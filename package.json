@@ -27,7 +27,7 @@
     "index": "node index.js"
   },
   "dependencies": {
-    "better-sqlite3": "^7.6.2",
+    "better-sqlite3": "^8.1.0",
     "colors": "^1.4.0",
     "discord-api-types": "^0.37.35",
     "discord.js": "^14.5.0",
