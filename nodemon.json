@@ -1,0 +1,8 @@
+{
+  "watch": [
+    "index.js",
+    "config.js",
+    "src/"
+  ],
+  "ext": "js, css"
+}
