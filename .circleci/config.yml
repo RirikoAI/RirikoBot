@@ -9,6 +9,8 @@ orbs:
 jobs:
   build_and_test: # this can be any name you choose
     executor: node/default # use the default executor defined within the orb
+    environment:
+      - NODE_ENV: development
     steps:
       - checkout
       - run:
