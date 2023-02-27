@@ -10,6 +10,10 @@ const colors = require("colors");
 const { RirikoAINLP } = require("app/RirikoAI-NLP");
 const getconfig = require("utils/getconfig");
 
+/**
+ * Will start a new Discord client
+ * @returns {Promise<Client<boolean>>} Discord Client instance
+ */
 const start = async () => {
   // Creating a new client:
   const client = new Client({
@@ -41,7 +45,6 @@ const start = async () => {
 
   // Getting the bot token:
   const AuthenticationToken = getconfig.discordToken();
-  console.log(process.env.DISCORD_BOT_TOKEN);
   if (!AuthenticationToken) {
     console.warn(
       "[CRASH] Authentication Token for Discord bot is required! Use Environment Secrets or config.js."

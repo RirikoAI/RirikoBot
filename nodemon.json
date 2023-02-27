@@ -4,5 +4,9 @@
     "config.js",
     "src/"
   ],
+  "ignore": [
+    "*.test.js",
+    "**/*.test.js"
+  ],
   "ext": "js, css"
 }

@@ -5,13 +5,13 @@ module.exports = (client, config) => {
   console.log("0------------------| Modals Handler:".blue);
 
   const modals = fs
-    .readdirSync(`./src/modals/`)
-    .filter((file) => file.endsWith(".js"));
+    .readdirSync(`./dist/modals/`)
+    .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
 
   for (let file of modals) {
     let pull = require(`../modals/${file}`);
     if (pull.id) {
-      client.modals.set(pull.id, pull);
+      client.modals?.set(pull.id, pull);
       console.log(`[HANDLER - MODALS] Loaded a file: ${file}`.brightGreen);
     } else {
       console.log(

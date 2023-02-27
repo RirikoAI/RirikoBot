@@ -1,0 +1,8 @@
+{
+  "testMatch": [
+    "**/src/**/*.test.js"
+  ],
+  "moduleDirectories": [
+    "node_modules"
+  ]
+}

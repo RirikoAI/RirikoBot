@@ -29,3 +29,6 @@ jspm_packages/
 
 # Per Bot database files
 json.sqlite
+
+# Jest, Unit test coverage files
+coverage
