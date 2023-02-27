@@ -14,6 +14,9 @@ jobs:
           command: npm run build
           name: Build
       - run:
+          command: cp config.example.js config.js
+          name: Copy configuration file
+      - run:
           command: npm run test
           name: Test
 
