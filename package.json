@@ -30,6 +30,9 @@
     "test:silent": "jest --coverage --silent",
     "heroku-prebuild": "npm install --dev"
   },
+  "engines": {
+    "node": "16.15.1"
+  },
   "dependencies": {
     "better-sqlite3": "^8.1.0",
     "colors": "^1.4.0",
