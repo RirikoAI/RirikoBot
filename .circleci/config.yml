@@ -1,6 +1,7 @@
 version: 2
 jobs:
   build:
+    executor: node/default
     steps:
       - checkout
       - run:
