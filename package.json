@@ -28,8 +28,7 @@
     "index": "node index.js",
     "test": "jest --coverage --verbose",
     "test:silent": "jest --coverage --silent",
-    "heroku-prebuild": "npm install --dev",
-    "heroku-postbuild": "cp config.example.js config.js"
+    "heroku-prebuild": "npm install --dev && cp config.example.js config.js"
   },
   "engines": {
     "node": "16.15.1"
