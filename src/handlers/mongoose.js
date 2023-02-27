@@ -1,8 +1,9 @@
-const config = require("../../config.js");
+const config = require("config");
+const getconfig = require("utils/getconfig");
 
 module.exports = (client) => {
   console.log("[MONGODB] Connecting to MongoDB...".yellow);
-  const mongoURI = process.env.MONGO || config.DATABASE.MongoDB.AccessURI;
+  const mongoURI = getconfig.mongoAccessURI();
 
   if (!mongoURI) {
     console.warn("[WARN] A Mongo URI/URL isn't provided! (Not required)");

@@ -1,4 +1,4 @@
-const client = require("../../ririko");
+const client = require("ririko");
 const colors = require("colors");
 
 module.exports = {

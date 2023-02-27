@@ -8,6 +8,17 @@
   "plugins": [
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-proposal-object-rest-spread",
-    "source-map-support"
+    "source-map-support",
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "app": "./dist/app",
+          "utils": "./dist/utils",
+          "config": "./config.js",
+          "ririko": "./dist/ririko.js"
+        }
+      }
+    ]
   ]
 }

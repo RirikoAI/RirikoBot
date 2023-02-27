@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
+const getconfig = require("utils/getconfig");
 
 module.exports = {
   config: {
@@ -8,7 +9,7 @@ module.exports = {
   permissions: ["SendMessages"], // Since the "owner" is TRUE, then we can set the permissions to 'sendMessages'.
   owner: true,
   run: async (client, message, args, prefix, config, db) => {
-    const ownersID = config.DISCORD.Users.Owners;
+    const ownersID = getconfig.discordBotOwners();
     if (!ownersID) return;
 
     const ownersARRAY = [];

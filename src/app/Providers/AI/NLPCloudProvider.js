@@ -1,11 +1,12 @@
 const NLPCloudClient = require("nlpcloud");
-const { AIProviderBase } = require("../AIProviderBase");
-const config = require("../../../../config");
+const { AIProviderBase } = require("app/Providers/AIProviderBase");
+const config = require("config");
+const getconfig = require("utils/getconfig");
 
 class NLPCloudProvider extends AIProviderBase {
   constructor() {
     super();
-    this.nlpcloudToken = config.AI.Token;
+    this.nlpcloudToken = getconfig.AIToken();
 
     if (this.nlpcloudToken === null) {
       console.error("No NLP Cloud token received");

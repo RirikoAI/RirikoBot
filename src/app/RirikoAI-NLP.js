@@ -1,8 +1,8 @@
 const { Configuration, OpenAIApi } = require("openai");
 const colors = require("colors");
-const config = require("../../config");
+const config = require("config");
 
-const { NLPCloudProvider } = require("./Providers/AI/NLPCloudProvider");
+const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
 
 /**
  * Now, this is going to be an awesome AI that can remember past conversations by saving it into the
@@ -127,7 +127,7 @@ class RirikoAINLP {
       await message.channel.sendTyping();
       // Send response to Discord bot.
       message.reply(answer);
-      this.handleAnswer(answer);
+      this.processAnswer(answer);
       return;
     }
   }
@@ -136,7 +136,7 @@ class RirikoAINLP {
    * Check if we have anything else to do when we receive the answer.
    * @param answer
    */
-  handleAnswer(answer) {
+  processAnswer(answer) {
     const matches = answer.match(/(?<=\🎵).+?(?=\🎵)/g);
     if (matches !== null) {
       console.log("Playing " + matches[0] + "now. ");

@@ -1,3 +1,4 @@
+require("dotenv").config({ path: ".env" });
 const buildDir = "./dist";
 const NODE_ENV = process.env.NODE_ENV || "development";
 const { start } = require(`./${buildDir}/ririko`);

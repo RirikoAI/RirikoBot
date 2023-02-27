@@ -5,7 +5,8 @@ module.exports = {
     Prefix: "!",
 
     // Discord bot token. Under the Bot tab
-    Token: "",
+    Token:
+      "",
 
     // The discord bot client ID under the General Information tab
     ID: "",
@@ -13,9 +14,9 @@ module.exports = {
     // Discord user IDs for permissions and ownerships
     Users: {
       // Discord IDs for owners of the bot
-      Owners: ["discord id 1", "discord id 2"],
-      // Discord IDs for those allowed to use the AI. Ignored if AI.enableWhitelist = true
-      AI_allowed_users: ["discord id 1"],
+      Owners: ["1", "2"],
+      // Discord IDs for those allowed to use the AI. Ignored if AI.EnableWhitelist = false
+      AIAllowedUsers: ["1"],
     },
   },
 
@@ -25,10 +26,13 @@ module.exports = {
     Prefix: ".",
 
     // The provider to use for the bot
-    Provider: "NLPCloudProvider",
+    Provider: "",
 
-    // The provider API token
+    // Provider Token
     Token: "",
+
+    // Enable or disable the Whitelist.
+    EnableWhitelist: true
   },
 
   DATABASE: {
@@ -37,7 +41,8 @@ module.exports = {
     // MongoDB related configs
     MongoDB: {
       // The MongoDB access URI, example: mongodb+srv://user:password@example.net
-      accessURI: "",
+      AccessURI:
+        "",
     },
   },
 

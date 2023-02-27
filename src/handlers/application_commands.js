@@ -1,7 +1,8 @@
-const client = require("../ririko");
+const client = require("ririko");
 const { PermissionsBitField, Routes, REST, User } = require("discord.js");
 const fs = require("fs");
 const colors = require("colors");
+const getconfig = require("utils/getconfig");
 
 module.exports = (client, config) => {
   console.log("0------------------| Application commands Handler:".blue);
@@ -115,17 +116,18 @@ module.exports = (client, config) => {
     }
   });
 
+  const discordBotID = getconfig.discordBotID();
+
   // Registering all the application commands:
-  if (!config.DISCORD.ID) {
+  if (!discordBotID) {
     console.log(
-      "[CRASH] You need to provide your bot ID in config.js!".red + "\n"
+      "[CRASH] You need to provide your bot ID in config.js or .env file!".red +
+        "\n"
     );
     return process.exit();
   }
 
-  const rest = new REST({ version: "10" }).setToken(
-    config.DISCORD.Token || process.env.DISCORD_BOT_TOKEN
-  );
+  const rest = new REST({ version: "10" }).setToken(getconfig.discordToken());
 
   (async () => {
     console.log(
@@ -133,7 +135,7 @@ module.exports = (client, config) => {
     );
 
     try {
-      await rest.put(Routes.applicationCommands(config.DISCORD.ID), {
+      await rest.put(Routes.applicationCommands(discordBotID), {
         body: commands,
       });
 

@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
-const client = require("../../ririko");
-const config = require("../../../config.js");
+const client = require("ririko");
+const config = require("config");
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 

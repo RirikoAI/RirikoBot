@@ -1,8 +1,9 @@
 const { EmbedBuilder, PermissionsBitField, codeBlock } = require("discord.js");
-const client = require("../../ririko");
-const config = require("../../../config.js");
+const client = require("ririko");
+const config = require("config");
 const { QuickDB } = require("quick.db");
-const { RirikoAINLP } = require("../../app/RirikoAI-NLP");
+const { RirikoAINLP } = require("app/RirikoAI-NLP");
+const getconfig = require("utils/getconfig");
 const db = new QuickDB();
 
 module.exports = {
@@ -18,8 +19,8 @@ client.on("messageCreate", async (message) => {
 
   const prefix =
     (await db.get(`guild_prefix_${message.guild.id}`)) ||
-    config.DISCORD.Prefix ||
-    "?";
+    getconfig.discordPrefix() ||
+    "!";
 
   if (!message.content.startsWith(prefix)) return;
   if (!message.guild) return;
@@ -53,19 +54,19 @@ client.on("messageCreate", async (message) => {
     }
 
     if ((command.owner, command.owner == true)) {
-      if (config.DISCORD.Users?.Owners) {
+      if (getconfig.discordBotOwners()) {
         const allowedUsers = []; // New Array.
 
-        config.DISCORD.Users.Owners.forEach((user) => {
+        getconfig.discordBotOwners().forEach((user) => {
           const fetchedUser = message.guild.members.cache.get(user);
           if (!fetchedUser) return allowedUsers.push("*Unknown User#0000*");
           allowedUsers.push(`${fetchedUser.user.tag}`);
         });
 
         if (
-          !config.DISCORD.Users.Owners.some((ID) =>
-            message.member.id.includes(ID)
-          )
+          !getconfig
+            .discordBotOwners()
+            .some((ID) => message.member.id.includes(ID))
         )
           return message.reply({
             embeds: [
