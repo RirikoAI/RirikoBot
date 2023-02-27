@@ -3,6 +3,7 @@ const colors = require("colors");
 const config = require("config");
 
 const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
+const { OpenAIProvider } = require("./Providers/AI/OpenAIProvider");
 
 /**
  * Now, this is going to be an awesome AI that can remember past conversations by saving it into the
@@ -29,9 +30,9 @@ class RirikoAINLP {
     try {
       this.prefix = ".";
       this.chatHistory = "";
-      this.costPerToken = 0.00007;
+      this.costPerToken = 0.00002;
 
-      this.nlpCloudClient = new NLPCloudProvider();
+      this.provider = new OpenAIProvider();
       this.isInitialized = true;
       console.log("[RirikoAI-NLP] Initialized successfully".blue);
     } catch (e) {
@@ -150,7 +151,7 @@ class RirikoAINLP {
     );
 
     // Send request to NLP Cloud.
-    const answer = await this.nlpCloudClient.sendChat(
+    const answer = await this.provider.sendChat(
       messageText,
       this.getPersonality(),
       this.getPrompt()
