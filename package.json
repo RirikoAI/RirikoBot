@@ -22,7 +22,7 @@
     "start": "npm run start:dev",
     "start:prod": "export NODE_ENV=production || set NODE_ENV=production && npm run index",
     "start:nowatch": "export NODE_ENV=development || set NODE_ENV=development && npm run build-and-start",
-    "start:dev": "export NODE_ENV=development || set NODE_ENV=development && nodemon --delay 3 --exec npm run build-and-start",
+    "start:dev": "export NODE_ENV=development || set NODE_ENV=development && nodemon --exec npm run build-and-start",
     "build-and-start": "npm-run-all -s build index",
     "build": "babel src --out-dir dist --extensions \".ts,.js\" --copy-files --presets minify",
     "index": "node index.js",
