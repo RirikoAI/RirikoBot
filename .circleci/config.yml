@@ -1,19 +1,23 @@
-version: 2
+version: 2.1
+orbs:
+  node: circleci/node@5.0.2
+
 jobs:
-  build:
+  build_and_test:
     executor: node/default
     steps:
       - checkout
       - run:
-          name: install-npm-dev
           command: npm install --dev
-      - save_cache: # special step to save the dependency cache
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - ./node_modules
+          name: Install dev dependencies
       - run:
-          name: build
           command: npm run build
+          name: Build
       - run:
-          name: test
           command: npm run test
+          name: Test
+
+workflows:
+  test_my_app:
+    jobs:
+      - build_and_test
