@@ -12,18 +12,18 @@ module.exports = (client, config) => {
   console.log("[!] Started loading slash commands...".yellow);
 
   // Slash commands handler:
-  fs.readdirSync("./src/commands/slash/").forEach((dir) => {
+  fs.readdirSync("./dist/commands/slash/").forEach((dir) => {
     const SlashCommands = fs
-      .readdirSync(`./src/commands/slash/${dir}`)
-      .filter((file) => file.endsWith(".js"));
+      .readdirSync(`./dist/commands/slash/${dir}`)
+      .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
 
     for (let file of SlashCommands) {
       let pull = require(`../commands/slash/${dir}/${file}`);
 
       if ((pull.name, pull.description, pull.type == 1)) {
-        client.slash_commands.set(pull.name, pull);
+        client.slash_commands?.set(pull.name, pull);
         console.log(
-          `[HANDLER - SLASH] Loaded a file: ${pull.name} (#${client.slash_commands.size})`
+          `[HANDLER - SLASH] Loaded a file: ${pull.name} (#${client.slash_commands?.size})`
             .brightGreen
         );
 
@@ -32,8 +32,8 @@ module.exports = (client, config) => {
           description: pull.description,
           type: pull.type || 1,
           options: pull.options ? pull.options : null,
-          default_permission: pull.permissions.DEFAULT_PERMISSIONS
-            ? pull.permissions.DEFAULT_PERMISSIONS
+          default_permission: pull.permissions?.DEFAULT_PERMISSIONS
+            ? pull.permissions?.DEFAULT_PERMISSIONS
             : null,
           default_member_permissions: pull.permissions
             .DEFAULT_MEMBER_PERMISSIONS
@@ -55,18 +55,18 @@ module.exports = (client, config) => {
   console.log("[!] Started loading user commands...".yellow);
 
   // User commands handler:
-  fs.readdirSync("./src/commands/user/").forEach((dir) => {
+  fs.readdirSync("./dist/commands/user/").forEach((dir) => {
     const UserCommands = fs
-      .readdirSync(`./src/commands/user/${dir}`)
-      .filter((file) => file.endsWith(".js"));
+      .readdirSync(`./dist/commands/user/${dir}`)
+      .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
 
     for (let file of UserCommands) {
       let pull = require(`../commands/user/${dir}/${file}`);
 
       if ((pull.name, pull.type == 2)) {
-        client.user_commands.set(pull.name, pull);
+        client.user_commands?.set(pull.name, pull);
         console.log(
-          `[HANDLER - USER] Loaded a file: ${pull.name} (#${client.user_commands.size})`
+          `[HANDLER - USER] Loaded a file: ${pull.name} (#${client.user_commands?.size})`
             .brightGreen
         );
 
@@ -87,18 +87,18 @@ module.exports = (client, config) => {
   console.log("[!] Started loading message commands...".yellow);
 
   // Message commands handler:
-  fs.readdirSync("./src/commands/message/").forEach((dir) => {
+  fs.readdirSync("./dist/commands/message/").forEach((dir) => {
     const UserCommands = fs
-      .readdirSync(`./src/commands/message/${dir}`)
-      .filter((file) => file.endsWith(".js"));
+      .readdirSync(`./dist/commands/message/${dir}`)
+      .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
 
     for (let file of UserCommands) {
       let pull = require(`../commands/message/${dir}/${file}`);
 
       if ((pull.name, pull.type == 3)) {
-        client.message_commands.set(pull.name, pull);
+        client.message_commands?.set(pull.name, pull);
         console.log(
-          `[HANDLER - MESSAGE] Loaded a file: ${pull.name} (#${client.user_commands.size})`
+          `[HANDLER - MESSAGE] Loaded a file: ${pull.name} (#${client.user_commands?.size})`
             .brightGreen
         );
 
@@ -115,6 +115,10 @@ module.exports = (client, config) => {
       }
     }
   });
+
+  if (typeof config.isMock !== "undefined") {
+    return true;
+  }
 
   const discordBotID = getconfig.discordBotID();
 
