@@ -27,7 +27,11 @@
     "build": "babel src --out-dir dist --extensions \".ts,.js\" --copy-files --presets minify",
     "index": "node index.js",
     "test": "jest --coverage --verbose",
-    "test:silent": "jest --coverage --silent"
+    "test:silent": "jest --coverage --silent",
+    "heroku-prebuild": "npm install --dev && cp config.example.js config.js"
+  },
+  "engines": {
+    "node": "16.15.1"
   },
   "dependencies": {
     "better-sqlite3": "^8.1.0",
