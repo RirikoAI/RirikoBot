@@ -1,5 +1,9 @@
 const config = require("../../config");
 
+const language = () => {
+  return config.LANGUAGE || process.env.LANGUAGE;
+};
+
 const discordPrefix = () => {
   return config.DISCORD.Prefix || process.env.DISCORD_BOT_PREFIX;
 };

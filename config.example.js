@@ -1,12 +1,14 @@
 module.exports = {
+  // Set the language of the bot
+  LANGUAGE: "en",
+
   // Discord related config. Create a new Application and create a bot with it. https://discord.com/developers/applications
   DISCORD: {
     // Prefix of the bot, used for General Purpose part of the bot
     Prefix: "!",
 
     // Discord bot token. Under the Bot tab
-    Token:
-      "",
+    Token: "",
 
     // The discord bot client ID under the General Information tab
     ID: "",
@@ -32,7 +34,7 @@ module.exports = {
     Token: "",
 
     // Enable or disable the Whitelist.
-    EnableWhitelist: true
+    EnableWhitelist: true,
   },
 
   DATABASE: {
@@ -41,8 +43,7 @@ module.exports = {
     // MongoDB related configs
     MongoDB: {
       // The MongoDB access URI, example: mongodb+srv://user:password@example.net
-      AccessURI:
-        "",
+      AccessURI: "",
     },
   },
 
