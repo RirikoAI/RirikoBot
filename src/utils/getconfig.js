@@ -1,29 +1,33 @@
 const config = require("../../config");
 
 const language = () => {
-  return config.LANGUAGE || process.env.LANGUAGE;
+  return process.env.LANGUAGE || config.LANGUAGE;
 };
 
 const discordPrefix = () => {
-  return config.DISCORD.Prefix || process.env.DISCORD_BOT_PREFIX;
+  return process.env.DISCORD_BOT_PREFIX || config.DISCORD.Prefix;
 };
 
 const discordToken = () => {
-  return config.DISCORD.Token || process.env.DISCORD_BOT_TOKEN;
+  return process.env.DISCORD_BOT_TOKEN || config.DISCORD.Token;
 };
 
 const discordBotID = () => {
-  return config.DISCORD.ID || process.env.DISCORD_BOT_ID;
+  return process.env.DISCORD_BOT_ID || config.DISCORD.ID;
 };
 
 const discordBotOwners = () => {
   try {
-    const cfg = config.DISCORD.Users?.Owners;
-    if (cfg.length === 0) {
-      const env = process.env.DISCORD_OWNER_IDS;
+    const env = process.env.DISCORD_OWNER_IDS;
+    if (env) {
       return env.split(" ");
     } else {
-      return cfg;
+      const cfg = config.DISCORD.Users?.Owners;
+      if (cfg.length === 0) {
+        return [];
+      } else {
+        return cfg;
+      }
     }
   } catch (e) {
     return [];
@@ -32,12 +36,16 @@ const discordBotOwners = () => {
 
 const allowedAIUsers = () => {
   try {
-    const cfg = config.DISCORD.Users?.AIAllowedUsers;
-    if (cfg.length === 0) {
-      const env = process.env.DISCORD_AI_ALLOWED_USERS;
+    const env = process.env.DISCORD_AI_ALLOWED_USERS;
+    if (env) {
       return env.split(" ");
     } else {
-      return cfg;
+      const cfg = config.DISCORD.Users?.AIAllowedUsers;
+      if (cfg.length === 0) {
+        return [];
+      } else {
+        return cfg;
+      }
     }
   } catch (e) {
     return [];
@@ -45,35 +53,35 @@ const allowedAIUsers = () => {
 };
 
 const AIPrefix = () => {
-  return config.AI.Prefix || process.env.DISCORD_AI_PREFIX;
+  return process.env.DISCORD_AI_PREFIX || config.AI.Prefix;
 };
 
 const AIProvider = () => {
-  return config.AI.Provider || process.env.AI_PROVIDER;
+  return process.env.AI_PROVIDER || config.AI.Provider;
 };
 
 const AIToken = () => {
-  return config.AI.Token || process.env.AI_TOKEN;
+  return process.env.AI_TOKEN || config.AI.Token;
 };
 
 const AIEnableWhitelist = () => {
-  return config.AI.EnableWhitelist || process.env.AI_ENABLE_WHITELIST;
+  return process.env.AI_ENABLE_WHITELIST || config.AI.EnableWhitelist;
 };
 
 const dbEngine = () => {
-  return config.DATABASE.Engine || process.env.DB_ENGINE;
+  return process.env.DB_ENGINE || config.DATABASE.Engine;
 };
 
 const mongoAccessURI = () => {
-  return config.DATABASE.MongoDB.AccessURI || process.env.MONGODB_ACCESS_URI;
+  return process.env.MONGODB_ACCESS_URI || config.DATABASE.MongoDB.AccessURI;
 };
 
 const debugLevel = () => {
-  return config.DEBUG.Level || process.env.DEBUG_LEVEL;
+  return process.env.DEBUG_LEVEL || config.DEBUG.Level;
 };
 
 const logDirectory = () => {
-  return config.DEBUG.LogDir || process.env.LOG_DIR;
+  return process.env.LOG_DIR || config.DEBUG.LogDir;
 };
 
 module.exports = {

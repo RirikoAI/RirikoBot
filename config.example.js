@@ -6,7 +6,7 @@ module.exports = {
   // Discord related config. Create a new Application and create a bot with it. https://discord.com/developers/applications
   DISCORD: {
     // Prefix of the bot, used for General Purpose part of the bot
-    Prefix: "=",
+    Prefix: "!",
 
     // Discord bot token. Under the Bot tab. Please prefer setting this in the .env file instead of here
     Token: "",
@@ -26,7 +26,7 @@ module.exports = {
   // AI related config
   AI: {
     // Prefix of the AI part of the bot
-    Prefix: "!",
+    Prefix: ".",
 
     // The provider to use for the bot
     Provider: "",
