@@ -4,12 +4,10 @@ const colors = require("colors");
 module.exports = (client, config = []) => {
   console.log("0------------------| Events Handler:".blue);
 
-  fs.readdirSync("./dist/events/").forEach((dir) => {
-    const events = fs
-      .readdirSync(`./dist/events/${dir}`)
-      .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
-    for (let file of events) {
-      let pull = require(`../events/${dir}/${file}`);
+  fs.readdirSync("./dist/events/")
+    .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"))
+    .forEach((file) => {
+      let pull = require(`../events/${file}`);
       if (pull.name) {
         client.events?.set(pull.name, pull);
         console.log(
@@ -20,8 +18,6 @@ module.exports = (client, config = []) => {
           `[HANDLER - EVENTS] Couldn't load the file ${file}. missing name or aliases.`
             .red
         );
-        continue;
       }
-    }
-  });
+    });
 };

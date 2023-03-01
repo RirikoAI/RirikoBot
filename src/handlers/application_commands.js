@@ -143,6 +143,8 @@ module.exports = (client, config) => {
         body: commands,
       });
 
+      client.commands = commands;
+
       console.log(
         "[HANDLER] Successfully registered all the application commands."
           .brightGreen
