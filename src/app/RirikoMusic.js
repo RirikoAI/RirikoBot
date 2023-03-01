@@ -5,6 +5,7 @@ const { SoundCloudPlugin } = require("@distube/soundcloud");
 const { DeezerPlugin } = require("@distube/deezer");
 const { YtDlpPlugin } = require("@distube/yt-dlp");
 const config = require("config");
+const { getLang } = require("utils/language");
 
 class RirikoMusic {
   /**
@@ -15,13 +16,14 @@ class RirikoMusic {
     this.client = client;
   }
 
-  createPlayer(lang) {
+  createPlayer() {
     const distube = new DisTube(this.client, {
       leaveOnStop: config.opt.voiceConfig.leaveOnStop,
       leaveOnFinish: config.opt.voiceConfig.leaveOnFinish,
       emitNewSongOnly: true,
       emitAddSongWhenCreatingQueue: false,
       emitAddListWhenCreatingQueue: false,
+      leaveOnEmpty: config.opt.voiceConfig.leaveOnEmpty.status,
       plugins: [
         new SpotifyPlugin(),
         new SoundCloudPlugin(),

@@ -8,6 +8,7 @@ const {
   TextInputStyle,
 } = require("discord.js");
 const config = require("config");
+const getConfig = require("utils/getconfig");
 module.exports = {
   name: "servers",
   description: "Admin command.",
@@ -22,7 +23,7 @@ module.exports = {
   type: 1,
   permissions: "0x0000000000000800",
   run: async (client, interaction) => {
-    if (!client.config.ownerID.includes(interaction?.user?.id))
+    if (!getConfig.discordBotOwners().includes(interaction?.user?.id))
       return interaction
         .reply({
           content: "You don't have permission to use this command.",
