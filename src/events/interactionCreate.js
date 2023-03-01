@@ -1,8 +1,18 @@
-const { EmbedBuilder } = require("discord.js");
+const {
+  EmbedBuilder,
+  InteractionType,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder,
+} = require("discord.js");
 const client = require("ririko");
 const config = require("config");
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
+
+const mongodb = require("../mongoDB");
+const fs = require("fs");
 
 module.exports = {
   name: "interactionCreate",

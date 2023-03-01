@@ -7,21 +7,16 @@ const { YtDlpPlugin } = require("@distube/yt-dlp");
 const config = require("config");
 
 class RirikoMusic {
-  static instance = null;
-
-  static getInstance() {
-    if (this.instance === null) {
-      this.instance = new this();
-    }
-    return this.instance;
-  }
-
   /**
    *
    * @param client discord.js client
    */
   constructor(client) {
-    client.player = new DisTube(client, {
+    this.client = client;
+  }
+
+  createPlayer(lang) {
+    this.player = new DisTube(this.client, {
       leaveOnStop: config.opt.voiceConfig.leaveOnStop,
       leaveOnFinish: config.opt.voiceConfig.leaveOnFinish,
       emitNewSongOnly: true,
@@ -34,5 +29,11 @@ class RirikoMusic {
         new DeezerPlugin(),
       ],
     });
+
+    return this.player;
   }
 }
+
+module.exports = {
+  RirikoMusic,
+};

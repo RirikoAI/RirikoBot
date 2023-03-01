@@ -9,6 +9,8 @@ const colors = require("colors");
 
 const { RirikoAINLP } = require("app/RirikoAI-NLP");
 const getconfig = require("utils/getconfig");
+const { RirikoMusic } = require("app/RirikoMusic");
+const mongoose = require("mongoose");
 
 /**
  * Will start a new Discord client
@@ -24,6 +26,9 @@ const start = async () => {
       GatewayIntentBits.GuildMessageReactions,
       GatewayIntentBits.DirectMessages,
       GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildIntegrations,
+      GatewayIntentBits.GuildVoiceStates,
     ],
     partials: [
       Partials.Channel,
@@ -53,6 +58,14 @@ const start = async () => {
     process.exit();
   }
 
+  // Include config file into the client
+  client.language = config.LANGUAGE || "en";
+  client.config = config;
+
+  let lang = require(`../languages/${config.LANGUAGE || "en"}.js`);
+  const ririkoMusic = new RirikoMusic(client);
+  client.player = ririkoMusic.createPlayer(lang);
+
   // Handler:
   client.prefix_commands = new Collection();
   client.slash_commands = new Collection();
@@ -68,6 +81,26 @@ const start = async () => {
       require(`./handlers/${file}`)(client, config);
     }
   );
+
+  const mongoDbAccessUri =
+    config.DATABASE.MongoDB.AccessURI || process.env.MONGODB_ACCESS_URI;
+
+  if (mongoDbAccessUri) {
+    const mongoose = require("mongoose");
+    mongoose
+      .connect(mongoDbAccessUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then(async () => {
+        console.log(`Connected MongoDB`);
+      })
+      .catch((err) => {
+        console.log("\nMongoDB Error: " + err + "\n\n" + lang.error4);
+      });
+  } else {
+    console.log(lang.error4);
+  }
 
   // Login to the bot:
   await client
