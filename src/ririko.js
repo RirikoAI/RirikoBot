@@ -65,7 +65,7 @@ const start = async () => {
 
   let lang = getLang();
   const ririkoMusic = new RirikoMusic(client);
-  client.player = ririkoMusic.createPlayer(lang);
+  client.player = ririkoMusic.createPlayer();
 
   // Handler:
   client.prefix_commands = new Collection();

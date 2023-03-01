@@ -129,7 +129,22 @@ class RirikoAINLP {
       await message.channel.sendTyping();
       // Send response to Discord bot.
       message.reply(answer);
-      this.processAnswer(answer);
+
+      const pa = this.processAnswer(answer);
+
+      if (pa.isMusic) {
+        if (message.member.voice.channelId !== null) {
+          await message.client.player.play(
+            message.member.voice.channel,
+            pa.name,
+            {
+              member: message.member,
+              textChannel: message.channel,
+              message,
+            }
+          );
+        }
+      }
       return;
     }
   }
@@ -142,6 +157,14 @@ class RirikoAINLP {
     const matches = answer.match(/(?<=\🎵).+?(?=\🎵)/g);
     if (matches !== null) {
       console.log("Playing " + matches[0] + "now. ");
+      return {
+        isMusic: true,
+        name: matches[0],
+      };
+    } else {
+      return {
+        isMusic: false,
+      };
     }
   }
 
