@@ -84,7 +84,7 @@ module.exports = {
         .setColor(client.config.embedColor)
         .setTitle("Select a language")
         .setTimestamp()
-        .setFooter({ text: `MusicMaker ❤️` });
+        .setFooter({ text: lang.footer1 });
       interaction
         ?.reply({ embeds: [embed], components: [buttons, buttons2, buttons3] })
         .then(async (Message) => {
@@ -377,7 +377,7 @@ module.exports = {
                 .setColor(client.config.embedColor)
                 .setTitle("Time ended, please try again.")
                 .setTimestamp()
-                .setFooter({ text: `MusicMaker ❤️` });
+                .setFooter({ text: lang.footer1 });
 
               await interaction
                 ?.editReply({ embeds: [embed], components: [buttons] })
@@ -387,7 +387,7 @@ module.exports = {
         })
         .catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },

@@ -18,7 +18,7 @@ module.exports = {
       queue?.toggleAutoplay();
       interaction?.reply(queue?.autoplay ? lang.msg136 : lang.msg137);
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },

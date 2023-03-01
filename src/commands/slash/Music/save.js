@@ -37,7 +37,7 @@ module.exports = {
       Modal.addComponents(PlaylistRow);
       await interaction.showModal(Modal).catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },

@@ -35,11 +35,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
     }
 
     if (newState.id === client.user.id) {
-      let lang = await db?.musicbot?.findOne({
-        guildID: queue?.textChannel?.guild?.id,
-      });
-      lang = lang?.language || client.language;
-      lang = require(`../languages/${lang}.js`);
+      let lang = getLang();
       if (oldState.serverMute === false && newState.serverMute === true) {
         if (queue?.textChannel) {
           try {

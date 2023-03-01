@@ -103,7 +103,7 @@ module.exports = {
         )}`
       );
       embed.setTimestamp();
-      embed.setFooter({ text: `codeshare.me | Umut Bayraktar ❤️` });
+      embed.setFooter({ text: lang.footer1 });
 
       let code;
       if (buttons1 && buttons2) {
@@ -173,7 +173,7 @@ module.exports = {
         })
         .catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },

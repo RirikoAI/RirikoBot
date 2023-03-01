@@ -11,6 +11,7 @@ const { RirikoAINLP } = require("app/RirikoAI-NLP");
 const getconfig = require("utils/getconfig");
 const { RirikoMusic } = require("app/RirikoMusic");
 const mongoose = require("mongoose");
+const { getLang } = require("./utils/language");
 
 /**
  * Will start a new Discord client
@@ -62,7 +63,7 @@ const start = async () => {
   client.language = config.LANGUAGE || "en";
   client.config = config;
 
-  let lang = require(`../languages/${config.LANGUAGE || "en"}.js`);
+  let lang = getLang();
   const ririkoMusic = new RirikoMusic(client);
   client.player = ririkoMusic.createPlayer(lang);
 

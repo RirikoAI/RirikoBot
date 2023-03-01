@@ -41,12 +41,12 @@ module.exports = {
         .setDescription(
           `**${queue.formattedCurrentTime} / ${queue.formattedDuration} (${music_percent3}%)**`
         )
-        .setFooter({ text: `MusicMaker ❤️` });
+        .setFooter({ text: lang.footer1 });
       interaction
         .reply({ embeds: [embed], components: [row] })
         .catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },

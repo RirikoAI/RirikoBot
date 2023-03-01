@@ -19,7 +19,7 @@ module.exports = {
       queue.stop(interaction.guild.id);
       return interaction.reply({ content: lang.msg85 }).catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },

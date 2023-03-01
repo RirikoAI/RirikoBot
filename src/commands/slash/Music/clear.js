@@ -22,7 +22,7 @@ module.exports = {
       await queue.stop(interaction.guild.id);
       interaction.reply({ content: `${lang.msg24}` }).catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },

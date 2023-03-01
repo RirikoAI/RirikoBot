@@ -46,7 +46,7 @@ module.exports = {
 > By: <@${track.user.id}>`);
 
       embed.setTimestamp();
-      embed.setFooter({ text: `MusicMaker ❤️` });
+      embed.setFooter({ text: lang.footer1 });
 
       const saveButton = new ButtonBuilder();
       saveButton.setLabel(lang.msg47);
@@ -59,7 +59,7 @@ module.exports = {
         .reply({ embeds: [embed], components: [row] })
         .catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },

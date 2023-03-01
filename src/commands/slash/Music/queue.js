@@ -171,7 +171,7 @@ module.exports = {
               )
               .setColor(client.config.embedColor)
               .setDescription(lang.msg70)
-              .setFooter({ text: `MusicMaker ❤️` });
+              .setFooter({ text: lang.footer1 });
             return interaction
               ?.editReply({ embeds: [embed], components: [button] })
               .catch((e) => {});
@@ -179,7 +179,7 @@ module.exports = {
         })
         .catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("../functions.js");
+      const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
     }
   },
