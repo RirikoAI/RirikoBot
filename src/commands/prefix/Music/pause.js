@@ -2,6 +2,8 @@ module.exports = {
   config: {
     name: "pause",
     aliases: ["pause", "hold"],
+    description: "Pause or unpause currently playing music",
+    usage: "pause",
   },
   inVoiceChannel: true,
   run: async (client, message) => {

@@ -1,6 +1,8 @@
 module.exports = {
   config: {
     name: "seek",
+    description: "Jump / seek currently playing music to a given time",
+    usage: "seek [position in seconds]",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {

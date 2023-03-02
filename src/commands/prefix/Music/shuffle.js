@@ -1,6 +1,8 @@
 module.exports = {
   config: {
     name: "shuffle",
+    description: "Shuffles / randomizes the current playing queue",
+    usage: "shuffle",
   },
   inVoiceChannel: true,
   run: async (client, message) => {

@@ -2,6 +2,9 @@ module.exports = {
   config: {
     name: "playskip",
     aliases: ["ps"],
+    description:
+      "Play the given music straightaway, skipping currently playing music",
+    usage: "playskip [song url or query]",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {

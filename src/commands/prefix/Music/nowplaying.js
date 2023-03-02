@@ -2,6 +2,8 @@ module.exports = {
   config: {
     name: "nowplaying",
     aliases: ["np"],
+    description: "Display currently playing music",
+    usage: "nowplaying",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {

@@ -2,6 +2,10 @@ module.exports = {
   config: {
     name: "filter",
     aliases: ["filters"],
+    description:
+      "Displays or clear the current audio filter in place." +
+      "\nSet a new filter by issuing slash command /filter [option]",
+    usage: "filter\nfilter off",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {

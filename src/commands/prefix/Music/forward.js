@@ -1,6 +1,8 @@
 module.exports = {
   config: {
     name: "forward",
+    description: "Fast forward the music by given time in seconds",
+    usage: "forward [time in seconds]",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {

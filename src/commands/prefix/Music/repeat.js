@@ -2,6 +2,8 @@ module.exports = {
   config: {
     name: "repeat",
     aliases: ["loop", "rp"],
+    description: "Enable or disable repeat",
+    usage: "repeat off\nrepeat song\nrepeat queue",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {

@@ -2,6 +2,8 @@ module.exports = {
   config: {
     name: "stop",
     aliases: ["disconnect", "leave"],
+    description: "Stops the music",
+    usage: "stop",
   },
   inVoiceChannel: true,
   run: async (client, message) => {

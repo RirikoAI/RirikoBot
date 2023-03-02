@@ -2,6 +2,8 @@ module.exports = {
   config: {
     name: "playtop",
     aliases: ["pt"],
+    description: "Adds the given music to the top of the queue",
+    usage: "playtop [song url or query]",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {
