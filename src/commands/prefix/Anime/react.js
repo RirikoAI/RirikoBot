@@ -38,7 +38,6 @@ module.exports = {
       "Send reaction anime images. Must be one of " + choices.join(", "),
     usage: "react [choice]",
   },
-  permissions: ["SendMessages"],
   owner: false,
   run: async (client, message, args, prefix) => {
     if (!args[0]) {
