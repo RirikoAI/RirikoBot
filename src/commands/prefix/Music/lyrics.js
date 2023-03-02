@@ -7,7 +7,6 @@ module.exports = {
     description: "Search for the lyrics by the given song title.",
     usage: "lyrics [song title]",
   },
-  permissions: ["Administrator"],
   owner: false,
   run: async (client, message, args, prefix, config, db) => {
     const queue = client.player.getQueue(message);
