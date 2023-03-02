@@ -11,6 +11,9 @@ const { DeezerPlugin } = require("@distube/deezer");
 const { YtDlpPlugin } = require("@distube/yt-dlp");
 const config = require("config");
 const { getLang } = require("utils/language");
+const getconfig = require("../utils/getconfig");
+const { QuickDB } = require("quick.db");
+const db = new QuickDB();
 
 class RirikoMusic {
   /**
@@ -45,7 +48,14 @@ class RirikoMusic {
   registerEvents(distube) {
     // DisTube event listeners, more in the documentation page
     distube
-      .on("playSong", (queue, song) => {
+      .on("playSong", async (queue, song) => {
+        const volume =
+          +(await db.get(`guild_volume_${queue.textChannel.guild.id}`)) ||
+          queue.volume ||
+          50;
+
+        queue.setVolume(volume);
+
         const embed = new EmbedBuilder();
         embed.setColor(this.client.config.embedColor);
         embed.setThumbnail(song.thumbnail);
