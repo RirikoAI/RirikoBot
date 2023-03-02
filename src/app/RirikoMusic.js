@@ -1,4 +1,9 @@
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  Partials,
+  EmbedBuilder,
+} = require("discord.js");
 const { DisTube } = require("distube");
 const { SpotifyPlugin } = require("@distube/spotify");
 const { SoundCloudPlugin } = require("@distube/soundcloud");
@@ -14,6 +19,7 @@ class RirikoMusic {
    */
   constructor(client) {
     this.client = client;
+    this.lang = getLang();
   }
 
   createPlayer() {
@@ -39,11 +45,21 @@ class RirikoMusic {
   registerEvents(distube) {
     // DisTube event listeners, more in the documentation page
     distube
-      .on("playSong", (queue, song) =>
-        queue.textChannel?.send(
-          `Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${song.user}`
-        )
-      )
+      .on("playSong", (queue, song) => {
+        const embed = new EmbedBuilder();
+        embed.setColor(this.client.config.embedColor);
+        embed.setThumbnail(song.thumbnail);
+        embed.setTitle("Now playing: " + song.name);
+        embed.setDescription(`Volume: \`${queue.volume}%\`
+Duration: \`${song.formattedDuration}\`
+URL: **${song.url}**
+By: <@${song.user.id}>`);
+
+        embed.setTimestamp();
+        embed.setFooter({ text: this.lang.footer1 });
+
+        queue.textChannel?.send({ embeds: [embed] }).catch((e) => {});
+      })
       .on("addSong", (queue, song) =>
         queue.textChannel?.send(
           `Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user}`

@@ -31,33 +31,31 @@ module.exports = {
       const embed = new EmbedBuilder();
       embed.setColor(client.config.embedColor);
       embed.setThumbnail(track.thumbnail);
-      embed.setTitle(track.name);
-      embed.setDescription(`> Audio \`%${queue.volume}\`
-> Duration \`${track.formattedDuration}\`
-> URL: **${track.url}**
-> Loop Mode \`${
+      embed.setTitle("Now playing: " + track.name);
+      embed.setDescription(`Volume: \`${queue.volume}%\`
+Duration: \`${track.formattedDuration}\`
+URL: **${track.url}**
+Loop Mode \`${
         queue.repeatMode
           ? queue.repeatMode === 2
             ? "All Queue"
             : "This Song"
           : "Off"
       }\`
-> Filter: \`${queue.filters.names.join(", ") || "Off"}\`
-> By: <@${track.user.id}>`);
+Filter: \`${queue.filters.names.join(", ") || "Off"}\`
+By: <@${track.user.id}>`);
 
       embed.setTimestamp();
       embed.setFooter({ text: lang.footer1 });
 
-      const saveButton = new ButtonBuilder();
-      saveButton.setLabel(lang.msg47);
-      saveButton.setCustomId("saveTrack");
-      saveButton.setStyle(ButtonStyle.Success);
-
-      const row = new ActionRowBuilder().addComponents(saveButton);
-
-      interaction
-        .reply({ embeds: [embed], components: [row] })
-        .catch((e) => {});
+      // const saveButton = new ButtonBuilder();
+      // saveButton.setLabel(lang.msg47);
+      // saveButton.setCustomId("saveTrack");
+      // saveButton.setStyle(ButtonStyle.Success);
+      //
+      // const row = new ActionRowBuilder().addComponents(saveButton);
+      //
+      interaction.reply({ embeds: [embed] }).catch((e) => {});
     } catch (e) {
       const errorNotifer = require("utils/errorNotifier");
       errorNotifer(client, interaction, e, lang);
