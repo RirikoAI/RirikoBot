@@ -2,6 +2,13 @@ const config = require("config");
 const { EmbedBuilder, WebhookClient } = require("discord.js");
 const pino = require("pino");
 
+let fs = require("fs");
+let dir = "./logs";
+
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir);
+}
+
 const webhookLogger = process.env.ERROR_LOGS
   ? new WebhookClient({ url: process.env.ERROR_LOGS })
   : undefined;
