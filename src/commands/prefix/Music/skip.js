@@ -1,6 +1,8 @@
 module.exports = {
   config: {
     name: "skip",
+    description: "Skip the current music",
+    usage: "skip",
   },
   inVoiceChannel: true,
   run: async (client, message) => {

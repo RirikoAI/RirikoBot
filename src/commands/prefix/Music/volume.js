@@ -2,6 +2,8 @@ module.exports = {
   config: {
     name: "volume",
     aliases: ["v", "set", "set-volume"],
+    description: "Set/get the server volume",
+    usage: "volume\nvolume [number]",
   },
   inVoiceChannel: true,
   run: async (client, message, args, prefix, config, db) => {

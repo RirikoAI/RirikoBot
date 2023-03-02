@@ -2,6 +2,8 @@ module.exports = {
   config: {
     name: "rewind",
     aliases: ["rw"],
+    description: "Rewind the music",
+    usage: "rewind [time in seconds]",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {

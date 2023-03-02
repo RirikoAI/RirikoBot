@@ -15,7 +15,11 @@ module.exports = {
       return message.reply({
         embeds: [
           new EmbedBuilder()
-            .setDescription("Please provide a command name.")
+            .setDescription(
+              "Please provide a command name. Use " +
+                prefix +
+                "help to display all the command list."
+            )
             .setColor("Red"),
         ],
       });

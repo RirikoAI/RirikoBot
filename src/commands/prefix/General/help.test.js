@@ -18,6 +18,14 @@ jest.mock("discord.js", () => ({
       setColor = () => {
         return this;
       };
+
+      setThumbnail = () => {
+        return this;
+      };
+
+      setTimestamp = () => {
+        return this;
+      };
     })();
   },
 }));

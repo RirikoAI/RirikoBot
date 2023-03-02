@@ -5,6 +5,7 @@ module.exports = {
   config: {
     name: "owners",
     description: "Replies with the registered owners only.",
+    usage: "owners",
   },
   permissions: ["SendMessages"], // Since the "owner" is TRUE, then we can set the permissions to 'sendMessages'.
   owner: true,

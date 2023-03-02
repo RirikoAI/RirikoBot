@@ -4,6 +4,8 @@ module.exports = {
   config: {
     name: "join",
     aliases: ["move"],
+    description: "Join the voice channel where the user is in",
+    usage: "join",
   },
   run: async (client, message, args) => {
     let voiceChannel = message.member.voice.channel;

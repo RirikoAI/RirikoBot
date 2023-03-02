@@ -1,6 +1,8 @@
 module.exports = {
   config: {
     name: "previous",
+    description: "Queue the previous song",
+    usage: "previous",
   },
   inVoiceChannel: true,
 

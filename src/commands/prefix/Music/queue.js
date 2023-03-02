@@ -2,6 +2,8 @@ module.exports = {
   config: {
     name: "queue",
     aliases: ["q"],
+    description: "Show the server queue",
+    usage: "queue",
   },
   run: async (client, message) => {
     const queue = client.player.getQueue(message);

@@ -1,6 +1,8 @@
 module.exports = {
   config: {
     name: "skipto",
+    description: "Skip to the song number in queue",
+    usage: "skipto [position in queue]",
   },
   inVoiceChannel: true,
   run: async (client, message, args) => {
