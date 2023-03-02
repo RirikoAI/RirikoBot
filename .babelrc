@@ -17,7 +17,8 @@
           "utils": "./dist/utils",
           "config": "./config.js",
           "ririko": "./dist/ririko.js",
-          "languages" :"./languages"
+          "languages" :"./languages",
+          "tools": "./dist/tools"
         }
       }
     ]
