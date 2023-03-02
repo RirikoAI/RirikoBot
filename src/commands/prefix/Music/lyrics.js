@@ -25,6 +25,16 @@ module.exports = {
 
     sl(search)
       .then((lyrics) => {
+        if (lyrics.lyrics.includes("<div>") || lyrics.lyrics.includes("<div")) {
+          message.channel.send(
+            "Something went wrong when processing " +
+              lyrics.source.name +
+              ". Try playing the music directly here: " +
+              lyrics.source.link
+          );
+          return;
+        }
+
         message.channel.send(
           "Found lyrics for " +
             lyrics.title +
