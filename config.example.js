@@ -55,6 +55,12 @@ module.exports = {
     LogDir: "logs",
   },
 
+  // ------------------------------------------- nitro boost announcer -------------------------------------------------
+
+  nitroAnnouncer: {
+    message: "Thank you %user% for boosting the server!",
+  },
+
   // ---------------------------------------------- music bot config ---------------------------------------------------
 
   sponsor: {
