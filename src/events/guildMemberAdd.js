@@ -39,35 +39,6 @@ client.on("guildMemberAdd", async (member) => {
     .catch((e) => {});
 
   /**
-   * Send new joiner private message with welcome embed
-   */
-  await member.send({
-    embeds: [
-      new EmbedBuilder()
-        .setAuthor({
-          name: `Hello, I'm ${client.user.username}.`,
-          iconURL: member.user.displayAvatarURL({
-            dynamic: true,
-          }),
-        })
-        .setTitle(`Welcome to ${member.guild.name}! 🎉`)
-        .setThumbnail(client.user.displayAvatarURL())
-        .setTimestamp()
-        .setDescription(
-          `I'm so happy you decided to join us here at **${member.guild.name}**. ` +
-            "I hope you'd enjoy your stay. We have fun activities here like game together, watch together and music sessions. Or if you'd like to just chill, it's okay too!\n\n" +
-            "Please don't forget to read the rules and be a good boy/girl okay^^\n\n" +
-            "You may be interested to see what I can do, find a bot command channel in the server and enter this command: " +
-            `**${prefix}help**.`
-        )
-        .setFooter({
-          text: `${lang.footer1}`,
-        })
-        .setColor("Blue"),
-    ],
-  });
-
-  /**
    * Get welcomer flag for the particular guild
    */
   const announcerEnabled = await db.get(
@@ -97,6 +68,42 @@ client.on("guildMemberAdd", async (member) => {
         });
     }
   } catch (e) {
-    console.error("Channel not found to send welcome message");
+    console.error("Something when wrong when sending the welcome message", e);
+  }
+
+  try {
+    /**
+     * Send new joiner private message with welcome embed
+     */
+    await member.send({
+      embeds: [
+        new EmbedBuilder()
+          .setAuthor({
+            name: `Hello, I'm ${client.user.username}.`,
+            iconURL: member.user.displayAvatarURL({
+              dynamic: true,
+            }),
+          })
+          .setTitle(`Welcome to ${member.guild.name}! 🎉`)
+          .setThumbnail(client.user.displayAvatarURL())
+          .setTimestamp()
+          .setDescription(
+            `I'm so happy you decided to join us here at **${member.guild.name}**. ` +
+              "I hope you'd enjoy your stay. We have fun activities here like game together, watch together and music sessions. Or if you'd like to just chill, it's okay too!\n\n" +
+              "Please don't forget to read the rules and be a good boy/girl okay^^\n\n" +
+              "You may be interested to see what I can do, find a bot command channel in the server and enter this command: " +
+              `**${prefix}help**.`
+          )
+          .setFooter({
+            text: `${lang.footer1}`,
+          })
+          .setColor("Blue"),
+      ],
+    });
+  } catch (e) {
+    console.error(
+      "Something went wrong when trying to send the member a DM",
+      e
+    );
   }
 });
