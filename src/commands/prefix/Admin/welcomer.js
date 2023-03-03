@@ -47,7 +47,9 @@ module.exports = {
             .setTitle("Welcomer")
             .setThumbnail(bgUrl)
             .setDescription(
-              `**Channel:** ${channel} ${channelID}\n**Enabled:** ${
+              `**Channel:**  ${
+                channelID !== null ? channel + " " + channelID : "Not set"
+              }\n**Enabled:** ${
                 status || "False"
               }\n**Background URL**: \n${bgUrl} ${
                 isDefault ? "(Default)" : ""
