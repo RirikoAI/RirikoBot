@@ -19,7 +19,6 @@
     - [MyAnimeList profile](#MyAnimeList-profile)
     - [Get my anime list](#Get-my-anime-list)
     - [Honorifics](#Honorifics)
-    - [NSFW](#NSFW)
     - [SFW](#SFW)
     - [Wallpaper](#Wallpaper)
 - [Coming soon](#Comming-soon)
@@ -70,14 +69,6 @@ anime.searchHonorifics('san').then(res => {
 });
 
 anime.nameHonorifics(freezegr, "san").then(res => {
-	console.log(res)
-});
-```
-
-## NSFW 
-
-```js
-anime.nsfw('anal').then(res=> {
 	console.log(res)
 });
 ```
