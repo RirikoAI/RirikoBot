@@ -18,7 +18,8 @@
           "config": "./config.js",
           "ririko": "./dist/ririko.js",
           "languages" :"./languages",
-          "tools": "./dist/tools"
+          "tools": "./dist/tools",
+          "assets": "./assets"
         }
       }
     ]

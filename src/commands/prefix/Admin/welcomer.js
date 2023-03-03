@@ -8,12 +8,12 @@ module.exports = {
     name: "welcomer",
     description: "Set the prefix for the guild.",
     usage:
-      "welcomer status\nwelcomer enable\nwelcomer disable\nwelcomer bg [background image]",
+      "welcomer status\nwelcomer enable\nwelcomer disable\nwelcomer bg [background image]\nwelcomer channel [channel id]",
   },
   permissions: ["Administrator"],
   owner: false,
   run: async (client, message, args, prefix, config, db) => {
-    if (!args[0] || (args[0] === "bg" && !args[1])) {
+    if (!args[0] || ((args[0] === "channel" || args[0] === "bg") && !args[1])) {
       return message.reply({
         embeds: [
           new EmbedBuilder()
@@ -24,7 +24,11 @@ module.exports = {
     }
 
     if (args[0] === "status") {
-      const status = await db.get(`guild_enabled_welcomer_${message.guild.id}`);
+      const status = await db.get(`guild_enabled_welcomer_${message.guild.id}`),
+        channelID = await db.get(
+          `guild_welcomer_announce_channel_${message.guild.id}`
+        ),
+        channel = await message.channel.guild.channels.fetch(channelID);
 
       let bgUrl = await db.get(
         `guild_welcomer_welcomer_bg_${message.guild.id}`
@@ -43,7 +47,7 @@ module.exports = {
             .setTitle("Welcomer")
             .setThumbnail(bgUrl)
             .setDescription(
-              `**Enabled:** ${
+              `**Channel:** ${channel} ${channelID}\n**Enabled:** ${
                 status || "False"
               }\n**Background URL**: \n${bgUrl} ${
                 isDefault ? "(Default)" : ""
@@ -54,6 +58,22 @@ module.exports = {
     }
 
     if (args[0] === "enable") {
+      const channelID = await db.get(
+          `guild_welcomer_announce_channel_${message.guild.id}`
+        ),
+        channel = await message.channel.guild.channels.fetch(channelID);
+
+      console.log("channel", channel.id);
+
+      if (!channel.id)
+        return message.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Channel not found")
+              .setDescription(`Please check the channel id`),
+          ],
+        });
+
       const enabled = await db.set(
         `guild_enabled_welcomer_${message.guild.id}`,
         true
@@ -83,34 +103,63 @@ module.exports = {
       });
     }
 
+    if (args[0] === "channel") {
+      let channelName;
+      try {
+        channelName = await message.channel.guild.channels.fetch(args[1]);
+
+        if (!channelName) throw new Error("channel not found");
+
+        const channel_id = await db.set(
+          `guild_welcomer_announce_channel_${message.guild.id}`,
+          args[1]
+        );
+
+        const embed = new EmbedBuilder()
+          .setTitle("Success!")
+          .setDescription(
+            `${channelName} set as the channel for announcing new members.`
+          )
+          .setColor("Green");
+
+        return message.reply({ embeds: [embed] });
+      } catch (e) {
+        return message.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Channel not found")
+              .setDescription(`Please check the channel id`),
+          ],
+        });
+      }
+    }
+
     if (args[0] === "bg") {
       const url = args[1];
 
       // Validate image
       try {
-        isImageURL("https://github.com/BhanukaUOM/Image-Url-Validator").then(
-          async (is_image) => {
-            if (is_image) {
-              const bg = await db.set(
-                `guild_welcomer_welcomer_bg_${message.guild.id}`,
-                url
-              );
+        isImageURL(args[1]).then(async (is_image) => {
+          if (is_image) {
+            const bg = await db.set(
+              `guild_welcomer_welcomer_bg_${message.guild.id}`,
+              url
+            );
 
-              return message.reply({
-                embeds: [
-                  new EmbedBuilder()
-                    .setTitle("Welcomer")
-                    .setThumbnail(bg)
-                    .setDescription(`Welcomer bg has been set successfully`),
-                ],
-              });
-            } else {
-              return message.reply(
-                `Error loading the image. Please check the source or try converting it to jpg`
-              );
-            }
+            return message.reply({
+              embeds: [
+                new EmbedBuilder()
+                  .setTitle("Welcomer")
+                  .setThumbnail(bg)
+                  .setDescription(`Welcomer bg has been set successfully`),
+              ],
+            });
+          } else {
+            return message.reply(
+              `Error loading the image. Please check the source or try converting it to jpg`
+            );
           }
-        );
+        });
       } catch (e) {
         return message.reply(
           `Something went wrong loading the image. Please check the source or try converting it to jpg`

@@ -23,15 +23,6 @@ client.on("messageCreate", async (message) => {
     getconfig.discordPrefix() ||
     "!";
 
-  const img = await generateImage(message.member);
-
-  (await message.member.guild.channels.fetch("1080879666702856192"))
-    .send({
-      // content: `${message.member.user.username}'s base:\n`,
-      files: [img],
-    })
-    .catch((e) => {});
-
   if (!message.content.startsWith(prefix)) return;
   if (!message.guild) return;
   if (!message.member)

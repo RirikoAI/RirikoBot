@@ -39,8 +39,6 @@ const generateImage = async (member) => {
 
   let bgUrl = await db.get(`guild_welcomer_welcomer_bg_${member.guild.id}`);
 
-  console.log(bgUrl);
-
   let isDefault = false;
 
   if (!bgUrl) {
