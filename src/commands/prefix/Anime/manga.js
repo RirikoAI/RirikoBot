@@ -58,7 +58,8 @@ module.exports = {
           name: "Synopsis: ",
           value: trim(manga.synopsis),
           inline: false,
-        }
+        },
+        lang.field1
       )
       .setTimestamp()
       .setFooter({ text: lang.footer1 });

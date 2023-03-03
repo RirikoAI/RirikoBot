@@ -1,3 +1,5 @@
+const { version } = require("../package.json");
+
 const language = {
   loadevent: "Loaded player event",
   loadcmd: "Loaded command",
@@ -164,6 +166,14 @@ const language = {
   msg136:
     "Autoplay is now turned on. I'm going to turn on random music from now on.",
   msg137: "Autoplay is off now.",
-  footer1: `RirikoAI ❤️`,
+  footer1: "RirikoAI ❤️",
+  field1: {
+    name: `RirikoAI version ${version}`,
+    value:
+      "✨ [Github](https://github.com/RirikoAI/RirikoBot 'Support the development of the RirikoAI here') | " +
+      "[Official Website](https://ririko.angel.net.my 'Visit the bot official page here') | " +
+      "By ANGEL#1111",
+    inline: false,
+  },
 };
 module.exports = language;

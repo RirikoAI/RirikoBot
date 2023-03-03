@@ -59,7 +59,8 @@ module.exports = {
           name: "Synopsis: ",
           value: trim(anime.synopsis),
           inline: false,
-        }
+        },
+        lang.field1
       )
       .setThumbnail(anime.posterImage.original)
       .setTimestamp()

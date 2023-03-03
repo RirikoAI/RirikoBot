@@ -39,6 +39,7 @@ module.exports = {
               .join("\n")}`
           )
           .setColor(client.config.embedColor)
+          .addFields(lang.field1)
           .setTimestamp();
         return interaction.reply({ embeds: [embed] }).catch((e) => {});
       } else {
@@ -60,6 +61,7 @@ module.exports = {
                 })
                 .join(" "),
             },
+            lang.field1,
           ])
           .setTimestamp()
           .setFooter({ text: lang.footer1 });

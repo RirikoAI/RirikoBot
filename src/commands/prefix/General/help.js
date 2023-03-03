@@ -33,6 +33,7 @@ module.exports = {
               commands.join(", ") +
               `\n\nUse **${prefix}info** for  info of the above commands.`
           )
+          .addFields(lang.field1)
           .setFooter({
             text: `${lang.footer1}`,
           })
