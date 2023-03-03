@@ -1,4 +1,4 @@
-const setPrefix = require("./set-prefix");
+const setPrefix = require("./prefix");
 const Discord = require("discord.js");
 const { GatewayIntentBits, Partials } = require("discord.js");
 
@@ -16,7 +16,7 @@ const mockMessage = {
     set: jest.fn(),
   };
 
-describe("prefix command > set-prefix", () => {
+describe("prefix command > prefix", () => {
   beforeAll(() => {
     // Setup Mock discord API Client
     mockClient = new Discord.Client({
