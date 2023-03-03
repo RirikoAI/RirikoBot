@@ -26,6 +26,10 @@ jest.mock("discord.js", () => ({
       setTimestamp = () => {
         return this;
       };
+
+      addFields = () => {
+        return this;
+      };
     })();
   },
 }));
