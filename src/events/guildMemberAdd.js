@@ -13,8 +13,9 @@ const db = new QuickDB();
 
 const mongodb = require("../mongoDB");
 const fs = require("fs");
-const { getLang } = require("../utils/language");
-const getconfig = require("../utils/getconfig");
+const { getLang } = require("utils/language");
+const getconfig = require("utils/getconfig");
+const generateImage = require("tools/generateImage");
 
 module.exports = {
   name: "guildMemberAdd",
@@ -28,6 +29,18 @@ client.on("guildMemberAdd", async (member) => {
     getconfig.discordPrefix() ||
     "!";
 
+  const img = await generateImage(member);
+
+  (await member.guild.channels.fetch("1080879666702856192"))
+    .send({
+      content: `${member.user.username}'s base:\n⁣`,
+      files: [img],
+    })
+    .catch((e) => {});
+
+  /**
+   * Send new joiner private message with welcome embed
+   */
   await member.send({
     embeds: [
       new EmbedBuilder()
@@ -53,4 +66,37 @@ client.on("guildMemberAdd", async (member) => {
         .setColor("Blue"),
     ],
   });
+
+  /**
+   * Get welcomer flag for the particular guild
+   */
+  const announcerEnabled = await db.get(
+    `guild_enabled_welcomer_${member.guild.id}`
+  );
+
+  /**
+   * Get welcome announcement channel for the particular guild
+   */
+  const channelID = await db.get(
+    `guild_welcomer_announce_channel_${member.guild.id}`
+  );
+
+  /**
+   * Send welcome message to the channel
+   */
+  try {
+    if (announcerEnabled && channelID !== null) {
+      const img = await generateImage(member);
+      (await member.guild.channels.fetch(channelID))
+        .send({
+          content: `Welcome to ${member.guild} ${member.user}!`,
+          files: [img],
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+  } catch (e) {
+    console.error("Channel not found to send welcome message");
+  }
 });

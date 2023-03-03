@@ -4,6 +4,7 @@ const config = require("config");
 const { QuickDB } = require("quick.db");
 const { RirikoAINLP } = require("app/RirikoAI-NLP");
 const getconfig = require("utils/getconfig");
+const generateImage = require("../tools/generateImage");
 const db = new QuickDB();
 
 module.exports = {
