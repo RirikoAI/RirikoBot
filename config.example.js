@@ -28,7 +28,7 @@ module.exports = {
     // Prefix of the AI part of the bot
     Prefix: ".",
 
-    // The provider to use for the bot
+    // The provider to use for the bot. Must be one of: NLPCloudProvider or OpenAIProvider
     Provider: "",
 
     // Provider Token
