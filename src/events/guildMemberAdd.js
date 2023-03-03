@@ -29,15 +29,6 @@ client.on("guildMemberAdd", async (member) => {
     getconfig.discordPrefix() ||
     "!";
 
-  const img = await generateImage(member);
-
-  (await member.guild.channels.fetch("1080879666702856192"))
-    .send({
-      content: `${member.user.username}'s base:\n⁣`,
-      files: [img],
-    })
-    .catch((e) => {});
-
   /**
    * Get welcomer flag for the particular guild
    */
