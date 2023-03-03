@@ -27,8 +27,26 @@ module.exports = {
       const status = await db.get(`guild_enabled_welcomer_${message.guild.id}`),
         channelID = await db.get(
           `guild_welcomer_announce_channel_${message.guild.id}`
-        ),
+        );
+
+      let channel;
+
+      try {
         channel = await message.channel.guild.channels.fetch(channelID);
+      } catch (e) {
+        const enabled = await db.set(
+          `guild_enabled_welcomer_${message.guild.id}`,
+          true
+        );
+
+        return message.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Channel not found")
+              .setDescription(`Please set the channel again`),
+          ],
+        });
+      }
 
       let bgUrl = await db.get(
         `guild_welcomer_welcomer_bg_${message.guild.id}`
@@ -47,9 +65,7 @@ module.exports = {
             .setTitle("Welcomer")
             .setThumbnail(bgUrl)
             .setDescription(
-              `**Channel:**  ${
-                channelID !== null ? channel + " " + channelID : "Not set"
-              }\n**Enabled:** ${
+              `**Channel:** ${channel} \n**Enabled:** ${
                 status || "False"
               }\n**Background URL**: \n${bgUrl} ${
                 isDefault ? "(Default)" : ""
