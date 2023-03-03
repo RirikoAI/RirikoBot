@@ -36,7 +36,7 @@ Start the server
 The AI chatbot uses the `.` prefix. Try it out by linking to your Discord bot and inviting it to a server. Start with `.hello`
 
 ### 2. AI Powered Music bot
-Try asking it to play a random anime music, or suggesting you a Nightcore music. Something like `.Hey can you play me an anime music?` **STILL WIP - Will be fully implemented soon**
+Try asking it to play a random anime music, or suggesting you a Nightcore music. Something like `.Hey can you play me an anime music?`
 
 ### 3. General Purpose bot
 Moderation / welcoming / auto-creating vc features **WIP**
