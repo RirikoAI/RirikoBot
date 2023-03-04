@@ -2,15 +2,15 @@ const { EmbedBuilder } = require("discord.js");
 
 module.exports = {
   config: {
-    name: "nitro-announce",
+    name: "nitro-announcer",
     description:
       "Set/unset the nitro channel and role id for announcement. Use `%user%` to mention the user.",
     usage:
-      "nitro-announce channel [channel id]\n" +
-      "nitro-announce id [role id]\n" +
-      "nitro-announce enable\n" +
-      "nitro-announce disable\n" +
-      "nitro-announce status",
+      "nitro-announcer channel [channel id]\n" +
+      "nitro-announcer id [role id]\n" +
+      "nitro-announcer enable\n" +
+      "nitro-announcer disable\n" +
+      "nitro-announcer status",
   },
   permissions: ["Administrator"],
   owner: false,
@@ -21,7 +21,7 @@ module.exports = {
           new EmbedBuilder()
             .setTitle("Missing argument")
             .setDescription(
-              `See **${prefix}info nitro-announce** for command info`
+              `See **${prefix}info nitro-announcer** for command info`
             ),
         ],
       });
@@ -52,7 +52,7 @@ module.exports = {
             new EmbedBuilder()
               .setTitle("Nitro boost announcer")
               .setDescription(
-                `Settings not properly configured. See **${prefix}info nitro-announce**`
+                `Settings not properly configured. See **${prefix}info nitro-announcer**`
               ),
           ],
         });
