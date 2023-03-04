@@ -30,14 +30,14 @@ client.on("guildMemberRemove", async (member) => {
     "!";
 
   /**
-   * Get welcomer flag for the particular guild
+   * Get leave announce flag for the particular guild
    */
   const announcerEnabled = await db.get(
     `guild_leave_announce_${member.guild.id}`
   );
 
   /**
-   * Get welcome announcement channel for the particular guild
+   * Get leave announcement channel for the particular guild
    */
   const channelID = await db.get(
     `guild_leave_announce_channel_${member.guild.id}`
