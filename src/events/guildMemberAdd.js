@@ -28,6 +28,15 @@ module.exports = {
 client.on("guildMemberAdd", async (member) => {
   const lang = getLang();
 
+  const { guild } = member;
+  const autorole = await db.get(`guild_autorole_${guild.id}`);
+
+  // Autorole
+  if (autorole !== null) {
+    const role = guild.roles.cache.get(autorole);
+    if (role) member.roles.add(role).catch((err) => {});
+  }
+
   const prefix =
     (await db.get(`guild_prefix_${member.guild.id}`)) ||
     getconfig.discordPrefix() ||
