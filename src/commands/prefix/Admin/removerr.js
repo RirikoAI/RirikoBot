@@ -70,6 +70,14 @@ module.exports = {
   },
 };
 
+/**
+ * @author saiteja-madha https://github.com/saiteja-madha/discord-js-bot
+ *
+ * @param guild
+ * @param channel
+ * @param messageId
+ * @returns {Promise<string>}
+ */
 async function removeRR(guild, channel, messageId) {
   if (!channel.permissionsFor(guild.members.me).has(channelPerms)) {
     return `You need the following permissions in ${channel.toString()}\n${parsePermissions(

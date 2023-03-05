@@ -28,6 +28,7 @@
     "index": "node index.js",
     "test": "jest --coverage --verbose",
     "test:silent": "jest --coverage --silent",
+    "upgrade": "git pull && npm i --dev && npm run build && npm run test && echo 'Upgrade success'",
     "heroku-prebuild": "npm install --dev && cp -n config.example.js config.js"
   },
   "engines": {
