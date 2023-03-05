@@ -7,7 +7,7 @@ module.exports = {
     name: "autorole",
     description: "setup role to be given when a member joins the server",
     enabled: true,
-    usage: "autorole status\nautorole off\nautorole [role name / id]",
+    usage: "autorole off\nautorole [role name / id]",
     minArgsCount: 1,
   },
   /**
