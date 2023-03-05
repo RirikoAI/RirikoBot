@@ -10,11 +10,16 @@ const { SoundCloudPlugin } = require("@distube/soundcloud");
 const { DeezerPlugin } = require("@distube/deezer");
 const { YtDlpPlugin } = require("@distube/yt-dlp");
 const config = require("config");
-const { getLang } = require("utils/language");
-const getconfig = require("../utils/getconfig");
+const { getLang } = require("helpers/language");
+const getconfig = require("../helpers/getconfig");
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 
+/**
+ * Ririko Music class to handle all Distube events
+ *
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 class RirikoMusic {
   /**
    *

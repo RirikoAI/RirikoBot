@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const fs = require("fs");
-const { getLang } = require("../../../utils/language");
+const { getLang } = require("../../../helpers/language");
 
 module.exports = {
   config: {
@@ -11,7 +11,20 @@ module.exports = {
   },
   permissions: ["SendMessages"],
   owner: false,
-  run: async (client, message, args, prefix) => {
+  /**
+   * Command runner
+   * @author earnestangel https://github.com/RirikoAI/RirikoBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Message | import("discord.js").CommandInteraction} message
+   * @param args Arguments, excludes the command name (e.g: !command args[0] args[1] args[2]...)
+   * @param prefix Guild specific prefix, falls back to config.js prefix
+   * @param {import("config")} config Config.js file
+   * @param {import("Quick.db").QuickDB} db Quick.db client
+   *
+   * @returns {Promise<*>}
+   */
+  run: async (client, message, args, prefix, config, db) => {
     const lang = getLang();
     const commands = client.prefix_commands.map((command) => {
       return `${prefix}${command.config.name}`;

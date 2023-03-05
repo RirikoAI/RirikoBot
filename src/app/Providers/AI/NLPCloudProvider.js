@@ -1,7 +1,7 @@
 const NLPCloudClient = require("nlpcloud");
 const { AIProviderBase } = require("app/Providers/AIProviderBase");
 const config = require("config");
-const getconfig = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
 
 class NLPCloudProvider extends AIProviderBase {
   constructor() {

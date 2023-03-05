@@ -4,15 +4,14 @@ const config = require("config");
 
 const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
 const { OpenAIProvider } = require("./Providers/AI/OpenAIProvider");
-const getconfig = require("utils/getconfig");
-const { AIProvider } = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
+const { AIProvider } = require("helpers/getconfig");
 
 /**
  * Now, this is going to be an awesome AI that can remember past conversations by saving it into the
- * "brain" a.k.a MongoDB
+ * "brain"
  *
- * The design of the class is singleton. It makes sure that the instance will only be
- * created once.
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
 class RirikoAINLP {
   //  Begin Static Class implementations -------------------------------------------------------------------------------

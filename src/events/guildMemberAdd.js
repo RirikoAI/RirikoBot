@@ -13,14 +13,18 @@ const db = new QuickDB();
 
 const mongodb = require("../mongoDB");
 const fs = require("fs");
-const { getLang } = require("utils/language");
-const getconfig = require("utils/getconfig");
+const { getLang } = require("helpers/language");
+const getconfig = require("helpers/getconfig");
 const generateImage = require("tools/generateImage");
 
 module.exports = {
   name: "guildMemberAdd",
 };
 
+/**
+ * on guildMemberAdd event
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 client.on("guildMemberAdd", async (member) => {
   const lang = getLang();
 

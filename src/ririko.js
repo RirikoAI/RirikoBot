@@ -8,13 +8,15 @@ const config = require("config");
 const colors = require("colors");
 
 const { RirikoAINLP } = require("app/RirikoAI-NLP");
-const getconfig = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
 const { RirikoMusic } = require("app/RirikoMusic");
 const mongoose = require("mongoose");
-const { getLang } = require("./utils/language");
+const { getLang } = require("./helpers/language");
 
 /**
- * Will start a new Discord client
+ * Ririko main application entrypoint. Will start a new Discord client
+ *
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
  * @returns {Promise<Client<boolean>>} Discord Client instance
  */
 const start = async () => {
@@ -63,6 +65,9 @@ const start = async () => {
   client.language = config.LANGUAGE || "en";
   client.config = config;
 
+  // Include
+  client.partials = [Partials.User, Partials.Message, Partials.Reaction];
+
   let lang = getLang();
   const ririkoMusic = new RirikoMusic(client);
   client.player = ririkoMusic.createPlayer();
@@ -77,31 +82,17 @@ const start = async () => {
 
   module.exports = client;
 
+  // Register all handlers
   ["prefix", "application_commands", "modals", "events", "mongoose"].forEach(
     (file) => {
       require(`./handlers/${file}`)(client, config);
     }
   );
 
-  const mongoDbAccessUri =
-    config.DATABASE.MongoDB.AccessURI || process.env.MONGODB_ACCESS_URI;
-
-  if (mongoDbAccessUri) {
-    const mongoose = require("mongoose");
-    mongoose
-      .connect(mongoDbAccessUri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
-      .then(async () => {
-        console.log(`Connected MongoDB`);
-      })
-      .catch((err) => {
-        console.log("\nMongoDB Error: " + err + "\n\n" + lang.error4);
-      });
-  } else {
-    console.log(lang.error4);
-  }
+  // Register all extenders
+  ["Guild.js"].forEach((file) => {
+    require(`./helpers/extenders/${file}`)(client, config);
+  });
 
   // Login to the bot:
   await client

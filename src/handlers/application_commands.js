@@ -2,8 +2,16 @@ const client = require("ririko");
 const { PermissionsBitField, Routes, REST, User } = require("discord.js");
 const fs = require("fs");
 const colors = require("colors");
-const getconfig = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
 
+/**
+ * Register all application commands
+ * @author TFAGaming https://github.com/TFAGaming/DiscordJS-V14-Bot-Template
+ *
+ * @param client
+ * @param config
+ * @returns {boolean}
+ */
 module.exports = (client, config) => {
   console.log("0------------------| Application commands Handler:".blue);
 

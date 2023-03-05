@@ -1,11 +1,20 @@
 const db = require("../../../mongoDB");
-const { getLang } = require("../../../utils/language");
+const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "statistic",
   description: "View your bot statistics.",
   options: [],
   permissions: "0x0000000000000800",
   type: 1,
+  /**
+   * Command runner
+   * @author umutxyp https://github.com/umutxyp/MusicBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Interaction} interaction
+   *
+   * @returns {Promise<*>}
+   */
   run: async (client, interaction) => {
     let lang = getLang();
     try {
@@ -99,8 +108,8 @@ ${
         .setTimestamp();
       return interaction.reply({ embeds: [embed] }).catch((err) => {});
     } catch (e) {
-      const errorNotifer = require("utils/errorNotifier");
-      errorNotifer(client, interaction, e, lang);
+      const errorNotifier = require("helpers/errorNotifier");
+      errorNotifier(client, interaction, e, lang);
     }
   },
 };

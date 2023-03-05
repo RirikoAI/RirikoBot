@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const fs = require("fs");
-const { getLang } = require("utils/language");
-const { getJson } = require("utils/httpUtils");
+const { getLang } = require("helpers/language");
+const { getJson } = require("helpers/httpUtils");
 const NekosLife = require("nekos.life");
 const neko = new NekosLife();
 
@@ -39,7 +39,20 @@ module.exports = {
     usage: "react [choice]",
   },
   owner: false,
-  run: async (client, message, args, prefix) => {
+  /**
+   * Command runner
+   * @author earnestangel https://github.com/RirikoAI/RirikoBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Message | import("discord.js").CommandInteraction} message
+   * @param args Arguments, excludes the command name (e.g: !command args[0] args[1] args[2]...)
+   * @param prefix Guild specific prefix, falls back to config.js prefix
+   * @param {import("config")} config Config.js file
+   * @param {import("Quick.db").QuickDB} db Quick.db client
+   *
+   * @returns {Promise<*>}
+   */
+  run: async (client, message, args, prefix, config, db) => {
     if (!args[0]) {
       return message.reply(
         `Invalid command. Try \`${prefix}react ${choices.join(", ")}\``

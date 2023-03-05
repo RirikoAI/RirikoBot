@@ -1,4 +1,15 @@
-function errorNotifer(client, interaction, e, lang) {
+/**
+ * error notifier
+ * @author umutxyp https://github.com/umutxyp/MusicBot
+ *
+ * @param {import("discord.js").Client} client Discord.js client
+ * @param {import("discord.js").Interaction} interaction
+ * @param e error
+ * @param lang language
+ *
+ * @returns {Promise<*>}
+ */
+function errorNotifier(client, interaction, e, lang) {
   const { EmbedBuilder } = require("discord.js");
   if (client.errorLog) {
     if (client.shard) {
@@ -94,4 +105,4 @@ function errorNotifer(client, interaction, e, lang) {
     .catch((e) => {});
 }
 
-module.exports = errorNotifer;
+module.exports = errorNotifier;

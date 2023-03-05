@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const db = require("../../../mongoDB");
-const { getLang } = require("../../../utils/language");
+const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "ping",
   description: "It helps you to get information about the speed of the bot.",
@@ -34,8 +34,8 @@ module.exports = {
         })
         .catch((err) => {});
     } catch (e) {
-      const errorNotifer = require("utils/errorNotifier");
-      errorNotifer(client, interaction, e, lang);
+      const errorNotifier = require("helpers/errorNotifier");
+      errorNotifier(client, interaction, e, lang);
     }
   },
 };

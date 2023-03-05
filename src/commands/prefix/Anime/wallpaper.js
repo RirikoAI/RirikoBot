@@ -8,7 +8,7 @@ const {
 
 const { AnimeWallpaper } = require("anime-wallpaper");
 const wall = new AnimeWallpaper();
-const { getLang } = require("utils/language");
+const { getLang } = require("helpers/language");
 const fetch = require("node-fetch");
 
 module.exports = {
@@ -20,7 +20,20 @@ module.exports = {
     description: "Get an anime wallpaper with the query",
   },
   owner: false,
-  run: async (client, message, args) => {
+  /**
+   * Command runner
+   * @author earnestangel https://github.com/RirikoAI/RirikoBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Message | import("discord.js").CommandInteraction} message
+   * @param args Arguments, excludes the command name (e.g: !command args[0] args[1] args[2]...)
+   * @param prefix Guild specific prefix, falls back to config.js prefix
+   * @param {import("config")} config Config.js file
+   * @param {import("Quick.db").QuickDB} db Quick.db client
+   *
+   * @returns {Promise<*>}
+   */
+  run: async (client, message, args, prefix, config, db) => {
     try {
       const lang = getLang();
       const query = args.join(" ");

@@ -166,6 +166,7 @@ const language = {
   msg136:
     "Autoplay is now turned on. I'm going to turn on random music from now on.",
   msg137: "Autoplay is off now.",
+  msg138: "You must be in a voice channel to do this.",
   footer1: "RirikoAI ❤️",
   field1: {
     name: `RirikoAI version ${version}`,

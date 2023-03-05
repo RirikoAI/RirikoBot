@@ -3,7 +3,7 @@ const client = require("ririko");
 const config = require("config");
 const { QuickDB } = require("quick.db");
 const { RirikoAINLP } = require("app/RirikoAI-NLP");
-const getconfig = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
 const generateImage = require("../tools/generateImage");
 const db = new QuickDB();
 
@@ -11,6 +11,11 @@ module.exports = {
   name: "messageCreate",
 };
 
+/**
+ * on messageCreate event
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ * @author TFAGaming https://github.com/TFAGaming/DiscordJS-V14-Bot-Template
+ */
 client.on("messageCreate", async (message) => {
   if (message.channel.type !== 0) return;
   if (message.author.bot) return;

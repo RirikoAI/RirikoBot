@@ -1,4 +1,4 @@
-const getconfig = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
 module.exports = {
   config: {
     name: "play",

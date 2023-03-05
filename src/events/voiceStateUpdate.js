@@ -1,11 +1,15 @@
 const db = require("../mongoDB");
 let client = require("ririko");
-const { getLang } = require("utils/language");
+const { getLang } = require("helpers/language");
 
 module.exports = {
   name: "voiceStateUpdate",
 };
 
+/**
+ * on voiceStateUpdate event
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 client.on("voiceStateUpdate", async (oldState, newState) => {
   const queue = client.player.getQueue(oldState.guild.id);
   if (queue || queue?.playing) {

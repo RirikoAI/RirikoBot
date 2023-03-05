@@ -13,6 +13,19 @@ module.exports = {
   },
   permissions: ["Administrator"],
   owner: false,
+  /**
+   * Command runner
+   * @author earnestangel https://github.com/RirikoAI/RirikoBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Message | import("discord.js").CommandInteraction} message
+   * @param args Arguments, excludes the command name (e.g: !command args[0] args[1] args[2]...)
+   * @param prefix Guild specific prefix, falls back to config.js prefix
+   * @param {import("config")} config Config.js file
+   * @param {import("Quick.db").QuickDB} db Quick.db client
+   *
+   * @returns {Promise<*>}
+   */
   run: async (client, message, args, prefix, config, db) => {
     if (!args[0] || (args[0] === "channel" && !args[1])) {
       return message.reply({
@@ -27,13 +40,9 @@ module.exports = {
     }
 
     if (args[0] === "status") {
-      let status = await db.get(
-          `guild_leave_announce_${message.guild.id}`,
-          false
-        ),
+      let status = await db.get(`guild_leave_announce_${message.guild.id}`),
         channelID = await db.get(
-          `guild_leave_announce_channel_${message.guild.id}`,
-          args[1]
+          `guild_leave_announce_channel_${message.guild.id}`
         );
 
       let channelName;
@@ -65,8 +74,7 @@ module.exports = {
 
     if (args[0] === "enable") {
       const channelID = await db.get(
-        `guild_leave_announce_channel_${message.guild.id}`,
-        args[1]
+        `guild_leave_announce_channel_${message.guild.id}`
       );
 
       if (channelID === null) {
