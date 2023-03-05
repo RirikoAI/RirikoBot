@@ -18,6 +18,11 @@ module.exports = {
   name: "interactionCreate",
 };
 
+/**
+ * on interactionCreate event
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ * @author TFAGaming https://github.com/TFAGaming/DiscordJS-V14-Bot-Template
+ */
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand()) {
     const command = client.slash_commands.get(interaction.commandName);

@@ -6,13 +6,22 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const db = require("../../../mongoDB");
-const { getLang } = require("../../../utils/language");
+const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "save",
   description: "It sends and saves the played music to you via dm box.",
   permissions: "0x0000000000000800",
   options: [],
   type: 1,
+  /**
+   * Command runner
+   * @author umutxyp https://github.com/umutxyp/MusicBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Interaction} interaction
+   *
+   * @returns {Promise<*>}
+   */
   run: async (client, interaction) => {
     let lang = getLang();
 
@@ -37,8 +46,8 @@ module.exports = {
       Modal.addComponents(PlaylistRow);
       await interaction.showModal(Modal).catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("utils/errorNotifier");
-      errorNotifer(client, interaction, e, lang);
+      const errorNotifier = require("helpers/errorNotifier");
+      errorNotifier(client, interaction, e, lang);
     }
   },
 };

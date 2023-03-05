@@ -1,6 +1,14 @@
 const fs = require("fs");
 const colors = require("colors");
 
+/**
+ * Register all prefix commands
+ * @author TFAGaming https://github.com/TFAGaming/DiscordJS-V14-Bot-Template
+ *
+ * @param client
+ * @param config
+ * @returns {boolean}
+ */
 module.exports = (client, config) => {
   console.log("0------------------| Prefix Handler:".blue);
 

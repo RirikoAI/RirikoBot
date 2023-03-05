@@ -8,7 +8,7 @@ const {
   TextInputStyle,
 } = require("discord.js");
 const config = require("config");
-const getConfig = require("utils/getconfig");
+const getConfig = require("helpers/getconfig");
 module.exports = {
   name: "servers",
   description: "Admin command.",
@@ -22,6 +22,15 @@ module.exports = {
   ],
   type: 1,
   permissions: "0x0000000000000800",
+  /**
+   * Command runner
+   * @author umutxyp https://github.com/umutxyp/MusicBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Interaction} interaction
+   *
+   * @returns {Promise<*>}
+   */
   run: async (client, interaction) => {
     if (!getConfig.discordBotOwners().includes(interaction?.user?.id))
       return interaction

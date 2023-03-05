@@ -1,5 +1,5 @@
 const db = require("../../../mongoDB");
-const { getLang } = require("../../../utils/language");
+const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "pause",
   description: "Stops playing the currently playing music.",
@@ -7,6 +7,15 @@ module.exports = {
   options: [],
   voiceChannel: true,
   type: 1,
+  /**
+   * Command runner
+   * @author umutxyp https://github.com/umutxyp/MusicBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Interaction} interaction
+   *
+   * @returns {Promise<*>}
+   */
   run: async (client, interaction) => {
     const queue = client.player.getQueue(interaction.guild.id);
     let lang = getLang();
@@ -25,8 +34,8 @@ module.exports = {
         })
         .catch((e) => {});
     } catch (e) {
-      const errorNotifer = require("utils/errorNotifier");
-      errorNotifer(client, interaction, e, lang);
+      const errorNotifier = require("helpers/errorNotifier");
+      errorNotifier(client, interaction, e, lang);
     }
   },
 };

@@ -1,4 +1,4 @@
-import { getOrdinalSuffixOf } from "utils/language";
+import { getOrdinalSuffixOf } from "helpers/language";
 
 const Canvas = require("canvas");
 Canvas.registerFont(path.resolve("assets/fonts/Roboto-Regular.ttf"), {
@@ -25,6 +25,13 @@ const av = {
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 
+/**
+ * Generate welcome image, showing their avatar and member nth
+ * @author 3chospirits https://github.com/3chospirits/niconiconii-bot
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ *
+ * @returns object {attachment: Canvas.toBuffer(), name: string}
+ */
 const generateImage = async (member) => {
   let username = member.user.username;
   let discrim = member.user.discriminator;

@@ -1,14 +1,37 @@
 const config = require("config");
-const getconfig = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
+const mongoose = require("mongoose");
+const { getLang } = require("../helpers/language");
 
-module.exports = (client) => {
+/**
+ * Register mongoose handler
+ *
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ * @author TFAGaming https://github.com/TFAGaming/DiscordJS-V14-Bot-Template
+ *
+ * @param client
+ * @returns {boolean}
+ */
+module.exports = async (client) => {
+  const lang = getLang();
   console.log("[MONGODB] Connecting to MongoDB...".yellow);
-  const mongoURI = getconfig.mongoAccessURI();
+  const mongoDbAccessUri =
+    config.DATABASE.MongoDB.AccessURI || process.env.MONGODB_ACCESS_URI;
 
-  if (!mongoURI) {
-    console.warn("[WARN] A Mongo URI/URL isn't provided! (Not required)");
+  if (mongoDbAccessUri) {
+    const mongoose = require("mongoose");
+    await mongoose
+      .connect(mongoDbAccessUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then(async () => {
+        console.log(`Connected to MongoDB successfully!`.yellow);
+      })
+      .catch((err) => {
+        console.log("\nMongoDB Error: " + err + "\n\n" + lang.error4);
+      });
   } else {
-    // soon will connect MongoDB here
-    console.log("[MONGODB] Not implemented".yellow);
+    console.log(lang.error4);
   }
 };

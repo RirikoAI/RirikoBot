@@ -19,7 +19,9 @@
           "ririko": "./dist/ririko.js",
           "languages" :"./languages",
           "tools": "./dist/tools",
-          "assets": "./assets"
+          "assets": "./assets",
+          "helpers": "./dist/helpers",
+          "handlers": "./dist/handlers/"
         }
       }
     ]

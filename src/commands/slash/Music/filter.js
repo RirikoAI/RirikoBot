@@ -1,5 +1,5 @@
 const db = require("../../../mongoDB");
-const { getLang } = require("../../../utils/language");
+const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "filter",
   description: "Adds audio filter to ongoing music.",
@@ -7,6 +7,15 @@ module.exports = {
   options: [],
   voiceChannel: true,
   type: 1,
+  /**
+   * Command runner
+   * @author umutxyp https://github.com/umutxyp/MusicBot
+   *
+   * @param {import("discord.js").Client} client Discord.js client
+   * @param {import("discord.js").Interaction} interaction
+   *
+   * @returns {Promise<*>}
+   */
   run: async (client, interaction) => {
     let lang = getLang();
     try {
@@ -188,8 +197,8 @@ module.exports = {
           });
         });
     } catch (e) {
-      const errorNotifer = require("utils/errorNotifier");
-      errorNotifer(client, interaction, e, lang);
+      const errorNotifier = require("helpers/errorNotifier");
+      errorNotifier(client, interaction, e, lang);
     }
   },
 };

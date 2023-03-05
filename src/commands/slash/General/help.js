@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType } = require("discord.js");
 const db = require("../../../mongoDB");
-const { getLang } = require("utils/language");
+const { getLang } = require("helpers/language");
 module.exports = {
   name: "help",
   description: "It helps you to get information about bot and commands.",
@@ -69,8 +69,8 @@ module.exports = {
       }
     } catch (e) {
       console.log(e);
-      const errorNotifer = require("utils/errorNotifier");
-      errorNotifer(client, interaction, e, lang);
+      const errorNotifier = require("helpers/errorNotifier");
+      errorNotifier(client, interaction, e, lang);
     }
   },
 };

@@ -1,6 +1,6 @@
 const { AIProviderBase } = require("app/Providers/AIProviderBase");
 const config = require("config");
-const getconfig = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
 const openai = require("openai");
 const { OpenAIApi, Configuration } = require("openai");
 

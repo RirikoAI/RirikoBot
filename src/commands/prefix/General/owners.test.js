@@ -1,5 +1,5 @@
 const owners = require("./owners");
-const getconfig = require("utils/getconfig");
+const getconfig = require("helpers/getconfig");
 
 jest.mock("discord.js", () => ({
   EmbedBuilder: () => {
@@ -23,7 +23,7 @@ jest.mock("discord.js", () => ({
   },
 }));
 
-jest.mock("utils/getconfig");
+jest.mock("helpers/getconfig");
 
 let mockClient;
 

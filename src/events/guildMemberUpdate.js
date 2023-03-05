@@ -18,6 +18,10 @@ module.exports = {
   name: "guildMemberUpdate",
 };
 
+/**
+ * on guildMemberUpdate event
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
   const boostAnnouncerEnabled = await db.get(
     `guild_nitro_announcer_${newMember.guild.id}`

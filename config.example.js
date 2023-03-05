@@ -17,7 +17,7 @@ module.exports = {
     // Discord user IDs for permissions and ownerships
     Users: {
       // Discord IDs for owners of the bot
-      Owners: [],
+      Owners: ["", "", ""],
       // Discord IDs for those allowed to use the AI. Ignored if AI.EnableWhitelist = false
       AIAllowedUsers: [],
     },
@@ -55,6 +55,12 @@ module.exports = {
     LogDir: "logs",
   },
 
+  // ------------------------------------------------ welcomer --------------------------------------------------------
+
+  welcomer: {
+    defaultImageUrl: "https://i.imgur.com/zvWTUVu.jpg",
+  },
+
   // ------------------------------------------- nitro boost announcer -------------------------------------------------
 
   nitroAnnouncer: {
@@ -62,6 +68,15 @@ module.exports = {
   },
 
   // ---------------------------------------------- music bot config ---------------------------------------------------
+
+  emoji: {
+    play: "▶️",
+    stop: "⏹️",
+    queue: "📄",
+    success: "☑️",
+    repeat: "🔁",
+    error: "❌",
+  },
 
   sponsor: {
     status: true, //true or false
@@ -131,5 +146,19 @@ module.exports = {
     },
 
     maxVol: 150, //You can specify the maximum volume level.
+  },
+
+  // ------------------------------------------- stats & leaderboards --------------------------------------------------
+  STATS: {
+    ENABLED: false,
+    XP_COOLDOWN: 5, // Cooldown in seconds between messages
+    DEFAULT_LVL_UP_MSG: "{member:tag}, You just advanced to **Level {level}**",
+  },
+
+  // ---------------------------------------------- system settings ----------------------------------------------------
+  CACHE_SIZE: {
+    GUILDS: 100,
+    USERS: 10000,
+    MEMBERS: 10000,
   },
 };
