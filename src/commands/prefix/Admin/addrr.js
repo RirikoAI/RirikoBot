@@ -49,7 +49,7 @@ module.exports = {
         embeds: [
           new EmbedBuilder()
             .setTitle("Missing argument")
-            .setDescription(`See **${prefix}info autorole** for more info`),
+            .setDescription(`See **${prefix}info addrr** for more info`),
         ],
       });
 
