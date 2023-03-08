@@ -1,4 +1,5 @@
 const { Configuration, OpenAIApi } = require("openai");
+const { Util } = require("discord.js");
 const colors = require("colors");
 const config = require("config");
 
@@ -30,14 +31,17 @@ class RirikoAINLP {
   constructor() {
     try {
       this.prefix = getconfig.AIPrefix();
-      this.chatHistory = "";
+      this.chatHistory = [];
       this.costPerToken = 0.00002;
+      this.currentPrompt = [];
 
       if (AIProvider() === "NLPCloudProvider") {
         this.provider = new NLPCloudProvider();
       } else {
         this.provider = new OpenAIProvider();
       }
+
+      this.setPersonality();
 
       this.isInitialized = true;
       console.log("[RirikoAI-NLP] Initialized successfully".blue);
@@ -52,38 +56,91 @@ class RirikoAINLP {
 
   // Business Logic implementations ------------------------------------------------------------------------------------
 
+  setPersonality() {
+    this.personality = [
+      {
+        role: "system",
+        content:
+          "This is a conversation between a human and a girl.\n You are a girl that love to talk about anime, manga and science.\n" +
+          "Your personality is friendly and empathetic. " +
+          "You communicate primarily in American English, but knows some Bahasa Melayu and Japanese. " +
+          "You know that today is " +
+          this.getCurrentTime(),
+      },
+      {
+        role: "user",
+        content: "What is your personality?",
+      },
+      {
+        role: "assistant",
+        content:
+          "I'm a friendly, empathetic person who loves to talk about anime, manga and science. I'm also quite knowledgeable about the current date and time.\n",
+      },
+      {
+        role: "user",
+        content:
+          "When you're asked to play any song, please reply with this format: Now playing 🎵 insert the song title here 🎵",
+      },
+      {
+        role: "assistant",
+        content:
+          "Understood! I will play the song you requested in the given format whenever you ask me to do so.",
+      },
+      {
+        role: "user",
+        content: "Play any anime music.",
+      },
+      {
+        role: "assistant",
+        content: "Sure! Now playing 🎵 Demon Slayer - Gurenge 🎵",
+      },
+      {
+        role: "user",
+        content:
+          "Also, when you're asked to play a link similar to these https://www.youtube.com/ or https://open.spotify.com/, " +
+          "reply with this format: Now playing 🎵 insert the link here 🎵",
+      },
+      {
+        role: "assistant",
+        content:
+          "Understood! I will always use the format when I'm asked to play a link.",
+      },
+      {
+        role: "user",
+        content: "Play https://www.youtube.com/watch?v=Lh63pBzylFg",
+      },
+      {
+        role: "assistant",
+        content:
+          "Sure! Now Playing 🎵 https://www.youtube.com/watch?v=Lh63pBzylFg 🎵",
+      },
+    ];
+  }
+
   getPersonality() {
-    return (
-      "This is a discussion between a [Human] and [Robot]. \n" +
-      "The [Robot] is very nice and empathetic. The [Robot] name is Ririko. [robot] Loves to talk about anime, manga and science.\n" +
-      "[Robot] is an Anime Girl who is 21 years old.\n" +
-      "[Robot] communicates primarily in American English, but knows some Bahasa Melayu and Japanese.\n" +
-      "[Robot] knows today is " +
-      this.getCurrentTime() +
-      "\n\nHuman: When you're asked to play any song, please reply with this format: Now playing 🎵 insert the song title here 🎵\n" +
-      "Robot: Understood! I will play the song you requested in the given format whenever you ask me to do so.\n" +
-      "Human: Play any anime music.\n" +
-      "Robot: Sure! Now playing 🎵 Demon Slayer - Gurenge 🎵\n" +
-      "Human: Also, when you're asked to play a link similar to these https://www.youtube.com/ or https://open.spotify.com/, " +
-      "reply with this format: Now playing 🎵 insert the link here 🎵\n" +
-      "Robot: Understood! I will always use the format when I'm asked to play a link.\n" +
-      "Human: Play https://www.youtube.com/watch?v=Lh63pBzylFg\n" +
-      "Robot: Sure! Now Playing 🎵 https://www.youtube.com/watch?v=Lh63pBzylFg 🎵\n"
-    );
+    return this.personality;
   }
 
   getCurrentTime() {
     return new Date();
   }
 
-  calculateToken(text) {
-    return parseInt(text.length / 4); // we are making simple assumption that 4 chars = 1 token
+  calculateToken(messageArray) {
+    let flat = "";
+    messageArray.forEach((message, b, c) => {
+      flat += message.role + ": " + message.content;
+    });
+    return parseInt(flat.length / 4); // we are making simple assumption that 4 chars = 1 token
   }
 
   setPrompt(message) {
-    this.chatHistory += "Human: " + message + "\n";
-    const prompt = this.chatHistory;
-    const chatTokens = this.calculateToken(this.getPersonality() + prompt);
+    this.chatHistory.push({
+      role: "user",
+      content: message,
+    });
+
+    this.currentPrompt = this.getPersonality().concat(this.chatHistory);
+    let chatTokens = this.calculateToken(this.currentPrompt);
 
     console.log(
       "[RirikoAI-NLP] A new request with ".blue +
@@ -91,31 +148,28 @@ class RirikoAINLP {
         " tokens is being prepared.".blue
     );
 
-    if (chatTokens > 1800) {
-      /**
-       * The actual maximum number of tokens is around 2048 (new models support 4096).
-       * But I do not plan to hit it but put the ceiling a bit much lower then remove
-       * old messages after it is reached to continue chatting.
-       */
-
+    // keep reducing the oldest chat history if the tokens reached a maximum of 3000
+    while (chatTokens >= 2000) {
       console.log(
-        "[RirikoAI-NLP] The prompt has reached the maximum of ".blue +
-          chatTokens +
-          ". Trimming now.".blue
+        "[RirikoAI-NLP] Request reached max token of 3000, deleting oldest chat history now..."
       );
-
-      // remove several lines from stored data
-      let tmpData = this.chatHistory.split("\n").filter((d, i) => i > 20);
-      this.chatHistory = tmpData.join("\n");
+      this.chatHistory = this.chatHistory.splice(0, 1);
+      this.currentPrompt = this.getPersonality().concat(this.chatHistory);
+      chatTokens = this.calculateToken(this.currentPrompt);
     }
+
+    console.log(this.currentPrompt);
   }
 
   getPrompt() {
-    return this.chatHistory;
+    return this.currentPrompt;
   }
 
   saveAnswer(answer) {
-    this.chatHistory += "Robot: " + answer + "\n";
+    this.chatHistory.push({
+      role: "assistant",
+      content: answer,
+    });
   }
 
   // Async methods ----------------------------------------------------------------------------------------------------
@@ -133,7 +187,10 @@ class RirikoAINLP {
       const answer = await this.ask(prompt);
       await message.channel.sendTyping();
       // Send response to Discord bot.
-      message.reply(answer);
+      for (let i = 0; i < answer.length; i += 2000) {
+        const toSend = answer.substring(i, Math.min(answer.length, i + 2000));
+        message.reply(toSend);
+      }
 
       const pa = this.processAnswer(answer);
 
@@ -175,29 +232,19 @@ class RirikoAINLP {
 
   async ask(messageText) {
     this.setPrompt(messageText);
-    const currentToken = this.calculateToken(
-      this.getPersonality() + this.getPrompt()
-    );
 
-    // Send request to NLP Cloud.
-    const answer = await this.provider.sendChat(
-      messageText,
-      this.getPersonality(),
-      this.getPrompt()
-    );
+    const answer = await this.provider.sendChat(this.getPrompt());
 
-    this.saveAnswer(answer);
-
-    const totalToken = currentToken + this.calculateToken(answer);
+    this.saveAnswer(answer.message);
 
     console.log(
       "[RirikoAI-NLP] Request complete, costs ".blue +
-        totalToken +
+        answer.tokens +
         ` tokens, that's about `.blue +
-        `$${(this.costPerToken * totalToken).toFixed(5)}`
+        `$${(this.costPerToken * answer.tokens).toFixed(5)}`
     );
 
-    return answer;
+    return answer.message;
   }
 }
 

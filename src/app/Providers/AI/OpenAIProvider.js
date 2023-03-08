@@ -25,23 +25,23 @@ class OpenAIProvider extends AIProviderBase {
     return this.openAiClient;
   }
 
-  async sendChat(messageText, context, history) {
-    const prompt = context + history;
+  async sendChat(messageArray, context, history) {
     try {
       // Send request to NLP Cloud.
-      const response = await this.openAiClient.createCompletion({
-        model: "text-davinci-003",
-        prompt,
+      const response = await this.openAiClient.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: messageArray,
         temperature: 0.5,
-        max_tokens: 350,
+        max_tokens: 2000,
         top_p: 1,
         frequency_penalty: 0.5,
         presence_penalty: 0,
-        stop: ["Human:"],
       });
 
-      const answer = response?.data.choices[0].text.split("Robot:")[1]?.trim();
-      return answer;
+      return {
+        message: response.data.choices[0].message.content,
+        tokens: response.data.usage.total_tokens,
+      };
     } catch (e) {
       throw e;
     }
