@@ -2,7 +2,7 @@ const db = require("../../../mongoDB");
 const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "stop",
-  description: "Plays the previous music again.",
+  description: "Stop the music.",
   permissions: "0x0000000000000800",
   options: [],
   voiceChannel: true,
