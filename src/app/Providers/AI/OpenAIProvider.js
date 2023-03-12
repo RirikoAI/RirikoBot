@@ -40,7 +40,7 @@ class OpenAIProvider extends AIProviderBase {
         stop: ["Human:"],
       });
 
-      const answer = response?.data.choices[0].text.split("Robot:")[1]?.trim();
+      const answer = response?.data.choices[0].text.split("Friend:")[1]?.trim();
       return answer;
     } catch (e) {
       throw e;
