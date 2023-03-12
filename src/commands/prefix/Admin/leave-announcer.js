@@ -3,8 +3,7 @@ const { EmbedBuilder } = require("discord.js");
 module.exports = {
   config: {
     name: "leave-announcer",
-    description:
-      "Set/unset the nitro channel and role id for announcement. Use `%user%` to mention the user.",
+    description: "Set/unset the leave announcer.",
     usage:
       "leave-announcer channel [channel id]\n" +
       "leave-announcer enable\n" +
