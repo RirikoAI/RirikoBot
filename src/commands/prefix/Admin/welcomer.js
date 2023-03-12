@@ -6,7 +6,7 @@ const isImageURL = require("image-url-validator").default;
 module.exports = {
   config: {
     name: "welcomer",
-    description: "Set the prefix for the guild.",
+    description: "Configure welcomer / new member announcer.",
     usage:
       "welcomer status\nwelcomer enable\nwelcomer disable\nwelcomer bg [background image]\nwelcomer channel [channel id]",
   },
