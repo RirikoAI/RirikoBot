@@ -69,7 +69,7 @@ class RirikoAVC {
   createChildVoice(primary, user) {
     primary.guild.channels
       .create({
-        name: `${user.user.username}'s Channel`,
+        name: `${user.user.username}'s Room`,
         type: ChannelType.GuildVoice,
         parent: primary.parentId,
       })

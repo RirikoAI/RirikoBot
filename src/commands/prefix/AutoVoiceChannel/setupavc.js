@@ -26,6 +26,6 @@ module.exports = {
    */
   async run(client, message, args, prefix, config, db) {
     client.avc.createPrimaryVoice(message.guild);
-    await message.reply(`channel created`);
+    await message.reply(`Auto Voice Channel has been created`);
   },
 };
