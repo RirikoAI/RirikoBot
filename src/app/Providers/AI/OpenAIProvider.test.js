@@ -8,7 +8,7 @@ jest.mock("openai", () => {
       createCompletion = () => {
         return {
           data: {
-            choices: [{ text: "Robot: example response" }],
+            choices: [{ text: "Friend: example response" }],
           },
         };
       };
