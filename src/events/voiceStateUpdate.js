@@ -11,6 +11,8 @@ module.exports = {
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
 client.on("voiceStateUpdate", async (oldState, newState) => {
+  client.avc.checkAVC(client);
+
   const queue = client.player.getQueue(oldState.guild.id);
   if (queue || queue?.playing) {
     if (client?.config?.opt?.voiceConfig?.leaveOnEmpty?.status === true) {
