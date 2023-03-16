@@ -12,6 +12,7 @@ const getconfig = require("helpers/getconfig");
 const { RirikoMusic } = require("app/RirikoMusic");
 const mongoose = require("mongoose");
 const { getLang } = require("./helpers/language");
+const { RirikoAVC } = require("./app/RirikoAVC");
 
 /**
  * Ririko main application entrypoint. Will start a new Discord client
@@ -64,6 +65,9 @@ const start = async () => {
   // Include config file into the client
   client.language = config.LANGUAGE || "en";
   client.config = config;
+
+  // Include Auto Voice Channel (AVC) functions
+  client.avc = new RirikoAVC();
 
   // Include
   client.partials = [Partials.User, Partials.Message, Partials.Reaction];
