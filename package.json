@@ -78,7 +78,7 @@
     "pino": "^8.11.0",
     "pino-pretty": "^9.4.0",
     "pretty-ms": "^8.0.0",
-    "quick.db": "^9.0.5",
+    "quick.db": "^9.0.10",
     "random-puppy": "^1.1.0",
     "save-dev": "^0.0.1-security",
     "songlyrics": "^2.4.5",
