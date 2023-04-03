@@ -93,6 +93,6 @@
     "babel-plugin-module-resolver": "^5.0.0",
     "babel-plugin-source-map-support": "^2.2.0",
     "babel-preset-minify": "^0.5.2",
-    "nodemon": "^2.0.21"
+    "nodemon": "^2.0.22"
   }
 }
