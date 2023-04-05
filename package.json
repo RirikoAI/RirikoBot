@@ -35,7 +35,7 @@
     "node": "16.15.1"
   },
   "dependencies": {
-    "@discordjs/builders": "^1.4.0",
+    "@discordjs/builders": "^1.6.1",
     "@discordjs/opus": "^0.9.0",
     "@discordjs/rest": "^1.5.0",
     "@discordjs/voice": "^0.15.0",
