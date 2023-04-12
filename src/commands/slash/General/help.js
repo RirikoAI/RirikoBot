@@ -3,13 +3,13 @@ const db = require("../../../mongoDB");
 const { getLang } = require("helpers/language");
 module.exports = {
   name: "help",
-  description: "It helps you to get information about bot and commands.",
+  description: "Pomůže vám získat informace o robotech a příkazech.",
   permissions: "0x0000000000000800",
   type: 1,
   options: [
     {
       name: "info",
-      description: "The command you want to get information about.",
+      description: "Příkaz, o kterém chcete získat informace.",
       type: ApplicationCommandOptionType.String,
       required: false,
     },

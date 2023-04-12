@@ -30,7 +30,7 @@ class OpenAIProvider extends AIProviderBase {
     try {
       // Send request to NLP Cloud.
       const response = await this.openAiClient.createCompletion({
-        model: "text-davinci-003",
+        model: "text-davinci-003", 
         prompt,
         temperature: 0.5,
         max_tokens: 1000,
