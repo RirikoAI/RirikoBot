@@ -8,6 +8,14 @@ Official RirikoAI Support Discord: https://discord.gg/VWzecBNTVv
 
 **[!] This project is still under heavy developments. Update 10th June 2023 - I've started to spend more and more time into this project, more features will come 😀**
 
+[![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
+[![CodeQL](https://github.com/RirikoAI/RirikoBot/workflows/CodeQL/badge.svg)](https://github.com/RirikoAI/RirikoBot/actions?query=workflow%3ACodeQL)
+
+[![GitHub tag](https://img.shields.io/github/tag/RirikoAI/RirikoBot?include_prereleases=&sort=semver&color=blue)](https://github.com/RirikoAI/RirikoBot/releases/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+[![issues - RirikoBot](https://img.shields.io/github/issues/RirikoAI/RirikoBot)](https://github.com/RirikoAI/RirikoBot/issues)
+[![Made In](https://img.shields.io/badge/made%20in-Malaysia-red.svg)](https://www.google.com/search?q=malaysia)
+
 ## Features
 ### 1. AI
 **Companion / Chatbot:**
@@ -105,3 +113,4 @@ See `CONTRIBUTING.md` for ways to get started.
 
 Please adhere to this project's `code of conduct` in `CODE_OF_CONDUCT.md`.
 
+[![Use this template](https://img.shields.io/badge/Generate-Use_this_template-2ea44f?style=for-the-badge)](https://github.com/RirikoAI/RirikoBot/generate)
