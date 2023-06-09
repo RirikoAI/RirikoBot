@@ -7,6 +7,7 @@ module.exports = {
     description: "Get a command's information.",
     usage: "info [command]",
   },
+  category: "Ririko",
   permissions: ["SendMessages"],
   owner: false,
   /**

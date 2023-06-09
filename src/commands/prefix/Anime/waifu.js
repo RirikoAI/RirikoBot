@@ -8,6 +8,7 @@ module.exports = {
     description: "Generate random waifu images",
     usage: "waifu",
   },
+  category: "Anime",
   owner: false,
   /**
    * Command runner

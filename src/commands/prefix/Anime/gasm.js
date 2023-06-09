@@ -8,6 +8,7 @@ module.exports = {
     description: "Generate random gasm images",
     usage: "gasm",
   },
+  category: "Anime",
   owner: false,
   /**
    * Command runner

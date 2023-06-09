@@ -4,6 +4,7 @@ module.exports = {
     description: "Fast forward the music by given time in seconds",
     usage: "forward [time in seconds]",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args) => {
     const queue = client.player.getQueue(message);

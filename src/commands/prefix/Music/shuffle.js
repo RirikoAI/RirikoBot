@@ -4,6 +4,7 @@ module.exports = {
     description: "Shuffles / randomizes the current playing queue",
     usage: "shuffle",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message) => {
     const queue = client.player.getQueue(message);

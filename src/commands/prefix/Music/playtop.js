@@ -5,6 +5,7 @@ module.exports = {
     description: "Adds the given music to the top of the queue",
     usage: "playtop [song url or query]",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args) => {
     const string = args.join(" ");

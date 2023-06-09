@@ -4,6 +4,7 @@ module.exports = {
     description: "Skip to the song number in queue",
     usage: "skipto [position in queue]",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args) => {
     const queue = client.player.getQueue(message);

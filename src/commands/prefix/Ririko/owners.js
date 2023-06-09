@@ -7,6 +7,7 @@ module.exports = {
     description: "Replies with the registered owners only.",
     usage: "owners",
   },
+  category: "Ririko",
   permissions: ["SendMessages"], // Since the "owner" is TRUE, then we can set the permissions to 'sendMessages'.
   owner: true,
   /**

@@ -6,10 +6,10 @@ module.exports = {
   config: {
     name: "anime",
     cooldown: 2000,
-    category: "Anime",
     usage: "anime [anime name]",
     description: "Get an anime descrption about a query",
   },
+  category: "Anime",
   owner: false,
   /**
    * Command runner

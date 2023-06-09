@@ -4,6 +4,7 @@ module.exports = {
     description: "Queue the previous song",
     usage: "previous",
   },
+  category: "Music",
   inVoiceChannel: true,
 
   run: async (client, message) => {

@@ -5,6 +5,7 @@ module.exports = {
     description: "Toggle autoplay on or off.",
     usage: "autoplay [on/off]",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message) => {
     const queue = client.player.getQueue(message);

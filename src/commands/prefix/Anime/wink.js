@@ -8,6 +8,7 @@ module.exports = {
     description: "Generate random winking anime images",
     usage: "wink",
   },
+  category: "Anime",
   owner: false,
   /**
    * Command runner

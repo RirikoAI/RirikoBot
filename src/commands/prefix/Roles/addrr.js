@@ -19,16 +19,14 @@ const {
   getReactionRoles,
 } = require("app/Schemas/ReactionRoles");
 
-const { removeReactionRole } = require("app/Schemas/ReactionRoles");
-
 module.exports = {
-  category: "ADMIN",
+  category: "Roles",
   userPermissions: ["ManageGuild"],
   config: {
-    name: "removerr",
-    description: "Remove configured reaction for the specified message",
+    name: "addrr",
+    description: "setup reaction role for the specified message",
     enabled: true,
-    usage: "removerr [channelID] [messageID]",
+    usage: "addrr [channelID] [messageID] [emote] [role to be given]",
     minArgsCount: 1,
   },
   /**
@@ -51,7 +49,7 @@ module.exports = {
         embeds: [
           new EmbedBuilder()
             .setTitle("Missing argument")
-            .setDescription(`See **${prefix}info removerr** for more info`),
+            .setDescription(`See **${prefix}info addrr** for more info`),
         ],
       });
 
@@ -60,25 +58,24 @@ module.exports = {
       return message.reply(`No channels found matching ${args[0]}`);
 
     const targetMessage = args[1];
-    const response = await removeRR(
+
+    const role = message.guild.findMatchingRoles(args[3])[0];
+    if (!role) return message.reply(`No roles found matching ${args[3]}`);
+
+    const reaction = args[2];
+
+    const response = await addRR(
       message.guild,
       targetChannel[0],
-      targetMessage
+      targetMessage,
+      reaction,
+      role
     );
-
     await message.reply(response);
   },
 };
 
-/**
- * @author saiteja-madha https://github.com/saiteja-madha/discord-js-bot
- *
- * @param guild
- * @param channel
- * @param messageId
- * @returns {Promise<string>}
- */
-async function removeRR(guild, channel, messageId) {
+async function addRR(guild, channel, messageId, reaction, role) {
   if (!channel.permissionsFor(guild.members.me).has(channelPerms)) {
     return `You need the following permissions in ${channel.toString()}\n${parsePermissions(
       channelPerms
@@ -92,12 +89,42 @@ async function removeRR(guild, channel, messageId) {
     return "Could not fetch message. Did you provide a valid messageId?";
   }
 
-  try {
-    await removeReactionRole(guild.id, channel.id, targetMessage.id);
-    await targetMessage.reactions?.removeAll();
-  } catch (ex) {
-    return "Oops! An unexpected error occurred. Try again later";
+  if (role.managed) {
+    return "I cannot assign bot roles.";
   }
 
-  return "Done! Configuration updated";
+  if (guild.roles.everyone.id === role.id) {
+    return "You cannot assign the everyone role.";
+  }
+
+  if (guild.members.me.roles.highest.position < role.position) {
+    return "Oops! I cannot add/remove members to that role. Is that role higher than mine?";
+  }
+
+  const custom = parseEmoji(reaction);
+  if (custom.id && !guild.emojis.cache.has(custom.id))
+    return "This emoji does not belong to this server";
+  const emoji = custom.id ? custom.id : custom.name;
+
+  try {
+    await targetMessage.react(emoji);
+  } catch (ex) {
+    return `Oops! Failed to react. Is this a valid emoji: ${reaction} ?`;
+  }
+
+  let reply = "";
+  const previousRoles = getReactionRoles(
+    guild.id,
+    channel.id,
+    targetMessage.id
+  );
+  if (previousRoles.length > 0) {
+    const found = previousRoles.find((rr) => rr.emote === emoji);
+    if (found)
+      reply =
+        "A role is already configured for this emoji. Overwriting data,\n";
+  }
+
+  await addReactionRole(guild.id, channel.id, targetMessage.id, emoji, role.id);
+  return (reply += "Done! Configuration saved");
 }

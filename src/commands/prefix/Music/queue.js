@@ -5,6 +5,7 @@ module.exports = {
     description: "Show the server queue",
     usage: "queue",
   },
+  category: "Music",
   run: async (client, message) => {
     const queue = client.player.getQueue(message);
     if (!queue)

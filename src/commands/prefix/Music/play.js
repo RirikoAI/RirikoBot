@@ -6,6 +6,7 @@ module.exports = {
     description: "Plays the music.",
     usage: "play [song title]\nplay [link]",
   },
+  category: "Music",
   permissions: ["SendMessages"],
   owner: false,
   inVoiceChannel: true,

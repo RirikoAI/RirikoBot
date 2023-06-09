@@ -15,11 +15,11 @@ module.exports = {
   config: {
     name: "wallpaper",
     cooldown: 2000,
-    category: "Anime",
     usage: "wallpaper [anime name]",
     description: "Get an anime wallpaper with the query",
   },
   owner: false,
+  category: "Anime",
   /**
    * Command runner
    * @author earnestangel https://github.com/RirikoAI/RirikoBot
