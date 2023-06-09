@@ -13,6 +13,9 @@ Official RirikoAI Support Discord: https://discord.gg/VWzecBNTVv
 **Companion / Chatbot:**
 The AI chatbot uses the `.` prefix. Try it out by linking to your Discord bot and inviting it to your server. Start with `.hello`
 
+Whats unique compared to the thousands of AI chatbots out there? 
+Ririko can remember your past conversations. It is also personalized to each user, so no more cross contaminating prompts and no more forgetting or confused about your own name
+
 **AI Powered Music bot:**
 Try asking it to play a random anime music or suggesting you a Nightcore music. Something like `.Hey can you play me an anime music?`
 
