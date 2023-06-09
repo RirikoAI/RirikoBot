@@ -5,6 +5,8 @@ A powerful AI-powered general Discord bot that you can call your companion
 
 ## Running the Project
 
+You'll need your own OpenAI or NLPCloud API keys.
+
 Clone the project
 
 ```bash
@@ -30,6 +32,10 @@ Start the server
 ```bash
   npm run start
 ```
+
+_**Problems running Ririko?:** Try to delete your old config.js and copy it again from config.example.js. ._
+
+
 
 ## Features
 ### 1. AI Chatbot
