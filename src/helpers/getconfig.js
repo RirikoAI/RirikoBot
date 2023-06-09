@@ -1,5 +1,9 @@
 const config = require("../../config");
 
+/**
+ * This section of code is proudly written by Ririko until some point
+ * @returns {*|string}
+ */
 const language = () => {
   return process.env.LANGUAGE || config.LANGUAGE;
 };
@@ -68,6 +72,14 @@ const AIEnableWhitelist = () => {
   return process.env.AI_ENABLE_WHITELIST || config.AI.EnableWhitelist;
 };
 
+const AIPersonality = () => {
+  return config.AI.Personality;
+};
+
+const AIPrompts = () => {
+  return config.AI.Prompts;
+};
+
 const dbEngine = () => {
   return process.env.DB_ENGINE || config.DATABASE.Engine;
 };
@@ -94,6 +106,8 @@ module.exports = {
   AIProvider,
   AIToken,
   AIEnableWhitelist,
+  AIPersonality,
+  AIPrompts,
   dbEngine,
   mongoAccessURI,
   debugLevel,
