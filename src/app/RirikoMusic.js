@@ -54,10 +54,14 @@ class RirikoMusic {
     // DisTube event listeners, more in the documentation page
     distube
       .on("playSong", async (queue, song) => {
-        const volume =
+        let volume =
           +(await db.get(`guild_volume_${queue.textChannel.guild.id}`)) ||
           queue.volume ||
           50;
+
+        if (volume < 0) {
+          volume = 0;
+        }
 
         queue.setVolume(volume);
 

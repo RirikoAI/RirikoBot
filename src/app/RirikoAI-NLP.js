@@ -2,10 +2,19 @@ const { Configuration, OpenAIApi } = require("openai");
 const colors = require("colors");
 const config = require("config");
 
-const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
 const { OpenAIProvider } = require("./Providers/AI/OpenAIProvider");
+const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
+
 const getconfig = require("helpers/getconfig");
 const { AIProvider } = require("helpers/getconfig");
+const { AIPersonality } = require("helpers/getconfig");
+const { AIPrompts } = require("../helpers/getconfig");
+const {
+  findChatHistory,
+  addChatHistory,
+  updateChatHistory,
+  deleteChatHistory,
+} = require("./Schemas/ChatHistory");
 
 /**
  * Now, this is going to be an awesome AI that can remember past conversations by saving it into the
@@ -53,23 +62,7 @@ class RirikoAINLP {
   // Business Logic implementations ------------------------------------------------------------------------------------
 
   getPersonality() {
-    return (
-      "This is a discussion between a [Human] and [Friend]. \n" +
-      "The [Friend] is very nice and empathetic. The [Friend] name is Ririko. [Friend] Loves to talk about anime, manga and science.\n" +
-      "[Friend] is an Anime Girl who is 21 years old. [Friend] is a normal person with feelings and emotions.\n" +
-      "[Friend] communicates primarily in American English, but knows some Bahasa Melayu and Japanese.\n" +
-      "[Friend] knows today is " +
-      this.getCurrentTime() +
-      "\n\nHuman: When you're asked to play any song, please reply with this format: Now playing 🎵 insert the song title here 🎵\n" +
-      "Friend: Understood! I will play the song you requested in the given format whenever you ask me to do so.\n" +
-      "Human: Play any anime music.\n" +
-      "Friend: Sure! Now playing 🎵 Demon Slayer - Gurenge 🎵\n" +
-      "Human: Also, when you're asked to play a link similar to these https://www.youtube.com/ or https://open.spotify.com/, " +
-      "reply with this format: Now playing 🎵 insert the link here 🎵\n" +
-      "Friend: Understood! I will always use the format when I'm asked to play a link.\n" +
-      "Human: Play https://www.youtube.com/watch?v=Lh63pBzylFg\n" +
-      "Friend: Sure! Now Playing 🎵 https://www.youtube.com/watch?v=Lh63pBzylFg 🎵\n"
-    );
+    return AIPersonality().join("\n") + "\n" + AIPrompts().join("\n") + "\n";
   }
 
   getCurrentTime() {
@@ -80,42 +73,8 @@ class RirikoAINLP {
     return parseInt(text.length / 4); // we are making simple assumption that 4 chars = 1 token
   }
 
-  setPrompt(message) {
-    this.chatHistory += "Human: " + message + "\n";
-    const prompt = this.chatHistory;
-    const chatTokens = this.calculateToken(this.getPersonality() + prompt);
-
-    console.log(
-      "[RirikoAI-NLP] A new request with ".blue +
-        chatTokens +
-        " tokens is being prepared.".blue
-    );
-
-    if (chatTokens > 1800) {
-      /**
-       * The actual maximum number of tokens is around 2048 (new models support 4096).
-       * But I do not plan to hit it but put the ceiling a bit much lower then remove
-       * old messages after it is reached to continue chatting.
-       */
-
-      console.log(
-        "[RirikoAI-NLP] The prompt has reached the maximum of ".blue +
-          chatTokens +
-          ". Trimming now.".blue
-      );
-
-      // remove several lines from stored data
-      let tmpData = this.chatHistory.split("\n").filter((d, i) => i > 20);
-      this.chatHistory = tmpData.join("\n");
-    }
-  }
-
   getPrompt() {
     return this.chatHistory;
-  }
-
-  saveAnswer(answer) {
-    this.chatHistory += "Friend: " + answer + "\n";
   }
 
   // Async methods ----------------------------------------------------------------------------------------------------
@@ -130,7 +89,7 @@ class RirikoAINLP {
       await message.channel.sendTyping();
 
       const prompt = message.content.substring(1); //remove the prefix from the message
-      const answer = await this.ask(prompt);
+      const answer = await this.ask(prompt, message);
       await message.channel.sendTyping();
 
       // Send response to Discord bot.
@@ -177,8 +136,12 @@ class RirikoAINLP {
     }
   }
 
-  async ask(messageText) {
-    this.setPrompt(messageText);
+  async ask(messageText, discordMessage) {
+    console.log("messageText", messageText);
+    if (messageText === "clear")
+      return await this.clearChatHistory(discordMessage);
+
+    await this.setPrompt(messageText, discordMessage);
     const currentToken = this.calculateToken(
       this.getPersonality() + this.getPrompt()
     );
@@ -190,7 +153,7 @@ class RirikoAINLP {
       this.getPrompt()
     );
 
-    this.saveAnswer(answer);
+    await this.saveAnswer(answer, discordMessage);
 
     const totalToken = currentToken + this.calculateToken(answer);
 
@@ -202,6 +165,67 @@ class RirikoAINLP {
     );
 
     return answer;
+  }
+
+  async setPrompt(message, discordMessage) {
+    const currentPrompt = "Human: " + message + "\n";
+
+    let perUserChatHistory = await findChatHistory(
+      discordMessage.guildId,
+      discordMessage.author.id
+    );
+
+    // this user never chatted with Ririko before, create a new chathistory
+    if (perUserChatHistory === null) {
+      perUserChatHistory = await addChatHistory(discordMessage, "");
+    }
+
+    this.chatHistory = perUserChatHistory.chat_history;
+
+    this.chatHistory += currentPrompt;
+
+    const prompt = this.chatHistory;
+
+    const chatTokens = this.calculateToken(this.getPersonality() + prompt);
+
+    console.log(
+      "[RirikoAI-NLP] A new request with ".blue +
+        chatTokens +
+        " tokens is being prepared.".blue
+    );
+
+    if (chatTokens > 1800) {
+      /**
+       * The actual maximum number of tokens is around 2048 (new models support 4096).
+       * But I do not plan to hit it but put the ceiling a bit much lower then remove
+       * old messages after it is reached to continue chatting.
+       */
+
+      console.log(
+        "[RirikoAI-NLP] The prompt has reached the maximum of ".blue +
+          chatTokens +
+          ". Trimming now.".blue
+      );
+
+      // remove several lines from stored data
+      let tmpData = this.chatHistory.split("\n").filter((d, i) => i > 20);
+      this.chatHistory = tmpData.join("\n");
+    }
+  }
+
+  async saveAnswer(answer, discordMessage) {
+    this.chatHistory += "Friend: " + answer + "\n";
+    // save chat history into mongodb
+    await updateChatHistory(
+      discordMessage.guildId,
+      discordMessage.author.id,
+      this.chatHistory
+    );
+  }
+
+  async clearChatHistory(discordMessage) {
+    await deleteChatHistory(discordMessage.guildId, discordMessage.author.id);
+    return "Your chat history with Ririko has been cleared.";
   }
 }
 

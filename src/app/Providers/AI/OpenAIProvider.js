@@ -33,7 +33,7 @@ class OpenAIProvider extends AIProviderBase {
         model: "text-davinci-003",
         prompt,
         temperature: 0.5,
-        max_tokens: 1000,
+        max_tokens: 2000,
         top_p: 1,
         frequency_penalty: 0.5,
         presence_penalty: 0,

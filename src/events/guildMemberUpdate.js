@@ -70,7 +70,7 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
             return m.user.tag;
           })
           .join("\n");
-        console.log(`${users} users boosted the server`);
+        // console.log(`${users} users boosted the server`);
       });
     }
   }
