@@ -137,7 +137,6 @@ class RirikoAINLP {
   }
 
   async ask(messageText, discordMessage) {
-    console.log("messageText", messageText);
     if (messageText === "clear")
       return await this.clearChatHistory(discordMessage);
 
