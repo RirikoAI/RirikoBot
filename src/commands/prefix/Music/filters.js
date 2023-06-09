@@ -7,6 +7,7 @@ module.exports = {
       "\nSet a new filter by issuing slash command /filter [option]",
     usage: "filter\nfilter off",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args) => {
     const queue = client.player.getQueue(message);

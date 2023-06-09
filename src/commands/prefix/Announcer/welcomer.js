@@ -10,6 +10,7 @@ module.exports = {
     usage:
       "welcomer status\nwelcomer enable\nwelcomer disable\nwelcomer bg [background image]\nwelcomer channel [channel id]",
   },
+  category: "Announcer",
   permissions: ["Administrator"],
   owner: false,
   /**

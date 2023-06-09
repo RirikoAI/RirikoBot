@@ -48,7 +48,8 @@ const language = {
   msg29: `Please enter a valid filter name. ❌\n{filters}`,
   msg30: `I couldn't find a filter with that name. ❌\n{filters}`,
   msg31: `Applied: **{filter}**, Filter Status: **{status}**\n **Remember, if the music is long, the filter application time may be longer accordingly.**`,
-  msg32: "Available slash commands for RirikoAI",
+  msg32:
+    "Available slash commands for RirikoAI. Only music commands are available here. For more, use: !help (prefix commands)",
   msg33: "Bot Commands",
   msg34: "You already have an active command here. ❌",
   msg35: "Queue",

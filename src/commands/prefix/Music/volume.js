@@ -5,6 +5,7 @@ module.exports = {
     description: "Set/get the server volume",
     usage: "volume\nvolume [number]",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args, prefix, config, db) => {
     const queue = client.player.getQueue(message);

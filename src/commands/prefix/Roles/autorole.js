@@ -1,7 +1,7 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
 
 module.exports = {
-  category: "ADMIN",
+  category: "Roles",
   userPermissions: ["ManageGuild"],
   config: {
     name: "autorole",

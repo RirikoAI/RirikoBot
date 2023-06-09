@@ -5,6 +5,7 @@ module.exports = {
     description: "Rewind the music",
     usage: "rewind [time in seconds]",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args) => {
     const queue = client.player.getQueue(message);

@@ -4,6 +4,7 @@ module.exports = {
     description: "Skip the current music",
     usage: "skip",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message) => {
     const queue = client.player.getQueue(message);

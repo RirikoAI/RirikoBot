@@ -8,6 +8,7 @@ module.exports = {
   },
   permissions: ["Administrator"],
   owner: false,
+  category: "Ririko",
   /**
    * Command runner
    * @author earnestangel https://github.com/RirikoAI/RirikoBot

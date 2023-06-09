@@ -8,6 +8,7 @@ module.exports = {
     description: "Wrap your texts with spoiler just to annoy your friends",
     usage: "spoiler [text]",
   },
+  category: "Fun",
   owner: false,
   /**
    * Command runner

@@ -39,6 +39,7 @@ module.exports = {
     usage: "react [choice]",
   },
   owner: false,
+  category: "Anime",
   /**
    * Command runner
    * @author earnestangel https://github.com/RirikoAI/RirikoBot

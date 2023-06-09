@@ -7,6 +7,7 @@ module.exports = {
     description: "Join the voice channel where the user is in",
     usage: "join",
   },
+  category: "Music",
   run: async (client, message, args) => {
     let voiceChannel = message.member.voice.channel;
     if (args[0]) {

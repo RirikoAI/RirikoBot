@@ -9,6 +9,7 @@ module.exports = {
       "Replies with help menu. If you want to know the info about commands, use\ninfo [command]",
     usage: "help",
   },
+  category: "Ririko",
   permissions: ["SendMessages"],
   owner: false,
   /**
@@ -26,9 +27,37 @@ module.exports = {
    */
   run: async (client, message, args, prefix, config, db) => {
     const lang = getLang();
-    const commands = client.prefix_commands.map((command) => {
-      return `${prefix}${command.config.name}`;
+
+    const categorized_commands = client.prefix_commands.reduce(
+      (acc, command) => {
+        const categoryIndex = acc.findIndex(
+          (item) => item.name === command.category
+        );
+        if (categoryIndex > -1) {
+          acc[categoryIndex].commands.push(command.config.name);
+        } else {
+          acc.push({
+            name: command.category,
+            commands: [command.config.name],
+          });
+        }
+        return acc;
+      },
+      []
+    );
+
+    let help_message = "";
+
+    categorized_commands.forEach(function (category) {
+      const subcommands = category.commands.map((command) => {
+        return `\`${prefix}${command}\``;
+      });
+      help_message += "**__" + category.name + "__**\n";
+      help_message += subcommands.join(", ");
+      help_message += "\n\n";
     });
+
+    console.log(help_message);
 
     return message.reply({
       embeds: [
@@ -42,9 +71,11 @@ module.exports = {
           .setThumbnail(client.user.displayAvatarURL())
           .setTimestamp()
           .setDescription(
-            "**Available prefix commands for this bot:** \n\n" +
-              commands.join(", ") +
-              `\n\nUse **${prefix}info** for  info of the above commands.`
+            "**Welcome to the AI-powered general Discord bot that you can call your companion. Here's all the prefix commands: ** \n\n" +
+              "**__AI__** \n `.prompt` - For example: `.Hello Ririko. Please play an anime music.` " +
+              "You can also ask Ririko any question like: `.What day is today?` or `.What do you think about love`\n\n" +
+              help_message +
+              `Use \`${prefix}info [command]\` for more info of the particular command. For slash commands, use \`/help\``
           )
           .addFields(lang.field1)
           .setFooter({

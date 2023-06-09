@@ -12,6 +12,7 @@ module.exports = {
       "nitro-announcer disable\n" +
       "nitro-announcer status",
   },
+  category: "Announcer",
   permissions: ["Administrator"],
   owner: false,
   /**

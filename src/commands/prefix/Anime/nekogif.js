@@ -9,6 +9,7 @@ module.exports = {
     usage: "nekogif",
   },
   owner: false,
+  category: "Anime",
   /**
    * Command runner
    * @author earnestangel https://github.com/RirikoAI/RirikoBot

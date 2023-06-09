@@ -5,6 +5,7 @@ module.exports = {
     description: "Enable or disable repeat",
     usage: "repeat off\nrepeat song\nrepeat queue",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args) => {
     const queue = client.player.getQueue(message);

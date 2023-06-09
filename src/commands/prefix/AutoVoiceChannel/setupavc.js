@@ -2,7 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 const fs = require("fs");
 
 module.exports = {
-  category: "ADMIN",
+  category: "AutoVoiceChannel",
   userPermissions: ["MANAGE_CHANNELS"],
   config: {
     name: "setupavc",

@@ -10,6 +10,7 @@ module.exports = {
       "leave-announcer disable\n" +
       "leave-announcer status",
   },
+  category: "Announcer",
   permissions: ["Administrator"],
   owner: false,
   /**

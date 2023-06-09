@@ -5,6 +5,7 @@ module.exports = {
     description: "Display currently playing music",
     usage: "nowplaying",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args) => {
     const queue = client.player.getQueue(message);

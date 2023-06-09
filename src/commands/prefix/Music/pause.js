@@ -5,6 +5,7 @@ module.exports = {
     description: "Pause or unpause currently playing music",
     usage: "pause",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message) => {
     const queue = client.player.getQueue(message);

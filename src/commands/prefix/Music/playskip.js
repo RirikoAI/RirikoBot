@@ -6,6 +6,7 @@ module.exports = {
       "Play the given music straightaway, skipping currently playing music",
     usage: "playskip [song url or query]",
   },
+  category: "Music",
   inVoiceChannel: true,
   run: async (client, message, args) => {
     const string = args.join(" ");

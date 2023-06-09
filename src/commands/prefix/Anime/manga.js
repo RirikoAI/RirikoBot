@@ -6,11 +6,11 @@ module.exports = {
   config: {
     name: "manga",
     cooldown: 2000,
-    category: "Anime",
     usage: "manga [manga name]",
     description: "Get a manga description about a query",
   },
   owner: false,
+  category: "Anime",
   /**
    * Command runner
    * @author earnestangel https://github.com/RirikoAI/RirikoBot
