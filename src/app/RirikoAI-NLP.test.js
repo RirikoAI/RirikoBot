@@ -47,6 +47,10 @@ class MockedRirikoAI extends RirikoAINLP {
     return "Robot: Answer";
   }
 
+  getCurrentTime() {
+    return new Date();
+  }
+
   chatHistory = "Human: Hello";
 }
 
