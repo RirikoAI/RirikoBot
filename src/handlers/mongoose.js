@@ -25,12 +25,14 @@ module.exports = async (client) => {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       })
-      .then(async () => {
-        console.log(`Connected to MongoDB successfully!`.yellow);
-      })
+      .then(async () => {})
       .catch((err) => {
         console.log("\nMongoDB Error: " + err + "\n\n" + lang.error4);
       });
+
+    if (!process.env.JEST_WORKER_ID) {
+      console.log(`Connected to MongoDB successfully!`.yellow);
+    }
   } else {
     console.log(lang.error4);
   }

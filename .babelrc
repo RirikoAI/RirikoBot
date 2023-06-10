@@ -13,6 +13,7 @@
       "module-resolver",
       {
         "alias": {
+          "root": "./dist/",
           "app": "./dist/app",
           "commands": "./dist/commands",
           "utils": "./dist/utils",
