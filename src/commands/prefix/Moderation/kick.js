@@ -13,7 +13,7 @@ module.exports = {
     description: "kicks the specified member",
     usage: "kick [@user] [reason]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   botPermissions: ["KickMembers"],
   permissions: ["KickMembers"],
   command: {

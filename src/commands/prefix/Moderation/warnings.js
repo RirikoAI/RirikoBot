@@ -14,7 +14,7 @@ module.exports = {
     description: "list or clear user warnings",
     usage: "warnings list [@user]\n" + "warnings clear [@user]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   userPermissions: ["KickMembers"],
   command: {
     enabled: true,

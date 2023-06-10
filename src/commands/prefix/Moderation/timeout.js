@@ -14,7 +14,7 @@ module.exports = {
     description: "timeouts the specified member. Duration can be: 1d/1h/1m/1s",
     usage: "timeout [@user] [duration] [reason]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   botPermissions: ["ModerateMembers"],
   permissions: ["ModerateMembers"],
   command: {

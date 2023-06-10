@@ -13,7 +13,7 @@ module.exports = {
     description: "warns the specified member",
     usage: "warn [@user] [reason]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   permissions: ["KickMembers"],
   command: {
     enabled: true,

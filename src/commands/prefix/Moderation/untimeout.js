@@ -13,7 +13,7 @@ module.exports = {
     description: "remove timeout from a member",
     usage: "untimeout [@user] [reason]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   botPermissions: ["ModerateMembers"],
   permissions: ["ModerateMembers"],
   command: {

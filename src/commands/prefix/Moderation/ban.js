@@ -12,7 +12,7 @@ module.exports = {
     description: "bans the specified member",
     usage: "ban [user] [reason]\n" + "ban [user]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   botPermissions: ["BanMembers"],
   permissions: ["BanMembers"],
   command: {

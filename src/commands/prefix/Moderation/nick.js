@@ -13,7 +13,7 @@ module.exports = {
     description: "nickname commands",
     usage: "nick set [@member] [nick]\n" + "nick reset [@member]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   permissions: ["ManageNicknames"],
   botPermissions: ["ManageNicknames"],
   command: {

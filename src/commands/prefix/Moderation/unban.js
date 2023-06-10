@@ -18,7 +18,7 @@ module.exports = {
     description: "unbans the specified member",
     usage: "unban [name] [reason]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   botPermissions: ["BanMembers"],
   permissions: ["BanMembers"],
   command: {

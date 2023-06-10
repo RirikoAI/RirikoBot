@@ -13,7 +13,7 @@ module.exports = {
     description: "softban the specified member. Kicks and deletes messages",
     usage: "softban [@user] [reason]",
   },
-  category: "MODERATION",
+  category: "Moderation",
   botPermissions: ["BanMembers"],
   permissions: ["KickMembers"],
   command: {
