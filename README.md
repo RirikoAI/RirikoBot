@@ -1,5 +1,5 @@
 
-# RirikoBot
+# Ririko AI
 A powerful AI-powered general Discord bot that you can call your companion.
 
 [![A mushroom-head robot](https://i.imgur.com/85Z84vf.png 'Codey the Codecademy mascot')](https://discord.gg/VWzecBNTVv)

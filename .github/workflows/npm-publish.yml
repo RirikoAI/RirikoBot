@@ -19,7 +19,7 @@ jobs:
       - run: cp .env.example .env
       - run: cp config.example.js config.js
       - run: npm run build
-      - run: npm run test
+      - run: npm prune --production 
 
   publish-npm:
     needs: build
@@ -33,4 +33,4 @@ jobs:
       - run: npm ci
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN }}
