@@ -18,7 +18,6 @@ jobs:
       - run: npm i --dev
       - run: npm run test
       - run: npm run build
-      - run: npm prune --production
 
   publish-npm:
     needs: build
