@@ -2,7 +2,6 @@ const fetch = require("node-fetch");
 const cheerio = require("cheerio");
 const { Anime, Manga } = require("./animeSearchClass");
 const { honorifics } = require("./db");
-const puppy = require("random-puppy");
 const { nsfw, sfw, nsfwAZ, sfwAZ } = require("./snfw");
 const nekoURL = "https://nekos.life/api/v2";
 const userAgentTxt = `kitsu.js, a npm module for the kitsu.io API.`;
