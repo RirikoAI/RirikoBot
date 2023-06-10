@@ -25,7 +25,7 @@ module.exports = {
    */
   run: async (client, message, args, prefix, config, db) => {
     const lang = getLang();
-    await fetch("https://some-random-api.ml/animu/wink")
+    await fetch("https://some-random-api.com/animu/wink")
       .then((res) => res.json())
       .then((body) => {
         const embed = new EmbedBuilder()

@@ -34,9 +34,9 @@ module.exports = {
    * @returns {Promise<*>}
    */
   run: async (client, message, args, prefix, config, db) => {
+    const lang = getLang();
+    const query = args.join(" ");
     try {
-      const lang = getLang();
-      const query = args.join(" ");
       if (!query)
         return message.reply("Please give me an anime to search a wallpaper!");
 
@@ -74,7 +74,7 @@ module.exports = {
         .setURL(randomImage.image)
         .setFooter({ text: `${lang.footer1}` });
 
-      message.reply({
+      await message.reply({
         embeds: [embed],
       });
     } catch (e) {
