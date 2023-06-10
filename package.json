@@ -1,6 +1,6 @@
 {
   "name": "ririko-ai",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A powerful AI-powered general Discord bot that you can call your companion",
   "author": "Earnest Angel",
   "email": "me@angel.net.my",
@@ -32,7 +32,7 @@
     "heroku-prebuild": "npm install --dev && cp -n config.example.js config.js"
   },
   "engines": {
-    "node": "16.15.1"
+    "node": "18.16.0"
   },
   "dependencies": {
     "@discordjs/builders": "^1.6.1",
