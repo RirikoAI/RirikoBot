@@ -2,8 +2,8 @@
  * @author saiteja-madha https://github.com/saiteja-madha/discord-js-bot/
  */
 const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
-const { getWarningLogs, clearWarningLogs } = require("app/schemas/ModLog");
-const { getMember } = require("app/schemas/Member");
+const { getWarningLogs, clearWarningLogs } = require("app/Schemas/ModLog");
+const { getMember } = require("app/Schemas/Member");
 
 /**
  * @type {import("@structures/Command")}
