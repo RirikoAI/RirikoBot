@@ -9,9 +9,9 @@ const { containsLink } = require("helpers/Utils");
 const { error } = require("helpers/logger");
 
 // Schemas
-const { getSettings } = require("app/schemas/Guild");
-const { getMember } = require("app/schemas/Member");
-const { addModLogToDb } = require("app/schemas/ModLog");
+const { getSettings } = require("app/Schemas/Guild");
+const { getMember } = require("app/Schemas/Member");
+const { addModLogToDb } = require("app/Schemas/ModLog");
 
 const DEFAULT_TIMEOUT_HOURS = 24; //hours
 
