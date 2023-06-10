@@ -103,6 +103,7 @@ module.exports = class Logger {
    * @param {object} ex
    */
   static error(content, ex) {
+    console.error(content, ex);
     if (ex) {
       pinoLogger.error(ex, `${content}: ${ex?.message}`);
     } else {

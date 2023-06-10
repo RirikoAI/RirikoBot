@@ -94,7 +94,7 @@ const start = async () => {
   );
 
   // Register all extenders
-  ["Guild.js"].forEach((file) => {
+  ["Guild", "Client"].forEach((file) => {
     require(`./helpers/extenders/${file}`)(client, config);
   });
 

@@ -110,7 +110,7 @@ const Schema = new mongoose.Schema({
   },
 });
 
-const Model = mongoose.model("guild", Schema);
+const Model = mongoose.models.guild || mongoose.model("guild", Schema);
 
 module.exports = {
   /**
