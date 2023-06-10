@@ -6,7 +6,7 @@ const { MODERATION } = require("config");
 
 // Utils
 const { containsLink } = require("helpers/Utils");
-const { error } = require("helpers/Logger");
+const { error } = require("helpers/logger");
 
 // Schemas
 const { getSettings } = require("app/schemas/Guild");
