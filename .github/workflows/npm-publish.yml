@@ -17,7 +17,7 @@ jobs:
           node-version: 16
       - run: npm i --include=dev
       - run: cp .env.example .env
-      - run: cp .config.example.js .config.js
+      - run: cp config.example.js .config.js
       - run: npm run build
       - run: npm run test
 
