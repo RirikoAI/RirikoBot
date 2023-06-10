@@ -59,7 +59,7 @@ I'm still working hard to make the anime recommendation function works, so you c
 Before starting, you'll need a couple of things:
 1. Of course, your own Discord bot tokens. Create a bot here if you still didn't have one: [Discord Developer Portal — My Applications](https://discord.com/developers/applications). Create a new application, and bot for the new application. 
 2. Your own OpenAI or NLPCloud API keys. Get OpenAI key here: [Sign Up for OpenAI)](https://platform.openai.com/signup?launch) OR NLPcloud [Sign Up for NLPCloud)](https://nlpcloud.com/home/register)
-3. A MongoDB server OR cloud. Get it here: [MongoDB Cloud Database (Official)](https://www.mongodb.com/free-cloud-database).  Then get the URI / connection string. They looks like this: `mongodb+srv://yourownuser:yourownpassword@ririko.onss3te.mongodb.net/?retryWrites=true&w=majority`
+3. A MongoDB server OR cloud. Get it here: [MongoDB Cloud Database (Official)](https://www.mongodb.com/free-cloud-database).  Then get the URI / connection string. They looks like this: `mongodb+srv://yourownuser:yourownpassword@yourdomain.onss3te.mongodb.net/?retryWrites=true&w=majority`
 4. LTS version of Node.js: [Download | Node.js (nodejs.org)](https://nodejs.org/en/download)
 5. (optional) Genius token - if you want the lyrics feature: http://genius.com/api-clients
 6. (non-optional) A little bit of patience. Keep calm and learn to ask for help. Read the instructions properly, ⚠️ DO NOT SKIP A SINGLE PART. No matter how smart you think you are⚠️
