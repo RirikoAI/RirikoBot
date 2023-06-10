@@ -9,6 +9,7 @@ module.exports = async function (client, config) {
   console.log("[EXTENDERS - CLIENT] Registered".green);
 
   /**
+   * @author saiteja-madha https://github.com/saiteja-madha/discord-js-bot
    * @param {string} search
    * @param {Boolean} exact
    */
