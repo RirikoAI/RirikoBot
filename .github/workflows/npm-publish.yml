@@ -15,9 +15,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - run: npm i --dev
-      - run: npm run test
+      - run: npm i --include=dev
+      - run: cp .env.example .env
+      - run: cp .config.example.js .config.js
       - run: npm run build
+      - run: npm run test
 
   publish-npm:
     needs: build
