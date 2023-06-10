@@ -52,7 +52,8 @@ class RirikoAINLP {
       console.log("[RirikoAI-NLP] Initialized successfully".blue);
     } catch (e) {
       console.error(
-        "[RirikoAI-NLP] Something went wrong during the initialization!".red
+        "[RirikoAI-NLP] Something went wrong during the initialization! Check your config (try copy and paste the example config files again)"
+          .red
       );
       this.isInitialized = false;
       throw e;
@@ -62,7 +63,14 @@ class RirikoAINLP {
   // Business Logic implementations ------------------------------------------------------------------------------------
 
   getPersonality() {
-    return AIPersonality().join("\n") + "\n" + AIPrompts().join("\n") + "\n";
+    try {
+      return AIPersonality().join("\n") + "\n" + AIPrompts().join("\n") + "\n";
+    } catch (e) {
+      throw (
+        "[ERROR] Something when wrong trying to read the AI Personality and Prompts. " +
+        "Check the config file (and config.example files), see if there are missing configs"
+      );
+    }
   }
 
   getCurrentTime() {
@@ -145,25 +153,38 @@ class RirikoAINLP {
       this.getPersonality() + this.getPrompt()
     );
 
-    // Send request to NLP Cloud.
-    const answer = await this.provider.sendChat(
-      messageText,
-      this.getPersonality(),
-      this.getPrompt()
-    );
+    try {
+      // Send request to NLP Cloud.
+      const answer = await this.provider.sendChat(
+        messageText,
+        this.getPersonality(),
+        this.getPrompt()
+      );
 
-    await this.saveAnswer(answer, discordMessage);
+      await this.saveAnswer(answer, discordMessage);
 
-    const totalToken = currentToken + this.calculateToken(answer);
+      const totalToken = currentToken + this.calculateToken(answer);
 
-    console.log(
-      "[RirikoAI-NLP] Request complete, costs ".blue +
-        totalToken +
-        ` tokens, that's about `.blue +
-        `$${(this.costPerToken * totalToken).toFixed(5)}`
-    );
+      console.log(
+        "[RirikoAI-NLP] Request complete, costs ".blue +
+          totalToken +
+          ` tokens, that's about `.blue +
+          `$${(this.costPerToken * totalToken).toFixed(5)}`
+      );
 
-    return answer;
+      return answer;
+    } catch (e) {
+      console.error(
+        "Something went wrong when trying to send the request to the AI provider: ",
+        e
+      );
+      console.error(
+        "Check if your API key is still valid, or if your prompts are not corrupted / too long."
+      );
+      console.error(
+        "Also try to clear your chat history with Ririko by entering .clear in Discord."
+      );
+    }
   }
 
   async setPrompt(message, discordMessage) {
