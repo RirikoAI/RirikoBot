@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const client = require("ririko");
 const config = require("config");
-const isImageURL = require("image-url-validator").default;
+const imageChecker = require("tools/imageChecker");
 
 module.exports = {
   config: {
@@ -171,27 +171,27 @@ module.exports = {
 
       // Validate image
       try {
-        isImageURL(args[1]).then(async (is_image) => {
-          if (is_image) {
-            const bg = await db.set(
-              `guild_welcomer_welcomer_bg_${message.guild.id}`,
-              url
-            );
+        const isValidImage = await imageChecker(url);
 
-            return message.reply({
-              embeds: [
-                new EmbedBuilder()
-                  .setTitle("Welcomer")
-                  .setThumbnail(bg)
-                  .setDescription(`Welcomer bg has been set successfully`),
-              ],
-            });
-          } else {
-            return message.reply(
-              `Error loading the image. Please check the source or try converting it to jpg`
-            );
-          }
-        });
+        if (isValidImage) {
+          const bg = await db.set(
+            `guild_welcomer_welcomer_bg_${message.guild.id}`,
+            url
+          );
+
+          return message.reply({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle("Welcomer")
+                .setThumbnail(bg)
+                .setDescription(`Welcomer bg has been set successfully`),
+            ],
+          });
+        } else {
+          return message.reply(
+            `Error loading the image. Please check the source or try converting it to jpg`
+          );
+        }
       } catch (e) {
         return message.reply(
           `Something went wrong loading the image. Please check the source or try converting it to jpg`
