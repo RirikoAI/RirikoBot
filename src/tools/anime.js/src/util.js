@@ -2,7 +2,6 @@ const fetch = require("node-fetch");
 const cheerio = require("cheerio");
 const { Anime, Manga } = require("./animeSearchClass");
 const { honorifics } = require("./db");
-const puppy = require("random-puppy");
 const { nsfw, sfw, nsfwAZ, sfwAZ } = require("./snfw");
 const nekoURL = "https://nekos.life/api/v2";
 const userAgentTxt = `kitsu.js, a npm module for the kitsu.io API.`;
@@ -82,87 +81,6 @@ module.exports.searchManga = function (search, maxResult = "max") {
   });
 };
 
-const honoFunction1 = function (honori) {
-  function first(txt) {
-    return honorifics.filter((x) => x.hono == txt);
-  }
-  function second(txt) {
-    const alies = honorifics.map((x) => x.aliases);
-    const to = alies.map((word) => word.includes(txt));
-    return to.includes(true);
-  }
-  function tpt(resolve, reject) {
-    if (first(honori).length == 0) {
-      if (second(honori) == true) {
-        var al = honorifics.map((x) => x.aliases);
-        for (let i = 0; i < al.length; i++) {
-          if (true == al[i].includes(honori)) {
-            resolve(honorifics.filter((x) => x.aliases == al[i])[0]);
-          }
-        }
-      } else {
-        reject("Not found");
-      }
-    } else {
-      resolve(honorifics.filter((x) => x.hono == honori)[0]);
-    }
-  }
-  return new Promise(tpt);
-};
-
-module.exports.nameHonorific = function (name, hono = "san") {
-  return honoFunction1(hono).then((res) => {
-    return `${name}-${res.hono}`;
-  });
-};
-
-module.exports.meme = function () {
-  var memesPar = ["animemes", "MemesOfAnime", "animememes", "AnimeFunny"];
-  var subreddit = memesPar[Math.floor(Math.random() * memesPar.length)];
-
-  function prom(resolve, reject) {
-    try {
-      puppy(subreddit).then((url) => {
-        resolve(url);
-      });
-    } catch (err) {
-      reject(new Error(`Couldn't fetch the api: ${err}`));
-    }
-  }
-  return new Promise(prom);
-};
-
-module.exports.nekoSfw = function (category) {
-  if (!category) return new Error("No category");
-  function exacute(value) {
-    return fetch(nekoURL + value)
-      .then((result) => result.json())
-      .then((res) => res);
-  }
-  async function promis(resolve, reject) {
-    for (let i = 0; i < Object.keys(sfw[0]).length; i++) {
-      if (Object.keys(sfw[0])[i] == category) {
-        resolve(await exacute(Object.values(sfw[0])[i]));
-      } else if (i == Object.keys(sfw[0]).length - 1) {
-        reject(`I can't find ${category}`);
-      }
-    }
-  }
-  return new Promise(promis);
-};
-
-module.exports.nekoWallpaper = function () {
-  function promis(resolve, reject) {
-    try {
-      fetch(nekoURL + sfw[0].wallpaper)
-        .then((result) => result.json())
-        .then((res) => resolve(res));
-    } catch (err) {
-      reject(err);
-    }
-  }
-  return new Promise(promis);
-};
 const getAnimeList = function (name, status = "all") {
   function exacute(resolve, reject) {
     fetch(`http://myanimelist.net/animelist/${name}/load.json`)
@@ -450,13 +368,6 @@ module.exports.profile = (name, callback) => {
   getInfo();
 };
 
-module.exports.nsfwAll = function () {
-  return nsfwAZ;
-};
 module.exports.sfwAll = function () {
   return sfwAZ;
 };
-module.exports.honorifics = function () {
-  return honorifics;
-};
-module.exports.honoFunction = honoFunction1;
