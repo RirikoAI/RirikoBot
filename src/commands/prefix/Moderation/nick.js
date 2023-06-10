@@ -32,7 +32,7 @@ module.exports = {
   },
 
   async run(client, message, args, prefix, config, db) {
-    if (!args[0] || args[0] === "set" || (args[0] === "reset" && !args[1])) {
+    if (!args[0]) {
       return message.reply({
         embeds: [
           new EmbedBuilder()
@@ -61,6 +61,14 @@ module.exports = {
 
       const response = await nickname(message, target);
       return message.reply(response);
+    } else {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Missing argument")
+            .setDescription(`See **${prefix}info nick** for command info`),
+        ],
+      });
     }
   },
 };
