@@ -20,7 +20,7 @@ const { RirikoAVC } = require("./app/RirikoAVC");
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  * @returns {Promise<Client<boolean>>} Discord Client instance
  */
-const start = async () => {
+const createBot = async () => {
   // Creating a new client:
   const client = new Client({
     intents: [
@@ -108,42 +108,29 @@ const start = async () => {
       console.error("[CRASH] Error from Discord API:" + err);
       return process.exit();
     })
-    .finally(() => {
+    .finally(async () => {
       let lines =
-          "\n======================= ✦ Ririko AI ✦ =======================\n",
-        linesEnd =
-          "\n=============================================================\n";
-      console.log("\n" + lines.magenta);
+        "\n======================= ✦ Ririko ✦ =======================\n";
+
+      console.log("\n" + lines.white);
       // initiate instance once
       const RirikoAi = RirikoAINLP.getInstance();
       if (RirikoAi.isInitialized === true) {
-        console.log("[RirikoAI] Ready to serve the world.".magenta);
+        console.log("[Ririko Bot] Ready to serve the world.".magenta);
       } else {
         console.log(
-          "[RirikoAI] Something went wrong. Please check the logs.".red
+          "[Ririko Bot] Something went wrong. Please check the logs.".red
         );
       }
 
       // Use this to remove commands list
       // client.application.commands.set([], "755618872920637440");
-      console.log(linesEnd.magenta);
     });
-
-  // Handle errors:
-  process.on("unhandledRejection", async (err, promise) => {
-    console.error(`[ANTI-CRASH] Unhandled Rejection: ${err}`.red);
-    console.error(promise);
-  });
-
-  process.on("uncaughtException", (err) => {
-    console.error(`Uncaught Exception: ${err.message}`);
-    console.error(err);
-  });
 
   return client;
 };
 
 //Export the "ask" function
 module.exports = {
-  start,
+  createBot,
 };

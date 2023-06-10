@@ -1,3 +1,7 @@
+/**
+ * This will be deprecated before version 1.0.0
+ * todo: remove this file before 1.0.0
+ */
 const { Schema, model } = require("mongoose");
 
 const musicbot = Schema({
@@ -7,15 +11,13 @@ const musicbot = Schema({
   channels: Array,
 });
 
-
 const playlist = Schema({
   userID: String,
   playlist: Array,
   musics: Array,
 });
 
-
 module.exports = {
   musicbot: model("musicbot", musicbot),
-  playlist: model("playlist", playlist)
+  playlist: model("playlist", playlist),
 };

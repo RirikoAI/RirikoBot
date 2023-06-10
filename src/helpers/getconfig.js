@@ -1,9 +1,13 @@
 const config = require("../../config");
 
 /**
- * This section of code is proudly written by Ririko until some point
+ * This section of code is proudly written by Ririko herself (up until a point)
  * @returns {*|string}
  */
+const port = () => {
+  return process.env.PORT || config.PORT;
+};
+
 const language = () => {
   return process.env.LANGUAGE || config.LANGUAGE;
 };
@@ -97,6 +101,8 @@ const logDirectory = () => {
 };
 
 module.exports = {
+  port,
+  language,
   discordPrefix,
   discordToken,
   discordBotID,
