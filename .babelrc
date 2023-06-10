@@ -14,6 +14,7 @@
       {
         "alias": {
           "app": "./dist/app",
+          "commands": "./dist/commands",
           "utils": "./dist/utils",
           "config": "./config.js",
           "ririko": "./dist/ririko.js",

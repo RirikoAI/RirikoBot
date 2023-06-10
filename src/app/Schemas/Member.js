@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { CACHE_SIZE } = require("@root/config.js");
+const { CACHE_SIZE } = require("config");
 const FixedSizeMap = require("fixedsize-map");
 
 const cache = new FixedSizeMap(CACHE_SIZE.MEMBERS);
@@ -39,7 +39,10 @@ module.exports = {
     const key = `${guildId}|${memberId}`;
     if (cache.contains(key)) return cache.get(key);
 
-    let member = await Model.findOne({ guild_id: guildId, member_id: memberId });
+    let member = await Model.findOne({
+      guild_id: guildId,
+      member_id: memberId,
+    });
     if (!member) {
       member = new Model({
         guild_id: guildId,

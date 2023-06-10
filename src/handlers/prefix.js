@@ -19,7 +19,7 @@ module.exports = (client, config) => {
 
     for (let file of commands) {
       let pull = require(`../commands/prefix/${dir}/${file}`);
-      if (pull.config.name) {
+      if (pull.config?.name) {
         client.prefix_commands?.set(pull.config.name, pull);
         console.log(
           `[HANDLER - PREFIX] Loaded a file: ${pull.config.name} (#${client.prefix_commands?.size})`
