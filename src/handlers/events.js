@@ -11,7 +11,7 @@ const colors = require("colors");
  */
 module.exports = (client, config = []) => {
   console.log("0------------------| Events Handler:".blue);
-
+  console.log("[!] Started loading events handler...".yellow);
   fs.readdirSync("./dist/events/")
     .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"))
     .forEach((file) => {

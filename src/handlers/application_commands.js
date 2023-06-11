@@ -1,4 +1,3 @@
-const client = require("ririko");
 const { PermissionsBitField, Routes, REST, User } = require("discord.js");
 const fs = require("fs");
 const colors = require("colors");
@@ -142,10 +141,6 @@ module.exports = (client, config) => {
   const rest = new REST({ version: "10" }).setToken(getconfig.discordToken());
 
   (async () => {
-    console.log(
-      "[HANDLER] Started registering all the application commands.".yellow
-    );
-
     try {
       await rest.put(Routes.applicationCommands(discordBotID), {
         body: commands,
@@ -154,7 +149,7 @@ module.exports = (client, config) => {
       client.commands = commands;
 
       console.log(
-        "[HANDLER] Successfully registered all the application commands."
+        "Successfully registered all the application commands to Discord"
           .brightGreen
       );
     } catch (err) {

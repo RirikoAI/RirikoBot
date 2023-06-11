@@ -12,6 +12,7 @@ const colors = require("colors");
 module.exports = (client, config) => {
   console.log("0------------------| Modals Handler:".blue);
 
+  console.log("[!] Started loading modals commands...".yellow);
   const modals = fs
     .readdirSync(`./dist/modals/`)
     .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));

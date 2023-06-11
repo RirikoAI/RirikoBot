@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const config = require("config");
-const db = require("../../../mongoDB");
+const db = require("../../../app/Schemas/MusicBot");
 const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "shuffle",

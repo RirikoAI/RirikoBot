@@ -6,12 +6,11 @@ const {
   TextInputStyle,
   ActionRowBuilder,
 } = require("discord.js");
-const client = require("ririko");
+const client = require("ririkoBot");
 const config = require("config");
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 
-const mongodb = require("../mongoDB");
 const fs = require("fs");
 const { getLang } = require("helpers/language");
 const getconfig = require("helpers/getconfig");

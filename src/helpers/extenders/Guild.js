@@ -6,7 +6,7 @@ const CHANNEL_MENTION = /<?#?(\d{17,20})>?/;
 const MEMBER_MENTION = /<?@?!?(\d{17,20})>?/;
 
 module.exports = async function (client, config) {
-  console.log("[EXTENDERS - GUILD] Registered".green);
+  console.log("[EXTENDERS - GUILD] Registered".brightGreen);
   /**
    * Get all channels that match the query
    *

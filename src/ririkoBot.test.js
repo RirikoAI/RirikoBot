@@ -4,7 +4,6 @@ const config = require("../config");
 
 let mockClient;
 
-const ririko = require("ririko");
 jest.mock("ririko", () => ({
   once: jest.fn(),
   on: jest.fn(),

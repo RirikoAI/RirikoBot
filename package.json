@@ -52,6 +52,7 @@
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "country-emoji-languages": "^1.0.0",
+    "date-fns": "^2.30.0",
     "decimal.js": "^10.4.3",
     "discord-api-types": "^0.37.37",
     "discord.js": "^14.8.0",

@@ -1,5 +1,5 @@
 const { EmbedBuilder, PermissionsBitField, codeBlock } = require("discord.js");
-const client = require("ririko");
+const client = require("ririkoBot");
 const config = require("config");
 const { QuickDB } = require("quick.db");
 const { RirikoAINLP } = require("app/RirikoAI-NLP");

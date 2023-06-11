@@ -18,7 +18,7 @@
           "commands": "./dist/commands",
           "utils": "./dist/utils",
           "config": "./config.js",
-          "ririko": "./dist/ririko.js",
+          "ririkoBot": "./dist/ririkoBot.js",
           "languages" :"./languages",
           "tools": "./dist/tools",
           "assets": "./assets",

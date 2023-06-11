@@ -11,6 +11,7 @@ const colors = require("colors");
  */
 module.exports = (client, config) => {
   console.log("0------------------| Prefix Handler:".blue);
+  console.log("[!] Started loading prefix commands...".yellow);
 
   fs.readdirSync("./dist/commands/prefix/").forEach((dir) => {
     const commands = fs

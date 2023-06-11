@@ -1,5 +1,4 @@
 const { EmbedBuilder } = require("discord.js");
-const client = require("ririko");
 const config = require("config");
 const imageChecker = require("tools/imageChecker");
 

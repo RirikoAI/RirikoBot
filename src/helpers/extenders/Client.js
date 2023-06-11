@@ -5,8 +5,10 @@ const ROLE_MENTION = /<?@?&?(\d{17,20})>?/;
 const CHANNEL_MENTION = /<?#?(\d{17,20})>?/;
 const MEMBER_MENTION = /<?@?!?(\d{17,20})>?/;
 
+const { log } = require("helpers/logger");
+
 module.exports = async function (client, config) {
-  console.log("[EXTENDERS - CLIENT] Registered".green);
+  log("[EXTENDERS - CLIENT] Registered".brightGreen);
 
   /**
    * @author saiteja-madha https://github.com/saiteja-madha/discord-js-bot

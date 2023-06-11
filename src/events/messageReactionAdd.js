@@ -1,4 +1,4 @@
-const client = require("ririko");
+const client = require("ririkoBot");
 const { getLang } = require("helpers/language");
 const { reactionRoleHandler } = require("handlers");
 
