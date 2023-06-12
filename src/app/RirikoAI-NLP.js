@@ -39,8 +39,8 @@ class RirikoAINLP {
   constructor() {
     try {
       this.prefix = getconfig.AIPrefix();
-      this.chatHistory = "";
-      this.costPerToken = 0.00002;
+      this.chatHistory = [];
+      this.costPerToken = 0.00003;
 
       if (AIProvider() === "NLPCloudProvider") {
         this.provider = new NLPCloudProvider();
@@ -62,10 +62,22 @@ class RirikoAINLP {
 
   // Business Logic implementations ------------------------------------------------------------------------------------
 
-  getPersonality() {
+  getPersonalitiesAndAbilities() {
     try {
-      return AIPersonality().join("\n") + "\n" + AIPrompts().join("\n") + "\n";
+      // Get the current time
+      let currentTime = new Date();
+
+      // Use regular expressions and the replace() method to replace the string
+      let personality = AIPersonality().join("\n");
+
+      return (
+        personality.replace("%CURRENT_TIME%", currentTime) +
+        "\n" +
+        AIPrompts().join("\n") +
+        "\n"
+      );
     } catch (e) {
+      console.error("Error in RIRIKO AI:", e);
       throw (
         "[ERROR] Something when wrong trying to read the AI Personality and Prompts. " +
         "Check the config file (and config.example files), see if there are missing configs"
@@ -81,8 +93,13 @@ class RirikoAINLP {
     return parseInt(text.length / 4); // we are making simple assumption that 4 chars = 1 token
   }
 
-  getPrompt() {
-    return this.chatHistory;
+  getChatHistory(discordMessage) {
+    if (this.chatHistory[discordMessage.author.id]) {
+      return this.chatHistory[discordMessage.author.id];
+    } else {
+      // This user has not chatted with Ririko recently, returns empty string
+      return "";
+    }
   }
 
   // Async methods ----------------------------------------------------------------------------------------------------
@@ -98,6 +115,11 @@ class RirikoAINLP {
 
       const prompt = message.content.substring(1); //remove the prefix from the message
       const answer = await this.ask(prompt, message);
+
+      if (!answer) {
+        return;
+      }
+
       await message.channel.sendTyping();
 
       // Send response to Discord bot.
@@ -132,7 +154,7 @@ class RirikoAINLP {
   processAnswer(answer) {
     const matches = answer.match(/(?<=\🎵).+?(?=\🎵)/g);
     if (matches !== null) {
-      console.log("Playing " + matches[0] + "now. ");
+      console.info("Playing " + matches[0] + "now. ");
       return {
         isMusic: true,
         name: matches[0],
@@ -148,24 +170,24 @@ class RirikoAINLP {
     if (messageText === "clear")
       return await this.clearChatHistory(discordMessage);
 
-    await this.setPrompt(messageText, discordMessage);
+    await this.setPromptAndChatHistory(messageText, discordMessage);
     const currentToken = this.calculateToken(
-      this.getPersonality() + this.getPrompt()
+      this.getPersonalitiesAndAbilities() + this.getChatHistory(discordMessage)
     );
 
     try {
       // Send request to NLP Cloud.
       const answer = await this.provider.sendChat(
         messageText,
-        this.getPersonality(),
-        this.getPrompt()
+        this.getPersonalitiesAndAbilities(),
+        this.getChatHistory(discordMessage)
       );
 
       await this.saveAnswer(answer, discordMessage);
 
       const totalToken = currentToken + this.calculateToken(answer);
 
-      console.log(
+      console.info(
         "[RirikoAI-NLP] Request complete, costs ".blue +
           totalToken +
           ` tokens, that's about `.blue +
@@ -175,19 +197,17 @@ class RirikoAINLP {
       return answer;
     } catch (e) {
       console.error(
-        "Something went wrong when trying to send the request to the AI provider: ",
+        "Something went wrong when trying to send the request to the AI provider:" +
+          " Check if your API key is still valid, or if your prompts are not corrupted / too long."
+      );
+      console.error(
+        "Also try to clear your chat history with Ririko by entering .clear in Discord.",
         e
-      );
-      console.error(
-        "Check if your API key is still valid, or if your prompts are not corrupted / too long."
-      );
-      console.error(
-        "Also try to clear your chat history with Ririko by entering .clear in Discord."
       );
     }
   }
 
-  async setPrompt(message, discordMessage) {
+  async setPromptAndChatHistory(message, discordMessage) {
     const currentPrompt = "Human: " + message + "\n";
 
     let perUserChatHistory = await findChatHistory(
@@ -200,15 +220,18 @@ class RirikoAINLP {
       perUserChatHistory = await addChatHistory(discordMessage, "");
     }
 
-    this.chatHistory = perUserChatHistory.chat_history;
+    this.chatHistory[discordMessage.author.id] =
+      perUserChatHistory.chat_history;
 
-    this.chatHistory += currentPrompt;
+    this.chatHistory[discordMessage.author.id] += currentPrompt;
 
-    const prompt = this.chatHistory;
+    const prompt = this.chatHistory[discordMessage.author.id];
 
-    const chatTokens = this.calculateToken(this.getPersonality() + prompt);
+    const chatTokens = this.calculateToken(
+      this.getPersonalitiesAndAbilities() + prompt
+    );
 
-    console.log(
+    console.info(
       "[RirikoAI-NLP] A new request with ".blue +
         chatTokens +
         " tokens is being prepared.".blue
@@ -221,25 +244,35 @@ class RirikoAINLP {
        * old messages after it is reached to continue chatting.
        */
 
-      console.log(
+      console.info(
         "[RirikoAI-NLP] The prompt has reached the maximum of ".blue +
           chatTokens +
           ". Trimming now.".blue
       );
 
-      // remove several lines from stored data
-      let tmpData = this.chatHistory.split("\n").filter((d, i) => i > 20);
-      this.chatHistory = tmpData.join("\n");
+      /**
+       * This code takes the chatHistory string, splits it into an array of lines, removes the first 21 lines,
+       * and then joins the remaining lines back into a single string with newline separators.
+       * The purpose is to keep only the most recent chat history, removing older entries.
+       *
+       * Proudly explained by Ririko herself
+       *
+       * @type {string[]}
+       */
+      let tmpData = this.chatHistory[discordMessage.author.id]
+        .split("\n")
+        .filter((d, i) => i > 20);
+      this.chatHistory[discordMessage.author.id] = tmpData.join("\n");
     }
   }
 
   async saveAnswer(answer, discordMessage) {
-    this.chatHistory += "Friend: " + answer + "\n";
+    this.chatHistory[discordMessage.author.id] += "Friend: " + answer + "\n";
     // save chat history into mongodb
     await updateChatHistory(
       discordMessage.guildId,
       discordMessage.author.id,
-      this.chatHistory
+      this.chatHistory[discordMessage.author.id]
     );
   }
 
