@@ -11,10 +11,10 @@ module.exports = {
     Prefix: "!",
 
     // Discord bot token. Under the Bot tab. Please prefer setting this in the .env file instead of here
-    Token: "",
+    Token: "INSERT YOUR TOKEN HERE",
 
     // The discord bot client ID under the General Information tab.  Please prefer setting this in the .env file instead of here
-    ID: "",
+    ID: "INSERT YOUR ID HERE",
 
     // Discord user IDs for permissions and ownerships
     Users: {
