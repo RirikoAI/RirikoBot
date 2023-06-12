@@ -70,7 +70,6 @@ class RirikoAINLP {
       // Use regular expressions and the replace() method to replace the string
       let personality = AIPersonality().join("\n");
 
-      console.info("personality", personality);
       return (
         personality.replace("%CURRENT_TIME%", currentTime) +
         "\n" +
