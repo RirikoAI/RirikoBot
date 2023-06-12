@@ -18,7 +18,7 @@ module.exports = async (client) => {
   const lang = getLang();
 
   if (client === false)
-    console.log(
+    console.info(
       "CONNECTED VIA RIRIKO STREAM CHECKER -------------------------"
     );
 

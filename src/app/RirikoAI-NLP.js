@@ -49,7 +49,7 @@ class RirikoAINLP {
       }
 
       this.isInitialized = true;
-      console.info("[RirikoAI-NLP] Initialized successfully".blue);
+      console.log("[RirikoAI-NLP] Initialized successfully".blue);
     } catch (e) {
       console.error(
         "[RirikoAI-NLP] Something went wrong during the initialization! Check your config (try copy and paste the example config files again)"
@@ -64,8 +64,21 @@ class RirikoAINLP {
 
   getPersonality() {
     try {
-      return AIPersonality().join("\n") + "\n" + AIPrompts().join("\n") + "\n";
+      // Get the current time
+      let currentTime = new Date().toString();
+
+      // Use regular expressions and the replace() method to replace the string
+      let personality = AIPersonality().join("\n");
+
+      console.info("personality", personality);
+      return (
+        personality.replace("%CURRENT_TIME%", currentTime) +
+        "\n" +
+        AIPrompts().join("\n") +
+        "\n"
+      );
     } catch (e) {
+      console.error("Error in RIRIKO AI:", e);
       throw (
         "[ERROR] Something when wrong trying to read the AI Personality and Prompts. " +
         "Check the config file (and config.example files), see if there are missing configs"
@@ -132,7 +145,7 @@ class RirikoAINLP {
   processAnswer(answer) {
     const matches = answer.match(/(?<=\🎵).+?(?=\🎵)/g);
     if (matches !== null) {
-      console.log("Playing " + matches[0] + "now. ");
+      console.info("Playing " + matches[0] + "now. ");
       return {
         isMusic: true,
         name: matches[0],
@@ -165,7 +178,7 @@ class RirikoAINLP {
 
       const totalToken = currentToken + this.calculateToken(answer);
 
-      console.log(
+      console.info(
         "[RirikoAI-NLP] Request complete, costs ".blue +
           totalToken +
           ` tokens, that's about `.blue +
@@ -208,7 +221,7 @@ class RirikoAINLP {
 
     const chatTokens = this.calculateToken(this.getPersonality() + prompt);
 
-    console.log(
+    console.info(
       "[RirikoAI-NLP] A new request with ".blue +
         chatTokens +
         " tokens is being prepared.".blue
@@ -221,7 +234,7 @@ class RirikoAINLP {
        * old messages after it is reached to continue chatting.
        */
 
-      console.log(
+      console.info(
         "[RirikoAI-NLP] The prompt has reached the maximum of ".blue +
           chatTokens +
           ". Trimming now.".blue

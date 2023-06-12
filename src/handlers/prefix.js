@@ -10,8 +10,8 @@ const colors = require("colors");
  * @returns {boolean}
  */
 module.exports = (client, config) => {
-  console.log("0------------------| Prefix Handler:".blue);
-  console.log("[!] Started loading prefix commands...".yellow);
+  console.info("0------------------| Prefix Handler:".blue);
+  console.info("[!] Started loading prefix commands...".yellow);
 
   fs.readdirSync("./dist/commands/prefix/").forEach((dir) => {
     const commands = fs
@@ -22,12 +22,12 @@ module.exports = (client, config) => {
       let pull = require(`../commands/prefix/${dir}/${file}`);
       if (pull.config?.name) {
         client.prefix_commands?.set(pull.config.name, pull);
-        console.log(
+        console.info(
           `[HANDLER - PREFIX] Loaded a file: ${pull.config.name} (#${client.prefix_commands?.size})`
             .brightGreen
         );
       } else {
-        console.log(
+        console.info(
           `[HANDLER - PREFIX] Couldn't load the file ${file}, missing module name value.`
             .red
         );

@@ -11,9 +11,9 @@ const rl = readline.createInterface({
   terminal: false, // Disable default behavior of echoing input
 });
 
-// Override console.log
-const originalConsoleLog = console.log;
-console.log = function (...args) {
+// Override console.info
+const originalConsoleLog = console.info;
+console.info = function (...args) {
   originalConsoleLog(...args);
   scrollToBottom();
   rl.prompt();
@@ -72,17 +72,17 @@ function exitCommand() {
 }
 
 function command0Handler() {
-  console.log("Executing command0");
+  console.info("Executing command0");
   // Handle command with 0 arguments
 }
 
 function command1Handler(arg1) {
-  console.log(`Executing command1 with argument: ${arg1}`);
+  console.info(`Executing command1 with argument: ${arg1}`);
   // Handle command with 1 argument
 }
 
 function command2Handler(arg1, arg2) {
-  console.log(`Executing command2 with arguments: ${arg1}, ${arg2}`);
+  console.info(`Executing command2 with arguments: ${arg1}, ${arg2}`);
   // Handle command with 2 arguments
 }
 
@@ -91,7 +91,7 @@ function helpCommand() {
   commands.forEach((value, key) => {
     helpText += `${key}: ${value.description}\n`;
   });
-  console.log("Available commands:\n" + helpText);
+  console.info("Available commands:\n" + helpText);
 }
 
 rl.on("line", (input) => {
@@ -104,7 +104,7 @@ rl.on("line", (input) => {
       const commandArgs = args.slice(1);
       commandHandler.handler(...commandArgs);
     } else {
-      console.log("Unknown command");
+      console.info("Unknown command");
     }
 
     scrollToBottom();
@@ -113,7 +113,7 @@ rl.on("line", (input) => {
 });
 
 rl.on("close", () => {
-  console.log("Custom terminal closed");
+  console.info("Custom terminal closed");
   process.exit(0);
 });
 
@@ -129,13 +129,13 @@ function enablePrompt() {
 }
 
 function logWithCallback(message, callback) {
-  console.log(message);
+  console.info(message);
   process.nextTick(callback);
 }
 
 function logWithPromise(message) {
   return new Promise((resolve) => {
-    console.log(message);
+    console.info(message);
     process.nextTick(resolve);
   });
 }

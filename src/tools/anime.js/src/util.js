@@ -161,7 +161,7 @@ const getMangaList = function (name, status = "all") {
           planToRead: [],
         };
         for (let i = 0; i < res.length; i++) {
-          console.log("res[i]", res[i]);
+          console.info("res[i]", res[i]);
           switch (res[i].status) {
             case 1:
               mangaStatus.reading.push(res[i].manga_title);

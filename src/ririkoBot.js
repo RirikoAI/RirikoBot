@@ -15,9 +15,9 @@ const { RirikoAVC } = require("./app/RirikoAVC");
 
 const { log, error } = require("helpers/logger");
 
-// override console.log
-let consoleLog = console.log;
-console.log = function (...args) {
+// override console.info
+let consoleLog = console.info;
+console.info = function (...args) {
   log(...args);
 };
 
@@ -27,7 +27,7 @@ console.error = function (...args) {
   error(...args);
 };
 
-console.log("0------------------| Ririko AI (Bot):".brightCyan);
+console.info("0------------------| Ririko AI (Bot):".brightCyan);
 
 /**
  * Ririko Bot entrypoint. Will start a new Discord client
@@ -110,7 +110,7 @@ module.exports = client;
     await require(`./handlers/${file}`)(client, config);
   }
 
-  console.log("0------------------| Extenders:".blue);
+  console.info("0------------------| Extenders:".blue);
   // Register all extenders
   for (const file of ["Guild", "Client"]) {
     await require(`./helpers/extenders/${file}`)(client, config);
@@ -130,13 +130,13 @@ module.exports = client;
       let lines =
         "\n======================= ✦ Ririko Bot ✦ =======================\n";
 
-      console.info("\n" + lines.white);
+      console.log("\n" + lines.white);
       // initiate instance once
       const RirikoAi = RirikoAINLP.getInstance();
       if (RirikoAi.isInitialized === true) {
-        console.info("[Ririko Bot] Ready to serve the world.".magenta);
+        console.log("[Ririko Bot] Ready to serve the world.".magenta);
       } else {
-        console.info(
+        console.log(
           "[Ririko Bot] Something went wrong. Please check the logs.".red
         );
       }

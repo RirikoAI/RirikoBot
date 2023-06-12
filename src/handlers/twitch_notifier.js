@@ -14,7 +14,7 @@ const { Subscriber } = require("../app/Schemas/StreamSubscribers");
  * @returns {boolean}
  */
 module.exports = async (client, config) => {
-  console.log("0------------------| Twitch Notifier Handler:".blue);
+  console.info("0------------------| Twitch Notifier Handler:".blue);
   log("[Twitch Notifier] Adding streamers into database...".yellow);
 
   // for each guild, add streamers
@@ -55,7 +55,7 @@ async function addStreamersAndSubscribers(twitchIds, guildId, channelId) {
     (streamer) => streamer.twitch_user_id
   );
 
-  console.log("existingSubscribers", existingSubscribers);
+  console.info("existingSubscribers", existingSubscribers);
 
   const newSubIds = twitchIds.filter((id) => !existingSubIds.includes(id));
 

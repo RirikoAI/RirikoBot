@@ -94,7 +94,7 @@ module.exports = {
         ),
         channel = await message.channel.guild.channels.fetch(channelID);
 
-      console.log("channel", channel.id);
+      console.info("channel", channel.id);
 
       if (!channel.id)
         return message.reply({

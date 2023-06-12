@@ -67,7 +67,7 @@ client.on("guildMemberAdd", async (member) => {
           files: [img],
         })
         .catch((e) => {
-          console.log(e);
+          console.info(e);
         });
     }
   } catch (e) {

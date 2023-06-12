@@ -38,7 +38,7 @@ async function checkStreamers(streamerNames) {
     let onlineStreamers = [];
     streamers.forEach((streamer) => {
       if (streamer.type === "live") {
-        console.log(
+        console.info(
           `[Twitch Notifier] Streamer ${streamer.user_login} is online, playing ${streamer.game_name}`
             .brightCyan
         );
@@ -51,7 +51,7 @@ async function checkStreamers(streamerNames) {
     );
 
     offlineStreamers.forEach((streamer) => {
-      console.log(`[Twitch Notifier] Streamer ${streamer} is offline`.cyan);
+      console.info(`[Twitch Notifier] Streamer ${streamer} is offline`.cyan);
     });
   } catch (error) {
     console.error("Error:", error.message);

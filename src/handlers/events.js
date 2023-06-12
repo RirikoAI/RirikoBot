@@ -10,19 +10,19 @@ const colors = require("colors");
  * @returns {boolean}
  */
 module.exports = (client, config = []) => {
-  console.log("0------------------| Events Handler:".blue);
-  console.log("[!] Started loading events handler...".yellow);
+  console.info("0------------------| Events Handler:".blue);
+  console.info("[!] Started loading events handler...".yellow);
   fs.readdirSync("./dist/events/")
     .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"))
     .forEach((file) => {
       let pull = require(`../events/${file}`);
       if (pull.name) {
         client.events?.set(pull.name, pull);
-        console.log(
+        console.info(
           `[HANDLER - EVENTS] Loaded a file: ${pull.name}`.brightGreen
         );
       } else {
-        console.log(
+        console.info(
           `[HANDLER - EVENTS] Couldn't load the file ${file}. missing name or aliases.`
             .red
         );

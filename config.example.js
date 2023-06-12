@@ -1,7 +1,9 @@
 module.exports = {
+  // Set the port for Ririko AI dashboard
+  PORT: 3000,
+
   // Set the language of the bot
   LANGUAGE: "en",
-  embedColor: "ffc0cb", //hex color code
 
   // Discord related config. Create a new Application and create a bot with it. https://discord.com/developers/applications
   DISCORD: {
@@ -19,23 +21,23 @@ module.exports = {
       // Discord IDs for owners of the bot
       Owners: ["", "", ""],
       // Discord IDs for those allowed to use the AI. Ignored if AI.EnableWhitelist = false
-      AIAllowedUsers: [],
+      AIAllowedUsers: [""],
     },
   },
 
-  // AI related config
+  // ------------------------------------------ Ririko AI / Chatbot ----------------------------------------------------
   AI: {
     // Prefix of the AI part of the bot
     Prefix: ".",
 
     // The provider to use for the bot. Must be one of: NLPCloudProvider or OpenAIProvider
-    Provider: "",
+    Provider: "OpenAIProvider",
 
     // Provider Token
     Token: "",
 
     // Enable or disable the Whitelist.
-    EnableWhitelist: true,
+    EnableWhitelist: false,
 
     // You can change the personality of Ririko here by adding your own.
     // It is also possible to make Ririko cosplay as someone - you gotta try to experiment them it's fun :)
@@ -44,7 +46,7 @@ module.exports = {
       "The [Friend] is very nice and empathetic. The [Friend] name is Ririko. [Friend] Loves to talk about anime, manga and science.",
       "[Friend] is an Anime Girl who is 21 years old. [Friend] is a normal person with feelings and emotions.",
       "[Friend] communicates primarily in American English, but knows some Bahasa Melayu and Japanese.",
-      `[Friend] knows today is ${new Date()}`,
+      `[Friend] knows today is `,
     ],
 
     // This is the past prompts, also adds the abilities
@@ -60,6 +62,7 @@ module.exports = {
     ],
   },
 
+  // ------------------------------------------------ Database ---------------------------------------------------------
   DATABASE: {
     // Database engine to use. Must be one of: sqlite, mongodb, mysql
     Engine: "mongodb",
@@ -68,13 +71,6 @@ module.exports = {
       // The MongoDB access URI, example: mongodb+srv://user:password@example.net
       AccessURI: "",
     },
-  },
-
-  DEBUG: {
-    // 0 = most basic logging, 1 = Some more logging, 2 = Even more logging, 3 = Gib me all the LOGS!
-    Level: 0,
-    // start
-    LogDir: "logs",
   },
 
   // ------------------------------------------------ welcomer --------------------------------------------------------
@@ -90,6 +86,7 @@ module.exports = {
   },
 
   // ---------------------------------------------- music bot config ---------------------------------------------------
+  embedColor: "ffc0cb", //hex color code
 
   emoji: {
     play: "▶️",
@@ -170,6 +167,13 @@ module.exports = {
     maxVol: 150, //You can specify the maximum volume level.
   },
 
+  // ------------------------------------------- stats & leaderboards --------------------------------------------------
+  STATS: {
+    ENABLED: false,
+    XP_COOLDOWN: 5, // Cooldown in seconds between messages
+    DEFAULT_LVL_UP_MSG: "{member:tag}, You just advanced to **Level {level}**",
+  },
+
   // --------------------------------------------- Moderation Tools ----------------------------------------------------
   MODERATION: {
     ENABLED: false,
@@ -189,13 +193,6 @@ module.exports = {
     },
   },
 
-  // ------------------------------------------- stats & leaderboards --------------------------------------------------
-  STATS: {
-    ENABLED: false,
-    XP_COOLDOWN: 5, // Cooldown in seconds between messages
-    DEFAULT_LVL_UP_MSG: "{member:tag}, You just advanced to **Level {level}**",
-  },
-
   // ---------------------------------------------- system settings ----------------------------------------------------
   CACHE_SIZE: {
     GUILDS: 100,
@@ -203,5 +200,12 @@ module.exports = {
     MEMBERS: 10000,
   },
 
-  VERSION: "1", // DO NOT TOUCH
+  DEBUG: {
+    // 0 = most basic logging, 1 = Some more logging, 2 = Even more logging, 3 = Gib me all the LOGS!
+    Level: 0,
+    // start
+    LogDir: "logs",
+  },
+
+  VERSION: "2", // DO NOT TOUCH
 };

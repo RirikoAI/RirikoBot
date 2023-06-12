@@ -126,7 +126,7 @@ module.exports = {
                   }
                 );
               } catch (e) {
-                console.log(e);
+                console.info(e);
                 await interaction
                   .editReply({ content: lang.msg60, ephemeral: true })
                   .catch((e) => {});
@@ -195,7 +195,7 @@ module.exports = {
             interaction,
           });
         } catch (e) {
-          console.log(e);
+          console.info(e);
           await interaction
             .editReply({ content: lang.msg60, ephemeral: true })
             .catch((e) => {});

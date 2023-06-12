@@ -5,9 +5,9 @@ const colors = require("colors");
 
 const { log, error } = require("helpers/logger");
 
-// override console.log
-let consoleLog = console.log;
-console.log = function (...args) {
+// override console.info
+let consoleLog = console.info;
+console.info = function (...args) {
   log(...args);
 };
 
@@ -17,7 +17,7 @@ console.error = function (...args) {
   error(...args);
 };
 
-console.log("0------------------| Ririko Express (Web Server):".brightCyan);
+console.info("0------------------| Ririko Express (Web Server):".brightCyan);
 
 // Endpoint to handle incoming webhook notifications
 app.post("/webhook/twitch/notification/:twitchId", async (req, res) => {
@@ -32,7 +32,7 @@ app.post("/webhook/twitch/notification/:twitchId", async (req, res) => {
   // Process the event data and send notifications
   if (event === "stream.online") {
     const streamerName = data[0].user_name;
-    console.log(`${streamerName} started streaming!`);
+    console.info(`${streamerName} started streaming!`);
 
     // Add your own notification logic here (e.g., send an email, push notification, etc.)
   }
@@ -46,6 +46,6 @@ app.get("/", (req, res) => {
 
 // Start the server
 app.listen(port(), () => {
-  console.log("[Ririko Express] Ready to serve the world.".yellow);
-  console.log(`[Ririko Express] Server listening on port ${port()} \n`.yellow);
+  console.info("[Ririko Express] Ready to serve the world.".yellow);
+  console.info(`[Ririko Express] Server listening on port ${port()} \n`.yellow);
 });

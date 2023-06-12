@@ -10,9 +10,9 @@ const colors = require("colors");
  * @returns {boolean}
  */
 module.exports = (client, config) => {
-  console.log("0------------------| Modals Handler:".blue);
+  console.info("0------------------| Modals Handler:".blue);
 
-  console.log("[!] Started loading modals commands...".yellow);
+  console.info("[!] Started loading modals commands...".yellow);
   const modals = fs
     .readdirSync(`./dist/modals/`)
     .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
@@ -21,9 +21,9 @@ module.exports = (client, config) => {
     let pull = require(`../modals/${file}`);
     if (pull.id) {
       client.modals?.set(pull.id, pull);
-      console.log(`[HANDLER - MODALS] Loaded a file: ${file}`.brightGreen);
+      console.info(`[HANDLER - MODALS] Loaded a file: ${file}`.brightGreen);
     } else {
-      console.log(
+      console.info(
         `[HANDLER - MODALS] Couldn't load the file ${file}. Missing modal ID.`
           .red
       );

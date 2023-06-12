@@ -27,13 +27,13 @@ client.once("ready", async () => {
       });
     }
   } catch (e) {
-    console.log("NODE_ENV:".red, NODE_ENV);
+    console.info("NODE_ENV:".red, NODE_ENV);
 
-    console.log(
+    console.info(
       "\n" + `[READY] ${client.user.tag} is up and ready to go.`.brightGreen
     );
 
-    console.log(
+    console.info(
       "\n=============================================================\n".white
     );
   }

@@ -91,7 +91,7 @@ function errorNotifier(client, interaction, e, lang) {
         .catch((e) => {});
     }
   } else {
-    console.log(`
+    console.info(`
     Command: ${interaction?.commandName}
     Error: ${e}
     User: ${interaction?.user?.tag} (${interaction?.user?.id})

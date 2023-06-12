@@ -68,7 +68,7 @@ module.exports = {
         interaction.reply({ embeds: [embed] }).catch((e) => {});
       }
     } catch (e) {
-      console.log(e);
+      console.info(e);
       const errorNotifier = require("helpers/errorNotifier");
       errorNotifier(client, interaction, e, lang);
     }

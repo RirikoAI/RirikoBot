@@ -41,7 +41,7 @@ module.exports = {
     try {
       // Insert streamers into the collection
       await Model.insertMany(streamers);
-      console.log("Streamers added successfully!");
+      console.info("Streamers added successfully!");
     } catch (error) {
       console.error("Error adding streamers:", error);
     }
