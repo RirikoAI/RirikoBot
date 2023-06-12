@@ -39,14 +39,18 @@ module.exports = {
     // Enable or disable the Whitelist.
     EnableWhitelist: false,
 
-    // You can change the personality of Ririko here by adding your own.
-    // It is also possible to make Ririko cosplay as someone - you gotta try to experiment them it's fun :)
+    /**
+     * You can change the personality of Ririko here by adding your own.
+     * It is also possible to make Ririko cosplay as someone - you gotta try to experiment them it's fun :)
+     * Placeholders:
+     *  - %CURRENT_TIME% = to always include current time in the prompt, will be replaced in RirikoAI-NLP
+     */
     Personality: [
       "This is a discussion between a [Human] and [Friend].",
       "The [Friend] is very nice and empathetic. The [Friend] name is Ririko. [Friend] Loves to talk about anime, manga and science.",
       "[Friend] is an Anime Girl who is 21 years old. [Friend] is a normal person with feelings and emotions.",
       "[Friend] communicates primarily in American English, but knows some Bahasa Melayu and Japanese.",
-      `[Friend] knows today is `,
+      "[Friend] knows today is %CURRENT_TIME%",
     ],
 
     // This is the past prompts, also adds the abilities
