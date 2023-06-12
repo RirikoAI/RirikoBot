@@ -7,25 +7,14 @@ const {
 const config = require("config");
 const colors = require("colors");
 
+const { overrideLoggers } = require("helpers/logger");
+overrideLoggers();
+
 const { RirikoAINLP } = require("app/RirikoAI-NLP");
 const getconfig = require("helpers/getconfig");
 const { RirikoMusic } = require("app/RirikoMusic");
 const { getLang } = require("./helpers/language");
 const { RirikoAVC } = require("./app/RirikoAVC");
-
-const { log, error } = require("helpers/logger");
-
-// override console.info
-let consoleLog = console.info;
-console.info = function (...args) {
-  log(...args);
-};
-
-// override console.error
-let errorLog = console.error;
-console.error = function (...args) {
-  error(...args);
-};
 
 console.info("0------------------| Ririko AI (Bot):".brightCyan);
 

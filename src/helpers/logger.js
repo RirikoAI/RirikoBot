@@ -24,11 +24,11 @@ const customLogFile = fs.createWriteStream(
 
 const pinoLogger = pino.default(
   {
-    level: "debug",
+    level: "trace",
   },
   pino.multistream([
     {
-      level: "info",
+      level: "trace",
       stream: pino.transport({
         target: "pino-pretty",
         options: {
@@ -42,10 +42,10 @@ const pinoLogger = pino.default(
       }),
     },
     {
-      level: "debug",
+      level: "trace",
       stream: {
         write: (log) => {
-          const { msg, pid, time } = JSON.parse(log);
+          const { msg, pid, time, err } = JSON.parse(log);
           const cleanMsg = msg.replace(
             /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
             ""
@@ -53,8 +53,11 @@ const pinoLogger = pino.default(
           const formattedLog = `[${format(
             new Date(time),
             "yyyy-MM-dd HH:mm:ss"
-          )}] [PID:${pid}] ${cleanMsg}\n`; // Format the log entry with timestamp, pid, and cleaned message
+          )}] [PID:${pid}] ${cleanMsg}\n`; // Format the log entry with formatted timestamp, pid, and cleaned message
           customLogFile.write(formattedLog);
+          if (err) {
+            customLogFile.write(`${err.stack}\n`); // Log error stack trace
+          }
         },
       },
     },
@@ -126,11 +129,12 @@ module.exports = class Logger {
    * @author saiteja-madha https://github.com/saiteja-madha/discord-js-bot
    * @param {string} content
    * @param {object} ex
+   * @param args
    */
-  static error(content, ex) {
-    console.error(content, ex);
+  static error(content, ex, ...args) {
     if (ex) {
       pinoLogger.error(ex, `${content}: ${ex?.message}`);
+      console.oError(content, ex);
     } else {
       pinoLogger.error(content);
     }
@@ -143,5 +147,35 @@ module.exports = class Logger {
    */
   static debug(...content) {
     pinoLogger.debug(...content);
+  }
+
+  /**
+   * @author earnestangel https://github.com/RirikoAI/RirikoBot
+   */
+  static overrideLoggers() {
+    if (process.env.JEST_WORKER_ID) return;
+    if (!console.oLog) {
+      console.oLog = console.log;
+    }
+
+    if (!console.oInfo) {
+      console.oInfo = console.info;
+      console.info = function (...args) {
+        pinoLogger.info(...args);
+      };
+    }
+
+    if (!console.oError) {
+      console.oError = console.error;
+      console.error = async function (content, ex, ...args) {
+        if (ex) {
+          await pinoLogger.error(ex, `${content}: ${ex?.message}`);
+          console.oError(content, ex);
+        } else {
+          pinoLogger.error(content);
+        }
+        if (webhookLogger) sendWebhook(content, ex);
+      };
+    }
   }
 };

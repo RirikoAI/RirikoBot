@@ -11,10 +11,12 @@ const rl = readline.createInterface({
   terminal: false, // Disable default behavior of echoing input
 });
 
-// Override console.info
-const originalConsoleLog = console.info;
-console.info = function (...args) {
-  originalConsoleLog(...args);
+const { overrideLoggers } = require("helpers/logger");
+overrideLoggers();
+
+// Override console.log
+console.log = function (...args) {
+  console.oLog(...args);
   scrollToBottom();
   rl.prompt();
 };
@@ -72,17 +74,17 @@ function exitCommand() {
 }
 
 function command0Handler() {
-  console.info("Executing command0");
+  console.log("Executing command0");
   // Handle command with 0 arguments
 }
 
 function command1Handler(arg1) {
-  console.info(`Executing command1 with argument: ${arg1}`);
+  console.log(`Executing command1 with argument: ${arg1}`);
   // Handle command with 1 argument
 }
 
 function command2Handler(arg1, arg2) {
-  console.info(`Executing command2 with arguments: ${arg1}, ${arg2}`);
+  console.log(`Executing command2 with arguments: ${arg1}, ${arg2}`);
   // Handle command with 2 arguments
 }
 
@@ -91,7 +93,7 @@ function helpCommand() {
   commands.forEach((value, key) => {
     helpText += `${key}: ${value.description}\n`;
   });
-  console.info("Available commands:\n" + helpText);
+  console.log("Available commands:\n" + helpText);
 }
 
 rl.on("line", (input) => {
@@ -104,7 +106,7 @@ rl.on("line", (input) => {
       const commandArgs = args.slice(1);
       commandHandler.handler(...commandArgs);
     } else {
-      console.info("Unknown command");
+      console.log("Unknown command");
     }
 
     scrollToBottom();
@@ -113,7 +115,7 @@ rl.on("line", (input) => {
 });
 
 rl.on("close", () => {
-  console.info("Custom terminal closed");
+  console.log("Custom terminal closed");
   process.exit(0);
 });
 
@@ -129,20 +131,20 @@ function enablePrompt() {
 }
 
 function logWithCallback(message, callback) {
-  console.info(message);
+  console.log(message);
   process.nextTick(callback);
 }
 
 function logWithPromise(message) {
   return new Promise((resolve) => {
-    console.info(message);
+    console.log(message);
     process.nextTick(resolve);
   });
 }
 
 module.exports = {
   rl: rl,
-  log: originalConsoleLog,
+  log: console.oLog,
   togglePrompt: togglePrompt,
   enablePrompt: enablePrompt,
 };

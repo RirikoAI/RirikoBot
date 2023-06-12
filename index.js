@@ -3,17 +3,6 @@ let fs = require("fs");
 const colors = require("colors");
 const { Worker } = require("worker_threads");
 
-// Handle errors
-process.on("unhandledRejection", async (err, promise) => {
-  console.error(`[ANTI-CRASH] Unhandled Rejection: ${err}`.red);
-  console.error(promise);
-});
-
-process.on("uncaughtException", (err) => {
-  console.error(`Uncaught Exception: ${err.message}`);
-  console.error(err);
-});
-
 // will be "development" or "production" depending on your config, falls back to "development"
 const NODE_ENV = process.env.NODE_ENV || "development";
 
@@ -25,6 +14,20 @@ let logDirectory = "./logs";
 if (!fs.existsSync(logDirectory)) {
   fs.mkdirSync(logDirectory);
 }
+
+const { overrideLoggers } = require(`${buildDir}/helpers/logger`);
+overrideLoggers();
+
+// Handle errors
+process.on("unhandledRejection", async (err, promise) => {
+  console.error(`[ANTI-CRASH] Unhandled Rejection: ${err}`.red);
+  console.error(promise);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error(`Uncaught Exception: ${err.message}`);
+  console.error(err);
+});
 
 // Start the bot and web server here
 (async () => {
@@ -77,15 +80,15 @@ if (!fs.existsSync(logDirectory)) {
 
   // Listen for errors from worker threads
   worker_RirikoExpress.on("error", (error) => {
-    console.error(`Error in Ririko Express: ${error}`);
+    console.error(`[UNCAUGHT EXCEPTION] Ririko Express:`, error);
   });
 
   worker_RirikoBot.on("error", (error) => {
-    console.error(`Error in Ririko Bot: ${error}`);
+    console.error(`[UNCAUGHT EXCEPTION] Ririko Bot:`, error);
   });
 
   worker_RirikoStreamChecker.on("error", (error) => {
-    console.error(`Error in Ririko Stream Notifier: ${error}`);
+    console.error(`[UNCAUGHT EXCEPTION] Ririko Stream Notifier:`, error);
   });
 
   // Start the worker threads

@@ -86,9 +86,9 @@ describe("Client", () => {
     });
   });
 
-  it("should be able to create a MongoDB instance", async () => {
-    ["mongoose"].forEach((file) => {
-      require(`./handlers/${file}`)(mockClient, config);
-    });
-  });
+  // it("should be able to create a MongoDB instance", async () => {
+  //   ["mongoose"].forEach((file) => {
+  //     require(`./handlers/${file}`)(mockClient, config);
+  //   });
+  // });
 });

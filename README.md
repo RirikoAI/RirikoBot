@@ -90,7 +90,7 @@ Install the dependencies (including the dev dependencies):
 3. Fill in the config files. Check the configs and make sure they are correct.
 4. (Upgrading) If you are upgrading from older version to a new major version (like 0.4 to 0.5 or 1.0.0 to 2.0.0), big chances the config files need to be re-copied. Repeat step 1-3 above.
 
-Also good to note that `config.js` file will override `.env` file.
+Also good to note that `.env` file will override `config.js` file (for deployments)
 
 **Step 4: Start the server**
 ```bash

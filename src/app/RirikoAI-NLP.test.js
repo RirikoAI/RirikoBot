@@ -1,31 +1,27 @@
-import { deleteChatHistory, findChatHistory } from "./Schemas/ChatHistory";
-
 const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
 jest.mock(NLPCloudProvider, () => ({}));
 
 const { RirikoAINLP } = require("./RirikoAI-NLP");
 
-import * as mockChatHistory from "./Schemas/ChatHistory";
-
-mockChatHistory.findChatHistory = jest.fn(() => {
-  return null;
-});
-
-mockChatHistory.addChatHistory = jest.fn(() => {
-  return {
-    chat_history: "Human: Hello",
-  };
-});
-
-mockChatHistory.updateChatHistory = jest.fn(() => {
-  return {
-    chat_history: "Human: Hello\nRobot: Answer",
-  };
-});
-
-mockChatHistory.deleteChatHistory = jest.fn(() => {
-  return true;
-});
+// Mock the imported functions
+jest.mock("./Schemas/ChatHistory", () => ({
+  findChatHistory: () => {
+    return null;
+  },
+  addChatHistory: () => {
+    return {
+      chat_history: "Human: Hello",
+    };
+  },
+  updateChatHistory: () => {
+    return {
+      chat_history: "Human: Hello\nRobot: Answer",
+    };
+  },
+  deleteChatHistory: () => {
+    return true;
+  },
+}));
 
 let ririkoAiNlp, personality;
 
@@ -64,7 +60,7 @@ describe("RirikoAI-NLP", () => {
   });
 
   it("should be able to get the personality", async () => {
-    personality = ririkoAiNlp.getPersonality();
+    personality = ririkoAiNlp.getPersonalitiesAndAbilities();
     expect(personality.length).toBeGreaterThan(0);
   });
 
@@ -79,12 +75,12 @@ describe("RirikoAI-NLP", () => {
   });
 
   it("should be able to set the prompt", async () => {
-    ririkoAiNlp.setPrompt("Hello", mockMessage);
+    await ririkoAiNlp.setPromptAndChatHistory("Hello", mockMessage);
   });
 
-  it("should be able to get the prompt", async () => {
-    const prompt = ririkoAiNlp.getPrompt();
-    expect(prompt).toContain("Human: Hello");
+  it("should be able to get the chat history", async () => {
+    const history = ririkoAiNlp.getChatHistory();
+    expect(history).toContain("Human: Hello");
   });
 
   it("should be able to handle the message", async () => {

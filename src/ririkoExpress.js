@@ -3,19 +3,8 @@ const { port } = require("helpers/getconfig");
 const app = express();
 const colors = require("colors");
 
-const { log, error } = require("helpers/logger");
-
-// override console.info
-let consoleLog = console.info;
-console.info = function (...args) {
-  log(...args);
-};
-
-// override console.error
-let errorLog = console.error;
-console.error = function (...args) {
-  error(...args);
-};
+const { overrideLoggers } = require("helpers/logger");
+overrideLoggers();
 
 console.info("0------------------| Ririko Express (Web Server):".brightCyan);
 
