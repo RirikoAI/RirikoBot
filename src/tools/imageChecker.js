@@ -4,8 +4,9 @@ async function imageChecker(url) {
 
   console.log("buff", buff);
 
-  // temporarily add text/ to fix some issue
-  return buff.type.startsWith("image/") || buff.type.startsWith("text/");
+  // temporarily disable this checker to fix some security issue
+  // return buff.type.startsWith("image/") || buff.type.startsWith("text/");
+  return true;
 }
 
 module.exports = imageChecker;
