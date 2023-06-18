@@ -28,7 +28,7 @@ Ririko can remember your past conversations. It is also personalized to each use
 Try asking it to play a random anime music or suggesting you a Nightcore music. Something like `.Hey can you play me an anime music?`
 
 ### 2. Twitch Stream Notifier
-Do you want to get notified when your favourite streamer is live on Twitch? Take a look at Ririko Twitch Stream Notifier by issuing this command `!info Twitch`
+Do you want to get notified when your favourite streamer is live on Twitch? Take a look at Ririko Twitch Stream Notifier by issuing this command `!info twitch`
 
 ### 3. General Purpose bot
 **Anime:** Collection of anime commands
