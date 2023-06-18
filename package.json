@@ -1,6 +1,6 @@
 {
   "name": "ririko",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Ririko - A powerful AI-powered general Discord bot that you can call your companion",
   "author": "Earnest Angel",
   "email": "me@angel.net.my",
@@ -15,7 +15,12 @@
   "keywords": [
     "AI",
     "Chatbot",
-    "General Discord bot",
+    "Twitch Live",
+    "Discord bot",
+    "Discord Chat Bot",
+    "discord.js v14",
+    "discord moderation bot",
+    "discord Twitch Live notifier",
     "gpt-neox-20b"
   ],
   "scripts": {
