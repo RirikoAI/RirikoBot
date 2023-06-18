@@ -3,23 +3,28 @@ const getconfig = require("helpers/getconfig");
 const mongoose = require("mongoose");
 const { getLang } = require("../helpers/language");
 
+const { log } = require("helpers/logger");
+
 /**
  * Register mongoose handler
  *
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  * @author TFAGaming https://github.com/TFAGaming/DiscordJS-V14-Bot-Template
  *
- * @param client
  * @returns {boolean}
  */
-module.exports = async (client) => {
+module.exports = async (discordClient, from, silent = false) => {
+  if (process.env.JEST_WORKER_ID) return;
   const lang = getLang();
-  console.log("[MONGODB] Connecting to MongoDB...".yellow);
+
+  if (discordClient && !silent) {
+    log(`[MONGODB] Connecting to MongoDB...`.yellow);
+  }
+
   const mongoDbAccessUri =
     config.DATABASE.MongoDB.AccessURI || process.env.MONGODB_ACCESS_URI;
 
   if (mongoDbAccessUri) {
-    const mongoose = require("mongoose");
     await mongoose
       .connect(mongoDbAccessUri, {
         useNewUrlParser: true,
@@ -27,13 +32,16 @@ module.exports = async (client) => {
       })
       .then(async () => {})
       .catch((err) => {
-        console.log("\nMongoDB Error: " + err + "\n\n" + lang.error4);
+        log("\nMongoDB Error: " + err + "\n\n" + lang.error4);
       });
 
-    if (!process.env.JEST_WORKER_ID) {
-      console.log(`Connected to MongoDB successfully!`.yellow);
-    }
+    if (!silent)
+      if (!from || discordClient) {
+        log(`[MONGODB] Connected to MongoDB successfully!`.yellow);
+      } else {
+        log(`[MONGODB] Connected to MongoDB successfully from ${from}!`.yellow);
+      }
   } else {
-    console.log(lang.error4);
+    log(lang.error4);
   }
 };

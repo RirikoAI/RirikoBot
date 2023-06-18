@@ -1,3 +1,6 @@
+/**
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 const {
   Client,
   GatewayIntentBits,

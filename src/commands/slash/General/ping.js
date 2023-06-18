@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
-const db = require("../../../mongoDB");
+const db = require("../../../app/Schemas/MusicBot");
 const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "ping",

@@ -1,5 +1,5 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
-const db = require("../../../mongoDB");
+const db = require("../../../app/Schemas/MusicBot");
 const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "play",
@@ -126,7 +126,7 @@ module.exports = {
                   }
                 );
               } catch (e) {
-                console.log(e);
+                console.info(e);
                 await interaction
                   .editReply({ content: lang.msg60, ephemeral: true })
                   .catch((e) => {});
@@ -195,7 +195,7 @@ module.exports = {
             interaction,
           });
         } catch (e) {
-          console.log(e);
+          console.info(e);
           await interaction
             .editReply({ content: lang.msg60, ephemeral: true })
             .catch((e) => {});

@@ -5,7 +5,7 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
-const db = require("../../../mongoDB");
+const db = require("../../../app/Schemas/MusicBot");
 const { getLang } = require("../../../helpers/language");
 module.exports = {
   name: "search",
@@ -47,7 +47,7 @@ module.exports = {
           interaction,
         });
       } catch (e) {
-        console.log(e);
+        console.info(e);
         return interaction.editReply({ content: lang.msg60 }).catch((e) => {});
       }
 
@@ -161,7 +161,7 @@ module.exports = {
                     }
                   );
                 } catch (e) {
-                  console.log(e);
+                  console.info(e);
                   await interaction
                     .editReply({ content: lang.msg60, ephemeral: true })
                     .catch((e) => {});

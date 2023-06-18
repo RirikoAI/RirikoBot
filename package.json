@@ -1,6 +1,6 @@
 {
   "name": "ririko",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Ririko - A powerful AI-powered general Discord bot that you can call your companion",
   "author": "Earnest Angel",
   "email": "me@angel.net.my",
@@ -15,7 +15,12 @@
   "keywords": [
     "AI",
     "Chatbot",
-    "General Discord bot",
+    "Twitch Live",
+    "Discord bot",
+    "Discord Chat Bot",
+    "discord.js v14",
+    "discord moderation bot",
+    "discord Twitch Live notifier",
     "gpt-neox-20b"
   ],
   "scripts": {
@@ -52,6 +57,7 @@
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",
     "country-emoji-languages": "^1.0.0",
+    "date-fns": "^2.30.0",
     "decimal.js": "^10.4.3",
     "discord-api-types": "^0.37.37",
     "discord.js": "^14.8.0",
@@ -80,6 +86,7 @@
     "pino-pretty": "^9.4.0",
     "pretty-ms": "^8.0.0",
     "quick.db": "^9.1.3",
+    "redis": "^4.6.7",
     "save-dev": "^0.0.1-security",
     "songlyrics": "^2.4.5",
     "source-map-support": "^0.5.21",

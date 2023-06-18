@@ -1,5 +1,5 @@
-const db = require("../mongoDB");
-let client = require("ririko");
+const db = require("../app/Schemas/MusicBot");
+let client = require("ririkoBot");
 const { getLang } = require("helpers/language");
 
 module.exports = {

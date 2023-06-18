@@ -1,3 +1,6 @@
+/**
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 const { Configuration, OpenAIApi } = require("openai");
 const colors = require("colors");
 const config = require("config");
@@ -237,7 +240,7 @@ class RirikoAINLP {
         " tokens is being prepared.".blue
     );
 
-    if (chatTokens > 1800) {
+    if (chatTokens > 1900) {
       /**
        * The actual maximum number of tokens is around 2048 (new models support 4096).
        * But I do not plan to hit it but put the ceiling a bit much lower then remove

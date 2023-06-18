@@ -1,5 +1,4 @@
 const { EmbedBuilder } = require("discord.js");
-const client = require("ririko");
 const config = require("config");
 const imageChecker = require("tools/imageChecker");
 
@@ -8,7 +7,11 @@ module.exports = {
     name: "welcomer",
     description: "Configure welcomer / new member announcer.",
     usage:
-      "welcomer status\nwelcomer enable\nwelcomer disable\nwelcomer bg [background image]\nwelcomer channel [channel id]",
+      "welcomer status\n" +
+      "welcomer enable\n" +
+      "welcomer disable\n" +
+      "welcomer bg [background image]\n" +
+      "welcomer channel [channel id]",
   },
   category: "Announcer",
   permissions: ["Administrator"],
@@ -95,7 +98,7 @@ module.exports = {
         ),
         channel = await message.channel.guild.channels.fetch(channelID);
 
-      console.log("channel", channel.id);
+      console.info("channel", channel.id);
 
       if (!channel.id)
         return message.reply({

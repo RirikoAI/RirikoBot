@@ -1,5 +1,5 @@
 const { ApplicationCommandOptionType } = require("discord.js");
-const db = require("../../../mongoDB");
+const db = require("../../../app/Schemas/MusicBot");
 const { getLang } = require("helpers/language");
 module.exports = {
   name: "help",
@@ -68,7 +68,7 @@ module.exports = {
         interaction.reply({ embeds: [embed] }).catch((e) => {});
       }
     } catch (e) {
-      console.log(e);
+      console.info(e);
       const errorNotifier = require("helpers/errorNotifier");
       errorNotifier(client, interaction, e, lang);
     }

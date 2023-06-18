@@ -1,4 +1,3 @@
-const client = require("ririko");
 const { PermissionsBitField, Routes, REST, User } = require("discord.js");
 const fs = require("fs");
 const colors = require("colors");
@@ -13,11 +12,11 @@ const getconfig = require("helpers/getconfig");
  * @returns {boolean}
  */
 module.exports = (client, config) => {
-  console.log("0------------------| Application commands Handler:".blue);
+  console.info("0------------------| Application commands Handler:".blue);
 
   let commands = [];
 
-  console.log("[!] Started loading slash commands...".yellow);
+  console.info("[!] Started loading slash commands...".yellow);
 
   // Slash commands handler:
   fs.readdirSync("./dist/commands/slash/").forEach((dir) => {
@@ -30,7 +29,7 @@ module.exports = (client, config) => {
 
       if ((pull.name, pull.description, pull.type == 1)) {
         client.slash_commands?.set(pull.name, pull);
-        console.log(
+        console.info(
           `[HANDLER - SLASH] Loaded a file: ${pull.name} (#${client.slash_commands?.size})`
             .brightGreen
         );
@@ -51,7 +50,7 @@ module.exports = (client, config) => {
             : null,
         });
       } else {
-        console.log(
+        console.info(
           `[HANDLER - SLASH] Couldn't load the file ${file}, missing module name value, description, or type isn't 1.`
             .red
         );
@@ -60,7 +59,7 @@ module.exports = (client, config) => {
     }
   });
 
-  console.log("[!] Started loading user commands...".yellow);
+  console.info("[!] Started loading user commands...".yellow);
 
   // User commands handler:
   fs.readdirSync("./dist/commands/user/").forEach((dir) => {
@@ -73,7 +72,7 @@ module.exports = (client, config) => {
 
       if ((pull.name, pull.type == 2)) {
         client.user_commands?.set(pull.name, pull);
-        console.log(
+        console.info(
           `[HANDLER - USER] Loaded a file: ${pull.name} (#${client.user_commands?.size})`
             .brightGreen
         );
@@ -83,7 +82,7 @@ module.exports = (client, config) => {
           type: pull.type || 2,
         });
       } else {
-        console.log(
+        console.info(
           `[HANDLER - USER] Couldn't load the file ${file}, missing module name value or type isn't 2.`
             .red
         );
@@ -92,7 +91,7 @@ module.exports = (client, config) => {
     }
   });
 
-  console.log("[!] Started loading message commands...".yellow);
+  console.info("[!] Started loading message commands...".yellow);
 
   // Message commands handler:
   fs.readdirSync("./dist/commands/message/").forEach((dir) => {
@@ -105,7 +104,7 @@ module.exports = (client, config) => {
 
       if ((pull.name, pull.type == 3)) {
         client.message_commands?.set(pull.name, pull);
-        console.log(
+        console.info(
           `[HANDLER - MESSAGE] Loaded a file: ${pull.name} (#${client.user_commands?.size})`
             .brightGreen
         );
@@ -115,7 +114,7 @@ module.exports = (client, config) => {
           type: pull.type || 3,
         });
       } else {
-        console.log(
+        console.info(
           `[HANDLER - MESSAGE] Couldn't load the file ${file}, missing module name value or type isn't 2.`
             .red
         );
@@ -132,7 +131,7 @@ module.exports = (client, config) => {
 
   // Registering all the application commands:
   if (!discordBotID) {
-    console.log(
+    console.info(
       "[CRASH] You need to provide your bot ID in config.js or .env file!".red +
         "\n"
     );
@@ -142,10 +141,6 @@ module.exports = (client, config) => {
   const rest = new REST({ version: "10" }).setToken(getconfig.discordToken());
 
   (async () => {
-    console.log(
-      "[HANDLER] Started registering all the application commands.".yellow
-    );
-
     try {
       await rest.put(Routes.applicationCommands(discordBotID), {
         body: commands,
@@ -153,12 +148,12 @@ module.exports = (client, config) => {
 
       client.commands = commands;
 
-      console.log(
-        "[HANDLER] Successfully registered all the application commands."
+      console.info(
+        "Successfully registered all the application commands to Discord"
           .brightGreen
       );
     } catch (err) {
-      console.log(err);
+      console.info(err);
     }
   })();
 };
