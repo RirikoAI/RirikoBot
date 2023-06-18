@@ -115,6 +115,7 @@ module.exports = client;
   client
     .login(AuthenticationToken)
     .catch((err) => {
+      if (process.env.JEST_WORKER_ID) return;
       console.error(
         "[CRASH] Something went wrong while connecting to your bot..."
       );
