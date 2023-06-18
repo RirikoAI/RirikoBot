@@ -58,11 +58,15 @@ const client = new Client({
 // Getting the bot token:
 const AuthenticationToken = getconfig.discordToken();
 if (!AuthenticationToken) {
-  console.warn(
-    "[CRASH] Authentication Token for Discord bot is required! Use Environment Secrets or config.js."
-      .red
-  );
-  process.exit();
+  if (!process.env.JEST_WORKER_ID) {
+    console.warn(
+      "[CRASH] Authentication Token for Discord bot is required! Use Environment Secrets or config.js."
+        .red
+    );
+    process.exit();
+  } else {
+    console.log("Running the Ririko Bot app from Jest unit test");
+  }
 }
 
 // Include config file into the client
