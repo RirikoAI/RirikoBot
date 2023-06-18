@@ -168,6 +168,22 @@ const logDirectory = () => {
   return process.env.LOG_DIR || config.DEBUG.LogDir;
 };
 
+/**
+ * @version 2
+ * @returns {string|string}
+ */
+const twitchClientId = () => {
+  return process.env.TWITCH_CLIENT_ID || config.TWITCH.clientId;
+};
+
+/**
+ * @version 2
+ * @returns {string|string}
+ */
+const twitchClientSecret = () => {
+  return process.env.TWITCH_CLIENT_SECRET || config.TWITCH.clientSecret;
+};
+
 module.exports = {
   port,
   language,
@@ -186,4 +202,6 @@ module.exports = {
   mongoAccessURI,
   debugLevel,
   logDirectory,
+  twitchClientId,
+  twitchClientSecret,
 };

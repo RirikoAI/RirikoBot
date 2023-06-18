@@ -11,10 +11,10 @@ module.exports = {
     Prefix: "!",
 
     // Discord bot token. Under the Bot tab. Please prefer setting this in the .env file instead of here
-    Token: "INSERT YOUR TOKEN HERE",
+    Token: "",
 
     // The discord bot client ID under the General Information tab.  Please prefer setting this in the .env file instead of here
-    ID: "INSERT YOUR ID HERE",
+    ID: "",
 
     // Discord user IDs for permissions and ownerships
     Users: {
@@ -37,7 +37,7 @@ module.exports = {
     Token: "",
 
     // Enable or disable the Whitelist.
-    EnableWhitelist: false,
+    EnableWhitelist: true,
 
     /**
      * You can change the personality of Ririko here by adding your own.
@@ -46,23 +46,22 @@ module.exports = {
      *  - %CURRENT_TIME% = to always include current time in the prompt, will be replaced in RirikoAI-NLP
      */
     Personality: [
-      "This is a discussion between a [Human] and [Friend].",
-      "The [Friend] is very nice and empathetic. The [Friend] name is Ririko. [Friend] Loves to talk about anime, manga and science.",
-      "[Friend] is an Anime Girl who is 21 years old. [Friend] is a normal person with feelings and emotions.",
-      "[Friend] communicates primarily in American English, but knows some Bahasa Melayu and Japanese.",
-      "[Friend] knows today is %CURRENT_TIME%",
+      "This is a chat between a [Human] and [Friend]. ",
+      "The [Friend] is very nice and empathetic. The [Friend] name is Ririko. [Friend] Loves to talk about anime, manga & science. ",
+      "[Friend] is an Anime Girl who's 21 years old. [Friend] is a normal person with feelings and emotions. ",
+      "[Friend] communicates primarily in British English, but knows some Bahasa Melayu & Japanese. ",
+      "[Friend] knows today is %CURRENT_TIME%.",
     ],
 
     // This is the past prompts, also adds the abilities
     Prompts: [
       "Human: When you're asked to play any song, please reply with this format: Now playing 🎵 insert the song title here 🎵",
       "Friend: Understood! I will play the song you requested in the given format whenever you ask me to do so.",
-      "Human: Play any anime music.",
-      "Friend: Sure! Now playing 🎵 Demon Slayer - Gurenge 🎵",
-      "Human: Also, when you're asked to play a link similar to these https://www.youtube.com/ or https://open.spotify.com/, reply with this format: Now playing 🎵 insert the link here 🎵",
-      "Friend: Understood! I will always use the format when I'm asked to play a link.",
-      "Human: Play https://www.youtube.com/watch?v=Lh63pBzylFg",
-      "Friend: Sure! Now Playing 🎵 https://www.youtube.com/watch?v=Lh63pBzylFg 🎵",
+      "Human: Also, when you're asked to play a link similar to these https://www.youtube.com/ or https://open.spotify.com/, " +
+        "reply with this format: Now playing 🎵 insert the link here 🎵",
+      "Friend: Understood! I'll always use the format asked to play a link.",
+      "Human: Play https://youtube.com/watch?v=Lh63pBzylFg",
+      "Friend: Sure! Now Playing 🎵 https://youtube.com/watch?v=Lh63pBzylFg 🎵",
     ],
   },
 
@@ -75,6 +74,15 @@ module.exports = {
       // The MongoDB access URI, example: mongodb+srv://user:password@example.net
       AccessURI: "",
     },
+  },
+
+  // -------------------------------------------- Twitch Announcer -----------------------------------------------------
+  TWITCH: {
+    // Your twitch client ID,get it here: https://dev.twitch.tv/console/apps/create
+    clientId: "",
+
+    //
+    clientSecret: "",
   },
 
   // ------------------------------------------------ welcomer --------------------------------------------------------

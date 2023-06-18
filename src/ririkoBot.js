@@ -1,3 +1,6 @@
+/**
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 const {
   Client,
   Partials,
@@ -48,7 +51,7 @@ const client = new Client({
         type: 0,
       },
     ],
-    status: "dnd",
+    status: "online",
   },
 });
 
@@ -94,7 +97,6 @@ module.exports = client;
     "application_commands",
     "modals",
     "events",
-    "twitch_notifier",
   ]) {
     await require(`./handlers/${file}`)(client, config);
   }

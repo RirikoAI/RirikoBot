@@ -34,6 +34,13 @@ const Schema = new mongoose.Schema({
       },
     ],
   },
+  twitch: {
+    enabled: {
+      type: Boolean,
+      default: false,
+    },
+    channel_id: String,
+  },
   automod: {
     debug: Boolean,
     strikes: { type: Number, default: 10 },
@@ -113,16 +120,28 @@ const Schema = new mongoose.Schema({
 const Model = mongoose.models.guild || mongoose.model("guild", Schema);
 
 module.exports = {
+  Guild: Model,
+  getAllSettings: async () => {
+    return Model.find({});
+  },
+  /**
+   * @param {string} guildId
+   */
+  getSettings: async (guildId) => {
+    if (!guildId) throw new Error("Guild is undefined");
+
+    // const cached = cache.get(guild.id);
+    // if (cached) return cached;
+
+    // cache.add(guild.id, guildData);
+    return Model.findOne({
+      _id: guildId,
+    });
+  },
   /**
    * @param {import('discord.js').Guild} guild
    */
-  getSettings: async (guild) => {
-    if (!guild) throw new Error("Guild is undefined");
-    if (!guild.id) throw new Error("Guild Id is undefined");
-
-    const cached = cache.get(guild.id);
-    if (cached) return cached;
-
+  updateGuildOwner: async (guild) => {
     let guildData = await Model.findById(guild.id);
     if (!guildData) {
       // save owner details
@@ -147,7 +166,63 @@ module.exports = {
 
       await guildData.save();
     }
-    cache.add(guild.id, guildData);
-    return guildData;
   },
+  setSettings: upsertNestedKeyValuePair,
+  deleteSettings: deleteNestedKeyValuePair,
 };
+
+// Function to insert or update a nested key-value pair
+async function upsertNestedKeyValuePair(guild, nestedPath, key, value) {
+  if (!guild) throw new Error("Guild is undefined");
+  if (!guild.id) throw new Error("Guild Id is undefined");
+  try {
+    const document = await Model.findById(guild.id);
+    setNestedValue(document, nestedPath, key, value);
+    await document.save();
+    // console.log("Nested key-value pair upserted successfully.");
+  } catch (error) {
+    console.error("Error upserting nested key-value pair:", error);
+  }
+}
+
+// Function to delete a nested key-value pair
+async function deleteNestedKeyValuePair(guild, nestedPath, key) {
+  if (!guild) throw new Error("Guild is undefined");
+  if (!guild.id) throw new Error("Guild Id is undefined");
+  try {
+    const document = await Model.findById(guild.id);
+    deleteNestedValue(document, nestedPath, key);
+    await document.save();
+    // console.log("Nested key-value pair deleted successfully.");
+  } catch (error) {
+    console.error("Error deleting nested key-value pair:", error);
+  }
+}
+
+// Helper function to set a nested key-value pair
+function setNestedValue(obj, path, key, value) {
+  const keys = path.split(".");
+  let currentObj = obj;
+  for (let i = 0; i < keys.length; i++) {
+    const currentKey = keys[i];
+    if (i === keys.length - 1) {
+      currentObj[currentKey][key] = value;
+    } else {
+      currentObj = currentObj[currentKey];
+    }
+  }
+}
+
+// Helper function to delete a nested key
+function deleteNestedValue(obj, path, key) {
+  const keys = path.split(".");
+  let currentObj = obj;
+  for (let i = 0; i < keys.length; i++) {
+    const currentKey = keys[i];
+    if (i === keys.length - 1) {
+      delete currentObj[currentKey][key];
+    } else {
+      currentObj = currentObj[currentKey];
+    }
+  }
+}

@@ -7,7 +7,11 @@ module.exports = {
     name: "welcomer",
     description: "Configure welcomer / new member announcer.",
     usage:
-      "welcomer status\nwelcomer enable\nwelcomer disable\nwelcomer bg [background image]\nwelcomer channel [channel id]",
+      "welcomer status\n" +
+      "welcomer enable\n" +
+      "welcomer disable\n" +
+      "welcomer bg [background image]\n" +
+      "welcomer channel [channel id]",
   },
   category: "Announcer",
   permissions: ["Administrator"],

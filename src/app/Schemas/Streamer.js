@@ -1,3 +1,6 @@
+/**
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 const mongoose = require("mongoose");
 const { boolean } = require("mathjs");
 
@@ -27,7 +30,6 @@ const Schema = new mongoose.Schema(
 );
 
 const Model = mongoose.model("Streamer", Schema);
-
 module.exports = {
   Streamer: Model,
   addStreamers: async (twitchUserIds) => {
@@ -51,9 +53,6 @@ module.exports = {
       guild_id: guildId,
       twitch_user_id: twitchUserIds,
     });
-  },
-  getStreamersByGuildId: async (guildId) => {
-    return Model.find({ guild_id: guildId });
   },
   getStreamers: async () => {
     return Model.find({});

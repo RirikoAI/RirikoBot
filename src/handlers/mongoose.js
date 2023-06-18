@@ -13,16 +13,13 @@ const { log } = require("helpers/logger");
  *
  * @returns {boolean}
  */
-module.exports = async (client) => {
+module.exports = async (discordClient, from, silent = false) => {
   if (process.env.JEST_WORKER_ID) return;
   const lang = getLang();
 
-  if (client === false)
-    console.info(
-      "CONNECTED VIA RIRIKO STREAM CHECKER -------------------------"
-    );
-
-  if (client !== false) log("[MONGODB] Connecting to MongoDB...".yellow);
+  if (discordClient && !silent) {
+    log(`[MONGODB] Connecting to MongoDB...`.yellow);
+  }
 
   const mongoDbAccessUri =
     config.DATABASE.MongoDB.AccessURI || process.env.MONGODB_ACCESS_URI;
@@ -38,8 +35,12 @@ module.exports = async (client) => {
         log("\nMongoDB Error: " + err + "\n\n" + lang.error4);
       });
 
-    if (client !== false)
-      log(`[MONGODB] Connected to MongoDB successfully!`.yellow);
+    if (!silent)
+      if (!from || discordClient) {
+        log(`[MONGODB] Connected to MongoDB successfully!`.yellow);
+      } else {
+        log(`[MONGODB] Connected to MongoDB successfully from ${from}!`.yellow);
+      }
   } else {
     log(lang.error4);
   }

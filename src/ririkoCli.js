@@ -1,3 +1,6 @@
+/**
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 const readline = require("readline");
 const colors = require("colors");
 const NODE_ENV = process.env.NODE_ENV || "development";

@@ -74,6 +74,8 @@ client.on("guildMemberAdd", async (member) => {
     console.error("Something when wrong when sending the welcome message", e);
   }
 
+  if (member.user.bot) return;
+
   try {
     /**
      * Send new joiner private message with welcome embed

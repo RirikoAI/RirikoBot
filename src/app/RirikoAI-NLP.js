@@ -1,3 +1,6 @@
+/**
+ * @author earnestangel https://github.com/RirikoAI/RirikoBot
+ */
 const { Configuration, OpenAIApi } = require("openai");
 const colors = require("colors");
 const config = require("config");
@@ -39,7 +42,7 @@ class RirikoAINLP {
   constructor() {
     try {
       this.prefix = getconfig.AIPrefix();
-      this.chatHistory = "";
+      this.chatHistory = [];
       this.costPerToken = 0.00003;
 
       if (AIProvider() === "NLPCloudProvider") {
@@ -93,8 +96,13 @@ class RirikoAINLP {
     return parseInt(text.length / 4); // we are making simple assumption that 4 chars = 1 token
   }
 
-  getChatHistory() {
-    return this.chatHistory;
+  getChatHistory(discordMessage) {
+    if (this.chatHistory[discordMessage.author.id]) {
+      return this.chatHistory[discordMessage.author.id];
+    } else {
+      // This user has not chatted with Ririko recently, returns empty string
+      return "";
+    }
   }
 
   // Async methods ----------------------------------------------------------------------------------------------------
@@ -167,7 +175,7 @@ class RirikoAINLP {
 
     await this.setPromptAndChatHistory(messageText, discordMessage);
     const currentToken = this.calculateToken(
-      this.getPersonalitiesAndAbilities() + this.getChatHistory()
+      this.getPersonalitiesAndAbilities() + this.getChatHistory(discordMessage)
     );
 
     try {
@@ -175,7 +183,7 @@ class RirikoAINLP {
       const answer = await this.provider.sendChat(
         messageText,
         this.getPersonalitiesAndAbilities(),
-        this.getChatHistory()
+        this.getChatHistory(discordMessage)
       );
 
       await this.saveAnswer(answer, discordMessage);
@@ -196,7 +204,8 @@ class RirikoAINLP {
           " Check if your API key is still valid, or if your prompts are not corrupted / too long."
       );
       console.error(
-        "Also try to clear your chat history with Ririko by entering .clear in Discord."
+        "Also try to clear your chat history with Ririko by entering .clear in Discord.",
+        e
       );
     }
   }
@@ -214,11 +223,12 @@ class RirikoAINLP {
       perUserChatHistory = await addChatHistory(discordMessage, "");
     }
 
-    this.chatHistory = perUserChatHistory.chat_history;
+    this.chatHistory[discordMessage.author.id] =
+      perUserChatHistory.chat_history;
 
-    this.chatHistory += currentPrompt;
+    this.chatHistory[discordMessage.author.id] += currentPrompt;
 
-    const prompt = this.chatHistory;
+    const prompt = this.chatHistory[discordMessage.author.id];
 
     const chatTokens = this.calculateToken(
       this.getPersonalitiesAndAbilities() + prompt
@@ -230,7 +240,7 @@ class RirikoAINLP {
         " tokens is being prepared.".blue
     );
 
-    if (chatTokens > 1800) {
+    if (chatTokens > 1900) {
       /**
        * The actual maximum number of tokens is around 2048 (new models support 4096).
        * But I do not plan to hit it but put the ceiling a bit much lower then remove
@@ -252,18 +262,20 @@ class RirikoAINLP {
        *
        * @type {string[]}
        */
-      let tmpData = this.chatHistory.split("\n").filter((d, i) => i > 20);
-      this.chatHistory = tmpData.join("\n");
+      let tmpData = this.chatHistory[discordMessage.author.id]
+        .split("\n")
+        .filter((d, i) => i > 20);
+      this.chatHistory[discordMessage.author.id] = tmpData.join("\n");
     }
   }
 
   async saveAnswer(answer, discordMessage) {
-    this.chatHistory += "Friend: " + answer + "\n";
+    this.chatHistory[discordMessage.author.id] += "Friend: " + answer + "\n";
     // save chat history into mongodb
     await updateChatHistory(
       discordMessage.guildId,
       discordMessage.author.id,
-      this.chatHistory
+      this.chatHistory[discordMessage.author.id]
     );
   }
 

@@ -48,7 +48,7 @@ process.on("uncaughtException", (err) => {
   }
 
   // Create a worker thread for Function 1
-  const worker_RirikoStreamChecker = new Worker(
+  const worker_ririkoStreamChecker = new Worker(
     `./${buildDir}/ririkoStreamChecker`
   );
 
@@ -58,9 +58,17 @@ process.on("uncaughtException", (err) => {
   // Create a worker thread for Function 2
   const worker_RirikoBot = new Worker(`./${buildDir}/ririkoBot`);
 
+  const worker_RirikoQueueManager = new Worker(
+    `./${buildDir}/ririkoQueueManager`
+  );
+
   // Listen for messages from worker threads
   worker_RirikoExpress.on("message", (message) => {
-    console.log(`Message from Function 1: ${message}`);
+    console.log(`Message from Ririko Express: ${message}`);
+  });
+
+  worker_RirikoQueueManager.on("message", (message) => {
+    console.log(`Message from Ririko Queue Manager: ${message}`);
   });
 
   worker_RirikoBot.on("message", (message) => {
@@ -87,12 +95,17 @@ process.on("uncaughtException", (err) => {
     console.error(`[UNCAUGHT EXCEPTION] Ririko Bot:`, error);
   });
 
-  worker_RirikoStreamChecker.on("error", (error) => {
+  worker_ririkoStreamChecker.on("error", (error) => {
+    console.error(`[UNCAUGHT EXCEPTION] Ririko Stream Notifier:`, error);
+  });
+
+  worker_RirikoQueueManager.on("error", (error) => {
     console.error(`[UNCAUGHT EXCEPTION] Ririko Stream Notifier:`, error);
   });
 
   // Start the worker threads
   worker_RirikoExpress.postMessage("Start");
-  worker_RirikoStreamChecker.postMessage("Start");
+  worker_ririkoStreamChecker.postMessage("Start");
   worker_RirikoBot.postMessage("Start");
+  worker_RirikoQueueManager.postMessage("Start");
 })();

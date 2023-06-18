@@ -6,7 +6,7 @@ const { RirikoAINLP } = require("./RirikoAI-NLP");
 // Mock the imported functions
 jest.mock("./Schemas/ChatHistory", () => ({
   findChatHistory: () => {
-    return null;
+    return "";
   },
   addChatHistory: () => {
     return {
@@ -27,13 +27,13 @@ let ririkoAiNlp, personality;
 
 const mockMessage = {
   content: ".Hello",
-  channelId: "",
+  channelId: "123123123123",
   channel: {
     sendTyping: jest.fn(),
   },
   guildId: "",
   author: {
-    id: "",
+    id: "723178923",
   },
   reply: jest.fn(),
 };
@@ -47,7 +47,7 @@ class MockedRirikoAI extends RirikoAINLP {
     return new Date();
   }
 
-  chatHistory = "Human: Hello";
+  chatHistory = [];
 }
 
 describe("RirikoAI-NLP", () => {
@@ -79,7 +79,10 @@ describe("RirikoAI-NLP", () => {
   });
 
   it("should be able to get the chat history", async () => {
-    const history = ririkoAiNlp.getChatHistory();
+    const history = ririkoAiNlp.getChatHistory(mockMessage);
+
+    console.log(history);
+
     expect(history).toContain("Human: Hello");
   });
 
