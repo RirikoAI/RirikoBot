@@ -27,7 +27,10 @@ Ririko can remember your past conversations. It is also personalized to each use
 **AI Powered Music bot:**
 Try asking it to play a random anime music or suggesting you a Nightcore music. Something like `.Hey can you play me an anime music?`
 
-### 2. General Purpose bot
+### 2. Twitch Stream Notifier
+Do you want to get notified when your favourite streamer is live on Twitch? Take a look at Ririko Twitch Stream Notifier by issuing this command `!info Twitch`
+
+### 3. General Purpose bot
 **Anime:** Collection of anime commands
  `!foxgirl`, `!manga`, `!nekogif`, `!react`, `!waifu`, `!wallpaper`, `!wink` 
 
@@ -49,7 +52,7 @@ Try asking it to play a random anime music or suggesting you a Nightcore music. 
 **Roles:** Reaction roles, auto roles
 `!addrr`, `!autorole`, `!removerr`
 
-### 3. Anime / Manga Finder
+### 4. Anime / Manga Finder
 Find your favourite anime / manga using this command: `!anime` 
 For example: `!anime Oshi No Ko`
 
