@@ -1,6 +1,6 @@
 {
   "name": "ririko",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "Ririko - A powerful AI-powered general Discord bot that you can call your companion",
   "author": "Earnest Angel",
   "email": "me@angel.net.my",
@@ -89,7 +89,6 @@
     "quick.db": "^9.1.3",
     "redis": "^4.6.7",
     "save-dev": "^0.0.1-security",
-    "songlyrics": "^2.4.5",
     "source-map-support": "^0.5.21",
     "sourcebin_js": "^0.0.3-ignore"
   },

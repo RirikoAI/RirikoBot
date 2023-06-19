@@ -1,5 +1,9 @@
 const { EmbedBuilder } = require("discord.js");
-const sl = require("songlyrics").default;
+const Genius = require("genius-lyrics");
+
+const Client = new Genius.Client(
+  process.env.GENIUS_TOKEN ? process.env.GENIUS_TOKEN : ""
+); // Scrapes if no key is provided
 
 module.exports = {
   config: {
@@ -23,38 +27,50 @@ module.exports = {
       search = args.join(" ");
     }
 
-    sl(search)
-      .then((lyrics) => {
-        if (lyrics.lyrics.includes("<div>") || lyrics.lyrics.includes("<div")) {
+    Client.songs
+      .search(search)
+      .then(async (searches) => {
+        const song = searches[0];
+        const lyrics = await song.lyrics();
+        if (lyrics.includes("<div>") || lyrics.includes("<div")) {
           message.channel.send(
             "Something went wrong when processing " +
-              lyrics.source.name +
+              song.name +
               ". Try playing the music directly here: " +
-              lyrics.source.link
+              song.source
           );
           return;
         }
 
         message.channel.send(
           "Found lyrics for " +
-            lyrics.title +
-            ". Thanks to " +
-            lyrics.source.name
+            song.artist.name +
+            " - " +
+            song.title +
+            ". Thanks to Genius."
         );
 
-        for (let i = 0; i < lyrics.lyrics.length; i += 2000) {
-          const toSend = lyrics.lyrics.substring(
-            i,
-            Math.min(lyrics.lyrics.length, i + 2000)
-          );
+        for (let i = 0; i < lyrics.length; i += 2000) {
+          const toSend = lyrics.substring(i, Math.min(lyrics.length, i + 2000));
           const lyricsEmbed = new EmbedBuilder()
             .setColor("#ffff00")
-            .setTitle(`Lyrics`)
-            .setDescription(toSend);
+            .setTitle(`Lyrics - ${song.title} by ${song.artist.name}:`)
+            .setURL(`${song.url}`)
+            .setDescription(toSend)
+            .setAuthor({
+              iconURL: song.artist.thumbnail,
+              name: song.artist.name,
+              url: song.artist.url,
+            });
+
+          if (song.artist?.image) lyricsEmbed.setThumbnail(song.artist.image);
+          if (song.artist?.thumbnail)
+            lyricsEmbed.setImage(song.artist.thumbnail);
           message.channel.send({ embeds: [lyricsEmbed] });
         }
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("Error when trying to get/send lyrics", e);
         message.reply(
           "Sorry, but I couldn't find the lyrics for the given song name."
         );
