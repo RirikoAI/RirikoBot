@@ -31,12 +31,12 @@ If you dont have npx:
 [![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
 [![CodeQL](https://github.com/RirikoAI/RirikoBot/workflows/CodeQL/badge.svg)](https://github.com/RirikoAI/RirikoBot/actions?query=workflow%3ACodeQL)
 
-[![NPM Version](https://badge.fury.io/js/ririko.svg?style=flat)](https://npmjs.org/package/ririko)
+[![NPM Version](https://badge.fury.io/js/ririko.svg)](https://npmjs.org/package/ririko)
 [![GitHub tag](https://img.shields.io/github/tag/RirikoAI/RirikoBot?include_prereleases=&sort=semver&color=blue)](https://github.com/RirikoAI/RirikoBot/releases/)
+[![NPM Download Stats](https://img.shields.io/npm/dw/ririko)](https://www.npmjs.com/package/ririko)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 [![issues - RirikoBot](https://img.shields.io/github/issues/RirikoAI/RirikoBot)](https://github.com/RirikoAI/RirikoBot/issues)
-[![Made In](https://img.shields.io/badge/made%20in-Malaysia-red.svg)](https://www.google.com/search?q=malaysia)
-
+[![Made In](https://img.shields.io/badge/made%20in-Malaysia-red.svg)](https://www.google.com/search?q=malaysia) 
 
 More details below. [#how-to-install](#how-to-install)
 
@@ -142,12 +142,12 @@ If you believe there is a bug in the codes, please report them here: [New Issue 
 
 ## Contributing
 
-Contributions are always welcome!
+Contributions are always welcome! As of now, the codes needs much improvements: [![Code Climate](https://codeclimate.com/github/RirikoAI/RirikoBot.png)](https://codeclimate.com/github/RirikoAI/RirikoBot), that, you can leave it to me to improve. If you have any feature you want to add, feel free to fork the repo and create a PR. It doesn't have to be too fancy, so long as we both understand each other :D
 
 See `CONTRIBUTING.md` for ways to get started.
 
 Please adhere to this project's `code of conduct` in `CODE_OF_CONDUCT.md`.
 
-[![Use this template](https://img.shields.io/badge/Generate-Use_this_template-2ea44f?style=for-the-badge)](https://github.com/RirikoAI/RirikoBot/generate)
+[![Use this template](https://img.shields.io/badge/Generate-Use_this_template-2ea44f?style=for-the-badge)](https://github.com/RirikoAI/RirikoBot/generate) 
 
-[![NPM Download Stats](https://img.shields.io/npm/dw/ririko)](https://www.npmjs.com/package/ririko)
+<img src="https://api.visitorbadge.io/api/VisitorHit?user=RirikoAI&repo=RirikoBot&countColor=%237B1E7A" />
