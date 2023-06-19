@@ -33,3 +33,4 @@ json.sqlite
 # Jest, Unit test coverage files
 coverage
 integrations
+/bin/test/
