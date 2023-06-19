@@ -35,34 +35,45 @@ module.exports = {
     }
 
     if (lyristEnabled()) {
-      LyristClient.search(search).then(async (lyrics) => {
-        message.channel.send(
-          "Found lyrics for " +
-            lyrics.artist +
-            " - " +
-            lyrics.title +
-            ". Thanks to Lyrist."
-        );
+      try {
+        LyristClient.search(search)
+          .then(async (lyrics) => {
+            if (!lyrics?.lyrics) {
+              throw "Lyrist server cannot found the lyrics";
+            }
 
-        for (let i = 0; i < lyrics.lyrics.length; i += 2000) {
-          const toSend = lyrics.lyrics.substring(
-            i,
-            Math.min(lyrics.lyrics.length, i + 2000)
-          );
-          const lyricsEmbed = new EmbedBuilder()
-            .setColor("#ffff00")
-            .setTitle(`Lyrics - ${lyrics.title} by ${lyrics.artist}:`)
-            .setDescription(toSend);
+            message.channel.send(
+              "Found lyrics for " +
+                lyrics.artist +
+                " - " +
+                lyrics.title +
+                ". Thanks to Lyrist."
+            );
 
-          if (lyrics?.image)
-            lyricsEmbed.setImage(lyrics?.image).setAuthor({
-              iconURL: lyrics.image,
-              name: lyrics.artist,
-            });
-          message.channel.send({ embeds: [lyricsEmbed] });
-        }
-      });
-      return;
+            for (let i = 0; i < lyrics.lyrics.length; i += 2000) {
+              const toSend = lyrics.lyrics.substring(
+                i,
+                Math.min(lyrics.lyrics.length, i + 2000)
+              );
+              const lyricsEmbed = new EmbedBuilder()
+                .setColor("#ffff00")
+                .setTitle(`Lyrics - ${lyrics.title} by ${lyrics.artist}:`)
+                .setDescription(toSend);
+
+              if (lyrics?.image)
+                lyricsEmbed.setImage(lyrics?.image).setAuthor({
+                  iconURL: lyrics.image,
+                  name: lyrics.artist,
+                });
+              message.channel.send({ embeds: [lyricsEmbed] });
+            }
+          })
+          .catch((e) => {
+            console.error("Error when trying to get/send lyrics from Lyrist.");
+          });
+      } catch (e) {
+        console.error("Error when trying to get/send lyrics from Lyrist.");
+      }
     }
 
     if (geniusEnabled()) {
@@ -113,14 +124,17 @@ module.exports = {
         })
         .catch((e) => {
           console.error(
-            "Error when trying to get/send lyrics from Genius. You should try to setup Lyrist (check our Github) if this continue to persists.",
-            e
+            "Error when trying to get/send lyrics from Genius. You should try to setup Lyrist (check our Github) if this continue to persists."
+          );
+
+          return message.reply(
+            "Sorry, but I couldn't find the lyrics for the given song name."
           );
         });
+    } else {
+      return message.reply(
+        "Sorry, but I couldn't find the lyrics for the given song name."
+      );
     }
-
-    message.reply(
-      "Sorry, but I couldn't find the lyrics for the given song name."
-    );
   },
 };
