@@ -184,6 +184,38 @@ const twitchClientSecret = () => {
   return process.env.TWITCH_CLIENT_SECRET || config.TWITCH.clientSecret;
 };
 
+/**
+ * @version 3
+ * @returns {*|string}
+ */
+const geniusToken = () => {
+  return process.env.GENIUS_TOKEN || config.GENIUS_TOKEN;
+};
+
+/**
+ * @version 3
+ * @returns {*|string}
+ */
+const geniusEnabled = () => {
+  return process.env.GENIUS_ENABLED === "true" ? true : config.GENIUS_ENABLED;
+};
+
+/**
+ * @version 3
+ * @returns {*|string}
+ */
+const lyristUrl = () => {
+  return process.env.LYRIST_URL || config.LYRIST_URL;
+};
+
+/**
+ * @version 3
+ * @returns {*|string}
+ */
+const lyristEnabled = () => {
+  return process.env.LYRIST_ENABLED === "true" ? true : config.LYRIST_ENABLED;
+};
+
 module.exports = {
   port,
   language,
@@ -204,4 +236,8 @@ module.exports = {
   logDirectory,
   twitchClientId,
   twitchClientSecret,
+  geniusToken,
+  geniusEnabled,
+  lyristUrl,
+  lyristEnabled,
 };
