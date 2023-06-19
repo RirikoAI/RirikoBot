@@ -6,6 +6,8 @@ const {
   GatewayIntentBits,
   Partials,
   EmbedBuilder,
+  ButtonBuilder,
+  ButtonStyle,
 } = require("discord.js");
 const { DisTube } = require("distube");
 const { SpotifyPlugin } = require("@distube/spotify");
@@ -128,6 +130,26 @@ By: <@${song.user.id}>`);
       .on("searchDone", () => {});
 
     return distube;
+  }
+
+  getControlButtons(backId, forwardId) {
+    return {
+      backButton: new ButtonBuilder()
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji("⬅️")
+        .setCustomId(backId)
+        .setDisabled(true),
+      closeButton: new ButtonBuilder()
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji("❌")
+        .setCustomId("close")
+        .setDisabled(true),
+      forwardButton: new ButtonBuilder()
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji("➡️")
+        .setCustomId(forwardId)
+        .setDisabled(true),
+    };
   }
 }
 

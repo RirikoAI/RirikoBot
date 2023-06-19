@@ -155,22 +155,14 @@ module.exports = {
           });
 
           collector.on("end", async (button) => {
+            const controlButtons = client.player.getControlButtons(
+              backId,
+              forwardId
+            );
             button = new ActionRowBuilder().addComponents(
-              new ButtonBuilder()
-                .setStyle(ButtonStyle.Secondary)
-                .setEmoji("⬅️")
-                .setCustomId(backId)
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setStyle(ButtonStyle.Secondary)
-                .setEmoji("❌")
-                .setCustomId("close")
-                .setDisabled(true),
-              new ButtonBuilder()
-                .setStyle(ButtonStyle.Secondary)
-                .setEmoji("➡️")
-                .setCustomId(forwardId)
-                .setDisabled(true)
+              controlButtons.backButton,
+              controlButtons.closeButton,
+              controlButtons.forwardButton
             );
 
             const embed = new EmbedBuilder()
