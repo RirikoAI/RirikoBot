@@ -76,7 +76,11 @@ process.on("uncaughtException", (err) => {
       cli.log("NODE_ENV:".red, NODE_ENV);
       cli.log(
         "\n" +
-          `[READY] ${message.botUsername} is up and ready to go.`.brightGreen
+          `[READY] ${message.botUsername} is up and ready to go. ${
+            process.env.npm_package_version
+              ? "\nRunning ririko@" + process.env.npm_package_version
+              : ""
+          }`.brightGreen
       );
       cli.log(
         "\n==============================================================\n"
