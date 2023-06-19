@@ -68,7 +68,7 @@ module.exports = {
                   iconURL: lyrics.image,
                   name: lyrics.artist,
                 });
-              message.channel.send({ embeds: [lyricsEmbed] });
+              return message.channel.send({ embeds: [lyricsEmbed] });
             }
           })
           .catch((e) => {
@@ -123,7 +123,7 @@ module.exports = {
                 name: song.artist.name,
                 url: song.artist.url,
               });
-            message.channel.send({ embeds: [lyricsEmbed] });
+            return message.channel.send({ embeds: [lyricsEmbed] });
           }
         })
         .catch((e) => {
