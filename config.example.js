@@ -97,6 +97,14 @@ module.exports = {
     message: "Thank you %user% for boosting the server!",
   },
 
+  // ----------------------------------------------- lyrics config -----------------------------------------------------
+
+  GENIUS_TOKEN: "",
+  GENIUS_ENABLED: true,
+
+  LYRIST_URL: "",
+  LYRIST_ENABLED: false,
+
   // ---------------------------------------------- music bot config ---------------------------------------------------
   embedColor: "ffc0cb", //hex color code
 
@@ -219,5 +227,5 @@ module.exports = {
     LogDir: "logs",
   },
 
-  VERSION: "2", // DO NOT TOUCH
+  VERSION: "3", // DO NOT TOUCH
 };
