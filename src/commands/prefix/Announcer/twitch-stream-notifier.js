@@ -66,6 +66,7 @@ module.exports = {
 
     // fetch channel id and name
     let channelName;
+
     try {
       const channelID = settings?.twitch?.channel_id;
       if (channelID) {
@@ -78,180 +79,27 @@ module.exports = {
     }
 
     if (args[0] === "status") {
-      const streamers = await getSubscribersByGuildId(message.guild.id);
-      let subscriptions = [];
-      let descriptions = "";
-
-      const embed = new EmbedBuilder()
-        .setColor("#6441A5")
-        .setTitle("Twitch Stream Notifier");
-
-      if (streamers.length !== 0) {
-        streamers.forEach((streamer) => {
-          subscriptions.push(streamer.twitch_user_id);
-        });
-        descriptions += `List of subscriptions: ${subscriptions.join(
-          ", "
-        )}\n\n`;
-      } else {
-        descriptions += `List of subscriptions: None - Why don't you add some ^^\n Use ${prefix}info twitch for more info.\n\n`;
-      }
-
-      descriptions += `Notification Channel: ${channelName}\n\n`;
-      descriptions += `Currently enabled: ${
-        settings?.twitch?.enabled ? "Enabled" : "Disabled"
-      }`;
-
-      embed.setDescription(descriptions);
-      embed.setTimestamp().setFooter({ text: `${getLang().footer1}` });
-      return message.channel.send({ embeds: [embed] });
+      return checkTwitchStatus(message, settings, prefix, channelName);
     }
 
     if (args[0] === "channel") {
-      try {
-        channelName = await message.channel.guild.channels.fetch(args[1]);
-
-        if (!channelName) throw new Error("Channel not found");
-
-        await setSettings(
-          message.guild,
-          "twitch",
-          "channel_id",
-          channelName.id
-        );
-
-        // update subscription and replace old channel_id with the new one
-        await updateSubscription(message.guild.id, channelName.id);
-
-        const embed = new EmbedBuilder()
-          .setTitle("Success!")
-          .setDescription(
-            `${channelName} set as the channel for notifying Twitch streams.`
-          )
-          .setColor("Green");
-
-        return message.reply({ embeds: [embed] });
-      } catch (e) {
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Channel not found")
-              .setImage("https://i.imgur.com/xiIihhn.gif")
-              .setDescription(
-                `Please check the channel id. Right click on the Channel and click Copy Channel ID.\nIf you can't find the option, you need to enable developer mode.`
-              ),
-          ],
-        });
-      }
+      return changeChannel(message, args);
     }
 
     if (args[0] === "watch") {
-      try {
-        await updateSubscription(message.guild.id, channelName.id);
-        await addStreamersAndSubscribers(
-          [args[1].toLowerCase()],
-          message.guild.id,
-          channelName.id
-        );
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Notification has been added")
-              .setDescription(
-                `You will now be notified when ${args[1]} is live.`
-              ),
-          ],
-        });
-      } catch (e) {
-        console.log("Error", e);
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Something went wrong")
-              .setDescription(
-                `Cannot add the stream notification. Please contact the bot developer.`
-              ),
-          ],
-        });
-      }
+      return watchStreamer(message, channelName, args);
     }
 
     if (args[0] === "unwatch") {
-      try {
-        await deleteSubscription(message.guild.id, args[1]);
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Streamer removed successfully")
-              .setDescription(
-                `You will no longer be notified when the streamer goes live.`
-              ),
-          ],
-        });
-      } catch (e) {
-        console.log("Error", e);
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Something went wrong")
-              .setDescription(
-                `Cannot delete the streamer notification. Please contact the bot developer.`
-              ),
-          ],
-        });
-      }
+      return unwatchStreamer(message, args);
     }
 
     if (args[0] === "enable") {
-      try {
-        await setSettings(message.guild, "twitch", "enabled", true);
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Twitch Stream Notification")
-              .setDescription(
-                `Notification enabled for the server ${message.guild}, in channel: ${channelName}`
-              ),
-          ],
-        });
-      } catch (e) {
-        console.log("Error", e);
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Something went wrong")
-              .setDescription(
-                `Cannot enable Twitch notification. Please contact the bot developer.`
-              ),
-          ],
-        });
-      }
+      return enableNotifications(message, channelName);
     }
 
     if (args[0] === "disable") {
-      try {
-        await setSettings(message.guild, "twitch", "enabled", false);
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Twitch Stream Notification")
-              .setDescription(
-                `Notification disabled for the server ${message.guild}, in channel: ${channelName}`
-              ),
-          ],
-        });
-      } catch (e) {
-        console.log("Error", e);
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Something went wrong")
-              .setDescription(
-                `Cannot disable Twitch notification. Please contact the bot developer.`
-              ),
-          ],
-        });
-      }
+      return disableNotifications(message, channelName);
     }
 
     return message.reply({
@@ -263,3 +111,171 @@ module.exports = {
     });
   },
 };
+
+async function unwatchStreamer(message, args) {
+  try {
+    await deleteSubscription(message.guild.id, args[1]);
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Streamer removed successfully")
+          .setDescription(
+            `You will no longer be notified when the streamer goes live.`
+          ),
+      ],
+    });
+  } catch (e) {
+    console.log("Error", e);
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Something went wrong")
+          .setDescription(
+            `Cannot delete the streamer notification. Please contact the bot developer.`
+          ),
+      ],
+    });
+  }
+}
+
+async function enableNotifications(message, channel) {
+  try {
+    await setSettings(message.guild, "twitch", "enabled", true);
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Twitch Stream Notification")
+          .setDescription(
+            `Notification enabled for the server ${message.guild}, in channel: ${channel}`
+          ),
+      ],
+    });
+  } catch (e) {
+    console.log("Error", e);
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Something went wrong")
+          .setDescription(
+            `Cannot enable Twitch notification. Please contact the bot developer.`
+          ),
+      ],
+    });
+  }
+}
+
+async function disableNotifications(message, channel) {
+  try {
+    await setSettings(message.guild, "twitch", "enabled", false);
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Twitch Stream Notification")
+          .setDescription(
+            `Notification disabled for the server ${message.guild}, in channel: ${channel}`
+          ),
+      ],
+    });
+  } catch (e) {
+    console.log("Error", e);
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Something went wrong")
+          .setDescription(
+            `Cannot disable Twitch notification. Please contact the bot developer.`
+          ),
+      ],
+    });
+  }
+}
+
+async function watchStreamer(message, channel, args) {
+  try {
+    await updateSubscription(message.guild.id, channel.id);
+    await addStreamersAndSubscribers(
+      [args[1].toLowerCase()],
+      message.guild.id,
+      channel.id
+    );
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Notification has been added")
+          .setDescription(`You will now be notified when ${args[1]} is live.`),
+      ],
+    });
+  } catch (e) {
+    console.log("Error", e);
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Something went wrong")
+          .setDescription(
+            `Cannot add the stream notification. Please contact the bot developer.`
+          ),
+      ],
+    });
+  }
+}
+
+async function checkTwitchStatus(message, settings, prefix, channel_name) {
+  const streamers = await getSubscribersByGuildId(message.guild.id);
+  let subscriptions = [];
+  let descriptions = "";
+
+  const embed = new EmbedBuilder()
+    .setColor("#6441A5")
+    .setTitle("Twitch Stream Notifier");
+
+  if (streamers.length !== 0) {
+    streamers.forEach((streamer) => {
+      subscriptions.push(streamer.twitch_user_id);
+    });
+    descriptions += `List of subscriptions: ${subscriptions.join(", ")}\n\n`;
+  } else {
+    descriptions += `List of subscriptions: None - Why don't you add some ^^\n Use ${prefix}info twitch for more info.\n\n`;
+  }
+
+  descriptions += `Notification Channel: ${channel_name}\n\n`;
+  descriptions += `Currently enabled: ${
+    settings?.twitch?.enabled ? "Enabled" : "Disabled"
+  }`;
+
+  embed.setDescription(descriptions);
+  embed.setTimestamp().setFooter({ text: `${getLang().footer1}` });
+  return message.channel.send({ embeds: [embed] });
+}
+
+async function changeChannel(message, args) {
+  try {
+    let channelName = await message.channel.guild.channels.fetch(args[1]);
+
+    if (!channelName) throw new Error("Channel not found");
+
+    await setSettings(message.guild, "twitch", "channel_id", channelName.id);
+
+    // update subscription and replace old channel_id with the new one
+    await updateSubscription(message.guild.id, channelName.id);
+
+    const embed = new EmbedBuilder()
+      .setTitle("Success!")
+      .setDescription(
+        `${channelName} set as the channel for notifying Twitch streams.`
+      )
+      .setColor("Green");
+
+    return message.reply({ embeds: [embed] });
+  } catch (e) {
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Channel not found")
+          .setImage("https://i.imgur.com/xiIihhn.gif")
+          .setDescription(
+            `Please check the channel id. Right click on the Channel and click Copy Channel ID.\nIf you can't find the option, you need to enable developer mode.`
+          ),
+      ],
+    });
+  }
+}
