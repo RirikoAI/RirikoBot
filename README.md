@@ -142,7 +142,7 @@ If you believe there is a bug in the codes, please report them here: [New Issue 
 
 ## Contributing
 
-Contributions are always welcome! As of now, the codes needs much improvements: [![Code Climate](https://codeclimate.com/github/RirikoAI/RirikoBot.png)](https://codeclimate.com/github/RirikoAI/RirikoBot), that, you can leave it to me to improve. If you have any feature you want to add, feel free to fork the repo and create a PR. It doesn't have to be too fancy, so long as we both understand each other :D
+Contributions are always welcome! As of now, I'm trying to make the code more maintainable: [![Code Climate](https://codeclimate.com/github/RirikoAI/RirikoBot.png)](https://codeclimate.com/github/RirikoAI/RirikoBot). If you have any feature you want to add, feel free to fork the repo and create a PR. It doesn't have to be too fancy, so long as we both understand each other :D
 
 See `CONTRIBUTING.md` for ways to get started.
 
