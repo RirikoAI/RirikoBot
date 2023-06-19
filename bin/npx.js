@@ -28,7 +28,7 @@ const runCommand = (command) => {
 const dirName = process.argv[2] ? process.argv[2] : "RirikoAI";
 const gitCheckoutCommand = `git clone https://github.com/RirikoAI/RirikoBot ${dirName}`;
 const installDepsCommands = `cd ${dirName} && npm i --include=dev`;
-const buildCommands = `${copyCommand} config.example.js config.js && ${copyCommand} .env.example .env && npm run build`;
+const buildCommands = `cd ${dirName} && ${copyCommand} config.example.js config.js && ${copyCommand} .env.example .env && npm run build`;
 
 console.log(
   `\n\n================= Cloning into ${dirName}... =================`
