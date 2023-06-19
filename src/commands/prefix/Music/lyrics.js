@@ -23,6 +23,7 @@ module.exports = {
   run: async (client, message, args, prefix, config, db) => {
     const queue = client.player.getQueue(message);
     let search;
+    let foundLyrics = false;
 
     if (!args[0]) {
       if (!queue) {
@@ -49,6 +50,8 @@ module.exports = {
                 lyrics.title +
                 ". Thanks to Lyrist."
             );
+
+            foundLyrics = true;
 
             for (let i = 0; i < lyrics.lyrics.length; i += 2000) {
               const toSend = lyrics.lyrics.substring(
@@ -100,6 +103,7 @@ module.exports = {
               ". Thanks to Genius."
           );
 
+          foundLyrics = true;
           for (let i = 0; i < lyrics.length; i += 2000) {
             const toSend = lyrics.substring(
               i,
@@ -131,7 +135,9 @@ module.exports = {
             "Sorry, but I couldn't find the lyrics for the given song name."
           );
         });
-    } else {
+    }
+
+    if (!foundLyrics) {
       return message.reply(
         "Sorry, but I couldn't find the lyrics for the given song name."
       );
