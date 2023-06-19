@@ -26,18 +26,19 @@ If you dont have npx:
   npm install -g npx
 ```
 
-More details below. [#how-to-install](#how-to-install)
-
 **[!] This project is still under heavy developments. Update 10th June 2023 - I've started to spend more and more time into this project, more features will come 😀**
 
 [![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
 [![CodeQL](https://github.com/RirikoAI/RirikoBot/workflows/CodeQL/badge.svg)](https://github.com/RirikoAI/RirikoBot/actions?query=workflow%3ACodeQL)
 
-[![NPM Version](https://badge.fury.io/js/ririko.svg?style=flat)](https://npmjs.org/package/ririko) 
+[![NPM Version](https://badge.fury.io/js/ririko.svg?style=flat)](https://npmjs.org/package/ririko)
 [![GitHub tag](https://img.shields.io/github/tag/RirikoAI/RirikoBot?include_prereleases=&sort=semver&color=blue)](https://github.com/RirikoAI/RirikoBot/releases/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 [![issues - RirikoBot](https://img.shields.io/github/issues/RirikoAI/RirikoBot)](https://github.com/RirikoAI/RirikoBot/issues)
 [![Made In](https://img.shields.io/badge/made%20in-Malaysia-red.svg)](https://www.google.com/search?q=malaysia)
+
+
+More details below. [#how-to-install](#how-to-install)
 
 ## Features
 ### 1. AI
