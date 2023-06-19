@@ -6,6 +6,28 @@ A powerful AI-powered general Discord bot that you can call your companion.
 
 Official RirikoAI Support Discord: https://discord.gg/VWzecBNTVv
 
+### Quickstart:
+[!!] Do not use `npm install Ririko` - it'll install to the node_modules dir. Use `npx` instead:
+
+Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win) and npx (install via npm)
+```bash
+  # install Ririko using the npx command:
+  npx ririko RirikoBot 
+  # change directory
+  cd RirikoBot
+  # To run the bot, configure your bot first (config.js or .env) before running this:
+  npm run start:prod
+```
+
+If you dont have npx:
+
+```bash
+  # Install npx globally (-g) using npm
+  npm install -g npx
+```
+
+More details below. [#how-to-install](#how-to-install)
+
 **[!] This project is still under heavy developments. Update 10th June 2023 - I've started to spend more and more time into this project, more features will come 😀**
 
 [![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
@@ -59,7 +81,10 @@ For example: `!anime Oshi No Ko`
 
 I'm still working hard to make the anime recommendation function works, so you can find similar anime by a given keyword or genre. Stay tuned.
 
-## Interested to run Ririko AI in your Discord servers?
+## How to Install?
+
+**Interested to run Ririko AI in your Discord servers?**
+
 Before starting, you'll need a couple of things:
 1. Of course, your own Discord bot tokens. Create a bot here if you still didn't have one: [Discord Developer Portal — My Applications](https://discord.com/developers/applications). Create a new application, and bot for the new application. 
 2. Your own OpenAI or NLPCloud API keys. Get OpenAI key here: [Sign Up for OpenAI)](https://platform.openai.com/signup?launch) OR NLPcloud [Sign Up for NLPCloud)](https://nlpcloud.com/home/register)
@@ -73,6 +98,11 @@ Before starting, you'll need a couple of things:
 There are two choices to download the files. Use the git command
 ```bash
   git clone https://github.com/RirikoAI/RirikoBot.git
+```
+**OR** 
+Use the npx command:
+```bash
+  npx ririko RirikoBot
 ```
 **OR** Just download the zip files from the releases page: [Releases · RirikoAI/RirikoBot (github.com)](https://github.com/RirikoAI/RirikoBot/releases)
 
@@ -119,4 +149,4 @@ Please adhere to this project's `code of conduct` in `CODE_OF_CONDUCT.md`.
 
 [![Use this template](https://img.shields.io/badge/Generate-Use_this_template-2ea44f?style=for-the-badge)](https://github.com/RirikoAI/RirikoBot/generate)
 
-[![NPM Download Stats](https://nodei.co/npm/ririko.png?downloads=true)](https://www.npmjs.com/package/ririko)
+[![NPM Download Stats](https://img.shields.io/npm/dw/ririko)](https://www.npmjs.com/package/ririko)
