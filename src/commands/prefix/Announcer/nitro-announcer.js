@@ -64,6 +64,51 @@ module.exports = {
 };
 
 /**
+ * Get the guild's nitro announcement flag
+ * @param db
+ * @param message
+ * @param args
+ * @param prefix
+ * @returns {Promise<*>}
+ */
+async function getStatus(db, message, args, prefix) {
+  // check if the guild has enabled the nitro announcement feature and if the settings are properly configured
+  const validSettings = checkSettings(message, db);
+
+  if (!validSettings) {
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Nitro boost announcer")
+          .setDescription(
+            `Please check your settings before enabling this feature`
+          ),
+      ],
+    });
+  }
+
+  const status = await getGuildNitroAnnouncementFlagDb(message.guild.id, db),
+    roleID = await getGuildNitroRoleIDDb(message.guild.id, db),
+    channelID = await getGuildNitroAnnouncementChannelDb(message.guild.id, db);
+
+  // number of Discord Nitro boosters on the server
+  const users = await getNitroBoostersCount(message, roleID);
+  const roleName = await getRoleById(roleID, message);
+  const channelName = await getChannelById(channelID, message);
+
+  // send message to the user with the current settings
+  return message.reply({
+    embeds: [
+      new EmbedBuilder()
+        .setTitle("Nitro boost announcer")
+        .setDescription(
+          `Enabled: ${status}\nRole: ${roleName} ${roleID}\nChannel: ${channelName} ${channelID}\nNumber of Boosters: ${users}`
+        ),
+    ],
+  });
+}
+
+/**
  * Set nitro announcement channel
  * @param message
  * @param db
@@ -174,21 +219,6 @@ async function enableNitroAnnouncer(message, db) {
     });
   }
 
-  const roleID = await getGuildNitroRoleIDDb(message.guild.id, db),
-    channelID = await getGuildNitroAnnouncementChannelDb(message.guild.id, db);
-
-  if (roleID === null || channelID === null) {
-    return message.reply({
-      embeds: [
-        new EmbedBuilder()
-          .setTitle("Nitro boost announcer")
-          .setDescription(
-            `Please check your settings before enabling this feature`
-          ),
-      ],
-    });
-  }
-
   await enableGuildNitroAnnouncementDb(message.guild.id, db);
 
   return message.reply({
@@ -263,53 +293,6 @@ async function getGuildNitroRoleIDDb(guildId, db) {
  */
 async function getGuildNitroAnnouncementChannelDb(guildId, db) {
   return db.get(`guild_nitro_announce_channel_${guildId}`, null);
-}
-
-/**
- * Get the guild's nitro announcement flag
- * @param db
- * @param message
- * @param args
- * @param prefix
- * @returns {Promise<*>}
- */
-async function getStatus(db, message, args, prefix) {
-  // check if the guild has enabled the nitro announcement feature and if the settings are properly configured
-  const status = await getGuildNitroAnnouncementFlagDb(message.guild.id, db),
-    roleID = await getGuildNitroRoleIDDb(message.guild.id, db),
-    channelID = await getGuildNitroAnnouncementChannelDb(message.guild.id, db);
-
-  if (roleID === null || channelID === null) {
-    // disable nitro announcement if settings are not properly configured
-    await disableGuildNitroAnnouncementDb(message.guild.id, db);
-
-    // send message to the user to configure the settings
-    return message.reply({
-      embeds: [
-        new EmbedBuilder()
-          .setTitle("Nitro boost announcer")
-          .setDescription(
-            `Settings not properly configured. See **${prefix}info nitro-announcer**`
-          ),
-      ],
-    });
-  }
-
-  // number of Discord Nitro boosters on the server
-  const users = await getNitroBoostersCount(message, roleID);
-  const roleName = await getRoleById(roleID, message);
-  const channelName = await getChannelById(channelID, message);
-
-  // send message to the user with the current settings
-  return message.reply({
-    embeds: [
-      new EmbedBuilder()
-        .setTitle("Nitro boost announcer")
-        .setDescription(
-          `Enabled: ${status}\nRole: ${roleName} ${roleID}\nChannel: ${channelName} ${channelID}\nNumber of Boosters: ${users}`
-        ),
-    ],
-  });
 }
 
 /**
