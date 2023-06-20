@@ -48,14 +48,9 @@ async function getLyricsFromGenius(search, message) {
 
     const song = searches[0];
     const lyrics = await song.lyrics();
-    if (lyrics.includes("<div>") || lyrics.includes("<div")) {
-      message.channel.send(
-        "Something went wrong when processing " +
-          song.name +
-          ". Try playing the music directly here: " +
-          song.source
-      );
-      return;
+
+    if (!lyrics?.length) {
+      throw "Lyrics not found";
     }
 
     message.channel.send(
@@ -66,35 +61,43 @@ async function getLyricsFromGenius(search, message) {
         ". Thanks to Genius."
     );
 
-    for (let i = 0; i < lyrics.length; i += 2000) {
-      const toSend = lyrics.substring(i, Math.min(lyrics.length, i + 2000));
-      const lyricsEmbed = new EmbedBuilder()
-        .setColor("#ffff00")
-        .setTitle(`Lyrics - ${song.title} by ${song.artist.name}:`)
-        .setURL(`${song.url}`)
-        .setDescription(toSend);
-
-      if (song.artist?.image) lyricsEmbed.setThumbnail(song.artist.image);
-
-      if (song.artist?.thumbnail)
-        lyricsEmbed.setImage(song.artist.thumbnail).setAuthor({
-          iconURL: song.artist.thumbnail,
-          name: song.artist.name,
-          url: song.artist.url,
-        });
-      return message.channel.send({ embeds: [lyricsEmbed] });
-    }
+    return buildGeniusLyricsEmbed(lyrics, song, message);
   } catch (e) {
     console.log(e);
     return message.channel.send(
-      `Sorry, I cannot find the lyrics for ${search} with Lyrist.`
+      `Sorry, I cannot find the lyrics for ${search} with Genius.`
     );
+  }
+}
+
+async function buildGeniusLyricsEmbed(lyrics, song, message) {
+  for (let i = 0; i < lyrics.length; i += 2000) {
+    const toSend = lyrics.substring(i, Math.min(lyrics.length, i + 2000));
+    const lyricsEmbed = new EmbedBuilder()
+      .setColor("#ffff00")
+      .setTitle(`Lyrics - ${song.title} by ${song.artist.name}:`)
+      .setURL(`${song.url}`)
+      .setDescription(toSend);
+
+    if (song.artist?.image) lyricsEmbed.setThumbnail(song.artist.image);
+
+    if (song.artist?.thumbnail)
+      lyricsEmbed.setImage(song.artist.thumbnail).setAuthor({
+        iconURL: song.artist.thumbnail,
+        name: song.artist.name,
+        url: song.artist.url,
+      });
+    return message.channel.send({ embeds: [lyricsEmbed] });
   }
 }
 
 async function getLyricsFromLyrist(search, message) {
   try {
     const lyrics = await LyristClient.search(search);
+
+    if (!lyrics?.lyrics?.length) {
+      throw "Lyrics not found";
+    }
 
     message.channel.send(
       "Found lyrics for " +
@@ -104,27 +107,31 @@ async function getLyricsFromLyrist(search, message) {
         ". Thanks to Lyrist."
     );
 
-    for (let i = 0; i < lyrics.lyrics.length; i += 2000) {
-      const toSend = lyrics.lyrics.substring(
-        i,
-        Math.min(lyrics.lyrics.length, i + 2000)
-      );
-      const lyricsEmbed = new EmbedBuilder()
-        .setColor("#ffff00")
-        .setTitle(`Lyrics - ${lyrics.title} by ${lyrics.artist}:`)
-        .setDescription(toSend);
-
-      if (lyrics?.image)
-        lyricsEmbed.setImage(lyrics?.image).setAuthor({
-          iconURL: lyrics.image,
-          name: lyrics.artist,
-        });
-      return message.channel.send({ embeds: [lyricsEmbed] });
-    }
+    return buildLyristLyricsEmbed(lyrics, message);
   } catch (e) {
     console.log(e);
     return message.channel.send(
       `Sorry, I cannot find the lyrics for ${search} with Lyrist.`
     );
+  }
+}
+
+async function buildLyristLyricsEmbed(lyrics, message) {
+  for (let i = 0; i < lyrics.lyrics.length; i += 2000) {
+    const toSend = lyrics.lyrics.substring(
+      i,
+      Math.min(lyrics.lyrics.length, i + 2000)
+    );
+    const lyricsEmbed = new EmbedBuilder()
+      .setColor("#ffff00")
+      .setTitle(`Lyrics - ${lyrics.title} by ${lyrics.artist}:`)
+      .setDescription(toSend);
+
+    if (lyrics?.image)
+      lyricsEmbed.setImage(lyrics?.image).setAuthor({
+        iconURL: lyrics.image,
+        name: lyrics.artist,
+      });
+    return message.channel.send({ embeds: [lyricsEmbed] });
   }
 }
