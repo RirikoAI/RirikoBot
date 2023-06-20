@@ -42,186 +42,321 @@ module.exports = {
     }
 
     if (args[0] === "status") {
-      const status = await db.get(
-          `guild_nitro_announcer_${message.guild.id}`,
-          false
-        ),
-        roleID = await db.get(
-          `guild_nitro_role_id_${message.guild.id}`,
-          args[1]
-        ),
-        channelID = await db.get(
-          `guild_nitro_announce_channel_${message.guild.id}`,
-          args[1]
-        );
-
-      if (roleID === null || channelID === null) {
-        const disabled = await db.set(
-          `guild_nitro_announcer_${message.guild.id}`,
-          false
-        );
-
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Nitro boost announcer")
-              .setDescription(
-                `Settings not properly configured. See **${prefix}info nitro-announcer**`
-              ),
-          ],
-        });
-      }
-
-      // number of Discord Nitro boosters on the server
-      let users = 0;
-      await message.channel.guild.members.fetch().then((members) => {
-        const test = members
-          // role id for nitro boosters
-          .filter((mmbr) => mmbr.roles.cache.get(roleID))
-          .map((m) => {
-            users++;
-            return m.user.tag;
-          })
-          .join("\n");
-      });
-
-      let roleName, channelName;
-      try {
-        roleName = await message.channel.guild.roles.fetch(roleID);
-      } catch (e) {
-        roleName = "<unknown>";
-      }
-
-      try {
-        channelName = await message.channel.guild.channels.fetch(channelID);
-      } catch (e) {
-        channelName = "<unknown>";
-      }
-
-      return message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setTitle("Nitro boost announcer")
-            .setDescription(
-              `Enabled: ${status}\nRole: ${roleName} ${roleID}\nChannel: ${channelName} ${channelID}\nNumber of Boosters: ${users}`
-            ),
-        ],
-      });
+      return getStatus(db, message, args, prefix);
     }
 
     if (args[0] === "enable") {
-      const roleID = await db.get(
-          `guild_nitro_role_id_${message.guild.id}`,
-          args[1]
-        ),
-        channelID = await db.get(
-          `guild_nitro_announce_channel_${message.guild.id}`,
-          args[1]
-        );
-
-      if (roleID === null || channelID === null) {
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Nitro boost announcer")
-              .setDescription(
-                `Please check your settings before enabling this feature`
-              ),
-          ],
-        });
-      }
-
-      const enabled = await db.set(
-        `guild_nitro_announcer_${message.guild.id}`,
-        true
-      );
-
-      return message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setTitle("Nitro boost announcer")
-            .setDescription(
-              `Nitro boost announcer has been **enabled** for the server`
-            ),
-        ],
-      });
+      return enableNitroAnnouncer(message, db);
     }
 
     if (args[0] === "disable") {
-      const disabled = await db.set(
-        `guild_nitro_announcer_${message.guild.id}`,
-        false
-      );
-
-      return message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setTitle("Nitro boost announcer")
-            .setDescription(
-              `Nitro boost announcer has been **disabled** for the server`
-            ),
-        ],
-      });
+      return disableNitroAnnouncer(message, db);
     }
 
     if (args[0] === "id") {
-      let roleName;
-      try {
-        roleName = await message.channel.guild.roles.fetch(args[1]);
-
-        if (!roleName) throw new Error("role not found");
-
-        const role_id = await db.set(
-          `guild_nitro_role_id_${message.guild.id}`,
-          args[1]
-        );
-
-        const embed = new EmbedBuilder()
-          .setTitle("Success!")
-          .setDescription(`${roleName} acknowledged as the nitro booster role.`)
-          .setColor("Green");
-
-        return message.reply({ embeds: [embed] });
-      } catch (e) {
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Role not found")
-              .setDescription(`Please check the role id`),
-          ],
-        });
-      }
+      return await setNitroRoleID(message, db, args[1]);
     }
 
     if (args[0] === "channel") {
-      let channelName;
-      try {
-        channelName = await message.channel.guild.channels.fetch(args[1]);
-
-        if (!channelName) throw new Error("role not found");
-
-        const channel_id = await db.set(
-          `guild_nitro_announce_channel_${message.guild.id}`,
-          args[1]
-        );
-
-        const embed = new EmbedBuilder()
-          .setTitle("Success!")
-          .setDescription(
-            `${channelName} set as the channel for announcing new nitro boosts.`
-          )
-          .setColor("Green");
-
-        return message.reply({ embeds: [embed] });
-      } catch (e) {
-        return message.reply({
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Channel not found")
-              .setDescription(`Please check the channel id`),
-          ],
-        });
-      }
+      return await setNitroAnnouncementChannelID(message, db, args[1]);
     }
   },
 };
+
+/**
+ * Set nitro announcement channel
+ * @param message
+ * @param db
+ * @param channelId
+ * @returns {Promise<*>}
+ */
+async function setNitroAnnouncementChannelID(message, db, channelId) {
+  let channelName;
+  try {
+    channelName = await message.channel.guild.channels.fetch(channelId);
+
+    if (!channelName) throw new Error("role not found");
+
+    const channel_id = await db.set(
+      `guild_nitro_announce_channel_${message.guild.id}`,
+      args[1]
+    );
+
+    const embed = new EmbedBuilder()
+      .setTitle("Success!")
+      .setDescription(
+        `${channelName} set as the channel for announcing new nitro boosts.`
+      )
+      .setColor("Green");
+
+    return message.reply({ embeds: [embed] });
+  } catch (e) {
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Channel not found")
+          .setDescription(`Please check the channel id`),
+      ],
+    });
+  }
+}
+
+/**
+ * Set nitro / server booster role id
+ * @param message
+ * @param db
+ * @param roleId
+ * @returns {Promise<*>}
+ */
+async function setNitroRoleID(message, db, roleId) {
+  let roleName;
+  try {
+    roleName = await message.channel.guild.roles.fetch(roleId);
+
+    if (!roleName) throw new Error("role not found");
+
+    await db.set(`guild_nitro_role_id_${message.guild.id}`, roleId);
+
+    const embed = new EmbedBuilder()
+      .setTitle("Success!")
+      .setDescription(`${roleName} acknowledged as the nitro booster role.`)
+      .setColor("Green");
+
+    return message.reply({ embeds: [embed] });
+  } catch (e) {
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Role not found")
+          .setDescription(`Please check the role id`),
+      ],
+    });
+  }
+}
+
+/**
+ * Disable nitro announcer
+ * @param message
+ * @param db
+ * @returns {Promise<*>}
+ */
+async function disableNitroAnnouncer(message, db) {
+  await disableGuildNitroAnnouncementDb(message.guild.id, db);
+  return message.reply({
+    embeds: [
+      new EmbedBuilder()
+        .setTitle("Nitro boost announcer")
+        .setDescription(
+          `Nitro boost announcer has been **disabled** for the server`
+        ),
+    ],
+  });
+}
+
+/**
+ * Enable nitro announcer
+ * @param message
+ * @param db
+ * @returns {Promise<*>}
+ */
+async function enableNitroAnnouncer(message, db) {
+  const validSettings = checkSettings(message, db);
+
+  if (!validSettings) {
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Nitro boost announcer")
+          .setDescription(
+            `Please check your settings before enabling this feature`
+          ),
+      ],
+    });
+  }
+
+  const roleID = await getGuildNitroRoleIDDb(message.guild.id, db),
+    channelID = await getGuildNitroAnnouncementChannelDb(message.guild.id, db);
+
+  if (roleID === null || channelID === null) {
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Nitro boost announcer")
+          .setDescription(
+            `Please check your settings before enabling this feature`
+          ),
+      ],
+    });
+  }
+
+  await enableGuildNitroAnnouncementDb(message.guild.id, db);
+
+  return message.reply({
+    embeds: [
+      new EmbedBuilder()
+        .setTitle("Nitro boost announcer")
+        .setDescription(
+          `Nitro boost announcer has been **enabled** for the server`
+        ),
+    ],
+  });
+}
+
+/**
+ * Check if the guild has the required settings for the nitro announcer
+ * @param guildId
+ * @param db
+ * @returns {Promise<boolean>}
+ */
+async function checkSettings(guildId, db) {
+  const roleID = await db.get(`guild_nitro_role_id_${guildId}`, null),
+    channelID = await db.get(`guild_nitro_announce_channel_${guildId}`, null);
+
+  return !(roleID === null || channelID === null);
+}
+
+/**
+ * Get the guild nitro announcement flag
+ * @param guildId
+ * @param db
+ * @returns {Promise<*>}
+ */
+async function enableGuildNitroAnnouncementDb(guildId, db) {
+  return db.set(`guild_nitro_announcer_${guildId}`, true);
+}
+
+/**
+ * Disable the guild nitro announcement flag
+ * @param guildId
+ * @param db
+ * @returns {Promise<*>}
+ */
+async function disableGuildNitroAnnouncementDb(guildId, db) {
+  return db.set(`guild_nitro_announcer_${guildId}`, false);
+}
+
+/**
+ * Get the guild's nitro announcement flag
+ * @param guildId
+ * @param db
+ * @returns {Promise<*>}
+ */
+async function getGuildNitroAnnouncementFlagDb(guildId, db) {
+  return db.get(`guild_nitro_announcer_${guildId}`, null);
+}
+
+/**
+ * Get the guild's nitro role id
+ * @param guildId
+ * @param db
+ * @returns {Promise<*>}
+ */
+async function getGuildNitroRoleIDDb(guildId, db) {
+  return db.get(`guild_nitro_role_id_${guildId}`, null);
+}
+
+/**
+ * Get the guild's nitro announcement channel
+ * @param guildId
+ * @param db
+ * @returns {Promise<*>}
+ */
+async function getGuildNitroAnnouncementChannelDb(guildId, db) {
+  return db.get(`guild_nitro_announce_channel_${guildId}`, null);
+}
+
+/**
+ * Get the guild's nitro announcement flag
+ * @param db
+ * @param message
+ * @param args
+ * @param prefix
+ * @returns {Promise<*>}
+ */
+async function getStatus(db, message, args, prefix) {
+  // check if the guild has enabled the nitro announcement feature and if the settings are properly configured
+  const status = await getGuildNitroAnnouncementFlagDb(message.guild.id, db),
+    roleID = await getGuildNitroRoleIDDb(message.guild.id, db),
+    channelID = await getGuildNitroAnnouncementChannelDb(message.guild.id, db);
+
+  if (roleID === null || channelID === null) {
+    // disable nitro announcement if settings are not properly configured
+    await disableGuildNitroAnnouncementDb(message.guild.id, db);
+
+    // send message to the user to configure the settings
+    return message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle("Nitro boost announcer")
+          .setDescription(
+            `Settings not properly configured. See **${prefix}info nitro-announcer**`
+          ),
+      ],
+    });
+  }
+
+  // number of Discord Nitro boosters on the server
+  const users = await getNitroBoostersCount(message, roleID);
+  const roleName = await getRoleById(roleID, message);
+  const channelName = await getChannelById(channelID, message);
+
+  // send message to the user with the current settings
+  return message.reply({
+    embeds: [
+      new EmbedBuilder()
+        .setTitle("Nitro boost announcer")
+        .setDescription(
+          `Enabled: ${status}\nRole: ${roleName} ${roleID}\nChannel: ${channelName} ${channelID}\nNumber of Boosters: ${users}`
+        ),
+    ],
+  });
+}
+
+/**
+ * Get the role by id
+ * @param roleID
+ * @param message
+ * @returns {Promise<*|string>}
+ */
+async function getRoleById(roleID, message) {
+  try {
+    return message.channel.guild.roles.cache.get(roleID);
+  } catch (e) {
+    return "<unknown>";
+  }
+}
+
+/**
+ * Get the channel by id
+ * @param channelID
+ * @param message
+ * @returns {Promise<*|string>}
+ */
+async function getChannelById(channelID, message) {
+  try {
+    return message.channel.guild.channels.cache.get(channelID);
+  } catch (e) {
+    return "<unknown>";
+  }
+}
+
+/**
+ * Get the number of nitro boosters on the server
+ * @param message
+ * @param roleID
+ * @returns {Promise<number>}
+ */
+async function getNitroBoostersCount(message, roleID) {
+  let users = 0;
+  await message.channel.guild.members.fetch().then((members) => {
+    const test = members
+      // role id for nitro boosters
+      .filter((mmbr) => mmbr.roles.cache.get(roleID))
+      .map((m) => {
+        users++;
+        return m.user.tag;
+      })
+      .join("\n");
+  });
+  return users;
+}
