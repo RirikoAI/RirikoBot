@@ -137,6 +137,15 @@ module.exports = client;
         );
       }
 
+      process
+        .on("unhandledRejection", (reason, p) => {
+          console.error(reason, "Unhandled Rejection at Promise", p);
+        })
+        .on("uncaughtException", (err) => {
+          console.error(err, "Uncaught Exception thrown");
+          process.exit(1);
+        });
+
       // Use this to remove commands list
       // client.application.commands.set([], "755618872920637440");
     });

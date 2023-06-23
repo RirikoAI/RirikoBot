@@ -124,7 +124,7 @@ async function setNitroAnnouncementChannelID(message, db, channelId) {
 
     const channel_id = await db.set(
       `guild_nitro_announce_channel_${message.guild.id}`,
-      args[1]
+      channelId
     );
 
     const embed = new EmbedBuilder()
