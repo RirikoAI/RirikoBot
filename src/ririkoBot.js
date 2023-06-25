@@ -105,6 +105,25 @@ module.exports = client;
     await require(`./handlers/${file}`)(client, config);
   }
 
+  console.info("0------------------| Discord Giveaways:".blue);
+  console.info(`Starting Discord Giveaways functionality`.brightGreen);
+  // Initialise discord giveaways
+  const { GiveawaysManager } = require("discord-giveaways");
+  client.giveawaysManager = new GiveawaysManager(client, {
+    storage: "giveaways.json",
+    default: {
+      botsCanWin: false,
+      embedColor: "#2F3136",
+      reaction: "🎉",
+      lastChance: {
+        enabled: true,
+        content: `🛑 **Last chance to enter** 🛑`,
+        threshold: 5000,
+        embedColor: "#FF0000",
+      },
+    },
+  });
+
   console.info("0------------------| Extenders:".blue);
   // Register all extenders
   for (const file of ["Guild", "Client"]) {

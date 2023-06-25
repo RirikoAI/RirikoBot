@@ -41,20 +41,23 @@ If you dont have npx:
 More details below. [#how-to-install](#how-to-install)
 
 ## Features
-### 1. AI
-**Companion / Chatbot:**
+### 🤖1. AI
+**💬Companion / Chatbot:**
 The AI chatbot uses the `.` prefix. Try it out by linking to your Discord bot and inviting it to your server. Start with `.hello`
 
 Whats unique compared to the thousands of AI chatbots out there? 
 Ririko can remember your past conversations. It is also personalized to each user, so no more cross contaminating prompts and no more forgetting or confused about your own name
 
-**AI Powered Music bot:**
+**🎵AI Powered Music bot:**
 Try asking it to play a random anime music or suggesting you a Nightcore music. Something like `.Hey can you play me an anime music?`
 
-### 2. Twitch Stream Notifier
+### 🎥2. Twitch Stream Notifier
 Do you want to get notified when your favourite streamer is live on Twitch? Take a look at Ririko Twitch Stream Notifier by issuing this command `!info twitch`
 
-### 3. General Purpose bot
+### 🎉3. Giveaways 
+Create giveaways using `!giveaway-create`, drops using `!giveaway-drop` and more! (see !help).
+
+### ☂️4. General Purpose bot
 **Anime:** Collection of anime commands
  `!foxgirl`, `!manga`, `!nekogif`, `!react`, `!waifu`, `!wallpaper`, `!wink` 
 
@@ -76,7 +79,10 @@ Do you want to get notified when your favourite streamer is live on Twitch? Take
 **Roles:** Reaction roles, auto roles
 `!addrr`, `!autorole`, `!removerr`
 
-### 4. Anime / Manga Finder
+**Moderations:** Ban, kick, mute, purge, warn, etc
+`!ban`, `!kick`, `!mute`, `!purge`, `!unban`, `!unmute`, `!warn` and more!
+
+### 🥷🏻4. Anime / Manga Finder
 Find your favourite anime / manga using this command: `!anime` 
 For example: `!anime Oshi No Ko`
 
@@ -142,7 +148,7 @@ If you believe there is a bug in the codes, please report them here: [New Issue 
 
 ## Contributing
 
-Contributions are always welcome! As of now, I'm trying to make the code more maintainable: [![Code Climate](https://codeclimate.com/github/RirikoAI/RirikoBot.png)](https://codeclimate.com/github/RirikoAI/RirikoBot). If you have any feature you want to add, feel free to fork the repo and create a PR. It doesn't have to be too fancy, so long as we both understand each other :D
+Contributions are always welcome! If you have any feature you want to add, feel free to fork the repo and create a PR. It doesn't have to be too fancy, so long as we both understand each other :D
 
 See `CONTRIBUTING.md` for ways to get started.
 
