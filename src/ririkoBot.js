@@ -118,7 +118,7 @@ module.exports = client;
       lastChance: {
         enabled: true,
         content: `🛑 **Last chance to enter** 🛑`,
-        threshold: 5000,
+        threshold: 60000,
         embedColor: "#FF0000",
       },
     },
