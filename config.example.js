@@ -97,6 +97,13 @@ module.exports = {
     message: "Thank you %user% for boosting the server!",
   },
 
+  // ------------------------------------------------- giveaways -------------------------------------------------------
+
+  // leave "false" if you don't want to mention everyone
+  giveaways: {
+    everyoneMention: true,
+  },
+
   // ----------------------------------------------- lyrics config -----------------------------------------------------
 
   GENIUS_TOKEN: "",
@@ -227,5 +234,5 @@ module.exports = {
     LogDir: "logs",
   },
 
-  VERSION: "3", // DO NOT TOUCH
+  VERSION: "4", // DO NOT TOUCH
 };

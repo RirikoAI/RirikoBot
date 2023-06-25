@@ -4,10 +4,10 @@
 const config = require("config");
 module.exports = {
   giveaway:
-    (config.giveaways.roleMention ? "@everyone\n\n" : "") +
+    (config.giveaways.everyoneMention ? "@everyone\n\n" : "") +
     "🎉 **GIVEAWAY** 🎉",
   giveawayEnded:
-    (config.giveaways.roleMention ? "@everyone\n\n" : "") +
+    (config.giveaways.everyoneMention ? "@everyone\n\n" : "") +
     "🎉 **GIVEAWAY ENDED** 🎉",
   drawing: `Ends: **{timestamp}**`,
   inviteToParticipate: `React with 🎉 to participate!`,
