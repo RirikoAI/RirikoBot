@@ -1,6 +1,9 @@
 # Bot config files. Please, never commit your config.js file anywhere
 config.js
 
+# Giveaway storage files
+giveaways.json
+
 # Logs
 logs
 *.log
