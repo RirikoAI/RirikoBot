@@ -1,4 +1,4 @@
-const config = require("../../config");
+const config = require("config");
 
 /**
  * This section of code is proudly written by Ririko herself (up until a point)
@@ -216,6 +216,14 @@ const lyristEnabled = () => {
   return process.env.LYRIST_ENABLED === "true" ? true : config.LYRIST_ENABLED;
 };
 
+/**
+ * @version 5
+ * @returns {*|string}
+ */
+const replicateToken = () => {
+  return process.env.REPLICATE_TOKEN || config.StableDiffusion.ReplicateToken;
+};
+
 module.exports = {
   port,
   language,
@@ -240,4 +248,5 @@ module.exports = {
   geniusEnabled,
   lyristUrl,
   lyristEnabled,
+  replicateToken,
 };

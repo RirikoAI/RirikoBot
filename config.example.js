@@ -25,6 +25,34 @@ module.exports = {
     },
   },
 
+  // ------------------------------------------- Stable Diffusion ------------------------------------------------------
+  StableDiffusion: {
+    // Replicate.com API Token. Get it from https://replicate.com/account
+    ReplicateToken: "",
+    // If you want to change the model, change this to one of the keys in AvailableModels (e.g. anything_3_0, eimis_anime_diffusion, stableDiffusion2_1)
+    Model: "anything_3_0_better_vae",
+    // Available models. You can add your own models here. The key is the name of the model, and the value is the model ID.
+    // You can find the model ID by going to https://replicate.com/models and clicking on the model you want to use.
+    AvailableModels: {
+      anything_3_0_better_vae:
+        "cjwbw/anything-v3-better-vae:09a5805203f4c12da649ec1923bb7729517ca25fcac790e640eaa9ed66573b65",
+      anything_3_0:
+        "cjwbw/anything-v3.0:f410ed4c6a0c3bf8b76747860b3a3c9e4c8b5a827a16eac9dd5ad9642edce9a2",
+      eimis_anime_diffusion:
+        "cjwbw/eimis_anime_diffusion:a409b0769c91cfb3ecfa61698babd73ae34aee400f7894b1f02d28526631ec97",
+      stableDiffusion2_1:
+        "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
+    },
+    NegativePrompt:
+      "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, " +
+      "low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name",
+    NumInferenceSteps: 10,
+    Width: 512,
+    Height: 640,
+    GuidanceScale: 7,
+    Scheduler: "DPMSolverMultistep",
+  },
+
   // ------------------------------------------ Ririko AI / Chatbot ----------------------------------------------------
   AI: {
     // Prefix of the AI part of the bot
@@ -234,5 +262,5 @@ module.exports = {
     LogDir: "logs",
   },
 
-  VERSION: "4", // DO NOT TOUCH
+  VERSION: "5", // DO NOT TOUCH
 };
