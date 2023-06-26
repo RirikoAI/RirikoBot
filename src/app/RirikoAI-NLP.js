@@ -1,23 +1,23 @@
 /**
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
-const { Configuration, OpenAIApi } = require("openai");
 const colors = require("colors");
-const config = require("config");
 
 const { OpenAIProvider } = require("./Providers/AI/OpenAIProvider");
 const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
 
 const getconfig = require("helpers/getconfig");
-const { AIProvider } = require("helpers/getconfig");
-const { AIPersonality } = require("helpers/getconfig");
-const { AIPrompts } = require("../helpers/getconfig");
+const { AIProvider, AIPersonality, AIPrompts } = require("helpers/getconfig");
+
 const {
   findChatHistory,
   addChatHistory,
   updateChatHistory,
   deleteChatHistory,
 } = require("./Schemas/ChatHistory");
+
+const { getAndIncrementUsageCount } = require("helpers/commandUsage");
+const { AI } = require("config");
 
 /**
  * Now, this is going to be an awesome AI that can remember past conversations by saving it into the
@@ -114,6 +114,17 @@ class RirikoAINLP {
    */
   async handleMessage(message) {
     if (message.content.substring(0, 1) === this.prefix) {
+      if (AI.DailyLimit !== false)
+        try {
+          const usageCount = await getAndIncrementUsageCount(
+            message.member.user.id,
+            AI.DailyLimit,
+            "ai"
+          );
+        } catch (e) {
+          return await message.reply(e.message);
+        }
+
       await message.channel.sendTyping();
 
       const prompt = message.content.substring(1); //remove the prefix from the message

@@ -43,15 +43,22 @@ module.exports = {
       stableDiffusion2_1:
         "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
     },
+
+    // These are all the StableDiffusion options. If you have problems generating images, try changing these (follow the settings in
+    // the model's page (https://replicate.com/cjwbw/anything-v3.0, https://replicate.com/cjwbw/eimis_anime_diffusion, etc.)
     NegativePrompt:
       "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, " +
       "low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name",
     NumInferenceSteps: 10,
     Width: 512,
-    Height: 640,
+    Height: 512,
     GuidanceScale: 7,
     Scheduler: "DPMSolverMultistep",
     DisableSafetyCheck: false,
+
+    // Enable daily limit for each member. Put numbers of uses per day in the DailyLimit config below (e.g: 15, 30)
+    // Leave this to false if you don't want to enable daily limit.
+    DailyLimit: false,
   },
 
   // ------------------------------------------ Ririko AI / Chatbot ----------------------------------------------------
@@ -92,6 +99,10 @@ module.exports = {
       "Human: Play https://youtube.com/watch?v=Lh63pBzylFg",
       "Friend: Sure! Now Playing 🎵 https://youtube.com/watch?v=Lh63pBzylFg 🎵",
     ],
+
+    // Enable daily limit for each member. Put numbers of uses per day in the DailyLimit config below (e.g: 15, 30)
+    // Leave this to false if you don't want to enable daily limit.
+    DailyLimit: false,
   },
 
   // ------------------------------------------------ Database ---------------------------------------------------------
@@ -263,5 +274,5 @@ module.exports = {
     LogDir: "logs",
   },
 
-  VERSION: "5", // DO NOT TOUCH
+  VERSION: "6", // DO NOT TOUCH
 };

@@ -15,6 +15,7 @@ import language from "languages/en";
 import { StableDiffusion } from "config";
 import axios, { get } from "axios";
 import { AttachmentBuilder } from "discord.js";
+import { getAndIncrementUsageCount } from "helpers/commandUsage";
 
 module.exports = {
   name: "imagine",
@@ -34,7 +35,19 @@ module.exports = {
 };
 
 async function imagineCommand(client, interaction, args, prefix) {
+  if (StableDiffusion.DailyLimit !== false)
+    try {
+      const usageCount = await getAndIncrementUsageCount(
+        interaction.member.user.id,
+        StableDiffusion.DailyLimit,
+        "imagine"
+      );
+    } catch (e) {
+      return await interaction.reply(e.message);
+    }
+
   await interaction.deferReply();
+
   const replicate = createReplicateClient();
 
   const userPrompt = interaction.options.getString("prompt");
