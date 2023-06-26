@@ -70,8 +70,9 @@ module.exports = {
           .setTimestamp()
           .setDescription(
             "**Welcome to the AI-powered general Discord bot that you can call your companion. Here's all the prefix commands: ** \n\n" +
-              "**__AI__** \n `.[your prompt]` - For example: `.Hello Ririko. Please play an anime music.` " +
+              "**__AI Chatbot__** \n `.[your prompt]` - For example: `.Hello Ririko. Please play an anime music.` " +
               "You can also ask Ririko any question like: `.What day is today?` or `.What do you think about love`, Clear your chat with `.clear`\n\n" +
+              "**__Stable Diffusion__** \n Generate arts using `/imagine` command.\n\n" +
               help_message +
               `Use \`${prefix}info [command]\` for more info of the particular command. For slash commands, use \`/help\``
           )
