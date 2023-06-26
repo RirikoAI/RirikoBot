@@ -33,7 +33,7 @@ module.exports = {
   run: imagineCommand,
 };
 
-async function imagineCommand(client, interaction, args, prefix, config, db) {
+async function imagineCommand(client, interaction, args, prefix) {
   await interaction.deferReply();
   const replicate = createReplicateClient();
 
