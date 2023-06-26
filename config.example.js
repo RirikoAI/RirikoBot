@@ -51,6 +51,7 @@ module.exports = {
     Height: 640,
     GuidanceScale: 7,
     Scheduler: "DPMSolverMultistep",
+    DisableSafetyCheck: false,
   },
 
   // ------------------------------------------ Ririko AI / Chatbot ----------------------------------------------------
