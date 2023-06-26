@@ -30,7 +30,7 @@ module.exports = {
     // Replicate.com API Token. Get it from https://replicate.com/account
     ReplicateToken: "",
     // If you want to change the model, change this to one of the keys in AvailableModels (e.g. anything_3_0, eimis_anime_diffusion, stableDiffusion2_1)
-    Model: "anything_3_0_better_vae",
+    Model: "stableDiffusion2_1",
     // Available models. You can add your own models here. The key is the name of the model, and the value is the model ID.
     // You can find the model ID by going to https://replicate.com/models and clicking on the model you want to use.
     AvailableModels: {
@@ -51,6 +51,7 @@ module.exports = {
     Height: 640,
     GuidanceScale: 7,
     Scheduler: "DPMSolverMultistep",
+    DisableSafetyCheck: false,
   },
 
   // ------------------------------------------ Ririko AI / Chatbot ----------------------------------------------------
@@ -262,5 +263,5 @@ module.exports = {
     LogDir: "logs",
   },
 
-  VERSION: "5", // DO NOT TOUCH
+  VERSION: "4", // DO NOT TOUCH
 };
