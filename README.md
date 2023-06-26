@@ -4,12 +4,13 @@ A powerful AI-powered general Discord bot that you can call your companion.
 
 [![A mushroom-head robot](https://i.imgur.com/85Z84vf.png 'Codey the Codecademy mascot')](https://discord.gg/VWzecBNTVv)
 
-Official RirikoAI Support Discord: https://discord.gg/VWzecBNTVv
+Official RirikoAI Support Discord (see the bot live on action/get help here): https://discord.gg/VWzecBNTVv
 
 ### Quickstart:
-[!!] Do not use `npm install Ririko` - it'll install to the node_modules dir. Use `npx` instead:
+Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win) and npx (install via npm like below)
 
-Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win) and npx (install via npm)
+[!!] To install, do not use `npm install Ririko`. Follow this instead:
+
 ```bash
   # install Ririko using the npx command:
   npx ririko RirikoBot 
@@ -26,6 +27,8 @@ If you dont have npx:
   npm install -g npx
 ```
 
+**Please follow the instructions below [#how-to-install](#how-to-install)**
+
 **[!] This project is still under heavy developments. Update 10th June 2023 - I've started to spend more and more time into this project, more features will come 😀**
 
 [![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
@@ -36,9 +39,9 @@ If you dont have npx:
 [![NPM Download Stats](https://img.shields.io/npm/dw/ririko)](https://www.npmjs.com/package/ririko)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 [![issues - RirikoBot](https://img.shields.io/github/issues/RirikoAI/RirikoBot)](https://github.com/RirikoAI/RirikoBot/issues)
-[![Made In](https://img.shields.io/badge/made%20in-Malaysia-red.svg)](https://www.google.com/search?q=malaysia) 
+[![Discord](https://img.shields.io/discord/1084420682995224716?color=blue&label=Discord&logo=discord&logoColor=white)](https://discord.gg/VWzecBNTVv)
+[![Made In](https://img.shields.io/badge/made%20in-Malaysia-red.svg)](https://www.google.com/search?q=malaysia)
 
-More details below. [#how-to-install](#how-to-install)
 
 ## Features
 ### 🤖1. AI
@@ -50,6 +53,9 @@ Ririko can remember your past conversations. It is also personalized to each use
 
 **🎵AI Powered Music bot:**
 Try asking it to play a random anime music or suggesting you a Nightcore music. Something like `.Hey can you play me an anime music?`
+
+**🖼️Stable Diffusion:**
+What you imagine can be a reality. Ririko can create art based on your imagination. Try it out by issuing this command `/imagine` and follow the instructions.
 
 ### 🎥2. Twitch Stream Notifier
 Do you want to get notified when your favourite streamer is live on Twitch? Take a look at Ririko Twitch Stream Notifier by issuing this command `!info twitch`
@@ -88,7 +94,7 @@ For example: `!anime Oshi No Ko`
 
 I'm still working hard to make the anime recommendation function works, so you can find similar anime by a given keyword or genre. Stay tuned.
 
-## How to Install?
+## How to Install
 
 **Interested to run Ririko AI in your Discord servers?**
 
@@ -97,12 +103,13 @@ Before starting, you'll need a couple of things:
 2. Your own OpenAI or NLPCloud API keys. Get OpenAI key here: [Sign Up for OpenAI)](https://platform.openai.com/signup?launch) OR NLPcloud [Sign Up for NLPCloud)](https://nlpcloud.com/home/register)
 3. A MongoDB server OR cloud. Get it here: [MongoDB Cloud Database (Official)](https://www.mongodb.com/free-cloud-database).  Then get the URI / connection string. They looks like this: `mongodb+srv://yourownuser:yourownpassword@yourdomain.onss3te.mongodb.net/?retryWrites=true&w=majority`
 4. LTS version of Node.js: [Download | Node.js (nodejs.org)](https://nodejs.org/en/download)
-5. (optional) Genius token - if you want the lyrics feature: http://genius.com/api-clients
-6. (non-optional) A little bit of patience. Keep calm and learn to ask for help. Read the instructions properly, ⚠️ DO NOT SKIP A SINGLE PART. No matter how smart you think you are⚠️
+5. Twitch Client ID and Client Secret. Get it here: [Twitch Developers - Twitch API v5](https://dev.twitch.tv/console/apps/create)
+6. (optional) Genius token - if you want the lyrics feature: http://genius.com/api-clients
+7. (non-optional) A little bit of patience. Keep calm and learn to ask for help. Read the instructions properly, ⚠️ DO NOT SKIP A SINGLE PART. No matter how smart you think you are⚠️
 
 ### Download and Setup
 **Step 1: Clone the project**
-There are two choices to download the files. Use the git command
+There are two choices to download the files. Use the git command. Skip this if you already have the files.
 ```bash
   git clone https://github.com/RirikoAI/RirikoBot.git
 ```
