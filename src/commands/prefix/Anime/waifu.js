@@ -1,5 +1,4 @@
 const { MessageEmbed, EmbedBuilder } = require("discord.js");
-const fetch = require("node-fetch");
 const { getLang } = require("helpers/language");
 
 module.exports = {

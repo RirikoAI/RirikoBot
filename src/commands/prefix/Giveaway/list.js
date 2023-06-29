@@ -5,9 +5,9 @@ const Discord = require("discord.js");
 
 module.exports = {
   config: {
-    name: "giveaway-list",
+    name: "glist",
     description: "List all giveaways.",
-    usage: "giveaway-list",
+    usage: "glist",
   },
   category: "Giveaways",
   owner: false,

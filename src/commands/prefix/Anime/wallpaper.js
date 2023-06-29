@@ -9,8 +9,6 @@ const {
 const { AnimeWallpaper } = require("anime-wallpaper");
 const wall = new AnimeWallpaper();
 const { getLang } = require("helpers/language");
-const fetch = require("node-fetch");
-
 module.exports = {
   config: {
     name: "wallpaper",

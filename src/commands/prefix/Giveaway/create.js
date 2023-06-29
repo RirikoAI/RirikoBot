@@ -10,9 +10,9 @@ let created = false;
 
 module.exports = {
   config: {
-    name: "giveaway-create",
+    name: "gcreate",
     description: "Create a new giveaway (Wizard)",
-    usage: "giveaway-create",
+    usage: "gcreate",
   },
   category: "Giveaways",
   owner: false,
