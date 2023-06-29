@@ -4,9 +4,9 @@
 const ms = require("ms");
 module.exports = {
   config: {
-    name: "giveaway-reroll",
+    name: "greroll",
     description: "Reroll a giveaway.",
-    usage: "giveaway-reroll [messageId]",
+    usage: "greroll [messageId]",
   },
   category: "Giveaways",
   owner: false,

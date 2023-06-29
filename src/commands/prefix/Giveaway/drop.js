@@ -4,9 +4,9 @@
 const messages = require("helpers/message");
 module.exports = {
   config: {
-    name: "giveaway-drop",
+    name: "gdrop",
     description: "Create a new drop giveaway (click to win)",
-    usage: "giveaway-drop [#channel] [winners] [prize]",
+    usage: "gdrop [#channel] [winners] [prize]",
   },
   category: "Giveaways",
   owner: false,

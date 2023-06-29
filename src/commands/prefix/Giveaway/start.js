@@ -5,9 +5,9 @@ const ms = require("ms");
 const messages = require("helpers/message");
 module.exports = {
   config: {
-    name: "giveaway-start",
+    name: "gstart",
     description: "Start a new giveaway",
-    usage: "giveaway-start [#channel] [duration] [winners] [prize]",
+    usage: "gstart [#channel] [duration] [winners] [prize]",
   },
   category: "Giveaways",
   owner: false,

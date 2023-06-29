@@ -11,9 +11,9 @@ const { footer1 } = require("languages/en");
 
 module.exports = {
   config: {
-    name: "giveaway-help",
+    name: "ghelp",
     description: "Learn how to use the giveaway commands.",
-    usage: "giveaway-help",
+    usage: "ghelp",
   },
   category: "Giveaways",
   owner: false,

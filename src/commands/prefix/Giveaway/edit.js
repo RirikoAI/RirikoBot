@@ -3,9 +3,9 @@
  */
 module.exports = {
   config: {
-    name: "giveaway-edit",
+    name: "gedit",
     description: "Edit an existing giveaway",
-    usage: "giveaway-edit",
+    usage: "gedit",
   },
   category: "Giveaways",
   owner: false,

@@ -3,9 +3,9 @@
  */
 module.exports = {
   config: {
-    name: "giveaway-end",
+    name: "gend",
     description: "End an existing giveaway.",
-    usage: "giveaway-end [message ID]",
+    usage: "gend [message ID]",
   },
   category: "Giveaways",
   owner: false,
