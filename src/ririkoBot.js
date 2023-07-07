@@ -7,7 +7,7 @@ const {
   Collection,
   GatewayIntentBits,
 } = require("discord.js");
-const config = require("config");
+const config = require("config") || null;
 const colors = require("colors");
 
 const { overrideLoggers } = require("helpers/logger");

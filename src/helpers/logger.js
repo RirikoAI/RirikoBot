@@ -1,4 +1,3 @@
-const config = require("config");
 const { EmbedBuilder, WebhookClient } = require("discord.js");
 const pino = require("pino");
 const { format } = require("date-fns");

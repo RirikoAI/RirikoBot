@@ -224,6 +224,14 @@ const replicateToken = () => {
   return process.env.REPLICATE_TOKEN || config.StableDiffusion.ReplicateToken;
 };
 
+/**
+ * @returns {*|string}
+ */
+const hostname = () => {
+  // read .env file and get the hostname
+  return process.env.HOSTNAME || "localhost";
+};
+
 module.exports = {
   port,
   language,
@@ -249,4 +257,5 @@ module.exports = {
   lyristUrl,
   lyristEnabled,
   replicateToken,
+  hostname,
 };
