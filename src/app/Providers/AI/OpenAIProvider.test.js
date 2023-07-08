@@ -28,7 +28,8 @@ describe("OpenAIProvider", () => {
   it("should be able return answer when we chat", async () => {
     const openAIProvider = new OpenAIProvider();
     const response = await openAIProvider.sendChat("Hello", "This is a chat", [
-      { message: "hello" },
+      "hello",
+      "hello",
     ]);
     expect(response).toBe("example response");
   });
