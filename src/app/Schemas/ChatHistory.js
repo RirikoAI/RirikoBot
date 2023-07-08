@@ -6,7 +6,8 @@ const Schema = new mongoose.Schema(
     last_channel_id: String,
     last_message_id: String,
     user_id: String,
-    chat_history: String,
+    // chat_history Array of String
+    chat_history: Array,
   },
   {
     timestamps: {
