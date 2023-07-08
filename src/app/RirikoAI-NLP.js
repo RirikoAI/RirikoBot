@@ -41,16 +41,21 @@ class RirikoAINLP {
 
   constructor() {
     try {
-      this.prefix = getconfig.AIPrefix();
-      this.chatHistory = [];
-      this.costPerToken = 0.00003;
+      this.prefix = getconfig.AIPrefix(); // Prefix for the AI
+      this.chatHistory = []; // This is where we store the chat history
+      this.costPerToken = 0.00003; // Cost per token in USD
+      this.minRepetition = 6; // Minimum number of times a phrase must occur to be considered a repetition
 
+      // Initialize the AI provider
       if (AIProvider() === "NLPCloudProvider") {
+        // If the provider is NLPCloudProvider, initialize the NLPCloudProvider
         this.provider = new NLPCloudProvider();
-      } else {
+      } else if (AIProvider() === "OpenAIProvider") {
+        // If the provider is OpenAIProvider, initialize the OpenAIProvider
         this.provider = new OpenAIProvider();
       }
 
+      // AI provider has been initialized
       this.isInitialized = true;
       console.log("[RirikoAI-NLP] Initialized successfully".blue);
     } catch (e) {
@@ -58,6 +63,7 @@ class RirikoAINLP {
         "[RirikoAI-NLP] Something went wrong during the initialization! Check your config (try copy and paste the example config files again)"
           .red
       );
+      // AI provider has not been initialized
       this.isInitialized = false;
       throw e;
     }
@@ -65,6 +71,10 @@ class RirikoAINLP {
 
   // Business Logic implementations ------------------------------------------------------------------------------------
 
+  /**
+   * Get Personality and Abilities
+   * @returns {string}
+   */
   getPersonalitiesAndAbilities() {
     try {
       // Get the current time
@@ -73,10 +83,12 @@ class RirikoAINLP {
       // Use regular expressions and the replace() method to replace the string
       let personality = AIPersonality().join("\n");
 
+      // Return the personality and abilities
       return (
+        // Replace the %CURRENT_TIME% placeholder with the current time
         personality.replace("%CURRENT_TIME%", currentTime) +
         "\n" +
-        AIPrompts().join("\n") +
+        AIPrompts().join("\n") + // Join the prompts with a new line
         "\n"
       );
     } catch (e) {
@@ -92,8 +104,8 @@ class RirikoAINLP {
     return new Date();
   }
 
-  calculateToken(text) {
-    return parseInt(text.length / 4); // we are making simple assumption that 4 chars = 1 token
+  calculateToken(historyString) {
+    return parseInt(historyString.length / 4); // we are making simple assumption that 4 chars = 1 token
   }
 
   getChatHistory(discordMessage) {
@@ -104,6 +116,31 @@ class RirikoAINLP {
       return "";
     }
   }
+
+  removeDuplicates = (reply, chatHistory) => {
+    // Remove duplicate sentences from the reply, based on the last 2 replies
+    const previousReplies = chatHistory
+      .filter((entry) => entry.startsWith("Friend:"))
+      .slice(-2);
+
+    const replyWithoutDuplicates = reply
+      .split(". ")
+      .map((sentence) => {
+        const normalizedSentence = sentence.trim();
+        if (
+          normalizedSentence &&
+          previousReplies.some((prevReply) =>
+            prevReply.includes(normalizedSentence)
+          )
+        ) {
+          return ".";
+        }
+        return sentence;
+      })
+      .join(". ");
+
+    return replyWithoutDuplicates;
+  };
 
   // Async methods ----------------------------------------------------------------------------------------------------
 
@@ -180,6 +217,10 @@ class RirikoAINLP {
     }
   }
 
+  retries = 0;
+  maxRetries = 3;
+  retryDelay = 1000;
+
   async ask(messageText, discordMessage) {
     if (messageText === "clear")
       return await this.clearChatHistory(discordMessage);
@@ -190,16 +231,36 @@ class RirikoAINLP {
     );
 
     try {
+      const chatHistory = await this.getChatHistory(discordMessage);
+
       // Send request to NLP Cloud.
-      const answer = await this.provider.sendChat(
+      let answer = await this.provider.sendChat(
         messageText,
         this.getPersonalitiesAndAbilities(),
-        this.getChatHistory(discordMessage)
+        chatHistory
       );
+
+      // if the answer is empty, retry
+      if (answer === undefined || answer === null) {
+        if (this.retries < this.maxRetries) {
+          this.retries++;
+          console.log("retrying...");
+          await this.sleep(this.retryDelay);
+          return await this.ask(messageText, discordMessage);
+        } else {
+          console.log("Max retries reached, aborting.");
+          this.retries = 0;
+          throw "Max retries reached, aborting. The answer is always empty.";
+        }
+      }
+
+      let originalAnswer = answer;
+
+      answer = this.removeDuplicates(answer, chatHistory);
 
       await this.saveAnswer(answer, discordMessage);
 
-      const totalToken = currentToken + this.calculateToken(answer);
+      const totalToken = currentToken + this.calculateToken(originalAnswer);
 
       console.info(
         "[RirikoAI-NLP] Request complete, costs ".blue +
@@ -222,66 +283,81 @@ class RirikoAINLP {
   }
 
   async setPromptAndChatHistory(message, discordMessage) {
-    const currentPrompt = "Human: " + message + "\n";
+    try {
+      const currentPrompt = "Human: " + message;
 
-    let perUserChatHistory = await findChatHistory(
-      discordMessage.guildId,
-      discordMessage.author.id
-    );
-
-    // this user never chatted with Ririko before, create a new chathistory
-    if (perUserChatHistory === null) {
-      perUserChatHistory = await addChatHistory(discordMessage, "");
-    }
-
-    this.chatHistory[discordMessage.author.id] =
-      perUserChatHistory.chat_history;
-
-    this.chatHistory[discordMessage.author.id] += currentPrompt;
-
-    const prompt = this.chatHistory[discordMessage.author.id];
-
-    const chatTokens = this.calculateToken(
-      this.getPersonalitiesAndAbilities() + prompt
-    );
-
-    console.info(
-      "[RirikoAI-NLP] A new request with ".blue +
-        chatTokens +
-        " tokens is being prepared.".blue
-    );
-
-    if (chatTokens > 1900) {
-      /**
-       * The actual maximum number of tokens is around 2048 (new models support 4096).
-       * But I do not plan to hit it but put the ceiling a bit much lower then remove
-       * old messages after it is reached to continue chatting.
-       */
-
-      console.info(
-        "[RirikoAI-NLP] The prompt has reached the maximum of ".blue +
-          chatTokens +
-          ". Trimming now.".blue
+      let perUserChatHistory = await findChatHistory(
+        discordMessage.guildId,
+        discordMessage.author.id
       );
 
-      /**
-       * This code takes the chatHistory string, splits it into an array of lines, removes the first 21 lines,
-       * and then joins the remaining lines back into a single string with newline separators.
-       * The purpose is to keep only the most recent chat history, removing older entries.
-       *
-       * Proudly explained by Ririko herself
-       *
-       * @type {string[]}
-       */
-      let tmpData = this.chatHistory[discordMessage.author.id]
-        .split("\n")
-        .filter((d, i) => i > 20);
-      this.chatHistory[discordMessage.author.id] = tmpData.join("\n");
+      // this user never chatted with Ririko before, create a new chathistory
+      if (perUserChatHistory === null) {
+        this.chatHistory[discordMessage.author.id] = [];
+        perUserChatHistory = await addChatHistory(discordMessage, []);
+      }
+
+      // Check if perUserChatHistory is an array or a string. If it's a string, convert it to an array.
+      // For compatibility with older versions of Ririko AI < 0.9.0
+      if (typeof perUserChatHistory.chat_history === "string") {
+        perUserChatHistory.chat_history = [perUserChatHistory.chat_history];
+      }
+
+      // Set the chat history to the one stored in the database
+      this.chatHistory[discordMessage.author.id] =
+        perUserChatHistory.chat_history;
+
+      // Add the current prompt to the chat history
+      this.chatHistory[discordMessage.author.id].push(currentPrompt);
+
+      // Join the chat history array into a single string
+      const prompt = this.chatHistory[discordMessage.author.id].join("\n");
+
+      // Calculate the number of tokens the prompt costs approximately
+      const chatTokens = this.calculateToken(
+        this.getPersonalitiesAndAbilities() + prompt
+      );
+
+      console.info(
+        "[RirikoAI-NLP] A new request with ".blue +
+          chatTokens +
+          " tokens is being prepared.".blue
+      );
+
+      // If the prompt is too long, trim it
+      if (chatTokens > 1900) {
+        /**
+         * The actual maximum number of tokens is around 2048 (new models support 4096).
+         * But I do not plan to hit it but put the ceiling a bit much lower then remove
+         * old messages after it is reached to continue chatting.
+         */
+
+        console.info(
+          "[RirikoAI-NLP] The prompt has reached the maximum of ".blue +
+            chatTokens +
+            ". Trimming now.".blue
+        );
+
+        /**
+         * This code takes the chatHistory array, removes the first 20 elements,
+         * and keeps the remaining elements as the most recent chat history.
+         */
+        this.chatHistory[discordMessage.author.id] =
+          this.chatHistory[discordMessage.author.id].slice(-20);
+      }
+    } catch (e) {
+      console.log("Something went wrong:", e);
     }
   }
 
+  /**
+   * Save the answer into the chat history db
+   * @param answer
+   * @param discordMessage
+   * @returns {Promise<void>}
+   */
   async saveAnswer(answer, discordMessage) {
-    this.chatHistory[discordMessage.author.id] += "Friend: " + answer + "\n";
+    this.chatHistory[discordMessage.author.id].push("Friend: " + answer);
     // save chat history into mongodb
     await updateChatHistory(
       discordMessage.guildId,
@@ -293,6 +369,10 @@ class RirikoAINLP {
   async clearChatHistory(discordMessage) {
     await deleteChatHistory(discordMessage.guildId, discordMessage.author.id);
     return "Your chat history with Ririko has been cleared.";
+  }
+
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
