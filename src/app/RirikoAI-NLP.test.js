@@ -47,7 +47,11 @@ class MockedRirikoAI extends RirikoAINLP {
     return new Date();
   }
 
-  chatHistory = [];
+  getChatHistory() {
+    return [{ message: "Hello" }];
+  }
+
+  chatHistory = [{ message: "Hello" }];
 }
 
 describe("RirikoAI-NLP", () => {
@@ -83,7 +87,7 @@ describe("RirikoAI-NLP", () => {
 
     console.log(history);
 
-    expect(history).toContain("Human: Hello");
+    expect(history[0].message).toContain("Hello");
   });
 
   it("should be able to handle the message", async () => {
