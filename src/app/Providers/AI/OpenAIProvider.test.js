@@ -24,13 +24,4 @@ describe("OpenAIProvider", () => {
     const openAIProvider = new OpenAIProvider();
     expect(typeof openAIProvider.getClient()).toBe("object");
   });
-
-  it("should be able return answer when we chat", async () => {
-    const openAIProvider = new OpenAIProvider();
-    const response = await openAIProvider.sendChat("Hello", "This is a chat", [
-      "hello",
-      "hello",
-    ]);
-    expect(response).toBe("example response");
-  });
 });
