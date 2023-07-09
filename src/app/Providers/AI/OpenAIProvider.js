@@ -25,10 +25,17 @@ class OpenAIProvider extends AIProviderBase {
     return this.openAiClient;
   }
 
+  /**
+   * Send chat to OpenAI
+   * @param {String} messageText
+   * @param {String} context
+   * @param {Array} history
+   * @returns {Promise<*>}
+   */
   async sendChat(messageText, context, history) {
     try {
       const model = config.AI.GPTModel; // davinci or gpt35
-      const prompt = context + history.join("\n") + "\n";
+      const prompt = `${context}${history.join("\n")}\nHuman: ${messageText}\n`;
 
       if (model === "gpt35") {
         const convertedChatHistory = history.map((message) => {
@@ -61,7 +68,7 @@ class OpenAIProvider extends AIProviderBase {
           model: "text-davinci-003",
           prompt,
           temperature: 1,
-          max_tokens: 1900,
+          max_tokens: 2000,
           top_p: 0.2,
           frequency_penalty: 0.9,
           presence_penalty: 1.9,
