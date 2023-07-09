@@ -26,7 +26,7 @@ describe("NLPCloudProvider", () => {
     const response = await nlpCloudProvider.sendChat(
       "hello",
       "This is a chat",
-      {}
+      []
     );
     expect(response).toBe("example response");
   });

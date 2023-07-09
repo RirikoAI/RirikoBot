@@ -24,12 +24,19 @@ class NLPCloudProvider extends AIProviderBase {
     return this.nlpCloudClient;
   }
 
+  /**
+   * Send chat to NLP Cloud
+   * @param {String} messageText
+   * @param {String} context
+   * @param {Array} history
+   * @returns {Promise<*>}
+   */
   async sendChat(messageText, context, history) {
     try {
       // Send request to NLP Cloud.
       const response = await this.nlpCloudClient.chatbot(
         messageText,
-        context + history
+        context + history.join("\n")
       );
 
       if (typeof response.data["response"] !== "undefined") {
