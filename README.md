@@ -1,10 +1,12 @@
-
 # Ririko AI
 A powerful AI-powered general Discord bot that you can call your companion.
 
 [![A mushroom-head robot](https://i.imgur.com/85Z84vf.png 'Codey the Codecademy mascot')](https://discord.gg/VWzecBNTVv)
 
 Official RirikoAI Support Discord (see the bot live on action/get help here): https://discord.gg/VWzecBNTVv
+
+| Please consider giving the repo a star ⭐ if you like it. It gives me motivation 😊 |
+| --- |
 
 ### Quickstart:
 Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win) and npx (install via npm like below)
