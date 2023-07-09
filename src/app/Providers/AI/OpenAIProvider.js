@@ -25,23 +25,60 @@ class OpenAIProvider extends AIProviderBase {
     return this.openAiClient;
   }
 
+  /**
+   * Send chat to OpenAI
+   * @param {String} messageText
+   * @param {String} context
+   * @param {Array} history
+   * @returns {Promise<*>}
+   */
   async sendChat(messageText, context, history) {
-    const prompt = context + history;
     try {
-      // Send request to NLP Cloud.
-      const response = await this.openAiClient.createCompletion({
-        model: "text-davinci-003",
-        prompt,
-        temperature: 0.5,
-        max_tokens: 2048,
-        top_p: 1,
-        frequency_penalty: 0.5,
-        presence_penalty: 0,
-        stop: ["Human:"],
-      });
+      const model = config.AI.GPTModel; // davinci or gpt35
+      const prompt = `${context}${history.join("\n")}\nHuman: ${messageText}\n`;
 
-      const answer = response?.data.choices[0].text.split("Friend:")[1]?.trim();
-      return answer;
+      if (model === "gpt35") {
+        const convertedChatHistory = history.map((message) => {
+          const [role, content] = message.split(": ");
+          return {
+            role: role === "Human" ? "user" : "assistant",
+            content: content.trim(),
+          };
+        });
+
+        const newPrompt = [
+          { role: "system", content: context },
+          ...convertedChatHistory,
+        ];
+
+        const response = await this.openAiClient.createChatCompletion({
+          model: "gpt-3.5-turbo",
+          messages: newPrompt,
+          temperature: 1,
+          max_tokens: 2000,
+          top_p: 1,
+          frequency_penalty: 0.9,
+          presence_penalty: 0.9,
+        });
+
+        return response.data.choices[0].message.content; // Uncomment for GPT-3.5-turbo
+      } else if (model === "davinci") {
+        // Send request to OpenAI for text-davinci-003
+        const response = await this.openAiClient.createCompletion({
+          model: "text-davinci-003",
+          prompt,
+          temperature: 1,
+          max_tokens: 2000,
+          top_p: 0.2,
+          frequency_penalty: 0.9,
+          presence_penalty: 1.9,
+          stop: ["Human:"],
+        });
+
+        return response?.data.choices[0].text.split("Friend:")[1]?.trim();
+      } else {
+        throw new Error("Invalid GPT model. Check config.js");
+      }
     } catch (e) {
       throw e;
     }

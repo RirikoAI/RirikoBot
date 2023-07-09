@@ -19,6 +19,10 @@ const { RirikoMusic } = require("app/RirikoMusic");
 const { getLang } = require("./helpers/language");
 const { RirikoAVC } = require("./app/RirikoAVC");
 
+process.on("uncaughtException", function (err) {
+  console.log("Caught exception: " + err);
+});
+
 console.info("0------------------| Ririko AI (Bot):".brightCyan);
 
 /**

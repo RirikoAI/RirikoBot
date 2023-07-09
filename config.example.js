@@ -72,6 +72,8 @@ module.exports = {
     // Provider Token
     Token: "",
 
+    GPTModel: "davinci", // Must be one of: davinci or gpt35
+
     // Enable or disable the Whitelist.
     EnableWhitelist: true,
 
