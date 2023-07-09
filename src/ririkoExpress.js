@@ -12,6 +12,7 @@ const { parentPort } = require("worker_threads");
 const bodyParser = require("body-parser");
 
 const { validateMongoDBConnection } = require("./helpers/mongoUtils.js");
+const path = require("path");
 
 const configFileExists = fs.existsSync("./config.js");
 
@@ -109,7 +110,85 @@ app.post("/test_mongodb", bodyParser.json(), (req, res) => {
   }
 });
 
-app.post("/submit_install", bodyParser.json(), (req, res) => {
-  console.log("Got data", req.body);
+app.post("/submit_install", bodyParser.json(), async (req, res) => {
+  if (req?.body[0]?.name) {
+    const filesToCopy = [
+      { source: "../config.example.js", destination: "../config.js" },
+    ];
+
+    const copySuccess = await copyConfigFiles(filesToCopy);
+
+    if (copySuccess) {
+      // Wait 3 seconds before writing to the config file
+      setTimeout(async () => {
+        await writeConfigFile(req.body);
+      }, 3000);
+    }
+  }
+
   res.sendStatus(200);
 });
+
+async function writeConfigFile(payloads) {
+  const filePath = path.resolve(__dirname, "../config.js");
+
+  // Read the contents of the file
+  const content = fs.readFileSync(filePath, "utf-8");
+
+  console.log(payloads);
+
+  // Define regular expressions to find and replace the values
+  const portRegex = integerRegex("PORT");
+  const languageRegex = stringRegex("LANGUAGE");
+
+  // Define the new values you want to set
+  const newPort = 8080;
+  const newLanguage = "fr";
+
+  // Replace the values while preserving the data type and comments
+  const modifiedContent = content
+    .replace(portRegex, newPort)
+    .replace(languageRegex, newLanguage);
+
+  // Write the modified contents back to the file
+  fs.writeFileSync(filePath, modifiedContent);
+
+  console.log("Config file updated successfully!");
+}
+
+function integerRegex(integerKey) {
+  return new RegExp(`(?<=${integerKey}:\\s)[0-9]+`);
+}
+
+function stringRegex(stringKey) {
+  return new RegExp(`(?<=${stringKey}:\\s")[a-z]+(?=")`);
+}
+
+async function copyConfigFiles(files) {
+  for (const file of files) {
+    const sourceFile = file.source;
+    const destinationFile = file.destination;
+
+    const sourceFilePath = path.resolve(__dirname, sourceFile);
+    const destinationFilePath = path.resolve(__dirname, destinationFile);
+
+    if (!fs.existsSync(destinationFilePath)) {
+      await fs.copyFile(sourceFilePath, destinationFilePath, (err) => {
+        if (err) {
+          console.error(`An error occurred while copying ${sourceFile}:`, err);
+        } else {
+          console.log(`${sourceFile} copied successfully!`);
+        }
+      });
+
+      return true;
+    } else {
+      console.log(`${sourceFile} already exists at the destination.`);
+      return false;
+    }
+  }
+}
+
+function getValueFromKey(key, payload) {
+  return payload.find((item) => item.name === key);
+}
