@@ -107,6 +107,6 @@
     "babel-plugin-source-map-support": "^2.2.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-minify": "^0.5.2",
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.0.1"
   }
 }
