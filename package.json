@@ -60,7 +60,7 @@
     "country-emoji-languages": "^1.0.0",
     "date-fns": "^2.30.0",
     "decimal.js": "^10.4.3",
-    "discord-api-types": "^0.37.47",
+    "discord-api-types": "^0.37.48",
     "discord-giveaways": "^6.0.1",
     "discord.js": "^14.8.0",
     "distube": "^4.0.4",
