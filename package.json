@@ -90,7 +90,7 @@
     "pretty-ms": "^8.0.0",
     "quick.db": "^9.1.6",
     "redis": "^4.6.7",
-    "replicate": "^0.13.0",
+    "replicate": "^0.14.0",
     "save-dev": "^0.0.1-security",
     "semver": "^7.5.3",
     "source-map-support": "^0.5.21",
