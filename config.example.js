@@ -151,6 +151,7 @@ module.exports = {
   GENIUS_TOKEN: "",
   GENIUS_ENABLED: true,
 
+  // example: https://your-lyrist-domain.vercel.app/api
   LYRIST_URL: "",
   LYRIST_ENABLED: false,
 
