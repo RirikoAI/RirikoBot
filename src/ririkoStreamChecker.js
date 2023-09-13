@@ -188,6 +188,8 @@ async function fetchStreamersInfo(streams) {
   if (streams.onlineStreamers.length === 0) return;
   if (!accessToken) await twitchLogin();
 
+  console.log('accessToken', accessToken)
+
   let onlineStreamers = [],
     streamerDetails = [],
     users;
