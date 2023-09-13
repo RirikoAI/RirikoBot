@@ -1,7 +1,7 @@
-require("dotenv").config({ path: ".env" });
+require("dotenv").config({path: ".env"});
 let fs = require("fs");
 const colors = require("colors");
-const { Worker } = require("worker_threads");
+const {Worker} = require("worker_threads");
 
 // will be "development" or "production" depending on your config, falls back to "development"
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -15,7 +15,7 @@ if (!fs.existsSync(logDirectory)) {
   fs.mkdirSync(logDirectory);
 }
 
-const { overrideLoggers } = require(`${buildDir}/helpers/logger`);
+const {overrideLoggers} = require(`${buildDir}/helpers/logger`);
 overrideLoggers();
 
 // Handle errors
@@ -33,7 +33,7 @@ process.on("uncaughtException", (err) => {
 (async () => {
   const cli = require(`./${buildDir}/ririkoCli`);
 
-  const { Worker } = require("worker_threads");
+  const {Worker} = require("worker_threads");
 
   // Function 1
   function function1() {
@@ -76,11 +76,11 @@ process.on("uncaughtException", (err) => {
       cli.log("NODE_ENV:".red, NODE_ENV);
       cli.log(
         "\n" +
-          `[READY] ${message.botUsername} is up and ready to go. ${
-            process.env.npm_package_version
-              ? "\nRunning ririko@" + process.env.npm_package_version
-              : ""
-          }`.brightGreen
+        `[READY] ${message.botUsername} is up and ready to go. ${
+          process.env.npm_package_version
+            ? "\nRunning ririko@" + process.env.npm_package_version
+            : ""
+        }`.brightGreen
       );
       cli.log(
         "\n==============================================================\n"
@@ -101,6 +101,13 @@ process.on("uncaughtException", (err) => {
 
   worker_ririkoStreamChecker.on("error", (error) => {
     console.error(`[UNCAUGHT EXCEPTION] Ririko Stream Notifier:`, error);
+  });
+
+  worker_ririkoStreamChecker.on("message", (message) => {
+    if (message.exit) {
+      console.error('Terminating stream checker due to unrecoverable error');
+      worker_ririkoStreamChecker.terminate()
+    }
   });
 
   worker_RirikoQueueManager.on("error", (error) => {
