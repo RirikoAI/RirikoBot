@@ -3,8 +3,9 @@
  */
 const colors = require("colors");
 
-const { OpenAIProvider } = require("./Providers/AI/OpenAIProvider");
+const { OpenAIProvider } = require("app/Providers/AI/OpenAIProvider");
 const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
+const { RirikoLLaMAProvider } = require("app/Providers/AI/RirikoLLaMAProvider");
 
 const getconfig = require("helpers/getconfig");
 const { AIProvider, AIPersonality, AIPrompts } = require("helpers/getconfig");
@@ -56,6 +57,8 @@ class RirikoAINLP {
       } else if (AIProvider() === "OpenAIProvider") {
         // If the provider is OpenAIProvider, initialize the OpenAIProvider
         this.provider = new OpenAIProvider();
+      } else if (AIProvider() === 'RirikoLLaMAProvider') {
+        this.provider = new RirikoLLaMAProvider();
       }
 
       // AI provider has been initialized

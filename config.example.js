@@ -66,13 +66,18 @@ module.exports = {
     // Prefix of the AI part of the bot
     Prefix: ".",
 
-    // The provider to use for the bot. Must be one of: NLPCloudProvider or OpenAIProvider
+    // The provider to use for the bot. Must be one of: NLPCloudProvider | OpenAIProvider | RirikoLLaMAProvider
     Provider: "OpenAIProvider",
 
     // Provider Token
     Token: "",
 
-    GPTModel: "davinci", // Must be one of: davinci or gpt35
+    // Must be one of: davinci or gpt35
+    GPTModel: "gpt35",
+
+    // URL of the local server for Ririko AI. Leave this empty if you don't have a local server.
+    // Example: http://localhost:5000/api/v1/ask
+    LocalServerURL: "",
 
     // Enable or disable the Whitelist.
     EnableWhitelist: true,
@@ -277,5 +282,5 @@ module.exports = {
     LogDir: "logs",
   },
 
-  VERSION: "6", // DO NOT TOUCH
+  VERSION: "7", // DO NOT TOUCH
 };
