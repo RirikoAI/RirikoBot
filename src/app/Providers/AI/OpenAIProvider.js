@@ -63,9 +63,10 @@ class OpenAIProvider extends AIProviderBase {
 
         return response.data.choices[0].message.content; // Uncomment for GPT-3.5-turbo
       } else if (model === "davinci") {
-        // Send request to OpenAI for text-davinci-003
+        // Send request to OpenAI for text-davinci-002
+        // NOTE: text-davinci-003 is now removed from OpenAI API
         const response = await this.openAiClient.createCompletion({
-          model: "text-davinci-003",
+          model: "text-davinci-002",
           prompt,
           temperature: 1,
           max_tokens: 2000,

@@ -224,6 +224,14 @@ const replicateToken = () => {
   return process.env.REPLICATE_TOKEN || config.StableDiffusion.ReplicateToken;
 };
 
+/**
+ * @version 7
+ * @returns {*|string} AI token
+ */
+const localAIServerURL = () => {
+  return process.env.AI_LOCAL_SERVER_URL || config.AI.LocalServerURL;
+};
+
 module.exports = {
   port,
   language,
@@ -248,5 +256,6 @@ module.exports = {
   geniusEnabled,
   lyristUrl,
   lyristEnabled,
+  localAIServerURL,
   replicateToken,
 };
