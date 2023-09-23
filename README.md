@@ -5,13 +5,11 @@ A powerful AI-powered general Discord bot that you can call your companion. With
 | --- |
 
 <div align="center">
-<img align="left" width="600px" src="https://repository-images.githubusercontent.com/606736855/f1ef8a0f-dfc1-4477-b42d-ac2e9945e77e">
+<img align="left" width="400px" src="https://repository-images.githubusercontent.com/606736855/f1ef8a0f-dfc1-4477-b42d-ac2e9945e77e">
 
   <div align="left">
 
-### How RirikoAI Works?
 
-RirikoAI is a Discord bot that works `node.js` and `npm`, it connects to several APIs (which you need to sign up for) so the bot can work its magic. 
     
 ### Join Our Discord
     
@@ -24,6 +22,19 @@ RirikoAI is a Discord bot that works `node.js` and `npm`, it connects to several
 </div>
 
 <p>&nbsp;</p>
+
+###
+&nbsp;
+
+## How RirikoAI Works?
+
+RirikoAI is a Discord bot that works `node.js` and `npm`, it connects to several APIs (which you need to sign up for) so the bot can work its magic. RirikoAI can be hosted on a PC or a Server and it also works with Pterodactyl (Docker) servers. 
+
+| **RirikoAI Hosted Version is Coming Soon**  | 
+| ------ |
+
+No more using your PC to run the bot 24/7
+
 
 ## Quickstart:
 Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win) and npx (install via npm like below)
