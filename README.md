@@ -1,14 +1,31 @@
 # Ririko AI
-A powerful AI-powered general Discord bot that you can call your companion.
-
-[![A mushroom-head robot](https://i.imgur.com/85Z84vf.png 'Codey the Codecademy mascot')](https://discord.gg/VWzecBNTVv)
-
-Official RirikoAI Support Discord (see the bot live on action/get help here): https://discord.gg/VWzecBNTVv
+A powerful AI-powered general Discord bot that you can call your companion. With Twitch Live Notifier, Giveaways, OpenAI, Stable Diffusion, Moderations, Anime / Manga Finder and more features. Based on Discord.js v14.
 
 | Please consider giving the repo a star ⭐ if you like it. It gives me motivation 😊 |
 | --- |
 
-### Quickstart:
+<div align="center">
+<img align="left" width="600px" src="https://repository-images.githubusercontent.com/606736855/f1ef8a0f-dfc1-4477-b42d-ac2e9945e77e">
+
+  <div align="left">
+
+### How RirikoAI Works?
+
+RirikoAI is a Discord bot that works `node.js` and `npm`, it connects to several APIs (which you need to sign up for) so the bot can work its magic. 
+    
+### Join Our Discord
+    
+<p>Official RirikoAI Support Discord (see the bot live on action/get help here): https://discord.gg/VWzecBNTVv</p>
+
+<img src="https://i.imgur.com/85Z84vf.png" width="300px" align="center">
+
+
+  </div>
+</div>
+
+<p>&nbsp;</p>
+
+## Quickstart:
 Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win) and npx (install via npm like below)
 
 [!!] To install, do not use `npm install Ririko`. Follow this instead:
@@ -31,6 +48,8 @@ If you dont have npx:
 
 **Please follow the step by step instructions here to install: [WIKI: how-to-install](https://github.com/RirikoAI/RirikoBot/wiki/How-to-Install)**
 
+Official RirikoAI Support Discord (see the bot live on action/get help here): https://discord.gg/VWzecBNTVv
+
 **[!] This project is still under heavy developments. Update 10th June 2023 - I've started to spend more and more time into this project, more features will come 😀**
 
 [![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
@@ -44,6 +63,13 @@ If you dont have npx:
 [![Discord](https://img.shields.io/discord/1084420682995224716?color=blue&label=Discord&logo=discord&logoColor=white)](https://discord.gg/VWzecBNTVv)
 [![Made In](https://img.shields.io/badge/made%20in-Malaysia-red.svg)](https://www.google.com/search?q=malaysia)
 
+###
+
+<div align="center">
+  <img src="https://ririko.angel.net.my/ririkobg.jpg">
+</div>
+
+###
 
 ## Features
 ### 🤖1. AI
