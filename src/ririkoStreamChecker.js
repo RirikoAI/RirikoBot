@@ -12,7 +12,6 @@ const {
 const {overrideLoggers} = require("helpers/logger");
 overrideLoggers();
 const {twitchClientId, twitchClientSecret} = require("helpers/getconfig");
-const redis = require("redis");
 const {det} = require("mathjs");
 const {addQueueItems, deleteQueueItems} = require("./app/Schemas/QueueItem");
 const {getNotification} = require("./app/Schemas/StreamNotification");
