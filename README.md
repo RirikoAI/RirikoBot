@@ -1,30 +1,9 @@
+<img align="left" width="400px" src="https://repository-images.githubusercontent.com/606736855/f1ef8a0f-dfc1-4477-b42d-ac2e9945e77e">
+
 # Ririko AI
 A powerful AI-powered general Discord bot that you can call your companion. With Twitch Live Notifier, Giveaways, OpenAI, Stable Diffusion, Moderations, Anime / Manga Finder and more features. Based on Discord.js v14.
 
-| Please consider giving the repo a star ⭐ if you like it. It gives me motivation 😊 |
-| --- |
-
-<div align="center">
-<img align="left" width="400px" src="https://repository-images.githubusercontent.com/606736855/f1ef8a0f-dfc1-4477-b42d-ac2e9945e77e">
-
-  <div align="left">
-
-
-    
-### Join Our Discord
-    
-<p>Official RirikoAI Support Discord (see the bot live on action/get help here): https://discord.gg/VWzecBNTVv</p>
-
-<img src="https://i.imgur.com/85Z84vf.png" width="300px" align="center">
-
-
-  </div>
-</div>
-
 <p>&nbsp;</p>
-
-###
-&nbsp;
 
 ## How RirikoAI Works?
 
@@ -33,8 +12,10 @@ RirikoAI is a Discord bot that works `node.js` and `npm`, it connects to several
 | **RirikoAI Hosted Version is Coming Soon**  | 
 | ------ |
 
-No more using your PC to run the bot 24/7
+| Please consider giving the repo a star ⭐ if you like it. It gives me motivation 😊 |
+| --- |
 
+No more using your PC to run the bot 24/7
 
 ## Quickstart:
 Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win) and npx (install via npm like below)
@@ -75,6 +56,14 @@ Official RirikoAI Support Discord (see the bot live on action/get help here): ht
 [![Made In](https://img.shields.io/badge/made%20in-Malaysia-red.svg)](https://www.google.com/search?q=malaysia)
 
 ###
+
+    
+### Join Our Discord
+    
+<p>Official RirikoAI Support Discord (see the bot live on action/get help here): https://discord.gg/VWzecBNTVv</p>
+
+<img src="https://i.imgur.com/85Z84vf.png" width="300px" align="center">
+
 
 <div align="center">
   <img src="https://ririko.angel.net.my/ririkobg.jpg">
