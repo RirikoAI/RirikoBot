@@ -66,7 +66,8 @@ module.exports = {
     // Prefix of the AI part of the bot
     Prefix: ".",
 
-    // The provider to use for the bot. Must be one of: NLPCloudProvider | OpenAIProvider | RirikoLLaMAProvider
+    // The provider to use for the bot. Must be one of:
+    // NLPCloudProvider | OpenAIProvider | RirikoLLaMAProvider | RirikoHuggingChatProvider
     Provider: "OpenAIProvider",
 
     // Provider Token
@@ -77,7 +78,7 @@ module.exports = {
 
     // URL of the local server for Ririko AI. Leave this empty if you don't have a local server.
     // Example: http://localhost:5000/api/v1/ask
-    LocalServerURL: "",
+    LocalServerURL: "http://localhost:5000/api/v1/ask",
 
     // Enable or disable the Whitelist.
     EnableWhitelist: true,
@@ -87,6 +88,8 @@ module.exports = {
      * It is also possible to make Ririko cosplay as someone - you gotta try to experiment them it's fun :)
      * Placeholders:
      *  - %CURRENT_TIME% = to always include current time in the prompt, will be replaced in RirikoAI-NLP
+     *
+     *  Does not work with RirikoHuggingChatProvider (for now)
      */
     Personality: [
       "This is a chat between a [Human] and [Friend]. ",
@@ -97,11 +100,12 @@ module.exports = {
     ],
 
     // This is the past prompts, also adds the abilities
+    // Does not work with RirikoHuggingChatProvider (for now)
     Prompts: [
       "Human: When you're asked to play any song, please reply with this format: Now playing 🎵 insert the song title here 🎵",
       "Friend: Understood! I will play the song you requested in the given format whenever you ask me to do so.",
       "Human: Also, when you're asked to play a link similar to these https://www.youtube.com/ or https://open.spotify.com/, " +
-        "reply with this format: Now playing 🎵 insert the link here 🎵",
+      "reply with this format: Now playing 🎵 insert the link here 🎵",
       "Friend: Understood! I'll always use the format asked to play a link.",
       "Human: Play https://youtube.com/watch?v=Lh63pBzylFg",
       "Friend: Sure! Now Playing 🎵 https://youtube.com/watch?v=Lh63pBzylFg 🎵",
