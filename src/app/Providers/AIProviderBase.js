@@ -22,11 +22,11 @@ class AIProviderBase {
    * set as the AI's personality.
    * @param history {*} Some providers requires the chat history to be in a separate payload,
    * but oftentimes can be combined with the context parameter.
-   *
+   * @param discordMessage (Optional) Discord Message object
    * Returns response from the provider as string.
    * @returns {Promise<string>} Response from the provider
    */
-  async sendChat(messageText, context, history) {}
+  async sendChat(messageText, context, history, discordMessage) {}
 }
 
 module.exports = { AIProviderBase };

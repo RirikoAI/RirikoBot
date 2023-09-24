@@ -6,6 +6,7 @@ const colors = require("colors");
 const { OpenAIProvider } = require("app/Providers/AI/OpenAIProvider");
 const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
 const { RirikoLLaMAProvider } = require("app/Providers/AI/RirikoLLaMAProvider");
+const { RirikoHuggingChatProvider } = require("app/Providers/AI/RirikoHuggingChatProvider");
 
 const getconfig = require("helpers/getconfig");
 const { AIProvider, AIPersonality, AIPrompts } = require("helpers/getconfig");
@@ -59,6 +60,8 @@ class RirikoAINLP {
         this.provider = new OpenAIProvider();
       } else if (AIProvider() === 'RirikoLLaMAProvider') {
         this.provider = new RirikoLLaMAProvider();
+      } else if (AIProvider() === 'RirikoHuggingChatProvider') {
+        this.provider = new RirikoHuggingChatProvider();
       }
 
       // AI provider has been initialized
@@ -155,7 +158,7 @@ class RirikoAINLP {
 
       const currentToken = this.calculateTokenWithEverything(discordMessage);
 
-      let answer = await this.sendChatRequest(messageText, chatHistory);
+      let answer = await this.sendChatRequest(messageText, chatHistory, discordMessage);
 
       if (!answer) {
         return await this.retryAsk(messageText, discordMessage);
@@ -179,13 +182,15 @@ class RirikoAINLP {
    * Send the chat request to the AI provider
    * @param {String} messageText
    * @param {Array} chatHistory
+   * @param discordMessage
    * @returns {Promise<*>}
    */
-  async sendChatRequest(messageText, chatHistory) {
+  async sendChatRequest(messageText, chatHistory, discordMessage) {
     return await this.provider.sendChat(
       messageText,
       this.getPersonalitiesAndAbilities(),
-      chatHistory
+      chatHistory,
+      discordMessage
     );
   }
 
@@ -215,17 +220,17 @@ class RirikoAINLP {
   logTokenCost(totalToken) {
     console.info(
       "[RirikoAI-NLP] Request complete, costs ".blue +
-        totalToken +
-        ` tokens, that's about `.blue +
-        `$${(this.costPerToken * totalToken).toFixed(5)}`
+      totalToken +
+      ` tokens, that's about `.blue +
+      `$${(this.costPerToken * totalToken).toFixed(5)}`
     );
   }
 
   handleRequestError(e) {
     console.error(
       "Something went wrong when trying to send the request to the AI provider: " +
-        "Check if your API key is still valid, or if your prompts are not corrupted / too long. Also try to clear your " +
-        "chat history with Ririko by entering .clear in Discord."
+      "Check if your API key is still valid, or if your prompts are not corrupted / too long. Also try to clear your " +
+      "chat history with Ririko by entering .clear in Discord."
     );
 
     if (e.response) {
@@ -272,7 +277,7 @@ class RirikoAINLP {
     // check upfront if the current message does not exceed the maxChatToken
     const tokens = this.calculateToken(
       this.getPersonalitiesAndAbilities() +
-        this.getCurrentPrompt(discordMessage)
+      this.getCurrentPrompt(discordMessage)
     );
 
     if (tokens > this.maxChatTokens - 1000) {
@@ -348,8 +353,8 @@ class RirikoAINLP {
   calculateTokenWithEverything(discordMessage) {
     return this.calculateToken(
       this.getPersonalitiesAndAbilities() +
-        this.getChatHistory(discordMessage).toString() +
-        this.getCurrentPrompt(discordMessage)
+      this.getChatHistory(discordMessage).toString() +
+      this.getCurrentPrompt(discordMessage)
     );
   }
 
@@ -364,8 +369,8 @@ class RirikoAINLP {
 
     console.info(
       "[RirikoAI-NLP] A new request with ".blue +
-        chatTokens +
-        " tokens is being prepared.".blue
+      chatTokens +
+      " tokens is being prepared.".blue
     );
 
     return chatTokens < this.maxChatTokens;
