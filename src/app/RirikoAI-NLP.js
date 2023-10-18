@@ -3,13 +3,13 @@
  */
 const colors = require("colors");
 
-const { OpenAIProvider } = require("app/Providers/AI/OpenAIProvider");
-const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
-const { RirikoLLaMAProvider } = require("app/Providers/AI/RirikoLLaMAProvider");
-const { RirikoHuggingChatProvider } = require("app/Providers/AI/RirikoHuggingChatProvider");
+const {OpenAIProvider} = require("app/Providers/AI/OpenAIProvider");
+const {NLPCloudProvider} = require("app/Providers/AI/NLPCloudProvider");
+const {RirikoLLaMAProvider} = require("app/Providers/AI/RirikoLLaMAProvider");
+const {RirikoHuggingChatProvider} = require("app/Providers/AI/RirikoHuggingChatProvider");
 
 const getconfig = require("helpers/getconfig");
-const { AIProvider, AIPersonality, AIPrompts } = require("helpers/getconfig");
+const {AIProvider, AIPersonality, AIPrompts} = require("helpers/getconfig");
 
 const {
   findChatHistory,
@@ -18,8 +18,8 @@ const {
   deleteChatHistory,
 } = require("./Schemas/ChatHistory");
 
-const { getAndIncrementUsageCount } = require("helpers/commandUsage");
-const { AI } = require("config");
+const {getAndIncrementUsageCount} = require("helpers/commandUsage");
+const {AI} = require("config");
 
 /**
  * Now, this is going to be an awesome AI that can remember past conversations by saving it into the
@@ -186,12 +186,17 @@ class RirikoAINLP {
    * @returns {Promise<*>}
    */
   async sendChatRequest(messageText, chatHistory, discordMessage) {
-    return await this.provider.sendChat(
-      messageText,
-      this.getPersonalitiesAndAbilities(),
-      chatHistory,
-      discordMessage
-    );
+    try {
+      return await this.provider.sendChat(
+        messageText,
+        this.getPersonalitiesAndAbilities(),
+        chatHistory,
+        discordMessage
+      );
+    } catch (e) {
+      return this.handleRequestError(e);
+    }
+
   }
 
   async retryAsk(messageText, discordMessage) {
@@ -233,7 +238,7 @@ class RirikoAINLP {
       "chat history with Ririko by entering .clear in Discord."
     );
 
-    if (e.response) {
+    if (e?.response) {
       console.error(e.response.data.error.message);
       return "Your current prompt is too long, please try again with a shorter prompt. Alternatively, you can clear your chat with `.clear` and try again.";
     } else {
@@ -564,4 +569,4 @@ class RirikoAINLP {
   }
 }
 
-module.exports = { RirikoAINLP };
+module.exports = {RirikoAINLP};

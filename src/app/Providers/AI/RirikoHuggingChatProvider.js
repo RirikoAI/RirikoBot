@@ -10,6 +10,7 @@ class RirikoHuggingChatProvider extends AIProviderBase {
       apiUrl: getconfig.localAIServerURL(),
       token: this.token = getconfig.AIToken(),
       settings: {
+        system_prompt: ""
       }
     });
   }
@@ -29,6 +30,10 @@ class RirikoHuggingChatProvider extends AIProviderBase {
   async sendChat(messageText, context, history, discordMessage) {
     try {
       // Send request to NLP Cloud.
+      this.ririkoHuggingChatClient.settings = {
+        system_prompt: context
+      }
+
       const response = await this.ririkoHuggingChatClient.ask(
         messageText,
         discordMessage.author.username
