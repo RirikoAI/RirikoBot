@@ -129,41 +129,6 @@ app.post("/submit_install", bodyParser.json(), async (req, res) => {
   res.sendStatus(200);
 });
 
-async function writeConfigFile(payloads) {
-  const filePath = path.resolve(__dirname, "../config.js");
-
-  // Read the contents of the file
-  const content = fs.readFileSync(filePath, "utf-8");
-
-  console.log(payloads);
-
-  // Define regular expressions to find and replace the values
-  const portRegex = integerRegex("PORT");
-  const languageRegex = stringRegex("LANGUAGE");
-
-  // Define the new values you want to set
-  const newPort = 8080;
-  const newLanguage = "fr";
-
-  // Replace the values while preserving the data type and comments
-  const modifiedContent = content
-    .replace(portRegex, newPort)
-    .replace(languageRegex, newLanguage);
-
-  // Write the modified contents back to the file
-  fs.writeFileSync(filePath, modifiedContent);
-
-  console.log("Config file updated successfully!");
-}
-
-function integerRegex(integerKey) {
-  return new RegExp(`(?<=${integerKey}:\\s)[0-9]+`);
-}
-
-function stringRegex(stringKey) {
-  return new RegExp(`(?<=${stringKey}:\\s")[a-z]+(?=")`);
-}
-
 async function copyConfigFiles(files) {
   for (const file of files) {
     const sourceFile = file.source;
@@ -190,5 +155,65 @@ async function copyConfigFiles(files) {
 }
 
 function getValueFromKey(key, payload) {
-  return payload.find((item) => item.name === key);
+  return payload.find((item) => item.name === key).value;
+}
+
+async function writeConfigFile(payloads) {
+  const filePath = path.resolve(__dirname, "../config.js");
+
+  // Read the contents of the file
+  const content = fs.readFileSync(filePath, "utf-8");
+
+  // Define regular expressions to find and replace the values
+  const discordTokenRegex = stringRegex("DiscordToken");
+  const discordBotIDRegex = stringRegex("DiscordBotID");
+  const replicateTokenRegex = stringRegex("ReplicateToken");
+  const aiTokenRegex = stringRegex("AIToken");
+  const accessURIRegex = stringRegex("AccessURI");
+  const twitchClientIdRegex = stringRegex("TwitchClientId");
+  const twitchClientSecretRegex = stringRegex("TwitchClientSecret");
+
+  // Define the new values you want to set
+  const discordToken = getValueFromKey("application_id", payloads);
+  const discordBotID = getValueFromKey("bot_token", payloads);
+  const replicateToken = getValueFromKey("replicate_token", payloads);
+  const aiToken = getValueFromKey("ai_token", payloads);
+  const accessURI = getValueFromKey("mongodb_uri", payloads);
+  const twitchClientId = getValueFromKey("twitch_client_id", payloads);
+  const twitchClientSecret = getValueFromKey("twitch_client_secret", payloads);
+
+  console.log("discordToken", discordToken);
+
+  console.log("discordTokenRegex", discordTokenRegex);
+
+  const portRegex = integerRegex("PORT");
+  const languageRegex = stringRegex("LANGUAGE");
+  const newPort = 8080;
+  const newLanguage = "fr";
+
+  // Replace the values while preserving the data type and comments
+  const modifiedContent = content
+    .replace(portRegex, `$1${newPort}`)
+    .replace(languageRegex, `$1${newLanguage}"`)
+    .replace(discordTokenRegex, `$1${discordToken}"`)
+    .replace(discordBotIDRegex, `$1${discordBotID}"`)
+    .replace(replicateTokenRegex, `$1${replicateToken}"`)
+    .replace(aiTokenRegex, `$1${aiToken}"`)
+    .replace(accessURIRegex, `$1${accessURI}"`)
+    .replace(twitchClientIdRegex, `$1${twitchClientId}"`)
+    .replace(twitchClientSecretRegex, `$1${twitchClientSecret}"`);
+
+  // Write the modified contents back to the file
+
+  fs.writeFileSync(filePath, modifiedContent);
+
+  console.log("Config file updated successfully!");
+}
+
+function integerRegex(integerKey) {
+  return new RegExp(`(${integerKey}:\\s*)(\\d+)`);
+}
+
+function stringRegex(stringKey) {
+  return new RegExp(`(${stringKey}:\\s*")([^"]*)(")`);
 }

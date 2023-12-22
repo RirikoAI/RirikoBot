@@ -174,7 +174,7 @@ const language = {
     value:
       "✨ [Github](https://github.com/RirikoAI/RirikoBot 'Support the development of the RirikoAI here') | " +
       "[Official Website](https://ririko.angel.net.my 'Visit the bot official page here') | " +
-      "By ANGEL#1111",
+      "By @angel.dev",
     inline: false,
   },
 };

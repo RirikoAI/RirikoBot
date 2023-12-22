@@ -33,7 +33,7 @@ const discordPrefix = () => {
  * @returns {*|string} Discord token
  */
 const discordToken = () => {
-  return process.env.DISCORD_BOT_TOKEN || config.DISCORD.Token;
+  return process.env.DISCORD_BOT_TOKEN || config.DISCORD.DiscordToken;
 };
 
 /**
@@ -41,7 +41,7 @@ const discordToken = () => {
  * @returns {*|string} Discord Bot ID
  */
 const discordBotID = () => {
-  return process.env.DISCORD_BOT_ID || config.DISCORD.ID;
+  return process.env.DISCORD_BOT_ID || config.DISCORD.DiscordBotID;
 };
 
 /**
@@ -109,7 +109,7 @@ const AIProvider = () => {
  * @returns {*|string} AI token
  */
 const AIToken = () => {
-  return process.env.AI_TOKEN || config.AI.Token;
+  return process.env.AI_TOKEN || config.AI.AIToken;
 };
 
 /**
@@ -173,7 +173,7 @@ const logDirectory = () => {
  * @returns {string|string}
  */
 const twitchClientId = () => {
-  return process.env.TWITCH_CLIENT_ID || config.TWITCH.clientId;
+  return process.env.TWITCH_CLIENT_ID || config.TWITCH.TwitchClientId;
 };
 
 /**
@@ -181,7 +181,7 @@ const twitchClientId = () => {
  * @returns {string|string}
  */
 const twitchClientSecret = () => {
-  return process.env.TWITCH_CLIENT_SECRET || config.TWITCH.clientSecret;
+  return process.env.TWITCH_CLIENT_SECRET || config.TWITCH.TwitchClientSecret;
 };
 
 /**
