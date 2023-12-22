@@ -16,7 +16,7 @@ function createLogDirectory() {
   }
 }
 
-const {overrideLoggers} = require(`${buildDir}/helpers/logger`);
+const { overrideLoggers } = require(`${buildDir}/helpers/logger`);
 overrideLoggers();
 
 function handleUnhandledRejection(err, promise) {
@@ -64,6 +64,14 @@ function startRirikoStreamCheckerWorker() {
   worker_ririkoStreamChecker.on("error", (error) => {
     console.error(`[UNCAUGHT EXCEPTION] Ririko Stream Notifier:`, error);
   });
+
+  worker_ririkoStreamChecker.on("message", (message) => {
+    if (message.exit) {
+      worker_ririkoStreamChecker.terminate().then(() => {
+        console.error("Terminating stream checker due to unrecoverable error");
+      });
+    }
+  });
 }
 
 function startRirikoQueueManagerWorker() {
@@ -73,13 +81,6 @@ function startRirikoQueueManagerWorker() {
 
   worker_RirikoQueueManager.on("message", (message) => {
     console.log(`Message from Ririko Queue Manager: ${message}`);
-  });
-
-  worker_ririkoStreamChecker.on("message", (message) => {
-    if (message.exit) {
-      console.error('Terminating stream checker due to unrecoverable error');
-      worker_ririkoStreamChecker.terminate()
-    }
   });
 
   worker_RirikoQueueManager.on("error", (error) => {
