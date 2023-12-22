@@ -18,6 +18,7 @@ class RirikoLyrist {
       const res = await axios.get(`${lyristUrl()}/${processUrl(title)}`);
       return res.data;
     } catch (e) {
+      console.error("Error getting lyrics from Lyrist", e.message);
       return null;
     }
   }
@@ -35,6 +36,7 @@ class RirikoLyrist {
       );
       return res.data;
     } catch (e) {
+      console.error("Error getting lyrics from Lyrist", e.message);
       return null;
     }
   }

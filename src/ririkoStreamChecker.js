@@ -3,28 +3,28 @@
  * @type {axios.AxiosStatic | axios | AxiosStatic | {all<T>(values: Array<Promise<T> | T>): Promise<T[]>, AxiosInterceptorOptions: AxiosInterceptorOptions, AxiosResponse: AxiosResponse, Axios: Axios, ParamsSerializerOptions: ParamsSerializerOptions, ParamEncoder: ParamEncoder, AxiosDefaults: AxiosDefaults, AxiosInterceptorManager: AxiosInterceptorManager, ResponseType: "arraybuffer" | "blob" | "document" | "json" | "text" | "stream", AxiosBasicCredentials: AxiosBasicCredentials, AxiosProxyConfig: AxiosProxyConfig, RawAxiosRequestHeaders: RawAxiosRequestHeaders, Method: "get" | "GET" | "delete" | "DELETE" | "head" | "HEAD" | "options" | "OPTIONS" | "post" | "POST" | "put" | "PUT" | "patch" | "PATCH" | "purge" | "PURGE" | "link" | "LINK" | "unlink" | "UNLINK", FormDataVisitorHelpers: FormDataVisitorHelpers, AxiosRequestConfig: AxiosRequestConfig, SerializerVisitor: SerializerVisitor, AxiosAdapter: AxiosAdapter, CancelStatic: CancelStatic, AxiosStatic: AxiosStatic, AxiosRequestHeaders: RawAxiosRequestHeaders & AxiosHeaders, AxiosPromise: Promise<AxiosResponse<T>>, InternalAxiosRequestConfig: InternalAxiosRequestConfig, GenericHTMLFormElement: GenericHTMLFormElement, CanceledError: CanceledError, RawAxiosRequestConfig: AxiosRequestConfig<D>, HeadersDefaults: HeadersDefaults, GenericFormData: GenericFormData, AxiosHeaderValue: AxiosHeaders | string | string[] | number | boolean, CancelTokenStatic: CancelTokenStatic, Canceler: Canceler, FormSerializerOptions: FormSerializerOptions, spread<T, R>(callback: (...args: T[]) => R): (array: T[]) => R, Cancel: Cancel, CancelTokenSource: CancelTokenSource, CancelToken: CancelToken, AxiosError: AxiosError, toFormData(sourceObj: object, targetFormData?: GenericFormData, options?: FormSerializerOptions): GenericFormData, AxiosProgressEvent: AxiosProgressEvent, responseEncoding: "ascii" | "ASCII" | "ansi" | "ANSI" | "binary" | "BINARY" | "base64" | "BASE64" | "base64url" | "BASE64URL" | "hex" | "HEX" | "latin1" | "LATIN1" | "ucs-2" | "UCS-2" | "ucs2" | "UCS2" | "utf-8" | "UTF-8" | "utf8" | "UTF8" | "utf16le" | "UTF16LE", isAxiosError<T=any, D=any>(payload: any): payload is AxiosError<T, D>, TransitionalOptions: TransitionalOptions, HttpStatusCode: HttpStatusCode, CustomParamsSerializer: CustomParamsSerializer, GenericAbortSignal: GenericAbortSignal, AxiosResponseHeaders: RawAxiosResponseHeaders & AxiosHeaders, CreateAxiosDefaults: CreateAxiosDefaults, formToJSON(form: (GenericFormData | GenericHTMLFormElement)): object, AxiosInstance: AxiosInstance, AxiosRequestTransformer: AxiosRequestTransformer, SerializerOptions: SerializerOptions, AxiosHeaders: AxiosHeaders, isCancel(value: any): value is Cancel, AxiosResponseTransformer: AxiosResponseTransformer, RawAxiosResponseHeaders: RawAxiosResponseHeaders, readonly default: AxiosStatic}}
  */
 const axios = require("axios");
-const { getStreamers } = require("app/Schemas/Streamer");
+const {getStreamers} = require("app/Schemas/Streamer");
 const {
   Subscriber,
   getSubscribersByUserId,
   getSubscribersByUserIdArray,
 } = require("app/Schemas/StreamSubscribers");
-const { overrideLoggers } = require("helpers/logger");
+const {overrideLoggers} = require("helpers/logger");
 overrideLoggers();
-const { twitchClientId, twitchClientSecret } = require("helpers/getconfig");
-const redis = require("redis");
-const { det } = require("mathjs");
-const { addQueueItems, deleteQueueItems } = require("./app/Schemas/QueueItem");
-const { getNotification } = require("./app/Schemas/StreamNotification");
-const { addStreamersAndSubscribers } = require("./app/RirikoTwitchManager");
-const { getAllSettings } = require("./app/Schemas/Guild");
+const {twitchClientId, twitchClientSecret} = require("helpers/getconfig");
+const {det} = require("mathjs");
+const {addQueueItems, deleteQueueItems} = require("./app/Schemas/QueueItem");
+const {getNotification} = require("./app/Schemas/StreamNotification");
+const {addStreamersAndSubscribers} = require("./app/RirikoTwitchManager");
+const {getAllSettings} = require("./app/Schemas/Guild");
+const {parentPort} = require("worker_threads");
 
 const clientId = twitchClientId();
 const clientSecret = twitchClientSecret();
 
 let tokenResponse, accessToken;
 let retries = 0,
-  max_retries = 15;
+  max_retries = 5;
 let iteration = 1;
 
 (async function () {
@@ -61,7 +61,7 @@ async function run() {
 }
 
 async function twitchLogin() {
-  if (retries <= 5) {
+  if (retries <= max_retries) {
     // Get OAuth token
     tokenResponse = await axios.post(
       "https://id.twitch.tv/oauth2/token",
@@ -77,7 +77,11 @@ async function twitchLogin() {
     accessToken = tokenResponse.data.access_token;
     retries++;
   } else {
-    console.error(`Max retries (${retries}/${max_retries}) reached.`);
+    if (typeof parentPort !== "undefined") {
+      parentPort.postMessage({
+        exit: true
+      });
+    }
   }
 }
 
@@ -203,8 +207,7 @@ async function fetchStreamersInfo(streams) {
       users = response.data.data;
     })
     .catch((error) => {
-      console.error("Error retrieving follower count:", error);
-      console.error("Retry auth");
+      console.error("Error retrieving follower count", error.message);
       twitchLogin();
     });
 
@@ -230,7 +233,7 @@ async function fetchStreamersInfo(streams) {
     // Make a request to the Twitch API to retrieve user information
     await axios
       .get(
-        `https://api.twitch.tv/helix/users/follows?to_id=${streamer.user_id}`,
+        `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${streamer.user_id}`,
         {
           headers: {
             "Client-ID": clientId,
@@ -243,8 +246,8 @@ async function fetchStreamersInfo(streams) {
         followerCount = response.data.total;
       })
       .catch((error) => {
-        console.error("Error retrieving follower count:", error);
-        console.error("Retry auth");
+        // API changed
+        console.error("Error retrieving follower count: " + error.message);
         twitchLogin();
       });
 
@@ -270,7 +273,7 @@ async function fetchStreamersInfo(streams) {
     const matchingItem = onlineStreamers.find((otherItem) => {
       return otherItem.user_id === item.user_id;
     });
-    return { ...item, ...matchingItem };
+    return {...item, ...matchingItem};
   });
 
   return onlineStreamers;

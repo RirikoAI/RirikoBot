@@ -63,7 +63,6 @@ async function getLyricsFromGenius(search, message) {
 
     return buildGeniusLyricsEmbed(lyrics, song, message);
   } catch (e) {
-    console.log(e);
     return message.channel.send(
       `Sorry, I cannot find the lyrics for ${search} with Genius.`
     );
@@ -109,7 +108,6 @@ async function getLyricsFromLyrist(search, message) {
 
     return buildLyristLyricsEmbed(lyrics, message);
   } catch (e) {
-    console.log(e);
     return message.channel.send(
       `Sorry, I cannot find the lyrics for ${search} with Lyrist.`
     );

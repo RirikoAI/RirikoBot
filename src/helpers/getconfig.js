@@ -232,6 +232,14 @@ const hostname = () => {
   return process.env.HOSTNAME || "localhost";
 };
 
+/**
+ * @version 7
+ * @returns {*|string} AI token
+ */
+const localAIServerURL = () => {
+  return process.env.AI_LOCAL_SERVER_URL || config.AI.LocalServerURL;
+};
+
 module.exports = {
   port,
   language,
@@ -256,6 +264,7 @@ module.exports = {
   geniusEnabled,
   lyristUrl,
   lyristEnabled,
+  localAIServerURL,
   replicateToken,
   hostname,
 };
