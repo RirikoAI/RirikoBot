@@ -1,4 +1,8 @@
-const config = require("config");
+let config;
+
+try {
+  config = require("../../config");
+} catch (e) {}
 
 /**
  * This section of code is proudly written by Ririko herself (up until a point)
