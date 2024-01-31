@@ -54,6 +54,7 @@
     "anime-wallpaper": "^1.1.1",
     "axios": "^1.4.0",
     "better-sqlite3": "^8.4.0",
+    "body-parser": "^1.20.2",
     "canvas": "^2.11.2",
     "cheerio": "^1.0.0-rc.12",
     "colors": "^1.4.0",

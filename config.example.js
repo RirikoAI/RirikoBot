@@ -11,10 +11,10 @@ module.exports = {
     Prefix: "!",
 
     // Discord bot token. Under the Bot tab. Please prefer setting this in the .env file instead of here
-    Token: "",
+    DiscordToken: "",
 
     // The discord bot client ID under the General Information tab.  Please prefer setting this in the .env file instead of here
-    ID: "",
+    DiscordBotID: "",
 
     // Discord user IDs for permissions and ownerships
     Users: {
@@ -71,7 +71,7 @@ module.exports = {
     Provider: "OpenAIProvider",
 
     // Provider Token
-    Token: "",
+    AIToken: "",
 
     // Must be one of: davinci or gpt35.
     GPTModel: "gpt35",
@@ -126,10 +126,10 @@ module.exports = {
   // -------------------------------------------- Twitch Announcer -----------------------------------------------------
   TWITCH: {
     // Your twitch client ID,get it here: https://dev.twitch.tv/console/apps/create
-    clientId: "",
+    TwitchClientId: "",
 
     //
-    clientSecret: "",
+    TwitchClientSecret: "",
   },
 
   // ------------------------------------------------ welcomer --------------------------------------------------------

@@ -4,6 +4,7 @@ const { workerData, parentPort, isMainThread } = require("worker_threads");
 
 const { cacheReactionRoles } = require("app/Schemas/ReactionRoles");
 const { getSettings } = require("app/Schemas/Guild");
+const { hostname, port } = require("../helpers/getconfig");
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 module.exports = {

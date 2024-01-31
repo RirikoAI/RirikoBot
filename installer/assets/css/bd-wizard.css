@@ -1,0 +1,421 @@
+body {
+    font-family: 'Karla', sans-serif;
+    background-color: #f2f3f8;
+}
+
+/* Wizard */
+.wizard a:hover {
+    text-decoration: none;
+}
+
+.wizard .audible {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.wizard .steps > ul {
+    list-style: none;
+    background: #f2f3f8;
+    padding-left: 0;
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    margin-bottom: 0;
+}
+
+.wizard .steps > ul li {
+    width: 270px;
+    max-width: calc(20% - 6px);
+}
+
+.wizard .steps > ul li a {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: rgba(153, 155, 163, 0.1);
+    padding: 28px 30px 24px;
+}
+
+@media (max-width: 767px) {
+    .wizard .steps > ul li a {
+        padding: 15px 10px;
+    }
+}
+
+@media (max-width: 767px) {
+    .wizard .steps > ul li a .media {
+        display: block;
+    }
+}
+
+.wizard .steps > ul li .bd-wizard-step-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 4px;
+    background-color: #e1e1e1;
+    font-size: 20px;
+    line-height: 34px;
+    text-align: center;
+    color: #b97482;
+    margin-right: 11px;
+}
+
+@media (max-width: 767px) {
+    .wizard .steps > ul li .bd-wizard-step-icon {
+        margin: 0 auto;
+    }
+}
+
+.wizard .steps > ul li .bd-wizard-step-title {
+    line-height: 1;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+}
+
+@media (max-width: 767px) {
+    .wizard .steps > ul li .bd-wizard-step-title {
+        display: none;
+    }
+}
+
+.wizard .steps > ul li .bd-wizard-step-subtitle {
+    line-height: 1;
+    font-size: 14px;
+    color: #b97482;
+}
+
+@media (max-width: 767px) {
+    .wizard .steps > ul li .bd-wizard-step-subtitle {
+        display: none;
+    }
+}
+
+.wizard .steps > ul li.current .bd-wizard-step-icon, .wizard .steps > ul li.done .bd-wizard-step-icon {
+    background-color: #b97482;
+    color: #fff;
+}
+
+.wizard .steps > ul li.current a {
+    background-color: #fff;
+}
+
+.wizard .content {
+    padding: 100px 35px 20px 35px;
+    min-height: 420px;
+}
+
+@media (max-width: 767px) {
+    .wizard .content {
+        padding-left: 20px;
+        padding-right: 20px;
+        min-height: auto;
+    }
+}
+
+.wizard .content .title {
+    display: none;
+}
+
+.wizard .content .content-wrapper {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.wizard .content .section-heading {
+    font-weight: bold;
+    color: #030303;
+    margin-bottom: 22px;
+}
+
+.wizard .content p {
+    font-size: 16px;
+    color: #030303;
+}
+
+.wizard .content .form-control {
+    padding: 26px 25px;
+    min-height: 50px;
+    max-width: 550px;
+    border-radius: 4px;
+    border: solid 1px #ececec;
+}
+
+.wizard .content .form-control::-webkit-input-placeholder {
+    color: #919aa3;
+}
+
+.wizard .content .form-control::-moz-placeholder {
+    color: #919aa3;
+}
+
+.wizard .content .form-control:-ms-input-placeholder {
+    color: #919aa3;
+}
+
+.wizard .content .form-control::-ms-input-placeholder {
+    color: #919aa3;
+}
+
+.wizard .content .form-control::placeholder {
+    color: #919aa3;
+}
+
+.wizard .actions {
+    padding: 0 35px 35px;
+}
+
+@media (max-width: 767px) {
+    .wizard .actions {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+.wizard .actions > ul {
+    list-style: none;
+    padding-left: 0;
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-pack: end;
+    justify-content: flex-end;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f5f5f4;
+}
+
+.wizard .actions li a {
+    display: inline-block;
+    border-radius: 6px;
+    background-color: #00d69f;
+    padding: 16px 30px;
+    color: #fff;
+    font-style: 15px;
+    font-weight: bold;
+}
+
+.wizard .actions li.disabled {
+    display: none;
+}
+
+.wizard .actions li:not(.disabled) + li, .wizard .actions li:not(:first-child):last-child {
+    margin-left: 15px;
+}
+
+/* Image modal */
+/* Style the Image Used to Trigger the Modal */
+.imgModal {
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.imgModal:hover {opacity: 0.7;}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+/* Modal Content (Image) */
+.modal-content {
+    margin: auto;
+    display: block;
+    width: 100%;
+    max-width: 80vw;
+}
+
+/* Caption of Modal Image (Image Text) - Same Width as the Image */
+#caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    height: 150px;
+}
+
+/* Add Animation - Zoom in the Modal */
+.modal-content, #caption {
+    animation-name: zoom;
+    animation-duration: 0.6s;
+}
+
+@keyframes zoom {
+    from {transform:scale(0)}
+    to {transform:scale(1)}
+}
+
+/* The Close Button */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 100% Image Width on Smaller Screens */
+@media only screen and (max-width: 700px){
+    .modal-content {
+        width: 100%;
+    }
+}
+
+/* Switches */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.switch-body .label-text {
+    display: inline-block;
+    position: relative;
+    top: -20px;
+    left: 75px;
+    width: max-content;
+}
+
+/* Wizard */
+#wizard {
+    background-image: url("/assets/images/r1.png");
+    background-size: 300px;
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    background-color: #fff;
+}
+
+li.first {
+    display: none;
+}
+
+label.error {
+    color: red;
+    width: 100%;
+    float: right;
+}
+
+.switch .error {
+    position: relative;
+    left: 75px;
+    width: max-content;
+}
+
+/*Select2*/
+.select2-container {
+    max-width: 550px;
+    width: 100%;
+}
+
+.select2-selection__rendered {
+    line-height: 55px !important;
+    padding-left: 25px !important;
+}
+
+.select2-selection__arrow {
+    height: 53px !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 55px !important;
+    width: 100vh;
+    max-width: 550px;
+}
+
+.wizard .content .form-control {
+    border: solid 1px #aaaaaa;
+}
+
+a.hidden {
+    display: none !important;
+}
+/*# sourceMappingURL=bd-wizard.css.map */
