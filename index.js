@@ -17,6 +17,7 @@ function createLogDirectory() {
 }
 
 const { overrideLoggers } = require(`${buildDir}/helpers/logger`);
+const { twitchClientId } = require("./src/helpers/getconfig");
 overrideLoggers();
 
 function handleUnhandledRejection(err, promise) {
@@ -57,6 +58,17 @@ function startRirikoBotWorker() {
 }
 
 function startRirikoStreamCheckerWorker() {
+  if (twitchClientId()) {
+    console.log(
+      "Twitch Client ID found in environment variables. Starting stream checker."
+    );
+  } else {
+    console.log(
+      "Twitch Client ID not found in environment variables. Not starting stream checker."
+    );
+    return;
+  }
+
   const worker_ririkoStreamChecker = new Worker(
     `./${buildDir}/ririkoStreamChecker`
   );

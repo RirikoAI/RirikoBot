@@ -174,8 +174,8 @@ async function writeConfigFile(payloads) {
   const twitchClientSecretRegex = stringRegex("TwitchClientSecret");
 
   // Define the new values you want to set
-  const discordToken = getValueFromKey("application_id", payloads);
-  const discordBotID = getValueFromKey("bot_token", payloads);
+  const discordToken = getValueFromKey("bot_token", payloads);
+  const discordBotID = getValueFromKey("application_id", payloads);
   const replicateToken = getValueFromKey("replicate_token", payloads);
   const aiToken = getValueFromKey("ai_token", payloads);
   const accessURI = getValueFromKey("mongodb_uri", payloads);
@@ -186,15 +186,8 @@ async function writeConfigFile(payloads) {
 
   console.log("discordTokenRegex", discordTokenRegex);
 
-  const portRegex = integerRegex("PORT");
-  const languageRegex = stringRegex("LANGUAGE");
-  const newPort = 8080;
-  const newLanguage = "fr";
-
   // Replace the values while preserving the data type and comments
   const modifiedContent = content
-    .replace(portRegex, `$1${newPort}`)
-    .replace(languageRegex, `$1${newLanguage}"`)
     .replace(discordTokenRegex, `$1${discordToken}"`)
     .replace(discordBotIDRegex, `$1${discordBotID}"`)
     .replace(replicateTokenRegex, `$1${replicateToken}"`)

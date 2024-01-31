@@ -75,25 +75,34 @@ form.children("#wizard").steps({
     return form.valid();
   },
   onFinished: function (event, currentIndex) {
-    var formData = JSON.stringify($("#wizardForm").serializeArray()); // Serialize form data
+    try {
+      var formData = JSON.stringify($("#wizardForm").serializeArray()); // Serialize form data
 
-    console.log("formData, ", formData);
+      console.log("formData, ", formData);
 
-    // Ajax request
-    $.ajax({
-      type: "POST",
-      url: "submit_install", // Replace with your server-side script URL
-      data: formData,
-      contentType: "application/json",
-      success: function (response) {
-        // Handle success response
-        console.log(response);
-      },
-      error: function (xhr, status, error) {
-        // Handle error response
-        console.log(error);
-      },
-    });
+      // Ajax request
+      $.ajax({
+        type: "POST",
+        url: "submit_install", // Replace with your server-side script URL
+        data: formData,
+        contentType: "application/json",
+        success: function (response) {
+          // Handle success response
+          console.log(response);
+        },
+        error: function (xhr, status, error) {
+          // Handle error response
+          console.log(error);
+        },
+      });
+      alert(
+        "Installation complete! Please restart the bot and refresh the page."
+      );
+    } catch (e) {
+      alert(
+        "An error occurred while submitting the form. Please try again, or contact the developer."
+      );
+    }
   },
 });
 

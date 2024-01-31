@@ -15,6 +15,7 @@ const {
   deleteSubscription,
 } = require("app/Schemas/StreamSubscribers");
 const { addStreamersAndSubscribers } = require("app/RirikoTwitchManager");
+const { twitchClientId } = require("../../../helpers/getconfig");
 
 module.exports = {
   config: {
@@ -45,6 +46,16 @@ module.exports = {
    * @returns {Promise<*>}
    */
   run: async (client, message, args, prefix, config, db) => {
+    if (!twitchClientId()) {
+      return message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Missing Twitch Client ID")
+            .setDescription(`You need to add Twitch Client ID to the config`),
+        ],
+      });
+    }
+
     await updateGuildOwner(message.guild);
     let settings = await getSettings(message.guild.id);
     // console.log("settings", settings);
