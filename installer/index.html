@@ -391,7 +391,7 @@
                     <p class="text-sm">MongoDB Access URL:</p>
                     <label for="mongodb_uri" class="sr-only">MongoDB Access URL</label>
                     <textarea type="text" name="mongodb_uri" id="mongodb_uri" class="form-control valid"
-                              placeholder="Enter your MongoDB Access URL here" aria-invalid="false"
+                              placeholder="Enter your MongoDB Access URL here" aria-invalid="false" required
                               style="height: 130px;"></textarea>
                   </div>
                 </div>
@@ -551,9 +551,21 @@
     can reset it by going to "Database Access" in your MongoDB Atlas dashboard. <a
       href="assets/images/mongo11.png" target="_blank">Click here to see how</a>. <br><br>
     If you have recently changed your password, please wait for a few minutes and try again.
+    <br /><br /><label><input type="checkbox" id="mongodb-bypass" name="mongodb-bypass" value="1"><b> Bypass check:</b> I'm pretty sure that my MongoDB Connection works</label>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
       <span aria-hidden="true">&times;</span>
     </button>
+
+    <script>
+      $("#mongodb-bypass").change(function () {
+        if ($("#mongodb-bypass").is(":checked")) {
+          $('a[href="#next"]').removeClass("hidden");
+        } else {
+          $('a[href="#next"]').addClass("hidden");
+        }
+      });
+    </script>
+
   </div>
 </div>
 
