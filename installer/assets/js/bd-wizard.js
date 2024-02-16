@@ -174,10 +174,10 @@ $(document).ready(function () {
         $("#mongoErrorLocation").html(
           "<h3 style='padding: 10px 0'>Verifying connection...</h3>"
         );
-        // Your code to be executed after 5 seconds
+
         var value = textarea.val();
         console.log("Textarea value changed:", value);
-        // Additional actions...
+
         $.ajax({
           type: "POST",
           url: "/test_mongodb",
@@ -193,6 +193,7 @@ $(document).ready(function () {
           },
           error: () => {
             console.log("Connection failed.");
+
             $("#mongoErrorLocation").html($("#mongoErrorTemplate").html());
             $("#mongodb_uri").attr("disabled", false);
             return false;
