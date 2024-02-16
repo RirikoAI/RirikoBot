@@ -39,3 +39,6 @@ integrations
 /bin/test/
 
 /vc.json
+
+# Temporary Files
+temp/

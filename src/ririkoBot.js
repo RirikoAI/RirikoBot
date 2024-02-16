@@ -170,6 +170,6 @@ module.exports = client;
         });
 
       // Use this to remove commands list
-      // client.application.commands.set([], "755618872920637440");
+      // client.application.commands.set([]);
     });
 })();
