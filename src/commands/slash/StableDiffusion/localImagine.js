@@ -41,8 +41,8 @@ async function localImagineCommand(client, interaction, args, prefix) {
       negativePrompt: "",
       samplingMethod: SamplingMethod.Euler_A,
       width: 512,
-      height: 512,
-      steps: 10,
+      height: 768,
+      steps: 20,
       batchSize: 1,
     });
 
