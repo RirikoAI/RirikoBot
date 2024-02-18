@@ -94,38 +94,43 @@ class RirikoAVC {
   }
 
   checkAVC(client) {
-    //remove deleted channels from data
-    let updatePersistance = false;
-    this.#_content.primary.forEach((id) => {
-      if (client.channels.cache.get(id) == null) {
-        this.#_content.primary.splice(this.#_content.primary.indexOf(id), 1);
-        updatePersistance = true;
-      }
-    });
-    this.#_content.children.forEach((id) => {
-      if (client.channels.cache.get(id) == null) {
-        this.#_content.children.splice(this.#_content.children.indexOf(id), 1);
-        updatePersistance = true;
-      }
-    });
-    if (updatePersistance) this.#save();
+    try {
+      //remove deleted channels from data
+      let updatePersistance = false;
+      this.#_content.primary.forEach((id) => {
+        if (client.channels.cache.get(id) == null) {
+          this.#_content.primary.splice(this.#_content.primary.indexOf(id), 1);
+          updatePersistance = true;
+        }
+      });
+      this.#_content.children.forEach((id) => {
+        if (client.channels.cache.get(id) == null) {
+          this.#_content.children.splice(
+            this.#_content.children.indexOf(id),
+            1
+          );
+          updatePersistance = true;
+        }
+      });
+      if (updatePersistance) this.#save();
 
-    // Check if channels need to be created
-    this.#_content.primary.forEach((id) => {
-      let primary = client.channels.cache.get(id);
-      if (primary?.members.first() != null) {
-        primary.members.every((member) => {
-          this.createChildVoice(primary, member);
-        });
-      }
-    });
-    //Check if channels need to be deleted
-    this.#_content.children.forEach((id) => {
-      let children = client.channels.cache.get(id);
-      if (children != null && children?.members.first() == null) {
-        this.deleteChildrenVoice(children);
-      }
-    });
+      // Check if channels need to be created
+      this.#_content.primary.forEach((id) => {
+        let primary = client.channels.cache.get(id);
+        if (primary?.members.first() != null) {
+          primary.members.every((member) => {
+            this.createChildVoice(primary, member);
+          });
+        }
+      });
+      //Check if channels need to be deleted
+      this.#_content.children.forEach((id) => {
+        let children = client.channels.cache.get(id);
+        if (children != null && children?.members.first() == null) {
+          this.deleteChildrenVoice(children);
+        }
+      });
+    } catch (e) {}
   }
 }
 

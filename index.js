@@ -10,6 +10,15 @@ const cli = require(`./${buildDir}/ririkoCli`);
 
 const configFileExists = fs.existsSync("./config.js");
 
+process
+  .on("unhandledRejection", (reason, p) => {
+    console.error(reason, "Unhandled Rejection at Promise", p);
+  })
+  .on("uncaughtException", (err) => {
+    console.error(err, "Uncaught Exception thrown");
+    console.oLog(err);
+  });
+
 function createLogDirectory() {
   if (!fs.existsSync(logDirectory)) {
     fs.mkdirSync(logDirectory);

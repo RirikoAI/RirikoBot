@@ -27,6 +27,15 @@ let retries = 0,
   max_retries = 5;
 let iteration = 1;
 
+process
+  .on("unhandledRejection", (reason, p) => {
+    console.error(reason, "Unhandled Rejection at Promise", p);
+  })
+  .on("uncaughtException", (err) => {
+    console.error(err, "Uncaught Exception thrown");
+    console.oLog(err);
+  });
+
 (async function () {
   require("handlers/mongoose")(false, "Stream Checker", true);
 
