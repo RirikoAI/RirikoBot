@@ -26,7 +26,7 @@ function createLogDirectory() {
 }
 
 const { overrideLoggers } = require(`${buildDir}/helpers/logger`);
-const { twitchClientId } = require("./src/helpers/getconfig");
+const { twitchClientId } = require("./dist/helpers/getconfig");
 overrideLoggers();
 
 function handleUnhandledRejection(err, promise) {

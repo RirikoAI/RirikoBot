@@ -4,6 +4,8 @@ const { getLang } = require("../helpers/language");
 import axios from "axios";
 
 class RirikoLyrist {
+  public lang: any;
+
   constructor() {
     this.lang = getLang();
   }

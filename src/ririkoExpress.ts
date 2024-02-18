@@ -3,7 +3,7 @@
  */
 const express = require("express");
 const app = express();
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 
 const { join } = require("path");
 const fs = require("fs");

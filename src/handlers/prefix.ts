@@ -1,5 +1,5 @@
 const fs = require("fs");
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 
 /**
  * Register all prefix commands
@@ -16,10 +16,14 @@ module.exports = (client, config) => {
   fs.readdirSync("./dist/commands/prefix/").forEach((dir) => {
     const commands = fs
       .readdirSync(`./dist/commands/prefix/${dir}`)
-      .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
+      .filter(
+        (file) =>
+          (file.endsWith(".js") || file.endsWith(".ts")) &&
+          !file.endsWith(".test.js")
+      );
 
     for (let file of commands) {
-      let pull = require(`../commands/prefix/${dir}/${file}`);
+      let pull = require(`../../dist/commands/prefix/${dir}/${file}`);
       if (pull.config?.name) {
         client.prefix_commands?.set(pull.config.name, pull);
         console.info(

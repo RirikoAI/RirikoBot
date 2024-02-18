@@ -1,7 +1,8 @@
 {
   "comments": false,
   "presets": [
-    "@babel/preset-env"
+    "@babel/preset-env",
+    "@babel/preset-typescript"
   ],
   "sourceRoot": "../src",
   "sourceMaps": "inline",
@@ -19,7 +20,7 @@
           "utils": "./dist/utils",
           "config": "./config.js",
           "ririkoBot": "./dist/ririkoBot.js",
-          "languages" :"./languages",
+          "languages": "./languages",
           "tools": "./dist/tools",
           "assets": "./assets",
           "helpers": "./dist/helpers",

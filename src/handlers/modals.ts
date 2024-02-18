@@ -1,5 +1,5 @@
 const fs = require("fs");
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 
 /**
  * Register all modals
@@ -15,10 +15,14 @@ module.exports = (client, config) => {
   console.info("[!] Started loading modals commands...".yellow);
   const modals = fs
     .readdirSync(`./dist/modals/`)
-    .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
+    .filter(
+      (file) =>
+        (file.endsWith(".js") || file.endsWith(".ts")) &&
+        !file.endsWith(".test.js")
+    );
 
   for (let file of modals) {
-    let pull = require(`../modals/${file}`);
+    let pull = require(`../../dist/modals/${file}`);
     if (pull.id) {
       client.modals?.set(pull.id, pull);
       console.info(`[HANDLER - MODALS] Loaded a file: ${file}`.brightGreen);

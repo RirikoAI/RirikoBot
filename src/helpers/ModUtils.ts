@@ -49,10 +49,15 @@ const logModeration = async (issuer, target, reason, type, data = {}) => {
     case "PURGE":
       embed.setAuthor({ name: `Moderation - ${type}` });
       fields.push(
+        // @ts-ignore
         { name: "Purge Type", value: data.purgeType, inline: true },
+
+        // @ts-ignore
         { name: "Messages", value: data.deletedCount.toString(), inline: true },
         {
           name: "Channel",
+
+          // @ts-ignore
           value: `#${data.channel.name} [${data.channel.id}]`,
           inline: false,
         }
@@ -143,6 +148,7 @@ const logModeration = async (issuer, target, reason, type, data = {}) => {
       });
     }
     if (type.toUpperCase() === "MOVE") {
+      // @ts-ignore
       fields.push({ name: "Moved to", value: data.channel.name, inline: true });
     }
   }

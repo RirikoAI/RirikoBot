@@ -1,5 +1,5 @@
 const client = require("ririkoBot");
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 const { workerData, parentPort, isMainThread } = require("worker_threads");
 
 const { cacheReactionRoles } = require("app/Schemas/ReactionRoles");

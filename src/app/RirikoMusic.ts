@@ -26,6 +26,10 @@ const db = new QuickDB();
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
 class RirikoMusic {
+  public client: any;
+  public lang: any;
+  public player: any;
+
   /**
    *
    * @param client discord.js client

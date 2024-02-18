@@ -1,6 +1,6 @@
 const { PermissionsBitField, Routes, REST, User } = require("discord.js");
 const fs = require("fs");
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 const getconfig = require("helpers/getconfig");
 
 /**
@@ -20,6 +20,10 @@ module.exports = (client, config) => {
 };
 
 class ApplicationCommands {
+  private client: any;
+  private config: any;
+  private commands: any[];
+
   constructor(client, config) {
     this.client = client;
     this.config = config;
@@ -32,10 +36,14 @@ class ApplicationCommands {
     fs.readdirSync("./dist/commands/slash/").forEach((dir) => {
       const SlashCommands = fs
         .readdirSync(`./dist/commands/slash/${dir}`)
-        .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
+        .filter(
+          (file) =>
+            (file.endsWith(".js") || file.endsWith(".ts")) &&
+            !file.endsWith(".test.js")
+        );
 
       for (let file of SlashCommands) {
-        let pull = require(`../commands/slash/${dir}/${file}`);
+        let pull = require(`../../dist/commands/slash/${dir}/${file}`);
 
         if (pull.name && pull.description && pull.type === 1) {
           this.client.slash_commands?.set(pull.name, pull);
@@ -82,7 +90,7 @@ class ApplicationCommands {
         .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
 
       for (let file of UserCommands) {
-        let pull = require(`../commands/user/${dir}/${file}`);
+        let pull = require(`../../dist/commands/user/${dir}/${file}`);
 
         if (pull.name && pull.type === 2) {
           this.client.user_commands?.set(pull.name, pull);
@@ -115,7 +123,7 @@ class ApplicationCommands {
         .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
 
       for (let file of MessageCommands) {
-        let pull = require(`../commands/message/${dir}/${file}`);
+        let pull = require(`../../dist/commands/message/${dir}/${file}`);
 
         if (pull.name && pull.type === 3) {
           this.client.message_commands?.set(pull.name, pull);

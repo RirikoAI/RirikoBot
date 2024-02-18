@@ -1,3 +1,6 @@
+// @ts-ignore
+// @ts-ignore
+
 /**
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
@@ -8,7 +11,7 @@ const {
   GatewayIntentBits,
 } = require("discord.js");
 const config = require("config") || null;
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 
 const { overrideLoggers } = require("helpers/logger");
 overrideLoggers();

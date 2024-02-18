@@ -1,5 +1,5 @@
 const { Guild, ChannelType } = require("discord.js");
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 
 const ROLE_MENTION = /<?@?&?(\d{17,20})>?/;
 const CHANNEL_MENTION = /<?#?(\d{17,20})>?/;

@@ -12,7 +12,7 @@ try {
  * @version 2
  * @returns {*|number} PORT Number
  */
-const port = () => {
+export const port = () => {
   return process.env.PORT || config.PORT;
 };
 
@@ -20,7 +20,7 @@ const port = () => {
  * @version 1
  * @returns {*|string} Language
  */
-const language = () => {
+export const language = () => {
   return process.env.LANGUAGE || config.LANGUAGE;
 };
 
@@ -28,7 +28,7 @@ const language = () => {
  * @version 1
  * @returns {*|string} Discord Prefix (e.g: !)
  */
-const discordPrefix = () => {
+export const discordPrefix = () => {
   return process.env.DISCORD_BOT_PREFIX || config.DISCORD.Prefix;
 };
 
@@ -36,7 +36,7 @@ const discordPrefix = () => {
  * @version 1
  * @returns {*|string} Discord token
  */
-const discordToken = () => {
+export const discordToken = () => {
   return process.env.DISCORD_BOT_TOKEN || config.DISCORD.DiscordToken;
 };
 
@@ -44,7 +44,7 @@ const discordToken = () => {
  * @version 1
  * @returns {*|string} Discord Bot ID
  */
-const discordBotID = () => {
+export const discordBotID = () => {
   return process.env.DISCORD_BOT_ID || config.DISCORD.DiscordBotID;
 };
 
@@ -52,7 +52,7 @@ const discordBotID = () => {
  * @version 1
  * @returns {string[]|*|*[]} Array of Discord IDs - Bot Owner
  */
-const discordBotOwners = () => {
+export const discordBotOwners = () => {
   try {
     const env = process.env.DISCORD_OWNER_IDS;
     if (env) {
@@ -74,7 +74,7 @@ const discordBotOwners = () => {
  * @version 1
  * @returns {[string]|*|*[]} Arrays of Discord IDs - Allowed AI Users
  */
-const allowedAIUsers = () => {
+export const allowedAIUsers = () => {
   try {
     const env = process.env.DISCORD_AI_ALLOWED_USERS;
     if (env) {
@@ -96,7 +96,7 @@ const allowedAIUsers = () => {
  * @version 1
  * @returns {*|string} Discord Prefix for AI features (e.g: .)
  */
-const AIPrefix = () => {
+export const AIPrefix = () => {
   return process.env.DISCORD_AI_PREFIX || config.AI.Prefix;
 };
 
@@ -104,7 +104,7 @@ const AIPrefix = () => {
  * @version 1
  * @returns {*|string} AI provider
  */
-const AIProvider = () => {
+export const AIProvider = () => {
   return process.env.AI_PROVIDER || config.AI.Provider;
 };
 
@@ -112,7 +112,7 @@ const AIProvider = () => {
  * @version 1
  * @returns {*|string} AI token
  */
-const AIToken = () => {
+export const AIToken = () => {
   return process.env.AI_TOKEN || config.AI.AIToken;
 };
 
@@ -120,7 +120,7 @@ const AIToken = () => {
  * @version 1
  * @returns {*|boolean} If AI features allowed for certain users only
  */
-const AIEnableWhitelist = () => {
+export const AIEnableWhitelist = () => {
   return process.env.AI_ENABLE_WHITELIST || config.AI.EnableWhitelist;
 };
 
@@ -128,7 +128,7 @@ const AIEnableWhitelist = () => {
  * @version 2
  * @returns {string[]} Get AI personality
  */
-const AIPersonality = () => {
+export const AIPersonality = () => {
   return config.AI.Personality;
 };
 
@@ -136,7 +136,7 @@ const AIPersonality = () => {
  * @version 2
  * @returns {*|string} Get prompts / AI features
  */
-const AIPrompts = () => {
+export const AIPrompts = () => {
   return config.AI.Prompts;
 };
 
@@ -144,7 +144,7 @@ const AIPrompts = () => {
  * @version 1
  * @returns {*|string} DB engine
  */
-const dbEngine = () => {
+export const dbEngine = () => {
   return process.env.DB_ENGINE || config.DATABASE.Engine;
 };
 
@@ -152,7 +152,7 @@ const dbEngine = () => {
  * @version 1
  * @returns {*|string} MongoDB access URI with username, password (optional database name)
  */
-const mongoAccessURI = () => {
+export const mongoAccessURI = () => {
   return process.env.MONGODB_ACCESS_URI || config.DATABASE.MongoDB.AccessURI;
 };
 
@@ -160,7 +160,7 @@ const mongoAccessURI = () => {
  * @version 1
  * @returns {*|number} Debug Level
  */
-const debugLevel = () => {
+export const debugLevel = () => {
   return process.env.DEBUG_LEVEL || config.DEBUG.Level;
 };
 
@@ -168,7 +168,7 @@ const debugLevel = () => {
  * @version 1
  * @returns {*|string} The directory to store logs
  */
-const logDirectory = () => {
+export const logDirectory = () => {
   return process.env.LOG_DIR || config.DEBUG.LogDir;
 };
 
@@ -176,7 +176,7 @@ const logDirectory = () => {
  * @version 2
  * @returns {string|string}
  */
-const twitchClientId = () => {
+export const twitchClientId = () => {
   return process.env.TWITCH_CLIENT_ID || config.TWITCH.TwitchClientId;
 };
 
@@ -184,7 +184,7 @@ const twitchClientId = () => {
  * @version 2
  * @returns {string|string}
  */
-const twitchClientSecret = () => {
+export const twitchClientSecret = () => {
   return process.env.TWITCH_CLIENT_SECRET || config.TWITCH.TwitchClientSecret;
 };
 
@@ -192,7 +192,7 @@ const twitchClientSecret = () => {
  * @version 3
  * @returns {*|string}
  */
-const geniusToken = () => {
+export const geniusToken = () => {
   return process.env.GENIUS_TOKEN || config.GENIUS_TOKEN;
 };
 
@@ -200,7 +200,7 @@ const geniusToken = () => {
  * @version 3
  * @returns {*|string}
  */
-const geniusEnabled = () => {
+export const geniusEnabled = () => {
   return process.env.GENIUS_ENABLED === "true" ? true : config.GENIUS_ENABLED;
 };
 
@@ -208,7 +208,7 @@ const geniusEnabled = () => {
  * @version 3
  * @returns {*|string}
  */
-const lyristUrl = () => {
+export const lyristUrl = () => {
   return process.env.LYRIST_URL || config.LYRIST_URL;
 };
 
@@ -216,7 +216,7 @@ const lyristUrl = () => {
  * @version 3
  * @returns {*|string}
  */
-const lyristEnabled = () => {
+export const lyristEnabled = () => {
   return process.env.LYRIST_ENABLED === "true" ? true : config.LYRIST_ENABLED;
 };
 
@@ -224,14 +224,14 @@ const lyristEnabled = () => {
  * @version 5
  * @returns {*|string}
  */
-const replicateToken = () => {
+export const replicateToken = () => {
   return process.env.REPLICATE_TOKEN || config.StableDiffusion.ReplicateToken;
 };
 
 /**
  * @returns {*|string}
  */
-const hostname = () => {
+export const hostname = () => {
   // read .env file and get the hostname
   return process.env.HOSTNAME || "localhost";
 };
@@ -240,35 +240,6 @@ const hostname = () => {
  * @version 7
  * @returns {*|string} AI token
  */
-const localAIServerURL = () => {
+export const localAIServerURL = () => {
   return process.env.AI_LOCAL_SERVER_URL || config.AI.LocalServerURL;
-};
-
-module.exports = {
-  port,
-  language,
-  discordPrefix,
-  discordToken,
-  discordBotID,
-  discordBotOwners,
-  allowedAIUsers,
-  AIPrefix,
-  AIProvider,
-  AIToken,
-  AIEnableWhitelist,
-  AIPersonality,
-  AIPrompts,
-  dbEngine,
-  mongoAccessURI,
-  debugLevel,
-  logDirectory,
-  twitchClientId,
-  twitchClientSecret,
-  geniusToken,
-  geniusEnabled,
-  lyristUrl,
-  lyristEnabled,
-  localAIServerURL,
-  replicateToken,
-  hostname,
 };

@@ -1,14 +1,14 @@
 {
   "watch": [
     "index.js",
-    "config.js",
     "src/",
-    "./config.js"
+    "config.js",
+    ".babelrc"
   ],
   "ignore": [
     "*.test.js",
     "**/*.test.js"
   ],
-  "ext": "js, css",
+  "ext": "js, css, ts",
   "delay": 3500
 }

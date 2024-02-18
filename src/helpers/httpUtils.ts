@@ -38,6 +38,7 @@ module.exports = class HttpUtils {
   static async getBuffer(url, options) {
     try {
       const response = options ? await fetch(url, options) : await fetch(url);
+      // @ts-ignore
       const buffer = await response.buffer();
       if (response.status !== 200) debug(response);
       return {

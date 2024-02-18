@@ -2,7 +2,7 @@
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
 const readline = require("readline");
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 let initialized = false;

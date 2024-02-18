@@ -1,5 +1,5 @@
 const fs = require("fs");
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 
 /**
  * Register all events
@@ -13,9 +13,13 @@ module.exports = (client, config = []) => {
   console.info("0------------------| Events Handler:".blue);
   console.info("[!] Started loading events handler...".yellow);
   fs.readdirSync("./dist/events/")
-    .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"))
+    .filter(
+      (file) =>
+        (file.endsWith(".js") || file.endsWith(".ts")) &&
+        !file.endsWith(".test.js")
+    )
     .forEach((file) => {
-      let pull = require(`../events/${file}`);
+      let pull = require(`../../dist/events/${file}`);
       if (pull.name) {
         client.events?.set(pull.name, pull);
         console.info(

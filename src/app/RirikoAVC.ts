@@ -19,7 +19,9 @@ const db = new QuickDB();
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
 class RirikoAVC {
+  // @ts-ignore
   #_path;
+  // @ts-ignore
   #_content = {
     primary: [],
     children: [],
@@ -34,6 +36,7 @@ class RirikoAVC {
     return this.#_content.primary;
   }
 
+  // @ts-ignore
   #save() {
     try {
       fs.writeFileSync(this.#_path, JSON.stringify(this.#_content));
@@ -42,6 +45,7 @@ class RirikoAVC {
     }
   }
 
+  // @ts-ignore
   #load() {
     try {
       this.#_content = JSON.parse(fs.readFileSync(this.#_path, "utf8"));

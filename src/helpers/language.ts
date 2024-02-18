@@ -1,12 +1,12 @@
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 const config = require("config");
 
-const getLang = () => {
+export const getLang = () => {
   const lang = config.LANGUAGE;
   return require(`../../languages/${lang}.js`);
 };
 
-function getOrdinalSuffixOf(i) {
+export function getOrdinalSuffixOf(i) {
   let j = i % 10,
     k = i % 100;
   if (j == 1 && k != 11) {
@@ -20,5 +20,3 @@ function getOrdinalSuffixOf(i) {
   }
   return i + "th";
 }
-
-module.exports = { getLang, getOrdinalSuffixOf };

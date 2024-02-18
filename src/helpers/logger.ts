@@ -1,7 +1,15 @@
 const { EmbedBuilder, WebhookClient } = require("discord.js");
 const pino = require("pino");
 const { format } = require("date-fns");
-const colors = require("colors");
+import "@ririkoai/colors.ts";
+
+declare global {
+  interface Console {
+    oLog: any;
+    oInfo: any;
+    oError: any;
+  }
+}
 
 let fs = require("fs");
 const moment = require("moment");

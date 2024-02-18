@@ -1,15 +1,17 @@
 /**
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 
-const {OpenAIProvider} = require("app/Providers/AI/OpenAIProvider");
-const {NLPCloudProvider} = require("app/Providers/AI/NLPCloudProvider");
-const {RirikoLLaMAProvider} = require("app/Providers/AI/RirikoLLaMAProvider");
-const {RirikoHuggingChatProvider} = require("app/Providers/AI/RirikoHuggingChatProvider");
+const { OpenAIProvider } = require("app/Providers/AI/OpenAIProvider");
+const { NLPCloudProvider } = require("app/Providers/AI/NLPCloudProvider");
+const { RirikoLLaMAProvider } = require("app/Providers/AI/RirikoLLaMAProvider");
+const {
+  RirikoHuggingChatProvider,
+} = require("app/Providers/AI/RirikoHuggingChatProvider");
 
 const getconfig = require("helpers/getconfig");
-const {AIProvider, AIPersonality, AIPrompts} = require("helpers/getconfig");
+const { AIProvider, AIPersonality, AIPrompts } = require("helpers/getconfig");
 
 const {
   findChatHistory,
@@ -18,8 +20,8 @@ const {
   deleteChatHistory,
 } = require("./Schemas/ChatHistory");
 
-const {getAndIncrementUsageCount} = require("helpers/commandUsage");
-const {AI} = require("config");
+const { getAndIncrementUsageCount } = require("helpers/commandUsage");
+const { AI } = require("config");
 
 /**
  * Now, this is going to be an awesome AI that can remember past conversations by saving it into the
@@ -29,6 +31,16 @@ const {AI} = require("config");
  */
 class RirikoAINLP {
   static instance = null;
+  public prefix: any;
+  public chatHistory: any[];
+  public currentUserPrompt: any[];
+  public costPerToken: number;
+  public maxChatTokens: number;
+  public retries: any[];
+  public maxRetries: number;
+  public retryDelay: number;
+  public provider: any;
+  public isInitialized: boolean;
 
   static getInstance() {
     if (this.instance === null) {
@@ -58,9 +70,9 @@ class RirikoAINLP {
       } else if (AIProvider() === "OpenAIProvider") {
         // If the provider is OpenAIProvider, initialize the OpenAIProvider
         this.provider = new OpenAIProvider();
-      } else if (AIProvider() === 'RirikoLLaMAProvider') {
+      } else if (AIProvider() === "RirikoLLaMAProvider") {
         this.provider = new RirikoLLaMAProvider();
-      } else if (AIProvider() === 'RirikoHuggingChatProvider') {
+      } else if (AIProvider() === "RirikoHuggingChatProvider") {
         this.provider = new RirikoHuggingChatProvider();
       }
 
@@ -158,7 +170,11 @@ class RirikoAINLP {
 
       const currentToken = this.calculateTokenWithEverything(discordMessage);
 
-      let answer = await this.sendChatRequest(messageText, chatHistory, discordMessage);
+      let answer = await this.sendChatRequest(
+        messageText,
+        chatHistory,
+        discordMessage
+      );
 
       if (!answer) {
         return await this.retryAsk(messageText, discordMessage);
@@ -196,7 +212,6 @@ class RirikoAINLP {
     } catch (e) {
       return this.handleRequestError(e);
     }
-
   }
 
   async retryAsk(messageText, discordMessage) {
@@ -225,17 +240,17 @@ class RirikoAINLP {
   logTokenCost(totalToken) {
     console.info(
       "[RirikoAI-NLP] Request complete, costs ".blue +
-      totalToken +
-      ` tokens, that's about `.blue +
-      `$${(this.costPerToken * totalToken).toFixed(5)}`
+        totalToken +
+        ` tokens, that's about `.blue +
+        `$${(this.costPerToken * totalToken).toFixed(5)}`
     );
   }
 
   handleRequestError(e) {
     console.error(
       "Something went wrong when trying to send the request to the AI provider: " +
-      "Check if your API key is still valid, or if your prompts are not corrupted / too long. Also try to clear your " +
-      "chat history with Ririko by entering .clear in Discord."
+        "Check if your API key is still valid, or if your prompts are not corrupted / too long. Also try to clear your " +
+        "chat history with Ririko by entering .clear in Discord."
     );
 
     if (e?.response) {
@@ -282,7 +297,7 @@ class RirikoAINLP {
     // check upfront if the current message does not exceed the maxChatToken
     const tokens = this.calculateToken(
       this.getPersonalitiesAndAbilities() +
-      this.getCurrentPrompt(discordMessage)
+        this.getCurrentPrompt(discordMessage)
     );
 
     if (tokens > this.maxChatTokens - 1000) {
@@ -347,7 +362,7 @@ class RirikoAINLP {
   calculateToken(historyString) {
     // Calculate the number of tokens, we're making the assumption that length of the string divided by 4 is the number of tokens
     // This is not 100% accurate, but it's good enough for now
-    return parseInt(historyString.length / 4);
+    return parseInt(String(historyString.length / 4));
   }
 
   /**
@@ -358,8 +373,8 @@ class RirikoAINLP {
   calculateTokenWithEverything(discordMessage) {
     return this.calculateToken(
       this.getPersonalitiesAndAbilities() +
-      this.getChatHistory(discordMessage).toString() +
-      this.getCurrentPrompt(discordMessage)
+        this.getChatHistory(discordMessage).toString() +
+        this.getCurrentPrompt(discordMessage)
     );
   }
 
@@ -374,8 +389,8 @@ class RirikoAINLP {
 
     console.info(
       "[RirikoAI-NLP] A new request with ".blue +
-      chatTokens +
-      " tokens is being prepared.".blue
+        chatTokens +
+        " tokens is being prepared.".blue
     );
 
     return chatTokens < this.maxChatTokens;
@@ -569,4 +584,4 @@ class RirikoAINLP {
   }
 }
 
-module.exports = {RirikoAINLP};
+module.exports = { RirikoAINLP };

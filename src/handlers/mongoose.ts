@@ -26,10 +26,7 @@ module.exports = async (discordClient, from, silent = false) => {
 
   if (mongoDbAccessUri) {
     await mongoose
-      .connect(mongoDbAccessUri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
+      .connect(mongoDbAccessUri)
       .then(async () => {})
       .catch((err) => {
         log("\nMongoDB Error: " + err + "\n\n" + lang.error4);

@@ -1,12 +1,12 @@
 /**
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
-import { discordToken } from "./helpers/getconfig";
+import { discordToken } from "helpers/getconfig";
 
-const colors = require("colors");
+import "@ririkoai/colors.ts";
 
-import { deleteQueueItemById, getQueuedItems } from "./app/Schemas/QueueItem";
-import { addNotification } from "./app/Schemas/StreamNotification";
+import { deleteQueueItemById, getQueuedItems } from "app/Schemas/QueueItem";
+import { addNotification } from "app/Schemas/StreamNotification";
 
 const { overrideLoggers } = require("helpers/logger");
 overrideLoggers();
