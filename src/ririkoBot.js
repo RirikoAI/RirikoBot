@@ -19,9 +19,14 @@ const { RirikoMusic } = require("app/RirikoMusic");
 const { getLang } = require("./helpers/language");
 const { RirikoAVC } = require("./app/RirikoAVC");
 
-process.on("uncaughtException", function (err) {
-  console.log("Caught exception: " + err);
-});
+process
+  .on("unhandledRejection", (reason, p) => {
+    console.error(reason, "Unhandled Rejection at Promise", p);
+  })
+  .on("uncaughtException", (err) => {
+    console.error(err, "Uncaught Exception thrown");
+    console.oLog(err);
+  });
 
 console.info("0------------------| Ririko AI (Bot):".brightCyan);
 
@@ -166,7 +171,7 @@ module.exports = client;
         })
         .on("uncaughtException", (err) => {
           console.error(err, "Uncaught Exception thrown");
-          process.exit(1);
+          console.oLog(err);
         });
 
       // Use this to remove commands list

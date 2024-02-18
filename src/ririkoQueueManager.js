@@ -13,6 +13,15 @@ overrideLoggers();
 
 console.info("[Ririko Queue Manager] Started".brightMagenta);
 
+process
+  .on("unhandledRejection", (reason, p) => {
+    console.error(reason, "Unhandled Rejection at Promise", p);
+  })
+  .on("uncaughtException", (err) => {
+    console.error(err, "Uncaught Exception thrown");
+    console.oLog(err);
+  });
+
 const { Client, Intents, GatewayIntentBits } = require("discord.js");
 
 const client = new Client({

@@ -8,6 +8,15 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 let initialized = false;
 let showPrompt = false; // Flag to control prompt display
 
+process
+  .on("unhandledRejection", (reason, p) => {
+    console.error(reason, "Unhandled Rejection at Promise", p);
+  })
+  .on("uncaughtException", (err) => {
+    console.error(err, "Uncaught Exception thrown");
+    console.oLog(err);
+  });
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
