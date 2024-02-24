@@ -1,30 +1,41 @@
 {
   "comments": false,
   "presets": [
-    "@babel/preset-env",
+    [
+      "@babel/preset-env",
+      {
+        "loose": true,
+        "shippedProposals": true
+      }
+    ],
     "@babel/preset-typescript"
   ],
   "sourceRoot": "../src",
   "sourceMaps": "inline",
   "plugins": [
-    "@babel/plugin-proposal-class-properties",
+    [
+      "@babel/plugin-proposal-class-properties",
+      {
+        "loose": true,
+        "shippedProposals": true
+      }
+    ],
     "@babel/plugin-proposal-object-rest-spread",
-    "source-map-support",
     [
       "module-resolver",
       {
         "alias": {
-          "root": "./dist/",
-          "app": "./dist/app",
-          "commands": "./dist/commands",
-          "utils": "./dist/utils",
+          "root": "./src/",
+          "app": "./src/app",
+          "commands": "./src/commands",
+          "utils": "./src/utils",
           "config": "./config.js",
-          "ririkoBot": "./dist/ririkoBot.js",
+          "ririkoBot": "./src/ririkoBot.js",
           "languages": "./languages",
-          "tools": "./dist/tools",
+          "tools": "./src/tools",
           "assets": "./assets",
-          "helpers": "./dist/helpers",
-          "handlers": "./dist/handlers/"
+          "helpers": "./src/helpers",
+          "handlers": "./src/handlers/"
         }
       }
     ]

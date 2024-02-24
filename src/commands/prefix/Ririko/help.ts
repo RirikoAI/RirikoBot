@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const fs = require("fs");
-const { getLang } = require("../../../helpers/language");
+import { getLang } from "helpers/language";
 
 module.exports = {
   config: {
@@ -19,8 +19,8 @@ module.exports = {
    * @param {import("discord.js").Client} client Discord.js client
    * @param {import("discord.js").Message | import("discord.js").CommandInteraction} message
    * @param args Arguments, excludes the command name (e.g: !command args[0] args[1] args[2]...)
-   * @param prefix Guild specific prefix, falls back to config.js prefix
-   * @param {import("config")} config Config.js file
+   * @param prefix Guild specific prefix, falls back to config.ts prefix
+   * @param {import("config")} config config.ts file
    * @param {import("Quick.db").QuickDB} db Quick.db client
    *
    * @returns {Promise<*>}

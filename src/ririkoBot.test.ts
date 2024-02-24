@@ -64,7 +64,7 @@ describe("Client", () => {
 
   it("should be able to load all prefix commands", async () => {
     ["prefix"].forEach((file) => {
-      require(`./handlers/${file}`)(mockClient, config);
+      require(`./handlers/${file}.ts`)(mockClient, config);
     });
   });
 

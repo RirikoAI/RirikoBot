@@ -1,6 +1,6 @@
 const { version } = require("../package.json");
 
-const language = {
+export const language = {
   loadevent: "Loaded player event",
   loadcmd: "Loaded command",
   ready: " successfully connected.",
@@ -26,7 +26,7 @@ const language = {
   msg12: "added to your music playlist.",
   error3: "Error reloading application [/] commands: ",
   error4:
-    "WARN: It looks like you didn't write the mongodb url? If you do not enter a valid mongodb url in the config.js file, you will not be able to use the bot.",
+    "WARN: It looks like you didn't write the mongodb url? If you do not enter a valid mongodb url in the config.ts file, you will not be able to use the bot.",
   msg13: `🎵 Now playing: **{track?.title}** -> Channel: **{queue?.connection.channel.name}** 🎧`,
   msg14: "Queue is empty. You can play some more music, byebye... ✅",
   msg15: "I disconnected because there is no one left in my channel. ❌",
@@ -178,4 +178,3 @@ const language = {
     inline: false,
   },
 };
-module.exports = language;

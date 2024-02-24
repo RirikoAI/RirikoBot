@@ -2,6 +2,9 @@ module.exports = {
   // Set the port for Ririko AI dashboard
   PORT: 3000,
 
+  // Set the port for the backend server
+  BACKEND_PORT: 3001,
+
   // Set the language of the bot
   LANGUAGE: "en",
 

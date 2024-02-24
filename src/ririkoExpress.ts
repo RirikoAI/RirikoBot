@@ -5,16 +5,21 @@ const express = require("express");
 const app = express();
 import "@ririkoai/colors.ts";
 
+console.info("Starting...");
+
+const { overrideLoggers } = require("helpers/logger");
+overrideLoggers();
+
 const { join } = require("path");
 const fs = require("fs");
 
 const { parentPort } = require("worker_threads");
 const bodyParser = require("body-parser");
 
-const { validateMongoDBConnection } = require("./helpers/mongoUtils.js");
+const { validateMongoDBConnection } = require("./helpers/mongoUtils");
 const path = require("path");
 
-const configFileExists = fs.existsSync("./config.js");
+const configFileExists = fs.existsSync("./config.ts");
 
 process
   .on("unhandledRejection", (reason, p) => {
@@ -22,7 +27,7 @@ process
   })
   .on("uncaughtException", (err) => {
     console.error(err, "Uncaught Exception thrown");
-    console.oLog(err);
+    console.log(err);
   });
 
 console.info("0------------------| Ririko Express (Web Server):".brightCyan);
@@ -32,9 +37,9 @@ let Hostname, Port;
 app.use(bodyParser.json());
 
 if (configFileExists) {
-  const { hostname, port } = require("./helpers/getconfig");
+  const { hostname, backendPort } = require("./helpers/getconfig");
   Hostname = hostname();
-  Port = port();
+  Port = backendPort();
 } else {
   Hostname = "localhost";
   Port = 3000;
@@ -81,7 +86,7 @@ app.listen(Port, Hostname, () => {
 });
 
 /**
- * If config.js does not exist, then we will run the installer
+ * If config.ts does not exist, then we will run the installer
  */
 if (!configFileExists) {
   app.use("/assets", express.static("installer/assets"));
@@ -122,7 +127,7 @@ app.post("/test_mongodb", bodyParser.json(), (req, res) => {
 app.post("/submit_install", bodyParser.json(), async (req, res) => {
   if (req?.body[0]?.name) {
     const filesToCopy = [
-      { source: "../config.example.js", destination: "../config.js" },
+      { source: "../config.example.js", destination: "../config.ts" },
     ];
 
     const copySuccess = await copyConfigFiles(filesToCopy);
@@ -168,7 +173,7 @@ function getValueFromKey(key, payload) {
 }
 
 async function writeConfigFile(payloads) {
-  const filePath = path.resolve(__dirname, "../config.js");
+  const filePath = path.resolve(__dirname, "../config.ts");
 
   // Read the contents of the file
   const content = fs.readFileSync(filePath, "utf-8");

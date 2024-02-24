@@ -72,6 +72,8 @@ module.exports = {
       const generateEmbed = async (start) => {
         let sayı = page === 1 ? 1 : page * kaçtane - kaçtane + 1;
         const current = trackl.slice(start, start + kaçtane);
+
+        // @ts-ignore
         if (!current || !current?.length > 0)
           return interaction
             .reply({ content: lang.msg63, ephemeral: true })

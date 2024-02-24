@@ -14,15 +14,15 @@ module.exports = (client, config) => {
 
   console.info("[!] Started loading modals commands...".yellow);
   const modals = fs
-    .readdirSync(`./dist/modals/`)
+    .readdirSync(`./src/modals/`)
     .filter(
       (file) =>
-        (file.endsWith(".js") || file.endsWith(".ts")) &&
-        !file.endsWith(".test.js")
+        (file.endsWith(".ts") || file.endsWith(".ts")) &&
+        !file.endsWith(".test.ts")
     );
 
   for (let file of modals) {
-    let pull = require(`../../dist/modals/${file}`);
+    let pull = require(`../../src/modals/${file}`);
     if (pull.id) {
       client.modals?.set(pull.id, pull);
       console.info(`[HANDLER - MODALS] Loaded a file: ${file}`.brightGreen);

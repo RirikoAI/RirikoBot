@@ -193,6 +193,7 @@ module.exports = {
         const playlist = await db.playlist
           .findOne({ userID: interaction.user.id })
           .catch((e) => {});
+        // @ts-ignore
         if (!playlist?.playlist?.filter((p) => p.name === name).length > 0)
           return interaction
             .reply({ content: lang.msg96, ephemeral: true })
@@ -255,6 +256,7 @@ module.exports = {
           .findOne({ userID: interaction.user.id })
           .catch((e) => {});
         if (
+          // @ts-ignore
           !playlist?.playlist?.filter((p) => p.name === playlist_name).length >
           0
         )
@@ -285,6 +287,7 @@ module.exports = {
             .reply({ content: lang.msg74, ephemeral: true })
             .catch((e) => {});
         }
+        // @ts-ignore
         if (!res || !res.length || !res.length > 1)
           return interaction
             .reply({ content: lang.msg74, ephemeral: true })
@@ -343,6 +346,7 @@ module.exports = {
           .findOne({ userID: interaction.user.id })
           .catch((e) => {});
         if (
+          // @ts-ignore
           !playlist?.playlist?.filter((p) => p.name === playlist_name).length >
           0
         )
@@ -353,6 +357,7 @@ module.exports = {
         const music_filter = playlist?.musics?.filter(
           (m) => m.playlist_name === playlist_name && m.music_name === name
         );
+        // @ts-ignore
         if (!music_filter?.length > 0)
           return interaction
             .reply({ content: lang.msg54, ephemeral: true })
@@ -392,6 +397,7 @@ module.exports = {
         let trackl;
 
         const playlist = await db.playlist.find().catch((e) => {});
+        // @ts-ignore
         if (!playlist?.length > 0)
           return interaction
             .reply({ content: lang.msg96, ephemeral: true })
@@ -420,6 +426,7 @@ module.exports = {
             trackl = await playlist[i]?.musics?.filter(
               (m) => m.playlist_name === name
             );
+            // @ts-ignore
             if (!trackl?.length > 0)
               return interaction
                 .reply({ content: lang.msg111, ephemeral: true })
@@ -461,6 +468,7 @@ module.exports = {
         const generateEmbed = async (start) => {
           let num = page === 1 ? 1 : page * howMany - howMany + 1;
           const current = trackl.slice(start, start + howMany);
+          // @ts-ignore
           if (!current || !current?.length > 0)
             return interaction
               .reply({ content: lang.msg111, ephemeral: true })
@@ -576,6 +584,7 @@ module.exports = {
         const playlist = await db?.playlist
           ?.findOne({ userID: interaction.user.id })
           .catch((e) => {});
+        // @ts-ignore
         if (!playlist?.playlist?.length > 0)
           return interaction
             .reply({ content: lang.msg117, ephemeral: true })
@@ -602,6 +611,7 @@ module.exports = {
 
       if (stp === "top") {
         let playlists = await db?.playlist?.find().catch((e) => {});
+        // @ts-ignore
         if (!playlists?.length > 0)
           return interaction
             .reply({ content: lang.msg114, ephemeral: true })
@@ -623,6 +633,7 @@ module.exports = {
 
         trackl = trackl.filter((a) => a.plays > 0);
 
+        // @ts-ignore
         if (!trackl?.length > 0)
           return interaction
             .reply({ content: lang.msg114, ephemeral: true })
@@ -657,6 +668,8 @@ module.exports = {
         const generateEmbed = async (start) => {
           let num = page === 1 ? 1 : page * howMany - howMany + 1;
           const current = trackl.slice(start, start + howMany);
+
+          // @ts-ignore
           if (!current || !current?.length > 0)
             return interaction
               .reply({ content: lang.msg114, ephemeral: true })

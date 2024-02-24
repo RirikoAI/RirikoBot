@@ -39,7 +39,7 @@ module.exports = {
     // Number of winners
     let giveawayNumberWinners = parseInt(args[2]);
     // If the specified number of winners is not a number
-    if (isNaN(giveawayNumberWinners) || parseInt(giveawayNumberWinners) <= 0) {
+    if (isNaN(giveawayNumberWinners) || giveawayNumberWinners <= 0) {
       return message.reply(
         ":x: You have to specify a valid number of winners!"
       );
@@ -58,7 +58,7 @@ module.exports = {
       // The giveaway prize
       prize: giveawayPrize,
       // The giveaway winner count
-      winnerCount: parseInt(giveawayNumberWinners),
+      winnerCount: giveawayNumberWinners,
       // Who hosts this giveaway
       hostedBy: client.config.hostedBy ? message.author : null,
       // Messages

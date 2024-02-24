@@ -59,7 +59,7 @@ module.exports = {
       const target = await message.guild.resolveMember(args[1]);
       if (!target) return message.reply("Could not find matching member");
 
-      const response = await nickname(message, target);
+      const response = await nickname(message, target, null);
       return message.reply(response);
     } else {
       return message.reply({

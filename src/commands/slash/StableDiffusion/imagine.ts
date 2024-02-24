@@ -3,18 +3,9 @@
  */
 import { replicateToken } from "helpers/getconfig";
 
-const {
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  MessageAttachment,
-} = require("discord.js");
 import Replicate from "replicate";
-import language from "languages/en";
+// @ts-ignore
 import { StableDiffusion } from "config";
-import axios, { get } from "axios";
-import { AttachmentBuilder } from "discord.js";
 import { getAndIncrementUsageCount } from "helpers/commandUsage";
 import {
   createActionRow,

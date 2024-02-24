@@ -1,3 +1,8 @@
+import "module-alias/register";
+
+var console = require("console");
+console.oLog = console.log;
+
 /**
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */

@@ -1,6 +1,7 @@
+import { handleReactionAdd } from "handlers/reactionRoles";
+
 const client = require("ririkoBot");
 const { getLang } = require("helpers/language");
-const { reactionRoleHandler } = require("handlers");
 
 module.exports = {
   name: "messageReactionAdd",
@@ -25,5 +26,5 @@ client.on("messageReactionAdd", async (reaction, user) => {
   if (user.bot) return;
 
   // Reaction Roles
-  await reactionRoleHandler.handleReactionAdd(reaction, user);
+  await handleReactionAdd(reaction, user);
 });

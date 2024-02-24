@@ -33,17 +33,17 @@ class ApplicationCommands {
   loadSlashCommands() {
     console.info("[!] Started loading slash commands...".yellow);
 
-    fs.readdirSync("./dist/commands/slash/").forEach((dir) => {
+    fs.readdirSync("./src/commands/slash/").forEach((dir) => {
       const SlashCommands = fs
-        .readdirSync(`./dist/commands/slash/${dir}`)
+        .readdirSync(`./src/commands/slash/${dir}`)
         .filter(
           (file) =>
-            (file.endsWith(".js") || file.endsWith(".ts")) &&
-            !file.endsWith(".test.js")
+            (file.endsWith(".ts") || file.endsWith(".ts")) &&
+            !file.endsWith(".test.ts")
         );
 
       for (let file of SlashCommands) {
-        let pull = require(`../../dist/commands/slash/${dir}/${file}`);
+        let pull = require(`../../src/commands/slash/${dir}/${file}`);
 
         if (pull.name && pull.description && pull.type === 1) {
           this.client.slash_commands?.set(pull.name, pull);
@@ -84,13 +84,13 @@ class ApplicationCommands {
   loadUserCommands() {
     console.info("[!] Started loading user commands...".yellow);
 
-    fs.readdirSync("./dist/commands/user/").forEach((dir) => {
+    fs.readdirSync("./src/commands/user/").forEach((dir) => {
       const UserCommands = fs
-        .readdirSync(`./dist/commands/user/${dir}`)
-        .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
+        .readdirSync(`./src/commands/user/${dir}`)
+        .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"));
 
       for (let file of UserCommands) {
-        let pull = require(`../../dist/commands/user/${dir}/${file}`);
+        let pull = require(`../../src/commands/user/${dir}/${file}`);
 
         if (pull.name && pull.type === 2) {
           this.client.user_commands?.set(pull.name, pull);
@@ -117,13 +117,13 @@ class ApplicationCommands {
   loadMessageCommands() {
     console.info("[!] Started loading message commands...".yellow);
 
-    fs.readdirSync("./dist/commands/message/").forEach((dir) => {
+    fs.readdirSync("./src/commands/message/").forEach((dir) => {
       const MessageCommands = fs
-        .readdirSync(`./dist/commands/message/${dir}`)
-        .filter((file) => file.endsWith(".js") && !file.endsWith(".test.js"));
+        .readdirSync(`./src/commands/message/${dir}`)
+        .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"));
 
       for (let file of MessageCommands) {
-        let pull = require(`../../dist/commands/message/${dir}/${file}`);
+        let pull = require(`../../src/commands/message/${dir}/${file}`);
 
         if (pull.name && pull.type === 3) {
           this.client.message_commands?.set(pull.name, pull);
@@ -156,7 +156,7 @@ class ApplicationCommands {
 
     if (!discordBotID) {
       console.info(
-        "[CRASH] You need to provide your bot ID in config.js or .env file!"
+        "[CRASH] You need to provide your bot ID in config.ts or .env file!"
           .red + "\n"
       );
       return process.exit();

@@ -6,8 +6,9 @@ const {
   Events,
 } = require("discord.js");
 
-const { AnimeWallpaper } = require("anime-wallpaper");
-const wall = new AnimeWallpaper();
+const { AnimeWallpaper, AnimeSource } = require("anime-wallpaper");
+const wallpaper = new AnimeWallpaper();
+
 const { getLang } = require("helpers/language");
 module.exports = {
   config: {
@@ -25,8 +26,8 @@ module.exports = {
    * @param {import("discord.js").Client} client Discord.js client
    * @param {import("discord.js").Message | import("discord.js").CommandInteraction} message
    * @param args Arguments, excludes the command name (e.g: !command args[0] args[1] args[2]...)
-   * @param prefix Guild specific prefix, falls back to config.js prefix
-   * @param {import("config")} config Config.js file
+   * @param prefix Guild specific prefix, falls back to config.ts prefix
+   * @param {import("config")} config config.ts file
    * @param {import("Quick.db").QuickDB} db Quick.db client
    *
    * @returns {Promise<*>}
@@ -41,8 +42,12 @@ module.exports = {
       let wallpapers;
 
       try {
-        wallpapers = await Wallpaper1(query);
+        wallpapers = await wallpaper.search(
+          { title: query },
+          AnimeSource.WallHaven
+        );
       } catch (err) {
+        console.error("Wallpaper error:", err);
         return message.reply(
           "❌ Sorry, I couldn't find any wallpaper with the keyword: " +
             query.toString()
@@ -83,8 +88,3 @@ module.exports = {
     }
   },
 };
-
-async function Wallpaper1(query) {
-  let wallpaper = await wall.getAnimeWall5(query);
-  return wallpaper;
-}

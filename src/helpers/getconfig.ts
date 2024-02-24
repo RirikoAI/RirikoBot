@@ -17,6 +17,14 @@ export const port = () => {
 };
 
 /**
+ * @version 8
+ * @returns {*|number} BACKEND_PORT Number
+ */
+export const backendPort = () => {
+  return process.env.BACKEND_PORT || config.BACKEND_PORT;
+};
+
+/**
  * @version 1
  * @returns {*|string} Language
  */

@@ -1,5 +1,6 @@
-# Bot config files. Please, never commit your config.js file anywhere
+# Bot config files. Please, never commit your config.ts file anywhere
 config.js
+config.ts
 
 # Giveaway storage files
 giveaways.json
@@ -15,6 +16,7 @@ lerna-debug.log*
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 dist
+build
 
 # Dependency directories
 node_modules/

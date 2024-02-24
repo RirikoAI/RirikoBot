@@ -13,17 +13,17 @@ module.exports = (client, config) => {
   console.info("0------------------| Prefix Handler:".blue);
   console.info("[!] Started loading prefix commands...".yellow);
 
-  fs.readdirSync("./dist/commands/prefix/").forEach((dir) => {
+  fs.readdirSync("./src/commands/prefix/").forEach((dir) => {
     const commands = fs
-      .readdirSync(`./dist/commands/prefix/${dir}`)
+      .readdirSync(`./src/commands/prefix/${dir}`)
       .filter(
         (file) =>
           (file.endsWith(".js") || file.endsWith(".ts")) &&
-          !file.endsWith(".test.js")
+          !file.endsWith(".test.ts")
       );
 
     for (let file of commands) {
-      let pull = require(`../../dist/commands/prefix/${dir}/${file}`);
+      let pull = require(`../../src/commands/prefix/${dir}/${file}`);
       if (pull.config?.name) {
         client.prefix_commands?.set(pull.config.name, pull);
         console.info(

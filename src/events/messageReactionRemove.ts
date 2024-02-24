@@ -1,6 +1,7 @@
+import { handleReactionRemove } from "handlers/reactionRoles";
+
 const client = require("ririkoBot");
 const { getLang } = require("helpers/language");
-const { reactionRoleHandler } = require("handlers");
 
 module.exports = {
   name: "messageReactionRemove",
@@ -21,5 +22,5 @@ client.on("messageReactionRemove", async (reaction, user) => {
     }
   }
 
-  await reactionRoleHandler.handleReactionRemove(reaction, user);
+  await handleReactionRemove(reaction, user);
 });

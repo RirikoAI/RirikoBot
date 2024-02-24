@@ -61,6 +61,7 @@ module.exports = {
       if (stp === "playlist") {
         let playlistw = interaction.options.getString("name");
         let playlist = await db?.playlist?.find().catch((e) => {});
+        // @ts-ignore
         if (!playlist?.length > 0)
           return interaction
             .reply({ content: lang.msg52, ephemeral: true })
@@ -90,6 +91,7 @@ module.exports = {
             const music_filter = playlist[i]?.musics?.filter(
               (m) => m.playlist_name === playlistw
             );
+            // @ts-ignore
             if (!music_filter?.length > 0)
               return interaction
                 .reply({ content: lang.msg54, ephemeral: true })

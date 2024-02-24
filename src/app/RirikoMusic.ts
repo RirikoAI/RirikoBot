@@ -20,6 +20,8 @@ const getconfig = require("../helpers/getconfig");
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 
+process.env.YTSR_NO_UPDATE = "1";
+
 /**
  * Ririko Music class to handle all Distube events
  *

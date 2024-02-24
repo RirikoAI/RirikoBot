@@ -3,7 +3,7 @@ const config = require("config");
 
 export const getLang = () => {
   const lang = config.LANGUAGE;
-  return require(`../../languages/${lang}.js`);
+  return require(`languages/${lang}.ts`).language;
 };
 
 export function getOrdinalSuffixOf(i) {

@@ -81,6 +81,7 @@ module.exports = {
           await m.reply(
             options instanceof EmbedBuilder ? { embeds: [options] } : options
           );
+          // @ts-ignore
           return await waitingEmbed(...cancel);
         }
       }

@@ -23,6 +23,7 @@ module.exports = {
       const info = interaction.options.getString("info");
       if (info) {
         const cmd_filter = client.commands.filter((x) => x.name === info);
+        // @ts-ignore
         if (!cmd_filter.length > 0)
           return interaction
             .reply({ content: lang.msg127, ephemeral: true })

@@ -10,11 +10,12 @@ const {
   Collection,
   GatewayIntentBits,
 } = require("discord.js");
-const config = require("config") || null;
-import "@ririkoai/colors.ts";
 
 const { overrideLoggers } = require("helpers/logger");
 overrideLoggers();
+
+const config = require("config") || null;
+import "@ririkoai/colors.ts";
 
 const { RirikoAINLP } = require("app/RirikoAI-NLP");
 const getconfig = require("helpers/getconfig");
@@ -72,7 +73,7 @@ const AuthenticationToken = getconfig.discordToken();
 if (!AuthenticationToken) {
   if (!process.env.JEST_WORKER_ID) {
     console.warn(
-      "[CRASH] Authentication Token for Discord bot is required! Use Environment Secrets or config.js."
+      "[CRASH] Authentication Token for Discord bot is required! Use Environment Secrets or config.ts."
         .red
     );
     process.exit();
@@ -154,15 +155,13 @@ module.exports = client;
       return process.exit();
     })
     .finally(async () => {
-      let lines =
-        "\n======================= ✦ Ririko Bot ✦ =======================\n";
-
-      console.log("\n" + lines.white);
       // initiate instance once
       const RirikoAi = RirikoAINLP.getInstance();
-      if (RirikoAi.isInitialized === true) {
-        console.log("[Ririko Bot] Ready to serve the world.".magenta);
-      } else {
+
+      // console.log("\n======================= ✦ Ririko Bot ✦ =======================\n".white);
+      // console.log("[Ririko Bot] Ready to serve the world!!".magenta);
+
+      if (RirikoAi.isInitialized !== true) {
         console.log(
           "[Ririko Bot] Something went wrong. Please check the logs.".red
         );

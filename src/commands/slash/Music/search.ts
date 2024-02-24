@@ -51,6 +51,7 @@ module.exports = {
         return interaction.editReply({ content: lang.msg60 }).catch((e) => {});
       }
 
+      // @ts-ignore
       if (!res || !res.length || !res.length > 1)
         return interaction
           .reply({ content: lang.msg74, ephemeral: true })

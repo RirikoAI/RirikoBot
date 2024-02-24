@@ -42,7 +42,7 @@ module.exports = {
     }
 
     const sub = args[0]?.toLowerCase();
-    let response = "";
+    let response: string | { embeds: (typeof EmbedBuilder)[] } = "";
 
     if (sub === "list") {
       const target =

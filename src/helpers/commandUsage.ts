@@ -7,9 +7,12 @@ const commandUsageSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now, expires: 24 * 60 * 60 }, // Set expiration time to 24 hours
 });
 
-const CommandUsageModel = mongoose.model("CommandUsage", commandUsageSchema);
+export const CommandUsageModel = mongoose.model(
+  "CommandUsage",
+  commandUsageSchema
+);
 
-async function getAndIncrementUsageCount(memberId, limit, commandName) {
+export async function getAndIncrementUsageCount(memberId, limit, commandName) {
   let commandUsage = await CommandUsageModel.findOne({
     memberId: memberId,
     commandName: commandName,

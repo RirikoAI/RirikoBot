@@ -1,9 +1,9 @@
-import { lyristUrl } from "../helpers/getconfig";
+import { lyristUrl } from "helpers/getconfig";
 
 const { getLang } = require("../helpers/language");
 import axios from "axios";
 
-class RirikoLyrist {
+export class RirikoLyrist {
   public lang: any;
 
   constructor() {
@@ -52,7 +52,3 @@ function processUrl(value) {
         .replace(/^-|-$/g, "")
         .toLowerCase();
 }
-
-module.exports = {
-  RirikoLyrist,
-};

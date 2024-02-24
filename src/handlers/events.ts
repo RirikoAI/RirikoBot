@@ -12,14 +12,14 @@ import "@ririkoai/colors.ts";
 module.exports = (client, config = []) => {
   console.info("0------------------| Events Handler:".blue);
   console.info("[!] Started loading events handler...".yellow);
-  fs.readdirSync("./dist/events/")
+  fs.readdirSync("./src/events/")
     .filter(
       (file) =>
-        (file.endsWith(".js") || file.endsWith(".ts")) &&
-        !file.endsWith(".test.js")
+        (file.endsWith(".ts") || file.endsWith(".ts")) &&
+        !file.endsWith(".test.ts")
     )
     .forEach((file) => {
-      let pull = require(`../../dist/events/${file}`);
+      let pull = require(`../../src/events/${file}`);
       if (pull.name) {
         client.events?.set(pull.name, pull);
         console.info(

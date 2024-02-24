@@ -1,14 +1,10 @@
 import { getOrdinalSuffixOf } from "helpers/language";
+import path from "path";
 
 const Canvas = require("canvas");
-Canvas.registerFont(path.resolve("assets/fonts/Roboto-Regular.ttf"), {
-  family: "Roboto",
-});
 
 const Discord = require("discord.js");
 const config = require("config");
-
-import path from "path";
 
 const dim = {
   height: 675,
@@ -99,7 +95,7 @@ const generateImage = async (member) => {
   ctx.textAlign = "center";
 
   // draw in Welcome
-  ctx.font = "50px Roboto";
+  ctx.font = "50px Sans";
   ctx.fillText(
     `Welcome to ${member.guild.name}`,
     dim.width / 2,
@@ -107,7 +103,7 @@ const generateImage = async (member) => {
   );
 
   // draw in the username
-  ctx.font = "60px Roboto";
+  ctx.font = "60px Sans";
   ctx.fillText(
     `${member.user.tag}`,
     dim.width / 2,
@@ -119,7 +115,7 @@ const generateImage = async (member) => {
   );
 
   // draw in to the server
-  ctx.font = "40px Roboto";
+  ctx.font = "40px Sans";
   ctx.fillText(
     `You're the ${memberCount} member`,
     dim.width / 2,

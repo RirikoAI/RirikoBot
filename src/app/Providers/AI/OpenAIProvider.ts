@@ -78,7 +78,7 @@ class OpenAIProvider extends AIProviderBase {
 
         return response?.data.choices[0].text.split("Friend:")[1]?.trim();
       } else {
-        throw new Error("Invalid GPT model. Check config.js");
+        throw new Error("Invalid GPT model. Check config.ts");
       }
     } catch (e) {
       throw e;

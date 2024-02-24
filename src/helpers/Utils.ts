@@ -99,6 +99,7 @@ module.exports = class Utils {
    * @param {Date} timeUntil
    */
   static getRemainingTime(timeUntil) {
+    // @ts-ignore
     const seconds = Math.abs((timeUntil - new Date()) / 1000);
     const time = Utils.timeformat(seconds);
     return time;
@@ -143,6 +144,7 @@ module.exports = class Utils {
   }
 };
 
+// @ts-ignore
 const { COLORS } = [
   "Default",
   "Random",

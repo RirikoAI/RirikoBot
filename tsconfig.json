@@ -1,39 +1,77 @@
 {
+  "ts-node": {
+    "swc": true
+  },
   "compilerOptions": {
-    "module": "commonjs",
+    "lib": [
+      "es5",
+      "es6",
+      "dom"
+    ],
+    "target": "es5",
+    "composite": true,
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
-    "target": "es5",
+    "checkJs": false,
     "noImplicitAny": false,
+    "strict": false,
+    "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
     "skipLibCheck": true,
-    "baseUrl": "./src",
     "allowJs": true,
     "moduleDetection": "force",
     "paths": {
-      "*": [
-        "node_modules/*",
-        "src/types/*"
+
+      "app/*": [
+        "./src/app/*"
       ],
-      "app/*": ["app/*"],
-      "commands/*": ["commands/*"],
-      "utils/*": ["utils/*"],
-      "ririkoBot": ["ririkoBot.js"],
-      "languages/*": ["languages/*"],
-      "tools/*": ["tools/*"],
-      "assets/*": ["assets/*"],
-      "helpers/*": ["helpers/*"],
-      "@helpers/*": ["helpers/*"],
-      "handlers/*": ["handlers/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ],
+      "config": [
+        "./config.ts"
+      ],
+      "ririkoBot": [
+        "./src/ririkoBot.ts"
+      ],
+      "commands/*": [
+        "./src/commands/*"
+      ],
+      "utils/*": [
+        "./src/utils/*"
+      ],
+      "languages/*": [
+        "./languages/*"
+      ],
+      "tools/*": [
+        "./src/tools/*"
+      ],
+      "assets/*": [
+        "./src/assets/*"
+      ],
+      "helpers/*": [
+        "./src/helpers/*"
+      ],
+      "@helpers/*": [
+        "./src/helpers/*"
+      ],
+      "handlers/*": [
+        "./src/handlers/*"
+      ]
+    },
+    "jsx": "react-jsx"
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "index.ts",
+    "languages/*",
+    "config.ts"
   ],
   "exclude": [
     "node_modules",
-    "**/*.test.ts"
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts"
   ]
 }
