@@ -11,9 +11,6 @@ jobs:
           command: npm install --dev
           name: Install dev dependencies
       - run:
-          command: npm run build
-          name: Build
-      - run:
           command: cp config.example.ts config.ts
           name: Copy configuration file
       - run:
