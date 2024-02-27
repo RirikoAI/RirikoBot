@@ -65,6 +65,16 @@ If you dont have npx:
   npm install -g npx
 ```
 
+## Note for Linux users
+Please follow these steps to get the Music bot working: (For Ubuntu/Debian based distros)
+
+```bash
+apt install ffmpeg
+npm uninstall ffmpeg-static
+npm uninstall ffmpeg
+npm update
+```
+
 **Please follow the step by step instructions here to
 install: [WIKI: how-to-install](https://github.com/RirikoAI/RirikoBot/wiki/How-to-Install)**
 
