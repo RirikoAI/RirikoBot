@@ -9,6 +9,7 @@
       "dom"
     ],
     "target": "es5",
+    "noUnusedLocals": false,
     "composite": true,
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
@@ -23,12 +24,11 @@
     "allowJs": true,
     "moduleDetection": "force",
     "paths": {
-
       "app/*": [
         "./src/app/*"
       ],
-      "@/*": [
-        "./src/*"
+      "@dashboard/*": [
+        "./src/dashboard/*"
       ],
       "config": [
         "./config.ts"
@@ -67,7 +67,8 @@
     "src/**/*",
     "index.ts",
     "languages/*",
-    "config.ts"
+    "config.ts",
+    "src/**/*.tsx"
   ],
   "exclude": [
     "node_modules",

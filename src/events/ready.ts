@@ -1,5 +1,8 @@
+import { backendPort, hostname } from "helpers/getconfig";
+
 const client = require("ririkoBot");
 import "@ririkoai/colors.ts";
+
 const { parentPort } = require("worker_threads");
 
 const { cacheReactionRoles } = require("app/Schemas/ReactionRoles");

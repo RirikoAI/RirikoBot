@@ -1,4 +1,5 @@
 import "@ririkoai/colors.ts";
+import { backendPort, hostname, port } from "helpers/getconfig";
 
 require("dotenv").config({ path: ".env" });
 const fs = require("fs");
@@ -180,6 +181,10 @@ function startRirikoDashboard() {
             }`.brightGreen
         );
         cli.log(
+          "\n" +
+            `Dashboard running at http://${hostname()}:${port()}`.brightGreen
+        );
+        cli.log(
           "\n==============================================================\n"
             .white
         );
@@ -206,8 +211,8 @@ startRirikoExpressWorker();
 
 // check if config.ts file exists
 if (configFileExists === true) {
+  startRirikoDashboard();
   startRirikoBotWorker();
   startRirikoStreamCheckerWorker();
   startRirikoQueueManagerWorker();
-  startRirikoDashboard();
 }

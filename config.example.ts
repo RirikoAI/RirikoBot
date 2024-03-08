@@ -285,5 +285,5 @@ module.exports = {
     LogDir: "logs",
   },
 
-  VERSION: "7", // DO NOT TOUCH
+  VERSION: "8", // DO NOT TOUCH
 };

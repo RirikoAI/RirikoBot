@@ -414,8 +414,16 @@ module.exports = function (webpackEnv) {
                 ),
                 presets: [
                   [
+                    "@babel/preset-react",
+                    {
+                      pragma: "dom",
+                      throwIfNamespace: false,
+                    },
+                  ],
+                  [
                     require.resolve("babel-preset-react-app"),
                     {
+                      throwIfNamespace: false,
                       runtime: hasJsxRuntime ? "automatic" : "classic",
                     },
                   ],
