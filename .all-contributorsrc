@@ -1,4 +1,28 @@
 {
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "earnestangel",
+      "name": "Earnest Angel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/57413115?v=4",
+      "profile": "https://angel.net.my",
+      "contributions": [
+        "code",
+        "design",
+        "infra"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
   "projectName": "RirikoBot",
   "projectOwner": "RirikoAI"
 }

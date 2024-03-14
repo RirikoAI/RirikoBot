@@ -1,4 +1,7 @@
 # Ririko AI
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 A powerful AI-powered general Discord bot that you can call your companion. With Twitch Live Notifier, Giveaways,
 OpenAI, Stable Diffusion, Moderations, Anime / Manga Finder and more features. Based on Discord.js v14.
@@ -178,3 +181,25 @@ Please adhere to this project's `code of conduct` in `CODE_OF_CONDUCT.md`.
 [![Use this template](https://img.shields.io/badge/Generate-Use_this_template-2ea44f?style=for-the-badge)](https://github.com/RirikoAI/RirikoBot/generate)
 
 <img src="https://api.visitorbadge.io/api/VisitorHit?user=RirikoAI&repo=RirikoBot&countColor=%237B1E7A" />
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://angel.net.my"><img src="https://avatars.githubusercontent.com/u/57413115?v=4?s=100" width="100px;" alt="Earnest Angel"/><br /><sub><b>Earnest Angel</b></sub></a><br /><a href="https://github.com/RirikoAI/RirikoBot/commits?author=earnestangel" title="Code">💻</a> <a href="#design-earnestangel" title="Design">🎨</a> <a href="#infra-earnestangel" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
