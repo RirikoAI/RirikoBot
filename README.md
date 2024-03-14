@@ -13,6 +13,7 @@ OpenAI, Stable Diffusion, Moderations, Anime / Manga Finder and more features. B
 [![NPM Version](https://badge.fury.io/js/ririko.svg)](https://npmjs.org/package/ririko)
 [![GitHub tag](https://img.shields.io/github/tag/RirikoAI/RirikoBot?include_prereleases=&sort=semver&color=blue)](https://github.com/RirikoAI/RirikoBot/releases/)
 [![NPM Download Stats](https://img.shields.io/npm/dw/ririko)](https://www.npmjs.com/package/ririko)
+[![All Contributors](https://img.shields.io/github/all-contributors/RirikoAI/RirikoBot?color=ee8449&style=flat-square)](#contributors)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 [![issues - RirikoBot](https://img.shields.io/github/issues/RirikoAI/RirikoBot)](https://github.com/RirikoAI/RirikoBot/issues)
 [![Discord](https://img.shields.io/discord/1084420682995224716?color=blue&label=Discord&logo=discord&logoColor=white)](https://discord.gg/VWzecBNTVv)
@@ -162,6 +163,17 @@ It doesn't have to be too fancy, so long as we both understand each other :D
 See `CONTRIBUTING.md` for ways to get started.
 
 Please adhere to this project's `code of conduct` in `CODE_OF_CONDUCT.md`.
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 [![Use this template](https://img.shields.io/badge/Generate-Use_this_template-2ea44f?style=for-the-badge)](https://github.com/RirikoAI/RirikoBot/generate)
 
