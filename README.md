@@ -1,6 +1,6 @@
 # Ririko AI
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 A powerful AI-powered general Discord bot that you can call your companion. With Twitch Live Notifier, Giveaways,
@@ -172,6 +172,14 @@ Please adhere to this project's `code of conduct` in `CODE_OF_CONDUCT.md`.
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://angel.net.my"><img src="https://avatars.githubusercontent.com/u/57413115?v=4?s=100" width="100px;" alt="Earnest Angel"/><br /><sub><b>Earnest Angel</b></sub></a><br /><a href="https://github.com/RirikoAI/RirikoBot/commits?author=earnestangel" title="Code">💻</a> <a href="#design-earnestangel" title="Design">🎨</a> <a href="#infra-earnestangel" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/True-Aki"><img src="https://avatars.githubusercontent.com/u/154510235?v=4?s=100" width="100px;" alt="Aki"/><br /><sub><b>Aki</b></sub></a><br /><a href="https://github.com/RirikoAI/RirikoBot/commits?author=True-Aki" title="Code">💻</a> <a href="#design-True-Aki" title="Design">🎨</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
