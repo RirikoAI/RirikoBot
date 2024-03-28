@@ -53,7 +53,7 @@
     "@vitalets/google-translate-api": "^9.2.0",
     "anime-wallpaper": "^1.1.1",
     "axios": "^1.6.3",
-    "better-sqlite3": "^8.4.0",
+    "better-sqlite3": "^9.4.3",
     "body-parser": "^1.20.2",
     "canvas": "^2.11.2",
     "cheerio": "^1.0.0-rc.12",
