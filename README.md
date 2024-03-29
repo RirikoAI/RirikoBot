@@ -1,12 +1,14 @@
 # Ririko AI
 
+| Please consider giving the repo a star ⭐ if you like it. It gives me motivation 😊 |
+|------------------------------------------------------------------------------------|
 
 A powerful AI-powered general Discord bot that you can call your companion. With Twitch Live Notifier, Giveaways,
 OpenAI, Stable Diffusion, Moderations, Anime / Manga Finder and more features. Based on Discord.js v14.
 
 <img align="left" width="400px" style="padding-right: 20px" src="https://repository-images.githubusercontent.com/606736855/f1ef8a0f-dfc1-4477-b42d-ac2e9945e77e">
 
-<p>&nbsp;</p>
+###
 
 [![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
 [![CodeQL](https://github.com/RirikoAI/RirikoBot/workflows/CodeQL/badge.svg)](https://github.com/RirikoAI/RirikoBot/actions?query=workflow%3ACodeQL)
@@ -23,54 +25,30 @@ OpenAI, Stable Diffusion, Moderations, Anime / Manga Finder and more features. B
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-<p>&nbsp;</p>
+####
 
-## How RirikoAI Works?
+## Ririko says Hello!
 
-RirikoAI is a Discord bot that is powered by `NodeJS`, it connects to several APIs (which you need to sign up for) so
+Ririko AI is a Discord bot that is powered by `NodeJS`, it connects to several APIs (which you need to sign up for) so
 the bot can work its magic. RirikoAI can be hosted on a PC or a Server and it also works with Pterodactyl (Docker)
 servers.
 
-| **RirikoAI Hosted Version is Coming Soon** | 
-|--------------------------------------------|
+<div align="center">
+  <img src="https://angel.net.my/wp-content/uploads/2023/12/ririko-scaled.jpg">
+</div>
 
-No more using your PC to run the bot 24/7
+## 🛠️ How to Install?
+[!!] To install, do not use `npm install Ririko` directly. Follow the instructions below:
 
-| Please consider giving the repo a star ⭐ if you like it. It gives me motivation 😊 |
-|------------------------------------------------------------------------------------|
+Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win)
 
-## How to Install?
-
-Now have web installer! Simply run without configuring anything `npm i --include=dev && npm run start` after downloading
+We now have a web installer! Copy `.env.example` into `.env`, and finally run `npm i --include=dev && npm run start` after downloading
 this source files.
 
-**Please follow the step by step instructions here to
+**You can also follow the step by step instructions here to
 install: [WIKI: how-to-install](https://github.com/RirikoAI/RirikoBot/wiki/How-to-Install)**
 
-## Quickstart:
-
-Requirements: [node.js LTS](https://nodejs.org/en/download), [git](https://git-scm.com/download/win) and npx (install
-via npm like below)
-
-[!!] To install, do not use `npm install Ririko`. Follow this instead:
-
-```bash
-  # install Ririko using the npx command:
-  npx ririko RirikoBot 
-  # change directory
-  cd RirikoBot
-  # To run the bot, configure your bot first (config.js or .env) before running this:
-  npm run start:prod
-```
-
-If you dont have npx:
-
-```bash
-  # Install npx globally (-g) using npm
-  npm install -g npx
-```
-
-## Note for Linux users
+## 🐧 Note for Linux users
 Please follow these steps to get the Music bot working: (For Ubuntu/Debian based distros)
 
 ```bash
@@ -87,8 +65,6 @@ Official RirikoAI Support Discord (see the bot live on action/get help here): ht
 
 **[!] This project is still under heavy developments. Update 10th June 2023 - I've started to spend more and more time
 into this project, more features will come 😀**
-
-###
 
 ### Join Our Discord
 
@@ -190,6 +166,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+This repository also contains resources from other repositories. Please see the [NOTICE.md](https://github.com/RirikoAI/RirikoBot/blob/master/NOTICE.md) file for more information.
 
 [![Use this template](https://img.shields.io/badge/Generate-Use_this_template-2ea44f?style=for-the-badge)](https://github.com/RirikoAI/RirikoBot/generate)
 
