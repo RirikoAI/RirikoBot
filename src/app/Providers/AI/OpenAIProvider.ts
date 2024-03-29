@@ -2,7 +2,7 @@ const { AIProviderBase } = require("app/Providers/AIProviderBase");
 const config = require("config");
 const getconfig = require("helpers/getconfig");
 const openai = require("openai");
-const { OpenAIApi, Configuration } = require("openai");
+const OpenAIApi = require("openai");
 
 class OpenAIProvider extends AIProviderBase {
   constructor() {
@@ -14,11 +14,9 @@ class OpenAIProvider extends AIProviderBase {
       return;
     }
 
-    this.configuration = new Configuration({
+    this.openAiClient = new OpenAIApi({
       apiKey: this.token,
     });
-
-    this.openAiClient = new OpenAIApi(this.configuration);
   }
 
   getClient() {
@@ -37,7 +35,7 @@ class OpenAIProvider extends AIProviderBase {
       const model = config.AI.GPTModel; // davinci or gpt35
       const prompt = `${context}${history.join("\n")}\nHuman: ${messageText}\n`;
 
-      if (model === "gpt35") {
+      if (model) {
         const convertedChatHistory = history.map((message) => {
           const [role, content] = message.split(": ");
           return {
@@ -49,10 +47,11 @@ class OpenAIProvider extends AIProviderBase {
         const newPrompt = [
           { role: "system", content: context },
           ...convertedChatHistory,
+          { role: "user", content: messageText }
         ];
 
-        const response = await this.openAiClient.createChatCompletion({
-          model: "gpt-3.5-turbo",
+        const response = await this.openAiClient.chat.completions.create({
+          model: model,
           messages: newPrompt,
           temperature: 1,
           max_tokens: 2000,
@@ -61,22 +60,7 @@ class OpenAIProvider extends AIProviderBase {
           presence_penalty: 0.9,
         });
 
-        return response.data.choices[0].message.content; // Uncomment for GPT-3.5-turbo
-      } else if (model === "davinci") {
-        // Send request to OpenAI for text-davinci-002
-        // NOTE: text-davinci-003 is now removed from OpenAI API
-        const response = await this.openAiClient.createCompletion({
-          model: "text-davinci-002",
-          prompt,
-          temperature: 1,
-          max_tokens: 2000,
-          top_p: 0.2,
-          frequency_penalty: 0.9,
-          presence_penalty: 1.9,
-          stop: ["Human:"],
-        });
-
-        return response?.data.choices[0].text.split("Friend:")[1]?.trim();
+        return response.choices[0].message.content; 
       } else {
         throw new Error("Invalid GPT model. Check config.ts");
       }

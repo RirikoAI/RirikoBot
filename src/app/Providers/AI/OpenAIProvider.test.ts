@@ -1,10 +1,8 @@
 const nlpcloud = require("nlpcloud"),
-  { OpenAIProvider } = require("./OpenAIProvider");
-const { Configuration } = require("openai");
+  { OpenAIProvider }  = require("./OpenAIProvider");
 
 jest.mock("openai", () => {
-  return {
-    OpenAIApi: class {
+  return class {
       createCompletion = () => {
         return {
           data: {
@@ -12,9 +10,8 @@ jest.mock("openai", () => {
           },
         };
       };
-    },
-    Configuration: jest.fn(),
-  };
+    }
+
 });
 
 describe("OpenAIProvider", () => {

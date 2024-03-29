@@ -76,8 +76,8 @@ module.exports = {
     // Provider Token
     AIToken: "",
 
-    // Must be one of: davinci or gpt35.
-    GPTModel: "gpt35",
+    // Use any model in this page https://platform.openai.com/docs/models/overview
+    GPTModel: "gpt-4",
 
     // URL of the local server for Ririko AI. Leave this empty if you don't have a local server.
     // Example: http://localhost:5000/api/v1/ask
