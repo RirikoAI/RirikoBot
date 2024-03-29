@@ -25,7 +25,7 @@ OpenAI, Stable Diffusion, Moderations, Anime / Manga Finder and more features. B
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-####
+#### &nbsp;
 
 ## Ririko says Hello!
 
