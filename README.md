@@ -60,7 +60,7 @@ via npm like below)
   # change directory
   cd RirikoBot
   # To run the bot, configure your bot first (config.js or .env) before running this:
-  npm run start:prod
+  npm run start
 ```
 
 If you dont have npx:
