@@ -97,7 +97,7 @@ export async function generateImage(replicate, userPrompt) {
     width: StableDiffusion.Width,
     height: StableDiffusion.Height,
     negative_prompt: StableDiffusion.NegativePrompt,
-    disable_safety_check: StableDiffusion.DisableSafetyCheck,
+    disable_safety_checker: StableDiffusion.DisableSafetyCheck,
     num_inference_steps: StableDiffusion.NumInferenceSteps,
     guidance_scale: StableDiffusion.GuidanceScale,
     scheduler: StableDiffusion.Scheduler,
