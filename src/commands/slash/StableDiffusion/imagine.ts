@@ -32,7 +32,7 @@ module.exports = {
   run: imagineCommand,
 };
 
-async function imagineCommand(client, interaction, args, prefix) {
+async function imagineCommand(client, interaction, args, prefix, manualUserPrompt = false) {
   if (StableDiffusion.DailyLimit !== false)
     try {
       const usageCount = await getAndIncrementUsageCount(
@@ -43,14 +43,14 @@ async function imagineCommand(client, interaction, args, prefix) {
     } catch (e) {
       return await interaction.reply(e.message);
     }
-
-  await interaction.deferReply();
-
-  const replicate = createReplicateClient();
-
-  const userPrompt = interaction.options.getString("prompt");
-
+  
   try {
+    await interaction.deferReply();
+    
+    const replicate = createReplicateClient();
+    
+    const userPrompt = (manualUserPrompt ? manualUserPrompt : interaction.options.getString("prompt"));
+    
     const output = await generateImage(replicate, userPrompt);
 
     const imageUrl = output.toString();
@@ -68,7 +68,18 @@ async function imagineCommand(client, interaction, args, prefix) {
       components: [embedRow],
       files: [attachment],
     });
+    
+    const filter = (i) => i.customId === 'run_command_again' && i.user.id === interaction.user.id;
+    
+    const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
+    
+    collector.on('collect', async (i) => {
+      await imagineCommand(client, i, args, prefix, userPrompt); // Execute your command again
+    });
   } catch (e) {
+    if (e.message.includes('already been acknowledged')) return;
+    if (e.message.includes('has not been sent or deferred')) return;
+    if (e.message.includes('Unknown interaction')) return;
     await handleErrorResponse(e, interaction);
   }
 }
