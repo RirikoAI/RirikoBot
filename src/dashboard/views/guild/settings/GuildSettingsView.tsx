@@ -1,6 +1,6 @@
 import { Flex, Heading, SimpleGrid, Text } from "@chakra-ui/layout";
-import { ChannelSelect } from "@dashboard/config/example/ChannelSelect";
-import { RolesSelect } from "@dashboard/config/example/RolesSelect";
+import { ChannelSelect } from "@dashboard/features/ChannelSelect";
+import { RolesSelect } from "@dashboard/features/RolesSelect";
 import { useFormRender } from "@dashboard/hooks/forms/useForm";
 
 /**

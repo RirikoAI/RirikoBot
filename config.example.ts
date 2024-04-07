@@ -4,6 +4,9 @@ module.exports = {
 
   // Set the port for the backend server
   BACKEND_PORT: 3001,
+  
+  // Set the domain name for Ririko AI. Use localhost if you are running it locally
+  DOMAIN_NAME: "localhost",
 
   // Set the language of the bot
   LANGUAGE: "en",
@@ -16,7 +19,7 @@ module.exports = {
     // Discord bot token. Under the Bot tab. Please prefer setting this in the .env file instead of here
     DiscordToken: "",
 
-    // The discord bot client ID under the General Information tab.  Please prefer setting this in the .env file instead of here
+    // The discord bot Application ID under the General Information tab.  Please prefer setting this in the .env file instead of here
     DiscordBotID: "",
 
     // Discord user IDs for permissions and ownerships

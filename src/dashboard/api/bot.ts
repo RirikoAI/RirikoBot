@@ -1,12 +1,13 @@
 import { IOSTokenStorage } from "@dashboard/api/core/plugins";
 import {
-  CustomFeatures,
   CustomGuildInfo,
 } from "@dashboard/config/types/custom-types";
+import { CustomFeatures } from "@dashboard/features";
+
 import { withBot, callDefault, callReturn } from "./core";
 import { ChannelTypes } from "./discord";
 
-export const bot = "http://localhost:8080";
+export const bot = "http://localhost:4000";
 
 export type Role = {
   id: string;

@@ -1,4 +1,6 @@
-import { CustomFeatures, CustomGuildInfo } from "../config/types";
+import { CustomGuildInfo } from "../config/types";
+import { CustomFeatures } from "@dashboard/features";
+
 import { useAPIStore } from "./apiStore";
 import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import {

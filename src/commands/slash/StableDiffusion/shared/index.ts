@@ -25,7 +25,7 @@ export function createEmbed(userPrompt, imageUrl, user) {
   return new EmbedBuilder()
     .setImage("attachment://image.png")
     .setTitle("Here's your image")
-    .setDescription(`**Prompts:**\n${userPrompt}`)
+    .setDescription(`**Prompts:**\n/imagine prompt:${userPrompt}`)
     .setColor("#00C853")
     .setFooter({
       text: `Requested by: ${user.username} | ${language.footer1}`,
@@ -35,6 +35,10 @@ export function createEmbed(userPrompt, imageUrl, user) {
 
 export function createActionRow(imageUrl) {
   return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('run_command_again')
+      .setLabel('Run Command Again')
+      .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setURL(imageUrl)
       .setLabel(`Download Image`)

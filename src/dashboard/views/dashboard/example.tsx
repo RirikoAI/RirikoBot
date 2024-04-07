@@ -40,6 +40,7 @@ import { IoPricetag } from "react-icons/io5";
 import { FaRobot } from "react-icons/fa";
 import { MdVoiceChat } from "react-icons/md";
 import { ReactElement } from "react";
+import { MusicPlayer } from "@dashboard/components/music/MusicPlayer";
 
 export function ExampleDashboardView() {
   const t = dashboard.useTranslations();
@@ -67,11 +68,6 @@ export function ExampleDashboardView() {
           </Button>
         </Flex>
       </HStack>
-      <Flex direction="column" gap={2} mt={3}>
-        <Heading size="md">{t.music.title}</Heading>
-        <Text variant="secondary">{t.music.description}</Text>
-        <MusicPlayer />
-      </Flex>
       <Grid templateColumns={{ base: "1fr", lg: "0.5fr 1fr" }} gap={3}>
         <Card rounded="3xl" variant="primary">
           <CardBody as={Center} p={4} flexDirection="column" gap={3}>
@@ -151,102 +147,8 @@ function TestChart() {
   );
 }
 
-function MusicPlayer() {
-  const t = dashboard.useTranslations();
-  const { cardBg, textColorSecondary, brand } = useColors();
 
-  return (
-    <>
-      <Flex direction="row" gap={5}>
-        <Image
-          rounded="xl"
-          src="https://cdns-images.dzcdn.net/images/artist/61bcbf8296b1669499064406c534d39d/500x500.jpg"
-          bg={brand}
-          w="200px"
-          h="200px"
-          display={{ base: "none", md: "block" }}
-          boxShadow="0px 5px 30px #ff5bff6e"
-          _dark={{
-            boxShadow: "0px 5px 30px #c03bc06e",
-          }}
-        />
-        <Flex
-          direction="column"
-          bg={cardBg}
-          rounded="xl"
-          gap={3}
-          p={3}
-          flex={1}
-          _light={{ boxShadow: "14px 17px 30px 4px rgb(112 144 176 / 13%)" }}
-        >
-          <HStack
-            color={textColorSecondary}
-            display={{ base: "none", md: "flex" }}
-          >
-            <BsPlayBtn />
-            <Text>{t.music["now playing"]}</Text>
-          </HStack>
-          <HStack>
-            <Avatar name="Stay with me" size="sm" />
-            <Text fontSize={{ base: "lg", md: "2xl" }} fontWeight="bold">
-              ZUTOMAYO - Study Me
-            </Text>
-          </HStack>
 
-          <HStack mt="auto" justify="space-between" fontWeight="bold">
-            <IconButton
-              fontSize="4xl"
-              icon={<Icon as={BiSkipPrevious} />}
-              aria-label="previous"
-              variant="action"
-            />
-            <IconButton
-              p={1}
-              h="fit-content"
-              fontSize="4xl"
-              icon={<Icon as={BsPlay} />}
-              aria-label="pause"
-              variant="brand"
-              rounded="full"
-            />
-            <IconButton
-              fontSize="4xl"
-              icon={<Icon as={BiSkipNext} />}
-              aria-label="next"
-              variant="action"
-            />
-          </HStack>
-          <HStack px={3}>
-            <Text>1:28</Text>
-            <Progress w="full" value={50} />
-          </HStack>
-        </Flex>
-      </Flex>
-      <HStack mt={2}>
-        <PrimaryButton icon={<AiFillLike />}>1203</PrimaryButton>
-        <PrimaryButton icon={<AiFillDislike />}>297</PrimaryButton>
-        <PrimaryButton icon={<BsShareFill />}>103</PrimaryButton>
-        <Hide below="2sm">
-          <Spacer />
-          <PrimaryButton icon={<ViewIcon />}>4258</PrimaryButton>
-        </Hide>
-      </HStack>
-    </>
-  );
-}
-
-function PrimaryButton(props: { icon: ReactElement; children: string }) {
-  return (
-    <Button
-      leftIcon={props.icon}
-      variant="action"
-      _light={{ bg: "white" }}
-      _dark={{ bg: "navy.800" }}
-    >
-      {props.children}
-    </Button>
-  );
-}
 
 function VoiceChannelItem() {
   const { brand, textColorSecondary } = useColors();

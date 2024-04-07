@@ -6,19 +6,14 @@ import { GuildInfo } from '.';
 
 export type CustomGuildInfo = GuildInfo & {};
 
-/**
- * Define feature ids and it's option types
- */
-export type CustomFeatures = {
-  music: MusicFeature;
-  gaming: {};
-  'reaction-role': {};
-  meme: {};
-  'welcome-message': WelcomeMessageFeature;
+/** example only */
+export type WelcomeMessageFeature = {
+  channel?: string;
+  message: string;
 };
 
 /** example only */
-export type WelcomeMessageFeature = {
+export type FarewellMessageFeature = {
   channel?: string;
   message: string;
 };

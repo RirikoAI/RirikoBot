@@ -72,7 +72,6 @@ async function handleError(res: Response, options: Options) {
 
 async function parseOptions<T extends Options>(url: string, options: T) {
   const isForm = options.body instanceof FormData;
-
   const request: RequestInit = {
     method: options.method,
     body: options.body,

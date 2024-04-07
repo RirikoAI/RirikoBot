@@ -5,13 +5,13 @@ export const guild = createI18n(provider, {
   en: {
     features: "Features",
     banner: {
-      title: "Getting Started",
-      description: "Create your bot and type something",
+      title: "Welcome to Ririko",
+      description: "Ririko AI is running in your server",
     },
     error: {
       "not found": "Where is it?",
       "not found description":
-        "The bot can't access the server, let's invite him!",
+        "Ririko can't access the server, maybe she's not in the server? Let's invite her!",
       load: "Failed to load guild",
     },
     bn: {

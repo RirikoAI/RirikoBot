@@ -1,4 +1,5 @@
 /**
+ * Will be used to handle the installer for Ririko Ai
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */
 const express = require("express");

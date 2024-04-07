@@ -22,6 +22,7 @@ export function Banner() {
       bgImg={{ base: null, "3sm": BannerImg }}
       bgSize="cover"
       gap={3}
+      style={{backgroundPosition: "center"}}
     >
       <Heading>{t.banner.title}</Heading>
       <Text fontWeight="400" color="gray.300">

@@ -19,6 +19,7 @@ const { getLang } = require("helpers/language");
 const getconfig = require("../helpers/getconfig");
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
+const {setSettings} = require("app/Schemas/Guild");
 
 process.env.YTSR_NO_UPDATE = "1";
 
@@ -88,6 +89,18 @@ By: <@${song.user.id}>`);
         embed.setTimestamp();
         embed.setFooter({ text: this.lang.footer1 });
 
+        // Set the current song details to DB
+        const query = {
+          id: queue.textChannel.guild.id
+        };
+        
+        // !todo: probably need to optimize this
+        await setSettings(query, 'musicplayer', 'now_playing', song.name);
+        await setSettings(query, 'musicplayer', 'current_time', song.formattedDuration);
+        await setSettings(query, 'musicplayer', 'maximum_time', song.formattedDuration);
+        await setSettings(query, 'musicplayer', 'cover_url', song.thumbnail);
+        await setSettings(query, 'musicplayer', 'requested_by', song.user.username);
+        
         queue.textChannel?.send({ embeds: [embed] }).catch((e) => {});
       })
       .on("addSong", (queue, song) =>

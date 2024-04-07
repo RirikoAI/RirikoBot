@@ -1,7 +1,9 @@
+import { AIPrefix } from "helpers/getconfig";
+
 const mongoose = require("mongoose");
-const { CACHE_SIZE, DISCORD, STATS } = require("config");
+const {CACHE_SIZE, DISCORD, STATS} = require("config");
 const FixedSizeMap = require("fixedsize-map");
-const { getUser } = require("./User");
+const {getUser} = require("./User");
 
 const cache = new FixedSizeMap(CACHE_SIZE.GUILDS);
 
@@ -10,22 +12,22 @@ const Schema = new mongoose.Schema({
   data: {
     name: String,
     region: String,
-    owner: { type: String, ref: "users" },
+    owner: {type: String, ref: "users"},
     joinedAt: Date,
     leftAt: Date,
-    bots: { type: Number, default: 0 },
+    bots: {type: Number, default: 0},
   },
-  prefix: { type: String, default: DISCORD.Prefix },
+  prefix: {type: String, default: DISCORD.Prefix},
   stats: {
     enabled: Boolean,
     xp: {
-      message: { type: String, default: STATS.DEFAULT_LVL_UP_MSG },
+      message: {type: String, default: STATS.DEFAULT_LVL_UP_MSG},
       channel: String,
     },
   },
   ticket: {
     log_channel: String,
-    limit: { type: Number, default: 10 },
+    limit: {type: Number, default: 10},
     categories: [
       {
         _id: false,
@@ -34,17 +36,25 @@ const Schema = new mongoose.Schema({
       },
     ],
   },
+  aichatbot: {
+    enabled: {type: Boolean, default: false},
+    prefix: {type: String, default: "."},
+  },
+  autovoicechannel: {
+    enabled: {type: Boolean, default: false},
+    primary_channels: [String],
+  },
   twitch: {
     enabled: {
       type: Boolean,
       default: false,
     },
-    channel_id: String,
+    channel: String,
   },
   automod: {
     debug: Boolean,
-    strikes: { type: Number, default: 10 },
-    action: { type: String, default: "TIMEOUT" },
+    strikes: {type: Number, default: 10},
+    action: {type: String, default: "TIMEOUT"},
     wh_channels: [String],
     anti_attachments: Boolean,
     anti_invites: Boolean,
@@ -58,8 +68,8 @@ const Schema = new mongoose.Schema({
     tracking: Boolean,
     ranks: [
       {
-        invites: { type: Number, required: true },
-        _id: { type: String, required: true },
+        invites: {type: Number, required: true},
+        _id: {type: String, required: true},
       },
     ],
   },
@@ -73,20 +83,21 @@ const Schema = new mongoose.Schema({
       enum: ["TIMEOUT", "KICK", "BAN"],
       default: "KICK",
     },
-    limit: { type: Number, default: 5 },
+    limit: {type: Number, default: 5},
   },
   counters: [
     {
       _id: false,
       counter_type: String,
       name: String,
-      channel_id: String,
+      channel: String,
     },
   ],
   welcome: {
-    enabled: Boolean,
+    enabled: {type: Boolean, default: false},
     channel: String,
     content: String,
+    message: {type: String, default: "Welcome to {server} {user}!"},
     embed: {
       description: String,
       color: String,
@@ -96,9 +107,10 @@ const Schema = new mongoose.Schema({
     },
   },
   farewell: {
-    enabled: Boolean,
+    enabled: {type: Boolean, default: false},
     channel: String,
     content: String,
+    message: {type: String, default: "Goodbye {user}!"},
     embed: {
       description: String,
       color: String,
@@ -107,10 +119,25 @@ const Schema = new mongoose.Schema({
       image: String,
     },
   },
-  autorole: String,
+  autorole: {
+    enabled: {type: Boolean, default: false},
+    role_id: String,
+  },
+  reactionroles: {
+    enabled: {type: Boolean, default: false},
+  },
+  musicplayer: {
+    enabled: {type: Boolean, default: true},
+    cover_url: String,
+    now_playing: String,
+    current_time: String,
+    maximum_time: String,
+    requested_by: String,
+    dj_user_id: String
+  },
   suggestions: {
     enabled: Boolean,
-    channel_id: String,
+    channel: String,
     approved_channel: String,
     rejected_channel: String,
     staff_roles: [String],
@@ -129,10 +156,10 @@ module.exports = {
    */
   getSettings: async (guildId) => {
     if (!guildId) throw new Error("Guild is undefined");
-
+    
     // const cached = cache.get(guild.id);
     // if (cached) return cached;
-
+    
     // cache.add(guild.id, guildData);
     return Model.findOne({
       _id: guildId,
@@ -151,8 +178,9 @@ module.exports = {
           const userDb = await getUser(owner);
           await userDb.save();
         })
-        .catch((ex) => {});
-
+        .catch((ex) => {
+        });
+      
       // create a new guild model
       guildData = new Model({
         _id: guild.id,
@@ -163,7 +191,7 @@ module.exports = {
           joinedAt: guild.joinedAt,
         },
       });
-
+      
       await guildData.save();
     }
   },
@@ -178,7 +206,7 @@ async function upsertNestedKeyValuePair(guild, nestedPath, key, value) {
   try {
     const document = await Model.findById(guild.id);
     setNestedValue(document, nestedPath, key, value);
-    await document.save();
+    return await document.save();
     // console.log("Nested key-value pair upserted successfully.");
   } catch (error) {
     console.error("Error upserting nested key-value pair:", error);

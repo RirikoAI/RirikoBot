@@ -48,6 +48,7 @@ export const layouts: RootLayout[] = [
           },
           {
             path: "features/:feature",
+            // @ts-ignore
             component: <FeatureView />,
             navbar: <GroupNavbar back />,
             sidebar: <InGuildSidebar />,

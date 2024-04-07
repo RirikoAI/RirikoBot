@@ -57,6 +57,14 @@ export const discordBotID = () => {
 };
 
 /**
+ * @version 8
+ * @returns {*|string} Discord Bot Client Secret
+ */
+export const discordBotClientSecret = () => {
+  return process.env.DISCORD_BOT_CLIENT_SECRET || config.DISCORD.DiscordClientSecret;
+}
+
+/**
  * @version 1
  * @returns {string[]|*|*[]} Array of Discord IDs - Bot Owner
  */

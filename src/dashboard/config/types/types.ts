@@ -1,6 +1,6 @@
-import { CustomFeatures } from "./custom-types";
 import { Guild } from "@dashboard/api/discord";
 import { ReactElement, ReactNode } from "react";
+import { CustomFeatures } from "@dashboard/features";
 
 export type AppConfig = {
   /**

@@ -5,7 +5,6 @@ import { SlideFade } from "@chakra-ui/react";
 import {
   FeatureConfig,
   FormRender,
-  CustomFeatures,
 } from "@dashboard/config/types";
 import { IoSave } from "react-icons/io5";
 import { useParams } from "react-router-dom";
@@ -13,6 +12,7 @@ import { useUpdateFeatureMutation } from "@dashboard/stores";
 import { useColors } from "@dashboard/theme";
 import { Params } from "./FeatureView";
 import { feature as view } from "@dashboard/config/translations/feature";
+import { CustomFeatures } from "@dashboard/features";
 
 export function UpdateFeaturePanel<K extends keyof CustomFeatures>({
   feature,

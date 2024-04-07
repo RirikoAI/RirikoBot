@@ -1,5 +1,5 @@
-import { CustomFeatures } from './types';
-import { features } from './features';
+import { CustomFeatures } from "@dashboard/features";
+import { features } from '../features';
 import { FeatureConfig } from './types';
 
 export type IdFeature<K extends keyof CustomFeatures = keyof CustomFeatures> = FeatureConfig<K> & {

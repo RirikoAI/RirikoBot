@@ -27,7 +27,7 @@ OpenAI, Stable Diffusion, Moderations, Anime / Manga Finder and more features. B
 
 #### &nbsp;
 
-## Ririko says Hello!
+## Ririko Says Hello!
 
 Ririko AI is a Discord bot that is powered by `NodeJS`, it connects to several APIs (which you need to sign up for) so
 the bot can work its magic. RirikoAI can be hosted on a PC or a Server and it also works with Pterodactyl (Docker)

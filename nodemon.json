@@ -6,6 +6,7 @@
     ".babelrc"
   ],
   "ignore": [
+    "src/dashboard/*",
     "*.test.ts",
     "**/*.test.ts"
   ],

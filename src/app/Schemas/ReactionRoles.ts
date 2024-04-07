@@ -30,18 +30,18 @@ const Model = mongoose.model("reaction-roles", Schema);
 
 // Cache
 const rrCache = new Map();
-const getKey = (guildId, channelId, messageId) => `${guildId}|${channelId}|${messageId}`;
+const getKey = (guildId, channelId, messageId) => `${ guildId }|${ channelId }|${ messageId }`;
 
 module.exports = {
-  model: Model,
-
+  ReactionRoles: Model,
+  
   cacheReactionRoles: async (client) => {
     // clear previous cache
     rrCache.clear();
-
+    
     // load all docs from database
     const docs = await Model.find().lean();
-
+    
     // validate and cache docs
     for (const doc of docs) {
       const guild = client.guilds.cache.get(doc.guild_id);
@@ -57,30 +57,30 @@ module.exports = {
       rrCache.set(key, doc.roles);
     }
   },
-
+  
   getReactionRoles: (guildId, channelId, messageId) => rrCache.get(getKey(guildId, channelId, messageId)) || [],
-
+  
   addReactionRole: async (guildId, channelId, messageId, emote, roleId) => {
-    const filter = { guild_id: guildId, channel_id: channelId, message_id: messageId };
-
+    const filter = {guild_id: guildId, channel_id: channelId, message_id: messageId};
+    
     // Pull if existing configuration is present
-    await Model.updateOne(filter, { $pull: { roles: { emote } } });
-
+    await Model.updateOne(filter, {$pull: {roles: {emote}}});
+    
     const data = await Model.findOneAndUpdate(
       filter,
       {
         $push: {
-          roles: { emote, role_id: roleId },
+          roles: {emote, role_id: roleId},
         },
       },
-      { upsert: true, new: true }
+      {upsert: true, new: true}
     ).lean();
-
+    
     // update cache
     const key = getKey(guildId, channelId, messageId);
     rrCache.set(key, data.roles);
   },
-
+  
   removeReactionRole: async (guildId, channelId, messageId) => {
     await Model.deleteOne({
       guild_id: guildId,
