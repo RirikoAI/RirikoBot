@@ -132,10 +132,10 @@ function startRirikoQueueManagerWorker() {
   });
 }
 
-function startRirikoExpressWorker() {
+function startRirikoInstallerWorker() {
   require("ts-node").register();
   
-  const worker_RirikoExpress = new Worker(`./${ buildDir }/ririkoExpress.ts`, {
+  const worker_RirikoInstaller = new Worker(`./${ buildDir }/RirikoInstaller.ts`, {
     execArgv: [
       "-r",
       "ts-node/register/transpile-only",
@@ -144,12 +144,12 @@ function startRirikoExpressWorker() {
     ],
   });
   
-  worker_RirikoExpress.on("message", (message) => {
+  worker_RirikoInstaller.on("message", (message) => {
     if (message.ready) {
     }
   });
   
-  worker_RirikoExpress.on("error", (error) => {
+  worker_RirikoInstaller.on("error", (error) => {
     console.error(`[UNCAUGHT EXCEPTION] Ririko Express:`, error);
   });
 }
@@ -157,7 +157,7 @@ function startRirikoExpressWorker() {
 function startRirikoBackendWorker() {
   require("ts-node").register();
   
-  const worker_RirikoExpress = new Worker(`./${ buildDir }/ririkoBackend.ts`, {
+  const worker_RirikoInstaller = new Worker(`./${ buildDir }/ririkoBackend.ts`, {
     execArgv: [
       "-r",
       "ts-node/register/transpile-only",
@@ -166,12 +166,12 @@ function startRirikoBackendWorker() {
     ],
   });
   
-  worker_RirikoExpress.on("message", (message) => {
+  worker_RirikoInstaller.on("message", (message) => {
     if (message.ready) {
     }
   });
   
-  worker_RirikoExpress.on("error", (error) => {
+  worker_RirikoInstaller.on("error", (error) => {
     console.error(`[UNCAUGHT EXCEPTION] Ririko Backend:`, error);
   });
 }
@@ -240,5 +240,5 @@ if (configFileExists === true) {
   startRirikoStreamCheckerWorker();
   startRirikoQueueManagerWorker();
 } else {
-  startRirikoExpressWorker();
+  startRirikoInstallerWorker();
 }

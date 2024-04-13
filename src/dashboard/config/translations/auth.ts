@@ -1,13 +1,13 @@
 import { provider } from "./provider";
 import { createI18n } from "@dashboard/hooks/i18n";
+import { enAuth } from "languages/en";
+import { cnAuth } from "languages/zh";
+import { msAuth } from "languages/ms";
+import { jaAuth } from "languages/ja";
 
 export const auth = createI18n(provider, {
-  en: {
-    login: "Login",
-    "login description": "Login to your Discord Account",
-  },
-  cn: {
-    login: "登錄",
-    "login description": "登錄您的 Discord 帳戶",
-  },
+  en: enAuth,
+  cn: cnAuth,
+  ms: msAuth,
+  ja: jaAuth
 });

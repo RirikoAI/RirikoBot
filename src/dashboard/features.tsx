@@ -10,56 +10,36 @@ import { TbMessage2Plus, TbMessage2X } from "react-icons/tb";
 import { RiChatVoiceLine, RiEmojiStickerLine, RiRobot2Line } from "react-icons/ri";
 import { useFarewellMessageFeature } from "@dashboard/features/FarewellMessageFeature";
 import { FiTwitch } from "react-icons/fi";
+import { enFeatures } from "languages/en";
+import { cnFeatures } from "languages/zh";
+import { msFeatures } from "languages/ms";
+import { jaFeatures } from "languages/ja";
 
 /**
- * Define feature ids and it's option types
+ * Features typing (basically some typescript shiz)
  */
 export type CustomFeatures = {
-  "musicplayer": MusicFeature;
-  "twitch": any;
-  "reactionroles": any;
-  "welcome": WelcomeMessageFeature;
-  "farewell": FarewellMessageFeature;
-  "autovoicechannel": WelcomeMessageFeature;
-  "aichatbot": any;
+  musicplayer: MusicFeature;
+  twitch: any;
+  reactionroles: any;
+  welcome: WelcomeMessageFeature;
+  farewell: FarewellMessageFeature;
+  autovoicechannel: WelcomeMessageFeature;
+  aichatbot: any;
 };
 
 /**
  * Support i18n (Localization)
  */
 const {T} = createI18n(provider, {
-  en: {
-    musicplayer: "Music Player",
-    twitch: "Twitch Live Notifier",
-    "twitch description": "Get notified when your favorite streamer is live",
-    "music description": "Play music in Your Discord Server",
-    autovoicechannel: "Auto Voice Channel",
-    "autovoicechannel description": "Enable the auto voice channel feature in your server",
-    aichatbot: "AI Chatbot",
-    "aichatbot description": "Enable the chatbot feature in your server",
-    "reaction role": "Reaction Role",
-    "reaction role description": "Give user a role when clicking on a button",
-    memes: "Memes Time",
-    "memes description": "Send memes everyday",
-  },
-  cn: {
-    musicplayer: "音樂播放器",
-    twitch: "Twitch Live Notifier",
-    "twitch description": "Get notified when your favorite streamer is live",
-    "music description": "在您的 Discord 服務器中播放音樂",
-    autovoicechannel: "遊戲",
-    "autovoicechannel description": "Enable the auto voice channel feature in your server",
-    aichatbot: "AI Chatbot",
-    "aichatbot description": "Enable the chatbot feature in your server",
-    "reaction role": "反應角色",
-    "reaction role description": "單擊按鈕時為用戶賦予角色",
-    memes: "模因時間",
-    "memes description": "每天發送模因",
-  },
+  ms: msFeatures,
+  en: enFeatures,
+  cn: cnFeatures,
+  ja: jaFeatures,
 });
 
 /**
- * Define information for each features
+ * Define how features are being displayed, and which data goes into the feature
  *
  * There is an example:
  */
@@ -103,20 +83,20 @@ export const features: FeaturesConfig = {
     },
   },
   "welcome": {
-    name: "Welcome Message",
-    description: "Send message when user joined the server",
+    name: <T text="welcome"/>,
+    description: <T text="welcome description"/>,
     icon: <Icon as={ TbMessage2Plus } w={ 45 } h={ 45 }/>,
     useRender: useWelcomeMessageFeature,
   },
   "farewell": {
-    name: "Leave Message",
-    description: "Send message when user left the server",
+    name: <T text="farewell"/>,
+    description: <T text="farewell description"/>,
     icon: <Icon as={ TbMessage2X } w={ 45 } h={ 45 }/>,
     useRender: useFarewellMessageFeature,
   },
   "reactionroles": {
-    name: <T text="reaction role"/>,
-    description: <T text="reaction role description"/>,
+    name: <T text="reactionroles"/>,
+    description: <T text="reactionroles description"/>,
     icon: <Icon as={ RiEmojiStickerLine } w={ 45 } h={ 45 }/>,
     useRender(data) {
       return {

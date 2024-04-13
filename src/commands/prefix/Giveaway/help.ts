@@ -7,7 +7,7 @@ const {
   SelectMenuBuilder,
   ComponentType,
 } = require("discord.js");
-const { footer1 } = require("languages/en");
+const { footer1 } = require("../../../../languages/en");
 
 module.exports = {
   config: {

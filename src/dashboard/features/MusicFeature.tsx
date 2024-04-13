@@ -12,11 +12,17 @@ import { MusicPlayer } from "@dashboard/components/music/MusicPlayer";
  * Support i18n (Localization)
  */
 const {T} = createI18n(provider, {
+  ms: {
+    message: "Mesej",
+  },
   en: {
     message: "Message",
   },
   cn: {
     message: "信息",
+  },
+  ja: {
+    message: "メッセージ",
   },
 });
 
@@ -41,10 +47,10 @@ export function useMusicFeature(data: MusicFeature) {
     },
     //define container component
     container: (f) => (<>
-        <Flex direction="column" gap={2} mt={3}>
-          {/*<Heading size="md">Currently Playing...</Heading>*/}
-          {/*<Text variant="secondary">Artist</Text>*/}
-          <MusicPlayer props={data} />
+        <Flex direction="column" gap={ 2 } mt={ 3 }>
+          {/*<Heading size="md">Currently Playing...</Heading>*/ }
+          {/*<Text variant="secondary">Artist</Text>*/ }
+          <MusicPlayer props={ data }/>
         </Flex>
         <SimpleGrid columns={ {base: 1, md: 2} } gap={ 3 }>
           { f }

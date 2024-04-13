@@ -335,6 +335,7 @@ module.exports = function (webpackEnv) {
           babelRuntimeEntry,
           babelRuntimeEntryHelpers,
           babelRuntimeRegenerator,
+          paths.languagesPath
         ]),
       ],
     },

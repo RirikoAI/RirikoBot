@@ -6,7 +6,7 @@ import {
   ButtonStyle,
   EmbedBuilder,
 } from "discord.js";
-import { language } from "languages/en";
+import { language } from "../../../../../languages/en";
 
 export async function getImageBuffer(imageUrl) {
   const response = await get(imageUrl, {
