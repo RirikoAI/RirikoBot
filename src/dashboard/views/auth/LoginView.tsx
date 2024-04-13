@@ -7,10 +7,10 @@ import { useColors } from "@dashboard/theme";
 import { HomeView } from "@dashboard/views/home/HomeView";
 import CloudSvg from "../../assets/Cloud.svg";
 import { bot } from "@dashboard/api/bot";
-import { auth } from "@dashboard/config/translations/auth";
+import { authI18n } from "@dashboard/utils/translationProvider";
 
 export function LoginView() {
-  const t = auth.useTranslations();
+  const t = authI18n.useTranslations();
 
   return (
     <AuthLayout>
@@ -25,7 +25,7 @@ export function LoginView() {
 }
 
 function AuthLayout({ children }: { children: ReactNode }) {
-  const t = auth.useTranslations();
+  const t = authI18n.useTranslations();
   const { globalBg, brand } = useColors();
 
   return (

@@ -3,7 +3,7 @@ import { Button, Icon } from "@chakra-ui/react";
 import { LoadingPanel } from "@dashboard/components/panel/LoadingPanel";
 import { QueryStatus } from "@dashboard/components/panel/QueryPanel";
 import { config } from "@dashboard/config/common";
-import { guild as view } from "@dashboard/config/translations/guild";
+import { guildI18b as view } from "@dashboard/utils/translationProvider";
 import { BsMailbox } from "react-icons/bs";
 import { FaRobot } from "react-icons/fa";
 import { useParams } from "react-router-dom";

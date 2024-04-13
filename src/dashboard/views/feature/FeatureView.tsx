@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 import { useEnableFeatureMutation, useFeatureQuery } from "@dashboard/stores";
 import { useColors } from "@dashboard/theme";
 import { UpdateFeaturePanel } from "./UpdateFeaturePanel";
-import { feature as view } from "@dashboard/config/translations/feature";
+import { featureI18b as view } from "@dashboard/utils/translationProvider";
 
 export type Params = {
   guild: string;

@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom";
 import { useUpdateFeatureMutation } from "@dashboard/stores";
 import { useColors } from "@dashboard/theme";
 import { Params } from "./FeatureView";
-import { feature as view } from "@dashboard/config/translations/feature";
+import { featureI18b as view } from "@dashboard/utils/translationProvider";
 import { CustomFeatures } from "@dashboard/features";
 
 export function UpdateFeaturePanel<K extends keyof CustomFeatures>({

@@ -8,7 +8,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { UseMutationResult } from "@tanstack/react-query";
-import { common } from "@dashboard/config/translations/common";
+import { commonI18b } from "@dashboard/utils/translationProvider";
 import { ReactNode } from "react";
 import { BsCloudRain } from "react-icons/bs";
 import { useColors } from "@dashboard/theme";
@@ -35,7 +35,7 @@ export function MutationPanel({
 }
 
 export function LoadingPanel({ size, ...props }: Props & CenterProps) {
-  const t = common.useTranslations();
+  const t = commonI18b.useTranslations();
   const { brand, textColorPrimary } = useColors();
 
   if (size === "sm") {

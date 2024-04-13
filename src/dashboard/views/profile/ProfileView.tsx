@@ -14,8 +14,8 @@ import {
 import { avatarUrl, bannerUrl } from "@dashboard/api/discord";
 import { SelectField } from "@dashboard/components/forms/SelectField";
 import { SwitchField } from "@dashboard/components/forms/SwitchField";
-import { languages, names } from "@dashboard/config/translations/provider";
-import { profile } from "@dashboard/config/translations/profile";
+import { languages, names } from "@dashboard/utils/translationProvider";
+import { profileI18b } from "@dashboard/utils/translationProvider";
 import { IoLogOut } from "react-icons/io5";
 import {
   useLogoutMutation,
@@ -30,7 +30,7 @@ import { useColors } from "@dashboard/theme";
 export function ProfileView() {
   const user = useSelfUser();
   const logout = useLogoutMutation();
-  const t = profile.useTranslations();
+  const t = profileI18b.useTranslations();
 
   const { cardBg, brand } = useColors();
   const { colorMode, setColorMode } = useColorMode();

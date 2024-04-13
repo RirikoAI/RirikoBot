@@ -1,6 +1,6 @@
-import { Languages } from "@dashboard/config/translations/provider";
 import create from "zustand";
 import { persist } from "zustand/middleware";
+import { LanguageISO } from "@dashboard/utils/translationProvider";
 
 export type PageStore = {
   sidebarIsOpen: boolean;
@@ -10,8 +10,8 @@ export type PageStore = {
 export type PersistStore = {
   devMode: boolean;
   setDevMode: (v: boolean) => void;
-  lang: Languages;
-  setLang: (v: Languages) => void;
+  lang: typeof LanguageISO[number];
+  setLang: (v: typeof LanguageISO[number]) => void;
 };
 
 export const usePageStore = create<PageStore>((set) => ({

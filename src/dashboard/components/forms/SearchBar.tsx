@@ -8,14 +8,14 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { AiOutlineSearch as SearchIcon } from "react-icons/ai";
-import { common } from "@dashboard/config/translations/common";
+import { commonI18b } from "@dashboard/utils/translationProvider";
 export function SearchBar(
   props: {
     input?: InputProps;
     onSearch?: () => void;
   } & InputGroupProps
 ) {
-  const t = common.useTranslations();
+  const t = commonI18b.useTranslations();
   // Pass the computed styles into the `__css` prop
   const { input, onSearch, ...rest } = props;
   // Chakra Color Mode

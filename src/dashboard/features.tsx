@@ -1,19 +1,13 @@
 import { Icon } from "@chakra-ui/react";
 import { BsMusicNoteBeamed } from "react-icons/bs";
-import { IoHappy } from "react-icons/io5";
 import { useMusicFeature } from "@dashboard/features/MusicFeature";
 import { FarewellMessageFeature, FeaturesConfig, MusicFeature, WelcomeMessageFeature } from "./config/types";
-import { provider } from "@dashboard/config/translations/provider";
-import { createI18n } from "@dashboard/hooks/i18n";
+import { featuresI18b, translationProvider } from "@dashboard/utils/translationProvider";
 import { useWelcomeMessageFeature } from "@dashboard/features/WelcomeMessageFeature";
 import { TbMessage2Plus, TbMessage2X } from "react-icons/tb";
 import { RiChatVoiceLine, RiEmojiStickerLine, RiRobot2Line } from "react-icons/ri";
 import { useFarewellMessageFeature } from "@dashboard/features/FarewellMessageFeature";
 import { FiTwitch } from "react-icons/fi";
-import { enFeatures } from "languages/en";
-import { cnFeatures } from "languages/zh";
-import { msFeatures } from "languages/ms";
-import { jaFeatures } from "languages/ja";
 
 /**
  * Features typing (basically some typescript shiz)
@@ -31,12 +25,7 @@ export type CustomFeatures = {
 /**
  * Support i18n (Localization)
  */
-const {T} = createI18n(provider, {
-  ms: msFeatures,
-  en: enFeatures,
-  cn: cnFeatures,
-  ja: jaFeatures,
-});
+const {T} = featuresI18b;
 
 /**
  * Define how features are being displayed, and which data goes into the feature

@@ -12,7 +12,7 @@ import { IoOpen, IoOptions } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useEnableFeatureMutation } from "@dashboard/stores";
 import { useColors } from "@dashboard/theme";
-import { guild as view } from "@dashboard/config/translations/guild";
+import { guildI18b as view } from "@dashboard/utils/translationProvider";
 export function FeatureItem({
   guild,
   feature,

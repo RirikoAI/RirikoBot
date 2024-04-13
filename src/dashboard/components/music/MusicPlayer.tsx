@@ -1,4 +1,3 @@
-import { dashboard } from "@dashboard/config/translations/dashboard";
 import { useColors } from "@dashboard/theme";
 import { Flex, HStack, Spacer, Text } from "@chakra-ui/layout";
 import { Avatar, Hide, Icon, IconButton, Image, Progress } from "@chakra-ui/react";
@@ -8,10 +7,11 @@ import { AiFillDislike, AiFillLike } from "react-icons/ai";
 import { PrimaryButton } from "@dashboard/components/button/PrimaryButton";
 import { useParams } from "react-router-dom";
 import { Params } from "@dashboard/views/feature/FeatureView";
+import { dashboardI18n } from "@dashboard/utils/translationProvider";
 
 export function MusicPlayer(data) {
   const props = data.props;
-  const t = dashboard.useTranslations();
+  const t = dashboardI18n.useTranslations();
   const {cardBg, textColorSecondary, brand} = useColors();
   const {guild} = useParams<Params>();
   return (

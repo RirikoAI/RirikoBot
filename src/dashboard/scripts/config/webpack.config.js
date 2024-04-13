@@ -415,6 +415,7 @@ module.exports = function (webpackEnv) {
                   "babel-preset-react-app/webpack-overrides"
                 ),
                 presets: [
+                  "@babel/preset-env",
                   [
                     "@babel/preset-react",
                     {
@@ -456,6 +457,7 @@ module.exports = function (webpackEnv) {
                 configFile: false,
                 compact: false,
                 presets: [
+                  "@babel/preset-env",
                   [
                     require.resolve("babel-preset-react-app/dependencies"),
                     { helpers: true },

@@ -9,7 +9,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { UserInfo, avatarUrl } from "@dashboard/api/discord";
-import { common } from "@dashboard/config/translations/common";
+import { commonI18b } from "@dashboard/utils/translationProvider";
 import { useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "@dashboard/stores";
 import { useSelfUser } from "@dashboard/stores";
@@ -46,7 +46,7 @@ function List(props: {
   menuBg: string;
   user: UserInfo;
 }) {
-  const t = common.useTranslations();
+  const t = commonI18b.useTranslations();
   const { menuBg, shadow, textColor, user } = props;
   const borderColor = useColorModeValue("#E6ECFA", "rgba(135, 140, 189, 0.3)");
   const navigate = useNavigate();

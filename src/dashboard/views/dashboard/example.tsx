@@ -26,7 +26,6 @@ import { config } from "@dashboard/config/common";
 import { BiSkipNext, BiSkipPrevious } from "react-icons/bi";
 import { useColors } from "@dashboard/theme";
 import { StyledChart } from "@dashboard/components/chart/StyledChart";
-import { dashboard } from "@dashboard/config/translations/dashboard";
 
 import {
   BsMusicNoteBeamed,
@@ -41,9 +40,10 @@ import { FaRobot } from "react-icons/fa";
 import { MdVoiceChat } from "react-icons/md";
 import { ReactElement } from "react";
 import { MusicPlayer } from "@dashboard/components/music/MusicPlayer";
+import { dashboardI18n } from "@dashboard/utils/translationProvider";
 
 export function ExampleDashboardView() {
-  const t = dashboard.useTranslations();
+  const t = dashboardI18n.useTranslations();
   const { globalBg, brand } = useColors();
 
   return (

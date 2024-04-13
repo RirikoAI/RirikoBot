@@ -10,7 +10,7 @@ import "./index.css";
 import { layouts } from "./layouts";
 import { NormalLayout } from "./utils/routeUtils";
 import { createRoot } from "react-dom/client";
-import { common } from "@dashboard/config/translations/common";
+import { commonI18b } from "@dashboard/utils/translationProvider";
 
 function RootRoutes({ loggedIn }: { loggedIn: boolean }) {
   function mapNestedLayout(layout: NormalLayout, key: string | number) {
@@ -36,7 +36,7 @@ function RootRoutes({ loggedIn }: { loggedIn: boolean }) {
 }
 
 function Pages() {
-  const t = common.useTranslations();
+  const t = commonI18b.useTranslations();
   const query = useLoginQuery();
 
   return (

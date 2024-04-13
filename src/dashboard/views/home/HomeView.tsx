@@ -21,11 +21,11 @@ import { MdMusicNote } from "react-icons/md";
 import { useColorsExtend } from "@dashboard/theme";
 import WorldSvg from "@dashboard/assets/World.svg";
 import { useSettingsStore } from "@dashboard/stores";
-import { languages, names } from "@dashboard/config/translations/provider";
+import { homeI18b, languages, names } from "@dashboard/utils/translationProvider";
 import { SelectField } from "@dashboard/components/forms/SelectField";
 import { TranslationofConfig } from "@dashboard/hooks/i18n";
-import { common } from "@dashboard/config/translations/common";
-import { home } from "@dashboard/config/translations/home";
+import { commonI18b } from "@dashboard/utils/translationProvider";
+import { homeI18b as home } from "@dashboard/utils/translationProvider";
 
 const features = (t: TranslationofConfig<typeof home>) => [
   {
@@ -92,7 +92,7 @@ export function HomeView() {
           label: name,
           value: key,
         }))}
-        placeholder={<common.T text="select lang" />}
+        placeholder={<commonI18b.T text="select lang" />}
       />
       <SimpleGrid columns={{ base: 1, "3sm": 2, xl: 3 }} mt="2rem" gap={2}>
         {features(t).map((feature, i) => (

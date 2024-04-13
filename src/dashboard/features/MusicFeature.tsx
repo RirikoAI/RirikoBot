@@ -5,26 +5,13 @@ import { RolesSelect } from "./RolesSelect";
 import { useForm, useFormRender } from "@dashboard/hooks/forms/useForm";
 import { SelectField } from "@dashboard/components/forms/SelectField";
 import { createI18n } from "@dashboard/hooks/i18n";
-import { provider } from "@dashboard/config/translations/provider";
+import { musicI18n, translationProvider } from "@dashboard/utils/translationProvider";
 import { MusicPlayer } from "@dashboard/components/music/MusicPlayer";
 
 /**
  * Support i18n (Localization)
  */
-const {T} = createI18n(provider, {
-  ms: {
-    message: "Mesej",
-  },
-  en: {
-    message: "Message",
-  },
-  cn: {
-    message: "信息",
-  },
-  ja: {
-    message: "メッセージ",
-  },
-});
+const {T} = musicI18n;
 
 /**
  * Used to configure a feature

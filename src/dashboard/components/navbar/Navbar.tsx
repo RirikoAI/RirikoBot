@@ -18,7 +18,7 @@ import { IoHome } from "react-icons/io5";
 import items from "@dashboard/sidebar";
 import { FaChevronRight as ChevronRightIcon } from "react-icons/fa";
 import { show, useColorsExtend } from "@dashboard/theme";
-import { common } from "@dashboard/config/translations/common";
+import { commonI18b } from "@dashboard/utils/translationProvider";
 
 export function DefaultNavbar({ children }: { children?: ReactNode }) {
   const activeItem = getActiveSidebarItem(items, useLocation());
@@ -34,7 +34,7 @@ export function DefaultNavbar({ children }: { children?: ReactNode }) {
   const breadcrumb = [
     {
       icon: <IoHome />,
-      text: <common.T text="pages" />,
+      text: <commonI18b.T text="pages" />,
       to: "/user/home",
     },
   ];

@@ -1,13 +1,7 @@
 {
   "comments": false,
   "presets": [
-    [
-      "@babel/preset-env",
-      {
-        "loose": true,
-        "shippedProposals": true
-      }
-    ],
+    "@babel/preset-env",
     [
       "@babel/preset-react",
       {

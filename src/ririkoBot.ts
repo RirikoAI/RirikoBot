@@ -1,6 +1,4 @@
 // @ts-ignore
-// @ts-ignore
-
 /**
  * @author earnestangel https://github.com/RirikoAI/RirikoBot
  */

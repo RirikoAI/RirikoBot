@@ -1,5 +1,5 @@
 import { Flex, Heading, SimpleGrid } from "@chakra-ui/layout";
-import { guild } from "@dashboard/config/translations/guild";
+import { guildI18b } from "@dashboard/utils/translationProvider";
 import { CustomGuildInfo } from "@dashboard/config/types";
 import { getFeatures } from "@dashboard/config/utils";
 import { Banner } from "./components/Banner";
@@ -12,7 +12,7 @@ export function GuildPanel({
   guild: string;
   info: CustomGuildInfo;
 }) {
-  const t = guild.useTranslations();
+  const t = guildI18b.useTranslations();
 
   return (
     <Flex direction="column" gap={5}>
