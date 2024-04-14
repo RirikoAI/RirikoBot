@@ -30,6 +30,9 @@
       "@dashboard/*": [
         "./src/dashboard/*"
       ],
+      "components/*": [
+        "./src/dashboard/components/*"
+      ],
       "config": [
         "./config.ts"
       ],

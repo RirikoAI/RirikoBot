@@ -44,3 +44,4 @@ integrations
 
 # Temporary Files
 temp/
+/.temp_cache/

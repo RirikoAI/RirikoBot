@@ -24,7 +24,6 @@ client.once("ready", async () => {
     
     // Find the document
     await Guild.findOneAndUpdate(query, update, options);
-    console.log('\n\n\nguild.id', guild.id)
   });
   // Load reaction roles to cache
   await cacheReactionRoles(client);

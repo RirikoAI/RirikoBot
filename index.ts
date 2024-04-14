@@ -1,5 +1,6 @@
 import "@ririkoai/colors.ts";
 import { backendPort, hostname, port } from "helpers/getconfig";
+import { execSync } from "child_process";
 
 require("dotenv").config({path: ".env"});
 const fs = require("fs");
@@ -60,7 +61,34 @@ function startRirikoBotWorker() {
   worker_RirikoBot.on("message", (message) => {
     if (message.ready) {
       botUsername = message.botUsername;
-      console.info("Ririko Bot is now connected to Discord".brightGreen);
+      cli.log("Ririko Bot is now connected to Discord".brightGreen);
+      cli.log(
+        "\n======================= ✦ Ririko Bot ✦ =======================\n"
+          .white
+      );
+      cli.log("[Ririko Bot] Ready to serve the world!!".magenta);
+      cli.log("NODE_ENV:".red, NODE_ENV);
+      cli.log(
+        "\n" +
+        `[READY] ${ botUsername } is up and ready to go. ${
+          process.env.npm_package_version
+            ? "\nRunning ririko@" + process.env.npm_package_version
+            : ""
+        }`.brightGreen
+      );
+      cli.log(
+        "\n" +
+        `✅  Dashboard running at http://${ hostname() }:${ port() }`.brightGreen
+      );
+      cli.log(
+        `✅  Backend running at http://${ hostname() }:${ backendPort() }`.brightGreen
+      );
+      cli.log(
+        "\n==============================================================\n"
+          .white
+      );
+      
+      cli.enablePrompt();
     }
   });
   
@@ -178,42 +206,25 @@ function startRirikoBackendWorker() {
 
 function startRirikoDashboard() {
   const {spawn} = require("node:child_process");
-  const child = spawn("node", ["./src/dashboard/scripts/start.js"]);
+  let startArgs;
+  if (process.env.NODE_ENV === "development") {
+    startArgs = ["./node_modules/webpack-dev-server/bin/webpack-dev-server.js", "--port", "3000", `--mode=${ process.env.NODE_ENV }`];
+  } else {
+    startArgs = ["./src/ririkoDashboard.ts", "build", "--config", "../serve.json"];
+  }
+  
+  const child = spawn("node", startArgs);
+  //spawn("node", ["./src/dashboard/scripts/start.js"]);
   
   child.stdout.on("data", (data) => {
-    const noIssuesMessage = data.includes("No issues found");
+    const noIssuesMessage = data.includes("successfully") || data.includes("App listening on port");
     if (!noIssuesMessage) console.info(`${ data }`.replace(/^\s+|\s+$/g, ""));
     
     if (!initiated)
       if (noIssuesMessage) {
         initiated = true;
         
-        cli.log(
-          "\n======================= ✦ Ririko Bot ✦ =======================\n"
-            .white
-        );
-        cli.log("[Ririko Bot] Ready to serve the world!!".magenta);
-        cli.log("NODE_ENV:".red, NODE_ENV);
-        cli.log(
-          "\n" +
-          `[READY] ${ botUsername } is up and ready to go. ${
-            process.env.npm_package_version
-              ? "\nRunning ririko@" + process.env.npm_package_version
-              : ""
-          }`.brightGreen
-        );
-        cli.log(
-          "\n" +
-          `✅  Dashboard running at http://${ hostname() }:${ port() }`.brightGreen
-        );
-        cli.log(
-          `✅  Backend running at http://${ hostname() }:${ backendPort() }`.brightGreen
-        );
-        cli.log(
-          "\n==============================================================\n"
-            .white
-        );
-        cli.enablePrompt();
+        console.info("Ririko Dashboard is now running".brightGreen);
       }
   });
   
@@ -234,11 +245,11 @@ process.on("uncaughtException", handleUncaughtException);
 
 // check if config.ts file exists
 if (configFileExists === true) {
-  startRirikoDashboard();
   startRirikoBotWorker();
   startRirikoBackendWorker();
   startRirikoStreamCheckerWorker();
   startRirikoQueueManagerWorker();
+  startRirikoDashboard();
 } else {
   startRirikoInstallerWorker();
 }

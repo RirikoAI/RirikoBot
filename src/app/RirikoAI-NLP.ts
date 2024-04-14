@@ -78,7 +78,7 @@ class RirikoAINLP {
 
       // AI provider has been initialized
       this.isInitialized = true;
-      console.info("[RirikoAI-NLP] Initialized successfully".blue);
+      console.log("[RirikoAI-NLP] Initialized successfully".blue);
     } catch (e) {
       console.error(
         "[RirikoAI-NLP] Something went wrong during the initialization! Check your config (try copy and paste the example config files again)"

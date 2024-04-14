@@ -1,8 +1,124 @@
 /**
  * English Translations
  */
-
 const {version} = require("../package.json");
+
+export const enFeatures = {
+  aichatbot: "AI Chatbot",
+  "aichatbot description": "Enable the chatbot feature in your server",
+  autovoicechannel: "Auto Voice Channel",
+  "autovoicechannel description": "Enable the auto voice channel feature in your server",
+  musicplayer: "Music Player",
+  "music description": "Play music in Your Discord Server",
+  twitch: "Twitch Live Notifier",
+  "twitch description": "Get notified when your favorite streamer is live",
+  welcome: "Welcome Message",
+  "welcome description": "Send a welcome message to new members",
+  farewell: "Farewell Message",
+  "farewell description": "Send a farewell message to members who leave",
+  reactionroles: "Reaction Role",
+  "reactionroles description": "Give user a role when clicking on a button"
+}
+
+export const enProfile = {
+  logout: "Logout",
+  language: "Language",
+  "language description": "Select your language",
+  settings: "Settings",
+  "dark mode": "Dark Mode",
+  "dark mode description": "Enables dark theme in order to protect your eyes",
+  "dev mode": "Developer Mode",
+  "dev mode description": "Used for debugging and testing",
+}
+
+export const enHome  = {
+  music: "Music",
+  "reaction role": "Reaction Role",
+  "auto moderator": "Auto Moderator",
+  "next gen discord bot": "Next-gen Discord Bot",
+  "play music anywhere": "Play music anywhere",
+  "reaction role description":
+    "Give user a role when clicking on a button or reaction",
+  "auto moderator description": "Keep your server safe and clean",
+  "trusted by": ["Trusted by ", " servers"],
+}
+
+export const enGuild = {
+  features: "Features",
+  banner: {
+    title: "Welcome to Ririko",
+    description: "Ririko AI is running in your server",
+  },
+  error: {
+    "not found": "Where is it?",
+    "not found description":
+      "Ririko can't access the server, maybe she's not in the server? Let's invite her!",
+    load: "Failed to load guild",
+  },
+  bn: {
+    "enable feature": "Enable",
+    "config feature": "Config",
+    invite: "Invite bot",
+    settings: "Settings",
+  },
+}
+
+export const enCommon = {
+  loading: "Loading",
+  search: "Search",
+  "select lang": "Select your language",
+  dashboard: "Dashboard",
+  profile: "Profile",
+  pages: "Pages",
+  logout: "Logout",
+  fail: {
+    login: "Failed to login",
+  },
+}
+
+export const enDashboard = {
+  welcome: "Welcome back, ",
+  pricing: "Pricing",
+  invite: {
+    title: "Invite our Bot",
+    description: "Try our discord bot with one-click",
+    bn: "Invite now",
+  },
+  music: {
+    title: "Music Player",
+    description: "Play Your Favorite songs in Voice channels",
+    "now playing": "Now Playing",
+  },
+  vc: {
+    create: "Create a voice channel",
+    "created channels": "Created Voice channels",
+  },
+  command: {
+    title: "Command Usage",
+    description: "Use of commands of your server",
+  },
+} as const;
+
+export const enFeature = {
+  unsaved: "Save Changes",
+  error: {
+    "not enabled": "Not Enabled",
+    "not enabled description": "Try enable this feature?",
+    "not found": "Not Found",
+    "not found description": "Hmm... Weird we can't find it",
+  },
+  bn: {
+    enable: "Enable Feature",
+    save: "Save",
+    discard: "Discard",
+  },
+}
+
+export const enAuth = {
+  login: "Login",
+  "login description": "Login to your Discord Account",
+}
+
 
 // !! todo: get rid of this massive pile of shiz and split it into multiple constants
 export const language = {
@@ -183,119 +299,3 @@ export const language = {
     inline: false,
   },
 };
-
-export const enFeatures = {
-  aichatbot: "AI Chatbot",
-  "aichatbot description": "Enable the chatbot feature in your server",
-  autovoicechannel: "Auto Voice Channel",
-  "autovoicechannel description": "Enable the auto voice channel feature in your server",
-  musicplayer: "Music Player",
-  "music description": "Play music in Your Discord Server",
-  twitch: "Twitch Live Notifier",
-  "twitch description": "Get notified when your favorite streamer is live",
-  welcome: "Welcome Message",
-  "welcome description": "Send a welcome message to new members",
-  farewell: "Farewell Message",
-  "farewell description": "Send a farewell message to members who leave",
-  reactionroles: "Reaction Role",
-  "reactionroles description": "Give user a role when clicking on a button"
-}
-
-export const enProfile = {
-  logout: "Logout",
-  language: "Language",
-  "language description": "Select your language",
-  settings: "Settings",
-  "dark mode": "Dark Mode",
-  "dark mode description": "Enables dark theme in order to protect your eyes",
-  "dev mode": "Developer Mode",
-  "dev mode description": "Used for debugging and testing",
-}
-
-export const enHome  = {
-  music: "Music",
-  "reaction role": "Reaction Role",
-  "auto moderator": "Auto Moderator",
-  "next gen discord bot": "Next-gen Discord Bot",
-  "play music anywhere": "Play music anywhere",
-  "reaction role description":
-    "Give user a role when clicking on a button or reaction",
-  "auto moderator description": "Keep your server safe and clean",
-  "trusted by": ["Trusted by ", " servers"],
-}
-
-export const enGuild = {
-  features: "Features",
-  banner: {
-    title: "Welcome to Ririko",
-    description: "Ririko AI is running in your server",
-  },
-  error: {
-    "not found": "Where is it?",
-    "not found description":
-      "Ririko can't access the server, maybe she's not in the server? Let's invite her!",
-    load: "Failed to load guild",
-  },
-  bn: {
-    "enable feature": "Enable",
-    "config feature": "Config",
-    invite: "Invite bot",
-    settings: "Settings",
-  },
-}
-
-export const enCommon = {
-  loading: "Loading",
-  search: "Search",
-  "select lang": "Select your language",
-  dashboard: "Dashboard",
-  profile: "Profile",
-  pages: "Pages",
-  logout: "Logout",
-  fail: {
-    login: "Failed to login",
-  },
-}
-
-export const enDashboard = {
-  welcome: "Welcome back, ",
-  pricing: "Pricing",
-  invite: {
-    title: "Invite our Bot",
-    description: "Try our discord bot with one-click",
-    bn: "Invite now",
-  },
-  music: {
-    title: "Music Player",
-    description: "Play Your Favorite songs in Voice channels",
-    "now playing": "Now Playing",
-  },
-  vc: {
-    create: "Create a voice channel",
-    "created channels": "Created Voice channels",
-  },
-  command: {
-    title: "Command Usage",
-    description: "Use of commands of your server",
-  },
-}
-
-export const enFeature = {
-  unsaved: "Save Changes",
-  error: {
-    "not enabled": "Not Enabled",
-    "not enabled description": "Try enable this feature?",
-    "not found": "Not Found",
-    "not found description": "Hmm... Weird we can't find it",
-  },
-  bn: {
-    enable: "Enable Feature",
-    save: "Save",
-    discard: "Discard",
-  },
-}
-
-export const enAuth = {
-  login: "Login",
-  "login description": "Login to your Discord Account",
-}

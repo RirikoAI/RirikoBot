@@ -1,7 +1,6 @@
 import { createIcon } from "@chakra-ui/react";
 import { PermissionFlags } from "@dashboard/api/discord";
 import { AppConfig } from "./types";
-import { discordBotID } from "helpers/getconfig";
 
 const OmagizeIcon = createIcon({
   displayName: "OmagizeLogo",
@@ -24,7 +23,7 @@ export const config: AppConfig = {
   name: "Ririko AI",
   icon: OmagizeIcon,
   inviteUrl:
-    `https://discord.com/api/oauth2/authorize?client_id=${discordBotID()}&permissions=8&scope=bot`,
+    `https://discord.com/api/oauth2/authorize?client_id=aa&permissions=8&scope=bot`,
   guild: {
     //filter guilds that user has no permissions to manage it
     filter: (guild) =>

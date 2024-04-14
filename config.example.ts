@@ -1,45 +1,51 @@
 module.exports = {
   // Set the port for Ririko AI dashboard
   PORT: 3000,
-
+  
   // Set the port for the backend server
-  BACKEND_PORT: 3001,
+  BACKEND_PORT: 4000,
   
   // Set the domain name for Ririko AI. Use localhost if you are running it locally
   DOMAIN_NAME: "localhost",
-
+  
   // Set the language of the bot
   LANGUAGE: "en",
-
+  
   // Discord related config. Create a new Application and create a bot with it. https://discord.com/developers/applications
   DISCORD: {
     // Prefix of the bot, used for General Purpose part of the bot
     Prefix: "!",
-
+    
     // Discord bot token. Under the Bot tab. Please prefer setting this in the .env file instead of here
-    DiscordToken: "",
-
+    DiscordToken:
+      "",
+    
     // The discord bot Application ID under the General Information tab.  Please prefer setting this in the .env file instead of here
     DiscordBotID: "",
-
+    
+    // Bot Client Secret, under the General Information tab
+    DiscordClientSecret: "",
+    
     // Discord user IDs for permissions and ownerships
     Users: {
       // Discord IDs for owners of the bot
-      Owners: ["", "", ""],
+      Owners: [""],
       // Discord IDs for those allowed to use the AI. Ignored if AI.EnableWhitelist = false
       AIAllowedUsers: [""],
     },
   },
-
+  
   // ------------------------------------------- Stable Diffusion ------------------------------------------------------
   StableDiffusion: {
     // Replicate.com API Token. Get it from https://replicate.com/account
     ReplicateToken: "",
     // If you want to change the model, change this to one of the keys in AvailableModels (e.g. anything_3_0, eimis_anime_diffusion, stableDiffusion2_1)
-    Model: "stableDiffusion2_1",
+    Model: "anything_3_0_better_vae",
     // Available models. You can add your own models here. The key is the name of the model, and the value is the model ID.
     // You can find the model ID by going to https://replicate.com/models and clicking on the model you want to use.
     AvailableModels: {
+      realistic_vision:
+        "heedster/realistic-vision-v5:c0259010b93e7a4102a4ba946d70e06d7d0c7dc007201af443cfc8f943ab1d3c",
       anything_3_0_better_vae:
         "cjwbw/anything-v3-better-vae:09a5805203f4c12da649ec1923bb7729517ca25fcac790e640eaa9ed66573b65",
       anything_3_0:
@@ -49,46 +55,51 @@ module.exports = {
       stableDiffusion2_1:
         "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
     },
-
+    
     // These are all the StableDiffusion options. If you have problems generating images, try changing these (follow the settings in
     // the model's page (https://replicate.com/cjwbw/anything-v3.0, https://replicate.com/cjwbw/eimis_anime_diffusion, etc.)
     NegativePrompt:
-      "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, " +
-      "low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name",
+      "(deformed iris, deformed pupils, semi-realistic), text, " +
+      "cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, " +
+      "mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, " +
+      "extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, " +
+      "fused fingers, too many fingers, long neck",
+    // "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, " +
+    // "low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name",
     NumInferenceSteps: 10,
     Width: 512,
-    Height: 512,
+    Height: 768,
     GuidanceScale: 7,
     Scheduler: "DPMSolverMultistep",
     DisableSafetyCheck: false,
-
+    
     // Enable daily limit for each member. Put numbers of uses per day in the DailyLimit config below (e.g: 15, 30)
     // Leave this to false if you don't want to enable daily limit.
     DailyLimit: false,
   },
-
+  
   // ------------------------------------------ Ririko AI / Chatbot ----------------------------------------------------
   AI: {
     // Prefix of the AI part of the bot
     Prefix: ".",
-
+    
     // The provider to use for the bot. Must be one of:
     // NLPCloudProvider | OpenAIProvider | RirikoLLaMAProvider | RirikoHuggingChatProvider
     Provider: "OpenAIProvider",
-
+    
     // Provider Token
     AIToken: "",
-
+    
     // Use any model in this page https://platform.openai.com/docs/models/overview
     GPTModel: "gpt-4",
-
+    
     // URL of the local server for Ririko AI. Leave this empty if you don't have a local server.
     // Example: http://localhost:5000/api/v1/ask
     LocalServerURL: "http://localhost:5000/api/v1/ask",
-
+    
     // Enable or disable the Whitelist.
     EnableWhitelist: true,
-
+    
     /**
      * You can change the personality of Ririko here by adding your own.
      * It is also possible to make Ririko cosplay as someone - you gotta try to experiment them it's fun :)
@@ -107,17 +118,17 @@ module.exports = {
       "When you are asked about your feelings, you will make up any feelings right now just to get the conversation going. ",
       "You know that today is %CURRENT_TIME%. ",
     ],
-
+    
     // This is the past prompts, also adds the abilities
     Prompts: [
       "When you're asked to play any song, please reply with this format: Now playing 🎵 insert the song title here 🎵. ",
     ],
-
+    
     // Enable daily limit for each member. Put numbers of uses per day in the DailyLimit config below (e.g: 15, 30)
     // Leave this to false if you don't want to enable daily limit.
     DailyLimit: false,
   },
-
+  
   // ------------------------------------------------ Database ---------------------------------------------------------
   DATABASE: {
     // Database engine to use. Must be one of: sqlite, mongodb, mysql
@@ -125,50 +136,50 @@ module.exports = {
     // MongoDB related configs
     MongoDB: {
       // The MongoDB access URI, example: mongodb+srv://user:password@example.net
-      AccessURI: "",
+      AccessURI: "mongodb+srv://user:password@example.net",
     },
   },
-
+  
   // -------------------------------------------- Twitch Announcer -----------------------------------------------------
   TWITCH: {
     // Your twitch client ID,get it here: https://dev.twitch.tv/console/apps/create
     TwitchClientId: "",
-
+    
     //
     TwitchClientSecret: "",
   },
-
+  
   // ------------------------------------------------ welcomer --------------------------------------------------------
-
+  
   welcomer: {
     defaultImageUrl: "https://i.imgur.com/zvWTUVu.jpg",
   },
-
+  
   // ------------------------------------------- nitro boost announcer -------------------------------------------------
-
+  
   nitroAnnouncer: {
     message: "Thank you %user% for boosting the server!",
   },
-
+  
   // ------------------------------------------------- giveaways -------------------------------------------------------
-
+  
   // leave "false" if you don't want to mention everyone
   giveaways: {
     everyoneMention: true,
   },
-
+  
   // ----------------------------------------------- lyrics config -----------------------------------------------------
-
+  
   GENIUS_TOKEN: "",
   GENIUS_ENABLED: true,
-
+  
   // example: https://your-lyrist-domain.vercel.app/api
   LYRIST_URL: "",
   LYRIST_ENABLED: false,
-
+  
   // ---------------------------------------------- music bot config ---------------------------------------------------
   embedColor: "ffc0cb", //hex color code
-
+  
   emoji: {
     play: "▶️",
     stop: "⏹️",
@@ -177,12 +188,12 @@ module.exports = {
     repeat: "🔁",
     error: "❌",
   },
-
+  
   sponsor: {
     status: true, //true or false
     url: "https://angel.net.my", //write your discord sponsor url.
   },
-
+  
   voteManager: {
     //optional
     status: false, //true or false
@@ -209,16 +220,16 @@ module.exports = {
     ], //write your use by vote commands.
     vote_url: "", //write your top.gg vote url.
   },
-
+  
   shardManager: {
     shardStatus: false, //If your bot exists on more than 1000 servers, change this part to true.
   },
-
+  
   playlistSettings: {
     maxPlaylist: 10, //max playlist count
     maxMusic: 75, //max music count
   },
-
+  
   opt: {
     DJ: {
       commands: [
@@ -234,27 +245,27 @@ module.exports = {
         "shuffle",
       ], //Please don't touch
     },
-
+    
     voiceConfig: {
       leaveOnFinish: false, //If this variable is "true", the bot will leave the channel the music ends.
       leaveOnStop: false, //If this variable is "true", the bot will leave the channel when the music is stopped.
-
+      
       leaveOnEmpty: {
         status: false,
         cooldown: 10000000, //1000 = 1 second
       },
     },
-
+    
     maxVol: 150, //You can specify the maximum volume level.
   },
-
+  
   // ------------------------------------------- stats & leaderboards --------------------------------------------------
   STATS: {
     ENABLED: false,
     XP_COOLDOWN: 5, // Cooldown in seconds between messages
     DEFAULT_LVL_UP_MSG: "{member:tag}, You just advanced to **Level {level}**",
   },
-
+  
   // --------------------------------------------- Moderation Tools ----------------------------------------------------
   MODERATION: {
     ENABLED: false,
@@ -273,20 +284,20 @@ module.exports = {
       MOVE: "RANDOM",
     },
   },
-
+  
   // ---------------------------------------------- system settings ----------------------------------------------------
   CACHE_SIZE: {
     GUILDS: 100,
     USERS: 10000,
     MEMBERS: 10000,
   },
-
+  
   DEBUG: {
     // 0 = most basic logging, 1 = Some more logging, 2 = Even more logging, 3 = Gib me all the LOGS!
     Level: 0,
     // start
     LogDir: "logs",
   },
-
-  VERSION: "8", // DO NOT TOUCH
+  
+  VERSION: "7", // DO NOT TOUCH
 };

@@ -12,13 +12,14 @@ const authRoutes = require('./backend/routes/auth.routes');
 const guildRoutes = require('./backend/routes/guild.routes');
 const cookieParser = require('cookie-parser');
 const cors = require('cors')
+import 'dotenv/config';
 
 // Override the default loggers
 overrideLoggers();
 
 // CORS options
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: `${process.env.DOMAIN_NAME}:${process.env.PORT}`,
   maxAge: 40,
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],

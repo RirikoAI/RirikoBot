@@ -5,7 +5,7 @@ import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { client, useLoginQuery } from "@dashboard/stores";
 import { theme } from "@dashboard/theme";
-import { QueryStatus } from "./components/panel/QueryPanel";
+import { QueryStatus } from "@dashboard/components/panel/QueryPanel";
 import "./index.css";
 import { layouts } from "./layouts";
 import { NormalLayout } from "./utils/routeUtils";
