@@ -103,7 +103,7 @@ export const enFeature = {
   unsaved: "Save Changes",
   error: {
     "not enabled": "Not Enabled",
-    "not enabled description": "Try enable this feature?",
+    "not enabled description": "Try to enable this feature?",
     "not found": "Not Found",
     "not found description": "Hmm... Weird we can't find it",
   },

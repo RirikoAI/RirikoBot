@@ -4,30 +4,30 @@
 
 export const deFeatures = {
   aichatbot: "AI Chatbot",
-  "aichatbot description": "Aktivieren Sie die Chatbot-Funktion auf Ihrem Server",
+  "aichatbot description": "Aktiviere die Chatbot-Funktion auf deinem Server",
   autovoicechannel: "Automatischer Sprachkanal",
-  "autovoicechannel description": "Aktivieren Sie die automatische Sprachkanalfunktion auf Ihrem Server",
+  "autovoicechannel description": "Aktiviere die automatische Sprachkanalfunktion auf deinem Server",
   musicplayer: "Musikplayer",
-  "music description": "Spielen Sie Musik auf Ihrem Discord-Server",
+  "music description": "Spiele Musik auf deinem Discord-Server",
   twitch: "Twitch Live-Benachrichtigungen",
-  "twitch description": "Erhalten Sie Benachrichtigungen, wenn Ihr Lieblings-Streamer live geht",
+  "twitch description": "Erhalte eine Benachrichtigung, wenn dein Lieblings-Streamer live geht",
   welcome: "Willkommensnachricht",
-  "welcome description": "Senden Sie eine Willkommensnachricht, wenn ein neues Mitglied beitritt",
+  "welcome description": "Sende eine Willkommensnachricht, wenn ein neues Mitglied den Server beitritt",
   farewell: "Abschiedsnachricht",
-  "farewell description": "Senden Sie eine Abschiedsnachricht, wenn ein Mitglied den Server verlässt",
+  "farewell description": "Sende eine Abschiedsnachricht, wenn ein Mitglied den Server verlässt",
   reactionroles: "Reaktionsrollen",
-  "reactionroles description": "Weisen Sie Benutzern Rollen zu, wenn ein Button geklickt wird"
+  "reactionroles description": "Weise Benutzern Rollen zu, wenn sie auf ein Button klicken"
 }
 
 export const deProfile = {
   logout: "Ausloggen",
-  language: "Ihre Sprache",
-  "language description": "Wählen Sie Ihre bevorzugte Sprache",
+  language: "Sprache",
+  "language description": "Wähle deine Sprache",
   settings: "Einstellungen",
-  "dark mode": "Dunkler Modus",
-  "dark mode description": "Aktivieren Sie das dunkle Thema, um Ihre Augen zu schonen",
+  "dark mode": "Dark Mode",
+  "dark mode description": "Aktiviert das dunkle Thema, um deine Augen zu schonen",
   "dev mode": "Entwicklermodus",
-  "dev mode description": "Zum Debuggen und Testen",
+  "dev mode description": "Wird zum Debuggen und Testen verwendet",
 }
 
 export const deHome = {
@@ -35,39 +35,38 @@ export const deHome = {
   "reaction role": "Reaktionsrollen",
   "auto moderator": "Auto-Moderator",
   "next gen discord bot": "Next-Gen Discord Bot",
-  "play music anywhere": "Musik überall abspielen",
-  "reaction role description": "Weisen Sie Benutzern Rollen zu, wenn ein Button oder eine Reaktion geklickt wird",
-  "auto moderator description": "Schützen Sie Ihren Server vor Angriffen",
-  "trusted by": ["Vertraut von", "Servern"]
+  "play music anywhere": "Überall Musik abspielen",
+  "reaction role description": "Weise Benutzern Rollen zu, wenn sie auf ein Button oder eine Reaktion klicken",
+  "auto moderator description": "Halte deinen Server sicher und sauber",
+  "trusted by": ["Von", "Servern vertraut"]
 }
 
 export const deGuild = {
-  features: "Bot-Funktionen verwalten",
+  features: "Funktionen",
   banner: {
-    title: "Jetzt kostenlos testen",
-    description: "Passen Sie den Bot für Ihren Server an",
+    title: "Willkommen zu Ririko",
+    description: "Ririko AI läuft in deinem Server",
   },
   error: {
     "not found": "Wo ist es?",
-    "not found description": "Lassen Sie uns den Bot einladen, da er keinen Zugriff auf den Server hat!",
+    "not found description": "Ririko hat keinen Zugriff auf den Server, vielleicht ist sie nicht im Server? Laden wir sie ein!",
     load: "Server konnte nicht geladen werden",
   },
   bn: {
-    "enable feature": "Funktion aktivieren",
-    "config feature": "Konfigurieren",
+    "enable feature": "Aktivieren",
+    "config feature": "Konfig",
     invite: "Bot einladen",
     settings: "Einstellungen",
   },
 }
 
 export const deCommon = {
-  // translate these to german
-  loading: "Laden",
+  loading: "Lädt",
   search: "Suche",
-  "select lang": "Wählen Sie Ihre Sprache",
+  "select lang": "Wähle deine Sprache aus",
   dashboard: "Dashboard",
   profile: "Profil",
-  pages: "Alle Seiten",
+  pages: "Seiten",
   logout: "Ausloggen",
   fail: {
     login: "Anmeldung fehlgeschlagen",
@@ -75,44 +74,44 @@ export const deCommon = {
 }
 
 export const deDashboard = {
-  welcome: "Willkommen",
+  welcome: "Willkommen zurück, ",
   pricing: "Preise",
   invite: {
-    title: "Bot einladen",
-    description: "Probieren Sie den Discord-Bot mit einem Klick aus",
+    title: "Lade unseren Bot ein",
+    description: "Probier unseren Discord-Bot mit einem Klick",
     bn: "Jetzt einladen",
   },
   music: {
     title: "Musikplayer",
-    description: "Spielen Sie Musik auf Ihrem Discord-Server",
-    "now playing": "Jetzt spielt",
+    description: "Spiele deine Lieblingsmusik in Sprachkanälen",
+    "now playing": "Jetzt läuft",
   },
   vc: {
     create: "Sprachkanal erstellen",
     "created channels": "Erstellte Sprachkanäle",
   },
   command: {
-    title: "Befehle",
-    description: "Verwenden Sie Befehle, um den Bot zu steuern",
+    title: "Befehlsnutzung",
+    description: "Nutzung von Befehlen in deinem Server",
   },
 }
 
 export const deFeature = {
-  unsaved: "Nicht gespeicherte Änderungen vorhanden",
+  unsaved: "Änderungen speichern",
   error: {
     "not enabled": "Nicht aktiviert",
-    "not enabled description": "Möchten Sie diese Funktion aktivieren?",
-    "not found": "Funktion nicht gefunden",
-    "not found description": "Seltsam... konnte nicht gefunden werden",
+    "not enabled description": "Versuche, diese Funktion zu aktivieren?",
+    "not found": "Nicht gefunden",
+    "not found description": "Hmm... seltsam, wir können es nicht finden",
   },
   bn: {
-    enable: "Aktivieren",
-    save: "Änderungen speichern",
+    enable: "Funktion Aktivieren",
+    save: "Speichern",
     discard: "Verwerfen",
   },
 }
 
 export const deAuth = {
   login: "Anmelden",
-  "login description": "Melden Sie sich mit Discord an, um fortzufahren",
+  "login description": "Melde dich mit deinem Discord-Account an",
 }
