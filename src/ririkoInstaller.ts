@@ -128,7 +128,8 @@ app.post("/test_mongodb", bodyParser.json(), (req, res) => {
 app.post("/submit_install", bodyParser.json(), async (req, res) => {
   if (req?.body[0]?.name) {
     const filesToCopy = [
-      { source: "../config.example.js", destination: "../config.ts" },
+      { source: "../config.example.ts", destination: "../config.ts" },
+      { source: "../.env.example", destination: "../.env" },
     ];
 
     const copySuccess = await copyConfigFiles(filesToCopy);
