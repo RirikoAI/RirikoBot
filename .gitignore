@@ -45,3 +45,6 @@ integrations
 # Temporary Files
 temp/
 /.temp_cache/
+
+# Docker data folder
+data/

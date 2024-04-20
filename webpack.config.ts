@@ -118,7 +118,7 @@ module.exports = function (webpackEnv) {
         // in `package.json`, in which case it will be the pathname of that URL.
         new InterpolateHtmlPlugin(HtmlWebpackPlugin, {
           'NODE_ENV': 'production',
-          'PUBLIC_URL': `${process.env.DOMAIN_NAME}:${process.env.PORT}`
+          'PUBLIC_URL': `${process.env.PUBLIC_URL}:${process.env.PORT}`
         }),
         // Generates an `index.html` file with the <script> injected.
         new HtmlWebpackPlugin(

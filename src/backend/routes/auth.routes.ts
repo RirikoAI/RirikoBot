@@ -11,7 +11,7 @@ router.get('/login', (req, res) => {
     'https://discord.com/api/oauth2/authorize?' +
     new URLSearchParams({
       client_id: discordBotID(),
-      redirect_uri: `${process.env.DOMAIN_NAME}:${process.env.BACKEND_PORT}/callback`,
+      redirect_uri: `${process.env.PUBLIC_URL}:${process.env.BACKEND_PORT}/callback`,
       response_type: 'code',
       scope: 'identify guilds',
     });
@@ -28,7 +28,7 @@ router.get('/callback', async (req, res) => {
     const token = await exchangeToken(req.query.code);
     
     setCookie(res, token);
-    res.redirect(`${process.env.DOMAIN_NAME}:${process.env.PORT}/callback`);
+    res.redirect(`${process.env.PUBLIC_URL}:${process.env.PORT}/callback`);
   } catch (e) {
     res.send(e.message);
   }

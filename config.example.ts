@@ -1,12 +1,15 @@
 module.exports = {
   // Set the port for Ririko AI dashboard
   PORT: 3000,
-  
+
   // Set the port for the backend server
   BACKEND_PORT: 4000,
-  
+
   // Set the domain name for Ririko AI. Use localhost if you are running it locally
   DOMAIN_NAME: "localhost",
+
+  // Set the public URL for Ririko AI. Use localhost if you are running it locally
+  PUBLIC_URL: "http://localhost",
   
   // Set the language of the bot
   LANGUAGE: "en",

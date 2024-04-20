@@ -7,7 +7,7 @@ import { CustomFeatures } from "@dashboard/features";
 import { withBot, callDefault, callReturn } from "./core";
 import { ChannelTypes } from "./discord";
 
-export const bot = `${process.env.DOMAIN_NAME}:${process.env.BACKEND_PORT}`;
+export const bot = `${process.env.PUBLIC_URL}:${process.env.BACKEND_PORT}`;
 
 export type Role = {
   id: string;

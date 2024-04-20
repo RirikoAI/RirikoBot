@@ -19,7 +19,7 @@ overrideLoggers();
 
 // CORS options
 const corsOptions = {
-  origin: `${process.env.DOMAIN_NAME}:${process.env.PORT}`,
+  origin: `${process.env.PUBLIC_URL}:${process.env.PORT}`,
   maxAge: 40,
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],

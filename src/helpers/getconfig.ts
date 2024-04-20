@@ -249,7 +249,23 @@ export const replicateToken = () => {
  */
 export const hostname = () => {
   // read .env file and get the hostname
-  return process.env.HOSTNAME || "localhost";
+  return process.env.IP_ADDRESS || "localhost";
+};
+
+/**
+ * @returns {*|string}
+ */
+export const domainName = () => {
+  // read .env file and get the hostname
+  return process.env.DOMAIN_NAME || config.DOMAIN_NAME || "localhost";
+};
+
+/**
+ * @returns {*|string}
+ */
+export const publicURL = () => {
+  // read .env file and get the hostname
+  return process.env.PUBLIC_URL || config.PUBLIC_URL || "localhost";
 };
 
 /**

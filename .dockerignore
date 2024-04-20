@@ -1,0 +1,11 @@
+**/node_modules
+build
+logs
+**/.temp_cache
+.circleci
+.github
+.vscode
+.env
+config.ts
+config.js
+data

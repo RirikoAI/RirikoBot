@@ -67,6 +67,14 @@
                 </div>
                 <div class="row">
                   <div class="form-group col-md-12">
+                    <p class="text-sm">OAuth2 Client Secret:</p>
+                    <label for="client_secret" class="sr-only">Bot Token</label>
+                    <input type="text" name="client_secret" id="client_secret" class="form-control"
+                           placeholder="Enter your Oauth2 client secret here" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="form-group col-md-12">
                     <p class="text-sm">Privileged Intents:</p>
                     <p>
                       <label><input type="checkbox" name="privileged_intents" id="privileged_intents"
@@ -500,7 +508,7 @@
                   created a bot for your application or not (see the guide in step 1).
                 </div>
                 <p>
-                  <button onclick="generateInviteLink()" target="_blank" class="btn btn-success">Click to invite the bot
+                  <button onclick="generateInviteLink(); return false;" target="_blank" class="btn btn-success">Click to invite the bot
                     to your server
                   </button>
                 </p>

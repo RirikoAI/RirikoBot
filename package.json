@@ -69,7 +69,6 @@
     "@chakra-ui/system": "^2.0.0",
     "@chakra-ui/theme-tools": "^2.0.0",
     "@discordjs/builders": "^1.7.0",
-    "@discordjs/opus": "^0.9.0",
     "@discordjs/rest": "^2.2.0",
     "@discordjs/voice": "^0.16.1",
     "@distube/deezer": "^1.0.0",

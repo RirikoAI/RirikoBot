@@ -1,5 +1,5 @@
 import { deepmerge } from 'deepmerge-ts';
-export const orgin = `${process.env.DOMAIN_NAME}:${process.env.PORT}`;
+export const orgin = `${process.env.PUBLIC_URL}:${process.env.PORT}`;
 
 export type ReturnOptions<T> = Options & {
   /**

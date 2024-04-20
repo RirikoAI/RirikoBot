@@ -3,9 +3,9 @@ import { discordBotClientSecret, discordBotID } from "helpers/getconfig";
 export const API_ENDPOINT = 'https://discord.com/api/v10';
 export const CLIENT_ID = discordBotID();
 export const CLIENT_SECRET = discordBotClientSecret();
-const STATIC_URL = `${process.env.DOMAIN_NAME}:${process.env.BACKEND_PORT}`;
+const STATIC_URL = `${process.env.PUBLIC_URL}:${process.env.BACKEND_PORT}`;
 export const REDIRECT_URI = `${ STATIC_URL }/callback`;
-export const WEB_URL = `${process.env.DOMAIN_NAME}:${process.env.PORT}`;
+export const WEB_URL = `${process.env.PUBLIC_URL}:${process.env.PORT}`;
 
 export type AccessToken = {
   access_token: string;
