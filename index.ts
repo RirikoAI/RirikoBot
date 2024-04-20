@@ -163,7 +163,7 @@ function startRirikoQueueManagerWorker() {
 function startRirikoInstallerWorker() {
   require("ts-node").register();
   
-  const worker_RirikoInstaller = new Worker(`./${ buildDir }/RirikoInstaller.ts`, {
+  const worker_RirikoInstaller = new Worker(`./${ buildDir }/ririkoInstaller.ts`, {
     execArgv: [
       "-r",
       "ts-node/register/transpile-only",

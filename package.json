@@ -37,8 +37,9 @@
   "scripts": {
     "------------------------------------------- Start Scripts -------------------------------------------": "",
     "start": "cross-env NODE_ENV=development npm run start:watch",
-    "start:prod": "cross-env NODE_ENV=production npm run build && cross-env NODE_ENV=production npm run start:watch",
-    "start:watch": "nodemon --exec ts-node -r tsconfig-paths/register --swc index.ts",
+    "start:prod": "cross-env NODE_ENV=production npm run build && cross-env NODE_ENV=production npm run start:swc",
+    "start:watch": "nodemon --exec npm run start:swc",
+    "start:swc": "ts-node -r tsconfig-paths/register --swc index.ts",
     "------------------------------------------- Test Scripts -------------------------------------------": "",
     "test": "jest --coverage --verbose",
     "test:silent": "jest --coverage --silent",
