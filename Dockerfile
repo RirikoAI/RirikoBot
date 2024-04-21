@@ -1,6 +1,4 @@
 # Start your image with a node base image
-# FROM node:20-alpine
-# FROM node:18.12-alpine # ririkoai
 FROM node:lts-bullseye
 
 # Install requirements
@@ -16,7 +14,8 @@ COPY . .
 COPY .env.example ./.env
 EXPOSE 3000 3100 4000
 
+### Add TS_NODE_DEBUG=true before npm run start:watch to enable debug logs
 CMD ["sh", "-c", " \
     npm run build ; \
-    TS_NODE_DEBUG=true NODE_ENV=production npm run start:watch ; \
+    NODE_ENV=production npm run start:watch ; \
     sleep infinity"]

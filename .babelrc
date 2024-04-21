@@ -34,7 +34,7 @@
           "utils": "./src/utils",
           "config": "./config.js",
           "ririkoBot": "./src/ririkoBot.js",
-          "languages": "./languages",
+          "languages": "./src/languages",
           "tools": "./src/tools",
           "assets": "./assets",
           "helpers": "./src/helpers",

@@ -1,5 +1,5 @@
 import "@ririkoai/colors.ts";
-const config = require("config");
+const config = require("../../config/config");
 
 export const getLang = () => {
   const lang = config.LANGUAGE;

@@ -21,7 +21,7 @@ const {
 } = require("./Schemas/ChatHistory");
 
 const { getAndIncrementUsageCount } = require("helpers/commandUsage");
-const { AI } = require("config");
+const { AI } = require("../../config/config");
 
 /**
  * Now, this is going to be an awesome AI that can remember past conversations by saving it into the

@@ -5,7 +5,7 @@ import { replicateToken } from "helpers/getconfig";
 
 import Replicate from "replicate";
 // @ts-ignore
-import { StableDiffusion } from "config";
+import { StableDiffusion } from "../../../../config/config";
 import { getAndIncrementUsageCount } from "helpers/commandUsage";
 import {
   createActionRow,

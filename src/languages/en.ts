@@ -1,7 +1,7 @@
 /**
  * English Translations
  */
-const {version} = require("../package.json");
+const {version} = require("../../package.json");
 
 export const enFeatures = {
   aichatbot: "AI Chatbot",

@@ -1,7 +1,7 @@
 let config;
 
 try {
-  config = require("../../config");
+  config = require("../../config/config");
 } catch (e) {}
 
 /**

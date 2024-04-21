@@ -1,4 +1,5 @@
 # NOTICE
+- The project is provided as-is and we do not provide any guarantees or warranties.
 - The projects below are may have been used in this project under the terms of their respective licenses.
 - We have made changes to the original projects to fit with the project's requirements.
 - Changes are stated in the commit messages and the code itself.

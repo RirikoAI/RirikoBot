@@ -12,7 +12,7 @@ const {
 const { overrideLoggers } = require("helpers/logger");
 overrideLoggers();
 
-const config = require("config") || null;
+const config = require("../config/config") || null;
 import "@ririkoai/colors.ts";
 
 const { RirikoAINLP } = require("app/RirikoAI-NLP");
@@ -121,7 +121,7 @@ module.exports = client;
   // Initialise discord giveaways
   const { GiveawaysManager } = require("discord-giveaways");
   client.giveawaysManager = new GiveawaysManager(client, {
-    storage: "giveaways.json",
+    storage: "./config/giveaways.json",
     default: {
       botsCanWin: false,
       embedColor: "#2F3136",

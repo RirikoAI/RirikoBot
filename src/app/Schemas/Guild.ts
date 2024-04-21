@@ -1,7 +1,7 @@
 import { AIPrefix } from "helpers/getconfig";
 
 const mongoose = require("mongoose");
-const {CACHE_SIZE, DISCORD, STATS} = require("config");
+const {CACHE_SIZE, DISCORD, STATS} = require("../../../config/config");
 const FixedSizeMap = require("fixedsize-map");
 const {getUser} = require("./User");
 

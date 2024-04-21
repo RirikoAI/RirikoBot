@@ -14,7 +14,12 @@ const buildDir = "./src";
 const logDirectory = "./logs";
 const cli = require(`./${buildDir}/ririkoCli`);
 
-const configFileExists = fs.existsSync("./config.ts");
+const configFileExists = fs.existsSync("./config/config.ts");
+
+// Create `data` directory if not exist
+if (!fs.existsSync("./data")) {
+    fs.mkdirSync("./data");
+}
 
 let initiated = false;
 let botUsername = "";
@@ -232,7 +237,7 @@ function startRirikoDashboard() {
     });
 
     child.stderr.on("data", (data) => {
-        console.error(`${data}`);
+        console.info(`${data}`);
     });
 
     child.on("close", (code) => {
@@ -257,7 +262,7 @@ if (configFileExists === true) {
     startRirikoInstallerWorker();
 }
 
-
+// Host a dummy express.js server to keep the bot running, while the child processes are running
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });

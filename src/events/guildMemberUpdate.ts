@@ -7,7 +7,7 @@ const {
   ActionRowBuilder,
 } = require("discord.js");
 const client = require("ririkoBot");
-const config = require("config");
+const config = require("../../config/config");
 const { QuickDB } = require("quick.db");
 const db = new QuickDB();
 

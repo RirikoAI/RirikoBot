@@ -7,7 +7,7 @@ const {
   TextInputBuilder,
   TextInputStyle,
 } = require("discord.js");
-const config = require("config");
+const config = require("../../../../config/config");
 const getConfig = require("helpers/getconfig");
 module.exports = {
   name: "servers",

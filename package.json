@@ -252,7 +252,7 @@
     "utils": "./src/utils",
     "config": "./config.ts",
     "ririkoBot": "./src/ririkoBot.ts",
-    "languages": "./languages",
+    "languages": "./src/languages",
     "tools": "./src/tools",
     "assets": "./assets",
     "helpers": "./src/helpers",

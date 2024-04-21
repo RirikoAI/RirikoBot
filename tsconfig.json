@@ -46,7 +46,7 @@
         "./src/utils/*"
       ],
       "languages/*": [
-        "./languages/*"
+        "./src/languages/*"
       ],
       "tools/*": [
         "./src/tools/*"
@@ -69,8 +69,8 @@
   "include": [
     "src/**/*",
     "index.ts",
-    "languages/*",
-    "config.ts",
+    "src/languages/*",
+    "config/config.ts",
     "src/**/*.tsx"
   ],
   "exclude": [

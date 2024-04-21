@@ -1,7 +1,7 @@
 /**
  * @author ZeroDiscord https://github.com/ZeroDiscord/Giveaway
  */
-const config = require("config");
+const config = require("../../config/config");
 module.exports = {
   giveaway:
     (config.giveaways.everyoneMention ? "@everyone\n\n" : "") +

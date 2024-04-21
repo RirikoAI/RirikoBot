@@ -6,6 +6,6 @@ logs
 .github
 .vscode
 .env
-config.ts
+config/config.ts
 config.js
 data

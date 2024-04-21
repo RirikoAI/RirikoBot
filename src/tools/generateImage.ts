@@ -4,7 +4,7 @@ import path from "path";
 const Canvas = require("canvas");
 
 const Discord = require("discord.js");
-const config = require("config");
+const config = require("../../config/config");
 
 const dim = {
   height: 675,

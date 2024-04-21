@@ -5,7 +5,7 @@ const {
   EmbedBuilder,
   ChannelType,
 } = require("discord.js");
-const config = require("config");
+const config = require("../../config/config");
 const { getLang } = require("helpers/language");
 const getconfig = require("../helpers/getconfig");
 const { QuickDB } = require("quick.db");
@@ -27,7 +27,7 @@ class RirikoAVC {
     children: [],
   };
 
-  constructor(path = "vc.json") {
+  constructor(path = "config/vc.json") {
     this.#_path = path;
     this.#load();
   }
@@ -50,7 +50,7 @@ class RirikoAVC {
     try {
       this.#_content = JSON.parse(fs.readFileSync(this.#_path, "utf8"));
     } catch (err) {
-      console.error(err);
+      console.info('[Ririko AVC] Configuration not found. Setup one by using !setupavc command.'.yellow);
       return false;
     }
   }

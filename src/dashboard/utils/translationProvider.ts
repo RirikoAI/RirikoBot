@@ -1,10 +1,10 @@
 import { initLanguages, initI18n, createI18n } from "@dashboard/hooks/i18n";
 import { useSettingsStore } from "@dashboard/stores";
-import { enAuth, enCommon, enDashboard, enFeature, enFeatures, enGuild, enHome, enProfile } from "languages/en";
-import { cnAuth, cnCommon, cnDashboard, cnFeature, cnFeatures, cnGuild, cnHome, cnProfile } from "languages/zh";
-import { msAuth, msCommon, msDashboard, msFeature, msFeatures, msGuild, msHome, msProfile } from "languages/ms";
-import { jaAuth, jaCommon, jaDashboard, jaFeature, jaFeatures, jaGuild, jaHome, jaProfile } from "languages/ja";
-import { deAuth, deCommon, deDashboard, deFeature, deFeatures, deGuild, deHome, deProfile } from "languages/de";
+import { enAuth, enCommon, enDashboard, enFeature, enFeatures, enGuild, enHome, enProfile } from "../../languages/en";
+import { cnAuth, cnCommon, cnDashboard, cnFeature, cnFeatures, cnGuild, cnHome, cnProfile } from "../../languages/zh";
+import { msAuth, msCommon, msDashboard, msFeature, msFeatures, msGuild, msHome, msProfile } from "../../languages/ms";
+import { jaAuth, jaCommon, jaDashboard, jaFeature, jaFeatures, jaGuild, jaHome, jaProfile } from "../../languages/ja";
+import { deAuth, deCommon, deDashboard, deFeature, deFeatures, deGuild, deHome, deProfile } from "../../languages/de";
 
 export const LanguageISO = [
   "en", "cn", "ms", "ja", "de"

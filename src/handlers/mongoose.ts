@@ -1,4 +1,4 @@
-const config = require("config");
+const config = require("../../config/config");
 const getconfig = require("helpers/getconfig");
 const mongoose = require("mongoose");
 const { getLang } = require("../helpers/language");

@@ -1,9 +1,11 @@
-# Bot config files. Please, never commit your config.ts file anywhere
+# Bot config files. Please, never commit your config.ts/config.js file anywhere
 config.js
 config.ts
+config/config.ts
 
 # Giveaway storage files
 giveaways.json
+config/giveaways.json
 
 # Logs
 logs
@@ -22,7 +24,7 @@ build
 node_modules/
 jspm_packages/
 
-# dotenv environment variable files
+# dotenv environment variable files. Please never commit your .env file to the repository
 .env
 .env.development.local
 .env.test.local
@@ -40,7 +42,9 @@ coverage
 integrations
 /bin/test/
 
-/vc.json
+# Autovoice files
+vc.json
+config/vc.json
 
 # Temporary Files
 temp/

@@ -1,5 +1,5 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
-const maxVol = require("config").opt.maxVol;
+const maxVol = require("../../../../config/config").opt.maxVol;
 const db = require("../../../app/Schemas/MusicBot");
 const { getLang } = require("../../../helpers/language");
 module.exports = {

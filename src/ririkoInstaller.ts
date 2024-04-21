@@ -20,7 +20,7 @@ const bodyParser = require("body-parser");
 const {validateMongoDBConnection} = require("./helpers/mongoUtils");
 const path = require("path");
 
-const configFileExists = fs.existsSync("./config.ts");
+const configFileExists = fs.existsSync("../config/config.ts");
 
 process
     .on("unhandledRejection", (reason, p) => {
@@ -80,7 +80,7 @@ app.listen(Port, Hostname, () => {
 
     if (!configFileExists) {
         console.info(
-            `You can now install Ririko Ai by visiting: http://${Hostname}:${Port}`
+            `You can now install Ririko Ai by visiting: http://${(Hostname === '0.0.0.0' ? 'localhost' : Hostname)}:${Port}`
                 .brightYellow
         );
     }
@@ -90,19 +90,19 @@ app.listen(Port, Hostname, () => {
  * If config.ts does not exist, then we will run the installer
  */
 if (!configFileExists) {
-    app.use("/assets", express.static("installer/assets"));
+    app.use("/assets", express.static("src/installer/assets"));
 
     app.get("/", function (req, res) {
-        res.sendFile(join(__dirname, "/../installer/index.html"));
+        res.sendFile(join(__dirname, "installer/index.html"));
     });
 }
 
 app.get("/terms-and-conditions", function (req, res) {
-    res.sendFile(join(__dirname, "/../installer/terms-and-conditions.html"));
+    res.sendFile(join(__dirname, "installer/terms-and-conditions.html"));
 });
 
 app.get("/privacy-policy", function (req, res) {
-    res.sendFile(join(__dirname, "/../installer/privacy-policy.html"));
+    res.sendFile(join(__dirname, "installer/privacy-policy.html"));
 });
 
 // Define a route to handle the POST request
@@ -128,7 +128,7 @@ app.post("/test_mongodb", bodyParser.json(), (req, res) => {
 app.post("/submit_install", bodyParser.json(), async (req, res) => {
     if (req?.body[0]?.name) {
         const filesToCopy = [
-            {source: "../config.example.ts", destination: "../config.ts"},
+            {source: "../config/config.example.ts", destination: "../config/config.ts"},
             {source: "../.env.example", destination: "../.env"},
         ];
 
@@ -175,7 +175,7 @@ function getValueFromKey(key, payload) {
 }
 
 async function writeConfigFile(payloads) {
-    const filePath = path.resolve(__dirname, "../config.ts");
+    const filePath = path.resolve(__dirname, "../config/config.ts");
 
     // Read the contents of the file
     const content = fs.readFileSync(filePath, "utf-8");

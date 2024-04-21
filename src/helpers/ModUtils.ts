@@ -2,7 +2,7 @@
  * @author saiteja-madha https://github.com/saiteja-madha/discord-js-bot/
  */
 const { Collection, EmbedBuilder, GuildMember } = require("discord.js");
-const { MODERATION } = require("config");
+const { MODERATION } = require("../../config/config");
 
 // Utils
 const { containsLink } = require("helpers/Utils");

@@ -3,6 +3,7 @@
     "index.ts",
     "src/",
     "config.ts",
+    "config/config.ts",
     ".babelrc"
   ],
   "ignore": [

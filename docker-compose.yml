@@ -1,6 +1,7 @@
 version: "3"
 
 services:
+  ## MongoDB Server
   mongodb:
     image: mongo:latest
     ports:
@@ -11,21 +12,26 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  ## Ririko Bot App
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ririkobot:latest
+    image: ririkoai/ririkobot:latest
     depends_on:
       - mongodb
     restart: always
-    #    environment:
-    #      - MATOMO_DATABASE_HOST=db
     env_file:
       - ./.env
     ports:
       - "3000:3000"
       - "4000:4000"
     tty: true
+    volumes:
+      - app-data:/opt/app/data
+      - ./config:/opt/app/config
+      - ./logs:/opt/app/logs
+
 volumes:
   mongo-data:
+  app-data:
