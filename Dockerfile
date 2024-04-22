@@ -1,5 +1,6 @@
 # Start your image with a node base image
-FROM node:lts-bullseye
+# FROM node:lts-bullseye
+FROM node:21.6.1-bullseye-slim
 
 # Install requirements
 RUN apt-get update

@@ -6,11 +6,15 @@ services:
     image: mongo:latest
     ports:
       - "27017:27017"
+    restart: always
+    tty: true
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
       - mongo-data:/data/db
+      - ./logs/mongodb_logs:/var/log/mongodb
+    command: ["mongod", "--logpath", "/var/log/mongodb/mongod.log"]
 
   ## Ririko Bot App
   app:
@@ -27,6 +31,7 @@ services:
       - "3000:3000"
       - "4000:4000"
     tty: true
+    stdin_open: true
     volumes:
       - app-data:/opt/app/data
       - ./config:/opt/app/config

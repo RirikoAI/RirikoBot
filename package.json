@@ -58,6 +58,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/preset-env": "^7.24.4",
     "@babel/preset-typescript": "^7.23.3",
+    "@babel/traverse": "^7.24.1",
     "@chakra-ui/anatomy": "^2.0.1",
     "@chakra-ui/form-control": "^2.0.0",
     "@chakra-ui/icon": "^3.0.0",
@@ -202,6 +203,7 @@
     "web-vitals": "^3.5.2",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
+    "webpack-dev-middleware": "^7.2.1",
     "webpack-manifest-plugin": "^5.0.0",
     "workbox-webpack-plugin": "^7.0.0",
     "zustand": "^4.5.2"
