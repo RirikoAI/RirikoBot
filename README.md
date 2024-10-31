@@ -1,3 +1,5 @@
+**Announcement: We are revamping the project structure to move towards our first Open Beta. Stay Tuned**
+
 # Ririko AI
 
 
