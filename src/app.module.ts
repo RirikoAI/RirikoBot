@@ -4,10 +4,12 @@ import { RootService } from './api/root.service';
 import { ConfigService } from './config/config.service';
 import { DiscordModule } from './discord/discord.module';
 import { DiscordController } from './discord/discord.controller';
+import { DiscordService } from "./discord/discord.service";
+import { RootModule } from "./api/root.module";
 
 @Module({
-  imports: [DiscordModule],
+  imports: [RootModule, DiscordModule],
   controllers: [RootController, DiscordController],
-  providers: [RootService, ConfigService, DiscordModule],
+  providers: [RootService, ConfigService, DiscordService],
 })
 export class AppModule {}

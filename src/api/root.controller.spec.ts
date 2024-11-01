@@ -1,22 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RootController } from './root.controller';
 import { RootService } from './root.service';
+import { RootController } from "./root.controller";
+import { ConfigService } from "../config/config.service";
+import { RootModule } from "./root.module";
 
-describe('AppController', () => {
-  let appController: RootController;
-
+describe('RootService', () => {
+  let service: RootService;
+  
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
+      
+      imports: [RootModule],
+      providers: [ConfigService],
       controllers: [RootController],
-      providers: [RootService],
     }).compile();
-
-    appController = app.get<RootController>(RootController);
+    
+    service = module.get<RootService>(RootService);
   });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
+  
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 });

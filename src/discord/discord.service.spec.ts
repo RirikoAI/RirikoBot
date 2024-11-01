@@ -1,18 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { DiscordController } from './discord.controller';
 import { DiscordService } from './discord.service';
+import { ConfigModule } from '../config/config.module';
+import { ConfigService } from '../config/config.service';
 
-describe('DiscordService', () => {
-  let service: DiscordService;
+describe('Discord Controller', () => {
+  let controller: DiscordController;
   
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [DiscordService],
+      imports: [ConfigModule],
+      providers: [DiscordService, ConfigService],
+      controllers: [DiscordController],
     }).compile();
     
-    service = module.get<DiscordService>(DiscordService);
+    controller = module.get<DiscordController>(DiscordController);
   });
   
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });
