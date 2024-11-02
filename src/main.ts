@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from '#app.module';
 import { SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from './config/config.service';
+import { ConfigService } from '#config/config.service';
 import { Logger } from '@nestjs/common';
-import { DiscordService } from './discord/discord.service';
-import { CommandService } from './command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { CommandService } from '#command/command.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,7 +21,7 @@ async function bootstrap() {
     Logger.log(`Bot invite link: ${config.getBotInviteLink()}`, 'Ririko Main');
     const client = await discordService.connect();
     discordService.registerEvents(client);
-    commandService.registerPrefixCommand(client);
+    await commandService.registerPrefixCommand(client);
   });
 }
 

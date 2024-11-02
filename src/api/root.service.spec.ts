@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RootController } from "./root.controller";
-import { ConfigService } from "../config/config.service";
+import { ConfigService } from "#config/config.service";
 import { RootModule } from "./root.module";
 
 describe('RootService', () => {

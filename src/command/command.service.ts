@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Client, Message, EmbedBuilder } from 'discord.js';
 
-import { ConfigService } from '../config/config.service';
-import { CommandList } from './command.list';
+import { ConfigService } from '#config/config.service';
+import { join } from "path";
+import { commandsLoaderUtil } from "#util/command/commands-loader.util";
 
 @Injectable()
 export class CommandService {
@@ -13,14 +14,17 @@ export class CommandService {
     readonly configService: ConfigService,
   ) {}
 
-  registerPrefixCommand(client: Client) {
-    const commandList: any = [...CommandList];
+  async registerPrefixCommand(client: Client) {
+    const commandDirectory = join(__dirname);
+    
+    const commandList: any = commandsLoaderUtil(commandDirectory);
     for (const command of commandList) {
+      const commandInstance = new command(this);
       Logger.log(
-        `${command.name} registered => ${command.description}`,
+        `${commandInstance.name} registered => ${commandInstance.description}`,
         'Ririko CommandService',
       );
-      CommandService.registeredCommands.push(new command(this));
+      CommandService.registeredCommands.push(commandInstance);
     }
   }
 

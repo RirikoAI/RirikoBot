@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Message, EmbedBuilder } from 'discord.js';
-import { Command } from '../command.class';
-import { CommandService } from '../command.service';
+import { Command } from '#command/command.class';
+import { CommandService } from '#command/command.service';
 
 @Injectable()
-export class HelpCommand extends Command {
+export default class HelpCommand extends Command {
   constructor(private readonly commandService: CommandService) {
     super();
   }

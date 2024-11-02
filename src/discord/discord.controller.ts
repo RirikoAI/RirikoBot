@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus, Redirect } from '@nestjs/common';
-import { ConfigService } from '../config/config.service';
+import { ConfigService } from '#config/config.service';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { ResponseDto } from '../api/response.dto';
+import { ResponseDto } from '#api/response.dto';
 
 @ApiTags('Ririko Bot')
 @Controller({
