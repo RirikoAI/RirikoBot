@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { Client, EmbedBuilder, Events } from 'discord.js';
 import { CommandService } from '../../command/command.service';
 
-export const messageCreateEvent = (
+export const MessageCreateEvent = (
   client: Client,
   commandService: CommandService,
 ) => {

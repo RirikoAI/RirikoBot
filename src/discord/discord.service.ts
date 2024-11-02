@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { ConfigService } from '../config/config.service';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
-import { messageCreateEvent } from './events/message-create.event';
-import { readyEvent } from './events/ready.event';
+import { MessageCreateEvent } from './events/message-create.event';
+import { ReadyEvent } from './events/ready.event';
 import { CommandService } from "../command/command.service";
 
 @Injectable()
@@ -48,7 +48,7 @@ export class DiscordService {
   }
 
   registerEvents(client: Client) {
-    readyEvent(client);
-    messageCreateEvent(client, this.commandService);
+    ReadyEvent(client);
+    MessageCreateEvent(client, this.commandService);
   }
 }
