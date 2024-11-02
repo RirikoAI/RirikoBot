@@ -3,7 +3,6 @@ import { Client, Message, EmbedBuilder } from 'discord.js';
 
 import { ConfigService } from '../config/config.service';
 import { CommandList } from './command.list';
-import { Command } from "./command.class";
 
 @Injectable()
 export class CommandService {
