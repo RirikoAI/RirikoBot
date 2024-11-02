@@ -6,7 +6,7 @@ import { ConfigService } from '../config/config.service';
 import {CommandModule} from "../command/command.module";
 
 describe('Discord Controller', () => {
-  let service: DiscordService;
+  let controller: DiscordController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -16,10 +16,10 @@ describe('Discord Controller', () => {
       controllers: [DiscordController],
     }).compile();
     
-    service = module.get<DiscordService>(DiscordService);
+    controller = module.get<DiscordController>(DiscordController);
   });
 
-  it('service should be defined', () => {
-    expect(service).toBeDefined();
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
   });
 });

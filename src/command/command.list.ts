@@ -1,5 +1,3 @@
-import { HelpCommand } from './help/help.command';
-import { CommandInterface } from "./command.interface";
-import { Command } from "./command.class";
+import {HelpCommand} from './help/help.command';
 
-export const CommandList= [HelpCommand];
+export const CommandList = [HelpCommand];
