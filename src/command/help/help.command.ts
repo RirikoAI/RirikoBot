@@ -5,7 +5,7 @@ import { CommandService } from '#command/command.service';
 
 @Injectable()
 export default class HelpCommand extends Command {
-  constructor(private readonly commandService: CommandService) {
+  constructor(private readonly app: CommandService) {
     super();
   }
 
@@ -15,7 +15,7 @@ export default class HelpCommand extends Command {
 
   async execute(message: Message): Promise<void> {
     // In the near future, we will be able to set a custom prefix for each server
-    const prefix = this.commandService.configService.defaultPrefix;
+    const prefix = this.app.configService.get('DEFAULT_PREFIX');
 
     const embed = new EmbedBuilder()
       .setDescription(`Hello, I'm Ririko!`)

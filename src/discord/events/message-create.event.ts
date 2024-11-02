@@ -10,7 +10,7 @@ export const MessageCreateEvent = (
     if (message.author.bot) return false;
 
     try {
-      commandService.checkPrefixCommand(message);
+      await commandService.checkPrefixCommand(message);
     } catch (error) {
       Logger.error(error.message, error.stack);
       const errorEmbed = new EmbedBuilder()

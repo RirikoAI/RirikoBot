@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { ConfigService } from '#config/config.service';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { MessageCreateEvent } from './events/message-create.event';
 import { ReadyEvent } from './events/ready.event';
 import { CommandService } from "#command/command.service";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class DiscordService {
@@ -12,7 +12,7 @@ export class DiscordService {
   ready: boolean;
 
   constructor(
-    private readonly config: ConfigService,
+    private readonly configService: ConfigService,
     private readonly commandService: CommandService,
   ) {}
 
@@ -33,7 +33,7 @@ export class DiscordService {
     });
 
     this.client
-      .login(this.config.discordBotToken)
+      .login(this.configService.get('DISCORD_BOT_TOKEN'))
       .then((r) => {
         Logger.log(
           `Logged in as ${this.client.user.tag}`,

@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { DiscordService } from './discord.service';
 import { DiscordController } from './discord.controller';
-import { ConfigModule } from '#config/config.module';
-import { ConfigService } from '#config/config.service';
 import { CommandModule } from '#command/command.module';
+import { ConfigModule, ConfigService } from "@nestjs/config";
 
 @Module({
   imports: [ConfigModule, CommandModule],
