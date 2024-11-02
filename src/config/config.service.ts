@@ -20,7 +20,7 @@ export class ConfigService {
     this.discordApplicationId = process.env.DISCORD_APPLICATION_ID || '';
     this.mongoURL =
       process.env.MONGO_URL || 'mongodb://localhost/ririko';
-    this.adminPrefix = process.env.ADMIN_PREIFX || 'admin';
+    this.adminPrefix = process.env.ADMIN_PREIFX || 'admin!';
     this.defaultPrefix = process.env.DEFAULT_PREFIX || '!';
   }
 

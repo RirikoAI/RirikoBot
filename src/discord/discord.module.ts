@@ -3,9 +3,10 @@ import { DiscordService } from './discord.service';
 import { DiscordController } from './discord.controller';
 import { ConfigModule } from '../config/config.module';
 import { ConfigService } from '../config/config.service';
+import { CommandModule } from '../command/command.module';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, CommandModule],
   providers: [DiscordService, ConfigService],
   exports: [DiscordService],
   controllers: [DiscordController],
