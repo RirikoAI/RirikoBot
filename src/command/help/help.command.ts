@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Message, EmbedBuilder } from 'discord.js';
 import { Command } from '#command/command.class';
-import { CommandService } from '#command/command.service';
+import {CommandServices} from '#command/command.service';
 
 @Injectable()
 export default class HelpCommand extends Command {
-  constructor(private readonly app: CommandService) {
+  constructor(private readonly app: CommandServices) {
     super();
   }
 
@@ -15,7 +15,7 @@ export default class HelpCommand extends Command {
 
   async execute(message: Message): Promise<void> {
     // In the near future, we will be able to set a custom prefix for each server
-    const prefix = this.app.configService.get('DEFAULT_PREFIX');
+    const prefix = this.app.config.get('DEFAULT_PREFIX');
 
     const embed = new EmbedBuilder()
       .setDescription(`Hello, I'm Ririko!`)

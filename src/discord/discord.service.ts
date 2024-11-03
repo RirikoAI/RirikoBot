@@ -16,7 +16,7 @@ export class DiscordService {
     private readonly commandService: CommandService,
   ) {}
 
-  connect(): Client {
+  async connect(): Promise<Client> {
     this.client = new Client({
       intents: [
         GatewayIntentBits.DirectMessages,
@@ -32,23 +32,27 @@ export class DiscordService {
       this.ready = true;
     });
 
-    this.client
-      .login(this.configService.get('DISCORD_BOT_TOKEN'))
-      .then((r) => {
-        Logger.log(
-          `Logged in as ${this.client.user.tag}`,
-          'Ririko DiscordService',
-        );
-      })
-      .catch((e) => {
-        Logger.error(e.message, e.stack);
-      });
+    await this.client
+        .login(this.configService.get('DISCORD_BOT_TOKEN'))
+        .then((r) => {
+          Logger.log(
+              `Logged in as ${this.client.user.tag}`,
+              'Ririko DiscordService',
+          );
+        })
+        .catch((e) => {
+          Logger.error(e.message, e.stack);
+        });
 
     return this.client;
   }
 
-  registerEvents(client: Client) {
-    ReadyEvent(client);
-    MessageCreateEvent(client, this.commandService);
+  get(): Client {
+    return this.client;
+  }
+
+  registerEvents() {
+    ReadyEvent(this.client);
+    MessageCreateEvent(this.client, this.commandService);
   }
 }
