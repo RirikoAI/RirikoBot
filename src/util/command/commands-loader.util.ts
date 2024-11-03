@@ -87,8 +87,17 @@ const instantiateCommands = (
   const instantiatedCommands: Command[] = [];
   for (const command of commandList as any as CommandConstructor[]) {
     const commandInstance: Command = new command(commandServices);
+
+    const types = [];
+    if (commandInstance.runPrefix) {
+      types.push('prefix');
+    }
+    if (commandInstance.runSlash) {
+      types.push('slash');
+    }
+
     Logger.log(
-      `${commandInstance.name} registered => ${commandInstance.description}`,
+      `${commandInstance.name} registered (${types.join(',')}) => ${commandInstance.description}`,
       'Ririko CommandService',
     );
     instantiatedCommands.push(commandInstance);

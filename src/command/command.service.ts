@@ -83,15 +83,22 @@ export class CommandService {
         );
         await this.runPrefixCommand(command, message);
         return;
-      } else {
-        Logger.debug(
-          `Prefix command not found: ${message.content}`,
-          'Ririko CommandService',
-        );
       }
     }
+    
+    Logger.debug(
+      `Prefix command not found: ${message.content}`,
+      'Ririko CommandService',
+    );
   }
-
+  
+  /**
+   * Check if a command is a slash command and execute it.
+   *
+   * This method is called by the InteractionCreateEvent event handler.
+   * @see InteractionCreateEvent
+   * @param interaction
+   */
   async checkSlashCommand(interaction: CommandInteraction) {
     // Loop through all registered commands and execute the first one that matches
     for (const command of CommandService.registeredCommands) {
@@ -102,13 +109,13 @@ export class CommandService {
         );
         await this.runSlashCommand(command, interaction);
         return;
-      } else {
-        Logger.debug(
-          `Slash command not found: ${interaction.commandName}`,
-          'Ririko CommandService',
-        );
       }
     }
+    
+    Logger.debug(
+      `Slash command not found: ${interaction.commandName}`,
+      'Ririko CommandService',
+    );
   }
 
   /**
