@@ -26,7 +26,7 @@ export type DiscordConfig = {
   discordApplicationId: string;
   adminPrefix: string;
   defaultPrefix: string;
-}
+};
 
 export type AllConfigType = {
   app: AppConfig;

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DiscordController } from './discord.controller';
 import { DiscordService } from './discord.service';
-import {CommandModule} from "#command/command.module";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { CommandModule } from '#command/command.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 describe('Discord Controller', () => {
   let controller: DiscordController;
@@ -14,7 +14,7 @@ describe('Discord Controller', () => {
       exports: [DiscordService],
       controllers: [DiscordController],
     }).compile();
-    
+
     controller = module.get<DiscordController>(DiscordController);
   });
 

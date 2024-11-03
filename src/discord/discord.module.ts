@@ -1,8 +1,8 @@
-import {forwardRef, Module} from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { DiscordService } from './discord.service';
 import { DiscordController } from './discord.controller';
 import { CommandModule } from '#command/command.module';
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [ConfigModule, forwardRef(() => CommandModule)],

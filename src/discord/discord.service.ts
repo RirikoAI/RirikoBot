@@ -3,8 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { MessageCreateEvent } from './events/message-create.event';
 import { ReadyEvent } from './events/ready.event';
-import { CommandService } from "#command/command.service";
-import { ConfigService } from "@nestjs/config";
+import { CommandService } from '#command/command.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DiscordService {
@@ -33,16 +33,16 @@ export class DiscordService {
     });
 
     await this.client
-        .login(this.configService.get('DISCORD_BOT_TOKEN'))
-        .then((r) => {
-          Logger.log(
-              `Logged in as ${this.client.user.tag}`,
-              'Ririko DiscordService',
-          );
-        })
-        .catch((e) => {
-          Logger.error(e.message, e.stack);
-        });
+      .login(this.configService.get('DISCORD_BOT_TOKEN'))
+      .then((r) => {
+        Logger.log(
+          `Logged in as ${this.client.user.tag}`,
+          'Ririko DiscordService',
+        );
+      })
+      .catch((e) => {
+        Logger.error(e.message, e.stack);
+      });
 
     return this.client;
   }

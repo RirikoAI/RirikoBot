@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Message, EmbedBuilder } from 'discord.js';
 import { Command } from '#command/command.class';
-import {CommandServices} from '#command/command.service';
+import { CommandServices } from '#command/command.service';
 
 @Injectable()
 export default class HelpCommand extends Command {
@@ -25,7 +25,7 @@ export default class HelpCommand extends Command {
           value: 'display this message',
         },
       ]);
-    
+
     await message.reply({
       embeds: [embed],
     });

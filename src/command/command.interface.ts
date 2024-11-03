@@ -1,11 +1,11 @@
-import {Message} from "discord.js";
+import { Message } from 'discord.js';
 
 export interface CommandInterface {
-    name: string;
-    regex: RegExp;
-    description: string;
+  name: string;
+  regex: RegExp;
+  description: string;
 
-    test(content: string): boolean;
+  test(content: string): boolean;
 
-    execute(message: Message): Promise<any>;
+  execute(message: Message): Promise<any>;
 }

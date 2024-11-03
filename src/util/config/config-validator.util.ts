@@ -12,7 +12,7 @@ function configValidatorUtil<T extends object>(
   const errors = validateSync(validatedConfig, {
     skipMissingProperties: false,
   });
-  
+
   if (errors.length > 0) {
     throw new Error(errors.toString());
   }

@@ -5,7 +5,7 @@ const runSeed = async () => {
   const app = await NestFactory.create(SeedModule);
 
   // run
-  
+
   await app.close();
 };
 

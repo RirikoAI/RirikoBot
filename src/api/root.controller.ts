@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { RootService } from './root.service';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { ResponseDto } from "./response.dto";
+import { ResponseDto } from './response.dto';
 
 @ApiTags('API')
 @Controller({
@@ -11,7 +11,7 @@ import { ResponseDto } from "./response.dto";
 @Controller()
 export class RootController {
   constructor(private readonly appService: RootService) {}
-  
+
   @ApiOkResponse({
     type: ResponseDto,
   })
