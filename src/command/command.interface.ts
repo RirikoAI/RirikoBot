@@ -1,11 +1,15 @@
-import { Message } from 'discord.js';
+import { CommandInteraction, Message } from 'discord.js';
 
 export interface CommandInterface {
   name: string;
+  
   regex: RegExp;
   description: string;
+  category?: string;
 
   test(content: string): boolean;
 
-  execute(message: Message): Promise<any>;
+  runPrefix(message: Message): Promise<any>;
+
+  runSlash(interaction: CommandInteraction): Promise<any>;
 }

@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { AppConfig } from './config.type';
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
-import configValidatorUtil from '#util/config/config-validator.util';
+import ConfigValidatorUtil from "#util/config/config-validator.util";
 
 enum Environment {
   Development = 'development',
@@ -22,7 +22,7 @@ class EnvironmentVariablesValidator {
 }
 
 export default registerAs<AppConfig>('app', () => {
-  configValidatorUtil(process.env, EnvironmentVariablesValidator);
+  ConfigValidatorUtil.validate(process.env, EnvironmentVariablesValidator);
 
   return {
     nodeEnv: process.env.NODE_ENV || 'development',

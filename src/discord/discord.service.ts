@@ -1,14 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { MessageCreateEvent } from './events/message-create.event';
 import { ReadyEvent } from './events/ready.event';
 import { CommandService } from '#command/command.service';
 import { ConfigService } from '@nestjs/config';
+import { DiscordClient } from '#discord/discord.client';
+import { InteractionCreateEvent } from '#discord/events/interaction-create.event';
 
 @Injectable()
 export class DiscordService {
-  client: Client;
+  client: DiscordClient;
   ready: boolean;
 
   constructor(
@@ -16,17 +17,8 @@ export class DiscordService {
     private readonly commandService: CommandService,
   ) {}
 
-  async connect(): Promise<Client> {
-    this.client = new Client({
-      intents: [
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildBans,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-      ],
-      partials: [Partials.Channel],
-    });
+  async connect(): Promise<DiscordClient> {
+    this.client = new DiscordClient();
 
     this.client.on('ready', () => {
       this.ready = true;
@@ -47,12 +39,9 @@ export class DiscordService {
     return this.client;
   }
 
-  get(): Client {
-    return this.client;
-  }
-
   registerEvents() {
-    ReadyEvent(this.client);
+    ReadyEvent(this.client, this.commandService);
     MessageCreateEvent(this.client, this.commandService);
+    InteractionCreateEvent(this.client, this.commandService);
   }
 }

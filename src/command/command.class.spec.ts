@@ -1,10 +1,11 @@
 import { Command } from './command.class';
+import { CommandServices } from "#command/command.service";
 
 describe('ConfigService', () => {
   let exampleCommand: Command;
 
   beforeEach(async () => {
-    exampleCommand = new Command();
+    exampleCommand = new Command([] as any as CommandServices);
   });
 
   it('should be defined', () => {

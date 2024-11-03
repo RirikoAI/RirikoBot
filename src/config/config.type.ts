@@ -24,7 +24,6 @@ export type AppConfig = {
 export type DiscordConfig = {
   discordBotToken: string;
   discordApplicationId: string;
-  adminPrefix: string;
   defaultPrefix: string;
 };
 

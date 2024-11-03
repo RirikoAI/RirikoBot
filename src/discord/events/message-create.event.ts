@@ -1,9 +1,10 @@
 import { Logger } from '@nestjs/common';
-import { Client, EmbedBuilder, Events } from 'discord.js';
+import { EmbedBuilder, Events } from 'discord.js';
 import { CommandService } from '#command/command.service';
+import { DiscordClient } from "#discord/discord.client";
 
 export const MessageCreateEvent = (
-  client: Client,
+  client: DiscordClient,
   commandService: CommandService,
 ) => {
   client.on(Events.MessageCreate, async (message) => {

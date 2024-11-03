@@ -9,7 +9,7 @@ import {
   ValidateIf,
   IsBoolean,
 } from 'class-validator';
-import configValidatorUtil from '#util/config/config-validator.util';
+import ConfigValidatorUtil from "#util/config/config-validator.util";
 
 class EnvironmentVariablesValidator {
   @ValidateIf((envValues) => envValues.DATABASE_URL)
@@ -83,7 +83,7 @@ class EnvironmentVariablesValidator {
 }
 
 export default registerAs<DatabaseConfig>('database', () => {
-  configValidatorUtil(process.env, EnvironmentVariablesValidator);
+  ConfigValidatorUtil.validate(process.env, EnvironmentVariablesValidator);
 
   return {
     url: process.env.DATABASE_URL,
