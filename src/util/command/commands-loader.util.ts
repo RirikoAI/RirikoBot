@@ -127,10 +127,17 @@ const putSlashCommandsInAGuild = async (
 };
 
 const prepareSlashCommands = (commands: Command[]) => {
-  return commands.map((command) => ({
-    name: command.name,
-    description: command.description,
-  }));
+  return commands
+    .map((command) => {
+      // Only return the command if it has a runSlash method
+      if (command.runSlash) {
+        return {
+          name: command.name,
+          description: command.description,
+        };
+      }
+    })
+    .filter(Boolean);
 };
 
 export default CommandsLoaderUtil;

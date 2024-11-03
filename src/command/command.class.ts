@@ -54,11 +54,11 @@ export class Command implements CommandInterface {
    * A function that will be called when the prefix command is run
    * @param message {Message}
    */
-  async runPrefix(message: Message): Promise<any> {}
+  runPrefix?(message: Message): Promise<any>
   
   /**
    * A function that will be called when the slash command is run
    * @param interaction {CommandInteraction}
    */
-  async runSlash(interaction: CommandInteraction): Promise<any> {}
+  runSlash?(interaction: CommandInteraction): Promise<any>
 }

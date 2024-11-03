@@ -6,7 +6,7 @@ import { Command } from '#command/command.class';
 export default class HelpCommand extends Command {
   name = 'help';
   regex = new RegExp('^help$|^help ', 'i');
-  description = 'display help message';
+  description = 'Display help message';
   category = 'general';
 
   async runPrefix(message: Message): Promise<void> {
@@ -17,7 +17,11 @@ export default class HelpCommand extends Command {
       .addFields([
         {
           name: `${prefix}help`,
-          value: 'display this message',
+          value: 'Display this message',
+        },
+        {
+          name: `${prefix}ping`,
+          value: 'Display response time I took to reply to your message/interaction',
         },
       ]);
 
@@ -32,7 +36,7 @@ export default class HelpCommand extends Command {
       .addFields([
         {
           name: `/help`,
-          value: 'display this message',
+          value: 'Display this message',
         },
       ]);
 
