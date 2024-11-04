@@ -1,16 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DiscordController } from './discord.controller';
 import { DiscordService } from './discord.service';
-import { CommandModule } from '#command/command.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
+import { CommandService } from "#command/command.service";
 
-describe('Discord Controller', () => {
+describe('Discord Service', () => {
   let service: DiscordService;
+
+  // Mock all available services used by the Discord Service
+  const configServiceMock = { get: jest.fn() };
+  const commandServiceMock = { get: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule, CommandModule],
-      providers: [DiscordService, ConfigService],
+      providers: [
+        DiscordService,
+        {
+          provide: ConfigService,
+          useValue: configServiceMock,
+        },
+        {
+          provide: CommandService,
+          useValue: commandServiceMock,
+        },
+      ],
       exports: [DiscordService],
       controllers: [DiscordController],
     }).compile();

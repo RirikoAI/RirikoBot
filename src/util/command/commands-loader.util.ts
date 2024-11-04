@@ -2,10 +2,10 @@ import { readdirSync } from 'fs';
 import { join } from 'path';
 import { Command, CommandConstructor } from '#command/command.class';
 import { Logger } from '@nestjs/common';
-import { CommandServices } from '#command/command.service';
 import { DiscordClient } from '#discord/discord.client';
 import { Routes } from 'discord.js';
 import { ConfigService } from '@nestjs/config';
+import { SharedServices } from "#command/command.module";
 
 const CommandList: Command[] = [];
 
@@ -22,7 +22,7 @@ export const CommandsLoaderUtil = {
    * @param commandList
    * @param commandServices
    */
-  instantiateCommands: (commandList: any, commandServices: CommandServices) => {
+  instantiateCommands: (commandList: any, commandServices: SharedServices) => {
     return instantiateCommands(commandList, commandServices);
   },
   /**
@@ -82,7 +82,7 @@ const loadCommandsInDirectory = (dir: string): Command[] => {
 
 const instantiateCommands = (
   commandList: CommandConstructor[],
-  commandServices: CommandServices,
+  commandServices: SharedServices,
 ) => {
   const instantiatedCommands: Command[] = [];
   for (const command of commandList as any as CommandConstructor[]) {

@@ -11,6 +11,7 @@ describe('CommandService', () => {
   // Mock all available services that are provided to commands in here
   const discordServiceMock = { get: jest.fn() };
   const configServiceMock = { get: jest.fn() };
+  const sharedServicesMock = { get: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -24,6 +25,10 @@ describe('CommandService', () => {
         {
           provide: ConfigService,
           useValue: configServiceMock,
+        },
+        {
+          provide: 'SHARED_SERVICES',
+          useValue: sharedServicesMock,
         },
       ],
       exports: [CommandService],

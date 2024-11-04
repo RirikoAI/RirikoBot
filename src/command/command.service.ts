@@ -1,22 +1,18 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { Message, EmbedBuilder, CommandInteraction } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, Message } from 'discord.js';
 
 import { join } from 'path';
 import { CommandsLoaderUtil } from '#util/command/commands-loader.util';
 import { ConfigService } from '@nestjs/config';
-import { CommandInterface } from '#command/command.interface';
 import { DiscordService } from '#discord/discord.service';
 import { Command } from '#command/command.class';
-import { DiscordClient } from '#discord/discord.client';
 import RegexHelperUtil from '#util/command/regex-helper.util';
+import { SharedServices } from '#command/command.module';
+import { CommandInterface } from '#command/command.interface';
 
-// Services for all commands
-export interface CommandServices {
-  config: ConfigService;
-  discord: DiscordService;
-  client: DiscordClient;
-}
-
+/**
+ * Service for registering and executing commands.
+ */
 @Injectable()
 export class CommandService {
   private static registeredCommands: Command[] = [];
@@ -26,16 +22,12 @@ export class CommandService {
     readonly config: ConfigService,
     @Inject(forwardRef(() => DiscordService))
     readonly discord: DiscordService,
+    // Inject the SHARED_SERVICES into CommandService. This will be used to pass services to all commands
+    @Inject('SHARED_SERVICES')
+    readonly services: SharedServices,
   ) {}
 
   async registerCommands(): Promise<Command[]> {
-    // List of services that will be exposed to all commands
-    const commandServices: CommandServices = {
-      config: this.config,
-      discord: this.discord,
-      client: this.discord.client,
-    };
-
     // Recursively load all commands in the current directory
     const commandList = CommandsLoaderUtil.loadCommandsInDirectory(
       // __dirname is the current directory (/src/command)
@@ -45,12 +37,17 @@ export class CommandService {
     // Instantiate all commands and register them in registeredCommands array
     CommandService.registeredCommands = CommandsLoaderUtil.instantiateCommands(
       commandList,
-      commandServices,
+      // Pass the services to all commands when instantiating them
+      this.services,
     );
 
     // Register all slash commands in all guilds
-    await CommandsLoaderUtil.putSlashCommandsInGuilds(CommandService.registeredCommands, this.discord.client, this.config);
-    
+    await CommandsLoaderUtil.putSlashCommandsInGuilds(
+      CommandService.registeredCommands,
+      this.discord.client,
+      this.config,
+    );
+
     // Return the list of registered commands
     return CommandService.registeredCommands;
   }
@@ -65,7 +62,7 @@ export class CommandService {
   async checkPrefixCommand(message: Message) {
     // Check if the guild has a custom prefix, if not use the default prefix
     // !todo: implement custom prefix
-    const guildPrefix = this.config.get('discord.defaultPrefix');
+    const guildPrefix = await this.getGuildPrefix(message);
     const prefixRegExp = RegexHelperUtil.getPrefixRegExp(guildPrefix);
 
     // Check a command is prefixed with the guild prefix otherwise ignore
@@ -77,21 +74,32 @@ export class CommandService {
     // Loop through all registered commands and execute the first one that matches
     for (const command of CommandService.registeredCommands) {
       if (command.test(message.content)) {
+        command.setParams(message.content);
         Logger.debug(
-          `Executing prefix command: ${message.content}`,
+          `Received prefix command: ${message.content.substring(0, message.content.indexOf(' '))} Params: ${command.params.length > 0 ? command.params.join(', ') : 'None'}`,
           'Ririko CommandService',
         );
+
         await this.runPrefixCommand(command, message);
         return;
       }
     }
-    
+
     Logger.debug(
       `Prefix command not found: ${message.content}`,
       'Ririko CommandService',
     );
+
+    // If the command is not found, reply with an error message
+    const errorEmbed = new EmbedBuilder()
+      .setColor('#ff0000')
+      .setTitle('❌ Command not found')
+      .setDescription(
+        'Check if the command exists or if it requires arguments. Use `help` command to see all available commands.',
+      );
+    await message.reply({ embeds: [errorEmbed] });
   }
-  
+
   /**
    * Check if a command is a slash command and execute it.
    *
@@ -104,36 +112,78 @@ export class CommandService {
     for (const command of CommandService.registeredCommands) {
       if (command.test(interaction.commandName)) {
         Logger.debug(
-          `Executing slash command: ${interaction.commandName}`,
+          `Received slash command: ${interaction.commandName}`,
           'Ririko CommandService',
         );
         await this.runSlashCommand(command, interaction);
         return;
       }
     }
-    
+
     Logger.debug(
       `Slash command not found: ${interaction.commandName}`,
       'Ririko CommandService',
     );
   }
 
+  getCommand(name: string): CommandInterface | undefined {
+    return CommandService.registeredCommands.find(
+      (command) => command.name === name,
+    ) as any as CommandInterface;
+  }
+
+  get getAllCommands(): Command[] {
+    return CommandService.registeredCommands;
+  }
+
+  get getPrefixCommands(): Command[] {
+    return CommandService.registeredCommands.filter(
+      (command) => command.runPrefix,
+    );
+  }
+
+  get getSlashCommands(): Command[] {
+    return CommandService.registeredCommands.filter(
+      (command) => command.runSlash,
+    );
+  }
+
+  async getGuildPrefix(message: Message): Promise<string> {
+    try {
+      const guildId = message.guild.id;
+      const guild = await this.services.guildRepository.findOne({
+        where: {
+          guildId,
+        },
+      });
+
+      return guild.prefix;
+    } catch (error) {
+      return this.services.config.get('DEFAULT_PREFIX');
+    }
+  }
+
   /**
    * Execute a command that is prefixed with the guild prefix.
-   * @param command {CommandInterface}
+   * @param command {Command}
    * @param message {Message}
    * @private
    */
-  private async runPrefixCommand(command: CommandInterface, message: Message) {
+  private async runPrefixCommand(command: Command, message: Message) {
     try {
       Logger.debug(
-        `executing prefix command [${command.name}] => ${message.content}`,
+        `└─ executing prefix command [${command.name}] => ${message.content}`,
+        'Ririko CommandService',
       );
       await command.runPrefix(message);
       return;
     } catch (error) {
-      Logger.error(error.message, error.stack);
+      Logger.error(
+        `[Ririko CommandService] └─ execution failed: ${error.message}`,
+        error.stack,
+      );
       const errorEmbed = new EmbedBuilder()
+        .setTitle('❌ Prefix Command Error')
         .setColor('#ff0000')
         .setDescription(error.message);
       await message.reply({ embeds: [errorEmbed] });
@@ -147,18 +197,23 @@ export class CommandService {
    * @private
    */
   private async runSlashCommand(
-    command: CommandInterface,
+    command: Command,
     interaction: CommandInteraction,
   ) {
     try {
       Logger.debug(
-        `executing slash command [${command.name}] => ${interaction.commandName}`,
+        `└─ executing slash command [${command.name}] => ${interaction.commandName}`,
+        'Ririko CommandService',
       );
       await command.runSlash(interaction);
       return;
     } catch (error) {
-      Logger.error(error.message, error.stack);
+      Logger.error(
+        `[Ririko CommandService] └─ execution failed: ${error.message}`,
+        error.stack,
+      );
       const errorEmbed = new EmbedBuilder()
+        .setTitle('❌ Slash Command Error')
         .setColor('#ff0000')
         .setDescription(error.message);
       await interaction.reply({ embeds: [errorEmbed] });

@@ -1,11 +1,12 @@
 import { Command } from './command.class';
-import { CommandServices } from "#command/command.service";
+
+import { SharedServices } from "#command/command.module";
 
 describe('ConfigService', () => {
   let exampleCommand: Command;
 
   beforeEach(async () => {
-    exampleCommand = new Command([] as any as CommandServices);
+    exampleCommand = new Command([] as any as SharedServices);
   });
 
   it('should be defined', () => {

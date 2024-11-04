@@ -18,6 +18,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "setup": "npm install && npm run migration:run && npm run seed:run",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

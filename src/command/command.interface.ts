@@ -6,6 +6,7 @@ export interface CommandInterface {
   regex: RegExp;
   description: string;
   category?: string;
+  usageExamples: string[];
 
   test(content: string): boolean;
 
