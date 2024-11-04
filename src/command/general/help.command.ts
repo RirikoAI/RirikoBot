@@ -12,13 +12,11 @@ export default class HelpCommand extends Command implements CommandInterface {
   usageExamples = ['help <command>'];
 
   async runPrefix(message: Message): Promise<void> {
-    // In the near future, we will be able to set a custom prefix for each server
     const prefix = this.services.config.get('DEFAULT_PREFIX');
 
     let embed;
     if (this.params.length === 0) {
-      embed = new EmbedBuilder()
-        .setThumbnail(this.client.user.displayAvatarURL())
+      embed = this.getBasicEmbed()
         .setTitle('📚 Help')
         .setDescription(`List of available prefix commands for Ririko:`)
         .addFields([
@@ -26,12 +24,9 @@ export default class HelpCommand extends Command implements CommandInterface {
           ...this.services.commandService.getPrefixCommands.map((command) => ({
             name: `${prefix}${command.name}`,
             value: command.description,
+            inline: true
           })),
-        ])
-        .setTimestamp()
-        .setFooter({
-          text: `Made with ❤️ by Ririko`,
-        });
+        ]);
     } else {
       const command = this.services.commandService.getCommand(this.params[0]);
       if (!command) {
@@ -44,18 +39,14 @@ export default class HelpCommand extends Command implements CommandInterface {
         fields.push({
           name: 'Usage',
           value: `${prefix}${command.usageExamples.join(`\n${prefix}`)}`,
+          inline: true
         });
       }
 
-      embed = new EmbedBuilder()
-        .setThumbnail(this.client.user.displayAvatarURL())
+      embed = this.getBasicEmbed()
         .setTitle('📚 Help entry for ' + command.name)
         .setDescription(`Description: ${command.description}`)
-        .addFields(fields)
-        .setTimestamp()
-        .setFooter({
-          text: `Made with ❤️ by Ririko`,
-        });
+        .addFields(fields);
     }
 
     await message.reply({
@@ -64,8 +55,7 @@ export default class HelpCommand extends Command implements CommandInterface {
   }
 
   async runSlash(interaction: CommandInteraction): Promise<any> {
-    const embed = new EmbedBuilder()
-      .setThumbnail(this.client.user.displayAvatarURL())
+    const embed = this.getBasicEmbed()
       .setTitle('📚 Help')
       .setDescription(`List of available slash commands for Ririko:`)
       .addFields([
@@ -73,15 +63,21 @@ export default class HelpCommand extends Command implements CommandInterface {
         ...this.services.commandService.getSlashCommands.map((command) => ({
           name: `/${command.name}`,
           value: command.description,
+          inline: true
         })),
-      ])
-      .setTimestamp()
-      .setFooter({
-        text: `Made with ❤️ by Ririko`,
-      });
+      ]);
 
     await interaction.reply({
       embeds: [embed],
     });
+  }
+
+  private getBasicEmbed(): EmbedBuilder {
+    return new EmbedBuilder()
+      .setThumbnail(this.client.user.displayAvatarURL())
+      .setTimestamp()
+      .setFooter({
+        text: `Made with ❤️ by Ririko`,
+      });
   }
 }

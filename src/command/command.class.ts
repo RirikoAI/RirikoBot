@@ -2,6 +2,7 @@ import { CommandInteraction, Message } from 'discord.js';
 
 import { SharedServices } from '#command/command.module';
 import { DiscordClient } from '#discord/discord.client';
+import { SlashCommandOptions } from '#command/command.types';
 
 export type CommandConstructor = new (services: SharedServices) => Command;
 
@@ -10,6 +11,7 @@ export class Command {
    * Command Constructor. Inject services into the command. Add your own shortcuts here.
    * - Sets the Discord client from the DiscordService as a shortcut.
    * - Sets the getGuildPrefix function from the CommandService as a shortcut.
+   * - Sets the allParams variable as a shortcut to the params array joined into a string.
    * @see SharedServices
    * @see DiscordService
    * @param services
@@ -21,39 +23,68 @@ export class Command {
   }
 
   /**
-   * List of services that can be used in the command
-   */
-  services: SharedServices;
-
-  /**
    * The name of the command.
    * This will be used for prefix commands and slash commands.
+   * @required
    */
   name: string = 'command';
 
   /**
    * Regular expression for the command
-   * In this example, it will match the word 'command' or 'command ' (with a space and any character (or parameter) after it)
+   * In this example, it will match the word 'command' or
+   * 'command ' (with a space and any character (or parameter) after it)
+   * @required
    */
   regex: RegExp = new RegExp('^command$|^command ', 'i');
 
   /**
    * Description of the command.
    * This will be used for the help command.
+   * @required
    */
   description: string = 'command description';
 
   /**
    * Category of the command.
    * This will be used for the help command.
+   * @optional
    */
   category?: string = 'command';
+
+  /**
+   * Slash and prefix command usage examples.
+   * Example: ['prefix', 'prefix <prefix>', 'setprefix <prefix>']
+   *
+   * @required
+   */
+  usageExamples: string[];
+
+  /**
+   * Slash command options.
+   * Only add if your slash command requires additional parameters.
+   *
+   * @see CommandsLoaderUtil
+   * @optional
+   */
+  slashOptions?: SlashCommandOptions;
+
+  // -- System
+
+  /**
+   * List of services that can be used in the command
+   */
+  services: SharedServices;
 
   /**
    * Stores parameters of the command.
    * Will be set only when the command is run.
    */
   params: string[] = [];
+
+  /**
+   * Stores params merged into a string.
+   */
+  allParams: string;
 
   /**
    * Serves as a shortcut to the Discord client from the DiscordService
@@ -93,6 +124,7 @@ export class Command {
    */
   setParams(content: string): string[] {
     this.params = content.split(' ').slice(1);
+    this.allParams = this.params.join(' ');
     return this.params;
   }
 }

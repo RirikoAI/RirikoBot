@@ -27,7 +27,12 @@ export class CommandService {
     readonly services: SharedServices,
   ) {}
 
-  async registerCommands(): Promise<Command[]> {
+  /**
+   * Register all commands in the current directory.
+   * If guildId is provided, register the commands only in that guild.
+   * @param guildId
+   */
+  async registerCommands(guildId: null | string = null): Promise<Command[]> {
     // Recursively load all commands in the current directory
     const commandList = CommandsLoaderUtil.loadCommandsInDirectory(
       // __dirname is the current directory (/src/command)
@@ -41,12 +46,23 @@ export class CommandService {
       this.services,
     );
 
-    // Register all slash commands in all guilds
-    await CommandsLoaderUtil.putSlashCommandsInGuilds(
-      CommandService.registeredCommands,
-      this.discord.client,
-      this.config,
-    );
+    // If guildId is provided, register the commands only in that guild
+    if (guildId) {
+      await CommandsLoaderUtil.putSlashCommandsInAGuild(
+        CommandService.registeredCommands,
+        this.discord.client,
+        this.config,
+        guildId,
+      );
+      return CommandService.registeredCommands;
+    } else {
+      // Register all slash commands in all guilds
+      await CommandsLoaderUtil.putSlashCommandsInGuilds(
+        CommandService.registeredCommands,
+        this.discord.client,
+        this.config,
+      );
+    }
 
     // Return the list of registered commands
     return CommandService.registeredCommands;

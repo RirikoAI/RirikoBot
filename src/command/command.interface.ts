@@ -1,4 +1,5 @@
 import { CommandInteraction, Message } from 'discord.js';
+import { SlashCommandOptions } from '#command/command.types';
 
 export interface CommandInterface {
   name: string;
@@ -7,6 +8,7 @@ export interface CommandInterface {
   description: string;
   category?: string;
   usageExamples: string[];
+  slashOptions?: SlashCommandOptions;
 
   test(content: string): boolean;
 

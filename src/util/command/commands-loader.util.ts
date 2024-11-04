@@ -5,7 +5,7 @@ import { Logger } from '@nestjs/common';
 import { DiscordClient } from '#discord/discord.client';
 import { Routes } from 'discord.js';
 import { ConfigService } from '@nestjs/config';
-import { SharedServices } from "#command/command.module";
+import { SharedServices } from '#command/command.module';
 
 const CommandList: Command[] = [];
 
@@ -143,6 +143,15 @@ const prepareSlashCommands = (commands: Command[]) => {
         return {
           name: command.name,
           description: command.description,
+          // Check if the command has slashOptions, otherwise don't pass "options"
+          options: command.slashOptions
+            ? command.slashOptions.map((option) => ({
+                type: option.type,
+                name: option.name,
+                description: option.description,
+                required: option.required,
+              }))
+            : undefined,
         };
       }
     })
