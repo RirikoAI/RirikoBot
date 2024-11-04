@@ -16,8 +16,8 @@ export class Command {
    */
   constructor(services: SharedServices) {
     this.services = services;
-    this.client = services.discord.client;
-    this.getGuildPrefix = services.commandService.getGuildPrefix;
+    this.client = services.discord?.client;
+    this.getGuildPrefix = services.commandService?.getGuildPrefix;
   }
 
   /**
