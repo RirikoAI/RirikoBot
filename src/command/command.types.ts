@@ -1,3 +1,5 @@
+import { APIEmbed } from 'discord-api-types/v10';
+
 export type SlashCommandOptions = SlashCommandOption[];
 
 export type SlashCommandOption = {
@@ -18,3 +20,5 @@ export enum SlashCommandOptionTypes {
   Role = 8,
   Mentionable = 9,
 }
+
+export type Pages = APIEmbed[];

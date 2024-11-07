@@ -2,14 +2,15 @@ import { CommandInteraction, Message } from 'discord.js';
 
 import { SharedServices } from '#command/command.module';
 import { DiscordClient } from '#discord/discord.client';
-import { SlashCommandOptions } from '#command/command.types';
+import { Pages, SlashCommandOptions } from '#command/command.types';
+import { CommandFeatures } from '#command/command.features';
 
 export type CommandConstructor = new (services: SharedServices) => Command;
 
 /**
  * @implements {CommandInterface}
  */
-export class Command {
+export class Command extends CommandFeatures {
   /**
    * Command Constructor. Inject services into the command. Add your own shortcuts here.
    * - Sets the Discord client from the DiscordService as a shortcut.
@@ -20,6 +21,7 @@ export class Command {
    * @param services
    */
   constructor(services: SharedServices) {
+    super();
     this.services = services;
     this.client = services.discord?.client;
     this.getGuildPrefix = services.commandService?.getGuildPrefix;
@@ -47,7 +49,7 @@ export class Command {
    * 'command ' (with a space and any character a.k.a. parameters after it)
    * @required
    */
-  regex?: RegExp = new RegExp('^command$|^command ', 'i');
+  regex?: RegExp;
 
   /**
    * Slash and prefix command usage examples.
@@ -74,6 +76,8 @@ export class Command {
    * @optional
    */
   slashOptions?: SlashCommandOptions;
+
+  pages?: Pages;
 
   // -- System
 
