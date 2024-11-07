@@ -49,7 +49,7 @@ export class Command extends CommandFeatures {
    * 'command ' (with a space and any character a.k.a. parameters after it)
    * @required
    */
-  regex?: RegExp;
+  regex?: RegExp = new RegExp('^command$|^command ', 'i');
 
   /**
    * Slash and prefix command usage examples.
