@@ -39,7 +39,7 @@ export default class MemberInfoCommand
    */
   async runPrefix(message: Message) {
     const user = this.getUserFromMessage(message);
-    const embed = await this.createMemberInfoEmbed(user);
+    const embed = await this.createMemberInfoEmbed(user, message.guildId);
     await message.reply({
       embeds: [embed],
     });
@@ -51,17 +51,33 @@ export default class MemberInfoCommand
    */
   async runSlash(interaction: CommandInteraction): Promise<any> {
     const user = this.getUserFromInteraction(interaction);
-    const embed = await this.createMemberInfoEmbed(user);
+    const embed = await this.createMemberInfoEmbed(user, interaction.guildId);
     await interaction.reply({
       embeds: [embed],
     });
   }
 
-  /**
-   * Create the member information embed.
-   * @param user The user to get information about.
-   */
-  public async createMemberInfoEmbed(user) {
+  public async createMemberInfoEmbed(user, guildId?: string) {
+    // If guildId is available, attempt to fetch the member from the guild
+    let roles = 'N/A';
+    if (guildId) {
+      try {
+        const guild = await this.client.guilds.fetch(guildId);
+        const member = await guild.members.fetch(user.id);
+
+        roles =
+          member.roles.cache.size > 1
+            ? member.roles.cache
+                .map((role) => role.name.replace('@everyone', ''))
+                .join(', ')
+                .replace(/,\s*$/, '')
+            : 'No roles';
+      } catch (error) {
+        roles = 'Error fetching roles';
+        console.error('Failed to fetch roles:', error);
+      }
+    }
+
     return new EmbedBuilder({
       title: `👤 Member Information`,
       description: `Here is some information about the user:`,
@@ -75,18 +91,7 @@ export default class MemberInfoCommand
         },
         {
           name: 'Roles',
-          value: user.client.guilds.cache
-            .map((guild) => {
-              const member = guild.members.cache.get(user.id);
-              if (member) {
-                return `${member.roles.cache
-                  .filter((role) => role.name !== '@everyone')
-                  .map((role) => role.name)
-                  .join(', ')}`;
-              }
-              return '';
-            })
-            .join('\n'),
+          value: roles,
         },
         {
           name: 'User ID',
