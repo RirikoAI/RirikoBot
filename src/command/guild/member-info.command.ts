@@ -3,6 +3,7 @@ import { CommandInteraction, EmbedBuilder, Message } from 'discord.js';
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import NicerTimeUtil from '#util/time/nicer-time.util';
 
 /**
  * Ping command.
@@ -94,7 +95,7 @@ export default class MemberInfoCommand
         },
         {
           name: 'Created At',
-          value: user.createdAt.toDateString(),
+          value: `${user.createdAt.toLocaleString()} (${NicerTimeUtil.timeSince(user.createdAt)} ago)`,
           inline: true,
         },
       ],
