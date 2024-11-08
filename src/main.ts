@@ -6,6 +6,10 @@ import { DiscordService } from '#discord/discord.service';
 import { CommandService } from '#command/command.service';
 import { ConfigService } from '@nestjs/config';
 
+/**
+ * Main function to bootstrap RiriKo AI
+ * @author Earnest Angel (https://angel.net.my)
+ */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);

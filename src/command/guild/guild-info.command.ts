@@ -3,6 +3,12 @@ import { CommandInterface } from '#command/command.interface';
 import { Injectable } from '@nestjs/common';
 import { CommandInteraction, EmbedBuilder, Guild, Message } from 'discord.js';
 
+/**
+ * Guild Info Command
+ * @description Command to get information about the guild.
+ * @category Command
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Injectable()
 export default class GuildInfoCommand
   extends Command

@@ -9,7 +9,8 @@ import {
 import { Pages } from '#command/command.types';
 
 /**
- * Pagination service handles paginated responses with buttons.
+ * A feature to enable pagination for a command interaction.
+ * @author Earnest Angel (https://angel.net.my)
  */
 @Injectable()
 export class PaginationFeature {

@@ -5,7 +5,8 @@ import { CommandInterface } from '#command/command.interface';
 
 /**
  * Ping command.
- * Use this as a template for creating new commands.
+ * @description Use this as a template for creating new commands.
+ * @category Command
  */
 @Injectable()
 export default class PingCommand extends Command implements CommandInterface {

@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+/**
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export class ResponseDto {
   @ApiProperty({
     example: 'Hello World!',

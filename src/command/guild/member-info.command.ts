@@ -6,8 +6,10 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 import NicerTimeUtil from '#util/time/nicer-time.util';
 
 /**
- * Ping command.
- * Use this as a template for creating new commands.
+ * MemberInfoCommand
+ * @description Discord command to get information about a member or yourself
+ * @category Command
+ * @author Earnest Angel (https://angel.net.my)
  */
 @Injectable()
 export default class MemberInfoCommand

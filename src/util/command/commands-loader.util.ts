@@ -9,6 +9,10 @@ import { SharedServices } from '#command/command.module';
 
 const CommandList: Command[] = [];
 
+/**
+ * Utility class to load and instantiate commands
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export const CommandsLoaderUtil = {
   /**
    * Recursively load all commands in a directory

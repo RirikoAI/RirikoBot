@@ -1,3 +1,7 @@
+/**
+ * Nicer Time Util
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export const NicerTimeUtil = {
   timeSince: timeSince,
 };

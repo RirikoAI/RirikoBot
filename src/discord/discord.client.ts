@@ -1,10 +1,9 @@
-import {
-  Client,
-  GatewayIntentBits,
-  Partials,
-  REST,
-} from 'discord.js';
+import { Client, GatewayIntentBits, Partials, REST } from 'discord.js';
 
+/**
+ * Discord Client
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export class DiscordClient extends Client {
   restClient: REST;
 
@@ -40,6 +39,6 @@ export class DiscordClient extends Client {
     this.restClient = new REST().setToken(token);
     return super.login(token);
   }
-  
+
   on: any;
 }

@@ -8,6 +8,12 @@ import ollama from 'ollama';
 import { PromptType, UserPrompts } from '#command/ai/ai.types';
 import { SystemPrompt } from '#command/ai/system-prompt';
 
+/**
+ * AI Command
+ * @description This command allows users to chat with the AI using Ollama
+ * @category Command
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Injectable()
 export default class AiCommand extends Command implements CommandInterface {
   name = 'ai';

@@ -1,3 +1,8 @@
+/**
+ * RegexHelperUtil
+ * @description A utility class to help with regex operations
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export const RegexHelperUtil = {
   getPrefixRegExp: (guildPrefix: string): RegExp => {
     return new RegExp(

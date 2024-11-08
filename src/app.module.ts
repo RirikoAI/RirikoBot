@@ -13,6 +13,10 @@ import appConfig from '#config/app.config';
 import databaseConfig from '#config/database.config';
 import discordConfig from '#config/discord.config';
 
+/**
+ * The main application module.
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({

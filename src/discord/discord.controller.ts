@@ -9,6 +9,11 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseDto } from '#api/response.dto';
 import { ConfigService } from '@nestjs/config';
 
+/**
+ * Discord Controller
+ * @module Discord
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @ApiTags('Ririko Bot')
 @Controller({
   path: '/discord',

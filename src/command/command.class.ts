@@ -8,7 +8,12 @@ import { CommandFeatures } from '#command/command.features';
 export type CommandConstructor = new (services: SharedServices) => Command;
 
 /**
- * @implements {CommandInterface}
+ * Command class that will be extended by all commands.
+ * This class contains all the necessary properties and methods for a command.
+ * @class Command
+ * @extends CommandFeatures
+ * @implements CommandInterface
+ * @author Earnest Angel (https://angel.net.my)
  */
 export class Command extends CommandFeatures {
   /**

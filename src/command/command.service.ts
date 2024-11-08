@@ -12,6 +12,7 @@ import { CommandInterface } from '#command/command.interface';
 
 /**
  * Service for registering and executing commands.
+ * @author Earnest Angel (https://angel.net.my)
  */
 @Injectable()
 export class CommandService {

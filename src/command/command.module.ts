@@ -5,8 +5,11 @@ import { DiscordModule } from '#discord/discord.module';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Guild } from '#command/guild/entities/guild.entity';
 import { DiscordService } from '#discord/discord.service';
-import { Repository } from "typeorm";
+import { Repository } from 'typeorm';
 
+/**
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Module({
   imports: [
     ConfigModule,

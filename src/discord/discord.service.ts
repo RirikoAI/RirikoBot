@@ -7,6 +7,10 @@ import { ConfigService } from '@nestjs/config';
 import { DiscordClient } from '#discord/discord.client';
 import { InteractionCreateEvent } from '#discord/events/interaction-create.event';
 
+/**
+ * Discord Service
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Injectable()
 export class DiscordService {
   client: DiscordClient;

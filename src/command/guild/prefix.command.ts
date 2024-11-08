@@ -9,6 +9,11 @@ import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import { SlashCommandOptionTypes } from '#command/command.types';
 
+/**
+ * Command to set the prefix for the Discord server
+ * @category Command
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Injectable()
 export default class PrefixCommand extends Command implements CommandInterface {
   name = 'prefix';

@@ -4,6 +4,12 @@ import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import { SlashCommandOptionTypes } from '#command/command.types';
 
+/**
+ * Help command
+ * @description Display help message
+ * @category Command
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Injectable()
 export default class HelpCommand extends Command implements CommandInterface {
   name = 'help';

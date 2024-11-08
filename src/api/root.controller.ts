@@ -3,6 +3,9 @@ import { RootService } from './root.service';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseDto } from './response.dto';
 
+/**
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @ApiTags('API')
 @Controller({
   path: '/',
