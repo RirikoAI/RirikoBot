@@ -14,10 +14,7 @@ export default class AiCommand extends Command implements CommandInterface {
   regex = new RegExp('^ai$|^ai ', 'i');
   description = 'Chat with the intelligent AI';
   category = 'ai';
-  usageExamples = ['/ai <prompt>'];
-
-  model = 'llama3.2:1b';
-  systemPrompt = SystemPrompt;
+  usageExamples = ['ai <prompt>'];
 
   slashOptions = [
     {
@@ -28,10 +25,12 @@ export default class AiCommand extends Command implements CommandInterface {
     },
   ];
 
+  model = 'llama3.2:1b';
+  systemPrompt = SystemPrompt;
   userPrompts: UserPrompts = [];
 
   async runSlash(interaction: ChatInputCommandInteraction): Promise<void> {
-    let prompt = interaction.options.getString('prompt');
+    const prompt = interaction.options.getString('prompt');
     const channelId = interaction.channel.id;
     const userId = interaction.user.id;
     await interaction.reply('Thinking...');

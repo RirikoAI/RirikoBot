@@ -7,53 +7,67 @@ import {
 } from 'discord.js';
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
+import { SlashCommandOptionTypes } from '#command/command.types';
 
 @Injectable()
 export default class PrefixCommand extends Command implements CommandInterface {
   name = 'prefix';
-  regex = new RegExp('^prefix$|^prefix |^setprefix ', 'i');
+  regex = /^(prefix|setprefix)\s*/i;
   description = 'Set prefix for this Discord server';
   category = 'server';
   usageExamples = ['prefix', 'prefix <prefix>', 'setprefix <prefix>'];
 
+  slashOptions = [
+    {
+      type: SlashCommandOptionTypes.String, // STRING type
+      name: 'newprefix',
+      description: 'New prefix to set',
+      required: false,
+    },
+  ];
+
   async runPrefix(message: Message): Promise<void> {
-    if (this.hasPermission(message.member) === false) {
+    // Check for permission
+    if (!this.checkPermission(message.member)) {
       await message.reply({
         content: `You don't have the required permission to change the prefix`,
       });
       return;
     }
 
-    // If no parameters are provided, we will display the current prefix
+    // If no parameters are provided, display the current prefix
     if (this.params.length === 0) {
-      const embed = new EmbedBuilder().addFields([
-        {
-          name: `Prefix`,
-          value: `The current server prefix is: \`${await this.getGuildPrefix(message)}\``,
-        },
-      ]);
-
-      await message.reply({
-        embeds: [embed],
-      });
+      await this.sendPrefixResponse(message);
     } else {
-      // If a parameter is provided, we will update the prefix
+      // Update the prefix
       await this.updateGuildPrefix(message, this.params[0]);
-
-      const embed = new EmbedBuilder().addFields([
-        {
-          name: `Prefix`,
-          value: `The prefix for this server has been set to \`${this.params[0]}\``,
-        },
-      ]);
-
-      await message.reply({
-        embeds: [embed],
-      });
+      await this.sendPrefixResponse(message, this.params[0]);
     }
   }
 
-  private hasPermission(member: GuildMember): boolean {
+  async runSlash(interaction: any): Promise<void> {
+    // Check for permission
+    if (!this.checkPermission(interaction.member)) {
+      await interaction.reply({
+        content: `You don't have the required permission to change the prefix`,
+        ephemeral: false,
+      });
+      return;
+    }
+
+    // Get the new prefix from the interaction options
+    const prefix = interaction.options.getString('newprefix');
+    if (!prefix) {
+      // Display current prefix if none is provided
+      await this.sendPrefixResponse(interaction);
+    } else {
+      // Update the prefix
+      await this.updateGuildPrefix(interaction, prefix);
+      await this.sendPrefixResponse(interaction, prefix);
+    }
+  }
+
+  private checkPermission(member: GuildMember): boolean {
     return member.permissions.has(
       PermissionsBitField.Flags.ManageChannels,
       true,
@@ -61,7 +75,7 @@ export default class PrefixCommand extends Command implements CommandInterface {
   }
 
   private async updateGuildPrefix(
-    message: Message,
+    message: Message | any,
     prefix: string,
   ): Promise<void> {
     const guildId = message.guild.id;
@@ -73,5 +87,29 @@ export default class PrefixCommand extends Command implements CommandInterface {
       },
       ['guildId'],
     );
+  }
+
+  private async sendPrefixResponse(
+    context: Message | any,
+    prefix: string = '',
+  ): Promise<void> {
+    const currentPrefix = prefix || (await this.getGuildPrefix(context));
+    const embed = new EmbedBuilder().addFields([
+      {
+        name: `Prefix`,
+        value: `The current server prefix is: \`${currentPrefix}\``,
+      },
+      {
+        name: 'Usage',
+        value: `${currentPrefix}${this.usageExamples.join('\n' + currentPrefix)}`,
+      },
+    ]);
+
+    // Send the reply (message or interaction)
+    if (context instanceof Message) {
+      await context.reply({ embeds: [embed] });
+    } else {
+      await context.reply({ embeds: [embed], ephemeral: false });
+    }
   }
 }

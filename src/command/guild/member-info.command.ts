@@ -15,7 +15,7 @@ export default class MemberInfoCommand
 {
   name = 'memberinfo';
   regex = new RegExp('^memberinfo$|^memberinfo |^userinfo$|^userinfo ', 'i');
-  description = 'Get information about yourself or another guild member.';
+  description = 'Get info of yourself or a member.';
   category = 'guild';
   usageExamples = [
     'memberinfo',
@@ -60,7 +60,7 @@ export default class MemberInfoCommand
    * Create the member information embed.
    * @param user The user to get information about.
    */
-  private async createMemberInfoEmbed(user) {
+  public async createMemberInfoEmbed(user) {
     return new EmbedBuilder({
       title: `👤 Member Information`,
       description: `Here is some information about the user:`,
@@ -79,7 +79,7 @@ export default class MemberInfoCommand
               const member = guild.members.cache.get(user.id);
               if (member) {
                 return `${member.roles.cache
-                  // .filter((role) => role.name !== '@everyone')
+                  .filter((role) => role.name !== '@everyone')
                   .map((role) => role.name)
                   .join(', ')}`;
               }
@@ -109,7 +109,7 @@ export default class MemberInfoCommand
    * Get the user from the message.
    * @param message The message to get the user from.
    */
-  private getUserFromMessage(message: Message) {
+  getUserFromMessage(message: Message) {
     return message.mentions.users.first() || message.author;
   }
 
@@ -117,7 +117,7 @@ export default class MemberInfoCommand
    * Get the user from the interaction.
    * @param interaction The interaction to get the user from.
    */
-  private getUserFromInteraction(interaction: CommandInteraction) {
+  getUserFromInteraction(interaction: CommandInteraction) {
     return interaction.options.get('user')?.user || interaction.user;
   }
 }

@@ -9,7 +9,7 @@ export default class GuildInfoCommand
   implements CommandInterface
 {
   name = 'guildinfo';
-  description = 'Get information about the guild.';
+  description = 'Get info of the guild.';
   regex = new RegExp('^guildinfo$|^info$', 'i');
   usageExamples = ['guildinfo', 'info'];
   category = 'guild';
