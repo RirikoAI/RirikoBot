@@ -1,5 +1,9 @@
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
+import {
+  SlashCommandOptions,
+  SlashCommandOptionTypes,
+} from '#command/command.types';
 
 /**
  * DeleteCommand
@@ -13,18 +17,21 @@ export default class DeleteCommand extends Command implements CommandInterface {
   description = 'Delete messages in a channel.';
   category = 'moderation';
   usageExamples = ['delete 5', 'del 10'];
-  slashOptions = [
+  slashOptions: SlashCommandOptions = [
     {
       name: 'amount',
       description: 'The amount of messages to delete.',
-      type: 4,
+      type: SlashCommandOptionTypes.Integer,
       required: true,
     },
   ];
 
   async runPrefix(message) {
     // check if the sender has permission to delete messages
-    if (!message.member.permissions.has('MANAGE_MESSAGES')) {
+    if (
+      !message.member.permissions.has('MANAGE_MESSAGES') ||
+      !message.member.permissions.has('ADMINISTRATOR')
+    ) {
       return await message.reply(
         'You do not have permission to delete messages.',
       );
@@ -44,7 +51,10 @@ export default class DeleteCommand extends Command implements CommandInterface {
 
   async runSlash(interaction) {
     // check if the sender has permission to delete messages
-    if (!interaction.member.permissions.has('MANAGE_MESSAGES')) {
+    if (
+      !interaction.member.permissions.has('MANAGE_MESSAGES') ||
+      !interaction.member.permissions.has('ADMINISTRATOR')
+    ) {
       return await interaction.reply(
         'You do not have permission to delete messages.',
       );
