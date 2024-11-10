@@ -4,6 +4,7 @@
  */
 export const NicerTimeUtil = {
   timeSince: timeSince,
+  getDateTime: getDateTime,
 };
 
 function timeSince(date: any) {
@@ -31,6 +32,19 @@ function timeSince(date: any) {
     return Math.floor(interval) + ' minutes';
   }
   return Math.floor(seconds) + ' seconds';
+}
+
+function getDateTime() {
+  const weekday = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+  return `${weekday[new Date().getDay().toLocaleString()]} ${new Date().toLocaleString()} GMT+8`;
 }
 
 export default NicerTimeUtil;

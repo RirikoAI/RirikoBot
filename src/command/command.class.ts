@@ -1,9 +1,12 @@
-import { CommandInteraction, Message } from 'discord.js';
-
 import { SharedServices } from '#command/command.module';
 import { DiscordClient } from '#discord/discord.client';
-import { Pages, SlashCommandOptions } from '#command/command.types';
+import {
+  DiscordInteraction,
+  DiscordMessage,
+  SlashCommandOptions,
+} from '#command/command.types';
 import { CommandFeatures } from '#command/command.features';
+import { Pages } from '#util/features/pagination-feature-types';
 
 export type CommandConstructor = new (services: SharedServices) => Command;
 
@@ -30,6 +33,7 @@ export class Command extends CommandFeatures {
     this.services = services;
     this.client = services.discord?.client;
     this.getGuildPrefix = services.commandService?.getGuildPrefix;
+    this.init();
   }
 
   /**
@@ -112,7 +116,7 @@ export class Command extends CommandFeatures {
    * Serves as a shortcut to get the guild prefix from the CommandService
    * @see CommandService
    */
-  getGuildPrefix: (message: Message) => Promise<string>;
+  getGuildPrefix: (message: DiscordMessage) => Promise<string>;
 
   /**
    * Test if the content matches the command
@@ -126,13 +130,13 @@ export class Command extends CommandFeatures {
    * A function that will be called when the prefix command is run
    * @param message {Message}
    */
-  async runPrefix?(message: Message): Promise<any>;
+  async runPrefix?(message: DiscordMessage): Promise<any>;
 
   /**
    * A function that will be called when the slash command is run
-   * @param interaction {CommandInteraction}
+   * @param interaction {DiscordInteraction}
    */
-  async runSlash?(interaction: CommandInteraction): Promise<any>;
+  async runSlash?(interaction: DiscordInteraction): Promise<any>;
 
   /**
    * Helper function to set the parameters of the command currently being run
@@ -143,4 +147,9 @@ export class Command extends CommandFeatures {
     this.allParams = this.params.join(' ');
     return this.params;
   }
+
+  /**
+   * Helper method to initialize the command.
+   */
+  init() {}
 }

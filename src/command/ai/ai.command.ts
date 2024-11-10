@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ChatInputCommandInteraction, Message, TextChannel } from 'discord.js';
+import { Message, TextChannel } from 'discord.js';
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
-import { SlashCommandOptionTypes } from '#command/command.types';
+import {
+  DiscordInteraction,
+  DiscordMessage,
+  SlashCommandOptionTypes,
+} from '#command/command.types';
 
 import ollama from 'ollama';
 import { PromptType, UserPrompts } from '#command/ai/ai.types';
@@ -32,10 +36,9 @@ export default class AiCommand extends Command implements CommandInterface {
   ];
 
   model = 'llama3.2:1b';
-  systemPrompt = SystemPrompt;
   userPrompts: UserPrompts = [];
 
-  async runSlash(interaction: ChatInputCommandInteraction): Promise<void> {
+  async runSlash(interaction: DiscordInteraction): Promise<void> {
     const prompt = interaction.options.getString('prompt');
     const channelId = interaction.channel.id;
     const userId = interaction.user.id;
@@ -44,7 +47,7 @@ export default class AiCommand extends Command implements CommandInterface {
     this.streamToChannel(prompt, userId, channelId, firstReply);
   }
 
-  async runPrefix(message: Message): Promise<void> {
+  async runPrefix(message: DiscordMessage): Promise<void> {
     const prompt = this.allParams;
     const firstReply = await message.reply('Thinking...');
     const channelId = message.channel.id;
@@ -69,7 +72,7 @@ export default class AiCommand extends Command implements CommandInterface {
     prompt: string,
     userId: string,
     channelId: string,
-    firstReply: Message,
+    firstReply: DiscordMessage | DiscordInteraction,
   ) {
     // Store all replies from the AI
     let replies = '';
@@ -86,7 +89,7 @@ export default class AiCommand extends Command implements CommandInterface {
       messages: [
         {
           role: 'system',
-          content: this.systemPrompt,
+          content: SystemPrompt(),
         },
         // Add the past prompts including the new one
         ...this.getPrompts(userId)?.prompts,

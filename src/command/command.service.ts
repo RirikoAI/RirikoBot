@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { CommandInteraction, EmbedBuilder, Message } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { join } from 'path';
 import { CommandsLoaderUtil } from '#util/command/commands-loader.util';
@@ -9,6 +9,7 @@ import { Command } from '#command/command.class';
 import RegexHelperUtil from '#util/command/regex-helper.util';
 import { SharedServices } from '#command/command.module';
 import { CommandInterface } from '#command/command.interface';
+import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 
 /**
  * Service for registering and executing commands.
@@ -76,7 +77,7 @@ export class CommandService {
    * @see MessageCreateEvent
    * @param message
    */
-  async checkPrefixCommand(message: Message) {
+  async checkPrefixCommand(message: DiscordMessage) {
     // Check if the guild has a custom prefix, if not use the default prefix
     // !todo: implement custom prefix
     const guildPrefix = await this.getGuildPrefix(message);
@@ -84,6 +85,9 @@ export class CommandService {
 
     // Check a command is prefixed with the guild prefix otherwise ignore
     if (!prefixRegExp.test(message.content)) return;
+
+    // ignore if the command is undefined
+    if (!message.content) return;
 
     // Remove the prefix from the message content
     message.content = message.content.replace(guildPrefix, '').trim();
@@ -124,7 +128,10 @@ export class CommandService {
    * @see InteractionCreateEvent
    * @param interaction
    */
-  async checkSlashCommand(interaction: CommandInteraction) {
+  async checkSlashCommand(interaction: DiscordInteraction) {
+    // ignore if the commandName is undefined
+    if (!interaction.commandName) return;
+
     // Loop through all registered commands and execute the first one that matches
     for (const command of CommandService.registeredCommands) {
       if (command.test(interaction.commandName)) {
@@ -165,7 +172,7 @@ export class CommandService {
     );
   }
 
-  async getGuildPrefix(message: Message): Promise<string> {
+  async getGuildPrefix(message: DiscordMessage): Promise<string> {
     try {
       const guildId = message.guild.id;
       const guild = await this.services.guildRepository.findOne({
@@ -186,7 +193,7 @@ export class CommandService {
    * @param message {Message}
    * @private
    */
-  private async runPrefixCommand(command: Command, message: Message) {
+  private async runPrefixCommand(command: Command, message: DiscordMessage) {
     try {
       Logger.debug(
         `└─ executing prefix command [${command.name}] => ${message.content}`,
@@ -215,7 +222,7 @@ export class CommandService {
    */
   private async runSlashCommand(
     command: Command,
-    interaction: CommandInteraction,
+    interaction: DiscordInteraction,
   ) {
     try {
       Logger.debug(

@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Message, EmbedBuilder, CommandInteraction } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
-import { SlashCommandOptionTypes } from '#command/command.types';
+import {
+  DiscordInteraction,
+  DiscordMessage,
+  SlashCommandOptionTypes,
+} from '#command/command.types';
 
 /**
  * Help command
@@ -27,7 +31,7 @@ export default class HelpCommand extends Command implements CommandInterface {
     },
   ];
 
-  async runPrefix(message: Message): Promise<void> {
+  async runPrefix(message: DiscordMessage): Promise<void> {
     const prefix = await this.getGuildPrefix(message);
     let embed: EmbedBuilder;
 
@@ -46,7 +50,7 @@ export default class HelpCommand extends Command implements CommandInterface {
     await message.reply({ embeds: [embed] });
   }
 
-  async runSlash(interaction: CommandInteraction): Promise<void> {
+  async runSlash(interaction: DiscordInteraction): Promise<void> {
     const commandName = (interaction as any).options.getString('command');
     let embed: EmbedBuilder;
 
@@ -78,10 +82,11 @@ export default class HelpCommand extends Command implements CommandInterface {
 
     const fields = Array.from(commandsMap).map(([category, commands]) => ({
       name: `__${category.charAt(0).toUpperCase() + category.slice(1)}__`,
-      value: commands
-        .map((command) => `**${command.name}** - ${command.description}`)
-        .join('\n'),
-      inline: true,
+      value:
+        commands
+          .map((command) => `**${command.name}** - ${command.description}`)
+          .join('\n') + '\n\u200b',
+      inline: false,
     }));
 
     embed.addFields(fields);

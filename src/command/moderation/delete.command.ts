@@ -1,6 +1,7 @@
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import {
+  DiscordMessage,
   SlashCommandOptions,
   SlashCommandOptionTypes,
 } from '#command/command.types';
@@ -26,7 +27,7 @@ export default class DeleteCommand extends Command implements CommandInterface {
     },
   ];
 
-  async runPrefix(message) {
+  async runPrefix(message: DiscordMessage) {
     // check if the sender has permission to delete messages
     if (
       !message.member.permissions.has('MANAGE_MESSAGES') ||
@@ -46,7 +47,7 @@ export default class DeleteCommand extends Command implements CommandInterface {
     //delete
     await message.channel.bulkDelete(amount + 1);
     // tell the user that the messages have been deleted
-    await message.reply(`Deleted ${amount} messages in this channel.`);
+    await message.channel.send(`Deleted ${amount} messages in this channel.`);
   }
 
   async runSlash(interaction) {

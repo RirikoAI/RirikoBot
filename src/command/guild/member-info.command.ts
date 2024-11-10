@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CommandInteraction, EmbedBuilder, Message } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
-import { SlashCommandOptionTypes } from '#command/command.types';
+import {
+  DiscordInteraction,
+  DiscordMessage,
+  SlashCommandOptionTypes,
+} from '#command/command.types';
 import NicerTimeUtil from '#util/time/nicer-time.util';
 
 /**
@@ -39,7 +43,7 @@ export default class MemberInfoCommand
    * Async runPrefix method. If this.params[0] is not null, it will attempt to get the user from the message.
    * If the user is not found, it will attempt to pull the user that sent the message.
    */
-  async runPrefix(message: Message) {
+  async runPrefix(message: DiscordMessage) {
     const user = this.getUserFromMessage(message);
     const embed = await this.createMemberInfoEmbed(user, message.guildId);
     await message.reply({
@@ -51,7 +55,7 @@ export default class MemberInfoCommand
    * Async runSlash method. If this.params[0] is not null, it will attempt to get the user from the interaction.
    * If the user is not found, it will attempt to pull the user that sent the interaction.
    */
-  async runSlash(interaction: CommandInteraction): Promise<any> {
+  async runSlash(interaction: DiscordInteraction): Promise<any> {
     const user = this.getUserFromInteraction(interaction);
     const embed = await this.createMemberInfoEmbed(user, interaction.guildId);
     await interaction.reply({
@@ -117,7 +121,7 @@ export default class MemberInfoCommand
    * Get the user from the message.
    * @param message The message to get the user from.
    */
-  getUserFromMessage(message: Message) {
+  getUserFromMessage(message: DiscordMessage) {
     return message.mentions.users.first() || message.author;
   }
 
@@ -125,7 +129,7 @@ export default class MemberInfoCommand
    * Get the user from the interaction.
    * @param interaction The interaction to get the user from.
    */
-  getUserFromInteraction(interaction: CommandInteraction) {
+  getUserFromInteraction(interaction: DiscordInteraction) {
     return interaction.options.get('user')?.user || interaction.user;
   }
 }

@@ -1,4 +1,12 @@
-import { APIEmbed } from 'discord-api-types/v10';
+import {
+  ChatInputCommandInteraction,
+  CommandInteractionOption,
+  CommandInteractionOptionResolver,
+  GuildMember,
+  Message,
+  PermissionsBitField,
+} from 'discord.js';
+import { Command } from '#command/command.class';
 
 export type SlashCommandOptions = SlashCommandOption[];
 
@@ -21,4 +29,35 @@ export enum SlashCommandOptionTypes {
   Mentionable = 9,
 }
 
-export type Pages = APIEmbed[];
+export type MenuOptions = MenuOption[];
+
+export type MenuOption = {
+  label: string;
+  value: string;
+  description: string;
+};
+
+export type MenuCallback = (
+  interaction: DiscordInteraction,
+  selectedOption: string,
+  context?: Command,
+) => Promise<any>;
+
+export interface DiscordGuildMember extends GuildMember {
+  get permissions(): Readonly<PermissionsBitField> | any;
+}
+
+export interface DiscordMessage extends Message<true> {
+  get member(): DiscordGuildMember;
+}
+
+export interface DiscordInteraction extends ChatInputCommandInteraction {
+  options:
+    | CommandInteractionOptionResolver
+    | NonNullable<CommandInteractionOption<any>['member']>
+    | any;
+
+  get member(): DiscordGuildMember;
+
+  fetchReply(): Promise<Message<true>>;
+}

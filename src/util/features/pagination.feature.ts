@@ -3,32 +3,32 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  CommandInteraction,
   MessageComponentInteraction,
 } from 'discord.js';
-import { Pages } from '#command/command.types';
+import { PaginationFeatureParams } from '#util/features/pagination-feature-types';
 
 /**
- * A feature to enable pagination for a command interaction.
+ * PaginationFeature
+ * @description A feature to enable pagination for a command interaction.
+ * @category Feature
  * @author Earnest Angel (https://angel.net.my)
  */
 @Injectable()
 export class PaginationFeature {
   private currentPage: number = 0;
 
-  constructor(interaction, pages: Pages) {
-    this.startPagination(interaction, pages);
+  constructor(params: PaginationFeatureParams) {
+    this.startPagination(params);
   }
 
   /**
    * Initialize the pagination with the pages and interaction.
-   * @param interaction The command interaction triggering the pagination.
-   * @param pages An array of pages, each containing a title and description.
+   * @param params {PaginationFeatureParams} - The parameters for the pagination feature.
+   * @see PaginationFeatureParams
    */
-  async startPagination(
-    interaction: CommandInteraction,
-    pages: Pages,
-  ): Promise<void> {
+  async startPagination(params: PaginationFeatureParams): Promise<void> {
+    const { interaction, pages } = params;
+
     this.currentPage = 0; // reset the page counter
 
     // Initial embed and row setup
@@ -55,7 +55,7 @@ export class PaginationFeature {
       i.user.id === interaction.user.id;
     const collector = reply.createMessageComponentCollector({
       filter,
-      time: 60000,
+      time: 180000,
     });
 
     collector.on('collect', async (i: MessageComponentInteraction) => {

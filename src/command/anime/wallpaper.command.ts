@@ -1,13 +1,11 @@
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
-import { SlashCommandOptionTypes } from '#command/command.types';
-import { AnimeSource, AnimeWallpaper } from 'anime-wallpaper';
 import {
-  CommandInteraction,
-  StringSelectMenuBuilder,
-  ActionRowBuilder,
-  MessageComponentInteraction,
-} from 'discord.js';
+  DiscordInteraction,
+  DiscordMessage,
+  SlashCommandOptionTypes,
+} from '#command/command.types';
+import { AnimeSource, AnimeWallpaper } from 'anime-wallpaper';
 import { Logger } from '@nestjs/common';
 
 /**
@@ -35,49 +33,28 @@ export default class WallpaperCommand
     },
   ];
 
-  async runSlash(interaction: CommandInteraction) {
+  async runSlash(interaction: DiscordInteraction) {
     const search = (interaction as any).options.getString('search');
     await this.handleInteraction(interaction, search);
   }
 
-  async runPrefix(message: any) {
+  async runPrefix(message: DiscordMessage) {
     const search = message.content.split(' ').slice(1).join(' ');
     await this.handleInteraction(message, search);
   }
 
   // Common logic for responding to user interactions
   private async handleInteraction(
-    interaction: CommandInteraction | any,
+    interaction: DiscordInteraction | DiscordMessage,
     search: string,
   ) {
     const sourceOptions = this.createSelectMenuOptions(search);
-    const selectMenu = new StringSelectMenuBuilder()
-      .setCustomId('select-menu')
-      .setPlaceholder('Choose an option...')
-      .addOptions(sourceOptions);
-
-    const row = new ActionRowBuilder().addComponents(selectMenu);
-
-    const reply = await interaction.reply({
-      content: 'Please select the source of the wallpaper:',
-      components: [row],
-    });
-
-    const filter = (i) => i.customId === 'select-menu';
-    const collector = reply.createMessageComponentCollector({
-      filter,
-      time: 60000,
-    });
-
-    collector.on('collect', async (i: any) => {
-      await i.deferReply();
-      await this.fetchWallpaper(i, i.values[0]);
-    });
-
-    collector.on('end', async (collected) => {
-      if (collected.size === 0) {
-        await interaction.editReply('No one selected an option.');
-      }
+    await this.createMenu({
+      interaction,
+      text: 'Select a source to search for the wallpaper:',
+      options: sourceOptions,
+      callback: this.handleWallpaperSelection.bind(this),
+      context: this,
     });
   }
 
@@ -86,12 +63,16 @@ export default class WallpaperCommand
     return [
       {
         label: 'WallHaven',
-        value: this.prepareOption(AnimeSource.WallHaven, search, 'WallHaven'),
+        value: this.prepareSelectionValue(
+          AnimeSource.WallHaven,
+          search,
+          'WallHaven',
+        ),
         description: `Search for ${search} in WallHaven`,
       },
       {
         label: 'Wallpapers.com',
-        value: this.prepareOption(
+        value: this.prepareSelectionValue(
           AnimeSource.Wallpapers,
           search,
           'Wallpapers.com',
@@ -100,23 +81,27 @@ export default class WallpaperCommand
       },
       {
         label: 'Live 2D - Moe Walls',
-        value: this.prepareOption('MoeWalls', search, 'MoeWalls'),
+        value: this.prepareSelectionValue('MoeWalls', search, 'MoeWalls'),
         description: `Search for ${search} in MoeWalls`,
       },
       {
         label: 'Pinterest',
-        value: this.prepareOption('Pinterest', search, 'Pinterest'),
+        value: this.prepareSelectionValue('Pinterest', search, 'Pinterest'),
         description: `Search for ${search} in Pinterest`,
       },
       {
-        label: 'ZeroChan',
-        value: this.prepareOption(AnimeSource.ZeroChan, search, 'ZeroChan'),
+        label: 'ZeroChan (Unstable)',
+        value: this.prepareSelectionValue(
+          AnimeSource.ZeroChan,
+          search,
+          'ZeroChan',
+        ),
         description: `Search for ${search} in ZeroChan`,
       },
     ];
   }
 
-  private prepareOption(
+  private prepareSelectionValue(
     source: AnimeSource | string,
     keyword: string,
     sourceName,
@@ -125,10 +110,11 @@ export default class WallpaperCommand
   }
 
   // Helper function to handle wallpaper retrieval
-  private async fetchWallpaper(
-    i: MessageComponentInteraction,
+  private async handleWallpaperSelection(
+    interaction: DiscordInteraction,
     selectedOption: string,
   ) {
+    await interaction.deferReply();
     try {
       const [source, keyword, sourceName, time] = selectedOption.split('&&&&');
       const wallpaper = new AnimeWallpaper();
@@ -142,7 +128,7 @@ export default class WallpaperCommand
         result = await wallpaper.search({ title: keyword }, parseInt(source));
       }
       if (!result) {
-        await i.editReply(
+        await interaction.editReply(
           `No result found. Searching for ${keyword} in ${sourceName} at ${time}...`,
         );
         return;
@@ -170,15 +156,19 @@ export default class WallpaperCommand
 
         if (random?.video) {
           randomWallpapers.push(random.video);
+          // only take one video
+          break;
         }
       }
 
-      await i.editReply({
+      await interaction.editReply({
         content: `Here is the wallpaper (Courtesy of ${sourceName}):`,
         files: randomWallpapers,
       });
     } catch (error) {
-      await i.editReply('An error occurred while fetching the wallpaper.');
+      await interaction.editReply(
+        'An error occurred while fetching the wallpaper.',
+      );
       Logger.error(error, 'Ririko CommandService');
     }
   }

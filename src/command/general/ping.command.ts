@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CommandInteraction, EmbedBuilder, Message } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
+import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 
 /**
  * Ping command.
@@ -16,7 +17,7 @@ export default class PingCommand extends Command implements CommandInterface {
   category = 'general';
   usageExamples = ['ping'];
 
-  async runPrefix(message: Message): Promise<void> {
+  async runPrefix(message: DiscordMessage): Promise<void> {
     const delay = this.calculateDelay(message.createdTimestamp);
 
     const embed = new EmbedBuilder().addFields([
@@ -31,7 +32,7 @@ export default class PingCommand extends Command implements CommandInterface {
     });
   }
 
-  async runSlash(interaction: CommandInteraction): Promise<void> {
+  async runSlash(interaction: DiscordInteraction): Promise<void> {
     const delay = this.calculateDelay(interaction.createdTimestamp);
 
     const embed = new EmbedBuilder().addFields([

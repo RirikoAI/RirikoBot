@@ -1,7 +1,8 @@
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import { Injectable } from '@nestjs/common';
-import { CommandInteraction, EmbedBuilder, Guild, Message } from 'discord.js';
+import { EmbedBuilder, Guild } from 'discord.js';
+import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 
 /**
  * Guild Info Command
@@ -20,14 +21,14 @@ export default class GuildInfoCommand
   usageExamples = ['guildinfo', 'info'];
   category = 'guild';
 
-  async runPrefix(message: Message) {
+  async runPrefix(message: DiscordMessage) {
     const embed = await this.createGuildInfoEmbed(message.guild);
     await message.reply({
       embeds: [embed],
     });
   }
 
-  async runSlash(interaction: CommandInteraction): Promise<any> {
+  async runSlash(interaction: DiscordInteraction): Promise<any> {
     const embed = await this.createGuildInfoEmbed(interaction.guild);
     await interaction.reply({
       embeds: [embed],

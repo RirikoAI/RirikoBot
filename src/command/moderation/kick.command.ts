@@ -1,6 +1,10 @@
 import { CommandInterface } from '#command/command.interface';
 import { Command } from '#command/command.class';
-import { SlashCommandOptionTypes } from '#command/command.types';
+import {
+  DiscordInteraction,
+  DiscordMessage,
+  SlashCommandOptionTypes,
+} from '#command/command.types';
 
 /**
  * KickCommand
@@ -23,7 +27,7 @@ export default class KickCommand extends Command implements CommandInterface {
     },
   ];
 
-  async runPrefix(message) {
+  async runPrefix(message: DiscordMessage) {
     // check if the sender has permission to kick members
     if (
       !message.member.permissions.has('KICK_MEMBERS') ||
@@ -46,7 +50,7 @@ export default class KickCommand extends Command implements CommandInterface {
     await message.reply(`Kicked ${user.user.tag} from the server.`);
   }
 
-  async runSlash(interaction) {
+  async runSlash(interaction: DiscordInteraction) {
     // check if the sender has permission to kick members
     if (
       !interaction.member.permissions.has('KICK_MEMBERS') ||

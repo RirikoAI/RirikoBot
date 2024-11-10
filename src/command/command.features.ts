@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PaginationFeature } from '#util/features/pagination.feature';
-import { Pages } from '#command/command.types';
+import { MenuFeature } from '#util/features/menu.feature';
+import { MenuFeatureParams } from '#util/features/menu-feature.types';
+import { PaginationFeatureParams } from '#util/features/pagination-feature-types';
 
 /**
  * Pagination service handles paginated responses with buttons.
@@ -9,7 +11,11 @@ import { Pages } from '#command/command.types';
  */
 @Injectable()
 export class CommandFeatures {
-  async startPagination(interaction: any, pages: Pages) {
-    return new PaginationFeature(interaction, pages);
+  async createPagination(params: PaginationFeatureParams) {
+    return new PaginationFeature(params);
+  }
+
+  async createMenu(params: MenuFeatureParams) {
+    return new MenuFeature(params);
   }
 }
