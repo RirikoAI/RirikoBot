@@ -11,7 +11,7 @@ export class JikanService {
 
   async searchAnime(search: string): Promise<SearchAnimeResults> {
     const response = await this.jikanApi.searchAnime({
-      q: encodeURIComponent(search),
+      q: search,
     });
     return response;
   }
