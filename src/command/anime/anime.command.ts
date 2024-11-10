@@ -1,13 +1,13 @@
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import { JikanService } from '#command/anime/jikan/jikan.service';
-import { Anime, SearchAnimeResults } from '#command/anime/jikan/jikan-api';
 import {
   DiscordInteraction,
   DiscordMessage,
   SlashCommandOptionTypes,
 } from '#command/command.types';
 import { EmbedBuilder } from 'discord.js';
+import { Anime, JikanResults } from '#command/anime/jikan/jikan.types';
 
 /**
  * AnimeCommand
@@ -45,7 +45,7 @@ export default class AnimeCommand extends Command implements CommandInterface {
     interaction: DiscordMessage | DiscordInteraction,
     search: string,
   ) {
-    const result: SearchAnimeResults = await new JikanService().searchAnime(
+    const result: JikanResults<Anime> = await new JikanService().searchAnime(
       search,
     );
     const data: Anime[] = result.data;
@@ -82,7 +82,7 @@ export default class AnimeCommand extends Command implements CommandInterface {
     await interaction.deferReply();
 
     // get the anime details
-    const data = await new JikanService().getAnimeDetails(
+    let data = await new JikanService().getAnimeDetails(
       parseInt(selectedOption),
     );
 
