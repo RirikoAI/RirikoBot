@@ -16,6 +16,8 @@ jobs:
       - run:
           command: npm run test:cov
           name: Test
+      - store_artifacts:
+          path: coverage
 
 workflows:
   test_my_app:
