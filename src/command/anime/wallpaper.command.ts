@@ -33,32 +33,45 @@ export default class WallpaperCommand
     },
   ];
 
+  currentUserSearch: {
+    userId: string;
+    search: string;
+  }[] = [];
+
   async runSlash(interaction: DiscordInteraction) {
     const search = (interaction as any).options.getString('search');
-    await this.handleInteraction(interaction, search);
+    this.currentUserSearch.push({
+      userId: interaction.user.id,
+      search,
+    });
+    await this.selectSource({ interaction, search });
   }
 
   async runPrefix(message: DiscordMessage) {
     const search = message.content.split(' ').slice(1).join(' ');
-    await this.handleInteraction(message, search);
+    this.currentUserSearch.push({
+      userId: message.author.id,
+      search,
+    });
+    await this.selectSource({ interaction: message, search });
   }
 
-  // Common logic for responding to user interactions
-  private async handleInteraction(
-    interaction: DiscordInteraction | DiscordMessage,
-    search: string,
-  ) {
+  private async selectSource(params: {
+    interaction: DiscordInteraction | DiscordMessage;
+    search: string;
+    followUp?: boolean;
+  }) {
+    const { interaction, search, followUp } = params;
     const sourceOptions = this.createSelectMenuOptions(search);
     await this.createMenu({
       interaction,
       text: 'Select a source to search for the wallpaper:',
       options: sourceOptions,
-      callback: this.handleWallpaperSelection.bind(this),
-      context: this,
+      callback: this.handleSourceSelection.bind(this),
+      followUp,
     });
   }
 
-  // Helper function to create select menu options
   private createSelectMenuOptions(search: string) {
     return [
       {
@@ -109,61 +122,39 @@ export default class WallpaperCommand
     return `${source}&&&&${keyword}&&&&${sourceName}&&&&${Date.now()}`;
   }
 
-  // Helper function to handle wallpaper retrieval
-  private async handleWallpaperSelection(
+  private async handleSourceSelection(
     interaction: DiscordInteraction,
     selectedOption: string,
   ) {
     await interaction.deferReply();
     try {
-      const [source, keyword, sourceName, time] = selectedOption.split('&&&&');
-      const wallpaper = new AnimeWallpaper();
-      let result;
+      const reply: any = await this.getWallpapers(selectedOption);
 
-      if (source === 'MoeWalls') {
-        result = await wallpaper.live2d(keyword);
-      } else if (source === 'Pinterest') {
-        result = await wallpaper.pinterest(keyword);
-      } else {
-        result = await wallpaper.search({ title: keyword }, parseInt(source));
-      }
-      if (!result) {
-        await interaction.editReply(
-          `No result found. Searching for ${keyword} in ${sourceName} at ${time}...`,
-        );
-        return;
-      }
+      await interaction.editReply(reply);
 
-      // Wallpaper could be an image or a video
-      // Randomly select 3 wallpapers (or less if there are less than 3)
-      // and send it to the user
-      const randomWallpapers = [];
-      for (let i = 0; i < 3; i++) {
-        const random = result[Math.floor(Math.random() * result.length)];
-
-        // ensure no duplicate
-        if (
-          randomWallpapers.includes(random.image) ||
-          randomWallpapers.includes(random.video)
-        ) {
-          i--;
-          continue;
-        }
-
-        if (random?.image) {
-          randomWallpapers.push(random.image);
-        }
-
-        if (random?.video) {
-          randomWallpapers.push(random.video);
-          // only take one video
-          break;
-        }
-      }
-
-      await interaction.editReply({
-        content: `Here is the wallpaper (Courtesy of ${sourceName}):`,
-        files: randomWallpapers,
+      // ask if the user wants to search on another source
+      await this.createMenu({
+        interaction,
+        text: 'Do you want to do anything else?',
+        options: [
+          {
+            label: 'Load another wallpaper',
+            value: selectedOption,
+            description: `Get more wallpaper from the same source`,
+          },
+          {
+            label: 'Select another source',
+            value: 'another_source',
+            description: 'Search on another source',
+          },
+          {
+            label: 'No',
+            value: 'no',
+            description: 'No, I am done',
+          },
+        ],
+        followUp: true,
+        callback: this.handleNextAction.bind(this),
       });
     } catch (error) {
       await interaction.editReply(
@@ -171,5 +162,79 @@ export default class WallpaperCommand
       );
       Logger.error(error, 'Ririko CommandService');
     }
+  }
+
+  async handleNextAction(
+    interaction: DiscordInteraction,
+    selectedOption: string,
+  ) {
+    if (selectedOption === 'another_source') {
+      const search = this.currentUserSearch.find(
+        (s) => s.userId === interaction.user.id,
+      ).search;
+      await this.selectSource({
+        interaction,
+        search,
+        followUp: true,
+      });
+    } else if (selectedOption === 'no') {
+      this.currentUserSearch = this.currentUserSearch.filter(
+        (s) => s.userId !== interaction.user.id,
+      );
+      await interaction.reply(
+        'Thank you for using the wallpaper command. Made with ❤️ by Ririko',
+      );
+    } else {
+      await this.handleSourceSelection(interaction, selectedOption);
+    }
+  }
+
+  async getWallpapers(selectedOption) {
+    const [source, keyword, sourceName] = selectedOption.split('&&&&');
+    const wallpaper = new AnimeWallpaper();
+    let result;
+
+    if (source === 'MoeWalls') {
+      result = await wallpaper.live2d(keyword);
+    } else if (source === 'Pinterest') {
+      result = await wallpaper.pinterest(keyword);
+    } else {
+      result = await wallpaper.search({ title: keyword }, parseInt(source));
+    }
+    if (!result) {
+      return false;
+    }
+
+    // Wallpaper could be an image or a video
+    // Randomly select 3 wallpapers (or less if there are less than 3)
+    // and send it to the user
+    const randomWallpapers = [];
+    for (let i = 0; i < 3; i++) {
+      const random = result[Math.floor(Math.random() * result.length)];
+
+      // ensure no duplicate
+      if (
+        randomWallpapers.includes(random.image) ||
+        randomWallpapers.includes(random.video)
+      ) {
+        i--;
+        continue;
+      }
+
+      if (random?.image) {
+        randomWallpapers.push(random.image);
+      }
+
+      if (random?.video) {
+        randomWallpapers.push(random.video);
+        // only take one video
+        break;
+      }
+    }
+
+    return {
+      content: `Here is the wallpaper (Courtesy of ${sourceName})`,
+      files: randomWallpapers,
+    };
   }
 }

@@ -13,20 +13,40 @@ export class MenuFeature {
   }
 
   async createMenu(params: MenuFeatureParams) {
-    const { interaction, text, options, callback, context } = params;
+    const menuId = Math.random().toString(36).substring(7);
+    const { interaction, text, options, callback, context, followUp } = params;
     const selectMenu = new StringSelectMenuBuilder()
-      .setCustomId('select-menu')
+      .setCustomId(menuId)
       .setPlaceholder('Choose an option...')
       .addOptions(options);
 
     const row = new ActionRowBuilder().addComponents(selectMenu);
 
-    const reply = await interaction.reply({
-      content: text,
-      components: [row],
-    });
+    let reply;
+    if (interaction.deferrable) {
+      await interaction.deferReply();
+      reply = await interaction.editReply({
+        content: text,
+        components: [row],
+      });
+    } else if (followUp) {
+      try {
+        await interaction?.deferUpdate();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {}
+      reply = await interaction.channel.send({
+        content: text,
+        components: [row],
+      });
+    } else {
+      reply = await interaction.reply({
+        content: text,
+        components: [row],
+      });
+    }
 
-    const filter = (i) => i.customId === 'select-menu';
+    const filter = (i) => i.customId === menuId;
+
     const collector = reply.createMessageComponentCollector({
       filter,
       time: 180000,

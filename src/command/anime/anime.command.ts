@@ -31,19 +31,36 @@ export default class AnimeCommand extends Command implements CommandInterface {
     },
   ];
 
+  currentUserSearch: {
+    userId: string;
+    search: string;
+  }[] = [];
+
   async runPrefix(message: DiscordMessage) {
     const search = message.content.split(' ').slice(1).join(' ');
+    // push the search keyword to the currentUserSearch, associated with the user id
+    this.currentUserSearch.push({
+      userId: message.author.id,
+      search,
+    });
     await this.searchAnime(message, search);
   }
 
   async runSlash(interaction: DiscordInteraction) {
     const search = (interaction as any).options.getString('search');
+    // push the search keyword to the currentUserSearch, associated with the user id
+    this.currentUserSearch.push({
+      userId: interaction.user.id,
+      search,
+    });
+
     await this.searchAnime(interaction, search);
   }
 
   private async searchAnime(
     interaction: DiscordMessage | DiscordInteraction,
     search: string,
+    followUp = false,
   ) {
     const result: JikanResults<Anime> = await new JikanService().searchAnime(
       search,
@@ -54,6 +71,7 @@ export default class AnimeCommand extends Command implements CommandInterface {
       text: 'Select an anime to view details:',
       options: this.createSelectMenuOptions(data),
       callback: this.handleAnimeSelection.bind(this),
+      followUp,
     });
   }
 
@@ -80,9 +98,50 @@ export default class AnimeCommand extends Command implements CommandInterface {
     selectedOption: string,
   ) {
     await interaction.deferReply();
+    const embed = await this.getAnimeDetails(selectedOption);
+    await interaction.editReply({ embeds: [embed] });
 
+    // show what to do next
+    await this.createMenu({
+      interaction,
+      text: 'What would you like to do next?',
+      options: [
+        {
+          label: 'Select a different anime',
+          value: 'search',
+          description: 'Search for another anime',
+        },
+        { label: 'Exit', value: 'exit', description: 'Exit' },
+      ],
+      callback: this.handleNextAction.bind(this),
+      followUp: true,
+    });
+  }
+
+  async handleNextAction(
+    interaction: DiscordInteraction,
+    selectedOption: string,
+  ) {
+    if (selectedOption === 'search') {
+      // get the search keyword associated with the user id
+      const search = this.currentUserSearch.find(
+        (s) => s.userId === interaction.user.id,
+      ).search;
+      await this.searchAnime(interaction, search, true);
+    } else {
+      // remove the search keyword associated with the user id
+      this.currentUserSearch = this.currentUserSearch.filter(
+        (s) => s.userId !== interaction.user.id,
+      );
+      interaction.reply(
+        'Thank you for using the anime command! Made with ❤️ by Ririko',
+      );
+    }
+  }
+
+  async getAnimeDetails(selectedOption: string) {
     // get the anime details
-    let data = await new JikanService().getAnimeDetails(
+    const data = await new JikanService().getAnimeDetails(
       parseInt(selectedOption),
     );
 
@@ -157,6 +216,7 @@ export default class AnimeCommand extends Command implements CommandInterface {
           inline: true,
         },
       );
-    await interaction.editReply({ embeds: [embed] });
+
+    return embed;
   }
 }
