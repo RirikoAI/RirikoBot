@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 
 import { MessageCreateEvent } from './events/message-create.event';
 import { ReadyEvent } from './events/ready.event';
@@ -21,6 +21,7 @@ export class DiscordService {
   constructor(
     private readonly configService: ConfigService,
     private readonly commandService: CommandService,
+    @Inject(forwardRef(() => AvcService))
     private readonly avcService: AvcService,
   ) {}
 

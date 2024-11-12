@@ -17,7 +17,7 @@ import { AvcModule } from '#avc/avc.module';
   imports: [
     ConfigModule,
     forwardRef(() => DiscordModule),
-    AvcModule,
+    forwardRef(() => AvcModule),
     // Import all command's ORM entities in here
     TypeOrmModule.forFeature([Guild]),
     TypeOrmModule.forFeature([VoiceChannel]),

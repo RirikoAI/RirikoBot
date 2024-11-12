@@ -3,7 +3,7 @@ import { DiscordController } from './discord.controller';
 import { DiscordService } from './discord.service';
 import { ConfigService } from '@nestjs/config';
 import { CommandService } from '#command/command.service';
-import { AvcModule } from '#avc/avc.module';
+import { AvcService } from '#avc/avc.service'; // Import AvcService here
 
 describe('Discord Service', () => {
   let service: DiscordService;
@@ -11,16 +11,12 @@ describe('Discord Service', () => {
   // Mock all available services used by the Discord Service
   const configServiceMock = { get: jest.fn() };
   const commandServiceMock = { get: jest.fn() };
-  const avcServiceMock = { get: jest.fn() };
-  const discordServiceMock = { get: jest.fn() };
+  const avcServiceMock = { get: jest.fn() }; // Mock AvcService here
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        {
-          provide: DiscordService,
-          useValue: discordServiceMock,
-        },
+        DiscordService,
         {
           provide: ConfigService,
           useValue: configServiceMock,
@@ -30,8 +26,8 @@ describe('Discord Service', () => {
           useValue: commandServiceMock,
         },
         {
-          provide: AvcModule,
-          useValue: avcServiceMock,
+          provide: AvcService, // Mock AvcService directly
+          useValue: avcServiceMock, // Pass the mocked version here
         },
       ],
       exports: [DiscordService],
