@@ -2,9 +2,11 @@ import {
   ChatInputCommandInteraction,
   CommandInteractionOption,
   CommandInteractionOptionResolver,
+  Guild,
   GuildMember,
   Message,
   PermissionsBitField,
+  VoiceChannel,
 } from 'discord.js';
 import { Command } from '#command/command.class';
 
@@ -61,3 +63,6 @@ export interface DiscordInteraction extends ChatInputCommandInteraction {
 
   fetchReply(): Promise<Message<true>>;
 }
+
+export type DiscordVoiceChannel = VoiceChannel;
+export type DiscordGuild = Guild;

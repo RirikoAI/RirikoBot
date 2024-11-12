@@ -1,4 +1,5 @@
 export type DatabaseConfig = {
+  logging?: boolean;
   url?: string;
   path?: string;
   type?: string;

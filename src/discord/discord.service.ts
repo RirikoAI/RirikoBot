@@ -6,6 +6,8 @@ import { CommandService } from '#command/command.service';
 import { ConfigService } from '@nestjs/config';
 import { DiscordClient } from '#discord/discord.client';
 import { InteractionCreateEvent } from '#discord/events/interaction-create.event';
+import { VoiceStateUpdateEvent } from '#discord/events/voice-state-update.event';
+import { AvcService } from '#avc/avc.service';
 
 /**
  * Discord Service
@@ -19,6 +21,7 @@ export class DiscordService {
   constructor(
     private readonly configService: ConfigService,
     private readonly commandService: CommandService,
+    private readonly avcService: AvcService,
   ) {}
 
   async connect(): Promise<DiscordClient> {
@@ -47,5 +50,6 @@ export class DiscordService {
     ReadyEvent(this.client, this.commandService);
     MessageCreateEvent(this.client, this.commandService);
     InteractionCreateEvent(this.client, this.commandService);
+    VoiceStateUpdateEvent(this.client, this.avcService);
   }
 }

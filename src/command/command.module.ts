@@ -3,9 +3,12 @@ import { CommandService } from './command.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DiscordModule } from '#discord/discord.module';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
-import { Guild } from '#command/guild/entities/guild.entity';
 import { DiscordService } from '#discord/discord.service';
 import { Repository } from 'typeorm';
+import { Guild } from '#database/entities/guild.entity';
+import { VoiceChannel } from '#database/entities/voice-channel.entity';
+import { AvcService } from '#avc/avc.service';
+import { AvcModule } from '#avc/avc.module';
 
 /**
  * @author Earnest Angel (https://angel.net.my)
@@ -14,8 +17,10 @@ import { Repository } from 'typeorm';
   imports: [
     ConfigModule,
     forwardRef(() => DiscordModule),
+    AvcModule,
     // Import all command's ORM entities in here
     TypeOrmModule.forFeature([Guild]),
+    TypeOrmModule.forFeature([VoiceChannel]),
   ],
   providers: [
     CommandService,
@@ -27,15 +32,19 @@ import { Repository } from 'typeorm';
         ConfigService,
         DiscordService,
         CommandService,
+        AvcService,
         // Inject all command's repositories in here
         getRepositoryToken(Guild),
+        getRepositoryToken(VoiceChannel),
       ],
       // Define the keys for the shared services in order of the inject array above
       useFactory: (...service): SharedServices => ({
         config: service[0],
         discord: service[1],
         commandService: service[2],
-        guildRepository: service[3],
+        autoVoiceChannelService: service[3],
+        guildRepository: service[4],
+        voiceChannelRepository: service[5],
       }),
     },
   ],
@@ -50,5 +59,7 @@ export type SharedServices = {
   config: ConfigService;
   discord: DiscordService;
   commandService: CommandService;
+  autoVoiceChannelService: AvcService;
   guildRepository: Repository<Guild>;
+  voiceChannelRepository: Repository<VoiceChannel>;
 };

@@ -9,12 +9,16 @@ import {
   ValidateIf,
   IsBoolean,
 } from 'class-validator';
-import ConfigValidatorUtil from "#util/config/config-validator.util";
+import ConfigValidatorUtil from '#util/config/config-validator.util';
 
 class EnvironmentVariablesValidator {
   @ValidateIf((envValues) => envValues.DATABASE_URL)
   @IsString()
   DATABASE_URL: string;
+
+  @IsBoolean()
+  @IsOptional()
+  DATABASE_LOGGING: boolean;
 
   @IsString()
   DATABASE_TYPE: string;
@@ -86,6 +90,7 @@ export default registerAs<DatabaseConfig>('database', () => {
   ConfigValidatorUtil.validate(process.env, EnvironmentVariablesValidator);
 
   return {
+    logging: process.env.DATABASE_LOGGING === 'true',
     url: process.env.DATABASE_URL,
     type: process.env.DATABASE_TYPE,
     host: process.env.DATABASE_HOST,

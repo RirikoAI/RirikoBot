@@ -177,7 +177,7 @@ export class CommandService {
       const guildId = message.guild.id;
       const guild = await this.services.guildRepository.findOne({
         where: {
-          guildId,
+          id: guildId,
         },
       });
 

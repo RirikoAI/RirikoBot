@@ -17,4 +17,16 @@ export const ReadyEvent = (
   client.once(Events.ClientReady, () => {
     Logger.log('Bot is ready!', 'Ririko DiscordServiceEventReady');
   });
+
+  // Upsert all guilds to the database
+  client.guilds.cache.forEach(async (cachedGuilds) => {
+    const guild = await cachedGuilds.fetch();
+    await commandService.services.guildRepository.upsert(
+      {
+        id: guild.id,
+        name: guild.name,
+      },
+      ['id'],
+    );
+  });
 };

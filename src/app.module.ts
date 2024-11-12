@@ -12,6 +12,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import appConfig from '#config/app.config';
 import databaseConfig from '#config/database.config';
 import discordConfig from '#config/discord.config';
+import { AvcModule } from '#avc/avc.module';
 
 /**
  * The main application module.
@@ -32,6 +33,7 @@ import discordConfig from '#config/discord.config';
     RootModule,
     DiscordModule,
     CommandModule,
+    AvcModule,
   ],
   controllers: [RootController],
   providers: [RootService, ConfigService, DiscordService],
