@@ -48,7 +48,7 @@
     "@distube/deezer": "^1.0.0",
     "@distube/soundcloud": "^1.3.0",
     "@distube/spotify": "^1.5.1",
-    "@distube/yt-dlp": "^1.1.3",
+    "@distube/yt-dlp": "^2.0.1",
     "@distube/ytdl-core": "^4.11.7",
     "@vitalets/google-translate-api": "^9.2.0",
     "anime-wallpaper": "^1.1.1",
