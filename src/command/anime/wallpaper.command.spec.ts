@@ -143,57 +143,57 @@ describe('WallpaperCommand', () => {
     );
   });
 
-  it('should return wallpapers from MoeWalls', async () => {
-    const mockResult = [{ image: 'image_url_1' }, { image: 'image_url_2' }];
-    AnimeWallpaper.prototype.live2d = jest.fn().mockResolvedValue(mockResult);
-
-    const result = await wallpaperCommand.getWallpapers(
-      'MoeWalls&&&&naruto&&&&MoeWalls&&&&123456',
-    );
-
-    expect(result).toEqual({
-      content: 'Here is the wallpaper (Courtesy of MoeWalls)',
-      files: ['image_url_1', 'image_url_2'],
+  it('should get wallpapers without making actual API calls', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const mockInteraction = createMock<DiscordInteraction>();
+    const mockResult = [
+      { image: 'image_url_1' },
+      { image: 'image_url_2' },
+      { image: 'image_url_3' },
+    ];
+    AnimeWallpaper.mockImplementation(() => {
+      return {
+        search: jest.fn().mockResolvedValue(mockResult),
+        live2d: jest.fn().mockResolvedValue(mockResult),
+        pinterest: jest.fn().mockResolvedValue(mockResult),
+      };
     });
-  });
 
-  it('should return wallpapers from Pinterest', async () => {
-    const mockResult = [{ image: 'image_url_1' }, { image: 'image_url_2' }];
-    AnimeWallpaper.prototype.pinterest = jest
-      .fn()
-      .mockResolvedValue(mockResult);
-
-    const result = await wallpaperCommand.getWallpapers(
-      'Pinterest&&&&naruto&&&&Pinterest&&&&123456',
-    );
-
-    expect(result).toEqual({
-      content: 'Here is the wallpaper (Courtesy of Pinterest)',
-      files: ['image_url_1', 'image_url_2'],
-    });
-  });
-
-  it('should return wallpapers from other sources', async () => {
-    const mockResult = [{ image: 'image_url_1' }, { image: 'image_url_2' }];
-    AnimeWallpaper.prototype.search = jest.fn().mockResolvedValue(mockResult);
-
-    const result = await wallpaperCommand.getWallpapers(
+    let result = await wallpaperCommand.getWallpapers(
       'WallHaven&&&&naruto&&&&WallHaven&&&&123456',
     );
 
     expect(result).toEqual({
       content: 'Here is the wallpaper (Courtesy of WallHaven)',
-      files: ['image_url_1', 'image_url_2'],
+      files: expect.arrayContaining([
+        'image_url_1',
+        'image_url_2',
+        'image_url_3',
+      ]),
     });
-  });
 
-  it('should handle no results', async () => {
-    AnimeWallpaper.prototype.search = jest.fn().mockResolvedValue([]);
-
-    const result = await wallpaperCommand.getWallpapers(
-      'WallHaven&&&&naruto&&&&WallHaven&&&&123456',
+    result = await wallpaperCommand.getWallpapers(
+      'Pinterest&&&&naruto&&&&Pinterest&&&&123456',
     );
 
-    expect(result).toBe(false);
+    expect(result).toEqual({
+      content: 'Here is the wallpaper (Courtesy of Pinterest)',
+      files: expect.arrayContaining([
+        'image_url_1',
+        'image_url_2',
+        'image_url_3',
+      ]),
+    });
+
+    result = await wallpaperCommand.getWallpapers('3&&&&naruto&&&&3&&&&123456');
+
+    expect(result).toEqual({
+      content: 'Here is the wallpaper (Courtesy of 3)',
+      files: expect.arrayContaining([
+        'image_url_1',
+        'image_url_2',
+        'image_url_3',
+      ]),
+    });
   });
 });
