@@ -29,7 +29,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage --json",
+    "test:cov": "jest --coverage --json --runInBand --no-cache",
     "test:ci": "cp .env.example .env && mkdir test-results && jest --runInBand --no-cache --reporters=default --reporters=jest-junit --coverage && mv junit.xml test-results",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",

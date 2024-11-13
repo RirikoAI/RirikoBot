@@ -10,3 +10,4 @@ const runSeed = async () => {
 };
 
 void runSeed();
+export { runSeed };
