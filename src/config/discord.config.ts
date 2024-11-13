@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { DiscordConfig } from './config.type';
 import { IsString } from 'class-validator';
-import ConfigValidatorUtil from "#util/config/config-validator.util";
+import ConfigValidatorUtil from '#util/config/config-validator.util';
 
 class EnvironmentVariablesValidator {
   @IsString()
@@ -9,7 +9,7 @@ class EnvironmentVariablesValidator {
 
   @IsString()
   DISCORD_APPLICATION_ID: string;
-  
+
   @IsString()
   DEFAULT_PREFIX: string;
 }

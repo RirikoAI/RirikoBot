@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
  * Main function to bootstrap RiriKo AI
  * @author Earnest Angel (https://angel.net.my)
  */
-async function bootstrap() {
+export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const discordService = app.get(DiscordService);

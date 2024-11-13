@@ -2,22 +2,49 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CommandService } from './command.service';
 import { ConfigService } from '@nestjs/config';
 import { DiscordService } from '#discord/discord.service';
+import { SharedServices } from '#command/command.module';
 import { fakeLogger } from '../../test/helper/fake-logger.helper';
 
 describe('CommandService', () => {
   let service: CommandService;
+  let discordServiceMock: jest.Mocked<DiscordService>;
+  let configServiceMock: jest.Mocked<ConfigService>;
+  let sharedServicesMock: jest.Mocked<SharedServices>;
   let app;
 
-  // Mock all available services that are provided to commands in here
-  const discordServiceMock = { get: jest.fn() };
-  const configServiceMock = { get: jest.fn() };
-  const sharedServicesMock = { get: jest.fn() };
+  const putTest = () => {};
 
   beforeEach(async () => {
+    discordServiceMock = {
+      client: {
+        // Mock the client methods used in CommandService
+        api: {
+          applications: {
+            commands: {
+              post: jest.fn(),
+              delete: jest.fn(),
+            },
+          },
+        },
+        restClient: {
+          put: putTest,
+        },
+      },
+    } as any;
+
+    configServiceMock = {
+      get: jest.fn().mockReturnValue('!'),
+    } as any;
+
+    sharedServicesMock = {
+      guildRepository: {
+        findOne: jest.fn().mockResolvedValue({ prefix: '!' }),
+      },
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CommandService,
-        // Mock services for all commands
         {
           provide: DiscordService,
           useValue: discordServiceMock,
@@ -31,7 +58,6 @@ describe('CommandService', () => {
           useValue: sharedServicesMock,
         },
       ],
-      exports: [CommandService],
     }).compile();
 
     app = module.createNestApplication({
@@ -50,8 +76,31 @@ describe('CommandService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should be able to register all commands', () => {
-    expect(service.registerCommands()).toBeDefined();
+  it('should check and execute prefix command', async () => {
+    const message = {
+      content: '!test',
+      guild: { id: '123' },
+      reply: jest.fn(),
+    } as any;
+
+    await service.checkPrefixCommand(message);
+    expect(sharedServicesMock.guildRepository.findOne).toHaveBeenCalledWith({
+      where: { id: '123' },
+    });
+  });
+
+  it('should register, check and execute slash command', async () => {
+    const interaction = {
+      commandName: 'ping',
+      reply: jest.fn(),
+      options: {
+        getString: jest.fn(),
+      },
+    } as any;
+
+    await service.registerCommands();
+    await service.checkSlashCommand(interaction);
+    expect(interaction.reply).toHaveBeenCalled();
   });
 
   afterAll(async () => {

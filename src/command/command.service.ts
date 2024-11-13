@@ -140,7 +140,7 @@ export class CommandService {
           'Ririko CommandService',
         );
         await this.runSlashCommand(command, interaction);
-        return;
+        return command;
       }
     }
 
