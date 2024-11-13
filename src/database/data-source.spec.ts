@@ -6,6 +6,10 @@ dotenv.config({ path: 'src/database/.env.test' });
 import { AppDataSource } from './data-source';
 
 describe('AppDataSource', () => {
+  it('should be defined', () => {
+    expect(AppDataSource).toBeDefined();
+  });
+
   it('should create a DataSource instance with the correct configuration', () => {
     const dataSourceOptions: any = AppDataSource.options;
 
