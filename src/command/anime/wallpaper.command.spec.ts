@@ -4,6 +4,7 @@ import WallpaperCommand from '#command/anime/wallpaper.command';
 import { DiscordMessage, DiscordInteraction } from '#command/command.types';
 import { CommandFeatures } from '#command/command.features';
 import { Logger } from '@nestjs/common';
+import { AnimeWallpaper } from 'anime-wallpaper';
 
 jest.mock('#command/command.features');
 jest.mock('anime-wallpaper');
@@ -140,5 +141,59 @@ describe('WallpaperCommand', () => {
     expect(mockInteraction.editReply).toHaveBeenCalledWith(
       'An error occurred while fetching the wallpaper.',
     );
+  });
+
+  it('should return wallpapers from MoeWalls', async () => {
+    const mockResult = [{ image: 'image_url_1' }, { image: 'image_url_2' }];
+    AnimeWallpaper.prototype.live2d = jest.fn().mockResolvedValue(mockResult);
+
+    const result = await wallpaperCommand.getWallpapers(
+      'MoeWalls&&&&naruto&&&&MoeWalls&&&&123456',
+    );
+
+    expect(result).toEqual({
+      content: 'Here is the wallpaper (Courtesy of MoeWalls)',
+      files: ['image_url_1', 'image_url_2'],
+    });
+  });
+
+  it('should return wallpapers from Pinterest', async () => {
+    const mockResult = [{ image: 'image_url_1' }, { image: 'image_url_2' }];
+    AnimeWallpaper.prototype.pinterest = jest
+      .fn()
+      .mockResolvedValue(mockResult);
+
+    const result = await wallpaperCommand.getWallpapers(
+      'Pinterest&&&&naruto&&&&Pinterest&&&&123456',
+    );
+
+    expect(result).toEqual({
+      content: 'Here is the wallpaper (Courtesy of Pinterest)',
+      files: ['image_url_1', 'image_url_2'],
+    });
+  });
+
+  it('should return wallpapers from other sources', async () => {
+    const mockResult = [{ image: 'image_url_1' }, { image: 'image_url_2' }];
+    AnimeWallpaper.prototype.search = jest.fn().mockResolvedValue(mockResult);
+
+    const result = await wallpaperCommand.getWallpapers(
+      'WallHaven&&&&naruto&&&&WallHaven&&&&123456',
+    );
+
+    expect(result).toEqual({
+      content: 'Here is the wallpaper (Courtesy of WallHaven)',
+      files: ['image_url_1', 'image_url_2'],
+    });
+  });
+
+  it('should handle no results', async () => {
+    AnimeWallpaper.prototype.search = jest.fn().mockResolvedValue([]);
+
+    const result = await wallpaperCommand.getWallpapers(
+      'WallHaven&&&&naruto&&&&WallHaven&&&&123456',
+    );
+
+    expect(result).toBe(false);
   });
 });
