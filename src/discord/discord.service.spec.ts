@@ -3,15 +3,26 @@ import { DiscordController } from './discord.controller';
 import { DiscordService } from './discord.service';
 import { ConfigService } from '@nestjs/config';
 import { CommandService } from '#command/command.service';
-import { AvcService } from '#avc/avc.service'; // Import AvcService here
+import { AvcService } from '#avc/avc.service';
+import { DiscordClient } from '#discord/discord.client';
+import { MessageCreateEvent } from './events/message-create.event';
+import { ReadyEvent } from './events/ready.event';
+import { InteractionCreateEvent } from '#discord/events/interaction-create.event';
+import { VoiceStateUpdateEvent } from '#discord/events/voice-state-update.event';
+
+jest.mock('#discord/discord.client');
+jest.mock('./events/message-create.event');
+jest.mock('./events/ready.event');
+jest.mock('#discord/events/interaction-create.event');
+jest.mock('#discord/events/voice-state-update.event');
 
 describe('Discord Service', () => {
   let service: DiscordService;
+  let discordClientMock: jest.Mocked<DiscordClient>;
 
-  // Mock all available services used by the Discord Service
   const configServiceMock = { get: jest.fn() };
   const commandServiceMock = { get: jest.fn() };
-  const avcServiceMock = { get: jest.fn() }; // Mock AvcService here
+  const avcServiceMock = { get: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,18 +37,57 @@ describe('Discord Service', () => {
           useValue: commandServiceMock,
         },
         {
-          provide: AvcService, // Mock AvcService directly
-          useValue: avcServiceMock, // Pass the mocked version here
+          provide: AvcService,
+          useValue: avcServiceMock,
         },
       ],
-      exports: [DiscordService],
       controllers: [DiscordController],
     }).compile();
 
     service = module.get<DiscordService>(DiscordService);
+    discordClientMock = new DiscordClient() as jest.Mocked<DiscordClient>;
+    (DiscordClient as unknown as jest.Mock).mockReturnValue(discordClientMock);
   });
 
   it('service should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('should connect to Discord and set ready state', async () => {
+    const loginMock = jest.fn().mockResolvedValue('token');
+    discordClientMock.login = loginMock;
+    discordClientMock.on = jest.fn((event, callback) => {
+      if (event === 'ready') {
+        callback();
+      }
+    });
+
+    await service.connect();
+
+    expect(discordClientMock.login).toHaveBeenCalledWith(undefined);
+    expect(service.ready).toBe(true);
+  });
+
+  it('should register events', () => {
+    service.client = discordClientMock;
+
+    service.registerEvents();
+
+    expect(ReadyEvent).toHaveBeenCalledWith(
+      discordClientMock,
+      commandServiceMock,
+    );
+    expect(MessageCreateEvent).toHaveBeenCalledWith(
+      discordClientMock,
+      commandServiceMock,
+    );
+    expect(InteractionCreateEvent).toHaveBeenCalledWith(
+      discordClientMock,
+      commandServiceMock,
+    );
+    expect(VoiceStateUpdateEvent).toHaveBeenCalledWith(
+      discordClientMock,
+      avcServiceMock,
+    );
   });
 });
