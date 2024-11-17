@@ -6,8 +6,8 @@ import { DiscordService } from '#discord/discord.service';
 import { ConfigService } from '@nestjs/config';
 import { Guild, TextChannel, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServices } from '#command/command.module';
 import { SystemPrompt } from '#command/ai/system-prompt';
+import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
 
 describe('AiCommand', () => {
   let command: AiCommand;
@@ -29,7 +29,7 @@ describe('AiCommand', () => {
   const mockCommandService = {
     getGuildPrefix: jest.fn(),
   };
-  const mockSharedServices: SharedServices = {
+  const mockSharedServices: SharedServicesMock = {
     config: {} as ConfigService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,

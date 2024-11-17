@@ -16,7 +16,8 @@ export type SlashCommandOption = {
   type: SlashCommandOptionTypes;
   name: string;
   description: string;
-  required: boolean;
+  required?: boolean;
+  options?: SlashCommandOptions;
 };
 
 export enum SlashCommandOptionTypes {
@@ -62,7 +63,17 @@ export interface DiscordInteraction extends ChatInputCommandInteraction {
   get member(): DiscordGuildMember;
 
   fetchReply(): Promise<Message<true>>;
+  
+  deferUpdate(): Promise<any>;
+  
+  customId?: string;
+  
+  message?: DiscordMessage;
 }
 
 export type DiscordVoiceChannel = VoiceChannel;
 export type DiscordGuild = Guild;
+
+export interface CommandButtons {
+  [key: string]: (interaction: DiscordInteraction) => Promise<any>;
+}

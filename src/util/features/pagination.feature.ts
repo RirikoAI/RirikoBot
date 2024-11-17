@@ -5,7 +5,7 @@ import {
   ButtonStyle,
   MessageComponentInteraction,
 } from 'discord.js';
-import { PaginationFeatureParams } from '#util/features/pagination-feature-types';
+import { PaginationFeatureParams } from '#util/features/pagination-feature.types';
 
 /**
  * PaginationFeature

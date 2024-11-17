@@ -19,13 +19,18 @@ export const InteractionCreateEvent = (
     Events.InteractionCreate,
     async (interaction: DiscordInteraction) => {
       try {
+        // check if the interaction is a button interaction
+        if (interaction?.isButton()) {
+          await commandService.checkButton(interaction);
+          return;
+        }
         await commandService.checkSlashCommand(interaction);
       } catch (error) {
         Logger.error(error.message, error.stack);
         const errorEmbed = new EmbedBuilder()
           .setColor('#FF0000')
           .setDescription(error.message);
-        await interaction.reply({ embeds: [errorEmbed] });
+        await interaction.channel.send({ embeds: [errorEmbed] });
       }
     },
   );

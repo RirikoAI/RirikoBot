@@ -1,9 +1,10 @@
 import {
+  CommandButtons,
   DiscordInteraction,
   DiscordMessage,
   SlashCommandOptions,
 } from '#command/command.types';
-import { Pages } from '#util/features/pagination-feature-types';
+import { Pages } from '#util/features/pagination-feature.types';
 
 /**
  * Command Interface
@@ -19,6 +20,7 @@ export interface CommandInterface {
   usageExamples: string[];
   slashOptions?: SlashCommandOptions;
   pages?: Pages;
+  buttons?: CommandButtons;
 
   test(content: string): boolean;
 

@@ -53,6 +53,12 @@ export class MenuFeature {
     });
 
     collector.on('collect', async (i: any) => {
+      if (params?.deleteAfterSelection) {
+        try {
+          await i.message.delete();
+        } catch (error) {}
+      }
+
       await callback(i, i.values[0], context);
     });
 

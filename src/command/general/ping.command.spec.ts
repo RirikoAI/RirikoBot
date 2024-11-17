@@ -5,7 +5,7 @@ import { DiscordService } from '#discord/discord.service';
 import { ConfigService } from '@nestjs/config';
 import { Guild, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServices } from '#command/command.module';
+import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
 
 describe('PingCommand', () => {
   let command: PingCommand;
@@ -21,7 +21,7 @@ describe('PingCommand', () => {
   const mockCommandService = {
     getGuildPrefix: jest.fn(),
   };
-  const mockSharedServices: SharedServices = {
+  const mockSharedServices: SharedServicesMock = {
     config: {} as ConfigService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,

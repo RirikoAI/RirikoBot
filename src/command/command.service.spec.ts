@@ -2,14 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CommandService } from './command.service';
 import { ConfigService } from '@nestjs/config';
 import { DiscordService } from '#discord/discord.service';
-import { SharedServices } from '#command/command.module';
 import { fakeLogger } from '../../test/helper/fake-logger.helper';
+import { SharedServicesMock } from "../../test/mocks/shared-services.mock";
 
 describe('CommandService', () => {
   let service: CommandService;
   let discordServiceMock: jest.Mocked<DiscordService>;
   let configServiceMock: jest.Mocked<ConfigService>;
-  let sharedServicesMock: jest.Mocked<SharedServices>;
+  let sharedServicesMock: jest.Mocked<SharedServicesMock>;
   let app;
 
   const putTest = () => {};

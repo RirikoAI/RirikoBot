@@ -19,8 +19,10 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       synchronize: this.configService.get('database.synchronize', {
         infer: true,
       }),
+      cache: true,
       dropSchema: false,
       keepConnectionAlive: true,
+      autoLoadEntities: true,
       logging: this.configService.get('database.logging', { infer: true }),
       entities: [__dirname + '/../**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/migrations/**/*{.ts,.js}'],

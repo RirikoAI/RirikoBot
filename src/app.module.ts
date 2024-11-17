@@ -13,6 +13,7 @@ import appConfig from '#config/app.config';
 import databaseConfig from '#config/database.config';
 import discordConfig from '#config/discord.config';
 import { AvcModule } from '#avc/avc.module';
+import { MusicModule } from "#music/music.module";
 
 /**
  * The main application module.
@@ -34,6 +35,7 @@ import { AvcModule } from '#avc/avc.module';
     DiscordModule,
     CommandModule,
     AvcModule,
+    MusicModule
   ],
   controllers: [RootController],
   providers: [RootService, ConfigService, DiscordService],

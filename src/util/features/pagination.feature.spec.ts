@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { PaginationFeature } from './pagination.feature';
-import { PaginationFeatureParams } from '#util/features/pagination-feature-types';
+import { PaginationFeatureParams } from '#util/features/pagination-feature.types';
 import { Interaction, Message, MessageComponentInteraction } from 'discord.js';
 
 jest.mock('discord.js', () => {

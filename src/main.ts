@@ -28,13 +28,13 @@ export async function bootstrap() {
   SwaggerModule.setup('docs', app, documentFactory);
 
   await app.listen(configService.get('app.port'), async () => {
+    await discordService.connect();
+    discordService.registerEvents();
+    await commandService.registerCommands();
     Logger.log(
       `Server listening on port ${configService.get('app.port')}`,
       'Ririko Main',
     );
-    await discordService.connect();
-    discordService.registerEvents();
-    await commandService.registerCommands();
   });
 }
 

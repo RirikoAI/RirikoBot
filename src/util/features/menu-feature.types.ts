@@ -51,4 +51,9 @@ export type MenuFeatureParams = {
    * Whether to follow up with a new message or reply to the original message
    */
   followUp?: boolean;
+  
+  /**
+   * Whether to delete the original message after an option is selected
+   */
+  deleteAfterSelection?: boolean;
 };

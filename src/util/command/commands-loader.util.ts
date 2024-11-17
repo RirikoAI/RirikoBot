@@ -140,26 +140,32 @@ const putSlashCommandsInAGuild = async (
 };
 
 const prepareSlashCommands = (commands: Command[]) => {
-  return commands
+  const cmd = commands
     .map((command) => {
       // Only return the command if it has a runSlash method
       if (command.runSlash) {
         return {
           name: command.name,
           description: command.description,
+          type: 1,
           // Check if the command has slashOptions, otherwise don't pass "options"
           options: command.slashOptions
-            ? command.slashOptions.map((option) => ({
-                type: option.type,
-                name: option.name,
-                description: option.description,
-                required: option.required,
-              }))
+            ? command.slashOptions.map((option) => {
+                return {
+                  type: option.type,
+                  name: option.name,
+                  description: option.description,
+                  required: option?.required,
+                  options: option?.options,
+                };
+              })
             : undefined,
         };
       }
     })
     .filter(Boolean);
+
+  return cmd;
 };
 
 export default CommandsLoaderUtil;

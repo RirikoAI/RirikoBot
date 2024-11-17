@@ -1,10 +1,12 @@
 import { Client, GatewayIntentBits, Partials, REST } from 'discord.js';
+import DisTube from "distube";
 
 /**
  * Discord Client
  * @author Earnest Angel (https://angel.net.my)
  */
 export class DiscordClient extends Client {
+  musicPlayer: DisTube;
   restClient: REST;
 
   constructor(...opt: any[]) {

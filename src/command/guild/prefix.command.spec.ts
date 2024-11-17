@@ -5,7 +5,7 @@ import { DiscordService } from '#discord/discord.service';
 import { ConfigService } from '@nestjs/config';
 import { Guild, GuildMember } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServices } from '#command/command.module';
+import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
 
 describe('PrefixCommand', () => {
   let command: PrefixCommand;
@@ -21,7 +21,7 @@ describe('PrefixCommand', () => {
   const mockCommandService = {
     getGuildPrefix: jest.fn().mockResolvedValue('!'),
   };
-  const mockSharedServices: SharedServices = {
+  const mockSharedServices: SharedServicesMock = {
     config: {} as ConfigService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,

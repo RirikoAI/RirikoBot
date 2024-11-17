@@ -9,6 +9,7 @@ import { VoiceState } from 'discord.js';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { AvcModule } from '#avc/avc.module';
 import { DiscordModule } from '#discord/discord.module';
+import { MusicChannel } from "#database/entities/music-channel.entity";
 
 describe('AvcService', () => {
   let service: AvcService;
@@ -53,11 +54,11 @@ describe('AvcService', () => {
         TypeOrmModule.forRoot({
           type: 'sqlite',
           database: ':memory:', // In-memory database
-          entities: [VoiceChannel, Guild], // Include your entities
+          entities: [VoiceChannel, Guild, MusicChannel], // Include your entities
           synchronize: true, // Automatically synchronize the schema
           dropSchema: true, // Drop schema on every test to start fresh
         }),
-        TypeOrmModule.forFeature([VoiceChannel, Guild]), // Import repositories for testing
+        TypeOrmModule.forFeature([VoiceChannel, Guild, MusicChannel]), // Import repositories for testing
 
         // Make sure both modules are included
         AvcModule,
@@ -75,6 +76,15 @@ describe('AvcService', () => {
         },
         {
           provide: getRepositoryToken(VoiceChannel),
+          useValue: {
+            findOne: jest.fn(),
+            insert: jest.fn(),
+            find: jest.fn(),
+            remove: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(MusicChannel),
           useValue: {
             findOne: jest.fn(),
             insert: jest.fn(),

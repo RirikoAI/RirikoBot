@@ -1,12 +1,14 @@
 import { SharedServices } from '#command/command.module';
 import { DiscordClient } from '#discord/discord.client';
 import {
+  CommandButtons,
   DiscordInteraction,
   DiscordMessage,
   SlashCommandOptions,
 } from '#command/command.types';
 import { CommandFeatures } from '#command/command.features';
-import { Pages } from '#util/features/pagination-feature-types';
+import { Pages } from '#util/features/pagination-feature.types';
+import DisTube from "distube";
 
 export type CommandConstructor = new (services: SharedServices) => Command;
 
@@ -33,6 +35,7 @@ export class Command extends CommandFeatures {
     this.services = services;
     this.client = services.discord?.client;
     this.getGuildPrefix = services.commandService?.getGuildPrefix;
+    this.player = services.discord?.client?.musicPlayer;
     this.init();
   }
 
@@ -86,7 +89,23 @@ export class Command extends CommandFeatures {
    */
   slashOptions?: SlashCommandOptions;
 
+  /**
+   * Pages for the command.
+   * @see Pages
+   * @see PaginationFeature
+   */
   pages?: Pages;
+
+  /**
+   * Buttons for the command.
+   * Example:
+   * ```
+   * buttons: { buttonId: this.handleButton }
+   * ```
+   * where handleButton is a function accepting interaction: DiscordInteraction parameter.
+   * @see CommandButtons
+   */
+  buttons?: CommandButtons;
 
   // -- System
 
@@ -111,6 +130,12 @@ export class Command extends CommandFeatures {
    * @see DiscordService
    */
   client: DiscordClient;
+  
+  /**
+   * Serves as a shortcut to the DisTube player from the MusicService
+   * @see MusicService
+   */
+  player: DisTube;
 
   /**
    * Serves as a shortcut to get the guild prefix from the CommandService

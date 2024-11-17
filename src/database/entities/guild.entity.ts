@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { VoiceChannel } from '#database/entities/voice-channel.entity';
+import { MusicChannel } from "#database/entities/music-channel.entity";
 
 /**
  * Guild Entity
@@ -20,7 +21,10 @@ export class Guild {
 
   @Column({ default: '!' })
   prefix: string;
-
+  
   @OneToMany(() => VoiceChannel, (voiceChannel) => voiceChannel.guild)
   voiceChannels: VoiceChannel[];
+  
+  @OneToMany(() => MusicChannel, (musicChannel) => musicChannel.guild)
+  musicChannels: VoiceChannel[];
 }

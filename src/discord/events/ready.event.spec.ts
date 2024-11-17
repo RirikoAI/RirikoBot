@@ -28,7 +28,9 @@ describe('InteractionCreateEvent', () => {
     InteractionCreateEvent(client, commandService);
 
     // Simulate the interaction event
-    const interaction = {} as DiscordInteraction;
+    const interaction = {
+      isButton: jest.fn(),
+    } as unknown as DiscordInteraction;
     const eventHandler = client.on.mock.calls[0][1];
     await eventHandler(interaction);
 

@@ -3,6 +3,11 @@ import { DiscordClient } from '#discord/discord.client';
 import { CommandService } from '#command/command.service';
 import { Events } from 'discord.js';
 import { DiscordMessage } from '#command/command.types';
+import { MusicService } from "#music/music.service";
+
+const musicService = {
+  handleMusic: jest.fn(),
+} as unknown as MusicService;
 
 describe('MessageCreateEvent', () => {
   it('should be defined', () => {
@@ -13,8 +18,8 @@ describe('MessageCreateEvent', () => {
     expect(MessageCreateEvent).toBeInstanceOf(Function);
   });
 
-  it('should have 2 parameters', () => {
-    expect(MessageCreateEvent).toHaveLength(2);
+  it('should have 3 parameters', () => {
+    expect(MessageCreateEvent).toHaveLength(3);
   });
 
   it('should call checkPrefixCommand', async () => {
@@ -25,7 +30,7 @@ describe('MessageCreateEvent', () => {
       checkPrefixCommand: jest.fn(),
     } as unknown as CommandService;
 
-    MessageCreateEvent(client, commandService);
+    MessageCreateEvent(client, commandService, musicService);
 
     // Simulate the message event
     const message = {
@@ -49,7 +54,7 @@ describe('MessageCreateEvent', () => {
       checkPrefixCommand: jest.fn(),
     } as unknown as CommandService;
 
-    MessageCreateEvent(client, commandService);
+    MessageCreateEvent(client, commandService, musicService);
 
     // Simulate the message event from a bot
     const message = {
@@ -73,7 +78,7 @@ describe('MessageCreateEvent', () => {
       checkPrefixCommand: jest.fn().mockRejectedValue(new Error('Test error')),
     } as unknown as CommandService;
 
-    MessageCreateEvent(client, commandService);
+    MessageCreateEvent(client, commandService, musicService);
 
     // Simulate the message event
     const message = {

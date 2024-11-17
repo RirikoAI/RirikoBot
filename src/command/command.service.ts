@@ -150,6 +150,28 @@ export class CommandService {
     );
   }
 
+  /**
+   * Check if a command is a button and execute
+   * @param interaction
+   */
+  async checkButton(interaction: DiscordInteraction) {
+    // Loop through all registered commands and execute the first one that matches
+    for (const command of CommandService.registeredCommands) {
+      // check if the command has buttons
+      if (command.buttons) {
+        const button = command.buttons[interaction.customId];
+        if (button) {
+          Logger.debug(
+            `Received button interaction: ${interaction.customId}`,
+            'Ririko CommandService',
+          );
+          const promise = button.bind(command);
+          await promise.call(command, interaction);
+        }
+      }
+    }
+  }
+
   getCommand(name: string): CommandInterface | undefined {
     return CommandService.registeredCommands.find(
       (command) => command.name === name,
@@ -210,7 +232,7 @@ export class CommandService {
         .setTitle('❌ Prefix Command Error')
         .setColor('#ff0000')
         .setDescription(error.message);
-      await message.reply({ embeds: [errorEmbed] });
+      await message.channel.send({ embeds: [errorEmbed] });
     }
   }
 

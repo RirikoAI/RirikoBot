@@ -5,8 +5,8 @@ import { DiscordService } from '#discord/discord.service';
 import { ConfigService } from '@nestjs/config';
 import { Guild, GuildMember, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServices } from '#command/command.module';
 import NicerTimeUtil from '#util/time/nicer-time.util';
+import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
 
 describe('MemberInfoCommand', () => {
   let command: MemberInfoCommand;
@@ -39,7 +39,7 @@ describe('MemberInfoCommand', () => {
   const mockCommandService = {
     getGuildPrefix: jest.fn(),
   };
-  const mockSharedServices: SharedServices = {
+  const mockSharedServices: SharedServicesMock = {
     config: {} as ConfigService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
