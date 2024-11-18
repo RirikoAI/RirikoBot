@@ -158,8 +158,6 @@ export class MusicService {
             () => this.handleGuildInterval(guildId, musicChannel.id),
             10000,
           );
-        } else {
-          console.log('???');
         }
       });
     }
@@ -186,20 +184,7 @@ export class MusicService {
         if (!queue) {
           return;
         }
-        const currentTime = queue.currentTime;
 
-        // format current time to be minutes and seconds, with 00:00 as the format.
-        const formattedTime = new Date(currentTime * 1000)
-          .toISOString()
-          .substr(currentTime >= 3600 ? 11 : 14, 8)
-          .split('.')[0];
-
-        const formattedDuration = new Date(queue.songs[0].duration * 1000)
-          .toISOString()
-          .substr(currentTime >= 3600 ? 11 : 14, 8)
-          .split('.')[0];
-
-        console.log(`${formattedTime}:${formattedDuration}`);
         channel.messages.fetch().then((messages) => {
           messages.last().edit({
             embeds: [
@@ -497,9 +482,10 @@ export class MusicService {
       console.log(channel, 'Channel not found');
       return;
     }
-
+    
     // delete all messages in the music channel
     const messages = await (textChannel as TextChannel).messages.fetch();
+    
     await Promise.all(messages.map((message) => message.delete()));
 
     const queue = this.distube.getQueue(guildId);

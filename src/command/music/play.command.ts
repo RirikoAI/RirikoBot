@@ -115,7 +115,9 @@ export default class PlayCommand extends Command implements CommandInterface {
       return;
     }
 
-    await loading.delete();
+    if (loading) {
+      await loading.delete();
+    }
 
     const reply = await interaction.channel.send({
       content: 'Playing song...',
@@ -143,19 +145,24 @@ export default class PlayCommand extends Command implements CommandInterface {
         userId: interaction.member.id,
       },
     });
-    
-    if (!playlist)
-      return interaction
-        .reply({ content: 'Playlist not found.', ephemeral: true })
-        .catch((e) => {});
 
-    if (!(playlist.tracks.length > 0))
-      return interaction
-        .reply({
+    if (!playlist) {
+      try {
+        return interaction.reply({
+          content: 'Playlist not found.',
+          ephemeral: true,
+        });
+      } catch (e) {}
+    }
+
+    if (!(playlist.tracks.length > 0)) {
+      try {
+        return interaction.reply({
           content: `The playlist ${playlist.name} has no tracks.`,
           ephemeral: true,
-        })
-        .catch((e) => {});
+        });
+      } catch (e) {}
+    }
 
     let songs = [];
     playlist.tracks.map((m) => songs.push(m.url));
@@ -177,11 +184,11 @@ export default class PlayCommand extends Command implements CommandInterface {
         message: reply,
       });
     } catch (e) {
-      await interaction
-        .editReply({
+      try {
+        await interaction.editReply({
           content: 'Something went wrong when trying to play the playlist',
-        })
-        .catch((e) => {});
+        });
+      } catch (e) {}
     }
   }
 

@@ -340,9 +340,9 @@ export default class PlaylistCommand
           ephemeral: true,
         })
         .catch((e) => {});
-
+    
     const music_filter = playlist?.tracks?.filter(
-      (m) => m.playlist.name === playlist_name && m.name === name,
+      (m) => m.playlist?.name === playlist_name && m?.name === name,
     );
     if (!(music_filter?.length > 0))
       return interaction
@@ -400,7 +400,7 @@ export default class PlaylistCommand
         let playlistOwner = playlist[i].author;
         let playlistIsPublic = playlist[i].public;
 
-        if (playlistOwner !== interaction.member.id) {
+        if (playlistOwner !== interaction.member?.id) {
           if (playlistIsPublic === false) {
             return interaction
               .reply({

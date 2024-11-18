@@ -192,6 +192,10 @@ export default class QueueCommand extends Command implements CommandInterface {
     interaction: DiscordInteraction,
     content: string,
   ): Promise<void> {
-    await interaction.reply({ content, ephemeral: true }).catch(console.error);
+    try {
+      await interaction.reply({ content, ephemeral: true });
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
