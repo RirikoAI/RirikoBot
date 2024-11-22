@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createMock } from '@golevelup/ts-jest';
 import AnimeCommand from '#command/anime/anime.command';
 import { DiscordMessage, DiscordInteraction } from '#command/command.types';
@@ -14,7 +13,7 @@ describe('AnimeCommand', () => {
   let mockInteraction: DiscordInteraction;
 
   beforeEach(() => {
-    animeCommand = new AnimeCommand(createMock<CommandFeatures>());
+    animeCommand = new AnimeCommand(createMock<CommandFeatures>() as any);
     mockMessage = createMock<DiscordMessage>();
     mockInteraction = createMock<DiscordInteraction>();
   });
@@ -30,8 +29,8 @@ describe('AnimeCommand', () => {
   it('should run prefix command and search for anime', async () => {
     mockMessage.content = 'anime naruto';
     const searchAnimeSpy = jest
-      .spyOn(animeCommand, 'searchAnime')
-      .mockResolvedValue();
+      .spyOn(animeCommand, 'searchAnime' as any)
+      .mockResolvedValue({});
 
     await animeCommand.runPrefix(mockMessage);
 
@@ -44,8 +43,8 @@ describe('AnimeCommand', () => {
   it('should run slash command and search for anime', async () => {
     mockInteraction.options.getString = jest.fn().mockReturnValue('naruto');
     const searchAnimeSpy = jest
-      .spyOn(animeCommand, 'searchAnime')
-      .mockResolvedValue();
+      .spyOn(animeCommand, 'searchAnime' as any)
+      .mockResolvedValue({});
 
     await animeCommand.runSlash(mockInteraction);
 
@@ -63,9 +62,9 @@ describe('AnimeCommand', () => {
       .mockResolvedValue(mockAnimeDetails);
     const createMenuSpy = jest
       .spyOn(animeCommand, 'createMenu')
-      .mockResolvedValue();
+      .mockResolvedValue({} as any);
 
-    await animeCommand.handleAnimeSelection(mockInteraction, '1');
+    await (animeCommand as any).handleAnimeSelection(mockInteraction, '1');
 
     expect(mockInteraction.deferReply).toHaveBeenCalled();
     expect(mockInteraction.editReply).toHaveBeenCalledWith({
@@ -80,8 +79,8 @@ describe('AnimeCommand', () => {
       { userId: mockInteraction.user.id, search: 'naruto' },
     ];
     const searchAnimeSpy = jest
-      .spyOn(animeCommand, 'searchAnime')
-      .mockResolvedValue();
+      .spyOn(animeCommand, 'searchAnime' as any)
+      .mockResolvedValue({});
 
     await animeCommand.handleNextAction(mockInteraction, 'search');
 

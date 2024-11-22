@@ -5,10 +5,7 @@ import { DiscordModule } from '#discord/discord.module';
 import { DiscordService } from '#discord/discord.service';
 import { RootModule } from '#api/root.module';
 import { CommandModule } from '#command/command.module';
-// import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-// import { TypeOrmConfigService } from '#database/typeorm-config.service';
-// import { DataSource, DataSourceOptions } from 'typeorm';
 import appConfig from '#config/app.config';
 import databaseConfig from '#config/database.config';
 import discordConfig from '#config/discord.config';
@@ -27,11 +24,6 @@ import { DatabaseModule } from '#database/database.module';
       load: [appConfig, databaseConfig, discordConfig],
       envFilePath: ['.env'],
     }),
-    // TypeOrmModule.forRootAsync({
-    //   useClass: TypeOrmConfigService,
-    //   dataSourceFactory: async (options: DataSourceOptions) =>
-    //     new DataSource(options).initialize(),
-    // }),
     RootModule,
     DiscordModule,
     CommandModule,

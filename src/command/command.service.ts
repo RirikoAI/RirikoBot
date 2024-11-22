@@ -208,7 +208,7 @@ export class CommandService {
 
       return guild.prefix;
     } catch (error) {
-      return this.services.config.get('DEFAULT_PREFIX');
+      return this?.services?.config?.get('DEFAULT_PREFIX') || '!';
     }
   }
 

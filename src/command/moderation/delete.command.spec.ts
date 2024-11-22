@@ -2,10 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import DeleteCommand from './delete.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { Guild, TextChannel } from 'discord.js';
 import { DiscordMessage, DiscordInteraction } from '#command/command.types';
-import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
 
 describe('DeleteCommand', () => {
   let command: DeleteCommand;
@@ -22,12 +21,9 @@ describe('DeleteCommand', () => {
     getGuildPrefix: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {} as any,
   };
 
   beforeEach(async () => {

@@ -1,13 +1,11 @@
-// @ts-nocheck
 import { Test, TestingModule } from '@nestjs/testing';
 import AiCommand from './ai.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { Guild, TextChannel, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { SystemPrompt } from '#command/ai/system-prompt';
-import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
 
 describe('AiCommand', () => {
   let command: AiCommand;
@@ -30,12 +28,9 @@ describe('AiCommand', () => {
     getGuildPrefix: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {} as any,
   };
 
   beforeEach(async () => {
@@ -86,12 +81,12 @@ describe('AiCommand', () => {
         channel: mockTextChannel,
       } as unknown as DiscordMessage;
 
-      command.streamToChannel = jest.fn();
+      (command as any).streamToChannel = jest.fn();
 
       await command.runPrefix(mockMessage);
 
       expect(mockMessage.reply).toHaveBeenCalledWith('Thinking...');
-      expect(command.streamToChannel).toHaveBeenCalledWith(
+      expect((command as any).streamToChannel).toHaveBeenCalledWith(
         undefined,
         mockUser.id,
         mockTextChannel.id,
@@ -117,12 +112,12 @@ describe('AiCommand', () => {
         channel: mockTextChannel,
       } as unknown as DiscordInteraction;
 
-      command.streamToChannel = jest.fn();
+      (command as any).streamToChannel = jest.fn();
 
       await command.runSlash(mockInteraction);
 
       expect(mockInteraction.reply).toHaveBeenCalledWith('Thinking...');
-      expect(command.streamToChannel).toHaveBeenCalledWith(
+      expect((command as any).streamToChannel).toHaveBeenCalledWith(
         'test prompt',
         mockUser.id,
         mockTextChannel.id,
@@ -134,7 +129,7 @@ describe('AiCommand', () => {
   describe('storePrompt', () => {
     it('should store the prompt for a new user', () => {
       const userId = '1234567890';
-      const prompt = { role: 'user', content: 'test prompt' };
+      const prompt = { role: 'user', content: 'test prompt' } as any;
 
       command.storePrompt(userId, prompt);
 
@@ -148,8 +143,8 @@ describe('AiCommand', () => {
 
     it('should store the prompt for an existing user', () => {
       const userId = '1234567890';
-      const prompt1 = { role: 'user', content: 'test prompt 1' };
-      const prompt2 = { role: 'user', content: 'test prompt 2' };
+      const prompt1 = { role: 'user', content: 'test prompt 1' } as any;
+      const prompt2 = { role: 'user', content: 'test prompt 2' } as any;
 
       command.storePrompt(userId, prompt1);
       command.storePrompt(userId, prompt2);
@@ -166,7 +161,7 @@ describe('AiCommand', () => {
   describe('getPrompts', () => {
     it('should return the prompts for a specific user', () => {
       const userId = '1234567890';
-      const prompt = { role: 'user', content: 'test prompt' };
+      const prompt = { role: 'user', content: 'test prompt' } as any;
 
       command.storePrompt(userId, prompt);
 

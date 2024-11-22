@@ -2,9 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import MuteCommand from './mute.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServicesMock } from '../../../test/mocks/shared-services.mock';
+import { SharedServicesMock, TestSharedService } from '../../../test/mocks/shared-services.mock';
 
 describe('MuteCommand', () => {
   let command: MuteCommand;
@@ -26,13 +25,10 @@ describe('MuteCommand', () => {
     muteMusic: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
     musicService: mockMusicService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {} as any,
   };
 
   beforeEach(async () => {

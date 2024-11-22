@@ -1,12 +1,10 @@
-// @ts-nocheck
 import { Test, TestingModule } from '@nestjs/testing';
 import BanCommand from './ban.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { Guild, GuildMember, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
 
 describe('BanCommand', () => {
   let command: BanCommand;
@@ -24,12 +22,9 @@ describe('BanCommand', () => {
     getGuildPrefix: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {} as any,
   };
 
   beforeEach(async () => {
@@ -91,7 +86,7 @@ describe('BanCommand', () => {
     });
 
     it('should not ban a user if the sender lacks permission', async () => {
-      mockGuildMember.permissions.has = jest.fn().mockReturnValue(false);
+      (mockGuildMember as any).permissions.has = jest.fn().mockReturnValue(false);
       const mockMessage = {
         guild: mockGuild,
         member: mockGuildMember,
@@ -132,7 +127,7 @@ describe('BanCommand', () => {
     });
 
     it('should not ban a user if the user is not bannable', async () => {
-      mockGuildMember.bannable = false;
+      (mockGuildMember as any).bannable = false;
       const mockMessage = {
         guild: mockGuild,
         member: mockGuildMember,
@@ -172,7 +167,7 @@ describe('BanCommand', () => {
     });
 
     it('should not ban a user if the sender lacks permission', async () => {
-      mockGuildMember.permissions.has = jest.fn().mockReturnValue(false);
+      (mockGuildMember as any).permissions.has = jest.fn().mockReturnValue(false);
       const mockInteraction = {
         guild: mockGuild,
         member: mockGuildMember,
@@ -209,7 +204,7 @@ describe('BanCommand', () => {
     });
 
     it('should not ban a user if the user is not bannable', async () => {
-      mockGuildMember.bannable = false;
+      (mockGuildMember as any).bannable = false;
       const mockInteraction = {
         guild: mockGuild,
         member: mockGuildMember,

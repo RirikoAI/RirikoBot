@@ -2,9 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import PlayCommand from './play.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServicesMock } from '../../../test/mocks/shared-services.mock';
+import { SharedServicesMock, TestSharedService } from '../../../test/mocks/shared-services.mock';
 
 describe('PlayCommand', () => {
   let command: PlayCommand;
@@ -26,13 +25,18 @@ describe('PlayCommand', () => {
     resumeMusic: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
     musicService: mockMusicService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {} as any,
+    db: {
+      playlistRepository: {
+        findOne: jest.fn(),
+      },
+      musicChannelRepository: {
+        findOne: jest.fn(),
+      }
+    } as any,
   };
 
   beforeEach(async () => {
@@ -46,15 +50,6 @@ describe('PlayCommand', () => {
     }).compile();
 
     command = module.get<PlayCommand>(PlayCommand);
-
-    // Mock the services
-    command.services.playlistRepository = {
-      findOne: jest.fn(),
-    } as any;
-
-    command.services.musicChannelRepository = {
-      findOne: jest.fn(),
-    } as any;
 
     // Mock the player
     command.player = {
@@ -156,13 +151,17 @@ describe('PlayCommand', () => {
         channel: { send: jest.fn() },
       } as unknown as DiscordInteraction;
 
-      jest.spyOn(command, 'findMusicChannel').mockResolvedValue(mockInteraction.channel);
+      jest
+        .spyOn(command, 'findMusicChannel')
+        .mockResolvedValue(mockInteraction.channel);
       jest.spyOn(command.player, 'play').mockResolvedValue();
 
       await command.playMusic(mockInteraction);
 
       expect(mockInteraction.deferReply).toHaveBeenCalled();
-      expect(mockInteraction.editReply).toHaveBeenCalledWith({ content: 'Loading command...' });
+      expect(mockInteraction.editReply).toHaveBeenCalledWith({
+        content: 'Loading command...',
+      });
       expect(command.player.play).toHaveBeenCalledWith(
         mockInteraction.member.voice.channel,
         'Test Song',
@@ -188,16 +187,23 @@ describe('PlayCommand', () => {
         tracks: [{ url: 'http://test.url' }],
       };
 
-      jest.spyOn(command.services.playlistRepository, 'findOne').mockResolvedValue(mockPlaylist as any);
-      jest.spyOn(command.player, 'createCustomPlaylist').mockResolvedValue('queuedPlaylist' as any);
+      jest
+        .spyOn(command.db.playlistRepository, 'findOne')
+        .mockResolvedValue(mockPlaylist as any);
+      jest
+        .spyOn(command.player, 'createCustomPlaylist')
+        .mockResolvedValue('queuedPlaylist' as any);
       jest.spyOn(command.player, 'play').mockResolvedValue();
 
       await command.playPlaylist(mockInteraction);
 
-      expect(command.services.playlistRepository.findOne).toHaveBeenCalledWith({
+      expect(command.db.playlistRepository.findOne).toHaveBeenCalledWith({
         where: { name: 'Test Playlist', userId: '1234567890' },
       });
-      expect(command.player.createCustomPlaylist).toHaveBeenCalledWith(['http://test.url'], expect.any(Object));
+      expect(command.player.createCustomPlaylist).toHaveBeenCalledWith(
+        ['http://test.url'],
+        expect.any(Object),
+      );
       expect(command.player.play).toBeDefined();
     });
   });
@@ -215,11 +221,15 @@ describe('PlayCommand', () => {
         },
       } as unknown as DiscordMessage;
 
-      jest.spyOn(command.services.musicChannelRepository, 'findOne').mockResolvedValue({ id: 'musicChannelId' } as any);
+      jest
+        .spyOn(command.db.musicChannelRepository, 'findOne')
+        .mockResolvedValue({ id: 'musicChannelId' } as any);
 
       const result = await command.findMusicChannel(mockMessage);
 
-      expect(command.services.musicChannelRepository.findOne).toHaveBeenCalledWith({
+      expect(
+        command.db.musicChannelRepository.findOne,
+      ).toHaveBeenCalledWith({
         where: { guild: { id: '1234567890' } },
       });
       expect(result).toEqual({ id: 'musicChannelId' });

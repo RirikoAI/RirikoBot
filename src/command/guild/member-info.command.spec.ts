@@ -2,18 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import MemberInfoCommand from './member-info.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
-import { Guild, GuildMember, User } from 'discord.js';
+import { Guild, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import NicerTimeUtil from '#util/time/nicer-time.util';
-import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
 
 describe('MemberInfoCommand', () => {
   let command: MemberInfoCommand;
   let mockGuild: Guild;
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let mockGuildMember: GuildMember;
   let mockUser: User;
   const mockDiscordService = {
     client: {
@@ -40,12 +36,9 @@ describe('MemberInfoCommand', () => {
     getGuildPrefix: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {} as any,
   };
 
   const mockCreatedAtValue = new Date('2020-01-01');
@@ -73,11 +66,7 @@ describe('MemberInfoCommand', () => {
         .mockReturnValue('http://example.com/avatar.png'),
       createdAt: mockCreatedAtValue,
     } as unknown as User;
-
-    mockGuildMember = {
-      user: mockUser,
-    } as GuildMember;
-
+    
     mockGuild = {
       id: '1234567890',
     } as unknown as Guild;

@@ -2,108 +2,131 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CommandService } from './command.service';
 import { ConfigService } from '@nestjs/config';
 import { DiscordService } from '#discord/discord.service';
-import { fakeLogger } from '../../test/helper/fake-logger.helper';
-import { SharedServicesMock } from "../../test/mocks/shared-services.mock";
+import { DatabaseService } from '#database/database.service';
+import { SharedServices } from '#command/command.module';
+import { Command } from '#command/command.class';
+import { DiscordMessage, DiscordInteraction } from '#command/command.types';
+import CommandsLoaderUtil from '#util/command/commands-loader.util';
 
 describe('CommandService', () => {
   let service: CommandService;
-  let discordServiceMock: jest.Mocked<DiscordService>;
-  let configServiceMock: jest.Mocked<ConfigService>;
-  let sharedServicesMock: jest.Mocked<SharedServicesMock>;
-  let app;
-
-  const putTest = () => {};
+  let configService: ConfigService;
+  let databaseService: DatabaseService;
+  let sharedServices: SharedServices;
 
   beforeEach(async () => {
-    discordServiceMock = {
-      client: {
-        // Mock the client methods used in CommandService
-        api: {
-          applications: {
-            commands: {
-              post: jest.fn(),
-              delete: jest.fn(),
-            },
-          },
-        },
-        restClient: {
-          put: putTest,
-        },
-      },
-    } as any;
-
-    configServiceMock = {
-      get: jest.fn().mockReturnValue('!'),
-    } as any;
-
-    sharedServicesMock = {
-      guildRepository: {
-        findOne: jest.fn().mockResolvedValue({ prefix: '!' }),
-      },
-    } as any;
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CommandService,
         {
-          provide: DiscordService,
-          useValue: discordServiceMock,
+          provide: ConfigService,
+          useValue: { get: jest.fn() },
         },
         {
-          provide: ConfigService,
-          useValue: configServiceMock,
+          provide: DiscordService,
+          useValue: { client: { musicPlayer: {} } },
+        },
+        {
+          provide: DatabaseService,
+          useValue: { guildRepository: { findOne: jest.fn() } },
         },
         {
           provide: 'SHARED_SERVICES',
-          useValue: sharedServicesMock,
+          useValue: {},
         },
       ],
     }).compile();
 
-    app = module.createNestApplication({
-      // @ts-ignore
-      logger: {
-        log: fakeLogger,
-      },
-    });
-
-    await app.init();
-
     service = module.get<CommandService>(CommandService);
+    configService = module.get<ConfigService>(ConfigService);
+    databaseService = module.get<DatabaseService>(DatabaseService);
+    sharedServices = module.get<SharedServices>('SHARED_SERVICES');
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should check and execute prefix command', async () => {
-    const message = {
-      content: '!test',
-      guild: { id: '123' },
-      reply: jest.fn(),
-    } as any;
+  describe('registerCommands', () => {
+    it('should register commands', async () => {
+      jest
+        .spyOn(CommandsLoaderUtil, 'loadCommandsInDirectory')
+        .mockReturnValue([]);
+      jest.spyOn(CommandsLoaderUtil, 'instantiateCommands').mockReturnValue([]);
+      jest
+        .spyOn(CommandsLoaderUtil, 'putSlashCommandsInGuilds')
+        .mockResolvedValue(undefined);
 
-    await service.checkPrefixCommand(message);
-    expect(sharedServicesMock.guildRepository.findOne).toHaveBeenCalledWith({
-      where: { id: '123' },
+      const result = await service.registerCommands();
+
+      expect(result).toEqual([]);
     });
   });
 
-  it('should register, check and execute slash command', async () => {
-    const interaction = {
-      commandName: 'ping',
-      reply: jest.fn(),
-      options: {
-        getString: jest.fn(),
-      },
-    } as any;
+  describe('checkPrefixCommand', () => {
+    it('should execute a prefix command', async () => {
+      const message = {
+        content: '!test',
+        guild: { id: '123' },
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
+      const command = new Command(sharedServices);
+      command.test = jest.fn().mockReturnValue(true);
+      command.setParams = jest.fn();
+      command.runPrefix = jest.fn();
 
-    await service.registerCommands();
-    await service.checkSlashCommand(interaction);
-    expect(interaction.reply).toHaveBeenCalled();
+      CommandService['registeredCommands'] = [command];
+      jest.spyOn(service, 'getGuildPrefix').mockResolvedValue('!');
+
+      await service.checkPrefixCommand(message);
+
+      expect(command.test).toHaveBeenCalledWith('test');
+      expect(command.setParams).toHaveBeenCalledWith('test');
+      expect(command.runPrefix).toHaveBeenCalledWith(message);
+    });
   });
 
-  afterAll(async () => {
-    await app.close();
+  describe('checkSlashCommand', () => {
+    it('should execute a slash command', async () => {
+      const interaction = {
+        commandName: 'test',
+      } as unknown as DiscordInteraction;
+      const command = new Command(sharedServices);
+      command.test = jest.fn().mockReturnValue(true);
+      command.runSlash = jest.fn();
+
+      CommandService['registeredCommands'] = [command];
+
+      await service.checkSlashCommand(interaction);
+
+      expect(command.test).toHaveBeenCalledWith('test');
+      expect(command.runSlash).toHaveBeenCalledWith(interaction);
+    });
+  });
+
+  describe('getGuildPrefix', () => {
+    it('should return the guild prefix', async () => {
+      const message = { guild: { id: '123' } } as unknown as DiscordMessage;
+      const guild = { prefix: '!' };
+      jest
+        .spyOn(databaseService.guildRepository, 'findOne')
+        .mockResolvedValue(guild as any);
+
+      const result = await service.getGuildPrefix(message);
+
+      expect(result).toBe('!');
+    });
+
+    it('should return the default prefix if an error occurs', async () => {
+      const message = { guild: { id: '123' } } as unknown as DiscordMessage;
+      jest
+        .spyOn(databaseService.guildRepository, 'findOne')
+        .mockRejectedValue(new Error('Error'));
+      jest.spyOn(configService, 'get').mockReturnValue('!');
+
+      const result = await service.getGuildPrefix(message);
+
+      expect(result).toBe('!');
+    });
   });
 });

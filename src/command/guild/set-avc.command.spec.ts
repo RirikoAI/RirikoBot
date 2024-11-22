@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import SetAvcCommand from './set-avc.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { ChannelType, Guild, VoiceChannel } from 'discord.js';
 import { DiscordMessage } from '#command/command.types';
-import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
+import {
+  SharedServicesMock,
+  TestSharedService,
+} from '../../../test/mocks/shared-services.mock';
 
 describe('SetAvcCommand', () => {
   let command: SetAvcCommand;
@@ -21,14 +23,15 @@ describe('SetAvcCommand', () => {
     getGuildPrefix: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {
-      insert: jest.fn(),
-    } as any,
+    db: {
+      guildRepository: {} as any,
+      voiceChannelRepository: {
+        insert: jest.fn(),
+      } as any,
+    },
   };
 
   beforeEach(async () => {
@@ -76,7 +79,7 @@ describe('SetAvcCommand', () => {
       });
 
       expect(
-        mockSharedServices.voiceChannelRepository.insert,
+        mockSharedServices.db.voiceChannelRepository.insert,
       ).toHaveBeenCalledWith({
         id: '0987654321',
         name: '🔊 Join To Create',

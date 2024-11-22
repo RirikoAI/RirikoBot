@@ -1,12 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MusicService } from './music.service';
 import { DiscordService } from '#discord/discord.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Guild } from '#database/entities/guild.entity';
 import { MusicChannel } from '#database/entities/music-channel.entity';
 import { Repository } from 'typeorm';
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 import { Collection } from 'discord.js';
+import { DatabaseService } from '#database/database.service';
 
 let moduleMetadata = {
   providers: [
@@ -39,12 +38,15 @@ let moduleMetadata = {
       },
     },
     {
-      provide: getRepositoryToken(Guild),
-      useClass: Repository,
-    },
-    {
-      provide: getRepositoryToken(MusicChannel),
-      useClass: Repository,
+      provide: DatabaseService,
+      useValue: {
+        guildRepository: {
+          findOne: jest.fn(),
+        },
+        musicChannelRepository: {
+          findOne: jest.fn(),
+        },
+      },
     },
   ],
 };
@@ -91,7 +93,7 @@ jest.mock('discord.js', () => {
 describe('MusicService', () => {
   let service: MusicService;
   let discordService: DiscordService;
-  let musicChannelRepository: Repository<MusicChannel>;
+  let musicChannelRepository: any;
 
   beforeEach(async () => {
     const module: TestingModule =
@@ -99,9 +101,7 @@ describe('MusicService', () => {
 
     service = module.get<MusicService>(MusicService);
     discordService = module.get<DiscordService>(DiscordService);
-    musicChannelRepository = module.get<Repository<MusicChannel>>(
-      getRepositoryToken(MusicChannel),
-    );
+    musicChannelRepository = module.get<DatabaseService>(DatabaseService).musicChannelRepository;
     await service.createPlayer();
   });
 
@@ -511,9 +511,7 @@ describe('MusicService', () => {
 
       service = module.get<MusicService>(MusicService);
       discordService = module.get<DiscordService>(DiscordService);
-      musicChannelRepository = module.get<Repository<MusicChannel>>(
-        getRepositoryToken(MusicChannel),
-      );
+      musicChannelRepository = module.get<DatabaseService>(DatabaseService).musicChannelRepository;
 
       interaction = {
         guild: { id: '1000000001112223334' },
@@ -576,9 +574,7 @@ describe('MusicService', () => {
 
       service = module.get<MusicService>(MusicService);
       discordService = module.get<DiscordService>(DiscordService);
-      musicChannelRepository = module.get<Repository<MusicChannel>>(
-        getRepositoryToken(MusicChannel),
-      );
+      musicChannelRepository = module.get<DatabaseService>(DatabaseService).musicChannelRepository;
 
       channel = {
         guild: { id: '1000000001112223334' },

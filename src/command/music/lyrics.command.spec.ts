@@ -2,10 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import LyricsCommand from './lyrics.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { EmbedBuilder, Guild, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServicesMock } from '../../../test/mocks/shared-services.mock';
+import { SharedServicesMock, TestSharedService } from '../../../test/mocks/shared-services.mock';
 import { Song } from 'genius-lyrics';
 
 describe('LyricsCommand', () => {
@@ -22,16 +21,15 @@ describe('LyricsCommand', () => {
       },
     },
   };
+  
   const mockCommandService = {
     getGuildPrefix: jest.fn(),
   };
+  
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {} as any,
   };
 
   beforeEach(async () => {

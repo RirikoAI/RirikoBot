@@ -2,9 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import PlaylistCommand from './playlist.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { DiscordInteraction } from '#command/command.types';
-import { SharedServicesMock } from '../../../test/mocks/shared-services.mock';
+import { SharedServicesMock, TestSharedService } from '../../../test/mocks/shared-services.mock';
 
 describe('PlaylistCommand', () => {
   let command: PlaylistCommand;
@@ -32,16 +31,16 @@ describe('PlaylistCommand', () => {
     delete: jest.fn(),
     insert: jest.fn(),
   };
+  
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
     musicService: mockMusicService,
-    playlistRepository: mockPlaylistRepository,
-    trackRepository: mockTrackRepository,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {} as any,
-    voiceChannelRepository: {} as any,
+    db: {
+      playlistRepository: mockPlaylistRepository,
+      trackRepository: mockTrackRepository,
+    }
   };
 
   beforeEach(async () => {

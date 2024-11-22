@@ -68,6 +68,7 @@
     "ollama": "^0.5.9",
     "opusscript": "^0.0.8",
     "reflect-metadata": "^0.2.0",
+    "require-all": "^3.0.0",
     "rxjs": "^7.8.1",
     "sodium-native": "^4.3.1",
     "songlyrics": "^2.4.8",

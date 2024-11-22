@@ -2,10 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import PrefixCommand from './prefix.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
-import { ConfigService } from '@nestjs/config';
 import { Guild, GuildMember } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServicesMock } from "../../../test/mocks/shared-services.mock";
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
 
 describe('PrefixCommand', () => {
   let command: PrefixCommand;
@@ -22,14 +21,15 @@ describe('PrefixCommand', () => {
     getGuildPrefix: jest.fn().mockResolvedValue('!'),
   };
   const mockSharedServices: SharedServicesMock = {
-    config: {} as ConfigService,
+    ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
-    autoVoiceChannelService: {} as any,
-    guildRepository: {
-      upsert: jest.fn(),
-    } as any,
-    voiceChannelRepository: {} as any,
+    db: {
+      guildRepository: {
+        upsert: jest.fn(),
+      } as any,
+      voiceChannelRepository: {} as any,
+    }
   };
 
   beforeEach(async () => {
@@ -86,7 +86,7 @@ describe('PrefixCommand', () => {
 
       await command.runPrefix(mockMessage);
 
-      expect(mockSharedServices.guildRepository.upsert).toHaveBeenCalledWith(
+      expect(mockSharedServices.db.guildRepository.upsert).toHaveBeenCalledWith(
         {
           id: mockGuild.id,
           prefix: 'newprefix',
@@ -126,7 +126,7 @@ describe('PrefixCommand', () => {
 
       await command.runSlash(mockInteraction);
 
-      expect(mockSharedServices.guildRepository.upsert).toHaveBeenCalledWith(
+      expect(mockSharedServices.db.guildRepository.upsert).toHaveBeenCalledWith(
         {
           id: mockGuild.id,
           prefix: 'newprefix',
