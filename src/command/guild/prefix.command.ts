@@ -84,7 +84,7 @@ export default class PrefixCommand extends Command implements CommandInterface {
     prefix: string,
   ): Promise<void> {
     const guildId = message.guild.id;
-    await this.services.guildRepository.upsert(
+    await this.db.guildRepository.upsert(
       {
         id: guildId,
         prefix,

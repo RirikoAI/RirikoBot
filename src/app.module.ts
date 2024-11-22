@@ -5,15 +5,16 @@ import { DiscordModule } from '#discord/discord.module';
 import { DiscordService } from '#discord/discord.service';
 import { RootModule } from '#api/root.module';
 import { CommandModule } from '#command/command.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+// import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmConfigService } from '#database/typeorm-config.service';
-import { DataSource, DataSourceOptions } from 'typeorm';
+// import { TypeOrmConfigService } from '#database/typeorm-config.service';
+// import { DataSource, DataSourceOptions } from 'typeorm';
 import appConfig from '#config/app.config';
 import databaseConfig from '#config/database.config';
 import discordConfig from '#config/discord.config';
 import { AvcModule } from '#avc/avc.module';
-import { MusicModule } from "#music/music.module";
+import { MusicModule } from '#music/music.module';
+import { DatabaseModule } from '#database/database.module';
 
 /**
  * The main application module.
@@ -26,16 +27,17 @@ import { MusicModule } from "#music/music.module";
       load: [appConfig, databaseConfig, discordConfig],
       envFilePath: ['.env'],
     }),
-    TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) =>
-        new DataSource(options).initialize(),
-    }),
+    // TypeOrmModule.forRootAsync({
+    //   useClass: TypeOrmConfigService,
+    //   dataSourceFactory: async (options: DataSourceOptions) =>
+    //     new DataSource(options).initialize(),
+    // }),
     RootModule,
     DiscordModule,
     CommandModule,
     AvcModule,
-    MusicModule
+    MusicModule,
+    DatabaseModule,
   ],
   controllers: [RootController],
   providers: [RootService, ConfigService, DiscordService],

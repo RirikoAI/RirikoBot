@@ -9,7 +9,7 @@ import { VoiceState } from 'discord.js';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { AvcModule } from '#avc/avc.module';
 import { DiscordModule } from '#discord/discord.module';
-import { MusicChannel } from "#database/entities/music-channel.entity";
+import { MusicChannel } from '#database/entities/music-channel.entity';
 
 describe('AvcService', () => {
   let service: AvcService;

@@ -1,11 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { DiscordService } from '#discord/discord.service';
-import { InjectRepository } from '@nestjs/typeorm';
 import { VoiceChannel } from '#database/entities/voice-channel.entity';
-import { Not, Repository } from 'typeorm';
-import { Guild } from '#database/entities/guild.entity';
+import { Not } from 'typeorm';
 import { ChannelType, PermissionsBitField, VoiceState } from 'discord.js';
 import { DiscordGuild, DiscordVoiceChannel } from '#command/command.types';
+import { DatabaseService } from '#database/database.service';
 
 /**
  * Auto voice channel service.
@@ -18,10 +17,8 @@ export class AvcService {
   constructor(
     @Inject(forwardRef(() => DiscordService))
     readonly discord: DiscordService,
-    @InjectRepository(Guild)
-    readonly guildRepository: Repository<Guild>,
-    @InjectRepository(VoiceChannel)
-    readonly voiceChannelRepository: Repository<VoiceChannel>,
+    @Inject(DatabaseService)
+    readonly db: DatabaseService,
   ) {}
 
   /**
@@ -52,7 +49,7 @@ export class AvcService {
   private async findVoiceChannel(
     channelId: string,
   ): Promise<VoiceChannel | null> {
-    return this.voiceChannelRepository.findOne({
+    return this.db.voiceChannelRepository.findOne({
       where: { id: channelId },
     });
   }
@@ -136,7 +133,7 @@ export class AvcService {
     voiceChannel: VoiceChannel,
     guild: DiscordGuild,
   ) {
-    await this.voiceChannelRepository.insert({
+    await this.db.voiceChannelRepository.insert({
       id: channel.id,
       name: channel.name,
       parentId: voiceChannel.id,
@@ -162,7 +159,7 @@ export class AvcService {
    * @param guild The guild where the cleanup will be done.
    */
   private async cleanVoiceChannels(guild: DiscordGuild) {
-    const voiceChannels = await this.voiceChannelRepository.find({
+    const voiceChannels = await this.db.voiceChannelRepository.find({
       where: { guild: { id: guild.id } },
     });
 
@@ -184,7 +181,7 @@ export class AvcService {
    * @param voiceChannel The voice channel to be removed.
    */
   private async removeVoiceChannelFromDatabase(voiceChannel: VoiceChannel) {
-    await this.voiceChannelRepository.remove(voiceChannel);
+    await this.db.voiceChannelRepository.remove(voiceChannel);
   }
 
   /**
@@ -207,7 +204,7 @@ export class AvcService {
    * @param guild The guild to clean up.
    */
   private async removeEmptyChildChannels(guild: DiscordGuild) {
-    const voiceChannels = await this.voiceChannelRepository.find({
+    const voiceChannels = await this.db.voiceChannelRepository.find({
       where: {
         parentId: Not('0'),
         guild: { id: guild.id },
@@ -217,7 +214,7 @@ export class AvcService {
     for (const voiceChannel of voiceChannels) {
       const channel: any = guild.channels.cache.get(voiceChannel.id);
       if (channel && channel.members.size === 0) {
-        await this.voiceChannelRepository.remove(voiceChannel);
+        await this.db.voiceChannelRepository.remove(voiceChannel);
         await channel.delete();
       }
     }
@@ -233,6 +230,6 @@ export class AvcService {
     name: string,
   ) {
     voiceChannel.name = name;
-    await this.voiceChannelRepository.save(voiceChannel);
+    await this.db.voiceChannelRepository.save(voiceChannel);
   }
 }

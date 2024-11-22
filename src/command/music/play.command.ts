@@ -82,7 +82,7 @@ export default class PlayCommand extends Command implements CommandInterface {
   }
 
   async runSlash(interaction: DiscordInteraction): Promise<void> {
-    let command = interaction.options.getSubcommand();
+    const command = interaction.options.getSubcommand();
 
     if (command === 'music') {
       await this.playMusic(interaction);
@@ -137,9 +137,9 @@ export default class PlayCommand extends Command implements CommandInterface {
 
   async playPlaylist(interaction: DiscordInteraction): Promise<any> {
     const loading = await interaction.reply('Loading command...');
-    let playlistName = interaction.options.getString('name');
+    const playlistName = interaction.options.getString('name');
 
-    let playlist = await this.services.playlistRepository.findOne({
+    const playlist = await this.db.playlistRepository.findOne({
       where: {
         name: playlistName,
         userId: interaction.member.id,
@@ -164,7 +164,7 @@ export default class PlayCommand extends Command implements CommandInterface {
       } catch (e) {}
     }
 
-    let songs = [];
+    const songs = [];
     playlist.tracks.map((m) => songs.push(m.url));
 
     const queuedPlaylist = await this.player.createCustomPlaylist(songs, {
@@ -201,7 +201,7 @@ export default class PlayCommand extends Command implements CommandInterface {
     message: DiscordMessage | DiscordInteraction,
   ): Promise<any> {
     // find the music channel of the guild from the db
-    const musicChannel = await this.services.musicChannelRepository.findOne({
+    const musicChannel = await this.db.musicChannelRepository.findOne({
       where: {
         guild: {
           id: message.guild.id,

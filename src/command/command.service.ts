@@ -10,6 +10,7 @@ import RegexHelperUtil from '#util/command/regex-helper.util';
 import { SharedServices } from '#command/command.module';
 import { CommandInterface } from '#command/command.interface';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
+import { DatabaseService } from '#database/database.service';
 
 /**
  * Service for registering and executing commands.
@@ -27,6 +28,8 @@ export class CommandService {
     // Inject the SHARED_SERVICES into CommandService. This will be used to pass services to all commands
     @Inject('SHARED_SERVICES')
     readonly services: SharedServices,
+    @Inject(DatabaseService)
+    readonly db: DatabaseService,
   ) {}
 
   /**
@@ -45,7 +48,7 @@ export class CommandService {
     CommandService.registeredCommands = CommandsLoaderUtil.instantiateCommands(
       commandList,
       // Pass the services to all commands when instantiating them
-      this.services,
+      { ...this.services, db: this.db },
     );
 
     // If guildId is provided, register the commands only in that guild
@@ -197,7 +200,7 @@ export class CommandService {
   async getGuildPrefix(message: DiscordMessage): Promise<string> {
     try {
       const guildId = message.guild.id;
-      const guild = await this.services.guildRepository.findOne({
+      const guild = await this.db.guildRepository.findOne({
         where: {
           id: guildId,
         },

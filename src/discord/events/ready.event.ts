@@ -21,7 +21,7 @@ export const ReadyEvent = (
   // Upsert all guilds to the database
   client.guilds.cache.forEach(async (cachedGuilds) => {
     const guild = await cachedGuilds.fetch();
-    await commandService.services.guildRepository.upsert(
+    await commandService.db.guildRepository.upsert(
       {
         id: guild.id,
         name: guild.name,

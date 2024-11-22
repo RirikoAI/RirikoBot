@@ -1,14 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { DiscordService } from '#discord/discord.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Guild } from '#database/entities/guild.entity';
-import { Repository } from 'typeorm';
-import { MusicChannel } from '#database/entities/music-channel.entity';
 import { TextChannel } from 'discord.js';
 import { addButtons } from '#util/features/add-buttons.feature';
 import { StringUtil } from '#util/string/string.util';
 import { Queue } from 'distube';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
+import { DatabaseService } from '#database/database.service';
 
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { DisTube } = require('distube');
@@ -36,10 +33,8 @@ export class MusicService {
   constructor(
     @Inject(forwardRef(() => DiscordService))
     readonly discord: DiscordService,
-    @InjectRepository(Guild)
-    readonly guildRepository: Repository<Guild>,
-    @InjectRepository(MusicChannel)
-    readonly musicChannelRepository: Repository<MusicChannel>,
+    @Inject()
+    readonly db: DatabaseService,
   ) {}
 
   async createPlayer() {
@@ -125,7 +120,7 @@ export class MusicService {
     )?.interval;
 
     // get the music channel of the guild
-    const musicChannel = await this.musicChannelRepository.findOne({
+    const musicChannel = await this.db.musicChannelRepository.findOne({
       where: {
         guild: {
           id: guildId,
@@ -200,7 +195,7 @@ export class MusicService {
 
   async handleMusic(message: any) {
     // get the guild prefix
-    const guild = await this.guildRepository.findOne({
+    const guild = await this.db.guildRepository.findOne({
       where: {
         id: message.guild.id,
       },
@@ -218,7 +213,7 @@ export class MusicService {
     }
 
     // check if the message is sent on a music-channel in the guild in the database
-    const musicChannel = await this.musicChannelRepository.findOne({
+    const musicChannel = await this.db.musicChannelRepository.findOne({
       where: {
         id: message.channel.id,
       },
@@ -292,7 +287,7 @@ export class MusicService {
     await this.distube.setVolume(interaction.guild.id, volume);
 
     // get the guild music channel
-    const musicChannel = await this.musicChannelRepository.findOne({
+    const musicChannel = await this.db.musicChannelRepository.findOne({
       where: {
         guild: {
           id: interaction.guild.id,
@@ -359,7 +354,7 @@ export class MusicService {
 
   async clearPlayer(channel: TextChannel) {
     // get the guild music channel
-    const musicChannel = await this.musicChannelRepository.findOne({
+    const musicChannel = await this.db.musicChannelRepository.findOne({
       where: {
         guild: {
           id: channel.guild.id,
@@ -425,7 +420,7 @@ export class MusicService {
     await this.distube.setRepeatMode(interaction.guild.id, repeatMode);
 
     // find the guild music channel from the database
-    const musicChannel = await this.musicChannelRepository.findOne({
+    const musicChannel = await this.db.musicChannelRepository.findOne({
       where: {
         guild: {
           id: interaction.guild.id,
@@ -457,8 +452,7 @@ export class MusicService {
   async updateMusicChannel(params: { channel: any; song: any }) {
     const { channel, song } = params;
     const guildId = channel.guild.id;
-    let textChannel;
-    const musicChannel = await this.musicChannelRepository.findOne({
+    const musicChannel = await this.db.musicChannelRepository.findOne({
       where: {
         guild: {
           id: guildId,
@@ -471,7 +465,7 @@ export class MusicService {
     }
 
     // get the channel
-    textChannel = await this.discord.client.channels
+    const textChannel = await this.discord.client.channels
       .fetch(musicChannel.id)
       .then((channel) => {
         return channel;
@@ -482,10 +476,10 @@ export class MusicService {
       console.log(channel, 'Channel not found');
       return;
     }
-    
+
     // delete all messages in the music channel
     const messages = await (textChannel as TextChannel).messages.fetch();
-    
+
     await Promise.all(messages.map((message) => message.delete()));
 
     const queue = this.distube.getQueue(guildId);
@@ -497,7 +491,7 @@ export class MusicService {
   async setupMusicChannel(params: { interaction: any; musicChannel: any }) {
     const { interaction, musicChannel } = params;
     // upsert the music channel in the database tied to the guild
-    await this.musicChannelRepository.upsert(
+    await this.db.musicChannelRepository.upsert(
       {
         id: musicChannel.id,
         name: musicChannel.name,

@@ -160,11 +160,11 @@ export default class PlaylistCommand
 
   // Utility methods
   private async fetchUserPlaylists(userId: string) {
-    return this.services.playlistRepository.find({ where: { userId } });
+    return this.db.playlistRepository.find({ where: { userId } });
   }
 
   private async fetchPlaylist(userId: string, playlistName: string) {
-    return this.services.playlistRepository.findOne({
+    return this.db.playlistRepository.findOne({
       where: { userId, name: playlistName },
     });
   }
@@ -206,7 +206,7 @@ export default class PlaylistCommand
     }
 
     await interaction.reply({ content: 'Creating playlist... 🎧' });
-    await this.services.playlistRepository.insert({
+    await this.db.playlistRepository.insert({
       userId: interaction.user.id,
       name: playlistName,
       public: isPublic,
@@ -241,8 +241,8 @@ export default class PlaylistCommand
 
     await interaction.reply({ content: 'Deleting playlist... 🎧' });
 
-    await this.services.trackRepository.delete({ playlist });
-    await this.services.playlistRepository.delete({
+    await this.db.trackRepository.delete({ playlist });
+    await this.db.playlistRepository.delete({
       userId: interaction.user.id,
       name: playlistName,
     });
@@ -298,7 +298,7 @@ export default class PlaylistCommand
       });
     }
 
-    await this.services.trackRepository.insert({
+    await this.db.trackRepository.insert({
       name: searchResult.name,
       url: searchResult.url,
       playlist,
@@ -310,7 +310,7 @@ export default class PlaylistCommand
   }
 
   private async handleDeleteMusic(interaction: DiscordInteraction) {
-    let name = interaction.options.getString('name');
+    const name = interaction.options.getString('name');
     if (!name)
       return interaction
         .reply({
@@ -318,7 +318,7 @@ export default class PlaylistCommand
           ephemeral: true,
         })
         .catch((e) => {});
-    let playlist_name = interaction.options.getString('playlist-name');
+    const playlist_name = interaction.options.getString('playlist-name');
     if (!playlist_name)
       return interaction
         .reply({
@@ -329,7 +329,7 @@ export default class PlaylistCommand
         .catch((e) => {});
 
     // Check if the playlist with the name exists
-    const playlist = await this.services.playlistRepository.findOne({
+    const playlist = await this.db.playlistRepository.findOne({
       where: { userId: interaction.user.id, name: playlist_name },
     });
 
@@ -340,7 +340,7 @@ export default class PlaylistCommand
           ephemeral: true,
         })
         .catch((e) => {});
-    
+
     const music_filter = playlist?.tracks?.filter(
       (m) => m.playlist?.name === playlist_name && m?.name === name,
     );
@@ -359,7 +359,7 @@ export default class PlaylistCommand
       .catch((e) => {});
 
     // Delete the music from the playlist
-    await this.services.trackRepository.delete({
+    await this.db.trackRepository.delete({
       name: name,
       playlist: playlist,
     });
@@ -372,7 +372,7 @@ export default class PlaylistCommand
   }
 
   private async handleListTracks(interaction: DiscordInteraction) {
-    let playlistName = interaction.options.getString('name');
+    const playlistName = interaction.options.getString('name');
     if (!playlistName)
       return interaction
         .reply({
@@ -383,7 +383,7 @@ export default class PlaylistCommand
 
     let tracks: any;
 
-    const playlist = await this.services.playlistRepository.find({
+    const playlist = await this.db.playlistRepository.find({
       where: { name: playlistName },
     });
 
@@ -397,8 +397,8 @@ export default class PlaylistCommand
 
     for (let i = 0; i < playlist.length; i++) {
       if (playlist[i].tracks.length > 0) {
-        let playlistOwner = playlist[i].author;
-        let playlistIsPublic = playlist[i].public;
+        const playlistOwner = playlist[i].author;
+        const playlistIsPublic = playlist[i].public;
 
         if (playlistOwner !== interaction.member?.id) {
           if (playlistIsPublic === false) {
@@ -443,9 +443,9 @@ export default class PlaylistCommand
       customId: forwardId,
     });
 
-    let howMany = 8;
+    const howMany = 8;
     let page = 1;
-    let a = tracks.length / howMany;
+    const a = tracks.length / howMany;
 
     const generateEmbed = async (start): Promise<any> => {
       let num = page === 1 ? 1 : page * howMany - howMany + 1;
@@ -512,6 +512,7 @@ Type **/playlist list <list-name>** to see the music in a list.\n${current.map(
               page++;
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             button.customId === backId
               ? (currentIndex -= howMany)
               : (currentIndex += howMany);
@@ -564,7 +565,7 @@ Type **/playlist list <list-name>** to see the music in a list.\n${current.map(
   }
 
   private async handleListPlaylists(interaction: DiscordInteraction) {
-    const playlist = await this.services.playlistRepository.find({
+    const playlist = await this.db.playlistRepository.find({
       where: { userId: interaction.user.id },
     });
 

@@ -8,7 +8,8 @@ import {
 } from '#command/command.types';
 import { CommandFeatures } from '#command/command.features';
 import { Pages } from '#util/features/pagination-feature.types';
-import DisTube from "distube";
+import DisTube from 'distube';
+import { DatabaseService } from '#database/database.service';
 
 export type CommandConstructor = new (services: SharedServices) => Command;
 
@@ -33,6 +34,7 @@ export class Command extends CommandFeatures {
   constructor(services: SharedServices) {
     super();
     this.services = services;
+    this.db = services.db;
     this.client = services.discord?.client;
     this.getGuildPrefix = services.commandService?.getGuildPrefix;
     this.player = services.discord?.client?.musicPlayer;
@@ -115,6 +117,11 @@ export class Command extends CommandFeatures {
   services: SharedServices;
 
   /**
+   * Database service
+   */
+  db: DatabaseService;
+
+  /**
    * Stores parameters of the command.
    * Will be set only when the command is run.
    */
@@ -130,7 +137,7 @@ export class Command extends CommandFeatures {
    * @see DiscordService
    */
   client: DiscordClient;
-  
+
   /**
    * Serves as a shortcut to the DisTube player from the MusicService
    * @see MusicService

@@ -25,7 +25,7 @@ export default class SetAvcCommand extends Command implements CommandInterface {
     });
 
     // push the new voice channel to the database
-    await this.services.voiceChannelRepository.insert({
+    await this.db.voiceChannelRepository.insert({
       id: channel.id,
       name: channel.name,
       parentId: '0',
