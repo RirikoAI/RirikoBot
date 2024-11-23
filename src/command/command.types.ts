@@ -63,11 +63,11 @@ export interface DiscordInteraction extends ChatInputCommandInteraction {
   get member(): DiscordGuildMember;
 
   fetchReply(): Promise<Message<true>>;
-  
+
   deferUpdate(): Promise<any>;
-  
+
   customId?: string;
-  
+
   message?: DiscordMessage;
 }
 
@@ -76,4 +76,8 @@ export type DiscordGuild = Guild;
 
 export interface CommandButtons {
   [key: string]: (interaction: DiscordInteraction) => Promise<any>;
+}
+
+export function Service(service) {
+  return service;
 }

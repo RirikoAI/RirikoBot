@@ -9,57 +9,39 @@ import { MusicModule } from '#music/music.module';
 import { MusicService } from '#music/music.service';
 import { DatabaseModule } from '#database/database.module';
 import { DatabaseService } from '#database/database.service';
+import { Service } from '#command/command.types';
+import { SharedServiceUtil } from "#util/command/shared-service.util";
+
+const modules = [
+  ConfigModule,
+  forwardRef(() => DiscordModule),
+  forwardRef(() => AvcModule),
+  AvcModule,
+  MusicModule,
+  DatabaseModule,
+];
+
+export class AvailableSharedServices {
+  config: ConfigService = Service(ConfigService);
+  discord: DiscordService = Service(DiscordService);
+  commandService: CommandService = Service(CommandService);
+  autoVoiceChannelService: AvcService = Service(AvcService);
+  musicService: MusicService = Service(MusicService);
+  db: DatabaseService = Service(DatabaseService);
+}
 
 /**
  * @author Earnest Angel (https://angel.net.my)
  */
 @Module({
-  imports: [
-    ConfigModule,
-    forwardRef(() => DiscordModule),
-    forwardRef(() => AvcModule),
-    MusicModule,
-    DatabaseModule,
-  ],
+  imports: modules,
   providers: [
     CommandService,
     DatabaseService,
-    // Import all command's services in here
-    {
-      provide: 'SHARED_SERVICES',
-      // Define the shared services to be injected
-      inject: [
-        ConfigService,
-        DiscordService,
-        CommandService,
-        AvcService,
-        MusicService,
-      ],
-      // Define the keys for the shared services in order of the inject array above
-      useFactory: (...service): any => {
-        let i = 0;
-        return {
-          config: service[i++],
-          discord: service[i++],
-          commandService: service[i++],
-          autoVoiceChannelService: service[i++],
-          musicService: service[i++],
-        };
-      },
-    },
+    SharedServiceUtil.getFactory('SHARED_SERVICES'),
   ],
   exports: [CommandService],
 })
 export class CommandModule {}
 
-/**
- * Services that will be exposed to all commands.
- */
-export type SharedServices = {
-  config: ConfigService;
-  discord: DiscordService;
-  commandService: CommandService;
-  autoVoiceChannelService: AvcService;
-  musicService: MusicService;
-  db: DatabaseService;
-};
+export type SharedServices = AvailableSharedServices;

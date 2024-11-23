@@ -19,7 +19,7 @@ export default class PrefixCommand extends Command implements CommandInterface {
   name = 'prefix';
   regex = /^(prefix|setprefix)\s*/i;
   description = 'Set prefix for this Discord server';
-  category = 'server';
+  category = 'guild';
   usageExamples = ['prefix', 'prefix <prefix>', 'setprefix <prefix>'];
 
   slashOptions = [
@@ -90,7 +90,7 @@ export default class PrefixCommand extends Command implements CommandInterface {
         prefix,
         name: message.guild.name,
       },
-      ['guildId'],
+      ['id'],
     );
   }
 
