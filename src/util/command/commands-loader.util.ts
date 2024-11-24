@@ -114,6 +114,7 @@ const putSlashCommandsInGuilds = async (
   client: DiscordClient,
   config: ConfigService,
 ) => {
+  // Register the commands in the global scope
   await client?.restClient.put(
     Routes.applicationCommands(config.get('DISCORD_APPLICATION_ID')),
     {
@@ -128,6 +129,17 @@ const putSlashCommandsInAGuild = async (
   config: ConfigService,
   guildId: string,
 ) => {
+  // Delete commands in the guild scope, so that we can re-register them.
+  await client?.restClient.put(
+    Routes.applicationGuildCommands(
+      config.get('DISCORD_APPLICATION_ID'),
+      guildId,
+    ),
+    {
+      body: [],
+    },
+  );
+
   await client?.restClient.put(
     Routes.applicationGuildCommands(
       config.get('DISCORD_APPLICATION_ID'),

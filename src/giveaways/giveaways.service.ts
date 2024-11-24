@@ -7,6 +7,8 @@ import { GiveawaysManager } from 'discord-giveaways';
  */
 @Injectable()
 export class GiveawaysService {
+  manager: GiveawaysManager;
+
   public register(client: DiscordClient): GiveawaysManager {
     const manager = new GiveawaysManager(client, {
       storage: './giveaways.json',
@@ -17,7 +19,7 @@ export class GiveawaysService {
         reaction: '🎉',
       },
     });
-
+    this.manager = manager;
     return manager;
   }
 }
