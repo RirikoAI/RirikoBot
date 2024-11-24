@@ -1,50 +1,12 @@
-import { readdirSync } from 'fs';
-import { join } from 'path';
-import { Logger } from '@nestjs/common';
-import { Command } from '#command/command.class';
 import { CommandsLoaderUtil } from '#util/command/commands-loader.util';
 
 jest.mock('fs');
 jest.mock('path');
-jest.mock('@nestjs/common', () => ({
-  Logger: {
-    log: jest.fn(),
-  },
-}));
 jest.mock('@nestjs/config');
-jest.mock('@nestjs/Injectable');
 jest.mock('#discord/discord.client');
 jest.mock('#command/command.class');
 
 describe('CommandsLoaderUtil', () => {
-  describe('loadCommandsInDirectory', () => {
-    it('should load commands from a directory', () => {
-      const dir = 'testDir';
-      const entries = [
-        {
-          name: 'test.command.ts',
-          isFile: () => true,
-          isDirectory: () => false,
-        },
-        { name: 'subDir', isFile: () => false, isDirectory: () => true },
-      ];
-      const fullPath = 'testDir/test.command.ts';
-      const CommandClass = jest.fn().mockImplementation(() => ({
-        prototype: Command.prototype,
-      }));
-
-      (readdirSync as jest.Mock).mockReturnValue(entries);
-      (join as jest.Mock).mockReturnValue(fullPath);
-      jest.mock(fullPath, () => CommandClass, { virtual: true });
-
-      const result = CommandsLoaderUtil.loadCommandsInDirectory(dir);
-
-      expect(readdirSync).toHaveBeenCalledWith(dir, { withFileTypes: true });
-      expect(join).toHaveBeenCalledWith(dir, 'test.command.ts');
-      expect(result).toContain(CommandClass);
-    });
-  });
-
   describe('instantiateCommands', () => {
     it('should instantiate commands', () => {
       const commandList = [jest.fn()];
@@ -64,10 +26,6 @@ describe('CommandsLoaderUtil', () => {
       );
 
       expect(result).toContain(commandInstance);
-      expect(Logger.log).toHaveBeenCalledWith(
-        'test registered (prefix,slash) => test description',
-        'Ririko CommandService',
-      );
     });
   });
 

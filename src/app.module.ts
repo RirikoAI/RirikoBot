@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { RootController } from '#api/root.controller';
 import { RootService } from '#api/root.service';
 import { DiscordModule } from '#discord/discord.module';
-import { DiscordService } from '#discord/discord.service';
 import { RootModule } from '#api/root.module';
 import { CommandModule } from '#command/command.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -32,6 +31,6 @@ import { DatabaseModule } from '#database/database.module';
     DatabaseModule,
   ],
   controllers: [RootController],
-  providers: [RootService, ConfigService, DiscordService],
+  providers: [RootService, ConfigService],
 })
 export class AppModule {}

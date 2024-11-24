@@ -1,8 +1,6 @@
-import { AvailableSharedServices } from '#command/command.module';
-
 export const SharedServiceUtil = {
-  getFactory: (sharedServiceIdentifier: string) => {
-    const sharedServicesInstance = new AvailableSharedServices();
+  getFactory: (sharedServiceIdentifier: string, sharedServices: any) => {
+    const sharedServicesInstance = new sharedServices();
 
     return {
       provide: sharedServiceIdentifier,
