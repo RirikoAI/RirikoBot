@@ -1,4 +1,5 @@
 import { CommandsLoaderUtil } from '#util/command/commands-loader.util';
+import { SharedServiceUtil } from '#util/command/shared-service.util';
 
 jest.mock('fs');
 jest.mock('path');
@@ -63,6 +64,29 @@ describe('CommandsLoaderUtil', () => {
 
       expect(client.restClient.put).toHaveBeenCalledWith(expect.any(String), {
         body: expect.any(Array),
+      });
+    });
+  });
+
+  describe('getFactory', () => {
+    it('should create a factory with the correct services', () => {
+      class MockService {
+        serviceA = 'Service A';
+        serviceB = 'Service B';
+      }
+
+      const factory = SharedServiceUtil.getFactory('MockService', MockService);
+
+      expect(factory.provide).toBe('MockService');
+      expect(factory.inject).toEqual(['Service A', 'Service B']);
+
+      const createdServices = factory.useFactory(
+        'Service A Instance',
+        'Service B Instance',
+      );
+      expect(createdServices).toEqual({
+        serviceA: 'Service A Instance',
+        serviceB: 'Service B Instance',
       });
     });
   });
