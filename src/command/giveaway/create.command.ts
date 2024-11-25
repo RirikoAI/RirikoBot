@@ -53,13 +53,22 @@ export default class CreateCommand extends Command implements CommandInterface {
     const duration = interaction.options.getString('duration');
     const channel = interaction.options.getChannel('channel');
 
-    if (!this.validateInputs(prize, winners, duration, channel, interaction)) {
+    const isValid = this.validateInputs(
+      prize,
+      winners,
+      duration,
+      channel,
+      interaction,
+    );
+
+    if (!isValid) {
+      interaction.reply('Please provide valid inputs.');
       return;
     }
 
     await this.sendGiveawayCreatedEmbed(prize, winners, duration, interaction);
 
-    await this.client.giveaways.start(channel, {
+    await this.client.giveawaysManager.start(channel, {
       duration: ms(duration),
       winnerCount: winners,
       prize: prize,
@@ -72,6 +81,16 @@ export default class CreateCommand extends Command implements CommandInterface {
     let winnerCount = null;
     let duration = null;
     let channel: GuildTextBasedChannel = null;
+
+    if (
+      !message.member.permissions.has('ManageMessages') &&
+      !message.member.roles.cache.some((r) => r.name === 'Giveaways')
+    ) {
+      await message.reply(
+        ':x: You need to have the manage messages permissions to edit giveaways.',
+      );
+      return;
+    }
 
     await this.sendEmbed('Item', 'What item are you giving away?', message);
     const collector = message.channel.createMessageCollector({
@@ -125,7 +144,7 @@ export default class CreateCommand extends Command implements CommandInterface {
         message,
       );
 
-      await this.client.giveaways.start(channel, {
+      await this.client.giveawaysManager.start(channel, {
         duration: ms(duration),
         winnerCount,
         prize,

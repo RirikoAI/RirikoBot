@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import SetAvcCommand from './set-avc.command';
+import SetupAvcCommand from './setup-avc.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
 import { ChannelType, Guild, VoiceChannel } from 'discord.js';
@@ -10,7 +10,7 @@ import {
 } from '../../../test/mocks/shared-services.mock';
 
 describe('SetAvcCommand', () => {
-  let command: SetAvcCommand;
+  let command: SetupAvcCommand;
   let mockGuild: Guild;
   const mockDiscordService = {
     client: {
@@ -38,13 +38,13 @@ describe('SetAvcCommand', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: SetAvcCommand,
-          useValue: new SetAvcCommand(mockSharedServices),
+          provide: SetupAvcCommand,
+          useValue: new SetupAvcCommand(mockSharedServices),
         },
       ],
     }).compile();
 
-    command = module.get<SetAvcCommand>(SetAvcCommand);
+    command = module.get<SetupAvcCommand>(SetupAvcCommand);
 
     mockGuild = {
       id: '1234567890',

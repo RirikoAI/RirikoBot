@@ -8,7 +8,7 @@ import { GiveawaysManager } from 'discord-giveaways';
  */
 export class DiscordClient extends Client {
   musicPlayer: DisTube;
-  giveaways: GiveawaysManager;
+  giveawaysManager: GiveawaysManager;
   restClient: REST;
 
   constructor(...opt: any[]) {

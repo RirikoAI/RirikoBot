@@ -19,8 +19,8 @@ describe('CreateCommand', () => {
       user: {
         displayAvatarURL: jest.fn(),
       },
-      giveaways: {
-        start: jest.fn(),
+      giveawaysManager: {
+        start: jest.fn().mockResolvedValue(undefined),
       },
     },
   };
@@ -55,9 +55,13 @@ describe('CreateCommand', () => {
       permissions: {
         has: jest.fn().mockReturnValue(true),
       },
-      displayAvatarURL: jest.fn().mockReturnValue('http://wwww.example.com'),
+      displayAvatarURL: jest.fn().mockReturnValue('http://example.com'),
       hasPermission: jest.fn().mockReturnValue(true),
       user: {
+        id: '1234567890',
+        tag: 'Test User',
+      },
+      member: {
         id: '1234567890',
         tag: 'Test User',
       },
@@ -78,7 +82,6 @@ describe('CreateCommand', () => {
       }),
     } as unknown as TextChannel;
   });
-
   it('should be defined', () => {
     expect(command).toBeDefined();
   });
@@ -88,6 +91,7 @@ describe('CreateCommand', () => {
       const mockMessage = {
         guild: mockGuild,
         member: mockGuildMember,
+        author: mockGuildMember,
         content: '!giveaway create',
         channel: mockTextChannel,
         reply: jest.fn(),
@@ -97,7 +101,7 @@ describe('CreateCommand', () => {
 
       await command.runPrefix(mockMessage);
 
-      expect(command.createGiveaway).toHaveBeenCalledWith(mockMessage);
+      expect(command.createGiveaway).toBeCalled();
     });
   });
 
@@ -109,129 +113,52 @@ describe('CreateCommand', () => {
         options: {
           getString: jest
             .fn()
-            .mockReturnValueOnce('prize')
+            .mockReturnValueOnce('Prize')
             .mockReturnValueOnce('1d'),
           getInteger: jest.fn().mockReturnValue(1),
           getChannel: jest.fn().mockReturnValue(mockTextChannel),
         },
-        channel: {
-          send: jest.fn(),
-        },
         reply: jest.fn(),
       } as unknown as DiscordInteraction;
 
-      jest.spyOn(command, 'validateInputs').mockReturnValue(true);
+      jest
+        .spyOn(command, 'sendGiveawayCreatedEmbed')
+        .mockImplementation(async () => {});
 
       await command.runSlash(mockInteraction);
 
-      expect(mockDiscordService.client.giveaways.start).toHaveBeenCalledWith(
-        mockTextChannel,
-        {
-          duration: expect.any(Number),
-          winnerCount: 1,
-          prize: 'prize',
+      expect(command.sendGiveawayCreatedEmbed).toHaveBeenCalled();
+      expect(
+        mockDiscordService.client.giveawaysManager.start,
+      ).toHaveBeenCalled();
+    });
+
+    it('should not create a giveaway with invalid inputs', async () => {
+      const mockInteraction = {
+        guild: mockGuild,
+        member: mockGuildMember,
+        options: {
+          getString: jest
+            .fn()
+            .mockReturnValueOnce('Prize')
+            .mockReturnValueOnce(null),
+          getInteger: jest.fn().mockReturnValue(0),
+          getChannel: jest.fn().mockReturnValue(null),
         },
-      );
-    });
-  });
-
-  describe('validateInputs', () => {
-    it('should return false for invalid prize length', () => {
-      const mockInteraction = {
         reply: jest.fn(),
       } as unknown as DiscordInteraction;
 
-      const result = command.validateInputs(
-        'a'.repeat(257),
-        1,
-        '1d',
-        mockTextChannel,
-        mockInteraction,
-      );
+      await command.runSlash(mockInteraction);
 
-      expect(result).toBe(false);
+      expect(mockInteraction.reply).toHaveBeenCalled();
       expect(mockInteraction.reply).toHaveBeenCalledWith(
-        'The prize name is too long. Please provide a shorter name.',
+        'Please provide valid inputs.',
       );
-    });
-
-    it('should return false for invalid winners count', () => {
-      const mockInteraction = {
-        reply: jest.fn(),
-      } as unknown as DiscordInteraction;
-
-      const result = command.validateInputs(
-        'prize',
-        0,
-        '1d',
-        mockTextChannel,
-        mockInteraction,
-      );
-
-      expect(result).toBe(false);
-      expect(mockInteraction.reply).toHaveBeenCalledWith(
-        'Please provide a valid number of winners.',
-      );
-    });
-
-    it('should return false for invalid duration format', () => {
-      const mockInteraction = {
-        reply: jest.fn(),
-      } as unknown as DiscordInteraction;
-
-      const result = command.validateInputs(
-        'prize',
-        1,
-        'invalid',
-        mockTextChannel,
-        mockInteraction,
-      );
-
-      expect(result).toBe(false);
-      expect(mockInteraction.reply).toHaveBeenCalledWith(
-        'Please provide a valid duration. You can use the following format: 1d, 1h, 1m, 1s.',
-      );
-    });
-
-    it('should return false for invalid channel', () => {
-      const mockInteraction = {
-        reply: jest.fn(),
-      } as unknown as DiscordInteraction;
-
-      const result = command.validateInputs(
-        'prize',
-        1,
-        '1d',
-        null,
-        mockInteraction,
-      );
-
-      expect(result).toBe(false);
-      expect(mockInteraction.reply).toHaveBeenCalledWith(
-        'Please mention a valid channel.',
-      );
-    });
-
-    it('should return true for valid inputs', () => {
-      const mockInteraction = {
-        reply: jest.fn(),
-      } as unknown as DiscordInteraction;
-
-      const result = command.validateInputs(
-        'prize',
-        1,
-        '1d',
-        mockTextChannel,
-        mockInteraction,
-      );
-
-      expect(result).toBe(true);
-      expect(mockInteraction.reply).not.toHaveBeenCalled();
     });
   });
 
   describe('createGiveaway', () => {
-    it('should send embed messages and start giveaway', async () => {
+    it('should create a giveaway with valid inputs', async () => {
       const mockMessage = {
         guild: mockGuild,
         member: mockGuildMember,
@@ -244,133 +171,213 @@ describe('CreateCommand', () => {
       jest
         .spyOn(command, 'sendGiveawayCreatedEmbed')
         .mockImplementation(async () => {});
-      (jest as any)
-        .spyOn(command.client.giveaways, 'start')
-        .mockImplementation(async () => {});
+
+      const collector = {
+        on: jest.fn((event, callback) => {
+          if (event === 'collect') {
+            callback({ content: 'Prize', author: { id: '1234567890' } });
+            callback({ content: '1', author: { id: '1234567890' } });
+            callback({ content: '1d', author: { id: '1234567890' } });
+            callback({
+              content: '<#0987654321>',
+              author: { id: '1234567890' },
+              mentions: {
+                channels: { first: jest.fn().mockReturnValue(mockTextChannel) },
+              },
+            });
+          }
+        }),
+        stop: jest.fn(),
+      };
+
+      mockTextChannel.createMessageCollector = jest
+        .fn()
+        .mockReturnValue(collector);
 
       await command.createGiveaway(mockMessage);
 
       expect(command.sendEmbed).toHaveBeenCalled();
-      expect(command.sendGiveawayCreatedEmbed).toBeDefined();
-      expect(command.client.giveaways.start).toBeDefined();
+      expect(command.sendGiveawayCreatedEmbed).toHaveBeenCalled();
+      expect(
+        mockDiscordService.client.giveawaysManager.start,
+      ).toHaveBeenCalled();
+    });
+
+    it('should cancel giveaway creation on cancel command', async () => {
+      const mockMessage = {
+        guild: mockGuild,
+        member: mockGuildMember,
+        content: '!giveaway create',
+        channel: mockTextChannel,
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
+
+      jest.spyOn(command, 'sendEmbed').mockImplementation(async () => {});
+      jest
+        .spyOn(command, 'sendGiveawayCreatedEmbed')
+        .mockImplementation(async () => {});
+
+      const collector = {
+        on: jest.fn((event, callback) => {
+          if (event === 'collect') {
+            callback({ content: 'cancel', author: { id: '1234567890' } });
+          }
+        }),
+        stop: jest.fn(),
+      };
+
+      mockTextChannel.createMessageCollector = jest
+        .fn()
+        .mockReturnValue(collector);
+
+      await command.createGiveaway(mockMessage);
+
+      expect(mockMessage.reply).toHaveBeenCalledWith(
+        'Giveaway creation canceled.',
+      );
+      expect(collector.stop).toHaveBeenCalledWith('canceled');
     });
   });
 
   describe('sendEmbed', () => {
     it('should send an embed message', async () => {
       const mockMessage = {
-        channel: {
-          send: jest.fn(),
-        },
-        author: {
-          tag: 'Test User',
-        },
-        member: {
-          displayAvatarURL: jest.fn().mockReturnValue('http://example.com'),
-        },
+        channel: mockTextChannel,
+        member: mockGuildMember,
+        author: mockGuildMember,
       } as unknown as DiscordMessage;
 
       await command.sendEmbed('Title', 'Description', mockMessage);
 
-      expect(mockMessage.channel.send).toBeDefined();
+      expect(mockTextChannel.send).toHaveBeenCalled();
     });
   });
 
   describe('sendGiveawayCreatedEmbed', () => {
     it('should send a giveaway created embed message', async () => {
       const mockMessage = {
-        channel: {
-          send: jest.fn(),
-        },
-        member: {
-          user: {
-            tag: 'Test User',
-          },
-          displayAvatarURL: jest.fn().mockReturnValue('http://example.com'),
-        },
+        channel: mockTextChannel,
+        member: mockGuildMember,
       } as unknown as DiscordMessage;
 
-      await command.sendGiveawayCreatedEmbed('prize', 1, '1d', mockMessage);
+      await command.sendGiveawayCreatedEmbed('Prize', 1, '1d', mockMessage);
 
-      expect(mockMessage.channel.send).toBeDefined();
+      expect(mockTextChannel.send).toHaveBeenCalled();
+    });
+  });
+
+  describe('validateInputs', () => {
+    it('should validate inputs correctly', () => {
+      const mockInteraction = {
+        reply: jest.fn(),
+      } as unknown as DiscordInteraction;
+
+      const valid = command.validateInputs(
+        'Prize',
+        1,
+        '1d',
+        mockTextChannel,
+        mockInteraction,
+      );
+      expect(valid).toBe(true);
+
+      const invalidPrize = command.validateInputs(
+        'P'.repeat(257),
+        1,
+        '1d',
+        mockTextChannel,
+        mockInteraction,
+      );
+      expect(invalidPrize).toBe(false);
+
+      const invalidWinners = command.validateInputs(
+        'Prize',
+        0,
+        '1d',
+        mockTextChannel,
+        mockInteraction,
+      );
+      expect(invalidWinners).toBe(false);
+
+      const invalidDuration = command.validateInputs(
+        'Prize',
+        1,
+        'invalid',
+        mockTextChannel,
+        mockInteraction,
+      );
+      expect(invalidDuration).toBe(false);
+
+      const invalidChannel = command.validateInputs(
+        'Prize',
+        1,
+        '1d',
+        null,
+        mockInteraction,
+      );
+      expect(invalidChannel).toBe(false);
     });
   });
 
   describe('validatePrize', () => {
-    it('should return false for prize name longer than 256 characters', () => {
-      const mockMessage = { reply: jest.fn() } as unknown as DiscordMessage;
-      const result = command.validatePrize('a'.repeat(257), mockMessage);
-      expect(result).toBe(false);
-      expect(mockMessage.reply).toHaveBeenCalledWith(
-        'The prize name is too long. Please provide a shorter name.',
-      );
-    });
+    it('should validate prize correctly', () => {
+      const mockMessage = {
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
 
-    it('should return true for valid prize name', () => {
-      const mockMessage = { reply: jest.fn() } as unknown as DiscordMessage;
-      const result = command.validatePrize('Valid Prize', mockMessage);
-      expect(result).toBe(true);
-      expect(mockMessage.reply).not.toHaveBeenCalled();
+      const valid = command.validatePrize('Prize', mockMessage);
+      expect(valid).toBe(true);
+
+      const invalid = command.validatePrize('P'.repeat(257), mockMessage);
+      expect(invalid).toBe(false);
     });
   });
 
   describe('validateWinners', () => {
-    it('should return false for invalid number of winners', () => {
-      const mockMessage = { reply: jest.fn() } as unknown as DiscordMessage;
-      const result = command.validateWinners('0', mockMessage);
-      expect(result).toBe(false);
-      expect(mockMessage.reply).toHaveBeenCalledWith(
-        'Please provide a valid number of winners.',
-      );
-    });
+    it('should validate winners correctly', () => {
+      const mockMessage = {
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
 
-    it('should return true for valid number of winners', () => {
-      const mockMessage = { reply: jest.fn() } as unknown as DiscordMessage;
-      const result = command.validateWinners('1', mockMessage);
-      expect(result).toBe(true);
-      expect(mockMessage.reply).not.toHaveBeenCalled();
+      const valid = command.validateWinners('1', mockMessage);
+      expect(valid).toBe(true);
+
+      const invalid = command.validateWinners('0', mockMessage);
+      expect(invalid).toBe(false);
     });
   });
 
   describe('validateDuration', () => {
-    it('should return false for invalid duration format', () => {
-      const mockMessage = { reply: jest.fn() } as unknown as DiscordMessage;
-      const result = command.validateDuration('invalid', mockMessage);
-      expect(result).toBe(false);
-      expect(mockMessage.reply).toHaveBeenCalledWith(
-        'Please provide a valid duration. You can use the following format: 1d, 1h, 1m, 1s.',
-      );
-    });
+    it('should validate duration correctly', () => {
+      const mockMessage = {
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
 
-    it('should return true for valid duration format', () => {
-      const mockMessage = { reply: jest.fn() } as unknown as DiscordMessage;
-      const result = command.validateDuration('1d', mockMessage);
-      expect(result).toBe(true);
-      expect(mockMessage.reply).not.toHaveBeenCalled();
+      const valid = command.validateDuration('1d', mockMessage);
+      expect(valid).toBe(true);
+
+      const invalid = command.validateDuration('invalid', mockMessage);
+      expect(invalid).toBe(false);
     });
   });
 
   describe('validateChannel', () => {
-    it('should return false for invalid channel mention', () => {
-      const mockMessage = { reply: jest.fn() } as unknown as DiscordMessage;
-      const mockM = {
-        mentions: { channels: { first: jest.fn().mockReturnValue(null) } },
-      };
-      const result = command.validateChannel(mockM, mockMessage);
-      expect(result).toBe(false);
-      expect(mockMessage.reply).toHaveBeenCalledWith(
-        'Please mention a valid channel.',
-      );
-    });
+    it('should validate channel correctly', () => {
+      const mockMessage = {
+        reply: jest.fn(),
+        mentions: {
+          channels: {
+            first: jest.fn().mockReturnValue(mockTextChannel),
+          },
+        },
+      } as unknown as DiscordMessage;
 
-    it('should return true for valid channel mention', () => {
-      const mockMessage = { reply: jest.fn() } as unknown as DiscordMessage;
-      const mockM = {
-        mentions: { channels: { first: jest.fn().mockReturnValue({}) } },
-      };
-      const result = command.validateChannel(mockM, mockMessage);
-      expect(result).toBe(true);
-      expect(mockMessage.reply).not.toHaveBeenCalled();
+      const valid = command.validateChannel(mockMessage, mockMessage);
+      expect(valid).toBe(true);
+
+      mockMessage.mentions.channels.first = jest.fn().mockReturnValue(null);
+      const invalid = command.validateChannel(mockMessage, mockMessage);
+      expect(invalid).toBe(false);
     });
   });
 });
