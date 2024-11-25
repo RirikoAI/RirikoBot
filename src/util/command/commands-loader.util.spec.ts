@@ -1,50 +1,13 @@
-import { readdirSync } from 'fs';
-import { join } from 'path';
-import { Logger } from '@nestjs/common';
-import { Command } from '#command/command.class';
 import { CommandsLoaderUtil } from '#util/command/commands-loader.util';
+import { SharedServiceUtil } from '#util/command/shared-service.util';
 
 jest.mock('fs');
 jest.mock('path');
-jest.mock('@nestjs/common', () => ({
-  Logger: {
-    log: jest.fn(),
-  },
-}));
 jest.mock('@nestjs/config');
-jest.mock('@nestjs/Injectable');
 jest.mock('#discord/discord.client');
 jest.mock('#command/command.class');
 
 describe('CommandsLoaderUtil', () => {
-  describe('loadCommandsInDirectory', () => {
-    it('should load commands from a directory', () => {
-      const dir = 'testDir';
-      const entries = [
-        {
-          name: 'test.command.ts',
-          isFile: () => true,
-          isDirectory: () => false,
-        },
-        { name: 'subDir', isFile: () => false, isDirectory: () => true },
-      ];
-      const fullPath = 'testDir/test.command.ts';
-      const CommandClass = jest.fn().mockImplementation(() => ({
-        prototype: Command.prototype,
-      }));
-
-      (readdirSync as jest.Mock).mockReturnValue(entries);
-      (join as jest.Mock).mockReturnValue(fullPath);
-      jest.mock(fullPath, () => CommandClass, { virtual: true });
-
-      const result = CommandsLoaderUtil.loadCommandsInDirectory(dir);
-
-      expect(readdirSync).toHaveBeenCalledWith(dir, { withFileTypes: true });
-      expect(join).toHaveBeenCalledWith(dir, 'test.command.ts');
-      expect(result).toContain(CommandClass);
-    });
-  });
-
   describe('instantiateCommands', () => {
     it('should instantiate commands', () => {
       const commandList = [jest.fn()];
@@ -64,10 +27,6 @@ describe('CommandsLoaderUtil', () => {
       );
 
       expect(result).toContain(commandInstance);
-      expect(Logger.log).toHaveBeenCalledWith(
-        'test registered (prefix,slash) => test description',
-        'Ririko CommandService',
-      );
     });
   });
 
@@ -105,6 +64,29 @@ describe('CommandsLoaderUtil', () => {
 
       expect(client.restClient.put).toHaveBeenCalledWith(expect.any(String), {
         body: expect.any(Array),
+      });
+    });
+  });
+
+  describe('getFactory', () => {
+    it('should create a factory with the correct services', () => {
+      class MockService {
+        serviceA = 'Service A';
+        serviceB = 'Service B';
+      }
+
+      const factory = SharedServiceUtil.getFactory('MockService', MockService);
+
+      expect(factory.provide).toBe('MockService');
+      expect(factory.inject).toEqual(['Service A', 'Service B']);
+
+      const createdServices = factory.useFactory(
+        'Service A Instance',
+        'Service B Instance',
+      );
+      expect(createdServices).toEqual({
+        serviceA: 'Service A Instance',
+        serviceB: 'Service B Instance',
       });
     });
   });

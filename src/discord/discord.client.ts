@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Partials, REST } from 'discord.js';
-import DisTube from "distube";
+import DisTube from 'distube';
+import { GiveawaysManager } from 'discord-giveaways';
 
 /**
  * Discord Client
@@ -7,6 +8,7 @@ import DisTube from "distube";
  */
 export class DiscordClient extends Client {
   musicPlayer: DisTube;
+  giveawaysManager: GiveawaysManager;
   restClient: REST;
 
   constructor(...opt: any[]) {

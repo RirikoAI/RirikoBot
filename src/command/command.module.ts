@@ -10,7 +10,7 @@ import { MusicService } from '#music/music.service';
 import { DatabaseModule } from '#database/database.module';
 import { DatabaseService } from '#database/database.service';
 import { Service } from '#command/command.types';
-import { SharedServiceUtil } from "#util/command/shared-service.util";
+import { SharedServiceUtil } from '#util/command/shared-service.util';
 
 const modules = [
   ConfigModule,
@@ -38,7 +38,7 @@ export class AvailableSharedServices {
   providers: [
     CommandService,
     DatabaseService,
-    SharedServiceUtil.getFactory('SHARED_SERVICES'),
+    SharedServiceUtil.getFactory('SHARED_SERVICES', AvailableSharedServices),
   ],
   exports: [CommandService],
 })

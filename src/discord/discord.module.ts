@@ -4,7 +4,8 @@ import { DiscordController } from './discord.controller';
 import { CommandModule } from '#command/command.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AvcModule } from '#avc/avc.module';
-import { MusicModule } from "#music/music.module";
+import { MusicModule } from '#music/music.module';
+import { GiveawaysModule } from '#giveaways/giveaways.module';
 
 /**
  * @author Earnest Angel (https://angel.net.my)
@@ -15,6 +16,7 @@ import { MusicModule } from "#music/music.module";
     forwardRef(() => CommandModule),
     forwardRef(() => AvcModule),
     forwardRef(() => MusicModule),
+    forwardRef(() => GiveawaysModule),
   ],
   providers: [DiscordService, ConfigService],
   exports: [DiscordService],

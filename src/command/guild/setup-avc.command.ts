@@ -10,12 +10,15 @@ import { DiscordMessage } from '#command/command.types';
  * @category Command
  */
 @Injectable()
-export default class SetAvcCommand extends Command implements CommandInterface {
-  name = 'set-avc';
-  regex = new RegExp('^set-avc$|^setup-avc$', 'i');
+export default class SetupAvcCommand
+  extends Command
+  implements CommandInterface
+{
+  name = 'setup-avc';
+  regex = new RegExp('^setup-avc$|^set-avc$', 'i');
   description = 'Setup auto voice channel';
   category = 'guild';
-  usageExamples = ['set-avc', 'setup-avc'];
+  usageExamples = ['setup-avc', 'set-avc'];
 
   async runPrefix(message: DiscordMessage): Promise<void> {
     // create a new voice channel in the guild

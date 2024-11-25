@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -13,7 +12,6 @@ import { PaginationFeatureParams } from '#util/features/pagination-feature.types
  * @category Feature
  * @author Earnest Angel (https://angel.net.my)
  */
-@Injectable()
 export class PaginationFeature {
   private currentPage: number = 0;
 

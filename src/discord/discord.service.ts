@@ -8,8 +8,8 @@ import { DiscordClient } from '#discord/discord.client';
 import { InteractionCreateEvent } from '#discord/events/interaction-create.event';
 import { VoiceStateUpdateEvent } from '#discord/events/voice-state-update.event';
 import { AvcService } from '#avc/avc.service';
-import { MusicService } from "#music/music.service";
-import DisTube from "distube";
+import { MusicService } from '#music/music.service';
+import { GiveawaysService } from '#giveaways/giveaways.service';
 
 /**
  * Discord Service
@@ -19,7 +19,6 @@ import DisTube from "distube";
 export class DiscordService {
   client: DiscordClient;
   ready: boolean;
-  musicPlayer: DisTube;
 
   constructor(
     private readonly configService: ConfigService,
@@ -28,6 +27,8 @@ export class DiscordService {
     private readonly avcService: AvcService,
     @Inject(forwardRef(() => MusicService))
     private readonly musicService: MusicService,
+    @Inject(forwardRef(() => GiveawaysService))
+    private readonly giveawaysService: GiveawaysService,
   ) {}
 
   async connect(): Promise<DiscordClient> {
@@ -48,9 +49,11 @@ export class DiscordService {
       .catch((e) => {
         Logger.error(e.message, e.stack);
       });
-    
+
+    Logger.log('Creating music player', 'Ririko DiscordService');
     this.client.musicPlayer = await this.musicService.createPlayer();
-    
+    Logger.log('Creating giveaways manager', 'Ririko DiscordService');
+    this.client.giveawaysManager = this.giveawaysService.register(this.client);
     return this.client;
   }
 

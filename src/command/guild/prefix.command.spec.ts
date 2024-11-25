@@ -92,7 +92,7 @@ describe('PrefixCommand', () => {
           prefix: 'newprefix',
           name: mockGuild.name,
         },
-        ['guildId'],
+        ['id'],
       );
       expect(mockMessage.reply).toHaveBeenCalledWith(expect.any(Object));
     });
@@ -132,7 +132,7 @@ describe('PrefixCommand', () => {
           prefix: 'newprefix',
           name: mockGuild.name,
         },
-        ['guildId'],
+        ['id'],
       );
       expect(mockInteraction.reply).toHaveBeenCalledWith(expect.any(Object));
     });

@@ -1,8 +1,6 @@
-import { AvailableSharedServices } from '#command/command.module';
-
 export const SharedServiceUtil = {
-  getFactory: (sharedServiceIdentifier: string) => {
-    const sharedServicesInstance = new AvailableSharedServices();
+  getFactory: (sharedServiceIdentifier: string, sharedServices: any) => {
+    const sharedServicesInstance = new sharedServices();
 
     return {
       provide: sharedServiceIdentifier,
@@ -13,7 +11,7 @@ export const SharedServiceUtil = {
       // Define the keys for the shared services in order of the inject array above
       useFactory: (...service): any => {
         let i = 0;
-        let svc = {};
+        const svc = {};
         Object.getOwnPropertyNames(sharedServicesInstance).forEach((key) => {
           svc[key] = service[i++];
         });
