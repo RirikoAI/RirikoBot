@@ -53,7 +53,7 @@ export class CommandService {
 
     // If guildId is provided, register the commands only in that guild
     if (guildId) {
-      await CommandsLoaderUtil.putSlashCommandsInAGuild(
+      await CommandsLoaderUtil.putInteractionCommandsInAGuild(
         CommandService.registeredCommands,
         this.discord.client,
         this.config,
@@ -61,8 +61,8 @@ export class CommandService {
       );
       return CommandService.registeredCommands;
     } else {
-      // Register all slash commands in all guilds
-      await CommandsLoaderUtil.putSlashCommandsInGuilds(
+      // Register all interaction commands in all guilds
+      await CommandsLoaderUtil.putInteractionCommandsInGuilds(
         CommandService.registeredCommands,
         this.discord.client,
         this.config,
@@ -138,17 +138,36 @@ export class CommandService {
     // Loop through all registered commands and execute the first one that matches
     for (const command of CommandService.registeredCommands) {
       if (command.test(interaction.commandName)) {
-        Logger.debug(
-          `Received slash command: ${interaction.commandName}`,
-          'Ririko CommandService',
-        );
-        await this.runSlashCommand(command, interaction);
-        return command;
+        // check if the interaction is a message command
+        if (interaction.isMessageContextMenuCommand()) {
+          Logger.debug(
+            `Received message context menu command: ${(interaction as any).commandName}`,
+            'Ririko CommandService',
+          );
+          await command.runChatMenu(interaction);
+          return command;
+        } else if ((interaction as any).isContextMenuCommand()) {
+          // check if the interaction is a context menu command
+          Logger.debug(
+            `Received user context menu command: ${(interaction as any).commandName}`,
+            'Ririko CommandService',
+          );
+          await command.runUserMenu(interaction);
+          return command;
+        } else {
+          // check if the interaction is a slash command
+          Logger.debug(
+            `Received slash command: ${(interaction as any).commandName}`,
+            'Ririko CommandService',
+          );
+          await this.runSlashCommand(command, interaction);
+          return command;
+        }
       }
     }
 
     Logger.debug(
-      `Slash command not found: ${interaction.commandName}`,
+      `Slash/UserMenu/ChatMenu command not found: ${interaction.commandName}`,
       'Ririko CommandService',
     );
   }

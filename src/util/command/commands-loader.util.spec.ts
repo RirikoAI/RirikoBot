@@ -36,7 +36,7 @@ describe('CommandsLoaderUtil', () => {
       const client = { restClient: { put: jest.fn() } };
       const config = { get: jest.fn().mockReturnValue('appId') };
 
-      await CommandsLoaderUtil.putSlashCommandsInGuilds(
+      await CommandsLoaderUtil.putInteractionCommandsInGuilds(
         commands as any,
         client as any,
         config as any,
@@ -55,7 +55,7 @@ describe('CommandsLoaderUtil', () => {
       const config = { get: jest.fn().mockReturnValue('appId') };
       const guildId = 'guildId';
 
-      await CommandsLoaderUtil.putSlashCommandsInAGuild(
+      await CommandsLoaderUtil.putInteractionCommandsInAGuild(
         commands as any,
         client as any,
         config as any,

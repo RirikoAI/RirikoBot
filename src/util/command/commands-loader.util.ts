@@ -35,27 +35,27 @@ export const CommandsLoaderUtil = {
    * @param client
    * @param config
    */
-  putSlashCommandsInGuilds: async (
+  putInteractionCommandsInGuilds: async (
     commands: Command[],
     client: DiscordClient,
     config: ConfigService,
   ) => {
-    await putSlashCommandsInGuilds(commands, client, config);
+    await putInteractionCommandsInGuilds(commands, client, config);
   },
   /**
-   * Register all slash commands in a specific guild
+   * Register all commands in a specific guild
    * @param commands
    * @param client
    * @param config
    * @param guildId
    */
-  putSlashCommandsInAGuild: async (
+  putInteractionCommandsInAGuild: async (
     commands: Command[],
     client: DiscordClient,
     config: ConfigService,
     guildId: string,
   ) => {
-    await putSlashCommandsInAGuild(commands, client, config, guildId);
+    await putInteractionCommandsInAGuild(commands, client, config, guildId);
   },
 };
 
@@ -99,6 +99,12 @@ const instantiateCommands = (
     if (commandInstance.runSlash) {
       types.push('slash');
     }
+    if (commandInstance.runUserMenu) {
+      types.push('userMenu');
+    }
+    if (commandInstance.runChatMenu) {
+      types.push('chatMenu');
+    }
 
     Logger.log(
       `${commandInstance.name} registered (${types.join(',')}) => ${commandInstance.description}`,
@@ -109,7 +115,7 @@ const instantiateCommands = (
   return instantiatedCommands;
 };
 
-const putSlashCommandsInGuilds = async (
+const putInteractionCommandsInGuilds = async (
   commands: Command[],
   client: DiscordClient,
   config: ConfigService,
@@ -118,12 +124,12 @@ const putSlashCommandsInGuilds = async (
   await client?.restClient.put(
     Routes.applicationCommands(config.get('DISCORD_APPLICATION_ID')),
     {
-      body: prepareSlashCommands(commands),
+      body: prepareInteractionCommands(commands),
     },
   );
 };
 
-const putSlashCommandsInAGuild = async (
+const putInteractionCommandsInAGuild = async (
   commands: Command[],
   client: DiscordClient,
   config: ConfigService,
@@ -146,36 +152,49 @@ const putSlashCommandsInAGuild = async (
       guildId,
     ),
     {
-      body: prepareSlashCommands(commands),
+      body: prepareInteractionCommands(commands),
     },
   );
 };
 
-const prepareSlashCommands = (commands: Command[]) => {
-  const cmd = commands
-    .map((command) => {
-      // Only return the command if it has a runSlash method
-      if (command.runSlash) {
-        return {
-          name: command.name,
-          description: command.description,
-          type: 1,
-          // Check if the command has slashOptions, otherwise don't pass "options"
-          options: command.slashOptions
-            ? command.slashOptions.map((option) => {
-                return {
-                  type: option.type,
-                  name: option.name,
-                  description: option.description,
-                  required: option?.required,
-                  options: option?.options,
-                };
-              })
-            : undefined,
-        };
-      }
-    })
-    .filter(Boolean);
+const prepareInteractionCommands = (commands: Command[]) => {
+  const cmd: any[] = [];
+
+  commands.forEach((command) => {
+    if (command.runSlash) {
+      cmd.push({
+        name: command.name,
+        description: command.description,
+        type: 1,
+        // Check if the command has slashOptions, otherwise don't pass "options"
+        options: command.slashOptions
+          ? command.slashOptions.map((option) => {
+              return {
+                type: option.type,
+                name: option.name,
+                description: option.description,
+                required: option?.required,
+                options: option?.options,
+              };
+            })
+          : undefined,
+      });
+    }
+
+    if (command.runUserMenu) {
+      cmd.push({
+        name: command.userMenuOption.name,
+        type: 2,
+      });
+    }
+
+    if (command.runChatMenu) {
+      cmd.push({
+        name: command.chatMenuOption.name,
+        type: 3,
+      });
+    }
+  });
 
   return cmd;
 };

@@ -17,6 +17,16 @@ export default class PingCommand extends Command implements CommandInterface {
   category = 'general';
   usageExamples = ['ping'];
 
+  // Define the user context menu command
+  userMenuOption = {
+    name: 'Ping from user context',
+  };
+
+  // Define the chat menu command
+  chatMenuOption = {
+    name: 'Ping from chat context',
+  };
+
   async runPrefix(message: DiscordMessage): Promise<void> {
     const delay = this.calculateDelay(message.createdTimestamp);
 
@@ -44,6 +54,38 @@ export default class PingCommand extends Command implements CommandInterface {
 
     await interaction.reply({
       embeds: [embed],
+    });
+  }
+
+  async runUserMenu(interaction: DiscordInteraction): Promise<void> {
+    const delay = this.calculateDelay(interaction.createdTimestamp);
+
+    const embed = new EmbedBuilder().addFields([
+      {
+        name: `Ping`,
+        value: `I took ${delay}ms to reply to your message/interaction`,
+      },
+    ]);
+
+    await interaction.reply({
+      embeds: [embed],
+      ephemeral: true,
+    });
+  }
+
+  async runChatMenu(interaction: DiscordInteraction): Promise<void> {
+    const delay = this.calculateDelay(interaction.createdTimestamp);
+
+    const embed = new EmbedBuilder().addFields([
+      {
+        name: `Ping`,
+        value: `I took ${delay}ms to reply to your message/interaction`,
+      },
+    ]);
+
+    await interaction.reply({
+      embeds: [embed],
+      ephemeral: true,
     });
   }
 

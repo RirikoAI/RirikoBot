@@ -2,6 +2,8 @@ import { SharedServices } from '#command/command.module';
 import { DiscordClient } from '#discord/discord.client';
 import {
   CommandButtons,
+  UserMenuOption,
+  ChatMenuOption,
   DiscordInteraction,
   DiscordMessage,
   SlashCommandOptions,
@@ -92,6 +94,22 @@ export class Command extends CommandFeatures {
   slashOptions?: SlashCommandOptions;
 
   /**
+   * User Context menu options.
+   *
+   * @see CommandsLoaderUtil
+   * @optional
+   */
+  userMenuOption?: UserMenuOption;
+
+  /**
+   * Chat menu options.
+   *
+   * @see CommandsLoaderUtil
+   * @optional
+   */
+  chatMenuOption?: ChatMenuOption;
+
+  /**
    * Pages for the command.
    * @see Pages
    * @see PaginationFeature
@@ -155,7 +173,14 @@ export class Command extends CommandFeatures {
    * @param content {string}
    */
   test(content: string): boolean {
-    return this.regex.test(content);
+    const regex = this.regex.test(content);
+    const userMenuOption = this.userMenuOption;
+    const chatMenuOption = this.chatMenuOption;
+    return (
+      regex ||
+      userMenuOption?.name === content ||
+      chatMenuOption?.name === content
+    );
   }
 
   /**
@@ -169,6 +194,18 @@ export class Command extends CommandFeatures {
    * @param interaction {DiscordInteraction}
    */
   async runSlash?(interaction: DiscordInteraction): Promise<any>;
+
+  /**
+   * A function that will be called when the user context command is run
+   * @param interaction {DiscordInteraction}
+   */
+  async runUserMenu?(interaction: DiscordInteraction): Promise<any>;
+
+  /**
+   * A function that will be called when the chat context command is run
+   * @param interaction {DiscordInteraction}
+   */
+  async runChatMenu?(interaction: DiscordInteraction): Promise<any>;
 
   /**
    * Helper function to set the parameters of the command currently being run

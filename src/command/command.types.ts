@@ -81,3 +81,11 @@ export interface CommandButtons {
 export function Service(service) {
   return service;
 }
+
+export type UserMenuOption = {
+  name: string;
+};
+
+export type ChatMenuOption = {
+  name: string;
+};

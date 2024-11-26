@@ -54,7 +54,7 @@ describe('CommandService', () => {
         .mockReturnValue([]);
       jest.spyOn(CommandsLoaderUtil, 'instantiateCommands').mockReturnValue([]);
       jest
-        .spyOn(CommandsLoaderUtil, 'putSlashCommandsInGuilds')
+        .spyOn(CommandsLoaderUtil, 'putInteractionCommandsInGuilds')
         .mockResolvedValue(undefined);
 
       const result = await service.registerCommands();
@@ -90,6 +90,8 @@ describe('CommandService', () => {
     it('should execute a slash command', async () => {
       const interaction = {
         commandName: 'test',
+        isMessageContextMenuCommand: jest.fn().mockReturnValue(false),
+        isContextMenuCommand: jest.fn().mockReturnValue(false),
       } as unknown as DiscordInteraction;
       const command = new Command(sharedServices);
       command.test = jest.fn().mockReturnValue(true);
