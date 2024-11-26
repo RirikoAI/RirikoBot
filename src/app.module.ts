@@ -11,6 +11,8 @@ import discordConfig from '#config/discord.config';
 import { AvcModule } from '#avc/avc.module';
 import { MusicModule } from '#music/music.module';
 import { DatabaseModule } from '#database/database.module';
+import { EconomyController } from '#economy/economy.controller';
+import { EconomyModule } from '#economy/economy.module';
 
 /**
  * The main application module.
@@ -29,8 +31,9 @@ import { DatabaseModule } from '#database/database.module';
     AvcModule,
     MusicModule,
     DatabaseModule,
+    EconomyModule,
   ],
-  controllers: [RootController],
+  controllers: [RootController, EconomyController],
   providers: [RootService, ConfigService],
 })
 export class AppModule {}
