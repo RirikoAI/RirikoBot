@@ -10,6 +10,7 @@ import { VoiceStateUpdateEvent } from '#discord/events/voice-state-update.event'
 import { AvcService } from '#avc/avc.service';
 import { MusicService } from '#music/music.service';
 import { GiveawaysService } from '#giveaways/giveaways.service';
+import { EconomyService } from '#economy/economy.service';
 
 /**
  * Discord Service
@@ -29,6 +30,8 @@ export class DiscordService {
     private readonly musicService: MusicService,
     @Inject(forwardRef(() => GiveawaysService))
     private readonly giveawaysService: GiveawaysService,
+    @Inject(forwardRef(() => EconomyService))
+    private readonly economyService: EconomyService,
   ) {}
 
   async connect(): Promise<DiscordClient> {
@@ -59,7 +62,12 @@ export class DiscordService {
 
   registerEvents() {
     ReadyEvent(this.client, this.commandService);
-    MessageCreateEvent(this.client, this.commandService, this.musicService);
+    MessageCreateEvent(
+      this.client,
+      this.commandService,
+      this.musicService,
+      this.economyService,
+    );
     InteractionCreateEvent(this.client, this.commandService);
     VoiceStateUpdateEvent(this.client, this.avcService);
   }

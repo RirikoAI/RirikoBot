@@ -11,6 +11,8 @@ import { DatabaseModule } from '#database/database.module';
 import { DatabaseService } from '#database/database.service';
 import { Service } from '#command/command.types';
 import { SharedServiceUtil } from '#util/command/shared-service.util';
+import { EconomyModule } from '#economy/economy.module';
+import { EconomyService } from '#economy/economy.service';
 
 const modules = [
   ConfigModule,
@@ -18,6 +20,7 @@ const modules = [
   forwardRef(() => AvcModule),
   AvcModule,
   MusicModule,
+  EconomyModule,
   DatabaseModule,
 ];
 
@@ -27,6 +30,7 @@ export class AvailableSharedServices {
   commandService: CommandService = Service(CommandService);
   autoVoiceChannelService: AvcService = Service(AvcService);
   musicService: MusicService = Service(MusicService);
+  economy: EconomyService = Service(EconomyService);
   db: DatabaseService = Service(DatabaseService);
 }
 

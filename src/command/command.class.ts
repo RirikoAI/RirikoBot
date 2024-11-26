@@ -10,6 +10,7 @@ import { CommandFeatures } from '#command/command.features';
 import { Pages } from '#util/features/pagination-feature.types';
 import DisTube from 'distube';
 import { DatabaseService } from '#database/database.service';
+import { EconomyService } from '#economy/economy.service';
 
 export type CommandConstructor = new (services: SharedServices) => Command;
 
@@ -38,6 +39,7 @@ export class Command extends CommandFeatures {
     this.client = services.discord?.client;
     this.getGuildPrefix = services.commandService?.getGuildPrefix;
     this.player = services.discord?.client?.musicPlayer;
+    this.economy = services.economy;
     this.init();
   }
 
@@ -143,6 +145,12 @@ export class Command extends CommandFeatures {
    * @see MusicService
    */
   player: DisTube;
+
+  /**
+   * Serves as a shortcut to the EconomyService
+   * @see EconomyService
+   */
+  economy: EconomyService;
 
   /**
    * Serves as a shortcut to get the guild prefix from the CommandService

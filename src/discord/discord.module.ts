@@ -6,6 +6,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AvcModule } from '#avc/avc.module';
 import { MusicModule } from '#music/music.module';
 import { GiveawaysModule } from '#giveaways/giveaways.module';
+import { EconomyModule } from '#economy/economy.module';
+import { EconomyService } from '#economy/economy.service';
+import { DatabaseModule } from '#database/database.module';
+import { DatabaseService } from '#database/database.service';
 
 /**
  * @author Earnest Angel (https://angel.net.my)
@@ -17,8 +21,10 @@ import { GiveawaysModule } from '#giveaways/giveaways.module';
     forwardRef(() => AvcModule),
     forwardRef(() => MusicModule),
     forwardRef(() => GiveawaysModule),
+    forwardRef(() => EconomyModule),
+    DatabaseModule,
   ],
-  providers: [DiscordService, ConfigService],
+  providers: [DiscordService, ConfigService, EconomyService, DatabaseService],
   exports: [DiscordService],
   controllers: [DiscordController],
 })

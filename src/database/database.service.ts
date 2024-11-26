@@ -7,6 +7,7 @@ import { MusicChannel } from '#database/entities/music-channel.entity';
 import { Playlist } from '#database/entities/playlist.entity';
 import { Track } from '#database/entities/track.entity';
 import { VoiceChannel } from '#database/entities/voice-channel.entity';
+import { User } from '#database/entities/user.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -21,5 +22,7 @@ export class DatabaseService {
     public trackRepository: Repository<Track>,
     @InjectRepository(VoiceChannel)
     public voiceChannelRepository: Repository<VoiceChannel>,
+    @InjectRepository(User)
+    public userRepository: Repository<User>,
   ) {}
 }
