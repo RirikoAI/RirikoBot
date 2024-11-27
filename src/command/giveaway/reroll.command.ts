@@ -18,6 +18,11 @@ export default class RerollCommand extends Command implements CommandInterface {
     'greroll <messageid>',
   ];
 
+  // Define the chat menu command
+  chatMenuOption = {
+    name: 'Reroll giveaway',
+  };
+
   slashOptions = [
     {
       name: 'message_id',
@@ -38,6 +43,11 @@ export default class RerollCommand extends Command implements CommandInterface {
     await this.rerollGiveaway(interaction, messageId);
   }
 
+  async runChatMenu(interaction: DiscordInteraction): Promise<void> {
+    const messageId = interaction.targetId;
+    await this.rerollGiveaway(interaction, messageId);
+  }
+
   async rerollGiveaway(
     message: DiscordMessage | DiscordInteraction,
     messageId?: string,
@@ -51,7 +61,7 @@ export default class RerollCommand extends Command implements CommandInterface {
       );
       return;
     }
-    
+
     // try to found the giveaway with prize then with ID
     const giveaway =
       // Search with giveaway ID

@@ -18,6 +18,11 @@ export default class EndCommand extends Command implements CommandInterface {
     'gend <messageid>',
   ];
 
+  // Define the chat menu command
+  chatMenuOption = {
+    name: 'End giveaway',
+  };
+
   slashOptions = [
     {
       name: 'message_id',
@@ -35,6 +40,11 @@ export default class EndCommand extends Command implements CommandInterface {
 
   async runSlash(interaction: DiscordInteraction): Promise<void> {
     const messageId = interaction.options.getString('message_id');
+    await this.endGiveaway(interaction, messageId);
+  }
+
+  async runChatMenu(interaction: DiscordInteraction): Promise<void> {
+    const messageId = interaction.targetId;
     await this.endGiveaway(interaction, messageId);
   }
 
