@@ -66,8 +66,8 @@ export interface DiscordInteraction extends ChatInputCommandInteraction {
 
   deferUpdate(): Promise<any>;
 
+  targetId?: string;
   customId?: string;
-
   message?: DiscordMessage;
 }
 
