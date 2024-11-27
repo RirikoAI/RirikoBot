@@ -61,6 +61,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cross-env": "^7.0.3",
+    "discord-card-canvas": "^1.4.4",
     "discord-giveaways": "^6.0.1",
     "discord.js": "^14.16.3",
     "distube": "^5.0.4",

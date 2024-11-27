@@ -11,23 +11,7 @@ export class KarmaExtension extends EconomyExtension {
 
     if (isGibberish) return;
 
-    // get the user from db
-    let user = await this.db.userRepository.findOne({
-      where: {
-        id: message.author.id,
-      },
-    });
-
-    // if not found, create a new user
-    if (!user) {
-      user = await this.db.userRepository.save({
-        id: message.author.id,
-        username: message.author.username,
-        displayName: message.author.displayName,
-        karma: 0,
-        createdAt: message.author.createdAt,
-      });
-    }
+    let user = await this.extensions.profile.getUser(message.author);
 
     // get the user exp or karma
     let karma = user.karma;

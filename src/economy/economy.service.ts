@@ -23,9 +23,12 @@ export class EconomyService {
   deductBalance = this.extensions.coins.deductBalance;
   addBalance = this.extensions.coins.addBalance;
 
+  getProfile = this.extensions.profile.getProfile;
+  getUser = this.extensions.profile.getUser;
+
   async handleMessage(message: DiscordMessage): Promise<any> {
     await this.extensions.karma.rewardUserForMessage(message);
-    await this.extensions.items.findRandomItems(message.author.id);
+    await this.extensions.items.findRandomItems(message.author, message.guild);
   }
 
   async getEconomyRoot(): Promise<ResponseDto> {
@@ -47,6 +50,7 @@ export class EconomyService {
       svcs.forEach((svc) => {
         this.extensions[key][svc] = this.services[svc];
       });
+      this.extensions[key]['extensions'] = this.extensions;
     }
   }
 }

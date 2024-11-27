@@ -1,13 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EconomyExtension } from '#economy/extension.class';
+import { Guild, User } from 'discord.js';
 
 @Injectable()
 export class ItemsExtension extends EconomyExtension {
-  async findRandomItems(userId): Promise<any> {
-    console.log('Finding random items for user', userId);
-    if (Math.random() < 50 / 100) {
+  async findRandomItems(user: User, guild: Guild): Promise<any> {
+    if (Math.random() < 90 / 100) {
       // 2% chance of finding an item
-      console.log(`${userId} found an item!`);
+      Logger.log(
+        `${user.tag} found an item in ${guild.name}!`,
+        'Ririko Economy',
+      );
       /**
        * Rarity  Name  Chance
        * 0  Trash  48%
@@ -20,30 +23,35 @@ export class ItemsExtension extends EconomyExtension {
        * 7  Mythical  0.9%
        * 8  Godly  0.1%
        */
-      const rarity = Math.floor(Math.random() * 100.0 + 0.01);
+      const roll = Math.floor(Math.random() * 100.0 + 0.01);
       //
       let item;
-      if (rarity < 48) {
+      if (roll < 48) {
         item = 'Trash';
-      } else if (rarity < 78) {
+      } else if (roll < 78) {
         item = 'Common';
-      } else if (rarity < 88) {
+      } else if (roll < 88) {
         item = 'Uncommon';
-      } else if (rarity < 93) {
+      } else if (roll < 93) {
         item = 'Rare';
-      } else if (rarity < 96) {
+      } else if (roll < 96) {
         item = 'Ultra Rare';
-      } else if (rarity < 98) {
+      } else if (roll < 98) {
         item = 'Epic';
-      } else if (rarity < 99) {
+      } else if (roll < 99) {
         item = 'Legendary';
-      } else if (rarity < 99.8) {
+      } else if (roll < 99.8) {
         item = 'Mythical';
       } else {
         item = 'Godly';
       }
 
-      console.log(`${userId} found a ${item} item at ${rarity} rarity`);
+      Logger.log(
+        `${user.tag} found a ${item} item at ${roll} rarity`,
+        'Ririko Economy',
+      );
+
+      // TODO! Add an item with that rarity to the user's inventory
     }
   }
 }

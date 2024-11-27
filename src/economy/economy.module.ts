@@ -10,22 +10,26 @@ import { CoinsExtension } from '#economy/coins/coins.extension';
 import { Service } from '#command/command.types';
 import { SharedServiceUtil } from '#util/command/shared-service.util';
 import { KarmaExtension } from '#economy/karma/karma.extension';
+import { ProfileExtension } from '#economy/profile/profile.extension';
+
+const modules = [forwardRef(() => DiscordModule), DatabaseModule];
+
+export class AvailableEconomyServices {
+  db: DatabaseService = Service(DatabaseService);
+}
 
 export class AvailableEconomyExtensions {
   items: ItemsExtension = Extension(ItemsExtension);
   coins: CoinsExtension = Extension(CoinsExtension);
   karma: KarmaExtension = Extension(KarmaExtension);
-}
-
-export class AvailableEconomyServices {
-  db: DatabaseService = Service(DatabaseService);
+  profile: ProfileExtension = Extension(ProfileExtension);
 }
 
 /**
  * @author Earnest Angel (https://angel.net.my)
  */
 @Module({
-  imports: [forwardRef(() => DiscordModule), DatabaseModule],
+  imports: modules,
   providers: [
     EconomyExtensionsUtil.getFactory(
       'ECONOMY_EXTENSIONS',
@@ -40,4 +44,7 @@ export class AvailableEconomyServices {
 export class EconomyModule {}
 
 export type EconomyExtensions = AvailableEconomyExtensions;
-export type EconomyServices = AvailableEconomyServices;
+
+export interface EconomyServices extends AvailableEconomyServices {
+  extensions: EconomyExtensions;
+}
