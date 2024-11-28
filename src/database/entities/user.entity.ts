@@ -12,6 +12,11 @@ export class User {
   displayName: string;
 
   @Column({
+    default: null,
+  })
+  backgroundImageURL: string;
+
+  @Column({
     default: 0,
   })
   karma: number;

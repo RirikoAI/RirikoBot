@@ -25,6 +25,7 @@ export class EconomyService {
 
   getProfile = this.extensions.profile.getProfile;
   getUser = this.extensions.profile.getUser;
+  setBackgroundImageURL = this.extensions.profile.setBackgroundImageURL;
 
   async handleMessage(message: DiscordMessage): Promise<any> {
     await this.extensions.karma.rewardUserForMessage(message);

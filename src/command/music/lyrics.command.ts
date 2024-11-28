@@ -48,7 +48,7 @@ export default class LyricsCommand extends Command implements CommandInterface {
     }
     await this.handleLyricsRequest(interaction);
   }
-  
+
   async handleButton(interaction: DiscordInteraction): Promise<void> {
     await this.handleLyricsRequest(interaction);
   }
@@ -107,11 +107,11 @@ export default class LyricsCommand extends Command implements CommandInterface {
         });
         return;
       }
-      
+
       reply.edit({
         content: `Lyrics for ${songName} found:`,
       });
-      
+
       await this.createMenu({
         interaction,
         text: `Please select which lyrics to view`,
@@ -124,6 +124,13 @@ export default class LyricsCommand extends Command implements CommandInterface {
         followUp: true,
         deleteAfterSelection: true,
       });
+
+      // remove the search from the list
+      this.searches = this.searches.filter(
+        (search) => search.userId !== userId,
+      );
+      this.params = [];
+      this.allParams = '';
     } catch (e) {
       console.error(e);
     }

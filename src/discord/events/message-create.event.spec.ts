@@ -3,11 +3,15 @@ import { DiscordClient } from '#discord/discord.client';
 import { CommandService } from '#command/command.service';
 import { Events } from 'discord.js';
 import { DiscordMessage } from '#command/command.types';
-import { MusicService } from "#music/music.service";
+import { MusicService } from '#music/music.service';
 
 const musicService = {
   handleMusic: jest.fn(),
 } as unknown as MusicService;
+
+const economyService = {
+  handleMessage: jest.fn(),
+};
 
 describe('MessageCreateEvent', () => {
   it('should be defined', () => {
@@ -19,7 +23,7 @@ describe('MessageCreateEvent', () => {
   });
 
   it('should have 3 parameters', () => {
-    expect(MessageCreateEvent).toHaveLength(3);
+    expect(MessageCreateEvent).toHaveLength(4);
   });
 
   it('should call checkPrefixCommand', async () => {
@@ -30,11 +34,21 @@ describe('MessageCreateEvent', () => {
       checkPrefixCommand: jest.fn(),
     } as unknown as CommandService;
 
-    MessageCreateEvent(client, commandService, musicService);
+    MessageCreateEvent['economyService'] = {
+      handleMessage: jest.fn(),
+    };
+
+    MessageCreateEvent(
+      client,
+      commandService,
+      musicService,
+      economyService as any,
+    );
 
     // Simulate the message event
     const message = {
       author: { bot: false },
+      channel: { send: jest.fn() },
     } as unknown as DiscordMessage;
     const eventHandler = client.on.mock.calls[0][1];
     await eventHandler(message);
@@ -54,7 +68,7 @@ describe('MessageCreateEvent', () => {
       checkPrefixCommand: jest.fn(),
     } as unknown as CommandService;
 
-    MessageCreateEvent(client, commandService, musicService);
+    MessageCreateEvent(client, commandService, musicService, jest.fn() as any);
 
     // Simulate the message event from a bot
     const message = {
@@ -78,7 +92,7 @@ describe('MessageCreateEvent', () => {
       checkPrefixCommand: jest.fn().mockRejectedValue(new Error('Test error')),
     } as unknown as CommandService;
 
-    MessageCreateEvent(client, commandService, musicService);
+    MessageCreateEvent(client, commandService, musicService, jest.fn() as any);
 
     // Simulate the message event
     const message = {

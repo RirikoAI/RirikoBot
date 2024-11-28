@@ -58,10 +58,10 @@
     "@nestjs/typeorm": "^10.0.2",
     "anime-wallpaper": "^3.2.2",
     "asdfjkl": "^0.0.7",
+    "canvas": "^2.11.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cross-env": "^7.0.3",
-    "discord-card-canvas": "^1.4.4",
     "discord-giveaways": "^6.0.1",
     "discord.js": "^14.16.3",
     "distube": "^5.0.4",
@@ -78,6 +78,7 @@
     "sodium-native": "^4.3.1",
     "songlyrics": "^2.4.8",
     "sqlite3": "^5.1.7",
+    "stackblur-canvas": "^2.7.0",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {

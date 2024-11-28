@@ -11,6 +11,7 @@ import { InteractionCreateEvent } from '#discord/events/interaction-create.event
 import { VoiceStateUpdateEvent } from '#discord/events/voice-state-update.event';
 import { MusicService } from '#music/music.service';
 import { GiveawaysService } from '#giveaways/giveaways.service';
+import { EconomyService } from '#economy/economy.service';
 
 jest.mock('#discord/discord.client');
 jest.mock('./events/message-create.event');
@@ -27,6 +28,7 @@ describe('Discord Service', () => {
   const avcServiceMock = { get: jest.fn() };
   const musicServiceMock = { createPlayer: jest.fn() };
   const giveawaysMock = { register: jest.fn() };
+  const economyMock = { register: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -51,6 +53,10 @@ describe('Discord Service', () => {
         {
           provide: GiveawaysService,
           useValue: giveawaysMock,
+        },
+        {
+          provide: EconomyService,
+          useValue: economyMock,
         },
       ],
       controllers: [DiscordController],
@@ -93,6 +99,7 @@ describe('Discord Service', () => {
       discordClientMock,
       commandServiceMock,
       musicServiceMock,
+      economyMock,
     );
     expect(InteractionCreateEvent).toHaveBeenCalledWith(
       discordClientMock,

@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EconomyExtension } from '#economy/extension.class';
-import { RankCardBuilder } from 'discord-card-canvas';
 import { GuildTextBasedChannel, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { EconomyUtil } from '#util/economy/economy.util';
+import { Banner } from '#util/economy/banner.util';
+import { BadgesUtil } from '#util/discord/badges.util';
 
 @Injectable()
 export class ProfileExtension extends EconomyExtension {
@@ -16,44 +17,45 @@ export class ProfileExtension extends EconomyExtension {
 
     const guildUser = await message.guild.members.fetch(user.id);
     const currentLevel = EconomyUtil.getCurrentLevel(userDB.karma);
-    let canvasRank = await new RankCardBuilder({
-      currentLvl: EconomyUtil.getCurrentLevel(userDB.karma),
-      currentRank: 'A' as any, // TODO! Implement rank system
-      currentXP: userDB.karma,
-      requiredXP: parseInt(
+
+    const badges = await BadgesUtil.getBadges(user);
+
+    let deferred;
+    if ('deferReply' in message) {
+      deferred = true;
+      await message.deferReply();
+    }
+
+    const banner = new Banner();
+    const buffer = await banner.generateBanner({
+      displayName: user.displayName,
+      avatarURL: user.displayAvatarURL({ extension: 'png', size: 512 }),
+      presenceStatus: guildUser.presence?.status || 'offline',
+      level: 'Level ' + currentLevel.toString(),
+      currentExp: userDB.karma,
+      requiredExp: parseInt(
         String(EconomyUtil.calculateTotalExpForLevel(currentLevel + 1)),
       ),
-      backgroundColor: { background: '#0d0112', bubbles: '#0060ff' },
-      // backgroundImgURL: 'any_image.png',
-      avatarImgURL: user.displayAvatarURL({ extension: 'png', size: 512 }),
-      nicknameText: {
-        content: user.displayName,
-        font: 'Nunito',
-        color: '#ffffff',
-      },
-      userStatus: guildUser.presence.status,
-    })
-      .setRankPrefix({
-        content: 'Rank',
-      })
-      // .setAvatarBackgroundColor('#b81d84')
-      // .setColorTextDefault('#ff00e1')
-      .setLvlPrefix({
-        content: 'Level',
-      });
-
-    // canvasRank.progressBarColor = '#ff00e1';
-    // canvasRank.currentXPColor = '#ff00e1';
-    // canvasRank.requiredXPColor = '#7F8384';
-
-    const canvas = await canvasRank.build();
-
-    // // Saving an image
-    // fs.writeFileSync('rank_blue.png', canvasRank.toBuffer());
-
-    await message.reply({
-      files: [{ attachment: canvas.toBuffer(), name: 'rank.png' }],
+      backgroundImgURL: userDB.backgroundImageURL,
+      backgroundImgBlur: 8,
+      badges: badges,
     });
+
+    if (deferred) {
+      await (message as any).editReply({
+        files: [{ attachment: buffer, name: 'rank.png' }],
+      });
+    } else {
+      await message.reply({
+        files: [{ attachment: buffer, name: 'rank.png' }],
+      });
+    }
+  }
+
+  async setBackgroundImageURL(user: User, url: string) {
+    let userDB = await this.getUser(user);
+    userDB.backgroundImageURL = url;
+    await this.db.userRepository.save(userDB);
   }
 
   async getUser(user: User) {
