@@ -11,11 +11,13 @@ import { Service } from '#command/command.types';
 import { SharedServiceUtil } from '#util/command/shared-service.util';
 import { KarmaExtension } from '#economy/karma/karma.extension';
 import { ProfileExtension } from '#economy/profile/profile.extension';
+import { DiscordService } from '#discord/discord.service';
 
 const modules = [forwardRef(() => DiscordModule), DatabaseModule];
 
 export class AvailableEconomyServices {
   db: DatabaseService = Service(DatabaseService);
+  discord: DiscordService = Service(DiscordService);
 }
 
 export class AvailableEconomyExtensions {

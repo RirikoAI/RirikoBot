@@ -1,13 +1,12 @@
-import { User } from 'discord.js';
 import { Image, loadImage } from 'canvas';
+import { DiscordGuildMember } from '#command/command.types';
 
 export const BadgesUtil = {
   getBadges: getBadges,
 };
 
-async function getBadges(user: User): Promise<Image[]> {
-  const flags = user.flags.toArray();
-
+async function getBadges(guildMember: DiscordGuildMember): Promise<Image[]> {
+  const flags = guildMember.user.flags.toArray();
   const badges: Image[] = [];
   for (const flag of flags) {
     // only get alphanumeric characters + numbers of flag and put it to safeFlag variable
@@ -22,5 +21,18 @@ async function getBadges(user: User): Promise<Image[]> {
       );
     }
   }
+
+  if (guildMember.premiumSince) {
+    try {
+      // load badge images svg from the path /assets/badges
+      const badge: Image = await loadImage(`./assets/badges/nitro.svg`);
+      badges.push(badge);
+    } catch (e) {
+      console.error(
+        `Error loading badge boost on path ./assets/badges/nitro.svg`,
+      );
+    }
+  }
+
   return badges;
 }

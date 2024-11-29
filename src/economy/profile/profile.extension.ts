@@ -17,8 +17,7 @@ export class ProfileExtension extends EconomyExtension {
 
     const guildUser = await message.guild.members.fetch(user.id);
     const currentLevel = EconomyUtil.getCurrentLevel(userDB.karma);
-
-    const badges = await BadgesUtil.getBadges(user);
+    const badges = await BadgesUtil.getBadges(guildUser);
 
     let deferred;
     if ('deferReply' in message) {

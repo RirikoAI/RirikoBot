@@ -1,8 +1,9 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ResponseDto } from '#api/response.dto';
 import { DiscordMessage } from '#command/command.types';
 import { DatabaseService } from '#database/database.service';
 import { EconomyExtensions, EconomyServices } from '#economy/economy.module';
+import { DiscordService } from '#discord/discord.service';
 
 /**
  * @author Earnest Angel (https://angel.net.my)
@@ -10,6 +11,8 @@ import { EconomyExtensions, EconomyServices } from '#economy/economy.module';
 @Injectable()
 export class EconomyService {
   constructor(
+    @Inject(forwardRef(() => DiscordService))
+    readonly discord: DiscordService,
     private readonly db: DatabaseService,
     @Inject('ECONOMY_EXTENSIONS')
     readonly extensions: EconomyExtensions,
@@ -52,6 +55,7 @@ export class EconomyService {
         this.extensions[key][svc] = this.services[svc];
       });
       this.extensions[key]['extensions'] = this.extensions;
+      this.extensions[key]['discord'] = this.discord;
     }
   }
 }
