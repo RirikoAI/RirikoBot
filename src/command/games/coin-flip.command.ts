@@ -5,9 +5,10 @@ import {CommandInterface} from '#command/command.interface';
 import {DiscordInteraction, DiscordMessage} from '#command/command.types';
 
 /**
- * Ping command.
- * @description Use this as a template for creating new commands.
- * @category Command
+ * CoinFlipCommand
+ * Coin flip command
+ * @category Commands: Games
+ * @author 00ZenDaniel
  */
 @Injectable()
 export default class CoinFlipCommand extends Command implements CommandInterface {
