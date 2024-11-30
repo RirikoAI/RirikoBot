@@ -124,13 +124,6 @@ export default class LyricsCommand extends Command implements CommandInterface {
         followUp: true,
         deleteAfterSelection: true,
       });
-
-      // remove the search from the list
-      this.searches = this.searches.filter(
-        (search) => search.userId !== userId,
-      );
-      this.params = [];
-      this.allParams = '';
     } catch (e) {
       console.error(e);
     }
@@ -173,5 +166,12 @@ export default class LyricsCommand extends Command implements CommandInterface {
       .setColor('#FFFFFF');
 
     await interaction.channel.send({ embeds: [embed] });
+
+    // remove the search from the list
+    this.searches = this.searches.filter(
+      (search) => search.userId !== interaction.user.id,
+    );
+    this.params = [];
+    this.allParams = '';
   }
 }
