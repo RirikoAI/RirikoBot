@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { VoiceChannel } from '#database/entities/voice-channel.entity';
-import { MusicChannel } from "#database/entities/music-channel.entity";
+import { MusicChannel } from '#database/entities/music-channel.entity';
+import { GuildConfig } from '#database/entities/guild-config.entity';
 
 /**
  * Guild Entity
@@ -21,10 +22,15 @@ export class Guild {
 
   @Column({ default: '!' })
   prefix: string;
-  
+
   @OneToMany(() => VoiceChannel, (voiceChannel) => voiceChannel.guild)
   voiceChannels: VoiceChannel[];
-  
+
   @OneToMany(() => MusicChannel, (musicChannel) => musicChannel.guild)
   musicChannels: VoiceChannel[];
+
+  @OneToMany(() => GuildConfig, (guildConfig) => guildConfig.guild, {
+    eager: true,
+  })
+  configurations: GuildConfig[];
 }

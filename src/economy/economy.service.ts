@@ -37,9 +37,7 @@ export class EconomyService {
 
   async getEconomyRoot(): Promise<ResponseDto> {
     // get the total number of users
-    const totalUsers = await this.db.userRepository.count({
-      cache: true,
-    });
+    const totalUsers = await this.db.userRepository.count();
 
     return {
       data: `Ririko is serving ${totalUsers} users.`,

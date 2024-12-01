@@ -11,6 +11,7 @@ import { AvcService } from '#avc/avc.service';
 import { MusicService } from '#music/music.service';
 import { GiveawaysService } from '#giveaways/giveaways.service';
 import { EconomyService } from '#economy/economy.service';
+import { GuildMemberAddEvent } from '#discord/events/guild-member-add.event';
 
 /**
  * Discord Service
@@ -70,5 +71,6 @@ export class DiscordService {
     );
     InteractionCreateEvent(this.client, this.commandService);
     VoiceStateUpdateEvent(this.client, this.avcService);
+    GuildMemberAddEvent(this.client, this.commandService);
   }
 }

@@ -8,6 +8,26 @@ import {
 } from 'typeorm';
 import { ItemCategory } from '#database/entities/item-category.entity';
 
+/**
+ * Item Entity
+ * @description The item entity represents an item in the database.
+ * @property {string} id - The item ID.
+ * @property {string} name - The item name.
+ * @property {number} price - The item price.
+ * @property {string} description - The item description.
+ * @property {number} rarity - The item rarity.
+ * @property {boolean} hidden - The item hidden status.
+ * @property {number} purchaseLimit - The item purchase limit.
+ * @property {boolean} purchasable - The item purchasable status.
+ * @property {boolean} sellable - The item sellable status.
+ * @property {boolean} findable - The item findable status.
+ * @property {string} imageUrl - The item image URL.
+ * @property {Date} createdAt - The item created date.
+ * @property {Date} updatedAt - The item updated date.
+ * @property {ItemCategory} category - The item category.
+ *
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Entity()
 export class Item {
   @PrimaryGeneratedColumn()

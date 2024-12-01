@@ -4,6 +4,7 @@ import {
   HttpCode,
   HttpStatus,
   Redirect,
+  Version,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseDto } from '#api/response.dto';
@@ -14,10 +15,9 @@ import { ConfigService } from '@nestjs/config';
  * @module Discord
  * @author Earnest Angel (https://angel.net.my)
  */
-@ApiTags('Ririko Bot')
+@ApiTags('Discord')
 @Controller({
   path: '/discord',
-  version: '1',
 })
 @Controller('discord')
 export class DiscordController {
@@ -34,6 +34,7 @@ export class DiscordController {
   })
   @HttpCode(HttpStatus.OK)
   @Get('/get-invite')
+  @Version('1')
   getInvite(): ResponseDto {
     return {
       data: this.getBotInviteLink(),
@@ -42,7 +43,7 @@ export class DiscordController {
     };
   }
 
-  getBotInviteLink(permissions = '1075305537'): string {
+  getBotInviteLink(permissions = '1086089850359'): string {
     return `https://discordapp.com/oauth2/authorize?client_id=${this.configService.get('DISCORD_APPLICATION_ID')}&scope=bot&permissions=${permissions}`;
   }
 }

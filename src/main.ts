@@ -12,6 +12,7 @@ import { ConfigService } from '@nestjs/config';
  */
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableVersioning();
   const configService = app.get(ConfigService);
   const discordService = app.get(DiscordService);
   const commandService = app.get(CommandService);

@@ -5,7 +5,7 @@ import { Guild, User } from 'discord.js';
 @Injectable()
 export class ItemsExtension extends EconomyExtension {
   async findRandomItems(user: User, guild: Guild): Promise<any> {
-    if (Math.random() < 2 / 100) {
+    if (Math.random() < 10 / 100) {
       // 2% chance of finding an item
       Logger.log(
         `${user.tag} found an item in ${guild.name}!`,

@@ -69,9 +69,16 @@ export class Banner {
     return this.canvas.toBuffer('image/png');
   }
 
-  drawBackground(color: string = '#013943') {
+  drawBackground(
+    color1: string = 'rgba(61,255,243,0.74)',
+    color2: string = '#138ad3',
+  ) {
     const { ctx, canvas } = this;
-    ctx.fillStyle = color;
+    // make background gradient
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 

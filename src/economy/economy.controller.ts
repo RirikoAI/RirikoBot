@@ -6,7 +6,7 @@ import { ResponseDto } from '#api/response.dto';
 /**
  * @author Earnest Angel (https://angel.net.my)
  */
-@ApiTags('API')
+@ApiTags('Economy')
 @Controller({
   path: '/economy',
   version: '1',

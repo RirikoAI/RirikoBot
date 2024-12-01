@@ -20,7 +20,7 @@ describe('RootService', () => {
     expect(controller).toBeDefined();
   });
 
-  it('getHello() should be defined', () => {
-    expect(controller.getHello()).toBeDefined();
+  it('getServiceInfo() should be defined', () => {
+    expect(controller.getServiceInfo()).toBeDefined();
   });
 });
