@@ -79,19 +79,29 @@ export default class HelpCommand extends Command implements CommandInterface {
     const embed = this.getBasicEmbed()
       .setTitle(`📚 Help`)
       .setDescription(`List of available ${type} commands for Ririko:`);
-
-    const fields = Array.from(commandsMap).map(([category, commands]) => ({
-      name: `__${category.charAt(0).toUpperCase() + category.slice(1)}__`,
-      value:
-        commands
-          .map((command) => `**${command.name}** - ${command.description}`)
-          .join('\n') + '\n\u200b',
+  
+    const fields = Array.from(commandsMap)
+      .filter(([category]) => category !== 'reactions') // Exclude "reactions" from the main categories
+      .map(([category, commands]) => ({
+        name: `__${category.charAt(0).toUpperCase() + category.slice(1)}__`,
+        value:
+          commands
+            .map((command) => `**${command.name}** - ${command.description}`)
+            .join('\n') + '\n\u200b',
+        inline: false,
+      }));
+  
+    // Add field for reactions information
+    fields.push({
+      name: `__Reactions__`,
+      value: `There are over 60 reactions like **hug**, **blush**, **kiss** and many more. \n**reacts** - For a full list of reactions.\n\u200b`,
       inline: false,
-    }));
-
+    });
+  
     embed.addFields(fields);
     return embed;
   }
+  
 
   private createCommandHelpEmbed(
     command: CommandInterface,
@@ -135,16 +145,20 @@ export default class HelpCommand extends Command implements CommandInterface {
   }
 
   private categorizeCommands(commands: any): Map<string, any> {
-    const categorizedCommands = new Map<string, CommandInterface[]>();
+  const categorizedCommands = new Map<string, CommandInterface[]>();
 
-    commands.forEach((command) => {
-      if (!categorizedCommands.has(command.category)) {
-        categorizedCommands.set(command.category, []);
-      }
+  commands.forEach((command) => {
+    // Skip commands in the "reactions" category
+    if (command.category === 'reactions') return;
 
-      categorizedCommands.get(command.category)?.push(command);
-    });
+    if (!categorizedCommands.has(command.category)) {
+      categorizedCommands.set(command.category, []);
+    }
 
-    return categorizedCommands;
-  }
+    categorizedCommands.get(command.category)?.push(command);
+  });
+
+  return categorizedCommands;
+}
+
 }
