@@ -4,7 +4,7 @@ import { Logger } from '@nestjs/common';
 import { CommandService } from '#command/command.service';
 import { WelcomeCard } from '#util/banner/welcome-card.util';
 
-export const GuildMemberAddEvent = (
+export const GuildMemberRemoveEvent = (
   client: DiscordClient,
   commandService: CommandService,
 ) => {
@@ -16,17 +16,17 @@ export const GuildMemberAddEvent = (
         },
       });
 
-      const welcomerEnabled = guild?.configurations?.find(
-        (config) => config.name === 'welcomer_enabled',
+      const farewellEnabled = guild?.configurations?.find(
+        (config) => config.name === 'farewell_enabled',
       );
 
-      if (welcomerEnabled.value !== 'true') {
+      if (farewellEnabled.value !== 'true') {
         return;
       }
 
       // get the channel id
       const channelID = guild?.configurations?.find(
-        (config) => config.name === 'welcomer_channel',
+        (config) => config.name === 'farewell_channel',
       );
 
       // get the channel
@@ -42,16 +42,21 @@ export const GuildMemberAddEvent = (
           extension: 'png',
           size: 512,
         }),
-        welcomeText: 'Welcome',
+        welcomeText: 'Good Bye',
+        backgroundColor: '#ff9700',
+        backgroundColor2: '#ff4700',
+        borderColor: '#ff0000',
+        borderColor2: '#970000',
+        bubblesColor: 'rgba(255, 255, 255, 0.5)',
         // backgroundImgURL: 'https://i.imgur.com/70gHapy.jpeg',
       });
 
       channel.send({
-        content: `Welcome to the server, <@${member.id}>!`,
+        content: `Goodbye, <@${member.id}>!`,
         files: [
           {
             attachment: buffer,
-            name: 'welcome-card.png',
+            name: 'goodbye-card.png',
           },
         ],
       });

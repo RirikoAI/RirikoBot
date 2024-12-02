@@ -8,43 +8,43 @@ import {
 import { EmbedBuilder } from 'discord.js';
 import { ImageUtil } from '#util/image/image.util';
 
-export default class WelcomerCommand
+export default class FarewellCommand
   extends Command
   implements CommandInterface
 {
-  name = 'welcomer';
-  description = 'Manage the welcomer settings';
+  name = 'farewell';
+  description = 'Configure the farewell message';
   category = 'guild';
   regex: RegExp = new RegExp(
-    `^welcomer$|^welcomer (status|enable|disable|bg|channel) ?(.*)?$`,
+    `^farewell$|^farewell (status|enable|disable|bg|channel) ?(.*)?$`,
   );
   usageExamples = [
-    'welcomer status',
-    'welcomer enable',
-    'welcomer disable',
-    'welcomer bg [background image]',
-    'welcomer channel [channel id]',
+    'farewell status',
+    'farewell enable',
+    'farewell disable',
+    'farewell bg [background image]',
+    'farewell channel [channel id]',
   ];
 
   slashOptions = [
     {
       name: 'status',
-      description: 'Get the current welcomer status',
+      description: 'Get the current farewell status',
       type: SlashCommandOptionTypes.Subcommand,
     },
     {
       name: 'enable',
-      description: 'Enable the welcomer',
+      description: 'Enable the farewell',
       type: SlashCommandOptionTypes.Subcommand,
     },
     {
       name: 'disable',
-      description: 'Disable the welcomer',
+      description: 'Disable the farewell',
       type: SlashCommandOptionTypes.Subcommand,
     },
     {
       name: 'bg',
-      description: 'Set the background image for the welcomer',
+      description: 'Set the background image for the farewell card',
       type: SlashCommandOptionTypes.Subcommand,
       options: [
         {
@@ -57,12 +57,12 @@ export default class WelcomerCommand
     },
     {
       name: 'channel',
-      description: 'Set the channel for the welcomer',
+      description: 'Set the channel for the farewell',
       type: SlashCommandOptionTypes.Subcommand,
       options: [
         {
           name: 'channel',
-          description: 'The channel for the welcomer',
+          description: 'The channel for the farewell',
           type: SlashCommandOptionTypes.Channel,
           required: true,
         },
@@ -104,7 +104,7 @@ export default class WelcomerCommand
     });
 
     const status = guildDB.configurations.find(
-      (config) => config.name === 'welcomer_enabled',
+      (config) => config.name === 'farewell_enabled',
     );
 
     if (status) {
@@ -112,15 +112,15 @@ export default class WelcomerCommand
       await this.db.guildConfigRepository.save(status);
     } else {
       await this.db.guildConfigRepository.save({
-        name: 'welcomer_enabled',
+        name: 'farewell_enabled',
         value: 'true',
         guild: guildDB,
       });
     }
 
     const embed = this.prepareEmbed({
-      title: 'Ririko Welcomer',
-      description: 'Welcomer has been enabled',
+      title: 'Ririko Farewell',
+      description: 'Farewell has been enabled',
       color: '#00ff00',
     });
 
@@ -137,7 +137,7 @@ export default class WelcomerCommand
     });
 
     const status = guildDB.configurations.find(
-      (config) => config.name === 'welcomer_enabled',
+      (config) => config.name === 'farewell_enabled',
     );
 
     if (status) {
@@ -145,15 +145,15 @@ export default class WelcomerCommand
       await this.db.guildConfigRepository.save(status);
     } else {
       await this.db.guildConfigRepository.save({
-        name: 'welcomer_enabled',
+        name: 'farewell_enabled',
         value: 'false',
         guild: guildDB,
       });
     }
 
     const embed = this.prepareEmbed({
-      title: 'Ririko Welcomer',
-      description: 'Welcomer has been disabled',
+      title: 'Ririko Farewell',
+      description: 'Farewell has been disabled',
       color: '#ff0000',
     });
 
@@ -175,7 +175,7 @@ export default class WelcomerCommand
 
     if (!isValidImage) {
       embed = this.prepareEmbed({
-        title: 'Ririko Welcomer',
+        title: 'Ririko Farewell',
         description: 'The URL provided is not an image',
         color: '#ff0000',
       });
@@ -192,7 +192,7 @@ export default class WelcomerCommand
     });
 
     const bgUrl = guildDB.configurations.find(
-      (config) => config.name === 'welcomer_bg',
+      (config) => config.name === 'farewell_bg',
     );
 
     if (bgUrl) {
@@ -200,14 +200,14 @@ export default class WelcomerCommand
       await this.db.guildConfigRepository.save(bgUrl);
     } else {
       await this.db.guildConfigRepository.save({
-        name: 'welcomer_bg',
+        name: 'farewell_bg',
         value: newURL,
         guild: guildDB,
       });
     }
 
     embed = this.prepareEmbed({
-      title: 'Ririko Welcomer',
+      title: 'Ririko Farewell',
       description: 'Background image has been set',
       color: '#00ff00',
     });
@@ -228,7 +228,7 @@ export default class WelcomerCommand
     });
 
     const channelID = guildDB.configurations.find(
-      (config) => config.name === 'welcomer_channel',
+      (config) => config.name === 'farewell_channel',
     );
 
     if (channelID) {
@@ -236,14 +236,14 @@ export default class WelcomerCommand
       await this.db.guildConfigRepository.save(channelID);
     } else {
       await this.db.guildConfigRepository.save({
-        name: 'welcomer_channel',
+        name: 'farewell_channel',
         value: newChannelID,
         guild: guildDB,
       });
     }
 
     const embed = this.prepareEmbed({
-      title: 'Ririko Welcomer',
+      title: 'Ririko Farewell',
       description: `Channel has been set to <#${newChannelID}>`,
       color: '#00ff00',
     });
@@ -259,13 +259,13 @@ export default class WelcomerCommand
     });
 
     const status = guildDB.configurations.find(
-      (config) => config.name === 'welcomer_enabled',
+      (config) => config.name === 'farewell_enabled',
     );
 
     if (!status) {
       const embed = this.prepareEmbed({
-        title: 'Ririko Welcomer',
-        description: 'Status: Welcomer is not enabled',
+        title: 'Ririko Farewell',
+        description: 'Status: Farewell is not enabled',
         color: '#ff0000',
       });
 
@@ -275,7 +275,7 @@ export default class WelcomerCommand
     }
 
     const channelID = guildDB.configurations.find(
-      (config) => config.name === 'welcomer_channel',
+      (config) => config.name === 'farewell_channel',
     );
 
     let channel;
@@ -284,9 +284,9 @@ export default class WelcomerCommand
     } catch (error) {
       console.error(error);
       const embed = this.prepareEmbed({
-        title: 'Ririko Welcomer',
+        title: 'Ririko Farewell',
         description:
-          'Status: Channel not found. Please set the channel again using /welcomer channel',
+          'Status: Channel not found. Please set the channel again using /farewell channel',
         color: '#ff0000',
       });
 
@@ -296,13 +296,13 @@ export default class WelcomerCommand
     }
 
     const bgUrl = guildDB.configurations.find(
-      (config) => config.name === 'welcomer_bg',
+      (config) => config.name === 'farewell_bg',
     );
 
     const isDefault = !bgUrl;
 
     const embed = this.prepareEmbed({
-      title: 'Ririko Welcomer',
+      title: 'Ririko Farewell',
       description: `Status: Enabled\nChannel: ${channel}\nBackground: ${
         isDefault ? 'Default' : bgUrl.value
       }`,
@@ -321,7 +321,7 @@ export default class WelcomerCommand
       .setThumbnail(this.client.user.displayAvatarURL())
       .setColor(params.color)
       .setFooter({
-        text: 'See the welcomer help entry for more info\nMade with ❤️ by Ririko',
+        text: 'See the farewell help entry for more info\nMade with ❤️ by Ririko',
       })
       .setTimestamp();
 
