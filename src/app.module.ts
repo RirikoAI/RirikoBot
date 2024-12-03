@@ -13,6 +13,8 @@ import { MusicModule } from '#music/music.module';
 import { DatabaseModule } from '#database/database.module';
 import { EconomyController } from '#economy/economy.controller';
 import { EconomyModule } from '#economy/economy.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TwitchModule } from '#twitch/twitch.module';
 
 /**
  * The main application module.
@@ -20,6 +22,7 @@ import { EconomyModule } from '#economy/economy.module';
  */
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, discordConfig],
@@ -32,6 +35,7 @@ import { EconomyModule } from '#economy/economy.module';
     MusicModule,
     DatabaseModule,
     EconomyModule,
+    TwitchModule,
   ],
   controllers: [RootController, EconomyController],
   providers: [RootService, ConfigService],
