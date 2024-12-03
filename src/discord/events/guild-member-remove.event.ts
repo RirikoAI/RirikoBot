@@ -8,7 +8,10 @@ export const GuildMemberRemoveEvent = (
   client: DiscordClient,
   commandService: CommandService,
 ) => {
-  client.on(Events.GuildMemberAdd, async (member: GuildMember) => {
+  client.on(Events.GuildMemberRemove, async (member: GuildMember) => {
+    console.log(
+      `Member has left the guild ${member.guild.name}: ${member.displayName}`,
+    );
     try {
       const guild = await commandService.db.guildRepository.findOne({
         where: {
@@ -26,13 +29,18 @@ export const GuildMemberRemoveEvent = (
 
       // get the channel id
       const channelID = guild?.configurations?.find(
-        (config) => config.name === 'farewell_channel',
+        (config) => config?.name === 'farewell_channel',
       );
 
       // get the channel
       const channel = member.guild.channels.cache.get(
         channelID.value,
       ) as GuildTextBasedChannel;
+
+      // get the background image
+      const bg = guild?.configurations?.find(
+        (config) => config?.name === 'farewell_bg',
+      );
 
       // send the message
       const welcomeCard = new WelcomeCard();
@@ -48,7 +56,7 @@ export const GuildMemberRemoveEvent = (
         borderColor: '#ff0000',
         borderColor2: '#970000',
         bubblesColor: 'rgba(255, 255, 255, 0.5)',
-        // backgroundImgURL: 'https://i.imgur.com/70gHapy.jpeg',
+        backgroundImgURL: bg?.value,
       });
 
       channel.send({

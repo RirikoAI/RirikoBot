@@ -34,6 +34,11 @@ export const GuildMemberAddEvent = (
         channelID.value,
       ) as GuildTextBasedChannel;
 
+      // get the background image
+      const bg = guild?.configurations?.find(
+        (config) => config?.name === 'welcomer_bg',
+      );
+
       // send the message
       const welcomeCard = new WelcomeCard();
       const buffer = await welcomeCard.generate({
@@ -43,7 +48,7 @@ export const GuildMemberAddEvent = (
           size: 512,
         }),
         welcomeText: 'Welcome',
-        // backgroundImgURL: 'https://i.imgur.com/70gHapy.jpeg',
+        backgroundImgURL: bg?.value,
       });
 
       channel.send({

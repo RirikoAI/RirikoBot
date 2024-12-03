@@ -26,7 +26,7 @@ export class WelcomeCard {
   canvas: Canvas;
   ctx: CanvasRenderingContext2D;
 
-  constructor(width: number = 800, height: number = 400) {
+  constructor(width: number = 800, height: number = 380) {
     this.canvas = createCanvas(width, height);
     this.ctx = this.canvas.getContext('2d');
   }
