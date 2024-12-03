@@ -280,11 +280,11 @@ export class CommandService {
         `[Ririko CommandService] └─ execution failed: ${error.message}`,
         error.stack,
       );
-      const errorEmbed = new EmbedBuilder()
-        .setTitle('❌ Slash Command Error')
-        .setColor('#ff0000')
-        .setDescription(error.message);
-      await interaction.reply({ embeds: [errorEmbed] });
+      // const errorEmbed = new EmbedBuilder()
+      //   .setTitle('❌ Slash Command Error')
+      //   .setColor('#ff0000')
+      //   .setDescription(error.message);
+      // await interaction.reply({ embeds: [errorEmbed] });
     }
   }
 }

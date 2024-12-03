@@ -8,6 +8,7 @@ import { Playlist } from '#database/entities/playlist.entity';
 import { Track } from '#database/entities/track.entity';
 import { VoiceChannel } from '#database/entities/voice-channel.entity';
 import { User } from '#database/entities/user.entity';
+import { GuildConfig } from '#database/entities/guild-config.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -24,5 +25,7 @@ export class DatabaseService {
     public voiceChannelRepository: Repository<VoiceChannel>,
     @InjectRepository(User)
     public userRepository: Repository<User>,
+    @InjectRepository(GuildConfig)
+    public guildConfigRepository: Repository<GuildConfig>,
   ) {}
 }

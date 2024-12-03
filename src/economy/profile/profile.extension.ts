@@ -3,7 +3,7 @@ import { EconomyExtension } from '#economy/extension.class';
 import { GuildTextBasedChannel, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { EconomyUtil } from '#util/economy/economy.util';
-import { Banner } from '#util/economy/banner.util';
+import { RankCard } from '#util/banner/rank-card.util';
 import { BadgesUtil } from '#util/discord/badges.util';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class ProfileExtension extends EconomyExtension {
       await message.deferReply();
     }
 
-    const banner = new Banner();
+    const banner = new RankCard();
     const buffer = await banner.generateBanner({
       displayName: user.displayName,
       avatarURL: user.displayAvatarURL({ extension: 'png', size: 512 }),

@@ -1,18 +1,26 @@
 import {
   Column,
   CreateDateColumn,
-  Entity, OneToMany,
+  Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
-import { Track } from "#database/entities/track.entity";
+import { Track } from '#database/entities/track.entity';
 
 /**
- * Voice Channel Entity
- * @description The voice channel entity represents a voice channel in the database.
- * @property {string} channelId - The channel ID.
- * @property {string} name - The channel name.
- * @property {string} guildId - The guild ID.
+ * Playlist entity
+ * @description The playlist entity represents a playlist in the database.
+ * @property {number} id - The playlist ID.
+ * @property {string} name - The playlist name.
+ * @property {string} userId - The user ID.
+ * @property {string} author - The playlist author.
+ * @property {string} authorTag - The playlist author tag.
+ * @property {boolean} public - The playlist public status.
+ * @property {number} plays - The playlist plays.
+ * @property {Date} createdAt - The playlist created date.
+ * @property {Date} updatedAt - The playlist updated date.
+ * @property {Track[]} tracks - The playlist tracks.
  *
  * @author Earnest Angel (https://angel.net.my)
  */
@@ -23,28 +31,28 @@ export class Playlist {
 
   @Column()
   name: string;
-  
+
   @Column()
   userId?: string;
-  
+
   @Column()
   author?: string;
-  
+
   @Column()
   authorTag?: string;
-  
+
   @Column()
   public?: boolean;
-  
+
   @Column()
   plays?: number;
-  
+
   @CreateDateColumn()
   createdAt: Date;
-  
+
   @UpdateDateColumn()
   updatedAt: Date;
-  
+
   @OneToMany(() => Track, (track) => track.playlist, {
     eager: true,
   })

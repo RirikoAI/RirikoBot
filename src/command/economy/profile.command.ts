@@ -5,6 +5,7 @@ import {
   DiscordMessage,
   SlashCommandOptionTypes,
 } from '#command/command.types';
+import { ImageUtil } from '#util/image/image.util';
 
 export default class ProfileCommand
   extends Command
@@ -59,22 +60,24 @@ export default class ProfileCommand
 
     switch (subcommand) {
       case 'set-banner':
+        await interaction.deferReply({
+          ephemeral: true,
+        });
+
         // get the url
         const url = interaction.options.getString('url', true);
         // check if the url is an image by checking the file content type
-        const isImage = await this.isImage(url);
+        const isImage = await ImageUtil.isImage(url);
         if (!isImage) {
-          await interaction.reply({
+          await interaction.editReply({
             content: 'The URL provided is not an image.',
-            ephemeral: true,
           });
           return;
         }
         await this.economy.setBackgroundImageURL(interaction.user, url);
         // send a message
-        await interaction.reply({
+        await interaction.editReply({
           content: 'Your banner has been set!',
-          ephemeral: true,
         });
 
         break;
@@ -93,11 +96,5 @@ export default class ProfileCommand
       interaction.channel,
       interaction,
     );
-  }
-
-  async isImage(url: string): Promise<boolean> {
-    const response = await fetch(url);
-    const contentType = response.headers.get('content-type');
-    return contentType?.startsWith('image');
   }
 }

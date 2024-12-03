@@ -9,7 +9,6 @@ import { ResponseDto } from './response.dto';
 @ApiTags('API')
 @Controller({
   path: '/',
-  version: '1',
 })
 @Controller()
 export class RootController {
@@ -20,7 +19,7 @@ export class RootController {
   })
   @HttpCode(HttpStatus.OK)
   @Get()
-  getHello(): { data: string } {
-    return this.appService.getHello();
+  getServiceInfo(): { data: string } {
+    return this.appService.getServiceInfo();
   }
 }

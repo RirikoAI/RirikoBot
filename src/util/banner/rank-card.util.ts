@@ -7,10 +7,7 @@ import {
   Image,
 } from 'canvas';
 
-/**
- * @typedef {Object} BannerUtilParams
- */
-export interface BannerUtilParams {
+export interface RankCardUtilParams {
   badges?: Image[]; // the urls of the badges
   presenceStatus: PresenceStatus;
   displayName: string;
@@ -30,7 +27,7 @@ export interface BannerUtilParams {
  * Banner Generator
  * @author Earnest Angel (https://angel.net.my)
  */
-export class Banner {
+export class RankCard {
   canvas: Canvas;
   ctx: CanvasRenderingContext2D;
 
@@ -39,7 +36,7 @@ export class Banner {
     this.ctx = this.canvas.getContext('2d');
   }
 
-  async generateBanner(params: BannerUtilParams) {
+  async generateBanner(params: RankCardUtilParams) {
     let formatter = Intl.NumberFormat('en', { notation: 'compact' });
 
     await this.drawBackground(params.backgroundColor);
@@ -69,9 +66,16 @@ export class Banner {
     return this.canvas.toBuffer('image/png');
   }
 
-  drawBackground(color: string = '#013943') {
+  drawBackground(
+    color1: string = 'rgba(61,255,243,0.74)',
+    color2: string = '#138ad3',
+  ) {
     const { ctx, canvas } = this;
-    ctx.fillStyle = color;
+    // make background gradient
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 

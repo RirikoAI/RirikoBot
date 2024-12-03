@@ -6,9 +6,13 @@ import { ResponseDto } from './response.dto';
  */
 @Injectable()
 export class RootService {
-  getHello(): ResponseDto {
+  getServiceInfo(): ResponseDto {
     return {
-      data: 'Hello World!',
+      data: {
+        name: process.env.npm_package_name,
+        version: process.env.npm_package_version,
+        env: process.env.NODE_ENV,
+      },
       success: true,
       statusCode: HttpStatus.OK,
     };

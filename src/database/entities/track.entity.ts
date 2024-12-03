@@ -1,12 +1,12 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Playlist } from "#database/entities/playlist.entity";
+import { Playlist } from '#database/entities/playlist.entity';
 
 /**
- * Voice Channel Entity
- * @description The voice channel entity represents a voice channel in the database.
- * @property {string} channelId - The channel ID.
- * @property {string} name - The channel name.
- * @property {string} guildId - The guild ID.
+ * Track entity
+ * @property {number} id - Track id
+ * @property {string} name - Track name
+ * @property {string} url - Track url
+ * @property {Playlist} playlist - Playlist entity
  *
  * @author Earnest Angel (https://angel.net.my)
  */
@@ -14,10 +14,10 @@ import { Playlist } from "#database/entities/playlist.entity";
 export class Track {
   @PrimaryGeneratedColumn()
   id: number;
-  
+
   @Column()
   name: string;
-  
+
   @Column()
   url: string;
 

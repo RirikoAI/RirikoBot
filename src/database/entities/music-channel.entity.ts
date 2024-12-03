@@ -2,13 +2,11 @@ import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Guild } from '#database/entities/guild.entity';
 
 /**
- * Voice Channel Entity
- * @description The voice channel entity represents a voice channel in the database.
- * @property {string} channelId - The channel ID.
- * @property {string} name - The channel name.
- * @property {string} guildId - The guild ID.
- *
- * @author Earnest Angel (https://angel.net.my)
+ * MusicChannel Entity
+ * @description A music channel entity that represents a music channel in a guild.
+ * @property {string} id The ID of the music channel.
+ * @property {string} name The name of the music channel.
+ * @property {Guild} guild The guild that the music channel belongs to.
  */
 @Entity()
 export class MusicChannel {
