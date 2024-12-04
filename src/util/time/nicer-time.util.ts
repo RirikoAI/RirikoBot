@@ -44,7 +44,18 @@ function getDateTime() {
     'Friday',
     'Saturday',
   ];
-  return `${weekday[new Date().getDay().toLocaleString()]} ${new Date().toLocaleString()} GMT+8`;
+  return `${weekday[new Date().getDay().toLocaleString()]}, ${new Date().toLocaleString(
+    'en-UK',
+    {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short',
+    },
+  )}`;
 }
 
 export default NicerTimeUtil;
