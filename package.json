@@ -39,7 +39,8 @@
     "migration:run": "cross-var npm run typeorm -- --dataSource=src/database/data-source.ts migration:run",
     "migration:revert": "cross-var npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert",
     "seed:create": "hygen seeds create",
-    "seed:run": "ts-node -r tsconfig-paths/register ./src/database/seeds/run-seed.ts"
+    "seed:run": "ts-node -r tsconfig-paths/register ./src/database/seeds/run-seed.ts",
+    "upgrade:bash": "sh scripts/bash-upgrade.sh"
   },
   "imports": {
     "#*": "./src/*"
