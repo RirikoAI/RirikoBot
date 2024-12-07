@@ -162,7 +162,7 @@ export default class HelpCommand extends Command implements CommandInterface {
 
   private categorizeCommands(commands: any): Map<string, any> {
     const categorizedCommands = new Map<string, CommandInterface[]>();
-
+    console.log('commands', commands);
     commands.forEach((command) => {
       if (!categorizedCommands.has(command.category)) {
         categorizedCommands.set(command.category, []);

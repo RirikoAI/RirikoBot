@@ -5,7 +5,11 @@ import { DiscordService } from '#discord/discord.service';
 import { Guild, TextChannel, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { SystemPrompt } from '#command/ai/system-prompt';
-import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+import {
+  SharedServicesMock,
+  TestSharedService,
+} from '../../../test/mocks/shared-services.mock';
+import ollama from 'ollama';
 
 describe('AiCommand', () => {
   let command: AiCommand;
@@ -184,6 +188,56 @@ describe('AiCommand', () => {
     it('should return system prompts', () => {
       const prompts = SystemPrompt;
       expect(prompts).toBeDefined();
+    });
+  });
+
+  describe('storePrompt', () => {
+    it('should store the new prompt for a user', () => {
+      const userId = '1234567890';
+      const newMessages = { role: 'user', content: 'new test prompt' } as any;
+
+      command.storePrompt(userId, newMessages);
+
+      expect(command.userPrompts).toEqual([
+        {
+          userId,
+          prompts: [newMessages],
+        },
+      ]);
+    });
+  });
+
+  describe('streamToChannel', () => {
+    it('should stream AI response to the channel', async () => {
+      const prompt = 'test prompt';
+      const userId = '1234567890';
+      const channelId = '1234567890';
+      const firstReply = { id: 'replyId' } as any;
+
+      const mockResponse = [
+        { message: { content: 'part 1' } },
+        { message: { content: 'part 2' } },
+        { message: { content: 'part 3' } },
+        { message: { content: 'part 4' } },
+      ];
+      command.client.channels.cache.get = jest
+        .fn()
+        .mockReturnValue(mockTextChannel);
+
+      jest.spyOn(ollama, 'chat').mockResolvedValue(mockResponse as any);
+      mockTextChannel.messages.fetch = jest.fn().mockResolvedValue(firstReply);
+      mockTextChannel.send = jest.fn().mockResolvedValue(firstReply);
+      firstReply.edit = jest.fn();
+
+      await (command as any).streamToChannel(
+        prompt,
+        userId,
+        channelId,
+        firstReply,
+      );
+
+      expect(firstReply.edit).toHaveBeenCalledTimes(1);
+      expect(firstReply.edit).toHaveBeenCalledWith('part 1part 2part 3part 4');
     });
   });
 });

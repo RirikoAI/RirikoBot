@@ -22,7 +22,7 @@ describe('InteractionCreateEvent', () => {
       on: jest.fn(),
     } as unknown as DiscordClient;
     const commandService = {
-      checkSlashCommand: jest.fn(),
+      checkInteractionCommand: jest.fn(),
     } as unknown as CommandService;
 
     InteractionCreateEvent(client, commandService);

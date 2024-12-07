@@ -131,4 +131,147 @@ describe('CommandService', () => {
       expect(result).toBe('!');
     });
   });
+
+  describe('checkButton', () => {
+    it('should execute a button command', async () => {
+      const interaction = {
+        customId: 'testButton',
+      } as unknown as DiscordInteraction;
+      const command = new Command(sharedServices);
+      command.buttons = {
+        testButton: jest.fn(),
+      };
+
+      CommandService['registeredCommands'] = [command];
+
+      await service.checkButton(interaction);
+
+      expect(command.buttons.testButton).toHaveBeenCalledWith(interaction);
+    });
+
+    it('should not execute if button command is not found', async () => {
+      const interaction = {
+        customId: 'unknownButton',
+      } as unknown as DiscordInteraction;
+      const command = new Command(sharedServices);
+      command.buttons = {
+        testButton: jest.fn(),
+      };
+
+      CommandService['registeredCommands'] = [command];
+
+      await service.checkButton(interaction);
+
+      expect(command.buttons.testButton).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('checkCliCommand', () => {
+    it('should execute a CLI command', async () => {
+      const input = 'test';
+      const command = new Command(sharedServices);
+      command.test = jest.fn().mockReturnValue(true);
+      command.runCli = jest.fn();
+
+      CommandService['registeredCommands'] = [command];
+
+      await service.checkCliCommand(input);
+
+      expect(command.test).toHaveBeenCalledWith(input);
+      expect(command.runCli).toHaveBeenCalledWith(input);
+    });
+
+    it('should not execute if CLI command is not found', async () => {
+      const input = 'unknown';
+      const command = new Command(sharedServices);
+      command.test = jest.fn().mockReturnValue(false);
+      command.runCli = jest.fn();
+
+      CommandService['registeredCommands'] = [command];
+
+      await service.checkCliCommand(input);
+
+      expect(command.test).toHaveBeenCalledWith(input);
+      expect(command.runCli).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getCommand', () => {
+    it('should return the command if found', () => {
+      const command = new Command(sharedServices);
+      command.name = 'test';
+
+      CommandService['registeredCommands'] = [command];
+
+      const result = service.getCommand('test');
+
+      expect(result).toBe(command);
+    });
+
+    it('should return undefined if command is not found', () => {
+      const command = new Command(sharedServices);
+      command.name = 'test';
+
+      CommandService['registeredCommands'] = [command];
+
+      const result = service.getCommand('unknown');
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getAllCommands', () => {
+    it('should return all registered commands', () => {
+      const command1 = new Command(sharedServices);
+      const command2 = new Command(sharedServices);
+
+      CommandService['registeredCommands'] = [command1, command2];
+
+      const result = service.getAllCommands;
+
+      expect(result).toEqual([command1, command2]);
+    });
+  });
+
+  describe('getPrefixCommands', () => {
+    it('should return all commands that run with a prefix', () => {
+      const command1 = new Command(sharedServices);
+      command1.runPrefix = jest.fn();
+      const command2 = new Command(sharedServices);
+
+      CommandService['registeredCommands'] = [command1, command2];
+
+      const result = service.getPrefixCommands;
+
+      expect(result).toEqual([command1]);
+    });
+  });
+
+  describe('getSlashCommands', () => {
+    it('should return all commands that run as slash commands', () => {
+      const command1 = new Command(sharedServices);
+      command1.runSlash = jest.fn();
+      const command2 = new Command(sharedServices);
+
+      CommandService['registeredCommands'] = [command1, command2];
+
+      const result = service.getSlashCommands;
+
+      expect(result).toEqual([command1]);
+    });
+  });
+
+  describe('getCliCommands', () => {
+    it('should return all commands that run as CLI commands', () => {
+      const command1 = new Command(sharedServices);
+      command1.runCli = jest.fn();
+      const command2 = new Command(sharedServices);
+
+      CommandService['registeredCommands'] = [command1, command2];
+
+      const result = service.getCliCommands;
+
+      expect(result).toEqual([command1]);
+    });
+  });
 });

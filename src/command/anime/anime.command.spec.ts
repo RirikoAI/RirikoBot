@@ -3,6 +3,8 @@ import AnimeCommand from '#command/anime/anime.command';
 import { DiscordMessage, DiscordInteraction } from '#command/command.types';
 import { CommandFeatures } from '#command/command.features';
 import { EmbedBuilder } from 'discord.js';
+import { Anime, JikanResults } from '#command/anime/jikan/jikan.types';
+import { JikanService } from '#command/anime/jikan/jikan.service';
 
 jest.mock('#command/anime/jikan/jikan.service');
 jest.mock('#command/command.features');
@@ -103,5 +105,41 @@ describe('AnimeCommand', () => {
     expect(mockInteraction.reply).toHaveBeenCalledWith(
       'Thank you for using the anime command! Made with ❤️ by Ririko',
     );
+  });
+
+  describe('searchAnime', () => {
+    it('should search for anime and create a menu', async () => {
+      const mockInteraction = createMock<DiscordInteraction>();
+      const mockAnimeData = [
+        { mal_id: 1, title: 'Naruto', genres: [{ name: 'Action' }] },
+      ];
+      jest
+        .spyOn(JikanService.prototype, 'searchAnime')
+        .mockResolvedValue({ data: mockAnimeData } as JikanResults<Anime>);
+      const createMenuSpy = jest
+        .spyOn(animeCommand, 'createMenu')
+        .mockResolvedValue({} as any);
+
+      await (animeCommand as any).searchAnime(mockInteraction, 'naruto');
+
+      expect(createMenuSpy).toHaveBeenCalled();
+    });
+
+    it('should handle follow-up search', async () => {
+      const mockInteraction = createMock<DiscordInteraction>();
+      const mockAnimeData = [
+        { mal_id: 1, title: 'Naruto', genres: [{ name: 'Action' }] },
+      ];
+      jest
+        .spyOn(JikanService.prototype, 'searchAnime')
+        .mockResolvedValue({ data: mockAnimeData } as JikanResults<Anime>);
+      const createMenuSpy = jest
+        .spyOn(animeCommand, 'createMenu')
+        .mockResolvedValue({} as any);
+
+      await (animeCommand as any).searchAnime(mockInteraction, 'naruto', true);
+
+      expect(createMenuSpy).toHaveBeenCalled();
+    });
   });
 });

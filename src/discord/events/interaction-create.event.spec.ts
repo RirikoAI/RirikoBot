@@ -17,12 +17,12 @@ describe('InteractionCreateEvent', () => {
     expect(InteractionCreateEvent).toHaveLength(2);
   });
 
-  it('should call checkSlashCommand command', async () => {
+  it('should call checkInteractionCommand command', async () => {
     const client = {
       on: jest.fn(),
     } as unknown as DiscordClient;
     const commandService = {
-      checkSlashCommand: jest.fn(),
+      checkInteractionCommand: jest.fn(),
     } as unknown as CommandService;
 
     InteractionCreateEvent(client, commandService);
@@ -51,7 +51,9 @@ describe('InteractionCreateEvent', () => {
       on: jest.fn(),
     } as unknown as DiscordClient;
     const commandService = {
-      checkSlashCommand: jest.fn().mockRejectedValue(new Error('Test error')),
+      checkInteractionCommand: jest
+        .fn()
+        .mockRejectedValue(new Error('Test error')),
     } as unknown as CommandService;
 
     InteractionCreateEvent(client, commandService);
