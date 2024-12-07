@@ -99,6 +99,9 @@ export class CommandService {
     for (const command of CommandService.registeredCommands) {
       if (command.test(message.content)) {
         command.setParams(message.content);
+
+        if (!command.runPrefix) continue;
+
         Logger.debug(
           `Received prefix command: ${message.content.substring(0, message.content.indexOf(' '))} Params: ${command.params.length > 0 ? command.params.join(', ') : 'None'}`,
           'Ririko CommandService',
@@ -131,7 +134,7 @@ export class CommandService {
    * @see InteractionCreateEvent
    * @param interaction
    */
-  async checkSlashCommand(interaction: DiscordInteraction) {
+  async checkInteractionCommand(interaction: DiscordInteraction) {
     // ignore if the commandName is undefined
     if (!interaction.commandName) return;
 
@@ -194,6 +197,20 @@ export class CommandService {
     }
   }
 
+  async checkCliCommand(input: string) {
+    // Loop through all registered commands and execute the first one that matches
+    for (const command of CommandService.registeredCommands) {
+      if (command.test(input)) {
+        if (command?.runCli) {
+          await command.runCli(input);
+          return command;
+        }
+      }
+    }
+
+    Logger.error(`CLI command not found: ${input}`, 'Ririko CommandService');
+  }
+
   getCommand(name: string): CommandInterface | undefined {
     return CommandService.registeredCommands.find(
       (command) => command.name === name,
@@ -213,6 +230,12 @@ export class CommandService {
   get getSlashCommands(): Command[] {
     return CommandService.registeredCommands.filter(
       (command) => command.runSlash,
+    );
+  }
+
+  get getCliCommands(): Command[] {
+    return CommandService.registeredCommands.filter(
+      (command) => command.runCli,
     );
   }
 
@@ -261,7 +284,7 @@ export class CommandService {
   /**
    * Execute a command that is a slash command.
    * @param command {CommandInterface}
-   * @param interaction {CommandInteraction}
+   * @param interaction {DiscordInteraction}
    * @private
    */
   private async runSlashCommand(
@@ -280,11 +303,11 @@ export class CommandService {
         `[Ririko CommandService] └─ execution failed: ${error.message}`,
         error.stack,
       );
-      // const errorEmbed = new EmbedBuilder()
-      //   .setTitle('❌ Slash Command Error')
-      //   .setColor('#ff0000')
-      //   .setDescription(error.message);
-      // await interaction.reply({ embeds: [errorEmbed] });
+      const errorEmbed = new EmbedBuilder()
+        .setTitle('❌ Slash Command Error')
+        .setColor('#ff0000')
+        .setDescription(error.message);
+      await interaction.channel.send({ embeds: [errorEmbed] });
     }
   }
 }

@@ -89,6 +89,10 @@ export default class PingCommand extends Command implements CommandInterface {
     });
   }
 
+  async runCli(input: string): Promise<void> {
+    console.log('Pong!');
+  }
+
   private calculateDelay(timestamp: number): number {
     return Math.abs(Date.now() - timestamp);
   }

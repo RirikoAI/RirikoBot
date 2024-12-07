@@ -24,7 +24,7 @@ export default class TestCommand extends Command implements CommandInterface {
       borderColor: '#00f400',
       borderColor2: '#003a00',
       bubblesColor: 'rgba(255, 255, 255, 0.5)',
-      // backgroundImgURL: 'https://i.imgur.com/70gHapy.jpeg',
+      backgroundImgURL: 'https://i.imgur.com/FvoaoLB.jpeg',
     });
 
     message.channel.send({

@@ -99,7 +99,7 @@ describe('CommandService', () => {
 
       CommandService['registeredCommands'] = [command];
 
-      await service.checkSlashCommand(interaction);
+      await service.checkInteractionCommand(interaction);
 
       expect(command.test).toHaveBeenCalledWith('test');
       expect(command.runSlash).toHaveBeenCalledWith(interaction);

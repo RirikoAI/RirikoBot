@@ -38,6 +38,8 @@ describe('InteractionCreateEvent', () => {
       Events.InteractionCreate,
       expect.any(Function),
     );
-    expect(commandService.checkSlashCommand).toHaveBeenCalledWith(interaction);
+    expect(commandService.checkInteractionCommand).toHaveBeenCalledWith(
+      interaction,
+    );
   });
 });

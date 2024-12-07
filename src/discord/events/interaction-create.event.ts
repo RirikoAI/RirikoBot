@@ -24,7 +24,7 @@ export const InteractionCreateEvent = (
           await commandService.checkButton(interaction);
           return;
         }
-        await commandService.checkSlashCommand(interaction);
+        await commandService.checkInteractionCommand(interaction);
       } catch (error) {
         Logger.error(error.message, error.stack);
         const errorEmbed = new EmbedBuilder()

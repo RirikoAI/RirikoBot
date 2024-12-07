@@ -27,4 +27,12 @@ export interface CommandInterface {
   runPrefix?(message: DiscordMessage): Promise<any>;
 
   runSlash?(interaction: DiscordInteraction): Promise<any>;
+
+  runChatMenu?(interaction: DiscordInteraction): Promise<any>;
+
+  runUserMenu?(interaction: DiscordInteraction): Promise<any>;
+
+  runChatMenu?(interaction: DiscordInteraction): Promise<any>;
+
+  runCli?(input: string): Promise<any>;
 }

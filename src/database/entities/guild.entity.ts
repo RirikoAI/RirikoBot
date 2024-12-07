@@ -2,6 +2,8 @@ import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { VoiceChannel } from '#database/entities/voice-channel.entity';
 import { MusicChannel } from '#database/entities/music-channel.entity';
 import { GuildConfig } from '#database/entities/guild-config.entity';
+import { StreamNotification } from '#database/entities/stream-notification.entity';
+import { StreamSubscription } from '#database/entities/stream-subscription.entity';
 
 /**
  * Guild Entity
@@ -33,4 +35,16 @@ export class Guild {
     eager: true,
   })
   configurations: GuildConfig[];
+
+  @OneToMany(
+    () => StreamNotification,
+    (streamNotification) => streamNotification.guild,
+  )
+  streamNotifications: StreamNotification[];
+
+  @OneToMany(
+    () => StreamSubscription,
+    (streamSubscription) => streamSubscription.guild,
+  )
+  streamSubscriptions: StreamSubscription[];
 }

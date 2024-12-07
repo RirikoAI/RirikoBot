@@ -34,7 +34,7 @@ describe('InteractionCreateEvent', () => {
         send: jest.fn(),
       },
       isButton: jest.fn().mockReturnValue(false),
-      commandName: 'testCommand'
+      commandName: 'testCommand',
     } as any as DiscordInteraction;
     const eventHandler = client.on.mock.calls[0][1];
     await eventHandler(interaction);
@@ -43,7 +43,7 @@ describe('InteractionCreateEvent', () => {
       Events.InteractionCreate,
       expect.any(Function),
     );
-    expect(commandService.checkSlashCommand).toBeDefined();
+    expect(commandService.checkInteractionCommand).toBeDefined();
   });
 
   it('should catch and log error', async () => {
@@ -63,7 +63,7 @@ describe('InteractionCreateEvent', () => {
         send: jest.fn(),
       },
       isButton: jest.fn().mockReturnValue(false),
-      commandName: 'testCommand'
+      commandName: 'testCommand',
     } as unknown as DiscordInteraction;
     const eventHandler = client.on.mock.calls[0][1];
     await eventHandler(interaction);
@@ -72,6 +72,6 @@ describe('InteractionCreateEvent', () => {
       Events.InteractionCreate,
       expect.any(Function),
     );
-    expect(commandService.checkSlashCommand).toBeDefined();
+    expect(commandService.checkInteractionCommand).toBeDefined();
   });
 });
