@@ -21,7 +21,11 @@ jobs:
           path: test-results
       - store_artifacts:
           path: coverage
-      - codecov/upload
+      - run:
+          command: rm -rf ./coverage/clover.xml
+          name: Remove clover.xml
+      - codecov/upload:
+          file: './coverage/lcov.info'
 
 workflows:
   test_my_app:
