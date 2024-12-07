@@ -22,7 +22,7 @@ describe('InteractionCreateEvent', () => {
       on: jest.fn(),
     } as unknown as DiscordClient;
     const commandService = {
-      checkSlashCommand: jest.fn(),
+      checkInteractionCommand: jest.fn(),
     } as unknown as CommandService;
 
     InteractionCreateEvent(client, commandService);
@@ -38,6 +38,8 @@ describe('InteractionCreateEvent', () => {
       Events.InteractionCreate,
       expect.any(Function),
     );
-    expect(commandService.checkSlashCommand).toHaveBeenCalledWith(interaction);
+    expect(commandService.checkInteractionCommand).toHaveBeenCalledWith(
+      interaction,
+    );
   });
 });

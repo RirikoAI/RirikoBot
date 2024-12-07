@@ -6,7 +6,7 @@
 
 ## Description
 
-Ririko AI BETA (Still in development). Please use Node 20 LTS
+Ririko AI BETA (Still in development). Please use Node 20 LTS.
 
 ## Project setup
 

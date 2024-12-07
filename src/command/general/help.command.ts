@@ -7,6 +7,7 @@ import {
   DiscordMessage,
   SlashCommandOptionTypes,
 } from '#command/command.types';
+import { CliHelpUtil } from '#util/command/cli-help.util';
 
 /**
  * Help command
@@ -70,6 +71,31 @@ export default class HelpCommand extends Command implements CommandInterface {
     }
 
     await interaction.reply({ embeds: [embed] });
+  }
+
+  async runCli(input: string): Promise<void> {
+    const params = input.split(' ').slice(1);
+    // check all commands which have the runCli method
+    const commands = this.services.commandService.getCliCommands;
+
+    if (params.length === 0) {
+      let table = [];
+      commands.forEach((command) => {
+        table.push({
+          name: command.name,
+          description: command.description,
+          usageExamples: command.usageExamples.join(' | '),
+        });
+      });
+
+      CliHelpUtil.table(table);
+    } else {
+      // check help entry to params[0]
+      const command = this.services.commandService.getCommand(params[0]);
+      if (!command) return;
+      console.log(`${command.description}\n`);
+      console.log(`Usage: ${command.usageExamples.join(' | ')}`);
+    }
   }
 
   private createHelpEmbed(
@@ -136,7 +162,7 @@ export default class HelpCommand extends Command implements CommandInterface {
 
   private categorizeCommands(commands: any): Map<string, any> {
     const categorizedCommands = new Map<string, CommandInterface[]>();
-
+    console.log('commands', commands);
     commands.forEach((command) => {
       if (!categorizedCommands.has(command.category)) {
         categorizedCommands.set(command.category, []);

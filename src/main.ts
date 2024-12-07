@@ -5,6 +5,7 @@ import { Logger } from '@nestjs/common';
 import { DiscordService } from '#discord/discord.service';
 import { CommandService } from '#command/command.service';
 import { ConfigService } from '@nestjs/config';
+import { CliService } from '#cli/cli.service';
 
 /**
  * Main function to bootstrap RiriKo AI
@@ -16,6 +17,7 @@ export async function bootstrap() {
   const configService = app.get(ConfigService);
   const discordService = app.get(DiscordService);
   const commandService = app.get(CommandService);
+  const cliService = app.get(CliService);
 
   const documentFactory = () =>
     SwaggerModule.createDocument(
@@ -36,6 +38,7 @@ export async function bootstrap() {
       `Server listening on port ${configService.get('app.port')}`,
       'Ririko Main',
     );
+    await cliService.start();
   });
 }
 

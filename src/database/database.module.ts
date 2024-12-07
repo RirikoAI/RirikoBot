@@ -25,6 +25,6 @@ export const entities = Object.values(entitiesRequire).map((entity) => {
     TypeOrmModule.forFeature(entities),
   ],
   providers: [DatabaseService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, DatabaseService],
 })
 export class DatabaseModule {}

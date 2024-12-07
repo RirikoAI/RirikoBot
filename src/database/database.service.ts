@@ -9,6 +9,10 @@ import { Track } from '#database/entities/track.entity';
 import { VoiceChannel } from '#database/entities/voice-channel.entity';
 import { User } from '#database/entities/user.entity';
 import { GuildConfig } from '#database/entities/guild-config.entity';
+import { Configuration } from '#database/entities/configuration.entity';
+import { StreamSubscription } from '#database/entities/stream-subscription.entity';
+import { StreamNotification } from '#database/entities/stream-notification.entity';
+import { TwitchStreamer } from '#database/entities/twitch-streamer.entity';
 
 @Injectable()
 export class DatabaseService {
@@ -27,5 +31,13 @@ export class DatabaseService {
     public userRepository: Repository<User>,
     @InjectRepository(GuildConfig)
     public guildConfigRepository: Repository<GuildConfig>,
+    @InjectRepository(Configuration)
+    public configRepository: Repository<Configuration>,
+    @InjectRepository(StreamSubscription)
+    public streamSubscriptionRepository: Repository<StreamSubscription>,
+    @InjectRepository(StreamNotification)
+    public streamNotificationRepository: Repository<StreamNotification>,
+    @InjectRepository(TwitchStreamer)
+    public twitchStreamerRepository: Repository<TwitchStreamer>,
   ) {}
 }

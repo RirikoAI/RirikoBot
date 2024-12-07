@@ -216,6 +216,12 @@ export class Command extends CommandFeatures {
   async runChatMenu?(interaction: DiscordInteraction): Promise<any>;
 
   /**
+   * A function that will be called when the command is run in the CLI
+   * @param input {string}
+   */
+  async runCli?(input: string): Promise<any>;
+
+  /**
    * Helper function to set the parameters of the command currently being run
    * @param content
    */

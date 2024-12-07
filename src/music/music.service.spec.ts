@@ -101,7 +101,8 @@ describe('MusicService', () => {
 
     service = module.get<MusicService>(MusicService);
     discordService = module.get<DiscordService>(DiscordService);
-    musicChannelRepository = module.get<DatabaseService>(DatabaseService).musicChannelRepository;
+    musicChannelRepository =
+      module.get<DatabaseService>(DatabaseService).musicChannelRepository;
     await service.createPlayer();
   });
 
@@ -511,7 +512,8 @@ describe('MusicService', () => {
 
       service = module.get<MusicService>(MusicService);
       discordService = module.get<DiscordService>(DiscordService);
-      musicChannelRepository = module.get<DatabaseService>(DatabaseService).musicChannelRepository;
+      musicChannelRepository =
+        module.get<DatabaseService>(DatabaseService).musicChannelRepository;
 
       interaction = {
         guild: { id: '1000000001112223334' },
@@ -574,7 +576,8 @@ describe('MusicService', () => {
 
       service = module.get<MusicService>(MusicService);
       discordService = module.get<DiscordService>(DiscordService);
-      musicChannelRepository = module.get<DatabaseService>(DatabaseService).musicChannelRepository;
+      musicChannelRepository =
+        module.get<DatabaseService>(DatabaseService).musicChannelRepository;
 
       channel = {
         guild: { id: '1000000001112223334' },
@@ -831,6 +834,106 @@ describe('MusicService', () => {
 
       expect(mockTextChannel.messages.fetch).not.toHaveBeenCalled();
       expect(service.sendEmbed).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('stopMusic', () => {
+    let interaction: any;
+
+    beforeEach(() => {
+      interaction = {
+        guildId: '1000000001112223334',
+        channel: { send: jest.fn() },
+      };
+
+      service.distube = {
+        stop: jest.fn(),
+      };
+
+      service.stopTrackingMusic = jest.fn();
+      service.clearPlayer = jest.fn();
+    });
+
+    it('should stop tracking music and clear the player', async () => {
+      await service.stopMusic(interaction);
+
+      expect(service.stopTrackingMusic).toHaveBeenCalledWith(
+        '1000000001112223334',
+      );
+      expect(service.distube.stop).toHaveBeenCalledWith('1000000001112223334');
+      expect(service.clearPlayer).toHaveBeenCalledWith(interaction.channel);
+    });
+
+    it('should handle errors gracefully', async () => {
+      service.distube.stop.mockImplementation(() => {
+        throw new Error('test error');
+      });
+
+      await expect(service.stopMusic(interaction)).resolves.not.toThrow();
+      expect(service.clearPlayer).toHaveBeenCalledWith(interaction.channel);
+    });
+  });
+
+  describe('handleMusic', () => {
+    let message: any;
+    let guild: any;
+    let musicChannel: any;
+
+    beforeEach(() => {
+      message = {
+        guild: { id: '1000000001112223334' },
+        channel: { id: '456', send: jest.fn() },
+        member: { voice: { channel: {} } },
+        content: '!play test song',
+      };
+
+      guild = { prefix: '!' };
+      musicChannel = { id: '456' };
+
+      service.db.guildRepository.findOne = jest.fn().mockResolvedValue(guild);
+      service.db.musicChannelRepository.findOne = jest
+        .fn()
+        .mockResolvedValue(musicChannel);
+      service.distube = {
+        play: jest.fn(),
+      };
+    });
+
+    it('should play music if the message is sent in a music channel', async () => {
+      message = {
+        content: 'some music',
+        startWith: true,
+        guild: { id: '1000000001112223334' },
+        channel: { id: '456', send: jest.fn() },
+        member: { voice: { channel: {} } },
+      };
+
+      await service.handleMusic(message);
+
+      expect(service.distube.play).toHaveBeenCalled();
+    });
+
+    it('should not play music if the message is not sent in a music channel', async () => {
+      service.db.musicChannelRepository.findOne = jest
+        .fn()
+        .mockResolvedValue(null);
+
+      await service.handleMusic(message);
+
+      expect(service.distube.play).not.toHaveBeenCalled();
+    });
+
+    it('should not play music if the message starts with the guild prefix', async () => {
+      message = {
+        content: '!a',
+        startWith: false,
+        guild: { id: '1000000001112223334' },
+        channel: { id: '456', send: jest.fn() },
+      };
+
+      await service.handleMusic(message);
+
+      expect(service.distube.play).not.toHaveBeenCalled();
     });
   });
 });

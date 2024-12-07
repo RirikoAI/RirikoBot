@@ -105,6 +105,9 @@ const instantiateCommands = (
     if (commandInstance.runChatMenu) {
       types.push('chatMenu');
     }
+    if (commandInstance.runCli) {
+      types.push('cli');
+    }
 
     Logger.log(
       `${commandInstance.name} registered (${types.join(',')}) => ${commandInstance.description}`,

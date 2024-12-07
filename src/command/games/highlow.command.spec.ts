@@ -1,10 +1,13 @@
-import {Test, TestingModule} from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import HighLowCommand from './highlow.command';
-import {CommandService} from '#command/command.service';
-import {DiscordService} from '#discord/discord.service';
-import {Guild, User} from 'discord.js';
-import {DiscordInteraction, DiscordMessage} from '#command/command.types';
-import {SharedServicesMock, TestSharedService} from '../../../test/mocks/shared-services.mock';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { Guild, User } from 'discord.js';
+import { DiscordInteraction, DiscordMessage } from '#command/command.types';
+import {
+  SharedServicesMock,
+  TestSharedService,
+} from '../../../test/mocks/shared-services.mock';
 
 describe('HighLowCommand', () => {
   let command: HighLowCommand;
@@ -72,6 +75,89 @@ describe('HighLowCommand', () => {
 
       expect(mockMessage.reply).toHaveBeenCalled();
     });
+
+    it('should handle higher guess correctly', async () => {
+      const mockMessage = {
+        guild: mockGuild,
+        author: mockUser,
+        reply: jest.fn(),
+        channel: {
+          createMessageCollector: jest
+            .fn()
+            .mockImplementation(({ filter, time, max }) => {
+              return {
+                on: (event, callback) => {
+                  if (event === 'collect') {
+                    callback({
+                      content: 'higher',
+                      author: mockUser,
+                      reply: jest.fn(),
+                    });
+                  }
+                },
+              };
+            }),
+        },
+      } as unknown as DiscordMessage;
+
+      await command.runPrefix(mockMessage);
+
+      expect(mockMessage.reply).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle lower guess correctly', async () => {
+      const mockMessage = {
+        guild: mockGuild,
+        author: mockUser,
+        reply: jest.fn(),
+        channel: {
+          createMessageCollector: jest
+            .fn()
+            .mockImplementation(({ filter, time, max }) => {
+              return {
+                on: (event, callback) => {
+                  if (event === 'collect') {
+                    callback({
+                      content: 'lower',
+                      author: mockUser,
+                      reply: jest.fn(),
+                    });
+                  }
+                },
+              };
+            }),
+        },
+      } as unknown as DiscordMessage;
+
+      await command.runPrefix(mockMessage);
+
+      expect(mockMessage.reply).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle timeout correctly', async () => {
+      const mockMessage = {
+        guild: mockGuild,
+        author: mockUser,
+        reply: jest.fn(),
+        channel: {
+          createMessageCollector: jest
+            .fn()
+            .mockImplementation(({ filter, time, max }) => {
+              return {
+                on: (event, callback) => {
+                  if (event === 'end') {
+                    callback([], 'time');
+                  }
+                },
+              };
+            }),
+        },
+      } as unknown as DiscordMessage;
+
+      await command.runPrefix(mockMessage);
+
+      expect(mockMessage.reply).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('runSlash', () => {
@@ -90,6 +176,89 @@ describe('HighLowCommand', () => {
       await command.runSlash(mockInteraction);
 
       expect(mockInteraction.reply).toHaveBeenCalled();
+    });
+
+    it('should handle higher guess correctly', async () => {
+      const mockInteraction = {
+        guild: mockGuild,
+        user: mockUser,
+        reply: jest.fn(),
+        channel: {
+          createMessageCollector: jest
+            .fn()
+            .mockImplementation(({ filter, time, max }) => {
+              return {
+                on: (event, callback) => {
+                  if (event === 'collect') {
+                    callback({
+                      content: 'higher',
+                      author: mockUser,
+                      reply: jest.fn(),
+                    });
+                  }
+                },
+              };
+            }),
+        },
+      } as unknown as DiscordInteraction;
+
+      await command.runSlash(mockInteraction);
+
+      expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle lower guess correctly', async () => {
+      const mockInteraction = {
+        guild: mockGuild,
+        user: mockUser,
+        reply: jest.fn(),
+        channel: {
+          createMessageCollector: jest
+            .fn()
+            .mockImplementation(({ filter, time, max }) => {
+              return {
+                on: (event, callback) => {
+                  if (event === 'collect') {
+                    callback({
+                      content: 'lower',
+                      author: mockUser,
+                      reply: jest.fn(),
+                    });
+                  }
+                },
+              };
+            }),
+        },
+      } as unknown as DiscordInteraction;
+
+      await command.runSlash(mockInteraction);
+
+      expect(mockInteraction.reply).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle timeout correctly', async () => {
+      const mockInteraction = {
+        guild: mockGuild,
+        user: mockUser,
+        reply: jest.fn(),
+        channel: {
+          createMessageCollector: jest
+            .fn()
+            .mockImplementation(({ filter, time, max }) => {
+              return {
+                on: (event, callback) => {
+                  if (event === 'end') {
+                    callback([], 'time');
+                  }
+                },
+              };
+            }),
+        },
+      } as unknown as DiscordInteraction;
+
+      await command.runSlash(mockInteraction);
+
+      expect(mockInteraction.reply).toHaveBeenCalledTimes(2);
     });
   });
 });

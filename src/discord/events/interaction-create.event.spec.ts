@@ -17,12 +17,12 @@ describe('InteractionCreateEvent', () => {
     expect(InteractionCreateEvent).toHaveLength(2);
   });
 
-  it('should call checkSlashCommand command', async () => {
+  it('should call checkInteractionCommand command', async () => {
     const client = {
       on: jest.fn(),
     } as unknown as DiscordClient;
     const commandService = {
-      checkSlashCommand: jest.fn(),
+      checkInteractionCommand: jest.fn(),
     } as unknown as CommandService;
 
     InteractionCreateEvent(client, commandService);
@@ -34,7 +34,7 @@ describe('InteractionCreateEvent', () => {
         send: jest.fn(),
       },
       isButton: jest.fn().mockReturnValue(false),
-      commandName: 'testCommand'
+      commandName: 'testCommand',
     } as any as DiscordInteraction;
     const eventHandler = client.on.mock.calls[0][1];
     await eventHandler(interaction);
@@ -43,7 +43,7 @@ describe('InteractionCreateEvent', () => {
       Events.InteractionCreate,
       expect.any(Function),
     );
-    expect(commandService.checkSlashCommand).toBeDefined();
+    expect(commandService.checkInteractionCommand).toBeDefined();
   });
 
   it('should catch and log error', async () => {
@@ -51,7 +51,9 @@ describe('InteractionCreateEvent', () => {
       on: jest.fn(),
     } as unknown as DiscordClient;
     const commandService = {
-      checkSlashCommand: jest.fn().mockRejectedValue(new Error('Test error')),
+      checkInteractionCommand: jest
+        .fn()
+        .mockRejectedValue(new Error('Test error')),
     } as unknown as CommandService;
 
     InteractionCreateEvent(client, commandService);
@@ -63,7 +65,7 @@ describe('InteractionCreateEvent', () => {
         send: jest.fn(),
       },
       isButton: jest.fn().mockReturnValue(false),
-      commandName: 'testCommand'
+      commandName: 'testCommand',
     } as unknown as DiscordInteraction;
     const eventHandler = client.on.mock.calls[0][1];
     await eventHandler(interaction);
@@ -72,6 +74,6 @@ describe('InteractionCreateEvent', () => {
       Events.InteractionCreate,
       expect.any(Function),
     );
-    expect(commandService.checkSlashCommand).toBeDefined();
+    expect(commandService.checkInteractionCommand).toBeDefined();
   });
 });
