@@ -14,4 +14,14 @@ export class Configuration {
     nullable: true,
   })
   twitchClientSecret: string;
+
+  @Column({
+    nullable: true,
+  })
+  stableDiffusionType: string;
+
+  @Column({
+    nullable: true,
+  })
+  stableDiffusionApiToken: string;
 }

@@ -6,14 +6,19 @@ import {
 } from '#command/command.types';
 import { EmbedBuilder } from 'discord.js';
 import { GuildConfig } from '#database/entities/guild-config.entity';
-import ollama from 'ollama';
 
-export default class ModelCommand extends Command implements CommandInterface {
-  name = 'model';
-  description = 'Set the AI model to use';
-  category = 'ai';
-  regex = new RegExp('^model$|^model ', 'i');
-  usageExamples = ['model set <model>', 'model pull'];
+export default class StableDiffusionModelCommand
+  extends Command
+  implements CommandInterface
+{
+  name = 'stablediffusion-model';
+  description = 'Set the StableDiffusion model to use';
+  category = 'stablediffusion';
+  regex = new RegExp('^stablediffusion-model$|^stablediffusion-model ', 'i');
+  usageExamples = [
+    'stablediffusion-model',
+    'stablediffusion-model set <model>',
+  ];
 
   slashOptions = [
     {
@@ -24,15 +29,11 @@ export default class ModelCommand extends Command implements CommandInterface {
         {
           type: SlashCommandOptionTypes.String,
           name: 'model',
-          description: 'The model to set',
+          description:
+            'The model to set (looks something like stability-ai/stable-diffusion or luma/photon)',
           required: true,
         },
       ],
-    },
-    {
-      type: SlashCommandOptionTypes.Subcommand,
-      name: 'pull',
-      description: 'Pull the model that is set in the database',
     },
   ];
 
@@ -58,24 +59,15 @@ export default class ModelCommand extends Command implements CommandInterface {
       }
 
       await message.reply({
-        embeds: [
-          this.prepareEmbed(
-            `Model set to: ${model}. Don't forget to run /model pull if you haven't downloaded the model yet.`,
-            false,
-          ),
-        ],
+        embeds: [this.prepareEmbed(`Model set to: ${model}.`, false)],
       });
-    } else if (subcommand === 'pull') {
-      const reply = await message.reply('Pulling model...');
-
-      const response = await this.pullModel(message.guild.id);
-      for await (const part of response) {
-        await reply.edit(`Status: ${part.status}`);
-      }
     } else {
       await message.reply({
         embeds: [
-          this.prepareEmbed('No subcommand provided. See /help model', true),
+          this.prepareEmbed(
+            'No subcommand provided. See /help stablediffusion-model',
+            true,
+          ),
         ],
       });
     }
@@ -95,19 +87,17 @@ export default class ModelCommand extends Command implements CommandInterface {
       }
 
       await interaction.reply({
+        embeds: [this.prepareEmbed(`Model set to: ${model}.`, false)],
+      });
+    } else {
+      await interaction.reply({
         embeds: [
           this.prepareEmbed(
-            `Model set to: ${model}. Don't forget to run /model pull if you haven't downloaded the model yet.`,
-            false,
+            'No subcommand provided. See /help stablediffusion-model',
+            true,
           ),
         ],
       });
-    } else if (subcommand === 'pull') {
-      await interaction.deferReply();
-      const response = await this.pullModel(interaction.guild.id);
-      for await (const part of response) {
-        await interaction.editReply(`Status: ${part.status}`);
-      }
     }
   }
 
@@ -117,16 +107,16 @@ export default class ModelCommand extends Command implements CommandInterface {
         where: { id: guild.id },
       });
 
-      const modelDB = guildDB.configurations.find(
-        (config) => config.name === 'ai_model',
+      let modelDB = guildDB.configurations.find(
+        (config) => config.name === 'stablediffusion_model',
       );
 
       if (modelDB) {
         modelDB.value = model;
-        await this.db.guildConfigRepository.save(modelDB);
+        modelDB = await this.db.guildConfigRepository.save(modelDB);
       } else {
-        await this.db.guildConfigRepository.save({
-          name: 'ai_model',
+        modelDB = await this.db.guildConfigRepository.save({
+          name: 'stablediffusion_model',
           value: model,
           guild: guildDB,
         });
@@ -136,28 +126,6 @@ export default class ModelCommand extends Command implements CommandInterface {
     } catch (error) {
       console.error(error);
       return null;
-    }
-  }
-
-  async pullModel(guildId) {
-    const guildDB = await this.db.guildRepository.findOne({
-      where: { id: guildId },
-    });
-
-    const model = guildDB.configurations.find(
-      (config) => config.name === 'ai_model',
-    );
-
-    if (model) {
-      return ollama.pull({
-        model: model.value,
-        stream: true,
-      });
-    } else {
-      return ollama.pull({
-        model: 'llama3.2:1b',
-        stream: true,
-      });
     }
   }
 

@@ -1,8 +1,8 @@
-import SetupApiCommand from './setup-api.command';
+import SetupTwitchApiCommand from './setup-twitch-api.command';
 import { Logger } from '@nestjs/common';
 
 describe('SetupApiCommand', () => {
-  let command: SetupApiCommand;
+  let command: SetupTwitchApiCommand;
   let mockDb: any;
 
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe('SetupApiCommand', () => {
       },
     };
 
-    command = new SetupApiCommand(jest.fn() as any);
+    command = new SetupTwitchApiCommand(jest.fn() as any);
     command.db = mockDb;
   });
 
