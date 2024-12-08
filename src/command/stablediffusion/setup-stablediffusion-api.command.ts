@@ -1,25 +1,24 @@
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
-import { Logger } from '@nestjs/common';
 
-export default class SetupApiCommand
+export default class SetupStableDiffusionApiCommand
   extends Command
   implements CommandInterface
 {
-  name = 'setup-twitch-api';
-  regex = new RegExp('^setup-twitch-api$|^setup-twitch-api ', 'i');
-  description = 'Setup Twitch API';
-  category = 'twitch';
-  usageExamples = [
-    'setup-twitch-api --client-id <client-id> --client-secret <client-secret>',
-  ];
+  name = 'setup-stablediffusion-api';
+  regex = new RegExp(
+    '^setup-stablediffusion-api$|^setup-stablediffusion-api ',
+    'i',
+  );
+  description = 'Setup StableDiffusion API';
+  category = 'stablediffusion';
+  usageExamples = ['setup-stablediffusion-api --api-token <api-token>'];
 
   async runCli(input: string): Promise<any> {
     const args = this.parseCliArgs(input);
-
-    if (!args['client-id'] || !args['client-secret']) {
-      Logger.error(
-        'Client ID and Client Secret are required\n   Example: setup-twitch-api --client-id <client-id> --client-secret <client-secret>',
+    if (!args['api-token']) {
+      console.error(
+        'API Token is required\n   Example: setup-stablediffusion-api --api-token <api-token>',
       );
       return;
     }
@@ -33,16 +32,14 @@ export default class SetupApiCommand
     if (!config) {
       await this.db.configRepository.create({
         applicationId: process.env.DISCORD_APPLICATION_ID,
-        twitchClientId: args['client-id'],
-        twitchClientSecret: args['client-secret'],
+        stableDiffusionApiToken: args['api-token'],
       });
     } else {
-      config.twitchClientId = args['client-id'];
-      config.twitchClientSecret = args['client-secret'];
+      config.stableDiffusionApiToken = args['api-token'];
       await this.db.configRepository.save(config);
     }
 
-    console.log('Twitch API has been set for this bot: ');
+    console.log('StableDiffusion API has been set for this bot: ');
     console.log(args);
   }
 

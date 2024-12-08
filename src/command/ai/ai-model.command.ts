@@ -8,12 +8,15 @@ import { EmbedBuilder } from 'discord.js';
 import { GuildConfig } from '#database/entities/guild-config.entity';
 import ollama from 'ollama';
 
-export default class ModelCommand extends Command implements CommandInterface {
-  name = 'model';
+export default class AiModelCommand
+  extends Command
+  implements CommandInterface
+{
+  name = 'ai-model';
   description = 'Set the AI model to use';
   category = 'ai';
-  regex = new RegExp('^model$|^model ', 'i');
-  usageExamples = ['model set <model>', 'model pull'];
+  regex = new RegExp('^ai-model$|^ai-model ', 'i');
+  usageExamples = ['ai-model', 'ai-model set <model>', 'ai-model pull'];
 
   slashOptions = [
     {
@@ -60,7 +63,7 @@ export default class ModelCommand extends Command implements CommandInterface {
       await message.reply({
         embeds: [
           this.prepareEmbed(
-            `Model set to: ${model}. Don't forget to run /model pull if you haven't downloaded the model yet.`,
+            `Model set to: ${model}. Don't forget to run /ai-model pull if you haven't downloaded the model yet.`,
             false,
           ),
         ],
@@ -75,7 +78,7 @@ export default class ModelCommand extends Command implements CommandInterface {
     } else {
       await message.reply({
         embeds: [
-          this.prepareEmbed('No subcommand provided. See /help model', true),
+          this.prepareEmbed('No subcommand provided. See /help ai-model', true),
         ],
       });
     }
@@ -97,7 +100,7 @@ export default class ModelCommand extends Command implements CommandInterface {
       await interaction.reply({
         embeds: [
           this.prepareEmbed(
-            `Model set to: ${model}. Don't forget to run /model pull if you haven't downloaded the model yet.`,
+            `Model set to: ${model}. Don't forget to run /ai-model pull if you haven't downloaded the model yet.`,
             false,
           ),
         ],
@@ -117,15 +120,15 @@ export default class ModelCommand extends Command implements CommandInterface {
         where: { id: guild.id },
       });
 
-      const modelDB = guildDB.configurations.find(
+      let modelDB = guildDB.configurations.find(
         (config) => config.name === 'ai_model',
       );
 
       if (modelDB) {
         modelDB.value = model;
-        await this.db.guildConfigRepository.save(modelDB);
+        modelDB = await this.db.guildConfigRepository.save(modelDB);
       } else {
-        await this.db.guildConfigRepository.save({
+        modelDB = await this.db.guildConfigRepository.save({
           name: 'ai_model',
           value: model,
           guild: guildDB,

@@ -208,11 +208,6 @@ export class MusicService {
     // check if the message has a prefix
     const prefix = guild.prefix;
 
-    console.log(
-      'message.content.startsWith(prefix)',
-      message.content.startsWith(prefix),
-    );
-
     if (message.content.startsWith(prefix)) {
       return;
     }

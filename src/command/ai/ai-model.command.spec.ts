@@ -1,5 +1,5 @@
 import { TestingModule, Test } from '@nestjs/testing';
-import ModelCommand from './model.command';
+import AiModelCommand from './ai-model.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
 import { Guild, TextChannel, User } from 'discord.js';
@@ -10,8 +10,8 @@ import {
 } from '../../../test/mocks/shared-services.mock';
 import ollama from 'ollama';
 
-describe('ModelCommand', () => {
-  let command: ModelCommand;
+describe('AiModelCommand', () => {
+  let command: AiModelCommand;
   let mockGuild: Guild;
   let mockUser: User;
   let mockTextChannel: TextChannel;
@@ -40,13 +40,13 @@ describe('ModelCommand', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: ModelCommand,
-          useValue: new ModelCommand(mockSharedServices),
+          provide: AiModelCommand,
+          useValue: new AiModelCommand(mockSharedServices),
         },
       ],
     }).compile();
 
-    command = module.get<ModelCommand>(ModelCommand);
+    command = module.get<AiModelCommand>(AiModelCommand);
 
     mockUser = {
       id: '1234567890',
