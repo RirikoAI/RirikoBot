@@ -30,7 +30,7 @@ export default class StableDiffusionModelCommand
           type: SlashCommandOptionTypes.String,
           name: 'model',
           description:
-            'The model to set (looks something like stability-ai/stable-diffusion:27b93a2413e7...)',
+            'The model to set (looks something like stability-ai/stable-diffusion or luma/photon)',
           required: true,
         },
       ],

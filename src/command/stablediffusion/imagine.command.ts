@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import {
@@ -95,6 +96,19 @@ export default class ImagineCommand
       interaction.user.id,
     );
 
+    if (!result) {
+      await interaction.editReply({
+        embeds: [
+          this.prepareEmbed({
+            message:
+              'Failed to imagine. Please check if you have set the API token',
+            error: true,
+          }),
+        ],
+      });
+      return;
+    }
+
     await interaction.editReply({
       embeds: [
         this.prepareEmbed({
@@ -150,6 +164,19 @@ export default class ImagineCommand
       interaction.user.id,
     );
 
+    if (!result) {
+      await interaction.editReply({
+        embeds: [
+          this.prepareEmbed({
+            message:
+              'Failed to imagine. Please check if you have set the API token or if you have set the right model.',
+            error: true,
+          }),
+        ],
+      });
+      return;
+    }
+
     await interaction.editReply({
       embeds: [
         this.prepareEmbed({
@@ -185,19 +212,25 @@ export default class ImagineCommand
       )?.value;
 
       if (!model) {
-        model =
-          'stability-ai/stable-diffusion:27b93a2413e7f36cd83da926f3656280b2931564ff050bf9575f1fdf9bcd7478';
+        model = 'luma/photon';
       }
 
       const input = {
         prompt,
       };
 
-      // @ts-ignore
-      const [output] = await replicate.run(model as any, { input });
+      const output = await replicate.run(model as any, { input });
+      
+      if (!output.url()) {
+        throw 'Failed to imagine. Please check if you have set the API token';
+      }
+
       return output;
     } catch (error) {
-      console.error(error);
+      console.error(
+        'Failed to imagine. Please check if you have set the API token or if you have set the right model.',
+        error,
+      );
       return false;
     }
   }
