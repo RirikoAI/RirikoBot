@@ -6,20 +6,20 @@ import {
 } from '#command/command.types';
 import { TwitchBaseCommand } from '#command/twitch/class/twitch-base.class';
 
-export default class SubscribeCommand
+export default class UnsubscribeCommand
   extends TwitchBaseCommand
   implements CommandInterface
 {
-  name = 'subscribe';
-  description = 'Get notified for Twitch streams';
-  regex = new RegExp(`^subscribe$|^subscribe (.+)$`, 'i');
-  usageExamples = ['subscribe', 'subscribe <twitch username>'];
+  name = 'unsubscribe';
+  description = 'Unsubscribe from a Twitch streamer';
+  regex = new RegExp(`^unsubscribe$|^unsubscribe (.+)$`, 'i');
+  usageExamples = ['unsubscribe', 'unsubscribe <twitch username>'];
   category = 'twitch';
 
   slashOptions = [
     {
       name: 'streamer',
-      description: 'The Twitch streamer to subscribe to',
+      description: 'The Twitch streamer to unsubscribe',
       type: SlashCommandOptionTypes.String,
       required: true,
     },
@@ -33,20 +33,20 @@ export default class SubscribeCommand
       return message.reply({
         embeds: [
           this.prepareEmbed({
-            message: `Please provide a Twitch streamer name.\nCheck the help command (\`${await this.getGuildPrefix(message)}help subscribe\`) for more information.`,
+            message: `Please provide a Twitch streamer name.\nCheck the help command (\`${await this.getGuildPrefix(message)}help unsubscribe\`) for more information.`,
             isError: true,
           }),
         ],
       });
     }
 
-    const subscribed = await this.subscribe(message.guild.id, streamerName);
+    const unsubscribed = await this.unsubscribe(message.guild.id, streamerName);
 
-    if (subscribed) {
+    if (unsubscribed) {
       return message.reply({
         embeds: [
           this.prepareEmbed({
-            message: `Successfully subscribed to ${streamerName}`,
+            message: `Successfully unsubscribed from ${streamerName}`,
           }),
         ],
       });
@@ -54,8 +54,7 @@ export default class SubscribeCommand
       return message.reply({
         embeds: [
           this.prepareEmbed({
-            message: `Failed to subscribe to ${streamerName}. 
-            Please make sure that you have setup the Twitch notification channel first.`,
+            message: `Failed to unsubscribe from ${streamerName}.`,
             isError: true,
           }),
         ],
@@ -72,19 +71,22 @@ export default class SubscribeCommand
         embeds: [
           this.prepareEmbed({
             message:
-              'Please provide a Twitch streamer name.\nCheck the help command (`/help subscribe`) for more information.',
+              'Please provide a Twitch streamer name.\nCheck the help command (`/help unsubscribe`) for more information.',
             isError: true,
           }),
         ],
       });
     }
 
-    const subscribed = await this.subscribe(interaction.guild.id, streamerName);
-    if (subscribed) {
+    const unsubscribed = await this.unsubscribe(
+      interaction.guild.id,
+      streamerName,
+    );
+    if (unsubscribed) {
       return interaction.reply({
         embeds: [
           this.prepareEmbed({
-            message: `Successfully subscribed to ${streamerName}`,
+            message: `Successfully unsubscribed from ${streamerName}`,
           }),
         ],
       });
@@ -101,25 +103,21 @@ export default class SubscribeCommand
     }
   }
 
-  async subscribe(guildId: string, streamerName: string): Promise<boolean> {
+  async unsubscribe(guildId: string, streamerName: string): Promise<boolean> {
     try {
       // Check if streamer exists in db
-      let streamer = await this.db.twitchStreamerRepository.findOne({
+      const streamer = await this.db.twitchStreamerRepository.findOne({
         where: {
           twitchUserId: streamerName,
         },
       });
 
       if (!streamer) {
-        // Create new streamer
-        streamer = this.db.twitchStreamerRepository.create({
-          twitchUserId: streamerName,
-        });
-        await this.db.twitchStreamerRepository.save(streamer);
+        return false;
       }
 
       // Check if subscription exists
-      let subscription = await this.db.streamSubscriptionRepository.findOne({
+      const subscription = await this.db.streamSubscriptionRepository.findOne({
         where: {
           twitchUserId: streamerName,
           guild: {
@@ -128,33 +126,13 @@ export default class SubscribeCommand
         },
       });
 
-      if (subscription) {
+      if (!subscription) {
         return false;
       }
 
-      // Get channel for notifications
-      const guildDB = await this.db.guildRepository.findOne({
-        where: { id: guildId },
-      });
+      // Remove subscription
+      await this.db.streamSubscriptionRepository.remove(subscription);
 
-      const channel = guildDB.configurations.find(
-        (config) => config.name === 'twitch_channel',
-      );
-
-      if (!channel) {
-        return false;
-      }
-
-      // Create new subscription
-      subscription = this.db.streamSubscriptionRepository.create({
-        twitchUserId: streamerName,
-        channelId: channel.value,
-        guild: {
-          id: guildId,
-        },
-      });
-
-      await this.db.streamSubscriptionRepository.save(subscription);
       return true;
     } catch (e) {
       console.log(e);
