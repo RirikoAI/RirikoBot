@@ -9,8 +9,13 @@ import {
 } from '#command/command.types';
 
 import ollama from 'ollama';
-import { PromptType, UserPrompts } from '#command/ai/ai.types';
-import { SystemPrompt } from '#command/ai/system-prompt';
+import {
+  PostReplyActionType,
+  PromptType,
+  UserPrompts,
+} from '#command/ai/ai.types';
+import { AiPresets, SystemPrompt } from '#command/ai/system-prompt';
+import { PostReplyActions } from '#command/ai/actions/post-reply.actions';
 
 /**
  * AI Command
@@ -53,7 +58,14 @@ export default class AiCommand extends Command implements CommandInterface {
     );
 
     const firstReply = await interaction.fetchReply();
-    this.streamToChannel(prompt, userId, channelId, firstReply, model?.value);
+    this.streamToChannel(
+      interaction,
+      prompt,
+      userId,
+      channelId,
+      firstReply,
+      model?.value,
+    );
   }
 
   async runPrefix(message: DiscordMessage): Promise<void> {
@@ -62,7 +74,7 @@ export default class AiCommand extends Command implements CommandInterface {
     const channelId = message.channel.id;
     const userId = message.author.id;
 
-    this.streamToChannel(prompt, userId, channelId, firstReply);
+    this.streamToChannel(message, prompt, userId, channelId, firstReply);
   }
 
   /**
@@ -71,6 +83,7 @@ export default class AiCommand extends Command implements CommandInterface {
    * The AI replies are buffered and sent in parts to prevent the
    * message from being too long.
    *
+   * @param interaction
    * @param prompt
    * @param userId
    * @param channelId
@@ -79,6 +92,7 @@ export default class AiCommand extends Command implements CommandInterface {
    * @private
    */
   private async streamToChannel(
+    interaction: DiscordInteraction | DiscordMessage,
     prompt: string,
     userId: string,
     channelId: string,
@@ -103,6 +117,8 @@ export default class AiCommand extends Command implements CommandInterface {
             role: 'system',
             content: SystemPrompt(),
           },
+          // Adding presets (or abilities) here
+          ...AiPresets(),
           // Add the past prompts including the new one
           ...this.getPrompts(userId)?.prompts,
         ],
@@ -135,7 +151,7 @@ export default class AiCommand extends Command implements CommandInterface {
         }
 
         // Check if the counter has reached 4, then only edit the message with the new replies
-        if (counter === 4) {
+        if (counter === 7) {
           // Edit the message by id with the new replies
           await currentReply.edit(replyBuffer);
           // Reset the counter
@@ -150,9 +166,45 @@ export default class AiCommand extends Command implements CommandInterface {
 
       // Store replies
       this.storePrompt(userId, { role: 'assistant', content: replies });
+      const postReplyActions = this.checkPostReplyActions(replies);
+      if (postReplyActions)
+        await this.executePostReplyActions(postReplyActions, interaction);
     } catch (error) {
       console.error(error);
       await firstReply.channel.send(error.message);
+    }
+  }
+
+  checkPostReplyActions(reply: string): PostReplyActionType {
+    try {
+      let postReplyActions: PostReplyActionType = [];
+      // check if the command contains enclosing 🎵 insert the song title here 🎵.
+      // if so, send the play command to the music command.
+      if (reply.includes('🎵')) {
+        let songTitle = reply.match(/🎵(.*?)🎵/)[1];
+        postReplyActions.push({ action: 'play', payload: songTitle });
+      }
+
+      return postReplyActions;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async executePostReplyActions(
+    actions: PostReplyActionType,
+    message: DiscordMessage | DiscordInteraction,
+  ) {
+    try {
+      for (const action of actions) {
+        switch (action.action) {
+          case 'play':
+            await PostReplyActions.play(action, message, this.services);
+            break;
+        }
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
 
