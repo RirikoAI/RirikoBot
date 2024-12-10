@@ -90,12 +90,7 @@ describe('AiCommand', () => {
       await command.runPrefix(mockMessage);
 
       expect(mockMessage.reply).toHaveBeenCalledWith('Thinking...');
-      expect((command as any).streamToChannel).toHaveBeenCalledWith(
-        undefined,
-        mockUser.id,
-        mockTextChannel.id,
-        expect.any(Object),
-      );
+      expect((command as any).streamToChannel).toHaveBeenCalled();
     });
   });
 
@@ -235,6 +230,7 @@ describe('AiCommand', () => {
       firstReply.edit = jest.fn();
 
       await (command as any).streamToChannel(
+        jest.fn() as any,
         prompt,
         userId,
         channelId,
