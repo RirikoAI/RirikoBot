@@ -73,12 +73,29 @@ export default class PlayCommand extends Command implements CommandInterface {
       return;
     }
 
-    // play the song
-    await this.player.play(message.member.voice.channel, songName.toString(), {
-      member: message.member,
-      textChannel: textChannel,
-      message,
-    });
+    try {
+      // play the song
+      await this.player.play(
+        message.member.voice.channel,
+        songName.toString(),
+        {
+          member: message.member,
+          textChannel: textChannel,
+          message,
+        },
+      );
+    } catch (e) {
+      if (e.message.includes('voiceChannel')) {
+        await message.reply('Please join a voice channel to play a music');
+        return;
+      } else {
+        console.error(e);
+        await message.reply(
+          'Something went wrong when trying to play the song',
+        );
+        return;
+      }
+    }
   }
 
   async runSlash(interaction: DiscordInteraction): Promise<void> {
@@ -101,7 +118,7 @@ export default class PlayCommand extends Command implements CommandInterface {
     });
 
     // get the song name from the interaction
-    const songName = interaction.options.getString('song');
+    const songName = interaction.options.getString('name');
 
     // check if the music channel exists
     const textChannel = await this.findMusicChannel(interaction);
@@ -123,16 +140,25 @@ export default class PlayCommand extends Command implements CommandInterface {
       content: 'Playing song...',
     });
 
-    // play the song
-    await this.player.play(
-      interaction.member.voice.channel,
-      songName.toString(),
-      {
+    try {
+      // play the song
+      await this.player.play(interaction.member.voice.channel, songName, {
         member: interaction.member,
         textChannel: textChannel,
         message: reply,
-      },
-    );
+      });
+    } catch (e) {
+      if (e.message.includes('voiceChannel')) {
+        await reply.edit({
+          content: 'Please join a voice channel to play a music',
+        });
+      } else {
+        console.error(e);
+        await reply.edit({
+          content: 'Something went wrong when trying to play the song',
+        });
+      }
+    }
   }
 
   async playPlaylist(interaction: DiscordInteraction): Promise<any> {
@@ -209,7 +235,12 @@ export default class PlayCommand extends Command implements CommandInterface {
       },
     });
 
-    // get the music channel from discord
-    return message.guild.channels.cache.get(musicChannel.id);
+    try {
+      // get the music channel from discord
+      return message.guild.channels.cache.get(musicChannel.id);
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   }
 }

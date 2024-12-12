@@ -24,5 +24,18 @@
         "src/*"
       ]
     }
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "*-base.js",
+    "public",
+    "test-results",
+    "scripts",
+    "dist",
+    ".hygen/**",
+    ".github/**",
+    ".circleci/**",
+    "typings/browser.d.ts",
+    "typings/browser/**"
+  ]
 }

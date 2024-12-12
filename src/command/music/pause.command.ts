@@ -13,7 +13,7 @@ import {
  * @category Command
  */
 @Injectable()
-export default class SkipCommand extends Command implements CommandInterface {
+export default class PauseCommand extends Command implements CommandInterface {
   name = 'pause';
   regex = new RegExp('^pause$', 'i');
   description = 'Pause the current song';
@@ -26,7 +26,7 @@ export default class SkipCommand extends Command implements CommandInterface {
 
   async runPrefix(message: DiscordMessage): Promise<void> {
     await this.services.musicService.pauseMusic(message);
-    
+
     await message.reply({
       content: 'Music paused/unpaused',
     });
@@ -34,7 +34,7 @@ export default class SkipCommand extends Command implements CommandInterface {
 
   async runSlash(interaction: DiscordInteraction): Promise<void> {
     await this.services.musicService.pauseMusic(interaction);
-    
+
     await interaction.reply({
       content: 'Music paused/unpaused',
     });

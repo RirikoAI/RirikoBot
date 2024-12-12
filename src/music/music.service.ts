@@ -75,7 +75,7 @@ export class MusicService {
     // DisTube event listeners, more in the documentation page
     distube
       .on('playSong', async (queue, song) => {
-        await this.trackMusic(queue.textChannel.guild.id);
+        await this.trackMusic(queue?.textChannel?.guild?.id);
         let volume = queue.volume || 50;
 
         if (volume < 0) {
@@ -99,11 +99,14 @@ export class MusicService {
         console.error(e);
       })
       .on('finish', async (queue) => {
-        await this.stopTrackingMusic(queue.textChannel.guild.id);
+        await this.stopTrackingMusic(queue.textChannel?.guild?.id);
         await this.clearPlayer(queue.textChannel as TextChannel);
       })
       .on('finishSong', (queue) => {})
-      .on('disconnect', (queue) => queue.textChannel?.send('Disconnected!'))
+      .on('disconnect', async (queue) => {
+        await this.stopTrackingMusic(queue.textChannel?.guild?.id);
+        await this.clearPlayer(queue.textChannel as TextChannel);
+      })
       .on('empty', (queue) =>
         queue.textChannel?.send(
           'The voice channel is empty! Leaving the voice channel...',
@@ -223,11 +226,23 @@ export class MusicService {
       return;
     }
 
-    await this.distube.play(message.member.voice.channel, message.toString(), {
-      member: message.member,
-      textChannel: message.channel,
-      message,
-    });
+    try {
+      await this.distube.play(
+        message.member.voice.channel,
+        message.toString(),
+        {
+          member: message.member,
+          textChannel: message.channel,
+          message,
+        },
+      );
+    } catch (e) {
+      if (e.message.includes('voiceChannel')) {
+        message.channel.send('Please join a voice channel to play a music');
+      } else {
+        throw e;
+      }
+    }
   }
 
   async muteMusic(interaction: DiscordInteraction | DiscordMessage) {
@@ -524,7 +539,7 @@ export class MusicService {
       const afterChar = '─';
       const trackerLength = 14;
       const progress = Math.floor(
-        (currentTime / song.duration) * trackerLength,
+        (currentTime / song?.duration) * trackerLength,
       );
       const progressString = '🔵';
       const before = beforeChar.repeat(progress);
@@ -602,6 +617,7 @@ export class MusicService {
     const embed = this.prepareEmbed(params);
 
     const row1Buttons = [
+      { customId: 'previous', label: '⏮️', style: ButtonStyle.Primary },
       paused
         ? {
             customId: 'play',
@@ -622,10 +638,10 @@ export class MusicService {
             label: '🔇',
             style: ButtonStyle.Secondary,
           },
-      { customId: 'repeat', label: '🔁', style: ButtonStyle.Secondary },
     ];
 
     const row2Buttons = [
+      { customId: 'repeat', label: '🔁', style: ButtonStyle.Secondary },
       { customId: 'lyrics', label: 'Lyrics', style: ButtonStyle.Secondary },
       {
         customId: 'playlists',
