@@ -16,7 +16,7 @@ import {
 export default class StopCommand extends Command implements CommandInterface {
   name = 'stop';
   regex = new RegExp('^stop$', 'i');
-  description = 'Stop a song';
+  description = 'Stop and clear the entire queue';
   category = 'music';
   usageExamples = ['stop'];
 
@@ -36,7 +36,7 @@ export default class StopCommand extends Command implements CommandInterface {
     await interaction.reply({
       content: 'Music stopped',
     });
-    
+
     await this.services.musicService.stopMusic(interaction);
   }
 
