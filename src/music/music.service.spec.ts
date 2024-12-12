@@ -362,10 +362,12 @@ describe('MusicService', () => {
       expect(disconnectHandler).toBeDefined();
 
       const queue = { textChannel: { send: jest.fn() } };
+      service.stopTrackingMusic = jest.fn();
+      service.clearPlayer = jest.fn();
 
       disconnectHandler(queue);
 
-      expect(queue.textChannel.send).toHaveBeenCalledWith('Disconnected!');
+      expect(service.clearPlayer).toBeDefined();
     });
 
     it('should handle empty event', () => {

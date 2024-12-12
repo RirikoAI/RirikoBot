@@ -103,9 +103,12 @@ export default class FilterCommand extends Command implements CommandInterface {
           .setStyle(ButtonStyle.Secondary),
       );
 
+      const currentFilters = queue.filters.toString() || 'None';
+
       const embed = new EmbedBuilder()
         .setColor('#3498db')
         .setTitle('Select a filter.')
+        .setDescription(`Current filters: \`${currentFilters}\``)
         .setTimestamp()
         .setFooter({ text: 'Filter selection' });
 

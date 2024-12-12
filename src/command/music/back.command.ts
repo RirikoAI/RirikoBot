@@ -11,10 +11,10 @@ import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 @Injectable()
 export default class BackCommand extends Command implements CommandInterface {
   name = 'back';
-  regex = new RegExp('^back$', 'i');
+  regex = new RegExp('^back$|^previous$', 'i');
   description = 'Play the previous music';
   category = 'music';
-  usageExamples = ['back'];
+  usageExamples = ['back', 'previous'];
 
   buttons = {
     previous: this.handleButton,

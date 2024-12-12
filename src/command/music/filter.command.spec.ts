@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import SkipCommand from './skip.command';
+import FilterCommand from './filter.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
 import { ConfigService } from '@nestjs/config';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { SharedServicesMock } from '../../../test/mocks/shared-services.mock';
 
-describe('SkipCommand', () => {
-  let command: SkipCommand;
+describe('FilterCommand', () => {
+  let command: FilterCommand;
   const mockDiscordService = {
     client: {
       user: {
@@ -20,11 +20,9 @@ describe('SkipCommand', () => {
   };
   const mockMusicService = {
     getQueue: jest.fn(),
-    skip: jest.fn(),
   };
   const mockPlayer = {
     getQueue: jest.fn(),
-    skip: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
     config: {} as ConfigService,
@@ -40,13 +38,13 @@ describe('SkipCommand', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: SkipCommand,
-          useValue: new SkipCommand(mockSharedServices),
+          provide: FilterCommand,
+          useValue: new FilterCommand(mockSharedServices),
         },
       ],
     }).compile();
 
-    command = module.get<SkipCommand>(SkipCommand);
+    command = module.get<FilterCommand>(FilterCommand);
     command['player'] = mockPlayer as any; // Mock the player property
   });
 
@@ -55,10 +53,14 @@ describe('SkipCommand', () => {
   });
 
   describe('runPrefix', () => {
-    it('should reply with "No queue found" if no queue exists', async () => {
+    it('should reply with "No music is currently playing." if no queue exists', async () => {
       const mockMessage = {
         guild: { id: 'guildId' },
-        reply: jest.fn(),
+        reply: jest.fn().mockResolvedValue({
+          createMessageComponentCollector: jest.fn().mockReturnValue({
+            on: jest.fn(),
+          }),
+        }),
       } as unknown as DiscordMessage;
 
       mockPlayer.getQueue.mockReturnValue(null);
@@ -66,31 +68,42 @@ describe('SkipCommand', () => {
       await command.runPrefix(mockMessage);
 
       expect(mockMessage.reply).toHaveBeenCalledWith({
-        content: 'No queue found',
+        content: 'No music is currently playing.',
+        ephemeral: true,
       });
     });
 
-    it('should skip the current song and reply with confirmation', async () => {
+    it('should load filters and send filter selection message', async () => {
       const mockMessage = {
         guild: { id: 'guildId' },
-        reply: jest.fn(),
+        reply: jest.fn().mockResolvedValue({
+          createMessageComponentCollector: jest.fn().mockReturnValue({
+            on: jest.fn(),
+          }),
+        }),
       } as unknown as DiscordMessage;
 
-      mockPlayer.getQueue.mockReturnValue({});
-      mockPlayer.skip.mockResolvedValue({});
+      const mockQueue = {
+        playing: true,
+        filters: { toString: jest.fn().mockReturnValue('None') },
+      };
+      mockPlayer.getQueue.mockReturnValue(mockQueue);
 
       await command.runPrefix(mockMessage);
 
-      expect(mockPlayer.skip).toHaveBeenCalled();
       expect(mockMessage.reply).toHaveBeenCalled();
     });
   });
 
   describe('runSlash', () => {
-    it('should reply with "No queue found" if no queue exists', async () => {
+    it('should reply with "No music is currently playing." if no queue exists', async () => {
       const mockInteraction = {
         guild: { id: 'guildId' },
-        reply: jest.fn(),
+        reply: jest.fn().mockResolvedValue({
+          createMessageComponentCollector: jest.fn().mockReturnValue({
+            on: jest.fn(),
+          }),
+        }),
       } as unknown as DiscordInteraction;
 
       mockPlayer.getQueue.mockReturnValue(null);
@@ -98,57 +111,30 @@ describe('SkipCommand', () => {
       await command.runSlash(mockInteraction);
 
       expect(mockInteraction.reply).toHaveBeenCalledWith({
-        content: 'No queue found',
+        content: 'No music is currently playing.',
+        ephemeral: true,
       });
     });
 
-    it('should skip the current song and reply with confirmation', async () => {
+    it('should load filters and send filter selection message', async () => {
       const mockInteraction = {
         guild: { id: 'guildId' },
-        reply: jest.fn(),
+        reply: jest.fn().mockResolvedValue({
+          createMessageComponentCollector: jest.fn().mockReturnValue({
+            on: jest.fn(),
+          }),
+        }),
       } as unknown as DiscordInteraction;
 
-      mockPlayer.getQueue.mockReturnValue({});
-      mockPlayer.skip.mockResolvedValue({});
+      const mockQueue = {
+        playing: true,
+        filters: { toString: jest.fn().mockReturnValue('None') },
+      };
+      mockPlayer.getQueue.mockReturnValue(mockQueue);
 
       await command.runSlash(mockInteraction);
 
-      expect(mockPlayer.skip).toHaveBeenCalled();
-      expect(mockInteraction.reply).toHaveBeenCalledWith(
-        'Skipped the current song.',
-      );
-    });
-  });
-
-  describe('handleButton', () => {
-    it('should reply with "No queue found" if no queue exists', async () => {
-      const mockInteraction = {
-        guild: { id: 'guildId' },
-        reply: jest.fn(),
-      } as unknown as DiscordInteraction;
-
-      mockPlayer.getQueue.mockReturnValue(null);
-
-      await command.handleButton(mockInteraction);
-
-      expect(mockInteraction.reply).toHaveBeenCalledWith({
-        content: 'No queue found',
-      });
-    });
-
-    it('should skip the current song and defer update', async () => {
-      const mockInteraction = {
-        guild: { id: 'guildId' },
-        deferUpdate: jest.fn(),
-      } as unknown as DiscordInteraction;
-
-      mockPlayer.getQueue.mockReturnValue({});
-      mockPlayer.skip.mockResolvedValue({});
-
-      await command.handleButton(mockInteraction);
-
-      expect(mockInteraction.deferUpdate).toHaveBeenCalled();
-      expect(mockPlayer.skip).toHaveBeenCalled();
+      expect(mockInteraction.reply).toHaveBeenCalled();
     });
   });
 });

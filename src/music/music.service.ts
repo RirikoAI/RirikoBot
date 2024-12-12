@@ -75,7 +75,7 @@ export class MusicService {
     // DisTube event listeners, more in the documentation page
     distube
       .on('playSong', async (queue, song) => {
-        await this.trackMusic(queue.textChannel.guild.id);
+        await this.trackMusic(queue?.textChannel?.guild?.id);
         let volume = queue.volume || 50;
 
         if (volume < 0) {
@@ -99,12 +99,12 @@ export class MusicService {
         console.error(e);
       })
       .on('finish', async (queue) => {
-        await this.stopTrackingMusic(queue.textChannel.guild.id);
+        await this.stopTrackingMusic(queue.textChannel?.guild?.id);
         await this.clearPlayer(queue.textChannel as TextChannel);
       })
       .on('finishSong', (queue) => {})
       .on('disconnect', async (queue) => {
-        await this.stopTrackingMusic(queue.textChannel.guild.id);
+        await this.stopTrackingMusic(queue.textChannel?.guild?.id);
         await this.clearPlayer(queue.textChannel as TextChannel);
       })
       .on('empty', (queue) =>

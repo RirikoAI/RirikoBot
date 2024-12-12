@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import SkipCommand from './skip.command';
+import BackCommand from './back.command';
 import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
 import { ConfigService } from '@nestjs/config';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { SharedServicesMock } from '../../../test/mocks/shared-services.mock';
 
-describe('SkipCommand', () => {
-  let command: SkipCommand;
+describe('BackCommand', () => {
+  let command: BackCommand;
   const mockDiscordService = {
     client: {
       user: {
@@ -20,11 +20,11 @@ describe('SkipCommand', () => {
   };
   const mockMusicService = {
     getQueue: jest.fn(),
-    skip: jest.fn(),
+    previous: jest.fn(),
   };
   const mockPlayer = {
     getQueue: jest.fn(),
-    skip: jest.fn(),
+    previous: jest.fn(),
   };
   const mockSharedServices: SharedServicesMock = {
     config: {} as ConfigService,
@@ -40,13 +40,13 @@ describe('SkipCommand', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: SkipCommand,
-          useValue: new SkipCommand(mockSharedServices),
+          provide: BackCommand,
+          useValue: new BackCommand(mockSharedServices),
         },
       ],
     }).compile();
 
-    command = module.get<SkipCommand>(SkipCommand);
+    command = module.get<BackCommand>(BackCommand);
     command['player'] = mockPlayer as any; // Mock the player property
   });
 
@@ -70,19 +70,21 @@ describe('SkipCommand', () => {
       });
     });
 
-    it('should skip the current song and reply with confirmation', async () => {
+    it('should play the previous song and reply with confirmation', async () => {
       const mockMessage = {
         guild: { id: 'guildId' },
         reply: jest.fn(),
       } as unknown as DiscordMessage;
 
-      mockPlayer.getQueue.mockReturnValue({});
-      mockPlayer.skip.mockResolvedValue({});
+      const mockQueue = { previous: jest.fn() };
+      mockPlayer.getQueue.mockReturnValue(mockQueue);
 
       await command.runPrefix(mockMessage);
 
-      expect(mockPlayer.skip).toHaveBeenCalled();
-      expect(mockMessage.reply).toHaveBeenCalled();
+      expect(mockQueue.previous).toHaveBeenCalled();
+      expect(mockMessage.reply).toHaveBeenCalledWith({
+        content: 'Played the previous music',
+      });
     });
   });
 
@@ -102,21 +104,21 @@ describe('SkipCommand', () => {
       });
     });
 
-    it('should skip the current song and reply with confirmation', async () => {
+    it('should play the previous song and reply with confirmation', async () => {
       const mockInteraction = {
         guild: { id: 'guildId' },
         reply: jest.fn(),
       } as unknown as DiscordInteraction;
 
-      mockPlayer.getQueue.mockReturnValue({});
-      mockPlayer.skip.mockResolvedValue({});
+      const mockQueue = { previous: jest.fn() };
+      mockPlayer.getQueue.mockReturnValue(mockQueue);
 
       await command.runSlash(mockInteraction);
 
-      expect(mockPlayer.skip).toHaveBeenCalled();
-      expect(mockInteraction.reply).toHaveBeenCalledWith(
-        'Skipped the current song.',
-      );
+      expect(mockQueue.previous).toHaveBeenCalled();
+      expect(mockInteraction.reply).toHaveBeenCalledWith({
+        content: 'Played the previous music',
+      });
     });
   });
 
@@ -136,19 +138,21 @@ describe('SkipCommand', () => {
       });
     });
 
-    it('should skip the current song and defer update', async () => {
+    it('should play the previous song and reply with confirmation', async () => {
       const mockInteraction = {
         guild: { id: 'guildId' },
-        deferUpdate: jest.fn(),
+        reply: jest.fn(),
       } as unknown as DiscordInteraction;
 
-      mockPlayer.getQueue.mockReturnValue({});
-      mockPlayer.skip.mockResolvedValue({});
+      const mockQueue = { previous: jest.fn() };
+      mockPlayer.getQueue.mockReturnValue(mockQueue);
 
       await command.handleButton(mockInteraction);
 
-      expect(mockInteraction.deferUpdate).toHaveBeenCalled();
-      expect(mockPlayer.skip).toHaveBeenCalled();
+      expect(mockQueue.previous).toHaveBeenCalled();
+      expect(mockInteraction.reply).toHaveBeenCalledWith({
+        content: 'Played the previous music',
+      });
     });
   });
 });
