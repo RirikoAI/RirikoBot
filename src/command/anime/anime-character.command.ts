@@ -7,26 +7,29 @@ import {
   SlashCommandOptionTypes,
 } from '#command/command.types';
 import { EmbedBuilder } from 'discord.js';
-import { Anime, JikanResults } from '#command/anime/jikan/jikan.types';
+import { AnimeCharacter, JikanResults } from '#command/anime/jikan/jikan.types';
 
 /**
- * AnimeCommand
+ * AnimeCharacterCommand
  * @description Search for an anime
  * @category Command
  * @author Earnest Angel (https://angel.net.my)
  */
-export default class AnimeCommand extends Command implements CommandInterface {
-  name = 'anime';
-  description = 'Search for an anime';
-  regex = new RegExp('^anime$|^anime ', 'i');
+export default class AnimeCharacterCommand
+  extends Command
+  implements CommandInterface
+{
+  name = 'anime-character';
+  description = 'Search for an anime character';
+  regex = new RegExp('^anime-character', 'i');
   category = 'anime';
-  usageExamples = ['anime <search>'];
+  usageExamples = ['anime-character <search>'];
 
   slashOptions = [
     {
       type: SlashCommandOptionTypes.String,
       name: 'search',
-      description: 'Input the anime name to search',
+      description: 'Input the anime character name to search',
       required: true,
     },
   ];
@@ -54,7 +57,8 @@ export default class AnimeCommand extends Command implements CommandInterface {
         search,
       });
     }
-    await this.searchAnime(message, search);
+
+    await this.searchAnimeCharacter(message, search);
   }
 
   async runSlash(interaction: DiscordInteraction) {
@@ -77,51 +81,50 @@ export default class AnimeCommand extends Command implements CommandInterface {
       });
     }
 
-    await this.searchAnime(interaction, search);
+    await this.searchAnimeCharacter(interaction, search);
   }
 
-  private async searchAnime(
+  private async searchAnimeCharacter(
     interaction: DiscordMessage | DiscordInteraction,
     search: string,
     followUp = false,
   ) {
-    const result: JikanResults<Anime> = await new JikanService().searchAnime(
-      search,
-    );
-    const data: Anime[] = result.data;
+    const result: JikanResults<AnimeCharacter> =
+      await new JikanService().searchAnimeCharacters(search);
+    const data: AnimeCharacter[] = result.data;
     await this.createMenu({
       interaction,
       text: 'Select an anime to view details:',
       options: this.createSelectMenuOptions(data),
-      callback: this.handleAnimeSelection.bind(this),
+      callback: this.handleAnimeCharacterSelection.bind(this),
       followUp,
     });
   }
 
-  private createSelectMenuOptions(data: Anime[]) {
+  private createSelectMenuOptions(data: AnimeCharacter[]) {
     const options = [];
-    for (const anime of data) {
+    for (const character of data) {
       // check if the anime is already in the options
-      if (options.find((o) => o.value === anime.mal_id.toString())) {
+      if (options.find((o) => o.value === character.mal_id.toString())) {
         continue;
       }
 
       options.push({
-        label: anime?.title,
-        value: anime?.mal_id?.toString(),
-        description:
-          anime?.genres?.map((g) => g.name).join(', ') || 'Unknown genre',
+        label: `${character.name} ${character?.name_kanji ? `(${character.name_kanji})` : ''}`,
+        value: character?.mal_id?.toString(),
+        // trim character.about to 100 characters
+        description: character.about?.substring(0, 100) || 'N/A',
       });
     }
     return options;
   }
 
-  private async handleAnimeSelection(
+  private async handleAnimeCharacterSelection(
     interaction: DiscordInteraction,
     selectedOption: string,
   ) {
     await interaction.deferReply();
-    const embed = await this.getAnimeDetails(selectedOption);
+    const embed = await this.getAnimeCharacterDetails(selectedOption);
     await interaction.editReply({ embeds: [embed] });
 
     // show what to do next
@@ -130,9 +133,9 @@ export default class AnimeCommand extends Command implements CommandInterface {
       text: 'What would you like to do next?',
       options: [
         {
-          label: 'Select a different anime',
+          label: 'Select a different anime character',
           value: 'search',
-          description: 'Search for another anime',
+          description: 'Search for another anime character',
         },
         { label: 'Exit', value: 'exit', description: 'Exit' },
       ],
@@ -150,33 +153,72 @@ export default class AnimeCommand extends Command implements CommandInterface {
       const search = this.currentUserSearch.find(
         (s) => s.userId === interaction.user.id,
       ).search;
-      await this.searchAnime(interaction, search, true);
+      await this.searchAnimeCharacter(interaction, search, true);
     } else {
       // remove the search keyword associated with the user id
       this.currentUserSearch = this.currentUserSearch.filter(
         (s) => s.userId !== interaction.user.id,
       );
-      interaction.reply(
+      await interaction.reply(
         'Thank you for using the anime command! Made with ❤️ by Ririko',
       );
     }
   }
 
-  async getAnimeDetails(selectedOption: string) {
+  async getAnimeCharacterDetails(selectedOption: string) {
     // get the anime details
-    const data = await new JikanService().getAnimeDetails(
+    const data = await new JikanService().getAnimeCharacter(
       parseInt(selectedOption),
     );
+
+    const animes: string[] = [];
+    data.anime.forEach((anime) => {
+      animes.push(`${anime.anime.title} - (${anime.role})`);
+    });
+
+    const mangas: string[] = [];
+    data.manga.forEach((manga) => {
+      mangas.push(`${manga.manga.title} - (${manga.role})`);
+    });
+
+    const voiceActors: string[] = [];
+    data.voices.forEach((va) => {
+      voiceActors.push(`${va.person.name} - (${va.language})`);
+    });
 
     // build embed based on the result data
     const embed = new EmbedBuilder()
       .setColor('#0099ff')
-      .setTitle(data?.title || 'N/a')
+      .setTitle(data?.name || 'N/a')
       .setURL(data?.url || 'N/A')
       .setDescription(
-        `English Title: ${data.title_english}\nJapanese Title:${data.title_japanese}\n\nSynopsis: ${data.synopsis}
-          `.substring(0, 2048),
+        `**Kanji Name:**${data?.name_kanji}\n\n**About:** ${data?.about}
+          `.substring(0, 2000),
       )
+      .setFields([
+        {
+          name: 'Nicknames',
+          value: data?.nicknames.join(', ') || 'N/A',
+          inline: true,
+        },
+        {
+          name: 'Favorites',
+          value: data.favorites ? `Favorites: ${data.favorites}` : 'N/A',
+          inline: true,
+        },
+        {
+          name: 'Anime',
+          value: animes.join('\n').substring(0, 1000) || 'N/A',
+        },
+        {
+          name: 'Manga',
+          value: mangas.join('\n').substring(0, 1000) || 'N/A',
+        },
+        {
+          name: 'Voice Actors',
+          value: voiceActors.join('\n').substring(0, 1000) || 'N/A',
+        },
+      ])
       .setAuthor({
         name: 'MyAnimeList',
         iconURL:
@@ -186,59 +228,7 @@ export default class AnimeCommand extends Command implements CommandInterface {
         text: `Made with ❤️ by Ririko`,
       })
       .setTimestamp()
-      .setImage(data?.images?.jpg?.image_url || data?.images?.webp?.image_url)
-      .addFields(
-        {
-          name: 'Score',
-          value: data?.score?.toString() || 'N/A',
-          inline: true,
-        },
-        {
-          name: 'Episodes',
-          value: data?.episodes?.toString() || 'N/A',
-          inline: true,
-        },
-        {
-          name: 'Genres',
-          value: data?.genres?.map((g) => g.name).join(', ') || 'N/A',
-          inline: true,
-        },
-        {
-          name: 'Popularity',
-          value: data?.popularity?.toString() || 'N/A',
-          inline: true,
-        },
-        {
-          name: 'Type',
-          value: data?.type,
-          inline: true,
-        },
-        {
-          name: 'Status',
-          value: data?.status,
-          inline: true,
-        },
-        {
-          name: 'Start Date',
-          value: data?.aired?.from || 'N/A',
-          inline: true,
-        },
-        {
-          name: 'End Date',
-          value: data?.aired?.to || 'N/A',
-          inline: true,
-        },
-        { name: 'Rating', value: data?.rating || 'N/A' },
-        {
-          name: 'Studios',
-          value: data?.studios?.map((s) => s.name).join(', ') || 'N/A',
-        },
-        {
-          name: 'Producers',
-          value: data?.producers?.map((p) => p.name).join(', ') || 'N/A',
-          inline: true,
-        },
-      );
+      .setImage(data?.images?.jpg?.image_url || data?.images?.webp?.image_url);
 
     return embed;
   }

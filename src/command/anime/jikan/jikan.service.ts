@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { JikanApi } from '#command/anime/jikan/jikan-api';
-import { Anime, JikanResults } from '#command/anime/jikan/jikan.types';
+import {
+  Anime,
+  AnimeCharacter,
+  FullAnimeCharacter,
+  JikanResults,
+} from '#command/anime/jikan/jikan.types';
 
 /**
  * JikanService
@@ -25,6 +30,20 @@ export class JikanService {
 
   async getAnimeDetails(id: number): Promise<Anime> {
     const response = await this.jikanApi.getAnimeDetails(id);
+    return response.data;
+  }
+
+  async searchAnimeCharacters(
+    search: string,
+  ): Promise<JikanResults<AnimeCharacter>> {
+    const response = await this.jikanApi.searchAnimeCharacters({
+      q: search,
+    });
+    return response;
+  }
+
+  async getAnimeCharacter(id: number): Promise<FullAnimeCharacter> {
+    const response = await this.jikanApi.getAnimeCharacter(id);
     return response.data;
   }
 }

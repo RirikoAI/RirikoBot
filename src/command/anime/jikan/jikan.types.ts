@@ -1,3 +1,42 @@
+// Jikan API Service parameters
+export type JikanResults<DataType> = {
+  pagination?: JikanPagination;
+  data: DataType[];
+};
+
+export type JikanResult<DataType> = {
+  pagination?: JikanPagination;
+  data: DataType;
+};
+
+export type JikanPaginationParams = {
+  page?: string;
+  limit?: string;
+  sort?: 'desc' | 'asc';
+  order_by?: string;
+};
+
+export type JikanImage = {
+  jpg: {
+    image_url: string;
+    small_image_url: string;
+    large_image_url: string;
+  };
+  webp: {
+    image_url: string;
+    small_image_url: string;
+    large_image_url: string;
+  };
+};
+
+export type JikanPerson = {
+  mal_id: number;
+  url: string;
+  images: JikanImage;
+  name: string;
+};
+
+// Search Anime
 export type SearchAnimeParams = {
   q: string;
   type?: string;
@@ -9,23 +48,11 @@ export type SearchAnimeParams = {
   sfw?: string;
   genres?: string;
   genres_exclude?: string;
-  order_by?: string;
-  sort?: string;
   letter?: string;
   producers?: string;
   start_date?: string;
   end_date?: string;
-};
-
-export type JikanResults<DataType> = {
-  pagination?: JikanPagination;
-  data: DataType[];
-};
-
-export type JikanResult<DataType> = {
-  pagination?: JikanPagination;
-  data: DataType;
-};
+} & JikanPaginationParams;
 
 export type JikanPagination = {
   last_visible_page: number;
@@ -141,7 +168,7 @@ export type Anime = {
   }[];
 };
 
-export type FullAnime = Anime & {
+export type FullAnime = {
   relations: {
     relation: string;
     entry: {
@@ -163,8 +190,9 @@ export type FullAnime = Anime & {
     name: string;
     url: string;
   }[];
-};
+} & Anime;
 
+//Search Anime Episodes
 export type AnimeEpisode = {
   mal_id: number;
   title: string;
@@ -174,4 +202,46 @@ export type AnimeEpisode = {
   recap: boolean;
   video_url: string;
   forum_url: string;
-}
+};
+
+// Search Anime Characters
+export type SearchAnimeCharactersParams = {
+  q: string;
+  letter?: string;
+} & JikanPaginationParams;
+
+export type AnimeCharacter = {
+  mal_id: number;
+  url: string;
+  name: string;
+  name_kanji: string;
+  nicknames: string[];
+  favorites: number;
+  about: string;
+  images: JikanImage;
+};
+
+export type FullAnimeCharacter = {
+  anime: {
+    role: string;
+    anime: {
+      mal_id: number;
+      url: string;
+      title: string;
+      images: JikanImage;
+    };
+  }[];
+  manga: {
+    role: string;
+    manga: {
+      mal_id: number;
+      url: string;
+      title: string;
+      images: JikanImage;
+    };
+  }[];
+  voices: {
+    language: string;
+    person: JikanPerson;
+  }[];
+} & AnimeCharacter;
