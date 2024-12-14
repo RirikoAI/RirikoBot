@@ -3,7 +3,12 @@ import { PaginationFeature } from '#util/features/pagination.feature';
 import { MenuFeature } from '#util/features/menu.feature';
 import { MenuFeatureParams } from '#util/features/menu-feature.types';
 import { PaginationFeatureParams } from '#util/features/pagination-feature.types';
-import { addButtons } from "#util/features/add-buttons.feature";
+import { addButtons } from '#util/features/add-buttons.feature';
+import {
+  DiscordPermission,
+  PermissionsUtil,
+} from '#util/features/permissions.util';
+import { DiscordGuildMember } from '#command/command.types';
 
 /**
  * Pagination service handles paginated responses with buttons.
@@ -12,6 +17,8 @@ import { addButtons } from "#util/features/add-buttons.feature";
  */
 @Injectable()
 export class CommandFeatures {
+  permissions?: DiscordPermission[];
+
   async createPagination(params: PaginationFeatureParams) {
     return new PaginationFeature(params);
   }
@@ -19,8 +26,16 @@ export class CommandFeatures {
   async createMenu(params: MenuFeatureParams) {
     return new MenuFeature(params);
   }
-  
-  addButtons(rawButtons): any {
+
+  addButtons(rawButtons: any): any {
     return addButtons(rawButtons);
+  }
+
+  async hasPermissions(
+    member: DiscordGuildMember,
+    permissions: DiscordPermission[],
+  ) {
+    if (!permissions) return true;
+    return PermissionsUtil.hasPermissions(member, permissions);
   }
 }

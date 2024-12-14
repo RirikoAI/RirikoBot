@@ -13,6 +13,7 @@ import { Pages } from '#util/features/pagination-feature.types';
 import DisTube from 'distube';
 import { DatabaseService } from '#database/database.service';
 import { EconomyService } from '#economy/economy.service';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
 export type CommandConstructor = new (services: SharedServices) => Command;
 
@@ -85,6 +86,13 @@ export class Command extends CommandFeatures {
    * @optional
    */
   category?: string;
+
+  /**
+   * Permissions required to run the command.
+   * @see PermissionsUtil
+   * @optional
+   */
+  permissions?: DiscordPermissions | string[] | any;
 
   /**
    * Slash command options.
