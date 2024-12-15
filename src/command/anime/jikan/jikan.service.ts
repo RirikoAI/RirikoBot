@@ -5,6 +5,7 @@ import {
   AnimeCharacter,
   FullAnimeCharacter,
   JikanResults,
+  Manga,
 } from '#command/anime/jikan/jikan.types';
 
 /**
@@ -44,6 +45,18 @@ export class JikanService {
 
   async getAnimeCharacter(id: number): Promise<FullAnimeCharacter> {
     const response = await this.jikanApi.getAnimeCharacter(id);
+    return response.data;
+  }
+
+  async searchManga(search: string): Promise<JikanResults<Manga>> {
+    const response = await this.jikanApi.searchManga({
+      q: search,
+    });
+    return response;
+  }
+
+  async getMangaDetails(id: number): Promise<Manga> {
+    const response = await this.jikanApi.getMangaDetails(id);
     return response.data;
   }
 }
