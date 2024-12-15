@@ -7,7 +7,7 @@ import {
 } from '#command/command.types';
 import { EmbedBuilder } from 'discord.js';
 import { ImageUtil } from '#util/image/image.util';
-import { DiscordPermissions } from '#util/features/permissions.util';
+// import { DiscordPermissions } from '#util/features/permissions.util';
 
 export default class FarewellCommand
   extends Command
@@ -27,7 +27,7 @@ export default class FarewellCommand
     'farewell channel [channel id]',
   ];
 
-  permissions: DiscordPermissions = ['ManageGuild'];
+  permissions: any = ['aaaa'];
 
   slashOptions = [
     {

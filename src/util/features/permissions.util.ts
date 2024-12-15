@@ -12,15 +12,14 @@ export class PermissionsUtil {
     permissions: DiscordPermissions,
   ) {
     if (!permissions) return true;
-
     const memberPermissions = member.permissions;
-    const memberPermissionsBitField = new PermissionsBitField(
-      memberPermissions,
-    );
-
-    return permissions.every((permission) => {
-      return memberPermissionsBitField.has(permission);
-    });
+    // check memberPermissions every against Permissions
+    for (const permission of permissions) {
+      if (!memberPermissions.has(Permissions[permission])) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

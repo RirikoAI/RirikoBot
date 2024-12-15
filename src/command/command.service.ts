@@ -170,7 +170,7 @@ export class CommandService {
     }
 
     Logger.debug(
-      `Slash/UserMenu/ChatMenu command not found: ${interaction.commandName}`,
+      `Interaction command not found: ${interaction.commandName}`,
       'Ririko CommandService',
     );
   }
@@ -262,6 +262,12 @@ export class CommandService {
    */
   private async runPrefixCommand(command: Command, message: DiscordMessage) {
     try {
+      const hasPermissions = await command.hasPermissions(
+        message?.member,
+        command?.permissions,
+      );
+      if (!hasPermissions)
+        throw new Error('You do not have permission to run this command.');
       Logger.debug(
         `└─ executing prefix command [${command.name}] => ${message.content}`,
         'Ririko CommandService',
@@ -292,6 +298,12 @@ export class CommandService {
     interaction: DiscordInteraction,
   ) {
     try {
+      const hasPermissions = await command.hasPermissions(
+        interaction?.member,
+        command?.permissions,
+      );
+      if (!hasPermissions)
+        throw new Error('You do not have permission to run this command.');
       Logger.debug(
         `└─ executing slash command [${command.name}] => ${interaction.commandName}`,
         'Ririko CommandService',
