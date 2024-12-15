@@ -192,6 +192,82 @@ export type FullAnime = {
   }[];
 } & Anime;
 
+// Search Manga
+export type Manga = {
+  mal_id: number;
+  url: string;
+  images: JikanImage;
+  approved: boolean;
+  titles: {
+    type: string;
+    title: string;
+  }[];
+  title: string;
+  title_english: string;
+  title_japanese: string;
+  type: string;
+  chapters: number;
+  volumes: number;
+  status: string;
+  publishing: boolean;
+  published: {
+    from: string;
+    to: string | null;
+    prop: {
+      from: {
+        day: number;
+        month: number;
+        year: number;
+      };
+      to: {
+        day: number;
+        month: number;
+        year: number;
+      };
+      string: string;
+    };
+  };
+  score: number | null;
+  scored_by: number | null;
+  rank: number | null;
+  popularity: number;
+  members: number;
+  favorites: number;
+  synopsis: string;
+  background: string;
+  authors: {
+    mal_id: number;
+    type: string;
+    name: string;
+    url: string;
+  }[];
+  serializations: {
+    mal_id: number;
+    type: string;
+    name: string;
+    url: string;
+  }[];
+  genres: {
+    mal_id: number;
+    type: string;
+    name: string;
+    url: string;
+  }[];
+  explicit_genres: any[];
+  themes: {
+    mal_id: number;
+    type: string;
+    name: string;
+    url: string;
+  }[];
+  demographics: {
+    mal_id: number;
+    type: string;
+    name: string;
+    url: string;
+  }[];
+};
+
 //Search Anime Episodes
 export type AnimeEpisode = {
   mal_id: number;

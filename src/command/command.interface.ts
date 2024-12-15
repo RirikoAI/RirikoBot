@@ -5,6 +5,7 @@ import {
   SlashCommandOptions,
 } from '#command/command.types';
 import { Pages } from '#util/features/pagination-feature.types';
+import { DiscordPermission } from '#util/features/permissions.util';
 
 /**
  * Command Interface
@@ -18,6 +19,7 @@ export interface CommandInterface {
   description: string;
   category: string;
   usageExamples: string[];
+  permissions?: DiscordPermission[] | any;
   slashOptions?: SlashCommandOptions;
   pages?: Pages;
   buttons?: CommandButtons;

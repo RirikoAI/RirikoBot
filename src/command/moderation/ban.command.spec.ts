@@ -4,7 +4,10 @@ import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
 import { Guild, GuildMember, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+import {
+  SharedServicesMock,
+  TestSharedService,
+} from '../../../test/mocks/shared-services.mock';
 
 describe('BanCommand', () => {
   let command: BanCommand;
@@ -86,13 +89,17 @@ describe('BanCommand', () => {
     });
 
     it('should not ban a user if the sender lacks permission', async () => {
-      (mockGuildMember as any).permissions.has = jest.fn().mockReturnValue(false);
+      (mockGuildMember as any).permissions.has = jest
+        .fn()
+        .mockReturnValue(false);
       const mockMessage = {
         guild: mockGuild,
         member: mockGuildMember,
         mentions: {
           members: {
-            first: jest.fn().mockReturnValue(mockGuildMember),
+            first: jest.fn().mockReturnValue({
+              bannable: false,
+            }),
           },
         },
         reply: jest.fn(),
@@ -102,7 +109,7 @@ describe('BanCommand', () => {
 
       expect(mockGuildMember.ban).not.toHaveBeenCalled();
       expect(mockMessage.reply).toHaveBeenCalledWith(
-        'You do not have permission to ban members.',
+        'This user cannot be banned.',
       );
     });
 
@@ -167,7 +174,9 @@ describe('BanCommand', () => {
     });
 
     it('should not ban a user if the sender lacks permission', async () => {
-      (mockGuildMember as any).permissions.has = jest.fn().mockReturnValue(false);
+      (mockGuildMember as any).permissions.has = jest
+        .fn()
+        .mockReturnValue(false);
       const mockInteraction = {
         guild: mockGuild,
         member: mockGuildMember,
@@ -181,7 +190,7 @@ describe('BanCommand', () => {
 
       expect(mockGuildMember.ban).not.toHaveBeenCalled();
       expect(mockInteraction.reply).toHaveBeenCalledWith(
-        'You do not have permission to ban members.',
+        'This user cannot be banned.',
       );
     });
 

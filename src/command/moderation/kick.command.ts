@@ -5,6 +5,7 @@ import {
   DiscordMessage,
   SlashCommandOptionTypes,
 } from '#command/command.types';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
 /**
  * KickCommand
@@ -27,14 +28,9 @@ export default class KickCommand extends Command implements CommandInterface {
     },
   ];
 
+  permissions: DiscordPermissions = ['KickMembers'];
+
   async runPrefix(message: DiscordMessage) {
-    // check if the sender has permission to kick members
-    if (
-      !message.member.permissions.has('KICK_MEMBERS') ||
-      !message.member.permissions.has('ADMINISTRATOR')
-    ) {
-      return await message.reply('You do not have permission to kick members.');
-    }
     // get the user to kick
     const user = message.mentions.members.first();
     if (!user) {
@@ -51,15 +47,6 @@ export default class KickCommand extends Command implements CommandInterface {
   }
 
   async runSlash(interaction: DiscordInteraction) {
-    // check if the sender has permission to kick members
-    if (
-      !interaction.member.permissions.has('KICK_MEMBERS') ||
-      !interaction.member.permissions.has('ADMINISTRATOR')
-    ) {
-      return await interaction.reply(
-        'You do not have permission to kick members.',
-      );
-    }
     // get the user to kick
     const user = interaction.options.getMember('user');
     if (!user) {

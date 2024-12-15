@@ -8,6 +8,7 @@ import {
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
 /**
  * Command to set the prefix for the Discord server
@@ -30,6 +31,8 @@ export default class PrefixCommand extends Command implements CommandInterface {
       required: false,
     },
   ];
+
+  permissions: DiscordPermissions = ['ManageGuild'];
 
   async runPrefix(message: Message): Promise<void> {
     // Check for permission

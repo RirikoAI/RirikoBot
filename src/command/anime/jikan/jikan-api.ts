@@ -2,12 +2,14 @@ import {
   Anime,
   AnimeCharacter,
   AnimeEpisode,
-  FullAnime, FullAnimeCharacter,
+  FullAnime,
+  FullAnimeCharacter,
   JikanResult,
   JikanResults,
+  Manga,
   SearchAnimeCharactersParams,
-  SearchAnimeParams
-} from "#command/anime/jikan/jikan.types";
+  SearchAnimeParams,
+} from '#command/anime/jikan/jikan.types';
 
 export class JikanApi {
   /**
@@ -58,6 +60,19 @@ export class JikanApi {
     id: number,
   ): Promise<JikanResult<FullAnimeCharacter>> {
     const url = `${this.baseUrl}/characters/${id}/full`;
+    const response = await fetch(url);
+    return response.json();
+  }
+
+  async searchManga(params: SearchAnimeParams): Promise<JikanResults<Manga>> {
+    const query = new URLSearchParams(params).toString();
+    const url = `${this.baseUrl}/manga?${query}`;
+    const response = await fetch(url);
+    return response.json();
+  }
+
+  async getMangaDetails(id: number): Promise<JikanResult<Manga>> {
+    const url = `${this.baseUrl}/manga/${id}`;
     const response = await fetch(url);
     return response.json();
   }

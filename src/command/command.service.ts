@@ -82,7 +82,6 @@ export class CommandService {
    */
   async checkPrefixCommand(message: DiscordMessage) {
     // Check if the guild has a custom prefix, if not use the default prefix
-    // !todo: implement custom prefix
     const guildPrefix = await this.getGuildPrefix(message);
     const prefixRegExp = RegexHelperUtil.getPrefixRegExp(guildPrefix);
 
@@ -147,7 +146,7 @@ export class CommandService {
             `Received message context menu command: ${(interaction as any).commandName}`,
             'Ririko CommandService',
           );
-          await command.runChatMenu(interaction);
+          await this.runChatMenuCommand(command, interaction);
           return command;
         } else if ((interaction as any).isContextMenuCommand()) {
           // check if the interaction is a context menu command
@@ -155,7 +154,7 @@ export class CommandService {
             `Received user context menu command: ${(interaction as any).commandName}`,
             'Ririko CommandService',
           );
-          await command.runUserMenu(interaction);
+          await this.runUserMenuCommand(command, interaction);
           return command;
         } else {
           // check if the interaction is a slash command
@@ -170,7 +169,7 @@ export class CommandService {
     }
 
     Logger.debug(
-      `Slash/UserMenu/ChatMenu command not found: ${interaction.commandName}`,
+      `Interaction command not found: ${interaction.commandName}`,
       'Ririko CommandService',
     );
   }
@@ -190,8 +189,7 @@ export class CommandService {
             `Received button interaction: ${interaction.customId}`,
             'Ririko CommandService',
           );
-          const promise = button.bind(command);
-          await promise.call(command, interaction);
+          await this.runButtonCommand(command, interaction, button);
         }
       }
     }
@@ -202,7 +200,7 @@ export class CommandService {
     for (const command of CommandService.registeredCommands) {
       if (command.test(input)) {
         if (command?.runCli) {
-          await command.runCli(input);
+          await this.runCliCommand(command, input);
           return command;
         }
       }
@@ -262,6 +260,7 @@ export class CommandService {
    */
   private async runPrefixCommand(command: Command, message: DiscordMessage) {
     try {
+      if (!(await this.checkPermissions(command, message))) return false;
       Logger.debug(
         `└─ executing prefix command [${command.name}] => ${message.content}`,
         'Ririko CommandService',
@@ -292,6 +291,7 @@ export class CommandService {
     interaction: DiscordInteraction,
   ) {
     try {
+      if (!(await this.checkPermissions(command, interaction))) return false;
       Logger.debug(
         `└─ executing slash command [${command.name}] => ${interaction.commandName}`,
         'Ririko CommandService',
@@ -308,6 +308,108 @@ export class CommandService {
         .setColor('#ff0000')
         .setDescription(error.message);
       await interaction.channel.send({ embeds: [errorEmbed] });
+    }
+  }
+
+  private async runChatMenuCommand(
+    command: Command,
+    interaction: DiscordInteraction,
+  ) {
+    try {
+      if (!(await this.checkPermissions(command, interaction))) return false;
+      Logger.debug(
+        `└─ executing chat menu command [${command.name}] => ${interaction.commandName}`,
+        'Ririko CommandService',
+      );
+      await command.runChatMenu(interaction);
+      return;
+    } catch (error) {
+      Logger.error(
+        `[Ririko CommandService] └─ execution failed: ${error.message}`,
+        error.stack,
+      );
+    }
+  }
+
+  private async runUserMenuCommand(
+    command: Command,
+    interaction: DiscordInteraction,
+  ) {
+    try {
+      if (!(await this.checkPermissions(command, interaction))) return false;
+      Logger.debug(
+        `└─ executing user menu command [${command.name}] => ${interaction.commandName}`,
+        'Ririko CommandService',
+      );
+      await command.runUserMenu(interaction);
+      return;
+    } catch (error) {
+      Logger.error(
+        `[Ririko CommandService] └─ execution failed: ${error.message}`,
+        error.stack,
+      );
+    }
+  }
+
+  private async runButtonCommand(
+    command: Command,
+    interaction: DiscordInteraction,
+    button: any,
+  ) {
+    try {
+      if (!(await this.checkPermissions(command, interaction))) return false;
+      Logger.debug(
+        `└─ executing button command [${command.name}] => ${interaction.customId}`,
+        'Ririko CommandService',
+      );
+      const promise = button.bind(command);
+      await promise.call(command, interaction);
+      return;
+    } catch (error) {
+      Logger.error(
+        `[Ririko CommandService] └─ execution failed: ${error.message}`,
+        error.stack,
+      );
+    }
+  }
+
+  private async runCliCommand(command: Command, input: string) {
+    try {
+      await command.runCli(input);
+      return;
+    } catch (error) {
+      Logger.error(
+        `[Ririko CommandService] └─ execution failed: ${error.message}`,
+        error.stack,
+      );
+    }
+  }
+
+  private async checkPermissions(
+    command: Command,
+    message: DiscordMessage | DiscordInteraction,
+  ) {
+    try {
+      const hasPermissions = await command.hasPermissions(
+        message.member,
+        command.permissions,
+      );
+      if (!hasPermissions) {
+        Logger.error(
+          `${message.member.user.displayName} has no permission to run command ${command.name} in ${message.guild.name}. Permissions needed: ${command.permissions.join(', ')}`,
+          'Ririko CommandService',
+        );
+        await message.reply(`You have no permission to run this command`);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      Logger.error(
+        `Error checking permissions / User has no permission to run command ${command.name} in ${message.guild.name}. Permissions needed: ${command.permissions.join(', ')}`,
+        'Ririko CommandService',
+      );
+      await message.reply('You have no permission to run this command');
+      return false;
     }
   }
 }

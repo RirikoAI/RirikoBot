@@ -3,11 +3,13 @@ import { EmbedBuilder, ChannelType } from 'discord.js';
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import { DiscordMessage } from '#command/command.types';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
 /**
  * Ping command.
  * @description Use this as a template for creating new commands.
  * @category Command
+ * @author Earnest Angel (https://angel.net.my)
  */
 @Injectable()
 export default class SetupAvcCommand
@@ -19,6 +21,8 @@ export default class SetupAvcCommand
   description = 'Setup auto voice channel';
   category = 'guild';
   usageExamples = ['setup-avc', 'set-avc'];
+
+  permissions: DiscordPermissions = ['ManageGuild'];
 
   async runPrefix(message: DiscordMessage): Promise<void> {
     // create a new voice channel in the guild

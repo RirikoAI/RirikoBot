@@ -7,6 +7,7 @@ import { SharedServices } from '#command/command.module';
 import { Command } from '#command/command.class';
 import { DiscordMessage, DiscordInteraction } from '#command/command.types';
 import CommandsLoaderUtil from '#util/command/commands-loader.util';
+import { Logger } from '@nestjs/common';
 
 describe('CommandService', () => {
   let service: CommandService;
@@ -41,6 +42,8 @@ describe('CommandService', () => {
     configService = module.get<ConfigService>(ConfigService);
     databaseService = module.get<DatabaseService>(DatabaseService);
     sharedServices = module.get<SharedServices>('SHARED_SERVICES');
+
+    jest.spyOn(Logger, 'error').mockImplementation(() => {});
   });
 
   it('should be defined', () => {
@@ -272,6 +275,211 @@ describe('CommandService', () => {
       const result = service.getCliCommands;
 
       expect(result).toEqual([command1]);
+    });
+  });
+
+  describe('registerCommands', () => {
+    it('should handle errors', async () => {
+      jest
+        .spyOn(CommandsLoaderUtil, 'loadCommandsInDirectory')
+        .mockImplementation(() => {
+          throw new Error('Error loading commands');
+        });
+
+      await expect(service.registerCommands()).rejects.toThrow(
+        'Error loading commands',
+      );
+    });
+  });
+
+  describe('checkButton', () => {
+    it('should handle errors', async () => {
+      const interaction = {
+        customId: 'testButton',
+      } as unknown as DiscordInteraction;
+      const command = new Command(sharedServices);
+      command.buttons = {
+        testButton: jest.fn().mockImplementation(() => {
+          throw new Error('Error');
+        }),
+      };
+
+      CommandService['registeredCommands'] = [command];
+
+      await service.checkButton(interaction);
+
+      expect(Logger.error).toHaveBeenCalledWith(
+        `[Ririko CommandService] └─ execution failed: Error`,
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('checkCliCommand', () => {
+    it('should handle errors', async () => {
+      const input = 'test';
+      const command = new Command(sharedServices);
+      command.test = jest.fn().mockReturnValue(true);
+      command.runCli = jest.fn().mockImplementation(() => {
+        throw new Error('Error');
+      });
+
+      CommandService['registeredCommands'] = [command];
+
+      await service.checkCliCommand(input);
+
+      expect(Logger.error).toHaveBeenCalledWith(
+        `[Ririko CommandService] └─ execution failed: Error`,
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('runChatMenuCommand', () => {
+    it('should handle errors', async () => {
+      const command = new Command(sharedServices);
+      const interaction = {
+        reply: jest.fn(),
+      } as unknown as DiscordInteraction;
+      command.runChatMenu = jest.fn().mockImplementation(() => {
+        throw new Error('Error');
+      });
+
+      await service['runChatMenuCommand'](command, interaction);
+
+      expect(Logger.error).toHaveBeenCalledWith(
+        `[Ririko CommandService] └─ execution failed: Error`,
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('runUserMenuCommand', () => {
+    it('should handle errors', async () => {
+      const command = new Command(sharedServices);
+      const interaction = {
+        reply: jest.fn(),
+      } as unknown as DiscordInteraction;
+      command.runUserMenu = jest.fn().mockImplementation(() => {
+        throw new Error('Error');
+      });
+
+      await service['runUserMenuCommand'](command, interaction);
+
+      expect(Logger.error).toHaveBeenCalledWith(
+        `[Ririko CommandService] └─ execution failed: Error`,
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('runButtonCommand', () => {
+    it('should handle errors', async () => {
+      const command = new Command(sharedServices);
+      const interaction = {
+        customId: 'testButton',
+      } as unknown as DiscordInteraction;
+      command.buttons = {
+        testButton: jest.fn().mockImplementation(() => {
+          throw new Error('Error');
+        }),
+      };
+
+      await service['runButtonCommand'](
+        command,
+        interaction,
+        command.buttons.testButton,
+      );
+
+      expect(Logger.error).toHaveBeenCalledWith(
+        `[Ririko CommandService] └─ execution failed: Error`,
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('runCliCommand', () => {
+    it('should handle errors', async () => {
+      const command = new Command(sharedServices);
+      command.runCli = jest.fn().mockImplementation(() => {
+        throw new Error('Error');
+      });
+
+      await service['runCliCommand'](command, 'test');
+
+      expect(Logger.error).toHaveBeenCalledWith(
+        `[Ririko CommandService] └─ execution failed: Error`,
+        expect.any(String),
+      );
+    });
+  });
+
+  describe('checkPermissions', () => {
+    it('should return true if the user has the required permissions', async () => {
+      const command = new Command(sharedServices);
+      command.permissions = ['BanMembers'];
+      const message = {
+        member: {
+          permissions: {
+            has: jest.fn().mockReturnValue(true),
+          },
+        },
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
+
+      const result = await service['checkPermissions'](command, message);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false if the user does not have the required permissions', async () => {
+      const command = new Command(sharedServices);
+      command.permissions = ['BanMembers'];
+      const message = {
+        member: {
+          permissions: {
+            has: jest.fn().mockReturnValue(false),
+          },
+        },
+        guild: {
+          id: '123',
+          name: 'test',
+        },
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
+
+      const result = await service['checkPermissions'](command, message);
+
+      expect(result).toBe(false);
+      expect(message.reply).toHaveBeenCalledWith(
+        'You have no permission to run this command',
+      );
+    });
+
+    it('should handle errors and return false', async () => {
+      const command = new Command(sharedServices);
+      command.permissions = ['BanMembers'];
+      const message = {
+        member: {
+          permissions: {
+            has: jest.fn().mockImplementation(() => {
+              throw new Error('Error');
+            }),
+          },
+        },
+        guild: {
+          id: '123',
+          name: 'test',
+        },
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
+
+      const result = await service['checkPermissions'](command, message);
+
+      expect(result).toBe(false);
+      expect(message.reply).toHaveBeenCalledWith(
+        'You have no permission to run this command',
+      );
     });
   });
 });

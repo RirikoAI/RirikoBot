@@ -19,7 +19,7 @@ export default class PlayTopCommand
 {
   name = 'playtop';
   regex = new RegExp('^playtop$|^playtop ', 'i');
-  description = 'Play a song';
+  description = 'Play a song on top of the queue';
   category = 'music';
   usageExamples = ['playtop', 'playtop <song name>'];
 
