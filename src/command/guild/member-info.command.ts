@@ -8,6 +8,7 @@ import {
   SlashCommandOptionTypes,
 } from '#command/command.types';
 import NicerTimeUtil from '#util/time/nicer-time.util';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
 /**
  * MemberInfoCommand
@@ -38,6 +39,8 @@ export default class MemberInfoCommand
       required: false,
     },
   ];
+
+  permissions: DiscordPermissions = ['ManageGuild'];
 
   /**
    * Async runPrefix method. If this.params[0] is not null, it will attempt to get the user from the message.

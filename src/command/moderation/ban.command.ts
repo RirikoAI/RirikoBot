@@ -5,6 +5,7 @@ import {
   DiscordMessage,
   SlashCommandOptionTypes,
 } from '#command/command.types';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
 /**
  * BanCommand
@@ -27,14 +28,9 @@ export default class BanCommand extends Command implements CommandInterface {
     },
   ];
 
+  permissions: DiscordPermissions = ['BanMembers'];
+
   async runPrefix(message: DiscordMessage) {
-    // check if the sender has permission to ban members
-    if (
-      !message.member.permissions.has('BAN_MEMBERS') ||
-      !message.member.permissions.has('ADMINISTRATOR')
-    ) {
-      return message.reply('You do not have permission to ban members.');
-    }
     // get the user to ban
     const user = message.mentions.members.first();
     if (!user) {
@@ -51,13 +47,6 @@ export default class BanCommand extends Command implements CommandInterface {
   }
 
   async runSlash(interaction: DiscordInteraction) {
-    // check if the sender has permission to ban members
-    if (
-      !interaction.member.permissions.has('BAN_MEMBERS') ||
-      !interaction.member.permissions.has('ADMINISTRATOR')
-    ) {
-      return interaction.reply('You do not have permission to ban members.');
-    }
     // get the user to ban
     const user = interaction.options.getUser('user');
     if (!user) {

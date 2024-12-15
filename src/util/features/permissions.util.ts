@@ -1,6 +1,11 @@
 import { DiscordGuildMember } from '#command/command.types';
 import { PermissionsBitField } from 'discord.js';
 
+/**
+ * Utility class for checking permissions
+ * @category Utility
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export class PermissionsUtil {
   /**
    * Check if the user has all permissions stated in the permissions array

@@ -7,7 +7,14 @@ import {
 } from '#command/command.types';
 import { EmbedBuilder } from 'discord.js';
 import { ImageUtil } from '#util/image/image.util';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
+/**
+ * WelcomerCommand
+ * @description Command to manage the welcomer settings
+ * @category Command
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export default class WelcomerCommand
   extends Command
   implements CommandInterface
@@ -25,6 +32,8 @@ export default class WelcomerCommand
     'welcomer bg [background image]',
     'welcomer channel [channel id]',
   ];
+
+  permissions: DiscordPermissions = ['ManageGuild'];
 
   slashOptions = [
     {

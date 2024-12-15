@@ -5,6 +5,7 @@ import {
   SlashCommandOptions,
   SlashCommandOptionTypes,
 } from '#command/command.types';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
 /**
  * DeleteCommand
@@ -27,16 +28,9 @@ export default class DeleteCommand extends Command implements CommandInterface {
     },
   ];
 
+  permissions: DiscordPermissions = ['ManageChannels'];
+
   async runPrefix(message: DiscordMessage) {
-    // check if the sender has permission to delete messages
-    if (
-      !message.member.permissions.has('MANAGE_MESSAGES') ||
-      !message.member.permissions.has('ADMINISTRATOR')
-    ) {
-      return await message.reply(
-        'You do not have permission to delete messages.',
-      );
-    }
     // get the amount of messages to delete
     const amount = parseInt(this.params[0]);
     if (isNaN(amount)) {
@@ -51,15 +45,6 @@ export default class DeleteCommand extends Command implements CommandInterface {
   }
 
   async runSlash(interaction) {
-    // check if the sender has permission to delete messages
-    if (
-      !interaction.member.permissions.has('MANAGE_MESSAGES') ||
-      !interaction.member.permissions.has('ADMINISTRATOR')
-    ) {
-      return await interaction.reply(
-        'You do not have permission to delete messages.',
-      );
-    }
     // get the amount of messages to delete
     const amount = interaction.options.getInteger('amount');
     if (amount < 1 || amount > 100) {

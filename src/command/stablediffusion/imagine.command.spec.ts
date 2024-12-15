@@ -5,6 +5,7 @@ jest.mock('#command/command.class');
 jest.mock('#command/command.interface');
 jest.mock('replicate');
 jest.mock('discord.js', () => ({
+  ...jest.requireActual('discord.js'),
   EmbedBuilder: jest.fn().mockImplementation(() => ({
     setTitle: jest.fn().mockReturnThis(),
     setDescription: jest.fn().mockReturnThis(),

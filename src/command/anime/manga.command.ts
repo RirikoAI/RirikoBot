@@ -19,7 +19,7 @@ export default class MangaCommand extends Command implements CommandInterface {
   name = 'manga';
   description = 'Search for a manga';
   regex = new RegExp('^manga$|^manga ', 'i');
-  category = 'manga';
+  category = 'anime';
   usageExamples = ['manga <search>'];
 
   slashOptions = [
@@ -181,7 +181,7 @@ export default class MangaCommand extends Command implements CommandInterface {
           `.substring(0, 2048),
       )
       .setAuthor({
-        name: 'MyMangaList',
+        name: 'MyAnimeList',
         iconURL:
           'https://upload.wikimedia.org/wikipedia/commons/7/7a/MyAnimeList_Logo.png',
       })

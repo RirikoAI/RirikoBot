@@ -7,8 +7,14 @@ import {
 } from '#command/command.types';
 import { EmbedBuilder } from 'discord.js';
 import { ImageUtil } from '#util/image/image.util';
-// import { DiscordPermissions } from '#util/features/permissions.util';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
+/**
+ * FarewellCommand
+ * @description Command to configure the farewell message
+ * @category Command
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export default class FarewellCommand
   extends Command
   implements CommandInterface
@@ -27,7 +33,7 @@ export default class FarewellCommand
     'farewell channel [channel id]',
   ];
 
-  permissions: any = ['aaaa'];
+  permissions: DiscordPermissions = ['ManageGuild'];
 
   slashOptions = [
     {

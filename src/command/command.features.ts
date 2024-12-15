@@ -36,7 +36,6 @@ export class CommandFeatures {
     permissions: DiscordPermission[],
   ) {
     if (!permissions) return true;
-    console.log(await PermissionsUtil.hasPermissions(member, permissions));
     return await PermissionsUtil.hasPermissions(member, permissions);
   }
 }

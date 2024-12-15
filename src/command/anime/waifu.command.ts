@@ -5,6 +5,12 @@ import { WaifuImService } from '#command/anime/waifu-im/waifu-im.service';
 import { EmbedBuilder } from 'discord.js';
 import { WaifuImResults } from '#command/anime/waifu-im/waifu-im.types';
 
+/**
+ * WaifuCommand
+ * @description Get a random waifu image
+ * @category Command
+ * @author Earnest Angel (https://angel.net.my)
+ */
 export default class WaifuCommand extends Command implements CommandInterface {
   name = 'waifu';
   description = 'Get a random waifu image';

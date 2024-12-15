@@ -4,7 +4,10 @@ import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
 import { Guild, GuildMember, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+import {
+  SharedServicesMock,
+  TestSharedService,
+} from '../../../test/mocks/shared-services.mock';
 
 describe('KickCommand', () => {
   let command: KickCommand;
@@ -84,27 +87,6 @@ describe('KickCommand', () => {
       );
     });
 
-    it('should not kick a user if the sender lacks permission', async () => {
-      (mockGuildMember as any).permissions.has = jest.fn().mockReturnValue(false);
-      const mockMessage = {
-        guild: mockGuild,
-        member: mockGuildMember,
-        mentions: {
-          members: {
-            first: jest.fn().mockReturnValue(mockGuildMember),
-          },
-        },
-        reply: jest.fn(),
-      } as unknown as DiscordMessage;
-
-      await command.runPrefix(mockMessage);
-
-      expect(mockGuildMember.kick).not.toHaveBeenCalled();
-      expect(mockMessage.reply).toHaveBeenCalledWith(
-        'You do not have permission to kick members.',
-      );
-    });
-
     it('should not kick a user if no user is mentioned', async () => {
       const mockMessage = {
         guild: mockGuild,
@@ -163,25 +145,6 @@ describe('KickCommand', () => {
       expect(mockGuildMember.kick).toHaveBeenCalled();
       expect(mockInteraction.reply).toHaveBeenCalledWith(
         `Kicked ${mockUser.tag} from the server.`,
-      );
-    });
-
-    it('should not kick a user if the sender lacks permission', async () => {
-      (mockGuildMember as any).permissions.has = jest.fn().mockReturnValue(false);
-      const mockInteraction = {
-        guild: mockGuild,
-        member: mockGuildMember,
-        options: {
-          getMember: jest.fn().mockReturnValue(mockUser),
-        },
-        reply: jest.fn(),
-      } as unknown as DiscordInteraction;
-
-      await command.runSlash(mockInteraction);
-
-      expect(mockGuildMember.kick).not.toHaveBeenCalled();
-      expect(mockInteraction.reply).toHaveBeenCalledWith(
-        'You do not have permission to kick members.',
       );
     });
 

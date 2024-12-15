@@ -3,6 +3,7 @@ import { CommandInterface } from '#command/command.interface';
 import { Injectable } from '@nestjs/common';
 import { EmbedBuilder, Guild } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
+import { DiscordPermissions } from '#util/features/permissions.util';
 
 /**
  * Guild Info Command
@@ -20,6 +21,8 @@ export default class GuildInfoCommand
   regex = new RegExp('^guildinfo$|^info$', 'i');
   usageExamples = ['guildinfo', 'info'];
   category = 'guild';
+
+  permissions: DiscordPermissions = ['ManageGuild'];
 
   async runPrefix(message: DiscordMessage) {
     const embed = await this.createGuildInfoEmbed(message.guild);
