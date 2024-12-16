@@ -15,10 +15,10 @@ import { DiscordPermissions } from '#util/features/permissions.util';
  */
 export default class KickCommand extends Command implements CommandInterface {
   name = 'kick';
-  regex = new RegExp('^kick$|^kick |^k ', 'i');
+  regex = new RegExp('^kick$|^kick ', 'i');
   description = 'Kick a user from the server.';
   category = 'moderation';
-  usageExamples = ['kick @user', 'k @user'];
+  usageExamples = ['kick @user'];
   slashOptions = [
     {
       name: 'user',

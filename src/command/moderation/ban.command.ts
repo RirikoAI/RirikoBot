@@ -15,10 +15,10 @@ import { DiscordPermissions } from '#util/features/permissions.util';
  */
 export default class BanCommand extends Command implements CommandInterface {
   name = 'ban';
-  regex = new RegExp('^ban$|^ban |^b ', 'i');
+  regex = new RegExp('^ban$|^ban ', 'i');
   description = 'Ban a user from the server.';
   category = 'moderation';
-  usageExamples = ['ban @user', 'b @user'];
+  usageExamples = ['ban @user'];
   slashOptions = [
     {
       name: 'user',
