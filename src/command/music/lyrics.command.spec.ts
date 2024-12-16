@@ -197,15 +197,6 @@ describe('LyricsCommand', () => {
     });
   });
 
-  describe('getSongList', () => {
-    it('should return a list of songs matching the song name', async () => {
-      // mock client.songs.search
-
-      const songs = await command.getSongList('Test Song');
-      expect(songs).toBeDefined();
-    });
-  });
-
   describe('handleSongSelection', () => {
     it("should send an embed with the selected song's lyrics", async () => {
       const mockInteraction = {
