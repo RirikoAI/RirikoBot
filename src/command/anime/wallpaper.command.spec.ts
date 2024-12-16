@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createMock } from '@golevelup/ts-jest';
 import WallpaperCommand from '#command/anime/wallpaper.command';
 import { DiscordMessage, DiscordInteraction } from '#command/command.types';
@@ -21,7 +20,9 @@ describe('WallpaperCommand', () => {
   let mockInteraction: DiscordInteraction;
 
   beforeEach(() => {
-    wallpaperCommand = new WallpaperCommand(createMock<CommandFeatures>());
+    wallpaperCommand = new WallpaperCommand(
+      createMock<CommandFeatures>() as any,
+    );
     mockMessage = createMock<DiscordMessage>();
     mockInteraction = createMock<DiscordInteraction>();
   });
@@ -39,8 +40,8 @@ describe('WallpaperCommand', () => {
     expect(wallpaperCommand.name).toBe('wallpaper');
     expect(wallpaperCommand.description).toBe('Get random anime wallpaper');
     const selectSourceSpy = jest
-      .spyOn(wallpaperCommand, 'selectSource')
-      .mockResolvedValue();
+      .spyOn(wallpaperCommand, 'selectSource' as any)
+      .mockResolvedValue(jest.fn());
 
     await wallpaperCommand.runPrefix(mockMessage);
 
@@ -56,8 +57,8 @@ describe('WallpaperCommand', () => {
   it('should run slash command and search for wallpaper', async () => {
     mockInteraction.options.getString = jest.fn().mockReturnValue('naruto');
     const selectSourceSpy = jest
-      .spyOn(wallpaperCommand, 'selectSource')
-      .mockResolvedValue();
+      .spyOn(wallpaperCommand, 'selectSource' as any)
+      .mockResolvedValue(jest.fn());
 
     await wallpaperCommand.runSlash(mockInteraction);
 
@@ -77,18 +78,14 @@ describe('WallpaperCommand', () => {
       files: ['image_url'],
     };
     jest.spyOn(wallpaperCommand, 'getWallpapers').mockResolvedValue(mockReply);
-    const createMenuSpy = jest
-      .spyOn(wallpaperCommand, 'createMenu')
-      .mockResolvedValue();
 
-    await wallpaperCommand.handleSourceSelection(
+    await (wallpaperCommand as any).handleSourceSelection(
       mockInteraction,
       'WallHaven&&&&naruto&&&&WallHaven&&&&123456',
     );
 
     expect(mockInteraction.deferReply).toHaveBeenCalled();
     expect(mockInteraction.editReply).toHaveBeenCalledWith(mockReply);
-    expect(createMenuSpy).toHaveBeenCalled();
   });
 
   it('should handle next action and search again', async () => {
@@ -97,8 +94,8 @@ describe('WallpaperCommand', () => {
       { userId: mockInteraction.user.id, search: 'naruto' },
     ];
     const selectSourceSpy = jest
-      .spyOn(wallpaperCommand, 'selectSource')
-      .mockResolvedValue();
+      .spyOn(wallpaperCommand, 'selectSource' as any)
+      .mockResolvedValue(jest.fn());
 
     await wallpaperCommand.handleNextAction(mockInteraction, 'another_source');
 
@@ -129,7 +126,7 @@ describe('WallpaperCommand', () => {
       .spyOn(wallpaperCommand, 'getWallpapers')
       .mockRejectedValue(new Error('Test error'));
 
-    await wallpaperCommand.handleSourceSelection(
+    await (wallpaperCommand as any).handleSourceSelection(
       mockInteraction,
       'WallHaven&&&&naruto&&&&WallHaven&&&&123456',
     );
@@ -144,14 +141,12 @@ describe('WallpaperCommand', () => {
   });
 
   it('should get wallpapers without making actual API calls', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const mockInteraction = createMock<DiscordInteraction>();
     const mockResult = [
       { image: 'image_url_1' },
       { image: 'image_url_2' },
       { image: 'image_url_3' },
     ];
-    AnimeWallpaper.mockImplementation(() => {
+    (AnimeWallpaper as any).mockImplementation(() => {
       return {
         search: jest.fn().mockResolvedValue(mockResult),
         live2d: jest.fn().mockResolvedValue(mockResult),

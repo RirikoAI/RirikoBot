@@ -1,4 +1,3 @@
-// src/users/user.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,7 +12,13 @@ import { Configuration } from '#database/entities/configuration.entity';
 import { StreamSubscription } from '#database/entities/stream-subscription.entity';
 import { StreamNotification } from '#database/entities/stream-notification.entity';
 import { TwitchStreamer } from '#database/entities/twitch-streamer.entity';
+import { UserNote } from '#database/entities/user-note.entity';
 
+/**
+ * Database Service
+ * @description The database service provides access to the database repositories.
+ * @author Earnest Angel (https://angel.net.my)
+ */
 @Injectable()
 export class DatabaseService {
   constructor(
@@ -39,5 +44,7 @@ export class DatabaseService {
     public streamNotificationRepository: Repository<StreamNotification>,
     @InjectRepository(TwitchStreamer)
     public twitchStreamerRepository: Repository<TwitchStreamer>,
+    @InjectRepository(UserNote)
+    public userNoteRepository: Repository<UserNote>,
   ) {}
 }

@@ -21,6 +21,7 @@ import { TwitchModule } from '#twitch/twitch.module';
 import { ConfigModule as RirikoConfigModule } from '#config/config.module';
 import { ConfigService as RirikoConfigService } from '#config/config.service';
 import { CliModule } from '#cli/cli.module';
+import { ModerationModule } from './moderation/moderation.module';
 
 /**
  * The main application module.
@@ -44,6 +45,7 @@ import { CliModule } from '#cli/cli.module';
     EconomyModule,
     TwitchModule,
     CliModule,
+    ModerationModule,
   ],
   controllers: [RootController, EconomyController],
   providers: [RootService, EnvConfigService, RirikoConfigService],

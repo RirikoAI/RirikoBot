@@ -13,6 +13,7 @@ import { Configuration } from '#database/entities/configuration.entity';
 import { StreamSubscription } from '#database/entities/stream-subscription.entity';
 import { StreamNotification } from '#database/entities/stream-notification.entity';
 import { TwitchStreamer } from '#database/entities/twitch-streamer.entity';
+import { UserNote } from '#database/entities/user-note.entity';
 
 describe('DatabaseService', () => {
   let service: DatabaseService;
@@ -39,6 +40,10 @@ describe('DatabaseService', () => {
           useClass: Repository,
         },
         { provide: getRepositoryToken(TwitchStreamer), useClass: Repository },
+        {
+          provide: getRepositoryToken(UserNote),
+          useClass: Repository,
+        },
       ],
     }).compile();
 

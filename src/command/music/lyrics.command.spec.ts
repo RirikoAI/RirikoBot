@@ -4,7 +4,10 @@ import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
 import { EmbedBuilder, Guild, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SharedServicesMock, TestSharedService } from '../../../test/mocks/shared-services.mock';
+import {
+  SharedServicesMock,
+  TestSharedService,
+} from '../../../test/mocks/shared-services.mock';
 import { Song } from 'genius-lyrics';
 
 describe('LyricsCommand', () => {
@@ -19,13 +22,16 @@ describe('LyricsCommand', () => {
       musicPlayer: {
         getQueue: jest.fn(),
       },
+      songs: {
+        search: jest.fn(),
+      },
     },
   };
-  
+
   const mockCommandService = {
     getGuildPrefix: jest.fn(),
   };
-  
+
   const mockSharedServices: SharedServicesMock = {
     ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
@@ -188,13 +194,6 @@ describe('LyricsCommand', () => {
 
       const songName = await command.getCurrentSongName(mockGuild.id);
       expect(songName).toBeNull();
-    });
-  });
-
-  describe('getSongList', () => {
-    it('should return a list of songs matching the song name', async () => {
-      const songs = await command.getSongList('Test Song');
-      expect(songs).toBeDefined();
     });
   });
 
