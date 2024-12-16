@@ -18,7 +18,7 @@ export default class ProfileCommand
   usageExamples = ['profile'];
 
   userMenuOption = {
-    name: 'View Profile',
+    name: 'View profile',
   };
 
   slashOptions = [

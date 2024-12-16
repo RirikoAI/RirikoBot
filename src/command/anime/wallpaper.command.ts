@@ -135,7 +135,7 @@ export default class WallpaperCommand
       // ask if the user wants to search on another source
       await this.createMenu({
         interaction,
-        text: 'Do you want to do anything else?',
+        text: `<@${interaction.user.id}>, do you want to do anything else?`,
         options: [
           {
             label: 'Load another wallpaper',

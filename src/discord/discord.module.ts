@@ -17,12 +17,12 @@ import { DatabaseService } from '#database/database.service';
 @Module({
   imports: [
     ConfigModule,
+    DatabaseModule,
     forwardRef(() => CommandModule),
     forwardRef(() => AvcModule),
     forwardRef(() => MusicModule),
     forwardRef(() => GiveawaysModule),
     forwardRef(() => EconomyModule),
-    DatabaseModule,
   ],
   providers: [DiscordService, ConfigService, EconomyService, DatabaseService],
   exports: [DiscordService],

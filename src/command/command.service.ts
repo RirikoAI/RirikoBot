@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { EmbedBuilder } from 'discord.js';
-
 import { join } from 'path';
 import { CommandsLoaderUtil } from '#util/command/commands-loader.util';
 import { ConfigService } from '@nestjs/config';
@@ -265,7 +264,7 @@ export class CommandService {
         `└─ executing prefix command [${command.name}] => ${message.content}`,
         'Ririko CommandService',
       );
-      await command.runPrefix(message);
+      command.runPrefix(message);
       return;
     } catch (error) {
       Logger.error(
@@ -296,7 +295,7 @@ export class CommandService {
         `└─ executing slash command [${command.name}] => ${interaction.commandName}`,
         'Ririko CommandService',
       );
-      await command.runSlash(interaction);
+      command.runSlash(interaction);
       return;
     } catch (error) {
       Logger.error(
@@ -321,7 +320,7 @@ export class CommandService {
         `└─ executing chat menu command [${command.name}] => ${interaction.commandName}`,
         'Ririko CommandService',
       );
-      await command.runChatMenu(interaction);
+      command.runChatMenu(interaction);
       return;
     } catch (error) {
       Logger.error(
@@ -341,7 +340,7 @@ export class CommandService {
         `└─ executing user menu command [${command.name}] => ${interaction.commandName}`,
         'Ririko CommandService',
       );
-      await command.runUserMenu(interaction);
+      command.runUserMenu(interaction);
       return;
     } catch (error) {
       Logger.error(
@@ -363,7 +362,7 @@ export class CommandService {
         'Ririko CommandService',
       );
       const promise = button.bind(command);
-      await promise.call(command, interaction);
+      promise.call(command, interaction);
       return;
     } catch (error) {
       Logger.error(
@@ -375,7 +374,7 @@ export class CommandService {
 
   private async runCliCommand(command: Command, input: string) {
     try {
-      await command.runCli(input);
+      command.runCli(input);
       return;
     } catch (error) {
       Logger.error(
