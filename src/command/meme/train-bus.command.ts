@@ -1,14 +1,14 @@
 import { MemeBase } from '#command/meme/class/MemeBase.class';
 import { SlashCommandOptionTypes } from '#command/command.types';
 
-export default class UndertakerCommand extends MemeBase {
-  name = 'undertaker';
-  regex = new RegExp('^undertaker$', 'i');
-  description = 'Generate undertaker meme';
+export default class TrainBusCommand extends MemeBase {
+  name = 'train-bus';
+  regex = new RegExp('^train-bus$', 'i');
+  description = 'Generate train hitting bus meme';
   category = 'meme';
   usageExamples = ['undertaker <text1> <text2>'];
 
-  fileName = 'aj_styles___undertaker.jpg';
+  fileName = 'a_train_hitting_a_school_bus.jpg';
 
   textSettings = [
     { x: 200, y: 340, width: 300 },
