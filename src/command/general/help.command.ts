@@ -36,7 +36,7 @@ export default class HelpCommand extends Command implements CommandInterface {
     const prefix = await this.getGuildPrefix(message);
     let embed: EmbedBuilder;
 
-    if (this.params[0]?.toLowerCase() === 'reacts') {
+    if (['react', 'reacts', 'reaction', 'reactions'].includes(this.params[0]?.toLowerCase())) {
       embed = this.createReactionsHelpEmbed(this.getCategorizedPrefixCommands(), 'prefix',);
     } else if (this.params.length === 0) {
       embed = this.createHelpEmbed(this.getCategorizedPrefixCommands(), 'prefix',);
@@ -54,7 +54,7 @@ export default class HelpCommand extends Command implements CommandInterface {
     const commandName = (interaction as any).options.getString('command');
     let embed: EmbedBuilder;
 
-    if (commandName?.toLowerCase() === 'reacts') {
+    if (['react', 'reacts', 'reaction', 'reactions'].includes(commandName?.toLowerCase())) {
       embed = this.createReactionsHelpEmbed(this.getCategorizedSlashCommands(), 'slash');
     } else if (commandName) {
       const command = this.services.commandService.getCommand(commandName);
