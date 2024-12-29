@@ -15,7 +15,7 @@ export const ReadyEvent = (
   commandService: CommandService,
 ) => {
   client.once(Events.ClientReady, () => {
-    Logger.log('Bot is ready!', 'Ririko DiscordServiceEventReady');
+    Logger.log('Bot is ready!', 'ReadyEvent');
   });
 
   // Upsert all guilds to the database

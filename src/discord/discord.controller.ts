@@ -43,7 +43,7 @@ export class DiscordController {
     };
   }
 
-  getBotInviteLink(permissions = '1086089850359'): string {
+  getBotInviteLink(permissions = '626721090433015'): string {
     return `https://discordapp.com/oauth2/authorize?client_id=${this.configService.get('DISCORD_APPLICATION_ID')}&scope=bot&permissions=${permissions}`;
   }
 }

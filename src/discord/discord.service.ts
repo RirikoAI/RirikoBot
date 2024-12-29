@@ -13,6 +13,7 @@ import { GiveawaysService } from '#giveaways/giveaways.service';
 import { EconomyService } from '#economy/economy.service';
 import { GuildMemberAddEvent } from '#discord/events/guild-member-add.event';
 import { GuildMemberRemoveEvent } from '#discord/events/guild-member-remove.event';
+import { GuildCreateEvent } from '#discord/events/guild-create.event';
 
 /**
  * Discord Service
@@ -74,5 +75,6 @@ export class DiscordService {
     VoiceStateUpdateEvent(this.client, this.avcService);
     GuildMemberAddEvent(this.client, this.commandService);
     GuildMemberRemoveEvent(this.client, this.commandService);
+    GuildCreateEvent(this.client, this.commandService);
   }
 }

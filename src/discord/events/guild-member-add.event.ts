@@ -9,6 +9,11 @@ export const GuildMemberAddEvent = (
   commandService: CommandService,
 ) => {
   client.on(Events.GuildMemberAdd, async (member: GuildMember) => {
+    if (member.user.bot) return;
+    Logger.log(
+      `Member has joined the guild ${member.guild.name}: ${member.displayName}`,
+      'GuildMemberAddEvent',
+    );
     try {
       const guild = await commandService.db.guildRepository.findOne({
         where: {

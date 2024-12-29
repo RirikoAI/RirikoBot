@@ -9,6 +9,7 @@ jest.mock('#util/banner/welcome-card.util');
 jest.mock('@nestjs/common', () => ({
   Logger: {
     error: jest.fn(),
+    log: jest.fn(),
   },
 }));
 
@@ -31,6 +32,9 @@ describe('GuildMemberAddEvent', () => {
     } as unknown as CommandService;
 
     member = {
+      user: {
+        bot: false,
+      },
       guild: {
         id: 'guildId',
         channels: {

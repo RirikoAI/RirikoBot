@@ -11,13 +11,27 @@ import { CommandInterface } from '#command/command.interface';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { DatabaseService } from '#database/database.service';
 
+export const guildCommandCategories = [
+  'ai',
+  'economy',
+  'games',
+  'general',
+  'giveaway',
+  'guild',
+  'moderation',
+  'music',
+  'stablediffusion',
+  'twitch',
+];
+
 /**
  * Service for registering and executing commands.
  * @author Earnest Angel (https://angel.net.my)
  */
 @Injectable()
 export class CommandService {
-  private static registeredCommands: Command[] = [];
+  private static registeredGlobalCommands: Command[] = [];
+  private static registeredGuildCommands: Command[] = [];
 
   constructor(
     // Inject dependencies into CommandService
@@ -33,43 +47,79 @@ export class CommandService {
 
   /**
    * Register all commands in the current directory.
-   * If guildId is provided, register the commands only in that guild.
-   * @param guildId
    */
-  async registerCommands(guildId: null | string = null): Promise<Command[]> {
+  async registerInteractionCommands(): Promise<{
+    registeredGlobalCommands: Command[];
+    registeredGuildCommands: Command[];
+  }> {
     // Recursively load all commands in the current directory
     const commandList = CommandsLoaderUtil.loadCommandsInDirectory(
       // __dirname is the current directory (/src/command)
       join(__dirname),
     );
 
-    // Instantiate all commands and register them in registeredCommands array
-    CommandService.registeredCommands = CommandsLoaderUtil.instantiateCommands(
-      commandList,
-      // Pass the services to all commands when instantiating them
-      { ...this.services, db: this.db },
+    // Instantiate global commands and register them in registeredGlobalCommands array
+    CommandService.registeredGlobalCommands =
+      CommandsLoaderUtil.instantiateCommands(
+        commandList.globalCommandList,
+        // Pass the services to all commands when instantiating them
+        { ...this.services, db: this.db },
+      );
+
+    // Instantiate guild commands and register them in registeredGuildCommands array
+    CommandService.registeredGuildCommands =
+      CommandsLoaderUtil.instantiateCommands(
+        commandList.guildCommandList,
+        // Pass the services to all commands when instantiating them
+        { ...this.services, db: this.db },
+      );
+
+    Logger.log(
+      `Registering ${CommandService.registeredGlobalCommands.length} global commands`,
+      'Ririko CommandService',
     );
 
-    // If guildId is provided, register the commands only in that guild
-    if (guildId) {
-      await CommandsLoaderUtil.putInteractionCommandsInAGuild(
-        CommandService.registeredCommands,
+    await CommandsLoaderUtil.registerInteractionCommands(
+      CommandService.registeredGlobalCommands,
+      this.discord.client,
+      this.config,
+    );
+
+    // foreach guilds, register guild commands
+    const guilds = this.discord.client.guilds.cache;
+
+    guilds.forEach((guild) => {
+      Logger.log(
+        `Registering ${CommandService.registeredGuildCommands.length} guild commands for: ${guild.name}`,
+        'Ririko CommandService',
+      );
+      CommandsLoaderUtil.registerInteractionCommandsInAGuild(
+        CommandService.registeredGuildCommands,
         this.discord.client,
         this.config,
-        guildId,
+        guild.id,
       );
-      return CommandService.registeredCommands;
-    } else {
-      // Register all interaction commands in all guilds
-      await CommandsLoaderUtil.putInteractionCommandsInGuilds(
-        CommandService.registeredCommands,
-        this.discord.client,
-        this.config,
-      );
-    }
+    });
 
     // Return the list of registered commands
-    return CommandService.registeredCommands;
+    return {
+      registeredGlobalCommands: CommandService.registeredGlobalCommands,
+      registeredGuildCommands: CommandService.registeredGuildCommands,
+    };
+  }
+
+  get registeredCommands() {
+    return CommandService.registeredGlobalCommands.concat(
+      CommandService.registeredGuildCommands,
+    );
+  }
+
+  get registeredGlobalCommands() {
+    return CommandService.registeredGlobalCommands;
+  }
+
+  get registeredGuildCommands() {
+    return CommandService.registeredGuildCommands;
   }
 
   /**
@@ -80,6 +130,9 @@ export class CommandService {
    * @param message
    */
   async checkPrefixCommand(message: DiscordMessage) {
+    // check if user is messaging from a guild, if not ignore
+    if (!message.guild) return;
+
     // Check if the guild has a custom prefix, if not use the default prefix
     const guildPrefix = await this.getGuildPrefix(message);
     const prefixRegExp = RegexHelperUtil.getPrefixRegExp(guildPrefix);
@@ -94,7 +147,7 @@ export class CommandService {
     message.content = message.content.replace(guildPrefix, '').trim();
 
     // Loop through all registered commands and execute the first one that matches
-    for (const command of CommandService.registeredCommands) {
+    for (const command of this.registeredCommands) {
       if (command.test(message.content)) {
         command.setParams(message.content);
 
@@ -137,7 +190,7 @@ export class CommandService {
     if (!interaction.commandName) return;
 
     // Loop through all registered commands and execute the first one that matches
-    for (const command of CommandService.registeredCommands) {
+    for (const command of this.registeredCommands) {
       if (command.test(interaction.commandName)) {
         // check if the interaction is a message command
         if (interaction.isMessageContextMenuCommand()) {
@@ -179,7 +232,7 @@ export class CommandService {
    */
   async checkButton(interaction: DiscordInteraction) {
     // Loop through all registered commands and execute the first one that matches
-    for (const command of CommandService.registeredCommands) {
+    for (const command of this.registeredCommands) {
       // check if the command has buttons
       if (command.buttons) {
         const button = command.buttons[interaction.customId];
@@ -196,7 +249,7 @@ export class CommandService {
 
   async checkCliCommand(input: string) {
     // Loop through all registered commands and execute the first one that matches
-    for (const command of CommandService.registeredCommands) {
+    for (const command of this.registeredCommands) {
       if (command.test(input)) {
         if (command?.runCli) {
           await this.runCliCommand(command, input);
@@ -209,31 +262,25 @@ export class CommandService {
   }
 
   getCommand(name: string): CommandInterface | undefined {
-    return CommandService.registeredCommands.find(
+    return this.registeredCommands.find(
       (command) => command.name === name,
     ) as any as CommandInterface;
   }
 
   get getAllCommands(): Command[] {
-    return CommandService.registeredCommands;
+    return this.registeredCommands;
   }
 
   get getPrefixCommands(): Command[] {
-    return CommandService.registeredCommands.filter(
-      (command) => command.runPrefix,
-    );
+    return this.registeredCommands.filter((command) => command.runPrefix);
   }
 
   get getSlashCommands(): Command[] {
-    return CommandService.registeredCommands.filter(
-      (command) => command.runSlash,
-    );
+    return this.registeredCommands.filter((command) => command.runSlash);
   }
 
   get getCliCommands(): Command[] {
-    return CommandService.registeredCommands.filter(
-      (command) => command.runCli,
-    );
+    return this.registeredCommands.filter((command) => command.runCli);
   }
 
   async getGuildPrefix(message: DiscordMessage): Promise<string> {

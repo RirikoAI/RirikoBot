@@ -47,6 +47,7 @@ export default class AiCommand extends Command implements CommandInterface {
     const prompt = interaction.options.getString('prompt');
     const channelId = interaction.channel.id;
     const userId = interaction.user.id;
+    const userName = interaction.user.username;
     await interaction.reply('Thinking...');
 
     const guildDB = await this.db.guildRepository.findOne({
@@ -62,6 +63,7 @@ export default class AiCommand extends Command implements CommandInterface {
       interaction,
       prompt,
       userId,
+      userName,
       channelId,
       firstReply,
       model?.value,
@@ -73,8 +75,16 @@ export default class AiCommand extends Command implements CommandInterface {
     const firstReply = await message.reply('Thinking...');
     const channelId = message.channel.id;
     const userId = message.author.id;
+    const userName = message.author.username;
 
-    this.streamToChannel(message, prompt, userId, channelId, firstReply);
+    this.streamToChannel(
+      message,
+      prompt,
+      userId,
+      userName,
+      channelId,
+      firstReply,
+    );
   }
 
   /**
@@ -95,6 +105,7 @@ export default class AiCommand extends Command implements CommandInterface {
     interaction: DiscordInteraction | DiscordMessage,
     prompt: string,
     userId: string,
+    userName: string,
     channelId: string,
     firstReply: DiscordMessage | DiscordInteraction,
     model?: string,
@@ -116,6 +127,14 @@ export default class AiCommand extends Command implements CommandInterface {
           {
             role: 'system',
             content: SystemPrompt(),
+          },
+          {
+            role: 'user',
+            content: `Hello, I am ${userName}. Nice to meet you, Ririko!`,
+          },
+          {
+            role: 'assistant',
+            content: 'Hello ${userName}! Nice to meet you too!',
           },
           // Adding presets (or abilities) here
           ...AiPresets(),
@@ -151,7 +170,7 @@ export default class AiCommand extends Command implements CommandInterface {
         }
 
         // Check if the counter has reached 4, then only edit the message with the new replies
-        if (counter === 7) {
+        if (counter === 10) {
           // Edit the message by id with the new replies
           await currentReply.edit(replyBuffer);
           // Reset the counter
