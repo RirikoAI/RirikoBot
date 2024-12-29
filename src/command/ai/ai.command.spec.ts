@@ -211,6 +211,7 @@ describe('AiCommand', () => {
     it('should stream AI response to the channel', async () => {
       const prompt = 'test prompt';
       const userId = '1234567890';
+      const userName = 'TestUser';
       const channelId = '1234567890';
       const firstReply = { id: 'replyId' } as any;
 
@@ -233,6 +234,7 @@ describe('AiCommand', () => {
         jest.fn() as any,
         prompt,
         userId,
+        userName,
         channelId,
         firstReply,
       );
