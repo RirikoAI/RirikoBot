@@ -9,8 +9,11 @@ export const GuildMemberRemoveEvent = (
   commandService: CommandService,
 ) => {
   client.on(Events.GuildMemberRemove, async (member: GuildMember) => {
-    console.log(
+    if (member.user.bot) return;
+
+    Logger.log(
       `Member has left the guild ${member.guild.name}: ${member.displayName}`,
+      'GuildMemberRemoveEvent',
     );
     try {
       const guild = await commandService.db.guildRepository.findOne({
@@ -23,7 +26,7 @@ export const GuildMemberRemoveEvent = (
         (config) => config.name === 'farewell_enabled',
       );
 
-      if (farewellEnabled.value !== 'true') {
+      if (farewellEnabled?.value !== 'true') {
         return;
       }
 

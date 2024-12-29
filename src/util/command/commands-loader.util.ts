@@ -6,60 +6,17 @@ import { DiscordClient } from '#discord/discord.client';
 import { Routes } from 'discord.js';
 import { ConfigService } from '@nestjs/config';
 import { SharedServices } from '#command/command.module';
+import { guildCommandCategories } from '#command/command.service';
 
-const CommandList: Command[] = [];
+const globalCommandList: Command[] = [];
+const guildCommandList: Command[] = [];
 
-/**
- * Utility class to load and instantiate commands
- * @author Earnest Angel (https://angel.net.my)
- */
-export const CommandsLoaderUtil = {
-  /**
-   * Recursively load all commands in a directory
-   * @param dir
-   */
-  loadCommandsInDirectory: (dir: string): Command[] => {
-    return loadCommandsInDirectory(dir);
-  },
-  /**
-   * Instantiate all commands
-   * @param commandList
-   * @param commandServices
-   */
-  instantiateCommands: (commandList: any, commandServices: SharedServices) => {
-    return instantiateCommands(commandList, commandServices);
-  },
-  /**
-   * Register all slash commands in all guilds
-   * @param commands
-   * @param client
-   * @param config
-   */
-  putInteractionCommandsInGuilds: async (
-    commands: Command[],
-    client: DiscordClient,
-    config: ConfigService,
-  ) => {
-    await putInteractionCommandsInGuilds(commands, client, config);
-  },
-  /**
-   * Register all commands in a specific guild
-   * @param commands
-   * @param client
-   * @param config
-   * @param guildId
-   */
-  putInteractionCommandsInAGuild: async (
-    commands: Command[],
-    client: DiscordClient,
-    config: ConfigService,
-    guildId: string,
-  ) => {
-    await putInteractionCommandsInAGuild(commands, client, config, guildId);
-  },
-};
-
-const loadCommandsInDirectory = (dir: string): Command[] => {
+const loadCommandsInDirectory = (
+  dir: string,
+): {
+  globalCommandList: Command[];
+  guildCommandList: Command[];
+} => {
   const entries = readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -73,15 +30,24 @@ const loadCommandsInDirectory = (dir: string): Command[] => {
     ) {
       // Dynamically require the command class
       const CommandClass = require(fullPath).default;
+      // get the current directory name, could be split by / or \
+      const directoryName = fullPath.split(/\\|\//).slice(-2, -1)[0];
 
       // Check if the class extends the Command base class
       if (CommandClass && CommandClass.prototype instanceof Command) {
-        CommandList.push(CommandClass); // Instantiate and add to the CommandList
+        if (guildCommandCategories.includes(directoryName)) {
+          guildCommandList.push(CommandClass);
+        } else {
+          globalCommandList.push(CommandClass);
+        }
       }
     }
   }
 
-  return CommandList;
+  return {
+    globalCommandList,
+    guildCommandList,
+  };
 };
 
 const instantiateCommands = (
@@ -118,7 +84,7 @@ const instantiateCommands = (
   return instantiatedCommands;
 };
 
-const putInteractionCommandsInGuilds = async (
+const registerInteractionCommands = async (
   commands: Command[],
   client: DiscordClient,
   config: ConfigService,
@@ -132,23 +98,12 @@ const putInteractionCommandsInGuilds = async (
   );
 };
 
-const putInteractionCommandsInAGuild = async (
+const registerInteractionCommandsInAGuild = async (
   commands: Command[],
   client: DiscordClient,
   config: ConfigService,
   guildId: string,
 ) => {
-  // Delete commands in the guild scope, so that we can re-register them.
-  await client?.restClient.put(
-    Routes.applicationGuildCommands(
-      config.get('DISCORD_APPLICATION_ID'),
-      guildId,
-    ),
-    {
-      body: [],
-    },
-  );
-
   await client?.restClient.put(
     Routes.applicationGuildCommands(
       config.get('DISCORD_APPLICATION_ID'),
@@ -200,6 +155,48 @@ const prepareInteractionCommands = (commands: Command[]) => {
   });
 
   return cmd;
+};
+
+/**
+ * Utility class to load and instantiate commands
+ * @author Earnest Angel (https://angel.net.my)
+ */
+export const CommandsLoaderUtil = {
+  /**
+   * Recursively load all commands in a directory
+   * @param dir
+   */
+  loadCommandsInDirectory: (
+    dir: string,
+  ): {
+    globalCommandList: Command[];
+    guildCommandList: Command[];
+  } => {
+    return loadCommandsInDirectory(dir);
+  },
+  /**
+   * Instantiate all commands
+   * @param commandList
+   * @param commandServices
+   */
+  instantiateCommands: (commandList: any, commandServices: SharedServices) => {
+    return instantiateCommands(commandList, commandServices);
+  },
+  /**
+   * Register all slash commands in all guilds
+   * @param commands
+   * @param client
+   * @param config
+   */
+  registerInteractionCommands: registerInteractionCommands,
+  /**
+   * Register all commands in a specific guild
+   * @param commands
+   * @param client
+   * @param config
+   * @param guildId
+   */
+  registerInteractionCommandsInAGuild: registerInteractionCommandsInAGuild,
 };
 
 export default CommandsLoaderUtil;

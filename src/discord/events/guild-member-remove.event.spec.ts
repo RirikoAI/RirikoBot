@@ -8,6 +8,7 @@ import { WelcomeCard } from '#util/banner/welcome-card.util';
 jest.mock('#util/banner/welcome-card.util');
 jest.mock('@nestjs/common', () => ({
   Logger: {
+    log: jest.fn(),
     error: jest.fn(),
   },
 }));
@@ -31,6 +32,9 @@ describe('GuildMemberRemoveEvent', () => {
     } as unknown as CommandService;
 
     member = {
+      user: {
+        bot: false,
+      },
       guild: {
         id: 'guildId',
         channels: {

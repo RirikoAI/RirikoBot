@@ -50,7 +50,7 @@ export default class AiModelCommand
         return;
       }
 
-      const model = this.allParams;
+      const model = this.params.slice(1).join(' ');
       const response = await this.setModel(message.guild, model);
 
       if (!response) {

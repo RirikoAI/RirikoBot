@@ -25,7 +25,17 @@ describe('CommandService', () => {
         },
         {
           provide: DiscordService,
-          useValue: { client: { musicPlayer: {} } },
+          useValue: {
+            client: {
+              musicPlayer: {},
+              guilds: {
+                cache: [{ id: '123', prefix: '!' }],
+              },
+              restClient: {
+                put: jest.fn(),
+              },
+            },
+          },
         },
         {
           provide: DatabaseService,
@@ -54,15 +64,21 @@ describe('CommandService', () => {
     it('should register commands', async () => {
       jest
         .spyOn(CommandsLoaderUtil, 'loadCommandsInDirectory')
-        .mockReturnValue([]);
+        .mockReturnValue({
+          globalCommandList: [],
+          guildCommandList: [],
+        });
       jest.spyOn(CommandsLoaderUtil, 'instantiateCommands').mockReturnValue([]);
       jest
-        .spyOn(CommandsLoaderUtil, 'putInteractionCommandsInGuilds')
+        .spyOn(CommandsLoaderUtil, 'registerInteractionCommands')
         .mockResolvedValue(undefined);
 
-      const result = await service.registerCommands();
+      const result = await service.registerInteractionCommands();
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        registeredGlobalCommands: [],
+        registeredGuildCommands: [],
+      });
     });
   });
 
@@ -78,7 +94,7 @@ describe('CommandService', () => {
       command.setParams = jest.fn();
       command.runPrefix = jest.fn();
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
       jest.spyOn(service, 'getGuildPrefix').mockResolvedValue('!');
 
       await service.checkPrefixCommand(message);
@@ -100,7 +116,7 @@ describe('CommandService', () => {
       command.test = jest.fn().mockReturnValue(true);
       command.runSlash = jest.fn();
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       await service.checkInteractionCommand(interaction);
 
@@ -145,7 +161,7 @@ describe('CommandService', () => {
         testButton: jest.fn(),
       };
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       await service.checkButton(interaction);
 
@@ -161,7 +177,7 @@ describe('CommandService', () => {
         testButton: jest.fn(),
       };
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       await service.checkButton(interaction);
 
@@ -176,7 +192,7 @@ describe('CommandService', () => {
       command.test = jest.fn().mockReturnValue(true);
       command.runCli = jest.fn();
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       await service.checkCliCommand(input);
 
@@ -190,7 +206,7 @@ describe('CommandService', () => {
       command.test = jest.fn().mockReturnValue(false);
       command.runCli = jest.fn();
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       await service.checkCliCommand(input);
 
@@ -204,7 +220,7 @@ describe('CommandService', () => {
       const command = new Command(sharedServices);
       command.name = 'test';
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       const result = service.getCommand('test');
 
@@ -215,7 +231,7 @@ describe('CommandService', () => {
       const command = new Command(sharedServices);
       command.name = 'test';
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       const result = service.getCommand('unknown');
 
@@ -228,7 +244,7 @@ describe('CommandService', () => {
       const command1 = new Command(sharedServices);
       const command2 = new Command(sharedServices);
 
-      CommandService['registeredCommands'] = [command1, command2];
+      CommandService['registeredGlobalCommands'] = [command1, command2];
 
       const result = service.getAllCommands;
 
@@ -242,7 +258,7 @@ describe('CommandService', () => {
       command1.runPrefix = jest.fn();
       const command2 = new Command(sharedServices);
 
-      CommandService['registeredCommands'] = [command1, command2];
+      CommandService['registeredGlobalCommands'] = [command1, command2];
 
       const result = service.getPrefixCommands;
 
@@ -256,7 +272,7 @@ describe('CommandService', () => {
       command1.runSlash = jest.fn();
       const command2 = new Command(sharedServices);
 
-      CommandService['registeredCommands'] = [command1, command2];
+      CommandService['registeredGlobalCommands'] = [command1, command2];
 
       const result = service.getSlashCommands;
 
@@ -270,7 +286,7 @@ describe('CommandService', () => {
       command1.runCli = jest.fn();
       const command2 = new Command(sharedServices);
 
-      CommandService['registeredCommands'] = [command1, command2];
+      CommandService['registeredGlobalCommands'] = [command1, command2];
 
       const result = service.getCliCommands;
 
@@ -286,7 +302,7 @@ describe('CommandService', () => {
           throw new Error('Error loading commands');
         });
 
-      await expect(service.registerCommands()).rejects.toThrow(
+      await expect(service.registerInteractionCommands()).rejects.toThrow(
         'Error loading commands',
       );
     });
@@ -304,7 +320,7 @@ describe('CommandService', () => {
         }),
       };
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       await service.checkButton(interaction);
 
@@ -324,7 +340,7 @@ describe('CommandService', () => {
         throw new Error('Error');
       });
 
-      CommandService['registeredCommands'] = [command];
+      CommandService['registeredGlobalCommands'] = [command];
 
       await service.checkCliCommand(input);
 

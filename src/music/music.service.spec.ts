@@ -904,11 +904,15 @@ describe('MusicService', () => {
     it('should play music if the message is sent in a music channel', async () => {
       message = {
         content: 'some music',
-        startWith: true,
+        startWith: false,
         guild: { id: '1000000001112223334' },
         channel: { id: '456', send: jest.fn() },
         member: { voice: { channel: {} } },
       };
+
+      service.db.musicChannelRepository.findOne = jest.fn().mockResolvedValue({
+        id: '456',
+      });
 
       await service.handleMusic(message);
 

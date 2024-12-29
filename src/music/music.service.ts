@@ -197,10 +197,13 @@ export class MusicService {
   }
 
   async handleMusic(message: any) {
+    // if message is not from a guild, return
+    if (!message.guild) return;
+
     // get the guild prefix
     const guild = await this.db.guildRepository.findOne({
       where: {
-        id: message.guild.id,
+        id: message?.guild?.id,
       },
     });
 
@@ -211,7 +214,7 @@ export class MusicService {
     // check if the message has a prefix
     const prefix = guild.prefix;
 
-    if (message.content.startsWith(prefix)) {
+    if (message.content.startsWith(prefix) || message.content.startsWith('!')) {
       return;
     }
 

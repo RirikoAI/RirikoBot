@@ -33,7 +33,7 @@ export async function bootstrap() {
   await app.listen(configService.get('app.port'), async () => {
     await discordService.connect();
     discordService.registerEvents();
-    await commandService.registerCommands();
+    await commandService.registerInteractionCommands();
     Logger.log(
       `Server listening on port ${configService.get('app.port')}`,
       'Ririko Main',
