@@ -196,11 +196,11 @@ export default class AiCommand extends Command implements CommandInterface {
 
   checkPostReplyActions(reply: string): PostReplyActionType {
     try {
-      let postReplyActions: PostReplyActionType = [];
+      const postReplyActions: PostReplyActionType = [];
       // check if the command contains enclosing 🎵 insert the song title here 🎵.
       // if so, send the play command to the music command.
       if (reply.includes('🎵')) {
-        let songTitle = reply.match(/🎵(.*?)🎵/)[1];
+        const songTitle = reply.match(/🎵(.*?)🎵/)[1];
         postReplyActions.push({ action: 'play', payload: songTitle });
       }
 
