@@ -26,8 +26,14 @@ describe('AppConfig', () => {
     const config = configService.get('app');
 
     expect(config).toEqual({
-      nodeEnv: configService.get('app.nodeEnv'),
-      port: configService.get('app.port'),
+      backendDomain: expect.any(String),
+      fallbackLanguage: expect.any(String),
+      frontendDomain: undefined,
+      name: expect.any(String),
+      workingDirectory: expect.any(String),
+      nodeEnv: expect.any(String),
+      port: expect.any(Number),
+      headerLanguage: expect.any(String),
     });
   });
 });
