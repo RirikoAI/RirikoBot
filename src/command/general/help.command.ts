@@ -36,7 +36,16 @@ export default class HelpCommand extends Command implements CommandInterface {
     const prefix = await this.getGuildPrefix(message);
     let embed: EmbedBuilder;
 
-    if (this.params.length === 0) {
+    if (
+      ['react', 'reacts', 'reaction', 'reactions'].includes(
+        this.params[0]?.toLowerCase(),
+      )
+    ) {
+      embed = this.createReactionsHelpEmbed(
+        this.getCategorizedPrefixCommands(),
+        'prefix',
+      );
+    } else if (this.params.length === 0) {
       embed = this.createHelpEmbed(
         this.getCategorizedPrefixCommands(),
         'prefix',
@@ -55,7 +64,16 @@ export default class HelpCommand extends Command implements CommandInterface {
     const commandName = (interaction as any).options.getString('command');
     let embed: EmbedBuilder;
 
-    if (commandName) {
+    if (
+      ['react', 'reacts', 'reaction', 'reactions'].includes(
+        commandName?.toLowerCase(),
+      )
+    ) {
+      embed = this.createReactionsHelpEmbed(
+        this.getCategorizedSlashCommands(),
+        'slash',
+      );
+    } else if (commandName) {
       const command = this.services.commandService.getCommand(commandName);
       if (!command) {
         await interaction.reply({
@@ -79,7 +97,7 @@ export default class HelpCommand extends Command implements CommandInterface {
     const commands = this.services.commandService.getCliCommands;
 
     if (params.length === 0) {
-      let table = [];
+      const table = [];
       commands.forEach((command) => {
         table.push({
           name: command.name,
@@ -98,6 +116,58 @@ export default class HelpCommand extends Command implements CommandInterface {
     }
   }
 
+  private createReactionsHelpEmbed(
+    commandsMap: Map<string, CommandInterface[]>,
+    type: 'prefix' | 'slash',
+  ): EmbedBuilder {
+    const embed = this.getBasicEmbed()
+      .setTitle(`📚 Help`)
+      .setDescription(
+        `List of available ${type} reaction commands for Ririko:`,
+      );
+
+    const fields: { name: string; value: string; inline: boolean }[] = [];
+    const categoryName = 'reactions';
+    const commandsPerField: number = 10;
+
+    Array.from(commandsMap)
+      .filter(([category]) => category === categoryName)
+      .forEach(([category, commands]) => {
+        let currentFieldValue = '';
+        let startIndex = 1;
+
+        commands.forEach((command, index) => {
+          const commandText = `**${command.name}** - ${command.description}\n`;
+          if (
+            currentFieldValue.length + commandText.length > 1024 ||
+            index + 1 - startIndex >= commandsPerField
+          ) {
+            fields.push({
+              name: `Reactions ${startIndex}-${index}`,
+              value: currentFieldValue.trimEnd(),
+              inline: false,
+            });
+            currentFieldValue = '';
+            startIndex = index + 1;
+          }
+
+          currentFieldValue += commandText;
+        });
+
+        if (currentFieldValue) {
+          fields.push({
+            name: `Reactions ${startIndex}-${commands.length}`,
+            value: currentFieldValue.trimEnd(),
+            inline: false,
+          });
+        }
+      });
+
+    embed.addFields(fields);
+
+    return embed;
+  }
+
   private createHelpEmbed(
     commandsMap: Map<string, CommandInterface[]>,
     type: 'prefix' | 'slash',
@@ -106,14 +176,22 @@ export default class HelpCommand extends Command implements CommandInterface {
       .setTitle(`📚 Help`)
       .setDescription(`List of available ${type} commands for Ririko:`);
 
-    const fields = Array.from(commandsMap).map(([category, commands]) => ({
-      name: `__${category.charAt(0).toUpperCase() + category.slice(1)}__`,
-      value:
-        commands
-          .map((command) => `**${command.name}** - ${command.description}`)
-          .join('\n') + '\n\u200b',
+    const fields = Array.from(commandsMap)
+      .filter(([category]) => category !== 'reactions')
+      .map(([category, commands]) => ({
+        name: `__${category.charAt(0).toUpperCase() + category.slice(1)}__`,
+        value:
+          commands
+            .map((command) => `**${command.name}** - ${command.description}`)
+            .join('\n') + '\n\u200b',
+        inline: false,
+      }));
+
+    fields.push({
+      name: `__Reactions__`,
+      value: `There are over 60 reactions like **hug**, **blush**, **kiss** and many more. \n**help reacts** - For a full list of reactions.\n\u200b`,
       inline: false,
-    }));
+    });
 
     embed.addFields(fields);
     return embed;
