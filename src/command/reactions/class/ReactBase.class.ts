@@ -60,7 +60,7 @@ export abstract class ReactBase extends Command implements CommandInterface {
   private async createReactEmbed(username: string): Promise<EmbedBuilder> {
     try {
       const { data } = await axios.get<{ url: string }>(
-        `https://api.otakugifs.xyz/gif?reaction=${this.reactionType}&format=gif`
+        `https://api.otakugifs.xyz/gif?reaction=${this.reactionType}&format=gif`,
       );
 
       return new EmbedBuilder()
@@ -68,7 +68,9 @@ export abstract class ReactBase extends Command implements CommandInterface {
         .setFooter({ text: `Requested by ${username}` });
     } catch (e) {
       return new EmbedBuilder()
-        .setDescription(`Error fetching the image.\nYou'll have to use your imagination for this one!`)
+        .setDescription(
+          `Error fetching the image.\nYou'll have to use your imagination for this one!`,
+        )
         .setFooter({ text: `Requested by ${username}` });
     }
   }
@@ -79,7 +81,10 @@ export abstract class ReactBase extends Command implements CommandInterface {
    * @param targetUserId The ID of the mentioned user, if any.
    * @returns The target ID or null if self-targeted or not mentioned.
    */
-  private getTargetId(userId: string, targetUserId?: string | null): string | null {
+  private getTargetId(
+    userId: string,
+    targetUserId?: string | null,
+  ): string | null {
     if (!targetUserId || targetUserId === userId) {
       return null;
     }
@@ -92,7 +97,10 @@ export abstract class ReactBase extends Command implements CommandInterface {
    * @param target The target user ID or null.
    * @returns The formatted reply content.
    */
-  private getReplyContent(user: { toString: () => string }, target: string | null): string {
+  private getReplyContent(
+    user: { toString: () => string },
+    target: string | null,
+  ): string {
     return target
       ? `${user} ${this.content} <@${target}>`
       : `${user} ${this.noTargetContent}`;

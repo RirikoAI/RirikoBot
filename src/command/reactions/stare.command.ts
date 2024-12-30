@@ -6,7 +6,8 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 export default class StareCommand extends ReactBase {
   name = 'stare';
   regex = new RegExp('^stare$|^stare ', 'i');
-  description = 'Fix your gaze on someone with intensity, curiosity, or confusion.';
+  description =
+    'Fix your gaze on someone with intensity, curiosity, or confusion.';
   category = 'reactions';
   usageExamples = ['stare @user'];
   reactionType = 'stare';

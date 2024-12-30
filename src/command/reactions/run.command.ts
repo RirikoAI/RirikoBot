@@ -11,7 +11,8 @@ export default class RunCommand extends ReactBase {
   usageExamples = ['run @user'];
   reactionType = 'run';
   content = 'ran away from';
-  noTargetContent = 'bolted off in a random direction, running from their own imagination';
+  noTargetContent =
+    'bolted off in a random direction, running from their own imagination';
 
   slashOptions = [
     {

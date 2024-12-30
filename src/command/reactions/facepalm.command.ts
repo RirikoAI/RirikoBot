@@ -6,12 +6,14 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 export default class FacepalmCommand extends ReactBase {
   name = 'facepalm';
   regex = new RegExp('^facepalm$|^facepalm ', 'i');
-  description = 'Plant your palm firmly on your face because someone left you speechless.';
+  description =
+    'Plant your palm firmly on your face because someone left you speechless.';
   category = 'reactions';
   usageExamples = ['facepalm @user'];
   reactionType = 'facepalm';
   content = 'facepalmed dramatically at';
-  noTargetContent = 'let out a sigh and facepalmed at their own thoughts, questioning everything';
+  noTargetContent =
+    'let out a sigh and facepalmed at their own thoughts, questioning everything';
 
   slashOptions = [
     {

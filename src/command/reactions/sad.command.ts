@@ -11,7 +11,8 @@ export default class SadCommand extends ReactBase {
   usageExamples = ['sad @user'];
   reactionType = 'sad';
   content = 'looked sad while thinking about';
-  noTargetContent = 'sat quietly with a heavy heart, lost in their own thoughts of sadness';
+  noTargetContent =
+    'sat quietly with a heavy heart, lost in their own thoughts of sadness';
 
   slashOptions = [
     {

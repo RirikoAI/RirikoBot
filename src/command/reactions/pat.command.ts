@@ -6,12 +6,14 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 export default class PatCommand extends ReactBase {
   name = 'pat';
   regex = new RegExp('^pat$|^pat ', 'i');
-  description = 'Give someone a gentle pat on the head to show they’re appreciated!';
+  description =
+    'Give someone a gentle pat on the head to show they’re appreciated!';
   category = 'reactions';
   usageExamples = ['pat @user'];
   reactionType = 'pat';
   content = 'gently patted';
-  noTargetContent = 'patted the air awkwardly, hoping someone would appear to receive it';
+  noTargetContent =
+    'patted the air awkwardly, hoping someone would appear to receive it';
 
   slashOptions = [
     {

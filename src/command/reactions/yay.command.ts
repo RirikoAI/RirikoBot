@@ -11,7 +11,8 @@ export default class YayCommand extends ReactBase {
   usageExamples = ['yay @user'];
   reactionType = 'yay';
   content = 'cheered excitedly at';
-  noTargetContent = 'threw their hands in the air and shouted "Yay!" with pure joy';
+  noTargetContent =
+    'threw their hands in the air and shouted "Yay!" with pure joy';
 
   slashOptions = [
     {

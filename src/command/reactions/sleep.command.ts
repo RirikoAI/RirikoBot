@@ -11,7 +11,8 @@ export default class SleepCommand extends ReactBase {
   usageExamples = ['sleep @user'];
   reactionType = 'sleep';
   content = 'fell asleep peacefully next to';
-  noTargetContent = 'curled up in a cozy spot and drifted off into a peaceful slumber';
+  noTargetContent =
+    'curled up in a cozy spot and drifted off into a peaceful slumber';
 
   slashOptions = [
     {

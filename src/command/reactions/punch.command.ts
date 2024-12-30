@@ -11,12 +11,14 @@ export default class PunchCommand extends ReactBase {
   usageExamples = ['punch @user'];
   reactionType = 'punch';
   content = 'threw a punch at';
-  noTargetContent = 'swung a punch into the air, fighting imaginary foes with style';
+  noTargetContent =
+    'swung a punch into the air, fighting imaginary foes with style';
 
   slashOptions = [
     {
       name: 'target',
-      description: 'The person you want to throw a punch at (hopefully playfully).',
+      description:
+        'The person you want to throw a punch at (hopefully playfully).',
       type: SlashCommandOptionTypes.User,
       required: false,
     },

@@ -11,7 +11,8 @@ export default class NyahCommand extends ReactBase {
   usageExamples = ['nyah @user'];
   reactionType = 'nyah';
   content = 'teased with a playful "nyah~" at';
-  noTargetContent = 'let out a cute "nyah~" to the world, feeling delightfully mischievous';
+  noTargetContent =
+    'let out a cute "nyah~" to the world, feeling delightfully mischievous';
 
   slashOptions = [
     {

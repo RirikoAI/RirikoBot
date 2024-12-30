@@ -11,7 +11,8 @@ export default class WaveCommand extends ReactBase {
   usageExamples = ['wave @user'];
   reactionType = 'wave';
   content = 'waved cheerfully at';
-  noTargetContent = 'waved enthusiastically at no one in particular, spreading good vibes';
+  noTargetContent =
+    'waved enthusiastically at no one in particular, spreading good vibes';
 
   slashOptions = [
     {

@@ -11,7 +11,8 @@ export default class LoveCommand extends ReactBase {
   usageExamples = ['love @user'];
   reactionType = 'love';
   content = 'shared heartfelt love with';
-  noTargetContent = 'sent love into the world, embracing their own heart with warmth';
+  noTargetContent =
+    'sent love into the world, embracing their own heart with warmth';
 
   slashOptions = [
     {

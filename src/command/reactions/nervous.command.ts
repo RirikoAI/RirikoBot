@@ -16,7 +16,8 @@ export default class NervousCommand extends ReactBase {
   slashOptions = [
     {
       name: 'target',
-      description: 'The person that is making you feel all fidgety and anxious.',
+      description:
+        'The person that is making you feel all fidgety and anxious.',
       type: SlashCommandOptionTypes.User,
       required: false,
     },

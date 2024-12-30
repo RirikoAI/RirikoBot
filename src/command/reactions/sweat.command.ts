@@ -11,7 +11,8 @@ export default class SweatCommand extends ReactBase {
   usageExamples = ['sweat @user'];
   reactionType = 'sweat';
   content = 'started sweating nervously at';
-  noTargetContent = 'wiped their forehead nervously, beads of sweat forming under the pressure';
+  noTargetContent =
+    'wiped their forehead nervously, beads of sweat forming under the pressure';
 
   slashOptions = [
     {

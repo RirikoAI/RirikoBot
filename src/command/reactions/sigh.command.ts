@@ -11,7 +11,8 @@ export default class SighCommand extends ReactBase {
   usageExamples = ['sigh @user'];
   reactionType = 'sigh';
   content = 'let out a heavy sigh while looking at';
-  noTargetContent = 'let out a deep sigh, staring into the distance with a wistful expression';
+  noTargetContent =
+    'let out a deep sigh, staring into the distance with a wistful expression';
 
   slashOptions = [
     {

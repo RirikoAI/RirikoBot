@@ -11,7 +11,8 @@ export default class RollCommand extends ReactBase {
   usageExamples = ['roll @user'];
   reactionType = 'roll';
   content = 'rolled around near';
-  noTargetContent = 'rolled around on the floor dramatically, as if life were just too much';
+  noTargetContent =
+    'rolled around on the floor dramatically, as if life were just too much';
 
   slashOptions = [
     {

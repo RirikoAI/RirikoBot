@@ -11,7 +11,8 @@ export default class ScaredCommand extends ReactBase {
   usageExamples = ['scared @user'];
   reactionType = 'scared';
   content = 'looked scared of';
-  noTargetContent = 'shivered nervously, looking around for imaginary monsters in the shadows';
+  noTargetContent =
+    'shivered nervously, looking around for imaginary monsters in the shadows';
 
   slashOptions = [
     {

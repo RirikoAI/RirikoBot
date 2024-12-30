@@ -11,7 +11,8 @@ export default class SmugCommand extends ReactBase {
   usageExamples = ['smug @user'];
   reactionType = 'smug';
   content = 'gave a smug look to';
-  noTargetContent = 'smirked confidently, feeling undeniably pleased with themselves';
+  noTargetContent =
+    'smirked confidently, feeling undeniably pleased with themselves';
 
   slashOptions = [
     {

@@ -11,7 +11,8 @@ export default class YesCommand extends ReactBase {
   usageExamples = ['yes @user'];
   reactionType = 'yes';
   content = 'enthusiastically said yes to';
-  noTargetContent = 'pumped their fist in the air and shouted "Yes!" with boundless enthusiasm';
+  noTargetContent =
+    'pumped their fist in the air and shouted "Yes!" with boundless enthusiasm';
 
   slashOptions = [
     {

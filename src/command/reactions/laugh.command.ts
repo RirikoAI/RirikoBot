@@ -16,7 +16,8 @@ export default class LaughCommand extends ReactBase {
   slashOptions = [
     {
       name: 'target',
-      description: 'The person you want to laugh with or at (in good spirit, of course!).',
+      description:
+        'The person you want to laugh with or at (in good spirit, of course!).',
       type: SlashCommandOptionTypes.User,
       required: false,
     },

@@ -11,7 +11,8 @@ export default class SorryCommand extends ReactBase {
   usageExamples = ['sorry @user'];
   reactionType = 'sorry';
   content = 'apologized sincerely to';
-  noTargetContent = 'looked down apologetically, muttering a heartfelt "I’m sorry"';
+  noTargetContent =
+    'looked down apologetically, muttering a heartfelt "I’m sorry"';
 
   slashOptions = [
     {

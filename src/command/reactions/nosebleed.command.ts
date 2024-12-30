@@ -11,7 +11,8 @@ export default class NosebleedCommand extends ReactBase {
   usageExamples = ['nosebleed @user'];
   reactionType = 'nosebleed';
   content = 'had a nosebleed because of';
-  noTargetContent = 'felt their face heat up and had a sudden, dramatic nosebleed';
+  noTargetContent =
+    'felt their face heat up and had a sudden, dramatic nosebleed';
 
   slashOptions = [
     {

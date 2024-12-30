@@ -11,7 +11,8 @@ export default class NuzzleCommand extends ReactBase {
   usageExamples = ['nuzzle @user'];
   reactionType = 'nuzzle';
   content = 'nuzzled up close to';
-  noTargetContent = 'curled up in a cozy spot and nuzzled into a soft blanket for comfort';
+  noTargetContent =
+    'curled up in a cozy spot and nuzzled into a soft blanket for comfort';
 
   slashOptions = [
     {

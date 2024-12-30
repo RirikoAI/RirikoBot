@@ -11,7 +11,8 @@ export default class PinchCommand extends ReactBase {
   usageExamples = ['pinch @user'];
   reactionType = 'pinch';
   content = 'gave a pinch to';
-  noTargetContent = 'pinched their own cheek to make sure they weren’t dreaming';
+  noTargetContent =
+    'pinched their own cheek to make sure they weren’t dreaming';
 
   slashOptions = [
     {

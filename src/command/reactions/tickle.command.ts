@@ -11,7 +11,8 @@ export default class TickleCommand extends ReactBase {
   usageExamples = ['tickle @user'];
   reactionType = 'tickle';
   content = 'playfully tickled';
-  noTargetContent = 'wiggled their fingers in the air, pretending to tickle an invisible friend';
+  noTargetContent =
+    'wiggled their fingers in the air, pretending to tickle an invisible friend';
 
   slashOptions = [
     {

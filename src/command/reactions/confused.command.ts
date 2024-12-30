@@ -6,7 +6,8 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 export default class ConfusedCommand extends ReactBase {
   name = 'confused';
   regex = new RegExp('^confused$|^confused ', 'i');
-  description = 'Tilt your head, scratch your chin, and show utter confusion toward someone.';
+  description =
+    'Tilt your head, scratch your chin, and show utter confusion toward someone.';
   category = 'reactions';
   usageExamples = ['confused @user'];
   reactionType = 'confused';

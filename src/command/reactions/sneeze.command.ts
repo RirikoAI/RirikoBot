@@ -11,7 +11,8 @@ export default class SneezeCommand extends ReactBase {
   usageExamples = ['sneeze @user'];
   reactionType = 'sneeze';
   content = 'sneezed loudly at';
-  noTargetContent = 'sneezed loudly into the air, startling themselves in the process';
+  noTargetContent =
+    'sneezed loudly into the air, startling themselves in the process';
 
   slashOptions = [
     {

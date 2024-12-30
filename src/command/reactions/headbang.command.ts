@@ -11,12 +11,14 @@ export default class HeadbangCommand extends ReactBase {
   usageExamples = ['headbang @user'];
   reactionType = 'headbang';
   content = 'banged their head against the wall because of';
-  noTargetContent = 'banged their head against the wall repeatedly, consumed by frustration';
+  noTargetContent =
+    'banged their head against the wall repeatedly, consumed by frustration';
 
   slashOptions = [
     {
       name: 'target',
-      description: 'The person who drove you to bang your head against the wall.',
+      description:
+        'The person who drove you to bang your head against the wall.',
       type: SlashCommandOptionTypes.User,
       required: false,
     },

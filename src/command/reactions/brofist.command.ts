@@ -11,7 +11,8 @@ export default class BrofistCommand extends ReactBase {
   usageExamples = ['brofist @user'];
   reactionType = 'brofist';
   content = 'threw a legendary brofist at';
-  noTargetContent = 'threw a brofist into the air, radiating pure camaraderie to everyone and no one';
+  noTargetContent =
+    'threw a brofist into the air, radiating pure camaraderie to everyone and no one';
 
   slashOptions = [
     {

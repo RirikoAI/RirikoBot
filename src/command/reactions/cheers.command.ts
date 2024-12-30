@@ -11,7 +11,8 @@ export default class CheersCommand extends ReactBase {
   usageExamples = ['cheers @user'];
   reactionType = 'cheers';
   content = 'raised a toast and clinked glasses with';
-  noTargetContent = 'raised a glass in celebration, toasting to themselves with a satisfied smile';
+  noTargetContent =
+    'raised a glass in celebration, toasting to themselves with a satisfied smile';
 
   slashOptions = [
     {

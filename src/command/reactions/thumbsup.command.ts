@@ -11,7 +11,8 @@ export default class ThumbsUpCommand extends ReactBase {
   usageExamples = ['thumbsup @user'];
   reactionType = 'thumbsup';
   content = 'gave a confident thumbs-up to';
-  noTargetContent = 'raised a confident thumbs-up to the air, brimming with positivity';
+  noTargetContent =
+    'raised a confident thumbs-up to the air, brimming with positivity';
 
   slashOptions = [
     {

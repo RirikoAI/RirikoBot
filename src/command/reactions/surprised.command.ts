@@ -11,7 +11,8 @@ export default class SurprisedCommand extends ReactBase {
   usageExamples = ['surprised @user'];
   reactionType = 'surprised';
   content = 'looked completely surprised at';
-  noTargetContent = 'gasped in astonishment, their face frozen in shock at the unexpected';
+  noTargetContent =
+    'gasped in astonishment, their face frozen in shock at the unexpected';
 
   slashOptions = [
     {

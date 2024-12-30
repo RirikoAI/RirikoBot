@@ -11,12 +11,14 @@ export default class SipCommand extends ReactBase {
   usageExamples = ['sip @user'];
   reactionType = 'sip';
   content = 'calmly sipped their drink while looking at';
-  noTargetContent = 'took a slow, contemplative sip of their drink, savoring the quiet moment';
+  noTargetContent =
+    'took a slow, contemplative sip of their drink, savoring the quiet moment';
 
   slashOptions = [
     {
       name: 'target',
-      description: 'The person you want to subtly observe while sipping your drink.',
+      description:
+        'The person you want to subtly observe while sipping your drink.',
       type: SlashCommandOptionTypes.User,
       required: false,
     },

@@ -11,7 +11,8 @@ export default class SmileCommand extends ReactBase {
   usageExamples = ['smile @user'];
   reactionType = 'smile';
   content = 'smiled warmly at';
-  noTargetContent = 'smiled softly to themselves, letting their happiness brighten the room';
+  noTargetContent =
+    'smiled softly to themselves, letting their happiness brighten the room';
 
   slashOptions = [
     {

@@ -11,7 +11,8 @@ export default class StopCommand extends ReactBase {
   usageExamples = ['stopit @user'];
   reactionType = 'stop';
   content = 'firmly demanded a stop from';
-  noTargetContent = 'held up a hand and shouted "Stop!" into the empty air, standing their ground';
+  noTargetContent =
+    'held up a hand and shouted "Stop!" into the empty air, standing their ground';
 
   slashOptions = [
     {

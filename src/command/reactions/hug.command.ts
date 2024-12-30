@@ -6,7 +6,8 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 export default class HugCommand extends ReactBase {
   name = 'hug';
   regex = new RegExp('^hug$|^hug ', 'i');
-  description = 'Wrap your arms around someone to show them some love and care!';
+  description =
+    'Wrap your arms around someone to show them some love and care!';
   category = 'reactions';
   usageExamples = ['hug @user'];
   reactionType = 'hug';

@@ -11,12 +11,14 @@ export default class CoolCommand extends ReactBase {
   usageExamples = ['cool @user'];
   reactionType = 'cool';
   content = 'flashed their coolest moves at';
-  noTargetContent = 'casually adjusted their shades and smirked at their own reflection';
+  noTargetContent =
+    'casually adjusted their shades and smirked at their own reflection';
 
   slashOptions = [
     {
       name: 'target',
-      description: 'The person you want to dazzle with your unmatched coolness.',
+      description:
+        'The person you want to dazzle with your unmatched coolness.',
       type: SlashCommandOptionTypes.User,
       required: false,
     },

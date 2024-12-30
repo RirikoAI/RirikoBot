@@ -6,12 +6,14 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 export default class DroolCommand extends ReactBase {
   name = 'drool';
   regex = new RegExp('^drool$|^drool ', 'i');
-  description = 'Let your jaw drop and drool over someone who is just that amazing.';
+  description =
+    'Let your jaw drop and drool over someone who is just that amazing.';
   category = 'reactions';
   usageExamples = ['drool @user'];
   reactionType = 'drool';
   content = 'was left drooling over';
-  noTargetContent = 'stared into space, drooling over thoughts too good to handle';
+  noTargetContent =
+    'stared into space, drooling over thoughts too good to handle';
 
   slashOptions = [
     {

@@ -11,7 +11,8 @@ export default class PeekCommand extends ReactBase {
   usageExamples = ['peek @user'];
   reactionType = 'peek';
   content = 'peeked curiously at';
-  noTargetContent = 'peeked around the corner cautiously, seeing nothing but their own shadow';
+  noTargetContent =
+    'peeked around the corner cautiously, seeing nothing but their own shadow';
 
   slashOptions = [
     {

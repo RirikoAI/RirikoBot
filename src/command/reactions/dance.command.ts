@@ -6,7 +6,8 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 export default class DanceCommand extends ReactBase {
   name = 'dance';
   regex = new RegExp('^dance$|^dance ', 'i');
-  description = 'Bust out some moves alone or invite someone to join the party!';
+  description =
+    'Bust out some moves alone or invite someone to join the party!';
   category = 'reactions';
   usageExamples = ['dance @user'];
   reactionType = 'dance';

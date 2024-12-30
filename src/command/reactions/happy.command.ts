@@ -6,12 +6,14 @@ import { SlashCommandOptionTypes } from '#command/command.types';
 export default class HappyCommand extends ReactBase {
   name = 'happy';
   regex = new RegExp('^happy$|^happy ', 'i');
-  description = 'Spread joy and share a moment of happiness with someone special!';
+  description =
+    'Spread joy and share a moment of happiness with someone special!';
   category = 'reactions';
   usageExamples = ['happy @user'];
   reactionType = 'happy';
   content = 'shared a joyful moment with';
-  noTargetContent = 'smiled brightly to themselves, radiating happiness in their own little bubble';
+  noTargetContent =
+    'smiled brightly to themselves, radiating happiness in their own little bubble';
 
   slashOptions = [
     {

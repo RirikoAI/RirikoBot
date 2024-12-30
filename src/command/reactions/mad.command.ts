@@ -11,7 +11,8 @@ export default class MadCommand extends ReactBase {
   usageExamples = ['mad @user'];
   reactionType = 'mad';
   content = 'is very mad at';
-  noTargetContent = 'crossed their arms and fumed silently, steaming like a kettle';
+  noTargetContent =
+    'crossed their arms and fumed silently, steaming like a kettle';
 
   slashOptions = [
     {

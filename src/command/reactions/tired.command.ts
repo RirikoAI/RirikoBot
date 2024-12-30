@@ -11,7 +11,8 @@ export default class TiredCommand extends ReactBase {
   usageExamples = ['tired @user'];
   reactionType = 'tired';
   content = 'looked utterly tired while glancing at';
-  noTargetContent = 'rubbed their eyes and let out a deep yawn, looking completely drained';
+  noTargetContent =
+    'rubbed their eyes and let out a deep yawn, looking completely drained';
 
   slashOptions = [
     {

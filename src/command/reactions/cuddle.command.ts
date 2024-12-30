@@ -11,7 +11,8 @@ export default class CuddleCommand extends ReactBase {
   usageExamples = ['cuddle @user'];
   reactionType = 'cuddle';
   content = 'snuggled up close to';
-  noTargetContent = 'wrapped themselves in a cozy blanket for some self-love snuggles';
+  noTargetContent =
+    'wrapped themselves in a cozy blanket for some self-love snuggles';
 
   slashOptions = [
     {

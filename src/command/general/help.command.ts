@@ -36,10 +36,20 @@ export default class HelpCommand extends Command implements CommandInterface {
     const prefix = await this.getGuildPrefix(message);
     let embed: EmbedBuilder;
 
-    if (['react', 'reacts', 'reaction', 'reactions'].includes(this.params[0]?.toLowerCase())) {
-      embed = this.createReactionsHelpEmbed(this.getCategorizedPrefixCommands(), 'prefix',);
+    if (
+      ['react', 'reacts', 'reaction', 'reactions'].includes(
+        this.params[0]?.toLowerCase(),
+      )
+    ) {
+      embed = this.createReactionsHelpEmbed(
+        this.getCategorizedPrefixCommands(),
+        'prefix',
+      );
     } else if (this.params.length === 0) {
-      embed = this.createHelpEmbed(this.getCategorizedPrefixCommands(), 'prefix',);
+      embed = this.createHelpEmbed(
+        this.getCategorizedPrefixCommands(),
+        'prefix',
+      );
     } else {
       const command = this.services.commandService.getCommand(this.params[0]);
       if (!command) return;
@@ -54,8 +64,15 @@ export default class HelpCommand extends Command implements CommandInterface {
     const commandName = (interaction as any).options.getString('command');
     let embed: EmbedBuilder;
 
-    if (['react', 'reacts', 'reaction', 'reactions'].includes(commandName?.toLowerCase())) {
-      embed = this.createReactionsHelpEmbed(this.getCategorizedSlashCommands(), 'slash');
+    if (
+      ['react', 'reacts', 'reaction', 'reactions'].includes(
+        commandName?.toLowerCase(),
+      )
+    ) {
+      embed = this.createReactionsHelpEmbed(
+        this.getCategorizedSlashCommands(),
+        'slash',
+      );
     } else if (commandName) {
       const command = this.services.commandService.getCommand(commandName);
       if (!command) {
@@ -80,7 +97,7 @@ export default class HelpCommand extends Command implements CommandInterface {
     const commands = this.services.commandService.getCliCommands;
 
     if (params.length === 0) {
-      let table = [];
+      const table = [];
       commands.forEach((command) => {
         table.push({
           name: command.name,
@@ -105,7 +122,9 @@ export default class HelpCommand extends Command implements CommandInterface {
   ): EmbedBuilder {
     const embed = this.getBasicEmbed()
       .setTitle(`📚 Help`)
-      .setDescription(`List of available ${type} reaction commands for Ririko:`);
+      .setDescription(
+        `List of available ${type} reaction commands for Ririko:`,
+      );
 
     const fields: { name: string; value: string; inline: boolean }[] = [];
     const categoryName = 'reactions';
@@ -121,7 +140,7 @@ export default class HelpCommand extends Command implements CommandInterface {
           const commandText = `**${command.name}** - ${command.description}\n`;
           if (
             currentFieldValue.length + commandText.length > 1024 ||
-            (index + 1 - startIndex) >= commandsPerField
+            index + 1 - startIndex >= commandsPerField
           ) {
             fields.push({
               name: `Reactions ${startIndex}-${index}`,
