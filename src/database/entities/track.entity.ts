@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Playlist } from '#database/entities/playlist.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * Track entity
@@ -11,7 +12,7 @@ import { Playlist } from '#database/entities/playlist.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class Track {
+export class Track extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: number;
 

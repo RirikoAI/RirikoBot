@@ -7,13 +7,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Guild } from '#database/entities/guild.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * StreamSubscription Entity
  * @description Contains guild subscriptions for Twitch streams
  */
 @Entity()
-export class StreamSubscription {
+export class StreamSubscription extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: string;
 

@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Guild } from '#database/entities/guild.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * StreamNotification Entity
@@ -23,7 +24,7 @@ import { Guild } from '#database/entities/guild.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class StreamNotification {
+export class StreamNotification extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: string;
 

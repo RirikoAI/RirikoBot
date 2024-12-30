@@ -5,9 +5,10 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 @Entity()
-export class TwitchStreamer {
+export class TwitchStreamer extends EntityHelper {
   @PrimaryColumn()
   twitchUserId: string;
 

@@ -21,7 +21,13 @@ import { TwitchModule } from '#twitch/twitch.module';
 import { ConfigModule as RirikoConfigModule } from '#config/config.module';
 import { ConfigService as RirikoConfigService } from '#config/config.service';
 import { CliModule } from '#cli/cli.module';
-import { ModerationModule } from './moderation/moderation.module';
+import { ModerationModule } from '#moderation/moderation.module';
+import authConfig from '#config/auth.config';
+import mailConfig from '#config/mail.config';
+import { AuthModule } from '#auth/auth.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmConfigService } from '#database/typeorm-config.service';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
 /**
  * The main application module.
@@ -33,8 +39,14 @@ import { ModerationModule } from './moderation/moderation.module';
     ScheduleModule.forRoot(),
     EnvConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, discordConfig],
+      load: [appConfig, databaseConfig, authConfig, discordConfig, mailConfig],
       envFilePath: ['.env'],
+    }),
+    TypeOrmModule.forRootAsync({
+      useClass: TypeOrmConfigService,
+      dataSourceFactory: async (options: DataSourceOptions) => {
+        return new DataSource(options).initialize();
+      },
     }),
     RootModule,
     DiscordModule,
@@ -46,6 +58,7 @@ import { ModerationModule } from './moderation/moderation.module';
     TwitchModule,
     CliModule,
     ModerationModule,
+    AuthModule,
   ],
   controllers: [RootController, EconomyController],
   providers: [RootService, EnvConfigService, RirikoConfigService],

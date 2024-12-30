@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Guild } from '#database/entities/guild.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * GuildConfig Entity
@@ -11,7 +12,7 @@ import { Guild } from '#database/entities/guild.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class GuildConfig {
+export class GuildConfig extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: string;
 

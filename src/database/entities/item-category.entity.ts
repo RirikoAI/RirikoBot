@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Item } from '#database/entities/item.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * ItemCategory Entity
@@ -13,7 +14,7 @@ import { Item } from '#database/entities/item.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class ItemCategory {
+export class ItemCategory extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: string;
 

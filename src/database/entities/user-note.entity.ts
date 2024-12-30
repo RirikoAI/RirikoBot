@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Guild } from '#database/entities/guild.entity';
 import { User } from '#database/entities/user.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * UserNotes entity
@@ -15,7 +16,7 @@ import { User } from '#database/entities/user.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class UserNote {
+export class UserNote extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: string;
 

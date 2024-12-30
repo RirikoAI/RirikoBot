@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ItemCategory } from '#database/entities/item-category.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * Item Entity
@@ -29,7 +30,7 @@ import { ItemCategory } from '#database/entities/item-category.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class Item {
+export class Item extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: string;
 

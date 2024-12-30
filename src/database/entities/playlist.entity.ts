@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Track } from '#database/entities/track.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * Playlist entity
@@ -25,7 +26,7 @@ import { Track } from '#database/entities/track.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class Playlist {
+export class Playlist extends EntityHelper {
   @PrimaryGeneratedColumn()
   id: number;
 

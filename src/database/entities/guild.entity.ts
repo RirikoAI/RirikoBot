@@ -5,6 +5,7 @@ import { GuildConfig } from '#database/entities/guild-config.entity';
 import { StreamNotification } from '#database/entities/stream-notification.entity';
 import { StreamSubscription } from '#database/entities/stream-subscription.entity';
 import { UserNote } from '#database/entities/user-note.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * Guild Entity
@@ -12,7 +13,7 @@ import { UserNote } from '#database/entities/user-note.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class Guild {
+export class Guild extends EntityHelper {
   @PrimaryColumn()
   id: string;
 

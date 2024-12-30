@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Guild } from '#database/entities/guild.entity';
+import { EntityHelper } from '#util/entities/entity-helper';
 
 /**
  * Voice Channel Entity
@@ -11,7 +12,7 @@ import { Guild } from '#database/entities/guild.entity';
  * @author Earnest Angel (https://angel.net.my)
  */
 @Entity()
-export class VoiceChannel {
+export class VoiceChannel extends EntityHelper {
   @PrimaryColumn()
   id: string;
 
