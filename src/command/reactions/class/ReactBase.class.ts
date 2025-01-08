@@ -5,6 +5,12 @@ import { CommandInterface } from '#command/command.interface';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import axios from 'axios';
 
+/**
+ * Base class for all reaction commands.
+ * Will fetch a gif for reactions like hug, kiss and many more
+ * Using otakugifs API (https://otakugifs.xyz)
+ * @author Aki (https://github.com/True-Aki)
+ */
 @Injectable()
 export abstract class ReactBase extends Command implements CommandInterface {
   abstract name: string;
