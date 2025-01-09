@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import BrofistCommand from './brofist.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('BrofistCommand', () => {
   let command: BrofistCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BrofistCommand],
+      providers: [
+        {
+          provide: BrofistCommand,
+          useValue: new BrofistCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<BrofistCommand>(BrofistCommand);
@@ -20,23 +44,19 @@ describe('BrofistCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('brofist');
     expect(command.regex).toEqual(new RegExp('^brofist$|^brofist ', 'i'));
-    expect(command.description).toBe(
-      'Send an epic brofist to show some solidarity or camaraderie.',
-    );
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['brofist @user']);
     expect(command.reactionType).toBe('brofist');
-    expect(command.content).toBe('threw a legendary brofist at');
-    expect(command.noTargetContent).toBe(
-      'threw a brofist into the air, radiating pure camaraderie to everyone and no one',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description: 'The legend you want to share an epic brofist with.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

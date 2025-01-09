@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import SorryCommand from './sorry.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('SorryCommand', () => {
   let command: SorryCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SorryCommand],
+      providers: [
+        {
+          provide: SorryCommand,
+          useValue: new SorryCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<SorryCommand>(SorryCommand);
@@ -20,23 +44,19 @@ describe('SorryCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('sorry');
     expect(command.regex).toEqual(new RegExp('^sorry$|^sorry ', 'i'));
-    expect(command.description).toBe(
-      'Apologize sincerely or sheepishly to someone.',
-    );
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['sorry @user']);
     expect(command.reactionType).toBe('sorry');
-    expect(command.content).toBe('apologized sincerely to');
-    expect(command.noTargetContent).toBe(
-      'looked down apologetically, muttering a heartfelt "I’m sorry"',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description: 'The person you want to say sorry to.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

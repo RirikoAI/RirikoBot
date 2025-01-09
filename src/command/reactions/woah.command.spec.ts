@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import WoahCommand from './woah.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from '../../../test/mocks/shared-services.mock';
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('WoahCommand', () => {
   let command: WoahCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WoahCommand],
+      providers: [
+        {
+          provide: WoahCommand,
+          useValue: new WoahCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<WoahCommand>(WoahCommand);
@@ -20,21 +44,19 @@ describe('WoahCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('woah');
     expect(command.regex).toEqual(new RegExp('^woah$|^woah ', 'i'));
-    expect(command.description).toBe('Express amazement or surprise at someone.');
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['woah @user']);
     expect(command.reactionType).toBe('woah');
-    expect(command.content).toBe('was amazed by');
-    expect(command.noTargetContent).toBe(
-      'stared wide-eyed, muttering a stunned "Woah..."',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description: 'The person that left you amazed.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

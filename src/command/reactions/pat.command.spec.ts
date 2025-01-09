@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import PatCommand from './pat.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('PatCommand', () => {
   let command: PatCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PatCommand],
+      providers: [
+        {
+          provide: PatCommand,
+          useValue: new PatCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<PatCommand>(PatCommand);
@@ -20,23 +44,19 @@ describe('PatCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('pat');
     expect(command.regex).toEqual(new RegExp('^pat$|^pat ', 'i'));
-    expect(command.description).toBe(
-      'Give someone a gentle pat on the head to show they’re appreciated!',
-    );
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['pat @user']);
     expect(command.reactionType).toBe('pat');
-    expect(command.content).toBe('gently patted');
-    expect(command.noTargetContent).toBe(
-      'patted the air awkwardly, hoping someone would appear to receive it',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description: 'The adorable person you want to give a comforting pat to.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

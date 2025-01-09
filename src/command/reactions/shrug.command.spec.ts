@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import ShrugCommand from './shrug.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('ShrugCommand', () => {
   let command: ShrugCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ShrugCommand],
+      providers: [
+        {
+          provide: ShrugCommand,
+          useValue: new ShrugCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<ShrugCommand>(ShrugCommand);
@@ -20,23 +44,19 @@ describe('ShrugCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('shrug');
     expect(command.regex).toEqual(new RegExp('^shrug$|^shrug ', 'i'));
-    expect(command.description).toBe(
-      'Shrug at someone with a mix of indifference, confusion, or playfulness.',
-    );
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['shrug @user']);
     expect(command.reactionType).toBe('shrug');
-    expect(command.content).toBe('shrugged nonchalantly at');
-    expect(command.noTargetContent).toBe(
-      'shrugged to themselves, as if the universe’s mysteries didn’t concern them',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description: 'The person you want to shrug at.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

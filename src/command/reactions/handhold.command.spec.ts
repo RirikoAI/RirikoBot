@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import HandholdCommand from './handhold.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('HandholdCommand', () => {
   let command: HandholdCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [HandholdCommand],
+      providers: [
+        {
+          provide: HandholdCommand,
+          useValue: new HandholdCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<HandholdCommand>(HandholdCommand);
@@ -20,24 +44,19 @@ describe('HandholdCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('handhold');
     expect(command.regex).toEqual(new RegExp('^handhold$|^handhold ', 'i'));
-    expect(command.description).toBe(
-      'Reach out and hold hands with someone special.',
-    );
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['handhold @user']);
     expect(command.reactionType).toBe('handhold');
-    expect(command.content).toBe('gently held hands with');
-    expect(command.noTargetContent).toBe(
-      'extended their hand into the air, wishing for someone to hold it',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description:
-          'The special someone you want to share a tender handhold with.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

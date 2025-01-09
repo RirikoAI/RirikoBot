@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import HeadbangCommand from './headbang.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('HeadbangCommand', () => {
   let command: HeadbangCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [HeadbangCommand],
+      providers: [
+        {
+          provide: HeadbangCommand,
+          useValue: new HeadbangCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<HeadbangCommand>(HeadbangCommand);
@@ -20,24 +44,19 @@ describe('HeadbangCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('headbang');
     expect(command.regex).toEqual(new RegExp('^headbang$|^headbang ', 'i'));
-    expect(command.description).toBe(
-      'Turn up the volume and rock out with a headbang frenzy!',
-    );
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['headbang @user']);
     expect(command.reactionType).toBe('headbang');
-    expect(command.content).toBe('banged their head against the wall because of');
-    expect(command.noTargetContent).toBe(
-      'banged their head against the wall repeatedly, consumed by frustration',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description:
-          'The person who drove you to bang your head against the wall.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

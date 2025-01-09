@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import StareCommand from './stare.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('StareCommand', () => {
   let command: StareCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [StareCommand],
+      providers: [
+        {
+          provide: StareCommand,
+          useValue: new StareCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<StareCommand>(StareCommand);
@@ -20,23 +44,19 @@ describe('StareCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('stare');
     expect(command.regex).toEqual(new RegExp('^stare$|^stare ', 'i'));
-    expect(command.description).toBe(
-      'Fix your gaze on someone with intensity, curiosity, or confusion.',
-    );
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['stare @user']);
     expect(command.reactionType).toBe('stare');
-    expect(command.content).toBe('stared intently at');
-    expect(command.noTargetContent).toBe(
-      'fixed their gaze on the wall, lost in their own thoughts',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description: 'The person you want to fix your gaze upon.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

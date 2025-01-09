@@ -116,6 +116,25 @@ describe('HelpCommand', () => {
 
       expect(mockMessage.reply).not.toHaveBeenCalled();
     });
+
+    it('should call createReactionsHelpEmbed when "help reacts" is used', async () => {
+      const mockMessage = {
+        guild: mockGuild,
+        author: mockUser,
+        content: 'help reacts',
+        reply: jest.fn(),
+      } as unknown as DiscordMessage;
+
+      const spy = jest.spyOn(command as any, 'createReactionsHelpEmbed');
+      command.setParams('help reacts');
+
+      await command.runPrefix(mockMessage);
+
+      expect(spy).toHaveBeenCalled();
+      expect(mockMessage.reply).toHaveBeenCalledWith({
+        embeds: [expect.any(Object)],
+      });
+    });
   });
 
   describe('runSlash', () => {
@@ -177,6 +196,26 @@ describe('HelpCommand', () => {
       expect(mockInteraction.reply).toHaveBeenCalledWith({
         content: 'Command not found',
         ephemeral: true,
+      });
+    });
+
+    it('should call createReactionsHelpEmbed when "react" keyword is used', async () => {
+      const mockInteraction = {
+        guild: mockGuild,
+        user: mockUser,
+        options: {
+          getString: jest.fn().mockReturnValue('react'),
+        },
+        reply: jest.fn(),
+      } as unknown as DiscordInteraction;
+
+      const spy = jest.spyOn(command as any, 'createReactionsHelpEmbed');
+
+      await command.runSlash(mockInteraction);
+
+      expect(spy).toHaveBeenCalled();
+      expect(mockInteraction.reply).toHaveBeenCalledWith({
+        embeds: [expect.any(Object)],
       });
     });
   });

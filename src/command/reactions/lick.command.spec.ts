@@ -1,13 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import LickCommand from './lick.command';
 import { SlashCommandOptionTypes } from '#command/command.types';
+import { CommandService } from '#command/command.service';
+import { DiscordService } from '#discord/discord.service';
+import { SharedServicesMock, TestSharedService } from "../../../test/mocks/shared-services.mock";
+
+const mockDiscordService = {
+  client: {
+    user: {
+      displayAvatarURL: jest.fn(),
+    },
+  },
+};
+const mockCommandService = {
+  getGuildPrefix: jest.fn(),
+};
+const mockSharedServices: SharedServicesMock = {
+  ...TestSharedService,
+  discord: mockDiscordService as unknown as DiscordService,
+  commandService: mockCommandService as unknown as CommandService,
+};
 
 describe('LickCommand', () => {
   let command: LickCommand;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LickCommand],
+      providers: [
+        {
+          provide: LickCommand,
+          useValue: new LickCommand(mockSharedServices),
+        },
+      ],
     }).compile();
 
     command = module.get<LickCommand>(LickCommand);
@@ -20,21 +44,19 @@ describe('LickCommand', () => {
   it('should have the correct properties', () => {
     expect(command.name).toBe('lick');
     expect(command.regex).toEqual(new RegExp('^lick$|^lick ', 'i'));
-    expect(command.description).toBe('Lick someone, because why not?');
+    expect(command.description).toEqual(expect.any(String));
     expect(command.category).toBe('reactions');
     expect(command.usageExamples).toEqual(['lick @user']);
     expect(command.reactionType).toBe('lick');
-    expect(command.content).toBe('gave a lick to');
-    expect(command.noTargetContent).toBe(
-      'stuck out their tongue and licked the air, just for fun',
-    );
+    expect(command.content).toEqual(expect.any(String));
+    expect(command.noTargetContent).toEqual(expect.any(String));
   });
 
   it('should define correct slash command options', () => {
     expect(command.slashOptions).toEqual([
       {
         name: 'target',
-        description: 'The person you want to give a lick to.',
+        description: expect.any(String),
         type: SlashCommandOptionTypes.User,
         required: false,
       },

@@ -31,8 +31,8 @@ export abstract class ReactBase extends Command implements CommandInterface {
     const targetUser = message.mentions.users.first();
     const target = this.getTargetId(user.id, targetUser?.id);
 
-    const embed = await this.createReactEmbed(user.username);
-    const replyContent = this.getReplyContent(user, target);
+    const embed = await this.createReactEmbed(user);
+    const replyContent = this.getReplyContent(user.id, target);
 
     await message.reply({
       content: replyContent,
@@ -49,8 +49,8 @@ export abstract class ReactBase extends Command implements CommandInterface {
     const targetUser = interaction.options.getUser('target');
     const target = this.getTargetId(user.id, targetUser?.id);
 
-    const embed = await this.createReactEmbed(user.username);
-    const replyContent = this.getReplyContent(user, target);
+    const embed = await this.createReactEmbed(user);
+    const replyContent = this.getReplyContent(user.id, target);
 
     await interaction.reply({
       content: replyContent,
@@ -63,7 +63,7 @@ export abstract class ReactBase extends Command implements CommandInterface {
    * @param username The username of the requester.
    * @returns A promise resolving to an EmbedBuilder.
    */
-  private async createReactEmbed(username: string): Promise<EmbedBuilder> {
+  private async createReactEmbed(user): Promise<EmbedBuilder> {
     try {
       const { data } = await axios.get<{ url: string }>(
         `https://api.otakugifs.xyz/gif?reaction=${this.reactionType}&format=gif`,
@@ -71,13 +71,19 @@ export abstract class ReactBase extends Command implements CommandInterface {
 
       return new EmbedBuilder()
         .setImage(data.url)
-        .setFooter({ text: `Requested by ${username}` });
+        .setFooter({ 
+          text: `Requested by ${user.username}`,
+          iconURL: user.displayAvatarURL()
+        });
     } catch (e) {
       return new EmbedBuilder()
         .setDescription(
           `Error fetching the image.\nYou'll have to use your imagination for this one!`,
         )
-        .setFooter({ text: `Requested by ${username}` });
+        .setFooter({ 
+          text: `Requested by ${user.username}`,
+          iconURL: user.displayAvatarURL()
+        });
     }
   }
 
@@ -104,11 +110,11 @@ export abstract class ReactBase extends Command implements CommandInterface {
    * @returns The formatted reply content.
    */
   private getReplyContent(
-    user: { toString: () => string },
+    user: string,
     target: string | null,
   ): string {
     return target
-      ? `${user} ${this.content} <@${target}>`
-      : `${user} ${this.noTargetContent}`;
+      ? `<@${user}> ${this.content} <@${target}>`
+      : `<@${user}> ${this.noTargetContent}`;
   }
 }
