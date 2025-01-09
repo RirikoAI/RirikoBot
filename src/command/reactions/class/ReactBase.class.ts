@@ -69,20 +69,18 @@ export abstract class ReactBase extends Command implements CommandInterface {
         `https://api.otakugifs.xyz/gif?reaction=${this.reactionType}&format=gif`,
       );
 
-      return new EmbedBuilder()
-        .setImage(data.url)
-        .setFooter({ 
-          text: `Requested by ${user.username}`,
-          iconURL: user.displayAvatarURL()
-        });
+      return new EmbedBuilder().setImage(data.url).setFooter({
+        text: `Requested by ${user.username}`,
+        iconURL: user.displayAvatarURL(),
+      });
     } catch (e) {
       return new EmbedBuilder()
         .setDescription(
           `Error fetching the image.\nYou'll have to use your imagination for this one!`,
         )
-        .setFooter({ 
+        .setFooter({
           text: `Requested by ${user.username}`,
-          iconURL: user.displayAvatarURL()
+          iconURL: user.displayAvatarURL(),
         });
     }
   }
@@ -109,10 +107,7 @@ export abstract class ReactBase extends Command implements CommandInterface {
    * @param target The target user ID or null.
    * @returns The formatted reply content.
    */
-  private getReplyContent(
-    user: string,
-    target: string | null,
-  ): string {
+  private getReplyContent(user: string, target: string | null): string {
     return target
       ? `<@${user}> ${this.content} <@${target}>`
       : `<@${user}> ${this.noTargetContent}`;
