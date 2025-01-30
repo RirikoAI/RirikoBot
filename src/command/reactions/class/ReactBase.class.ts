@@ -5,6 +5,12 @@ import { CommandInterface } from '#command/command.interface';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import axios from 'axios';
 
+/**
+ * Base class for all reaction commands.
+ * Will fetch a gif for reactions like hug, kiss and many more
+ * Using otakugifs API (https://otakugifs.xyz)
+ * @author Aki (https://github.com/True-Aki)
+ */
 @Injectable()
 export abstract class ReactBase extends Command implements CommandInterface {
   abstract name: string;
@@ -25,8 +31,8 @@ export abstract class ReactBase extends Command implements CommandInterface {
     const targetUser = message.mentions.users.first();
     const target = this.getTargetId(user.id, targetUser?.id);
 
-    const embed = await this.createReactEmbed(user.username);
-    const replyContent = this.getReplyContent(user, target);
+    const embed = await this.createReactEmbed(user);
+    const replyContent = this.getReplyContent(user.id, target);
 
     await message.reply({
       content: replyContent,
@@ -43,8 +49,8 @@ export abstract class ReactBase extends Command implements CommandInterface {
     const targetUser = interaction.options.getUser('target');
     const target = this.getTargetId(user.id, targetUser?.id);
 
-    const embed = await this.createReactEmbed(user.username);
-    const replyContent = this.getReplyContent(user, target);
+    const embed = await this.createReactEmbed(user);
+    const replyContent = this.getReplyContent(user.id, target);
 
     await interaction.reply({
       content: replyContent,
@@ -57,21 +63,25 @@ export abstract class ReactBase extends Command implements CommandInterface {
    * @param username The username of the requester.
    * @returns A promise resolving to an EmbedBuilder.
    */
-  private async createReactEmbed(username: string): Promise<EmbedBuilder> {
+  private async createReactEmbed(user): Promise<EmbedBuilder> {
     try {
       const { data } = await axios.get<{ url: string }>(
         `https://api.otakugifs.xyz/gif?reaction=${this.reactionType}&format=gif`,
       );
 
-      return new EmbedBuilder()
-        .setImage(data.url)
-        .setFooter({ text: `Requested by ${username}` });
+      return new EmbedBuilder().setImage(data.url).setFooter({
+        text: `Requested by ${user.username}`,
+        iconURL: user.displayAvatarURL(),
+      });
     } catch (e) {
       return new EmbedBuilder()
         .setDescription(
           `Error fetching the image.\nYou'll have to use your imagination for this one!`,
         )
-        .setFooter({ text: `Requested by ${username}` });
+        .setFooter({
+          text: `Requested by ${user.username}`,
+          iconURL: user.displayAvatarURL(),
+        });
     }
   }
 
@@ -97,12 +107,9 @@ export abstract class ReactBase extends Command implements CommandInterface {
    * @param target The target user ID or null.
    * @returns The formatted reply content.
    */
-  private getReplyContent(
-    user: { toString: () => string },
-    target: string | null,
-  ): string {
+  private getReplyContent(user: string, target: string | null): string {
     return target
-      ? `${user} ${this.content} <@${target}>`
-      : `${user} ${this.noTargetContent}`;
+      ? `<@${user}> ${this.content} <@${target}>`
+      : `<@${user}> ${this.noTargetContent}`;
   }
 }
