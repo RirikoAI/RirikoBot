@@ -13,6 +13,7 @@ import { StreamSubscription } from '#database/entities/stream-subscription.entit
 import { StreamNotification } from '#database/entities/stream-notification.entity';
 import { TwitchStreamer } from '#database/entities/twitch-streamer.entity';
 import { UserNote } from '#database/entities/user-note.entity';
+import { Session } from '#database/entities/session.entity';
 
 /**
  * Database Service
@@ -46,5 +47,7 @@ export class DatabaseService {
     public twitchStreamerRepository: Repository<TwitchStreamer>,
     @InjectRepository(UserNote)
     public userNoteRepository: Repository<UserNote>,
+    @InjectRepository(Session)
+    public sessionRepository: Repository<Session>,
   ) {}
 }

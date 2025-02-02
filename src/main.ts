@@ -13,15 +13,42 @@ import { ConfigService } from '@nestjs/config';
 import { CliService } from '#cli/cli.service';
 import validationOptions from '#util/entities/validation-option';
 import { useContainer } from 'class-validator';
+import session from 'express-session';
+import { JwksService } from '#jwks/jwks.service';
 
 /**
  * Main function to bootstrap RiriKo AI
  * @author Earnest Angel (https://angel.net.my)
  */
 export async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    cors: true,
+  const app = await NestFactory.create(AppModule);
+  const allowedOrigins = [process.env.FRONTEND_URL, process.env.BACKEND_URL];
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
   });
+
+  // Generate JWKS
+  const jwksService = app.get(JwksService);
+  await jwksService.generateJwks();
+
+  app.use(
+    session({
+      secret: process.env.AUTH_JWT_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 3600000 * 24,
+      },
+    }),
+  );
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalPipes(new ValidationPipe(validationOptions));

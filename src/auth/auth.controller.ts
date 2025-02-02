@@ -10,6 +10,8 @@ import {
   Patch,
   Delete,
   SerializeOptions,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -23,6 +25,10 @@ import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { LoginResponseType } from './types/login-response.type';
 import { NullableType } from '#util/types/nullable.type';
 import { User } from '#database/entities/user.entity';
+import {
+  AuthenticatedGuard,
+  DiscordAuthGuard,
+} from '#util/auth/discord-auth-guard.util';
 
 @ApiTags('Auth')
 @Controller({
@@ -31,6 +37,77 @@ import { User } from '#database/entities/user.entity';
 })
 export class AuthController {
   constructor(private readonly service: AuthService) {}
+
+  @SerializeOptions({
+    groups: ['me'],
+  })
+  @Get('discord/redirect')
+  @UseGuards(DiscordAuthGuard)
+  async redirect(@Res({ passthrough: true }) res: any, @Request() req: any) {
+    const payload = await this.service.validateDiscordUser(req.user);
+
+    if (payload.token) {
+      // Set HTTP-only cookies
+      res.cookie('access_token', payload.token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 3600000,
+        domain: 'localhost',
+      });
+
+      res.cookie('refresh_token', payload.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 3600000,
+        domain: 'localhost',
+      });
+
+      res.cookie('expires_at', payload.tokenExpires, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 3600000,
+        domain: 'localhost',
+      });
+
+      res.redirect(process.env.FRONTEND_URL + '/callback');
+    }
+  }
+
+  @SerializeOptions({
+    groups: ['me'],
+  })
+  @Get('discord/login')
+  @UseGuards(DiscordAuthGuard)
+  discordLogin() {
+    return { msg: 'Login' };
+  }
+
+  @SerializeOptions({
+    groups: ['me'],
+  })
+  @Get('getToken')
+  getToken(@Req() req: Request) {
+    const cookies = require('cookie').parse(req.headers['cookie'] || '');
+    const access_token = cookies['access_token'];
+    const refresh_token = cookies['refresh_token'];
+    const expires_at = cookies['expires_at'];
+
+    return {
+      access_token,
+      refresh_token,
+      expires_at,
+    };
+  }
+
+  @Get('status')
+  @UseGuards(AuthenticatedGuard)
+  @HttpCode(HttpStatus.OK)
+  status(@Req() req: any) {
+    return req.user;
+  }
 
   @SerializeOptions({
     groups: ['me'],
@@ -81,8 +158,14 @@ export class AuthController {
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
-  public me(@Request() request): Promise<NullableType<User>> {
-    return this.service.me(request.user);
+  public async me(@Request() request): Promise<any> {
+    const user = await this.service.me(request.user);
+    return {
+      ...user,
+      metadata: {
+        ...request.user.metadata,
+      },
+    };
   }
 
   @ApiBearerAuth()

@@ -5,7 +5,7 @@ import * as path from 'path';
 const migrationsDir = path.join(__dirname, 'migrations');
 
 /**
- * This test suite will run all migrations in the migrations directory.
+ * This test suite will run all migrations in the migrations directory against a test database.
  * It will test if the up method creates tables and inserts data, and if the down method drops tables and reverts changes.
  * This is useful to ensure that all migrations are working as expected.
  * If a migration is not working as expected, you can debug it by adding console.log statements in the migration file.

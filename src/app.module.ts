@@ -28,6 +28,9 @@ import { AuthModule } from '#auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from '#database/typeorm-config.service';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { PassportModule } from '@nestjs/passport';
+import { JwksModule } from '#jwks/jwks.module';
+import { JweModule } from './jwe/jwe.module';
 
 /**
  * The main application module.
@@ -35,6 +38,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
  */
 @Module({
   imports: [
+    PassportModule.register({ session: true }),
     RirikoConfigModule,
     ScheduleModule.forRoot(),
     EnvConfigModule.forRoot({
@@ -59,6 +63,8 @@ import { DataSource, DataSourceOptions } from 'typeorm';
     CliModule,
     ModerationModule,
     AuthModule,
+    JwksModule,
+    JweModule,
   ],
   controllers: [RootController, EconomyController],
   providers: [RootService, EnvConfigService, RirikoConfigService],

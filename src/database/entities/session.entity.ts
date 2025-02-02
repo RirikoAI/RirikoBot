@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   DeleteDateColumn,
+  Column,
 } from 'typeorm';
 import { User } from '#database/entities/user.entity';
 import { EntityHelper } from '#util/entities/entity-helper';
@@ -19,6 +20,16 @@ export class Session extends EntityHelper {
   })
   @Index()
   user: User;
+
+  @Column({
+    nullable: true,
+  })
+  provider: string;
+
+  @Column({
+    nullable: true,
+  })
+  expiresAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;

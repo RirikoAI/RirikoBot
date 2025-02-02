@@ -18,7 +18,6 @@ import { plainToClass } from 'class-transformer';
 import { Status } from '#database/entities/status.entity';
 import { Role } from '#database/entities/role.entity';
 import { AuthProvidersEnum } from './auth-providers.enum';
-import { SocialInterface } from '#auth/social/interfaces/social.interface';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { UsersService } from '#users/users.service';
 import { ForgotService } from '#auth/forgot/forgot.service';
@@ -31,6 +30,7 @@ import { JwtRefreshPayloadType } from './strategies/types/jwt-refresh-payload.ty
 import { JwtPayloadType } from './strategies/types/jwt-payload.type';
 import { SessionService } from '#auth/session/session.service';
 import { Session } from '#database/entities/session.entity';
+import { DiscordLoginPayload } from '#util/types/auth.type';
 
 @Injectable()
 export class AuthService {
@@ -91,6 +91,7 @@ export class AuthService {
 
     const session = await this.sessionService.create({
       user,
+      provider: AuthProvidersEnum.email,
     });
 
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
@@ -98,6 +99,11 @@ export class AuthService {
       role: user.role,
       sessionId: session.id,
     });
+
+    session.expiresAt = new Date(tokenExpires);
+    await session.save();
+
+    console.log(token);
 
     return {
       refreshToken,
@@ -107,86 +113,31 @@ export class AuthService {
     };
   }
 
-  async validateSocialLogin(
-    authProvider: string,
-    socialData: SocialInterface,
-  ): Promise<LoginResponseType> {
-    let user: NullableType<User>;
-    const socialEmail = socialData.email?.toLowerCase();
-
-    const userByEmail = await this.usersService.findOne({
-      email: socialEmail,
-    });
-
-    user = await this.usersService.findOne({
-      socialId: socialData.id,
-      provider: authProvider,
-    });
-
-    if (user) {
-      if (socialEmail && !userByEmail) {
-        user.email = socialEmail;
-      }
-      await this.usersService.update(user.id, user);
-    } else if (userByEmail) {
-      user = userByEmail;
-    } else {
-      const role = plainToClass(Role, {
-        id: RoleEnum.user,
-      });
-      const status = plainToClass(Status, {
-        id: StatusEnum.active,
-      });
-
-      user = await this.usersService.create(
-        {
-          email: socialEmail ?? null,
-          firstName: socialData.firstName ?? null,
-          lastName: socialData.lastName ?? null,
-          socialId: socialData.id,
-          provider: authProvider,
-          role,
-          status,
-        },
-        false,
-      );
-
-      user = await this.usersService.findOne({
-        id: user.id,
-      });
-    }
-
-    if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            user: 'userNotFound',
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    }
-
+  async validateDiscordUser(payload: DiscordLoginPayload) {
     const session = await this.sessionService.create({
-      user,
+      user: payload.user,
+      provider: AuthProvidersEnum.discord,
     });
 
-    const {
-      token: jwtToken,
-      refreshToken,
-      tokenExpires,
-    } = await this.getTokensData({
-      id: user.id,
-      role: user.role,
+    console.log(payload);
+
+    const { token, refreshToken, tokenExpires } = await this.getTokensData({
+      id: payload.user.id,
+      role: payload.user.role,
       sessionId: session.id,
+      metadata: {
+        avatarUrl: `https://cdn.discordapp.com/avatars/${payload.discord.id}/${payload.discord.avatar}.png`,
+      },
     });
+
+    session.expiresAt = new Date(tokenExpires);
+    await session.save();
 
     return {
       refreshToken,
-      token: jwtToken,
+      token,
       tokenExpires,
-      user,
+      payload,
     };
   }
 
@@ -417,6 +368,9 @@ export class AuthService {
     id: User['id'];
     role: User['role'];
     sessionId: Session['id'];
+    metadata?: {
+      avatarUrl?: string;
+    };
   }) {
     const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
       infer: true,
@@ -425,17 +379,10 @@ export class AuthService {
     const tokenExpires = Date.now() + ms(tokenExpiresIn as any);
 
     const [token, refreshToken] = await Promise.all([
-      await this.jwtService.signAsync(
-        {
-          id: data.id,
-          role: data.role,
-          sessionId: data.sessionId,
-        },
-        {
-          secret: this.configService.getOrThrow('auth.secret', { infer: true }),
-          expiresIn: tokenExpiresIn,
-        },
-      ),
+      await this.jwtService.signAsync(data, {
+        secret: this.configService.getOrThrow('auth.secret', { infer: true }),
+        expiresIn: tokenExpiresIn,
+      }),
       await this.jwtService.signAsync(
         {
           sessionId: data.sessionId,

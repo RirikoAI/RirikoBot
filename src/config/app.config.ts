@@ -30,7 +30,11 @@ class EnvironmentVariablesValidator {
 
   @IsUrl({ require_tld: false })
   @IsOptional()
-  FRONTEND_DOMAIN: string;
+  FRONTEND_URL: string;
+
+  @IsUrl({ require_tld: false })
+  @IsOptional()
+  BACKEND_URL: string;
 
   @IsString()
   @IsOptional()
@@ -52,8 +56,8 @@ export default registerAs<AppConfig>('app', () => {
       : process.env.PORT
         ? parseInt(process.env.PORT, 10)
         : 3000,
-    frontendDomain: process.env.FRONTEND_DOMAIN,
-    backendDomain: process.env.BACKEND_DOMAIN ?? 'http://localhost',
+    backendURL: process.env.BACKEND_URL ?? 'http://localhost:3000',
+    frontendURL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
     workingDirectory: process.env.PWD || process.cwd(),
     fallbackLanguage: process.env.APP_FALLBACK_LANGUAGE || 'en',
     headerLanguage: process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',
