@@ -10,6 +10,10 @@ import { EconomyModule } from '#economy/economy.module';
 import { EconomyService } from '#economy/economy.service';
 import { DatabaseModule } from '#database/database.module';
 import { DatabaseService } from '#database/database.service';
+import { JweModule } from '#jwe/jwe.module';
+import { JweService } from '#jwe/jwe.service';
+import { JwksModule } from '#jwks/jwks.module';
+import { JwksService } from '#jwks/jwks.service';
 
 /**
  * @author Earnest Angel (https://angel.net.my)
@@ -18,13 +22,22 @@ import { DatabaseService } from '#database/database.service';
   imports: [
     ConfigModule,
     DatabaseModule,
+    JweModule,
+    JwksModule,
     forwardRef(() => CommandModule),
     forwardRef(() => AvcModule),
     forwardRef(() => MusicModule),
     forwardRef(() => GiveawaysModule),
     forwardRef(() => EconomyModule),
   ],
-  providers: [DiscordService, ConfigService, EconomyService, DatabaseService],
+  providers: [
+    DiscordService,
+    ConfigService,
+    EconomyService,
+    DatabaseService,
+    JweService,
+    JwksService,
+  ],
   exports: [DiscordService],
   controllers: [DiscordController],
 })

@@ -33,7 +33,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: mailData.to,
       subject: emailConfirmTitle,
-      text: `${this.configService.get('app.frontendDomain', {
+      text: `${this.configService.get('app.frontendURL', {
         infer: true,
       })}/confirm-email/${mailData.data.hash} ${emailConfirmTitle}`,
       templatePath: path.join(
@@ -47,7 +47,7 @@ export class MailService {
       ),
       context: {
         title: emailConfirmTitle,
-        url: `${this.configService.get('app.frontendDomain', {
+        url: `${this.configService.get('app.frontendURL', {
           infer: true,
         })}/confirm-email/${mailData.data.hash}`,
         actionTitle: emailConfirmTitle,
@@ -86,7 +86,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: mailData.to,
       subject: accountCreatedTitle,
-      text: `${this.configService.get('app.frontendDomain', {
+      text: `${this.configService.get('app.frontendURL', {
         infer: true,
       })}/login} ${accountCreatedTitle}`,
       templatePath: path.join(
@@ -100,7 +100,7 @@ export class MailService {
       ),
       context: {
         title: accountCreatedTitle,
-        url: `${this.configService.get('app.frontendDomain', {
+        url: `${this.configService.get('app.frontendURL', {
           infer: true,
         })}/login`,
         actionTitle: loginButton,
@@ -135,7 +135,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: mailData.to,
       subject: resetPasswordTitle,
-      text: `${this.configService.get('app.frontendDomain', {
+      text: `${this.configService.get('app.frontendURL', {
         infer: true,
       })}/password-change/${mailData.data.hash} ${resetPasswordTitle}`,
       templatePath: path.join(
@@ -149,7 +149,7 @@ export class MailService {
       ),
       context: {
         title: resetPasswordTitle,
-        url: `${this.configService.get('app.frontendDomain', {
+        url: `${this.configService.get('app.frontendURL', {
           infer: true,
         })}/password-change/${mailData.data.hash}`,
         actionTitle: resetPasswordTitle,

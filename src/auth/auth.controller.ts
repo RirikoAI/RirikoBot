@@ -29,6 +29,7 @@ import {
   AuthenticatedGuard,
   DiscordAuthGuard,
 } from '#util/auth/discord-auth-guard.util';
+import { JweService } from '#jwe/jwe.service';
 
 @ApiTags('Auth')
 @Controller({
@@ -36,7 +37,10 @@ import {
   version: '1',
 })
 export class AuthController {
-  constructor(private readonly service: AuthService) {}
+  constructor(
+    private readonly service: AuthService,
+    private readonly jweService: JweService,
+  ) {}
 
   @SerializeOptions({
     groups: ['me'],
@@ -44,11 +48,11 @@ export class AuthController {
   @Get('discord/redirect')
   @UseGuards(DiscordAuthGuard)
   async redirect(@Res({ passthrough: true }) res: any, @Request() req: any) {
-    const payload = await this.service.validateDiscordUser(req.user);
+    const data = await this.service.validateDiscordUser(req.user);
 
-    if (payload.token) {
+    if (data.token) {
       // Set HTTP-only cookies
-      res.cookie('access_token', payload.token, {
+      res.cookie('access_token', data.token, {
         httpOnly: true,
         secure: false,
         sameSite: 'strict',
@@ -56,7 +60,7 @@ export class AuthController {
         domain: 'localhost',
       });
 
-      res.cookie('refresh_token', payload.refreshToken, {
+      res.cookie('refresh_token', data.refreshToken, {
         httpOnly: true,
         secure: false,
         sameSite: 'strict',
@@ -64,13 +68,25 @@ export class AuthController {
         domain: 'localhost',
       });
 
-      res.cookie('expires_at', payload.tokenExpires, {
+      res.cookie('expires_at', data.tokenExpires, {
         httpOnly: true,
         secure: false,
         sameSite: 'strict',
         maxAge: 3600000,
         domain: 'localhost',
       });
+
+      res.cookie(
+        'discord_access_token',
+        await this.jweService.encrypt(data.payload.discord.discordAccessToken),
+        {
+          httpOnly: true,
+          secure: false,
+          sameSite: 'strict',
+          maxAge: 3600000,
+          domain: 'localhost',
+        },
+      );
 
       res.redirect(process.env.FRONTEND_URL + '/callback');
     }

@@ -119,8 +119,6 @@ export class AuthService {
       provider: AuthProvidersEnum.discord,
     });
 
-    console.log(payload);
-
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
       id: payload.user.id,
       role: payload.user.role,

@@ -22,11 +22,23 @@ export class JweService {
     const jwe = await new jose.CompactEncrypt(new TextEncoder().encode(data))
       .setProtectedHeader({ alg: 'RSA-OAEP-256', enc: 'A256GCM' })
       .encrypt(publicKey);
-
     return jwe;
   }
 
   async decrypt(jwe: string): Promise<any> {
+    // get the keys from the jwksService
+    // use the private key to decrypt the data
+    const privateKey = await jose.importJWK(
+      this.jwksService.keys.encryptionPrivateJwk,
+    );
+
+    // decrypt using jose
+    const { plaintext } = await jose.compactDecrypt(jwe, privateKey);
+
+    return new TextDecoder().decode(plaintext);
+  }
+
+  async decryptJson(jwe: string): Promise<any> {
     // get the keys from the jwksService
     // use the private key to decrypt the data
     const privateKey = await jose.importJWK(

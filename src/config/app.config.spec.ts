@@ -26,9 +26,9 @@ describe('AppConfig', () => {
     const config = configService.get('app');
 
     expect(config).toEqual({
-      backendDomain: expect.any(String),
+      backendURL: expect.any(String),
       fallbackLanguage: expect.any(String),
-      frontendDomain: undefined,
+      frontendURL: expect.any(String) || undefined,
       name: expect.any(String),
       workingDirectory: expect.any(String),
       nodeEnv: expect.any(String),
