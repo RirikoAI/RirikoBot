@@ -13,6 +13,10 @@ import { ResponseDto } from '#api/response.dto';
 import { ConfigService } from '@nestjs/config';
 import { JweService } from '#jwe/jwe.service';
 import axios from 'axios';
+import { delay } from '#util/api/api.util';
+import { GuildDto, GuildsResponseDto } from '#discord/dto/discord.response.dto';
+
+// import { Permissions } from 'discord.js';
 
 /**
  * Discord Controller
@@ -54,7 +58,8 @@ export class DiscordController {
   @Get('guilds')
   @ApiOperation({ summary: 'Uses HttpOnly cookie' })
   @HttpCode(HttpStatus.OK)
-  async guilds(@Req() req: any) {
+  async guilds(@Req() req: any): Promise<GuildsResponseDto> {
+    await delay(1000);
     const discordAccessToken = await this.getDiscordAccessToken(req);
 
     if (!discordAccessToken) {
@@ -70,12 +75,26 @@ export class DiscordController {
     }
 
     const response = await axios.get(
-      'https://discord.com/api/users/@me/guilds',
+      'https://discord.com/api/users/@me/guilds?with_counts=true',
       {
         headers: { Authorization: `Bearer ${discordAccessToken}` },
       },
     );
-    return response.data;
+
+    const MANAGE_GUILD = 0x20; // 32 in decimal
+
+    // Assume response.data is of type Guild[]
+    const guilds: GuildDto[] = response.data
+      .map((guild) => ({
+        ...guild,
+        can_manage_server:
+          guild.owner || (guild.permissions & MANAGE_GUILD) === MANAGE_GUILD,
+      }))
+      .sort(
+        (a, b) => Number(b.can_manage_server) - Number(a.can_manage_server),
+      ); // Sort by can_manage_server (true first)
+
+    return guilds;
   }
 
   async getDiscordAccessToken(req: any) {

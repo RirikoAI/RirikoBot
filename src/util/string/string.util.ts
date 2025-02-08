@@ -6,6 +6,9 @@ export const StringUtil = {
     return str.charAt(0).toUpperCase() + str.slice(1);
   },
   isGibberish: isGibberish,
+  numberWithCommas(x): string {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  },
 };
 
 function isGibberish(message: DiscordMessage): boolean {
