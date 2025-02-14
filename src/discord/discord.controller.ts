@@ -15,6 +15,9 @@ import { JweService } from '#jwe/jwe.service';
 import axios from 'axios';
 import { delay } from '#util/api/api.util';
 import { GuildDto, GuildsResponseDto } from '#discord/dto/discord.response.dto';
+import { Roles } from '#users/roles/roles.decorator';
+import { RoleEnum } from '#users/roles/roles.enum';
+import { DiscordService } from '#discord/discord.service';
 
 // import { Permissions } from 'discord.js';
 
@@ -31,6 +34,7 @@ import { GuildDto, GuildsResponseDto } from '#discord/dto/discord.response.dto';
 @Controller('discord')
 export class DiscordController {
   constructor(
+    private readonly discordService: DiscordService,
     private readonly configService: ConfigService,
     private readonly jweService: JweService,
   ) {}
@@ -58,6 +62,7 @@ export class DiscordController {
   @Get('guilds')
   @ApiOperation({ summary: 'Uses HttpOnly cookie' })
   @HttpCode(HttpStatus.OK)
+  @Roles(RoleEnum.user)
   async guilds(@Req() req: any): Promise<GuildsResponseDto> {
     await delay(1000);
     const discordAccessToken = await this.getDiscordAccessToken(req);
@@ -83,17 +88,20 @@ export class DiscordController {
 
     const MANAGE_GUILD = 0x20; // 32 in decimal
 
+    const guildsTheBotIsIn = this.getGuildsTheBotIsIn();
+
     // Assume response.data is of type Guild[]
     const guilds: GuildDto[] = response.data
       .map((guild) => ({
         ...guild,
+        bot_in_guild: guildsTheBotIsIn.has(guild.id),
         can_manage_server:
           guild.owner || (guild.permissions & MANAGE_GUILD) === MANAGE_GUILD,
       }))
+      .sort((a, b) => Number(b.bot_in_guild) - Number(a.bot_in_guild))
       .sort(
         (a, b) => Number(b.can_manage_server) - Number(a.can_manage_server),
-      ); // Sort by can_manage_server (true first)
-
+      );
     return guilds;
   }
 
@@ -118,5 +126,9 @@ export class DiscordController {
 
   getBotInviteLink(permissions = '626721090433015'): string {
     return `https://discordapp.com/oauth2/authorize?client_id=${this.configService.get('DISCORD_APPLICATION_ID')}&scope=bot&permissions=${permissions}`;
+  }
+
+  getGuildsTheBotIsIn() {
+    return this.discordService.client.guilds.cache;
   }
 }

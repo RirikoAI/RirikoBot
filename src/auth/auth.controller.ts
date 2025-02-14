@@ -50,6 +50,10 @@ export class AuthController {
   async redirect(@Res({ passthrough: true }) res: any, @Request() req: any) {
     const data = await this.service.validateDiscordUser(req.user);
 
+    const backendDomain = process.env.BACKEND_URL.replace('http://', '')
+      .replace('https://', '')
+      .split(':')[0];
+
     if (data.token) {
       // Set HTTP-only cookies
       res.cookie('access_token', data.token, {
@@ -57,7 +61,7 @@ export class AuthController {
         secure: false,
         sameSite: 'strict',
         maxAge: 3600000,
-        domain: 'localhost',
+        domain: backendDomain,
       });
 
       res.cookie('refresh_token', data.refreshToken, {
@@ -65,7 +69,7 @@ export class AuthController {
         secure: false,
         sameSite: 'strict',
         maxAge: 7 * 24 * 3600000,
-        domain: 'localhost',
+        domain: backendDomain,
       });
 
       res.cookie('expires_at', data.tokenExpires, {
@@ -73,7 +77,7 @@ export class AuthController {
         secure: false,
         sameSite: 'strict',
         maxAge: 3600000,
-        domain: 'localhost',
+        domain: backendDomain,
       });
 
       res.cookie(
@@ -84,7 +88,7 @@ export class AuthController {
           secure: false,
           sameSite: 'strict',
           maxAge: 3600000,
-          domain: 'localhost',
+          domain: backendDomain,
         },
       );
 

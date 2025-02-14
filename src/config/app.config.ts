@@ -57,7 +57,7 @@ export default registerAs<AppConfig>('app', () => {
         ? parseInt(process.env.PORT, 10)
         : 3000,
     backendURL: process.env.BACKEND_URL ?? 'http://localhost:3000',
-    frontendURL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    frontendURL: process.env.FRONTEND_URL ?? 'http://localhost:8100',
     workingDirectory: process.env.PWD || process.cwd(),
     fallbackLanguage: process.env.APP_FALLBACK_LANGUAGE || 'en',
     headerLanguage: process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',

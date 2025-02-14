@@ -103,8 +103,6 @@ export class AuthService {
     session.expiresAt = new Date(tokenExpires);
     await session.save();
 
-    console.log(token);
-
     return {
       refreshToken,
       token,
