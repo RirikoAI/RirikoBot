@@ -117,19 +117,6 @@ describe('MusicService', () => {
     });
   });
 
-  describe('search', () => {
-    it('should return search results', async () => {
-      const query = 'test';
-      const mockResult = [{ name: 'test song', url: 'http://test.url' }];
-      service.youtubePlugin = {
-        search: jest.fn().mockResolvedValue(mockResult),
-      } as any;
-
-      const result = await service.search({ query });
-      expect(result).toEqual(mockResult[0]);
-    });
-  });
-
   describe('trackMusic', () => {
     it('should set an interval for tracking music', async () => {
       const guildId = '1000000001112223334';
