@@ -1,6 +1,6 @@
-[![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=beta/1.0.0)
+[![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
 [![codecov](https://codecov.io/github/ririkoai/ririkobot/branch/beta%2F1.0.0/graph/badge.svg?token=EBD0B7CJ76)](https://codecov.io/github/ririkoai/ririkobot)
-[![CodeFactor](https://www.codefactor.io/repository/github/ririkoai/ririkobot/badge/beta/1.0.0)](https://www.codefactor.io/repository/github/ririkoai/ririkobot/overview/beta/1.0.0)
+[![CodeFactor](https://www.codefactor.io/repository/github/ririkoai/ririkobot/badge/master)](https://www.codefactor.io/repository/github/ririkoai/ririkobot/overview/master)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
