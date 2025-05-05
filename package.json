@@ -34,10 +34,10 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "migration:generate": "cross-var npm run typeorm -- --dataSource=src/database/data-source.ts migration:generate ./src/database/migrations/$npm_config_name",
-    "migration:create": "cross-var npm run typeorm -- migration:create ./src/database/migrations/$npm_config_name",
-    "migration:run": "cross-var npm run typeorm -- --dataSource=src/database/data-source.ts migration:run",
-    "migration:revert": "cross-var npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert",
+    "migration:generate": "cross-env npm run typeorm -- --dataSource=src/database/data-source.ts migration:generate ./src/database/migrations/$npm_config_name",
+    "migration:create": "cross-env npm run typeorm -- migration:create ./src/database/migrations/$npm_config_name",
+    "migration:run": "cross-env npm run typeorm -- --dataSource=src/database/data-source.ts migration:run",
+    "migration:revert": "cross-env npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert",
     "seed:create": "hygen seeds create",
     "seed:run": "ts-node -r tsconfig-paths/register ./src/database/seeds/run-seed.ts",
     "upgrade:bash": "sh scripts/bash-upgrade.sh",
@@ -105,7 +105,6 @@
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
-    "cross-var": "^1.1.0",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.3.1",
@@ -139,8 +138,5 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  },
-  "overrides": {
-    "@babel/traverse": "7.27.1"
   }
 }
