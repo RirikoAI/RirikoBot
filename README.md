@@ -14,8 +14,8 @@ Ririko AI BETA (Still in development).
 If you are running Windows 10/11 x64, please use **Node v18 only** (blame `canvas` and `sqlite3` for not supporting
 newer versions on Windows 10/11 x64).
 
-## Download Node
-
+## Prerequisites
+### 1. Install Node:
 Download Node here: https://nodejs.org/en/download (Scroll down the versions and find v18.x.x for Windows 10/11 x64,
 download the MSI installer)
 
@@ -23,6 +23,9 @@ download the MSI installer)
 # Check node version (Ensure it is v18.x.x in Windows 10/11 x64)
 $ node -v
 ```
+
+### 2. Install FFMPEG for Music Bot
+Follow this tutorial if you want to use the Music Bot: https://github.com/RirikoAI/RirikoBot/wiki/Extra-configurations-for-Music-Bot
 
 ## Project setup
 
