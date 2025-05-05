@@ -42,7 +42,9 @@
     "seed:run": "ts-node -r tsconfig-paths/register ./src/database/seeds/run-seed.ts",
     "upgrade:bash": "sh scripts/bash-upgrade.sh",
     "publish:npm": "npm publish --access public",
-    "publish:docker": "docker build -t ririkoai/ririkobot:latest . && docker login && docker push ririkoai/ririkobot:latest"
+    "publish:docker": "docker build -t ririkoai/ririkobot:latest . && docker login && docker push ririkoai/ririkobot:latest",
+    "docker:build": "docker build -t ririkoai/ririkobot:latest .",
+    "docker:push": "docker push ririkoai/ririkobot:latest"
   },
   "imports": {
     "#*": "./src/*"
@@ -137,5 +139,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "overrides": {
+    "@babel/traverse": "7.27.1"
   }
 }
