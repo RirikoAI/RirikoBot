@@ -7,21 +7,37 @@
 
 ## Description
 
-Ririko AI BETA (Still in development). Please use Node 20 LTS.
+Ririko AI BETA (Still in development).
+
+### Important Note
+
+If you are running Windows 10/11 x64, please use **Node v18 only** (blame `canvas` and `sqlite3` for not supporting
+newer versions on Windows 10/11 x64).
+
+## Download Node
+
+Download Node here: https://nodejs.org/en/download (Scroll down the versions and find v18.x.x for Windows 10/11 x64,
+download the MSI installer)
+
+```bash
+# Check node version (Ensure it is v18.x.x in Windows 10/11 x64)
+$ node -v
+```
 
 ## Project setup
 
 ```bash
-$ npm install
+# Install the dependencies and configure the project
+$ npm run setup
+
+# Copy .env.example to .env
+$ cp .env.example .env # Set your Discord bot token here
 ```
 
 ## Compile and run the project
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
+# development mode
 $ npm run start:dev
 
 # production mode
