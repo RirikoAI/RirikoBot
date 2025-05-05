@@ -23,6 +23,10 @@ test-results
 # Data
 data
 
+# Database
+*.db
+*.sqlite
+
 # Environment variables
 .env.test
 .env.*
