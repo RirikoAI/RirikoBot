@@ -30,32 +30,32 @@ I am a Discord bot that can do a lot of things, including:
 See [full list of commands here](https://github.com/RirikoAI/RirikoBot/wiki/LIST:-All-commands-supported-by-Ririko-AI)
 
 ## Running Ririko AI using Docker (Recommended)
+
 You also need to have Docker installed on your machine. You can find the installation instructions for your OS below:
 
 | Windows Install Link                                                           | Linux Install Link                                          | MacOS Install Link                                                     | Raspberry Pi Install Link                                                          |
 |--------------------------------------------------------------------------------|-------------------------------------------------------------|------------------------------------------------------------------------|------------------------------------------------------------------------------------|
 | [Docker for Windows](https://docs.docker.com/desktop/install/windows-install/) | [Docker for Linux](https://docs.docker.com/engine/install/) | [Docker for Mac](https://docs.docker.com/desktop/install/mac-install/) | [Docker for Raspberry Pi](https://docs.docker.com/engine/install/raspberry-pi-os/) |
 
-
 ## Install using Docker prebuilt image
 
-You can run the container directly without a .env file by passing all required environment variables:
+Follow the steps below to run Ririko AI using Docker:. You don't need to clone the repository or install any
+dependencies, just the Docker software.
 
 ```bash
-$ docker run -d \
-  --name ririko-bot \
-  -p 3000:3000 \
-  -v ./data:/app/data \
-  -e NODE_ENV=production \
-  -e APP_PORT=3000 \
-  -e DISCORD_BOT_TOKEN=your_discord_bot_token \
-  -e DISCORD_APPLICATION_ID=your_discord_application_id \
-  -e DEFAULT_PREFIX=! \
-  -e DATABASE_TYPE=better-sqlite3 \
-  -e DATABASE_NAME=/app/data/ririko.db \
-  ririkoai/ririkobot:latest
+# Download the docker-compose.yml file
+$ curl -o docker-compose.yml https://raw.githubusercontent.com/RirikoAI/RirikoBot/refs/heads/master/docker-compose.production.yml
+
+# Configure the docker-compose.yml file by adding your Discord bot token, App ID, and other configurations
+$ notepad docker-compose.yml # Windows
+$ nano docker-compose.yml # Linux / MacOS
+
+# After configuring the docker-compose.yml file, run the following command to start the bot
+$ docker compose up -d
 ```
-If you want to build the image yourself, click [here](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Building-your-own-Docker-image)
+
+If you want to build the image yourself,
+click [here](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Building-your-own-Docker-image)
 
 ## Install without using Docker (Not recommended)
 

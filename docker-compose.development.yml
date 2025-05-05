@@ -1,3 +1,4 @@
+# For development use, this will build the image locally.
 version: '3.8'
 
 services:
