@@ -37,14 +37,11 @@ You also need to have Docker installed on your machine. You can find the install
 |--------------------------------------------------------------------------------|-------------------------------------------------------------|------------------------------------------------------------------------|------------------------------------------------------------------------------------|
 | [Docker for Windows](https://docs.docker.com/desktop/install/windows-install/) | [Docker for Linux](https://docs.docker.com/engine/install/) | [Docker for Mac](https://docs.docker.com/desktop/install/mac-install/) | [Docker for Raspberry Pi](https://docs.docker.com/engine/install/raspberry-pi-os/) |
 
-## Install using Docker prebuilt image
-
-Follow the steps below to run Ririko AI using Docker:. You don't need to clone the repository or install any
-dependencies, just the Docker software.
+### Setup docker-compose.yml
 
 ```bash
 # Download the docker-compose.yml file
-$ curl -o docker-compose.yml https://raw.githubusercontent.com/RirikoAI/RirikoBot/refs/heads/master/docker-compose.production.yml
+$ curl -o docker-compose.yml https://install.ririko.ai/docker-compose.yml
 
 # Configure the docker-compose.yml file by adding your Discord bot token, App ID, and other configurations
 $ notepad docker-compose.yml # Windows
@@ -53,6 +50,9 @@ $ nano docker-compose.yml # Linux / MacOS
 # After configuring the docker-compose.yml file, run the following command to start the bot
 $ docker compose up -d
 ```
+
+That's it. You should now have Ririko AI running on your machine. You can rerun `docker compose up -d` to start the bot
+again after stopping it or if you changed the configuration in the docker-compose.yml file.
 
 If you want to build the image yourself,
 click [here](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Building-your-own-Docker-image)
