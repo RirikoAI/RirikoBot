@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from '#config/app.config';
 import databaseConfig from '#config/database.config';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { existsSync } from 'fs';
 import { TypeOrmConfigService } from '../typeorm-config.service';
 
 @Module({
@@ -12,6 +13,7 @@ import { TypeOrmConfigService } from '../typeorm-config.service';
       isGlobal: true,
       load: [databaseConfig, appConfig],
       envFilePath: ['.env'],
+      ignoreEnvFile: !existsSync('.env'),
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,

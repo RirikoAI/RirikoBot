@@ -37,7 +37,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # dotenv environment variable files
-.env
+.env.test
 .env.dev
 .env.development.local
 .env.test.local
@@ -68,3 +68,5 @@ giveaways.json
 # some file
 *-base.js
 /lavalink/
+/docker-compose.yml
+/.env

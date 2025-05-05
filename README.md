@@ -2,32 +2,73 @@
 [![codecov](https://codecov.io/github/ririkoai/ririkobot/branch/beta%2F1.0.0/graph/badge.svg?token=EBD0B7CJ76)](https://codecov.io/github/ririkoai/ririkobot)
 [![CodeFactor](https://www.codefactor.io/repository/github/ririkoai/ririkobot/badge/master)](https://www.codefactor.io/repository/github/ririkoai/ririkobot/overview/master)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-## Description
+<img src="https://i.imgur.com/sNtvyAK.jpeg" style="max-width: 1000px;" alt="Ririko AI" />
 
-Ririko AI BETA (Still in development).
+# Hi there! I'm Ririko AI! 👋
 
-### Important Note
+I am a Discord bot that can do a lot of things, including:
 
-If you are running Windows 10/11 x64, please use **Node v18 only** (blame `canvas` and `sqlite3` for not supporting
-newer versions on Windows 10/11 x64).
+<table>
+    <tr>
+        <td>Image Generation</td>
+        <td>Chatbot</td>
+        <td>Fun Commands</td>
+        <td>Moderation</td>
+        <td>Music</td>
+    </tr>
+    <tr>
+        <td>Economy</td>
+        <td>Games</td>
+        <td>Giveaways</td>
+        <td>EXP System</td>
+        <td>...and many more!</td>
+    </tr>
+</table>
 
-## Prerequisites
-### 1. Install Node:
-Download Node here: https://nodejs.org/en/download (Scroll down the versions and find v18.x.x for Windows 10/11 x64,
-download the MSI installer)
+See [full list of commands here](https://github.com/RirikoAI/RirikoBot/wiki/LIST:-All-commands-supported-by-Ririko-AI)
+
+## Running Ririko AI using Docker (Recommended)
+You also need to have Docker installed on your machine. You can find the installation instructions for your OS below:
+
+| Windows Install Link                                                           | Linux Install Link                                          | MacOS Install Link                                                     | Raspberry Pi Install Link                                                          |
+|--------------------------------------------------------------------------------|-------------------------------------------------------------|------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [Docker for Windows](https://docs.docker.com/desktop/install/windows-install/) | [Docker for Linux](https://docs.docker.com/engine/install/) | [Docker for Mac](https://docs.docker.com/desktop/install/mac-install/) | [Docker for Raspberry Pi](https://docs.docker.com/engine/install/raspberry-pi-os/) |
+
+
+## Install using Docker prebuilt image
+
+You can run the container directly without a .env file by passing all required environment variables:
 
 ```bash
-# Check node version (Ensure it is v18.x.x in Windows 10/11 x64)
-$ node -v
+$ docker run -d \
+  --name ririko-bot \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -e NODE_ENV=production \
+  -e APP_PORT=3000 \
+  -e DISCORD_BOT_TOKEN=your_discord_bot_token \
+  -e DISCORD_APPLICATION_ID=your_discord_application_id \
+  -e DEFAULT_PREFIX=! \
+  -e DATABASE_TYPE=better-sqlite3 \
+  -e DATABASE_NAME=/app/data/ririko.db \
+  ririkoai/ririkobot:latest
 ```
+If you want to build the image yourself, click [here](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Building-your-own-Docker-image)
 
-### 2. Install FFMPEG for Music Bot
-Follow this tutorial if you want to use the Music Bot: https://github.com/RirikoAI/RirikoBot/wiki/Extra-configurations-for-Music-Bot
+## Install without using Docker (Not recommended)
 
-## Project setup
+### Download and install prerequisites
+
+1. Download Node here: https://nodejs.org/en/download.
+2. Download FFmpeg here: https://github.com/RirikoAI/RirikoBot/wiki/Extra-configurations-for-Music-Bot.
+
+### Note:
+
+Here's the tricky part, `canvas` and `better-sqlite3` are notoriously known for being difficult to install on Windows.
+If you are using Windows and just wants to enjoy using Ririko, we extremely recommend using Docker method above. Save
+yourself the headache.
 
 ```bash
 # Install the dependencies and configure the project
@@ -35,11 +76,7 @@ $ npm run setup
 
 # Copy .env.example to .env
 $ cp .env.example .env # Set your Discord bot token here
-```
 
-## Compile and run the project
-
-```bash
 # development mode
 $ npm run start:dev
 

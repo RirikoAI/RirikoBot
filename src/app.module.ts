@@ -22,6 +22,7 @@ import { ConfigModule as RirikoConfigModule } from '#config/config.module';
 import { ConfigService as RirikoConfigService } from '#config/config.service';
 import { CliModule } from '#cli/cli.module';
 import { ModerationModule } from './moderation/moderation.module';
+import { existsSync } from 'fs';
 
 /**
  * The main application module.
@@ -35,6 +36,7 @@ import { ModerationModule } from './moderation/moderation.module';
       isGlobal: true,
       load: [appConfig, databaseConfig, discordConfig],
       envFilePath: ['.env'],
+      ignoreEnvFile: !existsSync('.env'),
     }),
     RootModule,
     DiscordModule,

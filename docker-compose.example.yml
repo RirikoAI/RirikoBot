@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  ririko-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ririko-bot
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - APP_PORT=3000
+      - DISCORD_BOT_TOKEN=your_discord_bot_token
+      - DISCORD_APPLICATION_ID=your_discord_application_id
+      - DEFAULT_PREFIX=!
+      - DATABASE_TYPE=better-sqlite3
+      - DATABASE_NAME=/app/data/ririko.db
+    # No need to override the command here as it's already set in the Dockerfile
