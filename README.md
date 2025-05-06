@@ -29,6 +29,8 @@ I am a Discord bot that can do a lot of things, including:
 
 See [full list of commands here](https://github.com/RirikoAI/RirikoBot/wiki/LIST:-All-commands-supported-by-Ririko-AI)
 
+Join [our Discord server](https://discord.gg/W97eXhqX) if you need help or just want to chat.
+
 ## Running Ririko AI using Docker (Recommended)
 
 You also need to have Docker installed on your machine. You can find the installation instructions for your OS below:
