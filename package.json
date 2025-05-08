@@ -77,7 +77,7 @@
     "distube": "^5.0.7",
     "dotenv": "^16.5.0",
     "genius-lyrics": "^4.4.7",
-    "mongodb": "^5.9.2",
+    "mongodb": "^6.16.0",
     "ms": "3.0.0-canary.1",
     "nest-commander": "^3.17.0",
     "ollama": "^0.5.15",
