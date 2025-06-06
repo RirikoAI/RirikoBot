@@ -25,4 +25,10 @@ module.exports = {
     // Please consider avoiding require() in favor of ES6 imports
     '@typescript-eslint/no-require-imports': 'off',
   },
+  'prettier/prettier': [
+    'error',
+    {
+      endOfLine: 'auto',
+    },
+  ],
 };

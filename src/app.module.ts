@@ -22,6 +22,7 @@ import { ConfigModule as RirikoConfigModule } from '#config/config.module';
 import { ConfigService as RirikoConfigService } from '#config/config.service';
 import { CliModule } from '#cli/cli.module';
 import { ModerationModule } from './moderation/moderation.module';
+import { FreeGamesModule } from '#free-games/free-games.module';
 import { existsSync } from 'fs';
 
 /**
@@ -48,6 +49,7 @@ import { existsSync } from 'fs';
     TwitchModule,
     CliModule,
     ModerationModule,
+    FreeGamesModule,
   ],
   controllers: [RootController, EconomyController],
   providers: [RootService, EnvConfigService, RirikoConfigService],

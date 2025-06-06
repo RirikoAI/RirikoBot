@@ -13,6 +13,8 @@ import { Service } from '#command/command.types';
 import { SharedServiceUtil } from '#util/command/shared-service.util';
 import { EconomyModule } from '#economy/economy.module';
 import { EconomyService } from '#economy/economy.service';
+import { FreeGamesModule } from '#free-games/free-games.module';
+import { FreeGamesService } from '#free-games/free-games.service';
 
 const modules = [
   ConfigModule,
@@ -22,6 +24,7 @@ const modules = [
   MusicModule,
   EconomyModule,
   DatabaseModule,
+  FreeGamesModule,
 ];
 
 export class AvailableSharedServices {
@@ -32,6 +35,7 @@ export class AvailableSharedServices {
   musicService: MusicService = Service(MusicService);
   economy: EconomyService = Service(EconomyService);
   db: DatabaseService = Service(DatabaseService);
+  freeGamesService: FreeGamesService = Service(FreeGamesService);
 }
 
 /**
