@@ -15,7 +15,10 @@ services:
         sync: false
       - key: DEFAULT_PREFIX
         value: "!"
+        sync: false
       - key: DATABASE_TYPE
         value: better-sqlite3
+        sync: false
       - key: DATABASE_NAME
         value: /app/data/ririko.db
+        sync: false

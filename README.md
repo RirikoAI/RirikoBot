@@ -33,8 +33,9 @@ Join [our Discord server](https://discord.gg/W97eXhqX) if you need help or just 
 
 ## Deploy to Render (Recommended, Easiest)
 
-Click the button below to deploy Ririko AI to Render. You will need to provide your Discord bot token and Discord App ID
- on Render.
+Click the button below to deploy Ririko AI to Render. You'll need to provide your Discord bot token, App ID, and other
+configurations in the Render
+dashboard. [Click here to see the instructions](https://github.com/RirikoAI/RirikoBot/wiki/DEPLOY:-Deploying-to-Render.com).
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FRirikoAI%2FRirikoBot)
 
@@ -76,8 +77,8 @@ click [here](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Building-your-
 ### Note:
 
 Here's the tricky part, `canvas` and `better-sqlite3` are notoriously known for being difficult to install on Windows.
-If you are using Windows and just wants to enjoy using Ririko, we extremely recommend using Docker method above. Save
-yourself the headache.
+If you are using Windows and just wants to enjoy using Ririko, we extremely recommend using the recommended methods
+above. Save yourself the headache.
 
 ```bash
 # Install the dependencies and configure the project
