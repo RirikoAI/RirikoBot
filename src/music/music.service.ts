@@ -57,12 +57,11 @@ export class MusicService {
   }
 
   async createPlayer() {
-    // We're not using YouTubePlugin anymore, using youtubei.js instead
-    const distube = new DisTube(this.discord.client, {
-      emitNewSongOnly: false,
-      emitAddSongWhenCreatingQueue: false,
-      emitAddListWhenCreatingQueue: false,
-      plugins: [
+    const plugins = [];
+
+    // Only add YouTubePlugin if DISABLE_YOUTUBE is not set to 'true'
+    if (process.env.DISABLE_YOUTUBE !== 'true') {
+      plugins.push(
         new YouTubePlugin({
           ytdlOptions: {
             searchSongs: false,
@@ -79,10 +78,21 @@ export class MusicService {
             },
           },
         }),
-        new SpotifyPlugin(),
-        new DeezerPlugin(),
-        new SoundCloudPlugin(),
-      ],
+      );
+    }
+
+    // Add other plugins
+    plugins.push(
+      new SpotifyPlugin(),
+      new DeezerPlugin(),
+      new SoundCloudPlugin(),
+    );
+
+    const distube = new DisTube(this.discord.client, {
+      emitNewSongOnly: false,
+      emitAddSongWhenCreatingQueue: false,
+      emitAddListWhenCreatingQueue: false,
+      plugins,
     });
 
     this.distube = this.registerEvents(distube);

@@ -1,9 +1,12 @@
 services:
   - type: web
-    name: ririko-bot
-    env: docker
-    image: ririkoai/ririkobot:latest
-    plan: free
+    runtime: docker
+    name: ririko-ai
+    plan: starter
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
     autoDeploy: false
     envVars:
       - key: NODE_ENV
@@ -19,4 +22,6 @@ services:
       - key: DATABASE_TYPE
         value: better-sqlite3
       - key: DATABASE_NAME
-        value: /app/data/ririko.db
+        value: /data/ririko.db
+      - key: DISABLE_YOUTUBE
+        value: "true"
