@@ -1,8 +1,7 @@
 services:
   - type: web
-    name: ririko-bot
-    env: docker
-    image: ririkoai/ririkobot:latest
+    runtime: docker
+    name: ririko-ai
     plan: free
     autoDeploy: false
     envVars:
