@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: ririko-bot
+    env: docker
+    image: ririkoai/ririkobot:latest
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_PORT
+        value: 3000
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_APPLICATION_ID
+        sync: false
+      - key: DEFAULT_PREFIX
+        value: "!"
+      - key: DATABASE_TYPE
+        value: better-sqlite3
+      - key: DATABASE_NAME
+        value: /app/data/ririko.db

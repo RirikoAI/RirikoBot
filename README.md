@@ -31,6 +31,13 @@ See [full list of commands here](https://github.com/RirikoAI/RirikoBot/wiki/LIST
 
 Join [our Discord server](https://discord.gg/W97eXhqX) if you need help or just want to chat.
 
+## Deploy to Render (Recommended, Easiest)
+
+Click the button below to deploy Ririko AI to Render. You will need to provide your Discord bot token and Discord App ID
+ on Render.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FRirikoAI%2FRirikoBot)
+
 ## Running Ririko AI using Docker (Recommended)
 
 You also need to have Docker installed on your machine. You can find the installation instructions for your OS below:
