@@ -2,7 +2,11 @@ services:
   - type: web
     runtime: docker
     name: ririko-ai
-    plan: free
+    plan: starter
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
     autoDeploy: false
     envVars:
       - key: NODE_ENV
@@ -15,10 +19,7 @@ services:
         sync: false
       - key: DEFAULT_PREFIX
         value: "!"
-        sync: false
       - key: DATABASE_TYPE
         value: better-sqlite3
-        sync: false
       - key: DATABASE_NAME
-        value: /app/data/ririko.db
-        sync: false
+        value: /data/ririko.db
