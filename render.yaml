@@ -23,3 +23,5 @@ services:
         value: better-sqlite3
       - key: DATABASE_NAME
         value: /data/ririko.db
+      - key: DISABLE_YOUTUBE
+        value: "true"
