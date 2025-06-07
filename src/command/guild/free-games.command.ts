@@ -21,7 +21,7 @@ export default class FreeGamesCommand
   description = 'Get alerts about free games from Epic and Steam';
   regex = new RegExp('^freegames$|^freegames ', 'i');
   category = 'general';
-  usageExamples = ['freegames', 'freegames setchannel #channel'];
+  usageExamples = ['freegames', 'freegames setchannel #channel', 'freegames remove'];
 
   slashOptions = [
     {
@@ -42,6 +42,11 @@ export default class FreeGamesCommand
         },
       ],
     },
+    {
+      name: 'remove',
+      description: 'Remove the free games alerts channel configuration',
+      type: SlashCommandOptionTypes.Subcommand,
+    },
   ];
 
   async runPrefix(message: DiscordMessage) {
@@ -58,6 +63,9 @@ export default class FreeGamesCommand
       }
 
       await this.setFreeGamesChannel(message, channelMention.id);
+    } else if (subCommand === 'remove') {
+      // Remove the free games channel configuration
+      await this.removeFreeGamesChannel(message);
     } else {
       // Default to showing free games
       await this.sendFreeGamesAlert(message);
@@ -70,10 +78,88 @@ export default class FreeGamesCommand
     if (subCommand === 'setchannel') {
       const channel = interaction.options.getChannel('channel');
       await this.setFreeGamesChannel(interaction, channel.id);
+    } else if (subCommand === 'remove') {
+      // Remove the free games channel configuration
+      await this.removeFreeGamesChannel(interaction);
     } else {
       // Default to showing free games
       await interaction.deferReply();
       await this.sendFreeGamesAlert(interaction);
+    }
+  }
+
+  /**
+   * Remove the free games channel configuration
+   * @param interaction Discord interaction or message
+   */
+  private async removeFreeGamesChannel(
+    interaction: DiscordMessage | DiscordInteraction,
+  ) {
+    try {
+      // Get the guild ID
+      const guildId =
+        'guild' in interaction && interaction.guild
+          ? interaction.guild.id
+          : null;
+
+      if (!guildId) {
+        const errorMessage = 'This command can only be used in a server.';
+        if ('author' in interaction) {
+          await interaction.reply(errorMessage);
+        } else {
+          await interaction.reply({ content: errorMessage, ephemeral: true });
+        }
+        return;
+      }
+
+      // Get the guild from the database
+      const guild = await this.services.db.guildRepository.findOne({
+        where: { id: guildId },
+      });
+
+      if (!guild) {
+        const errorMessage = 'No configuration found for this server.';
+        if ('author' in interaction) {
+          await interaction.reply(errorMessage);
+        } else {
+          await interaction.reply({ content: errorMessage, ephemeral: true });
+        }
+        return;
+      }
+
+      // Check if a config exists for this guild
+      const existingConfig =
+        await this.services.db.guildConfigRepository.findOne({
+          where: { guild, name: 'freeGamesChannelId' },
+        });
+
+      if (!existingConfig) {
+        const errorMessage = 'No free games channel is configured for this server.';
+        if ('author' in interaction) {
+          await interaction.reply(errorMessage);
+        } else {
+          await interaction.reply({ content: errorMessage, ephemeral: true });
+        }
+        return;
+      }
+
+      // Remove the config
+      await this.services.db.guildConfigRepository.remove(existingConfig);
+
+      const successMessage = 'Free games alerts channel has been removed.';
+      if ('author' in interaction) {
+        await interaction.reply(successMessage);
+      } else {
+        await interaction.reply({ content: successMessage, ephemeral: true });
+      }
+    } catch (error) {
+      console.error('Error removing free games channel:', error);
+      const errorMessage = `An error occurred while removing the free games channel: ${error.message}`;
+      if ('author' in interaction) {
+        await interaction.reply(errorMessage);
+      } else {
+        await interaction.reply({ content: errorMessage, ephemeral: true });
+      }
     }
   }
 
