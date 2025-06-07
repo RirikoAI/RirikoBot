@@ -103,15 +103,15 @@ export default class SetupStableDiffusionApiCommand
     });
 
     if (!config) {
-      this.db.configRepository.create({
+      config = this.db.configRepository.create({
         applicationId: process.env.DISCORD_APPLICATION_ID,
         stableDiffusionApiToken: apiToken,
       });
+      await this.db.configRepository.save(config); // Save the new entity
     } else {
       config.stableDiffusionApiToken = apiToken;
+      await this.db.configRepository.save(config); // Save the updated entity
     }
-
-    await this.db.configRepository.save(config);
   }
 
   parseCliArgs(input: string): Record<string, string> {

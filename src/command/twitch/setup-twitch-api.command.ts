@@ -120,17 +120,17 @@ export default class SetupTwitchApiCommand
     });
 
     if (!config) {
-      this.db.configRepository.create({
+      config = this.db.configRepository.create({
         applicationId: process.env.DISCORD_APPLICATION_ID,
         twitchClientId: clientId,
         twitchClientSecret: clientSecret,
       });
+      await this.db.configRepository.save(config); // Save the new entity
     } else {
       config.twitchClientId = clientId;
       config.twitchClientSecret = clientSecret;
+      await this.db.configRepository.save(config); // Save the updated entity
     }
-
-    await this.db.configRepository.save(config);
   }
 
   parseCliArgs(input: string): Record<string, string> {
