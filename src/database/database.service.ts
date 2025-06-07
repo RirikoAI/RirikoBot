@@ -14,6 +14,7 @@ import { StreamNotification } from '#database/entities/stream-notification.entit
 import { TwitchStreamer } from '#database/entities/twitch-streamer.entity';
 import { UserNote } from '#database/entities/user-note.entity';
 import { FreeGameNotification } from '#database/entities/free-game-notification.entity';
+import { Reminder } from '#database/entities/reminder.entity';
 
 /**
  * Database Service
@@ -49,5 +50,7 @@ export class DatabaseService {
     public userNoteRepository: Repository<UserNote>,
     @InjectRepository(FreeGameNotification)
     public freeGameNotificationRepository: Repository<FreeGameNotification>,
+    @InjectRepository(Reminder)
+    public reminderRepository: Repository<Reminder>,
   ) {}
 }

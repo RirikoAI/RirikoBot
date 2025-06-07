@@ -15,6 +15,8 @@ import { EconomyModule } from '#economy/economy.module';
 import { EconomyService } from '#economy/economy.service';
 import { FreeGamesModule } from '#free-games/free-games.module';
 import { FreeGamesService } from '#free-games/free-games.service';
+import { ReminderService } from '#reminder/reminder.service';
+import { ReminderModule } from '#reminder/reminder.module';
 
 const modules = [
   ConfigModule,
@@ -25,6 +27,7 @@ const modules = [
   EconomyModule,
   DatabaseModule,
   FreeGamesModule,
+  ReminderModule,
 ];
 
 export class AvailableSharedServices {
@@ -36,6 +39,7 @@ export class AvailableSharedServices {
   economy: EconomyService = Service(EconomyService);
   db: DatabaseService = Service(DatabaseService);
   freeGamesService: FreeGamesService = Service(FreeGamesService);
+  reminderService = Service(ReminderService);
 }
 
 /**
