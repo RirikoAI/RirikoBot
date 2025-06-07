@@ -17,6 +17,8 @@ services:
         sync: false
       - key: DISCORD_APPLICATION_ID
         sync: false
+      - key: BOT_OWNER_ID
+        sync: false
       - key: DEFAULT_PREFIX
         value: "!"
       - key: DATABASE_TYPE

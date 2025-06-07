@@ -78,6 +78,10 @@ export interface CommandButtons {
   [key: string]: (interaction: DiscordInteraction) => Promise<any>;
 }
 
+export interface CommandModals {
+  [key: string]: (interaction: DiscordInteraction) => Promise<any>;
+}
+
 export function Service(service) {
   return service;
 }

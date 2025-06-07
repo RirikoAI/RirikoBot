@@ -24,13 +24,20 @@ export const InteractionCreateEvent = (
           await commandService.checkButton(interaction);
           return;
         }
+
+        // check if the interaction is a modal menu interaction
+        if (interaction.isModalSubmit()) {
+          await commandService.checkModal(interaction);
+          return;
+        }
+
         await commandService.checkInteractionCommand(interaction);
       } catch (error) {
         Logger.error(error.message, error.stack);
         const errorEmbed = new EmbedBuilder()
           .setColor('#FF0000')
           .setDescription(error.message);
-        await interaction.channel.send({ embeds: [errorEmbed] });
+        await interaction.channel?.send({ embeds: [errorEmbed] });
       }
     },
   );
