@@ -21,7 +21,11 @@ export default class FreeGamesCommand
   description = 'Get alerts about free games from Epic and Steam';
   regex = new RegExp('^freegames$|^freegames ', 'i');
   category = 'general';
-  usageExamples = ['freegames', 'freegames setchannel #channel', 'freegames remove'];
+  usageExamples = [
+    'freegames',
+    'freegames setchannel #channel',
+    'freegames remove',
+  ];
 
   slashOptions = [
     {
@@ -134,7 +138,8 @@ export default class FreeGamesCommand
         });
 
       if (!existingConfig) {
-        const errorMessage = 'No free games channel is configured for this server.';
+        const errorMessage =
+          'No free games channel is configured for this server.';
         if ('author' in interaction) {
           await interaction.reply(errorMessage);
         } else {
@@ -319,15 +324,10 @@ export default class FreeGamesCommand
       const steamGames =
         await this.services.freeGamesService.getSteamFreeGames();
 
-      // Create embeds (do this once for all guilds)
-      const epicEmbed = this.services.freeGamesService.createFreeGamesEmbed(
-        epicGames,
-        'Epic',
-      );
-      const steamEmbed = this.services.freeGamesService.createFreeGamesEmbed(
-        steamGames,
-        'Steam',
-      );
+      if (epicGames.length === 0 && steamGames.length === 0) {
+        console.log('No free games found');
+        return;
+      }
 
       // For each guild, check if they have a configured channel and send the alert
       for (const guild of guilds) {
@@ -357,11 +357,102 @@ export default class FreeGamesCommand
             continue;
           }
 
+          // Check for new games that haven't been notified yet
+          const newEpicGames = [];
+          const newSteamGames = [];
+
+          // Process Epic games
+          for (const game of epicGames) {
+            const gameId = game.id || game.productSlug || game.urlSlug;
+            const gameName = game.title;
+
+            // Check if this game has already been notified for this guild
+            const existingNotification =
+              await this.services.db.freeGameNotificationRepository.findOne({
+                where: {
+                  guildId: guild.id,
+                  gameId,
+                  source: 'Epic',
+                  notified: true,
+                },
+              });
+
+            if (!existingNotification) {
+              newEpicGames.push(game);
+
+              // Create a notification record
+              await this.services.db.freeGameNotificationRepository.save({
+                guildId: guild.id,
+                gameId,
+                gameName,
+                source: 'Epic',
+                notified: true,
+                guild,
+              });
+            }
+          }
+
+          // Process Steam games
+          for (const game of steamGames) {
+            const gameId = game.url;
+            const gameName = game.name;
+
+            // Check if this game has already been notified for this guild
+            const existingNotification =
+              await this.services.db.freeGameNotificationRepository.findOne({
+                where: {
+                  guildId: guild.id,
+                  gameId,
+                  source: 'Steam',
+                  notified: true,
+                },
+              });
+
+            if (!existingNotification) {
+              newSteamGames.push(game);
+
+              // Create a notification record
+              await this.services.db.freeGameNotificationRepository.save({
+                guildId: guild.id,
+                gameId,
+                gameName,
+                source: 'Steam',
+                notified: true,
+                guild,
+              });
+            }
+          }
+
+          // If there are no new games, skip sending notification
+          if (newEpicGames.length === 0 && newSteamGames.length === 0) {
+            console.log(
+              `No new free games to notify for guild ${guild.name} (${guild.id})`,
+            );
+            continue;
+          }
+
+          // Create embeds for new games only
+          const newEpicEmbed =
+            this.services.freeGamesService.createFreeGamesEmbed(
+              newEpicGames,
+              'Epic',
+            );
+          const newSteamEmbed =
+            this.services.freeGamesService.createFreeGamesEmbed(
+              newSteamGames,
+              'Steam',
+            );
+
+          // Prepare embeds to send (only include non-empty ones)
+          const embedsToSend = [];
+          if (newEpicGames.length > 0) embedsToSend.push(newEpicEmbed);
+          if (newSteamGames.length > 0) embedsToSend.push(newSteamEmbed);
+
           // Send embeds to the channel
           await channel.send({
             content:
-              "🎮 **Free Games Alert** 🎮\nHere are today's free games from Epic Games Store and Steam!",
-            embeds: [epicEmbed, steamEmbed],
+              '🎮 **Free Games Alert** 🎮\nHere are the latest free games from Epic Games Store and Steam!',
+            embeds: embedsToSend,
           });
 
           console.log(

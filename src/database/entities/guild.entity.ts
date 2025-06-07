@@ -5,6 +5,7 @@ import { GuildConfig } from '#database/entities/guild-config.entity';
 import { StreamNotification } from '#database/entities/stream-notification.entity';
 import { StreamSubscription } from '#database/entities/stream-subscription.entity';
 import { UserNote } from '#database/entities/user-note.entity';
+import { FreeGameNotification } from '#database/entities/free-game-notification.entity';
 
 /**
  * Guild Entity
@@ -47,4 +48,10 @@ export class Guild {
 
   @OneToMany(() => UserNote, (userNote) => userNote.guild)
   userNotes: UserNote[];
+
+  @OneToMany(
+    () => FreeGameNotification,
+    (freeGameNotification) => freeGameNotification.guild,
+  )
+  freeGameNotifications: FreeGameNotification[];
 }

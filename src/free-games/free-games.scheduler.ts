@@ -14,9 +14,9 @@ export class FreeGamesScheduler {
   constructor(private readonly commandService: CommandService) {}
 
   /**
-   * Check for free games and send alerts daily at 12:00 PM
+   * Check for free games and send alerts every hour
    */
-  @Cron(CronExpression.EVERY_DAY_AT_NOON)
+  @Cron(CronExpression.EVERY_HOUR)
   async checkFreeGames() {
     this.logger.log('Checking for free games...');
 

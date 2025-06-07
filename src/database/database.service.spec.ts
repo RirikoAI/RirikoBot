@@ -14,6 +14,7 @@ import { StreamSubscription } from '#database/entities/stream-subscription.entit
 import { StreamNotification } from '#database/entities/stream-notification.entity';
 import { TwitchStreamer } from '#database/entities/twitch-streamer.entity';
 import { UserNote } from '#database/entities/user-note.entity';
+import { FreeGameNotification } from '#database/entities/free-game-notification.entity';
 
 describe('DatabaseService', () => {
   let service: DatabaseService;
@@ -42,6 +43,10 @@ describe('DatabaseService', () => {
         { provide: getRepositoryToken(TwitchStreamer), useClass: Repository },
         {
           provide: getRepositoryToken(UserNote),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(FreeGameNotification),
           useClass: Repository,
         },
       ],
