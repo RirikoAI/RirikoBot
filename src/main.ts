@@ -30,7 +30,7 @@ export async function bootstrap() {
     );
   SwaggerModule.setup('docs', app, documentFactory);
 
-  await app.listen(configService.get('app.port'), async () => {
+  await app.listen(configService.get('app.port'), '0.0.0.0', async () => {
     await discordService.connect();
     discordService.registerEvents();
     await commandService.registerInteractionCommands();
