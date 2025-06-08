@@ -9,16 +9,23 @@ services:
       sizeGB: 1
     autoDeploy: false
     envVars:
-      - key: NODE_ENV
-        value: production
-      - key: APP_PORT
-        value: 3000
+      # Environment variables with sync: false are required.
       - key: DISCORD_BOT_TOKEN
         sync: false
       - key: DISCORD_APPLICATION_ID
         sync: false
       - key: BOT_OWNER_ID
         sync: false
+      - key: AI_SERVICE_TYPE
+        sync: false
+      - key: AI_SERVICE_API_KEY
+        sync: false
+      - key: AI_SERVICE_DEFAULT_MODEL
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: APP_PORT
+        value: 3000
       - key: DEFAULT_PREFIX
         value: "!"
       - key: DATABASE_TYPE
