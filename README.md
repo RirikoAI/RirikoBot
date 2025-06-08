@@ -94,6 +94,11 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Post-installation steps
+
+After installing Ririko AI, you need to set up the AI chatbot, Stable Diffusion, and others:
+[Click here to see the instructions](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Post%E2%80%90installation-settings)
+
 ## Run tests
 
 ```bash

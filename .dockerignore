@@ -28,6 +28,7 @@ data
 *.sqlite
 
 # Environment variables
+.env
 .env.test
 .env.*
 !.env.example
