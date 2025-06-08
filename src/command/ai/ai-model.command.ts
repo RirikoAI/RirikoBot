@@ -6,8 +6,9 @@ import {
 } from '#command/command.types';
 import { EmbedBuilder } from 'discord.js';
 import { GuildConfig } from '#database/entities/guild-config.entity';
-import ollama from 'ollama';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export default class AiModelCommand
   extends Command
   implements CommandInterface
@@ -16,7 +17,12 @@ export default class AiModelCommand
   description = 'Set the AI model to use';
   category = 'ai';
   regex = new RegExp('^ai-model$|^ai-model ', 'i');
-  usageExamples = ['ai-model', 'ai-model set <model>', 'ai-model pull'];
+  usageExamples = [
+    'ai-model',
+    'ai-model set <model>',
+    'ai-model pull',
+    'ai-model pull-default',
+  ];
 
   slashOptions = [
     {
@@ -36,6 +42,16 @@ export default class AiModelCommand
       type: SlashCommandOptionTypes.Subcommand,
       name: 'pull',
       description: 'Pull the model that is set in the database',
+    },
+    {
+      type: SlashCommandOptionTypes.Subcommand,
+      name: 'pull-default',
+      description: 'Pull the default model from the current service',
+    },
+    {
+      type: SlashCommandOptionTypes.Subcommand,
+      name: 'reset',
+      description: 'Reset the AI model to the default',
     },
   ];
 
@@ -75,6 +91,34 @@ export default class AiModelCommand
       for await (const part of response) {
         await reply.edit(`Status: ${part.status}`);
       }
+    } else if (subcommand === 'pull-default') {
+      const reply = await message.reply(
+        'Pulling default model from service...',
+      );
+
+      const response = await this.pullDefaultModel();
+      for await (const part of response) {
+        await reply.edit(`Status: ${part.status}`);
+      }
+    } else if (subcommand === 'reset') {
+      const guildDB = await this.db.guildRepository.findOne({
+        where: { id: message.guild.id },
+      });
+
+      const modelDB = guildDB.configurations.find(
+        (config) => config.name === 'ai_model',
+      );
+
+      if (modelDB) {
+        await this.db.guildConfigRepository.remove(modelDB);
+        await message.reply({
+          embeds: [this.prepareEmbed('AI model reset to default', false)],
+        });
+      } else {
+        await message.reply({
+          embeds: [this.prepareEmbed('No AI model set to reset', true)],
+        });
+      }
     } else {
       await message.reply({
         embeds: [
@@ -110,6 +154,31 @@ export default class AiModelCommand
       const response = await this.pullModel(interaction.guild.id);
       for await (const part of response) {
         await interaction.editReply(`Status: ${part.status}`);
+      }
+    } else if (subcommand === 'pull-default') {
+      await interaction.deferReply();
+      const response = await this.pullDefaultModel();
+      for await (const part of response) {
+        await interaction.editReply(`Status: ${part.status}`);
+      }
+    } else if (subcommand === 'reset') {
+      const guildDB = await this.db.guildRepository.findOne({
+        where: { id: interaction.guild.id },
+      });
+
+      const modelDB = guildDB.configurations.find(
+        (config) => config.name === 'ai_model',
+      );
+
+      if (modelDB) {
+        await this.db.guildConfigRepository.remove(modelDB);
+        await interaction.reply({
+          embeds: [this.prepareEmbed('AI model reset to default', false)],
+        });
+      } else {
+        await interaction.reply({
+          embeds: [this.prepareEmbed('No AI model set to reset', true)],
+        });
       }
     }
   }
@@ -151,17 +220,50 @@ export default class AiModelCommand
       (config) => config.name === 'ai_model',
     );
 
+    // Get the AI service from the factory
+    const aiService = this.services.aiServiceFactory.getService();
+    const defaultModel = this.services.aiServiceFactory.getDefaultModel();
+
     if (model) {
-      return ollama.pull({
-        model: model.value,
-        stream: true,
-      });
+      return aiService.pullModel(model.value);
     } else {
-      return ollama.pull({
-        model: 'llama3.2:1b',
-        stream: true,
-      });
+      return aiService.pullModel(defaultModel);
     }
+  }
+
+  /**
+   * Pull the default model from the current service
+   * This uses the default model defined in the service's chat method
+   * @returns AsyncIterable with status updates
+   */
+  async pullDefaultModel() {
+    // Get the AI service from the factory
+    const aiService = this.services.aiServiceFactory.getService();
+
+    // Get the service type to determine which default model to use
+    const serviceType = this.services.aiServiceFactory.getServiceType();
+
+    // Define default models for each service type based on their chat method defaults
+    let defaultServiceModel: string;
+    switch (serviceType) {
+      case 'ollama':
+        defaultServiceModel = 'llama3.2:1b';
+        break;
+      case 'google-ai':
+        defaultServiceModel = 'gemini-2.0-flash';
+        break;
+      case 'openrouter':
+        defaultServiceModel = 'meta-llama/llama-3.3-8b-instruct:free';
+        break;
+      case 'openai':
+        defaultServiceModel = 'gpt-4.1-nano';
+        break;
+      default:
+        // Fallback to the configured default model if service type is unknown
+        defaultServiceModel = this.services.aiServiceFactory.getDefaultModel();
+    }
+
+    return aiService.pullModel(defaultServiceModel);
   }
 
   prepareEmbed(text, isError): EmbedBuilder {

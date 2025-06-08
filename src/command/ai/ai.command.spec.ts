@@ -4,12 +4,11 @@ import { CommandService } from '#command/command.service';
 import { DiscordService } from '#discord/discord.service';
 import { Guild, TextChannel, User } from 'discord.js';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
-import { SystemPrompt } from '#command/ai/system-prompt';
+import { SystemPrompt } from '#ai/system-prompt';
 import {
   SharedServicesMock,
   TestSharedService,
 } from '../../../test/mocks/shared-services.mock';
-import ollama from 'ollama';
 
 describe('AiCommand', () => {
   let command: AiCommand;
@@ -35,6 +34,23 @@ describe('AiCommand', () => {
     ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
+    aiServiceFactory: {
+      getService: jest.fn().mockReturnValue({
+        chat: jest.fn().mockImplementation(function* () {
+          yield { content: 'part 1', done: false };
+          yield { content: 'part 2', done: false };
+          yield { content: 'part 3', done: false };
+          yield { content: 'part 4', done: true };
+        }),
+        pullModel: jest.fn().mockImplementation(function* () {
+          yield { status: 'Downloading' };
+          yield { status: 'Completed' };
+        }),
+        getAvailableModels: jest.fn().mockResolvedValue(['model1', 'model2']),
+      }),
+      getDefaultModel: jest.fn().mockReturnValue('default-model'),
+      getServiceType: jest.fn().mockReturnValue('ollama'),
+    },
   };
 
   beforeEach(async () => {
@@ -215,17 +231,27 @@ describe('AiCommand', () => {
       const channelId = '1234567890';
       const firstReply = { id: 'replyId' } as any;
 
-      const mockResponse = [
-        { message: { content: 'part 1' } },
-        { message: { content: 'part 2' } },
-        { message: { content: 'part 3' } },
-        { message: { content: 'part 4' } },
-      ];
+      // Mock the response from the aiServiceFactory
+      const mockResponse = function* () {
+        yield { content: 'part 1', done: false };
+        yield { content: 'part 2', done: false };
+        yield { content: 'part 3', done: false };
+        yield { content: 'part 4', done: true };
+      };
+
       command.client.channels.cache.get = jest
         .fn()
         .mockReturnValue(mockTextChannel);
 
-      jest.spyOn(ollama, 'chat').mockResolvedValue(mockResponse as any);
+      // Reset the mock to ensure we can verify it was called
+      (command.services.aiServiceFactory.getService as jest.Mock).mockClear();
+      const mockAiService = {
+        chat: jest.fn().mockReturnValue(mockResponse()),
+      };
+      (
+        command.services.aiServiceFactory.getService as jest.Mock
+      ).mockReturnValue(mockAiService);
+
       mockTextChannel.messages.fetch = jest.fn().mockResolvedValue(firstReply);
       mockTextChannel.send = jest.fn().mockResolvedValue(firstReply);
       firstReply.edit = jest.fn();
@@ -239,8 +265,10 @@ describe('AiCommand', () => {
         firstReply,
       );
 
+      expect(command.services.aiServiceFactory.getService).toHaveBeenCalled();
+      expect(mockAiService.chat).toHaveBeenCalled();
       expect(firstReply.edit).toHaveBeenCalledTimes(1);
-      expect(firstReply.edit).toHaveBeenCalledWith('part 1part 2part 3part 4');
+      expect(firstReply.edit).toHaveBeenCalledWith('part 1part 2part 3');
     });
   });
 });

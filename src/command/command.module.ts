@@ -17,6 +17,8 @@ import { FreeGamesModule } from '#free-games/free-games.module';
 import { FreeGamesService } from '#free-games/free-games.service';
 import { ReminderService } from '#reminder/reminder.service';
 import { ReminderModule } from '#reminder/reminder.module';
+import { AiModule } from '#ai/ai.module';
+import { AiService } from '#ai/ai.service';
 
 const modules = [
   ConfigModule,
@@ -28,6 +30,7 @@ const modules = [
   DatabaseModule,
   FreeGamesModule,
   ReminderModule,
+  AiModule,
 ];
 
 export class AvailableSharedServices {
@@ -40,6 +43,7 @@ export class AvailableSharedServices {
   db: DatabaseService = Service(DatabaseService);
   freeGamesService: FreeGamesService = Service(FreeGamesService);
   reminderService = Service(ReminderService);
+  aiServiceFactory = Service(AiService);
 }
 
 /**

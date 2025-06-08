@@ -8,7 +8,6 @@ import {
   SharedServicesMock,
   TestSharedService,
 } from '../../../test/mocks/shared-services.mock';
-import ollama from 'ollama';
 
 describe('AiModelCommand', () => {
   let command: AiModelCommand;
@@ -34,6 +33,23 @@ describe('AiModelCommand', () => {
     ...TestSharedService,
     discord: mockDiscordService as unknown as DiscordService,
     commandService: mockCommandService as unknown as CommandService,
+    aiServiceFactory: {
+      getService: jest.fn().mockReturnValue({
+        chat: jest.fn().mockImplementation(function* () {
+          yield { content: 'part 1', done: false };
+          yield { content: 'part 2', done: false };
+          yield { content: 'part 3', done: false };
+          yield { content: 'part 4', done: true };
+        }),
+        pullModel: jest.fn().mockImplementation(function* () {
+          yield { status: 'Downloading' };
+          yield { status: 'Completed' };
+        }),
+        getAvailableModels: jest.fn().mockResolvedValue(['model1', 'model2']),
+      }),
+      getDefaultModel: jest.fn().mockReturnValue('default-model'),
+      getServiceType: jest.fn().mockReturnValue('ollama'),
+    },
   };
 
   beforeEach(async () => {
@@ -252,19 +268,33 @@ describe('AiModelCommand', () => {
         },
       } as any;
 
-      const mockResponse = [{ status: 'Downloading' }, { status: 'Completed' }];
-      jest.spyOn(ollama, 'pull').mockResolvedValue(mockResponse as any);
+      // Mock the response from the aiServiceFactory
+      const mockResponse = function* () {
+        yield { status: 'Downloading' };
+        yield { status: 'Completed' };
+      };
+
+      // Reset the mock to ensure we can verify it was called
+      (command.services.aiServiceFactory.getService as jest.Mock).mockClear();
+      const mockAiService = {
+        pullModel: jest.fn().mockReturnValue(mockResponse()),
+      };
+      (command.services.aiServiceFactory.getService as jest.Mock).mockReturnValue(mockAiService);
 
       const response = await command.pullModel(mockGuildId);
 
       expect(command.db.guildRepository.findOne).toHaveBeenCalledWith({
         where: { id: mockGuildId },
       });
-      expect(ollama.pull).toHaveBeenCalledWith({
-        model: 'testModel',
-        stream: true,
-      });
-      expect(response).toEqual(mockResponse);
+      expect(command.services.aiServiceFactory.getService).toHaveBeenCalled();
+      expect(mockAiService.pullModel).toHaveBeenCalledWith('testModel');
+
+      // Convert generator to array to test the response
+      const responseArray = [];
+      for await (const item of response) {
+        responseArray.push(item);
+      }
+      expect(responseArray).toEqual([{ status: 'Downloading' }, { status: 'Completed' }]);
     });
   });
 });
