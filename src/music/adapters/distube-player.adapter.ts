@@ -84,6 +84,19 @@ export class DisTubePlayerAdapter implements MusicPlayerAdapter {
     return this.distube.setRepeatMode(guildId, mode);
   }
 
+  async skip(guildId: string): Promise<void> {
+    return this.distube.skip(guildId);
+  }
+
+  async createCustomPlaylist(songs: string[], options: any): Promise<any> {
+    // DisTube doesn't have a direct method for creating custom playlists
+    // We'll return an object that can be used with the play method
+    return {
+      songs,
+      ...options.properties,
+    };
+  }
+
   on(event: string, callback: (...args: any[]) => void): this {
     this.distube.on(event, callback);
     return this;

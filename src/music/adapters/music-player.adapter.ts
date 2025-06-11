@@ -41,6 +41,16 @@ export interface MusicPlayerAdapter {
   setRepeatMode(guildId: string, mode: number): Promise<void>;
 
   /**
+   * Skip the current song
+   */
+  skip(guildId: string): Promise<void>;
+
+  /**
+   * Create a custom playlist from a list of songs
+   */
+  createCustomPlaylist?(songs: string[], options: any): Promise<any>;
+
+  /**
    * Register event handlers for the player
    */
   on(event: string, callback: (...args: any[]) => void): this;

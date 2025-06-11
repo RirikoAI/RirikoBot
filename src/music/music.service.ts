@@ -6,8 +6,6 @@ import { StringUtil } from '#util/string/string.util';
 import { Queue } from 'distube';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { DatabaseService } from '#database/database.service';
-import { MusicPlayerAdapter } from './adapters/music-player.adapter';
-import { DisTubePlayerAdapter } from './adapters/distube-player.adapter';
 
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { DisTube } = require('distube');
@@ -16,6 +14,10 @@ const { DisTube } = require('distube');
  * This replaces the YouTubePlugin with a more reliable and feature-rich YouTube API client
  */
 import { Innertube, UniversalCache, YTNodes } from 'youtubei.js';
+import { MusicPlayerAdapter } from './adapters/music-player.adapter';
+import { DisTubePlayerAdapter } from './adapters/distube-player.adapter';
+import { LavaLinkPlayerAdapter } from '#music/adapters/lavalink-player.adapter';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Ririko Music class to handle all music playback events
@@ -39,6 +41,10 @@ export class MusicService {
     readonly discord: DiscordService,
     @Inject()
     readonly db: DatabaseService,
+    @Inject()
+    readonly configService: ConfigService,
+    // @Inject('MUSIC_PLAYER_ADAPTER')
+    // private readonly playerAdapter?: MusicPlayerAdapter,
   ) {
     // Initialize Innertube
     this.initYoutube();
@@ -56,23 +62,67 @@ export class MusicService {
   }
 
   async createPlayer() {
-    // Create a DisTubePlayerAdapter instance
-    const playerAdapter = new DisTubePlayerAdapter(this.discord.client, {
-      emitNewSongOnly: false,
-      emitAddSongWhenCreatingQueue: false,
-      emitAddListWhenCreatingQueue: false,
-    });
+    // Register the adapter based on configuration
+    await this.registerAdapter();
+
+    // If adapter wasn't created by registerAdapter, create a default one
+    if (!this.player) {
+      this.player = new DisTubePlayerAdapter(this.discord.client, {
+        emitNewSongOnly: false,
+        emitAddSongWhenCreatingQueue: false,
+        emitAddListWhenCreatingQueue: false,
+      });
+    }
 
     // Register events on the adapter
-    this.registerEvents(playerAdapter);
+    this.registerEvents(this.player);
 
-    // Assign the adapter to this.player
-    this.player = playerAdapter;
-
-    // For backward compatibility, assign the underlying DisTube instance to this.distube
-    this.distube = (playerAdapter as DisTubePlayerAdapter).getDistubeInstance();
+    // For backward compatibility, if using DisTubePlayerAdapter, assign the underlying DisTube instance to this.distube
+    if (this.player instanceof DisTubePlayerAdapter) {
+      this.distube = this.player.getDistubeInstance();
+    } else {
+      // If using a different adapter, we still need to set this.distube for backward compatibility
+      // but it won't have all the DisTube functionality
+      this.distube = this.player as any;
+    }
 
     return this.distube;
+  }
+
+  async registerAdapter() {
+    const adapterType = this.configService.get<string>(
+      'MUSIC_ADAPTER',
+      'distube',
+    );
+
+    if (adapterType.toLowerCase() === 'lavalink') {
+      this.player = new LavaLinkPlayerAdapter(this.discord.client, {
+        nodes: [
+          {
+            host: this.configService.get<string>('LAVALINK_HOST', 'localhost'),
+            port: parseInt(
+              this.configService.get<string>('LAVALINK_PORT', '2333'),
+            ),
+            authorization: this.configService.get<string>(
+              'LAVALINK_PASSWORD',
+              'youshallnotpass',
+            ),
+            secure:
+              this.configService.get<string>('LAVALINK_SECURE', 'false') ===
+              'true',
+          },
+        ],
+      });
+    } else {
+      // Default to DisTube
+      this.player = new DisTubePlayerAdapter(this.discord.client, {
+        emitNewSongOnly: false,
+        emitAddSongWhenCreatingQueue: false,
+        emitAddListWhenCreatingQueue: false,
+      });
+    }
+
+    return this.player;
   }
 
   async search(params: { query: string }) {

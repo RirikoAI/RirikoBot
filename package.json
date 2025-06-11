@@ -78,6 +78,7 @@
     "distube": "^5.0.7",
     "dotenv": "^16.5.0",
     "genius-lyrics": "^4.4.7",
+    "lavalink-client": "^2.5.6",
     "mongodb": "^6.16.0",
     "ms": "3.0.0-canary.1",
     "nest-commander": "^3.17.0",
@@ -93,7 +94,7 @@
     "sqlite3": "^5.1.7",
     "stackblur-canvas": "^2.7.0",
     "typeorm": "^0.3.22",
-    "youtubei.js": "^13.4.0"
+    "youtubei.js": "^14.0.0"
   },
   "devDependencies": {
     "@golevelup/ts-jest": "^0.6.2",
