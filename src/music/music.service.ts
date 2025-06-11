@@ -6,25 +6,24 @@ import { StringUtil } from '#util/string/string.util';
 import { Queue } from 'distube';
 import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { DatabaseService } from '#database/database.service';
+import { MusicPlayerAdapter } from './adapters/music-player.adapter';
+import { DisTubePlayerAdapter } from './adapters/distube-player.adapter';
 
 const { EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { DisTube } = require('distube');
-const { SpotifyPlugin } = require('@distube/spotify');
-const { SoundCloudPlugin } = require('@distube/soundcloud');
-const { DeezerPlugin } = require('@distube/deezer');
 /**
  * Import youtubei.js for YouTube search and playback
  * This replaces the YouTubePlugin with a more reliable and feature-rich YouTube API client
  */
 import { Innertube, UniversalCache, YTNodes } from 'youtubei.js';
-import { YouTubePlugin } from '@distube/youtube';
 
 /**
- * Ririko Music class to handle all Distube events
+ * Ririko Music class to handle all music playback events
  * @author Earnest Angel (https://angel.net.my)
  */
 @Injectable()
 export class MusicService {
+  player: MusicPlayerAdapter;
   distube: typeof DisTube;
   youtube: Innertube;
 
@@ -57,45 +56,22 @@ export class MusicService {
   }
 
   async createPlayer() {
-    const plugins = [];
-
-    // Only add YouTubePlugin if DISABLE_YOUTUBE is not set to 'true'
-    if (process.env.DISABLE_YOUTUBE !== 'true') {
-      plugins.push(
-        new YouTubePlugin({
-          ytdlOptions: {
-            searchSongs: false,
-            searchPlaylist: false,
-            searchResult: false,
-            requestOptions: {
-              dispatcher: {
-                // Use youtubei.js for YouTube requests
-                // @ts-ignore
-                request: (url, options) => {
-                  console.log('Requesting URL:', url);
-                },
-              },
-            },
-          },
-        }),
-      );
-    }
-
-    // Add other plugins
-    plugins.push(
-      new SpotifyPlugin(),
-      new DeezerPlugin(),
-      new SoundCloudPlugin(),
-    );
-
-    const distube = new DisTube(this.discord.client, {
+    // Create a DisTubePlayerAdapter instance
+    const playerAdapter = new DisTubePlayerAdapter(this.discord.client, {
       emitNewSongOnly: false,
       emitAddSongWhenCreatingQueue: false,
       emitAddListWhenCreatingQueue: false,
-      plugins,
     });
 
-    this.distube = this.registerEvents(distube);
+    // Register events on the adapter
+    this.registerEvents(playerAdapter);
+
+    // Assign the adapter to this.player
+    this.player = playerAdapter;
+
+    // For backward compatibility, assign the underlying DisTube instance to this.distube
+    this.distube = (playerAdapter as DisTubePlayerAdapter).getDistubeInstance();
+
     return this.distube;
   }
 
@@ -120,6 +96,20 @@ export class MusicService {
         return;
       }
 
+      console.log({
+        id: firstResult.id,
+        name: firstResult.title.text,
+        url: `https://www.youtube.com/watch?v=${firstResult.id}`,
+        thumbnail: firstResult.thumbnails?.[0]?.url || '',
+        duration: firstResult.duration?.seconds || 0,
+        formattedDuration: firstResult.duration?.text || '0:00',
+        uploader: {
+          name: firstResult.author?.name || 'Unknown',
+          url: firstResult.author?.url || '',
+        },
+        source: 'youtube',
+      });
+
       // Format the result to be compatible with DisTube's expectations
       return {
         id: firstResult.id,
@@ -140,9 +130,9 @@ export class MusicService {
     }
   }
 
-  registerEvents(distube: typeof DisTube) {
-    // DisTube event listeners, more in the documentation page
-    distube
+  registerEvents(player: MusicPlayerAdapter) {
+    // Register event listeners on the player adapter
+    player
       .on('playSong', async (queue, song) => {
         await this.trackMusic(queue?.textChannel?.guild?.id);
         let volume = queue.volume || 50;
@@ -182,7 +172,7 @@ export class MusicService {
         ),
       );
 
-    return distube;
+    return player;
   }
 
   async trackMusic(guildId) {
@@ -299,15 +289,11 @@ export class MusicService {
     }
 
     try {
-      await this.distube.play(
-        message.member.voice.channel,
-        message.toString(),
-        {
-          member: message.member,
-          textChannel: message.channel,
-          message,
-        },
-      );
+      await this.player.play(message.member.voice.channel, message.toString(), {
+        member: message.member,
+        textChannel: message.channel,
+        message,
+      });
     } catch (e) {
       if (e.message.includes('voiceChannel')) {
         message.channel.send('Please join a voice channel to play a music');
@@ -319,7 +305,7 @@ export class MusicService {
 
   async muteMusic(interaction: DiscordInteraction | DiscordMessage) {
     // get current volume
-    const queue = this.distube.getQueue(interaction.guild.id);
+    const queue = this.player.getQueue(interaction.guild.id);
     const currentVolume = queue?.volume;
     let muted;
     if (currentVolume === 0) {
@@ -330,10 +316,10 @@ export class MusicService {
 
       // if the guild volume setting exists, set the volume to the guild volume
       if (guildVolume) {
-        await this.distube.setVolume(interaction.guild.id, guildVolume.volume);
+        await this.player.setVolume(interaction.guild.id, guildVolume.volume);
       } else {
         // set the volume to 50 if the guild volume setting does not exist
-        await this.distube.setVolume(interaction.guild.id, 50);
+        await this.player.setVolume(interaction.guild.id, 50);
       }
       muted = false;
     } else {
@@ -350,14 +336,19 @@ export class MusicService {
         ).volume = currentVolume;
       }
 
-      await this.distube.setVolume(interaction.guild.id, 0);
+      await this.player.setVolume(interaction.guild.id, 0);
       muted = true;
     }
 
     await this.sendEmbed({
       musicChannel: interaction.channel as TextChannel,
       queue,
-      song: queue.songs[0],
+      song: {
+        ...queue.songs[0],
+        uploader: {
+          name: queue.songs[0]?.uploader?.name || 'Unknown Uploader',
+        },
+      } as any,
       muted,
       interaction,
     });
@@ -371,7 +362,7 @@ export class MusicService {
       return;
     }
 
-    await this.distube.setVolume(interaction.guild.id, volume);
+    await this.player.setVolume(interaction.guild.id, volume);
 
     // get the guild music channel
     const musicChannel = await this.db.musicChannelRepository.findOne({
@@ -404,28 +395,28 @@ export class MusicService {
   }
 
   async pauseMusic(interaction: DiscordInteraction | DiscordMessage) {
-    const queue = this.distube.getQueue(interaction.guild.id);
+    const queue = this.player.getQueue(interaction.guild.id);
     if (!queue) {
       return;
     }
 
     if (queue.paused) {
-      await this.distube.resume(interaction.guild.id);
+      await this.player.resume(interaction.guild.id);
       await this.sendEmbed({
         musicChannel: interaction.channel as TextChannel,
         queue,
-        song: queue.songs[0],
+        song: queue.songs[0] as any,
         paused: false,
         interaction,
       });
       return;
     }
 
-    await this.distube.pause(interaction.guild.id);
+    await this.player.pause(interaction.guild.id);
     await this.sendEmbed({
       musicChannel: interaction.channel as TextChannel,
       queue,
-      song: queue.songs[0],
+      song: queue.songs[0] as any,
       paused: true,
       interaction,
     });
@@ -434,7 +425,7 @@ export class MusicService {
   async stopMusic(interaction: DiscordInteraction | DiscordMessage) {
     try {
       await this.stopTrackingMusic(interaction.guildId);
-      await this.distube.stop(interaction.guildId);
+      await this.player.stop(interaction.guildId);
     } catch (e) {}
     await this.clearPlayer(interaction.channel as TextChannel);
   }
@@ -479,23 +470,23 @@ export class MusicService {
   }
 
   async resumeMusic(interaction: DiscordInteraction) {
-    const queue = this.distube.getQueue(interaction.guild.id);
+    const queue = this.player.getQueue(interaction.guild.id);
     if (!queue) {
       return;
     }
 
-    await this.distube.resume(interaction.guild.id);
+    await this.player.resume(interaction.guild.id);
     await this.sendEmbed({
       musicChannel: interaction.channel as TextChannel,
       queue,
-      song: queue.songs[0],
+      song: queue.songs[0] as any,
       paused: false,
       interaction,
     });
   }
 
   async repeatQueue(interaction: DiscordInteraction | DiscordMessage) {
-    const queue = this.distube.getQueue(interaction.guild.id);
+    const queue = this.player.getQueue(interaction.guild.id);
     if (!queue) {
       console.error('no queue');
       return;
@@ -504,7 +495,7 @@ export class MusicService {
     // cycle between repeat modes
     const repeatMode =
       queue.repeatMode === 0 ? 1 : queue.repeatMode === 1 ? 2 : 0;
-    await this.distube.setRepeatMode(interaction.guild.id, repeatMode);
+    await this.player.setRepeatMode(interaction.guild.id, repeatMode);
 
     // find the guild music channel from the database
     const musicChannel = await this.db.musicChannelRepository.findOne({
@@ -530,7 +521,7 @@ export class MusicService {
     await this.sendEmbed({
       musicChannel: textChannel as TextChannel,
       queue,
-      song: queue.songs[0],
+      song: queue.songs[0] as any,
       interaction,
       repeatMode,
     });
@@ -569,7 +560,7 @@ export class MusicService {
 
     await Promise.all(messages.map((message) => message.delete()));
 
-    const queue = this.distube.getQueue(guildId);
+    const queue = this.player.getQueue(guildId);
 
     // textChannel.send({ embeds: [embed] }).catch((e) => {});
     await this.sendEmbed({ musicChannel: channel, song: song, queue: queue });
@@ -666,8 +657,8 @@ export class MusicService {
   async sendEmbed(params: {
     musicChannel: TextChannel;
     song?: {
-      name: string;
-      thumbnail: string;
+      name?: string;
+      thumbnail?: string;
       uploader: {
         name: string;
       };
@@ -777,9 +768,5 @@ export class MusicService {
         .setCustomId(forwardId)
         .setDisabled(true),
     };
-  }
-
-  player(): typeof DisTube {
-    return this.distube;
   }
 }

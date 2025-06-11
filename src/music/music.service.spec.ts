@@ -163,9 +163,10 @@ describe('MusicService', () => {
       jest
         .spyOn(discordService.client.channels, 'fetch')
         .mockResolvedValue(mockChannel as any);
-      service.distube = {
+      service.player = {
         getQueue: jest.fn().mockReturnValue(mockQueue),
       } as any;
+      service.distube = service.player as any;
 
       await service.handleGuildInterval(guildId, channelId);
       expect(mockChannel.messages.fetch).toHaveBeenCalled();
@@ -389,10 +390,11 @@ describe('MusicService', () => {
         songs: [{ name: 'test song' }],
       };
 
-      service.distube = {
+      service.player = {
         getQueue: jest.fn().mockReturnValue(queue),
         setVolume: jest.fn(),
-      };
+      } as any;
+      service.distube = service.player as any;
 
       service.sendEmbed = jest.fn();
     });
@@ -400,7 +402,7 @@ describe('MusicService', () => {
     it('should mute the music if it is not muted', async () => {
       await service.muteMusic(interaction);
 
-      expect(service.distube.setVolume).toHaveBeenCalledWith(
+      expect(service.player.setVolume).toHaveBeenCalledWith(
         '1000000001112223334',
         0,
       );
@@ -419,7 +421,7 @@ describe('MusicService', () => {
 
       await service.muteMusic(interaction);
 
-      expect(service.distube.setVolume).toHaveBeenCalledWith(
+      expect(service.player.setVolume).toHaveBeenCalledWith(
         '1000000001112223334',
         50,
       );
@@ -448,11 +450,12 @@ describe('MusicService', () => {
         songs: [{ name: 'test song' }],
       };
 
-      service.distube = {
+      service.player = {
         getQueue: jest.fn().mockReturnValue(queue),
         pause: jest.fn(),
         resume: jest.fn(),
-      };
+      } as any;
+      service.distube = service.player as any;
 
       service.sendEmbed = jest.fn();
     });
@@ -460,7 +463,7 @@ describe('MusicService', () => {
     it('should pause the music if it is playing', async () => {
       await service.pauseMusic(interaction);
 
-      expect(service.distube.pause).toHaveBeenCalledWith('1000000001112223334');
+      expect(service.player.pause).toHaveBeenCalledWith('1000000001112223334');
       expect(service.sendEmbed).toHaveBeenCalledWith({
         musicChannel: interaction.channel,
         queue,
@@ -475,7 +478,7 @@ describe('MusicService', () => {
 
       await service.pauseMusic(interaction);
 
-      expect(service.distube.resume).toHaveBeenCalledWith(
+      expect(service.player.resume).toHaveBeenCalledWith(
         '1000000001112223334',
       );
       expect(service.sendEmbed).toHaveBeenCalledWith({
@@ -513,10 +516,11 @@ describe('MusicService', () => {
         songs: [{ name: 'test song' }],
       };
 
-      service.distube = {
+      service.player = {
         getQueue: jest.fn().mockReturnValue(queue),
         setVolume: jest.fn(),
-      };
+      } as any;
+      service.distube = service.player as any;
 
       service.sendEmbed = jest.fn();
     });
@@ -532,7 +536,7 @@ describe('MusicService', () => {
 
       await service.setVolume(interaction, 50);
 
-      expect(service.distube.setVolume).toHaveBeenCalledWith(
+      expect(service.player.setVolume).toHaveBeenCalledWith(
         '1000000001112223334',
         50,
       );
@@ -548,7 +552,7 @@ describe('MusicService', () => {
       await service.setVolume(interaction, -10);
       await service.setVolume(interaction, 110);
 
-      expect(service.distube.setVolume).not.toHaveBeenCalled();
+      expect(service.player.setVolume).not.toHaveBeenCalled();
       expect(service.sendEmbed).not.toHaveBeenCalled();
     });
   });
@@ -644,10 +648,11 @@ describe('MusicService', () => {
         songs: [{ name: 'test song' }],
       };
 
-      service.distube = {
+      service.player = {
         getQueue: jest.fn().mockReturnValue(queue),
         resume: jest.fn(),
-      };
+      } as any;
+      service.distube = service.player as any;
 
       service.sendEmbed = jest.fn();
     });
@@ -655,7 +660,7 @@ describe('MusicService', () => {
     it('should resume the music if it is paused', async () => {
       await service.resumeMusic(interaction);
 
-      expect(service.distube.resume).toHaveBeenCalledWith(
+      expect(service.player.resume).toHaveBeenCalledWith(
         '1000000001112223334',
       );
       expect(service.sendEmbed).toHaveBeenCalledWith({
@@ -668,11 +673,11 @@ describe('MusicService', () => {
     });
 
     it('should not resume the music if there is no queue', async () => {
-      service.distube.getQueue = jest.fn().mockReturnValue(null);
+      service.player.getQueue = jest.fn().mockReturnValue(null);
 
       await service.resumeMusic(interaction);
 
-      expect(service.distube.resume).not.toHaveBeenCalled();
+      expect(service.player.resume).not.toHaveBeenCalled();
       expect(service.sendEmbed).not.toHaveBeenCalled();
     });
   });
@@ -692,10 +697,11 @@ describe('MusicService', () => {
         songs: [{ name: 'test song' }],
       };
 
-      service.distube = {
+      service.player = {
         getQueue: jest.fn().mockReturnValue(queue),
         setRepeatMode: jest.fn(),
-      };
+      } as any;
+      service.distube = service.player as any;
 
       service.sendEmbed = jest.fn();
     });
@@ -706,7 +712,7 @@ describe('MusicService', () => {
         .mockResolvedValue({ id: '456' } as any);
       await service.repeatQueue(interaction);
 
-      expect(service.distube.setRepeatMode).toHaveBeenCalledWith(
+      expect(service.player.setRepeatMode).toHaveBeenCalledWith(
         '1000000001112223334',
         1,
       );
@@ -720,7 +726,7 @@ describe('MusicService', () => {
         .mockResolvedValue({ id: '456' } as any);
       await service.repeatQueue(interaction);
 
-      expect(service.distube.setRepeatMode).toHaveBeenCalledWith(
+      expect(service.player.setRepeatMode).toHaveBeenCalledWith(
         '1000000001112223334',
         2,
       );
@@ -734,7 +740,7 @@ describe('MusicService', () => {
         .mockResolvedValue({ id: '456' } as any);
       await service.repeatQueue(interaction);
 
-      expect(service.distube.setRepeatMode).toHaveBeenCalledWith(
+      expect(service.player.setRepeatMode).toHaveBeenCalledWith(
         '1000000001112223334',
         0,
       );
@@ -742,13 +748,13 @@ describe('MusicService', () => {
     });
 
     it('should not set repeat mode if there is no queue', async () => {
-      service.distube.getQueue = jest.fn().mockReturnValue(null);
+      service.player.getQueue = jest.fn().mockReturnValue(null);
       jest
         .spyOn(musicChannelRepository, 'findOne')
         .mockResolvedValue({ id: '456' } as any);
       await service.repeatQueue(interaction);
 
-      expect(service.distube.setRepeatMode).not.toHaveBeenCalled();
+      expect(service.player.setRepeatMode).not.toHaveBeenCalled();
       expect(service.sendEmbed).not.toHaveBeenCalled();
     });
   });
@@ -777,9 +783,10 @@ describe('MusicService', () => {
         },
       };
 
-      service.distube = {
+      service.player = {
         getQueue: jest.fn().mockReturnValue({ songs: [params.song] }),
-      };
+      } as any;
+      service.distube = service.player as any;
 
       service.sendEmbed = jest.fn();
     });
@@ -835,9 +842,10 @@ describe('MusicService', () => {
         channel: { send: jest.fn() },
       };
 
-      service.distube = {
+      service.player = {
         stop: jest.fn(),
-      };
+      } as any;
+      service.distube = service.player as any;
 
       service.stopTrackingMusic = jest.fn();
       service.clearPlayer = jest.fn();
@@ -883,9 +891,10 @@ describe('MusicService', () => {
       service.db.musicChannelRepository.findOne = jest
         .fn()
         .mockResolvedValue(musicChannel);
-      service.distube = {
+      service.player = {
         play: jest.fn(),
-      };
+      } as any;
+      service.distube = service.player as any;
     });
 
     it('should play music if the message is sent in a music channel', async () => {
