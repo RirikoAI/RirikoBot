@@ -56,9 +56,6 @@ export class Guild {
   )
   freeGameNotifications: FreeGameNotification[];
 
-  @OneToMany(
-    () => ReactionRole,
-    (reactionRole) => reactionRole.guild,
-  )
+  @OneToMany(() => ReactionRole, (reactionRole) => reactionRole.guild)
   reactionRoles: ReactionRole[];
 }

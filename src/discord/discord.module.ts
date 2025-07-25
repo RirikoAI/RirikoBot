@@ -27,7 +27,13 @@ import { ReactionRoleService } from '#reaction-role/reaction-role.service';
     forwardRef(() => EconomyModule),
     forwardRef(() => ReactionRoleModule),
   ],
-  providers: [DiscordService, ConfigService, EconomyService, DatabaseService, ReactionRoleService],
+  providers: [
+    DiscordService,
+    ConfigService,
+    EconomyService,
+    DatabaseService,
+    ReactionRoleService,
+  ],
   exports: [DiscordService],
   controllers: [DiscordController],
 })
