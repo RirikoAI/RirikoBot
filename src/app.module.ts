@@ -30,7 +30,7 @@ import { TypeOrmConfigService } from '#database/typeorm-config.service';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwksModule } from '#jwks/jwks.module';
-import { JweModule } from './jwe/jwe.module';
+import { JweModule } from '#jwe/jwe.module';
 import { FreeGamesModule } from '#free-games/free-games.module';
 import { ReminderModule } from '#reminder/reminder.module';
 import { ReactionRoleModule } from '#reaction-role/reaction-role.module';

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as jose from 'jose';
+import * as crypto from 'crypto';
 
 type Keys = {
   signingPublicJwk?: any;
