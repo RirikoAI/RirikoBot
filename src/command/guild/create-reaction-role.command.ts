@@ -98,106 +98,148 @@ export default class CreateReactionRoleCommand
     roleId: string,
   ): Promise<void> {
     const guild = context.guild;
-    const isInteraction =
-      'reply' in context && typeof context.reply === 'function';
+    const isInteraction = this.isInteractionContext(context);
 
-    // Check if the bot has permission to manage roles
+    // Check permissions and role validity
+    if (!await this.checkBotPermissions(context, guild, isInteraction)) return;
+    if (!await this.validateRole(context, guild, roleId, isInteraction)) return;
+
+    try {
+      // Fetch the message and create the reaction role
+      const targetMessage = await this.fetchTargetMessage(context, guild, messageId);
+      if (!targetMessage) return;
+
+      await this.createReactionRole(context, guild, targetMessage, messageId, emoji, roleId, isInteraction);
+    } catch (error) {
+      await this.sendErrorResponse(context, error.message, isInteraction);
+    }
+  }
+
+  private isInteractionContext(context: DiscordMessage | DiscordInteraction): boolean {
+    return 'reply' in context && typeof context.reply === 'function';
+  }
+
+  private async sendResponse(
+    context: DiscordMessage | DiscordInteraction,
+    response: any,
+    isInteraction: boolean,
+  ): Promise<void> {
+    if (isInteraction) {
+      await (context as DiscordInteraction).reply(response);
+    } else {
+      await (context as DiscordMessage).reply(response);
+    }
+  }
+
+  private async checkBotPermissions(
+    context: DiscordMessage | DiscordInteraction,
+    guild: any,
+    isInteraction: boolean,
+  ): Promise<boolean> {
     if (!this.services.reactionRoleService.hasPermission(guild)) {
       const response = {
         content: "I don't have permission to manage roles in this server.",
         ephemeral: isInteraction,
       };
-
-      if (isInteraction) {
-        await (context as DiscordInteraction).reply(response);
-      } else {
-        await (context as DiscordMessage).reply(response);
-      }
-      return;
+      await this.sendResponse(context, response, isInteraction);
+      return false;
     }
+    return true;
+  }
 
-    // Check if the role is valid
+  private async validateRole(
+    context: DiscordMessage | DiscordInteraction,
+    guild: any,
+    roleId: string,
+    isInteraction: boolean,
+  ): Promise<boolean> {
     if (!this.services.reactionRoleService.isValidRole(guild, roleId)) {
       const response = {
         content:
           'Invalid role. Make sure the role exists and is not the @everyone role. Also, my highest role must be above the role you want to assign.',
         ephemeral: isInteraction,
       };
-
-      if (isInteraction) {
-        await (context as DiscordInteraction).reply(response);
-      } else {
-        await (context as DiscordMessage).reply(response);
-      }
-      return;
+      await this.sendResponse(context, response, isInteraction);
+      return false;
     }
+    return true;
+  }
 
+  private async fetchTargetMessage(
+    context: DiscordMessage | DiscordInteraction,
+    guild: any,
+    messageId: string,
+  ): Promise<any | null> {
     try {
-      // Try to fetch the message to verify it exists
       const channel = await guild.channels.fetch(context.channelId);
       if (!channel || !channel.isTextBased()) {
         throw new Error('Channel not found or is not a text channel');
       }
 
-      try {
-        const targetMessage = await channel.messages.fetch(messageId);
-        if (!targetMessage) {
-          throw new Error('Message not found');
-        }
-
-        // Add the reaction to the message
-        await targetMessage.react(emoji);
-
-        // Save the reaction role to the database
-        await this.services.reactionRoleService.createReactionRole(
-          guild.id,
-          messageId,
-          emoji,
-          roleId,
-        );
-
-        const role = guild.roles.cache.get(roleId);
-        const embed = new EmbedBuilder()
-          .setTitle('Reaction Role Created')
-          .setDescription(
-            `Users who react with ${emoji} to [this message](${targetMessage.url}) will receive the ${role.name} role.`,
-          )
-          .setColor('#00FF00')
-          .setTimestamp();
-
-        const response = {
-          embeds: [embed],
-          ephemeral: isInteraction,
-        };
-
-        if (isInteraction) {
-          await (context as DiscordInteraction).reply(response);
-        } else {
-          await (context as DiscordMessage).reply(response);
-        }
-      } catch (error) {
-        const response = {
-          content: `Error: ${error.message}.`,
-          ephemeral: isInteraction,
-        };
-
-        if (isInteraction) {
-          await (context as DiscordInteraction).reply(response);
-        } else {
-          await (context as DiscordMessage).reply(response);
-        }
+      const targetMessage = await channel.messages.fetch(messageId);
+      if (!targetMessage) {
+        throw new Error('Message not found');
       }
+      return targetMessage;
     } catch (error) {
+      await this.sendErrorResponse(context, error.message, this.isInteractionContext(context));
+      return null;
+    }
+  }
+
+  private async createReactionRole(
+    context: DiscordMessage | DiscordInteraction,
+    guild: any,
+    targetMessage: any,
+    messageId: string,
+    emoji: string,
+    roleId: string,
+    isInteraction: boolean,
+  ): Promise<void> {
+    try {
+      // Add the reaction to the message
+      await targetMessage.react(emoji);
+
+      // Save the reaction role to the database
+      await this.services.reactionRoleService.createReactionRole(
+        guild.id,
+        messageId,
+        emoji,
+        roleId,
+      );
+
+      // Send success response
+      const successEmbed = this.createSuccessEmbed(guild, targetMessage, emoji, roleId);
       const response = {
-        content: `An error occurred: ${error.message}`,
+        embeds: [successEmbed],
         ephemeral: isInteraction,
       };
-
-      if (isInteraction) {
-        await (context as DiscordInteraction).reply(response);
-      } else {
-        await (context as DiscordMessage).reply(response);
-      }
+      await this.sendResponse(context, response, isInteraction);
+    } catch (error) {
+      await this.sendErrorResponse(context, error.message, isInteraction);
     }
+  }
+
+  private createSuccessEmbed(guild: any, targetMessage: any, emoji: string, roleId: string): EmbedBuilder {
+    const role = guild.roles.cache.get(roleId);
+    return new EmbedBuilder()
+      .setTitle('Reaction Role Created')
+      .setDescription(
+        `Users who react with ${emoji} to [this message](${targetMessage.url}) will receive the ${role.name} role.`,
+      )
+      .setColor('#00FF00')
+      .setTimestamp();
+  }
+
+  private async sendErrorResponse(
+    context: DiscordMessage | DiscordInteraction,
+    errorMessage: string,
+    isInteraction: boolean,
+  ): Promise<void> {
+    const response = {
+      content: `Error: ${errorMessage}.`,
+      ephemeral: isInteraction,
+    };
+    await this.sendResponse(context, response, isInteraction);
   }
 }
