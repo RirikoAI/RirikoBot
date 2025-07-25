@@ -31,6 +31,10 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwksModule } from '#jwks/jwks.module';
 import { JweModule } from './jwe/jwe.module';
+import { FreeGamesModule } from '#free-games/free-games.module';
+import { ReminderModule } from '#reminder/reminder.module';
+import { ReactionRoleModule } from '#reaction-role/reaction-role.module';
+import { existsSync } from 'fs';
 
 /**
  * The main application module.
@@ -45,6 +49,7 @@ import { JweModule } from './jwe/jwe.module';
       isGlobal: true,
       load: [appConfig, databaseConfig, authConfig, discordConfig, mailConfig],
       envFilePath: ['.env'],
+      ignoreEnvFile: !existsSync('.env'),
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
@@ -65,6 +70,9 @@ import { JweModule } from './jwe/jwe.module';
     AuthModule,
     JwksModule,
     JweModule,
+    FreeGamesModule,
+    ReminderModule,
+    ReactionRoleModule,
   ],
   controllers: [RootController, EconomyController],
   providers: [RootService, EnvConfigService, RirikoConfigService],

@@ -69,3 +69,7 @@ giveaways.json
 *-base.js
 /src/command/music/music.png
 /devnotes
+
+/lavalink/
+/docker-compose.yml
+/.env

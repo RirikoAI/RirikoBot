@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+.github
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Node.js
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build artifacts
+dist
+build
+coverage
+test-results
+
+# Data
+data
+
+# Database
+*.db
+*.sqlite
+
+# Environment variables
+.env
+.env.test
+.env.*
+!.env.example
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

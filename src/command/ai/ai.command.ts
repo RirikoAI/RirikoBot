@@ -8,14 +8,14 @@ import {
   SlashCommandOptionTypes,
 } from '#command/command.types';
 
-import ollama from 'ollama';
 import {
   PostReplyActionType,
   PromptType,
   UserPrompts,
 } from '#command/ai/ai.types';
-import { AiPresets, SystemPrompt } from '#command/ai/system-prompt';
-import { PostReplyActions } from '#command/ai/actions/post-reply.actions';
+import { AiPresets, SystemPrompt } from '#ai/system-prompt';
+import { PostReplyActions } from '#ai/actions/post-reply.actions';
+import * as process from 'node:process';
 
 /**
  * AI Command
@@ -39,8 +39,6 @@ export default class AiCommand extends Command implements CommandInterface {
       required: true,
     },
   ];
-
-  defaultModel = 'llama3.2:1b';
   userPrompts: UserPrompts = [];
 
   async runSlash(interaction: DiscordInteraction): Promise<void> {
@@ -121,28 +119,35 @@ export default class AiCommand extends Command implements CommandInterface {
     this.storePrompt(userId, newMessages);
 
     try {
-      const response = await ollama.chat({
-        model: model || this.defaultModel,
-        messages: [
-          {
-            role: 'system',
-            content: SystemPrompt(),
-          },
-          {
-            role: 'user',
-            content: `Hello, I am ${userName}. Nice to meet you, Ririko!`,
-          },
-          {
-            role: 'assistant',
-            content: 'Hello ${userName}! Nice to meet you too!',
-          },
-          // Adding presets (or abilities) here
-          ...AiPresets(),
-          // Add the past prompts including the new one
-          ...this.getPrompts(userId)?.prompts,
-        ],
-        stream: true,
-      });
+      // Get the AI service from the factory
+      const aiService = this.services.aiServiceFactory.getService();
+      const defaultModel = this.services.aiServiceFactory.getDefaultModel();
+
+      // Prepare the messages array
+      const messages: PromptType[] = [
+        {
+          role:
+            process.env.AI_SERVICE_TYPE === 'google_ai'
+              ? 'assistant' // Google AI uses 'assistant' as the role
+              : 'system', // Other services use 'system'
+          content: SystemPrompt(),
+        },
+        {
+          role: 'user',
+          content: `Hello, I am ${userName}. Nice to meet you, Ririko!`,
+        },
+        {
+          role: 'assistant',
+          content: `Hello ${userName}! Nice to meet you too!`,
+        },
+        // Adding presets (or abilities) here
+        ...AiPresets(),
+        // Add the past prompts including the new one
+        ...this.getPrompts(userId)?.prompts,
+      ];
+
+      // Get the response from the AI service
+      const response = aiService.chat(messages, model || defaultModel);
 
       let counter = 0;
       let currentReply: Message;
@@ -158,8 +163,11 @@ export default class AiCommand extends Command implements CommandInterface {
         });
 
       for await (const part of response) {
-        replies += part.message.content;
-        replyBuffer += part.message.content;
+        // Skip if this is just a completion signal
+        if (part.done) continue;
+
+        replies += part.content;
+        replyBuffer += part.content;
         counter++;
 
         // check if replies has 1800 characters.
@@ -169,7 +177,7 @@ export default class AiCommand extends Command implements CommandInterface {
           replyBuffer = '';
         }
 
-        // Check if the counter has reached 4, then only edit the message with the new replies
+        // Check if the counter has reached 10, then only edit the message with the new replies
         if (counter === 10) {
           // Edit the message by id with the new replies
           await currentReply.edit(replyBuffer);

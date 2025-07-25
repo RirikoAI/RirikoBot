@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { EmbedBuilder, ChannelType } from 'discord.js';
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
-import { DiscordMessage } from '#command/command.types';
+import { DiscordInteraction, DiscordMessage } from '#command/command.types';
 import { DiscordPermissions } from '#util/features/permissions.util';
 
 /**
- * Ping command.
- * @description Use this as a template for creating new commands.
+ * SetupAvcCommand
+ * @description Command to setup auto voice channel
  * @category Command
  * @author Earnest Angel (https://angel.net.my)
  */
@@ -25,24 +25,46 @@ export default class SetupAvcCommand
   permissions: DiscordPermissions = ['ManageGuild'];
 
   async runPrefix(message: DiscordMessage): Promise<void> {
-    // create a new voice channel in the guild
-    const channel = await message.guild.channels.create({
+    await this.setupVoiceChannel(message.guild, message.channel);
+  }
+
+  async runSlash(interaction: DiscordInteraction): Promise<void> {
+    if (!interaction.guild) {
+      await interaction.reply({
+        content: 'This command can only be used in a server.',
+        ephemeral: true,
+      });
+      return;
+    }
+
+    await interaction.deferReply();
+    await this.setupVoiceChannel(interaction.guild, interaction.channel);
+
+    await interaction.editReply({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle('Auto Voice Channel')
+          .setDescription('Auto voice channel has been set up!'),
+      ],
+    });
+  }
+
+  private async setupVoiceChannel(guild: any, channel: any): Promise<void> {
+    const voiceChannel = await guild.channels.create({
       type: ChannelType.GuildVoice,
       name: '🔊 Join To Create',
     });
 
-    // push the new voice channel to the database
     await this.db.voiceChannelRepository.insert({
-      id: channel.id,
-      name: channel.name,
+      id: voiceChannel.id,
+      name: voiceChannel.name,
       parentId: '0',
       guild: {
-        id: message.guild.id,
+        id: guild.id,
       },
     });
 
-    // send a success message
-    await message.channel.send({
+    await channel.send({
       embeds: [
         new EmbedBuilder()
           .setTitle('Auto Voice Channel')

@@ -12,6 +12,7 @@ import { VoiceStateUpdateEvent } from '#discord/events/voice-state-update.event'
 import { MusicService } from '#music/music.service';
 import { GiveawaysService } from '#giveaways/giveaways.service';
 import { EconomyService } from '#economy/economy.service';
+import { ReactionRoleService } from '#reaction-role/reaction-role.service';
 
 jest.mock('#discord/discord.client');
 jest.mock('./events/message-create.event');
@@ -57,6 +58,10 @@ describe('Discord Service', () => {
         {
           provide: EconomyService,
           useValue: economyMock,
+        },
+        {
+          provide: ReactionRoleService,
+          useValue: { register: jest.fn() },
         },
       ],
       controllers: [DiscordController],

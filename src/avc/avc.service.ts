@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { DiscordService } from '#discord/discord.service';
 import { VoiceChannel } from '#database/entities/voice-channel.entity';
 import { Not } from 'typeorm';
-import { ChannelType, PermissionsBitField, VoiceState } from 'discord.js';
+import { ChannelType, VoiceState } from 'discord.js';
 import { DiscordGuild, DiscordVoiceChannel } from '#command/command.types';
 import { DatabaseService } from '#database/database.service';
 
@@ -94,6 +94,7 @@ export class AvcService {
 
   /**
    * Sets the permissions for the new voice channel.
+   * Now copies the "Join to Create" channel's permissions.
    * @param channel The new voice channel.
    * @param newState The new voice state of the user.
    */
@@ -101,25 +102,28 @@ export class AvcService {
     channel: DiscordVoiceChannel,
     newState: VoiceState,
   ) {
-    await channel.permissionOverwrites.set([
-      {
-        id: newState.member.id,
-        allow: [
-          PermissionsBitField.Flags.ManageChannels,
-          PermissionsBitField.Flags.ViewChannel,
-          PermissionsBitField.Flags.Connect,
-          PermissionsBitField.Flags.Speak,
-        ],
-      },
-      {
-        id: newState.guild.id,
-        allow: [
-          PermissionsBitField.Flags.ViewChannel,
-          PermissionsBitField.Flags.Connect,
-          PermissionsBitField.Flags.Speak,
-        ],
-      },
-    ]);
+    const parentChannel = newState.channel; // This is the Join to Create channel
+
+    // Clone parent permission overwrites
+    const parentOverwrites = parentChannel.permissionOverwrites.cache.map(
+      (overwrite) => ({
+        id: overwrite.id,
+        allow: overwrite.allow,
+        deny: overwrite.deny,
+        type: overwrite.type,
+      }),
+    );
+
+    // Apply parent permissions
+    await channel.permissionOverwrites.set(parentOverwrites);
+
+    // Then add or override specific user and guild permissions
+    await channel.permissionOverwrites.edit(newState.member.id, {
+      ViewChannel: true,
+      Connect: true,
+      Speak: true,
+      ManageChannels: true,
+    });
   }
 
   /**

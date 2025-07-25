@@ -7,6 +7,7 @@ import {
   DiscordInteraction,
   DiscordMessage,
   SlashCommandOptions,
+  CommandModals,
 } from '#command/command.types';
 import { CommandFeatures } from '#command/command.features';
 import { Pages } from '#util/features/pagination-feature.types';
@@ -136,6 +137,17 @@ export class Command extends CommandFeatures {
    * @see CommandButtons
    */
   buttons?: CommandButtons;
+
+  /**
+   * Modals for the command.
+   * Example:
+   * ```
+   * modals: { modalId: this.handleModal }
+   * ```
+   * where handleModal is a function accepting interaction: DiscordInteraction parameter.
+   * @see CommandModals
+   */
+  modals?: CommandModals;
 
   // -- System
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the branch to pull updates from (default is "main")
-BRANCH=${1:-beta/1.0.0}
+BRANCH=${1:-master}
 
 echo "Updating to match the latest commits on branch: $BRANCH"
 

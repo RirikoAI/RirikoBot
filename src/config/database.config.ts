@@ -25,14 +25,18 @@ class EnvironmentVariablesValidator {
 
   @ValidateIf(
     (envValues) =>
-      !envValues.DATABASE_URL && envValues.DATABASE_TYPE !== 'sqlite',
+      !envValues.DATABASE_URL &&
+      envValues.DATABASE_TYPE !== 'sqlite' &&
+      envValues.DATABASE_TYPE !== 'better-sqlite3',
   )
   @IsString()
   DATABASE_HOST: string;
 
   @ValidateIf(
     (envValues) =>
-      !envValues.DATABASE_URL && envValues.DATABASE_TYPE !== 'sqlite',
+      !envValues.DATABASE_URL &&
+      envValues.DATABASE_TYPE !== 'sqlite' &&
+      envValues.DATABASE_TYPE !== 'better-sqlite3',
   )
   @IsInt()
   @Min(0)
@@ -41,7 +45,9 @@ class EnvironmentVariablesValidator {
 
   @ValidateIf(
     (envValues) =>
-      !envValues.DATABASE_URL && envValues.DATABASE_TYPE !== 'sqlite',
+      !envValues.DATABASE_URL &&
+      envValues.DATABASE_TYPE !== 'sqlite' &&
+      envValues.DATABASE_TYPE !== 'better-sqlite3',
   )
   @IsString()
   DATABASE_PASSWORD: string;
@@ -52,7 +58,9 @@ class EnvironmentVariablesValidator {
 
   @ValidateIf(
     (envValues) =>
-      !envValues.DATABASE_URL && envValues.DATABASE_TYPE !== 'sqlite',
+      !envValues.DATABASE_URL &&
+      envValues.DATABASE_TYPE !== 'sqlite' &&
+      envValues.DATABASE_TYPE !== 'better-sqlite3',
   )
   @IsString()
   DATABASE_USERNAME: string;

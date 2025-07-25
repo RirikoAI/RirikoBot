@@ -40,7 +40,10 @@ export default class SubscribeCommand
       });
     }
 
-    const subscribed = await this.subscribe(message.guild.id, streamerName);
+    const subscribed = await this.subscribe(
+      message.guild.id,
+      streamerName.toLowerCase(),
+    );
 
     if (subscribed) {
       return message.reply({
@@ -79,7 +82,10 @@ export default class SubscribeCommand
       });
     }
 
-    const subscribed = await this.subscribe(interaction.guild.id, streamerName);
+    const subscribed = await this.subscribe(
+      interaction.guild.id,
+      streamerName.toLowerCase(),
+    );
     if (subscribed) {
       return interaction.reply({
         embeds: [
@@ -92,8 +98,8 @@ export default class SubscribeCommand
       return interaction.reply({
         embeds: [
           this.prepareEmbed({
-            message: `Failed to subscribe to ${streamerName}. 
-            Please make sure that you have setup the Twitch notification channel first.`,
+            message: `Failed to subscribe to ${streamerName}.
+            Please make sure you haven't subscribed to that streamer first and you have setup the Twitch notification channel.`,
             isError: true,
           }),
         ],

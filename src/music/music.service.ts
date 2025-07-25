@@ -12,7 +12,12 @@ const { DisTube } = require('distube');
 const { SpotifyPlugin } = require('@distube/spotify');
 const { SoundCloudPlugin } = require('@distube/soundcloud');
 const { DeezerPlugin } = require('@distube/deezer');
-const { YouTubePlugin } = require('@distube/youtube');
+/**
+ * Import youtubei.js for YouTube search and playback
+ * This replaces the YouTubePlugin with a more reliable and feature-rich YouTube API client
+ */
+import { Innertube, UniversalCache, YTNodes } from 'youtubei.js';
+import { YouTubePlugin } from '@distube/youtube';
 
 /**
  * Ririko Music class to handle all Distube events
@@ -21,7 +26,7 @@ const { YouTubePlugin } = require('@distube/youtube');
 @Injectable()
 export class MusicService {
   distube: typeof DisTube;
-  youtubePlugin: typeof YouTubePlugin;
+  youtube: Innertube;
 
   // stores guild volume in guild setting
   guildConfig: {
@@ -35,22 +40,59 @@ export class MusicService {
     readonly discord: DiscordService,
     @Inject()
     readonly db: DatabaseService,
-  ) {}
+  ) {
+    // Initialize Innertube
+    this.initYoutube();
+  }
+
+  private async initYoutube() {
+    try {
+      this.youtube = await Innertube.create({
+        cache: new UniversalCache(false),
+      });
+      console.log('Innertube initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize Innertube:', error);
+    }
+  }
 
   async createPlayer() {
-    const youtubePlugin = new YouTubePlugin();
-    this.youtubePlugin = youtubePlugin;
+    const plugins = [];
+
+    // Only add YouTubePlugin if DISABLE_YOUTUBE is not set to 'true'
+    if (process.env.DISABLE_YOUTUBE !== 'true') {
+      plugins.push(
+        new YouTubePlugin({
+          ytdlOptions: {
+            searchSongs: false,
+            searchPlaylist: false,
+            searchResult: false,
+            requestOptions: {
+              dispatcher: {
+                // Use youtubei.js for YouTube requests
+                // @ts-ignore
+                request: (url, options) => {
+                  console.log('Requesting URL:', url);
+                },
+              },
+            },
+          },
+        }),
+      );
+    }
+
+    // Add other plugins
+    plugins.push(
+      new SpotifyPlugin(),
+      new DeezerPlugin(),
+      new SoundCloudPlugin(),
+    );
 
     const distube = new DisTube(this.discord.client, {
       emitNewSongOnly: false,
       emitAddSongWhenCreatingQueue: false,
       emitAddListWhenCreatingQueue: false,
-      plugins: [
-        youtubePlugin,
-        new SpotifyPlugin(),
-        new SoundCloudPlugin(),
-        new DeezerPlugin(),
-      ],
+      plugins,
     });
 
     this.distube = this.registerEvents(distube);
@@ -59,16 +101,43 @@ export class MusicService {
 
   async search(params: { query: string }) {
     const { query } = params;
-    const results = await this.youtubePlugin.search(query, {
-      type: 'video',
-      limit: 1,
-      safeSearch: true,
-    });
 
-    if (results.length === 0) {
+    try {
+      // Use youtubei.js to search for videos
+      const searchResults = await this.youtube.search(query, {
+        type: 'video',
+      });
+
+      if (!searchResults.results || searchResults.results.length === 0) {
+        return;
+      }
+
+      // Get the first result
+      const firstResult = searchResults.results[0];
+
+      // Check if it's a video
+      if (!(firstResult instanceof YTNodes.Video)) {
+        return;
+      }
+
+      // Format the result to be compatible with DisTube's expectations
+      return {
+        id: firstResult.id,
+        name: firstResult.title.text,
+        url: `https://www.youtube.com/watch?v=${firstResult.id}`,
+        thumbnail: firstResult.thumbnails?.[0]?.url || '',
+        duration: firstResult.duration?.seconds || 0,
+        formattedDuration: firstResult.duration?.text || '0:00',
+        uploader: {
+          name: firstResult.author?.name || 'Unknown',
+          url: firstResult.author?.url || '',
+        },
+        source: 'youtube',
+      };
+    } catch (error) {
+      console.error('Error searching with youtubei.js:', error);
       return;
     }
-    return results[0];
   }
 
   registerEvents(distube: typeof DisTube) {

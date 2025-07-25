@@ -14,6 +14,9 @@ import { EconomyService } from '#economy/economy.service';
 import { GuildMemberAddEvent } from '#discord/events/guild-member-add.event';
 import { GuildMemberRemoveEvent } from '#discord/events/guild-member-remove.event';
 import { GuildCreateEvent } from '#discord/events/guild-create.event';
+import { MessageReactionAddEvent } from '#discord/events/message-reaction-add.event';
+import { MessageReactionRemoveEvent } from '#discord/events/message-reaction-remove.event';
+import { ReactionRoleService } from '#reaction-role/reaction-role.service';
 
 /**
  * Discord Service
@@ -35,6 +38,8 @@ export class DiscordService {
     private readonly giveawaysService: GiveawaysService,
     @Inject(forwardRef(() => EconomyService))
     private readonly economyService: EconomyService,
+    @Inject(forwardRef(() => ReactionRoleService))
+    private readonly reactionRoleService: ReactionRoleService,
   ) {}
 
   async connect(): Promise<DiscordClient> {
@@ -76,5 +81,7 @@ export class DiscordService {
     GuildMemberAddEvent(this.client, this.commandService);
     GuildMemberRemoveEvent(this.client, this.commandService);
     GuildCreateEvent(this.client, this.commandService);
+    MessageReactionAddEvent(this.client, this.reactionRoleService);
+    MessageReactionRemoveEvent(this.client, this.reactionRoleService);
   }
 }

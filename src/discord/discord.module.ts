@@ -14,6 +14,8 @@ import { JweModule } from '#jwe/jwe.module';
 import { JweService } from '#jwe/jwe.service';
 import { JwksModule } from '#jwks/jwks.module';
 import { JwksService } from '#jwks/jwks.service';
+import { ReactionRoleModule } from '#reaction-role/reaction-role.module';
+import { ReactionRoleService } from '#reaction-role/reaction-role.service';
 
 /**
  * @author Earnest Angel (https://angel.net.my)
@@ -29,6 +31,7 @@ import { JwksService } from '#jwks/jwks.service';
     forwardRef(() => MusicModule),
     forwardRef(() => GiveawaysModule),
     forwardRef(() => EconomyModule),
+    forwardRef(() => ReactionRoleModule),
   ],
   providers: [
     DiscordService,
@@ -37,6 +40,7 @@ import { JwksService } from '#jwks/jwks.service';
     DatabaseService,
     JweService,
     JwksService,
+    ReactionRoleService,
   ],
   exports: [DiscordService],
   controllers: [DiscordController],

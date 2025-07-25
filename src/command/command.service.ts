@@ -247,6 +247,27 @@ export class CommandService {
     }
   }
 
+  /**
+   * Check if a command is a modal interaction and execute
+   * @param interaction
+   */
+  async checkModal(interaction: DiscordInteraction) {
+    // Loop through all registered commands and execute the first one that matches
+    for (const command of this.registeredCommands) {
+      // check if the command has modals
+      if (command.modals) {
+        const modal = command.modals[interaction.customId];
+        if (modal) {
+          Logger.debug(
+            `Received modal interaction: ${interaction.customId}`,
+            'Ririko CommandService',
+          );
+          await this.runModalCommand(command, interaction, modal);
+        }
+      }
+    }
+  }
+
   async checkCliCommand(input: string) {
     // Loop through all registered commands and execute the first one that matches
     for (const command of this.registeredCommands) {
@@ -409,6 +430,28 @@ export class CommandService {
         'Ririko CommandService',
       );
       const promise = button.bind(command);
+      promise.call(command, interaction);
+      return;
+    } catch (error) {
+      Logger.error(
+        `[Ririko CommandService] └─ execution failed: ${error.message}`,
+        error.stack,
+      );
+    }
+  }
+
+  private async runModalCommand(
+    command: Command,
+    interaction: DiscordInteraction,
+    modal: any,
+  ) {
+    try {
+      if (!(await this.checkPermissions(command, interaction))) return false;
+      Logger.debug(
+        `└─ executing modal command [${command.name}] => ${interaction.customId}`,
+        'Ririko CommandService',
+      );
+      const promise = modal.bind(command);
       promise.call(command, interaction);
       return;
     } catch (error) {

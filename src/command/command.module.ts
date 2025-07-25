@@ -13,6 +13,14 @@ import { Service } from '#command/command.types';
 import { SharedServiceUtil } from '#util/command/shared-service.util';
 import { EconomyModule } from '#economy/economy.module';
 import { EconomyService } from '#economy/economy.service';
+import { FreeGamesModule } from '#free-games/free-games.module';
+import { FreeGamesService } from '#free-games/free-games.service';
+import { ReminderService } from '#reminder/reminder.service';
+import { ReminderModule } from '#reminder/reminder.module';
+import { AiModule } from '#ai/ai.module';
+import { AiService } from '#ai/ai.service';
+import { ReactionRoleModule } from '#reaction-role/reaction-role.module';
+import { ReactionRoleService } from '#reaction-role/reaction-role.service';
 
 const modules = [
   ConfigModule,
@@ -22,6 +30,10 @@ const modules = [
   MusicModule,
   EconomyModule,
   DatabaseModule,
+  FreeGamesModule,
+  ReminderModule,
+  AiModule,
+  ReactionRoleModule,
 ];
 
 export class AvailableSharedServices {
@@ -32,6 +44,10 @@ export class AvailableSharedServices {
   musicService: MusicService = Service(MusicService);
   economy: EconomyService = Service(EconomyService);
   db: DatabaseService = Service(DatabaseService);
+  freeGamesService: FreeGamesService = Service(FreeGamesService);
+  reminderService = Service(ReminderService);
+  aiServiceFactory = Service(AiService);
+  reactionRoleService = Service(ReactionRoleService);
 }
 
 /**
