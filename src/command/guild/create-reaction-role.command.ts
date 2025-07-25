@@ -101,21 +101,37 @@ export default class CreateReactionRoleCommand
     const isInteraction = this.isInteractionContext(context);
 
     // Check permissions and role validity
-    if (!await this.checkBotPermissions(context, guild, isInteraction)) return;
-    if (!await this.validateRole(context, guild, roleId, isInteraction)) return;
+    if (!(await this.checkBotPermissions(context, guild, isInteraction)))
+      return;
+    if (!(await this.validateRole(context, guild, roleId, isInteraction)))
+      return;
 
     try {
       // Fetch the message and create the reaction role
-      const targetMessage = await this.fetchTargetMessage(context, guild, messageId);
+      const targetMessage = await this.fetchTargetMessage(
+        context,
+        guild,
+        messageId,
+      );
       if (!targetMessage) return;
 
-      await this.createReactionRole(context, guild, targetMessage, messageId, emoji, roleId, isInteraction);
+      await this.createReactionRole(
+        context,
+        guild,
+        targetMessage,
+        messageId,
+        emoji,
+        roleId,
+        isInteraction,
+      );
     } catch (error) {
       await this.sendErrorResponse(context, error.message, isInteraction);
     }
   }
 
-  private isInteractionContext(context: DiscordMessage | DiscordInteraction): boolean {
+  private isInteractionContext(
+    context: DiscordMessage | DiscordInteraction,
+  ): boolean {
     return 'reply' in context && typeof context.reply === 'function';
   }
 
@@ -182,7 +198,11 @@ export default class CreateReactionRoleCommand
       }
       return targetMessage;
     } catch (error) {
-      await this.sendErrorResponse(context, error.message, this.isInteractionContext(context));
+      await this.sendErrorResponse(
+        context,
+        error.message,
+        this.isInteractionContext(context),
+      );
       return null;
     }
   }
@@ -209,7 +229,12 @@ export default class CreateReactionRoleCommand
       );
 
       // Send success response
-      const successEmbed = this.createSuccessEmbed(guild, targetMessage, emoji, roleId);
+      const successEmbed = this.createSuccessEmbed(
+        guild,
+        targetMessage,
+        emoji,
+        roleId,
+      );
       const response = {
         embeds: [successEmbed],
         ephemeral: isInteraction,
@@ -220,7 +245,12 @@ export default class CreateReactionRoleCommand
     }
   }
 
-  private createSuccessEmbed(guild: any, targetMessage: any, emoji: string, roleId: string): EmbedBuilder {
+  private createSuccessEmbed(
+    guild: any,
+    targetMessage: any,
+    emoji: string,
+    roleId: string,
+  ): EmbedBuilder {
     const role = guild.roles.cache.get(roleId);
     return new EmbedBuilder()
       .setTitle('Reaction Role Created')
