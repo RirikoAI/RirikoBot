@@ -144,7 +144,7 @@ export default class ReactionRolesCommand
 
       // Add a footer with instructions on how to remove a reaction role
       embed.setFooter({
-        text: 'To remove a reaction role, use: list-reaction-roles remove <id>',
+        text: 'To remove a reaction role, use: reaction-roles remove <id>',
       });
 
       const response = {
