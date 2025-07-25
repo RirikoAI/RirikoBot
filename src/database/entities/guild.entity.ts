@@ -6,6 +6,7 @@ import { StreamNotification } from '#database/entities/stream-notification.entit
 import { StreamSubscription } from '#database/entities/stream-subscription.entity';
 import { UserNote } from '#database/entities/user-note.entity';
 import { FreeGameNotification } from '#database/entities/free-game-notification.entity';
+import { ReactionRole } from '#database/entities/reaction-role.entity';
 
 /**
  * Guild Entity
@@ -54,4 +55,10 @@ export class Guild {
     (freeGameNotification) => freeGameNotification.guild,
   )
   freeGameNotifications: FreeGameNotification[];
+
+  @OneToMany(
+    () => ReactionRole,
+    (reactionRole) => reactionRole.guild,
+  )
+  reactionRoles: ReactionRole[];
 }

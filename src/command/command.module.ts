@@ -19,6 +19,8 @@ import { ReminderService } from '#reminder/reminder.service';
 import { ReminderModule } from '#reminder/reminder.module';
 import { AiModule } from '#ai/ai.module';
 import { AiService } from '#ai/ai.service';
+import { ReactionRoleModule } from '#reaction-role/reaction-role.module';
+import { ReactionRoleService } from '#reaction-role/reaction-role.service';
 
 const modules = [
   ConfigModule,
@@ -31,6 +33,7 @@ const modules = [
   FreeGamesModule,
   ReminderModule,
   AiModule,
+  ReactionRoleModule,
 ];
 
 export class AvailableSharedServices {
@@ -44,6 +47,7 @@ export class AvailableSharedServices {
   freeGamesService: FreeGamesService = Service(FreeGamesService);
   reminderService = Service(ReminderService);
   aiServiceFactory = Service(AiService);
+  reactionRoleService = Service(ReactionRoleService);
 }
 
 /**
