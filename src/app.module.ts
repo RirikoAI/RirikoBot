@@ -24,6 +24,7 @@ import { CliModule } from '#cli/cli.module';
 import { ModerationModule } from './moderation/moderation.module';
 import { FreeGamesModule } from '#free-games/free-games.module';
 import { ReminderModule } from '#reminder/reminder.module';
+import { ReactionRoleModule } from '#reaction-role/reaction-role.module';
 import { existsSync } from 'fs';
 
 /**
@@ -52,6 +53,7 @@ import { existsSync } from 'fs';
     ModerationModule,
     FreeGamesModule,
     ReminderModule,
+    ReactionRoleModule,
   ],
   controllers: [RootController, EconomyController],
   providers: [RootService, EnvConfigService, RirikoConfigService],

@@ -10,6 +10,8 @@ import { EconomyModule } from '#economy/economy.module';
 import { EconomyService } from '#economy/economy.service';
 import { DatabaseModule } from '#database/database.module';
 import { DatabaseService } from '#database/database.service';
+import { ReactionRoleModule } from '#reaction-role/reaction-role.module';
+import { ReactionRoleService } from '#reaction-role/reaction-role.service';
 
 /**
  * @author Earnest Angel (https://angel.net.my)
@@ -23,8 +25,15 @@ import { DatabaseService } from '#database/database.service';
     forwardRef(() => MusicModule),
     forwardRef(() => GiveawaysModule),
     forwardRef(() => EconomyModule),
+    forwardRef(() => ReactionRoleModule),
   ],
-  providers: [DiscordService, ConfigService, EconomyService, DatabaseService],
+  providers: [
+    DiscordService,
+    ConfigService,
+    EconomyService,
+    DatabaseService,
+    ReactionRoleService,
+  ],
   exports: [DiscordService],
   controllers: [DiscordController],
 })
