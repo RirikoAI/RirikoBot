@@ -1,6 +1,8 @@
 [![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
 [![codecov](https://codecov.io/github/ririkoai/ririkobot/branch/beta%2F1.0.0/graph/badge.svg?token=EBD0B7CJ76)](https://codecov.io/github/ririkoai/ririkobot)
 [![CodeFactor](https://www.codefactor.io/repository/github/ririkoai/ririkobot/badge/master)](https://www.codefactor.io/repository/github/ririkoai/ririkobot/overview/master)
+[![Docker Pulls](https://img.shields.io/docker/pulls/ririkoai/ririkobot.svg)](https://hub.docker.com/r/ririkoai/ririkobot)
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -41,7 +43,7 @@ dashboard. [Click here to see the instructions](https://github.com/RirikoAI/Riri
 
 ## Running Ririko AI using Docker (Recommended)
 
-You also need to have Docker installed on your machine. You can find the installation instructions for your OS below:
+First, you need to have the Docker software installed on your machine. You can find the installation instructions for your OS below:
 
 | Windows Install Link                                                           | Linux Install Link                                          | MacOS Install Link                                                     | Raspberry Pi Install Link                                                          |
 |--------------------------------------------------------------------------------|-------------------------------------------------------------|------------------------------------------------------------------------|------------------------------------------------------------------------------------|
@@ -98,6 +100,8 @@ $ npm run start:prod
 
 After installing Ririko AI, you need to set up the AI chatbot, Stable Diffusion, and others:
 [Click here to see the instructions](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Post%E2%80%90installation-settings)
+
+If you want to use the AI features, head over to this page [AI README.md](https://github.com/RirikoAI/RirikoBot/blob/master/src/ai/README.md)
 
 ## Run tests
 
