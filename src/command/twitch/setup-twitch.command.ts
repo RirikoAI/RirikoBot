@@ -93,7 +93,11 @@ export default class SetupTwitchCommand
 
     // find existing subscriptions and update the channel
     const subscriptions = await this.db.streamSubscriptionRepository.find({
-      where: { guild: guildDB },
+      where: {
+        guild: {
+          id: guildId,
+        },
+      },
     });
 
     for (const subscription of subscriptions) {

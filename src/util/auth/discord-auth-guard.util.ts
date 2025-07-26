@@ -4,10 +4,17 @@ import { AuthGuard } from '@nestjs/passport';
 @Injectable()
 export class DiscordAuthGuard extends AuthGuard('discord') {
   async canActivate(context: ExecutionContext) {
-    const activate = (await super.canActivate(context)) as boolean;
-    const request = context.switchToHttp().getRequest();
-    await super.logIn(request);
-    return activate;
+    try {
+      const activate = (await super.canActivate(context)) as boolean;
+      const request = context.switchToHttp().getRequest();
+      await super.logIn(request);
+      return activate;
+    } catch (e) {
+      console.error(
+        'Error occurred while trying to login. Check if you have set the DISCORD_OAUTH2_CLIENT_SECRET, BACKEND_URL, and FRONTEND_URL properly in .env. DiscordAuthGuard error:',
+        e,
+      );
+    }
   }
 }
 

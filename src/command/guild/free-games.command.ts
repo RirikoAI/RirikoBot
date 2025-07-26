@@ -215,7 +215,7 @@ export default class FreeGamesCommand
 
       if (!guild) {
         guild = await this.services.db.guildRepository.save({
-          guildId,
+          id: guildId,
           name:
             'guild' in interaction && interaction.guild
               ? interaction.guild.name
@@ -226,7 +226,7 @@ export default class FreeGamesCommand
       // Check if a config already exists for this guild
       const existingConfig =
         await this.services.db.guildConfigRepository.findOne({
-          where: { guild, name: 'freeGamesChannelId' },
+          where: { id: guild.id, name: 'freeGamesChannelId' },
         });
 
       if (existingConfig) {
@@ -335,7 +335,7 @@ export default class FreeGamesCommand
           // Get the guild config for free games channel
           const guildConfig =
             await this.services.db.guildConfigRepository.findOne({
-              where: { guild, name: 'freeGamesChannelId' },
+              where: { id: guild.id, name: 'freeGamesChannelId' },
             });
 
           if (!guildConfig) {
