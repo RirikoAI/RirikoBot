@@ -33,17 +33,29 @@ export class KarmaExtension extends EconomyExtension {
 
     let userLevel = EconomyUtil.getCurrentLevel(karma);
 
-    // check if the user has leveled up
-    if (userLevel > EconomyUtil.getCurrentLevel(user.karma)) {
-      // console.log(`${message.author.username} has leveled up!`);
-      // DM the member that they have leveled up
-      await message.author.send(
-        `Congratulations! You have leveled up to level ${userLevel} in the server: ${message.guild.name}`,
-      );
-      // send a message to the channel
-      await message.channel.send(
-        `Congratulations to <@${message.author.id}> for leveling up to level ${userLevel}!`,
-      );
+    const guildDB = await this.db.guildRepository.findOne({
+      where: { id: message.guild.id },
+    });
+
+    let config = guildDB.configurations.find(
+      (c) => c.name === 'karma-notification-enabled',
+    );
+
+    if (config && config.value !== 'disabled') {
+      // check if the user has leveled up
+      if (userLevel > EconomyUtil.getCurrentLevel(user.karma)) {
+        if (!user.doNotNotifyOnLevelUp) {
+          // console.log(`${message.author.username} has leveled up!`);
+          // DM the member that they have leveled up
+          await message.author.send(
+            `Congratulations! You have leveled up to level ${userLevel} in the server: ${message.guild.name}`,
+          );
+          // send a message to the channel
+          await message.channel.send(
+            `Congratulations to <@${message.author.id}> for leveling up to level ${userLevel}!`,
+          );
+        }
+      }
     }
 
     // update the user karma and coins

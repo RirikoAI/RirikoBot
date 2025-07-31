@@ -14,6 +14,17 @@ describe('KarmaExtension', () => {
 
     karmaExtension = module.get<KarmaExtension>(KarmaExtension);
 
+    karmaExtension.db = {
+      userRepository: { save: jest.fn() },
+      guildRepository: {
+        findOne: jest.fn().mockResolvedValue({
+          configurations: [
+            { name: 'karma-notification-enabled', value: 'enabled' },
+          ],
+        }),
+      },
+    } as any;
+
     mockMessage = {
       author: {
         id: '123',
@@ -47,7 +58,6 @@ describe('KarmaExtension', () => {
     karmaExtension.extensions = {
       profile: { getUser: jest.fn().mockResolvedValue(user) },
     } as any;
-    karmaExtension.db = { userRepository: { save: jest.fn() } } as any;
 
     await karmaExtension.rewardUserForMessage(mockMessage);
 
@@ -65,7 +75,6 @@ describe('KarmaExtension', () => {
     karmaExtension.extensions = {
       profile: { getUser: jest.fn().mockResolvedValue(user) },
     } as any;
-    karmaExtension.db = { userRepository: { save: jest.fn() } } as any;
 
     await karmaExtension.rewardUserForMessage(mockMessage);
 
