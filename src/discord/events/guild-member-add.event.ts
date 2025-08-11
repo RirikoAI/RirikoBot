@@ -26,7 +26,12 @@ export const GuildMemberAddEvent = (
       );
 
       if (welcomerEnabled.value !== 'true') {
+        Logger.log('Welcomer is not enabled for this guild.');
         return;
+      } else {
+        Logger.log(
+          'Welcomer is enabled for this guild. Proceeding with welcome message and card.',
+        );
       }
 
       // get the channel id
@@ -38,6 +43,8 @@ export const GuildMemberAddEvent = (
       const channel = member.guild.channels.cache.get(
         channelID.value,
       ) as GuildTextBasedChannel;
+
+      Logger.log(`Channel ID for welcome message: ${channelID.value}`);
 
       // get the background image
       const bg = guild?.configurations?.find(
@@ -56,6 +63,8 @@ export const GuildMemberAddEvent = (
         backgroundImgURL: bg?.value,
       });
 
+      Logger.log('Welcome card generated successfully.');
+
       channel.send({
         content: `Welcome to the server, <@${member.id}>!`,
         files: [
@@ -65,6 +74,8 @@ export const GuildMemberAddEvent = (
           },
         ],
       });
+
+      Logger.log('Welcome message and card sent successfully.');
     } catch (error) {
       Logger.error(error.message, error.stack);
     }
