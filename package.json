@@ -80,7 +80,7 @@
     "genius-lyrics": "^4.4.7",
     "mongodb": "^6.16.0",
     "ms": "3.0.0-canary.1",
-    "nest-commander": "^3.17.0",
+    "nest-commander": "^3.19.0",
     "ollama": "^0.5.15",
     "opusscript": "^0.1.1",
     "parsec": "^2.0.2",
