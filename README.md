@@ -33,6 +33,17 @@ See [full list of commands here](https://github.com/RirikoAI/RirikoBot/wiki/LIST
 
 Join [our Discord server](https://discord.gg/uw3JTwwWYT) if you need help or just want to chat.
 
+## Development
+
+To set up a development environment, we would use Docker. Enter the following commands in your terminal:
+
+```bash
+docker build -f Dockerfile.dev .
+```
+
+We can now build and run the Dashboard: https://github.com/RirikoAI/RirikoBot/tree/beta/2.0.0-dashboard.
+Continue with the "Development with Docker" section.
+
 ## Deploy to Render (Recommended, Easiest)
 
 Click the button below to deploy Ririko AI to Render. You'll need to provide your Discord bot token, App ID, and other
@@ -43,7 +54,8 @@ dashboard. [Click here to see the instructions](https://github.com/RirikoAI/Riri
 
 ## Running Ririko AI using Docker (Recommended)
 
-First, you need to have the Docker software installed on your machine. You can find the installation instructions for your OS below:
+First, you need to have the Docker software installed on your machine. You can find the installation instructions for
+your OS below:
 
 | Windows Install Link                                                           | Linux Install Link                                          | MacOS Install Link                                                     | Raspberry Pi Install Link                                                          |
 |--------------------------------------------------------------------------------|-------------------------------------------------------------|------------------------------------------------------------------------|------------------------------------------------------------------------------------|
@@ -101,7 +113,8 @@ $ npm run start:prod
 After installing Ririko AI, you need to set up the AI chatbot, Stable Diffusion, and others:
 [Click here to see the instructions](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Post%E2%80%90installation-settings)
 
-If you want to use the AI features, head over to this page [AI README.md](https://github.com/RirikoAI/RirikoBot/blob/master/src/ai/README.md)
+If you want to use the AI features, head over to this
+page [AI README.md](https://github.com/RirikoAI/RirikoBot/blob/master/src/ai/README.md)
 
 ## Run tests
 
