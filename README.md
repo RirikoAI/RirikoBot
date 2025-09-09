@@ -38,11 +38,11 @@ Join [our Discord server](https://discord.gg/uw3JTwwWYT) if you need help or jus
 To set up a development environment, we would use Docker. Enter the following commands in your terminal:
 
 ```bash
-docker build -f Dockerfile.dev .
+docker build -t ririkoai/ririkobot-development -f Dockerfile.dev .
 ```
 
 We can now build and run the Dashboard: https://github.com/RirikoAI/RirikoBot/tree/beta/2.0.0-dashboard.
-Continue with the "Development with Docker" section.
+Continue with the "Development with Docker" section in the Dashboard README.md file.
 
 ## Deploy to Render (Recommended, Easiest)
 
