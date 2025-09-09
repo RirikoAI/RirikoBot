@@ -27,7 +27,7 @@ export async function bootstrap() {
     config.get('app.frontendURL'),
     config.get('app.backendURL'),
   ];
-
+  
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
@@ -38,11 +38,11 @@ export async function bootstrap() {
     },
     credentials: true,
   });
-
+  
   // Generate JWKS
   const jwksService = app.get(JwksService);
   await jwksService.generateJwks();
-
+  
   app.use(
     session({
       secret: config.get('auth.secret'),
@@ -53,19 +53,19 @@ export async function bootstrap() {
       },
     }),
   );
-
+  
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalPipes(new ValidationPipe(validationOptions));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableVersioning({
     type: VersioningType.URI,
   });
-
+  
   const configService = app.get(ConfigService);
   const discordService = app.get(DiscordService);
   const commandService = app.get(CommandService);
   const cliService = app.get(CliService);
-
+  
   const documentFactory = () =>
     SwaggerModule.createDocument(
       app,
@@ -77,7 +77,7 @@ export async function bootstrap() {
         .build(),
     );
   SwaggerModule.setup('docs', app, documentFactory);
-
+  
   await app.listen(configService.get('app.port'), '0.0.0.0', async () => {
     await discordService.connect();
     discordService.registerEvents();

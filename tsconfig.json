@@ -25,6 +25,9 @@
       ]
     }
   },
+  "watchOptions": {
+    "watchFile": "fixedPollingInterval"
+  },
   "exclude": [
     "config/*.ts",
     "node_modules",
@@ -38,5 +41,9 @@
     ".circleci/**",
     "typings/browser.d.ts",
     "typings/browser/**"
-  ]
+  ],
+  "ts-node": {
+    "swc": true,
+    "transpileOnly": true
+  }
 }

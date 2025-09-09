@@ -23,14 +23,10 @@ WORKDIR /app
 
 COPY package*.json ./
 
-
 # Install project dependencies
 RUN npm install && npm cache clean --force
 
 COPY . .
-
-# Build the application
-RUN npm run build
 
 EXPOSE 3000
 
