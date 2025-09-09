@@ -35,6 +35,7 @@ import { FreeGamesModule } from '#free-games/free-games.module';
 import { ReminderModule } from '#reminder/reminder.module';
 import { ReactionRoleModule } from '#reaction-role/reaction-role.module';
 import { existsSync } from 'fs';
+import ConfigFileUtil from '#util/config/config-file.util';
 
 /**
  * The main application module.
@@ -77,4 +78,9 @@ import { existsSync } from 'fs';
   controllers: [RootController, EconomyController],
   providers: [RootService, EnvConfigService, RirikoConfigService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    // Generate configuration files if they don't exist
+    ConfigFileUtil.generateConfigFiles();
+  }
+}

@@ -10,6 +10,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import ConfigValidatorUtil from '#util/config/config-validator.util';
+import ConfigFileUtil from '#util/config/config-file.util';
 
 class EnvironmentVariablesValidator {
   @ValidateIf((envValues) => envValues.DATABASE_URL)
@@ -97,25 +98,28 @@ class EnvironmentVariablesValidator {
 export default registerAs<DatabaseConfig>('database', () => {
   ConfigValidatorUtil.validate(process.env, EnvironmentVariablesValidator);
 
+  // Load config from file
+  const fileConfig = ConfigFileUtil.loadConfigFile('database');
+
   return {
-    logging: process.env.DATABASE_LOGGING === 'true',
-    url: process.env.DATABASE_URL,
-    type: process.env.DATABASE_TYPE,
-    host: process.env.DATABASE_HOST,
-    port: process.env.DATABASE_PORT
+    logging: fileConfig['logging'] !== undefined ? fileConfig['logging'] : process.env.DATABASE_LOGGING === 'true',
+    url: fileConfig['url'] || process.env.DATABASE_URL,
+    type: fileConfig['type'] || process.env.DATABASE_TYPE,
+    host: fileConfig['host'] || process.env.DATABASE_HOST,
+    port: fileConfig['port'] || (process.env.DATABASE_PORT
       ? parseInt(process.env.DATABASE_PORT, 10)
-      : 5432,
-    password: process.env.DATABASE_PASSWORD,
-    name: process.env.DATABASE_NAME,
-    username: process.env.DATABASE_USERNAME,
-    synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
-    maxConnections: process.env.DATABASE_MAX_CONNECTIONS
+      : 5432),
+    password: fileConfig['password'] || process.env.DATABASE_PASSWORD,
+    name: fileConfig['name'] || process.env.DATABASE_NAME,
+    username: fileConfig['username'] || process.env.DATABASE_USERNAME,
+    synchronize: fileConfig['synchronize'] !== undefined ? fileConfig['synchronize'] : process.env.DATABASE_SYNCHRONIZE === 'true',
+    maxConnections: fileConfig['maxConnections'] || (process.env.DATABASE_MAX_CONNECTIONS
       ? parseInt(process.env.DATABASE_MAX_CONNECTIONS, 10)
-      : 100,
-    sslEnabled: process.env.DATABASE_SSL_ENABLED === 'true',
-    rejectUnauthorized: process.env.DATABASE_REJECT_UNAUTHORIZED === 'true',
-    ca: process.env.DATABASE_CA,
-    key: process.env.DATABASE_KEY,
-    cert: process.env.DATABASE_CERT,
+      : 100),
+    sslEnabled: fileConfig['sslEnabled'] !== undefined ? fileConfig['sslEnabled'] : process.env.DATABASE_SSL_ENABLED === 'true',
+    rejectUnauthorized: fileConfig['rejectUnauthorized'] !== undefined ? fileConfig['rejectUnauthorized'] : process.env.DATABASE_REJECT_UNAUTHORIZED === 'true',
+    ca: fileConfig['ca'] || process.env.DATABASE_CA,
+    key: fileConfig['key'] || process.env.DATABASE_KEY,
+    cert: fileConfig['cert'] || process.env.DATABASE_CERT,
   };
 });

@@ -41,3 +41,6 @@ data
 *.njsproj
 *.sln
 *.sw?
+
+# Config folder
+config

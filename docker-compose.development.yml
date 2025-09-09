@@ -5,7 +5,8 @@ services:
   ririko-bot:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
+    image: ririkoai/ririkobot-development
     container_name: ririko-bot
     restart: unless-stopped
     ports:

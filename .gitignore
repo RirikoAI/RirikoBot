@@ -73,3 +73,6 @@ giveaways.json
 /lavalink/
 /docker-compose.yml
 /.env
+
+# ignore config folder
+/config
