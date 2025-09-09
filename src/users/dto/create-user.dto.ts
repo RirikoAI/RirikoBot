@@ -17,6 +17,12 @@ export class CreateUserDto {
   @IsEmail()
   email: string | null;
 
+  id?: string;
+
+  username?: string;
+
+  displayName?: string;
+
   @ApiProperty()
   @MinLength(6)
   password?: string;

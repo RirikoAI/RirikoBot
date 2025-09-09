@@ -22,8 +22,11 @@ import { JwksService } from '#jwks/jwks.service';
  */
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const allowedOrigins = [process.env.FRONTEND_URL, process.env.BACKEND_URL];
   const config = app.get(ConfigService);
+  const allowedOrigins = [
+    config.get('app.frontendURL'),
+    config.get('app.backendURL'),
+  ];
 
   app.enableCors({
     origin: (origin, callback) => {

@@ -48,6 +48,28 @@ export class DiscordStrategy extends PassportStrategy(Strategy) {
       });
     } else {
       // create a new user
+      const newUser = await this.userService.create(
+        {
+          id: profile.id,
+          email: profile.email,
+          firstName: profile.global_name,
+          username: profile.username,
+          displayName: profile.global_name,
+          lastName: '',
+        },
+        false,
+      );
+
+      done(null, {
+        discord: {
+          discordAccessToken: accessToken,
+          discordRefreshToken: refreshToken,
+          ...profile,
+        },
+        user: {
+          ...newUser,
+        },
+      });
     }
   }
 }
