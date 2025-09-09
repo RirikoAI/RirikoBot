@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Command } from '#command/command.class';
 import { CommandInterface } from '#command/command.interface';
 import {
@@ -194,7 +193,11 @@ export default class ImagineCommand
   async imagine(prompt, guildId, userId): Promise<any> {
     try {
       const config = await this.db.configRepository.findOne({
-        where: { applicationId: process.env.DISCORD_APPLICATION_ID },
+        where: {
+          applicationId: this.services.config.get<string>(
+            'discord.discordApplicationId',
+          ),
+        },
       });
 
       const replicate = new Replicate({
@@ -220,7 +223,8 @@ export default class ImagineCommand
       };
 
       const output = await replicate.run(model as any, { input });
-      
+
+      // @ts-ignore
       if (!output.url()) {
         throw 'Failed to imagine. Please check if you have set the API token';
       }

@@ -115,13 +115,17 @@ export default class SetupTwitchApiCommand
   ): Promise<void> {
     let config = await this.db.configRepository.findOne({
       where: {
-        applicationId: process.env.DISCORD_APPLICATION_ID,
+        applicationId: this.services.config.get<string>(
+          'discord.discordApplicationId',
+        ),
       },
     });
 
     if (!config) {
       config = this.db.configRepository.create({
-        applicationId: process.env.DISCORD_APPLICATION_ID,
+        applicationId: this.services.config.get<string>(
+          'discord.discordApplicationId',
+        ),
         twitchClientId: clientId,
         twitchClientSecret: clientSecret,
       });

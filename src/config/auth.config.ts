@@ -19,15 +19,26 @@ class EnvironmentVariablesValidator {
 }
 
 export default registerAs<AuthConfig>('auth', () => {
-  ConfigValidatorUtil.validate(process.env, EnvironmentVariablesValidator);
-
   // Load config from file
   const fileConfig = ConfigFileUtil.loadConfigFile('auth');
 
+  ConfigValidatorUtil.validate(
+    {
+      ...fileConfig,
+      ...process.env,
+    },
+    EnvironmentVariablesValidator,
+  );
+
   return {
-    secret: fileConfig['secret'] || process.env.AUTH_JWT_SECRET,
-    expires: fileConfig['expires'] || process.env.AUTH_JWT_TOKEN_EXPIRES_IN,
-    refreshSecret: fileConfig['refreshSecret'] || process.env.AUTH_REFRESH_SECRET,
-    refreshExpires: fileConfig['refreshExpires'] || process.env.AUTH_REFRESH_TOKEN_EXPIRES_IN,
+    secret: fileConfig['AUTH_JWT_SECRET'] || process.env.AUTH_JWT_SECRET,
+    expires:
+      fileConfig['AUTH_JWT_TOKEN_EXPIRES_IN'] ||
+      process.env.AUTH_JWT_TOKEN_EXPIRES_IN,
+    refreshSecret:
+      fileConfig['AUTH_REFRESH_SECRET'] || process.env.AUTH_REFRESH_SECRET,
+    refreshExpires:
+      fileConfig['AUTH_REFRESH_TOKEN_EXPIRES_IN'] ||
+      process.env.AUTH_REFRESH_TOKEN_EXPIRES_IN,
   };
 });

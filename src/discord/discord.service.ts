@@ -50,7 +50,7 @@ export class DiscordService {
     });
 
     await this.client
-      .login(this.configService.get('DISCORD_BOT_TOKEN'))
+      .login(this.configService.get('discord.discordBotToken'))
       .then((r) => {
         Logger.log(
           `Logged in as ${this?.client?.user?.tag}`,

@@ -96,30 +96,52 @@ class EnvironmentVariablesValidator {
 }
 
 export default registerAs<DatabaseConfig>('database', () => {
-  ConfigValidatorUtil.validate(process.env, EnvironmentVariablesValidator);
-
   // Load config from file
   const fileConfig = ConfigFileUtil.loadConfigFile('database');
 
+  ConfigValidatorUtil.validate(
+    {
+      ...fileConfig,
+      ...process.env,
+    },
+    EnvironmentVariablesValidator,
+  );
+
   return {
-    logging: fileConfig['logging'] !== undefined ? fileConfig['logging'] : process.env.DATABASE_LOGGING === 'true',
-    url: fileConfig['url'] || process.env.DATABASE_URL,
-    type: fileConfig['type'] || process.env.DATABASE_TYPE,
-    host: fileConfig['host'] || process.env.DATABASE_HOST,
-    port: fileConfig['port'] || (process.env.DATABASE_PORT
-      ? parseInt(process.env.DATABASE_PORT, 10)
-      : 5432),
-    password: fileConfig['password'] || process.env.DATABASE_PASSWORD,
-    name: fileConfig['name'] || process.env.DATABASE_NAME,
-    username: fileConfig['username'] || process.env.DATABASE_USERNAME,
-    synchronize: fileConfig['synchronize'] !== undefined ? fileConfig['synchronize'] : process.env.DATABASE_SYNCHRONIZE === 'true',
-    maxConnections: fileConfig['maxConnections'] || (process.env.DATABASE_MAX_CONNECTIONS
-      ? parseInt(process.env.DATABASE_MAX_CONNECTIONS, 10)
-      : 100),
-    sslEnabled: fileConfig['sslEnabled'] !== undefined ? fileConfig['sslEnabled'] : process.env.DATABASE_SSL_ENABLED === 'true',
-    rejectUnauthorized: fileConfig['rejectUnauthorized'] !== undefined ? fileConfig['rejectUnauthorized'] : process.env.DATABASE_REJECT_UNAUTHORIZED === 'true',
-    ca: fileConfig['ca'] || process.env.DATABASE_CA,
-    key: fileConfig['key'] || process.env.DATABASE_KEY,
-    cert: fileConfig['cert'] || process.env.DATABASE_CERT,
+    logging:
+      fileConfig['DATABASE_LOGGING'] !== undefined
+        ? fileConfig['DATABASE_LOGGING']
+        : process.env.DATABASE_LOGGING === 'true',
+    url: fileConfig['DATABASE_URL'] || process.env.DATABASE_URL,
+    type: fileConfig['DATABASE_TYPE'] || process.env.DATABASE_TYPE,
+    host: fileConfig['DATABASE_HOST'] || process.env.DATABASE_HOST,
+    port:
+      fileConfig['DATABASE_PORT'] ||
+      (process.env.DATABASE_PORT
+        ? parseInt(process.env.DATABASE_PORT, 10)
+        : 5432),
+    password: fileConfig['DATABASE_PASSWORD'] || process.env.DATABASE_PASSWORD,
+    name: fileConfig['DATABASE_NAME'] || process.env.DATABASE_NAME,
+    username: fileConfig['DATABASE_USERNAME'] || process.env.DATABASE_USERNAME,
+    synchronize:
+      fileConfig['DATABASE_SYNCHRONIZE'] !== undefined
+        ? fileConfig['DATABASE_SYNCHRONIZE']
+        : process.env.DATABASE_SYNCHRONIZE === 'true',
+    maxConnections:
+      fileConfig['DATABASE_MAX_CONNECTIONS'] ||
+      (process.env.DATABASE_MAX_CONNECTIONS
+        ? parseInt(process.env.DATABASE_MAX_CONNECTIONS, 10)
+        : 100),
+    sslEnabled:
+      fileConfig['DATABASE_SSL_ENABLED'] !== undefined
+        ? fileConfig['DATABASE_SSL_ENABLED']
+        : process.env.DATABASE_SSL_ENABLED === 'true',
+    rejectUnauthorized:
+      fileConfig['DATABASE_REJECT_UNAUTHORIZED'] !== undefined
+        ? fileConfig['DATABASE_REJECT_UNAUTHORIZED']
+        : process.env.DATABASE_REJECT_UNAUTHORIZED === 'true',
+    ca: fileConfig['DATABASE_CA'] || process.env.DATABASE_CA,
+    key: fileConfig['DATABASE_KEY'] || process.env.DATABASE_KEY,
+    cert: fileConfig['DATABASE_CERT'] || process.env.DATABASE_CERT,
   };
 });

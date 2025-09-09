@@ -98,13 +98,17 @@ export default class SetupStableDiffusionApiCommand
   async saveApiToken(apiToken: string): Promise<void> {
     let config = await this.db.configRepository.findOne({
       where: {
-        applicationId: process.env.DISCORD_APPLICATION_ID,
+        applicationId: this.services.config.get<string>(
+          'discord.discordApplicationId',
+        ),
       },
     });
 
     if (!config) {
       config = this.db.configRepository.create({
-        applicationId: process.env.DISCORD_APPLICATION_ID,
+        applicationId: this.services.config.get<string>(
+          'discord.discordApplicationId',
+        ),
         stableDiffusionApiToken: apiToken,
       });
       await this.db.configRepository.save(config); // Save the new entity

@@ -28,7 +28,7 @@ export class TwitchService {
   async login(): Promise<boolean> {
     if (this.retriesLeft <= 0) return false;
 
-    const config = await this.config.getAllConfig();
+    const config = await this.config.getAllDbConfig();
     if (!config.twitchClientId || !config.twitchClientSecret) {
       this.logger.error(
         'Twitch client ID and/or secret not set, disabling Twitch service',

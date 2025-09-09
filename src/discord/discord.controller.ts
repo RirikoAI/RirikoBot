@@ -125,7 +125,7 @@ export class DiscordController {
   refreshToken() {}
 
   getBotInviteLink(permissions = '626721090433015'): string {
-    return `https://discordapp.com/oauth2/authorize?client_id=${this.configService.get('DISCORD_APPLICATION_ID')}&scope=bot&permissions=${permissions}`;
+    return `https://discordapp.com/oauth2/authorize?client_id=${this.configService.get('discord.discordApplicationId')}&scope=bot&permissions=${permissions}`;
   }
 
   getGuildsTheBotIsIn() {

@@ -30,6 +30,7 @@ import {
   DiscordAuthGuard,
 } from '#util/auth/discord-auth-guard.util';
 import { JweService } from '#jwe/jwe.service';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Auth')
 @Controller({
@@ -40,6 +41,7 @@ export class AuthController {
   constructor(
     private readonly service: AuthService,
     private readonly jweService: JweService,
+    public configService: ConfigService,
   ) {}
 
   @SerializeOptions({
@@ -50,7 +52,9 @@ export class AuthController {
   async redirect(@Res({ passthrough: true }) res: any, @Request() req: any) {
     const data = await this.service.validateDiscordUser(req.user);
 
-    const backendDomain = process.env.BACKEND_URL.replace('http://', '')
+    const backendDomain = this.configService
+      .get('app.backendURL')
+      .replace('http://', '')
       .replace('https://', '')
       .split(':')[0];
 
@@ -92,7 +96,7 @@ export class AuthController {
         },
       );
 
-      res.redirect(process.env.FRONTEND_URL + '/callback');
+      res.redirect(this.configService.get('app.frontendURL') + '/callback');
     }
   }
 

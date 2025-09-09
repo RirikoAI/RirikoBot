@@ -11,6 +11,9 @@ import {
 import appConfig from '#config/app.config';
 import databaseConfig from '#config/database.config';
 import discordConfig from '#config/discord.config';
+import authConfig from '#config/auth.config';
+import mailConfig from '#config/mail.config';
+import aiConfig from '#config/ai.config';
 import { AvcModule } from '#avc/avc.module';
 import { MusicModule } from '#music/music.module';
 import { DatabaseModule } from '#database/database.module';
@@ -22,8 +25,6 @@ import { ConfigModule as RirikoConfigModule } from '#config/config.module';
 import { ConfigService as RirikoConfigService } from '#config/config.service';
 import { CliModule } from '#cli/cli.module';
 import { ModerationModule } from '#moderation/moderation.module';
-import authConfig from '#config/auth.config';
-import mailConfig from '#config/mail.config';
 import { AuthModule } from '#auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from '#database/typeorm-config.service';
@@ -48,7 +49,14 @@ import ConfigFileUtil from '#util/config/config-file.util';
     ScheduleModule.forRoot(),
     EnvConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, authConfig, discordConfig, mailConfig],
+      load: [
+        appConfig,
+        databaseConfig,
+        authConfig,
+        discordConfig,
+        mailConfig,
+        aiConfig,
+      ],
       envFilePath: ['.env'],
       ignoreEnvFile: !existsSync('.env'),
     }),

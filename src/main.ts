@@ -23,6 +23,7 @@ import { JwksService } from '#jwks/jwks.service';
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const allowedOrigins = [process.env.FRONTEND_URL, process.env.BACKEND_URL];
+  const config = app.get(ConfigService);
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -41,7 +42,7 @@ export async function bootstrap() {
 
   app.use(
     session({
-      secret: process.env.AUTH_JWT_SECRET,
+      secret: config.get('auth.secret'),
       resave: false,
       saveUninitialized: false,
       cookie: {

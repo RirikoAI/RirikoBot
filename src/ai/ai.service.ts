@@ -19,11 +19,11 @@ export class AiService {
     // Load configuration from environment variables
     this.serviceConfig = {
       type:
-        this.configService.get<AIServiceType>('AI_SERVICE_TYPE') ||
+        this.configService.get<AIServiceType>('ai.serviceType') ||
         AIServiceType.OLLAMA,
-      apiKey: this.configService.get<string>('AI_SERVICE_API_KEY'),
-      baseUrl: this.configService.get<string>('AI_SERVICE_BASE_URL'),
-      defaultModel: this.configService.get<string>('AI_SERVICE_DEFAULT_MODEL'),
+      apiKey: this.configService.get<string>('ai.apiKey'),
+      baseUrl: this.configService.get<string>('ai.baseUrl'),
+      defaultModel: this.configService.get<string>('ai.defaultModel'),
     };
   }
 

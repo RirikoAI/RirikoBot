@@ -24,24 +24,42 @@ class EnvironmentVariablesValidator {
 }
 
 export default registerAs<DiscordConfig>('discord', () => {
-  // Validate environment variables
-  ConfigValidatorUtil.validate(process.env, EnvironmentVariablesValidator);
-
   // Load config from file
   const fileConfig = ConfigFileUtil.loadConfigFile('discord');
 
+  ConfigValidatorUtil.validate(
+    {
+      ...fileConfig,
+      ...process.env,
+    },
+    EnvironmentVariablesValidator,
+  );
+
   // Merge config from file and environment variables
   const config = {
-    discordBotToken: fileConfig['discordBotToken'] || process.env.DISCORD_BOT_TOKEN || '',
-    discordApplicationId: fileConfig['discordApplicationId'] || process.env.DISCORD_APPLICATION_ID || '',
-    defaultPrefix: fileConfig['defaultPrefix'] || process.env.DEFAULT_PREFIX || '!',
-    discordRedirectUri: fileConfig['discordRedirectUri'] || process.env.DISCORD_REDIRECT_URI || '',
-    discordOauth2ClientSecret: fileConfig['discordOauth2ClientSecret'] || process.env.DISCORD_OAUTH2_CLIENT_SECRET || '',
+    discordBotToken:
+      fileConfig['DISCORD_BOT_TOKEN'] || process.env.DISCORD_BOT_TOKEN || '',
+    discordApplicationId:
+      fileConfig['DISCORD_APPLICATION_ID'] ||
+      process.env.DISCORD_APPLICATION_ID ||
+      '',
+    defaultPrefix:
+      fileConfig['DEFAULT_PREFIX'] || process.env.DEFAULT_PREFIX || '!',
+    discordRedirectUri:
+      fileConfig['DISCORD_REDIRECT_URI'] ||
+      process.env.DISCORD_REDIRECT_URI ||
+      '',
+    discordOauth2ClientSecret:
+      fileConfig['DISCORD_OAUTH2_CLIENT_SECRET'] ||
+      process.env.DISCORD_OAUTH2_CLIENT_SECRET ||
+      '',
   };
 
   // Validate required Discord tokens
   if (!config.discordBotToken || !config.discordApplicationId) {
-    throw new Error('DISCORD_BOT_TOKEN and DISCORD_APPLICATION_ID must be set in either config/discord.config.ts or .env file');
+    throw new Error(
+      'DISCORD_BOT_TOKEN and DISCORD_APPLICATION_ID must be set in either config/discord.config.ts or .env file',
+    );
   }
 
   return config;

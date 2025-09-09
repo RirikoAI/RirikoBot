@@ -73,7 +73,7 @@ describe('TwitchService', () => {
       };
 
       jest
-        .spyOn(configService, 'getAllConfig')
+        .spyOn(configService, 'getAllDbConfig')
         .mockResolvedValue(mockConfig as any);
       (axios.post as jest.Mock).mockResolvedValue(mockTokenResponse);
 
@@ -91,7 +91,7 @@ describe('TwitchService', () => {
       };
 
       jest
-        .spyOn(configService, 'getAllConfig')
+        .spyOn(configService, 'getAllDbConfig')
         .mockResolvedValue(mockConfig as any);
       (axios.post as jest.Mock).mockRejectedValue(new Error('Login failed'));
 

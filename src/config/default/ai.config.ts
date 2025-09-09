@@ -1,0 +1,6 @@
+export default {
+  AI_SERVICE_TYPE: '',
+  AI_SERVICE_API_KEY: '',
+  AI_SERVICE_DEFAULT_MODEL: '',
+  AI_SERVICE_BASE_URL: '',
+};

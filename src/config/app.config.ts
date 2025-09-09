@@ -39,6 +39,10 @@ class EnvironmentVariablesValidator {
 
   @IsString()
   @IsOptional()
+  APP_NAME: string;
+
+  @IsString()
+  @IsOptional()
   APP_FALLBACK_LANGUAGE: string;
 
   @IsString()
@@ -47,23 +51,43 @@ class EnvironmentVariablesValidator {
 }
 
 export default registerAs<AppConfig>('app', () => {
-  ConfigValidatorUtil.validate(process.env, EnvironmentVariablesValidator);
-
   // Load config from file
   const fileConfig = ConfigFileUtil.loadConfigFile('app');
 
+  ConfigValidatorUtil.validate(
+    {
+      ...fileConfig,
+      ...process.env,
+    },
+    EnvironmentVariablesValidator,
+  );
+
   return {
-    name: fileConfig['name'] || process.env.APP_NAME || 'Ririko',
-    nodeEnv: fileConfig['nodeEnv'] || process.env.NODE_ENV || 'development',
-    port: fileConfig['port'] || (process.env.APP_PORT
-      ? parseInt(process.env.APP_PORT, 10)
-      : process.env.PORT
-        ? parseInt(process.env.PORT, 10)
-        : 3000),
-    backendURL: fileConfig['backendURL'] || process.env.BACKEND_URL || 'http://localhost:3000',
-    frontendURL: fileConfig['frontendURL'] || process.env.FRONTEND_URL || 'http://localhost:8100',
-    workingDirectory: fileConfig['workingDirectory'] || process.env.PWD || process.cwd(),
-    fallbackLanguage: fileConfig['fallbackLanguage'] || process.env.APP_FALLBACK_LANGUAGE || 'en',
-    headerLanguage: fileConfig['headerLanguage'] || process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',
+    name: fileConfig['APP_NAME'] || process.env.APP_NAME || 'Ririko',
+    nodeEnv: fileConfig['NODE_ENV'] || process.env.NODE_ENV || 'development',
+    port:
+      fileConfig['APP_PORT'] ||
+      (process.env.APP_PORT
+        ? parseInt(process.env.APP_PORT, 10)
+        : process.env.PORT
+          ? parseInt(process.env.PORT, 10)
+          : 3000),
+    backendURL:
+      fileConfig['BACKEND_URL'] ||
+      process.env.BACKEND_URL ||
+      'http://localhost:3000',
+    frontendURL:
+      fileConfig['FRONTEND_URL'] ||
+      process.env.FRONTEND_URL ||
+      'http://localhost:8100',
+    fallbackLanguage:
+      fileConfig['APP_FALLBACK_LANGUAGE'] ||
+      process.env.APP_FALLBACK_LANGUAGE ||
+      'en',
+    headerLanguage:
+      fileConfig['APP_HEADER_LANGUAGE'] ||
+      process.env.APP_HEADER_LANGUAGE ||
+      'x-custom-lang',
+    workingDirectory: process.env.PWD || process.cwd(),
   };
 });

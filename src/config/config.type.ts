@@ -53,6 +53,13 @@ export type MailConfig = {
   requireTLS: boolean;
 };
 
+export type AIConfig = {
+  serviceType?: string;
+  apiKey?: string;
+  defaultModel?: string;
+  baseUrl?: string;
+};
+
 export type AllConfigType = {
   auth: AuthConfig;
   app: AppConfig;

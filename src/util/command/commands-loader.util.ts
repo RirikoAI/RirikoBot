@@ -91,7 +91,7 @@ const registerInteractionCommands = async (
 ) => {
   // Register the commands in the global scope
   await client?.restClient.put(
-    Routes.applicationCommands(config.get('DISCORD_APPLICATION_ID')),
+    Routes.applicationCommands(config.get('discord.discordApplicationId')),
     {
       body: prepareInteractionCommands(commands),
     },
@@ -106,7 +106,7 @@ const registerInteractionCommandsInAGuild = async (
 ) => {
   await client?.restClient.put(
     Routes.applicationGuildCommands(
-      config.get('DISCORD_APPLICATION_ID'),
+      config.get('discord.discordApplicationId'),
       guildId,
     ),
     {

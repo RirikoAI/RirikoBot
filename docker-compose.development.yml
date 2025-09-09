@@ -13,16 +13,7 @@ services:
       - "3000:3000"
     volumes:
       - ./data:/app/data
+      - ./config:/app/config
     environment:
       - NODE_ENV=development
-      - APP_PORT=3000
-      - DISCORD_BOT_TOKEN=your_discord_bot_token
-      - DISCORD_APPLICATION_ID=your_discord_application_id
-      - BOT_OWNER_ID=your_discord_user_id
-      - AI_SERVICE_TYPE=your_preferred_ai_service_type
-      - AI_SERVICE_API_KEY=your_ai_service_api_key
-      - AI_SERVICE_DEFAULT_MODEL=your_preferred_ai_service_default_model
-      - DEFAULT_PREFIX=!
-      - DATABASE_TYPE=better-sqlite3
-      - DATABASE_NAME=/app/data/ririko.db
     # No need to override the command here as it's already set in the Dockerfile
