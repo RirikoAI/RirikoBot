@@ -27,8 +27,8 @@ import { NullableType } from '#util/types/nullable.type';
 import { User } from '#database/entities/user.entity';
 import {
   AuthenticatedGuard,
-  DiscordAuthGuard,
-} from '#util/auth/discord-auth-guard.util';
+  DiscordOAuthGuard,
+} from '#auth/guards/discord-oauth.guard';
 import { JweService } from '#jwe/jwe.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -48,7 +48,7 @@ export class AuthController {
     groups: ['me'],
   })
   @Get('discord/redirect')
-  @UseGuards(DiscordAuthGuard)
+  @UseGuards(DiscordOAuthGuard)
   async redirect(@Res({ passthrough: true }) res: any, @Request() req: any) {
     const data = await this.service.validateDiscordUser(req.user);
 
@@ -104,7 +104,7 @@ export class AuthController {
     groups: ['me'],
   })
   @Get('discord/login')
-  @UseGuards(DiscordAuthGuard)
+  @UseGuards(DiscordOAuthGuard)
   discordLogin() {
     return { msg: 'Login' };
   }

@@ -4,20 +4,22 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  Param,
   Redirect,
-  Req,
+  Req, UseGuards,
   Version,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseDto } from '#api/response.dto';
 import { ConfigService } from '@nestjs/config';
-import { JweService } from '#jwe/jwe.service';
 import axios from 'axios';
 import { delay } from '#util/api/api.util';
 import { GuildDto, GuildsResponseDto } from '#discord/dto/discord.response.dto';
 import { Roles } from '#users/roles/roles.decorator';
 import { RoleEnum } from '#users/roles/roles.enum';
 import { DiscordService } from '#discord/discord.service';
+import { DatabaseService } from '#database/database.service';
+import { DiscordJweGuard } from '#auth/guards/discord-jwe.guard';
 
 // import { Permissions } from 'discord.js';
 
@@ -36,15 +38,16 @@ export class DiscordController {
   constructor(
     private readonly discordService: DiscordService,
     private readonly configService: ConfigService,
-    private readonly jweService: JweService,
-  ) {}
-
+    private readonly databaseService: DatabaseService,
+  ) {
+  }
+  
   @Get('/invite')
   @Redirect('')
   invite() {
     return { url: this.getBotInviteLink() };
   }
-
+  
   @ApiOkResponse({
     type: ResponseDto,
   })
@@ -58,38 +61,26 @@ export class DiscordController {
       success: true,
     };
   }
-
+  
   @Get('guilds')
   @ApiOperation({ summary: 'Uses HttpOnly cookie' })
   @HttpCode(HttpStatus.OK)
   @Roles(RoleEnum.user)
+  @UseGuards(DiscordJweGuard)
   async guilds(@Req() req: any): Promise<GuildsResponseDto> {
     await delay(1000);
-    const discordAccessToken = await this.getDiscordAccessToken(req);
-
-    if (!discordAccessToken) {
-      throw new HttpException(
-        {
-          status: HttpStatus.FORBIDDEN,
-          errors: {
-            discordAccessToken: 'notFound',
-          },
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
+    const discordAccessToken = req['discordAccessToken'];
     const response = await axios.get(
       'https://discord.com/api/users/@me/guilds?with_counts=true',
       {
-        headers: { Authorization: `Bearer ${discordAccessToken}` },
+        headers: { Authorization: `Bearer ${ discordAccessToken }` },
       },
     );
-
+    
     const MANAGE_GUILD = 0x20; // 32 in decimal
-
+    
     const guildsTheBotIsIn = this.getGuildsTheBotIsIn();
-
+    
     // Assume response.data is of type Guild[]
     const guilds: GuildDto[] = response.data
       .map((guild) => ({
@@ -104,30 +95,42 @@ export class DiscordController {
       );
     return guilds;
   }
-
-  async getDiscordAccessToken(req: any) {
-    const cookies = require('cookie').parse(req.headers['cookie'] || '');
-    const encryptedDiscordAccessToken = cookies['discord_access_token'];
-    let decryptedAccessToken: any;
-    try {
-      decryptedAccessToken = await this.jweService.decrypt(
-        encryptedDiscordAccessToken,
+  
+  @Get('guilds/:guildId/config')
+  @ApiOperation({ summary: 'Get guild configuration' })
+  @HttpCode(HttpStatus.OK)
+  @Roles(RoleEnum.user)
+  @UseGuards(DiscordJweGuard)
+  async getGuildConfig(@Param('guildId') guildId: string, @Req() req: any): Promise<ResponseDto> {
+    const guildConfig = await this.databaseService
+      .guildConfigRepository
+      .find({
+        where: { guild: { id: guildId } },
+      });
+    
+    if (!guildConfig.length) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          errors: {
+            guildConfig: 'notFound',
+          },
+        },
+        HttpStatus.NOT_FOUND,
       );
-    } catch (e) {
-      return null;
     }
-    return decryptedAccessToken;
+    
+    return {
+      data: guildConfig,
+      statusCode: HttpStatus.OK,
+      success: true,
+    };
   }
-
-  /**
-   * ToDo: Watch when we receive 401/403 errors from Discord api, then refresh the tokens
-   */
-  refreshToken() {}
-
+  
   getBotInviteLink(permissions = '626721090433015'): string {
-    return `https://discordapp.com/oauth2/authorize?client_id=${this.configService.get('discord.discordApplicationId')}&scope=bot&permissions=${permissions}`;
+    return `https://discordapp.com/oauth2/authorize?client_id=${ this.configService.get('discord.discordApplicationId') }&scope=bot&permissions=${ permissions }`;
   }
-
+  
   getGuildsTheBotIsIn() {
     return this.discordService.client.guilds.cache;
   }
