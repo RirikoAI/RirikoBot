@@ -21,7 +21,7 @@ export default class BackCommand extends Command implements CommandInterface {
   };
 
   async runPrefix(message: DiscordMessage): Promise<any> {
-    const queue = this.player.getQueue(message.guild.id);
+    const queue = await this.player.getQueue(message.guild.id);
     if (!queue) return await message.reply({ content: 'No queue found' });
     await queue.previous();
     await message.reply({
@@ -30,7 +30,7 @@ export default class BackCommand extends Command implements CommandInterface {
   }
 
   async runSlash(interaction: DiscordInteraction): Promise<any> {
-    const queue = this.player.getQueue(interaction.guild.id);
+    const queue = await this.player.getQueue(interaction.guild.id);
     if (!queue) return await interaction.reply({ content: 'No queue found' });
     await queue.previous();
     await interaction.reply({
@@ -39,7 +39,7 @@ export default class BackCommand extends Command implements CommandInterface {
   }
 
   async handleButton(interaction: DiscordInteraction): Promise<any> {
-    const queue = this.player.getQueue(interaction.guild.id);
+    const queue = await this.player.getQueue(interaction.guild.id);
     if (!queue) return await interaction.reply({ content: 'No queue found' });
     await queue.previous();
     await interaction.reply({

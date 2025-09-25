@@ -193,7 +193,7 @@ export default class PlayCommand extends Command implements CommandInterface {
     const songs = [];
     playlist.tracks.map((m) => songs.push(m.url));
 
-    const queuedPlaylist = await this.player.createCustomPlaylist(songs, {
+    const queuedPlaylist = await this.player.createPlaylist(songs, {
       member: interaction.member,
       properties: { name: 'My playlist name' },
       parallel: true,
