@@ -174,7 +174,7 @@ export class LavaSharkAdapter implements MusicAdapterInterface {
     };
   }
 
-  async setRepeatMode(guildId: string, mode: number): Promise<void> {
+  async setRepeatMode(guildId: string): Promise<void> {
     const player = this.lavashark.players.get(guildId);
     if (player) {
       // LavaShark doesn't have built-in repeat modes like DisTube
@@ -207,7 +207,7 @@ export class LavaSharkAdapter implements MusicAdapterInterface {
     }));
   }
 
-  on(event: any, handler: Function): void {
+  on(event: any, handler: any): void {
     this.lavashark.on(event, handler);
   }
 
@@ -218,6 +218,7 @@ export class LavaSharkAdapter implements MusicAdapterInterface {
   async createPlaylist(songs: any, options: any): Promise<any> {
     // LavaShark doesn't have built-in playlist creation like DisTube
     // You'll need to implement this manually
+    console.log('createPlaylist called with', songs, options);
     throw new Error('createPlaylist not implemented for LavaShark');
   }
 

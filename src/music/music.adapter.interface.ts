@@ -21,8 +21,8 @@ export interface MusicAdapterInterface {
   search(params: any): Promise<SearchResult[]>;
 
   // Event handling
-  on(event: string, handler: Function): void;
-  off(event: string, handler: Function): void;
+  on(event: string, handler: any): void;
+  off(event: string, handler: any): void;
 
   voices: any;
   createPlaylist: any;

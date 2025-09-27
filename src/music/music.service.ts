@@ -85,7 +85,7 @@ export class MusicService {
     });
 
     this.musicPlayer.on('finishSong', async (queue: Queue) => {
-      // Optional: Add any finish song logic
+      console.log('Song finished in guild', queue);
     });
 
     this.musicPlayer.on('disconnect', async (queue: Queue) => {
