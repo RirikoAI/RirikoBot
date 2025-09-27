@@ -22,7 +22,7 @@ export class DisTubeAdapter implements MusicAdapterInterface {
       new SpotifyPlugin(),
       new SoundCloudPlugin(),
       new DeezerPlugin(),
-      new YouTubePlugin(),
+      this.youtubePlugin,
     );
     
     this.distube = new DisTube(discordClient, {

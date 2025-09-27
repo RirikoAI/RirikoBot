@@ -8,8 +8,7 @@ import { DatabaseService } from '#database/database.service';
 import { MusicAdapterInterface, Queue } from './music.adapter.interface';
 import { DisTubeAdapter } from '#music/adapters/distube.adapter';
 import { LavaSharkAdapter } from '#music/adapters/lavashark.adapter';
-
-const CURRENT_PLAYER: string = 'any';
+import { Player, Track } from 'lavashark';
 
 @Injectable()
 export class MusicService {
@@ -32,9 +31,11 @@ export class MusicService {
   }
   
   public async initializeMusicPlayer(): Promise<void> {
-    if (CURRENT_PLAYER === 'lavalink'){
+    if (process.env.MUSIC_PLAYER === 'lavashark') {
+      console.log('Using LavaShark as music player');
       this.musicPlayer = new LavaSharkAdapter(this.discord.client);
     } else {
+      console.log('Using DisTube as music player');
       this.musicPlayer = new DisTubeAdapter(this.discord.client);
     }
     this.registerEvents();
@@ -45,6 +46,7 @@ export class MusicService {
    * @private
    */
   private registerEvents(): void {
+    // Distube Events
     this.musicPlayer.on('playSong', async (queue: Queue, song: any) => {
       await this.trackMusic(queue.textChannel.guild.id);
       let volume = queue.volume || 50;
@@ -91,6 +93,37 @@ export class MusicService {
       queue.textChannel?.send(
         'The voice channel is empty! Leaving the voice channel...',
       );
+    });
+    
+    // LavaShark Events
+    this.musicPlayer.on('trackStart', async (player: Player, track: Track) => {
+      await this.trackMusic(player.guildId);
+      const queue = await this.musicPlayer.getQueue(player.guildId) as any;
+      let volume = queue?.volume || 50;
+      
+      if (volume < 0) {
+        volume = 0;
+      }
+      
+      await this.musicPlayer.setVolume(player.guildId, volume);
+      
+      // get discord channel
+      const channel = await this.discord.client.channels.fetch(player.textChannelId) as TextChannel;
+      
+      await this.updateMusicChannel({
+        channel: channel,
+        song: {
+          name: track.title,
+          // track.duration.value is in milliseconds, convert to minutes:seconds
+          formattedDuration: new Date(track.duration.value).toISOString().substr(track.duration.value >= 3600000 ? 11 : 14, 8).split('.')[0],
+          user: { id: 'Unknown' },
+          url: track.uri,
+          thumbnail: '',
+          duration: track.duration.value,
+          source: 'youtube',
+          uploader: { name: track.author },
+        },
+      });
     });
   }
   
@@ -347,7 +380,21 @@ export class MusicService {
       });
   }
   
-  async updateMusicChannel(params: { channel: any; song: any }) {
+  async updateMusicChannel(params: {
+    channel: {
+      id: string; guild: { id: string }
+    };
+    song: {
+      name: string;
+      formattedDuration: string;
+      user: { id: string };
+      url: string;
+      thumbnail: string;
+      duration: number;
+      source: string;
+      uploader: { name: string }
+    }
+  }) {
     const { channel, song } = params;
     const guildId = channel.guild.id;
     const musicChannel = await this.db.musicChannelRepository.findOne({
@@ -361,7 +408,7 @@ export class MusicService {
       .then((channel) => channel);
     
     if (!textChannel) {
-      console.log(channel, 'Channel not found');
+      console.error(channel, 'Channel not found');
       return;
     }
     
@@ -562,7 +609,20 @@ export class MusicService {
   
   async setupMusicChannel(params: { interaction: any; musicChannel: any }) {
     const { interaction, musicChannel } = params;
-    // upsert the music channel in the database tied to the guild
+    
+    // delete if channel already exists
+    const existingChannel = await this.db.musicChannelRepository.findOne({
+      where: {
+        guild: {
+          id: interaction.guild.id,
+        },
+      },
+    });
+    
+    if (existingChannel) {
+      await this.db.musicChannelRepository.remove(existingChannel);
+    }
+    
     await this.db.musicChannelRepository.upsert(
       {
         id: musicChannel.id,

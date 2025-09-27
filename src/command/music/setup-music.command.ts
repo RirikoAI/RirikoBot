@@ -69,15 +69,12 @@ export default class SetupMusicCommand
       (channel) => channel.name === 'music-channel',
     );
 
-    // if music channel exists
     if (!musicChannel) {
-      // create the music channel. Discord.js v14
       musicChannel = await interaction.guild.channels.create({
         name: 'music-channel',
         type: ChannelType.GuildText,
       });
     } else {
-      // delete all messages in the music channel
       const messages = await (musicChannel as TextChannel).messages.fetch();
       await Promise.all(messages.map((message) => message.delete()));
     }

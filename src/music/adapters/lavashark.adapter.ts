@@ -1,7 +1,6 @@
-// lavashark-adapter.service.ts
 import { Injectable } from '@nestjs/common';
 import { MusicAdapterInterface, PlayOptions, SearchResult } from '../music.adapter.interface';
-import { LavaShark } from 'lavashark';
+import { LavaShark, Player } from 'lavashark';
 import { Client } from 'discord.js';
 
 @Injectable()
@@ -15,10 +14,10 @@ export class LavaSharkAdapter implements MusicAdapterInterface {
     this.lavashark = new LavaShark({
       nodes: [
         {
-          id: 'Node 1',
-          hostname: 'localhost', // Replace with your Lavalink node hostname
-          port: 2333, // Replace with your Lavalink node port
-          password: 'youshallnotpass', // Replace with your Lavalink node password
+          id: 'Ririko AI',
+          hostname: process.env.LAVALINK_HOST || 'localhost',
+          port: parseInt(process.env.LAVALINK_PORT) || 2333,
+          password: process.env.LAVALINK_PASSWORD || 'youshallnotpass',
         },
       ],
       sendWS: (guildId, payload) => {
@@ -41,17 +40,16 @@ export class LavaSharkAdapter implements MusicAdapterInterface {
     const guildId = voiceChannel.guild.id;
     
     console.log(`Playing in guild ${ guildId } on channel ${ voiceChannel.id } with query: ${ query }`);
-    const res = await this.lavashark.search(query);
+    const res = await this.lavashark.search(query, 'soundcloud');
     
     /**
      * search loadType: playlist, search, track, empty, error
      */
     
-    if (res.loadType === "error") {
-      console.log(`Search Error: ${res.exception.message}`);
+    if (res.loadType === 'error') {
+      console.log(`Search Error: ${ res.exception.message }`);
       // return message.reply('❌ | Not found music.');
-    }
-    else if (res.loadType === "empty") {
+    } else if (res.loadType === 'empty') {
       console.log(`Search Error: No matches (empty)`);
       // return message.reply('❌ | No matches.');
     }
@@ -60,25 +58,27 @@ export class LavaSharkAdapter implements MusicAdapterInterface {
     const player = this.lavashark.createPlayer({
       guildId: voiceChannel.guild.id,
       voiceChannelId: voiceChannel.id,
-      textChannelId: voiceChannel.id,
-      selfDeaf: true
+      textChannelId: options.textChannel.id,
+      selfDeaf: true,
     });
     
-    console.log(res)
+    console.log(res);
     
     try {
       await player.connect(); // Connects to the voice channel
     } catch (error) {
       console.log(error);
-      return voiceChannel.reply({ content: `❌ | I can't join audio channel.`, allowedMentions: { repliedUser: false } });
+      return voiceChannel.reply({
+        content: `❌ | I can't join audio channel.`,
+        allowedMentions: { repliedUser: false },
+      });
     }
     
     if (res.loadType === 'playlist') {
       player.addTracks(res.tracks, voiceChannel.author);
       
       // voiceChannel.reply(`Playlist \`${res.playlistInfo.name}\` loaded!`);
-    }
-    else {
+    } else {
       const track = res.tracks[0];
       player.addTracks(res.tracks[0], voiceChannel.author);
       console.log('Added track', track);
@@ -134,17 +134,26 @@ export class LavaSharkAdapter implements MusicAdapterInterface {
   }
   
   async getQueue(guildId: string): Promise<any | null> {
-    const player = this.lavashark.players.get(guildId);
+    const player: Player = this.lavashark.players.get(guildId);
+    
     if (!player) return null;
     
+    const track = player.current;
+    
     return {
-      songs: player.queue.tracks,
-      volume: player.volume,
-      paused: player.paused,
-      currentTime: player.position,
-      repeatMode: 0, // LavaShark handles repeat differently
-      textChannel: { id: player.textChannelId },
-      guild: { id: guildId },
+      songs: [{
+        name: track.title,
+        // track.duration.value is in milliseconds, convert to minutes:seconds
+        formattedDuration: new Date(track.duration.value).toISOString().substr(track.duration.value >= 3600000 ? 11 : 14, 8).split('.')[0],
+        user: { id: 'Unknown' },
+        url: track.uri,
+        thumbnail: '',
+        duration: track.duration.value,
+        source: 'youtube',
+        uploader: { name: track.author },
+      }],
+      // player.position is in milliseconds, convert to seconds
+      currentTime: Math.floor(player.position / 1000),
     };
   }
   
@@ -182,23 +191,7 @@ export class LavaSharkAdapter implements MusicAdapterInterface {
   }
   
   on(event: any, handler: Function): void {
-    this.lavashark.on('trackStart', (player, track) => {
-      // const channel: any = this.discordClient.channels.cache.get(player.textChannelId);
-      // channel.send(`Now playing \`${ track.title }\``);
-    });
-    
-    // Fired when the queue ends
-    this.lavashark.on('queueEnd', (player) => {
-      // const channel: any = this.discordClient.channels.cache.get(player.textChannelId);
-      // channel.send(`Queue ended`);
-      player.destroy();
-    });
-    
-    // This event is needed to catch any errors that occur on LavaShark
-    this.lavashark.on('error', (node, err) => {
-      console.error('[LavaShark]', `Error on node ${ node.identifier }`, err.message);
-    });
-    // this.lavashark.on(event, handler);
+    this.lavashark.on(event, handler);
   }
   
   off(event: any, handler: any): void {
