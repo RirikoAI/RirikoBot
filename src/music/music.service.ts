@@ -628,8 +628,8 @@ export class MusicService {
   async setupMusicChannel(params: { interaction: any; musicChannel: any }) {
     const { interaction, musicChannel } = params;
 
-    // delete if channel already exists
-    const existingChannel = await this.db.musicChannelRepository.findOne({
+    // delete all channel if already exists
+    const existingChannel = await this.db.musicChannelRepository.find({
       where: {
         guild: {
           id: interaction.guild.id,
@@ -637,8 +637,9 @@ export class MusicService {
       },
     });
 
-    if (existingChannel) {
-      await this.db.musicChannelRepository.remove(existingChannel);
+    if (existingChannel.length > 0) {
+      // remove all existing channels
+      await Promise.all(existingChannel.map((channel) => this.db.musicChannelRepository.remove(channel)));
     }
 
     await this.db.musicChannelRepository.upsert(
