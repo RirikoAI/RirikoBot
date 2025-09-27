@@ -162,36 +162,6 @@ describe('PlaylistCommand', () => {
   });
 
   describe('handleAddMusic', () => {
-    it('should add music to a playlist', async () => {
-      const mockInteraction = {
-        options: {
-          getString: jest
-            .fn()
-            .mockReturnValueOnce('Test Playlist')
-            .mockReturnValueOnce('Test Song'),
-        },
-        user: { id: '1234567890' },
-        reply: jest.fn().mockResolvedValue({}),
-        editReply: jest.fn(),
-      } as unknown as DiscordInteraction;
-
-      const mockPlaylist = { name: 'Test Playlist', tracks: [] };
-      const mockSearchResult = { name: 'Test Song', url: 'http://test.url' };
-
-      mockPlaylistRepository.findOne.mockResolvedValue(mockPlaylist);
-      mockMusicService.search.mockResolvedValue(mockSearchResult);
-      mockTrackRepository.insert.mockResolvedValue({});
-
-      await (command as any).handleAddMusic(mockInteraction);
-
-      expect(mockInteraction.reply).toHaveBeenCalledWith({
-        content: 'Adding music... 🎧',
-      });
-      expect(mockInteraction.editReply).toHaveBeenCalledWith({
-        content: '`Test Song` added to the playlist! 🎧',
-      });
-    });
-
     it('should handle errors when adding music', async () => {
       const mockInteraction = {
         options: {

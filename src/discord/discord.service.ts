@@ -62,7 +62,7 @@ export class DiscordService {
       });
 
     Logger.log('Creating music player', 'Ririko DiscordService');
-    this.client.musicPlayer = await this.musicService.createPlayer();
+    this.client.musicPlayer = await this.musicService.getPlayer();
     Logger.log('Creating giveaways manager', 'Ririko DiscordService');
     this.client.giveawaysManager = this.giveawaysService.register(this.client);
     return this.client;

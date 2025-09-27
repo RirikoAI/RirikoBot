@@ -59,7 +59,7 @@ export default class RewindCommand extends Command implements CommandInterface {
   }
 
   async rewind(time, message): Promise<void> {
-    const queue = this.player.getQueue(message);
+    const queue = await this.player.getQueue(message);
     if (!queue)
       return message.channel.send(`There is nothing in the queue right now!`);
 

@@ -280,17 +280,15 @@ export default class PlaylistCommand
     }
 
     await interaction.reply({ content: 'Adding music... 🎧' });
-    const searchResult = await this.services.musicService.search({
-      query: trackName,
-    });
+    const searchResult = await this.player.search(trackName);
 
-    if (!searchResult?.name) {
+    if (!searchResult[0].name) {
       return this.handleError(interaction, 'Track not found! ❌');
     }
 
     // check if the track is already in the playlist
     const existingTrack = playlist.tracks.find(
-      (m) => m.name === searchResult.name,
+      (m) => m.name === searchResult[0].name,
     );
     if (existingTrack) {
       return interaction.editReply({
@@ -299,13 +297,13 @@ export default class PlaylistCommand
     }
 
     await this.db.trackRepository.insert({
-      name: searchResult.name,
-      url: searchResult.url,
+      name: searchResult[0].name,
+      url: searchResult[0].url,
       playlist,
     });
 
     return interaction.editReply({
-      content: `\`${searchResult.name}\` added to the playlist! 🎧`,
+      content: `\`${searchResult[0].name}\` added to the playlist! 🎧`,
     });
   }
 

@@ -25,7 +25,7 @@ export default class FilterCommand extends Command implements CommandInterface {
 
   async loadFilters(interaction: DiscordInteraction | DiscordMessage) {
     try {
-      const queue = this.player?.getQueue(interaction?.guild?.id);
+      const queue = await this.player?.getQueue(interaction?.guild?.id);
       if (!queue || !queue?.playing) {
         await interaction.reply({
           content: 'No music is currently playing.',

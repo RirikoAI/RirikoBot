@@ -1,13 +1,13 @@
 import { Client, GatewayIntentBits, Partials, REST } from 'discord.js';
-import DisTube from 'distube';
 import { GiveawaysManager } from 'discord-giveaways';
+import { MusicAdapterInterface } from '#music/music.adapter.interface';
 
 /**
  * Discord Client
  * @author Earnest Angel (https://angel.net.my)
  */
 export class DiscordClient extends Client {
-  musicPlayer: DisTube;
+  musicPlayer: MusicAdapterInterface;
   giveawaysManager: GiveawaysManager;
   restClient: REST;
 

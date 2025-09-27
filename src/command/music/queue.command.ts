@@ -47,7 +47,7 @@ export default class QueueCommand extends Command implements CommandInterface {
 
   async run(interaction: DiscordInteraction): Promise<void> {
     try {
-      const queue = this.player.getQueue(interaction.guild.id);
+      const queue = await this.player.getQueue(interaction.guild.id);
       if (!queue || !queue.playing) {
         return this.replyWithEphemeral(
           interaction,

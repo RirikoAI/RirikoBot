@@ -11,10 +11,10 @@ import {
 } from '#command/command.types';
 import { CommandFeatures } from '#command/command.features';
 import { Pages } from '#util/features/pagination-feature.types';
-import DisTube from 'distube';
 import { DatabaseService } from '#database/database.service';
 import { EconomyService } from '#economy/economy.service';
 import { DiscordPermissions } from '#util/features/permissions.util';
+import { MusicAdapterInterface } from '#music/music.adapter.interface';
 
 export type CommandConstructor = new (services: SharedServices) => Command;
 
@@ -182,7 +182,7 @@ export class Command extends CommandFeatures {
    * Serves as a shortcut to the DisTube player from the MusicService
    * @see MusicService
    */
-  player: DisTube;
+  player: MusicAdapterInterface;
 
   /**
    * Serves as a shortcut to the EconomyService
