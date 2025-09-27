@@ -5,25 +5,25 @@ export interface MusicAdapterInterface {
   resume(guildId: string): Promise<void>;
   stop(guildId: string): Promise<void>;
   skip(guildId: string): Promise<void>;
-  
+
   // Volume controls
   setVolume(guildId: string, volume: number): Promise<void>;
   getVolume(guildId: string): Promise<number>;
   mute(guildId: string): Promise<void>;
   unmute(guildId: string): Promise<void>;
-  
+
   // Queue management
   getQueue(guildId: string): Promise<any | null>;
   setRepeatMode(guildId: string, mode: number): Promise<void>;
   getRepeatMode(guildId: string): Promise<number>;
-  
+
   // Search functionality
   search(params: any): Promise<SearchResult[]>;
-  
+
   // Event handling
   on(event: string, handler: Function): void;
   off(event: string, handler: Function): void;
-  
+
   voices: any;
   createPlaylist: any;
 }

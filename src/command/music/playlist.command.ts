@@ -281,7 +281,7 @@ export default class PlaylistCommand
 
     await interaction.reply({ content: 'Adding music... 🎧' });
     const searchResult = await this.player.search(trackName);
-    
+
     if (!searchResult[0].name) {
       return this.handleError(interaction, 'Track not found! ❌');
     }
