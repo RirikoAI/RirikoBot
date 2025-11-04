@@ -93,7 +93,7 @@
     "songlyrics": "^2.4.8",
     "sqlite3": "^5.1.7",
     "stackblur-canvas": "^2.7.0",
-    "typeorm": "^0.3.22",
+    "typeorm": "^0.3.26",
     "undici": "^7.16.0",
     "youtubei.js": "^14.0.0"
   },
