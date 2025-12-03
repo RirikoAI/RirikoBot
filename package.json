@@ -63,7 +63,7 @@
     "@nestjs/platform-express": "^10.4.17",
     "@nestjs/schedule": "^4.1.2",
     "@nestjs/swagger": "^8.1.1",
-    "@nestjs/typeorm": "^10.0.2",
+    "@nestjs/typeorm": "^11.0.0",
     "anime-wallpaper": "^3.2.2",
     "asdfjkl": "^0.0.7",
     "axios": "^1.9.0",
