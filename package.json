@@ -75,7 +75,7 @@
     "cross-env": "^7.0.3",
     "discord-giveaways": "^6.0.1",
     "discord.js": "^14.19.3",
-    "distube": "^5.0.7",
+    "distube": "^5.2.2",
     "dotenv": "^16.5.0",
     "genius-lyrics": "^4.4.7",
     "lavashark": "^2.3.0",
@@ -94,8 +94,8 @@
     "sqlite3": "^5.1.7",
     "stackblur-canvas": "^2.7.0",
     "typeorm": "^0.3.22",
-    "undici": "^7.16.0",
-    "youtubei.js": "^14.0.0"
+    "undici": "^7.18.2",
+    "youtubei.js": "^15.0.0"
   },
   "devDependencies": {
     "@golevelup/ts-jest": "^0.6.2",
