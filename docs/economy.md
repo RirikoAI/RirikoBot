@@ -30,6 +30,9 @@ export enum EconomyEventType {
   CARD_SOLD = 'CARD_SOLD',
   DAILY_REWARD = 'DAILY_REWARD',
   ACHIEVEMENT_UNLOCKED = 'ACHIEVEMENT_UNLOCKED',
+  ACHIEVEMENT_CLAIMED = 'ACHIEVEMENT_CLAIMED',
+  SHOP_PURCHASE = 'SHOP_PURCHASE',
+  CONSUMABLE_USED = 'CONSUMABLE_USED',
 }
 ```
 
@@ -65,7 +68,7 @@ export interface EconomyTransactionRecord {
   transactionId: string;
   userId: string;
   guildId?: string;
-  type: 'TRANSFER' | 'DEPOSIT' | 'WITHDRAW' | 'DAILY' | 'GAMBLE' | 'SHOP_BUY' | 'MARKET_FEE' | 'TCG_REWARD';
+  type: 'TRANSFER' | 'DEPOSIT' | 'WITHDRAW' | 'DAILY' | 'GAMBLE' | 'SHOP_BUY' | 'MARKET_FEE' | 'TCG_REWARD' | 'ACHIEVEMENT_REWARD';
   amount: bigint;
   currency: 'CREDITS' | 'GEMS';
   balanceBefore: bigint;
@@ -116,3 +119,16 @@ Rendered dynamically via `@napi-rs/canvas`:
 - Wallet Credits & Bank Balance.
 - Equipped Waifu TCG card thumbnail and serial number.
 - Custom Profile Background (`/profile background <url>`): Remote images are fetched, DNS/SSRF validated, scanned for dimensions (1200x400 px limit), and cached locally to eliminate dead image URLs.
+
+---
+
+## 7. Item Shop Currency Sinks & Consumable Control
+
+### 7.1. Shop Currency Sinks
+- The basic town shop (`/shop buy`) acts as a primary deflationary currency sink, removing credits from the economy.
+- Only entry-level Common/Uncommon items and minor potions are sold in the shop. High-tier items must be earned through gameplay (dungeons, raids, quests, achievements), preventing pay-to-win inflation.
+
+### 7.2. Anti-Abuse Stamina & Energy Potion Controls
+- Energy restores sold in the shop are hard-capped at **1 minor candy per user per day**.
+- All stamina potion usage is tracked in `player_energy.daily_energy_pots_used` with a hard ceiling (default max 3/day).
+- Consuming stamina pots cannot be automated or looped via bots to bypass stamina limits.

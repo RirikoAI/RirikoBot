@@ -33,6 +33,7 @@ For any significant task or feature implementation:
 ---
 
 ## 4. Git & Commit Guidelines
+- **Main Development Branch**: `develop/2.0.0` is our main development branch for the entire 2.0.0 development lifecycle. All feature branches, subsystem PRs, and architectural docs must branch from and target `develop/2.0.0`.
 - Use conventional commits:
   - `feat(tcg): implement 8-tier card drop generator`
   - `fix(music): clamp volume requests to 150%`

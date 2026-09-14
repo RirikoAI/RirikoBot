@@ -79,24 +79,32 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 - `free_games`: Free promotional games registry (`id` String PK, `provider` [EPIC, STEAM, GOG], `title`, `store_url`, `thumbnail_url`, `start_date`, `end_date`).
 - `free_game_announcements`: Recorded guild announcements preventing re-announcement (`game_id`, `guild_id`, `channel_id`, `message_id`, `announced_at`).
 
-### 2.12. Waifu Trading Card Game (Flagship System)
+### 2.12. Waifu Trading Card Game & Gamification (Flagship Subsystem)
 - `waifu_sources`: Ingestion sources (`id` String PK, `name`, `base_url`, `attribution_text`, `is_active`).
 - `waifu_assets`: Ingested & hashed anime character images (`id` UUID PK, `source_id`, `source_image_id`, `character_name`, `anime_title`, `image_hash` UNIQUE, `local_storage_path`, `discord_cdn_url`, `is_deleted_by_request`, `tags` JSON, `created_at`).
 - `waifu_cards`: Collectible card definitions (`id` UUID PK, `asset_id`, `name`, `rarity` [COMMON, UNCOMMON, RARE, SUPER_RARE, ULTRA_RARE, SECRET_RARE, SIR, MYTHIC], `element` [FIRE, WATER, EARTH, LIGHTNING, ICE, LIGHT, SHADOW], `attack` Int, `defense` Int, `speed` Int, `health` Int, `crit_rate` Float, `skill_name`, `skill_description`, `passive_name`, `passive_description`, `collection_number` Int, `is_active`).
 - `user_cards`: Instances of cards owned by players (`id` UUID PK, `user_id`, `card_id`, `serial_number` Int, `level` Int, `exp` Int, `state` [IDLE, EQUIPPED, IN_TRADE, IN_MARKET], `obtained_at`).
+- `game_items`: Master catalog of equipments, accessories, and consumables (`id` UUID PK, `code` UNIQUE, `name`, `description`, `type` [EQUIPMENT, ACCESSORY, CONSUMABLE], `subtype` [WEAPON, ARMOR, RELIC, RING, AMULET, TALISMAN, HP_POTION, MANA_POTION, ENERGY_RESTORE], `rarity` [COMMON, UNCOMMON, RARE, SUPER_RARE, ULTRA_RARE, SECRET_RARE, SIR, MYTHIC], `base_stats` JSON, `battle_perks` JSON, `consumable_effect` JSON, `is_shop_buyable` Boolean, `shop_price` BigInt, `max_daily_purchases` Int, `is_tradeable` Boolean, `created_at`).
+- `user_inventory_items`: Item instances owned by players (`id` UUID PK, `user_id`, `item_id`, `quantity` Int, `enhancement_level` Int, `equipped_to_card_id` UUID Nullable, `slot` [WEAPON, ARMOR, RELIC, RING, AMULET, TALISMAN, NONE], `state` [IDLE, EQUIPPED, IN_TRADE, IN_MARKET], `obtained_from` [SHOP, BATTLE, DUNGEON, BOSS, QUEST, ACHIEVEMENT, TRADE], `created_at`, `updated_at`).
+- `player_energy`: Player stamina pool & lifecycle (`user_id` Snowflake PK, `current_energy` Int, `max_energy` Int, `bonus_energy` Int, `daily_energy_pots_used` Int, `last_replenished_at` Timestamp, `last_reset_date` Date, `updated_at` Timestamp).
+- `game_achievements`: Master achievement specifications (`id` UUID PK, `code` UNIQUE, `title`, `description`, `category` [COLLECTOR, COMBATANT, TYCOON, BLACKSMITH, DEVOTION, GUILD_HERO], `tier` [BRONZE, SILVER, GOLD, PLATINUM, MYTHIC], `requirement_type` String, `requirement_target` Int, `reward_xp` Int, `reward_credits` BigInt, `reward_card_id` UUID Nullable, `reward_item_id` UUID Nullable, `reward_consumables` JSON, `reward_title` String, `badge_icon` String, `is_hidden` Boolean, `created_at`).
+- `user_achievements`: User progress and unlock claims (`id` UUID PK, `user_id`, `achievement_id`, `progress` Int, `is_unlocked` Boolean, `is_claimed` Boolean, `unlocked_at` Timestamp, `claimed_at` Timestamp).
+- `dungeon_seasons`: Seasonal dungeon instances (`id` String PK [e.g. 'TUTORIAL', 'S1', 'S2', 'S3'], `name`, `description`, `theme_element` [FIRE, WATER, EARTH, LIGHTNING, ICE, LIGHT, SHADOW, ALL], `seasonal_affixes` JSON, `scaling_model` [LINEAR, POLYNOMIAL, EXPONENTIAL, HYBRID], `scaling_params` JSON, `is_tutorial` Boolean, `is_active` Boolean, `starts_at` Timestamp, `ends_at` Timestamp, `created_at` Timestamp).
+- `dungeon_floors`: Floor stages within a season (`id` UUID PK, `season_id` String FK references `dungeon_seasons(id)`, `floor_number` Int, `name`, `energy_cost` Int, `min_player_level` Int, `enemy_lineup` JSON, `floor_affixes` JSON, `is_boss_floor` Boolean, `first_clear_rewards` JSON, `repeat_rewards_table` JSON, `created_at` Timestamp).
+- `user_dungeon_progress`: Player clearance records per season (`id` UUID PK, `user_id` Snowflake FK references `users(id)`, `season_id` String FK references `dungeon_seasons(id)`, `highest_cleared_floor` Int, `attempts_count` Int, `clear_count` Int, `first_cleared_at` Timestamp Nullable, `last_attempt_at` Timestamp, `created_at` Timestamp, `updated_at` Timestamp, UNIQUE(`user_id`, `season_id`)).
+- `tcg_system_configs`: Administrative gameplay parameters (`key` String PK, `value` JSON, `updated_by` Snowflake, `updated_at` Timestamp).
 - `card_trades`: Atomic P2P two-party trade proposals (`id` UUID PK, `sender_user_id`, `receiver_user_id`, `offered_card_ids` JSON, `requested_card_ids` JSON, `offered_credits` BigInt, `requested_credits` BigInt, `status` [PENDING, ACCEPTED, REJECTED, CANCELLED], `created_at`, `resolved_at`).
 - `market_listings`: Community player marketplace listings (`id` UUID PK, `seller_user_id`, `user_card_id`, `price` BigInt, `tax_paid` BigInt, `status` [ACTIVE, SOLD, CANCELLED, EXPIRED], `created_at`, `expires_at`).
 - `waifu_guilds`: In-game player guilds (`id` UUID PK, `name` UNIQUE, `leader_user_id`, `level` Int, `guild_xp` BigInt, `guild_bank` BigInt, `created_at`).
 - `waifu_guild_members`: Members of Waifu Guilds (`guild_id`, `user_id`, `rank` [LEADER, OFFICER, MEMBER], `contribution_xp` BigInt, `joined_at`).
 - `quests`: Daily and weekly quest templates (`id` UUID PK, `title`, `description`, `reward_xp` Int, `reward_credits` BigInt, `reward_card_id`, `target_count` Int, `type`).
-- `dungeons`: PvE expedition dungeons (`id` UUID PK, `name`, `difficulty_tier`, `min_level`, `energy_cost`, `rewards_table` JSON).
 - `bosses`: Server and guild cooperative raid bosses (`id` UUID PK, `name`, `total_hp` BigInt, `current_hp` BigInt, `element`, `rewards_table` JSON, `starts_at`, `ends_at`).
 - `boss_runs`: Player attacks on raid bosses (`id` UUID PK, `boss_id`, `user_id`, `damage_dealt` BigInt, `cards_used` JSON, `performed_at`).
 
 ### 2.13. Interactive Mini-Games
 - `mini_games`: Registered games catalog (`id` String PK, `name`, `min_players`, `max_players`, `allow_wagers`, `cooldown_seconds`).
 - `game_sessions`: Active game state instances (`id` UUID PK, `game_id`, `guild_id`, `channel_id`, `host_user_id`, `opponent_user_id`, `wager_amount` BigInt, `state` JSON, `status` [WAITING, IN_PROGRESS, COMPLETED, TIMED_OUT], `winner_user_id`, `created_at`).
-- `game_statistics`: Per-user game statistics (`user_id`, `game_id`, `wins` Int, `losses` Int, `ties` Int, `total_wagered` BigInt, `net_profit` BigInt).
+- `game_statistics`: Per-user game statistics (`user_id`, `game_id`, `wins` Int, `losses` Int, `ties` Int, `total_wagered` BigInt, `net_profit` BigInt).\
 
 ### 2.14. Server Utilities & Scheduled Reminders
 - `reaction_roles`: Message-to-role bindings (`id` UUID PK, `guild_id`, `channel_id`, `message_id`, `emoji_or_component_id`, `role_id`).
@@ -109,11 +117,16 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 ---
 
 ## 3. Indexing & Transaction Integrity Rules
-1. **Foreign Key Enforcement**: In SQLite, every connection explicitly executes `PRAGMA foreign_keys = ON;`.
-2. **ACID Transactions**: Balances, card trading, market purchases, and giveaway completions are strictly executed within Drizzle transactions (`db.transaction(...)`).
+1. **Foreign Key Enforcement**: In SQLite, every connection explicitly executes `PRAGMA foreign_keys = ON;`.\
+2. **ACID Transactions**: Balances, card trading, market purchases, equipment enhancements, and giveaway completions are strictly executed within Drizzle transactions (`db.transaction(...)`).
 3. **Compound Indexes**: Essential for high query throughput:
    - `moderation_cases(guild_id, case_number)`
    - `economy_transactions(user_id, created_at DESC)`
    - `ai_messages(conversation_id, created_at ASC)`
    - `stream_announcements(idempotency_key)`
    - `user_cards(user_id, state)`
+   - `user_inventory_items(user_id, state)`
+   - `user_achievements(user_id, is_claimed)`
+   - `game_items(type, rarity)`
+   - `dungeon_floors(season_id, floor_number)`
+   - `user_dungeon_progress(user_id, season_id)`

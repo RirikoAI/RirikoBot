@@ -42,7 +42,22 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 7. **Image Generation**: Provider selector, daily user quota limits, style presets.
 8. **Economy & Banking**: Currency name, daily reward base amount, bank interest rates, item shop manager.
 9. **XP & Ranking**: XP rate multipliers, voice XP toggles, level-up announcement channel.
-10. **Waifu TCG**: Drop channel picker, drop message frequency, rarity weight sliders, marketplace tax rate.
+10. **Waifu TCG & Gamification Settings**:
+    - **Card Drop Management**: Drop channel selector, message frequency slider (50–200 messages), active hours timepicker, claim window timer.
+    - **Rarity & Market Controls**: Drop weight fine-tuning, marketplace tax rate slider (1%–20%), listing expiration duration.
+    - **Dungeon Season & Tower Floor Manager**:
+      - **Tutorial Configuration**: Enable/disable tutorial gate, configure introductory starter rewards.
+      - **Season Lifecycle Editor**: Create new seasons (S1, S2, S3...), set active dates, assign theme elements (Fire, Ice, Light, Shadow, etc.), and customize environmental affixes.
+      - **Interactive Difficulty Curve Visualizer**: Real-time chart displaying enemy HP/ATK/DEF trajectories across floors (F1–F50+) based on selected model (`Linear`, `Polynomial`, `Exponential`, `Hybrid`) and growth rate parameter $r$ (0.03 to 0.25).
+      - **Boss Enrage & Shield Layer Configurator**: Set turn-count enrage limits, multi-layer elemental shield requirements, and first-clear vs repeat loot drop tables.
+    - **Energy & Stamina Governance**:
+      - Numerical input for **Global Energy Cap** (100–1000, default 300).
+      - Slider for **Base Energy** (50–200, default 100) and **Energy Scaling Per Level** (1–5).
+      - Daily Consumable Energy Restore Limit slider (1–10/day, default 3).
+      - Daily replenishment schedule cron string (default `'0 0 * * *'`).
+    - **Role Permissions**: Role selector for **TCG Manager Role** authorized to adjust game rules and run `/tcg-admin`.
+    - **Shop Catalog Manager**: Visual catalog editor to manage basic shop equipment, accessories, potions, and daily purchase quotas.
+    - **Achievement Manager**: Live inspector for achievement completion telemetry, active reward tables, and toggleable seasonal achievements.
 11. **Games**: Enable/disable specific mini-games, wager limits, cooldown sliders.
 12. **Giveaways**: Active giveaway list, winner reroll buttons, historical log.
 13. **Reaction Roles**: Visual message builder and role mapping manager.
