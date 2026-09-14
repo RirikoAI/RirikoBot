@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 61,
+  "revision": 69,
   "policy": {
     "pointScale": [
       1,
@@ -590,14 +590,18 @@
       ]
     },
     {
-      "status": "in-progress",
+      "status": "done",
       "estimate": 13,
       "estimateRationale": "Specify architecture, developer workflows and command contracts: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
       "groomedIn": "GR-004",
       "priority": "P1",
       "owner": "coordinator",
-      "handoff": ".workboard/handoffs/RIR-801/001-start.md",
-      "validation": [],
+      "handoff": ".workboard/handoffs/RIR-801/006-completion.md",
+      "validation": [
+        "12 documents reviewed against source and Gemini; 187 relative links valid",
+        "Requirements 91 sections/35 criteria valid; diff check passed",
+        "119 unit tests passed in one-worker full suite; live validation not claimed"
+      ],
       "id": "RIR-801",
       "type": "task",
       "title": "Specify architecture, developer workflows and command contracts",
@@ -1007,8 +1011,8 @@
         "docs/adr/ADR-001-runtime-and-monorepo-toolchain.md",
         "docs/adr/ADR-013-configuration-permissions-and-concurrency.md"
       ],
-      "status": "assigned",
-      "handoff": null
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-801/003-architecture-return.md"
     },
     {
       "id": "A-006",
@@ -1020,8 +1024,8 @@
         "docs/modules.md",
         "docs/adr/ADR-002-discord-framework-and-interaction-routing.md"
       ],
-      "status": "assigned",
-      "handoff": null
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-801/004-discord-return.md"
     },
     {
       "id": "A-007",
@@ -1033,8 +1037,8 @@
         "docs/contributing.md",
         "docs/work-management.md"
       ],
-      "status": "assigned",
-      "handoff": null
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-801/005-developer-return.md"
     }
   ],
   "batches": [
@@ -1520,6 +1524,62 @@
       "actor": "coordinator",
       "action": "assign",
       "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-007\",\"ticket\":\"RIR-801\",\"agent\":\"developer-docs\",\"scope\":\"Deepen reproducible developer/operator extension workflows and contribution/delivery/handoff recovery, grounded in actual CLI and protocol; no other files\",\"paths\":[\"docs/development.md\",\"docs/contributing.md\",\"docs/work-management.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 62,
+      "at": "2026-09-14T17:26:36.811Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-007\",\"handoff\":\".workboard/handoffs/RIR-801/005-developer-return.md\"}"
+    },
+    {
+      "id": 63,
+      "at": "2026-09-14T17:26:37.407Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-007\"}"
+    },
+    {
+      "id": 64,
+      "at": "2026-09-14T17:27:10.620Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-005\",\"handoff\":\".workboard/handoffs/RIR-801/003-architecture-return.md\"}"
+    },
+    {
+      "id": 65,
+      "at": "2026-09-14T17:27:11.214Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-005\"}"
+    },
+    {
+      "id": 66,
+      "at": "2026-09-14T17:27:46.991Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-006\",\"handoff\":\".workboard/handoffs/RIR-801/004-discord-return.md\"}"
+    },
+    {
+      "id": 67,
+      "at": "2026-09-14T17:27:47.573Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-006\"}"
+    },
+    {
+      "id": 68,
+      "at": "2026-09-14T17:28:36.119Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-801\",\"status\":\"review\",\"reason\":\"All twelve source-reviewed documents complete; all specialist returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-801/006-completion.md\",\"validation\":[\"12 documents reviewed against source and Gemini; 187 relative links valid\",\"Requirements 91 sections/35 criteria valid; diff check passed\",\"119 unit tests passed in one-worker full suite; live validation not claimed\"]}"
+    },
+    {
+      "id": 69,
+      "at": "2026-09-14T17:28:36.712Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-801\",\"status\":\"done\",\"reason\":\"All twelve source-reviewed documents complete; all specialist returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-801/006-completion.md\",\"validation\":[\"12 documents reviewed against source and Gemini; 187 relative links valid\",\"Requirements 91 sections/35 criteria valid; diff check passed\",\"119 unit tests passed in one-worker full suite; live validation not claimed\"]}"
     }
   ]
 }

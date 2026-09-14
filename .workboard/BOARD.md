@@ -1,19 +1,13 @@
 # Ririko work board
 
-Generated from state.json · revision 61 · execution limit **1**.
+Generated from state.json · revision 69 · execution limit **1**.
 
-**Current work:** RIR-801 — Specify architecture, developer workflows and command contracts (in-progress, 13 points)
+**Current work:** No occupied ticket.
 **Delivery:** BATCH-003 / RIR-800 / `feat/RIR-800-documentation-depth` → `develop/2.0.0-astra` (open)
 
 Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.
 
 **Approved stack:** parent BATCH-002 at `a04753a473c8a807892848052cc248cff3695805`, decision D-003. Run `pnpm board pr-plan` to resolve the immediate PR target; never assume the integration target excludes parent changes.
-
-## in-progress
-
-| ID | Type | Outcome | Points | Parent | Requires | Blocks | Delivery scope |
-|---|---|---|---:|---|---|---|---|
-| RIR-801 | task | Specify architecture, developer workflows and command contracts | 13 | RIR-800 | RIR-110 | RIR-802 | RIR-800 |
 
 ## ready
 
@@ -58,6 +52,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 |---|---|---|---:|---|---|---|---|
 | RIR-001 | chore | Establish work board, agent handoffs and safe Git delivery | 8 | RIR-100 | — | RIR-003, RIR-210, RIR-211, RIR-310, RIR-410, RIR-510, RIR-610, RIR-710, RIR-004, RIR-110 | RIR-001 |
 | RIR-110 | story | Trace release reviews to the blueprint and exact branch changes | 13 | RIR-100 | RIR-001 | RIR-005, RIR-800, RIR-801, RIR-808 | RIR-110 |
+| RIR-801 | task | Specify architecture, developer workflows and command contracts | 13 | RIR-800 | RIR-110 | RIR-802 | RIR-800 |
 | RIR-808 | task | Support fresh stack consent after a published parent closes | 5 | RIR-800 | RIR-110 | — | RIR-800 |
 
 ## Agent assignments
@@ -68,13 +63,21 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | A-002 | RIR-110 | delivery-guard | accepted | Implement and test explicit approved-stack resolution and Git guards against the coordinator types contract. Own git.ts and git-store.test.ts only; no board or Git publication mutations; return exact evidence. |
 | A-003 | RIR-110 | delivery-guard | accepted | Finish safe deferred-parent publication from the current child checkpoint: separate parent approval/head/base/scope, no worktree switch, no mixing or bypass of shared board. Own git.ts and git-store.test.ts only; return tested evidence. |
 | A-004 | RIR-808 | delivery-guard | accepted | Add a real Git/store regression for a fresh kind=stack decision after an existing parent PR is recorded and closed; retain exact published refs and reject use as parent publication. Own only git-store.test.ts; return evidence, no board/Git workspace mutations. |
-| A-005 | RIR-801 | architecture-docs | assigned | Deepen system topology, request/state/security/config contracts and concrete decision tradeoffs against actual source and pinned Gemini; no other files |
-| A-006 | RIR-801 | discord-docs | assigned | Deepen actual and planned command/help/module contracts, compatibility, lifecycle, failure and acceptance scenarios beyond Gemini; no other files |
-| A-007 | RIR-801 | developer-docs | assigned | Deepen reproducible developer/operator extension workflows and contribution/delivery/handoff recovery, grounded in actual CLI and protocol; no other files |
+| A-005 | RIR-801 | architecture-docs | accepted | Deepen system topology, request/state/security/config contracts and concrete decision tradeoffs against actual source and pinned Gemini; no other files |
+| A-006 | RIR-801 | discord-docs | accepted | Deepen actual and planned command/help/module contracts, compatibility, lifecycle, failure and acceptance scenarios beyond Gemini; no other files |
+| A-007 | RIR-801 | developer-docs | accepted | Deepen reproducible developer/operator extension workflows and contribution/delivery/handoff recovery, grounded in actual CLI and protocol; no other files |
 
 ## Current handoffs
 
-- RIR-801: [handoff](handoffs/RIR-801/001-start.md)
+- RIR-800: [handoff](handoffs/RIR-800/001-start.md)
+- RIR-801: [handoff](handoffs/RIR-801/006-completion.md)
+- RIR-802: [handoff](handoffs/RIR-802/001-start.md)
+- RIR-803: [handoff](handoffs/RIR-803/001-start.md)
+- RIR-804: [handoff](handoffs/RIR-804/001-start.md)
+- RIR-805: [handoff](handoffs/RIR-805/001-start.md)
+- RIR-806: [handoff](handoffs/RIR-806/001-start.md)
+- RIR-807: [handoff](handoffs/RIR-807/001-start.md)
+- RIR-808: [handoff](handoffs/RIR-808/002-completion.md)
 
 ## Grooming groups
 

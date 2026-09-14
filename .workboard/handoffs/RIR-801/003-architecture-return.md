@@ -1,0 +1,13 @@
+# RIR-801 / A-005 — architecture-docs return
+
+Agent architecture-docs; thirteen-point RIR-801 in RIR-800; branch feat/RIR-800-documentation-depth; starting HEAD 314cfec; integration anchor 801103c0e4c70eca6a380d7d1122b11234695bb1; immediate parent a04753a473c8a807892848052cc248cff3695805. Owned only architecture.md, architecture-summary.md, ADR-001 and ADR-013. All edits unstaged, worker finished; no runtime/board/Git/publication changes.
+
+Read instructions/state/handoffs, specialist guidance, relevant blueprint, requirements/inventory, complete owned local/Gemini counterparts at 1ba45ee3308b1bb5c7ecb4ea850c0009abb65d33 and actual core/config/settings/permissions, bot gateway/lifecycle/health, dispatcher, CLI, dialect repositories, package/TypeScript/CI files. Summary/ADR-013 have no exact Gemini counterpart; compared architecture configuration/topology coverage. Verified official Node exports, TypeScript references, pnpm workspaces and Discord permission sources.
+
+Architecture now has source-backed process/import/trust boundaries, three operation traces, field-specific policy resolution, revision/cache limitations, proposed transaction ownership, durable crash windows, lifecycle/resource limits and acceptance examples. Summary remains concise navigation but adds reasons, consequences and evidence. ADR-001 now explains alternatives, exports/build conditions, native constraints, ownership and reversal gates. ADR-013 now specifies schema/policy, adapter trust, worked revision race, stale browser intent gap, recovery, audit/failure and reconsideration criteria.
+
+Key decisions: discord package stays framework-neutral; CLI actor is trusted-local-operator identity, not verified Discord membership. True channel flags are not an allowlist. Repository CAS protects overlapping writes, not a future browser's displayed revision. Cache invalidation is not linearizable; SQLite has no enabled WAL; shutdown has no global deadline; health timeout does not cancel DB work. Essential module protection is not comprehensive command-policy recovery. These are documented gaps, not new implementation claims.
+
+Worker checks: 72 local links, zero missing; owned diff check and requirements91/35 passed; revision61 WIP1/1 confirmed. No runtime test duplication. Coordinator read actual four resulting files and reconciled the same limits into roadmap/dependencies. Central suite and complete corpus links will be recorded at ticket completion.
+
+Remaining implementation: caller precondition, policy recovery, stronger effect-time freshness, bounded drain, durable jobs and justified process separation. Accept A-005 after persistence, finish RIR-801 acceptance then serially start RIR-802. No next scope or publication authorized by this return.
