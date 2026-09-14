@@ -18,7 +18,7 @@
 ## 🎯 To Do (Groomed & Estimated)
 | ID | Type | Title | Pts | Epic / Parent | Requires |
 |---|---|---|---|---|---|
-| `STORY-012` | Story | `apps/cli` Scaffolding & `ririko doctor` Diagnostics | 5 | `EPIC-001` | `STORY-011` |
+| `EPIC-002` | Epic | Dual-Dialect Drizzle ORM & Data Access Layer | 21 | Self | `EPIC-001` |
 
 ---
 
@@ -37,6 +37,7 @@
 | `STORY-004` | Story | Complete Subsystem Documentation Catalog (16 Docs) | 5 | `EPIC-000` | [docs/](file:///Z:/Projects/ririko-v2-2026/docs/) |
 | `STORY-005` | Story | Scrum Kanban & Sub-Agent Knowledge Transfer System | 3 | `EPIC-000` | [TASK-0051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0051.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | `STORY-005` | [TASK-0051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0051.md) |
+| `EPIC-001` | Epic | Monorepo Workspace, Toolchain & Core Contracts | 13 | Self | [TASK-0122.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0122.md) |
 | `STORY-010` | Story | Workspace Configuration & Root Monorepo Tooling | 5 | `EPIC-001` | [TASK-0103.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0103.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | `STORY-010` | [TASK-0101.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | `STORY-010` | [TASK-0102.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0102.md) |
@@ -45,6 +46,9 @@
 | `TASK-0111` | Task | Zod Schema Environment Validation & Config Loader | 2 | `STORY-011` | [TASK-0111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0111.md) |
 | `TASK-0112` | Task | Standardized Error Hierarchy & Error Codes | 1 | `STORY-011` | [TASK-0112.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0112.md) |
 | `TASK-0113` | Task | Strongly-Typed Asynchronous EventBus & Lifecycle Hooks | 2 | `STORY-011` | [TASK-0113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0113.md) |
+| `STORY-012` | Story | `apps/cli` Scaffolding & `ririko doctor` Diagnostics | 5 | `EPIC-001` | [TASK-0122.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0122.md) |
+| `TASK-0121` | Task | CLI Subcommand Architecture, Global Options & Runner Harness | 2 | `STORY-012` | [TASK-0121.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0121.md) |
+| `TASK-0122` | Task | ririko doctor Comprehensive Diagnostics Engine | 3 | `STORY-012` | [TASK-0122.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0122.md) |
 
 ---
 
