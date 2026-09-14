@@ -29,3 +29,9 @@ Thumbs.db
 
 # Local
 .local/
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+temp-*/
+

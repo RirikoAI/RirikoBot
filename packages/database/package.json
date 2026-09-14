@@ -17,10 +17,16 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@ririko/core": "workspace:*"
+    "@ririko/core": "workspace:*",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-orm": "^0.45.2",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^22.13.9",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.10",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.2"
   }

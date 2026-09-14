@@ -1,12 +1,12 @@
 import { ErrorCode } from './codes.js';
 
 export interface RirikoErrorOptions {
-  code?: ErrorCode;
-  statusCode?: number;
-  userMessage?: string;
-  details?: unknown;
-  cause?: Error;
-  isOperational?: boolean;
+  code?: ErrorCode | undefined;
+  statusCode?: number | undefined;
+  userMessage?: string | undefined;
+  details?: unknown | undefined;
+  cause?: Error | undefined;
+  isOperational?: boolean | undefined;
 }
 
 /**
