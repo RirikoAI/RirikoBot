@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 8,
+  "revision": 10,
   "policy": {
     "pointScale": [
       1,
@@ -525,7 +525,18 @@
       "rationale": "Initial group estimates from audited general/guild and meme compatibility defects; revisit before scope expands."
     }
   ],
-  "decisions": [],
+  "decisions": [
+    {
+      "id": "D-001",
+      "kind": "defer-pr",
+      "reference": "User reply to the workflow question: Yes—defer this PR and allow one stacked improvement story. The prior message requested comparison before publication.",
+      "at": "2026-09-14T16:01:12.268Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-001"
+    }
+  ],
   "assignments": [
     {
       "id": "A-001",
@@ -547,7 +558,7 @@
       "branch": "chore/RIR-001-work-governance",
       "baseBranch": "develop/2.0.0-astra",
       "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
-      "status": "checkpoint",
+      "status": "closed",
       "tickets": [
         "RIR-001"
       ],
@@ -610,6 +621,20 @@
       "actor": "coordinator",
       "action": "checkpoint",
       "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-001\"}"
+    },
+    {
+      "id": 9,
+      "at": "2026-09-14T16:01:12.311Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-001\",\"kind\":\"defer-pr\",\"reference\":\"User reply to the workflow question: Yes—defer this PR and allow one stacked improvement story. The prior message requested comparison before publication.\",\"at\":\"2026-09-14T16:01:12.268Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-001\"}}"
+    },
+    {
+      "id": 10,
+      "at": "2026-09-14T16:01:12.635Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-001\",\"decision\":\"D-001\"}"
     }
   ]
 }

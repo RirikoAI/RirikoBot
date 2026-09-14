@@ -1,9 +1,9 @@
 # Ririko work board
 
-Generated from state.json · revision 8 · execution limit **1**.
+Generated from state.json · revision 10 · execution limit **1**.
 
 **Current work:** No occupied ticket.
-**Delivery:** BATCH-001 / RIR-001 / `chore/RIR-001-work-governance` → `develop/2.0.0-astra` (checkpoint)
+**Delivery:** No open batch.
 
 Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.
 
