@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 143,
+  "revision": 144,
   "policy": {
     "pointScale": [
       1,
@@ -974,6 +974,16 @@
       "toTicket": null,
       "disposition": null,
       "batchId": "BATCH-002"
+    },
+    {
+      "id": "D-004",
+      "kind": "pr-created",
+      "reference": "User replied yes to push RIR-800 head e09daed09d5b625095923a622789413d8281327b and create its PR into preserved RIR-110 a04753a473c8a807892848052cc248cff3695805. Independently verified https://github.com/RirikoAI/RirikoBot/pull/561 open with exact approved refs. Receipt: .workboard/handoffs/RIR-800/004-published.md. No merge, retarget or new scope.",
+      "at": "2026-09-14T19:11:37.743Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-003"
     }
   ],
   "assignments": [
@@ -2316,6 +2326,13 @@
       "actor": "coordinator",
       "action": "checkpoint",
       "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-003\"}"
+    },
+    {
+      "id": 144,
+      "at": "2026-09-14T19:11:37.743Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-004\",\"kind\":\"pr-created\",\"reference\":\"User replied yes to push RIR-800 head e09daed09d5b625095923a622789413d8281327b and create its PR into preserved RIR-110 a04753a473c8a807892848052cc248cff3695805. Independently verified https://github.com/RirikoAI/RirikoBot/pull/561 open with exact approved refs. Receipt: .workboard/handoffs/RIR-800/004-published.md. No merge, retarget or new scope.\",\"at\":\"2026-09-14T19:11:37.743Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-003\"}}"
     }
   ]
 }
