@@ -1,0 +1,7 @@
+# RIR-805 — coordinator credential decision review
+
+Coordinator eight points, branch feat/RIR-800-documentation-depth starting82df04e, parenta04753a/integration801103c unchanged. Read full local/Gemini ADR0111ba45ee, full relevantblueprint42–46/54, securityspecialist, actual config/logger/publicError/CLI and sourcecredentialsetup findings. Wrote ADR011only. Currentenvironment/redactionaccepted; vault/OAuthstorage unimplemented.
+
+Added explicitasset/threat/consumer authority, alternatives, processvsdynamicsecretclasses, writeonlymetadata, versionedAES256GCMrecord withrandom32bytekey/12bytenonce/16bytetag/AADscope, encoding/tamper/partialplaintext rejection, pendingreplacement/probe/active revision, credential vs encryptionrotation, singleflightrefresh/CASmigration/noncehistoryrestore limits, incidentmatrix, safelegacyimport/export/logging and actualacceptancegates. No credentialsreadorrotated; no runtimecode orcryptotest.
+
+Officialsourcesreviewed2026-09-14: Node24crypto https://nodejs.org/docs/latest-v24.x/api/crypto.html (movingdocs24.21 notdependencyupgrade); OWASPcryptographicstorage andsecretsmanagementguidance. Currentfinite logger cannotredactrawstrings; AppErrortrustedmessagecallerobligation explicit. SourceCLIprintsargs andplaintextConfigurationtokens verifiedwithoutvalues. Dashboardfirsthalf reviewed, noblockingfinding; sharedSettingsServiceCAS isnotdisplayedrevisionchecking, CLIlocalactor notOAuth. Awaitworkers/fullreadonlyreview, thenlinks/requirements/diff andlocalcheckpoint.

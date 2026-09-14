@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 105,
+  "revision": 117,
   "policy": {
     "pointScale": [
       1,
@@ -734,14 +734,16 @@
       ]
     },
     {
-      "status": "ready",
+      "status": "done",
       "estimate": 8,
       "estimateRationale": "Specify dashboard workflows, authorization and credential lifecycle: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
       "groomedIn": "GR-004",
       "priority": "P1",
-      "owner": null,
-      "handoff": ".workboard/handoffs/RIR-805/001-start.md",
-      "validation": [],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-805/006-completion.md",
+      "validation": [
+        "28 local paths valid; requirements91/35; diffcheck; full independent review; no runtime web claims"
+      ],
       "id": "RIR-805",
       "type": "task",
       "title": "Specify dashboard workflows, authorization and credential lifecycle",
@@ -1152,6 +1154,37 @@
       "paths": [],
       "status": "accepted",
       "handoff": ".workboard/handoffs/RIR-804/005-independent-review.md"
+    },
+    {
+      "id": "A-017",
+      "ticket": "RIR-805",
+      "agent": "developer-docs",
+      "scope": "Deepen dashboard main guide with all admin workflows and trustworthy current-versus-future contracts",
+      "paths": [
+        "docs/dashboard.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-805/004-dashboard-return.md"
+    },
+    {
+      "id": "A-018",
+      "ticket": "RIR-805",
+      "agent": "architecture-docs",
+      "scope": "Deepen web architecture ADR with alternatives, boundaries, authentication/cache/concurrency/rollout decisions",
+      "paths": [
+        "docs/adr/ADR-008-web-dashboard-architecture.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-805/003-web-architecture-return.md"
+    },
+    {
+      "id": "A-019",
+      "ticket": "RIR-805",
+      "agent": "discord-docs",
+      "scope": "Read-only independent dashboard/OAuth/secret lifecycle security and blueprint/Gemini completeness review",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-805/005-independent-review.md"
     }
   ],
   "batches": [
@@ -1945,6 +1978,90 @@
       "actor": "coordinator",
       "action": "move",
       "detail": "{\"action\":\"move\",\"ticket\":\"RIR-804\",\"status\":\"done\",\"reason\":\"Four expanded docs and numerical/transaction boundaries independently reviewed\",\"handoff\":\".workboard/handoffs/RIR-804/006-completion.md\",\"validation\":[\"Local links valid; requirements91/35; diffcheck; independent arithmetic and full breadth review; all runtime features remain proposed\"]}"
+    },
+    {
+      "id": 106,
+      "at": "2026-09-14T18:13:16.608Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-805\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 107,
+      "at": "2026-09-14T18:13:17.277Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-017\",\"ticket\":\"RIR-805\",\"agent\":\"developer-docs\",\"scope\":\"Deepen dashboard main guide with all admin workflows and trustworthy current-versus-future contracts\",\"paths\":[\"docs/dashboard.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 108,
+      "at": "2026-09-14T18:13:17.925Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-018\",\"ticket\":\"RIR-805\",\"agent\":\"architecture-docs\",\"scope\":\"Deepen web architecture ADR with alternatives, boundaries, authentication/cache/concurrency/rollout decisions\",\"paths\":[\"docs/adr/ADR-008-web-dashboard-architecture.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 109,
+      "at": "2026-09-14T18:13:18.578Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-019\",\"ticket\":\"RIR-805\",\"agent\":\"discord-docs\",\"scope\":\"Read-only independent dashboard/OAuth/secret lifecycle security and blueprint/Gemini completeness review\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 110,
+      "at": "2026-09-14T18:20:36.831Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-017\",\"handoff\":\".workboard/handoffs/RIR-805/004-dashboard-return.md\"}"
+    },
+    {
+      "id": 111,
+      "at": "2026-09-14T18:20:37.657Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-017\"}"
+    },
+    {
+      "id": 112,
+      "at": "2026-09-14T18:20:38.490Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-018\",\"handoff\":\".workboard/handoffs/RIR-805/003-web-architecture-return.md\"}"
+    },
+    {
+      "id": 113,
+      "at": "2026-09-14T18:20:39.260Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-018\"}"
+    },
+    {
+      "id": 114,
+      "at": "2026-09-14T18:20:40.003Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-019\",\"handoff\":\".workboard/handoffs/RIR-805/005-independent-review.md\"}"
+    },
+    {
+      "id": 115,
+      "at": "2026-09-14T18:20:40.774Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-019\"}"
+    },
+    {
+      "id": 116,
+      "at": "2026-09-14T18:20:41.539Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-805\",\"status\":\"review\",\"reason\":\"Three complete docs reviewed with independent authority/credential lifecycle signoff\",\"handoff\":\".workboard/handoffs/RIR-805/006-completion.md\",\"validation\":[\"28 local paths valid; requirements91/35; diffcheck; full independent review; no runtime web claims\"]}"
+    },
+    {
+      "id": 117,
+      "at": "2026-09-14T18:20:42.318Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-805\",\"status\":\"done\",\"reason\":\"Three complete docs reviewed with independent authority/credential lifecycle signoff\",\"handoff\":\".workboard/handoffs/RIR-805/006-completion.md\",\"validation\":[\"28 local paths valid; requirements91/35; diffcheck; full independent review; no runtime web claims\"]}"
     }
   ]
 }
