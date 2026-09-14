@@ -1,33 +1,68 @@
 # GEMINI.md — Ririko AI 2.0.0 Project Context & Agent Guidelines
+Based on the blueprint in [BLUEPRINT.md](file:///Z:/Projects/ririko-v2-2026/BLUEPRINT.md) and [docs/kanban/protocol.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/protocol.md)
 
 ## 1. Project Overview
 **Ririko AI 2.0.0** is the next-generation, production-grade overhaul of the Ririko Discord bot (originally version 1.4.0).
 - **Production Target Date**: 2026-08-14
-- **Core Philosophy**: Modernize the architecture, eliminate technical debt, enhance scalability, and add modern flagship features (Waifu TCG, Next.js 16 Web Dashboard, Multi-Provider AI with safe tool calling) while strictly preserving all existing functionality and user familiarity from 1.4.0.
+- **Core Philosophy**: Modernize the architecture, eliminate technical debt, enhance scalability, and implement modern flagship systems (Waifu TCG, Next.js 16 Web Dashboard, Multi-Provider AI with safe tool calling) while strictly preserving all existing functionality and user familiarity from 1.4.0.
 - **Reference Legacy Codebase**: `.local/RirikoBot` (strictly **READ-ONLY**, never modify).
 
 ---
 
-## 2. Absolute Engineering Rules
-1. **Understand Before Modifying**: Never rewrite or delete functionality based on surface impressions. Audit legacy behavior first.
-2. **Feature & Command Parity**: Preserve all 141 commands across all categories (with full Slash and Prefix command parity), 60 reaction animations, 11 meme generators, badge graphics, profile rank cards, AVC, reminders, and giveaways.
-3. **Zero Data Loss Migration**: Legacy SQLite databases from 1.4.0 must migrate safely and idempotently to 2.0 schemas (PostgreSQL in production, SQLite in development).
-4. **No Enterprise Bloat**: Do not introduce redundant abstraction layers or deep inheritance hierarchies. Follow the KISS principle (Keep It Simple, Stupid) with modular composition.
-5. **No Placeholders**: Never write stub functions or mock placeholders in place of real working business logic.
-6. **Strict Security**: Never store plaintext API keys or OAuth secrets in database tables. Use environment variables or AES-256-GCM encrypted credential vaults.
+## 2. Scrum Kanban Governance & Standing Operating Rules
+
+All agents and subagents are governed by the **Scrum Kanban Protocol** documented in [docs/kanban/protocol.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/protocol.md):
+
+### 2.1. Strict Work-In-Progress (WIP) Limit = 1
+- **Only EXACTLY ZERO or ONE ticket may be in `IN_PROGRESS` status on the entire board at any time.**
+- Multiple concurrent `IN_PROGRESS` tickets are strictly forbidden across all agents and subagents.
+
+### 2.2. Interruption & Task-Switching Protocol
+- If a new task or ticket needs to be started while an existing ticket is `IN_PROGRESS`:
+  1. **STOP IMMEDIATELY.** Do NOT start the new task.
+  2. **ASK THE USER** to decide the disposition of the current active ticket:
+     - **`PAUSED`**: The active ticket is put on hold with state preserved in `docs/kanban/handovers/<ticket-id>.md`.
+     - **`ABANDONED`**: The active ticket is permanently retired with documented reasons.
+  3. Only after the active ticket transitions to `PAUSED` or `ABANDONED` may the new ticket move to `IN_PROGRESS`.
+
+### 2.3. Fibonacci Estimation
+- All tickets (`Epic`, `Story`, `Task`, `Chore`, `Bug`) must be estimated in story points using the Fibonacci sequence:
+  $$\mathbf{1,\; 2,\; 3,\; 5,\; 8,\; 13,\; 21}$$
+- Tickets are groomed in batches grouped by Epic. No ticket enters `TODO` or `IN_PROGRESS` without an approved estimate.
+- Items estimated at 13+ points must be split into smaller Stories or Tasks.
+
+### 2.4. Sub-Agent & Cross-Session Knowledge Transfer
+- Every ticket transition (`PAUSED`, `REVIEW`, `DONE`, `ABANDONED`) requires updating:
+  - Canonical database: [docs/kanban/board.json](file:///Z:/Projects/ririko-v2-2026/docs/kanban/board.json)
+  - Visual board: [docs/kanban/BOARD.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/BOARD.md)
+  - Dedicated handover note: `docs/kanban/handovers/<ticket-id>.md` (summary, verification, gotchas, actionable next steps).
+
+### 2.5. Git Operations & PR Governance
+- **Base Integration Branch**: `develop/2.0.0`. All feature branches (`feat/<ticket-id>-<slug>`) target `develop/2.0.0`.
+- **Grouped Batches**: Commits and PR creations must correspond to a complete Story or Epic (except standalone chores or bugs).
+- **Anti-Runaway Session Boundary**: An agent session must NEVER silently complete multiple epics without user review checkpoints. When an Epic or Story completes, **STOP AND ASK THE USER** whether they want to create a Pull Request before proceeding.
 
 ---
 
-## 3. Technology Stack (2026 Production Baseline)
+## 3. Absolute Engineering Rules
+1. **Understand Before Modifying**: Never rewrite or delete functionality based on surface impressions. Audit legacy behavior first.
+2. **Feature & Command Parity**: Preserve all 141 commands across all categories (with full Slash and Prefix command parity), 60 reaction animations, 11 meme generators, badge graphics, profile rank cards, AVC, reminders, and giveaways.
+3. **Zero Data Loss Migration**: Legacy SQLite databases from 1.4.0 must migrate safely and idempotently to 2.0 schemas (PostgreSQL in production, SQLite in development).
+4. **No Enterprise Bloat (KISS)**: Do not introduce redundant microservices, message brokers, or deep inheritance hierarchies. Prefer modular composition, small services, and explicit types.
+5. **No Placeholders**: Never write stub functions or mock placeholders in place of real working business logic.
+6. **Strict Security**: Never store plaintext API keys or OAuth secrets in database tables. Use environment variables or AES-256-GCM encrypted credential vaults.
+7. **LLM Security Barrier**: The LLM is never the security boundary. Applications must mediate and enforce Discord permissions before executing any tool call.
+
+---
+
+## 4. Technology Stack (2026 Production Baseline)
 - **Runtime**: Node.js 22+ LTS / Node.js 24 LTS, ESM-first (`"type": "module"`).
 - **Language**: TypeScript 5.8+ / 6.x in strict mode (`strict: true`, `noImplicitAny: true`, `exactOptionalPropertyTypes: true`).
 - **Package Manager**: pnpm 10.x with pnpm workspaces.
-- **Database Layer**: Drizzle ORM with dual-dialect abstraction:
-  - Production: PostgreSQL (`postgres` / `drizzle-orm/node-postgres`)
-  - Development / Self-hosting: SQLite (`better-sqlite3` / `drizzle-orm/better-sqlite3`)
+- **Database Layer**: Drizzle ORM with dual-dialect abstraction (PostgreSQL in production, SQLite in development/self-hosting).
 - **Discord Framework**: Discord.js 14.x with REST API v10, Gateway v10, and modern Component Builders.
 - **Web Dashboard**: Next.js 16 (App Router), React 19, Tailwind CSS, Discord OAuth2 authentication.
-- **Audio Core**: Resilient audio extractor/player core (Discord Player 7 / Lavalink 4 adapter architecture).
+- **Audio Core**: Resilient multi-source extractor/player core (`@discordjs/voice`, with optional Lavalink 4 adapter).
 - **AI Engine**: Multi-provider adapter (Google Gemini, OpenAI, Ollama) with structured function tool calling and streaming.
 - **Graphics & Canvas**: `@napi-rs/canvas` (prebuilt Rust/Skia binaries, eliminating heavy system cairo/pango dependencies).
 - **Testing**: Vitest for unit & integration tests, Playwright for E2E web tests.
@@ -35,54 +70,27 @@
 
 ---
 
-## 4. Monorepo Structure
-```text
-ririko-v2-2026/
-├── apps/
-│   ├── bot/                # Discord bot Gateway client & lifecycle
-│   ├── web/                # Next.js 16 management dashboard & portal
-│   └── cli/                # Developer & admin CLI (ririko doctor, migrate, generate)
-├── packages/
-│   ├── core/               # Shared domain types, errors, config, event bus
-│   ├── database/           # Drizzle ORM schemas, relations, migrations, repositories
-│   ├── discord/            # Command dispatcher, interaction router, UI components
-│   ├── ai/                 # Multi-provider LLM engine, memory, safe tool calling
-│   ├── music/              # Audio player core, extractors, queue management
-│   └── services/           # Domain business logic (Economy, TCG, Moderation, etc.)
-├── docs/                   # Architecture, ADRs, migration guides, specifications
-├── .gemini/
-│   └── agents/             # Specialist agent definitions (18 agents)
-├── GEMINI.md               # This project guideline
-└── AGENTS.md               # Multi-agent coordination and responsibilities
-```
-
----
-
-## 5. Specialist Agents Directory
-When performing tasks in this repository, consult the specialized instructions in `.gemini/agents/`:
-- `legacy-auditor.md`: Auditing 1.4.0 legacy code and schemas.
-- `architecture.md`: Monorepo structure, package decoupling, and design patterns.
-- `discord.md`: Discord.js v14 interactions, slash/prefix command routing.
-- `database.md`: Drizzle ORM schemas, relations, and dual PostgreSQL/SQLite support.
-- `music.md`: Audio extractors, queues, and playback stability.
-- `ai.md`: Conversational memory, Gemini/OpenAI adapters, tool calling.
-- `moderation.md`: Warning escalations, auto-moderation rules, audit logging.
-- `image-generation.md`: Multi-backend AI image generation, meme synthesis, canvas cards.
-- `stream-platforms.md`: Twitch, YouTube Live, TikTok Live watcher with thumbnail caching.
-- `economy.md`: Double-entry transaction ledger, anti-spam XP, banking, shop.
-- `waifu-tcg.md`: Anime card ingestion, 8-tier rarity, combat, trading, and Waifu Guilds.
-- `games.md`: MiniGame interface, Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice.
-- `dashboard.md`: Next.js 16 web portal, Discord OAuth2, server settings.
-- `security.md`: Encryption at rest, input validation, permission gates, rate limiting.
-- `testing.md`: Vitest unit/integration tests, Discord mocks.
-- `devops.md`: Docker, Compose, CI/CD pipelines, health probes.
-- `code-reviewer.md`: TypeScript strictness, error handling, performance standards.
-- `migration.md`: Legacy SQLite to Drizzle PostgreSQL/SQLite migration pipeline.
-
----
-
-## 6. Execution Guidelines for Agents
-1. **Always maintain clickable file links** using github markdown links (`[path/file.ts](file:///path/file.ts)`).
-2. **Run verification commands** (`pnpm test`, `pnpm typecheck`, `pnpm lint`) after making changes.
-3. **Keep documentation in sync**: Any architectural changes must be reflected in `docs/architecture.md` or a new ADR in `docs/adr/`.
-4. **Preserve backward compatibility**: When updating database schemas, ensure existing legacy data fields are mapped without data loss.
+## 5. Complete Documentation Catalog (`docs/`)
+- [docs/kanban/protocol.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/protocol.md) — Scrum Kanban Governance & Knowledge Transfer Protocol.
+- [docs/kanban/BOARD.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/BOARD.md) — Live Scrum Kanban Board (WIP = 1).
+- [docs/kanban/board.json](file:///Z:/Projects/ririko-v2-2026/docs/kanban/board.json) — Machine-readable ticket registry.
+- [docs/architecture.md](file:///Z:/Projects/ririko-v2-2026/docs/architecture.md) — Monorepo topology, O(1) command router, dual-dialect DB, audio pipeline.
+- [docs/development.md](file:///Z:/Projects/ririko-v2-2026/docs/development.md) — Local setup, CLI commands (`ririko doctor`, `ririko generate:*`), engineering rules.
+- [docs/commands.md](file:///Z:/Projects/ririko-v2-2026/docs/commands.md) — Dual-dispatch slash & prefix pipeline, middleware chain, interactive help center.
+- [docs/modules.md](file:///Z:/Projects/ririko-v2-2026/docs/modules.md) — 20+ module catalog, autoroles, giveaways, auto-voice, mini-games, feature flags.
+- [docs/adapters.md](file:///Z:/Projects/ririko-v2-2026/docs/adapters.md) — Provider adapter architecture, capability discovery, fallback chains (AI, Images, Streams, Music, Games).
+- [docs/database.md](file:///Z:/Projects/ririko-v2-2026/docs/database.md) — 40+ table schema specifications, indexes, ACID transactions.
+- [docs/migrations.md](file:///Z:/Projects/ririko-v2-2026/docs/migrations.md) — 1.4.0 SQLite to 2.0.0 Drizzle migration runbook, CLI dry-run and verification.
+- [docs/testing.md](file:///Z:/Projects/ririko-v2-2026/docs/testing.md) — Testing standards, deterministic RNG seeds, quality gates (`pnpm test`, `typecheck`, `lint`).
+- [docs/deployment.md](file:///Z:/Projects/ririko-v2-2026/docs/deployment.md) — Docker multi-stage containerization, docker-compose.production.yml, `/health` and `/ready` probes.
+- [docs/dashboard.md](file:///Z:/Projects/ririko-v2-2026/docs/dashboard.md) — Next.js 16 App Router, React 19, Discord OAuth2, 20+ module management pages.
+- [docs/ai.md](file:///Z:/Projects/ririko-v2-2026/docs/ai.md) — Dedicated `#ririko-ai` channel, per-user isolated memory, `get_current_time()` tool, safe tool allowlist.
+- [docs/music.md](file:///Z:/Projects/ririko-v2-2026/docs/music.md) — Music 2.0 multi-source extractors (YouTube/Spotify/SoundCloud/Deezer), reactive UI without polling.
+- [docs/moderation.md](file:///Z:/Projects/ririko-v2-2026/docs/moderation.md) — Moderation cases, dynamic warning escalations, centralized permission verification, AutoMod.
+- [docs/economy.md](file:///Z:/Projects/ririko-v2-2026/docs/economy.md) — Event-driven economy, double-entry ledger, anti-spam protections, voice XP rules, banking.
+- [docs/waifu-tcg.md](file:///Z:/Projects/ririko-v2-2026/docs/waifu-tcg.md) — Flagship Waifu TCG: waifu.im ingestion, 8-tier rarity math, 7 elemental affinities (including Ice), combat, trading, player market, WaifuGuilds.
+- [docs/contributing.md](file:///Z:/Projects/ririko-v2-2026/docs/contributing.md) — Engineering guidelines, PR standards, conventional commits.
+- [docs/legacy-feature-inventory.md](file:///Z:/Projects/ririko-v2-2026/docs/legacy-feature-inventory.md) — Full audit of all 141 legacy commands and 17 entities.
+- [docs/dependency-evaluation.md](file:///Z:/Projects/ririko-v2-2026/docs/dependency-evaluation.md) — 2026 production dependency evaluations and selections.
+- [docs/implementation-roadmap.md](file:///Z:/Projects/ririko-v2-2026/docs/implementation-roadmap.md) — Gantt timeline and milestones for Phases 0 through 7.
+- [docs/adr/](file:///Z:/Projects/ririko-v2-2026/docs/adr/) — Architecture Decision Records (ADR-001 through ADR-012+).

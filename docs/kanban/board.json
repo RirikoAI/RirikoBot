@@ -1,0 +1,184 @@
+{
+  "$schema": "./protocol.md",
+  "wip_limit": 1,
+  "active_in_progress_ticket": null,
+  "epics": [
+    {
+      "id": "EPIC-000",
+      "title": "Planning, Audits, Architectural Specifications & Agent Design",
+      "points": 13,
+      "status": "DONE",
+      "requires": [],
+      "blocks": ["EPIC-001"],
+      "description": "Comprehensive specification of Ririko 2.0, legacy audit, 16 subsystem manuals, 18 agent designs, and Scrum Kanban protocol."
+    },
+    {
+      "id": "EPIC-001",
+      "title": "Monorepo Workspace, Toolchain & Core Contracts",
+      "points": 13,
+      "status": "TODO",
+      "requires": ["EPIC-000"],
+      "blocks": ["EPIC-002", "EPIC-003"],
+      "description": "pnpm workspaces, strict TypeScript configs, packages/core (Zod schemas, EventBus, Errors), and apps/cli (doctor, scaffolding)."
+    },
+    {
+      "id": "EPIC-002",
+      "title": "Dual-Dialect Drizzle ORM & Data Access Layer",
+      "points": 21,
+      "status": "BACKLOG",
+      "requires": ["EPIC-001"],
+      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-010"],
+      "description": "40+ tables normalized schemas for PostgreSQL and SQLite, ACID transaction helpers, and legacy migration CLI."
+    },
+    {
+      "id": "EPIC-003",
+      "title": "Discord.js 14 Gateway & O(1) Command Router",
+      "points": 21,
+      "status": "BACKLOG",
+      "requires": ["EPIC-001"],
+      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"],
+      "description": "Dual-dispatch router (slash + prefix), middleware chain (permissions, cooldowns, maintenance), interactive help center."
+    },
+    {
+      "id": "EPIC-004",
+      "title": "Centralized Transactional Economy & Banking Engine",
+      "points": 13,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-010", "EPIC-011"],
+      "description": "Double-entry ledger, anti-spam XP, voice AFK checks, banking, rankings, and canvas profile cards."
+    },
+    {
+      "id": "EPIC-005",
+      "title": "Multi-Source Music 2.0 Audio Engine",
+      "points": 13,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"],
+      "description": "YouTube/Spotify/SoundCloud/Deezer extractors, @discordjs/voice player, reactive embeds, volume clamping."
+    },
+    {
+      "id": "EPIC-006",
+      "title": "AI Chatbot 2.0 with Context Isolation & Safe Tools",
+      "points": 13,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"],
+      "description": "Dedicated #ririko-ai channel, per-user memory isolation, explicit time tool, safe tool allowlist."
+    },
+    {
+      "id": "EPIC-007",
+      "title": "Moderation 2.0 with Escalation & AutoMod",
+      "points": 13,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"],
+      "description": "Warning escalation engine, Discord AutoMod integration, case audit logs, and anti-raid filters."
+    },
+    {
+      "id": "EPIC-008",
+      "title": "Streamer Notifications & Free Games Announcer",
+      "points": 8,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"],
+      "description": "Twitch/YouTube/TikTok watchers with idempotency keys, thumbnail reupload CDN, and Epic/Steam games feed."
+    },
+    {
+      "id": "EPIC-009",
+      "title": "Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite",
+      "points": 13,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"],
+      "description": "Crash-resistant giveaways, Join to Create dynamic voice channels, and Minimax Tic-Tac-Toe, RPS, HighLow."
+    },
+    {
+      "id": "EPIC-010",
+      "title": "Waifu TCG Gameplay, Ingestion, Trading & Marketplace",
+      "points": 21,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-004"],
+      "blocks": ["EPIC-011"],
+      "description": "waifu.im ingestion, 8-tier rarity math, 7 elemental affinities (including Ice), atomic P2P trading, marketplace, WaifuGuilds."
+    },
+    {
+      "id": "EPIC-011",
+      "title": "Next.js 16 Web Dashboard & Management Portal",
+      "points": 21,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-010"],
+      "blocks": ["EPIC-012"],
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure."
+    },
+    {
+      "id": "EPIC-012",
+      "title": "Quality Gates, Docker Rootless & Production Verification",
+      "points": 13,
+      "status": "BACKLOG",
+      "requires": ["EPIC-001", "EPIC-011"],
+      "blocks": [],
+      "description": "End-to-end integration tests, rootless Dockerfile, docker-compose.production.yml, /health probes."
+    }
+  ],
+  "stories": [
+    {
+      "id": "STORY-001",
+      "epic": "EPIC-000",
+      "title": "Legacy 1.4.0 Codebase Audit & Feature Inventory",
+      "points": 5,
+      "status": "DONE",
+      "requires": [],
+      "blocks": ["STORY-002"]
+    },
+    {
+      "id": "STORY-002",
+      "epic": "EPIC-000",
+      "title": "Architecture Specification & ADR-001 to ADR-012",
+      "points": 5,
+      "status": "DONE",
+      "requires": ["STORY-001"],
+      "blocks": ["STORY-003"]
+    },
+    {
+      "id": "STORY-003",
+      "epic": "EPIC-000",
+      "title": "Specialist Agent Roster & Execution Protocols",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["STORY-002"],
+      "blocks": ["STORY-004"]
+    },
+    {
+      "id": "STORY-004",
+      "epic": "EPIC-000",
+      "title": "Complete Subsystem Documentation Catalog (16 Docs)",
+      "points": 5,
+      "status": "DONE",
+      "requires": ["STORY-003"],
+      "blocks": ["STORY-005"]
+    },
+    {
+      "id": "STORY-005",
+      "epic": "EPIC-000",
+      "title": "Scrum Kanban & Sub-Agent Knowledge Transfer System",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["STORY-004"],
+      "blocks": ["EPIC-001"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "TASK-0051",
+      "parent": "STORY-005",
+      "title": "Initialize Kanban Board, Protocol & WIP Limit Invariant",
+      "points": 3,
+      "status": "DONE",
+      "requires": [],
+      "blocks": []
+    }
+  ],
+  "chores": [],
+  "bugs": []
+}
