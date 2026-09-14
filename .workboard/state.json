@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 69,
+  "revision": 81,
   "policy": {
     "pointScale": [
       1,
@@ -631,14 +631,18 @@
       ]
     },
     {
-      "status": "ready",
+      "status": "done",
       "estimate": 8,
       "estimateRationale": "Deepen data contracts, legacy evidence and migration recovery: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
       "groomedIn": "GR-004",
       "priority": "P1",
-      "owner": null,
-      "handoff": ".workboard/handoffs/RIR-802/001-start.md",
-      "validation": [],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-802/006-completion.md",
+      "validation": [
+        "58 local links valid; requirements91/35 and diff check pass",
+        "All manifest records checked; 85SQL statements replay match17tables108columns11FK7indexes",
+        "Legacy snapshot, blueprint and both manifests unchanged"
+      ],
       "id": "RIR-802",
       "type": "task",
       "title": "Deepen data contracts, legacy evidence and migration recovery",
@@ -1039,6 +1043,42 @@
       ],
       "status": "accepted",
       "handoff": ".workboard/handoffs/RIR-801/005-developer-return.md"
+    },
+    {
+      "id": "A-008",
+      "agent": "architecture-docs",
+      "paths": [
+        "docs/database.md",
+        "docs/adr/ADR-003-database-layer-and-dual-dialect-orm.md"
+      ],
+      "scope": "Deepen actual and proposed data models, dialect/transaction/constraint contracts and ADR alternatives against source and Gemini; documentation only.",
+      "ticket": "RIR-802",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-802/003-database-return.md"
+    },
+    {
+      "id": "A-009",
+      "agent": "developer-docs",
+      "paths": [
+        "docs/migrations.md",
+        "docs/migration-1.x-to-2.0.md"
+      ],
+      "scope": "Deepen current schema migration and planned legacy importer operations, mapping/reconciliation/crash recovery/restore against source and Gemini; documentation only.",
+      "ticket": "RIR-802",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-802/004-migration-return.md"
+    },
+    {
+      "id": "A-010",
+      "ticket": "RIR-802",
+      "agent": "discord-docs",
+      "scope": "Read-only full audit of both legacy JSON manifests, verify every referenced source/asset/migration hash and structural totals against immutable source; return evidence, preserve both JSON files unless coordinator reviews a proven correction.",
+      "paths": [
+        "docs/legacy-command-manifest.json",
+        "docs/legacy-data-manifest.json"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-802/005-manifest-return.md"
     }
   ],
   "batches": [
@@ -1580,6 +1620,90 @@
       "actor": "coordinator",
       "action": "move",
       "detail": "{\"action\":\"move\",\"ticket\":\"RIR-801\",\"status\":\"done\",\"reason\":\"All twelve source-reviewed documents complete; all specialist returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-801/006-completion.md\",\"validation\":[\"12 documents reviewed against source and Gemini; 187 relative links valid\",\"Requirements 91 sections/35 criteria valid; diff check passed\",\"119 unit tests passed in one-worker full suite; live validation not claimed\"]}"
+    },
+    {
+      "id": 70,
+      "at": "2026-09-14T17:28:57.935Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-802\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 71,
+      "at": "2026-09-14T17:28:58.526Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-008\",\"agent\":\"architecture-docs\",\"paths\":[\"docs/database.md\",\"docs/adr/ADR-003-database-layer-and-dual-dialect-orm.md\"],\"scope\":\"Deepen actual and proposed data models, dialect/transaction/constraint contracts and ADR alternatives against source and Gemini; documentation only.\",\"ticket\":\"RIR-802\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 72,
+      "at": "2026-09-14T17:28:59.094Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-009\",\"agent\":\"developer-docs\",\"paths\":[\"docs/migrations.md\",\"docs/migration-1.x-to-2.0.md\"],\"scope\":\"Deepen current schema migration and planned legacy importer operations, mapping/reconciliation/crash recovery/restore against source and Gemini; documentation only.\",\"ticket\":\"RIR-802\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 73,
+      "at": "2026-09-14T17:29:58.357Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-010\",\"ticket\":\"RIR-802\",\"agent\":\"discord-docs\",\"scope\":\"Read-only full audit of both legacy JSON manifests, verify every referenced source/asset/migration hash and structural totals against immutable source; return evidence, preserve both JSON files unless coordinator reviews a proven correction.\",\"paths\":[\"docs/legacy-command-manifest.json\",\"docs/legacy-data-manifest.json\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 74,
+      "at": "2026-09-14T17:36:06.148Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-009\",\"handoff\":\".workboard/handoffs/RIR-802/004-migration-return.md\"}"
+    },
+    {
+      "id": 75,
+      "at": "2026-09-14T17:36:06.762Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-009\"}"
+    },
+    {
+      "id": 76,
+      "at": "2026-09-14T17:38:21.609Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-010\",\"handoff\":\".workboard/handoffs/RIR-802/005-manifest-return.md\"}"
+    },
+    {
+      "id": 77,
+      "at": "2026-09-14T17:38:22.203Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-010\"}"
+    },
+    {
+      "id": 78,
+      "at": "2026-09-14T17:42:20.141Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-008\",\"handoff\":\".workboard/handoffs/RIR-802/003-database-return.md\"}"
+    },
+    {
+      "id": 79,
+      "at": "2026-09-14T17:42:20.731Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-008\"}"
+    },
+    {
+      "id": 80,
+      "at": "2026-09-14T17:42:21.312Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-802\",\"status\":\"review\",\"reason\":\"All seven files source-reviewed; factual manifests verified unchanged; all worker returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-802/006-completion.md\",\"validation\":[\"58 local links valid; requirements91/35 and diff check pass\",\"All manifest records checked; 85SQL statements replay match17tables108columns11FK7indexes\",\"Legacy snapshot, blueprint and both manifests unchanged\"]}"
+    },
+    {
+      "id": 81,
+      "at": "2026-09-14T17:42:21.888Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-802\",\"status\":\"done\",\"reason\":\"All seven files source-reviewed; factual manifests verified unchanged; all worker returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-802/006-completion.md\",\"validation\":[\"58 local links valid; requirements91/35 and diff check pass\",\"All manifest records checked; 85SQL statements replay match17tables108columns11FK7indexes\",\"Legacy snapshot, blueprint and both manifests unchanged\"]}"
     }
   ]
 }
