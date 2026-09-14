@@ -1,4 +1,6 @@
 # Contributing and release
+Read the relevant full sections of [BLUEPRINT.md](../BLUEPRINT.md), map ticket acceptance through [requirements.md](requirements.md), and update evidence/remaining gaps with each implemented slice. `pnpm board requirements-check` verifies coverage and references; tests and live acceptance still need to be executed. Keep the original blueprint unchanged unless the user explicitly amends it.
+
 Read AGENTS.md, the source inventory, architecture and the matching specialist definition before implementing a domain. New commands/services require contracts, strict types, unit tests, both slash/prefix docs, bounded failure handling and relevant integration tests. Legacy reference directories are read-only.
 
 Use explicit composition, stable pinned dependencies and small reviewed changes. Add an ADR when choosing a meaningful alternative; mark future decisions proposed until verified. Update inventory parity status only with evidence. New schema changes belong in packages/database, cover both dialects, and must be reviewed before application use. Never rewrite an applied migration checksum.

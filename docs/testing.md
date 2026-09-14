@@ -43,6 +43,14 @@ Commands used the installed entry points to avoid the system pnpm version mismat
 
 Workflow tests exercise rejected WIP switches, missing estimates, grouped grooming, dependency cycles, terminal abandonment, pause consent, stale decisions/revisions, worker ownership and durable returns. Real temporary Git repositories/worktrees exercise shared locks, interrupted projection recovery, scope/staging guards, changed HEAD/base, wrong remotes/PR targets, non-fast-forward/deletion/multi-ref push rejection and safe closing metadata commits. These tests do not make a network push or create a PR.
 
+### Blueprint and stacked review checkpoint (RIR-110, 2026-09-14)
+
+The current story passed **113 unit tests** across ten files, including **65 work-board/requirements tests** (29 model, 29 real Git/store and seven requirements tests). The SQLite integration/CLI E2E run passed **13 tests**, with seven PostgreSQL tests explicitly skipped. **126 tests passed in this verification; seven skipped.** ESLint, strict typecheck, project-reference build, board validation and the 91-section/35-criterion requirement check passed. The original blueprint was verified byte-for-byte against the supplied attachment, and the audited legacy checkout remained clean.
+
+Commands used the same installed Node entry points listed above. New cases cover approved parent targets, missing/moved/integrated parents, inherited scope and arbitrary base anchors, exact target approval, separate parent/child publication approval and a complete atomic stack opening through real board commands. Requirement cases cover source integrity, exact coverage, invalid references and unsupported completion claims. The final unit run took 70.67 seconds; no network push or PR was performed by these tests.
+
+The frozen governance parent's older PR checker still rejects its closed batch. This separate issue is recorded as unstarted RIR-005; the story supports its parent branch as a review base without claiming the parent's own PR is ready. See the [completion handoff](../.workboard/handoffs/RIR-110/003-completion.md) and [pinned branch comparison](branch-comparison.md). Historical PostgreSQL evidence above remains historical, and all live/platform release gaps below remain open.
+
 ### Runtime foundation coverage
 
 - Slash/prefix/context equivalence, alias collision, escaped/quoted parsing, argument validation and concurrent request isolation.

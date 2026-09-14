@@ -1,0 +1,2370 @@
+{
+  "version": 1,
+  "source": {
+    "path": "BLUEPRINT.md",
+    "originalSha256": "5261a43d6522deccc8a9fe686f700a76867b0aa4a0f3eadb7a22cfb8eb6424c2",
+    "normalizedSha256": "0c605080aa91782d32545680369f4dc8005bb21c546819df8336c64b3a5da86c",
+    "sectionCount": 91,
+    "origin": "User-supplied Full Platform Rework attachment; preserved on 2026-09-14. Later explicit work-control and stacking instructions take precedence."
+  },
+  "requirements": [
+    {
+      "id": "BP-00",
+      "title": "Absolute Rules",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Standing preservation, KISS and compatibility rules exist; future code still needs per-ticket review."
+    },
+    {
+      "id": "BP-01",
+      "title": "FIRST TASK: AUDIT THE EXISTING REPOSITORY",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/legacy-feature-inventory.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Source audit inventories 141 commands, 17 tables and assets at the pinned legacy SHA; it does not certify runtime parity or production data."
+    },
+    {
+      "id": "BP-02",
+      "title": "CREATE THE AI ENGINEERING TEAM FIRST",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "AGENTS.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "All 18 specialist definitions exist with ownership and handoffs; definitions do not mean every subsystem is implemented."
+    },
+    {
+      "id": "BP-03",
+      "title": "CREATE PROJECT-LEVEL AGENT INSTRUCTIONS",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "GEMINI.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Root instructions and modular imports cover development and governance; future sessions must follow them."
+    },
+    {
+      "id": "BP-04",
+      "title": "CREATE A MODERN PROJECT STRUCTURE",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/core/src/contracts.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/core/src/core.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Five working application/library workspaces isolate Discord and persistence; web and provider/domain packages await working implementations."
+    },
+    {
+      "id": "BP-05",
+      "title": "TECHNOLOGY BASELINE",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dependency-evaluation.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "package.json",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/core/src/core.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Pinned Node/TypeScript/Discord/Drizzle/Vitest baseline exists; select dashboard and provider versions when those scopes are implemented."
+    },
+    {
+      "id": "BP-06",
+      "title": "KISS + EXTENSIBILITY PRINCIPLE",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/development.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "apps/cli/src/generate.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/cli/src/generate.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "The command generator works and is tested; module, adapter, migration, game and dashboard generators are pending."
+    },
+    {
+      "id": "BP-07",
+      "title": "COMMAND SYSTEM",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Shared slash/prefix registry, aliases, permissions, settings and cooldowns work for ping/prefix/help; remaining legacy commands and all rate-limit dimensions are pending."
+    },
+    {
+      "id": "BP-08",
+      "title": "HELP SYSTEM",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/builtins.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Metadata-driven search, categories, paging and requester-bound controls work for registered commands; dashboard links and full catalog await those features."
+    },
+    {
+      "id": "BP-09",
+      "title": "RIRIKO 2.0 MODULE SYSTEM",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/core/src/settings.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/cli/src/cli.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Core module flags/settings and CLI controls exist; the requested non-core modules are not registered."
+    },
+    {
+      "id": "BP-10",
+      "title": "MUSIC 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/music.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "No audio engine/resolver is implemented. Preserve required YouTube, Spotify, Deezer and SoundCloud plus safe AI controls and source capability checks."
+    },
+    {
+      "id": "BP-11",
+      "title": "AI CHATBOT 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/ai.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "No AI adapter or conversation store exists. Implement dedicated opt-in channel, per-user context, preferences, personality separation, time tool and safe mediated tools."
+    },
+    {
+      "id": "BP-12",
+      "title": "MODERATION 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/moderation.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Moderation commands, configurable warning escalation, audit history, AutoMod and anti-raid rules are pending."
+    },
+    {
+      "id": "BP-13",
+      "title": "AUTOMATIC ROLE SYSTEM",
+      "status": "planned",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Join/bot/verified/temporary/activity roles, reaction/button/select roles and dashboard controls are pending."
+    },
+    {
+      "id": "BP-14",
+      "title": "IMAGE GENERATION 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Image adapters, actual free/paid capability assessment, guild/user settings, quotas and bounded persistent jobs are pending."
+    },
+    {
+      "id": "BP-15",
+      "title": "DEFAULT ANIME PROMPTS",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Configurable positive/negative anime defaults and administrator-controlled user opt-out are pending."
+    },
+    {
+      "id": "BP-16",
+      "title": "GIVEAWAY 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Database-backed entries, scheduling, eligibility, rerolls, winner history and restart recovery are pending."
+    },
+    {
+      "id": "BP-17",
+      "title": "AUTO VOICE 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Join-to-create ownership/configuration, channel controls and restart/orphan reconciliation are pending."
+    },
+    {
+      "id": "BP-18",
+      "title": "STREAMER PLATFORM SYSTEM",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Implement only verified platform capabilities; initial required assessments are Twitch, TikTok and Facebook, not a silent YouTube substitution."
+    },
+    {
+      "id": "BP-19",
+      "title": "STREAM SUBSCRIPTION MODEL",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Persist guild/user/streamer subscriptions and idempotent delivery intent; reconcile crashes between external sends and database commits."
+    },
+    {
+      "id": "BP-20",
+      "title": "STREAM THUMBNAIL CACHE",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Validate, hash, cache and reupload stream thumbnails; configurable lifecycle and safe remote downloads are pending."
+    },
+    {
+      "id": "BP-21",
+      "title": "FREE GAMES ANNOUNCER 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Promotion adapters, repeated-post suppression, targets/filters and cached/reuploaded assets are pending."
+    },
+    {
+      "id": "BP-22",
+      "title": "WAIFU TCG — MAJOR NEW SYSTEM",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "TCG is unimplemented; the complete collection, game, quest and social requirements remain mandatory scope."
+    },
+    {
+      "id": "BP-23",
+      "title": "WAIFU IMAGE INGESTION PIPELINE",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "waifu.im ingestion/cache and provenance, refresh, safe image handling and local-first reuse are pending."
+    },
+    {
+      "id": "BP-24",
+      "title": "WAIFU CARD CREDITS",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Persist attribution and render Image source: waifu.im in card footer and response/help, including cached images."
+    },
+    {
+      "id": "BP-25",
+      "title": "CARD RARITIES",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Define a balanced configurable rarity/stat model and deterministic tests; the example tier names/probabilities are not silently fixed final balance."
+    },
+    {
+      "id": "BP-26",
+      "title": "CARD ELEMENTS",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Implement a configurable elemental interaction chart and extension path; blueprint examples are not a mandated hardcoded chart."
+    },
+    {
+      "id": "BP-27",
+      "title": "WAIFU DROP SYSTEM",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Drops/claim cooldowns, spawn rarity, concurrency, claim authorization and persistence are pending."
+    },
+    {
+      "id": "BP-28",
+      "title": "WAIFU CARD GAME MODES",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Training, battles, expeditions, dungeons, bosses, raids and quest/reward loops need bounded designs and tested state machines."
+    },
+    {
+      "id": "BP-29",
+      "title": "CARD COLLECTION",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Persistent inventory, filters, paging, sorting, card details, favorites/equipment and collection progress are pending."
+    },
+    {
+      "id": "BP-30",
+      "title": "CARD TRADING",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Transactional two-party trade proposal/accept/cancel/expiry, locks and history are pending."
+    },
+    {
+      "id": "BP-31",
+      "title": "CARD MARKET",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Listings, purchases, pricing/fees, auctions where justified and transactional ownership/ledger changes are pending."
+    },
+    {
+      "id": "BP-32",
+      "title": "ECONOMY 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Central transactional global/guild economy and currency/account services are pending; preserve legacy global balances without multiplying wallets."
+    },
+    {
+      "id": "BP-33",
+      "title": "ECONOMY EVENT ENGINE",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Typed reward events and centrally configured economy/XP awards are pending."
+    },
+    {
+      "id": "BP-34",
+      "title": "ANTI-SPAM REWARD PROTECTION",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Repeated-content, burst and automated-message reward suppression need deterministic anti-spam tests before awards."
+    },
+    {
+      "id": "BP-35",
+      "title": "VOICE XP / ECONOMY",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Voice participation tracking, anti-AFK eligibility and restart-safe XP/economy awards are pending."
+    },
+    {
+      "id": "BP-36",
+      "title": "BANK SYSTEM",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Bank accounts, deposits/withdrawals, interest and exploit prevention are pending."
+    },
+    {
+      "id": "BP-37",
+      "title": "GAMES",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Game interface, Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice, statistics and safe wagering are pending."
+    },
+    {
+      "id": "BP-38",
+      "title": "RANKING 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Global and per-guild leaderboards with pagination, snapshots/cache and privacy choices are pending."
+    },
+    {
+      "id": "BP-39",
+      "title": "PROFILE CARD 2.0",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Profile/rank card rendering, safe background downloads/cache and customization are pending."
+    },
+    {
+      "id": "BP-40",
+      "title": "ECONOMY + TCG INTEGRATION",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Card rewards, shop/crafting/upgrades and economy transactions must share checked services; integration is pending."
+    },
+    {
+      "id": "BP-41",
+      "title": "GUILD SYSTEM FOR WAIFU TCG",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Player WaifuGuild membership, permissions, bank, XP, quests/bosses and leaderboard remain distinct from Discord guilds."
+    },
+    {
+      "id": "BP-42",
+      "title": "DASHBOARD",
+      "status": "planned",
+      "tickets": [
+        "RIR-600"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "No web application exists. Implement Discord OAuth, secure sessions and fresh guild administration checks."
+    },
+    {
+      "id": "BP-43",
+      "title": "DASHBOARD MODULE CONFIGURATION",
+      "status": "partial",
+      "tickets": [
+        "RIR-600"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/core/src/contracts.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/core/src/core.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Core settings already share validation across CLI/runtime; web forms and remaining module schemas are pending."
+    },
+    {
+      "id": "BP-44",
+      "title": "DASHBOARD FEATURES TO ADD",
+      "status": "planned",
+      "tickets": [
+        "RIR-600"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Dashboard audit/health/usage, permissions, presets, maintenance and backup/import views are pending; do not expose secrets."
+    },
+    {
+      "id": "BP-45",
+      "title": "PROVIDER CONFIGURATION",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Provider-neutral design exists; no production AI/image/music/stream/free-game adapter is implemented."
+    },
+    {
+      "id": "BP-46",
+      "title": "SECRETS",
+      "status": "partial",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/core/src/config.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/core/src/core.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Foundation credentials use validated environment configuration and log redaction; encrypted editable provider secrets and masked web controls are pending."
+    },
+    {
+      "id": "BP-47",
+      "title": "DATABASE",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/database.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/database/src/sqlite.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/database/test/sqlite.integration.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Separate Drizzle dialect schemas and transactional settings/audit repositories exist; add domain tables only with their services."
+    },
+    {
+      "id": "BP-48",
+      "title": "MIGRATION STRATEGY",
+      "status": "partial",
+      "tickets": [
+        "RIR-710"
+      ],
+      "evidence": [
+        {
+          "path": "docs/migration-1.x-to-2.0.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Source field mapping and backup/rollback strategy exist; the actual legacy importer, dry-run/apply/verify/rollback CLI and representative-data rehearsal are pending."
+    },
+    {
+      "id": "BP-49",
+      "title": "EVENT-DRIVEN INTERNAL DESIGN",
+      "status": "planned",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Gateway events are handled; shared typed domain events and consumers are pending until the corresponding services exist."
+    },
+    {
+      "id": "BP-50",
+      "title": "SCHEDULING / JOBS",
+      "status": "planned",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Persistent jobs, leases, retries, deduplication and restart recovery are not implemented."
+    },
+    {
+      "id": "BP-51",
+      "title": "CACHING",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/core/src/settings.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/core/src/core.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Settings use a bounded memory cache; shared provider/media caching and lifecycle/retention are pending."
+    },
+    {
+      "id": "BP-52",
+      "title": "LOGGING",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/core/src/logger.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/core/src/core.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Pino logging and credential redaction exist; per-subsystem operation/duration/correlation fields and future provider instrumentation remain incomplete."
+    },
+    {
+      "id": "BP-53",
+      "title": "ERROR HANDLING",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "apps/bot/src/gateway.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/bot/src/gateway.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Gateway/dispatcher error boundaries and bounded health probes exist; provider retries/backoff/fallback/circuit behavior is pending."
+    },
+    {
+      "id": "BP-54",
+      "title": "SECURITY",
+      "status": "partial",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/testing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/access.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/cli/src/generate.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Foundation input/permission/generator controls are tested; OAuth/CSRF/SSRF/webhooks and all economy/TCG/provider boundaries still need review and tests."
+    },
+    {
+      "id": "BP-55",
+      "title": "TESTING",
+      "status": "partial",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/testing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "vitest.config.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Foundation unit/database/CLI tests exist; critical new-domain and dashboard suites remain pending."
+    },
+    {
+      "id": "BP-56",
+      "title": "QUALITY GATES",
+      "status": "partial",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/testing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "tools/workboard/model.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Lint/typecheck/unit/integration/E2E/build scripts and CI definitions exist; real remote CI/container evidence must accompany publication."
+    },
+    {
+      "id": "BP-57",
+      "title": "OBSERVABILITY",
+      "status": "partial",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/testing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "apps/bot/src/health.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/bot/src/health.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Liveness/readiness, gateway/database probes and CLI diagnostics exist; provider/job health, metrics and dashboard surfacing are pending."
+    },
+    {
+      "id": "BP-58",
+      "title": "RATE LIMITS",
+      "status": "partial",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/testing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Command cooldowns exist; user/guild/channel/provider/AI/image/economy/claim/market rate limiting remains incomplete."
+    },
+    {
+      "id": "BP-59",
+      "title": "CONFIGURATION HIERARCHY",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/core/src/settings.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/core/src/core.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Environment/default and guild settings validation exist; per-user/provider/dashboard overrides and full precedence coverage are pending."
+    },
+    {
+      "id": "BP-60",
+      "title": "ANALYTICS",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Aggregate command/domain usage metrics and configurable privacy-preserving retention are pending."
+    },
+    {
+      "id": "BP-61",
+      "title": "DATA RETENTION",
+      "status": "planned",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/testing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Per-domain retention windows and administrator controls are pending; never infer that indefinite storage is acceptable."
+    },
+    {
+      "id": "BP-62",
+      "title": "FEATURE FLAGS",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/access.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Registered command/module flags work; rollout flags for unimplemented systems are pending."
+    },
+    {
+      "id": "BP-63",
+      "title": "BACKWARD-COMPATIBLE USER EXPERIENCE",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/builtins.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/bot/src/gateway.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Only ping, prefix/setprefix and help are registered; all retained aliases/arguments/outputs need source-backed parity tests."
+    },
+    {
+      "id": "BP-64",
+      "title": "DEVELOPER DOCUMENTATION",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Required documentation files and this traceability index exist; planned subsystem guides must become tested operating instructions as code lands."
+    },
+    {
+      "id": "BP-65",
+      "title": "RELEASE VERSION",
+      "status": "partial",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/contributing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "package.json",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/cli/src/cli.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Workspace versions are 2.0.0 with documented SemVer/release rules; this is not a published or accepted full release."
+    },
+    {
+      "id": "BP-66",
+      "title": "IMPLEMENTATION ORDER",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/implementation-roadmap.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Roadmap and board preserve phased implementation order; do not skip acceptance gates or cross story/epic checkpoints automatically."
+    },
+    {
+      "id": "BP-67",
+      "title": "ADRs",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture-summary.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Thirteen ADRs record foundation and proposed domain choices; provider decisions remain proposed until evaluated."
+    },
+    {
+      "id": "BP-68",
+      "title": "DO NOT OVER-ENGINEER",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Small explicitly composed workspaces are used; optional infrastructure remains unjustified until measured need."
+    },
+    {
+      "id": "BP-69",
+      "title": "DEPLOYMENT",
+      "status": "partial",
+      "tickets": [
+        "RIR-003"
+      ],
+      "evidence": [
+        {
+          "path": "docs/deployment.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Docker/Compose definitions exist and configuration was validated; live image execution/deployment remains a tracked RIR-003 gate."
+    },
+    {
+      "id": "BP-70",
+      "title": "CLI",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/development.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "apps/cli/src/cli.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "tests/cli.e2e.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Operator diagnostics, migrations, metadata, config and command generation work; backup/restore, legacy import and provider/cache operators remain pending."
+    },
+    {
+      "id": "BP-71",
+      "title": "RIRIKO DOCTOR",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/development.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "apps/cli/src/doctor.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "tests/cli.e2e.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Doctor probes Node/config/storage/database/migrations/audio and distinguishes configured from live-verified credentials; provider-specific checks and full storage/tool diagnostics are pending."
+    },
+    {
+      "id": "BP-72",
+      "title": "DASHBOARD-TO-CLI PARITY",
+      "status": "partial",
+      "tickets": [
+        "RIR-600"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "CLI uses shared settings services; dashboard parity cannot be claimed before the web application exists."
+    },
+    {
+      "id": "BP-73",
+      "title": "DISCORD PERMISSIONS",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/access.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Central member/bot/role/module/channel checks exist; target hierarchy checks need integration with future privileged target commands."
+    },
+    {
+      "id": "BP-74",
+      "title": "AI + DISCORD SECURITY",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/ai.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "AI permission boundaries are specified; no AI tool execution adapter exists to verify them end to end."
+    },
+    {
+      "id": "BP-75",
+      "title": "MUSIC + AI SECURITY",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/ai.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Safe music tools and service-level volume/voice constraints are pending with the music/AI services."
+    },
+    {
+      "id": "BP-76",
+      "title": "ECONOMY SECURITY",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Atomic ledger/account/idempotency and exploit tests are pending; in-memory balances are not an acceptable implementation."
+    },
+    {
+      "id": "BP-77",
+      "title": "TCG SECURITY",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Card ownership state constraints, locking and transaction/idempotency tests are pending."
+    },
+    {
+      "id": "BP-78",
+      "title": "IMAGE STORAGE SECURITY",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Remote image URL/DNS/redirect/size/content/dimension validation and a bounded processor are pending before image features."
+    },
+    {
+      "id": "BP-79",
+      "title": "CURRENT WEB RESEARCH",
+      "status": "partial",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dependency-evaluation.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Foundation dependency evidence is recorded; provider availability, pricing, retention, permissions and licensing must be freshly researched per implementation."
+    },
+    {
+      "id": "BP-80",
+      "title": "THIRD-PARTY API FALLBACKS",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Real configured primary/fallback/disabled providers and failure tests are pending; no fake fallback is registered."
+    },
+    {
+      "id": "BP-81",
+      "title": "PROVIDER CAPABILITIES",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Provider capability design exists; actual discovery and UI suppression of unsupported actions are pending."
+    },
+    {
+      "id": "BP-82",
+      "title": "USER-FACING UX",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "apps/bot/src/presentation.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/bot/src/gateway.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Shared embeds/help controls and safe errors exist; coherent presentation and confirmations for future modules remain pending."
+    },
+    {
+      "id": "BP-83",
+      "title": "FEATURE DISCOVERY",
+      "status": "partial",
+      "tickets": [
+        "RIR-600"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/registry.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Help/CLI derive registered metadata; dashboard availability and remaining module discovery are pending."
+    },
+    {
+      "id": "BP-84",
+      "title": "MORE MODULES TO CONSIDER",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Optional module ideas remain evaluation backlog and must not displace the core release; none is implicitly approved for implementation."
+    },
+    {
+      "id": "BP-85",
+      "title": "MIGRATION PHILOSOPHY",
+      "status": "partial",
+      "tickets": [
+        "RIR-710"
+      ],
+      "evidence": [
+        {
+          "path": "docs/migration-1.x-to-2.0.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Legacy source manifests and preservation/mapping strategy exist; real import and verified restore of representative user data are pending."
+    },
+    {
+      "id": "BP-86",
+      "title": "FINAL ACCEPTANCE CRITERIA",
+      "status": "partial",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/testing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "The exact 35 acceptance criteria below remain the release gate; a passing foundation suite is not release completion."
+    },
+    {
+      "id": "BP-87",
+      "title": "HOW YOU SHOULD WORK AS THE MAIN AGENT",
+      "status": "documented",
+      "tickets": [
+        "RIR-110"
+      ],
+      "evidence": [
+        {
+          "path": ".workboard/PROTOCOL.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Standing inspect/estimate/delegate/review/test/handoff workflow exists; this story follows one active ticket and one delivery checkpoint."
+    },
+    {
+      "id": "BP-88",
+      "title": "WHEN SOMETHING IS UNCLEAR",
+      "status": "documented",
+      "tickets": [
+        "RIR-110"
+      ],
+      "evidence": [
+        {
+          "path": ".workboard/PROTOCOL.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Routine choices use documented engineering judgment; explicit user scope/PR decisions override broad autonomy."
+    },
+    {
+      "id": "BP-89",
+      "title": "FIRST DELIVERABLE",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/legacy-feature-inventory.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Audit/architecture/migration/dependency/roadmap/ADR/agent artifacts and summary exist; foundation implementation began, full platform remains incomplete."
+    },
+    {
+      "id": "BP-90",
+      "title": "QUALITY BAR",
+      "status": "documented",
+      "tickets": [
+        "RIR-110"
+      ],
+      "evidence": [
+        {
+          "path": ".workboard/PROTOCOL.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Quality rules are documented and foundation has verification; future contributors still need complete modules, provider tests and deployment evidence."
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "AC-01",
+      "title": "all significant 1.4.0 features have been inventoried;",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/legacy-feature-inventory.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Source audit inventories 141 commands, 17 tables and assets at the pinned legacy SHA; it does not certify runtime parity or production data."
+    },
+    {
+      "id": "AC-02",
+      "title": "all retained features work;",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/builtins.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "apps/bot/src/gateway.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Only ping, prefix/setprefix and help are registered; all retained aliases/arguments/outputs need source-backed parity tests."
+    },
+    {
+      "id": "AC-03",
+      "title": "migrations are tested;",
+      "status": "partial",
+      "tickets": [
+        "RIR-710"
+      ],
+      "evidence": [
+        {
+          "path": "docs/migration-1.x-to-2.0.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Source field mapping and backup/rollback strategy exist; the actual legacy importer, dry-run/apply/verify/rollback CLI and representative-data rehearsal are pending."
+    },
+    {
+      "id": "AC-04",
+      "title": "slash commands work;",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Shared slash/prefix registry, aliases, permissions, settings and cooldowns work for ping/prefix/help; remaining legacy commands and all rate-limit dimensions are pending."
+    },
+    {
+      "id": "AC-05",
+      "title": "prefix commands work;",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Shared slash/prefix registry, aliases, permissions, settings and cooldowns work for ping/prefix/help; remaining legacy commands and all rate-limit dimensions are pending."
+    },
+    {
+      "id": "AC-06",
+      "title": "help is dynamic;",
+      "status": "partial",
+      "tickets": [
+        "RIR-200"
+      ],
+      "evidence": [
+        {
+          "path": "docs/commands.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/discord/src/builtins.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Metadata-driven search, categories, paging and requester-bound controls work for registered commands; dashboard links and full catalog await those features."
+    },
+    {
+      "id": "AC-07",
+      "title": "dashboard authentication works;",
+      "status": "planned",
+      "tickets": [
+        "RIR-600"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "No web application exists. Implement Discord OAuth, secure sessions and fresh guild administration checks."
+    },
+    {
+      "id": "AC-08",
+      "title": "guild administration detection works;",
+      "status": "planned",
+      "tickets": [
+        "RIR-600"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "No web application exists. Implement Discord OAuth, secure sessions and fresh guild administration checks."
+    },
+    {
+      "id": "AC-09",
+      "title": "configuration works from dashboard;",
+      "status": "partial",
+      "tickets": [
+        "RIR-600"
+      ],
+      "evidence": [
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "packages/core/src/contracts.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/core/src/core.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Core settings already share validation across CLI/runtime; web forms and remaining module schemas are pending."
+    },
+    {
+      "id": "AC-10",
+      "title": "configuration works from CLI;",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/development.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "apps/cli/src/cli.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "tests/cli.e2e.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Operator diagnostics, migrations, metadata, config and command generation work; backup/restore, legacy import and provider/cache operators remain pending."
+    },
+    {
+      "id": "AC-11",
+      "title": "music supports the required platforms;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/music.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "No audio engine/resolver is implemented. Preserve required YouTube, Spotify, Deezer and SoundCloud plus safe AI controls and source capability checks."
+    },
+    {
+      "id": "AC-12",
+      "title": "AI supports dedicated-channel mode;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/ai.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "No AI adapter or conversation store exists. Implement dedicated opt-in channel, per-user context, preferences, personality separation, time tool and safe mediated tools."
+    },
+    {
+      "id": "AC-13",
+      "title": "AI context is isolated per user;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/ai.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "No AI adapter or conversation store exists. Implement dedicated opt-in channel, per-user context, preferences, personality separation, time tool and safe mediated tools."
+    },
+    {
+      "id": "AC-14",
+      "title": "AI can call safe tools;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/ai.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "AI permission boundaries are specified; no AI tool execution adapter exists to verify them end to end."
+    },
+    {
+      "id": "AC-15",
+      "title": "moderation escalation works;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/moderation.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Moderation commands, configurable warning escalation, audit history, AutoMod and anti-raid rules are pending."
+    },
+    {
+      "id": "AC-16",
+      "title": "spam does not grant EXP/credits;",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Repeated-content, burst and automated-message reward suppression need deterministic anti-spam tests before awards."
+    },
+    {
+      "id": "AC-17",
+      "title": "image provider selection works;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Image adapters, actual free/paid capability assessment, guild/user settings, quotas and bounded persistent jobs are pending."
+    },
+    {
+      "id": "AC-18",
+      "title": "image job concurrency works;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Image adapters, actual free/paid capability assessment, guild/user settings, quotas and bounded persistent jobs are pending."
+    },
+    {
+      "id": "AC-19",
+      "title": "giveaways survive restart;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Database-backed entries, scheduling, eligibility, rerolls, winner history and restart recovery are pending."
+    },
+    {
+      "id": "AC-20",
+      "title": "auto voice survives restart;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Join-to-create ownership/configuration, channel controls and restart/orphan reconciliation are pending."
+    },
+    {
+      "id": "AC-21",
+      "title": "streamer announcements are idempotent;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Persist guild/user/streamer subscriptions and idempotent delivery intent; reconcile crashes between external sends and database commits."
+    },
+    {
+      "id": "AC-22",
+      "title": "stream assets are cached/reuploaded;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Validate, hash, cache and reupload stream thumbnails; configurable lifecycle and safe remote downloads are pending."
+    },
+    {
+      "id": "AC-23",
+      "title": "free games do not duplicate announcements;",
+      "status": "planned",
+      "tickets": [
+        "RIR-300"
+      ],
+      "evidence": [
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Promotion adapters, repeated-post suppression, targets/filters and cached/reuploaded assets are pending."
+    },
+    {
+      "id": "AC-24",
+      "title": "economy transactions are safe;",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Atomic ledger/account/idempotency and exploit tests are pending; in-memory balances are not an acceptable implementation."
+    },
+    {
+      "id": "AC-25",
+      "title": "ranking works globally and per guild;",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Global and per-guild leaderboards with pagination, snapshots/cache and privacy choices are pending."
+    },
+    {
+      "id": "AC-26",
+      "title": "profile images can be cached;",
+      "status": "planned",
+      "tickets": [
+        "RIR-400"
+      ],
+      "evidence": [
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Profile/rank card rendering, safe background downloads/cache and customization are pending."
+    },
+    {
+      "id": "AC-27",
+      "title": "TCG card ownership is transactional;",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Card ownership state constraints, locking and transaction/idempotency tests are pending."
+    },
+    {
+      "id": "AC-28",
+      "title": "TCG collection/trading/market works;",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Transactional two-party trade proposal/accept/cancel/expiry, locks and history are pending."
+    },
+    {
+      "id": "AC-29",
+      "title": "TCG images are cached;",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "waifu.im ingestion/cache and provenance, refresh, safe image handling and local-first reuse are pending."
+    },
+    {
+      "id": "AC-30",
+      "title": "image attribution is preserved;",
+      "status": "planned",
+      "tickets": [
+        "RIR-500"
+      ],
+      "evidence": [
+        {
+          "path": "docs/waifu-tcg.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Persist attribution and render Image source: waifu.im in card footer and response/help, including cached images."
+    },
+    {
+      "id": "AC-31",
+      "title": "tests cover critical domains;",
+      "status": "partial",
+      "tickets": [
+        "RIR-700"
+      ],
+      "evidence": [
+        {
+          "path": "docs/testing.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "vitest.config.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "packages/discord/src/dispatcher.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Foundation unit/database/CLI tests exist; critical new-domain and dashboard suites remain pending."
+    },
+    {
+      "id": "AC-32",
+      "title": "Docker deployment works;",
+      "status": "partial",
+      "tickets": [
+        "RIR-003"
+      ],
+      "evidence": [
+        {
+          "path": "docs/deployment.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Docker/Compose definitions exist and configuration was validated; live image execution/deployment remains a tracked RIR-003 gate."
+    },
+    {
+      "id": "AC-33",
+      "title": "migrations work from a representative 1.4.0 database;",
+      "status": "partial",
+      "tickets": [
+        "RIR-710"
+      ],
+      "evidence": [
+        {
+          "path": "docs/migration-1.x-to-2.0.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Source field mapping and backup/rollback strategy exist; the actual legacy importer, dry-run/apply/verify/rollback CLI and representative-data rehearsal are pending."
+    },
+    {
+      "id": "AC-34",
+      "title": "documentation is present;",
+      "status": "documented",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/architecture.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        }
+      ],
+      "gap": "Required documentation files and this traceability index exist; planned subsystem guides must become tested operating instructions as code lands."
+    },
+    {
+      "id": "AC-35",
+      "title": "`ririko doctor` works.",
+      "status": "partial",
+      "tickets": [
+        "RIR-100"
+      ],
+      "evidence": [
+        {
+          "path": "docs/development.md",
+          "kind": "documentation",
+          "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "apps/cli/src/doctor.ts",
+          "kind": "implementation",
+          "note": "Evidence of the implemented subset only."
+        },
+        {
+          "path": "tests/cli.e2e.test.ts",
+          "kind": "test",
+          "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        }
+      ],
+      "gap": "Doctor probes Node/config/storage/database/migrations/audio and distinguishes configured from live-verified credentials; provider-specific checks and full storage/tool diagnostics are pending."
+    }
+  ]
+}

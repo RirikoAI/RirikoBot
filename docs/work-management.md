@@ -10,7 +10,7 @@ Every story/task has a parent. Root epics organize descendants; independent chor
 
 Groom related records together before readiness. Review the corresponding legacy inventory, architecture, acceptance and risks, assign Fibonacci points, record each rationale and the group's participants. Use **1, 2, 3, 5, 8, 13, 21, 34, 55, 89**; executable leaves above 13 must be split. Ungroomed backlog can have a null estimate. Points stay fixed after starting; discoveries become new tickets. Parent points express planning size and are not added to leaf estimates.
 
-The initial board contains 20 records covering the existing roadmap and an observed dependency-tracking cleanup. `GR-001` grooms foundation operations and this setup chore; `GR-002` grooms the first compatibility slice. Later domains are intentionally ungroomed until source and implementation risks can be assessed. Pre-board completed work has a factual [baseline handoff](../.workboard/context/baseline.md), without invented retrospective estimates or velocity.
+The board began with 20 records covering the existing roadmap and an observed dependency-tracking cleanup. `GR-001` grooms foundation operations and the setup chore; `GR-002` grooms the first compatibility slice; `GR-003` adds the user-approved RIR-110 review-evidence story and refines deferred cleanup. Later domains remain ungroomed until source and implementation risks can be assessed. Pre-board completed work has a factual [baseline handoff](../.workboard/context/baseline.md), without invented retrospective estimates or velocity.
 
 ## Cadence, readiness and completion
 
@@ -30,6 +30,8 @@ pnpm board check
 pnpm board show
 pnpm board show RIR-001
 pnpm board help
+pnpm board requirements-check
+pnpm board requirements-show BP-18
 ```
 
 Board mutations consume one JSON command from a file and require the revision you just read. Unknown fields and malformed commands are rejected. A mutation increments revision, appends an event and regenerates the board. Do not edit state or history by hand. Keep meaningful command inputs in a ticket handoff directory if they help recovery; the full command is already included in history.
@@ -56,7 +58,8 @@ Write the Markdown file first. This command records knowledge without changing s
 | `create` | `ticket` matching [template](../.workboard/templates/ticket.json) | Add a backlog record; never start implicitly |
 | `groom` | `grooming` group; `estimates` of `{id,points,rationale}` | Estimate every listed group member together |
 | `move` | `ticket,status,reason,handoff`; `validation` for review/done | Follow allowed lifecycle transitions |
-| `batch` | `batch` with ID, scope, topic, verified base/SHA, tickets, open status and null PR URL | Declare one delivery scope after the previous checkpoint is resolved |
+| `batch` | `batch` with ID, scope, topic, verified base/SHA, tickets, open status and null PR URL; optional explicit approved `stack` | Declare one delivery scope after the previous checkpoint is resolved; include the stack atomically when branching from an unpublished parent |
+| `stack` | `batch,parentBatch,parentHead,decision` | Record one actual user-approved dependency on a closed parent scope, with its frozen local commit; never infer permission from overlapping file paths |
 | `start` | `ticket,owner` | Claim the single slot after all readiness checks |
 | `handoff` | `ticket,handoff,reason`; optional `validation` | Persist active-session knowledge without switching work |
 | `assign` | `assignment` with ID, ticket, agent, bounded scope, paths, assigned status, null handoff | Delegate within the same ticket; overlapping write ownership is refused |
@@ -85,10 +88,26 @@ At the checkpoint:
 
 1. Finish the acceptance/handoff and prepare `.workboard/reviews/BATCH-ID.md`. Review the full diff, run relevant checks, mark the ticket done and batch checkpoint, then make a local commit with explicit staging.
 2. Fetch the exact target branch, verify ancestry and run `pnpm board pr-plan`. Inspect existing PRs and prepare the concrete head/base/diff for the user. Ask whether they want this scope published. Stop here until they answer.
-3. Only after approval, use `pnpm board approve-publish --reference "actual user reply and conversation reference" --head EXACT_SHA --base EXACT_SHA`. This fetches/rechecks the target and records the local approval; it does not push. Re-review and ask again if HEAD/base changed. A custom publish URL is rejected.
+3. Only after approval, use `pnpm board approve-publish --reference "actual user reply and conversation reference" --head EXACT_SHA --base EXACT_SHA --target EXACT_BRANCH`. This fetches/rechecks the integration and immediate target and records the local approval; it does not push. Re-review and ask again if HEAD/base/target changed. A custom publish URL is rejected.
 4. Push the explicit topic ref shown by `pr-plan`. Create the PR with explicit repository, head, base and the prepared body file; never rely on default branches. `gh` is optional and must actually be available/authenticated before using the printed arguments. A connector/API may perform the equivalent operation. Verify existing/resulting PR identity and URL before recording closure. Never auto-merge.
 
 The setup request authorizes local governance work, not a push or PR. Local hooks are bypassable and local CLI actor/reference strings cannot prove a conversational reply; every agent must still obey the standing user rules.
+
+### A user-approved stack
+
+RIR-110 is an explicitly approved example: the user deferred RIR-001 publication and permitted one separate story branch on top of it. The integration anchor remains `develop/2.0.0-astra`, while the immediate story PR target is the exact preserved `chore/RIR-001-work-governance` parent until that commit is integrated. The story's changed-file check uses the parent commit, so inherited governance changes remain in their own scope. An unapproved inherited batch is rejected even when both scopes happen to own the same paths.
+
+For a new approved stack, preserve/close the parent with its actual user decision, record and groom the new story, then create its separate topic from the unchanged parent HEAD. Include `stack: {parentBatch, parentHead, decision}` in the new `batch` command so the declaration and Git verification happen atomically before `start`. Opening a batch without that contract correctly rejects inherited unpublished work. The separate `stack` command supports declaring the same approved contract once on an already open batch; it cannot replace an existing anchor or bypass the decision checks.
+
+`pr-plan` reports the immediate target and whether it exists at the recorded SHA on the fetched remote. A missing remote parent blocks publication, not local review. At the child checkpoint, `pr-plan --batch BATCH-001` can prepare the deferred immediate parent's **separate branch push** from the child checkout; `approve-publish --batch BATCH-001 ...` binds a distinct real user approval to that parent ref. This does not reopen execution or switch worktrees. It cannot select unrelated closed batches. Publish only the exact parent ref shown, keep its PR deferred, then refresh the child plan and obtain its separate approval. Never treat a parent's approval as approval for the child.
+
+The frozen RIR-001 parent has an older PR checker which rejects its now-closed batch. RIR-005 records that unresolved parent-PR integration issue. Selecting that parent prints branch-push arguments only, not an unsafe claim that its own PR is ready. The parent branch may serve as the immediate target of this child's PR, whose new source contains the current checker. Do not rewrite the parent or merge the child into it merely to obscure the old issue; resolving parent integration is separate reviewed work.
+
+The resolver refuses a moved parent, guessed local integration anchor, changed approval target or wrong-base PR. Once the exact parent commit is an ancestor of the fetched integration target, the child can target integration after incorporating any new base changes. Squash/rewrite histories and changed stack anchors need a fresh reviewed resolution; do not force-push or silently replace recorded ancestry.
+
+### Blueprint evidence
+
+[BLUEPRINT.md](../BLUEPRINT.md) preserves the original request. [requirements.json](requirements.json) maps every numbered section and exact final acceptance criterion to status, backlog scopes and file references; [requirements.md](requirements.md) is generated. Update the manifest when implementation changes, then run `pnpm board requirements-render` and `pnpm board requirements-check`. The checker rejects omitted/duplicated requirements, changed source text, nonexistent scope IDs, broken/unsafe evidence paths and code-completion claims backed only by prose. It cannot infer passing tests or live behavior from a path; record exact verification in the ticket handoff.
 
 ## Multiple sessions, worktrees and recovery
 

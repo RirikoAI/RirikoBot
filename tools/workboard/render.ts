@@ -10,6 +10,7 @@ export function renderBoard(board: Board): string {
     `**Current work:** ${active.map((ticket) => `${ticket.id} — ${ticket.title} (${ticket.status}, ${ticket.estimate} points)`).join('; ') || 'No occupied ticket.'}`,
     `**Delivery:** ${batch ? `${batch.id} / ${batch.scope} / \`${batch.branch}\` → \`${batch.baseBranch}\` (${batch.status})` : 'No open batch.'}`, '',
     'Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.', ''];
+  if (batch?.stack) lines.push(`**Approved stack:** parent ${batch.stack.parentBatch} at \`${batch.stack.parentHead}\`, decision ${batch.stack.decision}. Run \`pnpm board pr-plan\` to resolve the immediate PR target; never assume the integration target excludes parent changes.`, '');
   for (const status of ['in-progress', 'blocked', 'review', 'paused', 'ready', 'backlog', 'done', 'abandoned']) {
     const tickets = board.tickets.filter((ticket) => ticket.status === status);
     if (!tickets.length) continue;
@@ -23,7 +24,8 @@ export function renderBoard(board: Board): string {
   lines.push('## Agent assignments', '', '| Assignment | Ticket | Agent | Status | Scope |', '|---|---|---|---|---|');
   for (const assignment of board.assignments) lines.push(`| ${[assignment.id, assignment.ticket, assignment.agent, assignment.status, assignment.scope].map(cell).join(' | ')} |`);
   lines.push('', '## Current handoffs', '');
-  for (const ticket of active) if (ticket.handoff) lines.push(`- ${ticket.id}: [handoff](${ticket.handoff.replace(/^\.workboard\//, '')})`);
+  const handoffTickets = active.length ? active : board.tickets.filter((ticket) => (batch ?? board.batches.at(-1))?.tickets.includes(ticket.id));
+  for (const ticket of handoffTickets) if (ticket.handoff) lines.push(`- ${ticket.id}: [handoff](${ticket.handoff.replace(/^\.workboard\//, '')})`);
   lines.push('', '## Grooming groups', '');
   for (const grooming of board.grooming) lines.push(`- ${grooming.id}: ${grooming.scope} · ${grooming.tickets.join(', ')} · ${grooming.rationale}`);
   lines.push('', 'Parent estimates are planning sizes; sum leaf tickets only for delivery reporting. Backlog items with unknown estimates cannot start. Inspect full acceptance/ownership/history with `pnpm board show ID`.', '');
