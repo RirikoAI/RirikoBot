@@ -18,8 +18,6 @@
 ## 🎯 To Do (Groomed & Estimated)
 | ID | Type | Title | Pts | Epic / Parent | Requires |
 |---|---|---|---|---|---|
-| `EPIC-001` | Epic | Monorepo Workspace, Toolchain & Core Contracts | 13 | Self | `EPIC-000` |
-| `STORY-010` | Story | Workspace Configuration & Root Monorepo Tooling | 5 | `EPIC-001` | `EPIC-000` |
 | `STORY-011` | Story | `packages/core` Contracts, Errors, EventBus & Config | 5 | `EPIC-001` | `STORY-010` |
 | `STORY-012` | Story | `apps/cli` Scaffolding & `ririko doctor` Diagnostics | 5 | `EPIC-001` | `STORY-011` |
 
@@ -40,6 +38,10 @@
 | `STORY-004` | Story | Complete Subsystem Documentation Catalog (16 Docs) | 5 | `EPIC-000` | [docs/](file:///Z:/Projects/ririko-v2-2026/docs/) |
 | `STORY-005` | Story | Scrum Kanban & Sub-Agent Knowledge Transfer System | 3 | `EPIC-000` | [TASK-0051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0051.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | `STORY-005` | [TASK-0051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0051.md) |
+| `STORY-010` | Story | Workspace Configuration & Root Monorepo Tooling | 5 | `EPIC-001` | [TASK-0103.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0103.md) |
+| `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | `STORY-010` | [TASK-0101.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0101.md) |
+| `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | `STORY-010` | [TASK-0102.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0102.md) |
+| `TASK-0103` | Task | Root Linting, Formatting & Vitest Configuration | 2 | `STORY-010` | [TASK-0103.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0103.md) |
 
 ---
 
