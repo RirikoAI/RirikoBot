@@ -1,13 +1,11 @@
 # Ririko work board
 
-Generated from state.json · revision 27 · execution limit **1**.
+Generated from state.json · revision 29 · execution limit **1**.
 
 **Current work:** No occupied ticket.
-**Delivery:** BATCH-002 / RIR-110 / `feat/RIR-110-review-evidence` → `develop/2.0.0-astra` (checkpoint)
+**Delivery:** No open batch.
 
 Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.
-
-**Approved stack:** parent BATCH-001 at `c1018829abf42fd2f8aad22948de343e51dc1e95`, decision D-001. Run `pnpm board pr-plan` to resolve the immediate PR target; never assume the integration target excludes parent changes.
 
 ## ready
 

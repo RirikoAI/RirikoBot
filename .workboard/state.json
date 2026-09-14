@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 27,
+  "revision": 29,
   "policy": {
     "pointScale": [
       1,
@@ -619,6 +619,16 @@
       "toTicket": null,
       "disposition": null,
       "batchId": "BATCH-001"
+    },
+    {
+      "id": "D-002",
+      "kind": "pr-created",
+      "reference": "User replied yes do it to the exact parent/story push and story PR request. Verified https://github.com/RirikoAI/RirikoBot/pull/557 at head a04753a473c8a807892848052cc248cff3695805 and base c1018829abf42fd2f8aad22948de343e51dc1e95; governance PR remains deferred. Receipt: .workboard/handoffs/RIR-110/005-published.md",
+      "at": "2026-09-14T16:47:56.057Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-002"
     }
   ],
   "assignments": [
@@ -678,11 +688,11 @@
       "branch": "feat/RIR-110-review-evidence",
       "baseBranch": "develop/2.0.0-astra",
       "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
-      "status": "checkpoint",
+      "status": "closed",
       "tickets": [
         "RIR-110"
       ],
-      "prUrl": null,
+      "prUrl": "https://github.com/RirikoAI/RirikoBot/pull/557",
       "stack": {
         "parentBatch": "BATCH-001",
         "parentHead": "c1018829abf42fd2f8aad22948de343e51dc1e95",
@@ -879,6 +889,20 @@
       "actor": "coordinator",
       "action": "checkpoint",
       "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-002\"}"
+    },
+    {
+      "id": 28,
+      "at": "2026-09-14T16:47:56.097Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-002\",\"kind\":\"pr-created\",\"reference\":\"User replied yes do it to the exact parent/story push and story PR request. Verified https://github.com/RirikoAI/RirikoBot/pull/557 at head a04753a473c8a807892848052cc248cff3695805 and base c1018829abf42fd2f8aad22948de343e51dc1e95; governance PR remains deferred. Receipt: .workboard/handoffs/RIR-110/005-published.md\",\"at\":\"2026-09-14T16:47:56.057Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-002\"}}"
+    },
+    {
+      "id": 29,
+      "at": "2026-09-14T16:47:56.680Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-002\",\"decision\":\"D-002\",\"prUrl\":\"https://github.com/RirikoAI/RirikoBot/pull/557\"}"
     }
   ]
 }
