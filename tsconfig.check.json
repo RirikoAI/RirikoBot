@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.base.json",
-  "compilerOptions": { "noEmit": true },
-  "include": ["apps/**/*.ts", "packages/**/*.ts", "tests/**/*.ts", "vitest.config.ts"],
+  "compilerOptions": { "noEmit": true, "allowImportingTsExtensions": true },
+  "include": ["apps/**/*.ts", "packages/**/*.ts", "tools/**/*.ts", "tests/**/*.ts", "vitest.config.ts"],
   "exclude": ["**/dist/**", "**/node_modules/**"]
 }

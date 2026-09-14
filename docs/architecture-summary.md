@@ -1,14 +1,36 @@
-# First deliverable: architecture summary
+# Architecture decision map — Ririko AI 2.0.0
 
-1. **Preserve:** all inventoried user-facing features, exact command names/aliases/options, profile/meme assets and source attribution. The audit records 141 commands and 68 reactions; declared handlers are not proof of working behavior.
-2. **Rewrite:** mutable command dispatch, settings/permission checks, unreliable background jobs, AI memory/tools, moderation, reward protection and notification delivery. Repair broken prefix handlers explicitly.
-3. **Replace:** Nest/TypeORM coupling with explicit TypeScript composition and Drizzle repositories; flat-file giveaway persistence and fragile provider coupling with durable services/adapters. Music/image engine choices require real validation.
-4. **Migrate:** all 17 source tables plus giveaway JSON, preserving Discord IDs, global balances/XP, notes, subscriptions, playlist records, role mappings and unknown/duplicate settings. Retain raw data and verify reconciliation; no legacy importer is claimed implemented.
-5. **Deprecate with compatibility:** plaintext API-secret persistence. Retain owner setup entry points in the compatibility plan, route storage to environment/vault, and never print or silently discard credentials. No user-facing feature is silently removed.
-6. **Structure:** bot/CLI and planned web apps; core/database/discord packages implemented; AI/music/domain/graphics packages added when they contain working code. Domains stay independent of Discord transport.
-7. **Database:** production PostgreSQL, single-process SQLite, separate Drizzle schemas/drivers behind the same repository contracts, checked revisions and atomic audit. Explicit checksummed migrations; refuse legacy schemas in the foundation runner.
-8. **Providers:** capability-aware adapters, bounded requests/retries/quotas and configured fallback/disabled states. Distinguish music metadata from audio; validate TikTok/Facebook API access independently; AI authority comes from application services.
-9. **Deployment:** Node24, pinned pnpm, non-root multi-stage Docker, optional PostgreSQL Compose, writable data volume, separate liveness/readiness and graceful shutdown. No mandatory Redis/API microservice; Docker execution remains unverified locally.
-10. **Phases:** audit → foundation → compatibility → rewritten systems → economy/XP/profile/games → TCG → dashboard → migration/release. Source audit and an executable foundation are delivered; the full release remains pending in the [roadmap](implementation-roadmap.md).
+The delivered foundation runs a bot and CLI over shared core/database/command packages. Only `ping`, `prefix`/`setprefix` and `help` are registered working commands. Music, AI, moderation, economy, TCG, dashboard and legacy import remain future implementation. The [requirement ledger](requirements.md) distinguishes design evidence from working feature evidence; this summary must not become a release-completion checklist.
 
-See [architecture](architecture.md), [source inventory](legacy-feature-inventory.md), [migration plan](migration-1.x-to-2.0.md), [dependencies](dependency-evaluation.md), [ADRs](adr/ADR-001-runtime-and-monorepo-toolchain.md), and [validation evidence](testing.md).
+## Decisions and their consequences
+
+| Decision | Why it fits this project | Consequence and limit | Detailed contract |
+|---|---|---|---|
+| Preserve the audited interface and data, repair broken internals | Users depend on command spellings, aliases, options, assets and existing identity | 141 declared commands/68 reactions are an audit count, not runtime parity; eleven broken meme prefix paths need explicit repair | [Inventory](legacy-feature-inventory.md), [migration](migration-1.x-to-2.0.md) |
+| One modular bot; CLI; later a web process | Shared services avoid duplicated policy and unnecessary network deployment | No API microservice, broker or Redis dependency is currently needed; future isolation must have measured or functional justification | [Architecture](architecture.md) |
+| Node 24, ESM, pinned pnpm and strict TypeScript | Explicit package boundaries and predictable source/build behavior | Native drivers need OS/container validation; strict typing does not validate untrusted runtime input | [ADR-001](adr/ADR-001-runtime-and-monorepo-toolchain.md), [versions](dependency-evaluation.md) |
+| Frameworks at application edges | Domain tests should not start Discord or a browser | `packages/discord` currently contains framework-neutral command logic; Discord.js presentation belongs to `apps/bot` | [Commands](commands.md), [modules](modules.md) |
+| Shared settings service with restrictive command policy | Slash, prefix and operator paths should not drift | Local CLI is a trusted deployment operator, not fresh Discord-member authorization; planned web must authenticate separately | [ADR-013](adr/ADR-013-configuration-permissions-and-concurrency.md) |
+| Revision-qualified writes plus atomic settings audit | Prevent concurrent writers overwriting each other silently | Five-second default cache permits stale reads; future stale browser forms also need caller-revision checking, which the current service lacks | [Database](database.md), [ADR-013](adr/ADR-013-configuration-permissions-and-concurrency.md) |
+| PostgreSQL for production; SQLite for small single-process use | Keep self-hosting practical without pretending dialects are interchangeable | SQLite is the actual default and does not enable WAL in code; both dialects need the same behavioral tests | [ADR-003](adr/ADR-003-database-layer-and-dual-dialect-orm.md) |
+| Durable domain state; replaceable presentation state | Restart must not invent rewards, lose ownership or repeat accepted work blindly | Help sessions/cooldowns are intentionally in memory; future jobs need persisted intent, leases, fencing and delivery reconciliation | [Architecture](architecture.md), [adapters](adapters.md) |
+| Capability-aware provider adapters | Required sources and provider failures differ materially | Music metadata is not playable audio; Twitch/TikTok/Facebook each need an access assessment; fallback cannot silently change spending authority | [Music](music.md), [AI](ai.md), [adapters](adapters.md) |
+| Application-mediated AI actions and server-held credentials | Generated text and browser input cannot grant authority | No implemented AI tool/vault/dashboard is claimed; secrets must never enter ordinary guild settings or client bundles | [AI](ai.md), [dashboard](dashboard.md) |
+
+## Follow one operation through the system
+
+For `/prefix newprefix:?`, the gateway defers the interaction, fetches actor/bot/channel permissions, then calls the shared dispatcher. The dispatcher applies canonical command policy and validates arguments. `SettingsService` checks guild-manager authority, reads the latest revision and calls a dialect repository. The repository commits the setting and audit together. The gateway then renders confirmation. A lost Discord reply after commit does not imply the settings transaction failed.
+
+For a **future** reminder, the analogous service must commit scheduling intent before saying it was accepted; a worker later performs delivery. It must distinguish durable acceptance from external confirmation, and permission at enqueue from permission at execution. These concrete traces and crash windows are specified in [architecture](architecture.md).
+
+## What is preserved, replaced and still gated
+
+Preserve all 17 audited source tables plus giveaway JSON, IDs, global balances/XP, notes, subscriptions, playlists, role mappings, unknown/duplicate settings, assets and attribution. Replace Nest/TypeORM coupling with explicit composition and Drizzle repositories; replace flat-file jobs and unsafe secret storage with durable services and a compatible credential setup path. Do not silently discard old data or remove user-facing features. The foundation schema migrator refuses an unrecognized legacy database; it does not import one.
+
+Current health routes are `/health/live` and `/health/ready`. Startup requires explicit completed migrations. Shutdown closes resources and waits for tracked handlers, but has no global deadline. Provider health, distributed quotas and restart-safe domain workers are not present. Container configuration and offline tests are distinct from live production evidence; use [deployment](deployment.md) and [testing](testing.md) for the actual gates.
+
+Implementation order remains foundation → compatibility → rewritten systems → economy/XP/profile/games → TCG → dashboard → migration/release, with estimated tickets and only one active ticket. The [roadmap](implementation-roadmap.md) supplies acceptance/dependencies rather than invented delivery dates. Every epic/story delivery ends at the user's PR checkpoint, including a long session.
+
+## Subsequent delivery integration decision
+
+[ADR-014](adr/ADR-014-completed-delivery-integration.md) records RIR-005: explicit provenance for integrating completed deliveries after squash merges, separate ownership for new repair changes, and actual-PR-head CI validation. It adds a fourteenth ADR after the RIR-800 documentation review; it does not implement another bot module or alter the original review counts.

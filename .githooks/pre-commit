@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+node tools/workboard/cli.ts check
+exec node tools/workboard/cli.ts guard-commit

@@ -1,0 +1,2545 @@
+{
+  "version": 1,
+  "revision": 161,
+  "policy": {
+    "pointScale": [
+      1,
+      2,
+      3,
+      5,
+      8,
+      13,
+      21,
+      34,
+      55,
+      89
+    ],
+    "wipLimit": 1,
+    "repository": "RirikoAI/RirikoBot",
+    "remote": "origin",
+    "remoteUrl": "https://github.com/RirikoAI/RirikoBot.git",
+    "baseBranch": "develop/2.0.0-astra"
+  },
+  "tickets": [
+    {
+      "id": "RIR-100",
+      "type": "epic",
+      "title": "Delivery governance and foundation validation",
+      "status": "ready",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-100",
+      "estimate": 13,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-001",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-001",
+      "type": "chore",
+      "title": "Establish work board, agent handoffs and safe Git delivery",
+      "status": "done",
+      "parent": "RIR-100",
+      "requires": [],
+      "deliveryScope": "RIR-001",
+      "estimate": 8,
+      "estimateRationale": "Workflow state machine, scoped Git hooks, agent protocol, seed backlog and regression tests require coordinated implementation.",
+      "groomedIn": "GR-001",
+      "priority": "P1",
+      "acceptance": [
+        "One active ticket and estimated/group-groomed starts are enforced",
+        "Task switching requires a recorded user decision and preserves paused/abandoned history",
+        "A single epic/story or standalone maintenance scope owns each delivery batch",
+        "All session and agent entry points load the durable handoff protocol",
+        "Git guards reject wrong branches, unrelated scope and unapproved publication",
+        "Board, templates, handoffs, tests and a concrete PR checkpoint are reviewable"
+      ],
+      "paths": [
+        ".workboard/",
+        "tools/workboard/",
+        ".githooks/",
+        ".gemini/",
+        "AGENTS.md",
+        "GEMINI.md",
+        "README.md",
+        "docs/",
+        "package.json",
+        "tsconfig.check.json",
+        "vitest.config.ts",
+        ".gitignore",
+        ".github/"
+      ],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-001/003-completion.md",
+      "validation": [
+        "87 unit tests passed, including 39 governance tests",
+        "13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped",
+        "ESLint, strict typecheck, build and board validation passed",
+        "Installed local hooks; verified target fetch unchanged; legacy checkout clean"
+      ]
+    },
+    {
+      "id": "RIR-003",
+      "type": "chore",
+      "title": "Validate the production Docker image and startup",
+      "status": "backlog",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-003",
+      "estimate": 5,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-001",
+      "priority": "P2",
+      "acceptance": [
+        "Build and run the rootless image with persistent storage",
+        "Verify diagnostics and shutdown; document real evidence"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-200",
+      "type": "epic",
+      "title": "Legacy compatibility",
+      "status": "ready",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-200",
+      "estimate": 34,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-210",
+      "type": "story",
+      "title": "General and guild information command parity",
+      "status": "ready",
+      "parent": "RIR-200",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-210",
+      "estimate": 8,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-211",
+      "type": "task",
+      "title": "Port get-avatar with slash and prefix parity",
+      "status": "ready",
+      "parent": "RIR-210",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-210",
+      "estimate": 3,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Preserve audited target argument/aliases and avatar behavior",
+        "Test both invocation paths and missing-member cases"
+      ],
+      "paths": [
+        "apps/bot/",
+        "packages/discord/",
+        "docs/commands.md"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-212",
+      "type": "task",
+      "title": "Port guildinfo and memberinfo through shared adapters",
+      "status": "ready",
+      "parent": "RIR-210",
+      "requires": [
+        "RIR-211"
+      ],
+      "deliveryScope": "RIR-210",
+      "estimate": 5,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [
+        "apps/bot/",
+        "packages/discord/",
+        "docs/commands.md"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-230",
+      "type": "story",
+      "title": "Meme rendering and usable prefix commands",
+      "status": "ready",
+      "parent": "RIR-200",
+      "requires": [
+        "RIR-210"
+      ],
+      "deliveryScope": "RIR-230",
+      "estimate": 13,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-231",
+      "type": "bug",
+      "title": "Repair the eleven broken legacy meme prefix paths",
+      "status": "ready",
+      "parent": "RIR-230",
+      "requires": [
+        "RIR-210"
+      ],
+      "deliveryScope": "RIR-231",
+      "estimate": 8,
+      "estimateRationale": "Confirmed legacy inherited method/regex defects; eleven interfaces and renderer integration need regression coverage.",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Implement fixes in new code without editing legacy",
+        "Keep all audited names/templates and usable slash/prefix arguments"
+      ],
+      "paths": [
+        "apps/bot/",
+        "packages/discord/",
+        "packages/graphics/",
+        "docs/"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-300",
+      "type": "epic",
+      "title": "Rewritten provider and durable systems",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-300",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-310",
+      "type": "story",
+      "title": "Music, AI, images, moderation, reminders and notifications",
+      "status": "backlog",
+      "parent": "RIR-300",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-310",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-400",
+      "type": "epic",
+      "title": "Economy, XP, rankings and games",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-400",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-410",
+      "type": "story",
+      "title": "Transactional rewards and anti-spam foundations",
+      "status": "backlog",
+      "parent": "RIR-400",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-410",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-500",
+      "type": "epic",
+      "title": "Waifu trading card game",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-500",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-510",
+      "type": "story",
+      "title": "Attribution-preserving ingestion and transactional ownership",
+      "status": "backlog",
+      "parent": "RIR-500",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-510",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-600",
+      "type": "epic",
+      "title": "Guild administration dashboard",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-600",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-610",
+      "type": "story",
+      "title": "Discord OAuth and shared configuration controls",
+      "status": "backlog",
+      "parent": "RIR-600",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-610",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-700",
+      "type": "epic",
+      "title": "Legacy migration and release",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-700",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-710",
+      "type": "story",
+      "title": "Representative-data import, restore rehearsal and rollout",
+      "status": "backlog",
+      "parent": "RIR-700",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-710",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-004",
+      "type": "chore",
+      "title": "Remove historically tracked generated dependency launchers",
+      "status": "backlog",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-004",
+      "estimate": 3,
+      "estimateRationale": "Bounded removal from tracking of three generated dependency launchers with frozen-install verification; remains backlog.",
+      "groomedIn": "GR-003",
+      "priority": "P3",
+      "acceptance": [
+        "Review git ls-files evidence for the three historical packages/core/node_modules/.bin/pino launchers.",
+        "Remove generated launchers from source tracking while preserving installed dependencies and unrelated files.",
+        "Verify frozen dependency installation and workspace Git status stay clean."
+      ],
+      "paths": [
+        "packages/core/node_modules/.bin/",
+        ".gitignore",
+        "docs/"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-110",
+      "type": "story",
+      "title": "Trace release reviews to the blueprint and exact branch changes",
+      "status": "done",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-110",
+      "estimate": 13,
+      "estimateRationale": "Cross-cutting blueprint preservation, 91-section evidence mapping, automated validation and safe stacked delivery with real Git regression tests.",
+      "groomedIn": "GR-003",
+      "priority": "P1",
+      "acceptance": [
+        "Preserve the full original blueprint verbatim with source hash and all numbered requirements.",
+        "Map every blueprint section to truthful status, evidence and a backlog scope; validate coverage and file references automatically.",
+        "Deliver a pinned source comparison separating remote Astra, local unpublished work and Gemini.",
+        "Verify explicitly user-approved stacked delivery without mixing parent changes or guessing PR targets.",
+        "Run appropriate regression checks, persist specialist knowledge and stop at this story PR checkpoint."
+      ],
+      "paths": [
+        "BLUEPRINT.md",
+        "AGENTS.md",
+        "GEMINI.md",
+        "README.md",
+        "docs/",
+        "tools/workboard/",
+        ".workboard/",
+        ".github/workflows/ci.yml",
+        "package.json"
+      ],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-110/003-completion.md",
+      "validation": [
+        "113 unit tests passed, including 65 board and requirement tests",
+        "13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped",
+        "ESLint, strict typecheck, production build, board and 91-section/35-criterion requirement checks passed",
+        "Verbatim blueprint source hash verified; latest branch comparison refreshed; legacy checkout clean",
+        "Both specialist returns accepted; preserved parent unchanged; no publication authorized"
+      ]
+    },
+    {
+      "id": "RIR-005",
+      "type": "bug",
+      "title": "Resolve deferred parent PR validation without rewriting preserved work",
+      "status": "done",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-110"
+      ],
+      "deliveryScope": "RIR-005",
+      "estimate": 13,
+      "estimateRationale": "Cross-cutting provenance, real Git history/CI regression and safe integration resolution; bounded to one executable bug",
+      "groomedIn": "GR-006",
+      "priority": "P1",
+      "acceptance": [
+        "Reproduce the frozen parent PR checker rejecting closed BATCH-001 while its branch push remains valid.",
+        "Choose and verify an explicit reviewed PR integration path preserving all original commits and separate scope boundaries.",
+        "Test exact parent head/base, closure state and CI behavior; do not bypass checks or mark another scope active."
+      ],
+      "paths": [
+        ".workboard/",
+        "tools/workboard/",
+        ".github/",
+        "docs/"
+      ],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-005/004-completion.md",
+      "validation": [
+        "Full unit135/135 passed across10files193.58s; lint/typecheck/build pass",
+        "Exact source/squash snapshots, retained ancestry and isolated repair paths validated on real merge graph",
+        "Both local squash-retention merges have zero tree delta; original commits/receipts preserved",
+        "Requirements91/35 and immutable source hashes pass; docs references valid",
+        "A026/A027 accepted; integration targets verified801103c; publication requires user checkpoint"
+      ]
+    },
+    {
+      "status": "done",
+      "estimate": 89,
+      "estimateRationale": "Full cross-domain specification and evidence review; seven bounded leaves cover the 40-file corpus",
+      "groomedIn": "GR-004",
+      "priority": "P1",
+      "owner": null,
+      "handoff": ".workboard/handoffs/RIR-800/003-completion.md",
+      "validation": [
+        "All40 original files reviewed;41 final files and exact40-row matrix",
+        "452 local references valid; exact blueprint/manifests preserved",
+        "91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid",
+        "Independent A023/A024/A025 returns accepted; final diff hygiene passes",
+        "119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim"
+      ],
+      "id": "RIR-800",
+      "type": "epic",
+      "title": "Implementation-ready documentation across every docs file",
+      "parent": null,
+      "requires": [
+        "RIR-110"
+      ],
+      "deliveryScope": "RIR-800",
+      "paths": [
+        "docs/"
+      ],
+      "acceptance": [
+        "Review every one of the 40 existing docs files and all 13 ADRs against pinned Gemini source and the original blueprint",
+        "Add concrete contracts, state transitions, schema and concurrency rules, security, failure recovery, worked examples and acceptance evidence appropriate to each document",
+        "Preserve source-backed audit data and distinguish implemented behavior from proposed design",
+        "Keep one active estimated ticket at a time; deliver the complete documentation epic at one PR checkpoint"
+      ]
+    },
+    {
+      "status": "done",
+      "estimate": 13,
+      "estimateRationale": "Specify architecture, developer workflows and command contracts: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
+      "groomedIn": "GR-004",
+      "priority": "P1",
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-801/006-completion.md",
+      "validation": [
+        "12 documents reviewed against source and Gemini; 187 relative links valid",
+        "Requirements 91 sections/35 criteria valid; diff check passed",
+        "119 unit tests passed in one-worker full suite; live validation not claimed"
+      ],
+      "id": "RIR-801",
+      "type": "task",
+      "title": "Specify architecture, developer workflows and command contracts",
+      "parent": "RIR-800",
+      "requires": [
+        "RIR-110"
+      ],
+      "deliveryScope": "RIR-800",
+      "paths": [
+        "docs/architecture.md",
+        "docs/architecture-summary.md",
+        "docs/development.md",
+        "docs/contributing.md",
+        "docs/commands.md",
+        "docs/modules.md",
+        "docs/dependency-evaluation.md",
+        "docs/implementation-roadmap.md",
+        "docs/work-management.md",
+        "docs/adr/ADR-001-runtime-and-monorepo-toolchain.md",
+        "docs/adr/ADR-002-discord-framework-and-interaction-routing.md",
+        "docs/adr/ADR-013-configuration-permissions-and-concurrency.md"
+      ],
+      "acceptance": [
+        "Read and compare every assigned file: docs/architecture.md, docs/architecture-summary.md, docs/development.md, docs/contributing.md, docs/commands.md, docs/modules.md, docs/dependency-evaluation.md, docs/implementation-roadmap.md, docs/work-management.md, docs/adr/ADR-001-runtime-and-monorepo-toolchain.md, docs/adr/ADR-002-discord-framework-and-interaction-routing.md, docs/adr/ADR-013-configuration-permissions-and-concurrency.md",
+        "Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims",
+        "Verify source references, links and cross-document consistency; persist a durable handoff"
+      ]
+    },
+    {
+      "status": "done",
+      "estimate": 8,
+      "estimateRationale": "Deepen data contracts, legacy evidence and migration recovery: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
+      "groomedIn": "GR-004",
+      "priority": "P1",
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-802/006-completion.md",
+      "validation": [
+        "58 local links valid; requirements91/35 and diff check pass",
+        "All manifest records checked; 85SQL statements replay match17tables108columns11FK7indexes",
+        "Legacy snapshot, blueprint and both manifests unchanged"
+      ],
+      "id": "RIR-802",
+      "type": "task",
+      "title": "Deepen data contracts, legacy evidence and migration recovery",
+      "parent": "RIR-800",
+      "requires": [
+        "RIR-801"
+      ],
+      "deliveryScope": "RIR-800",
+      "paths": [
+        "docs/database.md",
+        "docs/migrations.md",
+        "docs/migration-1.x-to-2.0.md",
+        "docs/legacy-feature-inventory.md",
+        "docs/legacy-command-manifest.json",
+        "docs/legacy-data-manifest.json",
+        "docs/adr/ADR-003-database-layer-and-dual-dialect-orm.md"
+      ],
+      "acceptance": [
+        "Read and compare every assigned file: docs/database.md, docs/migrations.md, docs/migration-1.x-to-2.0.md, docs/legacy-feature-inventory.md, docs/legacy-command-manifest.json, docs/legacy-data-manifest.json, docs/adr/ADR-003-database-layer-and-dual-dialect-orm.md",
+        "Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims",
+        "Verify source references, links and cross-document consistency; persist a durable handoff"
+      ]
+    },
+    {
+      "status": "done",
+      "estimate": 13,
+      "estimateRationale": "Specify provider, AI, music, moderation and durable delivery behavior: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
+      "groomedIn": "GR-004",
+      "priority": "P1",
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-803/006-completion.md",
+      "validation": [
+        "65 relative links resolve; requirements91/35; boardWIP1; diffcheck pass; no live subsystem claims"
+      ],
+      "id": "RIR-803",
+      "type": "task",
+      "title": "Specify provider, AI, music, moderation and durable delivery behavior",
+      "parent": "RIR-800",
+      "requires": [
+        "RIR-802"
+      ],
+      "deliveryScope": "RIR-800",
+      "paths": [
+        "docs/adapters.md",
+        "docs/ai.md",
+        "docs/music.md",
+        "docs/moderation.md",
+        "docs/adr/ADR-004-audio-and-music-engine.md",
+        "docs/adr/ADR-005-ai-chatbot-and-tool-calling-architecture.md",
+        "docs/adr/ADR-006-image-generation-and-canvas-synthesis.md",
+        "docs/adr/ADR-007-stream-platform-notification-architecture.md",
+        "docs/adr/ADR-012-job-scheduler-and-task-queue.md"
+      ],
+      "acceptance": [
+        "Read and compare every assigned file: docs/adapters.md, docs/ai.md, docs/music.md, docs/moderation.md, docs/adr/ADR-004-audio-and-music-engine.md, docs/adr/ADR-005-ai-chatbot-and-tool-calling-architecture.md, docs/adr/ADR-006-image-generation-and-canvas-synthesis.md, docs/adr/ADR-007-stream-platform-notification-architecture.md, docs/adr/ADR-012-job-scheduler-and-task-queue.md",
+        "Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims",
+        "Verify source references, links and cross-document consistency; persist a durable handoff"
+      ]
+    },
+    {
+      "status": "done",
+      "estimate": 13,
+      "estimateRationale": "Specify economy and complete TCG progression and transactional rules: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
+      "groomedIn": "GR-004",
+      "priority": "P1",
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-804/006-completion.md",
+      "validation": [
+        "Local links valid; requirements91/35; diffcheck; independent arithmetic and full breadth review; all runtime features remain proposed"
+      ],
+      "id": "RIR-804",
+      "type": "task",
+      "title": "Specify economy and complete TCG progression and transactional rules",
+      "parent": "RIR-800",
+      "requires": [
+        "RIR-803"
+      ],
+      "deliveryScope": "RIR-800",
+      "paths": [
+        "docs/economy.md",
+        "docs/waifu-tcg.md",
+        "docs/adr/ADR-009-centralized-transactional-economy-engine.md",
+        "docs/adr/ADR-010-waifu-tcg-pipeline-and-game-design.md"
+      ],
+      "acceptance": [
+        "Read and compare every assigned file: docs/economy.md, docs/waifu-tcg.md, docs/adr/ADR-009-centralized-transactional-economy-engine.md, docs/adr/ADR-010-waifu-tcg-pipeline-and-game-design.md",
+        "Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims",
+        "Verify source references, links and cross-document consistency; persist a durable handoff"
+      ]
+    },
+    {
+      "status": "done",
+      "estimate": 8,
+      "estimateRationale": "Specify dashboard workflows, authorization and credential lifecycle: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
+      "groomedIn": "GR-004",
+      "priority": "P1",
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-805/006-completion.md",
+      "validation": [
+        "28 local paths valid; requirements91/35; diffcheck; full independent review; no runtime web claims"
+      ],
+      "id": "RIR-805",
+      "type": "task",
+      "title": "Specify dashboard workflows, authorization and credential lifecycle",
+      "parent": "RIR-800",
+      "requires": [
+        "RIR-804"
+      ],
+      "deliveryScope": "RIR-800",
+      "paths": [
+        "docs/dashboard.md",
+        "docs/adr/ADR-008-web-dashboard-architecture.md",
+        "docs/adr/ADR-011-secrets-management-and-credential-security.md"
+      ],
+      "acceptance": [
+        "Read and compare every assigned file: docs/dashboard.md, docs/adr/ADR-008-web-dashboard-architecture.md, docs/adr/ADR-011-secrets-management-and-credential-security.md",
+        "Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims",
+        "Verify source references, links and cross-document consistency; persist a durable handoff"
+      ]
+    },
+    {
+      "status": "done",
+      "estimate": 8,
+      "estimateRationale": "Deepen deployment, incident recovery and acceptance test strategy: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
+      "groomedIn": "GR-004",
+      "priority": "P1",
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-806/006-completion.md",
+      "validation": [
+        "29 local paths valid; requirements91/35; board/diffcheck; lint/type/build pass; SQLite/CLI13pass7PGskip; no live platform claims"
+      ],
+      "id": "RIR-806",
+      "type": "task",
+      "title": "Deepen deployment, incident recovery and acceptance test strategy",
+      "parent": "RIR-800",
+      "requires": [
+        "RIR-805"
+      ],
+      "deliveryScope": "RIR-800",
+      "paths": [
+        "docs/deployment.md",
+        "docs/testing.md"
+      ],
+      "acceptance": [
+        "Read and compare every assigned file: docs/deployment.md, docs/testing.md",
+        "Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims",
+        "Verify source references, links and cross-document consistency; persist a durable handoff"
+      ]
+    },
+    {
+      "status": "done",
+      "estimate": 8,
+      "estimateRationale": "Reconcile every document, requirement and comparison with evidence: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
+      "groomedIn": "GR-004",
+      "priority": "P1",
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-807/005-completion.md",
+      "validation": [
+        "All40 original files reviewed;41 final files and exact40-row matrix",
+        "452 local references valid; exact blueprint/manifests preserved",
+        "91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid",
+        "Independent A023/A024/A025 returns accepted; final diff hygiene passes",
+        "119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim"
+      ],
+      "id": "RIR-807",
+      "type": "task",
+      "title": "Reconcile every document, requirement and comparison with evidence",
+      "parent": "RIR-800",
+      "requires": [
+        "RIR-806"
+      ],
+      "deliveryScope": "RIR-800",
+      "paths": [
+        "docs/requirements.json",
+        "docs/requirements.md",
+        "docs/branch-comparison.md",
+        "docs/documentation-review.md"
+      ],
+      "acceptance": [
+        "Read and compare every assigned file: docs/requirements.json, docs/requirements.md, docs/branch-comparison.md, docs/documentation-review.md",
+        "Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims",
+        "Verify source references, links and cross-document consistency; persist a durable handoff"
+      ]
+    },
+    {
+      "id": "RIR-808",
+      "type": "task",
+      "title": "Support fresh stack consent after a published parent closes",
+      "status": "done",
+      "parent": "RIR-800",
+      "requires": [
+        "RIR-110"
+      ],
+      "deliveryScope": "RIR-800",
+      "estimate": 5,
+      "estimateRationale": "Bounded additive decision variant with runtime validation, safe transition and real Git regression coverage",
+      "groomedIn": "GR-005",
+      "priority": "P1",
+      "acceptance": [
+        "Record a fresh stack decision on a closed parent without falsely deferring or closing its existing PR",
+        "Keep older stack decisions valid while rejecting reuse, wrong parent and use as publication approval",
+        "Verify normal atomic board commands and real Git guards, preserving all remote refs and the local receipt"
+      ],
+      "paths": [
+        "tools/workboard/",
+        ".workboard/",
+        "docs/work-management.md"
+      ],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-808/002-completion.md",
+      "validation": [
+        "33 model tests passed",
+        "2 targeted real Git/store cases passed; 29 unrelated cases excluded in worker run",
+        "Strict typecheck, modified-file ESLint, board and requirement validation passed",
+        "No remote changes, manual JSON transitions or hook bypass; original PR intact"
+      ]
+    }
+  ],
+  "grooming": [
+    {
+      "id": "GR-001",
+      "scope": "RIR-100",
+      "at": "2026-09-14T15:26:02Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-100",
+        "RIR-001",
+        "RIR-003"
+      ],
+      "rationale": "Group refinement from the user's standing governance requirements and known Docker verification gap."
+    },
+    {
+      "id": "GR-002",
+      "scope": "RIR-200",
+      "at": "2026-09-14T15:26:02Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-200",
+        "RIR-210",
+        "RIR-211",
+        "RIR-212",
+        "RIR-230",
+        "RIR-231"
+      ],
+      "rationale": "Initial group estimates from audited general/guild and meme compatibility defects; revisit before scope expands."
+    },
+    {
+      "id": "GR-003",
+      "scope": "RIR-100",
+      "at": "2026-09-14T16:03:17.079Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-110",
+        "RIR-004"
+      ],
+      "rationale": "Foundation refinement after pinned branch comparison; one approved review-evidence story and deferred dependency cleanup."
+    },
+    {
+      "id": "GR-004",
+      "scope": "RIR-800",
+      "at": "2026-09-14T17:04:23.485Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-800",
+        "RIR-801",
+        "RIR-802",
+        "RIR-803",
+        "RIR-804",
+        "RIR-805",
+        "RIR-806",
+        "RIR-807"
+      ],
+      "rationale": "User approved one stacked documentation epic. Grouped review of all 40 files and 13 ADRs; seven sequential leaves partition ownership and review risk. Parent is a planning estimate, not additional velocity."
+    },
+    {
+      "id": "GR-005",
+      "scope": "RIR-800",
+      "at": "2026-09-14T17:07:34.583Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-808"
+      ],
+      "rationale": "Explicit user-approved 5-point prerequisite discovered during opening of the already groomed documentation epic"
+    },
+    {
+      "id": "GR-006",
+      "scope": "RIR-100",
+      "at": "2026-09-14T19:29:12.505Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-005"
+      ],
+      "rationale": "User-authorized integration repair: exact source/squash ancestry and receipts, closed-batch CI and scope guard regression; one bounded bug, no domain work"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-001",
+      "kind": "defer-pr",
+      "reference": "User reply to the workflow question: Yes—defer this PR and allow one stacked improvement story. The prior message requested comparison before publication.",
+      "at": "2026-09-14T16:01:12.268Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-001"
+    },
+    {
+      "id": "D-002",
+      "kind": "pr-created",
+      "reference": "User replied yes do it to the exact parent/story push and story PR request. Verified https://github.com/RirikoAI/RirikoBot/pull/557 at head a04753a473c8a807892848052cc248cff3695805 and base c1018829abf42fd2f8aad22948de343e51dc1e95; governance PR remains deferred. Receipt: .workboard/handoffs/RIR-110/005-published.md",
+      "at": "2026-09-14T16:47:56.057Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-002"
+    },
+    {
+      "id": "D-003",
+      "kind": "stack",
+      "reference": "User replied Approve one stacked documentation epic, then Approve the prerequisite repair and board migration. Fresh consent for one scope above open PR #557 and preserved local receipt de7504b; no new push, PR or merge approval.",
+      "at": "2026-09-14T17:08:36.845Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-002"
+    },
+    {
+      "id": "D-004",
+      "kind": "pr-created",
+      "reference": "User replied yes to push RIR-800 head e09daed09d5b625095923a622789413d8281327b and create its PR into preserved RIR-110 a04753a473c8a807892848052cc248cff3695805. Independently verified https://github.com/RirikoAI/RirikoBot/pull/561 open with exact approved refs. Receipt: .workboard/handoffs/RIR-800/004-published.md. No merge, retarget or new scope.",
+      "at": "2026-09-14T19:11:37.743Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-003"
+    },
+    {
+      "id": "D-005",
+      "kind": "stack",
+      "reference": "User said can you do 1. to recommendation to reconcile squash merges and local receipts, preserve existing commits, fix RIR-005 and prepare integration into develop/2.0.0-astra. Authorizes one repair based on completed documentation e09daed and preserved local receipts; final PR approval remains separate.",
+      "at": "2026-09-14T19:29:12.505Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-003"
+    },
+    {
+      "id": "D-006",
+      "kind": "integrate",
+      "reference": "User said can you do 1. to RIR-005 integration repair: reconcile completed governance/evidence/documentation and exact squash histories, preserve local receipts and prepare develop/2.0.0-astra integration. Reviewed originals c1018829/a04753a/e09daed, squashes7f0fd9a/f33b0c5, administrative baselinea27151b. One repair scope; no push/PR/remote merge/new feature authorization.",
+      "at": "2026-09-14T19:47:23.026Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-004"
+    }
+  ],
+  "assignments": [
+    {
+      "id": "A-001",
+      "ticket": "RIR-001",
+      "agent": "workflow-engine",
+      "scope": "Implement and test the pure board validator/state transition engine against tools/workboard/types.ts and the standing protocol. Return evidence and design decisions; no Git or status changes.",
+      "paths": [
+        "tools/workboard/model.ts",
+        "tools/workboard/model.test.ts"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-001/002-workflow-engine.md"
+    },
+    {
+      "id": "A-002",
+      "ticket": "RIR-110",
+      "agent": "delivery-guard",
+      "scope": "Implement and test explicit approved-stack resolution and Git guards against the coordinator types contract. Own git.ts and git-store.test.ts only; no board or Git publication mutations; return exact evidence.",
+      "paths": [
+        "tools/workboard/git.ts",
+        "tools/workboard/git-store.test.ts"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-110/002-delivery-guard.md"
+    },
+    {
+      "id": "A-003",
+      "ticket": "RIR-110",
+      "agent": "delivery-guard",
+      "scope": "Finish safe deferred-parent publication from the current child checkpoint: separate parent approval/head/base/scope, no worktree switch, no mixing or bypass of shared board. Own git.ts and git-store.test.ts only; return tested evidence.",
+      "paths": [
+        "tools/workboard/git.ts",
+        "tools/workboard/git-store.test.ts"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-110/004-parent-publication.md"
+    },
+    {
+      "id": "A-004",
+      "ticket": "RIR-808",
+      "agent": "delivery-guard",
+      "scope": "Add a real Git/store regression for a fresh kind=stack decision after an existing parent PR is recorded and closed; retain exact published refs and reject use as parent publication. Own only git-store.test.ts; return evidence, no board/Git workspace mutations.",
+      "paths": [
+        "tools/workboard/git-store.test.ts"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-808/002-completion.md"
+    },
+    {
+      "id": "A-005",
+      "ticket": "RIR-801",
+      "agent": "architecture-docs",
+      "scope": "Deepen system topology, request/state/security/config contracts and concrete decision tradeoffs against actual source and pinned Gemini; no other files",
+      "paths": [
+        "docs/architecture.md",
+        "docs/architecture-summary.md",
+        "docs/adr/ADR-001-runtime-and-monorepo-toolchain.md",
+        "docs/adr/ADR-013-configuration-permissions-and-concurrency.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-801/003-architecture-return.md"
+    },
+    {
+      "id": "A-006",
+      "ticket": "RIR-801",
+      "agent": "discord-docs",
+      "scope": "Deepen actual and planned command/help/module contracts, compatibility, lifecycle, failure and acceptance scenarios beyond Gemini; no other files",
+      "paths": [
+        "docs/commands.md",
+        "docs/modules.md",
+        "docs/adr/ADR-002-discord-framework-and-interaction-routing.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-801/004-discord-return.md"
+    },
+    {
+      "id": "A-007",
+      "ticket": "RIR-801",
+      "agent": "developer-docs",
+      "scope": "Deepen reproducible developer/operator extension workflows and contribution/delivery/handoff recovery, grounded in actual CLI and protocol; no other files",
+      "paths": [
+        "docs/development.md",
+        "docs/contributing.md",
+        "docs/work-management.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-801/005-developer-return.md"
+    },
+    {
+      "id": "A-008",
+      "agent": "architecture-docs",
+      "paths": [
+        "docs/database.md",
+        "docs/adr/ADR-003-database-layer-and-dual-dialect-orm.md"
+      ],
+      "scope": "Deepen actual and proposed data models, dialect/transaction/constraint contracts and ADR alternatives against source and Gemini; documentation only.",
+      "ticket": "RIR-802",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-802/003-database-return.md"
+    },
+    {
+      "id": "A-009",
+      "agent": "developer-docs",
+      "paths": [
+        "docs/migrations.md",
+        "docs/migration-1.x-to-2.0.md"
+      ],
+      "scope": "Deepen current schema migration and planned legacy importer operations, mapping/reconciliation/crash recovery/restore against source and Gemini; documentation only.",
+      "ticket": "RIR-802",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-802/004-migration-return.md"
+    },
+    {
+      "id": "A-010",
+      "ticket": "RIR-802",
+      "agent": "discord-docs",
+      "scope": "Read-only full audit of both legacy JSON manifests, verify every referenced source/asset/migration hash and structural totals against immutable source; return evidence, preserve both JSON files unless coordinator reviews a proven correction.",
+      "paths": [
+        "docs/legacy-command-manifest.json",
+        "docs/legacy-data-manifest.json"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-802/005-manifest-return.md"
+    },
+    {
+      "id": "A-011",
+      "agent": "architecture-docs",
+      "paths": [
+        "docs/adapters.md",
+        "docs/adr/ADR-006-image-generation-and-canvas-synthesis.md",
+        "docs/adr/ADR-007-stream-platform-notification-architecture.md",
+        "docs/adr/ADR-012-job-scheduler-and-task-queue.md"
+      ],
+      "scope": "Deepen common provider/capability/error/job contracts plus image/canvas, stream and durable scheduler ADRs; compare whole Gemini counterparts and official sources, documentation only.",
+      "ticket": "RIR-803",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-803/003-adapter-return.md"
+    },
+    {
+      "id": "A-012",
+      "agent": "developer-docs",
+      "paths": [
+        "docs/ai.md",
+        "docs/adr/ADR-005-ai-chatbot-and-tool-calling-architecture.md"
+      ],
+      "scope": "Deepen AI scoped memory, provider selection, streaming, tools, security, budgets and recovery plus ADR, grounded in blueprint/legacy/current code and official sources; documentation only.",
+      "ticket": "RIR-803",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-803/004-ai-return.md"
+    },
+    {
+      "id": "A-013",
+      "agent": "discord-docs",
+      "paths": [
+        "docs/music.md",
+        "docs/adr/ADR-004-audio-and-music-engine.md"
+      ],
+      "scope": "Deepen music queue/voice/control/reconnect/provider capability and engine evaluation contracts plus ADR; preserve required sources and audited interface; documentation only.",
+      "ticket": "RIR-803",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-803/005-music-return.md"
+    },
+    {
+      "id": "A-014",
+      "ticket": "RIR-804",
+      "agent": "architecture-docs",
+      "scope": "Deepen full TCG guide against all blueprint/Gemini mechanics, contracts, worked examples and failure tests; no runtime or other paths",
+      "paths": [
+        "docs/waifu-tcg.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-804/003-tcg-return.md"
+    },
+    {
+      "id": "A-015",
+      "ticket": "RIR-804",
+      "agent": "developer-docs",
+      "scope": "Deepen economy guide including ledger, rewards/anti-abuse, inventory/games, rankings and exact legacy meaning; no runtime or other paths",
+      "paths": [
+        "docs/economy.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-804/004-economy-return.md"
+    },
+    {
+      "id": "A-016",
+      "ticket": "RIR-804",
+      "agent": "discord-docs",
+      "scope": "Read-only independent blueprint/Gemini TCG and economy breadth/consistency review, return missing concrete acceptance; no file writes",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-804/005-independent-review.md"
+    },
+    {
+      "id": "A-017",
+      "ticket": "RIR-805",
+      "agent": "developer-docs",
+      "scope": "Deepen dashboard main guide with all admin workflows and trustworthy current-versus-future contracts",
+      "paths": [
+        "docs/dashboard.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-805/004-dashboard-return.md"
+    },
+    {
+      "id": "A-018",
+      "ticket": "RIR-805",
+      "agent": "architecture-docs",
+      "scope": "Deepen web architecture ADR with alternatives, boundaries, authentication/cache/concurrency/rollout decisions",
+      "paths": [
+        "docs/adr/ADR-008-web-dashboard-architecture.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-805/003-web-architecture-return.md"
+    },
+    {
+      "id": "A-019",
+      "ticket": "RIR-805",
+      "agent": "discord-docs",
+      "scope": "Read-only independent dashboard/OAuth/secret lifecycle security and blueprint/Gemini completeness review",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-805/005-independent-review.md"
+    },
+    {
+      "id": "A-020",
+      "ticket": "RIR-806",
+      "agent": "developer-docs",
+      "scope": "Deepen deployment runbook against actual Docker/Compose/CI/health and source/Gemini, with verified commands and recovery gaps",
+      "paths": [
+        "docs/deployment.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-806/003-deployment-return.md"
+    },
+    {
+      "id": "A-021",
+      "ticket": "RIR-806",
+      "agent": "architecture-docs",
+      "scope": "Read-only independent deployment/release/backup/health and Git scope review",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-806/004-operations-review.md"
+    },
+    {
+      "id": "A-022",
+      "ticket": "RIR-806",
+      "agent": "discord-docs",
+      "scope": "Read-only independent test/CI inventory and testing guide review; do not rerun full suite",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-806/005-testing-return.md"
+    },
+    {
+      "id": "A-023",
+      "ticket": "RIR-807",
+      "agent": "developer-docs",
+      "scope": "Update branch comparison with pinned source/code evidence and documentation epic differences; no code or completion inflation",
+      "paths": [
+        "docs/branch-comparison.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-807/002-comparison-return.md"
+    },
+    {
+      "id": "A-024",
+      "ticket": "RIR-807",
+      "agent": "architecture-docs",
+      "scope": "Read-only entire 40-file corpus coherence/depth review and final documentation-review matrix verification",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-807/003-architecture-return.md"
+    },
+    {
+      "id": "A-025",
+      "ticket": "RIR-807",
+      "agent": "discord-docs",
+      "scope": "Read-only full corpus local file/anchor reference, source/status and command consistency check; do not rerun tests",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-807/004-reference-return.md"
+    },
+    {
+      "id": "A-026",
+      "ticket": "RIR-005",
+      "agent": "integration-reviewer",
+      "scope": "Read-only reproduce frozen closed-batch rejection and review safe exact-history integration design; source and CI edge cases, no mutations",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-005/002-review.md"
+    },
+    {
+      "id": "A-027",
+      "ticket": "RIR-005",
+      "agent": "integration-tests",
+      "scope": "Read-only independent test design for completed-delivery integration, graph and content authorization; later review root implementation",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-005/002-review.md"
+    }
+  ],
+  "batches": [
+    {
+      "id": "BATCH-001",
+      "scope": "RIR-001",
+      "branch": "chore/RIR-001-work-governance",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
+      "status": "closed",
+      "tickets": [
+        "RIR-001"
+      ],
+      "prUrl": null
+    },
+    {
+      "id": "BATCH-002",
+      "scope": "RIR-110",
+      "branch": "feat/RIR-110-review-evidence",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
+      "status": "closed",
+      "tickets": [
+        "RIR-110"
+      ],
+      "prUrl": "https://github.com/RirikoAI/RirikoBot/pull/557",
+      "stack": {
+        "parentBatch": "BATCH-001",
+        "parentHead": "c1018829abf42fd2f8aad22948de343e51dc1e95",
+        "decision": "D-001"
+      }
+    },
+    {
+      "id": "BATCH-003",
+      "scope": "RIR-800",
+      "branch": "feat/RIR-800-documentation-depth",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
+      "status": "closed",
+      "tickets": [
+        "RIR-800",
+        "RIR-808",
+        "RIR-801",
+        "RIR-802",
+        "RIR-803",
+        "RIR-804",
+        "RIR-805",
+        "RIR-806",
+        "RIR-807"
+      ],
+      "prUrl": "https://github.com/RirikoAI/RirikoBot/pull/561",
+      "stack": {
+        "parentBatch": "BATCH-002",
+        "parentHead": "a04753a473c8a807892848052cc248cff3695805",
+        "decision": "D-003"
+      }
+    },
+    {
+      "id": "BATCH-004",
+      "scope": "RIR-005",
+      "branch": "fix/RIR-005-integration-reconciliation",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
+      "status": "checkpoint",
+      "tickets": [
+        "RIR-005"
+      ],
+      "prUrl": null,
+      "integration": {
+        "decision": "D-006",
+        "baseline": "a27151bcf4ed3a72fdd3840011015acb17ae6048",
+        "sources": [
+          {
+            "batch": "BATCH-001",
+            "head": "c1018829abf42fd2f8aad22948de343e51dc1e95"
+          },
+          {
+            "batch": "BATCH-002",
+            "head": "a04753a473c8a807892848052cc248cff3695805",
+            "merged": "7f0fd9ae589ec140adc4ab7f01ec63299ac4a42b"
+          },
+          {
+            "batch": "BATCH-003",
+            "head": "e09daed09d5b625095923a622789413d8281327b",
+            "merged": "f33b0c5535a7a7df4d9278aebeec7a5b9440de43"
+          }
+        ]
+      }
+    }
+  ],
+  "history": [
+    {
+      "id": 1,
+      "at": "2026-09-14T15:26:02Z",
+      "actor": "coordinator",
+      "action": "bootstrap",
+      "detail": "User requested the governance system. Estimated RIR-001 at 8 points before implementation; no prior tracked ticket occupied the slot. Clean baseline and branch verified."
+    },
+    {
+      "id": 2,
+      "at": "2026-09-14T15:44:30.259Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-001\",\"handoff\":\".workboard/handoffs/RIR-001/002-workflow-engine.md\"}"
+    },
+    {
+      "id": 3,
+      "at": "2026-09-14T15:44:30.566Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-001\"}"
+    },
+    {
+      "id": 4,
+      "at": "2026-09-14T15:44:30.867Z",
+      "actor": "coordinator",
+      "action": "handoff",
+      "detail": "{\"action\":\"handoff\",\"ticket\":\"RIR-001\",\"handoff\":\".workboard/handoffs/RIR-001/001-start.md\",\"reason\":\"Bootstrap handoff registered; specialist return reviewed and accepted. Full verification is next.\"}"
+    },
+    {
+      "id": 5,
+      "at": "2026-09-14T15:48:59.174Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"id\":\"RIR-004\",\"type\":\"chore\",\"title\":\"Remove historically tracked generated dependency launchers\",\"status\":\"backlog\",\"parent\":\"RIR-100\",\"requires\":[\"RIR-001\"],\"deliveryScope\":\"RIR-004\",\"estimate\":null,\"estimateRationale\":\"Groom with foundation operations before execution; no effort has been started.\",\"groomedIn\":null,\"priority\":\"P3\",\"acceptance\":[\"Review git ls-files evidence for the three historical packages/core/node_modules/.bin/pino launchers.\",\"Remove generated launchers from source tracking while preserving installed dependencies and unrelated files.\",\"Verify frozen dependency installation and workspace Git status stay clean.\"],\"paths\":[\"packages/core/node_modules/.bin/\",\".gitignore\",\"docs/\"],\"owner\":null,\"handoff\":null,\"validation\":[]}}"
+    },
+    {
+      "id": 6,
+      "at": "2026-09-14T15:52:09.711Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-001\",\"status\":\"review\",\"reason\":\"Implementation and specialist return reviewed against all six acceptance criteria.\",\"handoff\":\".workboard/handoffs/RIR-001/003-completion.md\",\"validation\":[\"87 unit tests passed, including 39 governance tests\",\"13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped\",\"ESLint, strict typecheck, build and board validation passed\",\"Installed local hooks; verified target fetch unchanged; legacy checkout clean\"]}"
+    },
+    {
+      "id": 7,
+      "at": "2026-09-14T15:52:10.026Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-001\",\"status\":\"done\",\"reason\":\"All authorized governance work is implemented, documented and verified. Publication requires the user checkpoint.\",\"handoff\":\".workboard/handoffs/RIR-001/003-completion.md\",\"validation\":[\"87 unit tests passed, including 39 governance tests\",\"13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped\",\"ESLint, strict typecheck, build and board validation passed\",\"Installed local hooks; verified target fetch unchanged; legacy checkout clean\"]}"
+    },
+    {
+      "id": 8,
+      "at": "2026-09-14T15:52:10.324Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-001\"}"
+    },
+    {
+      "id": 9,
+      "at": "2026-09-14T16:01:12.311Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-001\",\"kind\":\"defer-pr\",\"reference\":\"User reply to the workflow question: Yes—defer this PR and allow one stacked improvement story. The prior message requested comparison before publication.\",\"at\":\"2026-09-14T16:01:12.268Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-001\"}}"
+    },
+    {
+      "id": 10,
+      "at": "2026-09-14T16:01:12.635Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-001\",\"decision\":\"D-001\"}"
+    },
+    {
+      "id": 11,
+      "at": "2026-09-14T16:03:17.124Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"id\":\"RIR-110\",\"type\":\"story\",\"title\":\"Trace release reviews to the blueprint and exact branch changes\",\"status\":\"backlog\",\"parent\":\"RIR-100\",\"requires\":[\"RIR-001\"],\"deliveryScope\":\"RIR-110\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped refinement before this story starts.\",\"groomedIn\":null,\"priority\":\"P1\",\"acceptance\":[\"Preserve the full original blueprint verbatim with source hash and all numbered requirements.\",\"Map every blueprint section to truthful status, evidence and a backlog scope; validate coverage and file references automatically.\",\"Deliver a pinned source comparison separating remote Astra, local unpublished work and Gemini.\",\"Verify explicitly user-approved stacked delivery without mixing parent changes or guessing PR targets.\",\"Run appropriate regression checks, persist specialist knowledge and stop at this story PR checkpoint.\"],\"paths\":[\"BLUEPRINT.md\",\"AGENTS.md\",\"GEMINI.md\",\"README.md\",\"docs/\",\"tools/workboard/\",\".workboard/\",\".github/workflows/ci.yml\",\"package.json\"],\"owner\":null,\"handoff\":null,\"validation\":[]}}"
+    },
+    {
+      "id": 12,
+      "at": "2026-09-14T16:03:17.283Z",
+      "actor": "coordinator",
+      "action": "groom",
+      "detail": "{\"action\":\"groom\",\"grooming\":{\"id\":\"GR-003\",\"scope\":\"RIR-100\",\"at\":\"2026-09-14T16:03:17.079Z\",\"participants\":[\"coordinator\"],\"tickets\":[\"RIR-110\",\"RIR-004\"],\"rationale\":\"Foundation refinement after pinned branch comparison; one approved review-evidence story and deferred dependency cleanup.\"},\"estimates\":[{\"id\":\"RIR-110\",\"points\":13,\"rationale\":\"Cross-cutting blueprint preservation, 91-section evidence mapping, automated validation and safe stacked delivery with real Git regression tests.\"},{\"id\":\"RIR-004\",\"points\":3,\"rationale\":\"Bounded removal from tracking of three generated dependency launchers with frozen-install verification; remains backlog.\"}]}"
+    },
+    {
+      "id": 13,
+      "at": "2026-09-14T16:03:17.435Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-110\",\"status\":\"ready\",\"reason\":\"Acceptance, scope, dependencies and 13-point estimate reviewed before starting.\",\"handoff\":\".workboard/handoffs/RIR-110/001-start.md\"}"
+    },
+    {
+      "id": 14,
+      "at": "2026-09-14T16:03:17.587Z",
+      "actor": "coordinator",
+      "action": "batch",
+      "detail": "{\"action\":\"batch\",\"batch\":{\"id\":\"BATCH-002\",\"scope\":\"RIR-110\",\"branch\":\"feat/RIR-110-review-evidence\",\"baseBranch\":\"develop/2.0.0-astra\",\"baseSha\":\"801103c0e4c70eca6a380d7d1122b11234695bb1\",\"status\":\"open\",\"tickets\":[\"RIR-110\"],\"prUrl\":null}}"
+    },
+    {
+      "id": 15,
+      "at": "2026-09-14T16:03:17.887Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-110\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 16,
+      "at": "2026-09-14T16:03:18.189Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-002\",\"ticket\":\"RIR-110\",\"agent\":\"delivery-guard\",\"scope\":\"Implement and test explicit approved-stack resolution and Git guards against the coordinator types contract. Own git.ts and git-store.test.ts only; no board or Git publication mutations; return exact evidence.\",\"paths\":[\"tools/workboard/git.ts\",\"tools/workboard/git-store.test.ts\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 17,
+      "at": "2026-09-14T16:14:50.701Z",
+      "actor": "coordinator",
+      "action": "stack",
+      "detail": "{\"action\":\"stack\",\"batch\":\"BATCH-002\",\"parentBatch\":\"BATCH-001\",\"parentHead\":\"c1018829abf42fd2f8aad22948de343e51dc1e95\",\"decision\":\"D-001\"}"
+    },
+    {
+      "id": 18,
+      "at": "2026-09-14T16:14:51.276Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-002\",\"handoff\":\".workboard/handoffs/RIR-110/002-delivery-guard.md\"}"
+    },
+    {
+      "id": 19,
+      "at": "2026-09-14T16:14:51.849Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-002\"}"
+    },
+    {
+      "id": 20,
+      "at": "2026-09-14T16:18:33.904Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-003\",\"ticket\":\"RIR-110\",\"agent\":\"delivery-guard\",\"scope\":\"Finish safe deferred-parent publication from the current child checkpoint: separate parent approval/head/base/scope, no worktree switch, no mixing or bypass of shared board. Own git.ts and git-store.test.ts only; return tested evidence.\",\"paths\":[\"tools/workboard/git.ts\",\"tools/workboard/git-store.test.ts\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 21,
+      "at": "2026-09-14T16:22:47.200Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"id\":\"RIR-005\",\"type\":\"bug\",\"title\":\"Resolve deferred parent PR validation without rewriting preserved work\",\"status\":\"backlog\",\"parent\":\"RIR-100\",\"requires\":[\"RIR-110\"],\"deliveryScope\":\"RIR-005\",\"estimate\":null,\"estimateRationale\":\"Refine the reviewed publication-history solution before any execution.\",\"groomedIn\":null,\"priority\":\"P1\",\"acceptance\":[\"Reproduce the frozen parent PR checker rejecting closed BATCH-001 while its branch push remains valid.\",\"Choose and verify an explicit reviewed PR integration path preserving all original commits and separate scope boundaries.\",\"Test exact parent head/base, closure state and CI behavior; do not bypass checks or mark another scope active.\"],\"paths\":[\".workboard/\",\"tools/workboard/\",\".github/\",\"docs/\"],\"owner\":null,\"handoff\":null,\"validation\":[]}}"
+    },
+    {
+      "id": 22,
+      "at": "2026-09-14T16:22:47.791Z",
+      "actor": "coordinator",
+      "action": "handoff",
+      "detail": "{\"action\":\"handoff\",\"ticket\":\"RIR-110\",\"handoff\":\".workboard/handoffs/RIR-110/003-session.md\",\"reason\":\"Persist requirements/comparison evidence and the remaining deferred-parent publication integration; retain the same active ticket.\"}"
+    },
+    {
+      "id": 23,
+      "at": "2026-09-14T16:28:29.346Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-003\",\"handoff\":\".workboard/handoffs/RIR-110/004-parent-publication.md\"}"
+    },
+    {
+      "id": 24,
+      "at": "2026-09-14T16:28:29.934Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-003\"}"
+    },
+    {
+      "id": 25,
+      "at": "2026-09-14T16:36:50.416Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-110\",\"status\":\"review\",\"reason\":\"All acceptance artifacts complete and specialist returns accepted; final regression and source review passed\",\"handoff\":\".workboard/handoffs/RIR-110/003-completion.md\",\"validation\":[\"113 unit tests passed, including 65 board and requirement tests\",\"13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped\",\"ESLint, strict typecheck, production build, board and 91-section/35-criterion requirement checks passed\",\"Verbatim blueprint source hash verified; latest branch comparison refreshed; legacy checkout clean\",\"Both specialist returns accepted; preserved parent unchanged; no publication authorized\"]}"
+    },
+    {
+      "id": 26,
+      "at": "2026-09-14T16:36:50.994Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-110\",\"status\":\"done\",\"reason\":\"Review accepted with explicit publication limits and durable evidence; no further implementation remains in this story\",\"handoff\":\".workboard/handoffs/RIR-110/003-completion.md\",\"validation\":[\"113 unit tests passed, including 65 board and requirement tests\",\"13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped\",\"ESLint, strict typecheck, production build, board and 91-section/35-criterion requirement checks passed\",\"Verbatim blueprint source hash verified; latest branch comparison refreshed; legacy checkout clean\",\"Both specialist returns accepted; preserved parent unchanged; no publication authorized\"]}"
+    },
+    {
+      "id": 27,
+      "at": "2026-09-14T16:36:51.534Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-002\"}"
+    },
+    {
+      "id": 28,
+      "at": "2026-09-14T16:47:56.097Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-002\",\"kind\":\"pr-created\",\"reference\":\"User replied yes do it to the exact parent/story push and story PR request. Verified https://github.com/RirikoAI/RirikoBot/pull/557 at head a04753a473c8a807892848052cc248cff3695805 and base c1018829abf42fd2f8aad22948de343e51dc1e95; governance PR remains deferred. Receipt: .workboard/handoffs/RIR-110/005-published.md\",\"at\":\"2026-09-14T16:47:56.057Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-002\"}}"
+    },
+    {
+      "id": 29,
+      "at": "2026-09-14T16:47:56.680Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-002\",\"decision\":\"D-002\",\"prUrl\":\"https://github.com/RirikoAI/RirikoBot/pull/557\"}"
+    },
+    {
+      "id": 30,
+      "at": "2026-09-14T17:04:22.193Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"status\":\"backlog\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped epic grooming\",\"groomedIn\":null,\"priority\":\"P1\",\"owner\":null,\"handoff\":null,\"validation\":[],\"id\":\"RIR-800\",\"type\":\"epic\",\"title\":\"Implementation-ready documentation across every docs file\",\"parent\":null,\"requires\":[\"RIR-110\"],\"deliveryScope\":\"RIR-800\",\"paths\":[\"docs/\"],\"acceptance\":[\"Review every one of the 40 existing docs files and all 13 ADRs against pinned Gemini source and the original blueprint\",\"Add concrete contracts, state transitions, schema and concurrency rules, security, failure recovery, worked examples and acceptance evidence appropriate to each document\",\"Preserve source-backed audit data and distinguish implemented behavior from proposed design\",\"Keep one active estimated ticket at a time; deliver the complete documentation epic at one PR checkpoint\"]}}"
+    },
+    {
+      "id": 31,
+      "at": "2026-09-14T17:04:22.359Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"status\":\"backlog\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped epic grooming\",\"groomedIn\":null,\"priority\":\"P1\",\"owner\":null,\"handoff\":null,\"validation\":[],\"id\":\"RIR-801\",\"type\":\"task\",\"title\":\"Specify architecture, developer workflows and command contracts\",\"parent\":\"RIR-800\",\"requires\":[\"RIR-110\"],\"deliveryScope\":\"RIR-800\",\"paths\":[\"docs/architecture.md\",\"docs/architecture-summary.md\",\"docs/development.md\",\"docs/contributing.md\",\"docs/commands.md\",\"docs/modules.md\",\"docs/dependency-evaluation.md\",\"docs/implementation-roadmap.md\",\"docs/work-management.md\",\"docs/adr/ADR-001-runtime-and-monorepo-toolchain.md\",\"docs/adr/ADR-002-discord-framework-and-interaction-routing.md\",\"docs/adr/ADR-013-configuration-permissions-and-concurrency.md\"],\"acceptance\":[\"Read and compare every assigned file: docs/architecture.md, docs/architecture-summary.md, docs/development.md, docs/contributing.md, docs/commands.md, docs/modules.md, docs/dependency-evaluation.md, docs/implementation-roadmap.md, docs/work-management.md, docs/adr/ADR-001-runtime-and-monorepo-toolchain.md, docs/adr/ADR-002-discord-framework-and-interaction-routing.md, docs/adr/ADR-013-configuration-permissions-and-concurrency.md\",\"Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims\",\"Verify source references, links and cross-document consistency; persist a durable handoff\"]}}"
+    },
+    {
+      "id": 32,
+      "at": "2026-09-14T17:04:22.519Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"status\":\"backlog\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped epic grooming\",\"groomedIn\":null,\"priority\":\"P1\",\"owner\":null,\"handoff\":null,\"validation\":[],\"id\":\"RIR-802\",\"type\":\"task\",\"title\":\"Deepen data contracts, legacy evidence and migration recovery\",\"parent\":\"RIR-800\",\"requires\":[\"RIR-801\"],\"deliveryScope\":\"RIR-800\",\"paths\":[\"docs/database.md\",\"docs/migrations.md\",\"docs/migration-1.x-to-2.0.md\",\"docs/legacy-feature-inventory.md\",\"docs/legacy-command-manifest.json\",\"docs/legacy-data-manifest.json\",\"docs/adr/ADR-003-database-layer-and-dual-dialect-orm.md\"],\"acceptance\":[\"Read and compare every assigned file: docs/database.md, docs/migrations.md, docs/migration-1.x-to-2.0.md, docs/legacy-feature-inventory.md, docs/legacy-command-manifest.json, docs/legacy-data-manifest.json, docs/adr/ADR-003-database-layer-and-dual-dialect-orm.md\",\"Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims\",\"Verify source references, links and cross-document consistency; persist a durable handoff\"]}}"
+    },
+    {
+      "id": 33,
+      "at": "2026-09-14T17:04:22.692Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"status\":\"backlog\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped epic grooming\",\"groomedIn\":null,\"priority\":\"P1\",\"owner\":null,\"handoff\":null,\"validation\":[],\"id\":\"RIR-803\",\"type\":\"task\",\"title\":\"Specify provider, AI, music, moderation and durable delivery behavior\",\"parent\":\"RIR-800\",\"requires\":[\"RIR-802\"],\"deliveryScope\":\"RIR-800\",\"paths\":[\"docs/adapters.md\",\"docs/ai.md\",\"docs/music.md\",\"docs/moderation.md\",\"docs/adr/ADR-004-audio-and-music-engine.md\",\"docs/adr/ADR-005-ai-chatbot-and-tool-calling-architecture.md\",\"docs/adr/ADR-006-image-generation-and-canvas-synthesis.md\",\"docs/adr/ADR-007-stream-platform-notification-architecture.md\",\"docs/adr/ADR-012-job-scheduler-and-task-queue.md\"],\"acceptance\":[\"Read and compare every assigned file: docs/adapters.md, docs/ai.md, docs/music.md, docs/moderation.md, docs/adr/ADR-004-audio-and-music-engine.md, docs/adr/ADR-005-ai-chatbot-and-tool-calling-architecture.md, docs/adr/ADR-006-image-generation-and-canvas-synthesis.md, docs/adr/ADR-007-stream-platform-notification-architecture.md, docs/adr/ADR-012-job-scheduler-and-task-queue.md\",\"Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims\",\"Verify source references, links and cross-document consistency; persist a durable handoff\"]}}"
+    },
+    {
+      "id": 34,
+      "at": "2026-09-14T17:04:22.856Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"status\":\"backlog\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped epic grooming\",\"groomedIn\":null,\"priority\":\"P1\",\"owner\":null,\"handoff\":null,\"validation\":[],\"id\":\"RIR-804\",\"type\":\"task\",\"title\":\"Specify economy and complete TCG progression and transactional rules\",\"parent\":\"RIR-800\",\"requires\":[\"RIR-803\"],\"deliveryScope\":\"RIR-800\",\"paths\":[\"docs/economy.md\",\"docs/waifu-tcg.md\",\"docs/adr/ADR-009-centralized-transactional-economy-engine.md\",\"docs/adr/ADR-010-waifu-tcg-pipeline-and-game-design.md\"],\"acceptance\":[\"Read and compare every assigned file: docs/economy.md, docs/waifu-tcg.md, docs/adr/ADR-009-centralized-transactional-economy-engine.md, docs/adr/ADR-010-waifu-tcg-pipeline-and-game-design.md\",\"Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims\",\"Verify source references, links and cross-document consistency; persist a durable handoff\"]}}"
+    },
+    {
+      "id": 35,
+      "at": "2026-09-14T17:04:23.022Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"status\":\"backlog\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped epic grooming\",\"groomedIn\":null,\"priority\":\"P1\",\"owner\":null,\"handoff\":null,\"validation\":[],\"id\":\"RIR-805\",\"type\":\"task\",\"title\":\"Specify dashboard workflows, authorization and credential lifecycle\",\"parent\":\"RIR-800\",\"requires\":[\"RIR-804\"],\"deliveryScope\":\"RIR-800\",\"paths\":[\"docs/dashboard.md\",\"docs/adr/ADR-008-web-dashboard-architecture.md\",\"docs/adr/ADR-011-secrets-management-and-credential-security.md\"],\"acceptance\":[\"Read and compare every assigned file: docs/dashboard.md, docs/adr/ADR-008-web-dashboard-architecture.md, docs/adr/ADR-011-secrets-management-and-credential-security.md\",\"Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims\",\"Verify source references, links and cross-document consistency; persist a durable handoff\"]}}"
+    },
+    {
+      "id": 36,
+      "at": "2026-09-14T17:04:23.181Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"status\":\"backlog\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped epic grooming\",\"groomedIn\":null,\"priority\":\"P1\",\"owner\":null,\"handoff\":null,\"validation\":[],\"id\":\"RIR-806\",\"type\":\"task\",\"title\":\"Deepen deployment, incident recovery and acceptance test strategy\",\"parent\":\"RIR-800\",\"requires\":[\"RIR-805\"],\"deliveryScope\":\"RIR-800\",\"paths\":[\"docs/deployment.md\",\"docs/testing.md\"],\"acceptance\":[\"Read and compare every assigned file: docs/deployment.md, docs/testing.md\",\"Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims\",\"Verify source references, links and cross-document consistency; persist a durable handoff\"]}}"
+    },
+    {
+      "id": 37,
+      "at": "2026-09-14T17:04:23.349Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"status\":\"backlog\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped epic grooming\",\"groomedIn\":null,\"priority\":\"P1\",\"owner\":null,\"handoff\":null,\"validation\":[],\"id\":\"RIR-807\",\"type\":\"task\",\"title\":\"Reconcile every document, requirement and comparison with evidence\",\"parent\":\"RIR-800\",\"requires\":[\"RIR-806\"],\"deliveryScope\":\"RIR-800\",\"paths\":[\"docs/requirements.json\",\"docs/requirements.md\",\"docs/branch-comparison.md\",\"docs/documentation-review.md\"],\"acceptance\":[\"Read and compare every assigned file: docs/requirements.json, docs/requirements.md, docs/branch-comparison.md, docs/documentation-review.md\",\"Deepen domain-specific contracts, decisions, examples, failure boundaries and verification beyond the Gemini design, without unsupported completion claims\",\"Verify source references, links and cross-document consistency; persist a durable handoff\"]}}"
+    },
+    {
+      "id": 38,
+      "at": "2026-09-14T17:04:23.517Z",
+      "actor": "coordinator",
+      "action": "groom",
+      "detail": "{\"action\":\"groom\",\"grooming\":{\"id\":\"GR-004\",\"scope\":\"RIR-800\",\"at\":\"2026-09-14T17:04:23.485Z\",\"participants\":[\"coordinator\"],\"tickets\":[\"RIR-800\",\"RIR-801\",\"RIR-802\",\"RIR-803\",\"RIR-804\",\"RIR-805\",\"RIR-806\",\"RIR-807\"],\"rationale\":\"User approved one stacked documentation epic. Grouped review of all 40 files and 13 ADRs; seven sequential leaves partition ownership and review risk. Parent is a planning estimate, not additional velocity.\"},\"estimates\":[{\"id\":\"RIR-800\",\"points\":89,\"rationale\":\"Full cross-domain specification and evidence review; seven bounded leaves cover the 40-file corpus\"},{\"id\":\"RIR-801\",\"points\":13,\"rationale\":\"Specify architecture, developer workflows and command contracts: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion\"},{\"id\":\"RIR-802\",\"points\":8,\"rationale\":\"Deepen data contracts, legacy evidence and migration recovery: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion\"},{\"id\":\"RIR-803\",\"points\":13,\"rationale\":\"Specify provider, AI, music, moderation and durable delivery behavior: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion\"},{\"id\":\"RIR-804\",\"points\":13,\"rationale\":\"Specify economy and complete TCG progression and transactional rules: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion\"},{\"id\":\"RIR-805\",\"points\":8,\"rationale\":\"Specify dashboard workflows, authorization and credential lifecycle: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion\"},{\"id\":\"RIR-806\",\"points\":8,\"rationale\":\"Deepen deployment, incident recovery and acceptance test strategy: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion\"},{\"id\":\"RIR-807\",\"points\":8,\"rationale\":\"Reconcile every document, requirement and comparison with evidence: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion\"}]}"
+    },
+    {
+      "id": 39,
+      "at": "2026-09-14T17:04:23.718Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-800\",\"status\":\"ready\",\"reason\":\"Group-groomed with explicit ownership, acceptance and sequential dependencies\",\"handoff\":\".workboard/handoffs/RIR-800/001-start.md\"}"
+    },
+    {
+      "id": 40,
+      "at": "2026-09-14T17:04:23.910Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-801\",\"status\":\"ready\",\"reason\":\"Group-groomed with explicit ownership, acceptance and sequential dependencies\",\"handoff\":\".workboard/handoffs/RIR-801/001-start.md\"}"
+    },
+    {
+      "id": 41,
+      "at": "2026-09-14T17:04:24.107Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-802\",\"status\":\"ready\",\"reason\":\"Group-groomed with explicit ownership, acceptance and sequential dependencies\",\"handoff\":\".workboard/handoffs/RIR-802/001-start.md\"}"
+    },
+    {
+      "id": 42,
+      "at": "2026-09-14T17:04:24.334Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-803\",\"status\":\"ready\",\"reason\":\"Group-groomed with explicit ownership, acceptance and sequential dependencies\",\"handoff\":\".workboard/handoffs/RIR-803/001-start.md\"}"
+    },
+    {
+      "id": 43,
+      "at": "2026-09-14T17:04:24.544Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-804\",\"status\":\"ready\",\"reason\":\"Group-groomed with explicit ownership, acceptance and sequential dependencies\",\"handoff\":\".workboard/handoffs/RIR-804/001-start.md\"}"
+    },
+    {
+      "id": 44,
+      "at": "2026-09-14T17:04:24.749Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-805\",\"status\":\"ready\",\"reason\":\"Group-groomed with explicit ownership, acceptance and sequential dependencies\",\"handoff\":\".workboard/handoffs/RIR-805/001-start.md\"}"
+    },
+    {
+      "id": 45,
+      "at": "2026-09-14T17:04:24.955Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-806\",\"status\":\"ready\",\"reason\":\"Group-groomed with explicit ownership, acceptance and sequential dependencies\",\"handoff\":\".workboard/handoffs/RIR-806/001-start.md\"}"
+    },
+    {
+      "id": 46,
+      "at": "2026-09-14T17:04:25.160Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-807\",\"status\":\"ready\",\"reason\":\"Group-groomed with explicit ownership, acceptance and sequential dependencies\",\"handoff\":\".workboard/handoffs/RIR-807/001-start.md\"}"
+    },
+    {
+      "id": 47,
+      "at": "2026-09-14T17:07:34.448Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"id\":\"RIR-808\",\"type\":\"task\",\"title\":\"Support fresh stack consent after a published parent closes\",\"status\":\"backlog\",\"parent\":\"RIR-800\",\"requires\":[\"RIR-110\"],\"deliveryScope\":\"RIR-800\",\"estimate\":null,\"estimateRationale\":\"User approved a 5-point prerequisite repair and backed-up board migration\",\"groomedIn\":null,\"priority\":\"P1\",\"acceptance\":[\"Record a fresh stack decision on a closed parent without falsely deferring or closing its existing PR\",\"Keep older stack decisions valid while rejecting reuse, wrong parent and use as publication approval\",\"Verify normal atomic board commands and real Git guards, preserving all remote refs and the local receipt\"],\"paths\":[\"tools/workboard/\",\".workboard/\",\"docs/work-management.md\"],\"owner\":null,\"handoff\":null,\"validation\":[]}}"
+    },
+    {
+      "id": 48,
+      "at": "2026-09-14T17:07:34.616Z",
+      "actor": "coordinator",
+      "action": "groom",
+      "detail": "{\"action\":\"groom\",\"grooming\":{\"id\":\"GR-005\",\"scope\":\"RIR-800\",\"at\":\"2026-09-14T17:07:34.583Z\",\"participants\":[\"coordinator\"],\"tickets\":[\"RIR-808\"],\"rationale\":\"Explicit user-approved 5-point prerequisite discovered during opening of the already groomed documentation epic\"},\"estimates\":[{\"id\":\"RIR-808\",\"points\":5,\"rationale\":\"Bounded additive decision variant with runtime validation, safe transition and real Git regression coverage\"}]}"
+    },
+    {
+      "id": 49,
+      "at": "2026-09-14T17:07:34.785Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-808\",\"status\":\"ready\",\"reason\":\"User-approved prerequisite estimated before bootstrap implementation\",\"handoff\":\".workboard/handoffs/RIR-808/001-start.md\"}"
+    },
+    {
+      "id": 50,
+      "at": "2026-09-14T17:08:36.887Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-003\",\"kind\":\"stack\",\"reference\":\"User replied Approve one stacked documentation epic, then Approve the prerequisite repair and board migration. Fresh consent for one scope above open PR #557 and preserved local receipt de7504b; no new push, PR or merge approval.\",\"at\":\"2026-09-14T17:08:36.845Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-002\"}}"
+    },
+    {
+      "id": 51,
+      "at": "2026-09-14T17:08:37.079Z",
+      "actor": "coordinator",
+      "action": "batch",
+      "detail": "{\"action\":\"batch\",\"batch\":{\"id\":\"BATCH-003\",\"scope\":\"RIR-800\",\"branch\":\"feat/RIR-800-documentation-depth\",\"baseBranch\":\"develop/2.0.0-astra\",\"baseSha\":\"801103c0e4c70eca6a380d7d1122b11234695bb1\",\"status\":\"open\",\"tickets\":[\"RIR-800\",\"RIR-808\",\"RIR-801\",\"RIR-802\",\"RIR-803\",\"RIR-804\",\"RIR-805\",\"RIR-806\",\"RIR-807\"],\"prUrl\":null,\"stack\":{\"parentBatch\":\"BATCH-002\",\"parentHead\":\"a04753a473c8a807892848052cc248cff3695805\",\"decision\":\"D-003\"}}}"
+    },
+    {
+      "id": 52,
+      "at": "2026-09-14T17:08:37.686Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-808\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 53,
+      "at": "2026-09-14T17:08:56.843Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-004\",\"ticket\":\"RIR-808\",\"agent\":\"delivery-guard\",\"scope\":\"Add a real Git/store regression for a fresh kind=stack decision after an existing parent PR is recorded and closed; retain exact published refs and reject use as parent publication. Own only git-store.test.ts; return evidence, no board/Git workspace mutations.\",\"paths\":[\"tools/workboard/git-store.test.ts\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 54,
+      "at": "2026-09-14T17:13:54.749Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-004\",\"handoff\":\".workboard/handoffs/RIR-808/002-completion.md\"}"
+    },
+    {
+      "id": 55,
+      "at": "2026-09-14T17:13:55.338Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-004\"}"
+    },
+    {
+      "id": 56,
+      "at": "2026-09-14T17:13:55.940Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-808\",\"status\":\"review\",\"reason\":\"Approved bootstrap repair verified through model tests and real Git mutations; specialist return accepted\",\"handoff\":\".workboard/handoffs/RIR-808/002-completion.md\",\"validation\":[\"33 model tests passed\",\"2 targeted real Git/store cases passed; 29 unrelated cases excluded in worker run\",\"Strict typecheck, modified-file ESLint, board and requirement validation passed\",\"No remote changes, manual JSON transitions or hook bypass; original PR intact\"]}"
+    },
+    {
+      "id": 57,
+      "at": "2026-09-14T17:13:56.532Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-808\",\"status\":\"done\",\"reason\":\"Approved bootstrap repair verified through model tests and real Git mutations; specialist return accepted\",\"handoff\":\".workboard/handoffs/RIR-808/002-completion.md\",\"validation\":[\"33 model tests passed\",\"2 targeted real Git/store cases passed; 29 unrelated cases excluded in worker run\",\"Strict typecheck, modified-file ESLint, board and requirement validation passed\",\"No remote changes, manual JSON transitions or hook bypass; original PR intact\"]}"
+    },
+    {
+      "id": 58,
+      "at": "2026-09-14T17:13:57.110Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-801\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 59,
+      "at": "2026-09-14T17:13:57.671Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-005\",\"ticket\":\"RIR-801\",\"agent\":\"architecture-docs\",\"scope\":\"Deepen system topology, request/state/security/config contracts and concrete decision tradeoffs against actual source and pinned Gemini; no other files\",\"paths\":[\"docs/architecture.md\",\"docs/architecture-summary.md\",\"docs/adr/ADR-001-runtime-and-monorepo-toolchain.md\",\"docs/adr/ADR-013-configuration-permissions-and-concurrency.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 60,
+      "at": "2026-09-14T17:13:58.231Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-006\",\"ticket\":\"RIR-801\",\"agent\":\"discord-docs\",\"scope\":\"Deepen actual and planned command/help/module contracts, compatibility, lifecycle, failure and acceptance scenarios beyond Gemini; no other files\",\"paths\":[\"docs/commands.md\",\"docs/modules.md\",\"docs/adr/ADR-002-discord-framework-and-interaction-routing.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 61,
+      "at": "2026-09-14T17:13:58.836Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-007\",\"ticket\":\"RIR-801\",\"agent\":\"developer-docs\",\"scope\":\"Deepen reproducible developer/operator extension workflows and contribution/delivery/handoff recovery, grounded in actual CLI and protocol; no other files\",\"paths\":[\"docs/development.md\",\"docs/contributing.md\",\"docs/work-management.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 62,
+      "at": "2026-09-14T17:26:36.811Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-007\",\"handoff\":\".workboard/handoffs/RIR-801/005-developer-return.md\"}"
+    },
+    {
+      "id": 63,
+      "at": "2026-09-14T17:26:37.407Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-007\"}"
+    },
+    {
+      "id": 64,
+      "at": "2026-09-14T17:27:10.620Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-005\",\"handoff\":\".workboard/handoffs/RIR-801/003-architecture-return.md\"}"
+    },
+    {
+      "id": 65,
+      "at": "2026-09-14T17:27:11.214Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-005\"}"
+    },
+    {
+      "id": 66,
+      "at": "2026-09-14T17:27:46.991Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-006\",\"handoff\":\".workboard/handoffs/RIR-801/004-discord-return.md\"}"
+    },
+    {
+      "id": 67,
+      "at": "2026-09-14T17:27:47.573Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-006\"}"
+    },
+    {
+      "id": 68,
+      "at": "2026-09-14T17:28:36.119Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-801\",\"status\":\"review\",\"reason\":\"All twelve source-reviewed documents complete; all specialist returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-801/006-completion.md\",\"validation\":[\"12 documents reviewed against source and Gemini; 187 relative links valid\",\"Requirements 91 sections/35 criteria valid; diff check passed\",\"119 unit tests passed in one-worker full suite; live validation not claimed\"]}"
+    },
+    {
+      "id": 69,
+      "at": "2026-09-14T17:28:36.712Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-801\",\"status\":\"done\",\"reason\":\"All twelve source-reviewed documents complete; all specialist returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-801/006-completion.md\",\"validation\":[\"12 documents reviewed against source and Gemini; 187 relative links valid\",\"Requirements 91 sections/35 criteria valid; diff check passed\",\"119 unit tests passed in one-worker full suite; live validation not claimed\"]}"
+    },
+    {
+      "id": 70,
+      "at": "2026-09-14T17:28:57.935Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-802\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 71,
+      "at": "2026-09-14T17:28:58.526Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-008\",\"agent\":\"architecture-docs\",\"paths\":[\"docs/database.md\",\"docs/adr/ADR-003-database-layer-and-dual-dialect-orm.md\"],\"scope\":\"Deepen actual and proposed data models, dialect/transaction/constraint contracts and ADR alternatives against source and Gemini; documentation only.\",\"ticket\":\"RIR-802\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 72,
+      "at": "2026-09-14T17:28:59.094Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-009\",\"agent\":\"developer-docs\",\"paths\":[\"docs/migrations.md\",\"docs/migration-1.x-to-2.0.md\"],\"scope\":\"Deepen current schema migration and planned legacy importer operations, mapping/reconciliation/crash recovery/restore against source and Gemini; documentation only.\",\"ticket\":\"RIR-802\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 73,
+      "at": "2026-09-14T17:29:58.357Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-010\",\"ticket\":\"RIR-802\",\"agent\":\"discord-docs\",\"scope\":\"Read-only full audit of both legacy JSON manifests, verify every referenced source/asset/migration hash and structural totals against immutable source; return evidence, preserve both JSON files unless coordinator reviews a proven correction.\",\"paths\":[\"docs/legacy-command-manifest.json\",\"docs/legacy-data-manifest.json\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 74,
+      "at": "2026-09-14T17:36:06.148Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-009\",\"handoff\":\".workboard/handoffs/RIR-802/004-migration-return.md\"}"
+    },
+    {
+      "id": 75,
+      "at": "2026-09-14T17:36:06.762Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-009\"}"
+    },
+    {
+      "id": 76,
+      "at": "2026-09-14T17:38:21.609Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-010\",\"handoff\":\".workboard/handoffs/RIR-802/005-manifest-return.md\"}"
+    },
+    {
+      "id": 77,
+      "at": "2026-09-14T17:38:22.203Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-010\"}"
+    },
+    {
+      "id": 78,
+      "at": "2026-09-14T17:42:20.141Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-008\",\"handoff\":\".workboard/handoffs/RIR-802/003-database-return.md\"}"
+    },
+    {
+      "id": 79,
+      "at": "2026-09-14T17:42:20.731Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-008\"}"
+    },
+    {
+      "id": 80,
+      "at": "2026-09-14T17:42:21.312Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-802\",\"status\":\"review\",\"reason\":\"All seven files source-reviewed; factual manifests verified unchanged; all worker returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-802/006-completion.md\",\"validation\":[\"58 local links valid; requirements91/35 and diff check pass\",\"All manifest records checked; 85SQL statements replay match17tables108columns11FK7indexes\",\"Legacy snapshot, blueprint and both manifests unchanged\"]}"
+    },
+    {
+      "id": 81,
+      "at": "2026-09-14T17:42:21.888Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-802\",\"status\":\"done\",\"reason\":\"All seven files source-reviewed; factual manifests verified unchanged; all worker returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-802/006-completion.md\",\"validation\":[\"58 local links valid; requirements91/35 and diff check pass\",\"All manifest records checked; 85SQL statements replay match17tables108columns11FK7indexes\",\"Legacy snapshot, blueprint and both manifests unchanged\"]}"
+    },
+    {
+      "id": 82,
+      "at": "2026-09-14T17:42:51.008Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-803\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 83,
+      "at": "2026-09-14T17:42:51.600Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-011\",\"agent\":\"architecture-docs\",\"paths\":[\"docs/adapters.md\",\"docs/adr/ADR-006-image-generation-and-canvas-synthesis.md\",\"docs/adr/ADR-007-stream-platform-notification-architecture.md\",\"docs/adr/ADR-012-job-scheduler-and-task-queue.md\"],\"scope\":\"Deepen common provider/capability/error/job contracts plus image/canvas, stream and durable scheduler ADRs; compare whole Gemini counterparts and official sources, documentation only.\",\"ticket\":\"RIR-803\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 84,
+      "at": "2026-09-14T17:42:52.162Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-012\",\"agent\":\"developer-docs\",\"paths\":[\"docs/ai.md\",\"docs/adr/ADR-005-ai-chatbot-and-tool-calling-architecture.md\"],\"scope\":\"Deepen AI scoped memory, provider selection, streaming, tools, security, budgets and recovery plus ADR, grounded in blueprint/legacy/current code and official sources; documentation only.\",\"ticket\":\"RIR-803\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 85,
+      "at": "2026-09-14T17:42:52.723Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-013\",\"agent\":\"discord-docs\",\"paths\":[\"docs/music.md\",\"docs/adr/ADR-004-audio-and-music-engine.md\"],\"scope\":\"Deepen music queue/voice/control/reconnect/provider capability and engine evaluation contracts plus ADR; preserve required sources and audited interface; documentation only.\",\"ticket\":\"RIR-803\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 86,
+      "at": "2026-09-14T17:55:02.802Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-011\",\"handoff\":\".workboard/handoffs/RIR-803/003-adapter-return.md\"}"
+    },
+    {
+      "id": 87,
+      "at": "2026-09-14T17:55:03.403Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-011\"}"
+    },
+    {
+      "id": 88,
+      "at": "2026-09-14T17:55:03.986Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-012\",\"handoff\":\".workboard/handoffs/RIR-803/004-ai-return.md\"}"
+    },
+    {
+      "id": 89,
+      "at": "2026-09-14T17:55:04.573Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-012\"}"
+    },
+    {
+      "id": 90,
+      "at": "2026-09-14T17:56:20.303Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-013\",\"handoff\":\".workboard/handoffs/RIR-803/005-music-return.md\"}"
+    },
+    {
+      "id": 91,
+      "at": "2026-09-14T17:56:20.912Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-013\"}"
+    },
+    {
+      "id": 92,
+      "at": "2026-09-14T17:56:21.496Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-803\",\"status\":\"review\",\"reason\":\"Nine documents compared and deepened; all specialist returns reviewed\",\"handoff\":\".workboard/handoffs/RIR-803/006-completion.md\",\"validation\":[\"65 relative links resolve; requirements91/35; boardWIP1; diffcheck pass; no live subsystem claims\"]}"
+    },
+    {
+      "id": 93,
+      "at": "2026-09-14T17:56:22.080Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-803\",\"status\":\"done\",\"reason\":\"Nine documents compared and deepened; all specialist returns reviewed\",\"handoff\":\".workboard/handoffs/RIR-803/006-completion.md\",\"validation\":[\"65 relative links resolve; requirements91/35; boardWIP1; diffcheck pass; no live subsystem claims\"]}"
+    },
+    {
+      "id": 94,
+      "at": "2026-09-14T17:56:40.326Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-804\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 95,
+      "at": "2026-09-14T17:56:40.941Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-014\",\"ticket\":\"RIR-804\",\"agent\":\"architecture-docs\",\"scope\":\"Deepen full TCG guide against all blueprint/Gemini mechanics, contracts, worked examples and failure tests; no runtime or other paths\",\"paths\":[\"docs/waifu-tcg.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 96,
+      "at": "2026-09-14T17:56:41.519Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-015\",\"ticket\":\"RIR-804\",\"agent\":\"developer-docs\",\"scope\":\"Deepen economy guide including ledger, rewards/anti-abuse, inventory/games, rankings and exact legacy meaning; no runtime or other paths\",\"paths\":[\"docs/economy.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 97,
+      "at": "2026-09-14T17:56:42.104Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-016\",\"ticket\":\"RIR-804\",\"agent\":\"discord-docs\",\"scope\":\"Read-only independent blueprint/Gemini TCG and economy breadth/consistency review, return missing concrete acceptance; no file writes\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 98,
+      "at": "2026-09-14T18:12:42.662Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-014\",\"handoff\":\".workboard/handoffs/RIR-804/003-tcg-return.md\"}"
+    },
+    {
+      "id": 99,
+      "at": "2026-09-14T18:12:43.342Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-014\"}"
+    },
+    {
+      "id": 100,
+      "at": "2026-09-14T18:12:44.005Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-015\",\"handoff\":\".workboard/handoffs/RIR-804/004-economy-return.md\"}"
+    },
+    {
+      "id": 101,
+      "at": "2026-09-14T18:12:44.683Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-015\"}"
+    },
+    {
+      "id": 102,
+      "at": "2026-09-14T18:12:45.353Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-016\",\"handoff\":\".workboard/handoffs/RIR-804/005-independent-review.md\"}"
+    },
+    {
+      "id": 103,
+      "at": "2026-09-14T18:12:45.993Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-016\"}"
+    },
+    {
+      "id": 104,
+      "at": "2026-09-14T18:12:46.646Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-804\",\"status\":\"review\",\"reason\":\"Four expanded docs and numerical/transaction boundaries independently reviewed\",\"handoff\":\".workboard/handoffs/RIR-804/006-completion.md\",\"validation\":[\"Local links valid; requirements91/35; diffcheck; independent arithmetic and full breadth review; all runtime features remain proposed\"]}"
+    },
+    {
+      "id": 105,
+      "at": "2026-09-14T18:12:47.306Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-804\",\"status\":\"done\",\"reason\":\"Four expanded docs and numerical/transaction boundaries independently reviewed\",\"handoff\":\".workboard/handoffs/RIR-804/006-completion.md\",\"validation\":[\"Local links valid; requirements91/35; diffcheck; independent arithmetic and full breadth review; all runtime features remain proposed\"]}"
+    },
+    {
+      "id": 106,
+      "at": "2026-09-14T18:13:16.608Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-805\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 107,
+      "at": "2026-09-14T18:13:17.277Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-017\",\"ticket\":\"RIR-805\",\"agent\":\"developer-docs\",\"scope\":\"Deepen dashboard main guide with all admin workflows and trustworthy current-versus-future contracts\",\"paths\":[\"docs/dashboard.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 108,
+      "at": "2026-09-14T18:13:17.925Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-018\",\"ticket\":\"RIR-805\",\"agent\":\"architecture-docs\",\"scope\":\"Deepen web architecture ADR with alternatives, boundaries, authentication/cache/concurrency/rollout decisions\",\"paths\":[\"docs/adr/ADR-008-web-dashboard-architecture.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 109,
+      "at": "2026-09-14T18:13:18.578Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-019\",\"ticket\":\"RIR-805\",\"agent\":\"discord-docs\",\"scope\":\"Read-only independent dashboard/OAuth/secret lifecycle security and blueprint/Gemini completeness review\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 110,
+      "at": "2026-09-14T18:20:36.831Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-017\",\"handoff\":\".workboard/handoffs/RIR-805/004-dashboard-return.md\"}"
+    },
+    {
+      "id": 111,
+      "at": "2026-09-14T18:20:37.657Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-017\"}"
+    },
+    {
+      "id": 112,
+      "at": "2026-09-14T18:20:38.490Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-018\",\"handoff\":\".workboard/handoffs/RIR-805/003-web-architecture-return.md\"}"
+    },
+    {
+      "id": 113,
+      "at": "2026-09-14T18:20:39.260Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-018\"}"
+    },
+    {
+      "id": 114,
+      "at": "2026-09-14T18:20:40.003Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-019\",\"handoff\":\".workboard/handoffs/RIR-805/005-independent-review.md\"}"
+    },
+    {
+      "id": 115,
+      "at": "2026-09-14T18:20:40.774Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-019\"}"
+    },
+    {
+      "id": 116,
+      "at": "2026-09-14T18:20:41.539Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-805\",\"status\":\"review\",\"reason\":\"Three complete docs reviewed with independent authority/credential lifecycle signoff\",\"handoff\":\".workboard/handoffs/RIR-805/006-completion.md\",\"validation\":[\"28 local paths valid; requirements91/35; diffcheck; full independent review; no runtime web claims\"]}"
+    },
+    {
+      "id": 117,
+      "at": "2026-09-14T18:20:42.318Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-805\",\"status\":\"done\",\"reason\":\"Three complete docs reviewed with independent authority/credential lifecycle signoff\",\"handoff\":\".workboard/handoffs/RIR-805/006-completion.md\",\"validation\":[\"28 local paths valid; requirements91/35; diffcheck; full independent review; no runtime web claims\"]}"
+    },
+    {
+      "id": 118,
+      "at": "2026-09-14T18:21:03.187Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-806\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 119,
+      "at": "2026-09-14T18:21:03.972Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-020\",\"ticket\":\"RIR-806\",\"agent\":\"developer-docs\",\"scope\":\"Deepen deployment runbook against actual Docker/Compose/CI/health and source/Gemini, with verified commands and recovery gaps\",\"paths\":[\"docs/deployment.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 120,
+      "at": "2026-09-14T18:21:04.780Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-021\",\"ticket\":\"RIR-806\",\"agent\":\"architecture-docs\",\"scope\":\"Read-only independent deployment/release/backup/health and Git scope review\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 121,
+      "at": "2026-09-14T18:21:05.552Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-022\",\"ticket\":\"RIR-806\",\"agent\":\"discord-docs\",\"scope\":\"Read-only independent test/CI inventory and testing guide review; do not rerun full suite\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 122,
+      "at": "2026-09-14T18:29:28.434Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-020\",\"handoff\":\".workboard/handoffs/RIR-806/003-deployment-return.md\"}"
+    },
+    {
+      "id": 123,
+      "at": "2026-09-14T18:29:29.286Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-020\"}"
+    },
+    {
+      "id": 124,
+      "at": "2026-09-14T18:29:30.096Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-021\",\"handoff\":\".workboard/handoffs/RIR-806/004-operations-review.md\"}"
+    },
+    {
+      "id": 125,
+      "at": "2026-09-14T18:29:30.919Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-021\"}"
+    },
+    {
+      "id": 126,
+      "at": "2026-09-14T18:29:31.738Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-022\",\"handoff\":\".workboard/handoffs/RIR-806/005-testing-return.md\"}"
+    },
+    {
+      "id": 127,
+      "at": "2026-09-14T18:29:32.550Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-022\"}"
+    },
+    {
+      "id": 128,
+      "at": "2026-09-14T18:29:33.344Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-806\",\"status\":\"review\",\"reason\":\"Both runbooks compared and independently source-reviewed, central checks passed\",\"handoff\":\".workboard/handoffs/RIR-806/006-completion.md\",\"validation\":[\"29 local paths valid; requirements91/35; board/diffcheck; lint/type/build pass; SQLite/CLI13pass7PGskip; no live platform claims\"]}"
+    },
+    {
+      "id": 129,
+      "at": "2026-09-14T18:29:34.158Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-806\",\"status\":\"done\",\"reason\":\"Both runbooks compared and independently source-reviewed, central checks passed\",\"handoff\":\".workboard/handoffs/RIR-806/006-completion.md\",\"validation\":[\"29 local paths valid; requirements91/35; board/diffcheck; lint/type/build pass; SQLite/CLI13pass7PGskip; no live platform claims\"]}"
+    },
+    {
+      "id": 130,
+      "at": "2026-09-14T18:29:55.537Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-807\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 131,
+      "at": "2026-09-14T18:29:56.378Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-023\",\"ticket\":\"RIR-807\",\"agent\":\"developer-docs\",\"scope\":\"Update branch comparison with pinned source/code evidence and documentation epic differences; no code or completion inflation\",\"paths\":[\"docs/branch-comparison.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 132,
+      "at": "2026-09-14T18:29:57.207Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-024\",\"ticket\":\"RIR-807\",\"agent\":\"architecture-docs\",\"scope\":\"Read-only entire 40-file corpus coherence/depth review and final documentation-review matrix verification\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 133,
+      "at": "2026-09-14T18:29:58.036Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-025\",\"ticket\":\"RIR-807\",\"agent\":\"discord-docs\",\"scope\":\"Read-only full corpus local file/anchor reference, source/status and command consistency check; do not rerun tests\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 134,
+      "at": "2026-09-14T18:44:14.338Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-023\",\"handoff\":\".workboard/handoffs/RIR-807/002-comparison-return.md\"}"
+    },
+    {
+      "id": 135,
+      "at": "2026-09-14T18:44:15.163Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-023\"}"
+    },
+    {
+      "id": 136,
+      "at": "2026-09-14T18:44:15.958Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-024\",\"handoff\":\".workboard/handoffs/RIR-807/003-architecture-return.md\"}"
+    },
+    {
+      "id": 137,
+      "at": "2026-09-14T18:44:16.763Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-024\"}"
+    },
+    {
+      "id": 138,
+      "at": "2026-09-14T18:44:17.543Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-025\",\"handoff\":\".workboard/handoffs/RIR-807/004-reference-return.md\"}"
+    },
+    {
+      "id": 139,
+      "at": "2026-09-14T18:44:18.349Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-025\"}"
+    },
+    {
+      "id": 140,
+      "at": "2026-09-14T18:44:19.159Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-807\",\"status\":\"review\",\"reason\":\"Final corpus, ledger and comparison accepted with documented limitations\",\"handoff\":\".workboard/handoffs/RIR-807/005-completion.md\",\"validation\":[\"All40 original files reviewed;41 final files and exact40-row matrix\",\"452 local references valid; exact blueprint/manifests preserved\",\"91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid\",\"Independent A023/A024/A025 returns accepted; final diff hygiene passes\",\"119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim\"]}"
+    },
+    {
+      "id": 141,
+      "at": "2026-09-14T18:44:19.949Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-807\",\"status\":\"done\",\"reason\":\"Final corpus, ledger and comparison accepted with documented limitations\",\"handoff\":\".workboard/handoffs/RIR-807/005-completion.md\",\"validation\":[\"All40 original files reviewed;41 final files and exact40-row matrix\",\"452 local references valid; exact blueprint/manifests preserved\",\"91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid\",\"Independent A023/A024/A025 returns accepted; final diff hygiene passes\",\"119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim\"]}"
+    },
+    {
+      "id": 142,
+      "at": "2026-09-14T18:44:20.736Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-800\",\"status\":\"done\",\"reason\":\"All eight approved leaves complete; one documentation epic ready for user PR checkpoint\",\"handoff\":\".workboard/handoffs/RIR-800/003-completion.md\",\"validation\":[\"All40 original files reviewed;41 final files and exact40-row matrix\",\"452 local references valid; exact blueprint/manifests preserved\",\"91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid\",\"Independent A023/A024/A025 returns accepted; final diff hygiene passes\",\"119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim\"]}"
+    },
+    {
+      "id": 143,
+      "at": "2026-09-14T18:44:21.518Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-003\"}"
+    },
+    {
+      "id": 144,
+      "at": "2026-09-14T19:11:37.743Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-004\",\"kind\":\"pr-created\",\"reference\":\"User replied yes to push RIR-800 head e09daed09d5b625095923a622789413d8281327b and create its PR into preserved RIR-110 a04753a473c8a807892848052cc248cff3695805. Independently verified https://github.com/RirikoAI/RirikoBot/pull/561 open with exact approved refs. Receipt: .workboard/handoffs/RIR-800/004-published.md. No merge, retarget or new scope.\",\"at\":\"2026-09-14T19:11:37.743Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-003\"}}"
+    },
+    {
+      "id": 145,
+      "at": "2026-09-14T19:12:03.708Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-003\",\"decision\":\"D-004\",\"prUrl\":\"https://github.com/RirikoAI/RirikoBot/pull/561\"}"
+    },
+    {
+      "id": 146,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "groom",
+      "detail": "{\"action\":\"groom\",\"grooming\":{\"id\":\"GR-006\",\"scope\":\"RIR-100\",\"at\":\"2026-09-14T19:29:12.505Z\",\"participants\":[\"coordinator\"],\"tickets\":[\"RIR-005\"],\"rationale\":\"User-authorized integration repair: exact source/squash ancestry and receipts, closed-batch CI and scope guard regression; one bounded bug, no domain work\"},\"estimates\":[{\"id\":\"RIR-005\",\"points\":13,\"rationale\":\"Cross-cutting provenance, real Git history/CI regression and safe integration resolution; bounded to one executable bug\"}]}"
+    },
+    {
+      "id": 147,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-005\",\"status\":\"ready\",\"reason\":\"Groomed before execution against actual merged stack\",\"handoff\":\".workboard/handoffs/RIR-005/001-start.md\"}"
+    },
+    {
+      "id": 148,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-005\",\"kind\":\"stack\",\"reference\":\"User said can you do 1. to recommendation to reconcile squash merges and local receipts, preserve existing commits, fix RIR-005 and prepare integration into develop/2.0.0-astra. Authorizes one repair based on completed documentation e09daed and preserved local receipts; final PR approval remains separate.\",\"at\":\"2026-09-14T19:29:12.505Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-003\"}}"
+    },
+    {
+      "id": 149,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "batch",
+      "detail": "{\"action\":\"batch\",\"batch\":{\"id\":\"BATCH-004\",\"scope\":\"RIR-005\",\"branch\":\"fix/RIR-005-integration-reconciliation\",\"baseBranch\":\"develop/2.0.0-astra\",\"baseSha\":\"801103c0e4c70eca6a380d7d1122b11234695bb1\",\"status\":\"open\",\"tickets\":[\"RIR-005\"],\"prUrl\":null,\"stack\":{\"parentBatch\":\"BATCH-003\",\"parentHead\":\"e09daed09d5b625095923a622789413d8281327b\",\"decision\":\"D-005\"}}}"
+    },
+    {
+      "id": 150,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-005\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 151,
+      "at": "2026-09-14T19:29:31.459Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-026\",\"ticket\":\"RIR-005\",\"agent\":\"integration-reviewer\",\"scope\":\"Read-only reproduce frozen closed-batch rejection and review safe exact-history integration design; source and CI edge cases, no mutations\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 152,
+      "at": "2026-09-14T19:29:32.305Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-027\",\"ticket\":\"RIR-005\",\"agent\":\"integration-tests\",\"scope\":\"Read-only independent test design for completed-delivery integration, graph and content authorization; later review root implementation\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 153,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-006\",\"kind\":\"integrate\",\"reference\":\"User said can you do 1. to RIR-005 integration repair: reconcile completed governance/evidence/documentation and exact squash histories, preserve local receipts and prepare develop/2.0.0-astra integration. Reviewed originals c1018829/a04753a/e09daed, squashes7f0fd9a/f33b0c5, administrative baselinea27151b. One repair scope; no push/PR/remote merge/new feature authorization.\",\"at\":\"2026-09-14T19:47:23.026Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-004\"}}"
+    },
+    {
+      "id": 154,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "integrate",
+      "detail": "{\"action\":\"integrate\",\"batch\":\"BATCH-004\",\"integration\":{\"decision\":\"D-006\",\"baseline\":\"a27151bcf4ed3a72fdd3840011015acb17ae6048\",\"sources\":[{\"batch\":\"BATCH-001\",\"head\":\"c1018829abf42fd2f8aad22948de343e51dc1e95\"},{\"batch\":\"BATCH-002\",\"head\":\"a04753a473c8a807892848052cc248cff3695805\",\"merged\":\"7f0fd9ae589ec140adc4ab7f01ec63299ac4a42b\"},{\"batch\":\"BATCH-003\",\"head\":\"e09daed09d5b625095923a622789413d8281327b\",\"merged\":\"f33b0c5535a7a7df4d9278aebeec7a5b9440de43\"}]}}"
+    },
+    {
+      "id": 155,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-026\",\"handoff\":\".workboard/handoffs/RIR-005/002-review.md\"}"
+    },
+    {
+      "id": 156,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-026\"}"
+    },
+    {
+      "id": 157,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-027\",\"handoff\":\".workboard/handoffs/RIR-005/002-review.md\"}"
+    },
+    {
+      "id": 158,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-027\"}"
+    },
+    {
+      "id": 159,
+      "at": "2026-09-14T19:53:21.584Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-005\",\"status\":\"review\",\"reason\":\"Reviewed integration repair with real-history and regression evidence\",\"handoff\":\".workboard/handoffs/RIR-005/004-completion.md\",\"validation\":[\"Full unit135/135 passed across10files193.58s; lint/typecheck/build pass\",\"Exact source/squash snapshots, retained ancestry and isolated repair paths validated on real merge graph\",\"Both local squash-retention merges have zero tree delta; original commits/receipts preserved\",\"Requirements91/35 and immutable source hashes pass; docs references valid\",\"A026/A027 accepted; integration targets verified801103c; publication requires user checkpoint\"]}"
+    },
+    {
+      "id": 160,
+      "at": "2026-09-14T19:53:23.165Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-005\",\"status\":\"done\",\"reason\":\"Reviewed integration repair with real-history and regression evidence\",\"handoff\":\".workboard/handoffs/RIR-005/004-completion.md\",\"validation\":[\"Full unit135/135 passed across10files193.58s; lint/typecheck/build pass\",\"Exact source/squash snapshots, retained ancestry and isolated repair paths validated on real merge graph\",\"Both local squash-retention merges have zero tree delta; original commits/receipts preserved\",\"Requirements91/35 and immutable source hashes pass; docs references valid\",\"A026/A027 accepted; integration targets verified801103c; publication requires user checkpoint\"]}"
+    },
+    {
+      "id": 161,
+      "at": "2026-09-14T19:53:24.658Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-004\"}"
+    }
+  ]
+}

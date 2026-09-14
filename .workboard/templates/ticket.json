@@ -1,0 +1,10 @@
+{
+  "action": "create",
+  "ticket": {
+    "id": "RIR-999", "type": "task", "title": "Replace this title with an observable outcome",
+    "status": "backlog", "parent": "RIR-210", "requires": [], "deliveryScope": "RIR-210",
+    "estimate": null, "estimateRationale": "Awaiting grouped grooming", "groomedIn": null,
+    "priority": "P2", "acceptance": ["Define verifiable acceptance before grooming"],
+    "paths": ["apps/bot/"], "owner": null, "handoff": null, "validation": []
+  }
+}
