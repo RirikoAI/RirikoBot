@@ -1081,7 +1081,7 @@
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; RIR-005 has135 unit cases passed; prior13 SQLite/CLI passed with seven PostgreSQL cases skipped; no live certification."
         },
         {
           "path": "packages/discord/src/access.ts",
@@ -1119,7 +1119,7 @@
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; RIR-005 has135 unit cases passed; prior13 SQLite/CLI passed with seven PostgreSQL cases skipped; no live certification."
         },
         {
           "path": "vitest.config.ts",
@@ -1152,7 +1152,7 @@
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; RIR-005 has135 unit cases passed; prior13 SQLite/CLI passed with seven PostgreSQL cases skipped; no live certification."
         },
         {
           "path": ".github/workflows/ci.yml",
@@ -1184,7 +1184,7 @@
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; RIR-005 has135 unit cases passed; prior13 SQLite/CLI passed with seven PostgreSQL cases skipped; no live certification."
         },
         {
           "path": "apps/bot/src/health.ts",
@@ -1218,7 +1218,7 @@
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; RIR-005 has135 unit cases passed; prior13 SQLite/CLI passed with seven PostgreSQL cases skipped; no live certification."
         },
         {
           "path": "packages/discord/src/dispatcher.ts",
@@ -1301,7 +1301,7 @@
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; RIR-005 has135 unit cases passed; prior13 SQLite/CLI passed with seven PostgreSQL cases skipped; no live certification."
         },
         {
           "path": "docs/database.md",
@@ -1839,7 +1839,7 @@
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; RIR-005 has135 unit cases passed; prior13 SQLite/CLI passed with seven PostgreSQL cases skipped; no live certification."
         }
       ],
       "gap": "The exact 35 acceptance criteria below remain the release gate; a passing foundation suite is not release completion."
@@ -2511,7 +2511,7 @@
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; RIR-005 has135 unit cases passed; prior13 SQLite/CLI passed with seven PostgreSQL cases skipped; no live certification."
         },
         {
           "path": "vitest.config.ts",

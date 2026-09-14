@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 158,
+  "revision": 161,
   "policy": {
     "pointScale": [
       1,
@@ -537,7 +537,7 @@
       "id": "RIR-005",
       "type": "bug",
       "title": "Resolve deferred parent PR validation without rewriting preserved work",
-      "status": "in-progress",
+      "status": "done",
       "parent": "RIR-100",
       "requires": [
         "RIR-110"
@@ -559,8 +559,14 @@
         "docs/"
       ],
       "owner": "coordinator",
-      "handoff": ".workboard/handoffs/RIR-005/001-start.md",
-      "validation": []
+      "handoff": ".workboard/handoffs/RIR-005/004-completion.md",
+      "validation": [
+        "Full unit135/135 passed across10files193.58s; lint/typecheck/build pass",
+        "Exact source/squash snapshots, retained ancestry and isolated repair paths validated on real merge graph",
+        "Both local squash-retention merges have zero tree delta; original commits/receipts preserved",
+        "Requirements91/35 and immutable source hashes pass; docs references valid",
+        "A026/A027 accepted; integration targets verified801103c; publication requires user checkpoint"
+      ]
     },
     {
       "status": "done",
@@ -1380,7 +1386,7 @@
       "branch": "fix/RIR-005-integration-reconciliation",
       "baseBranch": "develop/2.0.0-astra",
       "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
-      "status": "open",
+      "status": "checkpoint",
       "tickets": [
         "RIR-005"
       ],
@@ -2513,6 +2519,27 @@
       "actor": "coordinator",
       "action": "accept",
       "detail": "{\"action\":\"accept\",\"assignment\":\"A-027\"}"
+    },
+    {
+      "id": 159,
+      "at": "2026-09-14T19:53:21.584Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-005\",\"status\":\"review\",\"reason\":\"Reviewed integration repair with real-history and regression evidence\",\"handoff\":\".workboard/handoffs/RIR-005/004-completion.md\",\"validation\":[\"Full unit135/135 passed across10files193.58s; lint/typecheck/build pass\",\"Exact source/squash snapshots, retained ancestry and isolated repair paths validated on real merge graph\",\"Both local squash-retention merges have zero tree delta; original commits/receipts preserved\",\"Requirements91/35 and immutable source hashes pass; docs references valid\",\"A026/A027 accepted; integration targets verified801103c; publication requires user checkpoint\"]}"
+    },
+    {
+      "id": 160,
+      "at": "2026-09-14T19:53:23.165Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-005\",\"status\":\"done\",\"reason\":\"Reviewed integration repair with real-history and regression evidence\",\"handoff\":\".workboard/handoffs/RIR-005/004-completion.md\",\"validation\":[\"Full unit135/135 passed across10files193.58s; lint/typecheck/build pass\",\"Exact source/squash snapshots, retained ancestry and isolated repair paths validated on real merge graph\",\"Both local squash-retention merges have zero tree delta; original commits/receipts preserved\",\"Requirements91/35 and immutable source hashes pass; docs references valid\",\"A026/A027 accepted; integration targets verified801103c; publication requires user checkpoint\"]}"
+    },
+    {
+      "id": 161,
+      "at": "2026-09-14T19:53:24.658Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-004\"}"
     }
   ]
 }

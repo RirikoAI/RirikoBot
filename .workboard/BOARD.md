@@ -1,19 +1,13 @@
 # Ririko work board
 
-Generated from state.json · revision 158 · execution limit **1**.
+Generated from state.json · revision 161 · execution limit **1**.
 
-**Current work:** RIR-005 — Resolve deferred parent PR validation without rewriting preserved work (in-progress, 13 points)
-**Delivery:** BATCH-004 / RIR-005 / `fix/RIR-005-integration-reconciliation` → `develop/2.0.0-astra` (open)
+**Current work:** No occupied ticket.
+**Delivery:** BATCH-004 / RIR-005 / `fix/RIR-005-integration-reconciliation` → `develop/2.0.0-astra` (checkpoint)
 
 Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.
 
 **Approved integration:** completed deliveries BATCH-001@c1018829abf42fd2f8aad22948de343e51dc1e95, BATCH-002@a04753a473c8a807892848052cc248cff3695805, BATCH-003@e09daed09d5b625095923a622789413d8281327b; preserved baseline a27151bcf4ed3a72fdd3840011015acb17ae6048; decision D-006. New work remains in RIR-005; publication requires its own exact-head approval.
-
-## in-progress
-
-| ID | Type | Outcome | Points | Parent | Requires | Blocks | Delivery scope |
-|---|---|---|---:|---|---|---|---|
-| RIR-005 | bug | Resolve deferred parent PR validation without rewriting preserved work | 13 | RIR-100 | RIR-110 | — | RIR-005 |
 
 ## ready
 
@@ -50,6 +44,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 |---|---|---|---:|---|---|---|---|
 | RIR-001 | chore | Establish work board, agent handoffs and safe Git delivery | 8 | RIR-100 | — | RIR-003, RIR-210, RIR-211, RIR-310, RIR-410, RIR-510, RIR-610, RIR-710, RIR-004, RIR-110 | RIR-001 |
 | RIR-110 | story | Trace release reviews to the blueprint and exact branch changes | 13 | RIR-100 | RIR-001 | RIR-005, RIR-800, RIR-801, RIR-808 | RIR-110 |
+| RIR-005 | bug | Resolve deferred parent PR validation without rewriting preserved work | 13 | RIR-100 | RIR-110 | — | RIR-005 |
 | RIR-800 | epic | Implementation-ready documentation across every docs file | 89 | — | RIR-110 | — | RIR-800 |
 | RIR-801 | task | Specify architecture, developer workflows and command contracts | 13 | RIR-800 | RIR-110 | RIR-802 | RIR-800 |
 | RIR-802 | task | Deepen data contracts, legacy evidence and migration recovery | 8 | RIR-800 | RIR-801 | RIR-803 | RIR-800 |
@@ -94,7 +89,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 
 ## Current handoffs
 
-- RIR-005: [handoff](handoffs/RIR-005/001-start.md)
+- RIR-005: [handoff](handoffs/RIR-005/004-completion.md)
 
 ## Grooming groups
 

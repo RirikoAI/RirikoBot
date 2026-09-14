@@ -73,12 +73,12 @@ The historical real PostgreSQL run used an isolated PostgreSQL 18.6 server on lo
 
 ### Current unit inventory
 
-An independent static TypeScript-AST inventory agrees with the completed 119-case run. Parameterized literal arrays were expanded; this inventory itself did not execute tests.
+The RIR-800 static AST inventory covered 119 cases. The later RIR-005 executed report now verifies 135 cases across ten files, including 16 added integration-governance regressions. Counts below follow that completed report; the earlier inventory is not presented as a new AST audit.
 
 | Area | Cases | Evidence boundary |
 |---|---:|---|
-| Workboard model | 33 | Estimates/grooming, one active slot, dependencies, terminal states, consent transitions, assignments and fresh stack decisions |
-| Workboard Git/store | 31 | Real local repositories/worktrees, locking/recovery, branch/base/scope and publication guards; no actual remote push or PR |
+| Workboard model | 37 | Estimates/grooming, one active slot, dependencies, terminal states, consent transitions, assignments and fresh stack decisions |
+| Workboard Git/store | 43 | Real local repositories/worktrees, locking/recovery, branch/base/scope and publication guards; no actual remote push or PR |
 | Requirement ledger | 7 | Blueprint integrity, exact coverage, references and unsupported completion claims |
 | Discord dispatcher | 16 | Aliases, parsing, validation, middleware, help and transport isolation through controlled adapters |
 | Core | 10 | Configuration, permissions, settings cache, safe errors and selected redaction paths |
@@ -87,7 +87,7 @@ An independent static TypeScript-AST inventory agrees with the completed 119-cas
 | Generator | 11 | Traversal, symlink/junction boundaries, existing-file preservation and generated syntax |
 | Gateway | 3 | Mocked Discord Client ingress and actor/channel behavior, not live gateway login |
 | Health | 3 | Actual loopback HTTP with injected database/gateway state and failure cases |
-| Total | 119 | 71 governance/requirements plus 48 foundation cases |
+| Total | 135 | 87 governance/requirements plus 48 foundation cases |
 
 No line/branch coverage percentage is measured here. Optional peer metadata in a lockfile does not mean a coverage provider is installed. A future risk-based coverage gate needs a configured tool, honest baseline and meaningful uncovered-branch review; do not invent a percentage to make the project look complete.
 
@@ -109,11 +109,11 @@ Health tests distinguish /health/live and /health/ready. A deadline can bound th
 
 Board and blueprint checks precede dependency installation. Pull requests additionally run guard-pr against declared scope/target. Frozen installation precedes lint, typecheck, unit, both-dialect integration, CLI E2E and build. Later steps validate Compose configuration, build the runtime image and run narrowly defined smoke checks for a non-root process, unavailable TypeScript dev dependency, SQLite migration and doctor under a read-only container with writable temporary space.
 
-These are configured CI steps, not proof that this local unpublished branch ran them on GitHub. The container smoke uses dummy Discord credentials; it does not start the bot gateway, full Compose deployment, dashboard, music engine or providers. Inspect the actual completed run for the exact PR HEAD before reporting CI success. The frozen parent governance PR checker limitation remains unstarted RIR-005; do not bypass it or claim it repaired by this documentation epic.
+These are configured CI steps, not proof that this local unpublished branch ran them on GitHub. The container smoke uses dummy Discord credentials; it does not start the bot gateway, full Compose deployment, dashboard, music engine or providers. Inspect the actual completed run for the exact PR HEAD before reporting CI success. RIR-005 subsequently supplies an explicit new integration-repair checkpoint while preserving the frozen closed-batch checker. CI now checks out the actual event head, compares its committed board and validates resolved target ancestry; synthetic merge checkouts are rejected. The completed documentation PR #561 had successful CI run34885316146; that historical success does not certify the new unpublished repair.
 
 ## Future domain acceptance matrix
 
-Every new command/service needs strict typed implementation, meaningful tests and documented slash/prefix behavior. Tests target observable behavior, transactional boundaries and denied effects, rather than mirroring private helper implementation. The following coverage is **required future work**, not present in the 119-case suite:
+Every new command/service needs strict typed implementation, meaningful tests and documented slash/prefix behavior. Tests target observable behavior, transactional boundaries and denied effects, rather than mirroring private helper implementation. The following coverage is **required future work**, not present in the 135-case suite:
 
 | Domain | Deterministic service cases | Real boundary / release evidence |
 |---|---|---|
@@ -141,3 +141,13 @@ Use controlled barriers for races rather than arbitrary sleeps. For each durable
 Record exact command, HEAD/source changes, runtime/driver versions, passed/failed/skipped counts, selected projects, duration when useful and unresolved gates. A retry after a failure keeps the failed attempt in the record and explains the cause. Keep diagnostics sanitized and bounded. Persist specialist findings and coordinator acceptance under the active ticket's handoffs; do not rely on chat memory or sum overlapping historical test totals.
 
 No live Discord registration/login, external AI/image/stream request, audio playback, browser OAuth, production migration or local Docker image execution has been performed in this epic. The earlier Docker daemon was unavailable; this task has not reclassified that as a successful container run. Static audit replay verified legacy schema DDL, including the RIR-802 independent 85-statement SQLite replay, but did not run TypeORM or import representative production rows. Those remain release gates. Documentation links and arithmetic checks are useful evidence for documentation correctness, with that limited scope stated explicitly.
+
+## RIR-005 integration repair verification
+
+On 2026-09-14, `node node_modules/vitest/vitest.mjs run --project unit --maxWorkers=1` completed **135 passed / zero failed**, ten files,193.58seconds. JSON/default reporters recorded the same result. The targeted precursor selected13 real-Git cases (30 existing cases deselected), all passed in62.52seconds; do not add those to135 as new tests. Fresh ESLint, strict typecheck and project-reference build passed. Node24.13.1, Vitest4.1.10 and the existing lockfile were unchanged.
+
+The real-Git fixture file uses a bounded30-second test timeout because repeated Windows Git process creation exceeded the prior five-second default. Historical traversal was reduced to one NUL-delimited Git command per range. This does not change service timeouts or skip cases. Earlier red runs identified fixture shared-state/merge setup mistakes and integration/upstream ownership regressions; only the corrected complete run counts as acceptance.
+
+New tests exercise source order/identity/consent, immutable source ownership, identical-tree squash parent identity, transitive omissions, administrative-only baseline and transient edits, mandatory retained ancestry at atomic checkpoint, failed mutation preservation, source-owned versus repair-owned merge changes, actual-head/committed-board validation and already-integrated ordinary stacks. Existing approval, scope, non-fast-forward, shared-lock and worktree cases remain enabled.
+
+The real local repair preserved both original and squash ancestors through two inspected standard merges with zero content delta. Source/repair guards pass against that graph. Local CLI guard-pr and clean publication-plan results are recorded in the [RIR-005 completion handoff](../.workboard/handoffs/RIR-005/004-completion.md). No remote repair CI or integration merge is inferred from this rehearsal. Database runtime was unchanged, so the earlier13 SQLite/CLI cases and seven skipped PostgreSQL cases remain historical rather than being claimed freshly rerun here.
