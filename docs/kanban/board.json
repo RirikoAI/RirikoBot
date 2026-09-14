@@ -199,7 +199,7 @@
       "epic": "EPIC-002",
       "title": "Dual-Dialect Connection Factory & Client Harness",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-001"],
       "blocks": ["STORY-021"]
     },
@@ -318,7 +318,7 @@
       "parent": "STORY-020",
       "title": "Dependencies, Dual-Dialect Connection Factory & Client Interfaces",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [],
       "blocks": ["TASK-0202"]
     },
@@ -327,7 +327,7 @@
       "parent": "STORY-020",
       "title": "SQLite WAL/Foreign Key Pragmas, PG Pooling, Health Check & Integration Tests",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0201"],
       "blocks": ["STORY-021"]
     },

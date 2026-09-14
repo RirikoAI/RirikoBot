@@ -6,5 +6,5 @@
     "outDir": "./dist"
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../../packages/core" }]
+  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/database" }]
 }
