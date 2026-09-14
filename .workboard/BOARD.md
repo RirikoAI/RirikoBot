@@ -1,9 +1,9 @@
 # Ririko work board
 
-Generated from state.json · revision 129 · execution limit **1**.
+Generated from state.json · revision 143 · execution limit **1**.
 
 **Current work:** No occupied ticket.
-**Delivery:** BATCH-003 / RIR-800 / `feat/RIR-800-documentation-depth` → `develop/2.0.0-astra` (open)
+**Delivery:** BATCH-003 / RIR-800 / `feat/RIR-800-documentation-depth` → `develop/2.0.0-astra` (checkpoint)
 
 Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.
 
@@ -20,8 +20,6 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | RIR-212 | task | Port guildinfo and memberinfo through shared adapters | 5 | RIR-210 | RIR-211 | — | RIR-210 |
 | RIR-230 | story | Meme rendering and usable prefix commands | 13 | RIR-200 | RIR-210 | — | RIR-230 |
 | RIR-231 | bug | Repair the eleven broken legacy meme prefix paths | 8 | RIR-230 | RIR-210 | — | RIR-231 |
-| RIR-800 | epic | Implementation-ready documentation across every docs file | 89 | — | RIR-110 | — | RIR-800 |
-| RIR-807 | task | Reconcile every document, requirement and comparison with evidence | 8 | RIR-800 | RIR-806 | — | RIR-800 |
 
 ## backlog
 
@@ -47,12 +45,14 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 |---|---|---|---:|---|---|---|---|
 | RIR-001 | chore | Establish work board, agent handoffs and safe Git delivery | 8 | RIR-100 | — | RIR-003, RIR-210, RIR-211, RIR-310, RIR-410, RIR-510, RIR-610, RIR-710, RIR-004, RIR-110 | RIR-001 |
 | RIR-110 | story | Trace release reviews to the blueprint and exact branch changes | 13 | RIR-100 | RIR-001 | RIR-005, RIR-800, RIR-801, RIR-808 | RIR-110 |
+| RIR-800 | epic | Implementation-ready documentation across every docs file | 89 | — | RIR-110 | — | RIR-800 |
 | RIR-801 | task | Specify architecture, developer workflows and command contracts | 13 | RIR-800 | RIR-110 | RIR-802 | RIR-800 |
 | RIR-802 | task | Deepen data contracts, legacy evidence and migration recovery | 8 | RIR-800 | RIR-801 | RIR-803 | RIR-800 |
 | RIR-803 | task | Specify provider, AI, music, moderation and durable delivery behavior | 13 | RIR-800 | RIR-802 | RIR-804 | RIR-800 |
 | RIR-804 | task | Specify economy and complete TCG progression and transactional rules | 13 | RIR-800 | RIR-803 | RIR-805 | RIR-800 |
 | RIR-805 | task | Specify dashboard workflows, authorization and credential lifecycle | 8 | RIR-800 | RIR-804 | RIR-806 | RIR-800 |
 | RIR-806 | task | Deepen deployment, incident recovery and acceptance test strategy | 8 | RIR-800 | RIR-805 | RIR-807 | RIR-800 |
+| RIR-807 | task | Reconcile every document, requirement and comparison with evidence | 8 | RIR-800 | RIR-806 | — | RIR-800 |
 | RIR-808 | task | Support fresh stack consent after a published parent closes | 5 | RIR-800 | RIR-110 | — | RIR-800 |
 
 ## Agent assignments
@@ -81,17 +81,20 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | A-020 | RIR-806 | developer-docs | accepted | Deepen deployment runbook against actual Docker/Compose/CI/health and source/Gemini, with verified commands and recovery gaps |
 | A-021 | RIR-806 | architecture-docs | accepted | Read-only independent deployment/release/backup/health and Git scope review |
 | A-022 | RIR-806 | discord-docs | accepted | Read-only independent test/CI inventory and testing guide review; do not rerun full suite |
+| A-023 | RIR-807 | developer-docs | accepted | Update branch comparison with pinned source/code evidence and documentation epic differences; no code or completion inflation |
+| A-024 | RIR-807 | architecture-docs | accepted | Read-only entire 40-file corpus coherence/depth review and final documentation-review matrix verification |
+| A-025 | RIR-807 | discord-docs | accepted | Read-only full corpus local file/anchor reference, source/status and command consistency check; do not rerun tests |
 
 ## Current handoffs
 
-- RIR-800: [handoff](handoffs/RIR-800/001-start.md)
+- RIR-800: [handoff](handoffs/RIR-800/003-completion.md)
 - RIR-801: [handoff](handoffs/RIR-801/006-completion.md)
 - RIR-802: [handoff](handoffs/RIR-802/006-completion.md)
 - RIR-803: [handoff](handoffs/RIR-803/006-completion.md)
 - RIR-804: [handoff](handoffs/RIR-804/006-completion.md)
 - RIR-805: [handoff](handoffs/RIR-805/006-completion.md)
 - RIR-806: [handoff](handoffs/RIR-806/006-completion.md)
-- RIR-807: [handoff](handoffs/RIR-807/001-start.md)
+- RIR-807: [handoff](handoffs/RIR-807/005-completion.md)
 - RIR-808: [handoff](handoffs/RIR-808/002-completion.md)
 
 ## Grooming groups

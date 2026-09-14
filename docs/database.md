@@ -143,6 +143,9 @@ Jobs reference durable records instead of huge duplicated snapshots, but retain 
 | `moderation_cases` | PK ID; UQ guild/case-number; actor/target/action/reason, policy version, state/times | Transactional case number; attempted action is not assumed Discord success |
 | `moderation_action_attempts` | UQ case/attempt; external identity/outcome/error category | Operation-specific retry; execution-time permissions/hierarchy |
 | `moderation_warnings` | PK ID; guild/target/case, severity/state/expiry | Audited revoke/expire; index guild/target/state/expiry |
+| `moderation_warning_events` | PK event; warning/case, grant/revoke/expire, escalation episode, actor/time | Immutable facts update the warning projection atomically |
+| `moderation_evidence` / `moderation_outbox` | Scoped evidence metadata with retention; unique case/notification intent | Restricted payload access; notification failure cannot repeat a sanction |
+| `channel_lock_snapshots` | Operation/channel/revision; original allow/deny/inherit and owned changes | Restore only matching ownership and generation; preserve later staff changes |
 | `moderation_rules` / revisions | Rule ID/version; guild/type, bounded thresholds/exemptions/action/enabled | Preserve decision version; validated data, not executable code |
 | `moderation_notes` | PK ID; guild/target/author/content/revision, edited/deleted | Staff-only scope; edit evidence; no global warning-count substitute |
 | `moderation_case_counters` | PK guild; next sequence/revision | Race-safe allocation, never COUNT(*) + 1 |
@@ -158,11 +161,12 @@ Escalation reads applicable active warnings and records its decision consistentl
 | `economy_ledger_entries` | PK transaction/line; account, signed delta, before/after | Sum zero; query/index account + transaction/time; no cross-currency balancing |
 | `economy_holds` | PK ID; account/source, units/state/expiry; UQ source identity | Reserve/capture/release once; held cannot exceed eligible funds |
 | `reward_rules` / revisions | Rule/version; scope/event, integer amounts/weights/windows | Persist rule applied to decision; no executable formula payload |
-| `economy_rewards` | UQ scope/source-event/rule; decision reason, transaction/XP IDs | Duplicate events cannot award twice; rejected-event retry semantics explicit |
+| `economy_rewards` | UQ scope/source-event/logical-reward-kind; applied rule/version, decision reason, transaction/XP IDs | Changing rule version cannot remint an old event; rejected-event retry semantics explicit |
 | `economy_cooldowns` / windows | UQ scope/user/reward/window-key; eligible_at/counters | Durable abuse control, independent from dispatcher's memory cooldown |
-| `daily_claims` / interest settlements | UQ scope/account-or-user/rule/period; ledger/rules version | Governing timezone/period persisted; duplicate reset cannot mint twice |
+| `daily_claims` | UQ scope/user/claim-sequence; stable request identity, previous claim, eligible_at, streak, applied rules/ledger | Atomic rolling 24-hour eligibility and 36-hour continuity; no midnight or rule-edit extra claim |
+| Interest settlements | UQ scope/account/logical-interest-kind/period; governing timezone, applied rules/ledger | Calendar identity independent of rule version; duplicate period cannot mint twice |
 | `xp_accounts` | UQ scope/user; XP, level projection, formula version/revision | Explicit global/guild projections; no duplicated money |
-| `xp_events` | PK ID; unique source/rule, delta/account/time | Event and projection update atomic; compensating corrections |
+| `xp_events` | PK ID; unique account/source/logical-reward-kind, applied rule/version, delta/time | Event and projection update atomic; rule changes cannot replay old awards; compensating corrections |
 | `leaderboard_snapshots` / entries | Snapshot scope/metric/version/as_of; snapshot/user entries with rank | Stable tie-breaker; index snapshot/rank/user; bounded pages |
 
 Bank movements transfer pockets; net worth is derived, not independently editable. Frozen accounts need a reviewed refund/settlement policy rather than stranded holds. Snapshot ranking is a read model, not a promise of O(1) freshly recalculated rank across arbitrary populations. [Economy](economy.md) owns reward, abuse, interest and correction rules.
@@ -178,7 +182,7 @@ Bank movements transfer pockets; net worth is derived, not independently editabl
 | `ai_channels` | PK guild/channel; enabled/policy version | Opt-in dedicated channel with independent authorization |
 | `ai_conversations` | PK ID; guild/channel/user, generation, provider/model, summary/version/expiry | All lookups bind scope; reset generation cannot revive old private context |
 | `ai_messages` | PK ID; UQ conversation/sequence; role/content/request/tool identity, token estimate/time | Stable order, bounded payload/retention; index conversation/sequence |
-| `ai_tool_calls` | UQ conversation/request/tool-call; mediated actor, tool/version, safe args/result ref/state | Application supplies authority independently from model arguments |
+| `ai_tool_calls` | Unique application operation ID bound to conversation/generation and request digest; provider call IDs as attempt evidence; mediated actor, tool/version, safe args/result ref/state | Application supplies authority and semantic duplicate detection independently of model arguments or regenerated provider IDs |
 | `ai_guild_preferences` / `ai_user_preferences` | Guild or user/scope key; personality/model/timezone fields/revision | User choices cannot weaken guild policy; personality is not authority |
 | `image_providers` / `image_presets` | Provider or preset/version; capabilities/defaults/enabled | Configuration, not a promise of unlimited free availability; no embedded keys |
 | `image_jobs` | PK ID; job FK, scope/user, provider/model/preset version, prompt ref, units/result assets/state | Accept reserves quota; ambiguous paid result reconciled before retry/fallback |
@@ -197,6 +201,7 @@ Provider JSON remains untrusted. Query scope and stable IDs rather than globally
 | `giveaway_draws` / `giveaway_winners` | Draw ID/sequence, giveaway, receipt/RNG/replay metadata; winner slots | Reroll is a new audited draw, not overwritten history |
 | `streamers` | PK ID; UQ platform/platform-user-ID; metadata, observed state/time | Twitch/TikTok/Facebook assessed independently; YouTube may be additional |
 | `stream_subscriptions` | PK ID; UQ streamer/Discord-guild/target; template/mention policy, state/revision | Target-specific identity; fresh permission/mention policy before send |
+| `stream_subscription_members` | PK subscription/requesting-user; membership state, actor and timestamps | Independent subscriber attribution; removing one member cannot remove another's subscription or duplicate a target delivery |
 | `stream_events` | PK ID; UQ platform/external-stream-ID; streamer/start/end/metadata | Normalize stable provider identity; webhook/poll overlap deduplicates |
 | `stream_announcements` | PK delivery ID; UQ event/Discord-guild/target; state/message/intent/outcome times | Unique intent and explicit unknown outcome, not exactly-once guarantee |
 | `stream_assets` | Stream/asset relation; captured time, media asset/provenance | Payload removable independently of announcement history |
@@ -232,7 +237,7 @@ Deleting artwork tombstones the source, removes/replaces bytes and retains card 
 | `inventory_stacks` | UQ owner/item/version; available/reserved quantity | Nonnegative counts; conditional reservation/consumption |
 | `card_equipment` | PK owned-card/slot; item instance/owner/revision | UQ equipped item; owner/slot compatibility; atomic state/reservation updates |
 | `item_enhancement_attempts` | Unique request; item before/after, material/ledger refs, RNG/rules/result | Resource consumption and outcome once; retry cannot reroll |
-| `player_energy` | PK user/scope; current/cap/bonus, as_of, reset-period/revision | Atomic regeneration/spend; versioned cap/overflow; backward clock cannot grant extra |
+| `player_energy` | PK user/scope; regular E, bonus B, cap/rules version, last UTC reset date/revision | Once per UTC day E becomes max(E, max(0, C-B)); spend B first; cap decrease preserves excess as B; capacity uses max(1, global level), without changing XP/display level |
 | `energy_transactions` | PK ID; unique source; before/after/delta/reason/rules | Spend/replenish/refund trace; refund identity blocks double restoration |
 | `game_achievements` / versions | Code/version; requirement/target/reward-bundle/visibility | Freeze version for progress/claim policy |
 | `user_achievements` | UQ user/achievement/season-or-global-scope; progress/unlock/claim | Unlock and claim distinct; reward grant atomic with claim |

@@ -268,7 +268,7 @@ The permission helper accepts string permission names; reaction-role commands in
 | `guild-create.event.ts` | Registers guild application commands on join | KEEP, await and reconcile registration |
 | `message-reaction-add.event.ts` / `message-reaction-remove.event.ts` | Fetches partials and applies/removes configured emoji roles | KEEP emoji behavior; REWORK permissions, persistence constraints, partial handling |
 
-All nine event source files are under [src/discord/events](https://github.com/RirikoAI/RirikoBot/blob/0d8be25b17e25dfa61812d6e7b5aaf8497687257/src/discord/events).
+All nine event source files are under [src/discord/events](https://github.com/RirikoAI/RirikoBot/tree/0d8be25b17e25dfa61812d6e7b5aaf8497687257/src/discord/events).
 
 HTTP declarations: root service information; economy user-count information with intended `/economy` and version `1`; `/discord/invite` redirect; version `1` `/discord/get-invite`; Swagger `/docs`. The root/economy/Discord controllers contain duplicate `@Controller` decorators, so intended path/version annotations are not a verified effective routing table. Verify the running route map before defining compatibility redirects. No authentication guards are present on these informational controllers. Preserve response contracts where useful, add explicit health/readiness endpoints, and keep the future admin API behind authorization.
 

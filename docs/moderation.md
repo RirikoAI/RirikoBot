@@ -33,9 +33,10 @@ A proposed intent contains operationId, guildId, trusted actorId, action, target
 | Record | Invariant |
 |---|---|
 | moderation_cases | Guild-scoped case number, intent, restricted reason and outcome |
-| moderation_attempts | Submission boundary, lease/fence, redacted response category and correlation ID |
+| moderation_action_attempts | Submission boundary, lease/fence, redacted response category and correlation ID |
 | moderation_evidence | Scoped reference, sensitivity, integrity metadata and retention deadline; separate payload |
-| warning_events | Immutable grant/revoke/expire facts with escalation episode |
+| moderation_warnings | Current severity/state/expiry projection, updated with its event |
+| moderation_warning_events | Immutable grant/revoke/expire facts with escalation episode |
 | moderation_outbox | Notification intent retried independently of sanction |
 | channel_lock_snapshots | Original allow/deny/inherit bits and owned changes, channel and revision |
 

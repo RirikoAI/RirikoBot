@@ -1,0 +1,9 @@
+# RIR-807 / A-024 — independent architecture review
+
+Coordinator-preserved return from architecture-docs, 2026-09-14. Ticket RIR-807, eight points, GR-004; topic feat/RIR-800-documentation-depth, starting HEAD cf60f76481bfdf05dd133bdf323ea5784c452b18. Read-only assignment across the original corpus and final matrix/ledger; no owned files, Git/board mutations, runtime suites or provider calls.
+
+Reviewed actual current foundation behavior against guides and ADRs. Identified and verified coordinator corrections for wager hold-to-funded-escrow settlement, rolling daily versus calendar identity, stable reward/XP identity independent of rule version, stream subscriber attribution, moderation naming and AI streaming unknown outcome mapping. All now agree across relevant guides. Current three-command/three-table boundary remains explicit; future interfaces, balance defaults, provider access and web/vault services are not presented as implemented.
+
+Final matrix has exactly 40 unique original paths and resulting corpus is41 files/38 Markdown/three JSON. Both factual manifests are preserved; all three source sizes/hashes match. Requested three precision edits to modules/adapters/ADR-010 matrix descriptions; verified landed. Requirements checker passes with91 requirements/35 criteria and unchanged IDs/statuses versus314cfec. All452 local Markdown references resolve; scoped diff hygiene passes.
+
+Also inspected fresh Gemini a117c157024929a1e76ce799c71320f090d35189 delta: workspace/CLI scaffold and one test, corrected board story definitions/rarity/elements and expanded roadmap. Final addendum acknowledges actual progress while preserving historical anchors. No new missing design mechanics or cross-document blockers found. Accept return; documentation acceptance neither completes product features nor authorizes publication.

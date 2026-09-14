@@ -30,7 +30,7 @@ An account is identified by explicit global/Discord-guild/player-guild scope, ow
 
 A transaction header identifies operation, scope, currency, source and time. Posting lines have account, signed delta and consistent before/after values. Sum of deltas is zero per currency; issuance and sinks use explicit system counteraccounts. Player spendable funds equal posted less active holds and remain nonnegative. A hold is not also a debit: reserve once, then capture or release once under the same source identity.
 
-Example invariant, using synthetic units: buyer -100, seller +95, fee sink +5 sums to zero. Card ownership and the single-item listing's sold transition commit with those postings. If fee calculation or ownership validation fails, no line or transfer remains. A bank deposit moves wallet to bank; it cannot also be reported as newly earned wealth. Interest, if enabled after balance review, is explicit issuance tied to one account/rule/period receipt.
+Example invariant, using synthetic units: buyer -100, seller +95, fee sink +5 sums to zero. Card ownership and the single-item listing's sold transition commit with those postings. If fee calculation or ownership validation fails, no line or transfer remains. A bank deposit moves wallet to bank; it cannot also be reported as newly earned wealth. Interest, if enabled after balance review, is explicit issuance tied to one account/logical-interest-kind/period receipt, with applied rule version as evidence.
 
 ### One operation, many retries
 
@@ -44,7 +44,7 @@ Transactions are short and contain no provider/Discord calls. Commit domain effe
 
 Economy authorizes accounts, validates funds/holds and posts units; game/card services own valid moves, outcomes, offer revisions and ownership. Both are checked in the same settlement transaction. No command, dashboard form, background reward or AI tool directly changes a balance. Sensitive account administration uses the same rules with an auditable actor/reason, not a hidden bypass.
 
-Wagers reserve eligible stakes before a session begins. Timeout, cancellation, tie and winner settlement are explicit mutually exclusive terminal outcomes; one unique session settlement consumes/releases holds. Bot-opponent liabilities require a declared house reserve/issuance policy. Card trades require both parties to confirm the current offer revision, not merely any historical acceptance. Inventory consumption updates quantity/effect/receipt together. See [TCG ADR](ADR-010-waifu-tcg-pipeline-and-game-design.md).
+Wagers reserve eligible stakes before admission. Pre-admission expiry or cancellation releases holds. Once both players accept, admission atomically captures both stakes into match escrow. Mutually exclusive terminal winner, tie, timeout or cancellation outcomes debit that escrow to payouts/fees or refunds under one unique session settlement; they do not release already captured holds. Bot-opponent liabilities require a declared house reserve/issuance policy. Card trades require both parties to confirm the current offer revision, not merely any historical acceptance. Inventory consumption updates quantity/effect/receipt together. See [TCG ADR](ADR-010-waifu-tcg-pipeline-and-game-design.md).
 
 Freeze/disable policies stop new spending while retaining authorized refund/reconciliation paths; they must not strand funds. Corrections use compensating postings linked to original transactions, never silent history edits. Operations cannot be deleted to evade deduplication or inflate a retry budget.
 
@@ -54,7 +54,7 @@ A trusted domain event carries stable source identity, subject, scope, version a
 
 Text, voice, attachments, games, quests, achievements and giveaways share the engine. Voice awards should exceed ordinary chat under the chosen eligible participation policy, but disconnected/AFK intervals and unverified missing events earn nothing automatically. Hashes and rolling windows require bounded retention; anti-abuse heuristics are imperfect and need false-positive review. A local command cooldown is not durable economy protection.
 
-Daily claims, interest, quests and energy use persisted period identity and governing timezone/rules version. A restart or repeated scheduled reset is not a second period. XP thresholds and level projections are versioned; altering a curve needs preview/migration policy and cannot silently duplicate milestone rewards. Indexed leaderboard snapshots with as-of timestamps are read models, not fresh global rank recomputed by scanning all users on every profile.
+Daily claims use durable rolling eligibility (24 hours) and streak continuity (36 hours), while interest, quests and energy use their declared calendar periods. Persist the logical eligibility/period identity independently of the applied rule version; changing rules cannot create another claim for the same logical event. A restart or repeated scheduled reset is not another period. XP thresholds and level projections are versioned; altering a curve needs preview/migration policy and cannot silently duplicate milestone rewards. Indexed leaderboard snapshots with as-of timestamps are read models, not fresh global rank recomputed by scanning all users on every profile.
 
 ## Reconciliation, retention and rollout
 
@@ -64,6 +64,6 @@ The rollout order is contract/schema and both-dialect transaction tests, control
 
 ## Acceptance and reconsideration
 
-Required evidence includes simultaneous overspend, same-key replay and changed-payload conflict, integer boundaries, atomic card/payment/fee rollback, hold expiry-versus-capture, winner-versus-timeout, profile/rank ties, persistent abuse windows, duplicate daily/interest periods, partial migration and restore replay. Test each supported real driver, plus deterministic service tests and sampled invariant/property checks. A passed simulation does not prove enjoyable balance or immunity to inflation.
+Required evidence includes simultaneous overspend, same-key replay and changed-payload conflict, integer boundaries, atomic card/payment/fee rollback, hold expiry-versus-capture, winner-versus-timeout, profile/rank ties, persistent abuse windows, duplicate rolling daily eligibility claims and calendar interest periods, partial migration and restore replay. Test each supported real driver, plus deterministic service tests and sampled invariant/property checks. A passed simulation does not prove enjoyable balance or immunity to inflation.
 
 Reconsider extraction or accounting representation only when measured contention, storage or operating needs justify it, with an explicit migration/reconciliation design. Tune reward and interest rates through versioned simulations and user feedback. No fixed XP range, cooldown, interest or streak multiplier is accepted as balanced by this ADR. No runtime or live economy tests were executed in this documentation epic; [testing](../testing.md) separates actual evidence from these release gates.

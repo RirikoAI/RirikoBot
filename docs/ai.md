@@ -160,6 +160,8 @@ A cancel button is requester-bound and identifies turn/generation, not a raw pro
 
 ## Application-owned tool registry
 
+The streaming-specific `ChatEvent` envelope maps `failed` with `outcome: unknown` to the shared adapter result `unknown`, never to an ordinary retryable failure. A stream ending without a confirmed terminal result remains uncertain; a generic failed-event handler must not resubmit it.
+
 Native function calling chooses a **proposal**. The application owns allowed names, strict runtime schemas, purpose/actor checks, timeout, output redaction, idempotency and execution. Reject unknown names, extra properties, malformed JSON, oversized arguments and fabricated actor/guild/user fields. Provider strict mode can improve argument shape but is not a replacement for local validation or domain authorization.
 
 A proposed tool definition includes name/version, description, input/output schema, installed module, read/mutate classification, actor authorization function, timeout, result byte cap, data-disclosure class and idempotency policy. The registry offered to a model is the intersection of installed capabilities and allowed policy for that turn. Recheck permissions immediately before execution because roles, channel access, music voice state or module flags may change during generation.

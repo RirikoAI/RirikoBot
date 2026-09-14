@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 129,
+  "revision": 143,
   "policy": {
     "pointScale": [
       1,
@@ -563,14 +563,20 @@
       "validation": []
     },
     {
-      "status": "ready",
+      "status": "done",
       "estimate": 89,
       "estimateRationale": "Full cross-domain specification and evidence review; seven bounded leaves cover the 40-file corpus",
       "groomedIn": "GR-004",
       "priority": "P1",
       "owner": null,
-      "handoff": ".workboard/handoffs/RIR-800/001-start.md",
-      "validation": [],
+      "handoff": ".workboard/handoffs/RIR-800/003-completion.md",
+      "validation": [
+        "All40 original files reviewed;41 final files and exact40-row matrix",
+        "452 local references valid; exact blueprint/manifests preserved",
+        "91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid",
+        "Independent A023/A024/A025 returns accepted; final diff hygiene passes",
+        "119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim"
+      ],
       "id": "RIR-800",
       "type": "epic",
       "title": "Implementation-ready documentation across every docs file",
@@ -793,14 +799,20 @@
       ]
     },
     {
-      "status": "ready",
+      "status": "done",
       "estimate": 8,
       "estimateRationale": "Reconcile every document, requirement and comparison with evidence: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
       "groomedIn": "GR-004",
       "priority": "P1",
-      "owner": null,
-      "handoff": ".workboard/handoffs/RIR-807/001-start.md",
-      "validation": [],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-807/005-completion.md",
+      "validation": [
+        "All40 original files reviewed;41 final files and exact40-row matrix",
+        "452 local references valid; exact blueprint/manifests preserved",
+        "91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid",
+        "Independent A023/A024/A025 returns accepted; final diff hygiene passes",
+        "119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim"
+      ],
       "id": "RIR-807",
       "type": "task",
       "title": "Reconcile every document, requirement and comparison with evidence",
@@ -1216,6 +1228,35 @@
       "paths": [],
       "status": "accepted",
       "handoff": ".workboard/handoffs/RIR-806/005-testing-return.md"
+    },
+    {
+      "id": "A-023",
+      "ticket": "RIR-807",
+      "agent": "developer-docs",
+      "scope": "Update branch comparison with pinned source/code evidence and documentation epic differences; no code or completion inflation",
+      "paths": [
+        "docs/branch-comparison.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-807/002-comparison-return.md"
+    },
+    {
+      "id": "A-024",
+      "ticket": "RIR-807",
+      "agent": "architecture-docs",
+      "scope": "Read-only entire 40-file corpus coherence/depth review and final documentation-review matrix verification",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-807/003-architecture-return.md"
+    },
+    {
+      "id": "A-025",
+      "ticket": "RIR-807",
+      "agent": "discord-docs",
+      "scope": "Read-only full corpus local file/anchor reference, source/status and command consistency check; do not rerun tests",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-807/004-reference-return.md"
     }
   ],
   "batches": [
@@ -1254,7 +1295,7 @@
       "branch": "feat/RIR-800-documentation-depth",
       "baseBranch": "develop/2.0.0-astra",
       "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
-      "status": "open",
+      "status": "checkpoint",
       "tickets": [
         "RIR-800",
         "RIR-808",
@@ -2177,6 +2218,104 @@
       "actor": "coordinator",
       "action": "move",
       "detail": "{\"action\":\"move\",\"ticket\":\"RIR-806\",\"status\":\"done\",\"reason\":\"Both runbooks compared and independently source-reviewed, central checks passed\",\"handoff\":\".workboard/handoffs/RIR-806/006-completion.md\",\"validation\":[\"29 local paths valid; requirements91/35; board/diffcheck; lint/type/build pass; SQLite/CLI13pass7PGskip; no live platform claims\"]}"
+    },
+    {
+      "id": 130,
+      "at": "2026-09-14T18:29:55.537Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-807\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 131,
+      "at": "2026-09-14T18:29:56.378Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-023\",\"ticket\":\"RIR-807\",\"agent\":\"developer-docs\",\"scope\":\"Update branch comparison with pinned source/code evidence and documentation epic differences; no code or completion inflation\",\"paths\":[\"docs/branch-comparison.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 132,
+      "at": "2026-09-14T18:29:57.207Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-024\",\"ticket\":\"RIR-807\",\"agent\":\"architecture-docs\",\"scope\":\"Read-only entire 40-file corpus coherence/depth review and final documentation-review matrix verification\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 133,
+      "at": "2026-09-14T18:29:58.036Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-025\",\"ticket\":\"RIR-807\",\"agent\":\"discord-docs\",\"scope\":\"Read-only full corpus local file/anchor reference, source/status and command consistency check; do not rerun tests\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 134,
+      "at": "2026-09-14T18:44:14.338Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-023\",\"handoff\":\".workboard/handoffs/RIR-807/002-comparison-return.md\"}"
+    },
+    {
+      "id": 135,
+      "at": "2026-09-14T18:44:15.163Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-023\"}"
+    },
+    {
+      "id": 136,
+      "at": "2026-09-14T18:44:15.958Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-024\",\"handoff\":\".workboard/handoffs/RIR-807/003-architecture-return.md\"}"
+    },
+    {
+      "id": 137,
+      "at": "2026-09-14T18:44:16.763Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-024\"}"
+    },
+    {
+      "id": 138,
+      "at": "2026-09-14T18:44:17.543Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-025\",\"handoff\":\".workboard/handoffs/RIR-807/004-reference-return.md\"}"
+    },
+    {
+      "id": 139,
+      "at": "2026-09-14T18:44:18.349Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-025\"}"
+    },
+    {
+      "id": 140,
+      "at": "2026-09-14T18:44:19.159Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-807\",\"status\":\"review\",\"reason\":\"Final corpus, ledger and comparison accepted with documented limitations\",\"handoff\":\".workboard/handoffs/RIR-807/005-completion.md\",\"validation\":[\"All40 original files reviewed;41 final files and exact40-row matrix\",\"452 local references valid; exact blueprint/manifests preserved\",\"91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid\",\"Independent A023/A024/A025 returns accepted; final diff hygiene passes\",\"119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim\"]}"
+    },
+    {
+      "id": 141,
+      "at": "2026-09-14T18:44:19.949Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-807\",\"status\":\"done\",\"reason\":\"Final corpus, ledger and comparison accepted with documented limitations\",\"handoff\":\".workboard/handoffs/RIR-807/005-completion.md\",\"validation\":[\"All40 original files reviewed;41 final files and exact40-row matrix\",\"452 local references valid; exact blueprint/manifests preserved\",\"91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid\",\"Independent A023/A024/A025 returns accepted; final diff hygiene passes\",\"119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim\"]}"
+    },
+    {
+      "id": 142,
+      "at": "2026-09-14T18:44:20.736Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-800\",\"status\":\"done\",\"reason\":\"All eight approved leaves complete; one documentation epic ready for user PR checkpoint\",\"handoff\":\".workboard/handoffs/RIR-800/003-completion.md\",\"validation\":[\"All40 original files reviewed;41 final files and exact40-row matrix\",\"452 local references valid; exact blueprint/manifests preserved\",\"91 sections/35 criteria;126 IDs/statuses unchanged; generated ledger valid\",\"Independent A023/A024/A025 returns accepted; final diff hygiene passes\",\"119 prior unit passed; fresh806 lint/type/build and13 SQLite/CLI passed,7PG skipped; no live claim\"]}"
+    },
+    {
+      "id": 143,
+      "at": "2026-09-14T18:44:21.518Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-003\"}"
     }
   ]
 }
