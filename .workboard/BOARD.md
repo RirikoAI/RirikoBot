@@ -1,11 +1,19 @@
 # Ririko work board
 
-Generated from state.json · revision 29 · execution limit **1**.
+Generated from state.json · revision 61 · execution limit **1**.
 
-**Current work:** No occupied ticket.
-**Delivery:** No open batch.
+**Current work:** RIR-801 — Specify architecture, developer workflows and command contracts (in-progress, 13 points)
+**Delivery:** BATCH-003 / RIR-800 / `feat/RIR-800-documentation-depth` → `develop/2.0.0-astra` (open)
 
 Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.
+
+**Approved stack:** parent BATCH-002 at `a04753a473c8a807892848052cc248cff3695805`, decision D-003. Run `pnpm board pr-plan` to resolve the immediate PR target; never assume the integration target excludes parent changes.
+
+## in-progress
+
+| ID | Type | Outcome | Points | Parent | Requires | Blocks | Delivery scope |
+|---|---|---|---:|---|---|---|---|
+| RIR-801 | task | Specify architecture, developer workflows and command contracts | 13 | RIR-800 | RIR-110 | RIR-802 | RIR-800 |
 
 ## ready
 
@@ -18,6 +26,13 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | RIR-212 | task | Port guildinfo and memberinfo through shared adapters | 5 | RIR-210 | RIR-211 | — | RIR-210 |
 | RIR-230 | story | Meme rendering and usable prefix commands | 13 | RIR-200 | RIR-210 | — | RIR-230 |
 | RIR-231 | bug | Repair the eleven broken legacy meme prefix paths | 8 | RIR-230 | RIR-210 | — | RIR-231 |
+| RIR-800 | epic | Implementation-ready documentation across every docs file | 89 | — | RIR-110 | — | RIR-800 |
+| RIR-802 | task | Deepen data contracts, legacy evidence and migration recovery | 8 | RIR-800 | RIR-801 | RIR-803 | RIR-800 |
+| RIR-803 | task | Specify provider, AI, music, moderation and durable delivery behavior | 13 | RIR-800 | RIR-802 | RIR-804 | RIR-800 |
+| RIR-804 | task | Specify economy and complete TCG progression and transactional rules | 13 | RIR-800 | RIR-803 | RIR-805 | RIR-800 |
+| RIR-805 | task | Specify dashboard workflows, authorization and credential lifecycle | 8 | RIR-800 | RIR-804 | RIR-806 | RIR-800 |
+| RIR-806 | task | Deepen deployment, incident recovery and acceptance test strategy | 8 | RIR-800 | RIR-805 | RIR-807 | RIR-800 |
+| RIR-807 | task | Reconcile every document, requirement and comparison with evidence | 8 | RIR-800 | RIR-806 | — | RIR-800 |
 
 ## backlog
 
@@ -42,7 +57,8 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | ID | Type | Outcome | Points | Parent | Requires | Blocks | Delivery scope |
 |---|---|---|---:|---|---|---|---|
 | RIR-001 | chore | Establish work board, agent handoffs and safe Git delivery | 8 | RIR-100 | — | RIR-003, RIR-210, RIR-211, RIR-310, RIR-410, RIR-510, RIR-610, RIR-710, RIR-004, RIR-110 | RIR-001 |
-| RIR-110 | story | Trace release reviews to the blueprint and exact branch changes | 13 | RIR-100 | RIR-001 | RIR-005 | RIR-110 |
+| RIR-110 | story | Trace release reviews to the blueprint and exact branch changes | 13 | RIR-100 | RIR-001 | RIR-005, RIR-800, RIR-801, RIR-808 | RIR-110 |
+| RIR-808 | task | Support fresh stack consent after a published parent closes | 5 | RIR-800 | RIR-110 | — | RIR-800 |
 
 ## Agent assignments
 
@@ -51,15 +67,21 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | A-001 | RIR-001 | workflow-engine | accepted | Implement and test the pure board validator/state transition engine against tools/workboard/types.ts and the standing protocol. Return evidence and design decisions; no Git or status changes. |
 | A-002 | RIR-110 | delivery-guard | accepted | Implement and test explicit approved-stack resolution and Git guards against the coordinator types contract. Own git.ts and git-store.test.ts only; no board or Git publication mutations; return exact evidence. |
 | A-003 | RIR-110 | delivery-guard | accepted | Finish safe deferred-parent publication from the current child checkpoint: separate parent approval/head/base/scope, no worktree switch, no mixing or bypass of shared board. Own git.ts and git-store.test.ts only; return tested evidence. |
+| A-004 | RIR-808 | delivery-guard | accepted | Add a real Git/store regression for a fresh kind=stack decision after an existing parent PR is recorded and closed; retain exact published refs and reject use as parent publication. Own only git-store.test.ts; return evidence, no board/Git workspace mutations. |
+| A-005 | RIR-801 | architecture-docs | assigned | Deepen system topology, request/state/security/config contracts and concrete decision tradeoffs against actual source and pinned Gemini; no other files |
+| A-006 | RIR-801 | discord-docs | assigned | Deepen actual and planned command/help/module contracts, compatibility, lifecycle, failure and acceptance scenarios beyond Gemini; no other files |
+| A-007 | RIR-801 | developer-docs | assigned | Deepen reproducible developer/operator extension workflows and contribution/delivery/handoff recovery, grounded in actual CLI and protocol; no other files |
 
 ## Current handoffs
 
-- RIR-110: [handoff](handoffs/RIR-110/003-completion.md)
+- RIR-801: [handoff](handoffs/RIR-801/001-start.md)
 
 ## Grooming groups
 
 - GR-001: RIR-100 · RIR-100, RIR-001, RIR-003 · Group refinement from the user's standing governance requirements and known Docker verification gap.
 - GR-002: RIR-200 · RIR-200, RIR-210, RIR-211, RIR-212, RIR-230, RIR-231 · Initial group estimates from audited general/guild and meme compatibility defects; revisit before scope expands.
 - GR-003: RIR-100 · RIR-110, RIR-004 · Foundation refinement after pinned branch comparison; one approved review-evidence story and deferred dependency cleanup.
+- GR-004: RIR-800 · RIR-800, RIR-801, RIR-802, RIR-803, RIR-804, RIR-805, RIR-806, RIR-807 · User approved one stacked documentation epic. Grouped review of all 40 files and 13 ADRs; seven sequential leaves partition ownership and review risk. Parent is a planning estimate, not additional velocity.
+- GR-005: RIR-800 · RIR-808 · Explicit user-approved 5-point prerequisite discovered during opening of the already groomed documentation epic
 
 Parent estimates are planning sizes; sum leaf tickets only for delivery reporting. Backlog items with unknown estimates cannot start. Inspect full acceptance/ownership/history with `pnpm board show ID`.

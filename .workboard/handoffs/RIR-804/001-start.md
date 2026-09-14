@@ -1,0 +1,9 @@
+# RIR-804 — Specify economy and complete TCG progression and transactional rules
+
+Owner: coordinator. Groomed in GR-004 at 13 Fibonacci points before execution. Delivery scope RIR-800; topic feat/RIR-800-documentation-depth; integration develop/2.0.0-astra at 801103c0e4c70eca6a380d7d1122b11234695bb1. Immediate parent is PR #557 at a04753a473c8a807892848052cc248cff3695805. Original local receipt de7504b4bb09b20db6bc625ff8ac86c1812de4bf is preserved on feat/RIR-110-publication-receipt and inherited with explicit user approval.
+
+Actual reply: Approve one stacked documentation epic. No push, PR, merge or second epic is authorized. D-003 is a fresh stack decision introduced by the explicitly approved RIR-808 prerequisite; it grants this scope only and does not defer, close or merge existing PR #557. RIR-808 must finish before documentation execution.
+
+Read AGENTS.md, the standing protocol, current board, relevant blueprint sections, legacy inventory and assigned specialist guidance. Gemini comparison snapshot 1ba45ee3308b1bb5c7ecb4ea850c0009abb65d33. Follow dependencies serially; never activate two tickets. Assigned paths: docs/economy.md, docs/waifu-tcg.md, docs/adr/ADR-009-centralized-transactional-economy-engine.md, docs/adr/ADR-010-waifu-tcg-pipeline-and-game-design.md.
+
+For each document: preserve verified facts, inspect actual code, compare Gemini depth, distinguish proposed defaults from live behavior, add concrete contracts/data/state/permission/failure/operations/examples/acceptance detail relevant to its purpose, and cite official sources for external claims. Audit manifests remain factual; do not invent source entries to increase length. Record reviewed-file evidence and handoffs. Validate links and requirements, then review/done before the next leaf. Stop at the epic PR checkpoint.

@@ -1,0 +1,5 @@
+# RIR-808 — approved stack prerequisite
+
+Five points, GR-005, before implementation. User explicitly replied Approve the prerequisite repair and board migration. Existing shared state is backed up in the Git common workboard directory. Bootstrap scope permits the minimal backwards-compatible decision-model update needed to record fresh stack consent through the normal mutation API; no manual JSON transition, hook bypass or remote modification is allowed. Then open BATCH-003 and activate only RIR-808 before further work.
+
+Own tools/workboard, workflow guidance and board metadata. Add a distinct stack decision for closed parents; preserve existing defer-pr decisions. Reject reuse and use of stack consent as a PR/defer/switch approval. Parent PR #557 at a04753a remains open; receipt de7504b is preserved on feat/RIR-110-publication-receipt. Current topic feat/RIR-800-documentation-depth. Do not fix the separate RIR-005 parent integration problem or start documentation tickets before this prerequisite is reviewed.

@@ -375,3 +375,65 @@ describe('publishing the explicitly deferred parent from its child checkpoint', 
     expect(() => publicationBase(root, board, 'BATCH-001')).toThrow(/Parent branch moved/);
   });
 });
+
+describe('fresh stacking consent after a published parent closes', () => {
+  const parentPr = 'https://github.com/example/ririko/pull/557';
+  let parentHead: string;
+
+  beforeEach(() => {
+    publicationFixture();
+    const apply = (command: Command): Board => {
+      board = mutate(root, command, board.revision, { actor: 'coordinator', now: at });
+      return board;
+    };
+    parentHead = git(root, ['rev-parse', 'HEAD']);
+    // Model an already published ref without making a network push or creating a PR.
+    git(root, ['update-ref', `refs/remotes/origin/${board.batches[0]!.branch}`, parentHead]);
+    apply({ action: 'decision', decision: { id: 'D-001', kind: 'pr-created', reference: 'Fixture user approved the parent PR; its exact head and target were verified', at, fromTicket: null, toTicket: null, disposition: null, batchId: 'BATCH-001' } });
+    apply({ action: 'close-batch', batch: 'BATCH-001', decision: 'D-001', prUrl: parentPr });
+    apply({ action: 'decision', decision: { id: 'D-002', kind: 'stack', reference: 'Fixture user separately approves one new stacked story above the existing parent PR', at, fromTicket: null, toTicket: null, disposition: null, batchId: 'BATCH-001' } });
+    apply({ action: 'create', ticket: { ...board.tickets[1]!, id: 'RIR-110', type: 'story', status: 'backlog', deliveryScope: 'RIR-110', requires: ['RIR-001'], paths: ['src/'], estimate: null, groomedIn: null, owner: null, handoff: null, validation: [] } });
+    apply({ action: 'groom', grooming: { id: 'GR-002', scope: 'RIR-100', at, participants: ['coordinator'], tickets: ['RIR-110'], rationale: 'Refine the separately approved follow-up scope' }, estimates: [{ id: 'RIR-110', points: 3, rationale: 'Bounded regression fixture' }] });
+    const childHandoff = '.workboard/handoffs/RIR-110/001.md';
+    mkdirSync(resolve(root, '.workboard/handoffs/RIR-110'), { recursive: true });
+    writeFileSync(resolve(root, childHandoff), '# New story after publication\nFresh stack consent, estimate and outcome evidence.\n');
+    apply({ action: 'move', ticket: 'RIR-110', status: 'ready', reason: 'Freshly approved and groomed', handoff: childHandoff });
+    // Preserve the published parent ref; administrative receipt state travels with the child.
+    git(root, ['switch', '-c', 'feat/RIR-110-evidence']);
+    apply({ action: 'batch', batch: { id: 'BATCH-002', scope: 'RIR-110', branch: 'feat/RIR-110-evidence', baseBranch: board.policy.baseBranch, baseSha: board.batches[0]!.baseSha, status: 'open', tickets: ['RIR-110'], prUrl: null, stack: { parentBatch: 'BATCH-001', parentHead, decision: 'D-002' } } });
+    apply({ action: 'start', ticket: 'RIR-110', owner: 'coordinator' });
+    mkdirSync(resolve(root, 'src'));
+    writeFileSync(resolve(root, 'src/evidence.ts'), 'export const freshStack = true;\n');
+    apply({ action: 'move', ticket: 'RIR-110', status: 'review', reason: 'Review fixture evidence', handoff: childHandoff, validation: ['Fixture source and exact parent target reviewed'] });
+    apply({ action: 'move', ticket: 'RIR-110', status: 'done', reason: 'Fixture acceptance satisfied', handoff: childHandoff, validation: ['Fixture source and exact parent target accepted'] });
+    apply({ action: 'checkpoint', batch: 'BATCH-002' });
+    git(root, ['add', '.workboard', 'src/']);
+    git(root, ['commit', '-m', '[RIR-110] Preserve fresh stack fixture']);
+  });
+
+  it('persists fresh consent and resolves the exact child PR target while retaining the parent receipt', () => {
+    const persisted = readBoard(root);
+    expect(persisted.batches[0]).toMatchObject({ status: 'closed', prUrl: parentPr });
+    expect(persisted.decisions.map((entry) => entry.kind)).toEqual(['pr-created', 'stack']);
+    expect(persisted.history.filter((entry) => entry.action === 'close-batch')).toHaveLength(1);
+    const target = deliveryBase(root, persisted);
+    expect(target).toEqual({ branch: board.batches[0]!.branch, sha: parentHead, anchor: parentHead, stacked: true, published: true });
+    expect(guardPullRequest(persisted, prEvent(target.branch, parentHead), target)).toBe(git(root, ['rev-parse', 'HEAD']));
+    expect(() => guardPullRequest(persisted, prEvent(board.policy.baseBranch, board.batches[0]!.baseSha), target)).toThrow(/repository\/head\/base/);
+    expect(git(root, ['rev-parse', `refs/heads/${board.batches[0]!.branch}`])).toBe(parentHead);
+    expect(git(root, ['rev-parse', `refs/remotes/origin/${board.batches[0]!.branch}`])).toBe(parentHead);
+    const invalid = structuredClone(persisted);
+    invalid.batches[1]!.stack!.decision = 'D-001';
+    expect(() => deliveryBase(root, invalid)).toThrow(/recorded user defer\/stack decision/);
+  });
+
+  it('cannot republish the recorded parent or treat new stack consent as child publication approval', () => {
+    const plan = publicationPlan(root, board);
+    expect(plan).toMatchObject({ batch: 'BATCH-002', target: board.batches[0]!.branch, base: parentHead, reference: '' });
+    expect(() => publicationPlan(root, board, 'BATCH-001')).toThrow(/deferred immediate parent/);
+    expect(() => requirePublishedBase(root, board, 'BATCH-001')).toThrow(/deferred immediate parent/);
+    const childLine = `refs/heads/${plan.branch} ${plan.head} refs/heads/${plan.branch} ${'0'.repeat(40)}\n`;
+    expect(() => guardPush(root, board, null, 'origin', board.policy.remoteUrl, childLine)).toThrow(/No matching user approval/);
+    expect(readBoard(root).batches[0]).toMatchObject({ status: 'closed', prUrl: parentPr });
+  });
+});

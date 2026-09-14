@@ -62,6 +62,32 @@ function worker(id = 'A-1', paths = ['code/one.ts']): Assignment {
 }
 
 describe('runtime workboard parsing', () => {
+  it('records fresh stack consent for a published closed parent without changing its PR', () => {
+    const input = fixture();
+    const parent = input.batches[0]!;
+    parent.status = 'closed'; parent.prUrl = 'https://github.com/RirikoAI/RirikoBot/pull/557';
+    input.decisions.push({ id: 'D-published', kind: 'pr-created', reference: 'Verified existing parent PR', at: NOW, fromTicket: null, toTicket: null, disposition: null, batchId: parent.id });
+    const decision: Decision = { id: 'D-new-stack', kind: 'stack', reference: 'User approves one separate documentation epic above the open parent PR', at: NOW, fromTicket: null, toTicket: null, disposition: null, batchId: parent.id };
+    const consented = run(input, { action: 'decision', decision });
+    const next = run(consented, { action: 'batch', batch: { ...batch('B-2', 'S-20', ['S-20']), stack: { parentBatch: parent.id, parentHead: 'b'.repeat(40), decision: decision.id } } });
+    expect(next.batches[0]).toEqual(parent);
+    expect(next.batches[1]?.stack?.decision).toBe(decision.id);
+    expect(next.decisions.find((entry) => entry.id === 'D-published')?.kind).toBe('pr-created');
+    const reused = structuredClone(next);
+    reused.batches.push({ ...batch('B-3', 'S-20', ['S-20']), stack: { parentBatch: parent.id, parentHead: 'b'.repeat(40), decision: decision.id } });
+    expect(validateBoard(reused).join('\n')).toContain('one stacking decision cannot authorize multiple delivery scopes');
+  });
+  it.each(['open', 'checkpoint'] as const)('refuses fresh stack consent while the parent is %s', (status) => {
+    const input = fixture(); input.batches[0]!.status = status;
+    expect(() => run(input, { action: 'decision', decision: { id: 'D-stack', kind: 'stack', reference: 'Actual new user request still needs the prior delivery resolved', at: NOW, fromTicket: null, toTicket: null, disposition: null, batchId: 'B-1' } })).toThrow('closed parent delivery');
+  });
+  it('never treats stack consent as a publication or deferral decision', () => {
+    const input = fixture(); input.batches[0]!.status = 'checkpoint';
+    input.decisions.push({ id: 'D-stack', kind: 'stack', reference: 'Stack consent is not approval to close or publish', at: NOW, fromTicket: null, toTicket: null, disposition: null, batchId: 'B-1' });
+    input.history.push({ id: 1, at: NOW, actor: 'coordinator', action: 'decision', detail: JSON.stringify({ action: 'decision', decision: input.decisions[0] }) });
+    input.revision = 1;
+    expect(() => run(input, { action: 'close-batch', batch: 'B-1', decision: 'D-stack' })).toThrow('matching user PR-created or defer-pr decision');
+  });
   it('records an approved stack only once against an earlier closed parent delivery', () => {
     const input = fixture();
     input.batches.unshift({ ...batch('B-0', 'S-20', ['S-20']), status: 'closed' });

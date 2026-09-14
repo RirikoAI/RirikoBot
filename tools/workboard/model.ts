@@ -23,7 +23,7 @@ const ticketShape = object({
 });
 const groomingShape = object({ id: 'string', scope: 'string', at: 'string', participants: strings, tickets: strings, rationale: 'string' });
 const decisionShape = object({
-  id: 'string', kind: enumeration('switch', 'defer-pr', 'pr-created'), reference: 'string', at: 'string',
+  id: 'string', kind: enumeration('switch', 'defer-pr', 'pr-created', 'stack'), reference: 'string', at: 'string',
   fromTicket: 'nullable-string', toTicket: 'nullable-string', disposition: enumeration('paused', 'abandoned', null), batchId: 'nullable-string',
 });
 const assignmentShape = object({
@@ -306,7 +306,7 @@ export function validateBoard(board: Board): string[] {
       const decision = board.decisions.find((entry) => entry.id === batch.stack?.decision);
       if (!parent || parent.status !== 'closed' || board.batches.indexOf(parent) >= board.batches.indexOf(batch)) errors.push(`Batch ${batch.id}: stack needs an earlier closed parent batch`);
       if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(batch.stack.parentHead)) errors.push(`Batch ${batch.id}: stack parentHead must be an exact Git object ID`);
-      if (!decision || decision.kind !== 'defer-pr' || decision.batchId !== parent?.id) errors.push(`Batch ${batch.id}: stack requires the matching parent deferral decision and actual user stacking consent`);
+      if (!decision || !['defer-pr', 'stack'].includes(decision.kind) || decision.batchId !== parent?.id) errors.push(`Batch ${batch.id}: stack requires the matching parent deferral or stack decision and actual user stacking consent`);
       if (board.batches.some((entry) => entry.id !== batch.id && entry.stack?.decision === batch.stack?.decision)) errors.push(`Batch ${batch.id}: one stacking decision cannot authorize multiple delivery scopes`);
     }
     const scope = tickets.get(batch.scope);
@@ -493,6 +493,8 @@ export function applyCommand(input: Board, inputCommand: Command, context: Mutat
       if (decision.kind === 'switch') {
         if (decision.fromTicket === null || !ACTIVE.has(ticketById(board, decision.fromTicket).status)) throw new Error('Switch decisions must name the current active ticket');
         if (decision.toTicket !== null && !['ready', 'paused'].includes(ticketById(board, decision.toTicket).status)) throw new Error('Switch destination must be ready or paused');
+      } else if (decision.kind === 'stack') {
+        if (decision.batchId === null || batchById(board, decision.batchId).status !== 'closed') throw new Error('Fresh stack consent must name a closed parent delivery');
       } else if (decision.batchId === null || batchById(board, decision.batchId).status !== 'checkpoint') throw new Error('PR/defer decisions must name the current delivery checkpoint');
       board.decisions.push(decision);
       break;
@@ -538,7 +540,7 @@ export function applyCommand(input: Board, inputCommand: Command, context: Mutat
       if (batch.status !== 'checkpoint') throw new Error('Batch must be at its user PR checkpoint before closing');
       for (const id of batch.tickets) checkSettled(board, id);
       const decision = decisionById(board, command.decision);
-      if (decision.batchId !== batch.id || decision.kind === 'switch') throw new Error('Batch closure requires its matching user PR-created or defer-pr decision');
+      if (decision.batchId !== batch.id || !['pr-created', 'defer-pr'].includes(decision.kind)) throw new Error('Batch closure requires its matching user PR-created or defer-pr decision');
       if (decision.kind === 'pr-created') {
         if (!command.prUrl || !prUrlValid(command.prUrl, board.policy.repository)) throw new Error('PR-created closure needs the verified repository PR URL');
         batch.prUrl = command.prUrl;
