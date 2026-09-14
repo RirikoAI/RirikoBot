@@ -1,14 +1,31 @@
 {
-  "name": "ririko",
+  "name": "ririko-monorepo",
   "version": "2.0.0",
-  "description": "",
-  "main": "dist/index.js",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.8.1",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc -b",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "clean": "pnpm -r run clean"
   },
-  "dependencies": {},
   "devDependencies": {
-    "typescript": "^6.0.3"
-  },
-  "private": true
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.13.9",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.0"
+  }
 }
