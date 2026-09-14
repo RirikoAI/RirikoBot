@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 144,
+  "revision": 145,
   "policy": {
     "pointScale": [
       1,
@@ -1305,7 +1305,7 @@
       "branch": "feat/RIR-800-documentation-depth",
       "baseBranch": "develop/2.0.0-astra",
       "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
-      "status": "checkpoint",
+      "status": "closed",
       "tickets": [
         "RIR-800",
         "RIR-808",
@@ -1317,7 +1317,7 @@
         "RIR-806",
         "RIR-807"
       ],
-      "prUrl": null,
+      "prUrl": "https://github.com/RirikoAI/RirikoBot/pull/561",
       "stack": {
         "parentBatch": "BATCH-002",
         "parentHead": "a04753a473c8a807892848052cc248cff3695805",
@@ -2333,6 +2333,13 @@
       "actor": "coordinator",
       "action": "decision",
       "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-004\",\"kind\":\"pr-created\",\"reference\":\"User replied yes to push RIR-800 head e09daed09d5b625095923a622789413d8281327b and create its PR into preserved RIR-110 a04753a473c8a807892848052cc248cff3695805. Independently verified https://github.com/RirikoAI/RirikoBot/pull/561 open with exact approved refs. Receipt: .workboard/handoffs/RIR-800/004-published.md. No merge, retarget or new scope.\",\"at\":\"2026-09-14T19:11:37.743Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-003\"}}"
+    },
+    {
+      "id": 145,
+      "at": "2026-09-14T19:12:03.708Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-003\",\"decision\":\"D-004\",\"prUrl\":\"https://github.com/RirikoAI/RirikoBot/pull/561\"}"
     }
   ]
 }
