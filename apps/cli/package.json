@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ririko/core": "workspace:*",
+    "@ririko/database": "workspace:*",
     "commander": "^13.1.0",
     "picocolors": "^1.1.1"
   },
