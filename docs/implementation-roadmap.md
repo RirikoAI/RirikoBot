@@ -20,7 +20,7 @@ Implemented CLI commands are documented in development.md. The generator current
 
 The foundation migrator refuses legacy/unrecognized schemas and never imports user data. There is no representative 1.4.0 database or giveaway JSON in this workspace. The compiled bot requires credentials and an explicitly migrated database. Command synchronization is a separate operator action and has not been performed against Discord.
 
-The workspace itself has no Git metadata; the independent legacy checkout is pinned and must remain clean. Files have been edited in place; no branch, commit, PR, release or deployment was created.
+The foundation is now tracked at `801103c0e4c70eca6a380d7d1122b11234695bb1` on `develop/2.0.0-astra`. The independent legacy checkout remains pinned and immutable. [The work board](../.workboard/BOARD.md) is the authoritative execution record; its initial governance chore uses a separate topic branch. PR publication requires the user's delivery checkpoint decision.
 
 ## Phase gates
 Each phase requires lint, strict typecheck, unit tests, integration tests, applicable E2E and production builds; failures are not hidden by pass-with-no-tests switches. Match tests to failure modes: concurrent writes, permission bypass, cross-user data isolation, provider errors, duplicate events and crash recovery. A passing fake/provider fixture is not evidence that live authentication or streaming works.
@@ -28,5 +28,7 @@ Each phase requires lint, strict typecheck, unit tests, integration tests, appli
 Before a feature becomes visible, add its service contract, persistence/migrations if needed, permission rules, metadata, slash/prefix docs and tests. Before legacy cutover, every inventory item must have verified parity or an explicit compatibility/deprecation path. Full release acceptance also includes every new system in the original specification; this checkpoint does not waive those requirements.
 
 ## Next implementation slice
+This describes backlog order, not permission to start work. Groom estimates and dependencies through the [standing protocol](../.workboard/PROTOCOL.md), then complete the current PR checkpoint before selecting another story or epic.
+
 Port remaining general/guild commands through transport adapters, then anime/reactions/memes with validated cached providers/assets. Add the durable job foundation before reminders, giveaways or notifications. Implement service/schema changes in bounded groups and review before registering features. The source inventory and migration manifests are the continuing checklist.
 

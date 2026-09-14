@@ -44,3 +44,7 @@ Executable migration/verification commands, complete mapping reports, fixtures a
 Own migration CLI and assigned migration tests/docs. Never write legacy source databases, drop existing target data by default or alter domain schema without database review.
 
 All agents must leave `.audit/RirikoBot` and `.local/` immutable. Do not touch unrelated work or production data. Coordinate shared contracts/schema changes with the relevant specialist before consumer changes.
+
+## Mandatory work-board protocol
+
+Every session and assignment must first read `.workboard/PROTOCOL.md`, `.workboard/state.json`, `.workboard/BOARD.md`, and the active ticket handoff. Work only on the single active, estimated ticket and your recorded assignment. A parent/child relationship does not authorize parallel tickets. Do not change ticket status, approve pause/abandon, start another delivery scope, commit, push, or create a PR independently. Return a durable handoff with evidence and next steps; read-only agents send it to the coordinator to persist. Stop/report if scope changes; the coordinator must ask the user before switching work or crossing the epic/story PR checkpoint. These standing rules override broader autonomy language.

@@ -1,5 +1,17 @@
 # AGENTS.md — Multi-Agent Orchestration & Governance
 
+## Standing work-control rules — read before every task
+
+Read [.workboard/PROTOCOL.md](.workboard/PROTOCOL.md), [.workboard/state.json](.workboard/state.json), the generated board and the active ticket's handoff at the start of **every session and every sub-agent assignment**. This user-requested protocol takes precedence over older instructions to continue autonomously across tasks/phases.
+
+- Only one ticket may be in progress across all agents. Blocked/review work retains the slot; parents are containers. Sub-agents may assist only that ticket within recorded assignments.
+- Estimate in Fibonacci points and groom the group before starting. Record parent/child and requires/blocks links, status, acceptance and evidence. Do not fabricate historical estimates.
+- If another task is requested while work is active, **stop and ask the user** whether to pause it (revisit) or abandon it (permanent). Never auto-switch or silently reopen abandoned work.
+- Preserve durable handoffs and accept worker returns before transitions. Chat history alone is insufficient.
+- One epic/story per delivery batch; chores/bugs may stand alone. At its boundary, prepare the reviewable result and **ask the user whether to create a PR before starting the next scope**, even during a long session.
+- Verify actual topic/base branches, remote identity, ancestry, owned paths and staged changes. Never guess the target, push directly to protected branches, force/reset/clean, auto-stash or mix scopes. Install/check local hooks with `pnpm board install-hooks` and run `pnpm board check`.
+- Sub-agents cannot authorize switches, approvals, Git publication or independent tickets. The coordinator records the user's actual decisions; never invent consent.
+
 ## 1. Purpose & Scope
 This document governs how AI agents collaborate, divide responsibilities, and maintain quality across the development and modernization of **Ririko AI 2.0.0**.
 

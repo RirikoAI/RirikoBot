@@ -6,6 +6,11 @@ AGENTS.md also loads through .gemini/settings.json. Specialists live in .gemini/
 
 ## Shared context
 
+@./.workboard/PROTOCOL.md
+@./.workboard/BOARD.md
+
+Before any implementation or delegation, read .workboard/state.json and the active ticket's latest handoff. One active ticket across all agents; estimates/group grooming before start; user approval before pause/abandon switching and at epic/story PR checkpoints. These explicit standing rules override general autonomy wording below. Sub-agents contribute only to that ticket through recorded assignments.
+
 @./docs/architecture.md
 @./docs/dependency-evaluation.md
 @./docs/implementation-roadmap.md

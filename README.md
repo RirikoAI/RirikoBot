@@ -21,6 +21,8 @@ pnpm dev
 Migrations create the new foundation schema only. They refuse an existing legacy database. Do not point the new runtime at production 1.4.0 data. The [legacy migration runbook](docs/migration-1.x-to-2.0.md) describes staging, preservation and release gates.
 
 ## Engineering
+[Work board](.workboard/BOARD.md) · [Standing work protocol](.workboard/PROTOCOL.md) · [Workflow commands](docs/work-management.md). Every session and sub-agent follows the same single-ticket execution limit, estimated grooming and user PR checkpoints. Run `pnpm board install-hooks` once per clone and `pnpm board check` before work.
+
 [Architecture](docs/architecture.md) · [Source inventory](docs/legacy-feature-inventory.md) · [Roadmap](docs/implementation-roadmap.md) · [Development](docs/development.md) · [Commands](docs/commands.md) · [Testing](docs/testing.md) · [Deployment](docs/deployment.md)
 
 ```sh

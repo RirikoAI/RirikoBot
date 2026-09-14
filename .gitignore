@@ -2,6 +2,7 @@
 /out-tsc
 
 /node_modules
+**/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -22,3 +23,5 @@ test-results/
 .env.*
 !.env.example
 *.tsbuildinfo
+.workboard/.lock
+.workboard/.state-*.tmp

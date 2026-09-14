@@ -1,0 +1,615 @@
+{
+  "version": 1,
+  "revision": 8,
+  "policy": {
+    "pointScale": [
+      1,
+      2,
+      3,
+      5,
+      8,
+      13,
+      21,
+      34,
+      55,
+      89
+    ],
+    "wipLimit": 1,
+    "repository": "RirikoAI/RirikoBot",
+    "remote": "origin",
+    "remoteUrl": "https://github.com/RirikoAI/RirikoBot.git",
+    "baseBranch": "develop/2.0.0-astra"
+  },
+  "tickets": [
+    {
+      "id": "RIR-100",
+      "type": "epic",
+      "title": "Delivery governance and foundation validation",
+      "status": "ready",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-100",
+      "estimate": 13,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-001",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-001",
+      "type": "chore",
+      "title": "Establish work board, agent handoffs and safe Git delivery",
+      "status": "done",
+      "parent": "RIR-100",
+      "requires": [],
+      "deliveryScope": "RIR-001",
+      "estimate": 8,
+      "estimateRationale": "Workflow state machine, scoped Git hooks, agent protocol, seed backlog and regression tests require coordinated implementation.",
+      "groomedIn": "GR-001",
+      "priority": "P1",
+      "acceptance": [
+        "One active ticket and estimated/group-groomed starts are enforced",
+        "Task switching requires a recorded user decision and preserves paused/abandoned history",
+        "A single epic/story or standalone maintenance scope owns each delivery batch",
+        "All session and agent entry points load the durable handoff protocol",
+        "Git guards reject wrong branches, unrelated scope and unapproved publication",
+        "Board, templates, handoffs, tests and a concrete PR checkpoint are reviewable"
+      ],
+      "paths": [
+        ".workboard/",
+        "tools/workboard/",
+        ".githooks/",
+        ".gemini/",
+        "AGENTS.md",
+        "GEMINI.md",
+        "README.md",
+        "docs/",
+        "package.json",
+        "tsconfig.check.json",
+        "vitest.config.ts",
+        ".gitignore",
+        ".github/"
+      ],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-001/003-completion.md",
+      "validation": [
+        "87 unit tests passed, including 39 governance tests",
+        "13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped",
+        "ESLint, strict typecheck, build and board validation passed",
+        "Installed local hooks; verified target fetch unchanged; legacy checkout clean"
+      ]
+    },
+    {
+      "id": "RIR-003",
+      "type": "chore",
+      "title": "Validate the production Docker image and startup",
+      "status": "backlog",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-003",
+      "estimate": 5,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-001",
+      "priority": "P2",
+      "acceptance": [
+        "Build and run the rootless image with persistent storage",
+        "Verify diagnostics and shutdown; document real evidence"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-200",
+      "type": "epic",
+      "title": "Legacy compatibility",
+      "status": "ready",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-200",
+      "estimate": 34,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-210",
+      "type": "story",
+      "title": "General and guild information command parity",
+      "status": "ready",
+      "parent": "RIR-200",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-210",
+      "estimate": 8,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-211",
+      "type": "task",
+      "title": "Port get-avatar with slash and prefix parity",
+      "status": "ready",
+      "parent": "RIR-210",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-210",
+      "estimate": 3,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Preserve audited target argument/aliases and avatar behavior",
+        "Test both invocation paths and missing-member cases"
+      ],
+      "paths": [
+        "apps/bot/",
+        "packages/discord/",
+        "docs/commands.md"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-212",
+      "type": "task",
+      "title": "Port guildinfo and memberinfo through shared adapters",
+      "status": "ready",
+      "parent": "RIR-210",
+      "requires": [
+        "RIR-211"
+      ],
+      "deliveryScope": "RIR-210",
+      "estimate": 5,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [
+        "apps/bot/",
+        "packages/discord/",
+        "docs/commands.md"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-230",
+      "type": "story",
+      "title": "Meme rendering and usable prefix commands",
+      "status": "ready",
+      "parent": "RIR-200",
+      "requires": [
+        "RIR-210"
+      ],
+      "deliveryScope": "RIR-230",
+      "estimate": 13,
+      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-231",
+      "type": "bug",
+      "title": "Repair the eleven broken legacy meme prefix paths",
+      "status": "ready",
+      "parent": "RIR-230",
+      "requires": [
+        "RIR-210"
+      ],
+      "deliveryScope": "RIR-231",
+      "estimate": 8,
+      "estimateRationale": "Confirmed legacy inherited method/regex defects; eleven interfaces and renderer integration need regression coverage.",
+      "groomedIn": "GR-002",
+      "priority": "P2",
+      "acceptance": [
+        "Implement fixes in new code without editing legacy",
+        "Keep all audited names/templates and usable slash/prefix arguments"
+      ],
+      "paths": [
+        "apps/bot/",
+        "packages/discord/",
+        "packages/graphics/",
+        "docs/"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-300",
+      "type": "epic",
+      "title": "Rewritten provider and durable systems",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-300",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-310",
+      "type": "story",
+      "title": "Music, AI, images, moderation, reminders and notifications",
+      "status": "backlog",
+      "parent": "RIR-300",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-310",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-400",
+      "type": "epic",
+      "title": "Economy, XP, rankings and games",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-400",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-410",
+      "type": "story",
+      "title": "Transactional rewards and anti-spam foundations",
+      "status": "backlog",
+      "parent": "RIR-400",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-410",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-500",
+      "type": "epic",
+      "title": "Waifu trading card game",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-500",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-510",
+      "type": "story",
+      "title": "Attribution-preserving ingestion and transactional ownership",
+      "status": "backlog",
+      "parent": "RIR-500",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-510",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-600",
+      "type": "epic",
+      "title": "Guild administration dashboard",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-600",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-610",
+      "type": "story",
+      "title": "Discord OAuth and shared configuration controls",
+      "status": "backlog",
+      "parent": "RIR-600",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-610",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-700",
+      "type": "epic",
+      "title": "Legacy migration and release",
+      "status": "backlog",
+      "parent": null,
+      "requires": [],
+      "deliveryScope": "RIR-700",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-710",
+      "type": "story",
+      "title": "Representative-data import, restore rehearsal and rollout",
+      "status": "backlog",
+      "parent": "RIR-700",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-710",
+      "estimate": null,
+      "estimateRationale": "Awaiting epic grooming",
+      "groomedIn": null,
+      "priority": "P2",
+      "acceptance": [
+        "Define and verify the scoped outcome against the audited roadmap"
+      ],
+      "paths": [],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-004",
+      "type": "chore",
+      "title": "Remove historically tracked generated dependency launchers",
+      "status": "backlog",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-004",
+      "estimate": null,
+      "estimateRationale": "Groom with foundation operations before execution; no effort has been started.",
+      "groomedIn": null,
+      "priority": "P3",
+      "acceptance": [
+        "Review git ls-files evidence for the three historical packages/core/node_modules/.bin/pino launchers.",
+        "Remove generated launchers from source tracking while preserving installed dependencies and unrelated files.",
+        "Verify frozen dependency installation and workspace Git status stay clean."
+      ],
+      "paths": [
+        "packages/core/node_modules/.bin/",
+        ".gitignore",
+        "docs/"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    }
+  ],
+  "grooming": [
+    {
+      "id": "GR-001",
+      "scope": "RIR-100",
+      "at": "2026-09-14T15:26:02Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-100",
+        "RIR-001",
+        "RIR-003"
+      ],
+      "rationale": "Group refinement from the user's standing governance requirements and known Docker verification gap."
+    },
+    {
+      "id": "GR-002",
+      "scope": "RIR-200",
+      "at": "2026-09-14T15:26:02Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-200",
+        "RIR-210",
+        "RIR-211",
+        "RIR-212",
+        "RIR-230",
+        "RIR-231"
+      ],
+      "rationale": "Initial group estimates from audited general/guild and meme compatibility defects; revisit before scope expands."
+    }
+  ],
+  "decisions": [],
+  "assignments": [
+    {
+      "id": "A-001",
+      "ticket": "RIR-001",
+      "agent": "workflow-engine",
+      "scope": "Implement and test the pure board validator/state transition engine against tools/workboard/types.ts and the standing protocol. Return evidence and design decisions; no Git or status changes.",
+      "paths": [
+        "tools/workboard/model.ts",
+        "tools/workboard/model.test.ts"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-001/002-workflow-engine.md"
+    }
+  ],
+  "batches": [
+    {
+      "id": "BATCH-001",
+      "scope": "RIR-001",
+      "branch": "chore/RIR-001-work-governance",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
+      "status": "checkpoint",
+      "tickets": [
+        "RIR-001"
+      ],
+      "prUrl": null
+    }
+  ],
+  "history": [
+    {
+      "id": 1,
+      "at": "2026-09-14T15:26:02Z",
+      "actor": "coordinator",
+      "action": "bootstrap",
+      "detail": "User requested the governance system. Estimated RIR-001 at 8 points before implementation; no prior tracked ticket occupied the slot. Clean baseline and branch verified."
+    },
+    {
+      "id": 2,
+      "at": "2026-09-14T15:44:30.259Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-001\",\"handoff\":\".workboard/handoffs/RIR-001/002-workflow-engine.md\"}"
+    },
+    {
+      "id": 3,
+      "at": "2026-09-14T15:44:30.566Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-001\"}"
+    },
+    {
+      "id": 4,
+      "at": "2026-09-14T15:44:30.867Z",
+      "actor": "coordinator",
+      "action": "handoff",
+      "detail": "{\"action\":\"handoff\",\"ticket\":\"RIR-001\",\"handoff\":\".workboard/handoffs/RIR-001/001-start.md\",\"reason\":\"Bootstrap handoff registered; specialist return reviewed and accepted. Full verification is next.\"}"
+    },
+    {
+      "id": 5,
+      "at": "2026-09-14T15:48:59.174Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"id\":\"RIR-004\",\"type\":\"chore\",\"title\":\"Remove historically tracked generated dependency launchers\",\"status\":\"backlog\",\"parent\":\"RIR-100\",\"requires\":[\"RIR-001\"],\"deliveryScope\":\"RIR-004\",\"estimate\":null,\"estimateRationale\":\"Groom with foundation operations before execution; no effort has been started.\",\"groomedIn\":null,\"priority\":\"P3\",\"acceptance\":[\"Review git ls-files evidence for the three historical packages/core/node_modules/.bin/pino launchers.\",\"Remove generated launchers from source tracking while preserving installed dependencies and unrelated files.\",\"Verify frozen dependency installation and workspace Git status stay clean.\"],\"paths\":[\"packages/core/node_modules/.bin/\",\".gitignore\",\"docs/\"],\"owner\":null,\"handoff\":null,\"validation\":[]}}"
+    },
+    {
+      "id": 6,
+      "at": "2026-09-14T15:52:09.711Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-001\",\"status\":\"review\",\"reason\":\"Implementation and specialist return reviewed against all six acceptance criteria.\",\"handoff\":\".workboard/handoffs/RIR-001/003-completion.md\",\"validation\":[\"87 unit tests passed, including 39 governance tests\",\"13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped\",\"ESLint, strict typecheck, build and board validation passed\",\"Installed local hooks; verified target fetch unchanged; legacy checkout clean\"]}"
+    },
+    {
+      "id": 7,
+      "at": "2026-09-14T15:52:10.026Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-001\",\"status\":\"done\",\"reason\":\"All authorized governance work is implemented, documented and verified. Publication requires the user checkpoint.\",\"handoff\":\".workboard/handoffs/RIR-001/003-completion.md\",\"validation\":[\"87 unit tests passed, including 39 governance tests\",\"13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped\",\"ESLint, strict typecheck, build and board validation passed\",\"Installed local hooks; verified target fetch unchanged; legacy checkout clean\"]}"
+    },
+    {
+      "id": 8,
+      "at": "2026-09-14T15:52:10.324Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-001\"}"
+    }
+  ]
+}

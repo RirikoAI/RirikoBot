@@ -35,6 +35,16 @@ The temporary PostgreSQL server bound only 127.0.0.1, used an isolated test clus
 
 ## Failure modes covered
 
+### Work governance checkpoint (RIR-001, 2026-09-14)
+
+The subsequent workflow change passed **87 unit tests** (including **39 work-board tests**) and **13 SQLite integration/CLI E2E tests**, for **100 tests passed** in this run. Seven PostgreSQL cases skipped because `TEST_POSTGRES_URL` was not configured; the earlier PostgreSQL evidence above is historical and was not rerun for this tooling change. Strict typecheck, ESLint including `tools`, project-reference build and board validation passed. The audited legacy checkout remained clean.
+
+Commands used the installed entry points to avoid the system pnpm version mismatch: `node node_modules/eslint/bin/eslint.js apps packages tests tools`, `node node_modules/typescript/bin/tsc --noEmit -p tsconfig.check.json`, `node node_modules/typescript/bin/tsc -b`, `node node_modules/vitest/vitest.mjs run --project unit`, `node node_modules/vitest/vitest.mjs run --project integration --project e2e`, and `node tools/workboard/cli.ts check`. Incomplete copied dependency links were repaired from the unchanged frozen lockfile with pinned pnpm 10.34.5.
+
+Workflow tests exercise rejected WIP switches, missing estimates, grouped grooming, dependency cycles, terminal abandonment, pause consent, stale decisions/revisions, worker ownership and durable returns. Real temporary Git repositories/worktrees exercise shared locks, interrupted projection recovery, scope/staging guards, changed HEAD/base, wrong remotes/PR targets, non-fast-forward/deletion/multi-ref push rejection and safe closing metadata commits. These tests do not make a network push or create a PR.
+
+### Runtime foundation coverage
+
 - Slash/prefix/context equivalence, alias collision, escaped/quoted parsing, argument validation and concurrent request isolation.
 - Owner/member/bot/role/module/channel restrictions; uncached Discord channels are fetched and unavailable channels fail closed.
 - Private administrative deferral, requester-bound help menus and category selection without a search query, safe mention handling and error redaction.

@@ -8,7 +8,9 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc --noEmit -p tsconfig.check.json",
-    "lint": "eslint apps packages tests",
+    "lint": "eslint apps packages tests tools",
+    "board": "node tools/workboard/cli.ts",
+    "board:check": "node tools/workboard/cli.ts check",
     "test": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
     "test:e2e": "vitest run --project e2e",

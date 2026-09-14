@@ -36,11 +36,17 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24.19.0
           package-manager-cache: false
+      - name: Validate work board and handoffs
+        run: node tools/workboard/cli.ts check
+      - name: Verify PR scope and target
+        if: github.event_name == 'pull_request'
+        run: node tools/workboard/cli.ts guard-pr
       - name: Install native build tools and pnpm
         run: |
           sudo apt-get update
