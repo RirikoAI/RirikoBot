@@ -1,5 +1,7 @@
 # RIR-110 — completed review-evidence story and publication checkpoint
 
+Publication update: the subsequent user approval, exact pushed refs and verified PR #557 are recorded in [005-published.md](005-published.md). The pre-publication statements below describe the original completion checkpoint; consult that receipt for current delivery status.
+
 Coordinator, 2026-09-14. RIR-110 was estimated **13 points** in GR-003 before starting and remained the sole active ticket. A-002 and A-003 returned their bounded Git-guard assignments; both returns were reviewed, persisted and accepted. This handoff supersedes `003-session.md`. No second story or bug was started.
 
 ## Branch and decision context

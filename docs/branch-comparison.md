@@ -1,15 +1,17 @@
 # Astra and Gemini: source comparison and response
 
-Compared on 2026-09-14 after fetching both user-named branches from `RirikoAI/RirikoBot`, including a final refresh before the local checkpoint. This is a source/evidence comparison, not a model ranking or a claim that either branch is production-ready.
+The original comparison below records the 2026-09-14 fetch of both user-named branches from `RirikoAI/RirikoBot`, including its final refresh. It remains a historical source comparison. The later RIR-110 publication and RIR-800 documentation review are recorded separately below; they must not be attributed to those earlier remote snapshots. The final dated addendum records Gemini's newer scaffold and PR #557's subsequent merge. This is an evidence comparison, not a model ranking or a claim that either branch is production-ready.
+
+## Historical remote comparison
 
 | Snapshot | Exact commit | Meaning |
 |---|---|---|
 | Astra remote `develop/2.0.0-astra` | `801103c0e4c70eca6a380d7d1122b11234695bb1` | The source actually visible at the user's Astra link |
 | Gemini remote `develop/2.0.0` | `1ba45ee3308b1bb5c7ecb4ea850c0009abb65d33` | Gemini's planning, Kanban and expanded TCG design commits |
-| Astra local governance | `dd5a0aef26ae56d4ee826bc54a10c5187f447552` | Completed RIR-001; not pushed, so absent from the remote comparison |
+| Astra local governance | `dd5a0aef26ae56d4ee826bc54a10c5187f447552` | Completed RIR-001; unpushed at the original comparison, so absent from that remote snapshot |
 | Preserved local parent | `c1018829abf42fd2f8aad22948de343e51dc1e95` | RIR-001 plus the user's publication-deferral record; parent of RIR-110 |
 
-The user subsequently authorized one separate stacked improvement story, RIR-110, estimated at 13 points before implementation. Its changes are described below and must not be attributed to the earlier remote snapshot. Neither a push nor PR is authorized by the comparison/stacking approval.
+The user then authorized one separate stacked improvement story, RIR-110, estimated at 13 points before implementation. Its changes are described below and must not be attributed to the earlier remote snapshot. That comparison/stacking approval itself did not authorize a push or PR; a later explicit publication decision did, as recorded in the subsequent checkpoint section.
 
 ## What the source demonstrates
 
@@ -24,7 +26,7 @@ The user subsequently authorized one separate stacked improvement story, RIR-110
 | Work control | Not on Astra remote yet; the separate local RIR-001 adds validated transitions, locking, tests and Git guards | JSON/Markdown board and standing protocol; no transition validator, hooks or board tests | Distinguish the unpushed local implementation from the requested remote comparison |
 | Major product modules | Music/AI/moderation/economy/TCG/dashboard not implemented | Same modules described but not implemented | Neither branch fulfills the full Ririko 2.0 acceptance criteria |
 
-Counts came from `git ls-tree -r --name-only` at the fixed refs. Production counts exclude tests and node_modules; workspace counts refer to `apps/*/package.json` and `packages/*/package.json`. These counts help locate real code, not measure correctness or product value.
+Counts came from `git ls-tree -r --name-only` at the fixed refs. Production counts exclude test files/directories and node_modules; in particular, `packages/database/test/settings-contract.ts` is test support, not a thirty-first production file. Workspace counts refer to `apps/*/package.json` and `packages/*/package.json`. These counts help locate real code, not measure correctness or product value.
 
 Source: [Astra package and scripts](https://github.com/RirikoAI/RirikoBot/blob/801103c0e4c70eca6a380d7d1122b11234695bb1/package.json), [Astra built-in commands](https://github.com/RirikoAI/RirikoBot/blob/801103c0e4c70eca6a380d7d1122b11234695bb1/packages/discord/src/builtins.ts), [Astra CI](https://github.com/RirikoAI/RirikoBot/blob/801103c0e4c70eca6a380d7d1122b11234695bb1/.github/workflows/ci.yml), [Gemini runtime](https://github.com/RirikoAI/RirikoBot/blob/1ba45ee3308b1bb5c7ecb4ea850c0009abb65d33/src/index.ts), [Gemini package](https://github.com/RirikoAI/RirikoBot/blob/1ba45ee3308b1bb5c7ecb4ea850c0009abb65d33/package.json), [Gemini blueprint](https://github.com/RirikoAI/RirikoBot/blob/1ba45ee3308b1bb5c7ecb4ea850c0009abb65d33/BLUEPRINT.md).
 
@@ -43,17 +45,94 @@ The update adds no runtime code, dependencies, tests, workflow or board repairs,
 
 The Gemini application was not installed or run during this comparison: its inspected source and package script inventory are sufficient to establish the narrow implementation scope. That is not a claim that its build fails.
 
-## Gaps I am correcting in Astra
+## RIR-110 response at the original checkpoint
 
 - **Preserve requirements, not just a summary.** [BLUEPRINT.md](../BLUEPRINT.md) now retains the full user attachment. Its original byte hash and newline-normalized content hash are recorded in [requirements.json](requirements.json). Later explicit user workflow instructions still take precedence; the original source is not silently rewritten.
 - **Make omissions visible.** [The generated ledger](requirements.md) maps all **91 numbered sections** and **35 exact final acceptance criteria** to source/test/design evidence, truthful status, concrete remaining work and existing backlog scopes. It explicitly retains Facebook assessment, safe image attribution, migration preservation and unfinished product modules. These counts are coverage of the specification, not a percent-complete score.
 - **Test the review process.** `board requirements-check` checks source integrity, missing/duplicate/renamed requirements, stale rendered output, invalid ticket references, absent/unsafe evidence paths and implementation claims backed only by documents. It does not pretend a link proves live behavior. CI runs this check before dependency installation.
 - **Handle the approved stack honestly.** The Git guard now resolves the immediate PR target from the exact preserved parent commit. A dependent story cannot be sent to the integration branch while hiding its unpublished parent changes. Missing remote parent publication, parent movement, arbitrary local base anchors and undeclared inherited scopes fail closed. Approval includes target branch as well as HEAD/base SHA. Completed-delivery handoffs remain visible on the board.
 
-These changes improve specification retention and delivery verification. They do not add music, AI, TCG or a dashboard. The next product work should still come from one groomed story, such as RIR-210 command parity, after the current delivery checkpoint is resolved.
+These changes improved specification retention and delivery verification. They did not add music, AI, TCG or a dashboard. Product implementation still requires one groomed scope and its delivery checkpoint. The user subsequently selected a documentation epic, rather than authorizing the example RIR-210 product story here.
 
-## Verification and publication boundary
+## Historical RIR-110 verification and publication boundary
 
 Prior local RIR-001 verification passed 100 tests with seven PostgreSQL cases explicitly skipped; that includes 39 governance tests which are absent from the remote Astra snapshot. RIR-110's current verification is recorded in its [completion handoff](../.workboard/handoffs/RIR-110/003-completion.md); do not treat old test counts as the current suite or documentation as a CI run.
 
-The user's approval allows this local stack only. Governance retains its own chore commit/batch; RIR-110 has its own story branch and checkpoint. Its frozen parent's older PR checker rejects a closed batch; RIR-005 records that issue without starting a second ticket. A separately approved parent **branch push** can make it available as this story's immediate PR base while the parent PR remains deferred. Parent integration needs its own reviewed resolution; no commit is rewritten or hidden. No branch protection, live Discord/provider validation or deployment is claimed by this comparison.
+At that original checkpoint, approval covered only the local stack. Governance retained its own chore commit/batch and RIR-110 its story branch/checkpoint. Its frozen parent's older PR checker rejected a closed batch; RIR-005 recorded that issue without starting another ticket. A separately approved parent branch push was needed to make it available as the story's immediate PR base while keeping the parent PR deferred. The later publication receipt below supersedes that unpublished state, without authorizing parent integration or rewriting history. No branch protection, live Discord/provider validation or deployment is claimed by this comparison.
+
+## Subsequent publication and documentation stack
+
+These are later local/delivery facts, distinct from the original remote comparison. The [RIR-110 publication receipt](../.workboard/handoffs/RIR-110/005-published.md) records the user's explicit “yes do it” authorization, both branch pushes and independent confirmation of [PR #557](https://github.com/RirikoAI/RirikoBot/pull/557). Its recorded open/not-merged status and CI observation belong to that check, not a fresh assertion about GitHub now.
+
+| Checkpoint | Exact source anchor | Meaning |
+|---|---|---|
+| Published governance parent | `c1018829abf42fd2f8aad22948de343e51dc1e95` | `chore/RIR-001-work-governance` was pushed as the story's base; its own PR remained deferred. |
+| Published RIR-110 story | `a04753a473c8a807892848052cc248cff3695805` | PR #557 head `feat/RIR-110-review-evidence`, targeting the governance branch. The receipt recorded one commit and 32 changed files. |
+| Preserved local closure receipt | `de7504b4bb09b20db6bc625ff8ac86c1812de4bf` | Administrative record after the published story; preserved on `feat/RIR-110-publication-receipt`, not silently pushed under the consumed story approval. |
+| Documentation prerequisite | `314cfecd857ba23b8efed4763ddfd055a025a1ab` | RIR-808 introduced fresh closed-parent stack consent; opened the separately approved RIR-800 scope above the preserved story/receipt. |
+| Documentation source checkpoint through RIR-806 | `cf60f76481bfdf05dd133bdf323ea5784c452b18` | Completed foundation/data/provider/economy/TCG/dashboard/deployment/test documentation leaves before this final RIR-807 reconciliation. |
+
+The user approved one stacked documentation epic and then its five-point prerequisite repair. `feat/RIR-800-documentation-depth` inherits the exact story and local receipt with that consent. Its verified integration anchor remains Astra `801103c0e4c70eca6a380d7d1122b11234695bb1`; the exact immediate PR target must be resolved again at publication time. Neither Gemini's branch-local contribution instructions nor the prior story approval changes that target or authorizes this epic's publication.
+
+RIR-808 adds a distinct `stack` decision for a closed parent. It does not reopen/merge that parent's PR, close a batch, authorize a push, or fix the separate RIR-005 parent-integration issue. The board was backed up, and the additive model repair then allowed normal validated mutations; the [prerequisite handoff](../.workboard/handoffs/RIR-808/002-completion.md) records that no manual JSON transition/hook bypass was needed. This distinction matters for future agents recovering the session.
+
+At the `cf60f76` checkpoint, `git diff a04753a cf60f76 -- apps packages` is empty. The source differences under `tools` are five workboard model/Git/test files supporting RIR-808, totaling 95 insertions and five deletions. No bot feature, database runtime, provider SDK, installed dependency, Dockerfile or CI workflow changed during the documentation epic. More detailed designs must not be counted as additional runtime functionality.
+
+## What the documentation review adds
+
+The approved starting corpus contained **40 files**, including 13 ADRs. At `cf60f76`, 35 documents had changed; the two immutable source JSON manifests were inspected and deliberately preserved, making 37 original files covered through RIR-806. Final RIR-807 covers the remaining original comparison and requirements JSON/Markdown pair, plus the new [per-file documentation review](documentation-review.md). That review is the file-by-file acceptance record; this section explains the substantive differences without duplicating its inventory. File/word counts are not quality or completion scores.
+
+| Domain | Concrete depth added beyond the pinned Gemini proposal | Remaining proof / tradeoff |
+|---|---|---|
+| Architecture, modules and ADRs | Actual imports/process/actor boundaries; current versus proposed interfaces; worked request traces; configuration cache/permission/stale-form limits; dependencies, alternatives and revisit criteria. | A modular design does not implement missing modules. Short summaries remain navigational rather than repeating whole specifications. |
+| Development, commands and contribution | Exact parser/CLI/generator behavior, legacy slash/prefix distinctions, help/visibility restrictions, extension walkthroughs and shared-service boundaries. Planned generators and operator verbs are explicitly unavailable. | Five workspaces and three registered commands remain the implementation boundary; no generic CLI key/value editor is invented. |
+| Work management | Ticket transition/estimate/assignment/consent contracts, durable returns, crash/lock recovery, one active slot and exact parent/branch publication checks. | Local guards cannot authenticate human consent or prove hosted branch protection; publication still needs the user's concrete checkpoint decision. |
+| Database and migration | Proposed domain keys/indexes/constraints and cross-entity transactions; all 17 legacy table mappings, raw-secret quarantine, canonical row hashes, reconciliation, crash checkpoints, dual-dialect locking and cutover/rollback. | Current migration version 1 creates only the foundation schema and checks names/history, not full live DDL. No representative production dataset/importer is supplied. |
+| AI and provider adapters | Typed capabilities/results/errors, memory scope/generation/reset ordering, token/tool/budget limits, tool authorization/injection defenses, data-consent fallback and unknown paid outcomes; stream/image/job retries and recovery. | Configured does not mean verified or capable. Provider account access, quotas, latency and production availability remain unverified. |
+| Music and moderation | Metadata versus playable audio, queue/reconnect/voice authority, command compatibility; action/case/escalation state machines, hierarchy, late replies, partial effects and restart handling. | No audio engine, moderation runtime or measured service performance was added. More precise failure semantics cost persistence and testing work. |
+| Economy and games | Global COIN/legacy karma preservation; balanced signed postings and issuance exceptions; holds versus escrow; worked transfer/purchase/wager/refund races; durable rewards, rolling streaks, XP/version/rank rules and five-game settlement. | Numeric defaults are candidates. Conservation does not prove good balance, perfect abuse detection or production concurrency safety. |
+| TCG | Complete rarity/element/skill/combat order and replay contracts; ownership/reservations; tutorial, seasons, four curves, boss/shield/loot, equipment/accessories, consumables/energy, achievements, factions and atomic market/trade flows. | Candidate simulations expose growth/overflow and fairness concerns; no claim of playable, balanced or implemented combat follows. |
+| Dashboard and credentials | Every module's actor/read/action/audit/error/empty workflow; guild/personal/faction/operator separation; OAuth/session/CSRF/caching, displayed revisions, desired-versus-applied effects, write-only credentials and rotation/recovery. | `apps/web` remains absent. Framework origin checks are not a complete authorization system; global economy/content authority cannot be delegated by moving a field into a guild page. |
+| Deployment and testing | Actual image/Compose/CLI commands, readiness timeout/no-cancellation and shutdown limits, isolated restore and artifact/data rollback, incidents; exact test inventories, realistic fixtures and domain failure-injection gates. | Static runbooks and fixture tests do not certify live Discord, Linux containers, restore rehearsal, remote CI success or browser E2E. |
+| Requirements and source evidence | All 91 blueprint sections and 35 exact final criteria remain mapped to implementation/design evidence and explicit gaps; immutable manifests are explained and checked rather than expanded with invented rows. | Documented coverage is not percent complete. The original source and user decisions remain authoritative. |
+
+Cross-document reconciliation makes important choices explicit: global coins are not cloned into guild wallets; a player-guild treasury changes owner inside the same currency realm; a reserved stake is not also a posted escrow debit; reward uniqueness survives rule-version changes; rolling daily-claim streaks differ from UTC energy/shop reset periods; fresh level-zero players use the TCG energy normalization without changing displayed XP level. Dashboard charts use the shared TCG evaluator, including speed scaling, and cannot silently alter frozen active-run rules.
+
+The original assessment that Gemini's TCG planning was deeper remains true of the original compared documents. RIR-800 responds by retaining that breadth and adding concrete operation, arithmetic, authority, recovery and acceptance contracts across the corpus. It does not retroactively make the original Astra documentation equally detailed or establish a general winner between models.
+
+## Current verification and fair next comparison
+
+[Testing evidence](testing.md) separates these runs; they must not be added together as distinct new tests:
+
+- After RIR-808, the RIR-801 bounded full unit run passed **119 cases across ten files in 87.62 seconds**. Current unit inventory includes 33 workboard model, 31 Git/store and seven requirement-ledger cases. These are part of 119, not additional cases.
+- RIR-806 freshly passed lint, strict typecheck and project-reference build. Its combined SQLite/CLI run passed **13 cases**, with **seven PostgreSQL cases skipped**, in **25.57 seconds**. Disposable test migrations are not an operator cutover or a representative legacy import.
+- Documentation checks cover relative links, source references, illustrative syntax/arithmetic and workboard/requirements consistency. The final per-file record captures their scope and corrections. No full unit rerun is implied for every documentation leaf.
+
+Earlier RIR-001/RIR-110 and original foundation test totals remain historical. The original separately run PostgreSQL evidence is not silently promoted to a fresh test of this epic. PR #557's receipt observed a CI run in progress; this comparison claims no successful remote CI conclusion, current PR merge state, live credentials/provider test, container execution or production restore.
+
+A fair future comparison should select fresh exact commits and distinguish: implemented command/service behavior; real-driver transaction/recovery tests; representative migration reconciliation; authorized Discord/provider capability evidence; secured browser workflows; and measured operating performance. Apply the same datasets, failure cases and environment disclosures to both branches. Documentation earns credit for implementable, consistent decisions and traceable gaps, but feature completion still requires working code and corresponding evidence.
+
+At the end of this one documentation epic, prepare the reviewable diff and final evidence, resolve the exact stacked target, and ask whether the user wants its PR. Do not start another story/epic, merge an earlier PR, push this scope or repeat prior publication authorization automatically. [The standing protocol](../.workboard/PROTOCOL.md) and current board govern that checkpoint.
+
+## Fresh-fetch addendum — 2026-09-14
+
+A later coordinator fetch found Gemini `develop/2.0.0` at **`a117c157024929a1e76ce799c71320f090d35189`**, incorporating the roadmap update and merged scaffold PR #559. The original `1ba45ee` findings above remain historical; the newer source supersedes the one-greeting, zero-tests and missing-story observations for the current Gemini branch. This addendum reviews the delta without installing or running that branch.
+
+| Area | Newly verified source at `a117c15` | Updated assessment |
+|---|---|---|
+| Workspace and toolchain | Five app/library workspaces, pnpm lockfile, shared strict TypeScript configuration, lint/format/typecheck/build/test scripts and Vitest configuration. | Gemini now has a monorepo/toolchain scaffold; calling its current branch only a console greeting would be inaccurate. |
+| Bot and CLI | `apps/bot/src/index.ts` exports `getBotInfo`; the CLI configures Commander name/description/version and parses arguments. | Basic CLI help/version is present. There is still no Discord Gateway, command dispatcher or doctor implementation. |
+| Packages and tests | Core exports `CORE_VERSION`; database/Discord export package-name markers. One test checks that the core version equals 2.0.0. | Five production TypeScript files and one test file establish an initial scaffold, not working persistence or domain services. |
+| Reported validation | TASK-0103's handover reports build, typecheck, lint, formatting and one passing test in 214 ms. | Credit this as branch-authored evidence. It was not independently rerun here and is not evidence of live Discord/database behavior. |
+| Canonical board | STORY-010/011/012 now exist, with the workspace story and three scaffold tasks marked done. | The earlier missing-story finding is resolved. JSON marks EPIC-001 in progress while Markdown still says no active ticket; board presentation/authority consistency remains a concern. |
+| Roadmap | September 15 start and November 2026 target; detailed TCG phases 6.1–6.15 and rarity/seven-element values aligned with its existing TCG guide. | The earlier roadmap rarity/element mismatch was corrected there. The roadmap still says 60 reactions, and other architecture text was not changed by this delta. Dates, “balanced,” zero-race and rendering-time claims remain plans requiring evidence. |
+
+The complete pinned-to-fresh delta is **35 files, 2,580 insertions and 88 deletions**, including lockfile/tooling and three handovers. No Dockerfile, CI workflow, database driver/schema implementation, provider or dashboard runtime appears in that delta. The TCG roadmap expands the scheduling breakdown of mechanics already covered by this documentation epic; it does not require pretending those mechanics were newly implemented on either branch.
+
+Primary source anchors: [fresh Gemini package](https://github.com/RirikoAI/RirikoBot/blob/a117c157024929a1e76ce799c71320f090d35189/package.json), [CLI](https://github.com/RirikoAI/RirikoBot/blob/a117c157024929a1e76ce799c71320f090d35189/apps/cli/src/index.ts), [bot entry](https://github.com/RirikoAI/RirikoBot/blob/a117c157024929a1e76ce799c71320f090d35189/apps/bot/src/index.ts), [initial test](https://github.com/RirikoAI/RirikoBot/blob/a117c157024929a1e76ce799c71320f090d35189/packages/core/src/index.test.ts), [reported verification](https://github.com/RirikoAI/RirikoBot/blob/a117c157024929a1e76ce799c71320f090d35189/docs/kanban/handovers/TASK-0103.md), [updated roadmap](https://github.com/RirikoAI/RirikoBot/blob/a117c157024929a1e76ce799c71320f090d35189/docs/implementation-roadmap.md), [canonical board](https://github.com/RirikoAI/RirikoBot/blob/a117c157024929a1e76ce799c71320f090d35189/docs/kanban/board.json), [displayed board](https://github.com/RirikoAI/RirikoBot/blob/a117c157024929a1e76ce799c71320f090d35189/docs/kanban/BOARD.md).
+
+### Fresh PR #557 status and unchanged stack identity
+
+The coordinator's subsequent GitHub API check confirmed **[PR #557](https://github.com/RirikoAI/RirikoBot/pull/557) merged at `2026-09-14T16:53:18Z`**, with squash commit **`7f0fd9ae589ec140adc4ab7f01ec63299ac4a42b`** into `chore/RIR-001-work-governance`. This supersedes the publication receipt's earlier open-state observation. It does not establish that the story or governance was integrated into `develop/2.0.0-astra`, nor does it establish any CI result.
+
+The exact preserved parent ref `feat/RIR-110-review-evidence` still points to `a04753a473c8a807892848052cc248cff3695805`, and the integration anchor remains `801103c0e4c70eca6a380d7d1122b11234695bb1`. The documentation epic's recorded stack still resolves to that preserved story ref. A squash commit has different ancestry; the merge must not silently retarget this epic to the moved governance branch, squash commit or integration branch. Any new integration/stack resolution needs a concrete ancestry/diff review and the user's decision under the standing protocol. This addendum grants no push, PR creation, merge or next-scope authorization.

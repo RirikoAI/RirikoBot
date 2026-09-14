@@ -13,7 +13,7 @@ export interface Grooming {
   tickets: string[]; rationale: string;
 }
 export interface Decision {
-  id: string; kind: 'switch' | 'defer-pr' | 'pr-created'; reference: string; at: string;
+  id: string; kind: 'switch' | 'defer-pr' | 'pr-created' | 'stack'; reference: string; at: string;
   fromTicket: string | null; toTicket: string | null;
   disposition: 'paused' | 'abandoned' | null; batchId: string | null;
 }

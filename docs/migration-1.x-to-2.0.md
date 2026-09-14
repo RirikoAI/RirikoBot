@@ -173,3 +173,172 @@ TypeORM `down()` methods drop tables/columns; they are not this rollback strateg
 - Backup/restore rehearsal and proof dry-run/import/verify never change source files or external services.
 - Sanitized representative operator DB and giveaway state, per-record comparison and working retained-feature smoke tests.
 - Review of custom source extensions and measured cutover/rollback window. No migration-complete or zero-data-loss claim before these gates pass.
+
+## Import implementation specification (planned)
+
+The remainder makes the execution contract concrete for a future importer ticket. None of the run states, provenance tables, report fields or recovery operations below is implemented by the foundation CLI. They are separate from Scrum ticket statuses and the existing version-1 schema ledger. Follow [migrations.md](migrations.md) for what can actually be run today.
+
+### Inventory, dependency order and activation tests
+
+Import every source row into protected staging before projecting domain data. Staging order can be independent; application projection order must respect both actual foreign keys and semantic identity requirements. The audited 11 foreign keys are in [legacy-data-manifest.json](legacy-data-manifest.json); absence of a legacy FK does not mean any target identity is valid.
+
+| Table | Projection prerequisite | Activation/reconciliation check beyond row count |
+|---|---|---|
+| `configuration` | Resolved application identity and secret destination | Every non-null credential transferred or explicitly resolved; backend type retained; no plaintext report |
+| `guild` | None | Exact ID/name/prefix, including prefixes rejected by new validation |
+| `user` | None | Exact per-user global coins/karma/preferences; distinguish account-created date semantics |
+| `item_category` | None | Source integer identity and name preserved |
+| `playlist` | Owner identity resolution; no source FK enforces it | User ID versus author/authorTag preserved, visibility/plays/dates unchanged |
+| `twitch_streamer` | Provider identity resolution | Preserve original identifier/status as stale evidence; never replay a live alert from this snapshot |
+| `guild_config` | Guild map when non-null | Every raw row represented; conflicting duplicate keys unresolved until explicit decision |
+| `user_note` | Guild/user maps when non-null; separate author resolution | Exact note bytes, source integer ID, actor, scope and timestamps; no invented UUID/history |
+| `voice_channel` | Guild map and second-pass generator links | Preserve `parentId='0'` roots, null unknowns and child generator references; reconcile Discord state without deletion on cache miss |
+| `music_channel` | Guild map when non-null | Preserve multiple legacy rows; a future one-per-guild constraint needs conflict resolution |
+| `track` | Playlist map when non-null | IDs, URLs and duplicate multiplicity; imported order labeled approximation because source has no position column |
+| `stream_subscription` | Guild map when non-null; streamer login resolution | Destination preserved; unresolved login-to-provider-ID mapping blocks scheduling, not raw preservation |
+| `stream_notification` | Required guild map; notification/session identity | Preserve every history row and original display-name identifier; no lossy deduplication of history |
+| `reaction_role` | Guild map when non-null; external role/message checks | Exact emoji/role/message IDs; missing channel cannot be fabricated |
+| `reminder` | Semantic user/guild/channel validation; no source FK | UUID, text, instant, timezone and sent state; recurrence must not be invented |
+| `free_game_notification` | Required guild map | Opaque source-specific game ID, source, state and dates; suppress historical replay |
+| `item` | Category map when non-null | Every price/flag/limit/rarity/image/date retained; no conversion into owned items or TCG cards |
+
+Use two passes for relationships that reference another row of the same domain: preserve nodes first, then validate links. A null optional legacy relation remains null/unknown in provenance; it is not permission to attach the row to a convenient guild. A stronger target constraint needs a recorded resolution or a blocked activation. Do not temporarily disable foreign keys to hide invalid mappings.
+
+### Snapshot identity and canonical rows
+
+A source snapshot is a bundle: consistent database, giveaway file, schema/migration fingerprint, selected media and a protected deployment inventory. Give the bundle a stable ID derived from its manifest of file digests and capture boundary. The original files remain immutable. A new backup after more legacy writes is a **different snapshot**, even when filenames match.
+
+A proposed canonical row encoding uses an ordered array of columns in the inspected source-schema order. Each value carries its storage type and a lossless representation:
+
+```json
+{
+  "encodingVersion": 1,
+  "table": "user",
+  "primaryKey": [["id", "text", "100"]],
+  "values": [
+    ["id", "text", "100"],
+    ["coins", "integer", "1250"],
+    ["backgroundImageURL", "null", null]
+  ]
+}
+```
+
+This shortened synthetic record illustrates encoding only; an actual canonical row contains **every** source column. Integer payloads are decimal strings obtained without first passing through an unsafe JavaScript Number. Null and empty text remain distinct. Preserve text code points/bytes without trimming, Unicode normalization or date conversion. Blobs use a defined binary encoding; REAL values need an explicitly lossless representation and type inspection, not rounded JSON numbers. Preserve unexpected storage classes for review rather than coercing them into the expected SQL declaration.
+
+Compute a raw-row digest from versioned canonical bytes. Separately compute an expected normalized projection digest after a named transformation; raw and transformed hashes should not be compared as though the representation were unchanged. Whole-table verification uses a deterministic **multiset** of source identities and row digests, retaining duplicate payloads and their multiplicity. Sort using a defined typed key order, not locale-sensitive text sorting or driver-dependent row order. Keyless/custom tables need a separately reviewed stable identity strategy; do not use unstable query offsets as durable keys.
+
+Digests are integrity checks, not anonymization. Moderation text, credentials and other sensitive raw rows remain encrypted/access-controlled, including quarantine. Public/redacted reports contain IDs, counts and error categories; restricted keyed digests may be used for sensitive comparisons, with key identifiers recorded privately. Do not publish raw secret hashes that permit guessing, or store plaintext secret fields in an otherwise “redacted” staging dump.
+
+### Proposed staging and run records
+
+The exact physical schema must be reviewed alongside [database.md](database.md). The following logical records are requirements, not existing tables:
+
+| Logical record | Required data and uniqueness |
+|---|---|
+| Import run | Run ID, snapshot bundle ID/digest, transformer/config version, target identity/schema version, operator, plan digest, state, creation/update times, lease/fencing generation |
+| Source row | Snapshot/table/typed primary key, raw digest, encrypted payload reference, classification and transformation version; unique stable source identity |
+| Mapping | Source identity → target entity type/ID, expected projection digest and applied target version; one source can map to several named target entities |
+| Batch checkpoint | Run/table/key range, input digest/count, last committed typed cursor, target digest/count, transaction result and attempt metadata |
+| Anomaly | Stable code, source identity/field, severity, required-feature impact, redacted explanation, resolution decision/actor/time and revalidation status |
+| Secret transfer | Application/provider identity, source presence, deterministic transfer key, target vault reference/version and verification state; no secret value |
+| Activation record | Verified run/plan/report digests, approved boundary, job reconciliation result, active deployment identity and first-write/send boundary |
+
+Required uniqueness spans snapshot/table/key and target mapping role, not merely an attempt-specific run ID. Retrying the same bundle under a new process/run identifier must not mint a second opening balance. Every source row is classified as ready, protected pending resolution, securely transferred credential or explicitly deprecated recoverable metadata. “Archived” does not mean a required user feature works.
+
+A useful run state model is `captured → inspected → planned → applying → verifying → verified → activated`, with `blocked`/`failed` outcomes preserving the last committed checkpoint. Resume returns to the interrupted phase only after the snapshot, transformer, target and approved plan still match. Activation is explicit. A successful dry-run does not authorize applying a changed plan, and successful import does not authorize starting schedulers.
+
+### Dry-run and anomaly resolution
+
+Dry-run opens the captured source read-only, checks source/target identity aliases, inventories actual schema, stages/validates all rows, and produces a plan without writing domain data or sending network effects. Report/staging writes require an explicitly selected protected location. It must not connect the bot, start TypeORM lifecycle hooks, roll giveaway winners, fetch remote media blindly or test paid provider calls.
+
+Use redacted anomaly records with actionable codes rather than a single “bad rows” count:
+
+| Candidate code | Meaning | Required resolution |
+|---|---|---|
+| `SOURCE_SCHEMA_DRIFT` | Extra/missing/type-changed column/table relative to supported adapter | Inspect deployment; add a reviewed adapter/mapping; no silent column dropping |
+| `UNSAFE_INTEGER` | Fractional, negative where disallowed, malformed or out-of-range value | Preserve exact value and obtain domain resolution; never clamp/round/reset |
+| `DUPLICATE_CONFIG_CONFLICT` | Same guild/key has competing values | Preserve all rows and record explicit chosen projection with provenance |
+| `ORPHAN_REFERENCE` | Required target identity cannot be resolved | Restore missing evidence or define reviewed compatibility handling; no invented entity |
+| `AMBIGUOUS_TIME` | Unsupported or timezone-ambiguous representation | Preserve raw value and document interpretation decision before scheduling |
+| `SECRET_TRANSFER_REQUIRED` | Non-null legacy secret lacks verified destination | Secure transfer/reauthentication; affected provider cannot activate |
+| `GIVEAWAY_INCOMPLETE` | Storage/message/entry/winner information insufficient | Reconcile with actual deployment and complete participant evidence |
+| `DELIVERY_AMBIGUOUS` | A flag cannot prove whether a recent external send occurred | Separate operator reconciliation; never bulk replay historical jobs |
+| `TARGET_CONFLICT` | Existing target does not match the intended idempotent projection | Stop; preserve both versions; no blind upsert over later writes |
+
+Resolution records amend the transformation plan without altering the frozen source. Re-run validation and produce a new plan digest after any decision. Required unresolved anomalies block cutover; acknowledged missing optional metadata needs a precise, recoverable disposition rather than an unqualified “zero loss” claim.
+
+### Apply, resume and transaction boundaries
+
+Default to an isolated target containing only the approved schema, with application writers and workers excluded. Reconfirm the target database/schema identity, source bundle hashes and transformer/plan versions immediately before applying. A candidate initial batch limit is **500 rows or a configured byte limit, whichever comes first**; this is a tuning starting point, not measured throughput or a fixed universal transaction size. Large text/media references can make a row-count-only limit unsafe. Record observed transaction duration/bytes and tune within the reviewed plan.
+
+For each batch, the target transaction must atomically persist domain rows, source-to-target mappings, opening ledger entries, anomaly dispositions relevant to the committed rows, and its checkpoint. Advance a cursor only after those writes succeed together. Never write a progress file first and infer the database commit later. Re-read the database checkpoint on restart; process output is not the authoritative receipt.
+
+The resume key is the same frozen snapshot plus transformer/plan/target identity. Replay finds matching mappings and verifies target projections instead of reapplying rewards. Existing target content that differs is a conflict, not an invitation to overwrite it. Cross-table cursors follow the dependency order above. A changed source or transformation requires a new reviewed run/plan, with explicit treatment of existing target work.
+
+The target needs a single active import owner across processes. For PostgreSQL, use a reviewed lock/lease protocol plus a monotonically increasing fencing generation checked in every batch transaction; a transaction-only lock released between batches cannot alone own the entire import. For SQLite, keep one local importer and short immediate write transactions, with ownership/fencing stored and checked in the target. Exclude application writers explicitly; a file lock or advisory lock does not cause unrelated application code to honor an import freeze. Leases require safe owner-death verification and stale-worker rejection before takeover.
+
+Do not hold a database transaction open while waiting for Discord, fetching media or transferring secrets to an external vault. External secret transfer requires its own idempotent key and receipt: create/reuse the expected vault entry, then transactionally record the verified reference. If the process dies between those steps, reconcile the deterministic external reference before another transfer. Do not delete or rotate the source credential during import; rotation is a separately coordinated post-transfer operation.
+
+| Crash/failure point | Durable outcome to detect | Resume/recovery |
+|---|---|---|
+| Before batch transaction | Previous checkpoint only | Reprocess next batch from frozen source |
+| During rows, before mapping/checkpoint | Whole current batch rolls back | Retry after correcting cause; no reward counted from process memory |
+| After commit, before CLI success output | Rows and checkpoint may already exist | Read committed checkpoint/mappings and verify; do not issue a second opening credit |
+| Between tables | Prior dependency tables committed, later tables absent | Resume next verified cursor with jobs still disabled |
+| During external secret transfer | Vault entry may exist without target receipt | Reconcile by transfer key/reference and verify access; never print the secret |
+| During report write | Database verification state may exist without complete report | Regenerate the report from independent checks and bind its digest before activation |
+| Owner lease expires while old process resumes | Two processes may attempt writes | Fencing rejects old generation; only reviewed owner continues |
+| Failure after activation/new writes | Import baseline is no longer entire target state | Freeze, back up both generations and apply the post-activation recovery policy |
+
+### Worked reconciliation example
+
+These are synthetic values, not measured production counts. Three legacy users have:
+
+| Source user ID | Coins | Karma | Required target opening state |
+|---|---:|---:|---|
+| `100` | 1250 | 80 | Global wallet 1250; historical karma 80 |
+| `200` | 750 | 20 | Global wallet 750; historical karma 20 |
+| `300` | 0 | 0 | Explicit zero opening position/preserved provenance |
+
+The source coins sum is **2000**. Target user wallets must sum to 2000 and each user must match individually. A proposed double-entry initialization credits user balances by +1250/+750 and offsets them against a dedicated migration opening account by -2000, giving a balanced net movement of zero. The opening system account is not a user wallet; no bank balance or historical purchase is invented. Zero balances still need provenance even when the ledger policy omits a zero-value posting.
+
+Swapping users 100 and 200 passes an aggregate sum but fails the per-user mapping/digest. Copying the same wallets into two Discord guilds creates 4000 and fails both scope and conservation. Splitting karma into two independently spendable reward fields would fabricate value; preserve the original meaning and derive any future display projections explicitly.
+
+Assume two batches: users 100/200, then 300. If the first commits but the process loses its response, resuming must observe its two mappings and opening transaction, then process only the remaining user. A fresh attempt must still produce one opening transaction per mapped account. If source user 200 instead contains a malformed or negative value, report that row and block activation; do not publish an accepted-subset sum as the total migrated economy.
+
+For configuration, suppose two raw rows express the same `welcomer_enabled=true` value. They may project to one typed setting only while both source IDs remain mapped/preserved. A third row for the same guild/key with `false` creates a conflict: choosing the largest ID as “latest” is unsupported by unordered legacy reads. The verifier checks raw row coverage separately from typed-setting count and requires a resolution record for the conflict.
+
+A report should therefore include per-table source identities/count, mapped/preserved/unresolved counts, raw/projection digest results, per-user financial mismatches, FK violations, secret-transfer coverage and giveaway coverage. Do not compare total target row count with total source count: one user maps to profile, wallet and provenance records, while duplicate settings can map to one projection.
+
+### Giveaway reconciliation and delivery boundaries
+
+The audited service configures `discord-giveaways` storage at `./giveaways.json`, reaction 🎉, and `botsCanWin: false`. The package manifest specifies a version range; inspect the actual deployed lockfile/library format before parsing a production file. Do not assume the repository range proves the precise deployed storage version.
+
+For every giveaway object, preserve unknown fields and classify active/paused/ended state, original message/guild/channel IDs, deadlines, prize, winner data, eligibility and reroll metadata where available. Store participant evidence as a separate capture with pagination/completeness status and capture time. Never deduce “zero entries” from a failed Discord fetch or a missing file. An ended giveaway without winner evidence is unresolved; dry-run cannot repair it by rolling again.
+
+Database and JSON freeze together at an application boundary. Discord reactions can still change after the old process stops; define the cutover eligibility cutoff and final reconciliation explicitly. If historical entry timing cannot be reconstructed, record that uncertainty and obtain the operator's resolution instead of claiming an exact historical roster. Only authorized read operations should fetch original messages/entries; no import phase edits/deletes messages or announces winners.
+
+Existing sent/notified flags have different crash windows: free-games marks notified before sending, while Twitch/reminders persist after sending. Preserve the flag and source evidence but do not reinterpret it as exactly-once proof. Separate imported historical records, pending future work and ambiguous recent events. Activation must leave unresolved/overdue work paused until its policy is reviewed, with bounded release of due jobs and one active sender.
+
+## Cutover and restore decision record (planned operations)
+
+A production rehearsal must produce an operator-approved run sheet with identities, artifacts and observed timing rather than a generic “take a backup” step. PostgreSQL dumps capture a consistent database snapshot but not all cluster globals or external files; capture required roles/configuration/media/secrets separately. SQLite snapshots must account for WAL/journals. Follow the official backup references above and test restoration with the deployed tool/engine versions.
+
+| Checkpoint | Required evidence before proceeding |
+|---|---|
+| C0 — rehearsal ready | Importer/verifier exist; supported source schema; synthetic and representative fixtures; isolated network-disabled target |
+| C1 — freeze | Old writers/collectors/jobs drained or explicitly reconciled; no competing 2.0 writer; giveaway/DB boundary and active external work recorded |
+| C2 — capture | Immutable source bundle hashes, protected secret/archive references, backup sizes, storage headroom and successful isolated restore |
+| C3 — plan | Full row coverage, approved transformations, no unresolved required anomalies, exact source/target/plan digests |
+| C4 — import | Committed batch receipts and mapping coverage; workers remain disabled; unchanged source hashes |
+| C5 — independent verify | Per-record and financial reconciliation, schema constraints/sequences, secrets, media, giveaways and retained-feature staging checks |
+| C6 — activate | Actual operator cutover approval, one deployment identity, job-release policy and documented first new write/send boundary |
+| C7 — observe | Critical slash/prefix flows, configuration persistence, notification ambiguity handling and health observed; rollback limitations acknowledged |
+
+Measure capture, import, verification and restore duration on representative data before promising downtime. Define who can order a freeze and who verifies restoration. Record deployment commit, native/runtime versions, database engine/schema version, source bundle, target backup, vault key references and original giveaway file so another operator can reproduce recovery without chat history. Keep secret values outside the run sheet.
+
+A restore rehearsal succeeds only when the restored isolated system opens the expected schema, passes integrity/reconciliation checks, resolves required secret references and can execute controlled retained-feature checks without reaching production Discord/provider destinations. Merely creating a dump file is insufficient. Record restore duration and usable recovery point as measurements, not assumed RTO/RPO claims.
+
+Before any 2.0 write/send, the original source bundle and compatible legacy deployment can be the rollback boundary. After that boundary, never remove import-tagged rows and assume new data survives: new rows may reference imported users/items, and new balances may already incorporate transactions against opening funds. Freeze both versions, capture the current 2.0 state and external effects, then choose tested forward repair or a reviewed delta conversion. New TCG/ledger facts may have no legacy representation. TypeORM down-migrations and blind restore cannot provide lossless reversal of those facts.
+
+The remaining blocker is concrete: there is no implemented full importer/verifier and no representative operator database/giveaway file or measured restore rehearsal. This documentation deepens the design; it does not remove those release gates or authorize a live cutover.

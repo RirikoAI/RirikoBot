@@ -19,7 +19,7 @@ Use exact direct dependency versions and commit the pnpm lockfile. Package exist
 | Zod | 4.4.3 | 2026-05-04 | Parse environment, command and external data; [publisher metadata](https://registry.npmjs.org/zod). |
 | Pino | 10.3.1 | 2026-02-09 | Structured logging with explicit redaction; [publisher metadata](https://registry.npmjs.org/pino). |
 | Drizzle ORM | 0.45.2 | 2026-03-27 | SQL-first data layer; [publisher metadata](https://registry.npmjs.org/drizzle-orm). Exclude 1.x prereleases. |
-| Drizzle Kit | 0.31.10 | 2026-03-17 | Reviewed migration generation; [publisher metadata](https://registry.npmjs.org/drizzle-kit). |
+| Drizzle Kit | 0.31.10 (candidate; not installed) | 2026-03-17 | Reviewed migration generation; the current migrator uses checked-in SQL, not Kit. [Publisher metadata](https://registry.npmjs.org/drizzle-kit). |
 | Postgres.js (postgres) | 3.4.9 | 2026-04-05 | PostgreSQL driver; [publisher metadata](https://registry.npmjs.org/postgres). Not the PostgreSQL server version. |
 | better-sqlite3 | 13.0.3 | 2026-08-05 | SQLite driver, Node >=22; [publisher metadata](https://registry.npmjs.org/better-sqlite3). Native binaries require validation. |
 | Vitest | 4.1.10 | 2026-07-06 | Unit/integration runner supporting Node 24; [publisher metadata](https://registry.npmjs.org/vitest). |
@@ -91,3 +91,81 @@ Registered tools include `read_file`, `grep_search`, `glob`, `list_directory`, `
 Project settings load GEMINI.md and AGENTS.md through `context.fileName`; modular context uses `@./docs/file.md` imports. Keep paths valid and imported files free of secrets. [Context/import guide](https://geminicli.com/docs/cli/gemini-md/), [configuration](https://geminicli.com/docs/reference/configuration/).
 
 Validate JSON/frontmatter statically, then use `/agents`, `/tools` and `/memory show` in the installed CLI to check discovery. Static validation does not constitute an authenticated CLI smoke test. Do not suppress normal CLI approval policies or grant unrestricted shell tools to read-only audit agents.
+
+## Installed boundary and dependency ownership
+
+Read `package.json`, each workspace manifest and `pnpm-lock.yaml` together. A version in this evaluation table is not an installation instruction. The current repository has five application/package workspaces plus the root tooling project:
+
+| Owner | Direct runtime dependencies | Why the boundary matters |
+|---|---|---|
+| `packages/core` | Zod, Pino | Domain contracts and configuration must remain usable without a Discord client, database driver or web framework. |
+| `packages/database` | Core, Drizzle ORM, Postgres.js, better-sqlite3 | Both drivers are currently installed; choosing SQLite does not create a SQLite-only distribution. Native dependency installation remains a deployment concern. |
+| `packages/discord` | Core | Transport-neutral command metadata/dispatch does not instantiate discord.js. |
+| `apps/bot` | Core, database, discord package, discord.js | Owns the Gateway and REST library at the composition boundary. |
+| `apps/cli` | Core, database, discord package, discord.js | Needs REST for explicit command synchronization; local database commands still load application dependencies. |
+| Root development | TypeScript, ESLint and plugins, Vitest, tsx, declaration packages | Tool versions affect reproducibility but are not evidence that a provider or dashboard exists. |
+
+There is no `apps/web`, audio SDK, canvas dependency, AI SDK or durable queue dependency in this installed graph. Adding one requires a groomed implementation scope, its relevant ADR and lockfile review. Avoid a catch-all services package that makes every process load every optional native/provider dependency.
+
+The package exports use a development condition for `src/index.ts`, a types entry and a default compiled `dist/index.js` entry. Development uses `--conditions=development --import tsx`; production uses compiled JavaScript. A successful development launch alone does not verify that production exports resolve. Check both execution modes after changing package entrypoints. Export declarations define the supported import surface; they are not a security boundary. See [Node package entrypoints](https://nodejs.org/api/packages.html#package-entry-points).
+
+## Compatibility and acceptance matrix
+
+These are required evaluation cases, not a claim of completed cross-platform certification. Record the actual OS, architecture, runtime patch and lockfile digest with each result.
+
+| Change | Minimum experiment | Reject or investigate when |
+|---|---|---|
+| Node patch/major | Frozen install, native SQLite load, compiled CLI smoke, unit and database suites | ABI/prebuilt artifact failure, new engine warnings, signal/shutdown change or platform-specific crash |
+| TypeScript/parser pair | Check parser peer range, strict typecheck, project build, type-aware lint | Unsupported parser range even when one local compile happens to pass |
+| pnpm major | Read that major's migration notes, frozen install in clean disposable checkout, compare lockfile and lifecycle behavior | Silent lockfile re-resolution, changed script approval defaults or non-reproducible optional dependencies |
+| Drizzle/driver pair | Both schema builds, SQLite and PostgreSQL repository conformance, migration checksum/refusal tests | Dialect-specific numeric conversion, audit/CAS atomicity regression or changed transaction semantics |
+| discord.js | Compile application adapters; replay interaction and message fixtures; authorized test-guild smoke later | REST payload incompatibility, intent changes, acknowledgement regression or lost permission checks |
+| Canvas/audio candidate | Linux deployment target and Windows developer target; fonts/codecs, cancellation and memory-pressure fixture | Missing binary, undeclared system dependency, unbounded work on the bot event loop or inconsistent output |
+| Dashboard candidate | Server build and browser tests, session/CSRF/authorization checks, shared schema compatibility | Server secrets in client output, stale permission acceptance or framework-only validation |
+| Provider SDK candidate | Contract fixtures plus authorized live capability probe | SDK hides retry/cost behavior, incompatible response schema or undocumented fallback to another model/account |
+
+The recorded local runtime is Node 24.13.1; the selected deployment patch is 24.19.0. Do not collapse these into one environment result. PostgreSQL server 18.6 and `postgres` 3.4.9 are separate products. SQLite driver package version also does not establish the embedded SQLite engine version; capture it from the tested connection when evaluating SQL capabilities.
+
+## Alternatives and conditions for reopening decisions
+
+Evaluate an alternative against the same workload, fixtures and budget as the incumbent. Avoid claims such as zero overhead, guaranteed uptime or a fixed speedup without retained measurements.
+
+| Decision | Alternative retained for comparison | Cost accepted / reason to revisit |
+|---|---|---|
+| Explicit TypeScript composition | NestJS or another framework | We own lifecycle wiring and dependency boundaries. Revisit if repeated wiring defects demonstrably outweigh framework adoption/migration cost. |
+| Drizzle and explicit dialect repositories | Kysely, Prisma, TypeORM | We own dialect migrations and conformance. Revisit if a required query/migration cannot be made correct or maintenance cost exceeds a demonstrated alternative; do not generalize old library versions to current ones. |
+| discord.js at application edge | Direct REST/Gateway or another maintained client | We accept the client dependency to avoid maintaining protocol machinery. Revisit with measured resource constraints and parity tests, not popularity alone. |
+| Direct AI adapters | An orchestration framework | We own context budgeting, tool mediation and persistence. A framework is justified only if it preserves observable retries, permission checks and provider-specific capabilities. |
+| Canvas candidate | Existing node-canvas, SVG renderer, browser renderer | Native packaging, fonts and memory need experiments. Prefer output fidelity and deployability over an unsupported throughput claim. |
+| Discord Player versus Lavalink | Direct voice pipeline | Decision remains open. Compare reconnect/recovery, extractor access, queue ownership, operating cost and measured concurrent guild load. An external process creates another failure and upgrade boundary. |
+| Next.js target | A client application with separate API | Server rendering and shared code do not remove auth duties. Revisit if hosting constraints conflict with the required server/session model. |
+| Vitest | Existing Jest assertions adapted or retained in an isolated migration harness | ESM fit is the current rationale; behavioral coverage matters more than rewriting tests for stylistic uniformity. |
+
+## Supply-chain review and controlled upgrades
+
+The repository pins direct versions with `save-exact=true`, enables strict peers, and permits dependency builds only for `better-sqlite3` and `esbuild` in `pnpm-workspace.yaml`. Review why an added package needs an install script before extending that list. pnpm documents dependency script restrictions, but its current website targets a newer major: do not copy new settings into pinned pnpm 10 without version compatibility checks. [pnpm supply-chain guidance](https://pnpm.io/supply-chain-security).
+
+For an upgrade, preserve the old commit/lockfile and record the reason: security fix, unsupported runtime, required capability or verified defect. Inspect direct and transitive version changes, engine/peer constraints, package provenance where available, license texts and install scripts. A signed origin or registry integrity hash does not certify application behavior or safety. Never paste registry tokens into evidence.
+
+Run installation and checks in an isolated evaluation checkout with no production credentials. Retain the install log with secrets removed, exact platform identity, lockfile diff, build/test results and native artifact checks. Distinguish a network download failure from an incompatible package. If a security issue needs a post-cutoff version, document the exception and evaluate it; the historic cutoff is not a deployment safety waiver.
+
+Promote the reviewed lockfile and manifests together. Rollback means restoring the previously tested application artifact and configuration only when data/schema compatibility permits it; a dependency downgrade cannot reverse data writes. Database migrations require their own restore/forward-repair decision in [migrations](migrations.md). An update bot or registry alert may propose a ticket but does not authorize publishing a new scope.
+
+## Provider evaluation record and failure classification
+
+Each future adapter needs a versioned, credential-free evaluation record before enablement:
+
+```text
+provider / API family / SDK and API version / evaluated timestamp
+official capability and access documentation URLs
+account tier and region (no account secrets), approved data classes
+model/source ID, input/output limits, supported operations
+timeout, concurrency and cost budget, retry and cancellation behavior
+fixture IDs; authorized live probe ID and result, or explicitly not run
+retention/attribution/license findings; unresolved access conditions
+owner, review expiry trigger and rollback/disable procedure
+```
+
+Do not merge these distinct outcomes into `unhealthy`: unsupported capability, configuration missing, authentication rejected, permission/access denied, quota exhausted, rate limited, transient unavailable, malformed response, cancelled and outcome unknown. For a paid request whose response is lost, retrying can incur a second charge; preserve its request identity and reconcile before repeating. Cross-provider fallback changes recipients of user data and must follow explicit operator policy, not happen invisibly.
+
+For music, test metadata lookup and playable resolution separately, including wrong-song matching and unavailable tracks. For image generation, record workflow/model identity, output validation, attribution and deletion behavior. For stream notifications, test duplicate events, reconnect gaps and ambiguous Discord sends. For chat, test streaming cancellation, tool schema validation and memory isolation. Those probes are defined in [adapters](adapters.md), [music](music.md), [AI](ai.md) and [testing](testing.md); listing a provider here does not pass them.

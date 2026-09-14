@@ -268,7 +268,7 @@ The permission helper accepts string permission names; reaction-role commands in
 | `guild-create.event.ts` | Registers guild application commands on join | KEEP, await and reconcile registration |
 | `message-reaction-add.event.ts` / `message-reaction-remove.event.ts` | Fetches partials and applies/removes configured emoji roles | KEEP emoji behavior; REWORK permissions, persistence constraints, partial handling |
 
-All nine event source files are under [src/discord/events](https://github.com/RirikoAI/RirikoBot/blob/0d8be25b17e25dfa61812d6e7b5aaf8497687257/src/discord/events).
+All nine event source files are under [src/discord/events](https://github.com/RirikoAI/RirikoBot/tree/0d8be25b17e25dfa61812d6e7b5aaf8497687257/src/discord/events).
 
 HTTP declarations: root service information; economy user-count information with intended `/economy` and version `1`; `/discord/invite` redirect; version `1` `/discord/get-invite`; Swagger `/docs`. The root/economy/Discord controllers contain duplicate `@Controller` decorators, so intended path/version annotations are not a verified effective routing table. Verify the running route map before defining compatibility redirects. No authentication guards are present on these informational controllers. Preserve response contracts where useful, add explicit health/readiness endpoints, and keep the future admin API behind authorization.
 
@@ -385,3 +385,101 @@ The 205 source specs cover a mixture of metadata checks and mocked behavior; exa
 - [ ] Compare persisted source rows/relationships/timestamps against migration receipts and verification output; retain unknown legacy settings.
 - [ ] Add Vitest service/command tests and updated Slash + Prefix help; count parity only when tests and required integration checks pass.
 - [ ] Track new requested features (dashboard, TCG, expanded games/economy/providers) separately from legacy preservation.
+
+## 9. How to read and maintain the two evidence manifests
+
+These JSON files are audit artifacts, not runtime configuration or migration input containing user records. Review the whole artifact when changing its format. Keep factual source records stable; add new implementation evidence to [requirements](requirements.md) and the owning ticket rather than rewriting history to make every audit row say implemented. In particular, `v2ParityStatus` records the audit's uncertified baseline; it is not the live command registry. Current working commands are described in [commands](commands.md).
+
+### Command manifest, schemaVersion 1
+
+| Field / group | Interpretation | Consumer obligation |
+|---|---|---|
+| `repository`, `commit`, `packageVersion`, `snapshotDirectory`, `auditedAt`, `method` | Exact inspected source identity and audit method | Resolve the pinned commit; a moved branch or different local checkout is a different baseline |
+| `counts` | Aggregate declarations/categories/handler availability/registration scopes | Recompute from every record; directory category and declared category are distinct |
+| `commands[].name`, `category`, `registrationScope` | Declared canonical identity, metadata grouping and loader-derived guild/global scope | Preserve exact spelling; do not infer slash roots from spaced prefix aliases |
+| `source`, `sourceUrl`, `sourceSha256`, `declarationLine` | Source path, pinned permalink, content identity and navigational line | Verify bytes/commit before relying on line numbers; paths are not callable imports |
+| `classBase`, `handlersDeclaredOrInherited`, `inheritedHandlers` | Inheritance and method availability | Read the base handler and its callees; a true boolean is not successful behavior |
+| `prefixAliases`, `usageExamples`, `legacyPrefixStatus` | Deliberate aliases, literal help text and known handler limitations | Preserve valid intent; a typo in help or accidental regex match is not an approved new alias |
+| `slashOptions` | Recursive symbolic option tree, names, types, descriptions and required flags | Walk nested options; preserve order/requirements and validate the future registration tree |
+| `permissions`, `contextMenus` | Declared permission expressions and user/message menus | Normalize permission representation; inspect method-level checks separately |
+| `metadataSource` | Original declaration snippets with source lines, including regex/buttons/modals/render settings when present | Treat snippets as inert evidence, never eval/import them or copy them as trusted executable configuration |
+| `action`, `v2ParityStatus` | Preservation/rework direction and audit-time verification boundary | Separate design intention from implementation and test status |
+| Optional `reactionType`, `compatibilityPath` | Specialized reaction identity or safe replacement path | Preserve specialized fields; do not assume every command has them |
+| `assets[].source`, `bytes`, `sha256` | Every bundled asset's path, length and content identity | Preserve unused variants too; a hash proves identity, not license or safe decoding |
+
+The raw `metadataSource.regex.source` is essential when a normalized alias list loses behavior. For example, `prefix` declares a broad prefix/setprefix regex, while the new registry deliberately performs exact tokenized routing. A reviewer must distinguish preserving the deliberate `setprefix` alias from carrying forward unintended partial-word matches.
+
+`train-bus` demonstrates why normalized records must retain raw evidence: its source file uses the train/bus image but its help example says `undertaker`. Its inherited prefix path is broken. Preserve the `train-bus` feature and source asset; fix the text/path with explicit tests, rather than renaming it into another existing command. `playlist` demonstrates a different hole: a real nested slash tree exists while a working prefix handler does not. These require different compatibility tests.
+
+### Data manifest, formatVersion 1
+
+| Field / group | Interpretation | What it does not establish |
+|---|---|---|
+| `source` | Repository, branch label, pinned commit, audit date and read-only snapshot | Identity of a production database backup |
+| `method` | Static migration-up SQL replay in an empty in-memory SQLite database; engine/result metadata | TypeORM execution, entity synchronization, a deployed migration ledger or representative data validation |
+| `migrations` | Ordered filenames, source SHA-256 and count of extracted up statements | An application migration was applied to an operator's database |
+| `tableCount`, `tables[].name`, `createSql` | Final replayed source schema | Actual schema after years of synchronization/manual drift |
+| `columns` | Ordinal, name, SQL type, nullability, default SQL and primary-key position | Domain validation, legal identifier ranges or a populated table |
+| `foreignKeys` | Source column, target table/column, sequence and update/delete/match behavior | Every production row satisfies that relation or every conceptual relation has a declared FK |
+| `indexes` | Name, uniqueness, origin and partial flag from introspection | A complete index-column expression catalog or proof that a domain uniqueness rule exists |
+| `additionalSourceCandidates` | Giveaway file, runtime metadata/cache/sequence tables, environment and custom assets to investigate | Those files/tables were present in this source checkout |
+| `warnings` | Known absence, ambiguity and interpretation hazards | An exhaustive production anomaly report |
+
+There is no `entities` array in this manifest; it records the replayed migration schema. Entity declarations are a separate source for drift comparison. For actual import, inspect a consistent source snapshot's schema, columns, FKs and index definitions in addition to this manifest. The [migration runbook](migration-1.x-to-2.0.md) owns anomaly handling and mapping, while [database](database.md) owns the proposed target contracts.
+
+The replayed schema has **17 tables, 108 columns and 11 foreign-key rows**. These counts deliberately exclude runtime-created metadata/cache tables. A missing uniqueness constraint on `(guildId, name)` in `guild_config` means two records can legitimately appear in an old database; the importer cannot assume a map without a duplicate-resolution decision. Likewise, a playlist owner-like field without a database FK is a semantic relationship to investigate, not proof that all values resolve to an existing user.
+
+The RIR-802 review rechecked all 141 command files, 191 assets and 12 migration hashes against the immutable checkout. These recorded hashes describe **checkout bytes**: CRLF conversion makes the Git blobs differ for command/migration text and some text assets. Independent replay of all 85 extracted up statements under SQLite 3.51.2 matched every recorded table SQL definition, column, FK and the seven index descriptors, with integrity `ok` and no FK violations. The manifest's original SQLite 3.50.4 method record remains unchanged; a later verification run does not rewrite the original experiment. Neither empty-schema run establishes production-data correctness.
+
+## 10. Reproducible audit procedure and change review
+
+Use a separate read-only snapshot at the pinned source commit. Verify the source identity before collecting findings. Never run the old application, its auto-fixing lint, startup migration/seed or package scripts in that snapshot merely to regenerate documentation. SQL replay belongs in a new disposable database and must not invoke TypeORM application initialization.
+
+1. Enumerate tracked command/entity/migration/event/asset files at the exact commit. Compare the complete set with manifest paths, not just counts: one missing file plus one duplicate can preserve a total.
+2. Read command declarations and relevant base classes/callees without importing them. Preserve raw declaration snippets and symbolic enum types. Inspect registration loading separately from category labels and handler declarations.
+3. Hash source bytes and assets consistently. On Windows, checkout line-ending conversion can make text bytes differ from Git blobs; record the representation used and compare equivalent representations. Do not normalize binary assets or overwrite a pinned hash to disguise a mismatch.
+4. For data, extract reviewed literal up-SQL from each ordered source migration and replay only those statements into a fresh temporary/in-memory database. Retain engine version, statement counts, final schema/FKs/index metadata, integrity and FK results. This experiment proves only that empty-schema replay under that engine behaved as recorded.
+5. Compare entity declarations, migration SQL and runtime configuration independently. Record mismatches and absent representative inputs. Never add fictional fields from a desired 2.0 schema to a source manifest.
+6. Cross-check every command/asset path and every migration hash, then recompute aggregate counts. Review the JSON and prose together; a changed count must identify the exact added/removed/corrected record and source evidence.
+7. Preserve the audit version, compared SHA, checks and unresolved limitations in the ticket handoff. If the legacy baseline changes, create a separately identified audit revision instead of silently replacing the old reference.
+
+Example read-only inspection from the repository root:
+
+```sh
+git -C .audit/RirikoBot rev-parse HEAD
+git -C .audit/RirikoBot show 0d8be25b17e25dfa61812d6e7b5aaf8497687257:src/command/guild/prefix.command.ts
+```
+
+Do not print production secrets when inspecting a real database later. A schema column name such as `twitchClientSecret` is suitable for an inventory; its stored value is not. Restricted migration receipts should carry redacted metadata and secure provenance references rather than raw values in Git.
+
+## 11. Turn audit findings into executable acceptance
+
+For each feature family, first groom a bounded ticket with the source records and dependency contracts. A useful parity record links the canonical legacy command, source hash, normalized proposed invocation, new service/registration, specific behavioral test, actual run evidence and any remaining live gate. Do not use a single blanket `141/141` flag derived from file creation.
+
+| Dimension | Concrete review question | Example evidence |
+|---|---|---|
+| Identity | Are canonical name, nested path, aliases and menu labels preserved? | `prefix` plus `setprefix`, exact `newprefix` slash option |
+| Input | Do required/optional values, quoting and target defaults retain valid behavior? | Multiword reminder date/prompt, omitted avatar target, invalid numeric limits |
+| Authority | Are actor/bot permissions, guild scope, target hierarchy and ownership checked through every entry? | Giveaway slash denial matches prefix; known note ID does not grant cross-guild access |
+| Output | Are privacy, mentions, empty/error states and navigation deliberate? | Prefix output is public; provider error never exposes a token |
+| Side effects | What exactly commits, and what can be duplicated after retry/restart? | Saved giveaway draw survives notification retry; stream keys include destination |
+| Data | Are identities, scope, timestamps, ordering and aggregate values preserved? | User's global coins remain one global opening value; duplicates/quarantine reconcile |
+| Assets/providers | Are source images/credits retained and capability failures explicit? | Missing meme asset; metadata-only music source; revoked provider access |
+| Evidence | Is this source observation, a fixture pass, real DB integration or authorized live validation? | A mocked audio adapter proves routing only, not actual playback |
+
+Example `train-bus` acceptance should test correct source asset, text1 required/text2 optional, usable quoted prefix text, slash normalization, missing asset and rendering failure. The old wrong `undertaker` usage text is recorded as a defect; it must not become a route collision. Example Twitch acceptance uses the same stream event for two guild/channel destinations, makes one send fail, and verifies independent pending/confirmed outcomes instead of a global notified flag.
+
+## 12. Audit uncertainty and preservation register
+
+| Unknown or drift | Required evidence before cutover | Safe interim interpretation |
+|---|---|---|
+| Actual deployed DB/entity synchronization | Consistent schema and migration-ledger export from the operator's deployment | Source SQL is a comparison baseline, not deployed truth |
+| Production balances/XP and orphan relations | Redacted representative snapshot, per-user/aggregate reconciliation and disposition of anomalies | No successful data import or losslessness claim |
+| Giveaway JSON and pending external work | Snapshot aligned with database/write freeze, file schema and scheduler outcome review | Do not infer empty giveaways because the repo omits the file |
+| Plaintext secret usability | Restricted inventory and tested encrypted/env destination under operator control | Preserve usability securely; neither publish nor silently discard |
+| Dynamic collectors and in-flight actions | Explicit cutover policy, user-visible expiry or settlement evidence | RAM sessions are not recoverable merely by migrating tables |
+| Effective HTTP routes | Isolated runtime route inspection if compatibility is required | Duplicate controller decorators make intended annotations insufficient |
+| Provider access and image rights | Current official access/terms, account-specific probe and attribution/license evidence | Source usage does not grant continued availability or redistribution rights |
+| Custom assets/configuration outside Git | Operator inventory, hashes and storage migration plan | The 191 bundled assets do not encompass an unknown deployment's files |
+
+This documentation review preserves both source manifests as evidence and adds their interpretation, verification and acceptance contracts. No JSON entries are fabricated to increase documentation volume. RIR-807 will record final per-file coverage in a corpus review; until then the active ticket handoffs carry verification status.

@@ -1,0 +1,5 @@
+# RIR-805 / A-018 — web architecture return
+
+Agent architecture-docs; coordinator persistence. Branch feat/RIR-800-documentation-depth starting82df04e,parenta04753a/integration801103c unchanged. Read fullpinnedGeminiADR1ba45ee/relevantblueprint/currentsettingsCLI/boardprotocol. EditedonlyADR008. Expanded alternatives, separatewebprocess/serverclient/services, OAuthopaquesessionlifecycle, authoritativeguild/personal/operator/factionscopes, CSRF/cache/outputisolation, callerdisplayedrevisionprerequisite, durableoperationreceipts, pollingfirst/SSEgates, accessibility/observability/rollback/revisit andacceptance.
+
+Eightlocalpathsresolve; diffcheck andrequirements91/35pass. Fourprimarysourcesverified: Nextauthentication/components,DiscordOAuth,RFC9700. Candidateversions retainedfromdependencyevidence; session30minidle/12habsoluteunacceptedpolicy; noauthlibrary/PKCE/liveaccess/runtimebrowserclaim. RootreadcompleteADR; independentA019reviewpassed. No board/Git/runtime/provider/testsuite mutations. Coordinatoracceptancebeforeleaftransition. Mainworkflowreviewpending separately.

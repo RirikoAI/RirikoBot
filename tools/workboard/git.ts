@@ -61,7 +61,7 @@ export function deliveryBase(root: string, board: Board, batch = currentBatch(bo
     const stack = batch.stack;
     const parent = board.batches.find((entry) => entry.id === stack.parentBatch);
     const decision = board.decisions.find((entry) => entry.id === stack.decision);
-    if (!parent || parent.id === batch.id || parent.status !== 'closed' || parent.baseBranch !== batch.baseBranch || !decision || decision.kind !== 'defer-pr' || decision.batchId !== parent.id || !decision.reference.trim()) throw new Error('Stack needs a closed parent delivery and its recorded user defer/stack decision.');
+    if (!parent || parent.id === batch.id || parent.status !== 'closed' || parent.baseBranch !== batch.baseBranch || !decision || !['defer-pr', 'stack'].includes(decision.kind) || decision.batchId !== parent.id || !decision.reference.trim()) throw new Error('Stack needs a closed parent delivery and its recorded user defer/stack decision.');
     const preserved = commitRef(root, stack.parentHead);
     if (preserved !== stack.parentHead || !ancestor(root, preserved, headRef) || !ancestor(root, parent.baseSha, preserved)) throw new Error('Topic must descend from the exact preserved parent commit.');
     const localParent = commitRef(root, `refs/heads/${parent.branch}`, true);

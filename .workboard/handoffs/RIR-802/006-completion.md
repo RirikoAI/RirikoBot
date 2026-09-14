@@ -1,0 +1,9 @@
+# RIR-802 — data documentation complete
+
+Coordinator2026-09-14, eight points, RIR-800. Branch feat/RIR-800-documentation-depth starting c9ab6a6; published parenta04753a and integration801103c anchors unchanged. All seven files reviewed: five Markdown guides/ADR substantially deepened; two factual JSON manifests fully verified and preserved. A008/A009/A010 returns retained here and accepted only after actual review.
+
+Evidence:58relative Markdown references valid, zero missing; requirements91sections/35criteria and git diff --check passed. Complete AST/source/hash verification plus independent85statement SQLite3.51.2 empty-schema replay matched all recorded17tables/108columns/11FKs/7indexes. No manifest anomaly. Root verified JSON/blueprint SHA256 unchanged and legacy git status clean. Exact hashes and AST/SQL totals are in005-manifest-return.md. Current unit119pass is prior801central run over unchanged prerequisite code; no gratuitous rerun or live migration claim.
+
+Cross-document review corrected import dedup identity from attempt run to frozen snapshot/typed row/mapping role, retaining protected raw evidence. Current three-table schema, v1history/collision limits, no-WAL behavior, CAS versus stale-form preconditions, integer/account scope and external outcome uncertainty agree with801architecture. Future schema catalog and import/cutover contracts remain designs. Missing representative data, importer/verifier and measured restore are release gates.
+
+All work local/unstaged before checkpoint commit; no active test processes or workers after acceptance. Move review/done, commit explicit802paths plus board/handoffs, then start pre-groomed80313points. Root will own moderation; workers own AI, music and common adapters/image/stream/job ADRs with disjoint recorded assignments. Keep one active leaf, one epic batch and final PR checkpoint. No push/merge/new epic authorized.

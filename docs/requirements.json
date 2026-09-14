@@ -13,13 +13,14 @@
       "title": "Absolute Rules",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         }
       ],
       "gap": "Standing preservation, KISS and compatibility rules exist; future code still needs per-ticket review."
@@ -29,13 +30,14 @@
       "title": "FIRST TASK: AUDIT THE EXISTING REPOSITORY",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-802"
       ],
       "evidence": [
         {
           "path": "docs/legacy-feature-inventory.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Independently checked command/asset/entity/migration inventory and manifest interpretation at the pinned legacy source; no private runtime/data certification."
         }
       ],
       "gap": "Source audit inventories 141 commands, 17 tables and assets at the pinned legacy SHA; it does not certify runtime parity or production data."
@@ -77,13 +79,14 @@
       "title": "CREATE A MODERN PROJECT STRUCTURE",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         },
         {
           "path": "packages/core/src/contracts.ts",
@@ -103,13 +106,14 @@
       "title": "TECHNOLOGY BASELINE",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/dependency-evaluation.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Installed, selected and candidate versions distinguished; adoption/reversal gates and external capability caveats."
         },
         {
           "path": "package.json",
@@ -129,13 +133,14 @@
       "title": "KISS + EXTENSIBILITY PRINCIPLE",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/development.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Verified CLI/generator commands and extension walkthrough; proposed verbs and missing service capabilities are identified."
         },
         {
           "path": "apps/cli/src/generate.ts",
@@ -155,13 +160,14 @@
       "title": "COMMAND SYSTEM",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/discord/src/dispatcher.ts",
@@ -181,13 +187,14 @@
       "title": "HELP SYSTEM",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/discord/src/builtins.ts",
@@ -207,13 +214,14 @@
       "title": "RIRIKO 2.0 MODULE SYSTEM",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/core/src/settings.ts",
@@ -224,6 +232,11 @@
           "path": "apps/cli/src/cli.test.ts",
           "kind": "test",
           "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        },
+        {
+          "path": "docs/modules.md",
+          "kind": "documentation",
+          "note": "Installed/enabled/configured/verified distinctions and proposed admission, drain and recovery lifecycle; only core is installed."
         }
       ],
       "gap": "Core module flags/settings and CLI controls exist; the requested non-core modules are not registered."
@@ -233,13 +246,14 @@
       "title": "MUSIC 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/music.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Four required sources, metadata/playability separation, queue/session recovery and legacy command/playlist acceptance; no live playback proof."
         }
       ],
       "gap": "No audio engine/resolver is implemented. Preserve required YouTube, Spotify, Deezer and SoundCloud plus safe AI controls and source capability checks."
@@ -249,13 +263,14 @@
       "title": "AI CHATBOT 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/ai.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Scoped memory generation/reset, budgets, data-destination policy and application-mediated tool operation identities; no AI runtime."
         }
       ],
       "gap": "No AI adapter or conversation store exists. Implement dedicated opt-in channel, per-user context, preferences, personality separation, time tool and safe mediated tools."
@@ -265,13 +280,14 @@
       "title": "MODERATION 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/moderation.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Case/action/attempt/warning lifecycle, hierarchy, escalation races, uncertain effects and owned lock restoration; no sanction runtime."
         }
       ],
       "gap": "Moderation commands, configurable warning escalation, audit history, AutoMod and anti-raid rules are pending."
@@ -281,13 +297,20 @@
       "title": "AUTOMATIC ROLE SYSTEM",
       "status": "planned",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
+        },
+        {
+          "path": "docs/moderation.md",
+          "kind": "documentation",
+          "note": "Case/action/attempt/warning lifecycle, hierarchy, escalation races, uncertain effects and owned lock restoration; no sanction runtime."
         }
       ],
       "gap": "Join/bot/verified/temporary/activity roles, reaction/button/select roles and dashboard controls are pending."
@@ -297,13 +320,14 @@
       "title": "IMAGE GENERATION 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Image adapters, actual free/paid capability assessment, guild/user settings, quotas and bounded persistent jobs are pending."
@@ -313,13 +337,14 @@
       "title": "DEFAULT ANIME PROMPTS",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Configurable positive/negative anime defaults and administrator-controlled user opt-out are pending."
@@ -329,13 +354,14 @@
       "title": "GIVEAWAY 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Database-backed entries, scheduling, eligibility, rerolls, winner history and restart recovery are pending."
@@ -345,13 +371,14 @@
       "title": "AUTO VOICE 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Join-to-create ownership/configuration, channel controls and restart/orphan reconciliation are pending."
@@ -361,13 +388,14 @@
       "title": "STREAMER PLATFORM SYSTEM",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Implement only verified platform capabilities; initial required assessments are Twitch, TikTok and Facebook, not a silent YouTube substitution."
@@ -377,13 +405,14 @@
       "title": "STREAM SUBSCRIPTION MODEL",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Persist guild/user/streamer subscriptions and idempotent delivery intent; reconcile crashes between external sends and database commits."
@@ -393,13 +422,14 @@
       "title": "STREAM THUMBNAIL CACHE",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Validate, hash, cache and reupload stream thumbnails; configurable lifecycle and safe remote downloads are pending."
@@ -409,13 +439,14 @@
       "title": "FREE GAMES ANNOUNCER 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Promotion adapters, repeated-post suppression, targets/filters and cached/reuploaded assets are pending."
@@ -425,13 +456,14 @@
       "title": "WAIFU TCG — MAJOR NEW SYSTEM",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "TCG is unimplemented; the complete collection, game, quest and social requirements remain mandatory scope."
@@ -441,13 +473,14 @@
       "title": "WAIFU IMAGE INGESTION PIPELINE",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "waifu.im ingestion/cache and provenance, refresh, safe image handling and local-first reuse are pending."
@@ -457,13 +490,14 @@
       "title": "WAIFU CARD CREDITS",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Persist attribution and render Image source: waifu.im in card footer and response/help, including cached images."
@@ -473,13 +507,14 @@
       "title": "CARD RARITIES",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Define a balanced configurable rarity/stat model and deterministic tests; the example tier names/probabilities are not silently fixed final balance."
@@ -489,13 +524,14 @@
       "title": "CARD ELEMENTS",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Implement a configurable elemental interaction chart and extension path; blueprint examples are not a mandated hardcoded chart."
@@ -505,13 +541,14 @@
       "title": "WAIFU DROP SYSTEM",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Drops/claim cooldowns, spawn rarity, concurrency, claim authorization and persistence are pending."
@@ -521,13 +558,14 @@
       "title": "WAIFU CARD GAME MODES",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Training, battles, expeditions, dungeons, bosses, raids and quest/reward loops need bounded designs and tested state machines."
@@ -537,13 +575,14 @@
       "title": "CARD COLLECTION",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Persistent inventory, filters, paging, sorting, card details, favorites/equipment and collection progress are pending."
@@ -553,13 +592,14 @@
       "title": "CARD TRADING",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Transactional two-party trade proposal/accept/cancel/expiry, locks and history are pending."
@@ -569,13 +609,14 @@
       "title": "CARD MARKET",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Listings, purchases, pricing/fees, auctions where justified and transactional ownership/ledger changes are pending."
@@ -585,13 +626,14 @@
       "title": "ECONOMY 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Central transactional global/guild economy and currency/account services are pending; preserve legacy global balances without multiplying wallets."
@@ -601,13 +643,14 @@
       "title": "ECONOMY EVENT ENGINE",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Typed reward events and centrally configured economy/XP awards are pending."
@@ -617,13 +660,14 @@
       "title": "ANTI-SPAM REWARD PROTECTION",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Repeated-content, burst and automated-message reward suppression need deterministic anti-spam tests before awards."
@@ -633,13 +677,14 @@
       "title": "VOICE XP / ECONOMY",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Voice participation tracking, anti-AFK eligibility and restart-safe XP/economy awards are pending."
@@ -649,13 +694,14 @@
       "title": "BANK SYSTEM",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Bank accounts, deposits/withdrawals, interest and exploit prevention are pending."
@@ -665,13 +711,14 @@
       "title": "GAMES",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Game interface, Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice, statistics and safe wagering are pending."
@@ -681,13 +728,14 @@
       "title": "RANKING 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Global and per-guild leaderboards with pagination, snapshots/cache and privacy choices are pending."
@@ -697,13 +745,14 @@
       "title": "PROFILE CARD 2.0",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Profile/rank card rendering, safe background downloads/cache and customization are pending."
@@ -713,13 +762,14 @@
       "title": "ECONOMY + TCG INTEGRATION",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Card rewards, shop/crafting/upgrades and economy transactions must share checked services; integration is pending."
@@ -729,13 +779,14 @@
       "title": "GUILD SYSTEM FOR WAIFU TCG",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Player WaifuGuild membership, permissions, bank, XP, quests/bosses and leaderboard remain distinct from Discord guilds."
@@ -745,13 +796,14 @@
       "title": "DASHBOARD",
       "status": "planned",
       "tickets": [
-        "RIR-600"
+        "RIR-600",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/dashboard.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
         }
       ],
       "gap": "No web application exists. Implement Discord OAuth, secure sessions and fresh guild administration checks."
@@ -761,13 +813,14 @@
       "title": "DASHBOARD MODULE CONFIGURATION",
       "status": "partial",
       "tickets": [
-        "RIR-600"
+        "RIR-600",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/dashboard.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
         },
         {
           "path": "packages/core/src/contracts.ts",
@@ -787,13 +840,14 @@
       "title": "DASHBOARD FEATURES TO ADD",
       "status": "planned",
       "tickets": [
-        "RIR-600"
+        "RIR-600",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/dashboard.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
         }
       ],
       "gap": "Dashboard audit/health/usage, permissions, presets, maintenance and backup/import views are pending; do not expose secrets."
@@ -803,13 +857,14 @@
       "title": "PROVIDER CONFIGURATION",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Provider-neutral design exists; no production AI/image/music/stream/free-game adapter is implemented."
@@ -819,13 +874,15 @@
       "title": "SECRETS",
       "status": "partial",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         },
         {
           "path": "packages/core/src/config.ts",
@@ -836,6 +893,11 @@
           "path": "packages/core/src/core.test.ts",
           "kind": "test",
           "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        },
+        {
+          "path": "docs/adr/ADR-011-secrets-management-and-credential-security.md",
+          "kind": "documentation",
+          "note": "Proposed authenticated encryption envelope, key rotation/recovery and scoped credential authority; vault implementation pending."
         }
       ],
       "gap": "Foundation credentials use validated environment configuration and log redaction; encrypted editable provider secrets and masked web controls are pending."
@@ -845,13 +907,14 @@
       "title": "DATABASE",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-802"
       ],
       "evidence": [
         {
           "path": "docs/database.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact three-table v1 schema/driver limits plus proposed domain keys, constraints, indexes and atomic operation boundaries."
         },
         {
           "path": "packages/database/src/sqlite.ts",
@@ -871,13 +934,14 @@
       "title": "MIGRATION STRATEGY",
       "status": "partial",
       "tickets": [
-        "RIR-710"
+        "RIR-710",
+        "RIR-802"
       ],
       "evidence": [
         {
           "path": "docs/migration-1.x-to-2.0.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "All legacy table mappings, extraction/reconciliation identities, secret quarantine, restart checkpoints and cutover/reversal; representative data remains unavailable."
         }
       ],
       "gap": "Source field mapping and backup/rollback strategy exist; the actual legacy importer, dry-run/apply/verify/rollback CLI and representative-data rehearsal are pending."
@@ -887,13 +951,14 @@
       "title": "EVENT-DRIVEN INTERNAL DESIGN",
       "status": "planned",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         }
       ],
       "gap": "Gateway events are handled; shared typed domain events and consumers are pending until the corresponding services exist."
@@ -903,13 +968,14 @@
       "title": "SCHEDULING / JOBS",
       "status": "planned",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         }
       ],
       "gap": "Persistent jobs, leases, retries, deduplication and restart recovery are not implemented."
@@ -919,13 +985,14 @@
       "title": "CACHING",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         },
         {
           "path": "packages/core/src/settings.ts",
@@ -945,13 +1012,14 @@
       "title": "LOGGING",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         },
         {
           "path": "packages/core/src/logger.ts",
@@ -971,13 +1039,14 @@
       "title": "ERROR HANDLING",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         },
         {
           "path": "apps/bot/src/gateway.ts",
@@ -997,13 +1066,16 @@
       "title": "SECURITY",
       "status": "partial",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-806",
+        "RIR-805",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
         },
         {
           "path": "packages/discord/src/access.ts",
@@ -1014,6 +1086,16 @@
           "path": "apps/cli/src/generate.test.ts",
           "kind": "test",
           "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        },
+        {
+          "path": "docs/dashboard.md",
+          "kind": "documentation",
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
+        },
+        {
+          "path": "docs/moderation.md",
+          "kind": "documentation",
+          "note": "Case/action/attempt/warning lifecycle, hierarchy, escalation races, uncertain effects and owned lock restoration; no sanction runtime."
         }
       ],
       "gap": "Foundation input/permission/generator controls are tested; OAuth/CSRF/SSRF/webhooks and all economy/TCG/provider boundaries still need review and tests."
@@ -1023,13 +1105,14 @@
       "title": "TESTING",
       "status": "partial",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-806"
       ],
       "evidence": [
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
         },
         {
           "path": "vitest.config.ts",
@@ -1049,13 +1132,14 @@
       "title": "QUALITY GATES",
       "status": "partial",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-806"
       ],
       "evidence": [
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
         },
         {
           "path": ".github/workflows/ci.yml",
@@ -1075,13 +1159,14 @@
       "title": "OBSERVABILITY",
       "status": "partial",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-806"
       ],
       "evidence": [
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
         },
         {
           "path": "apps/bot/src/health.ts",
@@ -1092,6 +1177,11 @@
           "path": "apps/bot/src/health.test.ts",
           "kind": "test",
           "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        },
+        {
+          "path": "docs/deployment.md",
+          "kind": "documentation",
+          "note": "Actual Compose/image/CLI behavior, readiness/shutdown limits, isolated restore and rollout/rollback runbooks; no operator cutover or container rehearsal."
         }
       ],
       "gap": "Liveness/readiness, gateway/database probes and CLI diagnostics exist; provider/job health, metrics and dashboard surfacing are pending."
@@ -1101,13 +1191,16 @@
       "title": "RATE LIMITS",
       "status": "partial",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-806",
+        "RIR-803",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
         },
         {
           "path": "packages/discord/src/dispatcher.ts",
@@ -1118,6 +1211,16 @@
           "path": "packages/discord/src/dispatcher.test.ts",
           "kind": "test",
           "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        },
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
+        },
+        {
+          "path": "docs/economy.md",
+          "kind": "documentation",
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Command cooldowns exist; user/guild/channel/provider/AI/image/economy/claim/market rate limiting remains incomplete."
@@ -1127,13 +1230,14 @@
       "title": "CONFIGURATION HIERARCHY",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         },
         {
           "path": "packages/core/src/settings.ts",
@@ -1153,13 +1257,14 @@
       "title": "ANALYTICS",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Aggregate command/domain usage metrics and configurable privacy-preserving retention are pending."
@@ -1169,13 +1274,26 @@
       "title": "DATA RETENTION",
       "status": "planned",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-806",
+        "RIR-802",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
+        },
+        {
+          "path": "docs/database.md",
+          "kind": "documentation",
+          "note": "Exact three-table v1 schema/driver limits plus proposed domain keys, constraints, indexes and atomic operation boundaries."
+        },
+        {
+          "path": "docs/adapters.md",
+          "kind": "documentation",
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Per-domain retention windows and administrator controls are pending; never infer that indefinite storage is acceptable."
@@ -1185,13 +1303,14 @@
       "title": "FEATURE FLAGS",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         },
         {
           "path": "packages/discord/src/access.ts",
@@ -1211,13 +1330,14 @@
       "title": "BACKWARD-COMPATIBLE USER EXPERIENCE",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/discord/src/builtins.ts",
@@ -1237,29 +1357,42 @@
       "title": "DEVELOPER DOCUMENTATION",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801",
+        "RIR-807"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
+        },
+        {
+          "path": "docs/development.md",
+          "kind": "documentation",
+          "note": "Verified CLI/generator commands and extension walkthrough; proposed verbs and missing service capabilities are identified."
+        },
+        {
+          "path": "docs/documentation-review.md",
+          "kind": "documentation",
+          "note": "RIR-800 file-by-file review, cross-document reconciliation and validation boundaries."
         }
       ],
-      "gap": "Required documentation files and this traceability index exist; planned subsystem guides must become tested operating instructions as code lands."
+      "gap": "Complete corpus review covers contracts, state, authority, failures, recovery and worked acceptance examples. Domain designs remain unimplemented; each later code scope must update its guide and evidence."
     },
     {
       "id": "BP-65",
       "title": "RELEASE VERSION",
       "status": "partial",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/contributing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Requirement/ticket acceptance, compatibility review, exact branch targets and publication checkpoints."
         },
         {
           "path": "package.json",
@@ -1279,13 +1412,14 @@
       "title": "IMPLEMENTATION ORDER",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/implementation-roadmap.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Dependency and acceptance gates for retained platform breadth; plans do not establish delivery dates or completion."
         }
       ],
       "gap": "Roadmap and board preserve phased implementation order; do not skip acceptance gates or cross story/epic checkpoints automatically."
@@ -1295,29 +1429,37 @@
       "title": "ADRs",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801",
+        "RIR-807"
       ],
       "evidence": [
         {
           "path": "docs/architecture-summary.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Decision map links all 13 ADRs and separates foundation evidence from proposed subsystems."
+        },
+        {
+          "path": "docs/documentation-review.md",
+          "kind": "documentation",
+          "note": "RIR-800 file-by-file review, cross-document reconciliation and validation boundaries."
         }
       ],
-      "gap": "Thirteen ADRs record foundation and proposed domain choices; provider decisions remain proposed until evaluated."
+      "gap": "All 13 ADRs reviewed with current/proposed boundaries, alternatives, consequences, validation and revisit criteria; proposed decisions still need implementation evidence."
     },
     {
       "id": "BP-68",
       "title": "DO NOT OVER-ENGINEER",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
         }
       ],
       "gap": "Small explicitly composed workspaces are used; optional infrastructure remains unjustified until measured need."
@@ -1327,13 +1469,14 @@
       "title": "DEPLOYMENT",
       "status": "partial",
       "tickets": [
-        "RIR-003"
+        "RIR-003",
+        "RIR-806"
       ],
       "evidence": [
         {
           "path": "docs/deployment.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual Compose/image/CLI behavior, readiness/shutdown limits, isolated restore and rollout/rollback runbooks; no operator cutover or container rehearsal."
         }
       ],
       "gap": "Docker/Compose definitions exist and configuration was validated; live image execution/deployment remains a tracked RIR-003 gate."
@@ -1343,13 +1486,14 @@
       "title": "CLI",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/development.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Verified CLI/generator commands and extension walkthrough; proposed verbs and missing service capabilities are identified."
         },
         {
           "path": "apps/cli/src/cli.ts",
@@ -1369,13 +1513,14 @@
       "title": "RIRIKO DOCTOR",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/development.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Verified CLI/generator commands and extension walkthrough; proposed verbs and missing service capabilities are identified."
         },
         {
           "path": "apps/cli/src/doctor.ts",
@@ -1395,13 +1540,14 @@
       "title": "DASHBOARD-TO-CLI PARITY",
       "status": "partial",
       "tickets": [
-        "RIR-600"
+        "RIR-600",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/dashboard.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
         }
       ],
       "gap": "CLI uses shared settings services; dashboard parity cannot be claimed before the web application exists."
@@ -1411,13 +1557,14 @@
       "title": "DISCORD PERMISSIONS",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/discord/src/access.ts",
@@ -1437,13 +1584,14 @@
       "title": "AI + DISCORD SECURITY",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/ai.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Scoped memory generation/reset, budgets, data-destination policy and application-mediated tool operation identities; no AI runtime."
         }
       ],
       "gap": "AI permission boundaries are specified; no AI tool execution adapter exists to verify them end to end."
@@ -1453,13 +1601,14 @@
       "title": "MUSIC + AI SECURITY",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/ai.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Scoped memory generation/reset, budgets, data-destination policy and application-mediated tool operation identities; no AI runtime."
         }
       ],
       "gap": "Safe music tools and service-level volume/voice constraints are pending with the music/AI services."
@@ -1469,13 +1618,14 @@
       "title": "ECONOMY SECURITY",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Atomic ledger/account/idempotency and exploit tests are pending; in-memory balances are not an acceptable implementation."
@@ -1485,13 +1635,14 @@
       "title": "TCG SECURITY",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Card ownership state constraints, locking and transaction/idempotency tests are pending."
@@ -1501,13 +1652,14 @@
       "title": "IMAGE STORAGE SECURITY",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Remote image URL/DNS/redirect/size/content/dimension validation and a bounded processor are pending before image features."
@@ -1517,13 +1669,14 @@
       "title": "CURRENT WEB RESEARCH",
       "status": "partial",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/dependency-evaluation.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Installed, selected and candidate versions distinguished; adoption/reversal gates and external capability caveats."
         }
       ],
       "gap": "Foundation dependency evidence is recorded; provider availability, pricing, retention, permissions and licensing must be freshly researched per implementation."
@@ -1533,13 +1686,14 @@
       "title": "THIRD-PARTY API FALLBACKS",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Real configured primary/fallback/disabled providers and failure tests are pending; no fake fallback is registered."
@@ -1549,13 +1703,14 @@
       "title": "PROVIDER CAPABILITIES",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Provider capability design exists; actual discovery and UI suppression of unsupported actions are pending."
@@ -1565,13 +1720,14 @@
       "title": "USER-FACING UX",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "apps/bot/src/presentation.ts",
@@ -1591,13 +1747,14 @@
       "title": "FEATURE DISCOVERY",
       "status": "partial",
       "tickets": [
-        "RIR-600"
+        "RIR-600",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/dashboard.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
         },
         {
           "path": "packages/discord/src/registry.ts",
@@ -1617,13 +1774,14 @@
       "title": "MORE MODULES TO CONSIDER",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Optional module ideas remain evaluation backlog and must not displace the core release; none is implicitly approved for implementation."
@@ -1633,13 +1791,14 @@
       "title": "MIGRATION PHILOSOPHY",
       "status": "partial",
       "tickets": [
-        "RIR-710"
+        "RIR-710",
+        "RIR-802"
       ],
       "evidence": [
         {
           "path": "docs/migration-1.x-to-2.0.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "All legacy table mappings, extraction/reconciliation identities, secret quarantine, restart checkpoints and cutover/reversal; representative data remains unavailable."
         }
       ],
       "gap": "Legacy source manifests and preservation/mapping strategy exist; real import and verified restore of representative user data are pending."
@@ -1649,13 +1808,14 @@
       "title": "FINAL ACCEPTANCE CRITERIA",
       "status": "partial",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-806"
       ],
       "evidence": [
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
         }
       ],
       "gap": "The exact 35 acceptance criteria below remain the release gate; a passing foundation suite is not release completion."
@@ -1697,13 +1857,20 @@
       "title": "FIRST DELIVERABLE",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-802",
+        "RIR-807"
       ],
       "evidence": [
         {
           "path": "docs/legacy-feature-inventory.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Independently checked command/asset/entity/migration inventory and manifest interpretation at the pinned legacy source; no private runtime/data certification."
+        },
+        {
+          "path": "docs/documentation-review.md",
+          "kind": "documentation",
+          "note": "RIR-800 file-by-file review, cross-document reconciliation and validation boundaries."
         }
       ],
       "gap": "Audit/architecture/migration/dependency/roadmap/ADR/agent artifacts and summary exist; foundation implementation began, full platform remains incomplete."
@@ -1731,13 +1898,14 @@
       "title": "all significant 1.4.0 features have been inventoried;",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-802"
       ],
       "evidence": [
         {
           "path": "docs/legacy-feature-inventory.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Independently checked command/asset/entity/migration inventory and manifest interpretation at the pinned legacy source; no private runtime/data certification."
         }
       ],
       "gap": "Source audit inventories 141 commands, 17 tables and assets at the pinned legacy SHA; it does not certify runtime parity or production data."
@@ -1747,13 +1915,14 @@
       "title": "all retained features work;",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/discord/src/builtins.ts",
@@ -1773,13 +1942,14 @@
       "title": "migrations are tested;",
       "status": "partial",
       "tickets": [
-        "RIR-710"
+        "RIR-710",
+        "RIR-802"
       ],
       "evidence": [
         {
           "path": "docs/migration-1.x-to-2.0.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "All legacy table mappings, extraction/reconciliation identities, secret quarantine, restart checkpoints and cutover/reversal; representative data remains unavailable."
         }
       ],
       "gap": "Source field mapping and backup/rollback strategy exist; the actual legacy importer, dry-run/apply/verify/rollback CLI and representative-data rehearsal are pending."
@@ -1789,13 +1959,14 @@
       "title": "slash commands work;",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/discord/src/dispatcher.ts",
@@ -1815,13 +1986,14 @@
       "title": "prefix commands work;",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/discord/src/dispatcher.ts",
@@ -1841,13 +2013,14 @@
       "title": "help is dynamic;",
       "status": "partial",
       "tickets": [
-        "RIR-200"
+        "RIR-200",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/commands.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current ping/prefix/help parser, transport, visibility, permission and component behavior; legacy parity remains a separate gate."
         },
         {
           "path": "packages/discord/src/builtins.ts",
@@ -1867,13 +2040,14 @@
       "title": "dashboard authentication works;",
       "status": "planned",
       "tickets": [
-        "RIR-600"
+        "RIR-600",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/dashboard.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
         }
       ],
       "gap": "No web application exists. Implement Discord OAuth, secure sessions and fresh guild administration checks."
@@ -1883,13 +2057,14 @@
       "title": "guild administration detection works;",
       "status": "planned",
       "tickets": [
-        "RIR-600"
+        "RIR-600",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/dashboard.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
         }
       ],
       "gap": "No web application exists. Implement Discord OAuth, secure sessions and fresh guild administration checks."
@@ -1899,13 +2074,14 @@
       "title": "configuration works from dashboard;",
       "status": "partial",
       "tickets": [
-        "RIR-600"
+        "RIR-600",
+        "RIR-805"
       ],
       "evidence": [
         {
           "path": "docs/dashboard.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Proposed OAuth/session/CSRF and scoped authority, per-module forms, conflict/preview/recovery flows and vault administration; apps/web remains absent."
         },
         {
           "path": "packages/core/src/contracts.ts",
@@ -1925,13 +2101,14 @@
       "title": "configuration works from CLI;",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/development.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Verified CLI/generator commands and extension walkthrough; proposed verbs and missing service capabilities are identified."
         },
         {
           "path": "apps/cli/src/cli.ts",
@@ -1951,13 +2128,14 @@
       "title": "music supports the required platforms;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/music.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Four required sources, metadata/playability separation, queue/session recovery and legacy command/playlist acceptance; no live playback proof."
         }
       ],
       "gap": "No audio engine/resolver is implemented. Preserve required YouTube, Spotify, Deezer and SoundCloud plus safe AI controls and source capability checks."
@@ -1967,13 +2145,14 @@
       "title": "AI supports dedicated-channel mode;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/ai.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Scoped memory generation/reset, budgets, data-destination policy and application-mediated tool operation identities; no AI runtime."
         }
       ],
       "gap": "No AI adapter or conversation store exists. Implement dedicated opt-in channel, per-user context, preferences, personality separation, time tool and safe mediated tools."
@@ -1983,13 +2162,14 @@
       "title": "AI context is isolated per user;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/ai.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Scoped memory generation/reset, budgets, data-destination policy and application-mediated tool operation identities; no AI runtime."
         }
       ],
       "gap": "No AI adapter or conversation store exists. Implement dedicated opt-in channel, per-user context, preferences, personality separation, time tool and safe mediated tools."
@@ -1999,13 +2179,14 @@
       "title": "AI can call safe tools;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/ai.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Scoped memory generation/reset, budgets, data-destination policy and application-mediated tool operation identities; no AI runtime."
         }
       ],
       "gap": "AI permission boundaries are specified; no AI tool execution adapter exists to verify them end to end."
@@ -2015,13 +2196,14 @@
       "title": "moderation escalation works;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/moderation.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Case/action/attempt/warning lifecycle, hierarchy, escalation races, uncertain effects and owned lock restoration; no sanction runtime."
         }
       ],
       "gap": "Moderation commands, configurable warning escalation, audit history, AutoMod and anti-raid rules are pending."
@@ -2031,13 +2213,14 @@
       "title": "spam does not grant EXP/credits;",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Repeated-content, burst and automated-message reward suppression need deterministic anti-spam tests before awards."
@@ -2047,13 +2230,14 @@
       "title": "image provider selection works;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Image adapters, actual free/paid capability assessment, guild/user settings, quotas and bounded persistent jobs are pending."
@@ -2063,13 +2247,14 @@
       "title": "image job concurrency works;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Image adapters, actual free/paid capability assessment, guild/user settings, quotas and bounded persistent jobs are pending."
@@ -2079,13 +2264,14 @@
       "title": "giveaways survive restart;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Database-backed entries, scheduling, eligibility, rerolls, winner history and restart recovery are pending."
@@ -2095,13 +2281,14 @@
       "title": "auto voice survives restart;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Join-to-create ownership/configuration, channel controls and restart/orphan reconciliation are pending."
@@ -2111,13 +2298,14 @@
       "title": "streamer announcements are idempotent;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Persist guild/user/streamer subscriptions and idempotent delivery intent; reconcile crashes between external sends and database commits."
@@ -2127,13 +2315,14 @@
       "title": "stream assets are cached/reuploaded;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Validate, hash, cache and reupload stream thumbnails; configurable lifecycle and safe remote downloads are pending."
@@ -2143,13 +2332,14 @@
       "title": "free games do not duplicate announcements;",
       "status": "planned",
       "tickets": [
-        "RIR-300"
+        "RIR-300",
+        "RIR-803"
       ],
       "evidence": [
         {
           "path": "docs/adapters.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Capability/request/result contracts; quotas, accepted/unknown outcomes and domain delivery recovery; provider access is not inferred from configuration."
         }
       ],
       "gap": "Promotion adapters, repeated-post suppression, targets/filters and cached/reuploaded assets are pending."
@@ -2159,13 +2349,14 @@
       "title": "economy transactions are safe;",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Atomic ledger/account/idempotency and exploit tests are pending; in-memory balances are not an acceptable implementation."
@@ -2175,13 +2366,14 @@
       "title": "ranking works globally and per guild;",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Global and per-guild leaderboards with pagination, snapshots/cache and privacy choices are pending."
@@ -2191,13 +2383,14 @@
       "title": "profile images can be cached;",
       "status": "planned",
       "tickets": [
-        "RIR-400"
+        "RIR-400",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/economy.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Global COIN preservation, conserved postings, holds/escrow, stable reward identity, daily/XP/rank/game rules and worked races; numeric defaults remain candidates."
         }
       ],
       "gap": "Profile/rank card rendering, safe background downloads/cache and customization are pending."
@@ -2207,13 +2400,14 @@
       "title": "TCG card ownership is transactional;",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Card ownership state constraints, locking and transaction/idempotency tests are pending."
@@ -2223,13 +2417,14 @@
       "title": "TCG collection/trading/market works;",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Transactional two-party trade proposal/accept/cancel/expiry, locks and history are pending."
@@ -2239,13 +2434,14 @@
       "title": "TCG images are cached;",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "waifu.im ingestion/cache and provenance, refresh, safe image handling and local-first reuse are pending."
@@ -2255,13 +2451,14 @@
       "title": "image attribution is preserved;",
       "status": "planned",
       "tickets": [
-        "RIR-500"
+        "RIR-500",
+        "RIR-804"
       ],
       "evidence": [
         {
           "path": "docs/waifu-tcg.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Complete rarity/element rules, checked battle and floor arithmetic, ownership, equipment, energy, seasons, quests, markets and factions; balance/runtime unproven."
         }
       ],
       "gap": "Persist attribution and render Image source: waifu.im in card footer and response/help, including cached images."
@@ -2271,13 +2468,14 @@
       "title": "tests cover critical domains;",
       "status": "partial",
       "tickets": [
-        "RIR-700"
+        "RIR-700",
+        "RIR-806"
       ],
       "evidence": [
         {
           "path": "docs/testing.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Exact current/historical test provenance and domain failure-injection gates; 119 unit and 13 SQLite/CLI passed, seven current PostgreSQL cases skipped, no live certification."
         },
         {
           "path": "vitest.config.ts",
@@ -2297,13 +2495,14 @@
       "title": "Docker deployment works;",
       "status": "partial",
       "tickets": [
-        "RIR-003"
+        "RIR-003",
+        "RIR-806"
       ],
       "evidence": [
         {
           "path": "docs/deployment.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual Compose/image/CLI behavior, readiness/shutdown limits, isolated restore and rollout/rollback runbooks; no operator cutover or container rehearsal."
         }
       ],
       "gap": "Docker/Compose definitions exist and configuration was validated; live image execution/deployment remains a tracked RIR-003 gate."
@@ -2313,13 +2512,14 @@
       "title": "migrations work from a representative 1.4.0 database;",
       "status": "partial",
       "tickets": [
-        "RIR-710"
+        "RIR-710",
+        "RIR-802"
       ],
       "evidence": [
         {
           "path": "docs/migration-1.x-to-2.0.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "All legacy table mappings, extraction/reconciliation identities, secret quarantine, restart checkpoints and cutover/reversal; representative data remains unavailable."
         }
       ],
       "gap": "Source field mapping and backup/rollback strategy exist; the actual legacy importer, dry-run/apply/verify/rollback CLI and representative-data rehearsal are pending."
@@ -2329,29 +2529,37 @@
       "title": "documentation is present;",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801",
+        "RIR-807"
       ],
       "evidence": [
         {
           "path": "docs/architecture.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Actual package/process/actor/request boundaries and proposed service, cache and job contracts; implementation limits remain explicit."
+        },
+        {
+          "path": "docs/documentation-review.md",
+          "kind": "documentation",
+          "note": "RIR-800 file-by-file review, cross-document reconciliation and validation boundaries."
         }
       ],
-      "gap": "Required documentation files and this traceability index exist; planned subsystem guides must become tested operating instructions as code lands."
+      "gap": "All 40 original docs reviewed: 38 deepened/regenerated, two independently checked factual JSON manifests preserved; one new per-file review. Planned guides must become tested operating instructions as implementations land."
     },
     {
       "id": "AC-35",
       "title": "`ririko doctor` works.",
       "status": "partial",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-801"
       ],
       "evidence": [
         {
           "path": "docs/development.md",
           "kind": "documentation",
-          "note": "Current design/status and remaining acceptance boundary."
+          "note": "Verified CLI/generator commands and extension walkthrough; proposed verbs and missing service capabilities are identified."
         },
         {
           "path": "apps/cli/src/doctor.ts",
