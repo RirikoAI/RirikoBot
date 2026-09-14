@@ -25,7 +25,7 @@
       "id": "EPIC-002",
       "title": "Dual-Dialect Drizzle ORM & Data Access Layer",
       "points": 21,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": ["EPIC-001"],
       "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-010"],
       "description": "40+ tables normalized schemas for PostgreSQL and SQLite, ACID transaction helpers, and legacy migration CLI."
@@ -193,6 +193,42 @@
       "status": "DONE",
       "requires": ["STORY-011"],
       "blocks": ["EPIC-002", "EPIC-003"]
+    },
+    {
+      "id": "STORY-020",
+      "epic": "EPIC-002",
+      "title": "Dual-Dialect Connection Factory & Client Harness",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["EPIC-001"],
+      "blocks": ["STORY-021"]
+    },
+    {
+      "id": "STORY-021",
+      "epic": "EPIC-002",
+      "title": "70+ Normalized Table Schemas & Unified TypeScript Models",
+      "points": 8,
+      "status": "TODO",
+      "requires": ["STORY-020"],
+      "blocks": ["STORY-022"]
+    },
+    {
+      "id": "STORY-022",
+      "epic": "EPIC-002",
+      "title": "Dialect-Agnostic Repositories & ACID Transaction Abstractions",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["STORY-021"],
+      "blocks": ["STORY-023"]
+    },
+    {
+      "id": "STORY-023",
+      "epic": "EPIC-002",
+      "title": "Legacy 1.4.0 SQLite Migration Engine & CLI",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["STORY-022"],
+      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-010"]
     }
   ],
   "tasks": [
@@ -276,6 +312,78 @@
       "status": "DONE",
       "requires": ["TASK-0121"],
       "blocks": ["EPIC-002"]
+    },
+    {
+      "id": "TASK-0201",
+      "parent": "STORY-020",
+      "title": "Dependencies, Dual-Dialect Connection Factory & Client Interfaces",
+      "points": 2,
+      "status": "TODO",
+      "requires": [],
+      "blocks": ["TASK-0202"]
+    },
+    {
+      "id": "TASK-0202",
+      "parent": "STORY-020",
+      "title": "SQLite WAL/Foreign Key Pragmas, PG Pooling, Health Check & Integration Tests",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["TASK-0201"],
+      "blocks": ["STORY-021"]
+    },
+    {
+      "id": "TASK-0211",
+      "parent": "STORY-021",
+      "title": "Core & Service Schemas: Identity, Guilds, Moderation, Economy, XP, Music, AI",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["STORY-020"],
+      "blocks": ["TASK-0212"]
+    },
+    {
+      "id": "TASK-0212",
+      "parent": "STORY-021",
+      "title": "Specialized Schemas: Waifu TCG (20 tables), Streams, Giveaways, Games, Utilities & Inferred Models",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["TASK-0211"],
+      "blocks": ["STORY-022"]
+    },
+    {
+      "id": "TASK-0221",
+      "parent": "STORY-022",
+      "title": "Base Repository Pattern & Dialect-Agnostic Query Abstraction",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["STORY-021"],
+      "blocks": ["TASK-0222"]
+    },
+    {
+      "id": "TASK-0222",
+      "parent": "STORY-022",
+      "title": "Core Domain Repositories (Users, GuildSettings, Economy Ledger) & Tests",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["TASK-0221"],
+      "blocks": ["STORY-023"]
+    },
+    {
+      "id": "TASK-0231",
+      "parent": "STORY-023",
+      "title": "Legacy SQLite Inspector & 17-Entity Data Transformer",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-022"],
+      "blocks": ["TASK-0232"]
+    },
+    {
+      "id": "TASK-0232",
+      "parent": "STORY-023",
+      "title": "ririko migrate:legacy CLI Command with Dry-Run & Verification Harness",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["TASK-0231"],
+      "blocks": []
     }
   ],
   "chores": [],
