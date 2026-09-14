@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 93,
+  "revision": 105,
   "policy": {
     "pointScale": [
       1,
@@ -703,14 +703,16 @@
       ]
     },
     {
-      "status": "ready",
+      "status": "done",
       "estimate": 13,
       "estimateRationale": "Specify economy and complete TCG progression and transactional rules: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
       "groomedIn": "GR-004",
       "priority": "P1",
-      "owner": null,
-      "handoff": ".workboard/handoffs/RIR-804/001-start.md",
-      "validation": [],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-804/006-completion.md",
+      "validation": [
+        "Local links valid; requirements91/35; diffcheck; independent arithmetic and full breadth review; all runtime features remain proposed"
+      ],
       "id": "RIR-804",
       "type": "task",
       "title": "Specify economy and complete TCG progression and transactional rules",
@@ -1119,6 +1121,37 @@
       "ticket": "RIR-803",
       "status": "accepted",
       "handoff": ".workboard/handoffs/RIR-803/005-music-return.md"
+    },
+    {
+      "id": "A-014",
+      "ticket": "RIR-804",
+      "agent": "architecture-docs",
+      "scope": "Deepen full TCG guide against all blueprint/Gemini mechanics, contracts, worked examples and failure tests; no runtime or other paths",
+      "paths": [
+        "docs/waifu-tcg.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-804/003-tcg-return.md"
+    },
+    {
+      "id": "A-015",
+      "ticket": "RIR-804",
+      "agent": "developer-docs",
+      "scope": "Deepen economy guide including ledger, rewards/anti-abuse, inventory/games, rankings and exact legacy meaning; no runtime or other paths",
+      "paths": [
+        "docs/economy.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-804/004-economy-return.md"
+    },
+    {
+      "id": "A-016",
+      "ticket": "RIR-804",
+      "agent": "discord-docs",
+      "scope": "Read-only independent blueprint/Gemini TCG and economy breadth/consistency review, return missing concrete acceptance; no file writes",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-804/005-independent-review.md"
     }
   ],
   "batches": [
@@ -1828,6 +1861,90 @@
       "actor": "coordinator",
       "action": "move",
       "detail": "{\"action\":\"move\",\"ticket\":\"RIR-803\",\"status\":\"done\",\"reason\":\"Nine documents compared and deepened; all specialist returns reviewed\",\"handoff\":\".workboard/handoffs/RIR-803/006-completion.md\",\"validation\":[\"65 relative links resolve; requirements91/35; boardWIP1; diffcheck pass; no live subsystem claims\"]}"
+    },
+    {
+      "id": 94,
+      "at": "2026-09-14T17:56:40.326Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-804\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 95,
+      "at": "2026-09-14T17:56:40.941Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-014\",\"ticket\":\"RIR-804\",\"agent\":\"architecture-docs\",\"scope\":\"Deepen full TCG guide against all blueprint/Gemini mechanics, contracts, worked examples and failure tests; no runtime or other paths\",\"paths\":[\"docs/waifu-tcg.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 96,
+      "at": "2026-09-14T17:56:41.519Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-015\",\"ticket\":\"RIR-804\",\"agent\":\"developer-docs\",\"scope\":\"Deepen economy guide including ledger, rewards/anti-abuse, inventory/games, rankings and exact legacy meaning; no runtime or other paths\",\"paths\":[\"docs/economy.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 97,
+      "at": "2026-09-14T17:56:42.104Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-016\",\"ticket\":\"RIR-804\",\"agent\":\"discord-docs\",\"scope\":\"Read-only independent blueprint/Gemini TCG and economy breadth/consistency review, return missing concrete acceptance; no file writes\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 98,
+      "at": "2026-09-14T18:12:42.662Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-014\",\"handoff\":\".workboard/handoffs/RIR-804/003-tcg-return.md\"}"
+    },
+    {
+      "id": 99,
+      "at": "2026-09-14T18:12:43.342Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-014\"}"
+    },
+    {
+      "id": 100,
+      "at": "2026-09-14T18:12:44.005Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-015\",\"handoff\":\".workboard/handoffs/RIR-804/004-economy-return.md\"}"
+    },
+    {
+      "id": 101,
+      "at": "2026-09-14T18:12:44.683Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-015\"}"
+    },
+    {
+      "id": 102,
+      "at": "2026-09-14T18:12:45.353Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-016\",\"handoff\":\".workboard/handoffs/RIR-804/005-independent-review.md\"}"
+    },
+    {
+      "id": 103,
+      "at": "2026-09-14T18:12:45.993Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-016\"}"
+    },
+    {
+      "id": 104,
+      "at": "2026-09-14T18:12:46.646Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-804\",\"status\":\"review\",\"reason\":\"Four expanded docs and numerical/transaction boundaries independently reviewed\",\"handoff\":\".workboard/handoffs/RIR-804/006-completion.md\",\"validation\":[\"Local links valid; requirements91/35; diffcheck; independent arithmetic and full breadth review; all runtime features remain proposed\"]}"
+    },
+    {
+      "id": 105,
+      "at": "2026-09-14T18:12:47.306Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-804\",\"status\":\"done\",\"reason\":\"Four expanded docs and numerical/transaction boundaries independently reviewed\",\"handoff\":\".workboard/handoffs/RIR-804/006-completion.md\",\"validation\":[\"Local links valid; requirements91/35; diffcheck; independent arithmetic and full breadth review; all runtime features remain proposed\"]}"
     }
   ]
 }

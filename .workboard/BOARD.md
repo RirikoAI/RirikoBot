@@ -1,6 +1,6 @@
 # Ririko work board
 
-Generated from state.json · revision 93 · execution limit **1**.
+Generated from state.json · revision 105 · execution limit **1**.
 
 **Current work:** No occupied ticket.
 **Delivery:** BATCH-003 / RIR-800 / `feat/RIR-800-documentation-depth` → `develop/2.0.0-astra` (open)
@@ -21,7 +21,6 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | RIR-230 | story | Meme rendering and usable prefix commands | 13 | RIR-200 | RIR-210 | — | RIR-230 |
 | RIR-231 | bug | Repair the eleven broken legacy meme prefix paths | 8 | RIR-230 | RIR-210 | — | RIR-231 |
 | RIR-800 | epic | Implementation-ready documentation across every docs file | 89 | — | RIR-110 | — | RIR-800 |
-| RIR-804 | task | Specify economy and complete TCG progression and transactional rules | 13 | RIR-800 | RIR-803 | RIR-805 | RIR-800 |
 | RIR-805 | task | Specify dashboard workflows, authorization and credential lifecycle | 8 | RIR-800 | RIR-804 | RIR-806 | RIR-800 |
 | RIR-806 | task | Deepen deployment, incident recovery and acceptance test strategy | 8 | RIR-800 | RIR-805 | RIR-807 | RIR-800 |
 | RIR-807 | task | Reconcile every document, requirement and comparison with evidence | 8 | RIR-800 | RIR-806 | — | RIR-800 |
@@ -53,6 +52,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | RIR-801 | task | Specify architecture, developer workflows and command contracts | 13 | RIR-800 | RIR-110 | RIR-802 | RIR-800 |
 | RIR-802 | task | Deepen data contracts, legacy evidence and migration recovery | 8 | RIR-800 | RIR-801 | RIR-803 | RIR-800 |
 | RIR-803 | task | Specify provider, AI, music, moderation and durable delivery behavior | 13 | RIR-800 | RIR-802 | RIR-804 | RIR-800 |
+| RIR-804 | task | Specify economy and complete TCG progression and transactional rules | 13 | RIR-800 | RIR-803 | RIR-805 | RIR-800 |
 | RIR-808 | task | Support fresh stack consent after a published parent closes | 5 | RIR-800 | RIR-110 | — | RIR-800 |
 
 ## Agent assignments
@@ -72,6 +72,9 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | A-011 | RIR-803 | architecture-docs | accepted | Deepen common provider/capability/error/job contracts plus image/canvas, stream and durable scheduler ADRs; compare whole Gemini counterparts and official sources, documentation only. |
 | A-012 | RIR-803 | developer-docs | accepted | Deepen AI scoped memory, provider selection, streaming, tools, security, budgets and recovery plus ADR, grounded in blueprint/legacy/current code and official sources; documentation only. |
 | A-013 | RIR-803 | discord-docs | accepted | Deepen music queue/voice/control/reconnect/provider capability and engine evaluation contracts plus ADR; preserve required sources and audited interface; documentation only. |
+| A-014 | RIR-804 | architecture-docs | accepted | Deepen full TCG guide against all blueprint/Gemini mechanics, contracts, worked examples and failure tests; no runtime or other paths |
+| A-015 | RIR-804 | developer-docs | accepted | Deepen economy guide including ledger, rewards/anti-abuse, inventory/games, rankings and exact legacy meaning; no runtime or other paths |
+| A-016 | RIR-804 | discord-docs | accepted | Read-only independent blueprint/Gemini TCG and economy breadth/consistency review, return missing concrete acceptance; no file writes |
 
 ## Current handoffs
 
@@ -79,7 +82,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 - RIR-801: [handoff](handoffs/RIR-801/006-completion.md)
 - RIR-802: [handoff](handoffs/RIR-802/006-completion.md)
 - RIR-803: [handoff](handoffs/RIR-803/006-completion.md)
-- RIR-804: [handoff](handoffs/RIR-804/001-start.md)
+- RIR-804: [handoff](handoffs/RIR-804/006-completion.md)
 - RIR-805: [handoff](handoffs/RIR-805/001-start.md)
 - RIR-806: [handoff](handoffs/RIR-806/001-start.md)
 - RIR-807: [handoff](handoffs/RIR-807/001-start.md)
