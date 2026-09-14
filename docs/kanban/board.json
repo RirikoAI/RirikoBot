@@ -16,7 +16,7 @@
       "id": "EPIC-001",
       "title": "Monorepo Workspace, Toolchain & Core Contracts",
       "points": 13,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["EPIC-000"],
       "blocks": ["EPIC-002", "EPIC-003"],
       "description": "pnpm workspaces, strict TypeScript configs, packages/core (Zod schemas, EventBus, Errors), and apps/cli (doctor, scaffolding)."
@@ -190,7 +190,7 @@
       "epic": "EPIC-001",
       "title": "apps/cli Scaffolding & ririko doctor Diagnostics",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-011"],
       "blocks": ["EPIC-002", "EPIC-003"]
     }
@@ -258,6 +258,24 @@
       "status": "DONE",
       "requires": ["TASK-0112"],
       "blocks": ["STORY-012"]
+    },
+    {
+      "id": "TASK-0121",
+      "parent": "STORY-012",
+      "title": "CLI Subcommand Architecture, Global Options & Runner Harness",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["STORY-011"],
+      "blocks": ["TASK-0122"]
+    },
+    {
+      "id": "TASK-0122",
+      "parent": "STORY-012",
+      "title": "ririko doctor Comprehensive Diagnostics Engine",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["TASK-0121"],
+      "blocks": ["EPIC-002"]
     }
   ],
   "chores": [],
