@@ -1,12 +1,31 @@
-/tmp
-/out-tsc
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
 
-/node_modules
+# Build outputs
+dist/
+out-tsc/
+*.tsbuildinfo
+
+# Logs & Temp
+tmp/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/.pnp
-.pnp.js
+pnpm-debug.log*
 
-.vscode/*
-/.local/
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local
+.local/

@@ -16,7 +16,7 @@
       "id": "EPIC-001",
       "title": "Monorepo Workspace, Toolchain & Core Contracts",
       "points": 13,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["EPIC-000"],
       "blocks": ["EPIC-002", "EPIC-003"],
       "description": "pnpm workspaces, strict TypeScript configs, packages/core (Zod schemas, EventBus, Errors), and apps/cli (doctor, scaffolding)."
@@ -166,6 +166,33 @@
       "status": "DONE",
       "requires": ["STORY-004"],
       "blocks": ["EPIC-001"]
+    },
+    {
+      "id": "STORY-010",
+      "epic": "EPIC-001",
+      "title": "Workspace Configuration & Root Monorepo Tooling",
+      "points": 5,
+      "status": "DONE",
+      "requires": ["EPIC-000"],
+      "blocks": ["STORY-011"]
+    },
+    {
+      "id": "STORY-011",
+      "epic": "EPIC-001",
+      "title": "packages/core Contracts, Errors, EventBus & Config",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["STORY-010"],
+      "blocks": ["STORY-012"]
+    },
+    {
+      "id": "STORY-012",
+      "epic": "EPIC-001",
+      "title": "apps/cli Scaffolding & ririko doctor Diagnostics",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["STORY-011"],
+      "blocks": ["EPIC-002", "EPIC-003"]
     }
   ],
   "tasks": [
@@ -177,6 +204,33 @@
       "status": "DONE",
       "requires": [],
       "blocks": []
+    },
+    {
+      "id": "TASK-0101",
+      "parent": "STORY-010",
+      "title": "pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs",
+      "points": 2,
+      "status": "DONE",
+      "requires": [],
+      "blocks": ["TASK-0102"]
+    },
+    {
+      "id": "TASK-0102",
+      "parent": "STORY-010",
+      "title": "Shared TypeScript Base Configs & Package Reference Harness",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-0101"],
+      "blocks": ["TASK-0103"]
+    },
+    {
+      "id": "TASK-0103",
+      "parent": "STORY-010",
+      "title": "Root Linting, Formatting & Vitest Configuration",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-0102"],
+      "blocks": ["STORY-011"]
     }
   ],
   "chores": [],
