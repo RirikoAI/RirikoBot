@@ -30,3 +30,7 @@ Preserve all 17 audited source tables plus giveaway JSON, IDs, global balances/X
 Current health routes are `/health/live` and `/health/ready`. Startup requires explicit completed migrations. Shutdown closes resources and waits for tracked handlers, but has no global deadline. Provider health, distributed quotas and restart-safe domain workers are not present. Container configuration and offline tests are distinct from live production evidence; use [deployment](deployment.md) and [testing](testing.md) for the actual gates.
 
 Implementation order remains foundation → compatibility → rewritten systems → economy/XP/profile/games → TCG → dashboard → migration/release, with estimated tickets and only one active ticket. The [roadmap](implementation-roadmap.md) supplies acceptance/dependencies rather than invented delivery dates. Every epic/story delivery ends at the user's PR checkpoint, including a long session.
+
+## Subsequent delivery integration decision
+
+[ADR-014](adr/ADR-014-completed-delivery-integration.md) records RIR-005: explicit provenance for integrating completed deliveries after squash merges, separate ownership for new repair changes, and actual-PR-head CI validation. It adds a fourteenth ADR after the RIR-800 documentation review; it does not implement another bot module or alter the original review counts.

@@ -11,6 +11,7 @@ export function renderBoard(board: Board): string {
     `**Delivery:** ${batch ? `${batch.id} / ${batch.scope} / \`${batch.branch}\` → \`${batch.baseBranch}\` (${batch.status})` : 'No open batch.'}`, '',
     'Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.', ''];
   if (batch?.stack) lines.push(`**Approved stack:** parent ${batch.stack.parentBatch} at \`${batch.stack.parentHead}\`, decision ${batch.stack.decision}. Run \`pnpm board pr-plan\` to resolve the immediate PR target; never assume the integration target excludes parent changes.`, '');
+  if (batch?.integration) lines.push(`**Approved integration:** completed deliveries ${batch.integration.sources.map((source) => `${source.batch}@${source.head}`).join(', ')}; preserved baseline ${batch.integration.baseline}; decision ${batch.integration.decision}. New work remains in ${batch.scope}; publication requires its own exact-head approval.`, '');
   for (const status of ['in-progress', 'blocked', 'review', 'paused', 'ready', 'backlog', 'done', 'abandoned']) {
     const tickets = board.tickets.filter((ticket) => ticket.status === status);
     if (!tickets.length) continue;

@@ -394,3 +394,45 @@ describe('single-scope delivery checkpoints', () => {
     expect(board.batches[0]).toMatchObject({ status: 'closed', prUrl: 'https://github.com/RirikoAI/RirikoBot/pull/123' });
   });
 });
+
+describe('explicit completed-delivery integration', () => {
+  function integrationInput(): Board {
+    const b = fixture();
+    for (const id of ['S-10', 'T-1', 'T-2']) Object.assign(get(b, id), { status: 'done', handoff: handoff(id), validation: ['Completed source acceptance'] });
+    b.batches[0]!.status = 'closed';
+    b.decisions.push({ id: 'D-close', kind: 'defer-pr', reference: 'User defers the preserved completed source', at: NOW, fromTicket: null, toTicket: null, disposition: null, batchId: 'B-1' });
+    b.batches.push(batch('B-2', 'S-20', ['S-20']));
+    return run(b, { action: 'decision', decision: { id: 'D-integrate', kind: 'integrate', reference: 'User explicitly requests one integration resolution of completed B-1', at: NOW, fromTicket: null, toTicket: null, disposition: null, batchId: 'B-2' } });
+  }
+  const resolution = { decision: 'D-integrate', baseline: 'b'.repeat(40), sources: [{ batch: 'B-1', head: 'c'.repeat(40), merged: 'd'.repeat(40) }] };
+
+  it('records integration independently of source closure and publication consent', () => {
+    const b = integrationInput(), before = structuredClone(b.batches[0]);
+    const next = run(b, parseCommand({ action: 'integrate', batch: 'B-2', integration: resolution }));
+    expect(next.batches[0]).toEqual(before);
+    expect(next.batches[1]).toMatchObject({ status: 'open', integration: resolution });
+    expect(next.tickets.filter((t) => ['in-progress', 'review', 'blocked'].includes(t.status))).toHaveLength(0);
+    expect(() => run(next, { action: 'close-batch', batch: 'B-2', decision: 'D-integrate' })).toThrow();
+    expect(() => run(next, { action: 'integrate', batch: 'B-2', integration: resolution })).toThrow(/one reviewed/);
+  });
+  it('rejects missing, wrong-kind and other-batch resolution consent', () => {
+    for (const decision of ['absent', 'D-close']) expect(() => run(integrationInput(), { action: 'integrate', batch: 'B-2', integration: { ...resolution, decision } })).toThrow(/resolution decision/);
+    const b = integrationInput(); b.decisions.find((d) => d.id === 'D-integrate')!.batchId = 'B-1';
+    expect(() => run(b, { action: 'integrate', batch: 'B-2', integration: resolution })).toThrow(/resolution decision/);
+  });
+  it('rejects duplicate, empty, self, future, unknown and nonterminal sources', () => {
+    for (const sources of [[], [resolution.sources[0]!, resolution.sources[0]!], [{ batch: 'B-2', head: 'c'.repeat(40) }], [{ batch: 'unknown', head: 'c'.repeat(40) }]]) {
+      expect(() => run(integrationInput(), { action: 'integrate', batch: 'B-2', integration: { ...resolution, sources } })).toThrow();
+    }
+    const b = integrationInput(); get(b, 'T-2').status = 'ready';
+    expect(() => run(b, { action: 'integrate', batch: 'B-2', integration: resolution })).toThrow(/completed|unfinished/);
+  });
+  it('rejects malformed hashes and dual resolution modes and replaces an initial stack atomically', () => {
+    for (const baseline of ['HEAD', '', '../other']) expect(() => run(integrationInput(), { action: 'integrate', batch: 'B-2', integration: { ...resolution, baseline } })).toThrow(/exact commit|expected string/);
+    const b = integrationInput(); b.batches[1]!.stack = { parentBatch: 'B-1', parentHead: 'c'.repeat(40), decision: 'D-close' };
+    const next = run(b, { action: 'integrate', batch: 'B-2', integration: resolution });
+    expect(next.batches[1]!.stack).toBeUndefined();
+    next.batches[1]!.stack = b.batches[1]!.stack;
+    expect(validateBoard(next)).toContain('Batch B-2: integration and stack are mutually exclusive');
+  });
+});

@@ -23,18 +23,20 @@ const ticketShape = object({
 });
 const groomingShape = object({ id: 'string', scope: 'string', at: 'string', participants: strings, tickets: strings, rationale: 'string' });
 const decisionShape = object({
-  id: 'string', kind: enumeration('switch', 'defer-pr', 'pr-created', 'stack'), reference: 'string', at: 'string',
+  id: 'string', kind: enumeration('switch', 'defer-pr', 'pr-created', 'stack', 'integrate'), reference: 'string', at: 'string',
   fromTicket: 'nullable-string', toTicket: 'nullable-string', disposition: enumeration('paused', 'abandoned', null), batchId: 'nullable-string',
 });
 const assignmentShape = object({
   id: 'string', ticket: 'string', agent: 'string', scope: 'string', paths: strings,
   status: enumeration('assigned', 'returned', 'accepted'), handoff: 'nullable-string',
 });
+const integrationShape = object({ decision: 'string', baseline: 'string', sources: array(object({ batch: 'string', head: 'string', merged: 'string' }, ['merged'])) });
 const batchShape = object({
   id: 'string', scope: 'string', branch: 'string', baseBranch: 'string', baseSha: 'string',
   status: enumeration('open', 'checkpoint', 'closed'), tickets: strings, prUrl: 'nullable-string',
   stack: object({ parentBatch: 'string', parentHead: 'string', decision: 'string' }),
-}, ['stack']);
+  integration: integrationShape,
+}, ['stack', 'integration']);
 const boardShape = object({
   version: enumeration(1), revision: 'number',
   policy: object({ pointScale: array('number'), wipLimit: enumeration(1), repository: 'string', remote: 'string', remoteUrl: 'string', baseBranch: 'string' }),
@@ -52,6 +54,7 @@ const commandShapes: Readonly<Record<Command['action'], Shape>> = {
   decision: object({ action: enumeration('decision'), decision: decisionShape }),
   batch: object({ action: enumeration('batch'), batch: batchShape }),
   stack: object({ action: enumeration('stack'), batch: 'string', parentBatch: 'string', parentHead: 'string', decision: 'string' }),
+  integrate: object({ action: enumeration('integrate'), batch: 'string', integration: integrationShape }),
   checkpoint: object({ action: enumeration('checkpoint'), batch: 'string' }),
   'close-batch': object({ action: enumeration('close-batch'), batch: 'string', decision: 'string', prUrl: 'string' }, ['prUrl']),
   assign: object({ action: enumeration('assign'), assignment: assignmentShape }),
@@ -309,6 +312,24 @@ export function validateBoard(board: Board): string[] {
       if (!decision || !['defer-pr', 'stack'].includes(decision.kind) || decision.batchId !== parent?.id) errors.push(`Batch ${batch.id}: stack requires the matching parent deferral or stack decision and actual user stacking consent`);
       if (board.batches.some((entry) => entry.id !== batch.id && entry.stack?.decision === batch.stack?.decision)) errors.push(`Batch ${batch.id}: one stacking decision cannot authorize multiple delivery scopes`);
     }
+    if (batch.integration) {
+      if (batch.stack) errors.push(`Batch ${batch.id}: integration and stack are mutually exclusive`);
+      const integration = batch.integration;
+      const consent = board.decisions.find((entry) => entry.id === integration.decision);
+      if (!consent || consent.kind !== 'integrate' || consent.batchId !== batch.id) errors.push(`Batch ${batch.id}: integration requires its own explicit resolution decision`);
+      if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(integration.baseline)) errors.push(`Batch ${batch.id}: integration baseline must be an exact commit`);
+      if (!integration.sources.length) errors.push(`Batch ${batch.id}: integration sources required`);
+      duplicates(integration.sources.map((entry) => entry.batch), `Batch ${batch.id} integration sources`, errors);
+      let previousIndex = -1;
+      for (const source of integration.sources) {
+        const prior = batches.get(source.batch);
+        const index = prior ? board.batches.indexOf(prior) : -1;
+        if (!prior || prior.status !== 'closed' || index <= previousIndex || index >= board.batches.indexOf(batch)) errors.push(`Batch ${batch.id}: integration sources must be earlier closed deliveries in order`);
+        previousIndex = index;
+        if (prior && (prior.tickets.some((id) => tickets.get(id)?.status !== 'done') || board.assignments.some((entry) => prior.tickets.includes(entry.ticket) && entry.status !== 'accepted'))) errors.push(`Batch ${batch.id}: integration sources must be completed and settled`);
+        for (const sha of [source.head, ...(source.merged ? [source.merged] : [])]) if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(sha)) errors.push(`Batch ${batch.id}: integration source must be an exact commit`);
+      }
+    }
     const scope = tickets.get(batch.scope);
     if (!scope || (!['epic', 'story'].includes(scope.type) && !MAINTENANCE.has(scope.type))) errors.push(`Batch ${batch.id}: invalid scope`);
     if (scope) {
@@ -493,6 +514,8 @@ export function applyCommand(input: Board, inputCommand: Command, context: Mutat
       if (decision.kind === 'switch') {
         if (decision.fromTicket === null || !ACTIVE.has(ticketById(board, decision.fromTicket).status)) throw new Error('Switch decisions must name the current active ticket');
         if (decision.toTicket !== null && !['ready', 'paused'].includes(ticketById(board, decision.toTicket).status)) throw new Error('Switch destination must be ready or paused');
+      } else if (decision.kind === 'integrate') {
+        if (decision.batchId === null || batchById(board, decision.batchId).status !== 'open') throw new Error('Integration consent must name the current open repair delivery');
       } else if (decision.kind === 'stack') {
         if (decision.batchId === null || batchById(board, decision.batchId).status !== 'closed') throw new Error('Fresh stack consent must name a closed parent delivery');
       } else if (decision.batchId === null || batchById(board, decision.batchId).status !== 'checkpoint') throw new Error('PR/defer decisions must name the current delivery checkpoint');
@@ -525,6 +548,13 @@ export function applyCommand(input: Board, inputCommand: Command, context: Mutat
       const batch = batchById(board, command.batch);
       if (batch.status !== 'open' || batch.stack) throw new Error('Declare a stack once on the open batch; changed parent scope requires fresh review and authorization');
       batch.stack = { parentBatch: command.parentBatch, parentHead: command.parentHead, decision: command.decision };
+      break;
+    }
+    case 'integrate': {
+      const batch = batchById(board, command.batch);
+      if (batch.status !== 'open' || batch.integration) throw new Error('Declare one reviewed integration resolution on the open batch');
+      delete batch.stack;
+      batch.integration = command.integration;
       break;
     }
     case 'checkpoint': {

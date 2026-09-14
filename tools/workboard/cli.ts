@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { parseCommand } from './model.ts';
 import { renderBoard, ticketView } from './render.ts';
 import { checkHandoffs, commonDirectory, initializeShared, mutate, readBoard, synchronize, withLock } from './store.ts';
-import { checkPaths, deliveryBase, git, guardCommit, guardMessage, guardPullRequest, guardPush, publicationBase, publicationPlan, requirePublishedBase } from './git.ts';
+import { git, guardCommit, guardMessage, guardPush, verifyPullRequest, publicationBase, publicationPlan, requirePublishedBase } from './git.ts';
 import { readRequirements, renderRequirements } from './requirements.ts';
 import type { PublishApproval } from './git.ts';
 
@@ -97,10 +97,7 @@ function main(): void {
     case 'guard-pr': {
       const path = args[0] ?? process.env['GITHUB_EVENT_PATH'];
       if (!path) throw new Error('Missing pull request event path.');
-      const target = deliveryBase(root, board);
-      const head = guardPullRequest(board, JSON.parse(readFileSync(path, 'utf8')) as unknown, target);
-      const anchor = git(root, ['merge-base', target.sha, head]);
-      checkPaths(board, git(root, ['diff', anchor, head, '--name-only', '--no-renames', '-z', '--']).split('\0').filter(Boolean));
+      verifyPullRequest(root, board, JSON.parse(readFileSync(path, 'utf8')) as unknown);
       process.stdout.write('PR head, target, repository and delivery checkpoint match.\n');
       break;
     }

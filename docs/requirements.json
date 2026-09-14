@@ -63,13 +63,19 @@
       "title": "CREATE PROJECT-LEVEL AGENT INSTRUCTIONS",
       "status": "documented",
       "tickets": [
-        "RIR-100"
+        "RIR-100",
+        "RIR-005"
       ],
       "evidence": [
         {
           "path": "GEMINI.md",
           "kind": "documentation",
           "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "docs/adr/ADR-014-completed-delivery-integration.md",
+          "kind": "documentation",
+          "note": "Explicit completed-delivery integration preserves original/squash provenance, separate repair ownership and actual-head CI; publication remains a separate approval."
         }
       ],
       "gap": "Root instructions and modular imports cover development and governance; future sessions must follow them."
@@ -1106,7 +1112,8 @@
       "status": "partial",
       "tickets": [
         "RIR-700",
-        "RIR-806"
+        "RIR-806",
+        "RIR-005"
       ],
       "evidence": [
         {
@@ -1123,6 +1130,11 @@
           "path": "packages/discord/src/dispatcher.test.ts",
           "kind": "test",
           "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        },
+        {
+          "path": "docs/adr/ADR-014-completed-delivery-integration.md",
+          "kind": "documentation",
+          "note": "Explicit completed-delivery integration preserves original/squash provenance, separate repair ownership and actual-head CI; publication remains a separate approval."
         }
       ],
       "gap": "Foundation unit/database/CLI tests exist; critical new-domain and dashboard suites remain pending."
@@ -1133,7 +1145,8 @@
       "status": "partial",
       "tickets": [
         "RIR-700",
-        "RIR-806"
+        "RIR-806",
+        "RIR-005"
       ],
       "evidence": [
         {
@@ -1150,6 +1163,11 @@
           "path": "tools/workboard/model.test.ts",
           "kind": "test",
           "note": "Regression evidence for the implemented subset; not a live-provider certification."
+        },
+        {
+          "path": "docs/adr/ADR-014-completed-delivery-integration.md",
+          "kind": "documentation",
+          "note": "Explicit completed-delivery integration preserves original/squash provenance, separate repair ownership and actual-head CI; publication remains a separate approval."
         }
       ],
       "gap": "Lint/typecheck/unit/integration/E2E/build scripts and CI definitions exist; real remote CI/container evidence must accompany publication."
@@ -1431,7 +1449,8 @@
       "tickets": [
         "RIR-100",
         "RIR-801",
-        "RIR-807"
+        "RIR-807",
+        "RIR-005"
       ],
       "evidence": [
         {
@@ -1443,9 +1462,14 @@
           "path": "docs/documentation-review.md",
           "kind": "documentation",
           "note": "RIR-800 file-by-file review, cross-document reconciliation and validation boundaries."
+        },
+        {
+          "path": "docs/adr/ADR-014-completed-delivery-integration.md",
+          "kind": "documentation",
+          "note": "Explicit completed-delivery integration preserves original/squash provenance, separate repair ownership and actual-head CI; publication remains a separate approval."
         }
       ],
-      "gap": "All 13 ADRs reviewed with current/proposed boundaries, alternatives, consequences, validation and revisit criteria; proposed decisions still need implementation evidence."
+      "gap": "Fourteen ADRs include completed-delivery integration and retain current/proposed boundaries, alternatives, consequences and validation gates; domain decisions still need implementation evidence."
     },
     {
       "id": "BP-68",
@@ -1825,13 +1849,19 @@
       "title": "HOW YOU SHOULD WORK AS THE MAIN AGENT",
       "status": "documented",
       "tickets": [
-        "RIR-110"
+        "RIR-110",
+        "RIR-005"
       ],
       "evidence": [
         {
           "path": ".workboard/PROTOCOL.md",
           "kind": "documentation",
           "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "docs/adr/ADR-014-completed-delivery-integration.md",
+          "kind": "documentation",
+          "note": "Explicit completed-delivery integration preserves original/squash provenance, separate repair ownership and actual-head CI; publication remains a separate approval."
         }
       ],
       "gap": "Standing inspect/estimate/delegate/review/test/handoff workflow exists; this story follows one active ticket and one delivery checkpoint."
@@ -1880,13 +1910,19 @@
       "title": "QUALITY BAR",
       "status": "documented",
       "tickets": [
-        "RIR-110"
+        "RIR-110",
+        "RIR-005"
       ],
       "evidence": [
         {
           "path": ".workboard/PROTOCOL.md",
           "kind": "documentation",
           "note": "Current design/status and remaining acceptance boundary."
+        },
+        {
+          "path": "docs/adr/ADR-014-completed-delivery-integration.md",
+          "kind": "documentation",
+          "note": "Explicit completed-delivery integration preserves original/squash provenance, separate repair ownership and actual-head CI; publication remains a separate approval."
         }
       ],
       "gap": "Quality rules are documented and foundation has verification; future contributors still need complete modules, provider tests and deployment evidence."

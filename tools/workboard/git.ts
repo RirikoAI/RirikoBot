@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Batch, Board } from './types.ts';
+import { parseBoard } from './model.ts';
 
 export function git(root: string, args: string[], optional = false): string {
   const result = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8', windowsHide: true });
@@ -49,6 +50,42 @@ function ancestor(root: string, older: string, newer: string): boolean {
   return git(root, ['merge-base', older, newer], true) === older;
 }
 
+/** Audit each introduced commit, including transient changes hidden by a net diff. */
+function historyPaths(root: string, base: string, head: string, retained: string[] = []): string[] {
+  // One NUL-delimited Git traversal avoids a subprocess per commit on Windows.
+  return git(root, ['log', '--format=', '--name-only', '--no-renames', '-z', '--diff-merges=first-parent', `${base}..${head}`, ...retained.map((sha) => `^${sha}`), '--']).split('\0').filter(Boolean);
+}
+
+function integrationSources(root: string, board: Board, batch: Batch, headRef: string): void {
+  const resolution = batch.integration;
+  if (!resolution) return;
+  const declared = new Map(resolution.sources.map((source) => [source.batch, source.head]));
+  const consent = board.decisions.find((entry) => entry.id === resolution.decision);
+  if (!consent || consent.kind !== 'integrate' || consent.batchId !== batch.id) throw new Error('Missing explicit integration resolution consent.');
+  if (!ancestor(root, resolution.baseline, headRef)) throw new Error('Repair must retain its exact integration baseline.');
+  for (const source of resolution.sources) {
+    const previous = board.batches.find((entry) => entry.id === source.batch);
+    const snapshot = parseBoard(JSON.parse(git(root, ['show', `${source.head}:.workboard/state.json`])) as unknown);
+    const frozen = snapshot.batches.find((entry) => entry.id === source.batch);
+    if (snapshot.policy.repository !== board.policy.repository || snapshot.policy.remote !== board.policy.remote || snapshot.policy.remoteUrl !== board.policy.remoteUrl) throw new Error('Integration source repository identity differs from the reviewed repository.');
+    if (!previous || previous.status !== 'closed' || !frozen || !['checkpoint', 'closed'].includes(frozen.status) || frozen.integration ||
+      frozen.branch !== previous.branch || frozen.scope !== previous.scope || frozen.baseSha !== previous.baseSha || frozen.baseBranch !== board.policy.baseBranch ||
+      JSON.stringify(frozen.tickets) !== JSON.stringify(previous.tickets) || frozen.tickets.some((id) => snapshot.tickets.find((ticket) => ticket.id === id)?.status !== 'done') ||
+      snapshot.assignments.some((entry) => frozen.tickets.includes(entry.ticket) && entry.status !== 'accepted')) throw new Error('Integration source does not match a completed preserved delivery snapshot.');
+    const sourceBase = frozen.stack?.parentHead ?? frozen.baseSha;
+    if (frozen.stack && declared.get(frozen.stack.parentBatch) !== sourceBase && !ancestor(root, sourceBase, batch.baseSha)) throw new Error('Declare every unintegrated transitive source delivery explicitly.');
+    if (!ancestor(root, sourceBase, source.head) || !ancestor(root, source.head, resolution.baseline)) throw new Error('Integration baseline must retain the exact ordered original sources.');
+    checkPaths(snapshot, historyPaths(root, sourceBase, source.head), frozen);
+    if (source.merged) {
+      const parents = git(root, ['rev-list', '--parents', '-n', '1', source.merged]).split(' ');
+      if (parents.length !== 2 || parents[1] !== sourceBase || git(root, ['rev-parse', `${source.head}^{tree}`]) !== git(root, ['rev-parse', `${source.merged}^{tree}`])) throw new Error('Squash receipt must have the exact source target parent and identical full tree.');
+      if (batch.status !== 'open' && !ancestor(root, source.merged, headRef)) throw new Error('Retain every reviewed squash receipt before the integration checkpoint.');
+    }
+  }
+  const latest = resolution.sources.at(-1);
+  if (!latest || !ancestor(root, latest.head, resolution.baseline) || historyPaths(root, latest.head, resolution.baseline).some((path) => !path.startsWith('.workboard/'))) throw new Error('Baseline may add only administrative receipts after the latest approved source.');
+}
+
 /** Resolve both the review target and the exact boundary of this delivery's changes. */
 export function deliveryBase(root: string, board: Board, batch = currentBatch(board), headRef = 'HEAD'): DeliveryBase {
   if (batch.baseBranch !== board.policy.baseBranch) throw new Error('Batch target differs from the standing verified base.');
@@ -57,6 +94,10 @@ export function deliveryBase(root: string, board: Board, batch = currentBatch(bo
   if (!ancestor(root, batch.baseSha, headRef)) throw new Error('Topic does not descend from its recorded base SHA.');
   const approvedParents = new Set<string>();
   let result: DeliveryBase = { branch: batch.baseBranch, sha: integration, anchor: git(root, ['merge-base', integration, headRef]), stacked: false, published: true };
+  if (batch.integration) {
+    integrationSources(root, board, batch, headRef);
+    for (const source of batch.integration.sources) approvedParents.add(source.batch);
+  }
   if (batch.stack) {
     const stack = batch.stack;
     const parent = board.batches.find((entry) => entry.id === stack.parentBatch);
@@ -112,15 +153,25 @@ export function verifyGit(root: string, board: Board, batch = currentBatch(board
 
 function names(root: string, args: string[]): string[] { return git(root, [...args, '--name-only', '--no-renames', '-z', '--']).split('\0').filter(Boolean); }
 
+/** Historical sources retain their own ownership; repair edits never inherit that ownership. */
+export function checkDeliveryPaths(root: string, board: Board, batch: Batch, head = 'HEAD', workingTree = false): void {
+  const target = deliveryBase(root, board, batch, head);
+  const boundary = batch.integration?.baseline ?? target.anchor;
+  // Validated source/squash commits retain source ownership; merge resolutions still belong to the repair.
+  const retained = batch.integration?.sources.flatMap((source) => [source.head, ...(source.merged ? [source.merged] : [])]) ?? [];
+  if (batch.integration) checkPaths(board, historyPaths(root, boundary, head, retained), batch);
+  checkPaths(board, names(root, ['diff', boundary, ...(workingTree ? [] : [head])]), batch);
+}
+
 export function guardCommit(root: string, board: Board): void {
   const batch = commitBatch(board);
   verifyIdentity(root, board, batch);
-  const target = deliveryBase(root, board, batch);
+  deliveryBase(root, board, batch);
   const stagedPaths = names(root, ['diff', '--cached']);
   if (batch.status === 'closed' && stagedPaths.some((path) => !path.startsWith('.workboard/'))) throw new Error('A closed batch permits only its administrative closing handoff/board commit. Declare new work separately.');
   checkPaths(board, stagedPaths, batch);
   // Validate the entire delivery, including earlier local commits, not just this index.
-  checkPaths(board, names(root, ['diff', target.anchor]), batch);
+  checkDeliveryPaths(root, board, batch, 'HEAD', true);
   for (const path of ['.workboard/state.json', '.workboard/BOARD.md']) {
     const staged = git(root, ['show', `:${path}`]);
     if (staged.replaceAll('\r\n', '\n').trimEnd() !== readFileSync(resolve(root, path), 'utf8').replaceAll('\r\n', '\n').trimEnd()) throw new Error(`Stage the current ${path}; the index contains stale workflow state.`);
@@ -163,7 +214,7 @@ export function publicationBase(root: string, board: Board, batchId?: string): D
 export function publicationPlan(root: string, board: Board, batchId?: string): PublishApproval {
   const { batch, head } = publicationCandidate(root, board, batchId);
   const target = deliveryBase(root, board, batch, head);
-  checkPaths(board, names(root, ['diff', target.anchor, head]), batch);
+  checkDeliveryPaths(root, board, batch, head);
   const base = target.sha;
   if (git(root, ['merge-base', base, head]) !== base) throw new Error('Target advanced. Review and incorporate the fetched base before asking for publication approval.');
   if (base === head) throw new Error('There is no delivery diff to publish.');
@@ -202,4 +253,19 @@ export function guardPullRequest(board: Board, event: unknown, expectedTarget?: 
   const sha = head['sha'];
   if (typeof sha !== 'string' || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(sha)) throw new Error('PR event needs an exact head SHA.');
   return sha;
+}
+
+/** CI validates the real PR head, never GitHub's synthetic merge checkout. */
+export function verifyPullRequest(root: string, board: Board, event: unknown): void {
+  // Shape/repository/branch validation precedes every use of the untrusted SHA.
+  const raw = event as { pull_request?: { head?: { sha?: unknown } } } | null;
+  const head = raw?.pull_request?.head?.sha;
+  if (typeof head !== 'string' || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(head)) throw new Error('PR event needs an exact head SHA.');
+  if (commitRef(root, 'HEAD') !== head) throw new Error('Check out the actual PR head; synthetic merge checkout cannot validate delivery provenance.');
+  const committed = parseBoard(JSON.parse(git(root, ['show', `${head}:.workboard/state.json`])) as unknown);
+  if (JSON.stringify(committed) !== JSON.stringify(board)) throw new Error('PR board differs from its committed head.');
+  const target = deliveryBase(root, board, currentBatch(board), head);
+  guardPullRequest(board, event, target);
+  if (!ancestor(root, target.sha, head)) throw new Error('PR head must incorporate the verified current target.');
+  checkDeliveryPaths(root, board, currentBatch(board), head);
 }

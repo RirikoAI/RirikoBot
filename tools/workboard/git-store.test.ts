@@ -1,13 +1,15 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { relative, resolve } from 'node:path';
-import { deliveryBase, git, guardCommit, guardMessage, guardPullRequest, guardPush, publicationBase, publicationPlan, requirePublishedBase, verifyGit } from './git.ts';
+import { deliveryBase, git, guardCommit, guardMessage, guardPullRequest, guardPush, publicationBase, publicationPlan, requirePublishedBase, verifyGit, verifyPullRequest } from './git.ts';
 import { checkHandoffs, commonDirectory, initializeShared, mutate, readBoard, serialize, synchronize, withLock } from './store.ts';
 import { parseBoard } from './model.ts';
 import { renderBoard, ticketView } from './render.ts';
 import type { Batch, Board, Command } from './types.ts';
 
+// Real Git fixtures launch many bounded subprocesses; Windows spawn latency is not a product timeout.
+vi.setConfig({ testTimeout: 30_000 });
 const at = '2026-09-14T12:00:00Z';
 const handoff = '.workboard/handoffs/RIR-001/001.md';
 let directory: string;
@@ -435,5 +437,149 @@ describe('fresh stacking consent after a published parent closes', () => {
     const childLine = `refs/heads/${plan.branch} ${plan.head} refs/heads/${plan.branch} ${'0'.repeat(40)}\n`;
     expect(() => guardPush(root, board, null, 'origin', board.policy.remoteUrl, childLine)).toThrow(/No matching user approval/);
     expect(readBoard(root).batches[0]).toMatchObject({ status: 'closed', prUrl: parentPr });
+  });
+});
+
+/** Original chain and separate one-parent, tree-identical GitHub squash receipts. */
+function integrationFixture(sourceFault?: 'identity' | 'ownership'): { parent: string; child: string; baseline: string; squash: string } {
+  const parent = stackedFixture();
+  if (sourceFault === 'identity') {
+    const originalPolicy = structuredClone(board.policy);
+    board.policy.repository = 'different/repository'; board.policy.remoteUrl = 'https://github.com/different/repository.git';
+    project(board); git(root, ['add', '.workboard']); git(root, ['commit', '-m', 'Wrong source identity fixture']);
+    board.policy = originalPolicy;
+  }
+  if (sourceFault === 'ownership') {
+    writeFileSync(resolve(root, 'README.md'), 'Source escapes its own src-only ownership'); git(root, ['add', 'README.md']); git(root, ['commit', '-m', 'Bad source edit fixture']);
+    writeFileSync(resolve(root, 'README.md'), 'Completed parent delivery\n'); git(root, ['add', 'README.md']); git(root, ['commit', '-m', 'Hide source edit fixture']);
+  }
+  const child = git(root, ['rev-parse', 'HEAD']);
+  const squash = git(root, ['commit-tree', `${child}^{tree}`, '-p', parent, '-m', 'Verified squash fixture']);
+  board.batches[1]!.status = 'closed';
+  board.decisions.push({ id: 'D-close-child', kind: 'defer-pr', reference: 'User preserves completed child before integration', at, fromTicket: null, toTicket: null, disposition: null, batchId: 'BATCH-002' });
+  project(board); git(root, ['add', '.workboard']); git(root, ['commit', '-m', '[RIR-110] Preserve administrative receipt']);
+  const baseline = git(root, ['rev-parse', 'HEAD']);
+  git(root, ['switch', '-c', 'fix/RIR-005-integration']);
+  board.tickets.push({ ...board.tickets[1]!, id: 'RIR-005', type: 'bug', title: 'Integration repair', requires: ['RIR-110'], deliveryScope: 'RIR-005', paths: ['tools/'], handoff: '.workboard/handoffs/RIR-005/001.md' });
+  board.grooming[0]!.tickets.push('RIR-005');
+  mkdirSync(resolve(root, '.workboard/handoffs/RIR-005')); writeFileSync(resolve(root, '.workboard/handoffs/RIR-005/001.md'), '# Integration fixture handoff\n');
+  board.decisions.push({ id: 'D-integrate', kind: 'integrate', reference: 'User explicitly requests integration of these retained completed deliveries', at, fromTicket: null, toTicket: null, disposition: null, batchId: 'BATCH-003' });
+  board.batches.push({ id: 'BATCH-003', scope: 'RIR-005', branch: 'fix/RIR-005-integration', baseBranch: board.policy.baseBranch, baseSha: board.batches[0]!.baseSha, status: 'open', tickets: ['RIR-005'], prUrl: null, integration: { decision: 'D-integrate', baseline, sources: [{ batch: 'BATCH-001', head: parent }, { batch: 'BATCH-002', head: child, merged: squash }] } });
+  project(board); writeFileSync(resolve(commonDirectory(root), 'state.json'), serialize(parseBoard(board))); initializeShared(root);
+  mkdirSync(resolve(root, 'tools')); writeFileSync(resolve(root, 'tools/repair.ts'), 'export const repair = true;\n');
+  git(root, ['add', '.workboard', 'tools']); git(root, ['commit', '-m', '[RIR-005] Implement fixture repair']);
+  return { parent, child, baseline, squash };
+}
+
+function integrationCheckpoint(squash: string, extraResolution = false): void {
+  git(root, ['merge', '--no-ff', '--no-commit', squash], true);
+  if (git(root, ['rev-parse', '--verify', 'MERGE_HEAD']) !== squash) throw new Error('Expected retained squash merge');
+  const conflicts = git(root, ['diff', '--name-only', '--diff-filter=U']).split('\n').filter(Boolean);
+  if (conflicts.some((path) => !['.workboard/state.json', '.workboard/BOARD.md'].includes(path))) throw new Error('Unexpected fixture merge conflict');
+  // Keep the latest canonical board; source completion remains preserved in both parents.
+  project(board); git(root, ['add', '.workboard/state.json', '.workboard/BOARD.md']);
+  if (extraResolution) { writeFileSync(resolve(root, 'README.md'), 'Unapproved merge resolution'); git(root, ['add', 'README.md']); }
+  git(root, ['commit', '-m', '[RIR-005] Retain verified squash']);
+  board.batches.at(-1)!.status = 'checkpoint'; project(board); writeFileSync(resolve(commonDirectory(root), 'state.json'), serialize(parseBoard(board))); initializeShared(root);
+  git(root, ['add', '.workboard']); git(root, ['commit', '-m', '[RIR-005] Integration checkpoint']);
+}
+
+describe('completed-delivery integration provenance', () => {
+  it('reproduces frozen closed-board rejection and resolves a new repair directly to integration', () => {
+    const { parent, child, baseline, squash } = integrationFixture();
+    const frozen = parseBoard(JSON.parse(git(root, ['show', `${parent}:.workboard/state.json`])) as unknown);
+    expect(() => guardPullRequest(frozen, prEvent(board.policy.baseBranch, frozen.batches[0]!.baseSha))).toThrow(/No open/);
+    integrationCheckpoint(squash);
+    const plan = publicationPlan(root, board);
+    expect(plan.target).toBe(board.policy.baseBranch);
+    expect(plan.base).toBe(board.batches[0]!.baseSha);
+    for (const sha of [parent, child, baseline, squash]) expect(git(root, ['merge-base', sha, 'HEAD'])).toBe(sha);
+    expect(board.batches.slice(0, 2).every((b) => b.status === 'closed')).toBe(true);
+    expect(() => guardPush(root, board, null, 'origin', board.policy.remoteUrl, `refs/heads/${plan.branch} ${plan.head} refs/heads/${plan.branch} ${'0'.repeat(40)}\n`)).toThrow(/No matching user approval/);
+  });
+  it('requires exact source snapshot identity and every unintegrated stack parent', () => {
+    integrationFixture();
+    const changed = structuredClone(board); changed.batches.at(-1)!.integration!.sources.shift();
+    expect(() => deliveryBase(root, changed)).toThrow(/transitive/);
+    const forged = structuredClone(board); forged.batches[1]!.scope = 'RIR-005';
+    expect(() => deliveryBase(root, forged)).toThrow(/snapshot/);
+    const missing = structuredClone(board); missing.batches.at(-1)!.integration!.sources[0]!.head = 'f'.repeat(40);
+    expect(() => deliveryBase(root, missing)).toThrow();
+  });
+  it('rejects identical-tree squashes with wrong parent, unequal trees, and unretained receipts at checkpoint', () => {
+    const { child, squash } = integrationFixture();
+    const wrong = structuredClone(board);
+    wrong.batches.at(-1)!.integration!.sources[1]!.merged = git(root, ['commit-tree', `${child}^{tree}`, '-p', board.batches[0]!.baseSha, '-m', 'Wrong provenance']);
+    expect(() => deliveryBase(root, wrong)).toThrow(/exact source target/);
+    wrong.batches.at(-1)!.integration!.sources[1]!.merged = git(root, ['rev-parse', 'HEAD']);
+    expect(() => deliveryBase(root, wrong)).toThrow(/identical full tree/);
+    board.batches.at(-1)!.status = 'checkpoint';
+    expect(() => deliveryBase(root, board)).toThrow(/Retain every reviewed squash/);
+    expect(git(root, ['rev-parse', `${squash}^{tree}`])).toBe(git(root, ['rev-parse', `${child}^{tree}`]));
+  });
+  it('does not grant repair writes to historically owned paths, including transient add/remove history', () => {
+    const { squash } = integrationFixture(); integrationCheckpoint(squash);
+    writeFileSync(resolve(root, 'README.md'), 'Unauthorized repair in parent-owned file\n'); git(root, ['add', 'README.md']); git(root, ['commit', '-m', 'Unscoped edit fixture']);
+    writeFileSync(resolve(root, 'README.md'), 'Completed parent delivery\n'); git(root, ['add', 'README.md']); git(root, ['commit', '-m', 'Hide transient edit fixture']);
+    expect(() => publicationPlan(root, board)).toThrow(/outside delivery scope.*README/);
+  });
+  it('rejects a baseline hiding nonadministrative changes even when its final tree is unchanged', () => {
+    integrationFixture();
+    const saved = readFileSync(resolve(root, 'README.md'), 'utf8');
+    writeFileSync(resolve(root, 'README.md'), 'Unreviewed receipt implementation'); git(root, ['add', 'README.md']); git(root, ['commit', '-m', 'Bad receipt fixture']);
+    writeFileSync(resolve(root, 'README.md'), saved); git(root, ['add', 'README.md']); git(root, ['commit', '-m', 'Hide receipt fixture']);
+    board.batches.at(-1)!.integration!.baseline = git(root, ['rev-parse', 'HEAD']);
+    expect(() => deliveryBase(root, board)).toThrow(/only administrative/);
+  });
+  it('rejects an invalid resolution without changing shared or projected state', () => {
+    integrationFixture();
+    const originalResolution = board.batches.at(-1)!.integration!;
+    delete board.batches.at(-1)!.integration;
+    board.batches.at(-1)!.stack = { parentBatch: 'BATCH-002', parentHead: originalResolution.baseline, decision: 'D-close-child' };
+    project(board); writeFileSync(resolve(commonDirectory(root), 'state.json'), serialize(parseBoard(board))); initializeShared(root);
+    const before = readBoard(root); const projected = readFileSync(resolve(root, '.workboard/state.json'), 'utf8');
+    expect(() => mutate(root, { action: 'integrate', batch: 'BATCH-003', integration: { ...originalResolution, baseline: 'f'.repeat(40) } }, before.revision, { actor: 'coordinator', now: at })).toThrow();
+    expect(readBoard(root)).toEqual(before); expect(readFileSync(resolve(root, '.workboard/state.json'), 'utf8')).toBe(projected);
+  });
+  it('validates the actual PR head and refuses a synthetic merge checkout or dirty board', () => {
+    const { squash } = integrationFixture(); integrationCheckpoint(squash);
+    const base = board.batches[0]!.baseSha, head = git(root, ['rev-parse', 'HEAD']);
+    const event = prEvent(board.policy.baseBranch, base);
+    expect(() => verifyPullRequest(root, board, event)).not.toThrow();
+    const dirty = structuredClone(board); dirty.tickets[0]!.title = 'Checkout-only board edit';
+    expect(() => verifyPullRequest(root, dirty, event)).toThrow(/committed head/);
+    const synthetic = git(root, ['commit-tree', `${head}^{tree}`, '-p', base, '-p', head, '-m', 'Synthetic PR merge']);
+    git(root, ['switch', '--detach', synthetic]);
+    expect(() => verifyPullRequest(root, board, event)).toThrow(/actual PR head/);
+  });
+});
+
+
+describe('integration boundary regressions', () => {
+  it('rejects source repository substitution and source history outside its own scope', () => {
+    integrationFixture('identity');
+    expect(() => deliveryBase(root, board)).toThrow(/repository identity/);
+  });
+  it('audits transient source changes against the frozen source ownership', () => {
+    integrationFixture('ownership');
+    expect(() => deliveryBase(root, board)).toThrow(/outside delivery scope RIR-110.*README/);
+  });
+  it('refuses the checkpoint mutation until all declared squash receipts are retained', () => {
+    integrationFixture(); const before = readBoard(root);
+    expect(() => mutate(root, { action: 'checkpoint', batch: 'BATCH-003' }, before.revision, { actor: 'coordinator', now: at })).toThrow(/Retain every reviewed squash/);
+    expect(readBoard(root)).toEqual(before);
+  });
+  it('resolves an ordinary stack after its exact parent is integrated before validating its PR target', () => {
+    const parent = stackedFixture();
+    git(root, ['update-ref', 'refs/remotes/origin/develop/2.0.0-astra', parent]);
+    expect(() => verifyPullRequest(root, board, prEvent(board.policy.baseBranch, parent))).not.toThrow();
+  });
+});
+
+
+describe('merge resolution ownership', () => {
+  it('rejects new edits in a historically owned file introduced by squash conflict resolution', () => {
+    const { squash } = integrationFixture(); integrationCheckpoint(squash, true);
+    expect(() => publicationPlan(root, board)).toThrow(/outside delivery scope RIR-005.*README/);
   });
 });

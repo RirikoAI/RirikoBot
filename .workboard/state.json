@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 145,
+  "revision": 158,
   "policy": {
     "pointScale": [
       1,
@@ -537,15 +537,15 @@
       "id": "RIR-005",
       "type": "bug",
       "title": "Resolve deferred parent PR validation without rewriting preserved work",
-      "status": "backlog",
+      "status": "in-progress",
       "parent": "RIR-100",
       "requires": [
         "RIR-110"
       ],
       "deliveryScope": "RIR-005",
-      "estimate": null,
-      "estimateRationale": "Refine the reviewed publication-history solution before any execution.",
-      "groomedIn": null,
+      "estimate": 13,
+      "estimateRationale": "Cross-cutting provenance, real Git history/CI regression and safe integration resolution; bounded to one executable bug",
+      "groomedIn": "GR-006",
       "priority": "P1",
       "acceptance": [
         "Reproduce the frozen parent PR checker rejecting closed BATCH-001 while its branch push remains valid.",
@@ -558,8 +558,8 @@
         ".github/",
         "docs/"
       ],
-      "owner": null,
-      "handoff": null,
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-005/001-start.md",
       "validation": []
     },
     {
@@ -942,6 +942,18 @@
         "RIR-808"
       ],
       "rationale": "Explicit user-approved 5-point prerequisite discovered during opening of the already groomed documentation epic"
+    },
+    {
+      "id": "GR-006",
+      "scope": "RIR-100",
+      "at": "2026-09-14T19:29:12.505Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-005"
+      ],
+      "rationale": "User-authorized integration repair: exact source/squash ancestry and receipts, closed-batch CI and scope guard regression; one bounded bug, no domain work"
     }
   ],
   "decisions": [
@@ -984,6 +996,26 @@
       "toTicket": null,
       "disposition": null,
       "batchId": "BATCH-003"
+    },
+    {
+      "id": "D-005",
+      "kind": "stack",
+      "reference": "User said can you do 1. to recommendation to reconcile squash merges and local receipts, preserve existing commits, fix RIR-005 and prepare integration into develop/2.0.0-astra. Authorizes one repair based on completed documentation e09daed and preserved local receipts; final PR approval remains separate.",
+      "at": "2026-09-14T19:29:12.505Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-003"
+    },
+    {
+      "id": "D-006",
+      "kind": "integrate",
+      "reference": "User said can you do 1. to RIR-005 integration repair: reconcile completed governance/evidence/documentation and exact squash histories, preserve local receipts and prepare develop/2.0.0-astra integration. Reviewed originals c1018829/a04753a/e09daed, squashes7f0fd9a/f33b0c5, administrative baselinea27151b. One repair scope; no push/PR/remote merge/new feature authorization.",
+      "at": "2026-09-14T19:47:23.026Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-004"
     }
   ],
   "assignments": [
@@ -1267,6 +1299,24 @@
       "paths": [],
       "status": "accepted",
       "handoff": ".workboard/handoffs/RIR-807/004-reference-return.md"
+    },
+    {
+      "id": "A-026",
+      "ticket": "RIR-005",
+      "agent": "integration-reviewer",
+      "scope": "Read-only reproduce frozen closed-batch rejection and review safe exact-history integration design; source and CI edge cases, no mutations",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-005/002-review.md"
+    },
+    {
+      "id": "A-027",
+      "ticket": "RIR-005",
+      "agent": "integration-tests",
+      "scope": "Read-only independent test design for completed-delivery integration, graph and content authorization; later review root implementation",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-005/002-review.md"
     }
   ],
   "batches": [
@@ -1322,6 +1372,38 @@
         "parentBatch": "BATCH-002",
         "parentHead": "a04753a473c8a807892848052cc248cff3695805",
         "decision": "D-003"
+      }
+    },
+    {
+      "id": "BATCH-004",
+      "scope": "RIR-005",
+      "branch": "fix/RIR-005-integration-reconciliation",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
+      "status": "open",
+      "tickets": [
+        "RIR-005"
+      ],
+      "prUrl": null,
+      "integration": {
+        "decision": "D-006",
+        "baseline": "a27151bcf4ed3a72fdd3840011015acb17ae6048",
+        "sources": [
+          {
+            "batch": "BATCH-001",
+            "head": "c1018829abf42fd2f8aad22948de343e51dc1e95"
+          },
+          {
+            "batch": "BATCH-002",
+            "head": "a04753a473c8a807892848052cc248cff3695805",
+            "merged": "7f0fd9ae589ec140adc4ab7f01ec63299ac4a42b"
+          },
+          {
+            "batch": "BATCH-003",
+            "head": "e09daed09d5b625095923a622789413d8281327b",
+            "merged": "f33b0c5535a7a7df4d9278aebeec7a5b9440de43"
+          }
+        ]
       }
     }
   ],
@@ -2340,6 +2422,97 @@
       "actor": "coordinator",
       "action": "close-batch",
       "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-003\",\"decision\":\"D-004\",\"prUrl\":\"https://github.com/RirikoAI/RirikoBot/pull/561\"}"
+    },
+    {
+      "id": 146,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "groom",
+      "detail": "{\"action\":\"groom\",\"grooming\":{\"id\":\"GR-006\",\"scope\":\"RIR-100\",\"at\":\"2026-09-14T19:29:12.505Z\",\"participants\":[\"coordinator\"],\"tickets\":[\"RIR-005\"],\"rationale\":\"User-authorized integration repair: exact source/squash ancestry and receipts, closed-batch CI and scope guard regression; one bounded bug, no domain work\"},\"estimates\":[{\"id\":\"RIR-005\",\"points\":13,\"rationale\":\"Cross-cutting provenance, real Git history/CI regression and safe integration resolution; bounded to one executable bug\"}]}"
+    },
+    {
+      "id": 147,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-005\",\"status\":\"ready\",\"reason\":\"Groomed before execution against actual merged stack\",\"handoff\":\".workboard/handoffs/RIR-005/001-start.md\"}"
+    },
+    {
+      "id": 148,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-005\",\"kind\":\"stack\",\"reference\":\"User said can you do 1. to recommendation to reconcile squash merges and local receipts, preserve existing commits, fix RIR-005 and prepare integration into develop/2.0.0-astra. Authorizes one repair based on completed documentation e09daed and preserved local receipts; final PR approval remains separate.\",\"at\":\"2026-09-14T19:29:12.505Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-003\"}}"
+    },
+    {
+      "id": 149,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "batch",
+      "detail": "{\"action\":\"batch\",\"batch\":{\"id\":\"BATCH-004\",\"scope\":\"RIR-005\",\"branch\":\"fix/RIR-005-integration-reconciliation\",\"baseBranch\":\"develop/2.0.0-astra\",\"baseSha\":\"801103c0e4c70eca6a380d7d1122b11234695bb1\",\"status\":\"open\",\"tickets\":[\"RIR-005\"],\"prUrl\":null,\"stack\":{\"parentBatch\":\"BATCH-003\",\"parentHead\":\"e09daed09d5b625095923a622789413d8281327b\",\"decision\":\"D-005\"}}}"
+    },
+    {
+      "id": 150,
+      "at": "2026-09-14T19:29:12.505Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-005\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 151,
+      "at": "2026-09-14T19:29:31.459Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-026\",\"ticket\":\"RIR-005\",\"agent\":\"integration-reviewer\",\"scope\":\"Read-only reproduce frozen closed-batch rejection and review safe exact-history integration design; source and CI edge cases, no mutations\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 152,
+      "at": "2026-09-14T19:29:32.305Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-027\",\"ticket\":\"RIR-005\",\"agent\":\"integration-tests\",\"scope\":\"Read-only independent test design for completed-delivery integration, graph and content authorization; later review root implementation\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 153,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-006\",\"kind\":\"integrate\",\"reference\":\"User said can you do 1. to RIR-005 integration repair: reconcile completed governance/evidence/documentation and exact squash histories, preserve local receipts and prepare develop/2.0.0-astra integration. Reviewed originals c1018829/a04753a/e09daed, squashes7f0fd9a/f33b0c5, administrative baselinea27151b. One repair scope; no push/PR/remote merge/new feature authorization.\",\"at\":\"2026-09-14T19:47:23.026Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-004\"}}"
+    },
+    {
+      "id": 154,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "integrate",
+      "detail": "{\"action\":\"integrate\",\"batch\":\"BATCH-004\",\"integration\":{\"decision\":\"D-006\",\"baseline\":\"a27151bcf4ed3a72fdd3840011015acb17ae6048\",\"sources\":[{\"batch\":\"BATCH-001\",\"head\":\"c1018829abf42fd2f8aad22948de343e51dc1e95\"},{\"batch\":\"BATCH-002\",\"head\":\"a04753a473c8a807892848052cc248cff3695805\",\"merged\":\"7f0fd9ae589ec140adc4ab7f01ec63299ac4a42b\"},{\"batch\":\"BATCH-003\",\"head\":\"e09daed09d5b625095923a622789413d8281327b\",\"merged\":\"f33b0c5535a7a7df4d9278aebeec7a5b9440de43\"}]}}"
+    },
+    {
+      "id": 155,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-026\",\"handoff\":\".workboard/handoffs/RIR-005/002-review.md\"}"
+    },
+    {
+      "id": 156,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-026\"}"
+    },
+    {
+      "id": 157,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-027\",\"handoff\":\".workboard/handoffs/RIR-005/002-review.md\"}"
+    },
+    {
+      "id": 158,
+      "at": "2026-09-14T19:47:23.026Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-027\"}"
     }
   ]
 }

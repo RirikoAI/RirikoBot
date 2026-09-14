@@ -1,11 +1,19 @@
 # Ririko work board
 
-Generated from state.json · revision 145 · execution limit **1**.
+Generated from state.json · revision 158 · execution limit **1**.
 
-**Current work:** No occupied ticket.
-**Delivery:** No open batch.
+**Current work:** RIR-005 — Resolve deferred parent PR validation without rewriting preserved work (in-progress, 13 points)
+**Delivery:** BATCH-004 / RIR-005 / `fix/RIR-005-integration-reconciliation` → `develop/2.0.0-astra` (open)
 
 Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.
+
+**Approved integration:** completed deliveries BATCH-001@c1018829abf42fd2f8aad22948de343e51dc1e95, BATCH-002@a04753a473c8a807892848052cc248cff3695805, BATCH-003@e09daed09d5b625095923a622789413d8281327b; preserved baseline a27151bcf4ed3a72fdd3840011015acb17ae6048; decision D-006. New work remains in RIR-005; publication requires its own exact-head approval.
+
+## in-progress
+
+| ID | Type | Outcome | Points | Parent | Requires | Blocks | Delivery scope |
+|---|---|---|---:|---|---|---|---|
+| RIR-005 | bug | Resolve deferred parent PR validation without rewriting preserved work | 13 | RIR-100 | RIR-110 | — | RIR-005 |
 
 ## ready
 
@@ -35,7 +43,6 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | RIR-700 | epic | Legacy migration and release | Ungroomed | — | — | — | RIR-700 |
 | RIR-710 | story | Representative-data import, restore rehearsal and rollout | Ungroomed | RIR-700 | RIR-001 | — | RIR-710 |
 | RIR-004 | chore | Remove historically tracked generated dependency launchers | 3 | RIR-100 | RIR-001 | — | RIR-004 |
-| RIR-005 | bug | Resolve deferred parent PR validation without rewriting preserved work | Ungroomed | RIR-100 | RIR-110 | — | RIR-005 |
 
 ## done
 
@@ -82,18 +89,12 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | A-023 | RIR-807 | developer-docs | accepted | Update branch comparison with pinned source/code evidence and documentation epic differences; no code or completion inflation |
 | A-024 | RIR-807 | architecture-docs | accepted | Read-only entire 40-file corpus coherence/depth review and final documentation-review matrix verification |
 | A-025 | RIR-807 | discord-docs | accepted | Read-only full corpus local file/anchor reference, source/status and command consistency check; do not rerun tests |
+| A-026 | RIR-005 | integration-reviewer | accepted | Read-only reproduce frozen closed-batch rejection and review safe exact-history integration design; source and CI edge cases, no mutations |
+| A-027 | RIR-005 | integration-tests | accepted | Read-only independent test design for completed-delivery integration, graph and content authorization; later review root implementation |
 
 ## Current handoffs
 
-- RIR-800: [handoff](handoffs/RIR-800/003-completion.md)
-- RIR-801: [handoff](handoffs/RIR-801/006-completion.md)
-- RIR-802: [handoff](handoffs/RIR-802/006-completion.md)
-- RIR-803: [handoff](handoffs/RIR-803/006-completion.md)
-- RIR-804: [handoff](handoffs/RIR-804/006-completion.md)
-- RIR-805: [handoff](handoffs/RIR-805/006-completion.md)
-- RIR-806: [handoff](handoffs/RIR-806/006-completion.md)
-- RIR-807: [handoff](handoffs/RIR-807/005-completion.md)
-- RIR-808: [handoff](handoffs/RIR-808/002-completion.md)
+- RIR-005: [handoff](handoffs/RIR-005/001-start.md)
 
 ## Grooming groups
 
@@ -102,5 +103,6 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 - GR-003: RIR-100 · RIR-110, RIR-004 · Foundation refinement after pinned branch comparison; one approved review-evidence story and deferred dependency cleanup.
 - GR-004: RIR-800 · RIR-800, RIR-801, RIR-802, RIR-803, RIR-804, RIR-805, RIR-806, RIR-807 · User approved one stacked documentation epic. Grouped review of all 40 files and 13 ADRs; seven sequential leaves partition ownership and review risk. Parent is a planning estimate, not additional velocity.
 - GR-005: RIR-800 · RIR-808 · Explicit user-approved 5-point prerequisite discovered during opening of the already groomed documentation epic
+- GR-006: RIR-100 · RIR-005 · User-authorized integration repair: exact source/squash ancestry and receipts, closed-batch CI and scope guard regression; one bounded bug, no domain work
 
 Parent estimates are planning sizes; sum leaf tickets only for delivery reporting. Backlog items with unknown estimates cannot start. Inspect full acceptance/ownership/history with `pnpm board show ID`.

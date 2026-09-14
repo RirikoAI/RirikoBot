@@ -75,7 +75,7 @@ export function mutate(root: string, command: Command, expected: number, context
       if (changed.some((path) => !path.startsWith('.workboard/'))) throw new Error('Commit the delivery code before closing/defer; only closing board metadata may remain uncommitted.');
     }
     const next = applyCommand(board, command, context);
-    if (command.action === 'batch' || command.action === 'stack') verifyGit(root, next);
+    if (command.action === 'batch' || command.action === 'stack' || command.action === 'integrate' || command.action === 'checkpoint') verifyGit(root, next);
     checkHandoffs(root, next);
     atomicWrite(resolve(commonDirectory(root), 'state.json'), serialize(next));
     // The shared copy is written first: interrupted projection is recovered explicitly with sync.

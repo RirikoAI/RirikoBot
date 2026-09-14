@@ -13,7 +13,7 @@ export interface Grooming {
   tickets: string[]; rationale: string;
 }
 export interface Decision {
-  id: string; kind: 'switch' | 'defer-pr' | 'pr-created' | 'stack'; reference: string; at: string;
+  id: string; kind: 'switch' | 'defer-pr' | 'pr-created' | 'stack' | 'integrate'; reference: string; at: string;
   fromTicket: string | null; toTicket: string | null;
   disposition: 'paused' | 'abandoned' | null; batchId: string | null;
 }
@@ -21,11 +21,19 @@ export interface Assignment {
   id: string; ticket: string; agent: string; scope: string; paths: string[];
   status: 'assigned' | 'returned' | 'accepted'; handoff: string | null;
 }
+export interface Integration {
+  /** User consent for this integration resolution, not publication. */
+  decision: string;
+  /** Preserved latest source plus administrative receipts; repair changes start here. */
+  baseline: string;
+  sources: Array<{ batch: string; head: string; merged?: string }>;
+}
 export interface Batch {
   id: string; scope: string; branch: string; baseBranch: string; baseSha: string;
   status: 'open' | 'checkpoint' | 'closed'; tickets: string[]; prUrl: string | null;
   /** Explicit user-approved dependency; parent scope is excluded only against this exact preserved commit. */
   stack?: { parentBatch: string; parentHead: string; decision: string };
+  integration?: Integration;
 }
 export interface Event {
   id: number; at: string; actor: string; action: string; detail: string;
@@ -46,6 +54,7 @@ export type Command =
   | { action: 'decision'; decision: Decision }
   | { action: 'batch'; batch: Batch }
   | { action: 'stack'; batch: string; parentBatch: string; parentHead: string; decision: string }
+  | { action: 'integrate'; batch: string; integration: Integration }
   | { action: 'checkpoint'; batch: string }
   | { action: 'close-batch'; batch: string; decision: string; prUrl?: string }
   | { action: 'assign'; assignment: Assignment }

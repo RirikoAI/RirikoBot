@@ -13,7 +13,7 @@ Source: User-supplied Full Platform Rework attachment; preserved on 2026-09-14. 
 | BP-00 | Absolute Rules | documented | RIR-100, RIR-801 | Standing preservation, KISS and compatibility rules exist; future code still needs per-ticket review. |
 | BP-01 | FIRST TASK: AUDIT THE EXISTING REPOSITORY | documented | RIR-100, RIR-802 | Source audit inventories 141 commands, 17 tables and assets at the pinned legacy SHA; it does not certify runtime parity or production data. |
 | BP-02 | CREATE THE AI ENGINEERING TEAM FIRST | documented | RIR-100 | All 18 specialist definitions exist with ownership and handoffs; definitions do not mean every subsystem is implemented. |
-| BP-03 | CREATE PROJECT-LEVEL AGENT INSTRUCTIONS | documented | RIR-100 | Root instructions and modular imports cover development and governance; future sessions must follow them. |
+| BP-03 | CREATE PROJECT-LEVEL AGENT INSTRUCTIONS | documented | RIR-100, RIR-005 | Root instructions and modular imports cover development and governance; future sessions must follow them. |
 | BP-04 | CREATE A MODERN PROJECT STRUCTURE | partial | RIR-100, RIR-801 | Five working application/library workspaces isolate Discord and persistence; web and provider/domain packages await working implementations. |
 | BP-05 | TECHNOLOGY BASELINE | partial | RIR-100, RIR-801 | Pinned Node/TypeScript/Discord/Drizzle/Vitest baseline exists; select dashboard and provider versions when those scopes are implemented. |
 | BP-06 | KISS + EXTENSIBILITY PRINCIPLE | partial | RIR-100, RIR-801 | The command generator works and is tested; module, adapter, migration, game and dashboard generators are pending. |
@@ -65,8 +65,8 @@ Source: User-supplied Full Platform Rework attachment; preserved on 2026-09-14. 
 | BP-52 | LOGGING | partial | RIR-100, RIR-801 | Pino logging and credential redaction exist; per-subsystem operation/duration/correlation fields and future provider instrumentation remain incomplete. |
 | BP-53 | ERROR HANDLING | partial | RIR-100, RIR-801 | Gateway/dispatcher error boundaries and bounded health probes exist; provider retries/backoff/fallback/circuit behavior is pending. |
 | BP-54 | SECURITY | partial | RIR-700, RIR-806, RIR-805, RIR-803 | Foundation input/permission/generator controls are tested; OAuth/CSRF/SSRF/webhooks and all economy/TCG/provider boundaries still need review and tests. |
-| BP-55 | TESTING | partial | RIR-700, RIR-806 | Foundation unit/database/CLI tests exist; critical new-domain and dashboard suites remain pending. |
-| BP-56 | QUALITY GATES | partial | RIR-700, RIR-806 | Lint/typecheck/unit/integration/E2E/build scripts and CI definitions exist; real remote CI/container evidence must accompany publication. |
+| BP-55 | TESTING | partial | RIR-700, RIR-806, RIR-005 | Foundation unit/database/CLI tests exist; critical new-domain and dashboard suites remain pending. |
+| BP-56 | QUALITY GATES | partial | RIR-700, RIR-806, RIR-005 | Lint/typecheck/unit/integration/E2E/build scripts and CI definitions exist; real remote CI/container evidence must accompany publication. |
 | BP-57 | OBSERVABILITY | partial | RIR-700, RIR-806 | Liveness/readiness, gateway/database probes and CLI diagnostics exist; provider/job health, metrics and dashboard surfacing are pending. |
 | BP-58 | RATE LIMITS | partial | RIR-700, RIR-806, RIR-803, RIR-804 | Command cooldowns exist; user/guild/channel/provider/AI/image/economy/claim/market rate limiting remains incomplete. |
 | BP-59 | CONFIGURATION HIERARCHY | partial | RIR-100, RIR-801 | Environment/default and guild settings validation exist; per-user/provider/dashboard overrides and full precedence coverage are pending. |
@@ -77,7 +77,7 @@ Source: User-supplied Full Platform Rework attachment; preserved on 2026-09-14. 
 | BP-64 | DEVELOPER DOCUMENTATION | documented | RIR-100, RIR-801, RIR-807 | Complete corpus review covers contracts, state, authority, failures, recovery and worked acceptance examples. Domain designs remain unimplemented; each later code scope must update its guide and evidence. |
 | BP-65 | RELEASE VERSION | partial | RIR-700, RIR-801 | Workspace versions are 2.0.0 with documented SemVer/release rules; this is not a published or accepted full release. |
 | BP-66 | IMPLEMENTATION ORDER | documented | RIR-100, RIR-801 | Roadmap and board preserve phased implementation order; do not skip acceptance gates or cross story/epic checkpoints automatically. |
-| BP-67 | ADRs | documented | RIR-100, RIR-801, RIR-807 | All 13 ADRs reviewed with current/proposed boundaries, alternatives, consequences, validation and revisit criteria; proposed decisions still need implementation evidence. |
+| BP-67 | ADRs | documented | RIR-100, RIR-801, RIR-807, RIR-005 | Fourteen ADRs include completed-delivery integration and retain current/proposed boundaries, alternatives, consequences and validation gates; domain decisions still need implementation evidence. |
 | BP-68 | DO NOT OVER-ENGINEER | documented | RIR-100, RIR-801 | Small explicitly composed workspaces are used; optional infrastructure remains unjustified until measured need. |
 | BP-69 | DEPLOYMENT | partial | RIR-003, RIR-806 | Docker/Compose definitions exist and configuration was validated; live image execution/deployment remains a tracked RIR-003 gate. |
 | BP-70 | CLI | partial | RIR-100, RIR-801 | Operator diagnostics, migrations, metadata, config and command generation work; backup/restore, legacy import and provider/cache operators remain pending. |
@@ -97,10 +97,10 @@ Source: User-supplied Full Platform Rework attachment; preserved on 2026-09-14. 
 | BP-84 | MORE MODULES TO CONSIDER | planned | RIR-300, RIR-803 | Optional module ideas remain evaluation backlog and must not displace the core release; none is implicitly approved for implementation. |
 | BP-85 | MIGRATION PHILOSOPHY | partial | RIR-710, RIR-802 | Legacy source manifests and preservation/mapping strategy exist; real import and verified restore of representative user data are pending. |
 | BP-86 | FINAL ACCEPTANCE CRITERIA | partial | RIR-700, RIR-806 | The exact 35 acceptance criteria below remain the release gate; a passing foundation suite is not release completion. |
-| BP-87 | HOW YOU SHOULD WORK AS THE MAIN AGENT | documented | RIR-110 | Standing inspect/estimate/delegate/review/test/handoff workflow exists; this story follows one active ticket and one delivery checkpoint. |
+| BP-87 | HOW YOU SHOULD WORK AS THE MAIN AGENT | documented | RIR-110, RIR-005 | Standing inspect/estimate/delegate/review/test/handoff workflow exists; this story follows one active ticket and one delivery checkpoint. |
 | BP-88 | WHEN SOMETHING IS UNCLEAR | documented | RIR-110 | Routine choices use documented engineering judgment; explicit user scope/PR decisions override broad autonomy. |
 | BP-89 | FIRST DELIVERABLE | documented | RIR-100, RIR-802, RIR-807 | Audit/architecture/migration/dependency/roadmap/ADR/agent artifacts and summary exist; foundation implementation began, full platform remains incomplete. |
-| BP-90 | QUALITY BAR | documented | RIR-110 | Quality rules are documented and foundation has verification; future contributors still need complete modules, provider tests and deployment evidence. |
+| BP-90 | QUALITY BAR | documented | RIR-110, RIR-005 | Quality rules are documented and foundation has verification; future contributors still need complete modules, provider tests and deployment evidence. |
 
 ## Final acceptance checklist (35)
 
