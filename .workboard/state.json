@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 81,
+  "revision": 93,
   "policy": {
     "pointScale": [
       1,
@@ -667,14 +667,16 @@
       ]
     },
     {
-      "status": "ready",
+      "status": "done",
       "estimate": 13,
       "estimateRationale": "Specify provider, AI, music, moderation and durable delivery behavior: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
       "groomedIn": "GR-004",
       "priority": "P1",
-      "owner": null,
-      "handoff": ".workboard/handoffs/RIR-803/001-start.md",
-      "validation": [],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-803/006-completion.md",
+      "validation": [
+        "65 relative links resolve; requirements91/35; boardWIP1; diffcheck pass; no live subsystem claims"
+      ],
       "id": "RIR-803",
       "type": "task",
       "title": "Specify provider, AI, music, moderation and durable delivery behavior",
@@ -1079,6 +1081,44 @@
       ],
       "status": "accepted",
       "handoff": ".workboard/handoffs/RIR-802/005-manifest-return.md"
+    },
+    {
+      "id": "A-011",
+      "agent": "architecture-docs",
+      "paths": [
+        "docs/adapters.md",
+        "docs/adr/ADR-006-image-generation-and-canvas-synthesis.md",
+        "docs/adr/ADR-007-stream-platform-notification-architecture.md",
+        "docs/adr/ADR-012-job-scheduler-and-task-queue.md"
+      ],
+      "scope": "Deepen common provider/capability/error/job contracts plus image/canvas, stream and durable scheduler ADRs; compare whole Gemini counterparts and official sources, documentation only.",
+      "ticket": "RIR-803",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-803/003-adapter-return.md"
+    },
+    {
+      "id": "A-012",
+      "agent": "developer-docs",
+      "paths": [
+        "docs/ai.md",
+        "docs/adr/ADR-005-ai-chatbot-and-tool-calling-architecture.md"
+      ],
+      "scope": "Deepen AI scoped memory, provider selection, streaming, tools, security, budgets and recovery plus ADR, grounded in blueprint/legacy/current code and official sources; documentation only.",
+      "ticket": "RIR-803",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-803/004-ai-return.md"
+    },
+    {
+      "id": "A-013",
+      "agent": "discord-docs",
+      "paths": [
+        "docs/music.md",
+        "docs/adr/ADR-004-audio-and-music-engine.md"
+      ],
+      "scope": "Deepen music queue/voice/control/reconnect/provider capability and engine evaluation contracts plus ADR; preserve required sources and audited interface; documentation only.",
+      "ticket": "RIR-803",
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-803/005-music-return.md"
     }
   ],
   "batches": [
@@ -1704,6 +1744,90 @@
       "actor": "coordinator",
       "action": "move",
       "detail": "{\"action\":\"move\",\"ticket\":\"RIR-802\",\"status\":\"done\",\"reason\":\"All seven files source-reviewed; factual manifests verified unchanged; all worker returns accepted.\",\"handoff\":\".workboard/handoffs/RIR-802/006-completion.md\",\"validation\":[\"58 local links valid; requirements91/35 and diff check pass\",\"All manifest records checked; 85SQL statements replay match17tables108columns11FK7indexes\",\"Legacy snapshot, blueprint and both manifests unchanged\"]}"
+    },
+    {
+      "id": 82,
+      "at": "2026-09-14T17:42:51.008Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-803\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 83,
+      "at": "2026-09-14T17:42:51.600Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-011\",\"agent\":\"architecture-docs\",\"paths\":[\"docs/adapters.md\",\"docs/adr/ADR-006-image-generation-and-canvas-synthesis.md\",\"docs/adr/ADR-007-stream-platform-notification-architecture.md\",\"docs/adr/ADR-012-job-scheduler-and-task-queue.md\"],\"scope\":\"Deepen common provider/capability/error/job contracts plus image/canvas, stream and durable scheduler ADRs; compare whole Gemini counterparts and official sources, documentation only.\",\"ticket\":\"RIR-803\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 84,
+      "at": "2026-09-14T17:42:52.162Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-012\",\"agent\":\"developer-docs\",\"paths\":[\"docs/ai.md\",\"docs/adr/ADR-005-ai-chatbot-and-tool-calling-architecture.md\"],\"scope\":\"Deepen AI scoped memory, provider selection, streaming, tools, security, budgets and recovery plus ADR, grounded in blueprint/legacy/current code and official sources; documentation only.\",\"ticket\":\"RIR-803\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 85,
+      "at": "2026-09-14T17:42:52.723Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-013\",\"agent\":\"discord-docs\",\"paths\":[\"docs/music.md\",\"docs/adr/ADR-004-audio-and-music-engine.md\"],\"scope\":\"Deepen music queue/voice/control/reconnect/provider capability and engine evaluation contracts plus ADR; preserve required sources and audited interface; documentation only.\",\"ticket\":\"RIR-803\",\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 86,
+      "at": "2026-09-14T17:55:02.802Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-011\",\"handoff\":\".workboard/handoffs/RIR-803/003-adapter-return.md\"}"
+    },
+    {
+      "id": 87,
+      "at": "2026-09-14T17:55:03.403Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-011\"}"
+    },
+    {
+      "id": 88,
+      "at": "2026-09-14T17:55:03.986Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-012\",\"handoff\":\".workboard/handoffs/RIR-803/004-ai-return.md\"}"
+    },
+    {
+      "id": 89,
+      "at": "2026-09-14T17:55:04.573Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-012\"}"
+    },
+    {
+      "id": 90,
+      "at": "2026-09-14T17:56:20.303Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-013\",\"handoff\":\".workboard/handoffs/RIR-803/005-music-return.md\"}"
+    },
+    {
+      "id": 91,
+      "at": "2026-09-14T17:56:20.912Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-013\"}"
+    },
+    {
+      "id": 92,
+      "at": "2026-09-14T17:56:21.496Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-803\",\"status\":\"review\",\"reason\":\"Nine documents compared and deepened; all specialist returns reviewed\",\"handoff\":\".workboard/handoffs/RIR-803/006-completion.md\",\"validation\":[\"65 relative links resolve; requirements91/35; boardWIP1; diffcheck pass; no live subsystem claims\"]}"
+    },
+    {
+      "id": 93,
+      "at": "2026-09-14T17:56:22.080Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-803\",\"status\":\"done\",\"reason\":\"Nine documents compared and deepened; all specialist returns reviewed\",\"handoff\":\".workboard/handoffs/RIR-803/006-completion.md\",\"validation\":[\"65 relative links resolve; requirements91/35; boardWIP1; diffcheck pass; no live subsystem claims\"]}"
     }
   ]
 }

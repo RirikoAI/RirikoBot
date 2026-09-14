@@ -1,0 +1,7 @@
+# RIR-803 / A-013 — music return
+
+Agent discord-docs; coordinator persistence. Branch feat/RIR-800-documentation-depth starting522f963; parenta04753a/integration801103c unchanged. Read full Gemini counterparts1ba45ee, legacy0d8be25, protocol/board/start, relevant blueprint/specialist/source and current provider/engine/voice/FFmpeg primary docs.
+
+Edited only music.md and ADR004. Deepened typed metadata/playable separation, all17legacy command contracts and six playlist operations, queue/session/revision/generation, controls and actor/DJ/vote policy, durable playlists and crash recovery, exact controller identity/event coalescing, native resource/URL bounds, source-specific acceptance. Preserved pause/mute/repeat toggles, relative rewind and playtop insertion after current. AI naming reconciled to queue_song, search/play are domain operations and separate model search remains optional future tool. ADR adds concrete alternatives/invariants/prototype gates/operating and reversal evidence.
+
+16relative links zero missing and scoped diffcheck pass, normalLFCRLFnotices only. No runtime tests/playback/dependency/board/Git/publication actions. Required YouTube/Spotify/Deezer/SoundCloud access remains gate, especially Deezer portal login. Moving voice main docs Node>=24.17.0 exceeds workspace24.13.1; pinned actual compatibility must be tested, no dependency changed. All new music pending. Coordinator read/reconciled main and ADR; acceptance before leaf transition.
