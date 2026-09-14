@@ -181,7 +181,7 @@
       "epic": "EPIC-001",
       "title": "packages/core Contracts, Errors, EventBus & Config",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-010"],
       "blocks": ["STORY-012"]
     },
@@ -231,6 +231,33 @@
       "status": "DONE",
       "requires": ["TASK-0102"],
       "blocks": ["STORY-011"]
+    },
+    {
+      "id": "TASK-0111",
+      "parent": "STORY-011",
+      "title": "Zod Schema Environment Validation & Config Loader",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["STORY-010"],
+      "blocks": ["TASK-0112"]
+    },
+    {
+      "id": "TASK-0112",
+      "parent": "STORY-011",
+      "title": "Standardized Error Hierarchy & Error Codes",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-0111"],
+      "blocks": ["TASK-0113"]
+    },
+    {
+      "id": "TASK-0113",
+      "parent": "STORY-011",
+      "title": "Strongly-Typed Asynchronous EventBus & Lifecycle Hooks",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-0112"],
+      "blocks": ["STORY-012"]
     }
   ],
   "chores": [],
