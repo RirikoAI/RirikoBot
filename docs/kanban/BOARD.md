@@ -18,7 +18,6 @@
 ## 🎯 To Do (Groomed & Estimated)
 | ID | Type | Title | Pts | Epic / Parent | Requires |
 |---|---|---|---|---|---|
-| `STORY-011` | Story | `packages/core` Contracts, Errors, EventBus & Config | 5 | `EPIC-001` | `STORY-010` |
 | `STORY-012` | Story | `apps/cli` Scaffolding & `ririko doctor` Diagnostics | 5 | `EPIC-001` | `STORY-011` |
 
 ---
@@ -42,6 +41,10 @@
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | `STORY-010` | [TASK-0101.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | `STORY-010` | [TASK-0102.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0102.md) |
 | `TASK-0103` | Task | Root Linting, Formatting & Vitest Configuration | 2 | `STORY-010` | [TASK-0103.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0103.md) |
+| `STORY-011` | Story | `packages/core` Contracts, Errors, EventBus & Config | 5 | `EPIC-001` | [TASK-0113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0113.md) |
+| `TASK-0111` | Task | Zod Schema Environment Validation & Config Loader | 2 | `STORY-011` | [TASK-0111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0111.md) |
+| `TASK-0112` | Task | Standardized Error Hierarchy & Error Codes | 1 | `STORY-011` | [TASK-0112.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0112.md) |
+| `TASK-0113` | Task | Strongly-Typed Asynchronous EventBus & Lifecycle Hooks | 2 | `STORY-011` | [TASK-0113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0113.md) |
 
 ---
 
