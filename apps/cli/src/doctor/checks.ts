@@ -1,7 +1,6 @@
 import { exec } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
 import { promisify } from 'node:util';
+import { createDatabaseClient, pingDatabase } from '@ririko/database';
 import { DiagnosticCheck } from './types.js';
 
 const execAsync = promisify(exec);
@@ -48,43 +47,54 @@ export const typescriptCheck: DiagnosticCheck = {
 export const databaseCheck: DiagnosticCheck = {
   name: 'Database Configuration',
   required: true,
-  run: () => {
-    const dialect = process.env.DATABASE_DIALECT || 'sqlite';
+  run: async () => {
+    const dialect = (process.env.DATABASE_DIALECT || 'sqlite') as 'sqlite' | 'postgres';
     const dbUrl = process.env.DATABASE_URL || './data/ririko.sqlite';
 
-    if (dialect === 'sqlite') {
-      try {
-        const dir = path.dirname(dbUrl);
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
-        }
-        return {
-          status: 'pass',
-          message: `SQLite Storage (${dbUrl})`,
-        };
-      } catch (err: unknown) {
-        return {
-          status: 'fail',
-          message: `Cannot access or create SQLite directory: ${err instanceof Error ? err.message : String(err)}`,
-        };
-      }
-    } else if (dialect === 'postgres') {
-      if (!process.env.DATABASE_URL) {
-        return {
-          status: 'fail',
-          message: 'DATABASE_URL is required when DATABASE_DIALECT is postgres',
-        };
-      }
+    if (dialect !== 'sqlite' && dialect !== 'postgres') {
       return {
-        status: 'pass',
-        message: `PostgreSQL (${dbUrl.replace(/:[^:@]+@/, ':****@')})`,
+        status: 'fail',
+        message: `Unsupported DATABASE_DIALECT '${dialect}'. Must be 'postgres' or 'sqlite'.`,
       };
     }
 
-    return {
-      status: 'fail',
-      message: `Unsupported DATABASE_DIALECT '${dialect}'. Must be 'postgres' or 'sqlite'.`,
-    };
+    if (dialect === 'postgres' && !process.env.DATABASE_URL) {
+      return {
+        status: 'fail',
+        message: 'DATABASE_URL is required when DATABASE_DIALECT is postgres',
+      };
+    }
+
+    try {
+      const client = await createDatabaseClient({
+        dialect,
+        url: dbUrl,
+        connectionTimeoutMs: 3000,
+      });
+
+      const ping = await pingDatabase(client);
+      await client.close();
+
+      if (ping.ok) {
+        return {
+          status: 'pass',
+          message:
+            dialect === 'sqlite'
+              ? `SQLite Active (${dbUrl}, ${ping.latencyMs}ms)`
+              : `PostgreSQL Connected (${dbUrl.replace(/:[^:@]+@/, ':****@')}, ${ping.latencyMs}ms)`,
+        };
+      }
+
+      return {
+        status: 'fail',
+        message: `Database ping failed: ${ping.error ?? 'Unknown error'}`,
+      };
+    } catch (err: unknown) {
+      return {
+        status: 'fail',
+        message: `Database initialization failed: ${err instanceof Error ? err.message : String(err)}`,
+      };
+    }
   },
 };
 
