@@ -1,0 +1,50 @@
+name: ririko
+
+services:
+  postgres:
+    image: postgres:18.6-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ririko
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a PostgreSQL administrator password}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ririko"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    stop_grace_period: 30s
+
+  bot:
+    build:
+      context: .
+      target: runtime
+    image: ririko:2.0.0
+    init: true
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_DIALECT: postgres
+      DATABASE_URL: ${DATABASE_URL:?Set the ririko application PostgreSQL URL}
+      DISCORD_TOKEN: ${DISCORD_TOKEN:?Set the Discord bot token}
+      DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:?Set the Discord application ID}
+      BOT_OWNER_IDS: ${BOT_OWNER_IDS:-}
+      DEFAULT_PREFIX: ${DEFAULT_PREFIX:-!}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      HEALTH_HOST: 127.0.0.1
+      HEALTH_PORT: 3001
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    volumes:
+      - bot-data:/app/data
+    stop_grace_period: 30s
+
+volumes:
+  postgres-data:
+  bot-data:

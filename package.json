@@ -1,0 +1,30 @@
+{
+  "name": "ririko",
+  "version": "2.0.0",
+  "description": "Ririko AI 2.0.0 modular Discord platform",
+  "type": "module",
+  "packageManager": "pnpm@10.34.5",
+  "engines": { "node": ">=24.13.1 <25" },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "lint": "eslint apps packages tests",
+    "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:e2e": "vitest run --project e2e",
+    "dev": "node --conditions=development --import tsx apps/bot/src/index.ts",
+    "start": "node apps/bot/dist/index.js",
+    "ririko": "node --conditions=development --import tsx apps/cli/src/index.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "@types/node": "24.13.3",
+    "@eslint/js": "10.0.1",
+    "eslint": "10.8.1",
+    "typescript-eslint": "8.67.0",
+    "tsx": "4.23.12",
+    "vitest": "4.1.10"
+  },
+  "private": true
+}

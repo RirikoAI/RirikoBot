@@ -1,0 +1,1268 @@
+{
+  "formatVersion": 1,
+  "status": "Source schema audit; not a production data export or implemented 2.0 importer.",
+  "source": {
+    "repository": "https://github.com/RirikoAI/RirikoBot",
+    "branch": "master",
+    "commit": "0d8be25b17e25dfa61812d6e7b5aaf8497687257",
+    "auditDate": "2026-09-14",
+    "localReadOnlyClone": ".audit/RirikoBot"
+  },
+  "method": {
+    "description": "Extracted static queryRunner.query SQL literals from each migration up() and replayed on a new in-memory SQLite database with foreign keys enabled. This does not execute TypeORM, its migration ledger, entity synchronization, or application startup.",
+    "sqliteVersion": "3.50.4",
+    "integrityCheck": "ok",
+    "foreignKeyCheck": [],
+    "representativeProductionDataAvailable": false
+  },
+  "migrationCount": 12,
+  "migrations": [
+    {
+      "file": "1731423065562-InitialDB.ts",
+      "sha256": "dbd29a5fa62c77e01dba038834379ee47d06da1df936eae019984b3bc1bb5990",
+      "upStatementCount": 6
+    },
+    {
+      "file": "1731702068693-MusicChannel.ts",
+      "sha256": "4e015983e473ff21747db86c05d1119aa753f0623109e76544a863d86eee40c2",
+      "upStatementCount": 5
+    },
+    {
+      "file": "1731828022359-MusicTracks.ts",
+      "sha256": "05e25690efb24379df07b2a9c0d30d9df52355b028d32b8f5ec4ef545af8afa5",
+      "upStatementCount": 6
+    },
+    {
+      "file": "1732564190965-User.ts",
+      "sha256": "7fe298dc412489eba75c2d1d1b7a6c305ab62c6f22171f9c19fc35d116a9a67d",
+      "upStatementCount": 1
+    },
+    {
+      "file": "1732837987621-EconomyUpdate.ts",
+      "sha256": "9fa58c212a3e5aa4b5e1b02f5b33179eb6a84bf8518ce43db710e359792da107",
+      "upStatementCount": 10
+    },
+    {
+      "file": "1732921945292-GuildConfig.ts",
+      "sha256": "a2472e7f7d7370f3ad5563fd633a90e6c75836d046be01270b0e830f166057f5",
+      "upStatementCount": 5
+    },
+    {
+      "file": "1733570785744-ConfigAndTwitch.ts",
+      "sha256": "86fe5891c376ebb04c57dbcea5ff89c3f68a86dc1a85f9a579264ad073c123ec",
+      "upStatementCount": 12
+    },
+    {
+      "file": "1733669990246-StableDiffusion.ts",
+      "sha256": "c9a57bb1658929fd0780bc97ae636c90af8ff656ddd945146d374b793d4ce8a4",
+      "upStatementCount": 20
+    },
+    {
+      "file": "1734379313298-UserNote.ts",
+      "sha256": "972464c19ba345c7d71044551025a58e4012302e0a4ad442ace7b394a65cbce6",
+      "upStatementCount": 9
+    },
+    {
+      "file": "1749306901025-FreeGames.ts",
+      "sha256": "c82e0a3fcdacaa1fdb410648a5e9ef7d2798e61962ac710c109b378020e2999a",
+      "upStatementCount": 5
+    },
+    {
+      "file": "1749328951108-Reminders.ts",
+      "sha256": "7e881936d7cc7ef58d52185fc6cf36970d01ba25c10f46ba9b3f021bfbc5deb5",
+      "upStatementCount": 1
+    },
+    {
+      "file": "1753428868386-ReactionRole.ts",
+      "sha256": "24d4ef3390394ff0aae4268033afca01d378e1e7f7b3bbd2ce2129032e6fe0ea",
+      "upStatementCount": 5
+    }
+  ],
+  "tableCount": 17,
+  "tables": [
+    {
+      "name": "configuration",
+      "createSql": "CREATE TABLE \"configuration\" (\"applicationId\" varchar PRIMARY KEY NOT NULL, \"twitchClientId\" varchar, \"twitchClientSecret\" varchar, \"stableDiffusionType\" varchar, \"stableDiffusionApiToken\" varchar)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "applicationId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "twitchClientId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "twitchClientSecret",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "stableDiffusionType",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "stableDiffusionApiToken",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_configuration_1",
+          "unique": true,
+          "origin": "pk",
+          "partial": false
+        }
+      ]
+    },
+    {
+      "name": "free_game_notification",
+      "createSql": "CREATE TABLE \"free_game_notification\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"gameId\" varchar NOT NULL, \"gameName\" varchar NOT NULL, \"source\" varchar NOT NULL, \"notified\" boolean NOT NULL DEFAULT (0), \"guildId\" varchar NOT NULL, \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')), CONSTRAINT \"FK_d8c1952edfddb4c55bd310d98b2\" FOREIGN KEY (\"guildId\") REFERENCES \"guild\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "gameId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "gameName",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "source",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "notified",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 5,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 6,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 7,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "guild",
+          "column": "guildId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "guild",
+      "createSql": "CREATE TABLE \"guild\" (\"id\" varchar PRIMARY KEY NOT NULL, \"name\" varchar NOT NULL, \"prefix\" varchar NOT NULL DEFAULT ('!'))",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "prefix",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": "'!'",
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_guild_1",
+          "unique": true,
+          "origin": "pk",
+          "partial": false
+        }
+      ]
+    },
+    {
+      "name": "guild_config",
+      "createSql": "CREATE TABLE \"guild_config\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"name\" varchar NOT NULL, \"value\" varchar NOT NULL, \"guildId\" varchar, CONSTRAINT \"FK_d702256aa71bc54b91f0deb040c\" FOREIGN KEY (\"guildId\") REFERENCES \"guild\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "value",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "guild",
+          "column": "guildId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "item",
+      "createSql": "CREATE TABLE \"item\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"name\" varchar NOT NULL, \"price\" integer NOT NULL, \"description\" varchar NOT NULL, \"rarity\" integer NOT NULL, \"hidden\" boolean NOT NULL DEFAULT (0), \"purchaseLimit\" integer NOT NULL DEFAULT (0), \"purchasable\" boolean NOT NULL DEFAULT (0), \"sellable\" boolean NOT NULL DEFAULT (0), \"findable\" boolean NOT NULL DEFAULT (0), \"imageUrl\" varchar NOT NULL, \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')), \"categoryId\" integer, CONSTRAINT \"FK_c0c8f47a702c974a77812169bc2\" FOREIGN KEY (\"categoryId\") REFERENCES \"item_category\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "price",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "description",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "rarity",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 5,
+          "name": "hidden",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 6,
+          "name": "purchaseLimit",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 7,
+          "name": "purchasable",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 8,
+          "name": "sellable",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 9,
+          "name": "findable",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 10,
+          "name": "imageUrl",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 11,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 12,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 13,
+          "name": "categoryId",
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "item_category",
+          "column": "categoryId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "item_category",
+      "createSql": "CREATE TABLE \"item_category\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"name\" varchar NOT NULL)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": []
+    },
+    {
+      "name": "music_channel",
+      "createSql": "CREATE TABLE \"music_channel\" (\"id\" varchar PRIMARY KEY NOT NULL, \"name\" varchar NOT NULL, \"guildId\" varchar, CONSTRAINT \"FK_6148e98fda68aa504c141a05600\" FOREIGN KEY (\"guildId\") REFERENCES \"guild\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "guild",
+          "column": "guildId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_music_channel_1",
+          "unique": true,
+          "origin": "pk",
+          "partial": false
+        }
+      ]
+    },
+    {
+      "name": "playlist",
+      "createSql": "CREATE TABLE \"playlist\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"name\" varchar NOT NULL, \"userId\" varchar NOT NULL, \"author\" varchar NOT NULL, \"authorTag\" varchar NOT NULL, \"public\" boolean NOT NULL, \"plays\" integer NOT NULL, \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')))",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "userId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "author",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "authorTag",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 5,
+          "name": "public",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 6,
+          "name": "plays",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 7,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 8,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": []
+    },
+    {
+      "name": "reaction_role",
+      "createSql": "CREATE TABLE \"reaction_role\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"messageId\" varchar NOT NULL, \"emoji\" varchar NOT NULL, \"roleId\" varchar NOT NULL, \"guildId\" varchar, CONSTRAINT \"FK_3959343ea6e44ecef758a345642\" FOREIGN KEY (\"guildId\") REFERENCES \"guild\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "messageId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "emoji",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "roleId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "guild",
+          "column": "guildId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "reminder",
+      "createSql": "CREATE TABLE \"reminder\" (\"id\" varchar PRIMARY KEY NOT NULL, \"userId\" varchar NOT NULL, \"channelId\" varchar NOT NULL, \"guildId\" varchar NOT NULL, \"message\" varchar NOT NULL, \"scheduledTime\" datetime NOT NULL, \"sent\" boolean NOT NULL DEFAULT (0), \"timezone\" varchar, \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')))",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "userId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "channelId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "message",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 5,
+          "name": "scheduledTime",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 6,
+          "name": "sent",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 7,
+          "name": "timezone",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 8,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 9,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_reminder_1",
+          "unique": true,
+          "origin": "pk",
+          "partial": false
+        }
+      ]
+    },
+    {
+      "name": "stream_notification",
+      "createSql": "CREATE TABLE \"stream_notification\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"twitchUserId\" varchar NOT NULL, \"channelId\" varchar NOT NULL, \"streamId\" varchar NOT NULL, \"notified\" boolean NOT NULL DEFAULT (0), \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')), \"guildId\" varchar NOT NULL, CONSTRAINT \"FK_72d0bec59898ddbaca2f30b26be\" FOREIGN KEY (\"guildId\") REFERENCES \"guild\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "twitchUserId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "channelId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "streamId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "notified",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 5,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 6,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 7,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "guild",
+          "column": "guildId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "stream_subscription",
+      "createSql": "CREATE TABLE \"stream_subscription\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"twitchUserId\" varchar NOT NULL, \"channelId\" varchar NOT NULL, \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')), \"guildId\" varchar, CONSTRAINT \"FK_05ef6cd02914c41a7431574cf50\" FOREIGN KEY (\"guildId\") REFERENCES \"guild\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "twitchUserId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "channelId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 5,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "guild",
+          "column": "guildId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "track",
+      "createSql": "CREATE TABLE \"track\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"name\" varchar NOT NULL, \"url\" varchar NOT NULL, \"playlistId\" integer, CONSTRAINT \"FK_cd57e08e2edf7fd0078a493ffe5\" FOREIGN KEY (\"playlistId\") REFERENCES \"playlist\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "url",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "playlistId",
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "playlist",
+          "column": "playlistId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "twitch_streamer",
+      "createSql": "CREATE TABLE \"twitch_streamer\" (\"twitchUserId\" varchar PRIMARY KEY NOT NULL, \"isLive\" boolean NOT NULL DEFAULT (0), \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')))",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "twitchUserId",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "isLive",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_twitch_streamer_1",
+          "unique": true,
+          "origin": "pk",
+          "partial": false
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "createSql": "CREATE TABLE \"user\" (\"id\" varchar PRIMARY KEY NOT NULL, \"username\" varchar NOT NULL, \"displayName\" varchar NOT NULL, \"karma\" integer NOT NULL DEFAULT (0), \"coins\" integer NOT NULL DEFAULT (0), \"pointsSuspended\" boolean NOT NULL DEFAULT (0), \"commandsSuspended\" boolean NOT NULL DEFAULT (0), \"doNotNotifyOnLevelUp\" boolean NOT NULL DEFAULT (0), \"warns\" integer NOT NULL DEFAULT (0), \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')), \"backgroundImageURL\" varchar)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "username",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "displayName",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "karma",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "coins",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 5,
+          "name": "pointsSuspended",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 6,
+          "name": "commandsSuspended",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 7,
+          "name": "doNotNotifyOnLevelUp",
+          "type": "boolean",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 8,
+          "name": "warns",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": "0",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 9,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 10,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 11,
+          "name": "backgroundImageURL",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_user_1",
+          "unique": true,
+          "origin": "pk",
+          "partial": false
+        }
+      ]
+    },
+    {
+      "name": "user_note",
+      "createSql": "CREATE TABLE \"user_note\" (\"id\" integer PRIMARY KEY AUTOINCREMENT NOT NULL, \"note\" varchar NOT NULL, \"createdBy\" varchar NOT NULL, \"createdAt\" datetime NOT NULL DEFAULT (datetime('now')), \"updatedAt\" datetime NOT NULL DEFAULT (datetime('now')), \"guildId\" varchar, \"userId\" varchar, CONSTRAINT \"FK_51c1d8f260411e99453caa02299\" FOREIGN KEY (\"guildId\") REFERENCES \"guild\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT \"FK_236dbd155cee61376a015913576\" FOREIGN KEY (\"userId\") REFERENCES \"user\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "note",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "createdBy",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "createdAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 4,
+          "name": "updatedAt",
+          "type": "datetime",
+          "notNull": true,
+          "defaultSql": "datetime('now')",
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 5,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 6,
+          "name": "userId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "user",
+          "column": "userId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "sequence": 0,
+          "targetTable": "guild",
+          "column": "guildId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "voice_channel",
+      "createSql": "CREATE TABLE \"voice_channel\" (\"id\" varchar PRIMARY KEY NOT NULL, \"name\" varchar NOT NULL, \"parentId\" varchar, \"guildId\" varchar, CONSTRAINT \"FK_e64c66cfcac55ab6f4bc1102d82\" FOREIGN KEY (\"guildId\") REFERENCES \"guild\" (\"id\") ON DELETE NO ACTION ON UPDATE NO ACTION)",
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 1
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type": "varchar",
+          "notNull": true,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 2,
+          "name": "parentId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        },
+        {
+          "ordinal": 3,
+          "name": "guildId",
+          "type": "varchar",
+          "notNull": false,
+          "defaultSql": null,
+          "primaryKeyPosition": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "sequence": 0,
+          "targetTable": "guild",
+          "column": "guildId",
+          "targetColumn": "id",
+          "onUpdate": "NO ACTION",
+          "onDelete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "sqlite_autoindex_voice_channel_1",
+          "unique": true,
+          "origin": "pk",
+          "partial": false
+        }
+      ]
+    }
+  ],
+  "additionalSourceCandidates": [
+    "giveaways.json in process working directory",
+    "TypeORM migrations metadata table",
+    "sqlite_sequence",
+    "query-result-cache when TypeORM query caching creates it",
+    "deployment environment and secret files",
+    "local custom assets and external media references"
+  ],
+  "warnings": [
+    "Entity declarations are not evidence of actual deployed schema; inspect source sqlite_master and PRAGMAs.",
+    "Guild settings lack a uniqueness constraint on guildId/name.",
+    "Many relationship columns are nullable; do not silently drop or coerce orphaned records.",
+    "Discord identifiers are strings; most generated legacy internal IDs are integers, reminder IDs are UUID strings.",
+    "No representative SQLite database or giveaway JSON was included in the audited repository."
+  ]
+}

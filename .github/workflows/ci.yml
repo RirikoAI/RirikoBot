@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18.6-bookworm
+        env:
+          POSTGRES_DB: ririko_test
+          POSTGRES_USER: ririko_test
+          POSTGRES_PASSWORD: isolated-ci-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ririko_test -d ririko_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      TEST_POSTGRES_URL: postgres://ririko_test:isolated-ci-password@127.0.0.1:5432/ririko_test
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.19.0
+          package-manager-cache: false
+      - name: Install native build tools and pnpm
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3 make g++
+          npm install --global pnpm@10.34.5
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Type check
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Database integration tests
+        run: pnpm test:integration
+      - name: End-to-end tests
+        run: pnpm test:e2e
+      - name: Build applications
+        run: pnpm build
+      - name: Validate Compose configuration
+        env:
+          POSTGRES_PASSWORD: isolated-ci-password
+          DATABASE_URL: postgres://ririko_test:isolated-ci-password@postgres:5432/ririko_test
+          DISCORD_TOKEN: validation-only-token
+          DISCORD_APPLICATION_ID: "123456789012345678"
+        run: docker compose config --quiet
+      - name: Build production container
+        run: docker build --target runtime --tag ririko:ci .
+      - name: Verify production image, SQLite migration and diagnostics
+        run: |
+          docker run --rm --entrypoint node ririko:ci --input-type=module -e "if (process.getuid() === 0) process.exit(1); try { import.meta.resolve('typescript'); process.exit(1); } catch {}"
+          docker run --rm --read-only --tmpfs /tmp:size=64m,mode=1777 --env DISCORD_TOKEN=validation-only-token --env DISCORD_APPLICATION_ID=123456789012345678 --entrypoint sh ririko:ci -c 'node apps/cli/dist/index.js migrate && node apps/cli/dist/index.js doctor --json'
