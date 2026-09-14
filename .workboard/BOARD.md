@@ -1,6 +1,6 @@
 # Ririko work board
 
-Generated from state.json · revision 117 · execution limit **1**.
+Generated from state.json · revision 129 · execution limit **1**.
 
 **Current work:** No occupied ticket.
 **Delivery:** BATCH-003 / RIR-800 / `feat/RIR-800-documentation-depth` → `develop/2.0.0-astra` (open)
@@ -21,7 +21,6 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | RIR-230 | story | Meme rendering and usable prefix commands | 13 | RIR-200 | RIR-210 | — | RIR-230 |
 | RIR-231 | bug | Repair the eleven broken legacy meme prefix paths | 8 | RIR-230 | RIR-210 | — | RIR-231 |
 | RIR-800 | epic | Implementation-ready documentation across every docs file | 89 | — | RIR-110 | — | RIR-800 |
-| RIR-806 | task | Deepen deployment, incident recovery and acceptance test strategy | 8 | RIR-800 | RIR-805 | RIR-807 | RIR-800 |
 | RIR-807 | task | Reconcile every document, requirement and comparison with evidence | 8 | RIR-800 | RIR-806 | — | RIR-800 |
 
 ## backlog
@@ -53,6 +52,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | RIR-803 | task | Specify provider, AI, music, moderation and durable delivery behavior | 13 | RIR-800 | RIR-802 | RIR-804 | RIR-800 |
 | RIR-804 | task | Specify economy and complete TCG progression and transactional rules | 13 | RIR-800 | RIR-803 | RIR-805 | RIR-800 |
 | RIR-805 | task | Specify dashboard workflows, authorization and credential lifecycle | 8 | RIR-800 | RIR-804 | RIR-806 | RIR-800 |
+| RIR-806 | task | Deepen deployment, incident recovery and acceptance test strategy | 8 | RIR-800 | RIR-805 | RIR-807 | RIR-800 |
 | RIR-808 | task | Support fresh stack consent after a published parent closes | 5 | RIR-800 | RIR-110 | — | RIR-800 |
 
 ## Agent assignments
@@ -78,6 +78,9 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | A-017 | RIR-805 | developer-docs | accepted | Deepen dashboard main guide with all admin workflows and trustworthy current-versus-future contracts |
 | A-018 | RIR-805 | architecture-docs | accepted | Deepen web architecture ADR with alternatives, boundaries, authentication/cache/concurrency/rollout decisions |
 | A-019 | RIR-805 | discord-docs | accepted | Read-only independent dashboard/OAuth/secret lifecycle security and blueprint/Gemini completeness review |
+| A-020 | RIR-806 | developer-docs | accepted | Deepen deployment runbook against actual Docker/Compose/CI/health and source/Gemini, with verified commands and recovery gaps |
+| A-021 | RIR-806 | architecture-docs | accepted | Read-only independent deployment/release/backup/health and Git scope review |
+| A-022 | RIR-806 | discord-docs | accepted | Read-only independent test/CI inventory and testing guide review; do not rerun full suite |
 
 ## Current handoffs
 
@@ -87,7 +90,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 - RIR-803: [handoff](handoffs/RIR-803/006-completion.md)
 - RIR-804: [handoff](handoffs/RIR-804/006-completion.md)
 - RIR-805: [handoff](handoffs/RIR-805/006-completion.md)
-- RIR-806: [handoff](handoffs/RIR-806/001-start.md)
+- RIR-806: [handoff](handoffs/RIR-806/006-completion.md)
 - RIR-807: [handoff](handoffs/RIR-807/001-start.md)
 - RIR-808: [handoff](handoffs/RIR-808/002-completion.md)
 

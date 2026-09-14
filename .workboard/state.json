@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 117,
+  "revision": 129,
   "policy": {
     "pointScale": [
       1,
@@ -764,14 +764,16 @@
       ]
     },
     {
-      "status": "ready",
+      "status": "done",
       "estimate": 8,
       "estimateRationale": "Deepen deployment, incident recovery and acceptance test strategy: compare source/blueprint/vendor constraints, write detailed design and validate consistency before completion",
       "groomedIn": "GR-004",
       "priority": "P1",
-      "owner": null,
-      "handoff": ".workboard/handoffs/RIR-806/001-start.md",
-      "validation": [],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-806/006-completion.md",
+      "validation": [
+        "29 local paths valid; requirements91/35; board/diffcheck; lint/type/build pass; SQLite/CLI13pass7PGskip; no live platform claims"
+      ],
       "id": "RIR-806",
       "type": "task",
       "title": "Deepen deployment, incident recovery and acceptance test strategy",
@@ -1185,6 +1187,35 @@
       "paths": [],
       "status": "accepted",
       "handoff": ".workboard/handoffs/RIR-805/005-independent-review.md"
+    },
+    {
+      "id": "A-020",
+      "ticket": "RIR-806",
+      "agent": "developer-docs",
+      "scope": "Deepen deployment runbook against actual Docker/Compose/CI/health and source/Gemini, with verified commands and recovery gaps",
+      "paths": [
+        "docs/deployment.md"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-806/003-deployment-return.md"
+    },
+    {
+      "id": "A-021",
+      "ticket": "RIR-806",
+      "agent": "architecture-docs",
+      "scope": "Read-only independent deployment/release/backup/health and Git scope review",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-806/004-operations-review.md"
+    },
+    {
+      "id": "A-022",
+      "ticket": "RIR-806",
+      "agent": "discord-docs",
+      "scope": "Read-only independent test/CI inventory and testing guide review; do not rerun full suite",
+      "paths": [],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-806/005-testing-return.md"
     }
   ],
   "batches": [
@@ -2062,6 +2093,90 @@
       "actor": "coordinator",
       "action": "move",
       "detail": "{\"action\":\"move\",\"ticket\":\"RIR-805\",\"status\":\"done\",\"reason\":\"Three complete docs reviewed with independent authority/credential lifecycle signoff\",\"handoff\":\".workboard/handoffs/RIR-805/006-completion.md\",\"validation\":[\"28 local paths valid; requirements91/35; diffcheck; full independent review; no runtime web claims\"]}"
+    },
+    {
+      "id": 118,
+      "at": "2026-09-14T18:21:03.187Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-806\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 119,
+      "at": "2026-09-14T18:21:03.972Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-020\",\"ticket\":\"RIR-806\",\"agent\":\"developer-docs\",\"scope\":\"Deepen deployment runbook against actual Docker/Compose/CI/health and source/Gemini, with verified commands and recovery gaps\",\"paths\":[\"docs/deployment.md\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 120,
+      "at": "2026-09-14T18:21:04.780Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-021\",\"ticket\":\"RIR-806\",\"agent\":\"architecture-docs\",\"scope\":\"Read-only independent deployment/release/backup/health and Git scope review\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 121,
+      "at": "2026-09-14T18:21:05.552Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-022\",\"ticket\":\"RIR-806\",\"agent\":\"discord-docs\",\"scope\":\"Read-only independent test/CI inventory and testing guide review; do not rerun full suite\",\"paths\":[],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 122,
+      "at": "2026-09-14T18:29:28.434Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-020\",\"handoff\":\".workboard/handoffs/RIR-806/003-deployment-return.md\"}"
+    },
+    {
+      "id": 123,
+      "at": "2026-09-14T18:29:29.286Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-020\"}"
+    },
+    {
+      "id": 124,
+      "at": "2026-09-14T18:29:30.096Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-021\",\"handoff\":\".workboard/handoffs/RIR-806/004-operations-review.md\"}"
+    },
+    {
+      "id": 125,
+      "at": "2026-09-14T18:29:30.919Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-021\"}"
+    },
+    {
+      "id": 126,
+      "at": "2026-09-14T18:29:31.738Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-022\",\"handoff\":\".workboard/handoffs/RIR-806/005-testing-return.md\"}"
+    },
+    {
+      "id": 127,
+      "at": "2026-09-14T18:29:32.550Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-022\"}"
+    },
+    {
+      "id": 128,
+      "at": "2026-09-14T18:29:33.344Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-806\",\"status\":\"review\",\"reason\":\"Both runbooks compared and independently source-reviewed, central checks passed\",\"handoff\":\".workboard/handoffs/RIR-806/006-completion.md\",\"validation\":[\"29 local paths valid; requirements91/35; board/diffcheck; lint/type/build pass; SQLite/CLI13pass7PGskip; no live platform claims\"]}"
+    },
+    {
+      "id": 129,
+      "at": "2026-09-14T18:29:34.158Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-806\",\"status\":\"done\",\"reason\":\"Both runbooks compared and independently source-reviewed, central checks passed\",\"handoff\":\".workboard/handoffs/RIR-806/006-completion.md\",\"validation\":[\"29 local paths valid; requirements91/35; board/diffcheck; lint/type/build pass; SQLite/CLI13pass7PGskip; no live platform claims\"]}"
     }
   ]
 }
