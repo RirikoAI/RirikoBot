@@ -1,6 +1,8 @@
 # Development and operator commands
 Before implementation, follow [work management](work-management.md), read the current ticket/handoff and run `pnpm board check`. All agents share one active ticket; a new scope requires the user's PR checkpoint decision. Install local guards with `pnpm board install-hooks` in every clone.
 
+Use [the preserved blueprint](../BLUEPRINT.md) and [requirement ledger](requirements.md) to define acceptance. `pnpm board requirements-show BP-07` lists evidence and remaining work for a section; `pnpm board requirements-check` checks source/coverage/reference integrity. These local developer operations have no Discord slash/prefix equivalents.
+
 Use Node 24 LTS, pnpm 10.34.5 and the lockfile. Run commands from the workspace root. `pnpm install --frozen-lockfile` installs exact direct versions and locked transitives. Native SQLite builds may require Python and a C++ build toolchain. See dependency-evaluation.md.
 
 Copy .env.example to .env. Node's built-in environment loader is used; process environment takes precedence. Optional credentials can remain commented until the bot or command sync is needed. Startup validates known fields without printing invalid values. Production secrets come from environment, never source control. .env, databases, audit sources and tool downloads are ignored.

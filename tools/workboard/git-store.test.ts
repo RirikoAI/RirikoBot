@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { relative, resolve } from 'node:path';
-import { git, guardCommit, guardMessage, guardPullRequest, guardPush, publicationPlan, verifyGit } from './git.ts';
+import { deliveryBase, git, guardCommit, guardMessage, guardPullRequest, guardPush, publicationBase, publicationPlan, requirePublishedBase, verifyGit } from './git.ts';
 import { checkHandoffs, commonDirectory, initializeShared, mutate, readBoard, serialize, synchronize, withLock } from './store.ts';
 import { parseBoard } from './model.ts';
 import { renderBoard, ticketView } from './render.ts';
-import type { Board } from './types.ts';
+import type { Batch, Board, Command } from './types.ts';
 
 const at = '2026-09-14T12:00:00Z';
 const handoff = '.workboard/handoffs/RIR-001/001.md';
@@ -29,6 +29,35 @@ function publicationFixture(): ReturnType<typeof publicationPlan> {
   git(root, ['add', '.workboard']);
   git(root, ['commit', '-m', '[RIR-001] Complete fixture']);
   return { ...publicationPlan(root, board), reference: 'User reply in test: approve this exact scope', at };
+}
+
+function stackedFixture(publishParent = true): string {
+  publicationFixture();
+  // A real parent-only code change must not be attributed to the dependent story.
+  writeFileSync(resolve(root, 'README.md'), 'Completed parent delivery\n');
+  board.batches[0]!.status = 'closed';
+  board.decisions.push({ id: 'D-001', kind: 'defer-pr', reference: 'User: defer this PR and allow one stacked improvement story', at, fromTicket: null, toTicket: null, disposition: null, batchId: 'BATCH-001' });
+  project(board);
+  git(root, ['add', 'README.md', '.workboard']);
+  git(root, ['commit', '-m', '[RIR-001] Preserve deferred parent']);
+  const parentHead = git(root, ['rev-parse', 'HEAD']);
+  if (publishParent) git(root, ['update-ref', `refs/remotes/origin/${board.batches[0]!.branch}`, parentHead]);
+  git(root, ['switch', '-c', 'feat/RIR-110-evidence']);
+  board.tickets.push({ ...board.tickets[1]!, id: 'RIR-110', type: 'story', title: 'Independent delivery evidence', requires: ['RIR-001'], status: 'done', deliveryScope: 'RIR-110', paths: ['src/'], handoff: '.workboard/handoffs/RIR-110/001.md' });
+  board.grooming[0]!.tickets.push('RIR-110');
+  board.batches.push({ id: 'BATCH-002', scope: 'RIR-110', branch: 'feat/RIR-110-evidence', baseBranch: board.policy.baseBranch, baseSha: board.batches[0]!.baseSha, status: 'checkpoint', tickets: ['RIR-110'], prUrl: null, stack: { parentBatch: 'BATCH-001', parentHead, decision: 'D-001' } });
+  mkdirSync(resolve(root, '.workboard/handoffs/RIR-110'), { recursive: true });
+  writeFileSync(resolve(root, '.workboard/handoffs/RIR-110/001.md'), '# Story handoff\nReviewed independently.\n');
+  mkdirSync(resolve(root, 'src'));
+  writeFileSync(resolve(root, 'src/evidence.ts'), 'export const evidence = true;\n');
+  project(board);
+  git(root, ['add', 'src/', '.workboard']);
+  git(root, ['commit', '-m', '[RIR-110] Verify story evidence']);
+  return parentHead;
+}
+
+function prEvent(target: string, sha: string): unknown {
+  return { pull_request: { base: { ref: target, sha, repo: { full_name: board.policy.repository } }, head: { ref: board.batches.at(-1)!.branch, sha: git(root, ['rev-parse', 'HEAD']), repo: { full_name: board.policy.repository } } } };
 }
 
 beforeEach(() => {
@@ -149,6 +178,7 @@ describe('local Git and publication guards', () => {
     const line = `refs/heads/${approval.branch} ${approval.head} refs/heads/${approval.branch} ${'0'.repeat(40)}\n`;
     expect(() => guardPush(root, board, null, 'origin', board.policy.remoteUrl, line)).toThrow(/No matching user approval/);
     expect(() => guardPush(root, board, { ...approval, head: 'a'.repeat(40) }, 'origin', board.policy.remoteUrl, line)).toThrow(/No matching/);
+    expect(() => guardPush(root, board, { ...approval, target: 'develop/2.0.0' }, 'origin', board.policy.remoteUrl, line)).toThrow(/No matching/);
     expect(() => guardPush(root, board, approval, 'origin', board.policy.remoteUrl, line)).not.toThrow();
     expect(() => guardPush(root, board, approval, 'origin', board.policy.remoteUrl, `${line}${line}`)).toThrow(/exactly one/);
     expect(() => guardPush(root, board, approval, 'origin', board.policy.remoteUrl, line.replace(`refs/heads/${approval.branch}`, '(delete)'))).toThrow(/non-deletion/);
@@ -165,6 +195,20 @@ describe('local Git and publication guards', () => {
     git(root, ['update-ref', `refs/remotes/origin/${batch.baseBranch}`, divergent]);
     expect(() => publicationPlan(root, board)).toThrow(/Target advanced/);
   });
+  it('uses the actual integration fork point when upstream changes are incorporated', () => {
+    publicationFixture();
+    git(root, ['switch', board.policy.baseBranch]);
+    writeFileSync(resolve(root, 'upstream-only.txt'), 'An unrelated delivery already accepted upstream\n');
+    git(root, ['add', 'upstream-only.txt']);
+    git(root, ['commit', '-m', 'Separate upstream delivery']);
+    const upstream = git(root, ['rev-parse', 'HEAD']);
+    git(root, ['update-ref', `refs/remotes/origin/${board.policy.baseBranch}`, upstream]);
+    git(root, ['switch', board.batches[0]!.branch]);
+    git(root, ['merge', '--no-edit', upstream]);
+    expect(deliveryBase(root, board)).toMatchObject({ branch: board.policy.baseBranch, sha: upstream, anchor: upstream, stacked: false });
+    expect(() => guardCommit(root, board)).not.toThrow();
+    expect(() => publicationPlan(root, board)).not.toThrow();
+  });
   it('validates the PR target and repository instead of inferring from branch names', () => {
     publicationFixture();
     const event = { pull_request: { base: { ref: 'develop/2.0.0-astra', repo: { full_name: 'example/ririko' } }, head: { ref: 'chore/RIR-001-governance', sha: git(root, ['rev-parse', 'HEAD']), repo: { full_name: 'example/ririko' } } } };
@@ -172,5 +216,162 @@ describe('local Git and publication guards', () => {
     event.pull_request.base.ref = 'develop/2.0.0';
     expect(() => guardPullRequest(board, event)).toThrow(/repository\/head\/base/);
     expect(() => guardPullRequest(board, {})).toThrow(/Invalid/);
+  });
+});
+
+describe('explicitly approved stacked deliveries', () => {
+  it('opens an approved stack atomically through real board commands before starting the story', () => {
+    publicationFixture();
+    const apply = (command: Command): Board => mutate(root, command, readBoard(root).revision, { actor: 'coordinator', now: at });
+    apply({ action: 'decision', decision: { id: 'D-001', kind: 'defer-pr', reference: 'User: defer this PR and allow one stacked improvement story', at, fromTicket: null, toTicket: null, disposition: null, batchId: 'BATCH-001' } });
+    apply({ action: 'close-batch', batch: 'BATCH-001', decision: 'D-001' });
+    git(root, ['add', '.workboard']);
+    git(root, ['commit', '-m', '[RIR-001] Preserve deferred parent']);
+    const parentHead = git(root, ['rev-parse', 'HEAD']);
+    apply({ action: 'create', ticket: { ...board.tickets[1]!, id: 'RIR-110', type: 'story', status: 'backlog', deliveryScope: 'RIR-110', requires: ['RIR-001'], estimate: null, groomedIn: null, owner: null, handoff: null, validation: [] } });
+    apply({ action: 'groom', grooming: { id: 'GR-002', scope: 'RIR-100', at, participants: ['coordinator'], tickets: ['RIR-110'], rationale: 'Refine the one approved dependent story' }, estimates: [{ id: 'RIR-110', points: 3, rationale: 'Bounded fixture story' }] });
+    mkdirSync(resolve(root, '.workboard/handoffs/RIR-110'), { recursive: true });
+    writeFileSync(resolve(root, '.workboard/handoffs/RIR-110/001.md'), '# Approved story\nEstimate and acceptance reviewed.\n');
+    apply({ action: 'move', ticket: 'RIR-110', status: 'ready', reason: 'Groomed scope ready for its approved stack', handoff: '.workboard/handoffs/RIR-110/001.md' });
+    git(root, ['switch', '-c', 'feat/RIR-110-evidence']);
+    const batch: Batch = { id: 'BATCH-002', scope: 'RIR-110', branch: 'feat/RIR-110-evidence', baseBranch: board.policy.baseBranch, baseSha: board.batches[0]!.baseSha, status: 'open', tickets: ['RIR-110'], prUrl: null };
+    const revision = readBoard(root).revision;
+    expect(() => apply({ action: 'batch', batch })).toThrow(/Unapproved inherited delivery/);
+    expect(() => apply({ action: 'batch', batch: { ...batch, stack: { parentBatch: 'BATCH-001', parentHead, decision: 'missing' } } })).toThrow(/matching parent deferral/);
+    expect(readBoard(root).revision).toBe(revision);
+    apply({ action: 'batch', batch: { ...batch, stack: { parentBatch: 'BATCH-001', parentHead, decision: 'D-001' } } });
+    const next = apply({ action: 'start', ticket: 'RIR-110', owner: 'coordinator' });
+    expect(next.tickets.filter((entry) => entry.status === 'in-progress').map((entry) => entry.id)).toEqual(['RIR-110']);
+    expect(deliveryBase(root, next)).toMatchObject({ branch: board.batches[0]!.branch, anchor: parentHead, published: false });
+  });
+  it('isolates only the child story and requires the preserved parent as its immediate PR target', () => {
+    const parentHead = stackedFixture();
+    const target = deliveryBase(root, board);
+    expect(target).toEqual({ branch: 'chore/RIR-001-governance', sha: parentHead, anchor: parentHead, stacked: true, published: true });
+    expect(() => guardCommit(root, board)).not.toThrow();
+    const approval = { ...publicationPlan(root, board), reference: 'User approves this story and exact parent target', at };
+    expect(approval.target).toBe('chore/RIR-001-governance');
+    const line = `refs/heads/${approval.branch} ${approval.head} refs/heads/${approval.branch} ${'0'.repeat(40)}\n`;
+    expect(() => guardPush(root, board, approval, 'origin', board.policy.remoteUrl, line)).not.toThrow();
+    expect(guardPullRequest(board, prEvent(target.branch, parentHead), target)).toBe(approval.head);
+    expect(guardPullRequest(board, prEvent(target.branch, parentHead))).toBe(approval.head);
+    expect(() => guardPullRequest(board, prEvent(board.policy.baseBranch, board.batches[0]!.baseSha), target)).toThrow(/repository\/head\/base/);
+    expect(() => guardPullRequest(board, prEvent(board.policy.baseBranch, board.batches[0]!.baseSha))).toThrow(/repository\/head\/base/);
+    expect(() => guardPullRequest(board, prEvent(target.branch, 'f'.repeat(40)), target)).toThrow(/base SHA/);
+    expect(() => guardPullRequest(board, prEvent(target.branch, 'f'.repeat(40)))).toThrow(/base SHA/);
+  });
+  it('keeps an unpublished parent reviewable but refuses dependent publication', () => {
+    stackedFixture(false);
+    expect(deliveryBase(root, board).published).toBe(false);
+    const approval = { ...publicationPlan(root, board), reference: 'User approves the child only', at };
+    expect(approval.target).toBe('chore/RIR-001-governance');
+    expect(() => requirePublishedBase(root, board)).toThrow(/Parent target.*unpublished/);
+    const line = `refs/heads/${approval.branch} ${approval.head} refs/heads/${approval.branch} ${'0'.repeat(40)}\n`;
+    expect(() => guardPush(root, board, approval, 'origin', board.policy.remoteUrl, line)).toThrow(/Parent target.*unpublished/);
+  });
+  it.each(['refs/heads/', 'refs/remotes/origin/'])('rejects movement of the frozen parent at %s', (prefix) => {
+    const parentHead = stackedFixture();
+    const moved = git(root, ['commit-tree', `${parentHead}^{tree}`, '-p', parentHead, '-m', 'Additional parent work']);
+    git(root, ['update-ref', `${prefix}${board.batches[0]!.branch}`, moved]);
+    expect(() => deliveryBase(root, board)).toThrow(/Parent branch moved/);
+    expect(() => publicationPlan(root, board)).toThrow(/Parent branch moved/);
+  });
+  it('resolves an integrated parent to the integration target and actual fork point', () => {
+    const parentHead = stackedFixture();
+    const oldBase = board.batches[0]!.baseSha;
+    // A merge of the parent can advance integration independently of the child.
+    const integrated = git(root, ['commit-tree', `${parentHead}^{tree}`, '-p', oldBase, '-p', parentHead, '-m', 'Merge reviewed parent']);
+    git(root, ['update-ref', `refs/remotes/origin/${board.policy.baseBranch}`, integrated]);
+    const target = deliveryBase(root, board);
+    expect(target).toEqual({ branch: board.policy.baseBranch, sha: integrated, anchor: parentHead, stacked: true, published: true });
+    expect(() => guardCommit(root, board)).not.toThrow();
+    expect(() => guardPullRequest(board, prEvent(target.branch, integrated), target)).not.toThrow();
+    expect(() => publicationPlan(root, board)).toThrow(/Target advanced/);
+    git(root, ['merge', '--no-edit', integrated]);
+    expect(publicationPlan(root, board).target).toBe(board.policy.baseBranch);
+    expect(deliveryBase(root, board).anchor).toBe(integrated);
+  });
+  it('rejects unapproved inheritance even when both scopes happen to allow the same paths', () => {
+    stackedFixture();
+    delete board.batches[1]!.stack;
+    board.tickets.at(-1)!.paths.push('README.md');
+    expect(() => verifyGit(root, board)).toThrow(/Unapproved inherited delivery BATCH-001/);
+  });
+  it('rejects local commits substituted for the verified integration anchor', () => {
+    const parentHead = stackedFixture();
+    board.batches[1]!.baseSha = parentHead;
+    expect(() => verifyGit(root, board)).toThrow(/not an ancestor of the fetched integration/);
+  });
+  it('requires the parent delivery, decision and exact ancestor to remain valid', () => {
+    const parentHead = stackedFixture();
+    board.decisions[0]!.batchId = 'BATCH-002';
+    expect(() => deliveryBase(root, board)).toThrow(/closed parent delivery.*decision/);
+    board.decisions[0]!.batchId = 'BATCH-001';
+    board.batches[0]!.status = 'checkpoint';
+    expect(() => deliveryBase(root, board, board.batches[1])).toThrow(/closed parent delivery/);
+    board.batches[0]!.status = 'closed';
+    board.batches[1]!.stack!.parentHead = git(root, ['commit-tree', `${parentHead}^{tree}`, '-p', parentHead, '-m', 'Not an ancestor of child']);
+    expect(() => deliveryBase(root, board)).toThrow(/exact preserved parent commit/);
+  });
+});
+
+describe('publishing the explicitly deferred parent from its child checkpoint', () => {
+  it('plans only the preserved parent source and its own scope without changing checkout or ownership', () => {
+    const parentHead = stackedFixture(false);
+    const childHead = git(root, ['rev-parse', 'HEAD']);
+    board.tickets[1]!.paths = ['README.md'];
+    const snapshot = structuredClone(board);
+    const target = publicationBase(root, board, 'BATCH-001');
+    expect(target).toEqual({ branch: board.policy.baseBranch, sha: board.batches[0]!.baseSha, anchor: board.batches[0]!.baseSha, stacked: false, published: true });
+    expect(publicationPlan(root, board, 'BATCH-001')).toMatchObject({ batch: 'BATCH-001', branch: board.batches[0]!.branch, head: parentHead, target: board.policy.baseBranch, base: target.sha });
+    expect(requirePublishedBase(root, board, 'BATCH-001')).toEqual(target);
+    expect(git(root, ['branch', '--show-current'])).toBe(board.batches[1]!.branch);
+    expect(git(root, ['rev-parse', 'HEAD'])).toBe(childHead);
+    expect(board).toEqual(snapshot);
+    board.tickets[1]!.paths = [];
+    expect(() => publicationPlan(root, board, 'BATCH-001')).toThrow(/outside delivery scope RIR-001.*README/);
+  });
+  it('accepts a separately approved parent ref while the parent is still unpublished', () => {
+    stackedFixture(false);
+    const approval = { ...publicationPlan(root, board, 'BATCH-001'), reference: 'User approves only the exact deferred parent into integration', at };
+    const parentLine = `refs/heads/${approval.branch} ${approval.head} refs/heads/${approval.branch} ${'0'.repeat(40)}\n`;
+    expect(() => guardPush(root, board, approval, 'origin', board.policy.remoteUrl, parentLine)).not.toThrow();
+    expect(() => requirePublishedBase(root, board)).toThrow(/Parent target.*unpublished/);
+  });
+  it.each(['parent-for-child', 'child-for-parent', 'wrong-batch'] as const)('keeps approval separate for %s', (scenario) => {
+    stackedFixture();
+    const parentApproval = { ...publicationPlan(root, board, 'BATCH-001'), reference: 'User approves the deferred parent only', at };
+    const childApproval = { ...publicationPlan(root, board), reference: 'User separately approves the child story only', at };
+    const parentLine = `refs/heads/${parentApproval.branch} ${parentApproval.head} refs/heads/${parentApproval.branch} ${'0'.repeat(40)}\n`;
+    const childLine = `refs/heads/${childApproval.branch} ${childApproval.head} refs/heads/${childApproval.branch} ${'0'.repeat(40)}\n`;
+    if (scenario === 'parent-for-child') expect(() => guardPush(root, board, parentApproval, 'origin', board.policy.remoteUrl, childLine)).toThrow(/approved, non-deletion topic HEAD/);
+    if (scenario === 'child-for-parent') expect(() => guardPush(root, board, childApproval, 'origin', board.policy.remoteUrl, parentLine)).toThrow(/approved, non-deletion topic HEAD/);
+    if (scenario === 'wrong-batch') expect(() => guardPush(root, board, { ...parentApproval, batch: 'BATCH-002' }, 'origin', board.policy.remoteUrl, parentLine)).toThrow(/No matching user approval/);
+  });
+  it('refuses unrelated closed deliveries and a parent already recorded as published', () => {
+    stackedFixture();
+    board.batches.push({ ...board.batches[0]!, id: 'BATCH-003', branch: 'chore/RIR-003-unrelated' });
+    expect(() => publicationPlan(root, board, 'BATCH-003')).toThrow(/deferred immediate parent/);
+    expect(() => requirePublishedBase(root, board, 'BATCH-003')).toThrow(/deferred immediate parent/);
+    board.batches[0]!.prUrl = 'https://github.com/example/ririko/pull/1';
+    expect(() => publicationPlan(root, board, 'BATCH-001')).toThrow(/deferred immediate parent/);
+  });
+  it('requires the child checkpoint, accepted workers and clean checkout before selecting the parent', () => {
+    stackedFixture();
+    board.batches[1]!.status = 'open';
+    expect(() => publicationPlan(root, board, 'BATCH-001')).toThrow(/current PR checkpoint/);
+    board.batches[1]!.status = 'checkpoint';
+    board.assignments.push({ id: 'A-001', ticket: 'RIR-110', agent: 'worker', scope: 'Pending review', paths: ['src/'], status: 'returned', handoff: '.workboard/handoffs/RIR-110/001.md' });
+    expect(() => publicationPlan(root, board, 'BATCH-001')).toThrow(/Accept all worker returns/);
+    board.assignments[0]!.status = 'accepted';
+    writeFileSync(resolve(root, 'src/evidence.ts'), 'export const evidence = false;\n');
+    expect(() => publicationPlan(root, board, 'BATCH-001')).toThrow(/clean worktree/);
+  });
+  it('refuses selecting a parent after its preserved branch moves', () => {
+    const parentHead = stackedFixture(false);
+    const moved = git(root, ['commit-tree', `${parentHead}^{tree}`, '-p', parentHead, '-m', 'Unexpected parent advancement']);
+    git(root, ['update-ref', `refs/heads/${board.batches[0]!.branch}`, moved]);
+    expect(() => publicationPlan(root, board, 'BATCH-001')).toThrow(/Parent branch moved/);
+    expect(() => publicationBase(root, board, 'BATCH-001')).toThrow(/Parent branch moved/);
   });
 });

@@ -62,6 +62,17 @@ function worker(id = 'A-1', paths = ['code/one.ts']): Assignment {
 }
 
 describe('runtime workboard parsing', () => {
+  it('records an approved stack only once against an earlier closed parent delivery', () => {
+    const input = fixture();
+    input.batches.unshift({ ...batch('B-0', 'S-20', ['S-20']), status: 'closed' });
+    input.decisions.push({ id: 'D-stack', kind: 'defer-pr', reference: 'User explicitly defers the parent and approves one stacked story', at: NOW, fromTicket: null, toTicket: null, disposition: null, batchId: 'B-0' });
+    const command: Command = { action: 'stack', batch: 'B-1', parentBatch: 'B-0', parentHead: 'b'.repeat(40), decision: 'D-stack' };
+    const next = run(input, command);
+    expect(next.batches[1]?.stack?.parentBatch).toBe('B-0');
+    expect(() => run(next, command)).toThrow('once on the open batch');
+    expect(() => run(input, { ...command, decision: 'missing' })).toThrow('matching parent deferral');
+    expect(() => run(input, { ...command, parentBatch: 'B-1' })).toThrow('earlier closed parent');
+  });
   it('requires a relationship for standalone maintenance and a recorded user pause decision', () => {
     const isolated: Ticket = { ...ticket('C-1', 'chore', null), status: 'backlog', estimate: null, groomedIn: null };
     expect(() => run(fixture(), { action: 'create', ticket: isolated })).toThrow('relationship');

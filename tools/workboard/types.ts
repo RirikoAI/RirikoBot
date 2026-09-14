@@ -24,6 +24,8 @@ export interface Assignment {
 export interface Batch {
   id: string; scope: string; branch: string; baseBranch: string; baseSha: string;
   status: 'open' | 'checkpoint' | 'closed'; tickets: string[]; prUrl: string | null;
+  /** Explicit user-approved dependency; parent scope is excluded only against this exact preserved commit. */
+  stack?: { parentBatch: string; parentHead: string; decision: string };
 }
 export interface Event {
   id: number; at: string; actor: string; action: string; detail: string;
@@ -43,6 +45,7 @@ export type Command =
   | { action: 'switch'; from: string; to: string | null; decision: string; owner: string; handoff: string }
   | { action: 'decision'; decision: Decision }
   | { action: 'batch'; batch: Batch }
+  | { action: 'stack'; batch: string; parentBatch: string; parentHead: string; decision: string }
   | { action: 'checkpoint'; batch: string }
   | { action: 'close-batch'; batch: string; decision: string; prUrl?: string }
   | { action: 'assign'; assignment: Assignment }

@@ -2,6 +2,8 @@
 
 ## Standing work-control rules — read before every task
 
+The full original request is preserved in [BLUEPRINT.md](BLUEPRINT.md). Read its relevant sections and [the requirement ledger](docs/requirements.md) before grooming/implementation. Link ticket acceptance to those requirements; update implementation/test evidence and remaining gaps when work changes. Run `pnpm board requirements-check`. A design document or passing foundation test does not certify an unimplemented feature. Later explicit user work-control decisions override older broad autonomy in the blueprint.
+
 Read [.workboard/PROTOCOL.md](.workboard/PROTOCOL.md), [.workboard/state.json](.workboard/state.json), the generated board and the active ticket's handoff at the start of **every session and every sub-agent assignment**. This user-requested protocol takes precedence over older instructions to continue autonomously across tasks/phases.
 
 - Only one ticket may be in progress across all agents. Blocked/review work retains the slot; parents are containers. Sub-agents may assist only that ticket within recorded assignments.

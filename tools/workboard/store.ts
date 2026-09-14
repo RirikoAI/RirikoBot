@@ -64,7 +64,7 @@ export function mutate(root: string, command: Command, expected: number, context
     if (!existsSync(resolve(commonDirectory(root), 'state.json'))) throw new Error('Install repository hooks before changing the board.');
     const board = readBoard(root);
     if (board.revision !== expected) throw new Error(`Stale revision ${expected}; current revision is ${board.revision}. Re-read the board.`);
-    if (board.batches.some((entry) => entry.status !== 'closed')) verifyGit(root, board);
+    if (board.batches.some((entry) => entry.status !== 'closed') && command.action !== 'stack') verifyGit(root, board);
     if (command.action === 'close-batch') {
       const batch = board.batches.find((entry) => entry.id === command.batch);
       if (!batch || git(root, ['rev-parse', 'HEAD']) === batch.baseSha) throw new Error('Preserve a local delivery commit before closing the batch.');
@@ -75,7 +75,7 @@ export function mutate(root: string, command: Command, expected: number, context
       if (changed.some((path) => !path.startsWith('.workboard/'))) throw new Error('Commit the delivery code before closing/defer; only closing board metadata may remain uncommitted.');
     }
     const next = applyCommand(board, command, context);
-    if (command.action === 'batch') verifyGit(root, next);
+    if (command.action === 'batch' || command.action === 'stack') verifyGit(root, next);
     checkHandoffs(root, next);
     atomicWrite(resolve(commonDirectory(root), 'state.json'), serialize(next));
     // The shared copy is written first: interrupted projection is recovered explicitly with sync.

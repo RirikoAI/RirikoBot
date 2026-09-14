@@ -33,7 +33,8 @@ const assignmentShape = object({
 const batchShape = object({
   id: 'string', scope: 'string', branch: 'string', baseBranch: 'string', baseSha: 'string',
   status: enumeration('open', 'checkpoint', 'closed'), tickets: strings, prUrl: 'nullable-string',
-});
+  stack: object({ parentBatch: 'string', parentHead: 'string', decision: 'string' }),
+}, ['stack']);
 const boardShape = object({
   version: enumeration(1), revision: 'number',
   policy: object({ pointScale: array('number'), wipLimit: enumeration(1), repository: 'string', remote: 'string', remoteUrl: 'string', baseBranch: 'string' }),
@@ -50,6 +51,7 @@ const commandShapes: Readonly<Record<Command['action'], Shape>> = {
   switch: object({ action: enumeration('switch'), from: 'string', to: 'nullable-string', decision: 'string', owner: 'string', handoff: 'string' }),
   decision: object({ action: enumeration('decision'), decision: decisionShape }),
   batch: object({ action: enumeration('batch'), batch: batchShape }),
+  stack: object({ action: enumeration('stack'), batch: 'string', parentBatch: 'string', parentHead: 'string', decision: 'string' }),
   checkpoint: object({ action: enumeration('checkpoint'), batch: 'string' }),
   'close-batch': object({ action: enumeration('close-batch'), batch: 'string', decision: 'string', prUrl: 'string' }, ['prUrl']),
   assign: object({ action: enumeration('assign'), assignment: assignmentShape }),
@@ -299,6 +301,14 @@ export function validateBoard(board: Board): string[] {
     }
   }
   for (const batch of board.batches) {
+    if (batch.stack) {
+      const parent = batches.get(batch.stack.parentBatch);
+      const decision = board.decisions.find((entry) => entry.id === batch.stack?.decision);
+      if (!parent || parent.status !== 'closed' || board.batches.indexOf(parent) >= board.batches.indexOf(batch)) errors.push(`Batch ${batch.id}: stack needs an earlier closed parent batch`);
+      if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(batch.stack.parentHead)) errors.push(`Batch ${batch.id}: stack parentHead must be an exact Git object ID`);
+      if (!decision || decision.kind !== 'defer-pr' || decision.batchId !== parent?.id) errors.push(`Batch ${batch.id}: stack requires the matching parent deferral decision and actual user stacking consent`);
+      if (board.batches.some((entry) => entry.id !== batch.id && entry.stack?.decision === batch.stack?.decision)) errors.push(`Batch ${batch.id}: one stacking decision cannot authorize multiple delivery scopes`);
+    }
     const scope = tickets.get(batch.scope);
     if (!scope || (!['epic', 'story'].includes(scope.type) && !MAINTENANCE.has(scope.type))) errors.push(`Batch ${batch.id}: invalid scope`);
     if (scope) {
@@ -503,7 +513,16 @@ export function applyCommand(input: Board, inputCommand: Command, context: Mutat
       if (board.batches.some((batch) => batch.status !== 'closed')) throw new Error('An existing delivery batch must reach its user PR/defer checkpoint and close before opening another scope');
       if (board.tickets.some((ticket) => ACTIVE.has(ticket.status))) throw new Error('Cannot open another batch while a ticket occupies the execution slot');
       if (command.batch.status !== 'open' || command.batch.prUrl !== null) throw new Error('A new batch must be open without a claimed PR');
+      // An explicit approved stack must be declarable atomically: the Git guard
+      // correctly refuses an inherited parent before its stack contract exists.
+      // validateBoard checks the parent and decision before any state is written.
       board.batches.push(command.batch);
+      break;
+    }
+    case 'stack': {
+      const batch = batchById(board, command.batch);
+      if (batch.status !== 'open' || batch.stack) throw new Error('Declare a stack once on the open batch; changed parent scope requires fresh review and authorization');
+      batch.stack = { parentBatch: command.parentBatch, parentHead: command.parentHead, decision: command.decision };
       break;
     }
     case 'checkpoint': {

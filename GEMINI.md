@@ -6,6 +6,8 @@ AGENTS.md also loads through .gemini/settings.json. Specialists live in .gemini/
 
 ## Shared context
 
+Original requirements are preserved verbatim in BLUEPRINT.md; docs/requirements.md indexes all 91 sections and 35 final acceptance criteria. Read the relevant full sections before implementing a domain, update evidence without inflating completion, and run `pnpm board requirements-check`. Later explicit user instructions and the standing work protocol take precedence over the original broad autonomy instructions.
+
 @./.workboard/PROTOCOL.md
 @./.workboard/BOARD.md
 

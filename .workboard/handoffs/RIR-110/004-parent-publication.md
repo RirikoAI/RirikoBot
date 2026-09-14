@@ -1,0 +1,11 @@
+# RIR-110 / A-003 — deferred parent publication return
+
+Coordinator persisted and reviewed delivery-guard's completed return on 2026-09-14. Assignment owned only `tools/workboard/git.ts` and `tools/workboard/git-store.test.ts`. Topic remains `feat/RIR-110-review-evidence`; inherited HEAD and preserved parent are `c1018829abf42fd2f8aad22948de343e51dc1e95`. Integration target is `develop/2.0.0-astra` at `801103c0e4c70eca6a380d7d1122b11234695bb1`. No worker board changes, workspace Git mutations, publication or delegation occurred.
+
+`publicationPlan`, `publicationBase` and `requirePublishedBase` accept an optional batch ID. Selection permits only the current checkpoint or its exact closed, deferred immediate parent. The current checkout must be clean, worker returns accepted, and preserved parent unchanged. Parent plans use their own commit, scope and integration target without switching the checkout or board ownership. `guardPush` selects the approval's batch; parent and child approvals cannot authorize each other's refs.
+
+Worker evidence: **28 Git/store tests passed** in 68.64 seconds using disposable real repositories and worktrees. File-specific ESLint and strict repository typecheck passed. A compound approval-separation test originally exceeded five seconds; its independent cases were split into parameterized tests, with no timeout increase. The coordinator's complete unit run also passed all **112 tests**, including these 28 cases. No network push or real PR was tested.
+
+The coordinator integrated optional batch selection into `pr-plan` and `approve-publish`. Parent planning emits branch-push instructions only and deliberately omits PR creation arguments. The frozen parent's older PR checker still rejects its closed BATCH-001; RIR-005 records that separate, unstarted bug. This return does not solve parent integration or grant publication approval.
+
+Next: accept this return, finish the story handoff and review description, validate the board and requirement ledger, checkpoint and commit the one story, then inspect both concrete publication plans. Obtain actual user approval before any parent or child push/PR. Keep the original parent PR deferred and do not start RIR-005 or another story automatically.

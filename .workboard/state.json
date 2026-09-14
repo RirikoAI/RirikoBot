@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 10,
+  "revision": 27,
   "policy": {
     "pointScale": [
       1,
@@ -473,9 +473,9 @@
         "RIR-001"
       ],
       "deliveryScope": "RIR-004",
-      "estimate": null,
-      "estimateRationale": "Groom with foundation operations before execution; no effort has been started.",
-      "groomedIn": null,
+      "estimate": 3,
+      "estimateRationale": "Bounded removal from tracking of three generated dependency launchers with frozen-install verification; remains backlog.",
+      "groomedIn": "GR-003",
       "priority": "P3",
       "acceptance": [
         "Review git ls-files evidence for the three historical packages/core/node_modules/.bin/pino launchers.",
@@ -485,6 +485,77 @@
       "paths": [
         "packages/core/node_modules/.bin/",
         ".gitignore",
+        "docs/"
+      ],
+      "owner": null,
+      "handoff": null,
+      "validation": []
+    },
+    {
+      "id": "RIR-110",
+      "type": "story",
+      "title": "Trace release reviews to the blueprint and exact branch changes",
+      "status": "done",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-110",
+      "estimate": 13,
+      "estimateRationale": "Cross-cutting blueprint preservation, 91-section evidence mapping, automated validation and safe stacked delivery with real Git regression tests.",
+      "groomedIn": "GR-003",
+      "priority": "P1",
+      "acceptance": [
+        "Preserve the full original blueprint verbatim with source hash and all numbered requirements.",
+        "Map every blueprint section to truthful status, evidence and a backlog scope; validate coverage and file references automatically.",
+        "Deliver a pinned source comparison separating remote Astra, local unpublished work and Gemini.",
+        "Verify explicitly user-approved stacked delivery without mixing parent changes or guessing PR targets.",
+        "Run appropriate regression checks, persist specialist knowledge and stop at this story PR checkpoint."
+      ],
+      "paths": [
+        "BLUEPRINT.md",
+        "AGENTS.md",
+        "GEMINI.md",
+        "README.md",
+        "docs/",
+        "tools/workboard/",
+        ".workboard/",
+        ".github/workflows/ci.yml",
+        "package.json"
+      ],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-110/003-completion.md",
+      "validation": [
+        "113 unit tests passed, including 65 board and requirement tests",
+        "13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped",
+        "ESLint, strict typecheck, production build, board and 91-section/35-criterion requirement checks passed",
+        "Verbatim blueprint source hash verified; latest branch comparison refreshed; legacy checkout clean",
+        "Both specialist returns accepted; preserved parent unchanged; no publication authorized"
+      ]
+    },
+    {
+      "id": "RIR-005",
+      "type": "bug",
+      "title": "Resolve deferred parent PR validation without rewriting preserved work",
+      "status": "backlog",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-110"
+      ],
+      "deliveryScope": "RIR-005",
+      "estimate": null,
+      "estimateRationale": "Refine the reviewed publication-history solution before any execution.",
+      "groomedIn": null,
+      "priority": "P1",
+      "acceptance": [
+        "Reproduce the frozen parent PR checker rejecting closed BATCH-001 while its branch push remains valid.",
+        "Choose and verify an explicit reviewed PR integration path preserving all original commits and separate scope boundaries.",
+        "Test exact parent head/base, closure state and CI behavior; do not bypass checks or mark another scope active."
+      ],
+      "paths": [
+        ".workboard/",
+        "tools/workboard/",
+        ".github/",
         "docs/"
       ],
       "owner": null,
@@ -523,6 +594,19 @@
         "RIR-231"
       ],
       "rationale": "Initial group estimates from audited general/guild and meme compatibility defects; revisit before scope expands."
+    },
+    {
+      "id": "GR-003",
+      "scope": "RIR-100",
+      "at": "2026-09-14T16:03:17.079Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-110",
+        "RIR-004"
+      ],
+      "rationale": "Foundation refinement after pinned branch comparison; one approved review-evidence story and deferred dependency cleanup."
     }
   ],
   "decisions": [
@@ -549,6 +633,30 @@
       ],
       "status": "accepted",
       "handoff": ".workboard/handoffs/RIR-001/002-workflow-engine.md"
+    },
+    {
+      "id": "A-002",
+      "ticket": "RIR-110",
+      "agent": "delivery-guard",
+      "scope": "Implement and test explicit approved-stack resolution and Git guards against the coordinator types contract. Own git.ts and git-store.test.ts only; no board or Git publication mutations; return exact evidence.",
+      "paths": [
+        "tools/workboard/git.ts",
+        "tools/workboard/git-store.test.ts"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-110/002-delivery-guard.md"
+    },
+    {
+      "id": "A-003",
+      "ticket": "RIR-110",
+      "agent": "delivery-guard",
+      "scope": "Finish safe deferred-parent publication from the current child checkpoint: separate parent approval/head/base/scope, no worktree switch, no mixing or bypass of shared board. Own git.ts and git-store.test.ts only; return tested evidence.",
+      "paths": [
+        "tools/workboard/git.ts",
+        "tools/workboard/git-store.test.ts"
+      ],
+      "status": "accepted",
+      "handoff": ".workboard/handoffs/RIR-110/004-parent-publication.md"
     }
   ],
   "batches": [
@@ -563,6 +671,23 @@
         "RIR-001"
       ],
       "prUrl": null
+    },
+    {
+      "id": "BATCH-002",
+      "scope": "RIR-110",
+      "branch": "feat/RIR-110-review-evidence",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
+      "status": "checkpoint",
+      "tickets": [
+        "RIR-110"
+      ],
+      "prUrl": null,
+      "stack": {
+        "parentBatch": "BATCH-001",
+        "parentHead": "c1018829abf42fd2f8aad22948de343e51dc1e95",
+        "decision": "D-001"
+      }
     }
   ],
   "history": [
@@ -635,6 +760,125 @@
       "actor": "coordinator",
       "action": "close-batch",
       "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-001\",\"decision\":\"D-001\"}"
+    },
+    {
+      "id": 11,
+      "at": "2026-09-14T16:03:17.124Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"id\":\"RIR-110\",\"type\":\"story\",\"title\":\"Trace release reviews to the blueprint and exact branch changes\",\"status\":\"backlog\",\"parent\":\"RIR-100\",\"requires\":[\"RIR-001\"],\"deliveryScope\":\"RIR-110\",\"estimate\":null,\"estimateRationale\":\"Awaiting grouped refinement before this story starts.\",\"groomedIn\":null,\"priority\":\"P1\",\"acceptance\":[\"Preserve the full original blueprint verbatim with source hash and all numbered requirements.\",\"Map every blueprint section to truthful status, evidence and a backlog scope; validate coverage and file references automatically.\",\"Deliver a pinned source comparison separating remote Astra, local unpublished work and Gemini.\",\"Verify explicitly user-approved stacked delivery without mixing parent changes or guessing PR targets.\",\"Run appropriate regression checks, persist specialist knowledge and stop at this story PR checkpoint.\"],\"paths\":[\"BLUEPRINT.md\",\"AGENTS.md\",\"GEMINI.md\",\"README.md\",\"docs/\",\"tools/workboard/\",\".workboard/\",\".github/workflows/ci.yml\",\"package.json\"],\"owner\":null,\"handoff\":null,\"validation\":[]}}"
+    },
+    {
+      "id": 12,
+      "at": "2026-09-14T16:03:17.283Z",
+      "actor": "coordinator",
+      "action": "groom",
+      "detail": "{\"action\":\"groom\",\"grooming\":{\"id\":\"GR-003\",\"scope\":\"RIR-100\",\"at\":\"2026-09-14T16:03:17.079Z\",\"participants\":[\"coordinator\"],\"tickets\":[\"RIR-110\",\"RIR-004\"],\"rationale\":\"Foundation refinement after pinned branch comparison; one approved review-evidence story and deferred dependency cleanup.\"},\"estimates\":[{\"id\":\"RIR-110\",\"points\":13,\"rationale\":\"Cross-cutting blueprint preservation, 91-section evidence mapping, automated validation and safe stacked delivery with real Git regression tests.\"},{\"id\":\"RIR-004\",\"points\":3,\"rationale\":\"Bounded removal from tracking of three generated dependency launchers with frozen-install verification; remains backlog.\"}]}"
+    },
+    {
+      "id": 13,
+      "at": "2026-09-14T16:03:17.435Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-110\",\"status\":\"ready\",\"reason\":\"Acceptance, scope, dependencies and 13-point estimate reviewed before starting.\",\"handoff\":\".workboard/handoffs/RIR-110/001-start.md\"}"
+    },
+    {
+      "id": 14,
+      "at": "2026-09-14T16:03:17.587Z",
+      "actor": "coordinator",
+      "action": "batch",
+      "detail": "{\"action\":\"batch\",\"batch\":{\"id\":\"BATCH-002\",\"scope\":\"RIR-110\",\"branch\":\"feat/RIR-110-review-evidence\",\"baseBranch\":\"develop/2.0.0-astra\",\"baseSha\":\"801103c0e4c70eca6a380d7d1122b11234695bb1\",\"status\":\"open\",\"tickets\":[\"RIR-110\"],\"prUrl\":null}}"
+    },
+    {
+      "id": 15,
+      "at": "2026-09-14T16:03:17.887Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-110\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 16,
+      "at": "2026-09-14T16:03:18.189Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-002\",\"ticket\":\"RIR-110\",\"agent\":\"delivery-guard\",\"scope\":\"Implement and test explicit approved-stack resolution and Git guards against the coordinator types contract. Own git.ts and git-store.test.ts only; no board or Git publication mutations; return exact evidence.\",\"paths\":[\"tools/workboard/git.ts\",\"tools/workboard/git-store.test.ts\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 17,
+      "at": "2026-09-14T16:14:50.701Z",
+      "actor": "coordinator",
+      "action": "stack",
+      "detail": "{\"action\":\"stack\",\"batch\":\"BATCH-002\",\"parentBatch\":\"BATCH-001\",\"parentHead\":\"c1018829abf42fd2f8aad22948de343e51dc1e95\",\"decision\":\"D-001\"}"
+    },
+    {
+      "id": 18,
+      "at": "2026-09-14T16:14:51.276Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-002\",\"handoff\":\".workboard/handoffs/RIR-110/002-delivery-guard.md\"}"
+    },
+    {
+      "id": 19,
+      "at": "2026-09-14T16:14:51.849Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-002\"}"
+    },
+    {
+      "id": 20,
+      "at": "2026-09-14T16:18:33.904Z",
+      "actor": "coordinator",
+      "action": "assign",
+      "detail": "{\"action\":\"assign\",\"assignment\":{\"id\":\"A-003\",\"ticket\":\"RIR-110\",\"agent\":\"delivery-guard\",\"scope\":\"Finish safe deferred-parent publication from the current child checkpoint: separate parent approval/head/base/scope, no worktree switch, no mixing or bypass of shared board. Own git.ts and git-store.test.ts only; return tested evidence.\",\"paths\":[\"tools/workboard/git.ts\",\"tools/workboard/git-store.test.ts\"],\"status\":\"assigned\",\"handoff\":null}}"
+    },
+    {
+      "id": 21,
+      "at": "2026-09-14T16:22:47.200Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"id\":\"RIR-005\",\"type\":\"bug\",\"title\":\"Resolve deferred parent PR validation without rewriting preserved work\",\"status\":\"backlog\",\"parent\":\"RIR-100\",\"requires\":[\"RIR-110\"],\"deliveryScope\":\"RIR-005\",\"estimate\":null,\"estimateRationale\":\"Refine the reviewed publication-history solution before any execution.\",\"groomedIn\":null,\"priority\":\"P1\",\"acceptance\":[\"Reproduce the frozen parent PR checker rejecting closed BATCH-001 while its branch push remains valid.\",\"Choose and verify an explicit reviewed PR integration path preserving all original commits and separate scope boundaries.\",\"Test exact parent head/base, closure state and CI behavior; do not bypass checks or mark another scope active.\"],\"paths\":[\".workboard/\",\"tools/workboard/\",\".github/\",\"docs/\"],\"owner\":null,\"handoff\":null,\"validation\":[]}}"
+    },
+    {
+      "id": 22,
+      "at": "2026-09-14T16:22:47.791Z",
+      "actor": "coordinator",
+      "action": "handoff",
+      "detail": "{\"action\":\"handoff\",\"ticket\":\"RIR-110\",\"handoff\":\".workboard/handoffs/RIR-110/003-session.md\",\"reason\":\"Persist requirements/comparison evidence and the remaining deferred-parent publication integration; retain the same active ticket.\"}"
+    },
+    {
+      "id": 23,
+      "at": "2026-09-14T16:28:29.346Z",
+      "actor": "coordinator",
+      "action": "return",
+      "detail": "{\"action\":\"return\",\"assignment\":\"A-003\",\"handoff\":\".workboard/handoffs/RIR-110/004-parent-publication.md\"}"
+    },
+    {
+      "id": 24,
+      "at": "2026-09-14T16:28:29.934Z",
+      "actor": "coordinator",
+      "action": "accept",
+      "detail": "{\"action\":\"accept\",\"assignment\":\"A-003\"}"
+    },
+    {
+      "id": 25,
+      "at": "2026-09-14T16:36:50.416Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-110\",\"status\":\"review\",\"reason\":\"All acceptance artifacts complete and specialist returns accepted; final regression and source review passed\",\"handoff\":\".workboard/handoffs/RIR-110/003-completion.md\",\"validation\":[\"113 unit tests passed, including 65 board and requirement tests\",\"13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped\",\"ESLint, strict typecheck, production build, board and 91-section/35-criterion requirement checks passed\",\"Verbatim blueprint source hash verified; latest branch comparison refreshed; legacy checkout clean\",\"Both specialist returns accepted; preserved parent unchanged; no publication authorized\"]}"
+    },
+    {
+      "id": 26,
+      "at": "2026-09-14T16:36:50.994Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-110\",\"status\":\"done\",\"reason\":\"Review accepted with explicit publication limits and durable evidence; no further implementation remains in this story\",\"handoff\":\".workboard/handoffs/RIR-110/003-completion.md\",\"validation\":[\"113 unit tests passed, including 65 board and requirement tests\",\"13 SQLite integration/CLI E2E tests passed; 7 PostgreSQL cases explicitly skipped\",\"ESLint, strict typecheck, production build, board and 91-section/35-criterion requirement checks passed\",\"Verbatim blueprint source hash verified; latest branch comparison refreshed; legacy checkout clean\",\"Both specialist returns accepted; preserved parent unchanged; no publication authorized\"]}"
+    },
+    {
+      "id": 27,
+      "at": "2026-09-14T16:36:51.534Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-002\"}"
     }
   ]
 }

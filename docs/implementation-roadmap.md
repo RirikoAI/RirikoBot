@@ -2,6 +2,8 @@
 Updated 2026-09-14. This replaces the draft schedule, which incorrectly marked unverified work complete. There are no estimated completion dates.
 
 ## Current checkpoint
+The full original specification is preserved in [BLUEPRINT.md](../BLUEPRINT.md); [requirements.md](requirements.md) maps all sections and final acceptance criteria to evidence and remaining work. [The pinned branch comparison](branch-comparison.md) distinguishes implemented Astra foundation code from Gemini's planning scaffold and explains the RIR-110 improvements. No documentation count certifies product completion.
+
 The source audit and executable foundation are implemented. This is not a complete Ririko 2.0 release. Only ping, prefix/setprefix and help are registered in the new runtime. The authoritative inventory contains all 141 legacy command files; their presence in the inventory is not a claim of working parity. New code never imports the legacy runtime.
 
 | Phase | State | Scope and remaining acceptance evidence |
