@@ -54,6 +54,21 @@ export type CoreEvents = {
     totalXp: number;
     shouldNotify: boolean;
   };
+  'economy:itemBought': {
+    userId: string;
+    itemId: string;
+    quantity: number;
+    totalPrice: number;
+    guildId?: string | undefined;
+  };
+  'economy:itemUsed': {
+    userId: string;
+    itemId: string;
+    quantity: number;
+    effectType: string;
+    guildId?: string | undefined;
+    metadata?: Record<string, unknown> | undefined;
+  };
 
   // Music
   'music:trackStart': {

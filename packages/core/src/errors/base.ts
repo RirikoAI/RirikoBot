@@ -184,3 +184,21 @@ export class BusinessLogicError extends RirikoError {
     });
   }
 }
+
+/**
+ * Thrown when an action violates security constraints (e.g., SSRF attempts, invalid schemes, host bounds).
+ */
+export class SecurityError extends RirikoError {
+  constructor(
+    message: string = 'Security violation detected.',
+    options: Omit<RirikoErrorOptions, 'code' | 'statusCode'> & { code?: ErrorCode } = {},
+  ) {
+    super(message, {
+      code: options.code ?? ErrorCode.SECURITY_ERROR,
+      statusCode: 403,
+      userMessage: options.userMessage ?? message,
+      ...options,
+    });
+  }
+}
+
