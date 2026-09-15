@@ -11,7 +11,7 @@ export const LogLevelSchema = z
   .default('info');
 export type LogLevel = z.infer<typeof LogLevelSchema>;
 
-export const AppConfigSchema = z.object({
+const BaseAppConfigSchema = z.object({
   // Runtime environment
   NODE_ENV: NodeEnvSchema,
   LOG_LEVEL: LogLevelSchema,
@@ -49,5 +49,20 @@ export const AppConfigSchema = z.object({
   SPOTIFY_CLIENT_SECRET: z.string().optional(),
 });
 
-export type AppConfig = z.infer<typeof AppConfigSchema>;
+export const AppConfigSchema = z.preprocess((val) => {
+  if (val && typeof val === 'object') {
+    const raw = { ...(val as Record<string, unknown>) };
+    // Legacy 1.4.0 environment variable compatibility
+    if (!raw.DISCORD_TOKEN && raw.DISCORD_BOT_TOKEN) {
+      raw.DISCORD_TOKEN = raw.DISCORD_BOT_TOKEN;
+    }
+    if (!raw.DISCORD_CLIENT_ID && raw.DISCORD_APPLICATION_ID) {
+      raw.DISCORD_CLIENT_ID = raw.DISCORD_APPLICATION_ID;
+    }
+    return raw;
+  }
+  return val;
+}, BaseAppConfigSchema);
+
+export type AppConfig = z.infer<typeof BaseAppConfigSchema>;
 export type AppConfigInput = z.input<typeof AppConfigSchema>;
