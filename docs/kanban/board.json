@@ -494,6 +494,15 @@
       "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"]
     }
   ],
-  "chores": [],
+  "chores": [
+    {
+      "id": "CHORE-0301",
+      "title": "Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["EPIC-003"],
+      "blocks": []
+    }
+  ],
   "bugs": []
 }

@@ -102,11 +102,11 @@ export const discordTokenCheck: DiagnosticCheck = {
   name: 'Discord Token',
   required: true,
   run: () => {
-    const token = process.env.DISCORD_TOKEN;
+    const token = process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN;
     if (!token) {
       return {
         status: 'fail',
-        message: 'DISCORD_TOKEN not configured in environment',
+        message: 'DISCORD_TOKEN (or DISCORD_BOT_TOKEN) not configured in environment',
       };
     }
     return {
@@ -120,11 +120,11 @@ export const discordClientIdCheck: DiagnosticCheck = {
   name: 'Discord Client ID',
   required: true,
   run: () => {
-    const clientId = process.env.DISCORD_CLIENT_ID;
+    const clientId = process.env.DISCORD_CLIENT_ID || process.env.DISCORD_APPLICATION_ID;
     if (!clientId) {
       return {
         status: 'fail',
-        message: 'DISCORD_CLIENT_ID not configured in environment',
+        message: 'DISCORD_CLIENT_ID (or DISCORD_APPLICATION_ID) not configured in environment',
       };
     }
     return {

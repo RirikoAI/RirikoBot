@@ -9,6 +9,8 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "dev:bot": "pnpm --filter @ririko/bot dev",
+    "start:bot": "pnpm --filter @ririko/bot start",
     "typecheck": "pnpm -r run typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

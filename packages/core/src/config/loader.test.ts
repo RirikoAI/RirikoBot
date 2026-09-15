@@ -96,4 +96,14 @@ describe('Config Loader', () => {
       }),
     ).toThrow(ConfigurationError);
   });
+
+  it('supports legacy 1.4.0 DISCORD_BOT_TOKEN and DISCORD_APPLICATION_ID aliases', () => {
+    const config = loadConfig({
+      DISCORD_BOT_TOKEN: 'legacy-token-123',
+      DISCORD_APPLICATION_ID: 'legacy-app-id-456',
+    });
+
+    expect(config.DISCORD_TOKEN).toBe('legacy-token-123');
+    expect(config.DISCORD_CLIENT_ID).toBe('legacy-app-id-456');
+  });
 });
