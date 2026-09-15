@@ -1,0 +1,29 @@
+# RIR-003 — production-container validation completed
+
+Coordinator, 2026-09-15. Same five-point chore, grooming GR-007; resumed by the user's explicit "you may continue with rir-003". BATCH-007 on chore/RIR-003-container-validation-resume targets develop/2.0.0-astra at c175c629957bacaf6d3992bd913b6f60b7bcec39. Earlier interrupted BATCH-005 stays closed/deferred; earlier topic2d3328e and RIR-006 receipt887fc19 are preserved. PR572 was independently verified merged, exact full-tree equality checked, CI34938188865 passed. No stack or scope mixing. Read protocol/board and 004-resume.md. No workers assigned.
+
+## Result and artifacts
+
+Production image built and all nine operational check groups passed. Exact structured results: [006-results.json](006-results.json). Reproduction recipe, executed local scripts and fixture hashes: [007-replay.md](007-replay.md). Build log remains ignored at .tmp/rir003-build.log; raw report and temporary scripts remain in .tmp. Durable report excludes names/IDs of unrelated host resources. Source/lockfile and artifact identities are retained.
+
+- Source c175c62; Dockerfile SHA256 13c6391fc7982af4f4a67737eeae91f7d2267ddcab9876264519e7e1b0dd5952; pnpm-lock.yaml SHA256 bc0499812399e45523556a51ce6f9c0a2c5f5a5e1e8f80f90120901f811d94fb. Node24.19.0, pnpm10.34.5 frozen installs, native SQLite build and TypeScript application build succeeded inside Docker.
+- Base image node:24.19.0-bookworm-slim@sha256:a9f5f7c91a432850b2a8a7797adf5eadb6c733ceed61167806cee7ea7fbc29df. Local output tag ririko:rir003-c175c62; Docker image ID sha256:b3dcf1a0be1b5a3fa8c0a91eb619512bd8ecca58fe15524fd0f0c50c8c98d6a8. Runtime Linux amd64. Image retained locally for review; no image pushed.
+- Bot and CLI execute as UID/GID1000; volume owner1000. Root write fails EROFS, /tmp and named /app/data are writable, TypeScript/Vitest cannot resolve. This proves a non-root container process, not a rootless Docker daemon.
+- Unchanged image CMD rejects missing credentials and pending migration with exact actionable public errors and exit1. Before migration, CLI doctor/status report0/1; no database file is created by diagnosis/startup.
+- Explicit migration reaches1/1; repeat migration is idempotent. Compiled doctor reports working filesystem/database/migrations and accurately says Discord credentials are configured but not live-validated. FFmpeg/providers remain optional/unimplemented. CLI health passes.
+- CLI writes dummy guild prefix rir003! at revision1. Independent replacement container reads it. Direct read-only database inspection checks integrity_check=ok, exact actor audit0→1 and one migration record. Values remain identical after lifecycle stops/restarts.
+- Real compiled runtime serves liveness200 and readiness200 under the offline Discord client fixture. Toggling fixture gateway readiness produces503 with database=true/discord=false while liveness stays200; restoring it returns200. Actual image healthcheck command succeeds. Health intervals were shortened to1s for the rehearsal; the image still declares30s interval/start period,5s command timeout and3 retries.
+- Two SIGTERM stop cycles completed in266ms and237ms, exit0, not OOM-killed; two Shutdown complete log entries and real gateway destruction observations. Same-container start between cycles returned healthy. Measurements include local Docker stop command overhead and represent an idle offline fixture, not a busy live-gateway drain guarantee.
+- Task-created named volume and lifecycle container removed after evidence saved; 16 one-shot checks were removed automatically (see exact count in JSON). Final container and volume sets exactly match the seven pre-existing containers and three volumes. No existing resource was started, removed or altered by test commands. Additional startup checks used tmpfs only. Docker Desktop left running via the tested shell launch; no Desktop restart performed.
+
+## Acceptance and remaining gates
+
+RIR-003 acceptance is met for the current production image's non-root operation, persistent SQLite storage, diagnostics, startup failure handling and measured shutdown with offline gateway instrumentation. No application implementation changed. .workboard is the ticket's evidence boundary; no new production automation or runtime file was added.
+
+This is not live Discord login, slash/prefix delivery, command registration, real provider compatibility, PostgreSQL Compose runtime/outage recovery, load testing, backup/restore or production rollout evidence. The fixture cannot establish those. No external Discord network or live credentials were used. No blanket platform-completion claim: BP-69/AC-32, BP-57 and BP-71 remain partial for their wider requirements. The requirement ledger's earlier image-execution gap now has evidence here; its broader production gates remain open.
+
+Quality checks appropriate to evidence-only changes: fresh Compose fixture config --quiet exit0, board/requirements validation (91 sections/35 exact criteria), Git diff/path checks and the actual production build/operational assertions above. No unrelated unit suite rerun; application files match the merged CI-passing base. Exact preflight failure history remains in earlier handoffs rather than being erased or mislabeled as passing.
+
+## Delivery and next session
+
+Move RIR-003 through review/done, checkpoint BATCH-007, preserve a local commit and prepare .workboard/reviews/BATCH-007.md. Stop and ask whether to publish this single chore into develop/2.0.0-astra. No push, PR, merge or next scope authorized by the resumption. No execution process remains; only Docker Desktop is intentionally running. Ignore .tmp operational logs/scripts, retain the local image, and verify a clean tracked checkout after commit. Resume from the current board and publication receipt, not the historical blocked/paused statements.

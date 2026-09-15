@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 181,
+  "revision": 189,
   "policy": {
     "pointScale": [
       1,
@@ -89,7 +89,7 @@
       "id": "RIR-003",
       "type": "chore",
       "title": "Validate the production Docker image and startup",
-      "status": "paused",
+      "status": "done",
       "parent": "RIR-100",
       "requires": [
         "RIR-001"
@@ -105,11 +105,13 @@
       ],
       "paths": [],
       "owner": "coordinator",
-      "handoff": ".workboard/handoffs/RIR-003/003-paused.md",
+      "handoff": ".workboard/handoffs/RIR-003/005-completion.md",
       "validation": [
-        "Compose fixture config --quiet exit0",
-        "Requirements ledger valid: 91 sections / 35 exact criteria",
-        "Docker runtime checks not run: Linux engine unavailable"
+        "Production image build passed: Node24.19.0/pnpm10.34.5/Linux amd64/native SQLite",
+        "Nine operational groups passed; see 006-results.json and reproduction recipe",
+        "Persistent prefix and audit verified after replacement/restart; integrity_check ok",
+        "Two SIGTERM exits0 in266ms/237ms with offline gateway fixture; live Discord not verified",
+        "Task resources removed; exact existing container/volume sets preserved; Compose and requirements checks passed"
       ]
     },
     {
@@ -1108,6 +1110,16 @@
       "toTicket": null,
       "disposition": null,
       "batchId": "BATCH-005"
+    },
+    {
+      "id": "D-010",
+      "kind": "pr-created",
+      "reference": "2026-09-15 user explicitly requested repair-record PR into develop/2.0.0-astra. Published exact approved b55db33 and independently verified open PR572; see .workboard/handoffs/RIR-006/003-published.md. No merge or RIR-003 resumption.",
+      "at": "2026-09-15T06:43:54.322Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-006"
     }
   ],
   "assignments": [
@@ -1516,9 +1528,21 @@
       "branch": "fix/RIR-006-docker-engine",
       "baseBranch": "develop/2.0.0-astra",
       "baseSha": "7ed2073a1673f7a558e4a4221b6c6c20ccdee0a8",
-      "status": "checkpoint",
+      "status": "closed",
       "tickets": [
         "RIR-006"
+      ],
+      "prUrl": "https://github.com/RirikoAI/RirikoBot/pull/572"
+    },
+    {
+      "id": "BATCH-007",
+      "scope": "RIR-003",
+      "branch": "chore/RIR-003-container-validation-resume",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "c175c629957bacaf6d3992bd913b6f60b7bcec39",
+      "status": "checkpoint",
+      "tickets": [
+        "RIR-003"
       ],
       "prUrl": null
     }
@@ -2790,6 +2814,62 @@
       "actor": "coordinator",
       "action": "checkpoint",
       "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-006\"}"
+    },
+    {
+      "id": 182,
+      "at": "2026-09-15T06:43:54.375Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-010\",\"kind\":\"pr-created\",\"reference\":\"2026-09-15 user explicitly requested repair-record PR into develop/2.0.0-astra. Published exact approved b55db33 and independently verified open PR572; see .workboard/handoffs/RIR-006/003-published.md. No merge or RIR-003 resumption.\",\"at\":\"2026-09-15T06:43:54.322Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-006\"}}"
+    },
+    {
+      "id": 183,
+      "at": "2026-09-15T06:43:55.744Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-006\",\"decision\":\"D-010\",\"prUrl\":\"https://github.com/RirikoAI/RirikoBot/pull/572\"}"
+    },
+    {
+      "id": 184,
+      "at": "2026-09-15T07:27:26.724Z",
+      "actor": "coordinator",
+      "action": "batch",
+      "detail": "{\"action\":\"batch\",\"batch\":{\"id\":\"BATCH-007\",\"scope\":\"RIR-003\",\"branch\":\"chore/RIR-003-container-validation-resume\",\"baseBranch\":\"develop/2.0.0-astra\",\"baseSha\":\"c175c629957bacaf6d3992bd913b6f60b7bcec39\",\"status\":\"open\",\"tickets\":[\"RIR-003\"],\"prUrl\":null}}"
+    },
+    {
+      "id": 185,
+      "at": "2026-09-15T07:27:28.251Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-003\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 186,
+      "at": "2026-09-15T07:27:29.730Z",
+      "actor": "coordinator",
+      "action": "handoff",
+      "detail": "{\"action\":\"handoff\",\"ticket\":\"RIR-003\",\"handoff\":\".workboard/handoffs/RIR-003/004-resume.md\",\"reason\":\"Explicit user resumption after repair PR merged and engine ready; preserve prior estimate and incomplete runtime acceptance.\"}"
+    },
+    {
+      "id": 187,
+      "at": "2026-09-15T07:35:41.534Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-003\",\"status\":\"review\",\"reason\":\"Operational evidence reviewed against original acceptance; offline/live limits and exact cleanup documented.\",\"handoff\":\".workboard/handoffs/RIR-003/005-completion.md\",\"validation\":[\"Production image build passed: Node24.19.0/pnpm10.34.5/Linux amd64/native SQLite\",\"Nine operational groups passed; see 006-results.json and reproduction recipe\",\"Persistent prefix and audit verified after replacement/restart; integrity_check ok\",\"Two SIGTERM exits0 in266ms/237ms with offline gateway fixture; live Discord not verified\",\"Task resources removed; exact existing container/volume sets preserved; Compose and requirements checks passed\"]}"
+    },
+    {
+      "id": 188,
+      "at": "2026-09-15T07:35:45.471Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-003\",\"status\":\"done\",\"reason\":\"Original current-image operational acceptance satisfied; broader live platform gates remain partial.\",\"handoff\":\".workboard/handoffs/RIR-003/005-completion.md\",\"validation\":[\"Production image build passed: Node24.19.0/pnpm10.34.5/Linux amd64/native SQLite\",\"Nine operational groups passed; see 006-results.json and reproduction recipe\",\"Persistent prefix and audit verified after replacement/restart; integrity_check ok\",\"Two SIGTERM exits0 in266ms/237ms with offline gateway fixture; live Discord not verified\",\"Task resources removed; exact existing container/volume sets preserved; Compose and requirements checks passed\"]}"
+    },
+    {
+      "id": 189,
+      "at": "2026-09-15T07:35:49.313Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-007\"}"
     }
   ]
 }
