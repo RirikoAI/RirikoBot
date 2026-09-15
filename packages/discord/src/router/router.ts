@@ -5,6 +5,15 @@ import { SlashCommandContext, PrefixCommandContext } from '../command/context.js
 import { tokenizeCommandArgs } from '../command/tokenizer.js';
 import type { CommandContext } from '../command/types.js';
 import { RirikoError } from '@ririko/core';
+import { MiddlewarePipeline } from '../middleware/pipeline.js';
+import {
+  CommandCooldownError,
+  CommandRateLimitError,
+  CommandMaintenanceError,
+  CommandPermissionError,
+  CommandGuildOnlyError,
+  CommandDisabledError,
+} from '../errors/index.js';
 
 /**
  * High-performance Dual-Dispatch Command Router.
@@ -12,6 +21,7 @@ import { RirikoError } from '@ririko/core';
  */
 export class CommandRouter {
   public readonly registry: CommandRegistry;
+  public readonly pipeline: MiddlewarePipeline;
   private readonly options: CommandRouterOptions;
 
   constructor(registry?: CommandRegistry, options: CommandRouterOptions = {}) {
@@ -21,6 +31,10 @@ export class CommandRouter {
       mentionPrefix: true,
       ...options,
     };
+    this.pipeline = new MiddlewarePipeline();
+    if (this.options.middlewares && this.options.middlewares.length > 0) {
+      this.pipeline.use(...this.options.middlewares);
+    }
   }
 
   /**
@@ -76,9 +90,11 @@ export class CommandRouter {
       return true;
     }
 
-    const ctx = new SlashCommandContext(interaction);
+    const ctx = new SlashCommandContext(interaction, command);
     try {
-      await command.execute(ctx);
+      await this.pipeline.execute(ctx, async () => {
+        await command.execute(ctx);
+      });
       return true;
     } catch (error) {
       await this.handleError(ctx, error);
@@ -154,14 +170,16 @@ export class CommandRouter {
 
     const ctx = new PrefixCommandContext(
       message,
-      command.metadata.name,
+      command,
       invokedPrefix,
       rawArgs,
       command.metadata.options,
     );
 
     try {
-      await command.execute(ctx);
+      await this.pipeline.execute(ctx, async () => {
+        await command.execute(ctx);
+      });
       return true;
     } catch (error) {
       await this.handleError(ctx, error);
@@ -183,12 +201,27 @@ export class CommandRouter {
       }
     }
 
+    let prefixIcon = '❌';
+    if (error instanceof CommandCooldownError) {
+      prefixIcon = '⏳';
+    } else if (error instanceof CommandRateLimitError) {
+      prefixIcon = '⏱️';
+    } else if (error instanceof CommandMaintenanceError) {
+      prefixIcon = '🛠️';
+    } else if (error instanceof CommandPermissionError) {
+      prefixIcon = '🚫';
+    } else if (error instanceof CommandGuildOnlyError) {
+      prefixIcon = '🏠';
+    } else if (error instanceof CommandDisabledError) {
+      prefixIcon = '🔒';
+    }
+
     const userMessage =
       error instanceof RirikoError
         ? error.userMessage
         : 'An unexpected error occurred while executing this command.';
 
-    const replyContent = `❌ ${userMessage}`;
+    const replyContent = `${prefixIcon} ${userMessage}`;
 
     try {
       if (ctx.isReplied || ctx.isDeferred) {
