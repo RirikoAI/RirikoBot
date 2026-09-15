@@ -35,7 +35,9 @@ export type EconomyInventory = typeof sqlite.economyInventories.$inferSelect;
 export type XpAccount = typeof sqlite.xpAccounts.$inferSelect;
 export type NewXpAccount = typeof sqlite.xpAccounts.$inferInsert;
 export type XpEvent = typeof sqlite.xpEvents.$inferSelect;
+export type NewXpEvent = typeof sqlite.xpEvents.$inferInsert;
 export type LeaderboardSnapshot = typeof sqlite.leaderboardSnapshots.$inferSelect;
+export type NewLeaderboardSnapshot = typeof sqlite.leaderboardSnapshots.$inferInsert;
 
 // Music & Audio
 export type MusicGuildSettings = typeof sqlite.musicGuildSettings.$inferSelect;

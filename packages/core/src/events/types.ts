@@ -37,13 +37,22 @@ export type CoreEvents = {
     error: Error;
   };
 
-  // Economy
+  // Economy & Leveling
   'economy:balanceUpdated': {
     userId: string;
     guildId: string;
     previousBalance: number;
     newBalance: number;
     reason: string;
+  };
+  'leveling:levelUp': {
+    userId: string;
+    guildId: string;
+    previousLevel: number;
+    newLevel: number;
+    levelsGained: number;
+    totalXp: number;
+    shouldNotify: boolean;
   };
 
   // Music

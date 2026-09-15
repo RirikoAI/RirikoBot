@@ -289,7 +289,7 @@
       "epic": "EPIC-004",
       "title": "Leveling 2.0, Karma & High-Performance Materialized Leaderboards",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-041"],
       "blocks": ["STORY-044"]
     },
@@ -581,7 +581,7 @@
       "parent": "STORY-042",
       "title": "Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["TASK-0411"],
       "blocks": ["TASK-0422"],
       "description": "Bidirectional XP-to-Level and Level-to-XP formulas (5L^2 + 50L + 100), level-up threshold events, legacy Karma tracking and opt-in notification toggles."
@@ -591,7 +591,7 @@
       "parent": "STORY-042",
       "title": "Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["TASK-0421"],
       "blocks": ["STORY-044"],
       "description": "leaderboard_snapshots materialization cron computing global and server rank percentiles, point lookups with O(1) dense rank queries without full user table scans."
