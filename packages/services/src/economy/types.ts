@@ -90,3 +90,48 @@ export interface RewardResult {
   netWorth?: number | bigint | undefined;
   transactionId?: string | undefined;
 }
+
+/**
+ * Voice channel participant state for anti-AFK XP tracking.
+ */
+export interface VoiceParticipant {
+  userId: string;
+  guildId: string;
+  channelId: string;
+  isBot?: boolean | undefined;
+  isSelfMuted?: boolean | undefined;
+  isSelfDeafened?: boolean | undefined;
+  isServerMuted?: boolean | undefined;
+  isServerDeafened?: boolean | undefined;
+  joinedAt?: number | undefined;
+}
+
+/**
+ * Configuration options for the Voice Anti-AFK Accumulator.
+ */
+export interface VoiceTrackerConfig {
+  /**
+   * Minimum active human participants in a voice channel to satisfy quorum. Default: 2.
+   */
+  minQuorum?: number | undefined;
+  /**
+   * Discrete interval in seconds required to award a VOICE_MINUTE event. Default: 60s.
+   */
+  intervalSeconds?: number | undefined;
+  /**
+   * Set or list of channel IDs designated as AFK channels that are hard-excluded from XP accrual.
+   */
+  afkChannelIds?: string[] | Set<string> | undefined;
+}
+
+/**
+ * Result of a discrete voice accrual tick.
+ */
+export interface VoiceTickResult {
+  evaluatedChannels: number;
+  activeParticipants: number;
+  eligibleParticipants: number;
+  awardedEvents: EconomyEvent[];
+  rewardResults?: RewardResult[] | undefined;
+}
+
