@@ -244,7 +244,7 @@
       "epic": "EPIC-003",
       "title": "O(1) Dual-Dispatch Command Router (Slash & Prefix Parity)",
       "points": 8,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-030"],
       "blocks": ["STORY-032"]
     },
@@ -444,7 +444,7 @@
       "parent": "STORY-031",
       "title": "Command Interfaces, Option Parsers & Unified CommandContext Abstraction",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-030"],
       "blocks": ["TASK-0312"]
     },
@@ -453,7 +453,7 @@
       "parent": "STORY-031",
       "title": "O(1) Hash Map Command Registry, Prefix Tokenizer & Dual Dispatcher",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["TASK-0311"],
       "blocks": ["STORY-032"]
     },
