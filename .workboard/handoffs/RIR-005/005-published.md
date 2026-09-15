@@ -1,0 +1,13 @@
+# RIR-005 — verified PR publication receipt
+
+Coordinator, 2026-09-14. The user replied **yes** to the concrete RIR-005 checkpoint question authorizing publication of `fix/RIR-005-integration-reconciliation` at `1279966b9ca33dc337f6d4c5f345da583d2167a7` into `develop/2.0.0-astra` at `801103c0e4c70eca6a380d7d1122b11234695bb1`. This supersedes the completion handoff's pending-publication statement. It does not authorize a merge, retargeting or another work scope.
+
+The approval CLI refreshed the exact integration base and bound consent to BATCH-004/head/base/target. The explicit single-topic push passed the installed pre-push guards. Remote inspection confirmed the exact approved head and unchanged integration base. Connector search and GitHub API head-filtered listing found no duplicate before creation. The existing GitHub credential was used only in process memory through the previously established API path because connector PR-write permission is unavailable; no credentials were printed or saved.
+
+Created and independently fetched **[PR #564](https://github.com/RirikoAI/RirikoBot/pull/564)**, title **[RIR-005] Reconcile completed deliveries into the integration branch**. GitHub confirmed the exact approved repository/head/base, open status, non-draft and not merged. The cumulative PR has 20 commits and 153 changed files (17,321 additions, 477 deletions), incorporating the explicitly approved completed deliveries. New repair changes remain separately bounded from administrative baseline a27151b; no additional feature scope was executed.
+
+CI run **34890000973** was `in_progress` when checked. No successful conclusion is claimed. Local validation remains 135 passed unit tests across ten files, lint/typecheck/build, source hashes, 455 final local references, requirements and actual-head PR guards. No code or tests changed during publication.
+
+Record D-007 and close BATCH-004 after verification. This receipt and the closing board are a local administrative commit after the published head. Do not push that later commit under the consumed approval: the published PR retains its reviewed checkpoint state. Preserve original, squash and receipt histories; do not infer an integration-branch merge from PR creation. No active execution ticket or new batch is authorized.
+
+At resume, read this receipt and the shared board, inspect PR #564 and exact remote refs, and distinguish the local closing receipt from published head1279966. CI must be evaluated before proposing the next integration decision. No automatic merge, force/reset/rebase, branch deletion or follow-on task is authorized.

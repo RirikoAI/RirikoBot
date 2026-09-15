@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "revision": 161,
+  "revision": 181,
   "policy": {
     "pointScale": [
       1,
@@ -89,24 +89,28 @@
       "id": "RIR-003",
       "type": "chore",
       "title": "Validate the production Docker image and startup",
-      "status": "backlog",
+      "status": "paused",
       "parent": "RIR-100",
       "requires": [
         "RIR-001"
       ],
       "deliveryScope": "RIR-003",
       "estimate": 5,
-      "estimateRationale": "Relative effort and integration risk; not elapsed hours",
-      "groomedIn": "GR-001",
+      "estimateRationale": "Native Linux image build plus isolated volume persistence, diagnostics, startup failure and measured lifecycle verification; live Discord remains a separate gate.",
+      "groomedIn": "GR-007",
       "priority": "P2",
       "acceptance": [
         "Build and run the rootless image with persistent storage",
         "Verify diagnostics and shutdown; document real evidence"
       ],
       "paths": [],
-      "owner": null,
-      "handoff": null,
-      "validation": []
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-003/003-paused.md",
+      "validation": [
+        "Compose fixture config --quiet exit0",
+        "Requirements ledger valid: 91 sections / 35 exact criteria",
+        "Docker runtime checks not run: Linux engine unavailable"
+      ]
     },
     {
       "id": "RIR-200",
@@ -871,6 +875,34 @@
         "Strict typecheck, modified-file ESLint, board and requirement validation passed",
         "No remote changes, manual JSON transitions or hook bypass; original PR intact"
       ]
+    },
+    {
+      "id": "RIR-006",
+      "type": "bug",
+      "title": "Restore local Docker engine after inaccessible runtime socket failure",
+      "status": "done",
+      "parent": "RIR-100",
+      "requires": [
+        "RIR-001"
+      ],
+      "deliveryScope": "RIR-006",
+      "estimate": 5,
+      "estimateRationale": "Windows reparse investigation, reversible recovery and isolated engine verification; no data reset.",
+      "groomedIn": "GR-008",
+      "priority": "P1",
+      "acceptance": [
+        "Restore Docker Linux engine and verify isolated container execution (BP-69 / AC-32 prerequisite for paused RIR-003)",
+        "Preserve Docker settings, images, volumes and disks; record recovery and rollback evidence"
+      ],
+      "paths": [],
+      "owner": "coordinator",
+      "handoff": ".workboard/handoffs/RIR-006/002-completion.md",
+      "validation": [
+        "Engine28.4.0 Linux restored; clean stop and shell relaunch passed",
+        "Two isolated non-root/read-only smoke containers exit0; removed automatically",
+        "Settings SHA256 unchanged; post-recovery counts9 images/7 stopped containers/3 volumes retained",
+        "Underlying launch-context defect not proven fixed; shell-launch workaround documented; RIR-003 remains paused"
+      ]
     }
   ],
   "grooming": [
@@ -960,6 +992,30 @@
         "RIR-005"
       ],
       "rationale": "User-authorized integration repair: exact source/squash ancestry and receipts, closed-batch CI and scope guard regression; one bounded bug, no domain work"
+    },
+    {
+      "id": "GR-007",
+      "scope": "RIR-100",
+      "at": "2026-09-15T06:23:57.919Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-003"
+      ],
+      "rationale": "Reconfirm operational scope and five-point relative effort before execution; existing acceptance maps to BP-69/AC-32, BP-57/BP-71 and quality gates. Evidence-only changes; no implementation ownership expansion."
+    },
+    {
+      "id": "GR-008",
+      "scope": "RIR-100",
+      "at": "2026-09-15T06:31:53.259Z",
+      "participants": [
+        "coordinator"
+      ],
+      "tickets": [
+        "RIR-006"
+      ],
+      "rationale": "Bounded transient endpoint recovery with data preservation and engine smoke verification."
     }
   ],
   "decisions": [
@@ -1022,6 +1078,36 @@
       "toTicket": null,
       "disposition": null,
       "batchId": "BATCH-004"
+    },
+    {
+      "id": "D-007",
+      "kind": "pr-created",
+      "reference": "User replied yes to push RIR-005 head1279966b9ca33dc337f6d4c5f345da583d2167a7 and create its PR into develop/2.0.0-astra at801103c0e4c70eca6a380d7d1122b11234695bb1. Independently verified https://github.com/RirikoAI/RirikoBot/pull/564 open with exact approved refs. Receipt: .workboard/handoffs/RIR-005/005-published.md. No merge or new scope.",
+      "at": "2026-09-14T19:58:25.932Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-004"
+    },
+    {
+      "id": "D-008",
+      "kind": "switch",
+      "reference": "2026-09-15 user yes to pausing RIR-003 and starting a separate Docker repair ticket; revisit RIR-003 later.",
+      "at": "2026-09-15T06:30:28.114Z",
+      "fromTicket": "RIR-003",
+      "toTicket": null,
+      "disposition": "paused",
+      "batchId": null
+    },
+    {
+      "id": "D-009",
+      "kind": "defer-pr",
+      "reference": "2026-09-15 user approved pause of incomplete RIR-003 and separate Docker repair; preserve its local checkpoint and defer unfinished validation publication during that repair. No publication consent.",
+      "at": "2026-09-15T06:30:32.844Z",
+      "fromTicket": null,
+      "toTicket": null,
+      "disposition": null,
+      "batchId": "BATCH-005"
     }
   ],
   "assignments": [
@@ -1386,11 +1472,11 @@
       "branch": "fix/RIR-005-integration-reconciliation",
       "baseBranch": "develop/2.0.0-astra",
       "baseSha": "801103c0e4c70eca6a380d7d1122b11234695bb1",
-      "status": "checkpoint",
+      "status": "closed",
       "tickets": [
         "RIR-005"
       ],
-      "prUrl": null,
+      "prUrl": "https://github.com/RirikoAI/RirikoBot/pull/564",
       "integration": {
         "decision": "D-006",
         "baseline": "a27151bcf4ed3a72fdd3840011015acb17ae6048",
@@ -1411,6 +1497,30 @@
           }
         ]
       }
+    },
+    {
+      "id": "BATCH-005",
+      "scope": "RIR-003",
+      "branch": "chore/RIR-003-container-validation",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "7ed2073a1673f7a558e4a4221b6c6c20ccdee0a8",
+      "status": "closed",
+      "tickets": [
+        "RIR-003"
+      ],
+      "prUrl": null
+    },
+    {
+      "id": "BATCH-006",
+      "scope": "RIR-006",
+      "branch": "fix/RIR-006-docker-engine",
+      "baseBranch": "develop/2.0.0-astra",
+      "baseSha": "7ed2073a1673f7a558e4a4221b6c6c20ccdee0a8",
+      "status": "checkpoint",
+      "tickets": [
+        "RIR-006"
+      ],
+      "prUrl": null
     }
   ],
   "history": [
@@ -2540,6 +2650,146 @@
       "actor": "coordinator",
       "action": "checkpoint",
       "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-004\"}"
+    },
+    {
+      "id": 162,
+      "at": "2026-09-14T19:58:25.932Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-007\",\"kind\":\"pr-created\",\"reference\":\"User replied yes to push RIR-005 head1279966b9ca33dc337f6d4c5f345da583d2167a7 and create its PR into develop/2.0.0-astra at801103c0e4c70eca6a380d7d1122b11234695bb1. Independently verified https://github.com/RirikoAI/RirikoBot/pull/564 open with exact approved refs. Receipt: .workboard/handoffs/RIR-005/005-published.md. No merge or new scope.\",\"at\":\"2026-09-14T19:58:25.932Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-004\"}}"
+    },
+    {
+      "id": 163,
+      "at": "2026-09-14T19:58:25.932Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-004\",\"decision\":\"D-007\",\"prUrl\":\"https://github.com/RirikoAI/RirikoBot/pull/564\"}"
+    },
+    {
+      "id": 164,
+      "at": "2026-09-15T06:23:57.970Z",
+      "actor": "coordinator",
+      "action": "groom",
+      "detail": "{\"action\":\"groom\",\"grooming\":{\"id\":\"GR-007\",\"scope\":\"RIR-100\",\"at\":\"2026-09-15T06:23:57.919Z\",\"participants\":[\"coordinator\"],\"tickets\":[\"RIR-003\"],\"rationale\":\"Reconfirm operational scope and five-point relative effort before execution; existing acceptance maps to BP-69/AC-32, BP-57/BP-71 and quality gates. Evidence-only changes; no implementation ownership expansion.\"},\"estimates\":[{\"id\":\"RIR-003\",\"points\":5,\"rationale\":\"Native Linux image build plus isolated volume persistence, diagnostics, startup failure and measured lifecycle verification; live Discord remains a separate gate.\"}]}"
+    },
+    {
+      "id": 165,
+      "at": "2026-09-15T06:23:58.219Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-003\",\"status\":\"ready\",\"reason\":\"User authorized continuation of the proposed operational validation; estimate and evidence plan recorded.\",\"handoff\":\".workboard/handoffs/RIR-003/001-plan.md\"}"
+    },
+    {
+      "id": 166,
+      "at": "2026-09-15T06:23:58.470Z",
+      "actor": "coordinator",
+      "action": "batch",
+      "detail": "{\"action\":\"batch\",\"batch\":{\"id\":\"BATCH-005\",\"scope\":\"RIR-003\",\"branch\":\"chore/RIR-003-container-validation\",\"baseBranch\":\"develop/2.0.0-astra\",\"baseSha\":\"7ed2073a1673f7a558e4a4221b6c6c20ccdee0a8\",\"status\":\"open\",\"tickets\":[\"RIR-003\"],\"prUrl\":null}}"
+    },
+    {
+      "id": 167,
+      "at": "2026-09-15T06:23:59.688Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-003\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 168,
+      "at": "2026-09-15T06:27:40.290Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-003\",\"status\":\"blocked\",\"reason\":\"Docker Desktop fails before Linux engine startup on inaccessible inference socket; bounded non-destructive recovery failed. Container acceptance cannot run; separate host repair needs the user work-switch decision.\",\"handoff\":\".workboard/handoffs/RIR-003/002-docker-blocker.md\",\"validation\":[\"Compose fixture config --quiet exit0\",\"Requirements ledger valid: 91 sections / 35 exact criteria\",\"Docker runtime checks not run: Linux engine unavailable\"]}"
+    },
+    {
+      "id": 169,
+      "at": "2026-09-15T06:30:28.168Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-008\",\"kind\":\"switch\",\"reference\":\"2026-09-15 user yes to pausing RIR-003 and starting a separate Docker repair ticket; revisit RIR-003 later.\",\"at\":\"2026-09-15T06:30:28.114Z\",\"fromTicket\":\"RIR-003\",\"toTicket\":null,\"disposition\":\"paused\",\"batchId\":null}}"
+    },
+    {
+      "id": 170,
+      "at": "2026-09-15T06:30:29.441Z",
+      "actor": "coordinator",
+      "action": "switch",
+      "detail": "{\"action\":\"switch\",\"from\":\"RIR-003\",\"to\":null,\"decision\":\"D-008\",\"owner\":\"coordinator\",\"handoff\":\".workboard/handoffs/RIR-003/003-paused.md\"}"
+    },
+    {
+      "id": 171,
+      "at": "2026-09-15T06:30:30.645Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-005\"}"
+    },
+    {
+      "id": 172,
+      "at": "2026-09-15T06:30:32.889Z",
+      "actor": "coordinator",
+      "action": "decision",
+      "detail": "{\"action\":\"decision\",\"decision\":{\"id\":\"D-009\",\"kind\":\"defer-pr\",\"reference\":\"2026-09-15 user approved pause of incomplete RIR-003 and separate Docker repair; preserve its local checkpoint and defer unfinished validation publication during that repair. No publication consent.\",\"at\":\"2026-09-15T06:30:32.844Z\",\"fromTicket\":null,\"toTicket\":null,\"disposition\":null,\"batchId\":\"BATCH-005\"}}"
+    },
+    {
+      "id": 173,
+      "at": "2026-09-15T06:30:34.152Z",
+      "actor": "coordinator",
+      "action": "close-batch",
+      "detail": "{\"action\":\"close-batch\",\"batch\":\"BATCH-005\",\"decision\":\"D-009\"}"
+    },
+    {
+      "id": 174,
+      "at": "2026-09-15T06:31:53.041Z",
+      "actor": "coordinator",
+      "action": "create",
+      "detail": "{\"action\":\"create\",\"ticket\":{\"id\":\"RIR-006\",\"type\":\"bug\",\"title\":\"Restore local Docker engine after inaccessible runtime socket failure\",\"status\":\"backlog\",\"parent\":\"RIR-100\",\"requires\":[\"RIR-001\"],\"deliveryScope\":\"RIR-006\",\"estimate\":null,\"estimateRationale\":\"Pending grouped pre-start estimate\",\"groomedIn\":null,\"priority\":\"P1\",\"acceptance\":[\"Restore Docker Linux engine and verify isolated container execution (BP-69 / AC-32 prerequisite for paused RIR-003)\",\"Preserve Docker settings, images, volumes and disks; record recovery and rollback evidence\"],\"paths\":[],\"owner\":null,\"handoff\":null,\"validation\":[]}}"
+    },
+    {
+      "id": 175,
+      "at": "2026-09-15T06:31:53.305Z",
+      "actor": "coordinator",
+      "action": "groom",
+      "detail": "{\"action\":\"groom\",\"grooming\":{\"id\":\"GR-008\",\"scope\":\"RIR-100\",\"at\":\"2026-09-15T06:31:53.259Z\",\"participants\":[\"coordinator\"],\"tickets\":[\"RIR-006\"],\"rationale\":\"Bounded transient endpoint recovery with data preservation and engine smoke verification.\"},\"estimates\":[{\"id\":\"RIR-006\",\"points\":5,\"rationale\":\"Windows reparse investigation, reversible recovery and isolated engine verification; no data reset.\"}]}"
+    },
+    {
+      "id": 176,
+      "at": "2026-09-15T06:31:53.556Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-006\",\"status\":\"ready\",\"reason\":\"Approved separate repair; estimate and plan recorded.\",\"handoff\":\".workboard/handoffs/RIR-006/001-plan.md\"}"
+    },
+    {
+      "id": 177,
+      "at": "2026-09-15T06:31:53.807Z",
+      "actor": "coordinator",
+      "action": "batch",
+      "detail": "{\"action\":\"batch\",\"batch\":{\"id\":\"BATCH-006\",\"scope\":\"RIR-006\",\"branch\":\"fix/RIR-006-docker-engine\",\"baseBranch\":\"develop/2.0.0-astra\",\"baseSha\":\"7ed2073a1673f7a558e4a4221b6c6c20ccdee0a8\",\"status\":\"open\",\"tickets\":[\"RIR-006\"],\"prUrl\":null}}"
+    },
+    {
+      "id": 178,
+      "at": "2026-09-15T06:31:55.172Z",
+      "actor": "coordinator",
+      "action": "start",
+      "detail": "{\"action\":\"start\",\"ticket\":\"RIR-006\",\"owner\":\"coordinator\"}"
+    },
+    {
+      "id": 179,
+      "at": "2026-09-15T06:39:21.505Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-006\",\"status\":\"review\",\"reason\":\"Repair and operational workaround reviewed against exact evidence; failed direct restart and preservation limits documented.\",\"handoff\":\".workboard/handoffs/RIR-006/002-completion.md\",\"validation\":[\"Engine28.4.0 Linux restored; clean stop and shell relaunch passed\",\"Two isolated non-root/read-only smoke containers exit0; removed automatically\",\"Settings SHA256 unchanged; post-recovery counts9 images/7 stopped containers/3 volumes retained\",\"Underlying launch-context defect not proven fixed; shell-launch workaround documented; RIR-003 remains paused\"]}"
+    },
+    {
+      "id": 180,
+      "at": "2026-09-15T06:39:22.876Z",
+      "actor": "coordinator",
+      "action": "move",
+      "detail": "{\"action\":\"move\",\"ticket\":\"RIR-006\",\"status\":\"done\",\"reason\":\"Restored Linux engine, verified clean shell relaunch and isolated execution; preservation and recovery evidence complete.\",\"handoff\":\".workboard/handoffs/RIR-006/002-completion.md\",\"validation\":[\"Engine28.4.0 Linux restored; clean stop and shell relaunch passed\",\"Two isolated non-root/read-only smoke containers exit0; removed automatically\",\"Settings SHA256 unchanged; post-recovery counts9 images/7 stopped containers/3 volumes retained\",\"Underlying launch-context defect not proven fixed; shell-launch workaround documented; RIR-003 remains paused\"]}"
+    },
+    {
+      "id": 181,
+      "at": "2026-09-15T06:39:24.224Z",
+      "actor": "coordinator",
+      "action": "checkpoint",
+      "detail": "{\"action\":\"checkpoint\",\"batch\":\"BATCH-006\"}"
     }
   ]
 }
