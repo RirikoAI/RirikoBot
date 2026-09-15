@@ -6,9 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-| ID | Type | Title | Pts | Parent | Target Package |
-|---|---|---|---|---|---|
-| `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | `packages/services` |
+*No tickets currently in progress.*
 
 ---
 
@@ -21,8 +19,7 @@
 | ID | Type | Title | Pts | Parent | Status |
 |---|---|---|---|---|---|
 | `EPIC-004` | Epic | Centralized Transactional Economy & Banking Engine | 21 | Self | Active |
-| `STORY-041` | Story | Transactional Banking, Daily Streak Engine & Double-Entry Ledger | 5 | `EPIC-004` | Active |
-| `STORY-042` | Story | Leveling 2.0, Karma & High-Performance Materialized Leaderboards | 5 | `EPIC-004` | Queued |
+| `STORY-042` | Story | Leveling 2.0, Karma & High-Performance Materialized Leaderboards | 5 | `EPIC-004` | Ready |
 | `STORY-043` | Story | Shop Catalog, Inventory Bags & SSRF-Protected Profile Customization | 5 | `EPIC-004` | Queued |
 | `STORY-044` | Story | Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite | 5 | `EPIC-004` | Queued |
 
@@ -86,6 +83,8 @@
 | `TASK-0402` | Task | Voice XP / Economy Accumulator, Quorum Verification & Anti-AFK State Machine | 2 | `STORY-040` | [TASK-0402.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0402.md) |
 | `STORY-040` | Story | Event-Driven Economy Core & Anti-Spam / Anti-AFK Engine | 5 | `EPIC-004` | [TASK-0402.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0402.md) |
 | `TASK-0411` | Task | Daily Streak Engine (+5%/day up to 30d, 36h reset grace) & Account State | 2 | `STORY-041` | [TASK-0411.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0411.md) |
+| `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | [TASK-0412.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0412.md) |
+| `STORY-041` | Story | Transactional Banking, Daily Streak Engine & Double-Entry Ledger | 5 | `EPIC-004` | [STORY-041.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-041.md) |
 
 ---
 
@@ -112,10 +111,10 @@
 ### 🛠️ Groomed Tasks for EPIC-004
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | ⚡ In Progress | `TASK-0411` |
-| `TASK-0421` | Task | Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls | 2 | `STORY-042` | 📋 Backlog | `TASK-0411` |
+| `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | ✅ Done | `TASK-0411` |
+| `TASK-0421` | Task | Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls | 2 | `STORY-042` | 📋 Ready | `STORY-041` |
 | `TASK-0422` | Task | Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries | 3 | `STORY-042` | 📋 Backlog | `TASK-0421` |
-| `TASK-0431` | Task | Item Catalog Repository, Inventory Bags & Usable Consumables (Anti-Abuse Daily Potion Ceilings) | 3 | `STORY-043` | 📋 Backlog | `TASK-0412` |
+| `TASK-0431` | Task | Item Catalog Repository, Inventory Bags & Usable Consumables (Anti-Abuse Daily Potion Ceilings) | 3 | `STORY-043` | 📋 Ready | `STORY-041` |
 | `TASK-0432` | Task | Custom Profile Background Manager with DNS/SSRF IP Verification, Dimension Bounds & Cache | 2 | `STORY-043` | 📋 Backlog | `TASK-0431` |
 | `TASK-0441` | Task | Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot) | 3 | `STORY-044` | 📋 Backlog | `TASK-0422`, `TASK-0432` |
 | `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | 📋 Backlog | `TASK-0441` |

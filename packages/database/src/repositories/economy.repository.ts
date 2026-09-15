@@ -352,6 +352,13 @@ export class EconomyRepository extends BaseRepository<
     const targetClient = this.getClient(tx);
 
     return withTransaction(targetClient, async (txClient) => {
+      // Deterministic lock acquisition order by user ID to prevent database deadlocks
+      const sortedUserIds = [params.fromUserId, params.toUserId].sort();
+      const firstUserId = sortedUserIds[0];
+      const secondUserId = sortedUserIds[1];
+      if (firstUserId) await this.getOrCreateBalance(firstUserId, 10000, txClient);
+      if (secondUserId) await this.getOrCreateBalance(secondUserId, 10000, txClient);
+
       // Debit sender
       const debitResult = await this.modifyBalance(
         {
@@ -619,6 +626,24 @@ export class EconomyRepository extends BaseRepository<
   async isAccountFrozen(userId: string, tx?: DatabaseClient): Promise<boolean> {
     const account = await this.getAccount(userId, tx);
     return account?.isFrozen ?? false;
+  }
+
+  /**
+   * Sets or updates bank capacity for a user.
+   */
+  async setBankCapacity(
+    userId: string,
+    capacity: number,
+    tx?: DatabaseClient,
+  ): Promise<EconomyBalance> {
+    await this.getOrCreateBalance(userId, capacity, tx);
+    return this.update(
+      userId,
+      {
+        bankCapacity: capacity,
+      },
+      tx,
+    );
   }
 }
 

@@ -280,7 +280,7 @@
       "epic": "EPIC-004",
       "title": "Transactional Banking, Daily Streak Engine & Double-Entry Ledger",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-040"],
       "blocks": ["STORY-042", "STORY-043"]
     },
@@ -571,7 +571,7 @@
       "parent": "STORY-041",
       "title": "Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers)",
       "points": 3,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["TASK-0411"],
       "blocks": ["STORY-042", "STORY-043"],
       "description": "Deposit & withdraw operations with capacity scaling (10,000 + Level*2,500), configurable daily interest calculations, and peer-to-peer /pay transfers with deterministic deadlock-free row locking."

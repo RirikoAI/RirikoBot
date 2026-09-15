@@ -166,4 +166,65 @@ export interface DailyStatus {
   timeUntilResetMs: number;
 }
 
+/**
+ * Result of a bank deposit or withdrawal operation.
+ */
+export interface BankingOperationResult {
+  success: boolean;
+  reason?: string | undefined;
+  amount: number;
+  walletBalance?: number | bigint | undefined;
+  bankBalance?: number | bigint | undefined;
+  bankCapacity?: number | bigint | undefined;
+  netWorth?: number | bigint | undefined;
+  transactionId?: string | undefined;
+}
+
+/**
+ * Result of a peer-to-peer balance transfer.
+ */
+export interface TransferResult {
+  success: boolean;
+  reason?: string | undefined;
+  fromUserId: string;
+  toUserId: string;
+  amount: number;
+  fromWalletBalance?: number | bigint | undefined;
+  toWalletBalance?: number | bigint | undefined;
+  debitTransactionId?: string | undefined;
+  creditTransactionId?: string | undefined;
+}
+
+/**
+ * Parameters for a peer-to-peer transfer.
+ */
+export interface TransferParams {
+  fromUserId: string;
+  toUserId: string;
+  amount: number;
+  guildId?: string | undefined;
+  reason?: string | undefined;
+}
+
+/**
+ * Result of applying daily bank interest.
+ */
+export interface InterestResult {
+  success: boolean;
+  reason?: string | undefined;
+  userId: string;
+  bankBalanceBefore: number;
+  interestAwarded: number;
+  bankBalanceAfter: number;
+  transactionId?: string | undefined;
+}
+
+/**
+ * Configuration options for bank capacity scaling.
+ */
+export interface BankCapacityConfig {
+  baseCapacity?: number | undefined;
+  capacityPerLevel?: number | undefined;
+}
+
 
