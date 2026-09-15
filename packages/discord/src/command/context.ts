@@ -14,7 +14,12 @@ import type {
   TextBasedChannel,
   User,
 } from 'discord.js';
-import type { CommandContext, CommandOptionDefinition, ICommandOptionsResolver } from './types.js';
+import type {
+  Command,
+  CommandContext,
+  CommandOptionDefinition,
+  ICommandOptionsResolver,
+} from './types.js';
 import { SlashOptionsResolver, PrefixOptionsResolver } from './options.js';
 
 /**
@@ -33,10 +38,15 @@ export class SlashCommandContext implements CommandContext {
   public readonly commandName: string;
   public readonly invokedPrefix = '/';
   public readonly options: ICommandOptionsResolver;
+  public readonly command?: Command | undefined;
   public readonly raw: ChatInputCommandInteraction;
 
-  constructor(private readonly interaction: ChatInputCommandInteraction) {
+  constructor(
+    private readonly interaction: ChatInputCommandInteraction,
+    command?: Command,
+  ) {
     this.raw = interaction;
+    this.command = command;
     this.id = interaction.id;
     this.client = interaction.client;
     this.guild = interaction.guild;
@@ -118,6 +128,7 @@ export class PrefixCommandContext implements CommandContext {
   public readonly commandName: string;
   public readonly invokedPrefix: string;
   public readonly options: ICommandOptionsResolver;
+  public readonly command?: Command | undefined;
   public readonly raw: Message;
 
   private _repliedMessage: Message | null = null;
@@ -125,7 +136,7 @@ export class PrefixCommandContext implements CommandContext {
 
   constructor(
     private readonly message: Message,
-    commandName: string,
+    commandOrName: string | Command,
     invokedPrefix: string,
     rawArgs: string[],
     definitions: CommandOptionDefinition[] = [],
@@ -139,9 +150,19 @@ export class PrefixCommandContext implements CommandContext {
     this.channelId = message.channelId;
     this.user = message.author;
     this.member = message.member;
-    this.commandName = commandName;
+
+    if (typeof commandOrName === 'string') {
+      this.commandName = commandOrName;
+      this.command = undefined;
+    } else {
+      this.command = commandOrName;
+      this.commandName = commandOrName.metadata.name;
+    }
+
     this.invokedPrefix = invokedPrefix;
-    this.options = new PrefixOptionsResolver(message, rawArgs, definitions, message.client);
+    const resolvedDefs =
+      definitions.length > 0 ? definitions : (this.command?.metadata.options ?? []);
+    this.options = new PrefixOptionsResolver(message, rawArgs, resolvedDefs, message.client);
   }
 
   public get isReplied(): boolean {

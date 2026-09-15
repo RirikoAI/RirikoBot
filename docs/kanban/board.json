@@ -253,7 +253,7 @@
       "epic": "EPIC-003",
       "title": "Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance)",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-031"],
       "blocks": ["STORY-033"]
     },
@@ -462,7 +462,7 @@
       "parent": "STORY-032",
       "title": "Middleware Runner, Execution Chain Engine & Error Boundary Interceptor",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-031"],
       "blocks": ["TASK-0322"]
     },
@@ -471,7 +471,7 @@
       "parent": "STORY-032",
       "title": "Built-in Middlewares: PermissionBitfield, MaintenanceMode, ModuleToggle, Per-User Cooldown & TokenBucket RateLimit",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["TASK-0321"],
       "blocks": ["STORY-033"]
     },

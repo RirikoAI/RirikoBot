@@ -19,7 +19,6 @@
 | ID | Type | Title | Pts | Epic / Parent | Requires |
 |---|---|---|---|---|---|
 | `EPIC-003` | Epic | Discord.js 14 Gateway & O(1) Command Router | 21 | Self | `EPIC-001` |
-| `STORY-032` | Story | Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance) | 5 | `EPIC-003` | `STORY-031` |
 | `STORY-033` | Story | Interactive Dynamic Help Center & Command Auto-Registration | 3 | `EPIC-003` | `STORY-032` |
 
 ---
@@ -70,6 +69,9 @@
 | `TASK-0311` | Task | Command Interfaces, Option Parsers & Unified CommandContext Abstraction | 3 | `STORY-031` | [TASK-0311.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0311.md) |
 | `TASK-0312` | Task | O(1) Hash Map Command Registry, Prefix Tokenizer & Dual Dispatcher | 5 | `STORY-031` | [TASK-0312.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0312.md) |
 | `STORY-031` | Story | O(1) Dual-Dispatch Command Router (Slash & Prefix Parity) | 8 | `EPIC-003` | [STORY-031.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-031.md) |
+| `TASK-0321` | Task | Middleware Runner, Execution Chain Engine & Error Boundary Interceptor | 2 | `STORY-032` | [TASK-0321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0321.md) |
+| `TASK-0322` | Task | Built-in Middlewares: PermissionBitfield, MaintenanceMode, ModuleToggle, Per-User Cooldown & TokenBucket RateLimit | 3 | `STORY-032` | [TASK-0322.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0322.md) |
+| `STORY-032` | Story | Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance) | 5 | `EPIC-003` | [STORY-032.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-032.md) |
 
 ---
 

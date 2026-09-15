@@ -16,6 +16,7 @@ import type {
   InteractionEditReplyOptions,
   Attachment,
 } from 'discord.js';
+import type { CommandMiddleware } from '../middleware/types.js';
 
 export const CommandCategory = {
   AI: 'ai',
@@ -68,6 +69,7 @@ export interface CommandMetadata {
   isOwnerOnly?: boolean | undefined;
   isGuildOnly?: boolean | undefined;
   isHidden?: boolean | undefined;
+  middlewares?: readonly CommandMiddleware[] | undefined;
   options?: CommandOptionDefinition[] | undefined;
 }
 
@@ -104,6 +106,7 @@ export interface CommandContext {
   readonly commandName: string;
   readonly invokedPrefix: string;
   readonly options: ICommandOptionsResolver;
+  readonly command?: Command | undefined;
   readonly isReplied: boolean;
   readonly isDeferred: boolean;
 
