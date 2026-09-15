@@ -227,4 +227,57 @@ export interface BankCapacityConfig {
   capacityPerLevel?: number | undefined;
 }
 
+/**
+ * Detailed representation of a user's level, XP within level, and next milestone.
+ */
+export interface LevelProgress {
+  level: number;
+  currentLevelXp: number;
+  xpForNextLevel: number;
+  totalXpForCurrentLevel: number;
+  totalXpForNextLevel: number;
+  progressPercent: number;
+}
+
+/**
+ * Event published when a user gains enough XP to reach a new level.
+ */
+export interface LevelUpEvent {
+  userId: string;
+  guildId: string;
+  previousLevel: number;
+  newLevel: number;
+  levelsGained: number;
+  totalXp: number;
+  shouldNotify: boolean;
+}
+
+/**
+ * Result of adding experience to a user's account.
+ */
+export interface AddXpServiceResult {
+  userId: string;
+  guildId: string;
+  xpAdded: number;
+  totalXp: number;
+  progress: LevelProgress;
+  didLevelUp: boolean;
+  previousLevel: number;
+  newLevel: number;
+  levelsGained: number;
+  shouldNotify: boolean;
+  eventId: string;
+}
+
+/**
+ * User Karma status and notification preferences.
+ */
+export interface KarmaProfile {
+  userId: string;
+  guildId: string;
+  karma: number;
+  userNotificationsEnabled: boolean;
+  serverNotificationsEnabled: boolean;
+}
+
 

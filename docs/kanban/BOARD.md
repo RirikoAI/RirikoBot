@@ -6,7 +6,9 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress.*
+| ID | Type | Title | Pts | Parent | Target Package |
+|---|---|---|---|---|---|
+| `TASK-0422` | Task | Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries | 3 | `STORY-042` | `packages/services` |
 
 ---
 
@@ -85,6 +87,7 @@
 | `TASK-0411` | Task | Daily Streak Engine (+5%/day up to 30d, 36h reset grace) & Account State | 2 | `STORY-041` | [TASK-0411.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0411.md) |
 | `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | [TASK-0412.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0412.md) |
 | `STORY-041` | Story | Transactional Banking, Daily Streak Engine & Double-Entry Ledger | 5 | `EPIC-004` | [STORY-041.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-041.md) |
+| `TASK-0421` | Task | Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls | 2 | `STORY-042` | [TASK-0421.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0421.md) |
 
 ---
 
@@ -112,8 +115,8 @@
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | ✅ Done | `TASK-0411` |
-| `TASK-0421` | Task | Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls | 2 | `STORY-042` | 📋 Ready | `STORY-041` |
-| `TASK-0422` | Task | Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries | 3 | `STORY-042` | 📋 Backlog | `TASK-0421` |
+| `TASK-0421` | Task | Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls | 2 | `STORY-042` | ✅ Done | `STORY-041` |
+| `TASK-0422` | Task | Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries | 3 | `STORY-042` | ⚡ In Progress | `TASK-0421` |
 | `TASK-0431` | Task | Item Catalog Repository, Inventory Bags & Usable Consumables (Anti-Abuse Daily Potion Ceilings) | 3 | `STORY-043` | 📋 Ready | `STORY-041` |
 | `TASK-0432` | Task | Custom Profile Background Manager with DNS/SSRF IP Verification, Dimension Bounds & Cache | 2 | `STORY-043` | 📋 Backlog | `TASK-0431` |
 | `TASK-0441` | Task | Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot) | 3 | `STORY-044` | 📋 Backlog | `TASK-0422`, `TASK-0432` |
