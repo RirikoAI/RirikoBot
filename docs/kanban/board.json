@@ -34,7 +34,7 @@
       "id": "EPIC-003",
       "title": "Discord.js 14 Gateway & O(1) Command Router",
       "points": 21,
-      "status": "BACKLOG",
+      "status": "IN_PROGRESS",
       "requires": ["EPIC-001"],
       "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"],
       "description": "Dual-dispatch router (slash + prefix), middleware chain (permissions, cooldowns, maintenance), interactive help center."
@@ -229,6 +229,42 @@
       "status": "DONE",
       "requires": ["STORY-022"],
       "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-010"]
+    },
+    {
+      "id": "STORY-030",
+      "epic": "EPIC-003",
+      "title": "Discord Client Gateway Lifecycle, Sharding & REST V10 Harness",
+      "points": 5,
+      "status": "DONE",
+      "requires": ["EPIC-001"],
+      "blocks": ["STORY-031"]
+    },
+    {
+      "id": "STORY-031",
+      "epic": "EPIC-003",
+      "title": "O(1) Dual-Dispatch Command Router (Slash & Prefix Parity)",
+      "points": 8,
+      "status": "BACKLOG",
+      "requires": ["STORY-030"],
+      "blocks": ["STORY-032"]
+    },
+    {
+      "id": "STORY-032",
+      "epic": "EPIC-003",
+      "title": "Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance)",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["STORY-031"],
+      "blocks": ["STORY-033"]
+    },
+    {
+      "id": "STORY-033",
+      "epic": "EPIC-003",
+      "title": "Interactive Dynamic Help Center & Command Auto-Registration",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["STORY-032"],
+      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"]
     }
   ],
   "tasks": [
@@ -384,6 +420,78 @@
       "status": "DONE",
       "requires": ["TASK-0231"],
       "blocks": []
+    },
+    {
+      "id": "TASK-0301",
+      "parent": "STORY-030",
+      "title": "Discord.js 14 Client Factory with Gateway Intents, Partials & Cache Sweepers",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["EPIC-001"],
+      "blocks": ["TASK-0302"]
+    },
+    {
+      "id": "TASK-0302",
+      "parent": "STORY-030",
+      "title": "Gateway Lifecycle State Machine, Reconnection & Shard Health Monitoring",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-0301"],
+      "blocks": ["STORY-031"]
+    },
+    {
+      "id": "TASK-0311",
+      "parent": "STORY-031",
+      "title": "Command Interfaces, Option Parsers & Unified CommandContext Abstraction",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["STORY-030"],
+      "blocks": ["TASK-0312"]
+    },
+    {
+      "id": "TASK-0312",
+      "parent": "STORY-031",
+      "title": "O(1) Hash Map Command Registry, Prefix Tokenizer & Dual Dispatcher",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["TASK-0311"],
+      "blocks": ["STORY-032"]
+    },
+    {
+      "id": "TASK-0321",
+      "parent": "STORY-032",
+      "title": "Middleware Runner, Execution Chain Engine & Error Boundary Interceptor",
+      "points": 2,
+      "status": "BACKLOG",
+      "requires": ["STORY-031"],
+      "blocks": ["TASK-0322"]
+    },
+    {
+      "id": "TASK-0322",
+      "parent": "STORY-032",
+      "title": "Built-in Middlewares: PermissionBitfield, MaintenanceMode, ModuleToggle, Per-User Cooldown & TokenBucket RateLimit",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["TASK-0321"],
+      "blocks": ["STORY-033"]
+    },
+    {
+      "id": "TASK-0331",
+      "parent": "STORY-033",
+      "title": "Component-driven Interactive Help Menu with Category Selectors, Pagination & Detailed Command Inspector",
+      "points": 2,
+      "status": "BACKLOG",
+      "requires": ["STORY-032"],
+      "blocks": ["TASK-0332"]
+    },
+    {
+      "id": "TASK-0332",
+      "parent": "STORY-033",
+      "title": "Discord REST v10 Global / Guild Command Synchronization & Auto-Registration Engine",
+      "points": 1,
+      "status": "BACKLOG",
+      "requires": ["TASK-0331"],
+      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"]
     }
   ],
   "chores": [],
