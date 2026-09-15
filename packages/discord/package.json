@@ -17,7 +17,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@ririko/core": "workspace:*"
+    "@ririko/core": "workspace:*",
+    "discord.js": "^14.27.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",

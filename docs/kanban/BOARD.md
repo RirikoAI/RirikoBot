@@ -16,7 +16,12 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No tickets currently in To Do.*
+| ID | Type | Title | Pts | Epic / Parent | Requires |
+|---|---|---|---|---|---|
+| `EPIC-003` | Epic | Discord.js 14 Gateway & O(1) Command Router | 21 | Self | `EPIC-001` |
+| `STORY-031` | Story | O(1) Dual-Dispatch Command Router (Slash & Prefix Parity) | 8 | `EPIC-003` | `STORY-030` |
+| `STORY-032` | Story | Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance) | 5 | `EPIC-003` | `STORY-031` |
+| `STORY-033` | Story | Interactive Dynamic Help Center & Command Auto-Registration | 3 | `EPIC-003` | `STORY-032` |
 
 ---
 
@@ -60,6 +65,9 @@
 | `TASK-0232` | Task | ririko migrate:legacy CLI Command with Dry-Run & Verification Harness | 1 | `STORY-023` | [TASK-0232.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0232.md) |
 | `STORY-023` | Story | Legacy 1.4.0 SQLite Migration Engine & CLI | 3 | `EPIC-002` | [STORY-023.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-023.md) |
 | `EPIC-002` | Epic | Dual-Dialect Drizzle ORM & Data Access Layer | 21 | Self | [STORY-023.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-023.md) |
+| `TASK-0301` | Task | Discord.js 14 Client Factory with Gateway Intents, Partials & Cache Sweepers | 3 | `STORY-030` | [TASK-0301.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0301.md) |
+| `TASK-0302` | Task | Gateway Lifecycle State Machine, Reconnection & Shard Health Monitoring | 2 | `STORY-030` | [TASK-0302.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0302.md) |
+| `STORY-030` | Story | Discord Client Gateway Lifecycle, Sharding & REST V10 Harness | 5 | `EPIC-003` | [STORY-030.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-030.md) |
 
 ---
 
@@ -71,7 +79,6 @@
 ## 📋 Product Backlog (Future Epics)
 | ID | Title | Est. Pts | Prerequisites | Target Phase |
 |---|---|---|---|---|
-| `EPIC-003` | Discord.js 14 Gateway & O(1) Command Router | 21 | `EPIC-001` | Phase 3 |
 | `EPIC-004` | Centralized Transactional Economy & Banking Engine | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-005` | Multi-Source Music 2.0 Audio Engine | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-006` | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
