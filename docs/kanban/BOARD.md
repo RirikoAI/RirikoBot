@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress.*
+*No tickets currently in progress (WIP = 0).*
 
 ---
 
@@ -16,12 +16,7 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-| ID | Type | Title | Pts | Epic / Parent | Requires |
-|---|---|---|---|---|---|
-| `EPIC-002` | Epic | Dual-Dialect Drizzle ORM & Data Access Layer | 21 | Self | `EPIC-001` |
-| `STORY-023` | Story | Legacy 1.4.0 SQLite Migration Engine & CLI | 3 | `EPIC-002` | `STORY-022` |
-| `TASK-0231` | Task | Legacy SQLite Inspector & 17-Entity Data Transformer | 2 | `STORY-023` | `STORY-022` |
-| `TASK-0232` | Task | ririko migrate:legacy CLI Command with Dry-Run & Verification Harness | 1 | `STORY-023` | `TASK-0231` |
+*No tickets currently in To Do.*
 
 ---
 
@@ -61,6 +56,10 @@
 | `TASK-0221` | Task | Base Repository Pattern & Dialect-Agnostic Query Abstraction | 3 | `STORY-022` | [TASK-0221.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0221.md) |
 | `STORY-022` | Story | Dialect-Agnostic Repositories & ACID Transaction Abstractions | 5 | `EPIC-002` | [TASK-0222.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0222.md) |
 | `TASK-0222` | Task | Core Domain Repositories (Users, GuildSettings, Economy Ledger) & Tests | 2 | `STORY-022` | [TASK-0222.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0222.md) |
+| `TASK-0231` | Task | Legacy SQLite Inspector & 17-Entity Data Transformer | 2 | `STORY-023` | [TASK-0231.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0231.md) |
+| `TASK-0232` | Task | ririko migrate:legacy CLI Command with Dry-Run & Verification Harness | 1 | `STORY-023` | [TASK-0232.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0232.md) |
+| `STORY-023` | Story | Legacy 1.4.0 SQLite Migration Engine & CLI | 3 | `EPIC-002` | [STORY-023.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-023.md) |
+| `EPIC-002` | Epic | Dual-Dialect Drizzle ORM & Data Access Layer | 21 | Self | [STORY-023.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-023.md) |
 
 ---
 
@@ -72,7 +71,6 @@
 ## 📋 Product Backlog (Future Epics)
 | ID | Title | Est. Pts | Prerequisites | Target Phase |
 |---|---|---|---|---|
-| `EPIC-002` | Dual-Dialect Drizzle ORM & Data Access Layer | 21 | `EPIC-001` | Phase 2 |
 | `EPIC-003` | Discord.js 14 Gateway & O(1) Command Router | 21 | `EPIC-001` | Phase 3 |
 | `EPIC-004` | Centralized Transactional Economy & Banking Engine | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-005` | Multi-Source Music 2.0 Audio Engine | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |

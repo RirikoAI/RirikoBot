@@ -10,11 +10,14 @@ describe('CLI Program', () => {
     expect(program.version()).toBe('2.0.0');
   });
 
-  it('registers info command', () => {
+  it('registers core subcommands', () => {
     const program = createProgram();
     const commandNames = program.commands.map((cmd) => cmd.name());
 
     expect(commandNames).toContain('info');
+    expect(commandNames).toContain('doctor');
+    expect(commandNames).toContain('migrate:legacy');
+    expect(commandNames).toContain('migrate:verify');
   });
 
   it('registers global options', () => {

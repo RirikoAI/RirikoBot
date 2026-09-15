@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import pc from 'picocolors';
 import { registerDoctorCommand } from './commands/doctor.js';
 import { registerInfoCommand } from './commands/info.js';
+import { registerMigrateCommand } from './commands/migrate.js';
 
 export function createProgram(): Command {
   const program = new Command();
@@ -17,6 +18,7 @@ export function createProgram(): Command {
   // Register commands
   registerInfoCommand(program);
   registerDoctorCommand(program);
+  registerMigrateCommand(program);
 
   // Global error handler
   program.exitOverride();
