@@ -6,6 +6,9 @@ import { GuildSettingsRepository } from './guild-settings.repository.js';
 import { EconomyRepository } from './economy.repository.js';
 import { XpRepository } from './xp.repository.js';
 import { LeaderboardRepository } from './leaderboard.repository.js';
+import { ItemRepository } from './item.repository.js';
+import { InventoryRepository } from './inventory.repository.js';
+import { PlayerEnergyRepository } from './player-energy.repository.js';
 
 describe('Core Domain Repositories & ACID Financial Ledger', () => {
   let client: SqliteDatabaseClient;
@@ -14,6 +17,9 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
   let economyRepo: EconomyRepository;
   let xpRepo: XpRepository;
   let leaderboardRepo: LeaderboardRepository;
+  let itemRepo: ItemRepository;
+  let inventoryRepo: InventoryRepository;
+  let playerEnergyRepo: PlayerEnergyRepository;
 
   beforeEach(async () => {
     const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
@@ -106,6 +112,37 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
         calculated_at INTEGER NOT NULL,
         PRIMARY KEY (user_id, guild_id)
       );
+
+      CREATE TABLE economy_items (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        price INTEGER NOT NULL,
+        rarity TEXT NOT NULL DEFAULT 'COMMON',
+        category_id TEXT,
+        icon_url TEXT,
+        is_purchasable INTEGER NOT NULL DEFAULT 1,
+        metadata TEXT DEFAULT '{}'
+      );
+
+      CREATE TABLE economy_inventories (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        item_id TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        acquired_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE player_energy (
+        user_id TEXT PRIMARY KEY,
+        current_energy INTEGER NOT NULL DEFAULT 100,
+        max_energy INTEGER NOT NULL DEFAULT 100,
+        bonus_energy INTEGER NOT NULL DEFAULT 0,
+        daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
+        last_replenished_at INTEGER NOT NULL,
+        last_reset_date TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
     `);
 
     userRepo = new UserRepository(client);
@@ -113,6 +150,9 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
     economyRepo = new EconomyRepository(client);
     xpRepo = new XpRepository(client);
     leaderboardRepo = new LeaderboardRepository(client);
+    itemRepo = new ItemRepository(client);
+    inventoryRepo = new InventoryRepository(client);
+    playerEnergyRepo = new PlayerEnergyRepository(client);
   });
 
   afterEach(async () => {
@@ -499,5 +539,109 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       expect(serverLb.items[1]?.userId).toBe('user_snap_1'); // serverRank 2
     });
   });
+
+  describe('ItemRepository', () => {
+    it('creates, queries, and seeds default shop catalog', async () => {
+      const seeded = await itemRepo.seedDefaultCatalog();
+      expect(seeded).toBe(4);
+
+      // Re-seeding should not insert duplicates
+      const reseeded = await itemRepo.seedDefaultCatalog();
+      expect(reseeded).toBe(0);
+
+      const items = await itemRepo.findAll();
+      expect(items.length).toBe(4);
+
+      const candy = await itemRepo.findById('candy_minor');
+      expect(candy).not.toBeNull();
+      expect(candy?.name).toBe('Minor Energy Candy');
+      expect(candy?.price).toBe(100);
+
+      const purchasable = await itemRepo.findPurchasable();
+      expect(purchasable.length).toBe(4);
+    });
+  });
+
+  describe('InventoryRepository', () => {
+    it('adds, removes, and retrieves inventory bag slots atomically', async () => {
+      await itemRepo.seedDefaultCatalog();
+
+      // Add 2 candies
+      const slot = await inventoryRepo.addItem('inv_user_1', 'candy_minor', 2);
+      expect(slot.quantity).toBe(2);
+
+      // Add 1 more candy (updates quantity to 3)
+      const updated = await inventoryRepo.addItem('inv_user_1', 'candy_minor', 1);
+      expect(updated.quantity).toBe(3);
+
+      // Check quantity
+      const qty = await inventoryRepo.getItemQuantity('inv_user_1', 'candy_minor');
+      expect(qty).toBe(3);
+
+      // Retrieve inventory with joined item details
+      const bag = await inventoryRepo.getUserInventoryWithItems('inv_user_1');
+      expect(bag.length).toBe(1);
+      expect(bag[0]?.inventory.quantity).toBe(3);
+      expect(bag[0]?.item?.name).toBe('Minor Energy Candy');
+
+      // Remove 1 candy
+      const remaining = await inventoryRepo.removeItem('inv_user_1', 'candy_minor', 1);
+      expect(remaining?.quantity).toBe(2);
+
+      // Remove remaining 2 candies (deletes row)
+      const emptied = await inventoryRepo.removeItem('inv_user_1', 'candy_minor', 2);
+      expect(emptied).toBeNull();
+
+      const finalQty = await inventoryRepo.getItemQuantity('inv_user_1', 'candy_minor');
+      expect(finalQty).toBe(0);
+    });
+  });
+
+  describe('PlayerEnergyRepository', () => {
+    it('tracks stamina consumption and enforces anti-abuse ceiling', async () => {
+      const initial = await playerEnergyRepo.getOrCreate('energy_tester');
+      expect(initial.currentEnergy).toBe(100);
+      expect(initial.dailyEnergyPotsUsed).toBe(0);
+
+      // Set energy to 20
+      await playerEnergyRepo.update('energy_tester', { currentEnergy: 20 });
+
+      // Pot 1: +50 -> 70 energy, potsUsed = 1
+      const pot1 = await playerEnergyRepo.consumeEnergyPotion('energy_tester', 50, 3);
+      expect(pot1.success).toBe(true);
+      expect(pot1.energy.currentEnergy).toBe(70);
+      expect(pot1.potsUsedToday).toBe(1);
+
+      // Pot 2: +50 -> 100 energy (capped at 100), potsUsed = 2
+      const pot2 = await playerEnergyRepo.consumeEnergyPotion('energy_tester', 50, 3);
+      expect(pot2.success).toBe(true);
+      expect(pot2.energy.currentEnergy).toBe(100);
+      expect(pot2.potsUsedToday).toBe(2);
+
+      // Pot 3: potsUsed = 3
+      const pot3 = await playerEnergyRepo.consumeEnergyPotion('energy_tester', 50, 3);
+      expect(pot3.success).toBe(true);
+      expect(pot3.potsUsedToday).toBe(3);
+
+      // Pot 4: fails due to ceiling (max 3/day)
+      const pot4 = await playerEnergyRepo.consumeEnergyPotion('energy_tester', 50, 3);
+      expect(pot4.success).toBe(false);
+      expect(pot4.reason).toContain('Daily stamina potion ceiling reached');
+      expect(pot4.potsUsedToday).toBe(3);
+
+      // Simulate next day rollover: lastResetDate in the past
+      await playerEnergyRepo.update('energy_tester', {
+        lastResetDate: '2020-01-01',
+        currentEnergy: 30,
+      });
+
+      // Next day pot -> succeeds and resets potsUsedToday to 1
+      const potNextDay = await playerEnergyRepo.consumeEnergyPotion('energy_tester', 50, 3);
+      expect(potNextDay.success).toBe(true);
+      expect(potNextDay.potsUsedToday).toBe(1);
+      expect(potNextDay.energy.currentEnergy).toBe(80);
+    });
+  });
 });
+
 

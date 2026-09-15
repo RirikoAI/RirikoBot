@@ -348,5 +348,93 @@ export interface LeaderboardConfig {
   autoRefresh?: boolean | undefined;
 }
 
+/**
+ * Standard item effect categories.
+ */
+export type ItemEffectType =
+  | 'ENERGY_RESTORE'
+  | 'XP_GRANT'
+  | 'CREDITS_GRANT'
+  | 'PROFILE_BG_TOKEN'
+  | 'GENERIC';
+
+/**
+ * Metadata stored with shop items.
+ */
+export interface ItemMetadata {
+  itemType?: ItemEffectType | string | undefined;
+  energyRestored?: number | undefined;
+  xpAwarded?: number | undefined;
+  creditsAwarded?: number | undefined;
+  dailyPurchaseLimit?: number | undefined;
+  dailyUsageCeiling?: number | undefined;
+  [key: string]: unknown;
+}
+
+/**
+ * Parameters for purchasing an item from the shop catalog.
+ */
+export interface BuyItemParams {
+  userId: string;
+  itemId: string;
+  quantity?: number | undefined;
+  guildId?: string | undefined;
+}
+
+/**
+ * Result of attempting to purchase an item from the shop.
+ */
+export interface BuyItemResult {
+  success: boolean;
+  reason?: string | undefined;
+  item?: import('@ririko/database').EconomyItem | undefined;
+  quantity: number;
+  totalPrice: number;
+  walletBalanceAfter?: number | bigint | undefined;
+  inventorySlot?: import('@ririko/database').EconomyInventory | undefined;
+  transactionId?: string | undefined;
+}
+
+/**
+ * Parameters for using a consumable item from the user's inventory bag.
+ */
+export interface UseItemParams {
+  userId: string;
+  itemId: string;
+  quantity?: number | undefined;
+  guildId?: string | undefined;
+}
+
+/**
+ * Result of consuming an item from the inventory bag.
+ */
+export interface UseItemResult {
+  success: boolean;
+  reason?: string | undefined;
+  item?: import('@ririko/database').EconomyItem | undefined;
+  quantityUsed: number;
+  remainingQuantity: number;
+  effectSummary?: string | undefined;
+  energyRestored?: number | undefined;
+  currentEnergy?: number | undefined;
+  dailyEnergyPotsUsed?: number | undefined;
+  xpAwarded?: number | undefined;
+  creditsAwarded?: number | undefined;
+  transactionId?: string | undefined;
+}
+
+/**
+ * Detailed view of an inventory bag slot.
+ */
+export interface InventorySlotView {
+  id: string;
+  userId: string;
+  itemId: string;
+  quantity: number;
+  acquiredAt: Date;
+  item: import('@ririko/database').EconomyItem | null;
+}
+
+
 
 
