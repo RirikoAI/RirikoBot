@@ -307,7 +307,7 @@
       "epic": "EPIC-004",
       "title": "Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "IN_PROGRESS",
       "requires": ["STORY-042", "STORY-043"],
       "blocks": ["EPIC-010"]
     }
@@ -621,7 +621,7 @@
       "parent": "STORY-044",
       "title": "Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot)",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["TASK-0422", "TASK-0432"],
       "blocks": ["TASK-0442"],
       "description": "1200x400 high-performance canvas rank card synthesizer with Discord avatar, global & server rank badges, level, XP progress bar, wallet & bank balance, and equipped TCG card slot."
@@ -631,7 +631,7 @@
       "parent": "STORY-044",
       "title": "Dual-Dispatch Discord Commands & Gateway Event Listeners",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "IN_PROGRESS",
       "requires": ["TASK-0441"],
       "blocks": ["EPIC-010"],
       "description": "Slash & prefix parity commands (/balance, /daily, /deposit, /withdraw, /pay, /leaderboard, /profile, /shop, /inventory, /use, /karma) and message/voice Gateway event listeners in apps/bot."

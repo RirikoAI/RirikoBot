@@ -21,6 +21,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.66",
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*"
   },

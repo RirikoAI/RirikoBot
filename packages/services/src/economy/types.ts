@@ -491,6 +491,66 @@ export interface SetBackgroundResult {
   fileSizeBytes?: number | undefined;
 }
 
+/**
+ * View model of an equipped Waifu TCG card displayed on the profile rank card.
+ */
+export interface EquippedTcgCardView {
+  id: string;
+  name: string;
+  rarity: string;
+  serialNumber?: string | undefined;
+  imageUrl?: string | undefined;
+  imageBuffer?: Buffer | undefined;
+}
+
+/**
+ * Data payload for generating a 1200x400 Profile Card 2.0.
+ */
+export interface ProfileCardData {
+  userId: string;
+  username: string;
+  displayName: string;
+  avatarUrl?: string | undefined;
+  avatarBuffer?: Buffer | undefined;
+  presenceStatus?: 'online' | 'idle' | 'dnd' | 'offline' | undefined;
+  level: number;
+  currentLevelXp: number;
+  xpForNextLevel: number;
+  totalXp: number;
+  progressPercent: number;
+  walletBalance: number | bigint;
+  bankBalance: number | bigint;
+  bankCapacity?: number | bigint | undefined;
+  karma?: number | undefined;
+  serverRank?: number | string | undefined;
+  globalRank?: number | string | undefined;
+  customBackgroundPathOrUrl?: string | undefined;
+  customBackgroundBuffer?: Buffer | undefined;
+  equippedCard?: EquippedTcgCardView | undefined;
+}
+
+/**
+ * Options for rendering a user's profile card from database repositories.
+ */
+export interface ProfileCardRenderOptions {
+  guildId?: string | undefined;
+  avatarBuffer?: Buffer | undefined;
+  presenceStatus?: 'online' | 'idle' | 'dnd' | 'offline' | undefined;
+  equippedCard?: EquippedTcgCardView | undefined;
+}
+
+/**
+ * Configuration and dependency options for ProfileCardRenderer.
+ */
+export interface ProfileCardRendererOptions {
+  userRepository?: import('@ririko/database').UserRepository | undefined;
+  economyRepository?: import('@ririko/database').EconomyRepository | undefined;
+  levelingService?: import('./leveling.service.js').LevelingService | undefined;
+  bankingService?: import('./banking.service.js').BankingService | undefined;
+  leaderboardService?: import('./leaderboard.service.js').LeaderboardService | undefined;
+}
+
+
 
 
 
