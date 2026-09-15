@@ -9,8 +9,8 @@
       "points": 13,
       "status": "DONE",
       "requires": [],
-      "blocks": ["EPIC-001"],
-      "description": "Comprehensive specification of Ririko 2.0, legacy audit, 16 subsystem manuals, 18 agent designs, and Scrum Kanban protocol."
+      "blocks": ["EPIC-001", "EPIC-002"],
+      "description": "Foundational system architecture, complete subsystem specifications, and Scrum Kanban protocol."
     },
     {
       "id": "EPIC-001",
@@ -19,7 +19,7 @@
       "status": "DONE",
       "requires": ["EPIC-000"],
       "blocks": ["EPIC-002", "EPIC-003"],
-      "description": "pnpm workspaces, strict TypeScript configs, packages/core (Zod schemas, EventBus, Errors), and apps/cli (doctor, scaffolding)."
+      "description": "pnpm workspaces, strict TypeScript configs, @ririko/core with typed event bus and errors, and ririko CLI."
     },
     {
       "id": "EPIC-002",
@@ -34,7 +34,7 @@
       "id": "EPIC-003",
       "title": "Discord.js 14 Gateway & O(1) Command Router",
       "points": 21,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["EPIC-001"],
       "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"],
       "description": "Dual-dispatch router (slash + prefix), middleware chain (permissions, cooldowns, maintenance), interactive help center."
@@ -262,7 +262,7 @@
       "epic": "EPIC-003",
       "title": "Interactive Dynamic Help Center & Command Auto-Registration",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-032"],
       "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"]
     }
@@ -480,7 +480,7 @@
       "parent": "STORY-033",
       "title": "Component-driven Interactive Help Menu with Category Selectors, Pagination & Detailed Command Inspector",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-032"],
       "blocks": ["TASK-0332"]
     },
@@ -489,7 +489,7 @@
       "parent": "STORY-033",
       "title": "Discord REST v10 Global / Guild Command Synchronization & Auto-Registration Engine",
       "points": 1,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["TASK-0331"],
       "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"]
     }

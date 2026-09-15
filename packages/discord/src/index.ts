@@ -5,4 +5,5 @@ export * from './rest/index.js';
 export * from './command/index.js';
 export * from './router/index.js';
 export * from './middleware/index.js';
+export * from './help/index.js';
 export * from './errors/index.js';
