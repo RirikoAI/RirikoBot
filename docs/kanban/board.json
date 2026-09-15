@@ -561,18 +561,20 @@
       "parent": "STORY-041",
       "title": "Daily Streak Engine (+5%/day up to 30d, 36h reset grace) & Account State",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0401"],
-      "blocks": ["TASK-0412"]
+      "blocks": ["TASK-0412"],
+      "description": "economy_accounts state management, daily claim streaks with +5%/day bonus capping at +150% (30 days), 24h window with 12h grace period (36h total reset cutoff), and account freeze controls."
     },
     {
       "id": "TASK-0412",
       "parent": "STORY-041",
       "title": "Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers)",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "IN_PROGRESS",
       "requires": ["TASK-0411"],
-      "blocks": ["STORY-042", "STORY-043"]
+      "blocks": ["STORY-042", "STORY-043"],
+      "description": "Deposit & withdraw operations with capacity scaling (10,000 + Level*2,500), configurable daily interest calculations, and peer-to-peer /pay transfers with deterministic deadlock-free row locking."
     },
     {
       "id": "TASK-0421",
@@ -581,7 +583,8 @@
       "points": 2,
       "status": "BACKLOG",
       "requires": ["TASK-0411"],
-      "blocks": ["TASK-0422"]
+      "blocks": ["TASK-0422"],
+      "description": "Bidirectional XP-to-Level and Level-to-XP formulas (5L^2 + 50L + 100), level-up threshold events, legacy Karma tracking and opt-in notification toggles."
     },
     {
       "id": "TASK-0422",
@@ -590,7 +593,8 @@
       "points": 3,
       "status": "BACKLOG",
       "requires": ["TASK-0421"],
-      "blocks": ["STORY-044"]
+      "blocks": ["STORY-044"],
+      "description": "leaderboard_snapshots materialization cron computing global and server rank percentiles, point lookups with O(1) dense rank queries without full user table scans."
     },
     {
       "id": "TASK-0431",
@@ -599,7 +603,8 @@
       "points": 3,
       "status": "BACKLOG",
       "requires": ["TASK-0412"],
-      "blocks": ["TASK-0432"]
+      "blocks": ["TASK-0432"],
+      "description": "economy_items catalog, inventory bag persistence, consumable item use pipeline, and anti-abuse daily limits (1 minor candy/day in shop, max 3 stamina pots/day)."
     },
     {
       "id": "TASK-0432",
@@ -608,7 +613,8 @@
       "points": 2,
       "status": "BACKLOG",
       "requires": ["TASK-0431"],
-      "blocks": ["STORY-044"]
+      "blocks": ["STORY-044"],
+      "description": "Remote profile background fetching with SSRF private-IP filters, dimension validation (1200x400 limit), local storage caching, and shop sink deduction."
     },
     {
       "id": "TASK-0441",
@@ -617,7 +623,8 @@
       "points": 3,
       "status": "BACKLOG",
       "requires": ["TASK-0422", "TASK-0432"],
-      "blocks": ["TASK-0442"]
+      "blocks": ["TASK-0442"],
+      "description": "1200x400 high-performance canvas rank card synthesizer with Discord avatar, global & server rank badges, level, XP progress bar, wallet & bank balance, and equipped TCG card slot."
     },
     {
       "id": "TASK-0442",
@@ -626,7 +633,8 @@
       "points": 2,
       "status": "BACKLOG",
       "requires": ["TASK-0441"],
-      "blocks": ["EPIC-010"]
+      "blocks": ["EPIC-010"],
+      "description": "Slash & prefix parity commands (/balance, /daily, /deposit, /withdraw, /pay, /leaderboard, /profile, /shop, /inventory, /use, /karma) and message/voice Gateway event listeners in apps/bot."
     }
   ],
   "chores": [

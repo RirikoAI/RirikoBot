@@ -135,3 +135,35 @@ export interface VoiceTickResult {
   rewardResults?: RewardResult[] | undefined;
 }
 
+/**
+ * Result of claiming a daily reward.
+ */
+export interface DailyClaimResult {
+  success: boolean;
+  reason?: string | undefined;
+  creditsAwarded: number;
+  streak: number;
+  multiplier: number;
+  nextClaimAt?: Date | undefined;
+  graceExpiresAt?: Date | undefined;
+  wasReset: boolean;
+  walletBalance?: number | bigint | undefined;
+  transactionId?: string | undefined;
+}
+
+/**
+ * Daily claim status inspection for a user.
+ */
+export interface DailyStatus {
+  canClaim: boolean;
+  isFrozen: boolean;
+  currentStreak: number;
+  nextStreak: number;
+  multiplier: number;
+  rewardCredits: number;
+  lastDailyAt: Date | null;
+  timeUntilNextClaimMs: number;
+  timeUntilResetMs: number;
+}
+
+

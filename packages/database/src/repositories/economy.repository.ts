@@ -4,6 +4,8 @@ import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
 import type { PaginationOptions, PaginatedResult } from './types.js';
 import type {
+  EconomyAccount,
+  NewEconomyAccount,
   EconomyBalance,
   NewEconomyBalance,
   EconomyTransaction,
@@ -499,4 +501,124 @@ export class EconomyRepository extends BaseRepository<
       };
     }
   }
+
+  /**
+   * Retrieves an economy account by user ID.
+   */
+  async getAccount(userId: string, tx?: DatabaseClient): Promise<EconomyAccount | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .select()
+        .from(sqliteSchema.economyAccounts)
+        .where(eq(sqliteSchema.economyAccounts.userId, userId));
+      return (row as EconomyAccount) ?? null;
+    } else {
+      const [row] = await client.db
+        .select()
+        .from(pgSchema.economyAccounts)
+        .where(eq(pgSchema.economyAccounts.userId, userId));
+      return (row as unknown as EconomyAccount) ?? null;
+    }
+  }
+
+  /**
+   * Retrieves or initializes an economy account.
+   */
+  async getOrCreateAccount(userId: string, tx?: DatabaseClient): Promise<EconomyAccount> {
+    const existing = await this.getAccount(userId, tx);
+    if (existing) return existing;
+
+    const client = this.getClient(tx);
+    const now = new Date();
+
+    if (this.isSqlite(client)) {
+      const [created] = await client.db
+        .insert(sqliteSchema.economyAccounts)
+        .values({
+          userId,
+          isFrozen: false,
+          dailyStreak: 0,
+          lastDailyAt: null,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: sqliteSchema.economyAccounts.userId,
+          set: { updatedAt: now },
+        })
+        .returning();
+      if (!created) throw new DatabaseError(`Failed to get or create account for user ${userId}`);
+      return created as EconomyAccount;
+    } else {
+      const [created] = await client.db
+        .insert(pgSchema.economyAccounts)
+        .values({
+          userId,
+          isFrozen: false,
+          dailyStreak: 0,
+          lastDailyAt: null,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: pgSchema.economyAccounts.userId,
+          set: { updatedAt: now },
+        })
+        .returning();
+      if (!created) throw new DatabaseError(`Failed to get or create account for user ${userId}`);
+      return created as unknown as EconomyAccount;
+    }
+  }
+
+  /**
+   * Updates an economy account's state.
+   */
+  async updateAccount(
+    userId: string,
+    data: Partial<NewEconomyAccount>,
+    tx?: DatabaseClient,
+  ): Promise<EconomyAccount> {
+    const client = this.getClient(tx);
+    const updateData = { ...data, updatedAt: new Date() };
+
+    if (this.isSqlite(client)) {
+      const [updated] = await client.db
+        .update(sqliteSchema.economyAccounts)
+        .set(updateData)
+        .where(eq(sqliteSchema.economyAccounts.userId, userId))
+        .returning();
+      if (!updated) throw new DatabaseError(`Account for user ${userId} not found for update`);
+      return updated as EconomyAccount;
+    } else {
+      const [updated] = await client.db
+        .update(pgSchema.economyAccounts)
+        .set(updateData as unknown as Partial<typeof pgSchema.economyAccounts.$inferInsert>)
+        .where(eq(pgSchema.economyAccounts.userId, userId))
+        .returning();
+      if (!updated) throw new DatabaseError(`Account for user ${userId} not found for update`);
+      return updated as unknown as EconomyAccount;
+    }
+  }
+
+  /**
+   * Freezes or unfreezes a user's economy account.
+   */
+  async freezeAccount(
+    userId: string,
+    isFrozen = true,
+    tx?: DatabaseClient,
+  ): Promise<EconomyAccount> {
+    await this.getOrCreateAccount(userId, tx);
+    return this.updateAccount(userId, { isFrozen }, tx);
+  }
+
+  /**
+   * Checks whether a user's account is currently frozen.
+   */
+  async isAccountFrozen(userId: string, tx?: DatabaseClient): Promise<boolean> {
+    const account = await this.getAccount(userId, tx);
+    return account?.isFrozen ?? false;
+  }
 }
+
