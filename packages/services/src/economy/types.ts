@@ -435,6 +435,63 @@ export interface InventorySlotView {
   item: import('@ririko/database').EconomyItem | null;
 }
 
+/**
+ * Parsed image dimensions and format metadata.
+ */
+export interface ImageDimensions {
+  width: number;
+  height: number;
+  format: 'png' | 'jpeg' | 'webp' | 'gif';
+}
+
+/**
+ * Configuration for the Profile Background Manager.
+ */
+export interface ProfileBackgroundConfig {
+  /**
+   * Maximum allowable width in pixels. Default: 1200.
+   */
+  maxWidth?: number | undefined;
+  /**
+   * Maximum allowable height in pixels. Default: 400.
+   */
+  maxHeight?: number | undefined;
+  /**
+   * Maximum image file size in bytes. Default: 5MB (5,242,880 bytes).
+   */
+  maxSizeBytes?: number | undefined;
+  /**
+   * Network download timeout in milliseconds. Default: 10,000ms.
+   */
+  timeoutMs?: number | undefined;
+  /**
+   * Local directory on disk where validated backgrounds are cached.
+   */
+  cacheDir?: string | undefined;
+}
+
+/**
+ * Parameters for setting a user's custom profile background.
+ */
+export interface SetBackgroundParams {
+  userId: string;
+  url: string;
+  consumeToken?: boolean | undefined;
+}
+
+/**
+ * Outcome of validating, downloading, and caching a profile background.
+ */
+export interface SetBackgroundResult {
+  success: boolean;
+  reason?: string | undefined;
+  cachedPath?: string | undefined;
+  dimensions?: { width: number; height: number } | undefined;
+  format?: string | undefined;
+  fileSizeBytes?: number | undefined;
+}
+
+
 
 
 
