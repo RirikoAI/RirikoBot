@@ -16,7 +16,12 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No tickets currently in To Do. EPIC-004 is 100% complete!*
+| ID | Type | Title | Pts | Parent | Status |
+|---|---|---|---|---|---|
+| `EPIC-005` | Epic | Multi-Source Music 2.0 Audio Engine | 13 | Self | 🎯 To Do |
+| `STORY-050` | Story | Multi-Source Audio Extractors & Stream Resolvers | 5 | `EPIC-005` | 🎯 To Do |
+| `STORY-051` | Story | Voice Lifecycle, Audio Player Core & Queue Engine | 5 | `EPIC-005` | 🎯 To Do |
+| `STORY-052` | Story | Reactive Embed Controller & Dual-Dispatch Music Commands Suite | 3 | `EPIC-005` | 🎯 To Do |
 
 ---
 
@@ -101,7 +106,6 @@
 ## 📋 Product Backlog (Future Epics & Stories)
 | ID | Title | Est. Pts | Prerequisites | Target Phase |
 |---|---|---|---|---|
-| `EPIC-005` | Multi-Source Music 2.0 Audio Engine | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-006` | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-007` | Moderation 2.0 with Escalation & AutoMod | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-008` | Streamer Notifications & Free Games Announcer | 8 | `EPIC-002`, `EPIC-003` | Phase 4 |
@@ -109,6 +113,16 @@
 | `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | 21 | `EPIC-002`, `EPIC-004` | Phase 5 |
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 6 |
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7 |
+
+### 🛠️ Groomed Tasks for EPIC-005
+| ID | Type | Title | Pts | Parent | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `TASK-0501` | Task | Extractor Interfaces, Pattern Matchers & Source Adapters | 3 | `STORY-050` | 🎯 To Do | `EPIC-002`, `EPIC-003` |
+| `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | 🎯 To Do | `TASK-0501` |
+| `TASK-0511` | Task | Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping | 3 | `STORY-051` | 🎯 To Do | `STORY-050` |
+| `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | 🎯 To Do | `TASK-0511` |
+| `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | 🎯 To Do | `STORY-051` |
+| `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | 🎯 To Do | `TASK-0521` |
 
 ### 🛠️ Groomed Tasks for EPIC-004
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
