@@ -208,7 +208,7 @@
       "epic": "EPIC-002",
       "title": "70+ Normalized Table Schemas & Unified TypeScript Models",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-020"],
       "blocks": ["STORY-022"]
     },
@@ -336,7 +336,7 @@
       "parent": "STORY-021",
       "title": "Core & Service Schemas: Identity, Guilds, Moderation, Economy, XP, Music, AI",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-020"],
       "blocks": ["TASK-0212"]
     },
@@ -345,7 +345,7 @@
       "parent": "STORY-021",
       "title": "Specialized Schemas: Waifu TCG (20 tables), Streams, Giveaways, Games, Utilities & Inferred Models",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0211"],
       "blocks": ["STORY-022"]
     },

@@ -19,9 +19,6 @@
 | ID | Type | Title | Pts | Epic / Parent | Requires |
 |---|---|---|---|---|---|
 | `EPIC-002` | Epic | Dual-Dialect Drizzle ORM & Data Access Layer | 21 | Self | `EPIC-001` |
-| `STORY-021` | Story | 70+ Normalized Table Schemas & Unified TypeScript Models | 8 | `EPIC-002` | `STORY-020` |
-| `TASK-0211` | Task | Core & Service Schemas: Identity, Guilds, Moderation, Economy, XP, Music, AI | 5 | `STORY-021` | `STORY-020` |
-| `TASK-0212` | Task | Specialized Schemas: Waifu TCG (20 tables), Streams, Giveaways, Games, Utilities & Inferred Models | 3 | `STORY-021` | `TASK-0211` |
 | `STORY-022` | Story | Dialect-Agnostic Repositories & ACID Transaction Abstractions | 5 | `EPIC-002` | `STORY-021` |
 | `TASK-0221` | Task | Base Repository Pattern & Dialect-Agnostic Query Abstraction | 3 | `STORY-022` | `STORY-021` |
 | `TASK-0222` | Task | Core Domain Repositories (Users, GuildSettings, Economy Ledger) & Tests | 2 | `STORY-022` | `TASK-0221` |
@@ -61,6 +58,9 @@
 | `STORY-020` | Story | Dual-Dialect Connection Factory & Client Harness | 5 | `EPIC-002` | [TASK-0202.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0202.md) |
 | `TASK-0201` | Task | Dependencies, Dual-Dialect Connection Factory & Client Interfaces | 2 | `STORY-020` | [TASK-0201.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0201.md) |
 | `TASK-0202` | Task | SQLite WAL/Foreign Key Pragmas, PG Pooling, Health Check & Integration Tests | 3 | `STORY-020` | [TASK-0202.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0202.md) |
+| `STORY-021` | Story | 70+ Normalized Table Schemas & Unified TypeScript Models | 8 | `EPIC-002` | [TASK-0212.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0212.md) |
+| `TASK-0211` | Task | Core & Service Schemas: Identity, Guilds, Moderation, Economy, XP, Music, AI | 5 | `STORY-021` | [TASK-0211.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0211.md) |
+| `TASK-0212` | Task | Specialized Schemas: Waifu TCG (20 tables), Streams, Giveaways, Games, Utilities & Inferred Models | 3 | `STORY-021` | [TASK-0212.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0212.md) |
 
 ---
 
