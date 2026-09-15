@@ -1,0 +1,296 @@
+{
+  "at": "2026-09-15T07:32:08.159Z",
+  "source": "c175c629957bacaf6d3992bd913b6f60b7bcec39",
+  "checks": [
+    {
+      "name": "non-root/read-only-root/native production layout",
+      "evidence": {
+        "uid": 1000,
+        "gid": 1000,
+        "dataOwner": 1000,
+        "node": "v24.19.0",
+        "rootReadOnly": true,
+        "developmentModulesAbsent": true
+      }
+    },
+    {
+      "name": "unconfigured bot startup rejects credentials",
+      "evidence": {
+        "exit": 1,
+        "stdout": ""
+      }
+    },
+    {
+      "name": "unmigrated startup and doctor fail without creating database",
+      "evidence": {
+        "status": {
+          "current": 0,
+          "latest": 1
+        },
+        "doctor": [
+          {
+            "name": "Node.js",
+            "status": "ok",
+            "detail": "24.19.0"
+          },
+          {
+            "name": "Configuration",
+            "status": "ok",
+            "detail": "production; sqlite"
+          },
+          {
+            "name": "Discord token",
+            "status": "ok",
+            "detail": "Configured; not validated with Discord"
+          },
+          {
+            "name": "Discord application",
+            "status": "ok",
+            "detail": "Configured; not validated with Discord"
+          },
+          {
+            "name": "Filesystem",
+            "status": "ok",
+            "detail": "Database storage is readable and writable"
+          },
+          {
+            "name": "Database",
+            "status": "error",
+            "detail": "Database is missing, not migrated, or unavailable"
+          },
+          {
+            "name": "Migrations",
+            "status": "error",
+            "detail": "0/1; apply pending versions with ririko migrate"
+          },
+          {
+            "name": "FFmpeg",
+            "status": "optional",
+            "detail": "Not installed; needed when audio is enabled"
+          },
+          {
+            "name": "Providers",
+            "status": "optional",
+            "detail": "AI, images, music, and stream adapters are pending implementation"
+          }
+        ]
+      }
+    },
+    {
+      "name": "explicit idempotent migration and compiled doctor",
+      "evidence": {
+        "status": {
+          "current": 1,
+          "latest": 1
+        },
+        "doctor": [
+          {
+            "name": "Node.js",
+            "status": "ok",
+            "detail": "24.19.0"
+          },
+          {
+            "name": "Configuration",
+            "status": "ok",
+            "detail": "production; sqlite"
+          },
+          {
+            "name": "Discord token",
+            "status": "ok",
+            "detail": "Configured; not validated with Discord"
+          },
+          {
+            "name": "Discord application",
+            "status": "ok",
+            "detail": "Configured; not validated with Discord"
+          },
+          {
+            "name": "Filesystem",
+            "status": "ok",
+            "detail": "Database storage is readable and writable"
+          },
+          {
+            "name": "Database",
+            "status": "ok",
+            "detail": "Connection probe succeeded"
+          },
+          {
+            "name": "Migrations",
+            "status": "ok",
+            "detail": "1/1; apply pending versions with ririko migrate"
+          },
+          {
+            "name": "FFmpeg",
+            "status": "optional",
+            "detail": "Not installed; needed when audio is enabled"
+          },
+          {
+            "name": "Providers",
+            "status": "optional",
+            "detail": "AI, images, music, and stream adapters are pending implementation"
+          }
+        ],
+        "health": "Database ready. Discord connection is reported by the running bot /health/ready endpoint."
+      }
+    },
+    {
+      "name": "prefix and audit survive container replacement",
+      "evidence": {
+        "integrity": "ok",
+        "settings": [
+          {
+            "guild_id": "123456789012345678",
+            "prefix": "rir003!",
+            "revision": 1
+          }
+        ],
+        "audit": [
+          {
+            "actor_id": "123456789012345679",
+            "before_revision": 0,
+            "after_revision": 1
+          }
+        ],
+        "migrations": [
+          {
+            "version": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "compiled runtime and actual image healthcheck with offline gateway",
+      "evidence": {
+        "live": {
+          "status": 200,
+          "cache": "no-store",
+          "body": {
+            "status": "alive"
+          }
+        },
+        "ready": {
+          "status": 200,
+          "cache": "no-store",
+          "body": {
+            "status": "ready",
+            "checks": {
+              "database": true,
+              "discord": true
+            }
+          }
+        },
+        "down": {
+          "status": 503,
+          "cache": "no-store",
+          "body": {
+            "status": "not_ready",
+            "checks": {
+              "database": true,
+              "discord": false
+            }
+          }
+        },
+        "fixture": "Only Client.login/isReady/destroy instrumentation; no Discord network; no live readiness claim."
+      }
+    },
+    {
+      "name": "SIGTERM shutdown, same-container restart and durable state",
+      "evidence": {
+        "shutdowns": [
+          {
+            "cycle": 1,
+            "elapsedMs": 266,
+            "exitCode": 0,
+            "oomKilled": false
+          },
+          {
+            "cycle": 2,
+            "elapsedMs": 237,
+            "exitCode": 0,
+            "oomKilled": false
+          }
+        ],
+        "finalAudit": {
+          "integrity": "ok",
+          "settings": [
+            {
+              "guild_id": "123456789012345678",
+              "prefix": "rir003!",
+              "revision": 1
+            }
+          ],
+          "audit": [
+            {
+              "actor_id": "123456789012345679",
+              "before_revision": 0,
+              "after_revision": 1
+            }
+          ],
+          "migrations": [
+            {
+              "version": 1
+            }
+          ]
+        },
+        "completeShutdownLogCount": 2
+      }
+    },
+    {
+      "name": "exact task resource cleanup; existing containers and volumes unchanged",
+      "evidence": {
+        "oneShotContainers": 16
+      }
+    },
+    {
+      "name": "unchanged image CMD emits exact actionable startup errors",
+      "evidence": [
+        {
+          "name": "missing-credentials",
+          "exit": 1,
+          "publicError": "DISCORD_TOKEN and DISCORD_APPLICATION_ID are required."
+        },
+        {
+          "name": "pending-schema",
+          "exit": 1,
+          "publicError": "Database migrations are pending. Run pnpm ririko migrate before starting the bot."
+        }
+      ]
+    }
+  ],
+  "resources": {
+    "volume": "ririko-rir003-sqlite-20260915",
+    "runtime": "ririko-rir003-lifecycle-20260915",
+    "cleaned": true
+  },
+  "image": {
+    "id": "sha256:b3dcf1a0be1b5a3fa8c0a91eb619512bd8ecca58fe15524fd0f0c50c8c98d6a8",
+    "os": "linux",
+    "architecture": "amd64",
+    "user": "node",
+    "stopSignal": "SIGTERM",
+    "command": [
+      "node",
+      "apps/bot/dist/index.js"
+    ],
+    "healthcheck": {
+      "Interval": 30000000000,
+      "Retries": 3,
+      "StartPeriod": 30000000000,
+      "Test": [
+        "CMD-SHELL",
+        "node -e \"fetch('http://127.0.0.1:' + (process.env.HEALTH_PORT || '3001') + '/health/ready', { signal: AbortSignal.timeout(4000) }).then(response => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""
+      ],
+      "Timeout": 5000000000
+    }
+  },
+  "lockfileSha256": "bc0499812399e45523556a51ce6f9c0a2c5f5a5e1e8f80f90120901f811d94fb",
+  "runtimeLogs": "RIR003_OFFLINE_GATEWAY_LOGIN\nRIR003_OFFLINE_GATEWAY_CLOSED\n{\"level\":30,\"time\":1789457551774,\"service\":\"ririko\",\"version\":\"2.0.0\",\"module\":\"runtime\",\"msg\":\"Shutdown complete\"}\nRIR003_OFFLINE_GATEWAY_LOGIN\nRIR003_OFFLINE_GATEWAY_CLOSED\n{\"level\":30,\"time\":1789457558251,\"service\":\"ririko\",\"version\":\"2.0.0\",\"module\":\"runtime\",\"msg\":\"Shutdown complete\"}",
+  "result": "passed",
+  "preExistingResources": {
+    "containers": 7,
+    "volumes": 3,
+    "exactSetsUnchangedAfterCleanup": true
+  },
+  "baseImage": "node:24.19.0-bookworm-slim@sha256:a9f5f7c91a432850b2a8a7797adf5eadb6c733ceed61167806cee7ea7fbc29df",
+  "dockerfileSha256": "13c6391fc7982af4f4a67737eeae91f7d2267ddcab9876264519e7e1b0dd5952"
+}

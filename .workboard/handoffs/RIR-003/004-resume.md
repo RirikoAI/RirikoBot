@@ -1,0 +1,7 @@
+# RIR-003 — authorized resumption
+
+Coordinator, 2026-09-15. User: "you may continue with rir-003". Resume the same five-point GR-007 chore; no estimate rewrite or new implementation scope. Read protocol/state/board, paused and blocker handoffs, RIR-006 recovery/publication evidence, BLUEPRINT deployment and relevant requirements, Dockerfile and runtime sources.
+
+PR572 independently verified merged at c175c629957bacaf6d3992bd913b6f60b7bcec39, full tree identical to reviewed b55db33; CI34938188865 completed success. Fresh origin integration fetch matches c175c62. Docker Engine28.4.0 Linux x86_64 responds; no running containers. Earlier RIR-003 branch2d3328e and repair receipt887fc19 remain preserved. New branch chore/RIR-003-container-validation-resume starts at c175c62 and carries only latest administrative publication receipts. BATCH-007 reuses RIR-003; BATCH-005 remains a closed deferred historical attempt.
+
+Resume original operational-only acceptance: production build, non-root/read-only-root, explicit SQLite migration and doctor, settings/audit persistence across container replacement, startup failures, real compiled health/lifecycle with clearly labeled offline gateway injection, bounded SIGTERM exit. Use task-owned resources and dummy credentials, no external gateway/network. Record exact results and limits in this handoff directory. No implementation paths owned. No live Discord, production data, publication or next scope authorized. Stop at the final RIR-003 PR checkpoint.

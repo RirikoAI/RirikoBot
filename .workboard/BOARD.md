@@ -1,17 +1,11 @@
 # Ririko work board
 
-Generated from state.json · revision 181 · execution limit **1**.
+Generated from state.json · revision 189 · execution limit **1**.
 
 **Current work:** No occupied ticket.
-**Delivery:** BATCH-006 / RIR-006 / `fix/RIR-006-docker-engine` → `develop/2.0.0-astra` (checkpoint)
+**Delivery:** BATCH-007 / RIR-003 / `chore/RIR-003-container-validation-resume` → `develop/2.0.0-astra` (checkpoint)
 
 Read [the standing protocol](PROTOCOL.md) and the current handoff before working. A new task while the slot is occupied requires the user’s pause/abandon decision. A new delivery scope requires the PR checkpoint decision.
-
-## paused
-
-| ID | Type | Outcome | Points | Parent | Requires | Blocks | Delivery scope |
-|---|---|---|---:|---|---|---|---|
-| RIR-003 | chore | Validate the production Docker image and startup | 5 | RIR-100 | RIR-001 | — | RIR-003 |
 
 ## ready
 
@@ -46,6 +40,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 | ID | Type | Outcome | Points | Parent | Requires | Blocks | Delivery scope |
 |---|---|---|---:|---|---|---|---|
 | RIR-001 | chore | Establish work board, agent handoffs and safe Git delivery | 8 | RIR-100 | — | RIR-003, RIR-210, RIR-211, RIR-310, RIR-410, RIR-510, RIR-610, RIR-710, RIR-004, RIR-110, RIR-006 | RIR-001 |
+| RIR-003 | chore | Validate the production Docker image and startup | 5 | RIR-100 | RIR-001 | — | RIR-003 |
 | RIR-110 | story | Trace release reviews to the blueprint and exact branch changes | 13 | RIR-100 | RIR-001 | RIR-005, RIR-800, RIR-801, RIR-808 | RIR-110 |
 | RIR-005 | bug | Resolve deferred parent PR validation without rewriting preserved work | 13 | RIR-100 | RIR-110 | — | RIR-005 |
 | RIR-800 | epic | Implementation-ready documentation across every docs file | 89 | — | RIR-110 | — | RIR-800 |
@@ -93,7 +88,7 @@ Read [the standing protocol](PROTOCOL.md) and the current handoff before working
 
 ## Current handoffs
 
-- RIR-006: [handoff](handoffs/RIR-006/002-completion.md)
+- RIR-003: [handoff](handoffs/RIR-003/005-completion.md)
 
 ## Grooming groups
 

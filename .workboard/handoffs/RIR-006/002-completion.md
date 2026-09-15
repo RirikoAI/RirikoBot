@@ -41,3 +41,7 @@ Docker's CLI documentation supports bounded stop: https://docs.docker.com/refere
 ## Delivery and resume
 
 Acceptance met for restored engine plus safe isolated execution and preserved state. Move through review/done and put BATCH-006 at checkpoint. No push/PR/merge authorized. Prepare .workboard/reviews/BATCH-006.md and ask whether to publish this administrative repair record or defer it locally before resuming RIR-003. The latter remains paused; do not silently switch. All inspection/stop/smoke command sessions finished; Docker Desktop is intentionally left running. The workspace should be clean after the local checkpoint commit.
+
+## Publication update
+
+The pending-publication statement above is superseded by [the verified PR #572 receipt](003-published.md). RIR-003 remains paused.
