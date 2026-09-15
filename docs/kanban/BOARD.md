@@ -73,6 +73,7 @@
 | `TASK-0332` | Task | Discord REST v10 Global / Guild Command Synchronization & Auto-Registration Engine | 1 | `STORY-033` | [TASK-0332.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0332.md) |
 | `STORY-033` | Story | Interactive Dynamic Help Center & Command Auto-Registration | 3 | `EPIC-003` | [STORY-033.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-033.md) |
 | `EPIC-003` | Epic | Discord.js 14 Gateway & O(1) Command Router | 21 | Self | [EPIC-003.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/EPIC-003.md) |
+| `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | `EPIC-003` | [CHORE-0301.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-0301.md) |
 
 ---
 

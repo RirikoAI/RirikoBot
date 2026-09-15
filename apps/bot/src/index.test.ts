@@ -17,4 +17,9 @@ describe('apps/bot Bootstrapper', () => {
     expect(bot.gateway).toBeInstanceOf(GatewayManager);
     expect(bot.gateway.state).toBe('DISCONNECTED');
   });
+
+  it('exports main entrypoint function', async () => {
+    const { main } = await import('./main.js');
+    expect(typeof main).toBe('function');
+  });
 });
