@@ -1,4 +1,11 @@
-import { createBot, getBotInfo } from './index.js';
+import {
+  createBot,
+  getBotInfo,
+  createBotServices,
+  createEconomyCommands,
+  registerMessageListener,
+  registerVoiceListener,
+} from './index.js';
 import {
   CommandRouter,
   createHelpCommand,
@@ -65,6 +72,14 @@ export async function main(): Promise<void> {
   const helpCommand = createHelpCommand(router.registry);
   router.registry.register(helpCommand);
 
+  // 5. Initialize Domain Services and Register Economy Commands
+  console.log('• Initializing bot repositories and domain services...');
+  const services = await createBotServices();
+  const economyCommands = createEconomyCommands(services);
+  for (const cmd of economyCommands) {
+    router.registry.register(cmd);
+  }
+
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
       .getAll()
@@ -72,8 +87,12 @@ export async function main(): Promise<void> {
       .join(', ')}`,
   );
 
-  // 5. Bind Gateway Interaction & Message Listeners
+  // 6. Bind Gateway Interaction & Message Listeners
   router.bindClient(bot.client);
+
+  // Register Gateway message & voice event listeners
+  registerMessageListener(bot.client, services);
+  registerVoiceListener(bot.client, services);
 
   // Bind interactive Help Center UI components (select menus, buttons)
   bot.client.on('interactionCreate', async (interaction) => {

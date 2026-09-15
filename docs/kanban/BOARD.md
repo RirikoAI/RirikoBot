@@ -6,9 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-| ID | Type | Title | Pts | Parent | Target Package |
-|---|---|---|---|---|---|
-| `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | `apps/bot` |
+*No tickets currently in progress (WIP = 0).*
 
 ---
 
@@ -18,10 +16,7 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-| ID | Type | Title | Pts | Parent | Status |
-|---|---|---|---|---|---|
-| `EPIC-004` | Epic | Centralized Transactional Economy & Banking Engine | 21 | Self | Active |
-| `STORY-044` | Story | Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite | 5 | `EPIC-004` | ⚡ In Progress |
+*No tickets currently in To Do. EPIC-004 is 100% complete!*
 
 ---
 
@@ -92,6 +87,9 @@
 | `TASK-0432` | Task | Custom Profile Background Manager with DNS/SSRF IP Verification, Dimension Bounds & Cache | 2 | `STORY-043` | [TASK-0432.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0432.md) |
 | `STORY-043` | Story | Shop Catalog, Inventory Bags & SSRF-Protected Profile Customization | 5 | `EPIC-004` | [STORY-043.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-043.md) |
 | `TASK-0441` | Task | Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot) | 3 | `STORY-044` | [TASK-0441.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0441.md) |
+| `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | [TASK-0442.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0442.md) |
+| `STORY-044` | Story | Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite | 5 | `EPIC-004` | [STORY-044.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-044.md) |
+| `EPIC-004` | Epic | Centralized Transactional Economy & Banking Engine | 21 | Self | [EPIC-004.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/EPIC-004.md) |
 
 ---
 
@@ -121,5 +119,6 @@
 | `TASK-0431` | Task | Item Catalog Repository, Inventory Bags & Usable Consumables (Anti-Abuse Daily Potion Ceilings) | 3 | `STORY-043` | ✅ Done | `TASK-0412` |
 | `TASK-0432` | Task | Custom Profile Background Manager with DNS/SSRF IP Verification, Dimension Bounds & Cache | 2 | `STORY-043` | ✅ Done | `TASK-0431` |
 | `TASK-0441` | Task | Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot) | 3 | `STORY-044` | ✅ Done | `TASK-0422`, `TASK-0432` |
-| `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | ⚡ In Progress | `TASK-0441` |
+| `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | ✅ Done | `TASK-0441` |
+
 

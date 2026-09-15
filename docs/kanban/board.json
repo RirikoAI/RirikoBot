@@ -43,7 +43,7 @@
       "id": "EPIC-004",
       "title": "Centralized Transactional Economy & Banking Engine",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-010", "EPIC-011"],
       "description": "Double-entry ledger, anti-spam XP, voice AFK checks, banking, rankings, item catalog, and canvas profile cards."
@@ -307,7 +307,7 @@
       "epic": "EPIC-004",
       "title": "Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite",
       "points": 5,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["STORY-042", "STORY-043"],
       "blocks": ["EPIC-010"]
     }
@@ -631,7 +631,7 @@
       "parent": "STORY-044",
       "title": "Dual-Dispatch Discord Commands & Gateway Event Listeners",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["TASK-0441"],
       "blocks": ["EPIC-010"],
       "description": "Slash & prefix parity commands (/balance, /daily, /deposit, /withdraw, /pay, /leaderboard, /profile, /shop, /inventory, /use, /karma) and message/voice Gateway event listeners in apps/bot."

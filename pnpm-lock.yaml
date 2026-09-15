@@ -47,6 +47,9 @@ importers:
       '@ririko/discord':
         specifier: workspace:*
         version: link:../../packages/discord
+      '@ririko/services':
+        specifier: workspace:^
+        version: link:../../packages/services
       discord.js:
         specifier: ^14.27.0
         version: 14.27.0
