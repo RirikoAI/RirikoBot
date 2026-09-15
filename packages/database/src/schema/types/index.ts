@@ -23,6 +23,7 @@ export type ModerationNote = typeof sqlite.moderationNotes.$inferSelect;
 
 // Economy & Banking
 export type EconomyAccount = typeof sqlite.economyAccounts.$inferSelect;
+export type NewEconomyAccount = typeof sqlite.economyAccounts.$inferInsert;
 export type EconomyBalance = typeof sqlite.economyBalances.$inferSelect;
 export type NewEconomyBalance = typeof sqlite.economyBalances.$inferInsert;
 export type EconomyTransaction = typeof sqlite.economyTransactions.$inferSelect;
