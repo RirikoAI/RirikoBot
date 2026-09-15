@@ -8,4 +8,4 @@ export * from './leveling.service.js';
 export * from './leaderboard.service.js';
 export * from './inventory.service.js';
 export * from './profile-background.manager.js';
-
+export * from './profile-card.renderer.js';
