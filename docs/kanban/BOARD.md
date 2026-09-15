@@ -16,7 +16,11 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No tickets currently in To Do. Next epic awaiting grooming.*
+| ID | Type | Title | Pts | Parent | Status |
+|---|---|---|---|---|---|
+| `EPIC-004` | Epic | Centralized Transactional Economy & Banking Engine | 21 | Self | Active |
+| `STORY-040` | Story | Event-Driven Economy Core & Anti-Spam / Anti-AFK Engine | 5 | `EPIC-004` | Active |
+| `TASK-0402` | Task | Voice XP / Economy Accumulator, Quorum Verification & Anti-AFK State Machine | 2 | `STORY-040` | Ready |
 
 ---
 
@@ -74,6 +78,7 @@
 | `STORY-033` | Story | Interactive Dynamic Help Center & Command Auto-Registration | 3 | `EPIC-003` | [STORY-033.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-033.md) |
 | `EPIC-003` | Epic | Discord.js 14 Gateway & O(1) Command Router | 21 | Self | [EPIC-003.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/EPIC-003.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | `EPIC-003` | [CHORE-0301.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-0301.md) |
+| `TASK-0401` | Task | EconomyEvent Pipeline, Anti-Spam Evaluator & Core Service | 3 | `STORY-040` | [TASK-0401.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0401.md) |
 
 ---
 
@@ -82,10 +87,13 @@
 
 ---
 
-## 📋 Product Backlog (Future Epics)
+## 📋 Product Backlog (Future Epics & Stories)
 | ID | Title | Est. Pts | Prerequisites | Target Phase |
 |---|---|---|---|---|
-| `EPIC-004` | Centralized Transactional Economy & Banking Engine | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
+| `STORY-041` | Transactional Banking, Daily Streak Engine & Double-Entry Ledger | 5 | `STORY-040` | Phase 4 |
+| `STORY-042` | Leveling 2.0, Karma & High-Performance Materialized Leaderboards | 5 | `STORY-041` | Phase 4 |
+| `STORY-043` | Shop Catalog, Inventory Bags & SSRF-Protected Profile Customization | 5 | `STORY-041` | Phase 4 |
+| `STORY-044` | Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite | 5 | `STORY-042`, `STORY-043` | Phase 4 |
 | `EPIC-005` | Multi-Source Music 2.0 Audio Engine | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-006` | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-007` | Moderation 2.0 with Escalation & AutoMod | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
