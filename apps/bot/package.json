@@ -12,7 +12,8 @@
   "dependencies": {
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
-    "@ririko/discord": "workspace:*"
+    "@ririko/discord": "workspace:*",
+    "discord.js": "^14.27.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
