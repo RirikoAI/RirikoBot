@@ -16,10 +16,7 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-| ID | Type | Title | Pts | Epic / Parent | Requires |
-|---|---|---|---|---|---|
-| `EPIC-003` | Epic | Discord.js 14 Gateway & O(1) Command Router | 21 | Self | `EPIC-001` |
-| `STORY-033` | Story | Interactive Dynamic Help Center & Command Auto-Registration | 3 | `EPIC-003` | `STORY-032` |
+*No tickets currently in To Do. Next epic awaiting grooming.*
 
 ---
 
@@ -72,6 +69,10 @@
 | `TASK-0321` | Task | Middleware Runner, Execution Chain Engine & Error Boundary Interceptor | 2 | `STORY-032` | [TASK-0321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0321.md) |
 | `TASK-0322` | Task | Built-in Middlewares: PermissionBitfield, MaintenanceMode, ModuleToggle, Per-User Cooldown & TokenBucket RateLimit | 3 | `STORY-032` | [TASK-0322.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0322.md) |
 | `STORY-032` | Story | Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance) | 5 | `EPIC-003` | [STORY-032.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-032.md) |
+| `TASK-0331` | Task | Component-driven Interactive Help Menu with Category Selectors, Pagination & Detailed Command Inspector | 2 | `STORY-033` | [TASK-0331.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0331.md) |
+| `TASK-0332` | Task | Discord REST v10 Global / Guild Command Synchronization & Auto-Registration Engine | 1 | `STORY-033` | [TASK-0332.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0332.md) |
+| `STORY-033` | Story | Interactive Dynamic Help Center & Command Auto-Registration | 3 | `EPIC-003` | [STORY-033.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-033.md) |
+| `EPIC-003` | Epic | Discord.js 14 Gateway & O(1) Command Router | 21 | Self | [EPIC-003.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/EPIC-003.md) |
 
 ---
 
