@@ -29,7 +29,12 @@ export type NewEconomyBalance = typeof sqlite.economyBalances.$inferInsert;
 export type EconomyTransaction = typeof sqlite.economyTransactions.$inferSelect;
 export type NewEconomyTransaction = typeof sqlite.economyTransactions.$inferInsert;
 export type EconomyItem = typeof sqlite.economyItems.$inferSelect;
+export type NewEconomyItem = typeof sqlite.economyItems.$inferInsert;
 export type EconomyInventory = typeof sqlite.economyInventories.$inferSelect;
+export type NewEconomyInventory = typeof sqlite.economyInventories.$inferInsert;
+export type EconomyCooldown = typeof sqlite.economyCooldowns.$inferSelect;
+export type NewEconomyCooldown = typeof sqlite.economyCooldowns.$inferInsert;
+
 
 // Experience & Leveling
 export type XpAccount = typeof sqlite.xpAccounts.$inferSelect;
@@ -84,6 +89,7 @@ export type NewUserCard = typeof sqlite.userCards.$inferInsert;
 export type GameItem = typeof sqlite.gameItems.$inferSelect;
 export type UserInventoryItem = typeof sqlite.userInventoryItems.$inferSelect;
 export type PlayerEnergy = typeof sqlite.playerEnergy.$inferSelect;
+export type NewPlayerEnergy = typeof sqlite.playerEnergy.$inferInsert;
 export type GameAchievement = typeof sqlite.gameAchievements.$inferSelect;
 export type UserAchievement = typeof sqlite.userAchievements.$inferSelect;
 export type DungeonSeason = typeof sqlite.dungeonSeasons.$inferSelect;
