@@ -271,7 +271,7 @@
       "epic": "EPIC-004",
       "title": "Event-Driven Economy Core & Anti-Spam / Anti-AFK Engine",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["STORY-041"]
     },
@@ -280,7 +280,7 @@
       "epic": "EPIC-004",
       "title": "Transactional Banking, Daily Streak Engine & Double-Entry Ledger",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": ["STORY-040"],
       "blocks": ["STORY-042", "STORY-043"]
     },
@@ -552,7 +552,7 @@
       "parent": "STORY-040",
       "title": "Voice XP / Economy Accumulator, Quorum Verification & Anti-AFK State Machine",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0401"],
       "blocks": ["STORY-041"]
     },
@@ -561,7 +561,7 @@
       "parent": "STORY-041",
       "title": "Daily Streak Engine (+5%/day up to 30d, 36h reset grace) & Account State",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": ["TASK-0401"],
       "blocks": ["TASK-0412"]
     },
