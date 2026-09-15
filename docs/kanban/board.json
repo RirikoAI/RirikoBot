@@ -52,7 +52,7 @@
       "id": "EPIC-005",
       "title": "Multi-Source Music 2.0 Audio Engine",
       "points": 13,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "YouTube/Spotify/SoundCloud/Deezer extractors, @discordjs/voice player, reactive embeds, volume clamping."
@@ -310,6 +310,33 @@
       "status": "DONE",
       "requires": ["STORY-042", "STORY-043"],
       "blocks": ["EPIC-010"]
+    },
+    {
+      "id": "STORY-050",
+      "epic": "EPIC-005",
+      "title": "Multi-Source Audio Extractors & Stream Resolvers",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["STORY-051"]
+    },
+    {
+      "id": "STORY-051",
+      "epic": "EPIC-005",
+      "title": "Voice Lifecycle, Audio Player Core & Queue Engine",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["STORY-050"],
+      "blocks": ["STORY-052"]
+    },
+    {
+      "id": "STORY-052",
+      "epic": "EPIC-005",
+      "title": "Reactive Embed Controller & Dual-Dispatch Music Commands Suite",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["STORY-051"],
+      "blocks": ["EPIC-011"]
     }
   ],
   "tasks": [
@@ -635,6 +662,66 @@
       "requires": ["TASK-0441"],
       "blocks": ["EPIC-010"],
       "description": "Slash & prefix parity commands (/balance, /daily, /deposit, /withdraw, /pay, /leaderboard, /profile, /shop, /inventory, /use, /karma) and message/voice Gateway event listeners in apps/bot."
+    },
+    {
+      "id": "TASK-0501",
+      "parent": "STORY-050",
+      "title": "Extractor Interfaces, Pattern Matchers & Source Adapters",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["TASK-0502"],
+      "description": "MusicSourceAdapter interfaces, ExtractorPipeline with priority routing, YouTube, Spotify metadata resolver, SoundCloud, and Deezer/Direct stream extractors."
+    },
+    {
+      "id": "TASK-0502",
+      "parent": "STORY-050",
+      "title": "Session Cookie Rotation, Client Spoofing & Health Checks",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["TASK-0501"],
+      "blocks": ["STORY-051"],
+      "description": "Session cookie pool rotation, iOS/Android mobile client emulation headers to bypass IP bans, and adapter latency/health probes."
+    },
+    {
+      "id": "TASK-0511",
+      "parent": "STORY-051",
+      "title": "Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["STORY-050"],
+      "blocks": ["TASK-0512"],
+      "description": "FIFO queue, history stack for /back, loop modes (OFF, TRACK, QUEUE), FFmpeg audio filters (Bassboost, Nightcore, 8D), 0%-150% volume clamping, and autoplay."
+    },
+    {
+      "id": "TASK-0512",
+      "parent": "STORY-051",
+      "title": "Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["TASK-0511"],
+      "blocks": ["STORY-052"],
+      "description": "@discordjs/voice state machine, reconnection backoff, 3-minute idle timeout auto-disconnect, and MusicRepository (saved playlists & guild settings)."
+    },
+    {
+      "id": "TASK-0521",
+      "parent": "STORY-052",
+      "title": "Dual-Dispatch Music Commands Suite (17 Commands)",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-051"],
+      "blocks": ["TASK-0522"],
+      "description": "17 dual-dispatch music commands with slash and prefix parity (/play, /pause, /resume, /skip, /back, /stop, /queue, /nowplaying, /volume, /loop, /shuffle, /seek, /filter, /lyrics, /join, /leave, /playlist)."
+    },
+    {
+      "id": "TASK-0522",
+      "parent": "STORY-052",
+      "title": "Reactive Embed Controller & Interactive Button Matrix (Zero Polling)",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["TASK-0521"],
+      "blocks": ["EPIC-011"],
+      "description": "Dynamic #music controller embed with responsive 2-row ActionRow buttons (Play/Pause, Skip, Stop, Loop, Volume) updating purely on player/interaction events without setInterval polling."
     }
   ],
   "chores": [
