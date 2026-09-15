@@ -280,4 +280,73 @@ export interface KarmaProfile {
   serverNotificationsEnabled: boolean;
 }
 
+/**
+ * Resolved rank information for a specific user in a server and globally.
+ */
+export interface UserRankInfo {
+  userId: string;
+  guildId: string;
+  globalRank: number;
+  serverRank: number;
+  totalXp?: number | undefined;
+  level?: number | undefined;
+  calculatedAt: Date;
+  isCached: boolean;
+}
+
+/**
+ * An entry within a server or global leaderboard view.
+ */
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  guildId: string;
+  xp: number;
+  level: number;
+  globalRank?: number | undefined;
+  calculatedAt?: Date | undefined;
+}
+
+/**
+ * Paginated leaderboard response.
+ */
+export interface LeaderboardPage {
+  items: LeaderboardEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+  page: number;
+  totalPages: number;
+}
+
+/**
+ * Metrics summary returned after a full or partial leaderboard snapshot materialization.
+ */
+export interface MaterializeSummary {
+  guildsProcessed: number;
+  snapshotsCreated: number;
+  globalUsersRanked: number;
+  durationMs: number;
+  calculatedAt: Date;
+}
+
+/**
+ * Configuration options for the Leaderboard Service.
+ */
+export interface LeaderboardConfig {
+  /**
+   * Time-to-live for snapshot rank validity in milliseconds. Default: 10 minutes (600,000ms).
+   */
+  snapshotTtlMs?: number | undefined;
+  /**
+   * Periodic background auto-materialization interval in milliseconds. Default: 10 minutes (600,000ms).
+   */
+  refreshIntervalMs?: number | undefined;
+  /**
+   * Whether auto-refresh should be activated on service initialization. Default: false.
+   */
+  autoRefresh?: boolean | undefined;
+}
+
+
 

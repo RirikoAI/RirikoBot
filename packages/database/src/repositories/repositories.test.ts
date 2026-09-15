@@ -5,6 +5,7 @@ import { UserRepository } from './user.repository.js';
 import { GuildSettingsRepository } from './guild-settings.repository.js';
 import { EconomyRepository } from './economy.repository.js';
 import { XpRepository } from './xp.repository.js';
+import { LeaderboardRepository } from './leaderboard.repository.js';
 
 describe('Core Domain Repositories & ACID Financial Ledger', () => {
   let client: SqliteDatabaseClient;
@@ -12,6 +13,7 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
   let guildSettingsRepo: GuildSettingsRepository;
   let economyRepo: EconomyRepository;
   let xpRepo: XpRepository;
+  let leaderboardRepo: LeaderboardRepository;
 
   beforeEach(async () => {
     const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
@@ -95,12 +97,22 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
         source TEXT NOT NULL,
         created_at INTEGER NOT NULL
       );
+
+      CREATE TABLE leaderboard_snapshots (
+        user_id TEXT NOT NULL,
+        guild_id TEXT NOT NULL,
+        global_rank INTEGER NOT NULL,
+        server_rank INTEGER NOT NULL,
+        calculated_at INTEGER NOT NULL,
+        PRIMARY KEY (user_id, guild_id)
+      );
     `);
 
     userRepo = new UserRepository(client);
     guildSettingsRepo = new GuildSettingsRepository(client);
     economyRepo = new EconomyRepository(client);
     xpRepo = new XpRepository(client);
+    leaderboardRepo = new LeaderboardRepository(client);
   });
 
   afterEach(async () => {
@@ -393,5 +405,99 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       expect(leaderboard.items[1]?.userId).toBe('u3');
       expect(leaderboard.items[2]?.userId).toBe('u1');
     });
+
+    it('retrieves all accounts, distinct guilds, and global cumulative XP totals', async () => {
+      await xpRepo.create({ userId: 'userA', guildId: 'g1', xp: 500, level: 3 });
+      await xpRepo.create({ userId: 'userA', guildId: 'g2', xp: 200, level: 1 });
+      await xpRepo.create({ userId: 'userB', guildId: 'g1', xp: 1000, level: 4 });
+
+      const g1Accounts = await xpRepo.getAllGuildAccounts('g1');
+      expect(g1Accounts).toHaveLength(2);
+      expect(g1Accounts[0]?.userId).toBe('userB');
+      expect(g1Accounts[1]?.userId).toBe('userA');
+
+      const guilds = await xpRepo.getDistinctGuildIds();
+      expect(guilds).toContain('g1');
+      expect(guilds).toContain('g2');
+
+      const globalTotals = await xpRepo.getGlobalUserXpTotals();
+      expect(globalTotals[0]?.userId).toBe('userB'); // 1000 XP
+      expect(globalTotals[0]?.totalXp).toBe(1000);
+      expect(globalTotals[1]?.userId).toBe('userA'); // 500 + 200 = 700 XP
+      expect(globalTotals[1]?.totalXp).toBe(700);
+
+      // Test dynamic dense rank calculation
+      const rankAInG1 = await xpRepo.getUserGuildRank('userA', 'g1');
+      expect(rankAInG1?.rank).toBe(2);
+      expect(rankAInG1?.totalUsers).toBe(2);
+
+      const rankBInG1 = await xpRepo.getUserGuildRank('userB', 'g1');
+      expect(rankBInG1?.rank).toBe(1);
+
+      const rankAGlobal = await xpRepo.getUserGlobalRank('userA');
+      expect(rankAGlobal?.rank).toBe(2);
+      expect(rankAGlobal?.totalXp).toBe(700);
+
+      const rankBGlobal = await xpRepo.getUserGlobalRank('userB');
+      expect(rankBGlobal?.rank).toBe(1);
+      expect(rankBGlobal?.totalXp).toBe(1000);
+    });
+  });
+
+  describe('LeaderboardRepository', () => {
+    it('creates, retrieves, and bulk-upserts leaderboard snapshots', async () => {
+      const created = await leaderboardRepo.create({
+        userId: 'user_snap_1',
+        guildId: 'guild_snap',
+        globalRank: 10,
+        serverRank: 1,
+      });
+
+      expect(created.userId).toBe('user_snap_1');
+      expect(created.serverRank).toBe(1);
+      expect(created.globalRank).toBe(10);
+
+      const pointLookup = await leaderboardRepo.getUserRank('user_snap_1', 'guild_snap');
+      expect(pointLookup?.serverRank).toBe(1);
+      expect(pointLookup?.globalRank).toBe(10);
+
+      // Test bulk upsert (updating user_snap_1 and inserting user_snap_2)
+      const count = await leaderboardRepo.upsertBatch([
+        {
+          userId: 'user_snap_1',
+          guildId: 'guild_snap',
+          globalRank: 12,
+          serverRank: 2,
+          calculatedAt: new Date(),
+        },
+        {
+          userId: 'user_snap_2',
+          guildId: 'guild_snap',
+          globalRank: 5,
+          serverRank: 1,
+          calculatedAt: new Date(),
+        },
+      ]);
+
+      expect(count).toBe(2);
+
+      const updated1 = await leaderboardRepo.getUserRank('user_snap_1', 'guild_snap');
+      expect(updated1?.serverRank).toBe(2);
+      expect(updated1?.globalRank).toBe(12);
+
+      const inserted2 = await leaderboardRepo.getUserRank('user_snap_2', 'guild_snap');
+      expect(inserted2?.serverRank).toBe(1);
+      expect(inserted2?.globalRank).toBe(5);
+
+      // Server paginated leaderboard
+      const serverLb = await leaderboardRepo.getServerLeaderboard('guild_snap', {
+        limit: 10,
+        offset: 0,
+      });
+      expect(serverLb.total).toBe(2);
+      expect(serverLb.items[0]?.userId).toBe('user_snap_2'); // serverRank 1
+      expect(serverLb.items[1]?.userId).toBe('user_snap_1'); // serverRank 2
+    });
   });
 });
+

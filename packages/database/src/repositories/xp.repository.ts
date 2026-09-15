@@ -352,6 +352,232 @@ export class XpRepository extends BaseRepository<
   }
 
   /**
+   * Retrieves all XP accounts for a specific guild ordered by XP descending.
+   */
+  async getAllGuildAccounts(
+    guildId: string,
+    tx?: DatabaseClient,
+  ): Promise<XpAccount[]> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const rows = await client.db
+        .select()
+        .from(sqliteSchema.xpAccounts)
+        .where(eq(sqliteSchema.xpAccounts.guildId, guildId))
+        .orderBy(desc(sqliteSchema.xpAccounts.xp));
+      return rows as XpAccount[];
+    } else {
+      const rows = await client.db
+        .select()
+        .from(pgSchema.xpAccounts)
+        .where(eq(pgSchema.xpAccounts.guildId, guildId))
+        .orderBy(desc(pgSchema.xpAccounts.xp));
+      return rows as unknown as XpAccount[];
+    }
+  }
+
+  /**
+   * Retrieves all unique guild IDs that currently have XP accounts.
+   */
+  async getDistinctGuildIds(tx?: DatabaseClient): Promise<string[]> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const rows = await client.db
+        .selectDistinct({ guildId: sqliteSchema.xpAccounts.guildId })
+        .from(sqliteSchema.xpAccounts);
+      return rows.map((r) => r.guildId);
+    } else {
+      const rows = await client.db
+        .selectDistinct({ guildId: pgSchema.xpAccounts.guildId })
+        .from(pgSchema.xpAccounts);
+      return rows.map((r) => r.guildId);
+    }
+  }
+
+  /**
+   * Retrieves total aggregated XP across all guilds for all users, ordered descending.
+   */
+  async getGlobalUserXpTotals(
+    tx?: DatabaseClient,
+  ): Promise<Array<{ userId: string; totalXp: number }>> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const rows = await client.db
+        .select({
+          userId: sqliteSchema.xpAccounts.userId,
+          totalXp: sql<number>`cast(coalesce(sum(${sqliteSchema.xpAccounts.xp}), 0) as integer)`,
+        })
+        .from(sqliteSchema.xpAccounts)
+        .groupBy(sqliteSchema.xpAccounts.userId)
+        .orderBy(desc(sql`sum(${sqliteSchema.xpAccounts.xp})`));
+      return rows.map((r) => ({ userId: r.userId, totalXp: Number(r.totalXp) }));
+    } else {
+      const rows = await client.db
+        .select({
+          userId: pgSchema.xpAccounts.userId,
+          totalXp: sql<number>`cast(coalesce(sum(${pgSchema.xpAccounts.xp}), 0) as bigint)`,
+        })
+        .from(pgSchema.xpAccounts)
+        .groupBy(pgSchema.xpAccounts.userId)
+        .orderBy(desc(sql`sum(${pgSchema.xpAccounts.xp})`));
+      return rows.map((r) => ({ userId: r.userId, totalXp: Number(r.totalXp) }));
+    }
+  }
+
+  /**
+   * Dynamically calculates a user's dense rank within a guild on demand.
+   */
+  async getUserGuildRank(
+    userId: string,
+    guildId: string,
+    tx?: DatabaseClient,
+  ): Promise<{ rank: number; totalUsers: number } | null> {
+    const account = await this.getAccount(userId, guildId, tx);
+    if (!account) return null;
+
+    const client = this.getClient(tx);
+    const userXp = Number(account.xp);
+
+    if (this.isSqlite(client)) {
+      const [higherRes] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(sqliteSchema.xpAccounts)
+        .where(
+          and(
+            eq(sqliteSchema.xpAccounts.guildId, guildId),
+            sql`${sqliteSchema.xpAccounts.xp} > ${userXp}`,
+          ),
+        );
+      const [totalRes] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(sqliteSchema.xpAccounts)
+        .where(eq(sqliteSchema.xpAccounts.guildId, guildId));
+
+      return {
+        rank: Number(higherRes?.count ?? 0) + 1,
+        totalUsers: Number(totalRes?.count ?? 0),
+      };
+    } else {
+      const [higherRes] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(pgSchema.xpAccounts)
+        .where(
+          and(
+            eq(pgSchema.xpAccounts.guildId, guildId),
+            sql`${pgSchema.xpAccounts.xp} > ${BigInt(userXp)}`,
+          ),
+        );
+      const [totalRes] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(pgSchema.xpAccounts)
+        .where(eq(pgSchema.xpAccounts.guildId, guildId));
+
+      return {
+        rank: Number(higherRes?.count ?? 0) + 1,
+        totalUsers: Number(totalRes?.count ?? 0),
+      };
+    }
+  }
+
+  /**
+   * Dynamically calculates a user's global dense rank on demand across all guilds.
+   */
+  async getUserGlobalRank(
+    userId: string,
+    tx?: DatabaseClient,
+  ): Promise<{ rank: number; totalUsers: number; totalXp: number } | null> {
+    const client = this.getClient(tx);
+
+    if (this.isSqlite(client)) {
+      const [userRes] = await client.db
+        .select({
+          totalXp: sql<number>`coalesce(sum(${sqliteSchema.xpAccounts.xp}), 0)`,
+        })
+        .from(sqliteSchema.xpAccounts)
+        .where(eq(sqliteSchema.xpAccounts.userId, userId));
+
+      const [exists] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(sqliteSchema.xpAccounts)
+        .where(eq(sqliteSchema.xpAccounts.userId, userId));
+      if (!exists || Number(exists.count) === 0) return null;
+
+      const myTotalXp = Number(userRes?.totalXp ?? 0);
+
+      const [higherRes] = await client.db
+        .select({
+          count: sql<number>`count(*)`,
+        })
+        .from(
+          client.db
+            .select({
+              uid: sqliteSchema.xpAccounts.userId,
+              sumXp: sql<number>`sum(${sqliteSchema.xpAccounts.xp})`.as('sum_xp'),
+            })
+            .from(sqliteSchema.xpAccounts)
+            .groupBy(sqliteSchema.xpAccounts.userId)
+            .having(sql`sum(${sqliteSchema.xpAccounts.xp}) > ${myTotalXp}`)
+            .as('higher_users'),
+        );
+
+      const [totalUsersRes] = await client.db
+        .select({
+          count: sql<number>`count(distinct ${sqliteSchema.xpAccounts.userId})`,
+        })
+        .from(sqliteSchema.xpAccounts);
+
+      return {
+        rank: Number(higherRes?.count ?? 0) + 1,
+        totalUsers: Number(totalUsersRes?.count ?? 0),
+        totalXp: myTotalXp,
+      };
+    } else {
+      const [userRes] = await client.db
+        .select({
+          totalXp: sql<number>`coalesce(sum(${pgSchema.xpAccounts.xp}), 0)`,
+        })
+        .from(pgSchema.xpAccounts)
+        .where(eq(pgSchema.xpAccounts.userId, userId));
+
+      const [exists] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(pgSchema.xpAccounts)
+        .where(eq(pgSchema.xpAccounts.userId, userId));
+      if (!exists || Number(exists.count) === 0) return null;
+
+      const myTotalXp = Number(userRes?.totalXp ?? 0);
+
+      const [higherRes] = await client.db
+        .select({
+          count: sql<number>`count(*)`,
+        })
+        .from(
+          client.db
+            .select({
+              uid: pgSchema.xpAccounts.userId,
+              sumXp: sql<number>`sum(${pgSchema.xpAccounts.xp})`.as('sum_xp'),
+            })
+            .from(pgSchema.xpAccounts)
+            .groupBy(pgSchema.xpAccounts.userId)
+            .having(sql`sum(${pgSchema.xpAccounts.xp}) > ${BigInt(myTotalXp)}`)
+            .as('higher_users'),
+        );
+
+      const [totalUsersRes] = await client.db
+        .select({
+          count: sql<number>`count(distinct ${pgSchema.xpAccounts.userId})`,
+        })
+        .from(pgSchema.xpAccounts);
+
+      return {
+        rank: Number(higherRes?.count ?? 0) + 1,
+        totalUsers: Number(totalUsersRes?.count ?? 0),
+        totalXp: myTotalXp,
+      };
+    }
+  }
+
+  /**
    * Retrieves top ranked members within a guild.
    */
   async getLeaderboard(
