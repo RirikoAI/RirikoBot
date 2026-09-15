@@ -217,7 +217,7 @@
       "epic": "EPIC-002",
       "title": "Dialect-Agnostic Repositories & ACID Transaction Abstractions",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-021"],
       "blocks": ["STORY-023"]
     },
@@ -354,7 +354,7 @@
       "parent": "STORY-022",
       "title": "Base Repository Pattern & Dialect-Agnostic Query Abstraction",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-021"],
       "blocks": ["TASK-0222"]
     },
@@ -363,7 +363,7 @@
       "parent": "STORY-022",
       "title": "Core Domain Repositories (Users, GuildSettings, Economy Ledger) & Tests",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0221"],
       "blocks": ["STORY-023"]
     },
