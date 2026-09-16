@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress.*
+*No active tickets in progress. Ready for next ticket selection.*
 
 ---
 
@@ -28,6 +28,8 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0530` | Task | Lavalink v4 Backend Integration, Autoinstall Script & LavaSrc Setup | 8 | `STORY-050` | [TASK-0530.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0530.md) |
+| `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | `STORY-050` | [BUG-0002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0002.md) |
 | `TASK-0507` | Task | LavaSrc Precision Audio Mirroring (ISRC, Duration Guard & Candidate Scoring) | 3 | `STORY-050` | [TASK-0507.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0507.md) |
 | `TASK-0506` | Task | Spotify Web API Integration & Bridge Overhaul (Scrap go-librespot) | 3 | `STORY-050` | [TASK-0506.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0506.md) |
 | `TASK-0505` | Task | Chrome/Chromium Browser Harvester (Playwright Chrome, Anti-Detection & Interactive Google Login) | 2 | `STORY-050` | [TASK-0505.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0505.md) |

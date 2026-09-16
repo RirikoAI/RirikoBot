@@ -215,7 +215,7 @@ export class ExtractorPipeline {
           for (const query of queries) {
             try {
               const candidates = await ytAdapter.search(query, 5);
-              const bestMatch = PrecisionTrackMatcher.selectBestCandidate(track, candidates, 0.65);
+              const bestMatch = PrecisionTrackMatcher.selectBestCandidate(track, candidates, 0.70);
               if (bestMatch) {
                 const ytTrack = (await ytAdapter.resolve(bestMatch.candidate.url)) as ResolvedTrack;
                 return await ytTrack.getStream();
@@ -238,7 +238,7 @@ export class ExtractorPipeline {
           for (const query of scQueries) {
             try {
               const scCandidates = await scAdapter.search(query, 5);
-              const bestSc = PrecisionTrackMatcher.selectBestCandidate(track, scCandidates, 0.70);
+              const bestSc = PrecisionTrackMatcher.selectBestCandidate(track, scCandidates, 0.75);
               if (bestSc) {
                 const scTrack = (await scAdapter.resolve(bestSc.candidate.url)) as ResolvedTrack;
                 return await scTrack.getStream();

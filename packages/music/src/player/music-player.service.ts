@@ -18,7 +18,8 @@ import { AutoplayEngine } from '../queue/autoplay.js';
 import { VoiceLifecycleManager } from '../voice/voice-lifecycle-manager.js';
 import type { AudioFilterName, LoopMode, QueuedTrack } from '../queue/types.js';
 import type { PlayOptions, PlayResult } from './types.js';
-import type { ResolvedTrack, ExtractorPipelineOptions } from '../types.js';
+import type { ExtractorPipelineOptions } from '../types.js';
+import { LavalinkService, type LavalinkClientOptions } from '../lavalink/index.js';
 
 export interface MusicPlayerServiceOptions {
   pipeline?: ExtractorPipeline | undefined;
@@ -26,12 +27,14 @@ export interface MusicPlayerServiceOptions {
   defaultVolume?: number | undefined;
   idleTimeoutMs?: number | undefined;
   youtubeOptions?: ExtractorPipelineOptions['youtubeOptions'];
+  lavalink?: LavalinkClientOptions | undefined;
 }
 
 export class MusicPlayerService extends EventEmitter {
   readonly pipeline: ExtractorPipeline;
   readonly queueManager: QueueManager;
   readonly autoplayEngine: AutoplayEngine;
+  readonly lavalinkService?: LavalinkService | undefined;
 
   private readonly voiceManagers = new Map<string, VoiceLifecycleManager>();
   private readonly audioPlayers = new Map<string, AudioPlayer>();
@@ -49,19 +52,63 @@ export class MusicPlayerService extends EventEmitter {
     this.defaultVolume = options?.defaultVolume ?? 80;
     this.idleTimeoutMs = options?.idleTimeoutMs ?? 180_000;
 
+    if (options?.lavalink && options.lavalink.enabled !== false) {
+      this.lavalinkService = new LavalinkService(options.lavalink);
+      this.wireLavalinkEvents();
+    }
+
     // Prevent unhandled 'error' events from crashing Node.js runtime
     this.on('error', (guildId, err, track) => {
       console.error(`[MusicPlayerService] Error event for guild ${guildId}:`, err, track?.title);
     });
   }
 
+  private wireLavalinkEvents(): void {
+    if (!this.lavalinkService) return;
+    this.lavalinkService.on('trackStart', (guildId, track) => this.emit('trackStart', guildId, track));
+    this.lavalinkService.on('trackEnd', (guildId, track, reason) => this.emit('trackEnd', guildId, track, reason));
+    this.lavalinkService.on('stateChange', (guildId, oldState, newState) => this.emit('stateChange', guildId, oldState, newState));
+    this.lavalinkService.on('queueEnd', (guildId) => this.emit('queueEnd', guildId));
+    this.lavalinkService.on('volumeChange', (guildId, oldVol, newVol) => this.emit('volumeChange', guildId, oldVol, newVol));
+    this.lavalinkService.on('loopChange', (guildId, oldMode, newMode) => this.emit('loopChange', guildId, oldMode, newMode));
+    this.lavalinkService.on('filterChange', (guildId, filters, args) => this.emit('filterChange', guildId, filters, args));
+    this.lavalinkService.on('queueShuffled', (guildId, count) => this.emit('queueShuffled', guildId, count));
+  }
+
+  isLavalinkActive(): boolean {
+    return Boolean(this.lavalinkService?.isReady());
+  }
+
+  sendRawData(data: unknown): void {
+    this.lavalinkService?.sendRawData(data);
+  }
+
+  setSendToShard(fn: (guildId: string, payload: unknown) => void): void {
+    this.lavalinkService?.setSendToShard(fn);
+  }
+
+  async initLavalink(client: { id: string; username?: string }): Promise<void> {
+    await this.lavalinkService?.init(client);
+  }
+
   // --- Queue & Voice Lifecycle Accessors ---
 
   getQueue(guildId: string): GuildQueue | undefined {
+    if (this.isLavalinkActive()) {
+      return this.lavalinkService!.getQueue(guildId) as any;
+    }
     return this.queueManager.get(guildId);
   }
 
   getOrCreateQueue(guildId: string, textChannelId?: string): GuildQueue {
+    if (this.isLavalinkActive()) {
+      const adapter = this.lavalinkService!.getQueue(guildId);
+      if (adapter) {
+        if (textChannelId) adapter.textChannelId = textChannelId;
+        return adapter as unknown as GuildQueue;
+      }
+    }
+
     let queue = this.queueManager.get(guildId);
     if (!queue) {
       queue = this.queueManager.getOrCreate(guildId, {
@@ -143,6 +190,10 @@ export class MusicPlayerService extends EventEmitter {
   // --- Main Playback Commands ---
 
   async play(options: PlayOptions): Promise<PlayResult> {
+    if (this.isLavalinkActive()) {
+      return await this.lavalinkService!.play(options);
+    }
+
     const queue = this.getOrCreateQueue(options.guildId, options.textChannelId);
     const voiceManager = this.getOrCreateVoiceManager(options.guildId);
 
@@ -212,6 +263,9 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   pause(guildId: string): boolean {
+    if (this.isLavalinkActive()) {
+      return this.lavalinkService!.pause(guildId);
+    }
     const player = this.audioPlayers.get(guildId);
     const queue = this.queueManager.get(guildId);
     if (player && queue && queue.state === 'PLAYING') {
@@ -223,6 +277,9 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   resume(guildId: string): boolean {
+    if (this.isLavalinkActive()) {
+      return this.lavalinkService!.resume(guildId);
+    }
     const player = this.audioPlayers.get(guildId);
     const queue = this.queueManager.get(guildId);
     if (player && queue && queue.state === 'PAUSED') {
@@ -234,6 +291,9 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   skip(guildId: string): QueuedTrack | null {
+    if (this.isLavalinkActive()) {
+      return this.lavalinkService!.skip(guildId);
+    }
     const queue = this.queueManager.get(guildId);
     if (!queue) return null;
     const player = this.audioPlayers.get(guildId);
@@ -249,12 +309,19 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   previous(guildId: string): QueuedTrack | null {
+    if (this.isLavalinkActive()) {
+      return this.lavalinkService!.previous(guildId);
+    }
     const queue = this.queueManager.get(guildId);
     if (!queue) return null;
     return queue.previous();
   }
 
   stop(guildId: string): void {
+    if (this.isLavalinkActive()) {
+      this.lavalinkService!.stop(guildId);
+      return;
+    }
     const player = this.audioPlayers.get(guildId);
     if (player) {
       player.stop();
@@ -276,6 +343,10 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   setVolume(guildId: string, volume: number): number {
+    if (this.isLavalinkActive()) {
+      this.lavalinkService!.setVolume(guildId, volume);
+      return Math.max(0, Math.min(150, volume));
+    }
     const queue = this.getOrCreateQueue(guildId);
     const clamped = queue.setVolume(volume);
 
@@ -288,17 +359,29 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   setLoopMode(guildId: string, mode: LoopMode): void {
+    if (this.isLavalinkActive()) {
+      this.lavalinkService!.setLoopMode(guildId, mode);
+      return;
+    }
     const queue = this.getOrCreateQueue(guildId);
     queue.setLoopMode(mode);
   }
 
   shuffle(guildId: string): number {
+    if (this.isLavalinkActive()) {
+      this.lavalinkService!.shuffle(guildId);
+      return this.getQueue(guildId)?.size ?? 0;
+    }
     const queue = this.getOrCreateQueue(guildId);
     queue.shuffle();
     return queue.size;
   }
 
   async seek(guildId: string, seconds: number): Promise<void> {
+    if (this.isLavalinkActive()) {
+      this.lavalinkService!.seek(guildId, seconds);
+      return;
+    }
     const queue = this.getOrCreateQueue(guildId);
     queue.seek(seconds);
 
@@ -309,6 +392,9 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   toggleFilter(guildId: string, filter: AudioFilterName): boolean {
+    if (this.isLavalinkActive()) {
+      return this.lavalinkService!.setFilter(guildId, filter);
+    }
     const queue = this.getOrCreateQueue(guildId);
     const isActive = queue.toggleFilter(filter);
     // Restart current stream to apply new FFmpeg filter
@@ -319,6 +405,11 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   setFilter(guildId: string, filter: AudioFilterName, enabled: boolean): void {
+    if (this.isLavalinkActive()) {
+      if (enabled) this.lavalinkService!.setFilter(guildId, filter);
+      else this.lavalinkService!.clearFilters(guildId);
+      return;
+    }
     const queue = this.getOrCreateQueue(guildId);
     queue.setFilter(filter, enabled);
     if (queue.currentTrack) {
@@ -327,6 +418,10 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   clearFilters(guildId: string): void {
+    if (this.isLavalinkActive()) {
+      this.lavalinkService!.clearFilters(guildId);
+      return;
+    }
     const queue = this.getOrCreateQueue(guildId);
     queue.clearFilters();
     if (queue.currentTrack) {
@@ -339,6 +434,21 @@ export class MusicPlayerService extends EventEmitter {
     channelId: string,
     adapterCreator: DiscordGatewayAdapterCreator,
   ): Promise<VoiceConnection> {
+    if (this.isLavalinkActive()) {
+      let player = this.lavalinkService!.manager.players.get(guildId);
+      if (!player) {
+        player = this.lavalinkService!.manager.createPlayer({
+          guildId,
+          voiceChannelId: channelId,
+          selfDeaf: true,
+          volume: 80,
+        });
+      }
+      if (!player.connected) {
+        await player.connect();
+      }
+      return null as any;
+    }
     const vm = this.getOrCreateVoiceManager(guildId);
     return await vm.join({
       channelId,
@@ -348,10 +458,17 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   leave(guildId: string): void {
+    if (this.isLavalinkActive()) {
+      this.lavalinkService!.disconnect(guildId);
+      return;
+    }
     this.stop(guildId);
   }
 
   isPlaying(guildId: string): boolean {
+    if (this.isLavalinkActive()) {
+      return this.getQueue(guildId)?.state === 'PLAYING';
+    }
     const queue = this.queueManager.get(guildId);
     if (!queue || queue.state !== 'PLAYING') return false;
     const player = this.audioPlayers.get(guildId);
@@ -360,6 +477,9 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   isPaused(guildId: string): boolean {
+    if (this.isLavalinkActive()) {
+      return this.getQueue(guildId)?.state === 'PAUSED';
+    }
     const queue = this.queueManager.get(guildId);
     return queue !== undefined && queue.state === 'PAUSED';
   }

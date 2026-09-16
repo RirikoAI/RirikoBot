@@ -772,6 +772,16 @@
       "requires": ["TASK-0521"],
       "blocks": ["EPIC-011"],
       "description": "Dynamic #music controller embed with responsive 2-row ActionRow buttons (Play/Pause, Skip, Stop, Loop, Volume) updating purely on player/interaction events without setInterval polling."
+    },
+    {
+      "id": "TASK-0530",
+      "parent": "STORY-050",
+      "title": "Lavalink v4 Backend Integration, Autoinstall Script & LavaSrc Setup",
+      "points": 8,
+      "status": "DONE",
+      "requires": ["STORY-050"],
+      "blocks": [],
+      "description": "Migrate audio streaming core to Lavalink v4 + LavaSrc with an autoinstall setup script, preserving 100% command and embed controller compatibility."
     }
   ],
   "chores": [
@@ -794,6 +804,16 @@
       "requires": [],
       "blocks": [],
       "description": "Extractors previously returned mock stubs pushing null to Readable streams, causing silent player idle exits. Integrate real audio extraction & fallback streaming for YouTube, Spotify, SoundCloud, and Deezer."
+    },
+    {
+      "id": "BUG-0002",
+      "title": "Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination",
+      "points": 3,
+      "status": "DONE",
+      "parent": "STORY-050",
+      "requires": ["TASK-0507"],
+      "blocks": [],
+      "description": "Enforce strict hard artist filtering in PrecisionTrackMatcher and eliminate unconstrained SoundCloud title search fallback in YouTubeAdapter to prevent rogue club tracks from streaming."
     }
   ]
 }
