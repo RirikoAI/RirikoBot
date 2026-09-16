@@ -22,9 +22,12 @@ packages/music/
 │   │   ├── cookie-rotator.ts       # Round-robin session cookie rotation & health
 │   │   ├── deezer.adapter.ts       # Native Deezer REST API extractor
 │   │   ├── direct.adapter.ts       # Raw HTTP audio stream extractor (.mp3, .ogg, .wav)
+│   │   ├── librespot.client.ts     # go-librespot daemon supervisor, REST client & audio pipe
+│   │   ├── librespot.installer.ts  # Platform-aware go-librespot downloader (bot-local, no PATH)
 │   │   ├── pipeline.ts             # Orchestrator & multi-provider stream fallback
 │   │   ├── soundcloud.adapter.ts   # High-availability SoundCloud audio extractor
-│   │   ├── spotify.adapter.ts      # Spotify metadata scraper & stream bridging
+│   │   ├── spotify-native.service.ts # Native Spotify playback & single-stream lease
+│   │   ├── spotify.adapter.ts      # Spotify metadata scraper, native audio & stream bridging
 │   │   └── youtube.adapter.ts      # Resilient multi-tier YouTube streaming adapter
 │   ├── player/                     # Audio playback orchestration
 │   │   ├── music-player.service.ts # Core service wrapping @discordjs/voice AudioPlayer
@@ -59,7 +62,7 @@ flowchart TD
         Detect -- "SoundCloud URL" --> SC["SoundCloudAdapter"]
         Detect -- "Deezer URL" --> DZ["DeezerAdapter<br/>(Bridge to SoundCloud / Preview)"]
         Detect -- "Direct Audio URL" --> DIR["DirectAdapter"]
-        Detect -- "Search Query" --> Search["Pipeline.search(query)<br/>(SoundCloud -> YouTube -> Deezer)"]
+        Detect -- "Search Query" --> Search["Pipeline.search(query)<br/>(SoundCloud -> Spotify -> YouTube -> Deezer)"]
     end
 
     YT & SC & SP & DZ & DIR & Search --> Resolved["ResolvedTrack<br/>(Title, Artist, Duration, Thumbnail, getStream)"]
@@ -79,42 +82,51 @@ flowchart TD
 In modern environments, YouTube deploys **Server-Side Adaptive Bitrate (SABR / Protobuf UMP)** and **BotGuard Proof-of-Origin (PO-Token)** verification. Unauthenticated requests to major-label official music videos receive `server_abr_streaming_url` without raw format URLs, causing traditional scrapers to crash with:
 `PlayerError: No valid URL to decipher` or `HTTP 403 Forbidden`.
 
-To ensure near 100% playback reliability while preserving our fallback pipeline, [`YouTubeAdapter`](file:///Z:/Projects/ririko-v2-2026/packages/music/src/extractors/youtube.adapter.ts) implements an in-adapter 6-tier cascade:
+To ensure near 100% playback reliability while preserving our fallback pipeline, [`YouTubeAdapter`](file:///Z:/Projects/ririko-v2-2026/packages/music/src/extractors/youtube.adapter.ts) implements an in-adapter 7-tier cascade. The cascade is lazy: it executes inside `track.getStream()` at playback time, not during resolution.
 
 ```mermaid
 flowchart TD
-    Start["User plays YouTube Track or URL"] --> T1["Tier 1: Innertube Direct Stream<br/>(Fast ANDROID & WEB_EMBEDDED profiles)"]
+    Start["User plays YouTube Track or URL"] --> T1["Tier 1: Innertube Direct Stream<br/>(ANDROID, WEB & WEB_EMBEDDED profiles)"]
     T1 -- "Success" --> Play["Stream to Discord.js Voice"]
     T1 -- "SABR / No valid URL / 403" --> T2["Tier 2: @distube/ytdl-core Streamer<br/>(1500ms chunk probe)"]
     T2 -- "Success" --> Play
-    T2 -- "Failed" --> T3["Tier 3: play-dl Streamer<br/>(Guarded stream call)"]
+    T2 -- "Failed" --> T3["Tier 3: play-dl Streamer<br/>(1500ms guarded stream call)"]
     T3 -- "Success" --> Play
     T3 -- "Failed" --> T4["Tier 4: In-YouTube Topic & Audio Resolver<br/>(Finds clean Topic / audio upload on YouTube)"]
     T4 -- "Success" --> Play
-    T4 -- "Failed" --> T5["Tier 5: SoundCloud High-Availability Fallback<br/>(Cached Client ID & Query Normalization)"]
-    T5 -- "Success" --> Play
-    T5 -- "Failed" --> T6["Tier 6: Deezer Preview Audio Fallback<br/>(30-second official MP3 preview stream)"]
+    T4 -- "Failed" --> T5["Tier 5: Spotify Canonical Match<br/>(Studio Artist + Title via Web API / Session Cookies)"]
+    T5 --> T6["Tier 6: SoundCloud High-Availability Fallback<br/>(Cached Client ID & Canonical Query)"]
     T6 -- "Success" --> Play
-    T6 -- "Exhausted" --> Fail["Emit Descriptive Queue Error Event"]
+    T6 -- "Failed" --> T7["Tier 7: Deezer Preview Audio Fallback<br/>(30-second official MP3 preview stream)"]
+    T7 -- "Success" --> Play
+    T7 -- "Exhausted" --> Fail["Emit Descriptive Queue Error Event"]
 ```
 
 ### Cascade Details:
 1. **Tier 1 (Direct Innertube Streaming)**:
    - Uses `youtubei.js` (`Innertube`).
    - If `YOUTUBE_COOKIE`, `YOUTUBE_PO_TOKEN`, or `YOUTUBE_VISITOR_DATA` are configured, they are injected into `Innertube.create()`.
-   - Probes client profiles `['ANDROID', 'WEB_EMBEDDED']` and peeks the first chunk to ensure GoogleVideo CDN returns HTTP 200 OK.
+   - Probes client profiles `['ANDROID', 'WEB', 'WEB_EMBEDDED']` and peeks the first chunk to ensure GoogleVideo CDN returns HTTP 200 OK.
 2. **Tier 2 (`@distube/ytdl-core` Secondary Streamer)**:
-   - If Innertube encounters a cipher issue, attempts streaming via `@distube/ytdl-core` with `highWaterMark: 1 << 25`.
+   - If Innertube encounters a cipher issue, attempts streaming via `@distube/ytdl-core` with `highWaterMark: 1 << 25` and a 1500ms first-chunk probe.
 3. **Tier 3 (`play-dl` Secondary Streamer)**:
    - Probes `play-dl` with a fast 1500ms timeout guard.
 4. **Tier 4 (In-YouTube Topic & Audio Upload Discovery)**:
    - Official VEVO music videos have the strictest SABR locks. The exact same song almost always exists on YouTube as an official auto-generated YouTube Music track (`- Topic`) or high-fidelity studio upload.
-   - Searches YouTube for `"${artist} - ${title} audio"` or `"${artist} - ${title} Topic"`, resolves the alternative video ID, and streams it directly. **The user stays on YouTube with studio audio fidelity.**
-5. **Tier 5 (SoundCloud High-Availability Fallback)**:
-   - If all YouTube attempts fail, seamlessly falls back to SoundCloud.
+   - Searches YouTube for `"${artist} - ${title} audio"`, resolves the alternative video ID, and retries it through the Tier 1 streamer. **The user stays on YouTube with studio audio fidelity.**
+5. **Tier 5 (Spotify Canonical Match)**:
+   - YouTube upload titles are heavily decorated (`【MV】Lemon | Official Music Video`), and searching SoundCloud or Deezer with that string frequently misses. Spotify holds clean studio metadata for the same recording.
+   - `resolveCanonicalMatch()` identifies the recording on Spotify using official Spotify Web API or `sp_dc` session cookies, yielding a canonical `"Artist - Title"` pair.
+   - Guarded by a 2500ms timeout and a title-overlap check: an unrelated top hit is discarded rather than used, so a bad Spotify match can never degrade downstream queries.
+   - The canonical `"Artist - Title"` pair is prepended to the external fallback query list consumed by Tiers 6 and 7.
+   - The Spotify adapter is wired in by `ExtractorPipeline`. If no resolver is registered, the tier self-skips at zero cost.
+
+6. **Tier 6 (SoundCloud High-Availability Fallback)**:
+   - If all YouTube attempts fail, seamlessly falls back to SoundCloud using the canonical query from Tier 5 first, then the scrubbed YouTube title variants.
    - **SoundCloud Client ID Caching**: Client ID is cached in memory with automatic re-acquisition on failure, completely eliminating transient client ID fetch errors.
-6. **Tier 6 (Deezer Audio Fallback)**:
-   - Final safety net querying Deezer REST API for preview audio.
+   - This tier yields **full-length audio** and is therefore preferred over any preview-based source.
+7. **Tier 7 (Deezer Audio Fallback)**:
+   - Final safety net querying Deezer REST API for 30-second preview audio.
 
 ---
 
@@ -257,11 +269,42 @@ If you prefer extracting credentials from a specific logged-in browser session:
 
 ---
 
-## 6. Guide: Obtaining Spotify Session Credentials
+## 6. Guide: Spotify Credentials & Web API Integration
 
-Spotify audio streams are DRM-protected. Ririko resolves full-fidelity track, album, and playlist metadata via Spotify and automatically bridges audio to SoundCloud or YouTube.
+Spotify integration in Ririko powers full-fidelity track, album, and playlist metadata resolution and canonical song identification for Tier 5. You can configure either or both methods:
 
-To extract album art, tracklists, and playlists from Spotify without registering a Spotify Developer App:
+| Method | What it gives you | Setup |
+|---|---|---|
+| **6.1 Official Spotify Web API** | Direct API querying for search, track, album, and playlist resolution with official rate limits | Free Spotify Developer App (`SPOTIFY_CLIENT_ID` + `SPOTIFY_CLIENT_SECRET`) |
+| **6.2 Session Cookies** | Direct scraping of track, album, and playlist metadata without developer registration | `sp_dc` (and optional `sp_key`) from `open.spotify.com` |
+
+When a user plays a Spotify track or playlist (`/play <spotify-url>`), Ririko resolves the canonical metadata via Spotify Web API / session cookies and automatically bridges the audio into our high-availability streaming pipeline (SoundCloud studio stream, followed by YouTube official audio/Topic uploads).
+
+---
+
+### 6.1. Official Spotify Web API (Recommended)
+
+To obtain official Spotify Web API credentials:
+1. Navigate to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and sign in.
+2. Click **Create an App**.
+3. Fill in the App details:
+   - **App Name**: `Ririko Bot` (or your preferred name)
+   - **App Description**: `Discord Music Bot Integration`
+   - **Redirect URI**: `http://localhost:8888/callback` (not required for Client Credentials, but required by Spotify dashboard form)
+   - Select **Web API**.
+4. Once created, click on your app -> Go to **Settings**.
+5. Copy your **Client ID** and click **View client secret** to copy your **Client Secret**.
+6. Add them to your `.env`:
+   ```env
+   SPOTIFY_CLIENT_ID="your_spotify_client_id_here"
+   SPOTIFY_CLIENT_SECRET="your_spotify_client_secret_here"
+   ```
+
+---
+
+### 6.2. Session Cookies (`sp_dc` / `sp_key`)
+
+If you do not wish to create a Spotify Developer application, Ririko can scrape metadata using your personal browser session:
 
 1. Open your browser and navigate to [open.spotify.com](https://open.spotify.com).
 2. Log in to your Spotify account (free or premium).
@@ -288,10 +331,11 @@ The following environment variables in `.env` govern the audio subsystem:
 | `YOUTUBE_COOKIE` | Optional | None | Session cookie string to bypass YouTube datacenter IP blocking. |
 | `YOUTUBE_PO_TOKEN` | Optional | None | Proof of Origin token from YouTube Web player payload. |
 | `YOUTUBE_VISITOR_DATA` | Optional | None | Visitor context string paired with `YOUTUBE_PO_TOKEN`. |
-| `SPOTIFY_DC` | Optional | None | `sp_dc` cookie from `open.spotify.com` for anonymous metadata scraping. |
-| `SPOTIFY_KEY` | Optional | None | `sp_key` cookie from `open.spotify.com`. |
-| `SPOTIFY_CLIENT_ID` | Optional | None | Official Spotify Developer App Client ID (for official Web API search). |
+| `SPOTIFY_CLIENT_ID` | Optional | None | Official Spotify Developer App Client ID (for official Web API). |
 | `SPOTIFY_CLIENT_SECRET` | Optional | None | Official Spotify Developer App Client Secret. |
+| `SPOTIFY_DC` | Optional | None | `sp_dc` cookie from `open.spotify.com` for session cookie scraping. |
+| `SPOTIFY_KEY` | Optional | None | `sp_key` cookie from `open.spotify.com`. |
+| `FFMPEG_PATH` | Optional | `ffmpeg` | Path to the FFmpeg binary in system PATH. |
 
 Example `.env` configuration:
 ```env
@@ -305,7 +349,9 @@ YOUTUBE_COOKIE=
 YOUTUBE_PO_TOKEN=
 YOUTUBE_VISITOR_DATA=
 
-# Spotify Session (Optional, for playlist & track resolution)
+# Spotify Web API & Session (Optional, for playlist & track resolution)
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
 SPOTIFY_DC=
 SPOTIFY_KEY=
 ```
