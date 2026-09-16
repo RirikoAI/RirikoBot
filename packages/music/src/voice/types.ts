@@ -1,4 +1,5 @@
 import type { VoiceConnection, DiscordGatewayAdapterCreator } from '@discordjs/voice';
+export type { VoiceConnection, DiscordGatewayAdapterCreator };
 
 export type DisconnectReason =
   | 'EMPTY_QUEUE'

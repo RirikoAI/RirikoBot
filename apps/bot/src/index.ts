@@ -33,4 +33,6 @@ export function getBotInfo() {
 
 export * from './services.js';
 export * from './commands/economy/index.js';
+export * from './commands/music/index.js';
+export * from './controllers/index.js';
 export * from './listeners/index.js';
