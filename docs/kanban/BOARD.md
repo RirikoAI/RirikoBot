@@ -19,7 +19,6 @@
 | ID | Type | Title | Pts | Parent | Status |
 |---|---|---|---|---|---|
 | `EPIC-007` | Epic | Moderation 2.0 with Escalation & AutoMod | 13 | Self | 🎯 To Do |
-| `STORY-070` | Story | Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core | 5 | `EPIC-007` | 🎯 To Do |
 | `STORY-071` | Story | Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations | 3 | `EPIC-007` | 🎯 To Do |
 | `STORY-072` | Story | Real-Time Automated Defense & Auto-Moderation Pipeline | 3 | `EPIC-007` | 🎯 To Do |
 | `STORY-073` | Story | Dual-Dispatch Moderation Commands Suite & Gateway Listeners | 2 | `EPIC-007` | 🎯 To Do |
@@ -34,6 +33,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0702` | Task | Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History | 2 | `STORY-070` | [TASK-0702.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0702.md) |
+| `STORY-070` | Story | Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core | 5 | `EPIC-007` | [TASK-0702.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0702.md) |
+| `TASK-0701` | Task | PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock) | 3 | STORY-070 | [TASK-0701.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0701.md) |
 | `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | `STORY-063` | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
 | `STORY-063` | Story | Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite | 2 | `EPIC-006` | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
 | `EPIC-006` | Epic | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | Self | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
