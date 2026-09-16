@@ -477,6 +477,9 @@ export interface SetBackgroundParams {
   userId: string;
   url: string;
   consumeToken?: boolean | undefined;
+  username?: string | undefined;
+  displayName?: string | undefined;
+  avatarUrl?: string | undefined;
 }
 
 /**
@@ -537,6 +540,9 @@ export interface ProfileCardRenderOptions {
   avatarBuffer?: Buffer | undefined;
   presenceStatus?: 'online' | 'idle' | 'dnd' | 'offline' | undefined;
   equippedCard?: EquippedTcgCardView | undefined;
+  username?: string | undefined;
+  displayName?: string | undefined;
+  avatarUrl?: string | undefined;
 }
 
 /**
@@ -549,8 +555,6 @@ export interface ProfileCardRendererOptions {
   bankingService?: import('./banking.service.js').BankingService | undefined;
   leaderboardService?: import('./leaderboard.service.js').LeaderboardService | undefined;
 }
-
-
 
 
 

@@ -13,6 +13,9 @@ function createMockContext(params: {
   guildId?: string;
   optionsMap?: Record<string, unknown>;
   replyFn?: (res: unknown) => Promise<unknown>;
+  rawArgs?: string[];
+  attachments?: unknown;
+  source?: 'slash' | 'prefix';
 }): CommandContext {
   const user = {
     id: params.userId ?? 'user_commander_01',
@@ -27,7 +30,7 @@ function createMockContext(params: {
   const reply = (params.replyFn ?? vi.fn().mockResolvedValue({})) as unknown as CommandContext['reply'];
 
   return {
-    source: 'slash',
+    source: params.source ?? 'slash',
     id: 'ctx-mock-1',
     client: {} as Client,
     guild,
@@ -43,7 +46,7 @@ function createMockContext(params: {
     invokedPrefix: '/',
     isReplied: false,
     isDeferred: false,
-    raw: {} as unknown as Message,
+    raw: { attachments: params.attachments ?? new Map() } as unknown as Message,
     options: {
       getString: (name: string) => (optionsMap[name] as string | undefined) ?? null,
       getInteger: (name: string) => (optionsMap[name] as number | undefined) ?? null,
@@ -53,7 +56,7 @@ function createMockContext(params: {
       getMember: async () => null,
       getChannel: async () => null,
       getAttachment: () => null,
-      getRawArgs: () => [],
+      getRawArgs: () => params.rawArgs ?? [],
     },
     reply,
     deferReply: vi.fn().mockResolvedValue(undefined),
