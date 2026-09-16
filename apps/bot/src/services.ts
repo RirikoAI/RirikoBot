@@ -8,8 +8,10 @@ import {
   ItemRepository,
   InventoryRepository,
   PlayerEnergyRepository,
+  MusicRepository,
   type DatabaseClient,
 } from '@ririko/database';
+import { MusicPlayerService } from '@ririko/music';
 import { EventBus } from '@ririko/core';
 import {
   EconomyService,
@@ -35,6 +37,8 @@ export interface BotServices {
   itemRepo: ItemRepository;
   inventoryRepo: InventoryRepository;
   playerEnergyRepo: PlayerEnergyRepository;
+  musicRepo: MusicRepository;
+  musicPlayer: MusicPlayerService;
   economyService: EconomyService;
   bankingService: BankingService;
   dailyService: DailyService;
@@ -69,6 +73,8 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
   const itemRepo = new ItemRepository(db);
   const inventoryRepo = new InventoryRepository(db);
   const playerEnergyRepo = new PlayerEnergyRepository(db);
+  const musicRepo = new MusicRepository(db);
+  const musicPlayer = new MusicPlayerService();
 
   // Seed default shop catalog if empty
   await itemRepo.seedDefaultCatalog().catch(() => {});
@@ -159,6 +165,8 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
     itemRepo,
     inventoryRepo,
     playerEnergyRepo,
+    musicRepo,
+    musicPlayer,
     economyService,
     bankingService,
     dailyService,

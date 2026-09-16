@@ -21,6 +21,10 @@
     "./voice": {
       "types": "./dist/voice/index.d.ts",
       "import": "./dist/voice/index.js"
+    },
+    "./player": {
+      "types": "./dist/player/index.d.ts",
+      "import": "./dist/player/index.js"
     }
   },
   "scripts": {
@@ -31,7 +35,8 @@
   "dependencies": {
     "@discordjs/voice": "^0.19.2",
     "@ririko/core": "workspace:*",
-    "@ririko/database": "workspace:*"
+    "@ririko/database": "workspace:*",
+    "opusscript": "^0.1.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",

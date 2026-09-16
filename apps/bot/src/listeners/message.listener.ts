@@ -1,15 +1,26 @@
 import type { Client, Message } from 'discord.js';
 import { EconomyEventType } from '@ririko/services';
 import type { BotServices } from '../services.js';
+import type { MusicEmbedController } from '../controllers/music-embed.controller.js';
 
 /**
  * Gateway Message Listener: Evaluates anti-spam heuristics, dispatches Economy events,
- * and awards experience points with level-up notifications.
+ * awards experience points, and routes dedicated music channel song requests.
  */
-export function registerMessageListener(client: Client, services: BotServices): void {
+export function registerMessageListener(
+  client: Client,
+  services: BotServices,
+  musicController?: MusicEmbedController,
+): void {
   client.on('messageCreate', async (message: Message) => {
     // Ignore bots and direct messages
     if (message.author.bot || !message.guild) return;
+
+    // Check if message was sent in dedicated music channel
+    if (musicController) {
+      const handled = await musicController.handleMusicChannelMessage(message).catch(() => false);
+      if (handled) return;
+    }
 
     const userId = message.author.id;
     const guildId = message.guild.id;
