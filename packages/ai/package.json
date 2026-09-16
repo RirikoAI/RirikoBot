@@ -33,6 +33,10 @@
     "./personality": {
       "types": "./dist/personality/index.d.ts",
       "import": "./dist/personality/index.js"
+    },
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "import": "./dist/tools/index.js"
     }
   },
   "scripts": {
