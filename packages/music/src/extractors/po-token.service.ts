@@ -96,7 +96,9 @@ export async function generateYouTubePoToken(
         resolved = true;
         try {
           dom.window.close();
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         reject(new Error(`Timeout waiting for BotGuard PO token (${timeoutMs}ms)`));
       }
     }, timeoutMs);
@@ -110,7 +112,9 @@ export async function generateYouTubePoToken(
         if (decoded.includes('DFP:Invalid') || decoded.includes('Error')) {
           return;
         }
-      } catch {}
+      } catch {
+        /* ignore */
+      }
 
       // Valid minted BotGuard token is > 50 characters
       if (token.length > 50) {
@@ -118,7 +122,9 @@ export async function generateYouTubePoToken(
         clearTimeout(timer);
         try {
           dom.window.close();
-        } catch {}
+        } catch {
+          /* ignore */
+        }
         resolve(token);
       }
     };
@@ -133,8 +139,12 @@ export async function generateYouTubePoToken(
   } catch (evalErr) {
     try {
       dom.window.close();
-    } catch {}
-    throw new Error(`Failed to evaluate YouTube BotGuard script: ${(evalErr as Error).message}`);
+    } catch {
+      /* ignore */
+    }
+    throw new Error(`Failed to evaluate YouTube BotGuard script: ${(evalErr as Error).message}`, {
+      cause: evalErr,
+    });
   }
 
   const poToken = await tokenPromise;
@@ -207,7 +217,9 @@ export class PoTokenService {
     this.rotationTimer = setInterval(async () => {
       try {
         await this.refreshTokens();
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }, this.rotationIntervalMs);
     this.rotationTimer.unref?.();
   }

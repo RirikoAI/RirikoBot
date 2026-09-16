@@ -100,7 +100,9 @@ export async function harvestYouTubeBrowserSession(
         if (nav) {
           Object.defineProperty(nav, 'webdriver', { get: () => undefined });
         }
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     });
 
     if (isHeaded) {

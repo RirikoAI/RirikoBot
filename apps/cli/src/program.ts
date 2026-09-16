@@ -8,6 +8,7 @@ import { registerGeneratePoTokenCommand } from './commands/generate-po-token.js'
 import { registerInfoCommand } from './commands/info.js';
 import { registerMigrateCommand } from './commands/migrate.js';
 
+
 export function loadEnvConfig(customPath?: string): void {
   if (customPath) {
     const resolved = resolve(process.cwd(), customPath);
@@ -56,6 +57,7 @@ export function createProgram(): Command {
   registerDoctorCommand(program);
   registerMigrateCommand(program);
   registerGeneratePoTokenCommand(program);
+
 
   // Global error handler
   program.exitOverride();

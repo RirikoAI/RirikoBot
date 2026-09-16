@@ -35,3 +35,6 @@ storage/
 *.sqlite-wal
 *.sqlite-shm
 temp-*/
+
+# go-librespot session: holds authorized Spotify credentials and the downloaded binary
+.cache/
