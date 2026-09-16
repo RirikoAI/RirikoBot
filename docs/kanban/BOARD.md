@@ -8,7 +8,7 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
-| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | STORY-063 | [TASK-0631.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0631.md) |
+| `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | STORY-063 | Pending |
 
 ---
 
@@ -33,6 +33,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | STORY-063 | [TASK-0631.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0631.md) |
 | `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | [TASK-0622.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0622.md) |
 | `STORY-062` | Story | Deterministic Utility Tools, Explicit Clock & Application Security Interceptor | 3 | `EPIC-006` | [TASK-0622.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0622.md) |
 | `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | [TASK-0621.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0621.md) |

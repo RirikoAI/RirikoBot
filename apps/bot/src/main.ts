@@ -6,6 +6,7 @@ import {
   createMusicCommands,
   createSetupMusicCommand,
   MusicEmbedController,
+  AiChatController,
   registerMessageListener,
   registerVoiceListener,
 } from './index.js';
@@ -107,7 +108,8 @@ export async function main(): Promise<void> {
   router.bindClient(bot.client);
 
   // Register Gateway message & voice event listeners
-  registerMessageListener(bot.client, services, musicController);
+  const aiController = new AiChatController(bot.client, services);
+  registerMessageListener(bot.client, services, musicController, aiController);
   registerVoiceListener(bot.client, services);
 
   // Bind interactive Help Center UI components and Music Controller buttons
