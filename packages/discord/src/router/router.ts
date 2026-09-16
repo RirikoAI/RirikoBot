@@ -60,13 +60,14 @@ export class CommandRouter {
   }
 
   /**
-   * Dispatches a Discord interaction (Slash Command or Autocomplete).
-   * Returns true if a command handled the interaction, false otherwise.
+   * Dispatches an incoming Discord Interaction (Slash Command or Autocomplete).
+   * Returns true if handled, false if ignored.
    */
   public async dispatchInteraction(interaction: Interaction): Promise<boolean> {
     if (interaction.isAutocomplete()) {
-      const command = this.registry.get(interaction.commandName);
-      if (command && typeof command.autocomplete === 'function') {
+      const commandName = interaction.commandName;
+      const command = this.registry.get(commandName);
+      if (command && command.autocomplete) {
         await command.autocomplete(interaction);
         return true;
       }
@@ -77,20 +78,23 @@ export class CommandRouter {
       return false;
     }
 
-    const command = this.registry.get(interaction.commandName);
+    const commandName = interaction.commandName;
+    const command = this.registry.get(commandName);
+
     if (!command) {
       return false;
     }
 
     if (command.metadata.slashEnabled === false) {
       await interaction.reply({
-        content: 'This command is not available via slash commands.',
+        content: `This command is only available as a prefix command (\`${this.options.defaultPrefix}${command.metadata.name}\`).`,
         ephemeral: true,
       });
       return true;
     }
 
     const ctx = new SlashCommandContext(interaction, command);
+
     try {
       await this.pipeline.execute(ctx, async () => {
         await command.execute(ctx);
@@ -103,9 +107,8 @@ export class CommandRouter {
   }
 
   /**
-   * Dispatches a text message as a prefix command.
-   * Resolves prefixes dynamically (per guild) or falls back to default.
-   * Returns true if a command was dispatched, false otherwise.
+   * Dispatches an incoming Discord Message (Prefix Command).
+   * Returns true if handled, false if ignored.
    */
   public async dispatchMessage(message: Message): Promise<boolean> {
     if (message.author.bot || message.system) {

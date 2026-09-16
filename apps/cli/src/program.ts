@@ -1,9 +1,40 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { CORE_VERSION, RirikoError } from '@ririko/core';
 import { Command } from 'commander';
 import pc from 'picocolors';
 import { registerDoctorCommand } from './commands/doctor.js';
 import { registerInfoCommand } from './commands/info.js';
 import { registerMigrateCommand } from './commands/migrate.js';
+
+export function loadEnvConfig(customPath?: string): void {
+  if (customPath) {
+    const resolved = resolve(process.cwd(), customPath);
+    if (existsSync(resolved)) {
+      try {
+        process.loadEnvFile(resolved);
+      } catch {
+        // Ignore if unable to parse
+      }
+    }
+    return;
+  }
+
+  const candidatePaths = [
+    resolve(process.cwd(), '.env'),
+    resolve(process.cwd(), '../../.env'),
+  ];
+  for (const p of candidatePaths) {
+    if (existsSync(p)) {
+      try {
+        process.loadEnvFile(p);
+      } catch {
+        // Ignore
+      }
+      break;
+    }
+  }
+}
 
 export function createProgram(): Command {
   const program = new Command();
@@ -13,7 +44,11 @@ export function createProgram(): Command {
     .description('Ririko AI 2.0.0 Operator and Developer CLI')
     .version(CORE_VERSION, '-v, --version', 'Output the current version')
     .option('--verbose', 'Enable detailed verbose logging')
-    .option('--config <path>', 'Path to custom environment file (.env)');
+    .option('--config <path>', 'Path to custom environment file (.env)')
+    .hook('preAction', (thisCommand) => {
+      const opts = thisCommand.opts<{ config?: string }>();
+      loadEnvConfig(opts.config);
+    });
 
   // Register commands
   registerInfoCommand(program);
@@ -27,6 +62,7 @@ export function createProgram(): Command {
 }
 
 export async function runCli(argv: string[] = process.argv): Promise<void> {
+  loadEnvConfig();
   const program = createProgram();
 
   try {

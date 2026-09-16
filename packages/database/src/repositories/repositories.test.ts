@@ -200,6 +200,20 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       expect(deleted).toBe(true);
       expect(await userRepo.exists('user_100')).toBe(false);
     });
+
+    it('gets existing user or creates a new one with defaults', async () => {
+      const u1 = await userRepo.getOrCreate('user_auto_1', { username: 'AutoUser1' });
+      expect(u1.id).toBe('user_auto_1');
+      expect(u1.username).toBe('AutoUser1');
+
+      const u1Again = await userRepo.getOrCreate('user_auto_1');
+      expect(u1Again.id).toBe('user_auto_1');
+      expect(u1Again.username).toBe('AutoUser1');
+
+      const u2 = await userRepo.getOrCreate('user_auto_2');
+      expect(u2.id).toBe('user_auto_2');
+      expect(u2.username).toBe('user_user_auto_2');
+    });
   });
 
   describe('GuildSettingsRepository', () => {
@@ -643,5 +657,4 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
     });
   });
 });
-
 

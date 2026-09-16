@@ -100,6 +100,29 @@ export class UserRepository extends BaseRepository<User, NewUser, Partial<NewUse
     }
   }
 
+  async getOrCreate(
+    id: string,
+    defaultData?: Partial<NewUser>,
+    tx?: DatabaseClient,
+  ): Promise<User> {
+    const existing = await this.findById(id, tx);
+    if (existing) return existing;
+
+    const data: NewUser = {
+      id,
+      username: defaultData?.username ?? `user_${id}`,
+      displayName: defaultData?.displayName ?? null,
+      avatarUrl: defaultData?.avatarUrl ?? null,
+      profileBackgroundUrl: defaultData?.profileBackgroundUrl ?? null,
+      isBlacklisted: defaultData?.isBlacklisted ?? false,
+      warnCount: defaultData?.warnCount ?? 0,
+      notifyLevelUp: defaultData?.notifyLevelUp ?? true,
+      ...defaultData,
+    };
+
+    return this.upsert(data, tx);
+  }
+
   async delete(id: string, tx?: DatabaseClient): Promise<boolean> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {

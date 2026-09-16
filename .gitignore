@@ -30,8 +30,8 @@ Thumbs.db
 # Local
 .local/
 data/
+storage/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
 temp-*/
-

@@ -329,14 +329,45 @@ export function createEconomyCommands(services: BotServices): Command[] {
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
-      const bgUrl = ctx.options.getString('background');
+      let bgUrl = ctx.options.getString('background');
 
-      // Sub-action: set custom background
+      // 1. In prefix commands or raw input, auto-detect if any argument is an image/web URL
+      if (!bgUrl) {
+        const rawArgs = ctx.options.getRawArgs();
+        for (const arg of rawArgs) {
+          if (/^https?:\/\//i.test(arg.trim())) {
+            bgUrl = arg.trim();
+            break;
+          }
+        }
+      }
+
+      // 2. Direct Discord attachment auto-detection (uploading an image file)
+      if (!bgUrl) {
+        const attachment = ctx.options.getAttachment('background');
+        if (attachment?.url) {
+          bgUrl = attachment.url;
+        } else if (ctx.source === 'prefix' && 'attachments' in ctx.raw && ctx.raw.attachments && ctx.raw.attachments.size > 0) {
+          const firstAttachment = ctx.raw.attachments.first();
+          if (firstAttachment && (firstAttachment.contentType?.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(firstAttachment.name ?? ""))) {
+            bgUrl = firstAttachment.url;
+          }
+        }
+      }
+
+      // Sub-action: set custom background strictly for the command issuer (current user)
       if (bgUrl) {
+        const avatarUrl = ctx.user.displayAvatarURL
+          ? ctx.user.displayAvatarURL({ extension: 'png', size: 256 })
+          : undefined;
+
         const res = await services.profileBackgroundManager.setBackground({
           userId: ctx.user.id,
           url: bgUrl,
           consumeToken: false,
+          username: ctx.user.username,
+          displayName: ctx.user.displayName ?? ctx.user.username,
+          avatarUrl,
         });
 
         if (res.success) {
@@ -353,6 +384,9 @@ export function createEconomyCommands(services: BotServices): Command[] {
 
       // Default: Render 1200x400 Profile Card 2.0
       const target = (await ctx.options.getUser('target')) ?? ctx.user;
+      const avatarUrl = target.displayAvatarURL
+        ? target.displayAvatarURL({ extension: 'png', size: 256 })
+        : undefined;
 
       try {
         const buffer = await services.profileCardRenderer.renderFromRepositories(
@@ -360,6 +394,9 @@ export function createEconomyCommands(services: BotServices): Command[] {
           ctx.guild?.id,
           {
             presenceStatus: 'online',
+            username: target.username,
+            displayName: target.displayName ?? target.username,
+            avatarUrl,
           },
         );
 

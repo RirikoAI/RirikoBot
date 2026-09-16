@@ -128,10 +128,23 @@ export class ProfileCardRenderer {
     options?: ProfileCardRenderOptions,
   ): Promise<Buffer> {
     const user = this.userRepository ? await this.userRepository.findById(userId) : null;
-    const displayName = user?.displayName ?? user?.username ?? 'Adventurer';
-    const username = user?.username ?? 'adventurer';
-    const avatarUrl = user?.avatarUrl ?? undefined;
+    const displayName = options?.displayName ?? user?.displayName ?? user?.username ?? 'Adventurer';
+    const username = options?.username ?? user?.username ?? 'adventurer';
+    const avatarUrl = options?.avatarUrl ?? user?.avatarUrl ?? undefined;
     const customBackgroundPathOrUrl = user?.profileBackgroundUrl ?? undefined;
+
+    if (!user && this.userRepository && (options?.username || options?.displayName)) {
+      try {
+        await this.userRepository.create({
+          id: userId,
+          username: options.username ?? `user_${userId}`,
+          displayName: options.displayName ?? null,
+          avatarUrl: options.avatarUrl ?? null,
+        });
+      } catch {
+        // Ignore potential concurrent creation
+      }
+    }
 
     // Balances
     let walletBalance = 0;

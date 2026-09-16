@@ -14,6 +14,7 @@ export interface DatabaseConfig {
   walMode?: boolean | undefined;
   foreignKeys?: boolean | undefined;
   synchronous?: 'OFF' | 'NORMAL' | 'FULL' | 'EXTRA' | undefined;
+  autoMigrate?: boolean | undefined;
 }
 
 export interface PingResult {

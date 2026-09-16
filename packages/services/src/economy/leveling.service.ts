@@ -265,7 +265,16 @@ export class LevelingService {
    */
   public async setUserNotifications(userId: string, enabled: boolean): Promise<boolean> {
     if (!this.userRepository) return enabled;
-    await this.userRepository.update(userId, { notifyLevelUp: enabled });
+    const existing = await this.userRepository.findById(userId);
+    if (existing) {
+      await this.userRepository.update(userId, { notifyLevelUp: enabled });
+    } else {
+      await this.userRepository.create({
+        id: userId,
+        username: `user_${userId}`,
+        notifyLevelUp: enabled,
+      });
+    }
     return enabled;
   }
 

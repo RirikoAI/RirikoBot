@@ -43,6 +43,9 @@ export async function main(): Promise<void> {
   const router = new CommandRouter(undefined, {
     defaultPrefix: prefix,
     mentionPrefix: true,
+    onError: (ctx, err) => {
+      console.error(`[Command:${ctx.commandName}] Execution error:`, err);
+    },
   });
 
   // 3. Register standard test & diagnostic commands
@@ -121,6 +124,12 @@ export async function main(): Promise<void> {
 
   process.on('SIGINT', () => void handleShutdown('SIGINT'));
   process.on('SIGTERM', () => void handleShutdown('SIGTERM'));
+  process.on('unhandledRejection', (reason) => {
+    console.error('[UnhandledRejection]', reason);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error('[UncaughtException]', err);
+  });
 
   // 7. Track Gateway State Transitions
   bot.gateway.on('stateChange', (event) => {

@@ -408,11 +408,25 @@ export class ProfileBackgroundManager {
 
     await fs.writeFile(cachedFilePath, buffer);
 
-    // Update user profile in database
+    // Update or create user profile in database
     if (this.userRepository) {
-      await this.userRepository.update(userId, {
-        profileBackgroundUrl: cachedFilePath,
-      });
+      const existingUser = await this.userRepository.findById(userId);
+      if (existingUser) {
+        await this.userRepository.update(userId, {
+          profileBackgroundUrl: cachedFilePath,
+          ...(params.username ? { username: params.username } : {}),
+          ...(params.displayName !== undefined ? { displayName: params.displayName } : {}),
+          ...(params.avatarUrl !== undefined ? { avatarUrl: params.avatarUrl } : {}),
+        });
+      } else {
+        await this.userRepository.create({
+          id: userId,
+          username: params.username ?? `user_${userId}`,
+          displayName: params.displayName ?? null,
+          avatarUrl: params.avatarUrl ?? null,
+          profileBackgroundUrl: cachedFilePath,
+        });
+      }
     }
 
     return {

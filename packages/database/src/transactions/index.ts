@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import type {
   DatabaseClient,
   PostgresDatabaseClient,
@@ -14,16 +15,36 @@ export type TransactionCallback<T, TClient extends DatabaseClient = DatabaseClie
   client: TClient,
 ) => Promise<T>;
 
-const SQLITE_TX_DEPTH = Symbol('ririko:sqlite_tx_depth');
+class AsyncMutex {
+  private queue: Promise<void> = Promise.resolve();
 
-type SqliteWithDepth = SqliteDatabaseClient['raw'] & {
-  [SQLITE_TX_DEPTH]?: number | undefined;
+  acquire(): Promise<() => void> {
+    let release!: () => void;
+    const next = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const current = this.queue;
+    this.queue = current.then(() => next);
+    return current.then(() => release);
+  }
+}
+
+interface SqliteTxContext {
+  depth: number;
+}
+
+const sqliteTxStorage = new AsyncLocalStorage<SqliteTxContext>();
+const SQLITE_MUTEX = Symbol('ririko:sqlite_tx_mutex');
+
+type SqliteWithMutex = SqliteDatabaseClient['raw'] & {
+  [SQLITE_MUTEX]?: AsyncMutex | undefined;
 };
 
 /**
  * Executes a callback within an ACID database transaction.
  * Supports dual-dialect:
- * - SQLite: Uses BEGIN IMMEDIATE / COMMIT / ROLLBACK with SAVEPOINTs for nested transactions.
+ * - SQLite: Thread/task-safe async mutex serialization for concurrent transactions on a single connection,
+ *   with re-entrant SAVEPOINT nesting when called within the same async stack.
  * - PostgreSQL: Uses Drizzle's native connection pool transaction harness.
  */
 export async function withTransaction<T, TClient extends DatabaseClient = DatabaseClient>(
@@ -32,46 +53,55 @@ export async function withTransaction<T, TClient extends DatabaseClient = Databa
   _options?: TransactionOptions,
 ): Promise<T> {
   if (client.dialect === 'sqlite') {
-    const raw = client.raw as SqliteWithDepth;
-    const currentDepth = raw[SQLITE_TX_DEPTH] ?? 0;
+    const raw = client.raw as SqliteWithMutex;
+    const parentContext = sqliteTxStorage.getStore();
 
-    if (currentDepth === 0) {
-      raw[SQLITE_TX_DEPTH] = 1;
-      raw.prepare('BEGIN IMMEDIATE').run();
+    if (!parentContext) {
+      // Root transaction: acquire mutex across concurrent async tasks on this SQLite connection
+      if (!raw[SQLITE_MUTEX]) {
+        raw[SQLITE_MUTEX] = new AsyncMutex();
+      }
+      const releaseLock = await raw[SQLITE_MUTEX].acquire();
+
       try {
-        const result = await callback(client);
-        raw[SQLITE_TX_DEPTH] = 0;
-        raw.prepare('COMMIT').run();
-        return result;
-      } catch (error) {
-        raw[SQLITE_TX_DEPTH] = 0;
+        raw.prepare('BEGIN IMMEDIATE').run();
         try {
-          raw.prepare('ROLLBACK').run();
-        } catch {
-          // suppress rollback failure if connection was closed or already rolled back
+          const result = await sqliteTxStorage.run({ depth: 1 }, async () => {
+            return await callback(client);
+          });
+          raw.prepare('COMMIT').run();
+          return result;
+        } catch (error) {
+          try {
+            raw.prepare('ROLLBACK').run();
+          } catch {
+            // Suppress rollback failure if connection was closed or already rolled back
+          }
+          throw error instanceof Error
+            ? error
+            : new DatabaseError('Transaction failed and was rolled back', {
+                cause: error instanceof Error ? error : undefined,
+              });
         }
-        throw error instanceof Error
-          ? error
-          : new DatabaseError('Transaction failed and was rolled back', {
-              cause: error instanceof Error ? error : undefined,
-            });
+      } finally {
+        releaseLock();
       }
     } else {
-      // Nested transaction via SAVEPOINT
-      const savepoint = `sp_${currentDepth}`;
-      raw[SQLITE_TX_DEPTH] = currentDepth + 1;
+      // Re-entrant nested transaction on the same call stack: safely use SAVEPOINT
+      const depth = parentContext.depth;
+      const savepoint = `sp_${depth}`;
       raw.prepare(`SAVEPOINT ${savepoint}`).run();
       try {
-        const result = await callback(client);
-        raw[SQLITE_TX_DEPTH] = currentDepth;
+        const result = await sqliteTxStorage.run({ depth: depth + 1 }, async () => {
+          return await callback(client);
+        });
         raw.prepare(`RELEASE SAVEPOINT ${savepoint}`).run();
         return result;
       } catch (error) {
-        raw[SQLITE_TX_DEPTH] = currentDepth;
         try {
           raw.prepare(`ROLLBACK TO SAVEPOINT ${savepoint}`).run();
         } catch {
-          // suppress rollback failure
+          // Suppress rollback failure
         }
         throw error;
       }

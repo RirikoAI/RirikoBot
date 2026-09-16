@@ -14,7 +14,9 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "db:push": "drizzle-kit push",
+    "db:export": "drizzle-kit export --dialect sqlite --schema ./src/schema/sqlite/index.ts"
   },
   "dependencies": {
     "@ririko/core": "workspace:*",
