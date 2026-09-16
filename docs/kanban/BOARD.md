@@ -8,7 +8,7 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
-| `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | [TASK-0621.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0621.md) |
+| `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | [TASK-0622.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0622.md) |
 
 ---
 
@@ -34,6 +34,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | [TASK-0621.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0621.md) |
 | `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | [TASK-0612.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0612.md) |
 | `STORY-061` | Story | Persistent Memory, Strict Per-User Context Isolation & Personality Engine | 3 | `EPIC-006` | [TASK-0612.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0612.md) |
 | `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | [TASK-0611.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0611.md) |

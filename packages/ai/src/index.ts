@@ -4,3 +4,4 @@ export * from './fallback/index.js';
 export * from './providers/index.js';
 export * from './memory/index.js';
 export * from './personality/index.js';
+export * from './tools/index.js';
