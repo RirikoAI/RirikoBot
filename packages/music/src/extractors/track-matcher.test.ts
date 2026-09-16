@@ -134,5 +134,36 @@ describe('PrecisionTrackMatcher (LavaSrc Audio Mirroring)', () => {
       const scScore = PrecisionTrackMatcher.scoreCandidate(targetTrack, candidates[0]!);
       expect(scScore).toBe(0);
     });
+
+    it('hard-disqualifies cross-artist title collisions (e.g. Black Box - Ride on Time)', () => {
+      // 1989 Eurodance club hit that shares the same title and similar duration
+      const blackBoxCandidate: MusicSearchResult = {
+        id: 'sc_black_box',
+        title: 'Ride on Time',
+        artist: 'black box',
+        durationSeconds: 280,
+        url: 'https://soundcloud.com/blackbox/ride-on-time',
+        source: 'soundcloud',
+      };
+
+      const score = PrecisionTrackMatcher.scoreCandidate(targetTrack, blackBoxCandidate);
+      // Hard artist gate MUST reject candidate with zero matching artist keywords
+      expect(score).toBe(0);
+
+      const candidateList: MusicSearchResult[] = [
+        blackBoxCandidate,
+        {
+          id: 'sc_club_edit',
+          title: 'Ride On Time (Club Edit)',
+          artist: 'Garreth Maher',
+          durationSeconds: 278,
+          url: 'https://soundcloud.com/garrethmaher/ride-on-time',
+          source: 'soundcloud',
+        },
+      ];
+
+      const best = PrecisionTrackMatcher.selectBestCandidate(targetTrack, candidateList, 0.70);
+      expect(best).toBeNull();
+    });
   });
 });

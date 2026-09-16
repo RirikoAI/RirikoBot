@@ -17,6 +17,7 @@ import {
   getFallbackClient,
 } from './client-spoofing.js';
 import { PoTokenService } from './po-token.service.js';
+import { PrecisionTrackMatcher } from './track-matcher.js';
 
 // Configure JS interpreter for YouTube deciphering
 try {
@@ -493,29 +494,51 @@ export class YouTubeAdapter implements MusicSourceAdapter {
           isAuthorValid && !cleanTitle.toLowerCase().includes(cleanAuthor.toLowerCase())
             ? `${cleanAuthor} - ${cleanTitle}`
             : null,
-          cleanTitle,
+          // Only search bare cleanTitle if author is unknown to avoid cross-artist collisions
+          !isAuthorValid ? cleanTitle : null,
         ].filter((q, idx, arr): q is string => Boolean(q) && arr.indexOf(q) === idx);
 
-        // Tier 6: External Fallback to SoundCloud
+        const targetRef: ResolvedTrack = {
+          id: videoId,
+          title: cleanTitle,
+          artist: isAuthorValid ? cleanAuthor : canonicalMatch?.artist || 'Unknown',
+          durationSeconds,
+          url: originalUrl || `https://www.youtube.com/watch?v=${videoId}`,
+          source: 'youtube',
+          getStream: async () => {
+            throw new Error('Unresolved');
+          },
+        };
 
+        // Tier 6: External Fallback to SoundCloud (Verified via PrecisionTrackMatcher)
         try {
           await this.ensureSoundcloudClientId();
           for (const query of extQueries) {
             try {
               const scResults = await play.search(query, {
                 source: { soundcloud: 'tracks' },
-                limit: 3,
+                limit: 5,
               });
 
-              for (const scTrack of scResults || []) {
-                if (!scTrack) continue;
-                try {
+              const scCandidates: MusicSearchResult[] = (scResults || []).map((t: any) => ({
+                id: String(t.id || ''),
+                title: t.name || t.title || '',
+                artist: t.user?.name || t.publisher?.artist || t.artist || 'SoundCloud Artist',
+                durationSeconds: Math.round(t.durationInSec || t.duration || 0),
+                url: t.url || '',
+                source: 'soundcloud',
+              }));
+
+              const bestSc = PrecisionTrackMatcher.selectBestCandidate(targetRef, scCandidates, 0.70);
+              if (bestSc) {
+                const scTrack = (scResults || []).find(
+                  (t: any) => String(t.id || '') === bestSc.candidate.id || t.url === bestSc.candidate.url,
+                );
+                if (scTrack) {
                   const scStream = await play.stream_from_info(scTrack);
                   if (scStream?.stream) {
                     return scStream.stream as Readable;
                   }
-                } catch {
-                  // Try next track in search results
                 }
               }
             } catch {
@@ -526,19 +549,32 @@ export class YouTubeAdapter implements MusicSourceAdapter {
           // SoundCloud unavailable
         }
 
-        // Tier 7: External Fallback to Deezer preview stream
+        // Tier 7: External Fallback to Deezer preview stream (Verified via PrecisionTrackMatcher)
         for (const query of extQueries) {
           try {
             const dzRes = await fetch(
-              `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=1`,
+              `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=3`,
             );
             if (dzRes.ok) {
               const dzData = (await dzRes.json()) as any;
-              const preview = dzData?.data?.[0]?.preview;
-              if (preview) {
-                const audioRes = await fetch(preview);
-                if (audioRes.ok && audioRes.body) {
-                  return Readable.fromWeb(audioRes.body as any);
+              const dzItems: any[] = dzData?.data || [];
+              const dzCandidates: MusicSearchResult[] = dzItems.map((item: any) => ({
+                id: String(item.id),
+                title: item.title,
+                artist: item.artist?.name || 'Deezer Artist',
+                durationSeconds: item.duration || 0,
+                url: item.link || '',
+                source: 'deezer',
+              }));
+
+              const bestDz = PrecisionTrackMatcher.selectBestCandidate(targetRef, dzCandidates, 0.70);
+              if (bestDz) {
+                const matchedItem = dzItems.find((item: any) => String(item.id) === bestDz.candidate.id);
+                if (matchedItem?.preview) {
+                  const audioRes = await fetch(matchedItem.preview);
+                  if (audioRes.ok && audioRes.body) {
+                    return Readable.fromWeb(audioRes.body as any);
+                  }
                 }
               }
             }

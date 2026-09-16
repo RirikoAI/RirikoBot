@@ -148,14 +148,33 @@ export async function main(): Promise<void> {
     console.error('[UncaughtException]', err);
   });
 
+  // Forward raw Discord Gateway payloads for voice state & server updates to Lavalink
+  bot.client.on('raw', (data: unknown) => {
+    services.musicPlayer.sendRawData(data);
+  });
+
   // 7. Track Gateway State Transitions
-  bot.gateway.on('stateChange', (event) => {
+  bot.gateway.on('stateChange', async (event) => {
     console.log(
       `[Gateway] State changed: ${event.from} -> ${event.to}${event.reason ? ` (${event.reason})` : ''}`,
     );
     if (event.to === 'READY') {
       console.log(`✨ Logged in as: ${bot.client.user?.tag} (ID: ${bot.client.user?.id})`);
       console.log(`✨ Ready to process slash commands and prefix '${prefix}' messages!\n`);
+
+      // Initialize Lavalink connection with client credentials & shard router
+      if (bot.client.user) {
+        services.musicPlayer.setSendToShard((guildId, payload) => {
+          const guild = bot.client.guilds.cache.get(guildId);
+          if (guild) {
+            guild.shard.send(payload as any);
+          }
+        });
+        await services.musicPlayer.initLavalink({
+          id: bot.client.user.id,
+          username: bot.client.user.username,
+        });
+      }
     }
   });
 
