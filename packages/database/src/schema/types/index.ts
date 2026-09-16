@@ -46,10 +46,15 @@ export type NewLeaderboardSnapshot = typeof sqlite.leaderboardSnapshots.$inferIn
 
 // Music & Audio
 export type MusicGuildSettings = typeof sqlite.musicGuildSettings.$inferSelect;
+export type NewMusicGuildSettings = typeof sqlite.musicGuildSettings.$inferInsert;
 export type MusicChannel = typeof sqlite.musicChannels.$inferSelect;
+export type NewMusicChannel = typeof sqlite.musicChannels.$inferInsert;
 export type MusicHistory = typeof sqlite.musicHistory.$inferSelect;
+export type NewMusicHistory = typeof sqlite.musicHistory.$inferInsert;
 export type MusicPlaylist = typeof sqlite.musicSavedPlaylists.$inferSelect;
+export type NewMusicPlaylist = typeof sqlite.musicSavedPlaylists.$inferInsert;
 export type MusicTrack = typeof sqlite.musicPlaylistTracks.$inferSelect;
+export type NewMusicTrack = typeof sqlite.musicPlaylistTracks.$inferInsert;
 
 // AI Chatbot
 export type AiConversation = typeof sqlite.aiConversations.$inferSelect;
