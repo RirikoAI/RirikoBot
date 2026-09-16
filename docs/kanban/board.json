@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "TASK-0601",
   "epics": [
     {
       "id": "EPIC-000",
@@ -824,7 +824,7 @@
       "parent": "STORY-060",
       "title": "packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager",
       "points": 3,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["TASK-0602"],
       "description": "Initialize packages/ai workspace package with ChatModelProvider interface, ChatRequest/ChatResponse types, token streaming primitives, and FallbackChainManager for 429 quota/timeout auto-failover."
