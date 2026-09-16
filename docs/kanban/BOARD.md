@@ -6,9 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-| ID | Type | Title | Pts | Parent | Target Package |
-|---|---|---|---|---|---|
-| `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | `packages/music` |
+*No tickets currently in progress (WIP = 0).*
 
 ---
 
@@ -21,7 +19,6 @@
 | ID | Type | Title | Pts | Parent | Status |
 |---|---|---|---|---|---|
 | `EPIC-005` | Epic | Multi-Source Music 2.0 Audio Engine | 13 | Self | Active |
-| `STORY-050` | Story | Multi-Source Audio Extractors & Stream Resolvers | 5 | `EPIC-005` | ⚡ In Progress |
 | `STORY-051` | Story | Voice Lifecycle, Audio Player Core & Queue Engine | 5 | `EPIC-005` | 🎯 To Do |
 | `STORY-052` | Story | Reactive Embed Controller & Dual-Dispatch Music Commands Suite | 3 | `EPIC-005` | 🎯 To Do |
 
@@ -98,6 +95,8 @@
 | `STORY-044` | Story | Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite | 5 | `EPIC-004` | [STORY-044.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-044.md) |
 | `EPIC-004` | Epic | Centralized Transactional Economy & Banking Engine | 21 | Self | [EPIC-004.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/EPIC-004.md) |
 | `TASK-0501` | Task | Extractor Interfaces, Pattern Matchers & Source Adapters | 3 | `STORY-050` | [TASK-0501.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0501.md) |
+| `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | [TASK-0502.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0502.md) |
+| `STORY-050` | Story | Multi-Source Audio Extractors & Stream Resolvers | 5 | `EPIC-005` | [STORY-050.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-050.md) |
 
 ---
 
@@ -121,7 +120,7 @@
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `TASK-0501` | Task | Extractor Interfaces, Pattern Matchers & Source Adapters | 3 | `STORY-050` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | ⚡ In Progress | `TASK-0501` |
+| `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | ✅ Done | `TASK-0501` |
 | `TASK-0511` | Task | Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping | 3 | `STORY-051` | 🎯 To Do | `STORY-050` |
 | `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | 🎯 To Do | `TASK-0511` |
 | `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | 🎯 To Do | `STORY-051` |

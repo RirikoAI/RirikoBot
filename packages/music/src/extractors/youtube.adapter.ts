@@ -6,24 +6,32 @@ import type {
   ResolvedPlaylist,
   AdapterHealth,
 } from '../types.js';
+import { CookieRotator, type CookieRotatorOptions } from './cookie-rotator.js';
+import {
+  type YouTubeClientType,
+  buildClientHeaders,
+  getFallbackClient,
+} from './client-spoofing.js';
 
 export interface YouTubeAdapterOptions {
   cookies?: string[] | undefined;
-  clientType?: 'WEB' | 'ANDROID' | 'IOS' | undefined;
+  cookieOptions?: CookieRotatorOptions | undefined;
+  clientType?: YouTubeClientType | undefined;
   requestTimeoutMs?: number | undefined;
 }
 
 /**
  * YouTube Audio Source Adapter.
  * Supports standard watch URLs, youtu.be shortlinks, shorts, music.youtube.com, and playlists.
+ * Integrates cookie pool rotation and mobile/TV client spoofing for bot ban evasion.
  */
 export class YouTubeAdapter implements MusicSourceAdapter {
   readonly id = 'youtube' as const;
   readonly name = 'YouTube Audio Extractor';
   readonly priority = 10;
 
-  private readonly cookies: string[];
-  private readonly clientType: 'WEB' | 'ANDROID' | 'IOS';
+  private readonly cookieRotator: CookieRotator;
+  private clientType: YouTubeClientType;
   private readonly requestTimeoutMs: number;
 
   private static readonly YOUTUBE_REGEX =
@@ -33,9 +41,27 @@ export class YouTubeAdapter implements MusicSourceAdapter {
   private static readonly VIDEO_ID_REGEX = /(?:v=|youtu\.be\/|shorts\/)([\w-]{11})/;
 
   constructor(options: YouTubeAdapterOptions = {}) {
-    this.cookies = options.cookies ?? [];
+    this.cookieRotator = new CookieRotator(options.cookies ?? [], options.cookieOptions);
     this.clientType = options.clientType ?? 'ANDROID';
     this.requestTimeoutMs = options.requestTimeoutMs ?? 8000;
+  }
+
+  getCookieRotator(): CookieRotator {
+    return this.cookieRotator;
+  }
+
+  getClientType(): YouTubeClientType {
+    return this.clientType;
+  }
+
+  rotateClient(): YouTubeClientType {
+    this.clientType = getFallbackClient(this.clientType);
+    return this.clientType;
+  }
+
+  getRequestHeaders(): Record<string, string> {
+    const activeCookie = this.cookieRotator.getNextCookie();
+    return buildClientHeaders(this.clientType, activeCookie ?? undefined);
   }
 
   canResolve(input: string): boolean {

@@ -212,4 +212,40 @@ export class ExtractorPipeline {
     }
     return results;
   }
+
+  /**
+   * Generates a comprehensive health and latency diagnostic report.
+   */
+  async getHealthSummary(): Promise<PipelineHealthSummary> {
+    const adapters = await this.healthCheck();
+    const healthyCount = adapters.filter((a) => a.isHealthy).length;
+    const totalCount = adapters.length;
+    const totalLatency = adapters.reduce((sum, a) => sum + Math.max(0, a.latencyMs), 0);
+    const averageLatencyMs = totalCount > 0 ? Math.round(totalLatency / totalCount) : 0;
+
+    let status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' = 'HEALTHY';
+    if (healthyCount === 0) {
+      status = 'UNHEALTHY';
+    } else if (healthyCount < totalCount) {
+      status = 'DEGRADED';
+    }
+
+    return {
+      status,
+      healthyCount,
+      totalCount,
+      averageLatencyMs,
+      adapters,
+      checkedAt: new Date(),
+    };
+  }
+}
+
+export interface PipelineHealthSummary {
+  status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  healthyCount: number;
+  totalCount: number;
+  averageLatencyMs: number;
+  adapters: AdapterHealth[];
+  checkedAt: Date;
 }
