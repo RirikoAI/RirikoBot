@@ -43,8 +43,8 @@ export class SpotifyAdapter implements MusicSourceAdapter {
   private readonly spotifyInfo: SpotifyUrlInfo;
 
   constructor(options: SpotifyAdapterOptions = {}) {
-    const dcCookie = options.cookieDc || process.env.SPOTIFY_DC || process.env.SP_DC;
-    const keyCookie = options.cookieKey || process.env.SPOTIFY_KEY;
+    const dcCookie = process.env.SPOTIFY_DC || process.env.SP_DC || options.cookieDc;
+    const keyCookie = process.env.SPOTIFY_KEY || options.cookieKey;
     const cookieHeader = [
       dcCookie ? `sp_dc=${dcCookie}` : '',
       keyCookie ? `sp_key=${keyCookie}` : '',
