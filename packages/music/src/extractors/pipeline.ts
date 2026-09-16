@@ -38,6 +38,20 @@ export class ExtractorPipeline {
       this.registerAdapter(new DeezerAdapter());
       this.registerAdapter(new DirectAdapter());
     }
+
+    this.wireMetadataResolution();
+  }
+
+  /**
+   * Spotify holds the cleanest studio metadata for a recording. It is wired into the YouTube
+   * fallback cascade as Tier 5 to supply canonical artist and title queries for Tiers 6 and 7.
+   */
+  private wireMetadataResolution(): void {
+    const youtube = this.adapters.get('youtube');
+    const spotify = this.adapters.get('spotify');
+    if (youtube instanceof YouTubeAdapter && spotify instanceof SpotifyAdapter) {
+      youtube.setMetadataResolver(spotify);
+    }
   }
 
   registerAdapter(adapter: MusicSourceAdapter): void {

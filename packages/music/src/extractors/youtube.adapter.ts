@@ -3,6 +3,7 @@ import { Innertube, UniversalCache, Platform } from 'youtubei.js';
 import play from 'play-dl';
 import ytdl from '@distube/ytdl-core';
 import type {
+  CanonicalMetadataResolver,
   MusicSourceAdapter,
   MusicSearchResult,
   ResolvedTrack,
@@ -49,7 +50,10 @@ export class YouTubeAdapter implements MusicSourceAdapter {
   readonly name = 'YouTube Audio Extractor';
   readonly priority = 10;
 
+  private static readonly METADATA_TIMEOUT_MS = 2500;
+
   private readonly cookieRotator: CookieRotator;
+  private metadataResolver?: CanonicalMetadataResolver | undefined;
   private poToken?: string | undefined;
   private visitorData?: string | undefined;
   private readonly poTokenService?: PoTokenService | undefined;
@@ -109,6 +113,77 @@ export class YouTubeAdapter implements MusicSourceAdapter {
   getPoTokenService(): PoTokenService | undefined {
     return this.poTokenService;
   }
+
+  /**
+   * Registers the adapter used by fallback Tier 5 to play the track natively and, failing that,
+   * to resolve canonical studio metadata (wired to the Spotify adapter by ExtractorPipeline).
+   * Without a resolver, Tier 5 self-skips.
+   */
+  setMetadataResolver(resolver: CanonicalMetadataResolver | undefined): void {
+    this.metadataResolver = resolver;
+  }
+
+  getMetadataResolver(): CanonicalMetadataResolver | undefined {
+    return this.metadataResolver;
+  }
+
+  private normalizeForMatch(value: string): string {
+    return value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+  }
+
+  /**
+   * Fallback Tier 5, step one: identifies the same recording on the canonical metadata source.
+   * YouTube upload titles are decorated ("【MV】Lemon | Official Music Video"), which makes
+   * SoundCloud and Deezer text search miss. Spotify returns studio metadata for the same song,
+   * so the match both names the track and identifies it for native playback.
+   * Returns null when no resolver is wired, the lookup times out, or the top hit looks unrelated.
+   */
+  async resolveCanonicalMatch(
+    cleanTitle: string,
+    cleanAuthor: string,
+  ): Promise<MusicSearchResult | null> {
+    const resolver = this.metadataResolver;
+    if (!resolver || !cleanTitle) return null;
+
+    const query = cleanAuthor ? `${cleanAuthor} - ${cleanTitle}` : cleanTitle;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    try {
+      const results = await Promise.race([
+        resolver.search(query, 1),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error('metadata resolver timeout')),
+            YouTubeAdapter.METADATA_TIMEOUT_MS,
+          );
+        }),
+      ]);
+
+      const top = results?.[0];
+      if (!top?.title || !top.artist) return null;
+
+      // Guard against unrelated top hits poisoning the external fallback queries
+      const canonicalTitle = this.normalizeForMatch(top.title);
+      const youtubeTitle = this.normalizeForMatch(cleanTitle);
+      if (canonicalTitle.length < 3 || youtubeTitle.length < 3) return null;
+      if (!canonicalTitle.includes(youtubeTitle) && !youtubeTitle.includes(canonicalTitle)) {
+        return null;
+      }
+
+      return top;
+    } catch {
+      return null;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  /** Fallback Tier 5: resolves plain "Artist - Title" query for Tiers 6 and 7 using Spotify metadata. */
+  async resolveCanonicalQuery(cleanTitle: string, cleanAuthor: string): Promise<string | null> {
+    const match = await this.resolveCanonicalMatch(cleanTitle, cleanAuthor);
+    return match ? `${match.artist} - ${match.title}` : null;
+  }
+
 
   getCookieRotator(): CookieRotator {
     return this.cookieRotator;
@@ -374,7 +449,7 @@ export class YouTubeAdapter implements MusicSourceAdapter {
         // Direct YouTube download restricted or SABR/403 -> Prepare queries for alternate search & fallbacks
         const cleanTitle = title
           .replace(
-            /\s*[\(\[][^()\[\]]*(?:official|video|audio|hd|4k|lyrics?|remaster(?:ed)?|visualizer|feat\.?|ft\.?)[^()\[\]]*[\)\]]/gi,
+            /\s*[([][^()[\]]*(?:official|video|audio|hd|4k|lyrics?|remaster(?:ed)?|visualizer|feat\.?|ft\.?)[^()[\]]*[)\]]/gi,
             '',
           )
           .replace(/【.*?】|\[.*?\]|\|.*$/g, '')
@@ -417,14 +492,26 @@ export class YouTubeAdapter implements MusicSourceAdapter {
           // Alternative search failed
         }
 
-        // Tier 5: External Fallback to SoundCloud
+        // Tier 5: Match the recording on Spotify to sharpen downstream external queries.
+        const canonicalMatch = await this.resolveCanonicalMatch(
+          cleanTitle,
+          isAuthorValid ? cleanAuthor : '',
+        );
+
+        const canonicalQuery = canonicalMatch
+          ? `${canonicalMatch.artist} - ${canonicalMatch.title}`
+          : null;
+
         const extQueries = [
+          canonicalQuery,
           cleanTitle.includes(' - ') ? cleanTitle : null,
           isAuthorValid && !cleanTitle.toLowerCase().includes(cleanAuthor.toLowerCase())
             ? `${cleanAuthor} - ${cleanTitle}`
             : null,
           cleanTitle,
         ].filter((q, idx, arr): q is string => Boolean(q) && arr.indexOf(q) === idx);
+
+        // Tier 6: External Fallback to SoundCloud
 
         try {
           await this.ensureSoundcloudClientId();
@@ -454,7 +541,7 @@ export class YouTubeAdapter implements MusicSourceAdapter {
           // SoundCloud unavailable
         }
 
-        // Tier 6: External Fallback to Deezer preview stream
+        // Tier 7: External Fallback to Deezer preview stream
         for (const query of extQueries) {
           try {
             const dzRes = await fetch(
