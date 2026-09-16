@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-0611",
+  "active_in_progress_ticket": "TASK-0612",
   "epics": [
     {
       "id": "EPIC-000",
@@ -844,7 +844,7 @@
       "parent": "STORY-061",
       "title": "AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["STORY-060"],
       "blocks": ["TASK-0612"],
       "description": "Build AiRepository over ai_conversations and ai_messages schemas in PostgreSQL and SQLite, enforcing strict (guild_id, user_id, channel_id) isolation to prevent memory leakage across users in shared channels, with sliding-window truncation."
@@ -854,7 +854,7 @@
       "parent": "STORY-061",
       "title": "Personality Engine, System Safety Prompts & Sanitized Identity Ingestion",
       "points": 1,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["TASK-0611"],
       "blocks": ["STORY-062"],
       "description": "Implement personality engine with customizable guild personas (ai_guild_preferences) separated from immutable system safety instructions, and sanitize user identity tokens (username, display name, guild name) to prevent prompt injection."
