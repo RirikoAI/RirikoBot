@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-0702",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -950,7 +950,7 @@
       "parent": "STORY-070",
       "title": "Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["TASK-0701"],
       "blocks": ["STORY-071"],
       "description": "Implement atomic sequential per-guild case numbering (Case #N), audit case persistence in moderation_cases, rich embed logging to log_channel_id, persistent staff notes in moderation_notes, and full disciplinary history retrieval."
