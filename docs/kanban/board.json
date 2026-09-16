@@ -361,7 +361,7 @@
       "epic": "EPIC-006",
       "title": "Deterministic Utility Tools, Explicit Clock & Application Security Interceptor",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-061"],
       "blocks": ["STORY-063"]
     },
@@ -864,7 +864,7 @@
       "parent": "STORY-062",
       "title": "Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-061"],
       "blocks": ["TASK-0622"],
       "description": "Implement get_current_time tool resolving user timezone -> guild timezone -> UTC, alongside anime search, coinflip, and reminder tool definitions with strict Zod argument schemas."
@@ -874,7 +874,7 @@
       "parent": "STORY-062",
       "title": "Application Security Interceptor & Discord Permission-Mediated Tool Calling",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0621"],
       "blocks": ["STORY-063"],
       "description": "Implement security mediation layer ensuring the LLM is never the security boundary: verify caller Discord permissions, module toggle state, bot permissions, and role hierarchy before executing music.play or economy balance checks."
