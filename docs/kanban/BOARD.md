@@ -6,7 +6,9 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress.*
+| ID | Type | Title | Pts | Parent | Owner |
+|---|---|---|---|---|---|
+| `TASK-0505` | Task | Chrome/Chromium Browser Harvester (Playwright Chrome, Anti-Detection & Interactive Google Login) | 2 | `STORY-050` | `music` |
 
 ---
 
@@ -28,6 +30,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0504` | Task | Playwright Firefox YouTube Credential Harvester (Cookies, PO-Token, VisitorData & Client Spoofing) | 3 | `STORY-050` | [TASK-0504.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0504.md) |
+| `TASK-0503` | Task | YouTube PO-Token Automation: CLI Generator & In-Process Background Provider | 3 | `STORY-050` | [TASK-0503.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0503.md) |
+| `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | `STORY-050` | [BUG-0001.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0001.md) |
 | `EPIC-000` | Epic | Planning, Audits, Architectural Specifications & Agent Design | 13 | Self | [docs/](file:///Z:/Projects/ririko-v2-2026/docs/) |
 | `STORY-001` | Story | Legacy 1.4.0 Codebase Audit & Feature Inventory | 5 | `EPIC-000` | [legacy-feature-inventory.md](file:///Z:/Projects/ririko-v2-2026/docs/legacy-feature-inventory.md) |
 | `STORY-002` | Story | Architecture Specification & ADR-001 to ADR-012 | 5 | `EPIC-000` | [architecture.md](file:///Z:/Projects/ririko-v2-2026/docs/architecture.md) |

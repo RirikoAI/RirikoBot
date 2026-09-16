@@ -15,6 +15,8 @@ import type {
   Message,
   ButtonInteraction,
   GuildMember,
+  ActionRowBuilder,
+  ButtonBuilder,
 } from 'discord.js';
 import {
   VoiceLifecycleManager,
@@ -326,8 +328,8 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
         adapterCreator: (() => ({ sendPayload: () => true, destroy: () => {} })) as never,
       });
 
-      // Allow event dispatch tick
-      await new Promise((r) => setTimeout(r, 20));
+      // Allow event dispatch and debounce tick
+      await new Promise((r) => setTimeout(r, 70));
 
       // Controller should update the existing message in-place
       expect(mockMessage.edit).toHaveBeenCalled();
@@ -335,10 +337,58 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
 
       // Skip track to end queue
       services.musicPlayer.skip('guild_01');
-      await new Promise((r) => setTimeout(r, 20));
+      await new Promise((r) => setTimeout(r, 70));
 
       // On queue end, controller should update to idle
       expect(mockMessage.edit).toHaveBeenCalled();
+    });
+
+    it('reactively updates controller and enables Next button when a track is added to active playback', async () => {
+      const controller = new MusicEmbedController(mockClient, services);
+      await controller.setupMusicChannel('guild_01', 'channel-music-01');
+
+      // Start first track
+      await services.musicPlayer.play({
+        guildId: 'guild_01',
+        voiceChannelId: 'vc-01',
+        textChannelId: 'channel-music-01',
+        query: 'YOASOBI Idol',
+        member: { id: 'u1', username: 'Fan' },
+        adapterCreator: (() => ({ sendPayload: () => true, destroy: () => {} })) as never,
+      });
+      await new Promise((r) => setTimeout(r, 70));
+
+      expect(mockMessage.edit).toHaveBeenCalled();
+      const lastCallFirstTrack = vi.mocked(mockMessage.edit).mock.calls.at(-1)?.[0] as {
+        components?: ActionRowBuilder<ButtonBuilder>[];
+      };
+      const row1First = lastCallFirstTrack?.components?.[0]?.toJSON();
+      const row2First = lastCallFirstTrack?.components?.[1]?.toJSON();
+      const skipBtnFirst = row1First?.components?.[2] as { disabled?: boolean } | undefined;
+      const queueBtnFirst = row2First?.components?.[3] as { label?: string } | undefined;
+      expect(skipBtnFirst?.disabled).toBe(true); // No next track yet
+      expect(queueBtnFirst?.label).toBe('Queue (1)'); // Signifies 1 music currently playing and not (0)
+
+      // Add second track to active playback
+      await services.musicPlayer.play({
+        guildId: 'guild_01',
+        voiceChannelId: 'vc-01',
+        textChannelId: 'channel-music-01',
+        query: 'YOASOBI Monster',
+        member: { id: 'u1', username: 'Fan' },
+        adapterCreator: (() => ({ sendPayload: () => true, destroy: () => {} })) as never,
+      });
+      await new Promise((r) => setTimeout(r, 70));
+
+      const lastCallSecondTrack = vi.mocked(mockMessage.edit).mock.calls.at(-1)?.[0] as {
+        components?: ActionRowBuilder<ButtonBuilder>[];
+      };
+      const row1Second = lastCallSecondTrack?.components?.[0]?.toJSON();
+      const row2Second = lastCallSecondTrack?.components?.[1]?.toJSON();
+      const skipBtnSecond = row1Second?.components?.[2] as { disabled?: boolean } | undefined;
+      const queueBtnSecond = row2Second?.components?.[3] as { label?: string } | undefined;
+      expect(Boolean(skipBtnSecond?.disabled)).toBe(false); // Next button now enabled!
+      expect(queueBtnSecond?.label).toBe('Queue (2)'); // Shows 2 tracks
     });
   });
 
@@ -438,10 +488,22 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
       expect(lyricsInteraction.deferReply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
       expect(lyricsInteraction.editReply).toHaveBeenCalled();
 
-      // Queue (ephemeral response)
+      // Queue (ephemeral response showing now playing track even when upcoming is 0)
       const queueInteraction = createMockButtonInteraction('music_queue');
       await controller.handleButtonInteraction(queueInteraction);
-      expect(queueInteraction.reply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
+      expect(queueInteraction.reply).toHaveBeenCalledWith(
+        expect.objectContaining({
+          embeds: expect.arrayContaining([
+            expect.objectContaining({
+              data: expect.objectContaining({
+                title: expect.stringContaining('Current Queue (1 track)'),
+                description: expect.stringContaining('YOASOBI - Idol'),
+              }),
+            }),
+          ]),
+          ephemeral: true,
+        }),
+      );
 
       // Refresh
       const refreshInteraction = createMockButtonInteraction('music_refresh');

@@ -9,6 +9,8 @@
   "references": [
     { "path": "../../packages/core" },
     { "path": "../../packages/database" },
-    { "path": "../../packages/discord" }
+    { "path": "../../packages/discord" },
+    { "path": "../../packages/music" },
+    { "path": "../../packages/services" }
   ]
 }

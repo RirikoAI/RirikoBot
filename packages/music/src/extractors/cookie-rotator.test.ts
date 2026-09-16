@@ -102,9 +102,14 @@ describe('Session Cookie Rotation, Client Spoofing & Health Checks (TASK-0502)',
 
       const webHeaders = buildClientHeaders('WEB');
       expect(webHeaders['X-YouTube-Client-Name']).toBe('1');
+
+      const firefoxHeaders = buildClientHeaders('FIREFOX');
+      expect(firefoxHeaders['User-Agent']).toContain('Firefox');
+      expect(firefoxHeaders['X-YouTube-Client-Name']).toBe('1');
     });
 
     it('cycles fallback clients in correct sequence', () => {
+      expect(getFallbackClient('FIREFOX')).toBe('WEB');
       expect(getFallbackClient('ANDROID')).toBe('IOS');
       expect(getFallbackClient('IOS')).toBe('TV');
       expect(getFallbackClient('TV')).toBe('WEB');

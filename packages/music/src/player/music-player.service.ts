@@ -18,13 +18,14 @@ import { AutoplayEngine } from '../queue/autoplay.js';
 import { VoiceLifecycleManager } from '../voice/voice-lifecycle-manager.js';
 import type { AudioFilterName, LoopMode, QueuedTrack } from '../queue/types.js';
 import type { PlayOptions, PlayResult } from './types.js';
-import type { ResolvedTrack } from '../types.js';
+import type { ResolvedTrack, ExtractorPipelineOptions } from '../types.js';
 
 export interface MusicPlayerServiceOptions {
   pipeline?: ExtractorPipeline | undefined;
   queueManager?: QueueManager | undefined;
   defaultVolume?: number | undefined;
   idleTimeoutMs?: number | undefined;
+  youtubeOptions?: ExtractorPipelineOptions['youtubeOptions'];
 }
 
 export class MusicPlayerService extends EventEmitter {
@@ -35,16 +36,23 @@ export class MusicPlayerService extends EventEmitter {
   private readonly voiceManagers = new Map<string, VoiceLifecycleManager>();
   private readonly audioPlayers = new Map<string, AudioPlayer>();
   private readonly activeResources = new Map<string, AudioResource>();
+  private readonly skipInitiated = new Set<string>();
   private readonly defaultVolume: number;
   private readonly idleTimeoutMs: number;
 
   constructor(options?: MusicPlayerServiceOptions) {
     super();
-    this.pipeline = options?.pipeline ?? new ExtractorPipeline();
+    this.pipeline =
+      options?.pipeline ?? new ExtractorPipeline({ youtubeOptions: options?.youtubeOptions });
     this.queueManager = options?.queueManager ?? new QueueManager();
     this.autoplayEngine = new AutoplayEngine({ pipeline: this.pipeline });
     this.defaultVolume = options?.defaultVolume ?? 80;
     this.idleTimeoutMs = options?.idleTimeoutMs ?? 180_000;
+
+    // Prevent unhandled 'error' events from crashing Node.js runtime
+    this.on('error', (guildId, err, track) => {
+      console.error(`[MusicPlayerService] Error event for guild ${guildId}:`, err, track?.title);
+    });
   }
 
   // --- Queue & Voice Lifecycle Accessors ---
@@ -107,9 +115,13 @@ export class MusicPlayerService extends EventEmitter {
           newState.status === AudioPlayerStatus.Idle &&
           oldState.status !== AudioPlayerStatus.Idle
         ) {
+          if (this.skipInitiated.has(guildId)) {
+            // Idle transition caused by skip or failure handling, ignore to avoid double skip
+            return;
+          }
           // Playback of current track finished naturally
           const queue = this.getQueue(guildId);
-          if (queue) {
+          if (queue && queue.state === 'PLAYING') {
             await queue.onTrackFinished('finished');
           }
         }
@@ -117,9 +129,9 @@ export class MusicPlayerService extends EventEmitter {
 
       player.on('error', (err) => {
         const queue = this.getQueue(guildId);
-        if (queue) {
-          queue.emit('error', err);
-          queue.skip();
+        if (queue && queue.currentTrack) {
+          queue.emit('error', err, queue.currentTrack);
+          this.handlePlaybackFailure(guildId, queue.currentTrack, err);
         }
       });
 
@@ -156,8 +168,11 @@ export class MusicPlayerService extends EventEmitter {
         addedAt: new Date(),
       }));
 
+      const isFirst = queue.currentTrack === null || queue.state === 'IDLE';
+      if (isFirst && queue.currentTrack !== null) {
+        queue.skip(true);
+      }
       const addedCount = queue.addTracks(queuedTracks);
-      const isFirst = queue.currentTrack === null;
 
       if (isFirst) {
         queue.start();
@@ -177,7 +192,10 @@ export class MusicPlayerService extends EventEmitter {
         addedAt: new Date(),
       };
 
-      const isFirst = queue.currentTrack === null;
+      const isFirst = queue.currentTrack === null || queue.state === 'IDLE';
+      if (isFirst && queue.currentTrack !== null) {
+        queue.skip(true);
+      }
       queue.addTrack(queuedTrack);
 
       if (isFirst) {
@@ -218,7 +236,16 @@ export class MusicPlayerService extends EventEmitter {
   skip(guildId: string): QueuedTrack | null {
     const queue = this.queueManager.get(guildId);
     if (!queue) return null;
-    return queue.skip();
+    const player = this.audioPlayers.get(guildId);
+    this.skipInitiated.add(guildId);
+    try {
+      if (player) {
+        player.stop();
+      }
+      return queue.skip();
+    } finally {
+      setTimeout(() => this.skipInitiated.delete(guildId), 150);
+    }
   }
 
   previous(guildId: string): QueuedTrack | null {
@@ -326,7 +353,10 @@ export class MusicPlayerService extends EventEmitter {
 
   isPlaying(guildId: string): boolean {
     const queue = this.queueManager.get(guildId);
-    return queue !== undefined && queue.state === 'PLAYING';
+    if (!queue || queue.state !== 'PLAYING') return false;
+    const player = this.audioPlayers.get(guildId);
+    if (!player || !player.state) return true;
+    return player.state.status !== AudioPlayerStatus.Idle;
   }
 
   isPaused(guildId: string): boolean {
@@ -370,6 +400,13 @@ export class MusicPlayerService extends EventEmitter {
       this.emit('trackAdded', guildId, track);
     });
 
+    queue.on('tracksAdded', (tracks) => {
+      this.emit('tracksAdded', guildId, tracks);
+      if (tracks.length > 0 && tracks[0]) {
+        this.emit('trackAdded', guildId, tracks[0]);
+      }
+    });
+
     queue.on('queueCleared', () => {
       this.emit('queueCleared', guildId);
     });
@@ -379,7 +416,14 @@ export class MusicPlayerService extends EventEmitter {
     });
 
     queue.on('error', (err, track) => {
-      this.emit('error', guildId, err, track);
+      if (this.listenerCount('error') > 0) {
+        this.emit('error', guildId, err, track);
+      } else {
+        console.error(
+          `[MusicPlayerService] Playback error in guild ${guildId} for track "${track?.title ?? 'Unknown'}":`,
+          err,
+        );
+      }
     });
 
     queue.on('queueEnd', () => {
@@ -391,13 +435,24 @@ export class MusicPlayerService extends EventEmitter {
     });
   }
 
-  private async playTrackStream(guildId: string, track: ResolvedTrack): Promise<void> {
+  private async playTrackStream(guildId: string, track: QueuedTrack): Promise<void> {
     try {
       const player = this.getOrCreateAudioPlayer(guildId);
       const queue = this.getOrCreateQueue(guildId);
 
       const rawStream = await track.getStream();
       const nodeStream = rawStream as Readable;
+
+      if (typeof (nodeStream as any).on === 'function') {
+        (nodeStream as any).on('error', (streamErr: any) => {
+          console.error(`[MusicPlayerService] Audio stream error in guild ${guildId}:`, streamErr);
+          const q = this.getQueue(guildId);
+          if (q && q.currentTrack?.id === track.id) {
+            q.emit('error', streamErr instanceof Error ? streamErr : new Error(String(streamErr)), track);
+            this.handlePlaybackFailure(guildId, track, streamErr);
+          }
+        });
+      }
 
       const resource = createAudioResource(nodeStream, {
         inputType: StreamType.Arbitrary,
@@ -409,11 +464,32 @@ export class MusicPlayerService extends EventEmitter {
 
       player.play(resource);
     } catch (err) {
+      console.error(
+        `[MusicPlayerService] Failed to play track "${track.title}" in guild ${guildId}:`,
+        err,
+      );
       const queue = this.getQueue(guildId);
-      if (queue) {
-        queue.emit('error', err instanceof Error ? err : new Error(String(err)));
-        // Auto-skip failed track
-        queue.skip();
+      if (queue && queue.currentTrack?.id === track.id) {
+        queue.emit('error', err instanceof Error ? err : new Error(String(err)), track);
+        this.handlePlaybackFailure(guildId, track, err);
+      }
+    }
+  }
+
+  private handlePlaybackFailure(guildId: string, track: QueuedTrack, _err: unknown): void {
+    const queue = this.getQueue(guildId);
+    if (!queue) return;
+
+    if (queue.currentTrack && queue.currentTrack.id === track.id) {
+      const player = this.audioPlayers.get(guildId);
+      this.skipInitiated.add(guildId);
+      try {
+        if (player) {
+          player.stop();
+        }
+        queue.skip(true);
+      } finally {
+        setTimeout(() => this.skipInitiated.delete(guildId), 150);
       }
     }
   }

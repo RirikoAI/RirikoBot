@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { Status, type Client } from 'discord.js';
+import { Events, Status, type Client } from 'discord.js';
 import type {
   GatewayMetrics,
   GatewayState,
@@ -57,10 +57,13 @@ export class GatewayManager extends EventEmitter {
   }
 
   private setupListeners() {
-    this.client.on('ready', () => {
+    const onReady = () => {
+      if (this._state === 'READY') return;
       this._reconnectAttempts = 0;
       this.setState('READY', 'Gateway connection ready');
-    });
+    };
+    this.client.on(Events.ClientReady, onReady);
+    this.client.on('ready', onReady);
 
     this.client.on('shardDisconnect', (_closeEvent, shardId) => {
       if (this._state !== 'DESTROYED') {

@@ -34,11 +34,18 @@
   },
   "dependencies": {
     "@discordjs/voice": "^0.19.2",
+    "@distube/ytdl-core": "^4.16.12",
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
-    "opusscript": "^0.1.1"
+    "jsdom": "^26.1.0",
+    "opusscript": "^0.1.1",
+    "play-dl": "^1.9.7",
+    "spotify-url-info": "^3.3.3",
+    "youtube-po-token-generator": "^0.6.0",
+    "youtubei.js": "^18.0.0"
   },
   "devDependencies": {
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^22.13.9",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.2"

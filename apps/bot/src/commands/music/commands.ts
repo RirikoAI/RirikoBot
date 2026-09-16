@@ -69,7 +69,10 @@ export function createProgressBar(current: number, total: number, length = 15): 
  * - /leave (dc, disconnect)
  * - /playlist (pl)
  */
-export function createMusicCommands(services: BotServices): Command[] {
+export function createMusicCommands(
+  services: BotServices,
+  controller?: MusicEmbedController,
+): Command[] {
   // Helper to ensure guild and voice channel context
   function getVoiceContext(ctx: CommandContext): {
     guildId: string;
@@ -120,7 +123,8 @@ export function createMusicCommands(services: BotServices): Command[] {
       const vContext = getVoiceContext(ctx);
       if (!vContext) return;
 
-      const query = ctx.options.getString('query', true);
+      const rawQuery = ctx.options.getString('query', true)?.trim();
+      const query = rawQuery?.replace(/^<([\s\S]*)>$/, '$1').trim();
       if (!query) {
         await ctx.reply({ content: '❌ Please provide a song title or URL to play.' });
         return;
@@ -156,6 +160,7 @@ export function createMusicCommands(services: BotServices): Command[] {
             embed.setThumbnail(result.playlist.thumbnailUrl);
           }
           await ctx.editReply({ content: '', embeds: [embed] });
+          void controller?.updateController(vContext.guildId);
         } else if (result.track) {
           // Record history in database
           void services.musicRepo.recordHistory({
@@ -181,6 +186,7 @@ export function createMusicCommands(services: BotServices): Command[] {
             embed.setThumbnail(result.track.thumbnailUrl);
           }
           await ctx.editReply({ content: '', embeds: [embed] });
+          void controller?.updateController(vContext.guildId);
         }
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
@@ -321,25 +327,26 @@ export function createMusicCommands(services: BotServices): Command[] {
     async execute(ctx: CommandContext): Promise<void> {
       if (!ctx.guildId) return;
       const queue = services.musicPlayer.getQueue(ctx.guildId);
-      if (!queue || queue.isEmpty) {
+      const totalTracks = (queue?.currentTrack ? 1 : 0) + (queue?.size ?? 0);
+      if (!queue || totalTracks === 0) {
         await ctx.reply({ content: '📜 The music queue is currently empty.' });
         return;
       }
 
       const page = ctx.options.getInteger('page') ?? 1;
       const pageSize = 10;
-      const totalPages = Math.max(1, Math.ceil(queue.size / pageSize));
+      const totalPages = Math.max(1, Math.ceil((queue.size || 1) / pageSize));
       const currentPage = Math.min(page, totalPages);
       const startIndex = (currentPage - 1) * pageSize;
       const pageTracks = queue.tracks.slice(startIndex, startIndex + pageSize);
 
       const embed = new EmbedBuilder()
         .setColor(0x5865f2)
-        .setTitle(`📜 Music Queue (Page ${currentPage}/${totalPages})`);
+        .setTitle(`📜 Music Queue (${totalTracks} ${totalTracks === 1 ? 'track' : 'tracks'})`);
 
       if (queue.currentTrack) {
         embed.setDescription(
-          `**Now Playing:**\n🎶 **[${queue.currentTrack.title}](${queue.currentTrack.url})** | \`${formatDuration(queue.currentTrack.durationSeconds)}\` (Requested by: ${queue.currentTrack.requestedBy.username})\n\n**Upcoming Tracks:**`,
+          `**Now Playing:**\n🎶 **[${queue.currentTrack.title}](${queue.currentTrack.url})** | \`${formatDuration(queue.currentTrack.durationSeconds)}\` (Requested by: <@${queue.currentTrack.requestedBy?.id ?? 'Unknown'}>)\n\n**Upcoming Tracks:**`,
         );
       }
 
@@ -347,16 +354,16 @@ export function createMusicCommands(services: BotServices): Command[] {
         const listText = pageTracks
           .map(
             (t, i) =>
-              `\`${startIndex + i + 1}.\` **[${t.title}](${t.url})** | \`${formatDuration(t.durationSeconds)}\` (by ${t.requestedBy.username})`,
+              `\`${startIndex + i + 1}.\` **[${t.title}](${t.url})** | \`${formatDuration(t.durationSeconds)}\` (by <@${t.requestedBy?.id ?? 'Unknown'}>)`,
           )
           .join('\n');
         embed.addFields({ name: 'Queue', value: listText });
       } else {
-        embed.addFields({ name: 'Queue', value: '*No upcoming tracks.*' });
+        embed.addFields({ name: 'Upcoming', value: '*No upcoming tracks in queue.*' });
       }
 
       embed.setFooter({
-        text: `Total: ${queue.size} tracks | Total Duration: ${formatDuration(queue.totalDurationSeconds)} | Loop: ${queue.loopMode}`,
+        text: `Total: ${totalTracks} ${totalTracks === 1 ? 'track' : 'tracks'} | Total Duration: ${formatDuration(queue.totalDurationSeconds)} | Loop: ${queue.loopMode}`,
       });
 
       await ctx.reply({ embeds: [embed] });

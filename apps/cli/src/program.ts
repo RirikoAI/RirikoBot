@@ -4,6 +4,7 @@ import { CORE_VERSION, RirikoError } from '@ririko/core';
 import { Command } from 'commander';
 import pc from 'picocolors';
 import { registerDoctorCommand } from './commands/doctor.js';
+import { registerGeneratePoTokenCommand } from './commands/generate-po-token.js';
 import { registerInfoCommand } from './commands/info.js';
 import { registerMigrateCommand } from './commands/migrate.js';
 
@@ -54,6 +55,7 @@ export function createProgram(): Command {
   registerInfoCommand(program);
   registerDoctorCommand(program);
   registerMigrateCommand(program);
+  registerGeneratePoTokenCommand(program);
 
   // Global error handler
   program.exitOverride();

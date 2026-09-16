@@ -28,6 +28,7 @@ export interface MusicPlayerEvents {
   filterChange: (guildId: string, activeFilters: AudioFilterName[], ffmpegArgs: string[]) => void;
   loopChange: (guildId: string, oldMode: LoopMode, newMode: LoopMode) => void;
   trackAdded: (guildId: string, track: QueuedTrack) => void;
+  tracksAdded: (guildId: string, tracks: QueuedTrack[]) => void;
   queueCleared: (guildId: string) => void;
   queueShuffled: (guildId: string, count: number) => void;
   error: (guildId: string, error: Error, track?: QueuedTrack) => void;

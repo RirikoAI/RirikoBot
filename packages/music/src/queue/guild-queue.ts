@@ -260,17 +260,20 @@ export class GuildQueue extends EventEmitter {
   }
 
   /**
-   * Advances to the next track on demand (e.g. /skip command).
+   * Advances to the next track on demand (e.g. /skip command or on error).
    * Note: A manual skip intentionally bypasses single-track loop mode so users are not trapped.
+   * If isError is true, the track was unplayable and is discarded without being saved to history or re-queued.
    */
-  skip(): QueuedTrack | null {
+  skip(isError = false): QueuedTrack | null {
     if (this._currentTrack) {
-      this.emit('trackEnd', this._currentTrack, 'skipped');
+      this.emit('trackEnd', this._currentTrack, isError ? 'error' : 'skipped');
 
-      if (this._loopMode === 'QUEUE') {
-        this._tracks.push(this._currentTrack);
-      } else {
-        this.pushHistory(this._currentTrack);
+      if (!isError) {
+        if (this._loopMode === 'QUEUE') {
+          this._tracks.push(this._currentTrack);
+        } else {
+          this.pushHistory(this._currentTrack);
+        }
       }
     }
 
@@ -297,18 +300,20 @@ export class GuildQueue extends EventEmitter {
     if (previousTrack) {
       this.emit('trackEnd', previousTrack, reason);
 
-      if (this._loopMode === 'TRACK') {
-        // Repeat current track
-        this._playbackPositionSeconds = 0;
-        this.setState('PLAYING');
-        this.emit('trackStart', previousTrack);
-        return previousTrack;
-      }
+      if (reason !== 'error') {
+        if (this._loopMode === 'TRACK') {
+          // Repeat current track
+          this._playbackPositionSeconds = 0;
+          this.setState('PLAYING');
+          this.emit('trackStart', previousTrack);
+          return previousTrack;
+        }
 
-      if (this._loopMode === 'QUEUE') {
-        this._tracks.push(previousTrack);
-      } else {
-        this.pushHistory(previousTrack);
+        if (this._loopMode === 'QUEUE') {
+          this._tracks.push(previousTrack);
+        } else {
+          this.pushHistory(previousTrack);
+        }
       }
     }
 
@@ -321,7 +326,7 @@ export class GuildQueue extends EventEmitter {
     }
 
     // Queue is empty: check if Autoplay should suggest the next song
-    if (this._autoplay && this._autoplayEngine && previousTrack) {
+    if (this._autoplay && this._autoplayEngine && previousTrack && reason !== 'error') {
       try {
         const recommendation = await this._autoplayEngine.getRecommendation(
           previousTrack,

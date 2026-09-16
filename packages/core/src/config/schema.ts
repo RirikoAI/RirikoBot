@@ -47,6 +47,14 @@ const BaseAppConfigSchema = z.object({
   TWITCH_CLIENT_SECRET: z.string().optional(),
   SPOTIFY_CLIENT_ID: z.string().optional(),
   SPOTIFY_CLIENT_SECRET: z.string().optional(),
+  SPOTIFY_REFRESH_TOKEN: z.string().optional(),
+  SPOTIFY_DC: z.string().optional(),
+  SPOTIFY_KEY: z.string().optional(),
+
+  // Optional YouTube BotGuard & Authentication Credentials
+  YOUTUBE_COOKIE: z.string().optional(),
+  YOUTUBE_PO_TOKEN: z.string().optional(),
+  YOUTUBE_VISITOR_DATA: z.string().optional(),
 });
 
 export const AppConfigSchema = z.preprocess((val) => {
@@ -58,6 +66,9 @@ export const AppConfigSchema = z.preprocess((val) => {
     }
     if (!raw.DISCORD_CLIENT_ID && raw.DISCORD_APPLICATION_ID) {
       raw.DISCORD_CLIENT_ID = raw.DISCORD_APPLICATION_ID;
+    }
+    if (!raw.SPOTIFY_DC && raw.SP_DC) {
+      raw.SPOTIFY_DC = raw.SP_DC;
     }
     return raw;
   }

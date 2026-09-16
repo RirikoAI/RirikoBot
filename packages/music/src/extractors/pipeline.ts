@@ -23,7 +23,7 @@ export class ExtractorPipeline {
   private readonly defaultSearchLimit: number;
 
   constructor(options: ExtractorPipelineOptions = {}) {
-    this.defaultSearchSource = options.defaultSearchSource ?? 'youtube';
+    this.defaultSearchSource = options.defaultSearchSource ?? 'soundcloud';
     this.defaultSearchLimit = options.searchLimit ?? 5;
 
     if (options.adapters && options.adapters.length > 0) {
@@ -31,10 +31,10 @@ export class ExtractorPipeline {
         this.registerAdapter(adapter);
       }
     } else {
-      // Register all standard adapters in order
-      this.registerAdapter(new YouTubeAdapter());
-      this.registerAdapter(new SpotifyAdapter());
+      // Register all standard adapters: SoundCloud, Spotify, YouTube, Deezer, Direct
       this.registerAdapter(new SoundCloudAdapter());
+      this.registerAdapter(new SpotifyAdapter());
+      this.registerAdapter(new YouTubeAdapter(options.youtubeOptions as any));
       this.registerAdapter(new DeezerAdapter());
       this.registerAdapter(new DirectAdapter());
     }
@@ -52,10 +52,20 @@ export class ExtractorPipeline {
     return Array.from(this.adapters.values()).sort((a, b) => a.priority - b.priority);
   }
 
+  normalizeInput(input: string): string {
+    if (!input || typeof input !== 'string') return '';
+    let clean = input.trim();
+    if (clean.startsWith('<') && clean.endsWith('>')) {
+      clean = clean.slice(1, -1).trim();
+    }
+    return clean;
+  }
+
   canResolve(input: string): boolean {
-    if (!input || typeof input !== 'string') return false;
+    const clean = this.normalizeInput(input);
+    if (!clean) return false;
     for (const adapter of this.getAdapters()) {
-      if (adapter.canResolve(input)) {
+      if (adapter.canResolve(clean)) {
         return true;
       }
     }
@@ -63,8 +73,10 @@ export class ExtractorPipeline {
   }
 
   findAdapterForUrl(url: string): MusicSourceAdapter | null {
+    const clean = this.normalizeInput(url);
+    if (!clean) return null;
     for (const adapter of this.getAdapters()) {
-      if (adapter.canResolve(url)) {
+      if (adapter.canResolve(clean)) {
         return adapter;
       }
     }
@@ -72,8 +84,9 @@ export class ExtractorPipeline {
   }
 
   isUrl(input: string): boolean {
+    const clean = this.normalizeInput(input);
     try {
-      const url = new URL(input.trim());
+      const url = new URL(clean);
       return url.protocol === 'http:' || url.protocol === 'https:';
     } catch {
       return false;
@@ -85,7 +98,7 @@ export class ExtractorPipeline {
    * If a search string is given, resolves the first result from the primary search engine.
    */
   async resolve(input: string): Promise<ResolvedTrack | ResolvedPlaylist> {
-    const clean = input.trim();
+    const clean = this.normalizeInput(input);
     if (!clean) {
       throw new Error('Cannot resolve empty music query or URL.');
     }
@@ -97,6 +110,11 @@ export class ExtractorPipeline {
       // If resolved from Spotify (metadata-only), attach stream bridge
       if (adapter.id === 'spotify') {
         return this.bridgeSpotifyStream(resolved);
+      }
+
+      // If resolved from Deezer, attach stream bridge for full-length audio
+      if (adapter.id === 'deezer') {
+        return this.bridgeDeezerStream(resolved);
       }
 
       return resolved;
@@ -118,8 +136,21 @@ export class ExtractorPipeline {
     }
 
     const topResult = searchResults[0]!;
-    const primaryAdapter = this.getAdapter(topResult.source) ?? this.getAdapter('youtube')!;
-    return await primaryAdapter.resolve(topResult.url);
+    const primaryAdapter =
+      this.getAdapter(topResult.source) ??
+      this.getAdapter('youtube') ??
+      this.getAdapter('spotify') ??
+      this.getAdapter('soundcloud')!;
+    const resolved = await primaryAdapter.resolve(topResult.url);
+
+    if (topResult.source === 'spotify') {
+      return this.bridgeSpotifyStream(resolved);
+    }
+    if (topResult.source === 'deezer') {
+      return this.bridgeDeezerStream(resolved);
+    }
+
+    return resolved;
   }
 
   /**
@@ -141,21 +172,58 @@ export class ExtractorPipeline {
     return this.wrapTrackStreamBridge(resolved);
   }
 
+  /**
+   * Bridges Deezer metadata tracks to playable audio streams (preferring full-length SoundCloud stream).
+   */
+  private bridgeDeezerStream(
+    resolved: ResolvedTrack | ResolvedPlaylist,
+  ): ResolvedTrack | ResolvedPlaylist {
+    if ('tracks' in resolved) {
+      const bridgedTracks = resolved.tracks.map((track) => this.wrapTrackStreamBridge(track));
+      return {
+        ...resolved,
+        tracks: bridgedTracks,
+      };
+    }
+
+    return this.wrapTrackStreamBridge(resolved);
+  }
+
   private wrapTrackStreamBridge(track: ResolvedTrack): ResolvedTrack {
     return {
       ...track,
       getStream: async () => {
-        // Search YouTube fallback for the track
+        // 1. Search SoundCloud first (High-availability native audio streaming without 403 blocks)
+        const scAdapter = this.getAdapter('soundcloud');
+        if (scAdapter) {
+          const query = `${track.artist} - ${track.title}`;
+          try {
+            const scResults = await scAdapter.search(query, 1);
+            if (scResults && scResults.length > 0 && scResults[0]) {
+              const scTrack = (await scAdapter.resolve(scResults[0].url)) as ResolvedTrack;
+              return await scTrack.getStream();
+            }
+          } catch {
+            // SoundCloud search failed, fall back to YouTube
+          }
+        }
+
+        // 2. Search YouTube second (Secondary audio streaming provider)
         const ytAdapter = this.getAdapter('youtube');
-        if (!ytAdapter) {
-          throw new Error('YouTube adapter not registered for Spotify stream fallback');
+        if (ytAdapter) {
+          const query = `${track.artist} - ${track.title} audio`;
+          try {
+            const searchResults = await ytAdapter.search(query, 1);
+            if (searchResults && searchResults.length > 0 && searchResults[0]) {
+              const ytTrack = (await ytAdapter.resolve(searchResults[0].url)) as ResolvedTrack;
+              return await ytTrack.getStream();
+            }
+          } catch {
+            // YouTube stream search failed, fall back to preview
+          }
         }
-        const query = `${track.artist} - ${track.title} audio`;
-        const searchResults = await ytAdapter.search(query, 1);
-        if (searchResults.length > 0 && searchResults[0]) {
-          const ytTrack = (await ytAdapter.resolve(searchResults[0].url)) as ResolvedTrack;
-          return await ytTrack.getStream();
-        }
+
+        // 3. Fallback to track's original stream (e.g. preview MP3 stream if available)
         return await track.getStream();
       },
     };
@@ -172,21 +240,27 @@ export class ExtractorPipeline {
     const cleanQuery = query.trim();
     if (!cleanQuery) return [];
 
-    const primaryAdapter = this.getAdapter(preferredSource);
-    if (primaryAdapter) {
-      try {
-        const results = await primaryAdapter.search(cleanQuery, limit);
-        if (results.length > 0) return results;
-      } catch {
-        // Fallback to secondary source
-      }
-    }
+    // Fallback chain: preferred (default SoundCloud) -> Spotify -> YouTube -> Deezer
+    const rawChain: MusicSource[] = [
+      preferredSource,
+      'soundcloud',
+      'spotify',
+      'youtube',
+      'deezer',
+    ];
+    const chain = rawChain.filter((val, idx, arr) => arr.indexOf(val) === idx);
 
-    // Fallback: SoundCloud if primary was YouTube, or YouTube if primary was not YouTube
-    const fallbackSource: MusicSource = preferredSource === 'youtube' ? 'soundcloud' : 'youtube';
-    const fallbackAdapter = this.getAdapter(fallbackSource);
-    if (fallbackAdapter) {
-      return await fallbackAdapter.search(cleanQuery, limit);
+    for (const source of chain) {
+      const adapter = this.getAdapter(source);
+      if (!adapter) continue;
+      try {
+        const results = await adapter.search(cleanQuery, limit);
+        if (results && results.length > 0) {
+          return results;
+        }
+      } catch {
+        // Continue to next provider in fallback chain
+      }
     }
 
     return [];

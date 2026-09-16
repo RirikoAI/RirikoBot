@@ -54,7 +54,13 @@ export class DirectAdapter implements MusicSourceAdapter {
       source: 'direct',
       streamUrl: clean,
       isLive: clean.includes('.m3u8'),
-      getStream: async () => new Readable({ read() { this.push(null); } }),
+      getStream: async () => {
+        const res = await fetch(clean);
+        if (!res.ok || !res.body) {
+          throw new Error(`Failed to fetch direct audio stream from ${clean}: HTTP ${res.status}`);
+        }
+        return Readable.fromWeb(res.body as any);
+      },
     };
   }
 
