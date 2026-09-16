@@ -9,4 +9,5 @@ export * from './item.repository.js';
 export * from './inventory.repository.js';
 export * from './player-energy.repository.js';
 export * from './music.repository.js';
+export * from './ai.repository.js';
 
