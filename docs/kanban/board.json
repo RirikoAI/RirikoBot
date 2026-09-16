@@ -70,7 +70,7 @@
       "id": "EPIC-007",
       "title": "Moderation 2.0 with Escalation & AutoMod",
       "points": 13,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Warning escalation engine, Discord AutoMod integration, case audit logs, and anti-raid filters."
@@ -372,6 +372,42 @@
       "points": 2,
       "status": "DONE",
       "requires": ["STORY-062"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-070",
+      "epic": "EPIC-007",
+      "title": "Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["STORY-071"]
+    },
+    {
+      "id": "STORY-071",
+      "epic": "EPIC-007",
+      "title": "Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["STORY-070"],
+      "blocks": ["STORY-072"]
+    },
+    {
+      "id": "STORY-072",
+      "epic": "EPIC-007",
+      "title": "Real-Time Automated Defense & Auto-Moderation Pipeline",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["STORY-070"],
+      "blocks": ["STORY-073"]
+    },
+    {
+      "id": "STORY-073",
+      "epic": "EPIC-007",
+      "title": "Dual-Dispatch Moderation Commands Suite & Gateway Listeners",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-071", "STORY-072"],
       "blocks": ["EPIC-011"]
     }
   ],
@@ -898,6 +934,86 @@
       "requires": ["TASK-0631"],
       "blocks": ["EPIC-011"],
       "description": "Implement dual-dispatch slash and prefix AI command suite with autocomplete for models/providers, admin configuration commands, session clear, and comprehensive end-to-end integration test coverage."
+    },
+    {
+      "id": "TASK-0701",
+      "parent": "STORY-070",
+      "title": "PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock)",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["TASK-0702"],
+      "description": "Implement centralized 5-tier permission verification (invoker permissions, bot permissions, invoker role hierarchy, bot role hierarchy, module policy) and execute safe punitive actions (kick, ban, softban, unban, timeout, nick, lock, unlock) with structured action results and event bus emission."
+    },
+    {
+      "id": "TASK-0702",
+      "parent": "STORY-070",
+      "title": "Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["TASK-0701"],
+      "blocks": ["STORY-071"],
+      "description": "Implement atomic sequential per-guild case numbering (Case #N), audit case persistence in moderation_cases, rich embed logging to log_channel_id, persistent staff notes in moderation_notes, and full disciplinary history retrieval."
+    },
+    {
+      "id": "TASK-0711",
+      "parent": "STORY-071",
+      "title": "Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-070"],
+      "blocks": ["TASK-0712"],
+      "description": "Implement dynamic warning escalation engine with configurable threshold mappings (warn, timeout, kick, ban), sliding-window active warning expirations (e.g. 30 days), and severity weighting."
+    },
+    {
+      "id": "TASK-0712",
+      "parent": "STORY-071",
+      "title": "Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["TASK-0711"],
+      "blocks": ["STORY-072"],
+      "description": "Implement filtered bulk message purging (/purge count [user] [invites] [bots] [links]) respecting Discord 14-day API limits with audit log tracking."
+    },
+    {
+      "id": "TASK-0721",
+      "parent": "STORY-072",
+      "title": "AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam)",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-070"],
+      "blocks": ["TASK-0722"],
+      "description": "Implement high-speed message evaluation pipeline with invite filter (whitelists), scam and phishing URL shield with homoglyph normalization, mention spam detector, and token-bucket burst spam filter."
+    },
+    {
+      "id": "TASK-0722",
+      "parent": "STORY-072",
+      "title": "Anti-Raid Mass Join Monitor & Automated Server Verification Gate",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["TASK-0721"],
+      "blocks": ["STORY-073"],
+      "description": "Implement anti-raid sliding window join monitor detecting coordinated account flood attacks, triggering verification gates, and alerting staff."
+    },
+    {
+      "id": "TASK-0731",
+      "parent": "STORY-073",
+      "title": "Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.)",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["STORY-071", "STORY-072"],
+      "blocks": ["TASK-0732"],
+      "description": "Implement dual-dispatch slash and prefix moderation commands suite with interactive confirmation components, permission checks, and reason prompts."
+    },
+    {
+      "id": "TASK-0732",
+      "parent": "STORY-073",
+      "title": "Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["TASK-0731"],
+      "blocks": ["EPIC-011"],
+      "description": "Wire messageCreate and guildMemberAdd gateway listeners to AutoMod and anti-raid engines, with comprehensive end-to-end integration test coverage."
     }
   ],
   "chores": [
