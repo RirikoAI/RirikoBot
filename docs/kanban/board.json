@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "TASK-0621",
   "epics": [
     {
       "id": "EPIC-000",
@@ -864,7 +864,7 @@
       "parent": "STORY-062",
       "title": "Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools",
       "points": 1,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["STORY-061"],
       "blocks": ["TASK-0622"],
       "description": "Implement get_current_time tool resolving user timezone -> guild timezone -> UTC, alongside anime search, coinflip, and reminder tool definitions with strict Zod argument schemas."
