@@ -720,8 +720,18 @@
       "points": 3,
       "status": "DONE",
       "requires": ["TASK-0505"],
-      "blocks": ["EPIC-011"],
+      "blocks": ["TASK-0507"],
       "description": "Scrap broken go-librespot daemon, installer, login and pipe streaming on Windows. Modernize SpotifyAdapter with official Spotify Web API client credentials (SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET) and sp_dc/sp_key cookie fallback, high-fidelity metadata resolution, and robust multi-source streaming bridge (SoundCloud/YouTube) with clean doctor checks."
+    },
+    {
+      "id": "TASK-0507",
+      "parent": "STORY-050",
+      "title": "LavaSrc Precision Audio Mirroring (ISRC, Duration Guard & Candidate Scoring)",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["TASK-0506"],
+      "blocks": ["EPIC-011"],
+      "description": "Implement LavaSrc-style multi-signal precision candidate scoring (ISRC, title token overlap, artist verification, and strict duration tolerance guard) for Spotify audio mirroring. Prioritize YouTube Music / Topic official audio and eliminate incorrect fuzzy matches from SoundCloud radio/podcast streams."
     },
     {
       "id": "TASK-0511",

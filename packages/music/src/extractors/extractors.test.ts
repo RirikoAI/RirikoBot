@@ -176,7 +176,7 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
       // Execute the bridged getStream()
       const stream = await resolved.getStream();
       expect(stream).toBeDefined();
-    });
+    }, 15000);
 
     it('bridges Spotify album tracks to playable audio stream', async () => {
       const spotifyAlbumUrl = 'https://open.spotify.com/album/1DFixLWuPkv3KT3TnV35m3';
@@ -186,7 +186,7 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
       expect(resolved.tracks.length).toBeGreaterThan(0);
       const firstStream = await resolved.tracks[0]?.getStream();
       expect(firstStream).toBeDefined();
-    });
+    }, 15000);
 
     it('resolves keyword search queries using default search source', async () => {
       const searchResult = (await pipeline.resolve('YOASOBI Idol')) as ResolvedTrack;

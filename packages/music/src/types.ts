@@ -10,6 +10,8 @@ export interface MusicSearchResult {
   url: string;
   thumbnailUrl?: string | undefined;
   source: MusicSource;
+  isrc?: string | undefined;
+  album?: string | undefined;
 }
 
 export type AudioStreamGetter = () => Promise<Readable | NodeJS.ReadableStream>;
