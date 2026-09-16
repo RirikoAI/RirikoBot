@@ -16,6 +16,7 @@
     "@ririko/database": "workspace:*",
     "@ririko/discord": "workspace:*",
     "@ririko/music": "workspace:*",
+    "@ririko/ai": "workspace:*",
     "@ririko/services": "workspace:^",
     "discord.js": "^14.27.0"
   },
