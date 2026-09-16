@@ -316,7 +316,7 @@
       "epic": "EPIC-005",
       "title": "Multi-Source Audio Extractors & Stream Resolvers",
       "points": 5,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["STORY-051"]
     },
@@ -668,7 +668,7 @@
       "parent": "STORY-050",
       "title": "Extractor Interfaces, Pattern Matchers & Source Adapters",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["TASK-0502"],
       "description": "MusicSourceAdapter interfaces, ExtractorPipeline with priority routing, YouTube, Spotify metadata resolver, SoundCloud, and Deezer/Direct stream extractors."
@@ -678,7 +678,7 @@
       "parent": "STORY-050",
       "title": "Session Cookie Rotation, Client Spoofing & Health Checks",
       "points": 2,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["TASK-0501"],
       "blocks": ["STORY-051"],
       "description": "Session cookie pool rotation, iOS/Android mobile client emulation headers to bypass IP bans, and adapter latency/health probes."
