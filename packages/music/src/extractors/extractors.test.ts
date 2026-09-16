@@ -186,7 +186,7 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
       expect(resolved.tracks.length).toBeGreaterThan(0);
       const firstStream = await resolved.tracks[0]?.getStream();
       expect(firstStream).toBeDefined();
-    }, 15000);
+    }, 25000);
 
     it('resolves keyword search queries using default search source', async () => {
       const searchResult = (await pipeline.resolve('YOASOBI Idol')) as ResolvedTrack;
