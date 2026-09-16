@@ -47,6 +47,13 @@ export interface MusicSourceAdapter {
   healthCheck(): Promise<AdapterHealth>;
 }
 
+/**
+ * A metadata adapter wired into the YouTube fallback cascade as Tier 5.
+ * Supplies canonical studio metadata (Artist and Title) to sharpen downstream
+ * fallback queries in the SoundCloud and Deezer tiers.
+ */
+export type CanonicalMetadataResolver = MusicSourceAdapter;
+
 export interface ExtractorPipelineOptions {
   adapters?: MusicSourceAdapter[] | undefined;
   defaultSearchSource?: MusicSource | undefined;

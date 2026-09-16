@@ -47,7 +47,7 @@ export class SoundCloudAdapter implements MusicSourceAdapter {
           return clientId;
         } catch (err) {
           this.clientIdPromise = null;
-          throw new Error(`Failed to acquire SoundCloud client ID: ${(err as Error).message}`);
+          throw new Error(`Failed to acquire SoundCloud client ID: ${(err as Error).message}`, { cause: err });
         }
       })();
     }

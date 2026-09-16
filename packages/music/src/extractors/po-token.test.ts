@@ -103,12 +103,12 @@ describe('YouTube PO-Token Automation & Provider (TASK-0503)', () => {
     });
 
     it('automatically updates adapter credentials when token is refreshed', async () => {
-      let callbackHolder: ((tokens: YouTubePoTokenResult) => void) | undefined;
+      let _refreshedTokens: YouTubePoTokenResult | undefined;
       const customService = new PoTokenService({
         initialPoToken: 'initial_tok',
         initialVisitorData: 'initial_vis',
         onTokenRefreshed: (tokens) => {
-          callbackHolder?.(tokens);
+          _refreshedTokens = tokens;
         },
       });
 

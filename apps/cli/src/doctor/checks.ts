@@ -208,15 +208,32 @@ export const spotifyCheck: DiagnosticCheck = {
   name: 'Spotify Music Resolver',
   required: false,
   run: () => {
-    if (process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET) {
+    const hasWebApi = Boolean(process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET);
+    const hasCookies = Boolean(
+      process.env.SPOTIFY_DC || process.env.SP_DC || process.env.SPOTIFY_KEY || process.env.SP_KEY,
+    );
+
+    if (hasWebApi && hasCookies) {
       return {
         status: 'pass',
-        message: 'Configured',
+        message: 'Configured (Web API Client Credentials + Session Cookies active)',
+      };
+    }
+    if (hasWebApi) {
+      return {
+        status: 'pass',
+        message: 'Configured (Web API Client Credentials)',
+      };
+    }
+    if (hasCookies) {
+      return {
+        status: 'pass',
+        message: 'Configured (Session Cookies active)',
       };
     }
     return {
       status: 'warn',
-      message: 'SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET not configured (Optional)',
+      message: 'SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET or SPOTIFY_DC not configured (Optional)',
     };
   },
 };
@@ -233,3 +250,4 @@ export const allChecks: DiagnosticCheck[] = [
   twitchCheck,
   spotifyCheck,
 ];
+

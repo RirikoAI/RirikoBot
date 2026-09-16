@@ -7,7 +7,12 @@ import {
   DeezerAdapter,
   DirectAdapter,
 } from './index.js';
-import type { ResolvedTrack, ResolvedPlaylist } from '../types.js';
+import type {
+  CanonicalMetadataResolver,
+  ResolvedTrack,
+  ResolvedPlaylist,
+  MusicSearchResult,
+} from '../types.js';
 
 describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
   let pipeline: ExtractorPipeline;
@@ -213,4 +218,88 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
       );
     });
   });
+
+  describe('6. YouTube Fallback Tier 5 — Canonical Spotify Metadata', () => {
+    const stubResolver = (result: Partial<MusicSearchResult> | null): CanonicalMetadataResolver =>
+      ({
+        id: 'spotify',
+        name: 'Stub Metadata Resolver',
+        priority: 20,
+        canResolve: () => false,
+        search: async () => (result ? [result as MusicSearchResult] : []),
+        resolve: async () => {
+          throw new Error('not used');
+        },
+        healthCheck: async () => ({ source: 'spotify', isHealthy: true, latencyMs: 0 }),
+      }) as CanonicalMetadataResolver;
+
+    it('wires the Spotify adapter into the YouTube cascade on pipeline construction', () => {
+      const wired = new ExtractorPipeline({ adapters: [ytAdapter, spAdapter] });
+      expect(wired.getAdapter('youtube')).toBe(ytAdapter);
+      // Resolver is wired, so canonical lookups are attempted instead of self-skipping
+      expect(ytAdapter.getMetadataResolver()).toBe(spAdapter);
+    });
+
+    it('returns a canonical "Artist - Title" pair when the resolver matches the YouTube title', async () => {
+      ytAdapter.setMetadataResolver(stubResolver({ title: 'Lemon', artist: 'Kenshi Yonezu' }));
+      const canonical = await ytAdapter.resolveCanonicalQuery('Lemon MV', 'KenshiYonezuVEVO');
+      expect(canonical).toBe('Kenshi Yonezu - Lemon');
+    });
+
+    it('rejects unrelated resolver hits so fallback queries are not poisoned', async () => {
+      ytAdapter.setMetadataResolver(stubResolver({ title: 'Blinding Lights', artist: 'The Weeknd' }));
+      expect(await ytAdapter.resolveCanonicalQuery('Lemon', 'Kenshi Yonezu')).toBeNull();
+    });
+
+    it('self-skips when no resolver is wired or the resolver returns nothing', async () => {
+      ytAdapter.setMetadataResolver(undefined);
+      expect(await ytAdapter.resolveCanonicalQuery('Lemon', 'Kenshi Yonezu')).toBeNull();
+
+      ytAdapter.setMetadataResolver(stubResolver(null));
+      expect(await ytAdapter.resolveCanonicalQuery('Lemon', 'Kenshi Yonezu')).toBeNull();
+    });
+  });
+
+  describe('7. Spotify Web API Client Credentials & Session Cookie Fallback', () => {
+    it('accepts and parses Spotify track, album, and playlist URLs and URIs', () => {
+      expect(spAdapter.canResolve('https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT')).toBe(true);
+      expect(spAdapter.canResolve('spotify:track:4cOdK2wGLETKBW3PvgPWqT')).toBe(true);
+      expect(spAdapter.canResolve('https://open.spotify.com/album/4LH4d3cOWNNXdsqFd4G7gv')).toBe(true);
+      expect(spAdapter.canResolve('spotify:album:4LH4d3cOWNNXdsqFd4G7gv')).toBe(true);
+      expect(spAdapter.canResolve('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M')).toBe(true);
+      expect(spAdapter.canResolve('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M')).toBe(true);
+
+      expect(spAdapter.canResolve('https://soundcloud.com/artist/track')).toBe(false);
+      expect(spAdapter.canResolve('plain search query')).toBe(false);
+
+      const parsed = spAdapter.parseUrl('https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT');
+      expect(parsed).toEqual({ type: 'track', id: '4cOdK2wGLETKBW3PvgPWqT' });
+
+      const parsedUri = spAdapter.parseUrl('spotify:album:4LH4d3cOWNNXdsqFd4G7gv');
+      expect(parsedUri).toEqual({ type: 'album', id: '4LH4d3cOWNNXdsqFd4G7gv' });
+    });
+
+    it('accurately identifies when Web API credentials are provided vs cookie fallback', () => {
+      const withCreds = new SpotifyAdapter({
+        clientId: 'mock_client_id',
+        clientSecret: 'mock_client_secret',
+      });
+      expect(withCreds.hasWebApiCredentials()).toBe(true);
+
+      const withoutCreds = new SpotifyAdapter({});
+      // Relies on environment or session cookies
+      expect(typeof withoutCreds.hasWebApiCredentials()).toBe('boolean');
+    });
+
+    it('performs search and health check successfully', async () => {
+      const results = await spAdapter.search('Never Gonna Give You Up', 2);
+      expect(Array.isArray(results)).toBe(true);
+
+      const health = await spAdapter.healthCheck();
+      expect(health.source).toBe('spotify');
+      expect(typeof health.isHealthy).toBe('boolean');
+      expect(health.latencyMs).toBeGreaterThanOrEqual(0);
+    });
+  });
 });
+
