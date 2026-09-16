@@ -6,7 +6,9 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No active tickets in progress. Ready for next ticket selection.*
+| ID | Type | Title | Pts | Parent | Handover Note |
+|---|---|---|---|---|---|
+| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | [TASK-0611.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0611.md) |
 
 ---
 
@@ -139,7 +141,7 @@
 |---|---|---|---|---|---|---|
 | `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | ✅ Done | `TASK-0601` |
-| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | 🎯 To Do | `STORY-060` |
+| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | ⚡ In Progress | `STORY-060` |
 | `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | 🎯 To Do | `TASK-0611` |
 | `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | 🎯 To Do | `STORY-061` |
 | `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | 🎯 To Do | `TASK-0621` |
