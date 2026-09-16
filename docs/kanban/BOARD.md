@@ -28,6 +28,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0507` | Task | LavaSrc Precision Audio Mirroring (ISRC, Duration Guard & Candidate Scoring) | 3 | `STORY-050` | [TASK-0507.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0507.md) |
 | `TASK-0506` | Task | Spotify Web API Integration & Bridge Overhaul (Scrap go-librespot) | 3 | `STORY-050` | [TASK-0506.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0506.md) |
 | `TASK-0505` | Task | Chrome/Chromium Browser Harvester (Playwright Chrome, Anti-Detection & Interactive Google Login) | 2 | `STORY-050` | [TASK-0505.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0505.md) |
 | `TASK-0504` | Task | Playwright Firefox YouTube Credential Harvester (Cookies, PO-Token, VisitorData & Client Spoofing) | 3 | `STORY-050` | [TASK-0504.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0504.md) |

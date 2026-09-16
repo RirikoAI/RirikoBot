@@ -317,23 +317,8 @@ export class YouTubeAdapter implements MusicSourceAdapter {
     return null;
   }
 
-  private async streamFromPlayDl(videoId: string, originalUrl?: string): Promise<Readable | null> {
-    try {
-      const activeCookie = this.cookieRotator.getNextCookie();
-      if (activeCookie) {
-        await play.setToken({ youtube: { cookie: activeCookie } }).catch(() => {});
-      }
-      const url = originalUrl || `https://www.youtube.com/watch?v=${videoId}`;
-      const pStream = await Promise.race([
-        play.stream(url),
-        new Promise<null>((_, reject) => setTimeout(() => reject(new Error('play-dl timeout')), 1500)),
-      ]);
-      if (pStream && (pStream as any).stream) {
-        return (pStream as any).stream as Readable;
-      }
-    } catch {
-      // Play-dl stream failed
-    }
+  private async streamFromPlayDl(_videoId: string, _originalUrl?: string): Promise<Readable | null> {
+    // play-dl lacks modern YouTube PO-Token support and triggers 429 rate limit errors from YouTube
     return null;
   }
 

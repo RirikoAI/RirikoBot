@@ -295,8 +295,9 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
             artists: Array<{ name: string }>;
             duration_ms: number;
             external_urls?: { spotify?: string };
+            external_ids?: { isrc?: string };
             preview_url?: string | null;
-            album?: { images?: Array<{ url: string }> };
+            album?: { name?: string; images?: Array<{ url: string }> };
           }>(`/tracks/${parsed.id}`);
 
           if (trackData) {
@@ -314,6 +315,8 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
               url: cleanUrl,
               thumbnailUrl: coverUrl,
               source: 'spotify',
+              isrc: trackData.external_ids?.isrc,
+              album: trackData.album?.name,
               streamUrl: previewUrl,
               getStream: async () => {
                 if (previewUrl) {
@@ -360,6 +363,7 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
                 url: `https://open.spotify.com/track/${t.id}`,
                 thumbnailUrl: coverUrl,
                 source: 'spotify',
+                album: albumData.name,
                 streamUrl: previewUrl,
                 getStream: async () => {
                   if (previewUrl) {
@@ -477,6 +481,7 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
         url: cleanUrl,
         thumbnailUrl: coverUrl,
         source: 'spotify',
+        album: (data?.album?.name || data?.album || undefined) as string | undefined,
         streamUrl: previewUrl,
         getStream: async () => {
           if (previewUrl) {

@@ -12,6 +12,7 @@ import { SpotifyAdapter } from './spotify.adapter.js';
 import { SoundCloudAdapter } from './soundcloud.adapter.js';
 import { DeezerAdapter } from './deezer.adapter.js';
 import { DirectAdapter } from './direct.adapter.js';
+import { PrecisionTrackMatcher } from './track-matcher.js';
 
 /**
  * ExtractorPipeline orchestrates multiple audio extractors.
@@ -207,37 +208,48 @@ export class ExtractorPipeline {
     return {
       ...track,
       getStream: async () => {
-        // 1. Search SoundCloud first (High-availability native audio streaming without 403 blocks)
-        const scAdapter = this.getAdapter('soundcloud');
-        if (scAdapter) {
-          const query = `${track.artist} - ${track.title}`;
-          try {
-            const scResults = await scAdapter.search(query, 1);
-            if (scResults && scResults.length > 0 && scResults[0]) {
-              const scTrack = (await scAdapter.resolve(scResults[0].url)) as ResolvedTrack;
-              return await scTrack.getStream();
-            }
-          } catch {
-            // SoundCloud search failed, fall back to YouTube
-          }
-        }
-
-        // 2. Search YouTube second (Secondary audio streaming provider)
+        // Priority 1: YouTube Music & Official Topic Audio with Precision Matching
         const ytAdapter = this.getAdapter('youtube');
         if (ytAdapter) {
-          const query = `${track.artist} - ${track.title} audio`;
-          try {
-            const searchResults = await ytAdapter.search(query, 1);
-            if (searchResults && searchResults.length > 0 && searchResults[0]) {
-              const ytTrack = (await ytAdapter.resolve(searchResults[0].url)) as ResolvedTrack;
-              return await ytTrack.getStream();
+          const queries = PrecisionTrackMatcher.generateSearchQueries(track);
+          for (const query of queries) {
+            try {
+              const candidates = await ytAdapter.search(query, 5);
+              const bestMatch = PrecisionTrackMatcher.selectBestCandidate(track, candidates, 0.65);
+              if (bestMatch) {
+                const ytTrack = (await ytAdapter.resolve(bestMatch.candidate.url)) as ResolvedTrack;
+                return await ytTrack.getStream();
+              }
+            } catch {
+              // Try next query variant
             }
-          } catch {
-            // YouTube stream search failed, fall back to preview
           }
         }
 
-        // 3. Fallback to track's original stream (e.g. preview MP3 stream if available)
+        // Priority 2: SoundCloud Fallback with Strict Precision & Duration Guard
+        // SoundCloud is ONLY accepted if it meets the exact same precision criteria (rejecting radio podcasts/mixes)
+        const scAdapter = this.getAdapter('soundcloud');
+        if (scAdapter) {
+          const cleanTitle = PrecisionTrackMatcher.cleanTitle(track.title) || track.title;
+          const scQueries = [
+            `${track.artist} - ${cleanTitle}`,
+            `${track.artist} ${track.title}`,
+          ];
+          for (const query of scQueries) {
+            try {
+              const scCandidates = await scAdapter.search(query, 5);
+              const bestSc = PrecisionTrackMatcher.selectBestCandidate(track, scCandidates, 0.70);
+              if (bestSc) {
+                const scTrack = (await scAdapter.resolve(bestSc.candidate.url)) as ResolvedTrack;
+                return await scTrack.getStream();
+              }
+            } catch {
+              // Try next query
+            }
+          }
+        }
+
+        // Priority 3: Fallback to original track stream (e.g. preview MP3 stream if available)
         return await track.getStream();
       },
     };
