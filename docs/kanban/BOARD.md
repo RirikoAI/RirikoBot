@@ -16,7 +16,13 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No groomed tickets currently pending in TODO.*
+| ID | Type | Title | Pts | Parent | Status |
+|---|---|---|---|---|---|
+| `EPIC-007` | Epic | Moderation 2.0 with Escalation & AutoMod | 13 | Self | 🎯 To Do |
+| `STORY-070` | Story | Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core | 5 | `EPIC-007` | 🎯 To Do |
+| `STORY-071` | Story | Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations | 3 | `EPIC-007` | 🎯 To Do |
+| `STORY-072` | Story | Real-Time Automated Defense & Auto-Moderation Pipeline | 3 | `EPIC-007` | 🎯 To Do |
+| `STORY-073` | Story | Dual-Dispatch Moderation Commands Suite & Gateway Listeners | 2 | `EPIC-007` | 🎯 To Do |
 
 ---
 
