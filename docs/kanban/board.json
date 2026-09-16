@@ -61,7 +61,7 @@
       "id": "EPIC-006",
       "title": "AI Chatbot 2.0 with Context Isolation & Safe Tools",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Dedicated #ririko-ai channel, per-user memory isolation, explicit time tool, safe tool allowlist."
@@ -370,7 +370,7 @@
       "epic": "EPIC-006",
       "title": "Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-062"],
       "blocks": ["EPIC-011"]
     }
@@ -884,7 +884,7 @@
       "parent": "STORY-063",
       "title": "Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-062"],
       "blocks": ["TASK-0632"],
       "description": "Implement messageCreate gateway event listener for dedicated #ririko-ai channel (zero prefix/mention required) and non-dedicated mention trigger, with typing indicators and debounced streaming message edits (max 1 edit/1.5s) to avoid Discord rate limits."
@@ -894,7 +894,7 @@
       "parent": "STORY-063",
       "title": "Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0631"],
       "blocks": ["EPIC-011"],
       "description": "Implement dual-dispatch slash and prefix AI command suite with autocomplete for models/providers, admin configuration commands, session clear, and comprehensive end-to-end integration test coverage."

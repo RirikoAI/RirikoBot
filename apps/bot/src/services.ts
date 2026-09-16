@@ -9,9 +9,21 @@ import {
   InventoryRepository,
   PlayerEnergyRepository,
   MusicRepository,
+  AiRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import { MusicPlayerService } from '@ririko/music';
+import {
+  ConversationManager,
+  PersonalityEngine,
+  ToolRegistry,
+  ToolSecurityInterceptor,
+  MediatedToolExecutor,
+  FallbackChainManager,
+  GeminiProvider,
+  OpenAIProvider,
+  OllamaProvider,
+} from '@ririko/ai';
 import { EventBus } from '@ririko/core';
 import {
   EconomyService,
@@ -38,6 +50,7 @@ export interface BotServices {
   inventoryRepo: InventoryRepository;
   playerEnergyRepo: PlayerEnergyRepository;
   musicRepo: MusicRepository;
+  aiRepo: AiRepository;
   musicPlayer: MusicPlayerService;
   economyService: EconomyService;
   bankingService: BankingService;
@@ -49,6 +62,12 @@ export interface BotServices {
   profileCardRenderer: ProfileCardRenderer;
   antiSpamEvaluator: AntiSpamEvaluator;
   voiceAccumulator: VoiceSessionAccumulator;
+  conversationManager: ConversationManager;
+  personalityEngine: PersonalityEngine;
+  toolRegistry: ToolRegistry;
+  securityInterceptor: ToolSecurityInterceptor;
+  toolExecutor: MediatedToolExecutor;
+  fallbackChainManager: FallbackChainManager;
 }
 
 /**
@@ -169,6 +188,25 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
     },
   });
 
+  const aiRepo = new AiRepository(db);
+  const conversationManager = new ConversationManager({ repository: aiRepo });
+  const personalityEngine = new PersonalityEngine();
+  const toolRegistry = ToolRegistry.createDefault();
+  const securityInterceptor = new ToolSecurityInterceptor(toolRegistry);
+  const toolExecutor = new MediatedToolExecutor(toolRegistry, securityInterceptor);
+
+  const aiProviders = [];
+  if (process.env.GEMINI_API_KEY) {
+    aiProviders.push(new GeminiProvider({ apiKey: process.env.GEMINI_API_KEY }));
+  }
+  if (process.env.OPENAI_API_KEY) {
+    aiProviders.push(new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY }));
+  }
+  aiProviders.push(
+    new OllamaProvider({ baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434' }),
+  );
+  const fallbackChainManager = new FallbackChainManager(aiProviders);
+
   return {
     db,
     eventBus,
@@ -181,6 +219,7 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
     inventoryRepo,
     playerEnergyRepo,
     musicRepo,
+    aiRepo,
     musicPlayer,
     economyService,
     bankingService,
@@ -192,5 +231,11 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
     profileCardRenderer,
     antiSpamEvaluator,
     voiceAccumulator,
+    conversationManager,
+    personalityEngine,
+    toolRegistry,
+    securityInterceptor,
+    toolExecutor,
+    fallbackChainManager,
   };
 }

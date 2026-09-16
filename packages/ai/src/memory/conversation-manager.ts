@@ -207,6 +207,27 @@ export class ConversationManager {
   }
 
   /**
+   * Retrieves the dedicated #ririko-ai channel ID for a guild.
+   */
+  async getDedicatedChannel(guildId: string): Promise<string | null> {
+    return this.repository.getAiChannel(guildId);
+  }
+
+  /**
+   * Binds a dedicated #ririko-ai channel for a guild.
+   */
+  async setDedicatedChannel(guildId: string, channelId: string): Promise<void> {
+    return this.repository.setAiChannel(guildId, channelId);
+  }
+
+  /**
+   * Unbinds the dedicated #ririko-ai channel for a guild.
+   */
+  async removeDedicatedChannel(guildId: string): Promise<boolean> {
+    return this.repository.removeAiChannel(guildId);
+  }
+
+  /**
    * Helper to convert an AiMessage database record into a domain ChatMessage.
    */
   private toChatMessage(msg: AiMessage): ChatMessage {

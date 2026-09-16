@@ -58,6 +58,10 @@ export class FallbackChainManager {
     return Array.from(this.providers.values());
   }
 
+  public getProviders(): ChatModelProvider[] {
+    return this.getAllProviders();
+  }
+
   public isProviderInCooldown(id: string, now: number = Date.now()): boolean {
     const state = this.circuitStates.get(id);
     if (!state || state.cooldownUntil === null) return false;
