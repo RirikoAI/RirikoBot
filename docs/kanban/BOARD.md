@@ -6,7 +6,9 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress.*
+| ID | Type | Title | Pts | Parent | Handover Note |
+|---|---|---|---|---|---|
+| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | STORY-063 | [TASK-0631.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0631.md) |
 
 ---
 

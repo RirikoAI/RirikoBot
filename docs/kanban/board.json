@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "TASK-0631",
   "epics": [
     {
       "id": "EPIC-000",
@@ -884,7 +884,7 @@
       "parent": "STORY-063",
       "title": "Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller",
       "points": 1,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["STORY-062"],
       "blocks": ["TASK-0632"],
       "description": "Implement messageCreate gateway event listener for dedicated #ririko-ai channel (zero prefix/mention required) and non-dedicated mention trigger, with typing indicators and debounced streaming message edits (max 1 edit/1.5s) to avoid Discord rate limits."
