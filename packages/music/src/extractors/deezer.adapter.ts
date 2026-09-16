@@ -9,7 +9,7 @@ import type {
 
 /**
  * Deezer Audio Extractor Adapter.
- * Supports tracks, albums, and playlists from Deezer.
+ * Supports tracks, albums, and playlists from Deezer using public REST API.
  */
 export class DeezerAdapter implements MusicSourceAdapter {
   readonly id = 'deezer' as const;
@@ -36,75 +36,137 @@ export class DeezerAdapter implements MusicSourceAdapter {
     const cleanQuery = query.trim();
     if (!cleanQuery) return [];
 
-    const results: MusicSearchResult[] = [];
     const count = Math.min(Math.max(1, limit), 20);
+    try {
+      const res = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(cleanQuery)}&limit=${count}`);
+      if (!res.ok) return [];
 
-    for (let i = 1; i <= count; i++) {
-      const id = `${3135556 + i}`;
-      results.push({
-        id: `dz_${id}`,
-        title: `${cleanQuery} (Deezer #${i})`,
-        artist: 'European Artist',
-        durationSeconds: 205 + i * 8,
-        url: `https://www.deezer.com/track/${id}`,
-        thumbnailUrl: `https://e-cdns-images.dzcdn.net/images/cover/sample${id}/500x500-000000-80-0-0.jpg`,
+      const data = (await res.json()) as any;
+      if (!data || !data.data || !Array.isArray(data.data)) return [];
+
+      return data.data.map((item: any) => ({
+        id: String(item.id),
+        title: item.title || cleanQuery,
+        artist: item.artist?.name || 'Deezer Artist',
+        durationSeconds: item.duration || 0,
+        url: item.link || `https://www.deezer.com/track/${item.id}`,
+        thumbnailUrl: item.album?.cover_medium || item.album?.cover_big,
         source: 'deezer',
-      });
+      }));
+    } catch {
+      return [];
     }
-
-    return results;
   }
 
   async resolve(input: string): Promise<ResolvedTrack | ResolvedPlaylist> {
     const parsed = this.parseUrl(input);
-    const id = parsed?.id ?? '3135556';
-    const type = parsed?.type ?? 'track';
+    if (!parsed) {
+      throw new Error(`Invalid or unsupported Deezer URL: "${input}"`);
+    }
+
+    const { type, id } = parsed;
 
     if (type === 'track') {
+      const res = await fetch(`https://api.deezer.com/track/${id}`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch Deezer track ${id}: HTTP ${res.status}`);
+      }
+      const data = (await res.json()) as any;
+      if (data && data.error) {
+        throw new Error(`Deezer API error: ${data.error.message || JSON.stringify(data.error)}`);
+      }
+
+      const title = data.title || `Deezer Track [${id}]`;
+      const artist = data.artist?.name || 'Deezer Artist';
+      const durationSeconds = data.duration || 0;
+      const previewUrl = data.preview;
+      const thumbnailUrl = data.album?.cover_big || data.album?.cover_medium;
+
       return {
         id: `dz_${id}`,
-        title: `Deezer Track [${id}]`,
-        artist: 'Deezer Artist',
-        durationSeconds: 220,
-        url: `https://www.deezer.com/track/${id}`,
-        thumbnailUrl: `https://e-cdns-images.dzcdn.net/images/cover/${id}/500x500.jpg`,
+        title,
+        artist,
+        durationSeconds,
+        url: data.link || input,
+        thumbnailUrl,
         source: 'deezer',
-        streamUrl: `https://cdns-preview-d.dzcdn.net/stream/c-${id}-preview.mp3`,
-        getStream: async () => new Readable({ read() { this.push(null); } }),
+        streamUrl: previewUrl,
+        getStream: async () => {
+          if (previewUrl) {
+            const audioRes = await fetch(previewUrl);
+            if (audioRes.ok && audioRes.body) {
+              return Readable.fromWeb(audioRes.body as any);
+            }
+          }
+          throw new Error(`No direct stream available for Deezer track "${title}". Must be bridged to SoundCloud.`);
+        },
       };
     }
 
-    const tracks: ResolvedTrack[] = [];
-    for (let i = 1; i <= 6; i++) {
-      const trackId = `${Number(id) + i}`;
-      tracks.push({
-        id: `dz_${trackId}`,
-        title: `Deezer ${type === 'album' ? 'Album' : 'Playlist'} Track #${i}`,
-        artist: 'Deezer Artist',
-        durationSeconds: 190 + i * 10,
-        url: `https://www.deezer.com/track/${trackId}`,
-        thumbnailUrl: `https://e-cdns-images.dzcdn.net/images/cover/${id}/500x500.jpg`,
+    if (type === 'album' || type === 'playlist') {
+      const res = await fetch(`https://api.deezer.com/${type}/${id}`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch Deezer ${type} ${id}: HTTP ${res.status}`);
+      }
+      const data = (await res.json()) as any;
+      if (data && data.error) {
+        throw new Error(`Deezer API error: ${data.error.message || JSON.stringify(data.error)}`);
+      }
+
+      const collectionTitle = data.title || `Deezer ${type === 'album' ? 'Album' : 'Playlist'} [${id}]`;
+      const coverUrl = data.cover_big || data.picture_big || data.cover_medium || data.picture_medium;
+      const rawTracks: any[] = data.tracks?.data || [];
+
+      const tracks: ResolvedTrack[] = rawTracks.map((t: any) => ({
+        id: `dz_${t.id}`,
+        title: t.title || 'Deezer Track',
+        artist: t.artist?.name || data.artist?.name || 'Deezer Artist',
+        durationSeconds: t.duration || 0,
+        url: t.link || `https://www.deezer.com/track/${t.id}`,
+        thumbnailUrl: coverUrl,
         source: 'deezer',
-        streamUrl: `https://cdns-preview-d.dzcdn.net/stream/c-${trackId}-preview.mp3`,
-        getStream: async () => new Readable({ read() { this.push(null); } }),
-      });
+        streamUrl: t.preview,
+        getStream: async () => {
+          if (t.preview) {
+            const audioRes = await fetch(t.preview);
+            if (audioRes.ok && audioRes.body) {
+              return Readable.fromWeb(audioRes.body as any);
+            }
+          }
+          throw new Error(`No direct stream available for Deezer track "${t.title}". Must be bridged to SoundCloud.`);
+        },
+      }));
+
+      return {
+        title: collectionTitle,
+        url: input,
+        thumbnailUrl: coverUrl,
+        trackCount: tracks.length,
+        tracks,
+        source: 'deezer',
+      };
     }
 
-    return {
-      title: `Deezer ${type === 'album' ? 'Album' : 'Playlist'} [${id}]`,
-      url: input,
-      thumbnailUrl: tracks[0]?.thumbnailUrl,
-      trackCount: tracks.length,
-      tracks,
-      source: 'deezer',
-    };
+    throw new Error(`Unsupported Deezer URL type: "${type}"`);
   }
 
   async healthCheck(): Promise<AdapterHealth> {
-    return {
-      source: 'deezer',
-      isHealthy: true,
-      latencyMs: 18,
-    };
+    const start = Date.now();
+    try {
+      const res = await fetch('https://api.deezer.com/infos');
+      const isHealthy = res.ok;
+      return {
+        source: 'deezer',
+        isHealthy,
+        latencyMs: Date.now() - start,
+      };
+    } catch (err) {
+      return {
+        source: 'deezer',
+        isHealthy: false,
+        latencyMs: Date.now() - start,
+        errorMessage: (err as Error).message,
+      };
+    }
   }
 }

@@ -6,7 +6,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "tsx --env-file=../../.env src/main.ts",
+    "dev": "tsx watch --env-file=../../.env src/main.ts",
     "start": "node --env-file=../../.env dist/main.js",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist"

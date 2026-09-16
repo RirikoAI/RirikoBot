@@ -74,7 +74,13 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
   const inventoryRepo = new InventoryRepository(db);
   const playerEnergyRepo = new PlayerEnergyRepository(db);
   const musicRepo = new MusicRepository(db);
-  const musicPlayer = new MusicPlayerService();
+  const musicPlayer = new MusicPlayerService({
+    youtubeOptions: {
+      cookie: process.env.YOUTUBE_COOKIE,
+      poToken: process.env.YOUTUBE_PO_TOKEN,
+      visitorData: process.env.YOUTUBE_VISITOR_DATA,
+    },
+  });
 
   // Seed default shop catalog if empty
   await itemRepo.seedDefaultCatalog().catch(() => {});
