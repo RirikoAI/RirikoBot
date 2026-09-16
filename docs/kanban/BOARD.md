@@ -6,9 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-| ID | Type | Title | Pts | Parent | Handover Note |
-|---|---|---|---|---|---|
-| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | [TASK-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0601.md) |
+*No active tickets in progress. Ready for next ticket selection.*
 
 ---
 
@@ -36,6 +34,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | [TASK-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0601.md) |
 | `TASK-0530` | Task | Lavalink v4 Backend Integration, Autoinstall Script & LavaSrc Setup | 8 | `STORY-050` | [TASK-0530.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0530.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | `STORY-050` | [BUG-0002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0002.md) |
 | `TASK-0507` | Task | LavaSrc Precision Audio Mirroring (ISRC, Duration Guard & Candidate Scoring) | 3 | `STORY-050` | [TASK-0507.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0507.md) |
@@ -137,7 +136,7 @@
 ### 🛠️ Groomed Tasks for EPIC-006
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | ⚡ In Progress | `EPIC-002`, `EPIC-003` |
+| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | 🎯 To Do | `TASK-0601` |
 | `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | 🎯 To Do | `STORY-060` |
 | `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | 🎯 To Do | `TASK-0611` |
