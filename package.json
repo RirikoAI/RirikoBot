@@ -11,6 +11,8 @@
     "build": "tsc -b",
     "dev:bot": "pnpm --filter @ririko/bot dev",
     "start:bot": "pnpm --filter @ririko/bot start",
+    "lavalink:install": "tsx --env-file=.env scripts/lavalink-setup.ts",
+    "lavalink:start": "tsx --env-file=.env scripts/lavalink-start.ts",
     "cli": "tsx apps/cli/src/index.ts",
     "doctor": "tsx apps/cli/src/index.ts doctor",
     "db:push": "pnpm --filter @ririko/database db:push",
