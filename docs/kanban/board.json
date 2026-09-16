@@ -325,7 +325,7 @@
       "epic": "EPIC-005",
       "title": "Voice Lifecycle, Audio Player Core & Queue Engine",
       "points": 5,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["STORY-050"],
       "blocks": ["STORY-052"]
     },
@@ -688,7 +688,7 @@
       "parent": "STORY-051",
       "title": "Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-050"],
       "blocks": ["TASK-0512"],
       "description": "FIFO queue, history stack for /back, loop modes (OFF, TRACK, QUEUE), FFmpeg audio filters (Bassboost, Nightcore, 8D), 0%-150% volume clamping, and autoplay."
@@ -698,7 +698,7 @@
       "parent": "STORY-051",
       "title": "Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo",
       "points": 2,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["TASK-0511"],
       "blocks": ["STORY-052"],
       "description": "@discordjs/voice state machine, reconnection backoff, 3-minute idle timeout auto-disconnect, and MusicRepository (saved playlists & guild settings)."
