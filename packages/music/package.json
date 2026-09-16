@@ -13,6 +13,14 @@
     "./extractors": {
       "types": "./dist/extractors/index.d.ts",
       "import": "./dist/extractors/index.js"
+    },
+    "./queue": {
+      "types": "./dist/queue/index.d.ts",
+      "import": "./dist/queue/index.js"
+    },
+    "./voice": {
+      "types": "./dist/voice/index.d.ts",
+      "import": "./dist/voice/index.js"
     }
   },
   "scripts": {
@@ -21,6 +29,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@discordjs/voice": "^0.19.2",
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*"
   },
