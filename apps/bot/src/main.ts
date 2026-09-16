@@ -5,7 +5,9 @@ import {
   createEconomyCommands,
   createMusicCommands,
   createSetupMusicCommand,
+  createAiCommands,
   MusicEmbedController,
+  AiChatController,
   registerMessageListener,
   registerVoiceListener,
 } from './index.js';
@@ -96,6 +98,12 @@ export async function main(): Promise<void> {
   const setupMusicCommand = createSetupMusicCommand(services, musicController);
   router.registry.register(setupMusicCommand);
 
+  const aiController = new AiChatController(bot.client, services);
+  const aiCommands = createAiCommands(services, aiController);
+  for (const cmd of aiCommands) {
+    router.registry.register(cmd);
+  }
+
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
       .getAll()
@@ -107,7 +115,7 @@ export async function main(): Promise<void> {
   router.bindClient(bot.client);
 
   // Register Gateway message & voice event listeners
-  registerMessageListener(bot.client, services, musicController);
+  registerMessageListener(bot.client, services, musicController, aiController);
   registerVoiceListener(bot.client, services);
 
   // Bind interactive Help Center UI components and Music Controller buttons
