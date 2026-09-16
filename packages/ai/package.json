@@ -29,6 +29,10 @@
     "./memory": {
       "types": "./dist/memory/index.d.ts",
       "import": "./dist/memory/index.js"
+    },
+    "./personality": {
+      "types": "./dist/personality/index.d.ts",
+      "import": "./dist/personality/index.js"
     }
   },
   "scripts": {

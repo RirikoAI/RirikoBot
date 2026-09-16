@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-0612",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -352,7 +352,7 @@
       "epic": "EPIC-006",
       "title": "Persistent Memory, Strict Per-User Context Isolation & Personality Engine",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-060"],
       "blocks": ["STORY-062"]
     },
@@ -854,7 +854,7 @@
       "parent": "STORY-061",
       "title": "Personality Engine, System Safety Prompts & Sanitized Identity Ingestion",
       "points": 1,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["TASK-0611"],
       "blocks": ["STORY-062"],
       "description": "Implement personality engine with customizable guild personas (ai_guild_preferences) separated from immutable system safety instructions, and sanitize user identity tokens (username, display name, guild name) to prevent prompt injection."
