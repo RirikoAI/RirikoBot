@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-0622",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -361,7 +361,7 @@
       "epic": "EPIC-006",
       "title": "Deterministic Utility Tools, Explicit Clock & Application Security Interceptor",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-061"],
       "blocks": ["STORY-063"]
     },
@@ -874,7 +874,7 @@
       "parent": "STORY-062",
       "title": "Application Security Interceptor & Discord Permission-Mediated Tool Calling",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["TASK-0621"],
       "blocks": ["STORY-063"],
       "description": "Implement security mediation layer ensuring the LLM is never the security boundary: verify caller Discord permissions, module toggle state, bot permissions, and role hierarchy before executing music.play or economy balance checks."

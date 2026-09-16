@@ -106,3 +106,21 @@ export class AiToolExecutionError extends RirikoError {
     this.toolName = toolName;
   }
 }
+
+export class AiSecurityViolationError extends RirikoError {
+  public readonly toolName: string;
+  public readonly denialReason: string;
+
+  constructor(toolName: string, reason: string, details?: unknown) {
+    super(`Security policy blocked tool '${toolName}': ${reason}`, {
+      code: ErrorCode.FORBIDDEN,
+      statusCode: 403,
+      userMessage: `Action blocked by security policy: ${reason}`,
+      ...(details !== undefined ? { details } : {}),
+    });
+    this.name = 'AiSecurityViolationError';
+    this.toolName = toolName;
+    this.denialReason = reason;
+  }
+}
+
