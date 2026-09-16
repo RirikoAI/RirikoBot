@@ -79,6 +79,36 @@ export type CoreEvents = {
   'music:queueEnd': {
     guildId: string;
   };
+
+  // Moderation
+  'moderation:actionExecuted': {
+    guildId: string;
+    action: string;
+    targetUserId?: string | undefined;
+    moderatorUserId: string;
+    reason: string;
+    caseNumber?: number | undefined;
+    caseId?: string | undefined;
+    durationSeconds?: number | null | undefined;
+    metadata?: Record<string, unknown> | undefined;
+  };
+  'moderation:warningIssued': {
+    guildId: string;
+    userId: string;
+    moderatorId: string;
+    reason: string;
+    severity: number;
+    totalActiveWarnings: number;
+  };
+  'moderation:caseCreated': {
+    guildId: string;
+    caseNumber: number;
+    type: string;
+    targetUserId: string;
+    moderatorUserId: string;
+    reason: string;
+    durationSeconds?: number | null | undefined;
+  };
 };
 
 export type EventListener<T = unknown> = (payload: T) => void | Promise<void>;

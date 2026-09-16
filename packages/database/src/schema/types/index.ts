@@ -18,8 +18,11 @@ export type CommandSettings = typeof sqlite.commandSettings.$inferSelect;
 export type ModerationCase = typeof sqlite.moderationCases.$inferSelect;
 export type NewModerationCase = typeof sqlite.moderationCases.$inferInsert;
 export type ModerationWarning = typeof sqlite.moderationWarnings.$inferSelect;
+export type NewModerationWarning = typeof sqlite.moderationWarnings.$inferInsert;
 export type ModerationRule = typeof sqlite.moderationRules.$inferSelect;
+export type NewModerationRule = typeof sqlite.moderationRules.$inferInsert;
 export type ModerationNote = typeof sqlite.moderationNotes.$inferSelect;
+export type NewModerationNote = typeof sqlite.moderationNotes.$inferInsert;
 
 // Economy & Banking
 export type EconomyAccount = typeof sqlite.economyAccounts.$inferSelect;

@@ -264,6 +264,9 @@ importers:
       '@ririko/database':
         specifier: workspace:*
         version: link:../database
+      discord.js:
+        specifier: ^14.27.0
+        version: 14.27.0
     devDependencies:
       '@types/node':
         specifier: ^22.13.9
