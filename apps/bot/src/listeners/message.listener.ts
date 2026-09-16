@@ -2,15 +2,17 @@ import type { Client, Message } from 'discord.js';
 import { EconomyEventType } from '@ririko/services';
 import type { BotServices } from '../services.js';
 import type { MusicEmbedController } from '../controllers/music-embed.controller.js';
+import type { AiChatController } from '../controllers/ai-chat.controller.js';
 
 /**
  * Gateway Message Listener: Evaluates anti-spam heuristics, dispatches Economy events,
- * awards experience points, and routes dedicated music channel song requests.
+ * awards experience points, and routes dedicated music channel song requests or AI chat.
  */
 export function registerMessageListener(
   client: Client,
   services: BotServices,
   musicController?: MusicEmbedController,
+  aiController?: AiChatController,
 ): void {
   client.on('messageCreate', async (message: Message) => {
     // Ignore bots and direct messages
@@ -19,6 +21,12 @@ export function registerMessageListener(
     // Check if message was sent in dedicated music channel
     if (musicController) {
       const handled = await musicController.handleMusicChannelMessage(message).catch(() => false);
+      if (handled) return;
+    }
+
+    // Check if message is addressed to dedicated AI channel or mentions bot
+    if (aiController) {
+      const handled = await aiController.handleAiMessage(message).catch(() => false);
       if (handled) return;
     }
 
