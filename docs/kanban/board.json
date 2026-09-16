@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "TASK-0505",
   "epics": [
     {
       "id": "EPIC-000",
@@ -684,6 +684,36 @@
       "description": "Session cookie pool rotation, iOS/Android mobile client emulation headers to bypass IP bans, and adapter latency/health probes."
     },
     {
+      "id": "TASK-0503",
+      "parent": "STORY-050",
+      "title": "YouTube PO-Token Automation: CLI Generator & In-Process Background Provider",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["TASK-0502"],
+      "blocks": ["EPIC-011"],
+      "description": "Developer CLI command (ririko generate:po-token --save) and automated non-blocking in-process background BotGuard PO token provider with 18h TTL rotation."
+    },
+    {
+      "id": "TASK-0504",
+      "parent": "STORY-050",
+      "title": "Playwright Firefox YouTube Credential Harvester (Cookies, PO-Token, VisitorData & Client Spoofing)",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["TASK-0503"],
+      "blocks": ["EPIC-011"],
+      "description": "Microsoft Playwright Firefox integration in apps/cli with headless/headed login modes, cookie interception, and Firefox client spoofing parity."
+    },
+    {
+      "id": "TASK-0505",
+      "parent": "STORY-050",
+      "title": "Chrome/Chromium Browser Harvester (Playwright Chrome, Anti-Detection & Interactive Google Login)",
+      "points": 2,
+      "status": "IN_PROGRESS",
+      "requires": ["TASK-0504"],
+      "blocks": ["EPIC-011"],
+      "description": "Replace Firefox with Chrome/Chromium in browser harvester with anti-automation flags (--disable-blink-features=AutomationControlled) to fix Google login restrictions and childFrames frame navigation errors."
+    },
+    {
       "id": "TASK-0511",
       "parent": "STORY-051",
       "title": "Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping",
@@ -734,5 +764,16 @@
       "blocks": []
     }
   ],
-  "bugs": []
+  "bugs": [
+    {
+      "id": "BUG-0001",
+      "title": "Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors",
+      "points": 5,
+      "status": "DONE",
+      "parent": "STORY-050",
+      "requires": [],
+      "blocks": [],
+      "description": "Extractors previously returned mock stubs pushing null to Readable streams, causing silent player idle exits. Integrate real audio extraction & fallback streaming for YouTube, Spotify, SoundCloud, and Deezer."
+    }
+  ]
 }

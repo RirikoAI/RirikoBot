@@ -1,4 +1,4 @@
-export type YouTubeClientType = 'ANDROID' | 'IOS' | 'TV' | 'WEB';
+export type YouTubeClientType = 'ANDROID' | 'IOS' | 'TV' | 'WEB' | 'FIREFOX';
 
 export interface ClientProfile {
   clientName: string;
@@ -44,6 +44,14 @@ export const CLIENT_PROFILES: Record<YouTubeClientType, ClientProfile> = {
     osName: 'Windows',
     osVersion: '10.0',
   },
+  FIREFOX: {
+    clientName: 'WEB',
+    clientVersion: '2.20260315.01.00',
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0',
+    osName: 'Windows',
+    osVersion: '10.0',
+  },
 };
 
 /**
@@ -73,6 +81,8 @@ export function buildClientHeaders(
  */
 export function getFallbackClient(current: YouTubeClientType): YouTubeClientType {
   switch (current) {
+    case 'FIREFOX':
+      return 'WEB';
     case 'ANDROID':
       return 'IOS';
     case 'IOS':

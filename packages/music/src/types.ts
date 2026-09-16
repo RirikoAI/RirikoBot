@@ -51,4 +51,12 @@ export interface ExtractorPipelineOptions {
   adapters?: MusicSourceAdapter[] | undefined;
   defaultSearchSource?: MusicSource | undefined;
   searchLimit?: number | undefined;
+  youtubeOptions?: {
+    cookie?: string | undefined;
+    cookies?: string[] | undefined;
+    poToken?: string | undefined;
+    visitorData?: string | undefined;
+    clientType?: string | undefined;
+    requestTimeoutMs?: number | undefined;
+  } | undefined;
 }

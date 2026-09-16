@@ -20,6 +20,7 @@ export interface MusicEmbedState {
   isMuted: boolean;
   loopMode: LoopMode;
   queueSize: number;
+  canShuffle?: boolean;
 }
 
 /**
@@ -71,7 +72,7 @@ export function buildControllerButtonRows(
       .setEmoji('🔀')
       .setLabel('Shuffle')
       .setStyle(ButtonStyle.Secondary)
-      .setDisabled(state.queueSize < 2),
+      .setDisabled(state.canShuffle !== undefined ? !state.canShuffle : state.queueSize < 2),
     new ButtonBuilder()
       .setCustomId('music_lyrics')
       .setEmoji('📝')
@@ -105,6 +106,7 @@ export function buildNowPlayingEmbed(
   const positionSec = queue.playbackPositionSeconds;
   const durationSec = track.durationSeconds;
   const progressBar = createProgressBar(positionSec, durationSec, 14);
+  const totalTracks = (queue.currentTrack ? 1 : 0) + queue.size;
 
   const embed = new EmbedBuilder()
     .setColor(isPaused ? 0xfee75c : 0x5865f2)
@@ -135,7 +137,7 @@ export function buildNowPlayingEmbed(
         name: '🎛️ Settings',
         value: `Volume: **${volume}%** • Loop: **${queue.loopMode}** • Filters: **${
           queue.activeFilters.length > 0 ? queue.activeFilters.join(', ') : 'None'
-        }** • Upcoming: **${queue.size}**`,
+        }** • Queue: **${totalTracks}** (Upcoming: **${queue.size}**)`,
         inline: false,
       },
     )
@@ -183,6 +185,8 @@ export class MusicEmbedController {
   private readonly client: Client;
   private readonly services: BotServices;
   private readonly guildPreviousVolumes = new Map<string, number>();
+  private readonly guildUpdating = new Set<string>();
+  private readonly guildUpdateQueued = new Set<string>();
 
   constructor(client: Client, services: BotServices) {
     this.client = client;
@@ -225,15 +229,78 @@ export class MusicEmbedController {
       void this.updateController(guildId);
     });
 
+    player.on('trackAdded', (guildId) => {
+      void this.updateController(guildId);
+    });
+
+    player.on('tracksAdded', (guildId) => {
+      void this.updateController(guildId);
+    });
+
     player.on('queueShuffled', (guildId) => {
       void this.updateController(guildId);
+    });
+
+    player.on('error', async (guildId, error, track) => {
+      console.error(
+        `[MusicEmbedController] Playback error in guild ${guildId} for track "${track?.title ?? 'Unknown'}":`,
+        error,
+      );
+      // Wait briefly for failure handling/skip to settle before refreshing UI
+      setTimeout(() => {
+        void this.updateController(guildId);
+      }, 50);
+
+      try {
+        const musicChannelData = await this.services.musicRepo.getMusicChannel(guildId);
+        if (musicChannelData) {
+          const channel = await this.client.channels.fetch(musicChannelData.channelId).catch(() => null);
+          if (channel && 'send' in channel && typeof channel.send === 'function') {
+            const trackTitle = track?.title ? `"${track.title}"` : 'the requested track';
+            const tempMsg = await (channel as TextChannel)
+              .send({
+                content: `⚠️ Could not play ${trackTitle}: ${error.message || 'Stream unavailable'}. Skipping...`,
+              })
+              .catch(() => null);
+            if (tempMsg) {
+              setTimeout(() => {
+                tempMsg.delete().catch(() => {});
+              }, 7000);
+            }
+          }
+        }
+      } catch {
+        // Ignore channel notification failure
+      }
     });
   }
 
   /**
    * Updates or initializes the persistent controller message in the guild's music channel.
+   * Debounced and serialized to prevent race conditions and Discord rate limits.
    */
   async updateController(guildId: string): Promise<void> {
+    if (this.guildUpdating.has(guildId)) {
+      this.guildUpdateQueued.add(guildId);
+      return;
+    }
+
+    this.guildUpdating.add(guildId);
+
+    try {
+      // 50ms tick to coalesce rapid synchronous event bursts (e.g. trackAdded + trackStart + stateChange)
+      await new Promise((r) => setTimeout(r, 50));
+      await this.doUpdateController(guildId);
+    } finally {
+      this.guildUpdating.delete(guildId);
+      if (this.guildUpdateQueued.has(guildId)) {
+        this.guildUpdateQueued.delete(guildId);
+        void this.updateController(guildId);
+      }
+    }
+  }
+
+  private async doUpdateController(guildId: string): Promise<void> {
     try {
       const musicChannelData = await this.services.musicRepo.getMusicChannel(guildId);
       if (!musicChannelData) return;
@@ -243,15 +310,17 @@ export class MusicEmbedController {
 
       const textChannel = channel as unknown as TextChannel;
       const queue = this.services.musicPlayer.getQueue(guildId);
+      const totalTracks = (queue?.currentTrack ? 1 : 0) + (queue?.size ?? 0);
 
       const state: MusicEmbedState = {
         hasCurrentTrack: queue?.currentTrack !== null && queue?.currentTrack !== undefined,
         hasPrevious: (queue?.history.length ?? 0) > 0,
-        hasNextTrack: (queue?.size ?? 0) > 0,
+        hasNextTrack: (queue?.size ?? 0) > 0 || (queue?.loopMode === 'QUEUE' && Boolean(queue?.currentTrack)),
         isPaused: queue?.state === 'PAUSED',
         isMuted: (queue?.volume ?? 80) === 0,
         loopMode: queue?.loopMode ?? 'OFF',
-        queueSize: queue?.size ?? 0,
+        queueSize: totalTracks,
+        canShuffle: (queue?.size ?? 0) >= 2,
       };
 
       const components = buildControllerButtonRows(state);
@@ -271,18 +340,32 @@ export class MusicEmbedController {
 
       // If existing message ID recorded, attempt to edit in-place
       if (musicChannelData.lastMessageId) {
+        let existingMessage: Message | null = null;
         try {
-          const existingMessage = await textChannel.messages.fetch(musicChannelData.lastMessageId);
-          if (existingMessage) {
-            await existingMessage.edit({ embeds: [embed], components });
+          existingMessage = await textChannel.messages.fetch(musicChannelData.lastMessageId);
+        } catch (fetchErr: any) {
+          // If code is not 10008 (Unknown Message), message still exists or temporary network error
+          if (fetchErr?.code !== 10008 && fetchErr?.status !== 404) {
+            console.error(
+              `[MusicEmbedController] Temporary fetch error for message ${musicChannelData.lastMessageId}:`,
+              fetchErr?.message || fetchErr,
+            );
             return;
           }
-        } catch {
-          // Message might have been deleted; fall through to create a new one
+        }
+
+        if (existingMessage) {
+          try {
+            await existingMessage.edit({ embeds: [embed], components });
+            return;
+          } catch (editErr) {
+            console.error(`[MusicEmbedController] Failed to edit controller message:`, editErr);
+            return;
+          }
         }
       }
 
-      // Otherwise send new controller message and record ID
+      // Otherwise send new controller message and record ID only if truly missing/deleted
       const newMessage = await textChannel.send({ embeds: [embed], components });
       await this.services.musicRepo.setMusicChannel(guildId, textChannel.id, newMessage.id);
     } catch (err) {
@@ -301,15 +384,17 @@ export class MusicEmbedController {
 
     const textChannel = channel as unknown as TextChannel;
     const queue = this.services.musicPlayer.getQueue(guildId);
+    const totalTracks = (queue?.currentTrack ? 1 : 0) + (queue?.size ?? 0);
 
     const state: MusicEmbedState = {
       hasCurrentTrack: queue?.currentTrack !== null && queue?.currentTrack !== undefined,
       hasPrevious: (queue?.history.length ?? 0) > 0,
-      hasNextTrack: (queue?.size ?? 0) > 0,
+      hasNextTrack: (queue?.size ?? 0) > 0 || (queue?.loopMode === 'QUEUE' && Boolean(queue?.currentTrack)),
       isPaused: queue?.state === 'PAUSED',
       isMuted: (queue?.volume ?? 80) === 0,
       loopMode: queue?.loopMode ?? 'OFF',
-      queueSize: queue?.size ?? 0,
+      queueSize: totalTracks,
+      canShuffle: (queue?.size ?? 0) >= 2,
     };
 
     const embed =
@@ -344,6 +429,13 @@ export class MusicEmbedController {
     // Attempt to delete message to maintain clean controller interface
     message.delete().catch(() => {});
 
+    const rawContent = message.content.trim();
+    if (!rawContent) return true;
+
+    // Normalize input: strip angle brackets Discord wraps around URLs e.g. <https://...>
+    const query = rawContent.replace(/^<([\s\S]*)>$/, '$1').trim();
+    if (!query) return true;
+
     const member = message.member;
     const voiceChannelId = member?.voice.channelId;
 
@@ -375,7 +467,7 @@ export class MusicEmbedController {
         guildId,
         voiceChannelId,
         textChannelId: message.channelId,
-        query: message.content,
+        query,
         member: {
           id: message.author.id,
           username: message.author.username,
@@ -385,6 +477,9 @@ export class MusicEmbedController {
         },
         adapterCreator: message.guild.voiceAdapterCreator,
       });
+
+      // Refresh controller embed immediately so new tracks/state reflect in UI
+      void this.updateController(guildId);
     } catch (err) {
       const errWarn = await sendable
         .send({
@@ -544,7 +639,8 @@ export class MusicEmbedController {
       }
 
       case 'music_queue': {
-        if (!queue || queue.size === 0) {
+        const totalTracks = (queue?.currentTrack ? 1 : 0) + (queue?.size ?? 0);
+        if (!queue || totalTracks === 0) {
           await interaction.reply({
             content: '📜 The music queue is currently empty.',
             ephemeral: true,
@@ -552,19 +648,34 @@ export class MusicEmbedController {
           return;
         }
 
-        const upcoming = queue.tracks.slice(0, 10);
-        const queueList = upcoming
-          .map(
-            (t, i) =>
-              `\`${i + 1}.\` **[${t.title}](${t.url})** (\`${formatDuration(t.durationSeconds)}\`) - <@${t.requestedBy.id}>`,
-          )
-          .join('\n');
+        let description = '';
+        if (queue.currentTrack) {
+          description += `▶️ **Now Playing:**\n🎶 **[${queue.currentTrack.title}](${queue.currentTrack.url})** (\`${formatDuration(queue.currentTrack.durationSeconds)}\`) - <@${queue.currentTrack.requestedBy?.id ?? 'Unknown'}>`;
+        }
+
+        if (queue.tracks.length > 0) {
+          const upcoming = queue.tracks.slice(0, 10);
+          const queueList = upcoming
+            .map(
+              (t, i) =>
+                `\`${i + 1}.\` **[${t.title}](${t.url})** (\`${formatDuration(t.durationSeconds)}\`) - <@${t.requestedBy?.id ?? 'Unknown'}>`,
+            )
+            .join('\n');
+          description += `${description ? '\n\n' : ''}**Upcoming Tracks:**\n${queueList}`;
+          if (queue.tracks.length > 10) {
+            description += `\n*...and ${queue.tracks.length - 10} more*`;
+          }
+        } else {
+          description += '\n\n*(No upcoming tracks in queue)*';
+        }
 
         const queueEmbed = new EmbedBuilder()
           .setColor(0x5865f2)
-          .setTitle(`📜 Current Queue (${queue.size} tracks)`)
-          .setDescription(queueList)
-          .setFooter({ text: `Total duration: ${formatDuration(queue.totalDurationSeconds)}` });
+          .setTitle(`📜 Current Queue (${totalTracks} ${totalTracks === 1 ? 'track' : 'tracks'})`)
+          .setDescription(description)
+          .setFooter({
+            text: `Total: ${totalTracks} ${totalTracks === 1 ? 'track' : 'tracks'} | Total Duration: ${formatDuration(queue.totalDurationSeconds)} | Loop: ${queue.loopMode}`,
+          });
 
         await interaction.reply({ embeds: [queueEmbed], ephemeral: true });
         break;

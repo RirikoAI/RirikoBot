@@ -57,7 +57,7 @@ export async function main(): Promise<void> {
       name: 'ping',
       category: CommandCategory.GENERAL,
       description: 'Check bot latency, heartbeat, and gateway connection health',
-      aliases: ['p', 'latency'],
+      aliases: ['latency'],
       usage: '/ping',
       examples: ['/ping', `${prefix}ping`],
     },
@@ -88,7 +88,7 @@ export async function main(): Promise<void> {
 
   const musicController = new MusicEmbedController(bot.client, services);
 
-  const musicCommands = createMusicCommands(services);
+  const musicCommands = createMusicCommands(services, musicController);
   for (const cmd of musicCommands) {
     router.registry.register(cmd);
   }
