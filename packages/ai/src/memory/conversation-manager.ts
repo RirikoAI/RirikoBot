@@ -86,13 +86,19 @@ export class ConversationManager {
       ? (message.toolCalls as unknown as Record<string, unknown>[])
       : null;
 
+    let now = Date.now();
+    if (now <= this.lastTurnTimestamp) {
+      now = this.lastTurnTimestamp + 10;
+    }
+    this.lastTurnTimestamp = now;
+
     return this.repository.addMessage({
       conversationId: conv.id,
       role: message.role.toUpperCase(),
       content: message.content,
       toolCalls: toolCallsPayload,
       tokenCount: message.tokenCount ?? 0,
-      createdAt: new Date(),
+      createdAt: new Date(now),
     });
   }
 
