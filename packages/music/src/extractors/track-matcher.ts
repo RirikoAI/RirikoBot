@@ -152,7 +152,11 @@ export class PrecisionTrackMatcher {
 
     const artistRatio = Math.min(1.0, matchedArtists / targetArtists.length);
 
-    // Topic channel bonus
+    if (matchedArtists === 0) {
+      return 0;
+    }
+
+    // Topic channel bonus only if at least one target artist keyword matched
     let topicBonus = 0;
     if (candArtistLower.endsWith(' - topic') || candArtistLower.includes('official')) {
       topicBonus = 0.15;
@@ -182,10 +186,22 @@ export class PrecisionTrackMatcher {
       return 0;
     }
 
-    const artistScore = PrecisionTrackMatcher.calculateArtistScore(target.artist, candidate);
+    // Hard Artist Gate: If the target has an identifiable artist, the candidate MUST match
+    // at least one artist keyword. Otherwise, disqualify immediately (returns 0).
+    const targetArtistLower = (target.artist || '').trim().toLowerCase();
+    const isGenericArtist =
+      !targetArtistLower ||
+      targetArtistLower === 'unknown' ||
+      targetArtistLower === 'various artists' ||
+      targetArtistLower === 'spotify artist';
 
-    // Weighted composite
-    let composite = durationScore * 0.35 + titleScore * 0.45 + artistScore * 0.20;
+    const artistScore = PrecisionTrackMatcher.calculateArtistScore(target.artist, candidate);
+    if (!isGenericArtist && artistScore < 0.25) {
+      return 0;
+    }
+
+    // Balanced composite formula: Artist (40%), Title (35%), Duration (25%)
+    let composite = artistScore * 0.40 + titleScore * 0.35 + durationScore * 0.25;
 
     // Official Audio bonus
     const titleLower = candidate.title.toLowerCase();

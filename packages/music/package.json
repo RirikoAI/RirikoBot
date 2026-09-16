@@ -38,6 +38,7 @@
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
     "jsdom": "^26.1.0",
+    "lavalink-client": "^2.11.0",
     "opusscript": "^0.1.1",
     "play-dl": "^1.9.7",
     "spotify-url-info": "^3.3.3",
