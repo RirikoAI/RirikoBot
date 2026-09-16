@@ -334,7 +334,7 @@
       "epic": "EPIC-005",
       "title": "Reactive Embed Controller & Dual-Dispatch Music Commands Suite",
       "points": 3,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["STORY-051"],
       "blocks": ["EPIC-011"]
     }
@@ -708,7 +708,7 @@
       "parent": "STORY-052",
       "title": "Dual-Dispatch Music Commands Suite (17 Commands)",
       "points": 2,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["STORY-051"],
       "blocks": ["TASK-0522"],
       "description": "17 dual-dispatch music commands with slash and prefix parity (/play, /pause, /resume, /skip, /back, /stop, /queue, /nowplaying, /volume, /loop, /shuffle, /seek, /filter, /lyrics, /join, /leave, /playlist)."
