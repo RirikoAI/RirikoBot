@@ -6,7 +6,9 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress.*
+| ID | Type | Title | Pts | Parent | Handover Note |
+|---|---|---|---|---|---|
+| `TASK-0702` | Task | Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History | 2 | STORY-070 | Pending |
 
 ---
 
@@ -34,6 +36,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0701` | Task | PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock) | 3 | STORY-070 | [TASK-0701.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0701.md) |
 | `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | `STORY-063` | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
 | `STORY-063` | Story | Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite | 2 | `EPIC-006` | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
 | `EPIC-006` | Epic | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | Self | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
