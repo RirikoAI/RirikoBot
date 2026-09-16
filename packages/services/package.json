@@ -13,6 +13,10 @@
     "./economy": {
       "types": "./dist/economy/index.d.ts",
       "import": "./dist/economy/index.js"
+    },
+    "./moderation": {
+      "types": "./dist/moderation/index.d.ts",
+      "import": "./dist/moderation/index.js"
     }
   },
   "scripts": {
@@ -23,7 +27,8 @@
   "dependencies": {
     "@napi-rs/canvas": "^0.1.66",
     "@ririko/core": "workspace:*",
-    "@ririko/database": "workspace:*"
+    "@ririko/database": "workspace:*",
+    "discord.js": "^14.27.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
