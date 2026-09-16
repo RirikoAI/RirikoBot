@@ -80,6 +80,15 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
       poToken: process.env.YOUTUBE_PO_TOKEN,
       visitorData: process.env.YOUTUBE_VISITOR_DATA,
     },
+    lavalink: {
+      enabled: process.env.LAVALINK_ENABLED !== 'false',
+      node: {
+        host: process.env.LAVALINK_HOST || '127.0.0.1',
+        port: parseInt(process.env.LAVALINK_PORT || '2333', 10),
+        password: process.env.LAVALINK_PASSWORD || 'youshallnotpass',
+        secure: process.env.LAVALINK_SECURE === 'true',
+      },
+    },
   });
 
   // Seed default shop catalog if empty
