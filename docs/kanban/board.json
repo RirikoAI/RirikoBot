@@ -52,7 +52,7 @@
       "id": "EPIC-005",
       "title": "Multi-Source Music 2.0 Audio Engine",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "YouTube/Spotify/SoundCloud/Deezer extractors, @discordjs/voice player, reactive embeds, volume clamping."
@@ -334,7 +334,7 @@
       "epic": "EPIC-005",
       "title": "Reactive Embed Controller & Dual-Dispatch Music Commands Suite",
       "points": 3,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["STORY-051"],
       "blocks": ["EPIC-011"]
     }
@@ -718,7 +718,7 @@
       "parent": "STORY-052",
       "title": "Reactive Embed Controller & Interactive Button Matrix (Zero Polling)",
       "points": 1,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["TASK-0521"],
       "blocks": ["EPIC-011"],
       "description": "Dynamic #music controller embed with responsive 2-row ActionRow buttons (Play/Pause, Skip, Stop, Loop, Volume) updating purely on player/interaction events without setInterval polling."

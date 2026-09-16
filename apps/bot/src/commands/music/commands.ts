@@ -11,6 +11,7 @@ import {
   isValidFilter,
   FILTER_DESCRIPTIONS,
 } from '@ririko/music';
+import type { MusicEmbedController } from '../../controllers/music-embed.controller.js';
 
 export function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0 || !Number.isFinite(seconds)) return '0:00';
@@ -905,4 +906,51 @@ export function createMusicCommands(services: BotServices): Command[] {
     leaveCommand,
     playlistCommand,
   ];
+}
+
+/**
+ * Creates the setup-music command to initialize the dedicated music controller channel.
+ */
+export function createSetupMusicCommand(
+  _services: BotServices,
+  controller: MusicEmbedController,
+): Command {
+  return {
+    metadata: {
+      name: 'setup-music',
+      category: CommandCategory.MUSIC,
+      description: 'Initialize a dedicated interactive music channel with live player controls.',
+      usage: '/setup-music [channel]',
+      isGuildOnly: true,
+      options: [
+        {
+          name: 'channel',
+          type: 'CHANNEL',
+          description: 'Channel to designate as the music controller (defaults to current channel)',
+          required: false,
+        },
+      ],
+    },
+    async execute(ctx: CommandContext): Promise<void> {
+      if (!ctx.guildId) return;
+
+      const targetChannel = (await ctx.options.getChannel('channel')) ?? ctx.channel;
+      if (!targetChannel) {
+        await ctx.reply({ content: '❌ Could not determine target channel.' });
+        return;
+      }
+
+      await ctx.deferReply();
+      try {
+        await controller.setupMusicChannel(ctx.guildId, targetChannel.id);
+        await ctx.editReply({
+          content: `✅ Dedicated music controller successfully deployed in <#${targetChannel.id}>!\nSend song names or links in that channel, or use the interactive buttons below the controller embed.`,
+        });
+      } catch (err) {
+        await ctx.editReply({
+          content: `❌ Failed to setup music channel: ${err instanceof Error ? err.message : String(err)}`,
+        });
+      }
+    },
+  };
 }

@@ -1,3 +1,4 @@
+import { EventEmitter } from 'node:events';
 import { Readable } from 'node:stream';
 import {
   createAudioPlayer,
@@ -26,7 +27,7 @@ export interface MusicPlayerServiceOptions {
   idleTimeoutMs?: number | undefined;
 }
 
-export class MusicPlayerService {
+export class MusicPlayerService extends EventEmitter {
   readonly pipeline: ExtractorPipeline;
   readonly queueManager: QueueManager;
   readonly autoplayEngine: AutoplayEngine;
@@ -38,6 +39,7 @@ export class MusicPlayerService {
   private readonly idleTimeoutMs: number;
 
   constructor(options?: MusicPlayerServiceOptions) {
+    super();
     this.pipeline = options?.pipeline ?? new ExtractorPipeline();
     this.queueManager = options?.queueManager ?? new QueueManager();
     this.autoplayEngine = new AutoplayEngine({ pipeline: this.pipeline });
@@ -336,14 +338,48 @@ export class MusicPlayerService {
 
   private wireQueueEvents(guildId: string, queue: GuildQueue): void {
     queue.on('trackStart', async (track) => {
+      this.emit('trackStart', guildId, track);
       await this.playTrackStream(guildId, track);
     });
 
-    queue.on('volumeChange', () => {
+    queue.on('trackEnd', (track, reason) => {
+      this.emit('trackEnd', guildId, track, reason);
+    });
+
+    queue.on('stateChange', (oldState, newState) => {
+      this.emit('stateChange', guildId, oldState, newState);
+    });
+
+    queue.on('volumeChange', (oldVolume, newVolume) => {
       const resource = this.activeResources.get(guildId);
       if (resource?.volume) {
         resource.volume.setVolume(queue.gain);
       }
+      this.emit('volumeChange', guildId, oldVolume, newVolume);
+    });
+
+    queue.on('filterChange', (filters, ffmpegArgs) => {
+      this.emit('filterChange', guildId, filters, ffmpegArgs);
+    });
+
+    queue.on('loopChange', (oldMode, newMode) => {
+      this.emit('loopChange', guildId, oldMode, newMode);
+    });
+
+    queue.on('trackAdded', (track) => {
+      this.emit('trackAdded', guildId, track);
+    });
+
+    queue.on('queueCleared', () => {
+      this.emit('queueCleared', guildId);
+    });
+
+    queue.on('queueShuffled', (count) => {
+      this.emit('queueShuffled', guildId, count);
+    });
+
+    queue.on('error', (err, track) => {
+      this.emit('error', guildId, err, track);
     });
 
     queue.on('queueEnd', () => {
@@ -351,6 +387,7 @@ export class MusicPlayerService {
       if (player) {
         player.stop();
       }
+      this.emit('queueEnd', guildId);
     });
   }
 

@@ -4,6 +4,8 @@ import {
   createBotServices,
   createEconomyCommands,
   createMusicCommands,
+  createSetupMusicCommand,
+  MusicEmbedController,
   registerMessageListener,
   registerVoiceListener,
 } from './index.js';
@@ -84,10 +86,15 @@ export async function main(): Promise<void> {
     router.registry.register(cmd);
   }
 
+  const musicController = new MusicEmbedController(bot.client, services);
+
   const musicCommands = createMusicCommands(services);
   for (const cmd of musicCommands) {
     router.registry.register(cmd);
   }
+
+  const setupMusicCommand = createSetupMusicCommand(services, musicController);
+  router.registry.register(setupMusicCommand);
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
@@ -100,15 +107,19 @@ export async function main(): Promise<void> {
   router.bindClient(bot.client);
 
   // Register Gateway message & voice event listeners
-  registerMessageListener(bot.client, services);
+  registerMessageListener(bot.client, services, musicController);
   registerVoiceListener(bot.client, services);
 
-  // Bind interactive Help Center UI components (select menus, buttons)
+  // Bind interactive Help Center UI components and Music Controller buttons
   bot.client.on('interactionCreate', async (interaction) => {
     try {
+      if (interaction.isButton() && interaction.customId.startsWith('music_')) {
+        await musicController.handleButtonInteraction(interaction);
+        return;
+      }
       await handleHelpInteraction(interaction, router.registry);
     } catch (err) {
-      console.error('Unhandled error in help component interaction:', err);
+      console.error('Unhandled error in component interaction:', err);
     }
   });
 
