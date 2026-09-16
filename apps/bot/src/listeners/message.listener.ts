@@ -27,6 +27,17 @@ export function registerMessageListener(client: Client, services: BotServices): 
         return; // Spam or on cooldown; zero XP and zero rewards
       }
 
+      // Lazily ensure user record exists in database
+      await services.userRepo
+        .getOrCreate(userId, {
+          username: message.author.username,
+          displayName: message.author.displayName ?? message.author.username,
+          avatarUrl: message.author.displayAvatarURL
+            ? message.author.displayAvatarURL({ extension: 'png', size: 256 })
+            : undefined,
+        })
+        .catch(() => {});
+
       // 2. Dispatch Economy Event
       await services.economyService.handleEvent({
         type: EconomyEventType.MESSAGE_SENT,

@@ -260,6 +260,40 @@ describe('ProfileBackgroundManager', () => {
       expect(isPrivateOrRestrictedIp('93.184.216.34')).toBe(false);
       expect(isPrivateOrRestrictedIp('2606:4700:4700::1111')).toBe(false);
     });
+
+    it('should automatically create user record if user does not exist in database yet', async () => {
+      vi.spyOn(dns, 'lookup').mockResolvedValue([
+        { address: '93.184.216.34', family: 4 },
+      ] as never);
+
+      const testBuffer = createValidPngBuffer(800, 300);
+
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
+        headers: new Headers({
+          'content-type': 'image/png',
+          'content-length': String(testBuffer.length),
+        }),
+        arrayBuffer: async () =>
+          testBuffer.buffer.slice(testBuffer.byteOffset, testBuffer.byteOffset + testBuffer.byteLength),
+      } as Response);
+
+      const newUserId = '1257377848671600722';
+      const result = await manager.setBackground({
+        userId: newUserId,
+        url: 'https://example.com/fresh_user_bg.png',
+        username: 'FreshUser',
+        displayName: 'Fresh User',
+      });
+
+      expect(result.success).toBe(true);
+      const createdUser = await userRepo.findById(newUserId);
+      expect(createdUser).not.toBeNull();
+      expect(createdUser?.id).toBe(newUserId);
+      expect(createdUser?.username).toBe('FreshUser');
+      expect(createdUser?.displayName).toBe('Fresh User');
+      expect(createdUser?.profileBackgroundUrl).toBe(result.cachedPath);
+    });
   });
 
   describe('parseImageDimensions', () => {

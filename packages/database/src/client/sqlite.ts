@@ -2,22 +2,42 @@ import DatabaseConstructor from 'better-sqlite3';
 import type Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { DatabaseError } from '@ririko/core';
-import { dirname } from 'node:path';
-import { mkdirSync } from 'node:fs';
+import { dirname, resolve, isAbsolute } from 'node:path';
+import { mkdirSync, existsSync } from 'node:fs';
 import type { DatabaseConfig, PingResult, SqliteDatabaseClient } from './types.js';
+import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
+
+export function resolveDatabasePath(url: string): string {
+  if (url === ':memory:' || url.startsWith('file::memory:') || url.startsWith('sqlite:')) {
+    return url;
+  }
+  if (isAbsolute(url)) {
+    return url;
+  }
+  // Walk up from cwd to find workspace root (pnpm-workspace.yaml or .git)
+  let curr = process.cwd();
+  while (curr !== dirname(curr)) {
+    if (existsSync(resolve(curr, 'pnpm-workspace.yaml')) || existsSync(resolve(curr, '.git'))) {
+      return resolve(curr, url);
+    }
+    curr = dirname(curr);
+  }
+  return resolve(url);
+}
 
 export function createSqliteClient(config: DatabaseConfig): SqliteDatabaseClient {
   try {
-    const isMemory = config.url === ':memory:' || config.url.startsWith('file::memory:');
+    const resolvedUrl = resolveDatabasePath(config.url);
+    const isMemory = resolvedUrl === ':memory:' || resolvedUrl.startsWith('file::memory:');
     if (!isMemory) {
       // Ensure parent directory exists for file-based SQLite databases
-      const dir = dirname(config.url);
+      const dir = dirname(resolvedUrl);
       if (dir && dir !== '.') {
         mkdirSync(dir, { recursive: true });
       }
     }
 
-    const sqlite = new (DatabaseConstructor as unknown as typeof Database)(config.url);
+    const sqlite = new (DatabaseConstructor as unknown as typeof Database)(resolvedUrl);
 
     // Apply performance and safety pragmas
     if (config.foreignKeys !== false) {
@@ -30,6 +50,21 @@ export function createSqliteClient(config: DatabaseConfig): SqliteDatabaseClient
 
     const syncMode = config.synchronous ?? (isMemory ? 'OFF' : 'NORMAL');
     sqlite.pragma(`synchronous = ${syncMode}`);
+
+    // Auto-initialize schema if new/empty database
+    const shouldAutoMigrate =
+      config.autoMigrate === true || (!isMemory && config.autoMigrate !== false);
+    if (shouldAutoMigrate) {
+      const tableCountRow = sqlite
+        .prepare(
+          "SELECT count(*) as count FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+        )
+        .get() as { count: number } | undefined;
+
+      if (!tableCountRow || tableCountRow.count === 0) {
+        sqlite.exec(SQLITE_SCHEMA_DDL);
+      }
+    }
 
     const db = drizzle(sqlite);
 
