@@ -343,7 +343,7 @@
       "epic": "EPIC-006",
       "title": "Multi-Provider AI Core, Fallback Chain & Tool Calling Engine",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["STORY-061"]
     },
@@ -834,7 +834,7 @@
       "parent": "STORY-060",
       "title": "Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0601"],
       "blocks": ["STORY-061"],
       "description": "Implement GeminiProvider with @google/genai SDK, OpenAIProvider with openai SDK, and OllamaProvider with native HTTP fetch, supporting streaming responses and structured JSON function tool calling schemas."

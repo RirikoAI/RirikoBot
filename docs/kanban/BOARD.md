@@ -19,7 +19,6 @@
 | ID | Type | Title | Pts | Parent | Status |
 |---|---|---|---|---|---|
 | `EPIC-006` | Epic | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | Self | 🎯 To Do |
-| `STORY-060` | Story | Multi-Provider AI Core, Fallback Chain & Tool Calling Engine | 5 | `EPIC-006` | 🎯 To Do |
 | `STORY-061` | Story | Persistent Memory, Strict Per-User Context Isolation & Personality Engine | 3 | `EPIC-006` | 🎯 To Do |
 | `STORY-062` | Story | Deterministic Utility Tools, Explicit Clock & Application Security Interceptor | 3 | `EPIC-006` | 🎯 To Do |
 | `STORY-063` | Story | Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite | 2 | `EPIC-006` | 🎯 To Do |
@@ -34,6 +33,8 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) |
+| `STORY-060` | Story | Multi-Provider AI Core, Fallback Chain & Tool Calling Engine | 5 | `EPIC-006` | [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) |
 | `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | [TASK-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0601.md) |
 | `TASK-0530` | Task | Lavalink v4 Backend Integration, Autoinstall Script & LavaSrc Setup | 8 | `STORY-050` | [TASK-0530.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0530.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | `STORY-050` | [BUG-0002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0002.md) |
@@ -137,7 +138,7 @@
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | 🎯 To Do | `TASK-0601` |
+| `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | ✅ Done | `TASK-0601` |
 | `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | 🎯 To Do | `STORY-060` |
 | `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | 🎯 To Do | `TASK-0611` |
 | `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | 🎯 To Do | `STORY-061` |
