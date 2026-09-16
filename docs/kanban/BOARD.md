@@ -8,7 +8,7 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
-| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | [TASK-0611.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0611.md) |
+| `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | [TASK-0612.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0612.md) |
 
 ---
 
@@ -35,6 +35,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | [TASK-0611.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0611.md) |
 | `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) |
 | `STORY-060` | Story | Multi-Provider AI Core, Fallback Chain & Tool Calling Engine | 5 | `EPIC-006` | [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) |
 | `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | [TASK-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0601.md) |

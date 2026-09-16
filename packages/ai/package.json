@@ -25,6 +25,10 @@
     "./providers": {
       "types": "./dist/providers/index.d.ts",
       "import": "./dist/providers/index.js"
+    },
+    "./memory": {
+      "types": "./dist/memory/index.d.ts",
+      "import": "./dist/memory/index.js"
     }
   },
   "scripts": {
@@ -36,6 +40,7 @@
   "dependencies": {
     "@google/genai": "^2.22.0",
     "@ririko/core": "workspace:*",
+    "@ririko/database": "workspace:*",
     "openai": "^7.17.0",
     "zod": "^3.24.2"
   },
