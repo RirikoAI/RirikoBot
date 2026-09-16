@@ -8,7 +8,7 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Parent | Target Package |
 |---|---|---|---|---|---|
-| `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | `apps/bot` |
+| `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | `apps/bot` |
 
 ---
 
@@ -101,6 +101,7 @@
 | `TASK-0511` | Task | Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping | 3 | `STORY-051` | [TASK-0511.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0511.md) |
 | `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | [TASK-0512.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0512.md) |
 | `STORY-051` | Story | Voice Lifecycle, Audio Player Core & Queue Engine | 5 | `EPIC-005` | [STORY-051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-051.md) |
+| `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | [TASK-0521.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0521.md) |
 
 ---
 
@@ -127,8 +128,8 @@
 | `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | ✅ Done | `TASK-0501` |
 | `TASK-0511` | Task | Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping | 3 | `STORY-051` | ✅ Done | `STORY-050` |
 | `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | ✅ Done | `TASK-0511` |
-| `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | ⚡ In Progress | `STORY-051` |
-| `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | 🎯 To Do | `TASK-0521` |
+| `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | ✅ Done | `STORY-051` |
+| `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | ⚡ In Progress | `TASK-0521` |
 
 ### 🛠️ Groomed Tasks for EPIC-004
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |

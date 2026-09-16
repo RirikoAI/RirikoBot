@@ -3,6 +3,7 @@ import {
   getBotInfo,
   createBotServices,
   createEconomyCommands,
+  createMusicCommands,
   registerMessageListener,
   registerVoiceListener,
 } from './index.js';
@@ -80,6 +81,11 @@ export async function main(): Promise<void> {
   const services = await createBotServices();
   const economyCommands = createEconomyCommands(services);
   for (const cmd of economyCommands) {
+    router.registry.register(cmd);
+  }
+
+  const musicCommands = createMusicCommands(services);
+  for (const cmd of musicCommands) {
     router.registry.register(cmd);
   }
 

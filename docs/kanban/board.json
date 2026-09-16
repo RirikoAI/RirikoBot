@@ -708,7 +708,7 @@
       "parent": "STORY-052",
       "title": "Dual-Dispatch Music Commands Suite (17 Commands)",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["STORY-051"],
       "blocks": ["TASK-0522"],
       "description": "17 dual-dispatch music commands with slash and prefix parity (/play, /pause, /resume, /skip, /back, /stop, /queue, /nowplaying, /volume, /loop, /shuffle, /seek, /filter, /lyrics, /join, /leave, /playlist)."
@@ -718,7 +718,7 @@
       "parent": "STORY-052",
       "title": "Reactive Embed Controller & Interactive Button Matrix (Zero Polling)",
       "points": 1,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": ["TASK-0521"],
       "blocks": ["EPIC-011"],
       "description": "Dynamic #music controller embed with responsive 2-row ActionRow buttons (Play/Pause, Skip, Stop, Loop, Volume) updating purely on player/interaction events without setInterval polling."
