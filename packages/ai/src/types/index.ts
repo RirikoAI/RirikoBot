@@ -9,9 +9,9 @@ export interface ToolCall {
 export interface ChatMessage {
   role: ChatRole;
   content: string;
-  name?: string;
-  toolCalls?: ToolCall[];
-  toolCallId?: string;
+  name?: string | undefined;
+  toolCalls?: ToolCall[] | undefined;
+  toolCallId?: string | undefined;
 }
 
 export interface ToolDefinition {
@@ -22,33 +22,33 @@ export interface ToolDefinition {
 
 export interface UserContext {
   userId: string;
-  guildId?: string;
-  channelId?: string;
-  username?: string;
-  displayName?: string;
+  guildId?: string | undefined;
+  channelId?: string | undefined;
+  username?: string | undefined;
+  displayName?: string | undefined;
 }
 
 export interface ChatRequest {
   messages: ChatMessage[];
-  model?: string;
-  systemInstruction?: string;
-  temperature?: number;
-  maxOutputTokens?: number;
-  tools?: ToolDefinition[];
-  toolChoice?: 'auto' | 'none' | 'required';
-  userContext?: UserContext;
+  model?: string | undefined;
+  systemInstruction?: string | undefined;
+  temperature?: number | undefined;
+  maxOutputTokens?: number | undefined;
+  tools?: ToolDefinition[] | undefined;
+  toolChoice?: ('auto' | 'none' | 'required') | undefined;
+  userContext?: UserContext | undefined;
 }
 
 export interface ChatToken {
   text: string;
   isFinished: boolean;
-  toolCalls?: ToolCall[];
+  toolCalls?: ToolCall[] | undefined;
 }
 
 export interface TokenUsage {
-  promptTokens?: number;
-  completionTokens?: number;
-  totalTokens?: number;
+  promptTokens?: number | undefined;
+  completionTokens?: number | undefined;
+  totalTokens?: number | undefined;
 }
 
 export type FinishReason = 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'error';
@@ -57,16 +57,16 @@ export interface ChatResponse {
   content: string;
   model: string;
   provider: string;
-  toolCalls?: ToolCall[];
-  usage?: TokenUsage;
-  finishReason?: FinishReason;
+  toolCalls?: ToolCall[] | undefined;
+  usage?: TokenUsage | undefined;
+  finishReason?: FinishReason | undefined;
 }
 
 export interface ProviderHealth {
   healthy: boolean;
-  latencyMs?: number;
-  error?: string;
-  models?: string[];
+  latencyMs?: number | undefined;
+  error?: string | undefined;
+  models?: string[] | undefined;
 }
 
 export interface ChatModelProvider {
