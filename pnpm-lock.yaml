@@ -112,6 +112,9 @@ importers:
       '@ririko/core':
         specifier: workspace:*
         version: link:../core
+      '@ririko/database':
+        specifier: workspace:*
+        version: link:../database
       openai:
         specifier: ^7.17.0
         version: 7.17.0(undici@7.29.1)(ws@8.21.3)(zod@3.25.76)
