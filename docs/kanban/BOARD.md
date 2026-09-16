@@ -16,7 +16,12 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No tickets currently in To Do. Epic backlog ready for grooming.*
+| ID | Type | Title | Pts | Parent | Status |
+|---|---|---|---|---|---|
+| `EPIC-006` | Epic | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | Self | 🎯 To Do |
+| `STORY-061` | Story | Persistent Memory, Strict Per-User Context Isolation & Personality Engine | 3 | `EPIC-006` | 🎯 To Do |
+| `STORY-062` | Story | Deterministic Utility Tools, Explicit Clock & Application Security Interceptor | 3 | `EPIC-006` | 🎯 To Do |
+| `STORY-063` | Story | Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite | 2 | `EPIC-006` | 🎯 To Do |
 
 ---
 
@@ -28,6 +33,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) |
+| `STORY-060` | Story | Multi-Provider AI Core, Fallback Chain & Tool Calling Engine | 5 | `EPIC-006` | [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) |
+| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | [TASK-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0601.md) |
 | `TASK-0530` | Task | Lavalink v4 Backend Integration, Autoinstall Script & LavaSrc Setup | 8 | `STORY-050` | [TASK-0530.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0530.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | `STORY-050` | [BUG-0002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0002.md) |
 | `TASK-0507` | Task | LavaSrc Precision Audio Mirroring (ISRC, Duration Guard & Candidate Scoring) | 3 | `STORY-050` | [TASK-0507.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0507.md) |
@@ -119,13 +127,24 @@
 ## 📋 Product Backlog (Future Epics & Stories)
 | ID | Title | Est. Pts | Prerequisites | Target Phase |
 |---|---|---|---|---|
-| `EPIC-006` | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-007` | Moderation 2.0 with Escalation & AutoMod | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-008` | Streamer Notifications & Free Games Announcer | 8 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
 | `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | 21 | `EPIC-002`, `EPIC-004` | Phase 5 |
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 6 |
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7 |
+
+### 🛠️ Groomed Tasks for EPIC-006
+| ID | Type | Title | Pts | Parent | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | ✅ Done | `EPIC-002`, `EPIC-003` |
+| `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | ✅ Done | `TASK-0601` |
+| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | 🎯 To Do | `STORY-060` |
+| `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | 🎯 To Do | `TASK-0611` |
+| `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | 🎯 To Do | `STORY-061` |
+| `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | 🎯 To Do | `TASK-0621` |
+| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | `STORY-063` | 🎯 To Do | `STORY-062` |
+| `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | `STORY-063` | 🎯 To Do | `TASK-0631` |
 
 ### 🛠️ Groomed Tasks for EPIC-005
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
@@ -135,7 +154,7 @@
 | `TASK-0503` | Task | YouTube PO-Token Automation: CLI Generator & In-Process Background Provider | 3 | `STORY-050` | ✅ Done | `TASK-0502` |
 | `TASK-0504` | Task | Playwright Firefox YouTube Credential Harvester | 3 | `STORY-050` | ✅ Done | `TASK-0503` |
 | `TASK-0505` | Task | Chrome/Chromium Browser Harvester (Playwright Chrome & Anti-Detection) | 2 | `STORY-050` | ✅ Done | `TASK-0504` |
-| `TASK-0506` | Task | Spotify Web API Integration & Bridge Overhaul (Scrap go-librespot) | 3 | `STORY-050` | ⚡ In Progress | `TASK-0505` |
+| `TASK-0506` | Task | Spotify Web API Integration & Bridge Overhaul (Scrap go-librespot) | 3 | `STORY-050` | ✅ Done | `TASK-0505` |
 | `TASK-0511` | Task | Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping | 3 | `STORY-051` | ✅ Done | `STORY-050` |
 | `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | ✅ Done | `TASK-0511` |
 | `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | ✅ Done | `STORY-051` |

@@ -61,7 +61,7 @@
       "id": "EPIC-006",
       "title": "AI Chatbot 2.0 with Context Isolation & Safe Tools",
       "points": 13,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Dedicated #ririko-ai channel, per-user memory isolation, explicit time tool, safe tool allowlist."
@@ -336,6 +336,42 @@
       "points": 3,
       "status": "DONE",
       "requires": ["STORY-051"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-060",
+      "epic": "EPIC-006",
+      "title": "Multi-Provider AI Core, Fallback Chain & Tool Calling Engine",
+      "points": 5,
+      "status": "DONE",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["STORY-061"]
+    },
+    {
+      "id": "STORY-061",
+      "epic": "EPIC-006",
+      "title": "Persistent Memory, Strict Per-User Context Isolation & Personality Engine",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["STORY-060"],
+      "blocks": ["STORY-062"]
+    },
+    {
+      "id": "STORY-062",
+      "epic": "EPIC-006",
+      "title": "Deterministic Utility Tools, Explicit Clock & Application Security Interceptor",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["STORY-061"],
+      "blocks": ["STORY-063"]
+    },
+    {
+      "id": "STORY-063",
+      "epic": "EPIC-006",
+      "title": "Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-062"],
       "blocks": ["EPIC-011"]
     }
   ],
@@ -782,6 +818,86 @@
       "requires": ["STORY-050"],
       "blocks": [],
       "description": "Migrate audio streaming core to Lavalink v4 + LavaSrc with an autoinstall setup script, preserving 100% command and embed controller compatibility."
+    },
+    {
+      "id": "TASK-0601",
+      "parent": "STORY-060",
+      "title": "packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["TASK-0602"],
+      "description": "Initialize packages/ai workspace package with ChatModelProvider interface, ChatRequest/ChatResponse types, token streaming primitives, and FallbackChainManager for 429 quota/timeout auto-failover."
+    },
+    {
+      "id": "TASK-0602",
+      "parent": "STORY-060",
+      "title": "Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-0601"],
+      "blocks": ["STORY-061"],
+      "description": "Implement GeminiProvider with @google/genai SDK, OpenAIProvider with openai SDK, and OllamaProvider with native HTTP fetch, supporting streaming responses and structured JSON function tool calling schemas."
+    },
+    {
+      "id": "TASK-0611",
+      "parent": "STORY-061",
+      "title": "AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-060"],
+      "blocks": ["TASK-0612"],
+      "description": "Build AiRepository over ai_conversations and ai_messages schemas in PostgreSQL and SQLite, enforcing strict (guild_id, user_id, channel_id) isolation to prevent memory leakage across users in shared channels, with sliding-window truncation."
+    },
+    {
+      "id": "TASK-0612",
+      "parent": "STORY-061",
+      "title": "Personality Engine, System Safety Prompts & Sanitized Identity Ingestion",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["TASK-0611"],
+      "blocks": ["STORY-062"],
+      "description": "Implement personality engine with customizable guild personas (ai_guild_preferences) separated from immutable system safety instructions, and sanitize user identity tokens (username, display name, guild name) to prevent prompt injection."
+    },
+    {
+      "id": "TASK-0621",
+      "parent": "STORY-062",
+      "title": "Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["STORY-061"],
+      "blocks": ["TASK-0622"],
+      "description": "Implement get_current_time tool resolving user timezone -> guild timezone -> UTC, alongside anime search, coinflip, and reminder tool definitions with strict Zod argument schemas."
+    },
+    {
+      "id": "TASK-0622",
+      "parent": "STORY-062",
+      "title": "Application Security Interceptor & Discord Permission-Mediated Tool Calling",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["TASK-0621"],
+      "blocks": ["STORY-063"],
+      "description": "Implement security mediation layer ensuring the LLM is never the security boundary: verify caller Discord permissions, module toggle state, bot permissions, and role hierarchy before executing music.play or economy balance checks."
+    },
+    {
+      "id": "TASK-0631",
+      "parent": "STORY-063",
+      "title": "Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["STORY-062"],
+      "blocks": ["TASK-0632"],
+      "description": "Implement messageCreate gateway event listener for dedicated #ririko-ai channel (zero prefix/mention required) and non-dedicated mention trigger, with typing indicators and debounced streaming message edits (max 1 edit/1.5s) to avoid Discord rate limits."
+    },
+    {
+      "id": "TASK-0632",
+      "parent": "STORY-063",
+      "title": "Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["TASK-0631"],
+      "blocks": ["EPIC-011"],
+      "description": "Implement dual-dispatch slash and prefix AI command suite with autocomplete for models/providers, admin configuration commands, session clear, and comprehensive end-to-end integration test coverage."
     }
   ],
   "chores": [

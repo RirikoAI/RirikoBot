@@ -5,6 +5,7 @@
     { "path": "./packages/database" },
     { "path": "./packages/discord" },
     { "path": "./packages/music" },
+    { "path": "./packages/ai" },
     { "path": "./packages/services" },
     { "path": "./apps/cli" },
     { "path": "./apps/bot" }
