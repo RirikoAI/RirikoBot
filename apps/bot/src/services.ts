@@ -13,9 +13,16 @@ import {
   ModerationRepository,
   StreamRepository,
   FreeGameRepository,
+  GiveawayRepository,
   type DatabaseClient,
 } from '@ririko/database';
-import type { Client } from 'discord.js';
+import {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  type ButtonStyle,
+  type Client,
+} from 'discord.js';
 import { MusicPlayerService } from '@ririko/music';
 import {
   ConversationManager,
@@ -62,6 +69,7 @@ import {
   FreeGamesEngine,
   EpicGamesProvider,
   SteamFreeGamesProvider,
+  GiveawayEngine,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -81,9 +89,11 @@ export interface BotServices {
   moderationRepo: ModerationRepository;
   streamRepo: StreamRepository;
   freeGameRepo: FreeGameRepository;
+  giveawayRepo: GiveawayRepository;
   streamWatcher: StreamWatcherEngine;
   streamDispatcher: StreamNotificationDispatcher | undefined;
   freeGamesEngine: FreeGamesEngine;
+  giveawayEngine: GiveawayEngine;
   musicPlayer: MusicPlayerService;
   economyService: EconomyService;
   bankingService: BankingService;
@@ -374,6 +384,51 @@ export async function createBotServices(
     },
   });
 
+  // Giveaways Engine
+  const giveawayRepo = new GiveawayRepository(db);
+  const giveawayEngine: GiveawayEngine = new GiveawayEngine(giveawayRepo, {
+    onGiveawayEnded: async (result) => {
+      if (!discordClient) return;
+      try {
+        const giveaway = result.giveaway;
+        const channel = await discordClient.channels.fetch(giveaway.channelId).catch(() => null);
+        if (channel && channel.isTextBased() && 'messages' in channel) {
+          const msg = await (channel as any).messages.fetch(giveaway.messageId).catch(() => null);
+          const entryCount = await giveawayRepo.getEntryCount(giveaway.id);
+          const embedData = giveawayEngine.formatGiveawayEmbed(giveaway, entryCount, result.winnerIds);
+          const buttonData = giveawayEngine.formatGiveawayButton(giveaway.id, true, entryCount);
+          const embed = new EmbedBuilder(embedData);
+          const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setCustomId(buttonData.customId)
+              .setLabel(buttonData.label)
+              .setStyle(buttonData.style as ButtonStyle)
+              .setDisabled(true)
+              .setEmoji(buttonData.emoji),
+          );
+          if (msg) {
+            await msg.edit({ embeds: [embed], components: [row] }).catch(() => null);
+          }
+
+          const winnerText = result.winnerIds.length > 0
+            ? result.winnerIds.map((id) => `<@${id}>`).join(', ')
+            : 'None (No eligible entries)';
+          if (result.winnerIds.length > 0) {
+            await (channel as any).send({
+              content: `🎉 Congratulations ${winnerText}! You won **${giveaway.prize}**!\n${msg ? msg.url : ''}`,
+            }).catch(() => null);
+          } else {
+            await (channel as any).send({
+              content: `⚠️ Giveaway for **${giveaway.prize}** has ended with no eligible winners.`,
+            }).catch(() => null);
+          }
+        }
+      } catch (err) {
+        console.error(`[GiveawayEngine] onGiveawayEnded failed for ${result.giveaway.id}:`, err);
+      }
+    },
+  });
+
   return {
     db,
     eventBus,
@@ -390,9 +445,11 @@ export async function createBotServices(
     moderationRepo,
     streamRepo,
     freeGameRepo,
+    giveawayRepo,
     streamWatcher,
     streamDispatcher,
     freeGamesEngine,
+    giveawayEngine,
     musicPlayer,
     economyService,
     bankingService,
