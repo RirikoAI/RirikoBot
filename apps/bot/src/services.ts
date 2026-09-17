@@ -10,6 +10,7 @@ import {
   PlayerEnergyRepository,
   MusicRepository,
   AiRepository,
+  ModerationRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import { MusicPlayerService } from '@ririko/music';
@@ -36,6 +37,14 @@ import {
   ProfileCardRenderer,
   AntiSpamEvaluator,
   VoiceSessionAccumulator,
+  PermissionService,
+  ModerationActionService,
+  ModerationLogService,
+  DisciplinaryHistoryService,
+  WarningEscalationService,
+  PurgeService,
+  AutoModService,
+  AntiRaidService,
 } from '@ririko/services';
 
 export interface BotServices {
@@ -51,6 +60,7 @@ export interface BotServices {
   playerEnergyRepo: PlayerEnergyRepository;
   musicRepo: MusicRepository;
   aiRepo: AiRepository;
+  moderationRepo: ModerationRepository;
   musicPlayer: MusicPlayerService;
   economyService: EconomyService;
   bankingService: BankingService;
@@ -68,6 +78,14 @@ export interface BotServices {
   securityInterceptor: ToolSecurityInterceptor;
   toolExecutor: MediatedToolExecutor;
   fallbackChainManager: FallbackChainManager;
+  permissionService: PermissionService;
+  moderationActionService: ModerationActionService;
+  moderationLogService: ModerationLogService;
+  disciplinaryHistoryService: DisciplinaryHistoryService;
+  warningEscalationService: WarningEscalationService;
+  purgeService: PurgeService;
+  autoModService: AutoModService;
+  antiRaidService: AntiRaidService;
 }
 
 /**
@@ -207,6 +225,43 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
   );
   const fallbackChainManager = new FallbackChainManager(aiProviders);
 
+  // Moderation Subsystems
+  const moderationRepo = new ModerationRepository(db);
+  const permissionService = new PermissionService(guildSettingsRepo);
+  const moderationActionService = new ModerationActionService(
+    permissionService,
+    moderationRepo,
+    eventBus,
+  );
+  const moderationLogService = new ModerationLogService(
+    moderationRepo,
+    guildSettingsRepo,
+    eventBus,
+  );
+  const disciplinaryHistoryService = new DisciplinaryHistoryService(moderationRepo);
+  const warningEscalationService = new WarningEscalationService(
+    moderationRepo,
+    permissionService,
+    moderationActionService,
+    eventBus,
+  );
+  const purgeService = new PurgeService(
+    permissionService,
+    moderationRepo,
+    eventBus,
+  );
+  const autoModService = new AutoModService(
+    moderationRepo,
+    moderationActionService,
+    warningEscalationService,
+    eventBus,
+  );
+  const antiRaidService = new AntiRaidService(
+    moderationRepo,
+    moderationActionService,
+    eventBus,
+  );
+
   return {
     db,
     eventBus,
@@ -220,6 +275,7 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
     playerEnergyRepo,
     musicRepo,
     aiRepo,
+    moderationRepo,
     musicPlayer,
     economyService,
     bankingService,
@@ -237,5 +293,13 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
     securityInterceptor,
     toolExecutor,
     fallbackChainManager,
+    permissionService,
+    moderationActionService,
+    moderationLogService,
+    disciplinaryHistoryService,
+    warningEscalationService,
+    purgeService,
+    autoModService,
+    antiRaidService,
   };
 }
