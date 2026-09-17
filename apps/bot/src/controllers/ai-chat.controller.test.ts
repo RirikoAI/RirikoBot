@@ -21,24 +21,38 @@ class MockAiProvider implements ChatModelProvider {
   public responseText = 'Hello from Ririko AI!';
   public responseToolCalls?: ToolCall[];
   public streamTokens: string[] = ['Hello', ' from', ' Ririko', ' AI!'];
+  public synthesisText?: string;
+  public recordedRequests: ChatRequest[] = [];
 
-  async generate(_request: ChatRequest): Promise<ChatResponse> {
+  async generate(request: ChatRequest): Promise<ChatResponse> {
+    this.recordedRequests.push(request);
+    const isSynthesis = !request.tools && request.messages.some((m) => m.role === 'tool');
+    const content = isSynthesis && this.synthesisText !== undefined ? this.synthesisText : this.responseText;
+
     return {
-      content: this.responseText,
+      content,
       model: 'mock-model',
       provider: 'mock-provider',
-      toolCalls: this.responseToolCalls,
+      toolCalls: request.tools ? this.responseToolCalls : undefined,
     };
   }
 
-  async *stream(_request: ChatRequest): AsyncIterable<ChatToken> {
+  async *stream(request: ChatRequest): AsyncIterable<ChatToken> {
+    this.recordedRequests.push(request);
+    const isSynthesis = !request.tools && request.messages.some((m) => m.role === 'tool');
+
+    if (isSynthesis && this.synthesisText !== undefined) {
+      yield { text: this.synthesisText, isFinished: true };
+      return;
+    }
+
     for (let i = 0; i < this.streamTokens.length; i++) {
       const text = this.streamTokens[i]!;
       const isFinished = i === this.streamTokens.length - 1;
       yield {
         text,
         isFinished,
-        toolCalls: isFinished ? this.responseToolCalls : undefined,
+        toolCalls: isFinished && request.tools ? this.responseToolCalls : undefined,
       };
     }
   }
@@ -73,12 +87,18 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       CREATE TABLE guild_settings (
         guild_id TEXT PRIMARY KEY,
         prefix TEXT NOT NULL DEFAULT '!',
-        language TEXT NOT NULL DEFAULT 'en',
+        locale TEXT NOT NULL DEFAULT 'en-US',
         timezone TEXT NOT NULL DEFAULT 'UTC',
-        welcome_channel_id TEXT,
-        leave_channel_id TEXT,
+        ai_channel_id TEXT,
         log_channel_id TEXT,
-        autorole_id TEXT,
+        music_channel_id TEXT,
+        welcomer_channel_id TEXT,
+        welcomer_enabled INTEGER NOT NULL DEFAULT 0,
+        welcomer_bg TEXT,
+        farewell_channel_id TEXT,
+        farewell_enabled INTEGER NOT NULL DEFAULT 0,
+        farewell_bg TEXT,
+        karma_notifications_enabled INTEGER NOT NULL DEFAULT 1,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );
@@ -124,6 +144,15 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         timezone TEXT NOT NULL DEFAULT 'UTC',
         language_preference TEXT NOT NULL DEFAULT 'en'
       );
+
+      CREATE TABLE economy_balances (
+        user_id TEXT PRIMARY KEY,
+        wallet_balance INTEGER NOT NULL DEFAULT 0,
+        bank_balance INTEGER NOT NULL DEFAULT 0,
+        bank_capacity INTEGER NOT NULL DEFAULT 10000,
+        net_worth INTEGER NOT NULL DEFAULT 0,
+        updated_at INTEGER NOT NULL
+      );
     `);
 
     services = await createBotServices(dbClient);
@@ -137,6 +166,7 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
 
     controller = new AiChatController(mockClient, services, {
       minEditIntervalMs: 20, // fast edits for testing
+      defaultPrefix: '$',
     });
   });
 
@@ -147,6 +177,7 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
     userId?: string;
     isBot?: boolean;
     mentionsBot?: boolean;
+    voiceChannelId?: string | null;
   }): {
     message: Message;
     replyMsg: { id: string; content: string; edit: ReturnType<typeof vi.fn> };
@@ -179,7 +210,17 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       content: options.content,
       channelId: options.channelId ?? 'channel-general',
       channel: mockChannel,
-      guild: options.guildId !== null ? { id: options.guildId ?? 'guild-1', name: 'Test Guild' } : null,
+      guild: options.guildId !== null ? {
+        id: options.guildId ?? 'guild-1',
+        name: 'Test Guild',
+        voiceAdapterCreator: () => ({}),
+        members: {
+          me: {
+            permissions: { bitfield: 3145728n },
+            roles: { highest: { position: 99 } },
+          },
+        },
+      } : null,
       author: {
         id: options.userId ?? 'user-alice',
         username: 'Alice',
@@ -190,6 +231,9 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         permissions: { bitfield: 3145728n },
         roles: { highest: { position: 10 } },
         joinedAt: new Date('2025-01-01'),
+        voice: {
+          channelId: options.voiceChannelId ?? null,
+        },
       },
       mentions: {
         has: (id: string) => mentionsSet.has(id),
@@ -271,6 +315,65 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         content: expect.stringContaining('Konnichiwa! I am Ririko!'),
       });
     });
+
+    it('completely ignores messages starting with command prefix in dedicated channel', async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ririko-ai');
+
+      const { message } = createMockMessage({
+        content: '$balance',
+        channelId: 'channel-ririko-ai',
+        mentionsBot: false,
+      });
+
+      const handled = await controller.handleAiMessage(message);
+      expect(handled).toBe(false);
+      expect(message.reply).not.toHaveBeenCalled();
+    });
+
+    it('completely ignores default prefix (!) as well in dedicated channel', async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ririko-ai');
+
+      const { message } = createMockMessage({
+        content: '!help',
+        channelId: 'channel-ririko-ai',
+        mentionsBot: false,
+      });
+
+      const handled = await controller.handleAiMessage(message);
+      expect(handled).toBe(false);
+      expect(message.reply).not.toHaveBeenCalled();
+    });
+
+    it('completely ignores prefix commands when bot is mentioned', async () => {
+      const { message } = createMockMessage({
+        content: '<@bot-ririko-999> $balance',
+        channelId: 'channel-general',
+        mentionsBot: true,
+      });
+
+      const handled = await controller.handleAiMessage(message);
+      expect(handled).toBe(false);
+      expect(message.reply).not.toHaveBeenCalled();
+    });
+
+    it('respects dynamic custom guild prefix from guild settings', async () => {
+      await services.aiRepo.setAiChannel('guild-custom', 'channel-custom-ai');
+      await services.guildSettingsRepo.create({
+        guildId: 'guild-custom',
+        prefix: '?',
+      });
+
+      const { message } = createMockMessage({
+        content: '?rank',
+        guildId: 'guild-custom',
+        channelId: 'channel-custom-ai',
+        mentionsBot: false,
+      });
+
+      const handled = await controller.handleAiMessage(message);
+      expect(handled).toBe(false);
+      expect(message.reply).not.toHaveBeenCalled();
+    });
   });
 
   describe('2. Debounced Streaming & Edits', () => {
@@ -323,7 +426,7 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
   });
 
   describe('4. Tool Calling Integration', () => {
-    it('executes tool calls and appends structured tool summaries', async () => {
+    it('executes tool calls once and synthesizes natural language response', async () => {
       await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
 
       mockProvider.responseToolCalls = [
@@ -333,6 +436,46 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
           arguments: { timezone: 'UTC' },
         },
       ];
+      // Streaming initially emits tool calls with empty text
+      mockProvider.streamTokens = [''];
+      mockProvider.synthesisText = 'The current time in UTC is 8:44 AM!';
+
+      const { message, edits } = createMockMessage({
+        content: 'What time is it in UTC?',
+        channelId: 'channel-ai',
+      });
+
+      await controller.handleAiMessage(message);
+
+      // Intermediate edit showed tool execution status
+      expect(edits).toContain('🔧 *Using get_current_time...*');
+      // Final edit contains the synthesized natural response
+      const finalContent = edits[edits.length - 1];
+      expect(finalContent).toBe('The current time in UTC is 8:44 AM!');
+
+      // Verify that tool call was executed only once (synthesis request received exactly 1 tool result)
+      const synthesisReq = mockProvider.recordedRequests.find(
+        (r) => !r.tools && r.messages.some((m) => m.role === 'tool'),
+      );
+      expect(synthesisReq).toBeDefined();
+      const toolMessages = synthesisReq?.messages.filter((m) => m.role === 'tool');
+      expect(toolMessages).toHaveLength(1);
+      expect(toolMessages?.[0]?.toolCallId).toBe('call-clock-1');
+    });
+
+    it('falls back to clean formatted markdown when LLM synthesis fails', async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
+
+      mockProvider.responseToolCalls = [
+        {
+          id: 'call-clock-1',
+          name: 'get_current_time',
+          arguments: { timezone: 'UTC' },
+        },
+      ];
+      mockProvider.streamTokens = [''];
+      mockProvider.synthesisText = '';
+      mockProvider.responseText = '';
 
       const { message, edits } = createMockMessage({
         content: 'What time is it in UTC?',
@@ -342,8 +485,143 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       await controller.handleAiMessage(message);
 
       const finalContent = edits[edits.length - 1];
-      expect(finalContent).toContain('get_current_time');
+      // Expect clean markdown formatting, never raw JSON
+      expect(finalContent).toContain('🕒 **Current Time**:');
       expect(finalContent).toContain('UTC');
+      expect(finalContent).not.toContain('{"iso":');
+    });
+
+    it('resolves real database balance when economy.check_balance tool is invoked', async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
+
+      // Seed economy balance for user in database
+      await services.economyRepo.create({
+        userId: 'user-sender-1',
+        walletBalance: 250,
+        bankBalance: 500,
+        bankCapacity: 20000,
+        netWorth: 750,
+        updatedAt: new Date(),
+      });
+
+      mockProvider.responseToolCalls = [
+        {
+          id: 'call-economy-1',
+          name: 'economy.check_balance',
+          arguments: {},
+        },
+      ];
+      mockProvider.streamTokens = [''];
+      mockProvider.synthesisText = 'You have 250 credits in your wallet and 500 credits in the bank!';
+
+      const { message, edits } = createMockMessage({
+        content: 'Check my balance please',
+        channelId: 'channel-ai',
+        userId: 'user-sender-1',
+      });
+
+      await controller.handleAiMessage(message);
+
+      const synthesisReq = mockProvider.recordedRequests.find(
+        (r) => !r.tools && r.messages.some((m) => m.role === 'tool'),
+      );
+      expect(synthesisReq).toBeDefined();
+      const toolMessage = synthesisReq?.messages.find((m) => m.role === 'tool');
+      expect(toolMessage).toBeDefined();
+      const toolResult = JSON.parse(toolMessage?.content || '{}');
+      expect(toolResult.wallet).toBe(250);
+      expect(toolResult.bank).toBe(500);
+      expect(toolResult.netWorth).toBe(750);
+      expect(toolResult.message).toContain('250 credits in wallet');
+      expect(edits[edits.length - 1]).toBe('You have 250 credits in your wallet and 500 credits in the bank!');
+    });
+
+    it('reports actionable message when music.play is invoked and user is not in a voice channel', async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
+
+      mockProvider.responseToolCalls = [
+        {
+          id: 'call-music-1',
+          name: 'music.play',
+          arguments: { query: 'Frieren opening song' },
+        },
+      ];
+      mockProvider.streamTokens = [''];
+      mockProvider.synthesisText = 'Please join a voice channel first so I can play music for you!';
+
+      const { message, edits } = createMockMessage({
+        content: 'Please play me the intro song for Frieren',
+        channelId: 'channel-ai',
+        voiceChannelId: null, // Not in voice channel
+      });
+
+      await controller.handleAiMessage(message);
+
+      const synthesisReq = mockProvider.recordedRequests.find(
+        (r) => !r.tools && r.messages.some((m) => m.role === 'tool'),
+      );
+      expect(synthesisReq).toBeDefined();
+      const toolMessage = synthesisReq?.messages.find((m) => m.role === 'tool');
+      expect(toolMessage).toBeDefined();
+      const toolResult = JSON.parse(toolMessage?.content || '{}');
+      expect(toolResult.action).toBe('error');
+      expect(toolResult.message).toContain('connected to a voice channel');
+      expect(edits[edits.length - 1]).toBe('Please join a voice channel first so I can play music for you!');
+    });
+
+    it('queues music through real musicPlayer service when user is in a voice channel', async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
+
+      // Mock musicPlayer.play to simulate queuing
+      const playSpy = vi.spyOn(services.musicPlayer, 'play').mockResolvedValueOnce({
+        type: 'TRACK',
+        track: {
+          title: 'Yuusha',
+          author: 'YOASOBI',
+          url: 'https://www.youtube.com/watch?v=mock-yuusha',
+          duration: 195,
+        } as any,
+        tracksAdded: 1,
+        position: 0,
+      });
+
+      mockProvider.responseToolCalls = [
+        {
+          id: 'call-music-2',
+          name: 'music.play',
+          arguments: { query: 'Frieren opening song' },
+        },
+      ];
+      mockProvider.streamTokens = [''];
+      mockProvider.synthesisText = 'Yatta! I’ve queued “Yuusha” by YOASOBI for you in the music player. ✨';
+
+      const { message, edits } = createMockMessage({
+        content: 'Please play me the intro song for Frieren',
+        channelId: 'channel-ai',
+        voiceChannelId: 'voice-chan-100', // User is in voice channel
+      });
+
+      await controller.handleAiMessage(message);
+
+      expect(playSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          guildId: 'guild-1',
+          voiceChannelId: 'voice-chan-100',
+          query: 'Frieren opening song',
+        }),
+      );
+
+      const synthesisReq = mockProvider.recordedRequests.find(
+        (r) => !r.tools && r.messages.some((m) => m.role === 'tool'),
+      );
+      expect(synthesisReq).toBeDefined();
+      const toolMessage = synthesisReq?.messages.find((m) => m.role === 'tool');
+      expect(toolMessage).toBeDefined();
+      const toolResult = JSON.parse(toolMessage?.content || '{}');
+      expect(toolResult.action).toBe('queued');
+      expect(toolResult.trackTitle).toBe('Yuusha');
+      expect(toolResult.trackUrl).toBe('https://www.youtube.com/watch?v=mock-yuusha');
+      expect(edits[edits.length - 1]).toBe('Yatta! I’ve queued “Yuusha” by YOASOBI for you in the music player. ✨');
     });
   });
 

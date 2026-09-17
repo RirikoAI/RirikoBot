@@ -24,6 +24,12 @@ import {
   GeminiProvider,
   OpenAIProvider,
   OllamaProvider,
+  TimeTool,
+  CoinFlipTool,
+  AnimeSearchTool,
+  ReminderTool,
+  MusicPlayTool,
+  EconomyBalanceTool,
 } from '@ririko/ai';
 import { EventBus } from '@ririko/core';
 import {
@@ -209,21 +215,59 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
   const aiRepo = new AiRepository(db);
   const conversationManager = new ConversationManager({ repository: aiRepo });
   const personalityEngine = new PersonalityEngine();
-  const toolRegistry = ToolRegistry.createDefault();
+  const toolRegistry = new ToolRegistry();
+  toolRegistry.register(new TimeTool());
+  toolRegistry.register(new CoinFlipTool());
+  toolRegistry.register(new AnimeSearchTool());
+  toolRegistry.register(new ReminderTool());
+  toolRegistry.register(new MusicPlayTool());
+  toolRegistry.register(
+    new EconomyBalanceTool(async (userId: string) => {
+      const bal = await economyRepo.findById(userId);
+      if (!bal) return null;
+      return {
+        wallet: bal.walletBalance,
+        bank: bal.bankBalance,
+        netWorth: bal.netWorth,
+      };
+    }),
+  );
   const securityInterceptor = new ToolSecurityInterceptor(toolRegistry);
   const toolExecutor = new MediatedToolExecutor(toolRegistry, securityInterceptor);
 
+  const defaultAiProvider = (
+    process.env.DEFAULT_AI_PROVIDER ||
+    process.env.AI_PROVIDER ||
+    'gemini'
+  ).toLowerCase();
+
   const aiProviders = [];
   if (process.env.GEMINI_API_KEY) {
-    aiProviders.push(new GeminiProvider({ apiKey: process.env.GEMINI_API_KEY }));
+    aiProviders.push(
+      new GeminiProvider({
+        apiKey: process.env.GEMINI_API_KEY,
+        defaultModel: defaultAiProvider === 'gemini' ? process.env.DEFAULT_AI_MODEL : undefined,
+      }),
+    );
   }
   if (process.env.OPENAI_API_KEY) {
-    aiProviders.push(new OpenAIProvider({ apiKey: process.env.OPENAI_API_KEY }));
+    aiProviders.push(
+      new OpenAIProvider({
+        apiKey: process.env.OPENAI_API_KEY,
+        baseURL: process.env.OPENAI_BASE_URL,
+        defaultModel: defaultAiProvider === 'openai' ? process.env.DEFAULT_AI_MODEL : undefined,
+      }),
+    );
   }
   aiProviders.push(
-    new OllamaProvider({ baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434' }),
+    new OllamaProvider({
+      baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
+      defaultModel: defaultAiProvider === 'ollama' ? process.env.DEFAULT_AI_MODEL : undefined,
+    }),
   );
-  const fallbackChainManager = new FallbackChainManager(aiProviders);
+  const fallbackChainManager = new FallbackChainManager(aiProviders, {
+    defaultProviderId: defaultAiProvider,
+  });
 
   // Moderation Subsystems
   const moderationRepo = new ModerationRepository(db);

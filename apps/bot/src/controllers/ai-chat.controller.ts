@@ -1,5 +1,6 @@
-import type { Client, Message } from 'discord.js';
+import type { Client, Message, GuildMember } from 'discord.js';
 import type { BotServices } from '../services.js';
+import type { MusicEmbedController } from './music-embed.controller.js';
 import type {
   ChatMessage,
   ChatRequest,
@@ -8,15 +9,20 @@ import type {
   ToolExecutionContext,
   SecurityExecutionContext,
 } from '@ririko/ai';
+import { formatToolResultFallback } from '@ririko/ai';
 
 export interface AiChatControllerOptions {
   minEditIntervalMs?: number;
+  defaultPrefix?: string;
+  musicController?: MusicEmbedController;
 }
 
 export class AiChatController {
   private readonly client: Client;
   private readonly services: BotServices;
   private readonly minEditIntervalMs: number;
+  private readonly defaultPrefix: string;
+  public readonly musicController: MusicEmbedController | undefined;
   private readonly channelCache = new Map<string, { channelId: string | null; cachedAt: number }>();
   private readonly CACHE_TTL_MS = 60_000; // 1 minute cache for dedicated channel lookups
 
@@ -24,6 +30,21 @@ export class AiChatController {
     this.client = client;
     this.services = services;
     this.minEditIntervalMs = options.minEditIntervalMs ?? 1500;
+    this.defaultPrefix = options.defaultPrefix || process.env.DEFAULT_PREFIX || '$';
+    this.musicController = options.musicController;
+  }
+
+  /**
+   * Resolves the active command prefix for a guild, falling back to defaultPrefix.
+   */
+  async getPrefix(guildId?: string | null): Promise<string> {
+    if (guildId) {
+      const settings = await this.services.guildSettingsRepo.findById(guildId).catch(() => null);
+      if (settings?.prefix) {
+        return settings.prefix;
+      }
+    }
+    return this.defaultPrefix;
   }
 
   /**
@@ -51,6 +72,7 @@ export class AiChatController {
   /**
    * Evaluates incoming message and handles it if sent in dedicated #ririko-ai channel
    * or mentions the bot. Returns true if handled.
+   * Completely ignores any message that begins with the configured command prefix ($ or !).
    */
   async handleAiMessage(message: Message): Promise<boolean> {
     // Ignore bots and direct messages
@@ -61,6 +83,20 @@ export class AiChatController {
     const guildId = message.guild.id;
     const channelId = message.channelId;
     const botId = this.client.user?.id;
+
+    // Check if the message is a prefix command (e.g. $balance, !help).
+    // If so, let CommandRouter handle it exclusively and ignore in AI chat.
+    const prefix = await this.getPrefix(guildId);
+    const content = message.content.trim();
+    if (prefix && content.startsWith(prefix)) {
+      return false;
+    }
+    if (this.defaultPrefix && content.startsWith(this.defaultPrefix)) {
+      return false;
+    }
+    if (content.startsWith('!')) {
+      return false;
+    }
 
     const dedicatedChannelId = await this.getDedicatedChannelId(guildId);
     const isDedicatedChannel = dedicatedChannelId === channelId;
@@ -75,6 +111,17 @@ export class AiChatController {
     let prompt = message.content;
     if (botId) {
       prompt = prompt.replace(new RegExp(`<@!?${botId}>`, 'g'), '').trim();
+    }
+
+    // If message after bot mention still starts with command prefix, ignore it
+    if (prefix && prompt.startsWith(prefix)) {
+      return false;
+    }
+    if (this.defaultPrefix && prompt.startsWith(this.defaultPrefix)) {
+      return false;
+    }
+    if (prompt.startsWith('!')) {
+      return false;
     }
 
     // If empty mention, provide a friendly greeting
@@ -202,6 +249,7 @@ export class AiChatController {
 
       // Attempt streaming first
       const canStream = typeof this.services.fallbackChainManager.stream === 'function';
+      let streamSucceeded = false;
       if (canStream) {
         try {
           const stream = this.services.fallbackChainManager.stream(chatRequest);
@@ -215,13 +263,17 @@ export class AiChatController {
               accumulatedToolCalls.push(...token.toolCalls);
             }
           }
+          if (accumulatedContent || accumulatedToolCalls.length > 0) {
+            streamSucceeded = true;
+          }
         } catch {
-          // Stream failed, will fall back to single generation
+          accumulatedContent = '';
+          accumulatedToolCalls.length = 0;
         }
       }
 
-      // If streaming produced no text, use standard generate
-      if (!accumulatedContent) {
+      // If streaming produced neither text nor tool calls, use standard generate
+      if (!streamSucceeded) {
         const response = await this.services.fallbackChainManager.generate(chatRequest);
         accumulatedContent = response.content;
         if (response.toolCalls && response.toolCalls.length > 0) {
@@ -229,40 +281,177 @@ export class AiChatController {
         }
       }
 
+      // Deduplicate tool calls if any
+      const uniqueToolCalls: ToolCall[] = [];
+      const seenCallKeys = new Set<string>();
+      for (const tc of accumulatedToolCalls) {
+        const key = tc.id || `${tc.name}:${JSON.stringify(tc.arguments)}`;
+        if (!seenCallKeys.has(key)) {
+          seenCallKeys.add(key);
+          uniqueToolCalls.push(tc);
+        }
+      }
+
       // 10. Mediate Tool Calls if emitted
-      if (accumulatedToolCalls.length > 0) {
+      if (uniqueToolCalls.length > 0) {
+        const toolNames = uniqueToolCalls.map((t) => t.name).join(', ');
+        displayedText = `🔧 *Using ${toolNames}...*`;
+        await flushEdit(displayedText, true);
+
+        let member = message.member as GuildMember | null;
+        if (!member && message.guild) {
+          member = await message.guild.members.fetch(message.author.id).catch(() => null);
+        }
+        const voiceChannel = member?.voice?.channel;
+        const voiceChannelPerms = voiceChannel && member ? voiceChannel.permissionsFor(member)?.bitfield : undefined;
+        const userPermissions = voiceChannelPerms ?? member?.permissions?.bitfield;
+
+        const botMember = message.guild?.members?.me ?? (message.guild ? await message.guild.members.fetchMe().catch(() => null) : null);
+        const botVoicePerms = voiceChannel && botMember ? voiceChannel.permissionsFor(botMember)?.bitfield : undefined;
+        const botPermissions = botVoicePerms ?? botMember?.permissions?.bitfield;
+
         const toolContext: SecurityExecutionContext & ToolExecutionContext = {
           userId,
           guildId,
           channelId,
           userTimezone: userPrefs?.timezone,
           guildTimezone: guildSettings?.timezone,
-          userPermissions: message.member?.permissions?.bitfield,
-          botPermissions: message.guild?.members?.me?.permissions?.bitfield,
-          userHighestRolePosition: message.member?.roles?.highest?.position,
-          botHighestRolePosition: message.guild?.members?.me?.roles?.highest?.position,
+          userPermissions,
+          botPermissions,
+          userHighestRolePosition: member?.roles?.highest?.position,
+          botHighestRolePosition: botMember?.roles?.highest?.position,
           allowedTools,
+          getBalance: async (targetId: string) => {
+            const bal = await this.services.economyRepo.findById(targetId);
+            return bal
+              ? { wallet: bal.walletBalance, bank: bal.bankBalance, netWorth: bal.netWorth }
+              : null;
+          },
+          playMusic: async (query: string) => {
+            if (!message.guild) {
+              return {
+                success: false,
+                message: 'Music playback is only available in Discord servers.',
+              };
+            }
+
+            const voiceChannelId =
+              member?.voice?.channelId ??
+              message.guild.voiceStates?.cache?.get(message.author.id)?.channelId;
+            if (!voiceChannelId) {
+              return {
+                success: false,
+                message: 'You need to be connected to a voice channel so I know where to play music! Please join a voice channel and ask me again! 🎵',
+              };
+            }
+
+            try {
+              const result = await this.services.musicPlayer.play({
+                guildId: message.guild.id,
+                voiceChannelId,
+                textChannelId: message.channelId,
+                member: {
+                  id: message.author.id,
+                  username: message.author.username,
+                  avatarUrl: message.author.displayAvatarURL ? message.author.displayAvatarURL() : undefined,
+                },
+                query,
+                adapterCreator: message.guild.voiceAdapterCreator,
+              });
+
+              if (result.type === 'PLAYLIST' && result.playlist) {
+                void this.musicController?.updateController(message.guild.id);
+                return {
+                  success: true,
+                  message: `Successfully queued playlist "${result.playlist.title}" with ${result.tracksAdded} tracks into the music player! (Position: ${result.position === 0 ? 'Now playing' : '#' + result.position})`,
+                  trackTitle: result.playlist.title,
+                  trackUrl: result.playlist.url,
+                  position: result.position,
+                };
+              } else if (result.track) {
+                void this.musicController?.updateController(message.guild.id);
+                return {
+                  success: true,
+                  message: `Successfully queued "${result.track.title}" by ${result.track.artist || 'Unknown'} into the music player! (Position: ${result.position === 0 ? 'Now playing' : '#' + result.position})`,
+                  trackTitle: result.track.title,
+                  trackUrl: result.track.url,
+                  position: result.position,
+                };
+              } else {
+                return {
+                  success: false,
+                  message: `Could not find any playable tracks for "${query}".`,
+                };
+              }
+            } catch (err) {
+              const errorMsg = err instanceof Error ? err.message : String(err);
+              return {
+                success: false,
+                message: `Failed to play music: ${errorMsg}`,
+              };
+            }
+          },
         };
 
         const toolResponses = await this.services.toolExecutor.executeBatch(
-          accumulatedToolCalls,
+          uniqueToolCalls,
           toolContext,
         );
 
-        // Summarize tool execution for user
-        const toolSummaries: string[] = [];
-        for (const tr of toolResponses) {
-          if (tr.success) {
-            toolSummaries.push(`🔧 *[${tr.name}]*: ${JSON.stringify(tr.result)}`);
-          } else {
-            toolSummaries.push(`⚠️ *[${tr.name} Blocked]*: ${tr.error}`);
+        // Follow up with LLM to synthesize natural in-character conversational response
+        const synthesisMessages: ChatMessage[] = [
+          ...chatRequest.messages,
+          {
+            role: 'assistant',
+            content: accumulatedContent || '',
+            toolCalls: uniqueToolCalls,
+          },
+          ...toolResponses.map((tr) => ({
+            role: 'tool' as const,
+            toolCallId: tr.toolCallId,
+            name: tr.name,
+            content: tr.success
+              ? (typeof tr.result === 'string' ? tr.result : JSON.stringify(tr.result))
+              : JSON.stringify({ error: tr.error ?? 'Execution failed' }),
+          })),
+        ];
+
+        const synthesisRequest: ChatRequest = {
+          ...chatRequest,
+          messages: synthesisMessages,
+          tools: undefined, // Disallow further tools to force final response synthesis
+        };
+
+        let synthesizedText = '';
+        try {
+          if (canStream) {
+            try {
+              const synthStream = this.services.fallbackChainManager.stream(synthesisRequest);
+              for await (const token of synthStream) {
+                if (token.text) {
+                  synthesizedText += token.text;
+                  displayedText = synthesizedText;
+                  await flushEdit(synthesizedText, false);
+                }
+              }
+            } catch {
+              synthesizedText = '';
+            }
           }
+
+          if (!synthesizedText) {
+            const synthResponse = await this.services.fallbackChainManager.generate(synthesisRequest);
+            synthesizedText = synthResponse.content;
+          }
+        } catch (err) {
+          console.warn('[AiChatController] LLM synthesis from tool result failed, using formatted fallback:', err);
         }
 
-        if (toolSummaries.length > 0) {
-          accumulatedContent = accumulatedContent
-            ? `${accumulatedContent}\n\n${toolSummaries.join('\n')}`
-            : toolSummaries.join('\n');
+        if (synthesizedText) {
+          accumulatedContent = synthesizedText;
+        } else {
+          // Graceful fallback: clean, human-readable tool summary
+          accumulatedContent = formatToolResultFallback(toolResponses);
         }
       }
 
@@ -281,7 +470,7 @@ export class AiChatController {
         userContext,
         prompt,
         accumulatedContent,
-        accumulatedToolCalls.length > 0 ? { toolCalls: accumulatedToolCalls } : undefined,
+        uniqueToolCalls.length > 0 ? { toolCalls: uniqueToolCalls } : undefined,
       ).catch((err) => {
         console.error('[AiChatController] Failed to record conversation turn:', err);
       });

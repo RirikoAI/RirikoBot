@@ -10,6 +10,18 @@ export interface ToolExecutionContext {
   userPermissions?: bigint | undefined;
   botPermissions?: bigint | undefined;
   isModuleEnabled?: ((moduleName: string) => boolean) | undefined;
+  getBalance?:
+    | ((userId: string) => Promise<{ wallet: number; bank: number; netWorth: number } | null>)
+    | undefined;
+  playMusic?:
+    | ((query: string) => Promise<{
+        success: boolean;
+        message: string;
+        trackTitle?: string | undefined;
+        trackUrl?: string | undefined;
+        position?: number | undefined;
+      }>)
+    | undefined;
 }
 
 export interface SafeTool<TInput = unknown, TOutput = unknown> {
