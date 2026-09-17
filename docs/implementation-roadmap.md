@@ -1,6 +1,7 @@
 # Implementation Roadmap (Ririko AI 2.0.0)
 
 > **Effective Date / Roadmap Start**: September 15, 2026 (`2026-09-15`)  
+> **Current Date**: September 17, 2026 (`2026-09-17`)  
 > **Target Release**: November 2026  
 > **Main Development Branch**: `develop/2.0.0`
 
@@ -11,38 +12,34 @@ gantt
     title Ririko AI 2.0.0 Implementation Roadmap
     dateFormat  YYYY-MM-DD
     section Phase 0: Planning & Specs
-    Discovery & Architectural Specifications   :done, 2026-09-14, 1d
-    ADRs, Specialist Agents & TCG Design Specs :done, 2026-09-15, 1d
-    section Phase 1: Foundation
-    Monorepo Scaffold & pnpm Workspaces        :active, 2026-09-15, 2d
-    Drizzle ORM Dual-Dialect & CLI Doctor      :2026-09-17, 2d
-    Discord Engine & O(1) Command Router       :2026-09-19, 2d
-    section Phase 2: Core Parity
-    Port All 141 Commands & 60 Reactions       :2026-09-21, 3d
-    AVC, Reminders, Free Games, Giveaways      :2026-09-24, 2d
-    Legacy SQLite Migration Runner             :2026-09-26, 2d
-    section Phase 3: Music 2.0
-    Audio Player Core & Multi-Source Extractors:2026-09-28, 3d
-    Reactive Player UI & Queue Persistence     :2026-10-01, 2d
-    section Phase 4: AI & Graphics
-    Multi-Provider AI & Safe Tool Calling      :2026-10-03, 3d
-    Image Generation & @napi-rs/canvas Cards   :2026-10-06, 2d
-    section Phase 5: Safety & Streams
-    Moderation 2.0 Escalation & Auto-Mod       :2026-10-08, 2d
-    Multi-Platform Stream Watcher & Cache      :2026-10-10, 2d
-    section Phase 6: Waifu TCG & Economy
-    Double-Entry Economy, Ledger & Item Shop   :2026-10-12, 2d
-    Waifu Ingestion, Attribution & Deletion    :2026-10-14, 2d
-    8-Tier Rarity, 7-Element Combat & Drops    :2026-10-16, 3d
-    Equipment, Accessories & Consumables       :2026-10-19, 2d
-    Energy Lifecycle & Timed Expeditions       :2026-10-21, 2d
-    PvE Dungeon Engine, Scaling & Seasons      :2026-10-23, 3d
-    Atomic Trading, Marketplace & WaifuGuilds  :2026-10-26, 2d
-    Achievement Engine & TCG Admin CLI         :2026-10-28, 2d
-    section Phase 7: Dashboard & Deploy
-    Next.js 16 Web Dashboard & OAuth2          :2026-10-30, 3d
-    Web TCG Manager, Card Album & Market Portal:2026-11-02, 2d
-    E2E Testing, Containerization & Release    :2026-11-04, 3d
+    Discovery & Architectural Specifications   :done, 2026-09-14, 2026-09-15
+    ADRs, Specialist Agents & TCG Design Specs :done, 2026-09-15, 2026-09-16
+    section Phase 1: Foundation (Built)
+    Monorepo Scaffold & pnpm Workspaces        :done, 2026-09-15, 2026-09-16
+    Drizzle Dual-Dialect ORM & CLI Doctor      :done, 2026-09-16, 2026-09-16
+    Discord Engine & O(1) Command Router       :done, 2026-09-16, 2026-09-16
+    Legacy SQLite Migration Runner             :done, 2026-09-16, 2026-09-16
+    section Phase 2: Accelerated Core
+    Economy 2.0, Ledger & Canvas Rank Card     :done, 2026-09-16, 2026-09-16
+    Music 2.0 Engine, Lavalink v4 & Harvesters :done, 2026-09-16, 2026-09-17
+    AI Chatbot 2.0, Tools & Memory Isolation   :done, 2026-09-17, 2026-09-17
+    Moderation 2.0 Escalation, Cases & AutoMod :done, 2026-09-17, 2026-09-17
+    section Phase 3: Parity & Media Systems
+    Streamer Watchers & Free Games (EPIC-008)  :2026-09-18, 2d
+    Giveaways 2.0, AVC 2.0 & Mini-Games (EPIC-009) :2026-09-20, 3d
+    Media Synthesis, 60 Reactions & AI Img (EPIC-013) :2026-09-23, 3d
+    Server Utilities, AutoRoles & Reminders (EPIC-014) :2026-09-26, 3d
+    section Phase 4: Flagship Waifu TCG
+    Waifu Ingestion, Attribution & Rarity (EPIC-010) :2026-09-29, 3d
+    7-Element Combat Engine & Tactical Status Effects :2026-10-02, 3d
+    Equipment, Accessories, Energy & Potions          :2026-10-05, 3d
+    PvE Seasonal Dungeon Tower & Exponential Scaling  :2026-10-08, 4d
+    Atomic Trading, Marketplace & WaifuGuilds        :2026-10-12, 3d
+    Achievement System & Role Administration         :2026-10-15, 2d
+    section Phase 5: Dashboard & Deployment
+    Next.js 16 Web Dashboard & OAuth2 (EPIC-011)      :2026-10-17, 5d
+    Web TCG Manager, Card Album & Tower Visualizer    :2026-10-22, 4d
+    Quality Gates, Docker Rootless & CI/CD (EPIC-012) :2026-10-26, 4d
 ```
 
 ---
@@ -50,196 +47,143 @@ gantt
 ## Phase Breakdown & Acceptance Criteria
 
 ### Phase 0: Discovery, Architecture & Agent Definitions
-- **Status**: Complete
+- **Status**: ✅ **Complete** (`EPIC-000`, 13 pts)
 - **Deliverables**:
-  - `docs/legacy-feature-inventory.md`
-  - `docs/architecture.md`
-  - `docs/migration-1.x-to-2.0.md`
-  - `docs/dependency-evaluation.md`
-  - `docs/implementation-roadmap.md`
-  - `docs/waifu-tcg.md`
-  - `docs/database.md`, `docs/commands.md`, `docs/economy.md`, `docs/dashboard.md`
-  - `docs/adr/ADR-001` through `ADR-012`
-  - `GEMINI.md`, `AGENTS.md`, and 18 specialist agents in `.gemini/agents/`.
-- **Exit Gate**: All architectural decisions documented and approved.
+  - `docs/legacy-feature-inventory.md` (141 commands & 17 entities audited).
+  - `docs/architecture.md` (Clean architecture, monorepo topology, O(1) command router).
+  - `docs/migration-1.x-to-2.0.md` and `docs/dependency-evaluation.md`.
+  - `docs/waifu-tcg.md` (Comprehensive 15-subsystem flagship specification).
+  - `docs/database.md`, `docs/commands.md`, `docs/economy.md`, `docs/dashboard.md`, `docs/adapters.md`, `docs/ai.md`, `docs/music.md`, `docs/moderation.md`, `docs/modules.md`.
+  - `docs/adr/` (ADR-001 through ADR-012).
+  - `GEMINI.md`, `AGENTS.md`, and 18 specialist agent definitions in `.gemini/agents/`.
+- **Exit Gate**: All architectural decisions documented, approved, and registered in canonical board.
 
 ---
 
 ### Phase 1: Foundation Scaffold & Toolchain
-- **Scope**:
-  - Initialize pnpm workspace with `apps/` and `packages/`.
-  - Implement `packages/core` (Zod config validation, typed event bus, standard error hierarchy).
-  - Implement `packages/database` (Drizzle ORM PostgreSQL & SQLite schemas, connection factory).
-  - Implement `packages/discord` (Slash & Prefix command router with O(1) lookups, middleware pipeline).
-  - Implement `apps/cli` with `ririko doctor` (environment and database diagnostic checks).
+- **Status**: ✅ **Complete** (`EPIC-001`, `EPIC-002`, `EPIC-003`, 55 pts total)
+- **Deliverables**:
+  - `packages/core`: Zod config validation, typed asynchronous `EventBus`, standardized error codes hierarchy.
+  - `packages/database`: Drizzle ORM dual-dialect abstraction (PostgreSQL & SQLite), 70+ normalized table schemas, ACID transaction helpers, and `ririko migrate legacy` CLI runner with `--dry-run` and data verification (`STORY-023`).
+  - `packages/discord`: Discord.js 14 Gateway harness, dual-dispatch command router with O(1) hash map lookups, composable middleware pipeline (permissions, maintenance, cooldowns, rate limits), and interactive dynamic help center (`/help`).
+  - `apps/cli`: Scaffolding with `ririko doctor` comprehensive diagnostic harness.
+  - `apps/bot`: Dev entrypoint and `/ping` diagnostic command (`CHORE-0301`).
 - **Exit Gate**: `pnpm build`, `pnpm typecheck`, and `ririko doctor` run cleanly without errors.
 
 ---
 
-### Phase 2: Core Command Parity & Legacy Migrator
-- **Scope**:
-  - Port all 141 commands with 100% slash/prefix parity.
-  - Implement all 60 anime reaction commands via `packages/services/reactions` with local cache fallback.
-  - Modernize AVC (Auto Voice Channels) with instant cleanup and permission cloning.
-  - Modernize Reminders with persistent timezone-aware scheduler.
-  - Modernize Free Games notifications with Epic Games Store API + Steam Store API.
-  - Modernize Giveaways to database state (surviving bot restarts).
-  - Implement `ririko migrate legacy` CLI runner with `--dry-run` and verification checks.
-- **Exit Gate**: Verified 100% parity with legacy 1.4.0 commands and successful dry-run migration of legacy SQLite.
+### Phase 2: Centralized Economy & Music 2.0 Audio Core
+- **Status**: ✅ **Complete** (`EPIC-004`, `EPIC-005`, 34 pts total)
+- **Deliverables**:
+  - `packages/services/economy`:
+    - Double-entry financial ledger (`economy_transactions`, `economy_balances`) with ACID constraints.
+    - Anti-spam text heuristics and voice participation anti-AFK quorum state machine.
+    - Daily streak multiplier engine (+5%/day up to 30 days, 36h reset grace period).
+    - Transactional banking service (deposit, withdraw, level-scaled capacity, deadlock-free P2P transfers).
+    - Leveling 2.0 progression formula ($5L^2 + 50L + 100$) and materialized leaderboard snapshots for $O(1)$ dense rank queries.
+    - Shop catalog repository, inventory bags, and SSRF-validated custom profile backgrounds.
+    - High-performance 1200x400 `@napi-rs/canvas` Profile Card 2.0 synthesizer.
+    - Dual-dispatch economy command suite (/balance, /daily, /deposit, /withdraw, /pay, /leaderboard, /profile, /shop, /inventory, /use, /karma).
+  - `packages/music`:
+    - Multi-source extractors: YouTube, Spotify (Official Web API + LavaSrc precision matching), SoundCloud, Deezer.
+    - Session cookie rotation, mobile client spoofing, and automated PO-Token background provider with Playwright Chrome/Chromium credential harvester.
+    - Voice lifecycle state machine with 3-minute idle auto-disconnect and audio queue with loop modes and volume clamping (0%–150%).
+    - Lavalink v4 backend integration (`TASK-0530`) with automated installer script.
+    - Reactive embed controller and interactive button matrix updating without `setInterval` polling.
+    - 17 dual-dispatch music commands (/play, /pause, /skip, /back, /stop, /queue, /volume, /loop, /shuffle, /seek, /filter, /lyrics, /join, /leave, /playlist, etc.).
+- **Exit Gate**: 100% verified against unit tests, Playwright audio streams, and Discord Gateway voice events.
 
 ---
 
-### Phase 3: Music 2.0 & Audio Core
-- **Scope**:
-  - Implement audio playback core using `@discordjs/voice` with native Opus transcoding.
-  - Build multi-source resolvers: YouTube, Spotify, SoundCloud, Bandcamp, and direct URLs.
-  - Create interactive now-playing controller with responsive action buttons (Play/Pause, Skip, Back, Loop, Volume, Lyrics).
-  - Eliminate legacy 10-second polling interval; implement pure event-driven embed updates.
-  - Add optional Lavalink 4 adapter for enterprise sharding.
-- **Exit Gate**: Audio streams smoothly across voice channels with zero event-loop blocking and sub-100ms button response latency.
+### Phase 3: AI Chatbot 2.0 & Moderation 2.0
+- **Status**: ✅ **Complete** (`EPIC-006`, `EPIC-007`, 26 pts total)
+- **Deliverables**:
+  - `packages/ai` & `apps/bot/commands/ai`:
+    - Multi-provider AI core supporting Google Gemini (`@google/genai`), OpenAI (`openai`), and local Ollama with automatic failover chain.
+    - Per-user context isolation engine in `ai_conversations` and `ai_messages` preventing prompt/memory leakage across shared channels.
+    - System safety prompts and customizable guild persona engine.
+    - Safe function tool calling with bi-directional name sanitization and security mediation (verifying Discord permissions before tool execution).
+    - Explicit time tool (`get_current_time`) with timezone resolution, anime search, coinflip, and reminder tool definitions.
+    - Dedicated `#ririko-ai` gateway listener with debounced streaming message edits.
+    - Dual-dispatch AI command suite (`/ai chat`, `/ai model`, `/ai channel`, `/ai persona`, `/ai clear`) and `ririko ai:configure` CLI setup wizard (`CHORE-0601`).
+  - `packages/services/moderation` & `apps/bot/commands/moderation`:
+    - 5-tier centralized permission and role hierarchy verification service (`PermissionService`).
+    - Discord punitive actions core (kick, ban, softban, unban, timeout, nick, lock, unlock) with structured results and event bus emission.
+    - Atomic sequential per-guild case numbering (Case #N) with mod log channel dispatches and persistent staff notes.
+    - Dynamic warning escalation engine with threshold mappings and sliding-window expirations.
+    - Disciplinary purge sanitizer supporting multi-filter bulk deletes (user, bots, links, invites) respecting Discord 14-day API limits.
+    - Real-time AutoMod pipeline: invite filter with whitelist, scam/phishing URL shield with homoglyph normalization, mention spam detector, and burst spam limiter.
+    - Anti-raid mass join monitor detecting coordinated account floods.
+    - Dual-dispatch moderation commands suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.).
+- **Exit Gate**: All moderation actions audited, AutoMod filters verified against malicious inputs, and AI chat tests passing.
 
 ---
 
-### Phase 4: AI Chatbot 2.0 & Graphics Synthesis
+### Phase 4: Core Parity & Community Media Systems (Backlog)
 - **Scope**:
-  - Build unified `AiProvider` interface supporting Google Gemini, OpenAI, and local Ollama.
-  - Implement conversational memory with sliding-window context and persistent database sessions.
-  - Implement safe function tool calling (`get_time`, `search_anime`, `queue_song`, `check_balance`) with Zod validation.
-  - Overhaul visual card generation (`RankCard`, `WelcomeCard`, `GoodbyeCard`) using high-speed `@napi-rs/canvas`.
-  - Port and modernize all 11 meme template generators.
-  - Build multi-backend image generation service (Gemini Imagen, ComfyUI, Replicate, HuggingFace).
-- **Exit Gate**: Conversational AI responds with streaming tokens, tool calling triggers successfully, and rank cards render in under 150ms.
+  - **`EPIC-008`: Streamer Notifications & Free Games Announcer (8 pts)**:
+    - `STORY-080`: Multi-platform live stream watcher (Twitch EventSub, YouTube Live PubSubHubbub, TikTok Live) with persistent idempotency keys and local thumbnail CDN re-uploader.
+    - `STORY-081`: Free games announcer for Epic Games Store and Steam promotional specials feed with duplicate suppression.
+  - **`EPIC-009`: Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite (13 pts)**:
+    - `STORY-090`: Crash-resilient database-backed giveaways surviving bot restarts with button entry and role gates.
+    - `STORY-091`: Dynamic "Join to Create" temporary voice channels (Auto Voice 2.0) with permission inheritance and orphan channel cleanup.
+    - `STORY-092`: Interactive Mini-Games Suite: unbeatable Minimax AI Tic-Tac-Toe, Rock Paper Scissors, HighLow card wagering, CoinFlip, and Dice wagers with escrow.
+  - **`EPIC-013`: Media Synthesis, Anime Reactions & AI Image Generation (13 pts)**:
+    - `STORY-130`: All 60 legacy anime reaction commands (`airkiss`, `hug`, `slap`, `pat`, etc.) via unified factory backed by `api.otakugifs.xyz` with local fallback GIF cache.
+    - `STORY-131`: All 11 legacy meme template canvas synthesizers (`0days`, `allmyhomies`, `always-been`, `chad`, `undertaker`, etc.) using `@napi-rs/canvas`.
+    - `STORY-132`: Multi-backend AI image generation service (`/imagine`) supporting Google Gemini Imagen, local ComfyUI/SD-WebUI, and Replicate with background job queue (`image_jobs`).
+    - `STORY-133`: Welcomer and Farewell dynamic canvas cards featuring user avatar, member count, and SSRF-validated background imagery.
+  - **`EPIC-014`: Server Utilities, AutoRoles & Community Systems (13 pts)**:
+    - `STORY-140`: Automatic Role System & Reaction Roles (Join roles, verification roles, button/select-menu component roles, tiered progression roles, temporary expiring roles).
+    - `STORY-141`: Persistent natural language reminders engine (`!remindme in 2 hours`) with timezone awareness surviving bot reboots.
+    - `STORY-142`: Anime & Manga search service (`/anime`, `/manga`, `/anime-character`, `/wallpaper`, `/waifu`) via Jikan API v4 and AniList.
+    - `STORY-143`: Server utility & identity commands parity (`/get-avatar`, `/guild-info`, `/member-info`, `/prefix` with memory cache).
+- **Exit Gate**: 100% of all 141 legacy commands and all reaction/meme assets fully ported with verified dual-dispatch parity.
 
 ---
 
-### Phase 5: Moderation 2.0 & Multi-Platform Streams
-- **Scope**:
-  - Implement automated warning escalation engine (warn thresholds triggering timeout, kick, ban).
-  - Implement auto-moderation regex/trie engine (excessive mentions, invite links, scam URLs, spam).
-  - Build immutable moderation audit logging with dedicated mod log channel dispatches.
-  - Modernize Admin Notes with multi-moderator edit history and user menu shortcuts.
-  - Build multi-platform live stream watcher (Twitch, YouTube Live, TikTok Live) with persistent idempotency and thumbnail asset caching.
-- **Exit Gate**: Auto-mod filters bad links instantly, warnings escalate cleanly, and stream notifications deliver exactly once with cached thumbnails.
+### Phase 5: Flagship Waifu TCG Subsystem
+- **Status**: 📋 **Backlog** (`EPIC-010`, 21 pts)
+- **Synchronized Stories**:
+  - **`STORY-100`: Waifu Ingestion Pipeline, Asset Validation & Attribution (3 pts)**:
+    - Asynchronous worker harvesting `waifu.im`, AniList, and Jikan; magic bytes and dimension validation, SHA-256 deduplication, attribution overlay (`Image source: waifu.im`), graceful silhouette fallback for takedown requests (`is_deleted_by_request`).
+  - **`STORY-101`: 8-Tier Rarity Math, Card Attribute Generation & Automated Drops (5 pts)**:
+    - Mathematically balanced 8-tier rarity curve (Common 60% to Mythic 0.01%), dynamic stat calculations (HP 500–15k, ATK 50–2.5k, DEF 30–1.8k, SPD 10–300, CRIT 5%–50%, MP 100), active skills and passive traits.
+    - Guild drops generator: configurable `#waifu-drops` channel, activity threshold (50–100 messages), 60s interactive `[Claim Card]` button, anti-sniping cooldown (5 min).
+    - Commands: `/card collection`, `/card inspect`, `/card equip`, `/card favorite`, `/card dismantle`.
+  - **`STORY-102`: 7-Element Combat Engine & Tactical Status Effects (3 pts)**:
+    - 7-element affinity loop featuring Ice: Fire > Ice > Earth > Lightning > Water > Fire (1.5x damage); Light <> Shadow mutual catastrophe axis.
+    - Status effects: Burn DoT, Freeze/Chill (25% slow, 15% turn-skip), Fortify shielding, Surge (+15% CRIT), Purify (8% regen), Radiance, Decay (20% lifesteal).
+  - **`STORY-103`: Equipment, Accessories, Consumables & Daily Energy Lifecycle (3 pts)**:
+    - 3 Equipment slots (Weapon, Armor, Relic) with rarity-scaled Battle Perks (*Vampiric Touch*, *Glacial Counter*, *Mana Conduit*, *Phoenix Ward*, *Cosmic Cataclysm*).
+    - 3 Accessory slots (Ring, Amulet, Talisman) with % stat multipliers. +0 to +10 enhancement with Crafting Dust.
+    - Consumables: HP potions, Mana draughts, Energy restores (strictly capped at 3/day).
+    - Player Energy: Level-scaled capacity formula ($\min(300, 100 + \lfloor(\text{Level}-1)\times 2\rfloor + \text{Bonus})$), 00:00 UTC daily replenishment with lazy recovery.
+  - **`STORY-104`: PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling (5 pts)**:
+    - Tutorial Prologue (Floors T1–T4, 0 energy onboarding: elements, mana, potions, break shields).
+    - Seasonal framework (60–90 days per cycle, archived to Hall of Fame) with active environmental affixes (*Scorched Earth*, *Heat Haze*, *Torrential Deluge*, *Tidal Barrier*).
+    - Anti-powercreep architecture: multi-layer elemental wards, seasonal affix penalties, turn-10+ soft enrage (+100% ATK/turn and true damage).
+    - Configurable exponential difficulty scaling ($\text{Stat}(F) = \text{Base} \times (1 + r)^{F - 1} \times \text{BossMultiplier}$, $r=0.085$) via `/tcg-admin config dungeon`.
+  - **`STORY-105`: Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch (2 pts)**:
+    - P2P Trading (`/game trade`): interactive modal, state locking (`IN_TRADE`), dual-party confirmation, atomic ACID settlement.
+    - Player Marketplace (`/game market`): credit pricing, `IN_MARKET` locking, 5% coin sink tax, 7-day auto-expiration.
+    - WaifuGuilds: dedicated player factions (`WaifuGuild`), leveling progression, shared guild bank, cooperative raid bosses.
+    - Achievement System: 6 tracks (Collector, Combatant, Tycoon, Blacksmith, Devotion, Guild Hero) across 5 tiers with multi-asset reward dispatch (XP, credits, cards, gear, canvas badges).
+    - Role-guarded administration: `/tcg-admin` guarded by `tcg_manager_role_id` or Discord Administrator.
+- **Exit Gate**: Concurrency-tested trading and marketplace (zero race conditions), full 7-element combat validated, and floor 50+ scaling proven.
 
 ---
 
-### Phase 6: Waifu TCG & Centralized Transactional Economy
-
-Synchronized with the full technical specification in `docs/waifu-tcg.md`:
-
-- **6.1 Double-Entry Financial Ledger & Economy Core**:
-  - Implement immutable double-entry ledger (`economy_transactions`, `economy_balances`).
-  - Standard transaction types: `DAILY_REWARD`, `TRANSFER`, `PVP_WAGER`, `SHOP_BUY`, `MARKET_BUY`, `DUNGEON_REWARD`, `RAID_REWARD`, `EXPEDITION_REWARD`, `DISMANTLE_DUST`.
-  - Daily streak multiplier and automated bank interest accrual.
-
-- **6.2 Waifu Image Ingestion, Validation & Attribution Pipeline**:
-  - Asynchronous background worker harvesting assets from `waifu.im`, AniList, and Jikan.
-  - Validate image magic bytes, dimensions, and aspect ratio; compute SHA-256 content hashes.
-  - Catalog in `waifu_assets` table; store binary assets on local disk / S3 (`/assets/waifu-cards/`).
-  - Strict mandatory attribution overlay & Discord embed footer: `Image source: waifu.im`.
-  - Graceful deletion handling (`is_deleted_by_request = TRUE`): automatic fallback to standardized silhouette card frame with character name, stats, and ownership 100% preserved.
-
-- **6.3 8-Tier Rarity Curve & Dynamic Card Generation**:
-  - Mathematically balanced 8-tier rarity curve:
-    - Common (60.0%, 1.0x stat mult, max Lv 20, standard card border)
-    - Uncommon (20.0%, 1.2x stat mult, max Lv 30, bronze trim)
-    - Rare (10.0%, 1.5x stat mult, max Lv 40, silver sheen)
-    - Super Rare / SR (6.0%, 1.9x stat mult, max Lv 50, gold shimmer)
-    - Ultra Rare / UR (3.0%, 2.5x stat mult, max Lv 60, prismatic hologram)
-    - Secret Rare / SEC (0.9%, 3.2x stat mult, max Lv 70, dark sparkle foil)
-    - Special Illustration Rare / SIR (0.09%, 4.0x stat mult, max Lv 85, full-art textured foil)
-    - Mythic (0.01%, 5.0x stat mult, max Lv 100, cosmic celestial animated foil)
-  - Card attributes: Name, serial number (e.g. `Makima #0042/1000`), stats (HP 500–15,000, ATK 50–2,500, DEF 30–1,800, SPD 10–300, CRIT 5%–50%, MP 100), unique active skill, passive ability, and collection album index.
-  - Foil shaders and card rendering via `@napi-rs/canvas`.
-
-- **6.4 7-Element Affinity Matrix & Tactical Combat Engine**:
-  - 7-element loop featuring Ice: Fire > Ice > Earth > Lightning > Water > Fire (1.5x damage multiplier).
-  - Mutual high-risk axis: Light <> Shadow (1.5x mutual catastrophe damage).
-  - Elemental status effects and combat traits:
-    - Fire: *Burn* (10% ATK DoT)
-    - Ice: *Freeze & Chill* (25% SPD slow, 15% turn-skip chance)
-    - Earth: *Fortify* (defensive shielding & phys mitigation)
-    - Lightning: *Surge* (+15% CRIT & micro-stuns)
-    - Water: *Purify & Flow* (8% max HP regen/turn & debuff cleanse)
-    - Light: *Radiance* (team ATK buff & shield pierce)
-    - Shadow: *Decay & Leech* (20% lifesteal)
-
-- **6.5 Automated Waifu Drops & Card Inventory Management**:
-  - Automated guild drop generator: configurable channel (`#waifu-drops`), message activity threshold (50–100 messages from unique users), 60-second interactive `[Claim Card]` Discord button, allowed active hours (08:00–23:00), and 5-minute anti-sniping cooldown for the previous claimer.
-  - Inventory commands:
-    - `/card collection [filter] [sort]` (paginated interactive visual album)
-    - `/card inspect <card_id>` (high-resolution card embed with full history and equipped gear)
-    - `/card equip <card_id>` (assigns to active combat deck, locks from trade/market)
-    - `/card favorite <card_id>` (protects against accidental sale/dismantle)
-    - `/card dismantle <card_id>` (breaks duplicates into Crafting Dust)
-
-- **6.6 Equipment, Accessory & Enhancement Subsystem**:
-  - 3 Equipment slots per card: Weapon (ATK/CRIT), Armor (HP/DEF), Relic (SPD/Mana) with dynamic rarity-scaled Battle Perks (e.g. *Vampiric Touch*, *Glacial Counter*, *Mana Conduit*, *Phoenix Ward*, *Cosmic Cataclysm*).
-  - 3 Accessory slots per card: Ring (offensive % multipliers), Amulet (defensive % multipliers), Talisman (utility/mana % multipliers).
-  - Equipment enhancement (+0 to +10) powered by Crafting Dust and Credits, boosting base stats and scaling Battle Perk potencies at +5 and +10 milestones.
-
-- **6.7 Consumables & Potions Subsystem**:
-  - HP Potions: Minor (300 HP), Major (1,200 HP), Elixir of Full Vitality (100% HP + debuff cleanse).
-  - Mana Potions: Mana Draught (30 MP), Greater Mana Potion (70 MP), Cosmic Ether (100% MP + instant free skill cast).
-  - Energy Restores: Stamina Candy (+15), Grand Stamina Flask (+30), Celestial Ambrosia (Full Energy).
-  - Guardrails: Daily consumption cap of 3 energy restores per calendar day; no infinite shop stock.
-
-- **6.8 Player Energy (Stamina) Lifecycle Engine**:
-  - Deterministic daily replenishment at 00:00 UTC with lazy login recovery.
-  - Level-based capacity formula: $\text{MaxEnergy}(\text{Level}) = \min(\text{GlobalCap}, 100 + \lfloor(\text{Level}-1)\times 2\rfloor + \text{MilestoneBonus}(\text{Level}))$.
-  - Global energy cap governance (default 300, range 100–1,000).
-  - Energy expenditure pipeline: Timed Expeditions (1h = 10, 4h = 25, 8h = 45), Dungeons (10–25), World Boss Raids (30), PvP Duels (5).
-
-- **6.9 PvE Dungeon Architecture: Tutorial, Seasons & Exponential Scaling Engine**:
-  - **Tutorial Dungeon / Prologue (Floors T1–T4)**: Zero-energy onboarding covering Elemental Resonance, Mana & Active Skills, Consumables, and Boss Break Shields; awards starter card, gear, and `TUTORIAL_COMPLETE` achievement.
-  - **Seasonal Framework (S1, S2, S3...)**: 60–90 day seasonal cycles archived to Hall of Fame; active Environmental Affixes (e.g. *Scorched Earth*, *Heat Haze*, *Torrential Deluge*, *Tidal Barrier*, *Radiant Flare & Void Drain*).
-  - **Anti-Powercreep Architecture**: Multi-layer elemental wards (blocking off-element brute force), seasonal affix penalties, turn-10+ soft enrages (+100% ATK/turn and true damage).
-  - **Floor Progression**: Sequential climb with Mini-Bosses every 5 floors and Major Milestone Bosses every 10 floors with custom dialogue and animated avatars.
-  - **Configurable Scaling Models**: Linear, Polynomial, Hybrid, and default Exponential ($\text{MonsterStat}(F) = \text{BaseStat} \times (1 + r)^{F - 1} \times \text{BossMultiplier}$, $r=0.085$).
-
-- **6.10 Game Modes: Expeditions, PvP Duels & Cooperative Boss Raids**:
-  - Timed Expeditions (`/game explore` 1h, 4h, 8h) consuming energy for credits, materials, crafting dust, and card shards.
-  - PvP Duels (`/game pvp <@user> [wager]`) with 3v3 tactical elemental battles and escrowed credit wagers.
-  - Cooperative Boss Raids (`/game boss`) with server-wide HP pools, turn-based damage tracking, exclusive card frames, and Mythic gear fragments.
-  - Daily & weekly battle/claim mission milestones.
-
-- **6.11 Atomic Trading & Player Marketplace**:
-  - P2P Trading (`/game trade <@user>`): Interactive session, atomic state locking (`IN_TRADE`), dual-party button confirmation, single ACID transaction settlement.
-  - Player Marketplace (`/game market`): Custom credit pricing, state locking (`IN_MARKET`), configurable listing tax (5% coin sink), and 7-day auto-expiration.
-
-- **6.12 WaifuGuilds Subsystem**:
-  - Dedicated in-game player factions (`WaifuGuild`, decoupled from `DiscordGuild`): guild creation, custom emblems/mottos, XP progression from card battles, shared guild bank, and cooperative guild raids.
-
-- **6.13 Item Shop & Combat Loot Pipeline**:
-  - Basic Town Shop (`/shop`): Sells Common/Uncommon gear, basic accessories, minor potions, and 1 daily energy biscuit (audited via ledger `SHOP_BUY`).
-  - Superior Loot Progression: Rare through Mythic gear, dynamic battle perks, and high-tier potions drop exclusively through PvE battles, dungeons, raids, and quests.
-
-- **6.14 Game Achievement System**:
-  - 6 progression tracks: Collector, Combatant, Tycoon, Blacksmith, Devotion, Guild Hero across 5 tiers (Bronze, Silver, Gold, Platinum, Mythic).
-  - Event-driven listeners for `CARD_CLAIMED`, `DUNGEON_CLEARED`, `PVP_WON`, `EQUIPMENT_UPGRADED`.
-  - Multi-asset reward dispatch: Account EXP, Credits, exclusive Cards, Equipment, Accessories, Consumables, and Canvas profile badges/titles.
-  - Atomic claiming via `/achievement claim <id | all>`.
-
-- **6.15 Governance & Role-Guarded Administration**:
-  - Centralized parameter storage in `tcg_system_configs`.
-  - Protected Discord slash commands (`/tcg-admin config energy ...`, `/tcg-admin config dungeon ...`, `/tcg-admin config role <@role>`) guarded by `tcg_manager_role_id` or Discord `Administrator`.
-
-- **Exit Gate**:
-  - Zero-race-condition card trading, marketplace purchases, and coin transfers verified under high-concurrency test suites.
-  - Full elemental interaction matrix (7 elements) and status effects validated.
-  - Dungeon exponential difficulty scaling and multi-layer elemental wards verified up to Floor 50+.
-  - Energy replenishment lifecycle, daily potion limits, and shop inventory transaction integrity proven.
-  - Card collection album pagination and canvas visual card generation render cleanly under 150ms.
-
----
-
-### Phase 7: Web Dashboard, Comprehensive Testing & Production Deployment
+### Phase 6: Web Dashboard, Comprehensive Testing & Production Deployment
+- **Status**: 📋 **Backlog** (`EPIC-011`, `EPIC-012`, 34 pts total)
 - **Scope**:
-  - Build Next.js 16 management dashboard in `apps/web` with Discord OAuth2 authentication.
-  - Build server configuration portal for guild admins (prefix, welcomer, logs, AI settings).
-  - Build web-based Waifu card collection album, marketplace viewer, and economy leaderboards.
-  - Build Waifu TCG Settings Panel & Dungeon Tower Manager (scaling model dropdown, interactive curve visualizer, seasonal affix editor, shop catalog management, and achievement reward toggles).
-  - Author comprehensive Vitest test suites (target 80%+ coverage on core domain services).
-  - Create multi-stage rootless `Dockerfile` and `docker-compose.production.yml`.
-  - Configure GitHub Actions CI/CD workflows (`ci.yml`, `release.yml`).
-- **Exit Gate**: Production Docker container boots in under 3 seconds, all automated tests pass, and dashboard renders SSR flawlessly.
+  - **`EPIC-011`: Next.js 16 Web Dashboard & Management Portal (21 pts)**:
+    - `STORY-110`: Next.js 16 App Router, React 19, Tailwind CSS, Discord OAuth2 authentication flow (`identify`, `guilds`), session cookies, and guild permission evaluation (`ManageGuild`).
+    - `STORY-111`: Server Management Portal covering dedicated setting views for all 20+ modules (Overview, General, Moderation, AutoMod, Music, AI Chatbot, Image Gen, Economy, Ranking, Games, Giveaways, AutoVoice, ReactionRoles, Streams, FreeGames, Welcomer, Logs, Command Overrides).
+    - `STORY-112`: Waifu TCG Web Management: web-based card collection album, marketplace portal, interactive Dungeon Tower difficulty curve visualizer, seasonal affix editor, and shop catalog manager.
+    - `STORY-113`: Server analytics telemetry, live moderation case logs, shared Zod schema validation between dashboard and CLI, and secret redaction (`Configured ✓`).
+  - **`EPIC-012`: Quality Gates, Docker Rootless & Production Verification (13 pts)**:
+    - `STORY-120`: End-to-end Vitest test suites (target 80%+ coverage across core services, deterministic RNG seeds for TCG drops and gambling).
+    - `STORY-121`: Multi-stage rootless Dockerfile (Node.js 22 LTS, unprivileged user `nodejs`, minimal image size) and `docker-compose.production.yml`.
+    - `STORY-122`: Health and readiness probe endpoints (`/health`, `/ready`), GitHub Actions CI/CD workflows (`ci.yml`, `release.yml`), and deployment documentation runbook.
+- **Exit Gate**: Production Docker container boots in under 3 seconds, all automated tests pass, and dashboard SSR renders flawlessly with zero secret leakage.
