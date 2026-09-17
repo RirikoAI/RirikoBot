@@ -109,6 +109,23 @@ export type CoreEvents = {
     reason: string;
     durationSeconds?: number | null | undefined;
   };
+  'moderation:automodViolation': {
+    guildId: string;
+    channelId: string;
+    userId: string;
+    ruleType: string;
+    action: string;
+    reason: string;
+    matchedContent?: string | undefined;
+    messageId?: string | undefined;
+  };
+  'moderation:raidDetected': {
+    guildId: string;
+    joinCount: number;
+    windowSeconds: number;
+    actionTaken: string;
+    accounts: Array<{ userId: string; accountAgeHours: number }>;
+  };
 };
 
 export type EventListener<T = unknown> = (payload: T) => void | Promise<void>;
