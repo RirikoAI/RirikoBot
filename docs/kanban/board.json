@@ -451,7 +451,7 @@
       "epic": "EPIC-009",
       "title": "Giveaways 2.0 Database Engine & Resilient Lifecycle",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -1306,6 +1306,66 @@
       "requires": ["TASK-0811", "TASK-0802"],
       "blocks": ["EPIC-011"],
       "description": "Implement /stream and /freegames dual-dispatch commands with legacy aliases and verify full monorepo quality gate."
+    },
+    {
+      "id": "TASK-0901",
+      "parent": "STORY-090",
+      "title": "Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["TASK-0902"],
+      "description": "Implement GiveawayRepository in @ririko/database with ACID transactions and GiveawayEngine in @ririko/services with startup reconciliation, weighted roll math, role/age qualification gates, and deterministic testing support."
+    },
+    {
+      "id": "TASK-0902",
+      "parent": "STORY-090",
+      "title": "Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-0901"],
+      "blocks": ["STORY-091"],
+      "description": "Implement /giveaway (create, end, reroll, delete, edit, list) dual-dispatch commands with legacy prefix parity (!gcreate, !gend, etc.), component button entry interactions, and main service wiring."
+    },
+    {
+      "id": "TASK-0911",
+      "parent": "STORY-091",
+      "title": "Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup",
+      "points": 2,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["TASK-0912"],
+      "description": "Implement voiceStateUpdate gateway listener to provision dynamic user-owned temporary voice channels, transfer members, clean up on empty, and prune reboot orphans."
+    },
+    {
+      "id": "TASK-0912",
+      "parent": "STORY-091",
+      "title": "Dual-Dispatch Auto-Voice Configuration & Control Commands",
+      "points": 1,
+      "status": "BACKLOG",
+      "requires": ["TASK-0911"],
+      "blocks": ["STORY-092"],
+      "description": "Implement /autovoice configuration and owner controls (name, user limit, lock, permit, claim) with prefix parity."
+    },
+    {
+      "id": "TASK-0921",
+      "parent": "STORY-092",
+      "title": "Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-004"],
+      "blocks": ["TASK-0922"],
+      "description": "Implement unbeatable Minimax AI decision tree for 3x3 Tic-Tac-Toe, Rock-Paper-Scissors secret ephemeral selection engine, and session state machine with timeout forfeiture."
+    },
+    {
+      "id": "TASK-0922",
+      "parent": "STORY-092",
+      "title": "HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers",
+      "points": 2,
+      "status": "BACKLOG",
+      "requires": ["TASK-0921"],
+      "blocks": ["EPIC-011"],
+      "description": "Implement HighLow, CoinFlip, and Dice games with deterministic RNG, dual-dispatch /games suite, and atomic balance escrow integration via EconomyService."
     }
   ],
   "chores": [

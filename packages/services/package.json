@@ -25,6 +25,10 @@
     "./free-games": {
       "types": "./dist/free-games/index.d.ts",
       "import": "./dist/free-games/index.js"
+    },
+    "./giveaways": {
+      "types": "./dist/giveaways/index.d.ts",
+      "import": "./dist/giveaways/index.js"
     }
   },
   "scripts": {
