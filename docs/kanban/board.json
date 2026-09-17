@@ -397,7 +397,7 @@
       "epic": "EPIC-007",
       "title": "Real-Time Automated Defense & Auto-Moderation Pipeline",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-070"],
       "blocks": ["STORY-073"]
     },
@@ -980,7 +980,7 @@
       "parent": "STORY-072",
       "title": "AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam)",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-070"],
       "blocks": ["TASK-0722"],
       "description": "Implement high-speed message evaluation pipeline with invite filter (whitelists), scam and phishing URL shield with homoglyph normalization, mention spam detector, and token-bucket burst spam filter."
@@ -990,7 +990,7 @@
       "parent": "STORY-072",
       "title": "Anti-Raid Mass Join Monitor & Automated Server Verification Gate",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0721"],
       "blocks": ["STORY-073"],
       "description": "Implement anti-raid sliding window join monitor detecting coordinated account flood attacks, triggering verification gates, and alerting staff."
