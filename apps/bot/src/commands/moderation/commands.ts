@@ -166,11 +166,10 @@ export function createModerationCommands(services: BotServices): Command[] {
       if (result.escalationTriggered) {
         embed.addFields({
           name: '🚨 Automatic Escalation Triggered!',
-          value: `Infraction threshold reached step: **${result.escalationTriggered.action}**${
-            result.escalationTriggered.durationSeconds
+          value: `Infraction threshold reached step: **${result.escalationTriggered.action}**${result.escalationTriggered.durationSeconds
               ? ` (${formatDurationSeconds(result.escalationTriggered.durationSeconds)})`
               : ''
-          }`,
+            }`,
           inline: false,
         });
       }
@@ -354,7 +353,7 @@ export function createModerationCommands(services: BotServices): Command[] {
       name: 'kick',
       category: CommandCategory.MODERATION,
       description: 'Kicks a member from the server.',
-      aliases: ['k'],
+      aliases: ['boot'],
       usage: '/kick <user> [reason] [send_dm]',
       userPermissions: [PermissionFlagsBits.KickMembers],
       options: [
@@ -1133,8 +1132,7 @@ export function createModerationCommands(services: BotServices): Command[] {
               value: Array.from(configs.values())
                 .map(
                   (c) =>
-                    `• **${c.ruleType}**: ${c.isEnabled ? '✅ Enabled' : '❌ Disabled'} (Action: \`${c.action}\`${
-                      c.threshold ? `, Threshold: ${c.threshold}` : ''
+                    `• **${c.ruleType}**: ${c.isEnabled ? '✅ Enabled' : '❌ Disabled'} (Action: \`${c.action}\`${c.threshold ? `, Threshold: ${c.threshold}` : ''
                     })`,
                 )
                 .join('\n'),
