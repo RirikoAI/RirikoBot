@@ -460,7 +460,7 @@
       "epic": "EPIC-009",
       "title": "Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup)",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -1332,7 +1332,7 @@
       "parent": "STORY-091",
       "title": "Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["TASK-0912"],
       "description": "Implement voiceStateUpdate gateway listener to provision dynamic user-owned temporary voice channels, transfer members, clean up on empty, and prune reboot orphans."
@@ -1342,7 +1342,7 @@
       "parent": "STORY-091",
       "title": "Dual-Dispatch Auto-Voice Configuration & Control Commands",
       "points": 1,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["TASK-0911"],
       "blocks": ["STORY-092"],
       "description": "Implement /autovoice configuration and owner controls (name, user limit, lock, permit, claim) with prefix parity."

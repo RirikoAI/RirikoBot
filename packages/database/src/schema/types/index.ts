@@ -135,6 +135,9 @@ export type GameStatistic = typeof sqlite.gameStatistics.$inferSelect;
 // Utilities & Reminders
 export type ReactionRole = typeof sqlite.reactionRoles.$inferSelect;
 export type AutoVoiceConfig = typeof sqlite.autoVoiceConfigs.$inferSelect;
+export type NewAutoVoiceConfig = Omit<typeof sqlite.autoVoiceConfigs.$inferInsert, 'id'> & {
+  id?: string;
+};
 export type Reminder = typeof sqlite.reminders.$inferSelect;
 export type NewReminder = typeof sqlite.reminders.$inferInsert;
 export type WelcomeConfig = typeof sqlite.welcomeConfigs.$inferSelect;
