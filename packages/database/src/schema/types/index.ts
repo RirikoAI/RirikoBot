@@ -84,13 +84,21 @@ export type GiveawayWinner = typeof sqlite.giveawayWinners.$inferSelect;
 
 // Stream Platforms
 export type Streamer = typeof sqlite.streamers.$inferSelect;
+export type NewStreamer = typeof sqlite.streamers.$inferInsert;
 export type StreamSubscription = typeof sqlite.streamSubscriptions.$inferSelect;
+export type NewStreamSubscription = typeof sqlite.streamSubscriptions.$inferInsert;
 export type StreamEvent = typeof sqlite.streamEvents.$inferSelect;
+export type NewStreamEvent = typeof sqlite.streamEvents.$inferInsert;
 export type StreamAnnouncement = typeof sqlite.streamAnnouncements.$inferSelect;
+export type NewStreamAnnouncement = typeof sqlite.streamAnnouncements.$inferInsert;
+export type StreamAsset = typeof sqlite.streamAssets.$inferSelect;
+export type NewStreamAsset = typeof sqlite.streamAssets.$inferInsert;
 
 // Free Games
 export type FreeGame = typeof sqlite.freeGames.$inferSelect;
+export type NewFreeGame = typeof sqlite.freeGames.$inferInsert;
 export type FreeGameAnnouncement = typeof sqlite.freeGameAnnouncements.$inferSelect;
+export type NewFreeGameAnnouncement = typeof sqlite.freeGameAnnouncements.$inferInsert;
 
 // Waifu TCG & Gamification
 export type WaifuSource = typeof sqlite.waifuSources.$inferSelect;

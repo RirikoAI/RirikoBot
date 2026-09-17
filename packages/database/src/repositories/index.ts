@@ -11,3 +11,4 @@ export * from './player-energy.repository.js';
 export * from './music.repository.js';
 export * from './ai.repository.js';
 export * from './moderation.repository.js';
+export * from './stream.repository.js';

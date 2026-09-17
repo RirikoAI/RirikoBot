@@ -17,6 +17,14 @@
     "./moderation": {
       "types": "./dist/moderation/index.d.ts",
       "import": "./dist/moderation/index.js"
+    },
+    "./stream-platforms": {
+      "types": "./dist/stream-platforms/index.d.ts",
+      "import": "./dist/stream-platforms/index.js"
+    },
+    "./free-games": {
+      "types": "./dist/free-games/index.d.ts",
+      "import": "./dist/free-games/index.js"
     }
   },
   "scripts": {
