@@ -151,14 +151,69 @@
 ## 📋 Product Backlog (Future Epics & Stories)
 | ID | Title | Est. Pts | Prerequisites | Target Phase |
 |---|---|---|---|---|
-| `EPIC-007` | Moderation 2.0 with Escalation & AutoMod | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
-| `EPIC-008` | Streamer Notifications & Free Games Announcer | 8 | `EPIC-002`, `EPIC-003` | Phase 4 |
-| `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | 13 | `EPIC-002`, `EPIC-003` | Phase 4 |
-| `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | 21 | `EPIC-002`, `EPIC-004` | Phase 5 |
-| `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 6 |
-| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7 |
+| `EPIC-008` | Streamer Notifications & Free Games Announcer | 8 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 5 |
+| `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | 13 | `EPIC-002`, `EPIC-003` | Phase 2B |
+| `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | 21 | `EPIC-002`, `EPIC-004` | Phase 6B |
+| `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 7A |
+| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
+| `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 13 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
+| `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 13 | `EPIC-002`, `EPIC-003` | Phase 2B |
 
-### 🛠️ Groomed Tasks for EPIC-007
+### 📋 Groomed Stories for EPIC-008 (Streamers & Free Games)
+| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+
+### 📋 Groomed Stories for EPIC-009 (Giveaways, AutoVoice & Mini-Games)
+| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-004` |
+
+### 📋 Groomed Stories for EPIC-010 (Waifu TCG)
+| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | `EPIC-010` | 📋 Backlog | `EPIC-002` |
+| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | 📋 Backlog | `STORY-100` |
+| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | 📋 Backlog | `STORY-101` |
+| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | 📋 Backlog | `STORY-102` |
+| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | 📋 Backlog | `STORY-103` |
+| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 2 | `EPIC-010` | 📋 Backlog | `STORY-104` |
+
+### 📋 Groomed Stories for EPIC-011 (Web Dashboard)
+| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-110` | Story | Next.js 16 App Router, React 19 Scaffolding & Discord OAuth2 Pipeline | 5 | `EPIC-011` | 📋 Backlog | `EPIC-001` |
+| `STORY-111` | Story | Server Management Portal & Core Module Settings Views (20+ Tabs) | 8 | `EPIC-011` | 📋 Backlog | `STORY-110` |
+| `STORY-112` | Story | Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer | 5 | `EPIC-011` | 📋 Backlog | `STORY-111` |
+| `STORY-113` | Story | Server Analytics, Live Case Logs & Shared Zod Validation Parity | 3 | `EPIC-011` | 📋 Backlog | `STORY-112` |
+
+### 📋 Groomed Stories for EPIC-012 (Quality Gates & Production Deployment)
+| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-120` | Story | End-to-End Vitest & Integration Test Harness (80%+ Coverage) | 5 | `EPIC-012` | 📋 Backlog | `EPIC-001` |
+| `STORY-121` | Story | Multi-Stage Rootless Dockerfile & docker-compose.production.yml | 5 | `EPIC-012` | 📋 Backlog | `STORY-120` |
+| `STORY-122` | Story | Health / Readiness Probes, GitHub Actions CI/CD & Production Verification | 3 | `EPIC-012` | 📋 Backlog | `STORY-121` |
+
+### 📋 Groomed Stories for EPIC-013 (Media Synthesis, Reactions & AI Images)
+| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-130` | Story | 60 Anime Reactions Command Factory & OtakuGIFs Cache | 3 | `EPIC-013` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 3 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
+| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
+| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 2 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
+
+### 📋 Groomed Stories for EPIC-014 (Server Utilities, AutoRoles & Community)
+| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 3 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 3 | `EPIC-014` | 📋 Backlog | `EPIC-003` |
+| `STORY-143` | Story | Server Utility & Identity Commands Parity (/get-avatar, /guild-info, /member-info, /prefix) | 2 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+
+### 🛠️ Completed Tasks for EPIC-007 (Moderation 2.0)
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `TASK-0701` | Task | PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock) | 3 | `STORY-070` | ✅ Done | `EPIC-002`, `EPIC-003` |
@@ -167,8 +222,8 @@
 | `TASK-0712` | Task | Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support | 1 | `STORY-071` | ✅ Done | `TASK-0711` |
 | `TASK-0721` | Task | AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam) | 2 | `STORY-072` | ✅ Done | `STORY-070` |
 | `TASK-0722` | Task | Anti-Raid Mass Join Monitor & Automated Server Verification Gate | 1 | `STORY-072` | ✅ Done | `TASK-0721` |
-| `TASK-0731` | Task | Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.) | 1 | `STORY-073` | ⚡ In Progress | `STORY-071`, `STORY-072` |
-| `TASK-0732` | Task | Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests | 1 | `STORY-073` | 🎯 To Do | `TASK-0731` |
+| `TASK-0731` | Task | Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.) | 1 | `STORY-073` | ✅ Done | `STORY-071`, `STORY-072` |
+| `TASK-0732` | Task | Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests | 1 | `STORY-073` | ✅ Done | `TASK-0731` |
 
 ### 🛠️ Groomed Tasks for EPIC-006
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
