@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress (WIP = 0).*
+*No active ticket in progress.*
 
 ---
 
@@ -16,10 +16,7 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-| ID | Type | Title | Pts | Parent | Dependencies |
-|---|---|---|---|---|---|
-| `TASK-0811` | Task | Free Games Repository, Multi-Provider Fetchers (Epic Games & Steam) & Announcer Engine | 2 | `STORY-081` | `STORY-080` |
-| `TASK-0812` | Task | Dual-Dispatch Stream & Free Game Commands Suite & Quality Gate | 1 | `STORY-081` | `TASK-0811`, `TASK-0802` |
+*No groomed tickets currently in To Do.*
 
 ---
 
@@ -31,6 +28,10 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0812` | Task | Dual-Dispatch Stream & Free Game Commands Suite & Quality Gate | 1 | `STORY-081` | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
+| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
+| `EPIC-008` | Epic | Streamer Notifications & Free Games Announcer | 8 | Self | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
+| `TASK-0811` | Task | Free Games Repository, Multi-Provider Fetchers (Epic Games & Steam) & Announcer Engine | 2 | `STORY-081` | [TASK-0811.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0811.md) |
 | `TASK-0802` | Task | Stream Notification Dispatcher, Idempotency Deduplication, Thumbnail Cache & CDN Attachment Uploader | 2 | `STORY-080` | [TASK-0802.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0802.md) |
 | `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | [TASK-0802.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0802.md) |
 | `TASK-0801` | Task | Stream Repository, Multi-Platform Stream Adapters & Watcher Engine Core | 3 | `STORY-080` | [TASK-0801.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0801.md) |
@@ -169,7 +170,7 @@
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ⚡ In Progress | `EPIC-002`, `EPIC-003` |
 
 ### 📋 Groomed Stories for EPIC-009 (Giveaways, AutoVoice & Mini-Games)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
