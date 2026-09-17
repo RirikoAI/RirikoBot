@@ -6,10 +6,12 @@ import {
   createMusicCommands,
   createSetupMusicCommand,
   createAiCommands,
+  createModerationCommands,
   MusicEmbedController,
   AiChatController,
   registerMessageListener,
   registerVoiceListener,
+  registerMemberListener,
 } from './index.js';
 import {
   CommandRouter,
@@ -104,6 +106,11 @@ export async function main(): Promise<void> {
     router.registry.register(cmd);
   }
 
+  const moderationCommands = createModerationCommands(services);
+  for (const cmd of moderationCommands) {
+    router.registry.register(cmd);
+  }
+
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
       .getAll()
@@ -114,9 +121,10 @@ export async function main(): Promise<void> {
   // 6. Bind Gateway Interaction & Message Listeners
   router.bindClient(bot.client);
 
-  // Register Gateway message & voice event listeners
+  // Register Gateway message, voice & member event listeners
   registerMessageListener(bot.client, services, musicController, aiController);
   registerVoiceListener(bot.client, services);
+  registerMemberListener(bot.client, services);
 
   // Bind interactive Help Center UI components and Music Controller buttons
   bot.client.on('interactionCreate', async (interaction) => {

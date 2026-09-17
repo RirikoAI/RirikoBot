@@ -70,7 +70,7 @@
       "id": "EPIC-007",
       "title": "Moderation 2.0 with Escalation & AutoMod",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Warning escalation engine, Discord AutoMod integration, case audit logs, and anti-raid filters."
@@ -406,7 +406,7 @@
       "epic": "EPIC-007",
       "title": "Dual-Dispatch Moderation Commands Suite & Gateway Listeners",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-071", "STORY-072"],
       "blocks": ["EPIC-011"]
     }
@@ -1000,7 +1000,7 @@
       "parent": "STORY-073",
       "title": "Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.)",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-071", "STORY-072"],
       "blocks": ["TASK-0732"],
       "description": "Implement dual-dispatch slash and prefix moderation commands suite with interactive confirmation components, permission checks, and reason prompts."
@@ -1010,7 +1010,7 @@
       "parent": "STORY-073",
       "title": "Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0731"],
       "blocks": ["EPIC-011"],
       "description": "Wire messageCreate and guildMemberAdd gateway listeners to AutoMod and anti-raid engines, with comprehensive end-to-end integration test coverage."
