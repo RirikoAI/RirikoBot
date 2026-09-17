@@ -62,6 +62,21 @@ describe('FallbackChainManager', () => {
     expect(secondaryProvider.generate).not.toHaveBeenCalled();
   });
 
+  it('prioritizes defaultProviderId if specified in options', async () => {
+    const managerWithDefault = new FallbackChainManager(
+      [primaryProvider, secondaryProvider, tertiaryProvider],
+      { defaultProviderId: 'openai' },
+    );
+
+    expect(managerWithDefault.getDefaultProviderId()).toBe('openai');
+    const candidates = managerWithDefault.getCandidateProviders();
+    expect(candidates[0]?.id).toBe('openai');
+
+    const res = await managerWithDefault.generate(mockRequest);
+    expect(res.provider).toBe('openai');
+    expect(secondaryProvider.generate).toHaveBeenCalled();
+  });
+
   it('respects preferredProviderId and routes directly to it', async () => {
     const res = await manager.generate(mockRequest, 'openai');
     expect(res.provider).toBe('openai');

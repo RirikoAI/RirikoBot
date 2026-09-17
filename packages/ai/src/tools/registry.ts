@@ -17,15 +17,23 @@ export class ToolRegistry {
   }
 
   get(name: string): SafeTool | undefined {
-    return this.tools.get(name);
+    return (
+      this.tools.get(name) ??
+      this.tools.get(name.replace(/_/g, '.')) ??
+      this.tools.get(name.replace(/\./g, '_'))
+    );
   }
 
   has(name: string): boolean {
-    return this.tools.has(name);
+    return (
+      this.tools.has(name) ||
+      this.tools.has(name.replace(/_/g, '.')) ||
+      this.tools.has(name.replace(/\./g, '_'))
+    );
   }
 
   getAll(): SafeTool[] {
-    return Array.from(this.tools.values());
+    return Array.from(new Set(this.tools.values()));
   }
 
   /**
@@ -38,7 +46,7 @@ export class ToolRegistry {
     }
 
     return filterNames
-      .map((name) => this.tools.get(name)?.definition)
+      .map((name) => this.get(name)?.definition)
       .filter((d): d is ToolDefinition => d !== undefined);
   }
 
@@ -46,7 +54,7 @@ export class ToolRegistry {
    * Validates tool input arguments using the tool's strict Zod schema.
    */
   validateArgs<T = unknown>(name: string, rawArgs: unknown): T {
-    const tool = this.tools.get(name);
+    const tool = this.get(name);
     if (!tool) {
       throw new Error(`Tool "${name}" is not registered in the tool allowlist.`);
     }
@@ -62,7 +70,7 @@ export class ToolRegistry {
     rawArgs: unknown,
     context: ToolExecutionContext,
   ): Promise<T> {
-    const tool = this.tools.get(name);
+    const tool = this.get(name);
     if (!tool) {
       throw new Error(`Tool "${name}" is not registered in the tool allowlist.`);
     }

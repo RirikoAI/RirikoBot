@@ -173,6 +173,48 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
       expect(result.action).toBe('error');
       expect(result.message).toContain('only available in Discord servers');
     });
+
+    it('resolves live playback via context.playMusic when provided', async () => {
+      const liveContext: ToolExecutionContext = {
+        ...baseContext,
+        playMusic: async (query: string) => ({
+          success: true,
+          message: `Queued "${query}" in voice channel!`,
+          trackTitle: 'Frieren OP - Yuusha',
+          trackUrl: 'https://youtube.com/watch?v=mock',
+          position: 1,
+        }),
+      };
+      const result = await musicTool.execute({ query: 'Frieren opening' }, liveContext);
+      expect(result.action).toBe('queued');
+      expect(result.trackTitle).toBe('Frieren OP - Yuusha');
+      expect(result.trackUrl).toBe('https://youtube.com/watch?v=mock');
+      expect(result.position).toBe(1);
+    });
+
+    it('reports error when context.playMusic indicates not in voice channel', async () => {
+      const errorContext: ToolExecutionContext = {
+        ...baseContext,
+        playMusic: async (_query: string) => ({
+          success: false,
+          message: 'You need to be connected to a voice channel first!',
+        }),
+      };
+      const result = await musicTool.execute({ query: 'Frieren opening' }, errorContext);
+      expect(result.action).toBe('error');
+      expect(result.message).toContain('connected to a voice channel');
+    });
+
+    it('resolves playback via constructor playResolver fallback', async () => {
+      const customMusicTool = new MusicPlayTool(async (query) => ({
+        success: true,
+        message: `Playing ${query} now!`,
+        trackTitle: 'Special Track',
+      }));
+      const result = await customMusicTool.execute({ query: 'My Song' }, baseContext);
+      expect(result.action).toBe('queued');
+      expect(result.trackTitle).toBe('Special Track');
+    });
   });
 
   describe('6. EconomyBalanceTool (economy.check_balance)', () => {
@@ -181,11 +223,41 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
     it('defaults to context user ID when no target user specified', async () => {
       const result = await economyTool.execute({}, baseContext);
       expect(result.targetUserId).toBe('user-123');
+      expect(result.wallet).toBe(0);
     });
 
     it('uses target user ID when explicitly provided', async () => {
       const result = await economyTool.execute({ targetUserId: 'target-999' }, baseContext);
       expect(result.targetUserId).toBe('target-999');
+    });
+
+    it('resolves balance from context.getBalance when provided', async () => {
+      const customContext: ToolExecutionContext = {
+        ...baseContext,
+        getBalance: async (_id: string) => ({
+          wallet: 250,
+          bank: 50,
+          netWorth: 300,
+        }),
+      };
+      const result = await economyTool.execute({}, customContext);
+      expect(result.wallet).toBe(250);
+      expect(result.bank).toBe(50);
+      expect(result.netWorth).toBe(300);
+      expect(result.message).toContain('250 credits in wallet');
+    });
+
+    it('resolves balance from constructor balanceResolver fallback', async () => {
+      const customTool = new EconomyBalanceTool(async (_id: string) => ({
+        wallet: 1500,
+        bank: 5000,
+        netWorth: 6500,
+      }));
+      const result = await customTool.execute({ targetUserId: 'user-vip' }, baseContext);
+      expect(result.wallet).toBe(1500);
+      expect(result.bank).toBe(5000);
+      expect(result.netWorth).toBe(6500);
+      expect(result.message).toContain('1,500 credits in wallet');
     });
   });
 

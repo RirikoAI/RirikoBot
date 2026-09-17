@@ -39,6 +39,20 @@ export class OllamaProvider implements ChatModelProvider {
     return Boolean(this.baseURL);
   }
 
+  private sanitizeToolName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+
+  private restoreToolName(name: string, originalTools?: ChatRequest['tools']): string {
+    if (originalTools) {
+      const match = originalTools.find(
+        (t) => this.sanitizeToolName(t.name) === name || t.name === name,
+      );
+      if (match) return match.name;
+    }
+    return name;
+  }
+
   private mapMessages(messages: ChatMessage[], systemInstruction?: string) {
     const result: Array<{ role: string; content: string; tool_calls?: unknown[] }> = [];
 
@@ -46,21 +60,55 @@ export class OllamaProvider implements ChatModelProvider {
       result.push({ role: 'system', content: systemInstruction });
     }
 
+    const assistantToolCallIds = new Set<string>();
     for (const msg of messages) {
-      if (msg.role === 'assistant' && msg.toolCalls && msg.toolCalls.length > 0) {
-        result.push({
-          role: 'assistant',
-          content: msg.content,
-          tool_calls: msg.toolCalls.map((tc) => ({
-            function: {
-              name: tc.name,
-              arguments: tc.arguments,
-            },
-          })),
-        });
+      if (msg.role === 'assistant' && msg.toolCalls) {
+        for (const tc of msg.toolCalls) {
+          if (tc.id) assistantToolCallIds.add(tc.id);
+        }
+      }
+    }
+
+    const respondingToolCallIds = new Set(
+      messages
+        .filter((m) => m.role === 'tool' && m.toolCallId && assistantToolCallIds.has(m.toolCallId))
+        .map((m) => m.toolCallId!),
+    );
+    const hasAnyToolResponses = messages.some((m) => m.role === 'tool');
+
+    for (const msg of messages) {
+      if (msg.role === 'tool') {
+        if (!msg.toolCallId || respondingToolCallIds.has(msg.toolCallId)) {
+          result.push({
+            role: 'tool',
+            content: msg.content,
+          });
+        }
+      } else if (msg.role === 'assistant') {
+        const validToolCalls = msg.toolCalls?.filter(
+          (tc) => respondingToolCallIds.has(tc.id) || (hasAnyToolResponses && !tc.id),
+        ) ?? [];
+
+        if (validToolCalls.length > 0) {
+          result.push({
+            role: 'assistant',
+            content: msg.content,
+            tool_calls: validToolCalls.map((tc) => ({
+              function: {
+                name: this.sanitizeToolName(tc.name),
+                arguments: tc.arguments,
+              },
+            })),
+          });
+        } else {
+          result.push({
+            role: 'assistant',
+            content: msg.content || '*(No response)*',
+          });
+        }
       } else {
         result.push({
-          role: msg.role === 'tool' ? 'tool' : msg.role,
+          role: msg.role === 'system' ? 'system' : 'user',
           content: msg.content,
         });
       }
@@ -74,7 +122,7 @@ export class OllamaProvider implements ChatModelProvider {
     return tools.map((t) => ({
       type: 'function',
       function: {
-        name: t.name,
+        name: this.sanitizeToolName(t.name),
         description: t.description,
         parameters: t.parameters,
       },
@@ -130,7 +178,7 @@ export class OllamaProvider implements ChatModelProvider {
         for (const tc of data.message.tool_calls) {
           toolCalls.push({
             id: `call_${Math.random().toString(36).slice(2, 9)}`,
-            name: tc.function.name,
+            name: this.restoreToolName(tc.function.name, request.tools),
             arguments: tc.function.arguments ?? {},
           });
         }
@@ -229,7 +277,7 @@ export class OllamaProvider implements ChatModelProvider {
               for (const tc of data.message.tool_calls) {
                 toolCalls.push({
                   id: `call_${Math.random().toString(36).slice(2, 9)}`,
-                  name: tc.function.name,
+                  name: this.restoreToolName(tc.function.name, request.tools),
                   arguments: tc.function.arguments ?? {},
                 });
               }

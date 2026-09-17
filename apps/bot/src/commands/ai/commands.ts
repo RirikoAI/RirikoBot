@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, EmbedBuilder } from 'discord.js';
+import { PermissionFlagsBits, EmbedBuilder, type GuildMember } from 'discord.js';
 import {
   CommandCategory,
   type Command,
@@ -12,8 +12,10 @@ import type {
   SecurityExecutionContext,
   UserContext,
 } from '@ririko/ai';
+import { formatToolResultFallback } from '@ririko/ai';
 import type { BotServices } from '../../services.js';
 import type { AiChatController } from '../../controllers/ai-chat.controller.js';
+import type { MusicEmbedController } from '../../controllers/music-embed.controller.js';
 
 export const SPEAKING_STYLE_CHOICES = [
   { name: 'Friendly Anime (Default)', value: 'FRIENDLY_ANIME' },
@@ -31,6 +33,7 @@ export async function executeAiChatTurn(
   ctx: CommandContext,
   services: BotServices,
   prompt: string,
+  musicController?: MusicEmbedController,
 ): Promise<void> {
   await ctx.deferReply();
 
@@ -100,17 +103,99 @@ export async function executeAiChatTurn(
 
     // 7. Mediate any tool calls emitted by the model
     if (response.toolCalls && response.toolCalls.length > 0) {
+      let member = ctx.member as GuildMember | null;
+      if (!member && ctx.guild) {
+        member = await ctx.guild.members.fetch(ctx.user.id).catch(() => null);
+      }
+      const voiceChannel = member?.voice?.channel;
+      const voiceChannelPerms = voiceChannel && member ? voiceChannel.permissionsFor(member)?.bitfield : undefined;
+      const userPermissions = voiceChannelPerms ?? ctx.member?.permissions?.bitfield;
+
+      const botMember = ctx.guild?.members?.me ?? (ctx.guild ? await ctx.guild.members.fetchMe().catch(() => null) : null);
+      const botVoicePerms = voiceChannel && botMember ? voiceChannel.permissionsFor(botMember)?.bitfield : undefined;
+      const botPermissions = botVoicePerms ?? botMember?.permissions?.bitfield;
+
       const toolContext: SecurityExecutionContext & ToolExecutionContext = {
         userId,
         guildId,
         channelId,
         userTimezone: userPrefs?.timezone,
         guildTimezone: guildSettings?.timezone,
-        userPermissions: ctx.member?.permissions?.bitfield,
-        botPermissions: ctx.guild?.members?.me?.permissions?.bitfield,
-        userHighestRolePosition: ctx.member?.roles?.highest?.position,
-        botHighestRolePosition: ctx.guild?.members?.me?.roles?.highest?.position,
+        userPermissions,
+        botPermissions,
+        userHighestRolePosition: member?.roles?.highest?.position,
+        botHighestRolePosition: botMember?.roles?.highest?.position,
         allowedTools,
+        getBalance: async (targetId: string) => {
+          const bal = await services.economyRepo.findById(targetId);
+          return bal
+            ? { wallet: bal.walletBalance, bank: bal.bankBalance, netWorth: bal.netWorth }
+            : null;
+        },
+        playMusic: async (query: string) => {
+          if (!ctx.guild) {
+            return {
+              success: false,
+              message: 'Music playback is only available in Discord servers.',
+            };
+          }
+
+          const voiceChannelId =
+            member?.voice?.channelId ??
+            ctx.guild.voiceStates?.cache?.get(ctx.user.id)?.channelId;
+          if (!voiceChannelId) {
+            return {
+              success: false,
+              message: 'You need to be connected to a voice channel so I know where to play music! Please join a voice channel and ask me again! 🎵',
+            };
+          }
+
+          try {
+            const result = await services.musicPlayer.play({
+              guildId: ctx.guild.id,
+              voiceChannelId,
+              textChannelId: ctx.channelId,
+              member: {
+                id: ctx.user.id,
+                username: ctx.user.username,
+                avatarUrl: ctx.user.displayAvatarURL ? ctx.user.displayAvatarURL() : undefined,
+              },
+              query,
+              adapterCreator: ctx.guild.voiceAdapterCreator,
+            });
+
+            if (result.type === 'PLAYLIST' && result.playlist) {
+              void musicController?.updateController(ctx.guild.id);
+              return {
+                success: true,
+                message: `Successfully queued playlist "${result.playlist.title}" with ${result.tracksAdded} tracks into the music player! (Position: ${result.position === 0 ? 'Now playing' : '#' + result.position})`,
+                trackTitle: result.playlist.title,
+                trackUrl: result.playlist.url,
+                position: result.position,
+              };
+            } else if (result.track) {
+              void musicController?.updateController(ctx.guild.id);
+              return {
+                success: true,
+                message: `Successfully queued "${result.track.title}" by ${result.track.artist || 'Unknown'} into the music player! (Position: ${result.position === 0 ? 'Now playing' : '#' + result.position})`,
+                trackTitle: result.track.title,
+                trackUrl: result.track.url,
+                position: result.position,
+              };
+            } else {
+              return {
+                success: false,
+                message: `Could not find any playable tracks for "${query}".`,
+              };
+            }
+          } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : String(err);
+            return {
+              success: false,
+              message: `Failed to play music: ${errorMsg}`,
+            };
+          }
+        },
       };
 
       const toolResults = await services.toolExecutor.executeBatch(
@@ -118,19 +203,37 @@ export async function executeAiChatTurn(
         toolContext,
       );
 
-      const summaries: string[] = [];
-      for (const res of toolResults) {
-        if (res.success) {
-          summaries.push(`🔧 **[Tool: ${res.name}]**: \`${JSON.stringify(res.result)}\``);
-        } else {
-          summaries.push(`⚠️ **[Tool: ${res.name}]** (Blocked/Failed): ${res.error}`);
-        }
-      }
+      // Synthesize natural conversational response with LLM from tool outputs
+      const synthesisMessages: ChatMessage[] = [
+        ...messages,
+        {
+          role: 'assistant',
+          content: replyText || '',
+          toolCalls: response.toolCalls,
+        },
+        ...toolResults.map((tr) => ({
+          role: 'tool' as const,
+          toolCallId: tr.toolCallId,
+          name: tr.name,
+          content: tr.success
+            ? (typeof tr.result === 'string' ? tr.result : JSON.stringify(tr.result))
+            : JSON.stringify({ error: tr.error ?? 'Execution failed' }),
+        })),
+      ];
 
-      if (summaries.length > 0) {
-        replyText = replyText
-          ? `${replyText}\n\n${summaries.join('\n')}`
-          : summaries.join('\n');
+      try {
+        const followUpResponse = await services.fallbackChainManager.generate({
+          ...chatRequest,
+          messages: synthesisMessages,
+          tools: undefined,
+        });
+        if (followUpResponse.content) {
+          replyText = followUpResponse.content;
+        } else {
+          replyText = formatToolResultFallback(toolResults);
+        }
+      } catch {
+        replyText = formatToolResultFallback(toolResults);
       }
     }
 
@@ -419,7 +522,7 @@ export function createAiCommands(
         return;
       }
 
-      await executeAiChatTurn(ctx, services, prompt);
+      await executeAiChatTurn(ctx, services, prompt, aiController.musicController);
     },
   };
 
@@ -448,7 +551,7 @@ export function createAiCommands(
         });
         return;
       }
-      await executeAiChatTurn(ctx, services, prompt);
+      await executeAiChatTurn(ctx, services, prompt, aiController.musicController);
     },
   };
 
