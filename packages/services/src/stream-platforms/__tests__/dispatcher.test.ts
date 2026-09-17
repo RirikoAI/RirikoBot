@@ -59,7 +59,7 @@ describe('StreamNotificationDispatcher (TASK-0802)', () => {
         stream_id TEXT PRIMARY KEY,
         original_url TEXT NOT NULL,
         discord_attachment_url TEXT NOT NULL,
-        fileHash TEXT NOT NULL,
+        file_hash TEXT NOT NULL,
         cached_at INTEGER NOT NULL
       );
     `);

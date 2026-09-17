@@ -99,6 +99,8 @@ export type FreeGame = typeof sqlite.freeGames.$inferSelect;
 export type NewFreeGame = typeof sqlite.freeGames.$inferInsert;
 export type FreeGameAnnouncement = typeof sqlite.freeGameAnnouncements.$inferSelect;
 export type NewFreeGameAnnouncement = typeof sqlite.freeGameAnnouncements.$inferInsert;
+export type FreeGameChannel = typeof sqlite.freeGameChannels.$inferSelect;
+export type NewFreeGameChannel = typeof sqlite.freeGameChannels.$inferInsert;
 
 // Waifu TCG & Gamification
 export type WaifuSource = typeof sqlite.waifuSources.$inferSelect;

@@ -11,8 +11,11 @@ import {
   MusicRepository,
   AiRepository,
   ModerationRepository,
+  StreamRepository,
+  FreeGameRepository,
   type DatabaseClient,
 } from '@ririko/database';
+import type { Client } from 'discord.js';
 import { MusicPlayerService } from '@ririko/music';
 import {
   ConversationManager,
@@ -51,6 +54,15 @@ import {
   PurgeService,
   AutoModService,
   AntiRaidService,
+  StreamWatcherEngine,
+  StreamNotificationDispatcher,
+  TwitchStreamAdapter,
+  YouTubeStreamAdapter,
+  TikTokStreamAdapter,
+  FreeGamesEngine,
+  EpicGamesProvider,
+  SteamFreeGamesProvider,
+  type FreeGameItem,
 } from '@ririko/services';
 
 export interface BotServices {
@@ -67,6 +79,11 @@ export interface BotServices {
   musicRepo: MusicRepository;
   aiRepo: AiRepository;
   moderationRepo: ModerationRepository;
+  streamRepo: StreamRepository;
+  freeGameRepo: FreeGameRepository;
+  streamWatcher: StreamWatcherEngine;
+  streamDispatcher: StreamNotificationDispatcher | undefined;
+  freeGamesEngine: FreeGamesEngine;
   musicPlayer: MusicPlayerService;
   economyService: EconomyService;
   bankingService: BankingService;
@@ -97,7 +114,10 @@ export interface BotServices {
 /**
  * Initializes and wires all core repositories, services, and event buses for the Discord bot.
  */
-export async function createBotServices(customDb?: DatabaseClient): Promise<BotServices> {
+export async function createBotServices(
+  customDb?: DatabaseClient,
+  discordClient?: Client,
+): Promise<BotServices> {
   const eventBus = new EventBus();
 
   const db =
@@ -117,6 +137,8 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
   const inventoryRepo = new InventoryRepository(db);
   const playerEnergyRepo = new PlayerEnergyRepository(db);
   const musicRepo = new MusicRepository(db);
+  const streamRepo = new StreamRepository(db);
+  const freeGameRepo = new FreeGameRepository(db);
   const musicPlayer = new MusicPlayerService({
     youtubeOptions: {
       cookie: process.env.YOUTUBE_COOKIE,
@@ -306,6 +328,52 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
     eventBus,
   );
 
+  const streamDispatcher = discordClient
+    ? new StreamNotificationDispatcher(discordClient, streamRepo)
+    : undefined;
+
+  const streamWatcher = new StreamWatcherEngine(streamRepo, {
+    onStreamLive: async (streamer, stream) => {
+      if (streamDispatcher) {
+        await streamDispatcher.dispatch(streamer, stream);
+      }
+    },
+  });
+
+  streamWatcher.registerAdapter(
+    new TwitchStreamAdapter({
+      clientId: process.env.TWITCH_CLIENT_ID,
+      clientSecret: process.env.TWITCH_CLIENT_SECRET,
+    }),
+  );
+  streamWatcher.registerAdapter(new YouTubeStreamAdapter());
+  streamWatcher.registerAdapter(new TikTokStreamAdapter());
+
+  const freeGamesEngine: FreeGamesEngine = new FreeGamesEngine(freeGameRepo, {
+    providers: [new EpicGamesProvider(), new SteamFreeGamesProvider()],
+    onAnnounceGame: async (
+      _guildId: string,
+      channelId: string,
+      game: FreeGameItem,
+    ): Promise<string | null> => {
+      if (!discordClient) return null;
+      try {
+        const channel = await discordClient.channels.fetch(channelId).catch(() => null);
+        if (channel && channel.isTextBased() && 'send' in channel) {
+          const embed = freeGamesEngine.formatGameEmbed(game);
+          const msg = await (channel as any).send({ embeds: [embed] });
+          return (msg?.id as string) ?? null;
+        }
+      } catch (err) {
+        console.error(`[FreeGamesEngine] Failed to post alert in channel ${channelId}:`, err);
+      }
+      return null;
+    },
+    getGuildAnnounceTargets: async () => {
+      return freeGameRepo.listAllConfiguredGuildChannels();
+    },
+  });
+
   return {
     db,
     eventBus,
@@ -320,6 +388,11 @@ export async function createBotServices(customDb?: DatabaseClient): Promise<BotS
     musicRepo,
     aiRepo,
     moderationRepo,
+    streamRepo,
+    freeGameRepo,
+    streamWatcher,
+    streamDispatcher,
+    freeGamesEngine,
     musicPlayer,
     economyService,
     bankingService,
