@@ -119,6 +119,8 @@ describe('Dual-Dialect Complete Schema Catalog (70+ Tables)', () => {
       expect(pgSchema.freeGames).toBeDefined();
       expect(sqliteSchema.freeGameAnnouncements).toBeDefined();
       expect(pgSchema.freeGameAnnouncements).toBeDefined();
+      expect(sqliteSchema.freeGameChannels).toBeDefined();
+      expect(pgSchema.freeGameChannels).toBeDefined();
 
       // 12. Waifu TCG & Gamification (20 tables)
       expect(sqliteSchema.waifuSources).toBeDefined();

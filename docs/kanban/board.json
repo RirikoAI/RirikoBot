@@ -79,7 +79,7 @@
       "id": "EPIC-008",
       "title": "Streamer Notifications & Free Games Announcer",
       "points": 8,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Twitch/YouTube/TikTok watchers with idempotency keys, thumbnail reupload CDN, and Epic/Steam games feed."
@@ -442,7 +442,7 @@
       "epic": "EPIC-008",
       "title": "Free Games Announcer Engine (Epic Games Store & Steam Feed)",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -1292,7 +1292,7 @@
       "parent": "STORY-081",
       "title": "Free Games Repository, Multi-Provider Fetchers (Epic Games & Steam) & Announcer Engine",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-080"],
       "blocks": ["TASK-0812"],
       "description": "Implement FreeGameRepository and Epic Games Store + Steam free games fetchers with guild announcement tracking."
@@ -1302,7 +1302,7 @@
       "parent": "STORY-081",
       "title": "Dual-Dispatch Stream & Free Game Commands Suite & Quality Gate",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0811", "TASK-0802"],
       "blocks": ["EPIC-011"],
       "description": "Implement /stream and /freegames dual-dispatch commands with legacy aliases and verify full monorepo quality gate."

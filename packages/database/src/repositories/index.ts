@@ -12,3 +12,4 @@ export * from './music.repository.js';
 export * from './ai.repository.js';
 export * from './moderation.repository.js';
 export * from './stream.repository.js';
+export * from './free-game.repository.js';

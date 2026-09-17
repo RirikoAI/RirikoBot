@@ -7,6 +7,8 @@ import {
   createSetupMusicCommand,
   createAiCommands,
   createModerationCommands,
+  createStreamCommands,
+  createFreeGamesCommand,
   MusicEmbedController,
   AiChatController,
   registerMessageListener,
@@ -84,7 +86,7 @@ export async function main(): Promise<void> {
 
   // 5. Initialize Domain Services and Register Economy Commands
   console.log('• Initializing bot repositories and domain services...');
-  const services = await createBotServices();
+  const services = await createBotServices(undefined, bot.client);
   const economyCommands = createEconomyCommands(services);
   for (const cmd of economyCommands) {
     router.registry.register(cmd);
@@ -113,6 +115,14 @@ export async function main(): Promise<void> {
   for (const cmd of moderationCommands) {
     router.registry.register(cmd);
   }
+
+  const streamCommands = createStreamCommands(services);
+  for (const cmd of streamCommands) {
+    router.registry.register(cmd);
+  }
+
+  const freeGamesCommand = createFreeGamesCommand(services);
+  router.registry.register(freeGamesCommand);
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
@@ -149,6 +159,8 @@ export async function main(): Promise<void> {
     isShuttingDown = true;
     console.log(`\n[Bot] Received ${signal}. Shutting down gateway connection...`);
     try {
+      services.streamWatcher.stop();
+      services.freeGamesEngine.stop();
       await bot.gateway.destroy();
       console.log('✓ Bot gateway cleanly disconnected. Goodbye!');
     } catch (err) {
@@ -180,6 +192,11 @@ export async function main(): Promise<void> {
     if (event.to === 'READY') {
       console.log(`✨ Logged in as: ${bot.client.user?.tag} (ID: ${bot.client.user?.id})`);
       console.log(`✨ Ready to process slash commands and prefix '${prefix}' messages!\n`);
+
+      // Start background watcher & announcer engines
+      services.streamWatcher.start();
+      services.freeGamesEngine.start();
+      console.log('📡 Stream Watcher & Free Games Announcer engines active!');
 
       // Initialize Lavalink connection with client credentials & shard router
       if (bot.client.user) {

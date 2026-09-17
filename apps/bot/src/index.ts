@@ -36,5 +36,6 @@ export * from './commands/economy/index.js';
 export * from './commands/music/index.js';
 export * from './commands/ai/index.js';
 export * from './commands/moderation/index.js';
+export * from './commands/streams/index.js';
 export * from './controllers/index.js';
 export * from './listeners/index.js';
