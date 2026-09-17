@@ -79,7 +79,7 @@
       "id": "EPIC-008",
       "title": "Streamer Notifications & Free Games Announcer",
       "points": 8,
-      "status": "BACKLOG",
+      "status": "IN_PROGRESS",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Twitch/YouTube/TikTok watchers with idempotency keys, thumbnail reupload CDN, and Epic/Steam games feed."
@@ -433,7 +433,7 @@
       "epic": "EPIC-008",
       "title": "Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok)",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -1266,6 +1266,46 @@
       "requires": ["TASK-0731"],
       "blocks": ["EPIC-011"],
       "description": "Wire messageCreate and guildMemberAdd gateway listeners to AutoMod and anti-raid engines, with comprehensive end-to-end integration test coverage."
+    },
+    {
+      "id": "TASK-0801",
+      "parent": "STORY-080",
+      "title": "Stream Repository, Multi-Platform Stream Adapters & Watcher Engine Core",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["TASK-0802"],
+      "description": "Implement StreamRepository in @ririko/database and Twitch, YouTube, and TikTok stream adapters with polling Watcher Engine in @ririko/services."
+    },
+    {
+      "id": "TASK-0802",
+      "parent": "STORY-080",
+      "title": "Stream Notification Dispatcher, Idempotency Deduplication, Thumbnail Cache & CDN Attachment Uploader",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-0801"],
+      "blocks": ["TASK-0812"],
+      "description": "Implement StreamNotificationDispatcher with stream_announcements idempotency deduplication and Discord attachment thumbnail CDN proxying."
+    },
+    {
+      "id": "TASK-0811",
+      "parent": "STORY-081",
+      "title": "Free Games Repository, Multi-Provider Fetchers (Epic Games & Steam) & Announcer Engine",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-080"],
+      "blocks": ["TASK-0812"],
+      "description": "Implement FreeGameRepository and Epic Games Store + Steam free games fetchers with guild announcement tracking."
+    },
+    {
+      "id": "TASK-0812",
+      "parent": "STORY-081",
+      "title": "Dual-Dispatch Stream & Free Game Commands Suite & Quality Gate",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["TASK-0811", "TASK-0802"],
+      "blocks": ["EPIC-011"],
+      "description": "Implement /stream and /freegames dual-dispatch commands with legacy aliases and verify full monorepo quality gate."
     }
   ],
   "chores": [
