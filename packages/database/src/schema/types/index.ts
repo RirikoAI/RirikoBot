@@ -80,7 +80,9 @@ export type ImagePreset = typeof sqlite.imagePresets.$inferSelect;
 export type Giveaway = typeof sqlite.giveaways.$inferSelect;
 export type NewGiveaway = typeof sqlite.giveaways.$inferInsert;
 export type GiveawayEntry = typeof sqlite.giveawayEntries.$inferSelect;
+export type NewGiveawayEntry = typeof sqlite.giveawayEntries.$inferInsert;
 export type GiveawayWinner = typeof sqlite.giveawayWinners.$inferSelect;
+export type NewGiveawayWinner = typeof sqlite.giveawayWinners.$inferInsert;
 
 // Stream Platforms
 export type Streamer = typeof sqlite.streamers.$inferSelect;

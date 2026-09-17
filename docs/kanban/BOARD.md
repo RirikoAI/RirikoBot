@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No active ticket in progress.*
+*No tickets currently in progress.*
 
 ---
 
@@ -28,6 +28,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0902` | Task | Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners | 2 | `STORY-090` | [TASK-0902.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0902.md) |
+| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | [TASK-0902.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0902.md) |
+| `TASK-0901` | Task | Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine | 3 | `STORY-090` | [TASK-0901.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0901.md) |
 | `TASK-0812` | Task | Dual-Dispatch Stream & Free Game Commands Suite & Quality Gate | 1 | `STORY-081` | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
 | `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
 | `EPIC-008` | Epic | Streamer Notifications & Free Games Announcer | 8 | Self | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
@@ -170,14 +173,20 @@
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ⚡ In Progress | `EPIC-002`, `EPIC-003` |
+| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ✅ Done | `EPIC-002`, `EPIC-003` |
 
-### 📋 Groomed Stories for EPIC-009 (Giveaways, AutoVoice & Mini-Games)
-| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+### 📋 Groomed Stories & Tasks for EPIC-009 (Giveaways, AutoVoice & Mini-Games)
+| ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | ✅ Done | `EPIC-002`, `EPIC-003` |
+| `TASK-0901` | Task | Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine | 3 | `STORY-090` | ✅ Done | `EPIC-002`, `EPIC-003` |
+| `TASK-0902` | Task | Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners | 2 | `STORY-090` | ✅ Done | `TASK-0901` |
 | `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | 📋 Backlog | `TASK-0911` |
 | `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-004` |
+| `TASK-0921` | Task | Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine | 3 | `STORY-092` | 📋 Backlog | `EPIC-002`, `EPIC-004` |
+| `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | 📋 Backlog | `TASK-0921` |
 
 ### 📋 Groomed Stories for EPIC-010 (Waifu TCG)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
