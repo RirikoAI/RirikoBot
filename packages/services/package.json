@@ -29,6 +29,10 @@
     "./giveaways": {
       "types": "./dist/giveaways/index.d.ts",
       "import": "./dist/giveaways/index.js"
+    },
+    "./autovoice": {
+      "types": "./dist/autovoice/index.d.ts",
+      "import": "./dist/autovoice/index.js"
     }
   },
   "scripts": {
