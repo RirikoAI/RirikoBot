@@ -28,6 +28,10 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
+| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
+| `EPIC-009` | Epic | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | 13 | Self | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
+| `TASK-0921` | Task | Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine | 3 | `STORY-092` | [TASK-0921.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0921.md) |
 | `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | [TASK-0912.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0912.md) |
 | `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | [TASK-0912.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0912.md) |
 | `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | [TASK-0911.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0911.md) |
@@ -164,8 +168,6 @@
 ## 📋 Product Backlog (Future Epics & Stories)
 | ID | Title | Est. Pts | Prerequisites | Target Phase |
 |---|---|---|---|---|
-| `EPIC-008` | Streamer Notifications & Free Games Announcer | 8 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 5 |
-| `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | 13 | `EPIC-002`, `EPIC-003` | Phase 2B |
 | `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | 21 | `EPIC-002`, `EPIC-004` | Phase 6B |
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 7A |
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
@@ -187,9 +189,9 @@
 | `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | ✅ Done | `TASK-0911` |
-| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-004` |
-| `TASK-0921` | Task | Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine | 3 | `STORY-092` | 📋 Backlog | `EPIC-002`, `EPIC-004` |
-| `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | 📋 Backlog | `TASK-0921` |
+| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | ✅ Done | `EPIC-002`, `EPIC-004` |
+| `TASK-0921` | Task | Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine | 3 | `STORY-092` | ✅ Done | `EPIC-002`, `EPIC-004` |
+| `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | ✅ Done | `TASK-0921` |
 
 ### 📋 Groomed Stories for EPIC-010 (Waifu TCG)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |

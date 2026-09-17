@@ -11,6 +11,7 @@ import {
   createFreeGamesCommand,
   createGiveawayCommands,
   createAutoVoiceCommands,
+  createGamesCommands,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -134,6 +135,11 @@ export async function main(): Promise<void> {
 
   const autoVoiceCommands = createAutoVoiceCommands(services);
   for (const cmd of autoVoiceCommands) {
+    router.registry.register(cmd);
+  }
+
+  const gamesCommands = createGamesCommands(services);
+  for (const cmd of gamesCommands) {
     router.registry.register(cmd);
   }
 

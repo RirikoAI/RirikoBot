@@ -88,7 +88,7 @@
       "id": "EPIC-009",
       "title": "Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite",
       "points": 13,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Crash-resistant giveaways, Join to Create dynamic voice channels, and Minimax Tic-Tac-Toe, RPS, HighLow."
@@ -469,7 +469,7 @@
       "epic": "EPIC-009",
       "title": "Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice)",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-004"],
       "blocks": ["EPIC-011"]
     },
@@ -1352,7 +1352,7 @@
       "parent": "STORY-092",
       "title": "Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-004"],
       "blocks": ["TASK-0922"],
       "description": "Implement unbeatable Minimax AI decision tree for 3x3 Tic-Tac-Toe, Rock-Paper-Scissors secret ephemeral selection engine, and session state machine with timeout forfeiture."
@@ -1362,7 +1362,7 @@
       "parent": "STORY-092",
       "title": "HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["TASK-0921"],
       "blocks": ["EPIC-011"],
       "description": "Implement HighLow, CoinFlip, and Dice games with deterministic RNG, dual-dispatch /games suite, and atomic balance escrow integration via EconomyService."
