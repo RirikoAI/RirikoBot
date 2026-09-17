@@ -100,7 +100,10 @@ export async function main(): Promise<void> {
   const setupMusicCommand = createSetupMusicCommand(services, musicController);
   router.registry.register(setupMusicCommand);
 
-  const aiController = new AiChatController(bot.client, services);
+  const aiController = new AiChatController(bot.client, services, {
+    defaultPrefix: prefix,
+    musicController,
+  });
   const aiCommands = createAiCommands(services, aiController);
   for (const cmd of aiCommands) {
     router.registry.register(cmd);

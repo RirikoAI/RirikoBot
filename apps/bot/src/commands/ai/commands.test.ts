@@ -22,21 +22,35 @@ class MockAiProvider implements ChatModelProvider {
 
   public responseText = 'Hello from Ririko AI assistant!';
   public responseToolCalls?: ToolCall[];
+  public synthesisText?: string;
+  public recordedRequests: ChatRequest[] = [];
 
-  async generate(_request: ChatRequest): Promise<ChatResponse> {
+  async generate(request: ChatRequest): Promise<ChatResponse> {
+    this.recordedRequests.push(request);
+    const isSynthesis = !request.tools && request.messages.some((m) => m.role === 'tool');
+    const content = isSynthesis && this.synthesisText !== undefined ? this.synthesisText : this.responseText;
+
     return {
-      content: this.responseText,
+      content,
       model: 'mock-model',
       provider: 'mock-provider',
-      toolCalls: this.responseToolCalls,
+      toolCalls: request.tools ? this.responseToolCalls : undefined,
     };
   }
 
-  async *stream(_request: ChatRequest): AsyncIterable<ChatToken> {
+  async *stream(request: ChatRequest): AsyncIterable<ChatToken> {
+    this.recordedRequests.push(request);
+    const isSynthesis = !request.tools && request.messages.some((m) => m.role === 'tool');
+
+    if (isSynthesis && this.synthesisText !== undefined) {
+      yield { text: this.synthesisText, isFinished: true };
+      return;
+    }
+
     yield {
       text: this.responseText,
       isFinished: true,
-      toolCalls: this.responseToolCalls,
+      toolCalls: request.tools ? this.responseToolCalls : undefined,
     };
   }
 }
@@ -438,7 +452,7 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
       expect(msgs[1]!.content).toContain('299,792,458 m/s');
     });
 
-    it('executes tool call when emitted and appends tool summaries', async () => {
+    it('executes tool call when emitted and synthesizes conversational response', async () => {
       mockProvider.responseText = 'Checking the clock for you!';
       mockProvider.responseToolCalls = [
         {
@@ -447,6 +461,7 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
           arguments: { timezone: 'UTC' },
         },
       ];
+      mockProvider.synthesisText = 'The time in UTC is 8:44 AM!';
 
       const { ctx, edits } = createMockContext({
         source: 'prefix',
@@ -457,7 +472,39 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
 
       expect(edits[0]).toEqual(
         expect.objectContaining({
-          content: expect.stringContaining('[Tool: get_current_time]'),
+          content: 'The time in UTC is 8:44 AM!',
+        }),
+      );
+
+      // Verify tool response message was sent to synthesis turn
+      const synthesisReq = mockProvider.recordedRequests.find(
+        (r) => !r.tools && r.messages.some((m) => m.role === 'tool'),
+      );
+      expect(synthesisReq).toBeDefined();
+      expect(synthesisReq?.messages.some((m) => m.role === 'tool' && m.toolCallId === 'call-clock-1')).toBe(true);
+    });
+
+    it('falls back to clean formatted markdown when slash tool synthesis fails', async () => {
+      mockProvider.responseText = 'Checking the clock for you!';
+      mockProvider.responseToolCalls = [
+        {
+          id: 'call-clock-1',
+          name: 'get_current_time',
+          arguments: { timezone: 'UTC' },
+        },
+      ];
+      mockProvider.synthesisText = '';
+
+      const { ctx, edits } = createMockContext({
+        source: 'prefix',
+        rawArgs: ['What time is it in UTC?'],
+      });
+
+      await commands.get('ai')!(ctx);
+
+      expect(edits[0]).toEqual(
+        expect.objectContaining({
+          content: expect.stringContaining('🕒 **Current Time**:'),
         }),
       );
     });

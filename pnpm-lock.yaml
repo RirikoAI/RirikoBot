@@ -75,6 +75,9 @@ importers:
 
   apps/cli:
     dependencies:
+      '@ririko/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@ririko/core':
         specifier: workspace:*
         version: link:../../packages/core

@@ -19,6 +19,26 @@ describe('CLI Program', () => {
     expect(commandNames).toContain('migrate:legacy');
     expect(commandNames).toContain('migrate:verify');
     expect(commandNames).toContain('generate:po-token');
+    expect(commandNames).toContain('ai:configure');
+  });
+
+  it('registers ai:configure command options and aliases', () => {
+    const program = createProgram();
+    const cmd = program.commands.find((c) => c.name() === 'ai:configure');
+    expect(cmd).toBeDefined();
+    expect(cmd?.aliases()).toContain('ai:config');
+
+    const cmdFlags = cmd?.options.map((opt) => opt.flags) ?? [];
+    expect(cmdFlags).toContain('-p, --provider <provider>');
+    expect(cmdFlags).toContain('-m, --model <model>');
+    expect(cmdFlags).toContain('--gemini-key <key>');
+    expect(cmdFlags).toContain('--openai-key <key>');
+    expect(cmdFlags).toContain('--openai-base-url <url>');
+    expect(cmdFlags).toContain('--ollama-url <url>');
+    expect(cmdFlags).toContain('--show');
+    expect(cmdFlags).toContain('--test');
+    expect(cmdFlags).toContain('-i, --interactive');
+    expect(cmdFlags).toContain('-y, --yes');
   });
 
   it('registers global options', () => {

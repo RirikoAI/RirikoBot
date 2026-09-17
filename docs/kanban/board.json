@@ -1024,6 +1024,15 @@
       "status": "DONE",
       "requires": ["EPIC-003"],
       "blocks": []
+    },
+    {
+      "id": "CHORE-0601",
+      "title": "CLI Command to Configure AI Chat Functions & Provider Keys",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["EPIC-006"],
+      "blocks": [],
+      "description": "Add ririko ai:configure interactive and flag-based CLI command to configure AI providers (Gemini, OpenAI, Ollama), API keys, models, test connections, and update .env safely."
     }
   ],
   "bugs": [
@@ -1046,6 +1055,56 @@
       "requires": ["TASK-0507"],
       "blocks": [],
       "description": "Enforce strict hard artist filtering in PrecisionTrackMatcher and eliminate unconstrained SoundCloud title search fallback in YouTubeAdapter to prevent rogue club tracks from streaming."
+    },
+    {
+      "id": "BUG-0003",
+      "title": "OpenAI & LLM Providers Function Name Schema Validation & Sanitization",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-060",
+      "requires": [],
+      "blocks": [],
+      "description": "OpenAI API rejects tool function names containing dots (e.g. reminders.create) with 400 error matching ^[a-zA-Z0-9_-]+$. Implement bi-directional tool name sanitization and alias resolution across OpenAI, Gemini, Ollama, and ToolRegistry."
+    },
+    {
+      "id": "BUG-0004",
+      "title": "Unfulfilled Assistant Tool Calls in Historical Context Causing OpenAI 400 Error",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-060",
+      "requires": [],
+      "blocks": [],
+      "description": "OpenAI API throws 400 when an assistant message with tool_calls in conversation history is not followed by tool messages for each tool_call_id. Normalize message mapping in OpenAI, Gemini, and Ollama providers to ensure unresponded tool calls are not sent as pending requests."
+    },
+    {
+      "id": "BUG-0005",
+      "title": "Duplicate Tool Execution and Unrendered Raw JSON Tool Responses in AI Chat",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-060",
+      "requires": ["BUG-0004"],
+      "blocks": [],
+      "description": "Fix duplicate tool execution caused by stream/generate fallback condition when tools emit empty text. Feed tool execution results back to the LLM to synthesize natural language responses with clean fallback formatting."
+    },
+    {
+      "id": "BUG-0006",
+      "title": "Ignore Prefix Commands in AI Chat & Wire Real Database Values in EconomyBalanceTool",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-060",
+      "requires": ["BUG-0005"],
+      "blocks": ["BUG-0007"],
+      "description": "Ignore messages starting with bot command prefix in AI chat controller to prevent duplicate responses to prefix commands. Connect real database economy balance resolver to EconomyBalanceTool."
+    },
+    {
+      "id": "BUG-0007",
+      "title": "Wire Real Music Player Execution to MusicPlayTool in AI Chatbot",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-060",
+      "requires": ["BUG-0006"],
+      "blocks": [],
+      "description": "Connect MusicPlayTool in AI chat to real MusicPlayerService, validating voice channel presence and permissions, joining, queueing audio tracks, and refreshing the active music embed controller."
     }
   ]
 }

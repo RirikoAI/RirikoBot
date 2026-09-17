@@ -15,6 +15,7 @@
     "lavalink:start": "tsx --env-file=.env scripts/lavalink-start.ts",
     "cli": "tsx apps/cli/src/index.ts",
     "doctor": "tsx apps/cli/src/index.ts doctor",
+    "ai:configure": "tsx apps/cli/src/index.ts ai:configure",
     "db:push": "pnpm --filter @ririko/database db:push",
     "typecheck": "pnpm -r run typecheck",
     "lint": "eslint .",

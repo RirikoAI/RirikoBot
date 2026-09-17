@@ -13,9 +13,11 @@ import {
 
 export interface FallbackChainOptions {
   /** Default cooldown duration in milliseconds when a provider hits a rate limit or 5xx error (default: 60,000ms) */
-  defaultCooldownMs?: number;
+  defaultCooldownMs?: number | undefined;
   /** Max consecutive failures before entering circuit breaker cooldown (default: 3) */
-  maxConsecutiveFailures?: number;
+  maxConsecutiveFailures?: number | undefined;
+  /** Default primary provider ID to prioritize when none is explicitly requested */
+  defaultProviderId?: string | undefined;
 }
 
 interface ProviderCircuitState {
@@ -29,10 +31,12 @@ export class FallbackChainManager {
   private readonly circuitStates = new Map<string, ProviderCircuitState>();
   private readonly defaultCooldownMs: number;
   private readonly maxConsecutiveFailures: number;
+  private readonly defaultProviderId?: string | undefined;
 
   constructor(providers: ChatModelProvider[] = [], options: FallbackChainOptions = {}) {
     this.defaultCooldownMs = options.defaultCooldownMs ?? 60_000;
     this.maxConsecutiveFailures = options.maxConsecutiveFailures ?? 3;
+    this.defaultProviderId = options.defaultProviderId;
 
     for (const provider of providers) {
       this.registerProvider(provider);
@@ -140,20 +144,25 @@ export class FallbackChainManager {
     }
   }
 
+  public getDefaultProviderId(): string | undefined {
+    return this.defaultProviderId;
+  }
+
   /**
    * Builds an ordered list of candidate providers for a request.
    * Preferred provider is evaluated first, followed by others in registration order,
    * skipping providers that are disabled or in cooldown (unless all are in cooldown).
    */
   public getCandidateProviders(preferredProviderId?: string): ChatModelProvider[] {
+    const targetPreferredId = preferredProviderId ?? this.defaultProviderId;
     const all = Array.from(this.providers.values());
     const available = all.filter((p) => p.isAvailable);
 
     // Prioritize preferred provider
     const sorted = [...available].sort((a, b) => {
-      if (preferredProviderId) {
-        if (a.id === preferredProviderId) return -1;
-        if (b.id === preferredProviderId) return 1;
+      if (targetPreferredId) {
+        if (a.id === targetPreferredId) return -1;
+        if (b.id === targetPreferredId) return 1;
       }
       return 0;
     });

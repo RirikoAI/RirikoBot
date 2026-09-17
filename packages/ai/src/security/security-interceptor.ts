@@ -61,7 +61,13 @@ export class ToolSecurityInterceptor {
 
     // 3. Guild Allowed Tools Policy
     if (context.allowedTools && context.allowedTools.length > 0) {
-      if (!context.allowedTools.includes(toolName)) {
+      const isAllowed = context.allowedTools.some(
+        (allowed) =>
+          allowed === toolName ||
+          allowed === tool.definition.name ||
+          allowed.replace(/\./g, '_') === toolName.replace(/\./g, '_'),
+      );
+      if (!isAllowed) {
         return {
           allowed: false,
           reason: 'GUILD_TOOL_DISABLED',

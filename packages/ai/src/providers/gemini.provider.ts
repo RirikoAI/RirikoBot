@@ -54,7 +54,29 @@ export class GeminiProvider implements ChatModelProvider {
     return this.client;
   }
 
+  private sanitizeToolName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+
+  private restoreToolName(name: string, originalTools?: ChatRequest['tools']): string {
+    if (originalTools) {
+      const match = originalTools.find(
+        (t) => this.sanitizeToolName(t.name) === name || t.name === name,
+      );
+      if (match) return match.name;
+    }
+    return name;
+  }
+
   private mapMessages(messages: ChatMessage[]) {
+    const toolResponses = messages.filter((m) => m.role === 'tool');
+    const respondingNames = new Set(
+      toolResponses.map((m) => this.sanitizeToolName(m.name ?? '')).filter(Boolean),
+    );
+    const respondingCallIds = new Set(
+      toolResponses.map((m) => m.toolCallId).filter(Boolean),
+    );
+
     return messages
       .filter((m) => m.role !== 'system')
       .map((msg) => {
@@ -64,7 +86,7 @@ export class GeminiProvider implements ChatModelProvider {
             parts: [
               {
                 functionResponse: {
-                  name: msg.name ?? 'tool_response',
+                  name: this.sanitizeToolName(msg.name ?? 'tool_response'),
                   response: { content: msg.content },
                 },
               },
@@ -79,16 +101,24 @@ export class GeminiProvider implements ChatModelProvider {
           }
           if (msg.toolCalls && msg.toolCalls.length > 0) {
             for (const tc of msg.toolCalls) {
-              parts.push({
-                functionCall: {
-                  name: tc.name,
-                  args: tc.arguments,
-                },
-              });
+              const sanitized = this.sanitizeToolName(tc.name);
+              // Only include functionCall if there is a corresponding tool response in the messages
+              const hasResponse =
+                respondingCallIds.has(tc.id) ||
+                respondingNames.has(sanitized) ||
+                (toolResponses.length > 0 && !tc.id && !msg.content);
+              if (hasResponse) {
+                parts.push({
+                  functionCall: {
+                    name: sanitized,
+                    args: tc.arguments,
+                  },
+                });
+              }
             }
           }
           if (parts.length === 0) {
-            parts.push({ text: '' });
+            parts.push({ text: '*(No response)*' });
           }
           return { role: 'model', parts };
         }
@@ -117,7 +147,7 @@ export class GeminiProvider implements ChatModelProvider {
       config.tools = [
         {
           functionDeclarations: request.tools.map((t) => ({
-            name: t.name,
+            name: this.sanitizeToolName(t.name),
             description: t.description,
             parameters: t.parameters,
           })),
@@ -154,7 +184,7 @@ export class GeminiProvider implements ChatModelProvider {
             const fc = part.functionCall as { name: string; args: Record<string, unknown> };
             toolCalls.push({
               id: `call_${Math.random().toString(36).slice(2, 9)}`,
-              name: fc.name,
+              name: this.restoreToolName(fc.name, request.tools),
               arguments: fc.args ?? {},
             });
           }
@@ -214,7 +244,7 @@ export class GeminiProvider implements ChatModelProvider {
               const fc = part.functionCall as { name: string; args: Record<string, unknown> };
               toolCalls.push({
                 id: `call_${Math.random().toString(36).slice(2, 9)}`,
-                name: fc.name,
+                name: this.restoreToolName(fc.name, request.tools),
                 arguments: fc.args ?? {},
               });
             }

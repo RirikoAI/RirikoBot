@@ -15,6 +15,10 @@ export interface EconomyBalanceResult {
   message: string;
 }
 
+export type EconomyBalanceResolver = (
+  userId: string,
+) => Promise<{ wallet: number; bank: number; netWorth: number } | null>;
+
 export class EconomyBalanceTool implements SafeTool<EconomyBalanceArgs, EconomyBalanceResult> {
   readonly definition = {
     name: 'economy.check_balance',
@@ -33,15 +37,34 @@ export class EconomyBalanceTool implements SafeTool<EconomyBalanceArgs, EconomyB
   readonly schema = EconomyBalanceArgsSchema;
   readonly moduleName = 'economy';
 
+  constructor(private readonly balanceResolver?: EconomyBalanceResolver) {}
+
   async execute(args: EconomyBalanceArgs, context: ToolExecutionContext): Promise<EconomyBalanceResult> {
     const targetUserId = args.targetUserId || context.userId;
+
+    let balance: { wallet: number; bank: number; netWorth: number } | null = null;
+    if (context.getBalance) {
+      balance = await context.getBalance(targetUserId).catch(() => null);
+    } else if (this.balanceResolver) {
+      balance = await this.balanceResolver(targetUserId).catch(() => null);
+    }
+
+    if (balance) {
+      return {
+        targetUserId,
+        wallet: balance.wallet,
+        bank: balance.bank,
+        netWorth: balance.netWorth,
+        message: `User ${targetUserId} has ${balance.wallet.toLocaleString()} credits in wallet and ${balance.bank.toLocaleString()} credits in bank. Total net worth is ${balance.netWorth.toLocaleString()} credits.`,
+      };
+    }
 
     return {
       targetUserId,
       wallet: 0,
       bank: 0,
       netWorth: 0,
-      message: `Balance lookup prepared for user ${targetUserId}.`,
+      message: `User ${targetUserId} currently has 0 credits in wallet and 0 credits in bank.`,
     };
   }
 }
