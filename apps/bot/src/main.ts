@@ -9,6 +9,8 @@ import {
   createModerationCommands,
   createStreamCommands,
   createFreeGamesCommand,
+  createGiveawayCommands,
+  handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
   registerMessageListener,
@@ -124,6 +126,11 @@ export async function main(): Promise<void> {
   const freeGamesCommand = createFreeGamesCommand(services);
   router.registry.register(freeGamesCommand);
 
+  const giveawayCommands = createGiveawayCommands(services);
+  for (const cmd of giveawayCommands) {
+    router.registry.register(cmd);
+  }
+
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
       .getAll()
@@ -139,12 +146,18 @@ export async function main(): Promise<void> {
   registerVoiceListener(bot.client, services);
   registerMemberListener(bot.client, services);
 
-  // Bind interactive Help Center UI components and Music Controller buttons
+  // Bind interactive Help Center UI components, Music Controller buttons, and Giveaway buttons
   bot.client.on('interactionCreate', async (interaction) => {
     try {
-      if (interaction.isButton() && interaction.customId.startsWith('music_')) {
-        await musicController.handleButtonInteraction(interaction);
-        return;
+      if (interaction.isButton()) {
+        if (interaction.customId.startsWith('music_')) {
+          await musicController.handleButtonInteraction(interaction);
+          return;
+        }
+        if (interaction.customId.startsWith('giveaway:enter:')) {
+          await handleGiveawayButtonInteraction(interaction, services);
+          return;
+        }
       }
       await handleHelpInteraction(interaction, router.registry);
     } catch (err) {
@@ -161,6 +174,7 @@ export async function main(): Promise<void> {
     try {
       services.streamWatcher.stop();
       services.freeGamesEngine.stop();
+      services.giveawayEngine.stop();
       await bot.gateway.destroy();
       console.log('✓ Bot gateway cleanly disconnected. Goodbye!');
     } catch (err) {
@@ -193,10 +207,11 @@ export async function main(): Promise<void> {
       console.log(`✨ Logged in as: ${bot.client.user?.tag} (ID: ${bot.client.user?.id})`);
       console.log(`✨ Ready to process slash commands and prefix '${prefix}' messages!\n`);
 
-      // Start background watcher & announcer engines
+      // Start background watcher, announcer & giveaway engines
       services.streamWatcher.start();
       services.freeGamesEngine.start();
-      console.log('📡 Stream Watcher & Free Games Announcer engines active!');
+      services.giveawayEngine.start();
+      console.log('📡 Stream Watcher, Free Games Announcer & Giveaways engines active!');
 
       // Initialize Lavalink connection with client credentials & shard router
       if (bot.client.user) {
