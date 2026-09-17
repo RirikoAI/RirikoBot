@@ -37,9 +37,12 @@ const BaseAppConfigSchema = z.object({
     .length(64, 'SECRET_VAULT_KEY must be a 64-character hex string (32 bytes)')
     .optional(),
 
-  // Optional AI Provider Keys
+  // Optional AI Provider Keys & Configuration
+  DEFAULT_AI_PROVIDER: z.enum(['gemini', 'openai', 'ollama']).default('gemini'),
+  DEFAULT_AI_MODEL: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
+  OPENAI_BASE_URL: z.string().url().optional(),
   OLLAMA_BASE_URL: z.string().url().optional(),
 
   // Optional Streaming & External Integrations
@@ -69,6 +72,15 @@ export const AppConfigSchema = z.preprocess((val) => {
     }
     if (!raw.SPOTIFY_DC && raw.SP_DC) {
       raw.SPOTIFY_DC = raw.SP_DC;
+    }
+    if (!raw.DEFAULT_AI_PROVIDER && raw.AI_PROVIDER) {
+      raw.DEFAULT_AI_PROVIDER = raw.AI_PROVIDER;
+    }
+    if (!raw.DEFAULT_AI_PROVIDER && raw.AI_DEFAULT_PROVIDER) {
+      raw.DEFAULT_AI_PROVIDER = raw.AI_DEFAULT_PROVIDER;
+    }
+    if (!raw.DEFAULT_AI_MODEL && raw.AI_DEFAULT_MODEL) {
+      raw.DEFAULT_AI_MODEL = raw.AI_DEFAULT_MODEL;
     }
     return raw;
   }

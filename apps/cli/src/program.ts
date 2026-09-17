@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { CORE_VERSION, RirikoError } from '@ririko/core';
 import { Command } from 'commander';
 import pc from 'picocolors';
+import { registerAiConfigureCommand } from './commands/ai-configure.js';
 import { registerDoctorCommand } from './commands/doctor.js';
 import { registerGeneratePoTokenCommand } from './commands/generate-po-token.js';
 import { registerInfoCommand } from './commands/info.js';
@@ -57,6 +58,7 @@ export function createProgram(): Command {
   registerDoctorCommand(program);
   registerMigrateCommand(program);
   registerGeneratePoTokenCommand(program);
+  registerAiConfigureCommand(program);
 
 
   // Global error handler

@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No active tickets in progress.*
+*No tickets currently in progress (WIP = 0).*
 
 ---
 
@@ -28,6 +28,12 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0007` | Bug | Wire Real Music Player Execution to MusicPlayTool in AI Chatbot | 2 | `STORY-060` | [BUG-0007.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0007.md) |
+| `BUG-0006` | Bug | Ignore Prefix Commands in AI Chat & Wire Real Database Values in EconomyBalanceTool | 2 | `STORY-060` | [BUG-0006.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0006.md) |
+| `BUG-0005` | Bug | Duplicate Tool Execution and Unrendered Raw JSON Tool Responses in AI Chat | 2 | `STORY-060` | [BUG-0005.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0005.md) |
+| `BUG-0004` | Bug | Unfulfilled Assistant Tool Calls in Historical Context Causing OpenAI 400 Error | 2 | `STORY-060` | [BUG-0004.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0004.md) |
+| `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | `STORY-060` | [BUG-0003.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0003.md) |
+| `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | `EPIC-006` | [CHORE-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-0601.md) |
 | `TASK-0732` | Task | Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests | 1 | `STORY-073` | [TASK-0732.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0732.md) |
 | `STORY-073` | Story | Dual-Dispatch Moderation Commands Suite & Gateway Listeners | 2 | `EPIC-007` | [TASK-0732.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0732.md) |
 | `EPIC-007` | Epic | Moderation 2.0 with Escalation & AutoMod | 13 | Self | [TASK-0732.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0732.md) |

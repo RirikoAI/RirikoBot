@@ -63,6 +63,20 @@ export class OpenAIProvider implements ChatModelProvider {
     return this.client;
   }
 
+  private sanitizeToolName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+
+  private restoreToolName(name: string, originalTools?: ChatRequest['tools']): string {
+    if (originalTools) {
+      const match = originalTools.find(
+        (t) => this.sanitizeToolName(t.name) === name || t.name === name,
+      );
+      if (match) return match.name;
+    }
+    return name;
+  }
+
   private mapMessages(messages: ChatMessage[], systemInstruction?: string): ChatCompletionMessageParam[] {
     const result: ChatCompletionMessageParam[] = [];
 
@@ -70,25 +84,50 @@ export class OpenAIProvider implements ChatModelProvider {
       result.push({ role: 'system', content: systemInstruction });
     }
 
+    // Collect all tool call IDs declared by assistant messages
+    const assistantToolCallIds = new Set<string>();
+    for (const msg of messages) {
+      if (msg.role === 'assistant' && msg.toolCalls) {
+        for (const tc of msg.toolCalls) {
+          if (tc.id) assistantToolCallIds.add(tc.id);
+        }
+      }
+    }
+
+    // Collect tool response IDs that actually correspond to an assistant tool call.
+    // In OpenAI Chat Completion API, an assistant message with 'tool_calls' must be followed
+    // by tool messages responding to EACH 'tool_call_id'. If an assistant message contains toolCalls
+    // from a historical turn that already resolved into conversational text without explicit tool messages,
+    // sending 'tool_calls' without response messages causes OpenAI to reject the request with HTTP 400.
+    const respondingToolCallIds = new Set(
+      messages
+        .filter((m) => m.role === 'tool' && m.toolCallId && assistantToolCallIds.has(m.toolCallId))
+        .map((m) => m.toolCallId!),
+    );
+
     for (const msg of messages) {
       if (msg.role === 'system') {
         result.push({ role: 'system', content: msg.content });
       } else if (msg.role === 'tool') {
-        result.push({
-          role: 'tool',
-          tool_call_id: msg.toolCallId ?? 'call_default',
-          content: msg.content,
-        });
+        // Only include tool response messages if they correspond to a valid assistant tool call
+        if (msg.toolCallId && respondingToolCallIds.has(msg.toolCallId)) {
+          result.push({
+            role: 'tool',
+            tool_call_id: msg.toolCallId,
+            content: msg.content,
+          });
+        }
       } else if (msg.role === 'assistant') {
-        if (msg.toolCalls && msg.toolCalls.length > 0) {
+        const validToolCalls = msg.toolCalls?.filter((tc) => respondingToolCallIds.has(tc.id)) ?? [];
+        if (validToolCalls.length > 0) {
           result.push({
             role: 'assistant',
             content: msg.content || null,
-            tool_calls: msg.toolCalls.map((tc) => ({
+            tool_calls: validToolCalls.map((tc) => ({
               id: tc.id,
               type: 'function' as const,
               function: {
-                name: tc.name,
+                name: this.sanitizeToolName(tc.name),
                 arguments: JSON.stringify(tc.arguments),
               },
             })),
@@ -96,7 +135,7 @@ export class OpenAIProvider implements ChatModelProvider {
         } else {
           result.push({
             role: 'assistant',
-            content: msg.content,
+            content: msg.content || '*(No response)*',
           });
         }
       } else {
@@ -115,7 +154,7 @@ export class OpenAIProvider implements ChatModelProvider {
     return tools.map((t) => ({
       type: 'function',
       function: {
-        name: t.name,
+        name: this.sanitizeToolName(t.name),
         description: t.description,
         parameters: t.parameters,
       },
@@ -151,7 +190,7 @@ export class OpenAIProvider implements ChatModelProvider {
             }
             toolCalls.push({
               id: tc.id,
-              name: tc.function.name,
+              name: this.restoreToolName(tc.function.name, request.tools),
               arguments: args,
             });
           }
@@ -236,7 +275,7 @@ export class OpenAIProvider implements ChatModelProvider {
         }
         completedToolCalls.push({
           id: tc.id || `call_${Math.random().toString(36).slice(2, 9)}`,
-          name: tc.name,
+          name: this.restoreToolName(tc.name, request.tools),
           arguments: args,
         });
       }

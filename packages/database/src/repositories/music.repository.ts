@@ -105,7 +105,7 @@ export class MusicRepository extends BaseRepository<
     const client = this.getClient(tx);
     const insertData: NewMusicGuildSettings = {
       guildId,
-      defaultVolume: settings.defaultVolume ?? 80,
+      defaultVolume: settings.defaultVolume ?? 20,
       djRoleId: settings.djRoleId ?? null,
       restrictVoiceChannelId: settings.restrictVoiceChannelId ?? null,
       autoLeaveEmpty: settings.autoLeaveEmpty ?? true,
