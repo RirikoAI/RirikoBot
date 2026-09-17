@@ -107,7 +107,7 @@
       "title": "Next.js 16 Web Dashboard & Management Portal",
       "points": 21,
       "status": "BACKLOG",
-      "requires": ["EPIC-002", "EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-010"],
+      "requires": ["EPIC-002", "EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-008", "EPIC-009", "EPIC-010", "EPIC-013", "EPIC-014"],
       "blocks": ["EPIC-012"],
       "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure."
     },
@@ -119,6 +119,24 @@
       "requires": ["EPIC-001", "EPIC-011"],
       "blocks": [],
       "description": "End-to-end integration tests, rootless Dockerfile, docker-compose.production.yml, /health probes."
+    },
+    {
+      "id": "EPIC-013",
+      "title": "Media Synthesis, Anime Reactions & AI Image Generation",
+      "points": 13,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"],
+      "description": "60 anime reaction commands (otakugifs.xyz), 11 meme template generators with @napi-rs/canvas, multi-backend AI image generation (/imagine), and welcomer/farewell cards."
+    },
+    {
+      "id": "EPIC-014",
+      "title": "Server Utilities, AutoRoles & Community Systems",
+      "points": 13,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"],
+      "description": "Automatic role system & reaction roles (join/button/select-menu), persistent NLP reminders, anime/manga search engine, and server utility commands parity."
     }
   ],
   "stories": [
@@ -408,6 +426,240 @@
       "points": 2,
       "status": "DONE",
       "requires": ["STORY-071", "STORY-072"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-080",
+      "epic": "EPIC-008",
+      "title": "Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok)",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-081",
+      "epic": "EPIC-008",
+      "title": "Free Games Announcer Engine (Epic Games Store & Steam Feed)",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-090",
+      "epic": "EPIC-009",
+      "title": "Giveaways 2.0 Database Engine & Resilient Lifecycle",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-091",
+      "epic": "EPIC-009",
+      "title": "Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup)",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-092",
+      "epic": "EPIC-009",
+      "title": "Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice)",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-004"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-100",
+      "epic": "EPIC-010",
+      "title": "Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002"],
+      "blocks": ["STORY-101"]
+    },
+    {
+      "id": "STORY-101",
+      "epic": "EPIC-010",
+      "title": "8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["STORY-100"],
+      "blocks": ["STORY-102"]
+    },
+    {
+      "id": "STORY-102",
+      "epic": "EPIC-010",
+      "title": "7-Element Combat Engine & Tactical Status Effects (Including Ice)",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["STORY-101"],
+      "blocks": ["STORY-103"]
+    },
+    {
+      "id": "STORY-103",
+      "epic": "EPIC-010",
+      "title": "Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["STORY-102"],
+      "blocks": ["STORY-104"]
+    },
+    {
+      "id": "STORY-104",
+      "epic": "EPIC-010",
+      "title": "PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["STORY-103"],
+      "blocks": ["STORY-105"]
+    },
+    {
+      "id": "STORY-105",
+      "epic": "EPIC-010",
+      "title": "Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch",
+      "points": 2,
+      "status": "BACKLOG",
+      "requires": ["STORY-104"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-110",
+      "epic": "EPIC-011",
+      "title": "Next.js 16 App Router, React 19 Scaffolding & Discord OAuth2 Pipeline",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["EPIC-001"],
+      "blocks": ["STORY-111"]
+    },
+    {
+      "id": "STORY-111",
+      "epic": "EPIC-011",
+      "title": "Server Management Portal & Core Module Settings Views (20+ Tabs)",
+      "points": 8,
+      "status": "BACKLOG",
+      "requires": ["STORY-110"],
+      "blocks": ["STORY-112"]
+    },
+    {
+      "id": "STORY-112",
+      "epic": "EPIC-011",
+      "title": "Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["STORY-111"],
+      "blocks": ["STORY-113"]
+    },
+    {
+      "id": "STORY-113",
+      "epic": "EPIC-011",
+      "title": "Server Analytics, Live Case Logs & Shared Zod Validation Parity",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["STORY-112"],
+      "blocks": ["EPIC-012"]
+    },
+    {
+      "id": "STORY-120",
+      "epic": "EPIC-012",
+      "title": "End-to-End Vitest & Integration Test Harness (80%+ Coverage)",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["EPIC-001"],
+      "blocks": ["STORY-121"]
+    },
+    {
+      "id": "STORY-121",
+      "epic": "EPIC-012",
+      "title": "Multi-Stage Rootless Dockerfile & docker-compose.production.yml",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["STORY-120"],
+      "blocks": ["STORY-122"]
+    },
+    {
+      "id": "STORY-122",
+      "epic": "EPIC-012",
+      "title": "Health / Readiness Probes, GitHub Actions CI/CD & Production Verification",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["STORY-121"],
+      "blocks": []
+    },
+    {
+      "id": "STORY-130",
+      "epic": "EPIC-013",
+      "title": "60 Anime Reactions Command Factory & OtakuGIFs Cache",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-131",
+      "epic": "EPIC-013",
+      "title": "11 Meme Template Canvas Synthesizers with @napi-rs/canvas",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-132",
+      "epic": "EPIC-013",
+      "title": "Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate)",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-133",
+      "epic": "EPIC-013",
+      "title": "Welcomer & Farewell Dynamic Card Canvas with SSRF Verification",
+      "points": 2,
+      "status": "BACKLOG",
+      "requires": ["EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-140",
+      "epic": "EPIC-014",
+      "title": "Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus)",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-141",
+      "epic": "EPIC-014",
+      "title": "Persistent Natural Language Reminders Engine & Chrono Scheduler",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-142",
+      "epic": "EPIC-014",
+      "title": "Anime & Manga Search Service (Jikan v4 & AniList API)",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": ["EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-143",
+      "epic": "EPIC-014",
+      "title": "Server Utility & Identity Commands Parity (/get-avatar, /guild-info, /member-info, /prefix)",
+      "points": 2,
+      "status": "BACKLOG",
+      "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     }
   ],
