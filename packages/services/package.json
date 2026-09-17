@@ -33,6 +33,10 @@
     "./autovoice": {
       "types": "./dist/autovoice/index.d.ts",
       "import": "./dist/autovoice/index.js"
+    },
+    "./games": {
+      "types": "./dist/games/index.d.ts",
+      "import": "./dist/games/index.js"
     }
   },
   "scripts": {
