@@ -72,6 +72,10 @@ import {
   SteamFreeGamesProvider,
   GiveawayEngine,
   AutoVoiceService,
+  MiniGameSessionManager,
+  GameEscrowService,
+  TicTacToeEngine,
+  RpsEngine,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -98,6 +102,10 @@ export interface BotServices {
   streamDispatcher: StreamNotificationDispatcher | undefined;
   freeGamesEngine: FreeGamesEngine;
   giveawayEngine: GiveawayEngine;
+  gameSessionManager: MiniGameSessionManager;
+  gameEscrowService: GameEscrowService;
+  tictactoeEngine: TicTacToeEngine;
+  rpsEngine: RpsEngine;
   musicPlayer: MusicPlayerService;
   economyService: EconomyService;
   bankingService: BankingService;
@@ -435,6 +443,11 @@ export async function createBotServices(
     },
   });
 
+  const gameSessionManager = new MiniGameSessionManager();
+  const gameEscrowService = new GameEscrowService(economyRepo);
+  const tictactoeEngine = new TicTacToeEngine(gameSessionManager);
+  const rpsEngine = new RpsEngine(gameSessionManager);
+
   return {
     db,
     eventBus,
@@ -458,6 +471,10 @@ export async function createBotServices(
     streamDispatcher,
     freeGamesEngine,
     giveawayEngine,
+    gameSessionManager,
+    gameEscrowService,
+    tictactoeEngine,
+    rpsEngine,
     musicPlayer,
     economyService,
     bankingService,
