@@ -23,3 +23,11 @@ export const freeGameAnnouncements = sqliteTable(
   },
   (table) => [primaryKey({ columns: [table.gameId, table.guildId] })],
 );
+
+export const freeGameChannels = sqliteTable('free_game_channels', {
+  guildId: text('guild_id').primaryKey(),
+  channelId: text('channel_id').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
