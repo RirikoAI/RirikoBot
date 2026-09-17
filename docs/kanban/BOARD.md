@@ -16,7 +16,10 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No tickets currently in To Do. Groom the next epic when ready.*
+| ID | Type | Title | Pts | Parent | Dependencies |
+|---|---|---|---|---|---|
+| `TASK-0811` | Task | Free Games Repository, Multi-Provider Fetchers (Epic Games & Steam) & Announcer Engine | 2 | `STORY-081` | `STORY-080` |
+| `TASK-0812` | Task | Dual-Dispatch Stream & Free Game Commands Suite & Quality Gate | 1 | `STORY-081` | `TASK-0811`, `TASK-0802` |
 
 ---
 
@@ -28,6 +31,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0802` | Task | Stream Notification Dispatcher, Idempotency Deduplication, Thumbnail Cache & CDN Attachment Uploader | 2 | `STORY-080` | [TASK-0802.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0802.md) |
+| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | [TASK-0802.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0802.md) |
+| `TASK-0801` | Task | Stream Repository, Multi-Platform Stream Adapters & Watcher Engine Core | 3 | `STORY-080` | [TASK-0801.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0801.md) |
 | `BUG-0007` | Bug | Wire Real Music Player Execution to MusicPlayTool in AI Chatbot | 2 | `STORY-060` | [BUG-0007.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0007.md) |
 | `BUG-0006` | Bug | Ignore Prefix Commands in AI Chat & Wire Real Database Values in EconomyBalanceTool | 2 | `STORY-060` | [BUG-0006.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0006.md) |
 | `BUG-0005` | Bug | Duplicate Tool Execution and Unrendered Raw JSON Tool Responses in AI Chat | 2 | `STORY-060` | [BUG-0005.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0005.md) |
@@ -162,7 +168,7 @@
 ### 📋 Groomed Stories for EPIC-008 (Streamers & Free Games)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
 
 ### 📋 Groomed Stories for EPIC-009 (Giveaways, AutoVoice & Mini-Games)
