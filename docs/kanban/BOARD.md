@@ -19,7 +19,6 @@
 | ID | Type | Title | Pts | Parent | Status |
 |---|---|---|---|---|---|
 | `EPIC-007` | Epic | Moderation 2.0 with Escalation & AutoMod | 13 | Self | 🎯 To Do |
-| `STORY-072` | Story | Real-Time Automated Defense & Auto-Moderation Pipeline | 3 | `EPIC-007` | 🎯 To Do |
 | `STORY-073` | Story | Dual-Dispatch Moderation Commands Suite & Gateway Listeners | 2 | `EPIC-007` | 🎯 To Do |
 
 ---
@@ -32,6 +31,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0722` | Task | Anti-Raid Mass Join Monitor & Automated Server Verification Gate | 1 | `STORY-072` | [TASK-0722.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0722.md) |
+| `STORY-072` | Story | Real-Time Automated Defense & Auto-Moderation Pipeline | 3 | `EPIC-007` | [TASK-0722.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0722.md) |
+| `TASK-0721` | Task | AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam) | 2 | `STORY-072` | [TASK-0721.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0721.md) |
 | `TASK-0712` | Task | Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support | 1 | `STORY-071` | [TASK-0712.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0712.md) |
 | `STORY-071` | Story | Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations | 3 | `EPIC-007` | [TASK-0712.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0712.md) |
 | `TASK-0711` | Task | Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations | 2 | `STORY-071` | [TASK-0711.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0711.md) |
@@ -156,8 +158,8 @@
 | `TASK-0702` | Task | Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History | 2 | `STORY-070` | ✅ Done | `TASK-0701` |
 | `TASK-0711` | Task | Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations | 2 | `STORY-071` | ✅ Done | `STORY-070` |
 | `TASK-0712` | Task | Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support | 1 | `STORY-071` | ✅ Done | `TASK-0711` |
-| `TASK-0721` | Task | AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam) | 2 | `STORY-072` | 🎯 To Do | `STORY-070` |
-| `TASK-0722` | Task | Anti-Raid Mass Join Monitor & Automated Server Verification Gate | 1 | `STORY-072` | 🎯 To Do | `TASK-0721` |
+| `TASK-0721` | Task | AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam) | 2 | `STORY-072` | ✅ Done | `STORY-070` |
+| `TASK-0722` | Task | Anti-Raid Mass Join Monitor & Automated Server Verification Gate | 1 | `STORY-072` | ✅ Done | `TASK-0721` |
 | `TASK-0731` | Task | Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.) | 1 | `STORY-073` | 🎯 To Do | `STORY-071`, `STORY-072` |
 | `TASK-0732` | Task | Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests | 1 | `STORY-073` | 🎯 To Do | `TASK-0731` |
 

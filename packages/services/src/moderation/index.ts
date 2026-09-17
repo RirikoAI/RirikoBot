@@ -5,3 +5,8 @@ export * from './moderation-log.service.js';
 export * from './disciplinary-history.service.js';
 export * from './warning-escalation.service.js';
 export * from './purge.service.js';
+export * from './automod.types.js';
+export * from './rules/index.js';
+export * from './automod.service.js';
+export * from './anti-raid.service.js';
+
