@@ -10,6 +10,7 @@ import {
   createStreamCommands,
   createFreeGamesCommand,
   createGiveawayCommands,
+  createAutoVoiceCommands,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -131,6 +132,11 @@ export async function main(): Promise<void> {
     router.registry.register(cmd);
   }
 
+  const autoVoiceCommands = createAutoVoiceCommands(services);
+  for (const cmd of autoVoiceCommands) {
+    router.registry.register(cmd);
+  }
+
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
       .getAll()
@@ -198,6 +204,15 @@ export async function main(): Promise<void> {
     services.musicPlayer.sendRawData(data);
   });
 
+  // Auto Voice Channel dynamic creation & cleanup
+  bot.client.on('voiceStateUpdate', async (oldState, newState) => {
+    try {
+      await services.autoVoiceService.handleVoiceStateUpdate(oldState, newState);
+    } catch (err) {
+      console.error('[AutoVoice] Error handling voice state update:', err);
+    }
+  });
+
   // 7. Track Gateway State Transitions
   bot.gateway.on('stateChange', async (event) => {
     console.log(
@@ -212,6 +227,13 @@ export async function main(): Promise<void> {
       services.freeGamesEngine.start();
       services.giveawayEngine.start();
       console.log('📡 Stream Watcher, Free Games Announcer & Giveaways engines active!');
+
+      // Clean up orphaned dynamic voice channels across guilds
+      for (const [, guild] of bot.client.guilds.cache) {
+        services.autoVoiceService.cleanupOrphans(guild).catch((err: unknown) => {
+          console.error(`[AutoVoice] Error cleaning orphans for guild ${guild.id}:`, err);
+        });
+      }
 
       // Initialize Lavalink connection with client credentials & shard router
       if (bot.client.user) {

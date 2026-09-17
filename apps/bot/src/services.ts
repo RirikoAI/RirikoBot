@@ -14,6 +14,7 @@ import {
   StreamRepository,
   FreeGameRepository,
   GiveawayRepository,
+  AutoVoiceRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -70,6 +71,7 @@ import {
   EpicGamesProvider,
   SteamFreeGamesProvider,
   GiveawayEngine,
+  AutoVoiceService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -90,6 +92,8 @@ export interface BotServices {
   streamRepo: StreamRepository;
   freeGameRepo: FreeGameRepository;
   giveawayRepo: GiveawayRepository;
+  autoVoiceRepo: AutoVoiceRepository;
+  autoVoiceService: AutoVoiceService;
   streamWatcher: StreamWatcherEngine;
   streamDispatcher: StreamNotificationDispatcher | undefined;
   freeGamesEngine: FreeGamesEngine;
@@ -149,6 +153,8 @@ export async function createBotServices(
   const musicRepo = new MusicRepository(db);
   const streamRepo = new StreamRepository(db);
   const freeGameRepo = new FreeGameRepository(db);
+  const autoVoiceRepo = new AutoVoiceRepository(db);
+  const autoVoiceService = new AutoVoiceService(autoVoiceRepo);
   const musicPlayer = new MusicPlayerService({
     youtubeOptions: {
       cookie: process.env.YOUTUBE_COOKIE,
@@ -446,6 +452,8 @@ export async function createBotServices(
     streamRepo,
     freeGameRepo,
     giveawayRepo,
+    autoVoiceRepo,
+    autoVoiceService,
     streamWatcher,
     streamDispatcher,
     freeGamesEngine,

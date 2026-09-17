@@ -28,6 +28,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | [TASK-0912.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0912.md) |
+| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | [TASK-0912.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0912.md) |
+| `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | [TASK-0911.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0911.md) |
 | `TASK-0902` | Task | Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners | 2 | `STORY-090` | [TASK-0902.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0902.md) |
 | `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | [TASK-0902.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0902.md) |
 | `TASK-0901` | Task | Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine | 3 | `STORY-090` | [TASK-0901.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0901.md) |
@@ -181,9 +184,9 @@
 | `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-0901` | Task | Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine | 3 | `STORY-090` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-0902` | Task | Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners | 2 | `STORY-090` | ✅ Done | `TASK-0901` |
-| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
-| `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
-| `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | 📋 Backlog | `TASK-0911` |
+| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | ✅ Done | `EPIC-002`, `EPIC-003` |
+| `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | ✅ Done | `EPIC-002`, `EPIC-003` |
+| `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | ✅ Done | `TASK-0911` |
 | `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | 📋 Backlog | `EPIC-002`, `EPIC-004` |
 | `TASK-0921` | Task | Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine | 3 | `STORY-092` | 📋 Backlog | `EPIC-002`, `EPIC-004` |
 | `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | 📋 Backlog | `TASK-0921` |

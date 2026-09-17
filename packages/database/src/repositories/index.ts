@@ -14,3 +14,4 @@ export * from './moderation.repository.js';
 export * from './stream.repository.js';
 export * from './free-game.repository.js';
 export * from './giveaway.repository.js';
+export * from './autovoice.repository.js';
