@@ -19,7 +19,6 @@
 | ID | Type | Title | Pts | Parent | Status |
 |---|---|---|---|---|---|
 | `EPIC-007` | Epic | Moderation 2.0 with Escalation & AutoMod | 13 | Self | 🎯 To Do |
-| `STORY-071` | Story | Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations | 3 | `EPIC-007` | 🎯 To Do |
 | `STORY-072` | Story | Real-Time Automated Defense & Auto-Moderation Pipeline | 3 | `EPIC-007` | 🎯 To Do |
 | `STORY-073` | Story | Dual-Dispatch Moderation Commands Suite & Gateway Listeners | 2 | `EPIC-007` | 🎯 To Do |
 
@@ -33,6 +32,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0712` | Task | Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support | 1 | `STORY-071` | [TASK-0712.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0712.md) |
+| `STORY-071` | Story | Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations | 3 | `EPIC-007` | [TASK-0712.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0712.md) |
+| `TASK-0711` | Task | Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations | 2 | `STORY-071` | [TASK-0711.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0711.md) |
 | `TASK-0702` | Task | Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History | 2 | `STORY-070` | [TASK-0702.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0702.md) |
 | `STORY-070` | Story | Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core | 5 | `EPIC-007` | [TASK-0702.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0702.md) |
 | `TASK-0701` | Task | PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock) | 3 | STORY-070 | [TASK-0701.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0701.md) |
@@ -147,17 +149,29 @@
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 6 |
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7 |
 
+### 🛠️ Groomed Tasks for EPIC-007
+| ID | Type | Title | Pts | Parent | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `TASK-0701` | Task | PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock) | 3 | `STORY-070` | ✅ Done | `EPIC-002`, `EPIC-003` |
+| `TASK-0702` | Task | Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History | 2 | `STORY-070` | ✅ Done | `TASK-0701` |
+| `TASK-0711` | Task | Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations | 2 | `STORY-071` | ✅ Done | `STORY-070` |
+| `TASK-0712` | Task | Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support | 1 | `STORY-071` | ✅ Done | `TASK-0711` |
+| `TASK-0721` | Task | AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam) | 2 | `STORY-072` | 🎯 To Do | `STORY-070` |
+| `TASK-0722` | Task | Anti-Raid Mass Join Monitor & Automated Server Verification Gate | 1 | `STORY-072` | 🎯 To Do | `TASK-0721` |
+| `TASK-0731` | Task | Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.) | 1 | `STORY-073` | 🎯 To Do | `STORY-071`, `STORY-072` |
+| `TASK-0732` | Task | Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests | 1 | `STORY-073` | 🎯 To Do | `TASK-0731` |
+
 ### 🛠️ Groomed Tasks for EPIC-006
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | ✅ Done | `TASK-0601` |
-| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | ⚡ In Progress | `STORY-060` |
-| `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | 🎯 To Do | `TASK-0611` |
-| `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | 🎯 To Do | `STORY-061` |
-| `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | 🎯 To Do | `TASK-0621` |
-| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | `STORY-063` | 🎯 To Do | `STORY-062` |
-| `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | `STORY-063` | 🎯 To Do | `TASK-0631` |
+| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | ✅ Done | `STORY-060` |
+| `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | ✅ Done | `TASK-0611` |
+| `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | ✅ Done | `STORY-061` |
+| `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | ✅ Done | `TASK-0621` |
+| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | `STORY-063` | ✅ Done | `STORY-062` |
+| `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | `STORY-063` | ✅ Done | `TASK-0631` |
 
 ### 🛠️ Groomed Tasks for EPIC-005
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |

@@ -379,7 +379,7 @@
       "epic": "EPIC-007",
       "title": "Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["STORY-071"]
     },
@@ -388,7 +388,7 @@
       "epic": "EPIC-007",
       "title": "Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-070"],
       "blocks": ["STORY-072"]
     },
@@ -960,7 +960,7 @@
       "parent": "STORY-071",
       "title": "Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-070"],
       "blocks": ["TASK-0712"],
       "description": "Implement dynamic warning escalation engine with configurable threshold mappings (warn, timeout, kick, ban), sliding-window active warning expirations (e.g. 30 days), and severity weighting."
@@ -970,7 +970,7 @@
       "parent": "STORY-071",
       "title": "Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-0711"],
       "blocks": ["STORY-072"],
       "description": "Implement filtered bulk message purging (/purge count [user] [invites] [bots] [links]) respecting Discord 14-day API limits with audit log tracking."
