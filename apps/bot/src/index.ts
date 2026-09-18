@@ -40,5 +40,6 @@ export * from './commands/streams/index.js';
 export * from './commands/giveaway/index.js';
 export * from './commands/autovoice/index.js';
 export * from './commands/games/index.js';
+export * from './commands/tcg/index.js';
 export * from './controllers/index.js';
 export * from './listeners/index.js';
