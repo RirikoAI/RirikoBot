@@ -44,6 +44,9 @@ export function createCardCommand(services: BotServices): Command {
             { name: 'Favorite (Lock card to protect from dismantle/sale)', value: 'favorite' },
             { name: 'Equip (Equip card to active combat loadout)', value: 'equip' },
             { name: 'Dismantle (Dismantle card for Crafting Dust)', value: 'dismantle' },
+            { name: 'Loadout (View card 6-slot equipped gear & bonuses)', value: 'loadout' },
+            { name: 'Equip Gear (Equip weapon/armor/relic/ring/amulet/talisman)', value: 'equip-gear' },
+            { name: 'Unequip Gear (Unequip gear from slot)', value: 'unequip-gear' },
           ],
         },
         {
@@ -90,6 +93,26 @@ export function createCardCommand(services: BotServices): Command {
           type: 'STRING',
           required: false,
         },
+        {
+          name: 'item_id',
+          description: 'Inventory item ID to equip or unequip',
+          type: 'STRING',
+          required: false,
+        },
+        {
+          name: 'slot',
+          description: 'Target gear slot (WEAPON, ARMOR, RELIC, RING, AMULET, TALISMAN)',
+          type: 'STRING',
+          required: false,
+          choices: [
+            { name: 'Weapon (ATK / CRIT / Battle Perk)', value: 'WEAPON' },
+            { name: 'Armor (HP / DEF / Shield Perk)', value: 'ARMOR' },
+            { name: 'Relic (Speed / Mastery / Tactical Perk)', value: 'RELIC' },
+            { name: 'Ring (ATK% / CRIT% / Armor Piercing%)', value: 'RING' },
+            { name: 'Amulet (HP% / DEF% / Resistance%)', value: 'AMULET' },
+            { name: 'Talisman (SPD% / Max MP% / Mana Regen%)', value: 'TALISMAN' },
+          ],
+        },
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
@@ -108,7 +131,7 @@ export function createCardCommand(services: BotServices): Command {
       }
       if (!sub) {
         const firstArg = rawArgs[0]?.toLowerCase();
-        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle'].includes(firstArg ?? '')) {
+        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle', 'loadout', 'equip-gear', 'unequip-gear'].includes(firstArg ?? '')) {
           sub = firstArg;
         } else {
           sub = 'collection';
@@ -365,6 +388,136 @@ export function createCardCommand(services: BotServices): Command {
           await ctx.reply({
             content: `🔨 Dismantled **${result.cardName}** (\`${result.rarity}\`) into **${result.dustAwarded} Crafting Dust**!`,
           });
+          break;
+        }
+
+        case 'loadout': {
+          let cardId = ctx.options.getString('id') ?? rawArgs[1];
+          if (!cardId) {
+            // Find active equipped vanguard card
+            const equippedCards = await services.waifuCardRepo.listUserCards(ctx.user.id, { state: 'EQUIPPED' });
+            if (equippedCards.length > 0) {
+              cardId = equippedCards[0]!.id;
+            } else {
+              const allCards = await services.waifuCardRepo.listUserCards(ctx.user.id);
+              if (allCards.length > 0) {
+                cardId = allCards[0]!.id;
+              }
+            }
+          }
+
+          if (!cardId) {
+            await ctx.reply({ content: '❌ You do not have any cards to inspect loadouts for.', ephemeral: true });
+            return;
+          }
+
+          const userCard = await services.waifuCardRepo.findUserCardById(cardId);
+          if (!userCard || userCard.userId !== ctx.user.id) {
+            await ctx.reply({ content: '❌ Card not found in your collection.', ephemeral: true });
+            return;
+          }
+
+          const baseCard = await services.waifuCardRepo.findById(userCard.cardId);
+          const loadout = await services.loadoutService.getCardLoadout(cardId);
+
+          const renderSlot = (piece: typeof loadout.weapon, slotName: string) => {
+            if (!piece) return `• **${slotName}**: *[Empty Slot]*`;
+            const enhance = piece.inventoryItem.enhancementLevel > 0 ? ` **+${piece.inventoryItem.enhancementLevel}**` : '';
+            return `• **${slotName}**: **${piece.item.name}**${enhance} (\`ID: ${piece.inventoryItem.id}\`)`;
+          };
+
+          const statsLines = Object.entries(loadout.aggregateStats).map(
+            ([k, v]) => `  • **${k.toUpperCase()}**: +${v}`,
+          );
+
+          const embed = new EmbedBuilder()
+            .setColor(0x5865f2)
+            .setTitle(`⚔️ 6-Slot Combat Loadout: ${baseCard?.name ?? 'Card'} (Lv.${userCard.level})`)
+            .setDescription(
+              `**🛡️ Equipments**:\n` +
+                `${renderSlot(loadout.weapon, 'Weapon')}\n` +
+                `${renderSlot(loadout.armor, 'Armor')}\n` +
+                `${renderSlot(loadout.relic, 'Relic')}\n\n` +
+                `**💍 Accessories**:\n` +
+                `${renderSlot(loadout.ring, 'Ring')}\n` +
+                `${renderSlot(loadout.amulet, 'Amulet')}\n` +
+                `${renderSlot(loadout.talisman, 'Talisman')}\n\n` +
+                `📈 **Aggregate Gear Bonuses**:\n` +
+                (statsLines.length > 0 ? statsLines.join('\n') : '  *No gear bonuses active.*') +
+                (loadout.activePerks.length > 0
+                  ? `\n\n🔥 **Active Battle Perks**:\n  • ${loadout.activePerks.join('\n  • ')}`
+                  : ''),
+            )
+            .setFooter({
+              text: 'Equip gear with /card action:equip-gear id:<card_id> item_id:<item_id> slot:<slot>',
+            });
+
+          await ctx.reply({ embeds: [embed] });
+          break;
+        }
+
+        case 'equip-gear': {
+          const cardId = ctx.options.getString('id') ?? rawArgs[1];
+          const itemId = ctx.options.getString('item_id') ?? rawArgs[2];
+          const slot = (ctx.options.getString('slot') ?? rawArgs[3])?.toUpperCase();
+
+          if (!cardId || !itemId || !slot) {
+            await ctx.reply({
+              content:
+                '❌ Missing arguments! Usage: `/card action:equip-gear id:<card_id> item_id:<item_id> slot:<WEAPON|ARMOR|RELIC|RING|AMULET|TALISMAN>`',
+              ephemeral: true,
+            });
+            return;
+          }
+
+          try {
+            const { loadout, unequippedItemName } = await services.loadoutService.equip(
+              ctx.user.id,
+              cardId,
+              itemId,
+              slot as import('@ririko/services').GearSlot,
+            );
+
+            const userCard = await services.waifuCardRepo.findUserCardById(cardId);
+            const baseCard = await services.waifuCardRepo.findById(userCard?.cardId ?? '');
+
+            const swapNotice = unequippedItemName
+              ? ` (Swapped out **${unequippedItemName}** to inventory)`
+              : '';
+
+            await ctx.reply({
+              content: `⚔️ Successfully equipped gear piece into the **${slot}** slot on **${baseCard?.name ?? 'Card'}**!${swapNotice}\nUse \`/card action:loadout id:${cardId}\` to view your updated loadout!`,
+            });
+          } catch (err: unknown) {
+            await ctx.reply({
+              content: `❌ **Equip Failed**: ${err instanceof Error ? err.message : String(err)}`,
+              ephemeral: true,
+            });
+          }
+          break;
+        }
+
+        case 'unequip-gear': {
+          const itemId = ctx.options.getString('item_id') ?? rawArgs[1];
+          if (!itemId) {
+            await ctx.reply({
+              content: '❌ Please specify the inventory item ID to unequip. Usage: `/card action:unequip-gear item_id:<item_id>`',
+              ephemeral: true,
+            });
+            return;
+          }
+
+          try {
+            const { unequippedItemName } = await services.loadoutService.unequip(ctx.user.id, itemId);
+            await ctx.reply({
+              content: `🛡️ Unequipped **${unequippedItemName}**! The gear piece was safely returned to your inventory.`,
+            });
+          } catch (err: unknown) {
+            await ctx.reply({
+              content: `❌ **Unequip Failed**: ${err instanceof Error ? err.message : String(err)}`,
+              ephemeral: true,
+            });
+          }
           break;
         }
 
