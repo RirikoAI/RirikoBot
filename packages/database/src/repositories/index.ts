@@ -17,3 +17,4 @@ export * from './giveaway.repository.js';
 export * from './autovoice.repository.js';
 export * from './waifu-asset.repository.js';
 export * from './waifu-card.repository.js';
+export * from './tcg-item.repository.js';

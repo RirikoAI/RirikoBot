@@ -12,6 +12,9 @@ import {
   createGiveawayCommands,
   createAutoVoiceCommands,
   createGamesCommands,
+  createCardCommand,
+  createGameCommand,
+  createItemCommand,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -142,6 +145,11 @@ export async function main(): Promise<void> {
   for (const cmd of gamesCommands) {
     router.registry.register(cmd);
   }
+
+  // Waifu TCG & Equipment Commands
+  router.registry.register(createCardCommand(services));
+  router.registry.register(createGameCommand(services));
+  router.registry.register(createItemCommand(services));
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry

@@ -17,6 +17,8 @@ import {
   AutoVoiceRepository,
   WaifuAssetRepository,
   WaifuCardRepository,
+  GameItemRepository,
+  UserInventoryItemRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -85,6 +87,12 @@ import {
   BossRaidService,
   PvPDuelService,
   QuestService,
+  CANONICAL_ITEMS,
+  EnhancementService,
+  LoadoutService,
+  ConsumableService,
+  EnergyLifecycleService,
+  TcgShopService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -149,6 +157,13 @@ export interface BotServices {
   bossRaidService: BossRaidService;
   pvpDuelService: PvPDuelService;
   questService: QuestService;
+  gameItemRepo: GameItemRepository;
+  userInventoryItemRepo: UserInventoryItemRepository;
+  enhancementService: EnhancementService;
+  loadoutService: LoadoutService;
+  consumableService: ConsumableService;
+  energyLifecycleService: EnergyLifecycleService;
+  tcgShopService: TcgShopService;
 }
 
 /**
@@ -485,6 +500,26 @@ export async function createBotServices(
   const pvpDuelService = new PvPDuelService(playerEnergyRepo, economyRepo, combatSimulator);
   const questService = new QuestService();
 
+  const gameItemRepo = new GameItemRepository(db);
+  const userInventoryItemRepo = new UserInventoryItemRepository(db);
+  const enhancementService = new EnhancementService(gameItemRepo, userInventoryItemRepo);
+  const loadoutService = new LoadoutService(gameItemRepo, userInventoryItemRepo, waifuCardRepo, enhancementService);
+  const consumableService = new ConsumableService(gameItemRepo, userInventoryItemRepo, playerEnergyRepo);
+  const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo);
+  const tcgShopService = new TcgShopService(gameItemRepo, userInventoryItemRepo, economyRepo);
+
+  // Seed canonical items if needed
+  try {
+    for (const item of CANONICAL_ITEMS) {
+      const exists = await gameItemRepo.findByCode(item.code);
+      if (!exists) {
+        await gameItemRepo.create(item);
+      }
+    }
+  } catch {
+    // In some unit tests with isolated in-memory databases, game_items may not be created.
+  }
+
   return {
     db,
     eventBus,
@@ -546,5 +581,12 @@ export async function createBotServices(
     bossRaidService,
     pvpDuelService,
     questService,
+    gameItemRepo,
+    userInventoryItemRepo,
+    enhancementService,
+    loadoutService,
+    consumableService,
+    energyLifecycleService,
+    tcgShopService,
   };
 }
