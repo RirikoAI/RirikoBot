@@ -230,7 +230,7 @@ describe('Waifu Ingestion Pipeline & Validation (TASK-1001)', () => {
           .mockResolvedValueOnce({
             ok: true,
             status: 200,
-            arrayBuffer: async () => samplePng.buffer,
+            arrayBuffer: async () => Uint8Array.from(samplePng).buffer,
           }) as unknown as typeof fetch,
       });
 
@@ -257,7 +257,7 @@ describe('Waifu Ingestion Pipeline & Validation (TASK-1001)', () => {
           .mockResolvedValueOnce({
             ok: true,
             status: 200,
-            arrayBuffer: async () => samplePng.buffer,
+            arrayBuffer: async () => Uint8Array.from(samplePng).buffer,
           }) as unknown as typeof fetch,
       });
 
