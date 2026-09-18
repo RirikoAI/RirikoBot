@@ -15,6 +15,8 @@ import {
   FreeGameRepository,
   GiveawayRepository,
   AutoVoiceRepository,
+  WaifuAssetRepository,
+  WaifuCardRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -76,6 +78,8 @@ import {
   GameEscrowService,
   TicTacToeEngine,
   RpsEngine,
+  DropManager,
+  CardDismantleService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -131,6 +135,10 @@ export interface BotServices {
   purgeService: PurgeService;
   autoModService: AutoModService;
   antiRaidService: AntiRaidService;
+  waifuAssetRepo: WaifuAssetRepository;
+  waifuCardRepo: WaifuCardRepository;
+  dropManager: DropManager;
+  dismantleService: CardDismantleService;
 }
 
 /**
@@ -163,6 +171,10 @@ export async function createBotServices(
   const freeGameRepo = new FreeGameRepository(db);
   const autoVoiceRepo = new AutoVoiceRepository(db);
   const autoVoiceService = new AutoVoiceService(autoVoiceRepo);
+  const waifuAssetRepo = new WaifuAssetRepository(db);
+  const waifuCardRepo = new WaifuCardRepository(db);
+  const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo);
+  const dismantleService = new CardDismantleService(waifuCardRepo);
   const musicPlayer = new MusicPlayerService({
     youtubeOptions: {
       cookie: process.env.YOUTUBE_COOKIE,
@@ -510,5 +522,9 @@ export async function createBotServices(
     purgeService,
     autoModService,
     antiRaidService,
+    waifuAssetRepo,
+    waifuCardRepo,
+    dropManager,
+    dismantleService,
   };
 }

@@ -74,6 +74,7 @@ export const userCards = sqliteTable(
     level: integer('level').notNull().default(1),
     exp: integer('exp').notNull().default(0),
     state: text('state').notNull().default('IDLE'), // 'IDLE' | 'EQUIPPED' | 'IN_TRADE' | 'IN_MARKET'
+    isFavorite: integer('is_favorite', { mode: 'boolean' }).notNull().default(false),
     obtainedAt: integer('obtained_at', { mode: 'timestamp_ms' })
       .notNull()
       .$defaultFn(() => new Date()),
