@@ -97,7 +97,7 @@
       "id": "EPIC-010",
       "title": "Waifu TCG Gameplay, Ingestion, Trading & Marketplace",
       "points": 21,
-      "status": "BACKLOG",
+      "status": "IN_PROGRESS",
       "requires": ["EPIC-002", "EPIC-004"],
       "blocks": ["EPIC-011"],
       "description": "waifu.im ingestion, 8-tier rarity math, 7 elemental affinities (including Ice), atomic P2P trading, marketplace, WaifuGuilds."
@@ -478,7 +478,7 @@
       "epic": "EPIC-010",
       "title": "Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002"],
       "blocks": ["STORY-101"]
     },
@@ -1467,6 +1467,26 @@
       "requires": ["BUG-0006"],
       "blocks": [],
       "description": "Connect MusicPlayTool in AI chat to real MusicPlayerService, validating voice channel presence and permissions, joining, queueing audio tracks, and refreshing the active music embed controller."
+    },
+    {
+      "id": "TASK-1001",
+      "title": "waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-100",
+      "requires": ["EPIC-002"],
+      "blocks": ["TASK-1002"],
+      "description": "Build WaifuImClient with rate-limiting and backoff, ImageValidator for PNG/JPEG/WebP magic bytes and aspect ratio, SHA-256 binary deduplication, and dual-dialect WaifuAssetRepository with starter seed dataset."
+    },
+    {
+      "id": "TASK-1002",
+      "title": "Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests",
+      "points": 1,
+      "status": "DONE",
+      "parent": "STORY-100",
+      "requires": ["TASK-1001"],
+      "blocks": ["STORY-101"],
+      "description": "Enforce mandatory attribution footer 'Image source: waifu.im', graceful deletion silhouette card frame fallback preserving character stats and user ownership, and complete unit/integration test suite."
     }
   ]
 }
