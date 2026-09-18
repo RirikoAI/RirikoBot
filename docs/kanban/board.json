@@ -487,7 +487,7 @@
       "epic": "EPIC-010",
       "title": "8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-100"],
       "blocks": ["STORY-102"]
     },
@@ -1487,6 +1487,26 @@
       "requires": ["TASK-1001"],
       "blocks": ["STORY-101"],
       "description": "Enforce mandatory attribution footer 'Image source: waifu.im', graceful deletion silhouette card frame fallback preserving character stats and user ownership, and complete unit/integration test suite."
+    },
+    {
+      "id": "TASK-1011",
+      "title": "8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling",
+      "points": 3,
+      "status": "DONE",
+      "parent": "STORY-101",
+      "requires": ["STORY-100"],
+      "blocks": ["TASK-1012"],
+      "description": "Build 8-tier cumulative probability rarity engine with exact multipliers (1.0x to 5.0x) and max levels (20 to 100), dynamic primary stats (HP 500-15k, ATK 50-2500, DEF 30-1800, SPD 10-300, CRIT 5-50%, MP 100), active/passive skills, and WaifuCardRepository."
+    },
+    {
+      "id": "TASK-1012",
+      "title": "Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-101",
+      "requires": ["TASK-1011"],
+      "blocks": ["STORY-102"],
+      "description": "Implement drop trigger manager on message thresholds (50-100 msgs) during active hours (08:00-23:00), 60s [Claim Card] button, 5-minute claimant anti-sniping cooldown, crafting dust dismantling, and /card collection/inspect/favorite/equip commands."
     }
   ]
 }
