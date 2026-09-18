@@ -496,7 +496,7 @@
       "epic": "EPIC-010",
       "title": "7-Element Combat Engine & Tactical Status Effects (Including Ice)",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-101"],
       "blocks": ["STORY-103"]
     },
@@ -1507,6 +1507,26 @@
       "requires": ["TASK-1011"],
       "blocks": ["STORY-102"],
       "description": "Implement drop trigger manager on message thresholds (50-100 msgs) during active hours (08:00-23:00), 60s [Claim Card] button, 5-minute claimant anti-sniping cooldown, crafting dust dismantling, and /card collection/inspect/favorite/equip commands."
+    },
+    {
+      "id": "TASK-1021",
+      "title": "7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-102",
+      "requires": ["STORY-101"],
+      "blocks": ["TASK-1022"],
+      "description": "Build 7-element affinity matrix (Fire > Ice > Earth > Lightning > Water > Fire, Light <> Shadow), status effects engine (Burn, Freeze/Chill, Fortify, Surge, Purify/Flow, Radiance, Decay/Leech), 6 rarity-scaled battle perks, and turn-based combat simulator with turn 10+ soft enrage."
+    },
+    {
+      "id": "TASK-1022",
+      "title": "PvP Duels (/game pvp), Timed Expeditions (/game explore), Boss Raids (/game boss) & Quests",
+      "points": 1,
+      "status": "DONE",
+      "parent": "STORY-102",
+      "requires": ["TASK-1021"],
+      "blocks": ["STORY-103"],
+      "description": "Implement PvP duel controller with credit wager escrow, timed expeditions engine (1h, 4h, 8h with energy consumption), cooperative boss raid service, quests milestone tracking, and /game pvp, explore, boss, quests commands suite."
     }
   ]
 }

@@ -28,6 +28,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-1022` | Task | PvP Duels (`/game pvp`), Timed Expeditions (`/game explore`), Boss Raids (`/game boss`) & Quests | 1 | `STORY-102` | [TASK-1022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1022.md) |
+| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | [TASK-1022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1022.md) |
+| `TASK-1021` | Task | 7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator | 2 | `STORY-102` | [TASK-1021.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1021.md) |
 | `TASK-1012` | Task | Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite | 2 | `STORY-101` | [TASK-1012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1012.md) |
 | `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | [TASK-1012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1012.md) |
 | `TASK-1011` | Task | 8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling | 3 | `STORY-101` | [TASK-1011.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1011.md) |
@@ -190,7 +193,9 @@
 | `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | ✅ Done | `STORY-100` |
 | `TASK-1011` | Task | 8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling | 3 | `STORY-101` | ✅ Done | `STORY-100` |
 | `TASK-1012` | Task | Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite | 2 | `STORY-101` | ✅ Done | `TASK-1011` |
-| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | 📋 Backlog | `STORY-101` |
+| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | ✅ Done | `STORY-101` |
+| `TASK-1021` | Task | 7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator | 2 | `STORY-102` | ✅ Done | `STORY-101` |
+| `TASK-1022` | Task | PvP Duels (`/game pvp`), Timed Expeditions (`/game explore`), Boss Raids (`/game boss`) & Quests | 1 | `STORY-102` | ✅ Done | `TASK-1021` |
 | `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | 📋 Backlog | `STORY-102` |
 | `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | 📋 Backlog | `STORY-103` |
 | `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 2 | `EPIC-010` | 📋 Backlog | `STORY-104` |

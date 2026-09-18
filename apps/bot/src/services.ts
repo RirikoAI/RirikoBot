@@ -80,6 +80,11 @@ import {
   RpsEngine,
   DropManager,
   CardDismantleService,
+  CombatSimulator,
+  ExpeditionService,
+  BossRaidService,
+  PvPDuelService,
+  QuestService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -139,6 +144,11 @@ export interface BotServices {
   waifuCardRepo: WaifuCardRepository;
   dropManager: DropManager;
   dismantleService: CardDismantleService;
+  combatSimulator: CombatSimulator;
+  expeditionService: ExpeditionService;
+  bossRaidService: BossRaidService;
+  pvpDuelService: PvPDuelService;
+  questService: QuestService;
 }
 
 /**
@@ -469,6 +479,11 @@ export async function createBotServices(
   const gameEscrowService = new GameEscrowService(economyRepo);
   const tictactoeEngine = new TicTacToeEngine(gameSessionManager);
   const rpsEngine = new RpsEngine(gameSessionManager);
+  const combatSimulator = new CombatSimulator({ maxTurns: 25 });
+  const expeditionService = new ExpeditionService(playerEnergyRepo);
+  const bossRaidService = new BossRaidService(playerEnergyRepo, combatSimulator);
+  const pvpDuelService = new PvPDuelService(playerEnergyRepo, economyRepo, combatSimulator);
+  const questService = new QuestService();
 
   return {
     db,
@@ -526,5 +541,10 @@ export async function createBotServices(
     waifuCardRepo,
     dropManager,
     dismantleService,
+    combatSimulator,
+    expeditionService,
+    bossRaidService,
+    pvpDuelService,
+    questService,
   };
 }
