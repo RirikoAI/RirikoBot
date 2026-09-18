@@ -87,6 +87,9 @@ importers:
       '@ririko/music':
         specifier: workspace:*
         version: link:../../packages/music
+      '@ririko/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       commander:
         specifier: ^13.1.0
         version: 13.1.0

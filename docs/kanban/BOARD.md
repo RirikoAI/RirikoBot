@@ -28,6 +28,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-0803` | Task | Multi-Platform Stream Watcher Engine Reinforcement, Resilient Adapters, CLI Stream Configuration & General Stream Commands | 3 | `STORY-080` | [TASK-0803.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0803.md) |
 | `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
 | `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
 | `EPIC-009` | Epic | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | 13 | Self | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |

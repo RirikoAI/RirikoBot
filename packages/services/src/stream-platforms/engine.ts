@@ -7,9 +7,16 @@ import type {
 } from './types.js';
 
 export interface StreamWatcherOptions {
-  checkIntervalMs?: number;
+  checkIntervalMs?: number | undefined;
   onStreamLive?: (streamer: Streamer, stream: LiveStreamInfo) => Promise<void> | void;
   onStreamOffline?: (streamer: Streamer) => Promise<void> | void;
+}
+
+export interface StreamCheckResult {
+  totalChecked: number;
+  liveCount: number;
+  errors: number;
+  durationMs: number;
 }
 
 export class StreamWatcherEngine {
@@ -20,12 +27,15 @@ export class StreamWatcherEngine {
 
   private timer: NodeJS.Timeout | null = null;
   private isChecking = false;
+  private lastCheckedAt: Date | null = null;
 
   constructor(
     private readonly streamRepo: StreamRepository,
     options: StreamWatcherOptions = {},
   ) {
-    this.checkIntervalMs = options.checkIntervalMs ?? 60_000;
+    this.checkIntervalMs =
+      options.checkIntervalMs ??
+      Number(process.env.STREAM_CHECK_INTERVAL_MS || 60_000);
     this.onStreamLive = options.onStreamLive;
     this.onStreamOffline = options.onStreamOffline;
   }
@@ -37,6 +47,18 @@ export class StreamWatcherEngine {
 
   getAdapter(platform: StreamPlatform): StreamPlatformAdapter | undefined {
     return this.adapters.get(platform);
+  }
+
+  getAdapters(): Map<StreamPlatform, StreamPlatformAdapter> {
+    return new Map(this.adapters);
+  }
+
+  getCheckIntervalMs(): number {
+    return this.checkIntervalMs;
+  }
+
+  getLastCheckedAt(): Date | null {
+    return this.lastCheckedAt;
   }
 
   start(): void {
@@ -63,15 +85,36 @@ export class StreamWatcherEngine {
     return this.timer !== null;
   }
 
+  /**
+   * Performs a complete polling cycle and returns total live streams detected.
+   */
   async checkStreams(): Promise<number> {
-    if (this.isChecking) return 0;
-    this.isChecking = true;
+    const result = await this.checkStreamsDetailed();
+    return result.liveCount;
+  }
 
+  /**
+   * Detailed check cycle with diagnostic metrics and isolated error boundaries.
+   */
+  async checkStreamsDetailed(): Promise<StreamCheckResult> {
+    if (this.isChecking) {
+      return { totalChecked: 0, liveCount: 0, errors: 0, durationMs: 0 };
+    }
+    this.isChecking = true;
+    const startTime = Date.now();
+
+    let totalChecked = 0;
     let liveCount = 0;
+    let errorCount = 0;
 
     try {
       const streamers = await this.streamRepo.listActiveMonitoredStreamers();
-      if (streamers.length === 0) return 0;
+      if (streamers.length === 0) {
+        this.lastCheckedAt = new Date();
+        return { totalChecked: 0, liveCount: 0, errors: 0, durationMs: Date.now() - startTime };
+      }
+
+      totalChecked = streamers.length;
 
       // Group streamers by platform
       const byPlatform = new Map<StreamPlatform, Streamer[]>();
@@ -84,110 +127,137 @@ export class StreamWatcherEngine {
 
       for (const [platform, platformStreamers] of byPlatform.entries()) {
         const adapter = this.adapters.get(platform);
-        if (!adapter || !adapter.isConfigured()) continue;
+        if (!adapter) {
+          console.warn(`[StreamWatcherEngine] No adapter registered for platform: ${platform}`);
+          continue;
+        }
 
-        if (adapter.getBatchStreamStatus) {
-          const results = await adapter.getBatchStreamStatus(
-            platformStreamers.map((s) => ({
-              platformUserId: s.platformUserId,
-              username: s.username,
-            })),
-          );
+        if (!adapter.isConfigured()) {
+          continue;
+        }
 
-          for (const s of platformStreamers) {
-            const liveData = results.get(s.username.toLowerCase()) ?? null;
-            const isNowLive = Boolean(liveData);
+        try {
+          if (adapter.getBatchStreamStatus) {
+            const results = await adapter.getBatchStreamStatus(
+              platformStreamers.map((s) => ({
+                platformUserId: s.platformUserId,
+                username: s.username,
+              })),
+            );
 
-            if (isNowLive && liveData) {
-              liveCount++;
-              // If streamer wasn't marked live, state transition: OFFLINE -> LIVE
-              if (!s.isLive) {
-                await this.streamRepo.updateLiveStatus(s.id, true, new Date());
-                await this.streamRepo.recordStreamEvent({
-                  streamerId: s.id,
-                  streamId: liveData.streamId,
-                  title: liveData.title,
-                  gameName: liveData.gameName,
-                  viewerCount: liveData.viewerCount,
-                  startedAt: liveData.startedAt,
-                });
+            for (const s of platformStreamers) {
+              try {
+                const liveData = results.get(s.username.toLowerCase()) ?? null;
+                const isNowLive = Boolean(liveData);
 
-                if (this.onStreamLive) {
-                  try {
-                    await this.onStreamLive(s, liveData);
-                  } catch (handlerErr) {
-                    console.error(`[StreamWatcher] onStreamLive error for ${s.username}:`, handlerErr);
+                if (isNowLive && liveData) {
+                  liveCount++;
+                  if (!s.isLive) {
+                    await this.streamRepo.updateLiveStatus(s.id, true, new Date());
+                    await this.streamRepo.recordStreamEvent({
+                      streamerId: s.id,
+                      streamId: liveData.streamId,
+                      title: liveData.title,
+                      gameName: liveData.gameName,
+                      viewerCount: liveData.viewerCount,
+                      startedAt: liveData.startedAt,
+                    });
+
+                    if (this.onStreamLive) {
+                      try {
+                        await this.onStreamLive(s, liveData);
+                      } catch (handlerErr) {
+                        console.error(`[StreamWatcher] onStreamLive error for ${s.username}:`, handlerErr);
+                      }
+                    }
                   }
-                }
-              }
-            } else if (!isNowLive && s.isLive) {
-              // State transition: LIVE -> OFFLINE
-              await this.streamRepo.updateLiveStatus(s.id, false, new Date());
+                } else if (!isNowLive && s.isLive) {
+                  await this.streamRepo.updateLiveStatus(s.id, false, new Date());
 
-              if (this.onStreamOffline) {
-                try {
-                  await this.onStreamOffline(s);
-                } catch (handlerErr) {
-                  console.error(`[StreamWatcher] onStreamOffline error for ${s.username}:`, handlerErr);
+                  if (this.onStreamOffline) {
+                    try {
+                      await this.onStreamOffline(s);
+                    } catch (handlerErr) {
+                      console.error(`[StreamWatcher] onStreamOffline error for ${s.username}:`, handlerErr);
+                    }
+                  }
+                } else {
+                  await this.streamRepo.updateLiveStatus(s.id, s.isLive, new Date());
                 }
+              } catch (itemErr) {
+                errorCount++;
+                console.error(`[StreamWatcherEngine] Error processing streamer ${s.username}:`, itemErr);
               }
-            } else {
-              // Update last checked timestamp
-              await this.streamRepo.updateLiveStatus(s.id, s.isLive, new Date());
+            }
+          } else {
+            // Sequential resolution with isolated error handling per streamer
+            for (const s of platformStreamers) {
+              try {
+                const liveData = await adapter.getStreamStatus({
+                  platformUserId: s.platformUserId,
+                  username: s.username,
+                });
+                const isNowLive = Boolean(liveData);
+
+                if (isNowLive && liveData) {
+                  liveCount++;
+                  if (!s.isLive) {
+                    await this.streamRepo.updateLiveStatus(s.id, true, new Date());
+                    await this.streamRepo.recordStreamEvent({
+                      streamerId: s.id,
+                      streamId: liveData.streamId,
+                      title: liveData.title,
+                      gameName: liveData.gameName,
+                      viewerCount: liveData.viewerCount,
+                      startedAt: liveData.startedAt,
+                    });
+
+                    if (this.onStreamLive) {
+                      try {
+                        await this.onStreamLive(s, liveData);
+                      } catch (handlerErr) {
+                        console.error(`[StreamWatcher] onStreamLive error for ${s.username}:`, handlerErr);
+                      }
+                    }
+                  }
+                } else if (!isNowLive && s.isLive) {
+                  await this.streamRepo.updateLiveStatus(s.id, false, new Date());
+
+                  if (this.onStreamOffline) {
+                    try {
+                      await this.onStreamOffline(s);
+                    } catch (handlerErr) {
+                      console.error(`[StreamWatcher] onStreamOffline error for ${s.username}:`, handlerErr);
+                    }
+                  }
+                } else {
+                  await this.streamRepo.updateLiveStatus(s.id, s.isLive, new Date());
+                }
+              } catch (itemErr) {
+                errorCount++;
+                console.error(`[StreamWatcherEngine] Error checking streamer ${s.username} (${platform}):`, itemErr);
+              }
             }
           }
-        } else {
-          // Sequential resolution
-          for (const s of platformStreamers) {
-            const liveData = await adapter.getStreamStatus({
-              platformUserId: s.platformUserId,
-              username: s.username,
-            });
-            const isNowLive = Boolean(liveData);
-
-            if (isNowLive && liveData) {
-              liveCount++;
-              if (!s.isLive) {
-                await this.streamRepo.updateLiveStatus(s.id, true, new Date());
-                await this.streamRepo.recordStreamEvent({
-                  streamerId: s.id,
-                  streamId: liveData.streamId,
-                  title: liveData.title,
-                  gameName: liveData.gameName,
-                  viewerCount: liveData.viewerCount,
-                  startedAt: liveData.startedAt,
-                });
-
-                if (this.onStreamLive) {
-                  try {
-                    await this.onStreamLive(s, liveData);
-                  } catch (handlerErr) {
-                    console.error(`[StreamWatcher] onStreamLive error for ${s.username}:`, handlerErr);
-                  }
-                }
-              }
-            } else if (!isNowLive && s.isLive) {
-              await this.streamRepo.updateLiveStatus(s.id, false, new Date());
-
-              if (this.onStreamOffline) {
-                try {
-                  await this.onStreamOffline(s);
-                } catch (handlerErr) {
-                  console.error(`[StreamWatcher] onStreamOffline error for ${s.username}:`, handlerErr);
-                }
-              }
-            } else {
-              await this.streamRepo.updateLiveStatus(s.id, s.isLive, new Date());
-            }
-          }
+        } catch (platformErr) {
+          errorCount++;
+          console.error(`[StreamWatcherEngine] Error in platform check cycle for ${platform}:`, platformErr);
         }
       }
+
+      this.lastCheckedAt = new Date();
     } catch (err) {
+      errorCount++;
       console.error('[StreamWatcherEngine] Polling cycle error:', err);
     } finally {
       this.isChecking = false;
     }
 
-    return liveCount;
+    return {
+      totalChecked,
+      liveCount,
+      errors: errorCount,
+      durationMs: Date.now() - startTime,
+    };
   }
 }

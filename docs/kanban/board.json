@@ -1288,6 +1288,16 @@
       "description": "Implement StreamNotificationDispatcher with stream_announcements idempotency deduplication and Discord attachment thumbnail CDN proxying."
     },
     {
+      "id": "TASK-0803",
+      "parent": "STORY-080",
+      "title": "Multi-Platform Stream Watcher Engine Reinforcement, Resilient Adapters, CLI Stream Configuration & General Stream Commands",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["TASK-0802"],
+      "blocks": [],
+      "description": "Reinforce Twitch, YouTube, and TikTok adapters, implement ririko stream-configure CLI command, fix cross-platform unsubscription, and generalize command names."
+    },
+    {
       "id": "TASK-0811",
       "parent": "STORY-081",
       "title": "Free Games Repository, Multi-Provider Fetchers (Epic Games & Steam) & Announcer Engine",
