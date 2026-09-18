@@ -194,12 +194,59 @@ export const twitchCheck: DiagnosticCheck = {
     if (process.env.TWITCH_CLIENT_ID && process.env.TWITCH_CLIENT_SECRET) {
       return {
         status: 'pass',
-        message: 'Configured',
+        message: 'Configured (Client ID + Secret active)',
       };
     }
     return {
       status: 'warn',
-      message: 'TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET not configured (Optional)',
+      message: 'TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET not configured (Run `ririko stream-configure`)',
+    };
+  },
+};
+
+export const youtubeStreamCheck: DiagnosticCheck = {
+  name: 'YouTube Live Alerts',
+  required: false,
+  run: () => {
+    if (process.env.YOUTUBE_API_KEY) {
+      return {
+        status: 'pass',
+        message: 'Configured (YouTube Data API v3 key active)',
+      };
+    }
+    return {
+      status: 'pass',
+      message: 'Active via public web & RSS fallback (Optional: set YOUTUBE_API_KEY for higher quota)',
+    };
+  },
+};
+
+export const tiktokStreamCheck: DiagnosticCheck = {
+  name: 'TikTok Live Alerts',
+  required: false,
+  run: () => {
+    if (process.env.TIKTOK_SESSION_ID || process.env.TIKTOK_API_KEY) {
+      return {
+        status: 'pass',
+        message: 'Configured (Session ID / API Key active)',
+      };
+    }
+    return {
+      status: 'pass',
+      message: 'Active via public room alive checks (Optional: set TIKTOK_SESSION_ID to bypass anti-bot challenges)',
+    };
+  },
+};
+
+export const streamPollerCheck: DiagnosticCheck = {
+  name: 'Stream Polling Interval',
+  required: false,
+  run: () => {
+    const intervalMs = Number(process.env.STREAM_CHECK_INTERVAL_MS || 60000);
+    const seconds = Math.round(intervalMs / 1000);
+    return {
+      status: 'pass',
+      message: `Interval set to ${intervalMs}ms (${seconds}s)`,
     };
   },
 };
@@ -248,6 +295,9 @@ export const allChecks: DiagnosticCheck[] = [
   geminiCheck,
   openaiCheck,
   twitchCheck,
+  youtubeStreamCheck,
+  tiktokStreamCheck,
+  streamPollerCheck,
   spotifyCheck,
 ];
 

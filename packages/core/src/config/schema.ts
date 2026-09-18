@@ -48,6 +48,10 @@ const BaseAppConfigSchema = z.object({
   // Optional Streaming & External Integrations
   TWITCH_CLIENT_ID: z.string().optional(),
   TWITCH_CLIENT_SECRET: z.string().optional(),
+  YOUTUBE_API_KEY: z.string().optional(),
+  TIKTOK_SESSION_ID: z.string().optional(),
+  TIKTOK_API_KEY: z.string().optional(),
+  STREAM_CHECK_INTERVAL_MS: z.coerce.number().int().min(5000).max(86400000).default(60000),
   SPOTIFY_CLIENT_ID: z.string().optional(),
   SPOTIFY_CLIENT_SECRET: z.string().optional(),
   SPOTIFY_REFRESH_TOKEN: z.string().optional(),

@@ -92,16 +92,22 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
     };
   });
 
-  describe('Stream Alerts Commands (/stream, !subscribe, !unsubscribe, !setup-twitch, !twitch-status)', () => {
-    it('should register 5 stream commands including legacy aliases', () => {
+  describe('Stream Alerts Commands (/stream, !subscribe, !unsubscribe, !setup-stream-notification, !stream-status)', () => {
+    it('should register 5 stream commands including generalized names and legacy aliases', () => {
       const commands = createStreamCommands(mockServices as BotServices);
       expect(commands).toHaveLength(5);
       const names = commands.map((c) => c.metadata.name);
       expect(names).toContain('stream');
       expect(names).toContain('subscribe');
       expect(names).toContain('unsubscribe');
-      expect(names).toContain('setup-twitch');
-      expect(names).toContain('twitch-status');
+      expect(names).toContain('setup-stream-notification');
+      expect(names).toContain('stream-status');
+
+      const setupCmd = commands.find((c) => c.metadata.name === 'setup-stream-notification')!;
+      expect(setupCmd.metadata.aliases).toContain('setup-twitch');
+
+      const statusCmd = commands.find((c) => c.metadata.name === 'stream-status')!;
+      expect(statusCmd.metadata.aliases).toContain('twitch-status');
     });
 
     it('subscribing to a streamer requires ManageGuild permissions', async () => {
@@ -229,6 +235,97 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
       expect(mockCtx.editReply).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining('Successfully unsubscribed'),
+        }),
+      );
+    });
+
+    it('unsubscribes a YouTube streamer without requiring Twitch platform default', async () => {
+      (mockServices.streamRepo!.listGuildSubscriptionsWithStreamers as any) = vi.fn().mockResolvedValue([
+        {
+          subscription: { id: 'sub_yt_1', guildId: 'guild-1', streamerId: 'youtube_lofigirl' },
+          streamer: {
+            id: 'youtube_lofigirl',
+            platform: 'YOUTUBE',
+            platformUserId: 'UC_lofigirl',
+            username: 'lofigirl',
+            displayName: 'Lofi Girl',
+          },
+        },
+      ]);
+
+      const commands = createStreamCommands(mockServices as BotServices);
+      const streamCmd = commands.find((c) => c.metadata.name === 'stream')!;
+
+      const mockCtx: any = {
+        guildId: 'guild-1',
+        member: {
+          permissions: {
+            has: vi.fn().mockReturnValue(true),
+          },
+        },
+        options: {
+          getString: vi.fn().mockImplementation((name) => {
+            if (name === 'action') return 'unsubscribe';
+            if (name === 'streamer') return 'lofigirl';
+            return null;
+          }),
+          getRawArgs: vi.fn().mockReturnValue([]),
+        },
+        deferReply: vi.fn().mockResolvedValue(undefined),
+        editReply: vi.fn().mockResolvedValue(undefined),
+      };
+
+      await streamCmd.execute(mockCtx);
+
+      expect(mockServices.streamRepo?.removeSubscription).toHaveBeenCalledWith('guild-1', 'youtube_lofigirl');
+      expect(mockCtx.editReply).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.stringContaining('Lofi Girl'),
+        }),
+      );
+    });
+
+    it('executes /stream check manual poll diagnostic cycle', async () => {
+      (mockServices.streamWatcher as any).checkStreamsDetailed = vi.fn().mockResolvedValue({
+        totalChecked: 3,
+        liveCount: 1,
+        errors: 0,
+        durationMs: 45,
+      });
+      (mockServices.streamRepo!.listActiveMonitoredStreamers as any) = vi.fn().mockResolvedValue([
+        {
+          id: 'twitch_shroud',
+          platform: 'TWITCH',
+          username: 'shroud',
+          displayName: 'shroud',
+          isLive: true,
+        },
+      ]);
+
+      const commands = createStreamCommands(mockServices as BotServices);
+      const streamCmd = commands.find((c) => c.metadata.name === 'stream')!;
+
+      const mockCtx: any = {
+        guildId: 'guild-1',
+        member: {
+          permissions: {
+            has: vi.fn().mockReturnValue(true),
+          },
+        },
+        options: {
+          getString: vi.fn().mockImplementation((name) => (name === 'action' ? 'check' : null)),
+          getRawArgs: vi.fn().mockReturnValue([]),
+        },
+        deferReply: vi.fn().mockResolvedValue(undefined),
+        editReply: vi.fn().mockResolvedValue(undefined),
+      };
+
+      await streamCmd.execute(mockCtx);
+
+      expect(mockCtx.deferReply).toHaveBeenCalled();
+      expect(mockCtx.editReply).toHaveBeenCalledWith(
+        expect.objectContaining({
+          embeds: expect.any(Array),
         }),
       );
     });

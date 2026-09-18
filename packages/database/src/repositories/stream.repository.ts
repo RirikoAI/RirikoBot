@@ -517,6 +517,40 @@ export class StreamRepository extends BaseRepository<Streamer, NewStreamer, Part
     }
   }
 
+  async listGuildSubscriptionsWithStreamers(
+    guildId: string,
+    tx?: DatabaseClient,
+  ): Promise<Array<{ subscription: StreamSubscription; streamer: Streamer }>> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const rows = await client.db
+        .select({
+          subscription: sqliteSchema.streamSubscriptions,
+          streamer: sqliteSchema.streamers,
+        })
+        .from(sqliteSchema.streamSubscriptions)
+        .innerJoin(
+          sqliteSchema.streamers,
+          eq(sqliteSchema.streamSubscriptions.streamerId, sqliteSchema.streamers.id),
+        )
+        .where(eq(sqliteSchema.streamSubscriptions.guildId, guildId));
+      return rows as unknown as Array<{ subscription: StreamSubscription; streamer: Streamer }>;
+    } else {
+      const rows = await client.db
+        .select({
+          subscription: pgSchema.streamSubscriptions,
+          streamer: pgSchema.streamers,
+        })
+        .from(pgSchema.streamSubscriptions)
+        .innerJoin(
+          pgSchema.streamers,
+          eq(pgSchema.streamSubscriptions.streamerId, pgSchema.streamers.id),
+        )
+        .where(eq(pgSchema.streamSubscriptions.guildId, guildId));
+      return rows as unknown as Array<{ subscription: StreamSubscription; streamer: Streamer }>;
+    }
+  }
+
   async getSubscriptionsByStreamer(
     streamerId: string,
     tx?: DatabaseClient,

@@ -135,12 +135,27 @@ export class TwitchStreamAdapter implements StreamPlatformAdapter {
         url.searchParams.append('user_login', s.username.toLowerCase());
       }
 
-      const response = await this.fetch(url.toString(), {
+      let response = await this.fetch(url.toString(), {
         headers: {
           'Client-ID': this.clientId!,
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (response.status === 401) {
+        // Token expired or invalidated, clear and retry once
+        this.accessToken = null;
+        this.tokenExpiresAt = 0;
+        const freshToken = await this.getAccessToken();
+        if (freshToken) {
+          response = await this.fetch(url.toString(), {
+            headers: {
+              'Client-ID': this.clientId!,
+              Authorization: `Bearer ${freshToken}`,
+            },
+          });
+        }
+      }
 
       if (!response.ok) {
         console.warn(`[TwitchAdapter] Helix streams query failed with HTTP ${response.status}`);

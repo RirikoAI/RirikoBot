@@ -16,6 +16,7 @@
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
     "@ririko/music": "workspace:*",
+    "@ririko/services": "workspace:*",
     "commander": "^13.1.0",
     "picocolors": "^1.1.1",
     "playwright": "^1.50.0"
