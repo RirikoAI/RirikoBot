@@ -42,6 +42,8 @@ export function createGameCommand(services: BotServices): Command {
             { name: 'Timed Expeditions (Explore 1h, 4h, 8h for loot)', value: 'explore' },
             { name: 'World Boss Raid (Cooperative massive HP titan)', value: 'boss' },
             { name: 'Quests (Daily & weekly mission milestones)', value: 'quests' },
+            { name: 'Town Shop (Browse standard equipment and potions)', value: 'shop' },
+            { name: 'Buy Item (Purchase item with wallet credits)', value: 'buy' },
           ],
         },
         {
@@ -86,6 +88,18 @@ export function createGameCommand(services: BotServices): Command {
           type: 'STRING',
           required: false,
         },
+        {
+          name: 'item',
+          description: 'Item code or ID to purchase from Town Shop',
+          type: 'STRING',
+          required: false,
+        },
+        {
+          name: 'quantity',
+          description: 'Quantity to purchase from Town Shop',
+          type: 'INTEGER',
+          required: false,
+        },
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
@@ -106,7 +120,7 @@ export function createGameCommand(services: BotServices): Command {
 
       if (!action) {
         const first = rawArgs[0]?.toLowerCase();
-        if (['pvp', 'explore', 'boss', 'quests'].includes(first ?? '')) {
+        if (['pvp', 'explore', 'boss', 'quests', 'shop', 'buy'].includes(first ?? '')) {
           action = first;
         } else {
           action = 'quests';
@@ -402,6 +416,16 @@ export function createGameCommand(services: BotServices): Command {
           break;
         }
 
+        case 'shop': {
+          await handleShop(ctx, services, rawArgs);
+          break;
+        }
+
+        case 'buy': {
+          await handleBuy(ctx, services, rawArgs);
+          break;
+        }
+
         default:
           await ctx.reply({ content: `Unknown action: ${action}`, ephemeral: true });
       }
@@ -436,7 +460,7 @@ async function fetchUserCombatCards(
       uc.level,
     );
 
-    combatants.push({
+    const combatant: Combatant = {
       id: uc.id,
       name: `${base.name} (Lv.${uc.level})`,
       team,
@@ -462,8 +486,90 @@ async function fetchUserCombatCards(
       perks: [],
       hasUsedPhoenixWard: false,
       isAlive: true,
-    });
+    };
+
+    // Apply 6-slot equipped gear loadout and battle perks
+    const loadout = await services.loadoutService.getCardLoadout(uc.id);
+    services.loadoutService.applyLoadoutToCombatant(combatant, loadout);
+
+    combatants.push(combatant);
   }
 
   return combatants;
+}
+
+async function handleShop(
+  ctx: CommandContext,
+  services: BotServices,
+  rawArgs: readonly string[],
+): Promise<void> {
+  const category = (ctx.options.getString('subaction') ?? rawArgs[1])?.toUpperCase();
+  const catalog = await services.tcgShopService.getCatalog(category);
+
+  if (catalog.length === 0) {
+    await ctx.reply({ content: '🛒 The Town Item Shop is currently restocked or closed.' });
+    return;
+  }
+
+  const lines = catalog.map((item) => {
+    const dailyLimit = item.maxDailyPurchases > 0 ? ` (Limit: ${item.maxDailyPurchases}/day)` : '';
+    const perks = item.battlePerks && item.battlePerks.length > 0 ? ` | *Perk: ${item.battlePerks.join(', ')}*` : '';
+    return `• **${item.name}** (\`${item.code}\`) — 🪙 **${item.shopPrice.toLocaleString()} credits** [${item.rarity}]${dailyLimit}${perks}\n  *${item.description}*`;
+  });
+
+  const embed = new EmbedBuilder()
+    .setColor(0x5865f2)
+    .setTitle('🏪 Town Item Shop Catalog')
+    .setDescription(
+      `Welcome to the Town Shop, summoner! Acquire equipment, accessories, and potions using wallet credits.\n\n` +
+        lines.join('\n\n') +
+        `\n\n*Purchase items using:* \`/game action:buy item:<code_or_id> [quantity]\``,
+    )
+    .setFooter({ text: 'All transactions audited via double-entry financial ledger' });
+
+  await ctx.reply({ embeds: [embed] });
+}
+
+async function handleBuy(
+  ctx: CommandContext,
+  services: BotServices,
+  rawArgs: readonly string[],
+): Promise<void> {
+  const itemCode = ctx.options.getString('item') ?? rawArgs[1];
+  const quantity = ctx.options.getInteger('quantity') ?? (rawArgs[2] ? parseInt(rawArgs[2], 10) : 1);
+
+  if (!itemCode) {
+    await ctx.reply({
+      content: '❌ Please specify an item code to purchase. Usage: `/game action:buy item:<code_or_id> [quantity]`',
+      ephemeral: true,
+    });
+    return;
+  }
+
+  try {
+    const receipt = await services.tcgShopService.buyItem(
+      ctx.user.id,
+      itemCode,
+      quantity,
+      ctx.guild?.id,
+    );
+
+    const embed = new EmbedBuilder()
+      .setColor(0x57f287)
+      .setTitle('🛍️ Town Shop Purchase Successful!')
+      .setDescription(
+        `Acquired **${receipt.quantity}x ${receipt.item.name}**!\n\n` +
+          `• **Total Price**: \`${receipt.totalPrice.toLocaleString()} credits\`\n` +
+          `• **Remaining Wallet**: \`${receipt.walletBalanceAfter.toLocaleString()} credits\`\n\n` +
+          `*View your new items with:* \`/item action:inventory\``,
+      )
+      .setFooter({ text: 'Audited via double-entry financial ledger (SHOP_BUY)' });
+
+    await ctx.reply({ embeds: [embed] });
+  } catch (err: unknown) {
+    await ctx.reply({
+      content: `❌ **Purchase Failed**: ${err instanceof Error ? err.message : String(err)}`,
+      ephemeral: true,
+    });
+  }
 }

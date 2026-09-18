@@ -28,6 +28,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-1032` | Task | Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands | 1 | `STORY-103` | [TASK-1032.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1032.md) |
+| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | [TASK-1032.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1032.md) |
+| `TASK-1031` | Task | 6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog | 2 | `STORY-103` | [TASK-1031.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1031.md) |
 | `TASK-1022` | Task | PvP Duels (`/game pvp`), Timed Expeditions (`/game explore`), Boss Raids (`/game boss`) & Quests | 1 | `STORY-102` | [TASK-1022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1022.md) |
 | `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | [TASK-1022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1022.md) |
 | `TASK-1021` | Task | 7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator | 2 | `STORY-102` | [TASK-1021.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1021.md) |
@@ -196,7 +199,9 @@
 | `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | ✅ Done | `STORY-101` |
 | `TASK-1021` | Task | 7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator | 2 | `STORY-102` | ✅ Done | `STORY-101` |
 | `TASK-1022` | Task | PvP Duels (`/game pvp`), Timed Expeditions (`/game explore`), Boss Raids (`/game boss`) & Quests | 1 | `STORY-102` | ✅ Done | `TASK-1021` |
-| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | 📋 Backlog | `STORY-102` |
+| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | ✅ Done | `STORY-102` |
+| `TASK-1031` | Task | 6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog | 2 | `STORY-103` | ✅ Done | `STORY-102` |
+| `TASK-1032` | Task | Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands | 1 | `STORY-103` | ✅ Done | `TASK-1031` |
 | `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | 📋 Backlog | `STORY-103` |
 | `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 2 | `EPIC-010` | 📋 Backlog | `STORY-104` |
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
