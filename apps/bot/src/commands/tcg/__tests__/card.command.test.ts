@@ -105,11 +105,35 @@ describe('Card Command Suite (TASK-1012)', () => {
     dropManager = new DropManager(cardRepo, assetRepo);
     dismantleService = new CardDismantleService(cardRepo);
 
+    const mockLoadoutService = {
+      getCardLoadout: async (cardId: string) => ({
+        weapon: {
+          inventoryItem: { id: 'inv_weapon_1', enhancementLevel: 3 },
+          item: { name: 'Dragon Slayer' },
+        },
+        armor: null,
+        relic: null,
+        ring: null,
+        amulet: null,
+        talisman: null,
+        aggregateStats: { attack: 75 },
+        activePerks: ['CRIT_BONUS_T1'],
+      }),
+      equip: async (userId: string, cardId: string, itemId: string, slot: string) => ({
+        loadout: {},
+        unequippedItemName: undefined,
+      }),
+      unequip: async (userId: string, itemId: string) => ({
+        unequippedItemName: 'Dragon Slayer',
+      }),
+    };
+
     services = {
       waifuAssetRepo: assetRepo,
       waifuCardRepo: cardRepo,
       dropManager,
       dismantleService,
+      loadoutService: mockLoadoutService as any,
     } as unknown as BotServices;
   });
 
@@ -296,5 +320,67 @@ describe('Card Command Suite (TASK-1012)', () => {
     });
     await command.execute(ctxDisOk);
     expect(repDisOk[0].content).toContain('10000 Crafting Dust');
+  });
+
+  it('should inspect 6-slot loadout, equip gear, and unequip gear', async () => {
+    const command = createCardCommand(services);
+    const userId = 'user_loadout_test';
+
+    const baseCard = await cardRepo.create({
+      assetId: 'asset_rias_tcg',
+      name: 'Rias Gremory',
+      rarity: 'MYTHIC',
+      element: 'FIRE',
+      attack: 1000,
+      defense: 500,
+      speed: 120,
+      health: 5000,
+      critRate: 0.2,
+      skillName: 'Extinction Ray',
+      passiveName: 'Devil Royalty',
+      collectionNumber: 99,
+      isActive: true,
+    });
+
+    const userCard = await cardRepo.createUserCard({
+      userId,
+      cardId: baseCard.id,
+      serialNumber: 1,
+      level: 50,
+      exp: 0,
+      isFavorite: false,
+      state: 'EQUIPPED',
+    });
+
+    // 1. Inspect loadout
+    const { ctx: ctxLoadout, replies: repLoadout } = createMockContext({
+      subcommand: 'loadout',
+      userId,
+      args: { id: userCard.id },
+    });
+    await command.execute(ctxLoadout);
+    expect(repLoadout[0].embeds).toHaveLength(1);
+    expect(repLoadout[0].embeds[0].data.title).toContain('6-Slot Combat Loadout');
+    expect(repLoadout[0].embeds[0].data.description).toContain('Dragon Slayer');
+    expect(repLoadout[0].embeds[0].data.description).toContain('+3');
+    expect(repLoadout[0].embeds[0].data.description).toContain('+75');
+
+    // 2. Equip gear piece
+    const { ctx: ctxEquipGear, replies: repEquipGear } = createMockContext({
+      subcommand: 'equip-gear',
+      userId,
+      args: { id: userCard.id, item_id: 'inv_weapon_1', slot: 'WEAPON' },
+    });
+    await command.execute(ctxEquipGear);
+    expect(repEquipGear[0].content).toContain('Successfully equipped gear piece into the **WEAPON** slot');
+
+    // 3. Unequip gear piece
+    const { ctx: ctxUnequipGear, replies: repUnequipGear } = createMockContext({
+      subcommand: 'unequip-gear',
+      userId,
+      args: { item_id: 'inv_weapon_1' },
+    });
+    await command.execute(ctxUnequipGear);
+    expect(repUnequipGear[0].content).toContain('Unequipped **Dragon Slayer**');
   });
 });

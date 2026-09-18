@@ -9,3 +9,5 @@ export * from './card/dismantle-service.js';
 export * from './drops/drop-manager.js';
 export * from './combat/index.js';
 export * from './game-modes/index.js';
+export * from './equipment/index.js';
+export * from './energy/energy-lifecycle.service.js';

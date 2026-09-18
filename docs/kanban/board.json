@@ -505,7 +505,7 @@
       "epic": "EPIC-010",
       "title": "Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-102"],
       "blocks": ["STORY-104"]
     },
@@ -1525,8 +1525,28 @@
       "status": "DONE",
       "parent": "STORY-102",
       "requires": ["TASK-1021"],
-      "blocks": ["STORY-103"],
-      "description": "Implement PvP duel controller with credit wager escrow, timed expeditions engine (1h, 4h, 8h with energy consumption), cooperative boss raid service, quests milestone tracking, and /game pvp, explore, boss, quests commands suite."
+      "blocks": ["STORY-103"]
+    },
+    {
+      "id": "TASK-1031",
+      "title": "6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-103",
+      "requires": ["STORY-102"],
+      "blocks": ["TASK-1032"],
+      "description": "Implement 6 gear slots (Weapon, Armor, Relic, Ring, Amulet, Talisman), battle perks by rarity, +0 to +10 enhancement engine with Crafting Dust and Credits, consumables catalog (HP, Mana, Energy restores), and dual-dialect GameItemRepository and UserInventoryItemRepository."
+    },
+    {
+      "id": "TASK-1032",
+      "title": "Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands",
+      "points": 1,
+      "status": "DONE",
+      "parent": "STORY-103",
+      "requires": ["TASK-1031"],
+      "blocks": ["STORY-104"],
+      "description": "Implement level-based max energy formula with milestone bonuses, 00:00 UTC replenishment lifecycle, 3/day stamina potion anti-abuse ceiling, basic town shop with double-entry ledger audit, and dual-dispatch /shop, /inventory, /card equip, /card unequip, and /item commands suite."
     }
   ]
 }
+

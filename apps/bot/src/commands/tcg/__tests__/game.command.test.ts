@@ -54,6 +54,38 @@ describe('Game Command Suite (TASK-1022)', () => {
     const bossRaidService = new BossRaidService(mockEnergyRepo as any, combatSimulator);
     const pvpDuelService = new PvPDuelService(mockEnergyRepo as any, undefined, combatSimulator);
     const questService = new QuestService();
+    const mockTcgShopService = {
+      getCatalog: async (category?: string) => [
+        {
+          id: 'shop_pot_1',
+          code: 'STAMINA_POTION',
+          name: 'Stamina Elixir',
+          category: 'POTION',
+          rarity: 'UNCOMMON',
+          shopPrice: 1000,
+          maxDailyPurchases: 3,
+          description: 'Restores 50 daily energy.',
+          battlePerks: [],
+        },
+      ],
+      buyItem: async (userId: string, itemCode: string, quantity: number, guildId?: string) => {
+        if (itemCode === 'INVALID') throw new Error('Item not found in shop');
+        return {
+          item: { name: 'Stamina Elixir', code: 'STAMINA_POTION' },
+          quantity,
+          totalPrice: 1000 * quantity,
+          walletBalanceAfter: 49000,
+        };
+      },
+    };
+
+    const mockLoadoutService = {
+      getCardLoadout: async () => ({
+        aggregateStats: {},
+        activePerks: [],
+      }),
+      applyLoadoutToCombatant: () => {},
+    };
 
     services = {
       playerEnergyRepo: mockEnergyRepo as any,
@@ -63,6 +95,8 @@ describe('Game Command Suite (TASK-1022)', () => {
       bossRaidService,
       pvpDuelService,
       questService,
+      tcgShopService: mockTcgShopService as any,
+      loadoutService: mockLoadoutService as any,
     } as unknown as BotServices;
   });
 
@@ -73,6 +107,8 @@ describe('Game Command Suite (TASK-1022)', () => {
     quest_id?: string;
     user?: any;
     wager?: number;
+    item?: string;
+    quantity?: number;
     userId?: string;
     rawArgs?: string[];
   }): { ctx: CommandContext; replies: any[] } {
@@ -88,10 +124,12 @@ describe('Game Command Suite (TASK-1022)', () => {
           if (name === 'subaction') return options.subaction ?? null;
           if (name === 'duration') return options.duration ?? null;
           if (name === 'quest_id') return options.quest_id ?? null;
+          if (name === 'item') return options.item ?? null;
           return null;
         },
         getInteger: (name: string) => {
           if (name === 'wager') return options.wager ?? null;
+          if (name === 'quantity') return options.quantity ?? null;
           return null;
         },
         getUser: async (name: string) => {
@@ -247,5 +285,37 @@ describe('Game Command Suite (TASK-1022)', () => {
     expect(replies[0].embeds).toHaveLength(1);
     expect(replies[0].embeds[0].data.title).toContain('PvP Elemental Duel');
     expect(replies[0].embeds[0].data.description).toContain('Combat Action Log');
+  });
+
+  it('should display the Town Shop catalog with /game shop', async () => {
+    const command = createGameCommand(services);
+    const { ctx, replies } = createMockContext({
+      action: 'shop',
+    });
+
+    await command.execute(ctx);
+
+    expect(replies).toHaveLength(1);
+    const embed = replies[0].embeds[0];
+    expect(embed.data.title).toContain('Town Item Shop Catalog');
+    expect(embed.data.description).toContain('Stamina Elixir');
+    expect(embed.data.description).toContain('1,000 credits');
+  });
+
+  it('should purchase an item with /game buy', async () => {
+    const command = createGameCommand(services);
+    const { ctx, replies } = createMockContext({
+      action: 'buy',
+      item: 'STAMINA_POTION',
+      quantity: 2,
+    });
+
+    await command.execute(ctx);
+
+    expect(replies).toHaveLength(1);
+    const embed = replies[0].embeds[0];
+    expect(embed.data.title).toContain('Town Shop Purchase Successful');
+    expect(embed.data.description).toContain('2x Stamina Elixir');
+    expect(embed.data.description).toContain('2,000 credits');
   });
 });
