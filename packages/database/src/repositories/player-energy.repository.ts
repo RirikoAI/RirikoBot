@@ -245,4 +245,34 @@ export class PlayerEnergyRepository extends BaseRepository<
       };
     });
   }
+
+  /**
+   * Consumes energy for game activities (Expeditions, Dungeons, Boss Raids, PvP).
+   */
+  async consumeEnergy(
+    userId: string,
+    amount: number,
+    tx?: DatabaseClient,
+  ): Promise<{ success: boolean; currentEnergy: number; reason?: string }> {
+    const client = this.getClient(tx);
+    return withTransaction(client, async (txClient) => {
+      const record = await this.getOrCreate(userId, txClient);
+      if (record.currentEnergy < amount) {
+        return {
+          success: false,
+          currentEnergy: record.currentEnergy,
+          reason: `Insufficient energy! Required: ${amount} Energy, but you only have ${record.currentEnergy} Energy.`,
+        };
+      }
+      const updated = await this.update(
+        userId,
+        { currentEnergy: record.currentEnergy - amount },
+        txClient,
+      );
+      return {
+        success: true,
+        currentEnergy: updated.currentEnergy,
+      };
+    });
+  }
 }
