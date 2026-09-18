@@ -16,7 +16,7 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No groomed tickets currently in To Do.*
+*No tickets currently in To Do for active story.*
 
 ---
 
@@ -28,6 +28,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-1002` | Task | Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests | 1 | `STORY-100` | [TASK-1002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1002.md) |
+| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | `EPIC-010` | [TASK-1002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1002.md) |
+| `TASK-1001` | Task | waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository | 2 | `STORY-100` | [TASK-1001.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1001.md) |
 | `TASK-0803` | Task | Multi-Platform Stream Watcher Engine Reinforcement, Resilient Adapters, CLI Stream Configuration & General Stream Commands | 3 | `STORY-080` | [TASK-0803.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0803.md) |
 | `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
 | `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
@@ -175,7 +178,17 @@
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 13 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 13 | `EPIC-002`, `EPIC-003` | Phase 2B |
 
-### 📋 Groomed Stories for EPIC-008 (Streamers & Free Games)
+### 📋 Groomed Stories & Tasks for EPIC-010 (Waifu TCG)
+| ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | `EPIC-010` | ⚡ In Progress | `EPIC-002` |
+| `TASK-1001` | Task | waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository | 2 | `STORY-100` | ⚡ In Progress | `EPIC-002` |
+| `TASK-1002` | Task | Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests | 1 | `STORY-100` | 🎯 To Do | `TASK-1001` |
+| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | 📋 Backlog | `STORY-100` |
+| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | 📋 Backlog | `STORY-101` |
+| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | 📋 Backlog | `STORY-102` |
+| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | 📋 Backlog | `STORY-103` |
+| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 2 | `EPIC-010` | 📋 Backlog | `STORY-104` |
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | ✅ Done | `EPIC-002`, `EPIC-003` |
