@@ -357,6 +357,7 @@ export async function createBotServices(
     : undefined;
 
   const streamWatcher = new StreamWatcherEngine(streamRepo, {
+    checkIntervalMs: Number(process.env.STREAM_CHECK_INTERVAL_MS || 60_000),
     onStreamLive: async (streamer, stream) => {
       if (streamDispatcher) {
         await streamDispatcher.dispatch(streamer, stream);
@@ -370,8 +371,17 @@ export async function createBotServices(
       clientSecret: process.env.TWITCH_CLIENT_SECRET,
     }),
   );
-  streamWatcher.registerAdapter(new YouTubeStreamAdapter());
-  streamWatcher.registerAdapter(new TikTokStreamAdapter());
+  streamWatcher.registerAdapter(
+    new YouTubeStreamAdapter({
+      apiKey: process.env.YOUTUBE_API_KEY,
+    }),
+  );
+  streamWatcher.registerAdapter(
+    new TikTokStreamAdapter({
+      sessionId: process.env.TIKTOK_SESSION_ID,
+      apiKey: process.env.TIKTOK_API_KEY,
+    }),
+  );
 
   const freeGamesEngine: FreeGamesEngine = new FreeGamesEngine(freeGameRepo, {
     providers: [new EpicGamesProvider(), new SteamFreeGamesProvider()],

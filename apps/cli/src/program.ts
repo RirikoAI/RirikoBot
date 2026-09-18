@@ -8,6 +8,7 @@ import { registerDoctorCommand } from './commands/doctor.js';
 import { registerGeneratePoTokenCommand } from './commands/generate-po-token.js';
 import { registerInfoCommand } from './commands/info.js';
 import { registerMigrateCommand } from './commands/migrate.js';
+import { registerStreamConfigureCommand } from './commands/stream-configure.js';
 
 
 export function loadEnvConfig(customPath?: string): void {
@@ -59,6 +60,7 @@ export function createProgram(): Command {
   registerMigrateCommand(program);
   registerGeneratePoTokenCommand(program);
   registerAiConfigureCommand(program);
+  registerStreamConfigureCommand(program);
 
 
   // Global error handler
