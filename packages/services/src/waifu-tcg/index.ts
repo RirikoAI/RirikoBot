@@ -2,3 +2,8 @@ export * from './types.js';
 export * from './ingestion/index.js';
 export * from './attribution.js';
 export * from './silhouette.js';
+export * from './rarity/rarity-engine.js';
+export * from './card/card-generator.js';
+export * from './card/leveling-engine.js';
+export * from './card/dismantle-service.js';
+export * from './drops/drop-manager.js';
