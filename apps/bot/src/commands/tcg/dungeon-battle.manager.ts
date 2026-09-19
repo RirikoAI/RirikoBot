@@ -28,6 +28,12 @@ export interface StartBattleOptions {
 }
 
 const CARD_IMAGE_NAME = 'player_card.png';
+const BOSS_IMAGE_NAME = 'boss.png';
+
+interface BattleImages {
+  card: boolean;
+  boss: boolean;
+}
 
 /**
  * Creates an ASCII/Unicode progress bar.
@@ -122,6 +128,22 @@ export class DungeonBattleManager {
     }
 
     const session = sessionResult.session;
+
+    // 3b. Boss portrait (anime boss floors only)
+
+    let bossPngBuffer: Buffer | null = null;
+    if (session.bossProfile && this.services.bossImageService) {
+      try {
+        bossPngBuffer = await this.services.bossImageService.getBossImage(session.bossProfile, floorNumber);
+      } catch (err) {
+        console.warn(`[dungeon-battle] Failed to render boss image for ${session.bossProfile.id}:`, err);
+      }
+    }
+    const images: BattleImages = { card: Boolean(cardPngBuffer), boss: Boolean(bossPngBuffer) };
+    const battleFiles = [
+      ...(cardPngBuffer ? [{ attachment: cardPngBuffer, name: CARD_IMAGE_NAME }] : []),
+      ...(bossPngBuffer ? [{ attachment: bossPngBuffer, name: BOSS_IMAGE_NAME }] : []),
+    ];
     let currentMode: 'manual' | 'auto' = options.mode;
     let isAutoLoopRunning = false;
     let abortAuto = false;
@@ -129,7 +151,7 @@ export class DungeonBattleManager {
     // 4. Build initial embed & components
     const userPotions = await this.fetchUserPotions(ctx.user.id);
     const initialSnapshot = session.getSnapshot();
-    const initialEmbed = this.buildBattleEmbed(session, initialSnapshot, Boolean(cardPngBuffer));
+    const initialEmbed = this.buildBattleEmbed(session, initialSnapshot, images);
     const initialRows = this.buildActionRows(initialSnapshot, currentMode, userPotions);
 
     let discordMsg: Message | undefined;
@@ -142,14 +164,14 @@ export class DungeonBattleManager {
       await options.existingMessage.edit({
         embeds: [initialEmbed],
         components: initialRows,
-        files: cardPngBuffer ? [{ attachment: cardPngBuffer, name: CARD_IMAGE_NAME }] : [],
+        files: battleFiles,
       });
       discordMsg = options.existingMessage;
     } else {
       const replyMsg = await ctx.reply({
         embeds: [initialEmbed],
         components: initialRows,
-        files: cardPngBuffer ? [{ attachment: cardPngBuffer, name: CARD_IMAGE_NAME }] : [],
+        files: battleFiles,
       });
       discordMsg = (
         replyMsg && typeof replyMsg === 'object' && 'fetch' in replyMsg
@@ -196,7 +218,7 @@ export class DungeonBattleManager {
       const finalEmbed = this.buildBattleEmbed(
         session,
         finalSnapshot,
-        Boolean(cardPngBuffer),
+        images,
         runResult,
         tutorialCompletionMsg,
         floor4DefeatResult,
@@ -234,7 +256,7 @@ export class DungeonBattleManager {
           break;
         } else {
           const currentPotions = await this.fetchUserPotions(ctx.user.id);
-          const updatedEmbed = this.buildBattleEmbed(session, nextSnapshot, Boolean(cardPngBuffer));
+          const updatedEmbed = this.buildBattleEmbed(session, nextSnapshot, images);
           const updatedRows = this.buildActionRows(nextSnapshot, 'auto', currentPotions);
           await discordMsg
             .edit({ embeds: [updatedEmbed], components: updatedRows })
@@ -312,7 +334,7 @@ export class DungeonBattleManager {
           await finalizeBattle(interaction);
         } else {
           const updatedPotions = await this.fetchUserPotions(ctx.user.id);
-          const embed = this.buildBattleEmbed(session, nextSnapshot, Boolean(cardPngBuffer));
+          const embed = this.buildBattleEmbed(session, nextSnapshot, images);
           const rows = this.buildActionRows(nextSnapshot, 'manual', updatedPotions);
           await interaction.update({ embeds: [embed], components: rows }).catch(() => {});
         }
@@ -443,7 +465,7 @@ export class DungeonBattleManager {
         currentMode = 'manual';
         const snap = session.getSnapshot();
         const currentPotions = await this.fetchUserPotions(ctx.user.id);
-        const embed = this.buildBattleEmbed(session, snap, Boolean(cardPngBuffer));
+        const embed = this.buildBattleEmbed(session, snap, images);
         const rows = this.buildActionRows(snap, 'manual', currentPotions);
         await interaction.update({ embeds: [embed], components: rows }).catch(() => {});
         return;
@@ -453,7 +475,7 @@ export class DungeonBattleManager {
         currentMode = 'auto';
         const snap = session.getSnapshot();
         const currentPotions = await this.fetchUserPotions(ctx.user.id);
-        const embed = this.buildBattleEmbed(session, snap, Boolean(cardPngBuffer));
+        const embed = this.buildBattleEmbed(session, snap, images);
         const rows = this.buildActionRows(snap, 'auto', currentPotions);
         await interaction.update({ embeds: [embed], components: rows }).catch(() => {});
         void runAutoLoop();
@@ -477,7 +499,7 @@ export class DungeonBattleManager {
         await finalizeBattle(interaction);
       } else {
         const currentPotions = await this.fetchUserPotions(ctx.user.id);
-        const embed = this.buildBattleEmbed(session, nextSnapshot, Boolean(cardPngBuffer));
+        const embed = this.buildBattleEmbed(session, nextSnapshot, images);
         const rows = this.buildActionRows(nextSnapshot, 'manual', currentPotions);
         await interaction.update({ embeds: [embed], components: rows }).catch(() => {});
       }
@@ -501,7 +523,7 @@ export class DungeonBattleManager {
   private buildBattleEmbed(
     session: DungeonBattleSession,
     state: DungeonTurnState,
-    hasCardImage: boolean,
+    images: BattleImages,
     runResult?: DungeonRunResult | undefined,
     tutorialCompletionMsg?: string | undefined,
     floor4Defeat?: Floor4DefeatResult | undefined,
@@ -600,6 +622,10 @@ export class DungeonBattleManager {
           : `Equip a **[${floor4Defeat.bossElement}]** card to break the boss's ward!`)
       : '';
 
+    const profile = session.bossProfile;
+    const bossTitleText = profile?.title ? ` · *${profile.title}* (${profile.animeTitle})` : '';
+    const bossFlavorText =
+      profile?.flavorText && turn <= 1 && !isFinished ? `> ${profile.flavorText}\n` : '';
     const lootSection = runResult?.loot ? `\n\n${runResult.loot.message}` : '';
     const cardExpSection = runResult?.cardExp.length
       ? `\n${runResult.cardExp.map(formatCardExpResult).join('\n')}`
@@ -614,7 +640,8 @@ export class DungeonBattleManager {
         `🔷 **MP:** \`${playerMpBar}\` **${player.currentMp} / ${player.maxMp}**` +
         playerStatusText +
         `\n\n` +
-        `**👹 ${boss.name}** [${boss.element}]\n` +
+        `**👹 ${boss.name}** [${boss.element}]${bossTitleText}\n` +
+        bossFlavorText +
         `❤️ **HP:** \`${bossHpBar}\` **${boss.currentHealth.toLocaleString()} / ${boss.maxHealth.toLocaleString()}**` +
         bossWardText +
         bossStatusText +
@@ -625,7 +652,11 @@ export class DungeonBattleManager {
         floor4Lesson,
     );
 
-    if (hasCardImage) {
+    // Boss portrait takes the main image; the player's card moves to the thumbnail.
+    if (images.boss) {
+      embed.setImage(`attachment://${BOSS_IMAGE_NAME}`);
+      if (images.card) embed.setThumbnail(`attachment://${CARD_IMAGE_NAME}`);
+    } else if (images.card) {
       embed.setImage(`attachment://${CARD_IMAGE_NAME}`);
     }
 

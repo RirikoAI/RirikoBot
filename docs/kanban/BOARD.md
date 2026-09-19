@@ -18,7 +18,6 @@
 ## 🎯 To Do (Groomed & Estimated)
 | ID | Type | Title | Pts | Parent | Prerequisites |
 |---|---|---|---|---|---|
-| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | `STORY-154` |
 | `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | `STORY-152` |
 | `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | `BUG-0010` |
 | `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | `STORY-157` |
@@ -34,6 +33,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | [STORY-155.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-155.md) |
 | `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | `EPIC-015` | [STORY-154.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-154.md) |
 | `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | `EPIC-015` | [STORY-153.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-153.md) |
 | `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | `EPIC-015` | [STORY-152.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-152.md) |
@@ -223,7 +223,7 @@
 | `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | `EPIC-015` | ✅ Done | `STORY-151` |
 | `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | `EPIC-015` | ✅ Done | `STORY-151` |
 | `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | `EPIC-015` | ✅ Done | `STORY-152`, `STORY-153` |
-| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | 🎯 To Do | `STORY-154` |
+| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | ✅ Done | `STORY-154` |
 | `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | 🎯 To Do | `STORY-152` |
 | `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | 🎯 To Do | `BUG-0010` |
 | `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | 🎯 To Do | `STORY-157` |
