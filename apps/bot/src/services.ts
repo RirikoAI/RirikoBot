@@ -28,6 +28,8 @@ import {
   WaifuGuildRepository,
   AchievementRepository,
   TcgConfigRepository,
+  ReactionRoleRepository,
+  AutoRoleRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -116,6 +118,8 @@ import {
   WaifuGuildService,
   AchievementService,
   TcgConfigService,
+  AutoRoleService,
+  ReactionRoleService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -207,6 +211,10 @@ export interface BotServices {
   waifuGuildService: WaifuGuildService;
   achievementService: AchievementService;
   tcgConfigService: TcgConfigService;
+  reactionRoleRepo: ReactionRoleRepository;
+  autoRoleRepo: AutoRoleRepository;
+  reactionRoleService: ReactionRoleService;
+  autoRoleService: AutoRoleService;
 }
 
 /**
@@ -241,6 +249,10 @@ export async function createBotServices(
   const autoVoiceService = new AutoVoiceService(autoVoiceRepo);
   const waifuAssetRepo = new WaifuAssetRepository(db);
   const waifuCardRepo = new WaifuCardRepository(db);
+  const reactionRoleRepo = new ReactionRoleRepository(db);
+  const autoRoleRepo = new AutoRoleRepository(db);
+  const reactionRoleService = new ReactionRoleService(reactionRoleRepo);
+  const autoRoleService = new AutoRoleService(autoRoleRepo);
   const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo);
   const gameItemRepo = new GameItemRepository(db);
   const userInventoryItemRepo = new UserInventoryItemRepository(db);
@@ -751,5 +763,9 @@ export async function createBotServices(
     waifuGuildService,
     achievementService,
     tcgConfigService,
+    reactionRoleRepo,
+    autoRoleRepo,
+    reactionRoleService,
+    autoRoleService,
   };
 }

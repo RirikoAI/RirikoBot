@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No active tickets in progress.*
+*No tickets currently in progress.*
 
 ---
 
@@ -16,7 +16,7 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No groomed tickets waiting. `STORY-160` (crafting) stays in Backlog by user decision.*
+*No tickets currently in todo.*
 
 ---
 
@@ -28,6 +28,12 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | [STORY-140.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-140.md) |
+| `TASK-1405` | Task | Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites | 1 | `STORY-140` | [TASK-1405.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1405.md) |
+| `TASK-1404` | Task | Dual-Dispatch Commands (/autorole, /create-reaction-role, /reaction-roles, /temprole) with Slash & Prefix Parity | 1 | `STORY-140` | [TASK-1404.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1404.md) |
+| `TASK-1403` | Task | ReactionRole Engine: Multi-Mode Emoji, Button & Select Menu Handlers | 2 | `STORY-140` | [TASK-1403.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1403.md) |
+| `TASK-1402` | Task | AutoRole Engine: Join Roles (Humans & Bots), Verification Gateway & Temp Role Sweeper | 1 | `STORY-140` | [TASK-1402.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1402.md) |
+| `TASK-1401` | Task | Database Schemas & Dual-Dialect Repositories (AutoRoles, ReactionRoles, TempRoles) | 1 | `STORY-140` | [TASK-1401.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1401.md) |
 | `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | [STORY-159.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-159.md) |
 | `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | [STORY-158.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-158.md) |
 | `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | [STORY-157.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-157.md) |
@@ -301,10 +307,19 @@
 ### 📋 Groomed Stories for EPIC-014 (Server Utilities, AutoRoles & Community)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 3 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
 | `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 3 | `EPIC-014` | 📋 Backlog | `EPIC-003` |
 | `STORY-143` | Story | Server Utility & Identity Commands Parity (/get-avatar, /guild-info, /member-info, /prefix) | 2 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+
+### 🛠️ Completed Tasks for STORY-140 (Automatic Role System & Reaction Roles)
+| ID | Type | Title | Pts | Parent | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `TASK-1401` | Task | Database Schemas & Dual-Dialect Repositories (AutoRoles, ReactionRoles, TempRoles) | 1 | `STORY-140` | ✅ Done | `EPIC-002` |
+| `TASK-1402` | Task | AutoRole Engine: Join Roles (Humans & Bots), Verification Gateway & Temp Role Sweeper | 1 | `STORY-140` | ✅ Done | `TASK-1401` |
+| `TASK-1403` | Task | ReactionRole Engine: Multi-Mode Emoji, Button & Select Menu Handlers | 2 | `STORY-140` | ✅ Done | `TASK-1401` |
+| `TASK-1404` | Task | Dual-Dispatch Commands (/autorole, /create-reaction-role, /reaction-roles, /temprole) with Slash & Prefix Parity | 1 | `STORY-140` | ✅ Done | `TASK-1402`, `TASK-1403` |
+| `TASK-1405` | Task | Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites | 1 | `STORY-140` | ✅ Done | `TASK-1404` |
 
 ### 🛠️ Completed Tasks for EPIC-007 (Moderation 2.0)
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |

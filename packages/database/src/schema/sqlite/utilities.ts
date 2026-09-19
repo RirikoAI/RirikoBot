@@ -9,8 +9,46 @@ export const reactionRoles = sqliteTable(
     messageId: text('message_id').notNull(),
     emojiOrComponentId: text('emoji_or_component_id').notNull(),
     roleId: text('role_id').notNull(),
+    type: text('type').notNull().default('EMOJI'), // 'EMOJI' | 'BUTTON' | 'SELECT_MENU'
+    mode: text('mode').notNull().default('TOGGLE'), // 'TOGGLE' | 'GIVE_ONLY' | 'REMOVE_ONLY' | 'UNIQUE'
+    groupId: text('group_id'),
+    label: text('label'),
+    description: text('description'),
   },
   (table) => [index('idx_reaction_roles_msg').on(table.messageId, table.emojiOrComponentId)],
+);
+
+export const guildAutoRoles = sqliteTable('guild_auto_roles', {
+  guildId: text('guild_id').primaryKey(),
+  humanRoleIds: text('human_role_ids', { mode: 'json' }).$type<string[]>().notNull().default([]),
+  botRoleIds: text('bot_role_ids', { mode: 'json' }).$type<string[]>().notNull().default([]),
+  verificationRoleId: text('verification_role_id'),
+  verificationChannelId: text('verification_channel_id'),
+  verificationMessageId: text('verification_message_id'),
+  isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const temporaryRoles = sqliteTable(
+  'temporary_roles',
+  {
+    id: text('id').primaryKey(),
+    guildId: text('guild_id').notNull(),
+    userId: text('user_id').notNull(),
+    roleId: text('role_id').notNull(),
+    expiresAt: integer('expires_at', { mode: 'timestamp_ms' }).notNull(),
+    assignedBy: text('assigned_by').notNull(),
+    reason: text('reason'),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [index('idx_temporary_roles_expires').on(table.expiresAt)],
 );
 
 export const autoVoiceConfigs = sqliteTable('auto_voice_configs', {

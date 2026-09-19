@@ -19,8 +19,46 @@ export const reactionRoles = pgTable(
     messageId: varchar('message_id', { length: 32 }).notNull(),
     emojiOrComponentId: varchar('emoji_or_component_id', { length: 64 }).notNull(),
     roleId: varchar('role_id', { length: 32 }).notNull(),
+    type: varchar('type', { length: 32 }).notNull().default('EMOJI'),
+    mode: varchar('mode', { length: 32 }).notNull().default('TOGGLE'),
+    groupId: varchar('group_id', { length: 64 }),
+    label: text('label'),
+    description: text('description'),
   },
   (table) => [index('idx_pg_reaction_roles_msg').on(table.messageId, table.emojiOrComponentId)],
+);
+
+export const guildAutoRoles = pgTable('guild_auto_roles', {
+  guildId: varchar('guild_id', { length: 32 }).primaryKey(),
+  humanRoleIds: jsonb('human_role_ids').$type<string[]>().notNull().default([]),
+  botRoleIds: jsonb('bot_role_ids').$type<string[]>().notNull().default([]),
+  verificationRoleId: varchar('verification_role_id', { length: 32 }),
+  verificationChannelId: varchar('verification_channel_id', { length: 32 }),
+  verificationMessageId: varchar('verification_message_id', { length: 32 }),
+  isEnabled: boolean('is_enabled').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const temporaryRoles = pgTable(
+  'temporary_roles',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    guildId: varchar('guild_id', { length: 32 }).notNull(),
+    userId: varchar('user_id', { length: 32 }).notNull(),
+    roleId: varchar('role_id', { length: 32 }).notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    assignedBy: varchar('assigned_by', { length: 32 }).notNull(),
+    reason: text('reason'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index('idx_pg_temporary_roles_expires').on(table.expiresAt)],
 );
 
 export const autoVoiceConfigs = pgTable('auto_voice_configs', {

@@ -640,7 +640,7 @@
       "epic": "EPIC-014",
       "title": "Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus)",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -1675,6 +1675,51 @@
       "requires": ["TASK-1045"],
       "blocks": [],
       "description": "Fix battle button collector lifecycle & retry/status/equip buttons; add in-combat item select menu with HP/MP potions consuming a turn; enforce tutorial floor non-repeat restriction & Floor T3 potion rewards; implement interactive Town Shop and Inventory menus with potion purchasing."
+    },
+    {
+      "id": "TASK-1401",
+      "parent": "STORY-140",
+      "title": "Database Schemas & Dual-Dialect Repositories (AutoRoles, ReactionRoles, TempRoles)",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["EPIC-002"],
+      "blocks": ["TASK-1402", "TASK-1403"]
+    },
+    {
+      "id": "TASK-1402",
+      "parent": "STORY-140",
+      "title": "AutoRole Engine: Join Roles (Humans & Bots), Verification Gateway & Temp Role Sweeper",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1401"],
+      "blocks": ["TASK-1404"]
+    },
+    {
+      "id": "TASK-1403",
+      "parent": "STORY-140",
+      "title": "ReactionRole Engine: Multi-Mode Emoji, Button & Select Menu Handlers",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-1401"],
+      "blocks": ["TASK-1404"]
+    },
+    {
+      "id": "TASK-1404",
+      "parent": "STORY-140",
+      "title": "Dual-Dispatch Commands (/autorole, /create-reaction-role, /reaction-roles, /temprole) with Slash & Prefix Parity",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1402", "TASK-1403"],
+      "blocks": ["TASK-1405"]
+    },
+    {
+      "id": "TASK-1405",
+      "parent": "STORY-140",
+      "title": "Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1404"],
+      "blocks": []
     }
   ],
   "chores": [
