@@ -16,9 +16,7 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-| ID | Type | Title | Pts | Parent | Prerequisites |
-|---|---|---|---|---|---|
-| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | `STORY-152`, `STORY-156` |
+*No groomed tickets waiting. `STORY-160` (crafting) stays in Backlog by user decision.*
 
 ---
 
@@ -30,6 +28,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | [STORY-159.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-159.md) |
 | `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | [STORY-158.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-158.md) |
 | `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | [STORY-157.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-157.md) |
 | `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | [STORY-156.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-156.md) |
@@ -213,7 +212,7 @@
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 13 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 13 | `EPIC-002`, `EPIC-003` | Phase 2B |
-| `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B |
+| `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B ✅ Done (STORY-160 deferred) |
 
 ### 📋 Groomed Stories & Bugs for EPIC-015 (TCG Progression, Equipment & Bosses)
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
@@ -229,7 +228,7 @@
 | `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | ✅ Done | `STORY-152` |
 | `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | ✅ Done | `BUG-0010` |
 | `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | ✅ Done | `STORY-157` |
-| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | 🎯 To Do | `STORY-152`, `STORY-156` |
+| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | ✅ Done | `STORY-152`, `STORY-156` |
 | `STORY-160` | Story | Equipment Crafting with Dust (Deferred) | 5 | `EPIC-015` | 📋 Backlog | `STORY-156` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-010 (Waifu TCG)

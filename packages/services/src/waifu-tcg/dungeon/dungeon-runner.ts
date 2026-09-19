@@ -17,6 +17,7 @@ import { DungeonLootService, type DungeonLootResult } from './dungeon-loot.servi
 import { TUTORIAL_FLOORS, TutorialService, getCounterElement } from './tutorial-service.js';
 
 import { DungeonBattleSession } from './dungeon-battle-session.js';
+import type { DungeonProgressOutcome, DungeonProgressService } from './dungeon-progress.service.js';
 import {
   mergeBossDefinitions,
   parseBossDefinition,
@@ -59,6 +60,7 @@ export interface CreateBattleSessionResult {
 }
 
 export interface DungeonRunResult {
+  progress?: DungeonProgressOutcome | undefined;
   success: boolean;
   victory: boolean;
   floorNumber: number;
@@ -106,6 +108,7 @@ export function startEncounterSession(options: {
   userId: string;
   playerCard: Combatant;
   rng?: (() => number) | undefined;
+  pityBonus?: number | undefined;
 }): DungeonBattleSession {
   const { encounter } = options;
   const session = new DungeonBattleSession({
@@ -123,6 +126,7 @@ export function startEncounterSession(options: {
     bossSkillPower: encounter.bossSkillPower,
     bossProfile: encounter.bossProfile,
     rng: options.rng,
+    pityBonus: options.pityBonus,
   });
   session.start();
   return session;
@@ -139,6 +143,7 @@ export class DungeonRunner {
   private readonly cardRepo: WaifuCardRepository | undefined;
   private readonly tutorialService: TutorialService | undefined;
   private readonly cardProgression: CardProgressionService | undefined;
+  private readonly progressService: DungeonProgressService | undefined;
 
   constructor(
     energyRepo: PlayerEnergyRepository,
@@ -152,6 +157,7 @@ export class DungeonRunner {
       cardRepo?: WaifuCardRepository | undefined;
       tutorialService?: TutorialService | undefined;
       cardProgression?: CardProgressionService | undefined;
+      progressService?: DungeonProgressService | undefined;
     } = {},
   ) {
     this.energyRepo = energyRepo;
@@ -164,6 +170,7 @@ export class DungeonRunner {
     this.cardRepo = options.cardRepo;
     this.tutorialService = options.tutorialService;
     this.cardProgression = options.cardProgression;
+    this.progressService = options.progressService;
   }
 
   /** Grants card EXP for one battle to every card that fought. */
@@ -446,12 +453,19 @@ export class DungeonRunner {
       };
     }
 
+    const isTutorial = options.seasonId.toLowerCase().includes('tutorial');
+    const pityBonus =
+      !isTutorial && this.progressService
+        ? await this.progressService.getPityBonus(options.userId, options.seasonId, options.floorNumber)
+        : 0;
+
     const session = startEncounterSession({
       encounter: setup.encounter,
       floorNumber: options.floorNumber,
       seasonId: options.seasonId,
       userId: options.userId,
       playerCard: options.playerParty[0]!,
+      pityBonus,
     });
 
     return {
@@ -501,6 +515,17 @@ export class DungeonRunner {
       { victory: isWin, isFirstClear, forfeited: session.wasForfeited },
     );
 
+    const progress =
+      !isTutorial && this.progressService
+        ? await this.progressService.recordOutcome(session.userId, session.seasonId, session.floorNumber, {
+            victory: isWin,
+            forfeited: session.wasForfeited,
+            turns: snapshot.turn,
+            potionsUsed: session.potionCount,
+            energySpent: options.energySpent,
+          })
+        : undefined;
+
     return {
       success: true,
       victory: isWin,
@@ -513,6 +538,7 @@ export class DungeonRunner {
       isFirstClear,
       loot,
       cardExp,
+      progress,
     };
   }
 

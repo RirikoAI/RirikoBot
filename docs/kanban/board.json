@@ -142,7 +142,7 @@
       "id": "EPIC-015",
       "title": "Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-010"],
       "blocks": [],
       "description": "Balanced dungeon progression (win-rate bands per floor bracket verified by a balance simulator), DB-driven seasonal bosses as real anime characters (AniList + Danbooru pipeline, plain boss art with element icon), equipment acquisition (shop, drop tables, boss signature drops) and interactive gear/shop menus. Children total 63 pts; crafting deferred to STORY-160."
@@ -766,7 +766,7 @@
       "epic": "EPIC-015",
       "title": "Early-Floor Tuning, Pity Blessing & Floor Star Ratings",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-152", "STORY-156"],
       "blocks": [],
       "description": "Tune S1 to the win-rate bands, starter stat guarantee, stacking pity blessing with energy refund on F1-10, star ratings with bonus rewards."

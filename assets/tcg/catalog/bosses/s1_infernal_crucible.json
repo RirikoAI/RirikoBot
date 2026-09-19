@@ -10,7 +10,16 @@
     ],
     "scalingModel": "EXPONENTIAL",
     "scalingParams": {
-      "affixStartFloor": 6
+      "affixStartFloor": 6,
+      "baseStats": {
+        "hp": 950,
+        "attack": 90,
+        "defense": 50,
+        "speed": 22
+      },
+      "growthRate": 0.058,
+      "miniBossMultiplier": 1.35,
+      "majorBossMultiplier": 1.6
     },
     "durationDays": 90
   },
@@ -39,14 +48,15 @@
       "signatureDropCode": "WEAPON_CRIMSON_CHANT_STAFF",
       "definition": {
         "statMultipliers": {
-          "hp": 0.85,
-          "defense": 0.7
+          "hp": 1.15,
+          "defense": 0.8,
+          "attack": 0.8
         },
         "skill": {
           "name": "Explosion",
-          "description": "A single, catastrophic blast after five turns of chanting.",
-          "mpCost": 100,
-          "powerMult": 3
+          "mpCost": 80,
+          "powerMult": 3.5,
+          "description": "A single, catastrophic blast after four turns of chanting."
         }
       }
     },
@@ -73,15 +83,16 @@
       "signatureDropCode": "TALISMAN_MANEUVER_GEAR",
       "definition": {
         "statMultipliers": {
-          "attack": 1.15,
-          "defense": 0.9,
-          "speed": 1.25
+          "attack": 0.8,
+          "speed": 1.2,
+          "defense": 0.85,
+          "hp": 0.92
         },
-        "critRate": 0.2,
+        "critRate": 0.15,
         "skill": {
           "name": "Thunder Spear Barrage",
-          "mpCost": 50,
-          "powerMult": 1.8
+          "mpCost": 60,
+          "powerMult": 1.7
         }
       }
     },
@@ -108,15 +119,16 @@
       "signatureDropCode": "WEAPON_CALIDOS_GAUNTLETS",
       "definition": {
         "statMultipliers": {
-          "attack": 1.2
+          "attack": 0.92,
+          "hp": 0.8
         },
         "skill": {
           "name": "Calidos Brachium",
           "mpCost": 60,
-          "powerMult": 2
+          "powerMult": 1.8
         },
         "enrage": {
-          "startTurn": 8
+          "startTurn": 9
         }
       }
     },
@@ -143,25 +155,26 @@
       "signatureDropCode": "RING_RUIN_SIGNET",
       "definition": {
         "statMultipliers": {
-          "hp": 1.15
+          "hp": 0.9,
+          "attack": 0.9
         },
         "skill": {
           "name": "Power of Destruction",
           "mpCost": 80,
-          "powerMult": 2.4
+          "powerMult": 2.2
         },
         "wardLayers": [
           {
             "element": "WATER",
-            "hpPercent": 0.12
+            "hpPercent": 0.05
           },
           {
             "element": "EARTH",
-            "hpPercent": 0.12
+            "hpPercent": 0.05
           },
           {
             "element": "ICE",
-            "hpPercent": 0.12
+            "hpPercent": 0.05
           }
         ]
       }
@@ -189,33 +202,31 @@
       "signatureDropCode": "WEAPON_CRUCIBLE_HEART_BLADE",
       "definition": {
         "statMultipliers": {
-          "hp": 1.1,
-          "attack": 1.1,
-          "defense": 1.1,
-          "speed": 1.1
+          "hp": 0.7,
+          "attack": 0.9
         },
-        "critRate": 0.2,
+        "critRate": 0.15,
         "skill": {
           "name": "Shinku",
           "mpCost": 60,
-          "powerMult": 2.2
+          "powerMult": 2
         },
         "enrage": {
-          "startTurn": 12,
-          "perTurn": 0.75
+          "startTurn": 14,
+          "perTurn": 0.5
         },
         "wardLayers": [
           {
             "element": "WATER",
-            "hpPercent": 0.1
+            "hpPercent": 0.04
           },
           {
             "element": "LIGHTNING",
-            "hpPercent": 0.1
+            "hpPercent": 0.04
           },
           {
             "element": "ICE",
-            "hpPercent": 0.1
+            "hpPercent": 0.04
           }
         ]
       }
