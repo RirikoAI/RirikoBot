@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   createDatabaseClient,
   WaifuCardRepository,
@@ -18,6 +18,7 @@ describe('Card Command Suite (TASK-1012)', () => {
   let dropManager: DropManager;
   let dismantleService: CardDismantleService;
   let services: BotServices;
+  let getCardImage: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
@@ -128,7 +129,10 @@ describe('Card Command Suite (TASK-1012)', () => {
       }),
     };
 
+    getCardImage = vi.fn(async () => Buffer.from('rendered-card-png'));
+
     services = {
+      cardImageService: { getCardImage } as any,
       waifuAssetRepo: assetRepo,
       waifuCardRepo: cardRepo,
       dropManager,
@@ -202,6 +206,15 @@ describe('Card Command Suite (TASK-1012)', () => {
     expect(repliesClaim[0].embeds).toHaveLength(1);
     expect(repliesClaim[0].embeds[0].data.title).toContain('Card Claimed: Rias Gremory');
     expect(repliesClaim[0].embeds[0].data.footer?.text).toContain('Image source: waifu.im');
+    expect(repliesClaim[0].embeds[0].data.image?.url).toBe('attachment://card.png');
+    expect(repliesClaim[0].files).toEqual([
+      { attachment: Buffer.from('rendered-card-png'), name: 'card.png' },
+    ]);
+    expect(getCardImage).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Rias Gremory' }),
+      expect.objectContaining({ characterName: 'Rias Gremory' }),
+      expect.objectContaining({ attributionText: 'Image source: waifu.im' }),
+    );
   });
 
   it('should handle /card collection, inspect, favorite, equip, and dismantle', async () => {
@@ -266,6 +279,8 @@ describe('Card Command Suite (TASK-1012)', () => {
     expect(repInsp[0].embeds[0].data.title).toContain('Rias Gremory (#0042/1000)');
     expect(repInsp[0].embeds[0].data.description).toContain('Extinction Ray');
     expect(repInsp[0].embeds[0].data.footer?.text).toContain('Image source: waifu.im');
+    expect(repInsp[0].embeds[0].data.image?.url).toBe('attachment://card.png');
+    expect(repInsp[0].files).toHaveLength(1);
 
     // 4. Favorite card
     const { ctx: ctxFav, replies: repFav } = createMockContext({
@@ -382,5 +397,20 @@ describe('Card Command Suite (TASK-1012)', () => {
     });
     await command.execute(ctxUnequipGear);
     expect(repUnequipGear[0].content).toContain('Unequipped **Dragon Slayer**');
+  });
+  it('still replies with the text embed when card rendering fails', async () => {
+    getCardImage.mockRejectedValueOnce(new Error('canvas exploded'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const command = createCardCommand(services);
+    await dropManager.spawnDrop('guild_tcg_1', 'channel_main');
+
+    const { ctx, replies } = createMockContext({ subcommand: 'claim', userId: 'user_unlucky' });
+    await command.execute(ctx);
+
+    expect(replies[0].embeds[0].data.title).toContain('Card Claimed');
+    expect(replies[0].embeds[0].data.image).toBeUndefined();
+    expect(replies[0].files).toEqual([]);
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 });

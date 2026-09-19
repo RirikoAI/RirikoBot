@@ -42,3 +42,6 @@ temp-*/
 
 # Lavalink runtime & downloaded binary artifacts
 /lavalink/
+
+# Rendered TCG cards (rebuilt by `pnpm tcg:card-builder --rerender`; the bot renders missing ones on demand)
+public/cards/

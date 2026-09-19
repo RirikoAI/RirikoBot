@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.10.0)
+      '@napi-rs/canvas':
+        specifier: ^0.1.66
+        version: 0.1.100
       '@types/node':
         specifier: ^22.13.9
         version: 22.20.2

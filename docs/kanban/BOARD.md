@@ -28,6 +28,8 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-1061` | Task | Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI | 5 | `STORY-105` | [TASK-1061.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1061.md) |
+| `BUG-0008` | Bug | Fix Waifu TCG Tutorial False Completion, Missing Starter Card Seed & $climb Route | 3 | `STORY-104` | [BUG-0008.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0008.md) |
 | `TASK-1053` | Task | Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info) | 2 | `STORY-105` | [TASK-1053.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1053.md) |
 | `TASK-1052` | Task | WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite | 2 | `STORY-105` | [TASK-1052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1052.md) |
 | `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | `EPIC-010` | [TASK-1052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1052.md) |
