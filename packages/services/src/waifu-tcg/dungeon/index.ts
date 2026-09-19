@@ -6,3 +6,4 @@ export * from './tutorial-service.js';
 export * from './dungeon-loot.service.js';
 export * from './dungeon-battle-session.js';
 export * from './boss-definition.js';
+export * from './balance-simulator.js';

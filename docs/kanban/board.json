@@ -696,7 +696,7 @@
       "epic": "EPIC-015",
       "title": "Dungeon Balance Simulator CLI & CI Win-Rate Bands",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-151"],
       "blocks": [],
       "description": "ririko sim:dungeon runs DungeonBattleSession Monte Carlo per player profile; Vitest asserts target win-rate bands per floor bracket."
