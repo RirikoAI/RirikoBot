@@ -301,6 +301,25 @@ Precedence at battle time: floor overrides > boss definition > season curve > co
 
 Bosses build MP and cast their named skill. For example, Megumin's Explosion lands after five turns of charging, so defending that turn pays off.
 
+**Season 1 balance** is checked by `pnpm tcg:simulate --check` and by a CI test against `S1_TARGET_BANDS`:
+
+| Profile | Target |
+|---|---|
+| Tutorial graduate | ≥85% on F1–3, ≤10% on F10 |
+| Starter | ≥60% on F4–5 |
+| Early | ≥50% on F6–10, ≤5% on F20 |
+| Mid | ≥40% on F11–20, ≤10% on F30 |
+| Late | ≥35% on F21–30 |
+| Endgame | ≥15% on F31–50 |
+
+Every 10th floor is a boss wall that needs the next tier of cards and gear.
+
+**Keeping the climb possible and rewarding** (`DungeonProgressService`, stored per player and season in `tcg_system_configs`):
+- **Pity Blessing**: each real defeat on a floor gives +10% ATK/DEF/HP on the next attempt, up to +30%. It resets when the floor is cleared; forfeits don't count.
+- **Energy refund**: defeats on floors 1–10 refund half the energy spent.
+- **Star ratings**: 1★ for the clear, +1★ for ≤8 turns, +1★ for no potions. A floor's first 3★ clear pays floor × 10 Crafting Dust.
+- **Starter guarantee**: the tutorial's starter card comes from the stronger half of COMMON cards.
+
 In seasons, off-element strikes chip elemental wards at 25%. Matching the ward's element is still far faster. The tutorial keeps wards strict (0%) to teach the rule.
 
 ---

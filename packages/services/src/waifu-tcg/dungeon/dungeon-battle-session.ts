@@ -63,6 +63,8 @@ export interface DungeonBattleSessionOptions {
   bossSkillPower?: number | undefined;
   /** Display info for the boss character (art, anime, flavor text). */
   bossProfile?: DungeonBossProfile | undefined;
+  /** Pity blessing: extra share of ATK, DEF and HP for a player stuck on this floor. */
+  pityBonus?: number | undefined;
 }
 
 /**
@@ -88,6 +90,8 @@ export class DungeonBattleSession {
   private turn: number = 1;
   private defendingThisTurn: boolean = false;
   private potionUsedThisTurn: boolean = false;
+  private potionsUsed: number = 0;
+  private readonly pityBonus: number;
   private isFinished: boolean = false;
   private forfeited: boolean = false;
   private winner: 'TEAM_A' | 'TEAM_B' | 'DRAW' | null = null;
@@ -105,6 +109,7 @@ export class DungeonBattleSession {
     this.enrage = options.enrage ?? { ...DEFAULT_ENRAGE };
     this.bossSkillPower = options.bossSkillPower ?? 1.5;
     this.bossProfile = options.bossProfile ?? null;
+    this.pityBonus = Math.max(0, options.pityBonus ?? 0);
 
     // Clone player combatant with clean combat state
     this.player = {
@@ -119,6 +124,14 @@ export class DungeonBattleSession {
       hasUsedPhoenixWard: false,
     };
 
+    if (this.pityBonus > 0) {
+      const scale = 1 + this.pityBonus;
+      this.player.attack = Math.round(this.player.attack * scale);
+      this.player.defense = Math.round(this.player.defense * scale);
+      this.player.maxHealth = Math.round(this.player.maxHealth * scale);
+      this.player.currentHealth = Math.round(this.player.currentHealth * scale);
+    }
+
     // Clone boss combatant
     this.boss = {
       ...options.boss,
@@ -131,6 +144,11 @@ export class DungeonBattleSession {
       isAlive: true,
       hasUsedPhoenixWard: false,
     };
+  }
+
+  /** Potions drunk during this battle. */
+  public get potionCount(): number {
+    return this.potionsUsed;
   }
 
   /** True when the player surrendered instead of fighting the battle out. */
@@ -162,6 +180,16 @@ export class DungeonBattleSession {
     const affixLogs = this.affixHandler.applyBattleStartAffixes([this.player, this.boss]);
     for (const log of affixLogs) {
       this.pushLog(log);
+    }
+
+    if (this.pityBonus > 0) {
+      this.pushLog({
+        turn: 0,
+        actorId: this.player.id,
+        actorName: this.player.name,
+        actionType: 'PERK',
+        message: `🕊️ **Pity Blessing:** ${this.player.name} fights with +${Math.round(this.pityBonus * 100)}% ATK, DEF and HP after earlier defeats here.`,
+      });
     }
 
     // 3. Ward notification
@@ -360,6 +388,7 @@ export class DungeonBattleSession {
     }
 
     this.potionUsedThisTurn = true;
+    this.potionsUsed++;
     const currentTurn = this.turn;
 
     // Resolve item consumption
