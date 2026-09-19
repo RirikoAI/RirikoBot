@@ -155,6 +155,15 @@ export type GameStatistic = typeof sqlite.gameStatistics.$inferSelect;
 
 // Utilities & Reminders
 export type ReactionRole = typeof sqlite.reactionRoles.$inferSelect;
+export type NewReactionRole = Omit<typeof sqlite.reactionRoles.$inferInsert, 'id'> & {
+  id?: string;
+};
+export type GuildAutoRole = typeof sqlite.guildAutoRoles.$inferSelect;
+export type NewGuildAutoRole = typeof sqlite.guildAutoRoles.$inferInsert;
+export type TemporaryRole = typeof sqlite.temporaryRoles.$inferSelect;
+export type NewTemporaryRole = Omit<typeof sqlite.temporaryRoles.$inferInsert, 'id'> & {
+  id?: string;
+};
 export type AutoVoiceConfig = typeof sqlite.autoVoiceConfigs.$inferSelect;
 export type NewAutoVoiceConfig = Omit<typeof sqlite.autoVoiceConfigs.$inferInsert, 'id'> & {
   id?: string;

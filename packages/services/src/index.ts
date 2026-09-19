@@ -6,3 +6,4 @@ export * from './giveaways/index.js';
 export * from './autovoice/index.js';
 export * from './games/index.js';
 export * from './waifu-tcg/index.js';
+export * from './roles/index.js';
