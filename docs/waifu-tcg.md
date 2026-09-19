@@ -526,6 +526,32 @@ Superior gear cannot simply be purchased with money; it must be won in battle:
 - **Dungeon Floors 51–100**: Ultra Rare & Secret Rare Equipments (e.g. *Glacial Counter*, *Mana Conduit*).
 - **Server Raid Bosses**: Special Illustration Rare (SIR) and Mythic sets with dual synergy perks (e.g. *Phoenix Ward*, *Cosmic Cataclysm*).
 
+### 13.3. Dungeon Drop Tables & Boss Signature Gear (implemented)
+Drops come from `DUNGEON_DROP_BRACKETS` in `dungeon-loot.service.ts`. Every drop is a catalog code, and every clear also pays Crafting Dust.
+
+| Floors | Bracket gear (repeat clears: 35% item chance) | Boss-floor first clear |
+|---|---|---|
+| 1–9 | Shop tier: Boomerang, Buckler, Ember Charm, Copper Band + potions | Boss signature (F5: Fire Brigade Badge) |
+| 10–19 | RARE: Obsidian Katana, Magma Mail, Cinder Lantern, Blazing Sun, Mountain Amulet, Windwalker | F10 Crimson Chant Staff, F15 Crusader Plate |
+| 20–29 | SUPER_RARE: Solar Lance, Dragonscale, Phoenix Ash Censer, Solar Flare Ring, Obsidian Heart, Emberstep | F20 Maneuver Gear, F25 Sword Saint Band |
+| 30–39 | ULTRA_RARE: Crimson Calamity, Aegis, Chronos Hourglass, Inferno Crown, Magma Core, Tempest Feather | F30 Calidos Gauntlets, F35 Harvest Pouch |
+| 40+ | SECRET_RARE and up: Eternal Crucible, Sunforged Sigil, Primordial Flame, Ashen Wings, Phoenix Feather, World Breaker | F40 Signet of Ruin, F45 Chaos Dragon Scale, F50 Crucible Heart Blade |
+
+- The first clear of a standard floor always rolls one bracket item.
+- Repeat clears of a boss floor drop its signature again 8% of the time.
+
+**Secondary gear stats now affect dungeon combat:**
+
+| Stat | Effect |
+|---|---|
+| `mitigation` + `elementalResistance` | Cut incoming damage, capped at 60%; enrage true damage ignores it |
+| `armorPiercing` | Ignores part of the boss's defense |
+| `elementalMastery` | Adds to the elemental advantage multiplier |
+| `manaRegen` | Restores this share of max MP each turn |
+| `manaShield` | Starting shield |
+| `critDamage` | Added to crit damage |
+| `manaMax` | Raises max MP |
+
 ---
 
 ## 14. Game Achievement System

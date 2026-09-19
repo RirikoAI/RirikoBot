@@ -27,6 +27,18 @@ export interface ActiveStatusEffect {
   sourceElement?: CombatElement | undefined;
 }
 
+/** Secondary gear stats that shape dungeon combat (all fractions, 0.1 = 10%). */
+export interface GearCombatMods {
+  /** Cuts incoming damage (capped at 60%, not against enrage true damage). */
+  mitigation?: number | undefined;
+  /** Ignores this share of the target's defense on basic attacks. */
+  armorPiercing?: number | undefined;
+  /** Adds to the elemental advantage multiplier. */
+  elementalMastery?: number | undefined;
+  /** Share of max MP regained at the start of each turn. */
+  manaRegen?: number | undefined;
+}
+
 export interface Combatant {
   id: string;
   name: string;
@@ -53,6 +65,7 @@ export interface Combatant {
   perks: BattlePerkType[];
   hasUsedPhoenixWard: boolean;
   isAlive: boolean;
+  gearMods?: GearCombatMods | undefined;
 }
 
 export type ActionType =
