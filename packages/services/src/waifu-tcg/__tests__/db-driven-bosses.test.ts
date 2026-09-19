@@ -213,7 +213,7 @@ describe('DB-driven season curves & floor bosses (STORY-151)', () => {
 
       expect(setup.success).toBe(true);
       expect(setup.energyCost).toBe(5);
-      expect(setup.enemyBoss).toMatchObject({
+      expect(setup.encounter?.enemyBoss).toMatchObject({
         id: `${SEASON}:shana`,
         name: 'Shana',
         element: 'FIRE',
@@ -223,14 +223,11 @@ describe('DB-driven season curves & floor bosses (STORY-151)', () => {
         skillName: 'Shinku',
         skillManaCost: 40,
       });
-      expect(setup.bossSkillPower).toBe(1.8);
-      expect(setup.enrage).toEqual({ startTurn: 15, perTurn: 0.25, trueDamage: true });
-      expect(setup.elementalWard?.getCurrentLayer()).toMatchObject({
-        element: 'WATER',
-        maxHealth: 120,
-      });
-      expect(setup.affixHandler?.getTheme()).toBe('NONE'); // affixes start on floor 6
-      expect(setup.bossProfile).toMatchObject({
+      expect(setup.encounter?.bossSkillPower).toBe(1.8);
+      expect(setup.encounter?.enrage).toEqual({ startTurn: 15, perTurn: 0.25, trueDamage: true });
+      expect(setup.encounter?.wardLayers).toEqual([{ element: 'WATER', health: 120 }]);
+      expect(setup.encounter?.affixTheme).toBe('NONE'); // affixes start on floor 6
+      expect(setup.encounter?.bossProfile).toMatchObject({
         animeTitle: 'Shakugan no Shana',
         title: 'Flame-Haired Burning-Eyed Hunter',
         imagePath: 'public/bosses/s1_test/shana.png',
@@ -256,8 +253,8 @@ describe('DB-driven season curves & floor bosses (STORY-151)', () => {
         skipEnergyDeduction: true,
       });
       expect(fallback.energyCost).toBe(10);
-      expect(fallback.enemyBoss).toMatchObject({ maxHealth: 800, attack: 70, skillManaCost: 60 });
-      expect(fallback.bossProfile).toBeUndefined();
+      expect(fallback.encounter?.enemyBoss).toMatchObject({ maxHealth: 800, attack: 70, skillManaCost: 60 });
+      expect(fallback.encounter?.bossProfile).toBeUndefined();
     });
 
     it('upserts bosses and floors idempotently', async () => {

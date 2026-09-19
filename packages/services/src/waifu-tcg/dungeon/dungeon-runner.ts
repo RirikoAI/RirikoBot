@@ -73,18 +73,55 @@ export interface DungeonRunResult {
   error?: string | undefined;
 }
 
+/**
+ * Everything needed to fight one floor, as plain data. Stateful combat objects (ward, affix
+ * handler) are created per battle by startEncounterSession, so one encounter can be replayed.
+ */
+export interface FloorEncounter {
+  enemyBoss: Combatant;
+  wardLayers: Array<{ element: CardElement; health: number }> | null;
+  affixTheme: SeasonTheme;
+  seasonName: string;
+  enrage?: EnrageConfig | undefined;
+  maxTurns?: number | undefined;
+  bossSkillPower?: number | undefined;
+  bossProfile?: DungeonBossProfile | undefined;
+}
+
 export interface FloorSetup {
   success: boolean;
   error?: string | undefined;
   energyCost: number;
   highestCleared: number;
-  affixHandler?: SeasonalAffixHandler | undefined;
-  enemyBoss?: Combatant | undefined;
-  elementalWard?: ElementalWard | null | undefined;
-  enrage?: EnrageConfig | undefined;
-  maxTurns?: number | undefined;
-  bossSkillPower?: number | undefined;
-  bossProfile?: DungeonBossProfile | undefined;
+  encounter?: FloorEncounter | undefined;
+}
+
+/** Starts a fresh battle session for an encounter. */
+export function startEncounterSession(options: {
+  encounter: FloorEncounter;
+  floorNumber: number;
+  seasonId: string;
+  userId: string;
+  playerCard: Combatant;
+  rng?: (() => number) | undefined;
+}): DungeonBattleSession {
+  const { encounter } = options;
+  const session = new DungeonBattleSession({
+    floorNumber: options.floorNumber,
+    seasonId: options.seasonId,
+    userId: options.userId,
+    playerCard: options.playerCard,
+    boss: { ...encounter.enemyBoss, statusEffects: [], perks: [...encounter.enemyBoss.perks] },
+    affixHandler: new SeasonalAffixHandler(encounter.affixTheme, encounter.seasonName),
+    ward: encounter.wardLayers ? new ElementalWard(encounter.wardLayers) : null,
+    enrage: encounter.enrage,
+    maxTurns: encounter.maxTurns,
+    bossSkillPower: encounter.bossSkillPower,
+    bossProfile: encounter.bossProfile,
+    rng: options.rng,
+  });
+  session.start();
+  return session;
 }
 
 export class DungeonRunner {
@@ -193,16 +230,9 @@ export class DungeonRunner {
       };
     }
 
-    // 2. Season and floor configuration
-    const isTutorial = seasonId.toLowerCase().includes('tutorial');
-    const season = this.seasonRepo ? await this.seasonRepo.findById(seasonId) : null;
-    const floorRow =
-      !isTutorial && this.floorRepo
-        ? await this.floorRepo.findBySeasonAndFloor(seasonId, floorNumber)
-        : null;
+    const { encounter, energyCost } = await this.buildEncounter(userId, seasonId, floorNumber, playerParty);
 
-    // 3. Energy
-    const energyCost = isTutorial ? 0 : (floorRow?.energyCost ?? getDungeonFloorEnergyCost(floorNumber));
+    // 2. Energy
     if (!skipEnergyDeduction && energyCost > 0) {
       const energyResult = await this.energyRepo.consumeEnergy(userId, energyCost);
       if (!energyResult.success) {
@@ -215,23 +245,45 @@ export class DungeonRunner {
       }
     }
 
-    // 4. Environmental affixes (switched off below the season's affixStartFloor)
+
+    return { success: true, energyCost, highestCleared, encounter };
+  }
+
+  /**
+   * Builds the enemy and battle conditions for a floor without touching progress or energy.
+   * Season floors read the season curve (`dungeon_seasons.scaling_params`), the floor row
+   * (`dungeon_floors`) and its boss (`dungeon_bosses`); anything missing falls back to code defaults.
+   */
+  public async buildEncounter(
+    userId: string,
+    seasonId: string,
+    floorNumber: number,
+    playerParty: Combatant[],
+  ): Promise<{ encounter: FloorEncounter; energyCost: number }> {
+    const isTutorial = seasonId.toLowerCase().includes('tutorial');
+    const season = this.seasonRepo ? await this.seasonRepo.findById(seasonId) : null;
+    const floorRow =
+      !isTutorial && this.floorRepo
+        ? await this.floorRepo.findBySeasonAndFloor(seasonId, floorNumber)
+        : null;
+
+    const energyCost = isTutorial ? 0 : (floorRow?.energyCost ?? getDungeonFloorEnergyCost(floorNumber));
+
+    // Environmental affixes (switched off below the season's affixStartFloor)
     const curve = parseSeasonCurve(season?.scalingParams);
     const theme = this.resolveSeasonTheme(seasonId, season);
     const affixTheme: SeasonTheme = floorNumber < (curve.affixStartFloor ?? 1) ? 'NONE' : theme;
-    const affixHandler = new SeasonalAffixHandler(affixTheme, season?.name ?? 'Dungeon Tower');
+    const seasonName = season?.name ?? 'Dungeon Tower';
 
     if (isTutorial) {
+      const tutorial = await this.buildTutorialEnemy(userId, floorNumber, playerParty);
       return {
-        success: true,
         energyCost,
-        highestCleared,
-        affixHandler,
-        ...(await this.buildTutorialEnemy(userId, floorNumber, playerParty)),
+        encounter: { enemyBoss: tutorial.enemyBoss, wardLayers: tutorial.wardLayers, affixTheme, seasonName },
       };
     }
 
-    // 5. Season boss
+    // Season boss
     const engine = season
       ? new ScalingEngine(toScalingConfig(season.scalingModel, curve))
       : this.scalingEngine;
@@ -276,16 +328,14 @@ export class DungeonRunner {
       isAlive: true,
     };
 
-    let elementalWard: ElementalWard | null = null;
+    let wardLayers: FloorEncounter['wardLayers'] = null;
     if (def.wardLayers?.length) {
-      elementalWard = new ElementalWard(
-        def.wardLayers.map((l) => ({
-          element: l.element,
-          health: Math.max(1, Math.round(hp * l.hpPercent)),
-        })),
-      );
+      wardLayers = def.wardLayers.map((l) => ({
+        element: l.element,
+        health: Math.max(1, Math.round(hp * l.hpPercent)),
+      }));
     } else if (floorNumber >= 20 && floorType !== 'STANDARD') {
-      elementalWard = new ElementalWard(this.generateWardLayers(floorNumber, element, hp));
+      wardLayers = this.generateWardLayers(floorNumber, element, hp);
     }
 
     const bossProfile: DungeonBossProfile | undefined = bossRow
@@ -304,16 +354,17 @@ export class DungeonRunner {
       : undefined;
 
     return {
-      success: true,
       energyCost,
-      highestCleared,
-      affixHandler,
-      enemyBoss,
-      elementalWard,
-      enrage: resolveEnrage(curve.enrage, def.enrage),
-      maxTurns: def.maxTurns,
-      bossSkillPower: def.skill?.powerMult,
-      bossProfile,
+      encounter: {
+        enemyBoss,
+        wardLayers,
+        affixTheme,
+        seasonName,
+        enrage: resolveEnrage(curve.enrage, def.enrage),
+        maxTurns: def.maxTurns,
+        bossSkillPower: def.skill?.powerMult,
+        bossProfile,
+      },
     };
   }
 
@@ -321,7 +372,7 @@ export class DungeonRunner {
     userId: string,
     floorNumber: number,
     playerParty: Combatant[],
-  ): Promise<{ enemyBoss: Combatant; elementalWard: ElementalWard | null }> {
+  ): Promise<{ enemyBoss: Combatant; wardLayers: FloorEncounter['wardLayers'] }> {
     const tutFloor = TUTORIAL_FLOORS.find((f) => f.floorNumber === floorNumber);
     if (!tutFloor) {
       const stats = this.scalingEngine.calculateFloorStats(floorNumber);
@@ -349,12 +400,12 @@ export class DungeonRunner {
           hasUsedPhoenixWard: false,
           isAlive: true,
         },
-        elementalWard: null,
+        wardLayers: null,
       };
     }
 
     const enemyBoss: Combatant = { ...tutFloor.dummyEnemy };
-    if (floorNumber !== 4) return { enemyBoss, elementalWard: null };
+    if (floorNumber !== 4) return { enemyBoss, wardLayers: null };
 
     // Floor T4 teaches wards: the boss counters the player's element.
     const playerElement = (playerParty[0]?.element as CardElement) ?? 'FIRE';
@@ -367,10 +418,7 @@ export class DungeonRunner {
     }
     enemyBoss.element = bossElement;
     enemyBoss.name = bossName;
-    return {
-      enemyBoss,
-      elementalWard: new ElementalWard([{ element: bossElement, health: 100 }]),
-    };
+    return { enemyBoss, wardLayers: [{ element: bossElement, health: 100 }] };
   }
 
   /**
@@ -378,7 +426,7 @@ export class DungeonRunner {
    */
   public async createBattleSession(options: DungeonRunOptions): Promise<CreateBattleSessionResult> {
     const setup = await this.prepareFloorSetup(options);
-    if (!setup.success || !setup.enemyBoss || !setup.affixHandler) {
+    if (!setup.success || !setup.encounter) {
       return {
         success: false,
         energySpent: setup.energyCost,
@@ -387,21 +435,13 @@ export class DungeonRunner {
       };
     }
 
-    const session = new DungeonBattleSession({
+    const session = startEncounterSession({
+      encounter: setup.encounter,
       floorNumber: options.floorNumber,
       seasonId: options.seasonId,
       userId: options.userId,
       playerCard: options.playerParty[0]!,
-      boss: setup.enemyBoss,
-      affixHandler: setup.affixHandler,
-      ward: setup.elementalWard,
-      enrage: setup.enrage,
-      maxTurns: setup.maxTurns,
-      bossSkillPower: setup.bossSkillPower,
-      bossProfile: setup.bossProfile,
     });
-
-    session.start();
 
     return {
       success: true,

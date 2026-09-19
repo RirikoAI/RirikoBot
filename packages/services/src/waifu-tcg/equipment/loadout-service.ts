@@ -7,8 +7,7 @@ import type {
 } from '@ririko/database';
 import type { Combatant } from '../combat/types.js';
 import type { CardElement, CardRarity } from '../types.js';
-import { resolveSkillMpCost } from '../card/card-generator.js';
-import { LevelingEngine } from '../card/leveling-engine.js';
+import { createCardCombatant } from '../card/card-combatant.js';
 import type { EnhancementService } from './enhancement-service.js';
 import {
   ALL_GEAR_SLOTS,
@@ -18,7 +17,54 @@ import {
   type UserInventoryItemWithDefinition,
 } from './types.js';
 
-const levelingEngine = new LevelingEngine();
+/** Adds one gear piece's stats onto a running total. */
+export function addEquipmentStats(target: EquipmentStats, source: EquipmentStats): void {
+  if (source.attack) target.attack = (target.attack ?? 0) + source.attack;
+  if (source.defense) target.defense = (target.defense ?? 0) + source.defense;
+  if (source.health) target.health = (target.health ?? 0) + source.health;
+  if (source.speed) target.speed = (target.speed ?? 0) + source.speed;
+  if (source.critRate) target.critRate = +((target.critRate ?? 0) + source.critRate).toFixed(4);
+  if (source.critDamage) target.critDamage = +((target.critDamage ?? 0) + source.critDamage).toFixed(4);
+  if (source.mitigation) target.mitigation = +((target.mitigation ?? 0) + source.mitigation).toFixed(4);
+  if (source.elementalMastery) target.elementalMastery = +((target.elementalMastery ?? 0) + source.elementalMastery).toFixed(4);
+  if (source.manaShield) target.manaShield = (target.manaShield ?? 0) + source.manaShield;
+  if (source.armorPiercing) target.armorPiercing = +((target.armorPiercing ?? 0) + source.armorPiercing).toFixed(4);
+  if (source.elementalResistance) target.elementalResistance = +((target.elementalResistance ?? 0) + source.elementalResistance).toFixed(4);
+  if (source.manaMax) target.manaMax = (target.manaMax ?? 0) + source.manaMax;
+  if (source.manaRegen) target.manaRegen = +((target.manaRegen ?? 0) + source.manaRegen).toFixed(4);
+}
+
+/** Applies gear stats and battle perks to a combatant before battle. */
+export function applyEquipmentToCombatant(
+  combatant: Combatant,
+  stats: EquipmentStats,
+  perks: readonly string[],
+): void {
+  if (stats.health) {
+    combatant.maxHealth += stats.health;
+    combatant.currentHealth += stats.health;
+  }
+  if (stats.attack) {
+    combatant.attack += stats.attack;
+  }
+  if (stats.defense) {
+    combatant.defense += stats.defense;
+  }
+  if (stats.speed) {
+    combatant.speed += stats.speed;
+  }
+  if (stats.critRate) {
+    combatant.critRate += stats.critRate;
+  }
+
+  for (const perk of perks) {
+    // Map tiered perks (e.g. VAMPIRIC_TOUCH_T2) back to base perk trigger for combat engine
+    const basePerk = perk.replace(/_T\d+$/, '') as import('../combat/types.js').BattlePerkType;
+    if (!combatant.perks.includes(basePerk)) {
+      combatant.perks.push(basePerk);
+    }
+  }
+}
 
 export class LoadoutService {
   constructor(
@@ -149,7 +195,7 @@ export class LoadoutService {
       else if (inv.slot === 'TALISMAN') loadout.talisman = piece;
 
       // Accumulate stats
-      this.accumulateStats(loadout.aggregateStats, effectiveStats);
+      addEquipmentStats(loadout.aggregateStats, effectiveStats);
 
       // Accumulate perks
       for (const perk of effectivePerks) {
@@ -170,46 +216,27 @@ export class LoadoutService {
     const base = await this.cardRepo.findById(userCard.cardId);
     if (!base) return null;
 
-    const element = (base.element as CardElement) ?? 'FIRE';
-    const scaled = levelingEngine.calculateScaledStats(
+    const combatant = createCardCombatant(
       {
-        hp: base.health,
-        attack: base.attack,
-        defense: base.defense,
-        speed: base.speed,
-        critRate: base.critRate,
-        mp: 100,
+        id: userCard.id,
+        name: base.name,
+        element: (base.element as CardElement) ?? 'FIRE',
+        rarity: (base.rarity as CardRarity) ?? 'COMMON',
+        level: userCard.level,
+        stats: {
+          hp: base.health,
+          attack: base.attack,
+          defense: base.defense,
+          speed: base.speed,
+          critRate: base.critRate,
+        },
+        skillName: base.skillName,
+        skillDescription: base.skillDescription,
+        passiveName: base.passiveName,
+        passiveDescription: base.passiveDescription,
       },
-      userCard.level,
-    );
-
-    const combatant: Combatant = {
-      id: userCard.id,
-      name: `${base.name} (Lv.${userCard.level})`,
       team,
-      element,
-      rarity: (base.rarity as CardRarity) ?? 'COMMON',
-      level: userCard.level,
-      maxHealth: scaled.hp,
-      currentHealth: scaled.hp,
-      attack: scaled.attack,
-      defense: scaled.defense,
-      speed: scaled.speed,
-      critRate: scaled.critRate,
-      critDamage: 1.5,
-      maxMp: 100,
-      currentMp: 0,
-      skillName: base.skillName ?? undefined,
-      skillDescription: base.skillDescription ?? undefined,
-      skillManaCost: resolveSkillMpCost(base.skillDescription, element),
-      passiveName: base.passiveName ?? undefined,
-      passiveDescription: base.passiveDescription ?? undefined,
-      shield: 0,
-      statusEffects: [],
-      perks: [],
-      hasUsedPhoenixWard: false,
-      isAlive: true,
-    };
+    );
 
     this.applyLoadoutToCombatant(combatant, await this.getCardLoadout(userCard.id));
     return combatant;
@@ -236,47 +263,6 @@ export class LoadoutService {
    * Applies the equipped loadout stats and perks to a Combatant instance before battle.
    */
   applyLoadoutToCombatant(combatant: Combatant, loadout: CardLoadout): void {
-    const stats = loadout.aggregateStats;
-
-    if (stats.health) {
-      combatant.maxHealth += stats.health;
-      combatant.currentHealth += stats.health;
-    }
-    if (stats.attack) {
-      combatant.attack += stats.attack;
-    }
-    if (stats.defense) {
-      combatant.defense += stats.defense;
-    }
-    if (stats.speed) {
-      combatant.speed += stats.speed;
-    }
-    if (stats.critRate) {
-      combatant.critRate += stats.critRate;
-    }
-
-    for (const perk of loadout.activePerks) {
-      // Map tiered perks (e.g. VAMPIRIC_TOUCH_T2) back to base perk trigger for combat engine
-      const basePerk = perk.replace(/_T\d+$/, '') as import('../combat/types.js').BattlePerkType;
-      if (!combatant.perks.includes(basePerk)) {
-        combatant.perks.push(basePerk);
-      }
-    }
-  }
-
-  private accumulateStats(target: EquipmentStats, source: EquipmentStats): void {
-    if (source.attack) target.attack = (target.attack ?? 0) + source.attack;
-    if (source.defense) target.defense = (target.defense ?? 0) + source.defense;
-    if (source.health) target.health = (target.health ?? 0) + source.health;
-    if (source.speed) target.speed = (target.speed ?? 0) + source.speed;
-    if (source.critRate) target.critRate = +((target.critRate ?? 0) + source.critRate).toFixed(4);
-    if (source.critDamage) target.critDamage = +((target.critDamage ?? 0) + source.critDamage).toFixed(4);
-    if (source.mitigation) target.mitigation = +((target.mitigation ?? 0) + source.mitigation).toFixed(4);
-    if (source.elementalMastery) target.elementalMastery = +((target.elementalMastery ?? 0) + source.elementalMastery).toFixed(4);
-    if (source.manaShield) target.manaShield = (target.manaShield ?? 0) + source.manaShield;
-    if (source.armorPiercing) target.armorPiercing = +((target.armorPiercing ?? 0) + source.armorPiercing).toFixed(4);
-    if (source.elementalResistance) target.elementalResistance = +((target.elementalResistance ?? 0) + source.elementalResistance).toFixed(4);
-    if (source.manaMax) target.manaMax = (target.manaMax ?? 0) + source.manaMax;
-    if (source.manaRegen) target.manaRegen = +((target.manaRegen ?? 0) + source.manaRegen).toFixed(4);
+    applyEquipmentToCombatant(combatant, loadout.aggregateStats, loadout.activePerks);
   }
 }
