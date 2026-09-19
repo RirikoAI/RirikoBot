@@ -11,3 +11,4 @@ export * from './combat/index.js';
 export * from './game-modes/index.js';
 export * from './equipment/index.js';
 export * from './energy/energy-lifecycle.service.js';
+export * from './dungeon/index.js';
