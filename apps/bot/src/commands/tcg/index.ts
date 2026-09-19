@@ -2,3 +2,8 @@ export * from './card.command.js';
 export * from './game.command.js';
 export * from './item.command.js';
 export * from './dungeon.command.js';
+export * from './trade.command.js';
+export * from './market.command.js';
+export * from './guild.command.js';
+export * from './achievement.command.js';
+export * from './admin.command.js';

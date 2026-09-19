@@ -12,3 +12,8 @@ export * from './game-modes/index.js';
 export * from './equipment/index.js';
 export * from './energy/energy-lifecycle.service.js';
 export * from './dungeon/index.js';
+export * from './trading/index.js';
+export * from './market/index.js';
+export * from './guild/index.js';
+export * from './achievements/index.js';
+export * from './admin/index.js';

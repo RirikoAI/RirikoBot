@@ -19,3 +19,8 @@ export * from './waifu-asset.repository.js';
 export * from './waifu-card.repository.js';
 export * from './tcg-item.repository.js';
 export * from './dungeon.repository.js';
+export * from './card-trade.repository.js';
+export * from './market-listing.repository.js';
+export * from './waifu-guild.repository.js';
+export * from './achievement.repository.js';
+export * from './tcg-config.repository.js';
