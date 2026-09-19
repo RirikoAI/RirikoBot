@@ -24,3 +24,5 @@ export * from './market-listing.repository.js';
 export * from './waifu-guild.repository.js';
 export * from './achievement.repository.js';
 export * from './tcg-config.repository.js';
+export * from './reaction-role.repository.js';
+export * from './autorole.repository.js';
