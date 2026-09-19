@@ -8,3 +8,4 @@ export * from './guild.command.js';
 export * from './achievement.command.js';
 export * from './admin.command.js';
 export * from './info.command.js';
+export * from './cards.command.js';

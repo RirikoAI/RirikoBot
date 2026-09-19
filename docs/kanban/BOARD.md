@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress (WIP: 0/1).*
+*No active tickets in progress.*
 
 ---
 
@@ -28,6 +28,11 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0009` | Bug | Fix Tutorial Floor T4 Defeat Counter Card Grant & Stale Metadata Recovery | 2 | `STORY-104` | [BUG-0009.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0009.md) |
+| `TASK-1046` | Task | Interactive Combat Items Dropdown, Battle Collector Fixes, Tutorial Floor Lock & Potion Grants, and Interactive Town Shop & Inventory Menus | 5 | `STORY-104` | [TASK-1046.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1046.md) |
+| `TASK-1045` | Task | Tutorial Floor T4 Dynamic Elemental Disadvantage, Real Common Card Grant on Defeat & Direct Climb Gate Prompt | 3 | `STORY-104` | [TASK-1045.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1045.md) |
+| `TASK-1044` | Task | Interactive Card Album, Pagination, Inspection & Equip Menu Suite (/cards) | 3 | `STORY-101` | [TASK-1044.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1044.md) |
+| `TASK-1043` | Task | Interactive Real-Time Dungeon Tower Battles with Card Rendering, Manual & Auto Combat | 5 | `STORY-104` | [TASK-1043.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1043.md) |
 | `TASK-1061` | Task | Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI | 5 | `STORY-105` | [TASK-1061.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1061.md) |
 | `BUG-0008` | Bug | Fix Waifu TCG Tutorial False Completion, Missing Starter Card Seed & $climb Route | 3 | `STORY-104` | [BUG-0008.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0008.md) |
 | `TASK-1053` | Task | Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info) | 2 | `STORY-105` | [TASK-1053.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1053.md) |

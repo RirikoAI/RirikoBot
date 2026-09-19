@@ -13,6 +13,7 @@ import {
   createAutoVoiceCommands,
   createGamesCommands,
   createCardCommand,
+  createCardsCommand,
   createGameCommand,
   createItemCommand,
   createDungeonCommand,
@@ -155,6 +156,7 @@ export async function main(): Promise<void> {
 
   // Waifu TCG & Equipment Commands
   router.registry.register(createCardCommand(services));
+  router.registry.register(createCardsCommand(services));
   router.registry.register(createGameCommand(services));
   router.registry.register(createItemCommand(services));
   router.registry.register(createDungeonCommand(services));
