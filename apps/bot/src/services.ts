@@ -19,6 +19,9 @@ import {
   WaifuCardRepository,
   GameItemRepository,
   UserInventoryItemRepository,
+  DungeonSeasonRepository,
+  DungeonFloorRepository,
+  UserDungeonProgressRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -93,6 +96,10 @@ import {
   ConsumableService,
   EnergyLifecycleService,
   TcgShopService,
+  ScalingEngine,
+  DungeonRunner,
+  TutorialService,
+  DungeonLootService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -164,6 +171,13 @@ export interface BotServices {
   consumableService: ConsumableService;
   energyLifecycleService: EnergyLifecycleService;
   tcgShopService: TcgShopService;
+  dungeonSeasonRepo: DungeonSeasonRepository;
+  dungeonFloorRepo: DungeonFloorRepository;
+  userDungeonProgressRepo: UserDungeonProgressRepository;
+  scalingEngine: ScalingEngine;
+  dungeonRunner: DungeonRunner;
+  tutorialService: TutorialService;
+  dungeonLootService: DungeonLootService;
 }
 
 /**
@@ -508,6 +522,27 @@ export async function createBotServices(
   const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo);
   const tcgShopService = new TcgShopService(gameItemRepo, userInventoryItemRepo, economyRepo);
 
+  const dungeonSeasonRepo = new DungeonSeasonRepository(db);
+  const dungeonFloorRepo = new DungeonFloorRepository(db);
+  const userDungeonProgressRepo = new UserDungeonProgressRepository(db);
+  const scalingEngine = new ScalingEngine();
+  const dungeonLootService = new DungeonLootService({
+    economyRepo,
+    inventoryRepo: userInventoryItemRepo,
+    xpRepo,
+  });
+  const dungeonRunner = new DungeonRunner(playerEnergyRepo, userDungeonProgressRepo, {
+    scalingEngine,
+    floorRepo: dungeonFloorRepo,
+    seasonRepo: dungeonSeasonRepo,
+    lootService: dungeonLootService,
+  });
+  const tutorialService = new TutorialService(userDungeonProgressRepo, {
+    cardRepo: waifuCardRepo,
+    inventoryRepo: userInventoryItemRepo,
+    itemRepo: gameItemRepo,
+  });
+
   // Seed canonical items if needed
   try {
     for (const item of CANONICAL_ITEMS) {
@@ -518,6 +553,42 @@ export async function createBotServices(
     }
   } catch {
     // In some unit tests with isolated in-memory databases, game_items may not be created.
+  }
+
+  // Seed default seasons if needed
+  try {
+    const active = await dungeonSeasonRepo.findActiveSeason();
+    if (!active) {
+      await dungeonSeasonRepo.create({
+        id: 's1_infernal_crucible',
+        name: 'Season 1: Infernal Crucible',
+        description: 'Blistering magma towers with Scorched Earth and Heat Haze affixes.',
+        isActive: true,
+        themeElement: 'FIRE',
+        seasonalAffixes: ['SCORCHED_EARTH', 'HEAT_HAZE'],
+        scalingModel: 'EXPONENTIAL',
+        isTutorial: false,
+        startsAt: new Date(),
+        endsAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      });
+    }
+    const tutorialSeason = await dungeonSeasonRepo.findTutorialSeason();
+    if (!tutorialSeason) {
+      await dungeonSeasonRepo.create({
+        id: 'season_tutorial',
+        name: 'Tutorial Prologue: Training Grounds',
+        description: 'Introductory 4-floor training dungeon teaching basic mechanics and wards.',
+        isActive: true,
+        themeElement: 'NEUTRAL',
+        seasonalAffixes: [],
+        scalingModel: 'LINEAR',
+        isTutorial: true,
+        startsAt: new Date(),
+        endsAt: new Date(Date.now() + 3650 * 24 * 60 * 60 * 1000),
+      });
+    }
+  } catch {
+    // Ignore in tests
   }
 
   return {
@@ -588,5 +659,12 @@ export async function createBotServices(
     consumableService,
     energyLifecycleService,
     tcgShopService,
+    dungeonSeasonRepo,
+    dungeonFloorRepo,
+    userDungeonProgressRepo,
+    scalingEngine,
+    dungeonRunner,
+    tutorialService,
+    dungeonLootService,
   };
 }
