@@ -20,6 +20,7 @@
     "db:reset": "tsx scripts/db-reset.ts",
     "tcg:generate-assets": "tsx scripts/generate-tcg-assets.ts",
     "tcg:card-builder": "tsx scripts/tcg-card-builder.ts",
+    "tcg:boss-builder": "tsx --env-file-if-exists=.env scripts/tcg-boss-builder.ts",
     "tcg:reset-user": "tsx scripts/reset-tcg-user.ts",
     "tcg:simulate": "tsx --env-file-if-exists=.env scripts/tcg-balance-sim.ts",
     "typecheck": "pnpm -r run typecheck",
