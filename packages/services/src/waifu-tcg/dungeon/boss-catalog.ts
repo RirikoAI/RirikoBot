@@ -39,6 +39,8 @@ export const catalogBossSchema = z
     tier: z.enum(['STANDARD', 'MINI_BOSS', 'MAJOR_BOSS']),
     /** Floors this boss guards. Mini/major bosses list theirs; standard bosses rotate when omitted. */
     floors: z.array(z.number().int().min(1)).optional(),
+    /** Standard bosses only: the floor range [from, to] they rotate through (default: all). */
+    floorRange: z.tuple([z.number().int().min(1), z.number().int().min(1)]).optional(),
     title: z.string().optional(),
     flavorText: z.string().optional(),
     signatureDropCode: z.string().optional(),
@@ -109,9 +111,10 @@ export function saveBossCatalog(filePath: string, catalog: BossCatalog): void {
 }
 
 /**
- * Assigns a boss to every floor. Mini/major bosses take the floors they list; standard floors
- * cycle through the standard bosses without listed floors, never repeating a boss on
- * back-to-back standard floors. Throws on gaps, clashes or tier/floor mismatches.
+ * Assigns a boss to every floor. Mini/major bosses take the floors they list. Each standard
+ * floor takes the least-used standard boss whose floorRange covers it, never the boss of the
+ * previous standard floor, so appearances spread evenly and later floors can bring new faces.
+ * Throws on gaps, clashes or tier/floor mismatches.
  */
 export function planSeasonFloors(catalog: BossCatalog): PlannedFloor[] {
   const engine = new ScalingEngine();
@@ -137,7 +140,7 @@ export function planSeasonFloors(catalog: BossCatalog): PlannedFloor[] {
   }
 
   const pool = catalog.bosses.filter((b) => b.tier === 'STANDARD' && !b.floors?.length);
-  let poolIndex = 0;
+  const uses = new Map<string, number>();
   let previousStandard: string | undefined;
   const planned: PlannedFloor[] = [];
 
@@ -150,13 +153,19 @@ export function planSeasonFloors(catalog: BossCatalog): PlannedFloor[] {
         );
         continue;
       }
-      if (pool.length === 0) {
-        errors.push(`floor ${floor} needs a standard boss but the rotating pool is empty`);
+      const inRange = pool.filter(
+        (b) => !b.floorRange || (floor >= b.floorRange[0] && floor <= b.floorRange[1]),
+      );
+      const candidates =
+        inRange.length > 1 ? inRange.filter((b) => b.key !== previousStandard) : inRange;
+      if (candidates.length === 0) {
+        errors.push(`floor ${floor} needs a standard boss but none covers it`);
         continue;
       }
-      boss = pool[poolIndex % pool.length]!;
-      if (pool.length > 1 && boss.key === previousStandard) boss = pool[++poolIndex % pool.length]!;
-      poolIndex++;
+      boss = candidates.reduce((best, b) =>
+        (uses.get(b.key) ?? 0) < (uses.get(best.key) ?? 0) ? b : best,
+      );
+      uses.set(boss.key, (uses.get(boss.key) ?? 0) + 1);
       previousStandard = boss.key;
     }
     const override = catalog.floorOverrides?.[String(floor)];
