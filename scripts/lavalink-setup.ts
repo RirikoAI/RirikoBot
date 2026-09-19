@@ -40,7 +40,9 @@ export async function setupLavalink(): Promise<void> {
           .join('\n'),
     );
   } catch {
-    console.error('❌ Java 17+ is required but not found in PATH! Please install OpenJDK 17 or 21.');
+    console.error(
+      '❌ Java 17+ is required but not found in PATH! Please install OpenJDK 17 or 21.',
+    );
     process.exit(1);
   }
 
@@ -111,14 +113,10 @@ export async function setupLavalink(): Promise<void> {
   }
 
   // 5. Generate application.yml with exact YouTube & LavaSrc recipe
-  const spotifyClientId =
-    process.env.SPOTIFY_CLIENT_ID || 'a13a730cc1da43b3a51e0b2c1ebd790a';
-  const spotifyClientSecret =
-    process.env.SPOTIFY_CLIENT_SECRET || '0ccdd59967094748b5c1b9e9bbc7add1';
-  const spotifySpDc =
-    process.env.SPOTIFY_SP_DC ||
-    'AQDpJ0Yb4a4QhYu0lhKIObzj6cRiz-gkg56BxgjG5SR-v_CVY2wU_0NpomaN8VfgE29G0XwdbH3XGMt6turmUjW1rqmdjE-2SW_rczzwcu_Rv2xKQBRyxCZ0maOH1DLxJyURAEX6hu9lLPBNSZ04d0CuQZICaml01sdCVY5RoeJyuz5qzXzoxfxH-LiClO6jYujdOcn_KLM7dTLbLo4';
-  const lavalinkPassword = process.env.LAVALINK_PASSWORD || 'youshallnotpass';
+  const spotifyClientId = process.env.SPOTIFY_CLIENT_ID || '';
+  const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET || '';
+  const spotifySpDc = process.env.SPOTIFY_SP_DC || '';
+  const lavalinkPassword = process.env.LAVALINK_PASSWORD || '';
   const lavalinkPort = process.env.LAVALINK_PORT || '2333';
 
   console.log('⚙️ Generating production application.yml (exact LavaMusic recipe)...');
@@ -271,7 +269,9 @@ logging:
 
   writeFileSync(YML_PATH, configContent, 'utf8');
   console.log(`✅ Configuration generated at: ${YML_PATH}`);
-  console.log('🎉 [Ririko Lavalink Autoinstaller] Setup complete! You can start Lavalink using: pnpm lavalink:start');
+  console.log(
+    '🎉 [Ririko Lavalink Autoinstaller] Setup complete! You can start Lavalink using: pnpm lavalink:start',
+  );
 }
 
 if (process.argv[1]?.endsWith('lavalink-setup.ts')) {
@@ -280,4 +280,3 @@ if (process.argv[1]?.endsWith('lavalink-setup.ts')) {
     process.exit(1);
   });
 }
-
