@@ -15,6 +15,7 @@ import {
   createCardCommand,
   createGameCommand,
   createItemCommand,
+  createDungeonCommand,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -150,6 +151,7 @@ export async function main(): Promise<void> {
   router.registry.register(createCardCommand(services));
   router.registry.register(createGameCommand(services));
   router.registry.register(createItemCommand(services));
+  router.registry.register(createDungeonCommand(services));
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
