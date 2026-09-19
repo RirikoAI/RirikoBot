@@ -19,6 +19,7 @@ import {
 } from '../combat/battle-perks.js';
 import { ElementalWard } from './elemental-ward.js';
 import { SeasonalAffixHandler } from './seasonal-affixes.js';
+import { DEFAULT_ENRAGE, type DungeonBossProfile, type EnrageConfig } from './boss-definition.js';
 
 export type PlayerCombatAction = 'ATTACK' | 'SKILL' | 'DEFEND';
 
@@ -56,6 +57,12 @@ export interface DungeonBattleSessionOptions {
   ward?: ElementalWard | null | undefined;
   rng?: (() => number) | undefined;
   maxTurns?: number | undefined;
+  /** Soft enrage timing; defaults to turn 10, +100% ATK per turn, true damage. */
+  enrage?: EnrageConfig | undefined;
+  /** Boss skill damage multiplier over a basic attack (default 1.5). */
+  bossSkillPower?: number | undefined;
+  /** Display info for the boss character (art, anime, flavor text). */
+  bossProfile?: DungeonBossProfile | undefined;
 }
 
 /**
@@ -68,7 +75,10 @@ export class DungeonBattleSession {
   public readonly seasonId: string;
   public readonly userId: string;
   public readonly maxTurns: number;
+  public readonly bossProfile: DungeonBossProfile | null;
 
+  private readonly enrage: EnrageConfig;
+  private readonly bossSkillPower: number;
   private readonly player: Combatant;
   private readonly boss: Combatant;
   private readonly affixHandler: SeasonalAffixHandler;
@@ -92,6 +102,9 @@ export class DungeonBattleSession {
     this.ward = options.ward ?? null;
     this.rng = options.rng ?? Math.random;
     this.maxTurns = options.maxTurns ?? 25;
+    this.enrage = options.enrage ?? { ...DEFAULT_ENRAGE };
+    this.bossSkillPower = options.bossSkillPower ?? 1.5;
+    this.bossProfile = options.bossProfile ?? null;
 
     // Clone player combatant with clean combat state
     this.player = {
@@ -185,14 +198,16 @@ export class DungeonBattleSession {
 
     // 2. Soft Enrage notice on turn 10 (disabled in tutorial)
     const isTutorial = this.seasonId.toLowerCase().includes('tutorial');
-    const enrageMultiplier = !isTutorial && currentTurn >= 10 ? 1 + (currentTurn - 9) : 1.0;
-    if (!isTutorial && currentTurn === 10) {
+    const { startTurn, perTurn, trueDamage } = this.enrage;
+    const enrageMultiplier =
+      !isTutorial && currentTurn >= startTurn ? 1 + perTurn * (currentTurn - startTurn + 1) : 1.0;
+    if (!isTutorial && currentTurn === startTurn) {
       this.pushLog({
         turn: currentTurn,
         actorId: this.boss.id,
         actorName: this.boss.name,
         actionType: 'ENRAGE',
-        message: `⚠️ **SOFT ENRAGE ACTIVATED!** ${this.boss.name} gains +100% Attack per turn with true damage strikes!`,
+        message: `⚠️ **SOFT ENRAGE ACTIVATED!** ${this.boss.name} gains +${Math.round(perTurn * 100)}% Attack per turn${trueDamage ? ' with true damage strikes' : ''}!`,
       });
     }
 
@@ -649,10 +664,25 @@ export class DungeonBattleSession {
   ): void {
     const isTutorial = this.seasonId.toLowerCase().includes('tutorial');
     const effectiveEnrage = isTutorial ? 1.0 : enrageMultiplier;
-    const bossAtk = Math.round(bossStats.effectiveAttack * effectiveEnrage);
+    const isTrueDamage = !isTutorial && this.enrage.trueDamage && turn >= this.enrage.startTurn;
+
+    // Bosses build 20 MP per basic attack and unleash their skill once they can pay for it.
+    const castsSkill =
+      !isTutorial &&
+      Boolean(this.boss.skillName) &&
+      this.boss.skillManaCost > 0 &&
+      this.boss.currentMp >= this.boss.skillManaCost;
+    if (castsSkill) {
+      this.boss.currentMp -= this.boss.skillManaCost;
+    } else {
+      this.boss.currentMp = Math.min(this.boss.maxMp, this.boss.currentMp + 20);
+    }
+
+    const skillMult = castsSkill ? this.bossSkillPower : 1;
+    const bossAtk = Math.round(bossStats.effectiveAttack * effectiveEnrage * skillMult);
     let damage: number;
 
-    if (!isTutorial && turn >= 10) {
+    if (isTrueDamage) {
       // Unblockable true damage during enrage
       damage = bossAtk;
     } else {
@@ -701,19 +731,22 @@ export class DungeonBattleSession {
       }
     }
 
-    const enrageDesc = !isTutorial && turn >= 10 ? ' *(TRUE DAMAGE ENRAGE!)*' : '';
+    const enrageDesc = isTrueDamage ? ' *(TRUE DAMAGE ENRAGE!)*' : '';
     const guardDesc = this.defendingThisTurn ? ' *(Guard reduced damage by 50%)*' : '';
     const shieldDesc = shieldAbsorbed > 0 ? ` [${shieldAbsorbed} absorbed by shield]` : '';
+    const actionText = castsSkill
+      ? `💥 **${this.boss.name}** unleashed ✨ **${this.boss.skillName}** on`
+      : `💥 **${this.boss.name}** struck`;
 
     this.pushLog({
       turn,
       actorId: this.boss.id,
       actorName: this.boss.name,
-      actionType: 'ATTACK',
+      actionType: castsSkill ? 'SKILL' : 'ATTACK',
       targetId: this.player.id,
       targetName: this.player.name,
       damageDealt: damage,
-      message: `💥 **${this.boss.name}** struck **${this.player.name}** for **${damage} DMG**!${enrageDesc}${guardDesc}${shieldDesc}${!this.player.isAlive ? ` (${this.player.name} fainted!)` : ''}`,
+      message: `${actionText} **${this.player.name}** for **${damage} DMG**!${enrageDesc}${guardDesc}${shieldDesc}${!this.player.isAlive ? ` (${this.player.name} fainted!)` : ''}`,
     });
   }
 
