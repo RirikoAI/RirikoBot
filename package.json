@@ -24,12 +24,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "clean": "pnpm -r run clean"
+    "clean": "pnpm -r run clean",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^22.13.9",
     "eslint": "^10.10.0",
+    "husky": "^9.1.7",
     "prettier": "^3.9.6",
     "rimraf": "^6.0.1",
     "tsx": "^4.19.3",

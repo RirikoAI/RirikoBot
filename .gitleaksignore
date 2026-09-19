@@ -1,0 +1,8 @@
+# Findings reviewed and accepted as not secret (gitleaks fingerprints).
+# Test fixtures with fake values:
+5ce58cd5c1dc71a47b7dc94c7d3c6b8aa24462f3:apps/cli/src/commands/stream-configure.test.ts:generic-api-key:30
+b1095c9272ae71dd4cc36af044810e8cce53ad7d:apps/cli/src/utils/env-editor.test.ts:generic-api-key:129
+959272dbb9c0a3bc03772de813c3a21e7d62710c:packages/core/src/config/loader.test.ts:discord-client-id:12
+959272dbb9c0a3bc03772de813c3a21e7d62710c:packages/core/src/config/loader.test.ts:discord-client-id:29
+# Discord application IDs are public (they appear in bot invite URLs):
+164a893e07c546722ddb9880c7cd1583796ffc82:packages/music/src/lavalink/lavalink-service.ts:hardcoded-env-fallback:218

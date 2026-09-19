@@ -1,0 +1,28 @@
+# Secret scanning rules for the pre-commit hook (.husky/pre-commit).
+# Extends gitleaks' default ruleset with the patterns its defaults missed:
+# the 2026-09-17 Spotify leak in scripts/lavalink-setup.ts was a hardcoded
+# `process.env.X || '<secret>'` fallback, which the generic rule does not match.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "hardcoded-env-fallback"
+description = "Secret-looking literal used as a fallback for a sensitive env var"
+regex = '''process\.env\.[A-Z0-9_]*(?:SECRET|TOKEN|KEY|PASSWORD|PASS|DC|COOKIE|CLIENT_ID|CREDENTIAL)[A-Z0-9_]*\s*(?:\|\||\?\?)\s*['"`]([^'"`\s]{16,})['"`]'''
+secretGroup = 1
+keywords = ["process.env"]
+
+[[rules]]
+id = "spotify-session-cookie"
+description = "Spotify sp_dc session cookie or access token"
+regex = '''['"`=:\s]((?:AQ|BQ)[A-Za-z0-9_\-]{100,})'''
+secretGroup = 1
+keywords = ["aq", "bq"]
+
+[[rules]]
+id = "spotify-client-credential"
+description = "Spotify client ID or secret (32 hex) near a Spotify identifier"
+regex = '''(?i)spotify[\w.\-]{0,40}[\s\S]{0,80}?['"`=:\s]([0-9a-f]{32})\b'''
+secretGroup = 1
+keywords = ["spotify"]

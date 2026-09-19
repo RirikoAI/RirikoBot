@@ -1,0 +1,17 @@
+# Block secrets before they reach history. Rules: .gitleaks.toml
+
+# .env files are gitignored, but `git add -f` bypasses that.
+blocked=$(git diff --cached --name-only --diff-filter=ACR | grep -E '(^|/)\.env($|\.)' | grep -vE '\.example$' || true)
+if [ -n "$blocked" ]; then
+  echo "pre-commit: refusing to commit env files:"
+  echo "$blocked"
+  exit 1
+fi
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is required to scan for secrets."
+  echo "  Install: winget install gitleaks | brew install gitleaks | go install github.com/zricethezav/gitleaks/v8@latest"
+  exit 1
+fi
+
+gitleaks git --pre-commit --staged --redact --no-banner --config .gitleaks.toml
