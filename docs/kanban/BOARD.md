@@ -16,12 +16,25 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*All groomed tasks in STORY-105 in progress or completed.*
+| ID | Type | Title | Pts | Parent | Prerequisites |
+|---|---|---|---|---|---|
+| `STORY-150` | Story | Card EXP from Dungeon Wins & Real Skill MP Cost in Combat | 3 | `EPIC-015` | `BUG-0010` |
+| `STORY-151` | Story | DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table) | 8 | `EPIC-015` | `STORY-150` |
+| `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | `EPIC-015` | `STORY-151` |
+| `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | `EPIC-015` | `STORY-151` |
+| `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | `EPIC-015` | `STORY-152`, `STORY-153` |
+| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | `STORY-154` |
+| `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | `STORY-152` |
+| `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | `BUG-0010` |
+| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | `STORY-157` |
+| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | `STORY-152`, `STORY-156` |
 
 ---
 
 ## 🔍 Review / Quality Gate
-*No tickets currently in review.*
+| ID | Type | Title | Pts | Parent | Handover Note |
+|---|---|---|---|---|---|
+| `BUG-0010` | Bug | Grant TCG Items by Catalog Code, Auto-Equip Starter Blade & Repair Legacy Item Rows | 3 | `EPIC-015` | [BUG-0010.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0010.md) |
 
 ---
 
@@ -200,6 +213,23 @@
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 13 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 13 | `EPIC-002`, `EPIC-003` | Phase 2B |
+| `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B |
+
+### 📋 Groomed Stories & Bugs for EPIC-015 (TCG Progression, Equipment & Bosses)
+| ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `BUG-0010` | Bug | Grant TCG Items by Catalog Code, Auto-Equip Starter Blade & Repair Legacy Item Rows | 3 | `EPIC-015` | 🔍 Review | — |
+| `STORY-150` | Story | Card EXP from Dungeon Wins & Real Skill MP Cost in Combat | 3 | `EPIC-015` | 🎯 To Do | `BUG-0010` |
+| `STORY-151` | Story | DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table) | 8 | `EPIC-015` | 🎯 To Do | `STORY-150` |
+| `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | `EPIC-015` | 🎯 To Do | `STORY-151` |
+| `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | `EPIC-015` | 🎯 To Do | `STORY-151` |
+| `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | `EPIC-015` | 🎯 To Do | `STORY-152`, `STORY-153` |
+| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | 🎯 To Do | `STORY-154` |
+| `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | 🎯 To Do | `STORY-152` |
+| `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | 🎯 To Do | `BUG-0010` |
+| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | 🎯 To Do | `STORY-157` |
+| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | 🎯 To Do | `STORY-152`, `STORY-156` |
+| `STORY-160` | Story | Equipment Crafting with Dust (Deferred) | 5 | `EPIC-015` | 📋 Backlog | `STORY-156` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-010 (Waifu TCG)
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
