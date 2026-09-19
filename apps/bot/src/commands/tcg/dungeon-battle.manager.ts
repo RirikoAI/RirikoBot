@@ -15,6 +15,7 @@ import {
   type DungeonRunResult,
   type Floor4DefeatResult,
   formatCardExpResult,
+  formatProgressOutcome,
 } from '@ririko/services';
 import type { BotServices } from '../../services.js';
 
@@ -630,6 +631,8 @@ export class DungeonBattleManager {
     const cardExpSection = runResult?.cardExp.length
       ? `\n${runResult.cardExp.map(formatCardExpResult).join('\n')}`
       : '';
+    const progressText = runResult?.progress ? formatProgressOutcome(runResult.progress) : '';
+    const progressSection = progressText ? `\n${progressText}` : '';
     const tutorialSection = tutorialCompletionMsg ? `\n\n${tutorialCompletionMsg}` : '';
 
     embed.setDescription(
@@ -648,6 +651,7 @@ export class DungeonBattleManager {
         logSection +
         lootSection +
         cardExpSection +
+        progressSection +
         tutorialSection +
         floor4Lesson,
     );

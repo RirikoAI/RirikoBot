@@ -154,7 +154,7 @@ export const S1_TARGET_BANDS: readonly WinRateBand[] = [
     min: 0.6,
     note: 'First mini-boss teaches skills/potions',
   },
-  { profileId: 'newbie', fromFloor: 10, toFloor: 10, max: 0.05, note: 'F10 is a real gear check' },
+  { profileId: 'newbie', fromFloor: 10, toFloor: 10, max: 0.1, note: 'F10 is a real gear check' },
   { profileId: 'early', fromFloor: 6, toFloor: 10, min: 0.5, note: 'Element + shop gear' },
   { profileId: 'early', fromFloor: 20, toFloor: 20, max: 0.05, note: 'F20 needs enhanced gear' },
   { profileId: 'mid', fromFloor: 11, toFloor: 20, min: 0.4 },

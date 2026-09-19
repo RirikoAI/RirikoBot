@@ -105,6 +105,7 @@ import {
   TcgShopService,
   ItemGrantService,
   CardProgressionService,
+  DungeonProgressService,
   BossImageService,
   ScalingEngine,
   DungeonRunner,
@@ -608,6 +609,7 @@ export async function createBotServices(
     cardRepo: waifuCardRepo,
     tutorialService,
     cardProgression: new CardProgressionService(waifuCardRepo),
+    progressService: new DungeonProgressService(tcgConfigRepo, playerEnergyRepo, itemGrantService),
   });
 
   // Seed canonical items if needed

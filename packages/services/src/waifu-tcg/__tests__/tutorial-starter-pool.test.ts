@@ -6,12 +6,39 @@ import type {
 } from '@ririko/database';
 import { TutorialService } from '../dungeon/tutorial-service.js';
 
-function setup(options: { cards?: Array<{ id: string; name: string; element: string; rarity?: string; isActive?: boolean }>; random?: () => number }) {
+function setup(options: {
+  cards?: Array<{
+    id: string;
+    name: string;
+    element: string;
+    rarity?: string;
+    isActive?: boolean;
+    attack?: number;
+    defense?: number;
+    health?: number;
+    speed?: number;
+  }>;
+  random?: () => number;
+}) {
   const cards = new Map(
-    (options.cards ?? [
-      { id: 'card_aria', name: 'Flame Novice Aria', element: 'FIRE', rarity: 'COMMON', isActive: true },
-      { id: 'card_lyra', name: 'Frost Novice Lyra', element: 'ICE', rarity: 'COMMON', isActive: true },
-    ]).map((c) => [c.id, c]),
+    (
+      options.cards ?? [
+        {
+          id: 'card_aria',
+          name: 'Flame Novice Aria',
+          element: 'FIRE',
+          rarity: 'COMMON',
+          isActive: true,
+        },
+        {
+          id: 'card_lyra',
+          name: 'Frost Novice Lyra',
+          element: 'ICE',
+          rarity: 'COMMON',
+          isActive: true,
+        },
+      ]
+    ).map((c) => [c.id, c]),
   );
 
   const cardRepo = {
@@ -24,7 +51,12 @@ function setup(options: { cards?: Array<{ id: string; name: string; element: str
       return list;
     }),
     getHighestSerialNumber: vi.fn().mockResolvedValue(4),
-    createUserCard: vi.fn(async (data: { cardId: string; serialNumber: number; state: string }) => ({ id: 'uc1', ...data })),
+    createUserCard: vi.fn(
+      async (data: { cardId: string; serialNumber: number; state: string }) => ({
+        id: 'uc1',
+        ...data,
+      }),
+    ),
     create: vi.fn(),
   };
 
@@ -49,18 +81,42 @@ function setup(options: { cards?: Array<{ id: string; name: string; element: str
 }
 
 describe('TutorialService starter cards', () => {
-  it('grants a real common card from the database as starter card', async () => {
+  it('grants a real common card from the stronger half of the pool as starter card', async () => {
     const { service, cardRepo } = setup({
       cards: [
-        { id: 'card_c1', name: 'Wind Dancer', element: 'EARTH', rarity: 'COMMON', isActive: true },
-        { id: 'card_c2', name: 'Water Nymph', element: 'WATER', rarity: 'COMMON', isActive: true },
+        {
+          id: 'card_c1',
+          name: 'Wind Dancer',
+          element: 'EARTH',
+          rarity: 'COMMON',
+          isActive: true,
+          attack: 60,
+          defense: 40,
+          health: 600,
+          speed: 20,
+        },
+        {
+          id: 'card_c2',
+          name: 'Water Nymph',
+          element: 'WATER',
+          rarity: 'COMMON',
+          isActive: true,
+          attack: 250,
+          defense: 180,
+          health: 1400,
+          speed: 70,
+        },
       ],
-      random: () => 0.6,
+      random: () => 0,
     });
 
     const granted = await service.ensureStarterCard('user1');
 
-    expect(cardRepo.listCards).toHaveBeenCalledWith({ rarity: 'COMMON', isActive: true, limit: 100 });
+    expect(cardRepo.listCards).toHaveBeenCalledWith({
+      rarity: 'COMMON',
+      isActive: true,
+      limit: 100,
+    });
     expect(granted).toMatchObject({ cardId: 'card_c2', serialNumber: 5, state: 'EQUIPPED' });
     expect(cardRepo.create).not.toHaveBeenCalled();
   });
@@ -79,7 +135,9 @@ describe('TutorialService starter cards', () => {
 
   it('reports the granted card on tutorial completion', async () => {
     const { service } = setup({
-      cards: [{ id: 'card_c1', name: 'Frost Hero', element: 'ICE', rarity: 'COMMON', isActive: true }],
+      cards: [
+        { id: 'card_c1', name: 'Frost Hero', element: 'ICE', rarity: 'COMMON', isActive: true },
+      ],
     });
 
     const result = await service.completeTutorial('user1');
@@ -88,4 +146,3 @@ describe('TutorialService starter cards', () => {
     expect(result.message).toContain('**Card:** Frost Hero [ICE]');
   });
 });
-
