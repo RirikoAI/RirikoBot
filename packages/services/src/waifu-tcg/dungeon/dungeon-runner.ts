@@ -15,6 +15,11 @@ import { DungeonLootService, type DungeonLootResult } from './dungeon-loot.servi
 import { TUTORIAL_FLOORS, TutorialService, getCounterElement } from './tutorial-service.js';
 
 import { DungeonBattleSession } from './dungeon-battle-session.js';
+import {
+  getDungeonCardExp,
+  type CardExpResult,
+  type CardProgressionService,
+} from '../card/card-progression.service.js';
 
 export function getDungeonFloorEnergyCost(floorNumber: number, isTutorial: boolean = false): number {
   if (isTutorial || floorNumber <= 0) return 0; // Section 7.1: Tutorial = 0 Energy
@@ -51,6 +56,7 @@ export interface DungeonRunResult {
   highestFloorCleared: number;
   isFirstClear: boolean;
   loot?: DungeonLootResult | undefined;
+  cardExp: CardExpResult[];
   error?: string | undefined;
 }
 
@@ -63,6 +69,7 @@ export class DungeonRunner {
   private readonly lootService: DungeonLootService | undefined;
   private readonly cardRepo: WaifuCardRepository | undefined;
   private readonly tutorialService: TutorialService | undefined;
+  private readonly cardProgression: CardProgressionService | undefined;
 
   constructor(
     energyRepo: PlayerEnergyRepository,
@@ -74,6 +81,7 @@ export class DungeonRunner {
       lootService?: DungeonLootService | undefined;
       cardRepo?: WaifuCardRepository | undefined;
       tutorialService?: TutorialService | undefined;
+      cardProgression?: CardProgressionService | undefined;
     } = {},
   ) {
     this.energyRepo = energyRepo;
@@ -84,6 +92,23 @@ export class DungeonRunner {
     this.lootService = options.lootService;
     this.cardRepo = options.cardRepo;
     this.tutorialService = options.tutorialService;
+    this.cardProgression = options.cardProgression;
+  }
+
+  /** Grants card EXP for one battle to every card that fought. */
+  private async grantCardExp(
+    cardIds: string[],
+    floorNumber: number,
+    outcome: { victory: boolean; isFirstClear: boolean; forfeited: boolean },
+  ): Promise<CardExpResult[]> {
+    if (!this.cardProgression) return [];
+    const amount = getDungeonCardExp(floorNumber, outcome);
+    const results: CardExpResult[] = [];
+    for (const id of cardIds) {
+      const result = await this.cardProgression.grantExp(id, amount).catch(() => null);
+      if (result) results.push(result);
+    }
+    return results;
   }
 
   /**
@@ -331,6 +356,12 @@ export class DungeonRunner {
       isWin,
     );
 
+    const cardExp = await this.grantCardExp(
+      snapshot.player?.id ? [snapshot.player.id] : [],
+      session.floorNumber,
+      { victory: isWin, isFirstClear, forfeited: session.wasForfeited },
+    );
+
     return {
       success: true,
       victory: isWin,
@@ -342,6 +373,7 @@ export class DungeonRunner {
       highestFloorCleared: updatedProgress.highestClearedFloor,
       isFirstClear,
       loot,
+      cardExp,
     };
   }
 
@@ -361,6 +393,7 @@ export class DungeonRunner {
         logs: [],
         highestFloorCleared: setup.highestCleared,
         isFirstClear: false,
+        cardExp: [],
         error: setup.error,
       };
     }
@@ -399,6 +432,12 @@ export class DungeonRunner {
       isWin,
     );
 
+    const cardExp = await this.grantCardExp(
+      options.playerParty.map((c) => c.id).filter(Boolean),
+      options.floorNumber,
+      { victory: isWin, isFirstClear, forfeited: false },
+    );
+
     return {
       success: true,
       victory: isWin,
@@ -410,6 +449,7 @@ export class DungeonRunner {
       highestFloorCleared: updatedProgress.highestClearedFloor,
       isFirstClear,
       loot,
+      cardExp,
     };
   }
 

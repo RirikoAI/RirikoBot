@@ -12,15 +12,7 @@ import {
   type CommandContext,
 } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
-import {
-  type Combatant,
-  type CombatElement,
-  type CardRarity,
-  type ExpeditionDuration,
-  LevelingEngine,
-} from '@ririko/services';
-
-const levelingEngine = new LevelingEngine();
+import { type ExpeditionDuration } from '@ririko/services';
 
 export function createGameCommand(services: BotServices): Command {
   return {
@@ -156,7 +148,7 @@ export function createGameCommand(services: BotServices): Command {
           const wager = Math.max(0, ctx.options.getInteger('wager') ?? 0);
 
           // Get challenger and opponent combat cards
-          const challengerCards = await fetchUserCombatCards(services, ctx.user.id, 'TEAM_A');
+          const challengerCards = await services.loadoutService.buildActiveParty(ctx.user.id, 'TEAM_A');
           if (challengerCards.length === 0) {
             await ctx.reply({
               content: '❌ You have no cards in your collection to duel with! Claim card drops first using `/card claim`.',
@@ -165,7 +157,7 @@ export function createGameCommand(services: BotServices): Command {
             return;
           }
 
-          const opponentCards = await fetchUserCombatCards(services, targetUser.id, 'TEAM_B');
+          const opponentCards = await services.loadoutService.buildActiveParty(targetUser.id, 'TEAM_B');
           if (opponentCards.length === 0) {
             await ctx.reply({
               content: `❌ <@${targetUser.id}> does not have any cards in their collection yet!`,
@@ -313,7 +305,7 @@ export function createGameCommand(services: BotServices): Command {
           const subaction = ctx.options.getString('subaction')?.toLowerCase() ?? rawArgs[1]?.toLowerCase() ?? 'status';
 
           if (subaction === 'attack') {
-            const combatCards = await fetchUserCombatCards(services, ctx.user.id, 'TEAM_A');
+            const combatCards = await services.loadoutService.buildActiveParty(ctx.user.id, 'TEAM_A');
             if (combatCards.length === 0) {
               await ctx.reply({
                 content: '❌ You need at least 1 equipped card to attack the World Boss!',
@@ -438,71 +430,6 @@ export function createGameCommand(services: BotServices): Command {
       }
     },
   };
-}
-
-async function fetchUserCombatCards(
-  services: BotServices,
-  userId: string,
-  team: 'TEAM_A' | 'TEAM_B',
-): Promise<Combatant[]> {
-  let userCards = await services.waifuCardRepo.listUserCards(userId, { state: 'EQUIPPED' });
-  if (userCards.length === 0) {
-    userCards = await services.waifuCardRepo.listUserCards(userId, { limit: 1 });
-  }
-
-  const combatants: Combatant[] = [];
-  for (const uc of userCards) {
-    const base = await services.waifuCardRepo.findById(uc.cardId);
-    if (!base) continue;
-
-    const scaled = levelingEngine.calculateScaledStats(
-      {
-        hp: base.health,
-        attack: base.attack,
-        defense: base.defense,
-        speed: base.speed,
-        critRate: base.critRate,
-        mp: 100,
-      },
-      uc.level,
-    );
-
-    const combatant: Combatant = {
-      id: uc.id,
-      name: `${base.name} (Lv.${uc.level})`,
-      team,
-      element: (base.element as CombatElement) ?? 'FIRE',
-      rarity: (base.rarity as CardRarity) ?? 'COMMON',
-      level: uc.level,
-      maxHealth: scaled.hp,
-      currentHealth: scaled.hp,
-      attack: scaled.attack,
-      defense: scaled.defense,
-      speed: scaled.speed,
-      critRate: scaled.critRate,
-      critDamage: 1.5,
-      maxMp: 100,
-      currentMp: 0,
-      skillName: base.skillName ?? undefined,
-      skillDescription: base.skillDescription ?? undefined,
-      skillManaCost: 50,
-      passiveName: base.passiveName ?? undefined,
-      passiveDescription: base.passiveDescription ?? undefined,
-      shield: 0,
-      statusEffects: [],
-      perks: [],
-      hasUsedPhoenixWard: false,
-      isAlive: true,
-    };
-
-    // Apply 6-slot equipped gear loadout and battle perks
-    const loadout = await services.loadoutService.getCardLoadout(uc.id);
-    services.loadoutService.applyLoadoutToCombatant(combatant, loadout);
-
-    combatants.push(combatant);
-  }
-
-  return combatants;
 }
 
 async function handleShop(

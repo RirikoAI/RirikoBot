@@ -10,16 +10,13 @@ import {
 } from 'discord.js';
 import type { CommandContext } from '@ririko/discord';
 import {
-  type Combatant,
   type DungeonBattleSession,
   type DungeonTurnState,
   type DungeonRunResult,
   type Floor4DefeatResult,
-  LevelingEngine,
+  formatCardExpResult,
 } from '@ririko/services';
 import type { BotServices } from '../../services.js';
-
-const levelingEngine = new LevelingEngine();
 
 export interface StartBattleOptions {
   floorNumber: number;
@@ -64,7 +61,7 @@ export class DungeonBattleManager {
     const { floorNumber, seasonId, isTutorial } = options;
 
     // 1. Fetch user combat cards
-    const userCards = await this.fetchUserCombatCards(ctx.user.id);
+    const userCards = await this.services.loadoutService.buildActiveParty(ctx.user.id, 'TEAM_A');
     if (userCards.length === 0) {
       await ctx.reply({
         content:
@@ -604,6 +601,9 @@ export class DungeonBattleManager {
       : '';
 
     const lootSection = runResult?.loot ? `\n\n${runResult.loot.message}` : '';
+    const cardExpSection = runResult?.cardExp.length
+      ? `\n${runResult.cardExp.map(formatCardExpResult).join('\n')}`
+      : '';
     const tutorialSection = tutorialCompletionMsg ? `\n\n${tutorialCompletionMsg}` : '';
 
     embed.setDescription(
@@ -620,6 +620,7 @@ export class DungeonBattleManager {
         bossStatusText +
         logSection +
         lootSection +
+        cardExpSection +
         tutorialSection +
         floor4Lesson,
     );
@@ -849,65 +850,5 @@ export class DungeonBattleManager {
       }
     }
     return potions;
-  }
-
-  private async fetchUserCombatCards(userId: string): Promise<Combatant[]> {
-    let userCards = await this.services.waifuCardRepo.listUserCards(userId, { state: 'EQUIPPED' });
-    if (userCards.length === 0) {
-      userCards = await this.services.waifuCardRepo.listUserCards(userId, { limit: 1 });
-    }
-
-    const combatants: Combatant[] = [];
-    for (const uc of userCards) {
-      const base = await this.services.waifuCardRepo.findById(uc.cardId);
-      if (!base) continue;
-
-      const scaled = levelingEngine.calculateScaledStats(
-        {
-          hp: base.health,
-          attack: base.attack,
-          defense: base.defense,
-          speed: base.speed,
-          critRate: base.critRate,
-          mp: 100,
-        },
-        uc.level,
-      );
-
-      const combatant: Combatant = {
-        id: uc.id,
-        name: `${base.name} (Lv.${uc.level})`,
-        team: 'TEAM_A',
-        element: (base.element as any) ?? 'FIRE',
-        rarity: (base.rarity as any) ?? 'COMMON',
-        level: uc.level,
-        maxHealth: scaled.hp,
-        currentHealth: scaled.hp,
-        attack: scaled.attack,
-        defense: scaled.defense,
-        speed: scaled.speed,
-        critRate: scaled.critRate,
-        critDamage: 1.5,
-        maxMp: 100,
-        currentMp: 0,
-        skillName: base.skillName ?? undefined,
-        skillDescription: base.skillDescription ?? undefined,
-        skillManaCost: 50,
-        passiveName: base.passiveName ?? undefined,
-        passiveDescription: base.passiveDescription ?? undefined,
-        shield: 0,
-        statusEffects: [],
-        perks: [],
-        hasUsedPhoenixWard: false,
-        isAlive: true,
-      };
-
-      const loadout = await this.services.loadoutService.getCardLoadout(uc.id);
-      this.services.loadoutService.applyLoadoutToCombatant(combatant, loadout);
-
-      combatants.push(combatant);
-    }
-
-    return combatants;
   }
 }
