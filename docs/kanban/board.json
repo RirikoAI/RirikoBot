@@ -514,7 +514,7 @@
       "epic": "EPIC-010",
       "title": "PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-103"],
       "blocks": ["STORY-105"]
     },
@@ -1376,6 +1376,96 @@
       "requires": ["TASK-0921"],
       "blocks": ["EPIC-011"],
       "description": "Implement HighLow, CoinFlip, and Dice games with deterministic RNG, dual-dispatch /games suite, and atomic balance escrow integration via EconomyService."
+    },
+    {
+      "id": "TASK-1001",
+      "parent": "STORY-100",
+      "title": "waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["TASK-1002"]
+    },
+    {
+      "id": "TASK-1002",
+      "parent": "STORY-100",
+      "title": "Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1001"],
+      "blocks": ["STORY-101"]
+    },
+    {
+      "id": "TASK-1011",
+      "parent": "STORY-101",
+      "title": "8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["STORY-100"],
+      "blocks": ["TASK-1012"]
+    },
+    {
+      "id": "TASK-1012",
+      "parent": "STORY-101",
+      "title": "Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-1011"],
+      "blocks": ["STORY-102"]
+    },
+    {
+      "id": "TASK-1021",
+      "parent": "STORY-102",
+      "title": "7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["STORY-101"],
+      "blocks": ["TASK-1022"]
+    },
+    {
+      "id": "TASK-1022",
+      "parent": "STORY-102",
+      "title": "PvP Duels (/game pvp), Timed Expeditions (/game explore), Boss Raids (/game boss) & Quests",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1021"],
+      "blocks": ["STORY-103"]
+    },
+    {
+      "id": "TASK-1031",
+      "parent": "STORY-103",
+      "title": "6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["STORY-102"],
+      "blocks": ["TASK-1032"]
+    },
+    {
+      "id": "TASK-1032",
+      "parent": "STORY-103",
+      "title": "Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1031"],
+      "blocks": ["STORY-104"]
+    },
+    {
+      "id": "TASK-1041",
+      "parent": "STORY-104",
+      "title": "PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["STORY-103"],
+      "blocks": ["TASK-1042"]
+    },
+    {
+      "id": "TASK-1042",
+      "parent": "STORY-104",
+      "title": "Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-1041"],
+      "blocks": ["STORY-105"]
     }
   ],
   "chores": [
@@ -1546,6 +1636,26 @@
       "requires": ["TASK-1031"],
       "blocks": ["STORY-104"],
       "description": "Implement level-based max energy formula with milestone bonuses, 00:00 UTC replenishment lifecycle, 3/day stamina potion anti-abuse ceiling, basic town shop with double-entry ledger audit, and dual-dispatch /shop, /inventory, /card equip, /card unequip, and /item commands suite."
+    },
+    {
+      "id": "TASK-1041",
+      "title": "PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes",
+      "points": 3,
+      "status": "IN_PROGRESS",
+      "parent": "STORY-104",
+      "requires": ["STORY-103"],
+      "blocks": ["TASK-1042"],
+      "description": "Implement Dungeon repositories (DungeonSeasonRepository, DungeonFloorRepository, UserDungeonProgressRepository), ScalingEngine with 4 models (Linear, Polynomial, Exponential r=0.085, Hybrid) matching Section 7.5 baseline tables up to F50, Multi-Layer Elemental Wards, Seasonal Environmental Affixes (S1 Scorched Earth & Heat Haze, S2 Torrential Deluge & Tidal Barrier, S3 Radiant Flare & Void Drain), and Turn 10+ Soft Enrage."
+    },
+    {
+      "id": "TASK-1042",
+      "title": "Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite",
+      "points": 2,
+      "status": "TODO",
+      "parent": "STORY-104",
+      "requires": ["TASK-1041"],
+      "blocks": ["STORY-105"],
+      "description": "Implement Tutorial onboarding sequence (T1 to T4 with 0 energy cost, starter card, Novice Blade, 3x Minor HP Potions, and TUTORIAL_COMPLETE achievement unlock), floor energy brackets (F1-10 10, F11-25 15, F26-40 20, F41-50+ 25), mini-boss (1.75x) and major boss (3.2x) multipliers, first-clear and repeat loot drop tables, and dual-dispatch /dungeon status/climb/floor/leaderboard suite."
     }
   ]
 }
