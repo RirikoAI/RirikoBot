@@ -1,4 +1,5 @@
 import type { PlayerEnergyRepository } from '@ririko/database';
+import type { RewardPayout } from './expedition-service.js';
 import { CombatSimulator } from '../combat/combat-simulator.js';
 import type { Combatant, CombatResult } from '../combat/types.js';
 
@@ -46,8 +47,15 @@ export class BossRaidService {
   private readonly energyRepo: PlayerEnergyRepository;
   private readonly combatSimulator: CombatSimulator;
 
-  constructor(energyRepo: PlayerEnergyRepository, combatSimulator?: CombatSimulator) {
+  private readonly payout: RewardPayout | undefined;
+
+  constructor(
+    energyRepo: PlayerEnergyRepository,
+    combatSimulator?: CombatSimulator,
+    payout?: RewardPayout | undefined,
+  ) {
     this.energyRepo = energyRepo;
+    this.payout = payout;
     this.combatSimulator = combatSimulator ?? new CombatSimulator({ maxTurns: 10 });
     this.currentBoss = this.generateDefaultBoss();
   }
@@ -168,6 +176,16 @@ export class BossRaidService {
     const raidBadges = Math.max(1, Math.round(damageDealt / 500));
     const credits = Math.max(50, Math.round(damageDealt / 2));
     const craftingDust = Math.max(5, Math.round(damageDealt / 100));
+
+    if (this.payout) {
+      await this.payout.economyRepo.modifyBalance({
+        userId,
+        walletDelta: credits,
+        type: 'RAID_REWARD',
+        source: 'WORLD_BOSS_RAID',
+      });
+      await this.payout.grants.grant(userId, 'CRAFTING_DUST', craftingDust, 'BOSS_RAID');
+    }
 
     return {
       success: true,

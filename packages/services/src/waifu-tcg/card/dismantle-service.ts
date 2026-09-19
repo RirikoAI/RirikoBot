@@ -1,5 +1,6 @@
 import type { CardRarity } from '../types.js';
 import type { WaifuCardRepository } from '@ririko/database';
+import type { ItemGrantService } from '../equipment/item-grant.service.js';
 
 export const CRAFTING_DUST_YIELD: Record<CardRarity, number> = {
   COMMON: 10,
@@ -21,7 +22,10 @@ export interface DismantleResult {
 }
 
 export class CardDismantleService {
-  constructor(private readonly cardRepo: WaifuCardRepository) {}
+  constructor(
+    private readonly cardRepo: WaifuCardRepository,
+    private readonly grants?: ItemGrantService | undefined,
+  ) {}
 
   /**
    * Dismantles a user card into Crafting Dust according to docs/waifu-tcg.md:L166.
@@ -55,8 +59,9 @@ export class CardDismantleService {
     const rarity = (baseCard?.rarity as CardRarity) ?? 'COMMON';
     const dustAwarded = CRAFTING_DUST_YIELD[rarity] ?? 10;
 
-    // Delete card instance
+    // Delete card instance, then pay out the dust
     await this.cardRepo.deleteUserCard(userCardId);
+    await this.grants?.grant(userId, 'CRAFTING_DUST', dustAwarded, 'DISMANTLE');
 
     return {
       success: true,
