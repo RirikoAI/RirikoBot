@@ -1,4 +1,11 @@
-import type { PlayerEnergyRepository } from '@ririko/database';
+import type { EconomyRepository, PlayerEnergyRepository } from '@ririko/database';
+import type { ItemGrantService } from '../equipment/item-grant.service.js';
+
+/** Where claimed rewards are paid; without it rewards are only reported. */
+export interface RewardPayout {
+  economyRepo: EconomyRepository;
+  grants: ItemGrantService;
+}
 
 export type ExpeditionDuration = '1h' | '4h' | '8h';
 
@@ -68,8 +75,11 @@ export class ExpeditionService {
   private readonly activeExpeditions: Map<string, ActiveExpedition> = new Map();
   private readonly energyRepo: PlayerEnergyRepository;
 
-  constructor(energyRepo: PlayerEnergyRepository) {
+  private readonly payout: RewardPayout | undefined;
+
+  constructor(energyRepo: PlayerEnergyRepository, payout?: RewardPayout | undefined) {
     this.energyRepo = energyRepo;
+    this.payout = payout;
   }
 
   /**
@@ -162,6 +172,16 @@ export class ExpeditionService {
       config.minCredits + Math.round(rng() * (config.maxCredits - config.minCredits));
     const dust = config.minDust + Math.round(rng() * (config.maxDust - config.minDust));
     const cardShards = rng() < config.cardShardChance ? 1 : 0;
+
+    if (this.payout) {
+      await this.payout.economyRepo.modifyBalance({
+        userId,
+        walletDelta: credits,
+        type: 'EXPEDITION_REWARD',
+        source: `EXPEDITION_${expedition.tier}`,
+      });
+      await this.payout.grants.grant(userId, 'CRAFTING_DUST', dust, 'EXPEDITION');
+    }
 
     return {
       success: true,

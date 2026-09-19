@@ -17,12 +17,15 @@ export const LEGACY_ITEM_CODE_ALIASES: Readonly<Record<string, string>> = Object
   potion_mana_minor: 'POTION_MANA_DRAUGHT',
   potion_energy_grand: 'RESTORE_GRAND_STAMINA_FLASK',
   celestial_ambrosia: 'RESTORE_CELESTIAL_AMBROSIA',
+  crafting_dust: 'CRAFTING_DUST',
   weap_iron_greatsword: 'WEAPON_OBSIDIAN_KATANA',
   relic_chrono_fragment: 'AMULET_MOUNTAIN',
   weap_glacial_edge: 'WEAPON_SOLAR_LANCE',
   acc_prismatic_ring: 'RELIC_CHRONOS_HOURGLASS',
   armor_glacial_aegis: 'ARMOR_AEGIS_BARRIER',
 });
+
+const STACKABLE_TYPES = new Set(['CONSUMABLE', 'MATERIAL']);
 
 export interface ItemGrantResult {
   item: GameItem;
@@ -32,8 +35,8 @@ export interface ItemGrantResult {
 
 /**
  * Single entry point for putting catalog items into a user's inventory.
- * Consumables stack into one IDLE row; equipment and accessories get one row per instance
- * so each piece keeps its own enhancement level.
+ * Consumables and materials stack into one IDLE row; equipment and accessories get one row per
+ * instance so each piece keeps its own enhancement level.
  */
 export class ItemGrantService {
   constructor(
@@ -69,7 +72,7 @@ export class ItemGrantService {
   ): Promise<ItemGrantResult> {
     if (quantity <= 0) return { item, quantity: 0, inventoryItems: [] };
 
-    if (item.type === 'CONSUMABLE') {
+    if (STACKABLE_TYPES.has(item.type)) {
       const idle = await this.inventoryRepo.findByUser(userId, { state: 'IDLE' }, tx);
       const stack = idle.find((inv) => inv.itemId === item.id);
       const row = stack
@@ -99,6 +102,40 @@ export class ItemGrantService {
       );
     }
     return { item, quantity, inventoryItems };
+  }
+
+  /** Total quantity of a stackable item the user holds (0 if the item is unknown). */
+  async countOwned(userId: string, key: string, tx?: DatabaseClient): Promise<number> {
+    const item = await this.resolveItem(key, tx);
+    if (!item) return 0;
+    const idle = await this.inventoryRepo.findByUser(userId, { state: 'IDLE' }, tx);
+    return idle.filter((inv) => inv.itemId === item.id).reduce((sum, inv) => sum + inv.quantity, 0);
+  }
+
+  /**
+   * Removes quantity of a stackable item, emptying stacks in order. Throws when the user holds
+   * less than requested, before anything is changed.
+   */
+  async consume(userId: string, key: string, quantity: number, tx?: DatabaseClient): Promise<void> {
+    if (quantity <= 0) return;
+    const item = await this.resolveItem(key, tx);
+    if (!item) throw new Error(`Unknown item: ${key}`);
+    const stacks = (await this.inventoryRepo.findByUser(userId, { state: 'IDLE' }, tx)).filter(
+      (inv) => inv.itemId === item.id && inv.quantity > 0,
+    );
+    const owned = stacks.reduce((sum, inv) => sum + inv.quantity, 0);
+    if (owned < quantity) {
+      throw new Error(`Not enough ${item.name}: need ${quantity}, have ${owned}.`);
+    }
+
+    let remaining = quantity;
+    for (const stack of stacks) {
+      if (remaining <= 0) break;
+      const take = Math.min(stack.quantity, remaining);
+      if (take === stack.quantity) await this.inventoryRepo.delete(stack.id, tx);
+      else await this.inventoryRepo.update(stack.id, { quantity: stack.quantity - take }, tx);
+      remaining -= take;
+    }
   }
 
   /**

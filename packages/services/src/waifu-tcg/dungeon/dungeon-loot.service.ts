@@ -141,6 +141,10 @@ export class DungeonLootService {
       });
     }
 
+    if (this.grants && craftingDust > 0) {
+      await this.grants.grant(userId, 'CRAFTING_DUST', craftingDust, 'DUNGEON');
+    }
+
     // Only items that actually landed in the inventory are reported.
     const items: DungeonLootItem[] = [];
     if (this.grants) {

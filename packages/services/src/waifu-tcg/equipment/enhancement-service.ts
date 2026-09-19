@@ -8,6 +8,8 @@ import type {
   EnhancementResult,
   EquipmentStats,
 } from './types.js';
+import { CRAFTING_DUST_CODE } from './catalog.js';
+import { ItemGrantService } from './item-grant.service.js';
 
 export const MAX_ENHANCEMENT_LEVEL = 10;
 
@@ -98,10 +100,19 @@ export function scaleEquipmentPerks(perks: string[] | null | undefined, level: n
 }
 
 export class EnhancementService {
+  private readonly grants: ItemGrantService;
+
   constructor(
     private readonly itemRepo: GameItemRepository,
     private readonly inventoryRepo: UserInventoryItemRepository,
-  ) {}
+  ) {
+    this.grants = new ItemGrantService(itemRepo, inventoryRepo);
+  }
+
+  /** Crafting Dust the user currently holds. */
+  getDustBalance(userId: string): Promise<number> {
+    return this.grants.countOwned(userId, CRAFTING_DUST_CODE);
+  }
 
   /**
    * Calculates Crafting Dust and Credit costs to upgrade from currentLevel to currentLevel + 1.
@@ -132,14 +143,10 @@ export class EnhancementService {
   }
 
   /**
-   * Performs an equipment enhancement from +N to +(N+1).
+   * Performs an equipment enhancement from +N to +(N+1), spending the user's Crafting Dust.
+   * Credits are checked here; the caller debits them through the economy ledger.
    */
-  async enhance(
-    userId: string,
-    userItemId: string,
-    userDust: number,
-    userCredits: bigint | number,
-  ): Promise<EnhancementResult> {
+  async enhance(userId: string, userItemId: string, userCredits: bigint | number): Promise<EnhancementResult> {
     const invItem = await this.inventoryRepo.findById(userItemId);
     if (!invItem || invItem.userId !== userId) {
       throw new DatabaseError('Item not found or does not belong to you');
@@ -160,6 +167,7 @@ export class EnhancementService {
 
     const cost = this.getEnhancementCost(itemDef.rarity, invItem.enhancementLevel);
     const creditsNum = Number(userCredits);
+    const userDust = await this.getDustBalance(userId);
 
     if (userDust < cost.dustCost) {
       throw new DatabaseError(
@@ -171,6 +179,8 @@ export class EnhancementService {
         `Insufficient Credits! Required: ${cost.creditCost} Credits, but you only have ${creditsNum} Credits.`,
       );
     }
+
+    await this.grants.consume(userId, CRAFTING_DUST_CODE, cost.dustCost);
 
     const newLevel = invItem.enhancementLevel + 1;
     const updated = await this.inventoryRepo.update(userItemId, {

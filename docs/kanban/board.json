@@ -1796,6 +1796,16 @@
       "requires": [],
       "blocks": ["STORY-150"],
       "description": "Tutorial, dungeon loot and achievement rewards insert fake item ids (item_novice_blade, potion_hp_minor, weap_*) that never match game_items UUIDs, so rewards are invisible. Add a shared code-based item grant used by shop, tutorial, loot and achievements; auto-equip Novice Blade on the starter card; remap legacy rows at boot."
+    },
+    {
+      "id": "BUG-0011",
+      "title": "Persist Crafting Dust and Charge It for Equipment Enhancement",
+      "points": 3,
+      "status": "DONE",
+      "parent": "EPIC-015",
+      "requires": [],
+      "blocks": ["STORY-156"],
+      "description": "Crafting dust from dismantling, expeditions, boss raids, dungeon loot and achievements is shown but never stored, and enhancement passes a hard-coded 5000 dust. Store dust as a stackable CRAFTING_DUST inventory item granted by every source and spent atomically by EnhancementService."
     }
   ]
 }

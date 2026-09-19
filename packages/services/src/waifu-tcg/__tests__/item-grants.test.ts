@@ -66,7 +66,7 @@ describe('Catalog item grants (BUG-0010)', () => {
     it('resolves legacy aliases and returns null for unknown keys', async () => {
       const legacy = await grants.grant('u1', 'potion_hp_minor', 1, 'TEST');
       expect(legacy?.item.code).toBe('POTION_MINOR_HP');
-      expect(await grants.grant('u1', 'crafting_dust', 500, 'TEST')).toBeNull();
+      expect(await grants.grant('u1', 'title_tower_vanquisher', 1, 'TEST')).toBeNull();
     });
 
     it('repairs legacy inventory rows once', async () => {
@@ -120,8 +120,10 @@ describe('Catalog item grants (BUG-0010)', () => {
           quantity: 1,
         },
       ]);
+      const katanaId = await catalogId('WEAPON_OBSIDIAN_KATANA');
       const rows = await inventoryRepo.findByUser('u1');
-      expect(rows.map((r) => r.itemId)).toEqual([await catalogId('WEAPON_OBSIDIAN_KATANA')]);
+      expect(rows.filter((r) => r.itemId === katanaId)).toHaveLength(1);
+      expect(await grants.countOwned('u1', 'CRAFTING_DUST')).toBe(50);
     });
 
     it('stacks repeat-clear potion drops', async () => {
@@ -129,9 +131,9 @@ describe('Catalog item grants (BUG-0010)', () => {
       await loot.generateAndDispatchLoot('u1', 3, false);
       await loot.generateAndDispatchLoot('u1', 3, false);
 
-      const rows = await inventoryRepo.findByUser('u1');
-      expect(rows).toHaveLength(1);
-      expect(rows[0]!.quantity).toBe(2);
+      expect(await grants.countOwned('u1', 'POTION_MINOR_HP')).toBe(2);
+      const potionId = await catalogId('POTION_MINOR_HP');
+      expect((await inventoryRepo.findByUser('u1')).filter((r) => r.itemId === potionId)).toHaveLength(1);
     });
   });
 

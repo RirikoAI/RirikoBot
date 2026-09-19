@@ -241,7 +241,10 @@ export async function createBotServices(
   const waifuAssetRepo = new WaifuAssetRepository(db);
   const waifuCardRepo = new WaifuCardRepository(db);
   const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo);
-  const dismantleService = new CardDismantleService(waifuCardRepo);
+  const gameItemRepo = new GameItemRepository(db);
+  const userInventoryItemRepo = new UserInventoryItemRepository(db);
+  const itemGrantService = new ItemGrantService(gameItemRepo, userInventoryItemRepo);
+  const dismantleService = new CardDismantleService(waifuCardRepo, itemGrantService);
   const cardImageService = new CardImageService();
   const bossImageService = new BossImageService(waifuAssetRepo);
   const musicPlayer = new MusicPlayerService({
@@ -539,13 +542,12 @@ export async function createBotServices(
   const tictactoeEngine = new TicTacToeEngine(gameSessionManager);
   const rpsEngine = new RpsEngine(gameSessionManager);
   const combatSimulator = new CombatSimulator({ maxTurns: 25 });
-  const expeditionService = new ExpeditionService(playerEnergyRepo);
-  const bossRaidService = new BossRaidService(playerEnergyRepo, combatSimulator);
+  const rewardPayout = { economyRepo, grants: itemGrantService };
+  const expeditionService = new ExpeditionService(playerEnergyRepo, rewardPayout);
+  const bossRaidService = new BossRaidService(playerEnergyRepo, combatSimulator, rewardPayout);
   const pvpDuelService = new PvPDuelService(playerEnergyRepo, economyRepo, combatSimulator);
   const questService = new QuestService();
 
-  const gameItemRepo = new GameItemRepository(db);
-  const userInventoryItemRepo = new UserInventoryItemRepository(db);
   const enhancementService = new EnhancementService(gameItemRepo, userInventoryItemRepo);
   const loadoutService = new LoadoutService(gameItemRepo, userInventoryItemRepo, waifuCardRepo, enhancementService);
   const consumableService = new ConsumableService(gameItemRepo, userInventoryItemRepo, playerEnergyRepo);
@@ -617,7 +619,7 @@ export async function createBotServices(
       }
     }
     // Rows written by older reward code point at ids that never existed in game_items.
-    const repaired = await new ItemGrantService(gameItemRepo, userInventoryItemRepo).repairLegacyInventoryRows();
+    const repaired = await itemGrantService.repairLegacyInventoryRows();
     if (repaired > 0) console.log(`[tcg] Repaired ${repaired} legacy inventory item row(s).`);
   } catch {
     // In some unit tests with isolated in-memory databases, game_items may not be created.

@@ -220,18 +220,23 @@ describe('Waifu TCG: Equipment, Loadouts, Enhancement & Consumables (STORY-103 /
         enhancementLevel: 0,
       });
 
-      // Attempt enhance with insufficient dust
-      await expect(
-        enhancementService.enhance('user_test', userItem.id, 10, 500),
-      ).rejects.toThrow(/Insufficient Crafting Dust/);
+      const dustDef = await itemRepo.findByCode('CRAFTING_DUST');
+      await inventoryRepo.create({ userId: 'user_test', itemId: dustDef!.id, quantity: 10 });
+
+      // Attempt enhance with insufficient dust (10 held, 38 needed)
+      await expect(enhancementService.enhance('user_test', userItem.id, 500)).rejects.toThrow(
+        /Insufficient Crafting Dust/,
+      );
 
       // Enhance +0 -> +1 (cost: target 1 * 25 * 1.5 = 38 dust, 1 * 200 * 1.5 = 300 credits)
-      const res = await enhancementService.enhance('user_test', userItem.id, 100, 1000);
+      await inventoryRepo.create({ userId: 'user_test', itemId: dustDef!.id, quantity: 90 });
+      const res = await enhancementService.enhance('user_test', userItem.id, 1000);
       expect(res.success).toBe(true);
       expect(res.newLevel).toBe(1);
       expect(res.dustSpent).toBe(38);
       expect(res.creditsSpent).toBe(300);
       expect(res.scaledStats.attack).toBe(119); // 110 * 1.08 = 118.8 -> 119
+      expect(await enhancementService.getDustBalance('user_test')).toBe(62); // 100 - 38
     });
   });
 
