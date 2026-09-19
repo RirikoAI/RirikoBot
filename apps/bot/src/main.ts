@@ -23,12 +23,14 @@ import {
   createAchievementCommand,
   createTcgAdminCommand,
   createTcgInfoCommand,
+  createRoleCommands,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
   registerMessageListener,
   registerVoiceListener,
   registerMemberListener,
+  registerReactionListener,
 } from './index.js';
 import {
   CommandRouter,
@@ -167,6 +169,11 @@ export async function main(): Promise<void> {
   router.registry.register(createTcgAdminCommand(services));
   router.registry.register(createTcgInfoCommand(services));
 
+  const roleCommands = createRoleCommands(services);
+  for (const cmd of roleCommands) {
+    router.registry.register(cmd);
+  }
+
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
       .getAll()
@@ -181,8 +188,9 @@ export async function main(): Promise<void> {
   registerMessageListener(bot.client, services, musicController, aiController);
   registerVoiceListener(bot.client, services);
   registerMemberListener(bot.client, services);
+  registerReactionListener(bot.client, services);
 
-  // Bind interactive Help Center UI components, Music Controller buttons, and Giveaway buttons
+  // Bind interactive Help Center UI components, Music Controller buttons, Giveaway buttons, and Role components
   bot.client.on('interactionCreate', async (interaction) => {
     try {
       if (interaction.isButton()) {
@@ -194,7 +202,28 @@ export async function main(): Promise<void> {
           await handleGiveawayButtonInteraction(interaction, services);
           return;
         }
+        if (interaction.customId.startsWith('rr:btn:')) {
+          await services.reactionRoleService.handleButtonInteraction(interaction);
+          return;
+        }
+        if (interaction.customId.startsWith('verify:btn:')) {
+          const guild = interaction.guild;
+          const member = interaction.member;
+          if (guild && member) {
+            const res = await services.autoRoleService.handleVerification(guild, member as any);
+            await interaction.reply({ content: res.message, ephemeral: true });
+          }
+          return;
+        }
       }
+
+      if (interaction.isStringSelectMenu()) {
+        if (interaction.customId.startsWith('rr:select:')) {
+          await services.reactionRoleService.handleSelectMenuInteraction(interaction);
+          return;
+        }
+      }
+
       await handleHelpInteraction(interaction, router.registry);
     } catch (err) {
       console.error('Unhandled error in component interaction:', err);
@@ -211,6 +240,7 @@ export async function main(): Promise<void> {
       services.streamWatcher.stop();
       services.freeGamesEngine.stop();
       services.giveawayEngine.stop();
+      services.autoRoleService.stopSweeper();
       await bot.gateway.destroy();
       console.log('✓ Bot gateway cleanly disconnected. Goodbye!');
     } catch (err) {
@@ -252,11 +282,12 @@ export async function main(): Promise<void> {
       console.log(`✨ Logged in as: ${bot.client.user?.tag} (ID: ${bot.client.user?.id})`);
       console.log(`✨ Ready to process slash commands and prefix '${prefix}' messages!\n`);
 
-      // Start background watcher, announcer & giveaway engines
+      // Start background watcher, announcer, giveaway & autorole engines
       services.streamWatcher.start();
       services.freeGamesEngine.start();
       services.giveawayEngine.start();
-      console.log('📡 Stream Watcher, Free Games Announcer & Giveaways engines active!');
+      services.autoRoleService.startSweeper(bot.client);
+      console.log('📡 Stream Watcher, Free Games Announcer, Giveaways & AutoRole engines active!');
 
       // Clean up orphaned dynamic voice channels across guilds
       for (const [, guild] of bot.client.guilds.cache) {

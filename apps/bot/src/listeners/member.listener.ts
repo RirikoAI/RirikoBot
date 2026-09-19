@@ -49,6 +49,11 @@ export function registerMemberListener(
           }
         }
       }
+
+      // 3. Assign automated join roles via AutoRoleService
+      await services.autoRoleService.handleMemberJoin(member).catch((roleErr) => {
+        console.error(`[AutoRole] Failed to assign join roles for member ${member.id}:`, roleErr);
+      });
     } catch (err) {
       console.error('[MemberListener] Error handling guildMemberAdd event:', err);
     }

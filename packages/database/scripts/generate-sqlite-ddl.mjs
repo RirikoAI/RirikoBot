@@ -1,9 +1,10 @@
 // Regenerates src/schema/sqlite/ddl.ts from the Drizzle SQLite schema.
 // SQLITE_SCHEMA_DDL bootstraps empty SQLite databases, so run this after every sqlite schema change:
 //   pnpm -F @ririko/database db:generate-ddl
+/* global console */
 import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, URL } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const sql = execSync(
