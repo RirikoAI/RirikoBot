@@ -3,6 +3,7 @@ import type {
   UserDungeonProgressRepository,
   DungeonFloorRepository,
   DungeonSeasonRepository,
+  WaifuCardRepository,
 } from '@ririko/database';
 import type { CardElement } from '../types.js';
 import type { Combatant, CombatActionLog, CombatResult } from '../combat/types.js';
@@ -11,7 +12,9 @@ import { ElementalWard } from './elemental-ward.js';
 import { SeasonalAffixHandler, type SeasonTheme } from './seasonal-affixes.js';
 
 import { DungeonLootService, type DungeonLootResult } from './dungeon-loot.service.js';
-import { TUTORIAL_FLOORS } from './tutorial-service.js';
+import { TUTORIAL_FLOORS, TutorialService, getCounterElement } from './tutorial-service.js';
+
+import { DungeonBattleSession } from './dungeon-battle-session.js';
 
 export function getDungeonFloorEnergyCost(floorNumber: number, isTutorial: boolean = false): number {
   if (isTutorial || floorNumber <= 0) return 0; // Section 7.1: Tutorial = 0 Energy
@@ -26,7 +29,15 @@ export interface DungeonRunOptions {
   seasonId: string;
   floorNumber: number;
   playerParty: Combatant[];
-  skipEnergyDeduction?: boolean;
+  skipEnergyDeduction?: boolean | undefined;
+}
+
+export interface CreateBattleSessionResult {
+  success: boolean;
+  session?: DungeonBattleSession;
+  energySpent: number;
+  highestFloorCleared: number;
+  error?: string | undefined;
 }
 
 export interface DungeonRunResult {
@@ -40,16 +51,18 @@ export interface DungeonRunResult {
   highestFloorCleared: number;
   isFirstClear: boolean;
   loot?: DungeonLootResult | undefined;
-  error?: string;
+  error?: string | undefined;
 }
 
 export class DungeonRunner {
-  private readonly scalingEngine: ScalingEngine;
   private readonly energyRepo: PlayerEnergyRepository;
   private readonly progressRepo: UserDungeonProgressRepository;
+  private readonly scalingEngine: ScalingEngine;
   private readonly floorRepo: DungeonFloorRepository | undefined;
   private readonly seasonRepo: DungeonSeasonRepository | undefined;
   private readonly lootService: DungeonLootService | undefined;
+  private readonly cardRepo: WaifuCardRepository | undefined;
+  private readonly tutorialService: TutorialService | undefined;
 
   constructor(
     energyRepo: PlayerEnergyRepository,
@@ -59,6 +72,8 @@ export class DungeonRunner {
       floorRepo?: DungeonFloorRepository | undefined;
       seasonRepo?: DungeonSeasonRepository | undefined;
       lootService?: DungeonLootService | undefined;
+      cardRepo?: WaifuCardRepository | undefined;
+      tutorialService?: TutorialService | undefined;
     } = {},
   ) {
     this.energyRepo = energyRepo;
@@ -67,25 +82,32 @@ export class DungeonRunner {
     this.floorRepo = options.floorRepo;
     this.seasonRepo = options.seasonRepo;
     this.lootService = options.lootService;
+    this.cardRepo = options.cardRepo;
+    this.tutorialService = options.tutorialService;
   }
 
   /**
    * Executes a dungeon floor attempt.
    */
-  public async runFloor(options: DungeonRunOptions): Promise<DungeonRunResult> {
+  /**
+   * Prepares floor setup, validates prerequisites, consumes energy, and initializes boss & affixes.
+   */
+  public async prepareFloorSetup(options: DungeonRunOptions): Promise<{
+    success: boolean;
+    error?: string | undefined;
+    energyCost: number;
+    highestCleared: number;
+    affixHandler?: SeasonalAffixHandler | undefined;
+    enemyBoss?: Combatant | undefined;
+    elementalWard?: ElementalWard | null | undefined;
+  }> {
     const { userId, seasonId, floorNumber, playerParty, skipEnergyDeduction } = options;
 
     if (!playerParty || playerParty.length === 0) {
       return {
         success: false,
-        victory: false,
-        floorNumber,
-        seasonId,
-        energySpent: 0,
-        turnsTotal: 0,
-        logs: [],
-        highestFloorCleared: 0,
-        isFirstClear: false,
+        energyCost: 0,
+        highestCleared: 0,
         error: 'No active cards selected for dungeon climb! Equip or select a card first.',
       };
     }
@@ -97,14 +119,8 @@ export class DungeonRunner {
     if (floorNumber > highestCleared + 1) {
       return {
         success: false,
-        victory: false,
-        floorNumber,
-        seasonId,
-        energySpent: 0,
-        turnsTotal: 0,
-        logs: [],
-        highestFloorCleared: highestCleared,
-        isFirstClear: false,
+        energyCost: 0,
+        highestCleared,
         error: `Floor ${floorNumber} is locked! You must first clear Floor ${highestCleared + 1}.`,
       };
     }
@@ -118,15 +134,9 @@ export class DungeonRunner {
       if (!energyResult.success) {
         return {
           success: false,
-          victory: false,
-          floorNumber,
-          seasonId,
-          energySpent: 0,
-          turnsTotal: 0,
-          logs: [],
-          highestFloorCleared: highestCleared,
-          isFirstClear: false,
-          error: `Insufficient energy! Required: ${energyCost} Energy, Available: ${energyResult.currentEnergy} Energy.`,
+          energyCost,
+          highestCleared,
+          error: `Insufficient energy! Floor ${floorNumber} requires ${energyCost} energy. Current: ${energyResult.currentEnergy}`,
         };
       }
     }
@@ -162,10 +172,22 @@ export class DungeonRunner {
       if (tutFloor) {
         enemyBoss = { ...tutFloor.dummyEnemy };
         if (floorNumber === 4) {
+          const playerElement = (playerParty[0]?.element as CardElement) ?? 'FIRE';
+          let bossElement: CardElement = getCounterElement(playerElement);
+          let bossName = `Warded Guardian Automaton [${bossElement}]`;
+
+          if (this.tutorialService) {
+            const config = await this.tutorialService.getFloor4BossConfig(userId, playerElement);
+            bossElement = config.element;
+            bossName = config.name;
+          }
+
+          enemyBoss.element = bossElement;
+          enemyBoss.name = bossName;
           elementalWard = new ElementalWard([
             {
-              element: 'FIRE',
-              health: 300,
+              element: bossElement,
+              health: 100,
             },
           ]);
         }
@@ -234,26 +256,155 @@ export class DungeonRunner {
       }
     }
 
-    // 6. Run Combat with custom Dungeon Combat loop incorporating Wards, Affixes, and Soft Enrage
-    const simulationResult = this.simulateDungeonCombat(playerParty, enemyBoss, affixHandler, elementalWard);
+    return {
+      success: true,
+      energyCost,
+      highestCleared,
+      affixHandler,
+      enemyBoss,
+      elementalWard,
+    };
+  }
 
-    const isWin = simulationResult.winner === 'TEAM_A';
-    const isFirstClear = isWin && floorNumber > highestCleared;
-
-    let loot: DungeonLootResult | undefined;
-    if (isWin && !isTutorial && this.lootService) {
-      loot = await this.lootService.generateAndDispatchLoot(userId, floorNumber, isFirstClear);
+  /**
+   * Creates an interactive, step-by-step DungeonBattleSession for real-time combat.
+   */
+  public async createBattleSession(options: DungeonRunOptions): Promise<CreateBattleSessionResult> {
+    const setup = await this.prepareFloorSetup(options);
+    if (!setup.success || !setup.enemyBoss || !setup.affixHandler) {
+      return {
+        success: false,
+        energySpent: setup.energyCost,
+        highestFloorCleared: setup.highestCleared,
+        error: setup.error,
+      };
     }
 
-    // 7. Update user dungeon progress in repository
-    const updatedProgress = await this.progressRepo.recordFloorAttempt(userId, seasonId, floorNumber, isWin);
+    const session = new DungeonBattleSession({
+      floorNumber: options.floorNumber,
+      seasonId: options.seasonId,
+      userId: options.userId,
+      playerCard: options.playerParty[0]!,
+      boss: setup.enemyBoss,
+      affixHandler: setup.affixHandler,
+      ward: setup.elementalWard,
+    });
+
+    session.start();
+
+    return {
+      success: true,
+      session,
+      energySpent: setup.energyCost,
+      highestFloorCleared: setup.highestCleared,
+    };
+  }
+
+  /**
+   * Finalizes an interactive battle session: saves attempt/progress to the database and dispatches loot if won.
+   */
+  public async finalizeBattleResult(
+    session: DungeonBattleSession,
+    options: { energySpent: number },
+  ): Promise<DungeonRunResult> {
+    const snapshot = session.getSnapshot();
+    const isWin = snapshot.winner === 'TEAM_A';
+    const isTutorial = session.seasonId.toLowerCase().includes('tutorial');
+
+    const currentProgress = await this.progressRepo.getOrCreateProgress(session.userId, session.seasonId);
+    const isFirstClear = isWin && session.floorNumber > currentProgress.highestClearedFloor;
+
+    let loot: DungeonLootResult | undefined;
+    if (isWin) {
+      if (!isTutorial && this.lootService) {
+        loot = await this.lootService.generateAndDispatchLoot(session.userId, session.floorNumber, isFirstClear);
+      }
+      if (this.cardRepo && snapshot.player?.id) {
+        await this.cardRepo.incrementUserCardBattlesWon(snapshot.player.id).catch(() => {});
+      }
+    }
+
+    const updatedProgress = await this.progressRepo.recordFloorAttempt(
+      session.userId,
+      session.seasonId,
+      session.floorNumber,
+      isWin,
+    );
 
     return {
       success: true,
       victory: isWin,
-      floorNumber,
-      seasonId,
-      energySpent: energyCost,
+      floorNumber: session.floorNumber,
+      seasonId: session.seasonId,
+      energySpent: options.energySpent,
+      turnsTotal: snapshot.turn,
+      logs: snapshot.allLogs,
+      highestFloorCleared: updatedProgress.highestClearedFloor,
+      isFirstClear,
+      loot,
+    };
+  }
+
+  /**
+   * Executes a dungeon floor attempt (synchronous batch simulation).
+   */
+  public async runFloor(options: DungeonRunOptions): Promise<DungeonRunResult> {
+    const setup = await this.prepareFloorSetup(options);
+    if (!setup.success || !setup.enemyBoss || !setup.affixHandler) {
+      return {
+        success: false,
+        victory: false,
+        floorNumber: options.floorNumber,
+        seasonId: options.seasonId,
+        energySpent: setup.energyCost,
+        turnsTotal: 0,
+        logs: [],
+        highestFloorCleared: setup.highestCleared,
+        isFirstClear: false,
+        error: setup.error,
+      };
+    }
+
+    // Run Combat with custom Dungeon Combat loop incorporating Wards, Affixes, and Soft Enrage
+    const simulationResult = this.simulateDungeonCombat(
+      options.playerParty,
+      setup.enemyBoss,
+      setup.affixHandler,
+      setup.elementalWard ?? null,
+    );
+
+    const isWin = simulationResult.winner === 'TEAM_A';
+    const isTutorial = options.seasonId.toLowerCase().includes('tutorial');
+    const isFirstClear = isWin && options.floorNumber > setup.highestCleared;
+
+    let loot: DungeonLootResult | undefined;
+    if (isWin) {
+      if (!isTutorial && this.lootService) {
+        loot = await this.lootService.generateAndDispatchLoot(options.userId, options.floorNumber, isFirstClear);
+      }
+      if (this.cardRepo && options.playerParty.length > 0) {
+        for (const card of options.playerParty) {
+          if (card.id) {
+            await this.cardRepo.incrementUserCardBattlesWon(card.id).catch(() => {});
+          }
+        }
+      }
+    }
+
+    // Update user dungeon progress in repository
+    const updatedProgress = await this.progressRepo.recordFloorAttempt(
+      options.userId,
+      options.seasonId,
+      options.floorNumber,
+      isWin,
+    );
+
+    return {
+      success: true,
+      victory: isWin,
+      floorNumber: options.floorNumber,
+      seasonId: options.seasonId,
+      energySpent: setup.energyCost,
       turnsTotal: simulationResult.turnsTotal,
       logs: simulationResult.logs,
       highestFloorCleared: updatedProgress.highestClearedFloor,

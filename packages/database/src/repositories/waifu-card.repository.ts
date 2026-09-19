@@ -439,6 +439,29 @@ export class WaifuCardRepository extends BaseRepository<
     }
   }
 
+  async incrementUserCardBattlesWon(
+    id: string,
+    delta: number = 1,
+    tx?: DatabaseClient,
+  ): Promise<UserCard | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .update(sqliteSchema.userCards)
+        .set({ battlesWon: sql`${sqliteSchema.userCards.battlesWon} + ${delta}` })
+        .where(eq(sqliteSchema.userCards.id, id))
+        .returning();
+      return (row as UserCard) ?? null;
+    } else {
+      const [row] = await client.db
+        .update(pgSchema.userCards)
+        .set({ battlesWon: sql`${pgSchema.userCards.battlesWon} + ${delta}` })
+        .where(eq(pgSchema.userCards.id, id))
+        .returning();
+      return (row as unknown as UserCard) ?? null;
+    }
+  }
+
   async updateUserCardOwner(
     id: string,
     newUserId: string,

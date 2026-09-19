@@ -111,6 +111,7 @@ describe('Waifu TCG: Equipment, Loadouts, Enhancement & Consumables (STORY-103 /
         serial_number INTEGER NOT NULL,
         level INTEGER NOT NULL DEFAULT 1,
         exp INTEGER NOT NULL DEFAULT 0,
+        battles_won INTEGER NOT NULL DEFAULT 0,
         state TEXT NOT NULL DEFAULT 'IDLE',
         is_favorite INTEGER NOT NULL DEFAULT 0,
         obtained_at INTEGER NOT NULL
