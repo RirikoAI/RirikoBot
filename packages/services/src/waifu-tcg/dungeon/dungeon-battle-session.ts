@@ -196,6 +196,15 @@ export class DungeonBattleSession {
     this.processStatusTicks(currentTurn);
     if (this.isFinished) return this.getSnapshot();
 
+    // Gear mana regeneration
+    const manaRegen = this.player.gearMods?.manaRegen ?? 0;
+    if (manaRegen > 0) {
+      this.player.currentMp = Math.min(
+        this.player.maxMp,
+        this.player.currentMp + Math.round(this.player.maxMp * manaRegen),
+      );
+    }
+
     // 2. Soft Enrage notice on turn 10 (disabled in tutorial)
     const isTutorial = this.seasonId.toLowerCase().includes('tutorial');
     const { startTurn, perTurn, trueDamage } = this.enrage;
@@ -557,9 +566,10 @@ export class DungeonBattleSession {
     } else {
       // Basic attack generates 15 MP
       this.player.currentMp = Math.min(this.player.maxMp, this.player.currentMp + 15);
+      const piercing = Math.min(0.8, this.player.gearMods?.armorPiercing ?? 0);
       rawDamage = Math.max(
         10,
-        playerStats.effectiveAttack - Math.round(bossStats.effectiveDefense * 0.4),
+        playerStats.effectiveAttack - Math.round(bossStats.effectiveDefense * (1 - piercing) * 0.4),
       );
     }
 
@@ -570,7 +580,9 @@ export class DungeonBattleSession {
     }
 
     // Elemental multiplier
-    const elemMult = getElementalMultiplier(this.player.element, this.boss.element);
+    const baseElemMult = getElementalMultiplier(this.player.element, this.boss.element);
+    const elemMult =
+      baseElemMult > 1 ? baseElemMult + (this.player.gearMods?.elementalMastery ?? 0) : baseElemMult;
     rawDamage = Math.round(rawDamage * elemMult);
 
     // Apply affix modifier
@@ -687,6 +699,8 @@ export class DungeonBattleSession {
       damage = bossAtk;
     } else {
       damage = Math.round(bossAtk * (100 / (100 + playerStats.effectiveDefense)));
+      const mitigation = Math.min(0.6, this.player.gearMods?.mitigation ?? 0);
+      damage = Math.round(damage * (1 - mitigation));
     }
 
     // Halve damage if player guarded

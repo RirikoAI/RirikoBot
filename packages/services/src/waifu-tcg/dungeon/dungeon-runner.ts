@@ -479,7 +479,9 @@ export class DungeonRunner {
     let loot: DungeonLootResult | undefined;
     if (isWin) {
       if (!isTutorial && this.lootService) {
-        loot = await this.lootService.generateAndDispatchLoot(session.userId, session.floorNumber, isFirstClear);
+        loot = await this.lootService.generateAndDispatchLoot(session.userId, session.floorNumber, isFirstClear, {
+          signatureDropCode: session.bossProfile?.signatureDropCode,
+        });
       }
       if (this.cardRepo && snapshot.player?.id) {
         await this.cardRepo.incrementUserCardBattlesWon(snapshot.player.id).catch(() => {});

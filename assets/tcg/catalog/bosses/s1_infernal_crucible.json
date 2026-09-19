@@ -27,6 +27,16 @@
       ],
       "title": "Crimson Demon Archwizard",
       "flavorText": "She has one spell, and she has been saving it for you. Brace when the ground starts to glow.",
+      "anilistId": 89361,
+      "favourites": 16682,
+      "danbooruTag": "megumin",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/ef/41/sample-ef41a81e40399b902dc82e1339a4c357.jpg",
+        "source": "DANBOORU",
+        "sourceId": "3691277",
+        "credit": "Art: nagu · danbooru #3691277"
+      },
+      "signatureDropCode": "WEAPON_CRIMSON_CHANT_STAFF",
       "definition": {
         "statMultipliers": {
           "hp": 0.85,
@@ -38,15 +48,6 @@
           "mpCost": 100,
           "powerMult": 3
         }
-      },
-      "anilistId": 89361,
-      "favourites": 16682,
-      "danbooruTag": "megumin",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/ef/41/sample-ef41a81e40399b902dc82e1339a4c357.jpg",
-        "source": "DANBOORU",
-        "sourceId": "3691277",
-        "credit": "Art: nagu · danbooru #3691277"
       }
     },
     {
@@ -60,6 +61,16 @@
       ],
       "title": "Blade of the Scorched Walls",
       "flavorText": "Fast, relentless and never off balance. Outlast her first assault or fall to it.",
+      "anilistId": 40881,
+      "favourites": 25576,
+      "danbooruTag": "mikasa_ackerman",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/1d/ff/sample-1dffb85013b8c646a3961e77d3eb3a5e.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5993813",
+        "credit": "Art: khyle. · danbooru #5993813"
+      },
+      "signatureDropCode": "TALISMAN_MANEUVER_GEAR",
       "definition": {
         "statMultipliers": {
           "attack": 1.15,
@@ -72,15 +83,6 @@
           "mpCost": 50,
           "powerMult": 1.8
         }
-      },
-      "anilistId": 40881,
-      "favourites": 25576,
-      "danbooruTag": "mikasa_ackerman",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/1d/ff/sample-1dffb85013b8c646a3961e77d3eb3a5e.jpg",
-        "source": "DANBOORU",
-        "sourceId": "5993813",
-        "credit": "Art: khyle. · danbooru #5993813"
       }
     },
     {
@@ -94,6 +96,16 @@
       ],
       "title": "Lioness of the Crimson Kiln",
       "flavorText": "She hates waiting. Her fury ignites early, so every turn you waste makes her stronger.",
+      "anilistId": 124522,
+      "favourites": 2839,
+      "danbooruTag": "mereoleona_vermillion",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/04/f7/sample-04f7284217f35bd28bb40759027560d9.jpg",
+        "source": "DANBOORU",
+        "sourceId": "6522403",
+        "credit": "Art: nekoma_hikaru · danbooru #6522403"
+      },
+      "signatureDropCode": "WEAPON_CALIDOS_GAUNTLETS",
       "definition": {
         "statMultipliers": {
           "attack": 1.2
@@ -106,15 +118,6 @@
         "enrage": {
           "startTurn": 8
         }
-      },
-      "anilistId": 124522,
-      "favourites": 2839,
-      "danbooruTag": "mereoleona_vermillion",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/04/f7/sample-04f7284217f35bd28bb40759027560d9.jpg",
-        "source": "DANBOORU",
-        "sourceId": "6522403",
-        "credit": "Art: nekoma_hikaru · danbooru #6522403"
       }
     },
     {
@@ -128,6 +131,16 @@
       ],
       "title": "Crimson Princess of Ruin",
       "flavorText": "Three wards guard her throne. Bring the right elements, or your blows turn to ash.",
+      "anilistId": 50389,
+      "favourites": 6360,
+      "danbooruTag": "rias_gremory",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/93/32/sample-93328f248949921aeb22fbdf2fe1079c.jpg",
+        "source": "DANBOORU",
+        "sourceId": "8857819",
+        "credit": "Art: unknown · danbooru #8857819"
+      },
+      "signatureDropCode": "RING_RUIN_SIGNET",
       "definition": {
         "statMultipliers": {
           "hp": 1.15
@@ -151,15 +164,6 @@
             "hpPercent": 0.12
           }
         ]
-      },
-      "anilistId": 50389,
-      "favourites": 6360,
-      "danbooruTag": "rias_gremory",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/93/32/sample-93328f248949921aeb22fbdf2fe1079c.jpg",
-        "source": "DANBOORU",
-        "sourceId": "8857819",
-        "credit": "Art: unknown · danbooru #8857819"
       }
     },
     {
@@ -173,6 +177,16 @@
       ],
       "title": "Flame Haze of the Crucible Heart",
       "flavorText": "The crucible burns for her alone. Only a fully forged team reaches the summit.",
+      "anilistId": 1426,
+      "favourites": 1063,
+      "danbooruTag": "shana",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/5d/91/sample-5d915686529ad75a74011914671381a7.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5753552",
+        "credit": "Art: seungju_lee · danbooru #5753552"
+      },
+      "signatureDropCode": "WEAPON_CRUCIBLE_HEART_BLADE",
       "definition": {
         "statMultipliers": {
           "hp": 1.1,
@@ -204,15 +218,6 @@
             "hpPercent": 0.1
           }
         ]
-      },
-      "anilistId": 1426,
-      "favourites": 1063,
-      "danbooruTag": "shana",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/5d/91/sample-5d915686529ad75a74011914671381a7.jpg",
-        "source": "DANBOORU",
-        "sourceId": "5753552",
-        "credit": "Art: seungju_lee · danbooru #5753552"
       }
     },
     {
@@ -226,6 +231,16 @@
       ],
       "title": "Gatekeeper of the First Flame",
       "flavorText": "Sturdy and patient. Save your skill for when she is worn down, and keep a potion ready.",
+      "anilistId": 130713,
+      "favourites": 3908,
+      "danbooruTag": "maki_oze",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/65/b0/sample-65b06af8ac54d9335e8184c75984c075.jpg",
+        "source": "DANBOORU",
+        "sourceId": "3558582",
+        "credit": "Art: gsong-chan · danbooru #3558582"
+      },
+      "signatureDropCode": "RELIC_FIRE_BRIGADE_BADGE",
       "definition": {
         "statMultipliers": {
           "hp": 1.2,
@@ -236,15 +251,6 @@
           "mpCost": 60,
           "powerMult": 1.6
         }
-      },
-      "anilistId": 130713,
-      "favourites": 3908,
-      "danbooruTag": "maki_oze",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/65/b0/sample-65b06af8ac54d9335e8184c75984c075.jpg",
-        "source": "DANBOORU",
-        "sourceId": "3558582",
-        "credit": "Art: gsong-chan · danbooru #3558582"
       }
     },
     {
@@ -258,6 +264,16 @@
       ],
       "title": "Unbreakable Crusader",
       "flavorText": "She can take every hit you have. Her own swings rarely land hard. Race the enrage.",
+      "anilistId": 89363,
+      "favourites": 6045,
+      "danbooruTag": "darkness_(konosuba)",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/b0/df/sample-b0df5dca532c334c347cd23cfd227b73.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5604637",
+        "credit": "Art: izawa_(bhive003) · danbooru #5604637"
+      },
+      "signatureDropCode": "ARMOR_CRUSADER_PLATE",
       "definition": {
         "statMultipliers": {
           "hp": 1.6,
@@ -272,15 +288,6 @@
         "enrage": {
           "startTurn": 12
         }
-      },
-      "anilistId": 89363,
-      "favourites": 6045,
-      "danbooruTag": "darkness_(konosuba)",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/b0/df/sample-b0df5dca532c334c347cd23cfd227b73.jpg",
-        "source": "DANBOORU",
-        "sourceId": "5604637",
-        "credit": "Art: izawa_(bhive003) · danbooru #5604637"
       }
     },
     {
@@ -294,6 +301,16 @@
       ],
       "title": "Mad Sword of the Red Pass",
       "flavorText": "Short on patience, long on speed. Her critical strikes punish thin armor.",
+      "anilistId": 88349,
+      "favourites": 7202,
+      "danbooruTag": "eris_greyrat",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/35/13/sample-3513f82ed5af8b1b5eab56a8cdc49ca3.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5269747",
+        "credit": "Art: tochi_keisuke · danbooru #5269747"
+      },
+      "signatureDropCode": "RING_SWORD_SAINT_BAND",
       "definition": {
         "statMultipliers": {
           "hp": 0.9,
@@ -306,15 +323,6 @@
           "mpCost": 45,
           "powerMult": 1.7
         }
-      },
-      "anilistId": 88349,
-      "favourites": 7202,
-      "danbooruTag": "eris_greyrat",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/35/13/sample-3513f82ed5af8b1b5eab56a8cdc49ca3.jpg",
-        "source": "DANBOORU",
-        "sourceId": "5269747",
-        "credit": "Art: tochi_keisuke · danbooru #5269747"
       }
     },
     {
@@ -328,6 +336,16 @@
       ],
       "title": "Wisewolf of the Ember Harvest",
       "flavorText": "She strikes often and never tires. Endurance and healing win this hunt.",
+      "anilistId": 7373,
+      "favourites": 7057,
+      "danbooruTag": "holo",
+      "image": {
+        "url": "https://cdn.donmai.us/original/bd/c1/bdc18ebdd419cba7751d19a61773c47f.jpg",
+        "source": "DANBOORU",
+        "sourceId": "9543130",
+        "credit": "Art: likunea · danbooru #9543130"
+      },
+      "signatureDropCode": "AMULET_HARVEST_POUCH",
       "definition": {
         "statMultipliers": {
           "hp": 1.2
@@ -337,15 +355,6 @@
           "mpCost": 40,
           "powerMult": 1.4
         }
-      },
-      "anilistId": 7373,
-      "favourites": 7057,
-      "danbooruTag": "holo",
-      "image": {
-        "url": "https://cdn.donmai.us/original/bd/c1/bdc18ebdd419cba7751d19a61773c47f.jpg",
-        "source": "DANBOORU",
-        "sourceId": "9543130",
-        "credit": "Art: likunea · danbooru #9543130"
       }
     },
     {
@@ -359,6 +368,16 @@
       ],
       "title": "Chaos Dragon of the Caldera",
       "flavorText": "A dragon wearing a maid uniform is still a dragon. Mind the breath attack.",
+      "anilistId": 120970,
+      "favourites": 5233,
+      "danbooruTag": "tohru_(maidragon)",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/dd/42/sample-dd421157d4a4ad7beaa087ffe1f7d44d.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5417063",
+        "credit": "Art: modare · danbooru #5417063"
+      },
+      "signatureDropCode": "ARMOR_CHAOS_DRAGON_SCALE",
       "definition": {
         "statMultipliers": {
           "hp": 1.1,
@@ -375,15 +394,6 @@
             "hpPercent": 0.15
           }
         ]
-      },
-      "anilistId": 120970,
-      "favourites": 5233,
-      "danbooruTag": "tohru_(maidragon)",
-      "image": {
-        "url": "https://cdn.donmai.us/sample/dd/42/sample-dd421157d4a4ad7beaa087ffe1f7d44d.jpg",
-        "source": "DANBOORU",
-        "sourceId": "5417063",
-        "credit": "Art: modare · danbooru #5417063"
       }
     },
     {
