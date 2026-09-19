@@ -1383,8 +1383,9 @@
       "title": "waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository",
       "points": 2,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["TASK-1002"]
+      "requires": ["EPIC-002"],
+      "blocks": ["TASK-1002"],
+      "description": "Build WaifuImClient with rate-limiting and backoff, ImageValidator for PNG/JPEG/WebP magic bytes and aspect ratio, SHA-256 binary deduplication, and dual-dialect WaifuAssetRepository with starter seed dataset."
     },
     {
       "id": "TASK-1002",
@@ -1393,7 +1394,8 @@
       "points": 1,
       "status": "DONE",
       "requires": ["TASK-1001"],
-      "blocks": ["STORY-101"]
+      "blocks": ["STORY-101"],
+      "description": "Enforce mandatory attribution footer 'Image source: waifu.im', graceful deletion silhouette card frame fallback preserving character stats and user ownership, and complete unit/integration test suite."
     },
     {
       "id": "TASK-1011",
@@ -1402,7 +1404,8 @@
       "points": 3,
       "status": "DONE",
       "requires": ["STORY-100"],
-      "blocks": ["TASK-1012"]
+      "blocks": ["TASK-1012"],
+      "description": "Build 8-tier cumulative probability rarity engine with exact multipliers (1.0x to 5.0x) and max levels (20 to 100), dynamic primary stats (HP 500-15k, ATK 50-2500, DEF 30-1800, SPD 10-300, CRIT 5-50%, MP 100), active/passive skills, and WaifuCardRepository."
     },
     {
       "id": "TASK-1012",
@@ -1411,7 +1414,8 @@
       "points": 2,
       "status": "DONE",
       "requires": ["TASK-1011"],
-      "blocks": ["STORY-102"]
+      "blocks": ["STORY-102"],
+      "description": "Implement drop trigger manager on message thresholds (50-100 msgs) during active hours (08:00-23:00), 60s [Claim Card] button, 5-minute claimant anti-sniping cooldown, crafting dust dismantling, and /card collection/inspect/favorite/equip commands."
     },
     {
       "id": "TASK-1021",
@@ -1420,7 +1424,8 @@
       "points": 2,
       "status": "DONE",
       "requires": ["STORY-101"],
-      "blocks": ["TASK-1022"]
+      "blocks": ["TASK-1022"],
+      "description": "Build 7-element affinity matrix (Fire > Ice > Earth > Lightning > Water > Fire, Light <> Shadow), status effects engine (Burn, Freeze/Chill, Fortify, Surge, Purify/Flow, Radiance, Decay/Leech), 6 rarity-scaled battle perks, and turn-based combat simulator with turn 10+ soft enrage."
     },
     {
       "id": "TASK-1022",
@@ -1429,7 +1434,8 @@
       "points": 1,
       "status": "DONE",
       "requires": ["TASK-1021"],
-      "blocks": ["STORY-103"]
+      "blocks": ["STORY-103"],
+      "description": "Implement turn-based PvP duels with wager escrow, timed idle exploration expeditions with risk/reward brackets, and server-wide cooperative boss raids with damage contribution tracking."
     },
     {
       "id": "TASK-1031",
@@ -1438,7 +1444,8 @@
       "points": 2,
       "status": "DONE",
       "requires": ["STORY-102"],
-      "blocks": ["TASK-1032"]
+      "blocks": ["TASK-1032"],
+      "description": "Implement 6 gear slots (Weapon, Armor, Relic, Ring, Amulet, Talisman), battle perks by rarity, +0 to +10 enhancement engine with Crafting Dust and Credits, consumables catalog (HP, Mana, Energy restores), and dual-dialect GameItemRepository and UserInventoryItemRepository."
     },
     {
       "id": "TASK-1032",
@@ -1447,7 +1454,8 @@
       "points": 1,
       "status": "DONE",
       "requires": ["TASK-1031"],
-      "blocks": ["STORY-104"]
+      "blocks": ["STORY-104"],
+      "description": "Implement level-based max energy formula with milestone bonuses, 00:00 UTC replenishment lifecycle, 3/day stamina potion anti-abuse ceiling, basic town shop with double-entry ledger audit, and dual-dispatch /shop, /inventory, /card equip, /card unequip, and /item commands suite."
     },
     {
       "id": "TASK-1041",
@@ -1456,7 +1464,8 @@
       "points": 3,
       "status": "DONE",
       "requires": ["STORY-103"],
-      "blocks": ["TASK-1042"]
+      "blocks": ["TASK-1042"],
+      "description": "Implement Dungeon repositories (DungeonSeasonRepository, DungeonFloorRepository, UserDungeonProgressRepository), ScalingEngine with 4 models (Linear, Polynomial, Exponential r=0.085, Hybrid) matching Section 7.5 baseline tables up to F50, Multi-Layer Elemental Wards, Seasonal Environmental Affixes (S1 Scorched Earth & Heat Haze, S2 Torrential Deluge & Tidal Barrier, S3 Radiant Flare & Void Drain), and Turn 10+ Soft Enrage."
     },
     {
       "id": "TASK-1042",
@@ -1465,7 +1474,48 @@
       "points": 2,
       "status": "DONE",
       "requires": ["TASK-1041"],
-      "blocks": ["STORY-105"]
+      "blocks": ["STORY-105"],
+      "description": "Implement Tutorial onboarding sequence (T1 to T4 with 0 energy cost, starter card, Novice Blade, 3x Minor HP Potions, and TUTORIAL_COMPLETE achievement unlock), floor energy brackets (F1-10 10, F11-25 15, F26-40 20, F41-50+ 25), mini-boss (1.75x) and major boss (3.2x) multipliers, first-clear and repeat loot drop tables, and dual-dispatch /dungeon status/climb/floor/leaderboard suite."
+    },
+    {
+      "id": "TASK-1051",
+      "parent": "STORY-105",
+      "title": "Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["STORY-104"],
+      "blocks": ["TASK-1052"],
+      "description": "Implement CardTradeRepository and MarketListingRepository in packages/database, TradeService and MarketService with IN_TRADE/IN_MARKET state locking, dual confirmation, 5% market tax sink, 7-day expiration, and dual-dispatch /trade and /market commands suite."
+    },
+    {
+      "id": "TASK-1052",
+      "parent": "STORY-105",
+      "title": "WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-1051"],
+      "blocks": ["TASK-1053"],
+      "description": "Implement WaifuGuildRepository, AchievementRepository, and TcgConfigRepository in packages/database, WaifuGuildService, AchievementService with 7-asset reward dispatch, TcgConfigService with Zod validation, and dual-dispatch /waifuguild, /achievement, and /tcg-admin commands suite."
+    },
+    {
+      "id": "TASK-1053",
+      "parent": "STORY-105",
+      "title": "Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info)",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-1052"],
+      "blocks": ["TASK-1061"],
+      "description": "Implement comprehensive TCG player guide (docs/tcg-player-guide.md), interactive dual-dispatch /tcg-info command with StringSelectMenu and 10 guide topics, /card action:guide integration, and unit tests."
+    },
+    {
+      "id": "TASK-1061",
+      "parent": "STORY-105",
+      "title": "Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI",
+      "points": 5,
+      "status": "DONE",
+      "requires": ["TASK-1053"],
+      "blocks": ["EPIC-011"],
+      "description": "Implement CardSynthesizer canvas engine (800x1200 px, 8-layer stack, rarity foiling, modular assets/tcg structure with procedural fallbacks), and scripts/tcg-card-builder.ts supporting 50 cards per element bulk generation and manual single-card creation via waifu.im or direct URL."
     }
   ],
   "chores": [
@@ -1567,147 +1617,9 @@
       "requires": [],
       "blocks": [],
       "description": "Fix false tutorial completion caused by immediate floor 4 completion and unseeded starter card foreign key error; seed starter_waifu_01; route incomplete players from $climb into tutorial floors; fix prefix climb alias argument resolution."
-    },
-    {
-      "id": "TASK-1001",
-      "title": "waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-100",
-      "requires": ["EPIC-002"],
-      "blocks": ["TASK-1002"],
-      "description": "Build WaifuImClient with rate-limiting and backoff, ImageValidator for PNG/JPEG/WebP magic bytes and aspect ratio, SHA-256 binary deduplication, and dual-dialect WaifuAssetRepository with starter seed dataset."
-    },
-    {
-      "id": "TASK-1002",
-      "title": "Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests",
-      "points": 1,
-      "status": "DONE",
-      "parent": "STORY-100",
-      "requires": ["TASK-1001"],
-      "blocks": ["STORY-101"],
-      "description": "Enforce mandatory attribution footer 'Image source: waifu.im', graceful deletion silhouette card frame fallback preserving character stats and user ownership, and complete unit/integration test suite."
-    },
-    {
-      "id": "TASK-1011",
-      "title": "8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling",
-      "points": 3,
-      "status": "DONE",
-      "parent": "STORY-101",
-      "requires": ["STORY-100"],
-      "blocks": ["TASK-1012"],
-      "description": "Build 8-tier cumulative probability rarity engine with exact multipliers (1.0x to 5.0x) and max levels (20 to 100), dynamic primary stats (HP 500-15k, ATK 50-2500, DEF 30-1800, SPD 10-300, CRIT 5-50%, MP 100), active/passive skills, and WaifuCardRepository."
-    },
-    {
-      "id": "TASK-1012",
-      "title": "Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-101",
-      "requires": ["TASK-1011"],
-      "blocks": ["STORY-102"],
-      "description": "Implement drop trigger manager on message thresholds (50-100 msgs) during active hours (08:00-23:00), 60s [Claim Card] button, 5-minute claimant anti-sniping cooldown, crafting dust dismantling, and /card collection/inspect/favorite/equip commands."
-    },
-    {
-      "id": "TASK-1021",
-      "title": "7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-102",
-      "requires": ["STORY-101"],
-      "blocks": ["TASK-1022"],
-      "description": "Build 7-element affinity matrix (Fire > Ice > Earth > Lightning > Water > Fire, Light <> Shadow), status effects engine (Burn, Freeze/Chill, Fortify, Surge, Purify/Flow, Radiance, Decay/Leech), 6 rarity-scaled battle perks, and turn-based combat simulator with turn 10+ soft enrage."
-    },
-    {
-      "id": "TASK-1022",
-      "title": "PvP Duels (/game pvp), Timed Expeditions (/game explore), Boss Raids (/game boss) & Quests",
-      "points": 1,
-      "status": "DONE",
-      "parent": "STORY-102",
-      "requires": ["TASK-1021"],
-      "blocks": ["STORY-103"]
-    },
-    {
-      "id": "TASK-1031",
-      "title": "6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-103",
-      "requires": ["STORY-102"],
-      "blocks": ["TASK-1032"],
-      "description": "Implement 6 gear slots (Weapon, Armor, Relic, Ring, Amulet, Talisman), battle perks by rarity, +0 to +10 enhancement engine with Crafting Dust and Credits, consumables catalog (HP, Mana, Energy restores), and dual-dialect GameItemRepository and UserInventoryItemRepository."
-    },
-    {
-      "id": "TASK-1032",
-      "title": "Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands",
-      "points": 1,
-      "status": "DONE",
-      "parent": "STORY-103",
-      "requires": ["TASK-1031"],
-      "blocks": ["STORY-104"],
-      "description": "Implement level-based max energy formula with milestone bonuses, 00:00 UTC replenishment lifecycle, 3/day stamina potion anti-abuse ceiling, basic town shop with double-entry ledger audit, and dual-dispatch /shop, /inventory, /card equip, /card unequip, and /item commands suite."
-    },
-    {
-      "id": "TASK-1041",
-      "title": "PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes",
-      "points": 3,
-      "status": "DONE",
-      "parent": "STORY-104",
-      "requires": ["STORY-103"],
-      "blocks": ["TASK-1042"],
-      "description": "Implement Dungeon repositories (DungeonSeasonRepository, DungeonFloorRepository, UserDungeonProgressRepository), ScalingEngine with 4 models (Linear, Polynomial, Exponential r=0.085, Hybrid) matching Section 7.5 baseline tables up to F50, Multi-Layer Elemental Wards, Seasonal Environmental Affixes (S1 Scorched Earth & Heat Haze, S2 Torrential Deluge & Tidal Barrier, S3 Radiant Flare & Void Drain), and Turn 10+ Soft Enrage."
-    },
-    {
-      "id": "TASK-1042",
-      "title": "Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-104",
-      "requires": ["TASK-1041"],
-      "blocks": ["STORY-105"],
-      "description": "Implement Tutorial onboarding sequence (T1 to T4 with 0 energy cost, starter card, Novice Blade, 3x Minor HP Potions, and TUTORIAL_COMPLETE achievement unlock), floor energy brackets (F1-10 10, F11-25 15, F26-40 20, F41-50+ 25), mini-boss (1.75x) and major boss (3.2x) multipliers, first-clear and repeat loot drop tables, and dual-dispatch /dungeon status/climb/floor/leaderboard suite."
-    },
-    {
-      "id": "TASK-1051",
-      "title": "Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration",
-      "points": 3,
-      "status": "DONE",
-      "parent": "STORY-105",
-      "requires": ["STORY-104"],
-      "blocks": ["TASK-1052"],
-      "description": "Implement CardTradeRepository and MarketListingRepository in packages/database, TradeService and MarketService with IN_TRADE/IN_MARKET state locking, dual confirmation, 5% market tax sink, 7-day expiration, and dual-dispatch /trade and /market commands suite."
-    },
-    {
-      "id": "TASK-1052",
-      "title": "WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-105",
-      "requires": ["TASK-1051"],
-      "blocks": ["TASK-1053"],
-      "description": "Implement WaifuGuildRepository, AchievementRepository, and TcgConfigRepository in packages/database, WaifuGuildService, AchievementService with 7-asset reward dispatch, TcgConfigService with Zod validation, and dual-dispatch /waifuguild, /achievement, and /tcg-admin commands suite."
-    },
-    {
-      "id": "TASK-1053",
-      "title": "Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info)",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-105",
-      "requires": ["TASK-1052"],
-      "blocks": ["EPIC-011"],
-      "description": "Implement comprehensive TCG player guide (docs/tcg-player-guide.md), interactive dual-dispatch /tcg-info command with StringSelectMenu and 10 guide topics, /card action:guide integration, and unit tests."
-    },
-    {
-      "id": "TASK-1061",
-      "title": "Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI",
-      "points": 5,
-      "status": "DONE",
-      "parent": "STORY-105",
-      "requires": ["TASK-1053"],
-      "blocks": ["EPIC-011"],
-      "description": "Implement CardSynthesizer canvas engine (800x1200 px, 8-layer stack, rarity foiling, modular assets/tcg structure with procedural fallbacks), and scripts/tcg-card-builder.ts supporting 50 cards per element bulk generation and manual single-card creation via waifu.im or direct URL."
     }
   ]
 }
+
 
 

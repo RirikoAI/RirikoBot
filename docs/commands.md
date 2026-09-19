@@ -153,3 +153,65 @@ Selecting a specific command displays:
   - Designates the authorized manager role for game operations.
 - `/tcg-admin shop restock`
   - Manually refreshes shop rotating items or forces inventory sync.
+
+### 5.7. Card Collection & Inspection Subsystem (`/card`)
+- `/card collection [element] [rarity] [page]` (Prefix: `!cards`, `!collection`)
+  - Displays paginated collection album with element filters, rarity badges, and total completion count.
+- `/card inspect <card_id>` (Prefix: `!inspect <card_id>`)
+  - Displays complete card profile, primary stats, skills, equipped gear, and **attaches the rendered 800×1200 px foiled card PNG** via `CardImageService`.
+- `/card claim` (Prefix: `!claim`)
+  - Claims active chat drops in `#waifu-drops` text channels, enforcing a 5-minute claimant anti-sniping cooldown and attaching rendered card PNG.
+- `/card favorite <card_id>`
+  - Toggles favorite protection lock on a card to prevent accidental dismantling or market listing.
+- `/card dismantle <card_id | rarity>`
+  - Recycles duplicate or unwanted cards into Crafting Dust for gear enhancement.
+- `/card equip <card_id>` / `/card unequip <card_id>`
+  - Sets or clears the active combat card for PvP duels, expeditions, and dungeon tower battles.
+- `/card guide` / `/card info`
+  - Directly opens the interactive TCG Info Hub select menu.
+
+### 5.8. Peer-to-Peer Trading Subsystem (`/trade`)
+- `/trade request <@user>` (Prefix: `!trade <@user>`)
+  - Initiates an atomic trading session between two players.
+- `/trade offer card <trade_id> <card_id>` / `/trade offer credits <trade_id> <amount>`
+  - Offers cards or credits. Selected items are locked in `IN_TRADE` state.
+- `/trade confirm <trade_id>`
+  - Dual-confirmation gate. When both players confirm, settlement executes atomically within a database transaction.
+- `/trade cancel <trade_id>`
+  - Cancels the session and releases all item locks immediately.
+
+### 5.9. Player Marketplace Subsystem (`/market`)
+- `/market browse [element] [rarity] [sort] [page]` (Prefix: `!market`)
+  - Browses active player listings with price, rarity, and stat sorting.
+- `/market list <card_id> <price_credits>`
+  - Lists a card for sale, locking it in `IN_MARKET` state with a 7-day auto-expiration.
+- `/market buy <listing_id>`
+  - Purchases a card using credits. Enforces a 5% coin sink tax to curb inflation.
+- `/market cancel <listing_id>`
+  - Cancels a listing and returns the card to inventory.
+
+### 5.10. WaifuGuilds Factions Subsystem (`/waifuguild`)
+- `/waifuguild create <name> [tag]` (Prefix: `!guild create`)
+  - Establishes a player faction (5,000 credit creation fee).
+- `/waifuguild info [guild_id]` (Prefix: `!guild info`)
+  - Displays guild level, member roster, capacity ($10 + \text{Level} \times 2$), and guild bank balance.
+- `/waifuguild deposit <credits>`
+  - Deposits credits into the shared guild vault for upgrades and raid unlocking.
+- `/waifuguild join <guild_id>` / `/waifuguild leave`
+  - Manages player faction membership.
+
+### 5.11. TCG Info Hub & Onboarding Guide (`/tcg-info`)
+- `/tcg-info [topic]` (Prefix: `!tcg-info`, `!tcginfo`, `!tcgguide`, `!waifu-guide`)
+  - Interactive multi-page handbook powered by a Discord `StringSelectMenu`.
+  - 10 Guide Topics:
+    1. `overview`: Welcome, system architecture, core loops.
+    2. `starter`: How to obtain cards (tutorial, chat drops, marketplace).
+    3. `elements`: 7-element affinity loop, Ice mechanics, and status effects.
+    4. `gear`: 6-slot loadout, +10 enhancement, Crafting Dust.
+    5. `tutorial`: 4-floor onboarding prologue and starter pool.
+    6. `dungeon`: Seasonal towers, scaling models, elemental wards, enrage clock.
+    7. `trade`: Atomic P2P trading rules and `IN_TRADE` safety.
+    8. `market`: Community marketplace and 5% tax sink.
+    9. `guild`: WaifuGuild factions, leveling, and vaults.
+    10. `achievements`: 6 tracks, 5 tiers, and multi-asset rewards.
+
