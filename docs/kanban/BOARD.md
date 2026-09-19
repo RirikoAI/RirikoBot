@@ -18,7 +18,6 @@
 ## 🎯 To Do (Groomed & Estimated)
 | ID | Type | Title | Pts | Parent | Prerequisites |
 |---|---|---|---|---|---|
-| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | `STORY-157` |
 | `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | `STORY-152`, `STORY-156` |
 
 ---
@@ -31,6 +30,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | [STORY-158.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-158.md) |
 | `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | [STORY-157.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-157.md) |
 | `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | [STORY-156.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-156.md) |
 | `BUG-0011` | Bug | Persist Crafting Dust and Charge It for Equipment Enhancement | 3 | `EPIC-015` | [BUG-0011.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0011.md) |
@@ -228,7 +228,7 @@
 | `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | ✅ Done | `STORY-154` |
 | `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | ✅ Done | `STORY-152` |
 | `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | ✅ Done | `BUG-0010` |
-| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | 🎯 To Do | `STORY-157` |
+| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | ✅ Done | `STORY-157` |
 | `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | 🎯 To Do | `STORY-152`, `STORY-156` |
 | `STORY-160` | Story | Equipment Crafting with Dust (Deferred) | 5 | `EPIC-015` | 📋 Backlog | `STORY-156` |
 
