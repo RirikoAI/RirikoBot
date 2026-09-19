@@ -134,7 +134,7 @@ export type NewCardTrade = Omit<typeof sqlite.cardTrades.$inferInsert, 'id'> & {
 export type MarketListing = typeof sqlite.marketListings.$inferSelect;
 export type NewMarketListing = Omit<typeof sqlite.marketListings.$inferInsert, 'id'> & { id?: string };
 export type WaifuGuild = typeof sqlite.waifuGuilds.$inferSelect;
-export type NewWaifuGuild = typeof sqlite.waifuGuilds.$inferInsert;
+export type NewWaifuGuild = Omit<typeof sqlite.waifuGuilds.$inferInsert, 'id'> & { id?: string };
 export type WaifuGuildMember = typeof sqlite.waifuGuildMembers.$inferSelect;
 export type NewWaifuGuildMember = typeof sqlite.waifuGuildMembers.$inferInsert;
 export type Quest = typeof sqlite.quests.$inferSelect;
@@ -143,6 +143,8 @@ export type Boss = typeof sqlite.bosses.$inferSelect;
 export type NewBoss = Omit<typeof sqlite.bosses.$inferInsert, 'id'> & { id?: string };
 export type BossRun = typeof sqlite.bossRuns.$inferSelect;
 export type NewBossRun = Omit<typeof sqlite.bossRuns.$inferInsert, 'id'> & { id?: string };
+export type TcgSystemConfig = typeof sqlite.tcgSystemConfigs.$inferSelect;
+export type NewTcgSystemConfig = typeof sqlite.tcgSystemConfigs.$inferInsert;
 
 // Mini-Games
 export type MiniGame = typeof sqlite.miniGames.$inferSelect;

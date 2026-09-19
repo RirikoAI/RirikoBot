@@ -48,7 +48,8 @@
     "@napi-rs/canvas": "^0.1.66",
     "@ririko/core": "workspace:*",
     "@ririko/database": "workspace:*",
-    "discord.js": "^14.27.0"
+    "discord.js": "^14.27.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",

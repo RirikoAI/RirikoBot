@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No active tickets in progress.*
+*No tickets currently in progress (WIP: 0/1).*
 
 ---
 
@@ -16,7 +16,7 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No tickets currently in To Do.*
+*All groomed tasks in STORY-105 in progress or completed.*
 
 ---
 
@@ -28,6 +28,10 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-1052` | Task | WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite | 2 | `STORY-105` | [TASK-1052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1052.md) |
+| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | `EPIC-010` | [TASK-1052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1052.md) |
+| `EPIC-010` | Epic | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | 21 | Self | [TASK-1052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1052.md) |
+| `TASK-1051` | Task | Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration | 3 | `STORY-105` | [TASK-1051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1051.md) |
 | `TASK-1042` | Task | Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch `/dungeon` Suite | 2 | `STORY-104` | [TASK-1042.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1042.md) |
 | `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | [TASK-1042.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1042.md) |
 | `TASK-1041` | Task | PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes | 3 | `STORY-104` | [TASK-1041.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1041.md) |
@@ -207,7 +211,9 @@
 | `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | ✅ Done | `STORY-103` |
 | `TASK-1041` | Task | PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes | 3 | `STORY-104` | ✅ Done | `STORY-103` |
 | `TASK-1042` | Task | Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch `/dungeon` Suite | 2 | `STORY-104` | ✅ Done | `TASK-1041` |
-| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 2 | `EPIC-010` | 📋 Backlog | `STORY-104` |
+| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | `EPIC-010` | ⚡ In Progress | `STORY-104` |
+| `TASK-1051` | Task | Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration | 3 | `STORY-105` | ✅ Done | `STORY-104` |
+| `TASK-1052` | Task | WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite | 2 | `STORY-105` | ⚡ In Progress | `TASK-1051` |
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | ✅ Done | `EPIC-002`, `EPIC-003` |
@@ -229,12 +235,12 @@
 ### 📋 Groomed Stories for EPIC-010 (Waifu TCG)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | `EPIC-010` | 📋 Backlog | `EPIC-002` |
-| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | 📋 Backlog | `STORY-100` |
-| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | 📋 Backlog | `STORY-101` |
-| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | 📋 Backlog | `STORY-102` |
-| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | 📋 Backlog | `STORY-103` |
-| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 2 | `EPIC-010` | 📋 Backlog | `STORY-104` |
+| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | `EPIC-010` | ✅ Done | `EPIC-002` |
+| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | ✅ Done | `STORY-100` |
+| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | ✅ Done | `STORY-101` |
+| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | ✅ Done | `STORY-102` |
+| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | ✅ Done | `STORY-103` |
+| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | `EPIC-010` | ✅ Done | `STORY-104` |
 
 ### 📋 Groomed Stories for EPIC-011 (Web Dashboard)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |

@@ -22,6 +22,11 @@ import {
   DungeonSeasonRepository,
   DungeonFloorRepository,
   UserDungeonProgressRepository,
+  CardTradeRepository,
+  MarketListingRepository,
+  WaifuGuildRepository,
+  AchievementRepository,
+  TcgConfigRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -100,6 +105,11 @@ import {
   DungeonRunner,
   TutorialService,
   DungeonLootService,
+  TradeService,
+  MarketService,
+  WaifuGuildService,
+  AchievementService,
+  TcgConfigService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -178,6 +188,16 @@ export interface BotServices {
   dungeonRunner: DungeonRunner;
   tutorialService: TutorialService;
   dungeonLootService: DungeonLootService;
+  cardTradeRepo: CardTradeRepository;
+  marketRepo: MarketListingRepository;
+  tradeService: TradeService;
+  marketService: MarketService;
+  waifuGuildRepo: WaifuGuildRepository;
+  achievementRepo: AchievementRepository;
+  tcgConfigRepo: TcgConfigRepository;
+  waifuGuildService: WaifuGuildService;
+  achievementService: AchievementService;
+  tcgConfigService: TcgConfigService;
 }
 
 /**
@@ -531,6 +551,31 @@ export async function createBotServices(
     inventoryRepo: userInventoryItemRepo,
     xpRepo,
   });
+
+  const cardTradeRepo = new CardTradeRepository(db);
+  const marketRepo = new MarketListingRepository(db);
+  const tradeService = new TradeService(cardTradeRepo, waifuCardRepo, economyRepo, db);
+  const marketService = new MarketService(marketRepo, waifuCardRepo, economyRepo, db);
+
+  const waifuGuildRepo = new WaifuGuildRepository(db);
+  const achievementRepo = new AchievementRepository(db);
+  const tcgConfigRepo = new TcgConfigRepository(db);
+
+  const waifuGuildService = new WaifuGuildService(waifuGuildRepo, economyRepo, db);
+  const achievementService = new AchievementService(achievementRepo, economyRepo, db, {
+    xpRepo,
+    inventoryRepo: userInventoryItemRepo,
+    waifuCardRepo,
+  });
+  const tcgConfigService = new TcgConfigService(tcgConfigRepo);
+
+  // Seed default achievements if needed
+  try {
+    await achievementService.seedAchievements();
+  } catch {
+    // In some unit tests with isolated in-memory databases, tables may not exist yet
+  }
+
   const dungeonRunner = new DungeonRunner(playerEnergyRepo, userDungeonProgressRepo, {
     scalingEngine,
     floorRepo: dungeonFloorRepo,
@@ -666,5 +711,15 @@ export async function createBotServices(
     dungeonRunner,
     tutorialService,
     dungeonLootService,
+    cardTradeRepo,
+    marketRepo,
+    tradeService,
+    marketService,
+    waifuGuildRepo,
+    achievementRepo,
+    tcgConfigRepo,
+    waifuGuildService,
+    achievementService,
+    tcgConfigService,
   };
 }

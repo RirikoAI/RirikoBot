@@ -16,6 +16,11 @@ import {
   createGameCommand,
   createItemCommand,
   createDungeonCommand,
+  createTradeCommand,
+  createMarketCommand,
+  createGuildCommand,
+  createAchievementCommand,
+  createTcgAdminCommand,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -152,6 +157,11 @@ export async function main(): Promise<void> {
   router.registry.register(createGameCommand(services));
   router.registry.register(createItemCommand(services));
   router.registry.register(createDungeonCommand(services));
+  router.registry.register(createTradeCommand(services));
+  router.registry.register(createMarketCommand(services));
+  router.registry.register(createGuildCommand(services));
+  router.registry.register(createAchievementCommand(services));
+  router.registry.register(createTcgAdminCommand(services));
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
