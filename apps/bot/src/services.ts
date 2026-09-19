@@ -105,6 +105,7 @@ import {
   TcgShopService,
   ItemGrantService,
   CardProgressionService,
+  BossImageService,
   ScalingEngine,
   DungeonRunner,
   TutorialService,
@@ -174,6 +175,7 @@ export interface BotServices {
   dropManager: DropManager;
   dismantleService: CardDismantleService;
   cardImageService: CardImageService;
+  bossImageService: BossImageService;
   combatSimulator: CombatSimulator;
   expeditionService: ExpeditionService;
   bossRaidService: BossRaidService;
@@ -241,6 +243,7 @@ export async function createBotServices(
   const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo);
   const dismantleService = new CardDismantleService(waifuCardRepo);
   const cardImageService = new CardImageService();
+  const bossImageService = new BossImageService(waifuAssetRepo);
   const musicPlayer = new MusicPlayerService({
     youtubeOptions: {
       cookie: process.env.YOUTUBE_COOKIE,
@@ -713,6 +716,7 @@ export async function createBotServices(
     dropManager,
     dismantleService,
     cardImageService,
+    bossImageService,
     combatSimulator,
     expeditionService,
     bossRaidService,

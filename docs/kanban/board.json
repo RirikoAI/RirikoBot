@@ -726,7 +726,7 @@
       "epic": "EPIC-015",
       "title": "Boss Artwork in Dungeon Battle Screen",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-154"],
       "blocks": [],
       "description": "Battle embed shows boss image as main image and player card as thumbnail."
