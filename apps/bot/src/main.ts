@@ -21,6 +21,7 @@ import {
   createGuildCommand,
   createAchievementCommand,
   createTcgAdminCommand,
+  createTcgInfoCommand,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -162,6 +163,7 @@ export async function main(): Promise<void> {
   router.registry.register(createGuildCommand(services));
   router.registry.register(createAchievementCommand(services));
   router.registry.register(createTcgAdminCommand(services));
+  router.registry.register(createTcgInfoCommand(services));
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry

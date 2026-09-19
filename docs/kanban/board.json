@@ -1674,8 +1674,18 @@
       "status": "DONE",
       "parent": "STORY-105",
       "requires": ["TASK-1051"],
-      "blocks": ["EPIC-011"],
+      "blocks": ["TASK-1053"],
       "description": "Implement WaifuGuildRepository, AchievementRepository, and TcgConfigRepository in packages/database, WaifuGuildService, AchievementService with 7-asset reward dispatch, TcgConfigService with Zod validation, and dual-dispatch /waifuguild, /achievement, and /tcg-admin commands suite."
+    },
+    {
+      "id": "TASK-1053",
+      "title": "Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info)",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-105",
+      "requires": ["TASK-1052"],
+      "blocks": ["EPIC-011"],
+      "description": "Implement comprehensive TCG player guide (docs/tcg-player-guide.md), interactive dual-dispatch /tcg-info command with StringSelectMenu and 10 guide topics, /card action:guide integration, and unit tests."
     }
   ]
 }
