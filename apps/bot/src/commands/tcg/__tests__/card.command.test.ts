@@ -111,7 +111,8 @@ describe('Card Command Suite (TASK-1012)', () => {
       getCardLoadout: async (cardId: string) => ({
         weapon: {
           inventoryItem: { id: 'inv_weapon_1', enhancementLevel: 3 },
-          item: { name: 'Dragon Slayer' },
+          item: { name: 'Dragon Slayer', rarity: 'RARE', code: 'WEAPON_DRAGON_SLAYER' },
+          effectiveStats: { attack: 75 },
         },
         armor: null,
         relic: null,
@@ -139,6 +140,13 @@ describe('Card Command Suite (TASK-1012)', () => {
       dropManager,
       dismantleService,
       loadoutService: mockLoadoutService as any,
+      userInventoryItemRepo: { findByUser: async () => [] } as any,
+      gameItemRepo: { findById: async () => null } as any,
+      enhancementService: {
+        getScaledStats: () => ({}),
+        getEnhancementCost: () => ({ dustCost: 25, creditCost: 200 }),
+        getDustBalance: async () => 120,
+      } as any,
     } as unknown as BotServices;
   });
 
@@ -376,10 +384,10 @@ describe('Card Command Suite (TASK-1012)', () => {
     });
     await command.execute(ctxLoadout);
     expect(repLoadout[0].embeds).toHaveLength(1);
-    expect(repLoadout[0].embeds[0].data.title).toContain('6-Slot Combat Loadout');
-    expect(repLoadout[0].embeds[0].data.description).toContain('Dragon Slayer');
-    expect(repLoadout[0].embeds[0].data.description).toContain('+3');
-    expect(repLoadout[0].embeds[0].data.description).toContain('+75');
+    expect(repLoadout[0].embeds[0].data.title).toContain('Gear: Rias Gremory');
+    expect(repLoadout[0].embeds[0].data.description).toContain('Dragon Slayer +3');
+    expect(repLoadout[0].embeds[0].data.description).toContain('ATK +75');
+    expect(repLoadout[0].components.length).toBeGreaterThanOrEqual(3);
 
     // 2. Equip gear piece
     const { ctx: ctxEquipGear, replies: repEquipGear } = createMockContext({

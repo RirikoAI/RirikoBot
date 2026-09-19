@@ -746,7 +746,7 @@
       "epic": "EPIC-015",
       "title": "Interactive Equipment Menu (/card gear)",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["BUG-0010"],
       "blocks": [],
       "description": "Card, slot and item dropdowns with stat deltas; Equip, Unequip, Enhance and Back buttons; owner-only collector; in-place embed updates."

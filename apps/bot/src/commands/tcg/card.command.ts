@@ -16,6 +16,7 @@ import {
 } from '@ririko/services';
 import type { WaifuAsset, WaifuCard } from '@ririko/database';
 import { buildTcgInfoEmbed, buildTcgInfoSelectMenu } from './info.command.js';
+import { openGearMenu } from './gear-menu.js';
 import {
   handleCardsCommand,
   buildCardInspectEmbed,
@@ -78,6 +79,7 @@ export function createCardCommand(services: BotServices): Command {
             { name: 'Favorite (Lock card to protect from dismantle/sale)', value: 'favorite' },
             { name: 'Equip (Equip card to active combat loadout)', value: 'equip' },
             { name: 'Dismantle (Dismantle card for Crafting Dust)', value: 'dismantle' },
+            { name: 'Gear (Interactive menu: equip, compare & enhance gear)', value: 'gear' },
             { name: 'Loadout (View card 6-slot equipped gear & bonuses)', value: 'loadout' },
             { name: 'Equip Gear (Equip weapon/armor/relic/ring/amulet/talisman)', value: 'equip-gear' },
             { name: 'Unequip Gear (Unequip gear from slot)', value: 'unequip-gear' },
@@ -166,7 +168,7 @@ export function createCardCommand(services: BotServices): Command {
       }
       if (!sub) {
         const firstArg = rawArgs[0]?.toLowerCase();
-        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle', 'loadout', 'equip-gear', 'unequip-gear', 'guide', 'info'].includes(firstArg ?? '')) {
+        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle', 'gear', 'loadout', 'equip-gear', 'unequip-gear', 'guide', 'info'].includes(firstArg ?? '')) {
           sub = firstArg;
         } else {
           sub = 'collection';
@@ -368,68 +370,10 @@ export function createCardCommand(services: BotServices): Command {
           break;
         }
 
+        case 'gear':
         case 'loadout': {
-          let cardId = ctx.options.getString('id') ?? rawArgs[1];
-          if (!cardId) {
-            // Find active equipped vanguard card
-            const equippedCards = await services.waifuCardRepo.listUserCards(ctx.user.id, { state: 'EQUIPPED' });
-            if (equippedCards.length > 0) {
-              cardId = equippedCards[0]!.id;
-            } else {
-              const allCards = await services.waifuCardRepo.listUserCards(ctx.user.id);
-              if (allCards.length > 0) {
-                cardId = allCards[0]!.id;
-              }
-            }
-          }
-
-          if (!cardId) {
-            await ctx.reply({ content: '❌ You do not have any cards to inspect loadouts for.', ephemeral: true });
-            return;
-          }
-
-          const userCard = await services.waifuCardRepo.findUserCardById(cardId);
-          if (!userCard || userCard.userId !== ctx.user.id) {
-            await ctx.reply({ content: '❌ Card not found in your collection.', ephemeral: true });
-            return;
-          }
-
-          const baseCard = await services.waifuCardRepo.findById(userCard.cardId);
-          const loadout = await services.loadoutService.getCardLoadout(cardId);
-
-          const renderSlot = (piece: typeof loadout.weapon, slotName: string) => {
-            if (!piece) return `• **${slotName}**: *[Empty Slot]*`;
-            const enhance = piece.inventoryItem.enhancementLevel > 0 ? ` **+${piece.inventoryItem.enhancementLevel}**` : '';
-            return `• **${slotName}**: **${piece.item.name}**${enhance} (\`ID: ${piece.inventoryItem.id}\`)`;
-          };
-
-          const statsLines = Object.entries(loadout.aggregateStats).map(
-            ([k, v]) => `  • **${k.toUpperCase()}**: +${v}`,
-          );
-
-          const embed = new EmbedBuilder()
-            .setColor(0x5865f2)
-            .setTitle(`⚔️ 6-Slot Combat Loadout: ${baseCard?.name ?? 'Card'} (Lv.${userCard.level})`)
-            .setDescription(
-              `**🛡️ Equipments**:\n` +
-                `${renderSlot(loadout.weapon, 'Weapon')}\n` +
-                `${renderSlot(loadout.armor, 'Armor')}\n` +
-                `${renderSlot(loadout.relic, 'Relic')}\n\n` +
-                `**💍 Accessories**:\n` +
-                `${renderSlot(loadout.ring, 'Ring')}\n` +
-                `${renderSlot(loadout.amulet, 'Amulet')}\n` +
-                `${renderSlot(loadout.talisman, 'Talisman')}\n\n` +
-                `📈 **Aggregate Gear Bonuses**:\n` +
-                (statsLines.length > 0 ? statsLines.join('\n') : '  *No gear bonuses active.*') +
-                (loadout.activePerks.length > 0
-                  ? `\n\n🔥 **Active Battle Perks**:\n  • ${loadout.activePerks.join('\n  • ')}`
-                  : ''),
-            )
-            .setFooter({
-              text: 'Equip gear with /card action:equip-gear id:<card_id> item_id:<item_id> slot:<slot>',
-            });
-
-          await ctx.reply({ embeds: [embed] });
+          const cardId = ctx.options.getString('id') ?? rawArgs[1];
+          await openGearMenu(ctx, services, cardId);
           break;
         }
 
@@ -463,7 +407,7 @@ export function createCardCommand(services: BotServices): Command {
               : '';
 
             await ctx.reply({
-              content: `⚔️ Successfully equipped gear piece into the **${slot}** slot on **${baseCard?.name ?? 'Card'}**!${swapNotice}\nUse \`/card action:loadout id:${cardId}\` to view your updated loadout!`,
+              content: `⚔️ Successfully equipped gear piece into the **${slot}** slot on **${baseCard?.name ?? 'Card'}**!${swapNotice}\nUse \`/card action:gear\` to manage your gear!`,
             });
           } catch (err: unknown) {
             await ctx.reply({
