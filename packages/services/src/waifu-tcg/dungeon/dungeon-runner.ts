@@ -3,10 +3,12 @@ import type {
   UserDungeonProgressRepository,
   DungeonFloorRepository,
   DungeonSeasonRepository,
+  DungeonBossRepository,
+  DungeonSeason,
   WaifuCardRepository,
 } from '@ririko/database';
 import type { CardElement } from '../types.js';
-import type { Combatant, CombatActionLog, CombatResult } from '../combat/types.js';
+import type { Combatant, CombatActionLog } from '../combat/types.js';
 import { ScalingEngine } from './scaling-engine.js';
 import { ElementalWard } from './elemental-ward.js';
 import { SeasonalAffixHandler, type SeasonTheme } from './seasonal-affixes.js';
@@ -15,6 +17,17 @@ import { DungeonLootService, type DungeonLootResult } from './dungeon-loot.servi
 import { TUTORIAL_FLOORS, TutorialService, getCounterElement } from './tutorial-service.js';
 
 import { DungeonBattleSession } from './dungeon-battle-session.js';
+import {
+  mergeBossDefinitions,
+  parseBossDefinition,
+  parseFloorLineup,
+  parseSeasonCurve,
+  resolveEnrage,
+  toScalingConfig,
+  type BossTier,
+  type DungeonBossProfile,
+  type EnrageConfig,
+} from './boss-definition.js';
 import {
   getDungeonCardExp,
   type CardExpResult,
@@ -60,12 +73,27 @@ export interface DungeonRunResult {
   error?: string | undefined;
 }
 
+export interface FloorSetup {
+  success: boolean;
+  error?: string | undefined;
+  energyCost: number;
+  highestCleared: number;
+  affixHandler?: SeasonalAffixHandler | undefined;
+  enemyBoss?: Combatant | undefined;
+  elementalWard?: ElementalWard | null | undefined;
+  enrage?: EnrageConfig | undefined;
+  maxTurns?: number | undefined;
+  bossSkillPower?: number | undefined;
+  bossProfile?: DungeonBossProfile | undefined;
+}
+
 export class DungeonRunner {
   private readonly energyRepo: PlayerEnergyRepository;
   private readonly progressRepo: UserDungeonProgressRepository;
   private readonly scalingEngine: ScalingEngine;
   private readonly floorRepo: DungeonFloorRepository | undefined;
   private readonly seasonRepo: DungeonSeasonRepository | undefined;
+  private readonly bossRepo: DungeonBossRepository | undefined;
   private readonly lootService: DungeonLootService | undefined;
   private readonly cardRepo: WaifuCardRepository | undefined;
   private readonly tutorialService: TutorialService | undefined;
@@ -78,6 +106,7 @@ export class DungeonRunner {
       scalingEngine?: ScalingEngine | undefined;
       floorRepo?: DungeonFloorRepository | undefined;
       seasonRepo?: DungeonSeasonRepository | undefined;
+      bossRepo?: DungeonBossRepository | undefined;
       lootService?: DungeonLootService | undefined;
       cardRepo?: WaifuCardRepository | undefined;
       tutorialService?: TutorialService | undefined;
@@ -89,6 +118,7 @@ export class DungeonRunner {
     this.scalingEngine = options.scalingEngine ?? new ScalingEngine();
     this.floorRepo = options.floorRepo;
     this.seasonRepo = options.seasonRepo;
+    this.bossRepo = options.bossRepo;
     this.lootService = options.lootService;
     this.cardRepo = options.cardRepo;
     this.tutorialService = options.tutorialService;
@@ -111,21 +141,34 @@ export class DungeonRunner {
     return results;
   }
 
+  private resolveSeasonTheme(seasonId: string, season: DungeonSeason | null): SeasonTheme {
+    if (season) {
+      const affixString = (
+        (season.seasonalAffixes ?? []).join(' ') +
+        ' ' +
+        (season.themeElement ?? '')
+      ).toUpperCase();
+      if (affixString.includes('INFERNAL') || affixString.includes('SCORCHED') || season.themeElement === 'FIRE')
+        return 'INFERNAL_CRUCIBLE';
+      if (affixString.includes('ABYSSAL') || affixString.includes('TORRENTIAL') || season.themeElement === 'WATER')
+        return 'ABYSSAL_MAELSTROM';
+      if (affixString.includes('CELESTIAL') || affixString.includes('TWILIGHT') || season.themeElement === 'LIGHT')
+        return 'CELESTIAL_TWILIGHT';
+      return 'NONE';
+    }
+    const id = seasonId.toLowerCase();
+    if (id.includes('infernal') || seasonId === 's1') return 'INFERNAL_CRUCIBLE';
+    if (id.includes('abyssal') || seasonId === 's2') return 'ABYSSAL_MAELSTROM';
+    if (id.includes('celestial') || seasonId === 's3') return 'CELESTIAL_TWILIGHT';
+    return 'NONE';
+  }
+
   /**
-   * Executes a dungeon floor attempt.
+   * Prepares floor setup, validates prerequisites, consumes energy, and builds the boss.
+   * Season floors read the season curve (`dungeon_seasons.scaling_params`), the floor row
+   * (`dungeon_floors`) and its boss (`dungeon_bosses`); anything missing falls back to code defaults.
    */
-  /**
-   * Prepares floor setup, validates prerequisites, consumes energy, and initializes boss & affixes.
-   */
-  public async prepareFloorSetup(options: DungeonRunOptions): Promise<{
-    success: boolean;
-    error?: string | undefined;
-    energyCost: number;
-    highestCleared: number;
-    affixHandler?: SeasonalAffixHandler | undefined;
-    enemyBoss?: Combatant | undefined;
-    elementalWard?: ElementalWard | null | undefined;
-  }> {
+  public async prepareFloorSetup(options: DungeonRunOptions): Promise<FloorSetup> {
     const { userId, seasonId, floorNumber, playerParty, skipEnergyDeduction } = options;
 
     if (!playerParty || playerParty.length === 0) {
@@ -137,7 +180,7 @@ export class DungeonRunner {
       };
     }
 
-    // 1. Check user progress & prerequisites (sequential climb: must have cleared floorNumber - 1)
+    // 1. Sequential climb: floorNumber - 1 must be cleared
     const currentProgress = await this.progressRepo.getOrCreateProgress(userId, seasonId);
     const highestCleared = currentProgress.highestClearedFloor;
 
@@ -150,10 +193,16 @@ export class DungeonRunner {
       };
     }
 
-    // 2. Determine energy cost
+    // 2. Season and floor configuration
     const isTutorial = seasonId.toLowerCase().includes('tutorial');
-    const energyCost = getDungeonFloorEnergyCost(floorNumber, isTutorial);
+    const season = this.seasonRepo ? await this.seasonRepo.findById(seasonId) : null;
+    const floorRow =
+      !isTutorial && this.floorRepo
+        ? await this.floorRepo.findBySeasonAndFloor(seasonId, floorNumber)
+        : null;
 
+    // 3. Energy
+    const energyCost = isTutorial ? 0 : (floorRow?.energyCost ?? getDungeonFloorEnergyCost(floorNumber));
     if (!skipEnergyDeduction && energyCost > 0) {
       const energyResult = await this.energyRepo.consumeEnergy(userId, energyCost);
       if (!energyResult.success) {
@@ -166,71 +215,129 @@ export class DungeonRunner {
       }
     }
 
-    // 3. Look up season theme and environmental affix
-    let theme: SeasonTheme = 'NONE';
-    let seasonName = 'Dungeon Tower';
-
-    if (this.seasonRepo) {
-      const season = await this.seasonRepo.findById(seasonId);
-      if (season) {
-        seasonName = season.name;
-        const affixes = season.seasonalAffixes ?? [];
-        const affixString = (affixes.join(' ') + ' ' + (season.themeElement ?? '')).toUpperCase();
-        if (affixString.includes('INFERNAL') || affixString.includes('SCORCHED') || season.themeElement === 'FIRE') theme = 'INFERNAL_CRUCIBLE';
-        else if (affixString.includes('ABYSSAL') || affixString.includes('TORRENTIAL') || season.themeElement === 'WATER') theme = 'ABYSSAL_MAELSTROM';
-        else if (affixString.includes('CELESTIAL') || affixString.includes('TWILIGHT') || season.themeElement === 'LIGHT') theme = 'CELESTIAL_TWILIGHT';
-      }
-    } else {
-      if (seasonId.toLowerCase().includes('infernal') || seasonId === 's1') theme = 'INFERNAL_CRUCIBLE';
-      else if (seasonId.toLowerCase().includes('abyssal') || seasonId === 's2') theme = 'ABYSSAL_MAELSTROM';
-      else if (seasonId.toLowerCase().includes('celestial') || seasonId === 's3') theme = 'CELESTIAL_TWILIGHT';
-    }
-
-    const affixHandler = new SeasonalAffixHandler(theme, seasonName);
-
-    // 4. Generate enemy boss/combatant
-    let enemyBoss: Combatant;
-    let elementalWard: ElementalWard | null = null;
+    // 4. Environmental affixes (switched off below the season's affixStartFloor)
+    const curve = parseSeasonCurve(season?.scalingParams);
+    const theme = this.resolveSeasonTheme(seasonId, season);
+    const affixTheme: SeasonTheme = floorNumber < (curve.affixStartFloor ?? 1) ? 'NONE' : theme;
+    const affixHandler = new SeasonalAffixHandler(affixTheme, season?.name ?? 'Dungeon Tower');
 
     if (isTutorial) {
-      const tutFloor = TUTORIAL_FLOORS.find((f) => f.floorNumber === floorNumber);
-      if (tutFloor) {
-        enemyBoss = { ...tutFloor.dummyEnemy };
-        if (floorNumber === 4) {
-          const playerElement = (playerParty[0]?.element as CardElement) ?? 'FIRE';
-          let bossElement: CardElement = getCounterElement(playerElement);
-          let bossName = `Warded Guardian Automaton [${bossElement}]`;
+      return {
+        success: true,
+        energyCost,
+        highestCleared,
+        affixHandler,
+        ...(await this.buildTutorialEnemy(userId, floorNumber, playerParty)),
+      };
+    }
 
-          if (this.tutorialService) {
-            const config = await this.tutorialService.getFloor4BossConfig(userId, playerElement);
-            bossElement = config.element;
-            bossName = config.name;
-          }
+    // 5. Season boss
+    const engine = season
+      ? new ScalingEngine(toScalingConfig(season.scalingModel, curve))
+      : this.scalingEngine;
+    const floorType = engine.getFloorType(floorNumber);
+    const curveStats = engine.calculateFloorStats(floorNumber);
 
-          enemyBoss.element = bossElement;
-          enemyBoss.name = bossName;
-          elementalWard = new ElementalWard([
-            {
-              element: bossElement,
-              health: 100,
-            },
-          ]);
+    const lineup = parseFloorLineup(floorRow?.enemyLineup);
+    const bossRow = lineup && this.bossRepo ? await this.bossRepo.findById(lineup.bossId) : null;
+    const def = mergeBossDefinitions(
+      bossRow ? parseBossDefinition(bossRow.definition, `boss ${bossRow.id}`) : undefined,
+      lineup?.overrides,
+    );
+
+    const element =
+      (bossRow?.element as CardElement | undefined) ??
+      this.getEnemyElementForSeasonAndFloor(theme, floorNumber);
+    const hp = Math.round(def.stats?.hp ?? curveStats.hp * (def.statMultipliers?.hp ?? 1));
+    const enemyBoss: Combatant = {
+      id: bossRow?.id ?? `dungeon_mob_f${floorNumber}`,
+      name: bossRow?.name ?? this.generateEnemyName(floorNumber, floorType, element),
+      team: 'TEAM_B',
+      element,
+      rarity: floorType === 'MAJOR_BOSS' ? 'MYTHIC' : floorType === 'MINI_BOSS' ? 'SECRET_RARE' : 'RARE',
+      level: Math.max(1, floorNumber * 2),
+      maxHealth: hp,
+      currentHealth: hp,
+      attack: Math.round(def.stats?.attack ?? curveStats.attack * (def.statMultipliers?.attack ?? 1)),
+      defense: Math.round(def.stats?.defense ?? curveStats.defense * (def.statMultipliers?.defense ?? 1)),
+      speed: Math.round(def.stats?.speed ?? curveStats.speed * (def.statMultipliers?.speed ?? 1)),
+      critRate: def.critRate ?? 0.1,
+      critDamage: def.critDamage ?? 1.5,
+      maxMp: 100,
+      currentMp: 0,
+      skillName:
+        def.skill?.name ?? (floorType === 'MAJOR_BOSS' ? 'Cataclysmic Shatter' : 'Elemental Rend'),
+      skillDescription: def.skill?.description,
+      skillManaCost: def.skill?.mpCost ?? 60,
+      shield: 0,
+      statusEffects: [],
+      perks: [],
+      hasUsedPhoenixWard: false,
+      isAlive: true,
+    };
+
+    let elementalWard: ElementalWard | null = null;
+    if (def.wardLayers?.length) {
+      elementalWard = new ElementalWard(
+        def.wardLayers.map((l) => ({
+          element: l.element,
+          health: Math.max(1, Math.round(hp * l.hpPercent)),
+        })),
+      );
+    } else if (floorNumber >= 20 && floorType !== 'STANDARD') {
+      elementalWard = new ElementalWard(this.generateWardLayers(floorNumber, element, hp));
+    }
+
+    const bossProfile: DungeonBossProfile | undefined = bossRow
+      ? {
+          id: bossRow.id,
+          name: bossRow.name,
+          animeTitle: bossRow.animeTitle,
+          element,
+          tier: (bossRow.tier as BossTier) ?? floorType,
+          title: bossRow.title ?? undefined,
+          flavorText: bossRow.flavorText ?? undefined,
+          imagePath: bossRow.imagePath ?? undefined,
+          assetId: bossRow.assetId ?? undefined,
+          signatureDropCode: bossRow.signatureDropCode ?? undefined,
         }
-      } else {
-        const enemyStats = this.scalingEngine.calculateFloorStats(floorNumber);
-        const enemyElement = this.getEnemyElementForSeasonAndFloor(theme, floorNumber);
-        enemyBoss = {
+      : undefined;
+
+    return {
+      success: true,
+      energyCost,
+      highestCleared,
+      affixHandler,
+      enemyBoss,
+      elementalWard,
+      enrage: resolveEnrage(curve.enrage, def.enrage),
+      maxTurns: def.maxTurns,
+      bossSkillPower: def.skill?.powerMult,
+      bossProfile,
+    };
+  }
+
+  private async buildTutorialEnemy(
+    userId: string,
+    floorNumber: number,
+    playerParty: Combatant[],
+  ): Promise<{ enemyBoss: Combatant; elementalWard: ElementalWard | null }> {
+    const tutFloor = TUTORIAL_FLOORS.find((f) => f.floorNumber === floorNumber);
+    if (!tutFloor) {
+      const stats = this.scalingEngine.calculateFloorStats(floorNumber);
+      return {
+        enemyBoss: {
           id: `dungeon_mob_t${floorNumber}`,
           name: `Training Automaton T${floorNumber}`,
           team: 'TEAM_B',
-          element: enemyElement,
+          element: this.getEnemyElementForSeasonAndFloor('NONE', floorNumber),
           rarity: 'COMMON',
           level: floorNumber,
-          maxHealth: enemyStats.hp,
-          currentHealth: enemyStats.hp,
-          attack: enemyStats.attack,
-          defense: enemyStats.defense,
-          speed: enemyStats.speed,
+          maxHealth: stats.hp,
+          currentHealth: stats.hp,
+          attack: stats.attack,
+          defense: stats.defense,
+          speed: stats.speed,
           critRate: 0.05,
           critDamage: 1.5,
           maxMp: 0,
@@ -241,53 +348,28 @@ export class DungeonRunner {
           perks: [],
           hasUsedPhoenixWard: false,
           isAlive: true,
-        };
-      }
-    } else {
-      const enemyStats = this.scalingEngine.calculateFloorStats(floorNumber);
-      const floorType = this.scalingEngine.getFloorType(floorNumber);
-      const enemyElement = this.getEnemyElementForSeasonAndFloor(theme, floorNumber);
-
-      const enemyName = this.generateEnemyName(floorNumber, floorType, enemyElement);
-      enemyBoss = {
-        id: `dungeon_mob_f${floorNumber}`,
-        name: enemyName,
-        team: 'TEAM_B',
-        element: enemyElement,
-        rarity: floorType === 'MAJOR_BOSS' ? 'MYTHIC' : floorType === 'MINI_BOSS' ? 'SECRET_RARE' : 'RARE',
-        level: Math.max(1, floorNumber * 2),
-        maxHealth: enemyStats.hp,
-        currentHealth: enemyStats.hp,
-        attack: enemyStats.attack,
-        defense: enemyStats.defense,
-        speed: enemyStats.speed,
-        critRate: 0.1,
-        critDamage: 1.5,
-        maxMp: 100,
-        currentMp: 50,
-        skillName: floorType === 'MAJOR_BOSS' ? 'Cataclysmic Shatter' : 'Elemental Rend',
-        skillManaCost: 40,
-        shield: 0,
-        statusEffects: [],
-        perks: [],
-        hasUsedPhoenixWard: false,
-        isAlive: true,
+        },
+        elementalWard: null,
       };
-
-      // 5. Build Elemental Wards for high-tier boss floors (e.g. F20+, F30+, F40+, F50+)
-      if (floorNumber >= 20 && floorType !== 'STANDARD') {
-        const wardLayers = this.generateWardLayers(floorNumber, enemyElement, enemyStats.hp);
-        elementalWard = new ElementalWard(wardLayers);
-      }
     }
 
+    const enemyBoss: Combatant = { ...tutFloor.dummyEnemy };
+    if (floorNumber !== 4) return { enemyBoss, elementalWard: null };
+
+    // Floor T4 teaches wards: the boss counters the player's element.
+    const playerElement = (playerParty[0]?.element as CardElement) ?? 'FIRE';
+    let bossElement: CardElement = getCounterElement(playerElement);
+    let bossName = `Warded Guardian Automaton [${bossElement}]`;
+    if (this.tutorialService) {
+      const config = await this.tutorialService.getFloor4BossConfig(userId, playerElement);
+      bossElement = config.element;
+      bossName = config.name;
+    }
+    enemyBoss.element = bossElement;
+    enemyBoss.name = bossName;
     return {
-      success: true,
-      energyCost,
-      highestCleared,
-      affixHandler,
       enemyBoss,
-      elementalWard,
+      elementalWard: new ElementalWard([{ element: bossElement, health: 100 }]),
     };
   }
 
@@ -313,6 +395,10 @@ export class DungeonRunner {
       boss: setup.enemyBoss,
       affixHandler: setup.affixHandler,
       ward: setup.elementalWard,
+      enrage: setup.enrage,
+      maxTurns: setup.maxTurns,
+      bossSkillPower: setup.bossSkillPower,
+      bossProfile: setup.bossProfile,
     });
 
     session.start();
@@ -378,277 +464,30 @@ export class DungeonRunner {
   }
 
   /**
-   * Executes a dungeon floor attempt (synchronous batch simulation).
+   * Runs a whole floor attempt in one call using the session's auto-battle (skill when affordable,
+   * otherwise attack), then records the result like an interactive battle.
    */
   public async runFloor(options: DungeonRunOptions): Promise<DungeonRunResult> {
-    const setup = await this.prepareFloorSetup(options);
-    if (!setup.success || !setup.enemyBoss || !setup.affixHandler) {
+    const created = await this.createBattleSession(options);
+    if (!created.success || !created.session) {
       return {
         success: false,
         victory: false,
         floorNumber: options.floorNumber,
         seasonId: options.seasonId,
-        energySpent: setup.energyCost,
+        energySpent: created.energySpent,
         turnsTotal: 0,
         logs: [],
-        highestFloorCleared: setup.highestCleared,
+        highestFloorCleared: created.highestFloorCleared,
         isFirstClear: false,
         cardExp: [],
-        error: setup.error,
+        error: created.error,
       };
     }
 
-    // Run Combat with custom Dungeon Combat loop incorporating Wards, Affixes, and Soft Enrage
-    const simulationResult = this.simulateDungeonCombat(
-      options.playerParty,
-      setup.enemyBoss,
-      setup.affixHandler,
-      setup.elementalWard ?? null,
-    );
-
-    const isWin = simulationResult.winner === 'TEAM_A';
-    const isTutorial = options.seasonId.toLowerCase().includes('tutorial');
-    const isFirstClear = isWin && options.floorNumber > setup.highestCleared;
-
-    let loot: DungeonLootResult | undefined;
-    if (isWin) {
-      if (!isTutorial && this.lootService) {
-        loot = await this.lootService.generateAndDispatchLoot(options.userId, options.floorNumber, isFirstClear);
-      }
-      if (this.cardRepo && options.playerParty.length > 0) {
-        for (const card of options.playerParty) {
-          if (card.id) {
-            await this.cardRepo.incrementUserCardBattlesWon(card.id).catch(() => {});
-          }
-        }
-      }
-    }
-
-    // Update user dungeon progress in repository
-    const updatedProgress = await this.progressRepo.recordFloorAttempt(
-      options.userId,
-      options.seasonId,
-      options.floorNumber,
-      isWin,
-    );
-
-    const cardExp = await this.grantCardExp(
-      options.playerParty.map((c) => c.id).filter(Boolean),
-      options.floorNumber,
-      { victory: isWin, isFirstClear, forfeited: false },
-    );
-
-    return {
-      success: true,
-      victory: isWin,
-      floorNumber: options.floorNumber,
-      seasonId: options.seasonId,
-      energySpent: setup.energyCost,
-      turnsTotal: simulationResult.turnsTotal,
-      logs: simulationResult.logs,
-      highestFloorCleared: updatedProgress.highestClearedFloor,
-      isFirstClear,
-      loot,
-      cardExp,
-    };
-  }
-
-  /**
-   * Custom dungeon simulation adding Elemental Wards and Seasonal Affixes into the combat turn cycle.
-   */
-  private simulateDungeonCombat(
-    playerParty: Combatant[],
-    boss: Combatant,
-    affixHandler: SeasonalAffixHandler,
-    ward: ElementalWard | null,
-  ): CombatResult {
-    const logs: CombatActionLog[] = [];
-    const party = playerParty.map((p) => ({
-      ...p,
-      team: 'TEAM_A' as const,
-      currentHealth: p.currentHealth,
-      currentMp: p.currentMp ?? 0,
-      shield: p.shield ?? 0,
-      statusEffects: [...(p.statusEffects ?? [])],
-      isAlive: p.currentHealth > 0,
-    }));
-
-    const enemy = {
-      ...boss,
-      team: 'TEAM_B' as const,
-      currentHealth: boss.currentHealth,
-      currentMp: boss.currentMp ?? 0,
-      shield: boss.shield ?? 0,
-      statusEffects: [...(boss.statusEffects ?? [])],
-      isAlive: true,
-    };
-
-    // Environmental Affix at Start
-    const startAffixLogs = affixHandler.applyBattleStartAffixes([...party, enemy]);
-    logs.push(...startAffixLogs);
-
-    if (ward) {
-      logs.push({
-        turn: 0,
-        actorId: enemy.id,
-        actorName: enemy.name,
-        actionType: 'STATUS_TICK',
-        message: `🛡️ **Boss Ward Active:** ${ward.formatWardStatus()}! Matching elements required to break!`,
-      });
-    }
-
-    let turn = 1;
-    const maxTurns = 25;
-    let winner: 'TEAM_A' | 'TEAM_B' | 'DRAW' = 'DRAW';
-
-    while (turn <= maxTurns) {
-      // Check defeat
-      if (party.every((c) => !c.isAlive || c.currentHealth <= 0)) {
-        winner = 'TEAM_B';
-        break;
-      }
-      if (!enemy.isAlive || enemy.currentHealth <= 0) {
-        winner = 'TEAM_A';
-        break;
-      }
-
-      // Soft Enrage check (turn 10+)
-      const enrageMultiplier = turn >= 10 ? 1 + (turn - 9) : 1.0;
-      if (turn === 10) {
-        logs.push({
-          turn,
-          actorId: enemy.id,
-          actorName: enemy.name,
-          actionType: 'ENRAGE',
-          message: `⚠️ **SOFT ENRAGE ACTIVATED!** ${enemy.name} gains +100% Attack per turn with true damage strikes!`,
-        });
-      }
-
-      // Order turn by speed
-      const aliveAll = [...party.filter((c) => c.isAlive), enemy].sort((a, b) => b.speed - a.speed);
-
-      for (const actor of aliveAll) {
-        if (!actor.isAlive || actor.currentHealth <= 0) continue;
-
-        if (actor.team === 'TEAM_A') {
-          // Player card attacks boss
-          if (!enemy.isAlive || enemy.currentHealth <= 0) break;
-
-          const baseAtk = actor.attack;
-          const isCrit = Math.random() < actor.critRate;
-          let rawDmg = Math.round(baseAtk * (isCrit ? actor.critDamage : 1.0) * (100 / (100 + enemy.defense)));
-          rawDmg = Math.max(10, rawDmg);
-
-          // Apply affix modifier
-          const affixDmg = affixHandler.modifyDamage(actor, enemy, rawDmg);
-          rawDmg = affixDmg.damage;
-          if (affixDmg.logMessage) {
-            logs.push({ turn, actorId: actor.id, actorName: actor.name, actionType: 'ATTACK', message: affixDmg.logMessage });
-          }
-
-          // Check Elemental Ward
-          if (ward && !ward.isBroken()) {
-            const wardResult = ward.processAttack(actor.element, rawDmg);
-            logs.push({
-              turn,
-              actorId: actor.id,
-              actorName: actor.name,
-              actionType: 'ATTACK',
-              targetId: enemy.id,
-              targetName: enemy.name,
-              message: wardResult.message,
-            });
-
-            if (wardResult.damagePassedToBoss > 0) {
-              enemy.currentHealth = Math.max(0, enemy.currentHealth - wardResult.damagePassedToBoss);
-              if (enemy.currentHealth <= 0) {
-                enemy.isAlive = false;
-                logs.push({
-                  turn,
-                  actorId: actor.id,
-                  actorName: actor.name,
-                  actionType: 'ATTACK',
-                  message: `🏆 **${enemy.name} was vanquished!**`,
-                });
-                break;
-              }
-            }
-          } else {
-            // Direct damage to boss
-            enemy.currentHealth = Math.max(0, enemy.currentHealth - rawDmg);
-            logs.push({
-              turn,
-              actorId: actor.id,
-              actorName: actor.name,
-              actionType: 'ATTACK',
-              targetId: enemy.id,
-              targetName: enemy.name,
-              damageDealt: rawDmg,
-              isCritical: isCrit,
-              message: `⚔️ **${actor.name}** dealt **${rawDmg}** damage to **${enemy.name}**!${isCrit ? ' (CRITICAL!)' : ''}`,
-            });
-
-            if (enemy.currentHealth <= 0) {
-              enemy.isAlive = false;
-              logs.push({
-                turn,
-                actorId: actor.id,
-                actorName: actor.name,
-                actionType: 'ATTACK',
-                message: `🏆 **${enemy.name} was vanquished!**`,
-              });
-              break;
-            }
-          }
-        } else {
-          // Boss attacks a living player card
-          const livingCards = party.filter((c) => c.isAlive && c.currentHealth > 0);
-          if (livingCards.length === 0) break;
-          const target = livingCards[Math.floor(Math.random() * livingCards.length)]!;
-
-          const bossAtk = Math.round(enemy.attack * enrageMultiplier);
-          let damage = Math.round(bossAtk * (100 / (100 + target.defense)));
-          if (turn >= 10) {
-            // Unblockable true damage during enrage
-            damage = bossAtk;
-          }
-          damage = Math.max(15, damage);
-
-          target.currentHealth = Math.max(0, target.currentHealth - damage);
-          if (target.currentHealth <= 0) target.isAlive = false;
-
-          logs.push({
-            turn,
-            actorId: enemy.id,
-            actorName: enemy.name,
-            actionType: 'ATTACK',
-            targetId: target.id,
-            targetName: target.name,
-            damageDealt: damage,
-            message: `💥 **${enemy.name}** struck **${target.name}** for **${damage}** damage!${turn >= 10 ? ' *(TRUE DAMAGE ENRAGE!)*' : ''}${!target.isAlive ? ` (${target.name} fainted!)` : ''}`,
-          });
-        }
-      }
-
-      // End of turn affixes (e.g. Scorched Earth burn, Tidal Barrier heal)
-      const endAffixLogs = affixHandler.applyEndOfTurnAffixes(turn, party, enemy);
-      logs.push(...endAffixLogs);
-
-      turn++;
-    }
-
-    if (winner === 'DRAW') {
-      if (enemy.currentHealth <= 0) winner = 'TEAM_A';
-      else winner = 'TEAM_B'; // turn limit exceeded
-    }
-
-    return {
-      winner,
-      turnsTotal: Math.min(turn, maxTurns),
-      logs,
-      teamA: party,
-      teamB: [enemy],
-    };
+    let state = created.session.getSnapshot();
+    while (!state.isFinished) state = created.session.executeAutoTurn();
+    return this.finalizeBattleResult(created.session, { energySpent: created.energySpent });
   }
 
   private getEnemyElementForSeasonAndFloor(theme: SeasonTheme, floorNumber: number): CardElement {

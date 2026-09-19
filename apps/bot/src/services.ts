@@ -21,6 +21,7 @@ import {
   UserInventoryItemRepository,
   DungeonSeasonRepository,
   DungeonFloorRepository,
+  DungeonBossRepository,
   UserDungeonProgressRepository,
   CardTradeRepository,
   MarketListingRepository,
@@ -187,6 +188,7 @@ export interface BotServices {
   tcgShopService: TcgShopService;
   dungeonSeasonRepo: DungeonSeasonRepository;
   dungeonFloorRepo: DungeonFloorRepository;
+  dungeonBossRepo: DungeonBossRepository;
   userDungeonProgressRepo: UserDungeonProgressRepository;
   scalingEngine: ScalingEngine;
   dungeonRunner: DungeonRunner;
@@ -549,6 +551,7 @@ export async function createBotServices(
 
   const dungeonSeasonRepo = new DungeonSeasonRepository(db);
   const dungeonFloorRepo = new DungeonFloorRepository(db);
+  const dungeonBossRepo = new DungeonBossRepository(db);
   const userDungeonProgressRepo = new UserDungeonProgressRepository(db);
   const scalingEngine = new ScalingEngine();
   const dungeonLootService = new DungeonLootService({
@@ -594,6 +597,7 @@ export async function createBotServices(
   const dungeonRunner = new DungeonRunner(playerEnergyRepo, userDungeonProgressRepo, {
     scalingEngine,
     floorRepo: dungeonFloorRepo,
+    bossRepo: dungeonBossRepo,
     seasonRepo: dungeonSeasonRepo,
     lootService: dungeonLootService,
     cardRepo: waifuCardRepo,
@@ -723,6 +727,7 @@ export async function createBotServices(
     tcgShopService,
     dungeonSeasonRepo,
     dungeonFloorRepo,
+    dungeonBossRepo,
     userDungeonProgressRepo,
     scalingEngine,
     dungeonRunner,

@@ -91,11 +91,6 @@ describe('Card progression & real skill MP cost (STORY-150)', () => {
       });
       if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
       client = raw;
-      // SQLITE_SCHEMA_DDL predates these user_cards columns; add them until the DDL is regenerated.
-      client.raw.exec(`
-        ALTER TABLE user_cards ADD COLUMN battles_won integer DEFAULT 0 NOT NULL;
-        ALTER TABLE user_cards ADD COLUMN is_favorite integer DEFAULT false NOT NULL;
-      `);
       cardRepo = new WaifuCardRepository(client);
       itemRepo = new GameItemRepository(client);
       inventoryRepo = new UserInventoryItemRepository(client);
