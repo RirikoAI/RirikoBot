@@ -273,6 +273,9 @@ importers:
       discord.js:
         specifier: ^14.27.0
         version: 14.27.0
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^22.13.9

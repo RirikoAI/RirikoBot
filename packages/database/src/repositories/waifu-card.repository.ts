@@ -439,6 +439,30 @@ export class WaifuCardRepository extends BaseRepository<
     }
   }
 
+  async updateUserCardOwner(
+    id: string,
+    newUserId: string,
+    newState: string = 'IDLE',
+    tx?: DatabaseClient,
+  ): Promise<UserCard | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .update(sqliteSchema.userCards)
+        .set({ userId: newUserId, state: newState })
+        .where(eq(sqliteSchema.userCards.id, id))
+        .returning();
+      return (row as UserCard) ?? null;
+    } else {
+      const [row] = await client.db
+        .update(pgSchema.userCards)
+        .set({ userId: newUserId, state: newState })
+        .where(eq(pgSchema.userCards.id, id))
+        .returning();
+      return (row as unknown as UserCard) ?? null;
+    }
+  }
+
   async toggleUserCardFavorite(
     id: string,
     isFavorite: boolean,

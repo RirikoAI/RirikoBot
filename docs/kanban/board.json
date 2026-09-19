@@ -97,7 +97,7 @@
       "id": "EPIC-010",
       "title": "Waifu TCG Gameplay, Ingestion, Trading & Marketplace",
       "points": 21,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-004"],
       "blocks": ["EPIC-011"],
       "description": "waifu.im ingestion, 8-tier rarity math, 7 elemental affinities (including Ice), atomic P2P trading, marketplace, WaifuGuilds."
@@ -522,8 +522,8 @@
       "id": "STORY-105",
       "epic": "EPIC-010",
       "title": "Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch",
-      "points": 2,
-      "status": "BACKLOG",
+      "points": 5,
+      "status": "DONE",
       "requires": ["STORY-104"],
       "blocks": ["EPIC-011"]
     },
@@ -1641,7 +1641,7 @@
       "id": "TASK-1041",
       "title": "PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes",
       "points": 3,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "parent": "STORY-104",
       "requires": ["STORY-103"],
       "blocks": ["TASK-1042"],
@@ -1651,11 +1651,31 @@
       "id": "TASK-1042",
       "title": "Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "STORY-104",
       "requires": ["TASK-1041"],
       "blocks": ["STORY-105"],
       "description": "Implement Tutorial onboarding sequence (T1 to T4 with 0 energy cost, starter card, Novice Blade, 3x Minor HP Potions, and TUTORIAL_COMPLETE achievement unlock), floor energy brackets (F1-10 10, F11-25 15, F26-40 20, F41-50+ 25), mini-boss (1.75x) and major boss (3.2x) multipliers, first-clear and repeat loot drop tables, and dual-dispatch /dungeon status/climb/floor/leaderboard suite."
+    },
+    {
+      "id": "TASK-1051",
+      "title": "Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration",
+      "points": 3,
+      "status": "DONE",
+      "parent": "STORY-105",
+      "requires": ["STORY-104"],
+      "blocks": ["TASK-1052"],
+      "description": "Implement CardTradeRepository and MarketListingRepository in packages/database, TradeService and MarketService with IN_TRADE/IN_MARKET state locking, dual confirmation, 5% market tax sink, 7-day expiration, and dual-dispatch /trade and /market commands suite."
+    },
+    {
+      "id": "TASK-1052",
+      "title": "WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-105",
+      "requires": ["TASK-1051"],
+      "blocks": ["EPIC-011"],
+      "description": "Implement WaifuGuildRepository, AchievementRepository, and TcgConfigRepository in packages/database, WaifuGuildService, AchievementService with 7-asset reward dispatch, TcgConfigService with Zod validation, and dual-dispatch /waifuguild, /achievement, and /tcg-admin commands suite."
     }
   ]
 }
