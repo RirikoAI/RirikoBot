@@ -3,6 +3,7 @@ import type {
   WaifuCardRepository,
   UserInventoryItemRepository,
   GameItemRepository,
+  GameItem,
   WaifuAssetRepository,
   UserCard,
   WaifuCard,
@@ -11,6 +12,11 @@ import type {
 import type { Combatant } from '../combat/types.js';
 import type { AchievementService } from '../achievements/achievement-service.js';
 import type { CardElement } from '../types.js';
+import { ItemGrantService } from '../equipment/item-grant.service.js';
+
+const STARTER_WEAPON_CODE = 'WEAPON_NOVICE_BLADE';
+const STARTER_POTION_CODE = 'POTION_MINOR_HP';
+const STARTER_POTION_COUNT = 3;
 
 export interface TutorialFloorInfo {
   floorId: string;
@@ -212,7 +218,7 @@ export class TutorialService {
   private readonly progressRepo: UserDungeonProgressRepository;
   private readonly cardRepo: WaifuCardRepository | undefined;
   private readonly inventoryRepo: UserInventoryItemRepository | undefined;
-  private readonly itemRepo: GameItemRepository | undefined;
+  private readonly grants: ItemGrantService | undefined;
   private readonly assetRepo: WaifuAssetRepository | undefined;
   private readonly tcgConfigRepo: TcgConfigRepository | undefined;
   private readonly achievementService: AchievementService | undefined;
@@ -233,7 +239,10 @@ export class TutorialService {
     this.progressRepo = progressRepo;
     this.cardRepo = options.cardRepo;
     this.inventoryRepo = options.inventoryRepo;
-    this.itemRepo = options.itemRepo;
+    this.grants =
+      options.itemRepo && options.inventoryRepo
+        ? new ItemGrantService(options.itemRepo, options.inventoryRepo)
+        : undefined;
     this.assetRepo = options.assetRepo;
     this.tcgConfigRepo = options.tcgConfigRepo;
     this.achievementService = options.achievementService;
@@ -485,46 +494,20 @@ export class TutorialService {
   public async ensureFloor3Potions(
     userId: string,
   ): Promise<{ granted: boolean; hpPotionGranted: boolean; manaPotionGranted: boolean }> {
-    if (!this.inventoryRepo || !this.itemRepo) {
+    if (!this.inventoryRepo || !this.grants) {
       return { granted: false, hpPotionGranted: false, manaPotionGranted: false };
     }
 
-    const hpItem = await this.itemRepo.findByCode('POTION_MINOR_HP');
-    const manaItem = await this.itemRepo.findByCode('POTION_MANA_DRAUGHT');
     const userInventory = await this.inventoryRepo.findByUser(userId, { state: 'IDLE' });
+    const grantIfMissing = async (code: string): Promise<boolean> => {
+      const item = await this.grants!.resolveItem(code);
+      if (!item || userInventory.some((i) => i.itemId === item.id && i.quantity > 0)) return false;
+      await this.grants!.grantItem(userId, item, 1, 'TUTORIAL');
+      return true;
+    };
 
-    let hpPotionGranted = false;
-    let manaPotionGranted = false;
-
-    if (hpItem) {
-      const hasHp = userInventory.some((i) => i.itemId === hpItem.id && i.quantity > 0);
-      if (!hasHp) {
-        await this.inventoryRepo.create({
-          userId,
-          itemId: hpItem.id,
-          quantity: 1,
-          slot: 'NONE',
-          state: 'IDLE',
-          obtainedFrom: 'TUTORIAL',
-        });
-        hpPotionGranted = true;
-      }
-    }
-
-    if (manaItem) {
-      const hasMana = userInventory.some((i) => i.itemId === manaItem.id && i.quantity > 0);
-      if (!hasMana) {
-        await this.inventoryRepo.create({
-          userId,
-          itemId: manaItem.id,
-          quantity: 1,
-          slot: 'NONE',
-          state: 'IDLE',
-          obtainedFrom: 'TUTORIAL',
-        });
-        manaPotionGranted = true;
-      }
-    }
+    const hpPotionGranted = await grantIfMissing('POTION_MINOR_HP');
+    const manaPotionGranted = await grantIfMissing('POTION_MANA_DRAUGHT');
 
     return {
       granted: hpPotionGranted || manaPotionGranted,
@@ -539,7 +522,7 @@ export class TutorialService {
   public async handleTutorialFloor3Victory(
     userId: string,
   ): Promise<{ granted: boolean; message?: string }> {
-    if (!this.inventoryRepo || !this.itemRepo) return { granted: false };
+    if (!this.grants) return { granted: false };
 
     const configKey = `tutorial:floor3:potions_reward:${userId}`;
     if (this.tcgConfigRepo) {
@@ -549,41 +532,8 @@ export class TutorialService {
       }
     }
 
-    const hpItem = await this.itemRepo.findByCode('POTION_MINOR_HP');
-    const manaItem = await this.itemRepo.findByCode('POTION_MANA_DRAUGHT');
-    const userInventory = await this.inventoryRepo.findByUser(userId, { state: 'IDLE' });
-
-    if (hpItem) {
-      const hpSlot = userInventory.find((i) => i.itemId === hpItem.id);
-      if (hpSlot) {
-        await this.inventoryRepo.update(hpSlot.id, { quantity: hpSlot.quantity + 5 });
-      } else {
-        await this.inventoryRepo.create({
-          userId,
-          itemId: hpItem.id,
-          quantity: 5,
-          slot: 'NONE',
-          state: 'IDLE',
-          obtainedFrom: 'TUTORIAL',
-        });
-      }
-    }
-
-    if (manaItem) {
-      const manaSlot = userInventory.find((i) => i.itemId === manaItem.id);
-      if (manaSlot) {
-        await this.inventoryRepo.update(manaSlot.id, { quantity: manaSlot.quantity + 5 });
-      } else {
-        await this.inventoryRepo.create({
-          userId,
-          itemId: manaItem.id,
-          quantity: 5,
-          slot: 'NONE',
-          state: 'IDLE',
-          obtainedFrom: 'TUTORIAL',
-        });
-      }
-    }
+    await this.grants.grant(userId, 'POTION_MINOR_HP', 5, 'TUTORIAL');
+    await this.grants.grant(userId, 'POTION_MANA_DRAUGHT', 5, 'TUTORIAL');
 
     if (this.tcgConfigRepo) {
       try {
@@ -626,6 +576,39 @@ export class TutorialService {
   }
 
   /**
+   * Grants the starter weapon (once) and starter potions, and equips the weapon on the
+   * starter card when that card's weapon slot is empty.
+   */
+  private async grantStarterGear(
+    userId: string,
+    starter: UserCard | null,
+  ): Promise<{ weapon: GameItem | null; weaponEquipped: boolean; potion: GameItem | null; potionsGranted: number }> {
+    if (!this.grants || !this.inventoryRepo) {
+      return { weapon: null, weaponEquipped: false, potion: null, potionsGranted: 0 };
+    }
+
+    const weapon = await this.grants.resolveItem(STARTER_WEAPON_CODE);
+    let weaponEquipped = false;
+    if (weapon) {
+      const owned = await this.inventoryRepo.findByUser(userId);
+      const bladeRow =
+        owned.find((i) => i.itemId === weapon.id) ??
+        (await this.grants.grantItem(userId, weapon, 1, 'TUTORIAL')).inventoryItems[0];
+      if (bladeRow?.state === 'EQUIPPED') {
+        weaponEquipped = true;
+      } else if (bladeRow && starter && !(await this.inventoryRepo.findCardSlot(starter.id, 'WEAPON'))) {
+        await this.inventoryRepo.equipToCard(userId, bladeRow.id, starter.id, 'WEAPON');
+        weaponEquipped = true;
+      }
+    }
+
+    const potion = await this.grants.resolveItem(STARTER_POTION_CODE);
+    if (potion) await this.grants.grantItem(userId, potion, STARTER_POTION_COUNT, 'TUTORIAL');
+
+    return { weapon, weaponEquipped, potion, potionsGranted: potion ? STARTER_POTION_COUNT : 0 };
+  }
+
+  /**
    * Completes the prologue tutorial and grants starter rewards:
    * Novice Blade (Common), 3x Minor HP Potions, unlocks TUTORIAL_COMPLETE.
    * Cleans up Floor T4 tutorial metadata.
@@ -648,38 +631,17 @@ export class TutorialService {
     if (isFirstTime) {
       await this.progressRepo.recordFloorAttempt(userId, seasonId, 4, true);
 
-      // Grant starter equipment (Novice Blade) & potions if inventory repository is provided
-      if (this.inventoryRepo) {
-        const inventory = await this.inventoryRepo.findByUser(userId);
-        const hasBlade = inventory.some((i) => i.itemId === 'item_novice_blade');
-        if (!hasBlade) {
-          await this.inventoryRepo.create({
-            userId,
-            itemId: 'item_novice_blade',
-            slot: 'WEAPON',
-            obtainedFrom: 'TUTORIAL',
-            state: 'IDLE',
-          });
-        }
-
-        const potions = inventory.filter((i) => i.itemId === 'potion_hp_minor');
-        const potionsNeeded = Math.max(0, 3 - potions.length);
-        for (let i = 0; i < potionsNeeded; i++) {
-          await this.inventoryRepo.create({
-            userId,
-            itemId: 'potion_hp_minor',
-            slot: 'CONSUMABLE',
-            obtainedFrom: 'TUTORIAL',
-            state: 'IDLE',
-          });
-        }
-      }
-
       const starter = await this.ensureStarterCard(userId);
+      const gear = await this.grantStarterGear(userId, starter);
       const starterCard = starter ? await this.cardRepo?.findById(starter.cardId) : null;
       const starterCardName = starterCard
         ? `${starterCard.name} [${starterCard.element}]`
         : 'Waifu Vanguard';
+
+      const equipmentGranted = gear.weapon
+        ? `${gear.weapon.name} (+${gear.weapon.baseStats?.['attack'] ?? 0} ATK)${gear.weaponEquipped ? ', equipped' : ''}`
+        : undefined;
+      const consumablesGranted = gear.potion ? `${gear.potionsGranted}x ${gear.potion.name}` : undefined;
 
       if (this.achievementService) {
         try {
@@ -694,15 +656,15 @@ export class TutorialService {
         isFirstCompletion: true,
         starterCardId: starter?.cardId,
         starterCardName,
-        equipmentGranted: 'Novice Blade (Common Weapon, +20 ATK)',
-        consumablesGranted: '3x Minor HP Potions (+250 HP)',
+        equipmentGranted,
+        consumablesGranted,
         achievementCode: 'TUTORIAL_COMPLETE',
         message:
           '🎉 **Tutorial Prologue Completed!** You have mastered Elemental Resonance, Skills, Consumables, and Shield Wards!\n' +
           '🎁 **Starter Rewards Dispatched:**\n' +
           `• **Card:** ${starterCardName}\n` +
-          '• **Weapon:** Novice Blade (+20 ATK)\n' +
-          '• **Consumables:** 3x Minor HP Potions\n' +
+          (equipmentGranted ? `• **Weapon:** ${equipmentGranted}\n` : '') +
+          (consumablesGranted ? `• **Consumables:** ${consumablesGranted}\n` : '') +
           '• **Achievement Unlocked:** `TUTORIAL_COMPLETE`\n\n' +
           '🎓 **Congratulations, Summoner! You have graduated from the Tutorial!**\n' +
           'Would you like to enter **Season 1** now and test your strength against the Infernal Crucible?',

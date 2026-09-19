@@ -102,6 +102,7 @@ import {
   ConsumableService,
   EnergyLifecycleService,
   TcgShopService,
+  ItemGrantService,
   ScalingEngine,
   DungeonRunner,
   TutorialService,
@@ -552,6 +553,7 @@ export async function createBotServices(
   const dungeonLootService = new DungeonLootService({
     economyRepo,
     inventoryRepo: userInventoryItemRepo,
+    itemRepo: gameItemRepo,
     xpRepo,
   });
 
@@ -568,6 +570,7 @@ export async function createBotServices(
   const achievementService = new AchievementService(achievementRepo, economyRepo, db, {
     xpRepo,
     inventoryRepo: userInventoryItemRepo,
+    itemRepo: gameItemRepo,
     waifuCardRepo,
   });
   const tcgConfigService = new TcgConfigService(tcgConfigRepo);
@@ -604,6 +607,9 @@ export async function createBotServices(
         await gameItemRepo.create(item);
       }
     }
+    // Rows written by older reward code point at ids that never existed in game_items.
+    const repaired = await new ItemGrantService(gameItemRepo, userInventoryItemRepo).repairLegacyInventoryRows();
+    if (repaired > 0) console.log(`[tcg] Repaired ${repaired} legacy inventory item row(s).`);
   } catch {
     // In some unit tests with isolated in-memory databases, game_items may not be created.
   }

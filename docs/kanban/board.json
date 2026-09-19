@@ -137,6 +137,15 @@
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Automatic role system & reaction roles (join/button/select-menu), persistent NLP reminders, anime/manga search engine, and server utility commands parity."
+    },
+    {
+      "id": "EPIC-015",
+      "title": "Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses",
+      "points": 21,
+      "status": "TODO",
+      "requires": ["EPIC-010"],
+      "blocks": [],
+      "description": "Balanced dungeon progression (win-rate bands per floor bracket verified by a balance simulator), DB-driven seasonal bosses as real anime characters (AniList + Danbooru pipeline, plain boss art with element icon), equipment acquisition (shop, drop tables, boss signature drops) and interactive gear/shop menus. Children total 63 pts; crafting deferred to STORY-160."
     }
   ],
   "stories": [
@@ -661,6 +670,116 @@
       "status": "BACKLOG",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-150",
+      "epic": "EPIC-015",
+      "title": "Card EXP from Dungeon Wins & Real Skill MP Cost in Combat",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["BUG-0010"],
+      "blocks": [],
+      "description": "Dungeon clears grant card EXP via LevelingEngine; battle combatant uses the card skill MP cost instead of hard-coded 50."
+    },
+    {
+      "id": "STORY-151",
+      "epic": "EPIC-015",
+      "title": "DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table)",
+      "points": 8,
+      "status": "TODO",
+      "requires": ["STORY-150"],
+      "blocks": [],
+      "description": "New dungeon_bosses table (PG + SQLite), zod BossDefinition, precedence floor > boss > season scalingParams > code default; DungeonRunner reads season and floor rows; per-floor enrage and affix gating."
+    },
+    {
+      "id": "STORY-152",
+      "epic": "EPIC-015",
+      "title": "Dungeon Balance Simulator CLI & CI Win-Rate Bands",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["STORY-151"],
+      "blocks": [],
+      "description": "ririko sim:dungeon runs DungeonBattleSession Monte Carlo per player profile; Vitest asserts target win-rate bands per floor bracket."
+    },
+    {
+      "id": "STORY-153",
+      "epic": "EPIC-015",
+      "title": "tcg:boss-builder Script & BossSynthesizer Rendering",
+      "points": 8,
+      "status": "TODO",
+      "requires": ["STORY-151"],
+      "blocks": [],
+      "description": "Catalog JSON per season, --sync (AniList + Danbooru art, resumable, rate-limited), --render plain art + element icon top-left + name/anime/floor text, --import-db idempotent upsert into waifu_assets + dungeon_bosses + dungeon_floors, --suggest theme candidates."
+    },
+    {
+      "id": "STORY-154",
+      "epic": "EPIC-015",
+      "title": "Season 1 Infernal Crucible Boss Roster & Floor Seed Data",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["STORY-152", "STORY-153"],
+      "blocks": [],
+      "description": "Unique characters for all mini/major boss floors plus a rotating themed pool for standard floors with no back-to-back repeats; each boss has distinct skill, flavor text and signature drop."
+    },
+    {
+      "id": "STORY-155",
+      "epic": "EPIC-015",
+      "title": "Boss Artwork in Dungeon Battle Screen",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["STORY-154"],
+      "blocks": [],
+      "description": "Battle embed shows boss image as main image and player card as thumbnail."
+    },
+    {
+      "id": "STORY-156",
+      "epic": "EPIC-015",
+      "title": "Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget",
+      "points": 8,
+      "status": "TODO",
+      "requires": ["STORY-152"],
+      "blocks": [],
+      "description": "Catalog expansion per floor bracket and slot, first-clear and repeat drop tables by item code, boss signature drops, gear stats sized to floor brackets and verified by the simulator."
+    },
+    {
+      "id": "STORY-157",
+      "epic": "EPIC-015",
+      "title": "Interactive Equipment Menu (/card gear)",
+      "points": 8,
+      "status": "TODO",
+      "requires": ["BUG-0010"],
+      "blocks": [],
+      "description": "Card, slot and item dropdowns with stat deltas; Equip, Unequip, Enhance and Back buttons; owner-only collector; in-place embed updates."
+    },
+    {
+      "id": "STORY-158",
+      "epic": "EPIC-015",
+      "title": "Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation",
+      "points": 5,
+      "status": "TODO",
+      "requires": ["STORY-157"],
+      "blocks": [],
+      "description": "Category buttons, stat preview vs equipped gear, Buy & Equip, deterministic daily rotating RARE stock."
+    },
+    {
+      "id": "STORY-159",
+      "epic": "EPIC-015",
+      "title": "Early-Floor Tuning, Pity Blessing & Floor Star Ratings",
+      "points": 8,
+      "status": "TODO",
+      "requires": ["STORY-152", "STORY-156"],
+      "blocks": [],
+      "description": "Tune S1 to the win-rate bands, starter stat guarantee, stacking pity blessing with energy refund on F1-10, star ratings with bonus rewards."
+    },
+    {
+      "id": "STORY-160",
+      "epic": "EPIC-015",
+      "title": "Equipment Crafting with Dust (Deferred)",
+      "points": 5,
+      "status": "BACKLOG",
+      "requires": ["STORY-156"],
+      "blocks": [],
+      "description": "Deferred by user decision: craft equipment from crafting dust and materials."
     }
   ],
   "tasks": [
@@ -1667,9 +1786,16 @@
       "requires": ["TASK-1046"],
       "blocks": [],
       "description": "Ensure handleTutorialFloor4Defeat validates active card ownership before treating counter card as already given; grant real common counter card if user does not possess one; clear tcg_system_configs during user reset."
+    },
+    {
+      "id": "BUG-0010",
+      "title": "Grant TCG Items by Catalog Code, Auto-Equip Starter Blade & Repair Legacy Item Rows",
+      "points": 3,
+      "status": "REVIEW",
+      "parent": "EPIC-015",
+      "requires": [],
+      "blocks": ["STORY-150"],
+      "description": "Tutorial, dungeon loot and achievement rewards insert fake item ids (item_novice_blade, potion_hp_minor, weap_*) that never match game_items UUIDs, so rewards are invisible. Add a shared code-based item grant used by shop, tutorial, loot and achievements; auto-equip Novice Blade on the starter card; remap legacy rows at boot."
     }
   ]
 }
-
-
-

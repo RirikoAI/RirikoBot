@@ -5,6 +5,7 @@ import type {
   GameItemRepository,
   UserInventoryItemRepository,
 } from '@ririko/database';
+import { ItemGrantService } from './item-grant.service.js';
 
 export interface TcgShopReceipt {
   success: boolean;
@@ -15,11 +16,15 @@ export interface TcgShopReceipt {
 }
 
 export class TcgShopService {
+  private readonly grants: ItemGrantService;
+
   constructor(
     private readonly itemRepo: GameItemRepository,
-    private readonly inventoryRepo: UserInventoryItemRepository,
+    inventoryRepo: UserInventoryItemRepository,
     private readonly economyRepo: EconomyRepository,
-  ) {}
+  ) {
+    this.grants = new ItemGrantService(itemRepo, inventoryRepo);
+  }
 
   /**
    * Retrieves all items currently stocked in the Town Item Shop.
@@ -76,38 +81,7 @@ export class TcgShopService {
     });
 
     // 4. Provision item into user inventory
-    if (item.type === 'CONSUMABLE') {
-      const existing = await this.inventoryRepo.findByUser(userId, { state: 'IDLE' });
-      const matchingSlot = existing.find((inv) => inv.itemId === item!.id);
-
-      if (matchingSlot) {
-        await this.inventoryRepo.update(matchingSlot.id, {
-          quantity: matchingSlot.quantity + quantity,
-        });
-      } else {
-        await this.inventoryRepo.create({
-          userId,
-          itemId: item.id,
-          quantity,
-          slot: 'NONE',
-          state: 'IDLE',
-          obtainedFrom: 'SHOP',
-        });
-      }
-    } else {
-      // For Equipment and Accessories: each item is a distinct instance with its own enhancement level
-      for (let i = 0; i < quantity; i++) {
-        await this.inventoryRepo.create({
-          userId,
-          itemId: item.id,
-          quantity: 1,
-          enhancementLevel: 0,
-          slot: 'NONE',
-          state: 'IDLE',
-          obtainedFrom: 'SHOP',
-        });
-      }
-    }
+    await this.grants.grantItem(userId, item, quantity, 'SHOP');
 
     return {
       success: true,

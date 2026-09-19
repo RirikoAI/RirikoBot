@@ -3,6 +3,7 @@ import type {
   EconomyRepository,
   XpRepository,
   UserInventoryItemRepository,
+  GameItemRepository,
   WaifuCardRepository,
   DatabaseClient,
   GameAchievement,
@@ -10,6 +11,7 @@ import type {
 } from '@ririko/database';
 import { withTransaction } from '@ririko/database';
 import { CANONICAL_ACHIEVEMENTS } from './seeds.js';
+import { ItemGrantService } from '../equipment/item-grant.service.js';
 
 export interface AchievementClaimResult {
   achievement: GameAchievement;
@@ -33,7 +35,7 @@ export interface ProgressUpdateResult {
 
 export class AchievementService {
   private readonly xpRepo: XpRepository | undefined;
-  private readonly inventoryRepo: UserInventoryItemRepository | undefined;
+  private readonly grants: ItemGrantService | undefined;
   private readonly waifuCardRepo: WaifuCardRepository | undefined;
 
   constructor(
@@ -43,11 +45,15 @@ export class AchievementService {
     options: {
       xpRepo?: XpRepository | undefined;
       inventoryRepo?: UserInventoryItemRepository | undefined;
+      itemRepo?: GameItemRepository | undefined;
       waifuCardRepo?: WaifuCardRepository | undefined;
     } = {},
   ) {
     this.xpRepo = options.xpRepo;
-    this.inventoryRepo = options.inventoryRepo;
+    this.grants =
+      options.itemRepo && options.inventoryRepo
+        ? new ItemGrantService(options.itemRepo, options.inventoryRepo)
+        : undefined;
     this.waifuCardRepo = options.waifuCardRepo;
   }
 
@@ -182,40 +188,19 @@ export class AchievementService {
         }
       }
 
-      // 5. Dispatch Equipment / Accessory Item
-      if (achievement.rewardItemId && this.inventoryRepo) {
-        await this.inventoryRepo.create(
-          {
-            userId,
-            itemId: achievement.rewardItemId,
-            slot: 'WEAPON',
-            quantity: 1,
-            obtainedFrom: 'ACHIEVEMENT',
-            state: 'IDLE',
-          },
-          tx,
-        );
-        dispatched.items.push(achievement.rewardItemId);
+      // 5. Dispatch Equipment / Accessory Item (catalog code or legacy alias)
+      if (achievement.rewardItemId && this.grants) {
+        const granted = await this.grants.grant(userId, achievement.rewardItemId, 1, 'ACHIEVEMENT', tx);
+        if (granted) dispatched.items.push(granted.item.name);
       }
 
-      // 6. Dispatch Consumables
-      if (achievement.rewardConsumables && this.inventoryRepo) {
+      // 6. Dispatch Consumables (keyed by catalog code or legacy alias; non-item keys are skipped)
+      if (achievement.rewardConsumables && this.grants) {
         const consumables = achievement.rewardConsumables as Record<string, number>;
-        for (const [itemId, qty] of Object.entries(consumables)) {
-          if (qty > 0) {
-            await this.inventoryRepo.create(
-              {
-                userId,
-                itemId,
-                slot: 'CONSUMABLE',
-                quantity: qty,
-                obtainedFrom: 'ACHIEVEMENT',
-                state: 'IDLE',
-              },
-              tx,
-            );
-            dispatched.consumables[itemId] = qty;
-          }
+        for (const [key, qty] of Object.entries(consumables)) {
+          if (qty <= 0) continue;
+          const granted = await this.grants.grant(userId, key, qty, 'ACHIEVEMENT', tx);
+          if (granted) dispatched.consumables[granted.item.name] = qty;
         }
       }
 
@@ -226,6 +211,7 @@ export class AchievementService {
       if (dispatched.title) rewardParts.push(`🏷️ Title: "${dispatched.title}"`);
       if (dispatched.badge) rewardParts.push(`🎖️ Badge: ${dispatched.badge}`);
       for (const card of dispatched.cards) rewardParts.push(`🎴 Card: ${card}`);
+      for (const item of dispatched.items) rewardParts.push(`🗡️ Item: ${item}`);
       for (const [item, qty] of Object.entries(dispatched.consumables)) {
         rewardParts.push(`🧪 ${qty}x ${item}`);
       }
