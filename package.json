@@ -17,6 +17,7 @@
     "doctor": "tsx apps/cli/src/index.ts doctor",
     "ai:configure": "tsx apps/cli/src/index.ts ai:configure",
     "db:push": "pnpm --filter @ririko/database db:push",
+    "db:reset": "tsx scripts/db-reset.ts",
     "typecheck": "pnpm -r run typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

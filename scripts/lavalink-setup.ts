@@ -40,7 +40,9 @@ export async function setupLavalink(): Promise<void> {
           .join('\n'),
     );
   } catch {
-    console.error('❌ Java 17+ is required but not found in PATH! Please install OpenJDK 17 or 21.');
+    console.error(
+      '❌ Java 17+ is required but not found in PATH! Please install OpenJDK 17 or 21.',
+    );
     process.exit(1);
   }
 
@@ -111,14 +113,10 @@ export async function setupLavalink(): Promise<void> {
   }
 
   // 5. Generate application.yml with exact YouTube & LavaSrc recipe
-  const spotifyClientId =
-    process.env.SPOTIFY_CLIENT_ID || '***REMOVED_SPOTIFY_CLIENT_ID***';
-  const spotifyClientSecret =
-    process.env.SPOTIFY_CLIENT_SECRET || '***REMOVED_SPOTIFY_CLIENT_SECRET***';
-  const spotifySpDc =
-    process.env.SPOTIFY_SP_DC ||
-    '***REMOVED_SPOTIFY_SP_DC***';
-  const lavalinkPassword = process.env.LAVALINK_PASSWORD || 'youshallnotpass';
+  const spotifyClientId = process.env.SPOTIFY_CLIENT_ID || '';
+  const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET || '';
+  const spotifySpDc = process.env.SPOTIFY_SP_DC || '';
+  const lavalinkPassword = process.env.LAVALINK_PASSWORD || '';
   const lavalinkPort = process.env.LAVALINK_PORT || '2333';
 
   console.log('⚙️ Generating production application.yml (exact LavaMusic recipe)...');
@@ -271,7 +269,9 @@ logging:
 
   writeFileSync(YML_PATH, configContent, 'utf8');
   console.log(`✅ Configuration generated at: ${YML_PATH}`);
-  console.log('🎉 [Ririko Lavalink Autoinstaller] Setup complete! You can start Lavalink using: pnpm lavalink:start');
+  console.log(
+    '🎉 [Ririko Lavalink Autoinstaller] Setup complete! You can start Lavalink using: pnpm lavalink:start',
+  );
 }
 
 if (process.argv[1]?.endsWith('lavalink-setup.ts')) {
@@ -280,4 +280,3 @@ if (process.argv[1]?.endsWith('lavalink-setup.ts')) {
     process.exit(1);
   });
 }
-

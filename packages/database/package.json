@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "db:push": "drizzle-kit push",
+    "db:reset": "tsx ../../scripts/db-reset.ts",
     "db:export": "drizzle-kit export --dialect sqlite --schema ./src/schema/sqlite/index.ts"
   },
   "dependencies": {
