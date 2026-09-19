@@ -119,21 +119,22 @@ gantt
 
 ---
 
-### Phase 4: Core Parity & Community Media Systems (Backlog)
+### Phase 4: Core Parity & Community Media Systems
+- **Status**: 🔄 **In Progress / Partially Complete** (`EPIC-008` & `EPIC-009` ✅ Complete, `EPIC-013` & `EPIC-014` 📋 Backlog)
 - **Scope**:
-  - **`EPIC-008`: Streamer Notifications & Free Games Announcer (8 pts)**:
+  - **`EPIC-008`: Streamer Notifications & Free Games Announcer (8 pts)**: ✅ **Complete**
     - `STORY-080`: Multi-platform live stream watcher (Twitch EventSub, YouTube Live PubSubHubbub, TikTok Live) with persistent idempotency keys and local thumbnail CDN re-uploader.
     - `STORY-081`: Free games announcer for Epic Games Store and Steam promotional specials feed with duplicate suppression.
-  - **`EPIC-009`: Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite (13 pts)**:
+  - **`EPIC-009`: Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite (13 pts)**: ✅ **Complete**
     - `STORY-090`: Crash-resilient database-backed giveaways surviving bot restarts with button entry and role gates.
     - `STORY-091`: Dynamic "Join to Create" temporary voice channels (Auto Voice 2.0) with permission inheritance and orphan channel cleanup.
     - `STORY-092`: Interactive Mini-Games Suite: unbeatable Minimax AI Tic-Tac-Toe, Rock Paper Scissors, HighLow card wagering, CoinFlip, and Dice wagers with escrow.
-  - **`EPIC-013`: Media Synthesis, Anime Reactions & AI Image Generation (13 pts)**:
+  - **`EPIC-013`: Media Synthesis, Anime Reactions & AI Image Generation (13 pts)**: 📋 Backlog
     - `STORY-130`: All 60 legacy anime reaction commands (`airkiss`, `hug`, `slap`, `pat`, etc.) via unified factory backed by `api.otakugifs.xyz` with local fallback GIF cache.
     - `STORY-131`: All 11 legacy meme template canvas synthesizers (`0days`, `allmyhomies`, `always-been`, `chad`, `undertaker`, etc.) using `@napi-rs/canvas`.
     - `STORY-132`: Multi-backend AI image generation service (`/imagine`) supporting Google Gemini Imagen, local ComfyUI/SD-WebUI, and Replicate with background job queue (`image_jobs`).
     - `STORY-133`: Welcomer and Farewell dynamic canvas cards featuring user avatar, member count, and SSRF-validated background imagery.
-  - **`EPIC-014`: Server Utilities, AutoRoles & Community Systems (13 pts)**:
+  - **`EPIC-014`: Server Utilities, AutoRoles & Community Systems (13 pts)**: 📋 Backlog
     - `STORY-140`: Automatic Role System & Reaction Roles (Join roles, verification roles, button/select-menu component roles, tiered progression roles, temporary expiring roles).
     - `STORY-141`: Persistent natural language reminders engine (`!remindme in 2 hours`) with timezone awareness surviving bot reboots.
     - `STORY-142`: Anime & Manga search service (`/anime`, `/manga`, `/anime-character`, `/wallpaper`, `/waifu`) via Jikan API v4 and AniList.
@@ -143,12 +144,12 @@ gantt
 ---
 
 ### Phase 5: Flagship Waifu TCG Subsystem
-- **Status**: 📋 **Backlog** (`EPIC-010`, 21 pts)
+- **Status**: ✅ **Complete** (`EPIC-010`, 21 pts total)
 - **Synchronized Stories**:
   - **`STORY-100`: Waifu Ingestion Pipeline, Asset Validation & Attribution (3 pts)**:
     - Asynchronous worker harvesting `waifu.im`, AniList, and Jikan; magic bytes and dimension validation, SHA-256 deduplication, attribution overlay (`Image source: waifu.im`), graceful silhouette fallback for takedown requests (`is_deleted_by_request`).
   - **`STORY-101`: 8-Tier Rarity Math, Card Attribute Generation & Automated Drops (5 pts)**:
-    - Mathematically balanced 8-tier rarity curve (Common 60% to Mythic 0.01%), dynamic stat calculations (HP 500–15k, ATK 50–2.5k, DEF 30–1.8k, SPD 10–300, CRIT 5%–50%, MP 100), active skills and passive traits.
+    - Mathematically balanced 8-tier rarity curve (Common 50.0% to Mythic 0.05%), dynamic stat calculations (HP 500–15k, ATK 50–2.5k, DEF 30–1.8k, SPD 10–300, CRIT 5%–50%, MP 100), active skills and passive traits.
     - Guild drops generator: configurable `#waifu-drops` channel, activity threshold (50–100 messages), 60s interactive `[Claim Card]` button, anti-sniping cooldown (5 min).
     - Commands: `/card collection`, `/card inspect`, `/card equip`, `/card favorite`, `/card dismantle`.
   - **`STORY-102`: 7-Element Combat Engine & Tactical Status Effects (3 pts)**:
@@ -164,13 +165,16 @@ gantt
     - Seasonal framework (60–90 days per cycle, archived to Hall of Fame) with active environmental affixes (*Scorched Earth*, *Heat Haze*, *Torrential Deluge*, *Tidal Barrier*).
     - Anti-powercreep architecture: multi-layer elemental wards, seasonal affix penalties, turn-10+ soft enrage (+100% ATK/turn and true damage).
     - Configurable exponential difficulty scaling ($\text{Stat}(F) = \text{Base} \times (1 + r)^{F - 1} \times \text{BossMultiplier}$, $r=0.085$) via `/tcg-admin config dungeon`.
-  - **`STORY-105`: Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch (2 pts)**:
-    - P2P Trading (`/game trade`): interactive modal, state locking (`IN_TRADE`), dual-party confirmation, atomic ACID settlement.
-    - Player Marketplace (`/game market`): credit pricing, `IN_MARKET` locking, 5% coin sink tax, 7-day auto-expiration.
-    - WaifuGuilds: dedicated player factions (`WaifuGuild`), leveling progression, shared guild bank, cooperative raid bosses.
-    - Achievement System: 6 tracks (Collector, Combatant, Tycoon, Blacksmith, Devotion, Guild Hero) across 5 tiers with multi-asset reward dispatch (XP, credits, cards, gear, canvas badges).
+    - `BUG-0008`: Starter card seeding, random starter pool selection, and `$climb` prefix alias tutorial gating.
+  - **`STORY-105`: Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch (5 pts)**:
+    - P2P Trading (`/trade`): interactive modal, state locking (`IN_TRADE`), dual-party confirmation, atomic ACID settlement.
+    - Player Marketplace (`/market`): credit pricing, `IN_MARKET` locking, 5% coin sink tax, 7-day auto-expiration.
+    - WaifuGuilds (`/waifuguild`): dedicated player factions (`WaifuGuild`), leveling progression, shared guild bank, cooperative raid bosses.
+    - Achievement System (`/achievement`): 6 tracks across 5 tiers with multi-asset reward dispatch (XP, credits, cards, gear, accessories, consumables, canvas badges).
     - Role-guarded administration: `/tcg-admin` guarded by `tcg_manager_role_id` or Discord Administrator.
-- **Exit Gate**: Concurrency-tested trading and marketplace (zero race conditions), full 7-element combat validated, and floor 50+ scaling proven.
+    - TCG Info Hub (`/tcg-info`): Interactive 10-topic strategy guidebook and type advantage tutorial.
+    - Visual Card Synthesis Engine (`TASK-1061`): 800×1200 px `@napi-rs/canvas` physical-style card renderer with 8-layer stack, rarity foiling, 237 anime character catalog (`characters.json`), manifest (`manifest.json`), `CardImageService` attachment in `/card claim` & `/card inspect`, and Card Builder CLI (`scripts/tcg-card-builder.ts`).
+- **Exit Gate**: ✅ Concurrency-tested trading and marketplace (zero race conditions), full 7-element combat validated, floor 50+ scaling proven, and real card visual synthesis verified.
 
 ---
 

@@ -596,3 +596,37 @@ Administrative control over energy ceilings, shop catalogs, and item drops must 
    - *Security Middleware*: Rejects callers unless they hold the designated `tcg_manager_role_id` or Discord `Administrator` permissions.
 2. **Web Dashboard Portal**:
    - Under `/dashboard/[guildId]/waifu-tcg`, administrators can adjust numeric sliders, review live drop telemetry, manage item shop catalogs, configure seasonal dungeon towers with interactive curve visualizers, and toggle achievement reward packs with visual confirmation.
+
+---
+
+## 16. Visual Card Synthesis, Holographic Foiling & Character Catalog
+
+To deliver a premium physical-style collectible experience, Ririko AI 2.0.0 implements an in-process canvas synthesis engine powered by `@napi-rs/canvas`.
+
+Detailed specification: [docs/tcg-card-synthesis.md](file:///Z:/Projects/ririko-v2-2026/docs/tcg-card-synthesis.md).  
+Player handbook & guide: [docs/tcg-player-guide.md](file:///Z:/Projects/ririko-v2-2026/docs/tcg-player-guide.md).
+
+### 16.1. 8-Layer Canvas Composition Stack (800 × 1200 px)
+Cards are synthesized sequentially across 8 discrete layers:
+- **Layer 0 (Elemental Aura)**: Radial gradient base tuned to the card's element (Fire, Ice, Water, Earth, Lightning, Light, Shadow).
+- **Layer 1 (Character Artwork)**: High-resolution anime artwork with `cover` fit, top-face anchor preservation, and rounded corner clipping. Takedown requests render a standardized silhouette fallback frame.
+- **Layer 2 (Glassmorphic Footer)**: Discord-preview-optimized stat pills (HP, ATK, DEF, SPD), Tactical Active Skill with MP cost, Passive Perk description, serial number `#0001/0350`, and Section 24 mandatory attribution.
+- **Layer 3 (Card Frame)**: Metallic border frame scaled by rarity (Slate/Bronze Common, Silver Rare, Gold Super Rare, Platinum Ultra Rare, Full-Art Mythic).
+- **Layer 4 (Holographic Foil)**: Blended overlay textures (`assets/tcg/foils/`) using `soft-light`, `overlay`, or `color-dodge` blend modes.
+- **Layer 5 (Character Name Banner)**: Top glassmorphic ribbon with bold character name and series sub-title.
+- **Layer 6 (Rarity Stars)**: 1 to 8 centered stars (`star.png` or `star_prismatic.png`).
+- **Layer 7 (Elemental Badge)**: Top-left 96×96 px circular element emblem (`assets/tcg/elements/`).
+
+### 16.2. Character Catalog & Card Manifest
+- **Real Character Catalog (`assets/tcg/catalog/characters.json`)**: 237 real anime characters indexed with AniList IDs, romaji/english names, series titles, and gender tags.
+- **Card Manifest (`assets/tcg/catalog/manifest.json`)**: 350+ cards spanning all 7 elements, 8 rarities, and designated starter pool tags (`starter_pool`).
+
+### 16.3. Discord Bot Integration & On-Demand Rendering
+- **`CardImageService` (`packages/services/src/waifu-tcg/canvas/card-image.service.ts`)**: Manages disk caching under `public/cards/`. Pre-renders or synthesizes cards on demand.
+- **Commands Integration**: `/card claim` and `/card inspect` attach the rendered 800×1200 PNG file directly to Discord messages.
+- **Tutorial Integration**: New players running `/dungeon tutorial` or `$climb` receive a random card selected from the starter pool, guaranteeing immediate access to rendered cards.
+
+### 16.4. CLI Tooling
+- `pnpm tcg:generate-assets`: Procedurally generates all 20 modular PNG assets in `assets/tcg/` (elements, frames, foils, stars).
+- `pnpm tcg:card-builder`: Multi-mode builder tool supporting `--sync`, `--generate`, `--starters`, `--rerender`, `--create`, and `--import-db`.
+
