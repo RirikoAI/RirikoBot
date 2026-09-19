@@ -230,6 +230,39 @@ export const dungeonFloors = sqliteTable(
   (table) => [index('idx_dungeon_floors_season_floor').on(table.seasonId, table.floorNumber)],
 );
 
+/**
+ * Seasonal dungeon bosses: real anime characters synced by `pnpm tcg:boss-builder`.
+ * `definition` holds combat overrides (stats or stat multipliers, skill, enrage, wards).
+ */
+export const dungeonBosses = sqliteTable(
+  'dungeon_bosses',
+  {
+    id: text('id').primaryKey(), // '<seasonId>:<key>'
+    seasonId: text('season_id').notNull(),
+    key: text('key').notNull(),
+    name: text('name').notNull(),
+    animeTitle: text('anime_title').notNull(),
+    element: text('element').notNull(),
+    tier: text('tier').notNull().default('STANDARD'), // 'STANDARD' | 'MINI_BOSS' | 'MAJOR_BOSS'
+    title: text('title'),
+    flavorText: text('flavor_text'),
+    assetId: text('asset_id'),
+    anilistId: integer('anilist_id'),
+    danbooruTag: text('danbooru_tag'),
+    imagePath: text('image_path'),
+    definition: text('definition', { mode: 'json' }).$type<Record<string, unknown>>().notNull().default({}),
+    signatureDropCode: text('signature_drop_code'),
+    isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [uniqueIndex('idx_dungeon_bosses_season_key').on(table.seasonId, table.key)],
+);
+
 export const userDungeonProgress = sqliteTable(
   'user_dungeon_progress',
   {
