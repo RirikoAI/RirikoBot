@@ -56,6 +56,27 @@ export function applyEquipmentToCombatant(
   if (stats.critRate) {
     combatant.critRate += stats.critRate;
   }
+  if (stats.critDamage) {
+    combatant.critDamage += stats.critDamage;
+  }
+  if (stats.manaMax) {
+    combatant.maxMp += stats.manaMax;
+  }
+  if (stats.manaShield) {
+    combatant.shield += stats.manaShield;
+  }
+
+  // Elemental resistance guards against the boss's elemental strikes, so it stacks with mitigation.
+  const mitigation = (stats.mitigation ?? 0) + (stats.elementalResistance ?? 0);
+  if (mitigation || stats.armorPiercing || stats.elementalMastery || stats.manaRegen) {
+    const mods = (combatant.gearMods ??= {});
+    if (mitigation) mods.mitigation = (mods.mitigation ?? 0) + mitigation;
+    if (stats.armorPiercing) mods.armorPiercing = (mods.armorPiercing ?? 0) + stats.armorPiercing;
+    if (stats.elementalMastery) {
+      mods.elementalMastery = (mods.elementalMastery ?? 0) + stats.elementalMastery;
+    }
+    if (stats.manaRegen) mods.manaRegen = (mods.manaRegen ?? 0) + stats.manaRegen;
+  }
 
   for (const perk of perks) {
     // Map tiered perks (e.g. VAMPIRIC_TOUCH_T2) back to base perk trigger for combat engine
