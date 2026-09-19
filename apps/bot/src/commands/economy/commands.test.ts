@@ -229,6 +229,7 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
         serial_number INTEGER NOT NULL,
         level INTEGER NOT NULL DEFAULT 1,
         exp INTEGER NOT NULL DEFAULT 0,
+        battles_won INTEGER NOT NULL DEFAULT 0,
         state TEXT NOT NULL DEFAULT 'IDLE',
         obtained_at INTEGER NOT NULL
       );

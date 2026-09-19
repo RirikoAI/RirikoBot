@@ -629,4 +629,5 @@ Cards are synthesized sequentially across 8 discrete layers:
 ### 16.4. CLI Tooling
 - `pnpm tcg:generate-assets`: Procedurally generates all 20 modular PNG assets in `assets/tcg/` (elements, frames, foils, stars).
 - `pnpm tcg:card-builder`: Multi-mode builder tool supporting `--sync`, `--generate`, `--starters`, `--rerender`, `--create`, and `--import-db`.
+- `pnpm tcg:reset-user <user_id>`: Resets all Waifu TCG cards, inventory items, dungeon progression, energy, and achievements for a specified Discord user to re-enable fresh onboarding and tutorial testing.
 

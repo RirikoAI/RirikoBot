@@ -75,6 +75,7 @@ export const userCards = pgTable(
     serialNumber: integer('serial_number').notNull(),
     level: integer('level').notNull().default(1),
     exp: integer('exp').notNull().default(0),
+    battlesWon: integer('battles_won').notNull().default(0),
     state: varchar('state', { length: 32 }).notNull().default('IDLE'),
     isFavorite: boolean('is_favorite').notNull().default(false),
     obtainedAt: timestamp('obtained_at', { withTimezone: true }).notNull().defaultNow(),
