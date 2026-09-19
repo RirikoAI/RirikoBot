@@ -110,6 +110,33 @@ export class WaifuAssetRepository extends BaseRepository<
     }
   }
 
+  /** Active (not taken down) assets whose `tags` array contains `tag` exactly. */
+  async findActiveAssetsByTag(tag: string, limit = 100, tx?: DatabaseClient): Promise<WaifuAsset[]> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const t = sqliteSchema.waifuAssets;
+      const rows = await client.db
+        .select()
+        .from(t)
+        .where(
+          and(
+            eq(t.isDeletedByRequest, false),
+            sql`exists (select 1 from json_each(${t.tags}) where json_each.value = ${tag})`,
+          ),
+        )
+        .limit(limit);
+      return rows as WaifuAsset[];
+    } else {
+      const t = pgSchema.waifuAssets;
+      const rows = await client.db
+        .select()
+        .from(t)
+        .where(and(eq(t.isDeletedByRequest, false), sql`${t.tags} @> ${JSON.stringify([tag])}::jsonb`))
+        .limit(limit);
+      return rows as unknown as WaifuAsset[];
+    }
+  }
+
   async findActiveAssets(limit = 50, offset = 0, tx?: DatabaseClient): Promise<WaifuAsset[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {

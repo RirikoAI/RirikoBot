@@ -1,0 +1,4477 @@
+[
+  {
+    "key": "rias_gremory__high_school_dxd",
+    "name": "Rias Gremory",
+    "anime": "High School DxD",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "crimson"
+    ],
+    "anilistId": 50389,
+    "favourites": 6360,
+    "danbooruTag": "rias_gremory",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/93/32/sample-93328f248949921aeb22fbdf2fe1079c.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8857819",
+      "credit": "Art: unknown · danbooru #8857819"
+    }
+  },
+  {
+    "key": "megumin__konosuba",
+    "name": "Megumin",
+    "anime": "KonoSuba",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "explosion"
+    ],
+    "anilistId": 89361,
+    "favourites": 16682,
+    "danbooruTag": "megumin",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ef/41/sample-ef41a81e40399b902dc82e1339a4c357.jpg",
+      "source": "DANBOORU",
+      "sourceId": "3691277",
+      "credit": "Art: nagu · danbooru #3691277"
+    }
+  },
+  {
+    "key": "rin_tohsaka__fate_stay_night",
+    "name": "Rin Tohsaka",
+    "anime": "Fate/stay night",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "jewel_mage"
+    ],
+    "anilistId": 498,
+    "favourites": 12841,
+    "danbooruTag": "tohsaka_rin",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/25/2c/sample-252cd9325b120e637926a877fb42a8d5.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6090901",
+      "credit": "Art: cotta_(heleif) · danbooru #6090901"
+    }
+  },
+  {
+    "key": "nezuko_kamado__demon_slayer",
+    "name": "Nezuko Kamado",
+    "anime": "Demon Slayer",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "blood_demon"
+    ],
+    "anilistId": 127518,
+    "favourites": 14633,
+    "danbooruTag": "kamado_nezuko_(demon)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/8d/c4/8dc4c1e5fbdaa1a1d46f83612c825caf.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4292141",
+      "credit": "Art: uzuta · danbooru #4292141"
+    }
+  },
+  {
+    "key": "shana__shakugan_no_shana",
+    "name": "Shana",
+    "anime": "Shakugan no Shana",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "flame_haze"
+    ],
+    "anilistId": 1426,
+    "favourites": 1063,
+    "danbooruTag": "shana",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5d/91/sample-5d915686529ad75a74011914671381a7.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5753552",
+      "credit": "Art: seungju_lee · danbooru #5753552"
+    }
+  },
+  {
+    "key": "maki_oze__fire_force",
+    "name": "Maki Oze",
+    "anime": "Fire Force",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "witch"
+    ],
+    "anilistId": 130713,
+    "favourites": 3908,
+    "danbooruTag": "maki_oze",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/65/b0/sample-65b06af8ac54d9335e8184c75984c075.jpg",
+      "source": "DANBOORU",
+      "sourceId": "3558582",
+      "credit": "Art: gsong-chan · danbooru #3558582"
+    }
+  },
+  {
+    "key": "stella_vermillion__chivalry_of_a_failed_knight",
+    "name": "Stella Vermillion",
+    "anime": "Chivalry of a Failed Knight",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "princess"
+    ],
+    "anilistId": 88264,
+    "favourites": 2427,
+    "danbooruTag": "stella_vermillion",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/de/42/sample-de4239a1901ad12553cab6e559de0aca.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5212722",
+      "credit": "Art: toki_(rumukio) · danbooru #5212722"
+    }
+  },
+  {
+    "key": "erza_scarlet__fairy_tail",
+    "name": "Erza Scarlet",
+    "anime": "Fairy Tail",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "armor"
+    ],
+    "anilistId": 5189,
+    "favourites": 7092,
+    "danbooruTag": "erza_scarlet",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/02/2c/sample-022c42ec9e89aec89f144d915055d00e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5364401",
+      "credit": "Art: defaultz · danbooru #5364401"
+    }
+  },
+  {
+    "key": "yoko_littner__gurren_lagann",
+    "name": "Yoko Littner",
+    "anime": "Gurren Lagann",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "sniper"
+    ],
+    "anilistId": 2063,
+    "favourites": 3536,
+    "danbooruTag": "yoko_littner",
+    "image": {
+      "url": "https://cdn.donmai.us/original/2f/7b/2f7b3abdb6b37e8fa4f75971ed912a12.jpg",
+      "source": "DANBOORU",
+      "sourceId": "1380919",
+      "credit": "Art: ikiteirukagiri · danbooru #1380919"
+    }
+  },
+  {
+    "key": "kallen_stadtfeld__code_geass",
+    "name": "Kallen Stadtfeld",
+    "anime": "Code Geass",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "pilot"
+    ],
+    "anilistId": 558,
+    "favourites": 3746,
+    "danbooruTag": "kouzuki_kallen",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ec/c5/sample-ecc5314450b6397a0e91b7f7a302bd11.jpg",
+      "source": "DANBOORU",
+      "sourceId": "10639049",
+      "credit": "Art: yoo_tenchi · danbooru #10639049"
+    }
+  },
+  {
+    "key": "ryuko_matoi__kill_la_kill",
+    "name": "Ryuko Matoi",
+    "anime": "Kill la Kill",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "scissor_blade"
+    ],
+    "anilistId": 83797,
+    "favourites": 8162,
+    "image": {
+      "url": "https://cdn.donmai.us/sample/db/e3/sample-dbe3130925f98ee1eae3c81b7abd4bce.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5390798",
+      "credit": "Art: lem · danbooru #5390798"
+    },
+    "danbooruTag": "matoi_ryuuko"
+  },
+  {
+    "key": "asuka_langley_soryu__neon_genesis_evangelion",
+    "name": "Asuka Langley Soryu",
+    "anime": "Neon Genesis Evangelion",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "eva_pilot"
+    ],
+    "danbooruTag": "souryuu_asuka_langley",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/39/38/sample-3938cac9b359dd57f82fbed99c10604e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5540331",
+      "credit": "Art: ciloranko · danbooru #5540331"
+    }
+  },
+  {
+    "key": "zero_two__darling_in_the_franxx",
+    "name": "Zero Two",
+    "anime": "Darling in the Franxx",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "klaxosaur"
+    ],
+    "anilistId": 124381,
+    "favourites": 14713,
+    "danbooruTag": "zero_two_(darling_in_the_franxx)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/fb/a5/fba56231a1a46f3a152cb38605cc8e13.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5020927",
+      "credit": "Art: kangbus · danbooru #5020927"
+    }
+  },
+  {
+    "key": "kyoko_sakura__puella_magi_madoka_magica",
+    "name": "Kyoko Sakura",
+    "anime": "Puella Magi Madoka Magica",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "magical_girl"
+    ],
+    "danbooruTag": "sakura_kyoko",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/79/f3/sample-79f3c3bd03afa0a33d716999f1618fe6.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5439396",
+      "credit": "Art: dino_(dinoartforame) · danbooru #5439396"
+    }
+  },
+  {
+    "key": "mitsuri_kanroji__demon_slayer",
+    "name": "Mitsuri Kanroji",
+    "anime": "Demon Slayer",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "love_hashira"
+    ],
+    "anilistId": 136072,
+    "favourites": 6584,
+    "danbooruTag": "kanroji_mitsuri",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/81/41/sample-8141bd1cc0461580a1700f820cd97a56.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5860352",
+      "credit": "Art: suoiresnu · danbooru #5860352"
+    }
+  },
+  {
+    "key": "hestia__is_it_wrong_to_try_to_pick_up_girls_in_a_dungeon",
+    "name": "Hestia",
+    "anime": "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "goddess"
+    ],
+    "anilistId": 87654,
+    "favourites": 3144,
+    "danbooruTag": "hestia_(danmachi)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/47/be/sample-47be6e6746808508b4f9f22a7a915a49.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6271000",
+      "credit": "Art: kuragen_(ojikurage) · danbooru #6271000"
+    }
+  },
+  {
+    "key": "eris_greyrat__mushoku_tensei",
+    "name": "Eris Greyrat",
+    "anime": "Mushoku Tensei",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "swordswoman"
+    ],
+    "anilistId": 88349,
+    "favourites": 7202,
+    "danbooruTag": "eris_greyrat",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/35/13/sample-3513f82ed5af8b1b5eab56a8cdc49ca3.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5269747",
+      "credit": "Art: tochi_keisuke · danbooru #5269747"
+    }
+  },
+  {
+    "key": "yoimiya__genshin_impact",
+    "name": "Yoimiya",
+    "anime": "Genshin Impact",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "fireworks"
+    ],
+    "danbooruTag": "yoimiya_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/42/bc/sample-42bc099568d143f83e9b0187f19eb6e4.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6273119",
+      "credit": "Art: neekosiah · danbooru #6273119"
+    }
+  },
+  {
+    "key": "hu_tao__genshin_impact",
+    "name": "Hu Tao",
+    "anime": "Genshin Impact",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "funeral_director"
+    ],
+    "anilistId": 233425,
+    "favourites": 1504,
+    "danbooruTag": "hu_tao_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/a1/0e/sample-a10e02f33319cbc5a3d63dfd7231807a.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5553869",
+      "credit": "Art: rapi_(zx4748) · danbooru #5553869"
+    }
+  },
+  {
+    "key": "arlecchino__genshin_impact",
+    "name": "Arlecchino",
+    "anime": "Genshin Impact",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "harbinger"
+    ],
+    "anilistId": 350172,
+    "favourites": 232,
+    "danbooruTag": "arlecchino_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/35/40/3540edf2af2114642703004f151430be.png",
+      "source": "DANBOORU",
+      "sourceId": "5503289",
+      "credit": "Art: silence_girl · danbooru #5503289"
+    }
+  },
+  {
+    "key": "tohru__miss_kobayashi_s_dragon_maid",
+    "name": "Tohru",
+    "anime": "Miss Kobayashi's Dragon Maid",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "dragon"
+    ],
+    "anilistId": 120970,
+    "favourites": 5233,
+    "danbooruTag": "tohru_(maidragon)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/dd/42/sample-dd421157d4a4ad7beaa087ffe1f7d44d.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5417063",
+      "credit": "Art: modare · danbooru #5417063"
+    }
+  },
+  {
+    "key": "priscilla_barielle__re_zero",
+    "name": "Priscilla Barielle",
+    "anime": "Re:Zero",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "sun_princess"
+    ],
+    "anilistId": 90186,
+    "favourites": 853,
+    "danbooruTag": "priscilla_barielle",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3e/db/sample-3edb39d04859e3e7149fb79aa9fcb615.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8982115",
+      "credit": "Art: yu-y_(824412) · danbooru #8982115"
+    }
+  },
+  {
+    "key": "lina_inverse__slayers",
+    "name": "Lina Inverse",
+    "anime": "Slayers",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "dragon_slave"
+    ],
+    "anilistId": 1169,
+    "favourites": 737,
+    "danbooruTag": "lina_inverse",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/76/6b/sample-766b9e0950871a6b675749e6832ddca0.jpg",
+      "source": "DANBOORU",
+      "sourceId": "11570047",
+      "credit": "Art: nyantcha · danbooru #11570047"
+    }
+  },
+  {
+    "key": "tamaki_kotatsu__fire_force",
+    "name": "Tamaki Kotatsu",
+    "anime": "Fire Force",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "cat_flames"
+    ],
+    "anilistId": 130751,
+    "favourites": 3728,
+    "danbooruTag": "tamaki_kotatsu",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/09/16/sample-0916a55ebf7ee632cd49e34102e8e1f6.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8541274",
+      "credit": "Art: nyaa_(nnekoron) · danbooru #8541274"
+    }
+  },
+  {
+    "key": "princess_hibana__fire_force",
+    "name": "Princess Hibana",
+    "anime": "Fire Force",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "captain"
+    ],
+    "anilistId": 130783,
+    "favourites": 2236,
+    "danbooruTag": "hibana_(en'en_no_shouboutai)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5b/89/sample-5b8902d94e2a67919f77c73a4d9b1484.jpg",
+      "source": "DANBOORU",
+      "sourceId": "12139145",
+      "credit": "Art: omar_dogan · danbooru #12139145"
+    }
+  },
+  {
+    "key": "mereoleona_vermillion__black_clover",
+    "name": "Mereoleona Vermillion",
+    "anime": "Black Clover",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "captain"
+    ],
+    "anilistId": 124522,
+    "favourites": 2839,
+    "danbooruTag": "mereoleona_vermillion",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/04/f7/sample-04f7284217f35bd28bb40759027560d9.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6522403",
+      "credit": "Art: nekoma_hikaru · danbooru #6522403"
+    }
+  },
+  {
+    "key": "reze__chainsaw_man",
+    "name": "Reze",
+    "anime": "Chainsaw Man",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "bomb_devil"
+    ],
+    "anilistId": 148740,
+    "favourites": 10326,
+    "danbooruTag": "reze_(chainsaw_man)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/65/73/sample-6573b6bbcc15d20db56a39926aea7ce8.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8521342",
+      "credit": "Art: aiomita · danbooru #8521342"
+    }
+  },
+  {
+    "key": "nero_claudius__fate_extra",
+    "name": "Nero Claudius",
+    "anime": "Fate/Extra",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "emperor"
+    ],
+    "anilistId": 51523,
+    "favourites": 1490,
+    "danbooruTag": "nero_claudius_(fate)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/65/a7/65a77ac85867794b4a3d29452e73d7fa.png",
+      "source": "DANBOORU",
+      "sourceId": "2353278",
+      "credit": "Art: koshiro_itsuki · danbooru #2353278"
+    }
+  },
+  {
+    "key": "tamamo_no_mae__fate_extra",
+    "name": "Tamamo no Mae",
+    "anime": "Fate/Extra",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "fox"
+    ],
+    "anilistId": 52729,
+    "favourites": 466,
+    "danbooruTag": "tamamo_no_mae_(fate)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/34/8f/348fb85be0193585ac94078d110c8dba.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5386751",
+      "credit": "Art: tsukimi_okayu · danbooru #5386751"
+    }
+  },
+  {
+    "key": "rei_hino__sailor_moon",
+    "name": "Rei Hino",
+    "anime": "Sailor Moon",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "sailor_mars"
+    ],
+    "anilistId": 2367,
+    "favourites": 1680,
+    "danbooruTag": "hino_rei",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/d7/e0/sample-d7e070a45c7bd00d5e51fb23bf4ef116.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5756759",
+      "credit": "Art: kaiga · danbooru #5756759"
+    }
+  },
+  {
+    "key": "riza_hawkeye__fullmetal_alchemist_brotherhood",
+    "name": "Riza Hawkeye",
+    "anime": "Fullmetal Alchemist: Brotherhood",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "sharpshooter"
+    ],
+    "anilistId": 70,
+    "favourites": 4141,
+    "danbooruTag": "riza_hawkeye",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/2e/11/sample-2e11a0b3c849565353cf48a9d0b047af.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6880951",
+      "credit": "Art: mashutarou_(neko_no_oyashiro) · danbooru #6880951"
+    }
+  },
+  {
+    "key": "chisato_nishikigi__lycoris_recoil",
+    "name": "Chisato Nishikigi",
+    "anime": "Lycoris Recoil",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "lycoris"
+    ],
+    "anilistId": 260329,
+    "favourites": 7150,
+    "danbooruTag": "nishikigi_chisato",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/87/66/sample-8766f31eeb1a47dbc8bed0ff4ae67e4a.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6264058",
+      "credit": "Art: free_style_(yohan1754) · danbooru #6264058"
+    }
+  },
+  {
+    "key": "rebecca__cyberpunk_edgerunners",
+    "name": "Rebecca",
+    "anime": "Cyberpunk: Edgerunners",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "gunner"
+    ],
+    "anilistId": 284163,
+    "favourites": 5362,
+    "danbooruTag": "rebecca_(cyberpunk)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c8/ac/sample-c8ac97e1134d813444343320bced8bfc.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5671750",
+      "credit": "Art: a_f · danbooru #5671750"
+    }
+  },
+  {
+    "key": "nino_nakano__the_quintessential_quintuplets",
+    "name": "Nino Nakano",
+    "anime": "The Quintessential Quintuplets",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "tsundere"
+    ],
+    "anilistId": 126372,
+    "favourites": 10998,
+    "danbooruTag": "nakano_nino",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3e/6d/sample-3e6d110daed9c263a6575f3b939bdfd9.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5867265",
+      "credit": "Art: rakkasei · danbooru #5867265"
+    }
+  },
+  {
+    "key": "kana_arima__oshi_no_ko",
+    "name": "Kana Arima",
+    "anime": "Oshi no Ko",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "actress"
+    ],
+    "anilistId": 188783,
+    "favourites": 11811,
+    "danbooruTag": "arima_kana",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/29/36/sample-293605ef1874f6494fd72e46091bd2e8.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6310538",
+      "credit": "Art: torino_aqua · danbooru #6310538"
+    }
+  },
+  {
+    "key": "ruby_hoshino__oshi_no_ko",
+    "name": "Ruby Hoshino",
+    "anime": "Oshi no Ko",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "idol"
+    ],
+    "anilistId": 183884,
+    "favourites": 3929,
+    "danbooruTag": "hoshino_ruby",
+    "image": {
+      "url": "https://cdn.donmai.us/original/8d/38/8d387d457de5aa2c0e95091054f14c77.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6930331",
+      "credit": "Art: tokkyu · danbooru #6930331"
+    }
+  },
+  {
+    "key": "rin_shima__laid_back_camp",
+    "name": "Rin Shima",
+    "anime": "Laid-Back Camp",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "campfire"
+    ],
+    "anilistId": 124586,
+    "favourites": 4965,
+    "danbooruTag": "shima_rin",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/11/67/sample-116798659d3aa94f9ad6e762b51b63f1.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5319152",
+      "credit": "Art: doren · danbooru #5319152"
+    }
+  },
+  {
+    "key": "shuna__that_time_i_got_reincarnated_as_a_slime",
+    "name": "Shuna",
+    "anime": "That Time I Got Reincarnated as a Slime",
+    "element": "FIRE",
+    "tags": [
+      "fire",
+      "kijin"
+    ],
+    "anilistId": 128040,
+    "favourites": 2159,
+    "danbooruTag": "shuna_(tensura)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/61/48/614805b4563d47df7e6b7f5483358376.jpg",
+      "source": "DANBOORU",
+      "sourceId": "3349672",
+      "credit": "Art: rimo · danbooru #3349672"
+    }
+  },
+  {
+    "key": "esdeath__akame_ga_kill",
+    "name": "Esdeath",
+    "anime": "Akame ga Kill!",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "general"
+    ],
+    "anilistId": 65239,
+    "favourites": 6541,
+    "danbooruTag": "esdeath",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/90/00/sample-9000e75c2771138d53e1077a69674a5f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7680268",
+      "credit": "Art: harutoyumaarts · danbooru #7680268"
+    }
+  },
+  {
+    "key": "emilia__re_zero",
+    "name": "Emilia",
+    "anime": "Re:Zero",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "half_elf"
+    ],
+    "anilistId": 88572,
+    "favourites": 27689,
+    "danbooruTag": "emilia_(re:zero)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5a/d2/sample-5ad286d50657beefe99aa55be4dc97a1.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5728032",
+      "credit": "Art: na-suke · danbooru #5728032"
+    }
+  },
+  {
+    "key": "yukino_yukinoshita__oregairu",
+    "name": "Yukino Yukinoshita",
+    "anime": "Oregairu",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "ice_queen"
+    ],
+    "anilistId": 67067,
+    "favourites": 9865,
+    "danbooruTag": "yukinoshita_yukino",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/77/d8/sample-77d81392293fab9089346f8a8ce44a4f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4005784",
+      "credit": "Art: pro-p · danbooru #4005784"
+    }
+  },
+  {
+    "key": "cirno__touhou_project",
+    "name": "Cirno",
+    "anime": "Touhou Project",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "fairy"
+    ],
+    "anilistId": 24891,
+    "favourites": 205,
+    "danbooruTag": "cirno",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/4d/47/sample-4d4704609dd68a4c6e4480656bdb414f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "10609487",
+      "credit": "Art: madeno · danbooru #10609487"
+    }
+  },
+  {
+    "key": "ganyu__genshin_impact",
+    "name": "Ganyu",
+    "anime": "Genshin Impact",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "adeptus"
+    ],
+    "anilistId": 233410,
+    "favourites": 869,
+    "danbooruTag": "ganyu_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/59/16/sample-5916bc087a3d41410250966bdccbe9e8.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6221684",
+      "credit": "Art: no-ba · danbooru #6221684"
+    }
+  },
+  {
+    "key": "kamisato_ayaka__genshin_impact",
+    "name": "Kamisato Ayaka",
+    "anime": "Genshin Impact",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "shirasagi"
+    ],
+    "danbooruTag": "kamisato_ayaka",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/6f/6f/sample-6f6f2441ec5d95f106234bd63243da84.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5719368",
+      "credit": "Art: ippers · danbooru #5719368"
+    }
+  },
+  {
+    "key": "mizore_shirayuki__rosario_vampire",
+    "name": "Mizore Shirayuki",
+    "anime": "Rosario + Vampire",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "yuki_onna"
+    ],
+    "anilistId": 8129,
+    "favourites": 799,
+    "danbooruTag": "shirayuki_mizore",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/86/67/sample-8667cf37226980077dec0b8183ed4f09.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5430839",
+      "credit": "Art: kowai_(iamkowai) · danbooru #5430839"
+    }
+  },
+  {
+    "key": "tanya_degurechaff__saga_of_tanya_the_evil",
+    "name": "Tanya Degurechaff",
+    "anime": "Saga of Tanya the Evil",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "mage"
+    ],
+    "anilistId": 121052,
+    "favourites": 6445,
+    "danbooruTag": "tanya_degurechaff",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/27/54/sample-275464e8cbdffa709d4f21bfa1fbbea0.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4282943",
+      "credit": "Art: casul · danbooru #4282943"
+    }
+  },
+  {
+    "key": "kula_diamond__the_king_of_fighters",
+    "name": "Kula Diamond",
+    "anime": "The King of Fighters",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "cryomancer"
+    ],
+    "anilistId": 19000,
+    "favourites": 50,
+    "danbooruTag": "kula_diamond",
+    "image": {
+      "url": "https://cdn.donmai.us/original/d5/1d/d51d59e3b68b040bb6d2e5049c8ceb3e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6039727",
+      "credit": "Art: hungry_clicker · danbooru #6039727"
+    }
+  },
+  {
+    "key": "rukia_kuchiki__bleach",
+    "name": "Rukia Kuchiki",
+    "anime": "Bleach",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "shinigami"
+    ],
+    "anilistId": 6,
+    "favourites": 7390,
+    "danbooruTag": "kuchiki_rukia",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3b/58/sample-3b589442b5835b751369eb5319fa9bec.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7906749",
+      "credit": "Art: dakaeya · danbooru #7906749"
+    }
+  },
+  {
+    "key": "fubuki__one_punch_man",
+    "name": "Fubuki",
+    "anime": "One Punch Man",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "blizzard"
+    ],
+    "anilistId": 81931,
+    "favourites": 4521,
+    "danbooruTag": "fubuki_(one-punch_man)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/7c/d1/sample-7cd1fd1bc47878fd1533abe3e05a5067.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7437929",
+      "credit": "Art: mostlybluewyatt · danbooru #7437929"
+    }
+  },
+  {
+    "key": "alice_zuberg__sword_art_online",
+    "name": "Alice Zuberg",
+    "anime": "Sword Art Online",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "integrity_knight"
+    ],
+    "anilistId": 75450,
+    "favourites": 3450,
+    "danbooruTag": "alice_zuberg",
+    "image": {
+      "url": "https://cdn.donmai.us/original/58/13/58132845dfde5b9caeef7a929331254e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5909869",
+      "credit": "Art: gabiran · danbooru #5909869"
+    }
+  },
+  {
+    "key": "eula__genshin_impact",
+    "name": "Eula",
+    "anime": "Genshin Impact",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "knight"
+    ],
+    "anilistId": 359531,
+    "favourites": 2,
+    "danbooruTag": "eula_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/e9/fc/sample-e9fcc788ed1d5656597e0e87abf87937.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5538473",
+      "credit": "Art: torino_aqua · danbooru #5538473"
+    }
+  },
+  {
+    "key": "wiz__konosuba",
+    "name": "Wiz",
+    "anime": "KonoSuba",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "lich"
+    ],
+    "anilistId": 120655,
+    "favourites": 2065,
+    "danbooruTag": "wiz_(konosuba)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/b8/ca/sample-b8ca168105b3036f03c3514b700579db.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7555294",
+      "credit": "Art: kobaji · danbooru #7555294"
+    }
+  },
+  {
+    "key": "illyasviel_von_einzbern__fate_stay_night",
+    "name": "Illyasviel von Einzbern",
+    "anime": "Fate/stay night",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "homunculus"
+    ],
+    "anilistId": 503,
+    "favourites": 3166,
+    "danbooruTag": "illyasviel_von_einzbern",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5a/b1/sample-5ab17e18c60d59471749f3d791eb6f76.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9214079",
+      "credit": "Art: kaze_22 · danbooru #9214079"
+    }
+  },
+  {
+    "key": "yamato__one_piece",
+    "name": "Yamato",
+    "anime": "One Piece",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "ice_oni"
+    ],
+    "anilistId": 176840,
+    "favourites": 2373,
+    "danbooruTag": "yamato_(one_piece)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/70/33/sample-70331f470dbb13ae92b4daf76c009012.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5347640",
+      "credit": "Art: lufi_ays · danbooru #5347640"
+    }
+  },
+  {
+    "key": "annie_leonhart__attack_on_titan",
+    "name": "Annie Leonhart",
+    "anime": "Attack on Titan",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "crystal"
+    ],
+    "anilistId": 46490,
+    "favourites": 4833,
+    "danbooruTag": "annie_leonhart",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/53/46/sample-5346d862a72d4b2a4ba925e2087d519f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6885162",
+      "credit": "Art: atheko · danbooru #6885162"
+    }
+  },
+  {
+    "key": "olivier_mira_armstrong__fullmetal_alchemist_brotherhood",
+    "name": "Olivier Mira Armstrong",
+    "anime": "Fullmetal Alchemist: Brotherhood",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "briggs"
+    ],
+    "anilistId": 3934,
+    "favourites": 2368,
+    "danbooruTag": "olivier_mira_armstrong",
+    "image": {
+      "url": "https://cdn.donmai.us/original/22/d2/22d263b1fbdb291e80cd0d113afb24cb.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5440056",
+      "credit": "Art: guhanshounen · danbooru #5440056"
+    }
+  },
+  {
+    "key": "takina_inoue__lycoris_recoil",
+    "name": "Takina Inoue",
+    "anime": "Lycoris Recoil",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "lycoris"
+    ],
+    "anilistId": 260328,
+    "favourites": 4136,
+    "danbooruTag": "inoue_takina",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/fe/53/sample-fe5310f036c76e161ed29a40f91b68df.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6267422",
+      "credit": "Art: kitaku_(nakamachi_machi) · danbooru #6267422"
+    }
+  },
+  {
+    "key": "ai_hayasaka__kaguya_sama_love_is_war",
+    "name": "Ai Hayasaka",
+    "anime": "Kaguya-sama: Love Is War",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "valet"
+    ],
+    "anilistId": 121104,
+    "favourites": 10926,
+    "danbooruTag": "hayasaka_ai",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/df/d2/sample-dfd23993cdc52e30184bd434cc200dfe.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4675768",
+      "credit": "Art: free_style_(yohan1754) · danbooru #4675768"
+    }
+  },
+  {
+    "key": "tsubasa_hanekawa__bakemonogatari",
+    "name": "Tsubasa Hanekawa",
+    "anime": "Bakemonogatari",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "white_cat"
+    ],
+    "anilistId": 22055,
+    "favourites": 7848,
+    "danbooruTag": "hanekawa_tsubasa",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/83/9b/sample-839bcb0e73c4a74e2935774ecf519e21.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5436576",
+      "credit": "Art: oogure_ito · danbooru #5436576"
+    }
+  },
+  {
+    "key": "yuki_nagato__the_melancholy_of_haruhi_suzumiya",
+    "name": "Yuki Nagato",
+    "anime": "The Melancholy of Haruhi Suzumiya",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "interface"
+    ],
+    "anilistId": 249,
+    "favourites": 2898,
+    "danbooruTag": "nagato_yuki",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/69/89/sample-69898e160154c529ed53eb176428fc36.jpg",
+      "source": "DANBOORU",
+      "sourceId": "3954838",
+      "credit": "Art: modare · danbooru #3954838"
+    }
+  },
+  {
+    "key": "lawine__frieren_beyond_journey_s_end",
+    "name": "Lawine",
+    "anime": "Frieren: Beyond Journey's End",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "ice_mage"
+    ],
+    "anilistId": 293727,
+    "favourites": 255,
+    "danbooruTag": "lawine_(sousou_no_frieren)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/af/53/sample-af53f927843d55dc79197729c0e447b5.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7290775",
+      "credit": "Art: amenocchi · danbooru #7290775"
+    }
+  },
+  {
+    "key": "yoshino__date_a_live",
+    "name": "Yoshino",
+    "anime": "Date A Live",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "zadkiel"
+    ],
+    "anilistId": 70603,
+    "favourites": 1144,
+    "danbooruTag": "yoshino_(utaite)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/79/11/sample-791112fdd3596ddb18d0b4f5530a8c9c.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7566076",
+      "credit": "Art: riseno · danbooru #7566076"
+    }
+  },
+  {
+    "key": "suzune_horikita__classroom_of_the_elite",
+    "name": "Suzune Horikita",
+    "anime": "Classroom of the Elite",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "cold"
+    ],
+    "anilistId": 123213,
+    "favourites": 4556,
+    "danbooruTag": "horikita_suzune",
+    "image": {
+      "url": "https://cdn.donmai.us/original/7b/bb/7bbb88ac5cc4b469cd6269547411bf4f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8541522",
+      "credit": "Art: tomose_shunsaku · danbooru #8541522"
+    }
+  },
+  {
+    "key": "weiss_schnee__rwby",
+    "name": "Weiss Schnee",
+    "anime": "RWBY",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "glyphs"
+    ],
+    "anilistId": 126143,
+    "favourites": 537,
+    "danbooruTag": "weiss_schnee",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/b5/54/sample-b55419af28a982e9ded2124d34f1aa3c.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5956566",
+      "credit": "Art: stanley_lau · danbooru #5956566"
+    }
+  },
+  {
+    "key": "shenhe__genshin_impact",
+    "name": "Shenhe",
+    "anime": "Genshin Impact",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "exorcist"
+    ],
+    "anilistId": 383394,
+    "favourites": 19,
+    "danbooruTag": "shenhe_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/6a/76/sample-6a76be319d56d48acc704b833f91bdc5.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5416086",
+      "credit": "Art: ekina_(1217) · danbooru #5416086"
+    }
+  },
+  {
+    "key": "shiro__no_game_no_life",
+    "name": "Shiro",
+    "anime": "No Game No Life",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "gamer"
+    ],
+    "anilistId": 82525,
+    "favourites": 5857,
+    "danbooruTag": "shiro_(no_game_no_life)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/90/6a/906a13d0d531e804d7b7df3630114973.png",
+      "source": "DANBOORU",
+      "sourceId": "3747540",
+      "credit": "Art: unknown · danbooru #3747540"
+    }
+  },
+  {
+    "key": "mahiru_shiina__the_angel_next_door_spoils_me_rotten",
+    "name": "Mahiru Shiina",
+    "anime": "The Angel Next Door Spoils Me Rotten",
+    "element": "ICE",
+    "tags": [
+      "ice",
+      "angel"
+    ],
+    "anilistId": 195602,
+    "favourites": 3402,
+    "danbooruTag": "shiina_mahiru_(otonari_no_tenshi-sama)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/96/95/sample-96958276d35c61f3eaa2d950e81c3337.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6106843",
+      "credit": "Art: aquastar_inc. · danbooru #6106843"
+    }
+  },
+  {
+    "key": "rem__re_zero",
+    "name": "Rem",
+    "anime": "Re:Zero",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "maid"
+    ],
+    "anilistId": 88575,
+    "favourites": 16239,
+    "danbooruTag": "rem_(re:zero)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/06/20/0620f22c11d6e1b0955b12580f815a3f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6058279",
+      "credit": "Art: nakami_chihiro · danbooru #6058279"
+    }
+  },
+  {
+    "key": "aqua__konosuba",
+    "name": "Aqua",
+    "anime": "KonoSuba",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "goddess"
+    ],
+    "anilistId": 89362,
+    "favourites": 8259,
+    "danbooruTag": "aqua_(konosuba)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c1/e1/sample-c1e1453cc0a450200e8fb609dc4e2946.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5802513",
+      "credit": "Art: byeon_dha · danbooru #5802513"
+    }
+  },
+  {
+    "key": "juvia_lockser__fairy_tail",
+    "name": "Juvia Lockser",
+    "anime": "Fairy Tail",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "rain_woman"
+    ],
+    "anilistId": 9719,
+    "favourites": 2557,
+    "danbooruTag": "juvia_lockser",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/35/b6/sample-35b66a9ca6cbde3df3143a89842c3b63.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6045424",
+      "credit": "Art: ryota_(ry_o_ta) · danbooru #6045424"
+    }
+  },
+  {
+    "key": "chika_fujiwara__kaguya_sama_love_is_war",
+    "name": "Chika Fujiwara",
+    "anime": "Kaguya-sama: Love Is War",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "detective"
+    ],
+    "anilistId": 121103,
+    "favourites": 16161,
+    "danbooruTag": "fujiwara_chika",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/4e/aa/sample-4eaa2ceec5502964d97f8f9defd5ae1a.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5406378",
+      "credit": "Art: jiyasu · danbooru #5406378"
+    }
+  },
+  {
+    "key": "sangonomiya_kokomi__genshin_impact",
+    "name": "Sangonomiya Kokomi",
+    "anime": "Genshin Impact",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "priestess"
+    ],
+    "danbooruTag": "sangonomiya_kokomi",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/d8/67/sample-d867db8ea6f757cc7df5c1ccaf6dac7c.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5342834",
+      "credit": "Art: torino_aqua · danbooru #5342834"
+    }
+  },
+  {
+    "key": "ami_mizuno__sailor_moon",
+    "name": "Ami Mizuno",
+    "anime": "Sailor Moon",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "sailor_mercury"
+    ],
+    "anilistId": 2366,
+    "favourites": 1023,
+    "danbooruTag": "mizuno_ami",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/4f/4d/sample-4f4d015e5d22a025e80ca7970fe82ae5.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5912274",
+      "credit": "Art: nzeneee · danbooru #5912274"
+    }
+  },
+  {
+    "key": "tier_harribel__bleach",
+    "name": "Tier Harribel",
+    "anime": "Bleach",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "espada"
+    ],
+    "anilistId": 3217,
+    "favourites": 699,
+    "danbooruTag": "tier_harribel",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/b6/ce/sample-b6cefef86d5616f8090111debd8c73ba.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8887736",
+      "credit": "Art: bion_(insomn_bion) · danbooru #8887736"
+    }
+  },
+  {
+    "key": "noelle_silva__black_clover",
+    "name": "Noelle Silva",
+    "anime": "Black Clover",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "royalty"
+    ],
+    "anilistId": 123283,
+    "favourites": 4916,
+    "danbooruTag": "noelle_silva",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c7/66/sample-c76602e898851ca5246bc6b8448f0b93.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9786421",
+      "credit": "Art: horikoshi_kouhei · danbooru #9786421"
+    }
+  },
+  {
+    "key": "mio_akiyama__k_on",
+    "name": "Mio Akiyama",
+    "anime": "K-On!",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "bassist"
+    ],
+    "anilistId": 19566,
+    "favourites": 6148,
+    "danbooruTag": "akiyama_mio",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/62/c6/sample-62c6262e3a48a124f48255d519b79232.jpg",
+      "source": "DANBOORU",
+      "sourceId": "3930764",
+      "credit": "Art: pro-p · danbooru #3930764"
+    }
+  },
+  {
+    "key": "umi_sonoda__love_live",
+    "name": "Umi Sonoda",
+    "anime": "Love Live!",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "archer"
+    ],
+    "anilistId": 46167,
+    "favourites": 1142,
+    "danbooruTag": "sonoda_umi",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c5/64/sample-c56490519efb17c3551ca3d21380c371.jpg",
+      "source": "DANBOORU",
+      "sourceId": "2711525",
+      "credit": "Art: free_style_(yohan1754) · danbooru #2711525"
+    }
+  },
+  {
+    "key": "kagura__gintama",
+    "name": "Kagura",
+    "anime": "Gintama",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "yato"
+    ],
+    "anilistId": 674,
+    "favourites": 6202,
+    "danbooruTag": "kagura_(gintama)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/4d/0d/sample-4d0d93cb2f0d2715efe145075830c566.jpg",
+      "source": "DANBOORU",
+      "sourceId": "10934191",
+      "credit": "Art: h4sh1rnoto · danbooru #10934191"
+    }
+  },
+  {
+    "key": "yui_yuigahama__oregairu",
+    "name": "Yui Yuigahama",
+    "anime": "Oregairu",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "club_member"
+    ],
+    "anilistId": 67069,
+    "favourites": 6325,
+    "danbooruTag": "yuigahama_yui",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/a2/65/sample-a2659a3caebc8f8968df6694061de8d2.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6144703",
+      "credit": "Art: huhi_(huhi_1211) · danbooru #6144703"
+    }
+  },
+  {
+    "key": "furina__genshin_impact",
+    "name": "Furina",
+    "anime": "Genshin Impact",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "archon"
+    ],
+    "anilistId": 386545,
+    "favourites": 201,
+    "danbooruTag": "furina_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/cd/c5/sample-cdc52e54d461773508c70b5e2cf31aad.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7462879",
+      "credit": "Art: datsha · danbooru #7462879"
+    }
+  },
+  {
+    "key": "roxy_migurdia__mushoku_tensei",
+    "name": "Roxy Migurdia",
+    "anime": "Mushoku Tensei",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "water_saint"
+    ],
+    "anilistId": 88350,
+    "favourites": 11536,
+    "danbooruTag": "roxy_migurdia",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/84/14/sample-84149dd40488f6a1d45de260cfeded62.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6076762",
+      "credit": "Art: lunia · danbooru #6076762"
+    }
+  },
+  {
+    "key": "kanne__frieren_beyond_journey_s_end",
+    "name": "Kanne",
+    "anime": "Frieren: Beyond Journey's End",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "water_mage"
+    ],
+    "anilistId": 293728,
+    "favourites": 222,
+    "danbooruTag": "kanne_(sousou_no_frieren)",
+    "image": {
+      "url": "https://s4.anilist.co/file/anilistcdn/character/large/b293728-0ylNRoIOORcD.png",
+      "source": "ANILIST",
+      "sourceId": "293728",
+      "credit": "Image: AniList"
+    }
+  },
+  {
+    "key": "sayaka_miki__puella_magi_madoka_magica",
+    "name": "Sayaka Miki",
+    "anime": "Puella Magi Madoka Magica",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "magical_girl"
+    ],
+    "anilistId": 38395,
+    "favourites": 2793,
+    "danbooruTag": "miki_sayaka",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/64/ab/sample-64ab04a1743679d281471eb05391a056.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6111095",
+      "credit": "Art: mihifu · danbooru #6111095"
+    }
+  },
+  {
+    "key": "retsu_unohana__bleach",
+    "name": "Retsu Unohana",
+    "anime": "Bleach",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "healer"
+    ],
+    "anilistId": 3845,
+    "favourites": 1398,
+    "danbooruTag": "unohana_retsu",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/02/f6/sample-02f6e9e36d38e781c9b402e47e6c9f8e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9301939",
+      "credit": "Art: dr_octojuice · danbooru #9301939"
+    }
+  },
+  {
+    "key": "elma__miss_kobayashi_s_dragon_maid",
+    "name": "Elma",
+    "anime": "Miss Kobayashi's Dragon Maid",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "dragon"
+    ],
+    "anilistId": 120977,
+    "favourites": 1823,
+    "danbooruTag": "elma_(maidragon)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f7/2c/sample-f72cad817dca1a003b6ef604b54cc1ff.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5485273",
+      "credit": "Art: white_gorilla_(okamoto) · danbooru #5485273"
+    }
+  },
+  {
+    "key": "jolyne_cujoh__jojo_s_bizarre_adventure_stone_ocean",
+    "name": "Jolyne Cujoh",
+    "anime": "JoJo's Bizarre Adventure: Stone Ocean",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "stone_free"
+    ],
+    "anilistId": 11222,
+    "favourites": 7940,
+    "danbooruTag": "kujo_jolyne",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/b8/75/sample-b87549a403ea4fc2b5668c83235206ee.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4961710",
+      "credit": "Art: fishine · danbooru #4961710"
+    }
+  },
+  {
+    "key": "akane_kurokawa__oshi_no_ko",
+    "name": "Akane Kurokawa",
+    "anime": "Oshi no Ko",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "method_actress"
+    ],
+    "anilistId": 203384,
+    "favourites": 6430,
+    "danbooruTag": "kurokawa_akane",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/88/d2/sample-88d22cd1b42a2c5ae12ea30a0d3af1ef.jpg",
+      "source": "DANBOORU",
+      "sourceId": "11092939",
+      "credit": "Art: srtaka · danbooru #11092939"
+    }
+  },
+  {
+    "key": "ryo_yamada__bocchi_the_rock",
+    "name": "Ryo Yamada",
+    "anime": "Bocchi the Rock!",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "bassist"
+    ],
+    "danbooruTag": "yamada_ryo",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/28/93/sample-2893dfdd0e52169ee0947c07cfb5fd00.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5957155",
+      "credit": "Art: far_side · danbooru #5957155"
+    }
+  },
+  {
+    "key": "ichika_nakano__the_quintessential_quintuplets",
+    "name": "Ichika Nakano",
+    "anime": "The Quintessential Quintuplets",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "actress"
+    ],
+    "anilistId": 126371,
+    "favourites": 3431,
+    "danbooruTag": "nakano_ichika",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/4d/5c/sample-4d5cc00a7ad162f65c76ef22fe3720f4.jpg",
+      "source": "DANBOORU",
+      "sourceId": "3794022",
+      "credit": "Art: haruba_negi · danbooru #3794022"
+    }
+  },
+  {
+    "key": "uta__one_piece_film_red",
+    "name": "Uta",
+    "anime": "One Piece Film: Red",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "diva"
+    ],
+    "anilistId": 270493,
+    "favourites": 1148,
+    "danbooruTag": "uta_(one_piece)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f4/a9/sample-f4a9d33354721785358718d7796278ce.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5668981",
+      "credit": "Art: yuukauta · danbooru #5668981"
+    }
+  },
+  {
+    "key": "mona__genshin_impact",
+    "name": "Mona",
+    "anime": "Genshin Impact",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "astrologist"
+    ],
+    "anilistId": 209678,
+    "favourites": 489,
+    "danbooruTag": "mona_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/98/ba/sample-98bad93c6bc632f64d684e86e454e61b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5344104",
+      "credit": "Art: lem · danbooru #5344104"
+    }
+  },
+  {
+    "key": "nilou__genshin_impact",
+    "name": "Nilou",
+    "anime": "Genshin Impact",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "dancer"
+    ],
+    "danbooruTag": "nilou_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/7c/cd/sample-7ccdc0ddf5b078c000970c48e1f43aa8.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5652837",
+      "credit": "Art: vinncy · danbooru #5652837"
+    }
+  },
+  {
+    "key": "shirahoshi__one_piece",
+    "name": "Shirahoshi",
+    "anime": "One Piece",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "mermaid_princess"
+    ],
+    "anilistId": 40273,
+    "favourites": 390,
+    "danbooruTag": "shirahoshi",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/06/24/sample-0624a8a1c063091a7804b9584029dd1e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7640774",
+      "credit": "Art: shuravf · danbooru #7640774"
+    }
+  },
+  {
+    "key": "chizuru_mizuhara__rent_a_girlfriend",
+    "name": "Chizuru Mizuhara",
+    "anime": "Rent-a-Girlfriend",
+    "element": "WATER",
+    "tags": [
+      "water",
+      "rental_girlfriend"
+    ],
+    "anilistId": 128106,
+    "favourites": 6814,
+    "danbooruTag": "mizuhara_chizuru",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/15/33/sample-15330a4b7c9ac4027674929d60d052ec.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4131957",
+      "credit": "Art: tokkyu · danbooru #4131957"
+    }
+  },
+  {
+    "key": "raphtalia__the_rising_of_the_shield_hero",
+    "name": "Raphtalia",
+    "anime": "The Rising of the Shield Hero",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "sword"
+    ],
+    "anilistId": 88889,
+    "favourites": 6849,
+    "danbooruTag": "raphtalia",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ec/c3/sample-ecc375bd155c477faa038f1e708b8f2f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5418260",
+      "credit": "Art: aisha_(rfrm) · danbooru #5418260"
+    }
+  },
+  {
+    "key": "holo__spice_and_wolf",
+    "name": "Holo",
+    "anime": "Spice and Wolf",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "wise_wolf"
+    ],
+    "anilistId": 7373,
+    "favourites": 7057,
+    "danbooruTag": "holo",
+    "image": {
+      "url": "https://cdn.donmai.us/original/bd/c1/bdc18ebdd419cba7751d19a61773c47f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9543130",
+      "credit": "Art: likunea · danbooru #9543130"
+    }
+  },
+  {
+    "key": "diane__the_seven_deadly_sins",
+    "name": "Diane",
+    "anime": "The Seven Deadly Sins",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "giant"
+    ],
+    "anilistId": 74653,
+    "favourites": 1963,
+    "danbooruTag": "diane_(nanatsu_no_taizai)",
+    "image": {
+      "url": "https://s4.anilist.co/file/anilistcdn/character/large/b74653-XpMcsLVZBnkZ.jpg",
+      "source": "ANILIST",
+      "sourceId": "74653",
+      "credit": "Image: AniList"
+    }
+  },
+  {
+    "key": "navia__genshin_impact",
+    "name": "Navia",
+    "anime": "Genshin Impact",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "spina_di_rosula"
+    ],
+    "anilistId": 263449,
+    "favourites": 27,
+    "danbooruTag": "navia_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ef/d0/sample-efd041a2114a7105bc82ff8e31abb30b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7042351",
+      "credit": "Art: soybean_(hisoybean) · danbooru #7042351"
+    }
+  },
+  {
+    "key": "sheele__akame_ga_kill",
+    "name": "Sheele",
+    "anime": "Akame ga Kill!",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "extase"
+    ],
+    "anilistId": 65233,
+    "favourites": 1245,
+    "danbooruTag": "sheele",
+    "image": {
+      "url": "https://s4.anilist.co/file/anilistcdn/character/large/65233-f8RXB4LQiNh0.png",
+      "source": "ANILIST",
+      "sourceId": "65233",
+      "credit": "Image: AniList"
+    }
+  },
+  {
+    "key": "yotsuba_nakano__the_quintessential_quintuplets",
+    "name": "Yotsuba Nakano",
+    "anime": "The Quintessential Quintuplets",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "athlete"
+    ],
+    "anilistId": 126374,
+    "favourites": 5442,
+    "danbooruTag": "nakano_yotsuba",
+    "image": {
+      "url": "https://cdn.donmai.us/original/4b/82/4b8265afd08cfa5315e130f45b482239.png",
+      "source": "DANBOORU",
+      "sourceId": "5395640",
+      "credit": "Art: fagi_(kakikaki) · danbooru #5395640"
+    }
+  },
+  {
+    "key": "tsuyu_asui__my_hero_academia",
+    "name": "Tsuyu Asui",
+    "anime": "My Hero Academia",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "froppy"
+    ],
+    "anilistId": 89223,
+    "favourites": 4216,
+    "danbooruTag": "asui_tsuyu",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c6/a0/sample-c6a0b2096d66b3225bb61a6f7c54b638.jpg",
+      "source": "DANBOORU",
+      "sourceId": "2405189",
+      "credit": "Art: kexue · danbooru #2405189"
+    }
+  },
+  {
+    "key": "mirko__my_hero_academia",
+    "name": "Mirko",
+    "anime": "My Hero Academia",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "rabbit_hero"
+    ],
+    "anilistId": 148985,
+    "favourites": 2491,
+    "danbooruTag": "mirko",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/7e/13/sample-7e1369386910864ab4616d2e172c7060.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9193333",
+      "credit": "Art: masoq · danbooru #9193333"
+    }
+  },
+  {
+    "key": "morgiana__magi",
+    "name": "Morgiana",
+    "anime": "Magi",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "fanalis"
+    ],
+    "anilistId": 43121,
+    "favourites": 2722,
+    "danbooruTag": "morgiana",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/73/39/sample-73390de9eb04ed3e5d1bec5751874762.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5940594",
+      "credit": "Art: yadu_nadu · danbooru #5940594"
+    }
+  },
+  {
+    "key": "rory_mercury__gate",
+    "name": "Rory Mercury",
+    "anime": "GATE",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "apostle"
+    ],
+    "anilistId": 89029,
+    "favourites": 2329,
+    "danbooruTag": "rory_mercury",
+    "image": {
+      "url": "https://cdn.donmai.us/original/15/55/1555585521320231b0be7b1c88e729eb.png",
+      "source": "DANBOORU",
+      "sourceId": "5122140",
+      "credit": "Art: fagi_(kakikaki) · danbooru #5122140"
+    }
+  },
+  {
+    "key": "taiga_aisaka__toradora",
+    "name": "Taiga Aisaka",
+    "anime": "Toradora!",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "palmtop_tiger"
+    ],
+    "anilistId": 12064,
+    "favourites": 8436,
+    "danbooruTag": "aisaka_taiga",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/9c/c1/sample-9cc17dfd2f07732b16a7add29c96b42b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5755776",
+      "credit": "Art: seungju_lee · danbooru #5755776"
+    }
+  },
+  {
+    "key": "nahida__genshin_impact",
+    "name": "Nahida",
+    "anime": "Genshin Impact",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "dendro_archon"
+    ],
+    "danbooruTag": "nahida_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/7d/75/sample-7d75fba04437e5e968730c11e6c5c97d.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5741841",
+      "credit": "Art: alacarteneko · danbooru #5741841"
+    }
+  },
+  {
+    "key": "darkness__konosuba",
+    "name": "Darkness",
+    "anime": "KonoSuba",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "crusader"
+    ],
+    "anilistId": 89363,
+    "favourites": 6045,
+    "danbooruTag": "darkness_(konosuba)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/b0/df/sample-b0df5dca532c334c347cd23cfd227b73.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5604637",
+      "credit": "Art: izawa_(bhive003) · danbooru #5604637"
+    }
+  },
+  {
+    "key": "mikasa_ackerman__attack_on_titan",
+    "name": "Mikasa Ackerman",
+    "anime": "Attack on Titan",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "ackerman"
+    ],
+    "anilistId": 40881,
+    "favourites": 25576,
+    "danbooruTag": "mikasa_ackerman",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/1d/ff/sample-1dffb85013b8c646a3961e77d3eb3a5e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5993813",
+      "credit": "Art: khyle. · danbooru #5993813"
+    }
+  },
+  {
+    "key": "tsunade__naruto",
+    "name": "Tsunade",
+    "anime": "Naruto",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "sannin"
+    ],
+    "anilistId": 2767,
+    "favourites": 2520,
+    "danbooruTag": "tsunade_(naruto)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/56/be/56be5974be6494b5b1b0c2e57e90793b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "2950083",
+      "credit": "Art: lindaroze · danbooru #2950083"
+    }
+  },
+  {
+    "key": "sakura_haruno__naruto",
+    "name": "Sakura Haruno",
+    "anime": "Naruto",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "medic"
+    ],
+    "anilistId": 145,
+    "favourites": 2809,
+    "danbooruTag": "haruno_sakura",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/d2/72/sample-d272723e25e8d8f314599577299e2949.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5409360",
+      "credit": "Art: fxmao- · danbooru #5409360"
+    }
+  },
+  {
+    "key": "maki_zenin__jujutsu_kaisen",
+    "name": "Maki Zenin",
+    "anime": "Jujutsu Kaisen",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "heavenly_restriction"
+    ],
+    "anilistId": 134167,
+    "favourites": 13071,
+    "danbooruTag": "zen'in_maki",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c0/a5/sample-c0a501e3e0dbcf59bafa623f9a755b6c.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7139331",
+      "credit": "Art: funi_xd · danbooru #7139331"
+    }
+  },
+  {
+    "key": "rangiku_matsumoto__bleach",
+    "name": "Rangiku Matsumoto",
+    "anime": "Bleach",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "haineko"
+    ],
+    "anilistId": 904,
+    "favourites": 1761,
+    "danbooruTag": "matsumoto_rangiku",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/e2/7f/sample-e27f74187c67316c1163668c2083de67.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7738749",
+      "credit": "Art: ze_ro · danbooru #7738749"
+    }
+  },
+  {
+    "key": "nelliel_tu_odelschwanck__bleach",
+    "name": "Nelliel Tu Odelschwanck",
+    "anime": "Bleach",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "espada"
+    ],
+    "danbooruTag": "nelliel_tu_odelschwanck",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/9e/5b/sample-9e5bbe21be725bf3bd65379eb4767bea.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6602381",
+      "credit": "Art: ui_1231 · danbooru #6602381"
+    }
+  },
+  {
+    "key": "mimosa_vermillion__black_clover",
+    "name": "Mimosa Vermillion",
+    "anime": "Black Clover",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "plant_magic"
+    ],
+    "anilistId": 124438,
+    "favourites": 1486,
+    "danbooruTag": "mimosa_vermillion",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/9e/d6/sample-9ed658f416ea619d6ac342f7f14b86dd.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5924584",
+      "credit": "Art: tsugutoku · danbooru #5924584"
+    }
+  },
+  {
+    "key": "leone__akame_ga_kill",
+    "name": "Leone",
+    "anime": "Akame ga Kill!",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "lionelle"
+    ],
+    "anilistId": 65227,
+    "favourites": 2112,
+    "danbooruTag": "leone_(akame_ga_kill!)",
+    "image": {
+      "url": "https://s4.anilist.co/file/anilistcdn/character/large/b65227-PWmfiEVJbCwQ.png",
+      "source": "ANILIST",
+      "sourceId": "65227",
+      "credit": "Image: AniList"
+    }
+  },
+  {
+    "key": "leafa__sword_art_online",
+    "name": "Leafa",
+    "anime": "Sword Art Online",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "sylph"
+    ],
+    "anilistId": 36831,
+    "favourites": 1164,
+    "danbooruTag": "leafa_(sao)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5e/79/sample-5e795d791466af89eca2b813b891c73b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7786554",
+      "credit": "Art: ken-ji · danbooru #7786554"
+    }
+  },
+  {
+    "key": "kobeni_higashiyama__chainsaw_man",
+    "name": "Kobeni Higashiyama",
+    "anime": "Chainsaw Man",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "devil_hunter"
+    ],
+    "anilistId": 144594,
+    "favourites": 5303,
+    "danbooruTag": "higashiyama_kobeni",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/70/c1/sample-70c123206b11105366987c4ee134bf8b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7701380",
+      "credit": "Art: kozzzy · danbooru #7701380"
+    }
+  },
+  {
+    "key": "kikoru_shinomiya__kaiju_no_8",
+    "name": "Kikoru Shinomiya",
+    "anime": "Kaiju No. 8",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "axe"
+    ],
+    "anilistId": 183889,
+    "favourites": 1485,
+    "danbooruTag": "shinomiya_kikoru",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/67/fd/sample-67fde52cde817617b8c2731f3f832828.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8032831",
+      "credit": "Art: haban_(haban35) · danbooru #8032831"
+    }
+  },
+  {
+    "key": "kohaku__dr_stone",
+    "name": "Kohaku",
+    "anime": "Dr. Stone",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "warrior"
+    ],
+    "anilistId": 124143,
+    "favourites": 3237,
+    "danbooruTag": "kohaku_(dr._stone)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/4b/6c/4b6c43d154996268a30e42eb14aac71b.png",
+      "source": "DANBOORU",
+      "sourceId": "7433793",
+      "credit": "Art: ninomae_gin · danbooru #7433793"
+    }
+  },
+  {
+    "key": "biscuit_krueger__hunter_x_hunter",
+    "name": "Biscuit Krueger",
+    "anime": "Hunter x Hunter",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "nen_master"
+    ],
+    "anilistId": 13898,
+    "favourites": 1636,
+    "danbooruTag": "biscuit_krueger",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5e/84/sample-5e84a76538acce0dfc852da14494d8f2.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5750603",
+      "credit": "Art: feitian5575 · danbooru #5750603"
+    }
+  },
+  {
+    "key": "maomao__the_apothecary_diaries",
+    "name": "Maomao",
+    "anime": "The Apothecary Diaries",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "apothecary"
+    ],
+    "anilistId": 126824,
+    "favourites": 22378,
+    "danbooruTag": "maomao_(kusuriya_no_hitorigoto)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/53/1a/531a50f6119f963bc58fd10ccc5daad5.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7357050",
+      "credit": "Art: hong_(white_spider) · danbooru #7357050"
+    }
+  },
+  {
+    "key": "san__princess_mononoke",
+    "name": "San",
+    "anime": "Princess Mononoke",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "wolf_princess"
+    ],
+    "anilistId": 2727,
+    "favourites": 2464,
+    "danbooruTag": "san_(mononoke_hime)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/4c/5b/4c5be1ba555682d1b285abe682381227.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5464931",
+      "credit": "Art: yy_3dcg · danbooru #5464931"
+    }
+  },
+  {
+    "key": "nadeko_sengoku__monogatari",
+    "name": "Nadeko Sengoku",
+    "anime": "Monogatari",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "snake_god"
+    ],
+    "anilistId": 22050,
+    "favourites": 4880,
+    "danbooruTag": "sengoku_nadeko",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c5/c7/sample-c5c784e35408848437771d590077195a.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8170935",
+      "credit": "Art: solipsist · danbooru #8170935"
+    }
+  },
+  {
+    "key": "ochaco_uraraka__my_hero_academia",
+    "name": "Ochaco Uraraka",
+    "anime": "My Hero Academia",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "zero_gravity"
+    ],
+    "anilistId": 89221,
+    "favourites": 5522,
+    "danbooruTag": "uraraka_ochaco",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/11/8d/sample-118d1b073e6b57ea0bb2f1da7343efd8.jpg",
+      "source": "DANBOORU",
+      "sourceId": "2920758",
+      "credit": "Art: ryota_(ry_o_ta) · danbooru #2920758"
+    }
+  },
+  {
+    "key": "kanao_tsuyuri__demon_slayer",
+    "name": "Kanao Tsuyuri",
+    "anime": "Demon Slayer",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "flower_breathing"
+    ],
+    "anilistId": 139038,
+    "favourites": 5348,
+    "danbooruTag": "tsuyuri_kanao",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/df/7d/sample-df7d337d1929cd1dfe503d7097301025.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6277611",
+      "credit": "Art: diana_naitari · danbooru #6277611"
+    }
+  },
+  {
+    "key": "serie__frieren_beyond_journey_s_end",
+    "name": "Serie",
+    "anime": "Frieren: Beyond Journey's End",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "great_mage"
+    ],
+    "anilistId": 219734,
+    "favourites": 581,
+    "danbooruTag": "serie_(sousou_no_frieren)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/68/8c/sample-688cfeb48b5b60d99e1033e792d75d83.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7906628",
+      "credit": "Art: dino_(dinoartforame) · danbooru #7906628"
+    }
+  },
+  {
+    "key": "nadeshiko_kagamihara__laid_back_camp",
+    "name": "Nadeshiko Kagamihara",
+    "anime": "Laid-Back Camp",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "camper"
+    ],
+    "anilistId": 124576,
+    "favourites": 3072,
+    "danbooruTag": "kagamihara_nadeshiko",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/92/65/sample-926536101426f2749202ec60cbaceca8.jpg",
+      "source": "DANBOORU",
+      "sourceId": "2983847",
+      "credit": "Art: hiraga_matsuri · danbooru #2983847"
+    }
+  },
+  {
+    "key": "itsuki_nakano__the_quintessential_quintuplets",
+    "name": "Itsuki Nakano",
+    "anime": "The Quintessential Quintuplets",
+    "element": "EARTH",
+    "tags": [
+      "earth",
+      "student"
+    ],
+    "anilistId": 126375,
+    "favourites": 16028,
+    "danbooruTag": "nakano_itsuki",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/6c/18/sample-6c1851db7091ed7963c751c1b3a69077.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5661248",
+      "credit": "Art: tamago_sando · danbooru #5661248"
+    }
+  },
+  {
+    "key": "mikoto_misaka__a_certain_scientific_railgun",
+    "name": "Mikoto Misaka",
+    "anime": "A Certain Scientific Railgun",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "railgun"
+    ],
+    "anilistId": 13701,
+    "favourites": 5742,
+    "danbooruTag": "misaka_mikoto",
+    "image": {
+      "url": "https://cdn.donmai.us/original/dc/a9/dca982197296325d7f1512873cee06d8.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5845901",
+      "credit": "Art: hungry_clicker · danbooru #5845901"
+    }
+  },
+  {
+    "key": "raiden_shogun__genshin_impact",
+    "name": "Raiden Shogun",
+    "anime": "Genshin Impact",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "electro_archon"
+    ],
+    "danbooruTag": "raiden_shogun",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5c/90/sample-5c9020db995e40538e1716e61bdd3d6c.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5754743",
+      "credit": "Art: natsukko_0606 · danbooru #5754743"
+    }
+  },
+  {
+    "key": "makoto_kino__sailor_moon",
+    "name": "Makoto Kino",
+    "anime": "Sailor Moon",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "sailor_jupiter"
+    ],
+    "anilistId": 2825,
+    "favourites": 1182,
+    "danbooruTag": "kino_makoto",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/68/ed/sample-68ed45d1b019f2ffafe23e677ea231f0.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6217361",
+      "credit": "Art: cesar_art456 · danbooru #6217361"
+    }
+  },
+  {
+    "key": "yoruichi_shihoin__bleach",
+    "name": "Yoruichi Shihoin",
+    "anime": "Bleach",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "flash_goddess"
+    ],
+    "danbooruTag": "shihouin_yoruichi",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f6/71/sample-f671d9d09e4a6d8e1b0e37e89f62587b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9641725",
+      "credit": "Art: p_glansk · danbooru #9641725"
+    }
+  },
+  {
+    "key": "sinon__sword_art_online",
+    "name": "Sinon",
+    "anime": "Sword Art Online",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "hecate"
+    ],
+    "anilistId": 55147,
+    "favourites": 4814,
+    "danbooruTag": "sinon",
+    "image": {
+      "url": "https://cdn.donmai.us/original/26/0b/260b732ae296b5a2c9bbac4128a6eaac.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4461299",
+      "credit": "Art: gabiran · danbooru #4461299"
+    }
+  },
+  {
+    "key": "keqing__genshin_impact",
+    "name": "Keqing",
+    "anime": "Genshin Impact",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "yuheng"
+    ],
+    "anilistId": 233896,
+    "favourites": 417,
+    "danbooruTag": "keqing_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/87/84/sample-878445424cdb3696c6040f4e51abb08c.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5755354",
+      "credit": "Art: hyonee · danbooru #5755354"
+    }
+  },
+  {
+    "key": "clare__claymore",
+    "name": "Clare",
+    "anime": "Claymore",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "silver_eyed_witch"
+    ],
+    "anilistId": 2188,
+    "favourites": 1426,
+    "danbooruTag": "clare_(claymore)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/09/01/sample-0901b5dffcb045f3532ebe914bc97729.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5797332",
+      "credit": "Art: jhony_caballero · danbooru #5797332"
+    }
+  },
+  {
+    "key": "misato_katsuragi__neon_genesis_evangelion",
+    "name": "Misato Katsuragi",
+    "anime": "Neon Genesis Evangelion",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "commander"
+    ],
+    "anilistId": 1259,
+    "favourites": 10976,
+    "danbooruTag": "katsuragi_misato",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5f/1e/sample-5f1e16ef941a978e978d81a06bd2c089.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4744410",
+      "credit": "Art: yamashita_shun'ya · danbooru #4744410"
+    }
+  },
+  {
+    "key": "revy__black_lagoon",
+    "name": "Revy",
+    "anime": "Black Lagoon",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "two_hands"
+    ],
+    "anilistId": 458,
+    "favourites": 8152,
+    "danbooruTag": "revy_(black_lagoon)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/6a/88/sample-6a88c032405b30df399cf4ddc479208b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7776355",
+      "credit": "Art: jhony_caballero · danbooru #7776355"
+    }
+  },
+  {
+    "key": "nobara_kugisaki__jujutsu_kaisen",
+    "name": "Nobara Kugisaki",
+    "anime": "Jujutsu Kaisen",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "straw_doll"
+    ],
+    "anilistId": 133700,
+    "favourites": 13728,
+    "danbooruTag": "kugisaki_nobara",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/41/d8/sample-41d8e81b3bd29aaedb732d2a56f0184b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6268952",
+      "credit": "Art: fujimoto_tatsuki · danbooru #6268952"
+    }
+  },
+  {
+    "key": "winry_rockbell__fullmetal_alchemist",
+    "name": "Winry Rockbell",
+    "anime": "Fullmetal Alchemist",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "automail"
+    ],
+    "anilistId": 63,
+    "favourites": 4153,
+    "danbooruTag": "winry_rockbell",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/dd/0d/sample-dd0d2bff7ba1000cf28ba9dc87a43e0e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4367600",
+      "credit": "Art: seon_(seonon_) · danbooru #4367600"
+    }
+  },
+  {
+    "key": "chika_amatori__world_trigger",
+    "name": "Chika Amatori",
+    "anime": "World Trigger",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "sniper"
+    ],
+    "anilistId": 89227,
+    "favourites": 200,
+    "danbooruTag": "amatori_chika",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3d/a8/sample-3da881d49cd7c34fce3a5bb360fe3c50.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4690014",
+      "credit": "Art: jun_(navigavi) · danbooru #4690014"
+    }
+  },
+  {
+    "key": "fern__frieren_beyond_journey_s_end",
+    "name": "Fern",
+    "anime": "Frieren: Beyond Journey's End",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "zoltraak"
+    ],
+    "anilistId": 183965,
+    "favourites": 8666,
+    "danbooruTag": "fern_(sousou_no_frieren)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/27/bc/sample-27bcbe1512fd066605a44cd19299f045.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7004216",
+      "credit": "Art: dino_(dinoartforame) · danbooru #7004216"
+    }
+  },
+  {
+    "key": "yae_miko__genshin_impact",
+    "name": "Yae Miko",
+    "anime": "Genshin Impact",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "kitsune"
+    ],
+    "danbooruTag": "yae_miko",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/13/26/sample-132606115e8f68d5b6f97b8792a846fe.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8250062",
+      "credit": "Art: nyamo-lv0 · danbooru #8250062"
+    }
+  },
+  {
+    "key": "nami__one_piece",
+    "name": "Nami",
+    "anime": "One Piece",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "clima_tact"
+    ],
+    "anilistId": 723,
+    "favourites": 10206,
+    "danbooruTag": "nami_(one_piece)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/d5/0a/sample-d50afc63b59abad16c9644201d119c2b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6546589",
+      "credit": "Art: daniel_deng · danbooru #6546589"
+    }
+  },
+  {
+    "key": "kurisu_makise__steins_gate",
+    "name": "Kurisu Makise",
+    "anime": "Steins;Gate",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "scientist"
+    ],
+    "anilistId": 34470,
+    "favourites": 22353,
+    "danbooruTag": "makise_kurisu",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3b/29/sample-3b29ed199d6359619d16c21c977845ed.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5273941",
+      "credit": "Art: kalle21 · danbooru #5273941"
+    }
+  },
+  {
+    "key": "yunyun__konosuba",
+    "name": "Yunyun",
+    "anime": "KonoSuba",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "crimson_magic"
+    ],
+    "anilistId": 120652,
+    "favourites": 2386,
+    "danbooruTag": "yunyun_(konosuba)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/72/2b/sample-722be358f1df7cb2b3d15bcaaa944de8.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6260990",
+      "credit": "Art: unknown · danbooru #6260990"
+    }
+  },
+  {
+    "key": "kanna_kamui__miss_kobayashi_s_dragon_maid",
+    "name": "Kanna Kamui",
+    "anime": "Miss Kobayashi's Dragon Maid",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "dragon"
+    ],
+    "anilistId": 120974,
+    "favourites": 5898,
+    "danbooruTag": "kanna_kamui",
+    "image": {
+      "url": "https://cdn.donmai.us/original/10/b4/10b4b1204b8f23a50a8b3ad8db0551b5.jpg",
+      "source": "DANBOORU",
+      "sourceId": "2676360",
+      "credit": "Art: ice_(ice_aptx) · danbooru #2676360"
+    }
+  },
+  {
+    "key": "ais_wallenstein__is_it_wrong_to_try_to_pick_up_girls_in_a_dungeon",
+    "name": "Ais Wallenstein",
+    "anime": "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "sword_princess"
+    ],
+    "anilistId": 87655,
+    "favourites": 5457,
+    "danbooruTag": "aiz_wallenstein",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/27/b5/sample-27b5a6dab9fa49f40bae5d4b48c6b4bb.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6680936",
+      "credit": "Art: maousr · danbooru #6680936"
+    }
+  },
+  {
+    "key": "ram__re_zero",
+    "name": "Ram",
+    "anime": "Re:Zero",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "oni_maid"
+    ],
+    "anilistId": 88576,
+    "favourites": 4064,
+    "danbooruTag": "ram_(re:zero)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f4/a2/sample-f4a2d23a7ce295da5ad9efa2e4b8de32.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6300772",
+      "credit": "Art: yasehattagi · danbooru #6300772"
+    }
+  },
+  {
+    "key": "mine__akame_ga_kill",
+    "name": "Mine",
+    "anime": "Akame ga Kill!",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "pumpkin"
+    ],
+    "anilistId": 65229,
+    "favourites": 3234,
+    "danbooruTag": "mine_(akame_ga_kill!)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/b8/12/sample-b8128cf89f133a81e7260005a3fc486b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "1742355",
+      "credit": "Art: asakurashinji · danbooru #1742355"
+    }
+  },
+  {
+    "key": "kuroko_shirai__a_certain_scientific_railgun",
+    "name": "Kuroko Shirai",
+    "anime": "A Certain Scientific Railgun",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "teleporter"
+    ],
+    "anilistId": 17017,
+    "favourites": 1652,
+    "danbooruTag": "shirai_kuroko",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/09/ee/sample-09ee0232b7980e0988cc846855c42928.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5889671",
+      "credit": "Art: boa_(brianoa) · danbooru #5889671"
+    }
+  },
+  {
+    "key": "kyoka_jiro__my_hero_academia",
+    "name": "Kyoka Jiro",
+    "anime": "My Hero Academia",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "earphone_jack"
+    ],
+    "anilistId": 89897,
+    "favourites": 4004,
+    "danbooruTag": "jiro_kyoka",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/6f/fa/sample-6ffadea2f8ff5282f1c43050b1e4d487.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6142622",
+      "credit": "Art: kobaji · danbooru #6142622"
+    }
+  },
+  {
+    "key": "nejire_hado__my_hero_academia",
+    "name": "Nejire Hado",
+    "anime": "My Hero Academia",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "wave_motion"
+    ],
+    "anilistId": 126843,
+    "favourites": 1622,
+    "danbooruTag": "hado_nejire",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/7b/78/sample-7b785d98e82b0f0af12d0df2899c039d.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7250346",
+      "credit": "Art: fengling_(furin-jp) · danbooru #7250346"
+    }
+  },
+  {
+    "key": "touka_kirishima__tokyo_ghoul",
+    "name": "Touka Kirishima",
+    "anime": "Tokyo Ghoul",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "ukaku"
+    ],
+    "anilistId": 87277,
+    "favourites": 8275,
+    "danbooruTag": "kirishima_touka",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/a9/9a/sample-a99a11fc443797179a0fdcb2ad38a64f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7942851",
+      "credit": "Art: silvertsuki · danbooru #7942851"
+    }
+  },
+  {
+    "key": "lucy__cyberpunk_edgerunners",
+    "name": "Lucy",
+    "anime": "Cyberpunk: Edgerunners",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "netrunner"
+    ],
+    "anilistId": 284157,
+    "favourites": 8781,
+    "danbooruTag": "lucy_(cyberpunk)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/d2/97/sample-d297135e2f67caeca686c5785d879bdc.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5669194",
+      "credit": "Art: yoneyama_mai · danbooru #5669194"
+    }
+  },
+  {
+    "key": "motoko_kusanagi__ghost_in_the_shell",
+    "name": "Motoko Kusanagi",
+    "anime": "Ghost in the Shell",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "major"
+    ],
+    "anilistId": 1795,
+    "favourites": 3608,
+    "danbooruTag": "kusanagi_motoko",
+    "image": {
+      "url": "https://cdn.donmai.us/original/75/4d/754d34c5bc25bd2de8ee949b03d65722.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6173218",
+      "credit": "Art: hungry_clicker · danbooru #6173218"
+    }
+  },
+  {
+    "key": "milim_nava__that_time_i_got_reincarnated_as_a_slime",
+    "name": "Milim Nava",
+    "anime": "That Time I Got Reincarnated as a Slime",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "demon_lord"
+    ],
+    "anilistId": 128036,
+    "favourites": 3774,
+    "danbooruTag": "milim_nava",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/45/41/sample-4541623d6bd0f05400b1761d22eb2705.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8399915",
+      "credit": "Art: fuyumurasaki · danbooru #8399915"
+    }
+  },
+  {
+    "key": "narberal_gamma__overlord",
+    "name": "Narberal Gamma",
+    "anime": "Overlord",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "pleiades"
+    ],
+    "anilistId": 89152,
+    "favourites": 1147,
+    "danbooruTag": "narberal_gamma",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f8/88/sample-f888b94e818054e603c69e6190c36db3.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7786267",
+      "credit": "Art: so-bin · danbooru #7786267"
+    }
+  },
+  {
+    "key": "suruga_kanbaru__monogatari",
+    "name": "Suruga Kanbaru",
+    "anime": "Monogatari",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "monkey_paw"
+    ],
+    "anilistId": 22054,
+    "favourites": 4022,
+    "danbooruTag": "kanbaru_suruga",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/62/16/sample-62160e312031c3aeaf1c9e7d64b30309.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5016349",
+      "credit": "Art: nifffi · danbooru #5016349"
+    }
+  },
+  {
+    "key": "momo_ayase__dandadan",
+    "name": "Momo Ayase",
+    "anime": "Dandadan",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "psychic"
+    ],
+    "anilistId": 222594,
+    "favourites": 7351,
+    "danbooruTag": "ayase_momo",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/56/ed/sample-56ed01897114a220eebc6a8dd93fc53e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8296206",
+      "credit": "Art: spykeee · danbooru #8296206"
+    }
+  },
+  {
+    "key": "nijika_ijichi__bocchi_the_rock",
+    "name": "Nijika Ijichi",
+    "anime": "Bocchi the Rock!",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "drummer"
+    ],
+    "anilistId": 261674,
+    "favourites": 6801,
+    "danbooruTag": "ijichi_nijika",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/68/6b/sample-686b1fb11a177dab0f1db9e240946773.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5272875",
+      "credit": "Art: kerorira · danbooru #5272875"
+    }
+  },
+  {
+    "key": "wendy_marvell__fairy_tail",
+    "name": "Wendy Marvell",
+    "anime": "Fairy Tail",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "sky_dragon_slayer"
+    ],
+    "anilistId": 28886,
+    "favourites": 1542,
+    "danbooruTag": "wendy_marvell",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/03/50/sample-035063ac5eb848b056d83e60745d26e4.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7922977",
+      "credit": "Art: gazing_eye · danbooru #7922977"
+    }
+  },
+  {
+    "key": "faye_valentine__cowboy_bebop",
+    "name": "Faye Valentine",
+    "anime": "Cowboy Bebop",
+    "element": "LIGHTNING",
+    "tags": [
+      "lightning",
+      "bounty_hunter"
+    ],
+    "anilistId": 2,
+    "favourites": 6780,
+    "danbooruTag": "faye_valentine",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/0f/34/sample-0f3406dbfba9ed8520ded121604024fc.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8158006",
+      "credit": "Art: mostlybluewyatt · danbooru #8158006"
+    }
+  },
+  {
+    "key": "artoria_pendragon__fate_stay_night",
+    "name": "Artoria Pendragon",
+    "anime": "Fate/stay night",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "excalibur"
+    ],
+    "anilistId": 497,
+    "favourites": 12126,
+    "danbooruTag": "artoria_pendragon_(fate)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/70/d0/sample-70d0bd742b43fbf1a9b22fd5f0bd095b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "3967216",
+      "credit": "Art: sasoura · danbooru #3967216"
+    }
+  },
+  {
+    "key": "madoka_kaname__puella_magi_madoka_magica",
+    "name": "Madoka Kaname",
+    "anime": "Puella Magi Madoka Magica",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "goddess"
+    ],
+    "anilistId": 37832,
+    "favourites": 5410,
+    "danbooruTag": "kaname_madoka",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/d2/08/sample-d208e8761ce910bb8b20257a081fdc41.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5426935",
+      "credit": "Art: modare · danbooru #5426935"
+    }
+  },
+  {
+    "key": "violet_evergarden__violet_evergarden",
+    "name": "Violet Evergarden",
+    "anime": "Violet Evergarden",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "auto_memory_doll"
+    ],
+    "anilistId": 90169,
+    "favourites": 20379,
+    "danbooruTag": "violet_evergarden",
+    "image": {
+      "url": "https://cdn.donmai.us/original/f8/23/f823fafdbb5ecf378c00db335e443f8e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6513800",
+      "credit": "Art: unknown · danbooru #6513800"
+    }
+  },
+  {
+    "key": "jeanne_d_arc__fate_apocrypha",
+    "name": "Jeanne d'Arc",
+    "anime": "Fate/Apocrypha",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "ruler"
+    ],
+    "anilistId": 67769,
+    "favourites": 2002,
+    "danbooruTag": "jeanne_d'arc_(fate)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/cc/63/cc63508406fc2e059e15e4c99135cc71.png",
+      "source": "DANBOORU",
+      "sourceId": "5503456",
+      "credit": "Art: tsuki_tokage · danbooru #5503456"
+    }
+  },
+  {
+    "key": "karyl__princess_connect_re_dive",
+    "name": "Karyl",
+    "anime": "Princess Connect! Re:Dive",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "cat"
+    ],
+    "anilistId": 160246,
+    "favourites": 1281,
+    "danbooruTag": "karyl_(princess_connect!)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/57/b2/sample-57b2dc2dd4cb51d1052827e2ed0cb25a.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5033954",
+      "credit": "Art: akino_ell · danbooru #5033954"
+    }
+  },
+  {
+    "key": "asuna_yuuki__sword_art_online",
+    "name": "Asuna Yuuki",
+    "anime": "Sword Art Online",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "lightning_flash"
+    ],
+    "anilistId": 36828,
+    "favourites": 10156,
+    "danbooruTag": "asuna_(sao)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f1/31/sample-f131ab386a0ba87d5b804693c7287c49.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4028930",
+      "credit": "Art: aquastar_inc. · danbooru #4028930"
+    }
+  },
+  {
+    "key": "shinobu_kocho__demon_slayer",
+    "name": "Shinobu Kocho",
+    "anime": "Demon Slayer",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "insect_hashira"
+    ],
+    "anilistId": 136070,
+    "favourites": 9399,
+    "image": {
+      "url": "https://cdn.donmai.us/sample/73/c0/sample-73c049e5776d19b01e3f535840cbee81.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5471544",
+      "credit": "Art: torano · danbooru #5471544"
+    },
+    "danbooruTag": "kochou_shinobu"
+  },
+  {
+    "key": "mai_sakurajima__rascal_does_not_dream_of_bunny_girl_senpai",
+    "name": "Mai Sakurajima",
+    "anime": "Rascal Does Not Dream of Bunny Girl Senpai",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "actress"
+    ],
+    "anilistId": 127222,
+    "favourites": 21182,
+    "danbooruTag": "sakurajima_mai",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/76/11/sample-76118bb1b6b9288633ecb99d9de7a3d7.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6550794",
+      "credit": "Art: esw_artca · danbooru #6550794"
+    }
+  },
+  {
+    "key": "marin_kitagawa__my_dress_up_darling",
+    "name": "Marin Kitagawa",
+    "anime": "My Dress-Up Darling",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "cosplayer"
+    ],
+    "anilistId": 133676,
+    "favourites": 17299,
+    "danbooruTag": "kitagawa_marin",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/40/c4/sample-40c4b73606387956bf9c525bef2184ad.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5681129",
+      "credit": "Art: yamashita_shun'ya · danbooru #5681129"
+    }
+  },
+  {
+    "key": "chitoge_kirisaki__nisekoi",
+    "name": "Chitoge Kirisaki",
+    "anime": "Nisekoi",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "blonde"
+    ],
+    "anilistId": 48391,
+    "favourites": 3822,
+    "danbooruTag": "kirisaki_chitoge",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/9c/d3/sample-9cd3efbdc41e87a6882af509b0d2caf4.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8454740",
+      "credit": "Art: carlo_montie · danbooru #8454740"
+    }
+  },
+  {
+    "key": "miku_nakano__the_quintessential_quintuplets",
+    "name": "Miku Nakano",
+    "anime": "The Quintessential Quintuplets",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "headphones"
+    ],
+    "anilistId": 126373,
+    "favourites": 11976,
+    "danbooruTag": "nakano_miku",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/9e/54/sample-9e54289bc151d02a9ffc81c334eb3d33.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6170024",
+      "credit": "Art: bison_cangshu · danbooru #6170024"
+    }
+  },
+  {
+    "key": "kaguya_shinomiya__kaguya_sama_love_is_war",
+    "name": "Kaguya Shinomiya",
+    "anime": "Kaguya-sama: Love Is War",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "vice_president"
+    ],
+    "anilistId": 120649,
+    "favourites": 20489,
+    "danbooruTag": "shinomiya_kaguya",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/89/f4/sample-89f456633da2b29051780f266f79aa4e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5703003",
+      "credit": "Art: chanism! · danbooru #5703003"
+    }
+  },
+  {
+    "key": "frieren__frieren_beyond_journey_s_end",
+    "name": "Frieren",
+    "anime": "Frieren: Beyond Journey's End",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "elf_mage"
+    ],
+    "anilistId": 176754,
+    "favourites": 22488,
+    "danbooruTag": "frieren",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/89/dd/sample-89ddadd5d9802ca1ddb4b1dda19385c0.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6925086",
+      "credit": "Art: broken_(7589468) · danbooru #6925086"
+    }
+  },
+  {
+    "key": "lumine__genshin_impact",
+    "name": "Lumine",
+    "anime": "Genshin Impact",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "traveler"
+    ],
+    "anilistId": 209682,
+    "favourites": 438,
+    "danbooruTag": "lumine_(genshin_impact)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/45/c8/sample-45c80bc4cadb3e5e8afb205f5bc4ff32.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6549850",
+      "credit": "Art: pottsness · danbooru #6549850"
+    }
+  },
+  {
+    "key": "orihime_inoue__bleach",
+    "name": "Orihime Inoue",
+    "anime": "Bleach",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "shun_shun_rikka"
+    ],
+    "anilistId": 7,
+    "favourites": 3699,
+    "danbooruTag": "inoue_orihime",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/a7/7b/sample-a77bb7d16a8f3be1de985076a140b703.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9379164",
+      "credit": "Art: nekoranten · danbooru #9379164"
+    }
+  },
+  {
+    "key": "lucy_heartfilia__fairy_tail",
+    "name": "Lucy Heartfilia",
+    "anime": "Fairy Tail",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "celestial_mage"
+    ],
+    "anilistId": 5186,
+    "favourites": 4550,
+    "danbooruTag": "lucy_heartfilia",
+    "image": {
+      "url": "https://cdn.donmai.us/original/59/af/59afcfbc8890942bbb22aa5318ddfa03.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7164220",
+      "credit": "Art: mashima_hiro · danbooru #7164220"
+    }
+  },
+  {
+    "key": "usagi_tsukino__sailor_moon",
+    "name": "Usagi Tsukino",
+    "anime": "Sailor Moon",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "sailor_moon"
+    ],
+    "anilistId": 2030,
+    "favourites": 2675,
+    "danbooruTag": "tsukino_usagi",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3d/a1/sample-3da1511a81b5ca58cbd0c3694a70310c.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4517480",
+      "credit": "Art: ryota_(ry_o_ta) · danbooru #4517480"
+    }
+  },
+  {
+    "key": "sakura_kinomoto__cardcaptor_sakura",
+    "name": "Sakura Kinomoto",
+    "anime": "Cardcaptor Sakura",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "clow_cards"
+    ],
+    "anilistId": 2671,
+    "favourites": 3230,
+    "danbooruTag": "kinomoto_sakura",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/41/78/sample-41787b2cc491826a2a19ea97f40de64d.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7399657",
+      "credit": "Art: ryota_(ry_o_ta) · danbooru #7399657"
+    }
+  },
+  {
+    "key": "mami_tomoe__puella_magi_madoka_magica",
+    "name": "Mami Tomoe",
+    "anime": "Puella Magi Madoka Magica",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "magical_girl"
+    ],
+    "anilistId": 38194,
+    "favourites": 1974,
+    "danbooruTag": "tomoe_mami",
+    "image": {
+      "url": "https://cdn.donmai.us/original/7e/66/7e6692638daa1a33ebb24bfcdcffefea.jpg",
+      "source": "DANBOORU",
+      "sourceId": "848974",
+      "credit": "Art: fukamori_reo · danbooru #848974"
+    }
+  },
+  {
+    "key": "index__a_certain_magical_index",
+    "name": "Index",
+    "anime": "A Certain Magical Index",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "grimoire"
+    ],
+    "anilistId": 13699,
+    "favourites": 520,
+    "danbooruTag": "index_(toaru_majutsu_no_index)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ba/89/sample-ba89752e0264729aac2283916f5e8fd6.jpg",
+      "source": "DANBOORU",
+      "sourceId": "1487488",
+      "credit": "Art: hidari_(left_side) · danbooru #1487488"
+    }
+  },
+  {
+    "key": "mash_kyrielight__fate_grand_order",
+    "name": "Mash Kyrielight",
+    "anime": "Fate/Grand Order",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "shielder"
+    ],
+    "anilistId": 120735,
+    "favourites": 1547,
+    "danbooruTag": "mash_kyrielight",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/7d/f2/sample-7df215df2b24a8dc3d360058fc1f6272.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6538496",
+      "credit": "Art: rororo · danbooru #6538496"
+    }
+  },
+  {
+    "key": "jibril__no_game_no_life",
+    "name": "Jibril",
+    "anime": "No Game No Life",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "flugel"
+    ],
+    "anilistId": 87887,
+    "favourites": 2829,
+    "danbooruTag": "jibril_(no_game_no_life)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ca/c7/sample-cac74449f24944e05e6ff7088eb5d8d1.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6905852",
+      "credit": "Art: non_izuna · danbooru #6905852"
+    }
+  },
+  {
+    "key": "hinata_hyuga__naruto",
+    "name": "Hinata Hyuga",
+    "anime": "Naruto",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "byakugan"
+    ],
+    "danbooruTag": "hyuuga_hinata",
+    "image": {
+      "url": "https://cdn.donmai.us/original/08/88/0888739c79d2d24e92c4f51137328094.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4923589",
+      "credit": "Art: hungry_clicker · danbooru #4923589"
+    }
+  },
+  {
+    "key": "boa_hancock__one_piece",
+    "name": "Boa Hancock",
+    "anime": "One Piece",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "pirate_empress"
+    ],
+    "anilistId": 16342,
+    "favourites": 4811,
+    "danbooruTag": "boa_hancock",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/91/cf/sample-91cfdbcfdc8c41e64761979dde97efbd.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7556719",
+      "credit": "Art: aosora2823 · danbooru #7556719"
+    }
+  },
+  {
+    "key": "satsuki_kiryuin__kill_la_kill",
+    "name": "Satsuki Kiryuin",
+    "anime": "Kill la Kill",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "student_council"
+    ],
+    "anilistId": 83799,
+    "favourites": 3581,
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ae/59/sample-ae5957ae102bcbfdac49f982eefaf605.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6218045",
+      "credit": "Art: t-lex · danbooru #6218045"
+    },
+    "danbooruTag": "kiryuuin_satsuki"
+  },
+  {
+    "key": "nia_teppelin__gurren_lagann",
+    "name": "Nia Teppelin",
+    "anime": "Gurren Lagann",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "spiral"
+    ],
+    "anilistId": 2761,
+    "favourites": 2171,
+    "danbooruTag": "nia_teppelin",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/a2/a0/sample-a2a0d41f975698e47a0cbefb678b4c06.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4328638",
+      "credit": "Art: modare · danbooru #4328638"
+    }
+  },
+  {
+    "key": "historia_reiss__attack_on_titan",
+    "name": "Historia Reiss",
+    "anime": "Attack on Titan",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "queen"
+    ],
+    "danbooruTag": "krista_lenz",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/0f/fc/sample-0ffc384ef0390f195368244a23957d14.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4545188",
+      "credit": "Art: dotz · danbooru #4545188"
+    }
+  },
+  {
+    "key": "haruhi_suzumiya__the_melancholy_of_haruhi_suzumiya",
+    "name": "Haruhi Suzumiya",
+    "anime": "The Melancholy of Haruhi Suzumiya",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "sos_brigade"
+    ],
+    "anilistId": 251,
+    "favourites": 3963,
+    "danbooruTag": "suzumiya_haruhi",
+    "image": {
+      "url": "https://cdn.donmai.us/original/a1/02/a1020b397a0c4f27b885c99ad7e46e4e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "2181991",
+      "credit": "Art: puyo_(puyotopia) · danbooru #2181991"
+    }
+  },
+  {
+    "key": "ai_hoshino__oshi_no_ko",
+    "name": "Ai Hoshino",
+    "anime": "Oshi no Ko",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "idol"
+    ],
+    "anilistId": 172759,
+    "favourites": 6465,
+    "danbooruTag": "hoshino_ai",
+    "image": {
+      "url": "https://cdn.donmai.us/original/d2/41/d24132f97ab502b32a18dd0526019b50.png",
+      "source": "DANBOORU",
+      "sourceId": "5890906",
+      "credit": "Art: hirayama_kanna · danbooru #5890906"
+    }
+  },
+  {
+    "key": "kita_ikuyo__bocchi_the_rock",
+    "name": "Kita Ikuyo",
+    "anime": "Bocchi the Rock!",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "guitarist"
+    ],
+    "anilistId": 266041,
+    "favourites": 4055,
+    "danbooruTag": "kita_ikuyo",
+    "image": {
+      "url": "https://cdn.donmai.us/original/e8/9a/e89abba6c91e43c87dc666fd997e6ef8.png",
+      "source": "DANBOORU",
+      "sourceId": "6046520",
+      "credit": "Art: aroa_(aroamoyasi) · danbooru #6046520"
+    }
+  },
+  {
+    "key": "momo_yaoyorozu__my_hero_academia",
+    "name": "Momo Yaoyorozu",
+    "anime": "My Hero Academia",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "creation"
+    ],
+    "anilistId": 89241,
+    "favourites": 3430,
+    "danbooruTag": "yaoyorozu_momo",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/cc/80/sample-cc80b06423fc6a812b6b20ca0af23cb4.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7918896",
+      "credit": "Art: 0ping0 · danbooru #7918896"
+    }
+  },
+  {
+    "key": "yuki_tsukumo__jujutsu_kaisen",
+    "name": "Yuki Tsukumo",
+    "anime": "Jujutsu Kaisen",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "special_grade"
+    ],
+    "anilistId": 196502,
+    "favourites": 1000,
+    "danbooruTag": "tsukumo_yuki_(jujutsu_kaisen)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/23/27/sample-2327827631cfa7239c3078e6e9535faf.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7038884",
+      "credit": "Art: zu_yuan_cesar · danbooru #7038884"
+    }
+  },
+  {
+    "key": "cha_hae_in__solo_leveling",
+    "name": "Cha Hae-In",
+    "anime": "Solo Leveling",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "s_rank_hunter"
+    ],
+    "anilistId": 138789,
+    "favourites": 4726,
+    "danbooruTag": "cha_hae-in",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/17/6d/sample-176d5439bb09a3d5ecd70ae31e786d35.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6689361",
+      "credit": "Art: raise094 · danbooru #6689361"
+    }
+  },
+  {
+    "key": "sylphiette__mushoku_tensei",
+    "name": "Sylphiette",
+    "anime": "Mushoku Tensei",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "silent_magic"
+    ],
+    "anilistId": 88346,
+    "favourites": 4429,
+    "danbooruTag": "sylphiette_(mushoku_tensei)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3f/96/sample-3f966d6c48249954ad2607009f3ca0b6.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6232495",
+      "credit": "Art: wangza · danbooru #6232495"
+    }
+  },
+  {
+    "key": "ryuu_lion__is_it_wrong_to_try_to_pick_up_girls_in_a_dungeon",
+    "name": "Ryuu Lion",
+    "anime": "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "elf"
+    ],
+    "anilistId": 88890,
+    "favourites": 2964,
+    "danbooruTag": "ryu_lion",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f5/e1/sample-f5e1e5354087d1e70b641786b5325723.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6223664",
+      "credit": "Art: sasamoto_(7msaaxt6qto3joj) · danbooru #6223664"
+    }
+  },
+  {
+    "key": "marcille_donato__delicious_in_dungeon",
+    "name": "Marcille Donato",
+    "anime": "Delicious in Dungeon",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "elf_mage"
+    ],
+    "anilistId": 127292,
+    "favourites": 4242,
+    "danbooruTag": "marcille_donato",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/2e/b8/sample-2eb8fa1c2afb9772263dfd0559b32489.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9027622",
+      "credit": "Art: eitopondo · danbooru #9027622"
+    }
+  },
+  {
+    "key": "aira_shiratori__dandadan",
+    "name": "Aira Shiratori",
+    "anime": "Dandadan",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "acrobatic_silky"
+    ],
+    "anilistId": 245466,
+    "favourites": 6131,
+    "danbooruTag": "shiratori_aira_(dandadan)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/57/5f/575ffb07f3ece2227bd297701e88d631.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8977502",
+      "credit": "Art: divadiva548447 · danbooru #8977502"
+    }
+  },
+  {
+    "key": "miko_iino__kaguya_sama_love_is_war",
+    "name": "Miko Iino",
+    "anime": "Kaguya-sama: Love Is War",
+    "element": "LIGHT",
+    "tags": [
+      "light",
+      "discipline"
+    ],
+    "anilistId": 125886,
+    "favourites": 15180,
+    "danbooruTag": "iino_miko",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/d0/55/sample-d055330253621db0ddbe2078f4029acd.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5450642",
+      "credit": "Art: sonchi · danbooru #5450642"
+    }
+  },
+  {
+    "key": "makima__chainsaw_man",
+    "name": "Makima",
+    "anime": "Chainsaw Man",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "control_devil"
+    ],
+    "anilistId": 137080,
+    "favourites": 22260,
+    "danbooruTag": "makima_(chainsaw_man)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/68/3c/sample-683c19a0c94c0db4c0fb0190b05ac290.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6805122",
+      "credit": "Art: zeon_(zzeeonn) · danbooru #6805122"
+    }
+  },
+  {
+    "key": "kurumi_tokisaki__date_a_live",
+    "name": "Kurumi Tokisaki",
+    "anime": "Date A Live",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "nightmare"
+    ],
+    "anilistId": 70069,
+    "favourites": 8052,
+    "danbooruTag": "tokisaki_kurumi",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5e/20/sample-5e200bb8373da64e35f0e74a9de00d9f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7543575",
+      "credit": "Art: asle · danbooru #7543575"
+    }
+  },
+  {
+    "key": "akame__akame_ga_kill",
+    "name": "Akame",
+    "anime": "Akame ga Kill!",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "murasame"
+    ],
+    "anilistId": 63351,
+    "favourites": 7024,
+    "danbooruTag": "akame_(akame_ga_kill!)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/76/d5/sample-76d55d86f06bfa4e0dbe156dc6129bb2.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8393458",
+      "credit": "Art: peacekeeper.45 · danbooru #8393458"
+    }
+  },
+  {
+    "key": "albedo__overlord",
+    "name": "Albedo",
+    "anime": "Overlord",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "succubus"
+    ],
+    "anilistId": 89122,
+    "favourites": 5978,
+    "danbooruTag": "albedo_(overlord)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f4/ef/sample-f4ef356da1ce989b2c7b7e12e839bfd3.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5687532",
+      "credit": "Art: franlol · danbooru #5687532"
+    }
+  },
+  {
+    "key": "yor_forger__spy_x_family",
+    "name": "Yor Forger",
+    "anime": "Spy x Family",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "thorn_princess"
+    ],
+    "anilistId": 138102,
+    "favourites": 14406,
+    "danbooruTag": "yor_briar",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/0a/f0/sample-0af0df7d821880bf78807bd613102e42.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5278510",
+      "credit": "Art: dino_(dinoartforame) · danbooru #5278510"
+    }
+  },
+  {
+    "key": "c_c__code_geass",
+    "name": "C.C.",
+    "anime": "Code Geass",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "immortal"
+    ],
+    "anilistId": 1111,
+    "favourites": 10919,
+    "danbooruTag": "c.c.",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c1/a5/sample-c1a5cee16a07563d749f56cb19b6a34b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5623753",
+      "credit": "Art: dino_(dinoartforame) · danbooru #5623753"
+    }
+  },
+  {
+    "key": "homura_akemi__puella_magi_madoka_magica",
+    "name": "Homura Akemi",
+    "anime": "Puella Magi Madoka Magica",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "time_traveler"
+    ],
+    "anilistId": 38005,
+    "favourites": 12270,
+    "danbooruTag": "akemi_homura",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/20/43/sample-2043406285fdb31a944455ea98b98f25.jpg",
+      "source": "DANBOORU",
+      "sourceId": "9228063",
+      "credit": "Art: ebora · danbooru #9228063"
+    }
+  },
+  {
+    "key": "rize_kamishiro__tokyo_ghoul",
+    "name": "Rize Kamishiro",
+    "anime": "Tokyo Ghoul",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "binge_eater"
+    ],
+    "anilistId": 88413,
+    "favourites": 1420,
+    "danbooruTag": "kamishiro_rize",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/94/f1/sample-94f1d24f2f76bb6f26dd88ae31dc2226.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5558882",
+      "credit": "Art: parkjinsuky · danbooru #5558882"
+    }
+  },
+  {
+    "key": "hitagi_senjougahara__bakemonogatari",
+    "name": "Hitagi Senjougahara",
+    "anime": "Bakemonogatari",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "tsundere"
+    ],
+    "anilistId": 22037,
+    "favourites": 14776,
+    "danbooruTag": "senjougahara_hitagi",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3a/38/sample-3a386da0523d34a75f3b5661981fdc27.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5271938",
+      "credit": "Art: oogure_ito · danbooru #5271938"
+    }
+  },
+  {
+    "key": "lucy__elfen_lied",
+    "name": "Lucy",
+    "anime": "Elfen Lied",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "diclonius"
+    ],
+    "anilistId": 738,
+    "favourites": 2269,
+    "danbooruTag": "lucy_(elfen_lied)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/3e/97/sample-3e97eca992859eeb3b4bb4780a50fccb.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4304222",
+      "credit": "Art: hagioshi · danbooru #4304222"
+    }
+  },
+  {
+    "key": "rei_ayanami__neon_genesis_evangelion",
+    "name": "Rei Ayanami",
+    "anime": "Neon Genesis Evangelion",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "first_child"
+    ],
+    "anilistId": 86,
+    "favourites": 11535,
+    "danbooruTag": "ayanami_rei",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/8a/b3/sample-8ab3f21bdad16ec13e1a3e2f5a4c8464.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5540330",
+      "credit": "Art: ciloranko · danbooru #5540330"
+    }
+  },
+  {
+    "key": "nico_robin__one_piece",
+    "name": "Nico Robin",
+    "anime": "One Piece",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "archaeologist"
+    ],
+    "anilistId": 61,
+    "favourites": 14819,
+    "danbooruTag": "nico_robin",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/43/e9/sample-43e9a375f2a6d5bd7c7cc4fc989238ed.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6851185",
+      "credit": "Art: yotsumi_shiro · danbooru #6851185"
+    }
+  },
+  {
+    "key": "power__chainsaw_man",
+    "name": "Power",
+    "anime": "Chainsaw Man",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "blood_fiend"
+    ],
+    "anilistId": 137079,
+    "favourites": 20539,
+    "danbooruTag": "power_(chainsaw_man)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/66/25/6625fcd5e8a5830ee13bbad9de36ae86.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5305114",
+      "credit": "Art: wengwengchim · danbooru #5305114"
+    }
+  },
+  {
+    "key": "himiko_toga__my_hero_academia",
+    "name": "Himiko Toga",
+    "anime": "My Hero Academia",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "transform"
+    ],
+    "anilistId": 125619,
+    "favourites": 6142,
+    "danbooruTag": "toga_himiko",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f3/0f/sample-f30fdb556af6d710f4b12cd5d4d35551.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5738624",
+      "credit": "Art: lentiyay · danbooru #5738624"
+    }
+  },
+  {
+    "key": "shinobu_oshino__monogatari",
+    "name": "Shinobu Oshino",
+    "anime": "Monogatari",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "vampire"
+    ],
+    "anilistId": 23602,
+    "favourites": 13912,
+    "danbooruTag": "oshino_shinobu",
+    "image": {
+      "url": "https://cdn.donmai.us/original/64/cb/64cb1089bf73f3719c1e9416a07a4c52.jpg",
+      "source": "DANBOORU",
+      "sourceId": "908969",
+      "credit": "Art: makimura_shunsuke · danbooru #908969"
+    }
+  },
+  {
+    "key": "shalltear_bloodfallen__overlord",
+    "name": "Shalltear Bloodfallen",
+    "anime": "Overlord",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "vampire"
+    ],
+    "anilistId": 89121,
+    "favourites": 2842,
+    "danbooruTag": "shalltear_bloodfallen",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/33/05/sample-3305874298dd16cad91b57186c00e015.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4009864",
+      "credit": "Art: ataruman · danbooru #4009864"
+    }
+  },
+  {
+    "key": "seras_victoria__hellsing",
+    "name": "Seras Victoria",
+    "anime": "Hellsing",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "vampire"
+    ],
+    "anilistId": 624,
+    "favourites": 2027,
+    "danbooruTag": "seras_victoria",
+    "image": {
+      "url": "https://cdn.donmai.us/original/a8/7a/a87a99338729da66466e02b5ae305f86.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5385834",
+      "credit": "Art: k-suwabe · danbooru #5385834"
+    }
+  },
+  {
+    "key": "beatrice__re_zero",
+    "name": "Beatrice",
+    "anime": "Re:Zero",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "yin_magic"
+    ],
+    "anilistId": 90181,
+    "favourites": 4672,
+    "danbooruTag": "beatrice_(re:zero)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/dc/27/sample-dc2780f6ab93c06abb52b6800c7880c5.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4495470",
+      "credit": "Art: iwamushi · danbooru #4495470"
+    }
+  },
+  {
+    "key": "echidna__re_zero",
+    "name": "Echidna",
+    "anime": "Re:Zero",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "witch_of_greed"
+    ],
+    "anilistId": 129330,
+    "favourites": 5968,
+    "danbooruTag": "echidna_(re:zero)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/a8/33/sample-a833b86525d17809e6e23a9d2657abc3.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6570679",
+      "credit": "Art: iwamushi · danbooru #6570679"
+    }
+  },
+  {
+    "key": "aura__frieren_beyond_journey_s_end",
+    "name": "Aura",
+    "anime": "Frieren: Beyond Journey's End",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "guillotine"
+    ],
+    "anilistId": 219110,
+    "favourites": 253,
+    "danbooruTag": "aura_(sousou_no_frieren)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ee/33/sample-ee33c97bb1c882a7a96004315211be31.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6889426",
+      "credit": "Art: muginosa · danbooru #6889426"
+    }
+  },
+  {
+    "key": "ubel__frieren_beyond_journey_s_end",
+    "name": "Ubel",
+    "anime": "Frieren: Beyond Journey's End",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "reaper"
+    ],
+    "anilistId": 246057,
+    "favourites": 2140,
+    "danbooruTag": "ubel_(sousou_no_frieren)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/11/d4/sample-11d4c8c659b44a828c163fdd98d436eb.jpg",
+      "source": "DANBOORU",
+      "sourceId": "10210139",
+      "credit": "Art: jmx_(j_m_x) · danbooru #10210139"
+    }
+  },
+  {
+    "key": "daki__demon_slayer",
+    "name": "Daki",
+    "anime": "Demon Slayer",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "upper_moon"
+    ],
+    "anilistId": 126071,
+    "favourites": 18044,
+    "danbooruTag": "daki_(kimetsu_no_yaiba)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/e5/81/sample-e5816764d6f76b34067f2f8e42e1afde.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6124516",
+      "credit": "Art: baihua_er · danbooru #6124516"
+    }
+  },
+  {
+    "key": "mei_mei__jujutsu_kaisen",
+    "name": "Mei Mei",
+    "anime": "Jujutsu Kaisen",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "crows"
+    ],
+    "anilistId": 157215,
+    "favourites": 1255,
+    "danbooruTag": "mei_mei_(jujutsu_kaisen)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/96/31/sample-96313a4d59af6ef1edce4035673d5bf9.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6580632",
+      "credit": "Art: limart · danbooru #6580632"
+    }
+  },
+  {
+    "key": "soi_fon__bleach",
+    "name": "Soi Fon",
+    "anime": "Bleach",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "suzumebachi"
+    ],
+    "anilistId": 905,
+    "favourites": 1725,
+    "danbooruTag": "sui-feng",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/b9/ac/sample-b9ac0f2e1f6a28b79dcef9236055ca9e.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8142012",
+      "credit": "Art: izei1337 · danbooru #8142012"
+    }
+  },
+  {
+    "key": "mirajane_strauss__fairy_tail",
+    "name": "Mirajane Strauss",
+    "anime": "Fairy Tail",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "satan_soul"
+    ],
+    "anilistId": 5190,
+    "favourites": 1593,
+    "danbooruTag": "mirajane_strauss",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/5a/15/sample-5a15db7d49d0f951712ca3a0cb4695fe.jpg",
+      "source": "DANBOORU",
+      "sourceId": "10467670",
+      "credit": "Art: reytsu · danbooru #10467670"
+    }
+  },
+  {
+    "key": "yuuki_konno__sword_art_online",
+    "name": "Yuuki Konno",
+    "anime": "Sword Art Online",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "absolute_sword"
+    ],
+    "anilistId": 64523,
+    "favourites": 1712,
+    "danbooruTag": "konno_yuuki_(sao)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/eb/42/sample-eb42c91f8ca3c885f1aa865752174bd4.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4523561",
+      "credit": "Art: aco_(bearchannel) · danbooru #4523561"
+    }
+  },
+  {
+    "key": "perona__one_piece",
+    "name": "Perona",
+    "anime": "One Piece",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "ghosts"
+    ],
+    "anilistId": 7467,
+    "favourites": 2326,
+    "danbooruTag": "perona",
+    "image": {
+      "url": "https://cdn.donmai.us/original/07/e5/07e5438056040982ae7960f28b950291.png",
+      "source": "DANBOORU",
+      "sourceId": "4592933",
+      "credit": "Art: joman · danbooru #4592933"
+    }
+  },
+  {
+    "key": "lust__fullmetal_alchemist_brotherhood",
+    "name": "Lust",
+    "anime": "Fullmetal Alchemist: Brotherhood",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "homunculus"
+    ],
+    "anilistId": 650,
+    "favourites": 670,
+    "danbooruTag": "lust_(fma)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/84/5a/sample-845a13d8856a1e89af17b1ffff0e121b.jpg",
+      "source": "DANBOORU",
+      "sourceId": "10427665",
+      "credit": "Art: jeweldraw · danbooru #10427665"
+    }
+  },
+  {
+    "key": "nui_harime__kill_la_kill",
+    "name": "Nui Harime",
+    "anime": "Kill la Kill",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "grand_couturier"
+    ],
+    "anilistId": 88475,
+    "favourites": 511,
+    "danbooruTag": "harime_nui",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/25/da/sample-25da0cf5b689c067e548e6abc5ce47a6.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5496319",
+      "credit": "Art: logknn · danbooru #5496319"
+    }
+  },
+  {
+    "key": "scathach__fate_grand_order",
+    "name": "Scathach",
+    "anime": "Fate/Grand Order",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "land_of_shadows"
+    ],
+    "anilistId": 130864,
+    "favourites": 466,
+    "danbooruTag": "scathach_(fate)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/ba/7a/sample-ba7a0439d883e792e3645d2632fcaff2.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4841929",
+      "credit": "Art: dokshuri · danbooru #4841929"
+    }
+  },
+  {
+    "key": "yuno_gasai__future_diary",
+    "name": "Yuno Gasai",
+    "anime": "Future Diary",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "yandere"
+    ],
+    "anilistId": 4963,
+    "favourites": 5939,
+    "danbooruTag": "gasai_yuno",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/57/0a/sample-570ac1768f98e546cb9448c6c764f1aa.jpg",
+      "source": "DANBOORU",
+      "sourceId": "4329347",
+      "credit": "Art: hatena_(nazequestion) · danbooru #4329347"
+    }
+  },
+  {
+    "key": "rikka_takanashi__love_chunibyo_other_delusions",
+    "name": "Rikka Takanashi",
+    "anime": "Love, Chunibyo & Other Delusions",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "wicked_eye"
+    ],
+    "anilistId": 65865,
+    "favourites": 7928,
+    "danbooruTag": "takanashi_rikka",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/c5/88/sample-c588eb10d8a5522f42851e9bef2d8971.jpg",
+      "source": "DANBOORU",
+      "sourceId": "7461037",
+      "credit": "Art: gunu_(nyzn3223) · danbooru #7461037"
+    }
+  },
+  {
+    "key": "hitori_gotoh__bocchi_the_rock",
+    "name": "Hitori Gotoh",
+    "anime": "Bocchi the Rock!",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "guitar_hero"
+    ],
+    "anilistId": 257562,
+    "favourites": 12414,
+    "danbooruTag": "gotoh_hitori",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/db/36/sample-db3674dfddef43fc548903e60cc2effc.jpg",
+      "source": "DANBOORU",
+      "sourceId": "5272874",
+      "credit": "Art: kerorira · danbooru #5272874"
+    }
+  },
+  {
+    "key": "shion__that_time_i_got_reincarnated_as_a_slime",
+    "name": "Shion",
+    "anime": "That Time I Got Reincarnated as a Slime",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "kijin"
+    ],
+    "anilistId": 128033,
+    "favourites": 2533,
+    "danbooruTag": "shion_(tensura)",
+    "image": {
+      "url": "https://cdn.donmai.us/original/eb/88/eb88369edc461109176fbd951410dcbc.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6319507",
+      "credit": "Art: lihichi2808 · danbooru #6319507"
+    }
+  },
+  {
+    "key": "falin_touden__delicious_in_dungeon",
+    "name": "Falin Touden",
+    "anime": "Delicious in Dungeon",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "chimera"
+    ],
+    "anilistId": 130508,
+    "favourites": 1761,
+    "danbooruTag": "falin_touden",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/f9/3c/sample-f93c145620e286d0a9e6ec869afd6e74.jpg",
+      "source": "DANBOORU",
+      "sourceId": "8091392",
+      "credit": "Art: eitopondo · danbooru #8091392"
+    }
+  },
+  {
+    "key": "yuzuriha__hell_s_paradise",
+    "name": "Yuzuriha",
+    "anime": "Hell's Paradise",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "kunoichi"
+    ],
+    "anilistId": 137270,
+    "favourites": 2402,
+    "danbooruTag": "yuzuriha_(jigokuraku)",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/a4/79/sample-a47985e287ba8b21fc0fd74a4dc481bd.jpg",
+      "source": "DANBOORU",
+      "sourceId": "6308318",
+      "credit": "Art: kota_2kx · danbooru #6308318"
+    }
+  },
+  {
+    "key": "tohka_yatogami__date_a_live",
+    "name": "Tohka Yatogami",
+    "anime": "Date A Live",
+    "element": "SHADOW",
+    "tags": [
+      "shadow",
+      "sandalphon"
+    ],
+    "anilistId": 65259,
+    "favourites": 2710,
+    "danbooruTag": "yatogami_tohka",
+    "image": {
+      "url": "https://cdn.donmai.us/sample/4d/96/sample-4d963948381a3e1ec4e940d913c7e09f.jpg",
+      "source": "DANBOORU",
+      "sourceId": "3472944",
+      "credit": "Art: bison_cangshu · danbooru #3472944"
+    }
+  }
+]

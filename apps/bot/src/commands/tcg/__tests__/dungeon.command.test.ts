@@ -12,18 +12,31 @@ import {
 describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
   let services: BotServices;
   let replyMock: any;
+  let mockProgressRepo: any;
 
   beforeEach(() => {
     replyMock = vi.fn().mockResolvedValue(undefined);
 
-    const mockProgressRepo: any = {
-      getOrCreateProgress: vi.fn().mockResolvedValue({
-        id: 'prog_1',
-        userId: 'user_123',
-        seasonId: 's1_infernal_crucible',
-        highestClearedFloor: 0,
-        attemptsCount: 2,
-        clearCount: 1,
+    mockProgressRepo = {
+      getOrCreateProgress: vi.fn().mockImplementation((userId: string, seasonId: string) => {
+        if (seasonId === 'season_tutorial') {
+          return Promise.resolve({
+            id: 'prog_tut',
+            userId,
+            seasonId: 'season_tutorial',
+            highestClearedFloor: 4,
+            attemptsCount: 4,
+            clearCount: 4,
+          });
+        }
+        return Promise.resolve({
+          id: 'prog_1',
+          userId,
+          seasonId: 's1_infernal_crucible',
+          highestClearedFloor: 0,
+          attemptsCount: 2,
+          clearCount: 1,
+        });
       }),
       recordFloorAttempt: vi.fn().mockResolvedValue({
         id: 'prog_1',
@@ -76,6 +89,7 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
         critRate: 0.15,
       }),
       createUserCard: vi.fn().mockResolvedValue({ id: 'new_card_1' }),
+      updateUserCardState: vi.fn().mockResolvedValue({}),
     };
 
     const mockLoadoutService: any = {
@@ -92,6 +106,7 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
 
     const mockInventoryRepo: any = {
       create: vi.fn().mockResolvedValue({ id: 'inv_item_1' }),
+      findByUser: vi.fn().mockResolvedValue([]),
     };
 
     const mockEconomyRepo: any = {
@@ -173,6 +188,27 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
   });
 
   it('should complete tutorial prologue and dispatch starter rewards', async () => {
+    mockProgressRepo.getOrCreateProgress.mockImplementation((userId: string, seasonId: string) => {
+      if (seasonId === 'season_tutorial') {
+        return Promise.resolve({
+          id: 'prog_tut',
+          userId,
+          seasonId: 'season_tutorial',
+          highestClearedFloor: 3,
+          attemptsCount: 3,
+          clearCount: 3,
+        });
+      }
+      return Promise.resolve({
+        id: 'prog_1',
+        userId,
+        seasonId: 's1_infernal_crucible',
+        highestClearedFloor: 0,
+        attemptsCount: 2,
+        clearCount: 1,
+      });
+    });
+
     const cmd = createDungeonCommand(services);
     const ctx = createMockContext({ action: 'tutorial' }, ['tutorial']);
 
@@ -181,10 +217,70 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     expect(replyMock).toHaveBeenCalledTimes(1);
     const callArg = replyMock.mock.calls[0]![0];
     const embed = callArg.embeds[0].data;
-    expect(embed.title).toContain('Prologue Tutorial');
-    expect(embed.description).toContain('Flame Novice Aria');
+    expect(embed.title).toContain('Prologue Tutorial CLEARED');
+    // Names the starter the player actually holds (mock user already owns Flame Valkyrie)
+    expect(embed.description).toContain('Flame Valkyrie [FIRE]');
     expect(embed.description).toContain('Novice Blade');
     expect(embed.description).toContain('TUTORIAL_COMPLETE');
+  });
+
+  it('should automatically route incomplete players to tutorial Floor T1 when running climb', async () => {
+    mockProgressRepo.getOrCreateProgress.mockImplementation((userId: string, seasonId: string) => {
+      if (seasonId === 'season_tutorial') {
+        return Promise.resolve({
+          id: 'prog_tut',
+          userId,
+          seasonId: 'season_tutorial',
+          highestClearedFloor: 0,
+          attemptsCount: 0,
+          clearCount: 0,
+        });
+      }
+      return Promise.resolve({
+        id: 'prog_1',
+        userId,
+        seasonId: 's1_infernal_crucible',
+        highestClearedFloor: 0,
+        attemptsCount: 0,
+        clearCount: 0,
+      });
+    });
+
+    const cmd = createDungeonCommand(services);
+    const ctx = createMockContext({ action: 'climb' }, ['climb']);
+
+    await cmd.execute(ctx);
+
+    expect(replyMock).toHaveBeenCalledTimes(1);
+    const callArg = replyMock.mock.calls[0]![0];
+    const embed = callArg.embeds[0].data;
+    expect(embed.title).toContain('Floor T1');
+    expect(embed.description).toContain('Elemental Multipliers');
+  });
+
+  it('should resolve $climb prefix alias to climb action', async () => {
+    const cmd = createDungeonCommand(services);
+    const ctx: any = {
+      source: 'prefix',
+      raw: { content: '$climb' },
+      invokedPrefix: '$',
+      user: { id: 'user_123', username: 'TestHero' },
+      guild: { id: 'guild_123' },
+      options: {
+        getString: () => null,
+        getInteger: () => null,
+        getRawArgs: () => [],
+      },
+      reply: replyMock,
+    };
+
+    await cmd.execute(ctx);
+
+    expect(replyMock).toHaveBeenCalledTimes(1);
+    const callArg = replyMock.mock.calls[0]![0];
+    const embed = callArg.embeds[0].data;
+    expect(embed.title).toContain('Floor 1');
+    expect(embed.description).toContain('VICTORY');
   });
 
   it('should display seasonal leaderboard with top climbers', async () => {

@@ -90,6 +90,7 @@ import {
   RpsEngine,
   DropManager,
   CardDismantleService,
+  CardImageService,
   CombatSimulator,
   ExpeditionService,
   BossRaidService,
@@ -169,6 +170,7 @@ export interface BotServices {
   waifuCardRepo: WaifuCardRepository;
   dropManager: DropManager;
   dismantleService: CardDismantleService;
+  cardImageService: CardImageService;
   combatSimulator: CombatSimulator;
   expeditionService: ExpeditionService;
   bossRaidService: BossRaidService;
@@ -234,6 +236,7 @@ export async function createBotServices(
   const waifuCardRepo = new WaifuCardRepository(db);
   const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo);
   const dismantleService = new CardDismantleService(waifuCardRepo);
+  const cardImageService = new CardImageService();
   const musicPlayer = new MusicPlayerService({
     youtubeOptions: {
       cookie: process.env.YOUTUBE_COOKIE,
@@ -586,6 +589,8 @@ export async function createBotServices(
     cardRepo: waifuCardRepo,
     inventoryRepo: userInventoryItemRepo,
     itemRepo: gameItemRepo,
+    assetRepo: waifuAssetRepo,
+    achievementService,
   });
 
   // Seed canonical items if needed
@@ -600,7 +605,7 @@ export async function createBotServices(
     // In some unit tests with isolated in-memory databases, game_items may not be created.
   }
 
-  // Seed default seasons if needed
+  // Seed default seasons & starter card if needed
   try {
     const active = await dungeonSeasonRepo.findActiveSeason();
     if (!active) {
@@ -631,6 +636,55 @@ export async function createBotServices(
         startsAt: new Date(),
         endsAt: new Date(Date.now() + 3650 * 24 * 60 * 60 * 1000),
       });
+    }
+
+    // Seed canonical starter card (Flame Novice Aria [FIRE])
+    const starterCard = await waifuCardRepo.findById('starter_waifu_01');
+    if (!starterCard) {
+      let assetId = 'asset_starter_aria';
+      const activeAssets = await waifuAssetRepo.findActiveAssets(1, 0);
+      if (activeAssets.length > 0 && activeAssets[0]) {
+        assetId = activeAssets[0].id;
+      } else {
+        try {
+          const createdAsset = await waifuAssetRepo.create({
+            id: 'asset_starter_aria',
+            sourceId: 'WAIFU_IM',
+            sourceImageId: 'starter_aria',
+            characterName: 'Flame Novice Aria',
+            animeTitle: 'Ririko Academy',
+            imageHash: '0000000000000000000000000000000000000000000000000000000000000000',
+            localStoragePath: '/assets/waifu-cards/starter_aria.png',
+            tags: ['starter', 'fire', 'novice'],
+          });
+          assetId = createdAsset.id;
+        } catch {
+          // May already exist
+        }
+      }
+
+      try {
+        await waifuCardRepo.create({
+          id: 'starter_waifu_01',
+          assetId,
+          name: 'Flame Novice Aria',
+          rarity: 'COMMON',
+          element: 'FIRE',
+          attack: 120,
+          defense: 80,
+          speed: 95,
+          health: 600,
+          critRate: 0.05,
+          skillName: 'Ignite Slash',
+          skillDescription: 'Strikes enemy with fiery blade dealing 140% ATK damage.',
+          passiveName: 'Warm Up',
+          passiveDescription: 'Increases ATK by 5% in battle.',
+          collectionNumber: 1,
+          isActive: true,
+        });
+      } catch {
+        // May already exist
+      }
     }
   } catch {
     // Ignore in tests
@@ -692,6 +746,7 @@ export async function createBotServices(
     waifuCardRepo,
     dropManager,
     dismantleService,
+    cardImageService,
     combatSimulator,
     expeditionService,
     bossRaidService,

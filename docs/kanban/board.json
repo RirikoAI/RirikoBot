@@ -1559,6 +1559,16 @@
       "description": "Connect MusicPlayTool in AI chat to real MusicPlayerService, validating voice channel presence and permissions, joining, queueing audio tracks, and refreshing the active music embed controller."
     },
     {
+      "id": "BUG-0008",
+      "title": "Fix Waifu TCG Tutorial False Completion, Missing Starter Card Seed & $climb Route",
+      "points": 3,
+      "status": "DONE",
+      "parent": "STORY-104",
+      "requires": [],
+      "blocks": [],
+      "description": "Fix false tutorial completion caused by immediate floor 4 completion and unseeded starter card foreign key error; seed starter_waifu_01; route incomplete players from $climb into tutorial floors; fix prefix climb alias argument resolution."
+    },
+    {
       "id": "TASK-1001",
       "title": "waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository",
       "points": 2,
@@ -1686,7 +1696,18 @@
       "requires": ["TASK-1052"],
       "blocks": ["EPIC-011"],
       "description": "Implement comprehensive TCG player guide (docs/tcg-player-guide.md), interactive dual-dispatch /tcg-info command with StringSelectMenu and 10 guide topics, /card action:guide integration, and unit tests."
+    },
+    {
+      "id": "TASK-1061",
+      "title": "Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI",
+      "points": 5,
+      "status": "DONE",
+      "parent": "STORY-105",
+      "requires": ["TASK-1053"],
+      "blocks": ["EPIC-011"],
+      "description": "Implement CardSynthesizer canvas engine (800x1200 px, 8-layer stack, rarity foiling, modular assets/tcg structure with procedural fallbacks), and scripts/tcg-card-builder.ts supporting 50 cards per element bulk generation and manual single-card creation via waifu.im or direct URL."
     }
   ]
 }
+
 

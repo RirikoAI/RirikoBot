@@ -37,6 +37,10 @@
     "./games": {
       "types": "./dist/games/index.d.ts",
       "import": "./dist/games/index.js"
+    },
+    "./waifu-tcg": {
+      "types": "./dist/waifu-tcg/index.d.ts",
+      "import": "./dist/waifu-tcg/index.js"
     }
   },
   "scripts": {

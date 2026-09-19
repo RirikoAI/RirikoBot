@@ -1,9 +1,9 @@
 import DatabaseConstructor from 'better-sqlite3';
 import type Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { DatabaseError } from '@ririko/core';
-import { dirname, resolve, isAbsolute } from 'node:path';
-import { mkdirSync, existsSync } from 'node:fs';
+import { DatabaseError, resolveWorkspacePath } from '@ririko/core';
+import { dirname } from 'node:path';
+import { mkdirSync } from 'node:fs';
 import type { DatabaseConfig, PingResult, SqliteDatabaseClient } from './types.js';
 import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
 
@@ -11,18 +11,7 @@ export function resolveDatabasePath(url: string): string {
   if (url === ':memory:' || url.startsWith('file::memory:') || url.startsWith('sqlite:')) {
     return url;
   }
-  if (isAbsolute(url)) {
-    return url;
-  }
-  // Walk up from cwd to find workspace root (pnpm-workspace.yaml or .git)
-  let curr = process.cwd();
-  while (curr !== dirname(curr)) {
-    if (existsSync(resolve(curr, 'pnpm-workspace.yaml')) || existsSync(resolve(curr, '.git'))) {
-      return resolve(curr, url);
-    }
-    curr = dirname(curr);
-  }
-  return resolve(url);
+  return resolveWorkspacePath(url);
 }
 
 export function createSqliteClient(config: DatabaseConfig): SqliteDatabaseClient {
