@@ -3,8 +3,12 @@ import type {
   GameItemRepository,
   UserInventoryItemRepository,
   WaifuCardRepository,
+  UserCard,
 } from '@ririko/database';
 import type { Combatant } from '../combat/types.js';
+import type { CardElement, CardRarity } from '../types.js';
+import { resolveSkillMpCost } from '../card/card-generator.js';
+import { LevelingEngine } from '../card/leveling-engine.js';
 import type { EnhancementService } from './enhancement-service.js';
 import {
   ALL_GEAR_SLOTS,
@@ -13,6 +17,8 @@ import {
   type GearSlot,
   type UserInventoryItemWithDefinition,
 } from './types.js';
+
+const levelingEngine = new LevelingEngine();
 
 export class LoadoutService {
   constructor(
@@ -154,6 +160,76 @@ export class LoadoutService {
     }
 
     return loadout;
+  }
+
+  /**
+   * Builds the battle-ready form of an owned card: level-scaled stats, the card's real
+   * skill MP cost, and its equipped gear.
+   */
+  async buildCombatant(userCard: UserCard, team: 'TEAM_A' | 'TEAM_B'): Promise<Combatant | null> {
+    const base = await this.cardRepo.findById(userCard.cardId);
+    if (!base) return null;
+
+    const element = (base.element as CardElement) ?? 'FIRE';
+    const scaled = levelingEngine.calculateScaledStats(
+      {
+        hp: base.health,
+        attack: base.attack,
+        defense: base.defense,
+        speed: base.speed,
+        critRate: base.critRate,
+        mp: 100,
+      },
+      userCard.level,
+    );
+
+    const combatant: Combatant = {
+      id: userCard.id,
+      name: `${base.name} (Lv.${userCard.level})`,
+      team,
+      element,
+      rarity: (base.rarity as CardRarity) ?? 'COMMON',
+      level: userCard.level,
+      maxHealth: scaled.hp,
+      currentHealth: scaled.hp,
+      attack: scaled.attack,
+      defense: scaled.defense,
+      speed: scaled.speed,
+      critRate: scaled.critRate,
+      critDamage: 1.5,
+      maxMp: 100,
+      currentMp: 0,
+      skillName: base.skillName ?? undefined,
+      skillDescription: base.skillDescription ?? undefined,
+      skillManaCost: resolveSkillMpCost(base.skillDescription, element),
+      passiveName: base.passiveName ?? undefined,
+      passiveDescription: base.passiveDescription ?? undefined,
+      shield: 0,
+      statusEffects: [],
+      perks: [],
+      hasUsedPhoenixWard: false,
+      isAlive: true,
+    };
+
+    this.applyLoadoutToCombatant(combatant, await this.getCardLoadout(userCard.id));
+    return combatant;
+  }
+
+  /**
+   * The user's battle party: their EQUIPPED cards, or their first card when none is equipped.
+   */
+  async buildActiveParty(userId: string, team: 'TEAM_A' | 'TEAM_B'): Promise<Combatant[]> {
+    let userCards = await this.cardRepo.listUserCards(userId, { state: 'EQUIPPED' });
+    if (userCards.length === 0) {
+      userCards = await this.cardRepo.listUserCards(userId, { limit: 1 });
+    }
+
+    const party: Combatant[] = [];
+    for (const userCard of userCards) {
+      const combatant = await this.buildCombatant(userCard, team);
+      if (combatant) party.push(combatant);
+    }
+    return party;
   }
 
   /**

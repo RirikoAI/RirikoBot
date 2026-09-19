@@ -79,6 +79,7 @@ export class DungeonBattleSession {
   private defendingThisTurn: boolean = false;
   private potionUsedThisTurn: boolean = false;
   private isFinished: boolean = false;
+  private forfeited: boolean = false;
   private winner: 'TEAM_A' | 'TEAM_B' | 'DRAW' | null = null;
   private readonly allLogs: CombatActionLog[] = [];
   private lastTurnLogs: CombatActionLog[] = [];
@@ -117,6 +118,11 @@ export class DungeonBattleSession {
       isAlive: true,
       hasUsedPhoenixWard: false,
     };
+  }
+
+  /** True when the player surrendered instead of fighting the battle out. */
+  public get wasForfeited(): boolean {
+    return this.forfeited;
   }
 
   public get isTutorial(): boolean {
@@ -407,6 +413,7 @@ export class DungeonBattleSession {
     if (this.isFinished) return this.getSnapshot();
 
     this.isFinished = true;
+    this.forfeited = true;
     this.winner = 'TEAM_B';
     this.pushLog({
       turn: this.turn,

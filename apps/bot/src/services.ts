@@ -103,6 +103,7 @@ import {
   EnergyLifecycleService,
   TcgShopService,
   ItemGrantService,
+  CardProgressionService,
   ScalingEngine,
   DungeonRunner,
   TutorialService,
@@ -597,6 +598,7 @@ export async function createBotServices(
     lootService: dungeonLootService,
     cardRepo: waifuCardRepo,
     tutorialService,
+    cardProgression: new CardProgressionService(waifuCardRepo),
   });
 
   // Seed canonical items if needed

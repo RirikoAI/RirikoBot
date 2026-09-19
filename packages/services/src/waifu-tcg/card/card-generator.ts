@@ -121,6 +121,19 @@ export const ELEMENTAL_SKILLS: Record<CardElement, { skill: CardSkillInfo; passi
 };
 
 /**
+ * MP cost of a card's active skill. Card skill descriptions start with "Costs N MP."
+ * (the builder writes them that way); otherwise the element's default skill cost applies.
+ */
+export function resolveSkillMpCost(
+  skillDescription: string | null | undefined,
+  element: CardElement,
+): number {
+  const match = skillDescription?.match(/Costs (\d+) MP/i);
+  if (match) return Number(match[1]);
+  return ELEMENTAL_SKILLS[element]?.skill.mpCost ?? 40;
+}
+
+/**
  * Formats a card serial number matching specification (e.g. #0042/1000).
  */
 export function formatCardSerialNumber(serial: number, maxSerial = 1000): string {
