@@ -17,7 +17,8 @@
     "clean": "rimraf dist",
     "db:push": "drizzle-kit push",
     "db:reset": "tsx ../../scripts/db-reset.ts",
-    "db:export": "drizzle-kit export --dialect sqlite --schema ./src/schema/sqlite/index.ts"
+    "db:export": "drizzle-kit export --dialect sqlite --schema ./src/schema/sqlite/index.ts",
+    "db:generate-ddl": "node scripts/generate-sqlite-ddl.mjs"
   },
   "dependencies": {
     "@ririko/core": "workspace:*",

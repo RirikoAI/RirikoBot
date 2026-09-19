@@ -28,11 +28,6 @@ describe('Catalog item grants (BUG-0010)', () => {
     });
     if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
     client = raw;
-    // SQLITE_SCHEMA_DDL predates these user_cards columns; add them until the DDL is regenerated.
-    client.raw.exec(`
-      ALTER TABLE user_cards ADD COLUMN battles_won integer DEFAULT 0 NOT NULL;
-      ALTER TABLE user_cards ADD COLUMN is_favorite integer DEFAULT false NOT NULL;
-    `);
     itemRepo = new GameItemRepository(client);
     inventoryRepo = new UserInventoryItemRepository(client);
     for (const item of CANONICAL_ITEMS) await itemRepo.create(item);

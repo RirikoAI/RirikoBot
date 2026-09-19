@@ -7,6 +7,8 @@ import type {
   NewDungeonSeason,
   DungeonFloor,
   NewDungeonFloor,
+  DungeonBoss,
+  NewDungeonBoss,
   UserDungeonProgress,
   NewUserDungeonProgress,
 } from '../schema/types/index.js';
@@ -309,6 +311,16 @@ export class DungeonFloorRepository extends BaseRepository<
     }
   }
 
+  /**
+   * Creates or replaces the floor row for (seasonId, floorNumber). Keeps the existing id.
+   */
+  async upsertBySeasonAndFloor(floor: NewDungeonFloor, tx?: DatabaseClient): Promise<DungeonFloor> {
+    const existing = await this.findBySeasonAndFloor(floor.seasonId, floor.floorNumber, tx);
+    if (!existing) return this.create(floor, tx);
+    const { id: _ignored, createdAt: _created, ...data } = floor;
+    return this.update(existing.id, data, tx);
+  }
+
   async exists(id: string, tx?: DatabaseClient): Promise<boolean> {
     const record = await this.findById(id, tx);
     return record !== null;
@@ -587,6 +599,141 @@ export class UserDungeonProgressRepository extends BaseRepository<
       const [result] = await client.db
         .select({ count: sql<number>`count(*)` })
         .from(pgSchema.userDungeonProgress);
+      return Number(result?.count ?? 0);
+    }
+  }
+}
+
+/**
+ * Repository for seasonal dungeon bosses (anime characters with combat definitions).
+ */
+export class DungeonBossRepository extends BaseRepository<
+  DungeonBoss,
+  NewDungeonBoss,
+  Partial<NewDungeonBoss>
+> {
+  async findById(id: string, tx?: DatabaseClient): Promise<DungeonBoss | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .select()
+        .from(sqliteSchema.dungeonBosses)
+        .where(eq(sqliteSchema.dungeonBosses.id, id));
+      return (row as DungeonBoss) ?? null;
+    } else {
+      const [row] = await client.db
+        .select()
+        .from(pgSchema.dungeonBosses)
+        .where(eq(pgSchema.dungeonBosses.id, id));
+      return (row as unknown as DungeonBoss) ?? null;
+    }
+  }
+
+  async listForSeason(seasonId: string, tx?: DatabaseClient): Promise<DungeonBoss[]> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const rows = await client.db
+        .select()
+        .from(sqliteSchema.dungeonBosses)
+        .where(eq(sqliteSchema.dungeonBosses.seasonId, seasonId))
+        .orderBy(asc(sqliteSchema.dungeonBosses.key));
+      return rows as DungeonBoss[];
+    } else {
+      const rows = await client.db
+        .select()
+        .from(pgSchema.dungeonBosses)
+        .where(eq(pgSchema.dungeonBosses.seasonId, seasonId))
+        .orderBy(asc(pgSchema.dungeonBosses.key));
+      return rows as unknown as DungeonBoss[];
+    }
+  }
+
+  /**
+   * Inserts the boss or replaces every field of the existing row with the same id.
+   */
+  async upsert(boss: NewDungeonBoss, tx?: DatabaseClient): Promise<DungeonBoss> {
+    const client = this.getClient(tx);
+    const now = new Date();
+    const { id: _id, createdAt: _createdAt, ...fields } = boss;
+    const updateSet = { ...fields, updatedAt: now };
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .insert(sqliteSchema.dungeonBosses)
+        .values({ ...boss, createdAt: boss.createdAt ?? now, updatedAt: now })
+        .onConflictDoUpdate({ target: sqliteSchema.dungeonBosses.id, set: updateSet })
+        .returning();
+      return row as DungeonBoss;
+    } else {
+      const [row] = await client.db
+        .insert(pgSchema.dungeonBosses)
+        .values({ ...boss, createdAt: boss.createdAt ?? now, updatedAt: now } as typeof pgSchema.dungeonBosses.$inferInsert)
+        .onConflictDoUpdate({
+          target: pgSchema.dungeonBosses.id,
+          set: updateSet as Partial<typeof pgSchema.dungeonBosses.$inferInsert>,
+        })
+        .returning();
+      return row as unknown as DungeonBoss;
+    }
+  }
+
+  async update(id: string, data: Partial<NewDungeonBoss>, tx?: DatabaseClient): Promise<DungeonBoss> {
+    const client = this.getClient(tx);
+    const updateData = { ...data, updatedAt: new Date() };
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .update(sqliteSchema.dungeonBosses)
+        .set(updateData)
+        .where(eq(sqliteSchema.dungeonBosses.id, id))
+        .returning();
+      if (!row) throw new DatabaseError(`DungeonBoss not found: ${id}`);
+      return row as DungeonBoss;
+    } else {
+      const [row] = await client.db
+        .update(pgSchema.dungeonBosses)
+        .set(updateData as Partial<typeof pgSchema.dungeonBosses.$inferInsert>)
+        .where(eq(pgSchema.dungeonBosses.id, id))
+        .returning();
+      if (!row) throw new DatabaseError(`DungeonBoss not found: ${id}`);
+      return row as unknown as DungeonBoss;
+    }
+  }
+
+  async create(boss: NewDungeonBoss, tx?: DatabaseClient): Promise<DungeonBoss> {
+    return this.upsert(boss, tx);
+  }
+
+  async exists(id: string, tx?: DatabaseClient): Promise<boolean> {
+    return (await this.findById(id, tx)) !== null;
+  }
+
+  async delete(id: string, tx?: DatabaseClient): Promise<boolean> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const deleted = await client.db
+        .delete(sqliteSchema.dungeonBosses)
+        .where(eq(sqliteSchema.dungeonBosses.id, id))
+        .returning({ id: sqliteSchema.dungeonBosses.id });
+      return deleted.length > 0;
+    } else {
+      const deleted = await client.db
+        .delete(pgSchema.dungeonBosses)
+        .where(eq(pgSchema.dungeonBosses.id, id))
+        .returning({ id: pgSchema.dungeonBosses.id });
+      return deleted.length > 0;
+    }
+  }
+
+  async count(tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [result] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(sqliteSchema.dungeonBosses);
+      return Number(result?.count ?? 0);
+    } else {
+      const [result] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(pgSchema.dungeonBosses);
       return Number(result?.count ?? 0);
     }
   }

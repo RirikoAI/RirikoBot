@@ -686,7 +686,7 @@
       "epic": "EPIC-015",
       "title": "DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table)",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-150"],
       "blocks": [],
       "description": "New dungeon_bosses table (PG + SQLite), zod BossDefinition, precedence floor > boss > season scalingParams > code default; DungeonRunner reads season and floor rows; per-floor enrage and affix gating."

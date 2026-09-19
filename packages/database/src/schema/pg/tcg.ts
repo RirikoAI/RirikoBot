@@ -204,6 +204,35 @@ export const dungeonFloors = pgTable(
   (table) => [index('idx_pg_dungeon_floors_season_floor').on(table.seasonId, table.floorNumber)],
 );
 
+/**
+ * Seasonal dungeon bosses: real anime characters synced by `pnpm tcg:boss-builder`.
+ * `definition` holds combat overrides (stats or stat multipliers, skill, enrage, wards).
+ */
+export const dungeonBosses = pgTable(
+  'dungeon_bosses',
+  {
+    id: varchar('id', { length: 96 }).primaryKey(), // '<seasonId>:<key>'
+    seasonId: varchar('season_id', { length: 32 }).notNull(),
+    key: varchar('key', { length: 64 }).notNull(),
+    name: text('name').notNull(),
+    animeTitle: text('anime_title').notNull(),
+    element: varchar('element', { length: 16 }).notNull(),
+    tier: varchar('tier', { length: 16 }).notNull().default('STANDARD'),
+    title: text('title'),
+    flavorText: text('flavor_text'),
+    assetId: uuid('asset_id'),
+    anilistId: integer('anilist_id'),
+    danbooruTag: text('danbooru_tag'),
+    imagePath: text('image_path'),
+    definition: jsonb('definition').$type<Record<string, unknown>>().notNull().default({}),
+    signatureDropCode: varchar('signature_drop_code', { length: 64 }),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('idx_pg_dungeon_bosses_season_key').on(table.seasonId, table.key)],
+);
+
 export const userDungeonProgress = pgTable(
   'user_dungeon_progress',
   {
