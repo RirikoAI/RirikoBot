@@ -736,7 +736,7 @@
       "epic": "EPIC-015",
       "title": "Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-152"],
       "blocks": [],
       "description": "Catalog expansion per floor bracket and slot, first-clear and repeat drop tables by item code, boss signature drops, gear stats sized to floor brackets and verified by the simulator."
