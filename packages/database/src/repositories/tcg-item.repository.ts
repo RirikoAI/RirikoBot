@@ -546,6 +546,30 @@ export class UserInventoryItemRepository extends BaseRepository<
   }
 
   /**
+   * Points every inventory row holding `fromItemId` at `toItemId` and resets its slot to NONE.
+   * Used to repair rows written with ids that never existed in game_items. Returns rows changed.
+   */
+  async remapItemId(fromItemId: string, toItemId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    const updateData = { itemId: toItemId, slot: 'NONE', updatedAt: new Date() };
+    if (this.isSqlite(client)) {
+      const rows = await client.db
+        .update(sqliteSchema.userInventoryItems)
+        .set(updateData)
+        .where(eq(sqliteSchema.userInventoryItems.itemId, fromItemId))
+        .returning({ id: sqliteSchema.userInventoryItems.id });
+      return rows.length;
+    } else {
+      const rows = await client.db
+        .update(pgSchema.userInventoryItems)
+        .set(updateData)
+        .where(eq(pgSchema.userInventoryItems.itemId, fromItemId))
+        .returning({ id: pgSchema.userInventoryItems.id });
+      return rows.length;
+    }
+  }
+
+  /**
    * Equips an item to a card in a given slot, atomically unequipping any previously equipped item.
    */
   async equipToCard(
