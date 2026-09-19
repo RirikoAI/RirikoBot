@@ -195,7 +195,7 @@ The dungeon system provides the primary PvE endgame progression in Ririko 2.0. T
   - **Floor T3**: *Consumables & Tactical Survival* — Introduces HP potions and Mana Draughts in combat.
   - **Floor T4**: *Boss Break Shields* — Introduces multi-elemental barrier breaking on an elite training dummy.
 - **Entry Cost**: 0 Energy (free introductory access).
-- **Rewards**: Fixed starter waifu card, Novice Blade (Common), 3x Minor HP Potions, and unlocks Achievement `TUTORIAL_COMPLETE`.
+- **Rewards**: Random starter waifu card from the starter pool (see `docs/tcg-card-synthesis.md`), Novice Blade (Common), 3x Minor HP Potions, and unlocks Achievement `TUTORIAL_COMPLETE`.
 
 ### 7.2. Seasonal Framework (S1, S2, S3...)
 Dungeons operate on **Seasons** (typically 60–90 days per cycle). When a season concludes, it is archived to the historical Hall of Fame, and a new Season launches with fresh mechanics.

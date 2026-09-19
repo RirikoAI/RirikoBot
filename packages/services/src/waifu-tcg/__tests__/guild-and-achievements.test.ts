@@ -127,6 +127,15 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
         PRIMARY KEY (user_id, guild_id)
       );
 
+      CREATE TABLE xp_events (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        guild_id TEXT NOT NULL,
+        xp_awarded INTEGER NOT NULL,
+        source TEXT NOT NULL,
+        created_at INTEGER NOT NULL
+      );
+
       CREATE TABLE user_inventory_items (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,

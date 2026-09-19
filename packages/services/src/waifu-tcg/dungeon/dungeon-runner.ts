@@ -11,6 +11,7 @@ import { ElementalWard } from './elemental-ward.js';
 import { SeasonalAffixHandler, type SeasonTheme } from './seasonal-affixes.js';
 
 import { DungeonLootService, type DungeonLootResult } from './dungeon-loot.service.js';
+import { TUTORIAL_FLOORS } from './tutorial-service.js';
 
 export function getDungeonFloorEnergyCost(floorNumber: number, isTutorial: boolean = false): number {
   if (isTutorial || floorNumber <= 0) return 0; // Section 7.1: Tutorial = 0 Energy
@@ -153,41 +154,84 @@ export class DungeonRunner {
     const affixHandler = new SeasonalAffixHandler(theme, seasonName);
 
     // 4. Generate enemy boss/combatant
-    const enemyStats = this.scalingEngine.calculateFloorStats(floorNumber);
-    const floorType = this.scalingEngine.getFloorType(floorNumber);
-    const enemyElement = this.getEnemyElementForSeasonAndFloor(theme, floorNumber);
-
-    const enemyName = this.generateEnemyName(floorNumber, floorType, enemyElement);
-    const enemyBoss: Combatant = {
-      id: `dungeon_mob_f${floorNumber}`,
-      name: enemyName,
-      team: 'TEAM_B',
-      element: enemyElement,
-      rarity: floorType === 'MAJOR_BOSS' ? 'MYTHIC' : floorType === 'MINI_BOSS' ? 'SECRET_RARE' : 'RARE',
-      level: Math.max(1, floorNumber * 2),
-      maxHealth: enemyStats.hp,
-      currentHealth: enemyStats.hp,
-      attack: enemyStats.attack,
-      defense: enemyStats.defense,
-      speed: enemyStats.speed,
-      critRate: 0.1,
-      critDamage: 1.5,
-      maxMp: 100,
-      currentMp: 50,
-      skillName: floorType === 'MAJOR_BOSS' ? 'Cataclysmic Shatter' : 'Elemental Rend',
-      skillManaCost: 40,
-      shield: 0,
-      statusEffects: [],
-      perks: [],
-      hasUsedPhoenixWard: false,
-      isAlive: true,
-    };
-
-    // 5. Build Elemental Wards for high-tier boss floors (e.g. F20+, F30+, F40+, F50+)
+    let enemyBoss: Combatant;
     let elementalWard: ElementalWard | null = null;
-    if (floorNumber >= 20 && floorType !== 'STANDARD') {
-      const wardLayers = this.generateWardLayers(floorNumber, enemyElement, enemyStats.hp);
-      elementalWard = new ElementalWard(wardLayers);
+
+    if (isTutorial) {
+      const tutFloor = TUTORIAL_FLOORS.find((f) => f.floorNumber === floorNumber);
+      if (tutFloor) {
+        enemyBoss = { ...tutFloor.dummyEnemy };
+        if (floorNumber === 4) {
+          elementalWard = new ElementalWard([
+            {
+              element: 'FIRE',
+              health: 300,
+            },
+          ]);
+        }
+      } else {
+        const enemyStats = this.scalingEngine.calculateFloorStats(floorNumber);
+        const enemyElement = this.getEnemyElementForSeasonAndFloor(theme, floorNumber);
+        enemyBoss = {
+          id: `dungeon_mob_t${floorNumber}`,
+          name: `Training Automaton T${floorNumber}`,
+          team: 'TEAM_B',
+          element: enemyElement,
+          rarity: 'COMMON',
+          level: floorNumber,
+          maxHealth: enemyStats.hp,
+          currentHealth: enemyStats.hp,
+          attack: enemyStats.attack,
+          defense: enemyStats.defense,
+          speed: enemyStats.speed,
+          critRate: 0.05,
+          critDamage: 1.5,
+          maxMp: 0,
+          currentMp: 0,
+          skillManaCost: 0,
+          shield: 0,
+          statusEffects: [],
+          perks: [],
+          hasUsedPhoenixWard: false,
+          isAlive: true,
+        };
+      }
+    } else {
+      const enemyStats = this.scalingEngine.calculateFloorStats(floorNumber);
+      const floorType = this.scalingEngine.getFloorType(floorNumber);
+      const enemyElement = this.getEnemyElementForSeasonAndFloor(theme, floorNumber);
+
+      const enemyName = this.generateEnemyName(floorNumber, floorType, enemyElement);
+      enemyBoss = {
+        id: `dungeon_mob_f${floorNumber}`,
+        name: enemyName,
+        team: 'TEAM_B',
+        element: enemyElement,
+        rarity: floorType === 'MAJOR_BOSS' ? 'MYTHIC' : floorType === 'MINI_BOSS' ? 'SECRET_RARE' : 'RARE',
+        level: Math.max(1, floorNumber * 2),
+        maxHealth: enemyStats.hp,
+        currentHealth: enemyStats.hp,
+        attack: enemyStats.attack,
+        defense: enemyStats.defense,
+        speed: enemyStats.speed,
+        critRate: 0.1,
+        critDamage: 1.5,
+        maxMp: 100,
+        currentMp: 50,
+        skillName: floorType === 'MAJOR_BOSS' ? 'Cataclysmic Shatter' : 'Elemental Rend',
+        skillManaCost: 40,
+        shield: 0,
+        statusEffects: [],
+        perks: [],
+        hasUsedPhoenixWard: false,
+        isAlive: true,
+      };
+
+      // 5. Build Elemental Wards for high-tier boss floors (e.g. F20+, F30+, F40+, F50+)
+      if (floorNumber >= 20 && floorType !== 'STANDARD') {
+        const wardLayers = this.generateWardLayers(floorNumber, enemyElement, enemyStats.hp);
+        elementalWard = new ElementalWard(wardLayers);
+      }
     }
 
     // 6. Run Combat with custom Dungeon Combat loop incorporating Wards, Affixes, and Soft Enrage
@@ -197,7 +241,7 @@ export class DungeonRunner {
     const isFirstClear = isWin && floorNumber > highestCleared;
 
     let loot: DungeonLootResult | undefined;
-    if (isWin && this.lootService) {
+    if (isWin && !isTutorial && this.lootService) {
       loot = await this.lootService.generateAndDispatchLoot(userId, floorNumber, isFirstClear);
     }
 

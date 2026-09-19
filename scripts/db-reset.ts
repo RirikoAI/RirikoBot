@@ -6,6 +6,7 @@ import {
   GameItemRepository,
   DungeonSeasonRepository,
   WaifuAssetRepository,
+  WaifuCardRepository,
   AchievementRepository,
   EconomyRepository,
 } from '../packages/database/src/index.js';
@@ -189,6 +190,33 @@ async function resetDatabase(): Promise<void> {
     });
     const seededAssets = await ingestionService.seedCanonicalAssets();
     console.log(`  ✓ Seeded ${seededAssets} canonical waifu assets across all 7 elements.`);
+
+    // 6. Seed canonical starter card (Flame Novice Aria [FIRE])
+    const cardRepo = new WaifuCardRepository(dbClient);
+    const existingStarter = await cardRepo.findById('starter_waifu_01');
+    if (!existingStarter) {
+      const activeAssets = await assetRepo.findActiveAssets(1, 0);
+      const assetId = activeAssets[0]?.id ?? 'asset_starter_aria';
+      await cardRepo.create({
+        id: 'starter_waifu_01',
+        assetId,
+        name: 'Flame Novice Aria',
+        rarity: 'COMMON',
+        element: 'FIRE',
+        attack: 120,
+        defense: 80,
+        speed: 95,
+        health: 600,
+        critRate: 0.05,
+        skillName: 'Ignite Slash',
+        skillDescription: 'Strikes enemy with fiery blade dealing 140% ATK damage.',
+        passiveName: 'Warm Up',
+        passiveDescription: 'Increases ATK by 5% in battle.',
+        collectionNumber: 1,
+        isActive: true,
+      });
+      console.log('  ✓ Seeded canonical starter card (Flame Novice Aria [FIRE]).');
+    }
 
     // Verification
     let totalTables = 0;

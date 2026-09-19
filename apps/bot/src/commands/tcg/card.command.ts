@@ -9,12 +9,40 @@ import {
 import type { BotServices } from '../../services.js';
 import {
   formatCardEmbedFooter,
-  resolveCardAssetDisplay,
+  getCardAttribution,
   RARITY_TIERS,
   formatCardSerialNumber,
   type CardRarity,
 } from '@ririko/services';
+import type { WaifuAsset, WaifuCard } from '@ririko/database';
 import { buildTcgInfoEmbed, buildTcgInfoSelectMenu } from './info.command.js';
+
+const CARD_IMAGE_NAME = 'card.png';
+
+/**
+ * Renders the full card PNG (art, frame, foil, stats) and points the embed at it.
+ * Returns the reply `files` entry, or an empty list when rendering fails so the text embed
+ * still goes out.
+ */
+async function attachCardImage(
+  services: BotServices,
+  embed: EmbedBuilder,
+  card: WaifuCard,
+  asset: WaifuAsset | null,
+  attributionText: string,
+): Promise<Array<{ attachment: Buffer; name: string }>> {
+  try {
+    const png = await services.cardImageService.getCardImage(card, asset, {
+      attributionText,
+      maxCollectionNumber: await services.waifuCardRepo.count(),
+    });
+    embed.setImage(`attachment://${CARD_IMAGE_NAME}`);
+    return [{ attachment: png, name: CARD_IMAGE_NAME }];
+  } catch (err) {
+    console.warn(`[card] Failed to render card image for ${card.id}:`, err);
+    return [];
+  }
+}
 
 export function createCardCommand(services: BotServices): Command {
   return {
@@ -177,7 +205,10 @@ export function createCardCommand(services: BotServices): Command {
           }
 
           const tier = RARITY_TIERS[(claimResult.card?.rarity as CardRarity) ?? 'COMMON'];
-          const footer = formatCardEmbedFooter(null, claimResult.formattedSerial);
+          const claimSource = claimResult.asset
+            ? await services.waifuAssetRepo.findSourceById(claimResult.asset.sourceId)
+            : null;
+          const footer = formatCardEmbedFooter(claimSource, claimResult.formattedSerial);
 
           const embed = new EmbedBuilder()
             .setTitle(`🎉 Card Claimed: ${claimResult.card?.name}!`)
@@ -192,12 +223,17 @@ export function createCardCommand(services: BotServices): Command {
             )
             .setFooter(footer);
 
-          const rawUrl = claimResult.asset?.discordCdnUrl || claimResult.asset?.localStoragePath;
-          if (rawUrl && (rawUrl.startsWith('http://') || rawUrl.startsWith('https://') || rawUrl.startsWith('attachment://'))) {
-            embed.setImage(rawUrl);
-          }
+          const files = claimResult.card
+            ? await attachCardImage(
+                services,
+                embed,
+                claimResult.card,
+                claimResult.asset ?? null,
+                getCardAttribution(claimSource).footerText,
+              )
+            : [];
 
-          await ctx.reply({ embeds: [embed] });
+          await ctx.reply({ embeds: [embed], files });
           break;
         }
 
@@ -226,7 +262,6 @@ export function createCardCommand(services: BotServices): Command {
 
           const asset = await services.waifuAssetRepo.findById(baseCard.assetId);
           const source = asset ? await services.waifuAssetRepo.findSourceById(asset.sourceId) : null;
-          const display = asset ? resolveCardAssetDisplay(asset, source) : null;
 
           const tier = RARITY_TIERS[(baseCard.rarity as CardRarity) ?? 'COMMON'];
           const formattedSerial = formatCardSerialNumber(userCard.serialNumber);
@@ -253,16 +288,15 @@ export function createCardCommand(services: BotServices): Command {
             )
             .setFooter(footer);
 
-          if (
-            display?.imageUrl &&
-            (display.imageUrl.startsWith('http://') ||
-              display.imageUrl.startsWith('https://') ||
-              display.imageUrl.startsWith('attachment://'))
-          ) {
-            embed.setImage(display.imageUrl);
-          }
+          const files = await attachCardImage(
+            services,
+            embed,
+            baseCard,
+            asset,
+            getCardAttribution(source).footerText,
+          );
 
-          await ctx.reply({ embeds: [embed] });
+          await ctx.reply({ embeds: [embed], files });
           break;
         }
 

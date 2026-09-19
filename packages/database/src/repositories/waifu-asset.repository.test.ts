@@ -142,6 +142,35 @@ describe('WaifuAssetRepository (TASK-1001)', () => {
       expect(count).toBe(3);
     });
 
+    it('should find active assets by exact tag', async () => {
+      const base = { sourceId: 'WAIFU_IM', animeTitle: 'Re:Zero' };
+      const tagged = await repo.create({
+        ...base,
+        sourceImageId: 't_1',
+        characterName: 'Rem',
+        imageHash: 'hash_tag_1',
+        tags: ['starter_pool', 'water'],
+      });
+      await repo.create({
+        ...base,
+        sourceImageId: 't_2',
+        characterName: 'Ram',
+        imageHash: 'hash_tag_2',
+        tags: ['starter_pool_extra', 'water'],
+      });
+      const takenDown = await repo.create({
+        ...base,
+        sourceImageId: 't_3',
+        characterName: 'Emilia',
+        imageHash: 'hash_tag_3',
+        tags: ['starter_pool'],
+      });
+      await repo.markDeletedByRequest(takenDown.id);
+
+      const found = await repo.findActiveAssetsByTag('starter_pool');
+      expect(found.map((a) => a.id)).toEqual([tagged.id]);
+    });
+
     it('should handle soft deletion for takedown requests preserving stats', async () => {
       const asset = await repo.create({
         sourceId: 'WAIFU_IM',

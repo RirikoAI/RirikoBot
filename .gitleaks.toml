@@ -26,3 +26,10 @@ description = "Spotify client ID or secret (32 hex) near a Spotify identifier"
 regex = '''(?i)spotify[\w.\-]{0,40}[\s\S]{0,80}?['"`=:\s]([0-9a-f]{32})\b'''
 secretGroup = 1
 keywords = ["spotify"]
+
+# TCG character catalog/manifest slugs ("key": "kikoru_shinomiya__kaiju_no_8") are public
+# identifiers, not credentials. Only this exact slug shape on those fields is allowed.
+[allowlist]
+description = "TCG catalog character keys"
+regexTarget = "line"
+regexes = ['''"(?:key|characterKey)": "[a-z0-9_]+__[a-z0-9_]+"''']

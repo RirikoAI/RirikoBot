@@ -54,9 +54,15 @@ export function createDungeonCommand(services: BotServices): Command {
     },
     execute: async (ctx: CommandContext): Promise<void> => {
       const rawArgs = ctx.options.getRawArgs?.() ?? [];
+      const isClimbAlias =
+        ctx.source === 'prefix' &&
+        ctx.raw &&
+        'content' in ctx.raw &&
+        ctx.raw.content.slice(ctx.invokedPrefix.length).trim().split(/\s+/)[0]?.toLowerCase() === 'climb';
+
       const action =
         ctx.options.getString('action')?.toLowerCase() ??
-        rawArgs[0]?.toLowerCase() ??
+        (isClimbAlias ? 'climb' : rawArgs[0]?.toLowerCase()) ??
         'status';
 
       const activeSeason = (await services.dungeonSeasonRepo.findActiveSeason()) ?? {
@@ -101,6 +107,17 @@ export function createDungeonCommand(services: BotServices): Command {
         }
 
         case 'climb': {
+          // Tutorial Gate: ensure players clear Prologue Floors T1–T4 first
+          const tutorialProgress = await services.userDungeonProgressRepo.getOrCreateProgress(
+            ctx.user.id,
+            'season_tutorial',
+          );
+
+          if (tutorialProgress.highestClearedFloor < 4) {
+            await handleTutorialClimb(ctx, services, tutorialProgress.highestClearedFloor + 1);
+            return;
+          }
+
           const userCards = await fetchUserCombatCards(services, ctx.user.id, 'TEAM_A');
           if (userCards.length === 0) {
             await ctx.reply({
@@ -114,7 +131,11 @@ export function createDungeonCommand(services: BotServices): Command {
           const progress = await services.userDungeonProgressRepo.getOrCreateProgress(ctx.user.id, activeSeason.id);
           const floorToClimb =
             ctx.options.getInteger('floor_number') ??
-            (rawArgs[1] ? parseInt(rawArgs[1], 10) : progress.highestClearedFloor + 1);
+            (isClimbAlias && rawArgs[0] && !isNaN(parseInt(rawArgs[0], 10))
+              ? parseInt(rawArgs[0], 10)
+              : rawArgs[1] && !isNaN(parseInt(rawArgs[1], 10))
+                ? parseInt(rawArgs[1], 10)
+                : progress.highestClearedFloor + 1);
 
           const runResult = await services.dungeonRunner.runFloor({
             userId: ctx.user.id,
@@ -237,14 +258,26 @@ export function createDungeonCommand(services: BotServices): Command {
         }
 
         case 'tutorial': {
-          const res = await services.tutorialService.completeTutorial(ctx.user.id);
-          const embed = new EmbedBuilder()
-            .setTitle('🔰 Prologue Tutorial — Training Grounds')
-            .setColor(0x57f287)
-            .setDescription(res.message)
-            .setFooter({ text: 'Clear Floor 1 of the seasonal tower next with /dungeon climb!' });
+          const tutorialProgress = await services.userDungeonProgressRepo.getOrCreateProgress(
+            ctx.user.id,
+            'season_tutorial',
+          );
 
-          await ctx.reply({ embeds: [embed] });
+          if (tutorialProgress.highestClearedFloor >= 4) {
+            const embed = new EmbedBuilder()
+              .setTitle('🔰 Prologue Tutorial — Training Grounds')
+              .setColor(0x57f287)
+              .setDescription(
+                'You have already completed the Tutorial Prologue!\n' +
+                'Clear Floor 1 of the seasonal tower next with `/dungeon climb`!',
+              )
+              .setFooter({ text: 'Clear Floor 1 of the seasonal tower next with /dungeon climb!' });
+
+            await ctx.reply({ embeds: [embed] });
+            return;
+          }
+
+          await handleTutorialClimb(ctx, services, tutorialProgress.highestClearedFloor + 1);
           break;
         }
 
@@ -254,6 +287,120 @@ export function createDungeonCommand(services: BotServices): Command {
       }
     },
   };
+}
+
+async function handleTutorialClimb(
+  ctx: CommandContext,
+  services: BotServices,
+  tutorialFloor: number,
+): Promise<void> {
+  // 1. Ensure the player has their starter card
+  await services.tutorialService.ensureStarterCard(ctx.user.id);
+
+  // 2. Fetch player's equipped/combat cards
+  const userCards = await fetchUserCombatCards(services, ctx.user.id, 'TEAM_A');
+  if (userCards.length === 0) {
+    await ctx.reply({
+      content: '❌ Failed to initialize starter waifu card for the tutorial. Please try again.',
+      ephemeral: true,
+    });
+    return;
+  }
+
+  // 3. Get tutorial floor information
+  const tutFloorInfo = services.tutorialService.getTutorialFloor(tutorialFloor);
+
+  // 4. Run the tutorial floor
+  const runResult = await services.dungeonRunner.runFloor({
+    userId: ctx.user.id,
+    seasonId: 'season_tutorial',
+    floorNumber: tutorialFloor,
+    playerParty: userCards,
+    skipEnergyDeduction: true,
+  });
+
+  if (!runResult.success) {
+    await ctx.reply({
+      content: `❌ **Tutorial Run Failed**: ${runResult.error}`,
+      ephemeral: true,
+    });
+    return;
+  }
+
+  // Build battle highlights
+  const highlightLogs = runResult.logs
+    .filter(
+      (l) =>
+        l.actionType === 'ENRAGE' ||
+        l.message.includes('SHATTERED') ||
+        l.message.includes('BROKEN') ||
+        l.message.includes('absorbed') ||
+        l.message.includes('CRITICAL') ||
+        l.message.includes('vanquished') ||
+        l.message.includes('seared') ||
+        l.message.includes('healed'),
+    )
+    .slice(-6);
+
+  const logSection =
+    highlightLogs.length > 0
+      ? `\n**⚔️ Battle Highlights:**\n` + highlightLogs.map((l) => `Turn ${l.turn}: ${l.message}`).join('\n')
+      : '';
+
+  if (runResult.victory) {
+    if (tutorialFloor >= 4) {
+      // Completed the 4th floor -> finalize tutorial & dispatch starter pack!
+      const completion = await services.tutorialService.completeTutorial(ctx.user.id);
+      const embed = new EmbedBuilder()
+        .setTitle('🎉 Prologue Tutorial CLEARED! — Training Grounds Mastered!')
+        .setColor(0x57f287)
+        .setDescription(
+          `**Dungeon Run Report: Floor T${tutorialFloor} [${tutFloorInfo?.topic ?? 'Shield Wards'}]**\n` +
+            `• **Outcome**: ✅ **VICTORY**\n` +
+            `• **Turns Total**: \`${runResult.turnsTotal}/25 Turns\`\n` +
+            `• **Energy Consumed**: \`0 Energy (Free Tutorial)\`\n\n` +
+            (tutFloorInfo ? `💡 **Tactical Lesson**: *${tutFloorInfo.guideMessage}*\n` : '') +
+            logSection +
+            `\n\n${completion.message}`,
+        )
+        .setFooter({ text: 'Clear Floor 1 of the seasonal tower next with /dungeon climb!' });
+
+      await ctx.reply({ embeds: [embed] });
+    } else {
+      const nextFloorInfo = services.tutorialService.getTutorialFloor(tutorialFloor + 1);
+      const embed = new EmbedBuilder()
+        .setTitle(`🔰 Tutorial Floor T${tutorialFloor} CLEARED! — ${tutFloorInfo?.title ?? 'Victory'}`)
+        .setColor(0x57f287)
+        .setDescription(
+          `**Dungeon Run Report: Floor T${tutorialFloor} [${tutFloorInfo?.topic ?? 'Tutorial'}]**\n` +
+            `• **Outcome**: ✅ **VICTORY**\n` +
+            `• **Turns Total**: \`${runResult.turnsTotal}/25 Turns\`\n` +
+            `• **Energy Consumed**: \`0 Energy (Free Tutorial)\`\n\n` +
+            (tutFloorInfo ? `💡 **Tactical Lesson**: *${tutFloorInfo.guideMessage}*\n` : '') +
+            logSection +
+            `\n\n⚔️ **Next Challenge**: **Floor T${tutorialFloor + 1} (${nextFloorInfo?.topic ?? 'Next Floor'})**\n` +
+            `Run \`/dungeon climb\` or \`$climb\` to continue the tutorial!`,
+        )
+        .setFooter({ text: `Floor T${tutorialFloor}/4 Completed. 0 Energy cost.` });
+
+      await ctx.reply({ embeds: [embed] });
+    }
+  } else {
+    const embed = new EmbedBuilder()
+      .setTitle(`💀 Tutorial Floor T${tutorialFloor} Defeat`)
+      .setColor(0xed4245)
+      .setDescription(
+        `**Dungeon Run Report: Floor T${tutorialFloor} [${tutFloorInfo?.topic ?? 'Tutorial'}]**\n` +
+          `• **Outcome**: ❌ **DEFEATED**\n` +
+          `• **Turns Total**: \`${runResult.turnsTotal}/25 Turns\`\n\n` +
+          (tutFloorInfo ? `💡 **Tactical Tip**: *${tutFloorInfo.guideMessage}*\n` : '') +
+          logSection +
+          `\n\nDon't give up! Retrying tutorial floors costs **0 Energy**.\nRun \`/dungeon climb\` or \`$climb\` to try again!`,
+      )
+      .setFooter({ text: "Tip: Counter the dummy's element or use active skills when MP is full!" });
+
+    await ctx.reply({ embeds: [embed] });
+  }
 }
 
 async function fetchUserCombatCards(
