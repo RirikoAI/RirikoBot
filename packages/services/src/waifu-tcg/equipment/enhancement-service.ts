@@ -22,6 +22,81 @@ export const RARITY_ENHANCEMENT_MULTIPLIERS: Record<string, number> = {
   MYTHIC: 8.0,
 };
 
+/**
+ * Computes scaled stats for an equipment piece at a given enhancement level (+0 to +10).
+ * Base stats increase by +8% per level (up to +80% at +10).
+ */
+export function scaleEquipmentStats(
+  baseStats: Record<string, number> | null | undefined,
+  level: number,
+): EquipmentStats {
+  if (!baseStats) return {};
+
+  const levelClamped = Math.max(0, Math.min(MAX_ENHANCEMENT_LEVEL, level));
+  const multiplier = 1 + 0.08 * levelClamped;
+
+  const scaled: EquipmentStats = {};
+
+  if (baseStats.attack !== undefined) {
+    scaled.attack = Math.round(baseStats.attack * multiplier);
+  }
+  if (baseStats.defense !== undefined) {
+    scaled.defense = Math.round(baseStats.defense * multiplier);
+  }
+  if (baseStats.health !== undefined) {
+    scaled.health = Math.round(baseStats.health * multiplier);
+  }
+  if (baseStats.speed !== undefined) {
+    scaled.speed = Math.round(baseStats.speed * multiplier);
+  }
+  if (baseStats.critRate !== undefined) {
+    scaled.critRate = +(baseStats.critRate + levelClamped * 0.005).toFixed(4);
+  }
+  if (baseStats.critDamage !== undefined) {
+    scaled.critDamage = +(baseStats.critDamage + levelClamped * 0.01).toFixed(4);
+  }
+  if (baseStats.mitigation !== undefined) {
+    scaled.mitigation = +(baseStats.mitigation + levelClamped * 0.005).toFixed(4);
+  }
+  if (baseStats.elementalMastery !== undefined) {
+    scaled.elementalMastery = +(baseStats.elementalMastery + levelClamped * 0.01).toFixed(4);
+  }
+  if (baseStats.manaShield !== undefined) {
+    scaled.manaShield = Math.round(baseStats.manaShield * multiplier);
+  }
+  if (baseStats.armorPiercing !== undefined) {
+    scaled.armorPiercing = +(baseStats.armorPiercing + levelClamped * 0.005).toFixed(4);
+  }
+  if (baseStats.elementalResistance !== undefined) {
+    scaled.elementalResistance = +(baseStats.elementalResistance + levelClamped * 0.005).toFixed(4);
+  }
+  if (baseStats.manaMax !== undefined) {
+    scaled.manaMax = Math.round(baseStats.manaMax * multiplier);
+  }
+  if (baseStats.manaRegen !== undefined) {
+    scaled.manaRegen = +(baseStats.manaRegen + levelClamped * 0.01).toFixed(4);
+  }
+
+  return scaled;
+}
+
+/**
+ * Returns perk scaling tier or enhanced perk identifiers for +5 and +10 breakpoints.
+ */
+export function scaleEquipmentPerks(perks: string[] | null | undefined, level: number): string[] {
+  if (!perks || perks.length === 0) return [];
+  const levelClamped = Math.max(0, Math.min(MAX_ENHANCEMENT_LEVEL, level));
+
+  return perks.map((perk) => {
+    if (levelClamped >= 10) {
+      return `${perk}_T3`;
+    } else if (levelClamped >= 5) {
+      return `${perk}_T2`;
+    }
+    return perk;
+  });
+}
+
 export class EnhancementService {
   constructor(
     private readonly itemRepo: GameItemRepository,
@@ -48,76 +123,12 @@ export class EnhancementService {
     };
   }
 
-  /**
-   * Computes scaled stats for an equipment piece at a given enhancement level (+0 to +10).
-   * Base stats increase by +8% per level (up to +80% at +10).
-   */
   getScaledStats(baseStats: Record<string, number> | null | undefined, level: number): EquipmentStats {
-    if (!baseStats) return {};
-
-    const levelClamped = Math.max(0, Math.min(MAX_ENHANCEMENT_LEVEL, level));
-    const multiplier = 1 + 0.08 * levelClamped;
-
-    const scaled: EquipmentStats = {};
-
-    if (baseStats.attack !== undefined) {
-      scaled.attack = Math.round(baseStats.attack * multiplier);
-    }
-    if (baseStats.defense !== undefined) {
-      scaled.defense = Math.round(baseStats.defense * multiplier);
-    }
-    if (baseStats.health !== undefined) {
-      scaled.health = Math.round(baseStats.health * multiplier);
-    }
-    if (baseStats.speed !== undefined) {
-      scaled.speed = Math.round(baseStats.speed * multiplier);
-    }
-    if (baseStats.critRate !== undefined) {
-      scaled.critRate = +(baseStats.critRate + levelClamped * 0.005).toFixed(4);
-    }
-    if (baseStats.critDamage !== undefined) {
-      scaled.critDamage = +(baseStats.critDamage + levelClamped * 0.01).toFixed(4);
-    }
-    if (baseStats.mitigation !== undefined) {
-      scaled.mitigation = +(baseStats.mitigation + levelClamped * 0.005).toFixed(4);
-    }
-    if (baseStats.elementalMastery !== undefined) {
-      scaled.elementalMastery = +(baseStats.elementalMastery + levelClamped * 0.01).toFixed(4);
-    }
-    if (baseStats.manaShield !== undefined) {
-      scaled.manaShield = Math.round(baseStats.manaShield * multiplier);
-    }
-    if (baseStats.armorPiercing !== undefined) {
-      scaled.armorPiercing = +(baseStats.armorPiercing + levelClamped * 0.005).toFixed(4);
-    }
-    if (baseStats.elementalResistance !== undefined) {
-      scaled.elementalResistance = +(baseStats.elementalResistance + levelClamped * 0.005).toFixed(4);
-    }
-    if (baseStats.manaMax !== undefined) {
-      scaled.manaMax = Math.round(baseStats.manaMax * multiplier);
-    }
-    if (baseStats.manaRegen !== undefined) {
-      scaled.manaRegen = +(baseStats.manaRegen + levelClamped * 0.01).toFixed(4);
-    }
-
-    return scaled;
+    return scaleEquipmentStats(baseStats, level);
   }
 
-  /**
-   * Returns perk scaling tier or enhanced perk identifiers for +5 and +10 breakpoints.
-   */
   getScaledPerks(perks: string[] | null | undefined, level: number): string[] {
-    if (!perks || perks.length === 0) return [];
-    const levelClamped = Math.max(0, Math.min(MAX_ENHANCEMENT_LEVEL, level));
-
-    return perks.map((perk) => {
-      if (levelClamped >= 10) {
-        return `${perk}_T3`;
-      } else if (levelClamped >= 5) {
-        return `${perk}_T2`;
-      }
-      return perk;
-    });
+    return scaleEquipmentPerks(perks, level);
   }
 
   /**
