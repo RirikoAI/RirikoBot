@@ -386,4 +386,21 @@ export const CANONICAL_ITEMS: NewGameItem[] = [
     maxDailyPurchases: 0,
     isTradeable: false,
   },
+
+  // ─── MATERIALS ─────────────────────────────────────────────────────────────
+  {
+    code: 'CRAFTING_DUST',
+    name: 'Crafting Dust',
+    description: 'Shimmering residue from dismantled cards and cleared floors. Spent to enhance equipment.',
+    type: 'MATERIAL',
+    subtype: 'CRAFTING_DUST',
+    rarity: 'COMMON',
+    isShopBuyable: false,
+    shopPrice: 0,
+    maxDailyPurchases: 0,
+    isTradeable: false,
+  },
 ];
+
+/** Catalog code of the enhancement currency. */
+export const CRAFTING_DUST_CODE = 'CRAFTING_DUST';

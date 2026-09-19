@@ -115,7 +115,8 @@ describe('Item Command Suite (TASK-1032)', () => {
     };
 
     const mockEnhancementService = {
-      enhance: async (userId: string, userItemId: string, userDust: number, userCredits: bigint) => {
+      getDustBalance: async () => 400,
+      enhance: async (userId: string, userItemId: string, userCredits: bigint) => {
         const item = userInventory.get(userItemId);
         if (!item) throw new Error('Item not found');
         return {
@@ -265,6 +266,7 @@ describe('Item Command Suite (TASK-1032)', () => {
       expect(embed.data.title).toContain('+0 ➜ +1');
       expect(embed.data.description).toContain('Muramasa Cursed Blade');
       expect(embed.data.description).toContain('500 credits');
+      expect(embed.data.description).toContain('100 Dust` (400 left)');
       expect(modifiedBalances).toHaveLength(1);
       expect(modifiedBalances[0].walletDelta).toBe(-500);
       expect(modifiedBalances[0].type).toBe('ENHANCE_ITEM');

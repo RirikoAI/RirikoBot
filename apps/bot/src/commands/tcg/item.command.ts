@@ -165,7 +165,7 @@ async function handleInventory(
       const marker = isCurrent ? '👉 ' : '• ';
       const enhancementTag = inv.enhancementLevel > 0 ? ` **+${inv.enhancementLevel}**` : '';
       const stateTag = inv.state === 'EQUIPPED' ? ` \`[EQUIPPED: ${inv.slot}]\`` : '';
-      const qtyTag = def.type === 'CONSUMABLE' ? ` (x${inv.quantity})` : '';
+      const qtyTag = def.type === 'CONSUMABLE' || def.type === 'MATERIAL' ? ` (x${inv.quantity})` : '';
       const perkText = def.battlePerks && def.battlePerks.length > 0 ? ` | *Perk: ${def.battlePerks.join(', ')}*` : '';
       return `${marker}**${def.name}**${enhancementTag}${qtyTag}${stateTag} — [${def.rarity}]\n  *${def.description}*${perkText}`;
     });
@@ -178,7 +178,7 @@ async function handleInventory(
         lines.join('\n\n') +
         (selected
           ? `\n\n🎯 **Selected Item**: **${selected.def.name}** [${selected.def.rarity} ${selected.def.subtype}]` +
-            (selected.def.type === 'CONSUMABLE' ? ` (Quantity: ${selected.inv.quantity})` : ` (Enhancement: +${selected.inv.enhancementLevel})`) +
+            (selected.def.type === 'CONSUMABLE' || selected.def.type === 'MATERIAL' ? ` (Quantity: ${selected.inv.quantity})` : ` (Enhancement: +${selected.inv.enhancementLevel})`) +
             `\n*${selected.def.description}*`
           : ''),
       )
@@ -328,12 +328,9 @@ async function handleInventory(
         try {
           const balance = await services.economyRepo.getOrCreateBalance(userId);
           const userCredits = BigInt(balance.walletBalance);
-          const userDust = 5000;
-
           const enhanceResult = await services.enhancementService.enhance(
             userId,
             invId,
-            userDust,
             userCredits,
           );
 
@@ -405,22 +402,12 @@ async function handleEnhance(
     return;
   }
 
-  // 2. Fetch user balances (Crafting Dust from userCards or items, and credits)
+  // 2. Credits (Crafting Dust is read and spent by the enhancement service)
   const balance = await services.economyRepo.getOrCreateBalance(userId);
   const userCredits = BigInt(balance.walletBalance);
 
-  // For Crafting Dust: calculate dust from user card dismantle or default allowance
-  const userCards = await services.waifuCardRepo.listUserCards(userId);
-  // Estimate dust or use 5000 dust for active testing
-  const userDust = 5000;
-
   try {
-    const result = await services.enhancementService.enhance(
-      userId,
-      userItemId,
-      userDust,
-      userCredits,
-    );
+    const result = await services.enhancementService.enhance(userId, userItemId, userCredits);
 
     // Deduct credits from economy balance
     if (result.creditsSpent > 0) {
@@ -439,7 +426,7 @@ async function handleEnhance(
       .setTitle(`✨ Enhancement Succeeded! +${result.previousLevel} ➜ +${result.newLevel}`)
       .setDescription(
         `Successfully reinforced **${itemDef.name}** to **+${result.newLevel}**!\n\n` +
-          `• **Crafting Dust Spent**: \`${result.dustSpent} Dust\`\n` +
+          `• **Crafting Dust Spent**: \`${result.dustSpent} Dust\` (${await services.enhancementService.getDustBalance(userId)} left)\n` +
           `• **Credits Spent**: \`${result.creditsSpent} credits\`\n\n` +
           `📈 **Reinforced Base Stats (+8% / level)**:\n` +
           Object.entries(result.scaledStats)

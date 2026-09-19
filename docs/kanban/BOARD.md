@@ -33,6 +33,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0011` | Bug | Persist Crafting Dust and Charge It for Equipment Enhancement | 3 | `EPIC-015` | [BUG-0011.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0011.md) |
 | `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | [STORY-155.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-155.md) |
 | `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | `EPIC-015` | [STORY-154.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-154.md) |
 | `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | `EPIC-015` | [STORY-153.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-153.md) |
@@ -218,6 +219,7 @@
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `BUG-0010` | Bug | Grant TCG Items by Catalog Code, Auto-Equip Starter Blade & Repair Legacy Item Rows | 3 | `EPIC-015` | ✅ Done | — |
+| `BUG-0011` | Bug | Persist Crafting Dust and Charge It for Equipment Enhancement | 3 | `EPIC-015` | ✅ Done | — |
 | `STORY-150` | Story | Card EXP from Dungeon Wins & Real Skill MP Cost in Combat | 3 | `EPIC-015` | ✅ Done | `BUG-0010` |
 | `STORY-151` | Story | DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table) | 8 | `EPIC-015` | ✅ Done | `STORY-150` |
 | `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | `EPIC-015` | ✅ Done | `STORY-151` |
