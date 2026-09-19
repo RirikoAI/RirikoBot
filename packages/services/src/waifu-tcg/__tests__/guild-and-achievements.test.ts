@@ -7,11 +7,13 @@ import {
   EconomyRepository,
   XpRepository,
   UserInventoryItemRepository,
+  GameItemRepository,
 } from '@ririko/database';
 import type { SqliteDatabaseClient } from '@ririko/database';
 import { WaifuGuildService } from '../guild/waifu-guild.service.js';
 import { AchievementService } from '../achievements/achievement-service.js';
 import { TcgConfigService } from '../admin/tcg-config.service.js';
+import { CANONICAL_ITEMS } from '../equipment/catalog.js';
 
 describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
   let client: SqliteDatabaseClient;
@@ -21,6 +23,7 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
   let economyRepo: EconomyRepository;
   let xpRepo: XpRepository;
   let inventoryRepo: UserInventoryItemRepository;
+  let itemRepo: GameItemRepository;
 
   let guildService: WaifuGuildService;
   let achievementService: AchievementService;
@@ -149,6 +152,24 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );
+
+      CREATE TABLE game_items (
+        id TEXT PRIMARY KEY,
+        code TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        type TEXT NOT NULL,
+        subtype TEXT NOT NULL,
+        rarity TEXT NOT NULL DEFAULT 'COMMON',
+        base_stats TEXT DEFAULT '{}',
+        battle_perks TEXT DEFAULT '[]',
+        consumable_effect TEXT DEFAULT '{}',
+        is_shop_buyable INTEGER NOT NULL DEFAULT 1,
+        shop_price INTEGER NOT NULL DEFAULT 100,
+        max_daily_purchases INTEGER NOT NULL DEFAULT 5,
+        is_tradeable INTEGER NOT NULL DEFAULT 1,
+        created_at INTEGER NOT NULL
+      );
     `);
 
     guildRepo = new WaifuGuildRepository(client);
@@ -157,11 +178,14 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
     economyRepo = new EconomyRepository(client);
     xpRepo = new XpRepository(client);
     inventoryRepo = new UserInventoryItemRepository(client);
+    itemRepo = new GameItemRepository(client);
+    for (const item of CANONICAL_ITEMS) await itemRepo.create(item);
 
     guildService = new WaifuGuildService(guildRepo, economyRepo, client);
     achievementService = new AchievementService(achievementRepo, economyRepo, client, {
       xpRepo,
       inventoryRepo,
+      itemRepo,
     });
     configService = new TcgConfigService(configRepo);
   });
@@ -271,11 +295,14 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
       const p2 = await achievementService.recordProgress('user-ach', 'CARD_COUNT', 5);
       expect(p2[0]?.justUnlocked).toBe(true);
 
-      // 3. Claim achievement rewards (500 XP, 1000 Credits, 2x potion_hp_minor)
+      // 3. Claim achievement rewards (500 XP, 1000 Credits, 2x Minor HP Potion)
       const claim = await achievementService.claimAchievement('user-ach', 'COLL_INITIATE');
       expect(claim.rewardsDispatched.credits).toBe(1000);
       expect(claim.rewardsDispatched.exp).toBe(500);
-      expect(claim.rewardsDispatched.consumables['potion_hp_minor']).toBe(2);
+      expect(claim.rewardsDispatched.consumables['Minor HP Potion']).toBe(2);
+      const minorHp = await itemRepo.findByCode('POTION_MINOR_HP');
+      const potionRows = await inventoryRepo.findByUser('user-ach');
+      expect(potionRows.find((r) => r.itemId === minorHp!.id)?.quantity).toBe(2);
 
       const bal = await economyRepo.findById('user-ach');
       expect(bal?.walletBalance).toBe(1000);
