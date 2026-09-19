@@ -21,4 +21,5 @@ export * from './achievements/index.js';
 export * from './admin/index.js';
 export * from './canvas/card-synthesizer.js';
 export * from './canvas/card-image.service.js';
+export * from './canvas/boss-synthesizer.js';
 export * from './catalog/index.js';

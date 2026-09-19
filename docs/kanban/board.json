@@ -706,7 +706,7 @@
       "epic": "EPIC-015",
       "title": "tcg:boss-builder Script & BossSynthesizer Rendering",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-151"],
       "blocks": [],
       "description": "Catalog JSON per season, --sync (AniList + Danbooru art, resumable, rate-limited), --render plain art + element icon top-left + name/anime/floor text, --import-db idempotent upsert into waifu_assets + dungeon_bosses + dungeon_floors, --suggest theme candidates."
