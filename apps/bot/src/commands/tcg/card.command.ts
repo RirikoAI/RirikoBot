@@ -14,6 +14,7 @@ import {
   formatCardSerialNumber,
   type CardRarity,
 } from '@ririko/services';
+import { buildTcgInfoEmbed, buildTcgInfoSelectMenu } from './info.command.js';
 
 export function createCardCommand(services: BotServices): Command {
   return {
@@ -47,6 +48,7 @@ export function createCardCommand(services: BotServices): Command {
             { name: 'Loadout (View card 6-slot equipped gear & bonuses)', value: 'loadout' },
             { name: 'Equip Gear (Equip weapon/armor/relic/ring/amulet/talisman)', value: 'equip-gear' },
             { name: 'Unequip Gear (Unequip gear from slot)', value: 'unequip-gear' },
+            { name: 'Guide / Info (Tutorials, type advantages, rules)', value: 'guide' },
           ],
         },
         {
@@ -131,7 +133,7 @@ export function createCardCommand(services: BotServices): Command {
       }
       if (!sub) {
         const firstArg = rawArgs[0]?.toLowerCase();
-        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle', 'loadout', 'equip-gear', 'unequip-gear'].includes(firstArg ?? '')) {
+        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle', 'loadout', 'equip-gear', 'unequip-gear', 'guide', 'info'].includes(firstArg ?? '')) {
           sub = firstArg;
         } else {
           sub = 'collection';
@@ -139,6 +141,17 @@ export function createCardCommand(services: BotServices): Command {
       }
 
       switch (sub) {
+        case 'guide':
+        case 'info': {
+          const embed = buildTcgInfoEmbed('overview');
+          const row = buildTcgInfoSelectMenu('overview');
+          await ctx.reply({
+            embeds: [embed],
+            components: [row],
+          });
+          break;
+        }
+
         case 'claim': {
           const dropIdOption = ctx.options.getString('drop_id');
           const guildId = ctx.guild?.id ?? 'default_guild';
