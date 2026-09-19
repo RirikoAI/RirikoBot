@@ -6,6 +6,12 @@ import type {
   UserInventoryItemRepository,
 } from '@ririko/database';
 import { ItemGrantService } from './item-grant.service.js';
+import { DAILY_ROTATION_POOL } from './catalog.js';
+
+/** Number of drop-only items the shop stocks each day. */
+export const DAILY_ROTATION_SIZE = 2;
+/** Price multiplier for rotation stock, which is otherwise drop-only. */
+export const DAILY_ROTATION_MARKUP = 1.5;
 
 export interface TcgShopReceipt {
   success: boolean;
@@ -13,6 +19,26 @@ export interface TcgShopReceipt {
   quantity: number;
   totalPrice: number;
   walletBalanceAfter: number;
+  /** New inventory rows (one per equipment piece; the stack row for consumables). */
+  inventoryItemIds: string[];
+}
+
+/** UTC calendar day, e.g. "2026-09-20": the shop rotation key. */
+export function shopDayKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+/** Deterministic pick of today's rotation codes: the same for every player on the same day. */
+export function pickDailyRotation(dayKey: string, pool: readonly string[], size: number): string[] {
+  let hash = 2166136261;
+  for (const ch of dayKey) hash = Math.imul(hash ^ ch.charCodeAt(0), 16777619) >>> 0;
+  const remaining = [...pool];
+  const picked: string[] = [];
+  while (picked.length < size && remaining.length > 0) {
+    hash = Math.imul(hash ^ (hash >>> 15), 2246822507) >>> 0;
+    picked.push(remaining.splice(hash % remaining.length, 1)[0]!);
+  }
+  return picked;
 }
 
 export class TcgShopService {
@@ -37,7 +63,28 @@ export class TcgShopService {
   }
 
   /**
+   * Today's drop-only rotation stock, priced at DAILY_ROTATION_MARKUP × list price and limited
+   * to one purchase per order.
+   */
+  async getDailyRotation(now: Date = new Date()): Promise<GameItem[]> {
+    const codes = pickDailyRotation(shopDayKey(now), DAILY_ROTATION_POOL, DAILY_ROTATION_SIZE);
+    const items: GameItem[] = [];
+    for (const code of codes) {
+      const item = await this.itemRepo.findByCode(code);
+      if (item) {
+        items.push({
+          ...item,
+          shopPrice: Math.round(item.shopPrice * DAILY_ROTATION_MARKUP),
+          maxDailyPurchases: 1,
+        });
+      }
+    }
+    return items;
+  }
+
+  /**
    * Purchases an item from the Town Item Shop using wallet credits.
+   * Drop-only items can be bought only while they are in today's rotation.
    * Audited via double-entry financial ledger ('SHOP_BUY').
    */
   async buyItem(
@@ -45,6 +92,7 @@ export class TcgShopService {
     itemCodeOrId: string,
     quantity = 1,
     guildId?: string,
+    now: Date = new Date(),
   ): Promise<TcgShopReceipt> {
     if (quantity <= 0) {
       throw new DatabaseError('Quantity must be at least 1');
@@ -59,7 +107,13 @@ export class TcgShopService {
       throw new DatabaseError(`Item '${itemCodeOrId}' not found in town shop catalog`);
     }
     if (!item.isShopBuyable) {
-      throw new DatabaseError(`${item.name} is a superior drop and cannot be purchased with credits`);
+      const rotation = (await this.getDailyRotation(now)).find((r) => r.id === item!.id);
+      if (!rotation) {
+        throw new DatabaseError(
+          `${item.name} is a superior drop and cannot be purchased with credits`,
+        );
+      }
+      item = rotation;
     }
 
     // 2. Check daily purchase limits (e.g. Daily Energy Biscuit: max 1/day)
@@ -81,7 +135,7 @@ export class TcgShopService {
     });
 
     // 4. Provision item into user inventory
-    await this.grants.grantItem(userId, item, quantity, 'SHOP');
+    const granted = await this.grants.grantItem(userId, item, quantity, 'SHOP');
 
     return {
       success: true,
@@ -89,6 +143,7 @@ export class TcgShopService {
       quantity,
       totalPrice,
       walletBalanceAfter: Number(balanceResult.balance.walletBalance),
+      inventoryItemIds: granted.inventoryItems.map((inv) => inv.id),
     };
   }
 }

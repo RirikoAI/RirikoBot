@@ -756,7 +756,7 @@
       "epic": "EPIC-015",
       "title": "Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-157"],
       "blocks": [],
       "description": "Category buttons, stat preview vs equipped gear, Buy & Equip, deterministic daily rotating RARE stock."
