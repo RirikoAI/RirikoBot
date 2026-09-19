@@ -12,6 +12,7 @@ import {
   type CommandContext,
 } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
+import { enhanceGear } from './gear-actions.js';
 import { ALL_GEAR_SLOTS } from '@ririko/services';
 
 export function createItemCommand(services: BotServices): Command {
@@ -402,31 +403,18 @@ async function handleEnhance(
     return;
   }
 
-  // 2. Credits (Crafting Dust is read and spent by the enhancement service)
-  const balance = await services.economyRepo.getOrCreateBalance(userId);
-  const userCredits = BigInt(balance.walletBalance);
-
   try {
-    const result = await services.enhancementService.enhance(userId, userItemId, userCredits);
-
-    // Deduct credits from economy balance
-    if (result.creditsSpent > 0) {
-      await services.economyRepo.modifyBalance({
-        userId,
-        walletDelta: -result.creditsSpent,
-        type: 'ENHANCE_ITEM',
-        source: 'TCG_FORGE',
-        metadata: { itemCode: itemDef.code, newLevel: result.newLevel },
-        guildId: ctx.guild?.id,
-      });
-    }
+    const result = await enhanceGear(services, userId, userItemId, {
+      guildId: ctx.guild?.id,
+      itemCode: itemDef.code,
+    });
 
     const embed = new EmbedBuilder()
       .setColor(0x57f287)
       .setTitle(`✨ Enhancement Succeeded! +${result.previousLevel} ➜ +${result.newLevel}`)
       .setDescription(
         `Successfully reinforced **${itemDef.name}** to **+${result.newLevel}**!\n\n` +
-          `• **Crafting Dust Spent**: \`${result.dustSpent} Dust\` (${await services.enhancementService.getDustBalance(userId)} left)\n` +
+          `• **Crafting Dust Spent**: \`${result.dustSpent} Dust\` (${result.dustLeft} left)\n` +
           `• **Credits Spent**: \`${result.creditsSpent} credits\`\n\n` +
           `📈 **Reinforced Base Stats (+8% / level)**:\n` +
           Object.entries(result.scaledStats)
