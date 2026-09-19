@@ -277,6 +277,32 @@ The scaling parameters are completely dynamic and hot-reloadable:
   - `/tcg-admin config dungeon growth_rate <0.05-0.20>`
   - `/tcg-admin config dungeon season_affix <season_id> <affix_json>`
 
+### 7.7. Seasonal Anime Bosses & Season Data (`pnpm tcg:boss-builder`)
+Every season floor is guarded by a real anime character that fits the season theme. Season data lives in a hand-edited catalog, `assets/tcg/catalog/bosses/<seasonId>.json`:
+- **Season row and difficulty curve**: `scalingModel` plus `scalingParams` (base stats, growth, boss multipliers, enrage, `affixStartFloor`).
+- **Bosses**: character, element and tier; title and flavor text; combat `definition` (stat multipliers or absolute stats, a named skill with MP cost and power, enrage, elemental wards).
+- **Floor assignment**: mini and major bosses list their floors (`%5` and `%10`). Standard bosses rotate through a `floorRange`, so later floors bring new faces and no boss appears on back-to-back floors.
+
+Precedence at battle time: floor overrides > boss definition > season curve > code defaults.
+
+| Command | Effect |
+|---|---|
+| `pnpm tcg:boss-builder --sync` | Resolve AniList ids and Danbooru art for each boss and download images (resumable, rate-limited) |
+| `pnpm tcg:boss-builder --render` | Draw plain 720×960 boss portraits (element icon top-left, name, title, anime, tier/floor badge, no rarity frame) to `public/bosses/` |
+| `pnpm tcg:boss-builder --import-db [--dry-run]` | Upsert the season, boss assets, `dungeon_bosses` and all `dungeon_floors` rows |
+| `pnpm tcg:boss-builder --all` | All three steps in order |
+| `pnpm tcg:boss-builder --suggest --season=<id>` | List themed candidates from the card character catalog |
+| `pnpm tcg:simulate [--floors=] [--check]` | Monte Carlo win rates per floor for six player profiles, checked against the season's target bands |
+
+**Season 1 (Infernal Crucible)**: 26 FIRE/EARTH characters.
+- Major bosses: Megumin (F10), Mikasa Ackerman (F20), Mereoleona Vermillion (F30), Rias Gremory (F40), Shana (F50).
+- Mini-bosses: Maki Oze, Darkness, Eris Greyrat, Holo, Tohru.
+- Standard floors: a pool of six for F1–19 and ten more for F21–49.
+
+Bosses build MP and cast their named skill. For example, Megumin's Explosion lands after five turns of charging, so defending that turn pays off.
+
+In seasons, off-element strikes chip elemental wards at 25%. Matching the ward's element is still far faster. The tutorial keeps wards strict (0%) to teach the rule.
+
 ---
 
 ## 8. Atomic Trading & Player Marketplace

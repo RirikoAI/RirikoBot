@@ -10,7 +10,7 @@ import type {
 import type { CardElement } from '../types.js';
 import type { Combatant, CombatActionLog } from '../combat/types.js';
 import { ScalingEngine } from './scaling-engine.js';
-import { ElementalWard } from './elemental-ward.js';
+import { DEFAULT_OFF_ELEMENT_WARD_CHIP, ElementalWard } from './elemental-ward.js';
 import { SeasonalAffixHandler, type SeasonTheme } from './seasonal-affixes.js';
 
 import { DungeonLootService, type DungeonLootResult } from './dungeon-loot.service.js';
@@ -80,6 +80,8 @@ export interface DungeonRunResult {
 export interface FloorEncounter {
   enemyBoss: Combatant;
   wardLayers: Array<{ element: CardElement; health: number }> | null;
+  /** Share of off-element damage that chips wards (the tutorial uses 0). */
+  wardOffElementChip: number;
   affixTheme: SeasonTheme;
   seasonName: string;
   enrage?: EnrageConfig | undefined;
@@ -113,7 +115,9 @@ export function startEncounterSession(options: {
     playerCard: options.playerCard,
     boss: { ...encounter.enemyBoss, statusEffects: [], perks: [...encounter.enemyBoss.perks] },
     affixHandler: new SeasonalAffixHandler(encounter.affixTheme, encounter.seasonName),
-    ward: encounter.wardLayers ? new ElementalWard(encounter.wardLayers) : null,
+    ward: encounter.wardLayers
+      ? new ElementalWard(encounter.wardLayers, { offElementChip: encounter.wardOffElementChip })
+      : null,
     enrage: encounter.enrage,
     maxTurns: encounter.maxTurns,
     bossSkillPower: encounter.bossSkillPower,
@@ -279,7 +283,13 @@ export class DungeonRunner {
       const tutorial = await this.buildTutorialEnemy(userId, floorNumber, playerParty);
       return {
         energyCost,
-        encounter: { enemyBoss: tutorial.enemyBoss, wardLayers: tutorial.wardLayers, affixTheme, seasonName },
+        encounter: {
+          enemyBoss: tutorial.enemyBoss,
+          wardLayers: tutorial.wardLayers,
+          wardOffElementChip: 0,
+          affixTheme,
+          seasonName,
+        },
       };
     }
 
@@ -358,6 +368,7 @@ export class DungeonRunner {
       encounter: {
         enemyBoss,
         wardLayers,
+        wardOffElementChip: DEFAULT_OFF_ELEMENT_WARD_CHIP,
         affixTheme,
         seasonName,
         enrage: resolveEnrage(curve.enrage, def.enrage),
