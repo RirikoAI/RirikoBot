@@ -8,3 +8,4 @@ export * from './dungeon-battle-session.js';
 export * from './boss-definition.js';
 export * from './balance-simulator.js';
 export * from './boss-catalog.js';
+export * from './dungeon-progress.service.js';

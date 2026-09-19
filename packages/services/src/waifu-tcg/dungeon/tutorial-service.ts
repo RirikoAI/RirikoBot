@@ -14,6 +14,11 @@ import type { AchievementService } from '../achievements/achievement-service.js'
 import type { CardElement } from '../types.js';
 import { ItemGrantService } from '../equipment/item-grant.service.js';
 
+/** Rough combat power of a card, used to rank starter candidates. */
+function starterPower(card: WaifuCard): number {
+  return card.attack * 2 + card.defense + card.health / 5 + card.speed;
+}
+
 const STARTER_WEAPON_CODE = 'WEAPON_NOVICE_BLADE';
 const STARTER_POTION_CODE = 'POTION_MINOR_HP';
 const STARTER_POTION_COUNT = 3;
@@ -294,7 +299,10 @@ export class TutorialService {
       return null;
     }
 
-    const chosen = candidates[Math.floor(this.randomFn() * candidates.length)]!;
+    // Starter guarantee: pick from the stronger half, so a low roll never strands a new player.
+    const byPower = [...candidates].sort((a, b) => starterPower(b) - starterPower(a));
+    const pool = byPower.slice(0, Math.max(1, Math.ceil(byPower.length / 2)));
+    const chosen = pool[Math.floor(this.randomFn() * pool.length)]!;
     const serialNumber = (await this.cardRepo.getHighestSerialNumber(chosen.id)) + 1;
 
     return this.cardRepo.createUserCard({
