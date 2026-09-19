@@ -5,10 +5,12 @@ import type {
   GameItemRepository,
   WaifuAssetRepository,
   UserCard,
+  WaifuCard,
+  TcgConfigRepository,
 } from '@ririko/database';
 import type { Combatant } from '../combat/types.js';
 import type { AchievementService } from '../achievements/achievement-service.js';
-import { STARTER_POOL_TAG } from '../catalog/card-catalog.js';
+import type { CardElement } from '../types.js';
 
 export interface TutorialFloorInfo {
   floorId: string;
@@ -23,12 +25,60 @@ export interface TutorialFloorInfo {
 export interface TutorialCompletionResult {
   success: boolean;
   isFirstCompletion: boolean;
-  starterCardId?: string;
-  starterCardName?: string;
-  equipmentGranted?: string;
-  consumablesGranted?: string;
+  starterCardId?: string | undefined;
+  starterCardName?: string | undefined;
+  equipmentGranted?: string | undefined;
+  consumablesGranted?: string | undefined;
   achievementCode: string;
   message: string;
+}
+
+export interface TutorialFloor4Metadata {
+  bossElement: CardElement;
+  counterCardGiven: boolean;
+  counterCardId?: string;
+  userCardId?: string;
+  grantedAt?: number;
+}
+
+export interface Floor4DefeatResult {
+  bossElement: CardElement;
+  counterCard: WaifuCard | null;
+  userCard: UserCard | null;
+  isNewGrant: boolean;
+  alreadyOwned: boolean;
+  alreadyEquipped?: boolean | undefined;
+}
+
+/**
+ * Returns the element that counters (has advantage against) the given element.
+ * Loop:
+ * - Fire melts Ice (Fire > Ice, so Ice is countered by Fire)
+ * - Ice freezes Earth (Ice > Earth, so Earth is countered by Ice)
+ * - Earth grounds Lightning (Earth > Lightning, so Lightning is countered by Earth)
+ * - Lightning shocks Water (Lightning > Water, so Water is countered by Lightning)
+ * - Water extinguishes Fire (Water > Fire, so Fire is countered by Water)
+ * - Light and Shadow counter each other
+ */
+export function getCounterElement(element: CardElement): CardElement {
+  switch (element) {
+    case 'FIRE':
+      return 'WATER';
+    case 'WATER':
+      return 'LIGHTNING';
+    case 'LIGHTNING':
+      return 'EARTH';
+    case 'EARTH':
+      return 'ICE';
+    case 'ICE':
+      return 'FIRE';
+    case 'LIGHT':
+      return 'SHADOW';
+    case 'SHADOW':
+      return 'LIGHT';
+    default:
+      return 'WATER';
+  }
 }
 
 export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
@@ -46,10 +96,10 @@ export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
       element: 'ICE',
       rarity: 'COMMON',
       level: 1,
-      maxHealth: 500,
-      currentHealth: 500,
-      attack: 30,
-      defense: 20,
+      maxHealth: 400,
+      currentHealth: 400,
+      attack: 25,
+      defense: 15,
       speed: 15,
       critRate: 0,
       critDamage: 1.5,
@@ -77,11 +127,11 @@ export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
       element: 'EARTH',
       rarity: 'COMMON',
       level: 2,
-      maxHealth: 800,
-      currentHealth: 800,
-      attack: 50,
-      defense: 40,
-      speed: 20,
+      maxHealth: 500,
+      currentHealth: 500,
+      attack: 35,
+      defense: 20,
+      speed: 15,
       critRate: 0.05,
       critDamage: 1.5,
       maxMp: 50,
@@ -108,15 +158,15 @@ export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
       element: 'LIGHTNING',
       rarity: 'UNCOMMON',
       level: 3,
-      maxHealth: 1200,
-      currentHealth: 1200,
-      attack: 85,
-      defense: 50,
-      speed: 30,
-      critRate: 0.1,
+      maxHealth: 650,
+      currentHealth: 650,
+      attack: 45,
+      defense: 30,
+      speed: 20,
+      critRate: 0.05,
       critDamage: 1.5,
       maxMp: 50,
-      currentMp: 20,
+      currentMp: 0,
       skillManaCost: 25,
       shield: 0,
       statusEffects: [],
@@ -134,20 +184,20 @@ export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
     guideMessage: 'High-floor dungeon bosses possess Elemental Wards! Attacks with non-matching elements deal ZERO damage. Strike with the matching element to shatter their barrier!',
     dummyEnemy: {
       id: 'dummy_t4',
-      name: 'Warded Guardian Automaton [FIRE]',
+      name: 'Warded Guardian Automaton [WATER]',
       team: 'TEAM_B',
-      element: 'FIRE',
+      element: 'WATER',
       rarity: 'RARE',
       level: 5,
-      maxHealth: 1500,
-      currentHealth: 1500,
-      attack: 110,
-      defense: 70,
-      speed: 25,
-      critRate: 0.1,
+      maxHealth: 400,
+      currentHealth: 400,
+      attack: 40,
+      defense: 25,
+      speed: 15,
+      critRate: 0.05,
       critDamage: 1.5,
       maxMp: 100,
-      currentMp: 30,
+      currentMp: 0,
       skillManaCost: 35,
       shield: 0,
       statusEffects: [],
@@ -164,6 +214,7 @@ export class TutorialService {
   private readonly inventoryRepo: UserInventoryItemRepository | undefined;
   private readonly itemRepo: GameItemRepository | undefined;
   private readonly assetRepo: WaifuAssetRepository | undefined;
+  private readonly tcgConfigRepo: TcgConfigRepository | undefined;
   private readonly achievementService: AchievementService | undefined;
   private readonly randomFn: () => number;
 
@@ -174,6 +225,7 @@ export class TutorialService {
       inventoryRepo?: UserInventoryItemRepository | undefined;
       itemRepo?: GameItemRepository | undefined;
       assetRepo?: WaifuAssetRepository | undefined;
+      tcgConfigRepo?: TcgConfigRepository | undefined;
       achievementService?: AchievementService | undefined;
       randomFn?: (() => number) | undefined;
     } = {},
@@ -183,6 +235,7 @@ export class TutorialService {
     this.inventoryRepo = options.inventoryRepo;
     this.itemRepo = options.itemRepo;
     this.assetRepo = options.assetRepo;
+    this.tcgConfigRepo = options.tcgConfigRepo;
     this.achievementService = options.achievementService;
     this.randomFn = options.randomFn ?? Math.random;
   }
@@ -197,9 +250,7 @@ export class TutorialService {
 
   /**
    * Ensures the user has a starter waifu card equipped.
-   * If the user has no cards, grants a random card from the starter pool (assets tagged
-   * `starter_pool`, generated by `pnpm tcg:card-builder --starters`). With an empty pool it
-   * falls back to Flame Novice Aria [FIRE] (starter_waifu_01).
+   * Uses real COMMON cards existing in the database as starter candidates.
    */
   public async ensureStarterCard(userId: string): Promise<UserCard | null> {
     if (!this.cardRepo) return null;
@@ -215,96 +266,382 @@ export class TutorialService {
       return equipped ?? userCards[0]!;
     }
 
-    // 2. Prefer a random card from the generated starter pool
-    const pooledCardId = await this.pickStarterPoolCardId();
-    if (pooledCardId) {
-      return this.cardRepo.createUserCard({
-        userId,
-        cardId: pooledCardId,
-        serialNumber: (await this.cardRepo.getHighestSerialNumber(pooledCardId)) + 1,
-        state: 'EQUIPPED',
+    // 2. Pick any existing COMMON card from the database
+    let candidates = await this.cardRepo.listCards({
+      rarity: 'COMMON',
+      isActive: true,
+      limit: 100,
+    });
+
+    // Fallback: any active card in database
+    if (candidates.length === 0) {
+      candidates = await this.cardRepo.listCards({
+        isActive: true,
+        limit: 100,
       });
     }
 
-    // 3. Fallback: ensure base starter card exists in waifu_cards
-    let baseCard = await this.cardRepo.findById('starter_waifu_01');
-    if (!baseCard) {
-      let assetId = 'asset_starter_aria';
-      if (this.assetRepo) {
-        const assets = await this.assetRepo.findActiveAssets(1, 0);
-        if (assets.length > 0 && assets[0]) {
-          assetId = assets[0].id;
-        } else {
-          try {
-            const created = await this.assetRepo.create({
-              id: 'asset_starter_aria',
-              sourceId: 'WAIFU_IM',
-              sourceImageId: 'starter_aria',
-              characterName: 'Flame Novice Aria',
-              animeTitle: 'Ririko Academy',
-              imageHash: '0000000000000000000000000000000000000000000000000000000000000000',
-              localStoragePath: '/assets/waifu-cards/starter_aria.png',
-              tags: ['starter', 'fire', 'novice'],
-            });
-            assetId = created.id;
-          } catch {
-            // Fallback if already exists or table structure differs
-          }
-        }
-      }
-
-      try {
-        baseCard = await this.cardRepo.create({
-          id: 'starter_waifu_01',
-          assetId,
-          name: 'Flame Novice Aria',
-          rarity: 'COMMON',
-          element: 'FIRE',
-          attack: 120,
-          defense: 80,
-          speed: 95,
-          health: 600,
-          critRate: 0.05,
-          skillName: 'Ignite Slash',
-          skillDescription: 'Strikes enemy with fiery blade dealing 140% ATK damage.',
-          passiveName: 'Warm Up',
-          passiveDescription: 'Increases ATK by 5% in battle.',
-          collectionNumber: 1,
-          isActive: true,
-        });
-      } catch {
-        // May already exist
-      }
+    if (candidates.length === 0) {
+      return null;
     }
 
-    // 4. Grant card to user in EQUIPPED state
+    const chosen = candidates[Math.floor(this.randomFn() * candidates.length)]!;
+    const serialNumber = (await this.cardRepo.getHighestSerialNumber(chosen.id)) + 1;
+
     return this.cardRepo.createUserCard({
       userId,
-      cardId: 'starter_waifu_01',
-      serialNumber: 1,
+      cardId: chosen.id,
+      serialNumber,
       state: 'EQUIPPED',
     });
   }
 
-  /** Random active card from the starter pool, or null when the pool is empty. */
-  private async pickStarterPoolCardId(): Promise<string | null> {
-    if (!this.assetRepo || !this.cardRepo) return null;
-    const assets = [...(await this.assetRepo.findActiveAssetsByTag(STARTER_POOL_TAG))];
-    while (assets.length > 0) {
-      const [asset] = assets.splice(Math.floor(this.randomFn() * assets.length), 1);
-      const card = await this.cardRepo.findByAssetId(asset!.id);
-      if (card?.isActive) return card.id;
+  /**
+   * Resolves Floor T4 boss configuration for a specific user.
+   * If the user already has saved Floor T4 metadata, retains that boss element so the boss
+   * does not continuously shift when the player equips the counter card.
+   * Otherwise, calculates the counter element to the player's active card and persists it.
+   */
+  public async getFloor4BossConfig(
+    userId: string,
+    playerElement: CardElement,
+  ): Promise<{ element: CardElement; name: string }> {
+    const configKey = `tutorial:floor4:${userId}`;
+    if (this.tcgConfigRepo) {
+      try {
+        const existing = await this.tcgConfigRepo.getConfig<TutorialFloor4Metadata>(configKey);
+        if (existing?.bossElement) {
+          return {
+            element: existing.bossElement,
+            name: `Warded Guardian Automaton [${existing.bossElement}]`,
+          };
+        }
+      } catch {
+        // Ignore read errors, proceed to compute
+      }
     }
-    return null;
+
+    const counterElement = getCounterElement(playerElement);
+    if (this.tcgConfigRepo) {
+      try {
+        await this.tcgConfigRepo.setConfig<TutorialFloor4Metadata>(
+          configKey,
+          { bossElement: counterElement, counterCardGiven: false },
+          'system',
+        );
+      } catch {
+        // Ignore write errors
+      }
+    }
+
+    return {
+      element: counterElement,
+      name: `Warded Guardian Automaton [${counterElement}]`,
+    };
+  }
+
+  /**
+   * Handles defeat on Floor T4.
+   * Grants a real COMMON card of the boss's element from existing database cards,
+   * updating metadata so duplicate cards are not granted on repeated losses.
+   */
+  public async handleTutorialFloor4Defeat(
+    userId: string,
+    bossElement: CardElement,
+  ): Promise<Floor4DefeatResult> {
+    const configKey = `tutorial:floor4:${userId}`;
+    let metadata: TutorialFloor4Metadata | null = null;
+    if (this.tcgConfigRepo) {
+      try {
+        metadata = await this.tcgConfigRepo.getConfig<TutorialFloor4Metadata>(configKey);
+      } catch {
+        // Ignore
+      }
+    }
+
+    // 1. If card was marked as given, verify that the user still actually owns a card of bossElement
+    if (metadata?.counterCardGiven && this.cardRepo) {
+      let userCard: UserCard | null = null;
+      if (metadata.userCardId) {
+        const found = await this.cardRepo.findUserCardById(metadata.userCardId);
+        if (found && found.userId === userId) {
+          userCard = found;
+        }
+      }
+
+      // Fallback: check if the user owns any other card of bossElement
+      if (!userCard) {
+        const userCards = await this.cardRepo.listUserCards(userId);
+        for (const uc of userCards) {
+          const card = await this.cardRepo.findById(uc.cardId);
+          if (card && card.element === bossElement) {
+            userCard = uc;
+            break;
+          }
+        }
+      }
+
+      // If user genuinely owns a counter card, don't duplicate
+      if (userCard) {
+        const baseCard = await this.cardRepo.findById(userCard.cardId);
+        const alreadyEquipped = userCard.state === 'EQUIPPED';
+        return {
+          bossElement: metadata.bossElement ?? bossElement,
+          counterCard: baseCard,
+          userCard,
+          isNewGrant: false,
+          alreadyOwned: true,
+          alreadyEquipped,
+        };
+      }
+    }
+
+    // 2. Otherwise, find a real COMMON card of bossElement in database
+    if (!this.cardRepo) {
+      return {
+        bossElement,
+        counterCard: null,
+        userCard: null,
+        isNewGrant: false,
+        alreadyOwned: false,
+      };
+    }
+
+    let candidates = await this.cardRepo.listCards({
+      rarity: 'COMMON',
+      element: bossElement,
+      isActive: true,
+      limit: 50,
+    });
+
+    // Fallback: any card of that element
+    if (candidates.length === 0) {
+      candidates = await this.cardRepo.listCards({
+        element: bossElement,
+        isActive: true,
+        limit: 50,
+      });
+    }
+
+    // Fallback: any COMMON card in database
+    if (candidates.length === 0) {
+      candidates = await this.cardRepo.listCards({
+        rarity: 'COMMON',
+        isActive: true,
+        limit: 50,
+      });
+    }
+
+    if (candidates.length === 0) {
+      return {
+        bossElement,
+        counterCard: null,
+        userCard: null,
+        isNewGrant: false,
+        alreadyOwned: false,
+      };
+    }
+
+    const chosen = candidates[Math.floor(this.randomFn() * candidates.length)]!;
+    const nextSerial = (await this.cardRepo.getHighestSerialNumber(chosen.id)) + 1;
+    const userCard = await this.cardRepo.createUserCard({
+      userId,
+      cardId: chosen.id,
+      serialNumber: nextSerial,
+      state: 'IDLE',
+    });
+
+    if (this.tcgConfigRepo) {
+      try {
+        await this.tcgConfigRepo.setConfig<TutorialFloor4Metadata>(
+          configKey,
+          {
+            bossElement,
+            counterCardGiven: true,
+            counterCardId: chosen.id,
+            userCardId: userCard.id,
+            grantedAt: Date.now(),
+          },
+          'system',
+        );
+      } catch {
+        // Ignore
+      }
+    }
+
+    return {
+      bossElement,
+      counterCard: chosen,
+      userCard,
+      isNewGrant: true,
+      alreadyOwned: false,
+      alreadyEquipped: userCard.state === 'EQUIPPED',
+    };
+  }
+
+  /**
+   * Ensures the user has at least 1x Minor HP Potion and 1x Mana Draught during Floor T3 (Consumables tutorial).
+   */
+  public async ensureFloor3Potions(
+    userId: string,
+  ): Promise<{ granted: boolean; hpPotionGranted: boolean; manaPotionGranted: boolean }> {
+    if (!this.inventoryRepo || !this.itemRepo) {
+      return { granted: false, hpPotionGranted: false, manaPotionGranted: false };
+    }
+
+    const hpItem = await this.itemRepo.findByCode('POTION_MINOR_HP');
+    const manaItem = await this.itemRepo.findByCode('POTION_MANA_DRAUGHT');
+    const userInventory = await this.inventoryRepo.findByUser(userId, { state: 'IDLE' });
+
+    let hpPotionGranted = false;
+    let manaPotionGranted = false;
+
+    if (hpItem) {
+      const hasHp = userInventory.some((i) => i.itemId === hpItem.id && i.quantity > 0);
+      if (!hasHp) {
+        await this.inventoryRepo.create({
+          userId,
+          itemId: hpItem.id,
+          quantity: 1,
+          slot: 'NONE',
+          state: 'IDLE',
+          obtainedFrom: 'TUTORIAL',
+        });
+        hpPotionGranted = true;
+      }
+    }
+
+    if (manaItem) {
+      const hasMana = userInventory.some((i) => i.itemId === manaItem.id && i.quantity > 0);
+      if (!hasMana) {
+        await this.inventoryRepo.create({
+          userId,
+          itemId: manaItem.id,
+          quantity: 1,
+          slot: 'NONE',
+          state: 'IDLE',
+          obtainedFrom: 'TUTORIAL',
+        });
+        manaPotionGranted = true;
+      }
+    }
+
+    return {
+      granted: hpPotionGranted || manaPotionGranted,
+      hpPotionGranted,
+      manaPotionGranted,
+    };
+  }
+
+  /**
+   * Grants 10 bonus potions (5x Minor HP + 5x Mana Draught) upon winning Floor T3 for the first time.
+   */
+  public async handleTutorialFloor3Victory(
+    userId: string,
+  ): Promise<{ granted: boolean; message?: string }> {
+    if (!this.inventoryRepo || !this.itemRepo) return { granted: false };
+
+    const configKey = `tutorial:floor3:potions_reward:${userId}`;
+    if (this.tcgConfigRepo) {
+      const existing = await this.tcgConfigRepo.getConfig(configKey);
+      if (existing) {
+        return { granted: false };
+      }
+    }
+
+    const hpItem = await this.itemRepo.findByCode('POTION_MINOR_HP');
+    const manaItem = await this.itemRepo.findByCode('POTION_MANA_DRAUGHT');
+    const userInventory = await this.inventoryRepo.findByUser(userId, { state: 'IDLE' });
+
+    if (hpItem) {
+      const hpSlot = userInventory.find((i) => i.itemId === hpItem.id);
+      if (hpSlot) {
+        await this.inventoryRepo.update(hpSlot.id, { quantity: hpSlot.quantity + 5 });
+      } else {
+        await this.inventoryRepo.create({
+          userId,
+          itemId: hpItem.id,
+          quantity: 5,
+          slot: 'NONE',
+          state: 'IDLE',
+          obtainedFrom: 'TUTORIAL',
+        });
+      }
+    }
+
+    if (manaItem) {
+      const manaSlot = userInventory.find((i) => i.itemId === manaItem.id);
+      if (manaSlot) {
+        await this.inventoryRepo.update(manaSlot.id, { quantity: manaSlot.quantity + 5 });
+      } else {
+        await this.inventoryRepo.create({
+          userId,
+          itemId: manaItem.id,
+          quantity: 5,
+          slot: 'NONE',
+          state: 'IDLE',
+          obtainedFrom: 'TUTORIAL',
+        });
+      }
+    }
+
+    if (this.tcgConfigRepo) {
+      try {
+        await this.tcgConfigRepo.setConfig(configKey, { grantedAt: Date.now() }, 'system');
+      } catch {
+        // Ignore
+      }
+    }
+
+    return {
+      granted: true,
+      message: '🎁 **Tutorial Floor T3 Bonus**: Received 5x Minor HP Potions and 5x Mana Draughts (10 Potions)!',
+    };
+  }
+
+  /**
+   * Checks whether the user can challenge a specific tutorial floor.
+   * Tutorial floors (1 to 4) cannot be repeated once cleared.
+   */
+  public async canAttemptTutorialFloor(
+    userId: string,
+    floorNumber: number,
+  ): Promise<{ allowed: boolean; reason?: 'ALREADY_CLEARED' | 'LOCKED'; nextFloor?: number }> {
+    const progress = await this.progressRepo.getOrCreateProgress(userId, 'season_tutorial');
+    if (progress.highestClearedFloor >= floorNumber) {
+      return {
+        allowed: false,
+        reason: 'ALREADY_CLEARED',
+        nextFloor: Math.min(4, progress.highestClearedFloor + 1),
+      };
+    }
+    if (floorNumber > progress.highestClearedFloor + 1) {
+      return {
+        allowed: false,
+        reason: 'LOCKED',
+        nextFloor: progress.highestClearedFloor + 1,
+      };
+    }
+    return { allowed: true };
   }
 
   /**
    * Completes the prologue tutorial and grants starter rewards:
-   * Random starter waifu card (from the starter pool), Novice Blade (Common), 3x Minor HP Potions, unlocks TUTORIAL_COMPLETE.
+   * Novice Blade (Common), 3x Minor HP Potions, unlocks TUTORIAL_COMPLETE.
+   * Cleans up Floor T4 tutorial metadata.
    */
   public async completeTutorial(userId: string): Promise<TutorialCompletionResult> {
     const seasonId = 'season_tutorial';
     const progress = await this.progressRepo.getOrCreateProgress(userId, seasonId);
+
+    // Clean up Floor 4 metadata upon clearing tutorial
+    if (this.tcgConfigRepo) {
+      try {
+        await this.tcgConfigRepo.delete(`tutorial:floor4:${userId}`);
+      } catch {
+        // Ignore
+      }
+    }
 
     const isFirstTime = progress.highestClearedFloor < 4;
 
@@ -342,7 +679,7 @@ export class TutorialService {
       const starterCard = starter ? await this.cardRepo?.findById(starter.cardId) : null;
       const starterCardName = starterCard
         ? `${starterCard.name} [${starterCard.element}]`
-        : 'Flame Novice Aria [FIRE]';
+        : 'Waifu Vanguard';
 
       if (this.achievementService) {
         try {
@@ -355,7 +692,7 @@ export class TutorialService {
       return {
         success: true,
         isFirstCompletion: true,
-        starterCardId: starter?.cardId ?? 'starter_waifu_01',
+        starterCardId: starter?.cardId,
         starterCardName,
         equipmentGranted: 'Novice Blade (Common Weapon, +20 ATK)',
         consumablesGranted: '3x Minor HP Potions (+250 HP)',
@@ -366,7 +703,9 @@ export class TutorialService {
           `• **Card:** ${starterCardName}\n` +
           '• **Weapon:** Novice Blade (+20 ATK)\n' +
           '• **Consumables:** 3x Minor HP Potions\n' +
-          '• **Achievement Unlocked:** `TUTORIAL_COMPLETE`',
+          '• **Achievement Unlocked:** `TUTORIAL_COMPLETE`\n\n' +
+          '🎓 **Congratulations, Summoner! You have graduated from the Tutorial!**\n' +
+          'Would you like to enter **Season 1** now and test your strength against the Infernal Crucible?',
       };
     }
 
@@ -377,7 +716,10 @@ export class TutorialService {
       success: true,
       isFirstCompletion: false,
       achievementCode: 'TUTORIAL_COMPLETE',
-      message: 'You have already completed the Tutorial Prologue!',
+      message:
+        '🎓 **You have graduated from the Tutorial!**\n' +
+        'Would you like to enter **Season 1** now and test your strength against the Infernal Crucible?',
     };
   }
 }
+

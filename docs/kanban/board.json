@@ -1516,6 +1516,46 @@
       "requires": ["TASK-1053"],
       "blocks": ["EPIC-011"],
       "description": "Implement CardSynthesizer canvas engine (800x1200 px, 8-layer stack, rarity foiling, modular assets/tcg structure with procedural fallbacks), and scripts/tcg-card-builder.ts supporting 50 cards per element bulk generation and manual single-card creation via waifu.im or direct URL."
+    },
+    {
+      "id": "TASK-1043",
+      "parent": "STORY-104",
+      "title": "Interactive Real-Time Dungeon Tower Battles with Card Rendering, Manual & Auto Combat",
+      "points": 5,
+      "status": "DONE",
+      "requires": ["TASK-1042"],
+      "blocks": [],
+      "description": "Implement stateful DungeonBattleSession, real waifu card rendering via CardImageService, interactive Discord HUD with real-time ASCII HP/MP bars, manual tactical buttons (Attack, Skill, Defend, Forfeit), animated real-time auto-battle loop, pause/skip controls, and next-floor progression."
+    },
+    {
+      "id": "TASK-1044",
+      "parent": "STORY-101",
+      "title": "Interactive Card Album, Pagination, Inspection & Equip Menu Suite (/cards)",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["TASK-1043"],
+      "blocks": [],
+      "description": "Implement interactive /cards command with pagination, card select dropdown, rich inspection view with battles won, EXP progression, level-scaled stats, tactical skills/passives, equipped gear loadout, card foil synthesis PNG rendering, and interactive equip/favorite buttons."
+    },
+    {
+      "id": "TASK-1045",
+      "parent": "STORY-104",
+      "title": "Tutorial Floor T4 Dynamic Elemental Disadvantage, Real Common Card Grant on Defeat & Direct Climb Gate Prompt",
+      "points": 3,
+      "status": "DONE",
+      "requires": ["TASK-1043"],
+      "blocks": [],
+      "description": "Remove starter_waifu_01 and fake starter cards, granting real common database cards as starter candidates; make tutorial floor T4 dynamically present counter element boss and ward; grant real common card of boss element on defeat with metadata persistence to prevent loops; prompt direct climbers with tutorial confirmation."
+    },
+    {
+      "id": "TASK-1046",
+      "parent": "STORY-104",
+      "title": "Interactive Combat Items Dropdown, Battle Collector Fixes, Tutorial Floor Lock & Potion Grants, and Interactive Town Shop & Inventory Menus",
+      "points": 5,
+      "status": "DONE",
+      "requires": ["TASK-1045"],
+      "blocks": [],
+      "description": "Fix battle button collector lifecycle & retry/status/equip buttons; add in-combat item select menu with HP/MP potions consuming a turn; enforce tutorial floor non-repeat restriction & Floor T3 potion rewards; implement interactive Town Shop and Inventory menus with potion purchasing."
     }
   ],
   "chores": [
@@ -1617,6 +1657,16 @@
       "requires": [],
       "blocks": [],
       "description": "Fix false tutorial completion caused by immediate floor 4 completion and unseeded starter card foreign key error; seed starter_waifu_01; route incomplete players from $climb into tutorial floors; fix prefix climb alias argument resolution."
+    },
+    {
+      "id": "BUG-0009",
+      "title": "Fix Tutorial Floor T4 Defeat Counter Card Grant & Stale Metadata Recovery",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-104",
+      "requires": ["TASK-1046"],
+      "blocks": [],
+      "description": "Ensure handleTutorialFloor4Defeat validates active card ownership before treating counter card as already given; grant real common counter card if user does not possess one; clear tcg_system_configs during user reset."
     }
   ]
 }

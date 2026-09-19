@@ -1,4 +1,12 @@
-import { EmbedBuilder } from 'discord.js';
+import {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
+  type ButtonInteraction,
+  type Message,
+} from 'discord.js';
 import {
   CommandCategory,
   type Command,
@@ -12,20 +20,24 @@ import {
   LevelingEngine,
   getDungeonFloorEnergyCost,
 } from '@ririko/services';
+import { DungeonBattleManager } from './dungeon-battle.manager.js';
 
 const levelingEngine = new LevelingEngine();
 
 export function createDungeonCommand(services: BotServices): Command {
+  const battleManager = new DungeonBattleManager(services);
+
   return {
     metadata: {
       name: 'dungeon',
       category: CommandCategory.TCG,
       description: 'PvE Seasonal Dungeon Tower: Climb floors, challenge bosses, and overcome environmental affixes.',
       aliases: ['tower', 'climb', 'spire'],
-      usage: '/dungeon [action: status|climb|floor|leaderboard|tutorial] [floor_number]',
+      usage: '/dungeon [action: status|climb|floor|leaderboard|tutorial] [floor_number] [mode: manual|auto]',
       examples: [
         '/dungeon action:status',
         '/dungeon action:climb',
+        '/dungeon action:climb mode:auto',
         '/dungeon action:floor floor_number:10',
         '/dungeon action:leaderboard',
         '/dungeon action:tutorial',
@@ -49,6 +61,16 @@ export function createDungeonCommand(services: BotServices): Command {
           description: 'Floor number to inspect or challenge',
           type: 'INTEGER',
           required: false,
+        },
+        {
+          name: 'mode',
+          description: 'Combat mode (manual: interactive tactical buttons, auto: watch real-time turns)',
+          type: 'STRING',
+          required: false,
+          choices: [
+            { name: 'Manual (Tactical button controls)', value: 'manual' },
+            { name: 'Auto (Watch real-time turn battle)', value: 'auto' },
+          ],
         },
       ],
     },
@@ -102,11 +124,61 @@ export function createDungeonCommand(services: BotServices): Command {
             )
             .setFooter({ text: 'Seasonal Tower resets every 60–90 days with fresh environmental affixes.' });
 
-          await ctx.reply({ embeds: [embed] });
+          const climbBtn = new ButtonBuilder()
+            .setCustomId('dungeon:status:climb')
+            .setLabel(`⚔️ Climb Floor ${nextFloor}`)
+            .setStyle(ButtonStyle.Success);
+          const tutorialBtn = new ButtonBuilder()
+            .setCustomId('dungeon:status:tutorial')
+            .setLabel('🔰 Tutorial')
+            .setStyle(ButtonStyle.Secondary);
+          const row = new ActionRowBuilder<ButtonBuilder>().addComponents(climbBtn, tutorialBtn);
+
+          const replyMsg = await ctx.reply({ embeds: [embed], components: [row] });
+          const discordMsg = (
+            replyMsg && typeof replyMsg === 'object' && 'fetch' in replyMsg
+              ? await (replyMsg as any).fetch()
+              : replyMsg
+          ) as Message | undefined;
+          if (discordMsg && typeof discordMsg === 'object' && 'createMessageComponentCollector' in discordMsg) {
+            const collector = discordMsg.createMessageComponentCollector({
+              componentType: ComponentType.Button,
+              time: 60_000,
+            });
+            collector.on('collect', async (interaction: ButtonInteraction) => {
+              if (interaction.user.id !== ctx.user.id) {
+                await interaction.reply({ content: '⏳ This is not your menu!', ephemeral: true });
+                return;
+              }
+              collector.stop();
+              if (interaction.customId === 'dungeon:status:climb') {
+                await interaction.deferUpdate();
+                await battleManager.startBattle(ctx, {
+                  floorNumber: nextFloor,
+                  seasonId: activeSeason.id,
+                  mode: 'manual',
+                });
+              } else if (interaction.customId === 'dungeon:status:tutorial') {
+                await interaction.deferUpdate();
+                const tutProgress = await services.userDungeonProgressRepo.getOrCreateProgress(
+                  ctx.user.id,
+                  'season_tutorial',
+                );
+                await handleTutorialClimb(
+                  ctx,
+                  services,
+                  Math.min(4, tutProgress.highestClearedFloor + 1),
+                  'manual',
+                );
+              }
+            });
+          }
           break;
         }
 
         case 'climb': {
+          const mode = (ctx.options.getString('mode')?.toLowerCase() as 'manual' | 'auto') ?? 'manual';
+
           // Tutorial Gate: ensure players clear Prologue Floors T1–T4 first
           const tutorialProgress = await services.userDungeonProgressRepo.getOrCreateProgress(
             ctx.user.id,
@@ -114,17 +186,60 @@ export function createDungeonCommand(services: BotServices): Command {
           );
 
           if (tutorialProgress.highestClearedFloor < 4) {
-            await handleTutorialClimb(ctx, services, tutorialProgress.highestClearedFloor + 1);
-            return;
-          }
+            const nextTutFloor = tutorialProgress.highestClearedFloor + 1;
+            const embed = new EmbedBuilder()
+              .setTitle('🔰 Prologue Tutorial Required')
+              .setColor(0xfee75c)
+              .setDescription(
+                `⚠️ **You haven't finished the tutorial yet!**\n\n` +
+                  `Master the fundamentals of Elemental Resonance, MP & Skills, Consumables, and Shield Wards before entering the seasonal tower.\n\n` +
+                  `Begin **Tutorial Floor ${nextTutFloor} / 4**?`,
+              )
+              .setFooter({ text: 'Clear all 4 tutorial floors to unlock Season 1 tower climbing!' });
 
-          const userCards = await fetchUserCombatCards(services, ctx.user.id, 'TEAM_A');
-          if (userCards.length === 0) {
-            await ctx.reply({
-              content:
-                '❌ You have no cards available to climb the dungeon! Claim or equip a card first with `/card claim` or `/card equip`.',
-              ephemeral: true,
-            });
+            const beginBtn = new ButtonBuilder()
+              .setCustomId('dungeon:climb:begin_tutorial')
+              .setLabel(`⚔️ Begin Tutorial Floor ${nextTutFloor} / 4`)
+              .setStyle(ButtonStyle.Success);
+
+            const cancelBtn = new ButtonBuilder()
+              .setCustomId('dungeon:climb:cancel')
+              .setLabel('❌ Cancel')
+              .setStyle(ButtonStyle.Secondary);
+
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(beginBtn, cancelBtn);
+
+            const replyMsg = await ctx.reply({ embeds: [embed], components: [row] });
+            const discordMsg = (
+              replyMsg && typeof replyMsg === 'object' && 'fetch' in replyMsg
+                ? await (replyMsg as any).fetch()
+                : replyMsg
+            ) as Message | undefined;
+
+            if (discordMsg && typeof discordMsg === 'object' && 'createMessageComponentCollector' in discordMsg) {
+              const collector = discordMsg.createMessageComponentCollector({
+                componentType: ComponentType.Button,
+                time: 60_000,
+              });
+
+              collector.on('collect', async (interaction: ButtonInteraction) => {
+                if (interaction.user.id !== ctx.user.id) {
+                  await interaction.reply({ content: '⏳ This is not your menu!', ephemeral: true });
+                  return;
+                }
+                collector.stop();
+                if (interaction.customId === 'dungeon:climb:begin_tutorial') {
+                  await interaction.deferUpdate();
+                  await handleTutorialClimb(ctx, services, nextTutFloor, mode);
+                } else if (interaction.customId === 'dungeon:climb:cancel') {
+                  await interaction.update({
+                    content: 'Tutorial postponed. You can resume anytime with `/dungeon tutorial` or `/dungeon climb`.',
+                    embeds: [],
+                    components: [],
+                  });
+                }
+              });
+            }
             return;
           }
 
@@ -137,64 +252,12 @@ export function createDungeonCommand(services: BotServices): Command {
                 ? parseInt(rawArgs[1], 10)
                 : progress.highestClearedFloor + 1);
 
-          const runResult = await services.dungeonRunner.runFloor({
-            userId: ctx.user.id,
-            seasonId: activeSeason.id,
+          await battleManager.startBattle(ctx, {
             floorNumber: floorToClimb,
-            playerParty: userCards,
+            seasonId: activeSeason.id,
+            mode,
+            isTutorial: false,
           });
-
-          if (!runResult.success) {
-            await ctx.reply({
-              content: `❌ **Climb Failed**: ${runResult.error}`,
-              ephemeral: true,
-            });
-            return;
-          }
-
-          // Build log preview of highlights (up to 8 noteworthy logs)
-          const highlightLogs = runResult.logs
-            .filter(
-              (l) =>
-                l.actionType === 'ENRAGE' ||
-                l.message.includes('SHATTERED') ||
-                l.message.includes('BROKEN') ||
-                l.message.includes('absorbed') ||
-                l.message.includes('CRITICAL') ||
-                l.message.includes('vanquished') ||
-                l.message.includes('seared') ||
-                l.message.includes('healed'),
-            )
-            .slice(-6);
-
-          const logSection =
-            highlightLogs.length > 0
-              ? `\n**⚔️ Battle Highlights:**\n` + highlightLogs.map((l) => `Turn ${l.turn}: ${l.message}`).join('\n')
-              : '';
-
-          const embed = new EmbedBuilder()
-            .setTitle(
-              runResult.victory
-                ? `🏆 Floor ${runResult.floorNumber} CLEARED! — Victory!`
-                : `💀 Floor ${runResult.floorNumber} Defeat`,
-            )
-            .setColor(runResult.victory ? 0x57f287 : 0xed4245)
-            .setDescription(
-              `**Dungeon Run Report: Floor ${runResult.floorNumber}**\n` +
-                `• **Outcome**: ${runResult.victory ? '✅ **VICTORY**' : '❌ **DEFEATED**'}\n` +
-                `• **Turns Total**: \`${runResult.turnsTotal}/25 Turns\`\n` +
-                `• **Energy Consumed**: \`${runResult.energySpent} Energy\`\n` +
-                `• **Highest Floor**: \`Floor ${runResult.highestFloorCleared}\`\n` +
-                logSection +
-                (runResult.loot ? `\n\n${runResult.loot.message}` : ''),
-            )
-            .setFooter({
-              text: runResult.victory
-                ? 'Proceed to the next floor with /dungeon climb!'
-                : 'Tip: Counter the enemy element, equip enhanced gear, or bring potions!',
-            });
-
-          await ctx.reply({ embeds: [embed] });
           break;
         }
 
@@ -293,176 +356,43 @@ async function handleTutorialClimb(
   ctx: CommandContext,
   services: BotServices,
   tutorialFloor: number,
+  mode: 'manual' | 'auto' = 'manual',
 ): Promise<void> {
-  // 1. Ensure the player has their starter card
+  // 1. Ensure the player cannot replay cleared tutorial floors
+  const canAttempt = await services.tutorialService.canAttemptTutorialFloor(ctx.user.id, tutorialFloor);
+  let targetFloor = tutorialFloor;
+  if (!canAttempt.allowed) {
+    if (canAttempt.reason === 'ALREADY_CLEARED') {
+      if (canAttempt.nextFloor && canAttempt.nextFloor <= 4) {
+        targetFloor = canAttempt.nextFloor;
+      } else {
+        await ctx.reply({
+          content:
+            '🎉 You have already cleared all 4 floors of the Tutorial Prologue! Proceed to the seasonal tower with `/dungeon climb`.',
+          ephemeral: true,
+        });
+        return;
+      }
+    } else if (canAttempt.reason === 'LOCKED') {
+      targetFloor = canAttempt.nextFloor ?? 1;
+    }
+  }
+
+  // 2. Ensure the player has their starter card
   await services.tutorialService.ensureStarterCard(ctx.user.id);
 
-  // 2. Fetch player's equipped/combat cards
-  const userCards = await fetchUserCombatCards(services, ctx.user.id, 'TEAM_A');
-  if (userCards.length === 0) {
-    await ctx.reply({
-      content: '❌ Failed to initialize starter waifu card for the tutorial. Please try again.',
-      ephemeral: true,
-    });
-    return;
+  // 3. For Floor T3 (Consumables), ensure the player has 1x HP and 1x MP potion
+  if (targetFloor === 3) {
+    await services.tutorialService.ensureFloor3Potions(ctx.user.id);
   }
 
-  // 3. Get tutorial floor information
-  const tutFloorInfo = services.tutorialService.getTutorialFloor(tutorialFloor);
-
-  // 4. Run the tutorial floor
-  const runResult = await services.dungeonRunner.runFloor({
-    userId: ctx.user.id,
+  // 4. Launch interactive battle session for the tutorial floor
+  const battleManager = new DungeonBattleManager(services);
+  await battleManager.startBattle(ctx, {
+    floorNumber: targetFloor,
     seasonId: 'season_tutorial',
-    floorNumber: tutorialFloor,
-    playerParty: userCards,
-    skipEnergyDeduction: true,
+    mode,
+    isTutorial: true,
   });
-
-  if (!runResult.success) {
-    await ctx.reply({
-      content: `❌ **Tutorial Run Failed**: ${runResult.error}`,
-      ephemeral: true,
-    });
-    return;
-  }
-
-  // Build battle highlights
-  const highlightLogs = runResult.logs
-    .filter(
-      (l) =>
-        l.actionType === 'ENRAGE' ||
-        l.message.includes('SHATTERED') ||
-        l.message.includes('BROKEN') ||
-        l.message.includes('absorbed') ||
-        l.message.includes('CRITICAL') ||
-        l.message.includes('vanquished') ||
-        l.message.includes('seared') ||
-        l.message.includes('healed'),
-    )
-    .slice(-6);
-
-  const logSection =
-    highlightLogs.length > 0
-      ? `\n**⚔️ Battle Highlights:**\n` + highlightLogs.map((l) => `Turn ${l.turn}: ${l.message}`).join('\n')
-      : '';
-
-  if (runResult.victory) {
-    if (tutorialFloor >= 4) {
-      // Completed the 4th floor -> finalize tutorial & dispatch starter pack!
-      const completion = await services.tutorialService.completeTutorial(ctx.user.id);
-      const embed = new EmbedBuilder()
-        .setTitle('🎉 Prologue Tutorial CLEARED! — Training Grounds Mastered!')
-        .setColor(0x57f287)
-        .setDescription(
-          `**Dungeon Run Report: Floor T${tutorialFloor} [${tutFloorInfo?.topic ?? 'Shield Wards'}]**\n` +
-            `• **Outcome**: ✅ **VICTORY**\n` +
-            `• **Turns Total**: \`${runResult.turnsTotal}/25 Turns\`\n` +
-            `• **Energy Consumed**: \`0 Energy (Free Tutorial)\`\n\n` +
-            (tutFloorInfo ? `💡 **Tactical Lesson**: *${tutFloorInfo.guideMessage}*\n` : '') +
-            logSection +
-            `\n\n${completion.message}`,
-        )
-        .setFooter({ text: 'Clear Floor 1 of the seasonal tower next with /dungeon climb!' });
-
-      await ctx.reply({ embeds: [embed] });
-    } else {
-      const nextFloorInfo = services.tutorialService.getTutorialFloor(tutorialFloor + 1);
-      const embed = new EmbedBuilder()
-        .setTitle(`🔰 Tutorial Floor T${tutorialFloor} CLEARED! — ${tutFloorInfo?.title ?? 'Victory'}`)
-        .setColor(0x57f287)
-        .setDescription(
-          `**Dungeon Run Report: Floor T${tutorialFloor} [${tutFloorInfo?.topic ?? 'Tutorial'}]**\n` +
-            `• **Outcome**: ✅ **VICTORY**\n` +
-            `• **Turns Total**: \`${runResult.turnsTotal}/25 Turns\`\n` +
-            `• **Energy Consumed**: \`0 Energy (Free Tutorial)\`\n\n` +
-            (tutFloorInfo ? `💡 **Tactical Lesson**: *${tutFloorInfo.guideMessage}*\n` : '') +
-            logSection +
-            `\n\n⚔️ **Next Challenge**: **Floor T${tutorialFloor + 1} (${nextFloorInfo?.topic ?? 'Next Floor'})**\n` +
-            `Run \`/dungeon climb\` or \`$climb\` to continue the tutorial!`,
-        )
-        .setFooter({ text: `Floor T${tutorialFloor}/4 Completed. 0 Energy cost.` });
-
-      await ctx.reply({ embeds: [embed] });
-    }
-  } else {
-    const embed = new EmbedBuilder()
-      .setTitle(`💀 Tutorial Floor T${tutorialFloor} Defeat`)
-      .setColor(0xed4245)
-      .setDescription(
-        `**Dungeon Run Report: Floor T${tutorialFloor} [${tutFloorInfo?.topic ?? 'Tutorial'}]**\n` +
-          `• **Outcome**: ❌ **DEFEATED**\n` +
-          `• **Turns Total**: \`${runResult.turnsTotal}/25 Turns\`\n\n` +
-          (tutFloorInfo ? `💡 **Tactical Tip**: *${tutFloorInfo.guideMessage}*\n` : '') +
-          logSection +
-          `\n\nDon't give up! Retrying tutorial floors costs **0 Energy**.\nRun \`/dungeon climb\` or \`$climb\` to try again!`,
-      )
-      .setFooter({ text: "Tip: Counter the dummy's element or use active skills when MP is full!" });
-
-    await ctx.reply({ embeds: [embed] });
-  }
 }
 
-async function fetchUserCombatCards(
-  services: BotServices,
-  userId: string,
-  team: 'TEAM_A' | 'TEAM_B',
-): Promise<Combatant[]> {
-  let userCards = await services.waifuCardRepo.listUserCards(userId, { state: 'EQUIPPED' });
-  if (userCards.length === 0) {
-    userCards = await services.waifuCardRepo.listUserCards(userId, { limit: 1 });
-  }
-
-  const combatants: Combatant[] = [];
-  for (const uc of userCards) {
-    const base = await services.waifuCardRepo.findById(uc.cardId);
-    if (!base) continue;
-
-    const scaled = levelingEngine.calculateScaledStats(
-      {
-        hp: base.health,
-        attack: base.attack,
-        defense: base.defense,
-        speed: base.speed,
-        critRate: base.critRate,
-        mp: 100,
-      },
-      uc.level,
-    );
-
-    const combatant: Combatant = {
-      id: uc.id,
-      name: `${base.name} (Lv.${uc.level})`,
-      team,
-      element: (base.element as CombatElement) ?? 'FIRE',
-      rarity: (base.rarity as CardRarity) ?? 'COMMON',
-      level: uc.level,
-      maxHealth: scaled.hp,
-      currentHealth: scaled.hp,
-      attack: scaled.attack,
-      defense: scaled.defense,
-      speed: scaled.speed,
-      critRate: scaled.critRate,
-      critDamage: 1.5,
-      maxMp: 100,
-      currentMp: 0,
-      skillName: base.skillName ?? undefined,
-      skillDescription: base.skillDescription ?? undefined,
-      skillManaCost: 50,
-      passiveName: base.passiveName ?? undefined,
-      passiveDescription: base.passiveDescription ?? undefined,
-      shield: 0,
-      statusEffects: [],
-      perks: [],
-      hasUsedPhoenixWard: false,
-      isAlive: true,
-    };
-
-    const loadout = await services.loadoutService.getCardLoadout(uc.id);
-    services.loadoutService.applyLoadoutToCombatant(combatant, loadout);
-
-    combatants.push(combatant);
-  }
-
-  return combatants;
-}

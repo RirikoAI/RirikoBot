@@ -217,14 +217,14 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     expect(replyMock).toHaveBeenCalledTimes(1);
     const callArg = replyMock.mock.calls[0]![0];
     const embed = callArg.embeds[0].data;
-    expect(embed.title).toContain('Prologue Tutorial CLEARED');
-    // Names the starter the player actually holds (mock user already owns Flame Valkyrie)
-    expect(embed.description).toContain('Flame Valkyrie [FIRE]');
-    expect(embed.description).toContain('Novice Blade');
-    expect(embed.description).toContain('TUTORIAL_COMPLETE');
+    expect(embed.title).toContain('Tutorial Floor T4');
+    expect(embed.description).toContain('Flame Valkyrie');
+    expect(embed.description).toContain('Tactical Lesson');
+    expect(callArg.components).toBeDefined();
+    expect(callArg.components[0].components.length).toBe(5); // Attack, Skill, Defend, Auto, Forfeit
   });
 
-  it('should automatically route incomplete players to tutorial Floor T1 when running climb', async () => {
+  it('should prompt incomplete players to begin tutorial when running climb directly', async () => {
     mockProgressRepo.getOrCreateProgress.mockImplementation((userId: string, seasonId: string) => {
       if (seasonId === 'season_tutorial') {
         return Promise.resolve({
@@ -254,8 +254,11 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     expect(replyMock).toHaveBeenCalledTimes(1);
     const callArg = replyMock.mock.calls[0]![0];
     const embed = callArg.embeds[0].data;
-    expect(embed.title).toContain('Floor T1');
-    expect(embed.description).toContain('Elemental Multipliers');
+    expect(embed.title).toContain('Prologue Tutorial Required');
+    expect(embed.description).toContain("You haven't finished the tutorial yet!");
+    expect(embed.description).toContain('Begin **Tutorial Floor 1 / 4**?');
+    expect(callArg.components[0].components.length).toBe(2); // Begin Tutorial, Cancel
+    expect(callArg.components[0].components[0].data.label).toContain('Begin Tutorial Floor 1 / 4');
   });
 
   it('should resolve $climb prefix alias to climb action', async () => {
@@ -280,7 +283,10 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     const callArg = replyMock.mock.calls[0]![0];
     const embed = callArg.embeds[0].data;
     expect(embed.title).toContain('Floor 1');
-    expect(embed.description).toContain('VICTORY');
+    expect(embed.description).toContain('Flame Valkyrie');
+    expect(embed.description).toContain('HP:');
+    expect(embed.description).toContain('MP:');
+    expect(callArg.components[0].components.length).toBe(5);
   });
 
   it('should display seasonal leaderboard with top climbers', async () => {
@@ -297,7 +303,7 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     expect(embed.description).toContain('Floor 10');
   });
 
-  it('should execute floor climb, consume energy, and dispatch rewards on victory', async () => {
+  it('should execute floor climb, initialize interactive battle HUD, and expose tactical buttons', async () => {
     const cmd = createDungeonCommand(services);
     const ctx = createMockContext({ action: 'climb', floor_number: 1 }, ['climb', '1']);
 
@@ -307,7 +313,35 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     const callArg = replyMock.mock.calls[0]![0];
     const embed = callArg.embeds[0].data;
     expect(embed.title).toContain('Floor 1');
-    expect(embed.description).toContain('VICTORY');
-    expect(embed.description).toContain('Credits');
+    expect(embed.description).toContain('HP:');
+    expect(embed.description).toContain('MP:');
+
+    // Verify all 5 interactive buttons are present
+    const buttons = callArg.components[0].components;
+    expect(buttons.length).toBe(5);
+    expect(buttons[0].data.label).toContain('Attack');
+    expect(buttons[1].data.label).toContain('Skill');
+    expect(buttons[2].data.label).toContain('Defend');
+    expect(buttons[3].data.label).toContain('Auto');
+    expect(buttons[4].data.label).toContain('Forfeit');
+  });
+
+  it('should support auto mode option with pause and skip controls', async () => {
+    const cmd = createDungeonCommand(services);
+    const ctx = createMockContext({ action: 'climb', floor_number: 1, mode: 'auto' }, ['climb', '1', 'auto']);
+
+    await cmd.execute(ctx);
+
+    expect(replyMock).toHaveBeenCalledTimes(1);
+    const callArg = replyMock.mock.calls[0]![0];
+    const embed = callArg.embeds[0].data;
+    expect(embed.title).toContain('Floor 1');
+
+    // In auto mode, buttons are Pause, Skip, Forfeit
+    const buttons = callArg.components[0].components;
+    expect(buttons.length).toBe(3);
+    expect(buttons[0].data.label).toContain('Pause');
+    expect(buttons[1].data.label).toContain('Skip');
+    expect(buttons[2].data.label).toContain('Forfeit');
   });
 });

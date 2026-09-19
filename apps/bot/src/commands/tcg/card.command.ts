@@ -16,6 +16,11 @@ import {
 } from '@ririko/services';
 import type { WaifuAsset, WaifuCard } from '@ririko/database';
 import { buildTcgInfoEmbed, buildTcgInfoSelectMenu } from './info.command.js';
+import {
+  handleCardsCommand,
+  buildCardInspectEmbed,
+  buildCardInspectComponents,
+} from './cards.command.js';
 
 const CARD_IMAGE_NAME = 'card.png';
 
@@ -50,7 +55,7 @@ export function createCardCommand(services: BotServices): Command {
       name: 'card',
       category: CommandCategory.TCG,
       description: 'Waifu TCG collection, inspection, claim, favorite, equip, and dismantling commands.',
-      aliases: ['tcg', 'cards'],
+      aliases: ['tcg'],
       usage: '/card [action: collection|inspect|claim|favorite|equip|dismantle] [id] [filter] [sort]',
       examples: [
         '/card action:collection filter:ICE sort:level',
@@ -248,7 +253,7 @@ export function createCardCommand(services: BotServices): Command {
 
           if (!userCard || userCard.userId !== ctx.user.id) {
             await ctx.reply({
-              content: '❌ Card not found in your collection. Use `/card action:collection` to view your cards.',
+              content: '❌ Card not found in your collection. Use `/cards` to view your cards.',
               ephemeral: true,
             });
             return;
@@ -260,98 +265,23 @@ export function createCardCommand(services: BotServices): Command {
             return;
           }
 
-          const asset = await services.waifuAssetRepo.findById(baseCard.assetId);
-          const source = asset ? await services.waifuAssetRepo.findSourceById(asset.sourceId) : null;
+          const asset = baseCard.assetId && services.waifuAssetRepo
+            ? await services.waifuAssetRepo.findById(baseCard.assetId)
+            : null;
 
-          const tier = RARITY_TIERS[(baseCard.rarity as CardRarity) ?? 'COMMON'];
-          const formattedSerial = formatCardSerialNumber(userCard.serialNumber);
-          const footer = formatCardEmbedFooter(source, formattedSerial);
-
-          const embed = new EmbedBuilder()
-            .setTitle(`${userCard.isFavorite ? '⭐ ' : ''}${baseCard.name} (${formattedSerial})`)
-            .setColor(baseCard.element === 'FIRE' ? 0xff4500 : baseCard.element === 'ICE' ? 0x00ffff : 0x9370db)
-            .setDescription(
-              `**Rarity**: \`${tier.name}\` • **Foil**: \`${tier.foilEffect}\`\n` +
-                `**Element**: \`${baseCard.element}\` • **State**: \`${userCard.state}\`\n` +
-                `**Level**: \`${userCard.level} / ${tier.maxLevel}\` (EXP: \`${userCard.exp}\`)\n\n` +
-                `📊 **Attributes**\n` +
-                `• **HP**: \`${baseCard.health}\`\n` +
-                `• **ATK**: \`${baseCard.attack}\`\n` +
-                `• **DEF**: \`${baseCard.defense}\`\n` +
-                `• **SPD**: \`${baseCard.speed}\` (Turn Priority)\n` +
-                `• **CRIT**: \`${(baseCard.critRate * 100).toFixed(1)}%\`\n` +
-                `• **MP**: \`100 / 100\`\n\n` +
-                `⚔️ **Active Tactical Skill**\n` +
-                `**${baseCard.skillName ?? 'Skill'}**: ${baseCard.skillDescription ?? 'No description.'}\n\n` +
-                `🛡️ **Passive Ability**\n` +
-                `**${baseCard.passiveName ?? 'Passive'}**: ${baseCard.passiveDescription ?? 'No description.'}`,
-            )
-            .setFooter(footer);
-
-          const files = await attachCardImage(
-            services,
-            embed,
-            baseCard,
+          const { embed, files } = await buildCardInspectEmbed(services, {
+            userCard,
+            base: baseCard,
             asset,
-            getCardAttribution(source).footerText,
-          );
+          });
+          const components = buildCardInspectComponents(userCard);
 
-          await ctx.reply({ embeds: [embed], files });
+          await ctx.reply({ embeds: [embed], components, files });
           break;
         }
 
         case 'collection': {
-          const filter = ctx.options.getString('filter')?.toUpperCase();
-          const sort = ctx.options.getString('sort') ?? 'rarity';
-
-          const userCards = await services.waifuCardRepo.listUserCards(ctx.user.id, { limit: 100 });
-          if (userCards.length === 0) {
-            await ctx.reply({
-              content: '📭 Your card album is currently empty! Watch out for automated card drops in chat to claim your first waifu!',
-              ephemeral: true,
-            });
-            return;
-          }
-
-          // Fetch base cards for metadata
-          const populated = await Promise.all(
-            userCards.map(async (uc) => {
-              const base = await services.waifuCardRepo.findById(uc.cardId);
-              return { userCard: uc, base };
-            }),
-          );
-
-          // Filter by element or rarity
-          let filtered = populated.filter((item) => item.base !== null);
-          if (filter) {
-            filtered = filtered.filter(
-              (item) => item.base?.element === filter || item.base?.rarity === filter,
-            );
-          }
-
-          // Sort
-          filtered.sort((a, b) => {
-            if (sort === 'level') return b.userCard.level - a.userCard.level;
-            if (sort === 'name') return (a.base?.name ?? '').localeCompare(b.base?.name ?? '');
-            return (b.base?.attack ?? 0) - (a.base?.attack ?? 0);
-          });
-
-          const lines = filtered.slice(0, 15).map((item) => {
-            const fav = item.userCard.isFavorite ? '⭐' : '•';
-            const serial = formatCardSerialNumber(item.userCard.serialNumber);
-            return `${fav} **${item.base?.name}** (\`${item.base?.rarity}\` | \`${item.base?.element}\`) — Lv.${item.userCard.level} [${serial}] (ID: \`${item.userCard.id.slice(0, 8)}\`)`;
-          });
-
-          const embed = new EmbedBuilder()
-            .setTitle(`🎴 ${ctx.user.username}'s Waifu Collection`)
-            .setColor(0xff69b4)
-            .setDescription(
-              `Showing **${Math.min(15, filtered.length)}** of **${filtered.length}** cards matching filters.\n\n` +
-                (lines.length > 0 ? lines.join('\n') : '*No cards match the specified filter.*'),
-            )
-            .setFooter(formatCardEmbedFooter(null, `Total Owned: ${userCards.length}`));
-
-          await ctx.reply({ embeds: [embed] });
+          await handleCardsCommand(ctx, services);
           break;
         }
 

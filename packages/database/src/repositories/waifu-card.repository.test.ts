@@ -61,6 +61,7 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
         serial_number INTEGER NOT NULL,
         level INTEGER NOT NULL DEFAULT 1,
         exp INTEGER NOT NULL DEFAULT 0,
+        battles_won INTEGER NOT NULL DEFAULT 0,
         state TEXT NOT NULL DEFAULT 'IDLE',
         is_favorite INTEGER NOT NULL DEFAULT 0,
         obtained_at INTEGER NOT NULL
@@ -227,6 +228,13 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
     // Toggle favorite
     const fav = await repo.toggleUserCardFavorite(userCard.id, true);
     expect(fav?.isFavorite).toBe(true);
+
+    // Battles won increment
+    const won1 = await repo.incrementUserCardBattlesWon(userCard.id, 1);
+    expect(won1?.battlesWon).toBe(1);
+
+    const won2 = await repo.incrementUserCardBattlesWon(userCard.id, 3);
+    expect(won2?.battlesWon).toBe(4);
 
     // Dismantle / delete
     const deleted = await repo.deleteUserCard(userCard.id);

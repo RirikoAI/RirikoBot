@@ -1,4 +1,11 @@
-import { EmbedBuilder } from 'discord.js';
+import {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  StringSelectMenuBuilder,
+  type Message,
+} from 'discord.js';
 import {
   CommandCategory,
   type Command,
@@ -511,23 +518,141 @@ async function handleShop(
     return;
   }
 
-  const lines = catalog.map((item) => {
-    const dailyLimit = item.maxDailyPurchases > 0 ? ` (Limit: ${item.maxDailyPurchases}/day)` : '';
-    const perks = item.battlePerks && item.battlePerks.length > 0 ? ` | *Perk: ${item.battlePerks.join(', ')}*` : '';
-    return `• **${item.name}** (\`${item.code}\`) — 🪙 **${item.shopPrice.toLocaleString()} credits** [${item.rarity}]${dailyLimit}${perks}\n  *${item.description}*`;
+  let selectedIndex = 0;
+
+  const buildShopEmbed = (itemIdx: number, successNotice?: string) => {
+    const selected = catalog[itemIdx]!;
+    const lines = catalog.map((item, idx) => {
+      const isCurrent = idx === itemIdx;
+      const marker = isCurrent ? '👉 ' : '• ';
+      const dailyLimit = item.maxDailyPurchases > 0 ? ` (Limit: ${item.maxDailyPurchases}/day)` : '';
+      const perks = item.battlePerks && item.battlePerks.length > 0 ? ` | *Perk: ${item.battlePerks.join(', ')}*` : '';
+      return `${marker}**${item.name}** (\`${item.code}\`) — 🪙 **${item.shopPrice.toLocaleString()} credits** [${item.rarity}]${dailyLimit}${perks}\n  *${item.description}*`;
+    });
+
+    const embed = new EmbedBuilder()
+      .setColor(0x5865f2)
+      .setTitle('🏪 Town Item Shop Catalog — Interactive')
+      .setDescription(
+        (successNotice ? `${successNotice}\n\n` : '') +
+        `Welcome to the Town Shop, summoner! Select an item below and choose quantity to purchase.\n\n` +
+        lines.join('\n\n') +
+        `\n\n🎯 **Selected Item**: **${selected.name}** (${selected.shopPrice.toLocaleString()} credits each)\n` +
+        `*${selected.description}*`,
+      )
+      .setFooter({ text: 'Double-entry ledger audited | Buy with buttons below' });
+
+    return embed;
+  };
+
+  const buildShopComponents = (itemIdx: number) => {
+    const selected = catalog[itemIdx]!;
+
+    const selectMenu = new StringSelectMenuBuilder()
+      .setCustomId('shop:select_item')
+      .setPlaceholder(`Selected: ${selected.name} (${selected.shopPrice} credits)`);
+
+    for (let i = 0; i < Math.min(25, catalog.length); i++) {
+      const it = catalog[i]!;
+      const isPot = it.subtype === 'HP_POTION' || it.subtype === 'MANA_POTION' || it.subtype === 'ENERGY_POTION';
+      const icon = it.subtype === 'HP_POTION' ? '🧪' : it.subtype === 'MANA_POTION' ? '🔷' : isPot ? '⚡' : '⚔️';
+      selectMenu.addOptions({
+        label: `${icon} ${it.name} — ${it.shopPrice} credits`,
+        description: it.description ? it.description.slice(0, 100) : `${it.type} item`,
+        value: String(i),
+        default: i === itemIdx,
+      });
+    }
+
+    const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
+
+    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId('shop:buy:1')
+        .setLabel(`🛍️ Buy 1x (${selected.shopPrice}c)`)
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId('shop:buy:5')
+        .setLabel(`🛍️ Buy 5x (${selected.shopPrice * 5}c)`)
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId('shop:buy:10')
+        .setLabel(`🛍️ Buy 10x (${selected.shopPrice * 10}c)`)
+        .setStyle(ButtonStyle.Secondary),
+    );
+
+    return [selectRow, buttonRow];
+  };
+
+  const initialEmbed = buildShopEmbed(selectedIndex);
+  const initialComponents = buildShopComponents(selectedIndex);
+
+  const replyMsg = await ctx.reply({ embeds: [initialEmbed], components: initialComponents });
+  const discordMsg = (
+    replyMsg && typeof replyMsg === 'object' && 'fetch' in replyMsg
+      ? await (replyMsg as any).fetch()
+      : replyMsg
+  ) as Message | undefined;
+
+  if (!discordMsg || typeof discordMsg !== 'object' || !('createMessageComponentCollector' in discordMsg)) {
+    return;
+  }
+
+  const collector = discordMsg.createMessageComponentCollector({
+    time: 120_000,
   });
 
-  const embed = new EmbedBuilder()
-    .setColor(0x5865f2)
-    .setTitle('🏪 Town Item Shop Catalog')
-    .setDescription(
-      `Welcome to the Town Shop, summoner! Acquire equipment, accessories, and potions using wallet credits.\n\n` +
-        lines.join('\n\n') +
-        `\n\n*Purchase items using:* \`/game action:buy item:<code_or_id> [quantity]\``,
-    )
-    .setFooter({ text: 'All transactions audited via double-entry financial ledger' });
+  collector.on('collect', async (interaction) => {
+    if (interaction.user.id !== ctx.user.id) {
+      await interaction.reply({ content: '⏳ This is not your shop menu!', ephemeral: true });
+      return;
+    }
 
-  await ctx.reply({ embeds: [embed] });
+    if (interaction.isStringSelectMenu() && interaction.customId === 'shop:select_item') {
+      const idx = parseInt(interaction.values[0] ?? '0', 10);
+      if (!isNaN(idx) && idx >= 0 && idx < catalog.length) {
+        selectedIndex = idx;
+      }
+      const updatedEmbed = buildShopEmbed(selectedIndex);
+      const updatedComponents = buildShopComponents(selectedIndex);
+      await interaction.update({ embeds: [updatedEmbed], components: updatedComponents }).catch(() => {});
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('shop:buy:')) {
+      const qty = parseInt(interaction.customId.split(':')[2] ?? '1', 10);
+      const selectedItem = catalog[selectedIndex]!;
+
+      try {
+        const receipt = await services.tcgShopService.buyItem(
+          ctx.user.id,
+          selectedItem.code,
+          qty,
+          ctx.guild?.id,
+        );
+
+        const notice = `✅ **Purchased ${receipt.quantity}x ${receipt.item.name}** for **${receipt.totalPrice.toLocaleString()} credits**! (Wallet remaining: \`${receipt.walletBalanceAfter.toLocaleString()} credits\`)`;
+        const updatedEmbed = buildShopEmbed(selectedIndex, notice);
+        const updatedComponents = buildShopComponents(selectedIndex);
+        await interaction.update({ embeds: [updatedEmbed], components: updatedComponents }).catch(() => {});
+      } catch (err: unknown) {
+        await interaction.reply({
+          content: `❌ **Purchase Failed**: ${err instanceof Error ? err.message : String(err)}`,
+          ephemeral: true,
+        });
+      }
+    }
+  });
+
+  collector.on('end', async () => {
+    const disabledComponents = buildShopComponents(selectedIndex);
+    for (const row of disabledComponents) {
+      for (const comp of row.components) {
+        comp.setDisabled(true);
+      }
+    }
+    await discordMsg.edit({ components: disabledComponents }).catch(() => {});
+  });
 }
 
 async function handleBuy(
