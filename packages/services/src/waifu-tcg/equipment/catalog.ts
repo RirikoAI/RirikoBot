@@ -759,5 +759,18 @@ export const CANONICAL_ITEMS: NewGameItem[] = [
   },
 ];
 
+/**
+ * Drop-only RARE gear that the Town Shop may stock for a day (see TcgShopService.getDailyRotation).
+ * Boss signature gear is never listed here, so it stays a reward for beating the boss.
+ */
+export const DAILY_ROTATION_POOL: readonly string[] = [
+  'WEAPON_OBSIDIAN_KATANA',
+  'ARMOR_MAGMA_MAIL',
+  'RELIC_CINDER_LANTERN',
+  'RING_BLAZING_SUN',
+  'AMULET_MOUNTAIN',
+  'TALISMAN_WINDWALKER',
+];
+
 /** Catalog code of the enhancement currency. */
 export const CRAFTING_DUST_CODE = 'CRAFTING_DUST';
