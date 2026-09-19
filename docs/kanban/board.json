@@ -676,7 +676,7 @@
       "epic": "EPIC-015",
       "title": "Card EXP from Dungeon Wins & Real Skill MP Cost in Combat",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["BUG-0010"],
       "blocks": [],
       "description": "Dungeon clears grant card EXP via LevelingEngine; battle combatant uses the card skill MP cost instead of hard-coded 50."
@@ -1791,7 +1791,7 @@
       "id": "BUG-0010",
       "title": "Grant TCG Items by Catalog Code, Auto-Equip Starter Blade & Repair Legacy Item Rows",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "parent": "EPIC-015",
       "requires": [],
       "blocks": ["STORY-150"],

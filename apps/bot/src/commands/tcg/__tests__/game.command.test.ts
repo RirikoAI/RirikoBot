@@ -8,6 +8,7 @@ import {
   BossRaidService,
   PvPDuelService,
   QuestService,
+  LoadoutService,
 } from '@ririko/services';
 
 describe('Game Command Suite (TASK-1022)', () => {
@@ -85,6 +86,9 @@ describe('Game Command Suite (TASK-1022)', () => {
         activePerks: [],
       }),
       applyLoadoutToCombatant: () => {},
+      cardRepo: mockCardRepo,
+      buildCombatant: LoadoutService.prototype.buildCombatant,
+      buildActiveParty: LoadoutService.prototype.buildActiveParty,
     };
 
     services = {
