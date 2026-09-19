@@ -1,0 +1,904 @@
+{
+  "seasonId": "s1_infernal_crucible",
+  "season": {
+    "name": "Season 1: Infernal Crucible",
+    "description": "Blistering magma towers with Scorched Earth and Heat Haze affixes.",
+    "themeElement": "FIRE",
+    "seasonalAffixes": [
+      "SCORCHED_EARTH",
+      "HEAT_HAZE"
+    ],
+    "scalingModel": "EXPONENTIAL",
+    "scalingParams": {
+      "affixStartFloor": 6
+    },
+    "durationDays": 90
+  },
+  "floorCount": 50,
+  "bosses": [
+    {
+      "key": "megumin",
+      "name": "Megumin",
+      "anime": "KonoSuba",
+      "element": "FIRE",
+      "tier": "MAJOR_BOSS",
+      "floors": [
+        10
+      ],
+      "title": "Crimson Demon Archwizard",
+      "flavorText": "She has one spell, and she has been saving it for you. Brace when the ground starts to glow.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 0.85,
+          "defense": 0.7
+        },
+        "skill": {
+          "name": "Explosion",
+          "description": "A single, catastrophic blast after five turns of chanting.",
+          "mpCost": 100,
+          "powerMult": 3
+        }
+      },
+      "anilistId": 89361,
+      "favourites": 16682,
+      "danbooruTag": "megumin",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/ef/41/sample-ef41a81e40399b902dc82e1339a4c357.jpg",
+        "source": "DANBOORU",
+        "sourceId": "3691277",
+        "credit": "Art: nagu · danbooru #3691277"
+      }
+    },
+    {
+      "key": "mikasa_ackerman",
+      "name": "Mikasa Ackerman",
+      "anime": "Attack on Titan",
+      "element": "EARTH",
+      "tier": "MAJOR_BOSS",
+      "floors": [
+        20
+      ],
+      "title": "Blade of the Scorched Walls",
+      "flavorText": "Fast, relentless and never off balance. Outlast her first assault or fall to it.",
+      "definition": {
+        "statMultipliers": {
+          "attack": 1.15,
+          "defense": 0.9,
+          "speed": 1.25
+        },
+        "critRate": 0.2,
+        "skill": {
+          "name": "Thunder Spear Barrage",
+          "mpCost": 50,
+          "powerMult": 1.8
+        }
+      },
+      "anilistId": 40881,
+      "favourites": 25576,
+      "danbooruTag": "mikasa_ackerman",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/1d/ff/sample-1dffb85013b8c646a3961e77d3eb3a5e.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5993813",
+        "credit": "Art: khyle. · danbooru #5993813"
+      }
+    },
+    {
+      "key": "mereoleona_vermillion",
+      "name": "Mereoleona Vermillion",
+      "anime": "Black Clover",
+      "element": "FIRE",
+      "tier": "MAJOR_BOSS",
+      "floors": [
+        30
+      ],
+      "title": "Lioness of the Crimson Kiln",
+      "flavorText": "She hates waiting. Her fury ignites early, so every turn you waste makes her stronger.",
+      "definition": {
+        "statMultipliers": {
+          "attack": 1.2
+        },
+        "skill": {
+          "name": "Calidos Brachium",
+          "mpCost": 60,
+          "powerMult": 2
+        },
+        "enrage": {
+          "startTurn": 8
+        }
+      },
+      "anilistId": 124522,
+      "favourites": 2839,
+      "danbooruTag": "mereoleona_vermillion",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/04/f7/sample-04f7284217f35bd28bb40759027560d9.jpg",
+        "source": "DANBOORU",
+        "sourceId": "6522403",
+        "credit": "Art: nekoma_hikaru · danbooru #6522403"
+      }
+    },
+    {
+      "key": "rias_gremory",
+      "name": "Rias Gremory",
+      "anime": "High School DxD",
+      "element": "FIRE",
+      "tier": "MAJOR_BOSS",
+      "floors": [
+        40
+      ],
+      "title": "Crimson Princess of Ruin",
+      "flavorText": "Three wards guard her throne. Bring the right elements, or your blows turn to ash.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 1.15
+        },
+        "skill": {
+          "name": "Power of Destruction",
+          "mpCost": 80,
+          "powerMult": 2.4
+        },
+        "wardLayers": [
+          {
+            "element": "WATER",
+            "hpPercent": 0.12
+          },
+          {
+            "element": "EARTH",
+            "hpPercent": 0.12
+          },
+          {
+            "element": "ICE",
+            "hpPercent": 0.12
+          }
+        ]
+      },
+      "anilistId": 50389,
+      "favourites": 6360,
+      "danbooruTag": "rias_gremory",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/93/32/sample-93328f248949921aeb22fbdf2fe1079c.jpg",
+        "source": "DANBOORU",
+        "sourceId": "8857819",
+        "credit": "Art: unknown · danbooru #8857819"
+      }
+    },
+    {
+      "key": "shana",
+      "name": "Shana",
+      "anime": "Shakugan no Shana",
+      "element": "FIRE",
+      "tier": "MAJOR_BOSS",
+      "floors": [
+        50
+      ],
+      "title": "Flame Haze of the Crucible Heart",
+      "flavorText": "The crucible burns for her alone. Only a fully forged team reaches the summit.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 1.1,
+          "attack": 1.1,
+          "defense": 1.1,
+          "speed": 1.1
+        },
+        "critRate": 0.2,
+        "skill": {
+          "name": "Shinku",
+          "mpCost": 60,
+          "powerMult": 2.2
+        },
+        "enrage": {
+          "startTurn": 12,
+          "perTurn": 0.75
+        },
+        "wardLayers": [
+          {
+            "element": "WATER",
+            "hpPercent": 0.1
+          },
+          {
+            "element": "LIGHTNING",
+            "hpPercent": 0.1
+          },
+          {
+            "element": "ICE",
+            "hpPercent": 0.1
+          }
+        ]
+      },
+      "anilistId": 1426,
+      "favourites": 1063,
+      "danbooruTag": "shana",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/5d/91/sample-5d915686529ad75a74011914671381a7.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5753552",
+        "credit": "Art: seungju_lee · danbooru #5753552"
+      }
+    },
+    {
+      "key": "maki_oze",
+      "name": "Maki Oze",
+      "anime": "Fire Force",
+      "element": "FIRE",
+      "tier": "MINI_BOSS",
+      "floors": [
+        5
+      ],
+      "title": "Gatekeeper of the First Flame",
+      "flavorText": "Sturdy and patient. Save your skill for when she is worn down, and keep a potion ready.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 1.2,
+          "attack": 0.8
+        },
+        "skill": {
+          "name": "Flame Commandeer",
+          "mpCost": 60,
+          "powerMult": 1.6
+        }
+      },
+      "anilistId": 130713,
+      "favourites": 3908,
+      "danbooruTag": "maki_oze",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/65/b0/sample-65b06af8ac54d9335e8184c75984c075.jpg",
+        "source": "DANBOORU",
+        "sourceId": "3558582",
+        "credit": "Art: gsong-chan · danbooru #3558582"
+      }
+    },
+    {
+      "key": "darkness",
+      "name": "Darkness",
+      "anime": "KonoSuba",
+      "element": "EARTH",
+      "tier": "MINI_BOSS",
+      "floors": [
+        15
+      ],
+      "title": "Unbreakable Crusader",
+      "flavorText": "She can take every hit you have. Her own swings rarely land hard. Race the enrage.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 1.6,
+          "attack": 0.6,
+          "defense": 1.4
+        },
+        "skill": {
+          "name": "Crusader Resolve",
+          "mpCost": 70,
+          "powerMult": 1.3
+        },
+        "enrage": {
+          "startTurn": 12
+        }
+      },
+      "anilistId": 89363,
+      "favourites": 6045,
+      "danbooruTag": "darkness_(konosuba)",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/b0/df/sample-b0df5dca532c334c347cd23cfd227b73.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5604637",
+        "credit": "Art: izawa_(bhive003) · danbooru #5604637"
+      }
+    },
+    {
+      "key": "eris_greyrat",
+      "name": "Eris Greyrat",
+      "anime": "Mushoku Tensei",
+      "element": "FIRE",
+      "tier": "MINI_BOSS",
+      "floors": [
+        25
+      ],
+      "title": "Mad Sword of the Red Pass",
+      "flavorText": "Short on patience, long on speed. Her critical strikes punish thin armor.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 0.9,
+          "attack": 1.1,
+          "speed": 1.3
+        },
+        "critRate": 0.25,
+        "skill": {
+          "name": "Sword God Style: Light Severing",
+          "mpCost": 45,
+          "powerMult": 1.7
+        }
+      },
+      "anilistId": 88349,
+      "favourites": 7202,
+      "danbooruTag": "eris_greyrat",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/35/13/sample-3513f82ed5af8b1b5eab56a8cdc49ca3.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5269747",
+        "credit": "Art: tochi_keisuke · danbooru #5269747"
+      }
+    },
+    {
+      "key": "holo",
+      "name": "Holo",
+      "anime": "Spice and Wolf",
+      "element": "EARTH",
+      "tier": "MINI_BOSS",
+      "floors": [
+        35
+      ],
+      "title": "Wisewolf of the Ember Harvest",
+      "flavorText": "She strikes often and never tires. Endurance and healing win this hunt.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 1.2
+        },
+        "skill": {
+          "name": "Harvest Fang",
+          "mpCost": 40,
+          "powerMult": 1.4
+        }
+      },
+      "anilistId": 7373,
+      "favourites": 7057,
+      "danbooruTag": "holo",
+      "image": {
+        "url": "https://cdn.donmai.us/original/bd/c1/bdc18ebdd419cba7751d19a61773c47f.jpg",
+        "source": "DANBOORU",
+        "sourceId": "9543130",
+        "credit": "Art: likunea · danbooru #9543130"
+      }
+    },
+    {
+      "key": "tohru",
+      "name": "Tohru",
+      "anime": "Miss Kobayashi's Dragon Maid",
+      "element": "FIRE",
+      "tier": "MINI_BOSS",
+      "floors": [
+        45
+      ],
+      "title": "Chaos Dragon of the Caldera",
+      "flavorText": "A dragon wearing a maid uniform is still a dragon. Mind the breath attack.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 1.1,
+          "attack": 1.15
+        },
+        "skill": {
+          "name": "Dragon Breath",
+          "mpCost": 70,
+          "powerMult": 2.2
+        },
+        "wardLayers": [
+          {
+            "element": "WATER",
+            "hpPercent": 0.15
+          }
+        ]
+      },
+      "anilistId": 120970,
+      "favourites": 5233,
+      "danbooruTag": "tohru_(maidragon)",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/dd/42/sample-dd421157d4a4ad7beaa087ffe1f7d44d.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5417063",
+        "credit": "Art: modare · danbooru #5417063"
+      }
+    },
+    {
+      "key": "nezuko_kamado",
+      "name": "Nezuko Kamado",
+      "anime": "Demon Slayer",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        1,
+        19
+      ],
+      "title": "Ember of the Lower Halls",
+      "flavorText": "Quick to anger and quicker to burn.",
+      "definition": {
+        "skill": {
+          "name": "Exploding Blood",
+          "mpCost": 60,
+          "powerMult": 1.5
+        }
+      },
+      "anilistId": 127518,
+      "favourites": 14633,
+      "danbooruTag": "kamado_nezuko_(demon)",
+      "image": {
+        "url": "https://cdn.donmai.us/original/8d/c4/8dc4c1e5fbdaa1a1d46f83612c825caf.jpg",
+        "source": "DANBOORU",
+        "sourceId": "4292141",
+        "credit": "Art: uzuta · danbooru #4292141"
+      }
+    },
+    {
+      "key": "taiga_aisaka",
+      "name": "Taiga Aisaka",
+      "anime": "Toradora!",
+      "element": "EARTH",
+      "tier": "STANDARD",
+      "floorRange": [
+        1,
+        19
+      ],
+      "title": "Palmtop Tyrant",
+      "flavorText": "Small, stubborn and armed with a wooden sword.",
+      "definition": {
+        "statMultipliers": {
+          "defense": 1.15,
+          "speed": 0.9
+        },
+        "skill": {
+          "name": "Tiger Rush",
+          "mpCost": 60,
+          "powerMult": 1.5
+        }
+      },
+      "anilistId": 12064,
+      "favourites": 8436,
+      "danbooruTag": "aisaka_taiga",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/9c/c1/sample-9cc17dfd2f07732b16a7add29c96b42b.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5755776",
+        "credit": "Art: seungju_lee · danbooru #5755776"
+      }
+    },
+    {
+      "key": "hestia",
+      "name": "Hestia",
+      "anime": "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        1,
+        19
+      ],
+      "title": "Goddess of the Hearth Gate",
+      "flavorText": "She guards the warm floors, and she is not letting you pass for free.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 1.1,
+          "attack": 0.9
+        },
+        "skill": {
+          "name": "Hearthfire Blessing",
+          "mpCost": 60,
+          "powerMult": 1.4
+        }
+      },
+      "anilistId": 87654,
+      "favourites": 3144,
+      "danbooruTag": "hestia_(danmachi)",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/47/be/sample-47be6e6746808508b4f9f22a7a915a49.jpg",
+        "source": "DANBOORU",
+        "sourceId": "6271000",
+        "credit": "Art: kuragen_(ojikurage) · danbooru #6271000"
+      }
+    },
+    {
+      "key": "ochaco_uraraka",
+      "name": "Ochaco Uraraka",
+      "anime": "My Hero Academia",
+      "element": "EARTH",
+      "tier": "STANDARD",
+      "floorRange": [
+        1,
+        19
+      ],
+      "title": "Zero-Gravity Brawler",
+      "flavorText": "She makes the rubble float, then drops it on you.",
+      "definition": {
+        "skill": {
+          "name": "Meteor Shower",
+          "mpCost": 60,
+          "powerMult": 1.6
+        }
+      },
+      "anilistId": 89221,
+      "favourites": 5522,
+      "danbooruTag": "uraraka_ochaco",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/11/8d/sample-118d1b073e6b57ea0bb2f1da7343efd8.jpg",
+        "source": "DANBOORU",
+        "sourceId": "2920758",
+        "credit": "Art: ryota_(ry_o_ta) · danbooru #2920758"
+      }
+    },
+    {
+      "key": "tamaki_kotatsu",
+      "name": "Tamaki Kotatsu",
+      "anime": "Fire Force",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        1,
+        19
+      ],
+      "title": "Cat of the Scorched Stair",
+      "flavorText": "All bravado and burning tails.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 0.9,
+          "speed": 1.15
+        },
+        "skill": {
+          "name": "Nekomata Flames",
+          "mpCost": 60,
+          "powerMult": 1.5
+        }
+      },
+      "anilistId": 130751,
+      "favourites": 3728,
+      "danbooruTag": "tamaki_kotatsu",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/09/16/sample-0916a55ebf7ee632cd49e34102e8e1f6.jpg",
+        "source": "DANBOORU",
+        "sourceId": "8541274",
+        "credit": "Art: nyaa_(nnekoron) · danbooru #8541274"
+      }
+    },
+    {
+      "key": "rin_tohsaka",
+      "name": "Rin Tohsaka",
+      "anime": "Fate/stay night",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        1,
+        19
+      ],
+      "title": "Jewel Magus of the Furnace",
+      "flavorText": "Every gem she throws is worth a small fortune, and a large crater.",
+      "definition": {
+        "statMultipliers": {
+          "attack": 1.1,
+          "defense": 0.9
+        },
+        "skill": {
+          "name": "Jewel Magecraft",
+          "mpCost": 60,
+          "powerMult": 1.6
+        }
+      },
+      "anilistId": 498,
+      "favourites": 12841,
+      "danbooruTag": "tohsaka_rin",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/25/2c/sample-252cd9325b120e637926a877fb42a8d5.jpg",
+        "source": "DANBOORU",
+        "sourceId": "6090901",
+        "credit": "Art: cotta_(heleif) · danbooru #6090901"
+      }
+    },
+    {
+      "key": "zero_two",
+      "name": "Zero Two",
+      "anime": "Darling in the Franxx",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Oni of the Molten Deep",
+      "flavorText": "She is looking for a partner. You look breakable.",
+      "definition": {
+        "statMultipliers": {
+          "attack": 1.1
+        },
+        "skill": {
+          "name": "Strelizia Lance",
+          "mpCost": 60,
+          "powerMult": 1.6
+        }
+      },
+      "anilistId": 124381,
+      "favourites": 14713,
+      "danbooruTag": "zero_two_(darling_in_the_franxx)",
+      "image": {
+        "url": "https://cdn.donmai.us/original/fb/a5/fba56231a1a46f3a152cb38605cc8e13.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5020927",
+        "credit": "Art: kangbus · danbooru #5020927"
+      }
+    },
+    {
+      "key": "maki_zenin",
+      "name": "Maki Zenin",
+      "anime": "Jujutsu Kaisen",
+      "element": "EARTH",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Cursed Tool Vanguard",
+      "flavorText": "No cursed energy, no mercy.",
+      "definition": {
+        "statMultipliers": {
+          "defense": 1.05,
+          "speed": 1.15
+        },
+        "skill": {
+          "name": "Split Soul Katana",
+          "mpCost": 60,
+          "powerMult": 1.7
+        }
+      },
+      "anilistId": 134167,
+      "favourites": 13071,
+      "danbooruTag": "zen'in_maki",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/c0/a5/sample-c0a501e3e0dbcf59bafa623f9a755b6c.jpg",
+        "source": "DANBOORU",
+        "sourceId": "7139331",
+        "credit": "Art: funi_xd · danbooru #7139331"
+      }
+    },
+    {
+      "key": "ryuko_matoi",
+      "name": "Ryuko Matoi",
+      "anime": "Kill la Kill",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Scissor Blade Delinquent",
+      "flavorText": "Half a scissor blade, whole lot of attitude.",
+      "definition": {
+        "statMultipliers": {
+          "attack": 1.15,
+          "defense": 0.9
+        },
+        "skill": {
+          "name": "Senketsu Shippu",
+          "mpCost": 60,
+          "powerMult": 1.6
+        }
+      },
+      "anilistId": 83797,
+      "favourites": 8162,
+      "danbooruTag": "matoi_ryuuko",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/db/e3/sample-dbe3130925f98ee1eae3c81b7abd4bce.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5390798",
+        "credit": "Art: lem · danbooru #5390798"
+      }
+    },
+    {
+      "key": "mitsuri_kanroji",
+      "name": "Mitsuri Kanroji",
+      "anime": "Demon Slayer",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Love Hashira of the Lava Garden",
+      "flavorText": "Her whip-thin blade curls around any guard.",
+      "definition": {
+        "statMultipliers": {
+          "speed": 1.2
+        },
+        "skill": {
+          "name": "Love Breathing: Catlove Shower",
+          "mpCost": 55,
+          "powerMult": 1.5
+        }
+      },
+      "anilistId": 136072,
+      "favourites": 6584,
+      "danbooruTag": "kanroji_mitsuri",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/81/41/sample-8141bd1cc0461580a1700f820cd97a56.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5860352",
+        "credit": "Art: suoiresnu · danbooru #5860352"
+      }
+    },
+    {
+      "key": "kohaku",
+      "name": "Kohaku",
+      "anime": "Dr. Stone",
+      "element": "EARTH",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Lioness of the Stone Wilds",
+      "flavorText": "Sharp eyes, sharper reflexes.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 0.95,
+          "speed": 1.2
+        },
+        "skill": {
+          "name": "Stone World Ambush",
+          "mpCost": 60,
+          "powerMult": 1.5
+        }
+      },
+      "anilistId": 124143,
+      "favourites": 3237,
+      "danbooruTag": "kohaku_(dr._stone)",
+      "image": {
+        "url": "https://cdn.donmai.us/original/4b/6c/4b6c43d154996268a30e42eb14aac71b.png",
+        "source": "DANBOORU",
+        "sourceId": "7433793",
+        "credit": "Art: ninomae_gin · danbooru #7433793"
+      }
+    },
+    {
+      "key": "yoko_littner",
+      "name": "Yoko Littner",
+      "anime": "Gurren Lagann",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Sniper of the Ash Ridge",
+      "flavorText": "She hits from far away and far too often.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 0.9,
+          "attack": 1.1
+        },
+        "critRate": 0.2,
+        "skill": {
+          "name": "Rifle Barrage",
+          "mpCost": 60,
+          "powerMult": 1.6
+        }
+      },
+      "anilistId": 2063,
+      "favourites": 3536,
+      "danbooruTag": "yoko_littner",
+      "image": {
+        "url": "https://cdn.donmai.us/original/2f/7b/2f7b3abdb6b37e8fa4f75971ed912a12.jpg",
+        "source": "DANBOORU",
+        "sourceId": "1380919",
+        "credit": "Art: ikiteirukagiri · danbooru #1380919"
+      }
+    },
+    {
+      "key": "riza_hawkeye",
+      "name": "Riza Hawkeye",
+      "anime": "Fullmetal Alchemist: Brotherhood",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Hawk's Eye of the Flame Keep",
+      "flavorText": "She never misses the opening you leave.",
+      "definition": {
+        "critRate": 0.22,
+        "skill": {
+          "name": "Covering Fire",
+          "mpCost": 55,
+          "powerMult": 1.5
+        }
+      },
+      "anilistId": 70,
+      "favourites": 4141,
+      "danbooruTag": "riza_hawkeye",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/2e/11/sample-2e11a0b3c849565353cf48a9d0b047af.jpg",
+        "source": "DANBOORU",
+        "sourceId": "6880951",
+        "credit": "Art: mashutarou_(neko_no_oyashiro) · danbooru #6880951"
+      }
+    },
+    {
+      "key": "raphtalia",
+      "name": "Raphtalia",
+      "anime": "The Rising of the Shield Hero",
+      "element": "EARTH",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Sword of the Shielded Pass",
+      "flavorText": "Loyal, disciplined and hard to get past.",
+      "definition": {
+        "statMultipliers": {
+          "defense": 1.15
+        },
+        "skill": {
+          "name": "Illusion Sword",
+          "mpCost": 60,
+          "powerMult": 1.5
+        }
+      },
+      "anilistId": 88889,
+      "favourites": 6849,
+      "danbooruTag": "raphtalia",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/ec/c3/sample-ecc375bd155c477faa038f1e708b8f2f.jpg",
+        "source": "DANBOORU",
+        "sourceId": "5418260",
+        "credit": "Art: aisha_(rfrm) · danbooru #5418260"
+      }
+    },
+    {
+      "key": "kallen_stadtfeld",
+      "name": "Kallen Stadtfeld",
+      "anime": "Code Geass",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Radiant Wave Ace",
+      "flavorText": "Her surges melt armor from the inside.",
+      "definition": {
+        "statMultipliers": {
+          "attack": 1.15
+        },
+        "skill": {
+          "name": "Radiant Wave Surger",
+          "mpCost": 70,
+          "powerMult": 1.8
+        }
+      },
+      "anilistId": 558,
+      "favourites": 3746,
+      "danbooruTag": "kouzuki_kallen",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/ec/c5/sample-ecc5314450b6397a0e91b7f7a302bd11.jpg",
+        "source": "DANBOORU",
+        "sourceId": "10639049",
+        "credit": "Art: yoo_tenchi · danbooru #10639049"
+      }
+    },
+    {
+      "key": "reze",
+      "name": "Reze",
+      "anime": "Chainsaw Man",
+      "element": "FIRE",
+      "tier": "STANDARD",
+      "floorRange": [
+        21,
+        49
+      ],
+      "title": "Bomb of the Burning Tier",
+      "flavorText": "Charming until the pin comes out.",
+      "definition": {
+        "statMultipliers": {
+          "hp": 0.85,
+          "attack": 1.2
+        },
+        "skill": {
+          "name": "Detonation",
+          "mpCost": 70,
+          "powerMult": 1.9
+        }
+      },
+      "anilistId": 148740,
+      "favourites": 10326,
+      "danbooruTag": "reze_(chainsaw_man)",
+      "image": {
+        "url": "https://cdn.donmai.us/sample/65/73/sample-6573b6bbcc15d20db56a39926aea7ce8.jpg",
+        "source": "DANBOORU",
+        "sourceId": "8521342",
+        "credit": "Art: aiomita · danbooru #8521342"
+      }
+    }
+  ]
+}
