@@ -7,6 +7,7 @@ import {
   DungeonRunner,
   TutorialService,
   DungeonLootService,
+  LoadoutService,
 } from '@ririko/services';
 
 describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
@@ -102,6 +103,9 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
         talisman: null,
       }),
       applyLoadoutToCombatant: vi.fn(),
+      cardRepo: mockCardRepo,
+      buildCombatant: LoadoutService.prototype.buildCombatant,
+      buildActiveParty: LoadoutService.prototype.buildActiveParty,
     };
 
     const mockInventoryRepo: any = {
