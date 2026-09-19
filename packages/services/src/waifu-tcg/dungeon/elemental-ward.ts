@@ -16,10 +16,22 @@ export interface WardAttackResult {
   message: string;
 }
 
+/** Share of an off-element strike that still damages a season ward. */
+export const DEFAULT_OFF_ELEMENT_WARD_CHIP = 0.25;
+
 export class ElementalWard {
   private readonly layers: WardLayer[];
+  private readonly offElementChip: number;
 
-  constructor(layers: Array<{ element: CardElement; health: number }>) {
+  /**
+   * @param options.offElementChip share of an off-element strike that damages the ward
+   *   (0 = only the matching element breaks it, as in the tutorial).
+   */
+  constructor(
+    layers: Array<{ element: CardElement; health: number }>,
+    options: { offElementChip?: number | undefined } = {},
+  ) {
+    this.offElementChip = Math.max(0, Math.min(1, options.offElementChip ?? 0));
     this.layers = layers.map((l) => ({
       element: l.element,
       maxHealth: Math.max(1, l.health),
@@ -52,8 +64,8 @@ export class ElementalWard {
 
   /**
    * Processes incoming strike against the elemental ward.
-   * If non-matching element, absorbs 100% of damage (0 damage to boss).
-   * If matching element, depletes the active layer. Excess damage hits the boss if all wards break.
+   * Matching elements deplete the active layer at full damage; other elements only chip it by
+   * offElementChip (0 absorbs them completely). Excess damage hits the boss once all wards break.
    */
   public processAttack(attackerElement: CardElement, rawDamage: number): WardAttackResult {
     const current = this.getCurrentLayer();
@@ -69,8 +81,10 @@ export class ElementalWard {
       };
     }
 
-    // Check elemental match
-    if (attackerElement !== current.element) {
+    // Off-element strikes only chip the ward (or bounce off entirely)
+    const matching = attackerElement === current.element;
+    const effective = matching ? rawDamage : Math.round(rawDamage * this.offElementChip);
+    if (effective <= 0) {
       return {
         absorbed: true,
         damagePassedToBoss: 0,
@@ -80,10 +94,9 @@ export class ElementalWard {
       };
     }
 
-    // Matching element! Damage is dealt to the current ward layer
-    const damageDealt = Math.min(rawDamage, current.currentHealth);
+    const damageDealt = Math.min(effective, current.currentHealth);
     current.currentHealth -= damageDealt;
-    const overflow = rawDamage - damageDealt;
+    const overflow = effective - damageDealt;
 
     if (current.currentHealth <= 0) {
       current.currentHealth = 0;
@@ -117,7 +130,9 @@ export class ElementalWard {
       damagePassedToBoss: 0,
       layerBroken: false,
       allWardsBroken: false,
-      message: `⚔️ **Resonant Strike!** [${current.element}] barrier damaged for ${damageDealt} HP! (${current.currentHealth}/${current.maxHealth} remaining)`,
+      message: matching
+        ? `⚔️ **Resonant Strike!** [${current.element}] barrier damaged for ${damageDealt} HP! (${current.currentHealth}/${current.maxHealth} remaining)`
+        : `🛡️ **Off-element strike** only chipped the [${current.element}] barrier for ${damageDealt} HP (${Math.round(this.offElementChip * 100)}%). Match its element to break it faster! (${current.currentHealth}/${current.maxHealth} remaining)`,
     };
   }
 

@@ -716,7 +716,7 @@
       "epic": "EPIC-015",
       "title": "Season 1 Infernal Crucible Boss Roster & Floor Seed Data",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["STORY-152", "STORY-153"],
       "blocks": [],
       "description": "Unique characters for all mini/major boss floors plus a rotating themed pool for standard floors with no back-to-back repeats; each boss has distinct skill, flavor text and signature drop."
