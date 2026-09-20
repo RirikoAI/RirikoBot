@@ -176,10 +176,26 @@ describe('Waifu TCG: Energy Lifecycle & Town Item Shop (STORY-103 / TASK-1032)',
       }
     });
 
-    it('rejects purchase of non-buyable superior gear', async () => {
+    it('rejects purchase of non-buyable superior gear outside the daily rotation', async () => {
+      // The rotation is seeded from the reset-day key, so the date must be pinned: on days when
+      // WEAPON_OBSIDIAN_KATANA rotates in it becomes purchasable and this guard never fires.
+      // 2026-03-01 (GMT+8) rotates RING_BLAZING_SUN + ARMOR_MAGMA_MAIL.
+      const katanaOutOfRotation = new Date('2026-02-28T16:00:00.000Z');
       await expect(
-        shopService.buyItem('user_buyer', 'WEAPON_OBSIDIAN_KATANA', 1),
+        shopService.buyItem('user_buyer', 'WEAPON_OBSIDIAN_KATANA', 1, undefined, katanaOutOfRotation),
       ).rejects.toThrow(/cannot be purchased with credits/);
+    });
+
+    it('allows purchase of drop-only gear while it is in the daily rotation', async () => {
+      // 2026-03-02 (GMT+8) rotates WEAPON_OBSIDIAN_KATANA + TALISMAN_WINDWALKER.
+      const katanaInRotation = new Date('2026-03-01T16:00:00.000Z');
+      const rotation = await shopService.getDailyRotation(katanaInRotation);
+      expect(rotation.map((i) => i.code)).toContain('WEAPON_OBSIDIAN_KATANA');
+
+      // Rejected for price, not for being drop-only: the rotation guard let it through.
+      await expect(
+        shopService.buyItem('user_buyer', 'WEAPON_OBSIDIAN_KATANA', 1, undefined, katanaInRotation),
+      ).rejects.toThrow(/Insufficient wallet balance/);
     });
 
     it('rejects purchase if daily quantity limit is exceeded', async () => {

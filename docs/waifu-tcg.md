@@ -458,11 +458,14 @@ Every expedition, dungeon raid, and boss encounter consumes **Player Energy**.
 ### 12.1. Deterministic Daily Replenishment
 - Every day at the configured **reset boundary** (default **00:00 GMT+8**), all players have their active energy pool restored to their level's maximum capacity.
 - The boundary is shared with every other daily system in the bot and is configured through `RIRIKO_RESET_OFFSET_MINUTES` plus `RIRIKO_RESET_TIME` / `RIRIKO_RESET_TIME_ENERGY`. See Section 5.3 of [docs/economy.md](economy.md) for the full table.
-- Replenishment is evaluated lazily on the user's next interaction, so no scheduled job is required:
+- Replenishment is evaluated lazily on the user's next interaction, so no scheduled job is required and a bot that was offline across a boundary still replenishes correctly:
   $$\text{Energy}_{\text{current}} = \max\left(\text{Energy}_{\text{current}}, \text{MaxEnergy}(\text{Level})\right)$$
 
 ### 12.2. Level-Based Energy Formula & Progression Table
-A player's max energy capacity scales with their overall leveling progression (`xp_accounts.level`):
+A player's max energy capacity scales with their overall leveling progression. Energy is a
+**global per-user** resource while `xp_accounts` is keyed per guild, so the account-wide level is
+derived from the user's XP **summed across every guild** (`XpRepository.getUserTotalXp`) and run
+through the standard leveling curve, rather than from any single guild's row:
 
 $$\text{MaxEnergy}(\text{Level}) = \min\left(\text{GlobalCap}, 100 + \lfloor (\text{Level} - 1) \times 2 \rfloor + \text{MilestoneBonus}(\text{Level})\right)$$
 
@@ -497,7 +500,22 @@ Where **MilestoneBonus** rewards significant progression breakthroughs:
   - Gaining energy from rare consumables or leveling up can temporarily overflow past the normal cap (e.g. 115/100).
   - During the daily replenishment at the reset boundary, if a player's energy is already $\ge \text{MaxEnergy}$, it is not reduced or deleted, but no additional free energy is awarded.
 
-### 12.4. Energy Expenditure Table
+### 12.4. Reconciliation Entry Points
+
+`EnergyLifecycleService` is the single gateway for the energy pool. Every debit runs through it,
+and each one reconciles the reset boundary before evaluating the spend, so a player who has not
+been seen since the last boundary is replenished first rather than wrongly refused:
+
+| Entry point | Method |
+|---|---|
+| Timed expeditions | `spendEnergy` |
+| Dungeon floor attempts | `spendEnergy` |
+| World boss raids | `spendEnergy` |
+| PvP ranked duels | `spendEnergy` |
+| Energy potions (`/item use`, economy shop) | `consumePotion` |
+| Floor 1–10 defeat refund | `refundEnergy` |
+
+### 12.5. Energy Expenditure Table
 
 | Game Activity | Energy Cost | Rewards Gathered |
 |---------------|-------------|------------------|

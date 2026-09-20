@@ -20,6 +20,7 @@ import type {
   ItemMetadata,
 } from './types.js';
 import type { LevelingService } from './leveling.service.js';
+import type { EnergyLifecycleService } from '../waifu-tcg/energy/energy-lifecycle.service.js';
 
 export interface InventoryServiceOptions {
   itemRepository: ItemRepository;
@@ -29,6 +30,7 @@ export interface InventoryServiceOptions {
   levelingService?: LevelingService | undefined;
   eventBus?: EventBus | undefined;
   resetSchedule?: ResetSchedule | undefined;
+  energyLifecycle?: EnergyLifecycleService | undefined;
 }
 
 /**
@@ -47,6 +49,7 @@ export class InventoryService {
   private readonly levelingService?: LevelingService | undefined;
   private readonly eventBus?: EventBus | undefined;
   private readonly resetSchedule: ResetSchedule;
+  private readonly energyLifecycle: EnergyLifecycleService | undefined;
 
   constructor(options: InventoryServiceOptions) {
     this.itemRepository = options.itemRepository;
@@ -56,6 +59,7 @@ export class InventoryService {
     this.levelingService = options.levelingService;
     this.eventBus = options.eventBus;
     this.resetSchedule = options.resetSchedule ?? DEFAULT_RESET_SCHEDULE;
+    this.energyLifecycle = options.energyLifecycle;
   }
 
   /**
@@ -268,11 +272,13 @@ export class InventoryService {
         const energyPerItem = metadata.energyRestored ?? 50;
         const ceiling = metadata.dailyUsageCeiling ?? 3;
 
-        const potRes = await this.playerEnergyRepository.consumeEnergyPotion(
-          userId,
-          energyPerItem * quantity,
-          ceiling,
-        );
+        const potRes = this.energyLifecycle
+          ? await this.energyLifecycle.consumePotion(userId, energyPerItem * quantity, ceiling)
+          : await this.playerEnergyRepository.consumeEnergyPotion(
+              userId,
+              energyPerItem * quantity,
+              ceiling,
+            );
 
         if (!potRes.success) {
           return {

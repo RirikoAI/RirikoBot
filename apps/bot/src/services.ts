@@ -104,6 +104,7 @@ import {
   LoadoutService,
   ConsumableService,
   EnergyLifecycleService,
+  createXpLevelResolver,
   TcgShopService,
   ItemGrantService,
   CardProgressionService,
@@ -307,6 +308,17 @@ export async function createBotServices(
     eventBus,
   });
 
+  // Energy lifecycle owns the daily boundary and level-scaled capacity. It resolves the
+  // player's account-wide level from summed XP, since energy is global while xp_accounts
+  // is per guild.
+  const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, {
+    resetSchedule: resetSchedules.energy,
+    levelResolver: createXpLevelResolver(
+      xpRepo,
+      (totalXp) => levelingService.getLevelProgress(totalXp).level,
+    ),
+  });
+
   const leaderboardService = new LeaderboardService({
     xpRepository: xpRepo,
     leaderboardRepository: leaderboardRepo,
@@ -324,6 +336,7 @@ export async function createBotServices(
     levelingService,
     eventBus,
     resetSchedule: resetSchedules.shopPurchases,
+    energyLifecycle: energyLifecycleService,
   });
 
   const profileBackgroundManager = new ProfileBackgroundManager({
@@ -560,15 +573,29 @@ export async function createBotServices(
   const rpsEngine = new RpsEngine(gameSessionManager);
   const combatSimulator = new CombatSimulator({ maxTurns: 25 });
   const rewardPayout = { economyRepo, grants: itemGrantService };
-  const expeditionService = new ExpeditionService(playerEnergyRepo, rewardPayout);
-  const bossRaidService = new BossRaidService(playerEnergyRepo, combatSimulator, rewardPayout);
-  const pvpDuelService = new PvPDuelService(playerEnergyRepo, economyRepo, combatSimulator);
+  const expeditionService = new ExpeditionService(playerEnergyRepo, rewardPayout, energyLifecycleService);
+  const bossRaidService = new BossRaidService(
+    playerEnergyRepo,
+    combatSimulator,
+    rewardPayout,
+    energyLifecycleService,
+  );
+  const pvpDuelService = new PvPDuelService(
+    playerEnergyRepo,
+    economyRepo,
+    combatSimulator,
+    energyLifecycleService,
+  );
   const questService = new QuestService();
 
   const enhancementService = new EnhancementService(gameItemRepo, userInventoryItemRepo);
   const loadoutService = new LoadoutService(gameItemRepo, userInventoryItemRepo, waifuCardRepo, enhancementService);
-  const consumableService = new ConsumableService(gameItemRepo, userInventoryItemRepo, playerEnergyRepo);
-  const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, resetSchedules.energy);
+  const consumableService = new ConsumableService(
+    gameItemRepo,
+    userInventoryItemRepo,
+    playerEnergyRepo,
+    energyLifecycleService,
+  );
   const tcgShopService = new TcgShopService(
     gameItemRepo,
     userInventoryItemRepo,
@@ -622,6 +649,7 @@ export async function createBotServices(
     achievementService,
   });
   const dungeonRunner = new DungeonRunner(playerEnergyRepo, userDungeonProgressRepo, {
+    energyLifecycle: energyLifecycleService,
     scalingEngine,
     floorRepo: dungeonFloorRepo,
     bossRepo: dungeonBossRepo,

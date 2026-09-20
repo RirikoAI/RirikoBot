@@ -7,6 +7,7 @@ import type {
   DungeonSeason,
   WaifuCardRepository,
 } from '@ririko/database';
+import type { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 import type { CardElement } from '../types.js';
 import type { Combatant, CombatActionLog } from '../combat/types.js';
 import { ScalingEngine } from './scaling-engine.js';
@@ -134,6 +135,7 @@ export function startEncounterSession(options: {
 
 export class DungeonRunner {
   private readonly energyRepo: PlayerEnergyRepository;
+  private readonly energyLifecycle: EnergyLifecycleService | undefined;
   private readonly progressRepo: UserDungeonProgressRepository;
   private readonly scalingEngine: ScalingEngine;
   private readonly floorRepo: DungeonFloorRepository | undefined;
@@ -158,9 +160,11 @@ export class DungeonRunner {
       tutorialService?: TutorialService | undefined;
       cardProgression?: CardProgressionService | undefined;
       progressService?: DungeonProgressService | undefined;
+      energyLifecycle?: EnergyLifecycleService | undefined;
     } = {},
   ) {
     this.energyRepo = energyRepo;
+    this.energyLifecycle = options.energyLifecycle;
     this.progressRepo = progressRepo;
     this.scalingEngine = options.scalingEngine ?? new ScalingEngine();
     this.floorRepo = options.floorRepo;
@@ -245,7 +249,9 @@ export class DungeonRunner {
 
     // 2. Energy
     if (!skipEnergyDeduction && energyCost > 0) {
-      const energyResult = await this.energyRepo.consumeEnergy(userId, energyCost);
+      const energyResult = this.energyLifecycle
+        ? await this.energyLifecycle.spendEnergy(userId, energyCost)
+        : await this.energyRepo.consumeEnergy(userId, energyCost);
       if (!energyResult.success) {
         return {
           success: false,

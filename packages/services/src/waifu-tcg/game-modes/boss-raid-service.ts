@@ -2,6 +2,7 @@ import type { PlayerEnergyRepository } from '@ririko/database';
 import type { RewardPayout } from './expedition-service.js';
 import { CombatSimulator } from '../combat/combat-simulator.js';
 import type { Combatant, CombatResult } from '../combat/types.js';
+import type { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 
 export const BOSS_RAID_ENERGY_COST = 30; // Section 12.4
 
@@ -49,13 +50,17 @@ export class BossRaidService {
 
   private readonly payout: RewardPayout | undefined;
 
+  private readonly energyLifecycle: EnergyLifecycleService | undefined;
+
   constructor(
     energyRepo: PlayerEnergyRepository,
     combatSimulator?: CombatSimulator,
     payout?: RewardPayout | undefined,
+    energyLifecycle?: EnergyLifecycleService | undefined,
   ) {
     this.energyRepo = energyRepo;
     this.payout = payout;
+    this.energyLifecycle = energyLifecycle;
     this.combatSimulator = combatSimulator ?? new CombatSimulator({ maxTurns: 10 });
     this.currentBoss = this.generateDefaultBoss();
   }
@@ -99,7 +104,9 @@ export class BossRaidService {
     }
 
     // 1. Consume 30 energy
-    const energyResult = await this.energyRepo.consumeEnergy(userId, BOSS_RAID_ENERGY_COST);
+    const energyResult = this.energyLifecycle
+      ? await this.energyLifecycle.spendEnergy(userId, BOSS_RAID_ENERGY_COST)
+      : await this.energyRepo.consumeEnergy(userId, BOSS_RAID_ENERGY_COST);
     if (!energyResult.success) {
       return {
         success: false,
