@@ -145,8 +145,9 @@ export interface DailyClaimResult {
   streak: number;
   multiplier: number;
   nextClaimAt?: Date | undefined;
-  graceExpiresAt?: Date | undefined;
   wasReset: boolean;
+  /** Consecutive reset days missed immediately before this claim. */
+  missedDays: number;
   walletBalance?: number | bigint | undefined;
   transactionId?: string | undefined;
 }
@@ -157,6 +158,7 @@ export interface DailyClaimResult {
 export interface DailyStatus {
   canClaim: boolean;
   isFrozen: boolean;
+  /** Streak as it stands now, after accounting for any days already missed. */
   currentStreak: number;
   nextStreak: number;
   multiplier: number;
@@ -164,6 +166,10 @@ export interface DailyStatus {
   lastDailyAt: Date | null;
   timeUntilNextClaimMs: number;
   timeUntilResetMs: number;
+  /** Consecutive reset days missed since the last claim. */
+  missedDays: number;
+  /** Further consecutive days that may be missed before the streak is wiped. */
+  forgivenessRemaining: number;
 }
 
 /**

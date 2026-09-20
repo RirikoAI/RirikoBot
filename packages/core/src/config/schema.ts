@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ResetConfigShape } from '../time/reset-config.js';
 
 export const NodeEnvSchema = z.enum(['development', 'production', 'test']).default('development');
 export type NodeEnv = z.infer<typeof NodeEnvSchema>;
@@ -62,6 +63,9 @@ const BaseAppConfigSchema = z.object({
   YOUTUBE_COOKIE: z.string().optional(),
   YOUTUBE_PO_TOKEN: z.string().optional(),
   YOUTUBE_VISITOR_DATA: z.string().optional(),
+
+  // Daily Reset Boundary (shared by energy, shops and the daily reward)
+  ...ResetConfigShape,
 });
 
 export const AppConfigSchema = z.preprocess((val) => {

@@ -57,7 +57,7 @@ import {
   MusicPlayTool,
   EconomyBalanceTool,
 } from '@ririko/ai';
-import { EventBus } from '@ririko/core';
+import { EventBus, resolveResetSchedulesFromEnv } from '@ririko/core';
 import {
   EconomyService,
   BankingService,
@@ -226,6 +226,9 @@ export async function createBotServices(
 ): Promise<BotServices> {
   const eventBus = new EventBus();
 
+  // Shared calendar-day reset boundary (default 00:00 GMT+8) for every daily system.
+  const { schedules: resetSchedules, config: resetConfig } = resolveResetSchedulesFromEnv();
+
   const db =
     customDb ??
     (await createDatabaseClient({
@@ -241,7 +244,7 @@ export async function createBotServices(
   const leaderboardRepo = new LeaderboardRepository(db);
   const itemRepo = new ItemRepository(db);
   const inventoryRepo = new InventoryRepository(db);
-  const playerEnergyRepo = new PlayerEnergyRepository(db);
+  const playerEnergyRepo = new PlayerEnergyRepository(db, resetSchedules.energyPotions);
   const musicRepo = new MusicRepository(db);
   const streamRepo = new StreamRepository(db);
   const freeGameRepo = new FreeGameRepository(db);
@@ -292,8 +295,8 @@ export async function createBotServices(
     baseReward: 250,
     streakBonusPercent: 0.05,
     maxStreakBonusPercent: 1.5,
-    cooldownWindowMs: 24 * 3600 * 1000,
-    graceWindowMs: 12 * 3600 * 1000,
+    resetSchedule: resetSchedules.daily,
+    streakForgiveness: resetConfig.RIRIKO_DAILY_STREAK_FORGIVENESS,
   });
 
   const levelingService = new LevelingService({
@@ -320,6 +323,7 @@ export async function createBotServices(
     playerEnergyRepository: playerEnergyRepo,
     levelingService,
     eventBus,
+    resetSchedule: resetSchedules.shopPurchases,
   });
 
   const profileBackgroundManager = new ProfileBackgroundManager({
@@ -564,8 +568,13 @@ export async function createBotServices(
   const enhancementService = new EnhancementService(gameItemRepo, userInventoryItemRepo);
   const loadoutService = new LoadoutService(gameItemRepo, userInventoryItemRepo, waifuCardRepo, enhancementService);
   const consumableService = new ConsumableService(gameItemRepo, userInventoryItemRepo, playerEnergyRepo);
-  const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo);
-  const tcgShopService = new TcgShopService(gameItemRepo, userInventoryItemRepo, economyRepo);
+  const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, resetSchedules.energy);
+  const tcgShopService = new TcgShopService(
+    gameItemRepo,
+    userInventoryItemRepo,
+    economyRepo,
+    resetSchedules.tcgShop,
+  );
 
   const dungeonSeasonRepo = new DungeonSeasonRepository(db);
   const dungeonFloorRepo = new DungeonFloorRepository(db);

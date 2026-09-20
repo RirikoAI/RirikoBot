@@ -127,7 +127,7 @@ Selecting a specific command displays:
 
 ### 5.4. Player Energy & Stamina
 - `/energy status`
-  - Displays current energy, maximum level-scaled capacity, time until next 00:00 UTC replenishment, and remaining daily energy potions available.
+  - Displays current energy, maximum level-scaled capacity, time until the next energy reset boundary (default 00:00 GMT+8), and remaining daily energy potions available.
 
 ### 5.5. PvE Seasonal Dungeon Tower Commands
 - `/dungeon seasons`
