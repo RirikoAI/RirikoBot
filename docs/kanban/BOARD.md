@@ -10,6 +10,13 @@
 
 ---
 
+## 🔍 In Review
+| ID | Type | Title | Pts | Epic / Parent | Handover |
+|---|---|---|---|---|---|
+| `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | `EPIC-004` | [STORY-161.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-161.md) |
+
+---
+
 ## ⏸️ Paused (On Hold)
 *No paused tickets currently on the board.*
 
@@ -236,6 +243,7 @@
 | `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | ✅ Done | `STORY-157` |
 | `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | ✅ Done | `STORY-152`, `STORY-156` |
 | `STORY-160` | Story | Equipment Crafting with Dust (Deferred) | 5 | `EPIC-015` | 📋 Backlog | `STORY-156` |
+| `BUG-0012` | Bug | Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired | 3 | `EPIC-015` | 📋 Backlog | — |
 
 ### 📋 Groomed Stories & Tasks for EPIC-010 (Waifu TCG)
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |

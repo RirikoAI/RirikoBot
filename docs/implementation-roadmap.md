@@ -159,7 +159,7 @@ gantt
     - 3 Equipment slots (Weapon, Armor, Relic) with rarity-scaled Battle Perks (*Vampiric Touch*, *Glacial Counter*, *Mana Conduit*, *Phoenix Ward*, *Cosmic Cataclysm*).
     - 3 Accessory slots (Ring, Amulet, Talisman) with % stat multipliers. +0 to +10 enhancement with Crafting Dust.
     - Consumables: HP potions, Mana draughts, Energy restores (strictly capped at 3/day).
-    - Player Energy: Level-scaled capacity formula ($\min(300, 100 + \lfloor(\text{Level}-1)\times 2\rfloor + \text{Bonus})$), 00:00 UTC daily replenishment with lazy recovery.
+    - Player Energy: Level-scaled capacity formula ($\min(300, 100 + \lfloor(\text{Level}-1)\times 2\rfloor + \text{Bonus})$), daily replenishment on the configurable reset boundary (default 00:00 GMT+8) with lazy recovery.
   - **`STORY-104`: PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling (5 pts)**:
     - Tutorial Prologue (Floors T1–T4, 0 energy onboarding: elements, mana, potions, break shields).
     - Seasonal framework (60–90 days per cycle, archived to Hall of Fame) with active environmental affixes (*Scorched Earth*, *Heat Haze*, *Torrential Deluge*, *Tidal Barrier*).

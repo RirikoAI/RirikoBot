@@ -5,7 +5,12 @@ import type {
   PlayerEnergyRepository,
   EconomyItem,
 } from '@ririko/database';
-import type { EventBus } from '@ririko/core';
+import {
+  DEFAULT_RESET_SCHEDULE,
+  getResetDayIndex,
+  type EventBus,
+  type ResetSchedule,
+} from '@ririko/core';
 import type {
   BuyItemParams,
   BuyItemResult,
@@ -23,6 +28,7 @@ export interface InventoryServiceOptions {
   playerEnergyRepository?: PlayerEnergyRepository | undefined;
   levelingService?: LevelingService | undefined;
   eventBus?: EventBus | undefined;
+  resetSchedule?: ResetSchedule | undefined;
 }
 
 /**
@@ -40,6 +46,7 @@ export class InventoryService {
   private readonly playerEnergyRepository?: PlayerEnergyRepository | undefined;
   private readonly levelingService?: LevelingService | undefined;
   private readonly eventBus?: EventBus | undefined;
+  private readonly resetSchedule: ResetSchedule;
 
   constructor(options: InventoryServiceOptions) {
     this.itemRepository = options.itemRepository;
@@ -48,6 +55,7 @@ export class InventoryService {
     this.playerEnergyRepository = options.playerEnergyRepository;
     this.levelingService = options.levelingService;
     this.eventBus = options.eventBus;
+    this.resetSchedule = options.resetSchedule ?? DEFAULT_RESET_SCHEDULE;
   }
 
   /**
@@ -119,7 +127,7 @@ export class InventoryService {
 
     // Enforce daily purchase limit if defined (e.g. 1 minor candy per day)
     if (metadata.dailyPurchaseLimit !== undefined && metadata.dailyPurchaseLimit > 0) {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getResetDayIndex(new Date(), this.resetSchedule);
       const history = await this.economyRepository.getTransactionHistory(userId, { limit: 100 });
       let boughtToday = 0;
 
@@ -127,7 +135,7 @@ export class InventoryService {
         if (
           tx.type === 'PURCHASE' &&
           tx.source === `SHOP_BUY:${itemId}` &&
-          tx.createdAt.toISOString().slice(0, 10) === today
+          getResetDayIndex(tx.createdAt, this.resetSchedule) === today
         ) {
           const txMeta = tx.metadata as { quantity?: number } | undefined;
           boughtToday += txMeta?.quantity ?? 1;

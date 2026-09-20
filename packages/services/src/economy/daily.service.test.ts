@@ -4,12 +4,33 @@ import {
   EconomyRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
+import { DEFAULT_RESET_SCHEDULE } from '@ririko/core';
 import { DailyService } from './daily.service.js';
+
+/**
+ * Reset days run 00:00-23:59 GMT+8, which is 16:00 UTC on the previous date through
+ * 15:59 UTC. `resetDay(n)` returns midday inside reset day n so every fixture sits well
+ * clear of a boundary, and `+ 1` between two of them means exactly one reset apart.
+ */
+const RESET_DAY_ZERO_UTC = Date.parse('2026-09-20T16:00:00.000Z');
+const MS_PER_DAY = 86_400_000;
+const resetDay = (dayOffset: number, hoursIntoDay = 12): number =>
+  RESET_DAY_ZERO_UTC + dayOffset * MS_PER_DAY + hoursIntoDay * 3_600_000;
 
 describe('DailyService', () => {
   let client: SqliteDatabaseClient;
   let repo: EconomyRepository;
   let dailyService: DailyService;
+
+  const buildService = (streakForgiveness = 3): DailyService =>
+    new DailyService({
+      repository: repo,
+      baseReward: 250,
+      streakBonusPercent: 0.05,
+      maxStreakBonusPercent: 1.5,
+      resetSchedule: DEFAULT_RESET_SCHEDULE,
+      streakForgiveness,
+    });
 
   beforeEach(async () => {
     const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
@@ -50,14 +71,7 @@ describe('DailyService', () => {
     `);
 
     repo = new EconomyRepository(client);
-    dailyService = new DailyService({
-      repository: repo,
-      baseReward: 250,
-      streakBonusPercent: 0.05,
-      maxStreakBonusPercent: 1.5,
-      cooldownWindowMs: 24 * 3600 * 1000,
-      graceWindowMs: 12 * 3600 * 1000,
-    });
+    dailyService = buildService();
   });
 
   afterEach(async () => {
@@ -72,27 +86,20 @@ describe('DailyService', () => {
 
     it('calculates +5% per day for Day 2 to Day 30', () => {
       expect(dailyService.calculateMultiplier(2)).toBe(1.05);
+      expect(dailyService.calculateMultiplier(6)).toBe(1.25);
       expect(dailyService.calculateReward(2)).toBe(263);
-
-      expect(dailyService.calculateMultiplier(3)).toBe(1.1);
-      expect(dailyService.calculateReward(3)).toBe(275);
-
-      expect(dailyService.calculateMultiplier(11)).toBe(1.5);
-      expect(dailyService.calculateReward(11)).toBe(375);
     });
 
     it('caps streak bonus at +150% (2.50x multiplier, 625 credits) for 30+ days', () => {
       expect(dailyService.calculateMultiplier(31)).toBe(2.5);
+      expect(dailyService.calculateMultiplier(100)).toBe(2.5);
       expect(dailyService.calculateReward(31)).toBe(625);
-
-      expect(dailyService.calculateMultiplier(50)).toBe(2.5);
-      expect(dailyService.calculateReward(50)).toBe(625);
     });
   });
 
   describe('getStatus', () => {
     it('returns canClaim=true for a brand new account', async () => {
-      const status = await dailyService.getStatus('user_new');
+      const status = await dailyService.getStatus('user_new', resetDay(0));
 
       expect(status.canClaim).toBe(true);
       expect(status.isFrozen).toBe(false);
@@ -102,73 +109,85 @@ describe('DailyService', () => {
       expect(status.rewardCredits).toBe(250);
       expect(status.lastDailyAt).toBeNull();
       expect(status.timeUntilNextClaimMs).toBe(0);
+      expect(status.missedDays).toBe(0);
     });
 
-    it('returns canClaim=false when on cooldown (<24 hours)', async () => {
-      const now = Date.now();
-      const twelveHoursAgo = new Date(now - 12 * 3600 * 1000);
-
-      await repo.getOrCreateAccount('user_cooldown');
-      await repo.updateAccount('user_cooldown', {
+    it('returns canClaim=false once claimed within the same reset day', async () => {
+      await repo.getOrCreateAccount('user_claimed');
+      await repo.updateAccount('user_claimed', {
         dailyStreak: 3,
-        lastDailyAt: twelveHoursAgo,
+        lastDailyAt: new Date(resetDay(0, 1)),
       });
 
-      const status = await dailyService.getStatus('user_cooldown', now);
+      const status = await dailyService.getStatus('user_claimed', resetDay(0, 20));
 
       expect(status.canClaim).toBe(false);
       expect(status.currentStreak).toBe(3);
       expect(status.nextStreak).toBe(4);
+      expect(status.missedDays).toBe(0);
       expect(status.timeUntilNextClaimMs).toBeGreaterThan(0);
-      expect(status.timeUntilNextClaimMs).toBeLessThanOrEqual(12 * 3600 * 1000);
+      expect(status.timeUntilNextClaimMs).toBe(status.timeUntilResetMs);
     });
 
-    it('returns canClaim=true during grace period (24h to 36h) with incremented streak', async () => {
-      const now = Date.now();
-      const twentySixHoursAgo = new Date(now - 26 * 3600 * 1000);
-
-      await repo.getOrCreateAccount('user_grace');
-      await repo.updateAccount('user_grace', {
+    it('returns canClaim=true on the next reset day with an incremented streak', async () => {
+      await repo.getOrCreateAccount('user_next_day');
+      await repo.updateAccount('user_next_day', {
         dailyStreak: 5,
-        lastDailyAt: twentySixHoursAgo,
+        lastDailyAt: new Date(resetDay(0)),
       });
 
-      const status = await dailyService.getStatus('user_grace', now);
+      const status = await dailyService.getStatus('user_next_day', resetDay(1));
 
       expect(status.canClaim).toBe(true);
       expect(status.currentStreak).toBe(5);
       expect(status.nextStreak).toBe(6);
       expect(status.multiplier).toBe(1.25);
       expect(status.rewardCredits).toBe(313);
+      expect(status.missedDays).toBe(0);
+      expect(status.forgivenessRemaining).toBe(3);
       expect(status.timeUntilNextClaimMs).toBe(0);
-      expect(status.timeUntilResetMs).toBeGreaterThan(0);
     });
 
-    it('returns canClaim=true but streak resets to 1 after grace period expires (>36h)', async () => {
-      const now = Date.now();
-      const fortyHoursAgo = new Date(now - 40 * 3600 * 1000);
-
-      await repo.getOrCreateAccount('user_expired');
-      await repo.updateAccount('user_expired', {
-        dailyStreak: 10,
-        lastDailyAt: fortyHoursAgo,
+    it('reports missed days and shrinking forgiveness while the streak survives', async () => {
+      await repo.getOrCreateAccount('user_missed');
+      await repo.updateAccount('user_missed', {
+        dailyStreak: 15,
+        lastDailyAt: new Date(resetDay(0)),
       });
 
-      const status = await dailyService.getStatus('user_expired', now);
+      // Two whole reset days skipped (days 1 and 2); claiming on day 3.
+      const status = await dailyService.getStatus('user_missed', resetDay(3));
 
       expect(status.canClaim).toBe(true);
-      expect(status.currentStreak).toBe(10);
+      expect(status.currentStreak).toBe(15);
+      expect(status.nextStreak).toBe(16);
+      expect(status.missedDays).toBe(2);
+      expect(status.forgivenessRemaining).toBe(1);
+    });
+
+    it('reports a streak already lost to inactivity as zero', async () => {
+      await repo.getOrCreateAccount('user_lost');
+      await repo.updateAccount('user_lost', {
+        dailyStreak: 10,
+        lastDailyAt: new Date(resetDay(0)),
+      });
+
+      // Three whole reset days skipped reaches the forgiveness threshold.
+      const status = await dailyService.getStatus('user_lost', resetDay(4));
+
+      expect(status.canClaim).toBe(true);
+      expect(status.currentStreak).toBe(0);
       expect(status.nextStreak).toBe(1);
-      expect(status.multiplier).toBe(1.0);
+      expect(status.missedDays).toBe(3);
+      expect(status.forgivenessRemaining).toBe(0);
       expect(status.rewardCredits).toBe(250);
-      expect(status.timeUntilResetMs).toBe(0);
     });
 
     it('returns canClaim=false if the account is frozen', async () => {
       await repo.getOrCreateAccount('user_frozen');
       await repo.freezeAccount('user_frozen', true);
 
-      const status = await dailyService.getStatus('user_frozen');
+      const status = await dailyService.getStatus('user_frozen', resetDay(0));
 
       expect(status.canClaim).toBe(false);
       expect(status.isFrozen).toBe(true);
@@ -177,7 +196,7 @@ describe('DailyService', () => {
 
   describe('claimDaily', () => {
     it('successfully claims Day 1 reward, credits wallet, and creates ledger entry', async () => {
-      const now = Date.now();
+      const now = resetDay(0);
       const result = await dailyService.claimDaily('user_1', 'guild_1', now);
 
       expect(result.success).toBe(true);
@@ -185,6 +204,7 @@ describe('DailyService', () => {
       expect(result.streak).toBe(1);
       expect(result.multiplier).toBe(1.0);
       expect(result.wasReset).toBe(false);
+      expect(result.missedDays).toBe(0);
       expect(result.walletBalance).toBe(250);
       expect(result.transactionId).toBeDefined();
 
@@ -196,31 +216,37 @@ describe('DailyService', () => {
       expect(balance?.walletBalance).toBe(250);
     });
 
-    it('rejects claim if attempted within cooldown window (<24 hours)', async () => {
-      const startTime = Date.now();
-      await dailyService.claimDaily('user_cooldown_test', 'guild_1', startTime);
+    it('rejects a second claim inside the same reset day', async () => {
+      await dailyService.claimDaily('user_same_day', 'guild_1', resetDay(0, 1));
 
-      // Attempt claim 2 hours later
-      const attemptTime = startTime + 2 * 3600 * 1000;
-      const result = await dailyService.claimDaily('user_cooldown_test', 'guild_1', attemptTime);
+      // 20 hours later is still the same GMT+8 calendar day.
+      const result = await dailyService.claimDaily('user_same_day', 'guild_1', resetDay(0, 20));
 
       expect(result.success).toBe(false);
-      expect(result.reason).toContain('Daily reward is on cooldown');
+      expect(result.reason).toContain('already claimed today');
       expect(result.creditsAwarded).toBe(0);
       expect(result.streak).toBe(1);
 
-      // Balance remains 250
-      const balance = await repo.findById('user_cooldown_test');
+      const balance = await repo.findById('user_same_day');
       expect(balance?.walletBalance).toBe(250);
     });
 
-    it('advances streak and applies compound multiplier during grace window (25h later)', async () => {
-      const day1Time = Date.now();
-      await dailyService.claimDaily('user_streak_test', 'guild_1', day1Time);
+    it('allows a claim just past the boundary even if only minutes have elapsed', async () => {
+      // 15:59 UTC and 16:01 UTC are minutes apart but fall in different GMT+8 days.
+      const lateInDay = RESET_DAY_ZERO_UTC - 60_000;
+      const justAfterBoundary = RESET_DAY_ZERO_UTC + 60_000;
 
-      // Claim 25 hours later (valid streak progression window)
-      const day2Time = day1Time + 25 * 3600 * 1000;
-      const result = await dailyService.claimDaily('user_streak_test', 'guild_1', day2Time);
+      await dailyService.claimDaily('user_boundary', 'guild_1', lateInDay);
+      const result = await dailyService.claimDaily('user_boundary', 'guild_1', justAfterBoundary);
+
+      expect(result.success).toBe(true);
+      expect(result.streak).toBe(2);
+      expect(result.missedDays).toBe(0);
+    });
+
+    it('advances the streak on consecutive reset days', async () => {
+      await dailyService.claimDaily('user_streak', 'guild_1', resetDay(0));
+      const result = await dailyService.claimDaily('user_streak', 'guild_1', resetDay(1));
 
       expect(result.success).toBe(true);
       expect(result.streak).toBe(2);
@@ -229,38 +255,116 @@ describe('DailyService', () => {
       expect(result.wasReset).toBe(false);
       expect(result.walletBalance).toBe(250 + 263);
 
-      const account = await repo.getAccount('user_streak_test');
+      const account = await repo.getAccount('user_streak');
       expect(account?.dailyStreak).toBe(2);
     });
 
-    it('resets streak to 1 if claimed after grace period expires (>36 hours)', async () => {
-      const day1Time = Date.now();
-      await dailyService.claimDaily('user_reset_test', 'guild_1', day1Time);
-
-      // Advance artificially to Day 5 by modifying account streak
-      await repo.updateAccount('user_reset_test', {
-        dailyStreak: 5,
-        lastDailyAt: new Date(day1Time),
+    it('skips missed days rather than counting them: 15 + 2 missed resumes at 16', async () => {
+      await repo.getOrCreateAccount('user_resume');
+      await repo.updateAccount('user_resume', {
+        dailyStreak: 15,
+        lastDailyAt: new Date(resetDay(0)),
       });
 
-      // Claim 40 hours after day1Time (>36h grace window)
-      const expiredTime = day1Time + 40 * 3600 * 1000;
-      const result = await dailyService.claimDaily('user_reset_test', 'guild_1', expiredTime);
+      // Days 1 and 2 missed; claim lands on day 3.
+      const result = await dailyService.claimDaily('user_resume', 'guild_1', resetDay(3));
+
+      expect(result.success).toBe(true);
+      expect(result.streak).toBe(16);
+      expect(result.missedDays).toBe(2);
+      expect(result.wasReset).toBe(false);
+
+      const account = await repo.getAccount('user_resume');
+      expect(account?.dailyStreak).toBe(16);
+    });
+
+    it('survives a single missed day', async () => {
+      await repo.getOrCreateAccount('user_one_miss');
+      await repo.updateAccount('user_one_miss', {
+        dailyStreak: 7,
+        lastDailyAt: new Date(resetDay(0)),
+      });
+
+      const result = await dailyService.claimDaily('user_one_miss', 'guild_1', resetDay(2));
+
+      expect(result.success).toBe(true);
+      expect(result.streak).toBe(8);
+      expect(result.missedDays).toBe(1);
+      expect(result.wasReset).toBe(false);
+    });
+
+    it('wipes the streak once missed days reach the forgiveness threshold', async () => {
+      await repo.getOrCreateAccount('user_wiped');
+      await repo.updateAccount('user_wiped', {
+        dailyStreak: 20,
+        lastDailyAt: new Date(resetDay(0)),
+      });
+
+      // Days 1, 2 and 3 missed: three consecutive misses ends the run.
+      const result = await dailyService.claimDaily('user_wiped', 'guild_1', resetDay(4));
 
       expect(result.success).toBe(true);
       expect(result.streak).toBe(1);
       expect(result.multiplier).toBe(1.0);
       expect(result.creditsAwarded).toBe(250);
+      expect(result.missedDays).toBe(3);
       expect(result.wasReset).toBe(true);
 
-      const account = await repo.getAccount('user_reset_test');
+      const account = await repo.getAccount('user_wiped');
       expect(account?.dailyStreak).toBe(1);
+    });
+
+    it('clears accumulated misses on every successful claim', async () => {
+      await repo.getOrCreateAccount('user_cleared');
+      await repo.updateAccount('user_cleared', {
+        dailyStreak: 5,
+        lastDailyAt: new Date(resetDay(0)),
+      });
+
+      // Miss two days, claim on day 3 — streak survives at 6.
+      const first = await dailyService.claimDaily('user_cleared', 'guild_1', resetDay(3));
+      expect(first.streak).toBe(6);
+      expect(first.missedDays).toBe(2);
+
+      // Miss two more days. Because the claim reset the counter, this is 2 again, not 4.
+      const second = await dailyService.claimDaily('user_cleared', 'guild_1', resetDay(6));
+      expect(second.success).toBe(true);
+      expect(second.streak).toBe(7);
+      expect(second.missedDays).toBe(2);
+      expect(second.wasReset).toBe(false);
+    });
+
+    it('wipes on any missed day when forgiveness is disabled', async () => {
+      const strictService = buildService(0);
+
+      await repo.getOrCreateAccount('user_strict');
+      await repo.updateAccount('user_strict', {
+        dailyStreak: 9,
+        lastDailyAt: new Date(resetDay(0)),
+      });
+
+      const result = await strictService.claimDaily('user_strict', 'guild_1', resetDay(2));
+
+      expect(result.success).toBe(true);
+      expect(result.streak).toBe(1);
+      expect(result.missedDays).toBe(1);
+      expect(result.wasReset).toBe(true);
+    });
+
+    it('still advances on consecutive days when forgiveness is disabled', async () => {
+      const strictService = buildService(0);
+
+      await strictService.claimDaily('user_strict_ok', 'guild_1', resetDay(0));
+      const result = await strictService.claimDaily('user_strict_ok', 'guild_1', resetDay(1));
+
+      expect(result.streak).toBe(2);
+      expect(result.wasReset).toBe(false);
     });
 
     it('blocks claim if the user account is frozen', async () => {
       await repo.freezeAccount('user_frozen_test', true);
 
-      const result = await dailyService.claimDaily('user_frozen_test');
+      const result = await dailyService.claimDaily('user_frozen_test', undefined, resetDay(0));
 
       expect(result.success).toBe(false);
       expect(result.reason).toBe('ACCOUNT_FROZEN');

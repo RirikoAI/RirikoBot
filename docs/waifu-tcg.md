@@ -446,7 +446,7 @@ Consumables provide immediate tactical assistance during battles or replenish cr
   - **Grand Stamina Flask**: Restores +30 Energy.
   - **Celestial Ambrosia**: Fully replenishes energy up to the player's level cap. (Extremely rare; rewarded solely by master achievements or seasonal events).
 - **Anti-Abuse Guardrails & Rate Limits**:
-  1. **Daily Consumable Cap**: A player can consume at most **3 Energy Restores per calendar day** (configurable globally). Any attempt to consume beyond this quota is rejected with an informative error message: *"You have reached your daily stamina potion limit (3/3). Rest well, summoner!"*
+  1. **Daily Consumable Cap**: A player can consume at most **3 Energy Restores per reset day** (configurable globally; the reset day runs from the configured boundary, default 00:00 GMT+8, and is set by `RIRIKO_RESET_TIME_ENERGY_POTIONS`). Any attempt to consume beyond this quota is rejected with an informative error message: *"You have reached your daily stamina potion limit (3/3). Rest well, summoner!"*
   2. **Zero Infinite Stock in Shop**: Energy restores are **never** sold in unlimited quantities in the shop. The basic shop sells at most 1 minor Stamina Candy per day at high credit cost. High-tier restores drop strictly through battles, quests, and achievements.
 
 ---
@@ -456,8 +456,9 @@ Consumables provide immediate tactical assistance during battles or replenish cr
 Every expedition, dungeon raid, and boss encounter consumes **Player Energy**.
 
 ### 12.1. Deterministic Daily Replenishment
-- Every day at **00:00 UTC** (or the server's configured daily cron schedule), all players have their active energy pool restored to their level's maximum capacity.
-- The replenishment is executed via a scheduled background job and evaluated lazily if a user logs in after midnight:
+- Every day at the configured **reset boundary** (default **00:00 GMT+8**), all players have their active energy pool restored to their level's maximum capacity.
+- The boundary is shared with every other daily system in the bot and is configured through `RIRIKO_RESET_OFFSET_MINUTES` plus `RIRIKO_RESET_TIME` / `RIRIKO_RESET_TIME_ENERGY`. See Section 5.3 of [docs/economy.md](economy.md) for the full table.
+- Replenishment is evaluated lazily on the user's next interaction, so no scheduled job is required:
   $$\text{Energy}_{\text{current}} = \max\left(\text{Energy}_{\text{current}}, \text{MaxEnergy}(\text{Level})\right)$$
 
 ### 12.2. Level-Based Energy Formula & Progression Table
@@ -494,7 +495,7 @@ Where **MilestoneBonus** rewards significant progression breakthroughs:
   2. **Discord Admin Command**: `/tcg-admin config energy max_cap <value>` (Strictly protected by Discord `Administrator` permission or the designated `TCG Manager Role`).
 - **Temporary Overflow Rules**:
   - Gaining energy from rare consumables or leveling up can temporarily overflow past the normal cap (e.g. 115/100).
-  - During the daily 00:00 UTC replenishment, if a player's energy is already $\ge \text{MaxEnergy}$, it is not reduced or deleted, but no additional free energy is awarded.
+  - During the daily replenishment at the reset boundary, if a player's energy is already $\ge \text{MaxEnergy}$, it is not reduced or deleted, but no additional free energy is awarded.
 
 ### 12.4. Energy Expenditure Table
 

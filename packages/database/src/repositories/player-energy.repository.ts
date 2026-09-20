@@ -5,7 +5,12 @@ import type { PlayerEnergy, NewPlayerEnergy } from '../schema/types/index.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { withTransaction } from '../transactions/index.js';
-import { DatabaseError } from '@ririko/core';
+import {
+  DatabaseError,
+  DEFAULT_RESET_SCHEDULE,
+  getResetDayKey,
+  type ResetSchedule,
+} from '@ririko/core';
 
 export interface ConsumePotionResult {
   success: boolean;
@@ -24,6 +29,18 @@ export class PlayerEnergyRepository extends BaseRepository<
   Partial<NewPlayerEnergy>,
   string
 > {
+  constructor(
+    client: DatabaseClient,
+    private readonly resetSchedule: ResetSchedule = DEFAULT_RESET_SCHEDULE,
+  ) {
+    super(client);
+  }
+
+  /** The reset-day key for the energy potion ceiling, honouring the configured boundary. */
+  private currentDayKey(now: Date = new Date()): string {
+    return getResetDayKey(now, this.resetSchedule);
+  }
+
   async findById(userId: string, tx?: DatabaseClient): Promise<PlayerEnergy | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
@@ -49,7 +66,7 @@ export class PlayerEnergyRepository extends BaseRepository<
   async create(data: NewPlayerEnergy, tx?: DatabaseClient): Promise<PlayerEnergy> {
     const client = this.getClient(tx);
     const now = new Date();
-    const today = now.toISOString().slice(0, 10);
+    const today = this.currentDayKey(now);
     const insertData = {
       ...data,
       currentEnergy: data.currentEnergy ?? 100,
@@ -84,7 +101,7 @@ export class PlayerEnergyRepository extends BaseRepository<
 
     const client = this.getClient(tx);
     const now = new Date();
-    const today = now.toISOString().slice(0, 10);
+    const today = this.currentDayKey(now);
 
     if (this.isSqlite(client)) {
       const [created] = await client.db
@@ -203,9 +220,9 @@ export class PlayerEnergyRepository extends BaseRepository<
 
     return withTransaction(client, async (txClient) => {
       const energyRecord = await this.getOrCreate(userId, txClient);
-      const today = new Date().toISOString().slice(0, 10);
+      const today = this.currentDayKey();
 
-      // Check if UTC date rolled over to reset daily usage count
+      // Check if the reset day rolled over, which clears the daily usage count
       let currentPotsUsed = energyRecord.dailyEnergyPotsUsed;
       if (energyRecord.lastResetDate !== today) {
         currentPotsUsed = 0;

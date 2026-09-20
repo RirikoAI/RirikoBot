@@ -1,4 +1,5 @@
 import type { PlayerEnergyRepository, PlayerEnergy } from '@ririko/database';
+import { DEFAULT_RESET_SCHEDULE, getResetDayKey, type ResetSchedule } from '@ririko/core';
 
 export const DEFAULT_GLOBAL_ENERGY_CAP = 300;
 
@@ -23,7 +24,10 @@ export function calculateMaxEnergy(
 }
 
 export class EnergyLifecycleService {
-  constructor(private readonly energyRepo: PlayerEnergyRepository) {}
+  constructor(
+    private readonly energyRepo: PlayerEnergyRepository,
+    private readonly resetSchedule: ResetSchedule = DEFAULT_RESET_SCHEDULE,
+  ) {}
 
   /**
    * Lazily reconciles a user's energy pool based on current level and UTC date rollover.
@@ -37,7 +41,7 @@ export class EnergyLifecycleService {
     globalCap = DEFAULT_GLOBAL_ENERGY_CAP,
   ): Promise<PlayerEnergy> {
     const record = await this.energyRepo.getOrCreate(userId);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getResetDayKey(new Date(), this.resetSchedule);
     const maxCapacity = calculateMaxEnergy(playerLevel, globalCap);
 
     let needsUpdate = false;
@@ -77,7 +81,7 @@ export class EnergyLifecycleService {
     globalCap = DEFAULT_GLOBAL_ENERGY_CAP,
   ): Promise<PlayerEnergy> {
     const record = await this.energyRepo.getOrCreate(userId);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getResetDayKey(new Date(), this.resetSchedule);
     const maxCapacity = calculateMaxEnergy(playerLevel, globalCap);
 
     const newCurrent = Math.max(record.currentEnergy, maxCapacity);

@@ -1,4 +1,10 @@
 import type { EconomyRepository } from '@ririko/database';
+import {
+  DEFAULT_RESET_SCHEDULE,
+  getResetDayIndex,
+  getNextResetAt,
+  type ResetSchedule,
+} from '@ririko/core';
 import type { DailyClaimResult, DailyStatus } from './types.js';
 
 export interface DailyServiceOptions {
@@ -6,15 +12,29 @@ export interface DailyServiceOptions {
   baseReward?: number | undefined;
   streakBonusPercent?: number | undefined;
   maxStreakBonusPercent?: number | undefined;
-  cooldownWindowMs?: number | undefined;
-  graceWindowMs?: number | undefined;
+  /** Reset boundary governing when a new claim becomes available. */
+  resetSchedule?: ResetSchedule | undefined;
+  /** Consecutive missed days tolerated before the streak is wiped. 0 disables forgiveness. */
+  streakForgiveness?: number | undefined;
 }
+
+/** Outcome of comparing a claim against the previous one. */
+interface StreakOutcome {
+  nextStreak: number;
+  missedDays: number;
+  wasReset: boolean;
+}
+
+export const DEFAULT_STREAK_FORGIVENESS = 3;
 
 /**
  * Daily Claim & Streak Engine implementing Section 5.2 of docs/economy.md:
  * - Base reward: 250 credits.
  * - Daily streak multiplier: +5% per consecutive day, capping at 30 days (+150%).
- * - 24-hour claim window with a 12-hour grace period (36 hours total before streak resets).
+ * - One claim per reset day, on the shared configurable boundary (default 00:00 GMT+8).
+ * - Consecutive-miss forgiveness: missing fewer than `streakForgiveness` consecutive reset
+ *   days preserves the streak, and the missed days are skipped rather than counted. Reaching
+ *   the threshold wipes the streak, and the claim that follows counts as day 1.
  * - Anti-abuse: frozen accounts blocked from claiming.
  */
 export class DailyService {
@@ -22,16 +42,16 @@ export class DailyService {
   private readonly baseReward: number;
   private readonly streakBonusPercent: number;
   private readonly maxStreakBonusPercent: number;
-  private readonly cooldownWindowMs: number;
-  private readonly graceWindowMs: number;
+  private readonly resetSchedule: ResetSchedule;
+  private readonly streakForgiveness: number;
 
   constructor(options: DailyServiceOptions) {
     this.repository = options.repository;
     this.baseReward = options.baseReward ?? 250;
     this.streakBonusPercent = options.streakBonusPercent ?? 0.05; // 5% per day
     this.maxStreakBonusPercent = options.maxStreakBonusPercent ?? 1.5; // Cap at +150% (30 days)
-    this.cooldownWindowMs = options.cooldownWindowMs ?? 24 * 3600 * 1000; // 24 hours
-    this.graceWindowMs = options.graceWindowMs ?? 12 * 3600 * 1000; // 12 hours grace
+    this.resetSchedule = options.resetSchedule ?? DEFAULT_RESET_SCHEDULE;
+    this.streakForgiveness = options.streakForgiveness ?? DEFAULT_STREAK_FORGIVENESS;
   }
 
   /**
@@ -52,55 +72,74 @@ export class DailyService {
   }
 
   /**
-   * Inspects daily reward status, streak, and next claim time for a user.
+   * Resolves what a claim at `nowMs` does to a streak last advanced at `lastDailyAt`.
+   *
+   * Missed days are the whole reset days that elapsed between the two claims. Below the
+   * forgiveness threshold the streak simply advances by one — the missed days are skipped,
+   * never counted — so a 15-day streak interrupted by two missed days resumes at 16.
+   */
+  private resolveStreak(lastDailyAt: Date | null, currentStreak: number, nowMs: number): StreakOutcome {
+    if (!lastDailyAt) {
+      return { nextStreak: 1, missedDays: 0, wasReset: false };
+    }
+
+    const missedDays = this.countMissedDays(lastDailyAt, nowMs);
+
+    if (this.isStreakBroken(missedDays)) {
+      return { nextStreak: 1, missedDays, wasReset: true };
+    }
+
+    return { nextStreak: currentStreak + 1, missedDays, wasReset: false };
+  }
+
+  /** Whole reset days that passed without a claim between `lastDailyAt` and `nowMs`. */
+  private countMissedDays(lastDailyAt: Date, nowMs: number): number {
+    const lastIndex = getResetDayIndex(lastDailyAt, this.resetSchedule);
+    const todayIndex = getResetDayIndex(new Date(nowMs), this.resetSchedule);
+    return Math.max(0, todayIndex - lastIndex - 1);
+  }
+
+  /** A streak dies once the missed days reach the forgiveness threshold. */
+  private isStreakBroken(missedDays: number): boolean {
+    if (this.streakForgiveness <= 0) return missedDays > 0;
+    return missedDays >= this.streakForgiveness;
+  }
+
+  /**
+   * Inspects daily reward status, streak, and next reset time for a user.
    */
   public async getStatus(userId: string, nowMs = Date.now()): Promise<DailyStatus> {
     const account = await this.repository.getOrCreateAccount(userId);
+    const now = new Date(nowMs);
 
-    let canClaim: boolean;
-    let timeUntilNextClaimMs = 0;
-    let timeUntilResetMs = 0;
-    let nextStreak: number;
+    const alreadyClaimedToday =
+      account.lastDailyAt !== null &&
+      getResetDayIndex(account.lastDailyAt, this.resetSchedule) ===
+        getResetDayIndex(now, this.resetSchedule);
 
-    if (!account.lastDailyAt) {
-      canClaim = !account.isFrozen;
-      nextStreak = 1;
-    } else {
-      const elapsed = nowMs - account.lastDailyAt.getTime();
-      const totalResetCutoff = this.cooldownWindowMs + this.graceWindowMs;
+    const { nextStreak, missedDays } = this.resolveStreak(
+      account.lastDailyAt,
+      account.dailyStreak,
+      nowMs,
+    );
 
-      if (elapsed < this.cooldownWindowMs) {
-        canClaim = false;
-        timeUntilNextClaimMs = this.cooldownWindowMs - elapsed;
-        timeUntilResetMs = Math.max(0, totalResetCutoff - elapsed);
-        nextStreak = account.dailyStreak + 1;
-      } else if (elapsed <= totalResetCutoff) {
-        canClaim = !account.isFrozen;
-        timeUntilNextClaimMs = 0;
-        timeUntilResetMs = totalResetCutoff - elapsed;
-        nextStreak = account.dailyStreak + 1;
-      } else {
-        // Grace period expired, resets to 1
-        canClaim = !account.isFrozen;
-        timeUntilNextClaimMs = 0;
-        timeUntilResetMs = 0;
-        nextStreak = 1;
-      }
-    }
+    // A streak already doomed by inactivity is reported as gone, even before the next claim.
+    const currentStreak = this.isStreakBroken(missedDays) ? 0 : account.dailyStreak;
 
-    const multiplier = this.calculateMultiplier(nextStreak);
-    const rewardCredits = this.calculateReward(nextStreak);
+    const timeUntilResetMs = Math.max(0, getNextResetAt(now, this.resetSchedule).getTime() - nowMs);
 
     return {
-      canClaim,
+      canClaim: !account.isFrozen && !alreadyClaimedToday,
       isFrozen: account.isFrozen,
-      currentStreak: account.dailyStreak,
+      currentStreak,
       nextStreak,
-      multiplier,
-      rewardCredits,
+      multiplier: this.calculateMultiplier(nextStreak),
+      rewardCredits: this.calculateReward(nextStreak),
       lastDailyAt: account.lastDailyAt,
-      timeUntilNextClaimMs,
+      timeUntilNextClaimMs: alreadyClaimedToday ? timeUntilResetMs : 0,
       timeUntilResetMs,
+      missedDays,
+      forgivenessRemaining: Math.max(0, this.streakForgiveness - missedDays),
     };
   }
 
@@ -113,6 +152,8 @@ export class DailyService {
     nowMs = Date.now(),
   ): Promise<DailyClaimResult> {
     const account = await this.repository.getOrCreateAccount(userId);
+    const now = new Date(nowMs);
+    const nextResetAt = getNextResetAt(now, this.resetSchedule);
 
     // 1. Account freeze verification
     if (account.isFrozen) {
@@ -123,48 +164,43 @@ export class DailyService {
         streak: account.dailyStreak,
         multiplier: 1.0,
         wasReset: false,
+        missedDays: 0,
       };
     }
 
-    // 2. Cooldown & Grace period verification
-    let newStreak = 1;
-    let wasReset = false;
-    const totalResetCutoff = this.cooldownWindowMs + this.graceWindowMs;
-
-    if (account.lastDailyAt) {
-      const elapsed = nowMs - account.lastDailyAt.getTime();
-
-      if (elapsed < this.cooldownWindowMs) {
-        const remainingSeconds = Math.ceil((this.cooldownWindowMs - elapsed) / 1000);
-        return {
-          success: false,
-          reason: `Daily reward is on cooldown. Try again in ${remainingSeconds}s.`,
-          creditsAwarded: 0,
-          streak: account.dailyStreak,
-          multiplier: this.calculateMultiplier(account.dailyStreak),
-          nextClaimAt: new Date(account.lastDailyAt.getTime() + this.cooldownWindowMs),
-          graceExpiresAt: new Date(account.lastDailyAt.getTime() + totalResetCutoff),
-          wasReset: false,
-        };
-      } else if (elapsed <= totalResetCutoff) {
-        // Within 24-36h window: streak increments!
-        newStreak = account.dailyStreak + 1;
-        wasReset = false;
-      } else {
-        // Beyond 36 hours: streak resets to 1
-        newStreak = 1;
-        wasReset = true;
-      }
+    // 2. One claim per reset day
+    if (
+      account.lastDailyAt &&
+      getResetDayIndex(account.lastDailyAt, this.resetSchedule) ===
+        getResetDayIndex(now, this.resetSchedule)
+    ) {
+      const remainingSeconds = Math.ceil((nextResetAt.getTime() - nowMs) / 1000);
+      return {
+        success: false,
+        reason: `Daily reward already claimed today. Resets in ${remainingSeconds}s.`,
+        creditsAwarded: 0,
+        streak: account.dailyStreak,
+        multiplier: this.calculateMultiplier(account.dailyStreak),
+        nextClaimAt: nextResetAt,
+        wasReset: false,
+        missedDays: 0,
+      };
     }
 
-    const multiplier = this.calculateMultiplier(newStreak);
-    const creditsToAward = this.calculateReward(newStreak);
-    const claimDate = new Date(nowMs);
+    // 3. Streak progression with consecutive-miss forgiveness
+    const { nextStreak, missedDays, wasReset } = this.resolveStreak(
+      account.lastDailyAt,
+      account.dailyStreak,
+      nowMs,
+    );
 
-    // 3. Atomically update account streak and credit wallet balance
+    const multiplier = this.calculateMultiplier(nextStreak);
+    const creditsToAward = this.calculateReward(nextStreak);
+
+    // 4. Atomically update account streak and credit wallet balance
     await this.repository.updateAccount(userId, {
-      dailyStreak: newStreak,
-      lastDailyAt: claimDate,
+      dailyStreak: nextStreak,
+      lastDailyAt: now,
     });
 
     const balanceResult = await this.repository.modifyBalance({
@@ -174,20 +210,21 @@ export class DailyService {
       type: 'DAILY',
       source: 'DAILY_CLAIM',
       metadata: {
-        streak: newStreak,
+        streak: nextStreak,
         multiplier,
         wasReset,
+        missedDays,
       },
     });
 
     return {
       success: true,
       creditsAwarded: creditsToAward,
-      streak: newStreak,
+      streak: nextStreak,
       multiplier,
-      nextClaimAt: new Date(nowMs + this.cooldownWindowMs),
-      graceExpiresAt: new Date(nowMs + totalResetCutoff),
+      nextClaimAt: nextResetAt,
       wasReset,
+      missedDays,
       walletBalance: balanceResult.balance.walletBalance,
       transactionId: balanceResult.transaction.id,
     };

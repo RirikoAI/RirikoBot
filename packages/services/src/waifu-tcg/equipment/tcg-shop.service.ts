@@ -1,4 +1,9 @@
-import { DatabaseError } from '@ririko/core';
+import {
+  DatabaseError,
+  DEFAULT_RESET_SCHEDULE,
+  getResetDayKey,
+  type ResetSchedule,
+} from '@ririko/core';
 import type {
   EconomyRepository,
   GameItem,
@@ -23,9 +28,9 @@ export interface TcgShopReceipt {
   inventoryItemIds: string[];
 }
 
-/** UTC calendar day, e.g. "2026-09-20": the shop rotation key. */
-export function shopDayKey(date: Date): string {
-  return date.toISOString().slice(0, 10);
+/** Reset-day key, e.g. "2026-09-20": the shop rotation key. */
+export function shopDayKey(date: Date, schedule: ResetSchedule = DEFAULT_RESET_SCHEDULE): string {
+  return getResetDayKey(date, schedule);
 }
 
 /** Deterministic pick of today's rotation codes: the same for every player on the same day. */
@@ -48,6 +53,7 @@ export class TcgShopService {
     private readonly itemRepo: GameItemRepository,
     inventoryRepo: UserInventoryItemRepository,
     private readonly economyRepo: EconomyRepository,
+    private readonly resetSchedule: ResetSchedule = DEFAULT_RESET_SCHEDULE,
   ) {
     this.grants = new ItemGrantService(itemRepo, inventoryRepo);
   }
@@ -67,7 +73,11 @@ export class TcgShopService {
    * to one purchase per order.
    */
   async getDailyRotation(now: Date = new Date()): Promise<GameItem[]> {
-    const codes = pickDailyRotation(shopDayKey(now), DAILY_ROTATION_POOL, DAILY_ROTATION_SIZE);
+    const codes = pickDailyRotation(
+      shopDayKey(now, this.resetSchedule),
+      DAILY_ROTATION_POOL,
+      DAILY_ROTATION_SIZE,
+    );
     const items: GameItem[] = [];
     for (const code of codes) {
       const item = await this.itemRepo.findByCode(code);
