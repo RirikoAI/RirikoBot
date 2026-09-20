@@ -97,7 +97,29 @@ export interface EconomyTransactionRecord {
 ### 5.2. Daily Claim Streaks (`/daily`)
 - Base reward: 250 credits.
 - Daily streak multiplier: $+5\%$ per consecutive day, capping at 30 days ($+150\%$).
-- 24-hour claim window with an additional 12-hour grace period (36 hours total before streak resets).
+- **One claim per reset day**, on the shared reset boundary described in Section 5.3 (default 00:00 GMT+8). A claim becomes available the moment the boundary passes, however recently the last one was made.
+- **Consecutive-miss forgiveness**: missing fewer than `RIRIKO_DAILY_STREAK_FORGIVENESS` consecutive reset days (default 3) preserves the streak. Missed days are *skipped, never counted*: a 15-day streak interrupted by 2 missed days resumes at **16**, not 18.
+- Reaching the threshold wipes the streak. The claim that triggers the wipe counts as day 1 and pays the day-1 reward of 250 credits.
+- Any successful claim clears the accumulated miss counter, so forgiveness measures consecutive misses rather than lifetime misses.
+- Setting `RIRIKO_DAILY_STREAK_FORGIVENESS=0` disables forgiveness: a single missed reset day ends the streak.
+- The miss count is derived from `economy_accounts.last_daily_at` and is not stored separately, so it can never drift out of step with the last claim.
+- Anti-abuse: frozen accounts cannot claim.
+
+### 5.3. Shared Daily Reset Boundary
+
+Every daily system in the bot resets on one configurable boundary rather than at UTC midnight:
+
+| System | Reset |
+|---|---|
+| `/daily` claim & streak | `RIRIKO_RESET_TIME_DAILY` |
+| Player energy replenishment | `RIRIKO_RESET_TIME_ENERGY` |
+| Energy potion daily ceiling (3/day) | `RIRIKO_RESET_TIME_ENERGY_POTIONS` |
+| Waifu TCG shop daily rotation | `RIRIKO_RESET_TIME_TCG_SHOP` |
+| Economy shop daily purchase limits | `RIRIKO_RESET_TIME_SHOP_PURCHASES` |
+
+- `RIRIKO_RESET_OFFSET_MINUTES` (default `480`, i.e. GMT+8) sets the timezone for **all** of them. One shared offset keeps "today" meaning the same calendar day everywhere in the bot.
+- `RIRIKO_RESET_TIME` (default `00:00`) is the wall-clock boundary inside that offset. Each system may override just the time, which lets operators stagger resets (for example rotating the shop at 06:00 instead of overnight).
+- Boundaries are evaluated lazily on access, so no scheduled job is required.
 
 ---
 

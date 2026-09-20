@@ -1,5 +1,6 @@
 import type { EconomyRepository, PlayerEnergyRepository } from '@ririko/database';
 import type { ItemGrantService } from '../equipment/item-grant.service.js';
+import type { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 
 /** Where claimed rewards are paid; without it rewards are only reported. */
 export interface RewardPayout {
@@ -77,9 +78,16 @@ export class ExpeditionService {
 
   private readonly payout: RewardPayout | undefined;
 
-  constructor(energyRepo: PlayerEnergyRepository, payout?: RewardPayout | undefined) {
+  private readonly energyLifecycle: EnergyLifecycleService | undefined;
+
+  constructor(
+    energyRepo: PlayerEnergyRepository,
+    payout?: RewardPayout | undefined,
+    energyLifecycle?: EnergyLifecycleService | undefined,
+  ) {
     this.energyRepo = energyRepo;
     this.payout = payout;
+    this.energyLifecycle = energyLifecycle;
   }
 
   /**
@@ -108,7 +116,9 @@ export class ExpeditionService {
     }
 
     // Consume player energy
-    const energyResult = await this.energyRepo.consumeEnergy(userId, config.energyCost);
+    const energyResult = this.energyLifecycle
+      ? await this.energyLifecycle.spendEnergy(userId, config.energyCost)
+      : await this.energyRepo.consumeEnergy(userId, config.energyCost);
     if (!energyResult.success) {
       return {
         success: false,

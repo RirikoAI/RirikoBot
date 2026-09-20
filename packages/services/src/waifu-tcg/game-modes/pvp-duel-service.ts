@@ -1,6 +1,7 @@
 import type { PlayerEnergyRepository, EconomyRepository } from '@ririko/database';
 import { CombatSimulator } from '../combat/combat-simulator.js';
 import type { Combatant, CombatResult } from '../combat/types.js';
+import type { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 
 export const PVP_DUEL_ENERGY_COST = 5; // Section 12.4
 
@@ -27,13 +28,17 @@ export class PvPDuelService {
   private readonly economyRepo?: EconomyRepository | undefined;
   private readonly combatSimulator: CombatSimulator;
 
+  private readonly energyLifecycle: EnergyLifecycleService | undefined;
+
   constructor(
     energyRepo: PlayerEnergyRepository,
     economyRepo?: EconomyRepository | undefined,
     combatSimulator?: CombatSimulator,
+    energyLifecycle?: EnergyLifecycleService | undefined,
   ) {
     this.energyRepo = energyRepo;
     this.economyRepo = economyRepo;
+    this.energyLifecycle = energyLifecycle;
     this.combatSimulator = combatSimulator ?? new CombatSimulator({ maxTurns: 20 });
   }
 
@@ -64,7 +69,9 @@ export class PvPDuelService {
     }
 
     // 1. Consume 5 energy for challenger
-    const energyResult = await this.energyRepo.consumeEnergy(challengerId, PVP_DUEL_ENERGY_COST);
+    const energyResult = this.energyLifecycle
+      ? await this.energyLifecycle.spendEnergy(challengerId, PVP_DUEL_ENERGY_COST)
+      : await this.energyRepo.consumeEnergy(challengerId, PVP_DUEL_ENERGY_COST);
     if (!energyResult.success) {
       return {
         success: false,
