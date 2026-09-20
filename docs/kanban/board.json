@@ -780,6 +780,16 @@
       "requires": ["STORY-156"],
       "blocks": [],
       "description": "Deferred by user decision: craft equipment from crafting dust and materials."
+    },
+    {
+      "id": "STORY-161",
+      "epic": "EPIC-004",
+      "title": "Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness",
+      "points": 5,
+      "status": "REVIEW",
+      "requires": ["EPIC-004", "EPIC-015"],
+      "blocks": [],
+      "description": "Replace the five independent UTC calendar-day resets with one shared configurable reset boundary (default 00:00 GMT+8), exposed through a core ResetSchedule helper returning an integer day index. Covers energy replenishment, the energy potion daily ceiling, TCG shop daily rotation, the economy shop daily purchase limit and /daily. Converts /daily from a rolling 24h cooldown with 12h grace into a calendar-day claim with consecutive-miss streak forgiveness: fewer consecutive missed days than the configured threshold preserve the streak (missed days are skipped, never counted), reaching the threshold wipes the streak and the triggering claim counts as day 1. Missed count is derived from lastDailyAt rather than persisted. One global timezone offset with per-feature clock-time overrides."
     }
   ],
   "tasks": [
@@ -1851,6 +1861,26 @@
       "requires": [],
       "blocks": ["STORY-156"],
       "description": "Crafting dust from dismantling, expeditions, boss raids, dungeon loot and achievements is shown but never stored, and enhancement passes a hard-coded 5000 dust. Store dust as a stackable CRAFTING_DUST inventory item granted by every source and spent atomically by EnhancementService."
+    },
+    {
+      "id": "BUG-0013",
+      "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted",
+      "points": 2,
+      "status": "BACKLOG",
+      "parent": "EPIC-015",
+      "requires": [],
+      "blocks": [],
+      "description": "bonus_energy is summed into the effective cap in four places (potion ceiling in PlayerEnergyRepository, EnergyLifecycleService.refundEnergy, ConsumableService full restores and the InventoryService status line) but is only ever written as 0 by the repository constructors. No item, achievement, event or admin command grants it, so the column is permanently dead and the four cap calculations are equivalent to maxEnergy alone. Either wire a real grant path (seasonal buffs, achievement rewards, admin command) or remove the column and simplify the cap math to maxEnergy."
+    },
+    {
+      "id": "BUG-0012",
+      "title": "Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired",
+      "points": 3,
+      "status": "REVIEW",
+      "parent": "EPIC-015",
+      "requires": [],
+      "blocks": [],
+      "description": "EnergyLifecycleService.getOrReconcileUserEnergy and replenishUserEnergy had no callers anywhere in apps/ or packages/, so player energy was never replenished and max energy never scaled with player level. Players spent their starting 100 energy and could never recover it except through the 3/day potion ceiling. Fixed by making EnergyLifecycleService the gateway for every energy debit (spendEnergy, consumePotion, refundEnergy), wiring it into expeditions, dungeon runs, boss raids, PvP duels and both potion paths, and giving it an XP-backed level resolver so capacity scales without callers passing a level. Note: the half-energy refund on dungeon floors 1-10 was already implemented in DungeonProgressService and correctly wired; the original report was wrong on that point."
     }
   ]
 }

@@ -515,7 +515,12 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
           channel_id TEXT NOT NULL,
           message_id TEXT NOT NULL,
           emoji_or_component_id TEXT NOT NULL,
-          role_id TEXT NOT NULL
+          role_id TEXT NOT NULL,
+          type TEXT NOT NULL DEFAULT 'EMOJI',
+          mode TEXT NOT NULL DEFAULT 'TOGGLE',
+          group_id TEXT,
+          label TEXT,
+          description TEXT
         );
 
         CREATE TABLE reminders (

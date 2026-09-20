@@ -395,6 +395,33 @@ export class XpRepository extends BaseRepository<
   }
 
   /**
+   * Retrieves one user's total XP aggregated across every guild.
+   *
+   * Used for account-wide progression such as Waifu TCG energy capacity, which is a global
+   * per-user resource rather than a per-guild one. Returns 0 when the user has no XP rows.
+   */
+  async getUserTotalXp(userId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .select({
+          totalXp: sql<number>`cast(coalesce(sum(${sqliteSchema.xpAccounts.xp}), 0) as integer)`,
+        })
+        .from(sqliteSchema.xpAccounts)
+        .where(eq(sqliteSchema.xpAccounts.userId, userId));
+      return Number(row?.totalXp ?? 0);
+    } else {
+      const [row] = await client.db
+        .select({
+          totalXp: sql<number>`cast(coalesce(sum(${pgSchema.xpAccounts.xp}), 0) as bigint)`,
+        })
+        .from(pgSchema.xpAccounts)
+        .where(eq(pgSchema.xpAccounts.userId, userId));
+      return Number(row?.totalXp ?? 0);
+    }
+  }
+
+  /**
    * Retrieves total aggregated XP across all guilds for all users, ordered descending.
    */
   async getGlobalUserXpTotals(
