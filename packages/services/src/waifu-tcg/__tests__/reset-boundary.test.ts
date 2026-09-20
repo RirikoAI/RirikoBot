@@ -9,7 +9,12 @@ import {
   InventoryRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
-import { DEFAULT_RESET_SCHEDULE, createResetSchedule, type ResetSchedule } from '@ririko/core';
+import {
+  DEFAULT_RESET_SCHEDULE,
+  createResetSchedule,
+  getResetDayKey,
+  type ResetSchedule,
+} from '@ririko/core';
 import { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 import { TcgShopService, shopDayKey } from '../equipment/tcg-shop.service.js';
 import { InventoryService } from '../../economy/inventory.service.js';
@@ -295,5 +300,139 @@ describe('STORY-161 shared reset boundary', () => {
       expect(second.success).toBe(false);
       expect(second.reason).toContain('Daily purchase limit');
     });
+  });
+});
+
+describe('BUG-0012 energy lifecycle wiring', () => {
+  let client: SqliteDatabaseClient;
+
+  beforeEach(async () => {
+    const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
+    if (rawClient.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    client = rawClient;
+    client.raw.exec(`
+      CREATE TABLE IF NOT EXISTS player_energy (
+        user_id TEXT PRIMARY KEY,
+        current_energy INTEGER NOT NULL DEFAULT 100,
+        max_energy INTEGER NOT NULL DEFAULT 100,
+        bonus_energy INTEGER NOT NULL DEFAULT 0,
+        daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
+        last_replenished_at INTEGER NOT NULL,
+        last_reset_date TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+    `);
+  });
+
+  afterEach(async () => {
+    vi.useRealTimers();
+    await client.close();
+  });
+
+  const staleRecord = async (
+    repo: PlayerEnergyRepository,
+    userId: string,
+    currentEnergy: number,
+    maxEnergy = 100,
+  ): Promise<void> => {
+    await repo.getOrCreate(userId);
+    await repo.update(userId, { currentEnergy, maxEnergy, lastResetDate: '2000-01-01' });
+  };
+
+  it('replenishes before spending, so a stale player is not wrongly refused', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    // 5 energy left, but the reset boundary has long since passed.
+    await staleRecord(repo, 'user_spend', 5);
+
+    const result = await service.spendEnergy('user_spend', 45);
+
+    expect(result.success).toBe(true);
+    expect(result.currentEnergy).toBe(55); // replenished to 100, then 45 debited
+  });
+
+  it('still refuses a spend the replenished pool cannot cover', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    await staleRecord(repo, 'user_broke', 5);
+
+    const result = await service.spendEnergy('user_broke', 150);
+
+    expect(result.success).toBe(false);
+    expect(result.reason).toContain('Insufficient energy');
+    expect(result.currentEnergy).toBe(100);
+  });
+
+  it('does not replenish twice inside one reset day', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    await staleRecord(repo, 'user_once', 5);
+
+    await service.spendEnergy('user_once', 40); // 100 - 40 = 60
+    const second = await service.spendEnergy('user_once', 40); // 60 - 40 = 20
+
+    expect(second.success).toBe(true);
+    expect(second.currentEnergy).toBe(20);
+  });
+
+  it('scales capacity from the resolved account level', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, {
+      resetSchedule: DEFAULT_RESET_SCHEDULE,
+      levelResolver: async () => 50,
+    });
+
+    await staleRecord(repo, 'user_level', 5);
+    const record = await service.getOrReconcileUserEnergy('user_level');
+
+    expect(record.maxEnergy).toBe(228); // level 50 capacity
+    expect(record.currentEnergy).toBe(228);
+  });
+
+  it('never shrinks a high-level pool when no level can be resolved', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    // Without a resolver the stored capacity must be preserved, not reset to level-1's 100.
+    await staleRecord(repo, 'user_high', 10, 228);
+    const record = await service.getOrReconcileUserEnergy('user_high');
+
+    expect(record.maxEnergy).toBe(228);
+    expect(record.currentEnergy).toBe(228);
+  });
+
+  it('clears the potion ceiling when a potion is used after the boundary', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    await repo.getOrCreate('user_pot');
+    await repo.update('user_pot', {
+      currentEnergy: 10,
+      dailyEnergyPotsUsed: 3,
+      lastResetDate: '2000-01-01',
+    });
+
+    const result = await service.consumePotion('user_pot', 15, 3);
+
+    expect(result.success).toBe(true);
+    expect(result.potsUsedToday).toBe(1);
+  });
+
+  it('refunds energy without exceeding capacity', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, DEFAULT_RESET_SCHEDULE);
+
+    await repo.getOrCreate('user_refund');
+    await repo.update('user_refund', {
+      currentEnergy: 90,
+      maxEnergy: 100,
+      lastResetDate: getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE),
+    });
+
+    const record = await service.refundEnergy('user_refund', 25);
+    expect(record.currentEnergy).toBe(100);
   });
 });

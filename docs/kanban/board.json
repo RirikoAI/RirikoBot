@@ -1863,14 +1863,24 @@
       "description": "Crafting dust from dismantling, expeditions, boss raids, dungeon loot and achievements is shown but never stored, and enhancement passes a hard-coded 5000 dust. Store dust as a stackable CRAFTING_DUST inventory item granted by every source and spent atomically by EnhancementService."
     },
     {
-      "id": "BUG-0012",
-      "title": "Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired",
-      "points": 3,
+      "id": "BUG-0013",
+      "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted",
+      "points": 2,
       "status": "BACKLOG",
       "parent": "EPIC-015",
       "requires": [],
       "blocks": [],
-      "description": "EnergyLifecycleService.getOrReconcileUserEnergy and replenishUserEnergy have no callers anywhere in apps/ or packages/, so player energy is never replenished and max energy never scales with player level. Players spend their starting 100 energy and can never recover it except through the 3/day potion ceiling. Wire reconciliation into every energy-consuming entry point (expeditions, dungeon attempts, boss raids, PvP duels, /item use and energy status displays) so the daily boundary is evaluated lazily on access. Also unused: player_energy.bonus_energy is written by nothing, and the documented half-energy refund on dungeon floor 1-10 defeats has no implementation."
+      "description": "bonus_energy is summed into the effective cap in four places (potion ceiling in PlayerEnergyRepository, EnergyLifecycleService.refundEnergy, ConsumableService full restores and the InventoryService status line) but is only ever written as 0 by the repository constructors. No item, achievement, event or admin command grants it, so the column is permanently dead and the four cap calculations are equivalent to maxEnergy alone. Either wire a real grant path (seasonal buffs, achievement rewards, admin command) or remove the column and simplify the cap math to maxEnergy."
+    },
+    {
+      "id": "BUG-0012",
+      "title": "Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired",
+      "points": 3,
+      "status": "REVIEW",
+      "parent": "EPIC-015",
+      "requires": [],
+      "blocks": [],
+      "description": "EnergyLifecycleService.getOrReconcileUserEnergy and replenishUserEnergy had no callers anywhere in apps/ or packages/, so player energy was never replenished and max energy never scaled with player level. Players spent their starting 100 energy and could never recover it except through the 3/day potion ceiling. Fixed by making EnergyLifecycleService the gateway for every energy debit (spendEnergy, consumePotion, refundEnergy), wiring it into expeditions, dungeon runs, boss raids, PvP duels and both potion paths, and giving it an XP-backed level resolver so capacity scales without callers passing a level. Note: the half-energy refund on dungeon floors 1-10 was already implemented in DungeonProgressService and correctly wired; the original report was wrong on that point."
     }
   ]
 }

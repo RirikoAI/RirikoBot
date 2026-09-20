@@ -6,6 +6,7 @@ import type {
 } from '@ririko/database';
 import type { Combatant } from '../combat/types.js';
 import type { ConsumableUseResult } from './types.js';
+import type { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 
 export const DAILY_ENERGY_POTION_CAP = 3;
 
@@ -14,6 +15,7 @@ export class ConsumableService {
     private readonly itemRepo: GameItemRepository,
     private readonly inventoryRepo: UserInventoryItemRepository,
     private readonly energyRepo: PlayerEnergyRepository,
+    private readonly energyLifecycle?: EnergyLifecycleService | undefined,
   ) {}
 
   /**
@@ -50,15 +52,16 @@ export class ConsumableService {
       let energyAmount = Number(effect.energyRestored ?? 15);
 
       if (effect.fullEnergyRestore === true) {
-        const energyRecord = await this.energyRepo.getOrCreate(userId);
+        // Reconcile first so a full restore targets today's capacity, not a stale one.
+        const energyRecord = this.energyLifecycle
+          ? await this.energyLifecycle.getOrReconcileUserEnergy(userId)
+          : await this.energyRepo.getOrCreate(userId);
         energyAmount = energyRecord.maxEnergy + energyRecord.bonusEnergy - energyRecord.currentEnergy;
       }
 
-      const potionResult = await this.energyRepo.consumeEnergyPotion(
-        userId,
-        energyAmount,
-        DAILY_ENERGY_POTION_CAP,
-      );
+      const potionResult = this.energyLifecycle
+        ? await this.energyLifecycle.consumePotion(userId, energyAmount, DAILY_ENERGY_POTION_CAP)
+        : await this.energyRepo.consumeEnergyPotion(userId, energyAmount, DAILY_ENERGY_POTION_CAP);
 
       if (!potionResult.success) {
         return {

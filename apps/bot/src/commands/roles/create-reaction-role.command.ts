@@ -225,6 +225,7 @@ export function createCreateReactionRoleCommand(services: BotServices): Command 
             await services.reactionRoleRepo.delete(record.id).catch(() => null);
             throw new Error(
               `Bot could not react with emoji "${emoji}": ${reactErr?.message || 'Invalid emoji or missing Add Reactions permission'}`,
+              { cause: reactErr },
             );
           }
         }
