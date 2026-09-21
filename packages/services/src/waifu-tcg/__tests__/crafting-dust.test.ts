@@ -67,7 +67,7 @@ describe('Crafting dust & reward payouts (BUG-0011)', () => {
     });
     const owned = await cardRepo.createUserCard({ userId: 'u1', cardId: card.id, serialNumber: 1 });
 
-    const result = await new CardDismantleService(cardRepo, grants).dismantleCard('u1', owned.id);
+    const result = await new CardDismantleService(cardRepo, new UserInventoryItemRepository(client), grants).dismantleCard('u1', owned.id);
     expect(result.success).toBe(true);
     expect(await grants.countOwned('u1', 'CRAFTING_DUST')).toBe(result.dustAwarded);
   });

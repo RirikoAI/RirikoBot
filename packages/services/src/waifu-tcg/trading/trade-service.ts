@@ -1,6 +1,7 @@
 import type {
   CardTradeRepository,
   WaifuCardRepository,
+  UserInventoryItemRepository,
   EconomyRepository,
   DatabaseClient,
   CardTrade,
@@ -8,6 +9,7 @@ import type {
   WaifuCard,
 } from '@ririko/database';
 import { withTransaction } from '@ririko/database';
+import { assertCardHasNoGear, listEquippedSlots } from '../equipment/gear-lock.js';
 
 export interface CreateTradeProposalParams {
   senderUserId: string;
@@ -35,7 +37,12 @@ export class TradeService {
     private readonly waifuCardRepo: WaifuCardRepository,
     private readonly economyRepo: EconomyRepository,
     private readonly dbClient: DatabaseClient,
+    private readonly inventoryRepo: UserInventoryItemRepository,
   ) {}
+
+  private async cardName(card: UserCard): Promise<string | undefined> {
+    return (await this.waifuCardRepo.findById(card.cardId))?.name;
+  }
 
   async createProposal(params: CreateTradeProposalParams): Promise<CardTrade> {
     const {
@@ -87,6 +94,7 @@ export class TradeService {
       if (card.isFavorite) {
         throw new Error(`Offered card ${cardId} is marked as favorite. Unfavorite it first.`);
       }
+      await assertCardHasNoGear(this.inventoryRepo, card, 'traded', await this.cardName(card));
     }
 
     // Validate receiver cards
@@ -103,6 +111,13 @@ export class TradeService {
       }
       if (card.isFavorite) {
         throw new Error(`Requested card ${cardId} is marked as favorite by its owner.`);
+      }
+      const slots = await listEquippedSlots(this.inventoryRepo, card);
+      if (slots.length > 0) {
+        throw new Error(
+          `🔒 Requested card ${(await this.cardName(card)) ?? cardId} (\`${cardId}\`) still has gear equipped in: ${slots.join(', ')}. ` +
+            `Gear never moves with a card, so only cards with all 6 gear slots empty can be traded. Ask its owner to unequip it first.`,
+        );
       }
     }
 
@@ -168,6 +183,12 @@ export class TradeService {
 
     // Execute atomic balance & card ownership swap
     return withTransaction(this.dbClient, async (tx) => {
+      // Re-check inside the swap: gear never changes hands with a card.
+      for (const cardId of [...trade.offeredCardIds, ...trade.requestedCardIds]) {
+        const card = await this.waifuCardRepo.findUserCardById(cardId, tx);
+        if (card) await assertCardHasNoGear(this.inventoryRepo, card, 'traded', await this.cardName(card), tx);
+      }
+
       // Transfer credits if offered by sender
       if (trade.offeredCredits > 0) {
         await this.economyRepo.transferBalance(

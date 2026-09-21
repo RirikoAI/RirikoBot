@@ -247,6 +247,13 @@
 | `TASK-1601` | Task | CraftingService & Recipe Table: Floor-Gated Recipes, Dust/Credit/Ingredient Costs, Atomic Craft | 2 | `STORY-160` | ✅ Done | `STORY-156` |
 | `TASK-1602` | Task | Interactive /item craft Menu (Slash & Prefix Parity) & Bot Service Wiring | 2 | `STORY-160` | ✅ Done | `TASK-1601` |
 | `TASK-1603` | Task | Crafting Docs, Catalog Copy & Help Center Entry | 1 | `STORY-160` | ✅ Done | `TASK-1602` |
+| `BUG-0014` | Bug | Equipped Gear Leaks Across Card Sales, Trades & Dismantles; Add Unequip All | 3 | `EPIC-015` | ✅ Done | — |
+| `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | — (ungroomed) | `EPIC-015` | 📋 Backlog | `STORY-160` |
+| `BUG-0015` | Bug | Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs | — (ungroomed) | `EPIC-015` | 📋 Backlog | — |
+| `BUG-0016` | Bug | Gear, Craft and Shop Dropdowns Silently Drop Entries Past 25 | — (ungroomed) | `EPIC-015` | 📋 Backlog | — |
+| `BUG-0017` | Bug | Unknown /card Prefix Action Silently Opens the Collection | — (ungroomed) | `EPIC-010` | 📋 Backlog | — |
+| `CHORE-0602` | Chore | Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards | — (ungroomed) | `EPIC-015` | 📋 Backlog | `BUG-0014` |
+| `CHORE-0603` | Chore | Align Default Prefix: Code Fallback `!` vs .env.example and Guide Text `$` | — (ungroomed) | — | 📋 Backlog | — |
 | `BUG-0013` | Bug | player_energy.bonus_energy Is Read as Capacity but Never Granted | 2 | `EPIC-015` | 📋 Backlog | — |
 
 ### 📋 Groomed Stories & Tasks for EPIC-010 (Waifu TCG)

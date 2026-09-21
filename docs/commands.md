@@ -175,6 +175,10 @@ Selecting a specific command displays:
   - Toggles favorite protection lock on a card to prevent accidental dismantling or market listing.
 - `/card dismantle <card_id | rarity>`
   - Recycles duplicate or unwanted cards into Crafting Dust for gear enhancement.
+  - Any gear the card wears goes back to the owner's inventory first.
+- `/card unequip-all [card_id]`
+  - Unequips every gear piece from one card. Without a card ID it unequips gear from every card, including gear left
+    on a card the player no longer owns. The `/loadout` menu has the same action as an **Unequip All** button.
 - `/card equip <card_id>` / `/card unequip <card_id>`
   - Sets or clears the active combat card for PvP duels, expeditions, and dungeon tower battles.
 - `/card guide` / `/card info`
@@ -185,6 +189,8 @@ Selecting a specific command displays:
   - Initiates an atomic trading session between two players.
 - `/trade offer card <trade_id> <card_id>` / `/trade offer credits <trade_id> <amount>`
   - Offers cards or credits. Selected items are locked in `IN_TRADE` state.
+  - Only cards with all 6 gear slots empty can be offered or requested. The error names the equipped slots and
+    points to `/card unequip-all`. Gear can't be equipped onto a card while it is `IN_TRADE`.
 - `/trade confirm <trade_id>`
   - Dual-confirmation gate. When both players confirm, settlement executes atomically within a database transaction.
 - `/trade cancel <trade_id>`
@@ -195,6 +201,7 @@ Selecting a specific command displays:
   - Browses active player listings with price, rarity, and stat sorting.
 - `/market list <card_id> <price_credits>`
   - Lists a card for sale, locking it in `IN_MARKET` state with a 7-day auto-expiration.
+  - Only cards with all 6 gear slots empty can be listed or bought. Gear can't be equipped onto a card while it is `IN_MARKET`.
 - `/market buy <listing_id>`
   - Purchases a card using credits. Enforces a 5% coin sink tax to curb inflation.
 - `/market cancel <listing_id>`

@@ -86,7 +86,7 @@ export function createCardCommand(services: BotServices): Command {
       category: CommandCategory.TCG,
       description: 'Waifu TCG collection, inspection, claim, favorite, equip, and dismantling commands.',
       aliases: ['tcg'],
-      usage: '/card [action: collection|inspect|claim|favorite|equip|dismantle|gear|equip-gear|unequip-gear|guide] [id] [filter] [sort] [item_id] [slot]',
+      usage: '/card [action: collection|inspect|claim|favorite|equip|dismantle|gear|equip-gear|unequip-gear|unequip-all|guide] [id] [filter] [sort] [item_id] [slot]',
       examples: [
         '/card action:collection filter:ICE sort:level',
         '/card action:inspect id:12345678',
@@ -97,6 +97,8 @@ export function createCardCommand(services: BotServices): Command {
         '/card action:gear id:12345678',
         '/card action:equip-gear id:12345678 item_id:<item_id> slot:WEAPON',
         '/card action:unequip-gear item_id:<item_id>',
+        '/card action:unequip-all id:12345678',
+        '/card action:unequip-all',
       ],
       options: [
         {
@@ -115,6 +117,7 @@ export function createCardCommand(services: BotServices): Command {
             { name: 'Loadout (View card 6-slot equipped gear & bonuses)', value: 'loadout' },
             { name: 'Equip Gear (Equip weapon/armor/relic/ring/amulet/talisman)', value: 'equip-gear' },
             { name: 'Unequip Gear (Unequip gear from slot)', value: 'unequip-gear' },
+            { name: 'Unequip All (Empty a card, or every card when no id)', value: 'unequip-all' },
             { name: 'Guide / Info (Tutorials, type advantages, rules)', value: 'guide' },
           ],
         },
@@ -200,7 +203,7 @@ export function createCardCommand(services: BotServices): Command {
       }
       if (!sub) {
         const firstArg = rawArgs[0]?.toLowerCase();
-        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle', 'gear', 'loadout', 'equip-gear', 'unequip-gear', 'guide', 'info'].includes(firstArg ?? '')) {
+        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle', 'gear', 'loadout', 'equip-gear', 'unequip-gear', 'unequip-all', 'guide', 'info'].includes(firstArg ?? '')) {
           sub = firstArg;
         } else {
           sub = 'collection';
@@ -397,7 +400,10 @@ export function createCardCommand(services: BotServices): Command {
           }
 
           await ctx.reply({
-            content: `🔨 Dismantled **${result.cardName}** (\`${result.rarity}\`) into **${result.dustAwarded} Crafting Dust**!`,
+            content:
+              `🔨 Dismantled **${result.cardName}** (\`${result.rarity}\`) into **${result.dustAwarded} Crafting Dust**!` +
+              (result.gearReturned ? `
+🎒 ${result.gearReturned} gear piece(s) it wore went back to your inventory.` : ''),
           });
           break;
         }
@@ -464,6 +470,27 @@ export function createCardCommand(services: BotServices): Command {
             const { unequippedItemName } = await services.loadoutService.unequip(ctx.user.id, itemId);
             await ctx.reply({
               content: `🛡️ Unequipped **${unequippedItemName}**! The gear piece was safely returned to your inventory.`,
+            });
+          } catch (err: unknown) {
+            await ctx.reply({
+              content: `❌ **Unequip Failed**: ${err instanceof Error ? err.message : String(err)}`,
+              ephemeral: true,
+            });
+          }
+          break;
+        }
+
+        case 'unequip-all': {
+          // With a card: empty that card. Without: empty every card, including gear left on cards you no longer own.
+          const cardId = ctx.options.getString('id') ?? rawArgs[1];
+          try {
+            const { unequippedItemNames } = await services.loadoutService.unequipAll(ctx.user.id, cardId);
+            await ctx.reply({
+              content:
+                unequippedItemNames.length === 0
+                  ? `ℹ️ ${cardId ? 'That card has' : 'You have'} no gear equipped. Nothing to unequip.`
+                  : `🛡️ Unequipped ${unequippedItemNames.length} gear piece(s) ${cardId ? 'from that card' : 'from all your cards'}: ` +
+                    `${unequippedItemNames.map((n) => `**${n}**`).join(', ')}. They are back in your inventory.`,
             });
           } catch (err: unknown) {
             await ctx.reply({
