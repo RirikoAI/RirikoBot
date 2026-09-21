@@ -748,7 +748,7 @@ export const CANONICAL_ITEMS: NewGameItem[] = [
     code: 'CRAFTING_DUST',
     name: 'Crafting Dust',
     description:
-      'Shimmering residue from dismantled cards and cleared floors. Spent to enhance equipment.',
+      'Shimmering residue from dismantled cards and cleared floors. Spent to enhance equipment or craft new gear and potions.',
     type: 'MATERIAL',
     subtype: 'CRAFTING_DUST',
     rarity: 'COMMON',

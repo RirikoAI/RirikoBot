@@ -118,12 +118,22 @@ Selecting a specific command displays:
 ### 5.3. Equipment, Accessories & Inventory
 - `/item inventory [category]`
   - Displays player owned equipments, accessories, and consumables with enhancement levels (+0 to +10) and equip status.
+- `/loadout [card_id]` (Prefix: `loadout`, `gear`, `equipment`; same as `/card action:gear`)
+  - Opens the interactive gear menu on the chosen card (default: the active ⭐ card): card, slot and item
+    dropdowns with a stat-change preview, plus Equip, Unequip and Enhance buttons.
 - `/card equip-gear <card_id> <item_id> [slot]`
   - Equips a weapon, armor, relic, ring, amulet, or talisman to an active combat waifu card.
   - Automatically locks the equipped gear (`state = 'EQUIPPED'`) from market sale or trading.
 - `/item use <item_id> [quantity]`
   - Consumes an item from inventory (HP Potion, Mana Draught, Energy Restore).
   - For Energy Restores: Enforces the daily consumption limit (e.g. max 3/day).
+- `/item craft [recipe] [quantity]`
+  - With no `recipe`, opens the interactive Crafting Workshop menu (category picker, recipe picker, Craft button).
+  - With a `recipe` (exact recipe code or bare output item code), forges it directly, spending Crafting Dust, Credits,
+    and any chain ingredient. `quantity` batches potion recipes up to 10; equipment/accessory recipes are capped at 1.
+  - Prefix alias: `forge`. See `docs/waifu-tcg.md` §10.4 for the full recipe table and cost formula.
+- `/craft [recipe] [quantity]` (Prefix: `craft`, `forge`)
+  - Standalone shortcut for `/item craft`, listed as its own entry in `/help`.
 
 ### 5.4. Player Energy & Stamina
 - `/energy status`
@@ -203,15 +213,16 @@ Selecting a specific command displays:
 ### 5.11. TCG Info Hub & Onboarding Guide (`/tcg-info`)
 - `/tcg-info [topic]` (Prefix: `!tcg-info`, `!tcginfo`, `!tcgguide`, `!waifu-guide`)
   - Interactive multi-page handbook powered by a Discord `StringSelectMenu`.
-  - 10 Guide Topics:
+  - 11 Guide Topics:
     1. `overview`: Welcome, system architecture, core loops.
     2. `starter`: How to obtain cards (tutorial, chat drops, marketplace).
     3. `elements`: 7-element affinity loop, Ice mechanics, and status effects.
-    4. `gear`: 6-slot loadout, +10 enhancement, Crafting Dust.
-    5. `tutorial`: 4-floor onboarding prologue and starter pool.
-    6. `dungeon`: Seasonal towers, scaling models, elemental wards, enrage clock.
-    7. `trade`: Atomic P2P trading rules and `IN_TRADE` safety.
-    8. `market`: Community marketplace and 5% tax sink.
-    9. `guild`: WaifuGuild factions, leveling, and vaults.
-    10. `achievements`: 6 tracks, 5 tiers, and multi-asset rewards.
+    4. `gear`: 6-slot loadout, equipping with `/loadout`, +10 enhancement.
+    5. `crafting`: Crafting and forging with `/craft`, unlock floors, costs, Crafting Dust sources.
+    6. `tutorial`: 4-floor onboarding prologue and starter pool.
+    7. `dungeon`: Seasonal towers, scaling models, elemental wards, enrage clock.
+    8. `trade`: Atomic P2P trading rules and `IN_TRADE` safety.
+    9. `market`: Community marketplace and 5% tax sink.
+    10. `guild`: WaifuGuild factions, leveling, and vaults.
+    11. `achievements`: 6 tracks, 5 tiers, and multi-asset rewards.
 

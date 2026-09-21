@@ -107,6 +107,7 @@ import {
   createXpLevelResolver,
   TcgShopService,
   ItemGrantService,
+  CraftingService,
   CardProgressionService,
   DungeonProgressService,
   BossImageService,
@@ -194,6 +195,7 @@ export interface BotServices {
   consumableService: ConsumableService;
   energyLifecycleService: EnergyLifecycleService;
   tcgShopService: TcgShopService;
+  craftingService: CraftingService;
   dungeonSeasonRepo: DungeonSeasonRepository;
   dungeonFloorRepo: DungeonFloorRepository;
   dungeonBossRepo: DungeonBossRepository;
@@ -607,6 +609,14 @@ export async function createBotServices(
   const dungeonFloorRepo = new DungeonFloorRepository(db);
   const dungeonBossRepo = new DungeonBossRepository(db);
   const userDungeonProgressRepo = new UserDungeonProgressRepository(db);
+  const craftingService = new CraftingService(
+    gameItemRepo,
+    userInventoryItemRepo,
+    economyRepo,
+    userDungeonProgressRepo,
+    dungeonSeasonRepo,
+    db,
+  );
   const scalingEngine = new ScalingEngine();
   const dungeonLootService = new DungeonLootService({
     economyRepo,
@@ -782,6 +792,7 @@ export async function createBotServices(
     consumableService,
     energyLifecycleService,
     tcgShopService,
+    craftingService,
     dungeonSeasonRepo,
     dungeonFloorRepo,
     dungeonBossRepo,

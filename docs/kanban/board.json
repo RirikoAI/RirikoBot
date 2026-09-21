@@ -774,12 +774,12 @@
     {
       "id": "STORY-160",
       "epic": "EPIC-015",
-      "title": "Equipment Crafting with Dust (Deferred)",
+      "title": "Equipment Crafting with Dust",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["STORY-156"],
       "blocks": [],
-      "description": "Deferred by user decision: craft equipment from crafting dust and materials."
+      "description": "Craft non-signature, drop-only gear (per-slot upgrade chains) and select potions from Crafting Dust, Credits, and ingredients, gated by dungeon floor progress. Originally deferred by user decision; picked back up as TASK-1601/1602/1603."
     },
     {
       "id": "STORY-161",
@@ -1729,6 +1729,33 @@
       "points": 1,
       "status": "DONE",
       "requires": ["TASK-1404"],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1601",
+      "parent": "STORY-160",
+      "title": "CraftingService & Recipe Table: Floor-Gated Recipes, Dust/Credit/Ingredient Costs, Atomic Craft",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["STORY-156"],
+      "blocks": ["TASK-1602"]
+    },
+    {
+      "id": "TASK-1602",
+      "parent": "STORY-160",
+      "title": "Interactive /item craft Menu (Slash & Prefix Parity) & Bot Service Wiring",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-1601"],
+      "blocks": ["TASK-1603"]
+    },
+    {
+      "id": "TASK-1603",
+      "parent": "STORY-160",
+      "title": "Crafting Docs, Catalog Copy & Help Center Entry",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1602"],
       "blocks": []
     }
   ],
