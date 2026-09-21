@@ -263,7 +263,7 @@ export async function createBotServices(
   const gameItemRepo = new GameItemRepository(db);
   const userInventoryItemRepo = new UserInventoryItemRepository(db);
   const itemGrantService = new ItemGrantService(gameItemRepo, userInventoryItemRepo);
-  const dismantleService = new CardDismantleService(waifuCardRepo, itemGrantService);
+  const dismantleService = new CardDismantleService(waifuCardRepo, userInventoryItemRepo, itemGrantService);
   const cardImageService = new CardImageService();
   const bossImageService = new BossImageService(waifuAssetRepo);
   const musicPlayer = new MusicPlayerService({
@@ -627,8 +627,8 @@ export async function createBotServices(
 
   const cardTradeRepo = new CardTradeRepository(db);
   const marketRepo = new MarketListingRepository(db);
-  const tradeService = new TradeService(cardTradeRepo, waifuCardRepo, economyRepo, db);
-  const marketService = new MarketService(marketRepo, waifuCardRepo, economyRepo, db);
+  const tradeService = new TradeService(cardTradeRepo, waifuCardRepo, economyRepo, db, userInventoryItemRepo);
+  const marketService = new MarketService(marketRepo, waifuCardRepo, economyRepo, db, userInventoryItemRepo);
 
   const waifuGuildRepo = new WaifuGuildRepository(db);
   const achievementRepo = new AchievementRepository(db);

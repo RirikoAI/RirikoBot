@@ -16,6 +16,7 @@ import {
   type GearSlot,
   type UserInventoryItemWithDefinition,
 } from './types.js';
+import { GEAR_EQUIPPABLE_CARD_STATES } from './gear-lock.js';
 
 /** Adds one gear piece's stats onto a running total. */
 export function addEquipmentStats(target: EquipmentStats, source: EquipmentStats): void {
@@ -113,6 +114,13 @@ export class LoadoutService {
     if (!userCard || userCard.userId !== userId) {
       throw new DatabaseError('Card not found or does not belong to you');
     }
+    if (!GEAR_EQUIPPABLE_CARD_STATES.includes(userCard.state)) {
+      throw new DatabaseError(
+        userCard.state === 'IN_MARKET'
+          ? 'This card is listed on the market. Cancel the listing before equipping gear to it.'
+          : 'This card is locked in a pending trade. Finish or cancel the trade before equipping gear to it.',
+      );
+    }
 
     // 2. Verify item exists and belongs to user
     const invItem = await this.inventoryRepo.findById(userItemId);
@@ -177,10 +185,37 @@ export class LoadoutService {
   }
 
   /**
+   * Unequips every piece the user has on one card, or on all cards when `cardId` is omitted.
+   * The all-cards form also frees gear left on a card the user no longer owns.
+   */
+  async unequipAll(
+    userId: string,
+    cardId?: string | undefined,
+  ): Promise<{ unequippedItemNames: string[] }> {
+    if (cardId) {
+      const userCard = await this.cardRepo.findUserCardById(cardId);
+      if (!userCard || userCard.userId !== userId) {
+        throw new DatabaseError('Card not found or does not belong to you');
+      }
+    }
+    const rows = await this.inventoryRepo.unequipAllForUser(userId, cardId);
+    const unequippedItemNames: string[] = [];
+    for (const row of rows) {
+      unequippedItemNames.push((await this.itemRepo.findById(row.itemId))?.name ?? 'Item');
+    }
+    return { unequippedItemNames };
+  }
+
+  /**
    * Retrieves the full 6-slot loadout, aggregated stats, and active perks for a card.
+   * Only gear owned by the card's owner counts, so a piece stranded on a card that changed
+   * hands never lends its stats to the new owner.
    */
   async getCardLoadout(cardId: string): Promise<CardLoadout> {
-    const equippedItems = await this.inventoryRepo.findEquippedByCard(cardId);
+    const ownerId = (await this.cardRepo.findUserCardById(cardId))?.userId;
+    const equippedItems = (await this.inventoryRepo.findEquippedByCard(cardId)).filter(
+      (inv) => inv.userId === ownerId,
+    );
 
     const loadout: CardLoadout = {
       cardId,

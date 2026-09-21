@@ -1,5 +1,5 @@
 import type { CardRarity } from '../types.js';
-import type { WaifuCardRepository } from '@ririko/database';
+import type { UserInventoryItemRepository, WaifuCardRepository } from '@ririko/database';
 import type { ItemGrantService } from '../equipment/item-grant.service.js';
 
 export const CRAFTING_DUST_YIELD: Record<CardRarity, number> = {
@@ -16,6 +16,8 @@ export const CRAFTING_DUST_YIELD: Record<CardRarity, number> = {
 export interface DismantleResult {
   success: boolean;
   dustAwarded?: number;
+  /** Gear that was on the card and went back to the inventory. */
+  gearReturned?: number;
   cardName?: string;
   rarity?: CardRarity;
   error?: string;
@@ -24,6 +26,7 @@ export interface DismantleResult {
 export class CardDismantleService {
   constructor(
     private readonly cardRepo: WaifuCardRepository,
+    private readonly inventoryRepo: UserInventoryItemRepository,
     private readonly grants?: ItemGrantService | undefined,
   ) {}
 
@@ -59,13 +62,15 @@ export class CardDismantleService {
     const rarity = (baseCard?.rarity as CardRarity) ?? 'COMMON';
     const dustAwarded = CRAFTING_DUST_YIELD[rarity] ?? 10;
 
-    // Delete card instance, then pay out the dust
+    // Return the card's gear to the inventory, delete the card, then pay out the dust
+    const gearReturned = (await this.inventoryRepo.unequipAllForUser(userId, userCardId)).length;
     await this.cardRepo.deleteUserCard(userCardId);
     await this.grants?.grant(userId, 'CRAFTING_DUST', dustAwarded, 'DISMANTLE');
 
     return {
       success: true,
       dustAwarded,
+      gearReturned,
       cardName: baseCard?.name ?? 'Unknown Waifu',
       rarity,
     };

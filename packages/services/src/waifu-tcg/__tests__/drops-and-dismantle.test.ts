@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   createDatabaseClient,
+  UserInventoryItemRepository,
   WaifuCardRepository,
   WaifuAssetRepository,
   type SqliteDatabaseClient,
@@ -63,6 +64,20 @@ describe('Waifu Chat Drops & Dismantle Engine (TASK-1012)', () => {
         is_active INTEGER NOT NULL DEFAULT 1
       );
 
+      CREATE TABLE user_inventory_items (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        item_id TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        enhancement_level INTEGER NOT NULL DEFAULT 0,
+        equipped_to_card_id TEXT,
+        slot TEXT NOT NULL DEFAULT 'NONE',
+        state TEXT NOT NULL DEFAULT 'IDLE',
+        obtained_from TEXT NOT NULL DEFAULT 'SHOP',
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
       CREATE TABLE user_cards (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
@@ -101,7 +116,7 @@ describe('Waifu Chat Drops & Dismantle Engine (TASK-1012)', () => {
     });
 
     dropManager = new DropManager(cardRepo, assetRepo, new CardGenerator());
-    dismantleService = new CardDismantleService(cardRepo);
+    dismantleService = new CardDismantleService(cardRepo, new UserInventoryItemRepository(client));
   });
 
   afterEach(async () => {

@@ -1,6 +1,7 @@
 import type {
   MarketListingRepository,
   WaifuCardRepository,
+  UserInventoryItemRepository,
   EconomyRepository,
   DatabaseClient,
   MarketListing,
@@ -8,6 +9,7 @@ import type {
   WaifuCard,
 } from '@ririko/database';
 import { withTransaction } from '@ririko/database';
+import { assertCardHasNoGear } from '../equipment/gear-lock.js';
 
 export interface ListCardParams {
   sellerUserId: string;
@@ -45,6 +47,7 @@ export class MarketService {
     private readonly waifuCardRepo: WaifuCardRepository,
     private readonly economyRepo: EconomyRepository,
     private readonly dbClient: DatabaseClient,
+    private readonly inventoryRepo: UserInventoryItemRepository,
     options?: MarketServiceOptions,
   ) {
     this.marketTaxRate = options?.marketTaxRate ?? 0.05; // 5% default market tax
@@ -74,6 +77,9 @@ export class MarketService {
     if (card.isFavorite) {
       throw new Error(`Card ${userCardId} is marked as favorite. Unfavorite it before listing on the market.`);
     }
+
+    const cardName = (await this.waifuCardRepo.findById(card.cardId))?.name;
+    await assertCardHasNoGear(this.inventoryRepo, card, 'sold', cardName);
 
     const taxPaid = Math.floor(price * this.marketTaxRate);
     const expiresAt = new Date(Date.now() + this.listingDurationDays * 24 * 60 * 60 * 1000);
@@ -125,6 +131,13 @@ export class MarketService {
     const netSellerCredit = listing.price - taxDeducted;
 
     const updatedListing = await withTransaction(this.dbClient, async (tx) => {
+      // Listings made before gear locking may still carry gear: never sell it along with the card.
+      const card = await this.waifuCardRepo.findUserCardById(listing.userCardId, tx);
+      if (card) {
+        const cardName = (await this.waifuCardRepo.findById(card.cardId, tx))?.name;
+        await assertCardHasNoGear(this.inventoryRepo, card, 'sold', cardName, tx);
+      }
+
       // Deduct full price from buyer
       await this.economyRepo.modifyBalance(
         {

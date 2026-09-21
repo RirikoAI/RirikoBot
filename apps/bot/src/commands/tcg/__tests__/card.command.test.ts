@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   createDatabaseClient,
+  UserInventoryItemRepository,
   WaifuCardRepository,
   WaifuAssetRepository,
   type SqliteDatabaseClient,
@@ -67,6 +68,20 @@ describe('Card Command Suite (TASK-1012)', () => {
         is_active INTEGER NOT NULL DEFAULT 1
       );
 
+      CREATE TABLE user_inventory_items (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        item_id TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        enhancement_level INTEGER NOT NULL DEFAULT 0,
+        equipped_to_card_id TEXT,
+        slot TEXT NOT NULL DEFAULT 'NONE',
+        state TEXT NOT NULL DEFAULT 'IDLE',
+        obtained_from TEXT NOT NULL DEFAULT 'SHOP',
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
       CREATE TABLE user_cards (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
@@ -105,7 +120,7 @@ describe('Card Command Suite (TASK-1012)', () => {
     });
 
     dropManager = new DropManager(cardRepo, assetRepo);
-    dismantleService = new CardDismantleService(cardRepo);
+    dismantleService = new CardDismantleService(cardRepo, new UserInventoryItemRepository(client));
 
     const mockLoadoutService = {
       getCardLoadout: async (cardId: string) => ({
@@ -128,6 +143,9 @@ describe('Card Command Suite (TASK-1012)', () => {
       }),
       unequip: async (userId: string, itemId: string) => ({
         unequippedItemName: 'Dragon Slayer',
+      }),
+      unequipAll: async (userId: string, cardId?: string) => ({
+        unequippedItemNames: cardId === 'bare_card' ? [] : ['Dragon Slayer', 'Iron Hauberk'],
       }),
     };
 
@@ -406,6 +424,23 @@ describe('Card Command Suite (TASK-1012)', () => {
     });
     await command.execute(ctxUnequipGear);
     expect(repUnequipGear[0].content).toContain('Unequipped **Dragon Slayer**');
+  });
+
+  it('unequips all gear from one card, or from every card when no id is given', async () => {
+    const command = createCardCommand(services);
+
+    const { ctx: oneCard, replies: oneReplies } = createMockContext({ subcommand: 'unequip-all', args: { id: 'card_1' } });
+    await command.execute(oneCard);
+    expect(oneReplies[0].content).toContain('Unequipped 2 gear piece(s) from that card');
+    expect(oneReplies[0].content).toContain('**Iron Hauberk**');
+
+    const { ctx: allCards, replies: allReplies } = createMockContext({ subcommand: 'unequip-all' });
+    await command.execute(allCards);
+    expect(allReplies[0].content).toContain('from all your cards');
+
+    const { ctx: bare, replies: bareReplies } = createMockContext({ subcommand: 'unequip-all', args: { id: 'bare_card' } });
+    await command.execute(bare);
+    expect(bareReplies[0].content).toContain('no gear equipped');
   });
   it('still replies with the text embed when card rendering fails', async () => {
     getCardImage.mockRejectedValueOnce(new Error('canvas exploded'));

@@ -65,6 +65,7 @@ describe('Gear menu (STORY-157)', () => {
     expect(b['gear:equip']!.disabled).toBe(true); // nothing selected yet
     expect(b['gear:unequip']!.disabled).toBe(false);
     expect(b['gear:enhance']!.label).toContain('75 dust');
+    expect(b['gear:unequip_all']!.disabled).toBe(false);
 
     const selected = buildGearMenuView(state({ selectedItemId: 'w2' }));
     expect(selected.embed.data.description).toContain('ATK +81 ▲');
@@ -78,5 +79,12 @@ describe('Gear menu (STORY-157)', () => {
     const b = buttons(view);
     expect(b['gear:unequip']!.disabled).toBe(true);
     expect(b['gear:enhance']!.disabled).toBe(true);
+  });
+
+  it('disables Unequip All when the card wears no gear', () => {
+    const view = buildGearMenuView(
+      state({ loadout: { cardId: 'c1', aggregateStats: {}, activePerks: [] }, enhanceCost: undefined }),
+    );
+    expect(buttons(view)['gear:unequip_all']!.disabled).toBe(true);
   });
 });
