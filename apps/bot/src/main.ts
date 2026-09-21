@@ -13,6 +13,8 @@ import {
   createAutoVoiceCommands,
   createGamesCommands,
   createCardCommand,
+  createLoadoutCommand,
+  createCraftCommand,
   createCardsCommand,
   createGameCommand,
   createItemCommand,
@@ -161,6 +163,8 @@ export async function main(): Promise<void> {
   router.registry.register(createCardsCommand(services));
   router.registry.register(createGameCommand(services));
   router.registry.register(createItemCommand(services));
+  router.registry.register(createCraftCommand(services));
+  router.registry.register(createLoadoutCommand(services));
   router.registry.register(createDungeonCommand(services));
   router.registry.register(createTradeCommand(services));
   router.registry.register(createMarketCommand(services));

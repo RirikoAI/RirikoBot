@@ -13,7 +13,9 @@ import {
 } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { enhanceGear } from './gear-actions.js';
+import { openCraftMenu } from './craft-menu.js';
 import { ALL_GEAR_SLOTS } from '@ririko/services';
+import type { RecipeStatus } from '@ririko/services';
 
 export function createItemCommand(services: BotServices): Command {
   return {
@@ -21,23 +23,27 @@ export function createItemCommand(services: BotServices): Command {
       name: 'item',
       category: CommandCategory.TCG,
       description: 'Manage, inspect, enhance, and consume TCG equipment, accessories, and potions.',
-      aliases: ['tcgitem', 'gear', 'items'],
-      usage: '/item [action: inventory|enhance|use] [id] [filter] [card_id]',
+      aliases: ['tcgitem', 'items'],
+      usage: '/item [action: inventory|enhance|use|craft] [id] [filter] [card_id] [recipe] [quantity]',
       examples: [
         '/item action:inventory filter:EQUIPMENT',
         '/item action:enhance id:12345678',
         '/item action:use id:12345678',
+        '/item action:craft',
+        '/item action:craft recipe:CRAFT_WEAPON_OBSIDIAN_KATANA',
+        '/item action:craft recipe:CRAFT_POTION_MAJOR_HP quantity:3',
       ],
       options: [
         {
           name: 'action',
-          description: 'Subcommand action to execute (inventory, enhance, use)',
+          description: 'Subcommand action to execute (inventory, enhance, use, craft)',
           type: 'STRING',
           required: false,
           choices: [
             { name: 'Inventory (View owned equipment, accessories & potions)', value: 'inventory' },
             { name: 'Enhance (Upgrade equipment from +0 to +10)', value: 'enhance' },
             { name: 'Use (Consume an HP, Mana, or Energy potion)', value: 'use' },
+            { name: 'Craft (Forge gear & potions from Crafting Dust)', value: 'craft' },
           ],
         },
         {
@@ -63,6 +69,20 @@ export function createItemCommand(services: BotServices): Command {
           type: 'STRING',
           required: false,
         },
+        {
+          name: 'recipe',
+          description: 'Crafting recipe code to craft directly (omit to open the crafting menu)',
+          type: 'STRING',
+          required: false,
+        },
+        {
+          name: 'quantity',
+          description: 'How many to craft (equipment/accessories are capped at 1, potions at 10)',
+          type: 'INTEGER',
+          required: false,
+          minValue: 1,
+          maxValue: 10,
+        },
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
@@ -82,7 +102,7 @@ export function createItemCommand(services: BotServices): Command {
 
       if (!sub && rawArgs.length > 0) {
         const firstArg = rawArgs[0]!.toLowerCase();
-        if (['inventory', 'inv', 'enhance', 'upgrade', 'use', 'consume'].includes(firstArg)) {
+        if (['inventory', 'inv', 'enhance', 'upgrade', 'use', 'consume', 'craft', 'forge'].includes(firstArg)) {
           sub = firstArg;
         }
       }
@@ -90,6 +110,7 @@ export function createItemCommand(services: BotServices): Command {
       if (sub === 'inv') sub = 'inventory';
       if (sub === 'upgrade') sub = 'enhance';
       if (sub === 'consume') sub = 'use';
+      if (sub === 'forge') sub = 'craft';
 
       switch (sub) {
         case 'enhance':
@@ -97,6 +118,9 @@ export function createItemCommand(services: BotServices): Command {
           break;
         case 'use':
           await handleUse(ctx, services, rawArgs);
+          break;
+        case 'craft':
+          await handleCraft(ctx, services, rawArgs);
           break;
         case 'inventory':
         default:
@@ -486,6 +510,111 @@ async function handleUse(
   } catch (err: unknown) {
     await ctx.reply({
       content: `❌ **Error consuming item**: ${err instanceof Error ? err.message : String(err)}`,
+    });
+  }
+}
+
+/** Resolves a user-typed recipe code against the recipe list, by recipe code, output item code, or
+ *  output code with the `CRAFT_` prefix omitted (e.g. `WEAPON_OBSIDIAN_KATANA`). */
+/**
+ * Standalone `/craft` (prefix `craft`, `forge`): a shortcut for `/item action:craft` so crafting shows
+ * up as its own entry in help.
+ */
+export function createCraftCommand(services: BotServices): Command {
+  return {
+    metadata: {
+      name: 'craft',
+      category: CommandCategory.TCG,
+      description: 'Craft gear & potions from Crafting Dust (opens the crafting menu when no recipe is given).',
+      aliases: ['forge'],
+      usage: '/craft [recipe] [quantity]',
+      examples: [
+        '/craft',
+        '/craft recipe:WEAPON_OBSIDIAN_KATANA',
+        '/craft recipe:POTION_MAJOR_HP quantity:3',
+      ],
+      options: [
+        {
+          name: 'recipe',
+          description: 'Recipe code or item code to craft directly (omit to open the crafting menu)',
+          type: 'STRING',
+          required: false,
+        },
+        {
+          name: 'quantity',
+          description: 'How many to craft (equipment/accessories are capped at 1, potions at 10)',
+          type: 'INTEGER',
+          required: false,
+          minValue: 1,
+          maxValue: 10,
+        },
+      ],
+    },
+    async execute(ctx: CommandContext): Promise<void> {
+      // handleCraft reads prefix args after the action word, as in `item craft <recipe> <qty>`.
+      await handleCraft(ctx, services, ['craft', ...(ctx.options.getRawArgs?.() ?? [])]);
+    },
+  };
+}
+
+function resolveRecipeCode(input: string, statuses: RecipeStatus[]): string | undefined {
+  const normalized = input.trim().toUpperCase();
+  return (
+    statuses.find((s) => s.recipe.code === normalized)?.recipe.code ??
+    statuses.find((s) => s.outputItem.code === normalized)?.recipe.code ??
+    statuses.find((s) => s.recipe.code === `CRAFT_${normalized}`)?.recipe.code
+  );
+}
+
+export async function handleCraft(
+  ctx: CommandContext,
+  services: BotServices,
+  rawArgs: readonly string[],
+): Promise<void> {
+  const userId = ctx.user.id;
+  const recipeInput = ctx.options.getString('recipe') ?? rawArgs[1];
+  const rawQuantity = ctx.options.getInteger('quantity') ?? (rawArgs[2] ? Number.parseInt(rawArgs[2], 10) : undefined);
+  const quantity = rawQuantity && Number.isInteger(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
+
+  // No recipe given: open the interactive crafting menu instead of a direct craft.
+  if (!recipeInput) {
+    await openCraftMenu(ctx, services);
+    return;
+  }
+
+  try {
+    const statuses = await services.craftingService.listRecipes(userId);
+    const resolvedCode = resolveRecipeCode(recipeInput, statuses);
+    if (!resolvedCode) {
+      await ctx.reply({
+        content: `❌ Unknown crafting recipe: \`${recipeInput}\`. Run \`/craft\` with no recipe to browse the crafting menu.`,
+      });
+      return;
+    }
+    const status = statuses.find((s) => s.recipe.code === resolvedCode);
+
+    const receipt = await services.craftingService.craft(userId, resolvedCode, quantity);
+    const dustLeft = await services.enhancementService.getDustBalance(userId);
+    const ingredientNames = receipt.ingredientsSpent.map((ing) => {
+      const name = status?.ingredients.find((i) => i.code === ing.code)?.name ?? ing.code;
+      return `${ing.quantity}x ${name}`;
+    });
+
+    const embed = new EmbedBuilder()
+      .setColor(0x57f287)
+      .setTitle(`🔨 Crafted ${receipt.outputQuantity}x ${receipt.outputItem.name}!`)
+      .setDescription(
+        `Successfully forged **${receipt.outputQuantity}x ${receipt.outputItem.name}**!\n\n` +
+          `• **Crafting Dust Spent**: \`${receipt.dustSpent} Dust\` (${dustLeft} left)\n` +
+          `• **Credits Spent**: \`${receipt.creditsSpent} credits\` (Wallet: ${receipt.walletBalanceAfter.toLocaleString()})\n` +
+          (ingredientNames.length > 0 ? `• **Ingredients Used**: ${ingredientNames.join(', ')}\n` : ''),
+      )
+      .setFooter({ text: 'The Celestial Forge answers your call.' });
+
+    await ctx.reply({ embeds: [embed] });
+  } catch (err: unknown) {
+    await ctx.reply({
+      content: `❌ **Crafting Failed**: ${err instanceof Error ? err.message : String(err)}`,
     });
   }
 }
