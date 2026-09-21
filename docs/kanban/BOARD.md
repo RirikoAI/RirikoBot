@@ -226,7 +226,7 @@
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 13 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 13 | `EPIC-002`, `EPIC-003` | Phase 2B |
-| `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B ✅ Done (STORY-160 deferred) |
+| `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B ✅ Done |
 
 ### 📋 Groomed Stories & Bugs for EPIC-015 (TCG Progression, Equipment & Bosses)
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
@@ -243,7 +243,10 @@
 | `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | ✅ Done | `BUG-0010` |
 | `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | ✅ Done | `STORY-157` |
 | `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | ✅ Done | `STORY-152`, `STORY-156` |
-| `STORY-160` | Story | Equipment Crafting with Dust (Deferred) | 5 | `EPIC-015` | 📋 Backlog | `STORY-156` |
+| `STORY-160` | Story | Equipment Crafting with Dust | 5 | `EPIC-015` | ✅ Done | `STORY-156` |
+| `TASK-1601` | Task | CraftingService & Recipe Table: Floor-Gated Recipes, Dust/Credit/Ingredient Costs, Atomic Craft | 2 | `STORY-160` | ✅ Done | `STORY-156` |
+| `TASK-1602` | Task | Interactive /item craft Menu (Slash & Prefix Parity) & Bot Service Wiring | 2 | `STORY-160` | ✅ Done | `TASK-1601` |
+| `TASK-1603` | Task | Crafting Docs, Catalog Copy & Help Center Entry | 1 | `STORY-160` | ✅ Done | `TASK-1602` |
 | `BUG-0013` | Bug | player_energy.bonus_energy Is Read as Capacity but Never Granted | 2 | `EPIC-015` | 📋 Backlog | — |
 
 ### 📋 Groomed Stories & Tasks for EPIC-010 (Waifu TCG)

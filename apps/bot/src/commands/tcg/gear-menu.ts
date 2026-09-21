@@ -76,7 +76,7 @@ export function formatStatDelta(
   return parts.length > 0 ? parts.join(' · ') : 'No stat change';
 }
 
-function formatStats(stats: EquipmentStats): string {
+export function formatStats(stats: EquipmentStats): string {
   const parts = Object.entries(stats)
     .filter(([, v]) => typeof v === 'number' && v !== 0)
     .map(([k, v]) => `${STAT_LABELS[k] ?? k} +${formatStatValue(k, v as number)}`);

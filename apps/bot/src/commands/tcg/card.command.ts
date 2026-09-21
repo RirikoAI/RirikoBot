@@ -50,6 +50,35 @@ async function attachCardImage(
   }
 }
 
+/**
+ * Standalone `/loadout` (prefix `loadout`, `gear`, `equipment`): a shortcut for `/card action:gear`,
+ * the interactive menu for equipping, comparing and enhancing a card's gear.
+ */
+export function createLoadoutCommand(services: BotServices): Command {
+  return {
+    metadata: {
+      name: 'loadout',
+      category: CommandCategory.TCG,
+      description: "Open a card's gear menu: equip, compare, unequip & enhance its 6 gear slots.",
+      aliases: ['gear', 'equipment'],
+      usage: '/loadout [card_id]',
+      examples: ['/loadout', '/loadout card_id:12345678'],
+      options: [
+        {
+          name: 'card_id',
+          description: 'Card to open (defaults to your active ⭐ card)',
+          type: 'STRING',
+          required: false,
+        },
+      ],
+    },
+    async execute(ctx: CommandContext): Promise<void> {
+      const cardId = ctx.options.getString('card_id') ?? ctx.options.getRawArgs?.()[0];
+      await openGearMenu(ctx, services, cardId);
+    },
+  };
+}
+
 export function createCardCommand(services: BotServices): Command {
   return {
     metadata: {
@@ -57,7 +86,7 @@ export function createCardCommand(services: BotServices): Command {
       category: CommandCategory.TCG,
       description: 'Waifu TCG collection, inspection, claim, favorite, equip, and dismantling commands.',
       aliases: ['tcg'],
-      usage: '/card [action: collection|inspect|claim|favorite|equip|dismantle] [id] [filter] [sort]',
+      usage: '/card [action: collection|inspect|claim|favorite|equip|dismantle|gear|equip-gear|unequip-gear|guide] [id] [filter] [sort] [item_id] [slot]',
       examples: [
         '/card action:collection filter:ICE sort:level',
         '/card action:inspect id:12345678',
@@ -65,6 +94,9 @@ export function createCardCommand(services: BotServices): Command {
         '/card action:favorite id:12345678',
         '/card action:equip id:12345678',
         '/card action:dismantle id:12345678',
+        '/card action:gear id:12345678',
+        '/card action:equip-gear id:12345678 item_id:<item_id> slot:WEAPON',
+        '/card action:unequip-gear item_id:<item_id>',
       ],
       options: [
         {

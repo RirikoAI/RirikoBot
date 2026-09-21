@@ -64,7 +64,7 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
     expect(cmd.metadata.aliases).toContain('tcgguide');
     expect(cmd.metadata.aliases).toContain('card-guide');
     expect(cmd.metadata.options?.[0]?.name).toBe('topic');
-    expect(cmd.metadata.options?.[0]?.choices?.length).toBe(10);
+    expect(cmd.metadata.options?.[0]?.choices?.length).toBe(11);
   });
 
   it('should render the overview hub by default when no topic is provided', async () => {
@@ -229,6 +229,7 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
       'starter',
       'elements',
       'gear',
+      'crafting',
       'tutorial',
       'dungeon',
       'trade',
@@ -248,6 +249,6 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
     const row = buildTcgInfoSelectMenu('elements');
     expect(row.components.length).toBe(1);
     const menu = row.components[0] as any;
-    expect(menu.options.length).toBe(10);
+    expect(menu.options.length).toBe(11);
   });
 });
