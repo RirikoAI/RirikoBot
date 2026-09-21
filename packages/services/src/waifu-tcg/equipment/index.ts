@@ -7,3 +7,4 @@ export * from './tcg-shop.service.js';
 export * from './item-grant.service.js';
 export * from './crafting-recipes.js';
 export * from './crafting.service.js';
+export * from './gear-lock.js';

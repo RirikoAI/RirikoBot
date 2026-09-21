@@ -790,6 +790,18 @@
       "requires": ["EPIC-004", "EPIC-015"],
       "blocks": [],
       "description": "Replace the five independent UTC calendar-day resets with one shared configurable reset boundary (default 00:00 GMT+8), exposed through a core ResetSchedule helper returning an integer day index. Covers energy replenishment, the energy potion daily ceiling, TCG shop daily rotation, the economy shop daily purchase limit and /daily. Converts /daily from a rolling 24h cooldown with 12h grace into a calendar-day claim with consecutive-miss streak forgiveness: fewer consecutive missed days than the configured threshold preserve the streak (missed days are skipped, never counted), reaching the threshold wipes the streak and the triggering claim counts as day 1. Missed count is derived from lastDailyAt rather than persisted. One global timezone offset with per-feature clock-time overrides."
+    },
+    {
+      "id": "STORY-162",
+      "epic": "EPIC-015",
+      "title": "Craft & Equip Button and Card Name on Worn Gear in Inventory",
+      "points": null,
+      "status": "BACKLOG",
+      "requires": [
+        "STORY-160"
+      ],
+      "blocks": [],
+      "description": "Ungroomed. Crafted gear lands in the inventory and must be equipped separately; add a Craft & Equip button (onto the active card) like the shop's Buy & Equip. /item inventory tags worn gear [EQUIPPED: SLOT] without saying which card wears it; show the card name, and surface item IDs so /card action:equip-gear and unequip-gear are usable by hand."
     }
   ],
   "tasks": [
@@ -1776,6 +1788,26 @@
       "requires": ["EPIC-006"],
       "blocks": [],
       "description": "Add ririko ai:configure interactive and flag-based CLI command to configure AI providers (Gemini, OpenAI, Ollama), API keys, models, test connections, and update .env safely."
+    },
+    {
+      "id": "CHORE-0602",
+      "title": "Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards",
+      "points": null,
+      "status": "BACKLOG",
+      "requires": [
+        "BUG-0014"
+      ],
+      "blocks": [],
+      "description": "Ungroomed. Gear equipped before BUG-0014 may still point at deleted cards or cards now owned by someone else. It is harmless (ignored by loadouts) and recoverable via /card action:unequip-all, but a one-time idempotent repair on boot (like BUG-0010's legacy row repair) would return it to inventories automatically. Check live data volume first."
+    },
+    {
+      "id": "CHORE-0603",
+      "title": "Align Default Prefix: Code Fallback '!' vs .env.example and Guide Text '$'",
+      "points": null,
+      "status": "BACKLOG",
+      "requires": [],
+      "blocks": [],
+      "description": "Ungroomed. apps/bot/src/main.ts falls back to '!' when DEFAULT_PREFIX is unset, .env.example sets '$', help uses the configured prefix, but /tcg-info and docs hard-code '$' or '!' in places. Pick one default and render guide examples from the configured prefix."
     }
   ],
   "bugs": [
@@ -1890,6 +1922,16 @@
       "description": "Crafting dust from dismantling, expeditions, boss raids, dungeon loot and achievements is shown but never stored, and enhancement passes a hard-coded 5000 dust. Store dust as a stackable CRAFTING_DUST inventory item granted by every source and spent atomically by EnhancementService."
     },
     {
+      "id": "BUG-0014",
+      "title": "Equipped Gear Leaks Across Card Sales, Trades & Dismantles; Add Unequip All",
+      "points": 3,
+      "status": "DONE",
+      "parent": "EPIC-015",
+      "requires": [],
+      "blocks": [],
+      "description": "Selling, trading or dismantling a card never unequips its gear. The buyer's card fights with the seller's gear (findEquippedByCard ignores owner), while the seller's gear stays EQUIPPED on a card they no longer own and cannot be recovered without an item ID no screen shows. Fix: only empty cards can be listed, bought, traded or accepted (clear error naming the equipped slots and how to unequip); gear cannot be equipped onto IN_TRADE/IN_MARKET cards; dismantle returns gear to the inventory; card loadouts only count gear owned by the card's owner; new unequip-all (one card or every card, which also recovers stranded gear) via /card action:unequip-all and an Unequip All button in /loadout."
+    },
+    {
       "id": "BUG-0013",
       "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted",
       "points": 2,
@@ -1908,6 +1950,36 @@
       "requires": [],
       "blocks": [],
       "description": "EnergyLifecycleService.getOrReconcileUserEnergy and replenishUserEnergy had no callers anywhere in apps/ or packages/, so player energy was never replenished and max energy never scaled with player level. Players spent their starting 100 energy and could never recover it except through the 3/day potion ceiling. Fixed by making EnergyLifecycleService the gateway for every energy debit (spendEnergy, consumePotion, refundEnergy), wiring it into expeditions, dungeon runs, boss raids, PvP duels and both potion paths, and giving it an XP-backed level resolver so capacity scales without callers passing a level. Note: the half-energy refund on dungeon floors 1-10 was already implemented in DungeonProgressService and correctly wired; the original report was wrong on that point."
+    },
+    {
+      "id": "BUG-0015",
+      "title": "Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs",
+      "points": null,
+      "status": "BACKLOG",
+      "parent": "EPIC-015",
+      "requires": [],
+      "blocks": [],
+      "description": "Ungroomed. apps/bot/src/services.ts seeds CANONICAL_ITEMS with 'if (!exists) create', so edits to existing catalog rows (e.g. the STORY-160 CRAFTING_DUST description, any future stat rebalance) never reach deployed databases. Decide which fields are catalog-owned and upsert them by code on boot, keeping ids stable."
+    },
+    {
+      "id": "BUG-0016",
+      "title": "Gear, Craft and Shop Dropdowns Silently Drop Entries Past 25",
+      "points": null,
+      "status": "BACKLOG",
+      "parent": "EPIC-015",
+      "requires": [],
+      "blocks": [],
+      "description": "Ungroomed. Discord select menus hold at most 25 options. The /loadout menu slices cards and per-slot gear to 25, so larger collections lose entries without any hint. Add paging or filtering (and a visible 'showing 25 of N' note) in gear-menu, craft-menu and shop-menu where lists can exceed 25."
+    },
+    {
+      "id": "BUG-0017",
+      "title": "Unknown /card Prefix Action Silently Opens the Collection",
+      "points": null,
+      "status": "BACKLOG",
+      "parent": "EPIC-010",
+      "requires": [],
+      "blocks": [],
+      "description": "Ungroomed. card.command.ts falls back to 'collection' for any unrecognised first argument, so a typo like '!card gears' shows the collection instead of an error. Reply with the valid actions (or a did-you-mean) when the first argument is present but unknown."
     }
   ]
 }
