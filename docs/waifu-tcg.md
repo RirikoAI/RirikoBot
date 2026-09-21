@@ -163,7 +163,7 @@ Guild administrators configure automated card drops to stimulate server chatter:
 - `/card inspect <card_id>` — High-resolution card embed displaying foil art, full stats, skill, equipped gear, and history.
 - `/card equip <card_id>` — Assign card to active combat deck slot (locks card from trade/market).
 - `/card favorite <card_id>` — Protects card from accidental sale or dismantling.
-- `/card dismantle <card_id>` — Break down duplicate cards into crafting dust to upgrade card star ratings or enhance equipment.
+- `/card dismantle <card_id>` — Break down duplicate cards into crafting dust to upgrade card star ratings, enhance equipment, or craft new gear (see §10.4).
 
 ---
 
@@ -409,9 +409,96 @@ Accessories provide targeted stat min-maxing to specialize cards into Tanks, Gla
 
 ### 10.3. Equipment Enhancement & Refinement
 
-- Players can enhance equipments from **+0 to +10** using **Crafting Dust** (earned by dismantling duplicate waifu cards via `/card dismantle`) and Credits.
+- Players can enhance equipments from **+0 to +10** using **Crafting Dust** (earned by dismantling duplicate waifu cards via `/card dismantle`, or by clearing dungeon floors) and Credits.
 - Each enhancement level increases base stats by +5% to +10%.
 - At enhancement levels +5 and +10, the equipment's Battle Perk triggers with higher probability or potency (e.g. *Vampiric Touch* scales from 12% -> 18% -> 25%).
+- Crafting Dust is also spent to forge new gear and potions outright — see §10.4.
+
+### 10.4. Crafting: Forging Gear and Potions from Dust
+
+Crafting is a second, more deliberate way to gear up than hoping for a drop: spend Crafting Dust, Credits, and (for
+most recipes) an ingredient to forge a specific piece on demand. It never replaces drops or boss fights — it makes
+progress reliable once you've proven you can handle the floor a piece is meant for.
+
+**What can be crafted**
+- Every non-signature, drop-only piece of gear across the six slots (Weapon, Armor, Relic, Ring, Amulet, Talisman),
+  organized as a **per-slot upgrade chain**: RARE → SUPER_RARE → ULTRA_RARE → the slot's top non-signature tier
+  (usually SECRET_RARE; RELIC tops out at SPECIAL_ILLUSTRATION_RARE and WEAPON at MYTHIC, since neither slot has a
+  non-signature SECRET_RARE piece in the current catalog).
+- Two potions: **Major HP Potion** and **Greater Mana Potion**, each crafted from 3 copies of its basic-tier potion
+  (Minor HP Potion / Mana Draught).
+- **Elixir of Full Vitality**, **Cosmic Ether**, and every Energy Restore potion are deliberately **not craftable** —
+  they're one-time reward-tier items (full heal + cleanse, full mana + free cast, energy economy), and letting dust
+  buy them would trivialize the systems they gate.
+
+**Why boss signature drops are excluded**: a boss's signature gear (see §7) is defined outright as a reward for
+beating that boss. If it were craftable, dust would let a player skip the fight it's meant to reward, so signature
+drops never appear in a recipe — as either an output or an ingredient.
+
+**Cost formula** — every recipe charges dust, credits, and (after the first tier of a chain) one ingredient:
+- **Credits**: `round(shop price × 1.75)`. That 1.75x is the Town Shop's 1.5x daily-rotation markup (§5.3) plus a
+  0.25 crafting premium, so forging an item on demand always costs more credits than buying the same item on the day
+  it happens to be in rotation — crafting is the reliable path, never the cheap one.
+- **Crafting Dust**: `round(shop price ÷ 1000 × 40 × rarity multiplier)`, reusing the same rarity multiplier scale
+  that equipment enhancement already spends dust against (§10.3), so crafting costs sit on a curve players already
+  know instead of a new one.
+- **Ingredient** (upgrade-chain tiers 2+ only): one owned copy of the previous tier in the same slot's chain — the
+  old piece is "melted down" into the new one. Base-tier (first) recipes in each chain need no ingredient.
+
+**Unlock floors**: each recipe is locked until you've cleared a specific dungeon floor in the current season — floor
+10 for the RARE tier, 20 for SUPER_RARE, 30 for ULTRA_RARE, 40 for the top tier (45 for the Weapon slot's MYTHIC
+capstone, one floor past its SECRET_RARE-equivalent wall). A recipe unlocks at the wall just *before* the boss it
+helps you beat, never the one it would let you skip — potion recipes unlock at floor 5.
+
+**Quantity caps**: equipment and accessory recipes can only be crafted **one at a time** (each copy needs its own
+enhancement level to track). Potion recipes can be batched up to **10 per craft**.
+
+**Ingredient rule**: only unequipped copies count. Gear currently equipped to a card is never touched, and when a
+chain ingredient is consumed, the **lowest-enhancement copy** is removed first — so an enhanced piece survives an
+upgrade craft as long as an unenhanced spare exists.
+
+**Commands**:
+- `/item action:craft` (no `recipe`) opens the interactive **Crafting Workshop** menu: pick a category (the six gear
+  slots, plus a combined "Potions" bucket for the HP/Mana recipes), pick a recipe, review the detail panel (cost,
+  lock status, ingredient shortfalls), and press **Craft**. The menu always crafts one at a time.
+- `/item action:craft recipe:<code> quantity:<n>` crafts directly. `recipe` accepts the exact recipe code
+  (`CRAFT_WEAPON_OBSIDIAN_KATANA`), the bare output item code (`WEAPON_OBSIDIAN_KATANA`), or that code without the
+  `CRAFT_` prefix in lowercase (`weapon_obsidian_katana`) — matching is case-insensitive. `quantity` defaults to 1
+  and is capped per the rule above.
+- Prefix commands: `!item craft [recipe] [quantity]` and the alias `!item forge [recipe] [quantity]`.
+
+**Recipe table** (generated from `CRAFTING_RECIPES` in
+[`crafting-recipes.ts`](file:///Z:/Projects/ririko-v2-2026/packages/services/src/waifu-tcg/equipment/crafting-recipes.ts) —
+regenerate this table if that file changes):
+
+| Recipe | Output | Rarity | Slot | Unlock Floor | Dust | Credits | Ingredient |
+|---|---|---|---|---:|---:|---:|---|
+| `CRAFT_WEAPON_OBSIDIAN_KATANA` | Obsidian Katana | RARE | Weapon | 10 | 60 | 1,750 | — |
+| `CRAFT_WEAPON_SOLAR_LANCE` | Solar Lance | SUPER_RARE | Weapon | 20 | 200 | 4,375 | 1x Obsidian Katana |
+| `CRAFT_WEAPON_CRIMSON_CALAMITY` | Crimson Calamity | ULTRA_RARE | Weapon | 30 | 1,200 | 17,500 | 1x Solar Lance |
+| `CRAFT_WEAPON_WORLD_BREAKER` | World Breaker | MYTHIC | Weapon | 45 | 8,000 | 43,750 | 1x Crimson Calamity |
+| `CRAFT_ARMOR_MAGMA_MAIL` | Magma-Forged Mail | RARE | Armor | 10 | 90 | 2,625 | — |
+| `CRAFT_ARMOR_DRAGONSCALE_PLATE` | Dragonscale Plate | SUPER_RARE | Armor | 20 | 240 | 5,250 | 1x Magma-Forged Mail |
+| `CRAFT_ARMOR_AEGIS_BARRIER` | Aegis Barrier | ULTRA_RARE | Armor | 30 | 960 | 14,000 | 1x Dragonscale Plate |
+| `CRAFT_ARMOR_ETERNAL_CRUCIBLE` | Eternal Crucible Plate | SECRET_RARE | Armor | 40 | 3,200 | 35,000 | 1x Aegis Barrier |
+| `CRAFT_RELIC_CINDER_LANTERN` | Cinder Lantern | RARE | Relic | 10 | 90 | 2,625 | — |
+| `CRAFT_RELIC_PHOENIX_ASH_CENSER` | Phoenix Ash Censer | SUPER_RARE | Relic | 20 | 320 | 7,000 | 1x Cinder Lantern |
+| `CRAFT_RELIC_CHRONOS_HOURGLASS` | Chronos Hourglass | ULTRA_RARE | Relic | 30 | 1,200 | 17,500 | 1x Phoenix Ash Censer |
+| `CRAFT_RELIC_PHOENIX_FEATHER` | Phoenix Feather | SPECIAL_ILLUSTRATION_RARE | Relic | 40 | 4,000 | 35,000 | 1x Chronos Hourglass |
+| `CRAFT_RING_BLAZING_SUN` | Ring of the Blazing Sun | RARE | Ring | 10 | 72 | 2,100 | — |
+| `CRAFT_RING_SOLAR_FLARE` | Solar Flare Ring | SUPER_RARE | Ring | 20 | 320 | 7,000 | 1x Ring of the Blazing Sun |
+| `CRAFT_RING_INFERNO_CROWN` | Inferno Crown Ring | ULTRA_RARE | Ring | 30 | 1,200 | 17,500 | 1x Solar Flare Ring |
+| `CRAFT_RING_SUNFORGED_SIGIL` | Sunforged Sigil | SECRET_RARE | Ring | 40 | 3,200 | 35,000 | 1x Inferno Crown Ring |
+| `CRAFT_AMULET_MOUNTAIN` | Heart of the Mountain Amulet | RARE | Amulet | 10 | 72 | 2,100 | — |
+| `CRAFT_AMULET_OBSIDIAN_HEART` | Obsidian Heart Amulet | SUPER_RARE | Amulet | 20 | 320 | 7,000 | 1x Heart of the Mountain Amulet |
+| `CRAFT_AMULET_MAGMA_CORE` | Magma Core Amulet | ULTRA_RARE | Amulet | 30 | 1,200 | 17,500 | 1x Obsidian Heart Amulet |
+| `CRAFT_AMULET_PRIMORDIAL_FLAME` | Primordial Flame Amulet | SECRET_RARE | Amulet | 40 | 3,200 | 35,000 | 1x Magma Core Amulet |
+| `CRAFT_TALISMAN_WINDWALKER` | Windwalker Talisman | RARE | Talisman | 10 | 72 | 2,100 | — |
+| `CRAFT_TALISMAN_EMBERSTEP` | Emberstep Talisman | SUPER_RARE | Talisman | 20 | 320 | 7,000 | 1x Windwalker Talisman |
+| `CRAFT_TALISMAN_TEMPEST_FEATHER` | Tempest Feather | ULTRA_RARE | Talisman | 30 | 1,200 | 17,500 | 1x Emberstep Talisman |
+| `CRAFT_TALISMAN_ASHEN_WINGS` | Ashen Wings | SECRET_RARE | Talisman | 40 | 3,200 | 35,000 | 1x Tempest Feather |
+| `CRAFT_POTION_MAJOR_HP` | Major HP Potion | RARE | HP Potion | 5 | 12 | 350 | 3x Minor HP Potion |
+| `CRAFT_POTION_GREATER_MANA` | Greater Mana Potion | RARE | Mana Potion | 5 | 15 | 438 | 3x Mana Draught |
 
 ---
 

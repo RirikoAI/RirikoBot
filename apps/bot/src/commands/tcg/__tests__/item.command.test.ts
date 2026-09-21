@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createItemCommand } from '../item.command.js';
+import { createCraftCommand, createItemCommand } from '../item.command.js';
+import { createCardCommand, createLoadoutCommand } from '../card.command.js';
+import { CommandRegistry } from '@ririko/discord';
 import type { BotServices } from '../../../services.js';
 import type { CommandContext } from '@ririko/discord';
 import type { GameItem, UserInventoryItem } from '@ririko/database';
@@ -152,6 +154,46 @@ describe('Item Command Suite (TASK-1032)', () => {
       },
     };
 
+    const craftingRecipeStatus = {
+      recipe: {
+        code: 'CRAFT_WEAPON_OBSIDIAN_KATANA',
+        outputCode: 'WEAPON_OBSIDIAN_KATANA',
+        outputQuantity: 1,
+        dustCost: 90,
+        creditCost: 3938,
+        unlockFloor: 10,
+      },
+      outputItem: { code: 'WEAPON_OBSIDIAN_KATANA', name: 'Obsidian Katana' } as any,
+      unlocked: true,
+      requiredFloor: 10,
+      userHighestFloor: 12,
+      ownedDust: 500,
+      ownedCredits: 10000,
+      ingredients: [],
+      affordable: true,
+    };
+
+    const mockCraftingService = {
+      listRecipes: async () => [craftingRecipeStatus],
+      craft: async (userId: string, recipeCode: string, quantity = 1) => {
+        if (recipeCode !== craftingRecipeStatus.recipe.code) {
+          throw new Error(`Unknown crafting recipe: ${recipeCode}`);
+        }
+        return {
+          success: true,
+          recipeCode,
+          outputItem: craftingRecipeStatus.outputItem,
+          quantity,
+          outputQuantity: quantity,
+          dustSpent: 90 * quantity,
+          creditsSpent: 3938 * quantity,
+          ingredientsSpent: [],
+          inventoryItemIds: ['inv_new_1'],
+          walletBalanceAfter: 50000 - 3938 * quantity,
+        };
+      },
+    };
+
     services = {
       gameItemRepo: mockGameItemRepo as any,
       userInventoryItemRepo: mockUserInventoryRepo as any,
@@ -159,6 +201,7 @@ describe('Item Command Suite (TASK-1032)', () => {
       waifuCardRepo: mockWaifuCardRepo as any,
       enhancementService: mockEnhancementService as any,
       consumableService: mockConsumableService as any,
+      craftingService: mockCraftingService as any,
     } as unknown as BotServices;
   });
 
@@ -300,6 +343,154 @@ describe('Item Command Suite (TASK-1032)', () => {
       expect(embed.data.title).toContain('Stamina Replenished');
       expect(embed.data.description).toContain('+50 Energy');
       expect(embed.data.description).toContain('1 / 3');
+    });
+  });
+
+  describe('Craft Subcommand', () => {
+    it('opens the interactive crafting menu when no recipe is given (slash)', async () => {
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({
+        subcommand: 'craft',
+      });
+
+      await command.execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      const embed = replies[0].embeds[0];
+      expect(embed.data.title).toContain('Crafting Workshop');
+      expect(replies[0].components.length).toBeGreaterThan(0);
+    });
+
+    it('opens the interactive crafting menu when no recipe is given (prefix)', async () => {
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({
+        rawArgs: ['craft'],
+      });
+
+      await command.execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      expect(replies[0].embeds[0].data.title).toContain('Crafting Workshop');
+    });
+
+    it('crafts directly by recipe code and shows a receipt embed (slash)', async () => {
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({
+        subcommand: 'craft',
+        args: { recipe: 'CRAFT_WEAPON_OBSIDIAN_KATANA' },
+      });
+
+      await command.execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      const embed = replies[0].embeds[0];
+      expect(embed.data.title).toContain('Crafted 1x Obsidian Katana');
+      expect(embed.data.description).toContain('90 Dust');
+      expect(embed.data.description).toContain('3938 credits');
+      expect(embed.data.description).toContain('400 left');
+    });
+
+    it('crafts directly by recipe code (prefix) and resolves the output-item code fallback', async () => {
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({
+        rawArgs: ['craft', 'weapon_obsidian_katana'],
+      });
+
+      await command.execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      const embed = replies[0].embeds[0];
+      expect(embed.data.title).toContain('Crafted 1x Obsidian Katana');
+    });
+
+    it('respects an explicit quantity', async () => {
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({
+        subcommand: 'craft',
+        args: { recipe: 'CRAFT_WEAPON_OBSIDIAN_KATANA', quantity: 2 },
+      });
+
+      await command.execute(ctx);
+
+      const embed = replies[0].embeds[0];
+      expect(embed.data.title).toContain('Crafted 2x Obsidian Katana');
+      expect(embed.data.description).toContain('180 Dust');
+    });
+
+    it('shows an error message for an unknown recipe code', async () => {
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({
+        subcommand: 'craft',
+        args: { recipe: 'NOT_A_REAL_RECIPE' },
+      });
+
+      await command.execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      expect(replies[0].content).toContain('Unknown crafting recipe');
+    });
+
+    it('renders a service error (e.g. locked/insufficient) as an error message', async () => {
+      services.craftingService.craft = async () => {
+        throw new Error('Insufficient Crafting Dust! Required: 90 Dust, but you only have 10 Dust.');
+      };
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({
+        subcommand: 'craft',
+        args: { recipe: 'CRAFT_WEAPON_OBSIDIAN_KATANA' },
+      });
+
+      await command.execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      expect(replies[0].content).toContain('Crafting Failed');
+      expect(replies[0].content).toContain('Insufficient Crafting Dust');
+    });
+  });
+
+  describe('Standalone /craft and /loadout shortcuts', () => {
+    it('/craft with no recipe opens the crafting menu', async () => {
+      const command = createCraftCommand(services);
+      const { ctx, replies } = createMockContext({ rawArgs: [] });
+
+      await command.execute(ctx);
+
+      expect(replies[0].embeds[0].data.title).toContain('Crafting Workshop');
+    });
+
+    it('/craft crafts directly from slash options', async () => {
+      const command = createCraftCommand(services);
+      const { ctx, replies } = createMockContext({
+        args: { recipe: 'CRAFT_WEAPON_OBSIDIAN_KATANA', quantity: 2 },
+        rawArgs: [],
+      });
+
+      await command.execute(ctx);
+
+      expect(replies[0].embeds[0].data.title).toContain('Crafted 2x Obsidian Katana');
+    });
+
+    it('prefix `forge <recipe> <quantity>` reads the recipe from the first argument', async () => {
+      const command = createCraftCommand(services);
+      const { ctx, replies } = createMockContext({ rawArgs: ['weapon_obsidian_katana', '2'] });
+
+      await command.execute(ctx);
+
+      expect(replies[0].embeds[0].data.title).toContain('Crafted 2x Obsidian Katana');
+    });
+
+    it('registers craft/forge and loadout/gear/equipment without alias collisions', () => {
+      const registry = new CommandRegistry().registerAll([
+        createCardCommand(services),
+        createItemCommand(services),
+        createCraftCommand(services),
+        createLoadoutCommand(services),
+      ]);
+
+      expect(registry.get('forge')?.metadata.name).toBe('craft');
+      expect(registry.get('gear')?.metadata.name).toBe('loadout');
+      expect(registry.get('equipment')?.metadata.name).toBe('loadout');
+      expect(registry.get('items')?.metadata.name).toBe('item');
     });
   });
 });

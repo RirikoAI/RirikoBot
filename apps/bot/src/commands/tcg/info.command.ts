@@ -17,6 +17,7 @@ export type TcgInfoTopic =
   | 'starter'
   | 'elements'
   | 'gear'
+  | 'crafting'
   | 'tutorial'
   | 'dungeon'
   | 'trade'
@@ -99,12 +100,39 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
             `• \`+4 to +6\`: +15% stat growth per tier.\n` +
             `• \`+7 to +9\`: Unlocks secondary battle perks (Lifesteal, Burn Resist, etc.).\n` +
             `• \`+10 Masterwork\`: Unlocks radiant aura and card passive boosts!\n\n` +
-            `### ⚙️ Gear Commands\n` +
-            `• View card gear: \`/card action:loadout id:<card_id>\`\n` +
-            `• Equip item: \`/card action:equip-gear id:<card_id> item_id:<item_id>\`\n` +
-            `• Unequip item: \`/card action:unequip-gear id:<card_id> slot:<SLOT>\``,
+            `### ⚙️ Equipping Gear\n` +
+            `Gear is worn by a **card**, not by you. Set your active ⭐ card with \`/card action:equip id:<card_id>\`.\n` +
+            `• Open the gear menu: \`/loadout\` (prefix \`$loadout\`, \`$gear\`, \`$equipment\`). Add a card ID to pick a card.\n` +
+            `• In the menu, choose a card, then a slot, then an item. Each item shows its stat change (\`ATK +40 ▲\`).\n` +
+            `• Press **Equip**. The old piece goes back to your inventory. **Unequip** and **Enhance** are on the same screen.\n` +
+            `• Check worn gear: \`/item action:inventory\` tags it \`[EQUIPPED: <SLOT>]\`.\n` +
+            `• By ID: \`/card action:equip-gear id:<card_id> item_id:<item_id> slot:<SLOT>\` and \`/card action:unequip-gear item_id:<item_id>\`.`,
         )
-        .setFooter({ text: 'Visit /shop to buy weapons, armor, and daily health/energy potions!' });
+        .setFooter({ text: 'Buy gear with /game action:shop, or craft it with /craft!' });
+
+    case 'crafting':
+      return new EmbedBuilder()
+        .setTitle('🔨 Waifu TCG — Crafting & Forging')
+        .setColor(0xe67e22)
+        .setDescription(
+          `Turn **Crafting Dust**, **Credits** and lower-tier gear into stronger gear and potions.\n\n` +
+            `### 📜 What You Can Craft\n` +
+            `• Drop-only gear in 6 upgrade chains, one per slot (Rare ➜ Super Rare ➜ Ultra Rare ➜ top tier).\n` +
+            `• Major HP Potions and Greater Mana Potions.\n` +
+            `• Boss signature drops can't be crafted. Beat the boss to earn them.\n\n` +
+            `### 🔒 Unlocks & Costs\n` +
+            `• Recipes unlock by the highest dungeon floor you've cleared (floors 10, 20, 30, 40, 45).\n` +
+            `• Each recipe costs Crafting Dust and Credits. Gear upgrades also use the lower-tier piece.\n` +
+            `• Only **unequipped** gear is used as an ingredient. Equipped gear is never consumed.\n` +
+            `• Gear is crafted 1 at a time. Potions up to 10 at a time.\n\n` +
+            `### 🧪 Getting Crafting Dust\n` +
+            `Dismantle duplicate cards (\`/card action:dismantle id:<id>\`), clear dungeon floors, and earn 3★ floor clears.\n\n` +
+            `### ⚙️ Crafting Commands\n` +
+            `• Open the crafting menu: \`/craft\` (prefix \`$craft\`, \`$forge\`).\n` +
+            `• Craft directly: \`/craft recipe:<code> quantity:<n>\` (e.g. \`$craft POTION_MAJOR_HP 3\`).\n` +
+            `• Crafted gear goes to your inventory. Equip it with \`/loadout\`.`,
+        )
+        .setFooter({ text: 'Recipes locked? Climb higher in /dungeon to unlock them!' });
 
     case 'tutorial':
       return new EmbedBuilder()
@@ -275,7 +303,8 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
             `### 📑 Available Guides\n` +
             `• 🔰 **Getting Started & First Card**: How to claim your starter pack and chat drops.\n` +
             `• ⚔️ **7-Element Type Advantages**: The affinity wheel, multipliers, and status effects.\n` +
-            `• 🛡️ **Equipments & Accessories**: 6 gear slots, stats, and the +10 enhancement system.\n` +
+            `• 🛡️ **Equipments & Accessories**: 6 gear slots, equipping with \`/loadout\`, and +10 enhancement.\n` +
+            `• 🔨 **Crafting & Forging**: Craft gear and potions from Crafting Dust with \`/craft\`.\n` +
             `• 🏰 **Tutorial vs. S1 Tower**: Why you must start with \`/dungeon tutorial\` before \`/dungeon climb\`.\n` +
             `• 🔥 **Dungeon Tower Mechanics**: S1 Infernal Crucible, energy scaling, and boss enrage.\n` +
             `• 🔄 **P2P Trading System**: Atomic card swaps, \`IN_TRADE\` locking, and dual confirmation.\n` +
@@ -314,9 +343,15 @@ export function buildTcgInfoSelectMenu(currentTopic: TcgInfoTopic = 'overview'):
       new StringSelectMenuOptionBuilder()
         .setLabel('Equipments & +10 Enhancement')
         .setValue('gear')
-        .setDescription('6 gear slots, stat bonuses & refinement')
+        .setDescription('6 gear slots, equipping with /loadout & enhancement')
         .setEmoji('🛡️')
         .setDefault(currentTopic === 'gear'),
+      new StringSelectMenuOptionBuilder()
+        .setLabel('Crafting & Forging')
+        .setValue('crafting')
+        .setDescription('Craft gear & potions from Crafting Dust with /craft')
+        .setEmoji('🔨')
+        .setDefault(currentTopic === 'crafting'),
       new StringSelectMenuOptionBuilder()
         .setLabel('Tutorial vs. S1 Tower')
         .setValue('tutorial')
@@ -365,7 +400,7 @@ export function createTcgInfoCommand(_services: BotServices): Command {
       category: CommandCategory.TCG,
       description: 'Comprehensive Waifu TCG guide: tutorials, type advantages, gear, trading, market, and guilds.',
       aliases: ['tcginfo', 'tcgguide', 'tcg-guide', 'card-guide', 'waifu-guide'],
-      usage: '/tcg-info [topic: overview|starter|elements|gear|tutorial|dungeon|trade|market|guild|achievements]',
+      usage: '/tcg-info [topic: overview|starter|elements|gear|crafting|tutorial|dungeon|trade|market|guild|achievements]',
       examples: [
         '/tcg-info',
         '/tcg-info topic:elements',
@@ -387,6 +422,7 @@ export function createTcgInfoCommand(_services: BotServices): Command {
             { name: 'Getting Started & First Card', value: 'starter' },
             { name: '7-Element Type Advantages', value: 'elements' },
             { name: 'Equipments & +10 Enhancement', value: 'gear' },
+            { name: 'Crafting & Forging', value: 'crafting' },
             { name: 'Tutorial vs. S1 Tower', value: 'tutorial' },
             { name: 'Dungeon Tower Mechanics', value: 'dungeon' },
             { name: 'P2P Trading System', value: 'trade' },
@@ -409,6 +445,7 @@ export function createTcgInfoCommand(_services: BotServices): Command {
         'starter',
         'elements',
         'gear',
+        'crafting',
         'tutorial',
         'dungeon',
         'trade',
