@@ -104,7 +104,9 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
             `Gear is worn by a **card**, not by you. Set your active ⭐ card with \`/card action:equip id:<card_id>\`.\n` +
             `• Open the gear menu: \`/loadout\` (prefix \`$loadout\`, \`$gear\`, \`$equipment\`). Add a card ID to pick a card.\n` +
             `• In the menu, choose a card, then a slot, then an item. Each item shows its stat change (\`ATK +40 ▲\`).\n` +
-            `• Press **Equip**. The old piece goes back to your inventory. **Unequip** and **Enhance** are on the same screen.\n` +
+            `• Press **Equip**. The old piece goes back to your inventory. **Unequip**, **Unequip All** and **Enhance** are on the same screen.\n` +
+            `• Empty a card: \`/card action:unequip-all id:<card_id>\`. Without an ID it empties every card you own.\n` +
+            `• Gear stays yours: only empty cards can be sold or traded, and dismantling a card returns its gear to your inventory.\n` +
             `• Check worn gear: \`/item action:inventory\` tags it \`[EQUIPPED: <SLOT>]\`.\n` +
             `• By ID: \`/card action:equip-gear id:<card_id> item_id:<item_id> slot:<SLOT>\` and \`/card action:unequip-gear item_id:<item_id>\`.`,
         )
@@ -196,7 +198,8 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
             `### 🔒 Safety First: IN_TRADE State Locking\n` +
             `• When a trade is proposed, all offered and requested cards are locked with \`state = 'IN_TRADE'\`.\n` +
             `• Locked cards cannot be sold, dismantled, or offered in other simultaneous trades.\n` +
-            `• If a trade is rejected or cancelled, cards unlock back to \`IDLE\` immediately.\n\n` +
+            `• If a trade is rejected or cancelled, cards unlock back to \`IDLE\` immediately.\n` +
+            `• **Only empty cards can be traded.** Gear never moves with a card. Unequip everything first with \`/card action:unequip-all id:<card_id>\`.\n\n` +
             `### 🤝 How to Trade\n` +
             `1. **Propose a Trade**:\n` +
             `   \`\`\`\n` +
@@ -222,6 +225,7 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
             `### 🏷️ How to List a Card\n` +
             `\`\`\`\n/market action:list card_id:<id> price:<credits>\n\`\`\`\n` +
             `• The card is locked with \`state = 'IN_MARKET'\`.\n` +
+            `• **Only empty cards can be sold.** Gear never moves with a card. Unequip everything first with \`/card action:unequip-all id:<card_id>\` or **Unequip All** in \`/loadout\`.\n` +
             `• Set your own price in Credits.\n\n` +
             `### 🔍 How to Browse\n` +
             `\`\`\`\n/market action:browse page:1 filter_element:ICE filter_rarity:UR\n\`\`\`\n` +

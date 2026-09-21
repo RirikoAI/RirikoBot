@@ -224,6 +224,11 @@ export function buildGearMenuView(state: GearMenuState): {
         .setLabel(enhanceLabel)
         .setStyle(ButtonStyle.Primary)
         .setDisabled(!equipped || !state.enhanceCost),
+      new ButtonBuilder()
+        .setCustomId('gear:unequip_all')
+        .setLabel('Unequip All')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(!ALL_GEAR_SLOTS.some((slot) => slotPiece(state.loadout, slot))),
       new ButtonBuilder().setCustomId('gear:close').setLabel('Close').setStyle(ButtonStyle.Danger),
     ),
   );
@@ -363,6 +368,9 @@ export async function openGearMenu(
         } else if (interaction.customId === 'gear:unequip' && equipped) {
           const result = await services.loadoutService.unequip(userId, equipped.inventoryItem.id);
           notice = `🛡️ Unequipped **${result.unequippedItemName}**.`;
+        } else if (interaction.customId === 'gear:unequip_all') {
+          const result = await services.loadoutService.unequipAll(userId, state.cardId);
+          notice = `🛡️ Unequipped ${result.unequippedItemNames.length} piece(s). This card is empty and can now be sold or traded.`;
         } else if (interaction.customId === 'gear:enhance' && equipped) {
           const result = await enhanceGear(services, userId, equipped.inventoryItem.id, {
             guildId: ctx.guild?.id,

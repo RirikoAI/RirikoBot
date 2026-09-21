@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   createDatabaseClient,
+  UserInventoryItemRepository,
   type SqliteDatabaseClient,
   CardTradeRepository,
   MarketListingRepository,
@@ -18,6 +19,7 @@ describe('TradeService & MarketService (TASK-1051)', () => {
   let economyRepo: EconomyRepository;
   let tradeService: TradeService;
   let marketService: MarketService;
+  let inventoryRepo: UserInventoryItemRepository;
 
   beforeEach(async () => {
     const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
@@ -102,6 +104,20 @@ describe('TradeService & MarketService (TASK-1051)', () => {
         resolved_at INTEGER
       );
 
+      CREATE TABLE user_inventory_items (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        item_id TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        enhancement_level INTEGER NOT NULL DEFAULT 0,
+        equipped_to_card_id TEXT,
+        slot TEXT NOT NULL DEFAULT 'NONE',
+        state TEXT NOT NULL DEFAULT 'IDLE',
+        obtained_from TEXT NOT NULL DEFAULT 'SHOP',
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
       CREATE TABLE market_listings (
         id TEXT PRIMARY KEY,
         seller_user_id TEXT NOT NULL,
@@ -119,8 +135,9 @@ describe('TradeService & MarketService (TASK-1051)', () => {
     cardRepo = new WaifuCardRepository(client);
     economyRepo = new EconomyRepository(client);
 
-    tradeService = new TradeService(tradeRepo, cardRepo, economyRepo, client);
-    marketService = new MarketService(marketRepo, cardRepo, economyRepo, client, {
+    inventoryRepo = new UserInventoryItemRepository(client);
+    tradeService = new TradeService(tradeRepo, cardRepo, economyRepo, client, inventoryRepo);
+    marketService = new MarketService(marketRepo, cardRepo, economyRepo, client, inventoryRepo, {
       marketTaxRate: 0.05,
       listingDurationDays: 7,
     });
@@ -427,6 +444,81 @@ describe('TradeService & MarketService (TASK-1051)', () => {
 
       const updatedCard = await cardRepo.findUserCardById(card.id);
       expect(updatedCard?.state).toBe('IDLE');
+    });
+  });
+
+  describe('Gear lock: only empty cards change hands (BUG-0014)', () => {
+    async function equipGear(userId: string, cardId: string, slot = 'WEAPON') {
+      return inventoryRepo.create({
+        userId,
+        itemId: 'item-blade',
+        quantity: 1,
+        enhancementLevel: 0,
+        equippedToCardId: cardId,
+        slot,
+        state: 'EQUIPPED',
+        obtainedFrom: 'SHOP',
+      });
+    }
+
+    it('refuses to list a card with gear and names the occupied slots', async () => {
+      const card = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
+      await equipGear('user-alice', card.id, 'WEAPON');
+      await equipGear('user-alice', card.id, 'RING');
+
+      await expect(
+        marketService.listCard({ sellerUserId: 'user-alice', userCardId: card.id, price: 1000 }),
+      ).rejects.toThrow(/Flame Dancer .*still has gear equipped in: Weapon, Ring.*unequip-all/);
+      expect((await cardRepo.findUserCardById(card.id))?.state).toBe('IDLE');
+    });
+
+    it('lists the card once its gear is unequipped', async () => {
+      const card = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
+      await equipGear('user-alice', card.id);
+      await inventoryRepo.unequipAllForUser('user-alice', card.id);
+
+      const listing = await marketService.listCard({ sellerUserId: 'user-alice', userCardId: card.id, price: 1000 });
+      expect(listing.status).toBe('ACTIVE');
+    });
+
+    it('refuses a purchase when a listed card still carries gear (listing made before the lock)', async () => {
+      const card = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
+      const listing = await marketService.listCard({ sellerUserId: 'user-alice', userCardId: card.id, price: 1000 });
+      await equipGear('user-alice', card.id);
+
+      await expect(
+        marketService.buyListing({ listingId: listing.id, buyerUserId: 'user-bob' }),
+      ).rejects.toThrow(/still has gear equipped/);
+      expect((await cardRepo.findUserCardById(card.id))?.userId).toBe('user-alice');
+      expect(Number((await economyRepo.findById('user-bob'))?.walletBalance)).toBe(3000);
+    });
+
+    it('refuses to offer or request a card with gear in a trade', async () => {
+      const aliceCard = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
+      const bobCard = await cardRepo.createUserCard({ userId: 'user-bob', cardId: 'base-card-ice', serialNumber: 2 });
+      await equipGear('user-alice', aliceCard.id);
+      await equipGear('user-bob', bobCard.id, 'ARMOR');
+
+      await expect(
+        tradeService.createProposal({ senderUserId: 'user-alice', receiverUserId: 'user-bob', offeredCardIds: [aliceCard.id] }),
+      ).rejects.toThrow(/Flame Dancer .*Weapon.*can be traded/);
+      await expect(
+        tradeService.createProposal({ senderUserId: 'user-alice', receiverUserId: 'user-bob', requestedCardIds: [bobCard.id] }),
+      ).rejects.toThrow(/Requested card Frost Archer .*Armor.*Ask its owner/);
+      expect((await cardRepo.findUserCardById(aliceCard.id))?.state).toBe('IDLE');
+    });
+
+    it('refuses to accept a trade whose card gained gear after the proposal', async () => {
+      const aliceCard = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
+      const trade = await tradeService.createProposal({
+        senderUserId: 'user-alice',
+        receiverUserId: 'user-bob',
+        offeredCardIds: [aliceCard.id],
+      });
+      await equipGear('user-alice', aliceCard.id);
+
+      await expect(tradeService.acceptTrade(trade.id, 'user-bob')).rejects.toThrow(/still has gear equipped/);
+      expect((await cardRepo.findUserCardById(aliceCard.id))?.userId).toBe('user-alice');
     });
   });
 });

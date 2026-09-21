@@ -648,4 +648,53 @@ export class UserInventoryItemRepository extends BaseRepository<
       );
     });
   }
+
+  /**
+   * Unequips every piece a user has equipped, on one card or (without `cardId`) on any card,
+   * including cards the user no longer owns. Returns the rows that were unequipped.
+   */
+  async unequipAllForUser(
+    userId: string,
+    cardId?: string | undefined,
+    tx?: DatabaseClient,
+  ): Promise<UserInventoryItem[]> {
+    const client = this.getClient(tx);
+    const updateData = { equippedToCardId: null, slot: 'NONE', state: 'IDLE', updatedAt: new Date() };
+    try {
+      if (this.isSqlite(client)) {
+        const t = sqliteSchema.userInventoryItems;
+        const rows = await client.db
+          .update(t)
+          .set(updateData)
+          .where(
+            and(
+              eq(t.userId, userId),
+              eq(t.state, 'EQUIPPED'),
+              cardId ? eq(t.equippedToCardId, cardId) : undefined,
+            ),
+          )
+          .returning();
+        return rows as UserInventoryItem[];
+      } else {
+        const t = pgSchema.userInventoryItems;
+        const rows = await client.db
+          .update(t)
+          .set(updateData)
+          .where(
+            and(
+              eq(t.userId, userId),
+              eq(t.state, 'EQUIPPED'),
+              cardId ? eq(t.equippedToCardId, cardId) : undefined,
+            ),
+          )
+          .returning();
+        return rows as unknown as UserInventoryItem[];
+      }
+    } catch (error) {
+      throw new DatabaseError(
+        `Failed to unequip gear: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error instanceof Error ? error : undefined },
+      );
+    }
+  }
 }

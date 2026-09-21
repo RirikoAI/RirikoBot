@@ -334,11 +334,16 @@ In seasons, off-element strikes chip elemental wards at 25%. Matching the ward's
 - **Dual Confirmation**: Both parties must inspect the full trade proposal (cards + items + offered credits) and click
   `[Confirm Trade]`.
 - **Atomic Transfer**: All card and item ownership updates and coin transfers occur inside a single ACID database transaction.
+- **Empty Cards Only**: Gear never moves with a card. A card can only be offered, requested or accepted in a trade when
+  all 6 gear slots are empty. The check runs again inside the transfer transaction.
 
 ### 8.2. Community Player Marketplace (`/game market`)
 
 - Players can list idle cards and tradeable equipment for sale at a custom credit price.
 - **Listing Lock**: Listed assets enter `state = 'IN_MARKET'`.
+- **Empty Cards Only**: A card with any gear equipped can't be listed or bought. Players empty a card with
+  `/card unequip-all <card_id>` or the **Unequip All** button in `/loadout`. Dismantling a card returns its gear to the
+  inventory instead of deleting it.
 - **Market Tax**: Configurable listing fee (e.g. 5% coin sink) deducted upon listing or sale to control bot economy
   inflation.
 - **Expiration**: Unsold listings expire automatically after 7 days, returning the asset to the seller's inventory.
