@@ -80,6 +80,13 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
       const buttonRow = components[1]?.toJSON() as { components: { url?: string }[] };
       expect(buttonRow.components[0]?.url).toBe('https://ririko.ai/dashboard');
     });
+
+    it('uses dynamic server prefix in description and footer when provided', () => {
+      const { embed } = HelpGenerator.generateHomeView(registry, { defaultPrefix: '!' }, '$');
+      const data = embed.toJSON();
+      expect(data.description).toContain('`$`');
+      expect(data.footer?.text).toContain('Prefix: $');
+    });
   });
 
   describe('HelpGenerator.generateCategoryView', () => {
@@ -103,6 +110,43 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
       expect(buttonRow.components[0]?.disabled).toBe(true); // prev
       expect(buttonRow.components[1]?.custom_id).toBe('help:home'); // home
       expect(buttonRow.components[2]?.disabled).toBe(true); // next
+    });
+
+    it('uses dynamic server prefix for command syntax and footer', () => {
+      const { embed } = HelpGenerator.generateCategoryView(
+        registry,
+        CommandCategory.MUSIC,
+        1,
+        { defaultPrefix: '!' },
+        '$',
+      );
+      const data = embed.toJSON();
+      const playField = data.fields?.find((f) => f.name.includes('/play'));
+      expect(playField?.name).toContain('(Prefix: `$play`, Aliases: `$p-music`)');
+      expect(data.footer?.text).toContain('Prefix: $');
+    });
+
+    it('displays prefix syntax for commands without aliases', () => {
+      const noAliasCmd: Command = {
+        metadata: {
+          name: 'volume',
+          category: CommandCategory.MUSIC,
+          description: 'Adjust audio playback volume',
+        },
+        execute: vi.fn(),
+      };
+      registry.register(noAliasCmd);
+
+      const { embed } = HelpGenerator.generateCategoryView(
+        registry,
+        CommandCategory.MUSIC,
+        1,
+        {},
+        '?',
+      );
+      const data = embed.toJSON();
+      const volField = data.fields?.find((f) => f.name.includes('/volume'));
+      expect(volField?.name).toBe('`/volume` (Prefix: `?volume`)');
     });
   });
 
@@ -137,6 +181,25 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
       };
       expect(buttonRow.components.some((b) => b.custom_id === 'help:home')).toBe(true);
       expect(buttonRow.components.some((b) => b.url?.includes('/modules/music'))).toBe(true);
+    });
+
+    it('formats examples and syntax with dynamic server prefix instead of hardcoding !', () => {
+      const { embed } = HelpGenerator.generateCommandDetailView(
+        playCmd,
+        { defaultPrefix: '!' },
+        '?',
+      );
+      const data = embed.toJSON();
+      const syntaxField = data.fields?.find((f) => f.name === 'Syntax');
+      expect(syntaxField?.value).toContain('?play <query>');
+
+      const aliasesField = data.fields?.find((f) => f.name === 'Aliases');
+      expect(aliasesField?.value).toContain('`?p-music`');
+
+      const examplesField = data.fields?.find((f) => f.name === 'Examples');
+      expect(examplesField?.value).toContain('`/play query:YOASOBI`');
+      expect(examplesField?.value).toContain('`?play "Idol"`');
+      expect(examplesField?.value).not.toContain('!play');
     });
   });
 
@@ -199,6 +262,53 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
         ephemeral: true,
       });
     });
+
+    it('resolves active server prefix via resolvePrefix callback', async () => {
+      const resolvePrefix = vi.fn().mockResolvedValue('~');
+      const helpCmd = createHelpCommand(registry, { resolvePrefix });
+      const mockReply = vi.fn().mockResolvedValue(undefined);
+
+      const ctx = {
+        guildId: 'guild-123',
+        source: 'slash',
+        options: {
+          getString: vi.fn().mockReturnValue(null),
+        },
+        reply: mockReply,
+      } as unknown as CommandContext;
+
+      await helpCmd.execute(ctx);
+
+      expect(resolvePrefix).toHaveBeenCalledWith('guild-123');
+      const callArg = mockReply.mock.calls[0]![0] as {
+        embeds: { toJSON: () => { description: string; footer: { text: string } } }[];
+      };
+      expect(callArg.embeds[0]!.toJSON().description).toContain('`~`');
+      expect(callArg.embeds[0]!.toJSON().footer.text).toContain('Prefix: ~');
+    });
+
+    it('uses invokedPrefix when executed via prefix command', async () => {
+      const helpCmd = createHelpCommand(registry, { defaultPrefix: '!' });
+      const mockReply = vi.fn().mockResolvedValue(undefined);
+
+      const ctx = {
+        guildId: null,
+        source: 'prefix',
+        invokedPrefix: '$',
+        options: {
+          getString: vi.fn().mockReturnValue('play'),
+        },
+        reply: mockReply,
+      } as unknown as CommandContext;
+
+      await helpCmd.execute(ctx);
+
+      const callArg = mockReply.mock.calls[0]![0] as {
+        embeds: { toJSON: () => { fields: { name: string; value: string }[] } }[];
+      };
+      const syntax = callArg.embeds[0]!.toJSON().fields.find((f) => f.name === 'Syntax');
+      expect(syntax?.value).toContain('$play <query>');
+    });
   });
 
   describe('handleHelpInteraction', () => {
@@ -257,6 +367,30 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
 
       const handled = await handleHelpInteraction(mockUnrelated, registry);
       expect(handled).toBe(false);
+    });
+
+    it('uses resolvePrefix callback for interaction in a guild', async () => {
+      const mockUpdate = vi.fn().mockResolvedValue(undefined);
+      const mockSelectInteraction = {
+        isStringSelectMenu: () => true,
+        isButton: () => false,
+        customId: 'help:category:select',
+        values: [CommandCategory.MUSIC],
+        guildId: 'guild-abc',
+        update: mockUpdate,
+      } as unknown as StringSelectMenuInteraction;
+
+      const resolvePrefix = vi.fn().mockResolvedValue('.');
+      const handled = await handleHelpInteraction(mockSelectInteraction, registry, {
+        resolvePrefix,
+      });
+
+      expect(handled).toBe(true);
+      expect(resolvePrefix).toHaveBeenCalledWith('guild-abc');
+      const callArg = mockUpdate.mock.calls[0]![0] as {
+        embeds: { toJSON: () => { footer: { text: string } } }[];
+      };
+      expect(callArg.embeds[0]!.toJSON().footer.text).toContain('Prefix: .');
     });
   });
 });

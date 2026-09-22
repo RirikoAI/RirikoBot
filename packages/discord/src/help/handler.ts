@@ -13,6 +13,10 @@ export async function handleHelpInteraction(
   registry: CommandRegistry,
   options: HelpOptions = {},
 ): Promise<boolean> {
+  const resolvedPrefix = options.resolvePrefix
+    ? await options.resolvePrefix(interaction.guildId ?? interaction.guild?.id)
+    : (options.defaultPrefix ?? '!');
+
   // 1. Handle Category Select Menu
   if (interaction.isStringSelectMenu() && interaction.customId === 'help:category:select') {
     const selectedCategory = interaction.values[0] as CommandCategory | undefined;
@@ -25,6 +29,7 @@ export async function handleHelpInteraction(
       selectedCategory,
       1,
       options,
+      resolvedPrefix,
     );
 
     await interaction.update({ embeds: [embed], components });
@@ -35,7 +40,11 @@ export async function handleHelpInteraction(
   if (interaction.isButton()) {
     // 2.1 Return to Home View
     if (interaction.customId === 'help:home') {
-      const { embed, components } = HelpGenerator.generateHomeView(registry, options);
+      const { embed, components } = HelpGenerator.generateHomeView(
+        registry,
+        options,
+        resolvedPrefix,
+      );
       await interaction.update({ embeds: [embed], components });
       return true;
     }
@@ -58,6 +67,7 @@ export async function handleHelpInteraction(
         category,
         page,
         options,
+        resolvedPrefix,
       );
 
       await interaction.update({ embeds: [embed], components });
@@ -77,6 +87,7 @@ export async function handleHelpInteraction(
         category,
         1,
         options,
+        resolvedPrefix,
       );
 
       await interaction.update({ embeds: [embed], components });
