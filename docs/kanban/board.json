@@ -133,7 +133,7 @@
       "id": "EPIC-014",
       "title": "Server Utilities, AutoRoles & Community Systems",
       "points": 21,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
       "description": "Automatic role system & reaction roles (join/button/select-menu), persistent NLP reminders, anime/manga search engine, and server utility commands parity."
@@ -665,9 +665,9 @@
     {
       "id": "STORY-143",
       "epic": "EPIC-014",
-      "title": "Server Utility & Identity Commands Parity (/get-avatar, /guild-info, /member-info, /prefix)",
-      "points": 2,
-      "status": "BACKLOG",
+      "title": "Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone)",
+      "points": 5,
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -2070,6 +2070,36 @@
       "requires": [],
       "blocks": [],
       "description": "Ungroomed. card.command.ts falls back to 'collection' for any unrecognised first argument, so a typo like '!card gears' shows the collection instead of an error. Reply with the valid actions (or a did-you-mean) when the first argument is present but unknown."
+    },
+    {
+      "id": "TASK-1431",
+      "title": "GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-143",
+      "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["TASK-1432", "TASK-1433"],
+      "description": "In-memory cached GuildSettingsService wrapping guildSettingsRepo with TTL to eliminate DB queries on messages, plus resolveUserTimeZone and resolveGuildTimeZone fallback."
+    },
+    {
+      "id": "TASK-1432",
+      "title": "Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-143",
+      "requires": ["TASK-1431"],
+      "blocks": [],
+      "description": "Dual-dispatch /prefix and /timezone commands with ManageGuild permission checks, IANA timezone validation, and server/user scope support."
+    },
+    {
+      "id": "TASK-1433",
+      "title": "Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting",
+      "points": 1,
+      "status": "DONE",
+      "parent": "STORY-143",
+      "requires": ["TASK-1431"],
+      "blocks": [],
+      "description": "Dual-dispatch server utility and identity commands with rich embeds, Discord timestamp chips, and server local time representations."
     }
   ]
 }

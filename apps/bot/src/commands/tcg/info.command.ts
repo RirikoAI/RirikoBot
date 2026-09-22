@@ -25,7 +25,7 @@ export type TcgInfoTopic =
   | 'guild'
   | 'achievements';
 
-export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
+export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): EmbedBuilder {
   switch (topic) {
     case 'starter':
       return new EmbedBuilder()
@@ -35,14 +35,14 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
           `Welcome to the Waifu TCG! Before fighting in battles, you need at least **one combat card**.\n\n` +
             `### 1. The Instant Starter Kit (Best First Step!)\n` +
             `Run the Prologue Tutorial:\n` +
-            `\`\`\`\n/dungeon action:tutorial\n# or: $dungeon tutorial\n\`\`\`\n` +
+            `\`\`\`\n/dungeon action:tutorial\n# or: ${prefix}dungeon tutorial\n\`\`\`\n` +
             `• **Free Starter Card**: If you don't have any cards, Ririko will immediately grant you a starter card!\n` +
             `• **Novice Blade**: +15 ATK weapon gear.\n` +
             `• **3x Minor HP Potions**: Restore 150 HP each.\n` +
             `• **TUTORIAL_COMPLETE Achievement**: Grants +100 EXP & +250 Credits!\n\n` +
             `### 2. Chat Drops (Free Cards Just for Chatting!)\n` +
             `• Cards drop randomly into active server chat channels.\n` +
-            `• When a card appears, type \`/card action:claim\` or \`$card claim\` to claim it!\n` +
+            `• When a card appears, type \`/card action:claim\` or \`${prefix}card claim\` to claim it!\n` +
             `• Follows 8 rarity tiers: Common (50%), Uncommon (25%), Rare (12%), Super Rare (7%), Ultra Rare (4%), Secret Rare (1.5%), SIR (0.45%), Mythic (0.05%).\n\n` +
             `### 3. Community Marketplace\n` +
             `• Buy cards listed by other players with \`/market action:browse\` and \`/market action:buy\`!`,
@@ -102,7 +102,7 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
             `• \`+10 Masterwork\`: Unlocks radiant aura and card passive boosts!\n\n` +
             `### ⚙️ Equipping Gear\n` +
             `Gear is worn by a **card**, not by you. Set your active ⭐ card with \`/card action:equip id:<card_id>\`.\n` +
-            `• Open the gear menu: \`/loadout\` (prefix \`$loadout\`, \`$gear\`, \`$equipment\`). Add a card ID to pick a card.\n` +
+            `• Open the gear menu: \`/loadout\` (prefix \`${prefix}loadout\`, \`${prefix}gear\`, \`${prefix}equipment\`). Add a card ID to pick a card.\n` +
             `• In the menu, choose a card, then a slot, then an item. Each item shows its stat change (\`ATK +40 ▲\`).\n` +
             `• Press **Equip**. The old piece goes back to your inventory. **Unequip**, **Unequip All** and **Enhance** are on the same screen.\n` +
             `• Empty a card: \`/card action:unequip-all id:<card_id>\`. Without an ID it empties every card you own.\n` +
@@ -130,8 +130,8 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic): EmbedBuilder {
             `### 🧪 Getting Crafting Dust\n` +
             `Dismantle duplicate cards (\`/card action:dismantle id:<id>\`), clear dungeon floors, and earn 3★ floor clears.\n\n` +
             `### ⚙️ Crafting Commands\n` +
-            `• Open the crafting menu: \`/craft\` (prefix \`$craft\`, \`$forge\`).\n` +
-            `• Craft directly: \`/craft recipe:<code> quantity:<n>\` (e.g. \`$craft POTION_MAJOR_HP 3\`).\n` +
+            `• Open the crafting menu: \`/craft\` (prefix \`${prefix}craft\`, \`${prefix}forge\`).\n` +
+            `• Craft directly: \`/craft recipe:<code> quantity:<n>\` (e.g. \`${prefix}craft POTION_MAJOR_HP 3\`).\n` +
             `• Crafted gear goes to your inventory. Equip it with \`/loadout\`.`,
         )
         .setFooter({ text: 'Recipes locked? Climb higher in /dungeon to unlock them!' });
@@ -397,7 +397,7 @@ export function buildTcgInfoSelectMenu(currentTopic: TcgInfoTopic = 'overview'):
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 }
 
-export function createTcgInfoCommand(_services: BotServices): Command {
+export function createTcgInfoCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'tcg-info',
@@ -462,7 +462,14 @@ export function createTcgInfoCommand(_services: BotServices): Command {
         ? (topicInput as TcgInfoTopic)
         : 'overview';
 
-      const embed = buildTcgInfoEmbed(topic);
+      const prefix =
+        ctx.invokedPrefix && ctx.invokedPrefix !== '/'
+          ? ctx.invokedPrefix
+          : ctx.guildId
+            ? await services.guildSettingsService.getPrefix(ctx.guildId)
+            : (process.env.DEFAULT_PREFIX || '$');
+
+      const embed = buildTcgInfoEmbed(topic, prefix);
       const row = buildTcgInfoSelectMenu(topic);
 
       const response = await ctx.reply({
@@ -487,7 +494,7 @@ export function createTcgInfoCommand(_services: BotServices): Command {
           }
 
           const selected = interaction.values[0] as TcgInfoTopic;
-          const updatedEmbed = buildTcgInfoEmbed(selected);
+          const updatedEmbed = buildTcgInfoEmbed(selected, prefix);
           const updatedRow = buildTcgInfoSelectMenu(selected);
 
           await interaction.update({
