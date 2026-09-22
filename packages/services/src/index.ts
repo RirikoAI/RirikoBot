@@ -9,3 +9,4 @@ export * from './waifu-tcg/index.js';
 export * from './roles/index.js';
 export * from './http/index.js';
 export * from './anime/index.js';
+export * from './reminders/index.js';

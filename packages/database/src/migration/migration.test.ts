@@ -224,7 +224,8 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
         ('msg_roles', '⭐', 'role_vip', 'guild_alpha');
 
       INSERT INTO reminder (id, userId, channelId, guildId, message, scheduledTime, sent, createdAt, updatedAt) VALUES
-        ('rem_1', 'user_alice', 'chan_general', 'guild_alpha', 'Meeting in 1h', '${nowIso}', 0, '${nowIso}', '${nowIso}');
+        ('rem_1', 'user_alice', 'chan_general', 'guild_alpha', 'Meeting in 1h', '${nowIso}', 0, '${nowIso}', '${nowIso}'),
+        ('rem_2', 'user_alice', 'dm_channel', 'DM', 'Water plants', '${nowIso}', 1, '${nowIso}', '${nowIso}');
 
       INSERT INTO free_game_notification (gameId, gameName, source, notified, guildId, createdAt, updatedAt) VALUES
         ('epic_game_99', 'Awesome Free Game', 'EPIC', 1, 'guild_alpha', '${nowIso}', '${nowIso}');
@@ -338,8 +339,10 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       expect(data.reactionRoles[0]?.emojiOrComponentId).toBe('⭐');
 
       // 9. Reminders
-      expect(data.reminders.length).toBe(1);
-      expect(data.reminders[0]?.message).toBe('Meeting in 1h');
+      expect(data.reminders.length).toBe(2);
+      expect(data.reminders[0]).toMatchObject({ message: 'Meeting in 1h', guildId: 'guild_alpha', isCompleted: false });
+      // 1.4.0 stored the literal 'DM' as the guild of direct-message reminders.
+      expect(data.reminders[1]).toMatchObject({ message: 'Water plants', guildId: null, isCompleted: true });
 
       // 10. Free Game Announcements
       expect(data.freeGameAnnouncements.length).toBe(1);

@@ -276,6 +276,9 @@ importers:
       '@ririko/database':
         specifier: workspace:*
         version: link:../database
+      chrono-node:
+        specifier: ^2.10.1
+        version: 2.10.1
       discord.js:
         specifier: ^14.27.0
         version: 14.27.0
@@ -1396,6 +1399,10 @@ packages:
   chai@6.2.2:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
     engines: {node: '>=18'}
+
+  chrono-node@2.10.1:
+    resolution: {integrity: sha512-tPOsBzYVAK5zth+CiHCgp5NGeqRc4mMD8FPthQ5IxkgjPWWxIFdM5odnmfw//IRAzl6C++Xy8olQW7wn5qBR1g==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   commander@13.1.0:
     resolution: {integrity: sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==}
@@ -3354,6 +3361,8 @@ snapshots:
       qified: 0.10.1
 
   chai@6.2.2: {}
+
+  chrono-node@2.10.1: {}
 
   commander@13.1.0: {}
 

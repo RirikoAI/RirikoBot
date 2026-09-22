@@ -144,36 +144,39 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
   });
 
   describe('4. ReminderTool (reminders.create)', () => {
-    const reminderTool = new ReminderTool();
+    it('schedules through the injected scheduler and reports a Discord timestamp', async () => {
+      const scheduler = vi.fn(async () => ({
+        message: 'Check laundry',
+        triggerAt: new Date('2026-09-22T12:15:00Z'),
+      }));
+      const tool = new ReminderTool(scheduler);
 
-    it.each([
-      ['10s', 10 * 1000, '10 seconds'],
-      ['5m', 5 * 60 * 1000, '5 minutes'],
-      ['2h', 2 * 3600 * 1000, '2 hours'],
-      ['1d', 86400 * 1000, '1 day'],
-    ])('parses duration %s into correct milliseconds (%i)', (input, expectedMs, expectedDesc) => {
-      const parsed = reminderTool.parseDuration(input);
-      expect(parsed.ms).toBe(expectedMs);
-      expect(parsed.description).toBe(expectedDesc);
+      const result = await tool.execute({ timeString: '15m', message: 'Check laundry' }, baseContext);
+
+      expect(scheduler).toHaveBeenCalledWith({ timeString: '15m', message: 'Check laundry' }, baseContext);
+      expect(result).toEqual({
+        scheduled: true,
+        message: 'Check laundry',
+        triggerTimeIso: '2026-09-22T12:15:00.000Z',
+        relativeDescription: '<t:1790079300:R>, <t:1790079300:f>',
+      });
     });
 
-    it('schedules reminder with accurate trigger timestamp', async () => {
-      const before = Date.now();
-      const result = await reminderTool.execute(
-        { timeString: '15m', message: 'Check laundry' },
-        baseContext,
-      );
+    it('reports the user-facing reason when scheduling fails', async () => {
+      const tool = new ReminderTool(async () => {
+        throw Object.assign(new Error('past'), { userMessage: 'That time is in the past.' });
+      });
+      const result = await tool.execute({ timeString: 'yesterday', message: 'x' }, baseContext);
+      expect(result).toMatchObject({ scheduled: false, error: 'That time is in the past.' });
+    });
 
-      expect(result.scheduled).toBe(true);
-      expect(result.message).toBe('Check laundry');
-      expect(result.relativeDescription).toBe('in 15 minutes');
-
-      const triggerMs = new Date(result.triggerTimeIso).getTime();
-      expect(triggerMs).toBeGreaterThanOrEqual(before + 15 * 60 * 1000 - 50);
-      expect(triggerMs).toBeLessThanOrEqual(Date.now() + 15 * 60 * 1000 + 50);
+    it('never claims success without a scheduler', async () => {
+      const result = await new ReminderTool().execute({ timeString: '15m', message: 'x' }, baseContext);
+      expect(result.scheduled).toBe(false);
     });
 
     it('validates schema requirements', () => {
+      const reminderTool = new ReminderTool();
       expect(() => reminderTool.schema.parse({ timeString: '' })).toThrow();
       expect(() => reminderTool.schema.parse({ timeString: '10m', message: '' })).toThrow();
     });

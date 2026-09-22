@@ -648,8 +648,8 @@
       "id": "STORY-141",
       "epic": "EPIC-014",
       "title": "Persistent Natural Language Reminders Engine & Chrono Scheduler",
-      "points": 3,
-      "status": "BACKLOG",
+      "points": 5,
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -1750,6 +1750,33 @@
       "points": 1,
       "status": "DONE",
       "requires": ["TASK-1404"],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1411",
+      "parent": "STORY-141",
+      "title": "Reminder Repository (Dual-Dialect, Atomic Claim) & Legacy DM Guild Migration Fix",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["EPIC-002"],
+      "blocks": ["TASK-1412"]
+    },
+    {
+      "id": "TASK-1412",
+      "parent": "STORY-141",
+      "title": "ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-1411"],
+      "blocks": ["TASK-1413"]
+    },
+    {
+      "id": "TASK-1413",
+      "parent": "STORY-141",
+      "title": "/reminder Command (Set, List, Cancel, Timezone) with Prefix Parity & Real AI reminders.create Tool",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1412"],
       "blocks": []
     },
     {

@@ -8,16 +8,26 @@ export const ReminderCreateArgsSchema = z.object({
 
 export type ReminderCreateArgs = z.infer<typeof ReminderCreateArgsSchema>;
 
+/**
+ * Injected by the host app (the bot wires `ReminderService` from @ririko/services). Resolves the
+ * stored reminder, or throws with a user-facing reason (invalid time, limit reached, ...).
+ */
+export type ReminderToolScheduler = (
+  args: ReminderCreateArgs,
+  context: ToolExecutionContext,
+) => Promise<{ message: string; triggerAt: Date }>;
+
 export class ReminderTool implements SafeTool<ReminderCreateArgs, ReminderCreateResult> {
   readonly definition = {
     name: 'reminders.create',
-    description: 'Schedules a personal reminder for the user after a given time duration (e.g. "10m", "2h", "30 minutes", "1 day").',
+    description:
+      'Schedules a personal reminder for the user. Accepts relative or natural times (e.g. "10m", "2 hours", "tomorrow 9am", "next friday at 8pm") in the user timezone.',
     parameters: {
       type: 'object',
       properties: {
         timeString: {
           type: 'string',
-          description: 'Duration string specifying when to send the reminder (e.g. "10m", "2 hours", "1d", "45s").',
+          description: 'When to remind, e.g. "10m", "2 hours", "tomorrow 9am", "next friday at 8pm".',
         },
         message: {
           type: 'string',
@@ -31,43 +41,36 @@ export class ReminderTool implements SafeTool<ReminderCreateArgs, ReminderCreate
   readonly schema = ReminderCreateArgsSchema;
   readonly moduleName = 'utilities';
 
-  /**
-   * Parses basic human durations into milliseconds.
-   */
-  parseDuration(input: string): { ms: number; description: string } {
-    const text = input.trim().toLowerCase();
+  private readonly scheduler?: ReminderToolScheduler | undefined;
 
-    // Regex for numbers + unit
-    const match = text.match(/^(\d+(?:\.\d+)?)\s*(s(?:ec(?:ond)?s?)?|m(?:in(?:ute)?s?)?|h(?:(?:ou)?rs?)?|d(?:ays?)?)$/);
-    if (match && match[1] && match[2]) {
-      const value = parseFloat(match[1]);
-      const unit = match[2][0];
-
-      switch (unit) {
-        case 's':
-          return { ms: value * 1000, description: `${value} second${value === 1 ? '' : 's'}` };
-        case 'm':
-          return { ms: value * 60 * 1000, description: `${value} minute${value === 1 ? '' : 's'}` };
-        case 'h':
-          return { ms: value * 3600 * 1000, description: `${value} hour${value === 1 ? '' : 's'}` };
-        case 'd':
-          return { ms: value * 86400 * 1000, description: `${value} day${value === 1 ? '' : 's'}` };
-      }
-    }
-
-    // Default fallback: 10 minutes
-    return { ms: 10 * 60 * 1000, description: '10 minutes' };
+  constructor(scheduler?: ReminderToolScheduler) {
+    this.scheduler = scheduler;
   }
 
-  async execute(args: ReminderCreateArgs, _context: ToolExecutionContext): Promise<ReminderCreateResult> {
-    const { ms, description } = this.parseDuration(args.timeString);
-    const triggerTime = new Date(Date.now() + ms);
+  async execute(args: ReminderCreateArgs, context: ToolExecutionContext): Promise<ReminderCreateResult> {
+    if (!this.scheduler) {
+      return this.failed(args, 'Reminders are not available right now.');
+    }
+    try {
+      const { message, triggerAt } = await this.scheduler(args, context);
+      const unix = Math.floor(triggerAt.getTime() / 1000);
+      return {
+        scheduled: true,
+        message,
+        triggerTimeIso: triggerAt.toISOString(),
+        // Discord renders this in each reader's own timezone.
+        relativeDescription: `<t:${unix}:R>, <t:${unix}:f>`,
+      };
+    } catch (err) {
+      const reason =
+        err && typeof err === 'object' && 'userMessage' in err && typeof err.userMessage === 'string'
+          ? err.userMessage
+          : 'The reminder could not be saved.';
+      return this.failed(args, reason);
+    }
+  }
 
-    return {
-      scheduled: true,
-      message: args.message,
-      triggerTimeIso: triggerTime.toISOString(),
-      relativeDescription: `in ${description}`,
-    };
+  private failed(args: ReminderCreateArgs, reason: string): ReminderCreateResult {
+    return { scheduled: false, message: args.message, triggerTimeIso: '', relativeDescription: '', error: reason };
   }
 }
