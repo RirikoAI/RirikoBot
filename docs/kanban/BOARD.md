@@ -6,7 +6,9 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress.*
+| ID | Type | Title | Pts | Parent | Branch |
+|---|---|---|---|---|---|
+| `TASK-1412` | Task | ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery | 2 | `STORY-141` | `feat/STORY-141-reminders` |
 
 ---
 
@@ -328,7 +330,7 @@
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 3 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | ⚡ In Progress | `EPIC-002`, `EPIC-003` |
 | `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 3 | `EPIC-014` | 📋 Backlog | `EPIC-003` |
 | `STORY-143` | Story | Server Utility & Identity Commands Parity (/get-avatar, /guild-info, /member-info, /prefix) | 2 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
 
