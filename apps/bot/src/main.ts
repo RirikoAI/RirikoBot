@@ -26,6 +26,7 @@ import {
   createTcgAdminCommand,
   createTcgInfoCommand,
   createRoleCommands,
+  createAnimeCommands,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -175,6 +176,10 @@ export async function main(): Promise<void> {
 
   const roleCommands = createRoleCommands(services);
   for (const cmd of roleCommands) {
+    router.registry.register(cmd);
+  }
+
+  for (const cmd of createAnimeCommands(services)) {
     router.registry.register(cmd);
   }
 

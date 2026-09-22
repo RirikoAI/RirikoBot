@@ -233,3 +233,43 @@ Selecting a specific command displays:
     10. `guild`: WaifuGuild factions, leveling, and vaults.
     11. `achievements`: 6 tracks, 5 tiers, and multi-asset rewards.
 
+
+## 6. Anime & Manga Commands (`anime` category)
+
+### 6.1. Search Commands (`/anime`, `/manga`, `/anime-character`)
+- `/anime search:<title>` (Prefix: `!anime <title>`)
+- `/manga search:<title>` (Prefix: `!manga <title>`)
+- `/anime-character search:<name>` (Prefix: `!anime-character <name>`, `!character <name>`)
+  - Flow: search, then a `StringSelectMenu` with up to 10 results, then a detail embed. The menu stays under the detail embed so the invoker can pick another result. Only the invoker can use the menu. It is removed after 2 minutes without use.
+  - Data source: MyAnimeList (through Jikan v4) answers first, to keep 1.4.0 parity. If Jikan fails, AniList answers, and Jikan is skipped for 60 seconds so an outage does not slow every search. The embed author line names the source that answered.
+  - Anime and manga detail fields: score, episodes or chapters/volumes, popularity (MAL rank or AniList member count), type, status, genres, start and end dates, age rating (MAL only), studios and producers (anime) or authors and serialization (manga).
+  - Character detail fields: Japanese name, description, nicknames, favourites, anime, manga, and Japanese voice actors.
+  - Adult entries are excluded unless the channel is age-restricted. Search results are cached in memory for 10 minutes.
+  - Service: `AnimeSearchService` in `packages/services/src/anime`, exposed as `services.animeSearchService`.
+
+### 6.2. Waifu Images (`/waifu`)
+- `/waifu` (Prefix: `!waifu`)
+  - Sends a random SFW image from waifu.im (`/images` endpoint, API v7). The embed matches 1.4.0: tags, favorite count, and the artist with a link. The footer points to `/tcg-info`.
+  - **Another one** button: regenerates the image. Only the invoker can use it. The bot asks for 10 random images and prefers one the user has not seen yet, because waifu.im repeats its random pick for a few seconds.
+  - Uses the `waifu` tag. 1.4.0 used `selfies`, but only 3 SFW images carry that tag today.
+
+### 6.3. Anime Wallpapers (`/wallpaper`)
+- `/wallpaper search:<keyword>` (Prefix: `!wallpaper <keyword>`, `!wallpapers`)
+  - Same interactive flow as 1.4.0:
+    1. A menu to pick a source.
+    2. 3 random wallpapers from that source.
+    3. A menu with **Load another wallpaper**, **Select another source**, and **No, I am done**.
+  - Improvements over 1.4.0:
+    - One message is edited in place instead of stacking follow-up menus.
+    - Wallpapers already shown are never repeated, and the next page is fetched only when needed.
+    - A failing source leads back to the source menu with an explanation.
+    - Only the invoker can use the menus.
+  - Sources: all three use documented JSON APIs and are SFW-only.
+    - **WallHaven** (anime category, SFW purity).
+    - **Zerochan** (JSON API, identifying User-Agent).
+    - **Konachan** (konachan.net, `rating:safe`).
+  - Dropped 1.4.0 sources:
+    - Wallpapers.com: no API, and its search pages mix unrelated images.
+    - MoeWalls: behind a Cloudflare challenge.
+    - Pinterest: rejects API requests.
+  - Service: `WallpaperService` (`packages/services/src/anime/wallpaper.service.ts`), exposed as `services.wallpaperService`.

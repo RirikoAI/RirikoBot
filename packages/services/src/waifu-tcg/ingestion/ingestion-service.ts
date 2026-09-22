@@ -1,7 +1,7 @@
 import type { WaifuAssetRepository } from '@ririko/database';
-import type { WaifuImClient } from './waifu-im.client.js';
+import type { WaifuImClient, WaifuImImage, WaifuImSearchOptions } from '../../anime/waifu-im.client.js';
 import type { ImageValidator } from './image-validator.js';
-import type { IngestionResult, WaifuImSearchOptions } from '../types.js';
+import type { IngestionResult } from '../types.js';
 import { CANONICAL_SEED_ASSETS, createMockPngBuffer } from './seed-assets.js';
 
 export interface IngestionServiceOptions {
@@ -82,11 +82,11 @@ export class IngestionService {
 
     for (const image of images) {
       try {
-        const imageUrl = image.url || image.image;
+        const imageUrl = image.url;
         if (!imageUrl) {
           results.push({
             success: false,
-            reason: `No image URL found for asset ${image.image_id}`,
+            reason: `No image URL found for asset ${image.id}`,
           });
           continue;
         }
@@ -114,10 +114,10 @@ export class IngestionService {
           continue;
         }
 
-        const metadata = this.client.extractMetadata(image);
+        const metadata = extractWaifuImMetadata(image);
         const asset = await this.assetRepo.create({
           sourceId: 'WAIFU_IM',
-          sourceImageId: String(image.image_id),
+          sourceImageId: String(image.id),
           characterName: metadata.characterName,
           animeTitle: metadata.animeTitle,
           imageHash: validation.hash,
@@ -141,4 +141,25 @@ export class IngestionService {
 
     return results;
   }
+}
+
+/**
+ * Derives a card name from waifu.im tags. waifu.im tags are mostly generic (`maid`, `waifu`);
+ * character tags such as `rem` or `raiden-shogun` become the name when present.
+ */
+export function extractWaifuImMetadata(image: WaifuImImage): {
+  characterName: string;
+  animeTitle: string;
+  tags: string[];
+} {
+  const tags = image.tags.map((t) => t.slug);
+  const generic = /maid|waifu|uniform|selfies/i;
+  const characterTag = tags.find((tag) => !generic.test(tag));
+  const characterName = characterTag
+    ? characterTag
+        .split(/[-_]/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ')
+    : `Waifu #${String(image.id).slice(-4)}`;
+  return { characterName, animeTitle: 'Anime Collection', tags };
 }
