@@ -32,6 +32,12 @@ export const CATEGORY_INFO: Record<CommandCategory, CategoryInfo> = {
     emoji: '🎴',
     description: 'Card collecting, trading, marketplace, combat dungeons, and waifuguilds',
   },
+  anime: {
+    id: 'anime',
+    label: 'Anime & Manga',
+    emoji: '🌸',
+    description: 'Anime, manga, and character lookups, waifu images, and wallpapers',
+  },
   economy: {
     id: 'economy',
     label: 'Economy & Levels',

@@ -23,6 +23,7 @@ export const CommandCategory = {
   MUSIC: 'music',
   MODERATION: 'moderation',
   TCG: 'tcg',
+  ANIME: 'anime',
   ECONOMY: 'economy',
   UTILITY: 'utility',
   STREAMS: 'streams',
