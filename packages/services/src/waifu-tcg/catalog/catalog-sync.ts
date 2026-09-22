@@ -1,5 +1,5 @@
 import type { CatalogCharacter } from './card-catalog.js';
-import type { AniListClient } from './anilist.client.js';
+import type { AniListClient } from '../../anime/anilist.client.js';
 import type { DanbooruClient } from './danbooru.client.js';
 
 export interface CatalogSyncClients {

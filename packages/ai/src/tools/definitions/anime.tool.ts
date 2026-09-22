@@ -7,6 +7,10 @@ export const AnimeSearchArgsSchema = z.object({
 
 export type AnimeSearchArgs = z.infer<typeof AnimeSearchArgsSchema>;
 
+/**
+ * Injected by the host app (the bot wires the shared, rate-limited AniList client from
+ * @ririko/services). Returns null when nothing matches; throws when the source is unreachable.
+ */
 export type AnimeSearchProvider = (title: string) => Promise<AnimeSearchResult | null>;
 
 export class AnimeSearchTool implements SafeTool<AnimeSearchArgs, AnimeSearchResult> {
@@ -36,64 +40,24 @@ export class AnimeSearchTool implements SafeTool<AnimeSearchArgs, AnimeSearchRes
 
   async execute(args: AnimeSearchArgs, _context: ToolExecutionContext): Promise<AnimeSearchResult> {
     if (this.searchProvider) {
-      const result = await this.searchProvider(args.title);
-      if (result) return result;
-    }
-
-    // Default AniList GraphQL fetch
-    try {
-      const query = `
-        query ($search: String) {
-          Media (search: $search, type: ANIME) {
-            title { romaji english native }
-            description(asHtml: false)
-            averageScore
-            episodes
-            status
-            siteUrl
-          }
-        }
-      `;
-
-      const res = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ query, variables: { search: args.title } }),
-        signal: AbortSignal.timeout(5000),
-      });
-
-      if (res.ok) {
-        const json = (await res.json()) as {
-          data?: {
-            Media?: {
-              title: { english?: string; romaji?: string; native?: string };
-              description?: string;
-              averageScore?: number;
-              episodes?: number;
-              status?: string;
-              siteUrl?: string;
-            };
-          };
+      try {
+        const result = await this.searchProvider(args.title);
+        if (result) return result;
+      } catch {
+        return {
+          title: args.title,
+          synopsis: 'The anime database is currently unreachable. Try again later.',
         };
-        const media = json?.data?.Media;
-        if (media) {
-          return {
-            title: media.title.english || media.title.romaji || media.title.native || args.title,
-            synopsis: media.description?.slice(0, 400) || 'No description available.',
-            score: media.averageScore ? media.averageScore / 10 : undefined,
-            episodes: media.episodes || undefined,
-            status: media.status || undefined,
-            url: media.siteUrl || undefined,
-          };
-        }
       }
-    } catch {
-      // Fallback
+      return {
+        title: args.title,
+        synopsis: `No anime matching "${args.title}" was found.`,
+      };
     }
 
     return {
       title: args.title,
-      synopsis: `Anime matching query "${args.title}" was not found or the database is currently unreachable.`,
+      synopsis: 'Anime search is not available right now.',
     };
   }
 }

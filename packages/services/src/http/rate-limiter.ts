@@ -34,13 +34,16 @@ export class RateLimiter {
 export interface FetchWithRetryOptions {
   limiter: RateLimiter;
   fetchFn?: typeof fetch | undefined;
-  maxRetries?: number;
+  maxRetries?: number | undefined;
   baseBackoffMs?: number;
+  /** Aborts each attempt after this many ms; an aborted attempt counts as a retryable failure. */
+  timeoutMs?: number | undefined;
   sleep?: (ms: number) => Promise<void>;
 }
 
 /**
- * Rate-limited fetch that retries on 429 (honouring Retry-After) and 5xx with exponential backoff.
+ * Rate-limited fetch that retries on 429 (honouring Retry-After), 5xx and network errors with
+ * exponential backoff.
  * Other responses (including 4xx) are returned to the caller as-is.
  */
 export async function fetchWithRetry(
@@ -57,7 +60,14 @@ export async function fetchWithRetry(
     let res: Response | undefined;
     let error: unknown;
     try {
-      res = await options.limiter.schedule(() => fetchFn(url, init));
+      res = await options.limiter.schedule(() =>
+        fetchFn(
+          url,
+          options.timeoutMs === undefined
+            ? init
+            : { ...init, signal: AbortSignal.timeout(options.timeoutMs) },
+        ),
+      );
     } catch (err) {
       error = err;
     }

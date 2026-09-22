@@ -41,6 +41,10 @@
     "./waifu-tcg": {
       "types": "./dist/waifu-tcg/index.d.ts",
       "import": "./dist/waifu-tcg/index.js"
+    },
+    "./anime": {
+      "types": "./dist/anime/index.d.ts",
+      "import": "./dist/anime/index.js"
     }
   },
   "scripts": {
