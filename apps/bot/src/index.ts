@@ -43,5 +43,6 @@ export * from './commands/games/index.js';
 export * from './commands/tcg/index.js';
 export * from './commands/roles/index.js';
 export * from './commands/anime/index.js';
+export * from './commands/reminders/index.js';
 export * from './controllers/index.js';
 export * from './listeners/index.js';

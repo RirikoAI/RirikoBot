@@ -6,9 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-| ID | Type | Title | Pts | Parent | Branch |
-|---|---|---|---|---|---|
-| `TASK-1412` | Task | ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery | 2 | `STORY-141` | `feat/STORY-141-reminders` |
+*No tickets currently in progress.*
 
 ---
 
@@ -38,6 +36,10 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
+| `TASK-1411` | Task | Reminder Repository (Dual-Dialect, Atomic Claim) & Legacy DM Guild Migration Fix | 1 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
+| `TASK-1412` | Task | ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery | 2 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
+| `TASK-1413` | Task | /reminder Command (Set, List, Cancel, Timezone) with Prefix Parity & Real AI reminders.create Tool | 1 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
 | `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | `EPIC-014` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
 | `TASK-1441` | Task | Move WaifuImClient to Shared anime Module on fetchWithRetry & /waifu Command | 1 | `STORY-144` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
 | `TASK-1442` | Task | WallHaven REST Client (SFW Anime Wallpapers) & /wallpaper Command Replacing Legacy Scrapers | 2 | `STORY-144` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
@@ -337,7 +339,7 @@
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | ⚡ In Progress | `EPIC-002`, `EPIC-003` |
+| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | `EPIC-014` | ✅ Done | `EPIC-003`, `CHORE-1401` |
 | `STORY-143` | Story | Server Utility & Identity Commands Parity (/get-avatar, /guild-info, /member-info, /prefix) | 2 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
 | `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | `EPIC-014` | ✅ Done | `CHORE-1401` |

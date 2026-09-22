@@ -27,6 +27,7 @@ import {
   createTcgInfoCommand,
   createRoleCommands,
   createAnimeCommands,
+  createReminderCommand,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -182,6 +183,7 @@ export async function main(): Promise<void> {
   for (const cmd of createAnimeCommands(services)) {
     router.registry.register(cmd);
   }
+  router.registry.register(createReminderCommand(services));
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
@@ -296,7 +298,8 @@ export async function main(): Promise<void> {
       services.freeGamesEngine.start();
       services.giveawayEngine.start();
       services.autoRoleService.startSweeper(bot.client);
-      console.log('📡 Stream Watcher, Free Games Announcer, Giveaways & AutoRole engines active!');
+      services.reminderScheduler?.start();
+      console.log('📡 Stream Watcher, Free Games Announcer, Giveaways, AutoRole & Reminder engines active!');
 
       // Clean up orphaned dynamic voice channels across guilds
       for (const [, guild] of bot.client.guilds.cache) {

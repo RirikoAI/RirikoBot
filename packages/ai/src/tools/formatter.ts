@@ -43,8 +43,13 @@ export function formatToolResultFallback(toolResponses: MediatedToolResponse[]):
       lines.push(`💰 **Balance**: **${wallet}** in wallet | **${bank}** in bank`);
     } else if (normName.includes('reminder')) {
       const msg = typeof res.message === 'string' ? res.message : 'Reminder';
-      const rel = typeof res.relativeDescription === 'string' ? ` (${res.relativeDescription})` : '';
-      lines.push(`⏰ **Reminder Set**: "${msg}"${rel}`);
+      if (res.scheduled === false) {
+        const reason = typeof res.error === 'string' ? res.error : 'The reminder could not be saved.';
+        lines.push(`⚠️ **Reminder not set**: ${reason}`);
+      } else {
+        const rel = typeof res.relativeDescription === 'string' ? ` (${res.relativeDescription})` : '';
+        lines.push(`⏰ **Reminder Set**: "${msg}"${rel}`);
+      }
     } else if (normName.includes('music')) {
       if (res.action === 'error') {
         lines.push(`⚠️ **Music**: ${res.message || 'Unable to play music.'}`);
