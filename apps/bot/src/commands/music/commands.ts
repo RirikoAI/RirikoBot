@@ -441,10 +441,15 @@ export function createMusicCommands(
     async execute(ctx: CommandContext): Promise<void> {
       if (!ctx.guildId) return;
       const level = ctx.options.getInteger('level');
-      const queue = services.musicPlayer.getOrCreateQueue(ctx.guildId);
 
       if (level === null || level === undefined) {
-        await ctx.reply({ content: `🔊 Current playback volume is **${queue.volume}%**.` });
+        const queue = services.musicPlayer.getQueue(ctx.guildId);
+        const savedVolume = await services.musicPlayer.resolveVolumeForGuild(ctx.guildId);
+        if (queue && queue.currentTrack) {
+          await ctx.reply({ content: `🔊 Current playback volume is **${queue.volume}%** (server default: **${savedVolume}%**).` });
+        } else {
+          await ctx.reply({ content: `🔊 Current playback volume is **${savedVolume}%** (server default).` });
+        }
         return;
       }
 
@@ -452,7 +457,7 @@ export function createMusicCommands(
       // Persist default volume in database
       void services.musicRepo.upsertGuildSettings(ctx.guildId, { defaultVolume: clamped });
 
-      await ctx.reply({ content: `🔊 Playback volume adjusted to **${clamped}%**.` });
+      await ctx.reply({ content: `🔊 Playback volume adjusted to **${clamped}%** (saved as server default).` });
     },
   };
 

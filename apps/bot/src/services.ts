@@ -310,6 +310,10 @@ export async function createBotServices(
         secure: process.env.LAVALINK_SECURE === 'true',
       },
     },
+    resolveGuildVolume: async (guildId: string) => {
+      const settings = await musicRepo.getGuildSettings(guildId).catch(() => null);
+      return settings?.defaultVolume;
+    },
   });
 
   // Seed default shop catalog if empty

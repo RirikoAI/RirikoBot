@@ -36,6 +36,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0018` | Bug | Persist and Restore Guild Default Volume Across Music Sessions | 3 | `EPIC-005` | [BUG-0018.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0018.md) |
 | `EPIC-014` | Epic | Server Utilities, AutoRoles & Community Systems | 21 | Self | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
 | `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | `EPIC-014` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
 | `TASK-1431` | Task | GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration | 2 | `STORY-143` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |

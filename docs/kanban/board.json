@@ -2100,6 +2100,16 @@
       "requires": ["TASK-1431"],
       "blocks": [],
       "description": "Dual-dispatch server utility and identity commands with rich embeds, Discord timestamp chips, and server local time representations."
+    },
+    {
+      "id": "BUG-0018",
+      "title": "Persist and Restore Guild Default Volume Across Music Sessions",
+      "points": 3,
+      "status": "DONE",
+      "parent": "EPIC-005",
+      "requires": ["EPIC-005"],
+      "blocks": [],
+      "description": "Wire guild default volume resolution into MusicPlayerService and LavalinkService so that volume set via $volume or /volume is restored on new playback sessions instead of reverting to 80%, implement setVolume on LavalinkQueueAdapter, and display the guild default volume when /volume is run with no arguments while idle."
     }
   ]
 }

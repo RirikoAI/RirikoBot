@@ -66,6 +66,12 @@ export class LavalinkQueueAdapter extends EventEmitter {
     return this.player.volume;
   }
 
+  setVolume(volume: number): number {
+    const clamped = Math.max(0, Math.min(150, volume));
+    void this.player.setVolume(clamped);
+    return clamped;
+  }
+
   get gain(): number {
     return this.player.volume / 100;
   }
@@ -308,15 +314,16 @@ export class LavalinkService extends EventEmitter {
     return adapter;
   }
 
-  async play(options: PlayOptions): Promise<PlayResult> {
+  async play(options: PlayOptions, initialVolume?: number): Promise<PlayResult> {
     let player = this.manager.players.get(options.guildId);
     if (!player) {
+      const vol = initialVolume !== undefined ? Math.max(0, Math.min(150, initialVolume)) : 80;
       player = this.manager.createPlayer({
         guildId: options.guildId,
         voiceChannelId: options.voiceChannelId,
         ...(options.textChannelId ? { textChannelId: options.textChannelId } : {}),
         selfDeaf: true,
-        volume: 80,
+        volume: vol,
       });
       const adapter = new LavalinkQueueAdapter(
         player,
