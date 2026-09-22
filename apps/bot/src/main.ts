@@ -28,6 +28,7 @@ import {
   createRoleCommands,
   createAnimeCommands,
   createReminderCommand,
+  createUtilityCommands,
   handleGiveawayButtonInteraction,
   MusicEmbedController,
   AiChatController,
@@ -69,10 +70,18 @@ export async function main(): Promise<void> {
   // 1. Initialize Bot & Gateway
   const bot = createBot();
 
-  // 2. Initialize Dual-Dispatch Command Router
+  // 2. Initialize Domain Services and Repositories
+  console.log('• Initializing bot repositories and domain services...');
+  const services = await createBotServices(undefined, bot.client);
+
+  // 3. Initialize Dual-Dispatch Command Router with in-memory cached dynamic prefix resolution
   const router = new CommandRouter(undefined, {
     defaultPrefix: prefix,
     mentionPrefix: true,
+    resolvePrefix: async (message) => {
+      if (!message.guildId) return prefix;
+      return services.guildSettingsService.getPrefix(message.guildId, prefix);
+    },
     onError: (ctx, err) => {
       console.error(`[Command:${ctx.commandName}] Execution error:`, err);
     },
@@ -105,9 +114,7 @@ export async function main(): Promise<void> {
   const helpCommand = createHelpCommand(router.registry);
   router.registry.register(helpCommand);
 
-  // 5. Initialize Domain Services and Register Economy Commands
-  console.log('• Initializing bot repositories and domain services...');
-  const services = await createBotServices(undefined, bot.client);
+  // 5. Register Economy Commands
   const economyCommands = createEconomyCommands(services);
   for (const cmd of economyCommands) {
     router.registry.register(cmd);
@@ -184,6 +191,10 @@ export async function main(): Promise<void> {
     router.registry.register(cmd);
   }
   router.registry.register(createReminderCommand(services));
+
+  for (const cmd of createUtilityCommands(services)) {
+    router.registry.register(cmd);
+  }
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry

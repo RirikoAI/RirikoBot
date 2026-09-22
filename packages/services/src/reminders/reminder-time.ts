@@ -31,6 +31,16 @@ export function resolveTimeZone(...candidates: Array<string | null | undefined>)
   return candidates.find((tz): tz is string => typeof tz === 'string' && isValidTimeZone(tz)) ?? 'UTC';
 }
 
+/** Formats a Date in the given timeZone with full date and short time. */
+export function formatLocalTime(timeZone: string, now = new Date()): string {
+  const safeTz = isValidTimeZone(timeZone) ? timeZone : 'UTC';
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: safeTz,
+    dateStyle: 'full',
+    timeStyle: 'short',
+  }).format(now);
+}
+
 export interface ParsedReminderTime {
   triggerAt: Date;
   /** The words chrono read as the time, e.g. `tomorrow 9am`. */
