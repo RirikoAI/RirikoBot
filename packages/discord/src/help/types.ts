@@ -78,6 +78,7 @@ export const CATEGORY_INFO: Record<CommandCategory, CategoryInfo> = {
 
 export interface HelpOptions {
   defaultPrefix?: string | undefined;
+  resolvePrefix?: ((guildId?: string | null) => string | Promise<string>) | undefined;
   dashboardUrl?: string | undefined;
   supportServerUrl?: string | undefined;
   inviteUrl?: string | undefined;

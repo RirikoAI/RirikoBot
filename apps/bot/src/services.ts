@@ -135,6 +135,7 @@ import {
   ReminderScheduler,
   createDiscordReminderDelivery,
   resolveTimeZone,
+  GuildSettingsService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -187,8 +188,11 @@ export interface BotServices {
   reminderService: ReminderService;
   /** Null when no Discord client was supplied (tests); started on gateway READY. */
   reminderScheduler: ReminderScheduler | null;
+  guildSettingsService: GuildSettingsService;
   /** Zone for reading reminder times: the user's saved zone, then the guild's, then UTC. */
   resolveUserTimeZone: (userId: string, guildId: string | null) => Promise<string>;
+  /** Zone for reading guild times: the guild's saved zone, then UTC. */
+  resolveGuildTimeZone: (guildId: string | null) => Promise<string>;
   /** WallHaven, Zerochan and Konachan wallpaper search for /wallpaper. */
   wallpaperService: WallpaperService;
   securityInterceptor: ToolSecurityInterceptor;
@@ -434,12 +438,21 @@ export async function createBotServices(
   );
   const reminderRepo = new ReminderRepository(db);
   const reminderService = new ReminderService({ repo: reminderRepo });
+  const guildSettingsService = new GuildSettingsService({
+    repo: guildSettingsRepo,
+    defaultPrefix: process.env.DEFAULT_PREFIX || '!',
+    defaultTimezone: 'UTC',
+  });
   const resolveUserTimeZone = async (userId: string, guildId: string | null): Promise<string> => {
-    const [userPrefs, guildSettings] = await Promise.all([
+    const [userPrefs, guildTz] = await Promise.all([
       conversationManager.getUserPreferences(userId).catch(() => null),
-      guildId ? guildSettingsRepo.getByGuildId(guildId).catch(() => null) : Promise.resolve(null),
+      guildId ? guildSettingsService.getTimezone(guildId) : 'UTC',
     ]);
-    return resolveTimeZone(userPrefs?.timezone, guildSettings?.timezone);
+    return resolveTimeZone(userPrefs?.timezone, guildTz);
+  };
+  const resolveGuildTimeZone = async (guildId: string | null): Promise<string> => {
+    if (!guildId) return 'UTC';
+    return guildSettingsService.getTimezone(guildId);
   };
   const reminderScheduler = discordClient
     ? new ReminderScheduler({
@@ -848,7 +861,9 @@ export async function createBotServices(
     waifuImClient,
     reminderService,
     reminderScheduler,
+    guildSettingsService,
     resolveUserTimeZone,
+    resolveGuildTimeZone,
     wallpaperService,
     securityInterceptor,
     toolExecutor,

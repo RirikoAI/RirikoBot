@@ -17,6 +17,15 @@ export const HELP_COLORS = {
   WARNING: 0xfee75c,
 } as const;
 
+/**
+ * Formats a command string, example, or usage string with the active server prefix.
+ * Replaces leading ! or $ (or preceded by space/quote/bracket) with the active prefix,
+ * while leaving slash commands (/command) and trailing argument characters intact.
+ */
+export function formatPrefixCommand(text: string, prefix: string): string {
+  return text.replace(/(^|[\s|`"'(])([!$])([a-zA-Z0-9_-]+)/g, `$1${prefix}$3`);
+}
+
 export class HelpGenerator {
   /**
    * Generates the root Help Center home view with category summary and selection controls.
@@ -24,11 +33,12 @@ export class HelpGenerator {
   public static generateHomeView(
     registry: CommandRegistry,
     options: HelpOptions = {},
+    currentPrefix?: string,
   ): {
     embed: EmbedBuilder;
     components: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[];
   } {
-    const prefix = options.defaultPrefix ?? '!';
+    const prefix = currentPrefix ?? options.defaultPrefix ?? '!';
 
     const embed = new EmbedBuilder()
       .setColor(HELP_COLORS.PRIMARY)
@@ -125,12 +135,13 @@ export class HelpGenerator {
     category: CommandCategory,
     page: number = 1,
     options: HelpOptions = {},
+    currentPrefix?: string,
   ): {
     embed: EmbedBuilder;
     components: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[];
   } {
     const info = CATEGORY_INFO[category];
-    const prefix = options.defaultPrefix ?? '!';
+    const prefix = currentPrefix ?? options.defaultPrefix ?? '!';
     const pageSize = Math.max(1, options.pageSize ?? 5);
 
     const commands = registry
@@ -160,9 +171,18 @@ export class HelpGenerator {
     } else {
       for (const cmd of pageCommands) {
         const { metadata } = cmd;
-        let syntax = `\`/${metadata.name}\``;
-        if (metadata.aliases && metadata.aliases.length > 0) {
-          syntax += ` (Prefix: \`${prefix}${metadata.name}\`, Aliases: \`${metadata.aliases.map((a) => `${prefix}${a}`).join(', ')}\`)`;
+        let syntax: string;
+        const aliasesStr =
+          metadata.aliases && metadata.aliases.length > 0
+            ? `, Aliases: \`${metadata.aliases.map((a) => `${prefix}${a}`).join(', ')}\``
+            : '';
+
+        if (metadata.slashEnabled !== false && metadata.prefixEnabled !== false) {
+          syntax = `\`/${metadata.name}\` (Prefix: \`${prefix}${metadata.name}\`${aliasesStr})`;
+        } else if (metadata.prefixEnabled !== false) {
+          syntax = `\`${prefix}${metadata.name}\`${aliasesStr ? ` (${aliasesStr.slice(2)})` : ''}`;
+        } else {
+          syntax = `\`/${metadata.name}\``;
         }
 
         embed.addFields({
@@ -174,7 +194,7 @@ export class HelpGenerator {
     }
 
     embed.setFooter({
-      text: `Page ${currentPage}/${totalPages} • Category: ${info.label} (${commands.length} commands)`,
+      text: `Page ${currentPage}/${totalPages} • Category: ${info.label} (${commands.length} commands) • Prefix: ${prefix}`,
     });
 
     // Component rows
@@ -234,13 +254,14 @@ export class HelpGenerator {
   public static generateCommandDetailView(
     command: Command,
     options: HelpOptions = {},
+    currentPrefix?: string,
   ): {
     embed: EmbedBuilder;
     components: ActionRowBuilder<ButtonBuilder>[];
   } {
     const { metadata } = command;
     const info = CATEGORY_INFO[metadata.category];
-    const prefix = options.defaultPrefix ?? '!';
+    const prefix = currentPrefix ?? options.defaultPrefix ?? '!';
 
     const embed = new EmbedBuilder()
       .setColor(HELP_COLORS.PRIMARY)
@@ -332,13 +353,15 @@ export class HelpGenerator {
     if (metadata.examples && metadata.examples.length > 0) {
       embed.addFields({
         name: 'Examples',
-        value: metadata.examples.map((ex) => `\`${ex}\``).join('\n'),
+        value: metadata.examples
+          .map((ex) => `\`${formatPrefixCommand(ex, prefix)}\``)
+          .join('\n'),
         inline: false,
       });
     }
 
     embed.setFooter({
-      text: `Ririko AI 2.0 • Category: ${info.label}`,
+      text: `Ririko AI 2.0 • Category: ${info.label} • Prefix: ${prefix}`,
     });
 
     const buttons: ButtonBuilder[] = [

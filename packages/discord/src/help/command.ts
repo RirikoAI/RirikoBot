@@ -27,6 +27,12 @@ export function createHelpCommand(registry: CommandRegistry, options: HelpOption
       examples: ['/help', '/help command:ping', '!help play'],
     },
     async execute(ctx: CommandContext): Promise<void> {
+      const resolvedPrefix = options.resolvePrefix
+        ? await options.resolvePrefix(ctx.guildId ?? ctx.guild?.id)
+        : (ctx.source === 'prefix' && ctx.invokedPrefix && ctx.invokedPrefix !== '/'
+          ? ctx.invokedPrefix
+          : (options.defaultPrefix ?? '!'));
+
       const query = ctx.options.getString('command');
 
       if (query && query.trim().length > 0) {
@@ -41,7 +47,11 @@ export function createHelpCommand(registry: CommandRegistry, options: HelpOption
           return;
         }
 
-        const { embed, components } = HelpGenerator.generateCommandDetailView(command, options);
+        const { embed, components } = HelpGenerator.generateCommandDetailView(
+          command,
+          options,
+          resolvedPrefix,
+        );
 
         await ctx.reply({
           embeds: [embed],
@@ -51,7 +61,11 @@ export function createHelpCommand(registry: CommandRegistry, options: HelpOption
       }
 
       // Show root interactive Help Center
-      const { embed, components } = HelpGenerator.generateHomeView(registry, options);
+      const { embed, components } = HelpGenerator.generateHomeView(
+        registry,
+        options,
+        resolvedPrefix,
+      );
       await ctx.reply({
         embeds: [embed],
         components,

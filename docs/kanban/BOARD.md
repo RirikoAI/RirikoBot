@@ -36,6 +36,11 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `EPIC-014` | Epic | Server Utilities, AutoRoles & Community Systems | 21 | Self | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
+| `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | `EPIC-014` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
+| `TASK-1431` | Task | GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration | 2 | `STORY-143` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
+| `TASK-1432` | Task | Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity | 2 | `STORY-143` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
+| `TASK-1433` | Task | Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting | 1 | `STORY-143` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
 | `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
 | `TASK-1411` | Task | Reminder Repository (Dual-Dialect, Atomic Claim) & Legacy DM Guild Migration Fix | 1 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
 | `TASK-1412` | Task | ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery | 2 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
@@ -237,7 +242,7 @@
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 7A |
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 13 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
-| `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 21 | `EPIC-002`, `EPIC-003` | Phase 2B |
+| `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 21 | `EPIC-002`, `EPIC-003` | Phase 2B ✅ Done |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B ✅ Done |
 
 ### 📋 Groomed Stories & Bugs for EPIC-015 (TCG Progression, Equipment & Bosses)
@@ -341,8 +346,15 @@
 | `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | `EPIC-014` | ✅ Done | `EPIC-003`, `CHORE-1401` |
-| `STORY-143` | Story | Server Utility & Identity Commands Parity (/get-avatar, /guild-info, /member-info, /prefix) | 2 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | `EPIC-014` | ✅ Done | `CHORE-1401` |
+
+### 🛠️ Completed Tasks for STORY-143 (Server Utility, Identity & Timezone Commands Parity)
+| ID | Type | Title | Pts | Parent | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `TASK-1431` | Task | GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration | 2 | `STORY-143` | ✅ Done | `EPIC-002`, `EPIC-003` |
+| `TASK-1432` | Task | Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity | 2 | `STORY-143` | ✅ Done | `TASK-1431` |
+| `TASK-1433` | Task | Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting | 1 | `STORY-143` | ✅ Done | `TASK-1431` |
 
 ### 🛠️ Completed Tasks for STORY-140 (Automatic Role System & Reaction Roles)
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
