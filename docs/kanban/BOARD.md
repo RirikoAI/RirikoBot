@@ -36,6 +36,13 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | `EPIC-014` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
+| `TASK-1441` | Task | Move WaifuImClient to Shared anime Module on fetchWithRetry & /waifu Command | 1 | `STORY-144` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
+| `TASK-1442` | Task | WallHaven REST Client (SFW Anime Wallpapers) & /wallpaper Command Replacing Legacy Scrapers | 2 | `STORY-144` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
+| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | `EPIC-014` | [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) |
+| `TASK-1421` | Task | Jikan v4 Client (Anime, Manga, Characters: Search & Full Details, SFW, Rate-Limited) | 2 | `STORY-142` | [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) |
+| `TASK-1422` | Task | AnimeSearchService: Source-Neutral Models, Jikan-to-AniList Fallback, TTL Cache & AniList Detail Queries | 2 | `STORY-142` | [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) |
+| `TASK-1423` | Task | /anime, /manga, /anime-character Commands: Search Select Menu, Detail Embeds & Prefix Parity | 1 | `STORY-142` | [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) |
 | `CHORE-1401` | Chore | Shared AniList Client & HTTP Rate-Limit Layer (Decouple from Waifu TCG) | 2 | `EPIC-014` | [CHORE-1401.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1401.md) |
 | `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | [STORY-140.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-140.md) |
 | `TASK-1405` | Task | Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites | 1 | `STORY-140` | [TASK-1405.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1405.md) |
@@ -226,7 +233,7 @@
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 7A |
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 13 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
-| `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 13 | `EPIC-002`, `EPIC-003` | Phase 2B |
+| `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 21 | `EPIC-002`, `EPIC-003` | Phase 2B |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B ✅ Done |
 
 ### 📋 Groomed Stories & Bugs for EPIC-015 (TCG Progression, Equipment & Bosses)
@@ -329,8 +336,9 @@
 |---|---|---|---|---|---|---|
 | `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 3 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
-| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 3 | `EPIC-014` | 📋 Backlog | `EPIC-003` |
+| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | `EPIC-014` | ✅ Done | `EPIC-003`, `CHORE-1401` |
 | `STORY-143` | Story | Server Utility & Identity Commands Parity (/get-avatar, /guild-info, /member-info, /prefix) | 2 | `EPIC-014` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
+| `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | `EPIC-014` | ✅ Done | `CHORE-1401` |
 
 ### 🛠️ Completed Tasks for STORY-140 (Automatic Role System & Reaction Roles)
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
