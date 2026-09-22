@@ -436,6 +436,38 @@ describe('Dual-Dispatch Music Commands Suite (TASK-0521)', () => {
       expect(queue?.volume).toBe(120);
     });
 
+    it('restores guild default volume on a brand new playback session after stop (BUG-0018)', async () => {
+      const commands = createMusicCommands(services);
+      const playCmd = commands.find((c) => c.metadata.name === 'play')!;
+      const volCmd = commands.find((c) => c.metadata.name === 'volume')!;
+      const stopCmd = commands.find((c) => c.metadata.name === 'stop')!;
+
+      // 1. Play first track
+      await playCmd.execute(createMockContext({ optionsMap: { query: 'first song' } }));
+
+      // 2. Set volume to 25% (should persist into music_guild_settings)
+      const setVolCtx = createMockContext({ optionsMap: { level: 25 }, replyFn: vi.fn() });
+      await volCmd.execute(setVolCtx);
+      expect(services.musicPlayer.getQueue('guild_music_01')?.volume).toBe(25);
+
+      // Verify persisted in DB
+      const dbSettings = await services.musicRepo.getGuildSettings('guild_music_01');
+      expect(dbSettings?.defaultVolume).toBe(25);
+
+      // 3. Stop session (cleans up and deletes queue)
+      const stopCtx = createMockContext({ replyFn: vi.fn() });
+      await stopCmd.execute(stopCtx);
+      expect(services.musicPlayer.getQueue('guild_music_01')).toBeUndefined();
+
+      // 4. Start a brand new session with another track
+      await playCmd.execute(createMockContext({ optionsMap: { query: 'second song' } }));
+
+      // 5. Verify the new queue was created with the saved volume (25%), NOT default 80%
+      const newQueue = services.musicPlayer.getQueue('guild_music_01');
+      expect(newQueue).toBeDefined();
+      expect(newQueue?.volume).toBe(25);
+    });
+
     it('cycles and sets loop modes', async () => {
       const commands = createMusicCommands(services);
       const loopCmd = commands.find((c) => c.metadata.name === 'loop')!;

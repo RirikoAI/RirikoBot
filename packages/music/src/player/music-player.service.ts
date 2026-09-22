@@ -28,6 +28,7 @@ export interface MusicPlayerServiceOptions {
   idleTimeoutMs?: number | undefined;
   youtubeOptions?: ExtractorPipelineOptions['youtubeOptions'];
   lavalink?: LavalinkClientOptions | undefined;
+  resolveGuildVolume?: ((guildId: string) => Promise<number | undefined> | number | undefined) | undefined;
 }
 
 export class MusicPlayerService extends EventEmitter {
@@ -42,6 +43,8 @@ export class MusicPlayerService extends EventEmitter {
   private readonly skipInitiated = new Set<string>();
   private readonly defaultVolume: number;
   private readonly idleTimeoutMs: number;
+  private readonly resolveGuildVolume?: ((guildId: string) => Promise<number | undefined> | number | undefined) | undefined;
+  private readonly guildVolumeCache = new Map<string, number>();
 
   constructor(options?: MusicPlayerServiceOptions) {
     super();
@@ -51,6 +54,7 @@ export class MusicPlayerService extends EventEmitter {
     this.autoplayEngine = new AutoplayEngine({ pipeline: this.pipeline });
     this.defaultVolume = options?.defaultVolume ?? 80;
     this.idleTimeoutMs = options?.idleTimeoutMs ?? 180_000;
+    this.resolveGuildVolume = options?.resolveGuildVolume;
 
     if (options?.lavalink && options.lavalink.enabled !== false) {
       this.lavalinkService = new LavalinkService(options.lavalink);
@@ -93,6 +97,35 @@ export class MusicPlayerService extends EventEmitter {
 
   // --- Queue & Voice Lifecycle Accessors ---
 
+  async resolveVolumeForGuild(guildId: string): Promise<number> {
+    const cached = this.guildVolumeCache.get(guildId);
+    if (cached !== undefined) return cached;
+
+    if (this.resolveGuildVolume) {
+      try {
+        const resolved = await this.resolveGuildVolume(guildId);
+        if (typeof resolved === 'number' && !Number.isNaN(resolved)) {
+          const clamped = Math.max(0, Math.min(150, resolved));
+          this.guildVolumeCache.set(guildId, clamped);
+          return clamped;
+        }
+      } catch (err) {
+        console.warn(`[MusicPlayerService] Failed to resolve guild volume for ${guildId}:`, err);
+      }
+    }
+
+    this.guildVolumeCache.set(guildId, this.defaultVolume);
+    return this.defaultVolume;
+  }
+
+  getGuildCachedVolume(guildId: string): number {
+    return this.guildVolumeCache.get(guildId) ?? this.defaultVolume;
+  }
+
+  setGuildCachedVolume(guildId: string, volume: number): void {
+    this.guildVolumeCache.set(guildId, Math.max(0, Math.min(150, volume)));
+  }
+
   getQueue(guildId: string): GuildQueue | undefined {
     if (this.isLavalinkActive()) {
       return this.lavalinkService!.getQueue(guildId) as any;
@@ -100,7 +133,7 @@ export class MusicPlayerService extends EventEmitter {
     return this.queueManager.get(guildId);
   }
 
-  getOrCreateQueue(guildId: string, textChannelId?: string): GuildQueue {
+  getOrCreateQueue(guildId: string, textChannelId?: string, initialVolume?: number): GuildQueue {
     if (this.isLavalinkActive()) {
       const adapter = this.lavalinkService!.getQueue(guildId);
       if (adapter) {
@@ -111,8 +144,9 @@ export class MusicPlayerService extends EventEmitter {
 
     let queue = this.queueManager.get(guildId);
     if (!queue) {
+      const vol = initialVolume ?? this.getGuildCachedVolume(guildId);
       queue = this.queueManager.getOrCreate(guildId, {
-        defaultVolume: this.defaultVolume,
+        defaultVolume: vol,
         idleTimeoutMs: this.idleTimeoutMs,
         textChannelId,
       });
@@ -190,11 +224,13 @@ export class MusicPlayerService extends EventEmitter {
   // --- Main Playback Commands ---
 
   async play(options: PlayOptions): Promise<PlayResult> {
+    const guildVol = await this.resolveVolumeForGuild(options.guildId);
+
     if (this.isLavalinkActive()) {
-      return await this.lavalinkService!.play(options);
+      return await this.lavalinkService!.play(options, guildVol);
     }
 
-    const queue = this.getOrCreateQueue(options.guildId, options.textChannelId);
+    const queue = this.getOrCreateQueue(options.guildId, options.textChannelId, guildVol);
     const voiceManager = this.getOrCreateVoiceManager(options.guildId);
 
     // 1. Join Voice Channel if not already connected
@@ -343,12 +379,15 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   setVolume(guildId: string, volume: number): number {
+    const clamped = Math.max(0, Math.min(150, volume));
+    this.guildVolumeCache.set(guildId, clamped);
+
     if (this.isLavalinkActive()) {
       this.lavalinkService!.setVolume(guildId, volume);
-      return Math.max(0, Math.min(150, volume));
+      return clamped;
     }
-    const queue = this.getOrCreateQueue(guildId);
-    const clamped = queue.setVolume(volume);
+    const queue = this.getOrCreateQueue(guildId, undefined, clamped);
+    queue.setVolume(clamped);
 
     const resource = this.activeResources.get(guildId);
     if (resource?.volume) {
@@ -437,11 +476,12 @@ export class MusicPlayerService extends EventEmitter {
     if (this.isLavalinkActive()) {
       let player = this.lavalinkService!.manager.players.get(guildId);
       if (!player) {
+        const guildVol = await this.resolveVolumeForGuild(guildId);
         player = this.lavalinkService!.manager.createPlayer({
           guildId,
           voiceChannelId: channelId,
           selfDeaf: true,
-          volume: 80,
+          volume: guildVol,
         });
       }
       if (!player.connected) {
