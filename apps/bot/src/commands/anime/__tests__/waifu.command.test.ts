@@ -26,13 +26,13 @@ const servicesWith = (search: ReturnType<typeof vi.fn>) =>
   ({ waifuImClient: { search } }) as unknown as BotServices;
 
 describe('/waifu (TASK-1441)', () => {
-  it('defaults to the legacy selfies tag and renders the legacy embed', async () => {
+  it('serves SFW waifu images with the legacy embed and a regenerate button', async () => {
     const search = vi.fn().mockResolvedValue([image(7567)]);
     const { ctx, raw } = makeContext(null);
 
     await createWaifuCommand(servicesWith(search)).execute(ctx);
 
-    expect(search).toHaveBeenCalledWith({ tags: ['selfies'] });
+    expect(search).toHaveBeenCalledWith({ tags: ['waifu'], limit: 10 });
     const payload = raw.editReply.mock.calls[0]![0];
     const embed = payload.embeds[0].data;
     expect(embed.title).toBe('Random Waifu Image');
@@ -45,19 +45,10 @@ describe('/waifu (TASK-1441)', () => {
     expect(payload.components[0].components[0].data.custom_id).toBe(WAIFU_REROLL_ID);
   });
 
-  it('rejects tags outside the SFW allowlist without calling waifu.im', async () => {
-    const search = vi.fn();
-    const { ctx, raw } = makeContext('hentai');
-
-    await createWaifuCommand(servicesWith(search)).execute(ctx);
-
-    expect(search).not.toHaveBeenCalled();
-    expect(raw.reply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
-  });
-
   it('rerolls for the invoker only', async () => {
-    const search = vi.fn().mockResolvedValueOnce([image(1)]).mockResolvedValueOnce([image(2)]);
-    const { ctx, collector } = makeContext('maid');
+    // waifu.im may hand back the same "random" image again; the unseen one must win.
+    const search = vi.fn().mockResolvedValueOnce([image(1)]).mockResolvedValueOnce([image(1), image(2)]);
+    const { ctx, collector } = makeContext(null);
     await createWaifuCommand(servicesWith(search)).execute(ctx);
 
     const intruder = buttonInteraction(WAIFU_REROLL_ID, 'user-2');
@@ -68,7 +59,7 @@ describe('/waifu (TASK-1441)', () => {
     const owner = buttonInteraction(WAIFU_REROLL_ID);
     collector.emit('collect', owner);
     await flush();
-    expect(search).toHaveBeenLastCalledWith({ tags: ['maid'] });
+    expect(search).toHaveBeenLastCalledWith({ tags: ['waifu'], limit: 10 });
     expect(owner.editReply.mock.calls[0]![0].embeds[0].data.image.url).toBe('https://cdn.waifu.im/2.jpg');
   });
 

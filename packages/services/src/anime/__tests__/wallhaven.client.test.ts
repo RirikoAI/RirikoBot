@@ -21,20 +21,20 @@ const raw = (id: string, purity = 'sfw') => ({
 });
 
 describe('WallhavenClient', () => {
-  it('pins every search to the Anime category and SFW purity, by relevance for a query', async () => {
+  it('pins every search to the Anime category and SFW purity, by relevance', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ data: [raw('k8831q')] }));
     const client = new WallhavenClient({ limiter: instantLimiter(), fetchFn });
 
-    const [wallpaper] = await client.search({ query: ' frieren ', page: 2 });
+    const [wallpaper] = await client.search(' frieren ', 2);
 
     const url = new URL(String(fetchFn.mock.calls[0]![0]));
     expect(url.pathname).toBe('/api/v1/search');
     expect(Object.fromEntries(url.searchParams)).toEqual({
+      q: 'frieren',
       categories: '010',
       purity: '100',
       sorting: 'relevance',
       page: '2',
-      q: 'frieren',
     });
     expect(wallpaper).toEqual({
       id: 'k8831q',
@@ -48,22 +48,17 @@ describe('WallhavenClient', () => {
     });
   });
 
-  it('uses random sorting without a query and drops anything not SFW', async () => {
+  it('drops anything not SFW', async () => {
     const fetchFn = vi
       .fn<typeof fetch>()
       .mockResolvedValue(jsonResponse({ data: [raw('aaaaaa'), raw('bbbbbb', 'sketchy')] }));
     const client = new WallhavenClient({ limiter: instantLimiter(), fetchFn });
 
-    const results = await client.search();
-
-    const url = new URL(String(fetchFn.mock.calls[0]![0]));
-    expect(url.searchParams.get('sorting')).toBe('random');
-    expect(url.searchParams.has('q')).toBe(false);
-    expect(results.map((w) => w.id)).toEqual(['aaaaaa']);
+    expect((await client.search('x')).map((w) => w.id)).toEqual(['aaaaaa']);
   });
 
   it('throws on failures', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(new Response('', { status: 401 }));
-    await expect(new WallhavenClient({ limiter: instantLimiter(), fetchFn }).search()).rejects.toThrow('HTTP 401');
+    await expect(new WallhavenClient({ limiter: instantLimiter(), fetchFn }).search('x')).rejects.toThrow('HTTP 401');
   });
 });

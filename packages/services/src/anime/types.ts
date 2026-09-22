@@ -62,3 +62,20 @@ export interface AnimeSearchResult<T> {
   source: AnimeDataSource;
   items: T[];
 }
+
+export interface Wallpaper {
+  /** Id within the source. */
+  id: string;
+  /** Source page for the wallpaper. */
+  pageUrl: string;
+  /** Image shown in the embed; empty until resolved for sources that need a lookup. */
+  imageUrl: string;
+  thumbnailUrl: string | null;
+  /** `WIDTHxHEIGHT`. */
+  resolution: string;
+  /** Favorites or score, when the source exposes one. */
+  favorites: number | null;
+  views: number | null;
+  /** Original artwork link, when known. */
+  source: string | null;
+}

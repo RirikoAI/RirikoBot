@@ -63,6 +63,7 @@ export function selectInteraction(value: string, userId = 'user-1'): MockCompone
     isStringSelectMenu: () => true,
     reply: vi.fn().mockResolvedValue(undefined),
     deferUpdate: vi.fn().mockResolvedValue(undefined),
+    update: vi.fn().mockResolvedValue(undefined),
     editReply: vi.fn().mockResolvedValue(undefined),
     followUp: vi.fn().mockResolvedValue(undefined),
   };

@@ -1,23 +1,5 @@
 import { RateLimiter, fetchWithRetry } from '../http/rate-limiter.js';
-
-export interface Wallpaper {
-  id: string;
-  /** Wallhaven page for the wallpaper. */
-  pageUrl: string;
-  /** Full-resolution image. */
-  imageUrl: string;
-  thumbnailUrl: string | null;
-  resolution: string;
-  favorites: number;
-  views: number;
-  source: string | null;
-}
-
-export interface WallhavenSearchOptions {
-  /** Free-text query; omitted means random wallpapers. */
-  query?: string;
-  page?: number;
-}
+import type { Wallpaper } from './types.js';
 
 export interface WallhavenClientOptions {
   baseUrl?: string;
@@ -59,16 +41,15 @@ export class WallhavenClient {
     this.timeoutMs = options.timeoutMs;
   }
 
-  /** One page (up to 24) of SFW anime wallpapers, by relevance for a query or random otherwise. */
-  async search(options: WallhavenSearchOptions = {}): Promise<Wallpaper[]> {
-    const query = options.query?.trim();
+  /** One page (up to 24) of SFW anime wallpapers, most relevant first. */
+  async search(query: string, page = 1): Promise<Wallpaper[]> {
     const params = new URLSearchParams({
+      q: query.trim(),
       categories: '010',
       purity: '100',
-      sorting: query ? 'relevance' : 'random',
-      page: String(Math.max(options.page ?? 1, 1)),
+      sorting: 'relevance',
+      page: String(Math.max(page, 1)),
     });
-    if (query) params.set('q', query);
 
     const res = await fetchWithRetry(
       `${this.baseUrl}/search?${params.toString()}`,

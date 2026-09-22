@@ -127,6 +127,9 @@ import {
   AnimeSearchService,
   WaifuImClient,
   WallhavenClient,
+  ZerochanClient,
+  KonachanClient,
+  WallpaperService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -176,7 +179,8 @@ export interface BotServices {
   /** MyAnimeList-first anime/manga/character search with AniList fallback and caching. */
   animeSearchService: AnimeSearchService;
   waifuImClient: WaifuImClient;
-  wallhavenClient: WallhavenClient;
+  /** WallHaven, Zerochan and Konachan wallpaper search for /wallpaper. */
+  wallpaperService: WallpaperService;
   securityInterceptor: ToolSecurityInterceptor;
   toolExecutor: MediatedToolExecutor;
   fallbackChainManager: FallbackChainManager;
@@ -399,7 +403,11 @@ export async function createBotServices(
     anilist: anilistClient,
   });
   const waifuImClient = new WaifuImClient({ maxRetries: 1, timeoutMs: 5000 });
-  const wallhavenClient = new WallhavenClient({ maxRetries: 1, timeoutMs: 5000 });
+  const wallpaperService = new WallpaperService({
+    wallhaven: new WallhavenClient({ maxRetries: 1, timeoutMs: 5000 }),
+    zerochan: new ZerochanClient({ maxRetries: 1, timeoutMs: 5000 }),
+    konachan: new KonachanClient({ maxRetries: 1, timeoutMs: 5000 }),
+  });
   toolRegistry.register(
     new AnimeSearchTool(async (title: string) => {
       const [media] = await anilistClient.searchMedia(title, { type: 'ANIME', perPage: 1 });
@@ -799,7 +807,7 @@ export async function createBotServices(
     anilistClient,
     animeSearchService,
     waifuImClient,
-    wallhavenClient,
+    wallpaperService,
     securityInterceptor,
     toolExecutor,
     fallbackChainManager,

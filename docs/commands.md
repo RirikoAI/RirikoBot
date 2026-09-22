@@ -248,14 +248,28 @@ Selecting a specific command displays:
   - Service: `AnimeSearchService` in `packages/services/src/anime`, exposed as `services.animeSearchService`.
 
 ### 6.2. Waifu Images (`/waifu`)
-- `/waifu [tag]` (Prefix: `!waifu [tag]`)
-  - Sends a random image from waifu.im (`/images` endpoint, API v7). The default tag is `selfies`, as in 1.4.0. The embed shows the tags, the favorite count, and the artist with a link.
-  - Tags are limited to a fixed SFW allowlist (`WAIFU_IM_SFW_TAGS`). Adult images are never requested.
-  - **Another one** button: fetches a new image with the same tag. Only the invoker can use it.
-  - The footer points to `/tcg-info`, to link the command to the Waifu TCG.
+- `/waifu` (Prefix: `!waifu`)
+  - Sends a random SFW image from waifu.im (`/images` endpoint, API v7). The embed matches 1.4.0: tags, favorite count, and the artist with a link. The footer points to `/tcg-info`.
+  - **Another one** button: regenerates the image. Only the invoker can use it. The bot asks for 10 random images and prefers one the user has not seen yet, because waifu.im repeats its random pick for a few seconds.
+  - Uses the `waifu` tag. 1.4.0 used `selfies`, but only 3 SFW images carry that tag today.
 
 ### 6.3. Anime Wallpapers (`/wallpaper`)
-- `/wallpaper [search]` (Prefix: `!wallpaper [search]`, `!wallpapers`)
-  - Searches the Wallhaven REST API, always limited to the Anime category and SFW purity. With a search term, results are ordered by relevance. Without one, they are random.
-  - ◀️ / ▶️ page through up to 24 results. A **Full resolution** link button opens the original file. Only the invoker can page.
-  - Replaces the 1.4.0 scrapers (WallHaven HTML, Wallpapers.com, MoeWalls, Pinterest, ZeroChan) and their source picker.
+- `/wallpaper search:<keyword>` (Prefix: `!wallpaper <keyword>`, `!wallpapers`)
+  - Same interactive flow as 1.4.0:
+    1. A menu to pick a source.
+    2. 3 random wallpapers from that source.
+    3. A menu with **Load another wallpaper**, **Select another source**, and **No, I am done**.
+  - Improvements over 1.4.0:
+    - One message is edited in place instead of stacking follow-up menus.
+    - Wallpapers already shown are never repeated, and the next page is fetched only when needed.
+    - A failing source leads back to the source menu with an explanation.
+    - Only the invoker can use the menus.
+  - Sources: all three use documented JSON APIs and are SFW-only.
+    - **WallHaven** (anime category, SFW purity).
+    - **Zerochan** (JSON API, identifying User-Agent).
+    - **Konachan** (konachan.net, `rating:safe`).
+  - Dropped 1.4.0 sources:
+    - Wallpapers.com: no API, and its search pages mix unrelated images.
+    - MoeWalls: behind a Cloudflare challenge.
+    - Pinterest: rejects API requests.
+  - Service: `WallpaperService` (`packages/services/src/anime/wallpaper.service.ts`), exposed as `services.wallpaperService`.
