@@ -123,6 +123,8 @@ import {
   AutoRoleService,
   ReactionRoleService,
   AniListClient,
+  JikanClient,
+  AnimeSearchService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -169,6 +171,8 @@ export interface BotServices {
   toolRegistry: ToolRegistry;
   /** Shared AniList client; one per process so every caller shares the AniList rate limit. */
   anilistClient: AniListClient;
+  /** MyAnimeList-first anime/manga/character search with AniList fallback and caching. */
+  animeSearchService: AnimeSearchService;
   securityInterceptor: ToolSecurityInterceptor;
   toolExecutor: MediatedToolExecutor;
   fallbackChainManager: FallbackChainManager;
@@ -385,6 +389,11 @@ export async function createBotServices(
   toolRegistry.register(new CoinFlipTool());
   // Interactive callers (AI chat, commands) fail fast instead of using the batch retry defaults.
   const anilistClient = new AniListClient({ maxRetries: 1, timeoutMs: 5000 });
+  // No retries: on failure the search service answers from AniList and pauses Jikan briefly.
+  const animeSearchService = new AnimeSearchService({
+    jikan: new JikanClient({ maxRetries: 0, timeoutMs: 5000 }),
+    anilist: anilistClient,
+  });
   toolRegistry.register(
     new AnimeSearchTool(async (title: string) => {
       const [media] = await anilistClient.searchMedia(title, { type: 'ANIME', perPage: 1 });
@@ -782,6 +791,7 @@ export async function createBotServices(
     personalityEngine,
     toolRegistry,
     anilistClient,
+    animeSearchService,
     securityInterceptor,
     toolExecutor,
     fallbackChainManager,
