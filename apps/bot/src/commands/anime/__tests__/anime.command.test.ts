@@ -1,6 +1,4 @@
-import { EventEmitter } from 'node:events';
 import { describe, it, expect, vi } from 'vitest';
-import type { CommandContext } from '@ririko/discord';
 import type { AnimeCharacterDetails, AnimeMediaDetails } from '@ririko/services';
 import type { BotServices } from '../../../services.js';
 import {
@@ -9,6 +7,7 @@ import {
   createMangaCommand,
 } from '../search.command.js';
 import { buildMediaEmbed, humanize, mediaOption } from '../embeds.js';
+import { flush, makeContext, selectInteraction } from './helpers.js';
 
 const frieren: AnimeMediaDetails = {
   source: 'myanimelist',
@@ -53,42 +52,9 @@ const rem: AnimeCharacterDetails = {
   voiceActors: ['Inori Minase'],
 };
 
-function makeContext(search: string | null, options: { nsfw?: boolean; userId?: string } = {}) {
-  const collector = Object.assign(new EventEmitter(), { resetTimer: vi.fn() });
-  const message = {
-    createMessageComponentCollector: vi.fn().mockReturnValue(collector),
-    edit: vi.fn().mockResolvedValue(undefined),
-  };
-  const ctx = {
-    commandName: 'anime',
-    user: { id: options.userId ?? 'user-1' },
-    channel: { nsfw: options.nsfw ?? false },
-    options: { getString: vi.fn().mockReturnValue(search) },
-    reply: vi.fn().mockResolvedValue(undefined),
-    deferReply: vi.fn().mockResolvedValue(undefined),
-    editReply: vi.fn().mockResolvedValue(message),
-  };
-  return { ctx: ctx as unknown as CommandContext, raw: ctx, collector, message };
-}
-
-function selectInteraction(value: string, userId = 'user-1') {
-  return {
-    customId: 'anime:select',
-    values: [value],
-    user: { id: userId },
-    isStringSelectMenu: () => true,
-    reply: vi.fn().mockResolvedValue(undefined),
-    deferUpdate: vi.fn().mockResolvedValue(undefined),
-    editReply: vi.fn().mockResolvedValue(undefined),
-    followUp: vi.fn().mockResolvedValue(undefined),
-  };
-}
-
 function servicesWith(search: Partial<BotServices['animeSearchService']>): BotServices {
   return { animeSearchService: search } as unknown as BotServices;
 }
-
-const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('Anime search commands (TASK-1423)', () => {
   it('lists results in a select menu and shows details for the picked entry', async () => {

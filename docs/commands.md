@@ -246,3 +246,16 @@ Selecting a specific command displays:
   - Character detail fields: Japanese name, description, nicknames, favourites, anime, manga, and Japanese voice actors.
   - Adult entries are excluded unless the channel is age-restricted. Search results are cached in memory for 10 minutes.
   - Service: `AnimeSearchService` in `packages/services/src/anime`, exposed as `services.animeSearchService`.
+
+### 6.2. Waifu Images (`/waifu`)
+- `/waifu [tag]` (Prefix: `!waifu [tag]`)
+  - Sends a random image from waifu.im (`/images` endpoint, API v7). The default tag is `selfies`, as in 1.4.0. The embed shows the tags, the favorite count, and the artist with a link.
+  - Tags are limited to a fixed SFW allowlist (`WAIFU_IM_SFW_TAGS`). Adult images are never requested.
+  - **Another one** button: fetches a new image with the same tag. Only the invoker can use it.
+  - The footer points to `/tcg-info`, to link the command to the Waifu TCG.
+
+### 6.3. Anime Wallpapers (`/wallpaper`)
+- `/wallpaper [search]` (Prefix: `!wallpaper [search]`, `!wallpapers`)
+  - Searches the Wallhaven REST API, always limited to the Anime category and SFW purity. With a search term, results are ordered by relevance. Without one, they are random.
+  - ◀️ / ▶️ page through up to 24 results. A **Full resolution** link button opens the original file. Only the invoker can page.
+  - Replaces the 1.4.0 scrapers (WallHaven HTML, Wallpapers.com, MoeWalls, Pinterest, ZeroChan) and their source picker.
