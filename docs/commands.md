@@ -233,3 +233,16 @@ Selecting a specific command displays:
     10. `guild`: WaifuGuild factions, leveling, and vaults.
     11. `achievements`: 6 tracks, 5 tiers, and multi-asset rewards.
 
+
+## 6. Anime & Manga Commands (`anime` category)
+
+### 6.1. Search Commands (`/anime`, `/manga`, `/anime-character`)
+- `/anime search:<title>` (Prefix: `!anime <title>`)
+- `/manga search:<title>` (Prefix: `!manga <title>`)
+- `/anime-character search:<name>` (Prefix: `!anime-character <name>`, `!character <name>`)
+  - Flow: search, then a `StringSelectMenu` with up to 10 results, then a detail embed. The menu stays under the detail embed so the invoker can pick another result. Only the invoker can use the menu. It is removed after 2 minutes without use.
+  - Data source: MyAnimeList (through Jikan v4) answers first, to keep 1.4.0 parity. If Jikan fails, AniList answers, and Jikan is skipped for 60 seconds so an outage does not slow every search. The embed author line names the source that answered.
+  - Anime and manga detail fields: score, episodes or chapters/volumes, popularity (MAL rank or AniList member count), type, status, genres, start and end dates, age rating (MAL only), studios and producers (anime) or authors and serialization (manga).
+  - Character detail fields: Japanese name, description, nicknames, favourites, anime, manga, and Japanese voice actors.
+  - Adult entries are excluded unless the channel is age-restricted. Search results are cached in memory for 10 minutes.
+  - Service: `AnimeSearchService` in `packages/services/src/anime`, exposed as `services.animeSearchService`.

@@ -132,7 +132,7 @@
     {
       "id": "EPIC-014",
       "title": "Server Utilities, AutoRoles & Community Systems",
-      "points": 13,
+      "points": 21,
       "status": "BACKLOG",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"],
@@ -657,8 +657,8 @@
       "id": "STORY-142",
       "epic": "EPIC-014",
       "title": "Anime & Manga Search Service (Jikan v4 & AniList API)",
-      "points": 3,
-      "status": "BACKLOG",
+      "points": 5,
+      "status": "DONE",
       "requires": ["EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -669,6 +669,15 @@
       "points": 2,
       "status": "BACKLOG",
       "requires": ["EPIC-002", "EPIC-003"],
+      "blocks": ["EPIC-011"]
+    },
+    {
+      "id": "STORY-144",
+      "epic": "EPIC-014",
+      "title": "Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs",
+      "points": 3,
+      "status": "TODO",
+      "requires": ["CHORE-1401"],
       "blocks": ["EPIC-011"]
     },
     {
@@ -1768,6 +1777,51 @@
       "points": 1,
       "status": "DONE",
       "requires": ["TASK-1602"],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1421",
+      "parent": "STORY-142",
+      "title": "Jikan v4 Client (Anime, Manga, Characters: Search & Full Details, SFW, Rate-Limited)",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["CHORE-1401"],
+      "blocks": ["TASK-1422"]
+    },
+    {
+      "id": "TASK-1422",
+      "parent": "STORY-142",
+      "title": "AnimeSearchService: Source-Neutral Models, Jikan-to-AniList Fallback, TTL Cache & AniList Detail Queries",
+      "points": 2,
+      "status": "DONE",
+      "requires": ["TASK-1421"],
+      "blocks": ["TASK-1423"]
+    },
+    {
+      "id": "TASK-1423",
+      "parent": "STORY-142",
+      "title": "/anime, /manga, /anime-character Commands: Search Select Menu, Detail Embeds & Prefix Parity",
+      "points": 1,
+      "status": "DONE",
+      "requires": ["TASK-1422"],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1441",
+      "parent": "STORY-144",
+      "title": "Move WaifuImClient to Shared anime Module on fetchWithRetry & /waifu Command",
+      "points": 1,
+      "status": "TODO",
+      "requires": ["CHORE-1401"],
+      "blocks": ["TASK-1442"]
+    },
+    {
+      "id": "TASK-1442",
+      "parent": "STORY-144",
+      "title": "WallHaven REST Client (SFW Anime Wallpapers) & /wallpaper Command Replacing Legacy Scrapers",
+      "points": 2,
+      "status": "TODO",
+      "requires": ["TASK-1441"],
       "blocks": []
     }
   ],
