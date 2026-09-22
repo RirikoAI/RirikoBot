@@ -58,15 +58,23 @@ Delivered the complete dual-dispatch (Slash & Prefix) server utility, identity, 
    - Wired `CommandRouter` with `resolvePrefix: async (msg) => services.guildSettingsService.getPrefix(msg.guildId)`.
    - Messages are routed dynamically with zero database overhead on every message.
 
+8. **Dynamic Server Prefix Across Help Pages (`packages/discord/src/help/`, `apps/bot/src/main.ts`)**:
+   - Extended `HelpOptions` with `resolvePrefix?: (guildId?: string | null) => string | Promise<string>`.
+   - Category command listings now display `(Prefix: `${prefix}${name}`)` for every command (with aliases if present), even if the command has no aliases.
+   - Command inspector examples are dynamically formatted to replace `!` or `$` with the server's configured prefix.
+   - Interactive components (buttons and select menus) resolve the active prefix for the guild where the interaction occurred.
+   - Dynamic prefix formatting integrated into Waifu TCG guides and timezone configuration embeds.
+
 ---
 
 ## 2. Verification & Testing
 
+- `packages/discord/src/help/help.test.ts`: 17 tests passing.
 - `packages/services/src/guild/__tests__/guild-settings.service.test.ts`: 14 tests passing.
 - `apps/bot/src/commands/utility/__tests__/settings.commands.test.ts`: 15 tests passing.
 - `apps/bot/src/commands/utility/__tests__/identity.commands.test.ts`: 9 tests passing.
 - `apps/bot/src/commands/reminders/__tests__/reminder.command.test.ts`: 8 tests passing.
-- Total Vitest tests: 46 passing.
+- Total Vitest tests: 63 passing in domain suites (1,463 passing across entire monorepo).
 - Monorepo TypeScript check (`pnpm typecheck`): 8 workspace projects clean with 0 errors.
 
 ---
