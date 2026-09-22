@@ -2,10 +2,29 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createDatabaseClient, WaifuAssetRepository } from '@ririko/database';
 import type { SqliteDatabaseClient } from '@ririko/database';
 import { ImageValidator } from '../ingestion/image-validator.js';
-import { WaifuImClient } from '../ingestion/waifu-im.client.js';
-import { IngestionService } from '../ingestion/ingestion-service.js';
+import { WaifuImClient } from '../../anime/waifu-im.client.js';
+import { RateLimiter } from '../../http/rate-limiter.js';
+import { IngestionService, extractWaifuImMetadata } from '../ingestion/ingestion-service.js';
 import { createMockPngBuffer, CANONICAL_SEED_ASSETS } from '../ingestion/seed-assets.js';
-import type { WaifuImSearchResponse } from '../types.js';
+
+const instantLimiter = () => new RateLimiter(0, { sleep: () => Promise.resolve() });
+
+/** Minimal waifu.im v7 `/images` item. */
+function waifuImItem(id: number, tagSlugs: string[]) {
+  return {
+    id,
+    url: `https://cdn.waifu.im/${id}.png`,
+    extension: '.png',
+    source: null,
+    isNsfw: false,
+    width: 600,
+    height: 900,
+    dominantColor: null,
+    favorites: 0,
+    tags: tagSlugs.map((slug) => ({ name: slug, slug })),
+    artists: [],
+  };
+}
 
 describe('Waifu Ingestion Pipeline & Validation (TASK-1001)', () => {
   describe('ImageValidator', () => {
@@ -63,61 +82,21 @@ describe('Waifu Ingestion Pipeline & Validation (TASK-1001)', () => {
     });
   });
 
-  describe('WaifuImClient', () => {
-    it('should query API and extract character metadata', async () => {
-      const mockResponse: WaifuImSearchResponse = {
-        images: [
-          {
-            image_id: 101,
-            signature: 'sig_101',
-            extension: '.png',
-            image: 'https://cdn.waifu.im/101.png',
-            width: 600,
-            height: 900,
-            tags: [{ name: 'makima', is_nsfw: false }, { name: 'suit', is_nsfw: false }],
-          },
+  describe('extractWaifuImMetadata', () => {
+    it('names the card after the first non-generic tag', () => {
+      const meta = extractWaifuImMetadata({
+        ...waifuImItem(101, ['maid', 'raiden-shogun']),
+        tags: [
+          { name: 'Maid', slug: 'maid' },
+          { name: 'Raiden Shogun', slug: 'raiden-shogun' },
         ],
-      };
-
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => mockResponse,
       });
-
-      const client = new WaifuImClient({
-        fetchFn: mockFetch as unknown as typeof fetch,
-      });
-
-      const images = await client.search({ tags: ['makima'] });
-      expect(images).toHaveLength(1);
-      expect(images[0]?.image_id).toBe(101);
-
-      const metadata = client.extractMetadata(images[0]!);
-      expect(metadata.characterName).toBe('Makima');
-      expect(metadata.tags).toEqual(['makima', 'suit']);
+      expect(meta.characterName).toBe('Raiden Shogun');
+      expect(meta.tags).toEqual(['maid', 'raiden-shogun']);
     });
 
-    it('should retry with backoff on HTTP 429 rate limit', async () => {
-      const mockResponse: WaifuImSearchResponse = { images: [] };
-
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValueOnce({ ok: false, status: 429 })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          json: async () => mockResponse,
-        });
-
-      const client = new WaifuImClient({
-        fetchFn: mockFetch as unknown as typeof fetch,
-        maxRetries: 2,
-      });
-
-      const images = await client.search();
-      expect(images).toEqual([]);
-      expect(mockFetch).toHaveBeenCalledTimes(2);
+    it('falls back to a numbered name when only generic tags exist', () => {
+      expect(extractWaifuImMetadata(waifuImItem(12345, ['waifu'])).characterName).toBe('Waifu #2345');
     });
   });
 
@@ -205,21 +184,10 @@ describe('Waifu Ingestion Pipeline & Validation (TASK-1001)', () => {
 
     it('should ingest and deduplicate images by SHA-256 content hash', async () => {
       const samplePng = createMockPngBuffer(600, 900);
-      const mockImageMeta: WaifuImSearchResponse = {
-        images: [
-          {
-            image_id: 999,
-            signature: 'sig_999',
-            extension: '.png',
-            image: 'https://cdn.waifu.im/999.png',
-            width: 600,
-            height: 900,
-            tags: [{ name: 'kurumi_tokisaki' }],
-          },
-        ],
-      };
+      const mockImageMeta = { items: [waifuImItem(999, ['kurumi_tokisaki'])] };
 
       const mockClient = new WaifuImClient({
+        limiter: instantLimiter(),
         fetchFn: vi
           .fn()
           .mockResolvedValueOnce({
@@ -247,6 +215,7 @@ describe('Waifu Ingestion Pipeline & Validation (TASK-1001)', () => {
 
       // Re-ingesting identical binary must detect duplicate hash and skip insertion
       const duplicateClient = new WaifuImClient({
+        limiter: instantLimiter(),
         fetchFn: vi
           .fn()
           .mockResolvedValueOnce({

@@ -16,10 +16,17 @@ describe('AniListClient', () => {
   const page = (characters: unknown[]) => jsonResponse({ data: { Page: { characters } } });
   const aniChar = (id: number, name: string, titles: string[], favourites = 10) => ({
     id,
-    name: { full: name },
+    name: { full: name, native: null, alternative: null },
     image: { large: `https://img/${id}.png` },
     favourites,
-    media: { nodes: titles.map((t) => ({ title: { romaji: t, english: null } })) },
+    description: null,
+    siteUrl: `https://anilist.co/character/${id}`,
+    media: {
+      edges: titles.map((t) => ({
+        node: { type: 'ANIME', title: { romaji: t, english: null } },
+        voiceActors: [],
+      })),
+    },
   });
 
   it('prefers the result whose media matches the anime title', async () => {
@@ -57,7 +64,23 @@ describe('AniListClient', () => {
       status: 'FINISHED',
       format: 'TV',
       genres: null,
-      startDate: { year: 2023 },
+      popularity: 5000,
+      startDate: { year: 2023, month: 9, day: 29 },
+      endDate: { year: 2024, month: 3, day: null },
+      studios: {
+        edges: [
+          { isMain: true, node: { name: 'Madhouse', isAnimationStudio: true } },
+          { isMain: true, node: { name: 'Aniplex', isAnimationStudio: false } },
+          { isMain: false, node: { name: 'Side Studio', isAnimationStudio: true } },
+        ],
+      },
+      staff: {
+        edges: [
+          { role: 'Story', node: { name: { full: 'Kanehito Yamada' } } },
+          { role: 'Director', node: { name: { full: 'Keiichirou Saitou' } } },
+          { role: 'Art (assistance)', node: { name: { full: 'Studio Gaga' } } },
+        ],
+      },
       coverImage: { large: `https://img/${id}.jpg` },
       siteUrl: `https://anilist.co/anime/${id}`,
       isAdult: null,
@@ -76,7 +99,12 @@ describe('AniListClient', () => {
         id: 5,
         idMal: 1005,
         genres: [],
-        startYear: 2023,
+        startDate: '2023-09-29',
+        endDate: '2024-03',
+        studios: ['Madhouse'],
+        producers: ['Aniplex'],
+        authors: ['Kanehito Yamada'],
+        popularity: 5000,
         coverImageUrl: 'https://img/5.jpg',
         isAdult: false,
       });
@@ -106,6 +134,62 @@ describe('AniListClient', () => {
 
       await expect(client.searchMedia('x')).rejects.toThrow('Bad query');
       await expect(client.searchMedia('x')).rejects.toThrow('HTTP 404');
+    });
+  });
+
+  describe('characters', () => {
+    const richCharacter = {
+      id: 88,
+      name: { full: 'Rem', native: 'レム', alternative: ['Oni Maid', ''] },
+      image: { large: 'https://img/88.png' },
+      favourites: 5000,
+      description: 'Twin maid.',
+      siteUrl: 'https://anilist.co/character/88',
+      media: {
+        edges: [
+          {
+            node: { type: 'ANIME', title: { romaji: 'Re:Zero kara Hajimeru Isekai Seikatsu', english: 'Re:ZERO' } },
+            voiceActors: [{ name: { full: 'Inori Minase' } }],
+          },
+          {
+            node: { type: 'ANIME', title: { romaji: 'Re:Zero 2nd Season', english: 'Re:ZERO' } },
+            voiceActors: [{ name: { full: 'Inori Minase' } }],
+          },
+          { node: { type: 'MANGA', title: { romaji: 'Re:Zero Manga', english: null } }, voiceActors: null },
+        ],
+      },
+    };
+
+    it('splits media by type and de-duplicates titles and voice actors', async () => {
+      const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(page([richCharacter]));
+      const client = new AniListClient({ limiter: instantLimiter(), fetchFn });
+
+      const [rem] = await client.searchCharacters('Rem', { perPage: 3 });
+
+      expect(rem).toMatchObject({
+        name: 'Rem',
+        nativeName: 'レム',
+        alternativeNames: ['Oni Maid'],
+        animeTitles: ['Re:ZERO'],
+        mangaTitles: ['Re:Zero Manga'],
+        voiceActors: ['Inori Minase'],
+      });
+      expect(rem!.mediaTitles).toContain('Re:Zero 2nd Season');
+      const body = JSON.parse(fetchFn.mock.calls[0]![1]!.body as string);
+      expect(body.variables).toEqual({ search: 'Rem', perPage: 3 });
+    });
+
+    it('loads a character by id and returns null when AniList answers 404', async () => {
+      const fetchFn = vi
+        .fn<typeof fetch>()
+        .mockResolvedValueOnce(jsonResponse({ data: { Character: richCharacter } }))
+        .mockResolvedValueOnce(
+          jsonResponse({ data: { Character: null }, errors: [{ message: 'Not Found.' }] }, 404),
+        );
+      const client = new AniListClient({ limiter: instantLimiter(), fetchFn });
+
+      expect((await client.getCharacter(88))?.name).toBe('Rem');
+      expect(await client.getCharacter(1)).toBeNull();
     });
   });
 });
