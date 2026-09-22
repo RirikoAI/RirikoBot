@@ -30,7 +30,7 @@ const SOURCE_AUTHOR: Record<AnimeDataSource, { name: string; iconURL: string; co
 const NA = 'N/A';
 
 /** Upstream URLs are untrusted; discord.js throws on anything that is not http(s). */
-const httpUrl = (value: string | null) => (value && /^https?:\/\/\S+$/i.test(value) ? value : null);
+export const httpUrl = (value: string | null) => (value && /^https?:\/\/\S+$/i.test(value) ? value : null);
 
 /** `FINISHED_AIRING` / `Finished Airing` → `Finished Airing`; keeps short codes like `TV`. */
 export function humanize(value: string | null | undefined): string {

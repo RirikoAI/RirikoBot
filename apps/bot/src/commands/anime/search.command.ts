@@ -11,8 +11,8 @@ import {
   characterOption,
   mediaOption,
 } from './embeds.js';
+import { attachOwnerCollector } from './owner-collector.js';
 
-const COLLECTOR_TIME_MS = 120_000;
 const MAX_QUERY_LENGTH = 100;
 
 interface SearchFlow<T> {
@@ -64,28 +64,13 @@ async function runSearchFlow<T>(ctx: CommandContext, flow: SearchFlow<T>): Promi
     embeds: [buildResultListEmbed(result.source, `🔍 ${capitalize(flow.noun)} search`, query, items.length)],
     components: [menu],
   });
-  if (typeof message?.createMessageComponentCollector !== 'function') return;
-
-  const collector = message.createMessageComponentCollector({
-    filter: (i) => i.customId === ANIME_SELECT_ID,
-    time: COLLECTOR_TIME_MS,
-  });
-
-  collector.on('collect', async (interaction) => {
-    if (!interaction.isStringSelectMenu()) return;
-    if (interaction.user.id !== ctx.user.id) {
-      await interaction.reply({
-        content: `⏳ This menu belongs to someone else. Run \`/${ctx.commandName}\` to start your own search.`,
-        ephemeral: true,
-      });
-      return;
-    }
-    collector.resetTimer();
-    await showSelection(interaction, items, result.source, flow, menu);
-  });
-
-  collector.on('end', async () => {
-    await message.edit({ components: [] }).catch(() => undefined);
+  attachOwnerCollector(message, {
+    ownerId: ctx.user.id,
+    customIds: [ANIME_SELECT_ID],
+    notOwnerHint: `⏳ This menu belongs to someone else. Run \`/${ctx.commandName}\` to start your own search.`,
+    onCollect: async (interaction) => {
+      if (interaction.isStringSelectMenu()) await showSelection(interaction, items, result.source, flow, menu);
+    },
   });
 }
 

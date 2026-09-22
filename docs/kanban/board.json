@@ -676,7 +676,7 @@
       "epic": "EPIC-014",
       "title": "Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["CHORE-1401"],
       "blocks": ["EPIC-011"]
     },
@@ -1811,7 +1811,7 @@
       "parent": "STORY-144",
       "title": "Move WaifuImClient to Shared anime Module on fetchWithRetry & /waifu Command",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["CHORE-1401"],
       "blocks": ["TASK-1442"]
     },
@@ -1820,7 +1820,7 @@
       "parent": "STORY-144",
       "title": "WallHaven REST Client (SFW Anime Wallpapers) & /wallpaper Command Replacing Legacy Scrapers",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-1441"],
       "blocks": []
     }

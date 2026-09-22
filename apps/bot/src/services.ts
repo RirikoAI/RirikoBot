@@ -125,6 +125,8 @@ import {
   AniListClient,
   JikanClient,
   AnimeSearchService,
+  WaifuImClient,
+  WallhavenClient,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -173,6 +175,8 @@ export interface BotServices {
   anilistClient: AniListClient;
   /** MyAnimeList-first anime/manga/character search with AniList fallback and caching. */
   animeSearchService: AnimeSearchService;
+  waifuImClient: WaifuImClient;
+  wallhavenClient: WallhavenClient;
   securityInterceptor: ToolSecurityInterceptor;
   toolExecutor: MediatedToolExecutor;
   fallbackChainManager: FallbackChainManager;
@@ -394,6 +398,8 @@ export async function createBotServices(
     jikan: new JikanClient({ maxRetries: 0, timeoutMs: 5000 }),
     anilist: anilistClient,
   });
+  const waifuImClient = new WaifuImClient({ maxRetries: 1, timeoutMs: 5000 });
+  const wallhavenClient = new WallhavenClient({ maxRetries: 1, timeoutMs: 5000 });
   toolRegistry.register(
     new AnimeSearchTool(async (title: string) => {
       const [media] = await anilistClient.searchMedia(title, { type: 'ANIME', perPage: 1 });
@@ -792,6 +798,8 @@ export async function createBotServices(
     toolRegistry,
     anilistClient,
     animeSearchService,
+    waifuImClient,
+    wallhavenClient,
     securityInterceptor,
     toolExecutor,
     fallbackChainManager,
