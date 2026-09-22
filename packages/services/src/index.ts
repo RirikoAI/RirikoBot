@@ -7,3 +7,5 @@ export * from './autovoice/index.js';
 export * from './games/index.js';
 export * from './waifu-tcg/index.js';
 export * from './roles/index.js';
+export * from './http/index.js';
+export * from './anime/index.js';

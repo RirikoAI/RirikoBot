@@ -122,6 +122,7 @@ import {
   TcgConfigService,
   AutoRoleService,
   ReactionRoleService,
+  AniListClient,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -166,6 +167,8 @@ export interface BotServices {
   conversationManager: ConversationManager;
   personalityEngine: PersonalityEngine;
   toolRegistry: ToolRegistry;
+  /** Shared AniList client; one per process so every caller shares the AniList rate limit. */
+  anilistClient: AniListClient;
   securityInterceptor: ToolSecurityInterceptor;
   toolExecutor: MediatedToolExecutor;
   fallbackChainManager: FallbackChainManager;
@@ -380,7 +383,22 @@ export async function createBotServices(
   const toolRegistry = new ToolRegistry();
   toolRegistry.register(new TimeTool());
   toolRegistry.register(new CoinFlipTool());
-  toolRegistry.register(new AnimeSearchTool());
+  // Interactive callers (AI chat, commands) fail fast instead of using the batch retry defaults.
+  const anilistClient = new AniListClient({ maxRetries: 1, timeoutMs: 5000 });
+  toolRegistry.register(
+    new AnimeSearchTool(async (title: string) => {
+      const [media] = await anilistClient.searchMedia(title, { type: 'ANIME', perPage: 1 });
+      if (!media) return null;
+      return {
+        title: media.title.english || media.title.romaji || media.title.native || title,
+        synopsis: media.description?.slice(0, 400) || 'No description available.',
+        score: media.averageScore ? media.averageScore / 10 : undefined,
+        episodes: media.episodes ?? undefined,
+        status: media.status ?? undefined,
+        url: media.siteUrl ?? undefined,
+      };
+    }),
+  );
   toolRegistry.register(new ReminderTool());
   toolRegistry.register(new MusicPlayTool());
   toolRegistry.register(
@@ -763,6 +781,7 @@ export async function createBotServices(
     conversationManager,
     personalityEngine,
     toolRegistry,
+    anilistClient,
     securityInterceptor,
     toolExecutor,
     fallbackChainManager,

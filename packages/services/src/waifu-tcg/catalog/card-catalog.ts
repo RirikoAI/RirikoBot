@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { CardElement, CardRarity } from '../types.js';
 import { ORDERED_RARITY_TIERS } from '../rarity/rarity-engine.js';
-import { titlesMatch } from './anilist.client.js';
+import { titlesMatch } from '../../anime/titles.js';
 
 /** Asset tag marking a character's card as part of the random starter pool. */
 export const STARTER_POOL_TAG = 'starter_pool';

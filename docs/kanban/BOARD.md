@@ -36,6 +36,7 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `CHORE-1401` | Chore | Shared AniList Client & HTTP Rate-Limit Layer (Decouple from Waifu TCG) | 2 | `EPIC-014` | [CHORE-1401.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1401.md) |
 | `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | [STORY-140.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-140.md) |
 | `TASK-1405` | Task | Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites | 1 | `STORY-140` | [TASK-1405.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1405.md) |
 | `TASK-1404` | Task | Dual-Dispatch Commands (/autorole, /create-reaction-role, /reaction-roles, /temprole) with Slash & Prefix Parity | 1 | `STORY-140` | [TASK-1404.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1404.md) |

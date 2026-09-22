@@ -1808,6 +1808,15 @@
       "requires": [],
       "blocks": [],
       "description": "Ungroomed. apps/bot/src/main.ts falls back to '!' when DEFAULT_PREFIX is unset, .env.example sets '$', help uses the configured prefix, but /tcg-info and docs hard-code '$' or '!' in places. Pick one default and render guide examples from the configured prefix."
+    },
+    {
+      "id": "CHORE-1401",
+      "title": "Shared AniList Client & HTTP Rate-Limit Layer (Decouple from Waifu TCG)",
+      "points": 2,
+      "status": "DONE",
+      "requires": [],
+      "blocks": ["STORY-142"],
+      "description": "Move AniListClient and RateLimiter/fetchWithRetry out of waifu-tcg/catalog into packages/services/src/anime and src/http, add searchMedia and request timeouts, and inject one shared rate-limited client into the AI anime.search tool (removing its inline GraphQL fetch). Prepares STORY-142."
     }
   ],
   "bugs": [
