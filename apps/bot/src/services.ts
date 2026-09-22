@@ -30,6 +30,7 @@ import {
   TcgConfigRepository,
   ReactionRoleRepository,
   AutoRoleRepository,
+  ReminderRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -130,6 +131,10 @@ import {
   ZerochanClient,
   KonachanClient,
   WallpaperService,
+  ReminderService,
+  ReminderScheduler,
+  createDiscordReminderDelivery,
+  resolveTimeZone,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -179,6 +184,11 @@ export interface BotServices {
   /** MyAnimeList-first anime/manga/character search with AniList fallback and caching. */
   animeSearchService: AnimeSearchService;
   waifuImClient: WaifuImClient;
+  reminderService: ReminderService;
+  /** Null when no Discord client was supplied (tests); started on gateway READY. */
+  reminderScheduler: ReminderScheduler | null;
+  /** Zone for reading reminder times: the user's saved zone, then the guild's, then UTC. */
+  resolveUserTimeZone: (userId: string, guildId: string | null) => Promise<string>;
   /** WallHaven, Zerochan and Konachan wallpaper search for /wallpaper. */
   wallpaperService: WallpaperService;
   securityInterceptor: ToolSecurityInterceptor;
@@ -422,7 +432,36 @@ export async function createBotServices(
       };
     }),
   );
-  toolRegistry.register(new ReminderTool());
+  const reminderRepo = new ReminderRepository(db);
+  const reminderService = new ReminderService({ repo: reminderRepo });
+  const resolveUserTimeZone = async (userId: string, guildId: string | null): Promise<string> => {
+    const [userPrefs, guildSettings] = await Promise.all([
+      conversationManager.getUserPreferences(userId).catch(() => null),
+      guildId ? guildSettingsRepo.getByGuildId(guildId).catch(() => null) : Promise.resolve(null),
+    ]);
+    return resolveTimeZone(userPrefs?.timezone, guildSettings?.timezone);
+  };
+  const reminderScheduler = discordClient
+    ? new ReminderScheduler({
+        repo: reminderRepo,
+        deliver: createDiscordReminderDelivery(discordClient),
+        resolveTimeZone: resolveUserTimeZone,
+      })
+    : null;
+  toolRegistry.register(
+    new ReminderTool(async (args, context) => {
+      if (!context.channelId) throw new Error('Reminders need a channel to fall back to.');
+      const reminder = await reminderService.create({
+        userId: context.userId,
+        guildId: context.guildId ?? null,
+        channelId: context.channelId,
+        when: args.timeString,
+        message: args.message,
+        timeZone: resolveTimeZone(context.userTimezone, context.guildTimezone),
+      });
+      return { message: reminder.message, triggerAt: reminder.triggerAt };
+    }),
+  );
   toolRegistry.register(new MusicPlayTool());
   toolRegistry.register(
     new EconomyBalanceTool(async (userId: string) => {
@@ -807,6 +846,9 @@ export async function createBotServices(
     anilistClient,
     animeSearchService,
     waifuImClient,
+    reminderService,
+    reminderScheduler,
+    resolveUserTimeZone,
     wallpaperService,
     securityInterceptor,
     toolExecutor,

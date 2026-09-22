@@ -9,7 +9,7 @@ import { CommandCategory, type Command, type CommandContext } from '@ririko/disc
 import type { WaifuImImage } from '@ririko/services';
 import type { BotServices } from '../../services.js';
 import { httpUrl, truncate } from './embeds.js';
-import { attachOwnerCollector } from './owner-collector.js';
+import { attachOwnerCollector } from '../shared/owner-collector.js';
 
 export const WAIFU_REROLL_ID = 'waifu:reroll';
 /**

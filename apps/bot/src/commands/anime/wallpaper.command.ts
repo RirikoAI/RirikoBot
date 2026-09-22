@@ -14,7 +14,7 @@ import {
 } from '@ririko/services';
 import type { BotServices } from '../../services.js';
 import { httpUrl, truncate } from './embeds.js';
-import { attachOwnerCollector } from './owner-collector.js';
+import { attachOwnerCollector } from '../shared/owner-collector.js';
 
 export const WALLPAPER_SOURCE_ID = 'wallpaper:source';
 export const WALLPAPER_ACTION_ID = 'wallpaper:action';

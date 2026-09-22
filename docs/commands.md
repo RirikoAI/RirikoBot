@@ -273,3 +273,14 @@ Selecting a specific command displays:
     - MoeWalls: behind a Cloudflare challenge.
     - Pinterest: rejects API requests.
   - Service: `WallpaperService` (`packages/services/src/anime/wallpaper.service.ts`), exposed as `services.wallpaperService`.
+
+## 7. Reminders (`/reminder`)
+- `/reminder time:<when> message:<text> [repeat:daily|weekly]`: set a reminder. Without an `action`, a time means set and no time means list.
+- `/reminder action:list`: your active reminders with Discord timestamps (shown in each viewer's own timezone), plus a menu to cancel one. Only you can use the menu.
+- `/reminder action:cancel id:<id>`: cancel by the 8-character id from the list.
+- `/reminder action:timezone [zone:<IANA name>]`: show or set the timezone used to read times such as "9am". Stored per user (`ai_user_preferences.timezone`, shared with AI chat). Resolution order: the user's zone, then the server's, then UTC.
+- Prefix parity (1.4.0 style): `!remindme 1h Take a break`, `!remindme call mom tomorrow at 6pm`, `!remindme daily 9am take pills`, `!reminder list`, `!reminder cancel <id>`, `!reminder tz Asia/Kuala_Lumpur`. Aliases: `remindme`, `reminders`.
+- Times are parsed with `chrono-node`: 1.4.0 shorthand (`30m`, `2h`, `2d`), natural language (`tomorrow 9am`, `in 2 hours`, `next friday at 8pm`), and dates (`2026-12-25 08:00`). The time phrase can appear anywhere in the prefix text; the rest becomes the message.
+- Limits: the time must be in the future and at most 1 year ahead. At most 25 active reminders per user, and 500 characters per message.
+- Delivery: a scheduler checks every 15 s. Each due reminder is claimed atomically, then sent by DM. If the DM fails, it is posted in the channel where it was set, mentioning only that user. If both fail, the reminder is dropped for good (repeating ones included). Repeating reminders keep the same local clock time across DST changes and skip occurrences missed while the bot was offline.
+- AI chat: the `reminders.create` tool schedules through the same `ReminderService`, and reports the reason when a reminder cannot be set.

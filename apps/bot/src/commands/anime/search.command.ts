@@ -11,7 +11,7 @@ import {
   characterOption,
   mediaOption,
 } from './embeds.js';
-import { attachOwnerCollector } from './owner-collector.js';
+import { attachOwnerCollector } from '../shared/owner-collector.js';
 
 const MAX_QUERY_LENGTH = 100;
 
