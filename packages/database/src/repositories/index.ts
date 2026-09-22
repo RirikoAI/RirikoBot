@@ -26,3 +26,4 @@ export * from './achievement.repository.js';
 export * from './tcg-config.repository.js';
 export * from './reaction-role.repository.js';
 export * from './autorole.repository.js';
+export * from './reminder.repository.js';

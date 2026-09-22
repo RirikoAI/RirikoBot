@@ -340,7 +340,8 @@ export class LegacyTransformer {
       transformed.reminders.push({
         id: rem.id,
         userId: rem.userId,
-        guildId: rem.guildId ?? null,
+        // 1.4.0 stored the literal 'DM' for reminders set in direct messages.
+        guildId: rem.guildId && rem.guildId !== 'DM' ? rem.guildId : null,
         channelId: rem.channelId,
         message: rem.message,
         triggerAt: parseDate(rem.scheduledTime),
