@@ -44,25 +44,6 @@ export interface WaifuImClientOptions {
   timeoutMs?: number;
 }
 
-/**
- * SFW tag slugs offered to users. waifu.im also serves adult tags; they are never offered.
- * Source: https://api.waifu.im/tags
- */
-export const WAIFU_IM_SFW_TAGS = [
-  'selfies',
-  'waifu',
-  'maid',
-  'uniform',
-  'genshin-impact',
-  'raiden-shogun',
-  'kamisato-ayaka',
-  'marin-kitagawa',
-  'mori-calliope',
-  'rem',
-  'nami',
-  'one-piece',
-] as const;
-
 const USER_AGENT = 'RirikoBot/2.0 (+https://github.com/RirikoAI/RirikoBot)';
 
 interface RawImage {

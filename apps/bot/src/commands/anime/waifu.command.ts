@@ -6,23 +6,18 @@ import {
   type Message,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
-import { WAIFU_IM_SFW_TAGS, type WaifuImImage } from '@ririko/services';
+import type { WaifuImImage } from '@ririko/services';
 import type { BotServices } from '../../services.js';
 import { httpUrl, truncate } from './embeds.js';
 import { attachOwnerCollector } from './owner-collector.js';
 
 export const WAIFU_REROLL_ID = 'waifu:reroll';
-const DEFAULT_TAG = 'selfies';
-
-type WaifuTag = (typeof WAIFU_IM_SFW_TAGS)[number];
-
-const isWaifuTag = (value: string): value is WaifuTag => (WAIFU_IM_SFW_TAGS as readonly string[]).includes(value);
-
-const tagLabel = (slug: string) =>
-  slug
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
+/**
+ * 1.4.0 served `selfies`, but only 3 SFW images carry that tag now (the rest are NSFW), so
+ * regenerating would loop. `waifu` has over 1,200 SFW images.
+ */
+const WAIFU_TAG = 'waifu';
+const BATCH_SIZE = 10;
 
 export function buildWaifuEmbed(image: WaifuImImage): EmbedBuilder {
   const embed = new EmbedBuilder()
@@ -62,33 +57,23 @@ export function createWaifuCommand(services: BotServices): Command {
       name: 'waifu',
       category: CommandCategory.ANIME,
       description: 'Get a random waifu image from waifu.im',
-      usage: '/waifu [tag]',
-      examples: ['/waifu', '/waifu tag:maid', '!waifu raiden-shogun'],
+      usage: '/waifu',
+      examples: ['/waifu', '!waifu'],
       cooldownSeconds: 3,
-      options: [
-        {
-          name: 'tag',
-          description: `Image theme (default: ${DEFAULT_TAG})`,
-          type: 'STRING',
-          required: false,
-          choices: WAIFU_IM_SFW_TAGS.map((slug) => ({ name: tagLabel(slug), value: slug })),
-        },
-      ],
     },
 
     execute: async (ctx: CommandContext) => {
-      const requested = ctx.options.getString('tag')?.trim().toLowerCase() || DEFAULT_TAG;
-      if (!isWaifuTag(requested)) {
-        await ctx.reply({
-          content: `❌ Unknown tag \`${truncate(requested, 50)}\`. Available tags: ${WAIFU_IM_SFW_TAGS.map((t) => `\`${t}\``).join(', ')}`,
-          ephemeral: true,
-        });
-        return;
-      }
-
-      // Skip entries whose URL discord.js would reject.
-      const fetchImage = async () =>
-        (await services.waifuImClient.search({ tags: [requested] })).find((i) => httpUrl(i.url)) ?? null;
+      // waifu.im repeats its "random" pick for a few seconds, so ask for a batch and prefer an
+      // image this user has not seen yet. Entries with URLs discord.js would reject are skipped.
+      const shown = new Set<number>();
+      const fetchImage = async () => {
+        const batch = (await services.waifuImClient.search({ tags: [WAIFU_TAG], limit: BATCH_SIZE })).filter((i) =>
+          httpUrl(i.url),
+        );
+        const image = batch.find((i) => !shown.has(i.id)) ?? batch[0] ?? null;
+        if (image) shown.add(image.id);
+        return image;
+      };
 
       await ctx.deferReply();
       let image: WaifuImImage | null;
@@ -100,7 +85,7 @@ export function createWaifuCommand(services: BotServices): Command {
         return;
       }
       if (!image) {
-        await ctx.editReply({ content: `🔍 No images found for \`${requested}\`.` });
+        await ctx.editReply({ content: '🔍 waifu.im returned no image. Please try again.' });
         return;
       }
 
