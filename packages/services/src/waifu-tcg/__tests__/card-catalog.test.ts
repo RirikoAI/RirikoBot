@@ -2,8 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, it, expect, vi } from 'vitest';
-import { RateLimiter, fetchWithRetry } from '../catalog/rate-limiter.js';
-import { AniListClient } from '../catalog/anilist.client.js';
+import { RateLimiter } from '../../http/rate-limiter.js';
 import { DanbooruClient, danbooruTagVariants } from '../catalog/danbooru.client.js';
 import {
   loadCatalog,
@@ -57,94 +56,6 @@ function manifestCard(
 }
 
 const emptyManifest = (): CardManifest => ({ version: 1, assets: {}, cards: [] });
-
-describe('RateLimiter & fetchWithRetry', () => {
-  it('spaces task starts by the minimum interval', async () => {
-    let clock = 0;
-    const sleeps: number[] = [];
-    const limiter = new RateLimiter(1000, {
-      now: () => clock,
-      sleep: async (ms) => {
-        sleeps.push(ms);
-        clock += ms;
-      },
-    });
-    const starts: number[] = [];
-    await Promise.all([1, 2, 3].map(() => limiter.schedule(async () => void starts.push(clock))));
-    expect(starts).toEqual([0, 1000, 2000]);
-    expect(sleeps).toEqual([1000, 1000]);
-  });
-
-  it('keeps working after a task throws', async () => {
-    const limiter = instantLimiter();
-    await expect(limiter.schedule(() => Promise.reject(new Error('boom')))).rejects.toThrow('boom');
-    await expect(limiter.schedule(async () => 'ok')).resolves.toBe('ok');
-  });
-
-  it('retries 429 using Retry-After and 5xx with backoff, then returns success', async () => {
-    const fetchFn = vi
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(new Response('', { status: 429, headers: { 'retry-after': '3' } }))
-      .mockResolvedValueOnce(new Response('', { status: 503 }))
-      .mockResolvedValueOnce(new Response('ok', { status: 200 }));
-    const sleeps: number[] = [];
-    const res = await fetchWithRetry(
-      'https://x',
-      {},
-      {
-        limiter: instantLimiter(),
-        fetchFn,
-        baseBackoffMs: 100,
-        sleep: async (ms) => void sleeps.push(ms),
-      },
-    );
-    expect(res.status).toBe(200);
-    expect(sleeps).toEqual([3000, 200]);
-  });
-
-  it('does not retry client errors', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(new Response('', { status: 404 }));
-    const res = await fetchWithRetry(
-      'https://x',
-      {},
-      { limiter: instantLimiter(), fetchFn, sleep: noSleep },
-    );
-    expect(res.status).toBe(404);
-    expect(fetchFn).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('AniListClient', () => {
-  const page = (characters: unknown[]) => jsonResponse({ data: { Page: { characters } } });
-  const aniChar = (id: number, name: string, titles: string[], favourites = 10) => ({
-    id,
-    name: { full: name },
-    image: { large: `https://img/${id}.png` },
-    favourites,
-    media: { nodes: titles.map((t) => ({ title: { romaji: t, english: null } })) },
-  });
-
-  it('prefers the result whose media matches the anime title', async () => {
-    const fetchFn = vi
-      .fn<typeof fetch>()
-      .mockResolvedValue(
-        page([aniChar(1, 'Lucy', ['Fairy Tail']), aniChar(2, 'Lucy', ['Elfen Lied'], 50)]),
-      );
-    const client = new AniListClient({ limiter: instantLimiter(), fetchFn });
-    const found = await client.findCharacter('Lucy', 'Elfen Lied');
-    expect(found).toMatchObject({ id: 2, favourites: 50, imageUrl: 'https://img/2.png' });
-  });
-
-  it('falls back to the first result and returns null on no results', async () => {
-    const fetchFn = vi
-      .fn<typeof fetch>()
-      .mockResolvedValueOnce(page([aniChar(7, 'Rem', ['Something Else'])]))
-      .mockResolvedValueOnce(page([]));
-    const client = new AniListClient({ limiter: instantLimiter(), fetchFn });
-    expect((await client.findCharacter('Rem', 'Re:Zero'))?.id).toBe(7);
-    expect(await client.findCharacter('Nobody')).toBeNull();
-  });
-});
 
 describe('DanbooruClient', () => {
   it('builds full, reversed and first-name tag variants', () => {
