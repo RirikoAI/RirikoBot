@@ -41,6 +41,7 @@ import {
   CommandRouter,
   createHelpCommand,
   handleHelpInteraction,
+  type HelpOptions,
   CommandSynchronizer,
   createRestClient,
   CommandCategory,
@@ -111,7 +112,14 @@ export async function main(): Promise<void> {
   router.registry.register(pingCommand);
 
   // 4. Register Interactive Help Center (/help, !help, !h, !commands)
-  const helpCommand = createHelpCommand(router.registry);
+  const helpOptions: HelpOptions = {
+    defaultPrefix: prefix,
+    resolvePrefix: async (guildId) => {
+      if (!guildId) return prefix;
+      return services.guildSettingsService.getPrefix(guildId, prefix);
+    },
+  };
+  const helpCommand = createHelpCommand(router.registry, helpOptions);
   router.registry.register(helpCommand);
 
   // 5. Register Economy Commands
@@ -246,7 +254,7 @@ export async function main(): Promise<void> {
         }
       }
 
-      await handleHelpInteraction(interaction, router.registry);
+      await handleHelpInteraction(interaction, router.registry, helpOptions);
     } catch (err) {
       console.error('Unhandled error in component interaction:', err);
     }

@@ -59,6 +59,14 @@ export function createTimezoneCommand(services: BotServices): Command {
     },
 
     async execute(ctx: CommandContext): Promise<void> {
+      // Resolve active server prefix for dynamic help text
+      const pfx =
+        ctx.invokedPrefix && ctx.invokedPrefix !== '/'
+          ? ctx.invokedPrefix
+          : ctx.guildId
+            ? await services.guildSettingsService.getPrefix(ctx.guildId)
+            : (process.env.DEFAULT_PREFIX || '!');
+
       let requestedZone: string | undefined;
       let requestedScope: 'server' | 'user' | undefined;
 
@@ -105,41 +113,46 @@ export function createTimezoneCommand(services: BotServices): Command {
         const now = new Date();
 
         const embed = new EmbedBuilder()
+          .setTitle('🕒 Timezone Configuration')
           .setColor(0x5865f2)
-          .setTitle('🌍 Timezone Configuration')
           .setDescription(
-            `Time-sensitive commands in Ririko automatically fall back through this hierarchy:\n` +
-              `**1. User Preference** ➔ **2. Server Timezone** ➔ **3. UTC**`,
+            `Displaying effective timezone settings for **${ctx.user.username}** and **${ctx.guild?.name || 'Direct Messages'}**.\n\n` +
+              `All time-sensitive features (reminders, logs, daily resets, AI natural language) will format dates using these preferences.`,
           );
 
-        if (ctx.guild) {
-          embed.addFields([
-            {
-              name: '🏠 Server Timezone',
+        const serverField = ctx.guild
+          ? {
+              name: '🏰 Server Default Timezone',
               value: `**${serverTz || 'UTC'}**\n🕒 Current time: \`${formatLocalTime(serverTz || 'UTC', now)}\``,
               inline: true,
-            },
-          ]);
-        }
+            }
+          : {
+              name: '🏰 Server Default Timezone',
+              value: `_Not in a server_ (Fallback: **UTC**)`,
+              inline: true,
+            };
+
+        const userField = {
+          name: '👤 Personal Timezone Override',
+          value: userTz
+            ? `**${userTz}**\n🕒 Current time: \`${formatLocalTime(userTz, now)}\``
+            : `_Not set_\n🕒 Inheriting: **${serverTz || 'UTC'}**`,
+          inline: true,
+        };
 
         embed.addFields([
+          serverField,
+          userField,
           {
-            name: '👤 Your Personal Timezone',
-            value: userTz
-              ? `**${userTz}**\n🕒 Current time: \`${formatLocalTime(userTz, now)}\``
-              : `_Not set_\n🕒 Inheriting: **${serverTz || 'UTC'}**`,
-            inline: true,
-          },
-          {
-            name: '⚡ Effective Active Timezone',
+            name: '✨ Active Effective Timezone',
             value: `**${effectiveTz}** (\`${formatLocalTime(effectiveTz, now)}\`)`,
             inline: false,
           },
           {
             name: '💡 How to Change',
             value:
-              `• **Set Server Timezone:** \`/timezone set:<zone> scope:server\` or \`!tz server <zone>\` *(requires Manage Server)*\n` +
-              `• **Set Personal Timezone:** \`/timezone set:<zone> scope:user\` or \`!tz user <zone>\`\n` +
+              `• **Set Server Timezone:** \`/timezone set:<zone> scope:server\` or \`${pfx}tz server <zone>\` *(requires Manage Server)*\n` +
+              `• **Set Personal Timezone:** \`/timezone set:<zone> scope:user\` or \`${pfx}tz user <zone>\`\n` +
               `• **Supported Format:** Standard IANA names such as \`Asia/Kuala_Lumpur\`, \`America/New_York\`, \`Europe/London\`, \`Asia/Tokyo\`, \`UTC\`.`,
           },
         ]);
@@ -181,7 +194,7 @@ export function createTimezoneCommand(services: BotServices): Command {
         if (!hasPermission) {
           throw new CommandPermissionError(
             'You need the **Manage Server** permission to update the server-wide timezone.\n' +
-              `To configure your own personal timezone override instead, use: \`/timezone set:${canonical} scope:user\` or \`!tz user ${canonical}\`.`,
+              `To configure your own personal timezone override instead, use: \`/timezone set:${canonical} scope:user\` or \`${pfx}tz user ${canonical}\`.`,
             {
               missingPermissions: ['ManageGuild'],
               missingFor: 'user',
@@ -218,7 +231,7 @@ export function createTimezoneCommand(services: BotServices): Command {
         .setDescription(
           `Your personal timezone has been set to: **${canonical}**\n\n` +
             `🕒 **Current Local Time:** \`${formatLocalTime(canonical, now)}\`\n\n` +
-            `Your natural language reminders (\`/reminder\`, \`!remindme\`) and AI conversations will now prioritize this timezone across all servers.`,
+            `Your natural language reminders (\`/reminder\`, \`${pfx}remindme\`) and AI conversations will now prioritize this timezone across all servers.`,
         )
         .setFooter({ text: 'Ririko AI 2.0 • User Utilities' });
 
