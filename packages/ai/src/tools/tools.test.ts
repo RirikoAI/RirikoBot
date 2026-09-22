@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   ToolRegistry,
   TimeTool,
@@ -112,6 +112,28 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
       expect(result.title).toBe('Frieren: Beyond Journey\'s End');
       expect(result.score).toBe(9.3);
       expect(result.episodes).toBe(28);
+    });
+
+    it('reports no match when the provider finds nothing', async () => {
+      const tool = new AnimeSearchTool(async () => null);
+      const result = await tool.execute({ title: 'Nope' }, baseContext);
+      expect(result).toEqual({ title: 'Nope', synopsis: 'No anime matching "Nope" was found.' });
+    });
+
+    it('reports the source as unreachable when the provider throws', async () => {
+      const tool = new AnimeSearchTool(async () => {
+        throw new Error('HTTP 503');
+      });
+      const result = await tool.execute({ title: 'Frieren' }, baseContext);
+      expect(result.synopsis).toMatch(/unreachable/);
+    });
+
+    it('makes no network call without a provider', async () => {
+      const fetchSpy = vi.spyOn(globalThis, 'fetch');
+      const result = await new AnimeSearchTool().execute({ title: 'Frieren' }, baseContext);
+      expect(result.synopsis).toBe('Anime search is not available right now.');
+      expect(fetchSpy).not.toHaveBeenCalled();
+      fetchSpy.mockRestore();
     });
 
     it('validates required non-empty title argument', () => {

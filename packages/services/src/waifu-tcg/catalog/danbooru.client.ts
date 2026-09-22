@@ -1,5 +1,5 @@
-import { RateLimiter, fetchWithRetry } from './rate-limiter.js';
-import { titlesMatch } from './anilist.client.js';
+import { RateLimiter, fetchWithRetry } from '../../http/rate-limiter.js';
+import { titlesMatch } from '../../anime/titles.js';
 
 export interface DanbooruArt {
   postId: number;
