@@ -15,6 +15,17 @@ export function isValidTimeZone(timeZone: string): boolean {
   }
 }
 
+/**
+ * Canonical IANA name for user input, matched case-insensitively (`asia/tokyo` → `Asia/Tokyo`).
+ * Offsets and abbreviations are rejected so stored zones always follow DST rules.
+ */
+export function canonicalTimeZone(input: string): string | null {
+  const wanted = input.trim().replace(/\s+/g, '_').toLowerCase();
+  if (!wanted) return null;
+  if (wanted === 'utc' || wanted === 'etc/utc') return 'UTC';
+  return Intl.supportedValuesOf('timeZone').find((zone) => zone.toLowerCase() === wanted) ?? null;
+}
+
 /** First valid zone among the candidates (user, then guild), else UTC. */
 export function resolveTimeZone(...candidates: Array<string | null | undefined>): string {
   return candidates.find((tz): tz is string => typeof tz === 'string' && isValidTimeZone(tz)) ?? 'UTC';

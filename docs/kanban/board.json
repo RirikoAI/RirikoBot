@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-1412",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -649,7 +649,7 @@
       "epic": "EPIC-014",
       "title": "Persistent Natural Language Reminders Engine & Chrono Scheduler",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["EPIC-002", "EPIC-003"],
       "blocks": ["EPIC-011"]
     },
@@ -1766,7 +1766,7 @@
       "parent": "STORY-141",
       "title": "ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": ["TASK-1411"],
       "blocks": ["TASK-1413"]
     },
@@ -1775,7 +1775,7 @@
       "parent": "STORY-141",
       "title": "/reminder Command (Set, List, Cancel, Timezone) with Prefix Parity & Real AI reminders.create Tool",
       "points": 1,
-      "status": "TODO",
+      "status": "DONE",
       "requires": ["TASK-1412"],
       "blocks": []
     },

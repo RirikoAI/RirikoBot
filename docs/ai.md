@@ -61,7 +61,7 @@ The AI is strictly limited to an audited tool allowlist:
 - `music.play(query)`: Queues a track in the guild player.
 - `economy.check_balance()`: Inspects user wallet and bank.
 - `anime.search(title)`: Fetches anime synopsis and score from AniList/MAL.
-- `reminders.create(time, message)`: Schedules a personal reminder.
+- `reminders.create(time, message)`: Schedules a real, persistent reminder through `ReminderService` (natural-language times in the user timezone; see `docs/commands.md` §7). Returns the reason when it cannot be scheduled.
 - `games.coinflip()`: Flips a random coin.
 
 ---

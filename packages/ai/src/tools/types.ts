@@ -59,4 +59,6 @@ export interface ReminderCreateResult {
   message: string;
   triggerTimeIso: string;
   relativeDescription: string;
+  /** Why the reminder was not scheduled (only when `scheduled` is false). */
+  error?: string | undefined;
 }
