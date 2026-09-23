@@ -11,3 +11,4 @@ export * from './http/index.js';
 export * from './anime/index.js';
 export * from './reminders/index.js';
 export * from './guild/index.js';
+export * from './reactions/index.js';
