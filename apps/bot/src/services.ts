@@ -346,15 +346,25 @@ export async function createBotServices(
     eventBus,
   });
 
+  const tcgConfigRepo = new TcgConfigRepository(db);
+  const tcgConfigService = new TcgConfigService(tcgConfigRepo);
+
   // Energy lifecycle owns the daily boundary and level-scaled capacity. It resolves the
   // player's account-wide level from summed XP, since energy is global while xp_accounts
-  // is per guild.
+  // is per guild. It also reconciles incremental bonus energy up to the configured cap.
   const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, {
     resetSchedule: resetSchedules.energy,
     levelResolver: createXpLevelResolver(
       xpRepo,
       (totalXp) => levelingService.getLevelProgress(totalXp).level,
     ),
+    bonusConfigResolver: async () => {
+      const [maxBonusCap, dailyIncrement] = await Promise.all([
+        tcgConfigService.getConfig('max_bonus_energy_cap'),
+        tcgConfigService.getConfig('daily_bonus_energy_increment'),
+      ]);
+      return { maxBonusCap, dailyIncrement };
+    },
   });
 
   const leaderboardService = new LeaderboardService({
@@ -733,7 +743,6 @@ export async function createBotServices(
 
   const waifuGuildRepo = new WaifuGuildRepository(db);
   const achievementRepo = new AchievementRepository(db);
-  const tcgConfigRepo = new TcgConfigRepository(db);
 
   const waifuGuildService = new WaifuGuildService(waifuGuildRepo, economyRepo, db);
   const achievementService = new AchievementService(achievementRepo, economyRepo, db, {
@@ -742,7 +751,6 @@ export async function createBotServices(
     itemRepo: gameItemRepo,
     waifuCardRepo,
   });
-  const tcgConfigService = new TcgConfigService(tcgConfigRepo);
 
   // Seed default achievements if needed
   try {

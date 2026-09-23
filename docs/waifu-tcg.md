@@ -772,6 +772,8 @@ Administrative control over energy ceilings, shop catalogs, and item drops must 
 1. **Discord Command Line**:
    - `/tcg-admin config energy max_cap <value>`
    - `/tcg-admin config energy pot_limit <value>`
+   - `/tcg-admin config energy bonus_cap <value>`
+   - `/tcg-admin config energy bonus_increment <value>`
    - `/tcg-admin config dungeon scaling_model <model>`
    - `/tcg-admin config dungeon growth_rate <value>`
    - `/tcg-admin config role <@role>`
