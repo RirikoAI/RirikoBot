@@ -2896,13 +2896,13 @@
     },
     {
       "id": "BUG-0017",
-      "title": "Unknown /card Prefix Action Silently Opens the Collection",
-      "points": null,
-      "status": "BACKLOG",
+      "title": "Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul",
+      "points": 2,
+      "status": "IN_PROGRESS",
       "parent": "EPIC-010",
       "requires": [],
       "blocks": [],
-      "description": "Ungroomed. card.command.ts falls back to 'collection' for any unrecognised first argument, so a typo like '!card gears' shows the collection instead of an error. Reply with the valid actions (or a did-you-mean) when the first argument is present but unknown."
+      "description": "card.command.ts falls back to 'collection' for unrecognised first arguments, so typos like '!card gears' silently show the collection. Fix prefix action routing with Did-You-Mean suggestions, fix missing rawArgs[1] across subcommands, and overhaul card ID and catalog/mint serial display so cards show distinct short IDs and catalog numbers instead of confusing '#0001/1000'."
     },
     {
       "id": "TASK-1431",
@@ -2967,6 +2967,18 @@
       ],
       "blocks": [],
       "description": "Increment bonus energy daily upon login/activity up to a configurable cap, managed via dual-dispatch /tcg-admin action:energy command."
+    },
+    {
+      "id": "BUG-0017",
+      "title": "Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul",
+      "points": 2,
+      "status": "DONE",
+      "parent": "EPIC-010",
+      "requires": [
+        "EPIC-010"
+      ],
+      "blocks": [],
+      "description": "Fix unrecognized !card prefix action silently opening collection by computing Did-You-Mean suggestions and error replies. Auto-route card identifiers (!card 1, !card Harribel) to inspect. Add flexible card resolution (UUID, 8-char short ID, 1-based index, character name, serial) across inspect, favorite, equip, dismantle, gear, and loadout. Disambiguate card ID from character collection number and mint serial counter."
     }
   ]
 }
