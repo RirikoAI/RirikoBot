@@ -24,7 +24,10 @@ export const HELP_COLORS = {
  * while leaving slash commands (/command) and trailing argument characters intact.
  */
 export function formatPrefixCommand(text: string, prefix: string): string {
-  return text.replace(/(^|[\s|`"'(])([!$])([a-zA-Z0-9_-]+)/g, `$1${prefix}$3`);
+  return text.replace(
+    /(^|[\s|`"'(])([!$])([a-zA-Z0-9_-]+)/g,
+    (_match, p1, _p2, p3) => `${p1}${prefix}${p3}`,
+  );
 }
 
 export class HelpGenerator {
