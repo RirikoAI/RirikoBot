@@ -327,7 +327,7 @@ The following environment variables in `.env` govern the audio subsystem:
 
 | Variable | Required? | Default | Description |
 |---|---|---|---|
-| `DEFAULT_PREFIX` | Optional | `$` | Default command prefix for text commands (e.g. `$play`). |
+| `DEFAULT_PREFIX` | Optional | `!` | Default command prefix for text commands (e.g. `!play`). |
 | `YOUTUBE_COOKIE` | Optional | None | Session cookie string to bypass YouTube datacenter IP blocking. |
 | `YOUTUBE_PO_TOKEN` | Optional | None | Proof of Origin token from YouTube Web player payload. |
 | `YOUTUBE_VISITOR_DATA` | Optional | None | Visitor context string paired with `YOUTUBE_PO_TOKEN`. |
@@ -342,7 +342,7 @@ Example `.env` configuration:
 # Discord Bot Credentials
 DISCORD_TOKEN=your_token_here
 DISCORD_CLIENT_ID=your_client_id_here
-DEFAULT_PREFIX=$
+DEFAULT_PREFIX=!
 
 # YouTube Audio Credentials (Optional, maximizes reliability)
 YOUTUBE_COOKIE=
@@ -379,25 +379,25 @@ Legacy bots use continuous `setInterval` polling to update embeds. Music 2.0 use
 
 ## 9. Command & Component Control Catalog
 
-All commands support dual-dispatch: full Slash Command (`/play`) and Message Prefix (`$play`) parity.
+All commands support dual-dispatch: full Slash Command (`/play`) and Message Prefix (`!play`) parity.
 
 | Command | Aliases | Parameters | Description |
 |---|---|---|---|
-| `/play` | `$p` | `<query \| url>` | Resolves track/playlist and enqueues it. |
-| `/pause` | `$pause` | None | Pauses active playback. |
-| `/resume` | `$resume`, `$unpause` | None | Resumes paused playback. |
-| `/skip` | `$s`, `$next` | None | Skips current track. |
-| `/back` | `$prev`, `$previous` | None | Plays the previous track from history. |
-| `/stop` | `$leave`, `$dc` | None | Clears the queue, stops audio, and leaves voice channel. |
-| `/queue` | `$q` | `[page]` | Displays interactive paginated track queue. |
-| `/nowplaying` | `$np` | None | Renders detailed progress card for active song. |
-| `/volume` | `$vol`, `$v` | `<1-150>` | Adjusts guild player volume (clamped 0% to 150%). |
-| `/loop` | `$repeat` | `<off \| track \| queue>` | Sets loop mode. |
-| `/shuffle` | `$mix` | None | Randomizes waiting tracks in the queue. |
-| `/seek` | `$jump` | `<seconds>` | Seeks to a specific timestamp in the track. |
-| `/filter` | `$fx` | `<bassboost \| nightcore \| 8d \| ...>` | Applies audio filter preset. |
-| `/lyrics` | `$ly` | `[song]` | Fetches synced or plain lyrics. |
-| `/join` | `$connect` | None | Summons bot to user's voice channel. |
+| `/play` | `!p` | `<query \| url>` | Resolves track/playlist and enqueues it. |
+| `/pause` | `!pause` | None | Pauses active playback. |
+| `/resume` | `!resume`, `!unpause` | None | Resumes paused playback. |
+| `/skip` | `!s`, `!next` | None | Skips current track. |
+| `/back` | `!prev`, `!previous` | None | Plays the previous track from history. |
+| `/stop` | `!leave`, `!dc` | None | Clears the queue, stops audio, and leaves voice channel. |
+| `/queue` | `!q` | `[page]` | Displays interactive paginated track queue. |
+| `/nowplaying` | `!np` | None | Renders detailed progress card for active song. |
+| `/volume` | `!vol`, `!v` | `<1-150>` | Adjusts guild player volume (clamped 0% to 150%). |
+| `/loop` | `!repeat` | `<off \| track \| queue>` | Sets loop mode. |
+| `/shuffle` | `!mix` | None | Randomizes waiting tracks in the queue. |
+| `/seek` | `!jump` | `<seconds>` | Seeks to a specific timestamp in the track. |
+| `/filter` | `!fx` | `<bassboost \| nightcore \| 8d \| ...>` | Applies audio filter preset. |
+| `/lyrics` | `!ly` | `[song]` | Fetches synced or plain lyrics. |
+| `/join` | `!connect` | None | Summons bot to user's voice channel. |
 | `/setup-music` | None | None | Generates the dedicated `#music` interactive channel. |
 
 ### Interactive Embed Buttons:

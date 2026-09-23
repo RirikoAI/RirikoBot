@@ -29,7 +29,7 @@ The easiest and fastest way to start is by running the **Prologue Tutorial**:
 ```
 /dungeon action:tutorial
 # or
-$dungeon tutorial
+!dungeon tutorial
 ```
 If you do not have any cards, this command **automatically gifts you a Starter Card**, equips you with a **Novice Blade** (+15 ATK), provides **3x Minor Health Potions**, and grants the `TUTORIAL_COMPLETE` achievement!
 
@@ -39,7 +39,7 @@ As members chat in your Discord server, Ririko periodically drops random waifu c
   ```
   /card action:claim
   # or
-  $card claim
+  !card claim
   ```
 - **Anti-Sniping Rule**: Card drops have an anti-sniping cooldown to give active chatters a fair chance.
 - **Rarity Odds**: Standard drops follow the 8-tier rarity table:

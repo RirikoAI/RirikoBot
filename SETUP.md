@@ -96,7 +96,7 @@ Keep these defaults for the standard local setup:
 ```env
 DATABASE_DIALECT=sqlite
 DATABASE_URL=./data/ririko.sqlite
-DEFAULT_PREFIX=$
+DEFAULT_PREFIX=!
 LAVALINK_HOST=127.0.0.1
 LAVALINK_PORT=2333
 LAVALINK_PASSWORD=youshallnotpass

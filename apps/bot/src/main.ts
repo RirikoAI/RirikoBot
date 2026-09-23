@@ -46,6 +46,7 @@ import {
   CommandSynchronizer,
   createRestClient,
   CommandCategory,
+  DEFAULT_COMMAND_PREFIX,
   type Command,
   type CommandContext,
 } from '@ririko/discord';
@@ -56,7 +57,7 @@ import {
 export async function main(): Promise<void> {
   const token = process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN;
   const clientId = process.env.DISCORD_CLIENT_ID || process.env.DISCORD_APPLICATION_ID;
-  const prefix = process.env.DEFAULT_PREFIX || '!';
+  const prefix = process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX;
 
   if (!token) {
     console.error('✖ Error: DISCORD_TOKEN is not configured in environment or .env file.');

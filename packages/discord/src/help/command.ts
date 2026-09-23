@@ -1,5 +1,5 @@
 import type { Command, CommandContext } from '../command/types.js';
-import { CommandCategory } from '../command/types.js';
+import { CommandCategory, DEFAULT_COMMAND_PREFIX } from '../command/types.js';
 import type { CommandRegistry } from '../router/registry.js';
 import { HelpGenerator } from './generator.js';
 import type { HelpOptions } from './types.js';
@@ -31,7 +31,7 @@ export function createHelpCommand(registry: CommandRegistry, options: HelpOption
         ? await options.resolvePrefix(ctx.guildId ?? ctx.guild?.id)
         : (ctx.source === 'prefix' && ctx.invokedPrefix && ctx.invokedPrefix !== '/'
           ? ctx.invokedPrefix
-          : (options.defaultPrefix ?? '!'));
+          : (options.defaultPrefix ?? DEFAULT_COMMAND_PREFIX));
 
       const query = ctx.options.getString('command');
 

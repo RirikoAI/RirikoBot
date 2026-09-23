@@ -15,6 +15,7 @@ import {
 } from '@ririko/services';
 import { ValidationError } from '@ririko/core';
 import type { BotServices } from '../../services.js';
+import { resolveContextPrefix } from '../shared/prefix-resolver.js';
 
 /**
  * Creates the dual-dispatch `/timezone` and `!timezone` command.
@@ -60,12 +61,7 @@ export function createTimezoneCommand(services: BotServices): Command {
 
     async execute(ctx: CommandContext): Promise<void> {
       // Resolve active server prefix for dynamic help text
-      const pfx =
-        ctx.invokedPrefix && ctx.invokedPrefix !== '/'
-          ? ctx.invokedPrefix
-          : ctx.guildId
-            ? await services.guildSettingsService.getPrefix(ctx.guildId)
-            : (process.env.DEFAULT_PREFIX || '!');
+      const pfx = await resolveContextPrefix(ctx, services);
 
       let requestedZone: string | undefined;
       let requestedScope: 'server' | 'user' | undefined;

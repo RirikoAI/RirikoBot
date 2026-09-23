@@ -10,6 +10,7 @@ import {
   type CommandContext,
 } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
+import { resolveContextPrefix } from '../shared/prefix-resolver.js';
 
 function hasAdminPermission(ctx: CommandContext): boolean {
   if (!ctx.member) return true; // Direct/test mock fallback
@@ -420,8 +421,9 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
         return;
       }
 
+      const prefix = await resolveContextPrefix(ctx, services);
       await ctx.reply({
-        content: '❓ Available voice controls:\n`/voice name <name>` • `/voice limit <limit>` • `/voice lock <locked>` • `/voice permit <user>` • `/voice kick <user>` • `/voice claim` • `/voice transfer <user>`',
+        content: `❓ Available voice controls:\n\`${prefix}voice name <name>\` • \`${prefix}voice limit <limit>\` • \`${prefix}voice lock <locked>\` • \`${prefix}voice permit <user>\` • \`${prefix}voice kick <user>\` • \`${prefix}voice claim\` • \`${prefix}voice transfer <user>\`\n*(Slash commands like \`/voice <action>\` are also supported)*`,
       });
     },
   };
