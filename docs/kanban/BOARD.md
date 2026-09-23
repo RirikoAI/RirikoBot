@@ -13,9 +13,6 @@
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover |
 |---|---|---|---|---|---|
-| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
-| `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
-| `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
 | `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | `EPIC-004` | [STORY-161.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-161.md) |
 | `BUG-0012` | Bug | Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired | 3 | `EPIC-015` | [BUG-0012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0012.md) |
 
@@ -39,6 +36,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
+| `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
+| `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
 | `BUG-0018` | Bug | Persist and Restore Guild Default Volume Across Music Sessions | 3 | `EPIC-005` | [BUG-0018.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0018.md) |
 | `EPIC-014` | Epic | Server Utilities, AutoRoles & Community Systems | 21 | Self | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
 | `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | `EPIC-014` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
@@ -339,7 +339,7 @@
 ### 📋 Groomed Stories for EPIC-013 (Media Synthesis, Reactions & AI Images)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | 🔍 In Review | `EPIC-002`, `EPIC-003` |
+| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | ✅ Done | — |
 | `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | ✅ Done | `TASK-1301` |
 | `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | 📋 Backlog | `EPIC-003` |

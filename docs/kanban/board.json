@@ -909,7 +909,7 @@
       "epic": "EPIC-013",
       "title": "Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "EPIC-002",
         "EPIC-003"
