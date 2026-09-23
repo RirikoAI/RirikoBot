@@ -101,6 +101,7 @@ import {
   PvPDuelService,
   QuestService,
   CANONICAL_ITEMS,
+  syncCanonicalItems,
   EnhancementService,
   LoadoutService,
   ConsumableService,
@@ -780,13 +781,11 @@ export async function createBotServices(
     progressService: new DungeonProgressService(tcgConfigRepo, playerEnergyRepo, itemGrantService),
   });
 
-  // Seed canonical items if needed
+  // Seed and synchronize canonical items
   try {
-    for (const item of CANONICAL_ITEMS) {
-      const exists = await gameItemRepo.findByCode(item.code);
-      if (!exists) {
-        await gameItemRepo.create(item);
-      }
+    const { created, updated } = await syncCanonicalItems(gameItemRepo);
+    if (created > 0 || updated > 0) {
+      console.log(`[tcg] Canonical items synced: ${created} created, ${updated} updated.`);
     }
     // Rows written by older reward code point at ids that never existed in game_items.
     const repaired = await itemGrantService.repairLegacyInventoryRows();
