@@ -4,6 +4,7 @@ import {
 } from 'discord.js';
 import {
   CommandCategory,
+  DEFAULT_COMMAND_PREFIX,
   type Command,
   type CommandContext,
   CommandGuildOnlyError,
@@ -55,7 +56,7 @@ export function createPrefixCommand(services: BotServices): Command {
       // VIEW MODE: No prefix argument provided
       if (!requestedPrefix) {
         if (!ctx.guild) {
-          const defaultPrefix = process.env.DEFAULT_PREFIX || '!';
+          const defaultPrefix = process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX;
           await ctx.reply({
             embeds: [
               new EmbedBuilder()

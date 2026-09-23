@@ -223,7 +223,7 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
     expect(embed.data.title).toContain('Information & Strategy Hub');
   });
 
-  it('buildTcgInfoEmbed should generate valid embeds for all topics', () => {
+  it('buildTcgInfoEmbed should generate valid embeds for all topics with default ! prefix', () => {
     const topics: TcgInfoTopic[] = [
       'overview',
       'starter',
@@ -243,9 +243,41 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
       expect(embed.data.title).toBeTruthy();
       expect(embed.data.description).toBeTruthy();
     }
+
+    const starterEmbed = buildTcgInfoEmbed('starter');
+    expect(starterEmbed.data.description).toContain('!dungeon tutorial');
+    expect(starterEmbed.data.description).toContain('!card claim');
+
+    const gearEmbed = buildTcgInfoEmbed('gear');
+    expect(gearEmbed.data.description).toContain('!loadout');
+
+    const tutorialEmbed = buildTcgInfoEmbed('tutorial');
+    expect(tutorialEmbed.data.description).toContain('!dungeon tutorial');
   });
 
-  it('buildTcgInfoSelectMenu should generate a select menu with 10 options', () => {
+  it('buildTcgInfoEmbed should dynamically format commands with a custom prefix', () => {
+    const customPrefix = 'r!';
+    const starterEmbed = buildTcgInfoEmbed('starter', customPrefix);
+    expect(starterEmbed.data.description).toContain('r!dungeon tutorial');
+    expect(starterEmbed.data.description).toContain('r!card claim');
+
+    const craftingEmbed = buildTcgInfoEmbed('crafting', customPrefix);
+    expect(craftingEmbed.data.description).toContain('r!craft');
+
+    const dungeonEmbed = buildTcgInfoEmbed('dungeon', customPrefix);
+    expect(dungeonEmbed.data.description).toContain('r!dungeon climb');
+
+    const tradeEmbed = buildTcgInfoEmbed('trade', customPrefix);
+    expect(tradeEmbed.data.description).toContain('r!trade request');
+
+    const marketEmbed = buildTcgInfoEmbed('market', customPrefix);
+    expect(marketEmbed.data.description).toContain('r!market list');
+
+    const guildEmbed = buildTcgInfoEmbed('guild', customPrefix);
+    expect(guildEmbed.data.description).toContain('r!waifuguild create');
+  });
+
+  it('buildTcgInfoSelectMenu should generate a select menu with 11 options', () => {
     const row = buildTcgInfoSelectMenu('elements');
     expect(row.components.length).toBe(1);
     const menu = row.components[0] as any;

@@ -40,6 +40,7 @@ import {
   type ButtonStyle,
   type Client,
 } from 'discord.js';
+import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 import { MusicPlayerService } from '@ririko/music';
 import {
   ConversationManager,
@@ -459,7 +460,7 @@ export async function createBotServices(
   const reminderService = new ReminderService({ repo: reminderRepo });
   const guildSettingsService = new GuildSettingsService({
     repo: guildSettingsRepo,
-    defaultPrefix: process.env.DEFAULT_PREFIX || '!',
+    defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
     defaultTimezone: 'UTC',
   });
   const resolveUserTimeZone = async (userId: string, guildId: string | null): Promise<string> => {

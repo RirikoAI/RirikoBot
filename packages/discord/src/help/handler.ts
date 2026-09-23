@@ -1,6 +1,7 @@
 import type { Interaction } from 'discord.js';
 import type { CommandRegistry } from '../router/registry.js';
 import type { CommandCategory } from '../command/types.js';
+import { DEFAULT_COMMAND_PREFIX } from '../command/types.js';
 import { HelpGenerator } from './generator.js';
 import type { HelpOptions } from './types.js';
 
@@ -15,7 +16,7 @@ export async function handleHelpInteraction(
 ): Promise<boolean> {
   const resolvedPrefix = options.resolvePrefix
     ? await options.resolvePrefix(interaction.guildId ?? interaction.guild?.id)
-    : (options.defaultPrefix ?? '!');
+    : (options.defaultPrefix ?? DEFAULT_COMMAND_PREFIX);
 
   // 1. Handle Category Select Menu
   if (interaction.isStringSelectMenu() && interaction.customId === 'help:category:select') {

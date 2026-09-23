@@ -17,6 +17,11 @@ import type {
   Attachment,
 } from 'discord.js';
 import type { CommandMiddleware } from '../middleware/types.js';
+/**
+ * Standard default fallback command prefix across the entire bot system.
+ * Preserves 100% parity with legacy Ririko 1.4.0 and database schema defaults.
+ */
+export const DEFAULT_COMMAND_PREFIX = '!';
 
 export const CommandCategory = {
   AI: 'ai',
