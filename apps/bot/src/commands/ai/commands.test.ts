@@ -115,6 +115,7 @@ function createMockContext(params: {
     member,
     user,
     commandName: 'ai',
+    invokedName: 'ai',
     invokedPrefix: params.source === 'prefix' ? '!' : '/',
     isReplied: false,
     isDeferred: false,

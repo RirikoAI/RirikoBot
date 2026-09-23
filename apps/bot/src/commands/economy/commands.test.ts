@@ -43,6 +43,7 @@ function createMockContext(params: {
     member: null,
     user,
     commandName: 'economy',
+    invokedName: 'economy',
     invokedPrefix: '/',
     isReplied: false,
     isDeferred: false,

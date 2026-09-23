@@ -136,6 +136,7 @@ import {
   createDiscordReminderDelivery,
   resolveTimeZone,
   GuildSettingsService,
+  ReactionGifService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -185,6 +186,8 @@ export interface BotServices {
   /** MyAnimeList-first anime/manga/character search with AniList fallback and caching. */
   animeSearchService: AnimeSearchService;
   waifuImClient: WaifuImClient;
+  /** Backs `/react` and its 67 legacy `!<reaction>` aliases with pooled otakugifs.xyz GIF urls. */
+  reactionGifService: ReactionGifService;
   reminderService: ReminderService;
   /** Null when no Discord client was supplied (tests); started on gateway READY. */
   reminderScheduler: ReminderScheduler | null;
@@ -421,6 +424,7 @@ export async function createBotServices(
     anilist: anilistClient,
   });
   const waifuImClient = new WaifuImClient({ maxRetries: 1, timeoutMs: 5000 });
+  const reactionGifService = new ReactionGifService();
   const wallpaperService = new WallpaperService({
     wallhaven: new WallhavenClient({ maxRetries: 1, timeoutMs: 5000 }),
     zerochan: new ZerochanClient({ maxRetries: 1, timeoutMs: 5000 }),
@@ -863,6 +867,7 @@ export async function createBotServices(
     anilistClient,
     animeSearchService,
     waifuImClient,
+    reactionGifService,
     reminderService,
     reminderScheduler,
     guildSettingsService,

@@ -177,6 +177,7 @@ export class CommandRouter {
       invokedPrefix,
       rawArgs,
       command.metadata.options,
+      commandName,
     );
 
     try {

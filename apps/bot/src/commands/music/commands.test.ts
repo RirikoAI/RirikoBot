@@ -71,6 +71,7 @@ function createMockContext(params: {
     member,
     user,
     commandName: 'music',
+    invokedName: 'music',
     invokedPrefix: '/',
     isReplied: false,
     isDeferred: false,

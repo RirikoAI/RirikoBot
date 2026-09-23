@@ -9,7 +9,10 @@
       "points": 13,
       "status": "DONE",
       "requires": [],
-      "blocks": ["EPIC-001", "EPIC-002"],
+      "blocks": [
+        "EPIC-001",
+        "EPIC-002"
+      ],
       "description": "Foundational system architecture, complete subsystem specifications, and Scrum Kanban protocol."
     },
     {
@@ -17,8 +20,13 @@
       "title": "Monorepo Workspace, Toolchain & Core Contracts",
       "points": 13,
       "status": "DONE",
-      "requires": ["EPIC-000"],
-      "blocks": ["EPIC-002", "EPIC-003"],
+      "requires": [
+        "EPIC-000"
+      ],
+      "blocks": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
       "description": "pnpm workspaces, strict TypeScript configs, @ririko/core with typed event bus and errors, and ririko CLI."
     },
     {
@@ -26,8 +34,16 @@
       "title": "Dual-Dialect Drizzle ORM & Data Access Layer",
       "points": 21,
       "status": "DONE",
-      "requires": ["EPIC-001"],
-      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-010"],
+      "requires": [
+        "EPIC-001"
+      ],
+      "blocks": [
+        "EPIC-004",
+        "EPIC-005",
+        "EPIC-006",
+        "EPIC-007",
+        "EPIC-010"
+      ],
       "description": "40+ tables normalized schemas for PostgreSQL and SQLite, ACID transaction helpers, and legacy migration CLI."
     },
     {
@@ -35,8 +51,16 @@
       "title": "Discord.js 14 Gateway & O(1) Command Router",
       "points": 21,
       "status": "DONE",
-      "requires": ["EPIC-001"],
-      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"],
+      "requires": [
+        "EPIC-001"
+      ],
+      "blocks": [
+        "EPIC-004",
+        "EPIC-005",
+        "EPIC-006",
+        "EPIC-007",
+        "EPIC-009"
+      ],
       "description": "Dual-dispatch router (slash + prefix), middleware chain (permissions, cooldowns, maintenance), interactive help center."
     },
     {
@@ -44,8 +68,14 @@
       "title": "Centralized Transactional Economy & Banking Engine",
       "points": 21,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-010", "EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-010",
+        "EPIC-011"
+      ],
       "description": "Double-entry ledger, anti-spam XP, voice AFK checks, banking, rankings, item catalog, and canvas profile cards."
     },
     {
@@ -53,8 +83,13 @@
       "title": "Multi-Source Music 2.0 Audio Engine",
       "points": 13,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "YouTube/Spotify/SoundCloud/Deezer extractors, @discordjs/voice player, reactive embeds, volume clamping."
     },
     {
@@ -62,8 +97,13 @@
       "title": "AI Chatbot 2.0 with Context Isolation & Safe Tools",
       "points": 13,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Dedicated #ririko-ai channel, per-user memory isolation, explicit time tool, safe tool allowlist."
     },
     {
@@ -71,8 +111,13 @@
       "title": "Moderation 2.0 with Escalation & AutoMod",
       "points": 13,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Warning escalation engine, Discord AutoMod integration, case audit logs, and anti-raid filters."
     },
     {
@@ -80,8 +125,13 @@
       "title": "Streamer Notifications & Free Games Announcer",
       "points": 8,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Twitch/YouTube/TikTok watchers with idempotency keys, thumbnail reupload CDN, and Epic/Steam games feed."
     },
     {
@@ -89,8 +139,13 @@
       "title": "Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite",
       "points": 13,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Crash-resistant giveaways, Join to Create dynamic voice channels, and Minimax Tic-Tac-Toe, RPS, HighLow."
     },
     {
@@ -98,8 +153,13 @@
       "title": "Waifu TCG Gameplay, Ingestion, Trading & Marketplace",
       "points": 21,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-004"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-004"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "waifu.im ingestion, 8-tier rarity math, 7 elemental affinities (including Ice), atomic P2P trading, marketplace, WaifuGuilds."
     },
     {
@@ -107,8 +167,21 @@
       "title": "Next.js 16 Web Dashboard & Management Portal",
       "points": 21,
       "status": "BACKLOG",
-      "requires": ["EPIC-002", "EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-008", "EPIC-009", "EPIC-010", "EPIC-013", "EPIC-014"],
-      "blocks": ["EPIC-012"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-004",
+        "EPIC-005",
+        "EPIC-006",
+        "EPIC-007",
+        "EPIC-008",
+        "EPIC-009",
+        "EPIC-010",
+        "EPIC-013",
+        "EPIC-014"
+      ],
+      "blocks": [
+        "EPIC-012"
+      ],
       "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure."
     },
     {
@@ -116,17 +189,25 @@
       "title": "Quality Gates, Docker Rootless & Production Verification",
       "points": 13,
       "status": "BACKLOG",
-      "requires": ["EPIC-001", "EPIC-011"],
+      "requires": [
+        "EPIC-001",
+        "EPIC-011"
+      ],
       "blocks": [],
       "description": "End-to-end integration tests, rootless Dockerfile, docker-compose.production.yml, /health probes."
     },
     {
       "id": "EPIC-013",
       "title": "Media Synthesis, Anime Reactions & AI Image Generation",
-      "points": 13,
+      "points": 21,
       "status": "BACKLOG",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "60 anime reaction commands (otakugifs.xyz), 11 meme template generators with @napi-rs/canvas, multi-backend AI image generation (/imagine), and welcomer/farewell cards."
     },
     {
@@ -134,8 +215,13 @@
       "title": "Server Utilities, AutoRoles & Community Systems",
       "points": 21,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Automatic role system & reaction roles (join/button/select-menu), persistent NLP reminders, anime/manga search engine, and server utility commands parity."
     },
     {
@@ -143,7 +229,9 @@
       "title": "Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses",
       "points": 21,
       "status": "DONE",
-      "requires": ["EPIC-010"],
+      "requires": [
+        "EPIC-010"
+      ],
       "blocks": [],
       "description": "Balanced dungeon progression (win-rate bands per floor bracket verified by a balance simulator), DB-driven seasonal bosses as real anime characters (AniList + Danbooru pipeline, plain boss art with element icon), equipment acquisition (shop, drop tables, boss signature drops) and interactive gear/shop menus. Children total 63 pts; crafting deferred to STORY-160."
     }
@@ -156,7 +244,9 @@
       "points": 5,
       "status": "DONE",
       "requires": [],
-      "blocks": ["STORY-002"]
+      "blocks": [
+        "STORY-002"
+      ]
     },
     {
       "id": "STORY-002",
@@ -164,8 +254,12 @@
       "title": "Architecture Specification & ADR-001 to ADR-012",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-001"],
-      "blocks": ["STORY-003"]
+      "requires": [
+        "STORY-001"
+      ],
+      "blocks": [
+        "STORY-003"
+      ]
     },
     {
       "id": "STORY-003",
@@ -173,8 +267,12 @@
       "title": "Specialist Agent Roster & Execution Protocols",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-002"],
-      "blocks": ["STORY-004"]
+      "requires": [
+        "STORY-002"
+      ],
+      "blocks": [
+        "STORY-004"
+      ]
     },
     {
       "id": "STORY-004",
@@ -182,8 +280,12 @@
       "title": "Complete Subsystem Documentation Catalog (16 Docs)",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-003"],
-      "blocks": ["STORY-005"]
+      "requires": [
+        "STORY-003"
+      ],
+      "blocks": [
+        "STORY-005"
+      ]
     },
     {
       "id": "STORY-005",
@@ -191,8 +293,12 @@
       "title": "Scrum Kanban & Sub-Agent Knowledge Transfer System",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-004"],
-      "blocks": ["EPIC-001"]
+      "requires": [
+        "STORY-004"
+      ],
+      "blocks": [
+        "EPIC-001"
+      ]
     },
     {
       "id": "STORY-010",
@@ -200,8 +306,12 @@
       "title": "Workspace Configuration & Root Monorepo Tooling",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-000"],
-      "blocks": ["STORY-011"]
+      "requires": [
+        "EPIC-000"
+      ],
+      "blocks": [
+        "STORY-011"
+      ]
     },
     {
       "id": "STORY-011",
@@ -209,8 +319,12 @@
       "title": "packages/core Contracts, Errors, EventBus & Config",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-010"],
-      "blocks": ["STORY-012"]
+      "requires": [
+        "STORY-010"
+      ],
+      "blocks": [
+        "STORY-012"
+      ]
     },
     {
       "id": "STORY-012",
@@ -218,8 +332,13 @@
       "title": "apps/cli Scaffolding & ririko doctor Diagnostics",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-011"],
-      "blocks": ["EPIC-002", "EPIC-003"]
+      "requires": [
+        "STORY-011"
+      ],
+      "blocks": [
+        "EPIC-002",
+        "EPIC-003"
+      ]
     },
     {
       "id": "STORY-020",
@@ -227,8 +346,12 @@
       "title": "Dual-Dialect Connection Factory & Client Harness",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-001"],
-      "blocks": ["STORY-021"]
+      "requires": [
+        "EPIC-001"
+      ],
+      "blocks": [
+        "STORY-021"
+      ]
     },
     {
       "id": "STORY-021",
@@ -236,8 +359,12 @@
       "title": "70+ Normalized Table Schemas & Unified TypeScript Models",
       "points": 8,
       "status": "DONE",
-      "requires": ["STORY-020"],
-      "blocks": ["STORY-022"]
+      "requires": [
+        "STORY-020"
+      ],
+      "blocks": [
+        "STORY-022"
+      ]
     },
     {
       "id": "STORY-022",
@@ -245,8 +372,12 @@
       "title": "Dialect-Agnostic Repositories & ACID Transaction Abstractions",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-021"],
-      "blocks": ["STORY-023"]
+      "requires": [
+        "STORY-021"
+      ],
+      "blocks": [
+        "STORY-023"
+      ]
     },
     {
       "id": "STORY-023",
@@ -254,8 +385,16 @@
       "title": "Legacy 1.4.0 SQLite Migration Engine & CLI",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-022"],
-      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-010"]
+      "requires": [
+        "STORY-022"
+      ],
+      "blocks": [
+        "EPIC-004",
+        "EPIC-005",
+        "EPIC-006",
+        "EPIC-007",
+        "EPIC-010"
+      ]
     },
     {
       "id": "STORY-030",
@@ -263,8 +402,12 @@
       "title": "Discord Client Gateway Lifecycle, Sharding & REST V10 Harness",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-001"],
-      "blocks": ["STORY-031"]
+      "requires": [
+        "EPIC-001"
+      ],
+      "blocks": [
+        "STORY-031"
+      ]
     },
     {
       "id": "STORY-031",
@@ -272,8 +415,12 @@
       "title": "O(1) Dual-Dispatch Command Router (Slash & Prefix Parity)",
       "points": 8,
       "status": "DONE",
-      "requires": ["STORY-030"],
-      "blocks": ["STORY-032"]
+      "requires": [
+        "STORY-030"
+      ],
+      "blocks": [
+        "STORY-032"
+      ]
     },
     {
       "id": "STORY-032",
@@ -281,8 +428,12 @@
       "title": "Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance)",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-031"],
-      "blocks": ["STORY-033"]
+      "requires": [
+        "STORY-031"
+      ],
+      "blocks": [
+        "STORY-033"
+      ]
     },
     {
       "id": "STORY-033",
@@ -290,8 +441,16 @@
       "title": "Interactive Dynamic Help Center & Command Auto-Registration",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-032"],
-      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"]
+      "requires": [
+        "STORY-032"
+      ],
+      "blocks": [
+        "EPIC-004",
+        "EPIC-005",
+        "EPIC-006",
+        "EPIC-007",
+        "EPIC-009"
+      ]
     },
     {
       "id": "STORY-040",
@@ -299,8 +458,13 @@
       "title": "Event-Driven Economy Core & Anti-Spam / Anti-AFK Engine",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["STORY-041"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "STORY-041"
+      ]
     },
     {
       "id": "STORY-041",
@@ -308,8 +472,13 @@
       "title": "Transactional Banking, Daily Streak Engine & Double-Entry Ledger",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-040"],
-      "blocks": ["STORY-042", "STORY-043"]
+      "requires": [
+        "STORY-040"
+      ],
+      "blocks": [
+        "STORY-042",
+        "STORY-043"
+      ]
     },
     {
       "id": "STORY-042",
@@ -317,8 +486,12 @@
       "title": "Leveling 2.0, Karma & High-Performance Materialized Leaderboards",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-041"],
-      "blocks": ["STORY-044"]
+      "requires": [
+        "STORY-041"
+      ],
+      "blocks": [
+        "STORY-044"
+      ]
     },
     {
       "id": "STORY-043",
@@ -326,8 +499,12 @@
       "title": "Shop Catalog, Inventory Bags & SSRF-Protected Profile Customization",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-041"],
-      "blocks": ["STORY-044"]
+      "requires": [
+        "STORY-041"
+      ],
+      "blocks": [
+        "STORY-044"
+      ]
     },
     {
       "id": "STORY-044",
@@ -335,8 +512,13 @@
       "title": "Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-042", "STORY-043"],
-      "blocks": ["EPIC-010"]
+      "requires": [
+        "STORY-042",
+        "STORY-043"
+      ],
+      "blocks": [
+        "EPIC-010"
+      ]
     },
     {
       "id": "STORY-050",
@@ -344,8 +526,13 @@
       "title": "Multi-Source Audio Extractors & Stream Resolvers",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["STORY-051"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "STORY-051"
+      ]
     },
     {
       "id": "STORY-051",
@@ -353,8 +540,12 @@
       "title": "Voice Lifecycle, Audio Player Core & Queue Engine",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-050"],
-      "blocks": ["STORY-052"]
+      "requires": [
+        "STORY-050"
+      ],
+      "blocks": [
+        "STORY-052"
+      ]
     },
     {
       "id": "STORY-052",
@@ -362,8 +553,12 @@
       "title": "Reactive Embed Controller & Dual-Dispatch Music Commands Suite",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-051"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "STORY-051"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-060",
@@ -371,8 +566,13 @@
       "title": "Multi-Provider AI Core, Fallback Chain & Tool Calling Engine",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["STORY-061"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "STORY-061"
+      ]
     },
     {
       "id": "STORY-061",
@@ -380,8 +580,12 @@
       "title": "Persistent Memory, Strict Per-User Context Isolation & Personality Engine",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-060"],
-      "blocks": ["STORY-062"]
+      "requires": [
+        "STORY-060"
+      ],
+      "blocks": [
+        "STORY-062"
+      ]
     },
     {
       "id": "STORY-062",
@@ -389,8 +593,12 @@
       "title": "Deterministic Utility Tools, Explicit Clock & Application Security Interceptor",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-061"],
-      "blocks": ["STORY-063"]
+      "requires": [
+        "STORY-061"
+      ],
+      "blocks": [
+        "STORY-063"
+      ]
     },
     {
       "id": "STORY-063",
@@ -398,8 +606,12 @@
       "title": "Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-062"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "STORY-062"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-070",
@@ -407,8 +619,13 @@
       "title": "Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["STORY-071"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "STORY-071"
+      ]
     },
     {
       "id": "STORY-071",
@@ -416,8 +633,12 @@
       "title": "Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-070"],
-      "blocks": ["STORY-072"]
+      "requires": [
+        "STORY-070"
+      ],
+      "blocks": [
+        "STORY-072"
+      ]
     },
     {
       "id": "STORY-072",
@@ -425,8 +646,12 @@
       "title": "Real-Time Automated Defense & Auto-Moderation Pipeline",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-070"],
-      "blocks": ["STORY-073"]
+      "requires": [
+        "STORY-070"
+      ],
+      "blocks": [
+        "STORY-073"
+      ]
     },
     {
       "id": "STORY-073",
@@ -434,8 +659,13 @@
       "title": "Dual-Dispatch Moderation Commands Suite & Gateway Listeners",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-071", "STORY-072"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "STORY-071",
+        "STORY-072"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-080",
@@ -443,8 +673,13 @@
       "title": "Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok)",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-081",
@@ -452,8 +687,13 @@
       "title": "Free Games Announcer Engine (Epic Games Store & Steam Feed)",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-090",
@@ -461,8 +701,13 @@
       "title": "Giveaways 2.0 Database Engine & Resilient Lifecycle",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-091",
@@ -470,8 +715,13 @@
       "title": "Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup)",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-092",
@@ -479,8 +729,13 @@
       "title": "Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice)",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-004"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-004"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-100",
@@ -488,8 +743,12 @@
       "title": "Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002"],
-      "blocks": ["STORY-101"]
+      "requires": [
+        "EPIC-002"
+      ],
+      "blocks": [
+        "STORY-101"
+      ]
     },
     {
       "id": "STORY-101",
@@ -497,8 +756,12 @@
       "title": "8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-100"],
-      "blocks": ["STORY-102"]
+      "requires": [
+        "STORY-100"
+      ],
+      "blocks": [
+        "STORY-102"
+      ]
     },
     {
       "id": "STORY-102",
@@ -506,8 +769,12 @@
       "title": "7-Element Combat Engine & Tactical Status Effects (Including Ice)",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-101"],
-      "blocks": ["STORY-103"]
+      "requires": [
+        "STORY-101"
+      ],
+      "blocks": [
+        "STORY-103"
+      ]
     },
     {
       "id": "STORY-103",
@@ -515,8 +782,12 @@
       "title": "Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-102"],
-      "blocks": ["STORY-104"]
+      "requires": [
+        "STORY-102"
+      ],
+      "blocks": [
+        "STORY-104"
+      ]
     },
     {
       "id": "STORY-104",
@@ -524,8 +795,12 @@
       "title": "PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-103"],
-      "blocks": ["STORY-105"]
+      "requires": [
+        "STORY-103"
+      ],
+      "blocks": [
+        "STORY-105"
+      ]
     },
     {
       "id": "STORY-105",
@@ -533,8 +808,12 @@
       "title": "Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-104"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "STORY-104"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-110",
@@ -542,8 +821,12 @@
       "title": "Next.js 16 App Router, React 19 Scaffolding & Discord OAuth2 Pipeline",
       "points": 5,
       "status": "BACKLOG",
-      "requires": ["EPIC-001"],
-      "blocks": ["STORY-111"]
+      "requires": [
+        "EPIC-001"
+      ],
+      "blocks": [
+        "STORY-111"
+      ]
     },
     {
       "id": "STORY-111",
@@ -551,8 +834,12 @@
       "title": "Server Management Portal & Core Module Settings Views (20+ Tabs)",
       "points": 8,
       "status": "BACKLOG",
-      "requires": ["STORY-110"],
-      "blocks": ["STORY-112"]
+      "requires": [
+        "STORY-110"
+      ],
+      "blocks": [
+        "STORY-112"
+      ]
     },
     {
       "id": "STORY-112",
@@ -560,8 +847,12 @@
       "title": "Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer",
       "points": 5,
       "status": "BACKLOG",
-      "requires": ["STORY-111"],
-      "blocks": ["STORY-113"]
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [
+        "STORY-113"
+      ]
     },
     {
       "id": "STORY-113",
@@ -569,8 +860,12 @@
       "title": "Server Analytics, Live Case Logs & Shared Zod Validation Parity",
       "points": 3,
       "status": "BACKLOG",
-      "requires": ["STORY-112"],
-      "blocks": ["EPIC-012"]
+      "requires": [
+        "STORY-112"
+      ],
+      "blocks": [
+        "EPIC-012"
+      ]
     },
     {
       "id": "STORY-120",
@@ -578,8 +873,12 @@
       "title": "End-to-End Vitest & Integration Test Harness (80%+ Coverage)",
       "points": 5,
       "status": "BACKLOG",
-      "requires": ["EPIC-001"],
-      "blocks": ["STORY-121"]
+      "requires": [
+        "EPIC-001"
+      ],
+      "blocks": [
+        "STORY-121"
+      ]
     },
     {
       "id": "STORY-121",
@@ -587,8 +886,12 @@
       "title": "Multi-Stage Rootless Dockerfile & docker-compose.production.yml",
       "points": 5,
       "status": "BACKLOG",
-      "requires": ["STORY-120"],
-      "blocks": ["STORY-122"]
+      "requires": [
+        "STORY-120"
+      ],
+      "blocks": [
+        "STORY-122"
+      ]
     },
     {
       "id": "STORY-122",
@@ -596,26 +899,37 @@
       "title": "Health / Readiness Probes, GitHub Actions CI/CD & Production Verification",
       "points": 3,
       "status": "BACKLOG",
-      "requires": ["STORY-121"],
+      "requires": [
+        "STORY-121"
+      ],
       "blocks": []
     },
     {
       "id": "STORY-130",
       "epic": "EPIC-013",
-      "title": "60 Anime Reactions Command Factory & OtakuGIFs Cache",
-      "points": 3,
-      "status": "BACKLOG",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "title": "Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache",
+      "points": 5,
+      "status": "REVIEW",
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-131",
       "epic": "EPIC-013",
       "title": "11 Meme Template Canvas Synthesizers with @napi-rs/canvas",
-      "points": 3,
+      "points": 5,
       "status": "BACKLOG",
-      "requires": ["EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-132",
@@ -623,17 +937,25 @@
       "title": "Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate)",
       "points": 5,
       "status": "BACKLOG",
-      "requires": ["EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-133",
       "epic": "EPIC-013",
       "title": "Welcomer & Farewell Dynamic Card Canvas with SSRF Verification",
-      "points": 2,
+      "points": 3,
       "status": "BACKLOG",
-      "requires": ["EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-140",
@@ -641,8 +963,13 @@
       "title": "Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus)",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-141",
@@ -650,8 +977,13 @@
       "title": "Persistent Natural Language Reminders Engine & Chrono Scheduler",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-142",
@@ -659,8 +991,12 @@
       "title": "Anime & Manga Search Service (Jikan v4 & AniList API)",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-143",
@@ -668,8 +1004,13 @@
       "title": "Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone)",
       "points": 5,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-144",
@@ -677,8 +1018,12 @@
       "title": "Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs",
       "points": 3,
       "status": "DONE",
-      "requires": ["CHORE-1401"],
-      "blocks": ["EPIC-011"]
+      "requires": [
+        "CHORE-1401"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ]
     },
     {
       "id": "STORY-150",
@@ -686,7 +1031,9 @@
       "title": "Card EXP from Dungeon Wins & Real Skill MP Cost in Combat",
       "points": 3,
       "status": "DONE",
-      "requires": ["BUG-0010"],
+      "requires": [
+        "BUG-0010"
+      ],
       "blocks": [],
       "description": "Dungeon clears grant card EXP via LevelingEngine; battle combatant uses the card skill MP cost instead of hard-coded 50."
     },
@@ -696,7 +1043,9 @@
       "title": "DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table)",
       "points": 8,
       "status": "DONE",
-      "requires": ["STORY-150"],
+      "requires": [
+        "STORY-150"
+      ],
       "blocks": [],
       "description": "New dungeon_bosses table (PG + SQLite), zod BossDefinition, precedence floor > boss > season scalingParams > code default; DungeonRunner reads season and floor rows; per-floor enrage and affix gating."
     },
@@ -706,7 +1055,9 @@
       "title": "Dungeon Balance Simulator CLI & CI Win-Rate Bands",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-151"],
+      "requires": [
+        "STORY-151"
+      ],
       "blocks": [],
       "description": "ririko sim:dungeon runs DungeonBattleSession Monte Carlo per player profile; Vitest asserts target win-rate bands per floor bracket."
     },
@@ -716,7 +1067,9 @@
       "title": "tcg:boss-builder Script & BossSynthesizer Rendering",
       "points": 8,
       "status": "DONE",
-      "requires": ["STORY-151"],
+      "requires": [
+        "STORY-151"
+      ],
       "blocks": [],
       "description": "Catalog JSON per season, --sync (AniList + Danbooru art, resumable, rate-limited), --render plain art + element icon top-left + name/anime/floor text, --import-db idempotent upsert into waifu_assets + dungeon_bosses + dungeon_floors, --suggest theme candidates."
     },
@@ -726,7 +1079,10 @@
       "title": "Season 1 Infernal Crucible Boss Roster & Floor Seed Data",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-152", "STORY-153"],
+      "requires": [
+        "STORY-152",
+        "STORY-153"
+      ],
       "blocks": [],
       "description": "Unique characters for all mini/major boss floors plus a rotating themed pool for standard floors with no back-to-back repeats; each boss has distinct skill, flavor text and signature drop."
     },
@@ -736,7 +1092,9 @@
       "title": "Boss Artwork in Dungeon Battle Screen",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-154"],
+      "requires": [
+        "STORY-154"
+      ],
       "blocks": [],
       "description": "Battle embed shows boss image as main image and player card as thumbnail."
     },
@@ -746,7 +1104,9 @@
       "title": "Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget",
       "points": 8,
       "status": "DONE",
-      "requires": ["STORY-152"],
+      "requires": [
+        "STORY-152"
+      ],
       "blocks": [],
       "description": "Catalog expansion per floor bracket and slot, first-clear and repeat drop tables by item code, boss signature drops, gear stats sized to floor brackets and verified by the simulator."
     },
@@ -756,7 +1116,9 @@
       "title": "Interactive Equipment Menu (/card gear)",
       "points": 8,
       "status": "DONE",
-      "requires": ["BUG-0010"],
+      "requires": [
+        "BUG-0010"
+      ],
       "blocks": [],
       "description": "Card, slot and item dropdowns with stat deltas; Equip, Unequip, Enhance and Back buttons; owner-only collector; in-place embed updates."
     },
@@ -766,7 +1128,9 @@
       "title": "Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-157"],
+      "requires": [
+        "STORY-157"
+      ],
       "blocks": [],
       "description": "Category buttons, stat preview vs equipped gear, Buy & Equip, deterministic daily rotating RARE stock."
     },
@@ -776,7 +1140,10 @@
       "title": "Early-Floor Tuning, Pity Blessing & Floor Star Ratings",
       "points": 8,
       "status": "DONE",
-      "requires": ["STORY-152", "STORY-156"],
+      "requires": [
+        "STORY-152",
+        "STORY-156"
+      ],
       "blocks": [],
       "description": "Tune S1 to the win-rate bands, starter stat guarantee, stacking pity blessing with energy refund on F1-10, star ratings with bonus rewards."
     },
@@ -786,7 +1153,9 @@
       "title": "Equipment Crafting with Dust",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-156"],
+      "requires": [
+        "STORY-156"
+      ],
       "blocks": [],
       "description": "Craft non-signature, drop-only gear (per-slot upgrade chains) and select potions from Crafting Dust, Credits, and ingredients, gated by dungeon floor progress. Originally deferred by user decision; picked back up as TASK-1601/1602/1603."
     },
@@ -796,7 +1165,10 @@
       "title": "Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness",
       "points": 5,
       "status": "REVIEW",
-      "requires": ["EPIC-004", "EPIC-015"],
+      "requires": [
+        "EPIC-004",
+        "EPIC-015"
+      ],
       "blocks": [],
       "description": "Replace the five independent UTC calendar-day resets with one shared configurable reset boundary (default 00:00 GMT+8), exposed through a core ResetSchedule helper returning an integer day index. Covers energy replenishment, the energy potion daily ceiling, TCG shop daily rotation, the economy shop daily purchase limit and /daily. Converts /daily from a rolling 24h cooldown with 12h grace into a calendar-day claim with consecutive-miss streak forgiveness: fewer consecutive missed days than the configured threshold preserve the streak (missed days are skipped, never counted), reaching the threshold wipes the streak and the triggering claim counts as day 1. Missed count is derived from lastDailyAt rather than persisted. One global timezone offset with per-feature clock-time overrides."
     },
@@ -830,7 +1202,9 @@
       "points": 2,
       "status": "DONE",
       "requires": [],
-      "blocks": ["TASK-0102"]
+      "blocks": [
+        "TASK-0102"
+      ]
     },
     {
       "id": "TASK-0102",
@@ -838,8 +1212,12 @@
       "title": "Shared TypeScript Base Configs & Package Reference Harness",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0101"],
-      "blocks": ["TASK-0103"]
+      "requires": [
+        "TASK-0101"
+      ],
+      "blocks": [
+        "TASK-0103"
+      ]
     },
     {
       "id": "TASK-0103",
@@ -847,8 +1225,12 @@
       "title": "Root Linting, Formatting & Vitest Configuration",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0102"],
-      "blocks": ["STORY-011"]
+      "requires": [
+        "TASK-0102"
+      ],
+      "blocks": [
+        "STORY-011"
+      ]
     },
     {
       "id": "TASK-0111",
@@ -856,8 +1238,12 @@
       "title": "Zod Schema Environment Validation & Config Loader",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-010"],
-      "blocks": ["TASK-0112"]
+      "requires": [
+        "STORY-010"
+      ],
+      "blocks": [
+        "TASK-0112"
+      ]
     },
     {
       "id": "TASK-0112",
@@ -865,8 +1251,12 @@
       "title": "Standardized Error Hierarchy & Error Codes",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0111"],
-      "blocks": ["TASK-0113"]
+      "requires": [
+        "TASK-0111"
+      ],
+      "blocks": [
+        "TASK-0113"
+      ]
     },
     {
       "id": "TASK-0113",
@@ -874,8 +1264,12 @@
       "title": "Strongly-Typed Asynchronous EventBus & Lifecycle Hooks",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0112"],
-      "blocks": ["STORY-012"]
+      "requires": [
+        "TASK-0112"
+      ],
+      "blocks": [
+        "STORY-012"
+      ]
     },
     {
       "id": "TASK-0121",
@@ -883,8 +1277,12 @@
       "title": "CLI Subcommand Architecture, Global Options & Runner Harness",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-011"],
-      "blocks": ["TASK-0122"]
+      "requires": [
+        "STORY-011"
+      ],
+      "blocks": [
+        "TASK-0122"
+      ]
     },
     {
       "id": "TASK-0122",
@@ -892,8 +1290,12 @@
       "title": "ririko doctor Comprehensive Diagnostics Engine",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0121"],
-      "blocks": ["EPIC-002"]
+      "requires": [
+        "TASK-0121"
+      ],
+      "blocks": [
+        "EPIC-002"
+      ]
     },
     {
       "id": "TASK-0201",
@@ -902,7 +1304,9 @@
       "points": 2,
       "status": "DONE",
       "requires": [],
-      "blocks": ["TASK-0202"]
+      "blocks": [
+        "TASK-0202"
+      ]
     },
     {
       "id": "TASK-0202",
@@ -910,8 +1314,12 @@
       "title": "SQLite WAL/Foreign Key Pragmas, PG Pooling, Health Check & Integration Tests",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0201"],
-      "blocks": ["STORY-021"]
+      "requires": [
+        "TASK-0201"
+      ],
+      "blocks": [
+        "STORY-021"
+      ]
     },
     {
       "id": "TASK-0211",
@@ -919,8 +1327,12 @@
       "title": "Core & Service Schemas: Identity, Guilds, Moderation, Economy, XP, Music, AI",
       "points": 5,
       "status": "DONE",
-      "requires": ["STORY-020"],
-      "blocks": ["TASK-0212"]
+      "requires": [
+        "STORY-020"
+      ],
+      "blocks": [
+        "TASK-0212"
+      ]
     },
     {
       "id": "TASK-0212",
@@ -928,8 +1340,12 @@
       "title": "Specialized Schemas: Waifu TCG (20 tables), Streams, Giveaways, Games, Utilities & Inferred Models",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0211"],
-      "blocks": ["STORY-022"]
+      "requires": [
+        "TASK-0211"
+      ],
+      "blocks": [
+        "STORY-022"
+      ]
     },
     {
       "id": "TASK-0221",
@@ -937,8 +1353,12 @@
       "title": "Base Repository Pattern & Dialect-Agnostic Query Abstraction",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-021"],
-      "blocks": ["TASK-0222"]
+      "requires": [
+        "STORY-021"
+      ],
+      "blocks": [
+        "TASK-0222"
+      ]
     },
     {
       "id": "TASK-0222",
@@ -946,8 +1366,12 @@
       "title": "Core Domain Repositories (Users, GuildSettings, Economy Ledger) & Tests",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0221"],
-      "blocks": ["STORY-023"]
+      "requires": [
+        "TASK-0221"
+      ],
+      "blocks": [
+        "STORY-023"
+      ]
     },
     {
       "id": "TASK-0231",
@@ -955,8 +1379,12 @@
       "title": "Legacy SQLite Inspector & 17-Entity Data Transformer",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-022"],
-      "blocks": ["TASK-0232"]
+      "requires": [
+        "STORY-022"
+      ],
+      "blocks": [
+        "TASK-0232"
+      ]
     },
     {
       "id": "TASK-0232",
@@ -964,7 +1392,9 @@
       "title": "ririko migrate:legacy CLI Command with Dry-Run & Verification Harness",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0231"],
+      "requires": [
+        "TASK-0231"
+      ],
       "blocks": []
     },
     {
@@ -973,8 +1403,12 @@
       "title": "Discord.js 14 Client Factory with Gateway Intents, Partials & Cache Sweepers",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-001"],
-      "blocks": ["TASK-0302"]
+      "requires": [
+        "EPIC-001"
+      ],
+      "blocks": [
+        "TASK-0302"
+      ]
     },
     {
       "id": "TASK-0302",
@@ -982,8 +1416,12 @@
       "title": "Gateway Lifecycle State Machine, Reconnection & Shard Health Monitoring",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0301"],
-      "blocks": ["STORY-031"]
+      "requires": [
+        "TASK-0301"
+      ],
+      "blocks": [
+        "STORY-031"
+      ]
     },
     {
       "id": "TASK-0311",
@@ -991,8 +1429,12 @@
       "title": "Command Interfaces, Option Parsers & Unified CommandContext Abstraction",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-030"],
-      "blocks": ["TASK-0312"]
+      "requires": [
+        "STORY-030"
+      ],
+      "blocks": [
+        "TASK-0312"
+      ]
     },
     {
       "id": "TASK-0312",
@@ -1000,8 +1442,12 @@
       "title": "O(1) Hash Map Command Registry, Prefix Tokenizer & Dual Dispatcher",
       "points": 5,
       "status": "DONE",
-      "requires": ["TASK-0311"],
-      "blocks": ["STORY-032"]
+      "requires": [
+        "TASK-0311"
+      ],
+      "blocks": [
+        "STORY-032"
+      ]
     },
     {
       "id": "TASK-0321",
@@ -1009,8 +1455,12 @@
       "title": "Middleware Runner, Execution Chain Engine & Error Boundary Interceptor",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-031"],
-      "blocks": ["TASK-0322"]
+      "requires": [
+        "STORY-031"
+      ],
+      "blocks": [
+        "TASK-0322"
+      ]
     },
     {
       "id": "TASK-0322",
@@ -1018,8 +1468,12 @@
       "title": "Built-in Middlewares: PermissionBitfield, MaintenanceMode, ModuleToggle, Per-User Cooldown & TokenBucket RateLimit",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0321"],
-      "blocks": ["STORY-033"]
+      "requires": [
+        "TASK-0321"
+      ],
+      "blocks": [
+        "STORY-033"
+      ]
     },
     {
       "id": "TASK-0331",
@@ -1027,8 +1481,12 @@
       "title": "Component-driven Interactive Help Menu with Category Selectors, Pagination & Detailed Command Inspector",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-032"],
-      "blocks": ["TASK-0332"]
+      "requires": [
+        "STORY-032"
+      ],
+      "blocks": [
+        "TASK-0332"
+      ]
     },
     {
       "id": "TASK-0332",
@@ -1036,8 +1494,16 @@
       "title": "Discord REST v10 Global / Guild Command Synchronization & Auto-Registration Engine",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0331"],
-      "blocks": ["EPIC-004", "EPIC-005", "EPIC-006", "EPIC-007", "EPIC-009"]
+      "requires": [
+        "TASK-0331"
+      ],
+      "blocks": [
+        "EPIC-004",
+        "EPIC-005",
+        "EPIC-006",
+        "EPIC-007",
+        "EPIC-009"
+      ]
     },
     {
       "id": "TASK-0401",
@@ -1045,8 +1511,12 @@
       "title": "EconomyEvent Pipeline, Anti-Spam Evaluator & Core Service",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002"],
-      "blocks": ["TASK-0402"]
+      "requires": [
+        "EPIC-002"
+      ],
+      "blocks": [
+        "TASK-0402"
+      ]
     },
     {
       "id": "TASK-0402",
@@ -1054,8 +1524,12 @@
       "title": "Voice XP / Economy Accumulator, Quorum Verification & Anti-AFK State Machine",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0401"],
-      "blocks": ["STORY-041"]
+      "requires": [
+        "TASK-0401"
+      ],
+      "blocks": [
+        "STORY-041"
+      ]
     },
     {
       "id": "TASK-0411",
@@ -1063,8 +1537,12 @@
       "title": "Daily Streak Engine (+5%/day up to 30d, 36h reset grace) & Account State",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0401"],
-      "blocks": ["TASK-0412"],
+      "requires": [
+        "TASK-0401"
+      ],
+      "blocks": [
+        "TASK-0412"
+      ],
       "description": "economy_accounts state management, daily claim streaks with +5%/day bonus capping at +150% (30 days), 24h window with 12h grace period (36h total reset cutoff), and account freeze controls."
     },
     {
@@ -1073,8 +1551,13 @@
       "title": "Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers)",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0411"],
-      "blocks": ["STORY-042", "STORY-043"],
+      "requires": [
+        "TASK-0411"
+      ],
+      "blocks": [
+        "STORY-042",
+        "STORY-043"
+      ],
       "description": "Deposit & withdraw operations with capacity scaling (10,000 + Level*2,500), configurable daily interest calculations, and peer-to-peer /pay transfers with deterministic deadlock-free row locking."
     },
     {
@@ -1083,8 +1566,12 @@
       "title": "Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0411"],
-      "blocks": ["TASK-0422"],
+      "requires": [
+        "TASK-0411"
+      ],
+      "blocks": [
+        "TASK-0422"
+      ],
       "description": "Bidirectional XP-to-Level and Level-to-XP formulas (5L^2 + 50L + 100), level-up threshold events, legacy Karma tracking and opt-in notification toggles."
     },
     {
@@ -1093,8 +1580,12 @@
       "title": "Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0421"],
-      "blocks": ["STORY-044"],
+      "requires": [
+        "TASK-0421"
+      ],
+      "blocks": [
+        "STORY-044"
+      ],
       "description": "leaderboard_snapshots materialization cron computing global and server rank percentiles, point lookups with O(1) dense rank queries without full user table scans."
     },
     {
@@ -1103,8 +1594,12 @@
       "title": "Item Catalog Repository, Inventory Bags & Usable Consumables (Anti-Abuse Daily Potion Ceilings)",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0412"],
-      "blocks": ["TASK-0432"],
+      "requires": [
+        "TASK-0412"
+      ],
+      "blocks": [
+        "TASK-0432"
+      ],
       "description": "economy_items catalog, inventory bag persistence, consumable item use pipeline, and anti-abuse daily limits (1 minor candy/day in shop, max 3 stamina pots/day)."
     },
     {
@@ -1113,8 +1608,12 @@
       "title": "Custom Profile Background Manager with DNS/SSRF IP Verification, Dimension Bounds & Cache",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0431"],
-      "blocks": ["STORY-044"],
+      "requires": [
+        "TASK-0431"
+      ],
+      "blocks": [
+        "STORY-044"
+      ],
       "description": "Remote profile background fetching with SSRF private-IP filters, dimension validation (1200x400 limit), local storage caching, and shop sink deduction."
     },
     {
@@ -1123,8 +1622,13 @@
       "title": "Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot)",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0422", "TASK-0432"],
-      "blocks": ["TASK-0442"],
+      "requires": [
+        "TASK-0422",
+        "TASK-0432"
+      ],
+      "blocks": [
+        "TASK-0442"
+      ],
       "description": "1200x400 high-performance canvas rank card synthesizer with Discord avatar, global & server rank badges, level, XP progress bar, wallet & bank balance, and equipped TCG card slot."
     },
     {
@@ -1133,8 +1637,12 @@
       "title": "Dual-Dispatch Discord Commands & Gateway Event Listeners",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0441"],
-      "blocks": ["EPIC-010"],
+      "requires": [
+        "TASK-0441"
+      ],
+      "blocks": [
+        "EPIC-010"
+      ],
       "description": "Slash & prefix parity commands (/balance, /daily, /deposit, /withdraw, /pay, /leaderboard, /profile, /shop, /inventory, /use, /karma) and message/voice Gateway event listeners in apps/bot."
     },
     {
@@ -1143,8 +1651,13 @@
       "title": "Extractor Interfaces, Pattern Matchers & Source Adapters",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["TASK-0502"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-0502"
+      ],
       "description": "MusicSourceAdapter interfaces, ExtractorPipeline with priority routing, YouTube, Spotify metadata resolver, SoundCloud, and Deezer/Direct stream extractors."
     },
     {
@@ -1153,8 +1666,12 @@
       "title": "Session Cookie Rotation, Client Spoofing & Health Checks",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0501"],
-      "blocks": ["STORY-051"],
+      "requires": [
+        "TASK-0501"
+      ],
+      "blocks": [
+        "STORY-051"
+      ],
       "description": "Session cookie pool rotation, iOS/Android mobile client emulation headers to bypass IP bans, and adapter latency/health probes."
     },
     {
@@ -1163,8 +1680,12 @@
       "title": "YouTube PO-Token Automation: CLI Generator & In-Process Background Provider",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0502"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-0502"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Developer CLI command (ririko generate:po-token --save) and automated non-blocking in-process background BotGuard PO token provider with 18h TTL rotation."
     },
     {
@@ -1173,8 +1694,12 @@
       "title": "Playwright Firefox YouTube Credential Harvester (Cookies, PO-Token, VisitorData & Client Spoofing)",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0503"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-0503"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Microsoft Playwright Firefox integration in apps/cli with headless/headed login modes, cookie interception, and Firefox client spoofing parity."
     },
     {
@@ -1183,8 +1708,12 @@
       "title": "Chrome/Chromium Browser Harvester (Playwright Chrome, Anti-Detection & Interactive Google Login)",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0504"],
-      "blocks": ["TASK-0506"],
+      "requires": [
+        "TASK-0504"
+      ],
+      "blocks": [
+        "TASK-0506"
+      ],
       "description": "Replace Firefox with Chrome/Chromium in browser harvester with anti-automation flags (--disable-blink-features=AutomationControlled) to fix Google login restrictions and childFrames frame navigation errors."
     },
     {
@@ -1193,8 +1722,12 @@
       "title": "Spotify Web API Integration & Bridge Overhaul (Scrap go-librespot)",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0505"],
-      "blocks": ["TASK-0507"],
+      "requires": [
+        "TASK-0505"
+      ],
+      "blocks": [
+        "TASK-0507"
+      ],
       "description": "Scrap broken go-librespot daemon, installer, login and pipe streaming on Windows. Modernize SpotifyAdapter with official Spotify Web API client credentials (SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET) and sp_dc/sp_key cookie fallback, high-fidelity metadata resolution, and robust multi-source streaming bridge (SoundCloud/YouTube) with clean doctor checks."
     },
     {
@@ -1203,8 +1736,12 @@
       "title": "LavaSrc Precision Audio Mirroring (ISRC, Duration Guard & Candidate Scoring)",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0506"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-0506"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Implement LavaSrc-style multi-signal precision candidate scoring (ISRC, title token overlap, artist verification, and strict duration tolerance guard) for Spotify audio mirroring. Prioritize YouTube Music / Topic official audio and eliminate incorrect fuzzy matches from SoundCloud radio/podcast streams."
     },
     {
@@ -1213,8 +1750,12 @@
       "title": "Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-050"],
-      "blocks": ["TASK-0512"],
+      "requires": [
+        "STORY-050"
+      ],
+      "blocks": [
+        "TASK-0512"
+      ],
       "description": "FIFO queue, history stack for /back, loop modes (OFF, TRACK, QUEUE), FFmpeg audio filters (Bassboost, Nightcore, 8D), 0%-150% volume clamping, and autoplay."
     },
     {
@@ -1223,8 +1764,12 @@
       "title": "Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0511"],
-      "blocks": ["STORY-052"],
+      "requires": [
+        "TASK-0511"
+      ],
+      "blocks": [
+        "STORY-052"
+      ],
       "description": "@discordjs/voice state machine, reconnection backoff, 3-minute idle timeout auto-disconnect, and MusicRepository (saved playlists & guild settings)."
     },
     {
@@ -1233,8 +1778,12 @@
       "title": "Dual-Dispatch Music Commands Suite (17 Commands)",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-051"],
-      "blocks": ["TASK-0522"],
+      "requires": [
+        "STORY-051"
+      ],
+      "blocks": [
+        "TASK-0522"
+      ],
       "description": "17 dual-dispatch music commands with slash and prefix parity (/play, /pause, /resume, /skip, /back, /stop, /queue, /nowplaying, /volume, /loop, /shuffle, /seek, /filter, /lyrics, /join, /leave, /playlist)."
     },
     {
@@ -1243,8 +1792,12 @@
       "title": "Reactive Embed Controller & Interactive Button Matrix (Zero Polling)",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0521"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-0521"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Dynamic #music controller embed with responsive 2-row ActionRow buttons (Play/Pause, Skip, Stop, Loop, Volume) updating purely on player/interaction events without setInterval polling."
     },
     {
@@ -1253,7 +1806,9 @@
       "title": "Lavalink v4 Backend Integration, Autoinstall Script & LavaSrc Setup",
       "points": 8,
       "status": "DONE",
-      "requires": ["STORY-050"],
+      "requires": [
+        "STORY-050"
+      ],
       "blocks": [],
       "description": "Migrate audio streaming core to Lavalink v4 + LavaSrc with an autoinstall setup script, preserving 100% command and embed controller compatibility."
     },
@@ -1263,8 +1818,13 @@
       "title": "packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["TASK-0602"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-0602"
+      ],
       "description": "Initialize packages/ai workspace package with ChatModelProvider interface, ChatRequest/ChatResponse types, token streaming primitives, and FallbackChainManager for 429 quota/timeout auto-failover."
     },
     {
@@ -1273,8 +1833,12 @@
       "title": "Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0601"],
-      "blocks": ["STORY-061"],
+      "requires": [
+        "TASK-0601"
+      ],
+      "blocks": [
+        "STORY-061"
+      ],
       "description": "Implement GeminiProvider with @google/genai SDK, OpenAIProvider with openai SDK, and OllamaProvider with native HTTP fetch, supporting streaming responses and structured JSON function tool calling schemas."
     },
     {
@@ -1283,8 +1847,12 @@
       "title": "AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-060"],
-      "blocks": ["TASK-0612"],
+      "requires": [
+        "STORY-060"
+      ],
+      "blocks": [
+        "TASK-0612"
+      ],
       "description": "Build AiRepository over ai_conversations and ai_messages schemas in PostgreSQL and SQLite, enforcing strict (guild_id, user_id, channel_id) isolation to prevent memory leakage across users in shared channels, with sliding-window truncation."
     },
     {
@@ -1293,8 +1861,12 @@
       "title": "Personality Engine, System Safety Prompts & Sanitized Identity Ingestion",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0611"],
-      "blocks": ["STORY-062"],
+      "requires": [
+        "TASK-0611"
+      ],
+      "blocks": [
+        "STORY-062"
+      ],
       "description": "Implement personality engine with customizable guild personas (ai_guild_preferences) separated from immutable system safety instructions, and sanitize user identity tokens (username, display name, guild name) to prevent prompt injection."
     },
     {
@@ -1303,8 +1875,12 @@
       "title": "Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools",
       "points": 1,
       "status": "DONE",
-      "requires": ["STORY-061"],
-      "blocks": ["TASK-0622"],
+      "requires": [
+        "STORY-061"
+      ],
+      "blocks": [
+        "TASK-0622"
+      ],
       "description": "Implement get_current_time tool resolving user timezone -> guild timezone -> UTC, alongside anime search, coinflip, and reminder tool definitions with strict Zod argument schemas."
     },
     {
@@ -1313,8 +1889,12 @@
       "title": "Application Security Interceptor & Discord Permission-Mediated Tool Calling",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0621"],
-      "blocks": ["STORY-063"],
+      "requires": [
+        "TASK-0621"
+      ],
+      "blocks": [
+        "STORY-063"
+      ],
       "description": "Implement security mediation layer ensuring the LLM is never the security boundary: verify caller Discord permissions, module toggle state, bot permissions, and role hierarchy before executing music.play or economy balance checks."
     },
     {
@@ -1323,8 +1903,12 @@
       "title": "Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller",
       "points": 1,
       "status": "DONE",
-      "requires": ["STORY-062"],
-      "blocks": ["TASK-0632"],
+      "requires": [
+        "STORY-062"
+      ],
+      "blocks": [
+        "TASK-0632"
+      ],
       "description": "Implement messageCreate gateway event listener for dedicated #ririko-ai channel (zero prefix/mention required) and non-dedicated mention trigger, with typing indicators and debounced streaming message edits (max 1 edit/1.5s) to avoid Discord rate limits."
     },
     {
@@ -1333,8 +1917,12 @@
       "title": "Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0631"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-0631"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Implement dual-dispatch slash and prefix AI command suite with autocomplete for models/providers, admin configuration commands, session clear, and comprehensive end-to-end integration test coverage."
     },
     {
@@ -1343,8 +1931,13 @@
       "title": "PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock)",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["TASK-0702"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-0702"
+      ],
       "description": "Implement centralized 5-tier permission verification (invoker permissions, bot permissions, invoker role hierarchy, bot role hierarchy, module policy) and execute safe punitive actions (kick, ban, softban, unban, timeout, nick, lock, unlock) with structured action results and event bus emission."
     },
     {
@@ -1353,8 +1946,12 @@
       "title": "Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0701"],
-      "blocks": ["STORY-071"],
+      "requires": [
+        "TASK-0701"
+      ],
+      "blocks": [
+        "STORY-071"
+      ],
       "description": "Implement atomic sequential per-guild case numbering (Case #N), audit case persistence in moderation_cases, rich embed logging to log_channel_id, persistent staff notes in moderation_notes, and full disciplinary history retrieval."
     },
     {
@@ -1363,8 +1960,12 @@
       "title": "Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-070"],
-      "blocks": ["TASK-0712"],
+      "requires": [
+        "STORY-070"
+      ],
+      "blocks": [
+        "TASK-0712"
+      ],
       "description": "Implement dynamic warning escalation engine with configurable threshold mappings (warn, timeout, kick, ban), sliding-window active warning expirations (e.g. 30 days), and severity weighting."
     },
     {
@@ -1373,8 +1974,12 @@
       "title": "Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0711"],
-      "blocks": ["STORY-072"],
+      "requires": [
+        "TASK-0711"
+      ],
+      "blocks": [
+        "STORY-072"
+      ],
       "description": "Implement filtered bulk message purging (/purge count [user] [invites] [bots] [links]) respecting Discord 14-day API limits with audit log tracking."
     },
     {
@@ -1383,8 +1988,12 @@
       "title": "AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam)",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-070"],
-      "blocks": ["TASK-0722"],
+      "requires": [
+        "STORY-070"
+      ],
+      "blocks": [
+        "TASK-0722"
+      ],
       "description": "Implement high-speed message evaluation pipeline with invite filter (whitelists), scam and phishing URL shield with homoglyph normalization, mention spam detector, and token-bucket burst spam filter."
     },
     {
@@ -1393,8 +2002,12 @@
       "title": "Anti-Raid Mass Join Monitor & Automated Server Verification Gate",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0721"],
-      "blocks": ["STORY-073"],
+      "requires": [
+        "TASK-0721"
+      ],
+      "blocks": [
+        "STORY-073"
+      ],
       "description": "Implement anti-raid sliding window join monitor detecting coordinated account flood attacks, triggering verification gates, and alerting staff."
     },
     {
@@ -1403,8 +2016,13 @@
       "title": "Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.)",
       "points": 1,
       "status": "DONE",
-      "requires": ["STORY-071", "STORY-072"],
-      "blocks": ["TASK-0732"],
+      "requires": [
+        "STORY-071",
+        "STORY-072"
+      ],
+      "blocks": [
+        "TASK-0732"
+      ],
       "description": "Implement dual-dispatch slash and prefix moderation commands suite with interactive confirmation components, permission checks, and reason prompts."
     },
     {
@@ -1413,8 +2031,12 @@
       "title": "Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0731"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-0731"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Wire messageCreate and guildMemberAdd gateway listeners to AutoMod and anti-raid engines, with comprehensive end-to-end integration test coverage."
     },
     {
@@ -1423,8 +2045,13 @@
       "title": "Stream Repository, Multi-Platform Stream Adapters & Watcher Engine Core",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["TASK-0802"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-0802"
+      ],
       "description": "Implement StreamRepository in @ririko/database and Twitch, YouTube, and TikTok stream adapters with polling Watcher Engine in @ririko/services."
     },
     {
@@ -1433,8 +2060,12 @@
       "title": "Stream Notification Dispatcher, Idempotency Deduplication, Thumbnail Cache & CDN Attachment Uploader",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0801"],
-      "blocks": ["TASK-0812"],
+      "requires": [
+        "TASK-0801"
+      ],
+      "blocks": [
+        "TASK-0812"
+      ],
       "description": "Implement StreamNotificationDispatcher with stream_announcements idempotency deduplication and Discord attachment thumbnail CDN proxying."
     },
     {
@@ -1443,7 +2074,9 @@
       "title": "Multi-Platform Stream Watcher Engine Reinforcement, Resilient Adapters, CLI Stream Configuration & General Stream Commands",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-0802"],
+      "requires": [
+        "TASK-0802"
+      ],
       "blocks": [],
       "description": "Reinforce Twitch, YouTube, and TikTok adapters, implement ririko stream-configure CLI command, fix cross-platform unsubscription, and generalize command names."
     },
@@ -1453,8 +2086,12 @@
       "title": "Free Games Repository, Multi-Provider Fetchers (Epic Games & Steam) & Announcer Engine",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-080"],
-      "blocks": ["TASK-0812"],
+      "requires": [
+        "STORY-080"
+      ],
+      "blocks": [
+        "TASK-0812"
+      ],
       "description": "Implement FreeGameRepository and Epic Games Store + Steam free games fetchers with guild announcement tracking."
     },
     {
@@ -1463,8 +2100,13 @@
       "title": "Dual-Dispatch Stream & Free Game Commands Suite & Quality Gate",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0811", "TASK-0802"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-0811",
+        "TASK-0802"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Implement /stream and /freegames dual-dispatch commands with legacy aliases and verify full monorepo quality gate."
     },
     {
@@ -1473,8 +2115,13 @@
       "title": "Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["TASK-0902"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-0902"
+      ],
       "description": "Implement GiveawayRepository in @ririko/database with ACID transactions and GiveawayEngine in @ririko/services with startup reconciliation, weighted roll math, role/age qualification gates, and deterministic testing support."
     },
     {
@@ -1483,8 +2130,12 @@
       "title": "Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0901"],
-      "blocks": ["STORY-091"],
+      "requires": [
+        "TASK-0901"
+      ],
+      "blocks": [
+        "STORY-091"
+      ],
       "description": "Implement /giveaway (create, end, reroll, delete, edit, list) dual-dispatch commands with legacy prefix parity (!gcreate, !gend, etc.), component button entry interactions, and main service wiring."
     },
     {
@@ -1493,8 +2144,13 @@
       "title": "Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup",
       "points": 2,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["TASK-0912"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-0912"
+      ],
       "description": "Implement voiceStateUpdate gateway listener to provision dynamic user-owned temporary voice channels, transfer members, clean up on empty, and prune reboot orphans."
     },
     {
@@ -1503,8 +2159,12 @@
       "title": "Dual-Dispatch Auto-Voice Configuration & Control Commands",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-0911"],
-      "blocks": ["STORY-092"],
+      "requires": [
+        "TASK-0911"
+      ],
+      "blocks": [
+        "STORY-092"
+      ],
       "description": "Implement /autovoice configuration and owner controls (name, user limit, lock, permit, claim) with prefix parity."
     },
     {
@@ -1513,8 +2173,13 @@
       "title": "Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine",
       "points": 3,
       "status": "DONE",
-      "requires": ["EPIC-002", "EPIC-004"],
-      "blocks": ["TASK-0922"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-004"
+      ],
+      "blocks": [
+        "TASK-0922"
+      ],
       "description": "Implement unbeatable Minimax AI decision tree for 3x3 Tic-Tac-Toe, Rock-Paper-Scissors secret ephemeral selection engine, and session state machine with timeout forfeiture."
     },
     {
@@ -1523,8 +2188,12 @@
       "title": "HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-0921"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-0921"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Implement HighLow, CoinFlip, and Dice games with deterministic RNG, dual-dispatch /games suite, and atomic balance escrow integration via EconomyService."
     },
     {
@@ -1533,8 +2202,12 @@
       "title": "waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository",
       "points": 2,
       "status": "DONE",
-      "requires": ["EPIC-002"],
-      "blocks": ["TASK-1002"],
+      "requires": [
+        "EPIC-002"
+      ],
+      "blocks": [
+        "TASK-1002"
+      ],
       "description": "Build WaifuImClient with rate-limiting and backoff, ImageValidator for PNG/JPEG/WebP magic bytes and aspect ratio, SHA-256 binary deduplication, and dual-dialect WaifuAssetRepository with starter seed dataset."
     },
     {
@@ -1543,8 +2216,12 @@
       "title": "Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1001"],
-      "blocks": ["STORY-101"],
+      "requires": [
+        "TASK-1001"
+      ],
+      "blocks": [
+        "STORY-101"
+      ],
       "description": "Enforce mandatory attribution footer 'Image source: waifu.im', graceful deletion silhouette card frame fallback preserving character stats and user ownership, and complete unit/integration test suite."
     },
     {
@@ -1553,8 +2230,12 @@
       "title": "8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-100"],
-      "blocks": ["TASK-1012"],
+      "requires": [
+        "STORY-100"
+      ],
+      "blocks": [
+        "TASK-1012"
+      ],
       "description": "Build 8-tier cumulative probability rarity engine with exact multipliers (1.0x to 5.0x) and max levels (20 to 100), dynamic primary stats (HP 500-15k, ATK 50-2500, DEF 30-1800, SPD 10-300, CRIT 5-50%, MP 100), active/passive skills, and WaifuCardRepository."
     },
     {
@@ -1563,8 +2244,12 @@
       "title": "Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1011"],
-      "blocks": ["STORY-102"],
+      "requires": [
+        "TASK-1011"
+      ],
+      "blocks": [
+        "STORY-102"
+      ],
       "description": "Implement drop trigger manager on message thresholds (50-100 msgs) during active hours (08:00-23:00), 60s [Claim Card] button, 5-minute claimant anti-sniping cooldown, crafting dust dismantling, and /card collection/inspect/favorite/equip commands."
     },
     {
@@ -1573,8 +2258,12 @@
       "title": "7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-101"],
-      "blocks": ["TASK-1022"],
+      "requires": [
+        "STORY-101"
+      ],
+      "blocks": [
+        "TASK-1022"
+      ],
       "description": "Build 7-element affinity matrix (Fire > Ice > Earth > Lightning > Water > Fire, Light <> Shadow), status effects engine (Burn, Freeze/Chill, Fortify, Surge, Purify/Flow, Radiance, Decay/Leech), 6 rarity-scaled battle perks, and turn-based combat simulator with turn 10+ soft enrage."
     },
     {
@@ -1583,8 +2272,12 @@
       "title": "PvP Duels (/game pvp), Timed Expeditions (/game explore), Boss Raids (/game boss) & Quests",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1021"],
-      "blocks": ["STORY-103"],
+      "requires": [
+        "TASK-1021"
+      ],
+      "blocks": [
+        "STORY-103"
+      ],
       "description": "Implement turn-based PvP duels with wager escrow, timed idle exploration expeditions with risk/reward brackets, and server-wide cooperative boss raids with damage contribution tracking."
     },
     {
@@ -1593,8 +2286,12 @@
       "title": "6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-102"],
-      "blocks": ["TASK-1032"],
+      "requires": [
+        "STORY-102"
+      ],
+      "blocks": [
+        "TASK-1032"
+      ],
       "description": "Implement 6 gear slots (Weapon, Armor, Relic, Ring, Amulet, Talisman), battle perks by rarity, +0 to +10 enhancement engine with Crafting Dust and Credits, consumables catalog (HP, Mana, Energy restores), and dual-dialect GameItemRepository and UserInventoryItemRepository."
     },
     {
@@ -1603,8 +2300,12 @@
       "title": "Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1031"],
-      "blocks": ["STORY-104"],
+      "requires": [
+        "TASK-1031"
+      ],
+      "blocks": [
+        "STORY-104"
+      ],
       "description": "Implement level-based max energy formula with milestone bonuses, 00:00 UTC replenishment lifecycle, 3/day stamina potion anti-abuse ceiling, basic town shop with double-entry ledger audit, and dual-dispatch /shop, /inventory, /card equip, /card unequip, and /item commands suite."
     },
     {
@@ -1613,8 +2314,12 @@
       "title": "PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-103"],
-      "blocks": ["TASK-1042"],
+      "requires": [
+        "STORY-103"
+      ],
+      "blocks": [
+        "TASK-1042"
+      ],
       "description": "Implement Dungeon repositories (DungeonSeasonRepository, DungeonFloorRepository, UserDungeonProgressRepository), ScalingEngine with 4 models (Linear, Polynomial, Exponential r=0.085, Hybrid) matching Section 7.5 baseline tables up to F50, Multi-Layer Elemental Wards, Seasonal Environmental Affixes (S1 Scorched Earth & Heat Haze, S2 Torrential Deluge & Tidal Barrier, S3 Radiant Flare & Void Drain), and Turn 10+ Soft Enrage."
     },
     {
@@ -1623,8 +2328,12 @@
       "title": "Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1041"],
-      "blocks": ["STORY-105"],
+      "requires": [
+        "TASK-1041"
+      ],
+      "blocks": [
+        "STORY-105"
+      ],
       "description": "Implement Tutorial onboarding sequence (T1 to T4 with 0 energy cost, starter card, Novice Blade, 3x Minor HP Potions, and TUTORIAL_COMPLETE achievement unlock), floor energy brackets (F1-10 10, F11-25 15, F26-40 20, F41-50+ 25), mini-boss (1.75x) and major boss (3.2x) multipliers, first-clear and repeat loot drop tables, and dual-dispatch /dungeon status/climb/floor/leaderboard suite."
     },
     {
@@ -1633,8 +2342,12 @@
       "title": "Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration",
       "points": 3,
       "status": "DONE",
-      "requires": ["STORY-104"],
-      "blocks": ["TASK-1052"],
+      "requires": [
+        "STORY-104"
+      ],
+      "blocks": [
+        "TASK-1052"
+      ],
       "description": "Implement CardTradeRepository and MarketListingRepository in packages/database, TradeService and MarketService with IN_TRADE/IN_MARKET state locking, dual confirmation, 5% market tax sink, 7-day expiration, and dual-dispatch /trade and /market commands suite."
     },
     {
@@ -1643,8 +2356,12 @@
       "title": "WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1051"],
-      "blocks": ["TASK-1053"],
+      "requires": [
+        "TASK-1051"
+      ],
+      "blocks": [
+        "TASK-1053"
+      ],
       "description": "Implement WaifuGuildRepository, AchievementRepository, and TcgConfigRepository in packages/database, WaifuGuildService, AchievementService with 7-asset reward dispatch, TcgConfigService with Zod validation, and dual-dispatch /waifuguild, /achievement, and /tcg-admin commands suite."
     },
     {
@@ -1653,8 +2370,12 @@
       "title": "Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info)",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1052"],
-      "blocks": ["TASK-1061"],
+      "requires": [
+        "TASK-1052"
+      ],
+      "blocks": [
+        "TASK-1061"
+      ],
       "description": "Implement comprehensive TCG player guide (docs/tcg-player-guide.md), interactive dual-dispatch /tcg-info command with StringSelectMenu and 10 guide topics, /card action:guide integration, and unit tests."
     },
     {
@@ -1663,8 +2384,12 @@
       "title": "Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI",
       "points": 5,
       "status": "DONE",
-      "requires": ["TASK-1053"],
-      "blocks": ["EPIC-011"],
+      "requires": [
+        "TASK-1053"
+      ],
+      "blocks": [
+        "EPIC-011"
+      ],
       "description": "Implement CardSynthesizer canvas engine (800x1200 px, 8-layer stack, rarity foiling, modular assets/tcg structure with procedural fallbacks), and scripts/tcg-card-builder.ts supporting 50 cards per element bulk generation and manual single-card creation via waifu.im or direct URL."
     },
     {
@@ -1673,7 +2398,9 @@
       "title": "Interactive Real-Time Dungeon Tower Battles with Card Rendering, Manual & Auto Combat",
       "points": 5,
       "status": "DONE",
-      "requires": ["TASK-1042"],
+      "requires": [
+        "TASK-1042"
+      ],
       "blocks": [],
       "description": "Implement stateful DungeonBattleSession, real waifu card rendering via CardImageService, interactive Discord HUD with real-time ASCII HP/MP bars, manual tactical buttons (Attack, Skill, Defend, Forfeit), animated real-time auto-battle loop, pause/skip controls, and next-floor progression."
     },
@@ -1683,7 +2410,9 @@
       "title": "Interactive Card Album, Pagination, Inspection & Equip Menu Suite (/cards)",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-1043"],
+      "requires": [
+        "TASK-1043"
+      ],
       "blocks": [],
       "description": "Implement interactive /cards command with pagination, card select dropdown, rich inspection view with battles won, EXP progression, level-scaled stats, tactical skills/passives, equipped gear loadout, card foil synthesis PNG rendering, and interactive equip/favorite buttons."
     },
@@ -1693,7 +2422,9 @@
       "title": "Tutorial Floor T4 Dynamic Elemental Disadvantage, Real Common Card Grant on Defeat & Direct Climb Gate Prompt",
       "points": 3,
       "status": "DONE",
-      "requires": ["TASK-1043"],
+      "requires": [
+        "TASK-1043"
+      ],
       "blocks": [],
       "description": "Remove starter_waifu_01 and fake starter cards, granting real common database cards as starter candidates; make tutorial floor T4 dynamically present counter element boss and ward; grant real common card of boss element on defeat with metadata persistence to prevent loops; prompt direct climbers with tutorial confirmation."
     },
@@ -1703,7 +2434,9 @@
       "title": "Interactive Combat Items Dropdown, Battle Collector Fixes, Tutorial Floor Lock & Potion Grants, and Interactive Town Shop & Inventory Menus",
       "points": 5,
       "status": "DONE",
-      "requires": ["TASK-1045"],
+      "requires": [
+        "TASK-1045"
+      ],
       "blocks": [],
       "description": "Fix battle button collector lifecycle & retry/status/equip buttons; add in-combat item select menu with HP/MP potions consuming a turn; enforce tutorial floor non-repeat restriction & Floor T3 potion rewards; implement interactive Town Shop and Inventory menus with potion purchasing."
     },
@@ -1713,8 +2446,13 @@
       "title": "Database Schemas & Dual-Dialect Repositories (AutoRoles, ReactionRoles, TempRoles)",
       "points": 1,
       "status": "DONE",
-      "requires": ["EPIC-002"],
-      "blocks": ["TASK-1402", "TASK-1403"]
+      "requires": [
+        "EPIC-002"
+      ],
+      "blocks": [
+        "TASK-1402",
+        "TASK-1403"
+      ]
     },
     {
       "id": "TASK-1402",
@@ -1722,8 +2460,12 @@
       "title": "AutoRole Engine: Join Roles (Humans & Bots), Verification Gateway & Temp Role Sweeper",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1401"],
-      "blocks": ["TASK-1404"]
+      "requires": [
+        "TASK-1401"
+      ],
+      "blocks": [
+        "TASK-1404"
+      ]
     },
     {
       "id": "TASK-1403",
@@ -1731,8 +2473,12 @@
       "title": "ReactionRole Engine: Multi-Mode Emoji, Button & Select Menu Handlers",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1401"],
-      "blocks": ["TASK-1404"]
+      "requires": [
+        "TASK-1401"
+      ],
+      "blocks": [
+        "TASK-1404"
+      ]
     },
     {
       "id": "TASK-1404",
@@ -1740,8 +2486,13 @@
       "title": "Dual-Dispatch Commands (/autorole, /create-reaction-role, /reaction-roles, /temprole) with Slash & Prefix Parity",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1402", "TASK-1403"],
-      "blocks": ["TASK-1405"]
+      "requires": [
+        "TASK-1402",
+        "TASK-1403"
+      ],
+      "blocks": [
+        "TASK-1405"
+      ]
     },
     {
       "id": "TASK-1405",
@@ -1749,7 +2500,9 @@
       "title": "Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1404"],
+      "requires": [
+        "TASK-1404"
+      ],
       "blocks": []
     },
     {
@@ -1758,8 +2511,12 @@
       "title": "Reminder Repository (Dual-Dialect, Atomic Claim) & Legacy DM Guild Migration Fix",
       "points": 1,
       "status": "DONE",
-      "requires": ["EPIC-002"],
-      "blocks": ["TASK-1412"]
+      "requires": [
+        "EPIC-002"
+      ],
+      "blocks": [
+        "TASK-1412"
+      ]
     },
     {
       "id": "TASK-1412",
@@ -1767,8 +2524,12 @@
       "title": "ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1411"],
-      "blocks": ["TASK-1413"]
+      "requires": [
+        "TASK-1411"
+      ],
+      "blocks": [
+        "TASK-1413"
+      ]
     },
     {
       "id": "TASK-1413",
@@ -1776,7 +2537,9 @@
       "title": "/reminder Command (Set, List, Cancel, Timezone) with Prefix Parity & Real AI reminders.create Tool",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1412"],
+      "requires": [
+        "TASK-1412"
+      ],
       "blocks": []
     },
     {
@@ -1785,8 +2548,12 @@
       "title": "CraftingService & Recipe Table: Floor-Gated Recipes, Dust/Credit/Ingredient Costs, Atomic Craft",
       "points": 2,
       "status": "DONE",
-      "requires": ["STORY-156"],
-      "blocks": ["TASK-1602"]
+      "requires": [
+        "STORY-156"
+      ],
+      "blocks": [
+        "TASK-1602"
+      ]
     },
     {
       "id": "TASK-1602",
@@ -1794,8 +2561,12 @@
       "title": "Interactive /item craft Menu (Slash & Prefix Parity) & Bot Service Wiring",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1601"],
-      "blocks": ["TASK-1603"]
+      "requires": [
+        "TASK-1601"
+      ],
+      "blocks": [
+        "TASK-1603"
+      ]
     },
     {
       "id": "TASK-1603",
@@ -1803,7 +2574,9 @@
       "title": "Crafting Docs, Catalog Copy & Help Center Entry",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1602"],
+      "requires": [
+        "TASK-1602"
+      ],
       "blocks": []
     },
     {
@@ -1812,8 +2585,12 @@
       "title": "Jikan v4 Client (Anime, Manga, Characters: Search & Full Details, SFW, Rate-Limited)",
       "points": 2,
       "status": "DONE",
-      "requires": ["CHORE-1401"],
-      "blocks": ["TASK-1422"]
+      "requires": [
+        "CHORE-1401"
+      ],
+      "blocks": [
+        "TASK-1422"
+      ]
     },
     {
       "id": "TASK-1422",
@@ -1821,8 +2598,12 @@
       "title": "AnimeSearchService: Source-Neutral Models, Jikan-to-AniList Fallback, TTL Cache & AniList Detail Queries",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1421"],
-      "blocks": ["TASK-1423"]
+      "requires": [
+        "TASK-1421"
+      ],
+      "blocks": [
+        "TASK-1423"
+      ]
     },
     {
       "id": "TASK-1423",
@@ -1830,7 +2611,9 @@
       "title": "/anime, /manga, /anime-character Commands: Search Select Menu, Detail Embeds & Prefix Parity",
       "points": 1,
       "status": "DONE",
-      "requires": ["TASK-1422"],
+      "requires": [
+        "TASK-1422"
+      ],
       "blocks": []
     },
     {
@@ -1839,8 +2622,12 @@
       "title": "Move WaifuImClient to Shared anime Module on fetchWithRetry & /waifu Command",
       "points": 1,
       "status": "DONE",
-      "requires": ["CHORE-1401"],
-      "blocks": ["TASK-1442"]
+      "requires": [
+        "CHORE-1401"
+      ],
+      "blocks": [
+        "TASK-1442"
+      ]
     },
     {
       "id": "TASK-1442",
@@ -1848,7 +2635,31 @@
       "title": "WallHaven REST Client (SFW Anime Wallpapers) & /wallpaper Command Replacing Legacy Scrapers",
       "points": 2,
       "status": "DONE",
-      "requires": ["TASK-1441"],
+      "requires": [
+        "TASK-1441"
+      ],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1301",
+      "parent": "STORY-130",
+      "title": "Command Framework: Autocomplete Option Flag, ctx.invokedName Alias Resolution, REACTIONS Category & 62-Entry Reaction Catalog",
+      "points": 2,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [
+        "TASK-1302"
+      ]
+    },
+    {
+      "id": "TASK-1302",
+      "parent": "STORY-130",
+      "title": "ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified /react Command with 62 Legacy Prefix Aliases",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "TASK-1301"
+      ],
       "blocks": []
     }
   ],
@@ -1858,7 +2669,9 @@
       "title": "Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility",
       "points": 2,
       "status": "DONE",
-      "requires": ["EPIC-003"],
+      "requires": [
+        "EPIC-003"
+      ],
       "blocks": []
     },
     {
@@ -1866,7 +2679,9 @@
       "title": "CLI Command to Configure AI Chat Functions & Provider Keys",
       "points": 2,
       "status": "DONE",
-      "requires": ["EPIC-006"],
+      "requires": [
+        "EPIC-006"
+      ],
       "blocks": [],
       "description": "Add ririko ai:configure interactive and flag-based CLI command to configure AI providers (Gemini, OpenAI, Ollama), API keys, models, test connections, and update .env safely."
     },
@@ -1896,7 +2711,9 @@
       "points": 2,
       "status": "DONE",
       "requires": [],
-      "blocks": ["STORY-142"],
+      "blocks": [
+        "STORY-142"
+      ],
       "description": "Move AniListClient and RateLimiter/fetchWithRetry out of waifu-tcg/catalog into packages/services/src/anime and src/http, add searchMedia and request timeouts, and inject one shared rate-limited client into the AI anime.search tool (removing its inline GraphQL fetch). Prepares STORY-142."
     }
   ],
@@ -1917,7 +2734,9 @@
       "points": 3,
       "status": "DONE",
       "parent": "STORY-050",
-      "requires": ["TASK-0507"],
+      "requires": [
+        "TASK-0507"
+      ],
       "blocks": [],
       "description": "Enforce strict hard artist filtering in PrecisionTrackMatcher and eliminate unconstrained SoundCloud title search fallback in YouTubeAdapter to prevent rogue club tracks from streaming."
     },
@@ -1947,7 +2766,9 @@
       "points": 2,
       "status": "DONE",
       "parent": "STORY-060",
-      "requires": ["BUG-0004"],
+      "requires": [
+        "BUG-0004"
+      ],
       "blocks": [],
       "description": "Fix duplicate tool execution caused by stream/generate fallback condition when tools emit empty text. Feed tool execution results back to the LLM to synthesize natural language responses with clean fallback formatting."
     },
@@ -1957,8 +2778,12 @@
       "points": 2,
       "status": "DONE",
       "parent": "STORY-060",
-      "requires": ["BUG-0005"],
-      "blocks": ["BUG-0007"],
+      "requires": [
+        "BUG-0005"
+      ],
+      "blocks": [
+        "BUG-0007"
+      ],
       "description": "Ignore messages starting with bot command prefix in AI chat controller to prevent duplicate responses to prefix commands. Connect real database economy balance resolver to EconomyBalanceTool."
     },
     {
@@ -1967,7 +2792,9 @@
       "points": 2,
       "status": "DONE",
       "parent": "STORY-060",
-      "requires": ["BUG-0006"],
+      "requires": [
+        "BUG-0006"
+      ],
       "blocks": [],
       "description": "Connect MusicPlayTool in AI chat to real MusicPlayerService, validating voice channel presence and permissions, joining, queueing audio tracks, and refreshing the active music embed controller."
     },
@@ -1987,7 +2814,9 @@
       "points": 2,
       "status": "DONE",
       "parent": "STORY-104",
-      "requires": ["TASK-1046"],
+      "requires": [
+        "TASK-1046"
+      ],
       "blocks": [],
       "description": "Ensure handleTutorialFloor4Defeat validates active card ownership before treating counter card as already given; grant real common counter card if user does not possess one; clear tcg_system_configs during user reset."
     },
@@ -1998,7 +2827,9 @@
       "status": "DONE",
       "parent": "EPIC-015",
       "requires": [],
-      "blocks": ["STORY-150"],
+      "blocks": [
+        "STORY-150"
+      ],
       "description": "Tutorial, dungeon loot and achievement rewards insert fake item ids (item_novice_blade, potion_hp_minor, weap_*) that never match game_items UUIDs, so rewards are invisible. Add a shared code-based item grant used by shop, tutorial, loot and achievements; auto-equip Novice Blade on the starter card; remap legacy rows at boot."
     },
     {
@@ -2008,7 +2839,9 @@
       "status": "DONE",
       "parent": "EPIC-015",
       "requires": [],
-      "blocks": ["STORY-156"],
+      "blocks": [
+        "STORY-156"
+      ],
       "description": "Crafting dust from dismantling, expeditions, boss raids, dungeon loot and achievements is shown but never stored, and enhancement passes a hard-coded 5000 dust. Store dust as a stackable CRAFTING_DUST inventory item granted by every source and spent atomically by EnhancementService."
     },
     {
@@ -2077,8 +2910,14 @@
       "points": 2,
       "status": "DONE",
       "parent": "STORY-143",
-      "requires": ["EPIC-002", "EPIC-003"],
-      "blocks": ["TASK-1432", "TASK-1433"],
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-1432",
+        "TASK-1433"
+      ],
       "description": "In-memory cached GuildSettingsService wrapping guildSettingsRepo with TTL to eliminate DB queries on messages, plus resolveUserTimeZone and resolveGuildTimeZone fallback."
     },
     {
@@ -2087,7 +2926,9 @@
       "points": 2,
       "status": "DONE",
       "parent": "STORY-143",
-      "requires": ["TASK-1431"],
+      "requires": [
+        "TASK-1431"
+      ],
       "blocks": [],
       "description": "Dual-dispatch /prefix and /timezone commands with ManageGuild permission checks, IANA timezone validation, and server/user scope support."
     },
@@ -2097,7 +2938,9 @@
       "points": 1,
       "status": "DONE",
       "parent": "STORY-143",
-      "requires": ["TASK-1431"],
+      "requires": [
+        "TASK-1431"
+      ],
       "blocks": [],
       "description": "Dual-dispatch server utility and identity commands with rich embeds, Discord timestamp chips, and server local time representations."
     },
@@ -2107,7 +2950,9 @@
       "points": 3,
       "status": "DONE",
       "parent": "EPIC-005",
-      "requires": ["EPIC-005"],
+      "requires": [
+        "EPIC-005"
+      ],
       "blocks": [],
       "description": "Wire guild default volume resolution into MusicPlayerService and LavalinkService so that volume set via $volume or /volume is restored on new playback sessions instead of reverting to 80%, implement setVolume on LavalinkQueueAdapter, and display the guild default volume when /volume is run with no arguments while idle."
     }

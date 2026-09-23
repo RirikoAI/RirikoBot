@@ -207,6 +207,7 @@ describe('Unified CommandContext (TASK-0311)', () => {
 
     expect(ctx.source).toBe('slash');
     expect(ctx.commandName).toBe('ping');
+    expect(ctx.invokedName).toBe('ping');
     expect(ctx.invokedPrefix).toBe('/');
     expect(ctx.user.id).toBe('usr1');
 
@@ -247,6 +248,9 @@ describe('Unified CommandContext (TASK-0311)', () => {
 
     expect(ctx.source).toBe('prefix');
     expect(ctx.commandName).toBe('help');
+    // No explicit invokedName was passed to the constructor: it falls back to the resolved
+    // command's primary name for backward compatibility with existing call sites.
+    expect(ctx.invokedName).toBe('help');
     expect(ctx.invokedPrefix).toBe('!');
     expect(ctx.user.id).toBe('usr2');
     expect(ctx.options.getString('category')).toBe('music');
@@ -260,5 +264,49 @@ describe('Unified CommandContext (TASK-0311)', () => {
 
     await ctx.editReply('Updated help output');
     expect(mockSentReply.edit).toHaveBeenCalledWith('Updated help output');
+  });
+
+  it('reports the alias actually typed via invokedName while commandName stays canonical (TASK-1301)', () => {
+    const mockMessage = {
+      id: 'msg-101',
+      client: {} as unknown as Client,
+      guild: { id: 'g1' },
+      guildId: 'g1',
+      channel: { id: 'ch1', send: vi.fn() },
+      channelId: 'ch1',
+      author: { id: 'usr3' },
+      member: { id: 'mbr3' },
+      reply: vi.fn(),
+    } as unknown as Message;
+
+    const hugCommand = {
+      metadata: { name: 'react', category: 'reactions', description: 'React' },
+      execute: vi.fn(),
+    };
+
+    // The user typed the legacy alias "!hug", which the router resolves to the "react"
+    // primary command — commandName must stay canonical while invokedName preserves "hug".
+    const ctx = new PrefixCommandContext(mockMessage, hugCommand as never, '!', [], [], 'hug');
+
+    expect(ctx.commandName).toBe('react');
+    expect(ctx.invokedName).toBe('hug');
+  });
+
+  it('lowercases and trims an explicitly supplied invokedName (TASK-1301)', () => {
+    const mockMessage = {
+      id: 'msg-102',
+      client: {} as unknown as Client,
+      guild: { id: 'g1' },
+      guildId: 'g1',
+      channel: { id: 'ch1', send: vi.fn() },
+      channelId: 'ch1',
+      author: { id: 'usr4' },
+      member: { id: 'mbr4' },
+      reply: vi.fn(),
+    } as unknown as Message;
+
+    const ctx = new PrefixCommandContext(mockMessage, 'ping', '!', [], [], '  PING  ');
+
+    expect(ctx.invokedName).toBe('ping');
   });
 });

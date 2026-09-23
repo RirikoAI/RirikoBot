@@ -81,7 +81,13 @@ export function buildCommandPayload(
           required: opt.required ?? false,
         };
 
-        if (opt.choices && opt.choices.length > 0) {
+        // Discord rejects an option that carries both `choices` and `autocomplete`. When a
+        // definition sets both, autocomplete wins (it is the escape hatch for option spaces
+        // too large for the 25-choice REST limit) and the static choices are dropped rather
+        // than throwing, so a definition authored with a choices fallback degrades gracefully.
+        if (opt.autocomplete) {
+          optionPayload.autocomplete = true;
+        } else if (opt.choices && opt.choices.length > 0) {
           optionPayload.choices = opt.choices.map((c) => ({
             name: c.name,
             value: c.value,
