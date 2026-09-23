@@ -2858,7 +2858,7 @@
       "id": "BUG-0013",
       "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "parent": "EPIC-015",
       "requires": [],
       "blocks": [],
@@ -2877,12 +2877,12 @@
     {
       "id": "BUG-0015",
       "title": "Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs",
-      "points": null,
-      "status": "BACKLOG",
+      "points": 2,
+      "status": "IN_PROGRESS",
       "parent": "EPIC-015",
       "requires": [],
       "blocks": [],
-      "description": "Ungroomed. apps/bot/src/services.ts seeds CANONICAL_ITEMS with 'if (!exists) create', so edits to existing catalog rows (e.g. the STORY-160 CRAFTING_DUST description, any future stat rebalance) never reach deployed databases. Decide which fields are catalog-owned and upsert them by code on boot, keeping ids stable."
+      "description": "Catalog seed in services.ts previously only inserted non-existent items. Update boot-time canonical item seeding to upsert catalog-owned attributes (name, description, type, subtype, rarity, baseStats, battlePerks, consumableEffect, isShopBuyable, shopPrice, maxDailyPurchases, isTradeable) while preserving existing item IDs, ensuring game balance and text fixes reach existing databases."
     },
     {
       "id": "BUG-0016",
@@ -2955,6 +2955,30 @@
       ],
       "blocks": [],
       "description": "Wire guild default volume resolution into MusicPlayerService and LavalinkService so that volume set via $volume or /volume is restored on new playback sessions instead of reverting to 80%, implement setVolume on LavalinkQueueAdapter, and display the guild default volume when /volume is run with no arguments while idle."
+    },
+    {
+      "id": "BUG-0013",
+      "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted (Daily Incremental Bonus Energy & Configurable Admin Cap)",
+      "points": 3,
+      "status": "DONE",
+      "parent": "EPIC-015",
+      "requires": [
+        "EPIC-015"
+      ],
+      "blocks": [],
+      "description": "Increment bonus energy daily upon login/activity up to a configurable cap, managed via dual-dispatch /tcg-admin action:energy command."
+    },
+    {
+      "id": "BUG-0015",
+      "title": "Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs",
+      "points": 2,
+      "status": "DONE",
+      "parent": "EPIC-015",
+      "requires": [
+        "EPIC-015"
+      ],
+      "blocks": [],
+      "description": "Upsert canonical game items on bot startup updating catalog-owned fields while strictly preserving existing primary key UUIDs so inventory relations never break."
     }
   ]
 }
