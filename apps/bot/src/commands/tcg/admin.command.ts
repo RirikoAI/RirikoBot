@@ -17,7 +17,7 @@ export function createTcgAdminCommand(services: BotServices): Command {
       usage: '/tcg-admin [action: view|energy|dungeon|market|role] [value]',
       examples: [
         '/tcg-admin action:view',
-        '/tcg-admin action:energy max_cap:350 pot_limit:5',
+        '/tcg-admin action:energy max_cap:350 pot_limit:5 bonus_cap:50 bonus_increment:5',
         '/tcg-admin action:dungeon scaling_model:EXPONENTIAL growth_rate:0.09',
         '/tcg-admin action:market tax_rate:0.05',
         '/tcg-admin action:role role:@TCGManager',
@@ -45,6 +45,18 @@ export function createTcgAdminCommand(services: BotServices): Command {
         {
           name: 'pot_limit',
           description: 'Daily stamina potion usage limit (1 - 10)',
+          type: 'INTEGER',
+          required: false,
+        },
+        {
+          name: 'bonus_cap',
+          description: 'Maximum bonus energy cap a player can accumulate daily (0 - 500)',
+          type: 'INTEGER',
+          required: false,
+        },
+        {
+          name: 'bonus_increment',
+          description: 'Daily bonus energy increment granted on reset rollover (0 - 50)',
           type: 'INTEGER',
           required: false,
         },
@@ -122,8 +134,25 @@ export function createTcgAdminCommand(services: BotServices): Command {
 
       switch (action) {
         case 'energy': {
-          const maxCap = ctx.options.getInteger('max_cap');
-          const potLimit = ctx.options.getInteger('pot_limit');
+          let maxCap = ctx.options.getInteger('max_cap');
+          let potLimit = ctx.options.getInteger('pot_limit');
+          let bonusCap = ctx.options.getInteger('bonus_cap');
+          let bonusIncrement = ctx.options.getInteger('bonus_increment');
+
+          // Fallback parsing for prefix key:value arguments e.g. !tcg-admin energy bonus_cap:100 bonus_increment:10
+          for (const arg of rawArgs.slice(1)) {
+            const [k, v] = arg.split(':');
+            if (k && v) {
+              const num = parseInt(v, 10);
+              if (!isNaN(num)) {
+                const keyLower = k.toLowerCase();
+                if (keyLower === 'max_cap' || keyLower === 'maxcap') maxCap = num;
+                if (keyLower === 'pot_limit' || keyLower === 'potlimit') potLimit = num;
+                if (keyLower === 'bonus_cap' || keyLower === 'bonuscap') bonusCap = num;
+                if (keyLower === 'bonus_increment' || keyLower === 'bonusincrement' || keyLower === 'increment') bonusIncrement = num;
+              }
+            }
+          }
 
           const changes: string[] = [];
           try {
@@ -143,10 +172,27 @@ export function createTcgAdminCommand(services: BotServices): Command {
               );
               changes.push(`• **Daily Potion Limit:** \`${potLimit}\``);
             }
+            if (bonusCap !== null && bonusCap !== undefined) {
+              await services.tcgConfigService.setConfig(
+                'max_bonus_energy_cap',
+                bonusCap,
+                ctx.user.id,
+              );
+              changes.push(`• **Max Bonus Energy Cap:** \`${bonusCap}\``);
+            }
+            if (bonusIncrement !== null && bonusIncrement !== undefined) {
+              await services.tcgConfigService.setConfig(
+                'daily_bonus_energy_increment',
+                bonusIncrement,
+                ctx.user.id,
+              );
+              changes.push(`• **Daily Bonus Increment:** \`+${bonusIncrement}\``);
+            }
 
             if (changes.length === 0) {
               await ctx.reply({
-                content: 'ℹ️ No energy parameters provided to update. Usage: `/tcg-admin action:energy max_cap:350 pot_limit:5`',
+                content:
+                  'ℹ️ No energy parameters provided to update. Usage: `/tcg-admin action:energy max_cap:350 pot_limit:5 bonus_cap:50 bonus_increment:5`',
                 ephemeral: true,
               });
               return;
@@ -288,6 +334,8 @@ export function createTcgAdminCommand(services: BotServices): Command {
                     `• **Base Capacity:** \`${configs.base_energy_capacity}\`\n` +
                     `• **Max Cap:** \`${configs.global_max_energy_cap}\`\n` +
                     `• **Scaling Per Level:** \`+${configs.energy_scaling_per_level}\`\n` +
+                    `• **Max Bonus Cap:** \`${configs.max_bonus_energy_cap}\`\n` +
+                    `• **Daily Bonus Increment:** \`+${configs.daily_bonus_energy_increment}\`\n` +
                     `• **Daily Potions Limit:** \`${configs.daily_energy_restore_pot_limit}\`\n` +
                     `• **Replenish Cron:** \`${configs.daily_replenish_cron}\``,
                   inline: false,

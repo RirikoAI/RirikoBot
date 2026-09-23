@@ -26,11 +26,21 @@ export function calculateMaxEnergy(
 /** Resolves a user's account-wide level. Injected so this service owns level lookup. */
 export type PlayerLevelResolver = (userId: string) => Promise<number>;
 
+export interface BonusEnergyConfig {
+  maxBonusCap: number;
+  dailyIncrement: number;
+}
+
+/** Resolves bonus energy configuration (daily increment and maximum cap). */
+export type BonusConfigResolver = () => Promise<BonusEnergyConfig>;
+
 export interface EnergyLifecycleOptions {
   resetSchedule?: ResetSchedule | undefined;
   globalCap?: number | undefined;
   /** Resolves account-wide player level; omit to keep each player's stored capacity. */
   levelResolver?: PlayerLevelResolver | undefined;
+  /** Resolves bonus energy configuration; omit to disable daily bonus energy increments. */
+  bonusConfigResolver?: BonusConfigResolver | undefined;
 }
 
 /**
@@ -68,6 +78,7 @@ export class EnergyLifecycleService {
   private readonly resetSchedule: ResetSchedule;
   private readonly globalCap: number;
   private readonly levelResolver: PlayerLevelResolver | undefined;
+  private readonly bonusConfigResolver: BonusConfigResolver | undefined;
 
   constructor(
     private readonly energyRepo: PlayerEnergyRepository,
@@ -82,6 +93,7 @@ export class EnergyLifecycleService {
     this.resetSchedule = options.resetSchedule ?? DEFAULT_RESET_SCHEDULE;
     this.globalCap = options.globalCap ?? DEFAULT_GLOBAL_ENERGY_CAP;
     this.levelResolver = options.levelResolver;
+    this.bonusConfigResolver = options.bonusConfigResolver;
   }
 
   /**
@@ -138,9 +150,23 @@ export class EnergyLifecycleService {
       updateData.lastResetDate = today;
       updateData.dailyEnergyPotsUsed = 0;
       updateData.lastReplenishedAt = new Date();
-      // Replenish up to capacity if below it, preserving overflow above it
-      if (record.currentEnergy < maxCapacity) {
-        updateData.currentEnergy = maxCapacity;
+
+      let currentBonus = record.bonusEnergy ?? 0;
+      if (this.bonusConfigResolver) {
+        const { maxBonusCap, dailyIncrement } = await this.bonusConfigResolver();
+        if (dailyIncrement > 0) {
+          const newBonus = Math.min(maxBonusCap, currentBonus + dailyIncrement);
+          if (newBonus !== currentBonus) {
+            updateData.bonusEnergy = newBonus;
+            currentBonus = newBonus;
+          }
+        }
+      }
+
+      // Replenish up to effective capacity (maxCapacity + bonusEnergy) if below it, preserving overflow above it
+      const effectiveCap = maxCapacity + currentBonus;
+      if (record.currentEnergy < effectiveCap) {
+        updateData.currentEnergy = effectiveCap;
       }
       needsUpdate = true;
     }

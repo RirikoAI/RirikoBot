@@ -435,4 +435,68 @@ describe('BUG-0012 energy lifecycle wiring', () => {
     const record = await service.refundEnergy('user_refund', 25);
     expect(record.currentEnergy).toBe(100);
   });
+
+  it('increments bonusEnergy by dailyIncrement and replenishes to effective capacity on rollover', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, {
+      resetSchedule: DEFAULT_RESET_SCHEDULE,
+      bonusConfigResolver: async () => ({ maxBonusCap: 50, dailyIncrement: 5 }),
+    });
+
+    await repo.getOrCreate('user_bonus_inc');
+    await repo.update('user_bonus_inc', {
+      currentEnergy: 10,
+      maxEnergy: 100,
+      bonusEnergy: 10,
+      lastResetDate: '2000-01-01',
+    });
+
+    const record = await service.getOrReconcileUserEnergy('user_bonus_inc');
+
+    expect(record.bonusEnergy).toBe(15); // 10 + 5
+    expect(record.currentEnergy).toBe(115); // 100 + 15
+  });
+
+  it('clamps bonusEnergy at maxBonusCap on rollover', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, {
+      resetSchedule: DEFAULT_RESET_SCHEDULE,
+      bonusConfigResolver: async () => ({ maxBonusCap: 20, dailyIncrement: 10 }),
+    });
+
+    await repo.getOrCreate('user_bonus_clamp');
+    await repo.update('user_bonus_clamp', {
+      currentEnergy: 10,
+      maxEnergy: 100,
+      bonusEnergy: 18,
+      lastResetDate: '2000-01-01',
+    });
+
+    const record = await service.getOrReconcileUserEnergy('user_bonus_clamp');
+
+    expect(record.bonusEnergy).toBe(20); // capped at 20, not 28
+    expect(record.currentEnergy).toBe(120); // 100 + 20
+  });
+
+  it('does not increment bonusEnergy twice on the same reset day', async () => {
+    const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
+    const service = new EnergyLifecycleService(repo, {
+      resetSchedule: DEFAULT_RESET_SCHEDULE,
+      bonusConfigResolver: async () => ({ maxBonusCap: 50, dailyIncrement: 5 }),
+    });
+
+    await repo.getOrCreate('user_bonus_once');
+    await repo.update('user_bonus_once', {
+      currentEnergy: 10,
+      maxEnergy: 100,
+      bonusEnergy: 0,
+      lastResetDate: '2000-01-01',
+    });
+
+    const first = await service.getOrReconcileUserEnergy('user_bonus_once');
+    expect(first.bonusEnergy).toBe(5);
+
+    const second = await service.getOrReconcileUserEnergy('user_bonus_once');
+    expect(second.bonusEnergy).toBe(5);
+  });
 });
