@@ -1,4 +1,4 @@
-import type { NewGameItem } from '@ririko/database';
+import type { NewGameItem, GameItemRepository } from '@ririko/database';
 
 export const CANONICAL_ITEMS: NewGameItem[] = [
   // ─── EQUIPMENTS: WEAPONS ───────────────────────────────────────────────────
@@ -774,3 +774,43 @@ export const DAILY_ROTATION_POOL: readonly string[] = [
 
 /** Catalog code of the enhancement currency. */
 export const CRAFTING_DUST_CODE = 'CRAFTING_DUST';
+
+/**
+ * Synchronizes canonical item definitions to the database.
+ * Creates items that don't exist yet, and updates existing rows with catalog-owned fields
+ * (name, description, type, subtype, rarity, baseStats, battlePerks, consumableEffect,
+ * isShopBuyable, shopPrice, maxDailyPurchases, isTradeable) while preserving existing UUIDs.
+ */
+export async function syncCanonicalItems(
+  itemRepo: GameItemRepository,
+  items: readonly NewGameItem[] = CANONICAL_ITEMS,
+): Promise<{ created: number; updated: number }> {
+  let created = 0;
+  let updated = 0;
+
+  for (const item of items) {
+    const exists = await itemRepo.findByCode(item.code);
+    if (!exists) {
+      await itemRepo.create(item);
+      created++;
+    } else {
+      await itemRepo.update(exists.id, {
+        name: item.name,
+        description: item.description,
+        type: item.type,
+        subtype: item.subtype,
+        rarity: item.rarity,
+        baseStats: item.baseStats ?? {},
+        battlePerks: item.battlePerks ?? [],
+        consumableEffect: item.consumableEffect ?? {},
+        isShopBuyable: item.isShopBuyable ?? true,
+        shopPrice: item.shopPrice ?? 100,
+        maxDailyPurchases: item.maxDailyPurchases ?? 5,
+        isTradeable: item.isTradeable ?? true,
+      });
+      updated++;
+    }
+  }
+
+  return { created, updated };
+}
