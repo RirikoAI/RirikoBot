@@ -74,6 +74,12 @@ export const CATEGORY_INFO: Record<CommandCategory, CategoryInfo> = {
     emoji: '👑',
     description: 'Bot configuration, module toggles, and developer administration',
   },
+  reactions: {
+    id: 'reactions',
+    label: 'Reactions',
+    emoji: '🎭',
+    description: 'Anime-style reaction GIFs to hug, poke, and tease your friends',
+  },
 };
 
 export interface HelpOptions {

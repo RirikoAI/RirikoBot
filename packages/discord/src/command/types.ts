@@ -30,6 +30,7 @@ export const CommandCategory = {
   GAMES: 'games',
   GENERAL: 'general',
   ADMIN: 'admin',
+  REACTIONS: 'reactions',
 } as const;
 
 export type CommandCategory = (typeof CommandCategory)[keyof typeof CommandCategory];
@@ -48,6 +49,12 @@ export interface CommandOptionDefinition {
   type: CommandOptionType;
   required?: boolean | undefined;
   choices?: CommandChoice[] | undefined;
+  /**
+   * Enables Discord's dynamic autocomplete for this option (e.g. for STRING options with
+   * more possible values than the 25-choice REST limit allows). Mutually exclusive with
+   * `choices` — see `buildCommandPayload` in rest/sync.ts for how a conflict is resolved.
+   */
+  autocomplete?: boolean | undefined;
   minValue?: number | undefined;
   maxValue?: number | undefined;
   minLength?: number | undefined;
@@ -105,6 +112,12 @@ export interface CommandContext {
   readonly user: User;
   readonly member: GuildMember | null;
   readonly commandName: string;
+  /**
+   * The lowercased name the user actually typed to invoke this command — the alias or the
+   * primary name. `commandName` always holds the command's canonical primary name, regardless
+   * of which alias was used.
+   */
+  readonly invokedName: string;
   readonly invokedPrefix: string;
   readonly options: ICommandOptionsResolver;
   readonly command?: Command | undefined;
