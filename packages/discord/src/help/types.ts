@@ -10,7 +10,7 @@ export interface CategoryInfo {
 export const CATEGORY_INFO: Record<CommandCategory, CategoryInfo> = {
   ai: {
     id: 'ai',
-    label: 'AI Chatbot',
+    label: 'AI & Chatbot',
     emoji: '🤖',
     description: 'Multimodal AI chat, context-aware assistance, and safe tools',
   },

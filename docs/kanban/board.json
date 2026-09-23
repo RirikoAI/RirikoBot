@@ -936,7 +936,7 @@
       "epic": "EPIC-013",
       "title": "Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate)",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "EPIC-003"
       ],
@@ -2715,6 +2715,17 @@
         "STORY-142"
       ],
       "description": "Move AniListClient and RateLimiter/fetchWithRetry out of waifu-tcg/catalog into packages/services/src/anime and src/http, add searchMedia and request timeouts, and inject one shared rate-limited client into the AI anime.search tool (removing its inline GraphQL fetch). Prepares STORY-142."
+    },
+    {
+      "id": "CHORE-1321",
+      "title": "CLI Command to Configure Image Generation Providers & Keys (image-configure)",
+      "points": 2,
+      "status": "DONE",
+      "requires": [
+        "STORY-132"
+      ],
+      "blocks": [],
+      "description": "Add ririko image-configure / image:configure interactive wizard and flag-based CLI command to configure image generation providers (Gemini Imagen, ComfyUI, Replicate), API keys/URLs, default provider, user daily quota, test generation, and add doctor diagnostic check."
     }
   ],
   "bugs": [
@@ -2895,16 +2906,6 @@
       "description": "Discord select menus hold at most 25 options. Add pagination or chunking (and a visible 'showing X-Y of N' indicator) with Prev/Next controls in gear-menu, craft-menu and shop-menu where item or card collections can exceed 25 options."
     },
     {
-      "id": "BUG-0017",
-      "title": "Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul",
-      "points": 2,
-      "status": "IN_PROGRESS",
-      "parent": "EPIC-010",
-      "requires": [],
-      "blocks": [],
-      "description": "card.command.ts falls back to 'collection' for unrecognised first arguments, so typos like '!card gears' silently show the collection. Fix prefix action routing with Did-You-Mean suggestions, fix missing rawArgs[1] across subcommands, and overhaul card ID and catalog/mint serial display so cards show distinct short IDs and catalog numbers instead of confusing '#0001/1000'."
-    },
-    {
       "id": "TASK-1431",
       "title": "GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration",
       "points": 2,
@@ -2979,6 +2980,44 @@
       ],
       "blocks": [],
       "description": "Fix unrecognized !card prefix action silently opening collection by computing Did-You-Mean suggestions and error replies. Auto-route card identifiers (!card 1, !card Harribel) to inspect. Add flexible card resolution (UUID, 8-char short ID, 1-based index, character name, serial) across inspect, favorite, equip, dismantle, gear, and loadout. Disambiguate card ID from character collection number and mint serial counter."
+    },
+    {
+      "id": "BUG-0018",
+      "title": "Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-132",
+      "requires": [
+        "STORY-132"
+      ],
+      "blocks": [],
+      "description": "Remove hanging Prefer: wait header in Replicate prediction creation and use fast asynchronous creation + status polling. Direct fetch image buffer downloads without API rate limiter. Fix Discord attachment extension dynamically mapping WebP and JPEG mime types so Discord embed previews render correctly."
+    },
+    {
+      "id": "TASK-1321",
+      "title": "Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue",
+      "points": 3,
+      "status": "DONE",
+      "parent": "STORY-132",
+      "requires": [
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-1322"
+      ],
+      "description": "Implement packages/services/src/image-generation/ and packages/database/src/repositories/image.repository.ts. Build typed ImageGenerationProvider adapters for Gemini Imagen, ComfyUI/SD-WebUI, Replicate, and Mock. Implement anime positive/negative presets, concurrency-limited job queue, per-user daily quota tracking, and dual-dialect persistence with full Vitest test suites."
+    },
+    {
+      "id": "TASK-1322",
+      "title": "Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-132",
+      "requires": [
+        "TASK-1321"
+      ],
+      "blocks": [],
+      "description": "Implement dual-dispatch /imagine command in apps/bot/src/commands/images/imagine.command.ts with Slash and Prefix (!imagine) parity, aspect ratio and preset choices, Discord attachment delivery, interactive Action Row buttons (Regenerate, Dismiss), /stablediffusion-model configuration, and legacy token deprecation handling. Wire into BotServices and main.ts with comprehensive Vitest suite."
     }
   ]
 }

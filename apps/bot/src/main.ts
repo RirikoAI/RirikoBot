@@ -29,6 +29,8 @@ import {
   createAnimeCommands,
   createReactionCommands,
   createMemeCommands,
+  createImageCommands,
+  handleImagineButtonInteraction,
   createReminderCommand,
   createUtilityCommands,
   handleGiveawayButtonInteraction,
@@ -209,6 +211,10 @@ export async function main(): Promise<void> {
   for (const cmd of createMemeCommands(services)) {
     router.registry.register(cmd);
   }
+
+  for (const cmd of createImageCommands(services)) {
+    router.registry.register(cmd);
+  }
   router.registry.register(createReminderCommand(services));
 
   for (const cmd of createUtilityCommands(services)) {
@@ -237,6 +243,10 @@ export async function main(): Promise<void> {
       if (interaction.isButton()) {
         if (interaction.customId.startsWith('music_')) {
           await musicController.handleButtonInteraction(interaction);
+          return;
+        }
+        if (interaction.customId.startsWith('imagine:')) {
+          await handleImagineButtonInteraction(interaction, services);
           return;
         }
         if (interaction.customId.startsWith('giveaway:enter:')) {
