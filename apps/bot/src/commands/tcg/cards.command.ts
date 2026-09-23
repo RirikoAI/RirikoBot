@@ -103,13 +103,15 @@ export function buildCardListEmbed(
     const num = startIndex + idx + 1;
     const fav = item.userCard.isFavorite ? '⭐ ' : '';
     const eq = item.userCard.state === 'EQUIPPED' ? '⚔️ ' : '';
-    const serial = formatCardSerialNumber(item.userCard.serialNumber);
+    const shortId = item.userCard.id.slice(0, 8);
+    const catNo = `No. ${String(item.base.collectionNumber).padStart(3, '0')}`;
+    const mintStr = `Mint #${item.userCard.serialNumber}`;
     const tier = RARITY_TIERS[(item.base.rarity as CardRarity) ?? 'COMMON'];
     const expReq = levelingEngine.getExpForNextLevel(item.userCard.level);
     const battles = item.userCard.battlesWon ?? 0;
 
     return (
-      `\`${num}.\` ${eq}${fav}**${item.base.name}** (\`${item.base.rarity}\` | \`${item.base.element}\`) — **Lv.${item.userCard.level}** \`[${serial}]\`\n` +
+      `\`${num}.\` ${eq}${fav}**${item.base.name}** (\`${item.base.rarity}\` | \`${item.base.element}\`) — **Lv.${item.userCard.level}** • \`ID: ${shortId}\` • \`${catNo}\` (${mintStr})\n` +
       `   └ 🏆 **${battles}** Wins | ⚡ **${item.userCard.exp}/${expReq}** EXP | State: \`${item.userCard.state}\``
     );
   });
@@ -151,12 +153,13 @@ export function buildCardListComponents(
           const num = startIndex + idx + 1;
           const eq = item.userCard.state === 'EQUIPPED' ? '⚔️ ' : '';
           const fav = item.userCard.isFavorite ? '⭐ ' : '';
-          const serial = formatCardSerialNumber(item.userCard.serialNumber);
+          const shortId = item.userCard.id.slice(0, 8);
+          const catNo = `No. ${String(item.base.collectionNumber).padStart(3, '0')}`;
           const battles = item.userCard.battlesWon ?? 0;
 
           return {
             label: `${num}. ${eq}${fav}${item.base.name} (Lv.${item.userCard.level})`.slice(0, 100),
-            description: `${item.base.rarity} | ${item.base.element} • ${battles} Wins • ${serial}`.slice(0, 100),
+            description: `${item.base.rarity} | ${item.base.element} • ID: ${shortId} • ${catNo} • Mint #${item.userCard.serialNumber}`.slice(0, 100),
             value: `card:${item.userCard.id}`,
           };
         }),
@@ -207,12 +210,9 @@ export async function buildCardInspectEmbed(
 ): Promise<{ embed: EmbedBuilder; files: Array<{ attachment: Buffer; name: string }> }> {
   const { userCard, base, asset } = item;
   const tier = RARITY_TIERS[(base.rarity as CardRarity) ?? 'COMMON'];
-  const formattedSerial = formatCardSerialNumber(userCard.serialNumber);
-
   const source = asset
     ? await services.waifuAssetRepo.findSourceById(asset.sourceId)
     : null;
-  const footer = formatCardEmbedFooter(source, formattedSerial);
 
   // Scaled stats
   const scaled = levelingEngine.calculateScaledStats(
@@ -274,14 +274,20 @@ export async function buildCardInspectEmbed(
   };
   const embedColor = colorMap[base.element] ?? 0x9370db;
 
+  const shortId = userCard.id.slice(0, 8);
+  const catNo = `No. ${String(base.collectionNumber).padStart(3, '0')}`;
+  const mintStr = `Mint #${userCard.serialNumber}`;
+  const footer = formatCardEmbedFooter(source, `ID: ${shortId} • ${catNo} • ${mintStr}`);
+
   const embed = new EmbedBuilder()
     .setTitle(
-      `${isEquipped ? '⚔️ [EQUIPPED] ' : ''}${userCard.isFavorite ? '⭐ ' : ''}${base.name} (${formattedSerial})`,
+      `${isEquipped ? '⚔️ [EQUIPPED] ' : ''}${userCard.isFavorite ? '⭐ ' : ''}${base.name} (${catNo} • ${mintStr})`,
     )
     .setColor(embedColor)
     .setDescription(
-      `**Rarity**: \`${tier.name}\` (${tier.foilEffect}) • **Element**: \`${base.element}\`\n` +
-        `**State**: \`${userCard.state}\` • **Favorite**: ${userCard.isFavorite ? '⭐ Yes' : 'No'}\n\n` +
+      `• **Card ID**: \`${shortId}\` *(Full: \`${userCard.id}\`)*\n` +
+        `• **Rarity**: \`${tier.name}\` (${tier.foilEffect}) • **Element**: \`${base.element}\` • **Catalog**: \`${catNo}\`\n` +
+        `• **State**: \`${userCard.state}\` • **Favorite**: ${userCard.isFavorite ? '⭐ Yes' : 'No'} • **Edition**: \`${mintStr}\`\n\n` +
         `📈 **Progression & Combat Record**\n` +
         `• **Level**: \`${userCard.level} / ${tier.maxLevel}\`\n` +
         `• **EXP**: ${expText}\n` +

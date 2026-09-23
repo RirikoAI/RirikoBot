@@ -22,6 +22,7 @@ import {
   buildCardInspectEmbed,
   buildCardInspectComponents,
 } from './cards.command.js';
+import { resolveUserCard } from './card-resolver.js';
 
 const CARD_IMAGE_NAME = 'card.png';
 
@@ -73,10 +74,63 @@ export function createLoadoutCommand(services: BotServices): Command {
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
-      const cardId = ctx.options.getString('card_id') ?? ctx.options.getRawArgs?.()[0];
-      await openGearMenu(ctx, services, cardId);
+      const rawId = ctx.options.getString('card_id') ?? ctx.options.getRawArgs?.()[0];
+      const userCard = rawId ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId) : null;
+      await openGearMenu(ctx, services, userCard ? userCard.id : rawId);
     },
   };
+}
+
+function levenshteinDistance(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i]![0] = i;
+  for (let j = 0; j <= n; j++) dp[0]![j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i]![j] = Math.min(
+        dp[i - 1]![j]! + 1,
+        dp[i]![j - 1]! + 1,
+        dp[i - 1]![j - 1]! + cost,
+      );
+    }
+  }
+  return dp[m]![n]!;
+}
+
+const VALID_CARD_ACTIONS = [
+  'collection',
+  'inspect',
+  'claim',
+  'favorite',
+  'equip',
+  'dismantle',
+  'gear',
+  'loadout',
+  'equip-gear',
+  'unequip-gear',
+  'unequip-all',
+  'guide',
+  'info',
+] as const;
+
+function findClosestCardAction(query: string): string | null {
+  let minDistance = Infinity;
+  let bestCandidate: string | null = null;
+  const lower = query.toLowerCase();
+  for (const candidate of VALID_CARD_ACTIONS) {
+    let dist = levenshteinDistance(lower, candidate.toLowerCase());
+    if (candidate.toLowerCase().startsWith(lower) || lower.startsWith(candidate.toLowerCase())) {
+      dist = Math.max(0, dist - 2);
+    }
+    if (dist < minDistance) {
+      minDistance = dist;
+      bestCandidate = candidate;
+    }
+  }
+  return minDistance <= 3 ? bestCandidate : null;
 }
 
 export function createCardCommand(services: BotServices): Command {
@@ -189,6 +243,7 @@ export function createCardCommand(services: BotServices): Command {
     },
     async execute(ctx: CommandContext): Promise<void> {
       const rawArgs = ctx.options.getRawArgs?.() ?? [];
+      let implicitCardId: string | null = null;
       let sub = ctx.options.getString('action')?.toLowerCase();
       if (!sub) {
         try {
@@ -203,10 +258,27 @@ export function createCardCommand(services: BotServices): Command {
       }
       if (!sub) {
         const firstArg = rawArgs[0]?.toLowerCase();
-        if (['collection', 'inspect', 'claim', 'favorite', 'equip', 'dismantle', 'gear', 'loadout', 'equip-gear', 'unequip-gear', 'unequip-all', 'guide', 'info'].includes(firstArg ?? '')) {
+        if (!firstArg) {
+          sub = 'collection';
+        } else if ((VALID_CARD_ACTIONS as readonly string[]).includes(firstArg)) {
           sub = firstArg;
         } else {
-          sub = 'collection';
+          // Check if firstArg resolves to a card (e.g. !card 1, !card 137b8c24, !card Harribel)
+          const maybeCard = await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawArgs[0]);
+          if (maybeCard) {
+            sub = 'inspect';
+            implicitCardId = maybeCard.id;
+          } else {
+            const didYouMean = findClosestCardAction(firstArg);
+            const suggestion = didYouMean ? ` Did you mean \`/card ${didYouMean}\`?` : '';
+            await ctx.reply({
+              content:
+                `❌ Unknown action: \`${rawArgs[0]}\`.${suggestion}\n` +
+                `Valid actions: \`${VALID_CARD_ACTIONS.join('`, `')}\``,
+              ephemeral: true,
+            });
+            return;
+          }
         }
       }
 
@@ -280,13 +352,13 @@ export function createCardCommand(services: BotServices): Command {
         }
 
         case 'inspect': {
-          const cardId = ctx.options.getString('id');
-          if (!cardId) {
+          const rawId = ctx.options.getString('id') ?? implicitCardId ?? rawArgs[1];
+          if (!rawId) {
             await ctx.reply({ content: '❌ Please specify a Card ID. Usage: `/card action:inspect id:<id>`', ephemeral: true });
             return;
           }
 
-          const userCard = await services.waifuCardRepo.findUserCardById(cardId);
+          const userCard = await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId);
 
           if (!userCard || userCard.userId !== ctx.user.id) {
             await ctx.reply({
@@ -323,13 +395,13 @@ export function createCardCommand(services: BotServices): Command {
         }
 
         case 'favorite': {
-          const cardId = ctx.options.getString('id');
-          if (!cardId) {
+          const rawId = ctx.options.getString('id') ?? rawArgs[1];
+          if (!rawId) {
             await ctx.reply({ content: '❌ Please specify a Card ID. Usage: `/card action:favorite id:<id>`', ephemeral: true });
             return;
           }
 
-          const userCard = await services.waifuCardRepo.findUserCardById(cardId);
+          const userCard = await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId);
 
           if (!userCard || userCard.userId !== ctx.user.id) {
             await ctx.reply({ content: '❌ Card not found in your collection.', ephemeral: true });
@@ -337,7 +409,7 @@ export function createCardCommand(services: BotServices): Command {
           }
 
           const newFav = !userCard.isFavorite;
-          await services.waifuCardRepo.toggleUserCardFavorite(cardId, newFav);
+          await services.waifuCardRepo.toggleUserCardFavorite(userCard.id, newFav);
 
           const base = await services.waifuCardRepo.findById(userCard.cardId);
           await ctx.reply({
@@ -349,13 +421,13 @@ export function createCardCommand(services: BotServices): Command {
         }
 
         case 'equip': {
-          const cardId = ctx.options.getString('id');
-          if (!cardId) {
+          const rawId = ctx.options.getString('id') ?? rawArgs[1];
+          if (!rawId) {
             await ctx.reply({ content: '❌ Please specify a Card ID. Usage: `/card action:equip id:<id>`', ephemeral: true });
             return;
           }
 
-          const userCard = await services.waifuCardRepo.findUserCardById(cardId);
+          const userCard = await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId);
 
           if (!userCard || userCard.userId !== ctx.user.id) {
             await ctx.reply({ content: '❌ Card not found in your collection.', ephemeral: true });
@@ -376,7 +448,7 @@ export function createCardCommand(services: BotServices): Command {
             await services.waifuCardRepo.updateUserCardState(eqCard.id, 'IDLE');
           }
 
-          await services.waifuCardRepo.updateUserCardState(cardId, 'EQUIPPED');
+          await services.waifuCardRepo.updateUserCardState(userCard.id, 'EQUIPPED');
           const base = await services.waifuCardRepo.findById(userCard.cardId);
 
           await ctx.reply({
@@ -386,13 +458,19 @@ export function createCardCommand(services: BotServices): Command {
         }
 
         case 'dismantle': {
-          const cardId = ctx.options.getString('id');
-          if (!cardId) {
+          const rawId = ctx.options.getString('id') ?? rawArgs[1];
+          if (!rawId) {
             await ctx.reply({ content: '❌ Please specify a Card ID. Usage: `/card action:dismantle id:<id>`', ephemeral: true });
             return;
           }
 
-          const result = await services.dismantleService.dismantleCard(ctx.user.id, cardId);
+          const userCard = await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId);
+          if (!userCard || userCard.userId !== ctx.user.id) {
+            await ctx.reply({ content: '❌ Card not found in your collection.', ephemeral: true });
+            return;
+          }
+
+          const result = await services.dismantleService.dismantleCard(ctx.user.id, userCard.id);
 
           if (!result.success) {
             await ctx.reply({ content: `❌ ${result.error}`, ephemeral: true });
@@ -410,13 +488,16 @@ export function createCardCommand(services: BotServices): Command {
 
         case 'gear':
         case 'loadout': {
-          const cardId = ctx.options.getString('id') ?? rawArgs[1];
-          await openGearMenu(ctx, services, cardId);
+          const rawId = ctx.options.getString('id') ?? rawArgs[1];
+          const userCard = rawId ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId) : null;
+          await openGearMenu(ctx, services, userCard ? userCard.id : rawId);
           break;
         }
 
         case 'equip-gear': {
-          const cardId = ctx.options.getString('id') ?? rawArgs[1];
+          const rawId = ctx.options.getString('id') ?? rawArgs[1];
+          const userCard = rawId ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId) : null;
+          const cardId = userCard ? userCard.id : rawId;
           const itemId = ctx.options.getString('item_id') ?? rawArgs[2];
           const slot = (ctx.options.getString('slot') ?? rawArgs[3])?.toUpperCase();
 
@@ -482,7 +563,9 @@ export function createCardCommand(services: BotServices): Command {
 
         case 'unequip-all': {
           // With a card: empty that card. Without: empty every card, including gear left on cards you no longer own.
-          const cardId = ctx.options.getString('id') ?? rawArgs[1];
+          const rawId = ctx.options.getString('id') ?? rawArgs[1];
+          const userCard = rawId ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId) : null;
+          const cardId = userCard ? userCard.id : rawId;
           try {
             const { unequippedItemNames } = await services.loadoutService.unequipAll(ctx.user.id, cardId);
             await ctx.reply({
