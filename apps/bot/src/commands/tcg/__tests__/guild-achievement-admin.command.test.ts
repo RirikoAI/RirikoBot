@@ -156,6 +156,8 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
         energy_scaling_per_level: 2,
         daily_energy_restore_pot_limit: 3,
         daily_replenish_cron: '0 0 * * *',
+        max_bonus_energy_cap: 50,
+        daily_bonus_energy_increment: 5,
         dungeon_scaling_model: 'HYBRID',
         dungeon_growth_rate: 0.085,
         market_tax_rate: 0.05,
@@ -345,6 +347,8 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
         action: 'energy',
         max_cap: 400,
         pot_limit: 5,
+        bonus_cap: 75,
+        bonus_increment: 10,
       });
 
       await cmd.execute(ctx);
@@ -356,6 +360,33 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
       expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
         'daily_energy_restore_pot_limit',
         5,
+        'user_1',
+      );
+      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
+        'max_bonus_energy_cap',
+        75,
+        'user_1',
+      );
+      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
+        'daily_bonus_energy_increment',
+        10,
+        'user_1',
+      );
+    });
+
+    it('updates energy parameters via prefix arguments', async () => {
+      const cmd = createTcgAdminCommand(services);
+      const ctx = createMockContext({}, ['energy', 'bonus_cap:100', 'bonus_increment:15']);
+
+      await cmd.execute(ctx);
+      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
+        'max_bonus_energy_cap',
+        100,
+        'user_1',
+      );
+      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
+        'daily_bonus_energy_increment',
+        15,
         'user_1',
       );
     });
