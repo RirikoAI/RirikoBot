@@ -356,9 +356,9 @@
 | `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | ✅ Done | `EPIC-003` |
 | `TASK-1311` | Task | Meme Synthesis Engine: 11-Template Catalog, @napi-rs/canvas Renderer (Auto-Wrap, Font Scaling & Shadows) & Vitest Suite | 3 | `STORY-131` | ✅ Done | — |
 | `TASK-1312` | Task | Dual-Dispatch /meme Command Suite with Autocomplete, 11 Legacy Prefix Aliases & Attachment Delivery | 2 | `STORY-131` | ✅ Done | `TASK-1311` |
-| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | 🎯 To Do | `EPIC-003` |
-| `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | ⚡ In Progress | `EPIC-003` |
-| `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | 🎯 To Do | `TASK-1321` |
+| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | ✅ Done | `EPIC-003` |
+| `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | ✅ Done | `EPIC-003` |
+| `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | ✅ Done | `TASK-1321` |
 | `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
 
 ### 📋 Groomed Stories for EPIC-014 (Server Utilities, AutoRoles & Community)
