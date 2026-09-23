@@ -285,6 +285,34 @@ export const spotifyCheck: DiagnosticCheck = {
   },
 };
 
+export const imageGenerationCheck: DiagnosticCheck = {
+  name: 'Image Generation Subsystem',
+  required: false,
+  run: () => {
+    const hasGemini = Boolean(process.env.GEMINI_API_KEY);
+    const hasComfyUi = Boolean(process.env.COMFYUI_BASE_URL);
+    const hasReplicate = Boolean(process.env.REPLICATE_API_TOKEN);
+    const configuredProviders: string[] = [];
+    if (hasGemini) configuredProviders.push('Gemini Imagen');
+    if (hasComfyUi) configuredProviders.push('ComfyUI');
+    if (hasReplicate) configuredProviders.push('Replicate');
+
+    const defaultProv = (process.env.IMAGE_DEFAULT_PROVIDER || 'gemini').toUpperCase();
+
+    if (configuredProviders.length > 0) {
+      return {
+        status: 'pass',
+        message: `Configured (${configuredProviders.join(', ')} | Default: ${defaultProv})`,
+      };
+    }
+
+    return {
+      status: 'pass',
+      message: 'Active via offline Mock synthesizer (Run `ririko image-configure` to configure external providers)',
+    };
+  },
+};
+
 export const allChecks: DiagnosticCheck[] = [
   nodeCheck,
   typescriptCheck,
@@ -299,5 +327,6 @@ export const allChecks: DiagnosticCheck[] = [
   tiktokStreamCheck,
   streamPollerCheck,
   spotifyCheck,
+  imageGenerationCheck,
 ];
 

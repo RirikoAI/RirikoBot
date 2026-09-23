@@ -75,6 +75,11 @@ export type NewAiUserPreferences = typeof sqlite.aiUserPreferences.$inferInsert;
 export type ImageJob = typeof sqlite.imageJobs.$inferSelect;
 export type NewImageJob = typeof sqlite.imageJobs.$inferInsert;
 export type ImagePreset = typeof sqlite.imagePresets.$inferSelect;
+export type NewImagePreset = typeof sqlite.imagePresets.$inferInsert;
+export type ImageProvider = typeof sqlite.imageProviders.$inferSelect;
+export type NewImageProvider = typeof sqlite.imageProviders.$inferInsert;
+export type ImageUsage = typeof sqlite.imageUsage.$inferSelect;
+export type NewImageUsage = typeof sqlite.imageUsage.$inferInsert;
 
 // Giveaways
 export type Giveaway = typeof sqlite.giveaways.$inferSelect;
