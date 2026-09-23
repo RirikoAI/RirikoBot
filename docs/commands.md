@@ -72,7 +72,7 @@ The legacy static help embed is replaced by an interactive, component-driven hel
 │ Browse commands by category or search below.    │
 │                                                 │
 │ [ Select Category ▼ ]                           │
-│   • AI Chatbot                                  │
+│   • AI & Chatbot                                │
 │   • Music & Audio                               │
 │   • Moderation & Safety                         │
 │   • Waifu TCG & Gamification                    │

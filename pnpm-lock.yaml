@@ -267,6 +267,9 @@ importers:
 
   packages/services:
     dependencies:
+      '@google/genai':
+        specifier: ^2.22.0
+        version: 2.22.0
       '@napi-rs/canvas':
         specifier: ^0.1.66
         version: 0.1.100

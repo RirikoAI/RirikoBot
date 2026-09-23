@@ -33,6 +33,11 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0018` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | `STORY-132` | [BUG-0018.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0018.md) |
+| `CHORE-1321` | Chore | CLI Command to Configure Image Generation Providers & Keys (image-configure) | 2 | — | [CHORE-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1321.md) |
+| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | [STORY-132.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-132.md) |
+| `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | [TASK-1322.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1322.md) |
+| `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | [TASK-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1321.md) |
 | `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | [STORY-131.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-131.md) |
 | `TASK-1312` | Task | Dual-Dispatch /meme Command Suite with Autocomplete, 11 Legacy Prefix Aliases & Attachment Delivery | 2 | `STORY-131` | [TASK-1312.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1312.md) |
 | `TASK-1311` | Task | Meme Synthesis Engine: 11-Template Catalog, @napi-rs/canvas Renderer (Auto-Wrap, Font Scaling & Shadows) & Vitest Suite | 3 | `STORY-131` | [TASK-1311.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1311.md) |
@@ -351,7 +356,9 @@
 | `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | ✅ Done | `EPIC-003` |
 | `TASK-1311` | Task | Meme Synthesis Engine: 11-Template Catalog, @napi-rs/canvas Renderer (Auto-Wrap, Font Scaling & Shadows) & Vitest Suite | 3 | `STORY-131` | ✅ Done | — |
 | `TASK-1312` | Task | Dual-Dispatch /meme Command Suite with Autocomplete, 11 Legacy Prefix Aliases & Attachment Delivery | 2 | `STORY-131` | ✅ Done | `TASK-1311` |
-| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
+| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | 🎯 To Do | `EPIC-003` |
+| `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | ⚡ In Progress | `EPIC-003` |
+| `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | 🎯 To Do | `TASK-1321` |
 | `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
 
 ### 📋 Groomed Stories for EPIC-014 (Server Utilities, AutoRoles & Community)
