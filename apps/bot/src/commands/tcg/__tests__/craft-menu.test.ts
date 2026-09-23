@@ -99,4 +99,53 @@ describe('Crafting menu (TASK-1602)', () => {
     expect(view.embed.data.description).toContain('No recipes in this category');
     expect(buttons(view)['craft:craft']!.disabled).toBe(true);
   });
+
+  it('paginates recipes when list exceeds 25 (BUG-0016)', () => {
+    const manyRecipes = Array.from({ length: 27 }, (_, i) =>
+      recipeStatus({
+        recipe: {
+          code: `CRAFT_ITEM_${i + 1}`,
+          outputCode: `ITEM_${i + 1}`,
+          outputQuantity: 1,
+          dustCost: 50,
+          creditCost: 1000,
+          unlockFloor: 1,
+        },
+        outputItem: {
+          code: `ITEM_${i + 1}`,
+          name: `Craftable Item ${i + 1}`,
+          description: `Description ${i + 1}`,
+          type: 'EQUIPMENT',
+          subtype: 'WEAPON',
+          rarity: 'COMMON',
+          baseStats: { attack: 10 + i },
+          battlePerks: [],
+        } as unknown as GameItem,
+      }),
+    );
+
+    // Page 0 (recipes 1-25)
+    const view0 = buildCraftMenuView(state({ recipes: manyRecipes, page: 0, selectedIndex: 0 }));
+    expect(view0.embed.data.description).toContain('Showing 1–25 of 27 (Page 1/2)');
+    expect(view0.components).toHaveLength(4); // category select, recipe select, pagination row, action row
+
+    const pageRow0 = view0.components[2]!.toJSON() as {
+      components: Array<{ custom_id: string; disabled?: boolean; label: string }>;
+    };
+    const b0 = Object.fromEntries(pageRow0.components.map((b) => [b.custom_id, b]));
+    expect(b0['craft:prev']!.disabled).toBe(true);
+    expect(b0['craft:page_info']!.label).toBe('Page 1 / 2');
+    expect(b0['craft:next']!.disabled).toBe(false);
+
+    // Page 1 (recipes 26-27)
+    const view1 = buildCraftMenuView(state({ recipes: manyRecipes, page: 1, selectedIndex: 25 }));
+    expect(view1.embed.data.description).toContain('Showing 26–27 of 27 (Page 2/2)');
+    expect(view1.embed.data.description).toContain('Craftable Item 26');
+    const pageRow1 = view1.components[2]!.toJSON() as {
+      components: Array<{ custom_id: string; disabled?: boolean; label: string }>;
+    };
+    const b1 = Object.fromEntries(pageRow1.components.map((b) => [b.custom_id, b]));
+    expect(b1['craft:prev']!.disabled).toBe(false);
+    expect(b1['craft:next']!.disabled).toBe(true);
+  });
 });

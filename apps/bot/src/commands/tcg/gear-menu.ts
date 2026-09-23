@@ -95,11 +95,15 @@ export interface GearCandidate {
 }
 
 export interface GearMenuState {
+  allCards?: GearCardOption[] | undefined;
+  cardPage?: number | undefined;
   cards: GearCardOption[];
   cardId: string;
   cardLabel: string;
   loadout: CardLoadout;
   slot: GearSlot;
+  allCandidates?: GearCandidate[] | undefined;
+  candidatePage?: number | undefined;
   candidates: GearCandidate[];
   selectedItemId?: string | undefined;
   enhanceCost?: { dustCost: number; creditCost: number } | undefined;
@@ -119,6 +123,15 @@ export function buildGearMenuView(state: GearMenuState): {
   embed: EmbedBuilder;
   components: Array<ActionRowBuilder<StringSelectMenuBuilder> | ActionRowBuilder<ButtonBuilder>>;
 } {
+  const allCards = state.allCards ?? state.cards;
+  const cardPage = state.cardPage ?? 0;
+  const allCandidates = state.allCandidates ?? state.candidates;
+  const candidatePage = state.candidatePage ?? 0;
+
+  const PAGE_SIZE = 25;
+  const totalCardPages = Math.max(1, Math.ceil(allCards.length / PAGE_SIZE));
+  const totalCandidatePages = Math.max(1, Math.ceil(allCandidates.length / PAGE_SIZE));
+
   const equipped = slotPiece(state.loadout, state.slot);
   const selected = state.candidates.find((c) => c.inventoryItem.id === state.selectedItemId);
 
@@ -142,6 +155,18 @@ export function buildGearMenuView(state: GearMenuState): {
     focus += '\n*You own no spare gear for this slot. Clear dungeon floors or visit the shop.*';
   }
 
+  let paginationNote = '';
+  if (allCards.length > PAGE_SIZE || allCandidates.length > PAGE_SIZE) {
+    const cardStart = cardPage * PAGE_SIZE + 1;
+    const cardEnd = Math.min((cardPage + 1) * PAGE_SIZE, allCards.length);
+    const candStart = candidatePage * PAGE_SIZE + 1;
+    const candEnd = Math.min((candidatePage + 1) * PAGE_SIZE, allCandidates.length);
+    paginationNote = `\n\n📄 **Collection**: Cards ${cardStart}–${cardEnd} of ${allCards.length} (Page ${cardPage + 1}/${totalCardPages})`;
+    if (allCandidates.length > 0) {
+      paginationNote += ` · Gear ${candStart}–${candEnd} of ${allCandidates.length} (Page ${candidatePage + 1}/${totalCandidatePages})`;
+    }
+  }
+
   const embed = new EmbedBuilder()
     .setColor(0x5865f2)
     .setTitle(`⚔️ Gear: ${state.cardLabel}`)
@@ -152,13 +177,19 @@ export function buildGearMenuView(state: GearMenuState): {
         (state.loadout.activePerks.length
           ? `\n🔥 **Perks**: ${state.loadout.activePerks.join(', ')}`
           : '') +
-        focus,
+        focus +
+        paginationNote,
     )
     .setFooter({ text: `🧪 Crafting Dust: ${state.dust.toLocaleString()}` });
 
+  const cardMenuPlaceholder =
+    totalCardPages > 1
+      ? `Choose a card (Page ${cardPage + 1}/${totalCardPages} · ${allCards.length} cards)`
+      : 'Choose a card';
+
   const cardMenu = new StringSelectMenuBuilder()
     .setCustomId('gear:card')
-    .setPlaceholder('Choose a card')
+    .setPlaceholder(cardMenuPlaceholder)
     .addOptions(
       state.cards.slice(0, 25).map((c) => ({
         label: c.label.slice(0, 100),
@@ -185,9 +216,14 @@ export function buildGearMenuView(state: GearMenuState): {
   ];
 
   if (state.candidates.length > 0) {
+    const itemMenuPlaceholder =
+      totalCandidatePages > 1
+        ? `Choose gear to compare (Page ${candidatePage + 1}/${totalCandidatePages} · ${allCandidates.length} items)`
+        : 'Choose gear to compare';
+
     const itemMenu = new StringSelectMenuBuilder()
       .setCustomId('gear:item')
-      .setPlaceholder('Choose gear to compare')
+      .setPlaceholder(itemMenuPlaceholder)
       .addOptions(
         state.candidates.slice(0, 25).map((c) => ({
           label:
@@ -233,6 +269,72 @@ export function buildGearMenuView(state: GearMenuState): {
     ),
   );
 
+  // Pagination row if either cards or candidates exceed 25
+  if (totalCardPages > 1 || totalCandidatePages > 1) {
+    const pageButtons: ButtonBuilder[] = [];
+    if (totalCardPages > 1 && totalCandidatePages > 1) {
+      pageButtons.push(
+        new ButtonBuilder()
+          .setCustomId('gear:card_prev')
+          .setLabel('◀ Card')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(cardPage === 0),
+        new ButtonBuilder()
+          .setCustomId('gear:card_next')
+          .setLabel('Card ▶')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(cardPage >= totalCardPages - 1),
+        new ButtonBuilder()
+          .setCustomId('gear:candidate_prev')
+          .setLabel('◀ Gear')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(candidatePage === 0),
+        new ButtonBuilder()
+          .setCustomId('gear:candidate_next')
+          .setLabel('Gear ▶')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(candidatePage >= totalCandidatePages - 1),
+      );
+    } else if (totalCardPages > 1) {
+      pageButtons.push(
+        new ButtonBuilder()
+          .setCustomId('gear:card_prev')
+          .setLabel('◀ Prev Cards')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(cardPage === 0),
+        new ButtonBuilder()
+          .setCustomId('gear:card_page_info')
+          .setLabel(`Cards ${cardPage + 1}/${totalCardPages}`)
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(true),
+        new ButtonBuilder()
+          .setCustomId('gear:card_next')
+          .setLabel('Next Cards ▶')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(cardPage >= totalCardPages - 1),
+      );
+    } else {
+      pageButtons.push(
+        new ButtonBuilder()
+          .setCustomId('gear:candidate_prev')
+          .setLabel('◀ Prev Gear')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(candidatePage === 0),
+        new ButtonBuilder()
+          .setCustomId('gear:candidate_page_info')
+          .setLabel(`Gear ${candidatePage + 1}/${totalCandidatePages}`)
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(true),
+        new ButtonBuilder()
+          .setCustomId('gear:candidate_next')
+          .setLabel('Next Gear ▶')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(candidatePage >= totalCandidatePages - 1),
+      );
+    }
+    rows.push(new ActionRowBuilder<ButtonBuilder>().addComponents(pageButtons));
+  }
+
   return { embed, components: rows };
 }
 
@@ -240,36 +342,65 @@ export function buildGearMenuView(state: GearMenuState): {
 export async function loadGearMenuState(
   services: BotServices,
   userId: string,
-  cardId: string,
-  slot: GearSlot,
+  targetCardId?: string | undefined,
+  slot: GearSlot = 'WEAPON',
   selectedItemId?: string | undefined,
+  requestedCardPage?: number | undefined,
+  requestedCandidatePage?: number | undefined,
 ): Promise<GearMenuState | null> {
   const userCards = await services.waifuCardRepo.listUserCards(userId);
   if (userCards.length === 0) return null;
 
-  const cards: GearCardOption[] = [];
-  for (const uc of userCards.slice(0, 25)) {
+  const allCards: GearCardOption[] = [];
+  for (const uc of userCards) {
     const base = await services.waifuCardRepo.findById(uc.cardId);
     const equippedTag = uc.state === 'EQUIPPED' ? ' ⭐' : '';
-    cards.push({
+    allCards.push({
       userCardId: uc.id,
       label: `${base?.name ?? 'Card'} Lv.${uc.level} [${base?.element ?? '?'}]${equippedTag}`,
     });
   }
-  const current = cards.find((c) => c.userCardId === cardId) ?? cards[0]!;
+
+  let targetIndex = targetCardId ? allCards.findIndex((c) => c.userCardId === targetCardId) : -1;
+  if (targetIndex === -1) {
+    const equippedIndex = allCards.findIndex((c) => c.label.includes('⭐'));
+    targetIndex = equippedIndex !== -1 ? equippedIndex : 0;
+  }
+  const current = allCards[targetIndex]!;
+
+  const PAGE_SIZE = 25;
+  const totalCardPages = Math.max(1, Math.ceil(allCards.length / PAGE_SIZE));
+  let cardPage =
+    requestedCardPage !== undefined ? requestedCardPage : Math.floor(targetIndex / PAGE_SIZE);
+  cardPage = Math.max(0, Math.min(cardPage, totalCardPages - 1));
+  const cards = allCards.slice(cardPage * PAGE_SIZE, (cardPage + 1) * PAGE_SIZE);
 
   const loadout = await services.loadoutService.getCardLoadout(current.userCardId);
   const idle = await services.userInventoryItemRepo.findByUser(userId, { state: 'IDLE' });
-  const candidates: GearCandidate[] = [];
+  const allCandidates: GearCandidate[] = [];
   for (const inv of idle) {
     const item = await services.gameItemRepo.findById(inv.itemId);
     if (!item || item.subtype !== slot) continue;
-    candidates.push({
+    allCandidates.push({
       inventoryItem: inv,
       item,
       stats: services.enhancementService.getScaledStats(item.baseStats, inv.enhancementLevel),
     });
   }
+
+  const totalCandidatePages = Math.max(1, Math.ceil(allCandidates.length / PAGE_SIZE));
+  let candidatePage = requestedCandidatePage ?? 0;
+  if (selectedItemId) {
+    const selIdx = allCandidates.findIndex((c) => c.inventoryItem.id === selectedItemId);
+    if (selIdx !== -1) {
+      candidatePage = Math.floor(selIdx / PAGE_SIZE);
+    }
+  }
+  candidatePage = Math.max(0, Math.min(candidatePage, totalCandidatePages - 1));
+  const candidates = allCandidates.slice(
+    candidatePage * PAGE_SIZE,
+    (candidatePage + 1) * PAGE_SIZE,
+  );
 
   const equipped = slotPiece(loadout, slot);
   const level = equipped?.inventoryItem.enhancementLevel ?? 0;
@@ -279,13 +410,17 @@ export async function loadGearMenuState(
       : undefined;
 
   return {
+    allCards,
+    cardPage,
     cards,
     cardId: current.userCardId,
     cardLabel: current.label,
     loadout,
     slot,
+    allCandidates,
+    candidatePage,
     candidates,
-    selectedItemId: candidates.some((c) => c.inventoryItem.id === selectedItemId)
+    selectedItemId: allCandidates.some((c) => c.inventoryItem.id === selectedItemId)
       ? selectedItemId
       : undefined,
     enhanceCost,
@@ -335,7 +470,11 @@ export async function openGearMenu(
     if (!state) return;
 
     let notice: string | undefined;
-    let { cardId: nextCard, slot: nextSlot, selectedItemId: nextItem } = state;
+    let nextCard = state.cardId;
+    let nextSlot = state.slot;
+    let nextItem = state.selectedItemId;
+    let nextCardPage = state.cardPage ?? 0;
+    let nextCandidatePage = state.candidatePage ?? 0;
 
     try {
       if (interaction.isStringSelectMenu()) {
@@ -343,9 +482,15 @@ export async function openGearMenu(
         if (interaction.customId === 'gear:card') {
           nextCard = value;
           nextItem = undefined;
+          nextCandidatePage = 0;
+          const cardIdx = (state.allCards ?? state.cards).findIndex(
+            (c) => c.userCardId === value,
+          );
+          if (cardIdx !== -1) nextCardPage = Math.floor(cardIdx / 25);
         } else if (interaction.customId === 'gear:slot') {
           nextSlot = value as GearSlot;
           nextItem = undefined;
+          nextCandidatePage = 0;
         } else if (interaction.customId === 'gear:item') {
           nextItem = value;
         }
@@ -356,7 +501,19 @@ export async function openGearMenu(
           await interaction.update({ components: [] }).catch(() => {});
           return;
         }
-        if (interaction.customId === 'gear:equip' && state.selectedItemId) {
+        if (interaction.customId === 'gear:card_prev') {
+          nextCardPage = Math.max(0, (state.cardPage ?? 0) - 1);
+          nextCard = (state.allCards ?? state.cards)[nextCardPage * 25]?.userCardId ?? state.cardId;
+        } else if (interaction.customId === 'gear:card_next') {
+          const totalPages = Math.ceil(((state.allCards ?? state.cards).length) / 25);
+          nextCardPage = Math.min(totalPages - 1, (state.cardPage ?? 0) + 1);
+          nextCard = (state.allCards ?? state.cards)[nextCardPage * 25]?.userCardId ?? state.cardId;
+        } else if (interaction.customId === 'gear:candidate_prev') {
+          nextCandidatePage = Math.max(0, (state.candidatePage ?? 0) - 1);
+        } else if (interaction.customId === 'gear:candidate_next') {
+          const totalPages = Math.ceil(((state.allCandidates ?? state.candidates).length) / 25);
+          nextCandidatePage = Math.min(totalPages - 1, (state.candidatePage ?? 0) + 1);
+        } else if (interaction.customId === 'gear:equip' && state.selectedItemId) {
           const result = await services.loadoutService.equip(
             userId,
             state.cardId,
@@ -383,7 +540,16 @@ export async function openGearMenu(
       notice = `❌ ${err instanceof Error ? err.message : String(err)}`;
     }
 
-    state = (await loadGearMenuState(services, userId, nextCard, nextSlot, nextItem)) ?? state;
+    state =
+      (await loadGearMenuState(
+        services,
+        userId,
+        nextCard,
+        nextSlot,
+        nextItem,
+        nextCardPage,
+        nextCandidatePage,
+      )) ?? state;
     state.notice = notice;
     const view = buildGearMenuView(state);
     await interaction.update({ embeds: [view.embed], components: view.components }).catch(() => {});

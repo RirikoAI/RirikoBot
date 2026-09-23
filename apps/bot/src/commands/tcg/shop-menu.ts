@@ -27,6 +27,7 @@ const GEAR_TYPES = new Set(['EQUIPMENT', 'ACCESSORY']);
 export interface ShopMenuState {
   category: ShopCategory;
   items: GameItem[];
+  page?: number | undefined;
   selectedIndex: number;
   /** Stats of the item in the same slot on the equipped card (gear only). */
   equippedStats?: EquipmentStats | undefined;
@@ -47,11 +48,18 @@ export function buildShopView(state: ShopMenuState): {
   embed: EmbedBuilder;
   components: Array<ActionRowBuilder<ButtonBuilder> | ActionRowBuilder<StringSelectMenuBuilder>>;
 } {
+  const page = state.page ?? 0;
+  const PAGE_SIZE = 25;
+  const totalPages = Math.max(1, Math.ceil(state.items.length / PAGE_SIZE));
+  const effectivePage = Math.max(0, Math.min(page, totalPages - 1));
+  const pagedItems = state.items.slice(effectivePage * PAGE_SIZE, (effectivePage + 1) * PAGE_SIZE);
+
   const selected = state.items[state.selectedIndex];
   const isGear = selected ? GEAR_TYPES.has(selected.type) : false;
 
-  const lines = state.items.slice(0, 25).map((item, idx) => {
-    const marker = idx === state.selectedIndex ? '👉 ' : '• ';
+  const lines = pagedItems.map((item, idxOnPage) => {
+    const globalIdx = effectivePage * PAGE_SIZE + idxOnPage;
+    const marker = globalIdx === state.selectedIndex ? '👉 ' : '• ';
     const limit = item.maxDailyPurchases > 0 ? ` (Limit: ${item.maxDailyPurchases}/day)` : '';
     return `${marker}${itemIcon(item)} **${item.name}** — 🪙 **${item.shopPrice.toLocaleString()} credits** [${item.rarity}]${limit}`;
   });
@@ -70,6 +78,13 @@ export function buildShopView(state: ShopMenuState): {
     }
   }
 
+  let paginationNote = '';
+  if (state.items.length > PAGE_SIZE) {
+    const start = effectivePage * PAGE_SIZE + 1;
+    const end = Math.min((effectivePage + 1) * PAGE_SIZE, state.items.length);
+    paginationNote = `\n\n📄 **Catalog**: Showing ${start}–${end} of ${state.items.length} (Page ${effectivePage + 1}/${totalPages})`;
+  }
+
   const embed = new EmbedBuilder()
     .setColor(0x5865f2)
     .setTitle(`🏪 Town Item Shop Catalog — ${CATEGORY_LABELS[state.category]}`)
@@ -79,7 +94,8 @@ export function buildShopView(state: ShopMenuState): {
           ? '🌅 Drop-only gear, on sale today only (resets 00:00 UTC).\n\n'
           : '') +
         (lines.length > 0 ? lines.join('\n') : '*Nothing in stock in this category.*') +
-        detail,
+        detail +
+        paginationNote,
     )
     .setFooter({ text: 'Double-entry ledger audited | Pick an item, then buy with the buttons' });
 
@@ -96,18 +112,26 @@ export function buildShopView(state: ShopMenuState): {
   ];
 
   if (state.items.length > 0 && selected) {
+    const itemMenuPlaceholder =
+      totalPages > 1
+        ? `Choose an item (Page ${effectivePage + 1}/${totalPages} · ${state.items.length} items)`
+        : 'Choose an item';
+
     rows.push(
       new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
         new StringSelectMenuBuilder()
           .setCustomId('shop:select_item')
-          .setPlaceholder('Choose an item')
+          .setPlaceholder(itemMenuPlaceholder)
           .addOptions(
-            state.items.slice(0, 25).map((item, idx) => ({
-              label: `${itemIcon(item)} ${item.name} — ${item.shopPrice}c`.slice(0, 100),
-              description: (item.description || `${item.type} item`).slice(0, 100),
-              value: String(idx),
-              default: idx === state.selectedIndex,
-            })),
+            pagedItems.map((item, idxOnPage) => {
+              const globalIdx = effectivePage * PAGE_SIZE + idxOnPage;
+              return {
+                label: `${itemIcon(item)} ${item.name} — ${item.shopPrice}c`.slice(0, 100),
+                description: (item.description || `${item.type} item`).slice(0, 100),
+                value: String(globalIdx),
+                default: globalIdx === state.selectedIndex,
+              };
+            }),
           ),
       ),
     );
@@ -131,6 +155,28 @@ export function buildShopView(state: ShopMenuState): {
           .setDisabled(!isGear || !state.vanguardName),
       ),
     );
+
+    if (totalPages > 1) {
+      rows.push(
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setCustomId('shop:prev')
+            .setLabel('◀ Prev')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(effectivePage === 0),
+          new ButtonBuilder()
+            .setCustomId('shop:page_info')
+            .setLabel(`Page ${effectivePage + 1} / ${totalPages}`)
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(true),
+          new ButtonBuilder()
+            .setCustomId('shop:next')
+            .setLabel('Next ▶')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(effectivePage >= totalPages - 1),
+        ),
+      );
+    }
   }
 
   return { embed, components: rows };
@@ -222,10 +268,22 @@ export async function openShopMenu(
       if (interaction.isButton() && interaction.customId.startsWith('shop:cat:')) {
         const cat = interaction.customId.split(':')[2] as ShopCategory;
         items = await loadItems(services, cat);
-        next = { category: cat, items, selectedIndex: 0 };
+        next = { category: cat, items, selectedIndex: 0, page: 0 };
       } else if (interaction.isStringSelectMenu() && interaction.customId === 'shop:select_item') {
         const idx = Number.parseInt(interaction.values[0] ?? '0', 10);
-        if (idx >= 0 && idx < state.items.length) next.selectedIndex = idx;
+        if (idx >= 0 && idx < state.items.length) {
+          next.selectedIndex = idx;
+          next.page = Math.floor(idx / 25);
+        }
+      } else if (interaction.isButton() && interaction.customId === 'shop:prev') {
+        const newPage = Math.max(0, (state.page ?? 0) - 1);
+        next.page = newPage;
+        next.selectedIndex = newPage * 25;
+      } else if (interaction.isButton() && interaction.customId === 'shop:next') {
+        const totalPages = Math.ceil(state.items.length / 25);
+        const newPage = Math.min(totalPages - 1, (state.page ?? 0) + 1);
+        next.page = newPage;
+        next.selectedIndex = newPage * 25;
       } else if (interaction.isButton()) {
         const selected = state.items[state.selectedIndex];
         if (selected && interaction.customId.startsWith('shop:buy:')) {

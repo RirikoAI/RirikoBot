@@ -87,4 +87,71 @@ describe('Gear menu (STORY-157)', () => {
     );
     expect(buttons(view)['gear:unequip_all']!.disabled).toBe(true);
   });
+
+  it('paginates cards and candidate gear when lists exceed 25 (BUG-0016)', () => {
+    const allCards = Array.from({ length: 30 }, (_, i) => ({
+      userCardId: `card-${i + 1}`,
+      label: `Waifu ${i + 1} Lv.1 [FIRE]`,
+    }));
+
+    // Page 0 (cards 1-25)
+    const page0Cards = allCards.slice(0, 25);
+    const view0 = buildGearMenuView(
+      state({
+        allCards,
+        cards: page0Cards,
+        cardPage: 0,
+        cardId: 'card-1',
+      }),
+    );
+    expect(view0.embed.data.description).toContain('Cards 1–25 of 30 (Page 1/2)');
+    expect(view0.components).toHaveLength(5); // card, slot, item, action buttons, pagination buttons
+
+    const pageRow0 = view0.components.at(-1)!.toJSON() as {
+      components: Array<{ custom_id: string; disabled?: boolean; label: string }>;
+    };
+    const b0 = Object.fromEntries(pageRow0.components.map((b) => [b.custom_id, b]));
+    expect(b0['gear:card_prev']!.disabled).toBe(true);
+    expect(b0['gear:card_page_info']!.label).toBe('Cards 1/2');
+    expect(b0['gear:card_next']!.disabled).toBe(false);
+
+    // Page 1 (cards 26-30)
+    const page1Cards = allCards.slice(25, 30);
+    const view1 = buildGearMenuView(
+      state({
+        allCards,
+        cards: page1Cards,
+        cardPage: 1,
+        cardId: 'card-26',
+      }),
+    );
+    expect(view1.embed.data.description).toContain('Cards 26–30 of 30 (Page 2/2)');
+    const pageRow1 = view1.components.at(-1)!.toJSON() as {
+      components: Array<{ custom_id: string; disabled?: boolean; label: string }>;
+    };
+    const b1 = Object.fromEntries(pageRow1.components.map((b) => [b.custom_id, b]));
+    expect(b1['gear:card_prev']!.disabled).toBe(false);
+    expect(b1['gear:card_next']!.disabled).toBe(true);
+
+    // Combined pagination when candidates also exceed 25
+    const allCandidates = Array.from({ length: 28 }, (_, i) => ({
+      inventoryItem: inv(`w-${i + 1}`),
+      item: item(`Blade ${i + 1}`),
+      stats: { attack: 10 + i },
+    }));
+    const viewBoth = buildGearMenuView(
+      state({
+        allCards,
+        cards: page0Cards,
+        cardPage: 0,
+        allCandidates,
+        candidates: allCandidates.slice(0, 25),
+        candidatePage: 0,
+      }),
+    );
+    const bothRow = viewBoth.components.at(-1)!.toJSON() as {
+      components: Array<{ custom_id: string; disabled?: boolean; label: string }>;
+    };
+    expect(bothRow.components).toHaveLength(4); // [◀ Card] [Card ▶] [◀ Gear] [Gear ▶]
+  });
 });
