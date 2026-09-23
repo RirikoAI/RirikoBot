@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PermissionFlagsBits } from 'discord.js';
 import { CommandRegistry } from '../router/registry.js';
 import { CommandCategory, type Command, type CommandContext } from '../command/types.js';
-import { HelpGenerator } from './generator.js';
+import { HelpGenerator, formatPrefixCommand } from './generator.js';
 import { createHelpCommand } from './command.js';
 import { handleHelpInteraction } from './handler.js';
 import type { StringSelectMenuInteraction, ButtonInteraction } from 'discord.js';
@@ -281,6 +281,28 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
       expect(examplesField?.value).toContain('`/play query:YOASOBI`');
       expect(examplesField?.value).toContain('`?play "Idol"`');
       expect(examplesField?.value).not.toContain('!play');
+    });
+
+    it('correctly handles $ prefix without regex replacement token collision ($1, $3)', () => {
+      // Direct unit test of formatPrefixCommand with $ prefix
+      expect(formatPrefixCommand('!imagine a magical forest', '$')).toBe('$imagine a magical forest');
+      expect(formatPrefixCommand('!imagine cybernetic samurai --provider comfyui --ar 1:1', '$')).toBe(
+        '$imagine cybernetic samurai --provider comfyui --ar 1:1',
+      );
+      expect(formatPrefixCommand('/imagine prompt:foo | !imagine foo', '$')).toBe(
+        '/imagine prompt:foo | $imagine foo',
+      );
+
+      // Embed integration test
+      const { embed } = HelpGenerator.generateCommandDetailView(
+        playCmd,
+        { defaultPrefix: '$' },
+        '$',
+      );
+      const data = embed.toJSON();
+      const examplesField = data.fields?.find((f) => f.name === 'Examples');
+      expect(examplesField?.value).toContain('`$play "Idol"`');
+      expect(examplesField?.value).not.toContain('$3');
     });
 
     it('renders active prefix in home view description and footer', () => {
