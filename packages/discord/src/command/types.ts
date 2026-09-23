@@ -36,6 +36,7 @@ export const CommandCategory = {
   GENERAL: 'general',
   ADMIN: 'admin',
   REACTIONS: 'reactions',
+  MEMES: 'memes',
 } as const;
 
 export type CommandCategory = (typeof CommandCategory)[keyof typeof CommandCategory];
