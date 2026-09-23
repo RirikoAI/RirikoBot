@@ -150,11 +150,15 @@ Selecting a specific command displays:
   - Displays the user's highest cleared floor, first-clear rewards status, attempt history, and fastest clear times.
 
 ### 5.6. Role-Guarded Game Administration (`/tcg-admin`)
-- `/tcg-admin config energy max_cap <value: 100-1000>`
-  - Sets the global or guild ceiling on maximum player energy.
+- `/tcg-admin action:energy [max_cap: 100-1000] [pot_limit: 1-10] [bonus_cap: 0-500] [bonus_increment: 0-50]`
+  - Sets global energy parameters: base max capacity, daily potion ceiling, max bonus energy accumulation cap, and daily reset bonus energy increment.
   - **Permission Guard**: Requires Discord `Administrator` or the designated `TCG Manager Role`.
 - `/tcg-admin config energy pot_limit <value: 1-10>`
   - Adjusts maximum daily energy consumable usage per player.
+- `/tcg-admin config energy bonus_cap <value: 0-500>`
+  - Configures the maximum bonus energy cap a player can accumulate daily.
+- `/tcg-admin config energy bonus_increment <value: 0-50>`
+  - Configures the bonus energy increment granted on each daily reset rollover.
 - `/tcg-admin config dungeon scaling_model <LINEAR|POLYNOMIAL|EXPONENTIAL|HYBRID>`
   - Hot-reloads the difficulty growth model for current dungeon floors.
 - `/tcg-admin config dungeon growth_rate <value: 0.03-0.25>`

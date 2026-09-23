@@ -7,6 +7,8 @@ export const TcgConfigKeySchema = z.enum([
   'energy_scaling_per_level',
   'daily_energy_restore_pot_limit',
   'daily_replenish_cron',
+  'max_bonus_energy_cap',
+  'daily_bonus_energy_increment',
   'dungeon_scaling_model',
   'dungeon_growth_rate',
   'market_tax_rate',
@@ -21,6 +23,8 @@ export const TcgConfigSchemas = {
   energy_scaling_per_level: z.number().int().min(1).max(5).default(2),
   daily_energy_restore_pot_limit: z.number().int().min(1).max(10).default(3),
   daily_replenish_cron: z.string().min(5).default('0 0 * * *'),
+  max_bonus_energy_cap: z.number().int().min(0).max(500).default(50),
+  daily_bonus_energy_increment: z.number().int().min(0).max(50).default(5),
   dungeon_scaling_model: z
     .enum(['LINEAR', 'POLYNOMIAL', 'EXPONENTIAL', 'HYBRID'])
     .default('HYBRID'),
@@ -35,6 +39,8 @@ export interface AllTcgConfigs {
   energy_scaling_per_level: number;
   daily_energy_restore_pot_limit: number;
   daily_replenish_cron: string;
+  max_bonus_energy_cap: number;
+  daily_bonus_energy_increment: number;
   dungeon_scaling_model: 'LINEAR' | 'POLYNOMIAL' | 'EXPONENTIAL' | 'HYBRID';
   dungeon_growth_rate: number;
   market_tax_rate: number;
@@ -94,6 +100,12 @@ export class TcgConfigService {
       ),
       daily_replenish_cron: TcgConfigSchemas.daily_replenish_cron.parse(
         rawAll['daily_replenish_cron'],
+      ),
+      max_bonus_energy_cap: TcgConfigSchemas.max_bonus_energy_cap.parse(
+        rawAll['max_bonus_energy_cap'],
+      ),
+      daily_bonus_energy_increment: TcgConfigSchemas.daily_bonus_energy_increment.parse(
+        rawAll['daily_bonus_energy_increment'],
       ),
       dungeon_scaling_model: TcgConfigSchemas.dungeon_scaling_model.parse(
         rawAll['dungeon_scaling_model'],

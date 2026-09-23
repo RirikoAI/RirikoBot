@@ -1164,7 +1164,7 @@
       "epic": "EPIC-004",
       "title": "Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "EPIC-004",
         "EPIC-015"
@@ -2689,12 +2689,12 @@
       "id": "CHORE-0602",
       "title": "Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards",
       "points": null,
-      "status": "BACKLOG",
+      "status": "ABANDONED",
       "requires": [
         "BUG-0014"
       ],
       "blocks": [],
-      "description": "Ungroomed. Gear equipped before BUG-0014 may still point at deleted cards or cards now owned by someone else. It is harmless (ignored by loadouts) and recoverable via /card action:unequip-all, but a one-time idempotent repair on boot (like BUG-0010's legacy row repair) would return it to inventories automatically. Check live data volume first."
+      "description": "Dropped per architecture review. Stranded gear is harmless (ignored by loadouts in loadout-service.ts:216) and recoverable via /card action:unequip-all. Standalone boot-time scanning is unnecessary."
     },
     {
       "id": "CHORE-0603",
@@ -2857,18 +2857,18 @@
     {
       "id": "BUG-0013",
       "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted",
-      "points": 2,
-      "status": "BACKLOG",
+      "points": 3,
+      "status": "REVIEW",
       "parent": "EPIC-015",
       "requires": [],
       "blocks": [],
-      "description": "bonus_energy is summed into the effective cap in four places (potion ceiling in PlayerEnergyRepository, EnergyLifecycleService.refundEnergy, ConsumableService full restores and the InventoryService status line) but is only ever written as 0 by the repository constructors. No item, achievement, event or admin command grants it, so the column is permanently dead and the four cap calculations are equivalent to maxEnergy alone. Either wire a real grant path (seasonal buffs, achievement rewards, admin command) or remove the column and simplify the cap math to maxEnergy."
+      "description": "Daily incremental bonus energy accumulation up to an admin-configurable cap. Reconciles on daily reset rollover in EnergyLifecycleService, replenishing current energy up to maxEnergy + bonusEnergy. Configured via /tcg-admin action:energy with bonus_cap and bonus_increment parameters."
     },
     {
       "id": "BUG-0012",
       "title": "Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "parent": "EPIC-015",
       "requires": [],
       "blocks": [],
