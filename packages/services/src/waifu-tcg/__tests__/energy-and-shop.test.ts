@@ -7,6 +7,7 @@ import {
   PlayerEnergyRepository,
   EconomyRepository,
 } from '@ririko/database';
+import { getResetDayKey, DEFAULT_RESET_SCHEDULE } from '@ririko/core';
 import {
   CANONICAL_ITEMS,
   EnergyLifecycleService,
@@ -147,7 +148,7 @@ describe('Waifu TCG: Energy Lifecycle & Town Item Shop (STORY-103 / TASK-1032)',
       expect(reconciled.maxEnergy).toBe(163);
       expect(reconciled.currentEnergy).toBe(163);
       expect(reconciled.dailyEnergyPotsUsed).toBe(0);
-      expect(reconciled.lastResetDate).toBe(new Date().toISOString().slice(0, 10));
+      expect(reconciled.lastResetDate).toBe(getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE));
     });
 
     it('preserves energy overflow above max capacity during rollover', async () => {

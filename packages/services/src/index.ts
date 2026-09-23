@@ -13,3 +13,4 @@ export * from './reminders/index.js';
 export * from './guild/index.js';
 export * from './reactions/index.js';
 export * from './memes/index.js';
+export * from './image-generation/index.js';

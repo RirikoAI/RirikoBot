@@ -3,12 +3,13 @@ import { resolve } from 'node:path';
 import { CORE_VERSION, RirikoError } from '@ririko/core';
 import { Command } from 'commander';
 import pc from 'picocolors';
-import { registerAiConfigureCommand } from './commands/ai-configure.js';
-import { registerDoctorCommand } from './commands/doctor.js';
-import { registerGeneratePoTokenCommand } from './commands/generate-po-token.js';
 import { registerInfoCommand } from './commands/info.js';
+import { registerDoctorCommand } from './commands/doctor.js';
 import { registerMigrateCommand } from './commands/migrate.js';
+import { registerGeneratePoTokenCommand } from './commands/generate-po-token.js';
+import { registerAiConfigureCommand } from './commands/ai-configure.js';
 import { registerStreamConfigureCommand } from './commands/stream-configure.js';
+import { registerImageConfigureCommand } from './commands/image-configure.js';
 
 
 export function loadEnvConfig(customPath?: string): void {
@@ -61,6 +62,7 @@ export function createProgram(): Command {
   registerGeneratePoTokenCommand(program);
   registerAiConfigureCommand(program);
   registerStreamConfigureCommand(program);
+  registerImageConfigureCommand(program);
 
 
   // Global error handler

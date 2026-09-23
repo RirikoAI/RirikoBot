@@ -31,6 +31,7 @@ import {
   ReactionRoleRepository,
   AutoRoleRepository,
   ReminderRepository,
+  ImageRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -140,6 +141,7 @@ import {
   GuildSettingsService,
   ReactionGifService,
   MemeSynthesizer,
+  ImageGenerationService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -255,6 +257,8 @@ export interface BotServices {
   autoRoleRepo: AutoRoleRepository;
   reactionRoleService: ReactionRoleService;
   autoRoleService: AutoRoleService;
+  imageRepo: ImageRepository;
+  imageGenerationService: ImageGenerationService;
 }
 
 /**
@@ -441,6 +445,12 @@ export async function createBotServices(
   const waifuImClient = new WaifuImClient({ maxRetries: 1, timeoutMs: 5000 });
   const reactionGifService = new ReactionGifService();
   const memeSynthesizer = new MemeSynthesizer();
+  const imageRepo = new ImageRepository(db);
+  const imageGenerationService = new ImageGenerationService({
+    repository: imageRepo,
+    defaultProviderId: process.env.IMAGE_DEFAULT_PROVIDER || 'gemini',
+    dailyQuotaPerUser: parseInt(process.env.IMAGE_DAILY_QUOTA || '30', 10),
+  });
   const wallpaperService = new WallpaperService({
     wallhaven: new WallhavenClient({ maxRetries: 1, timeoutMs: 5000 }),
     zerochan: new ZerochanClient({ maxRetries: 1, timeoutMs: 5000 }),
@@ -939,5 +949,7 @@ export async function createBotServices(
     autoRoleRepo,
     reactionRoleService,
     autoRoleService,
+    imageRepo,
+    imageGenerationService,
   };
 }
