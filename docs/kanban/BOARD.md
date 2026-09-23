@@ -13,6 +13,9 @@
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover |
 |---|---|---|---|---|---|
+| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
+| `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
+| `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
 | `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | `EPIC-004` | [STORY-161.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-161.md) |
 | `BUG-0012` | Bug | Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired | 3 | `EPIC-015` | [BUG-0012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0012.md) |
 
@@ -242,7 +245,7 @@
 |---|---|---|---|---|
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 7A |
 | `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
-| `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 13 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
+| `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 21 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 21 | `EPIC-002`, `EPIC-003` | Phase 2B ✅ Done |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B ✅ Done |
 
@@ -336,10 +339,12 @@
 ### 📋 Groomed Stories for EPIC-013 (Media Synthesis, Reactions & AI Images)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-130` | Story | 60 Anime Reactions Command Factory & OtakuGIFs Cache | 3 | `EPIC-013` | 📋 Backlog | `EPIC-002`, `EPIC-003` |
-| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 3 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
+| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | 🔍 In Review | `EPIC-002`, `EPIC-003` |
+| `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | ✅ Done | — |
+| `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | ✅ Done | `TASK-1301` |
+| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
 | `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
-| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 2 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
+| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
 
 ### 📋 Groomed Stories for EPIC-014 (Server Utilities, AutoRoles & Community)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |

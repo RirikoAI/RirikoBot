@@ -36,6 +36,7 @@ export class SlashCommandContext implements CommandContext {
   public readonly user: User;
   public readonly member: GuildMember | null;
   public readonly commandName: string;
+  public readonly invokedName: string;
   public readonly invokedPrefix = '/';
   public readonly options: ICommandOptionsResolver;
   public readonly command?: Command | undefined;
@@ -56,6 +57,7 @@ export class SlashCommandContext implements CommandContext {
     this.user = interaction.user;
     this.member = (interaction.member as GuildMember) ?? null;
     this.commandName = interaction.commandName;
+    this.invokedName = interaction.commandName.toLowerCase().trim();
     this.options = new SlashOptionsResolver(interaction);
   }
 
@@ -126,6 +128,7 @@ export class PrefixCommandContext implements CommandContext {
   public readonly user: User;
   public readonly member: GuildMember | null;
   public readonly commandName: string;
+  public readonly invokedName: string;
   public readonly invokedPrefix: string;
   public readonly options: ICommandOptionsResolver;
   public readonly command?: Command | undefined;
@@ -140,6 +143,7 @@ export class PrefixCommandContext implements CommandContext {
     invokedPrefix: string,
     rawArgs: string[],
     definitions: CommandOptionDefinition[] = [],
+    invokedName?: string | undefined,
   ) {
     this.raw = message;
     this.id = message.id;
@@ -158,6 +162,10 @@ export class PrefixCommandContext implements CommandContext {
       this.command = commandOrName;
       this.commandName = commandOrName.metadata.name;
     }
+
+    // Backward compatible: existing call sites that omit the raw invoked token (alias or
+    // primary name the user actually typed) fall back to the resolved command's primary name.
+    this.invokedName = (invokedName ?? this.commandName).toLowerCase().trim();
 
     this.invokedPrefix = invokedPrefix;
     const resolvedDefs =

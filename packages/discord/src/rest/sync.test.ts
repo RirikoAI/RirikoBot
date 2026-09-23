@@ -87,6 +87,86 @@ describe('Discord REST v10 Command Synchronizer (TASK-0332)', () => {
     });
   });
 
+  describe('autocomplete option flag (TASK-1301)', () => {
+    it('emits autocomplete: true and omits choices for an autocomplete-enabled option', () => {
+      const cmd: Command = {
+        metadata: {
+          name: 'react',
+          category: CommandCategory.REACTIONS,
+          description: 'Send a reaction GIF',
+          options: [
+            {
+              name: 'type',
+              type: 'STRING',
+              description: 'The reaction to send',
+              required: true,
+              autocomplete: true,
+            },
+          ],
+        },
+        execute: vi.fn(),
+      };
+
+      const payload = buildCommandPayload(cmd);
+      const [typeOpt] = payload.options!;
+
+      expect((typeOpt as { autocomplete?: boolean }).autocomplete).toBe(true);
+      expect((typeOpt as { choices?: unknown[] }).choices).toBeUndefined();
+    });
+
+    it('prefers autocomplete over choices when both are set on the same option', () => {
+      const cmd: Command = {
+        metadata: {
+          name: 'react',
+          category: CommandCategory.REACTIONS,
+          description: 'Send a reaction GIF',
+          options: [
+            {
+              name: 'type',
+              type: 'STRING',
+              description: 'The reaction to send',
+              required: true,
+              autocomplete: true,
+              choices: [{ name: 'Hug', value: 'hug' }],
+            },
+          ],
+        },
+        execute: vi.fn(),
+      };
+
+      const payload = buildCommandPayload(cmd);
+      const [typeOpt] = payload.options!;
+
+      expect((typeOpt as { autocomplete?: boolean }).autocomplete).toBe(true);
+      expect((typeOpt as { choices?: unknown[] }).choices).toBeUndefined();
+    });
+
+    it('leaves an option with only choices unaffected', () => {
+      const cmd: Command = {
+        metadata: {
+          name: 'poll',
+          category: CommandCategory.GENERAL,
+          description: 'Create a poll',
+          options: [
+            {
+              name: 'kind',
+              type: 'STRING',
+              description: 'Poll kind',
+              choices: [{ name: 'Yes/No', value: 'yesno' }],
+            },
+          ],
+        },
+        execute: vi.fn(),
+      };
+
+      const payload = buildCommandPayload(cmd);
+      const [kindOpt] = payload.options!;
+
+      expect((kindOpt as { autocomplete?: boolean }).autocomplete).toBeUndefined();
+      expect((kindOpt as { choices?: unknown[] }).choices).toHaveLength(1);
+    });
+  });
+
   describe('CommandSynchronizer operations', () => {
     const mockPut = vi.fn().mockResolvedValue([]);
     const mockRest = {

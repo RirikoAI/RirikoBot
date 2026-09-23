@@ -173,6 +173,34 @@ describe('CommandRouter Dual Dispatcher (TASK-0312)', () => {
       expect(mockReply).toHaveBeenCalledWith('Echo: Hello Antigravity');
     });
 
+    it('sets both ctx.commandName and ctx.invokedName to the slash command name (TASK-1301)', async () => {
+      let seenCtx: CommandContext | undefined;
+      (sampleCommand.execute as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        async (ctx: CommandContext) => {
+          seenCtx = ctx;
+          await ctx.reply('ok');
+        },
+      );
+
+      const mockInteraction = {
+        isAutocomplete: () => false,
+        isChatInputCommand: () => true,
+        commandName: 'echo',
+        client: {} as unknown as Client,
+        user: { id: 'user-1' } as unknown as User,
+        replied: false,
+        deferred: false,
+        reply: vi.fn().mockResolvedValue(undefined),
+        options: { getString: vi.fn().mockReturnValue('hi') },
+      } as unknown as ChatInputCommandInteraction;
+
+      const handled = await router.dispatchInteraction(mockInteraction);
+
+      expect(handled).toBe(true);
+      expect(seenCtx?.commandName).toBe('echo');
+      expect(seenCtx?.invokedName).toBe('echo');
+    });
+
     it('returns false for unregistered slash command', async () => {
       const mockInteraction = {
         isAutocomplete: () => false,
@@ -263,6 +291,62 @@ describe('CommandRouter Dual Dispatcher (TASK-0312)', () => {
 
       expect(handled).toBe(true);
       expect(mockReply).toHaveBeenCalledWith({ content: 'Echo: Repeated message' });
+    });
+
+    it('surfaces the typed alias via ctx.invokedName while ctx.commandName stays canonical (TASK-1301)', async () => {
+      const mockReply = vi.fn().mockResolvedValue(undefined);
+      let seenCtx: CommandContext | undefined;
+      const aliasAwareCommand: Command = {
+        metadata: {
+          name: 'react',
+          category: CommandCategory.REACTIONS,
+          description: 'Unified reaction command',
+          aliases: ['hug'],
+        },
+        execute: vi.fn(async (ctx: CommandContext) => {
+          seenCtx = ctx;
+          await ctx.reply('done');
+        }),
+      };
+      registry.register(aliasAwareCommand);
+
+      const mockMessage = {
+        author: { bot: false, id: 'user-1' },
+        system: false,
+        content: '!hug @friend',
+        client: { user: { id: 'bot-1' } },
+        reply: mockReply,
+      } as unknown as Message;
+
+      const handled = await router.dispatchMessage(mockMessage);
+
+      expect(handled).toBe(true);
+      expect(seenCtx?.commandName).toBe('react');
+      expect(seenCtx?.invokedName).toBe('hug');
+    });
+
+    it('sets ctx.invokedName to the primary name when a command is invoked directly', async () => {
+      let seenCtx: CommandContext | undefined;
+      (sampleCommand.execute as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        async (ctx: CommandContext) => {
+          seenCtx = ctx;
+          await ctx.reply('ok');
+        },
+      );
+
+      const mockMessage = {
+        author: { bot: false, id: 'user-1' },
+        system: false,
+        content: '!echo "direct"',
+        client: { user: { id: 'bot-1' } },
+        reply: vi.fn().mockResolvedValue(undefined),
+      } as unknown as Message;
+
+      const handled = await router.dispatchMessage(mockMessage);
+
+      expect(handled).toBe(true);
+      expect(seenCtx?.commandName).toBe('echo');
+      expect(seenCtx?.invokedName).toBe('echo');
     });
 
     it('dispatches command using bot mention prefix', async () => {
