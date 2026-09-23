@@ -51,6 +51,7 @@ export interface CraftMenuState {
   allRecipes: RecipeStatus[];
   /** allRecipes filtered to `category`. */
   recipes: RecipeStatus[];
+  page?: number | undefined;
   selectedIndex: number;
   dust: number;
   credits: number;
@@ -62,10 +63,20 @@ export function buildCraftMenuView(state: CraftMenuState): {
   embed: EmbedBuilder;
   components: Array<ActionRowBuilder<StringSelectMenuBuilder> | ActionRowBuilder<ButtonBuilder>>;
 } {
+  const page = state.page ?? 0;
+  const PAGE_SIZE = 25;
+  const totalPages = Math.max(1, Math.ceil(state.recipes.length / PAGE_SIZE));
+  const effectivePage = Math.max(0, Math.min(page, totalPages - 1));
+  const pagedRecipes = state.recipes.slice(
+    effectivePage * PAGE_SIZE,
+    (effectivePage + 1) * PAGE_SIZE,
+  );
+
   const selected = state.recipes[state.selectedIndex];
 
-  const lines = state.recipes.slice(0, 25).map((status, idx) => {
-    const marker = idx === state.selectedIndex ? '👉 ' : '• ';
+  const lines = pagedRecipes.map((status, idxOnPage) => {
+    const globalIdx = effectivePage * PAGE_SIZE + idxOnPage;
+    const marker = globalIdx === state.selectedIndex ? '👉 ' : '• ';
     return (
       `${marker}${recipeIcon(status)} **${status.outputItem.name}** — ` +
       `🧪 ${status.recipe.dustCost} Dust + 🪙 ${status.recipe.creditCost}c [${statusMarker(status)}]`
@@ -94,13 +105,21 @@ export function buildCraftMenuView(state: CraftMenuState): {
       (ingredientLines.length > 0 ? `\nIngredients:\n${ingredientLines.join('\n')}` : '');
   }
 
+  let paginationNote = '';
+  if (state.recipes.length > PAGE_SIZE) {
+    const start = effectivePage * PAGE_SIZE + 1;
+    const end = Math.min((effectivePage + 1) * PAGE_SIZE, state.recipes.length);
+    paginationNote = `\n\n📄 **Recipes**: Showing ${start}–${end} of ${state.recipes.length} (Page ${effectivePage + 1}/${totalPages})`;
+  }
+
   const embed = new EmbedBuilder()
     .setColor(0x5865f2)
     .setTitle(`🔨 Crafting Workshop — ${CATEGORY_LABELS[state.category]}`)
     .setDescription(
       (state.notice ? `${state.notice}\n\n` : '') +
         (lines.length > 0 ? lines.join('\n') : '*No recipes in this category.*') +
-        detail,
+        detail +
+        paginationNote,
     )
     .setFooter({ text: `🧪 Crafting Dust: ${state.dust.toLocaleString()} | 🪙 Credits: ${state.credits.toLocaleString()}` });
 
@@ -120,18 +139,48 @@ export function buildCraftMenuView(state: CraftMenuState): {
   ];
 
   if (state.recipes.length > 0) {
+    const recipeMenuPlaceholder =
+      totalPages > 1
+        ? `Choose a recipe (Page ${effectivePage + 1}/${totalPages} · ${state.recipes.length} recipes)`
+        : 'Choose a recipe';
+
     const recipeMenu = new StringSelectMenuBuilder()
       .setCustomId('craft:select_recipe')
-      .setPlaceholder('Choose a recipe')
+      .setPlaceholder(recipeMenuPlaceholder)
       .addOptions(
-        state.recipes.slice(0, 25).map((status, idx) => ({
-          label: `${recipeIcon(status)} ${status.outputItem.name}`.slice(0, 100),
-          description: `${status.recipe.dustCost} Dust + ${status.recipe.creditCost}c — ${statusMarker(status)}`.slice(0, 100),
-          value: String(idx),
-          default: idx === state.selectedIndex,
-        })),
+        pagedRecipes.map((status, idxOnPage) => {
+          const globalIdx = effectivePage * PAGE_SIZE + idxOnPage;
+          return {
+            label: `${recipeIcon(status)} ${status.outputItem.name}`.slice(0, 100),
+            description: `${status.recipe.dustCost} Dust + ${status.recipe.creditCost}c — ${statusMarker(status)}`.slice(0, 100),
+            value: String(globalIdx),
+            default: globalIdx === state.selectedIndex,
+          };
+        }),
       );
     rows.push(new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(recipeMenu));
+  }
+
+  if (totalPages > 1) {
+    rows.push(
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId('craft:prev')
+          .setLabel('◀ Prev')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(effectivePage === 0),
+        new ButtonBuilder()
+          .setCustomId('craft:page_info')
+          .setLabel(`Page ${effectivePage + 1} / ${totalPages}`)
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(true),
+        new ButtonBuilder()
+          .setCustomId('craft:next')
+          .setLabel('Next ▶')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(effectivePage >= totalPages - 1),
+      ),
+    );
   }
 
   rows.push(
@@ -154,18 +203,25 @@ export async function loadCraftMenuState(
   userId: string,
   category: CraftCategory,
   selectedRecipeCode?: string | undefined,
+  requestedPage?: number | undefined,
 ): Promise<CraftMenuState> {
   const allRecipes = await services.craftingService.listRecipes(userId);
   const recipes = allRecipes.filter((status) => matchesCategory(status, category));
-  const selectedIndex = Math.max(
-    0,
-    recipes.findIndex((status) => status.recipe.code === selectedRecipeCode),
-  );
+  const foundIndex = selectedRecipeCode
+    ? recipes.findIndex((status) => status.recipe.code === selectedRecipeCode)
+    : -1;
+  const selectedIndex = Math.max(0, foundIndex);
+
+  const PAGE_SIZE = 25;
+  const totalPages = Math.max(1, Math.ceil(recipes.length / PAGE_SIZE));
+  let page = requestedPage !== undefined ? requestedPage : Math.floor(selectedIndex / PAGE_SIZE);
+  page = Math.max(0, Math.min(page, totalPages - 1));
 
   return {
     category,
     allRecipes,
     recipes,
+    page,
     selectedIndex,
     dust: allRecipes[0]?.ownedDust ?? 0,
     credits: allRecipes[0]?.ownedCredits ?? 0,
@@ -209,14 +265,24 @@ export async function openCraftMenu(
     let notice: string | undefined;
     let nextCategory = state.category;
     let nextSelectedCode: string | undefined = state.recipes[state.selectedIndex]?.recipe.code;
+    let nextPage = state.page ?? 0;
 
     try {
       if (interaction.isStringSelectMenu() && interaction.customId === 'craft:category') {
         nextCategory = (interaction.values[0] as CraftCategory) ?? state.category;
         nextSelectedCode = undefined;
+        nextPage = 0;
       } else if (interaction.isStringSelectMenu() && interaction.customId === 'craft:select_recipe') {
         const idx = Number.parseInt(interaction.values[0] ?? '0', 10);
         nextSelectedCode = state.recipes[idx]?.recipe.code;
+        nextPage = Math.floor(idx / 25);
+      } else if (interaction.isButton() && interaction.customId === 'craft:prev') {
+        nextPage = Math.max(0, (state.page ?? 0) - 1);
+        nextSelectedCode = state.recipes[nextPage * 25]?.recipe.code;
+      } else if (interaction.isButton() && interaction.customId === 'craft:next') {
+        const totalPages = Math.ceil(state.recipes.length / 25);
+        nextPage = Math.min(totalPages - 1, (state.page ?? 0) + 1);
+        nextSelectedCode = state.recipes[nextPage * 25]?.recipe.code;
       } else if (interaction.isButton() && interaction.customId === 'craft:close') {
         collector.stop('closed');
         await interaction.update({ components: [] }).catch(() => {});
@@ -241,7 +307,7 @@ export async function openCraftMenu(
       notice = `❌ **Craft Failed**: ${err instanceof Error ? err.message : String(err)}`;
     }
 
-    state = await loadCraftMenuState(services, userId, nextCategory, nextSelectedCode);
+    state = await loadCraftMenuState(services, userId, nextCategory, nextSelectedCode, nextPage);
     state.notice = notice;
     const view = buildCraftMenuView(state);
     await interaction.update({ embeds: [view.embed], components: view.components }).catch(() => {});

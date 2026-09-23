@@ -70,4 +70,43 @@ describe('Town shop menu (STORY-158)', () => {
     expect(view.components).toHaveLength(1);
     expect(view.embed.data.description).toContain('Nothing in stock');
   });
+
+  it('paginates shop items when catalog exceeds 25 items (BUG-0016)', () => {
+    const manyItems = Array.from({ length: 28 }, (_, i) => ({
+      code: `SHOP_ITEM_${i + 1}`,
+      name: `Shop Item ${i + 1}`,
+      description: `Item description ${i + 1}`,
+      type: 'EQUIPMENT',
+      subtype: 'WEAPON',
+      rarity: 'COMMON',
+      baseStats: { attack: 10 + i },
+      battlePerks: [],
+      shopPrice: 100 * (i + 1),
+      maxDailyPurchases: 5,
+    } as unknown as GameItem));
+
+    // Page 0 (items 1-25)
+    const view0 = buildShopView({ category: 'ALL', items: manyItems, selectedIndex: 0, page: 0 });
+    expect(view0.embed.data.description).toContain('Showing 1–25 of 28 (Page 1/2)');
+    expect(view0.components).toHaveLength(4); // category row, select menu, buy buttons, pagination buttons
+
+    const pageRow0 = view0.components[3]!.toJSON() as {
+      components: Array<{ custom_id: string; disabled?: boolean; label: string }>;
+    };
+    const b0 = Object.fromEntries(pageRow0.components.map((b) => [b.custom_id, b]));
+    expect(b0['shop:prev']!.disabled).toBe(true);
+    expect(b0['shop:page_info']!.label).toBe('Page 1 / 2');
+    expect(b0['shop:next']!.disabled).toBe(false);
+
+    // Page 1 (items 26-28)
+    const view1 = buildShopView({ category: 'ALL', items: manyItems, selectedIndex: 25, page: 1 });
+    expect(view1.embed.data.description).toContain('Showing 26–28 of 28 (Page 2/2)');
+    expect(view1.embed.data.description).toContain('Shop Item 26');
+    const pageRow1 = view1.components[3]!.toJSON() as {
+      components: Array<{ custom_id: string; disabled?: boolean; label: string }>;
+    };
+    const b1 = Object.fromEntries(pageRow1.components.map((b) => [b.custom_id, b]));
+    expect(b1['shop:prev']!.disabled).toBe(false);
+    expect(b1['shop:next']!.disabled).toBe(true);
+  });
 });
