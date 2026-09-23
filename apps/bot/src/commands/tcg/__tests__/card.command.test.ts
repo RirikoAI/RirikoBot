@@ -173,23 +173,25 @@ describe('Card Command Suite (TASK-1012)', () => {
   });
 
   function createMockContext(options: {
-    subcommand: string;
+    subcommand?: string;
     userId?: string;
     guildId?: string;
     args?: Record<string, unknown>;
+    rawArgs?: string[];
   }): { ctx: CommandContext; replies: any[] } {
     const replies: any[] = [];
     const userId = options.userId ?? 'user_commander_1';
     const guildId = options.guildId ?? 'guild_tcg_1';
+    const rawArgs = options.rawArgs ?? (options.subcommand ? [options.subcommand] : []);
 
     const ctx: Partial<CommandContext> = {
       user: { id: userId, username: 'Commander' } as any,
       guild: { id: guildId, name: 'Anime Guild' } as any,
       options: {
-        getSubcommand: () => options.subcommand,
-        getRawArgs: () => [options.subcommand],
+        getSubcommand: () => options.subcommand ?? '',
+        getRawArgs: () => rawArgs,
         getString: (name: string, required?: boolean) => {
-          if (name === 'action' && options.args?.['action'] === undefined) {
+          if (name === 'action' && options.args?.['action'] === undefined && !options.rawArgs && options.subcommand) {
             return options.subcommand;
           }
           const val = options.args?.[name];
@@ -293,7 +295,9 @@ describe('Card Command Suite (TASK-1012)', () => {
     await command.execute(ctxColl);
     expect(repColl[0].embeds).toHaveLength(1);
     expect(repColl[0].embeds[0].data.description).toContain('Rias Gremory');
-    expect(repColl[0].embeds[0].data.description).toContain('#0042/1000');
+    expect(repColl[0].embeds[0].data.description).toContain('ID: ' + userCard.id.slice(0, 8));
+    expect(repColl[0].embeds[0].data.description).toContain('No. 001');
+    expect(repColl[0].embeds[0].data.description).toContain('(Mint #42)');
 
     // 3. Inspect card
     const { ctx: ctxInsp, replies: repInsp } = createMockContext({
@@ -303,7 +307,9 @@ describe('Card Command Suite (TASK-1012)', () => {
     });
     await command.execute(ctxInsp);
     expect(repInsp[0].embeds).toHaveLength(1);
-    expect(repInsp[0].embeds[0].data.title).toContain('Rias Gremory (#0042/1000)');
+    expect(repInsp[0].embeds[0].data.title).toContain('Rias Gremory (No. 001 • Mint #42)');
+    expect(repInsp[0].embeds[0].data.description).toContain('Card ID');
+    expect(repInsp[0].embeds[0].data.description).toContain(userCard.id.slice(0, 8));
     expect(repInsp[0].embeds[0].data.description).toContain('Extinction Ray');
     expect(repInsp[0].embeds[0].data.footer?.text).toContain('Image source: waifu.im');
     expect(repInsp[0].embeds[0].data.image?.url).toBe('attachment://card.png');
@@ -456,5 +462,113 @@ describe('Card Command Suite (TASK-1012)', () => {
     expect(replies[0].files).toEqual([]);
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
+  });
+
+  describe('BUG-0017: Prefix action routing and card resolution', () => {
+    it('suggests Did-You-Mean when an invalid prefix action is close to a valid one', async () => {
+      const command = createCardCommand(services);
+      const { ctx, replies } = createMockContext({
+        userId: 'user_prefix_test',
+        rawArgs: ['gears'],
+      });
+      await command.execute(ctx);
+      expect(replies[0].content).toContain('Unknown action: `gears`');
+      expect(replies[0].content).toContain('Did you mean `/card gear`?');
+      expect(replies[0].content).toContain('Valid actions:');
+    });
+
+    it('returns error with valid actions when action is completely unrecognized', async () => {
+      const command = createCardCommand(services);
+      const { ctx, replies } = createMockContext({
+        userId: 'user_prefix_test',
+        rawArgs: ['completelyunknown'],
+      });
+      await command.execute(ctx);
+      expect(replies[0].content).toContain('Unknown action: `completelyunknown`');
+      expect(replies[0].content).not.toContain('Did you mean');
+      expect(replies[0].content).toContain('Valid actions:');
+    });
+
+    it('defaults to collection view when no args are passed', async () => {
+      const command = createCardCommand(services);
+      const { ctx, replies } = createMockContext({
+        userId: 'user_prefix_test',
+        rawArgs: [],
+      });
+      await command.execute(ctx);
+      expect(replies[0].content).toContain('empty');
+    });
+
+    it('resolves card by 1-based index, short ID, and character name with auto-inspect shortcut', async () => {
+      const command = createCardCommand(services);
+      const userId = 'user_resolver_test';
+      const card = await cardRepo.create({
+        assetId: 'asset_rias_tcg',
+        name: 'Rias Gremory',
+        rarity: 'COMMON',
+        element: 'FIRE',
+        attack: 100,
+        defense: 50,
+        speed: 80,
+        health: 500,
+        critRate: 0.05,
+        skillName: 'Extinction Ray',
+        skillDescription: 'Blast',
+        passiveName: null,
+        passiveDescription: null,
+        collectionNumber: 1,
+        isActive: true,
+      });
+      const userCard = await cardRepo.createUserCard({
+        userId,
+        cardId: card.id,
+        serialNumber: 1,
+        level: 10,
+        exp: 200,
+        state: 'IDLE',
+        isFavorite: false,
+      });
+
+      // 1. Resolve by 1-based index via !card inspect 1
+      const { ctx: ctxIndex, replies: repIndex } = createMockContext({
+        userId,
+        rawArgs: ['inspect', '1'],
+      });
+      await command.execute(ctxIndex);
+      expect(repIndex[0].embeds[0].data.title).toContain('Rias Gremory (No. 001');
+
+      // 2. Resolve by short ID via !card inspect <shortId>
+      const shortId = userCard.id.slice(0, 8);
+      const { ctx: ctxShort, replies: repShort } = createMockContext({
+        userId,
+        rawArgs: ['inspect', shortId],
+      });
+      await command.execute(ctxShort);
+      expect(repShort[0].embeds[0].data.title).toContain('Rias Gremory (No. 001');
+
+      // 3. Resolve by name via !card inspect Rias
+      const { ctx: ctxName, replies: repName } = createMockContext({
+        userId,
+        rawArgs: ['inspect', 'Rias'],
+      });
+      await command.execute(ctxName);
+      expect(repName[0].embeds[0].data.title).toContain('Rias Gremory (No. 001');
+
+      // 4. Auto-inspect shortcut via !card 1
+      const { ctx: ctxAutoNum, replies: repAutoNum } = createMockContext({
+        userId,
+        rawArgs: ['1'],
+      });
+      await command.execute(ctxAutoNum);
+      expect(repAutoNum[0].embeds[0].data.title).toContain('Rias Gremory (No. 001');
+
+      // 5. Auto-inspect shortcut via !card Rias
+      const { ctx: ctxAutoName, replies: repAutoName } = createMockContext({
+        userId,
+        rawArgs: ['Rias'],
+      });
+      await command.execute(ctxAutoName);
+      expect(repAutoName[0].embeds[0].data.title).toContain('Rias Gremory (No. 001');
+    });
   });
 });
