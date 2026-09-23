@@ -2878,7 +2878,7 @@
       "id": "BUG-0015",
       "title": "Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "parent": "EPIC-015",
       "requires": [],
       "blocks": [],
@@ -2887,12 +2887,12 @@
     {
       "id": "BUG-0016",
       "title": "Gear, Craft and Shop Dropdowns Silently Drop Entries Past 25",
-      "points": null,
-      "status": "BACKLOG",
+      "points": 3,
+      "status": "DONE",
       "parent": "EPIC-015",
       "requires": [],
       "blocks": [],
-      "description": "Ungroomed. Discord select menus hold at most 25 options. The /loadout menu slices cards and per-slot gear to 25, so larger collections lose entries without any hint. Add paging or filtering (and a visible 'showing 25 of N' note) in gear-menu, craft-menu and shop-menu where lists can exceed 25."
+      "description": "Discord select menus hold at most 25 options. Add pagination or chunking (and a visible 'showing X-Y of N' indicator) with Prev/Next controls in gear-menu, craft-menu and shop-menu where item or card collections can exceed 25 options."
     },
     {
       "id": "BUG-0017",
@@ -2967,18 +2967,6 @@
       ],
       "blocks": [],
       "description": "Increment bonus energy daily upon login/activity up to a configurable cap, managed via dual-dispatch /tcg-admin action:energy command."
-    },
-    {
-      "id": "BUG-0015",
-      "title": "Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs",
-      "points": 2,
-      "status": "DONE",
-      "parent": "EPIC-015",
-      "requires": [
-        "EPIC-015"
-      ],
-      "blocks": [],
-      "description": "Upsert canonical game items on bot startup updating catalog-owned fields while strictly preserving existing primary key UUIDs so inventory relations never break."
     }
   ]
 }
