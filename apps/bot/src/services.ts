@@ -139,6 +139,7 @@ import {
   resolveTimeZone,
   GuildSettingsService,
   ReactionGifService,
+  MemeSynthesizer,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -190,6 +191,8 @@ export interface BotServices {
   waifuImClient: WaifuImClient;
   /** Backs `/react` and its 67 legacy `!<reaction>` aliases with pooled otakugifs.xyz GIF urls. */
   reactionGifService: ReactionGifService;
+  /** Backs `/meme` and its 11 legacy `!<template>` aliases with dynamic canvas rendering. */
+  memeSynthesizer: MemeSynthesizer;
   reminderService: ReminderService;
   /** Null when no Discord client was supplied (tests); started on gateway READY. */
   reminderScheduler: ReminderScheduler | null;
@@ -437,6 +440,7 @@ export async function createBotServices(
   });
   const waifuImClient = new WaifuImClient({ maxRetries: 1, timeoutMs: 5000 });
   const reactionGifService = new ReactionGifService();
+  const memeSynthesizer = new MemeSynthesizer();
   const wallpaperService = new WallpaperService({
     wallhaven: new WallhavenClient({ maxRetries: 1, timeoutMs: 5000 }),
     zerochan: new ZerochanClient({ maxRetries: 1, timeoutMs: 5000 }),
@@ -876,6 +880,7 @@ export async function createBotServices(
     animeSearchService,
     waifuImClient,
     reactionGifService,
+    memeSynthesizer,
     reminderService,
     reminderScheduler,
     guildSettingsService,

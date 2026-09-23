@@ -923,7 +923,7 @@
       "epic": "EPIC-013",
       "title": "11 Meme Template Canvas Synthesizers with @napi-rs/canvas",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "EPIC-003"
       ],

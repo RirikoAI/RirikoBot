@@ -80,6 +80,12 @@ export const CATEGORY_INFO: Record<CommandCategory, CategoryInfo> = {
     emoji: '🎭',
     description: 'Anime-style reaction GIFs to hug, poke, and tease your friends',
   },
+  memes: {
+    id: 'memes',
+    label: 'Memes & Image Synthesis',
+    emoji: '🖼️',
+    description: 'Dynamic canvas meme templates and image synthesis',
+  },
 };
 
 export interface HelpOptions {

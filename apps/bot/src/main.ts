@@ -28,6 +28,7 @@ import {
   createRoleCommands,
   createAnimeCommands,
   createReactionCommands,
+  createMemeCommands,
   createReminderCommand,
   createUtilityCommands,
   handleGiveawayButtonInteraction,
@@ -202,6 +203,10 @@ export async function main(): Promise<void> {
   }
 
   for (const cmd of createReactionCommands(services)) {
+    router.registry.register(cmd);
+  }
+
+  for (const cmd of createMemeCommands(services)) {
     router.registry.register(cmd);
   }
   router.registry.register(createReminderCommand(services));
