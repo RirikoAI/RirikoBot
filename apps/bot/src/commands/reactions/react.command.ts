@@ -2,6 +2,7 @@ import { EmbedBuilder, type AutocompleteInteraction, type User } from 'discord.j
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import { REACTION_NAMES, getReaction, searchReactions } from '@ririko/services';
 import type { BotServices } from '../../services.js';
+import { resolveContextPrefix } from '../shared/prefix-resolver.js';
 
 /** Canonical command name/invocation, e.g. `/react type:hug` or `!react hug`. */
 const COMMAND_NAME = 'react';
@@ -44,15 +45,7 @@ async function resolveMentionedUser(ctx: CommandContext, raw: string | undefined
   }
 }
 
-async function resolveActivePrefix(ctx: CommandContext, services: BotServices): Promise<string> {
-  if (ctx.invokedPrefix && ctx.invokedPrefix !== '/') {
-    return ctx.invokedPrefix;
-  }
-  if (ctx.guildId) {
-    return services.guildSettingsService.getPrefix(ctx.guildId);
-  }
-  return process.env['DEFAULT_PREFIX'] || '!';
-}
+
 
 function buildUnknownReactionMessage(attempted: string, prefix: string): string {
   const suggestions = attempted ? searchReactions(attempted, 5).map((r) => r.name) : [];
@@ -136,7 +129,7 @@ export function createReactCommand(services: BotServices): Command {
 
       const reaction = getReaction(reactionName);
       if (!reaction) {
-        const prefix = await resolveActivePrefix(ctx, services);
+        const prefix = await resolveContextPrefix(ctx, services);
         await ctx.reply({ content: buildUnknownReactionMessage(reactionName, prefix), ephemeral: true });
         return;
       }

@@ -122,8 +122,38 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
       );
       const data = embed.toJSON();
       const playField = data.fields?.find((f) => f.name.includes('/play'));
-      expect(playField?.name).toContain('(Prefix: `$play`, Aliases: `$p-music`)');
+      expect(playField?.name).toBe('`/play` (Prefix: `$play`)');
+      expect(playField?.value).toContain('*Aliases: `$p-music`*');
       expect(data.footer?.text).toContain('Prefix: $');
+    });
+
+    it('safely handles commands with 60+ aliases without exceeding Discord embed constraints', () => {
+      const reactionAliases = Array.from({ length: 60 }, (_, i) => `alias${i + 1}`);
+      const massiveAliasCmd: Command = {
+        metadata: {
+          name: 'react',
+          category: CommandCategory.REACTIONS,
+          description: 'Trigger an anime reaction GIF',
+          aliases: reactionAliases,
+        },
+        execute: vi.fn(),
+      };
+      registry.register(massiveAliasCmd);
+
+      const { embed } = HelpGenerator.generateCategoryView(
+        registry,
+        CommandCategory.REACTIONS,
+        1,
+        {},
+        '$',
+      );
+      const data = embed.toJSON();
+      const reactField = data.fields?.find((f) => f.name.includes('/react'));
+      expect(reactField?.name).toBe('`/react` (Prefix: `$react`)');
+      expect(reactField?.value).toContain('*Aliases: `$alias1`, `$alias2`');
+      expect(reactField?.value).toContain('(+55 more)');
+      expect(reactField?.name.length).toBeLessThanOrEqual(256);
+      expect((reactField?.value ?? '').length).toBeLessThanOrEqual(1024);
     });
 
     it('displays prefix syntax for commands without aliases', () => {
@@ -183,6 +213,57 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
       expect(buttonRow.components.some((b) => b.url?.includes('/modules/music'))).toBe(true);
     });
 
+    it('formats examples, usage, subcommands, and syntax with dynamic server prefix instead of hardcoding !', () => {
+      const cmdWithUsage: Command = {
+        metadata: {
+          name: 'prefix',
+          category: CommandCategory.UTILITY,
+          description: 'Set server prefix',
+          usage: '/prefix [set:<new>] | !prefix [new] | !setprefix <new>',
+          aliases: ['setprefix'],
+          options: [
+            {
+              name: 'action',
+              type: 'STRING',
+              description: 'Action to perform',
+              choices: [
+                { name: 'Set', value: 'set' },
+                { name: 'Reset', value: 'reset' },
+              ],
+            },
+          ],
+          examples: ['!prefix ?', '!setprefix !'],
+        },
+        execute: vi.fn(),
+      };
+
+      const { embed } = HelpGenerator.generateCommandDetailView(
+        cmdWithUsage,
+        { defaultPrefix: '!' },
+        'r!',
+      );
+      const data = embed.toJSON();
+
+      const usageField = data.fields?.find((f) => f.name === 'Usage');
+      expect(usageField?.value).toContain('r!prefix [new]');
+      expect(usageField?.value).toContain('r!setprefix <new>');
+
+      const syntaxField = data.fields?.find((f) => f.name === 'Syntax');
+      expect(syntaxField?.value).toContain('r!prefix');
+
+      const aliasesField = data.fields?.find((f) => f.name === 'Aliases');
+      expect(aliasesField?.value).toContain('`r!setprefix`');
+
+      const examplesField = data.fields?.find((f) => f.name === 'Examples');
+      expect(examplesField?.value).toContain('`r!prefix ?`');
+
+      const optionsField = data.fields?.find((f) => f.name === 'Arguments');
+      expect(optionsField?.value).toContain('Subcommands / Choices: `set`, `reset`');
+
+      const footer = data.footer?.text;
+      expect(footer).toContain('Prefix: r!');
+    });
+
     it('formats examples and syntax with dynamic server prefix instead of hardcoding !', () => {
       const { embed } = HelpGenerator.generateCommandDetailView(
         playCmd,
@@ -200,6 +281,27 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
       expect(examplesField?.value).toContain('`/play query:YOASOBI`');
       expect(examplesField?.value).toContain('`?play "Idol"`');
       expect(examplesField?.value).not.toContain('!play');
+    });
+
+    it('renders active prefix in home view description and footer', () => {
+      const { embed } = HelpGenerator.generateHomeView(registry, {}, '>>');
+      const data = embed.toJSON();
+      expect(data.description).toContain('(or `>>help <name>`)');
+      expect(data.description).toContain('with prefix `>>`');
+      expect(data.footer?.text).toContain('Prefix: >>');
+    });
+
+    it('renders active prefix in category view description and footer', () => {
+      const { embed } = HelpGenerator.generateCategoryView(
+        registry,
+        CommandCategory.MUSIC,
+        1,
+        {},
+        '>>',
+      );
+      const data = embed.toJSON();
+      expect(data.description).toContain('(or `>>help <name>`)');
+      expect(data.footer?.text).toContain('Prefix: >>');
     });
   });
 

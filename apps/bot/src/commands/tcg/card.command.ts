@@ -23,6 +23,7 @@ import {
   buildCardInspectComponents,
 } from './cards.command.js';
 import { resolveUserCard } from './card-resolver.js';
+import { resolveContextPrefix } from '../shared/prefix-resolver.js';
 
 const CARD_IMAGE_NAME = 'card.png';
 
@@ -269,8 +270,11 @@ export function createCardCommand(services: BotServices): Command {
             sub = 'inspect';
             implicitCardId = maybeCard.id;
           } else {
+            const prefix = await resolveContextPrefix(ctx, services);
             const didYouMean = findClosestCardAction(firstArg);
-            const suggestion = didYouMean ? ` Did you mean \`/card ${didYouMean}\`?` : '';
+            const suggestion = didYouMean
+              ? (ctx.source === 'prefix' ? ` Did you mean \`${prefix}card ${didYouMean}\`?` : ` Did you mean \`/card ${didYouMean}\`?`)
+              : '';
             await ctx.reply({
               content:
                 `❌ Unknown action: \`${rawArgs[0]}\`.${suggestion}\n` +
@@ -285,7 +289,8 @@ export function createCardCommand(services: BotServices): Command {
       switch (sub) {
         case 'guide':
         case 'info': {
-          const embed = buildTcgInfoEmbed('overview');
+          const prefix = await resolveContextPrefix(ctx, services);
+          const embed = buildTcgInfoEmbed('overview', prefix);
           const row = buildTcgInfoSelectMenu('overview');
           await ctx.reply({
             embeds: [embed],

@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 import type { CommandRegistry } from '../router/registry.js';
 import type { Command, CommandCategory } from '../command/types.js';
+import { DEFAULT_COMMAND_PREFIX } from '../command/types.js';
 import { CATEGORY_INFO, type HelpOptions } from './types.js';
 import { resolvePermissionNames } from '../middleware/permissions.js';
 
@@ -38,14 +39,15 @@ export class HelpGenerator {
     embed: EmbedBuilder;
     components: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[];
   } {
-    const prefix = currentPrefix ?? options.defaultPrefix ?? '!';
+    const prefix = currentPrefix ?? options.defaultPrefix ?? DEFAULT_COMMAND_PREFIX;
 
     const embed = new EmbedBuilder()
       .setColor(HELP_COLORS.PRIMARY)
       .setTitle('✨ Ririko AI 2.0 — Interactive Help Center')
       .setDescription(
-        'Welcome to **Ririko AI 2.0**! Use the category menu below to browse available commands, or type `/help command:<name>` to inspect a command directly.\n\n' +
-          'All commands feature dual-dispatch parity — use them seamlessly as `/slash` commands or with prefix `' +
+        'Welcome to **Ririko AI 2.0**! Use the category menu below to browse available commands, or type `/help command:<name>` ' +
+          `(or \`${prefix}help <name>\`) to inspect a command directly.\n\n` +
+          'All commands feature dual-dispatch parity — use them seamlessly as `/slash` commands or with prefix ' +
           `\`${prefix}\`.\n`,
       );
 
@@ -141,7 +143,7 @@ export class HelpGenerator {
     components: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[];
   } {
     const info = CATEGORY_INFO[category];
-    const prefix = currentPrefix ?? options.defaultPrefix ?? '!';
+    const prefix = currentPrefix ?? options.defaultPrefix ?? DEFAULT_COMMAND_PREFIX;
     const pageSize = Math.max(1, options.pageSize ?? 5);
 
     const commands = registry
@@ -160,7 +162,7 @@ export class HelpGenerator {
       .setTitle(`${info.emoji} ${info.label} Commands`)
       .setDescription(
         `*${info.description}*\n\n` +
-          `Browse the commands below or use \`/help command:<name>\` for deep inspection.\n`,
+          `Browse the commands below or use \`/help command:<name>\` (or \`${prefix}help <name>\`) for deep inspection.\n`,
       );
 
     if (pageCommands.length === 0) {
@@ -172,22 +174,26 @@ export class HelpGenerator {
       for (const cmd of pageCommands) {
         const { metadata } = cmd;
         let syntax: string;
-        const aliasesStr =
-          metadata.aliases && metadata.aliases.length > 0
-            ? `, Aliases: \`${metadata.aliases.map((a) => `${prefix}${a}`).join(', ')}\``
-            : '';
 
         if (metadata.slashEnabled !== false && metadata.prefixEnabled !== false) {
-          syntax = `\`/${metadata.name}\` (Prefix: \`${prefix}${metadata.name}\`${aliasesStr})`;
+          syntax = `\`/${metadata.name}\` (Prefix: \`${prefix}${metadata.name}\`)`;
         } else if (metadata.prefixEnabled !== false) {
-          syntax = `\`${prefix}${metadata.name}\`${aliasesStr ? ` (${aliasesStr.slice(2)})` : ''}`;
+          syntax = `\`${prefix}${metadata.name}\``;
         } else {
           syntax = `\`/${metadata.name}\``;
         }
 
+        let desc = metadata.description || 'No description provided.';
+        if (metadata.aliases && metadata.aliases.length > 0) {
+          const maxShown = 5;
+          const shown = metadata.aliases.slice(0, maxShown).map((a) => `\`${prefix}${a}\``).join(', ');
+          const more = metadata.aliases.length > maxShown ? ` (+${metadata.aliases.length - maxShown} more)` : '';
+          desc += `\n*Aliases: ${shown}${more}*`;
+        }
+
         embed.addFields({
-          name: `${syntax}`,
-          value: metadata.description || 'No description provided.',
+          name: syntax.length > 256 ? syntax.slice(0, 256) : syntax,
+          value: desc.length > 1024 ? desc.slice(0, 1021) + '...' : desc,
           inline: false,
         });
       }
@@ -261,7 +267,7 @@ export class HelpGenerator {
   } {
     const { metadata } = command;
     const info = CATEGORY_INFO[metadata.category];
-    const prefix = currentPrefix ?? options.defaultPrefix ?? '!';
+    const prefix = currentPrefix ?? options.defaultPrefix ?? DEFAULT_COMMAND_PREFIX;
 
     const embed = new EmbedBuilder()
       .setColor(HELP_COLORS.PRIMARY)
@@ -290,7 +296,16 @@ export class HelpGenerator {
       inline: false,
     });
 
-    // 2. Category & Aliases
+    // 2. Usage (formatted with active guild prefix)
+    if (metadata.usage) {
+      embed.addFields({
+        name: 'Usage',
+        value: `\`${formatPrefixCommand(metadata.usage, prefix)}\``,
+        inline: false,
+      });
+    }
+
+    // 3. Category & Aliases
     embed.addFields(
       {
         name: 'Category',
@@ -299,10 +314,20 @@ export class HelpGenerator {
       },
       {
         name: 'Aliases',
-        value:
-          metadata.aliases && metadata.aliases.length > 0
-            ? metadata.aliases.map((a) => `\`${prefix}${a}\``).join(', ')
-            : '*None*',
+        value: (() => {
+          if (!metadata.aliases || metadata.aliases.length === 0) return '*None*';
+          const joined = metadata.aliases.map((a) => `\`${prefix}${a}\``).join(', ');
+          if (joined.length <= 1020) return joined;
+          let truncated = '';
+          let count = 0;
+          for (const a of metadata.aliases) {
+            const item = (count === 0 ? '' : ', ') + `\`${prefix}${a}\``;
+            if ((truncated + item).length > 950) break;
+            truncated += item;
+            count++;
+          }
+          return `${truncated} *(+${metadata.aliases.length - count} more)*`;
+        })(),
         inline: true,
       },
       {
@@ -312,7 +337,7 @@ export class HelpGenerator {
       },
     );
 
-    // 3. Permissions
+    // 4. Permissions
     const userPerms =
       metadata.userPermissions && metadata.userPermissions.length > 0
         ? resolvePermissionNames(metadata.userPermissions).join(', ')
@@ -327,7 +352,7 @@ export class HelpGenerator {
       { name: 'Required Bot Permissions', value: botPerms, inline: true },
     );
 
-    // 4. Cooldown & Rate Limits
+    // 5. Cooldown & Rate Limits
     const cooldownStr = metadata.cooldownSeconds ? `${metadata.cooldownSeconds} seconds` : 'None';
     const rateLimitStr = metadata.rateLimit
       ? `${metadata.rateLimit.max} uses per ${metadata.rateLimit.windowSeconds}s`
@@ -338,24 +363,35 @@ export class HelpGenerator {
       { name: 'Rate Limit', value: rateLimitStr, inline: true },
     );
 
-    // 5. Options details
+    // 6. Options & Subcommands details
     if (metadata.options && metadata.options.length > 0) {
-      const optDesc = metadata.options
-        .map(
-          (o) =>
-            `• \`${o.name}\` (*${o.type.toLowerCase()}*, ${o.required ? 'required' : 'optional'}): ${o.description}`,
-        )
+      let optDesc = metadata.options
+        .map((o) => {
+          let line = `• \`${o.name}\` (*${o.type.toLowerCase()}*, ${o.required ? 'required' : 'optional'}): ${o.description}`;
+          if (o.choices && o.choices.length > 0) {
+            const choicesStr = o.choices.map((c) => `\`${c.value}\``).join(', ');
+            line += `\n  - Subcommands / Choices: ${choicesStr.length > 500 ? choicesStr.slice(0, 497) + '...' : choicesStr}`;
+          }
+          return line;
+        })
         .join('\n');
+      if (optDesc.length > 1024) {
+        optDesc = optDesc.slice(0, 1020) + '...';
+      }
       embed.addFields({ name: 'Arguments', value: optDesc, inline: false });
     }
 
-    // 6. Examples
+    // 7. Examples
     if (metadata.examples && metadata.examples.length > 0) {
+      let examplesStr = metadata.examples
+        .map((ex) => `\`${formatPrefixCommand(ex, prefix)}\``)
+        .join('\n');
+      if (examplesStr.length > 1024) {
+        examplesStr = examplesStr.slice(0, 1020) + '...';
+      }
       embed.addFields({
         name: 'Examples',
-        value: metadata.examples
-          .map((ex) => `\`${formatPrefixCommand(ex, prefix)}\``)
-          .join('\n'),
+        value: examplesStr,
         inline: false,
       });
     }

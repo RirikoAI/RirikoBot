@@ -2699,11 +2699,11 @@
     {
       "id": "CHORE-0603",
       "title": "Align Default Prefix: Code Fallback '!' vs .env.example and Guide Text '$'",
-      "points": null,
-      "status": "BACKLOG",
+      "points": 1,
+      "status": "DONE",
       "requires": [],
       "blocks": [],
-      "description": "Ungroomed. apps/bot/src/main.ts falls back to '!' when DEFAULT_PREFIX is unset, .env.example sets '$', help uses the configured prefix, but /tcg-info and docs hard-code '$' or '!' in places. Pick one default and render guide examples from the configured prefix."
+      "description": "Align default command prefix fallback to '!' across bot router, .env.example, guides, and documentation. Ensure all help views, inspectors, subcommands, and suggestions dynamically display the active server prefix (or fallback)."
     },
     {
       "id": "CHORE-1401",
