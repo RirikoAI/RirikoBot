@@ -10,6 +10,7 @@ import type {
   SecurityExecutionContext,
 } from '@ririko/ai';
 import { formatToolResultFallback } from '@ririko/ai';
+import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 
 export interface AiChatControllerOptions {
   minEditIntervalMs?: number;
@@ -30,7 +31,7 @@ export class AiChatController {
     this.client = client;
     this.services = services;
     this.minEditIntervalMs = options.minEditIntervalMs ?? 1500;
-    this.defaultPrefix = options.defaultPrefix || process.env.DEFAULT_PREFIX || '$';
+    this.defaultPrefix = options.defaultPrefix || process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX;
     this.musicController = options.musicController;
   }
 

@@ -166,7 +166,6 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
 
     controller = new AiChatController(mockClient, services, {
       minEditIntervalMs: 20, // fast edits for testing
-      defaultPrefix: '$',
     });
   });
 
@@ -320,7 +319,7 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       await services.aiRepo.setAiChannel('guild-1', 'channel-ririko-ai');
 
       const { message } = createMockMessage({
-        content: '$balance',
+        content: '!balance',
         channelId: 'channel-ririko-ai',
         mentionsBot: false,
       });
@@ -330,7 +329,7 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       expect(message.reply).not.toHaveBeenCalled();
     });
 
-    it('completely ignores default prefix (!) as well in dedicated channel', async () => {
+    it('completely ignores default prefix (!) commands in dedicated channel', async () => {
       await services.aiRepo.setAiChannel('guild-1', 'channel-ririko-ai');
 
       const { message } = createMockMessage({
@@ -346,7 +345,7 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
 
     it('completely ignores prefix commands when bot is mentioned', async () => {
       const { message } = createMockMessage({
-        content: '<@bot-ririko-999> $balance',
+        content: '<@bot-ririko-999> !balance',
         channelId: 'channel-general',
         mentionsBot: true,
       });

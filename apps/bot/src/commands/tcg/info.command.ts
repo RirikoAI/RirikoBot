@@ -7,10 +7,12 @@ import {
 } from 'discord.js';
 import {
   CommandCategory,
+  DEFAULT_COMMAND_PREFIX,
   type Command,
   type CommandContext,
 } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
+import { resolveContextPrefix } from '../shared/prefix-resolver.js';
 
 export type TcgInfoTopic =
   | 'overview'
@@ -25,7 +27,10 @@ export type TcgInfoTopic =
   | 'guild'
   | 'achievements';
 
-export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): EmbedBuilder {
+export function buildTcgInfoEmbed(
+  topic: TcgInfoTopic,
+  prefix: string = DEFAULT_COMMAND_PREFIX,
+): EmbedBuilder {
   switch (topic) {
     case 'starter':
       return new EmbedBuilder()
@@ -142,10 +147,10 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
         .setColor(0xe67e22)
         .setDescription(
           `⚠️ **CRITICAL WARNING FOR NEW SUMMONERS** ⚠️\n` +
-            `**Do NOT jump straight into \`/dungeon climb\` without finishing the tutorial!**\n` +
+            `**Do NOT jump straight into \`/dungeon climb\` (or \`${prefix}dungeon climb\`) without finishing the tutorial!**\n` +
             `Floor 1 of the real tower features scorching environmental heat affixes and high-stat enemies.\n\n` +
             `### 🔰 The Tutorial Prologue (Floors T1–T4)\n` +
-            `• **Command**: \`/dungeon action:tutorial\`\n` +
+            `• **Command**: \`/dungeon action:tutorial\` or \`${prefix}dungeon tutorial\`\n` +
             `• **Energy Cost**: **0 Energy** (completely free!)\n` +
             `• **Encounter Progression**:\n` +
             `  - **T1: Target Dummy** (150 HP, 10 ATK) — Learn turn order and basic strikes.\n` +
@@ -157,9 +162,9 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
             `• \`Novice Blade\` (+15 ATK weapon)\n` +
             `• \`3x Minor Health Potions\` (150 HP restore each)\n` +
             `• \`TUTORIAL_COMPLETE\` Achievement (+100 EXP, +250 Credits)\n\n` +
-            `*Once completed, equip your Novice Blade and begin climbing Season 1 with \`/dungeon climb\`!*`,
+            `*Once completed, equip your Novice Blade and begin climbing Season 1 with \`/dungeon climb\` (or \`${prefix}dungeon climb\`)!*`,
         )
-        .setFooter({ text: 'Run /dungeon action:tutorial right now to claim your starter gear!' });
+        .setFooter({ text: `Run /dungeon action:tutorial or ${prefix}dungeon tutorial right now to claim your starter gear!` });
 
     case 'dungeon':
       return new EmbedBuilder()
@@ -182,10 +187,10 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
             `• **Multi-Layer Elemental Wards**: Absorb all damage until shattered with opposing elements!\n` +
             `• **Soft Enrage Clock (Turn 10+)**: Bosses gain +100% ATK per turn with unblockable true damage strikes. Finish battles quickly!\n\n` +
             `### 📜 Dungeon Commands\n` +
-            `• \`/dungeon action:status\` — Check season, highest floor, and current energy.\n` +
-            `• \`/dungeon action:climb\` — Battle the next unlocked floor.\n` +
-            `• \`/dungeon action:floor floor_number:<n>\` — Inspect floor stats & drops.\n` +
-            `• \`/dungeon action:leaderboard\` — View top season tower climbers.`,
+            `• \`/dungeon action:status\` (or \`${prefix}dungeon status\`)\n` +
+            `• \`/dungeon action:climb\` (or \`${prefix}dungeon climb\` / \`${prefix}climb\`)\n` +
+            `• \`/dungeon action:floor floor_number:<n>\` (or \`${prefix}dungeon floor <n>\`)\n` +
+            `• \`/dungeon action:leaderboard\` (or \`${prefix}dungeon leaderboard\`)`,
         )
         .setFooter({ text: 'Use water/ice combatants in Season 1 to bypass Scorched Earth burn damage!' });
 
@@ -199,22 +204,23 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
             `• When a trade is proposed, all offered and requested cards are locked with \`state = 'IN_TRADE'\`.\n` +
             `• Locked cards cannot be sold, dismantled, or offered in other simultaneous trades.\n` +
             `• If a trade is rejected or cancelled, cards unlock back to \`IDLE\` immediately.\n` +
-            `• **Only empty cards can be traded.** Gear never moves with a card. Unequip everything first with \`/card action:unequip-all id:<card_id>\`.\n\n` +
+            `• **Only empty cards can be traded.** Gear never moves with a card. Unequip everything first with \`/card action:unequip-all id:<card_id>\` or \`${prefix}card unequip-all <card_id>\`.\n\n` +
             `### 🤝 How to Trade\n` +
             `1. **Propose a Trade**:\n` +
             `   \`\`\`\n` +
             `   /trade action:request target:@User offer_card_ids:id1,id2 request_card_ids:id3 offer_credits:500 request_credits:0\n` +
+            `   # or: ${prefix}trade request @User id1,id2 id3 500\n` +
             `   \`\`\`\n` +
             `2. **Inspect the Proposal**:\n` +
-            `   The target user checks details with \`/trade action:view id:<trade_id>\`.\n` +
+            `   The target user checks details with \`/trade action:view id:<trade_id>\` or \`${prefix}trade view <trade_id>\`.\n` +
             `3. **Accept or Reject**:\n` +
-            `   - Accept: \`/trade action:accept id:<trade_id>\`\n` +
-            `   - Reject: \`/trade action:reject id:<trade_id>\`\n` +
-            `   - Cancel: \`/trade action:cancel id:<trade_id>\` (proposer only)\n\n` +
+            `   - Accept: \`/trade action:accept id:<trade_id>\` (or \`${prefix}trade accept <trade_id>\`)\n` +
+            `   - Reject: \`/trade action:reject id:<trade_id>\` (or \`${prefix}trade reject <trade_id>\`)\n` +
+            `   - Cancel: \`/trade action:cancel id:<trade_id>\` (or \`${prefix}trade cancel <trade_id>\`)\n\n` +
             `### ⚡ Atomic ACID Guarantee\n` +
             `Card ownerships and credits are transferred inside a single database transaction. If either party lacks funds or cards, the entire trade reverts safely!`,
         )
-        .setFooter({ text: 'View your pending incoming and outgoing trades with /trade action:list.' });
+        .setFooter({ text: `View your pending incoming and outgoing trades with /trade action:list or ${prefix}trade list.` });
 
     case 'market':
       return new EmbedBuilder()
@@ -223,12 +229,12 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
         .setDescription(
           `Buy and sell cards in the open player economy!\n\n` +
             `### 🏷️ How to List a Card\n` +
-            `\`\`\`\n/market action:list card_id:<id> price:<credits>\n\`\`\`\n` +
+            `\`\`\`\n/market action:list card_id:<id> price:<credits>\n# or: ${prefix}market list <id> <credits>\n\`\`\`\n` +
             `• The card is locked with \`state = 'IN_MARKET'\`.\n` +
-            `• **Only empty cards can be sold.** Gear never moves with a card. Unequip everything first with \`/card action:unequip-all id:<card_id>\` or **Unequip All** in \`/loadout\`.\n` +
+            `• **Only empty cards can be sold.** Gear never moves with a card. Unequip everything first with \`/card action:unequip-all id:<card_id>\` or \`${prefix}card unequip-all <card_id>\`.\n` +
             `• Set your own price in Credits.\n\n` +
             `### 🔍 How to Browse\n` +
-            `\`\`\`\n/market action:browse page:1 filter_element:ICE filter_rarity:UR\n\`\`\`\n` +
+            `\`\`\`\n/market action:browse page:1 filter_element:ICE filter_rarity:UR\n# or: ${prefix}market browse 1 ICE UR\n\`\`\`\n` +
             `• Filter by elemental affinity or rarity tier.\n` +
             `• Displays seller username, card level, stats, and asking price.\n\n` +
             `### 💰 5% Market Tax Sink\n` +
@@ -237,9 +243,9 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
             `### ⏳ 7-Day Auto-Expiration\n` +
             `• Listings stay active for **7 days**.\n` +
             `• If unsold after 7 days, listings automatically expire and cards return to your inventory in \`IDLE\` state!\n` +
-            `• You can also manually cancel anytime with \`/market action:cancel listing_id:<id>\`.`,
+            `• You can also manually cancel anytime with \`/market action:cancel listing_id:<id>\` or \`${prefix}market cancel <id>\`.`,
         )
-        .setFooter({ text: 'View all your active listings with /market action:my-listings.' });
+        .setFooter({ text: `View all your active listings with /market action:my-listings or ${prefix}market my-listings.` });
 
     case 'guild':
       return new EmbedBuilder()
@@ -248,7 +254,7 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
         .setDescription(
           `Team up with fellow summoners to form a guild, level up together, and climb the guild leaderboards!\n\n` +
             `### 🚩 Creating a Guild\n` +
-            `\`\`\`\n/waifuguild action:create name:"Crimson Lotus" tag:"LOTUS" description:"Top fire guild"\n\`\`\`\n` +
+            `\`\`\`\n/waifuguild action:create name:"Crimson Lotus" tag:"LOTUS" description:"Top fire guild"\n# or: ${prefix}waifuguild create "Crimson Lotus" LOTUS "Top fire guild"\n\`\`\`\n` +
             `• **Creation Fee**: 5,000 Credits.\n` +
             `• Creator becomes the **Guild Leader**.\n\n` +
             `### 📈 Guild Leveling & Capacity\n` +
@@ -258,13 +264,13 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
             `• Guild members earn Guild XP from winning dungeon battles and duels!\n\n` +
             `### 🏦 Guild Bank\n` +
             `• Members can contribute credits to the shared guild bank:\n` +
-            `  \`\`\`\n  /waifuguild action:deposit amount:1000\n  \`\`\`\n` +
+            `  \`\`\`\n  /waifuguild action:deposit amount:1000\n  # or: ${prefix}waifuguild deposit 1000\n  \`\`\`\n` +
             `• Used to unlock future guild upgrades and perks.\n\n` +
             `### 👑 Guild Commands\n` +
-            `• \`/waifuguild action:info\` — View guild stats, level, bank, and roster.\n` +
-            `• \`/waifuguild action:join guild_id:<id>\` — Join an existing guild.\n` +
-            `• \`/waifuguild action:leave\` — Leave your current guild.\n` +
-            `• \`/waifuguild action:leaderboard\` — View top guilds ranked by Level and XP.`,
+            `• \`/waifuguild action:info\` (or \`${prefix}waifuguild info\`)\n` +
+            `• \`/waifuguild action:join guild_id:<id>\` (or \`${prefix}waifuguild join <id>\`)\n` +
+            `• \`/waifuguild action:leave\` (or \`${prefix}waifuguild leave\`)\n` +
+            `• \`/waifuguild action:leaderboard\` (or \`${prefix}waifuguild leaderboard\`)`,
         )
         .setFooter({ text: 'Guild leaders can promote/demote officers and manage the member roster.' });
 
@@ -291,8 +297,8 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
             `• **Consumables**: Energy potions and health elixirs.\n` +
             `• **Custom Titles & Badges**: Displayed on your canvas profile card!\n\n` +
             `### 📜 Achievement Commands\n` +
-            `• \`/achievement action:list\` — Check your unlocked and locked achievements.\n` +
-            `• \`/achievement action:claim achievement_id:<id>\` — Claim your unlocked rewards!`,
+            `• \`/achievement action:list\` (or \`${prefix}achievement list\`)\n` +
+            `• \`/achievement action:claim achievement_id:<id>\` (or \`${prefix}achievement claim <id>\`)`,
         )
         .setFooter({ text: 'Complete the tutorial to instantly claim your first achievement: TUTORIAL_COMPLETE!' });
 
@@ -303,7 +309,7 @@ export function buildTcgInfoEmbed(topic: TcgInfoTopic, prefix: string = '$'): Em
         .setColor(0xe91e63)
         .setDescription(
           `Welcome to the **Ririko Waifu TCG Information Hub**!\n` +
-            `Select a topic from the dropdown menu below or run \`/tcg-info topic:<name>\` to read specific guides.\n\n` +
+            `Select a topic from the dropdown menu below, run \`/tcg-info topic:<name>\`, or run \`${prefix}tcg-info <topic>\` to read specific guides.\n\n` +
             `### 📑 Available Guides\n` +
             `• 🔰 **Getting Started & First Card**: How to claim your starter pack and chat drops.\n` +
             `• ⚔️ **7-Element Type Advantages**: The affinity wheel, multipliers, and status effects.\n` +
@@ -462,12 +468,7 @@ export function createTcgInfoCommand(services: BotServices): Command {
         ? (topicInput as TcgInfoTopic)
         : 'overview';
 
-      const prefix =
-        ctx.invokedPrefix && ctx.invokedPrefix !== '/'
-          ? ctx.invokedPrefix
-          : ctx.guildId
-            ? await services.guildSettingsService.getPrefix(ctx.guildId)
-            : (process.env.DEFAULT_PREFIX || '$');
+      const prefix = await resolveContextPrefix(ctx, services);
 
       const embed = buildTcgInfoEmbed(topic, prefix);
       const row = buildTcgInfoSelectMenu(topic);
