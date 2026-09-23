@@ -33,6 +33,9 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | [STORY-131.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-131.md) |
+| `TASK-1312` | Task | Dual-Dispatch /meme Command Suite with Autocomplete, 11 Legacy Prefix Aliases & Attachment Delivery | 2 | `STORY-131` | [TASK-1312.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1312.md) |
+| `TASK-1311` | Task | Meme Synthesis Engine: 11-Template Catalog, @napi-rs/canvas Renderer (Auto-Wrap, Font Scaling & Shadows) & Vitest Suite | 3 | `STORY-131` | [TASK-1311.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1311.md) |
 | `CHORE-0603` | Chore | Align Default Prefix: Code Fallback `!` vs .env.example and Guide Text `$` | 1 | — | [CHORE-0603.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-0603.md) |
 | `BUG-0017` | Bug | Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul | 2 | `EPIC-010` | [BUG-0017.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0017.md) |
 | `BUG-0016` | Bug | Gear, Craft and Shop Dropdowns Silently Drop Entries Past 25 | 3 | `EPIC-015` | [BUG-0016.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0016.md) |
@@ -345,7 +348,9 @@
 | `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | ✅ Done | `EPIC-002`, `EPIC-003` |
 | `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | ✅ Done | — |
 | `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | ✅ Done | `TASK-1301` |
-| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
+| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | ✅ Done | `EPIC-003` |
+| `TASK-1311` | Task | Meme Synthesis Engine: 11-Template Catalog, @napi-rs/canvas Renderer (Auto-Wrap, Font Scaling & Shadows) & Vitest Suite | 3 | `STORY-131` | ✅ Done | — |
+| `TASK-1312` | Task | Dual-Dispatch /meme Command Suite with Autocomplete, 11 Legacy Prefix Aliases & Attachment Delivery | 2 | `STORY-131` | ✅ Done | `TASK-1311` |
 | `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
 | `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
 
