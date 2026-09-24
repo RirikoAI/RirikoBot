@@ -166,7 +166,7 @@
       "id": "EPIC-011",
       "title": "Next.js 16 Web Dashboard & Management Portal",
       "points": 21,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": [
         "EPIC-002",
         "EPIC-004",
@@ -182,13 +182,13 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use."
     },
     {
       "id": "EPIC-012",
       "title": "Quality Gates, Docker Rootless & Production Verification",
       "points": 13,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": [
         "EPIC-001",
         "EPIC-011"
@@ -818,64 +818,117 @@
     {
       "id": "STORY-110",
       "epic": "EPIC-011",
-      "title": "Next.js 16 App Router, React 19 Scaffolding & Discord OAuth2 Pipeline",
-      "points": 5,
-      "status": "BACKLOG",
+      "title": "Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization",
+      "points": 8,
+      "status": "TODO",
       "requires": [
         "EPIC-001"
       ],
       "blocks": [
         "STORY-111"
-      ]
+      ],
+      "description": "New apps/web workspace (Next.js 16, React 19, Tailwind, strict TS) wired to the monorepo quality gates, Discord OAuth2 login with a revocable server-side session, and the guild authorization guard every later page and Server Action depends on. Re-estimated from 5 to 8 during grooming."
     },
     {
       "id": "STORY-111",
       "epic": "EPIC-011",
-      "title": "Server Management Portal & Core Module Settings Views (20+ Tabs)",
+      "title": "Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity",
       "points": 8,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": [
         "STORY-110"
       ],
       "blocks": [
-        "STORY-112"
-      ]
+        "STORY-112",
+        "STORY-113",
+        "STORY-114",
+        "STORY-115",
+        "STORY-116"
+      ],
+      "description": "Foundation for all module pages: guild config schemas defined once in @ririko/core, a GuildConfigService that validates, persists through existing repositories and writes audit_logs field diffs, the guild layout and form kit, the General tab, and the matching `ririko guild:config` CLI. Re-scoped during grooming: the original 20+ tabs moved to STORY-114/115/116 and Zod parity moved here from STORY-113."
     },
     {
       "id": "STORY-112",
       "epic": "EPIC-011",
       "title": "Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer",
-      "points": 5,
-      "status": "BACKLOG",
+      "points": 8,
+      "status": "TODO",
       "requires": [
         "STORY-111"
       ],
-      "blocks": [
-        "STORY-113"
-      ]
+      "blocks": [],
+      "description": "TCG management pages. tcg_system_configs and dungeon_seasons are global, so global game rules and the season editor are gated to bot owners (ownerIds); guild-scoped TCG settings stay with guild managers and the TCG Manager Role. Re-estimated from 5 to 8 during grooming."
     },
     {
       "id": "STORY-113",
       "epic": "EPIC-011",
-      "title": "Server Analytics, Live Case Logs & Shared Zod Validation Parity",
-      "points": 3,
-      "status": "BACKLOG",
+      "title": "Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer",
+      "points": 5,
+      "status": "TODO",
       "requires": [
-        "STORY-112"
+        "STORY-111"
       ],
       "blocks": [
         "EPIC-012"
-      ]
+      ],
+      "description": "Overview tab with live server stats and a command usage chart (needs new command usage counters, none are recorded today), moderation case log inspector, and a viewer for dashboard audit_logs. Shared Zod parity moved to STORY-111; re-estimated from 3 to 5."
+    },
+    {
+      "id": "STORY-114",
+      "epic": "EPIC-011",
+      "title": "Moderation, AutoMod, Logging, Command Overrides, Reaction Roles & Auto Voice Pages",
+      "points": 8,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [],
+      "description": "Module pages for moderation and community tooling (dashboard.md sections 3, 4, 13, 14, 18, 19), built on the STORY-111 form kit and GuildConfigService."
+    },
+    {
+      "id": "STORY-115",
+      "epic": "EPIC-011",
+      "title": "Economy & Banking, XP & Ranking, Games & Giveaways Pages",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [],
+      "description": "Module pages for engagement systems (dashboard.md sections 8, 9, 11, 12)."
+    },
+    {
+      "id": "STORY-116",
+      "epic": "EPIC-011",
+      "title": "Music, AI Chatbot, Image Generation, Stream Alerts, Free Games, Welcome & Integrations Pages",
+      "points": 8,
+      "status": "TODO",
+      "requires": [
+        "STORY-111",
+        "STORY-133"
+      ],
+      "blocks": [],
+      "description": "Module pages for media and notification systems (dashboard.md sections 5, 6, 7, 15, 16, 17, 20). The Welcome & Farewell editor needs the STORY-133 WelcomerService renderer."
+    },
+    {
+      "id": "STORY-117",
+      "epic": "EPIC-011",
+      "title": "Dashboard Security Hardening: Passkey Step-Up, Session Management & Alerts, CSP & Authorization Coverage",
+      "points": 8,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [],
+      "description": "Makes a stolen credential short-lived, revocable, unable to perform sensitive writes without a second factor, and visible to the owner. JWKS/JWE were considered and rejected: one app issues and verifies its own sessions, so there is no verifier to publish keys to, and a self-contained token cannot be revoked. Browser-side per-request signing was rejected because malware that copies the browser profile copies the key; Chrome DBSC is an optional enhancement where supported."
     },
     {
       "id": "STORY-120",
       "epic": "EPIC-012",
-      "title": "End-to-End Vitest & Integration Test Harness (80%+ Coverage)",
+      "title": "E2E Integration Tests & Quality Gates Setup",
       "points": 5,
-      "status": "BACKLOG",
-      "requires": [
-        "EPIC-001"
-      ],
+      "status": "TODO",
+      "requires": [],
       "blocks": [
         "STORY-121"
       ]
@@ -883,9 +936,9 @@
     {
       "id": "STORY-121",
       "epic": "EPIC-012",
-      "title": "Multi-Stage Rootless Dockerfile & docker-compose.production.yml",
+      "title": "Rootless Dockerfile & Containerization",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": [
         "STORY-120"
       ],
@@ -896,9 +949,9 @@
     {
       "id": "STORY-122",
       "epic": "EPIC-012",
-      "title": "Health / Readiness Probes, GitHub Actions CI/CD & Production Verification",
+      "title": "Production Orchestration & Health Probes",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": [
         "STORY-121"
       ],
@@ -949,7 +1002,7 @@
       "epic": "EPIC-013",
       "title": "Welcomer & Farewell Dynamic Card Canvas with SSRF Verification",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": [
         "EPIC-003"
       ],
@@ -2393,6 +2446,306 @@
       "description": "Implement CardSynthesizer canvas engine (800x1200 px, 8-layer stack, rarity foiling, modular assets/tcg structure with procedural fallbacks), and scripts/tcg-card-builder.ts supporting 50 cards per element bulk generation and manual single-card creation via waifu.im or direct URL."
     },
     {
+      "id": "TASK-1101",
+      "parent": "STORY-110",
+      "title": "apps/web Workspace Scaffold: Next.js 16, React 19, Tailwind, Strict TS, Env Schema & Server-Only Service Bootstrap",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "EPIC-001"
+      ],
+      "blocks": [
+        "TASK-1102"
+      ],
+      "description": "Create the @ririko/web package (App Router, ESM, strict TS incl. exactOptionalPropertyTypes), hook it into tsc -b, eslint, vitest and pnpm scripts (dev:web, start:web). Validate web env vars (DISCORD_CLIENT_ID/SECRET, redirect URI, SESSION_SECRET) through the @ririko/core config loader. Add a server-only singleton that opens the dual-dialect DB client and constructs the services the dashboard needs, reusing the bot composition in apps/bot/src/services.ts rather than duplicating it."
+    },
+    {
+      "id": "TASK-1102",
+      "parent": "STORY-110",
+      "title": "Discord OAuth2 (identify, guilds) Login/Callback/Logout & Revocable Server-Side Sessions (Hashed Session IDs, Encrypted Discord Tokens)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1101"
+      ],
+      "blocks": [
+        "TASK-1103"
+      ],
+      "description": "Route handlers /api/auth/login, /api/auth/callback, /api/auth/logout with a signed state parameter (plus PKCE if Discord accepts it for this app type), token exchange and refresh. Server-side sessions instead of a self-contained cookie token, so logout and revocation take effect immediately: the __Host- cookie (HttpOnly, Secure, SameSite=Lax, Path=/) holds 32 random bytes; the dual-dialect web_sessions table stores only the SHA-256 of that ID, the user ID, created/last-seen/expires timestamps, IP, user agent, step_up_at, and the Discord access/refresh tokens encrypted with AES-256-GCM under a versioned env key. 30 min idle / 12 h absolute expiry; the session ID rotates on login. Discord tokens never reach client components. Unit tests for ID hashing, token encryption round-trip and tamper rejection, expiry, and rotation."
+    },
+    {
+      "id": "TASK-1103",
+      "parent": "STORY-110",
+      "title": "Guild Discovery & requireGuildAccess Guard (ManageGuild/Administrator, Bot Membership, Per-Request Re-Verification) & Server Selector",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1102"
+      ],
+      "blocks": [
+        "STORY-111"
+      ],
+      "description": "Fetch the user guild list, keep guilds where permissions include ManageGuild (0x20) or Administrator (0x8), intersect with guilds the bot is in (bot-token REST, short TTL cache). requireGuildAccess(guildId) re-verifies on every Server Action and route so revoked permissions are rejected on the next request. Server selector grid with an invite link for guilds without the bot. Tests for the permission bitfield filter and guard."
+    },
+    {
+      "id": "TASK-1111",
+      "parent": "STORY-111",
+      "title": "Shared Zod Guild Config Schemas in @ririko/core, GuildConfigService & audit_logs Field-Diff Writer",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-110"
+      ],
+      "blocks": [
+        "TASK-1112",
+        "TASK-1113"
+      ],
+      "description": "Define per-module config schemas once in packages/core (only keys the bot reads). GuildConfigService in packages/services reads and writes through the existing repositories, validates with those schemas, invalidates the GuildSettingsService cache, and records actor, IP and before/after field diffs in audit_logs. Unit tests per schema and for the diff writer."
+    },
+    {
+      "id": "TASK-1112",
+      "parent": "STORY-111",
+      "title": "Dashboard Shell: Guild Layout & Module Nav, Channel/Role Pickers, Server Action Form Kit & General Tab",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1111"
+      ],
+      "blocks": [
+        "STORY-112",
+        "STORY-113",
+        "STORY-114",
+        "STORY-115",
+        "STORY-116"
+      ],
+      "description": "Guild-scoped layout with sidebar navigation, channel and role pickers backed by cached bot-token REST, and a reusable form pattern: Server Action -> requireGuildAccess -> Zod parse -> GuildConfigService, with field-level errors and origin checks. General tab covers prefix, timezone and locale (reusing GuildSettingsService validation)."
+    },
+    {
+      "id": "TASK-1113",
+      "parent": "STORY-111",
+      "title": "`ririko guild:config <guild_id> [key] [value]` CLI Parity (get, set, list) on the Same Schemas & Service",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1111"
+      ],
+      "blocks": [],
+      "description": "CLI command in apps/cli that lists, reads and sets any dashboard-configurable key through GuildConfigService and the shared Zod schemas, so every web setting is also scriptable (docs/dashboard.md section 4). Audit entries use a CLI actor marker. Vitest coverage for parsing and validation errors."
+    },
+    {
+      "id": "TASK-1121",
+      "parent": "STORY-112",
+      "title": "TCG Settings: Guild Drop Settings, TCG Manager Role & Owner-Gated Global Rules (Market Tax, Listing Expiry, Energy Governance)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [
+        "TASK-1122"
+      ],
+      "description": "Guild managers edit guild-scoped drop settings and the TCG Manager Role. Bot owners (ownerIds) edit global tcg_system_configs rules: market tax (1-20%), listing expiry, energy cap/base/scaling, daily restore limit. All values validated by shared schemas and audited."
+    },
+    {
+      "id": "TASK-1122",
+      "parent": "STORY-112",
+      "title": "Owner-Only Dungeon Season Editor, Difficulty Curve Visualizer & Boss Enrage/Shield/Loot Configurator",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1121"
+      ],
+      "blocks": [
+        "TASK-1123"
+      ],
+      "description": "Create and edit dungeon_seasons (dates, theme element, affixes, scaling model and params) and dungeon_bosses enrage turns, shield layers and first-clear/repeat loot. The HP/ATK/DEF curve chart across floors calls the same scaling functions the dungeon engine uses (imported from @ririko/services, not reimplemented)."
+    },
+    {
+      "id": "TASK-1123",
+      "parent": "STORY-112",
+      "title": "Card Album Viewer (CardSynthesizer Renders), Shop Catalog Manager & Achievement Manager",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1122"
+      ],
+      "blocks": [],
+      "description": "Per-user card album gallery served from cached CardSynthesizer renders, shop catalog editor over the existing item catalog (respecting catalog-code seeding from BUG-0015), and an achievement inspector with completion counts and seasonal toggles."
+    },
+    {
+      "id": "TASK-1131",
+      "parent": "STORY-113",
+      "title": "Command Usage Daily Counters (Dual-Dialect Table & Router Hook), Bot Status Heartbeat & Overview Tab",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [
+        "TASK-1132"
+      ],
+      "description": "Add a command_usage_daily table (PG + SQLite) incremented from the command router after dispatch, and a small bot status record (gateway ping, guild count, uptime) the bot refreshes on a fixed interval that EPIC-012 /health can reuse. Overview tab shows member and online counts (REST with_counts), active voice channels, command usage chart and bot latency."
+    },
+    {
+      "id": "TASK-1132",
+      "parent": "STORY-113",
+      "title": "Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1131"
+      ],
+      "blocks": [],
+      "description": "Read-only case log over moderation_cases/warnings/notes with filters by user, moderator, action and date, cursor pagination and case detail; audit log viewer over audit_logs with field-diff rendering."
+    },
+    {
+      "id": "TASK-1141",
+      "parent": "STORY-114",
+      "title": "Moderation Page (Warning Escalation Policy Builder) & AutoMod Page (Toggles & Thresholds)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [
+        "TASK-1142"
+      ],
+      "description": "Escalation policy builder over moderation_rules (warn count -> action and duration) and AutoMod toggles and thresholds (invite spam, phishing, caps, mention limits) using the existing moderation and automod services."
+    },
+    {
+      "id": "TASK-1142",
+      "parent": "STORY-114",
+      "title": "Logging Channel Bindings & Command Overrides Page (command_settings Enable/Disable, Allowed/Blocked Roles, Cooldowns)",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1141"
+      ],
+      "blocks": [
+        "TASK-1143"
+      ],
+      "description": "Logging page binds the log channel(s) the bot actually emits to. Command overrides page lists the registered command catalog and edits command_settings per guild and optional channel."
+    },
+    {
+      "id": "TASK-1143",
+      "parent": "STORY-114",
+      "title": "Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1142"
+      ],
+      "blocks": [],
+      "description": "Visual reaction-role builder (buttons and select menus) that publishes or updates the message through the existing reaction role service; auto role and join-to-create auto voice configuration (user limit, bitrate). Role hierarchy checks mirror the bot-side validation."
+    },
+    {
+      "id": "TASK-1151",
+      "parent": "STORY-115",
+      "title": "Economy & Banking Page (Rewards, Interest, Item Shop Manager) & XP & Ranking Page (Multipliers, Voice XP, Level-Up Channel)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [
+        "TASK-1152"
+      ],
+      "description": "Expose the economy and XP settings the services read today; add backing columns only where the bot consumes them. Item shop manager edits economy_items and categories."
+    },
+    {
+      "id": "TASK-1152",
+      "parent": "STORY-115",
+      "title": "Games Page (Enable/Disable, Wager Limits, Cooldowns) & Giveaways Page (Active List, End, Reroll, History)",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1151"
+      ],
+      "blocks": [],
+      "description": "Mini-game settings and giveaway management. End and reroll call GiveawayService so results match the Discord commands and the crash-resistant scheduler."
+    },
+    {
+      "id": "TASK-1161",
+      "parent": "STORY-116",
+      "title": "Music Page (Volume, DJ Role, Music Channel), AI Chatbot Page (Persona, Provider/Model, Tool Toggles) & Image Generation Page (Provider, Quotas, Presets)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [
+        "TASK-1162"
+      ],
+      "description": "Edit music_guild_settings, ai_guild_preferences and image provider/quota/preset settings through the existing services. Provider selectors only list providers with configured credentials; credentials are never sent to the client."
+    },
+    {
+      "id": "TASK-1162",
+      "parent": "STORY-116",
+      "title": "Stream Alerts Page (Streamer Subscriptions, Templates, Mention Roles) & Free Games Page (Channels, Ping Roles)",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1161"
+      ],
+      "blocks": [
+        "TASK-1163"
+      ],
+      "description": "Manage stream_subscriptions for Twitch/YouTube/TikTok and free_game_channels through the existing stream and free-games services, with platform handle validation shared with the /stream command."
+    },
+    {
+      "id": "TASK-1163",
+      "parent": "STORY-116",
+      "title": "Welcome & Farewell Live Canvas Preview Editor (SSRF-Safe Background Upload) & Integrations Status Page (Zero Secret Exposure)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1162",
+        "STORY-133"
+      ],
+      "blocks": [],
+      "description": "Editor renders previews server-side with the STORY-133 WelcomerService and validates background URLs/uploads through its SSRF and DNS checks. Integrations page shows only \"Configured\" / \"Not configured\" per provider; no secret value is rendered or serialized to the client."
+    },
+    {
+      "id": "TASK-1171",
+      "parent": "STORY-117",
+      "title": "WebAuthn Passkey Enrollment & Step-Up Re-Verification for Sensitive Writes (Mandatory for Bot-Owner Console)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-111"
+      ],
+      "blocks": [
+        "TASK-1172"
+      ],
+      "description": "Dual-dialect web_passkeys table and WebAuthn registration/assertion (library choice recorded in dependency-evaluation.md). Once a user enrolls a passkey it is always required; bot owners (ownerIds) must enroll before using the owner console. Sensitive Server Actions (owner console, moderation policy, reaction-role publish, integrations) require a passkey assertion newer than a short window (step_up_at on the session), and step-up rotates the session ID. A stolen session cookie or a compromised Discord account alone cannot pass step-up."
+    },
+    {
+      "id": "TASK-1172",
+      "parent": "STORY-117",
+      "title": "Active Sessions Page (Revoke, Sign Out Everywhere), New Sign-In DM Alerts & Dashboard Change Notices to the Guild Log Channel",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1171"
+      ],
+      "blocks": [
+        "TASK-1173"
+      ],
+      "description": "List the user's web_sessions (created, last seen, IP, user agent) with per-session revoke and sign out everywhere. The bot DMs the user on a sign-in from a new device, and posts a notice to the guild log channel when dashboard changes are saved, so a silent takeover is detected. Changes stay recorded in audit_logs with IP and user agent."
+    },
+    {
+      "id": "TASK-1173",
+      "parent": "STORY-117",
+      "title": "Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1172"
+      ],
+      "blocks": [],
+      "description": "Nonce-based CSP (no unsafe-inline), frame-ancestors none, HSTS, nosniff, strict Referrer-Policy and COOP. Enable React taint (experimental_taintUniqueValue / taintObjectReference) for secrets and Discord tokens, and import server-only in every module that touches them. Origin check on route handlers. A test enumerates every Server Action and route handler and fails if one skips requireGuildAccess (or the owner guard); middleware/proxy is never the authorization layer (CVE-2025-29927). Rate limits on auth routes and Server Actions."
+    },
+    {
       "id": "TASK-1043",
       "parent": "STORY-104",
       "title": "Interactive Real-Time Dungeon Tower Battles with Card Rendering, Manual & Auto Combat",
@@ -2661,6 +3014,80 @@
         "TASK-1301"
       ],
       "blocks": []
+    },
+    {
+      "id": "TASK-1201",
+      "story": "STORY-120",
+      "title": "Setup Playwright for Web Dashboard E2E Tests",
+      "points": 2,
+      "status": "TODO",
+      "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1202",
+      "story": "STORY-120",
+      "title": "Setup Discord API Mock Harness & Integration Test Suite",
+      "points": 3,
+      "status": "TODO",
+      "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1211",
+      "story": "STORY-121",
+      "title": "Multi-stage Rootless Dockerfile for Web Dashboard",
+      "points": 2,
+      "status": "TODO",
+      "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1212",
+      "story": "STORY-121",
+      "title": "Multi-stage Rootless Dockerfile for Bot",
+      "points": 3,
+      "status": "TODO",
+      "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1221",
+      "story": "STORY-122",
+      "title": "Implement /health and /ready probes for Bot and Web",
+      "points": 1,
+      "status": "TODO",
+      "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1222",
+      "story": "STORY-122",
+      "title": "docker-compose.production.yml with Redis, PostgreSQL, and App Services",
+      "points": 2,
+      "status": "TODO",
+      "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1331",
+      "story": "STORY-133",
+      "title": "Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests",
+      "points": 2,
+      "status": "TODO",
+      "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1332",
+      "story": "STORY-133",
+      "title": "guildMemberAdd / guildMemberRemove Discord Gateway listeners and dual-dispatch configuration commands (/welcomer, /farewell)",
+      "points": 1,
+      "status": "TODO",
+      "requires": [
+        "TASK-1331"
+      ],
+      "blocks": []
     }
   ],
   "chores": [
@@ -2867,7 +3294,7 @@
     },
     {
       "id": "BUG-0013",
-      "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted",
+      "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted (Daily Incremental Bonus Energy & Configurable Admin Cap)",
       "points": 3,
       "status": "DONE",
       "parent": "EPIC-015",
@@ -2958,18 +3385,6 @@
       "description": "Wire guild default volume resolution into MusicPlayerService and LavalinkService so that volume set via $volume or /volume is restored on new playback sessions instead of reverting to 80%, implement setVolume on LavalinkQueueAdapter, and display the guild default volume when /volume is run with no arguments while idle."
     },
     {
-      "id": "BUG-0013",
-      "title": "player_energy.bonus_energy Is Read as Capacity but Never Granted (Daily Incremental Bonus Energy & Configurable Admin Cap)",
-      "points": 3,
-      "status": "DONE",
-      "parent": "EPIC-015",
-      "requires": [
-        "EPIC-015"
-      ],
-      "blocks": [],
-      "description": "Increment bonus energy daily upon login/activity up to a configurable cap, managed via dual-dispatch /tcg-admin action:energy command."
-    },
-    {
       "id": "BUG-0017",
       "title": "Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul",
       "points": 2,
@@ -2982,7 +3397,7 @@
       "description": "Fix unrecognized !card prefix action silently opening collection by computing Did-You-Mean suggestions and error replies. Auto-route card identifiers (!card 1, !card Harribel) to inspect. Add flexible card resolution (UUID, 8-char short ID, 1-based index, character name, serial) across inspect, favorite, equip, dismantle, gear, and loadout. Disambiguate card ID from character collection number and mint serial counter."
     },
     {
-      "id": "BUG-0018",
+      "id": "BUG-0019",
       "title": "Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension",
       "points": 2,
       "status": "DONE",

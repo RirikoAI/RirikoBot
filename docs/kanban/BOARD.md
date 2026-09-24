@@ -21,7 +21,11 @@
 ---
 
 ## 🎯 To Do (Groomed & Estimated)
-*No tickets currently in todo.*
+Ready tickets are listed once, in their epic section at the bottom of the board.
+
+- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 58): see **Groomed Stories & Tasks for EPIC-011**
+- `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
+- `STORY-133` Welcomer & Farewell Dynamic Card Canvas with SSRF Verification (3 pts): see **Groomed Stories for EPIC-013**
 
 ---
 
@@ -33,104 +37,33 @@
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
-| `BUG-0018` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | `STORY-132` | [BUG-0018.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0018.md) |
+| `BUG-0019` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | `STORY-132` | [BUG-0019.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0019.md) |
 | `CHORE-1321` | Chore | CLI Command to Configure Image Generation Providers & Keys (image-configure) | 2 | — | [CHORE-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1321.md) |
-| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | [STORY-132.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-132.md) |
-| `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | [TASK-1322.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1322.md) |
-| `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | [TASK-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1321.md) |
-| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | [STORY-131.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-131.md) |
-| `TASK-1312` | Task | Dual-Dispatch /meme Command Suite with Autocomplete, 11 Legacy Prefix Aliases & Attachment Delivery | 2 | `STORY-131` | [TASK-1312.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1312.md) |
-| `TASK-1311` | Task | Meme Synthesis Engine: 11-Template Catalog, @napi-rs/canvas Renderer (Auto-Wrap, Font Scaling & Shadows) & Vitest Suite | 3 | `STORY-131` | [TASK-1311.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1311.md) |
-| `CHORE-0603` | Chore | Align Default Prefix: Code Fallback `!` vs .env.example and Guide Text `$` | 1 | — | [CHORE-0603.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-0603.md) |
-| `BUG-0017` | Bug | Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul | 2 | `EPIC-010` | [BUG-0017.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0017.md) |
-| `BUG-0016` | Bug | Gear, Craft and Shop Dropdowns Silently Drop Entries Past 25 | 3 | `EPIC-015` | [BUG-0016.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0016.md) |
-| `BUG-0015` | Bug | Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs | 2 | `EPIC-015` | [BUG-0015.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0015.md) |
-| `BUG-0013` | Bug | player_energy.bonus_energy Is Read as Capacity but Never Granted (Daily Incremental Bonus Energy & Configurable Admin Cap) | 3 | `EPIC-015` | [BUG-0013.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0013.md) |
 | `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | `EPIC-004` | [STORY-161.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-161.md) |
 | `BUG-0012` | Bug | Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired | 3 | `EPIC-015` | [BUG-0012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0012.md) |
-| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
-| `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
-| `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) |
 | `BUG-0018` | Bug | Persist and Restore Guild Default Volume Across Music Sessions | 3 | `EPIC-005` | [BUG-0018.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0018.md) |
 | `EPIC-014` | Epic | Server Utilities, AutoRoles & Community Systems | 21 | Self | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
-| `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | `EPIC-014` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
-| `TASK-1431` | Task | GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration | 2 | `STORY-143` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
-| `TASK-1432` | Task | Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity | 2 | `STORY-143` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
-| `TASK-1433` | Task | Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting | 1 | `STORY-143` | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
-| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
 | `TASK-1411` | Task | Reminder Repository (Dual-Dialect, Atomic Claim) & Legacy DM Guild Migration Fix | 1 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
 | `TASK-1412` | Task | ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery | 2 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
 | `TASK-1413` | Task | /reminder Command (Set, List, Cancel, Timezone) with Prefix Parity & Real AI reminders.create Tool | 1 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
-| `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | `EPIC-014` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
 | `TASK-1441` | Task | Move WaifuImClient to Shared anime Module on fetchWithRetry & /waifu Command | 1 | `STORY-144` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
 | `TASK-1442` | Task | WallHaven REST Client (SFW Anime Wallpapers) & /wallpaper Command Replacing Legacy Scrapers | 2 | `STORY-144` | [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) |
-| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | `EPIC-014` | [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) |
 | `TASK-1421` | Task | Jikan v4 Client (Anime, Manga, Characters: Search & Full Details, SFW, Rate-Limited) | 2 | `STORY-142` | [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) |
 | `TASK-1422` | Task | AnimeSearchService: Source-Neutral Models, Jikan-to-AniList Fallback, TTL Cache & AniList Detail Queries | 2 | `STORY-142` | [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) |
 | `TASK-1423` | Task | /anime, /manga, /anime-character Commands: Search Select Menu, Detail Embeds & Prefix Parity | 1 | `STORY-142` | [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) |
 | `CHORE-1401` | Chore | Shared AniList Client & HTTP Rate-Limit Layer (Decouple from Waifu TCG) | 2 | `EPIC-014` | [CHORE-1401.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1401.md) |
-| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | [STORY-140.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-140.md) |
-| `TASK-1405` | Task | Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites | 1 | `STORY-140` | [TASK-1405.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1405.md) |
-| `TASK-1404` | Task | Dual-Dispatch Commands (/autorole, /create-reaction-role, /reaction-roles, /temprole) with Slash & Prefix Parity | 1 | `STORY-140` | [TASK-1404.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1404.md) |
-| `TASK-1403` | Task | ReactionRole Engine: Multi-Mode Emoji, Button & Select Menu Handlers | 2 | `STORY-140` | [TASK-1403.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1403.md) |
-| `TASK-1402` | Task | AutoRole Engine: Join Roles (Humans & Bots), Verification Gateway & Temp Role Sweeper | 1 | `STORY-140` | [TASK-1402.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1402.md) |
-| `TASK-1401` | Task | Database Schemas & Dual-Dialect Repositories (AutoRoles, ReactionRoles, TempRoles) | 1 | `STORY-140` | [TASK-1401.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1401.md) |
-| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | [STORY-159.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-159.md) |
-| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | [STORY-158.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-158.md) |
-| `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | [STORY-157.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-157.md) |
-| `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | [STORY-156.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-156.md) |
-| `BUG-0011` | Bug | Persist Crafting Dust and Charge It for Equipment Enhancement | 3 | `EPIC-015` | [BUG-0011.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0011.md) |
-| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | [STORY-155.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-155.md) |
-| `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | `EPIC-015` | [STORY-154.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-154.md) |
-| `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | `EPIC-015` | [STORY-153.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-153.md) |
-| `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | `EPIC-015` | [STORY-152.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-152.md) |
-| `STORY-151` | Story | DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table) | 8 | `EPIC-015` | [STORY-151.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-151.md) |
-| `STORY-150` | Story | Card EXP from Dungeon Wins & Real Skill MP Cost in Combat | 3 | `EPIC-015` | [STORY-150.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-150.md) |
-| `BUG-0010` | Bug | Grant TCG Items by Catalog Code, Auto-Equip Starter Blade & Repair Legacy Item Rows | 3 | `EPIC-015` | [BUG-0010.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0010.md) |
 | `BUG-0009` | Bug | Fix Tutorial Floor T4 Defeat Counter Card Grant & Stale Metadata Recovery | 2 | `STORY-104` | [BUG-0009.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0009.md) |
 | `TASK-1046` | Task | Interactive Combat Items Dropdown, Battle Collector Fixes, Tutorial Floor Lock & Potion Grants, and Interactive Town Shop & Inventory Menus | 5 | `STORY-104` | [TASK-1046.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1046.md) |
 | `TASK-1045` | Task | Tutorial Floor T4 Dynamic Elemental Disadvantage, Real Common Card Grant on Defeat & Direct Climb Gate Prompt | 3 | `STORY-104` | [TASK-1045.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1045.md) |
 | `TASK-1044` | Task | Interactive Card Album, Pagination, Inspection & Equip Menu Suite (/cards) | 3 | `STORY-101` | [TASK-1044.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1044.md) |
 | `TASK-1043` | Task | Interactive Real-Time Dungeon Tower Battles with Card Rendering, Manual & Auto Combat | 5 | `STORY-104` | [TASK-1043.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1043.md) |
-| `TASK-1061` | Task | Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI | 5 | `STORY-105` | [TASK-1061.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1061.md) |
-| `BUG-0008` | Bug | Fix Waifu TCG Tutorial False Completion, Missing Starter Card Seed & $climb Route | 3 | `STORY-104` | [BUG-0008.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0008.md) |
-| `TASK-1053` | Task | Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info) | 2 | `STORY-105` | [TASK-1053.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1053.md) |
-| `TASK-1052` | Task | WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite | 2 | `STORY-105` | [TASK-1052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1052.md) |
-| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | `EPIC-010` | [TASK-1061.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1061.md) |
 | `EPIC-010` | Epic | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | 21 | Self | [EPIC-010.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/EPIC-010.md) |
-| `TASK-1051` | Task | Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration | 3 | `STORY-105` | [TASK-1051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1051.md) |
-| `TASK-1042` | Task | Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch `/dungeon` Suite | 2 | `STORY-104` | [TASK-1042.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1042.md) |
-| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | [TASK-1042.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1042.md) |
-| `TASK-1041` | Task | PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes | 3 | `STORY-104` | [TASK-1041.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1041.md) |
-| `TASK-1032` | Task | Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands | 1 | `STORY-103` | [TASK-1032.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1032.md) |
-| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | [TASK-1032.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1032.md) |
-| `TASK-1031` | Task | 6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog | 2 | `STORY-103` | [TASK-1031.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1031.md) |
-| `TASK-1022` | Task | PvP Duels (`/game pvp`), Timed Expeditions (`/game explore`), Boss Raids (`/game boss`) & Quests | 1 | `STORY-102` | [TASK-1022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1022.md) |
-| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | [TASK-1022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1022.md) |
-| `TASK-1021` | Task | 7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator | 2 | `STORY-102` | [TASK-1021.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1021.md) |
-| `TASK-1012` | Task | Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite | 2 | `STORY-101` | [TASK-1012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1012.md) |
-| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | [TASK-1012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1012.md) |
-| `TASK-1011` | Task | 8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling | 3 | `STORY-101` | [TASK-1011.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1011.md) |
-| `TASK-1002` | Task | Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests | 1 | `STORY-100` | [TASK-1002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1002.md) |
-| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | `EPIC-010` | [TASK-1002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1002.md) |
-| `TASK-1001` | Task | waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository | 2 | `STORY-100` | [TASK-1001.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1001.md) |
 | `TASK-0803` | Task | Multi-Platform Stream Watcher Engine Reinforcement, Resilient Adapters, CLI Stream Configuration & General Stream Commands | 3 | `STORY-080` | [TASK-0803.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0803.md) |
-| `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
-| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
 | `EPIC-009` | Epic | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | 13 | Self | [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) |
-| `TASK-0921` | Task | Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine | 3 | `STORY-092` | [TASK-0921.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0921.md) |
-| `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | [TASK-0912.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0912.md) |
-| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | [TASK-0912.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0912.md) |
-| `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | [TASK-0911.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0911.md) |
-| `TASK-0902` | Task | Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners | 2 | `STORY-090` | [TASK-0902.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0902.md) |
-| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | [TASK-0902.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0902.md) |
-| `TASK-0901` | Task | Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine | 3 | `STORY-090` | [TASK-0901.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0901.md) |
 | `TASK-0812` | Task | Dual-Dispatch Stream & Free Game Commands Suite & Quality Gate | 1 | `STORY-081` | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
-| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
 | `EPIC-008` | Epic | Streamer Notifications & Free Games Announcer | 8 | Self | [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) |
 | `TASK-0811` | Task | Free Games Repository, Multi-Provider Fetchers (Epic Games & Steam) & Announcer Engine | 2 | `STORY-081` | [TASK-0811.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0811.md) |
 | `TASK-0802` | Task | Stream Notification Dispatcher, Idempotency Deduplication, Thumbnail Cache & CDN Attachment Uploader | 2 | `STORY-080` | [TASK-0802.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0802.md) |
-| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | [TASK-0802.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0802.md) |
 | `TASK-0801` | Task | Stream Repository, Multi-Platform Stream Adapters & Watcher Engine Core | 3 | `STORY-080` | [TASK-0801.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0801.md) |
 | `BUG-0007` | Bug | Wire Real Music Player Execution to MusicPlayTool in AI Chatbot | 2 | `STORY-060` | [BUG-0007.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0007.md) |
 | `BUG-0006` | Bug | Ignore Prefix Commands in AI Chat & Wire Real Database Values in EconomyBalanceTool | 2 | `STORY-060` | [BUG-0006.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0006.md) |
@@ -138,39 +71,19 @@
 | `BUG-0004` | Bug | Unfulfilled Assistant Tool Calls in Historical Context Causing OpenAI 400 Error | 2 | `STORY-060` | [BUG-0004.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0004.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | `STORY-060` | [BUG-0003.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0003.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | `EPIC-006` | [CHORE-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-0601.md) |
-| `TASK-0732` | Task | Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests | 1 | `STORY-073` | [TASK-0732.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0732.md) |
 | `STORY-073` | Story | Dual-Dispatch Moderation Commands Suite & Gateway Listeners | 2 | `EPIC-007` | [TASK-0732.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0732.md) |
 | `EPIC-007` | Epic | Moderation 2.0 with Escalation & AutoMod | 13 | Self | [TASK-0732.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0732.md) |
-| `TASK-0731` | Task | Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.) | 1 | `STORY-073` | [TASK-0731.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0731.md) |
-| `TASK-0722` | Task | Anti-Raid Mass Join Monitor & Automated Server Verification Gate | 1 | `STORY-072` | [TASK-0722.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0722.md) |
 | `STORY-072` | Story | Real-Time Automated Defense & Auto-Moderation Pipeline | 3 | `EPIC-007` | [TASK-0722.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0722.md) |
-| `TASK-0721` | Task | AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam) | 2 | `STORY-072` | [TASK-0721.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0721.md) |
-| `TASK-0712` | Task | Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support | 1 | `STORY-071` | [TASK-0712.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0712.md) |
 | `STORY-071` | Story | Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations | 3 | `EPIC-007` | [TASK-0712.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0712.md) |
-| `TASK-0711` | Task | Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations | 2 | `STORY-071` | [TASK-0711.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0711.md) |
-| `TASK-0702` | Task | Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History | 2 | `STORY-070` | [TASK-0702.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0702.md) |
 | `STORY-070` | Story | Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core | 5 | `EPIC-007` | [TASK-0702.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0702.md) |
-| `TASK-0701` | Task | PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock) | 3 | STORY-070 | [TASK-0701.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0701.md) |
-| `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | `STORY-063` | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
 | `STORY-063` | Story | Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite | 2 | `EPIC-006` | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
 | `EPIC-006` | Epic | AI Chatbot 2.0 with Context Isolation & Safe Tools | 13 | Self | [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) |
-| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | STORY-063 | [TASK-0631.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0631.md) |
-| `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | [TASK-0622.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0622.md) |
 | `STORY-062` | Story | Deterministic Utility Tools, Explicit Clock & Application Security Interceptor | 3 | `EPIC-006` | [TASK-0622.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0622.md) |
-| `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | [TASK-0621.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0621.md) |
-| `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | [TASK-0612.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0612.md) |
 | `STORY-061` | Story | Persistent Memory, Strict Per-User Context Isolation & Personality Engine | 3 | `EPIC-006` | [TASK-0612.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0612.md) |
-| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | [TASK-0611.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0611.md) |
-| `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) |
 | `STORY-060` | Story | Multi-Provider AI Core, Fallback Chain & Tool Calling Engine | 5 | `EPIC-006` | [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) |
-| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | [TASK-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0601.md) |
 | `TASK-0530` | Task | Lavalink v4 Backend Integration, Autoinstall Script & LavaSrc Setup | 8 | `STORY-050` | [TASK-0530.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0530.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | `STORY-050` | [BUG-0002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0002.md) |
 | `TASK-0507` | Task | LavaSrc Precision Audio Mirroring (ISRC, Duration Guard & Candidate Scoring) | 3 | `STORY-050` | [TASK-0507.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0507.md) |
-| `TASK-0506` | Task | Spotify Web API Integration & Bridge Overhaul (Scrap go-librespot) | 3 | `STORY-050` | [TASK-0506.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0506.md) |
-| `TASK-0505` | Task | Chrome/Chromium Browser Harvester (Playwright Chrome, Anti-Detection & Interactive Google Login) | 2 | `STORY-050` | [TASK-0505.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0505.md) |
-| `TASK-0504` | Task | Playwright Firefox YouTube Credential Harvester (Cookies, PO-Token, VisitorData & Client Spoofing) | 3 | `STORY-050` | [TASK-0504.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0504.md) |
-| `TASK-0503` | Task | YouTube PO-Token Automation: CLI Generator & In-Process Background Provider | 3 | `STORY-050` | [TASK-0503.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0503.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | `STORY-050` | [BUG-0001.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0001.md) |
 | `EPIC-000` | Epic | Planning, Audits, Architectural Specifications & Agent Design | 13 | Self | [docs/](file:///Z:/Projects/ririko-v2-2026/docs/) |
 | `STORY-001` | Story | Legacy 1.4.0 Codebase Audit & Feature Inventory | 5 | `EPIC-000` | [legacy-feature-inventory.md](file:///Z:/Projects/ririko-v2-2026/docs/legacy-feature-inventory.md) |
@@ -222,26 +135,13 @@
 | `TASK-0402` | Task | Voice XP / Economy Accumulator, Quorum Verification & Anti-AFK State Machine | 2 | `STORY-040` | [TASK-0402.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0402.md) |
 | `STORY-040` | Story | Event-Driven Economy Core & Anti-Spam / Anti-AFK Engine | 5 | `EPIC-004` | [TASK-0402.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0402.md) |
 | `TASK-0411` | Task | Daily Streak Engine (+5%/day up to 30d, 36h reset grace) & Account State | 2 | `STORY-041` | [TASK-0411.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0411.md) |
-| `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | [TASK-0412.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0412.md) |
 | `STORY-041` | Story | Transactional Banking, Daily Streak Engine & Double-Entry Ledger | 5 | `EPIC-004` | [STORY-041.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-041.md) |
-| `TASK-0421` | Task | Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls | 2 | `STORY-042` | [TASK-0421.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0421.md) |
-| `TASK-0422` | Task | Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries | 3 | `STORY-042` | [TASK-0422.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0422.md) |
 | `STORY-042` | Story | Leveling 2.0, Karma & High-Performance Materialized Leaderboards | 5 | `EPIC-004` | [STORY-042.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-042.md) |
-| `TASK-0431` | Task | Item Catalog Repository, Inventory Bags & Usable Consumables (Anti-Abuse Daily Potion Ceilings) | 3 | `STORY-043` | [TASK-0431.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0431.md) |
-| `TASK-0432` | Task | Custom Profile Background Manager with DNS/SSRF IP Verification, Dimension Bounds & Cache | 2 | `STORY-043` | [TASK-0432.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0432.md) |
 | `STORY-043` | Story | Shop Catalog, Inventory Bags & SSRF-Protected Profile Customization | 5 | `EPIC-004` | [STORY-043.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-043.md) |
-| `TASK-0441` | Task | Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot) | 3 | `STORY-044` | [TASK-0441.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0441.md) |
-| `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | [TASK-0442.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0442.md) |
 | `STORY-044` | Story | Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite | 5 | `EPIC-004` | [STORY-044.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-044.md) |
 | `EPIC-004` | Epic | Centralized Transactional Economy & Banking Engine | 21 | Self | [EPIC-004.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/EPIC-004.md) |
-| `TASK-0501` | Task | Extractor Interfaces, Pattern Matchers & Source Adapters | 3 | `STORY-050` | [TASK-0501.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0501.md) |
-| `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | [TASK-0502.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0502.md) |
 | `STORY-050` | Story | Multi-Source Audio Extractors & Stream Resolvers | 5 | `EPIC-005` | [STORY-050.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-050.md) |
-| `TASK-0511` | Task | Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping | 3 | `STORY-051` | [TASK-0511.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0511.md) |
-| `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | [TASK-0512.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0512.md) |
 | `STORY-051` | Story | Voice Lifecycle, Audio Player Core & Queue Engine | 5 | `EPIC-005` | [STORY-051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-051.md) |
-| `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | [TASK-0521.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0521.md) |
-| `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | [TASK-0522.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0522.md) |
 | `STORY-052` | Story | Reactive Embed Controller & Dual-Dispatch Music Commands Suite | 3 | `EPIC-005` | [STORY-052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-052.md) |
 | `EPIC-005` | Epic | Multi-Source Music 2.0 Audio Engine | 13 | Self | [STORY-052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-052.md) |
 
@@ -252,187 +152,214 @@
 
 ---
 
-## 📋 Product Backlog (Future Epics & Stories)
-| ID | Title | Est. Pts | Prerequisites | Target Phase |
-|---|---|---|---|---|
-| `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | 21 | `EPIC-002`, `EPIC-004`.. | Phase 7A |
-| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | 13 | `EPIC-001`..`EPIC-011` | Phase 7B |
-| `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | 21 | `EPIC-002`, `EPIC-003` | Phase 2B / Phase 4B |
-| `EPIC-014` | Server Utilities, AutoRoles & Community Systems | 21 | `EPIC-002`, `EPIC-003` | Phase 2B ✅ Done |
-| `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | 21 (children 63) | `EPIC-010` | Phase 6B ✅ Done |
-
 ### 📋 Groomed Stories & Bugs for EPIC-015 (TCG Progression, Equipment & Bosses)
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `BUG-0010` | Bug | Grant TCG Items by Catalog Code, Auto-Equip Starter Blade & Repair Legacy Item Rows | 3 | `EPIC-015` | ✅ Done | — |
-| `BUG-0011` | Bug | Persist Crafting Dust and Charge It for Equipment Enhancement | 3 | `EPIC-015` | ✅ Done | — |
-| `STORY-150` | Story | Card EXP from Dungeon Wins & Real Skill MP Cost in Combat | 3 | `EPIC-015` | ✅ Done | `BUG-0010` |
-| `STORY-151` | Story | DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table) | 8 | `EPIC-015` | ✅ Done | `STORY-150` |
-| `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | `EPIC-015` | ✅ Done | `STORY-151` |
-| `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | `EPIC-015` | ✅ Done | `STORY-151` |
-| `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | `EPIC-015` | ✅ Done | `STORY-152`, `STORY-153` |
-| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | ✅ Done | `STORY-154` |
-| `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | ✅ Done | `STORY-152` |
-| `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | ✅ Done | `BUG-0010` |
-| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | ✅ Done | `STORY-157` |
-| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | ✅ Done | `STORY-152`, `STORY-156` |
+| `BUG-0010` | Bug | Grant TCG Items by Catalog Code, Auto-Equip Starter Blade & Repair Legacy Item Rows | 3 | `EPIC-015` | ✅ Done · [BUG-0010.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0010.md) | — |
+| `BUG-0011` | Bug | Persist Crafting Dust and Charge It for Equipment Enhancement | 3 | `EPIC-015` | ✅ Done · [BUG-0011.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0011.md) | — |
+| `STORY-150` | Story | Card EXP from Dungeon Wins & Real Skill MP Cost in Combat | 3 | `EPIC-015` | ✅ Done · [STORY-150.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-150.md) | `BUG-0010` |
+| `STORY-151` | Story | DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table) | 8 | `EPIC-015` | ✅ Done · [STORY-151.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-151.md) | `STORY-150` |
+| `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | `EPIC-015` | ✅ Done · [STORY-152.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-152.md) | `STORY-151` |
+| `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | `EPIC-015` | ✅ Done · [STORY-153.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-153.md) | `STORY-151` |
+| `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | `EPIC-015` | ✅ Done · [STORY-154.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-154.md) | `STORY-152`, `STORY-153` |
+| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | `EPIC-015` | ✅ Done · [STORY-155.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-155.md) | `STORY-154` |
+| `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | `EPIC-015` | ✅ Done · [STORY-156.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-156.md) | `STORY-152` |
+| `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | `EPIC-015` | ✅ Done · [STORY-157.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-157.md) | `BUG-0010` |
+| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | `EPIC-015` | ✅ Done · [STORY-158.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-158.md) | `STORY-157` |
+| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | `EPIC-015` | ✅ Done · [STORY-159.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-159.md) | `STORY-152`, `STORY-156` |
 | `STORY-160` | Story | Equipment Crafting with Dust | 5 | `EPIC-015` | ✅ Done | `STORY-156` |
 | `TASK-1601` | Task | CraftingService & Recipe Table: Floor-Gated Recipes, Dust/Credit/Ingredient Costs, Atomic Craft | 2 | `STORY-160` | ✅ Done | `STORY-156` |
 | `TASK-1602` | Task | Interactive /item craft Menu (Slash & Prefix Parity) & Bot Service Wiring | 2 | `STORY-160` | ✅ Done | `TASK-1601` |
 | `TASK-1603` | Task | Crafting Docs, Catalog Copy & Help Center Entry | 1 | `STORY-160` | ✅ Done | `TASK-1602` |
 | `BUG-0014` | Bug | Equipped Gear Leaks Across Card Sales, Trades & Dismantles; Add Unequip All | 3 | `EPIC-015` | ✅ Done | — |
-| `BUG-0015` | Bug | Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs | 2 | `EPIC-015` | ✅ Done | — |
-| `BUG-0016` | Bug | Gear, Craft and Shop Dropdowns Silently Drop Entries Past 25 | 3 | `EPIC-015` | ✅ Done | — |
-| `BUG-0017` | Bug | Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul | 2 | `EPIC-010` | ✅ Done | — |
+| `BUG-0015` | Bug | Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs | 2 | `EPIC-015` | ✅ Done · [BUG-0015.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0015.md) | — |
+| `BUG-0016` | Bug | Gear, Craft and Shop Dropdowns Silently Drop Entries Past 25 | 3 | `EPIC-015` | ✅ Done · [BUG-0016.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0016.md) | — |
+| `BUG-0017` | Bug | Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul | 2 | `EPIC-010` | ✅ Done · [BUG-0017.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0017.md) | — |
 | `CHORE-0602` | Chore | Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards | — | `EPIC-015` | ❌ Dropped | `BUG-0014` |
-| `CHORE-0603` | Chore | Align Default Prefix: Code Fallback `!` vs .env.example and Guide Text `$` | 1 | — | ✅ Done | — |
-| `BUG-0013` | Bug | player_energy.bonus_energy Is Read as Capacity but Never Granted (Daily Incremental Bonus Energy & Configurable Admin Cap) | 3 | `EPIC-015` | ✅ Done | — |
+| `CHORE-0603` | Chore | Align Default Prefix: Code Fallback `!` vs .env.example and Guide Text `$` | 1 | — | ✅ Done · [CHORE-0603.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-0603.md) | — |
+| `BUG-0013` | Bug | player_energy.bonus_energy Is Read as Capacity but Never Granted (Daily Incremental Bonus Energy & Configurable Admin Cap) | 3 | `EPIC-015` | ✅ Done · [BUG-0013.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0013.md) | — |
 
 ### 📋 Groomed Stories & Tasks for EPIC-010 (Waifu TCG)
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | `EPIC-010` | ✅ Done | `EPIC-002` |
-| `TASK-1001` | Task | waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository | 2 | `STORY-100` | ✅ Done | `EPIC-002` |
-| `TASK-1002` | Task | Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests | 1 | `STORY-100` | ✅ Done | `TASK-1001` |
-| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | ✅ Done | `STORY-100` |
-| `TASK-1011` | Task | 8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling | 3 | `STORY-101` | ✅ Done | `STORY-100` |
-| `TASK-1012` | Task | Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite | 2 | `STORY-101` | ✅ Done | `TASK-1011` |
-| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | ✅ Done | `STORY-101` |
-| `TASK-1021` | Task | 7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator | 2 | `STORY-102` | ✅ Done | `STORY-101` |
-| `TASK-1022` | Task | PvP Duels (`/game pvp`), Timed Expeditions (`/game explore`), Boss Raids (`/game boss`) & Quests | 1 | `STORY-102` | ✅ Done | `TASK-1021` |
-| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | ✅ Done | `STORY-102` |
-| `TASK-1031` | Task | 6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog | 2 | `STORY-103` | ✅ Done | `STORY-102` |
-| `TASK-1032` | Task | Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands | 1 | `STORY-103` | ✅ Done | `TASK-1031` |
-| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | ✅ Done | `STORY-103` |
-| `TASK-1041` | Task | PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes | 3 | `STORY-104` | ✅ Done | `STORY-103` |
-| `TASK-1042` | Task | Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch `/dungeon` Suite | 2 | `STORY-104` | ✅ Done | `TASK-1041` |
-| `BUG-0008` | Bug | Fix Waifu TCG Tutorial False Completion, Missing Starter Card Seed & $climb Route | 3 | `STORY-104` | ✅ Done | None |
-| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | `EPIC-010` | ✅ Done | `STORY-104` |
-| `TASK-1051` | Task | Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration | 3 | `STORY-105` | ✅ Done | `STORY-104` |
-| `TASK-1052` | Task | WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite | 2 | `STORY-105` | ✅ Done | `TASK-1051` |
-| `TASK-1053` | Task | Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info) | 2 | `STORY-105` | ✅ Done | `TASK-1052` |
-| `TASK-1061` | Task | Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI | 5 | `STORY-105` | ✅ Done | `TASK-1053` |
+| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | `EPIC-010` | ✅ Done · [TASK-1002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1002.md) | `EPIC-002` |
+| `TASK-1001` | Task | waifu.im Ingestion Client, Image Validation, SHA-256 Deduplication & Asset Repository | 2 | `STORY-100` | ✅ Done · [TASK-1001.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1001.md) | `EPIC-002` |
+| `TASK-1002` | Task | Section 24 Attribution Footer, Soft-Delete Silhouette Fallback & Ingestion Unit Tests | 1 | `STORY-100` | ✅ Done · [TASK-1002.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1002.md) | `TASK-1001` |
+| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | `EPIC-010` | ✅ Done · [TASK-1012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1012.md) | `STORY-100` |
+| `TASK-1011` | Task | 8-Tier Rarity Math Engine, Dynamic Stats Generation, Skills/Passives & Card Leveling | 3 | `STORY-101` | ✅ Done · [TASK-1011.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1011.md) | `STORY-100` |
+| `TASK-1012` | Task | Chat Drops Engine, Anti-Sniping Cooldown, Card Dismantling & Collection Commands Suite | 2 | `STORY-101` | ✅ Done · [TASK-1012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1012.md) | `TASK-1011` |
+| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | `EPIC-010` | ✅ Done · [TASK-1022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1022.md) | `STORY-101` |
+| `TASK-1021` | Task | 7-Element Affinity Matrix (Including Ice), Tactical Status Effects, Dynamic Battle Perks & Combat Simulator | 2 | `STORY-102` | ✅ Done · [TASK-1021.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1021.md) | `STORY-101` |
+| `TASK-1022` | Task | PvP Duels (`/game pvp`), Timed Expeditions (`/game explore`), Boss Raids (`/game boss`) & Quests | 1 | `STORY-102` | ✅ Done · [TASK-1022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1022.md) | `TASK-1021` |
+| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | `EPIC-010` | ✅ Done · [TASK-1032.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1032.md) | `STORY-102` |
+| `TASK-1031` | Task | 6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog | 2 | `STORY-103` | ✅ Done · [TASK-1031.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1031.md) | `STORY-102` |
+| `TASK-1032` | Task | Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands | 1 | `STORY-103` | ✅ Done · [TASK-1032.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1032.md) | `TASK-1031` |
+| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | `EPIC-010` | ✅ Done · [TASK-1042.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1042.md) | `STORY-103` |
+| `TASK-1041` | Task | PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes | 3 | `STORY-104` | ✅ Done · [TASK-1041.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1041.md) | `STORY-103` |
+| `TASK-1042` | Task | Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch `/dungeon` Suite | 2 | `STORY-104` | ✅ Done · [TASK-1042.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1042.md) | `TASK-1041` |
+| `BUG-0008` | Bug | Fix Waifu TCG Tutorial False Completion, Missing Starter Card Seed & $climb Route | 3 | `STORY-104` | ✅ Done · [BUG-0008.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0008.md) | None |
+| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | `EPIC-010` | ✅ Done · [TASK-1061.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1061.md) | `STORY-104` |
+| `TASK-1051` | Task | Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration | 3 | `STORY-105` | ✅ Done · [TASK-1051.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1051.md) | `STORY-104` |
+| `TASK-1052` | Task | WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite | 2 | `STORY-105` | ✅ Done · [TASK-1052.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1052.md) | `TASK-1051` |
+| `TASK-1053` | Task | Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info) | 2 | `STORY-105` | ✅ Done · [TASK-1053.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1053.md) | `TASK-1052` |
+| `TASK-1061` | Task | Waifu TCG Visual Card Synthesis, Holographic Foil Engine & Card Builder CLI | 5 | `STORY-105` | ✅ Done · [TASK-1061.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1061.md) | `TASK-1053` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-009 (Giveaways, AutoVoice & Mini-Games)
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0901` | Task | Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine | 3 | `STORY-090` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0902` | Task | Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners | 2 | `STORY-090` | ✅ Done | `TASK-0901` |
-| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | ✅ Done | `TASK-0911` |
-| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | ✅ Done | `EPIC-002`, `EPIC-004` |
-| `TASK-0921` | Task | Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine | 3 | `STORY-092` | ✅ Done | `EPIC-002`, `EPIC-004` |
-| `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | ✅ Done | `TASK-0921` |
+| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | `EPIC-009` | ✅ Done · [TASK-0902.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0902.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-0901` | Task | Giveaways Repository, Lifecycle Scheduler & Crash-Resistant Rollover Engine | 3 | `STORY-090` | ✅ Done · [TASK-0901.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0901.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-0902` | Task | Dual-Dispatch Giveaway Commands Suite, Interactive Buttons & Gateway Listeners | 2 | `STORY-090` | ✅ Done · [TASK-0902.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0902.md) | `TASK-0901` |
+| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | `EPIC-009` | ✅ Done · [TASK-0912.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0912.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-0911` | Task | Voice State Gateway Handler, Join-To-Create Dynamic Channel Generator & Auto-Cleanup | 2 | `STORY-091` | ✅ Done · [TASK-0911.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0911.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-0912` | Task | Dual-Dispatch Auto-Voice Configuration & Control Commands | 1 | `STORY-091` | ✅ Done · [TASK-0912.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0912.md) | `TASK-0911` |
+| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | `EPIC-009` | ✅ Done · [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) | `EPIC-002`, `EPIC-004` |
+| `TASK-0921` | Task | Minimax Tic-Tac-Toe AI, RPS Session Engine & State Machine | 3 | `STORY-092` | ✅ Done · [TASK-0921.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0921.md) | `EPIC-002`, `EPIC-004` |
+| `TASK-0922` | Task | HighLow, Dice, CoinFlip & Dual-Dispatch Mini-Games Commands with Optional Economy Wagers | 2 | `STORY-092` | ✅ Done · [TASK-0922.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0922.md) | `TASK-0921` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-008 (Streamer Notifications & Free Games Announcer)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ✅ Done | `EPIC-002`, `EPIC-003` |
+| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | `EPIC-008` | ✅ Done · [TASK-0802.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0802.md) | `EPIC-002`, `EPIC-003` |
+| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ✅ Done · [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) | `EPIC-002`, `EPIC-003` |
 
-### 📋 Groomed Stories for EPIC-011 (Web Dashboard)
-| ID | Type | Title | Pts | Epic | Status | Prerequisites |
-|---|---|---|---|---|---|---|
-| `STORY-110` | Story | Next.js 16 App Router, React 19 Scaffolding & Discord OAuth2 Pipeline | 5 | `EPIC-011` | 📋 Backlog | `EPIC-001` |
-| `STORY-111` | Story | Server Management Portal & Core Module Settings Views (20+ Tabs) | 8 | `EPIC-011` | 📋 Backlog | `STORY-110` |
-| `STORY-112` | Story | Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer | 5 | `EPIC-011` | 📋 Backlog | `STORY-111` |
-| `STORY-113` | Story | Server Analytics, Live Case Logs & Shared Zod Validation Parity | 3 | `EPIC-011` | 📋 Backlog | `STORY-112` |
+### 📋 Groomed Stories & Tasks for EPIC-011 (Web Dashboard)
+> Groomed 2026-09-24. Children total 58 pts. STORY-110 and STORY-111 are the foundation; STORY-112..117 can run in any order after STORY-111. Pages expose only settings the bot actually reads (no placeholder UI).
 
-### 📋 Groomed Stories for EPIC-012 (Quality Gates & Production Deployment)
-| ID | Type | Title | Pts | Epic | Status | Prerequisites |
+| ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-120` | Story | End-to-End Vitest & Integration Test Harness (80%+ Coverage) | 5 | `EPIC-012` | 📋 Backlog | `EPIC-001` |
-| `STORY-121` | Story | Multi-Stage Rootless Dockerfile & docker-compose.production.yml | 5 | `EPIC-012` | 📋 Backlog | `STORY-120` |
-| `STORY-122` | Story | Health / Readiness Probes, GitHub Actions CI/CD & Production Verification | 3 | `EPIC-012` | 📋 Backlog | `STORY-121` |
+| `STORY-110` | Story | Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization | 8 | `EPIC-011` | 🎯 To Do | `EPIC-001` |
+| `TASK-1101` | Task | apps/web Workspace Scaffold: Next.js 16, React 19, Tailwind, Strict TS, Env Schema & Server-Only Service Bootstrap | 3 | `STORY-110` | 🎯 To Do | `EPIC-001` |
+| `TASK-1102` | Task | Discord OAuth2 (identify, guilds) Login/Callback/Logout & Revocable Server-Side Sessions (Hashed Session IDs, Encrypted Discord Tokens) | 3 | `STORY-110` | 🎯 To Do | `TASK-1101` |
+| `TASK-1103` | Task | Guild Discovery & requireGuildAccess Guard (ManageGuild/Administrator, Bot Membership, Per-Request Re-Verification) & Server Selector | 2 | `STORY-110` | 🎯 To Do | `TASK-1102` |
+| `STORY-111` | Story | Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity | 8 | `EPIC-011` | 🎯 To Do | `STORY-110` |
+| `TASK-1111` | Task | Shared Zod Guild Config Schemas in @ririko/core, GuildConfigService & audit_logs Field-Diff Writer | 3 | `STORY-111` | 🎯 To Do | `STORY-110` |
+| `TASK-1112` | Task | Dashboard Shell: Guild Layout & Module Nav, Channel/Role Pickers, Server Action Form Kit & General Tab | 3 | `STORY-111` | 🎯 To Do | `TASK-1111` |
+| `TASK-1113` | Task | `ririko guild:config <guild_id> [key] [value]` CLI Parity (get, set, list) on the Same Schemas & Service | 2 | `STORY-111` | 🎯 To Do | `TASK-1111` |
+| `STORY-114` | Story | Moderation, AutoMod, Logging, Command Overrides, Reaction Roles & Auto Voice Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `TASK-1141` | Task | Moderation Page (Warning Escalation Policy Builder) & AutoMod Page (Toggles & Thresholds) | 3 | `STORY-114` | 🎯 To Do | `STORY-111` |
+| `TASK-1142` | Task | Logging Channel Bindings & Command Overrides Page (command_settings Enable/Disable, Allowed/Blocked Roles, Cooldowns) | 2 | `STORY-114` | 🎯 To Do | `TASK-1141` |
+| `TASK-1143` | Task | Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages | 3 | `STORY-114` | 🎯 To Do | `TASK-1142` |
+| `STORY-115` | Story | Economy & Banking, XP & Ranking, Games & Giveaways Pages | 5 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `TASK-1151` | Task | Economy & Banking Page (Rewards, Interest, Item Shop Manager) & XP & Ranking Page (Multipliers, Voice XP, Level-Up Channel) | 3 | `STORY-115` | 🎯 To Do | `STORY-111` |
+| `TASK-1152` | Task | Games Page (Enable/Disable, Wager Limits, Cooldowns) & Giveaways Page (Active List, End, Reroll, History) | 2 | `STORY-115` | 🎯 To Do | `TASK-1151` |
+| `STORY-116` | Story | Music, AI Chatbot, Image Generation, Stream Alerts, Free Games, Welcome & Integrations Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-133` |
+| `TASK-1161` | Task | Music Page (Volume, DJ Role, Music Channel), AI Chatbot Page (Persona, Provider/Model, Tool Toggles) & Image Generation Page (Provider, Quotas, Presets) | 3 | `STORY-116` | 🎯 To Do | `STORY-111` |
+| `TASK-1162` | Task | Stream Alerts Page (Streamer Subscriptions, Templates, Mention Roles) & Free Games Page (Channels, Ping Roles) | 2 | `STORY-116` | 🎯 To Do | `TASK-1161` |
+| `TASK-1163` | Task | Welcome & Farewell Live Canvas Preview Editor (SSRF-Safe Background Upload) & Integrations Status Page (Zero Secret Exposure) | 3 | `STORY-116` | 🎯 To Do | `TASK-1162`, `STORY-133` |
+| `STORY-117` | Story | Dashboard Security Hardening: Passkey Step-Up, Session Management & Alerts, CSP & Authorization Coverage | 8 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `TASK-1171` | Task | WebAuthn Passkey Enrollment & Step-Up Re-Verification for Sensitive Writes (Mandatory for Bot-Owner Console) | 3 | `STORY-117` | 🎯 To Do | `STORY-111` |
+| `TASK-1172` | Task | Active Sessions Page (Revoke, Sign Out Everywhere), New Sign-In DM Alerts & Dashboard Change Notices to the Guild Log Channel | 2 | `STORY-117` | 🎯 To Do | `TASK-1171` |
+| `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-117` | 🎯 To Do | `TASK-1172` |
+| `STORY-112` | Story | Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer | 8 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `TASK-1121` | Task | TCG Settings: Guild Drop Settings, TCG Manager Role & Owner-Gated Global Rules (Market Tax, Listing Expiry, Energy Governance) | 3 | `STORY-112` | 🎯 To Do | `STORY-111` |
+| `TASK-1122` | Task | Owner-Only Dungeon Season Editor, Difficulty Curve Visualizer & Boss Enrage/Shield/Loot Configurator | 3 | `STORY-112` | 🎯 To Do | `TASK-1121` |
+| `TASK-1123` | Task | Card Album Viewer (CardSynthesizer Renders), Shop Catalog Manager & Achievement Manager | 2 | `STORY-112` | 🎯 To Do | `TASK-1122` |
+| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `TASK-1131` | Task | Command Usage Daily Counters (Dual-Dialect Table & Router Hook), Bot Status Heartbeat & Overview Tab | 3 | `STORY-113` | 🎯 To Do | `STORY-111` |
+| `TASK-1132` | Task | Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer | 2 | `STORY-113` | 🎯 To Do | `TASK-1131` |
+
+### 📋 Groomed Stories & Tasks for EPIC-012 (Quality Gates & Production Deployment)
+| ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
+|---|---|---|---|---|---|---|
+| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 5 | `EPIC-012` | 🎯 To Do | — |
+| `TASK-1201` | Task | Setup Playwright for Web Dashboard E2E Tests | 2 | `STORY-120` | 🎯 To Do | — |
+| `TASK-1202` | Task | Setup Discord API Mock Harness & Integration Test Suite | 3 | `STORY-120` | 🎯 To Do | — |
+| `STORY-121` | Story | Rootless Dockerfile & Containerization | 5 | `EPIC-012` | 🎯 To Do | `STORY-120` |
+| `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 2 | `STORY-121` | 🎯 To Do | — |
+| `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | `STORY-121` | 🎯 To Do | — |
+| `STORY-122` | Story | Production Orchestration & Health Probes | 3 | `EPIC-012` | 🎯 To Do | `STORY-121` |
+| `TASK-1221` | Task | Implement `/health` and `/ready` probes for Bot and Web | 1 | `STORY-122` | 🎯 To Do | — |
+| `TASK-1222` | Task | docker-compose.production.yml with Redis, PostgreSQL, and App Services | 2 | `STORY-122` | 🎯 To Do | — |
 
 ### 📋 Groomed Stories for EPIC-013 (Media Synthesis, Reactions & AI Images)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | ✅ Done | — |
-| `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | ✅ Done | `TASK-1301` |
-| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | ✅ Done | `EPIC-003` |
-| `TASK-1311` | Task | Meme Synthesis Engine: 11-Template Catalog, @napi-rs/canvas Renderer (Auto-Wrap, Font Scaling & Shadows) & Vitest Suite | 3 | `STORY-131` | ✅ Done | — |
-| `TASK-1312` | Task | Dual-Dispatch /meme Command Suite with Autocomplete, 11 Legacy Prefix Aliases & Attachment Delivery | 2 | `STORY-131` | ✅ Done | `TASK-1311` |
-| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | ✅ Done | `EPIC-003` |
-| `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | ✅ Done | `EPIC-003` |
-| `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | ✅ Done | `TASK-1321` |
-| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | 📋 Backlog | `EPIC-003` |
+| `STORY-130` | Story | Unified `/react` Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | `EPIC-013` | ✅ Done · [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-1301` | Task | Command Framework: Autocomplete Option Flag, `ctx.invokedName` Alias Resolution, REACTIONS Category & 68-Entry Reaction Catalog | 2 | `STORY-130` | ✅ Done · [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) | — |
+| `TASK-1302` | Task | ReactionGifService (OtakuGIFs Client, TTL URL Pool, Offline Fallback) & Unified `/react` Command with 67 Legacy Prefix Aliases | 3 | `STORY-130` | ✅ Done · [STORY-130.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-130.md) | `TASK-1301` |
+| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | `EPIC-013` | ✅ Done · [STORY-131.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-131.md) | `EPIC-003` |
+| `TASK-1311` | Task | Meme Synthesis Engine: 11-Template Catalog, @napi-rs/canvas Renderer (Auto-Wrap, Font Scaling & Shadows) & Vitest Suite | 3 | `STORY-131` | ✅ Done · [TASK-1311.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1311.md) | — |
+| `TASK-1312` | Task | Dual-Dispatch /meme Command Suite with Autocomplete, 11 Legacy Prefix Aliases & Attachment Delivery | 2 | `STORY-131` | ✅ Done · [TASK-1312.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1312.md) | `TASK-1311` |
+| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | ✅ Done · [STORY-132.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-132.md) | `EPIC-003` |
+| `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | ✅ Done · [TASK-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1321.md) | `EPIC-003` |
+| `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | ✅ Done · [TASK-1322.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1322.md) | `TASK-1321` |
+| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | 🎯 To Do | `EPIC-003` |
+| `TASK-1331` | Task | Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests | 2 | `STORY-133` | 🎯 To Do | — |
+| `TASK-1332` | Task | guildMemberAdd / guildMemberRemove Discord Gateway listeners and dual-dispatch configuration commands (/welcomer, /farewell) | 1 | `STORY-133` | 🎯 To Do | `TASK-1331` |
 
 ### 📋 Groomed Stories for EPIC-014 (Server Utilities, AutoRoles & Community)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | `EPIC-014` | ✅ Done | `EPIC-003`, `CHORE-1401` |
-| `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | `EPIC-014` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | `EPIC-014` | ✅ Done | `CHORE-1401` |
+| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | `EPIC-014` | ✅ Done · [STORY-140.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-140.md) | `EPIC-002`, `EPIC-003` |
+| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | `EPIC-014` | ✅ Done · [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) | `EPIC-002`, `EPIC-003` |
+| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | `EPIC-014` | ✅ Done · [STORY-142.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-142.md) | `EPIC-003`, `CHORE-1401` |
+| `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | `EPIC-014` | ✅ Done · [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) | `EPIC-002`, `EPIC-003` |
+| `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | `EPIC-014` | ✅ Done · [STORY-144.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-144.md) | `CHORE-1401` |
 
 ### 🛠️ Completed Tasks for STORY-143 (Server Utility, Identity & Timezone Commands Parity)
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `TASK-1431` | Task | GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration | 2 | `STORY-143` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-1432` | Task | Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity | 2 | `STORY-143` | ✅ Done | `TASK-1431` |
-| `TASK-1433` | Task | Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting | 1 | `STORY-143` | ✅ Done | `TASK-1431` |
+| `TASK-1431` | Task | GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration | 2 | `STORY-143` | ✅ Done · [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-1432` | Task | Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity | 2 | `STORY-143` | ✅ Done · [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) | `TASK-1431` |
+| `TASK-1433` | Task | Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting | 1 | `STORY-143` | ✅ Done · [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) | `TASK-1431` |
 
 ### 🛠️ Completed Tasks for STORY-140 (Automatic Role System & Reaction Roles)
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `TASK-1401` | Task | Database Schemas & Dual-Dialect Repositories (AutoRoles, ReactionRoles, TempRoles) | 1 | `STORY-140` | ✅ Done | `EPIC-002` |
-| `TASK-1402` | Task | AutoRole Engine: Join Roles (Humans & Bots), Verification Gateway & Temp Role Sweeper | 1 | `STORY-140` | ✅ Done | `TASK-1401` |
-| `TASK-1403` | Task | ReactionRole Engine: Multi-Mode Emoji, Button & Select Menu Handlers | 2 | `STORY-140` | ✅ Done | `TASK-1401` |
-| `TASK-1404` | Task | Dual-Dispatch Commands (/autorole, /create-reaction-role, /reaction-roles, /temprole) with Slash & Prefix Parity | 1 | `STORY-140` | ✅ Done | `TASK-1402`, `TASK-1403` |
-| `TASK-1405` | Task | Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites | 1 | `STORY-140` | ✅ Done | `TASK-1404` |
+| `TASK-1401` | Task | Database Schemas & Dual-Dialect Repositories (AutoRoles, ReactionRoles, TempRoles) | 1 | `STORY-140` | ✅ Done · [TASK-1401.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1401.md) | `EPIC-002` |
+| `TASK-1402` | Task | AutoRole Engine: Join Roles (Humans & Bots), Verification Gateway & Temp Role Sweeper | 1 | `STORY-140` | ✅ Done · [TASK-1402.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1402.md) | `TASK-1401` |
+| `TASK-1403` | Task | ReactionRole Engine: Multi-Mode Emoji, Button & Select Menu Handlers | 2 | `STORY-140` | ✅ Done · [TASK-1403.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1403.md) | `TASK-1401` |
+| `TASK-1404` | Task | Dual-Dispatch Commands (/autorole, /create-reaction-role, /reaction-roles, /temprole) with Slash & Prefix Parity | 1 | `STORY-140` | ✅ Done · [TASK-1404.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1404.md) | `TASK-1402`, `TASK-1403` |
+| `TASK-1405` | Task | Gateway Listener Wiring, Component Routing & Comprehensive Vitest Suites | 1 | `STORY-140` | ✅ Done · [TASK-1405.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1405.md) | `TASK-1404` |
 
 ### 🛠️ Completed Tasks for EPIC-007 (Moderation 2.0)
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `TASK-0701` | Task | PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock) | 3 | `STORY-070` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0702` | Task | Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History | 2 | `STORY-070` | ✅ Done | `TASK-0701` |
-| `TASK-0711` | Task | Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations | 2 | `STORY-071` | ✅ Done | `STORY-070` |
-| `TASK-0712` | Task | Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support | 1 | `STORY-071` | ✅ Done | `TASK-0711` |
-| `TASK-0721` | Task | AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam) | 2 | `STORY-072` | ✅ Done | `STORY-070` |
-| `TASK-0722` | Task | Anti-Raid Mass Join Monitor & Automated Server Verification Gate | 1 | `STORY-072` | ✅ Done | `TASK-0721` |
-| `TASK-0731` | Task | Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.) | 1 | `STORY-073` | ✅ Done | `STORY-071`, `STORY-072` |
-| `TASK-0732` | Task | Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests | 1 | `STORY-073` | ✅ Done | `TASK-0731` |
+| `TASK-0701` | Task | PermissionService & Discord Punitive Actions Core (Kick, Ban, Softban, Timeout, Lock) | 3 | `STORY-070` | ✅ Done · [TASK-0701.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0701.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-0702` | Task | Sequential Case Audit Logger, Staff Notes Manager & Disciplinary History | 2 | `STORY-070` | ✅ Done · [TASK-0702.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0702.md) | `TASK-0701` |
+| `TASK-0711` | Task | Dynamic Warning Escalation Engine & Sliding-Window Warning Expirations | 2 | `STORY-071` | ✅ Done · [TASK-0711.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0711.md) | `STORY-070` |
+| `TASK-0712` | Task | Disciplinary Purge & Bulk Message Sanitizer with Multi-Filter Support | 1 | `STORY-071` | ✅ Done · [TASK-0712.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0712.md) | `TASK-0711` |
+| `TASK-0721` | Task | AutoMod Rule Pipeline & High-Speed Pattern Engine (Invites, Phishing, Mentions, Spam) | 2 | `STORY-072` | ✅ Done · [TASK-0721.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0721.md) | `STORY-070` |
+| `TASK-0722` | Task | Anti-Raid Mass Join Monitor & Automated Server Verification Gate | 1 | `STORY-072` | ✅ Done · [TASK-0722.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0722.md) | `TASK-0721` |
+| `TASK-0731` | Task | Dual-Dispatch Moderation Commands Suite (/warn, /timeout, /kick, /ban, /purge, /lock, etc.) | 1 | `STORY-073` | ✅ Done · [TASK-0731.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0731.md) | `STORY-071`, `STORY-072` |
+| `TASK-0732` | Task | Gateway Moderation Listeners, AutoMod Message Pipeline Wiring & Integration Tests | 1 | `STORY-073` | ✅ Done · [TASK-0732.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0732.md) | `TASK-0731` |
 
 ### 🛠️ Groomed Tasks for EPIC-006
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | ✅ Done | `TASK-0601` |
-| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | ✅ Done | `STORY-060` |
-| `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | ✅ Done | `TASK-0611` |
-| `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | ✅ Done | `STORY-061` |
-| `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | ✅ Done | `TASK-0621` |
-| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | `STORY-063` | ✅ Done | `STORY-062` |
-| `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | `STORY-063` | ✅ Done | `TASK-0631` |
+| `TASK-0601` | Task | packages/ai Scaffolding, Core Types, Provider Interfaces & Fallback Chain Manager | 3 | `STORY-060` | ✅ Done · [TASK-0601.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0601.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-0602` | Task | Google Gemini (@google/genai), OpenAI & Ollama Model Adapters with Native Tool Calling | 2 | `STORY-060` | ✅ Done · [TASK-0602.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0602.md) | `TASK-0601` |
+| `TASK-0611` | Task | AI Conversation Repository, Multi-Dialect Schemas & Strict Per-User Isolation Engine | 2 | `STORY-061` | ✅ Done · [TASK-0611.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0611.md) | `STORY-060` |
+| `TASK-0612` | Task | Personality Engine, System Safety Prompts & Sanitized Identity Ingestion | 1 | `STORY-061` | ✅ Done · [TASK-0612.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0612.md) | `TASK-0611` |
+| `TASK-0621` | Task | Explicit Time Tool (get_current_time) with Multi-Tier Timezone Resolution & Utility Tools | 1 | `STORY-062` | ✅ Done · [TASK-0621.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0621.md) | `STORY-061` |
+| `TASK-0622` | Task | Application Security Interceptor & Discord Permission-Mediated Tool Calling | 2 | `STORY-062` | ✅ Done · [TASK-0622.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0622.md) | `TASK-0621` |
+| `TASK-0631` | Task | Dedicated #ririko-ai Channel Gateway Listener & Debounced Streaming Message Controller | 1 | `STORY-063` | ✅ Done · [TASK-0631.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0631.md) | `STORY-062` |
+| `TASK-0632` | Task | Dual-Dispatch AI Commands Suite (/ai chat, /ai model, /ai channel, /ai persona, /ai clear) & Tests | 1 | `STORY-063` | ✅ Done · [TASK-0632.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0632.md) | `TASK-0631` |
 
 ### 🛠️ Groomed Tasks for EPIC-005
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `TASK-0501` | Task | Extractor Interfaces, Pattern Matchers & Source Adapters | 3 | `STORY-050` | ✅ Done | `EPIC-002`, `EPIC-003` |
-| `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | ✅ Done | `TASK-0501` |
-| `TASK-0503` | Task | YouTube PO-Token Automation: CLI Generator & In-Process Background Provider | 3 | `STORY-050` | ✅ Done | `TASK-0502` |
-| `TASK-0504` | Task | Playwright Firefox YouTube Credential Harvester | 3 | `STORY-050` | ✅ Done | `TASK-0503` |
-| `TASK-0505` | Task | Chrome/Chromium Browser Harvester (Playwright Chrome & Anti-Detection) | 2 | `STORY-050` | ✅ Done | `TASK-0504` |
-| `TASK-0506` | Task | Spotify Web API Integration & Bridge Overhaul (Scrap go-librespot) | 3 | `STORY-050` | ✅ Done | `TASK-0505` |
-| `TASK-0511` | Task | Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping | 3 | `STORY-051` | ✅ Done | `STORY-050` |
-| `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | ✅ Done | `TASK-0511` |
-| `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | ✅ Done | `STORY-051` |
-| `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | ✅ Done | `TASK-0521` |
+| `TASK-0501` | Task | Extractor Interfaces, Pattern Matchers & Source Adapters | 3 | `STORY-050` | ✅ Done · [TASK-0501.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0501.md) | `EPIC-002`, `EPIC-003` |
+| `TASK-0502` | Task | Session Cookie Rotation, Client Spoofing & Health Checks | 2 | `STORY-050` | ✅ Done · [TASK-0502.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0502.md) | `TASK-0501` |
+| `TASK-0503` | Task | YouTube PO-Token Automation: CLI Generator & In-Process Background Provider | 3 | `STORY-050` | ✅ Done · [TASK-0503.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0503.md) | `TASK-0502` |
+| `TASK-0504` | Task | Playwright Firefox YouTube Credential Harvester (Cookies, PO-Token, VisitorData & Client Spoofing) | 3 | `STORY-050` | ✅ Done · [TASK-0504.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0504.md) | `TASK-0503` |
+| `TASK-0505` | Task | Chrome/Chromium Browser Harvester (Playwright Chrome, Anti-Detection & Interactive Google Login) | 2 | `STORY-050` | ✅ Done · [TASK-0505.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0505.md) | `TASK-0504` |
+| `TASK-0506` | Task | Spotify Web API Integration & Bridge Overhaul (Scrap go-librespot) | 3 | `STORY-050` | ✅ Done · [TASK-0506.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0506.md) | `TASK-0505` |
+| `TASK-0511` | Task | Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping | 3 | `STORY-051` | ✅ Done · [TASK-0511.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0511.md) | `STORY-050` |
+| `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | ✅ Done · [TASK-0512.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0512.md) | `TASK-0511` |
+| `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | ✅ Done · [TASK-0521.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0521.md) | `STORY-051` |
+| `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | ✅ Done · [TASK-0522.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0522.md) | `TASK-0521` |
 
 ### 🛠️ Groomed Tasks for EPIC-004
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | ✅ Done | `TASK-0411` |
-| `TASK-0421` | Task | Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls | 2 | `STORY-042` | ✅ Done | `STORY-041` |
-| `TASK-0422` | Task | Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries | 3 | `STORY-042` | ✅ Done | `TASK-0421` |
-| `TASK-0431` | Task | Item Catalog Repository, Inventory Bags & Usable Consumables (Anti-Abuse Daily Potion Ceilings) | 3 | `STORY-043` | ✅ Done | `TASK-0412` |
-| `TASK-0432` | Task | Custom Profile Background Manager with DNS/SSRF IP Verification, Dimension Bounds & Cache | 2 | `STORY-043` | ✅ Done | `TASK-0431` |
-| `TASK-0441` | Task | Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot) | 3 | `STORY-044` | ✅ Done | `TASK-0422`, `TASK-0432` |
-| `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | ✅ Done | `TASK-0441` |
+| `TASK-0412` | Task | Banking Service (Deposit, Withdraw, Capacity Scaling, Interest Yield & Deadlock-Free Transfers) | 3 | `STORY-041` | ✅ Done · [TASK-0412.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0412.md) | `TASK-0411` |
+| `TASK-0421` | Task | Leveling Progression Formula (5L^2 + 50L + 100), Level-Up Events & Karma Controls | 2 | `STORY-042` | ✅ Done · [TASK-0421.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0421.md) | `STORY-041` |
+| `TASK-0422` | Task | Materialized Leaderboard Snapshot Engine, Cron Calculation & O(1) Dense Rank Queries | 3 | `STORY-042` | ✅ Done · [TASK-0422.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0422.md) | `TASK-0421` |
+| `TASK-0431` | Task | Item Catalog Repository, Inventory Bags & Usable Consumables (Anti-Abuse Daily Potion Ceilings) | 3 | `STORY-043` | ✅ Done · [TASK-0431.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0431.md) | `TASK-0412` |
+| `TASK-0432` | Task | Custom Profile Background Manager with DNS/SSRF IP Verification, Dimension Bounds & Cache | 2 | `STORY-043` | ✅ Done · [TASK-0432.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0432.md) | `TASK-0431` |
+| `TASK-0441` | Task | Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot) | 3 | `STORY-044` | ✅ Done · [TASK-0441.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0441.md) | `TASK-0422`, `TASK-0432` |
+| `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | ✅ Done · [TASK-0442.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0442.md) | `TASK-0441` |
 
 

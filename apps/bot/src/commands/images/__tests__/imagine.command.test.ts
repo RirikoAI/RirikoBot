@@ -407,7 +407,7 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
       expect(call.embeds[0].data.description).toContain('permanently discontinued');
     });
 
-    it('attaches WebP images correctly with imagine.webp and attachment://imagine.webp (BUG-0018)', async () => {
+    it('attaches WebP images correctly with imagine.webp and attachment://imagine.webp (BUG-0019)', async () => {
       const services = createMockServices();
       (services.imageGenerationService.generateImage as Mock).mockResolvedValueOnce({
         jobId: 'job-webp-123',
