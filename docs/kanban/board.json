@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-1101",
+  "active_in_progress_ticket": "TASK-1103",
   "epics": [
     {
       "id": "EPIC-000",
@@ -2450,7 +2450,7 @@
       "parent": "STORY-110",
       "title": "apps/web Workspace Scaffold: Next.js 16, React 19, Tailwind, Strict TS, Env Schema & Server-Only Service Bootstrap",
       "points": 3,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": [
         "EPIC-001"
       ],
@@ -2464,7 +2464,7 @@
       "parent": "STORY-110",
       "title": "Discord OAuth2 (identify, guilds) Login/Callback/Logout & Revocable Server-Side Sessions (Hashed Session IDs, Encrypted Discord Tokens)",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1101"
       ],
@@ -2478,7 +2478,7 @@
       "parent": "STORY-110",
       "title": "Guild Discovery & requireGuildAccess Guard (ManageGuild/Administrator, Bot Membership, Per-Request Re-Verification) & Server Selector",
       "points": 2,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "TASK-1102"
       ],
