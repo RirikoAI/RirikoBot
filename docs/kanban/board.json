@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-1332",
+  "active_in_progress_ticket": "TASK-1101",
   "epics": [
     {
       "id": "EPIC-000",
@@ -200,7 +200,7 @@
       "id": "EPIC-013",
       "title": "Media Synthesis, Anime Reactions & AI Image Generation",
       "points": 21,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -1002,7 +1002,7 @@
       "epic": "EPIC-013",
       "title": "Welcomer & Farewell Dynamic Card Canvas with SSRF Verification",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "EPIC-003"
       ],
@@ -2450,7 +2450,7 @@
       "parent": "STORY-110",
       "title": "apps/web Workspace Scaffold: Next.js 16, React 19, Tailwind, Strict TS, Env Schema & Server-Only Service Bootstrap",
       "points": 3,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "EPIC-001"
       ],
@@ -3083,7 +3083,7 @@
       "parent": "STORY-133",
       "title": "guildMemberAdd / guildMemberRemove Discord Gateway listeners and dual-dispatch configuration commands (/welcomer, /farewell)",
       "points": 1,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": [
         "TASK-1331"
       ],
