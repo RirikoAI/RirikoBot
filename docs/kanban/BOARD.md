@@ -8,7 +8,7 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| | | | | |
+| `TASK-1101` | Task | apps/web Workspace Scaffold: Next.js 16, React 19, Tailwind, Strict TS, Env Schema & Server-Only Service Bootstrap | 3 | `STORY-110` (`EPIC-011`) |
 
 ---
 
@@ -27,7 +27,6 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 
 - `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 58): see **Groomed Stories & Tasks for EPIC-011**
 - `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
-- `STORY-133` Welcomer & Farewell Dynamic Card Canvas with SSRF Verification (3 pts): see **Groomed Stories for EPIC-013**
 
 ---
 
@@ -39,12 +38,12 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
-| `TASK-1331` | Task | Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests | 2 | `STORY-133` | [TASK-1331.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1331.md) |
 | `BUG-0019` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | `STORY-132` | [BUG-0019.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0019.md) |
 | `CHORE-1321` | Chore | CLI Command to Configure Image Generation Providers & Keys (image-configure) | 2 | — | [CHORE-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1321.md) |
 | `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | `EPIC-004` | [STORY-161.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-161.md) |
 | `BUG-0012` | Bug | Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired | 3 | `EPIC-015` | [BUG-0012.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0012.md) |
 | `BUG-0018` | Bug | Persist and Restore Guild Default Volume Across Music Sessions | 3 | `EPIC-005` | [BUG-0018.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0018.md) |
+| `EPIC-013` | Epic | Media Synthesis, Anime Reactions & AI Image Generation | 21 | Self | [TASK-1332.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1332.md) |
 | `EPIC-014` | Epic | Server Utilities, AutoRoles & Community Systems | 21 | Self | [STORY-143.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-143.md) |
 | `TASK-1411` | Task | Reminder Repository (Dual-Dialect, Atomic Claim) & Legacy DM Guild Migration Fix | 1 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
 | `TASK-1412` | Task | ReminderService & Scheduler: chrono-node Parsing in User Timezone, Limits, DST-Safe Repeats, DM-then-Channel Delivery | 2 | `STORY-141` | [STORY-141.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-141.md) |
@@ -232,7 +231,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `STORY-110` | Story | Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization | 8 | `EPIC-011` | 🎯 To Do | `EPIC-001` |
-| `TASK-1101` | Task | apps/web Workspace Scaffold: Next.js 16, React 19, Tailwind, Strict TS, Env Schema & Server-Only Service Bootstrap | 3 | `STORY-110` | 🎯 To Do | `EPIC-001` |
+| `TASK-1101` | Task | apps/web Workspace Scaffold: Next.js 16, React 19, Tailwind, Strict TS, Env Schema & Server-Only Service Bootstrap | 3 | `STORY-110` | ⚡ In Progress | `EPIC-001` |
 | `TASK-1102` | Task | Discord OAuth2 (identify, guilds) Login/Callback/Logout & Revocable Server-Side Sessions (Hashed Session IDs, Encrypted Discord Tokens) | 3 | `STORY-110` | 🎯 To Do | `TASK-1101` |
 | `TASK-1103` | Task | Guild Discovery & requireGuildAccess Guard (ManageGuild/Administrator, Bot Membership, Per-Request Re-Verification) & Server Selector | 2 | `STORY-110` | 🎯 To Do | `TASK-1102` |
 | `STORY-111` | Story | Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity | 8 | `EPIC-011` | 🎯 To Do | `STORY-110` |
@@ -289,7 +288,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | ✅ Done · [STORY-132.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-132.md) | `EPIC-003` |
 | `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | ✅ Done · [TASK-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1321.md) | `EPIC-003` |
 | `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | ✅ Done · [TASK-1322.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1322.md) | `TASK-1321` |
-| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | ✅ Done | `EPIC-003` |
+| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | ✅ Done · [TASK-1332.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1332.md) | `EPIC-003` |
 | `TASK-1331` | Task | Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests | 2 | `STORY-133` | ✅ Done · [TASK-1331.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1331.md) | — |
 | `TASK-1332` | Task | guildMemberAdd / guildMemberRemove Discord Gateway listeners and dual-dispatch configuration commands (/welcomer, /farewell) | 1 | `STORY-133` | ✅ Done · [TASK-1332.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1332.md) | `TASK-1331` |
 
