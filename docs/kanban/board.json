@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-1103",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -820,7 +820,7 @@
       "epic": "EPIC-011",
       "title": "Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization",
       "points": 8,
-      "status": "TODO",
+      "status": "REVIEW",
       "requires": [
         "EPIC-001"
       ],
@@ -2478,7 +2478,7 @@
       "parent": "STORY-110",
       "title": "Guild Discovery & requireGuildAccess Guard (ManageGuild/Administrator, Bot Membership, Per-Request Re-Verification) & Server Selector",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": [
         "TASK-1102"
       ],
