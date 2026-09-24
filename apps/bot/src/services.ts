@@ -32,6 +32,7 @@ import {
   AutoRoleRepository,
   ReminderRepository,
   ImageRepository,
+  WelcomerRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import {
@@ -142,6 +143,7 @@ import {
   ReactionGifService,
   MemeSynthesizer,
   ImageGenerationService,
+  WelcomerService,
   type FreeGameItem,
 } from '@ririko/services';
 
@@ -259,6 +261,8 @@ export interface BotServices {
   autoRoleService: AutoRoleService;
   imageRepo: ImageRepository;
   imageGenerationService: ImageGenerationService;
+  welcomerRepo: WelcomerRepository;
+  welcomerService: WelcomerService;
 }
 
 /**
@@ -300,6 +304,8 @@ export async function createBotServices(
   const autoRoleRepo = new AutoRoleRepository(db);
   const reactionRoleService = new ReactionRoleService(reactionRoleRepo);
   const autoRoleService = new AutoRoleService(autoRoleRepo);
+  const welcomerRepo = new WelcomerRepository(db);
+  const welcomerService = new WelcomerService();
   const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo);
   const gameItemRepo = new GameItemRepository(db);
   const userInventoryItemRepo = new UserInventoryItemRepository(db);
@@ -949,6 +955,8 @@ export async function createBotServices(
     autoRoleRepo,
     reactionRoleService,
     autoRoleService,
+    welcomerRepo,
+    welcomerService,
     imageRepo,
     imageGenerationService,
   };

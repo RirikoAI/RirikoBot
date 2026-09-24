@@ -6,7 +6,9 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-*No tickets currently in progress.*
+| ID | Type | Title | Pts | Epic / Parent |
+|---|---|---|---|---|
+| | | | | |
 
 ---
 
@@ -37,6 +39,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-1331` | Task | Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests | 2 | `STORY-133` | [TASK-1331.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1331.md) |
 | `BUG-0019` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | `STORY-132` | [BUG-0019.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0019.md) |
 | `CHORE-1321` | Chore | CLI Command to Configure Image Generation Providers & Keys (image-configure) | 2 | — | [CHORE-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1321.md) |
 | `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | `EPIC-004` | [STORY-161.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-161.md) |
@@ -260,6 +263,8 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1132` | Task | Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer | 2 | `STORY-113` | 🎯 To Do | `TASK-1131` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-012 (Quality Gates & Production Deployment)
+> Scope gap from the regrooming: the original STORY-120 targeted 80%+ test coverage and the original STORY-122 included GitHub Actions CI/CD. Neither is covered by the tasks below; add them back before EPIC-012 closes. TASK-1221 can reuse the bot status record from TASK-1131 (EPIC-011).
+
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
 | `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 5 | `EPIC-012` | 🎯 To Do | — |
@@ -284,9 +289,10 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | `EPIC-013` | ✅ Done · [STORY-132.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-132.md) | `EPIC-003` |
 | `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | `STORY-132` | ✅ Done · [TASK-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1321.md) | `EPIC-003` |
 | `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | `STORY-132` | ✅ Done · [TASK-1322.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1322.md) | `TASK-1321` |
-| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | 🎯 To Do | `EPIC-003` |
-| `TASK-1331` | Task | Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests | 2 | `STORY-133` | 🎯 To Do | — |
-| `TASK-1332` | Task | guildMemberAdd / guildMemberRemove Discord Gateway listeners and dual-dispatch configuration commands (/welcomer, /farewell) | 1 | `STORY-133` | 🎯 To Do | `TASK-1331` |
+| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | `EPIC-013` | ✅ Done | `EPIC-003` |
+| `TASK-1331` | Task | Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests | 2 | `STORY-133` | ✅ Done · [TASK-1331.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1331.md) | — |
+| `TASK-1332` | Task | guildMemberAdd / guildMemberRemove Discord Gateway listeners and dual-dispatch configuration commands (/welcomer, /farewell) | 1 | `STORY-133` | ✅ Done · [TASK-1332.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1332.md) | `TASK-1331` |
+
 
 ### 📋 Groomed Stories for EPIC-014 (Server Utilities, AutoRoles & Community)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |

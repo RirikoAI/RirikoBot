@@ -75,19 +75,23 @@ export const reminders = sqliteTable(
   (table) => [index('idx_reminders_trigger').on(table.triggerAt, table.isCompleted)],
 );
 
-export const welcomeConfigs = sqliteTable('welcome_configs', {
+export const guildWelcomer = sqliteTable('guild_welcomer', {
   guildId: text('guild_id').primaryKey(),
   channelId: text('channel_id').notNull(),
   messageTemplate: text('message_template').notNull().default('Welcome to {server}, {user}!'),
   cardTheme: text('card_theme').notNull().default('DEFAULT'),
+  backgroundUrl: text('background_url'),
+  textColor: text('text_color').notNull().default('#ffffff'),
   isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
 });
 
-export const farewellConfigs = sqliteTable('farewell_configs', {
+export const guildFarewell = sqliteTable('guild_farewell', {
   guildId: text('guild_id').primaryKey(),
   channelId: text('channel_id').notNull(),
   messageTemplate: text('message_template').notNull().default('Goodbye {user}!'),
   cardTheme: text('card_theme').notNull().default('DEFAULT'),
+  backgroundUrl: text('background_url'),
+  textColor: text('text_color').notNull().default('#ffffff'),
   isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
 });
 
