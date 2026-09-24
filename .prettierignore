@@ -1,4 +1,5 @@
 dist/
+.next/
 node_modules/
 .local/
 pnpm-lock.yaml

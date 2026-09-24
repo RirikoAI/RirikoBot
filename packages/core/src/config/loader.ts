@@ -1,4 +1,5 @@
-import { AppConfig, AppConfigSchema } from './schema.js';
+import type { z } from 'zod';
+import { AppConfig, AppConfigSchema, WebConfig, WebConfigSchema } from './schema.js';
 
 let cachedConfig: AppConfig | null = null;
 
@@ -29,8 +30,24 @@ export function loadConfig(
     return cachedConfig;
   }
 
-  const rawEnv = envOverrides ?? process.env;
-  const result = AppConfigSchema.safeParse(rawEnv);
+  const config = parseConfig(AppConfigSchema, envOverrides ?? process.env);
+
+  if (options.cache !== false) {
+    cachedConfig = config;
+  }
+
+  return config;
+}
+
+/**
+ * Validates the environment against a config schema.
+ * Throws a ConfigurationError listing every invalid or missing variable.
+ */
+export function parseConfig<TSchema extends z.ZodTypeAny>(
+  schema: TSchema,
+  env: Record<string, string | undefined>,
+): z.output<TSchema> {
+  const result = schema.safeParse(env);
 
   if (!result.success) {
     const formattedErrors = result.error.errors.map(
@@ -44,11 +61,15 @@ export function loadConfig(
     throw new ConfigurationError(errorMessage, formattedErrors);
   }
 
-  if (options.cache !== false) {
-    cachedConfig = result.data;
-  }
-
   return result.data;
+}
+
+/**
+ * Validates and loads the web dashboard configuration (not cached; the dashboard keeps its own
+ * server-only singleton).
+ */
+export function loadWebConfig(env: Record<string, string | undefined> = process.env): WebConfig {
+  return parseConfig(WebConfigSchema, env);
 }
 
 /**

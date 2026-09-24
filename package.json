@@ -11,6 +11,9 @@
     "build": "tsc -b",
     "dev:bot": "pnpm --filter @ririko/bot dev",
     "start:bot": "pnpm --filter @ririko/bot start",
+    "dev:web": "tsc -b && pnpm --filter @ririko/web dev",
+    "build:web": "tsc -b && pnpm --filter @ririko/web build",
+    "start:web": "pnpm --filter @ririko/web start",
     "lavalink:install": "tsx --env-file=.env scripts/lavalink-setup.ts",
     "lavalink:start": "tsx --env-file=.env scripts/lavalink-start.ts",
     "cli": "tsx apps/cli/src/index.ts",
@@ -35,6 +38,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@napi-rs/canvas": "^0.1.66",
+    "@next/eslint-plugin-next": "^16.3.6",
     "@types/node": "^22.13.9",
     "eslint": "^10.10.0",
     "husky": "^9.1.7",

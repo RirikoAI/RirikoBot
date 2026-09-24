@@ -7,6 +7,8 @@ export type NodeEnv = z.infer<typeof NodeEnvSchema>;
 export const DatabaseDialectSchema = z.enum(['postgres', 'sqlite']).default('sqlite');
 export type DatabaseDialect = z.infer<typeof DatabaseDialectSchema>;
 
+const HEX_KEY = /^[0-9a-fA-F]{64}$/;
+
 export const LogLevelSchema = z
   .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
   .default('info');
@@ -35,7 +37,17 @@ const BaseAppConfigSchema = z.object({
   // AppSec & Credential Vault (AES-256-GCM 32-byte hex key)
   SECRET_VAULT_KEY: z
     .string()
-    .length(64, 'SECRET_VAULT_KEY must be a 64-character hex string (32 bytes)')
+    .regex(HEX_KEY, 'SECRET_VAULT_KEY must be a 64-character hex string (32 bytes)')
+    .optional(),
+  // Version stamped into every ciphertext so the key can be rotated without breaking old data.
+  SECRET_VAULT_KEY_VERSION: z.coerce.number().int().min(1).default(1),
+  // Retired keys still accepted for decryption during rotation: "1:<hex>,2:<hex>".
+  SECRET_VAULT_PREVIOUS_KEYS: z
+    .string()
+    .regex(
+      /^\d+:[0-9a-fA-F]{64}(,\d+:[0-9a-fA-F]{64})*$/,
+      'SECRET_VAULT_PREVIOUS_KEYS must be a comma-separated list of <version>:<64-char hex key>',
+    )
     .optional(),
 
   // Optional AI Provider Keys & Configuration
@@ -68,7 +80,7 @@ const BaseAppConfigSchema = z.object({
   ...ResetConfigShape,
 });
 
-export const AppConfigSchema = z.preprocess((val) => {
+function applyLegacyAliases(val: unknown): unknown {
   if (val && typeof val === 'object') {
     const raw = { ...(val as Record<string, unknown>) };
     // Legacy 1.4.0 environment variable compatibility
@@ -93,7 +105,31 @@ export const AppConfigSchema = z.preprocess((val) => {
     return raw;
   }
   return val;
-}, BaseAppConfigSchema);
+}
+
+export const AppConfigSchema = z.preprocess(applyLegacyAliases, BaseAppConfigSchema);
 
 export type AppConfig = z.infer<typeof BaseAppConfigSchema>;
 export type AppConfigInput = z.input<typeof AppConfigSchema>;
+
+/**
+ * Web dashboard (apps/web) configuration. The OAuth2 secret, public URL and vault key are
+ * optional for the bot but required for the dashboard.
+ */
+const BaseWebConfigSchema = BaseAppConfigSchema.extend({
+  DISCORD_CLIENT_SECRET: z
+    .string({ required_error: 'DISCORD_CLIENT_SECRET is required for the web dashboard' })
+    .min(1, 'DISCORD_CLIENT_SECRET cannot be empty'),
+  // Public origin of the dashboard. The OAuth2 redirect URI is `${DASHBOARD_URL}/api/auth/callback`.
+  DASHBOARD_URL: z
+    .string({ required_error: 'DASHBOARD_URL is required for the web dashboard' })
+    .url('DASHBOARD_URL must be an absolute URL such as http://localhost:3000')
+    .transform((url) => new URL(url).origin),
+  SECRET_VAULT_KEY: z
+    .string({ required_error: 'SECRET_VAULT_KEY is required for the web dashboard' })
+    .regex(HEX_KEY, 'SECRET_VAULT_KEY must be a 64-character hex string (32 bytes)'),
+});
+
+export const WebConfigSchema = z.preprocess(applyLegacyAliases, BaseWebConfigSchema);
+
+export type WebConfig = z.infer<typeof BaseWebConfigSchema>;
