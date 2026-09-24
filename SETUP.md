@@ -111,6 +111,7 @@ Optional integrations. Leave blank to disable the feature:
 | YouTube reliability | `YOUTUBE_COOKIE`, `YOUTUBE_PO_TOKEN`, `YOUTUBE_VISITOR_DATA` | Browser cookies; `pnpm cli youtube:token` helps generate a PO token |
 | Stream alerts | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY`, `TIKTOK_SESSION_ID`, `TIKTOK_API_KEY` | <https://dev.twitch.tv/console/apps>, Google Cloud console |
 | Credential vault | `SECRET_VAULT_KEY` | `openssl rand -hex 32` (64 hex characters) |
+| Web dashboard | `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL`, `SECRET_VAULT_KEY` | Client secret from the Discord Developer Portal (OAuth2 page). See [section 8.1](#81-run-the-web-dashboard). |
 
 Check the result:
 
@@ -213,6 +214,40 @@ pnpm build
 
 ```bash
 pnpm start:bot
+```
+
+### 8.1. Run the web dashboard
+
+The dashboard (`apps/web`, Next.js 16) signs users in with Discord OAuth2. It reads the same
+root `.env` as the bot and needs three extra values:
+
+1. In the Discord Developer Portal, open your application, go to **OAuth2**, copy the
+   **Client Secret** into `DISCORD_CLIENT_SECRET`, and add
+   `http://localhost:3000/api/auth/callback` under **Redirects**.
+2. Set `DASHBOARD_URL=http://localhost:3000`. In production, use the public `https://` origin
+   and register `<DASHBOARD_URL>/api/auth/callback` as a redirect instead.
+3. Set `SECRET_VAULT_KEY` to the output of `openssl rand -hex 32`. It encrypts the Discord
+   tokens stored with each dashboard session. Changing it signs everyone out.
+
+The dashboard stores sessions in the `web_sessions` table. A database created before this table
+existed needs `pnpm db:push` (or `pnpm db:reset` for a throwaway dev database).
+
+```bash
+pnpm dev:web
+```
+
+Open <http://localhost:3000> in Chrome or Firefox. The session cookie uses the `__Host-` prefix,
+which browsers accept only over HTTPS or on `localhost`, so do not open the dashboard through a
+LAN IP over plain HTTP.
+
+Production-style run:
+
+```bash
+pnpm build:web
+```
+
+```bash
+pnpm start:web
 ```
 
 ---

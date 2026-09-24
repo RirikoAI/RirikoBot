@@ -1,4 +1,5 @@
 import 'server-only';
+import { REST } from '@discordjs/rest';
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
   createDatabaseClient,
@@ -8,6 +9,8 @@ import {
 } from '@ririko/database';
 import { DiscordOAuthClient } from './auth/discord-oauth';
 import { SessionService } from './auth/session-service';
+import { BotGuildDirectory } from './guilds/bot-guilds';
+import { GuildAccessService } from './guilds/guild-access';
 
 /**
  * Server-side dependencies of the dashboard. Built once per process from the shared monorepo
@@ -20,6 +23,9 @@ export interface WebServices {
   oauth: DiscordOAuthClient;
   sessions: SessionService;
   users: UserRepository;
+  /** Discord REST client authenticated with the bot token; server-side only. */
+  botRest: REST;
+  guildAccess: GuildAccessService;
 }
 
 async function createWebServices(): Promise<WebServices> {
@@ -35,7 +41,23 @@ async function createWebServices(): Promise<WebServices> {
     redirectUri: `${config.DASHBOARD_URL}/api/auth/callback`,
   });
   const sessions = new SessionService({ repo: new WebSessionRepository(db), vault, oauth });
-  return { config, db, vault, oauth, sessions, users: new UserRepository(db) };
+  const botRest = new REST({ version: '10' }).setToken(config.DISCORD_TOKEN);
+  const botGuilds = new BotGuildDirectory(botRest);
+  const guildAccess = new GuildAccessService({
+    sessions,
+    oauth,
+    botGuildIds: () => botGuilds.guildIds(),
+  });
+  return {
+    config,
+    db,
+    vault,
+    oauth,
+    sessions,
+    users: new UserRepository(db),
+    botRest,
+    guildAccess,
+  };
 }
 
 // Kept on globalThis so dev-mode module reloads reuse one database connection.

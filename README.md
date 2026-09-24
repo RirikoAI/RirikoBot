@@ -80,6 +80,7 @@ Generated or local-only paths (gitignored): `.env`, `data/` (SQLite DB and artwo
 | --- | --- |
 | `pnpm dev:bot` | Run the bot with hot reload |
 | `pnpm build` / `pnpm start:bot` | Compile and run the production build |
+| `pnpm dev:web` | Run the web dashboard (see [SETUP.md](SETUP.md#81-run-the-web-dashboard)) |
 | `pnpm doctor` | Check the environment and integrations |
 | `pnpm db:reset` | Wipe and reseed the dev database |
 | `pnpm lavalink:install` / `pnpm lavalink:start` | Set up and run the Lavalink server |

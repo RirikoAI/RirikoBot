@@ -101,6 +101,11 @@ export class SessionService {
     await this.deps.repo.delete(hashSessionToken(token));
   }
 
+  /** Ends a resolved session, e.g. when Discord rejects its access token. */
+  async end(session: ActiveSession): Promise<void> {
+    await this.deps.repo.delete(session.id);
+  }
+
   /**
    * Returns a usable Discord access token, refreshing it shortly before expiry. Returns null and
    * ends the session when Discord no longer honours the grant (the user deauthorized the app).
