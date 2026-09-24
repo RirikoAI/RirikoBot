@@ -1,6 +1,13 @@
 import 'server-only';
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
-import { createDatabaseClient, type DatabaseClient } from '@ririko/database';
+import {
+  createDatabaseClient,
+  UserRepository,
+  WebSessionRepository,
+  type DatabaseClient,
+} from '@ririko/database';
+import { DiscordOAuthClient } from './auth/discord-oauth';
+import { SessionService } from './auth/session-service';
 
 /**
  * Server-side dependencies of the dashboard. Built once per process from the shared monorepo
@@ -10,6 +17,9 @@ export interface WebServices {
   config: WebConfig;
   db: DatabaseClient;
   vault: SecretVault;
+  oauth: DiscordOAuthClient;
+  sessions: SessionService;
+  users: UserRepository;
 }
 
 async function createWebServices(): Promise<WebServices> {
@@ -18,7 +28,14 @@ async function createWebServices(): Promise<WebServices> {
     dialect: config.DATABASE_DIALECT,
     url: config.DATABASE_URL,
   });
-  return { config, db, vault: SecretVault.fromConfig(config) };
+  const vault = SecretVault.fromConfig(config);
+  const oauth = new DiscordOAuthClient({
+    clientId: config.DISCORD_CLIENT_ID,
+    clientSecret: config.DISCORD_CLIENT_SECRET,
+    redirectUri: `${config.DASHBOARD_URL}/api/auth/callback`,
+  });
+  const sessions = new SessionService({ repo: new WebSessionRepository(db), vault, oauth });
+  return { config, db, vault, oauth, sessions, users: new UserRepository(db) };
 }
 
 // Kept on globalThis so dev-mode module reloads reuse one database connection.

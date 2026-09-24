@@ -1,6 +1,16 @@
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
+// `server-only` throws unless bundled for React Server Components; tests load the no-op entry
+// that Next resolves under the `react-server` condition.
+const requireFromWeb = createRequire(new URL('./apps/web/package.json', import.meta.url));
+const serverOnlyNoop = join(dirname(requireFromWeb.resolve('server-only')), 'empty.js');
+
 export default defineConfig({
+  resolve: {
+    alias: { 'server-only': serverOnlyNoop },
+  },
   test: {
     globals: true,
     environment: 'node',

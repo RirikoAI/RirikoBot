@@ -121,12 +121,18 @@ importers:
 
   apps/web:
     dependencies:
+      '@discordjs/rest':
+        specifier: ^2.6.3
+        version: 2.6.3
       '@ririko/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@ririko/database':
         specifier: workspace:*
         version: link:../../packages/database
+      discord-api-types:
+        specifier: ^0.38.55
+        version: 0.38.55
       next:
         specifier: ^16.3.6
         version: 16.3.6(@types/node@22.20.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

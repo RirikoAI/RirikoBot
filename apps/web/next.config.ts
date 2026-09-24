@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['better-sqlite3', 'pg'],
   poweredByHeader: false,
   reactStrictMode: true,
+  images: {
+    remotePatterns: [{ protocol: 'https', hostname: 'cdn.discordapp.com' }],
+  },
 };
 
 export default nextConfig;
