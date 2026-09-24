@@ -175,6 +175,6 @@ export type NewAutoVoiceConfig = Omit<typeof sqlite.autoVoiceConfigs.$inferInser
 };
 export type Reminder = typeof sqlite.reminders.$inferSelect;
 export type NewReminder = typeof sqlite.reminders.$inferInsert;
-export type WelcomeConfig = typeof sqlite.welcomeConfigs.$inferSelect;
-export type FarewellConfig = typeof sqlite.farewellConfigs.$inferSelect;
+export type WelcomeConfig = typeof sqlite.guildWelcomer.$inferSelect;
+export type FarewellConfig = typeof sqlite.guildFarewell.$inferSelect;
 export type AuditLog = typeof sqlite.auditLogs.$inferSelect;

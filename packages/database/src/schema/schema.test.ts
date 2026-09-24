@@ -179,10 +179,10 @@ describe('Dual-Dialect Complete Schema Catalog (70+ Tables)', () => {
       expect(pgSchema.autoVoiceConfigs).toBeDefined();
       expect(sqliteSchema.reminders).toBeDefined();
       expect(pgSchema.reminders).toBeDefined();
-      expect(sqliteSchema.welcomeConfigs).toBeDefined();
-      expect(pgSchema.welcomeConfigs).toBeDefined();
-      expect(sqliteSchema.farewellConfigs).toBeDefined();
-      expect(pgSchema.farewellConfigs).toBeDefined();
+      expect(sqliteSchema.guildWelcomer).toBeDefined();
+      expect(pgSchema.guildWelcomer).toBeDefined();
+      expect(sqliteSchema.guildFarewell).toBeDefined();
+      expect(pgSchema.guildFarewell).toBeDefined();
       expect(sqliteSchema.auditLogs).toBeDefined();
       expect(pgSchema.auditLogs).toBeDefined();
     });

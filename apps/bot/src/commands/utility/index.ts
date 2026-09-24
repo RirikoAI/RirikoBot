@@ -5,6 +5,8 @@ import { createTimezoneCommand } from './timezone.command.js';
 import { createAvatarCommand } from './avatar.command.js';
 import { createGuildInfoCommand } from './guild-info.command.js';
 import { createMemberInfoCommand } from './member-info.command.js';
+import { createWelcomerCommand } from './welcomer.command.js';
+import { createFarewellCommand } from './farewell.command.js';
 
 /**
  * Creates the complete suite of server utility and identity commands for EPIC-014:
@@ -13,6 +15,8 @@ import { createMemberInfoCommand } from './member-info.command.js';
  * - /get-avatar (!avatar, !pfp)
  * - /guild-info (!guildinfo, !serverinfo, !info)
  * - /member-info (!memberinfo, !userinfo, !whois)
+ * - /welcomer (!welcome)
+ * - /farewell (!goodbye)
  */
 export function createUtilityCommands(services: BotServices): Command[] {
   return [
@@ -21,6 +25,8 @@ export function createUtilityCommands(services: BotServices): Command[] {
     createAvatarCommand(services),
     createGuildInfoCommand(services),
     createMemberInfoCommand(services),
+    createWelcomerCommand(services),
+    createFarewellCommand(services),
   ];
 }
 
@@ -29,3 +35,5 @@ export * from './timezone.command.js';
 export * from './avatar.command.js';
 export * from './guild-info.command.js';
 export * from './member-info.command.js';
+export * from './welcomer.command.js';
+export * from './farewell.command.js';

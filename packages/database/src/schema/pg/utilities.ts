@@ -85,19 +85,23 @@ export const reminders = pgTable(
   (table) => [index('idx_pg_reminders_trigger').on(table.triggerAt, table.isCompleted)],
 );
 
-export const welcomeConfigs = pgTable('welcome_configs', {
+export const guildWelcomer = pgTable('guild_welcomer', {
   guildId: varchar('guild_id', { length: 32 }).primaryKey(),
   channelId: varchar('channel_id', { length: 32 }).notNull(),
   messageTemplate: text('message_template').notNull().default('Welcome to {server}, {user}!'),
   cardTheme: varchar('card_theme', { length: 64 }).notNull().default('DEFAULT'),
+  backgroundUrl: text('background_url'),
+  textColor: varchar('text_color', { length: 7 }).notNull().default('#ffffff'),
   isEnabled: boolean('is_enabled').notNull().default(true),
 });
 
-export const farewellConfigs = pgTable('farewell_configs', {
+export const guildFarewell = pgTable('guild_farewell', {
   guildId: varchar('guild_id', { length: 32 }).primaryKey(),
   channelId: varchar('channel_id', { length: 32 }).notNull(),
   messageTemplate: text('message_template').notNull().default('Goodbye {user}!'),
   cardTheme: varchar('card_theme', { length: 64 }).notNull().default('DEFAULT'),
+  backgroundUrl: text('background_url'),
+  textColor: varchar('text_color', { length: 7 }).notNull().default('#ffffff'),
   isEnabled: boolean('is_enabled').notNull().default(true),
 });
 
