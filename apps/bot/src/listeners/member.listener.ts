@@ -1,4 +1,4 @@
-import type { Client, GuildMember } from 'discord.js';
+import { AttachmentBuilder, type Client, type GuildMember, type PartialGuildMember } from 'discord.js';
 import type { BotServices } from '../services.js';
 
 /**
@@ -54,8 +54,58 @@ export function registerMemberListener(
       await services.autoRoleService.handleMemberJoin(member).catch((roleErr) => {
         console.error(`[AutoRole] Failed to assign join roles for member ${member.id}:`, roleErr);
       });
+
+      // 4. Send Welcome Card
+      const welcomeConfig = await services.welcomerRepo.getWelcomeConfig(member.guild.id).catch(() => null);
+      if (welcomeConfig?.isEnabled && welcomeConfig.channelId) {
+        const channel = member.guild.channels.cache.get(welcomeConfig.channelId) ?? await member.guild.channels.fetch(welcomeConfig.channelId).catch(() => null);
+        if (channel && channel.isTextBased() && 'send' in channel) {
+          const cardBuf = await services.welcomerService.renderCard({
+            userTag: member.user.tag,
+            avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+            memberCount: member.guild.memberCount,
+            serverName: member.guild.name,
+            messageText: welcomeConfig.messageTemplate,
+            backgroundUrl: welcomeConfig.backgroundUrl,
+            textColor: welcomeConfig.textColor,
+            isFarewell: false,
+          });
+          const attachment = new AttachmentBuilder(cardBuf, { name: 'welcome.png' });
+          await (channel as any).send({ files: [attachment] }).catch((err: any) => {
+            console.error(`[Welcomer] Failed to send welcome for ${member.id}:`, err);
+          });
+        }
+      }
     } catch (err) {
       console.error('[MemberListener] Error handling guildMemberAdd event:', err);
+    }
+  });
+
+  client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) => {
+    try {
+      const farewellConfig = await services.welcomerRepo.getFarewellConfig(member.guild.id).catch(() => null);
+      if (farewellConfig?.isEnabled && farewellConfig.channelId) {
+        const channel = member.guild.channels.cache.get(farewellConfig.channelId) ?? await member.guild.channels.fetch(farewellConfig.channelId).catch(() => null);
+        if (channel && channel.isTextBased() && 'send' in channel) {
+          const user = member.user;
+          const cardBuf = await services.welcomerService.renderCard({
+            userTag: user ? (user.tag || user.username) : 'Unknown User',
+            avatarUrl: user?.displayAvatarURL({ extension: 'png', size: 256 }) ?? 'https://cdn.discordapp.com/embed/avatars/0.png',
+            memberCount: member.guild.memberCount,
+            serverName: member.guild.name,
+            messageText: farewellConfig.messageTemplate,
+            backgroundUrl: farewellConfig.backgroundUrl,
+            textColor: farewellConfig.textColor,
+            isFarewell: true,
+          });
+          const attachment = new AttachmentBuilder(cardBuf, { name: 'farewell.png' });
+          await (channel as any).send({ files: [attachment] }).catch((err: any) => {
+            console.error(`[Farewell] Failed to send farewell for ${member.id}:`, err);
+          });
+        }
+      }
+    } catch (err) {
+      console.error('[MemberListener] Error handling guildMemberRemove event:', err);
     }
   });
 }

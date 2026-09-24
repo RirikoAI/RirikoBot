@@ -28,3 +28,4 @@ export * from './reaction-role.repository.js';
 export * from './autorole.repository.js';
 export * from './reminder.repository.js';
 export * from './image.repository.js';
+export * from './welcomer.repository.js';

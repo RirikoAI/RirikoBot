@@ -133,3 +133,29 @@ To prevent lost work, uncontrolled runaway commits, and git accidents:
   - **STOP AND ASK THE USER**:
     > *"Epic [EPIC-XXX: Title] is complete with all tests passing. Would you like me to commit, push the branch, and create a Pull Request to `develop/2.0.0` before we proceed to the next Epic?"*
   - Wait for explicit user confirmation before initiating the next Epic.
+
+---
+
+## 8. Board Layout & Ticket ID Rules
+
+These rules keep `BOARD.md` and `board.json` free of duplicates. They were adopted on 2026-09-24 after a cleanup removed 104 duplicated rows and an ID collision.
+
+### 8.1. Each Ticket Is Listed Once
+- Every ticket has exactly **one row** in `BOARD.md`: in its epic section at the bottom of the board (`### 📋 Groomed Stories & Tasks for EPIC-XXX`). Tickets without an epic (standalone chores and bugs) keep their row in the lifecycle section.
+- The `## 🎯 To Do` section is an **index**, not a table. It lists one line per groomed epic or standalone story and points to that epic section.
+- The `## ✅ Done` section holds only tickets that have no epic-section row. When a ticket in an epic section reaches `DONE`, set its Status cell to `✅ Done · [TICKET-ID.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TICKET-ID.md)` instead of adding a second row.
+- When a grooming changes an epic, update or replace its existing section. Do not add a second section for the same epic.
+
+### 8.2. Ticket IDs Are Unique
+- Before assigning a new ID, search `board.json` for it. IDs are never reused, including IDs of `ABANDONED` tickets.
+- `board.json` holds one record per ID. When a ticket is regroomed, edit its existing record instead of appending a new one.
+- Handover notes are named after the ticket ID, so a reused ID overwrites another ticket's handover note. Example: BUG-0018 (guild default volume) had its note overwritten by the Replicate timeout fix; the fix was renumbered to BUG-0019 and the original note was restored from git history.
+- Task records use the `parent` field (not `story`) to point to their story.
+
+### 8.3. Verifying the Board
+Before committing board changes, check that no ID appears twice:
+```bash
+node -e "const b=require('./docs/kanban/board.json');const a=[...b.epics,...b.stories,...b.tasks,...b.chores,...b.bugs].map(t=>t.id);console.log(a.filter((x,i)=>a.indexOf(x)!==i))"
+grep -oE '^\| `[A-Z]+-[0-9]+`' docs/kanban/BOARD.md | sort | uniq -d
+```
+The first command must print `[]` and the second must print nothing. Also check that each story's task points add up to the story estimate.

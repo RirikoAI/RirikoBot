@@ -115,6 +115,14 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 - `farewell_configs`: Farewell customization settings (`guild_id` PK, `channel_id`, `message_template`, `card_theme`, `is_enabled`).
 - `audit_logs`: Security and administrative action audit trails (`id` UUID PK, `guild_id`, `actor_user_id`, `action`, `details` JSON, `ip_address`, `created_at`).
 
+### 2.15. Web Dashboard (Planned, EPIC-011)
+These tables do not exist yet. Column lists are the groomed design from [docs/dashboard.md](file:///Z:/Projects/ririko-v2-2026/docs/dashboard.md) and [ADR-013](file:///Z:/Projects/ririko-v2-2026/docs/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md); final names are set when the tickets are implemented.
+- `web_sessions` (TASK-1102): Opaque server-side dashboard sessions. The primary key is the SHA-256 hash of the session ID; the raw ID exists only in the `__Host-` cookie. Columns: `user_id`, `created_at`, `last_seen_at`, `expires_at`, `ip_address`, `user_agent`, `step_up_at`, the Discord access and refresh tokens encrypted with AES-256-GCM, and the encryption `key_version`. Index on `user_id` for "sign out everywhere".
+- `web_passkeys` (TASK-1171): WebAuthn credentials per user (credential ID, public key, signature counter, transports, `created_at`, `last_used_at`).
+- `command_usage_daily` (TASK-1131): Command usage counters (`guild_id`, `command_name`, `day`, `count`), incremented by the command router after dispatch. Unique on (`guild_id`, `command_name`, `day`).
+- Bot status record (TASK-1131): Gateway ping, guild count and uptime, refreshed by the bot on a fixed interval for the dashboard Overview tab and reusable by the EPIC-012 health probes.
+- Guild TCG drop settings (TASK-1121): `DropManager` currently keeps `GuildDropConfig` in memory only, so drop settings need a persisted home before the dashboard can edit them.
+
 ---
 
 ## 3. Indexing & Transaction Integrity Rules
