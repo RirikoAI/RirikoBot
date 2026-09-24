@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "TASK-1332",
   "epics": [
     {
       "id": "EPIC-000",
@@ -2544,7 +2544,7 @@
       "blocks": [
         "TASK-1122"
       ],
-      "description": "Guild managers edit guild-scoped drop settings and the TCG Manager Role. Bot owners (ownerIds) edit global tcg_system_configs rules: market tax (1-20%), listing expiry, energy cap/base/scaling, daily restore limit. All values validated by shared schemas and audited."
+      "description": "Guild managers edit guild-scoped drop settings and the TCG Manager Role. DropManager currently keeps GuildDropConfig in an in-memory Map and nothing calls setGuildConfig outside tests, so drop settings must first be persisted and loaded by the bot. Bot owners (ownerIds, passkey required) edit global tcg_system_configs rules in the owner console: market tax (1-20%), listing expiry, energy cap/base/scaling, daily restore limit. All values validated by shared schemas and audited."
     },
     {
       "id": "TASK-1122",
@@ -2570,7 +2570,7 @@
         "TASK-1122"
       ],
       "blocks": [],
-      "description": "Per-user card album gallery served from cached CardSynthesizer renders, shop catalog editor over the existing item catalog (respecting catalog-code seeding from BUG-0015), and an achievement inspector with completion counts and seasonal toggles."
+      "description": "Per-user card album gallery served from cached CardSynthesizer renders. The shop catalog editor (game_items, respecting catalog-code seeding from BUG-0015) and achievement edits (game_achievements) change global tables, so they live in the owner console; guild managers get a read-only achievement completion inspector."
     },
     {
       "id": "TASK-1131",
@@ -2650,7 +2650,7 @@
       "blocks": [
         "TASK-1152"
       ],
-      "description": "Expose the economy and XP settings the services read today; add backing columns only where the bot consumes them. Item shop manager edits economy_items and categories."
+      "description": "Expose the economy and XP settings the services read today; add backing columns only where the bot consumes them. The item shop manager edits the global economy_items and economy_item_categories catalog, so it lives in the owner console (bot owners, passkey required), not on the guild page."
     },
     {
       "id": "TASK-1152",
@@ -3017,7 +3017,7 @@
     },
     {
       "id": "TASK-1201",
-      "story": "STORY-120",
+      "parent": "STORY-120",
       "title": "Setup Playwright for Web Dashboard E2E Tests",
       "points": 2,
       "status": "TODO",
@@ -3026,7 +3026,7 @@
     },
     {
       "id": "TASK-1202",
-      "story": "STORY-120",
+      "parent": "STORY-120",
       "title": "Setup Discord API Mock Harness & Integration Test Suite",
       "points": 3,
       "status": "TODO",
@@ -3035,7 +3035,7 @@
     },
     {
       "id": "TASK-1211",
-      "story": "STORY-121",
+      "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Web Dashboard",
       "points": 2,
       "status": "TODO",
@@ -3044,7 +3044,7 @@
     },
     {
       "id": "TASK-1212",
-      "story": "STORY-121",
+      "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Bot",
       "points": 3,
       "status": "TODO",
@@ -3053,7 +3053,7 @@
     },
     {
       "id": "TASK-1221",
-      "story": "STORY-122",
+      "parent": "STORY-122",
       "title": "Implement /health and /ready probes for Bot and Web",
       "points": 1,
       "status": "TODO",
@@ -3062,7 +3062,7 @@
     },
     {
       "id": "TASK-1222",
-      "story": "STORY-122",
+      "parent": "STORY-122",
       "title": "docker-compose.production.yml with Redis, PostgreSQL, and App Services",
       "points": 2,
       "status": "TODO",
@@ -3071,19 +3071,19 @@
     },
     {
       "id": "TASK-1331",
-      "story": "STORY-133",
+      "parent": "STORY-133",
       "title": "Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [],
       "blocks": []
     },
     {
       "id": "TASK-1332",
-      "story": "STORY-133",
+      "parent": "STORY-133",
       "title": "guildMemberAdd / guildMemberRemove Discord Gateway listeners and dual-dispatch configuration commands (/welcomer, /farewell)",
       "points": 1,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "TASK-1331"
       ],
