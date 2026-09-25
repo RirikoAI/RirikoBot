@@ -10,6 +10,11 @@ export interface CommandRouterOptions {
   mentionPrefix?: boolean | undefined;
   middlewares?: CommandMiddleware[] | undefined;
   onError?: ((ctx: CommandContext, error: Error) => void | Promise<void>) | undefined;
+  /**
+   * Called when a command passes the middleware pipeline, just before it executes. It must not
+   * block: it runs on every command. Errors it throws are logged and ignored.
+   */
+  onCommandRun?: ((ctx: CommandContext) => void) | undefined;
 }
 
 export type CommandExecutionHook = (ctx: CommandContext) => void | Promise<void>;

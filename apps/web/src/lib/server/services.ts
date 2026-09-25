@@ -5,6 +5,7 @@ import { experimental_taintObjectReference, experimental_taintUniqueValue } from
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
   AuditLogRepository,
+  BotActivityRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -24,6 +25,7 @@ import { DiscordNotifier } from './discord-notifier';
 import { BotGuildDirectory } from './guilds/bot-guilds';
 import { GuildAccessService } from './guilds/guild-access';
 import { GuildResourceDirectory } from './guilds/guild-resources';
+import { UserDirectory } from './guilds/user-directory';
 
 /**
  * Server-side dependencies of the dashboard. Built once per process from the shared monorepo
@@ -45,7 +47,13 @@ export interface WebServices {
   guildAccess: GuildAccessService;
   /** Channels and roles for pickers; only after `requireGuildAccess`. */
   guildResources: GuildResourceDirectory;
+  /** Discord names for user IDs in cases and audit entries. */
+  userDirectory: UserDirectory;
+  /** Moderation cases, warnings and notes, for the read-only case log. */
+  moderation: ModerationRepository;
   guildConfig: GuildConfigService;
+  /** Command usage, bot status and voice activity written by the bot; read-only here. */
+  botActivity: BotActivityRepository;
   /** Security DMs and guild change notices (best effort). */
   notifier: DiscordNotifier;
 }
@@ -104,10 +112,11 @@ async function createWebServices(): Promise<WebServices> {
     origin: config.DASHBOARD_URL,
   });
   const guildSettings = new GuildSettingsRepository(db);
+  const moderation = new ModerationRepository(db);
   const guildConfig = new GuildConfigService({
     db,
     guildSettings,
-    moderation: new ModerationRepository(db),
+    moderation,
     versions: new GuildConfigVersionRepository(db),
     audit,
     defaultPrefix: config.DEFAULT_PREFIX,
@@ -125,7 +134,10 @@ async function createWebServices(): Promise<WebServices> {
     botRest,
     guildAccess,
     guildResources: new GuildResourceDirectory(botRest),
+    userDirectory: new UserDirectory(botRest),
+    moderation,
     guildConfig,
+    botActivity: new BotActivityRepository(db),
     notifier: new DiscordNotifier({
       rest: botRest,
       guildSettings,

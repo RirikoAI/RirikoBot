@@ -866,7 +866,7 @@
       "epic": "EPIC-011",
       "title": "Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
@@ -2639,7 +2639,7 @@
       "parent": "STORY-113",
       "title": "Command Usage Daily Counters (Dual-Dialect Table & Router Hook), Bot Status Heartbeat & Overview Tab",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
@@ -2653,7 +2653,7 @@
       "parent": "STORY-113",
       "title": "Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1131"
       ],

@@ -35,3 +35,4 @@ export * from './guild-config-version.repository.js';
 export * from './audit-log.repository.js';
 export * from './web-passkey.repository.js';
 export * from './web-known-device.repository.js';
+export * from './bot-activity.repository.js';
