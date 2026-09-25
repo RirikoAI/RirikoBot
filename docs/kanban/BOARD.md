@@ -8,14 +8,12 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| | | | | |
+| `CHORE-1101` | Chore | Cross-Process Guild Config Change Feed (guild_config_versions Table, Bot Watcher & Cache Invalidation Events) | 2 | `EPIC-011` |
 
 ---
 
 ## 🔍 In Review
-| ID | Type | Title | Pts | Epic / Parent | Handover Note |
-|---|---|---|---|---|---|
-| `STORY-110` | Story | Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization | 8 | `EPIC-011` | [STORY-110.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-110.md) |
+*No tickets currently in review.*
 
 ---
 
@@ -27,7 +25,7 @@
 ## 🎯 To Do (Groomed & Estimated)
 Ready tickets are listed once, in their epic section at the bottom of the board.
 
-- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 58): see **Groomed Stories & Tasks for EPIC-011**
+- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 60): see **Groomed Stories & Tasks for EPIC-011**
 - `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
 
 ---
@@ -228,16 +226,17 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ✅ Done · [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) | `EPIC-002`, `EPIC-003` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-011 (Web Dashboard)
-> Groomed 2026-09-24. Children total 58 pts. STORY-110 and STORY-111 are the foundation; STORY-112..117 can run in any order after STORY-111. Pages expose only settings the bot actually reads (no placeholder UI).
+> Groomed 2026-09-24, re-groomed 2026-09-25. Children total 60 pts. Delivery order: STORY-110, CHORE-1101, STORY-111, STORY-117, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112 (security hardening first because owner-console and step-up writes depend on it). Pages expose only settings the bot actually reads (no placeholder UI).
 
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-110` | Story | Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization | 8 | `EPIC-011` | 🔍 Review · [STORY-110.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-110.md) | `EPIC-001` |
+| `STORY-110` | Story | Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization | 8 | `EPIC-011` | ✅ Done · [STORY-110.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-110.md) | `EPIC-001` |
 | `TASK-1101` | Task | apps/web Workspace Scaffold: Next.js 16, React 19, Tailwind, Strict TS, Env Schema & Server-Only Service Bootstrap | 3 | `STORY-110` | ✅ Done · [STORY-110.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-110.md) | `EPIC-001` |
 | `TASK-1102` | Task | Discord OAuth2 (identify, guilds) Login/Callback/Logout & Revocable Server-Side Sessions (Hashed Session IDs, Encrypted Discord Tokens) | 3 | `STORY-110` | ✅ Done · [STORY-110.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-110.md) | `TASK-1101` |
 | `TASK-1103` | Task | Guild Discovery & requireGuildAccess Guard (ManageGuild/Administrator, Bot Membership, Per-Request Re-Verification) & Server Selector | 2 | `STORY-110` | ✅ Done · [STORY-110.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-110.md) | `TASK-1102` |
+| `CHORE-1101` | Chore | Cross-Process Guild Config Change Feed (guild_config_versions Table, Bot Watcher & Cache Invalidation Events) | 2 | `EPIC-011` | ⚡ In Progress | `STORY-110` |
 | `STORY-111` | Story | Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity | 8 | `EPIC-011` | 🎯 To Do | `STORY-110` |
-| `TASK-1111` | Task | Shared Zod Guild Config Schemas in @ririko/core, GuildConfigService & audit_logs Field-Diff Writer | 3 | `STORY-111` | 🎯 To Do | `STORY-110` |
+| `TASK-1111` | Task | Shared Zod Guild Config Schemas in @ririko/core, GuildConfigService & audit_logs Field-Diff Writer | 3 | `STORY-111` | 🎯 To Do | `STORY-110`, `CHORE-1101` |
 | `TASK-1112` | Task | Dashboard Shell: Guild Layout & Module Nav, Channel/Role Pickers, Server Action Form Kit & General Tab | 3 | `STORY-111` | 🎯 To Do | `TASK-1111` |
 | `TASK-1113` | Task | `ririko guild:config <guild_id> [key] [value]` CLI Parity (get, set, list) on the Same Schemas & Service | 2 | `STORY-111` | 🎯 To Do | `TASK-1111` |
 | `STORY-114` | Story | Moderation, AutoMod, Logging, Command Overrides, Reaction Roles & Auto Voice Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111` |
