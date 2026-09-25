@@ -1,6 +1,6 @@
 import 'server-only';
 import { createHash, randomBytes } from 'node:crypto';
-import type { SecretVault } from '@ririko/core';
+import { SecurityError, type SecretVault } from '@ririko/core';
 import type { WebSession, WebSessionRepository } from '@ririko/database';
 import { DiscordApiError, type DiscordOAuthClient, type DiscordTokenSet } from './discord-oauth';
 
@@ -11,6 +11,10 @@ const TOUCH_INTERVAL_MS = 60_000;
 /** Refresh the Discord access token when it expires within this window. */
 const TOKEN_REFRESH_MARGIN_MS = 60_000;
 const SESSION_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
+/** How long a WebAuthn challenge stays valid. */
+const WEBAUTHN_CHALLENGE_TTL_MS = 5 * 60_000;
+
+export type WebAuthnPurpose = 'register' | 'authenticate';
 
 /** What the rest of the dashboard sees of a session: never the Discord tokens. */
 export interface ActiveSession {
@@ -101,6 +105,64 @@ export class SessionService {
     await this.deps.repo.delete(hashSessionToken(token));
   }
 
+  /** Stores the session's pending WebAuthn challenge, replacing any earlier one. */
+  async storeChallenge(
+    session: ActiveSession,
+    purpose: WebAuthnPurpose,
+    challenge: string,
+  ): Promise<void> {
+    const now = this.now().getTime();
+    await this.deps.repo.update(session.id, {
+      webauthnChallenge: `${purpose}:${challenge}`,
+      webauthnChallengeExpiresAt: new Date(now + WEBAUTHN_CHALLENGE_TTL_MS),
+    });
+  }
+
+  /** True once for a stored, unexpired challenge of that purpose; it cannot be reused. */
+  consumeChallenge(
+    session: ActiveSession,
+    purpose: WebAuthnPurpose,
+    challenge: string,
+  ): Promise<boolean> {
+    return this.deps.repo.consumeChallenge(session.id, `${purpose}:${challenge}`, this.now());
+  }
+
+  /**
+   * Marks a successful passkey check: records the time and rotates the session ID, so a cookie
+   * captured before the check is worthless afterwards. The Discord tokens are re-encrypted
+   * because their ciphertexts are bound to the session ID.
+   */
+  async completePasskeyCheck(
+    session: ActiveSession,
+  ): Promise<{ token: string; session: ActiveSession }> {
+    // A refresh in flight would write rotated Discord tokens to the old row; let it finish.
+    await this.refreshing.get(session.id)?.catch(() => null);
+    const row = await this.deps.repo.findById(session.id);
+    if (!row) throw new SecurityError('The session ended before the passkey check completed.');
+
+    const now = this.now();
+    const token = randomBytes(32).toString('base64url');
+    const id = hashSessionToken(token);
+    const moved = await this.deps.repo.update(row.id, {
+      id,
+      stepUpAt: now,
+      lastSeenAt: now,
+      ...this.encryptTokens(id, {
+        accessToken: this.deps.vault.decrypt(
+          row.discordAccessToken,
+          tokenContext('access', row.id),
+        ),
+        refreshToken: this.deps.vault.decrypt(
+          row.discordRefreshToken,
+          tokenContext('refresh', row.id),
+        ),
+        expiresAt: row.discordTokenExpiresAt,
+      }),
+    });
+    if (!moved) throw new SecurityError('The session ended before the passkey check completed.');
+    return { token, session: { ...toActiveSession(row), id, stepUpAt: now } };
+  }
+
   /** Ends a resolved session, e.g. when Discord rejects its access token. */
   async end(session: ActiveSession): Promise<void> {
     await this.deps.repo.delete(session.id);
@@ -148,7 +210,10 @@ export class SessionService {
     return tokens.accessToken;
   }
 
-  private encryptTokens(id: string, tokens: DiscordTokenSet) {
+  private encryptTokens(
+    id: string,
+    tokens: Pick<DiscordTokenSet, 'accessToken' | 'refreshToken' | 'expiresAt'>,
+  ) {
     return {
       discordAccessToken: this.deps.vault.encrypt(tokens.accessToken, tokenContext('access', id)),
       discordRefreshToken: this.deps.vault.encrypt(

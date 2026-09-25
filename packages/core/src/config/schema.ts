@@ -30,6 +30,17 @@ const BaseAppConfigSchema = z.object({
     .min(1, 'DISCORD_CLIENT_ID cannot be empty'),
   DISCORD_CLIENT_SECRET: z.string().optional(),
   DISCORD_DEV_GUILD_ID: z.string().optional(),
+  // Bot owners (comma-separated Discord user IDs). The dashboard owner console is limited to them.
+  BOT_OWNER_ID: z
+    .string()
+    .optional()
+    .transform((value) =>
+      (value ?? '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.string().regex(/^\d{17,20}$/, 'BOT_OWNER_ID must list Discord user IDs'))),
   DEFAULT_PREFIX: PrefixSchema.default(DEFAULT_COMMAND_PREFIX),
 
   // Dual-Dialect Database
