@@ -48,11 +48,14 @@ Guild Discovery Pipeline
 - A test enumerates every Server Action and route handler and fails if one skips the guard.
 - Global (non-guild) settings use an owner guard that checks the bot `ownerIds` (see Section 3.1).
 
-### 2.3. Passkey Step-Up
-- Users can enroll WebAuthn passkeys. Once a user has a passkey, it is always required.
-- Bot owners must enroll a passkey before using the owner console.
-- Sensitive writes require a passkey assertion newer than a short window: the owner console, the moderation escalation policy, reaction-role publishing, and integrations.
-- A stolen session cookie or a compromised Discord account alone cannot pass step-up.
+### 2.3. Passkey Sign-In Gate & Step-Up
+- Passkeys are optional. Once a user has at least one, every sign-in must complete a passkey check before any page or Server Action works, so a compromised Discord account alone cannot reach the dashboard.
+- Removing a passkey needs a passkey check newer than 5 minutes, is audited, and sends the user a DM. There is no "keep passkeys but stop asking" setting.
+- Sensitive writes always need a passkey check newer than 5 minutes: the owner console, the moderation escalation policy, reaction-role publishing, and integrations. Users without a passkey cannot perform them.
+- Bot owners (`BOT_OWNER_ID`) must have a passkey to use the owner console.
+- A passkey check rotates the session ID.
+- Lost authenticators are recovered with `ririko passkeys:reset <user_id>` by an operator.
+- Sessions stay opaque and server-side; JWE was re-evaluated and rejected (ADR-013, revision 2026-09-25).
 
 ---
 
@@ -190,4 +193,6 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-114 | 8 | Moderation, AutoMod, Logging, Command Overrides, Reaction Roles, Auto Roles, Auto Voice pages | 4 (3, 4, 13, 14, 18, 19) |
 | STORY-115 | 5 | Economy, XP, Games, Giveaways pages | 4 (8, 9, 11, 12) |
 | STORY-116 | 8 | Music, AI, Image Generation, Stream Alerts, Free Games, Welcome & Farewell, Integrations pages; needs STORY-133 | 4 (5, 6, 7, 15, 16, 17, 20) |
-| STORY-117 | 8 | Passkey step-up, session management and alerts, CSP and taint guards, authorization coverage test | 2.3, 7 |
+| STORY-117 | 5 | Passkey sign-in gate, step-up, owner guard, recovery CLI | 2.3 |
+| STORY-118 | 5 | Session management and alerts, CSP and taint guards, rate limits, authorization coverage test | 7 |
+| STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
