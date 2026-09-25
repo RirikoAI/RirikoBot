@@ -42,6 +42,8 @@ export function registerMessageListener(
             author: { id: message.author.id, bot: message.author.bot },
             id: message.id,
           },
+          guild: message.guild,
+          member: message.member ?? undefined,
         });
 
         if (automodResult.matched) {

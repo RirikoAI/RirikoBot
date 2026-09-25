@@ -29,6 +29,9 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
     expect(report.entryPoints).toEqual(
       expect.arrayContaining([
         'app/dashboard/[guildId]/general/actions.ts#saveGeneralSettings',
+        'app/dashboard/[guildId]/moderation/actions.ts#saveModerationSettings',
+        'app/dashboard/[guildId]/automod/actions.ts#saveAutoModSettings',
+        'app/dashboard/[guildId]/logging/actions.ts#saveLoggingSettings',
         'app/account/security/actions.ts#removePasskey',
         'app/account/sessions/actions.ts#revokeOtherSessions',
         'app/verify/actions.ts#finishPasskeyCheck',

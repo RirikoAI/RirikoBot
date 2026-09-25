@@ -2,7 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Guild, GuildMember } from 'discord.js';
 import { createEventBus } from '@ririko/core';
 import type { CoreEvents } from '@ririko/core';
-import type { ModerationRepository, ModerationWarning } from '@ririko/database';
+import type {
+  GuildSettings,
+  GuildSettingsRepository,
+  ModerationRepository,
+  ModerationWarning,
+} from '@ririko/database';
 import { PermissionService } from './permission.service.js';
 import { ModerationActionService } from './moderation-action.service.js';
 import {
@@ -59,9 +64,8 @@ describe('WarningEscalationService — TASK-0711', () => {
     getActiveWarnings: ReturnType<typeof vi.fn>;
     clearUserWarnings: ReturnType<typeof vi.fn>;
     createCase: ReturnType<typeof vi.fn>;
-    getRuleByType: ReturnType<typeof vi.fn>;
-    upsertRule: ReturnType<typeof vi.fn>;
   };
+  let mockGuildSettings: { findById: ReturnType<typeof vi.fn> };
   let permissionService: PermissionService;
   let mockActionService: {
     timeout: ReturnType<typeof vi.fn>;
@@ -85,10 +89,9 @@ describe('WarningEscalationService — TASK-0711', () => {
         id: 'case_uuid_1',
         caseNumber: 10,
       }),
-      getRuleByType: vi.fn().mockResolvedValue(null),
-      upsertRule: vi.fn().mockResolvedValue({}),
     };
 
+    mockGuildSettings = { findById: vi.fn().mockResolvedValue(null) };
     permissionService = new PermissionService();
     mockActionService = {
       timeout: vi.fn().mockResolvedValue({ success: true, action: 'TIMEOUT' }),
@@ -99,6 +102,7 @@ describe('WarningEscalationService — TASK-0711', () => {
 
     escalationService = new WarningEscalationService(
       mockModRepo as unknown as ModerationRepository,
+      mockGuildSettings as unknown as GuildSettingsRepository,
       permissionService,
       mockActionService as unknown as ModerationActionService,
       eventBus,
@@ -346,21 +350,37 @@ describe('WarningEscalationService — TASK-0711', () => {
       expect(policy).toEqual(DEFAULT_ESCALATION_STEPS);
     });
 
-    it('saves and uses custom escalation policy', async () => {
+    it('reads the policy saved in guild_settings.escalation_steps (TASK-1142)', async () => {
       const customPolicy: EscalationStep[] = [
         { warnThreshold: 2, action: 'TIMEOUT', durationSeconds: 300 },
         { warnThreshold: 4, action: 'KICK' },
-        { warnThreshold: 5, action: 'BAN' },
       ];
+      mockGuildSettings.findById.mockResolvedValue({
+        escalationSteps: customPolicy,
+      } as Partial<GuildSettings>);
 
-      await escalationService.setEscalationPolicy('guild_1', customPolicy);
+      expect(await escalationService.getEscalationPolicy('guild_1')).toEqual(customPolicy);
+      expect(mockGuildSettings.findById).toHaveBeenCalledWith('guild_1');
+      mockModRepo.getActiveWarnings.mockResolvedValue([
+        { severity: 2 },
+        { severity: 1 },
+      ] as ModerationWarning[]);
+      const evaluation = await escalationService.evaluateEscalation('guild_1', 'user_1');
+      expect(evaluation.triggeredStep).toEqual(customPolicy[0]);
+    });
 
-      expect(mockModRepo.upsertRule).toHaveBeenCalledWith(
-        expect.objectContaining({
-          guildId: 'guild_1',
-          ruleType: 'ESCALATION_POLICY',
-        }),
-      );
+    it('never escalates when the guild saved an empty policy', async () => {
+      mockGuildSettings.findById.mockResolvedValue({
+        escalationSteps: [],
+      } as Partial<GuildSettings>);
+      mockModRepo.getActiveWarnings.mockResolvedValue([{ severity: 5 }] as ModerationWarning[]);
+      const evaluation = await escalationService.evaluateEscalation('guild_1', 'user_1');
+      expect(evaluation.triggeredStep).toBeUndefined();
+    });
+
+    it('does not fall back to the default policy when the settings cannot be read', async () => {
+      mockGuildSettings.findById.mockRejectedValue(new Error('database is locked'));
+      await expect(escalationService.getEscalationPolicy('guild_1')).rejects.toThrow('locked');
     });
   });
 

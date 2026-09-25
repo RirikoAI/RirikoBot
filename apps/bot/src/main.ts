@@ -281,6 +281,10 @@ export async function main(): Promise<void> {
     }
   });
 
+  // Post every new moderation case to the guild's log channel. Subscribed once here, not on
+  // READY, because READY fires again after each reconnect.
+  const stopCaseLog = services.moderationLogService.startListening(bot.client);
+
   // 6. Graceful Shutdown Handlers
   let isShuttingDown = false;
   const handleShutdown = async (signal: string) => {
@@ -292,6 +296,7 @@ export async function main(): Promise<void> {
       services.freeGamesEngine.stop();
       services.giveawayEngine.stop();
       services.guildConfigWatcher.stop();
+      stopCaseLog?.();
       services.autoRoleService.stopSweeper();
       await bot.gateway.destroy();
       console.log('✓ Bot gateway cleanly disconnected. Goodbye!');

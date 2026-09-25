@@ -1152,10 +1152,16 @@ export function createModerationCommands(services: BotServices): Command[] {
 
       const isEnabled = action === 'enable';
 
+      // A new row starts from the rule's real defaults; the repository's own insert defaults
+      // (WARN, threshold 3) would silently change what the rule does.
+      const existing = await services.moderationRepo.getRuleByType(ctx.guild.id, ruleType);
+      const { action: defaultAction, threshold } = services.autoModService.getDefaultConfig(ruleType);
       await services.moderationRepo.upsertRule({
         guildId: ctx.guild.id,
         ruleType,
         isEnabled,
+        ...(existing ? {} : { action: defaultAction }),
+        ...(existing || threshold === undefined ? {} : { threshold }),
       });
       services.autoModService.invalidateRuleCache(ctx.guild.id);
 

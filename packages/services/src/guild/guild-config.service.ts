@@ -1,6 +1,11 @@
 import {
+  AUTOMOD_ACTIONS,
+  AUTOMOD_RULE_DEFAULTS,
+  DEFAULT_ESCALATION_STEPS,
   GuildConfigSchemas,
   ValidationError,
+  type AutoModConfigurableAction,
+  type AutoModRuleTypeName,
   type GuildConfigModule,
   type GuildConfigValues,
 } from '@ririko/core';
@@ -10,6 +15,8 @@ import {
   type DatabaseClient,
   type GuildConfigVersionRepository,
   type GuildSettingsRepository,
+  type ModerationRepository,
+  type ModerationRule,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
@@ -50,6 +57,61 @@ export function diffFields(
     .map((field) => ({ field, before: before[field], after: after[field] }));
 }
 
+/**
+ * Field errors by top-level field. Errors inside a list keep their row number, which
+ * `flatten()` would drop: `Row 3: Timeout steps need a length.`
+ */
+function fieldErrorsOf(issues: readonly { path: (string | number)[]; message: string }[]) {
+  const fieldErrors: Record<string, string[]> = {};
+  for (const { path, message } of issues) {
+    const [field, row] = path;
+    if (typeof field !== 'string') continue;
+    (fieldErrors[field] ??= []).push(
+      typeof row === 'number' ? `Row ${row + 1}: ${message}` : message,
+    );
+  }
+  return fieldErrors;
+}
+
+/** AutoMod settings keys (`mentionSpamEnabled`, ...) and the `moderation_rules.rule_type` each one maps to. */
+const AUTOMOD_RULE_KEYS = {
+  inviteFilter: 'INVITE_FILTER',
+  phishingShield: 'PHISHING_SHIELD',
+  mentionSpam: 'MENTION_SPAM',
+  burstSpam: 'BURST_SPAM',
+} as const satisfies Record<string, AutoModRuleTypeName>;
+
+/** Rules whose `threshold` the bot reads, and the settings key it is edited under. */
+const AUTOMOD_LIMIT_KEYS: Partial<Record<AutoModRuleTypeName, string>> = {
+  MENTION_SPAM: 'mentionSpamLimit',
+  BURST_SPAM: 'burstSpamLimit',
+};
+
+function isConfigurableAction(action: string): action is AutoModConfigurableAction {
+  return (AUTOMOD_ACTIONS as readonly string[]).includes(action);
+}
+
+/**
+ * AutoMod settings as the bot runs them: a stored row wins, otherwise the rule's defaults.
+ * A stored `ALLOW` (or unknown) action behaves like `DELETE`, because every match deletes the
+ * message, so it is shown as `DELETE`.
+ */
+function readAutoModValues(rules: ModerationRule[]): GuildConfigValues<'automod'> {
+  const values: Record<string, unknown> = {};
+  for (const [key, ruleType] of Object.entries(AUTOMOD_RULE_KEYS)) {
+    // `moderation_rules` has no unique key; like the bot, the last row of a type wins.
+    const row = rules.findLast((rule) => rule.ruleType === ruleType);
+    const defaults = AUTOMOD_RULE_DEFAULTS[ruleType];
+    values[`${key}Enabled`] = row?.isEnabled ?? defaults.isEnabled;
+    values[`${key}Action`] = row && isConfigurableAction(row.action) ? row.action : defaults.action;
+    values[`${key}ExemptRoleIds`] = row?.exemptRoles ?? [];
+    values[`${key}ExemptChannelIds`] = row?.exemptChannels ?? [];
+    const limitKey = AUTOMOD_LIMIT_KEYS[ruleType];
+    if (limitKey) values[limitKey] = row?.threshold ?? defaults.threshold;
+  }
+  return values as GuildConfigValues<'automod'>;
+}
+
 interface ModuleStore<M extends GuildConfigModule> {
   read(guildId: string, tx?: DatabaseClient): Promise<GuildConfigValues<M>>;
   write(guildId: string, values: GuildConfigValues<M>, tx: DatabaseClient): Promise<void>;
@@ -58,6 +120,7 @@ interface ModuleStore<M extends GuildConfigModule> {
 export interface GuildConfigServiceDeps {
   db: DatabaseClient;
   guildSettings: GuildSettingsRepository;
+  moderation: ModerationRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -91,6 +154,49 @@ export class GuildConfigService {
           await deps.guildSettings.upsert({ guildId, ...values }, tx);
         },
       },
+      moderation: {
+        read: async (guildId, tx) => {
+          const row = await deps.guildSettings.findById(guildId, tx);
+          return {
+            escalationSteps:
+              row?.escalationSteps ?? DEFAULT_ESCALATION_STEPS.map((step) => ({ ...step })),
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.guildSettings.upsert({ guildId, escalationSteps: values.escalationSteps }, tx);
+        },
+      },
+      automod: {
+        read: async (guildId, tx) => readAutoModValues(await deps.moderation.getRules(guildId, tx)),
+        write: async (guildId, values, tx) => {
+          const fields = values as Record<string, unknown>;
+          for (const [key, ruleType] of Object.entries(AUTOMOD_RULE_KEYS)) {
+            const limitKey = AUTOMOD_LIMIT_KEYS[ruleType];
+            await deps.moderation.upsertRule(
+              {
+                guildId,
+                ruleType,
+                isEnabled: fields[`${key}Enabled`] as boolean,
+                action: fields[`${key}Action`] as string,
+                // Rules without a limit keep whatever threshold their row already has.
+                threshold: limitKey ? (fields[limitKey] as number) : undefined,
+                exemptRoles: fields[`${key}ExemptRoleIds`] as string[],
+                exemptChannels: fields[`${key}ExemptChannelIds`] as string[],
+              },
+              tx,
+            );
+          }
+        },
+      },
+      logging: {
+        read: async (guildId, tx) => {
+          const row = await deps.guildSettings.findById(guildId, tx);
+          return { logChannelId: row?.logChannelId ?? null };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.guildSettings.upsert({ guildId, logChannelId: values.logChannelId }, tx);
+        },
+      },
     };
   }
 
@@ -113,9 +219,7 @@ export class GuildConfigService {
       const before = await store.read(guildId, tx);
       const parsed = GuildConfigSchemas[module].safeParse({ ...before, ...patch });
       if (!parsed.success) {
-        throw new GuildConfigValidationError(
-          parsed.error.flatten((issue) => issue.message).fieldErrors as Record<string, string[]>,
-        );
+        throw new GuildConfigValidationError(fieldErrorsOf(parsed.error.issues));
       }
       const values = parsed.data as GuildConfigValues<M>;
       const changes = diffFields(before, values);

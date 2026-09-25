@@ -8,6 +8,7 @@ import {
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
+  ModerationRepository,
   UserRepository,
   WebKnownDeviceRepository,
   WebPasskeyRepository,
@@ -106,6 +107,7 @@ async function createWebServices(): Promise<WebServices> {
   const guildConfig = new GuildConfigService({
     db,
     guildSettings,
+    moderation: new ModerationRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit,
     defaultPrefix: config.DEFAULT_PREFIX,

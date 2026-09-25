@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core';
+import type { EscalationStep } from '@ririko/core';
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -56,6 +57,8 @@ export const guildSettings = sqliteTable('guild_settings', {
   timezone: text('timezone').notNull().default('UTC'),
   aiChannelId: text('ai_channel_id'),
   logChannelId: text('log_channel_id'),
+  /** Warning escalation policy; null means the default policy. */
+  escalationSteps: text('escalation_steps', { mode: 'json' }).$type<EscalationStep[]>(),
   musicChannelId: text('music_channel_id'),
   welcomerChannelId: text('welcomer_channel_id'),
   welcomerEnabled: integer('welcomer_enabled', { mode: 'boolean' }).notNull().default(false),

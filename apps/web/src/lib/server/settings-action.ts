@@ -3,7 +3,9 @@ import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
 import type { GuildConfigModule } from '@ririko/core';
 import { GuildConfigValidationError } from '@ririko/services/guild';
+import { PASSKEY_REASON_MESSAGES } from '@/lib/passkey-action-result';
 import type { SettingsFormState } from '@/lib/settings-form-state';
+import { requireStepUp } from './auth/session';
 import { requireGuildAccess } from './guilds/require-guild-access';
 import { checkDashboardRequest, requestActor } from './request-context';
 import { getWebServices } from './services';
@@ -22,19 +24,52 @@ export function pickFormFields(
 }
 
 /**
+ * Typed values of the named fields: `text` fields as strings (absent ones keep their value),
+ * `list` fields as every submitted string (none clears the list), and `flag` fields as
+ * checkboxes (unchecked, so absent, is false).
+ */
+export function readFormFields(
+  formData: FormData,
+  fields: { text?: readonly string[]; list?: readonly string[]; flag?: readonly string[] },
+): Record<string, unknown> {
+  const values: Record<string, unknown> = pickFormFields(formData, fields.text ?? []);
+  for (const name of fields.list ?? []) {
+    values[name] = formData.getAll(name).filter((value) => typeof value === 'string');
+  }
+  for (const name of fields.flag ?? []) {
+    values[name] = formData.get(name) === 'on';
+  }
+  return values;
+}
+
+/**
  * The body of every settings Server Action. Server Actions are public endpoints, so the guild
  * ID is checked here on every call: dashboard Origin and rate limit, then `requireGuildAccess`,
  * then the shared schema inside `GuildConfigService`, which also writes the audit entry. A save
  * that changes something is announced in the guild's log channel after the response is sent.
+ * Sensitive modules pass `stepUp`, which also requires a passkey check from the last five
+ * minutes; without one the form is told why, so it can run the check and submit again.
  */
 export async function saveGuildSettings(
   guildId: string,
   module: GuildConfigModule,
-  patch: Record<string, string>,
+  patch: Record<string, unknown>,
+  options: { stepUp?: boolean } = {},
 ): Promise<SettingsFormState> {
   const rejected = await checkDashboardRequest();
   if (rejected) return { status: 'error', message: rejected };
   const { session } = await requireGuildAccess(guildId);
+  if (options.stepUp) {
+    const state = await requireStepUp(session);
+    if (state !== 'ok') {
+      return {
+        status: 'error',
+        message: PASSKEY_REASON_MESSAGES[state],
+        reason: state,
+        values: patch,
+      };
+    }
+  }
   const { guildConfig, notifier } = await getWebServices();
 
   try {
