@@ -7,11 +7,7 @@ import {
   type ButtonInteraction,
   type Message,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import {
   type Combatant,
@@ -31,9 +27,11 @@ export function createDungeonCommand(services: BotServices): Command {
     metadata: {
       name: 'dungeon',
       category: CommandCategory.TCG,
-      description: 'PvE Seasonal Dungeon Tower: Climb floors, challenge bosses, and overcome environmental affixes.',
+      description:
+        'PvE Seasonal Dungeon Tower: Climb floors, challenge bosses, and overcome environmental affixes.',
       aliases: ['tower', 'climb', 'spire'],
-      usage: '/dungeon [action: status|climb|floor|leaderboard|tutorial] [floor_number] [mode: manual|auto]',
+      usage:
+        '/dungeon [action: status|climb|floor|leaderboard|tutorial] [floor_number] [mode: manual|auto]',
       examples: [
         '/dungeon action:status',
         '/dungeon action:climb',
@@ -64,7 +62,8 @@ export function createDungeonCommand(services: BotServices): Command {
         },
         {
           name: 'mode',
-          description: 'Combat mode (manual: interactive tactical buttons, auto: watch real-time turns)',
+          description:
+            'Combat mode (manual: interactive tactical buttons, auto: watch real-time turns)',
           type: 'STRING',
           required: false,
           choices: [
@@ -80,7 +79,8 @@ export function createDungeonCommand(services: BotServices): Command {
         ctx.source === 'prefix' &&
         ctx.raw &&
         'content' in ctx.raw &&
-        ctx.raw.content.slice(ctx.invokedPrefix.length).trim().split(/\s+/)[0]?.toLowerCase() === 'climb';
+        ctx.raw.content.slice(ctx.invokedPrefix.length).trim().split(/\s+/)[0]?.toLowerCase() ===
+          'climb';
 
       const action =
         ctx.options.getString('action')?.toLowerCase() ??
@@ -96,7 +96,10 @@ export function createDungeonCommand(services: BotServices): Command {
 
       switch (action) {
         case 'status': {
-          const progress = await services.userDungeonProgressRepo.getOrCreateProgress(ctx.user.id, activeSeason.id);
+          const progress = await services.userDungeonProgressRepo.getOrCreateProgress(
+            ctx.user.id,
+            activeSeason.id,
+          );
           const energy = await services.playerEnergyRepo.getOrCreate(ctx.user.id);
           const nextFloor = progress.highestClearedFloor + 1;
           const nextCost = getDungeonFloorEnergyCost(nextFloor);
@@ -122,7 +125,9 @@ export function createDungeonCommand(services: BotServices): Command {
                 `• **Entry Cost**: \`${nextCost} Energy\`\n\n` +
                 `*Commands:* \`/dungeon climb\` to battle | \`/dungeon floor <id>\` to inspect | \`/dungeon leaderboard\``,
             )
-            .setFooter({ text: 'Seasonal Tower resets every 60–90 days with fresh environmental affixes.' });
+            .setFooter({
+              text: 'Seasonal Tower resets every 60–90 days with fresh environmental affixes.',
+            });
 
           const climbBtn = new ButtonBuilder()
             .setCustomId('dungeon:status:climb')
@@ -140,7 +145,11 @@ export function createDungeonCommand(services: BotServices): Command {
               ? await (replyMsg as any).fetch()
               : replyMsg
           ) as Message | undefined;
-          if (discordMsg && typeof discordMsg === 'object' && 'createMessageComponentCollector' in discordMsg) {
+          if (
+            discordMsg &&
+            typeof discordMsg === 'object' &&
+            'createMessageComponentCollector' in discordMsg
+          ) {
             const collector = discordMsg.createMessageComponentCollector({
               componentType: ComponentType.Button,
               time: 60_000,
@@ -177,7 +186,8 @@ export function createDungeonCommand(services: BotServices): Command {
         }
 
         case 'climb': {
-          const mode = (ctx.options.getString('mode')?.toLowerCase() as 'manual' | 'auto') ?? 'manual';
+          const mode =
+            (ctx.options.getString('mode')?.toLowerCase() as 'manual' | 'auto') ?? 'manual';
 
           // Tutorial Gate: ensure players clear Prologue Floors T1–T4 first
           const tutorialProgress = await services.userDungeonProgressRepo.getOrCreateProgress(
@@ -195,7 +205,9 @@ export function createDungeonCommand(services: BotServices): Command {
                   `Master the fundamentals of Elemental Resonance, MP & Skills, Consumables, and Shield Wards before entering the seasonal tower.\n\n` +
                   `Begin **Tutorial Floor ${nextTutFloor} / 4**?`,
               )
-              .setFooter({ text: 'Clear all 4 tutorial floors to unlock Season 1 tower climbing!' });
+              .setFooter({
+                text: 'Clear all 4 tutorial floors to unlock Season 1 tower climbing!',
+              });
 
             const beginBtn = new ButtonBuilder()
               .setCustomId('dungeon:climb:begin_tutorial')
@@ -216,7 +228,11 @@ export function createDungeonCommand(services: BotServices): Command {
                 : replyMsg
             ) as Message | undefined;
 
-            if (discordMsg && typeof discordMsg === 'object' && 'createMessageComponentCollector' in discordMsg) {
+            if (
+              discordMsg &&
+              typeof discordMsg === 'object' &&
+              'createMessageComponentCollector' in discordMsg
+            ) {
               const collector = discordMsg.createMessageComponentCollector({
                 componentType: ComponentType.Button,
                 time: 60_000,
@@ -224,7 +240,10 @@ export function createDungeonCommand(services: BotServices): Command {
 
               collector.on('collect', async (interaction: ButtonInteraction) => {
                 if (interaction.user.id !== ctx.user.id) {
-                  await interaction.reply({ content: '⏳ This is not your menu!', ephemeral: true });
+                  await interaction.reply({
+                    content: '⏳ This is not your menu!',
+                    ephemeral: true,
+                  });
                   return;
                 }
                 collector.stop();
@@ -233,7 +252,8 @@ export function createDungeonCommand(services: BotServices): Command {
                   await handleTutorialClimb(ctx, services, nextTutFloor, mode);
                 } else if (interaction.customId === 'dungeon:climb:cancel') {
                   await interaction.update({
-                    content: 'Tutorial postponed. You can resume anytime with `/dungeon tutorial` or `/dungeon climb`.',
+                    content:
+                      'Tutorial postponed. You can resume anytime with `/dungeon tutorial` or `/dungeon climb`.',
                     embeds: [],
                     components: [],
                   });
@@ -243,7 +263,10 @@ export function createDungeonCommand(services: BotServices): Command {
             return;
           }
 
-          const progress = await services.userDungeonProgressRepo.getOrCreateProgress(ctx.user.id, activeSeason.id);
+          const progress = await services.userDungeonProgressRepo.getOrCreateProgress(
+            ctx.user.id,
+            activeSeason.id,
+          );
           const floorToClimb =
             ctx.options.getInteger('floor_number') ??
             (isClimbAlias && rawArgs[0] && !isNaN(parseInt(rawArgs[0], 10))
@@ -263,8 +286,7 @@ export function createDungeonCommand(services: BotServices): Command {
 
         case 'floor': {
           const floorNumber =
-            ctx.options.getInteger('floor_number') ??
-            (rawArgs[1] ? parseInt(rawArgs[1], 10) : 1);
+            ctx.options.getInteger('floor_number') ?? (rawArgs[1] ? parseInt(rawArgs[1], 10) : 1);
 
           const stats = services.scalingEngine.calculateFloorStats(floorNumber);
           const floorType = services.scalingEngine.getFloorType(floorNumber);
@@ -274,7 +296,13 @@ export function createDungeonCommand(services: BotServices): Command {
 
           const embed = new EmbedBuilder()
             .setTitle(`🔍 Dungeon Inspection — Floor ${floorNumber} [${floorType}]`)
-            .setColor(floorType === 'MAJOR_BOSS' ? 0xff0055 : floorType === 'MINI_BOSS' ? 0xffaa00 : 0x00bfff)
+            .setColor(
+              floorType === 'MAJOR_BOSS'
+                ? 0xff0055
+                : floorType === 'MINI_BOSS'
+                  ? 0xffaa00
+                  : 0x00bfff,
+            )
             .setDescription(
               `**Enemy Intelligence Report**:\n` +
                 `• **Floor Bracket**: \`Floor ${floorNumber}\` (${floorType})\n` +
@@ -289,14 +317,19 @@ export function createDungeonCommand(services: BotServices): Command {
                 `🛡️ **Special Defenses**: ${floorNumber >= 20 && floorType !== 'STANDARD' ? 'Active Multi-Layer Elemental Wards' : 'Standard Barrier'}\n` +
                 `⚠️ **Enrage Clock**: Turn 10+ (+100% ATK/turn with unblockable true damage strikes)`,
             )
-            .setFooter({ text: 'Challenge this floor with /dungeon climb floor_number:' + floorNumber });
+            .setFooter({
+              text: 'Challenge this floor with /dungeon climb floor_number:' + floorNumber,
+            });
 
           await ctx.reply({ embeds: [embed] });
           break;
         }
 
         case 'leaderboard': {
-          const climbers = await services.userDungeonProgressRepo.getSeasonLeaderboard(activeSeason.id, 10);
+          const climbers = await services.userDungeonProgressRepo.getSeasonLeaderboard(
+            activeSeason.id,
+            10,
+          );
 
           if (climbers.length === 0) {
             await ctx.reply({
@@ -306,7 +339,8 @@ export function createDungeonCommand(services: BotServices): Command {
           }
 
           const lines = climbers.map((c, idx) => {
-            const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `\`#${idx + 1}\``;
+            const medal =
+              idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `\`#${idx + 1}\``;
             return `${medal} <@${c.userId}> — **Floor ${c.highestClearedFloor}** (${c.clearCount} Clears / ${c.attemptsCount} Attempts)`;
           });
 
@@ -314,7 +348,9 @@ export function createDungeonCommand(services: BotServices): Command {
             .setTitle(`🏆 ${activeSeason.name} — Top Tower Climbers`)
             .setColor(0xffd700)
             .setDescription(lines.join('\n\n'))
-            .setFooter({ text: 'Compete for seasonal hall-of-fame placement and milestone rewards!' });
+            .setFooter({
+              text: 'Compete for seasonal hall-of-fame placement and milestone rewards!',
+            });
 
           await ctx.reply({ embeds: [embed] });
           break;
@@ -332,7 +368,7 @@ export function createDungeonCommand(services: BotServices): Command {
               .setColor(0x57f287)
               .setDescription(
                 'You have already completed the Tutorial Prologue!\n' +
-                'Clear Floor 1 of the seasonal tower next with `/dungeon climb`!',
+                  'Clear Floor 1 of the seasonal tower next with `/dungeon climb`!',
               )
               .setFooter({ text: 'Clear Floor 1 of the seasonal tower next with /dungeon climb!' });
 
@@ -345,7 +381,10 @@ export function createDungeonCommand(services: BotServices): Command {
         }
 
         default:
-          await ctx.reply({ content: `Unknown dungeon action: ${action}. Use /dungeon status`, ephemeral: true });
+          await ctx.reply({
+            content: `Unknown dungeon action: ${action}. Use /dungeon status`,
+            ephemeral: true,
+          });
           break;
       }
     },
@@ -359,7 +398,10 @@ async function handleTutorialClimb(
   mode: 'manual' | 'auto' = 'manual',
 ): Promise<void> {
   // 1. Ensure the player cannot replay cleared tutorial floors
-  const canAttempt = await services.tutorialService.canAttemptTutorialFloor(ctx.user.id, tutorialFloor);
+  const canAttempt = await services.tutorialService.canAttemptTutorialFloor(
+    ctx.user.id,
+    tutorialFloor,
+  );
   let targetFloor = tutorialFloor;
   if (!canAttempt.allowed) {
     if (canAttempt.reason === 'ALREADY_CLEARED') {
@@ -395,4 +437,3 @@ async function handleTutorialClimb(
     isTutorial: true,
   });
 }
-

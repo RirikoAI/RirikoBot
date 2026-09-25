@@ -136,7 +136,9 @@ describe('Dungeon Repositories (TASK-1041)', () => {
         name: 'Ember Gates (F1)',
         energyCost: 10,
         minPlayerLevel: 1,
-        enemyLineup: [{ name: 'Fire Slime', hp: 1200, atk: 120, def: 80, spd: 25, element: 'FIRE' }],
+        enemyLineup: [
+          { name: 'Fire Slime', hp: 1200, atk: 120, def: 80, spd: 25, element: 'FIRE' },
+        ],
         floorAffixes: [],
         isBossFloor: false,
         firstClearRewards: { credits: 500, dust: 50 },
@@ -150,7 +152,9 @@ describe('Dungeon Repositories (TASK-1041)', () => {
         name: 'Magma Sentinel (F5 Mini-Boss)',
         energyCost: 10,
         minPlayerLevel: 5,
-        enemyLineup: [{ name: 'Magma Sentinel', hp: 3360, atk: 315, def: 210, spd: 38, element: 'FIRE' }],
+        enemyLineup: [
+          { name: 'Magma Sentinel', hp: 3360, atk: 315, def: 210, spd: 38, element: 'FIRE' },
+        ],
         floorAffixes: ['SCORCHED_EARTH'],
         isBossFloor: true,
         firstClearRewards: { credits: 2500, dust: 200 },

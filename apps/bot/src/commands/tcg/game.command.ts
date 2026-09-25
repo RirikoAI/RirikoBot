@@ -1,9 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { openShopMenu } from './shop-menu.js';
 import { type ExpeditionDuration } from '@ririko/services';
@@ -13,9 +9,11 @@ export function createGameCommand(services: BotServices): Command {
     metadata: {
       name: 'game',
       category: CommandCategory.TCG,
-      description: 'TCG Game Modes: PvP Duels, Timed Expeditions, Boss Raids, and Quest Milestones.',
+      description:
+        'TCG Game Modes: PvP Duels, Timed Expeditions, Boss Raids, and Quest Milestones.',
       aliases: ['battle', 'duel', 'tcggame'],
-      usage: '/game [action: pvp|explore|boss|quests] [user] [wager] [duration] [subaction] [quest_id]',
+      usage:
+        '/game [action: pvp|explore|boss|quests] [user] [wager] [duration] [subaction] [quest_id]',
       examples: [
         '/game action:pvp user:@Friend wager:100',
         '/game action:explore duration:4h subaction:start',
@@ -102,9 +100,10 @@ export function createGameCommand(services: BotServices): Command {
       if (!action) {
         try {
           const optionsRecord = ctx.options as unknown as Record<string, unknown>;
-          const sc = typeof optionsRecord['getSubcommand'] === 'function'
-            ? (optionsRecord['getSubcommand'] as () => string)()
-            : null;
+          const sc =
+            typeof optionsRecord['getSubcommand'] === 'function'
+              ? (optionsRecord['getSubcommand'] as () => string)()
+              : null;
           if (sc) action = String(sc).toLowerCase();
         } catch {
           // ignore
@@ -125,7 +124,8 @@ export function createGameCommand(services: BotServices): Command {
           const targetUser = await ctx.options.getUser('user');
           if (!targetUser) {
             await ctx.reply({
-              content: '❌ Please mention or specify a user to challenge in a PvP duel. Usage: `/game action:pvp user:@User [wager]`',
+              content:
+                '❌ Please mention or specify a user to challenge in a PvP duel. Usage: `/game action:pvp user:@User [wager]`',
               ephemeral: true,
             });
             return;
@@ -142,16 +142,23 @@ export function createGameCommand(services: BotServices): Command {
           const wager = Math.max(0, ctx.options.getInteger('wager') ?? 0);
 
           // Get challenger and opponent combat cards
-          const challengerCards = await services.loadoutService.buildActiveParty(ctx.user.id, 'TEAM_A');
+          const challengerCards = await services.loadoutService.buildActiveParty(
+            ctx.user.id,
+            'TEAM_A',
+          );
           if (challengerCards.length === 0) {
             await ctx.reply({
-              content: '❌ You have no cards in your collection to duel with! Claim card drops first using `/card claim`.',
+              content:
+                '❌ You have no cards in your collection to duel with! Claim card drops first using `/card claim`.',
               ephemeral: true,
             });
             return;
           }
 
-          const opponentCards = await services.loadoutService.buildActiveParty(targetUser.id, 'TEAM_B');
+          const opponentCards = await services.loadoutService.buildActiveParty(
+            targetUser.id,
+            'TEAM_B',
+          );
           if (opponentCards.length === 0) {
             await ctx.reply({
               content: `❌ <@${targetUser.id}> does not have any cards in their collection yet!`,
@@ -195,7 +202,9 @@ export function createGameCommand(services: BotServices): Command {
               (isDraw
                 ? '🤝 **The battle ended in a stalemate DRAW!**'
                 : `🏆 **Winner: <@${duelResult.winnerUserId}>** (+${duelResult.ratingDelta} Rating Rating)`) +
-                (duelResult.wagerWon ? `\n💰 **Wager Won**: \`${duelResult.wagerWon} Coins\`!` : '') +
+                (duelResult.wagerWon
+                  ? `\n💰 **Wager Won**: \`${duelResult.wagerWon} Coins\`!`
+                  : '') +
                 `\n⚡ **Energy Expended**: 5 Energy\n\n` +
                 `📜 **Combat Action Log**\n${topLogs}`,
             )
@@ -206,8 +215,13 @@ export function createGameCommand(services: BotServices): Command {
         }
 
         case 'explore': {
-          const subaction = ctx.options.getString('subaction')?.toLowerCase() ?? rawArgs[1]?.toLowerCase() ?? 'status';
-          const duration = (ctx.options.getString('duration')?.toLowerCase() ?? rawArgs[2]?.toLowerCase() ?? '1h') as ExpeditionDuration;
+          const subaction =
+            ctx.options.getString('subaction')?.toLowerCase() ??
+            rawArgs[1]?.toLowerCase() ??
+            'status';
+          const duration = (ctx.options.getString('duration')?.toLowerCase() ??
+            rawArgs[2]?.toLowerCase() ??
+            '1h') as ExpeditionDuration;
 
           if (subaction === 'start') {
             const userCards = await services.waifuCardRepo.listUserCards(ctx.user.id, { limit: 1 });
@@ -230,9 +244,12 @@ export function createGameCommand(services: BotServices): Command {
               return;
             }
 
-            const completesTimestamp = Math.floor(startRes.expedition!.completesAt.getTime() / 1000);
+            const completesTimestamp = Math.floor(
+              startRes.expedition!.completesAt.getTime() / 1000,
+            );
             await ctx.reply({
-              content: `🧭 **Expedition Deployed!**\n` +
+              content:
+                `🧭 **Expedition Deployed!**\n` +
                 `• **Duration**: \`${duration}\`\n` +
                 `• **Energy Consumed**: \`${startRes.expedition!.energyCost} Energy\`\n` +
                 `• **Returns**: <t:${completesTimestamp}:R> (<t:${completesTimestamp}:t>)\n` +
@@ -247,7 +264,8 @@ export function createGameCommand(services: BotServices): Command {
 
             if (unclaimed.length === 0) {
               await ctx.reply({
-                content: '📭 You have no active expeditions to claim! Deploy one with `/game action:explore subaction:start duration:1h`.',
+                content:
+                  '📭 You have no active expeditions to claim! Deploy one with `/game action:explore subaction:start duration:1h`.',
                 ephemeral: true,
               });
               return;
@@ -265,10 +283,13 @@ export function createGameCommand(services: BotServices): Command {
             services.questService.recordProgress(ctx.user.id, 'daily_expedition_complete', 1);
 
             await ctx.reply({
-              content: `🎉 **Expedition Completed!**\n` +
+              content:
+                `🎉 **Expedition Completed!**\n` +
                 `• **Credits Earned**: \`+${claimRes.rewards?.credits} Coins\`\n` +
                 `• **Crafting Dust**: \`+${claimRes.rewards?.dust} Dust\`\n` +
-                (claimRes.rewards?.cardShards ? `• **Bonus**: \`+${claimRes.rewards.cardShards} Card Shard\`! ✨\n` : ''),
+                (claimRes.rewards?.cardShards
+                  ? `• **Bonus**: \`+${claimRes.rewards.cardShards} Card Shard\`! ✨\n`
+                  : ''),
             });
             return;
           }
@@ -277,7 +298,8 @@ export function createGameCommand(services: BotServices): Command {
           const activeExps = services.expeditionService.getUserExpeditions(ctx.user.id);
           if (activeExps.length === 0) {
             await ctx.reply({
-              content: '🧭 **No active expeditions deployed.**\nDeploy your cards with `/game action:explore subaction:start duration:1h` (1h, 4h, 8h).',
+              content:
+                '🧭 **No active expeditions deployed.**\nDeploy your cards with `/game action:explore subaction:start duration:1h` (1h, 4h, 8h).',
               ephemeral: true,
             });
             return;
@@ -285,7 +307,11 @@ export function createGameCommand(services: BotServices): Command {
 
           const lines = activeExps.map((e) => {
             const ts = Math.floor(e.completesAt.getTime() / 1000);
-            const status = e.isClaimed ? '✅ Claimed' : Date.now() >= e.completesAt.getTime() ? '🎁 Ready to Claim' : `⏳ Returns <t:${ts}:R>`;
+            const status = e.isClaimed
+              ? '✅ Claimed'
+              : Date.now() >= e.completesAt.getTime()
+                ? '🎁 Ready to Claim'
+                : `⏳ Returns <t:${ts}:R>`;
             return `• **Tier**: \`${e.tier}\` | ${status}`;
           });
 
@@ -296,10 +322,16 @@ export function createGameCommand(services: BotServices): Command {
         }
 
         case 'boss': {
-          const subaction = ctx.options.getString('subaction')?.toLowerCase() ?? rawArgs[1]?.toLowerCase() ?? 'status';
+          const subaction =
+            ctx.options.getString('subaction')?.toLowerCase() ??
+            rawArgs[1]?.toLowerCase() ??
+            'status';
 
           if (subaction === 'attack') {
-            const combatCards = await services.loadoutService.buildActiveParty(ctx.user.id, 'TEAM_A');
+            const combatCards = await services.loadoutService.buildActiveParty(
+              ctx.user.id,
+              'TEAM_A',
+            );
             if (combatCards.length === 0) {
               await ctx.reply({
                 content: '❌ You need at least 1 equipped card to attack the World Boss!',
@@ -308,14 +340,21 @@ export function createGameCommand(services: BotServices): Command {
               return;
             }
 
-            const attackRes = await services.bossRaidService.attackBoss(ctx.user.id, combatCards[0]!);
+            const attackRes = await services.bossRaidService.attackBoss(
+              ctx.user.id,
+              combatCards[0]!,
+            );
             if (!attackRes.success) {
               await ctx.reply({ content: `❌ ${attackRes.error}`, ephemeral: true });
               return;
             }
 
             // Record weekly raid quest progress
-            services.questService.recordProgress(ctx.user.id, 'weekly_boss_raid_damage', attackRes.damageDealt);
+            services.questService.recordProgress(
+              ctx.user.id,
+              'weekly_boss_raid_damage',
+              attackRes.damageDealt,
+            );
 
             const boss = services.bossRaidService.getCurrentBoss();
             const hpPct = ((boss.currentHp / boss.totalHp) * 100).toFixed(1);
@@ -331,7 +370,9 @@ export function createGameCommand(services: BotServices): Command {
                   `• **Raid Badges**: \`+${attackRes.rewards?.raidBadges}\` 🎖️\n` +
                   `• **Credits**: \`+${attackRes.rewards?.credits} Coins\` 🪙\n` +
                   `• **Crafting Dust**: \`+${attackRes.rewards?.craftingDust} Dust\` 💎` +
-                  (attackRes.isBossDefeated ? '\n\n🎉 **THE WORLD BOSS HAS BEEN VANQUISHED!**' : ''),
+                  (attackRes.isBossDefeated
+                    ? '\n\n🎉 **THE WORLD BOSS HAS BEEN VANQUISHED!**'
+                    : ''),
               )
               .setFooter({ text: 'Cooperative World Boss • 30 Energy per attack' });
 
@@ -344,9 +385,13 @@ export function createGameCommand(services: BotServices): Command {
           const leaderboard = services.bossRaidService.getLeaderboard().slice(0, 5);
           const hpPct = ((boss.currentHp / boss.totalHp) * 100).toFixed(1);
 
-          const lbLines = leaderboard.length > 0
-            ? leaderboard.map((p, idx) => `${idx + 1}. <@${p.userId}> — **${p.totalDamage.toLocaleString()} DMG** (${p.attemptsCount} attempts)`)
-            : ['*No players have attacked this boss cycle yet. Be the first!*'];
+          const lbLines =
+            leaderboard.length > 0
+              ? leaderboard.map(
+                  (p, idx) =>
+                    `${idx + 1}. <@${p.userId}> — **${p.totalDamage.toLocaleString()} DMG** (${p.attemptsCount} attempts)`,
+                )
+              : ['*No players have attacked this boss cycle yet. Be the first!*'];
 
           const embed = new EmbedBuilder()
             .setTitle(`👹 World Boss: ${boss.name} (${boss.element})`)
@@ -365,13 +410,17 @@ export function createGameCommand(services: BotServices): Command {
         }
 
         case 'quests': {
-          const subaction = ctx.options.getString('subaction')?.toLowerCase() ?? rawArgs[1]?.toLowerCase() ?? 'list';
+          const subaction =
+            ctx.options.getString('subaction')?.toLowerCase() ??
+            rawArgs[1]?.toLowerCase() ??
+            'list';
           const questId = ctx.options.getString('quest_id') ?? rawArgs[2];
 
           if (subaction === 'claim') {
             if (!questId) {
               await ctx.reply({
-                content: '❌ Please specify a Quest ID to claim. Example: `/game action:quests subaction:claim quest_id:daily_pvp_win`',
+                content:
+                  '❌ Please specify a Quest ID to claim. Example: `/game action:quests subaction:claim quest_id:daily_pvp_win`',
                 ephemeral: true,
               });
               return;
@@ -384,7 +433,8 @@ export function createGameCommand(services: BotServices): Command {
             }
 
             await ctx.reply({
-              content: `🎉 **Quest Claimed: ${claimRes.questTitle}!**\n` +
+              content:
+                `🎉 **Quest Claimed: ${claimRes.questTitle}!**\n` +
                 `• **Credits**: \`+${claimRes.rewardCredits} Coins\`\n` +
                 `• **Crafting Dust**: \`+${claimRes.rewardDust} Dust\`\n` +
                 (claimRes.rewardTicket ? '• **Bonus**: `+1 Summon Ticket`! 🎫\n' : ''),
@@ -395,7 +445,11 @@ export function createGameCommand(services: BotServices): Command {
           // Default: list quests
           const userQuests = services.questService.getUserQuests(ctx.user.id);
           const questLines = userQuests.map((q) => {
-            const statusIcon = q.isClaimed ? '✅ Claimed' : q.isCompleted ? '🎁 Ready (`/game quests claim ' + q.questId + '`)' : `⏳ Progress: ${q.currentCount}/${q.targetCount}`;
+            const statusIcon = q.isClaimed
+              ? '✅ Claimed'
+              : q.isCompleted
+                ? '🎁 Ready (`/game quests claim ' + q.questId + '`)'
+                : `⏳ Progress: ${q.currentCount}/${q.targetCount}`;
             return `• **${q.quest.title}** (\`${q.quest.type}\`)\n  ${q.quest.description}\n  Status: ${statusIcon} — Reward: \`${q.quest.rewardCredits} Coins\`, \`${q.quest.rewardDust} Dust\``;
           });
 
@@ -403,7 +457,9 @@ export function createGameCommand(services: BotServices): Command {
             .setTitle(`📜 Commander ${ctx.user.username}'s Daily & Weekly Missions`)
             .setColor(0x00bfff)
             .setDescription(questLines.join('\n\n'))
-            .setFooter({ text: 'Complete missions daily and weekly for free coins and crafting dust!' });
+            .setFooter({
+              text: 'Complete missions daily and weekly for free coins and crafting dust!',
+            });
 
           await ctx.reply({ embeds: [embed] });
           break;
@@ -440,11 +496,13 @@ async function handleBuy(
   rawArgs: readonly string[],
 ): Promise<void> {
   const itemCode = ctx.options.getString('item') ?? rawArgs[1];
-  const quantity = ctx.options.getInteger('quantity') ?? (rawArgs[2] ? parseInt(rawArgs[2], 10) : 1);
+  const quantity =
+    ctx.options.getInteger('quantity') ?? (rawArgs[2] ? parseInt(rawArgs[2], 10) : 1);
 
   if (!itemCode) {
     await ctx.reply({
-      content: '❌ Please specify an item code to purchase. Usage: `/game action:buy item:<code_or_id> [quantity]`',
+      content:
+        '❌ Please specify an item code to purchase. Usage: `/game action:buy item:<code_or_id> [quantity]`',
       ephemeral: true,
     });
     return;

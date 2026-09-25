@@ -7,7 +7,12 @@ import {
   type Message,
 } from 'discord.js';
 import type { CommandContext } from '@ririko/discord';
-import { ALL_GEAR_SLOTS, type EquipmentStats, type GearSlot, type RecipeStatus } from '@ririko/services';
+import {
+  ALL_GEAR_SLOTS,
+  type EquipmentStats,
+  type GearSlot,
+  type RecipeStatus,
+} from '@ririko/services';
 import type { BotServices } from '../../services.js';
 import { formatStats } from './gear-menu.js';
 
@@ -98,7 +103,9 @@ export function buildCraftMenuView(state: CraftMenuState): {
       `\n\n🎯 **${selected.outputItem.name}** [${selected.outputItem.rarity} ${selected.outputItem.subtype}]` +
       `\n*${selected.outputItem.description}*` +
       `\nOutput stats: ${formatStats(stats)}` +
-      (selected.outputItem.battlePerks?.length ? `\n🔥 Perk: ${selected.outputItem.battlePerks.join(', ')}` : '') +
+      (selected.outputItem.battlePerks?.length
+        ? `\n🔥 Perk: ${selected.outputItem.battlePerks.join(', ')}`
+        : '') +
       `\n\n${lockLine}` +
       `\n${selected.ownedDust >= selected.recipe.dustCost ? '✅' : '❌'} Dust: ${selected.recipe.dustCost} (have ${selected.ownedDust})` +
       `\n${selected.ownedCredits >= selected.recipe.creditCost ? '✅' : '❌'} Credits: ${selected.recipe.creditCost} (have ${selected.ownedCredits})` +
@@ -121,7 +128,9 @@ export function buildCraftMenuView(state: CraftMenuState): {
         detail +
         paginationNote,
     )
-    .setFooter({ text: `🧪 Crafting Dust: ${state.dust.toLocaleString()} | 🪙 Credits: ${state.credits.toLocaleString()}` });
+    .setFooter({
+      text: `🧪 Crafting Dust: ${state.dust.toLocaleString()} | 🪙 Credits: ${state.credits.toLocaleString()}`,
+    });
 
   const categoryMenu = new StringSelectMenuBuilder()
     .setCustomId('craft:category')
@@ -152,7 +161,11 @@ export function buildCraftMenuView(state: CraftMenuState): {
           const globalIdx = effectivePage * PAGE_SIZE + idxOnPage;
           return {
             label: `${recipeIcon(status)} ${status.outputItem.name}`.slice(0, 100),
-            description: `${status.recipe.dustCost} Dust + ${status.recipe.creditCost}c — ${statusMarker(status)}`.slice(0, 100),
+            description:
+              `${status.recipe.dustCost} Dust + ${status.recipe.creditCost}c — ${statusMarker(status)}`.slice(
+                0,
+                100,
+              ),
             value: String(globalIdx),
             default: globalIdx === state.selectedIndex,
           };
@@ -187,7 +200,11 @@ export function buildCraftMenuView(state: CraftMenuState): {
     new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId('craft:craft')
-        .setLabel(selected ? `🔨 Craft (${selected.recipe.dustCost} dust, ${selected.recipe.creditCost}c)` : '🔨 Craft')
+        .setLabel(
+          selected
+            ? `🔨 Craft (${selected.recipe.dustCost} dust, ${selected.recipe.creditCost}c)`
+            : '🔨 Craft',
+        )
         .setStyle(ButtonStyle.Success)
         .setDisabled(!selected || !selected.unlocked || !selected.affordable),
       new ButtonBuilder().setCustomId('craft:close').setLabel('Close').setStyle(ButtonStyle.Danger),
@@ -272,7 +289,10 @@ export async function openCraftMenu(
         nextCategory = (interaction.values[0] as CraftCategory) ?? state.category;
         nextSelectedCode = undefined;
         nextPage = 0;
-      } else if (interaction.isStringSelectMenu() && interaction.customId === 'craft:select_recipe') {
+      } else if (
+        interaction.isStringSelectMenu() &&
+        interaction.customId === 'craft:select_recipe'
+      ) {
         const idx = Number.parseInt(interaction.values[0] ?? '0', 10);
         nextSelectedCode = state.recipes[idx]?.recipe.code;
         nextPage = Math.floor(idx / 25);

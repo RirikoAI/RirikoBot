@@ -201,4 +201,3 @@ export class SecurityError extends RirikoError {
     });
   }
 }
-

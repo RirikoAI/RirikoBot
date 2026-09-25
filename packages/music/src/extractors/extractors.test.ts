@@ -41,14 +41,22 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
       expect(ytAdapter.canResolve('https://youtu.be/dQw4w9WgXcQ')).toBe(true);
       expect(ytAdapter.canResolve('https://www.youtube.com/shorts/dQw4w9WgXcQ')).toBe(true);
       expect(ytAdapter.canResolve('https://music.youtube.com/watch?v=dQw4w9WgXcQ')).toBe(true);
-      expect(ytAdapter.canResolve('https://www.youtube.com/playlist?list=PLrAlnnR2v3e96s61f2w_h_bE2L9')).toBe(true);
+      expect(
+        ytAdapter.canResolve('https://www.youtube.com/playlist?list=PLrAlnnR2v3e96s61f2w_h_bE2L9'),
+      ).toBe(true);
       expect(ytAdapter.canResolve('https://google.com')).toBe(false);
     });
 
     it('recognizes Spotify track, album, playlist URLs and URIs', () => {
-      expect(spAdapter.canResolve('https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT')).toBe(true);
-      expect(spAdapter.canResolve('https://open.spotify.com/album/1DFixLWuPkv3KT3TnV35m3')).toBe(true);
-      expect(spAdapter.canResolve('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M')).toBe(true);
+      expect(spAdapter.canResolve('https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT')).toBe(
+        true,
+      );
+      expect(spAdapter.canResolve('https://open.spotify.com/album/1DFixLWuPkv3KT3TnV35m3')).toBe(
+        true,
+      );
+      expect(spAdapter.canResolve('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M')).toBe(
+        true,
+      );
       expect(spAdapter.canResolve('spotify:track:4cOdK2wGLETKBW3PvgPWqT')).toBe(true);
       expect(spAdapter.canResolve('spotify:album:1DFixLWuPkv3KT3TnV35m3')).toBe(true);
       expect(spAdapter.canResolve('https://apple.com/music')).toBe(false);
@@ -136,7 +144,9 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
     });
 
     it('resolves Deezer track with preview stream', async () => {
-      const res = (await dzAdapter.resolve('https://www.deezer.com/track/3135556')) as ResolvedTrack;
+      const res = (await dzAdapter.resolve(
+        'https://www.deezer.com/track/3135556',
+      )) as ResolvedTrack;
       expect(res.source).toBe('deezer');
       expect(res.streamUrl).toBeDefined();
     });
@@ -247,7 +257,9 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
     });
 
     it('rejects unrelated resolver hits so fallback queries are not poisoned', async () => {
-      ytAdapter.setMetadataResolver(stubResolver({ title: 'Blinding Lights', artist: 'The Weeknd' }));
+      ytAdapter.setMetadataResolver(
+        stubResolver({ title: 'Blinding Lights', artist: 'The Weeknd' }),
+      );
       expect(await ytAdapter.resolveCanonicalQuery('Lemon', 'Kenshi Yonezu')).toBeNull();
     });
 
@@ -262,11 +274,17 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
 
   describe('7. Spotify Web API Client Credentials & Session Cookie Fallback', () => {
     it('accepts and parses Spotify track, album, and playlist URLs and URIs', () => {
-      expect(spAdapter.canResolve('https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT')).toBe(true);
+      expect(spAdapter.canResolve('https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT')).toBe(
+        true,
+      );
       expect(spAdapter.canResolve('spotify:track:4cOdK2wGLETKBW3PvgPWqT')).toBe(true);
-      expect(spAdapter.canResolve('https://open.spotify.com/album/4LH4d3cOWNNXdsqFd4G7gv')).toBe(true);
+      expect(spAdapter.canResolve('https://open.spotify.com/album/4LH4d3cOWNNXdsqFd4G7gv')).toBe(
+        true,
+      );
       expect(spAdapter.canResolve('spotify:album:4LH4d3cOWNNXdsqFd4G7gv')).toBe(true);
-      expect(spAdapter.canResolve('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M')).toBe(true);
+      expect(spAdapter.canResolve('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M')).toBe(
+        true,
+      );
       expect(spAdapter.canResolve('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M')).toBe(true);
 
       expect(spAdapter.canResolve('https://soundcloud.com/artist/track')).toBe(false);
@@ -302,4 +320,3 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
     });
   });
 });
-

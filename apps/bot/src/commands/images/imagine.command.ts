@@ -17,7 +17,14 @@ export const IMAGINE_COMMAND_NAME = 'imagine';
 export const IMAGINE_ALIASES = ['img', 'ai-image', 'generate-image'];
 
 export const VALID_ASPECT_RATIOS = ['1:1', '16:9', '9:16', '4:3', '3:4'] as const;
-export const VALID_PRESETS = ['anime', 'photoreal', 'pixel-art', 'fantasy', 'cyberpunk', 'none'] as const;
+export const VALID_PRESETS = [
+  'anime',
+  'photoreal',
+  'pixel-art',
+  'fantasy',
+  'cyberpunk',
+  'none',
+] as const;
 export const VALID_PROVIDERS = ['auto', 'gemini', 'comfyui', 'replicate', 'mock'] as const;
 
 export interface ParsedImagineArgs {
@@ -127,7 +134,10 @@ export function getImageAttachmentName(mimeType?: string): string {
   return 'imagine.png';
 }
 
-export function buildImagineActionRow(jobId: string, userId: string): ActionRowBuilder<ButtonBuilder> {
+export function buildImagineActionRow(
+  jobId: string,
+  userId: string,
+): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`imagine:regen:${jobId}`)
@@ -215,7 +225,11 @@ export async function handleImagineButtonInteraction(
         .setImage(`attachment://${fileName}`)
         .setColor(0x8b5cf6)
         .addFields(
-          { name: 'Provider', value: `\`${result.providerName ?? result.providerId}\``, inline: true },
+          {
+            name: 'Provider',
+            value: `\`${result.providerName ?? result.providerId}\``,
+            inline: true,
+          },
           { name: 'Preset', value: `\`${result.preset ?? 'anime'}\``, inline: true },
           { name: 'Aspect Ratio', value: `\`${result.aspectRatio ?? '1:1'}\``, inline: true },
           { name: 'Generation Time', value: `\`${durationSec}s\``, inline: true },
@@ -380,9 +394,17 @@ export function createImagineCommand(services: BotServices): Command {
           .setImage(`attachment://${fileName}`)
           .setColor(0x8b5cf6)
           .addFields(
-            { name: 'Provider', value: `\`${result.providerName ?? result.providerId}\``, inline: true },
+            {
+              name: 'Provider',
+              value: `\`${result.providerName ?? result.providerId}\``,
+              inline: true,
+            },
             { name: 'Preset', value: `\`${result.preset ?? preset ?? 'anime'}\``, inline: true },
-            { name: 'Aspect Ratio', value: `\`${result.aspectRatio ?? aspectRatio ?? '1:1'}\``, inline: true },
+            {
+              name: 'Aspect Ratio',
+              value: `\`${result.aspectRatio ?? aspectRatio ?? '1:1'}\``,
+              inline: true,
+            },
             { name: 'Generation Time', value: `\`${durationSec}s\``, inline: true },
           )
           .setFooter({ text: `Requested by ${ctx.user.username} • Ririko AI Imagen` })
@@ -398,7 +420,10 @@ export function createImagineCommand(services: BotServices): Command {
 
         attachOwnerCollector(message, {
           ownerId: ctx.user.id,
-          customIds: [`imagine:regen:${result.jobId ?? 'job-default'}`, `imagine:dismiss:${ctx.user.id}`],
+          customIds: [
+            `imagine:regen:${result.jobId ?? 'job-default'}`,
+            `imagine:dismiss:${ctx.user.id}`,
+          ],
           notOwnerHint: '⏳ Only the requester can control this image.',
           onCollect: async (interaction: MessageComponentInteraction) => {
             if (interaction.isButton()) {

@@ -2,11 +2,7 @@ import type { VoiceConnection, DiscordGatewayAdapterCreator } from '@discordjs/v
 export type { VoiceConnection, DiscordGatewayAdapterCreator };
 
 export type DisconnectReason =
-  | 'EMPTY_QUEUE'
-  | 'EMPTY_CHANNEL'
-  | 'MANUAL'
-  | 'ERROR'
-  | 'RECONNECT_FAILED';
+  'EMPTY_QUEUE' | 'EMPTY_CHANNEL' | 'MANUAL' | 'ERROR' | 'RECONNECT_FAILED';
 
 export interface VoiceLifecycleOptions {
   guildId: string;

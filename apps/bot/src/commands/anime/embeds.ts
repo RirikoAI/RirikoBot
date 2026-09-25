@@ -14,7 +14,10 @@ import type {
 
 export const ANIME_SELECT_ID = 'anime:select';
 
-const SOURCE_AUTHOR: Record<AnimeDataSource, { name: string; iconURL: string; color: ColorResolvable }> = {
+const SOURCE_AUTHOR: Record<
+  AnimeDataSource,
+  { name: string; iconURL: string; color: ColorResolvable }
+> = {
   myanimelist: {
     name: 'MyAnimeList',
     iconURL: 'https://upload.wikimedia.org/wikipedia/commons/7/7a/MyAnimeList_Logo.png',
@@ -30,7 +33,8 @@ const SOURCE_AUTHOR: Record<AnimeDataSource, { name: string; iconURL: string; co
 const NA = 'N/A';
 
 /** Upstream URLs are untrusted; discord.js throws on anything that is not http(s). */
-export const httpUrl = (value: string | null) => (value && /^https?:\/\/\S+$/i.test(value) ? value : null);
+export const httpUrl = (value: string | null) =>
+  value && /^https?:\/\/\S+$/i.test(value) ? value : null;
 
 /** `FINISHED_AIRING` / `Finished Airing` → `Finished Airing`; keeps short codes like `TV`. */
 export function humanize(value: string | null | undefined): string {
@@ -48,7 +52,8 @@ export function truncate(text: string, max: number): string {
   return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
 }
 
-const list = (values: string[], max = 1024) => (values.length ? truncate(values.join(', '), max) : NA);
+const list = (values: string[], max = 1024) =>
+  values.length ? truncate(values.join(', '), max) : NA;
 const num = (value: number | null) => (value === null ? NA : value.toLocaleString('en-US'));
 
 function yearOf(media: AnimeMediaDetails): string | null {
@@ -88,7 +93,10 @@ export function mediaOption(media: AnimeMediaDetails): { label: string; descript
   return { label: media.title, description: [meta, genres].filter(Boolean).join(' — ') };
 }
 
-export function characterOption(character: AnimeCharacterSummary): { label: string; description: string } {
+export function characterOption(character: AnimeCharacterSummary): {
+  label: string;
+  description: string;
+} {
   const favourites = `❤️ ${character.favourites.toLocaleString('en-US')} favourites`;
   return {
     label: character.name,
@@ -111,20 +119,33 @@ export function buildResultListEmbed(
 
 export function buildMediaEmbed(media: AnimeMediaDetails): EmbedBuilder {
   const titles = [
-    media.englishTitle && media.englishTitle !== media.title ? `**English:** ${media.englishTitle}` : null,
+    media.englishTitle && media.englishTitle !== media.title
+      ? `**English:** ${media.englishTitle}`
+      : null,
     media.nativeTitle ? `**Japanese:** ${media.nativeTitle}` : null,
   ].filter(Boolean);
   const synopsis = media.synopsis ?? 'No synopsis available.';
   const description = truncate([...titles, '', synopsis].join('\n').trim(), 4096);
 
   const fields: APIEmbedField[] = [
-    { name: 'Score', value: media.score === null ? NA : `⭐ ${media.score.toFixed(2)}`, inline: true },
+    {
+      name: 'Score',
+      value: media.score === null ? NA : `⭐ ${media.score.toFixed(2)}`,
+      inline: true,
+    },
     media.kind === 'ANIME'
       ? { name: 'Episodes', value: num(media.episodes), inline: true }
-      : { name: 'Chapters / Volumes', value: `${num(media.chapters)} / ${num(media.volumes)}`, inline: true },
+      : {
+          name: 'Chapters / Volumes',
+          value: `${num(media.chapters)} / ${num(media.volumes)}`,
+          inline: true,
+        },
     {
       name: 'Popularity',
-      value: media.popularityRank !== null ? `#${num(media.popularityRank)}` : `${num(media.members)} members`,
+      value:
+        media.popularityRank !== null
+          ? `#${num(media.popularityRank)}`
+          : `${num(media.members)} members`,
       inline: true,
     },
     { name: 'Type', value: humanize(media.format), inline: true },
@@ -139,7 +160,8 @@ export function buildMediaEmbed(media: AnimeMediaDetails): EmbedBuilder {
     fields.push({ name: 'Producers', value: list(media.producers) });
   } else {
     fields.push({ name: 'Authors', value: list(media.authors) });
-    if (media.producers.length) fields.push({ name: 'Serialization', value: list(media.producers) });
+    if (media.producers.length)
+      fields.push({ name: 'Serialization', value: list(media.producers) });
   }
 
   const embed = baseEmbed(media.source)

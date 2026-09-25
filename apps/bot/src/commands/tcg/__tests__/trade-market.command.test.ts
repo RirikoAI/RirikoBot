@@ -127,7 +127,10 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
     } as unknown as BotServices;
   });
 
-  function createMockContext(options: Record<string, any> = {}, rawArgs: string[] = []): CommandContext {
+  function createMockContext(
+    options: Record<string, any> = {},
+    rawArgs: string[] = [],
+  ): CommandContext {
     return {
       user: { id: 'user_1', username: 'Tester' },
       guild: { id: 'guild_1' },
@@ -170,7 +173,10 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
 
     it('handles /trade accept correctly', async () => {
       const cmd = createTradeCommand(services);
-      const ctx = createMockContext({ action: 'accept', trade_id: 'trade_123' }, ['accept', 'trade_123']);
+      const ctx = createMockContext({ action: 'accept', trade_id: 'trade_123' }, [
+        'accept',
+        'trade_123',
+      ]);
 
       await cmd.execute(ctx);
       expect(services.tradeService.acceptTrade).toHaveBeenCalledWith('trade_123', 'user_1');
@@ -179,18 +185,27 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
 
     it('handles /trade reject and cancel', async () => {
       const cmd = createTradeCommand(services);
-      const rejectCtx = createMockContext({ action: 'reject', trade_id: 'trade_123' }, ['reject', 'trade_123']);
+      const rejectCtx = createMockContext({ action: 'reject', trade_id: 'trade_123' }, [
+        'reject',
+        'trade_123',
+      ]);
       await cmd.execute(rejectCtx);
       expect(services.tradeService.rejectTrade).toHaveBeenCalledWith('trade_123', 'user_1');
 
-      const cancelCtx = createMockContext({ action: 'cancel', trade_id: 'trade_123' }, ['cancel', 'trade_123']);
+      const cancelCtx = createMockContext({ action: 'cancel', trade_id: 'trade_123' }, [
+        'cancel',
+        'trade_123',
+      ]);
       await cmd.execute(cancelCtx);
       expect(services.tradeService.cancelTrade).toHaveBeenCalledWith('trade_123', 'user_1');
     });
 
     it('handles /trade view and list', async () => {
       const cmd = createTradeCommand(services);
-      const viewCtx = createMockContext({ action: 'view', trade_id: 'trade_123' }, ['view', 'trade_123']);
+      const viewCtx = createMockContext({ action: 'view', trade_id: 'trade_123' }, [
+        'view',
+        'trade_123',
+      ]);
       await cmd.execute(viewCtx);
       expect(services.tradeService.getTradeDetails).toHaveBeenCalledWith('trade_123');
 
@@ -203,10 +218,11 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
   describe('Market Command (/market)', () => {
     it('handles /market list correctly', async () => {
       const cmd = createMarketCommand(services);
-      const ctx = createMockContext(
-        { action: 'list', card_id: 'card_a', price: 2000 },
-        ['list', 'card_a', '2000'],
-      );
+      const ctx = createMockContext({ action: 'list', card_id: 'card_a', price: 2000 }, [
+        'list',
+        'card_a',
+        '2000',
+      ]);
 
       await cmd.execute(ctx);
       expect(services.marketService.listCard).toHaveBeenCalledWith({
@@ -219,10 +235,10 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
 
     it('handles /market buy correctly', async () => {
       const cmd = createMarketCommand(services);
-      const ctx = createMockContext(
-        { action: 'buy', listing_id: 'listing_123' },
-        ['buy', 'listing_123'],
-      );
+      const ctx = createMockContext({ action: 'buy', listing_id: 'listing_123' }, [
+        'buy',
+        'listing_123',
+      ]);
 
       await cmd.execute(ctx);
       expect(services.marketService.buyListing).toHaveBeenCalledWith({
@@ -234,10 +250,10 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
 
     it('handles /market cancel correctly', async () => {
       const cmd = createMarketCommand(services);
-      const ctx = createMockContext(
-        { action: 'cancel', listing_id: 'listing_123' },
-        ['cancel', 'listing_123'],
-      );
+      const ctx = createMockContext({ action: 'cancel', listing_id: 'listing_123' }, [
+        'cancel',
+        'listing_123',
+      ]);
 
       await cmd.execute(ctx);
       expect(services.marketService.cancelListing).toHaveBeenCalledWith({

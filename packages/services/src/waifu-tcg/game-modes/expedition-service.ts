@@ -49,7 +49,7 @@ export const EXPEDITION_TIERS: Record<ExpeditionDuration, ExpeditionTierConfig> 
     maxCredits: 2500,
     minDust: 150,
     maxDust: 300,
-    cardShardChance: 0.70,
+    cardShardChance: 0.7,
     label: '8 Hour Deep-Wilds Expedition',
   },
 };
@@ -178,8 +178,7 @@ export class ExpeditionService {
     const config = EXPEDITION_TIERS[expedition.tier];
 
     // Roll rewards
-    const credits =
-      config.minCredits + Math.round(rng() * (config.maxCredits - config.minCredits));
+    const credits = config.minCredits + Math.round(rng() * (config.maxCredits - config.minCredits));
     const dust = config.minDust + Math.round(rng() * (config.maxDust - config.minDust));
     const cardShards = rng() < config.cardShardChance ? 1 : 0;
 

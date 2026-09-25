@@ -2,17 +2,8 @@ import { Command } from 'commander';
 import pc from 'picocolors';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import {
-  TwitchStreamAdapter,
-  YouTubeStreamAdapter,
-  TikTokStreamAdapter,
-} from '@ririko/services';
-import {
-  maskSecret,
-  readEnvFile,
-  resolveEnvFilePath,
-  updateEnvFile,
-} from '../utils/env-editor.js';
+import { TwitchStreamAdapter, YouTubeStreamAdapter, TikTokStreamAdapter } from '@ririko/services';
+import { maskSecret, readEnvFile, resolveEnvFilePath, updateEnvFile } from '../utils/env-editor.js';
 
 export interface StreamConfigureOptions {
   twitchClientId?: string | undefined;
@@ -40,7 +31,9 @@ export function printStreamStatus(env: Record<string, string>, targetPath: strin
   console.log(pc.bold(pc.magenta('╰──────────────────────────────────────────────────╯\n')));
 
   console.log(`  ${pc.bold('Target File:')}         ${pc.gray(targetPath)}`);
-  console.log(`  ${pc.bold('Polling Interval:')}    ${pc.cyan(`${checkInterval}ms (${checkSeconds}s)`)}\n`);
+  console.log(
+    `  ${pc.bold('Polling Interval:')}    ${pc.cyan(`${checkInterval}ms (${checkSeconds}s)`)}\n`,
+  );
 
   console.log(pc.bold('  ── Provider Credentials ───────────────────────────'));
 
@@ -57,7 +50,9 @@ export function printStreamStatus(env: Record<string, string>, targetPath: strin
     }`,
   );
   console.log(`    ${pc.gray('Client ID:')}         ${pc.gray(maskSecret(env.TWITCH_CLIENT_ID))}`);
-  console.log(`    ${pc.gray('Client Secret:')}     ${pc.gray(maskSecret(env.TWITCH_CLIENT_SECRET))}`);
+  console.log(
+    `    ${pc.gray('Client Secret:')}     ${pc.gray(maskSecret(env.TWITCH_CLIENT_SECRET))}`,
+  );
 
   // 2. YouTube Live
   const hasYoutubeKey = Boolean(env.YOUTUBE_API_KEY);
@@ -82,7 +77,9 @@ export function printStreamStatus(env: Record<string, string>, targetPath: strin
     }`,
   );
   if (env.TIKTOK_SESSION_ID) {
-    console.log(`    ${pc.gray('Session ID:')}        ${pc.gray(maskSecret(env.TIKTOK_SESSION_ID))}`);
+    console.log(
+      `    ${pc.gray('Session ID:')}        ${pc.gray(maskSecret(env.TIKTOK_SESSION_ID))}`,
+    );
   }
   if (env.TIKTOK_API_KEY) {
     console.log(`    ${pc.gray('API Key:')}           ${pc.gray(maskSecret(env.TIKTOK_API_KEY))}`);
@@ -242,7 +239,9 @@ export function registerStreamConfigureCommand(program: Command): void {
     .alias('stream:configure')
     .alias('streams:configure')
     .alias('streams-configure')
-    .description('Configure Twitch, YouTube, and TikTok streaming API credentials and polling interval')
+    .description(
+      'Configure Twitch, YouTube, and TikTok streaming API credentials and polling interval',
+    )
     .option('--twitch-client-id <id>', 'Twitch application Client ID')
     .option('--twitch-client-secret <secret>', 'Twitch application Client Secret')
     .option('--youtube-key <key>', 'Google Cloud YouTube Data API v3 Key')
@@ -297,7 +296,9 @@ export function registerStreamConfigureCommand(program: Command): void {
       if (options.checkInterval !== undefined) {
         const parsed = parseInt(options.checkInterval, 10);
         if (isNaN(parsed) || parsed < 5000) {
-          console.error(pc.red('\n✖ Check interval must be a valid number of milliseconds (>= 5000).'));
+          console.error(
+            pc.red('\n✖ Check interval must be a valid number of milliseconds (>= 5000).'),
+          );
           process.exit(1);
         }
         updates.STREAM_CHECK_INTERVAL_MS = String(parsed);
@@ -305,11 +306,16 @@ export function registerStreamConfigureCommand(program: Command): void {
 
       if (Object.keys(updates).length > 0) {
         const result = updateEnvFile(envPath, updates);
-        console.log(pc.green(`\n✔ Successfully updated Stream configuration in ${result.filePath}:`));
+        console.log(
+          pc.green(`\n✔ Successfully updated Stream configuration in ${result.filePath}:`),
+        );
         for (const k of [...result.updatedKeys, ...result.addedKeys]) {
           const val = updates[k];
-          const isSecret = k.toLowerCase().includes('key') || k.toLowerCase().includes('secret') || k.toLowerCase().includes('session');
-          console.log(`  • ${pc.bold(k)} = ${pc.cyan(isSecret ? maskSecret(val) : val ?? '')}`);
+          const isSecret =
+            k.toLowerCase().includes('key') ||
+            k.toLowerCase().includes('secret') ||
+            k.toLowerCase().includes('session');
+          console.log(`  • ${pc.bold(k)} = ${pc.cyan(isSecret ? maskSecret(val) : (val ?? ''))}`);
         }
 
         if (options.test) {
@@ -318,7 +324,11 @@ export function registerStreamConfigureCommand(program: Command): void {
         }
       } else {
         printStreamStatus(currentEnv, envPath);
-        console.log(pc.gray('Tip: Run `ririko stream-configure -i` for the interactive setup wizard or see `ririko stream-configure --help`.\n'));
+        console.log(
+          pc.gray(
+            'Tip: Run `ririko stream-configure -i` for the interactive setup wizard or see `ririko stream-configure --help`.\n',
+          ),
+        );
       }
     });
 }

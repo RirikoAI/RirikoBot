@@ -1,5 +1,12 @@
 import type { AniListCharacter, AniListClient, AniListMedia } from './anilist.client.js';
-import type { JikanAnime, JikanCharacter, JikanCharacterFull, JikanClient, JikanImages, JikanManga } from './jikan.client.js';
+import type {
+  JikanAnime,
+  JikanCharacter,
+  JikanCharacterFull,
+  JikanClient,
+  JikanImages,
+  JikanManga,
+} from './jikan.client.js';
 import type {
   AnimeCharacterDetails,
   AnimeCharacterSummary,
@@ -84,7 +91,8 @@ function jikanImage(images: JikanImages | null | undefined): string | null {
 }
 
 const isoDay = (value: string | null | undefined) => (value ? value.slice(0, 10) : null);
-const names = (entries: Array<{ name: string }> | null | undefined) => (entries ?? []).map((e) => e.name);
+const names = (entries: Array<{ name: string }> | null | undefined) =>
+  (entries ?? []).map((e) => e.name);
 
 function fromJikanAnime(a: JikanAnime): AnimeMediaDetails {
   return {
@@ -190,7 +198,9 @@ function fromJikanCharacterFull(c: JikanCharacterFull): AnimeCharacterDetails {
     url: c.url,
     animeTitles: (c.anime ?? []).map((a) => a.anime.title),
     mangaTitles: (c.manga ?? []).map((m) => m.manga.title),
-    voiceActors: (c.voices ?? []).filter((v) => v.language === 'Japanese').map((v) => v.person.name),
+    voiceActors: (c.voices ?? [])
+      .filter((v) => v.language === 'Japanese')
+      .map((v) => v.person.name),
   };
 }
 
@@ -231,29 +241,45 @@ export class AnimeSearchService {
     this.resultLimit = Math.min(Math.max(options.resultLimit ?? 10, 1), 25);
     this.jikanCooldownMs = options.jikanCooldownMs ?? 60_000;
     this.now = options.now ?? Date.now;
-    this.cache = new TtlCache(options.cacheTtlMs ?? 10 * 60_000, options.cacheMaxEntries ?? 500, this.now);
+    this.cache = new TtlCache(
+      options.cacheTtlMs ?? 10 * 60_000,
+      options.cacheMaxEntries ?? 500,
+      this.now,
+    );
   }
 
-  searchAnime(query: string, options: AnimeMediaSearchOptions = {}): Promise<AnimeSearchResult<AnimeMediaDetails>> {
+  searchAnime(
+    query: string,
+    options: AnimeMediaSearchOptions = {},
+  ): Promise<AnimeSearchResult<AnimeMediaDetails>> {
     const includeAdult = options.includeAdult ?? false;
     const limit = this.resultLimit;
     return this.cached(`anime:${includeAdult}:${normalizeQuery(query)}`, () =>
       this.withFallback(
-        async () => (await this.jikan.searchAnime(query, { limit, includeAdult })).map(fromJikanAnime),
         async () =>
-          (await this.anilist.searchMedia(query, { type: 'ANIME', perPage: limit, includeAdult })).map(fromAniListMedia),
+          (await this.jikan.searchAnime(query, { limit, includeAdult })).map(fromJikanAnime),
+        async () =>
+          (
+            await this.anilist.searchMedia(query, { type: 'ANIME', perPage: limit, includeAdult })
+          ).map(fromAniListMedia),
       ),
     );
   }
 
-  searchManga(query: string, options: AnimeMediaSearchOptions = {}): Promise<AnimeSearchResult<AnimeMediaDetails>> {
+  searchManga(
+    query: string,
+    options: AnimeMediaSearchOptions = {},
+  ): Promise<AnimeSearchResult<AnimeMediaDetails>> {
     const includeAdult = options.includeAdult ?? false;
     const limit = this.resultLimit;
     return this.cached(`manga:${includeAdult}:${normalizeQuery(query)}`, () =>
       this.withFallback(
-        async () => (await this.jikan.searchManga(query, { limit, includeAdult })).map(fromJikanManga),
         async () =>
-          (await this.anilist.searchMedia(query, { type: 'MANGA', perPage: limit, includeAdult })).map(fromAniListMedia),
+          (await this.jikan.searchManga(query, { limit, includeAdult })).map(fromJikanManga),
+        async () =>
+          (
+            await this.anilist.searchMedia(query, { type: 'MANGA', perPage: limit, includeAdult })
+          ).map(fromAniListMedia),
       ),
     );
   }
@@ -263,7 +289,10 @@ export class AnimeSearchService {
     return this.cached(`characters:${normalizeQuery(query)}`, () =>
       this.withFallback<AnimeCharacterSummary>(
         async () => (await this.jikan.searchCharacters(query, { limit })).map(fromJikanCharacter),
-        async () => (await this.anilist.searchCharacters(query, { perPage: limit })).map(fromAniListCharacter),
+        async () =>
+          (await this.anilist.searchCharacters(query, { perPage: limit })).map(
+            fromAniListCharacter,
+          ),
       ),
     );
   }

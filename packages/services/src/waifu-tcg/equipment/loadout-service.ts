@@ -25,12 +25,21 @@ export function addEquipmentStats(target: EquipmentStats, source: EquipmentStats
   if (source.health) target.health = (target.health ?? 0) + source.health;
   if (source.speed) target.speed = (target.speed ?? 0) + source.speed;
   if (source.critRate) target.critRate = +((target.critRate ?? 0) + source.critRate).toFixed(4);
-  if (source.critDamage) target.critDamage = +((target.critDamage ?? 0) + source.critDamage).toFixed(4);
-  if (source.mitigation) target.mitigation = +((target.mitigation ?? 0) + source.mitigation).toFixed(4);
-  if (source.elementalMastery) target.elementalMastery = +((target.elementalMastery ?? 0) + source.elementalMastery).toFixed(4);
+  if (source.critDamage)
+    target.critDamage = +((target.critDamage ?? 0) + source.critDamage).toFixed(4);
+  if (source.mitigation)
+    target.mitigation = +((target.mitigation ?? 0) + source.mitigation).toFixed(4);
+  if (source.elementalMastery)
+    target.elementalMastery = +((target.elementalMastery ?? 0) + source.elementalMastery).toFixed(
+      4,
+    );
   if (source.manaShield) target.manaShield = (target.manaShield ?? 0) + source.manaShield;
-  if (source.armorPiercing) target.armorPiercing = +((target.armorPiercing ?? 0) + source.armorPiercing).toFixed(4);
-  if (source.elementalResistance) target.elementalResistance = +((target.elementalResistance ?? 0) + source.elementalResistance).toFixed(4);
+  if (source.armorPiercing)
+    target.armorPiercing = +((target.armorPiercing ?? 0) + source.armorPiercing).toFixed(4);
+  if (source.elementalResistance)
+    target.elementalResistance = +(
+      (target.elementalResistance ?? 0) + source.elementalResistance
+    ).toFixed(4);
   if (source.manaMax) target.manaMax = (target.manaMax ?? 0) + source.manaMax;
   if (source.manaRegen) target.manaRegen = +((target.manaRegen ?? 0) + source.manaRegen).toFixed(4);
 }

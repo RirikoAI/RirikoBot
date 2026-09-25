@@ -28,8 +28,9 @@ function setup(next: ReturnType<typeof vi.fn>, search: string | null = 'Frieren'
   return { ...context, createSession, command: createWallpaperCommand(services) };
 }
 
-const menuOf = (payload: { components: Array<{ components: Array<{ data: { custom_id: string } }> }> }) =>
-  payload.components[0]!.components[0]!;
+const menuOf = (payload: {
+  components: Array<{ components: Array<{ data: { custom_id: string } }> }>;
+}) => payload.components[0]!.components[0]!;
 
 const pick = (customId: string, value: string, userId = 'user-1') => ({
   ...selectInteraction(value, userId),
@@ -44,8 +45,13 @@ describe('/wallpaper (TASK-1442)', () => {
 
     expect(createSession).toHaveBeenCalledWith('Frieren');
     const prompt = raw.editReply.mock.calls[0]![0];
-    expect(prompt.embeds[0].data.description).toContain('Select a source to search for **Frieren**');
-    const menu = menuOf(prompt) as unknown as { data: { custom_id: string }; options: Array<{ data: { value: string } }> };
+    expect(prompt.embeds[0].data.description).toContain(
+      'Select a source to search for **Frieren**',
+    );
+    const menu = menuOf(prompt) as unknown as {
+      data: { custom_id: string };
+      options: Array<{ data: { value: string } }>;
+    };
     expect(menu.data.custom_id).toBe(WALLPAPER_SOURCE_ID);
     expect(menu.options.map((o) => o.data.value)).toEqual(['wallhaven', 'zerochan', 'konachan']);
   });
@@ -64,12 +70,17 @@ describe('/wallpaper (TASK-1442)', () => {
     expect(next).toHaveBeenCalledWith('wallhaven', 3);
     const results = source.editReply.mock.calls[0]![0];
     expect(results.content).toBe('🖼️ Here are wallpapers for **Frieren** (Courtesy of WallHaven)');
-    expect(results.embeds.map((e: { data: { image: { url: string } } }) => e.data.image.url)).toEqual([
+    expect(
+      results.embeds.map((e: { data: { image: { url: string } } }) => e.data.image.url),
+    ).toEqual([
       'https://w.wallhaven.cc/full/xx/wallhaven-a.jpg',
       'https://w.wallhaven.cc/full/xx/wallhaven-b.jpg',
       'https://w.wallhaven.cc/full/xx/wallhaven-c.jpg',
     ]);
-    const actions = menuOf(results) as unknown as { data: { custom_id: string }; options: Array<{ data: { value: string } }> };
+    const actions = menuOf(results) as unknown as {
+      data: { custom_id: string };
+      options: Array<{ data: { value: string } }>;
+    };
     expect(actions.data.custom_id).toBe(WALLPAPER_ACTION_ID);
     expect(actions.options.map((o) => o.data.value)).toEqual(['more', 'sources', 'done']);
 
@@ -136,7 +147,10 @@ describe('/wallpaper (TASK-1442)', () => {
     expect(embed.footer!.text).toBe('1920x1080 • ❤️ 1,200 • 👁️ 34,000 • WallHaven');
     expect(embed.description).toBe('[Original artwork](https://www.pixiv.net/artworks/1)');
 
-    const bare = buildWallpaperEmbed(wallpaper('b', { favorites: null, views: null, source: null }), 'zerochan').data;
+    const bare = buildWallpaperEmbed(
+      wallpaper('b', { favorites: null, views: null, source: null }),
+      'zerochan',
+    ).data;
     expect(bare.footer!.text).toBe('1920x1080 • Zerochan');
     expect(bare.description).toBeUndefined();
   });

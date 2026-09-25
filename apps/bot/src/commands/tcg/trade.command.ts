@@ -1,9 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { TradeEnrichedCard } from '@ririko/services';
 import type { CardTrade } from '@ririko/database';
@@ -13,9 +9,11 @@ export function createTradeCommand(services: BotServices): Command {
     metadata: {
       name: 'trade',
       category: CommandCategory.TCG,
-      description: 'P2P Trading: Trade cards and credits with other players with state locking and atomic transfers.',
+      description:
+        'P2P Trading: Trade cards and credits with other players with state locking and atomic transfers.',
       aliases: ['cardtrade', 'tcgtrade'],
-      usage: '/trade [action: request|accept|reject|cancel|view|list] [user] [offered_card_id] [requested_card_id] [offered_credits] [requested_credits] [trade_id]',
+      usage:
+        '/trade [action: request|accept|reject|cancel|view|list] [user] [offered_card_id] [requested_card_id] [offered_credits] [requested_credits] [trade_id]',
       examples: [
         '/trade action:request user:@Player offered_card_id:card123 requested_card_id:card456 offered_credits:100',
         '/trade action:accept trade_id:trade_xyz',
@@ -80,9 +78,7 @@ export function createTradeCommand(services: BotServices): Command {
     execute: async (ctx: CommandContext): Promise<void> => {
       const rawArgs = ctx.options.getRawArgs?.() ?? [];
       const action =
-        ctx.options.getString('action')?.toLowerCase() ??
-        rawArgs[0]?.toLowerCase() ??
-        'list';
+        ctx.options.getString('action')?.toLowerCase() ?? rawArgs[0]?.toLowerCase() ?? 'list';
 
       const tradeService = services.tradeService;
       if (!tradeService) {
@@ -95,14 +91,19 @@ export function createTradeCommand(services: BotServices): Command {
         const targetUserId = targetUser?.id ?? rawArgs[1]?.replace(/[<@!>]/g, '');
 
         if (!targetUserId) {
-          await ctx.reply({ content: '❌ Please specify a user to trade with: `/trade action:request user:@Player`' });
+          await ctx.reply({
+            content: '❌ Please specify a user to trade with: `/trade action:request user:@Player`',
+          });
           return;
         }
 
         const offeredCardId = ctx.options.getString('offered_card_id') ?? rawArgs[2];
         const requestedCardId = ctx.options.getString('requested_card_id') ?? rawArgs[3];
-        const offeredCredits = ctx.options.getInteger('offered_credits') ?? (rawArgs[4] ? parseInt(rawArgs[4], 10) : 0);
-        const requestedCredits = ctx.options.getInteger('requested_credits') ?? (rawArgs[5] ? parseInt(rawArgs[5], 10) : 0);
+        const offeredCredits =
+          ctx.options.getInteger('offered_credits') ?? (rawArgs[4] ? parseInt(rawArgs[4], 10) : 0);
+        const requestedCredits =
+          ctx.options.getInteger('requested_credits') ??
+          (rawArgs[5] ? parseInt(rawArgs[5], 10) : 0);
 
         const offeredCardIds = offeredCardId ? [offeredCardId] : [];
         const requestedCardIds = requestedCardId ? [requestedCardId] : [];
@@ -144,7 +145,9 @@ export function createTradeCommand(services: BotServices): Command {
       if (action === 'accept') {
         const tradeId = ctx.options.getString('trade_id') ?? rawArgs[1];
         if (!tradeId) {
-          await ctx.reply({ content: '❌ Please specify a trade ID to accept: `/trade action:accept trade_id:<id>`' });
+          await ctx.reply({
+            content: '❌ Please specify a trade ID to accept: `/trade action:accept trade_id:<id>`',
+          });
           return;
         }
 
@@ -172,7 +175,9 @@ export function createTradeCommand(services: BotServices): Command {
       if (action === 'reject') {
         const tradeId = ctx.options.getString('trade_id') ?? rawArgs[1];
         if (!tradeId) {
-          await ctx.reply({ content: '❌ Please specify a trade ID to reject: `/trade action:reject trade_id:<id>`' });
+          await ctx.reply({
+            content: '❌ Please specify a trade ID to reject: `/trade action:reject trade_id:<id>`',
+          });
           return;
         }
 
@@ -192,7 +197,9 @@ export function createTradeCommand(services: BotServices): Command {
       if (action === 'cancel') {
         const tradeId = ctx.options.getString('trade_id') ?? rawArgs[1];
         if (!tradeId) {
-          await ctx.reply({ content: '❌ Please specify a trade ID to cancel: `/trade action:cancel trade_id:<id>`' });
+          await ctx.reply({
+            content: '❌ Please specify a trade ID to cancel: `/trade action:cancel trade_id:<id>`',
+          });
           return;
         }
 
@@ -212,7 +219,9 @@ export function createTradeCommand(services: BotServices): Command {
       if (action === 'view') {
         const tradeId = ctx.options.getString('trade_id') ?? rawArgs[1];
         if (!tradeId) {
-          await ctx.reply({ content: '❌ Please specify a trade ID to view: `/trade action:view trade_id:<id>`' });
+          await ctx.reply({
+            content: '❌ Please specify a trade ID to view: `/trade action:view trade_id:<id>`',
+          });
           return;
         }
 
@@ -276,7 +285,8 @@ export function createTradeCommand(services: BotServices): Command {
         const pending = await tradeService.listPendingTrades(ctx.user.id);
         if (pending.length === 0) {
           await ctx.reply({
-            content: 'ℹ️ You currently have no pending trade proposals. Propose one with `/trade action:request user:@Player`.',
+            content:
+              'ℹ️ You currently have no pending trade proposals. Propose one with `/trade action:request user:@Player`.',
           });
           return;
         }

@@ -646,4 +646,3 @@ export class EconomyRepository extends BaseRepository<
     );
   }
 }
-

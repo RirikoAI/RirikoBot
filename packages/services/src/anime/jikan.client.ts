@@ -109,7 +109,10 @@ export class JikanClient {
   }
 
   /** Jikan has no SFW filter for characters; they are ordered by favourites. */
-  searchCharacters(query: string, options: Pick<JikanSearchOptions, 'limit'> = {}): Promise<JikanCharacter[]> {
+  searchCharacters(
+    query: string,
+    options: Pick<JikanSearchOptions, 'limit'> = {},
+  ): Promise<JikanCharacter[]> {
     return this.search<JikanCharacter>('characters', query, options);
   }
 
@@ -146,7 +149,10 @@ export class JikanClient {
     return body?.data ?? [];
   }
 
-  private async getFull<T>(resource: 'anime' | 'manga' | 'characters', id: number): Promise<T | null> {
+  private async getFull<T>(
+    resource: 'anime' | 'manga' | 'characters',
+    id: number,
+  ): Promise<T | null> {
     const body = await this.getJson<{ data?: T }>(`/${resource}/${id}/full`, `${resource} ${id}`);
     return body?.data ?? null;
   }

@@ -92,17 +92,20 @@ describe('Item Command Suite (TASK-1032)', () => {
 
     const mockGameItemRepo = {
       findById: async (id: string) => itemsCatalog.get(id) ?? null,
-      findByCode: async (code: string) => Array.from(itemsCatalog.values()).find((i) => i.code === code) ?? null,
+      findByCode: async (code: string) =>
+        Array.from(itemsCatalog.values()).find((i) => i.code === code) ?? null,
       listAll: async () => Array.from(itemsCatalog.values()),
     };
 
     const mockUserInventoryRepo = {
       findById: async (id: string) => userInventory.get(id) ?? null,
-      findByUser: async (userId: string) => Array.from(userInventory.values()).filter((i) => i.userId === userId),
+      findByUser: async (userId: string) =>
+        Array.from(userInventory.values()).filter((i) => i.userId === userId),
     };
 
     const mockEconomyRepo = {
-      getOrCreateBalance: async (userId: string) => userBalances.get(userId) ?? { walletBalance: '0' },
+      getOrCreateBalance: async (userId: string) =>
+        userBalances.get(userId) ?? { walletBalance: '0' },
       modifyBalance: async (params: any) => {
         modifiedBalances.push(params);
         return {
@@ -432,7 +435,9 @@ describe('Item Command Suite (TASK-1032)', () => {
 
     it('renders a service error (e.g. locked/insufficient) as an error message', async () => {
       services.craftingService.craft = async () => {
-        throw new Error('Insufficient Crafting Dust! Required: 90 Dust, but you only have 10 Dust.');
+        throw new Error(
+          'Insufficient Crafting Dust! Required: 90 Dust, but you only have 10 Dust.',
+        );
       };
       const command = createItemCommand(services);
       const { ctx, replies } = createMockContext({

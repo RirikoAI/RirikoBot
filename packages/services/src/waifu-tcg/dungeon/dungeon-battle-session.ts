@@ -1,8 +1,4 @@
-import type {
-  Combatant,
-  CombatActionLog,
-  CombatElement,
-} from '../combat/types.js';
+import type { Combatant, CombatActionLog, CombatElement } from '../combat/types.js';
 import {
   getElementalMultiplier,
   getElementAdvantageDescription,
@@ -298,7 +294,11 @@ export class DungeonBattleSession {
     }
 
     // 4. Apply end-of-turn environmental affixes (e.g. Scorched Earth burn, Tidal Barrier heal)
-    const endAffixLogs = this.affixHandler.applyEndOfTurnAffixes(currentTurn, [this.player], this.boss);
+    const endAffixLogs = this.affixHandler.applyEndOfTurnAffixes(
+      currentTurn,
+      [this.player],
+      this.boss,
+    );
     for (const log of endAffixLogs) {
       this.pushLog(log);
     }
@@ -363,14 +363,17 @@ export class DungeonBattleSession {
     code: string;
     name: string;
     subtype: string;
-    consumableEffect?: {
-      healFlat?: number | undefined;
-      healPercent?: number | undefined;
-      cleanseDebuffs?: boolean | undefined;
-      restoreMp?: number | undefined;
-      restoreMpPercent?: number | undefined;
-      freeSkillCast?: boolean | undefined;
-    } | null | undefined;
+    consumableEffect?:
+      | {
+          healFlat?: number | undefined;
+          healPercent?: number | undefined;
+          cleanseDebuffs?: boolean | undefined;
+          restoreMp?: number | undefined;
+          restoreMpPercent?: number | undefined;
+          freeSkillCast?: boolean | undefined;
+        }
+      | null
+      | undefined;
   }): DungeonTurnState {
     if (this.isFinished) {
       return this.getSnapshot();
@@ -400,7 +403,10 @@ export class DungeonBattleSession {
       if (healAmount <= 0) healAmount = 300;
 
       const prevHp = this.player.currentHealth;
-      this.player.currentHealth = Math.min(this.player.maxHealth, this.player.currentHealth + healAmount);
+      this.player.currentHealth = Math.min(
+        this.player.maxHealth,
+        this.player.currentHealth + healAmount,
+      );
       const actualHealed = this.player.currentHealth - prevHp;
 
       let extraMsg = '';
@@ -421,7 +427,8 @@ export class DungeonBattleSession {
     } else if (item.subtype === 'MANA_POTION') {
       let mpAmount = 0;
       if (effect.restoreMp) mpAmount += effect.restoreMp;
-      if (effect.restoreMpPercent) mpAmount += Math.round(this.player.maxMp * effect.restoreMpPercent);
+      if (effect.restoreMpPercent)
+        mpAmount += Math.round(this.player.maxMp * effect.restoreMpPercent);
       if (mpAmount <= 0) mpAmount = 30;
 
       const prevMp = this.player.currentMp;
@@ -611,7 +618,9 @@ export class DungeonBattleSession {
     // Elemental multiplier
     const baseElemMult = getElementalMultiplier(this.player.element, this.boss.element);
     const elemMult =
-      baseElemMult > 1 ? baseElemMult + (this.player.gearMods?.elementalMastery ?? 0) : baseElemMult;
+      baseElemMult > 1
+        ? baseElemMult + (this.player.gearMods?.elementalMastery ?? 0)
+        : baseElemMult;
     rawDamage = Math.round(rawDamage * elemMult);
 
     // Apply affix modifier
@@ -645,7 +654,10 @@ export class DungeonBattleSession {
       });
 
       if (wardResult.damagePassedToBoss > 0) {
-        this.boss.currentHealth = Math.max(0, this.boss.currentHealth - wardResult.damagePassedToBoss);
+        this.boss.currentHealth = Math.max(
+          0,
+          this.boss.currentHealth - wardResult.damagePassedToBoss,
+        );
         if (this.boss.currentHealth <= 0) this.boss.isAlive = false;
       }
     } else {
@@ -861,7 +873,10 @@ export class DungeonBattleSession {
       }
       case 'LIGHT': {
         const heal = Math.round(this.player.maxHealth * 0.25);
-        this.player.currentHealth = Math.min(this.player.maxHealth, this.player.currentHealth + heal);
+        this.player.currentHealth = Math.min(
+          this.player.maxHealth,
+          this.player.currentHealth + heal,
+        );
         this.pushLog({
           turn,
           actorId: this.player.id,

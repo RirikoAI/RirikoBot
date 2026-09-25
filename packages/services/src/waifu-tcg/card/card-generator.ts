@@ -40,7 +40,10 @@ export interface CardGeneratorOptions {
 /**
  * Elementary skill catalog according to docs/waifu-tcg.md:L85-86.
  */
-export const ELEMENTAL_SKILLS: Record<CardElement, { skill: CardSkillInfo; passive: CardPassiveInfo }> = {
+export const ELEMENTAL_SKILLS: Record<
+  CardElement,
+  { skill: CardSkillInfo; passive: CardPassiveInfo }
+> = {
   FIRE: {
     skill: {
       name: 'Inferno Burst',
@@ -146,13 +149,24 @@ export function formatCardSerialNumber(serial: number, maxSerial = 1000): string
  */
 export function resolveElementFromTags(tags: string[] = []): CardElement {
   const lowerTags = tags.map((t) => t.toLowerCase());
-  if (lowerTags.some((t) => t.includes('ice') || t.includes('frost') || t.includes('cold'))) return 'ICE';
-  if (lowerTags.some((t) => t.includes('fire') || t.includes('flame') || t.includes('burn'))) return 'FIRE';
-  if (lowerTags.some((t) => t.includes('earth') || t.includes('stone') || t.includes('rock'))) return 'EARTH';
-  if (lowerTags.some((t) => t.includes('lightning') || t.includes('thunder') || t.includes('electric'))) return 'LIGHTNING';
-  if (lowerTags.some((t) => t.includes('water') || t.includes('aqua') || t.includes('ocean'))) return 'WATER';
-  if (lowerTags.some((t) => t.includes('light') || t.includes('holy') || t.includes('radiant'))) return 'LIGHT';
-  if (lowerTags.some((t) => t.includes('shadow') || t.includes('dark') || t.includes('void'))) return 'SHADOW';
+  if (lowerTags.some((t) => t.includes('ice') || t.includes('frost') || t.includes('cold')))
+    return 'ICE';
+  if (lowerTags.some((t) => t.includes('fire') || t.includes('flame') || t.includes('burn')))
+    return 'FIRE';
+  if (lowerTags.some((t) => t.includes('earth') || t.includes('stone') || t.includes('rock')))
+    return 'EARTH';
+  if (
+    lowerTags.some(
+      (t) => t.includes('lightning') || t.includes('thunder') || t.includes('electric'),
+    )
+  )
+    return 'LIGHTNING';
+  if (lowerTags.some((t) => t.includes('water') || t.includes('aqua') || t.includes('ocean')))
+    return 'WATER';
+  if (lowerTags.some((t) => t.includes('light') || t.includes('holy') || t.includes('radiant')))
+    return 'LIGHT';
+  if (lowerTags.some((t) => t.includes('shadow') || t.includes('dark') || t.includes('void')))
+    return 'SHADOW';
   return 'FIRE';
 }
 
@@ -180,17 +194,20 @@ export class CardGenerator {
 
     // Base rolls before multiplier
     const baseHp = 500 + Math.floor(this.randomFn() * 1000); // 500 - 1500
-    const baseAtk = 50 + Math.floor(this.randomFn() * 250);   // 50 - 300
-    const baseDef = 30 + Math.floor(this.randomFn() * 180);   // 30 - 210
-    const baseSpd = 10 + Math.floor(this.randomFn() * 80);    // 10 - 90
-    const baseCrit = 0.05 + this.randomFn() * 0.08;          // 5% - 13%
+    const baseAtk = 50 + Math.floor(this.randomFn() * 250); // 50 - 300
+    const baseDef = 30 + Math.floor(this.randomFn() * 180); // 30 - 210
+    const baseSpd = 10 + Math.floor(this.randomFn() * 80); // 10 - 90
+    const baseCrit = 0.05 + this.randomFn() * 0.08; // 5% - 13%
 
     // Multiplier scaling & bounds clamping
     const hp = Math.min(15000, Math.max(500, Math.round(baseHp * m)));
     const attack = Math.min(2500, Math.max(50, Math.round(baseAtk * m)));
     const defense = Math.min(1800, Math.max(30, Math.round(baseDef * m)));
     const speed = Math.min(300, Math.max(10, Math.round(baseSpd * (1 + (m - 1) * 0.35))));
-    const critRate = Math.min(0.50, Math.max(0.05, Number((baseCrit * (1 + (m - 1) * 0.2)).toFixed(3))));
+    const critRate = Math.min(
+      0.5,
+      Math.max(0.05, Number((baseCrit * (1 + (m - 1) * 0.2)).toFixed(3))),
+    );
 
     return {
       hp,

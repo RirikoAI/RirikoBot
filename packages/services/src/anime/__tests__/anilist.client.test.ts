@@ -109,7 +109,12 @@ describe('AniListClient', () => {
         isAdult: false,
       });
       const body = JSON.parse(fetchFn.mock.calls[0]![1]!.body as string);
-      expect(body.variables).toEqual({ search: 'Frieren', type: 'ANIME', perPage: 10, isAdult: false });
+      expect(body.variables).toEqual({
+        search: 'Frieren',
+        type: 'ANIME',
+        perPage: 10,
+        isAdult: false,
+      });
     });
 
     it('passes type, clamps perPage and lifts the adult filter on request', async () => {
@@ -118,9 +123,9 @@ describe('AniListClient', () => {
         .mockResolvedValue(jsonResponse({ data: { Page: { media: [] } } }));
       const client = new AniListClient({ limiter: instantLimiter(), fetchFn });
 
-      expect(await client.searchMedia('Berserk', { type: 'MANGA', perPage: 99, includeAdult: true })).toEqual(
-        [],
-      );
+      expect(
+        await client.searchMedia('Berserk', { type: 'MANGA', perPage: 99, includeAdult: true }),
+      ).toEqual([]);
       const body = JSON.parse(fetchFn.mock.calls[0]![1]!.body as string);
       expect(body.variables).toMatchObject({ type: 'MANGA', perPage: 25, isAdult: null });
     });
@@ -148,14 +153,20 @@ describe('AniListClient', () => {
       media: {
         edges: [
           {
-            node: { type: 'ANIME', title: { romaji: 'Re:Zero kara Hajimeru Isekai Seikatsu', english: 'Re:ZERO' } },
+            node: {
+              type: 'ANIME',
+              title: { romaji: 'Re:Zero kara Hajimeru Isekai Seikatsu', english: 'Re:ZERO' },
+            },
             voiceActors: [{ name: { full: 'Inori Minase' } }],
           },
           {
             node: { type: 'ANIME', title: { romaji: 'Re:Zero 2nd Season', english: 'Re:ZERO' } },
             voiceActors: [{ name: { full: 'Inori Minase' } }],
           },
-          { node: { type: 'MANGA', title: { romaji: 'Re:Zero Manga', english: null } }, voiceActors: null },
+          {
+            node: { type: 'MANGA', title: { romaji: 'Re:Zero Manga', english: null } },
+            voiceActors: null,
+          },
         ],
       },
     };

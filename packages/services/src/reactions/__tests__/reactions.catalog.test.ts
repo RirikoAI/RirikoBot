@@ -69,7 +69,8 @@ describe('REACTION_CATALOG (TASK-1301)', () => {
       reactionType: 'stop',
       description: 'Tell someone to halt or cease whatever they’re doing.',
       content: 'firmly demanded a stop from',
-      noTargetContent: 'held up a hand and shouted "Stop!" into the empty air, standing their ground',
+      noTargetContent:
+        'held up a hand and shouted "Stop!" into the empty air, standing their ground',
     });
 
     expect(getReaction('yay')?.description).toBe(

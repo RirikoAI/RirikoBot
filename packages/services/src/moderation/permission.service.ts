@@ -1,20 +1,13 @@
-import {
-  PermissionsBitField,
-  type GuildMember,
-  type PermissionResolvable,
-} from 'discord.js';
+import { PermissionsBitField, type GuildMember, type PermissionResolvable } from 'discord.js';
 import type { GuildSettingsRepository } from '@ririko/database';
-import type {
-  PermissionCheckParams,
-  PermissionCheckResult,
-} from './types.js';
+import type { PermissionCheckParams, PermissionCheckResult } from './types.js';
 
 export class PermissionService {
   constructor(private readonly guildSettingsRepo?: GuildSettingsRepository | undefined) {}
 
   /**
    * Centralized 5-tier permission and role hierarchy verification.
-   * 
+   *
    * Tier 1: Invoker Discord Permissions (Guild Owner bypass)
    * Tier 2: Bot Discord Permissions (Guild & Channel level)
    * Tier 3: Role Hierarchy (Invoker > Target, Bot > Target, Self-check, Guild Owner protection)
@@ -130,7 +123,8 @@ export class PermissionService {
         return {
           allowed: false,
           code: 'BOT_HIERARCHY_VIOLATION',
-          message: "Ririko's highest role must be above the target's highest role to moderate them.",
+          message:
+            "Ririko's highest role must be above the target's highest role to moderate them.",
         };
       }
     }

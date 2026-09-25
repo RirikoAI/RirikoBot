@@ -40,17 +40,11 @@ async function resolveReactionRoleBinding(
  * Gateway Reaction Listener: Listens for messageReactionAdd and messageReactionRemove
  * events, resolves partials, and applies or removes reaction roles via ReactionRoleService.
  */
-export function registerReactionListener(
-  client: Client,
-  services: BotServices,
-): void {
+export function registerReactionListener(client: Client, services: BotServices): void {
   // 1. Reaction Add Event
   client.on(
     'messageReactionAdd',
-    async (
-      reaction: MessageReaction | PartialMessageReaction,
-      user: User | PartialUser,
-    ) => {
+    async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
       try {
         // Resolve partials if necessary - fetch message first
         if (reaction.message.partial) {
@@ -69,8 +63,8 @@ export function registerReactionListener(
         const guild =
           reaction.message.guild ??
           (reaction.message.guildId
-            ? client.guilds.cache.get(reaction.message.guildId) ??
-              (await client.guilds.fetch(reaction.message.guildId).catch(() => null))
+            ? (client.guilds.cache.get(reaction.message.guildId) ??
+              (await client.guilds.fetch(reaction.message.guildId).catch(() => null)))
             : null);
         if (!guild) return;
 
@@ -79,11 +73,7 @@ export function registerReactionListener(
           (await guild.members.fetch(user.id).catch(() => null));
         if (!member) return;
 
-        const resolved = await resolveReactionRoleBinding(
-          services,
-          reaction.message.id,
-          reaction,
-        );
+        const resolved = await resolveReactionRoleBinding(services, reaction.message.id, reaction);
         if (!resolved) return;
 
         const result = await services.reactionRoleService.handleReactionAdd(
@@ -126,10 +116,7 @@ export function registerReactionListener(
   // 2. Reaction Remove Event
   client.on(
     'messageReactionRemove',
-    async (
-      reaction: MessageReaction | PartialMessageReaction,
-      user: User | PartialUser,
-    ) => {
+    async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
       try {
         if (reaction.message.partial) {
           await reaction.message.fetch().catch(() => null);
@@ -146,8 +133,8 @@ export function registerReactionListener(
         const guild =
           reaction.message.guild ??
           (reaction.message.guildId
-            ? client.guilds.cache.get(reaction.message.guildId) ??
-              (await client.guilds.fetch(reaction.message.guildId).catch(() => null))
+            ? (client.guilds.cache.get(reaction.message.guildId) ??
+              (await client.guilds.fetch(reaction.message.guildId).catch(() => null)))
             : null);
         if (!guild) return;
 
@@ -156,11 +143,7 @@ export function registerReactionListener(
           (await guild.members.fetch(user.id).catch(() => null));
         if (!member) return;
 
-        const resolved = await resolveReactionRoleBinding(
-          services,
-          reaction.message.id,
-          reaction,
-        );
+        const resolved = await resolveReactionRoleBinding(services, reaction.message.id, reaction);
         if (!resolved) return;
 
         const result = await services.reactionRoleService.handleReactionRemove(

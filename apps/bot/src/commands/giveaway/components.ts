@@ -25,7 +25,10 @@ export async function handleGiveawayButtonInteraction(
     return;
   }
 
-  const alreadyEntered = await services.giveawayRepo.hasUserEntered(giveawayId, interaction.user.id);
+  const alreadyEntered = await services.giveawayRepo.hasUserEntered(
+    giveawayId,
+    interaction.user.id,
+  );
   if (alreadyEntered) {
     await interaction.reply({
       content: '⚠️ You have already entered this giveaway!',
@@ -43,7 +46,9 @@ export async function handleGiveawayButtonInteraction(
       if (typeof (member.roles.cache as any).map === 'function') {
         roleIds = (member.roles.cache as any).map((r: any) => (typeof r === 'string' ? r : r.id));
       } else {
-        roleIds = Array.from(member.roles.cache.values()).map((r: any) => (typeof r === 'string' ? r : r.id));
+        roleIds = Array.from(member.roles.cache.values()).map((r: any) =>
+          typeof r === 'string' ? r : r.id,
+        );
       }
     }
   }
@@ -66,7 +71,11 @@ export async function handleGiveawayButtonInteraction(
   }
 
   const bonusMultiplier = validation.bonusMultiplier ?? 1;
-  const added = await services.giveawayRepo.addEntry(giveawayId, interaction.user.id, bonusMultiplier);
+  const added = await services.giveawayRepo.addEntry(
+    giveawayId,
+    interaction.user.id,
+    bonusMultiplier,
+  );
   if (!added) {
     await interaction.reply({
       content: '⚠️ You have already entered this giveaway!',
@@ -80,7 +89,11 @@ export async function handleGiveawayButtonInteraction(
   // Update button and embed count on message
   try {
     const embedData = services.giveawayEngine.formatGiveawayEmbed(giveaway, totalEntries);
-    const buttonData = services.giveawayEngine.formatGiveawayButton(giveawayId, false, totalEntries);
+    const buttonData = services.giveawayEngine.formatGiveawayButton(
+      giveawayId,
+      false,
+      totalEntries,
+    );
 
     const embed = new EmbedBuilder(embedData);
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

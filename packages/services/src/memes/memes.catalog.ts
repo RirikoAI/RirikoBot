@@ -43,7 +43,7 @@ export const MEME_TEMPLATES: Record<string, MemeTemplateConfig> = {
       { x: 270, y: 340, width: 500 },
     ],
   },
-  'allmyhomies': {
+  allmyhomies: {
     id: 'allmyhomies',
     name: 'allmyhomies',
     title: 'All My Homies Hate X',
@@ -82,7 +82,7 @@ export const MEME_TEMPLATES: Record<string, MemeTemplateConfig> = {
       { x: 320, y: 1750, width: 550 },
     ],
   },
-  'chad': {
+  chad: {
     id: 'chad',
     name: 'chad',
     title: 'GigaChad vs Virgin',
@@ -94,7 +94,7 @@ export const MEME_TEMPLATES: Record<string, MemeTemplateConfig> = {
       { x: 1150, y: 850, width: 500 },
     ],
   },
-  'everywhere': {
+  everywhere: {
     id: 'everywhere',
     name: 'everywhere',
     title: 'X, X Everywhere',
@@ -142,7 +142,7 @@ export const MEME_TEMPLATES: Record<string, MemeTemplateConfig> = {
       { x: 750, y: 140, width: 300 },
     ],
   },
-  'undertaker': {
+  undertaker: {
     id: 'undertaker',
     name: 'undertaker',
     title: 'AJ Styles & Undertaker',

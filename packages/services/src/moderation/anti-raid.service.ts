@@ -4,10 +4,7 @@ import type { ModerationActionService } from './moderation-action.service.js';
 
 export type RaidStatus = 'NORMAL' | 'RAID_DETECTED' | 'LOCKDOWN';
 
-export type RaidMitigationAction =
-  | 'LOCKDOWN'
-  | 'VERIFICATION_GATE'
-  | 'ALERT_ONLY';
+export type RaidMitigationAction = 'LOCKDOWN' | 'VERIFICATION_GATE' | 'ALERT_ONLY';
 
 export interface AntiRaidConfig {
   enabled: boolean;
@@ -107,11 +104,7 @@ export class AntiRaidService {
 
     // Auto-recovery check if lockdown cooldown has expired
     const now = Date.now();
-    if (
-      state.status === 'LOCKDOWN' &&
-      state.lockdownExpiresAt &&
-      now >= state.lockdownExpiresAt
-    ) {
+    if (state.status === 'LOCKDOWN' && state.lockdownExpiresAt && now >= state.lockdownExpiresAt) {
       state.status = 'NORMAL';
       state.lockdownExpiresAt = undefined;
       state.raidStartedAt = undefined;
@@ -147,9 +140,7 @@ export class AntiRaidService {
   /**
    * Evaluates a member join event against the sliding-window join monitor.
    */
-  public async handleMemberJoin(
-    join: MemberJoinContext,
-  ): Promise<RaidEvaluationResult> {
+  public async handleMemberJoin(join: MemberJoinContext): Promise<RaidEvaluationResult> {
     const config = this.getConfig(join.guildId);
     if (!config.enabled) {
       return {
@@ -175,8 +166,7 @@ export class AntiRaidService {
     }
 
     const now = join.joinedTimestamp ?? Date.now();
-    const accountAgeHours =
-      Math.max(0, now - join.accountCreatedTimestamp) / (1000 * 60 * 60);
+    const accountAgeHours = Math.max(0, now - join.accountCreatedTimestamp) / (1000 * 60 * 60);
     const isFresh = accountAgeHours < config.freshAccountAgeHours;
 
     const entry: FlaggedJoinEntry = {
@@ -296,8 +286,7 @@ export class AntiRaidService {
     return {
       title: '🚨 Anti-Raid Alert: Raid Activity Detected',
       description:
-        result.reason ??
-        'An abnormal surge of account joins was detected in this server.',
+        result.reason ?? 'An abnormal surge of account joins was detected in this server.',
       color: 0xff0033, // Bright red
       fields: [
         {
@@ -321,8 +310,7 @@ export class AntiRaidService {
             result.accounts
               .slice(0, 8)
               .map(
-                (a) =>
-                  `• <@${a.userId}> (${a.username ?? a.userId}) — Age: ${a.accountAgeHours}h`,
+                (a) => `• <@${a.userId}> (${a.username ?? a.userId}) — Age: ${a.accountAgeHours}h`,
               )
               .join('\n') || 'None',
           inline: false,

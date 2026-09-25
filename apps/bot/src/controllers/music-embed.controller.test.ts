@@ -135,7 +135,9 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
     services.musicPlayer.pipeline.registerAdapter(mockAdapter);
 
     // Mock voice manager join
-    vi.spyOn(VoiceLifecycleManager.prototype, 'join').mockImplementation(async function (this: VoiceLifecycleManager) {
+    vi.spyOn(VoiceLifecycleManager.prototype, 'join').mockImplementation(async function (
+      this: VoiceLifecycleManager,
+    ) {
       const fakeConnection = {
         state: { status: 'ready' },
         subscribe: vi.fn(),
@@ -153,8 +155,14 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
       stop: vi.fn(),
       on: vi.fn(),
     };
-    vi.spyOn(services.musicPlayer as unknown as { getOrCreateAudioPlayer: (guildId: string) => unknown }, 'getOrCreateAudioPlayer').mockImplementation((guildId: string) => {
-      (services.musicPlayer as unknown as { audioPlayers: Map<string, unknown> }).audioPlayers.set(guildId, fakeAudioPlayer);
+    vi.spyOn(
+      services.musicPlayer as unknown as { getOrCreateAudioPlayer: (guildId: string) => unknown },
+      'getOrCreateAudioPlayer',
+    ).mockImplementation((guildId: string) => {
+      (services.musicPlayer as unknown as { audioPlayers: Map<string, unknown> }).audioPlayers.set(
+        guildId,
+        fakeAudioPlayer,
+      );
       return fakeAudioPlayer;
     });
 
@@ -409,7 +417,10 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
       });
     });
 
-    function createMockButtonInteraction(customId: string, voiceChannelId: string | null = 'vc-01'): ButtonInteraction {
+    function createMockButtonInteraction(
+      customId: string,
+      voiceChannelId: string | null = 'vc-01',
+    ): ButtonInteraction {
       const member = {
         id: 'u1',
         voice: {
@@ -485,7 +496,9 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
       // Lyrics
       const lyricsInteraction = createMockButtonInteraction('music_lyrics');
       await controller.handleButtonInteraction(lyricsInteraction);
-      expect(lyricsInteraction.deferReply).toHaveBeenCalledWith(expect.objectContaining({ ephemeral: true }));
+      expect(lyricsInteraction.deferReply).toHaveBeenCalledWith(
+        expect.objectContaining({ ephemeral: true }),
+      );
       expect(lyricsInteraction.editReply).toHaveBeenCalled();
 
       // Queue (ephemeral response showing now playing track even when upcoming is 0)
@@ -582,7 +595,9 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
       const handled = await controller.handleMusicChannelMessage(mockMsg);
       expect(handled).toBe(true);
       expect(sendFn).toHaveBeenCalledWith(
-        expect.objectContaining({ content: expect.stringContaining('please join a voice channel') }),
+        expect.objectContaining({
+          content: expect.stringContaining('please join a voice channel'),
+        }),
       );
     });
 

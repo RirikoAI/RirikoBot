@@ -38,7 +38,6 @@ export type NewEconomyInventory = typeof sqlite.economyInventories.$inferInsert;
 export type EconomyCooldown = typeof sqlite.economyCooldowns.$inferSelect;
 export type NewEconomyCooldown = typeof sqlite.economyCooldowns.$inferInsert;
 
-
 // Experience & Leveling
 export type XpAccount = typeof sqlite.xpAccounts.$inferSelect;
 export type NewXpAccount = typeof sqlite.xpAccounts.$inferInsert;
@@ -121,25 +120,37 @@ export type NewUserCard = Omit<typeof sqlite.userCards.$inferInsert, 'id'> & { i
 export type GameItem = typeof sqlite.gameItems.$inferSelect;
 export type NewGameItem = Omit<typeof sqlite.gameItems.$inferInsert, 'id'> & { id?: string };
 export type UserInventoryItem = typeof sqlite.userInventoryItems.$inferSelect;
-export type NewUserInventoryItem = Omit<typeof sqlite.userInventoryItems.$inferInsert, 'id'> & { id?: string };
+export type NewUserInventoryItem = Omit<typeof sqlite.userInventoryItems.$inferInsert, 'id'> & {
+  id?: string;
+};
 export type PlayerEnergy = typeof sqlite.playerEnergy.$inferSelect;
 export type NewPlayerEnergy = typeof sqlite.playerEnergy.$inferInsert;
 export type GameAchievement = typeof sqlite.gameAchievements.$inferSelect;
-export type NewGameAchievement = Omit<typeof sqlite.gameAchievements.$inferInsert, 'id'> & { id?: string };
+export type NewGameAchievement = Omit<typeof sqlite.gameAchievements.$inferInsert, 'id'> & {
+  id?: string;
+};
 export type UserAchievement = typeof sqlite.userAchievements.$inferSelect;
-export type NewUserAchievement = Omit<typeof sqlite.userAchievements.$inferInsert, 'id'> & { id?: string };
+export type NewUserAchievement = Omit<typeof sqlite.userAchievements.$inferInsert, 'id'> & {
+  id?: string;
+};
 export type DungeonSeason = typeof sqlite.dungeonSeasons.$inferSelect;
 export type NewDungeonSeason = typeof sqlite.dungeonSeasons.$inferInsert;
 export type DungeonFloor = typeof sqlite.dungeonFloors.$inferSelect;
-export type NewDungeonFloor = Omit<typeof sqlite.dungeonFloors.$inferInsert, 'id'> & { id?: string };
+export type NewDungeonFloor = Omit<typeof sqlite.dungeonFloors.$inferInsert, 'id'> & {
+  id?: string;
+};
 export type DungeonBoss = typeof sqlite.dungeonBosses.$inferSelect;
 export type NewDungeonBoss = typeof sqlite.dungeonBosses.$inferInsert;
 export type UserDungeonProgress = typeof sqlite.userDungeonProgress.$inferSelect;
-export type NewUserDungeonProgress = Omit<typeof sqlite.userDungeonProgress.$inferInsert, 'id'> & { id?: string };
+export type NewUserDungeonProgress = Omit<typeof sqlite.userDungeonProgress.$inferInsert, 'id'> & {
+  id?: string;
+};
 export type CardTrade = typeof sqlite.cardTrades.$inferSelect;
 export type NewCardTrade = Omit<typeof sqlite.cardTrades.$inferInsert, 'id'> & { id?: string };
 export type MarketListing = typeof sqlite.marketListings.$inferSelect;
-export type NewMarketListing = Omit<typeof sqlite.marketListings.$inferInsert, 'id'> & { id?: string };
+export type NewMarketListing = Omit<typeof sqlite.marketListings.$inferInsert, 'id'> & {
+  id?: string;
+};
 export type WaifuGuild = typeof sqlite.waifuGuilds.$inferSelect;
 export type NewWaifuGuild = Omit<typeof sqlite.waifuGuilds.$inferInsert, 'id'> & { id?: string };
 export type WaifuGuildMember = typeof sqlite.waifuGuildMembers.$inferSelect;

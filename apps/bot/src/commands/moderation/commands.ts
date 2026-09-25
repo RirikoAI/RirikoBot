@@ -5,11 +5,7 @@ import {
   type GuildTextBasedChannel,
   type User,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { AutoModRuleType } from '@ririko/services';
 
@@ -146,7 +142,11 @@ export function createModerationCommands(services: BotServices): Command[] {
         .setTitle(`⚠️ Warning Issued — Case #${result.caseNumber ?? '?'}`)
         .setColor(0xf1c40f)
         .addFields(
-          { name: 'Target Member', value: `<@${targetMember.id}> (${targetMember.user.tag})`, inline: true },
+          {
+            name: 'Target Member',
+            value: `<@${targetMember.id}> (${targetMember.user.tag})`,
+            inline: true,
+          },
           { name: 'Moderator', value: `<@${ctx.user.id}>`, inline: true },
           { name: 'Severity', value: `${severity}`, inline: true },
           { name: 'Reason', value: reason, inline: false },
@@ -166,10 +166,11 @@ export function createModerationCommands(services: BotServices): Command[] {
       if (result.escalationTriggered) {
         embed.addFields({
           name: '🚨 Automatic Escalation Triggered!',
-          value: `Infraction threshold reached step: **${result.escalationTriggered.action}**${result.escalationTriggered.durationSeconds
+          value: `Infraction threshold reached step: **${result.escalationTriggered.action}**${
+            result.escalationTriggered.durationSeconds
               ? ` (${formatDurationSeconds(result.escalationTriggered.durationSeconds)})`
               : ''
-            }`,
+          }`,
           inline: false,
         });
       }
@@ -233,7 +234,8 @@ export function createModerationCommands(services: BotServices): Command[] {
       const durationSeconds = parseDurationToSeconds(rawDuration);
       if (!durationSeconds || durationSeconds <= 0 || durationSeconds > 28 * 86400) {
         await ctx.reply({
-          content: '❌ Invalid duration. Must be between 1 second and 28 days (e.g. `10m`, `1h`, `1d`).',
+          content:
+            '❌ Invalid duration. Must be between 1 second and 28 days (e.g. `10m`, `1h`, `1d`).',
         });
         return;
       }
@@ -268,7 +270,11 @@ export function createModerationCommands(services: BotServices): Command[] {
         .setTitle(`⏳ Member Timed Out — Case #${res.caseNumber ?? '?'}`)
         .setColor(0xfee75c)
         .addFields(
-          { name: 'Target', value: `<@${targetMember.id}> (${targetMember.user.tag})`, inline: true },
+          {
+            name: 'Target',
+            value: `<@${targetMember.id}> (${targetMember.user.tag})`,
+            inline: true,
+          },
           { name: 'Duration', value: formatDurationSeconds(durationSeconds), inline: true },
           { name: 'Moderator', value: `<@${ctx.user.id}>`, inline: true },
           { name: 'Reason', value: reason, inline: false },
@@ -421,7 +427,11 @@ export function createModerationCommands(services: BotServices): Command[] {
         .setTitle(`👢 Member Kicked — Case #${res.caseNumber ?? '?'}`)
         .setColor(0xe67e22)
         .addFields(
-          { name: 'Target', value: `<@${targetMember.id}> (${targetMember.user.tag})`, inline: true },
+          {
+            name: 'Target',
+            value: `<@${targetMember.id}> (${targetMember.user.tag})`,
+            inline: true,
+          },
           { name: 'Moderator', value: `<@${ctx.user.id}>`, inline: true },
           { name: 'Reason', value: reason, inline: false },
         )
@@ -513,7 +523,11 @@ export function createModerationCommands(services: BotServices): Command[] {
         .setTitle(`🔨 Member Softbanned — Case #${res.caseNumber ?? '?'}`)
         .setColor(0xe74c3c)
         .addFields(
-          { name: 'Target', value: `<@${targetMember.id}> (${targetMember.user.tag})`, inline: true },
+          {
+            name: 'Target',
+            value: `<@${targetMember.id}> (${targetMember.user.tag})`,
+            inline: true,
+          },
           { name: 'Purged Message Days', value: `${days} days`, inline: true },
           { name: 'Moderator', value: `<@${ctx.user.id}>`, inline: true },
           { name: 'Reason', value: reason, inline: false },
@@ -713,7 +727,9 @@ export function createModerationCommands(services: BotServices): Command[] {
     },
     async execute(ctx: CommandContext): Promise<void> {
       if (!ctx.guild || !ctx.member || !ctx.channel) {
-        await ctx.reply({ content: '❌ This command can only be used within a server text channel.' });
+        await ctx.reply({
+          content: '❌ This command can only be used within a server text channel.',
+        });
         return;
       }
 
@@ -790,7 +806,7 @@ export function createModerationCommands(services: BotServices): Command[] {
       }
 
       const channelOpt = await ctx.options.getChannel('channel');
-      const targetChannel = ((channelOpt ?? ctx.channel) as unknown) as GuildTextBasedChannel;
+      const targetChannel = (channelOpt ?? ctx.channel) as unknown as GuildTextBasedChannel;
       const reason = ctx.options.getString('reason') ?? 'Channel locked by staff';
 
       const res = await services.moderationActionService.lockChannel({
@@ -841,7 +857,7 @@ export function createModerationCommands(services: BotServices): Command[] {
       }
 
       const channelOpt = await ctx.options.getChannel('channel');
-      const targetChannel = ((channelOpt ?? ctx.channel) as unknown) as GuildTextBasedChannel;
+      const targetChannel = (channelOpt ?? ctx.channel) as unknown as GuildTextBasedChannel;
       const reason = ctx.options.getString('reason') ?? 'Channel unlocked by staff';
 
       const res = await services.moderationActionService.unlockChannel({
@@ -968,7 +984,10 @@ export function createModerationCommands(services: BotServices): Command[] {
         return;
       }
 
-      const summary = await services.disciplinaryHistoryService.getSummary(ctx.guild.id, targetUser.id);
+      const summary = await services.disciplinaryHistoryService.getSummary(
+        ctx.guild.id,
+        targetUser.id,
+      );
       const embed = services.disciplinaryHistoryService.buildHistoryEmbed(summary, targetUser);
 
       await ctx.reply({ embeds: [embed] });
@@ -1132,7 +1151,8 @@ export function createModerationCommands(services: BotServices): Command[] {
               value: Array.from(configs.values())
                 .map(
                   (c) =>
-                    `• **${c.ruleType}**: ${c.isEnabled ? '✅ Enabled' : '❌ Disabled'} (Action: \`${c.action}\`${c.threshold ? `, Threshold: ${c.threshold}` : ''
+                    `• **${c.ruleType}**: ${c.isEnabled ? '✅ Enabled' : '❌ Disabled'} (Action: \`${c.action}\`${
+                      c.threshold ? `, Threshold: ${c.threshold}` : ''
                     })`,
                 )
                 .join('\n'),
@@ -1155,7 +1175,8 @@ export function createModerationCommands(services: BotServices): Command[] {
       // A new row starts from the rule's real defaults; the repository's own insert defaults
       // (WARN, threshold 3) would silently change what the rule does.
       const existing = await services.moderationRepo.getRuleByType(ctx.guild.id, ruleType);
-      const { action: defaultAction, threshold } = services.autoModService.getDefaultConfig(ruleType);
+      const { action: defaultAction, threshold } =
+        services.autoModService.getDefaultConfig(ruleType);
       await services.moderationRepo.upsertRule({
         guildId: ctx.guild.id,
         ruleType,

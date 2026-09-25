@@ -12,8 +12,20 @@ describe('Tutorial Potions and Progression Rules (TASK-1046)', () => {
     const configs = new Map<string, any>();
     const inventory: any[] = [];
     const gameItems = [
-      { id: 'item_hp_minor', code: 'POTION_MINOR_HP', name: 'Minor HP Potion', type: 'CONSUMABLE', subtype: 'HP_POTION' },
-      { id: 'item_mana_draught', code: 'POTION_MANA_DRAUGHT', name: 'Mana Draught', type: 'CONSUMABLE', subtype: 'MANA_POTION' },
+      {
+        id: 'item_hp_minor',
+        code: 'POTION_MINOR_HP',
+        name: 'Minor HP Potion',
+        type: 'CONSUMABLE',
+        subtype: 'HP_POTION',
+      },
+      {
+        id: 'item_mana_draught',
+        code: 'POTION_MANA_DRAUGHT',
+        name: 'Mana Draught',
+        type: 'CONSUMABLE',
+        subtype: 'MANA_POTION',
+      },
     ];
 
     const progressRepo = {
@@ -104,7 +116,9 @@ describe('Tutorial Potions and Progression Rules (TASK-1046)', () => {
       expect(res.manaPotionGranted).toBe(true);
       expect(inventory.length).toBe(2);
       expect(inventory.some((i) => i.itemId === 'item_hp_minor' && i.quantity === 1)).toBe(true);
-      expect(inventory.some((i) => i.itemId === 'item_mana_draught' && i.quantity === 1)).toBe(true);
+      expect(inventory.some((i) => i.itemId === 'item_mana_draught' && i.quantity === 1)).toBe(
+        true,
+      );
     });
 
     it('does not grant duplicate potions if user already has them', async () => {

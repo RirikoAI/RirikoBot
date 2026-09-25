@@ -175,12 +175,14 @@ export class AchievementRepository extends BaseRepository<
     if (data.category !== undefined) updateData['category'] = data.category;
     if (data.tier !== undefined) updateData['tier'] = data.tier;
     if (data.requirementType !== undefined) updateData['requirementType'] = data.requirementType;
-    if (data.requirementTarget !== undefined) updateData['requirementTarget'] = data.requirementTarget;
+    if (data.requirementTarget !== undefined)
+      updateData['requirementTarget'] = data.requirementTarget;
     if (data.rewardXp !== undefined) updateData['rewardXp'] = data.rewardXp;
     if (data.rewardCredits !== undefined) updateData['rewardCredits'] = data.rewardCredits;
     if (data.rewardCardId !== undefined) updateData['rewardCardId'] = data.rewardCardId;
     if (data.rewardItemId !== undefined) updateData['rewardItemId'] = data.rewardItemId;
-    if (data.rewardConsumables !== undefined) updateData['rewardConsumables'] = data.rewardConsumables;
+    if (data.rewardConsumables !== undefined)
+      updateData['rewardConsumables'] = data.rewardConsumables;
     if (data.rewardTitle !== undefined) updateData['rewardTitle'] = data.rewardTitle;
     if (data.badgeIcon !== undefined) updateData['badgeIcon'] = data.badgeIcon;
     if (data.isHidden !== undefined) updateData['isHidden'] = data.isHidden;
@@ -226,7 +228,8 @@ export class AchievementRepository extends BaseRepository<
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const conditions = [];
-      if (options?.category) conditions.push(eq(sqliteSchema.gameAchievements.category, options.category));
+      if (options?.category)
+        conditions.push(eq(sqliteSchema.gameAchievements.category, options.category));
       if (options?.tier) conditions.push(eq(sqliteSchema.gameAchievements.tier, options.tier));
 
       const query = client.db.select().from(sqliteSchema.gameAchievements);
@@ -234,7 +237,8 @@ export class AchievementRepository extends BaseRepository<
       return rows.map((r) => this.normalizeAchievement(r as unknown as Record<string, unknown>));
     } else {
       const conditions = [];
-      if (options?.category) conditions.push(eq(pgSchema.gameAchievements.category, options.category));
+      if (options?.category)
+        conditions.push(eq(pgSchema.gameAchievements.category, options.category));
       if (options?.tier) conditions.push(eq(pgSchema.gameAchievements.tier, options.tier));
 
       const query = client.db.select().from(pgSchema.gameAchievements);

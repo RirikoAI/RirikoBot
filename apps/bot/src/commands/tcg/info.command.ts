@@ -52,7 +52,9 @@ export function buildTcgInfoEmbed(
             `### 3. Community Marketplace\n` +
             `• Buy cards listed by other players with \`/market action:browse\` and \`/market action:buy\`!`,
         )
-        .setFooter({ text: 'Tip: Always run /dungeon tutorial first before attempting the real tower!' });
+        .setFooter({
+          text: 'Tip: Always run /dungeon tutorial first before attempting the real tower!',
+        });
 
     case 'elements':
       return new EmbedBuilder()
@@ -82,7 +84,9 @@ export function buildTcgInfoEmbed(
             `• ☀️ **Radiance**: Blinds targets (reduces hit accuracy).\n` +
             `• 🌑 **Decay**: Drains enemy HP and leeches health back.`,
         )
-        .setFooter({ text: 'Ice is the 7th element in Ririko 2.0, completely counters Earth and is weak to Fire!' });
+        .setFooter({
+          text: 'Ice is the 7th element in Ririko 2.0, completely counters Earth and is weak to Fire!',
+        });
 
     case 'gear':
       return new EmbedBuilder()
@@ -164,7 +168,9 @@ export function buildTcgInfoEmbed(
             `• \`TUTORIAL_COMPLETE\` Achievement (+100 EXP, +250 Credits)\n\n` +
             `*Once completed, equip your Novice Blade and begin climbing Season 1 with \`/dungeon climb\` (or \`${prefix}dungeon climb\`)!*`,
         )
-        .setFooter({ text: `Run /dungeon action:tutorial or ${prefix}dungeon tutorial right now to claim your starter gear!` });
+        .setFooter({
+          text: `Run /dungeon action:tutorial or ${prefix}dungeon tutorial right now to claim your starter gear!`,
+        });
 
     case 'dungeon':
       return new EmbedBuilder()
@@ -192,7 +198,9 @@ export function buildTcgInfoEmbed(
             `• \`/dungeon action:floor floor_number:<n>\` (or \`${prefix}dungeon floor <n>\`)\n` +
             `• \`/dungeon action:leaderboard\` (or \`${prefix}dungeon leaderboard\`)`,
         )
-        .setFooter({ text: 'Use water/ice combatants in Season 1 to bypass Scorched Earth burn damage!' });
+        .setFooter({
+          text: 'Use water/ice combatants in Season 1 to bypass Scorched Earth burn damage!',
+        });
 
     case 'trade':
       return new EmbedBuilder()
@@ -220,7 +228,9 @@ export function buildTcgInfoEmbed(
             `### ⚡ Atomic ACID Guarantee\n` +
             `Card ownerships and credits are transferred inside a single database transaction. If either party lacks funds or cards, the entire trade reverts safely!`,
         )
-        .setFooter({ text: `View your pending incoming and outgoing trades with /trade action:list or ${prefix}trade list.` });
+        .setFooter({
+          text: `View your pending incoming and outgoing trades with /trade action:list or ${prefix}trade list.`,
+        });
 
     case 'market':
       return new EmbedBuilder()
@@ -245,7 +255,9 @@ export function buildTcgInfoEmbed(
             `• If unsold after 7 days, listings automatically expire and cards return to your inventory in \`IDLE\` state!\n` +
             `• You can also manually cancel anytime with \`/market action:cancel listing_id:<id>\` or \`${prefix}market cancel <id>\`.`,
         )
-        .setFooter({ text: `View all your active listings with /market action:my-listings or ${prefix}market my-listings.` });
+        .setFooter({
+          text: `View all your active listings with /market action:my-listings or ${prefix}market my-listings.`,
+        });
 
     case 'guild':
       return new EmbedBuilder()
@@ -272,7 +284,9 @@ export function buildTcgInfoEmbed(
             `• \`/waifuguild action:leave\` (or \`${prefix}waifuguild leave\`)\n` +
             `• \`/waifuguild action:leaderboard\` (or \`${prefix}waifuguild leaderboard\`)`,
         )
-        .setFooter({ text: 'Guild leaders can promote/demote officers and manage the member roster.' });
+        .setFooter({
+          text: 'Guild leaders can promote/demote officers and manage the member roster.',
+        });
 
     case 'achievements':
       return new EmbedBuilder()
@@ -300,7 +314,9 @@ export function buildTcgInfoEmbed(
             `• \`/achievement action:list\` (or \`${prefix}achievement list\`)\n` +
             `• \`/achievement action:claim achievement_id:<id>\` (or \`${prefix}achievement claim <id>\`)`,
         )
-        .setFooter({ text: 'Complete the tutorial to instantly claim your first achievement: TUTORIAL_COMPLETE!' });
+        .setFooter({
+          text: 'Complete the tutorial to instantly claim your first achievement: TUTORIAL_COMPLETE!',
+        });
 
     case 'overview':
     default:
@@ -323,11 +339,15 @@ export function buildTcgInfoEmbed(
             `• 🏆 **Achievements & Rewards**: 6 tracks, 5 tiers, and 7-asset reward dispatch.\n\n` +
             `*Tip: Use the dropdown menu below to navigate between guides immediately!*`,
         )
-        .setFooter({ text: 'Full handbook documentation is also available in docs/tcg-player-guide.md.' });
+        .setFooter({
+          text: 'Full handbook documentation is also available in docs/tcg-player-guide.md.',
+        });
   }
 }
 
-export function buildTcgInfoSelectMenu(currentTopic: TcgInfoTopic = 'overview'): ActionRowBuilder<StringSelectMenuBuilder> {
+export function buildTcgInfoSelectMenu(
+  currentTopic: TcgInfoTopic = 'overview',
+): ActionRowBuilder<StringSelectMenuBuilder> {
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId('tcg_info_select')
     .setPlaceholder('📖 Choose a TCG Guide Topic...')
@@ -408,9 +428,11 @@ export function createTcgInfoCommand(services: BotServices): Command {
     metadata: {
       name: 'tcg-info',
       category: CommandCategory.TCG,
-      description: 'Comprehensive Waifu TCG guide: tutorials, type advantages, gear, trading, market, and guilds.',
+      description:
+        'Comprehensive Waifu TCG guide: tutorials, type advantages, gear, trading, market, and guilds.',
       aliases: ['tcginfo', 'tcgguide', 'tcg-guide', 'card-guide', 'waifu-guide'],
-      usage: '/tcg-info [topic: overview|starter|elements|gear|crafting|tutorial|dungeon|trade|market|guild|achievements]',
+      usage:
+        '/tcg-info [topic: overview|starter|elements|gear|crafting|tutorial|dungeon|trade|market|guild|achievements]',
       examples: [
         '/tcg-info',
         '/tcg-info topic:elements',
@@ -446,9 +468,7 @@ export function createTcgInfoCommand(services: BotServices): Command {
     execute: async (ctx: CommandContext): Promise<void> => {
       const rawArgs = ctx.options.getRawArgs?.() ?? [];
       const topicInput =
-        ctx.options.getString('topic')?.toLowerCase() ??
-        rawArgs[0]?.toLowerCase() ??
-        'overview';
+        ctx.options.getString('topic')?.toLowerCase() ?? rawArgs[0]?.toLowerCase() ?? 'overview';
 
       const validTopics: TcgInfoTopic[] = [
         'overview',
@@ -488,7 +508,8 @@ export function createTcgInfoCommand(services: BotServices): Command {
         collector.on('collect', async (interaction) => {
           if (interaction.user.id !== ctx.user.id) {
             await interaction.reply({
-              content: 'Only the summoner who opened this guide can switch topics. Run `/tcg-info` to open your own!',
+              content:
+                'Only the summoner who opened this guide can switch topics. Run `/tcg-info` to open your own!',
               ephemeral: true,
             });
             return;
@@ -508,7 +529,9 @@ export function createTcgInfoCommand(services: BotServices): Command {
           try {
             // Disable select menu when collector expires
             const disabledMenu = StringSelectMenuBuilder.from(row.components[0]!).setDisabled(true);
-            const disabledRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(disabledMenu);
+            const disabledRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+              disabledMenu,
+            );
             await response.edit({
               components: [disabledRow],
             });

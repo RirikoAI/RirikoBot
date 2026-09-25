@@ -24,11 +24,7 @@ export class TicTacToeEngine {
    * Initializes a new Tic-Tac-Toe game session.
    */
   public createGame(options: CreateTttOptions): GameSession<TttMetadata> {
-    const emptyBoard: TttBoard = [
-      null, null, null,
-      null, null, null,
-      null, null, null,
-    ];
+    const emptyBoard: TttBoard = [null, null, null, null, null, null, null, null, null];
 
     const playerXId = options.player1.id;
     const playerOId = options.player2.id;
@@ -66,11 +62,7 @@ export class TicTacToeEngine {
   /**
    * Executes a player move and, if playing against AI, computes and applies the AI countermove.
    */
-  public makeMove(
-    sessionId: string,
-    playerId: string,
-    cellIndex: number,
-  ): TttMoveResult {
+  public makeMove(sessionId: string, playerId: string, cellIndex: number): TttMoveResult {
     const session = this.sessionManager.getSession<TttMetadata>(sessionId);
     if (!session) {
       throw new Error(`Tic-Tac-Toe session ${sessionId} not found`);
@@ -120,12 +112,7 @@ export class TicTacToeEngine {
     }
 
     if (resultAfterPlayer.winner === 'TIE') {
-      this.sessionManager.endSession(
-        session.id,
-        'TIED',
-        null,
-        'The game ended in a tie!',
-      );
+      this.sessionManager.endSession(session.id, 'TIED', null, 'The game ended in a tie!');
       return { session };
     }
 
@@ -159,12 +146,7 @@ export class TicTacToeEngine {
           `AI (${aiMark}) won the game!`,
         );
       } else if (resultAfterAi.winner === 'TIE') {
-        this.sessionManager.endSession(
-          session.id,
-          'TIED',
-          null,
-          'The game ended in a tie!',
-        );
+        this.sessionManager.endSession(session.id, 'TIED', null, 'The game ended in a tie!');
       } else {
         // Turn returns to player
         session.currentTurnPlayerId = playerId;

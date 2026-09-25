@@ -122,7 +122,9 @@ describe('DB-driven season curves & floor bosses (STORY-151)', () => {
       const second = s.executeTurn('ATTACK');
       expect(second.lastTurnLogs.some((l) => l.actionType === 'ENRAGE')).toBe(true);
       // Enraged true damage: 100 ATK × (1 + 0.5) ignores the player's 50 DEF.
-      const bossHit = second.lastTurnLogs.find((l) => l.actorId === 'boss' && l.actionType === 'ATTACK');
+      const bossHit = second.lastTurnLogs.find(
+        (l) => l.actorId === 'boss' && l.actionType === 'ATTACK',
+      );
       expect(bossHit?.damageDealt).toBe(150);
     });
   });
@@ -253,7 +255,11 @@ describe('DB-driven season curves & floor bosses (STORY-151)', () => {
         skipEnergyDeduction: true,
       });
       expect(fallback.energyCost).toBe(10);
-      expect(fallback.encounter?.enemyBoss).toMatchObject({ maxHealth: 800, attack: 70, skillManaCost: 60 });
+      expect(fallback.encounter?.enemyBoss).toMatchObject({
+        maxHealth: 800,
+        attack: 70,
+        skillManaCost: 60,
+      });
       expect(fallback.encounter?.bossProfile).toBeUndefined();
     });
 

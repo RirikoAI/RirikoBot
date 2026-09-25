@@ -1,18 +1,8 @@
 import type { Guild, GuildMember } from 'discord.js';
 
-export type AutoModRuleType =
-  | 'INVITE_FILTER'
-  | 'PHISHING_SHIELD'
-  | 'MENTION_SPAM'
-  | 'BURST_SPAM';
+export type AutoModRuleType = 'INVITE_FILTER' | 'PHISHING_SHIELD' | 'MENTION_SPAM' | 'BURST_SPAM';
 
-export type AutoModAction =
-  | 'ALLOW'
-  | 'DELETE'
-  | 'WARN'
-  | 'TIMEOUT'
-  | 'KICK'
-  | 'BAN';
+export type AutoModAction = 'ALLOW' | 'DELETE' | 'WARN' | 'TIMEOUT' | 'KICK' | 'BAN';
 
 export interface ModerationContext {
   guildId: string;
@@ -25,16 +15,20 @@ export interface ModerationContext {
   isBot?: boolean | undefined;
   isOwner?: boolean | undefined;
   createdTimestamp?: number | undefined;
-  mentions?: {
-    users?: number | undefined;
-    roles?: number | undefined;
-    everyone?: boolean | undefined;
-  } | undefined;
-  rawMessage?: {
-    delete: () => Promise<unknown>;
-    author?: { id: string; bot: boolean } | undefined;
-    id?: string | undefined;
-  } | undefined;
+  mentions?:
+    | {
+        users?: number | undefined;
+        roles?: number | undefined;
+        everyone?: boolean | undefined;
+      }
+    | undefined;
+  rawMessage?:
+    | {
+        delete: () => Promise<unknown>;
+        author?: { id: string; bot: boolean } | undefined;
+        id?: string | undefined;
+      }
+    | undefined;
   /** Needed for WARN, TIMEOUT, KICK and BAN; without them a match only deletes the message. */
   guild?: Guild | undefined;
   member?: GuildMember | undefined;

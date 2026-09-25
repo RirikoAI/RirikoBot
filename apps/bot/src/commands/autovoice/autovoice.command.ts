@@ -1,14 +1,5 @@
-import {
-  EmbedBuilder,
-  PermissionFlagsBits,
-  ChannelType,
-  type VoiceChannel,
-} from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { EmbedBuilder, PermissionFlagsBits, ChannelType, type VoiceChannel } from 'discord.js';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { resolveContextPrefix } from '../shared/prefix-resolver.js';
 
@@ -92,7 +83,8 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
 
       if (action !== 'list' && !hasAdminPermission(ctx)) {
         await ctx.reply({
-          content: '❌ You need the **Manage Channels** or **Manage Server** permission to configure auto-voice.',
+          content:
+            '❌ You need the **Manage Channels** or **Manage Server** permission to configure auto-voice.',
         });
         return;
       }
@@ -103,7 +95,8 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
 
         if (!channelIdInput) {
           await ctx.reply({
-            content: '❌ Please specify the voice channel to use as the "Join to Create" generator.\nExample: `/autovoice setup channel:#JoinToCreate`',
+            content:
+              '❌ Please specify the voice channel to use as the "Join to Create" generator.\nExample: `/autovoice setup channel:#JoinToCreate`',
           });
           return;
         }
@@ -122,10 +115,16 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
 
         const embed = new EmbedBuilder()
           .setTitle('🔊 Auto-Voice Channel Configured')
-          .setDescription(`Successfully set <#${config.parentChannelId}> as a **Join to Create** generator.`)
+          .setDescription(
+            `Successfully set <#${config.parentChannelId}> as a **Join to Create** generator.`,
+          )
           .addFields(
             { name: 'Name Template', value: `\`${config.channelNameTemplate}\``, inline: true },
-            { name: 'User Limit', value: config.userLimit === 0 ? 'Unlimited' : `${config.userLimit}`, inline: true },
+            {
+              name: 'User Limit',
+              value: config.userLimit === 0 ? 'Unlimited' : `${config.userLimit}`,
+              inline: true,
+            },
             { name: 'Bitrate', value: `${config.bitrate / 1000} kbps`, inline: true },
           )
           .setColor(0x57f287);
@@ -140,14 +139,20 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
 
         if (!channelIdInput) {
           await ctx.reply({
-            content: '❌ Please provide the voice channel to remove from auto-voice configs.\nExample: `/autovoice remove channel:#JoinToCreate`',
+            content:
+              '❌ Please provide the voice channel to remove from auto-voice configs.\nExample: `/autovoice remove channel:#JoinToCreate`',
           });
           return;
         }
 
-        const deleted = await services.autoVoiceRepo.deleteByParentChannelId(ctx.guildId, channelIdInput);
+        const deleted = await services.autoVoiceRepo.deleteByParentChannelId(
+          ctx.guildId,
+          channelIdInput,
+        );
         if (!deleted) {
-          await ctx.reply({ content: `⚠️ No active auto-voice configuration found for <#${channelIdInput}>.` });
+          await ctx.reply({
+            content: `⚠️ No active auto-voice configuration found for <#${channelIdInput}>.`,
+          });
           return;
         }
 
@@ -158,7 +163,10 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
       if (action === 'list') {
         const configs = await services.autoVoiceRepo.listByGuildId(ctx.guildId);
         if (configs.length === 0) {
-          await ctx.reply({ content: '📋 No auto-voice generators configured in this server. Use `/autovoice setup` to create one.' });
+          await ctx.reply({
+            content:
+              '📋 No auto-voice generators configured in this server. Use `/autovoice setup` to create one.',
+          });
           return;
         }
 
@@ -255,14 +263,18 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
       const member = ctx.member as any;
       const voiceChannel = member?.voice?.channel as VoiceChannel | null | undefined;
       if (!voiceChannel) {
-        await ctx.reply({ content: '❌ You must be connected to a voice channel to use voice controls.' });
+        await ctx.reply({
+          content: '❌ You must be connected to a voice channel to use voice controls.',
+        });
         return;
       }
 
       // Check if the channel is an active dynamic voice channel
       const active = services.autoVoiceService.getActiveChannel(voiceChannel.id);
       if (!active) {
-        await ctx.reply({ content: '❌ This voice channel is not a temporary dynamic voice channel.' });
+        await ctx.reply({
+          content: '❌ This voice channel is not a temporary dynamic voice channel.',
+        });
         return;
       }
 
@@ -278,29 +290,38 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
 
         const ownerStillHere = voiceChannel.members?.has(active.ownerId) ?? false;
         if (ownerStillHere) {
-          await ctx.reply({ content: '❌ The current channel owner is still connected. Ownership cannot be claimed.' });
+          await ctx.reply({
+            content:
+              '❌ The current channel owner is still connected. Ownership cannot be claimed.',
+          });
           return;
         }
 
         services.autoVoiceService.transferOwnership(voiceChannel.id, callerId);
         // Grant permissions to new owner
-        await voiceChannel.permissionOverwrites.edit(callerId, {
-          ViewChannel: true,
-          Connect: true,
-          Speak: true,
-          ManageChannels: true,
-          MoveMembers: true,
-          MuteMembers: true,
-          DeafenMembers: true,
-        }).catch(() => null);
+        await voiceChannel.permissionOverwrites
+          .edit(callerId, {
+            ViewChannel: true,
+            Connect: true,
+            Speak: true,
+            ManageChannels: true,
+            MoveMembers: true,
+            MuteMembers: true,
+            DeafenMembers: true,
+          })
+          .catch(() => null);
 
-        await ctx.reply({ content: `👑 <@${callerId}> has claimed ownership of this voice channel!` });
+        await ctx.reply({
+          content: `👑 <@${callerId}> has claimed ownership of this voice channel!`,
+        });
         return;
       }
 
       // All other actions require ownership
       if (!isOwner) {
-        await ctx.reply({ content: `❌ Only the channel owner (<@${active.ownerId}>) can manage this channel.` });
+        await ctx.reply({
+          content: `❌ Only the channel owner (<@${active.ownerId}>) can manage this channel.`,
+        });
         return;
       }
 
@@ -316,13 +337,16 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
       }
 
       if (action === 'limit') {
-        const rawLimit = ctx.options.getInteger('limit') ?? (rawArgs[1] ? parseInt(rawArgs[1], 10) : null);
+        const rawLimit =
+          ctx.options.getInteger('limit') ?? (rawArgs[1] ? parseInt(rawArgs[1], 10) : null);
         if (rawLimit === null || isNaN(rawLimit) || rawLimit < 0 || rawLimit > 99) {
           await ctx.reply({ content: '❌ Please provide a valid user limit between 0 and 99.' });
           return;
         }
         await services.autoVoiceService.setUserLimit(voiceChannel, rawLimit);
-        await ctx.reply({ content: `✓ User limit set to **${rawLimit === 0 ? 'Unlimited' : rawLimit}**.` });
+        await ctx.reply({
+          content: `✓ User limit set to **${rawLimit === 0 ? 'Unlimited' : rawLimit}**.`,
+        });
         return;
       }
 
@@ -350,7 +374,9 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
         const targetUser = await ctx.options.getUser('user');
         const targetUserId = targetUser?.id ?? rawArgs[1]?.replace(/[<@!>]/g, '');
         if (!targetUserId) {
-          await ctx.reply({ content: '❌ Please mention or provide the ID of the user to permit.' });
+          await ctx.reply({
+            content: '❌ Please mention or provide the ID of the user to permit.',
+          });
           return;
         }
 
@@ -359,7 +385,9 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
           ViewChannel: true,
         });
 
-        await ctx.reply({ content: `✓ Permitted <@${targetUserId}> to connect to this voice channel.` });
+        await ctx.reply({
+          content: `✓ Permitted <@${targetUserId}> to connect to this voice channel.`,
+        });
         return;
       }
 
@@ -367,7 +395,9 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
         const targetUser = await ctx.options.getUser('user');
         const targetUserId = targetUser?.id ?? rawArgs[1]?.replace(/[<@!>]/g, '');
         if (!targetUserId) {
-          await ctx.reply({ content: '❌ Please mention or provide the ID of the user to disconnect.' });
+          await ctx.reply({
+            content: '❌ Please mention or provide the ID of the user to disconnect.',
+          });
           return;
         }
 
@@ -391,7 +421,9 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
         const targetUser = await ctx.options.getUser('user');
         const targetUserId = targetUser?.id ?? rawArgs[1]?.replace(/[<@!>]/g, '');
         if (!targetUserId) {
-          await ctx.reply({ content: '❌ Please mention or provide the ID of the user to transfer ownership to.' });
+          await ctx.reply({
+            content: '❌ Please mention or provide the ID of the user to transfer ownership to.',
+          });
           return;
         }
 
@@ -402,20 +434,24 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
 
         const targetMember = voiceChannel.members?.get(targetUserId);
         if (!targetMember) {
-          await ctx.reply({ content: `⚠️ <@${targetUserId}> must be connected to this channel to transfer ownership.` });
+          await ctx.reply({
+            content: `⚠️ <@${targetUserId}> must be connected to this channel to transfer ownership.`,
+          });
           return;
         }
 
         services.autoVoiceService.transferOwnership(voiceChannel.id, targetUserId);
-        await voiceChannel.permissionOverwrites.edit(targetUserId, {
-          ViewChannel: true,
-          Connect: true,
-          Speak: true,
-          ManageChannels: true,
-          MoveMembers: true,
-          MuteMembers: true,
-          DeafenMembers: true,
-        }).catch(() => null);
+        await voiceChannel.permissionOverwrites
+          .edit(targetUserId, {
+            ViewChannel: true,
+            Connect: true,
+            Speak: true,
+            ManageChannels: true,
+            MoveMembers: true,
+            MuteMembers: true,
+            DeafenMembers: true,
+          })
+          .catch(() => null);
 
         await ctx.reply({ content: `👑 Transferred channel ownership to <@${targetUserId}>!` });
         return;
@@ -479,6 +515,10 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
     createLegacyVoiceAlias('vpermit', 'permit', 'Permit user to voice channel (legacy alias)'),
     createLegacyVoiceAlias('vkick', 'kick', 'Kick user from voice channel (legacy alias)'),
     createLegacyVoiceAlias('vclaim', 'claim', 'Claim vacant voice channel (legacy alias)'),
-    createLegacyVoiceAlias('vtransfer', 'transfer', 'Transfer voice channel ownership (legacy alias)'),
+    createLegacyVoiceAlias(
+      'vtransfer',
+      'transfer',
+      'Transfer voice channel ownership (legacy alias)',
+    ),
   ];
 }

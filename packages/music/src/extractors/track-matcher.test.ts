@@ -5,10 +5,20 @@ import type { MusicSearchResult, ResolvedTrack } from '../types.js';
 describe('PrecisionTrackMatcher (LavaSrc Audio Mirroring)', () => {
   describe('cleanTitle', () => {
     it('strips bracketed noise and common YouTube video tags', () => {
-      expect(PrecisionTrackMatcher.cleanTitle('RIDE ON TIME (Official Music Video)')).toBe('RIDE ON TIME');
-      expect(PrecisionTrackMatcher.cleanTitle('Never Gonna Give You Up [4K Remastered]')).toBe('Never Gonna Give You Up');
-      expect(PrecisionTrackMatcher.cleanTitle('【Rainych & evening cinema】 RIDE ON TIME - Tatsuro Yamashita')).toBe('RIDE ON TIME Tatsuro Yamashita');
-      expect(PrecisionTrackMatcher.cleanTitle('Song Title (feat. Artist) [Audio]')).toBe('Song Title');
+      expect(PrecisionTrackMatcher.cleanTitle('RIDE ON TIME (Official Music Video)')).toBe(
+        'RIDE ON TIME',
+      );
+      expect(PrecisionTrackMatcher.cleanTitle('Never Gonna Give You Up [4K Remastered]')).toBe(
+        'Never Gonna Give You Up',
+      );
+      expect(
+        PrecisionTrackMatcher.cleanTitle(
+          '【Rainych & evening cinema】 RIDE ON TIME - Tatsuro Yamashita',
+        ),
+      ).toBe('RIDE ON TIME Tatsuro Yamashita');
+      expect(PrecisionTrackMatcher.cleanTitle('Song Title (feat. Artist) [Audio]')).toBe(
+        'Song Title',
+      );
     });
   });
 
@@ -54,14 +64,18 @@ describe('PrecisionTrackMatcher (LavaSrc Audio Mirroring)', () => {
     it('matches multi-artist target against candidate channel and title', () => {
       const candidate: MusicSearchResult = {
         id: 'q1F8YWZtEGg',
-        title: '【Rainych & evening cinema】 RIDE ON TIME - Tatsuro Yamashita ｜ Official Music Video',
+        title:
+          '【Rainych & evening cinema】 RIDE ON TIME - Tatsuro Yamashita ｜ Official Music Video',
         artist: 'Rainych Ran',
         durationSeconds: 276,
         url: 'https://www.youtube.com/watch?v=q1F8YWZtEGg',
         source: 'youtube',
       };
 
-      const score = PrecisionTrackMatcher.calculateArtistScore('Rainych, evening cinema', candidate);
+      const score = PrecisionTrackMatcher.calculateArtistScore(
+        'Rainych, evening cinema',
+        candidate,
+      );
       expect(score).toBeGreaterThanOrEqual(0.8);
     });
 
@@ -116,7 +130,8 @@ describe('PrecisionTrackMatcher (LavaSrc Audio Mirroring)', () => {
         // 3. The exact official YouTube release
         {
           id: 'q1F8YWZtEGg',
-          title: '【Rainych & evening cinema】 RIDE ON TIME - Tatsuro Yamashita ｜ Official Music Video',
+          title:
+            '【Rainych & evening cinema】 RIDE ON TIME - Tatsuro Yamashita ｜ Official Music Video',
           artist: 'Rainych Ran',
           durationSeconds: 276,
           url: 'https://www.youtube.com/watch?v=q1F8YWZtEGg',
@@ -162,7 +177,7 @@ describe('PrecisionTrackMatcher (LavaSrc Audio Mirroring)', () => {
         },
       ];
 
-      const best = PrecisionTrackMatcher.selectBestCandidate(targetTrack, candidateList, 0.70);
+      const best = PrecisionTrackMatcher.selectBestCandidate(targetTrack, candidateList, 0.7);
       expect(best).toBeNull();
     });
   });

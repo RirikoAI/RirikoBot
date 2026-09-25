@@ -17,7 +17,11 @@ export type CreateReminderRow = Omit<NewReminder, 'id'> & { id?: string };
  * Persistent reminders. A row is "active" while `isCompleted` is false; the scheduler claims a due
  * row by flipping that flag, which only one caller can win.
  */
-export class ReminderRepository extends BaseRepository<Reminder, CreateReminderRow, Partial<NewReminder>> {
+export class ReminderRepository extends BaseRepository<
+  Reminder,
+  CreateReminderRow,
+  Partial<NewReminder>
+> {
   async findById(id: string, tx?: DatabaseClient): Promise<Reminder | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {

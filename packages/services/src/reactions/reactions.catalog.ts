@@ -65,14 +65,16 @@ export const REACTION_CATALOG: readonly ReactionDefinition[] = [
     reactionType: 'brofist',
     description: 'Send an epic brofist to show some solidarity or camaraderie.',
     content: 'threw a legendary brofist at',
-    noTargetContent: 'threw a brofist into the air, radiating pure camaraderie to everyone and no one',
+    noTargetContent:
+      'threw a brofist into the air, radiating pure camaraderie to everyone and no one',
   },
   {
     name: 'celebrate',
     reactionType: 'celebrate',
     description: 'Throw confetti, pop the champagne, and celebrate with someone special!',
     content: 'threw a party and celebrated with',
-    noTargetContent: 'threw a solo celebration, confetti and all, partying in their own awesome company',
+    noTargetContent:
+      'threw a solo celebration, confetti and all, partying in their own awesome company',
   },
   {
     name: 'cheers',
@@ -105,7 +107,8 @@ export const REACTION_CATALOG: readonly ReactionDefinition[] = [
   {
     name: 'cry',
     reactionType: 'cry',
-    description: 'Let the tears flow because someone tugged at your heartstrings or hurt your feelings.',
+    description:
+      'Let the tears flow because someone tugged at your heartstrings or hurt your feelings.',
     content: 'shed tears because of',
     noTargetContent: 'shed tears quietly, feeling the weight of their emotions alone',
   },
@@ -135,7 +138,8 @@ export const REACTION_CATALOG: readonly ReactionDefinition[] = [
     reactionType: 'evillaugh',
     description: 'Channel your inner villain and unleash a spine-chilling evil laugh.',
     content: 'unleashed a maniacal evil laugh at',
-    noTargetContent: 'threw their head back and let out a dramatic "Mwahaha!" echoing into the void',
+    noTargetContent:
+      'threw their head back and let out a dramatic "Mwahaha!" echoing into the void',
   },
   {
     name: 'facepalm',
@@ -156,7 +160,8 @@ export const REACTION_CATALOG: readonly ReactionDefinition[] = [
     reactionType: 'happy',
     description: 'Spread joy and share a moment of happiness with someone special!',
     content: 'shared a joyful moment with',
-    noTargetContent: 'smiled brightly to themselves, radiating happiness in their own little bubble',
+    noTargetContent:
+      'smiled brightly to themselves, radiating happiness in their own little bubble',
   },
   {
     name: 'headbang',
@@ -485,7 +490,8 @@ export const REACTION_CATALOG: readonly ReactionDefinition[] = [
     reactionType: 'yawn',
     description: 'Let out a big yawn, showing how tired or bored you are.',
     content: 'yawned sleepily at',
-    noTargetContent: 'stretched their arms and let out a long, exaggerated yawn, barely staying awake',
+    noTargetContent:
+      'stretched their arms and let out a long, exaggerated yawn, barely staying awake',
   },
   {
     name: 'yay',

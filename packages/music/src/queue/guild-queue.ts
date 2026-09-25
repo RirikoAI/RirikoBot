@@ -331,7 +331,7 @@ export class GuildQueue extends EventEmitter {
         const recommendation = await this._autoplayEngine.getRecommendation(
           previousTrack,
           this._history,
-          this._tracks
+          this._tracks,
         );
         if (recommendation) {
           this._currentTrack = recommendation;
@@ -508,7 +508,10 @@ export class GuildQueue extends EventEmitter {
     return super.once(event, listener as (...args: unknown[]) => void);
   }
 
-  override emit<E extends keyof QueueEvents>(event: E, ...args: Parameters<QueueEvents[E]>): boolean {
+  override emit<E extends keyof QueueEvents>(
+    event: E,
+    ...args: Parameters<QueueEvents[E]>
+  ): boolean {
     return super.emit(event, ...args);
   }
 }

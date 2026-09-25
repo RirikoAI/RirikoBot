@@ -16,11 +16,7 @@ import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
 
-export class ImageRepository extends BaseRepository<
-  ImageJob,
-  NewImageJob,
-  Partial<NewImageJob>
-> {
+export class ImageRepository extends BaseRepository<ImageJob, NewImageJob, Partial<NewImageJob>> {
   async findById(id: string, tx?: DatabaseClient): Promise<ImageJob | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
@@ -54,10 +50,7 @@ export class ImageRepository extends BaseRepository<
     };
 
     if (this.isSqlite(client)) {
-      const [created] = await client.db
-        .insert(sqliteSchema.imageJobs)
-        .values(payload)
-        .returning();
+      const [created] = await client.db.insert(sqliteSchema.imageJobs).values(payload).returning();
       if (!created) throw new DatabaseError(`Failed to insert image job ${id}`);
       return created as ImageJob;
     } else {
@@ -99,9 +92,7 @@ export class ImageRepository extends BaseRepository<
         .where(eq(sqliteSchema.imageJobs.id, id));
       return (res.changes ?? 0) > 0;
     } else {
-      const res = await client.db
-        .delete(pgSchema.imageJobs)
-        .where(eq(pgSchema.imageJobs.id, id));
+      const res = await client.db.delete(pgSchema.imageJobs).where(eq(pgSchema.imageJobs.id, id));
       return (res.rowCount ?? 0) > 0;
     }
   }
@@ -133,7 +124,9 @@ export class ImageRepository extends BaseRepository<
         status,
         resultUrl: options.resultUrl,
         errorMessage: options.errorMessage,
-        completedAt: options.completedAt ?? (status === 'COMPLETED' || status === 'FAILED' ? new Date() : undefined),
+        completedAt:
+          options.completedAt ??
+          (status === 'COMPLETED' || status === 'FAILED' ? new Date() : undefined),
       },
       tx,
     );
@@ -194,7 +187,11 @@ export class ImageRepository extends BaseRepository<
 
   // --- Quota & Usage Methods ---
 
-  async getUsage(userId: string, providerId: string, tx?: DatabaseClient): Promise<ImageUsage | null> {
+  async getUsage(
+    userId: string,
+    providerId: string,
+    tx?: DatabaseClient,
+  ): Promise<ImageUsage | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [row] = await client.db

@@ -62,7 +62,8 @@ export class AutoVoiceService {
       let parentOverwrites: any[] = [];
       if (channel.permissionOverwrites?.cache) {
         const cache = channel.permissionOverwrites.cache as any;
-        const items = typeof cache.map === 'function' ? cache.map((o: any) => o) : Array.from(cache.values());
+        const items =
+          typeof cache.map === 'function' ? cache.map((o: any) => o) : Array.from(cache.values());
         parentOverwrites = items.map((overwrite: any) => ({
           id: overwrite.id,
           allow: overwrite.allow,
@@ -185,12 +186,18 @@ export class AutoVoiceService {
    * Deletes a created channel on Discord and forgets it. A channel that is already gone is also
    * forgotten; on any other failure the record is kept so startup cleanup can retry.
    */
-  private async deleteCreatedChannel(channel: { id: string; delete(): Promise<unknown> }): Promise<boolean> {
+  private async deleteCreatedChannel(channel: {
+    id: string;
+    delete(): Promise<unknown>;
+  }): Promise<boolean> {
     try {
       await channel.delete();
     } catch (err) {
       if ((err as { code?: unknown } | null)?.code !== RESTJSONErrorCodes.UnknownChannel) {
-        console.error(`[AutoVoiceService] Failed to delete dynamic voice channel ${channel.id}:`, err);
+        console.error(
+          `[AutoVoiceService] Failed to delete dynamic voice channel ${channel.id}:`,
+          err,
+        );
         return false;
       }
     }

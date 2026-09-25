@@ -10,7 +10,12 @@ import {
   type UserInventoryItem,
   type UserInventoryItemRepository,
 } from '@ririko/database';
-import { CraftingIngredient, CraftingRecipe, CRAFTING_RECIPES, findCraftingRecipe } from './crafting-recipes.js';
+import {
+  CraftingIngredient,
+  CraftingRecipe,
+  CRAFTING_RECIPES,
+  findCraftingRecipe,
+} from './crafting-recipes.js';
 import { ItemGrantService } from './item-grant.service.js';
 
 /** Equipment/accessory recipes only ever produce one instance per craft() call. */
@@ -85,7 +90,11 @@ export class CraftingService {
   }
 
   /** Number of unequipped units of `code` the user owns (stacked count for materials/potions, row count for gear). */
-  private async countUnequipped(userId: string, code: string, tx?: DatabaseClient): Promise<number> {
+  private async countUnequipped(
+    userId: string,
+    code: string,
+    tx?: DatabaseClient,
+  ): Promise<number> {
     const item = await this.itemRepo.findByCode(code, tx);
     if (!item) return 0;
     if (item.type === 'MATERIAL' || item.type === 'CONSUMABLE') {
@@ -253,10 +262,12 @@ export class CraftingService {
         );
       }
 
-      const scaledIngredients: CraftingIngredient[] = (recipe.ingredients ?? []).map((ingredient) => ({
-        code: ingredient.code,
-        quantity: ingredient.quantity * quantity,
-      }));
+      const scaledIngredients: CraftingIngredient[] = (recipe.ingredients ?? []).map(
+        (ingredient) => ({
+          code: ingredient.code,
+          quantity: ingredient.quantity * quantity,
+        }),
+      );
       for (const ingredient of scaledIngredients) {
         const owned = await this.countUnequipped(userId, ingredient.code, tx);
         if (owned < ingredient.quantity) {
@@ -290,7 +301,13 @@ export class CraftingService {
 
       const granted: UserInventoryItem[] = [];
       for (let i = 0; i < quantity; i++) {
-        const result = await this.grants.grantItem(userId, outputItem, recipe.outputQuantity, 'CRAFTING', tx);
+        const result = await this.grants.grantItem(
+          userId,
+          outputItem,
+          recipe.outputQuantity,
+          'CRAFTING',
+          tx,
+        );
         granted.push(...result.inventoryItems);
       }
 

@@ -8,17 +8,9 @@ import {
   type ButtonInteraction,
 } from 'discord.js';
 import { randomUUID } from 'node:crypto';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
-import {
-  generateHighLowInitial,
-  evaluateHighLow,
-  type HighLowGuess,
-} from '@ririko/services';
+import { generateHighLowInitial, evaluateHighLow, type HighLowGuess } from '@ririko/services';
 
 export function createHighLowCommand(services: BotServices): Command {
   return {
@@ -27,12 +19,7 @@ export function createHighLowCommand(services: BotServices): Command {
       category: CommandCategory.GAMES,
       description: 'Guess if the next random number (1-100) will be higher or lower',
       usage: '/highlow [wager:credits]',
-      examples: [
-        '/highlow',
-        '/highlow wager:100',
-        '!high-low',
-        '!hl 50',
-      ],
+      examples: ['/highlow', '/highlow wager:100', '!high-low', '!hl 50'],
       aliases: ['high-low', 'hl'],
       cooldownSeconds: 3,
       options: [
@@ -104,8 +91,8 @@ export function createHighLowCommand(services: BotServices): Command {
         .setTitle('High Low')
         .setDescription(
           `The number is **${currentNumber}**. Will the next number be higher or lower?\n` +
-          `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits\n` : ''}` +
-          `\nClick a button below to guess within 15 seconds!`,
+            `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits\n` : ''}` +
+            `\nClick a button below to guess within 15 seconds!`,
         )
         .setColor('#0099ff')
         .setTimestamp();
@@ -189,7 +176,9 @@ export function createHighLowCommand(services: BotServices): Command {
         const resultEmbed = new EmbedBuilder()
           .setTitle('High Low')
           .setDescription(outcomeText)
-          .setColor(result.outcome === 'WIN' ? '#57F287' : result.outcome === 'TIE' ? '#FEE75C' : '#ED4245')
+          .setColor(
+            result.outcome === 'WIN' ? '#57F287' : result.outcome === 'TIE' ? '#FEE75C' : '#ED4245',
+          )
           .setTimestamp();
 
         const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(

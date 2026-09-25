@@ -188,12 +188,7 @@ describe('LevelingService', () => {
         eventFired = true;
       });
 
-      const result = await levelingService.addExperience(
-        'user_1',
-        'guild_1',
-        50,
-        'CHAT_MESSAGE',
-      );
+      const result = await levelingService.addExperience('user_1', 'guild_1', 50, 'CHAT_MESSAGE');
 
       expect(result.xpAdded).toBe(50);
       expect(result.totalXp).toBe(50);

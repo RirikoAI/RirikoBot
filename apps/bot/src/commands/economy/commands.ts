@@ -1,8 +1,4 @@
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
 /**
@@ -206,7 +202,9 @@ export function createEconomyCommands(services: BotServices): Command[] {
       const amount = ctx.options.getInteger('amount', true);
 
       if (!target || !amount) {
-        await ctx.reply({ content: '❌ Please specify both a recipient member and a valid amount.' });
+        await ctx.reply({
+          content: '❌ Please specify both a recipient member and a valid amount.',
+        });
         return;
       }
 
@@ -283,13 +281,17 @@ export function createEconomyCommands(services: BotServices): Command[] {
         });
       } else {
         if (!ctx.guild) {
-          await ctx.reply({ content: '❌ Server leaderboard can only be accessed within a Discord server.' });
+          await ctx.reply({
+            content: '❌ Server leaderboard can only be accessed within a Discord server.',
+          });
           return;
         }
 
         const lb = await services.leaderboardService.getServerLeaderboard(ctx.guild.id, page, 10);
         if (lb.items.length === 0) {
-          await ctx.reply({ content: '📊 Server leaderboard has no ranked members yet. Start chatting to gain XP!' });
+          await ctx.reply({
+            content: '📊 Server leaderboard has no ranked members yet. Start chatting to gain XP!',
+          });
           return;
         }
 
@@ -347,9 +349,18 @@ export function createEconomyCommands(services: BotServices): Command[] {
         const attachment = ctx.options.getAttachment('background');
         if (attachment?.url) {
           bgUrl = attachment.url;
-        } else if (ctx.source === 'prefix' && 'attachments' in ctx.raw && ctx.raw.attachments && ctx.raw.attachments.size > 0) {
+        } else if (
+          ctx.source === 'prefix' &&
+          'attachments' in ctx.raw &&
+          ctx.raw.attachments &&
+          ctx.raw.attachments.size > 0
+        ) {
           const firstAttachment = ctx.raw.attachments.first();
-          if (firstAttachment && (firstAttachment.contentType?.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(firstAttachment.name ?? ""))) {
+          if (
+            firstAttachment &&
+            (firstAttachment.contentType?.startsWith('image/') ||
+              /\.(png|jpe?g|webp)$/i.test(firstAttachment.name ?? ''))
+          ) {
             bgUrl = firstAttachment.url;
           }
         }
@@ -452,12 +463,15 @@ export function createEconomyCommands(services: BotServices): Command[] {
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
-      const action = ctx.options.getString('action') ?? (ctx.options.getString('item') ? 'buy' : 'list');
+      const action =
+        ctx.options.getString('action') ?? (ctx.options.getString('item') ? 'buy' : 'list');
 
       if (action === 'buy') {
         const itemId = ctx.options.getString('item');
         if (!itemId) {
-          await ctx.reply({ content: '❌ Please specify an item ID to purchase. Use `/shop list` to view catalog.' });
+          await ctx.reply({
+            content: '❌ Please specify an item ID to purchase. Use `/shop list` to view catalog.',
+          });
           return;
         }
         const quantity = ctx.options.getInteger('quantity') ?? 1;
@@ -578,7 +592,9 @@ export function createEconomyCommands(services: BotServices): Command[] {
       });
 
       if (res.success) {
-        const effectStr = res.effectSummary ? `\n\n**Effects Applied:**\n• ${res.effectSummary}` : '';
+        const effectStr = res.effectSummary
+          ? `\n\n**Effects Applied:**\n• ${res.effectSummary}`
+          : '';
 
         await ctx.reply({
           content: `✨ **Consumed ${res.quantityUsed}x ${res.item?.name}!**${effectStr}\nRemaining in inventory: \`${res.remainingQuantity}\``,

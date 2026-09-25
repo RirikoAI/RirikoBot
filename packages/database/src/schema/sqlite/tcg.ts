@@ -250,7 +250,10 @@ export const dungeonBosses = sqliteTable(
     anilistId: integer('anilist_id'),
     danbooruTag: text('danbooru_tag'),
     imagePath: text('image_path'),
-    definition: text('definition', { mode: 'json' }).$type<Record<string, unknown>>().notNull().default({}),
+    definition: text('definition', { mode: 'json' })
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default({}),
     signatureDropCode: text('signature_drop_code'),
     isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
     createdAt: integer('created_at', { mode: 'timestamp_ms' })

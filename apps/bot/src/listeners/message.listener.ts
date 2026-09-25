@@ -27,8 +27,12 @@ export function registerMessageListener(
           userId: message.author.id,
           content: message.content,
           messageId: message.id,
-          memberRoles: message.member?.roles?.cache ? Array.from(message.member.roles.cache.keys()) : [],
-          memberPermissions: message.member?.permissions ? message.member.permissions.toArray() : [],
+          memberRoles: message.member?.roles?.cache
+            ? Array.from(message.member.roles.cache.keys())
+            : [],
+          memberPermissions: message.member?.permissions
+            ? message.member.permissions.toArray()
+            : [],
           isBot: message.author.bot,
           isOwner: message.guild.ownerId === message.author.id,
           createdTimestamp: message.createdTimestamp,

@@ -483,9 +483,7 @@ export async function openGearMenu(
           nextCard = value;
           nextItem = undefined;
           nextCandidatePage = 0;
-          const cardIdx = (state.allCards ?? state.cards).findIndex(
-            (c) => c.userCardId === value,
-          );
+          const cardIdx = (state.allCards ?? state.cards).findIndex((c) => c.userCardId === value);
           if (cardIdx !== -1) nextCardPage = Math.floor(cardIdx / 25);
         } else if (interaction.customId === 'gear:slot') {
           nextSlot = value as GearSlot;
@@ -505,13 +503,13 @@ export async function openGearMenu(
           nextCardPage = Math.max(0, (state.cardPage ?? 0) - 1);
           nextCard = (state.allCards ?? state.cards)[nextCardPage * 25]?.userCardId ?? state.cardId;
         } else if (interaction.customId === 'gear:card_next') {
-          const totalPages = Math.ceil(((state.allCards ?? state.cards).length) / 25);
+          const totalPages = Math.ceil((state.allCards ?? state.cards).length / 25);
           nextCardPage = Math.min(totalPages - 1, (state.cardPage ?? 0) + 1);
           nextCard = (state.allCards ?? state.cards)[nextCardPage * 25]?.userCardId ?? state.cardId;
         } else if (interaction.customId === 'gear:candidate_prev') {
           nextCandidatePage = Math.max(0, (state.candidatePage ?? 0) - 1);
         } else if (interaction.customId === 'gear:candidate_next') {
-          const totalPages = Math.ceil(((state.allCandidates ?? state.candidates).length) / 25);
+          const totalPages = Math.ceil((state.allCandidates ?? state.candidates).length / 25);
           nextCandidatePage = Math.min(totalPages - 1, (state.candidatePage ?? 0) + 1);
         } else if (interaction.customId === 'gear:equip' && state.selectedItemId) {
           const result = await services.loadoutService.equip(

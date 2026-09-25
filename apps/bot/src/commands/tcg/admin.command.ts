@@ -1,9 +1,5 @@
 import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { TcgConfigKey } from '@ririko/services';
 
@@ -12,7 +8,8 @@ export function createTcgAdminCommand(services: BotServices): Command {
     metadata: {
       name: 'tcg-admin',
       category: CommandCategory.TCG,
-      description: 'TCG Administration: Manage game balance, energy caps, dungeon curves, and market taxes.',
+      description:
+        'TCG Administration: Manage game balance, energy caps, dungeon curves, and market taxes.',
       aliases: ['tcgadmin', 'tcgconfig'],
       usage: '/tcg-admin [action: view|energy|dungeon|market|role] [value]',
       examples: [
@@ -128,9 +125,7 @@ export function createTcgAdminCommand(services: BotServices): Command {
 
       const rawArgs = ctx.options.getRawArgs?.() ?? [];
       const action =
-        ctx.options.getString('action')?.toLowerCase() ??
-        rawArgs[0]?.toLowerCase() ??
-        'view';
+        ctx.options.getString('action')?.toLowerCase() ?? rawArgs[0]?.toLowerCase() ?? 'view';
 
       switch (action) {
         case 'energy': {
@@ -149,7 +144,12 @@ export function createTcgAdminCommand(services: BotServices): Command {
                 if (keyLower === 'max_cap' || keyLower === 'maxcap') maxCap = num;
                 if (keyLower === 'pot_limit' || keyLower === 'potlimit') potLimit = num;
                 if (keyLower === 'bonus_cap' || keyLower === 'bonuscap') bonusCap = num;
-                if (keyLower === 'bonus_increment' || keyLower === 'bonusincrement' || keyLower === 'increment') bonusIncrement = num;
+                if (
+                  keyLower === 'bonus_increment' ||
+                  keyLower === 'bonusincrement' ||
+                  keyLower === 'increment'
+                )
+                  bonusIncrement = num;
               }
             }
           }
@@ -238,7 +238,8 @@ export function createTcgAdminCommand(services: BotServices): Command {
 
             if (changes.length === 0) {
               await ctx.reply({
-                content: 'ℹ️ No dungeon parameters provided to update. Usage: `/tcg-admin action:dungeon scaling_model:EXPONENTIAL growth_rate:0.09`',
+                content:
+                  'ℹ️ No dungeon parameters provided to update. Usage: `/tcg-admin action:dungeon scaling_model:EXPONENTIAL growth_rate:0.09`',
                 ephemeral: true,
               });
               return;
@@ -264,7 +265,8 @@ export function createTcgAdminCommand(services: BotServices): Command {
 
           if (taxRate === null || taxRate === undefined) {
             await ctx.reply({
-              content: 'ℹ️ Please specify a tax rate: `/tcg-admin action:market tax_rate:0.05` (5%)',
+              content:
+                'ℹ️ Please specify a tax rate: `/tcg-admin action:market tax_rate:0.05` (5%)',
               ephemeral: true,
             });
             return;
@@ -306,7 +308,9 @@ export function createTcgAdminCommand(services: BotServices): Command {
             const embed = new EmbedBuilder()
               .setTitle('🛡️ TCG Manager Role Configured')
               .setColor(0x57f287)
-              .setDescription(`Members with <@&${roleId}> can now access and manage TCG administration settings.`)
+              .setDescription(
+                `Members with <@&${roleId}> can now access and manage TCG administration settings.`,
+              )
               .setFooter({ text: `Updated by @${ctx.user.username}` })
               .setTimestamp();
 
@@ -326,7 +330,9 @@ export function createTcgAdminCommand(services: BotServices): Command {
             const embed = new EmbedBuilder()
               .setTitle('⚙️ Global Waifu TCG Configuration')
               .setColor(0x5865f2)
-              .setDescription('Live global parameters governing combat, dungeons, energy, and economy.')
+              .setDescription(
+                'Live global parameters governing combat, dungeons, energy, and economy.',
+              )
               .addFields(
                 {
                   name: '⚡ Energy Subsystem',

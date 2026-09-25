@@ -1,9 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
 export function createGuildCommand(services: BotServices): Command {
@@ -11,9 +7,11 @@ export function createGuildCommand(services: BotServices): Command {
     metadata: {
       name: 'waifuguild',
       category: CommandCategory.TCG,
-      description: 'WaifuGuilds: Form player factions, pool bank credits, level up capacity, and climb leaderboards.',
+      description:
+        'WaifuGuilds: Form player factions, pool bank credits, level up capacity, and climb leaderboards.',
       aliases: ['wguild', 'guild'],
-      usage: '/waifuguild [action: create|info|join|leave|deposit|members|leaderboard] [name] [amount]',
+      usage:
+        '/waifuguild [action: create|info|join|leave|deposit|members|leaderboard] [name] [amount]',
       examples: [
         '/waifuguild action:create name:"Starlight Order"',
         '/waifuguild action:info',
@@ -64,9 +62,7 @@ export function createGuildCommand(services: BotServices): Command {
 
       const rawArgs = ctx.options.getRawArgs?.() ?? [];
       const action =
-        ctx.options.getString('action')?.toLowerCase() ??
-        rawArgs[0]?.toLowerCase() ??
-        'info';
+        ctx.options.getString('action')?.toLowerCase() ?? rawArgs[0]?.toLowerCase() ?? 'info';
 
       switch (action) {
         case 'create': {
@@ -76,7 +72,8 @@ export function createGuildCommand(services: BotServices): Command {
 
           if (!rawName) {
             await ctx.reply({
-              content: '❌ Please specify a guild name: `/waifuguild action:create name:<guild_name>`',
+              content:
+                '❌ Please specify a guild name: `/waifuguild action:create name:<guild_name>`',
               ephemeral: true,
             });
             return;
@@ -100,7 +97,11 @@ export function createGuildCommand(services: BotServices): Command {
               .addFields(
                 { name: 'Guild ID', value: `\`${guild.id}\``, inline: true },
                 { name: 'Level', value: `${guild.level}`, inline: true },
-                { name: 'Guild Bank', value: `${guild.guildBank.toLocaleString()} Credits`, inline: true },
+                {
+                  name: 'Guild Bank',
+                  value: `${guild.guildBank.toLocaleString()} Credits`,
+                  inline: true,
+                },
               )
               .setFooter({ text: 'WaifuGuilds Subsystem • Ririko AI 2.0' })
               .setTimestamp();
@@ -120,7 +121,8 @@ export function createGuildCommand(services: BotServices): Command {
 
           if (!targetName) {
             await ctx.reply({
-              content: '❌ Please specify the guild name or ID: `/waifuguild action:join name:<guild_name>`',
+              content:
+                '❌ Please specify the guild name or ID: `/waifuguild action:join name:<guild_name>`',
               ephemeral: true,
             });
             return;
@@ -172,12 +174,12 @@ export function createGuildCommand(services: BotServices): Command {
 
         case 'deposit': {
           const amount =
-            ctx.options.getInteger('amount') ??
-            (rawArgs[1] ? parseInt(rawArgs[1], 10) : NaN);
+            ctx.options.getInteger('amount') ?? (rawArgs[1] ? parseInt(rawArgs[1], 10) : NaN);
 
           if (isNaN(amount) || amount <= 0) {
             await ctx.reply({
-              content: '❌ Please specify a positive credit amount: `/waifuguild action:deposit amount:<number>`',
+              content:
+                '❌ Please specify a positive credit amount: `/waifuguild action:deposit amount:<number>`',
               ephemeral: true,
             });
             return;
@@ -205,8 +207,7 @@ export function createGuildCommand(services: BotServices): Command {
 
         case 'members': {
           const targetName =
-            ctx.options.getString('name') ??
-            (rawArgs[1] ? rawArgs.slice(1).join(' ') : undefined);
+            ctx.options.getString('name') ?? (rawArgs[1] ? rawArgs.slice(1).join(' ') : undefined);
 
           try {
             const details = targetName
@@ -250,13 +251,15 @@ export function createGuildCommand(services: BotServices): Command {
 
             if (guilds.length === 0) {
               await ctx.reply({
-                content: '🏰 No WaifuGuilds have been established yet! Be the first with `/waifuguild action:create`.',
+                content:
+                  '🏰 No WaifuGuilds have been established yet! Be the first with `/waifuguild action:create`.',
               });
               return;
             }
 
             const lines = guilds.map((g, idx) => {
-              const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `\`#${idx + 1}\``;
+              const medal =
+                idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `\`#${idx + 1}\``;
               return `${medal} **${g.name}** — Lv.${g.level} | ⚡ ${g.guildXp.toLocaleString()} XP | 🪙 ${g.guildBank.toLocaleString()} Credits`;
             });
 
@@ -278,8 +281,7 @@ export function createGuildCommand(services: BotServices): Command {
         case 'info':
         default: {
           const targetName =
-            ctx.options.getString('name') ??
-            (rawArgs[1] ? rawArgs.slice(1).join(' ') : undefined);
+            ctx.options.getString('name') ?? (rawArgs[1] ? rawArgs.slice(1).join(' ') : undefined);
 
           try {
             const details = targetName
@@ -311,7 +313,9 @@ export function createGuildCommand(services: BotServices): Command {
                   `⚡ **XP Progress:** ${guild.guildXp.toLocaleString()} / ${xpToNextLevel.toLocaleString()} XP (${xpPct}%)\n` +
                   `\`[${progressBar}]\``,
               )
-              .setFooter({ text: `Guild ID: ${guild.id} • Founded ${guild.createdAt.toLocaleDateString()}` })
+              .setFooter({
+                text: `Guild ID: ${guild.id} • Founded ${guild.createdAt.toLocaleDateString()}`,
+              })
               .setTimestamp();
 
             await ctx.reply({ embeds: [embed] });

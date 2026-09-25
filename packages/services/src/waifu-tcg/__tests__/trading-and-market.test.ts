@@ -462,7 +462,11 @@ describe('TradeService & MarketService (TASK-1051)', () => {
     }
 
     it('refuses to list a card with gear and names the occupied slots', async () => {
-      const card = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
+      const card = await cardRepo.createUserCard({
+        userId: 'user-alice',
+        cardId: 'base-card-fire',
+        serialNumber: 1,
+      });
       await equipGear('user-alice', card.id, 'WEAPON');
       await equipGear('user-alice', card.id, 'RING');
 
@@ -473,17 +477,33 @@ describe('TradeService & MarketService (TASK-1051)', () => {
     });
 
     it('lists the card once its gear is unequipped', async () => {
-      const card = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
+      const card = await cardRepo.createUserCard({
+        userId: 'user-alice',
+        cardId: 'base-card-fire',
+        serialNumber: 1,
+      });
       await equipGear('user-alice', card.id);
       await inventoryRepo.unequipAllForUser('user-alice', card.id);
 
-      const listing = await marketService.listCard({ sellerUserId: 'user-alice', userCardId: card.id, price: 1000 });
+      const listing = await marketService.listCard({
+        sellerUserId: 'user-alice',
+        userCardId: card.id,
+        price: 1000,
+      });
       expect(listing.status).toBe('ACTIVE');
     });
 
     it('refuses a purchase when a listed card still carries gear (listing made before the lock)', async () => {
-      const card = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
-      const listing = await marketService.listCard({ sellerUserId: 'user-alice', userCardId: card.id, price: 1000 });
+      const card = await cardRepo.createUserCard({
+        userId: 'user-alice',
+        cardId: 'base-card-fire',
+        serialNumber: 1,
+      });
+      const listing = await marketService.listCard({
+        sellerUserId: 'user-alice',
+        userCardId: card.id,
+        price: 1000,
+      });
       await equipGear('user-alice', card.id);
 
       await expect(
@@ -494,22 +514,42 @@ describe('TradeService & MarketService (TASK-1051)', () => {
     });
 
     it('refuses to offer or request a card with gear in a trade', async () => {
-      const aliceCard = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
-      const bobCard = await cardRepo.createUserCard({ userId: 'user-bob', cardId: 'base-card-ice', serialNumber: 2 });
+      const aliceCard = await cardRepo.createUserCard({
+        userId: 'user-alice',
+        cardId: 'base-card-fire',
+        serialNumber: 1,
+      });
+      const bobCard = await cardRepo.createUserCard({
+        userId: 'user-bob',
+        cardId: 'base-card-ice',
+        serialNumber: 2,
+      });
       await equipGear('user-alice', aliceCard.id);
       await equipGear('user-bob', bobCard.id, 'ARMOR');
 
       await expect(
-        tradeService.createProposal({ senderUserId: 'user-alice', receiverUserId: 'user-bob', offeredCardIds: [aliceCard.id] }),
+        tradeService.createProposal({
+          senderUserId: 'user-alice',
+          receiverUserId: 'user-bob',
+          offeredCardIds: [aliceCard.id],
+        }),
       ).rejects.toThrow(/Flame Dancer .*Weapon.*can be traded/);
       await expect(
-        tradeService.createProposal({ senderUserId: 'user-alice', receiverUserId: 'user-bob', requestedCardIds: [bobCard.id] }),
+        tradeService.createProposal({
+          senderUserId: 'user-alice',
+          receiverUserId: 'user-bob',
+          requestedCardIds: [bobCard.id],
+        }),
       ).rejects.toThrow(/Requested card Frost Archer .*Armor.*Ask its owner/);
       expect((await cardRepo.findUserCardById(aliceCard.id))?.state).toBe('IDLE');
     });
 
     it('refuses to accept a trade whose card gained gear after the proposal', async () => {
-      const aliceCard = await cardRepo.createUserCard({ userId: 'user-alice', cardId: 'base-card-fire', serialNumber: 1 });
+      const aliceCard = await cardRepo.createUserCard({
+        userId: 'user-alice',
+        cardId: 'base-card-fire',
+        serialNumber: 1,
+      });
       const trade = await tradeService.createProposal({
         senderUserId: 'user-alice',
         receiverUserId: 'user-bob',
@@ -517,7 +557,9 @@ describe('TradeService & MarketService (TASK-1051)', () => {
       });
       await equipGear('user-alice', aliceCard.id);
 
-      await expect(tradeService.acceptTrade(trade.id, 'user-bob')).rejects.toThrow(/still has gear equipped/);
+      await expect(tradeService.acceptTrade(trade.id, 'user-bob')).rejects.toThrow(
+        /still has gear equipped/,
+      );
       expect((await cardRepo.findUserCardById(aliceCard.id))?.userId).toBe('user-alice');
     });
   });

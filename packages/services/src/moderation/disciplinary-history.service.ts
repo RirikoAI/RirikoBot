@@ -1,8 +1,4 @@
-import {
-  EmbedBuilder,
-  type User,
-  type GuildMember,
-} from 'discord.js';
+import { EmbedBuilder, type User, type GuildMember } from 'discord.js';
 import type {
   ModerationRepository,
   ModerationCase,
@@ -131,8 +127,7 @@ export class DisciplinaryHistoryService {
       const recentCases = summary.cases
         .slice(0, 5)
         .map(
-          (c) =>
-            `• **Case #${c.caseNumber}** [${c.type}]: ${c.reason} (<@${c.moderatorUserId}>)`,
+          (c) => `• **Case #${c.caseNumber}** [${c.type}]: ${c.reason} (<@${c.moderatorUserId}>)`,
         )
         .join('\n');
       embed.addFields({

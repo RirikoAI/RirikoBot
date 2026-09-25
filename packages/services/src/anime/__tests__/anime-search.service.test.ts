@@ -206,7 +206,9 @@ describe('AnimeSearchService', () => {
 
 describe('toPlainText', () => {
   it('strips markup, decodes entities and keeps spoilers hidden', () => {
-    expect(toPlainText('<i>Hi</i> &amp; __bold__<br><br><br><br>~!twist!~')).toBe('Hi & bold\n\n||twist||');
+    expect(toPlainText('<i>Hi</i> &amp; __bold__<br><br><br><br>~!twist!~')).toBe(
+      'Hi & bold\n\n||twist||',
+    );
     expect(toPlainText('   ')).toBeNull();
     expect(toPlainText(null)).toBeNull();
   });

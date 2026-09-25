@@ -75,7 +75,9 @@ export class MarketService {
     }
 
     if (card.isFavorite) {
-      throw new Error(`Card ${userCardId} is marked as favorite. Unfavorite it before listing on the market.`);
+      throw new Error(
+        `Card ${userCardId} is marked as favorite. Unfavorite it before listing on the market.`,
+      );
     }
 
     const cardName = (await this.waifuCardRepo.findById(card.cardId))?.name;
@@ -103,7 +105,9 @@ export class MarketService {
     });
   }
 
-  async buyListing(params: BuyListingParams): Promise<{ listing: MarketListing; netPaid: number; taxDeducted: number }> {
+  async buyListing(
+    params: BuyListingParams,
+  ): Promise<{ listing: MarketListing; netPaid: number; taxDeducted: number }> {
     const { listingId, buyerUserId } = params;
 
     const listing = await this.marketRepo.findById(listingId);
@@ -219,7 +223,12 @@ export class MarketService {
     page?: number;
     limit?: number;
     sellerUserId?: string;
-  }): Promise<{ listings: EnrichedMarketListing[]; total: number; page: number; totalPages: number }> {
+  }): Promise<{
+    listings: EnrichedMarketListing[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
     const page = Math.max(1, options?.page ?? 1);
     const limit = Math.min(50, Math.max(1, options?.limit ?? 10));
     const offset = (page - 1) * limit;

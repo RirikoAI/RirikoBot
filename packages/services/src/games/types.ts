@@ -1,12 +1,7 @@
 export type GameType = 'TICTACTOE' | 'RPS' | 'HIGHLOW' | 'COINFLIP' | 'DICE';
 
 export type GameState =
-  | 'PENDING_OPPONENT'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'TIED'
-  | 'TIMEOUT'
-  | 'CANCELLED';
+  'PENDING_OPPONENT' | 'IN_PROGRESS' | 'COMPLETED' | 'TIED' | 'TIMEOUT' | 'CANCELLED';
 
 export interface Player {
   id: string;

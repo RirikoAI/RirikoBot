@@ -323,7 +323,11 @@ export async function createBotServices(
   const gameItemRepo = new GameItemRepository(db);
   const userInventoryItemRepo = new UserInventoryItemRepository(db);
   const itemGrantService = new ItemGrantService(gameItemRepo, userInventoryItemRepo);
-  const dismantleService = new CardDismantleService(waifuCardRepo, userInventoryItemRepo, itemGrantService);
+  const dismantleService = new CardDismantleService(
+    waifuCardRepo,
+    userInventoryItemRepo,
+    itemGrantService,
+  );
   const cardImageService = new CardImageService();
   const bossImageService = new BossImageService(waifuAssetRepo);
   const musicPlayer = new MusicPlayerService({
@@ -606,11 +610,7 @@ export async function createBotServices(
     moderationActionService,
     eventBus,
   );
-  const purgeService = new PurgeService(
-    permissionService,
-    moderationRepo,
-    eventBus,
-  );
+  const purgeService = new PurgeService(permissionService, moderationRepo, eventBus);
   const autoModService = new AutoModService(
     moderationRepo,
     moderationActionService,
@@ -622,11 +622,7 @@ export async function createBotServices(
   eventBus.on('guild:configChanged', ({ guildId, module }) => {
     if (module === 'automod') autoModService.invalidateRuleCache(guildId);
   });
-  const antiRaidService = new AntiRaidService(
-    moderationRepo,
-    moderationActionService,
-    eventBus,
-  );
+  const antiRaidService = new AntiRaidService(moderationRepo, moderationActionService, eventBus);
 
   const streamDispatcher = discordClient
     ? new StreamNotificationDispatcher(discordClient, streamRepo)
@@ -695,7 +691,11 @@ export async function createBotServices(
         if (channel && channel.isTextBased() && 'messages' in channel) {
           const msg = await (channel as any).messages.fetch(giveaway.messageId).catch(() => null);
           const entryCount = await giveawayRepo.getEntryCount(giveaway.id);
-          const embedData = giveawayEngine.formatGiveawayEmbed(giveaway, entryCount, result.winnerIds);
+          const embedData = giveawayEngine.formatGiveawayEmbed(
+            giveaway,
+            entryCount,
+            result.winnerIds,
+          );
           const buttonData = giveawayEngine.formatGiveawayButton(giveaway.id, true, entryCount);
           const embed = new EmbedBuilder(embedData);
           const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -710,17 +710,22 @@ export async function createBotServices(
             await msg.edit({ embeds: [embed], components: [row] }).catch(() => null);
           }
 
-          const winnerText = result.winnerIds.length > 0
-            ? result.winnerIds.map((id) => `<@${id}>`).join(', ')
-            : 'None (No eligible entries)';
+          const winnerText =
+            result.winnerIds.length > 0
+              ? result.winnerIds.map((id) => `<@${id}>`).join(', ')
+              : 'None (No eligible entries)';
           if (result.winnerIds.length > 0) {
-            await (channel as any).send({
-              content: `🎉 Congratulations ${winnerText}! You won **${giveaway.prize}**!\n${msg ? msg.url : ''}`,
-            }).catch(() => null);
+            await (channel as any)
+              .send({
+                content: `🎉 Congratulations ${winnerText}! You won **${giveaway.prize}**!\n${msg ? msg.url : ''}`,
+              })
+              .catch(() => null);
           } else {
-            await (channel as any).send({
-              content: `⚠️ Giveaway for **${giveaway.prize}** has ended with no eligible winners.`,
-            }).catch(() => null);
+            await (channel as any)
+              .send({
+                content: `⚠️ Giveaway for **${giveaway.prize}** has ended with no eligible winners.`,
+              })
+              .catch(() => null);
           }
         }
       } catch (err) {
@@ -735,7 +740,11 @@ export async function createBotServices(
   const rpsEngine = new RpsEngine(gameSessionManager);
   const combatSimulator = new CombatSimulator({ maxTurns: 25 });
   const rewardPayout = { economyRepo, grants: itemGrantService };
-  const expeditionService = new ExpeditionService(playerEnergyRepo, rewardPayout, energyLifecycleService);
+  const expeditionService = new ExpeditionService(
+    playerEnergyRepo,
+    rewardPayout,
+    energyLifecycleService,
+  );
   const bossRaidService = new BossRaidService(
     playerEnergyRepo,
     combatSimulator,
@@ -751,7 +760,12 @@ export async function createBotServices(
   const questService = new QuestService();
 
   const enhancementService = new EnhancementService(gameItemRepo, userInventoryItemRepo);
-  const loadoutService = new LoadoutService(gameItemRepo, userInventoryItemRepo, waifuCardRepo, enhancementService);
+  const loadoutService = new LoadoutService(
+    gameItemRepo,
+    userInventoryItemRepo,
+    waifuCardRepo,
+    enhancementService,
+  );
   const consumableService = new ConsumableService(
     gameItemRepo,
     userInventoryItemRepo,
@@ -787,8 +801,20 @@ export async function createBotServices(
 
   const cardTradeRepo = new CardTradeRepository(db);
   const marketRepo = new MarketListingRepository(db);
-  const tradeService = new TradeService(cardTradeRepo, waifuCardRepo, economyRepo, db, userInventoryItemRepo);
-  const marketService = new MarketService(marketRepo, waifuCardRepo, economyRepo, db, userInventoryItemRepo);
+  const tradeService = new TradeService(
+    cardTradeRepo,
+    waifuCardRepo,
+    economyRepo,
+    db,
+    userInventoryItemRepo,
+  );
+  const marketService = new MarketService(
+    marketRepo,
+    waifuCardRepo,
+    economyRepo,
+    db,
+    userInventoryItemRepo,
+  );
 
   const waifuGuildRepo = new WaifuGuildRepository(db);
   const achievementRepo = new AchievementRepository(db);

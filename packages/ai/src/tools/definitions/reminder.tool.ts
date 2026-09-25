@@ -27,7 +27,8 @@ export class ReminderTool implements SafeTool<ReminderCreateArgs, ReminderCreate
       properties: {
         timeString: {
           type: 'string',
-          description: 'When to remind, e.g. "10m", "2 hours", "tomorrow 9am", "next friday at 8pm".',
+          description:
+            'When to remind, e.g. "10m", "2 hours", "tomorrow 9am", "next friday at 8pm".',
         },
         message: {
           type: 'string',
@@ -47,7 +48,10 @@ export class ReminderTool implements SafeTool<ReminderCreateArgs, ReminderCreate
     this.scheduler = scheduler;
   }
 
-  async execute(args: ReminderCreateArgs, context: ToolExecutionContext): Promise<ReminderCreateResult> {
+  async execute(
+    args: ReminderCreateArgs,
+    context: ToolExecutionContext,
+  ): Promise<ReminderCreateResult> {
     if (!this.scheduler) {
       return this.failed(args, 'Reminders are not available right now.');
     }
@@ -63,7 +67,10 @@ export class ReminderTool implements SafeTool<ReminderCreateArgs, ReminderCreate
       };
     } catch (err) {
       const reason =
-        err && typeof err === 'object' && 'userMessage' in err && typeof err.userMessage === 'string'
+        err &&
+        typeof err === 'object' &&
+        'userMessage' in err &&
+        typeof err.userMessage === 'string'
           ? err.userMessage
           : 'The reminder could not be saved.';
       return this.failed(args, reason);
@@ -71,6 +78,12 @@ export class ReminderTool implements SafeTool<ReminderCreateArgs, ReminderCreate
   }
 
   private failed(args: ReminderCreateArgs, reason: string): ReminderCreateResult {
-    return { scheduled: false, message: args.message, triggerTimeIso: '', relativeDescription: '', error: reason };
+    return {
+      scheduled: false,
+      message: args.message,
+      triggerTimeIso: '',
+      relativeDescription: '',
+      error: reason,
+    };
   }
 }

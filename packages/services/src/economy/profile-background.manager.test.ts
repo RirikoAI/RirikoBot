@@ -262,9 +262,7 @@ describe('ProfileBackgroundManager', () => {
     });
 
     it('should automatically create user record if user does not exist in database yet', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '93.184.216.34', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
 
       const testBuffer = createValidPngBuffer(800, 300);
 
@@ -275,7 +273,10 @@ describe('ProfileBackgroundManager', () => {
           'content-length': String(testBuffer.length),
         }),
         arrayBuffer: async () =>
-          testBuffer.buffer.slice(testBuffer.byteOffset, testBuffer.byteOffset + testBuffer.byteLength),
+          testBuffer.buffer.slice(
+            testBuffer.byteOffset,
+            testBuffer.byteOffset + testBuffer.byteLength,
+          ),
       } as Response);
 
       const newUserId = '1257377848671600722';
@@ -357,9 +358,7 @@ describe('ProfileBackgroundManager', () => {
     });
 
     it('should reject hostnames that resolve via DNS to private or loopback IPs', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '192.168.1.50', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '192.168.1.50', family: 4 }] as never);
 
       await expect(
         manager.validateUrlSecurity('https://attacker-domain.com/image.png'),
@@ -367,9 +366,7 @@ describe('ProfileBackgroundManager', () => {
     });
 
     it('should accept hostnames resolving to public IPs', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '93.184.216.34', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
 
       const res = await manager.validateUrlSecurity('https://example.com/image.png');
       expect(res.resolvedIps).toEqual(['93.184.216.34']);
@@ -401,9 +398,7 @@ describe('ProfileBackgroundManager', () => {
 
   describe('downloadImage', () => {
     it('should download and return buffer for valid response', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '93.184.216.34', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
 
       const testBuffer = createValidPngBuffer(800, 300);
 
@@ -413,7 +408,11 @@ describe('ProfileBackgroundManager', () => {
           'content-type': 'image/png',
           'content-length': String(testBuffer.length),
         }),
-        arrayBuffer: async () => testBuffer.buffer.slice(testBuffer.byteOffset, testBuffer.byteOffset + testBuffer.byteLength),
+        arrayBuffer: async () =>
+          testBuffer.buffer.slice(
+            testBuffer.byteOffset,
+            testBuffer.byteOffset + testBuffer.byteLength,
+          ),
       } as Response);
 
       const res = await manager.downloadImage('https://example.com/profile-bg.png');
@@ -422,9 +421,7 @@ describe('ProfileBackgroundManager', () => {
     });
 
     it('should reject non-image content-type', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '93.184.216.34', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: true,
@@ -439,9 +436,7 @@ describe('ProfileBackgroundManager', () => {
     });
 
     it('should reject images exceeding max file size limit (5MB)', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '93.184.216.34', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: true,
@@ -470,9 +465,7 @@ describe('ProfileBackgroundManager', () => {
     });
 
     it('should successfully validate, download, cache and set background in database', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '93.184.216.34', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
 
       const testBuffer = createValidPngBuffer(800, 300);
 
@@ -482,7 +475,11 @@ describe('ProfileBackgroundManager', () => {
           'content-type': 'image/png',
           'content-length': String(testBuffer.length),
         }),
-        arrayBuffer: async () => testBuffer.buffer.slice(testBuffer.byteOffset, testBuffer.byteOffset + testBuffer.byteLength),
+        arrayBuffer: async () =>
+          testBuffer.buffer.slice(
+            testBuffer.byteOffset,
+            testBuffer.byteOffset + testBuffer.byteLength,
+          ),
       } as Response);
 
       const result = await manager.setBackground({
@@ -508,9 +505,7 @@ describe('ProfileBackgroundManager', () => {
     });
 
     it('should consume voucher when consumeToken is requested and user has voucher', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '93.184.216.34', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
 
       const testBuffer = createValidPngBuffer(600, 250);
 
@@ -520,7 +515,11 @@ describe('ProfileBackgroundManager', () => {
           'content-type': 'image/png',
           'content-length': String(testBuffer.length),
         }),
-        arrayBuffer: async () => testBuffer.buffer.slice(testBuffer.byteOffset, testBuffer.byteOffset + testBuffer.byteLength),
+        arrayBuffer: async () =>
+          testBuffer.buffer.slice(
+            testBuffer.byteOffset,
+            testBuffer.byteOffset + testBuffer.byteLength,
+          ),
       } as Response);
 
       // Add voucher to user inventory
@@ -557,9 +556,7 @@ describe('ProfileBackgroundManager', () => {
     });
 
     it('should fail gracefully if remote image download fails', async () => {
-      vi.spyOn(dns, 'lookup').mockResolvedValue([
-        { address: '93.184.216.34', family: 4 },
-      ] as never);
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: false,

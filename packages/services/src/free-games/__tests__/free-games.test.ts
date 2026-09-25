@@ -16,9 +16,7 @@ describe('EpicGamesProvider', () => {
                 id: 'game-1',
                 title: 'Test Free Game',
                 productSlug: 'test-free-game',
-                keyImages: [
-                  { type: 'OfferImageWide', url: 'https://example.com/epic-image.jpg' },
-                ],
+                keyImages: [{ type: 'OfferImageWide', url: 'https://example.com/epic-image.jpg' }],
                 price: {
                   totalPrice: {
                     fmtPrice: { originalPrice: '$29.99' },
