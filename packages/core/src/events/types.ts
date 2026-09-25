@@ -22,6 +22,12 @@ export type CoreEvents = {
     guildId: string;
     name: string;
   };
+  /** A module's settings were changed outside this process (dashboard or CLI). */
+  'guild:configChanged': {
+    guildId: string;
+    module: string;
+    version: number;
+  };
 
   // Command execution
   'command:executed': {

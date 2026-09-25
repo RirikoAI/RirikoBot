@@ -291,6 +291,7 @@ export async function main(): Promise<void> {
       services.streamWatcher.stop();
       services.freeGamesEngine.stop();
       services.giveawayEngine.stop();
+      services.guildConfigWatcher.stop();
       services.autoRoleService.stopSweeper();
       await bot.gateway.destroy();
       console.log('✓ Bot gateway cleanly disconnected. Goodbye!');
@@ -339,6 +340,7 @@ export async function main(): Promise<void> {
       services.giveawayEngine.start();
       services.autoRoleService.startSweeper(bot.client);
       services.reminderScheduler?.start();
+      services.guildConfigWatcher.start();
       console.log('📡 Stream Watcher, Free Games Announcer, Giveaways, AutoRole & Reminder engines active!');
 
       // Clean up orphaned dynamic voice channels across guilds

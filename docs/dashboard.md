@@ -72,11 +72,24 @@ Server Action
  ├── requireGuildAccess(guildId) or owner guard
  ├── passkey step-up check (sensitive writes only)
  ├── Zod parse with the shared schema from @ririko/core
- └── GuildConfigService (packages/services)
+ └── GuildConfigService (packages/services), in one transaction
       ├── write through the existing repositories
-      ├── invalidate the GuildSettingsService cache
+      ├── bump guild_config_versions (guild, module)
       └── write audit_logs (actor, IP, user agent, before/after field diffs)
+
+Bot process
+ └── GuildConfigWatcher polls guild_config_versions every 5 seconds
+      └── emits guild:configChanged on the EventBus; each service evicts its cached settings
 ```
+
+The dashboard and CLI run in separate processes from the bot, so they cannot clear the bot's in-memory caches directly (CHORE-1101). The watcher compares versions over a 60-second overlap window, so a second write in the same millisecond, or a write committed after a newer one, is still picked up. A module whose bot-side service caches settings must subscribe to `guild:configChanged` when its dashboard page is added.
+
+### 3.4. Adding a Settings Page
+1. Add the module's strict schema to `GuildConfigSchemas` in `packages/core/src/config/guild-config.ts` (only keys the bot reads) and its read/write store to `GuildConfigService` in `packages/services/src/guild/guild-config.service.ts`.
+2. If a bot service caches those settings, subscribe it to `guild:configChanged` in `apps/bot/src/services.ts`.
+3. Add `app/dashboard/[guildId]/<module>/actions.ts` (`'use server'`) whose action returns `saveGuildSettings(guildId, '<module>', pickFormFields(formData, [...]))`. That helper runs the Origin check, `requireGuildAccess`, validation, the audited write and `revalidatePath`.
+4. Add `page.tsx` that calls `requireGuildAccess(guildId)`, reads `guildConfig.get(guildId, '<module>')` and renders `SettingsForm` with `TextField`, `SelectField`, `ChannelSelectField` or `RoleSelectField`. Field errors and saved values come back through `useActionState`.
+5. Add the page to `GUILD_NAV_ITEMS` in `apps/web/src/lib/dashboard-nav.ts`.
 
 ---
 
@@ -133,7 +146,7 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 ## 6. Shared Zod Validation & Dashboard-to-CLI Parity
 
 In compliance with Sections 43 and 72 of `BLUEPRINT.md`:
-- Configuration schemas are defined once in `packages/core` using **Zod**, and only for keys the bot reads.
+- Configuration schemas are defined once in `packages/core/src/config/guild-config.ts` (`GuildConfigSchemas`, one strict Zod object per module) and only for keys the bot reads. The `/prefix` and `/timezone` commands validate with the same `PrefixSchema` and `TimezoneSchema`.
 - Both the **Web Dashboard** and the **CLI** invoke the exact same application services (`GuildConfigService`) and validation schemas.
 - Any change that can be configured via the web UI can also be executed via `ririko guild:config <guild_id> [key] [value]`: no key lists all keys, a key alone reads its value, and a key with a value sets it. CLI changes are written to `audit_logs` with a CLI actor marker.
 

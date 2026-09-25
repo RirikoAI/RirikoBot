@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ResetConfigShape } from '../time/reset-config.js';
+import { DEFAULT_COMMAND_PREFIX, PrefixSchema } from './guild-config.js';
 
 export const NodeEnvSchema = z.enum(['development', 'production', 'test']).default('development');
 export type NodeEnv = z.infer<typeof NodeEnvSchema>;
@@ -29,6 +30,7 @@ const BaseAppConfigSchema = z.object({
     .min(1, 'DISCORD_CLIENT_ID cannot be empty'),
   DISCORD_CLIENT_SECRET: z.string().optional(),
   DISCORD_DEV_GUILD_ID: z.string().optional(),
+  DEFAULT_PREFIX: PrefixSchema.default(DEFAULT_COMMAND_PREFIX),
 
   // Dual-Dialect Database
   DATABASE_URL: z.string().default('./data/ririko.sqlite'),
