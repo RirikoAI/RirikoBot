@@ -231,6 +231,7 @@ describe('Dual-Dialect Complete Schema Catalog (70+ Tables)', () => {
           timezone TEXT NOT NULL DEFAULT 'UTC',
           ai_channel_id TEXT,
           log_channel_id TEXT,
+          escalation_steps TEXT,
           music_channel_id TEXT,
           welcomer_channel_id TEXT,
           welcomer_enabled INTEGER NOT NULL DEFAULT 0,

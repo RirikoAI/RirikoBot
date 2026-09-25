@@ -78,10 +78,17 @@ describe('Moderation Commands Suite', () => {
         moderationRepo: {
           getNotesByUser: vi.fn().mockResolvedValue([]),
           upsertRule: vi.fn().mockResolvedValue({}),
+          getRuleByType: vi.fn().mockResolvedValue(null),
         } as any,
         autoModService: {
           getGuildRuleConfigs: vi.fn().mockResolvedValue(new Map()),
           invalidateRuleCache: vi.fn(),
+          getDefaultConfig: vi.fn((ruleType: string) => ({
+            ruleType,
+            isEnabled: true,
+            action: 'DELETE',
+            ...(ruleType === 'MENTION_SPAM' ? { threshold: 5 } : {}),
+          })),
         } as any,
         antiRaidService: {
           getConfig: vi.fn().mockReturnValue({
@@ -260,6 +267,36 @@ describe('Moderation Commands Suite', () => {
           embeds: expect.any(Array),
         }),
       );
+    });
+
+    it('automod enable creates a new rule with the rule defaults, not the repository ones (TASK-1142)', async () => {
+      const automodCmd = commands.find((c) => c.metadata.name === 'automod')!;
+      const ctx = (action: string): any => ({
+        guild: { id: 'guild-1', name: 'Test Server' },
+        options: {
+          getString: vi.fn((key: string) => (key === 'action' ? action : 'MENTION_SPAM')),
+        },
+        reply: vi.fn(),
+      });
+      const repo = mockServices.moderationRepo as any;
+
+      await automodCmd.execute(ctx('enable'));
+      expect(repo.upsertRule).toHaveBeenLastCalledWith({
+        guildId: 'guild-1',
+        ruleType: 'MENTION_SPAM',
+        isEnabled: true,
+        action: 'DELETE',
+        threshold: 5,
+      });
+
+      repo.getRuleByType.mockResolvedValue({ action: 'BAN', threshold: 9 });
+      await automodCmd.execute(ctx('disable'));
+      expect(repo.upsertRule).toHaveBeenLastCalledWith({
+        guildId: 'guild-1',
+        ruleType: 'MENTION_SPAM',
+        isEnabled: false,
+      });
+      expect(mockServices.autoModService!.invalidateRuleCache).toHaveBeenCalledWith('guild-1');
     });
   });
 });

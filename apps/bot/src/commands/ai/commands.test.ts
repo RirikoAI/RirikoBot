@@ -175,6 +175,7 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
         welcome_channel_id TEXT,
         leave_channel_id TEXT,
         log_channel_id TEXT,
+        escalation_steps TEXT,
         autorole_id TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL

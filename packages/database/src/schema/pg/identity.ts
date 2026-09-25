@@ -8,6 +8,7 @@ import {
   jsonb,
   primaryKey,
 } from 'drizzle-orm/pg-core';
+import type { EscalationStep } from '@ririko/core';
 
 export const users = pgTable('users', {
   id: varchar('id', { length: 32 }).primaryKey(),
@@ -53,6 +54,8 @@ export const guildSettings = pgTable('guild_settings', {
   timezone: varchar('timezone', { length: 64 }).notNull().default('UTC'),
   aiChannelId: varchar('ai_channel_id', { length: 32 }),
   logChannelId: varchar('log_channel_id', { length: 32 }),
+  /** Warning escalation policy; null means the default policy. */
+  escalationSteps: jsonb('escalation_steps').$type<EscalationStep[]>(),
   musicChannelId: varchar('music_channel_id', { length: 32 }),
   welcomerChannelId: varchar('welcomer_channel_id', { length: 32 }),
   welcomerEnabled: boolean('welcomer_enabled').notNull().default(false),

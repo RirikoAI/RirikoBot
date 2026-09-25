@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   revalidatePath: vi.fn(),
   after: [] as Array<() => unknown>,
   guildSettingsChanged: vi.fn(),
+  requireStepUp: vi.fn(),
 }));
 
 vi.mock('next/headers', () => ({
@@ -17,6 +18,10 @@ vi.mock('next/headers', () => ({
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock('next/server', () => ({ after: (task: () => unknown) => mocks.after.push(task) }));
 vi.mock('./guilds/require-guild-access', () => ({ requireGuildAccess: mocks.requireGuildAccess }));
+vi.mock('./auth/session', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./auth/session')>()),
+  requireStepUp: mocks.requireStepUp,
+}));
 vi.mock('./services', () => ({
   getWebServices: async () => ({
     config: { DASHBOARD_URL: 'https://dash.example.com' },
@@ -25,7 +30,7 @@ vi.mock('./services', () => ({
   }),
 }));
 
-const { pickFormFields, saveGuildSettings } = await import('./settings-action');
+const { pickFormFields, readFormFields, saveGuildSettings } = await import('./settings-action');
 
 const GUILD = '100000000000000001';
 
@@ -113,6 +118,58 @@ describe('saveGuildSettings (TASK-1112)', () => {
       values: { prefix: ' ' },
     });
     expect(mocks.revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it('asks for a passkey check before a sensitive save, and writes nothing (TASK-1141)', async () => {
+    const session = { userId: 'user-1' };
+    mocks.requireGuildAccess.mockResolvedValue({ session });
+    mocks.requireStepUp.mockResolvedValue('passkey-check-required');
+    const patch = { escalationSteps: '[]' };
+
+    const state = await saveGuildSettings(GUILD, 'moderation', patch, { stepUp: true });
+
+    expect(mocks.requireStepUp).toHaveBeenCalledWith(session);
+    expect(state).toEqual({
+      status: 'error',
+      message: 'Confirm it is you with your passkey first.',
+      reason: 'passkey-check-required',
+      values: patch,
+    });
+    expect(mocks.update).not.toHaveBeenCalled();
+
+    mocks.requireStepUp.mockResolvedValue('passkey-required');
+    expect(await saveGuildSettings(GUILD, 'moderation', patch, { stepUp: true })).toMatchObject({
+      reason: 'passkey-required',
+    });
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+
+  it('saves a sensitive module after a recent passkey check, and skips the check otherwise', async () => {
+    mocks.requireStepUp.mockResolvedValue('ok');
+    mocks.update.mockResolvedValue({ values: { escalationSteps: [] }, changes: [] });
+    await saveGuildSettings(GUILD, 'moderation', { escalationSteps: '[]' }, { stepUp: true });
+    expect(mocks.update).toHaveBeenCalledTimes(1);
+
+    mocks.requireStepUp.mockClear();
+    await saveGuildSettings(GUILD, 'logging', { logChannelId: '' });
+    expect(mocks.requireStepUp).not.toHaveBeenCalled();
+  });
+});
+
+describe('readFormFields (TASK-1141)', () => {
+  it('reads text, list and checkbox fields', () => {
+    const form = new FormData();
+    form.set('action', 'WARN');
+    form.append('roles', '1');
+    form.append('roles', '2');
+    form.set('enabled', 'on');
+    expect(
+      readFormFields(form, {
+        text: ['action', 'missing'],
+        list: ['roles', 'channels'],
+        flag: ['enabled', 'other'],
+      }),
+    ).toEqual({ action: 'WARN', roles: ['1', '2'], channels: [], enabled: true, other: false });
   });
 });
 

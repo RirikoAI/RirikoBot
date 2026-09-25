@@ -98,10 +98,18 @@ The dashboard and CLI run in separate processes from the bot, so they cannot cle
 
 ### 3.4. Adding a Settings Page
 1. Add the module's strict schema to `GuildConfigSchemas` in `packages/core/src/config/guild-config.ts` (only keys the bot reads) and its read/write store to `GuildConfigService` in `packages/services/src/guild/guild-config.service.ts`.
+   - Build fields from the setting types in the same file, so the dashboard and the CLI share one parser: `FlagSetting` (booleans; the CLI may pass `on`/`off`), `IntSetting(min, max)`, `OptionalSnowflakeSetting` (an empty value clears it), `SnowflakeListSetting(max)` (the CLI passes IDs comma separated) and `JsonSetting(schema)` for lists of rows (the CLI and the form pass JSON text).
+   - Validation errors inside a list keep their row number (`Row 3: Timeout steps need a length.`).
 2. If a bot service caches those settings, subscribe it to `guild:configChanged` in `apps/bot/src/services.ts`.
-3. Add `app/dashboard/[guildId]/<module>/actions.ts` (`'use server'`) whose action returns `saveGuildSettings(guildId, '<module>', pickFormFields(formData, [...]))`. That helper runs `checkDashboardRequest` (Origin and rate limit), `requireGuildAccess`, validation, the audited write, `revalidatePath` and the log-channel change notice. Any other Server Action must call `checkDashboardRequest` and a guard itself, or the coverage test fails.
-4. Add `page.tsx` that calls `requireGuildAccess(guildId)`, reads `guildConfig.get(guildId, '<module>')` and renders `SettingsForm` with `TextField`, `SelectField`, `ChannelSelectField` or `RoleSelectField`. Field errors and saved values come back through `useActionState`.
-5. Add the page to `GUILD_NAV_ITEMS` in `apps/web/src/lib/dashboard-nav.ts`.
+3. Add `app/dashboard/[guildId]/<module>/actions.ts` (`'use server'`) whose action returns `saveGuildSettings(guildId, '<module>', fields)`.
+   - Read `fields` with `pickFormFields(formData, [...])` for text fields, or `readFormFields(formData, { text, list, flag })` when the form has lists or checkboxes.
+   - `saveGuildSettings` runs `checkDashboardRequest` (Origin and rate limit), `requireGuildAccess`, validation, the audited write, `revalidatePath` and the log-channel change notice.
+   - Sensitive modules (Section 2.3) pass `{ stepUp: true }`. Without a passkey check from the last five minutes nothing is written; the form offers "Confirm with passkey and save" and submits the same values again, or links to the Security page if the user has no passkey.
+   - Any other Server Action must call `checkDashboardRequest` and a guard itself, or the coverage test fails.
+4. Add `page.tsx` that calls `requireGuildAccess(guildId)`, reads `guildConfig.get(guildId, '<module>')` and renders `SettingsForm`. Field errors and saved values come back through `useActionState`.
+   - Fields: `TextField`, `NumberField`, `ToggleField`, `SelectField`, `ListField`, and the guild pickers `ChannelSelectField`, `RoleSelectField`, `ChannelListField` and `RoleListField`.
+   - For a custom client field, use `useSettingsField(name, description)` and `FieldNotes` from `components/settings-form.tsx` (see the escalation step builder).
+5. Add the page to `GUILD_NAV_ITEMS` in `apps/web/src/lib/dashboard-nav.ts` and its action to the expected entry points in `authorization-coverage.test.ts`.
 
 ---
 
@@ -111,7 +119,9 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 1. **Overview**: Live server stats (member count, active voice channels, command usage graphs, bot latency).
 2. **General**: Server prefix, default embed color, bot language, timezone.
 3. **Moderation**: Case logs, warning escalation policy builder, moderation history inspector.
+   - *Shipped in STORY-114:* the escalation policy builder. Steps are stored in `guild_settings.escalation_steps` (null means the default policy, an empty list turns escalation off), and saving needs a fresh passkey check. The case log and history inspector are STORY-113.
 4. **AutoMod**: Toggles and threshold sliders for invite spam, phishing shields, caps lock, and mention limits.
+   - *Shipped in STORY-114:* per rule (phishing shield, invite filter, mention spam, burst spam) an on/off switch, the action (delete, or delete plus warn, 10-minute timeout, kick or ban), the mention or message limit, and exempt roles and channels, stored in `moderation_rules`. There is no caps-lock rule, so the page has none. Warnings from AutoMod count toward the escalation policy.
 5. **Music**: Default volume, DJ role picker, music channel binding, audio filter presets.
 6. **AI Chatbot**: Personality prompt editor, model selection (Gemini / OpenAI / Ollama), tool toggles.
 7. **Image Generation**: Provider selector, daily user quota limits, style presets.
@@ -135,13 +145,14 @@ The dashboard provides dedicated management views for all 20+ bot modules:
     - **Achievement Manager** (*owner console* for edits, `game_achievements` is global): Live inspector for achievement completion telemetry, active reward tables, and toggleable seasonal achievements.
 11. **Games**: Enable/disable specific mini-games, wager limits, cooldown sliders.
 12. **Giveaways**: Active giveaway list, winner reroll buttons, historical log.
-13. **Reaction Roles**: Visual message builder and role mapping manager.
-14. **Auto Voice**: Join-to-create channel assigner, user limit, bitrate presets.
+13. **Reaction Roles**: Visual message builder and role mapping manager (STORY-164).
+14. **Auto Voice**: Join-to-create channel assigner, user limit, bitrate presets (STORY-164). The bot deletes every empty voice channel in a hub's category, so the page must tell users to keep hubs in their own category.
 15. **Stream Alerts**: Streamer subscription list (Twitch/YouTube/TikTok), announcement templates, mention roles.
 16. **Free Games**: Epic/Steam/GOG announcement channels and notification ping roles.
 17. **Welcome & Farewell**: Interactive canvas preview card editor with custom background uploads.
 18. **Logging**: Channel bindings for message edits, deletes, voice joins, and role updates.
-19. **Command Overrides**: Enable/disable specific commands or limit them to staff roles.
+   - *Shipped in STORY-114:* the one channel the bot has, `guild_settings.log_channel_id`. It receives moderation cases, anti-raid alerts and dashboard change notices. The bot writes no message, voice or role logs, so per-event bindings would be placeholders.
+19. **Command Overrides**: Enable/disable specific commands or limit them to staff roles (STORY-163; the bot does not read `command_settings` yet).
 20. **Integrations & Secrets**: Third-party API status (`Configured ✓`). Secrets are **never** displayed.
 
 ---
@@ -199,9 +210,11 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-111 | 8 | Shared Zod schemas, `GuildConfigService` and audit writer, dashboard shell and General tab, `ririko guild:config` | 3, 4 (General), 6 |
 | STORY-112 | 8 | TCG settings, owner-only season editor and curve visualizer, card album, shop and achievement managers | 4 (TCG) |
 | STORY-113 | 5 | Overview tab, command usage counters, bot status record, case log and audit viewers | 4 (Overview), 5 |
-| STORY-114 | 8 | Moderation, AutoMod, Logging, Command Overrides, Reaction Roles, Auto Roles, Auto Voice pages | 4 (3, 4, 13, 14, 18, 19) |
+| STORY-114 | 8 | Typed settings and step-up settings forms, Logging, Moderation escalation and AutoMod pages, real AutoMod actions | 3.4, 4 (3, 4, 18) |
 | STORY-115 | 5 | Economy, XP, Games, Giveaways pages | 4 (8, 9, 11, 12) |
 | STORY-116 | 8 | Music, AI, Image Generation, Stream Alerts, Free Games, Welcome & Farewell, Integrations pages; needs STORY-133 | 4 (5, 6, 7, 15, 16, 17, 20) |
 | STORY-117 | 5 | Passkey sign-in gate, step-up, owner guard, recovery CLI | 2.3 |
 | STORY-118 | 5 | Session management and alerts, CSP and taint guards, rate limits, authorization coverage test | 7 |
 | STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
+| STORY-163 | 5 | Command Overrides engine (repository, catalog, override middleware) and page | 4 (19) |
+| STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 4 (13, 14) |

@@ -1,3 +1,5 @@
+import type { Guild, GuildMember } from 'discord.js';
+
 export type AutoModRuleType =
   | 'INVITE_FILTER'
   | 'PHISHING_SHIELD'
@@ -33,6 +35,9 @@ export interface ModerationContext {
     author?: { id: string; bot: boolean } | undefined;
     id?: string | undefined;
   } | undefined;
+  /** Needed for WARN, TIMEOUT, KICK and BAN; without them a match only deletes the message. */
+  guild?: Guild | undefined;
+  member?: GuildMember | undefined;
 }
 
 export interface RuleEvaluationResult {

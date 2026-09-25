@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
+import type { Guild, GuildMember } from 'discord.js';
 import { EventBus, type CoreEvents } from '@ririko/core';
 import {
   InviteFilterRule,
@@ -7,7 +8,9 @@ import {
   BurstSpamRule,
 } from './rules/index.js';
 import { AutoModService } from './automod.service.js';
-import type { ModerationContext } from './automod.types.js';
+import type { AutoModAction, ModerationContext } from './automod.types.js';
+import type { ModerationActionService } from './moderation-action.service.js';
+import type { WarningEscalationService } from './warning-escalation.service.js';
 
 describe('AutoMod Rules & Engine Suite', () => {
   describe('InviteFilterRule', () => {
@@ -633,6 +636,89 @@ describe('AutoMod Rules & Engine Suite', () => {
       expect(result.matched).toBe(true);
       expect(result.deleted).toBe(false);
       expect(result.error).toContain('Unknown Message');
+    });
+  });
+
+  describe('AutoModService punishments (TASK-1142)', () => {
+    const bot = { id: 'bot-1' } as unknown as GuildMember;
+    const member = { id: 'violator-1' } as unknown as GuildMember;
+    const guild = { id: 'guild-1', members: { me: bot } } as unknown as Guild;
+    let actions: { timeout: Mock; kick: Mock; ban: Mock };
+    let escalation: { issueWarning: Mock };
+    let service: AutoModService;
+
+    const inviteContext = (): ModerationContext => ({
+      guildId: 'guild-1',
+      channelId: 'chan-1',
+      userId: 'violator-1',
+      content: 'join discord.gg/elsewhere',
+      rawMessage: { delete: vi.fn().mockResolvedValue({}) },
+      guild,
+      member,
+    });
+
+    beforeEach(() => {
+      actions = {
+        timeout: vi.fn().mockResolvedValue({ success: true }),
+        kick: vi.fn().mockResolvedValue({ success: true }),
+        ban: vi.fn().mockResolvedValue({ success: false, error: 'Missing Ban Members' }),
+      };
+      escalation = { issueWarning: vi.fn().mockResolvedValue({ success: true }) };
+      service = new AutoModService(
+        undefined,
+        actions as unknown as ModerationActionService,
+        escalation as unknown as WarningEscalationService,
+      );
+    });
+
+    const withAction = (action: AutoModAction) =>
+      service.setRuleConfig('guild-1', { ruleType: 'INVITE_FILTER', isEnabled: true, action });
+
+    it('warns through the escalation policy with the bot as the acting member', async () => {
+      withAction('WARN');
+      const result = await service.processMessage(inviteContext());
+      expect(result).toMatchObject({ deleted: true, punished: true, actionTaken: 'WARN' });
+      expect(escalation.issueWarning).toHaveBeenCalledWith({
+        guild,
+        invoker: bot,
+        target: member,
+        reason: expect.stringMatching(/^AutoMod: /),
+        severity: 1,
+      });
+    });
+
+    it.each([
+      ['TIMEOUT', 'timeout'],
+      ['KICK', 'kick'],
+      ['BAN', 'ban'],
+    ] as const)('runs %s through ModerationActionService', async (action, method) => {
+      withAction(action);
+      const result = await service.processMessage(inviteContext());
+      expect(actions[method]).toHaveBeenCalledWith(
+        expect.objectContaining({ guild, invoker: bot, target: member }),
+      );
+      if (action === 'TIMEOUT') {
+        expect(actions.timeout.mock.calls[0]?.[0]).toMatchObject({ durationSeconds: 600 });
+      }
+      expect(result.punished).toBe(action !== 'BAN');
+      if (action === 'BAN') expect(result.error).toBe('Missing Ban Members');
+    });
+
+    it('only deletes for DELETE, and reports when there is no member to punish', async () => {
+      withAction('DELETE');
+      expect(await service.processMessage(inviteContext())).toMatchObject({
+        deleted: true,
+        punished: false,
+      });
+      expect(actions.timeout).not.toHaveBeenCalled();
+      expect(escalation.issueWarning).not.toHaveBeenCalled();
+
+      withAction('KICK');
+      const { guild: _guild, member: _member, ...withoutMember } = inviteContext();
+      const result = await service.processMessage(withoutMember);
+      expect(result).toMatchObject({ deleted: true, punished: false });
+      expect(result.error).toContain('No guild member');
+      expect(actions.kick).not.toHaveBeenCalled();
     });
   });
 });

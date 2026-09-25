@@ -31,7 +31,7 @@ In compliance with Section 73 of `BLUEPRINT.md`, permission checks are centraliz
 
 ### 3.2. Case Audit Logging & Moderation Notes
 - Every punitive action generates an immutable `moderation_cases` record with a sequential per-guild case number (e.g. `Case #1042`).
-- Cases are dispatched as rich embeds to the guild's configured `log_channel_id`.
+- Cases are dispatched as rich embeds to the guild's configured `log_channel_id` (set on the dashboard Logging page or with `ririko guild:config <guild_id> logging.logChannelId <channel_id>`). The bot subscribes `ModerationLogService` to `moderation:caseCreated` once at startup.
 - Staff can attach persistent notes to suspect members via `/note add <@user> <content>` and view full disciplinary history via `/history <@user>`.
 
 ---
@@ -57,6 +57,13 @@ export interface EscalationStep {
 - 6 Warnings $\rightarrow$ Permanent server ban.
 
 Warnings support expiration dates (e.g. active for 30 days) and severity weights.
+
+### Storage and Matching (STORY-114)
+- The policy lives in `guild_settings.escalation_steps` (JSON). `null` means the default policy above, and an empty list means warnings never escalate. `EscalationStepSchema`, `EscalationPolicySchema` and `DEFAULT_ESCALATION_STEPS` are defined once in `packages/core/src/config/moderation-settings.ts`.
+- Rules: 1 to 20 steps, thresholds from 1 to 100 and unique, timeouts from 1 minute to 28 days and only on `TIMEOUT` steps. Steps are saved sorted by threshold.
+- Edit it on the dashboard Moderation page (needs a passkey check from the last five minutes) or with `ririko guild:config <guild_id> moderation.escalationSteps '<json>'`.
+- On each new warning the score is the sum of the member's active warning severities, and the step with the highest threshold at or below the score applies. A step therefore applies again on every later warning while the score stays at or above it.
+- If the settings cannot be read, the warning is already saved, but the error is reported and no step, DM or case follows. The default policy is never used as a fallback, because it could ban members in a guild that turned escalation off.
 
 ---
 
@@ -86,3 +93,10 @@ export interface RuleResult {
 4. **Message & Burst Spam**: Flags duplicate messages sent within a short sliding window.
 5. **Anti-Raid / Join Gate**: Detects abnormal influxes of account creations joining simultaneously, automatically enabling verification gates.
 6. **Attachment & Sticker Spam**: Limits rapid multi-attachment posting by unverified members.
+
+### What the Bot Runs Today (STORY-114)
+- Four rules run on every guild message, in this order, stopping at the first match: phishing shield, invite filter, mention spam, burst spam. Anti-raid runs on member joins. Attachment/sticker spam does not exist yet.
+- Settings per rule are stored in `moderation_rules` (one row per guild and rule type): on/off, action, threshold (mention spam: mentions per message; burst spam: messages within 3 seconds; both match when exceeded), exempt roles and exempt channels. A guild without a row gets `AUTOMOD_RULE_DEFAULTS` from `@ririko/core`: on, `DELETE`, threshold 5.
+- Edit them on the dashboard AutoMod page, with `ririko guild:config <guild_id> automod.<key> <value>`, or toggle a rule with `/automod enable|disable`. The bot caches rules for five minutes and drops the cache when the change feed reports an `automod` change.
+- Every match deletes the message. The action adds: `WARN` issues a warning through the escalation engine (so AutoMod warnings count toward the policy), `TIMEOUT` times the member out for 10 minutes, `KICK` and `BAN` kick or ban. Punishments run through `WarningEscalationService` and `ModerationActionService` with Ririko's own member as the actor, so permission and role-hierarchy checks apply and a case is recorded.
+- Bots, the server owner and members with Administrator, Manage Server, Manage Messages, Timeout Members or Ban Members are always exempt.
