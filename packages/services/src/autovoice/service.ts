@@ -1,10 +1,11 @@
 import {
   ChannelType,
+  RESTJSONErrorCodes,
   type VoiceState,
   type Guild,
   type VoiceChannel,
 } from 'discord.js';
-import type { AutoVoiceRepository, AutoVoiceConfig } from '@ririko/database';
+import type { AutoVoiceRepository, AutoVoiceChannelRepository } from '@ririko/database';
 import type { ActiveVoiceChannel, AutoVoiceServiceOptions } from './types.js';
 
 export class AutoVoiceService {
@@ -13,6 +14,7 @@ export class AutoVoiceService {
 
   constructor(
     private readonly autoVoiceRepo: AutoVoiceRepository,
+    private readonly channelRepo: AutoVoiceChannelRepository,
     private readonly options: AutoVoiceServiceOptions = {},
   ) {}
 
@@ -88,6 +90,13 @@ export class AutoVoiceService {
 
       createdChannel = (await guild.channels.create(createOptions)) as VoiceChannel;
 
+      // Record the channel as ours so only channels the service created are ever deleted
+      await this.channelRepo.create({
+        channelId: createdChannel.id,
+        guildId: guild.id,
+        parentChannelId: config.parentChannelId,
+      });
+
       // Grant channel owner management permissions
       await createdChannel.permissionOverwrites.edit(member.id, {
         ViewChannel: true,
@@ -116,9 +125,9 @@ export class AutoVoiceService {
       // Clean up orphaned channel if user couldn't be moved or disconnected
       if (createdChannel) {
         try {
-          await createdChannel.delete();
+          await this.deleteCreatedChannel(createdChannel);
         } catch {
-          // Ignore deletion error
+          // Ignore cleanup error; startup cleanup retries recorded channels
         }
       }
     } finally {
@@ -127,88 +136,71 @@ export class AutoVoiceService {
   }
 
   /**
-   * Handles user leaving a channel: deletes dynamic channel if now empty.
+   * Handles user leaving a channel: deletes it if the service created it and it is now empty.
    */
   private async handleUserLeftChannel(state: VoiceState): Promise<void> {
-    const channelId = state.channelId;
-    if (!channelId) return;
-
-    const channel = state.channel as VoiceChannel | null;
+    const channel = state.channel;
     if (!channel) return;
+    if ((channel.members?.size ?? 0) > 0) return;
 
-    // Check if channel is tracked as active
-    const active = this.activeChannels.get(channelId);
-    if (active) {
-      const remainingCount = channel.members?.size ?? 0;
-      if (remainingCount === 0) {
-        this.activeChannels.delete(channelId);
-        try {
-          await channel.delete();
-        } catch (err) {
-          console.error('[AutoVoiceService] Failed to delete empty dynamic voice channel:', err);
-        }
-      }
-      return;
-    }
+    // Only channels this service created are deleted, including ones created before a restart
+    const isCreatedChannel =
+      this.activeChannels.has(channel.id) || (await this.channelRepo.exists(channel.id));
+    if (!isCreatedChannel) return;
 
-    // Untracked orphan check (e.g. left behind after reboot before empty)
-    if (channel.members?.size === 0 && state.guild) {
-      const configs: AutoVoiceConfig[] = await this.autoVoiceRepo.listByGuildId(state.guild.id);
-      const isConfigParent = configs.some((c: AutoVoiceConfig) => c.parentChannelId === channelId);
-      if (!isConfigParent) {
-        // Channel is empty and not a configured parent channel
-        const matchesCategory = configs.some(
-          (c: AutoVoiceConfig) => channel.parent && channel.parent.id === state.guild.channels.cache.get(c.parentChannelId)?.parentId,
-        );
-        if (matchesCategory) {
-          try {
-            await channel.delete();
-          } catch {
-            // Non-fatal
-          }
-        }
-      }
-    }
+    await this.deleteCreatedChannel(channel);
   }
 
   /**
-   * Scans guild for empty orphaned dynamic channels left behind after a bot restart.
+   * Forgets a created channel that was deleted outside the service (channelDelete gateway event).
+   */
+  async handleChannelDelete(channelId: string): Promise<void> {
+    await this.forgetChannel(channelId);
+  }
+
+  /**
+   * Deletes empty channels the service created before a restart and forgets records of channels
+   * that no longer exist. Channels the service did not create are never touched.
    */
   async cleanupOrphans(guild: Guild): Promise<number> {
     let deletedCount = 0;
     try {
-      const configs: AutoVoiceConfig[] = await this.autoVoiceRepo.listByGuildId(guild.id);
-      if (configs.length === 0) return 0;
-
-      const parentIds = new Set(configs.map((c: AutoVoiceConfig) => c.parentChannelId));
-      const parentCategories = new Set(
-        configs
-          .map((c: AutoVoiceConfig) => guild.channels.cache.get(c.parentChannelId)?.parentId)
-          .filter(Boolean) as string[],
-      );
-
-      // Check all guild voice channels
-      for (const [, channel] of guild.channels.cache) {
-        if (channel.type !== ChannelType.GuildVoice) continue;
-        if (parentIds.has(channel.id)) continue; // Never delete Join to Create parent
-
-        const isTrackedChild = this.activeChannels.has(channel.id);
-        const isInParentCategory = channel.parentId && parentCategories.has(channel.parentId);
-
-        if ((isTrackedChild || isInParentCategory) && channel.members.size === 0) {
-          this.activeChannels.delete(channel.id);
-          try {
-            await channel.delete();
-            deletedCount++;
-          } catch (err) {
-            console.error(`[AutoVoiceService] Failed to prune orphan channel ${channel.id}:`, err);
-          }
+      const records = await this.channelRepo.listByGuildId(guild.id);
+      for (const record of records) {
+        const channel = guild.channels.cache.get(record.channelId);
+        if (!channel) {
+          await this.forgetChannel(record.channelId);
+          continue;
         }
+        if (channel.type !== ChannelType.GuildVoice || channel.members.size > 0) continue;
+        if (await this.deleteCreatedChannel(channel)) deletedCount++;
       }
     } catch (err) {
       console.error('[AutoVoiceService] Error during orphan cleanup:', err);
     }
     return deletedCount;
+  }
+
+  /**
+   * Deletes a created channel on Discord and forgets it. A channel that is already gone is also
+   * forgotten; on any other failure the record is kept so startup cleanup can retry.
+   */
+  private async deleteCreatedChannel(channel: { id: string; delete(): Promise<unknown> }): Promise<boolean> {
+    try {
+      await channel.delete();
+    } catch (err) {
+      if ((err as { code?: unknown } | null)?.code !== RESTJSONErrorCodes.UnknownChannel) {
+        console.error(`[AutoVoiceService] Failed to delete dynamic voice channel ${channel.id}:`, err);
+        return false;
+      }
+    }
+    await this.forgetChannel(channel.id);
+    return true;
+  }
+
+  private async forgetChannel(channelId: string): Promise<void> {
+    this.activeChannels.delete(channelId);
+    await this.channelRepo.delete(channelId);
   }
 
   // --- Channel Ownership & Controls ---

@@ -3599,6 +3599,18 @@
       ],
       "blocks": [],
       "description": "Reported 2026-09-25: the passkey check failed with 'The passkey could not be verified' in Edge while registration worked. Root cause: the authenticator Edge used signed assertions without the user-verification (UV) flag, and verification required it. The reason was invisible because verification failures were not logged. Two more defects hid it: getWebServices() cached services on globalThis, so after a hot reload the server kept running old code, and its PasskeyVerificationError class no longer matched the action's instanceof check, so failures escaped as unhandled rejections. Fix: request UV but only require user presence (the passkey is a second factor after Discord sign-in), return passkey outcomes instead of throwing, log every rejection reason, and cache only the database connection process-wide."
+    },
+    {
+      "id": "BUG-0021",
+      "title": "Auto Voice Deleted Every Empty Voice Channel in a Join-to-Create Hub's Category, Including Permanent Server Channels",
+      "points": 3,
+      "status": "DONE",
+      "parent": "STORY-091",
+      "requires": [
+        "STORY-091"
+      ],
+      "blocks": [],
+      "description": "Reported 2026-09-26: AutoVoiceService deleted any empty voice channel in the category of a join-to-create hub, not only the temporary channels it created. Both the member-leave handler and cleanupOrphans (run on READY) matched channels by category, and the set of created channels lived only in memory, so after a restart the bot could not tell its channels from the server's own. A guild with permanent voice channels next to a hub lost them whenever they were empty. Fix: persist the IDs of created channels in a new dual-dialect auto_voice_channels table (AutoVoiceChannelRepository), delete only recorded channels, forget records when the channel is deleted or no longer exists (including the channelDelete gateway event), and make cleanupOrphans iterate the records instead of scanning the category. Existing databases need pnpm db:push."
     }
   ]
 }

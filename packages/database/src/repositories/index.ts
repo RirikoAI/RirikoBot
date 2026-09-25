@@ -15,6 +15,7 @@ export * from './stream.repository.js';
 export * from './free-game.repository.js';
 export * from './giveaway.repository.js';
 export * from './autovoice.repository.js';
+export * from './autovoice-channel.repository.js';
 export * from './waifu-asset.repository.js';
 export * from './waifu-card.repository.js';
 export * from './tcg-item.repository.js';
