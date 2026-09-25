@@ -866,7 +866,7 @@
       "epic": "EPIC-011",
       "title": "Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],

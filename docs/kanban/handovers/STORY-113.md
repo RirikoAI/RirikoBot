@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 5 pts (`TASK-1131` = 3, `TASK-1132` = 2)
 - **Epic**: `EPIC-011`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #648)
 - **Timestamp**: 2026-09-26
 - **Branch**: `feat/STORY-113-overview-case-log` (targets `develop/2.0.0`)
 - **Commits**: `32753be` (start), `e82c7b8` (TASK-1131), `5677065` (TASK-1132)
@@ -78,8 +78,7 @@
 - **Case-number cursor:** `createCase` computes `MAX + 1` without a unique index, so two concurrent cases can share a number. The cursor then skips the duplicate at a page boundary. This is a pre-existing gap, not new.
 
 ## 4. Actionable Next Steps for Next Session / Continuing Agent
-1. Review the branch and open a PR to `develop/2.0.0` when the user asks.
-2. After merge, run `pnpm db:push` on each existing database, then restart the bot so the heartbeat and counters start.
-3. Sign in to the dashboard and check Overview, Case Log (filters and paging) and Audit Log against real data.
-4. EPIC-012 (`TASK-1221`): the `/health` and `/ready` probes can read `bot_status` through `BotActivityRepository.getBotStatus(BOT_STATUS_ID)` and `BOT_STATUS_STALE_MS`.
-5. Next in the EPIC-011 order: STORY-115.
+1. Run `pnpm db:push` on each existing database, then restart the bot so the heartbeat and counters start.
+2. Sign in to the dashboard and check Overview, Case Log (filters and paging) and Audit Log against real data.
+3. EPIC-012 (`TASK-1221`): the `/health` and `/ready` probes can read `bot_status` through `BotActivityRepository.getBotStatus(BOT_STATUS_ID)` and `BOT_STATUS_STALE_MS`.
+4. Next in the EPIC-011 order: STORY-115.

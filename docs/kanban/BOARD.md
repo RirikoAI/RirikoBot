@@ -15,7 +15,7 @@
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | `EPIC-011` | [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) |
+| | | | | | |
 
 ---
 
@@ -272,7 +272,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1121` | Task | TCG Settings: Guild Drop Settings, TCG Manager Role & Owner-Gated Global Rules (Market Tax, Listing Expiry, Energy Governance) | 3 | `STORY-112` | 🎯 To Do | `STORY-111` |
 | `TASK-1122` | Task | Owner-Only Dungeon Season Editor, Difficulty Curve Visualizer & Boss Enrage/Shield/Loot Configurator | 3 | `STORY-112` | 🎯 To Do | `TASK-1121` |
 | `TASK-1123` | Task | Card Album Viewer (CardSynthesizer Renders), Shop Catalog Manager & Achievement Manager | 2 | `STORY-112` | 🎯 To Do | `TASK-1122` |
-| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | `EPIC-011` | 🔍 Review · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `STORY-111` |
+| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | `EPIC-011` | ✅ Done · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `STORY-111` |
 | `TASK-1131` | Task | Command Usage Daily Counters (Dual-Dialect Table & Router Hook), Bot Status Heartbeat & Overview Tab | 3 | `STORY-113` | ✅ Done · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `STORY-111` |
 | `TASK-1132` | Task | Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer | 2 | `STORY-113` | ✅ Done · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `TASK-1131` |
 
