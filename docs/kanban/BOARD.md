@@ -8,14 +8,14 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | `EPIC-012` |
+| | | | | |
 
 ---
 
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| | | | | | |
+| `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | `EPIC-012` | [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) |
 
 ---
 
@@ -291,10 +291,10 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-122` | Story | Production Orchestration & Health Probes | 3 | `EPIC-012` | 🎯 To Do | `STORY-121` |
 | `TASK-1221` | Task | Implement `/health` and `/ready` probes for Bot and Web | 1 | `STORY-122` | 🎯 To Do | — |
 | `TASK-1222` | Task | docker-compose.production.yml with Redis, PostgreSQL, and App Services | 2 | `STORY-122` | 🎯 To Do | — |
-| `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | `EPIC-012` | ⚡ In Progress | — |
-| `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | `STORY-123` | 🎯 To Do | — |
-| `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | `STORY-123` | 🎯 To Do | `TASK-1231` |
-| `TASK-1233` | Task | Vercel Project Status Site Generated from the Kanban Board | 1 | `STORY-123` | 🎯 To Do | — |
+| `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | `EPIC-012` | 🔍 Review · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | — |
+| `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | — |
+| `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | `TASK-1231` |
+| `TASK-1233` | Task | Vercel Project Status Site Generated from the Kanban Board | 1 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | — |
 
 ### 📋 Groomed Stories for EPIC-013 (Media Synthesis, Reactions & AI Images)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
