@@ -4,8 +4,10 @@ import {
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
+  ModerationRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
+import { DEFAULT_ESCALATION_STEPS } from '@ririko/core';
 import {
   diffFields,
   GuildConfigService,
@@ -24,6 +26,7 @@ const dashboardActor: GuildConfigActor = {
 describe('GuildConfigService (TASK-1111)', () => {
   let db: SqliteDatabaseClient;
   let versions: GuildConfigVersionRepository;
+  let moderation: ModerationRepository;
   let service: GuildConfigService;
 
   beforeEach(async () => {
@@ -35,9 +38,11 @@ describe('GuildConfigService (TASK-1111)', () => {
     if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
     db = raw;
     versions = new GuildConfigVersionRepository(db);
+    moderation = new ModerationRepository(db);
     service = new GuildConfigService({
       db,
       guildSettings: new GuildSettingsRepository(db),
+      moderation,
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -132,6 +137,158 @@ describe('GuildConfigService (TASK-1111)', () => {
     await expect(
       service.update('g1', 'general', { locale: 'fr-FR' }, dashboardActor),
     ).rejects.toBeInstanceOf(GuildConfigValidationError);
+  });
+
+  describe('logging (TASK-1141)', () => {
+    it('sets and clears the log channel', async () => {
+      expect(await service.get('g1', 'logging')).toEqual({ logChannelId: null });
+      await service.update('g1', 'logging', { logChannelId: '123456789012345678' }, dashboardActor);
+      expect(await service.get('g1', 'logging')).toEqual({ logChannelId: '123456789012345678' });
+      const { changes } = await service.update(
+        'g1',
+        'logging',
+        { logChannelId: '' },
+        dashboardActor,
+      );
+      expect(changes).toEqual([
+        { field: 'logChannelId', before: '123456789012345678', after: null },
+      ]);
+      expect(await service.get('g1', 'logging')).toEqual({ logChannelId: null });
+    });
+
+    it('keeps the other guild settings when the log channel changes', async () => {
+      await service.update('g1', 'general', { prefix: '$' }, dashboardActor);
+      await service.update('g1', 'logging', { logChannelId: '123456789012345678' }, dashboardActor);
+      expect(await service.get('g1', 'general')).toEqual({ prefix: '$', timezone: 'UTC' });
+    });
+  });
+
+  describe('moderation (TASK-1142)', () => {
+    it('returns the default policy until one is saved', async () => {
+      expect(await service.get('g1', 'moderation')).toEqual({
+        escalationSteps: DEFAULT_ESCALATION_STEPS,
+      });
+    });
+
+    it('saves a sorted policy from JSON text, and an empty policy turns escalation off', async () => {
+      await service.update(
+        'g1',
+        'moderation',
+        {
+          escalationSteps:
+            '[{"warnThreshold":4,"action":"BAN"},{"warnThreshold":2,"action":"TIMEOUT","durationSeconds":900}]',
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'moderation')).toEqual({
+        escalationSteps: [
+          { warnThreshold: 2, action: 'TIMEOUT', durationSeconds: 900 },
+          { warnThreshold: 4, action: 'BAN' },
+        ],
+      });
+
+      await service.update('g1', 'moderation', { escalationSteps: [] }, dashboardActor);
+      expect(await service.get('g1', 'moderation')).toEqual({ escalationSteps: [] });
+    });
+
+    it('reports errors with the row they belong to', async () => {
+      const error = await service
+        .update(
+          'g1',
+          'moderation',
+          {
+            escalationSteps: [
+              { warnThreshold: 1, action: 'WARN' },
+              { warnThreshold: 2, action: 'TIMEOUT' },
+            ],
+          },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect((error as GuildConfigValidationError).fieldErrors).toEqual({
+        escalationSteps: ['Row 2: Timeout steps need a length.'],
+      });
+    });
+  });
+
+  describe('automod (TASK-1142)', () => {
+    it('reads the rule defaults when no rows exist', async () => {
+      expect(await service.get('g1', 'automod')).toEqual({
+        inviteFilterEnabled: true,
+        inviteFilterAction: 'DELETE',
+        inviteFilterExemptRoleIds: [],
+        inviteFilterExemptChannelIds: [],
+        phishingShieldEnabled: true,
+        phishingShieldAction: 'DELETE',
+        phishingShieldExemptRoleIds: [],
+        phishingShieldExemptChannelIds: [],
+        mentionSpamEnabled: true,
+        mentionSpamAction: 'DELETE',
+        mentionSpamExemptRoleIds: [],
+        mentionSpamExemptChannelIds: [],
+        mentionSpamLimit: 5,
+        burstSpamEnabled: true,
+        burstSpamAction: 'DELETE',
+        burstSpamExemptRoleIds: [],
+        burstSpamExemptChannelIds: [],
+        burstSpamLimit: 5,
+      });
+    });
+
+    it('shows what the bot runs for rows the automod command created', async () => {
+      await moderation.upsertRule({ guildId: 'g1', ruleType: 'MENTION_SPAM', isEnabled: false });
+      await moderation.upsertRule({ guildId: 'g1', ruleType: 'BURST_SPAM', action: 'ALLOW' });
+      expect(await service.get('g1', 'automod')).toMatchObject({
+        mentionSpamEnabled: false,
+        mentionSpamAction: 'WARN',
+        mentionSpamLimit: 3,
+        burstSpamAction: 'DELETE',
+      });
+    });
+
+    it('writes each rule to moderation_rules and keeps thresholds the bot does not read', async () => {
+      await moderation.upsertRule({ guildId: 'g1', ruleType: 'INVITE_FILTER', threshold: 7 });
+      await service.update(
+        'g1',
+        'automod',
+        {
+          inviteFilterEnabled: 'off',
+          mentionSpamAction: 'TIMEOUT',
+          mentionSpamLimit: '12',
+          burstSpamExemptChannelIds: '123456789012345678,223456789012345678',
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+
+      const rules = await moderation.getRules('g1');
+      expect(rules).toHaveLength(4);
+      expect(rules.find((rule) => rule.ruleType === 'INVITE_FILTER')).toMatchObject({
+        isEnabled: false,
+        action: 'WARN',
+        threshold: 7,
+      });
+      expect(rules.find((rule) => rule.ruleType === 'MENTION_SPAM')).toMatchObject({
+        action: 'TIMEOUT',
+        threshold: 12,
+      });
+      expect(rules.find((rule) => rule.ruleType === 'BURST_SPAM')).toMatchObject({
+        exemptChannels: ['123456789012345678', '223456789012345678'],
+      });
+      expect((await versions.listChangedSince(new Date(0)))[0]).toMatchObject({
+        module: 'automod',
+      });
+    });
+
+    it('rejects out-of-range limits and unknown actions', async () => {
+      const error = await service
+        .update('g1', 'automod', { mentionSpamLimit: 0, burstSpamAction: 'ALLOW' }, dashboardActor)
+        .catch((e: unknown) => e);
+      expect(Object.keys((error as GuildConfigValidationError).fieldErrors)).toEqual([
+        'mentionSpamLimit',
+        'burstSpamAction',
+      ]);
+      expect(await moderation.getRules('g1')).toEqual([]);
+    });
   });
 });
 

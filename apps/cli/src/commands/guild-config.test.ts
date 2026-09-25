@@ -29,10 +29,60 @@ describe('ririko guild:config (TASK-1113)', () => {
   });
 
   it('exposes every key from the shared schemas', () => {
-    expect(listConfigKeys().map((entry) => entry.key)).toEqual([
+    const keys = listConfigKeys().map((entry) => entry.key);
+    expect(keys.slice(0, 3)).toEqual([
       'general.prefix',
       'general.timezone',
+      'moderation.escalationSteps',
     ]);
+    expect(keys).toContain('automod.mentionSpamLimit');
+    expect(keys).toContain('automod.burstSpamExemptRoleIds');
+    expect(keys.at(-1)).toBe('logging.logChannelId');
+    expect(listConfigKeys().every((entry) => entry.description.length > 0)).toBe(true);
+  });
+
+  it('round-trips flags, numbers, ID lists, rows and cleared channels as text (TASK-1141)', async () => {
+    await runGuildConfig(service, GUILD, 'automod.inviteFilterEnabled', 'off');
+    await runGuildConfig(service, GUILD, 'automod.mentionSpamLimit', '8');
+    await runGuildConfig(
+      service,
+      GUILD,
+      'automod.burstSpamExemptRoleIds',
+      '200000000000000001, 200000000000000002',
+    );
+    await runGuildConfig(
+      service,
+      GUILD,
+      'moderation.escalationSteps',
+      '[{"warnThreshold":2,"action":"KICK"}]',
+    );
+    expect(await runGuildConfig(service, GUILD, 'automod.inviteFilterEnabled')).toEqual(['false']);
+    expect(await runGuildConfig(service, GUILD, 'automod.mentionSpamLimit')).toEqual(['8']);
+    expect(await runGuildConfig(service, GUILD, 'automod.burstSpamExemptRoleIds')).toEqual([
+      '200000000000000001,200000000000000002',
+    ]);
+    expect(await runGuildConfig(service, GUILD, 'moderation.escalationSteps')).toEqual([
+      '[{"warnThreshold":2,"action":"KICK"}]',
+    ]);
+
+    const set = plain(
+      await runGuildConfig(service, GUILD, 'logging.logChannelId', '300000000000000001'),
+    );
+    expect(set).toEqual(['✔ logging.logChannelId: (none) → 300000000000000001']);
+    await runGuildConfig(service, GUILD, 'logging.logChannelId', '');
+    expect(await runGuildConfig(service, GUILD, 'logging.logChannelId')).toEqual(['']);
+
+    await expect(runGuildConfig(service, GUILD, 'automod.mentionSpamLimit', '99')).rejects.toThrow(
+      /Invalid value for automod\.mentionSpamLimit: Enter a whole number from 1 to 50\./,
+    );
+    await expect(
+      runGuildConfig(
+        service,
+        GUILD,
+        'moderation.escalationSteps',
+        '[{"warnThreshold":2,"action":"TIMEOUT"}]',
+      ),
+    ).rejects.toThrow(/Row 1: Timeout steps need a length\./);
   });
 
   it('lists all settings with their current values', async () => {

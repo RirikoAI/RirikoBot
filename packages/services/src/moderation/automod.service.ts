@@ -1,4 +1,9 @@
-import type { EventBus, CoreEvents } from '@ririko/core';
+import {
+  AUTOMOD_RULE_DEFAULTS,
+  AUTOMOD_TIMEOUT_SECONDS,
+  type CoreEvents,
+  type EventBus,
+} from '@ririko/core';
 import type { ModerationRepository } from '@ririko/database';
 import type {
   AutoModAction,
@@ -82,35 +87,9 @@ export class AutoModService {
    * Gets default configuration for a given rule type.
    */
   public getDefaultConfig(ruleType: AutoModRuleType): AutoModRuleConfig {
-    switch (ruleType) {
-      case 'PHISHING_SHIELD':
-        return {
-          ruleType,
-          isEnabled: true,
-          action: 'DELETE',
-        };
-      case 'INVITE_FILTER':
-        return {
-          ruleType,
-          isEnabled: true,
-          action: 'DELETE',
-          whitelist: [],
-        };
-      case 'MENTION_SPAM':
-        return {
-          ruleType,
-          isEnabled: true,
-          action: 'DELETE',
-          threshold: 5,
-        };
-      case 'BURST_SPAM':
-        return {
-          ruleType,
-          isEnabled: true,
-          action: 'DELETE',
-          threshold: 5,
-        };
-    }
+    // Shared with the dashboard, which shows these values for rules a guild never saved.
+    const config: AutoModRuleConfig = { ruleType, ...AUTOMOD_RULE_DEFAULTS[ruleType] };
+    return ruleType === 'INVITE_FILTER' ? { ...config, whitelist: [] } : config;
   }
 
   /**
@@ -297,37 +276,12 @@ export class AutoModService {
     const action = evaluation.action;
     const reason = evaluation.reason ?? `AutoMod: ${evaluation.ruleType} violation`;
 
-    if (action === 'WARN' && this.warningEscalationService && this.moderationRepo) {
+    if (action !== 'ALLOW' && action !== 'DELETE') {
       try {
-        await this.moderationRepo.createWarning({
-          guildId: context.guildId,
-          userId: context.userId,
-          moderatorId: 'AUTOMOD',
-          reason,
-          severity: 1,
-        });
-        await this.moderationRepo.createCase({
-          guildId: context.guildId,
-          type: 'WARN',
-          targetUserId: context.userId,
-          moderatorUserId: 'AUTOMOD',
-          reason,
-        });
-        punished = true;
-      } catch (err) {
-        error = err instanceof Error ? err.message : String(err);
-      }
-    } else if (action === 'TIMEOUT' && this.moderationRepo) {
-      try {
-        await this.moderationRepo.createCase({
-          guildId: context.guildId,
-          type: 'TIMEOUT',
-          targetUserId: context.userId,
-          moderatorUserId: 'AUTOMOD',
-          reason,
-          durationSeconds: 600, // default 10m
-        });
-        punished = true;
+        const caseReason = evaluation.reason ? `AutoMod: ${evaluation.reason}` : reason;
+        const outcome = await this.punish(context, action, caseReason);
+        punished = outcome.success;
+        if (outcome.error) error = outcome.error;
       } catch (err) {
         error = err instanceof Error ? err.message : String(err);
       }
@@ -357,5 +311,52 @@ export class AutoModService {
       error,
       metadata: evaluation.metadata,
     };
+  }
+
+  /**
+   * Runs a punitive action through the same services moderators use, with Ririko's own member
+   * as the actor, so permission and role-hierarchy checks apply and a moderation case is
+   * recorded. WARN goes through the escalation policy like `/warn`.
+   */
+  private async punish(
+    context: ModerationContext,
+    action: 'WARN' | 'TIMEOUT' | 'KICK' | 'BAN',
+    reason: string,
+  ): Promise<{ success: boolean; error?: string | undefined }> {
+    const { guild, member } = context;
+    if (!guild || !member) {
+      return { success: false, error: `No guild member available for ${action}` };
+    }
+    const bot = guild.members.me ?? (await guild.members.fetchMe().catch(() => null));
+    if (!bot) return { success: false, error: 'Bot member unavailable' };
+
+    if (action === 'WARN') {
+      if (!this.warningEscalationService) {
+        return { success: false, error: 'Warning escalation service unavailable' };
+      }
+      const result = await this.warningEscalationService.issueWarning({
+        guild,
+        invoker: bot,
+        target: member,
+        reason,
+        severity: 1,
+      });
+      return { success: result.success, error: result.error };
+    }
+
+    if (!this.moderationActionService) {
+      return { success: false, error: 'Moderation action service unavailable' };
+    }
+    const params = { guild, invoker: bot, target: member, reason };
+    const result =
+      action === 'TIMEOUT'
+        ? await this.moderationActionService.timeout({
+            ...params,
+            durationSeconds: AUTOMOD_TIMEOUT_SECONDS,
+          })
+        : action === 'KICK'
+          ? await this.moderationActionService.kick(params)
+          : await this.moderationActionService.ban(params);
+    return { success: result.success, error: result.error };
   }
 }

@@ -12,6 +12,7 @@ import {
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
+  ModerationRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService, GuildConfigValidationError } from '@ririko/services/guild';
@@ -54,6 +55,18 @@ function resolveKey(key: string): ConfigKey {
   return match;
 }
 
+/**
+ * A setting value in the form `guild:config` accepts back: ID lists comma separated, rows as
+ * JSON, and nothing (an empty string) for an unset ID.
+ */
+export function formatConfigValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (Array.isArray(value) && value.every((item) => typeof item === 'string'))
+    return value.join(',');
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
 /** `cli:<os user>` so audit entries show who ran the command. */
 function cliActor(): string {
   try {
@@ -80,11 +93,12 @@ export async function runGuildConfig(
 
   if (key === undefined) {
     const lines = [pc.bold(`Settings for guild ${guildId}`)];
+    const keyWidth = Math.max(...listConfigKeys().map((entry) => entry.key.length));
     for (const module of GUILD_CONFIG_MODULES) {
       const values: Record<string, unknown> = await service.get(guildId, module);
       for (const entry of listConfigKeys().filter((candidate) => candidate.module === module)) {
         lines.push(
-          `  ${pc.cyan(entry.key.padEnd(20))} ${String(values[entry.field]).padEnd(24)} ${pc.gray(entry.description)}`,
+          `  ${pc.cyan(entry.key.padEnd(keyWidth))} ${(formatConfigValue(values[entry.field]) || '(none)').padEnd(24)} ${pc.gray(entry.description)}`,
         );
       }
     }
@@ -94,7 +108,7 @@ export async function runGuildConfig(
   const entry = resolveKey(key);
   if (value === undefined) {
     const values: Record<string, unknown> = await service.get(guildId, entry.module);
-    return [String(values[entry.field])];
+    return [formatConfigValue(values[entry.field])];
   }
 
   try {
@@ -106,7 +120,9 @@ export async function runGuildConfig(
     );
     const change = changes.find((candidate) => candidate.field === entry.field);
     return change
-      ? [`${pc.green('✔')} ${entry.key}: ${String(change.before)} → ${String(change.after)}`]
+      ? [
+          `${pc.green('✔')} ${entry.key}: ${formatConfigValue(change.before) || '(none)'} → ${formatConfigValue(change.after) || '(none)'}`,
+        ]
       : [`${entry.key} is already ${value.trim()}; nothing changed.`];
   } catch (error) {
     if (error instanceof GuildConfigValidationError) {
@@ -122,6 +138,7 @@ export function createGuildConfigService(db: DatabaseClient): GuildConfigService
   return new GuildConfigService({
     db,
     guildSettings: new GuildSettingsRepository(db),
+    moderation: new ModerationRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
@@ -136,7 +153,10 @@ export function registerGuildConfigCommand(program: Command): void {
     )
     .argument('<guild_id>', 'Discord guild ID')
     .argument('[key]', 'Setting as module.field, e.g. general.prefix; omit to list all')
-    .argument('[value]', 'New value; omit to print the current one')
+    .argument(
+      '[value]',
+      'New value; omit to print the current one. Flags take true/false, ID lists are comma separated, rows are JSON, and "" clears a channel',
+    )
     .action(async (guildId: string, key?: string, value?: string) => {
       const db = await createDatabaseClient({
         dialect: (process.env.DATABASE_DIALECT || 'sqlite') as 'sqlite' | 'postgres',

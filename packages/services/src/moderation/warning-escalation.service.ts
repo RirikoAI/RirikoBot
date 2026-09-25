@@ -3,8 +3,9 @@ import {
   type Guild,
   type GuildMember,
 } from 'discord.js';
-import type { EventBus, CoreEvents } from '@ririko/core';
+import { DEFAULT_ESCALATION_STEPS, type CoreEvents, type EscalationStep, type EventBus } from '@ririko/core';
 import type {
+  GuildSettingsRepository,
   ModerationRepository,
   ModerationWarning,
 } from '@ririko/database';
@@ -12,20 +13,8 @@ import { PermissionService } from './permission.service.js';
 import { ModerationActionService } from './moderation-action.service.js';
 import type { ModerationActionResult } from './types.js';
 
-export interface EscalationStep {
-  warnThreshold: number;
-  action: 'WARN' | 'TIMEOUT' | 'KICK' | 'BAN';
-  durationSeconds?: number | undefined;
-}
-
-export const DEFAULT_ESCALATION_STEPS: EscalationStep[] = [
-  { warnThreshold: 1, action: 'WARN' },
-  { warnThreshold: 2, action: 'WARN' },
-  { warnThreshold: 3, action: 'TIMEOUT', durationSeconds: 600 }, // 10 minutes
-  { warnThreshold: 4, action: 'TIMEOUT', durationSeconds: 3600 }, // 1 hour
-  { warnThreshold: 5, action: 'TIMEOUT', durationSeconds: 86400 }, // 24 hours
-  { warnThreshold: 6, action: 'BAN' }, // Permanent server ban
-];
+// The policy shape and defaults are shared with the dashboard and CLI schemas in @ririko/core.
+export { DEFAULT_ESCALATION_STEPS, type EscalationStep };
 
 export interface IssueWarningParams {
   guild: Guild;
@@ -61,6 +50,7 @@ export interface EscalationEvaluation {
 export class WarningEscalationService {
   constructor(
     private readonly modRepo: ModerationRepository,
+    private readonly guildSettingsRepo: Pick<GuildSettingsRepository, 'findById'>,
     private readonly permissionService: PermissionService,
     private readonly moderationActionService: ModerationActionService,
     private readonly eventBus?: EventBus<CoreEvents> | undefined,
@@ -253,37 +243,14 @@ export class WarningEscalationService {
   }
 
   /**
-   * Retrieves the escalation policy for a guild, falling back to defaults.
+   * The guild's escalation policy from `guild_settings.escalation_steps` (saved through the
+   * dashboard or `ririko guild:config`), or the default policy when it never saved one. An
+   * empty policy means warnings never escalate. A database error is not treated as "no policy":
+   * applying the defaults could ban members in a guild that turned escalation off.
    */
   async getEscalationPolicy(guildId: string): Promise<EscalationStep[]> {
-    try {
-      const rule = await this.modRepo.getRuleByType(guildId, 'ESCALATION_POLICY');
-      if (rule && rule.exemptRoles && Array.isArray(rule.exemptRoles) && rule.exemptRoles.length > 0) {
-        // Saved policy in rule metadata/field if available
-        const parsed = (rule.exemptRoles as unknown) as EscalationStep[];
-        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0]?.warnThreshold === 'number') {
-          return parsed;
-        }
-      }
-    } catch {
-      // Fall through to default policy
-    }
-    return [...DEFAULT_ESCALATION_STEPS];
-  }
-
-  /**
-   * Configures a custom escalation policy for a guild.
-   */
-  async setEscalationPolicy(guildId: string, steps: EscalationStep[]): Promise<void> {
-    const sorted = [...steps].sort((a, b) => a.warnThreshold - b.warnThreshold);
-    await this.modRepo.upsertRule({
-      guildId,
-      ruleType: 'ESCALATION_POLICY',
-      action: 'WARN',
-      threshold: sorted.length,
-      isEnabled: true,
-      exemptRoles: (sorted as unknown) as string[],
-    });
+    const steps = (await this.guildSettingsRepo.findById(guildId))?.escalationSteps;
+    return (steps ?? DEFAULT_ESCALATION_STEPS).map((step) => ({ ...step }));
   }
 
   /**

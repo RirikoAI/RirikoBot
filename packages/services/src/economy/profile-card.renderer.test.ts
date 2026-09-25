@@ -256,6 +256,7 @@ describe('ProfileCardRenderer', () => {
           timezone TEXT NOT NULL DEFAULT 'UTC',
           ai_channel_id TEXT,
           log_channel_id TEXT,
+          escalation_steps TEXT,
           welcome_channel_id TEXT,
           welcome_message TEXT,
           leave_channel_id TEXT,

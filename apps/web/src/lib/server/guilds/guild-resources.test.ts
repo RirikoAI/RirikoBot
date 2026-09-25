@@ -52,5 +52,11 @@ describe('GuildResourceDirectory (TASK-1112)', () => {
       'Moderator',
       'Member',
     ]);
+    expect((await directory.memberRoles(GUILD)).map((r) => r.name)).toEqual([
+      'Ririko',
+      'Moderator',
+      'Member',
+    ]);
+    expect(get).toHaveBeenCalledTimes(1);
   });
 });
