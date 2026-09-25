@@ -1,5 +1,8 @@
 # Ririko AI 2.0.0
 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/RirikoAI/RirikoBot/tree/develop%2F2.0.0.svg?style=shield)](https://app.circleci.com/pipelines/gh/RirikoAI/RirikoBot?branch=develop%2F2.0.0)
+[![codecov](https://codecov.io/gh/RirikoAI/RirikoBot/branch/develop%2F2.0.0/graph/badge.svg)](https://app.codecov.io/gh/RirikoAI/RirikoBot/tree/develop%2F2.0.0)
+
 Ririko is a multipurpose Discord bot: music, AI chat, moderation, economy, leveling,
 giveaways, auto-voice channels, stream alerts, mini-games and the Waifu TCG (cards, gear,
 dungeons and seasonal bosses).
