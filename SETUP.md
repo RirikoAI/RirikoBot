@@ -88,7 +88,7 @@ Fill in at minimum:
 | `DISCORD_TOKEN` | Bot token from step 3 |
 | `DISCORD_CLIENT_ID` | Application ID from step 3 |
 | `DISCORD_DEV_GUILD_ID` | Your test server ID |
-| `BOT_OWNER_ID` | Your Discord user ID |
+| `BOT_OWNER_ID` | Your Discord user ID (comma-separate several owners). Owners can open the dashboard owner console once they add a passkey. |
 | `SYNC_COMMANDS` | `true` for the first run (see step 8) |
 
 Keep these defaults for the standard local setup:

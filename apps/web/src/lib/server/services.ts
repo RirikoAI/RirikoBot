@@ -7,11 +7,13 @@ import {
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   UserRepository,
+  WebPasskeyRepository,
   WebSessionRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
 import { DiscordOAuthClient } from './auth/discord-oauth';
+import { PasskeyService } from './auth/passkeys';
 import { SessionService } from './auth/session-service';
 import { BotGuildDirectory } from './guilds/bot-guilds';
 import { GuildAccessService } from './guilds/guild-access';
@@ -27,6 +29,7 @@ export interface WebServices {
   vault: SecretVault;
   oauth: DiscordOAuthClient;
   sessions: SessionService;
+  passkeys: PasskeyService;
   users: UserRepository;
   /** Discord REST client authenticated with the bot token; server-side only. */
   botRest: REST;
@@ -56,11 +59,18 @@ async function createWebServices(): Promise<WebServices> {
     oauth,
     botGuildIds: () => botGuilds.guildIds(),
   });
+  const audit = new AuditLogRepository(db);
+  const passkeys = new PasskeyService({
+    repo: new WebPasskeyRepository(db),
+    sessions,
+    audit,
+    origin: config.DASHBOARD_URL,
+  });
   const guildConfig = new GuildConfigService({
     db,
     guildSettings: new GuildSettingsRepository(db),
     versions: new GuildConfigVersionRepository(db),
-    audit: new AuditLogRepository(db),
+    audit,
     defaultPrefix: config.DEFAULT_PREFIX,
   });
   return {
@@ -69,6 +79,7 @@ async function createWebServices(): Promise<WebServices> {
     vault,
     oauth,
     sessions,
+    passkeys,
     users: new UserRepository(db),
     botRest,
     guildAccess,

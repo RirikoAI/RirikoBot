@@ -61,6 +61,10 @@ Every dependency selected for Ririko AI 2.0.0 is evaluated against six criteria:
 - **2.0.0 Decision**: **Next.js 16 (App Router) with Tailwind CSS**.
 - **Justification**: Secure server-side Discord token handling, instant page loads, and direct code-sharing of Zod schemas and Drizzle database types.
 
+### 2.7.1. Dashboard Passkeys: `@simplewebauthn/server` vs. Hand-Rolled WebAuthn vs. Hosted Identity
+- **Evaluation**: WebAuthn verification means parsing CBOR attestation and authenticator data, checking the RP ID hash, origin, challenge, user-verification flag and signature counter, and verifying COSE-encoded ES256, RS256 or EdDSA signatures. Writing this by hand is error-prone and security-critical. Hosted identity providers (Auth0, Clerk) would add a third party to every sign-in and duplicate the Discord OAuth2 login.
+- **2.0.0 Decision (STORY-117, 2026-09-25)**: **`@simplewebauthn/server` and `@simplewebauthn/browser` 14.x**. MIT-licensed, widely used, small dependency tree, typed JSON options and responses, and a callback for single-use challenge checks. Attestation is not requested (`attestationType: 'none'`), so no metadata service is needed.
+
 ### 2.8. Test Runner: Vitest vs. Jest
 - **Legacy 1.4.0 Choice**: Jest 29.x with `ts-jest`.
 - **Evaluation**: Jest requires complex ESM transformation flags, runs slowly with TypeScript, and has high memory consumption.
@@ -88,3 +92,4 @@ Every dependency selected for Ririko AI 2.0.0 is evaluated against six criteria:
 | `next` | React Framework for Dashboard | `^15.2.0` / `^16.0.0` | MIT |
 | `react` | UI Library for Dashboard | `^19.0.0` | MIT |
 | `tailwindcss` | Utility-First Styling for Dashboard | `^4.0.0` | MIT |
+| `@simplewebauthn/server` / `@simplewebauthn/browser` | Dashboard Passkeys (WebAuthn) | `^14.0.0` | MIT |

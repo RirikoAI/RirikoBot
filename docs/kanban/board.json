@@ -182,7 +182,7 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog."
     },
     {
       "id": "EPIC-012",
@@ -834,7 +834,7 @@
       "epic": "EPIC-011",
       "title": "Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-110"
       ],
@@ -843,7 +843,8 @@
         "STORY-113",
         "STORY-114",
         "STORY-115",
-        "STORY-116"
+        "STORY-116",
+        "STORY-117"
       ],
       "description": "Foundation for all module pages: guild config schemas defined once in @ririko/core, a GuildConfigService that validates, persists through existing repositories and writes audit_logs field diffs, the guild layout and form kit, the General tab, and the matching `ririko guild:config` CLI. Re-scoped during grooming: the original 20+ tabs moved to STORY-114/115/116 and Zod parity moved here from STORY-113. Re-groomed 2026-09-25: CHORE-1101 added as a prerequisite for cross-process cache invalidation; the General tab drops locale because the bot does not read it."
     },
@@ -854,7 +855,8 @@
       "points": 8,
       "status": "TODO",
       "requires": [
-        "STORY-111"
+        "STORY-111",
+        "STORY-117"
       ],
       "blocks": [],
       "description": "TCG management pages. tcg_system_configs and dungeon_seasons are global, so global game rules and the season editor are gated to bot owners (ownerIds); guild-scoped TCG settings stay with guild managers and the TCG Manager Role. Re-estimated from 5 to 8 during grooming."
@@ -880,7 +882,8 @@
       "points": 8,
       "status": "TODO",
       "requires": [
-        "STORY-111"
+        "STORY-111",
+        "STORY-117"
       ],
       "blocks": [],
       "description": "Module pages for moderation and community tooling (dashboard.md sections 3, 4, 13, 14, 18, 19), built on the STORY-111 form kit and GuildConfigService."
@@ -892,7 +895,8 @@
       "points": 5,
       "status": "TODO",
       "requires": [
-        "STORY-111"
+        "STORY-111",
+        "STORY-117"
       ],
       "blocks": [],
       "description": "Module pages for engagement systems (dashboard.md sections 8, 9, 11, 12)."
@@ -905,7 +909,8 @@
       "status": "TODO",
       "requires": [
         "STORY-111",
-        "STORY-133"
+        "STORY-133",
+        "STORY-117"
       ],
       "blocks": [],
       "description": "Module pages for media and notification systems (dashboard.md sections 5, 6, 7, 15, 16, 17, 20). The Welcome & Farewell editor needs the STORY-133 WelcomerService renderer."
@@ -913,14 +918,46 @@
     {
       "id": "STORY-117",
       "epic": "EPIC-011",
-      "title": "Dashboard Security Hardening: Passkey Step-Up, Session Management & Alerts, CSP & Authorization Coverage",
-      "points": 8,
-      "status": "TODO",
+      "title": "Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard",
+      "points": 5,
+      "status": "REVIEW",
       "requires": [
         "STORY-111"
       ],
+      "blocks": [
+        "STORY-118",
+        "STORY-112",
+        "STORY-114",
+        "STORY-115",
+        "STORY-116"
+      ],
+      "description": "Re-groomed 2026-09-25 (split from the original 8-point hardening story; session management, alerts and browser hardening moved to STORY-118). Passkeys are optional, but once a user has one it is required at every sign-in, so a stolen Discord account alone cannot reach the dashboard. Removing a passkey needs a fresh passkey check. Sensitive writes (owner console, integrations, moderation escalation policy, reaction-role publishing) always need a passkey check newer than 5 minutes, so users without a passkey cannot perform them. Bot owners (BOT_OWNER_ID) must have a passkey. Recovery is an operator CLI reset, not recovery codes. Sessions stay opaque and server-side: JWE was re-evaluated and rejected again because a stolen token is replayed, not decrypted (ADR-013)."
+    },
+    {
+      "id": "STORY-118",
+      "epic": "EPIC-011",
+      "title": "Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-117"
+      ],
+      "blocks": [
+        "STORY-119"
+      ],
+      "description": "Split from STORY-117 on 2026-09-25. Makes a stolen session visible and killable (active sessions page, new-device and passkey-removal DMs, dashboard change notices in the guild log channel) and hardens the browser side (nonce CSP, security headers, React taint, rate limits) with a test that fails if any Server Action or route handler skips its guard. Risk-based re-checks on IP or user-agent changes were considered and dropped: an infostealer copies the device cookie together with the session cookie, and IP binding misfires for mobile and VPN users."
+    },
+    {
+      "id": "STORY-119",
+      "epic": "EPIC-011",
+      "title": "Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": [
+        "STORY-118"
+      ],
       "blocks": [],
-      "description": "Makes a stolen credential short-lived, revocable, unable to perform sensitive writes without a second factor, and visible to the owner. JWKS/JWE were considered and rejected: one app issues and verifies its own sessions, so there is no verifier to publish keys to, and a self-contained token cannot be revoked. Browser-side per-request signing was rejected because malware that copies the browser profile copies the key; Chrome DBSC is an optional enhancement where supported."
+      "description": "Optional enhancement from ADR-013 decision 4, parked 2026-09-25. Where the browser supports DBSC, bind the dashboard session to a TPM-held key and issue short-lived cookies that must be refreshed with a signature, so a cookie copied by malware stops working within minutes. Estimate is provisional: confirm current browser and platform support before grooming."
     },
     {
       "id": "STORY-120",
@@ -2709,34 +2746,48 @@
     {
       "id": "TASK-1171",
       "parent": "STORY-117",
-      "title": "WebAuthn Passkey Enrollment & Step-Up Re-Verification for Sensitive Writes (Mandatory for Bot-Owner Console)",
+      "title": "WebAuthn Passkeys: web_passkeys Table, Security Page (Add/Remove), Sign-In Gate for Enrolled Users & requireStepUp",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
       "blocks": [
-        "TASK-1172"
+        "TASK-1174"
       ],
-      "description": "Dual-dialect web_passkeys table and WebAuthn registration/assertion (library choice recorded in dependency-evaluation.md). Once a user enrolls a passkey it is always required; bot owners (ownerIds) must enroll before using the owner console. Sensitive Server Actions (owner console, moderation policy, reaction-role publish, integrations) require a passkey assertion newer than a short window (step_up_at on the session), and step-up rotates the session ID. A stolen session cookie or a compromised Discord account alone cannot pass step-up. Also add BOT_OWNER_ID (comma-separated) to the core config schema and wire it as ownerIds for the bot middleware and the dashboard owner guard: .env.example documents it but nothing reads it today."
+      "description": "Dual-dialect web_passkeys table (credential ID, public key, signature counter, transports, device type and backed-up flags, user-given name, created and last-used times) and @simplewebauthn/server + @simplewebauthn/browser (recorded in dependency-evaluation.md). rpID and origin come from DASHBOARD_URL; user verification required; attestation none. Challenges travel in a short-lived vault-sealed __Host- cookie bound to the session. Security page lists passkeys (synced or this device only) and adds or removes them; removal needs a passkey check within 5 minutes. Sign-in gate: while a user has at least one passkey, a session without a passkey check is redirected to a verify page before any other page or Server Action. A passkey check sets step_up_at and rotates the session ID (re-encrypting the Discord tokens under the new ID). requireStepUp() returns a step-up-required result that the client form resolves with a passkey prompt and retries. Passkey add/remove are written to audit_logs. Tests: registration and assertion verification, counter regression, sign-in gate, step-up window, session rotation."
     },
     {
-      "id": "TASK-1172",
+      "id": "TASK-1174",
       "parent": "STORY-117",
-      "title": "Active Sessions Page (Revoke, Sign Out Everywhere), New Sign-In DM Alerts & Dashboard Change Notices to the Guild Log Channel",
+      "title": "BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & ririko passkeys:reset Recovery CLI",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1171"
       ],
       "blocks": [
+        "STORY-118"
+      ],
+      "description": "Add BOT_OWNER_ID (comma-separated Discord user IDs) to the core config schema. requireOwner() allows only listed owners who have a passkey and a passkey check newer than 5 minutes; the owner console pages in STORY-112 and STORY-115 use it. The bot permission middleware is not wired today and no command is owner-only, so the bot is left unchanged. ririko passkeys:reset <user_id> deletes a user's passkeys and ends their sessions, audited with a cli actor, as the recovery path for lost authenticators. Tests for the guard and the CLI."
+    },
+    {
+      "id": "TASK-1172",
+      "parent": "STORY-118",
+      "title": "Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "STORY-117"
+      ],
+      "blocks": [
         "TASK-1173"
       ],
-      "description": "List the user's web_sessions (created, last seen, IP, user agent) with per-session revoke and sign out everywhere. The bot DMs the user on a sign-in from a new device, and posts a notice to the guild log channel when dashboard changes are saved, so a silent takeover is detected. Changes stay recorded in audit_logs with IP and user agent."
+      "description": "List the user's web_sessions (created, last seen, IP, user agent, current session marked) with per-session revoke and sign out everywhere. A long-lived random __Host- device cookie, stored hashed in a dual-dialect web_known_devices table, marks known browsers; a sign-in from an unknown one, and any passkey removal, sends the user a Discord DM through bot-token REST (best effort: users who block DMs are skipped). After a dashboard save with changes, post a notice to the guild log_channel_id after the response is sent (next/server after()). Changes stay in audit_logs with IP and user agent."
     },
     {
       "id": "TASK-1173",
-      "parent": "STORY-117",
+      "parent": "STORY-118",
       "title": "Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test",
       "points": 3,
       "status": "TODO",
@@ -2744,7 +2795,7 @@
         "TASK-1172"
       ],
       "blocks": [],
-      "description": "Nonce-based CSP (no unsafe-inline), frame-ancestors none, HSTS, nosniff, strict Referrer-Policy and COOP. Enable React taint (experimental_taintUniqueValue / taintObjectReference) for secrets and Discord tokens, and import server-only in every module that touches them. Origin check on route handlers. A test enumerates every Server Action and route handler and fails if one skips requireGuildAccess (or the owner guard); middleware/proxy is never the authorization layer (CVE-2025-29927). Rate limits on auth routes and Server Actions."
+      "description": "Nonce-based CSP without unsafe-inline, frame-ancestors none, HSTS, nosniff, strict Referrer-Policy and COOP, set in proxy.ts, which only sets headers and never authorizes (CVE-2025-29927). React taint (experimental_taintUniqueValue) on the bot token, OAuth client secret and vault key, and server-only in every module that reads them. In-process token-bucket rate limits on the auth routes and Server Actions (enough for one dashboard instance; move them to the database if the dashboard is ever scaled out). A test parses every use-server export and route handler and fails if one does not go through saveGuildSettings, requireGuildAccess, requireStepUp or requireOwner, apart from an explicit allowlist of auth routes."
     },
     {
       "id": "TASK-1043",
