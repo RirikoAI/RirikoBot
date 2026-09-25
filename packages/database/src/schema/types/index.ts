@@ -185,6 +185,7 @@ export type WebSession = typeof sqlite.webSessions.$inferSelect;
 export type NewWebSession = typeof sqlite.webSessions.$inferInsert;
 export type WebPasskey = typeof sqlite.webPasskeys.$inferSelect;
 export type NewWebPasskey = typeof sqlite.webPasskeys.$inferInsert;
+export type WebKnownDevice = typeof sqlite.webKnownDevices.$inferSelect;
 
 // Guild Config Change Feed
 export type GuildConfigVersion = typeof sqlite.guildConfigVersions.$inferSelect;

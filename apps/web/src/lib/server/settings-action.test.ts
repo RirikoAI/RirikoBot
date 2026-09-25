@@ -6,15 +6,22 @@ const mocks = vi.hoisted(() => ({
   requireGuildAccess: vi.fn(),
   update: vi.fn(),
   revalidatePath: vi.fn(),
+  after: [] as Array<() => unknown>,
+  guildSettingsChanged: vi.fn(),
 }));
 
-vi.mock('next/headers', () => ({ headers: async () => mocks.headers }));
+vi.mock('next/headers', () => ({
+  headers: async () => mocks.headers,
+  cookies: async () => ({ get: () => undefined }),
+}));
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
+vi.mock('next/server', () => ({ after: (task: () => unknown) => mocks.after.push(task) }));
 vi.mock('./guilds/require-guild-access', () => ({ requireGuildAccess: mocks.requireGuildAccess }));
 vi.mock('./services', () => ({
   getWebServices: async () => ({
     config: { DASHBOARD_URL: 'https://dash.example.com' },
     guildConfig: { update: mocks.update },
+    notifier: { guildSettingsChanged: mocks.guildSettingsChanged },
   }),
 }));
 
@@ -25,6 +32,7 @@ const GUILD = '100000000000000001';
 describe('saveGuildSettings (TASK-1112)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.after = [];
     mocks.headers = new Headers({
       origin: 'https://dash.example.com',
       'x-forwarded-for': '203.0.113.7',
@@ -63,6 +71,27 @@ describe('saveGuildSettings (TASK-1112)', () => {
       values: { prefix: '?', timezone: 'UTC' },
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith(`/dashboard/${GUILD}`, 'layout');
+  });
+
+  it('posts a change notice after the response only when something changed (TASK-1172)', async () => {
+    const changes = [{ field: 'prefix', before: '!', after: '?' }];
+    mocks.update.mockResolvedValue({ values: { prefix: '?', timezone: 'UTC' }, changes });
+    await saveGuildSettings(GUILD, 'general', { prefix: '?' });
+
+    expect(mocks.guildSettingsChanged).not.toHaveBeenCalled();
+    expect(mocks.after).toHaveLength(1);
+    await mocks.after[0]?.();
+    expect(mocks.guildSettingsChanged).toHaveBeenCalledWith(GUILD, {
+      userId: 'user-1',
+      module: 'general',
+      changes,
+    });
+
+    mocks.after = [];
+    mocks.update.mockResolvedValue({ values: { prefix: '?', timezone: 'UTC' }, changes: [] });
+    const state = await saveGuildSettings(GUILD, 'general', { prefix: '?' });
+    expect(state).toMatchObject({ status: 'saved', message: 'Nothing changed.' });
+    expect(mocks.after).toHaveLength(0);
   });
 
   it('never saves when the guard rejects the guild', async () => {

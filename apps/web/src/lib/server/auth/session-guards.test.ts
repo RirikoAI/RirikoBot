@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   passkeyCount: 0,
   headers: new Headers({ origin: 'https://dash.example.com' }),
   remove: vi.fn(),
+  after: [] as Array<() => unknown>,
+  passkeyRemoved: vi.fn(),
 }));
 
 vi.mock('next/headers', () => ({
@@ -25,11 +27,13 @@ vi.mock('next/navigation', () => ({
   },
 }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
+vi.mock('next/server', () => ({ after: (task: () => unknown) => mocks.after.push(task) }));
 vi.mock('../services', () => ({
   getWebServices: async () => ({
     config: { DASHBOARD_URL: 'https://dash.example.com', BOT_OWNER_ID: ['owner-1'] },
     sessions: { resolve: async () => mocks.session },
     passkeys: { count: async () => mocks.passkeyCount, remove: mocks.remove },
+    notifier: { passkeyRemoved: mocks.passkeyRemoved },
   }),
 }));
 
@@ -93,11 +97,20 @@ describe('removePasskey (TASK-1171)', () => {
     expect(mocks.remove).not.toHaveBeenCalled();
   });
 
-  it('removes the passkey after a recent passkey check', async () => {
+  it('removes the passkey after a recent passkey check and DMs the user', async () => {
     mocks.session = session(new Date());
+    mocks.after = [];
     mocks.remove.mockResolvedValue({ id: 'cred-1', name: 'Laptop' });
     expect(await removePasskey('cred-1')).toEqual({ ok: true, data: null });
     expect(mocks.remove).toHaveBeenCalledWith('user-1', 'cred-1', {
+      ipAddress: null,
+      userAgent: null,
+    });
+
+    expect(mocks.passkeyRemoved).not.toHaveBeenCalled();
+    await mocks.after[0]?.();
+    expect(mocks.passkeyRemoved).toHaveBeenCalledWith('user-1', 'Laptop', 1, {
+      at: expect.any(Date),
       ipAddress: null,
       userAgent: null,
     });
