@@ -84,6 +84,13 @@ Bot process
 
 The dashboard and CLI run in separate processes from the bot, so they cannot clear the bot's in-memory caches directly (CHORE-1101). The watcher compares versions over a 60-second overlap window, so a second write in the same millisecond, or a write committed after a newer one, is still picked up. A module whose bot-side service caches settings must subscribe to `guild:configChanged` when its dashboard page is added.
 
+### 3.4. Adding a Settings Page
+1. Add the module's strict schema to `GuildConfigSchemas` in `packages/core/src/config/guild-config.ts` (only keys the bot reads) and its read/write store to `GuildConfigService` in `packages/services/src/guild/guild-config.service.ts`.
+2. If a bot service caches those settings, subscribe it to `guild:configChanged` in `apps/bot/src/services.ts`.
+3. Add `app/dashboard/[guildId]/<module>/actions.ts` (`'use server'`) whose action returns `saveGuildSettings(guildId, '<module>', pickFormFields(formData, [...]))`. That helper runs the Origin check, `requireGuildAccess`, validation, the audited write and `revalidatePath`.
+4. Add `page.tsx` that calls `requireGuildAccess(guildId)`, reads `guildConfig.get(guildId, '<module>')` and renders `SettingsForm` with `TextField`, `SelectField`, `ChannelSelectField` or `RoleSelectField`. Field errors and saved values come back through `useActionState`.
+5. Add the page to `GUILD_NAV_ITEMS` in `apps/web/src/lib/dashboard-nav.ts`.
+
 ---
 
 ## 4. Comprehensive Module Configuration Pages
