@@ -80,10 +80,7 @@ function taintSecrets(config: WebConfig): void {
 async function createWebServices(): Promise<WebServices> {
   const config = loadWebConfig();
   taintSecrets(config);
-  const db = await createDatabaseClient({
-    dialect: config.DATABASE_DIALECT,
-    url: config.DATABASE_URL,
-  });
+  const db = await getDatabase(config);
   const vault = SecretVault.fromConfig(config);
   const oauth = new DiscordOAuthClient({
     clientId: config.DISCORD_CLIENT_ID,
@@ -135,15 +132,31 @@ async function createWebServices(): Promise<WebServices> {
   };
 }
 
-// Kept on globalThis so dev-mode module reloads reuse one database connection.
-const globalForServices = globalThis as typeof globalThis & {
-  __ririkoWebServices?: Promise<WebServices>;
+// Only the database connection is process-wide (kept on globalThis so dev-mode reloads reuse
+// it). The services are built per module instance: a process-wide singleton would keep running
+// old code after a hot reload and would hand callers objects whose classes come from another
+// module instance, where `instanceof` checks fail.
+const globalForDatabase = globalThis as typeof globalThis & {
+  __ririkoWebDatabase?: Promise<DatabaseClient>;
 };
 
-export function getWebServices(): Promise<WebServices> {
-  globalForServices.__ririkoWebServices ??= createWebServices().catch((error: unknown) => {
-    delete globalForServices.__ririkoWebServices;
+function getDatabase(config: WebConfig): Promise<DatabaseClient> {
+  globalForDatabase.__ririkoWebDatabase ??= createDatabaseClient({
+    dialect: config.DATABASE_DIALECT,
+    url: config.DATABASE_URL,
+  }).catch((error: unknown) => {
+    delete globalForDatabase.__ririkoWebDatabase;
     throw error;
   });
-  return globalForServices.__ririkoWebServices;
+  return globalForDatabase.__ririkoWebDatabase;
+}
+
+let services: Promise<WebServices> | undefined;
+
+export function getWebServices(): Promise<WebServices> {
+  services ??= createWebServices().catch((error: unknown) => {
+    services = undefined;
+    throw error;
+  });
+  return services;
 }
