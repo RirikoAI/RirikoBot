@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "CHORE-1101",
   "epics": [
     {
       "id": "EPIC-000",
@@ -182,7 +182,7 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it."
     },
     {
       "id": "EPIC-012",
@@ -820,7 +820,7 @@
       "epic": "EPIC-011",
       "title": "Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "EPIC-001"
       ],
@@ -845,7 +845,7 @@
         "STORY-115",
         "STORY-116"
       ],
-      "description": "Foundation for all module pages: guild config schemas defined once in @ririko/core, a GuildConfigService that validates, persists through existing repositories and writes audit_logs field diffs, the guild layout and form kit, the General tab, and the matching `ririko guild:config` CLI. Re-scoped during grooming: the original 20+ tabs moved to STORY-114/115/116 and Zod parity moved here from STORY-113."
+      "description": "Foundation for all module pages: guild config schemas defined once in @ririko/core, a GuildConfigService that validates, persists through existing repositories and writes audit_logs field diffs, the guild layout and form kit, the General tab, and the matching `ririko guild:config` CLI. Re-scoped during grooming: the original 20+ tabs moved to STORY-114/115/116 and Zod parity moved here from STORY-113. Re-groomed 2026-09-25: CHORE-1101 added as a prerequisite for cross-process cache invalidation; the General tab drops locale because the bot does not read it."
     },
     {
       "id": "STORY-112",
@@ -2494,13 +2494,14 @@
       "points": 3,
       "status": "TODO",
       "requires": [
-        "STORY-110"
+        "STORY-110",
+        "CHORE-1101"
       ],
       "blocks": [
         "TASK-1112",
         "TASK-1113"
       ],
-      "description": "Define per-module config schemas once in packages/core (only keys the bot reads). GuildConfigService in packages/services reads and writes through the existing repositories, validates with those schemas, invalidates the GuildSettingsService cache, and records actor, IP and before/after field diffs in audit_logs. Unit tests per schema and for the diff writer."
+      "description": "Define per-module config schemas once in packages/core, only for keys the bot reads; this story adds the general module (prefix, timezone) and moves the prefix rules out of GuildSettingsService so the /prefix command, dashboard and CLI share them. Add an AuditLogRepository (dual-dialect, new user_agent column) and a field-diff helper. GuildConfigService in packages/services reads and writes through the existing repositories inside one transaction: validate with the shared schema, write, bump guild_config_versions (CHORE-1101) and record actor, IP, user agent and before/after field diffs in audit_logs when something changed. Unit tests per schema and for the diff writer."
     },
     {
       "id": "TASK-1112",
@@ -2518,7 +2519,7 @@
         "STORY-115",
         "STORY-116"
       ],
-      "description": "Guild-scoped layout with sidebar navigation, channel and role pickers backed by cached bot-token REST, and a reusable form pattern: Server Action -> requireGuildAccess -> Zod parse -> GuildConfigService, with field-level errors and origin checks. General tab covers prefix, timezone and locale (reusing GuildSettingsService validation)."
+      "description": "Guild-scoped layout with sidebar navigation (only pages that exist), channel and role pickers backed by cached bot-token REST, and a reusable form pattern: Server Action -> requireGuildAccess -> Origin check -> Zod parse -> GuildConfigService, with field-level errors via useActionState. General tab covers prefix and timezone. Locale is left off because the bot does not read it (no placeholder settings)."
     },
     {
       "id": "TASK-1113",
@@ -2717,7 +2718,7 @@
       "blocks": [
         "TASK-1172"
       ],
-      "description": "Dual-dialect web_passkeys table and WebAuthn registration/assertion (library choice recorded in dependency-evaluation.md). Once a user enrolls a passkey it is always required; bot owners (ownerIds) must enroll before using the owner console. Sensitive Server Actions (owner console, moderation policy, reaction-role publish, integrations) require a passkey assertion newer than a short window (step_up_at on the session), and step-up rotates the session ID. A stolen session cookie or a compromised Discord account alone cannot pass step-up."
+      "description": "Dual-dialect web_passkeys table and WebAuthn registration/assertion (library choice recorded in dependency-evaluation.md). Once a user enrolls a passkey it is always required; bot owners (ownerIds) must enroll before using the owner console. Sensitive Server Actions (owner console, moderation policy, reaction-role publish, integrations) require a passkey assertion newer than a short window (step_up_at on the session), and step-up rotates the session ID. A stolen session cookie or a compromised Discord account alone cannot pass step-up. Also add BOT_OWNER_ID (comma-separated) to the core config schema and wire it as ownerIds for the bot middleware and the dashboard owner guard: .env.example documents it but nothing reads it today."
     },
     {
       "id": "TASK-1172",
@@ -3153,6 +3154,19 @@
       ],
       "blocks": [],
       "description": "Add ririko image-configure / image:configure interactive wizard and flag-based CLI command to configure image generation providers (Gemini Imagen, ComfyUI, Replicate), API keys/URLs, default provider, user daily quota, test generation, and add doctor diagnostic check."
+    },
+    {
+      "id": "CHORE-1101",
+      "title": "Cross-Process Guild Config Change Feed (guild_config_versions Table, Bot Watcher & Cache Invalidation Events)",
+      "points": 2,
+      "status": "IN_PROGRESS",
+      "requires": [
+        "STORY-110"
+      ],
+      "blocks": [
+        "TASK-1111"
+      ],
+      "description": "EPIC-011 prerequisite added during STORY-111 grooming (2026-09-25). The dashboard and CLI run in separate processes from the bot, so they cannot clear the bot's in-memory setting caches (GuildSettingsService caches for 5 minutes). Add a dual-dialect guild_config_versions table (guild_id, module, version, updated_at) that writers bump in the same transaction as the settings write, a bot-side watcher that polls it every few seconds and emits a guild:config-changed EventBus event, and subscribe GuildSettingsService to evict the guild. Later module stories subscribe their own caches."
     }
   ],
   "bugs": [
