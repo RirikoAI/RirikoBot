@@ -16,6 +16,7 @@
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
 | `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | `EPIC-011` | [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) |
+| `BUG-0020` | Bug | Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors | 2 | `STORY-117` | [BUG-0020.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0020.md) |
 
 ---
 

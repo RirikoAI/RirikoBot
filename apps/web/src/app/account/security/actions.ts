@@ -2,11 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
-import { ValidationError } from '@ririko/core';
 import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/server';
 import { PASSKEY_REASON_MESSAGES, type PasskeyActionResult } from '@/lib/passkey-action-result';
 import { enrollmentState } from '@/lib/server/auth/passkey-policy';
-import { PasskeyVerificationError } from '@/lib/server/auth/passkeys';
 import {
   getPasskeyCount,
   requireSession,
@@ -58,15 +56,9 @@ export async function finishPasskeyRegistration(
   if (!allowed.ok) return allowed;
   const { notifier, passkeys, sessions } = await getWebServices();
   const actor = await requestActor();
-  let passkey;
-  try {
-    passkey = await passkeys.register(allowed.data, name, response, actor);
-  } catch (error) {
-    if (error instanceof ValidationError || error instanceof PasskeyVerificationError) {
-      return { ok: false, error: error.userMessage };
-    }
-    throw error;
-  }
+  const outcome = await passkeys.register(allowed.data, name, response, actor);
+  if (!outcome.ok) return { ok: false, error: outcome.message };
+  const passkey = outcome.value;
   const rotated = await sessions.completePasskeyCheck(allowed.data);
   await writeSessionCookie(rotated.token, rotated.session);
   const added = { name: passkey.name, context: { at: passkey.createdAt, ...actor } };
