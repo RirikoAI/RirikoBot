@@ -29,9 +29,9 @@ export function createHelpCommand(registry: CommandRegistry, options: HelpOption
     async execute(ctx: CommandContext): Promise<void> {
       const resolvedPrefix = options.resolvePrefix
         ? await options.resolvePrefix(ctx.guildId ?? ctx.guild?.id)
-        : (ctx.source === 'prefix' && ctx.invokedPrefix && ctx.invokedPrefix !== '/'
+        : ctx.source === 'prefix' && ctx.invokedPrefix && ctx.invokedPrefix !== '/'
           ? ctx.invokedPrefix
-          : (options.defaultPrefix ?? DEFAULT_COMMAND_PREFIX));
+          : (options.defaultPrefix ?? DEFAULT_COMMAND_PREFIX);
 
       const query = ctx.options.getString('command');
 

@@ -166,10 +166,17 @@ describe('TASK-1041: PvE Dungeon Progression Core & Scaling Mechanics', () => {
       expect(fireCard.critRate).toBe(0.2); // Fire is exempt
 
       // Scorched Earth on Turn 2: unprotected takes 6% max HP burn (120 DMG)
-      const boss = createMockCombatant({ id: 'boss', team: 'TEAM_B', maxHealth: 5000, currentHealth: 5000 });
+      const boss = createMockCombatant({
+        id: 'boss',
+        team: 'TEAM_B',
+        maxHealth: 5000,
+        currentHealth: 5000,
+      });
       const logsTurn2 = handler.applyEndOfTurnAffixes(2, [waterCard], boss);
       expect(waterCard.currentHealth).toBe(2000 - 120);
-      expect(logsTurn2.some((l) => l.message.includes('Scorched Earth') && l.message.includes('seared'))).toBe(true);
+      expect(
+        logsTurn2.some((l) => l.message.includes('Scorched Earth') && l.message.includes('seared')),
+      ).toBe(true);
 
       // Earth shielded card is immune to Scorched Earth
       const earthCard = createMockCombatant({
@@ -179,7 +186,9 @@ describe('TASK-1041: PvE Dungeon Progression Core & Scaling Mechanics', () => {
       });
       const logsProtected = handler.applyEndOfTurnAffixes(2, [earthCard], boss);
       expect(earthCard.currentHealth).toBe(2000);
-      expect(logsProtected.some((l) => l.message.includes('protected from Scorched Earth'))).toBe(true);
+      expect(logsProtected.some((l) => l.message.includes('protected from Scorched Earth'))).toBe(
+        true,
+      );
     });
 
     it('S2 Abyssal Maelstrom: Torrential Deluge cuts speed, Lightning gets +20% bonus', () => {

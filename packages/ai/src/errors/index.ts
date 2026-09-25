@@ -49,11 +49,18 @@ export class AiRateLimitError extends AiProviderError {
     } = {},
   ) {
     super(providerId, {
-      ...(options.message ? { message: options.message } : { message: `AI provider '${providerId}' rate limit or quota exceeded.` }),
+      ...(options.message
+        ? { message: options.message }
+        : { message: `AI provider '${providerId}' rate limit or quota exceeded.` }),
       externalStatusCode: 429,
       isRetryable: true,
       ...(options.details !== undefined || options.retryAfterMs !== undefined
-        ? { details: { ...((options.details as object) || {}), ...(options.retryAfterMs !== undefined ? { retryAfterMs: options.retryAfterMs } : {}) } }
+        ? {
+            details: {
+              ...((options.details as object) || {}),
+              ...(options.retryAfterMs !== undefined ? { retryAfterMs: options.retryAfterMs } : {}),
+            },
+          }
         : {}),
     });
     this.name = 'AiRateLimitError';
@@ -71,9 +78,7 @@ export class AiProviderExhaustionError extends RirikoError {
   public readonly failures: readonly ProviderFailureReport[];
 
   constructor(failures: ProviderFailureReport[]) {
-    const errorDetails = failures
-      .map((f) => `[${f.providerId}]: ${f.error.message}`)
-      .join('; ');
+    const errorDetails = failures.map((f) => `[${f.providerId}]: ${f.error.message}`).join('; ');
 
     super(`All configured AI providers in fallback chain failed: ${errorDetails}`, {
       code: ErrorCode.EXTERNAL_API_ERROR,
@@ -123,4 +128,3 @@ export class AiSecurityViolationError extends RirikoError {
     this.denialReason = reason;
   }
 }
-

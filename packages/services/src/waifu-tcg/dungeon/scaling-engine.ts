@@ -27,14 +27,66 @@ export const BASELINE_F1_STATS: Readonly<MonsterStats> = Object.freeze({
   speed: 25,
 });
 
-export const SAMPLE_PROGRESSION_TABLE: Record<number, MonsterStats & { type: DungeonFloorType; check: string }> = {
-  1: { hp: 1200, attack: 120, defense: 80, speed: 25, type: 'STANDARD', check: 'Starter Gear check' },
-  5: { hp: 3360, attack: 315, defense: 210, speed: 38, type: 'MINI_BOSS', check: 'Elemental Match check' },
-  10: { hp: 10240, attack: 845, defense: 560, speed: 52, type: 'MAJOR_BOSS', check: 'Skill & Potion timing check' },
-  20: { hp: 23100, attack: 1850, defense: 1220, speed: 78, type: 'MAJOR_BOSS', check: '+5 Enhanced Gear & Synergies' },
-  30: { hp: 52100, attack: 4050, defense: 2680, speed: 115, type: 'MAJOR_BOSS', check: 'SR/UR Gear + Accessory check' },
-  40: { hp: 117500, attack: 8900, defense: 5880, speed: 165, type: 'MAJOR_BOSS', check: 'Dual Elemental Barrier check' },
-  50: { hp: 265000, attack: 19500, defense: 12900, speed: 230, type: 'MAJOR_BOSS', check: 'Mythic Endgame Master Challenge' },
+export const SAMPLE_PROGRESSION_TABLE: Record<
+  number,
+  MonsterStats & { type: DungeonFloorType; check: string }
+> = {
+  1: {
+    hp: 1200,
+    attack: 120,
+    defense: 80,
+    speed: 25,
+    type: 'STANDARD',
+    check: 'Starter Gear check',
+  },
+  5: {
+    hp: 3360,
+    attack: 315,
+    defense: 210,
+    speed: 38,
+    type: 'MINI_BOSS',
+    check: 'Elemental Match check',
+  },
+  10: {
+    hp: 10240,
+    attack: 845,
+    defense: 560,
+    speed: 52,
+    type: 'MAJOR_BOSS',
+    check: 'Skill & Potion timing check',
+  },
+  20: {
+    hp: 23100,
+    attack: 1850,
+    defense: 1220,
+    speed: 78,
+    type: 'MAJOR_BOSS',
+    check: '+5 Enhanced Gear & Synergies',
+  },
+  30: {
+    hp: 52100,
+    attack: 4050,
+    defense: 2680,
+    speed: 115,
+    type: 'MAJOR_BOSS',
+    check: 'SR/UR Gear + Accessory check',
+  },
+  40: {
+    hp: 117500,
+    attack: 8900,
+    defense: 5880,
+    speed: 165,
+    type: 'MAJOR_BOSS',
+    check: 'Dual Elemental Barrier check',
+  },
+  50: {
+    hp: 265000,
+    attack: 19500,
+    defense: 12900,
+    speed: 230,
+    type: 'MAJOR_BOSS',
+    check: 'Mythic Endgame Master Challenge',
+  },
 };
 
 export class ScalingEngine {
@@ -145,7 +197,9 @@ export class ScalingEngine {
   /**
    * Retrieves reference stats from the sample table or computes via model.
    */
-  public getSampleProgression(floorNumber: number): (MonsterStats & { type: DungeonFloorType; check: string }) | null {
+  public getSampleProgression(
+    floorNumber: number,
+  ): (MonsterStats & { type: DungeonFloorType; check: string }) | null {
     return SAMPLE_PROGRESSION_TABLE[floorNumber] ?? null;
   }
 }

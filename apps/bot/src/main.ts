@@ -360,7 +360,9 @@ export async function main(): Promise<void> {
       services.guildConfigWatcher.start();
       services.commandUsageRecorder.start();
       services.botStatusReporter?.start();
-      console.log('📡 Stream Watcher, Free Games Announcer, Giveaways, AutoRole, Reminder & Bot Status engines active!');
+      console.log(
+        '📡 Stream Watcher, Free Games Announcer, Giveaways, AutoRole, Reminder & Bot Status engines active!',
+      );
 
       // Clean up orphaned dynamic voice channels across guilds
       for (const [, guild] of bot.client.guilds.cache) {

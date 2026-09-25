@@ -265,8 +265,7 @@ describe('AutoMod Rules & Engine Suite', () => {
         guildId: 'guild-1',
         channelId: 'chan-1',
         userId: 'user-1',
-        content:
-          '<@111> <@222> <@333> <@&444> <@555> <@666> wake up!',
+        content: '<@111> <@222> <@333> <@&444> <@555> <@666> wake up!',
       };
 
       const result = await rule.evaluate(context, {
@@ -613,8 +612,7 @@ describe('AutoMod Rules & Engine Suite', () => {
         guildId: 'guild-1',
         channelId: 'chan-1',
         userId: 'attacker-1',
-        content:
-          'Join discord.gg/spammer and claim free gift https://discord-nitro.gift/claim',
+        content: 'Join discord.gg/spammer and claim free gift https://discord-nitro.gift/claim',
       };
 
       const result = await service.evaluate(context);

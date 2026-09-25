@@ -189,8 +189,14 @@ export class HelpGenerator {
         let desc = metadata.description || 'No description provided.';
         if (metadata.aliases && metadata.aliases.length > 0) {
           const maxShown = 5;
-          const shown = metadata.aliases.slice(0, maxShown).map((a) => `\`${prefix}${a}\``).join(', ');
-          const more = metadata.aliases.length > maxShown ? ` (+${metadata.aliases.length - maxShown} more)` : '';
+          const shown = metadata.aliases
+            .slice(0, maxShown)
+            .map((a) => `\`${prefix}${a}\``)
+            .join(', ');
+          const more =
+            metadata.aliases.length > maxShown
+              ? ` (+${metadata.aliases.length - maxShown} more)`
+              : '';
           desc += `\n*Aliases: ${shown}${more}*`;
         }
 

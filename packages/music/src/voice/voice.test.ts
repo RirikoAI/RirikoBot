@@ -11,7 +11,11 @@ class MockVoiceConnection extends EventEmitter {
 
   destroy = vi.fn(() => {
     this.state.status = VoiceConnectionStatus.Destroyed;
-    this.emit('stateChange', { status: VoiceConnectionStatus.Ready }, { status: VoiceConnectionStatus.Destroyed });
+    this.emit(
+      'stateChange',
+      { status: VoiceConnectionStatus.Ready },
+      { status: VoiceConnectionStatus.Destroyed },
+    );
   });
 
   rejoin = vi.fn(() => true);

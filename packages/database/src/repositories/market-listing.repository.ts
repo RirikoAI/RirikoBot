@@ -22,8 +22,14 @@ export class MarketListingRepository extends BaseRepository<
       price: Number(row['price']),
       taxPaid: Number(row['taxPaid'] ?? 0),
       status: String(row['status']),
-      createdAt: row['createdAt'] instanceof Date ? row['createdAt'] : new Date(row['createdAt'] as string | number),
-      expiresAt: row['expiresAt'] instanceof Date ? row['expiresAt'] : new Date(row['expiresAt'] as string | number),
+      createdAt:
+        row['createdAt'] instanceof Date
+          ? row['createdAt']
+          : new Date(row['createdAt'] as string | number),
+      expiresAt:
+        row['expiresAt'] instanceof Date
+          ? row['expiresAt']
+          : new Date(row['expiresAt'] as string | number),
     } as unknown as MarketListing;
   }
 
@@ -96,7 +102,11 @@ export class MarketListingRepository extends BaseRepository<
     }
   }
 
-  async update(id: string, data: Partial<NewMarketListing>, tx?: DatabaseClient): Promise<MarketListing> {
+  async update(
+    id: string,
+    data: Partial<NewMarketListing>,
+    tx?: DatabaseClient,
+  ): Promise<MarketListing> {
     const client = this.getClient(tx);
     try {
       if (this.isSqlite(client)) {
@@ -133,12 +143,20 @@ export class MarketListingRepository extends BaseRepository<
     }
   }
 
-  async updateStatus(id: string, status: MarketListingStatus, tx?: DatabaseClient): Promise<MarketListing> {
+  async updateStatus(
+    id: string,
+    status: MarketListingStatus,
+    tx?: DatabaseClient,
+  ): Promise<MarketListing> {
     return this.update(id, { status }, tx);
   }
 
   async listActiveListings(
-    options?: { sellerUserId?: string | undefined; limit?: number | undefined; offset?: number | undefined },
+    options?: {
+      sellerUserId?: string | undefined;
+      limit?: number | undefined;
+      offset?: number | undefined;
+    },
     tx?: DatabaseClient,
   ): Promise<MarketListing[]> {
     const client = this.getClient(tx);
@@ -224,7 +242,10 @@ export class MarketListingRepository extends BaseRepository<
     }
   }
 
-  async countActiveListings(options?: { sellerUserId?: string | undefined }, tx?: DatabaseClient): Promise<number> {
+  async countActiveListings(
+    options?: { sellerUserId?: string | undefined },
+    tx?: DatabaseClient,
+  ): Promise<number> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const conditions = [eq(sqliteSchema.marketListings.status, 'ACTIVE')];

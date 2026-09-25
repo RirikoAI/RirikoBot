@@ -4,8 +4,16 @@ import { REACTION_NAMES } from '@ririko/services';
 import { createReactCommand } from '../react.command.js';
 import type { BotServices } from '../../../services.js';
 
-const INVOKER = { id: '111111111111111111', username: 'Invoker', displayAvatarURL: () => 'https://cdn/avatar-1.png' };
-const TARGET = { id: '222222222222222222', username: 'Target', displayAvatarURL: () => 'https://cdn/avatar-2.png' };
+const INVOKER = {
+  id: '111111111111111111',
+  username: 'Invoker',
+  displayAvatarURL: () => 'https://cdn/avatar-1.png',
+};
+const TARGET = {
+  id: '222222222222222222',
+  username: 'Target',
+  displayAvatarURL: () => 'https://cdn/avatar-2.png',
+};
 
 function makeClient(users: Record<string, { id: string }>) {
   return {
@@ -59,7 +67,9 @@ function servicesWith(getGifUrl: ReturnType<typeof vi.fn>): BotServices {
 
 describe('/react (TASK-1302)', () => {
   it('replies with the legacy target phrasing and the fetched gif when a distinct target is mentioned', async () => {
-    const getGifUrl = vi.fn().mockResolvedValue({ url: 'https://otakugifs.xyz/hug.gif', stale: false });
+    const getGifUrl = vi
+      .fn()
+      .mockResolvedValue({ url: 'https://otakugifs.xyz/hug.gif', stale: false });
     const { ctx, reply } = makeCtx({
       source: 'slash',
       invokedName: 'react',
@@ -71,27 +81,50 @@ describe('/react (TASK-1302)', () => {
 
     expect(getGifUrl).toHaveBeenCalledWith('hug');
     const payload = reply.mock.calls[0]![0];
-    expect(payload.content).toBe(`<@${INVOKER.id}> wrapped themselves in a warm hug with <@${TARGET.id}>`);
+    expect(payload.content).toBe(
+      `<@${INVOKER.id}> wrapped themselves in a warm hug with <@${TARGET.id}>`,
+    );
     expect(payload.embeds[0].data.image.url).toBe('https://otakugifs.xyz/hug.gif');
-    expect(payload.embeds[0].data.footer).toEqual({ text: 'Requested by Invoker', icon_url: 'https://cdn/avatar-1.png' });
+    expect(payload.embeds[0].data.footer).toEqual({
+      text: 'Requested by Invoker',
+      icon_url: 'https://cdn/avatar-1.png',
+    });
   });
 
   it('replies with the legacy self-directed phrasing when no target is mentioned', async () => {
-    const getGifUrl = vi.fn().mockResolvedValue({ url: 'https://otakugifs.xyz/hug.gif', stale: false });
-    const { ctx, reply } = makeCtx({ source: 'slash', invokedName: 'react', slashType: 'hug', slashTargetUser: null });
+    const getGifUrl = vi
+      .fn()
+      .mockResolvedValue({ url: 'https://otakugifs.xyz/hug.gif', stale: false });
+    const { ctx, reply } = makeCtx({
+      source: 'slash',
+      invokedName: 'react',
+      slashType: 'hug',
+      slashTargetUser: null,
+    });
 
     await createReactCommand(servicesWith(getGifUrl)).execute(ctx);
 
-    expect(reply.mock.calls[0]![0].content).toBe(`<@${INVOKER.id}> wrapped themselves in a warm, self-comforting hug`);
+    expect(reply.mock.calls[0]![0].content).toBe(
+      `<@${INVOKER.id}> wrapped themselves in a warm, self-comforting hug`,
+    );
   });
 
   it('treats a self-mention exactly like no target', async () => {
-    const getGifUrl = vi.fn().mockResolvedValue({ url: 'https://otakugifs.xyz/hug.gif', stale: false });
-    const { ctx, reply } = makeCtx({ source: 'slash', invokedName: 'react', slashType: 'hug', slashTargetUser: INVOKER });
+    const getGifUrl = vi
+      .fn()
+      .mockResolvedValue({ url: 'https://otakugifs.xyz/hug.gif', stale: false });
+    const { ctx, reply } = makeCtx({
+      source: 'slash',
+      invokedName: 'react',
+      slashType: 'hug',
+      slashTargetUser: INVOKER,
+    });
 
     await createReactCommand(servicesWith(getGifUrl)).execute(ctx);
 
-    expect(reply.mock.calls[0]![0].content).toBe(`<@${INVOKER.id}> wrapped themselves in a warm, self-comforting hug`);
+    expect(reply.mock.calls[0]![0].content).toBe(
+      `<@${INVOKER.id}> wrapped themselves in a warm, self-comforting hug`,
+    );
   });
 
   it('renders the legacy "use your imagination" embed when no gif is available', async () => {
@@ -101,12 +134,16 @@ describe('/react (TASK-1302)', () => {
     await createReactCommand(servicesWith(getGifUrl)).execute(ctx);
 
     const embed = reply.mock.calls[0]![0].embeds[0].data;
-    expect(embed.description).toBe("Error fetching the image.\nYou'll have to use your imagination for this one!");
+    expect(embed.description).toBe(
+      "Error fetching the image.\nYou'll have to use your imagination for this one!",
+    );
     expect(embed.image).toBeUndefined();
   });
 
   it('dispatches canonical prefix invocation: !react <type> [@target]', async () => {
-    const getGifUrl = vi.fn().mockResolvedValue({ url: 'https://otakugifs.xyz/poke.gif', stale: false });
+    const getGifUrl = vi
+      .fn()
+      .mockResolvedValue({ url: 'https://otakugifs.xyz/poke.gif', stale: false });
     const { ctx, reply } = makeCtx({
       source: 'prefix',
       invokedName: 'react',
@@ -120,7 +157,9 @@ describe('/react (TASK-1302)', () => {
   });
 
   it('dispatches a legacy alias invocation using ctx.invokedName as the reaction (!hug @user)', async () => {
-    const getGifUrl = vi.fn().mockResolvedValue({ url: 'https://otakugifs.xyz/hug.gif', stale: false });
+    const getGifUrl = vi
+      .fn()
+      .mockResolvedValue({ url: 'https://otakugifs.xyz/hug.gif', stale: false });
     const { ctx, reply } = makeCtx({
       source: 'prefix',
       invokedName: 'hug',
@@ -130,11 +169,15 @@ describe('/react (TASK-1302)', () => {
     await createReactCommand(servicesWith(getGifUrl)).execute(ctx);
 
     expect(getGifUrl).toHaveBeenCalledWith('hug');
-    expect(reply.mock.calls[0]![0].content).toBe(`<@${INVOKER.id}> wrapped themselves in a warm hug with <@${TARGET.id}>`);
+    expect(reply.mock.calls[0]![0].content).toBe(
+      `<@${INVOKER.id}> wrapped themselves in a warm hug with <@${TARGET.id}>`,
+    );
   });
 
   it('dispatches a bare legacy alias with no target (!poke)', async () => {
-    const getGifUrl = vi.fn().mockResolvedValue({ url: 'https://otakugifs.xyz/poke.gif', stale: false });
+    const getGifUrl = vi
+      .fn()
+      .mockResolvedValue({ url: 'https://otakugifs.xyz/poke.gif', stale: false });
     const { ctx, reply } = makeCtx({ source: 'prefix', invokedName: 'poke', rawArgs: [] });
 
     await createReactCommand(servicesWith(getGifUrl)).execute(ctx);
@@ -145,7 +188,11 @@ describe('/react (TASK-1302)', () => {
 
   it('rejects an unknown reaction type with a helpful, non-crashing error', async () => {
     const getGifUrl = vi.fn();
-    const { ctx, reply } = makeCtx({ source: 'slash', invokedName: 'react', slashType: 'not-a-reaction' });
+    const { ctx, reply } = makeCtx({
+      source: 'slash',
+      invokedName: 'react',
+      slashType: 'not-a-reaction',
+    });
 
     await createReactCommand(servicesWith(getGifUrl)).execute(ctx);
 
@@ -204,8 +251,10 @@ describe('/react (TASK-1302)', () => {
 
     const results = respond.mock.calls[0]![0] as Array<{ name: string; value: string }>;
     expect(results.some((r) => r.value === 'hug')).toBe(true);
-    expect(results.every((r) => r.name.toLowerCase().includes('hu') || r.value.toLowerCase().includes('hu'))).toBe(
-      true,
-    );
+    expect(
+      results.every(
+        (r) => r.name.toLowerCase().includes('hu') || r.value.toLowerCase().includes('hu'),
+      ),
+    ).toBe(true);
   });
 });

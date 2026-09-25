@@ -75,7 +75,10 @@ export class TwitchStreamAdapter implements StreamPlatformAdapter {
     if (!token) return null;
 
     try {
-      const sanitized = usernameOrId.toLowerCase().trim().replace(/^https?:\/\/(www\.)?twitch\.tv\//, '');
+      const sanitized = usernameOrId
+        .toLowerCase()
+        .trim()
+        .replace(/^https?:\/\/(www\.)?twitch\.tv\//, '');
       const url = new URL('https://api.twitch.tv/helix/users');
       url.searchParams.set('login', sanitized);
 
@@ -182,7 +185,9 @@ export class TwitchStreamAdapter implements StreamPlatformAdapter {
 
         const thumbUrl = item.thumbnail_url
           ? item.thumbnail_url.replace('{width}', '1280').replace('{height}', '720')
-          : 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' + item.user_login + '-1280x720.jpg';
+          : 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' +
+            item.user_login +
+            '-1280x720.jpg';
 
         resultMap.set(item.user_login.toLowerCase(), {
           streamId: item.id,

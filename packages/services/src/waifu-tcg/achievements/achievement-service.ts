@@ -190,7 +190,13 @@ export class AchievementService {
 
       // 5. Dispatch Equipment / Accessory Item (catalog code or legacy alias)
       if (achievement.rewardItemId && this.grants) {
-        const granted = await this.grants.grant(userId, achievement.rewardItemId, 1, 'ACHIEVEMENT', tx);
+        const granted = await this.grants.grant(
+          userId,
+          achievement.rewardItemId,
+          1,
+          'ACHIEVEMENT',
+          tx,
+        );
         if (granted) dispatched.items.push(granted.item.name);
       }
 
@@ -206,7 +212,8 @@ export class AchievementService {
 
       // Format summary
       const rewardParts: string[] = [];
-      if (dispatched.credits > 0) rewardParts.push(`🪙 +${dispatched.credits.toLocaleString()} Credits`);
+      if (dispatched.credits > 0)
+        rewardParts.push(`🪙 +${dispatched.credits.toLocaleString()} Credits`);
       if (dispatched.exp > 0) rewardParts.push(`⚡ +${dispatched.exp.toLocaleString()} EXP`);
       if (dispatched.title) rewardParts.push(`🏷️ Title: "${dispatched.title}"`);
       if (dispatched.badge) rewardParts.push(`🎖️ Badge: ${dispatched.badge}`);

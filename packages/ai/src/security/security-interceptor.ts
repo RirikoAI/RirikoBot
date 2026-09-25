@@ -1,8 +1,5 @@
 import type { ToolRegistry } from '../tools/registry.js';
-import type {
-  SecurityCheckRequest,
-  SecurityVerdict,
-} from './types.js';
+import type { SecurityCheckRequest, SecurityVerdict } from './types.js';
 
 export const PROHIBITED_PATTERNS = [
   /^exec(?:ute)?$/i,
@@ -96,7 +93,8 @@ export class ToolSecurityInterceptor {
         return {
           allowed: false,
           reason: 'USER_PERMISSION_DENIED',
-          message: 'Permission Denied: You do not possess the required Discord permissions to execute this action.',
+          message:
+            'Permission Denied: You do not possess the required Discord permissions to execute this action.',
           requiredPermission: tool.requiredPermission,
         };
       }
@@ -111,7 +109,8 @@ export class ToolSecurityInterceptor {
         return {
           allowed: false,
           reason: 'BOT_PERMISSION_DENIED',
-          message: 'Permission Denied: Ririko lacks the necessary Discord permissions in this server to perform this action.',
+          message:
+            'Permission Denied: Ririko lacks the necessary Discord permissions in this server to perform this action.',
           requiredPermission: tool.requiredPermission,
         };
       }
@@ -133,7 +132,7 @@ export class ToolSecurityInterceptor {
         return {
           allowed: false,
           reason: 'ROLE_HIERARCHY_VIOLATION',
-          message: 'Role Hierarchy Violation: Ririko\'s role must be higher than the target member.',
+          message: "Role Hierarchy Violation: Ririko's role must be higher than the target member.",
         };
       }
     }

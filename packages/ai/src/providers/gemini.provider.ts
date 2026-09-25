@@ -73,9 +73,7 @@ export class GeminiProvider implements ChatModelProvider {
     const respondingNames = new Set(
       toolResponses.map((m) => this.sanitizeToolName(m.name ?? '')).filter(Boolean),
     );
-    const respondingCallIds = new Set(
-      toolResponses.map((m) => m.toolCallId).filter(Boolean),
-    );
+    const respondingCallIds = new Set(toolResponses.map((m) => m.toolCallId).filter(Boolean));
 
     return messages
       .filter((m) => m.role !== 'system')

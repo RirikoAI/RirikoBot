@@ -143,9 +143,7 @@ export class XpRepository extends BaseRepository<
         .returning();
 
       if (!created) {
-        throw new DatabaseError(
-          `Failed to get or create XP account for ${userId} in ${guildId}`,
-        );
+        throw new DatabaseError(`Failed to get or create XP account for ${userId} in ${guildId}`);
       }
       return created as XpAccount;
     } else {
@@ -167,9 +165,7 @@ export class XpRepository extends BaseRepository<
         .returning();
 
       if (!created) {
-        throw new DatabaseError(
-          `Failed to get or create XP account for ${userId} in ${guildId}`,
-        );
+        throw new DatabaseError(`Failed to get or create XP account for ${userId} in ${guildId}`);
       }
       return created as unknown as XpAccount;
     }
@@ -293,10 +289,7 @@ export class XpRepository extends BaseRepository<
             updatedAt: now,
           })
           .where(
-            and(
-              eq(pgSchema.xpAccounts.userId, userId),
-              eq(pgSchema.xpAccounts.guildId, guildId),
-            ),
+            and(eq(pgSchema.xpAccounts.userId, userId), eq(pgSchema.xpAccounts.guildId, guildId)),
           )
           .returning();
 
@@ -354,10 +347,7 @@ export class XpRepository extends BaseRepository<
   /**
    * Retrieves all XP accounts for a specific guild ordered by XP descending.
    */
-  async getAllGuildAccounts(
-    guildId: string,
-    tx?: DatabaseClient,
-  ): Promise<XpAccount[]> {
+  async getAllGuildAccounts(guildId: string, tx?: DatabaseClient): Promise<XpAccount[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const rows = await client.db

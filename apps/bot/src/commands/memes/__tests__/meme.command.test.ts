@@ -113,10 +113,10 @@ describe('MemeCommand (TASK-1312)', () => {
 
       await createMemeCommand(services).execute(ctx);
 
-      expect(generateMeme).toHaveBeenCalledWith(
-        expect.objectContaining({ id: '0days' }),
-        ['Accident Free', 'Until Today'],
-      );
+      expect(generateMeme).toHaveBeenCalledWith(expect.objectContaining({ id: '0days' }), [
+        'Accident Free',
+        'Until Today',
+      ]);
       expect(reply).toHaveBeenCalled();
       const payload = reply.mock.calls[0]![0];
       expect(payload.content).toContain('0 Days Without Accidents');
@@ -176,10 +176,10 @@ describe('MemeCommand (TASK-1312)', () => {
 
       await createMemeCommand(services).execute(ctx);
 
-      expect(generateMeme).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'chad' }),
-        ['Average JS fan', 'Average TS enjoyer'],
-      );
+      expect(generateMeme).toHaveBeenCalledWith(expect.objectContaining({ id: 'chad' }), [
+        'Average JS fan',
+        'Average TS enjoyer',
+      ]);
       expect(reply).toHaveBeenCalled();
     });
 
@@ -214,10 +214,10 @@ describe('MemeCommand (TASK-1312)', () => {
 
       await createMemeCommand(services).execute(ctx);
 
-      expect(generateMeme).toHaveBeenCalledWith(
-        expect.objectContaining({ id: '0days' }),
-        ['0 Days', 'Without TypeScript Errors'],
-      );
+      expect(generateMeme).toHaveBeenCalledWith(expect.objectContaining({ id: '0days' }), [
+        '0 Days',
+        'Without TypeScript Errors',
+      ]);
       expect(reply).toHaveBeenCalled();
       const payload = reply.mock.calls[0]![0];
       expect(payload.content).toContain('0 Days Without Accidents');
@@ -238,10 +238,10 @@ describe('MemeCommand (TASK-1312)', () => {
 
       await createMemeCommand(services).execute(ctx);
 
-      expect(generateMeme).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'chad' }),
-        ['Left Panel', 'Right Panel'],
-      );
+      expect(generateMeme).toHaveBeenCalledWith(expect.objectContaining({ id: 'chad' }), [
+        'Left Panel',
+        'Right Panel',
+      ]);
     });
 
     it('executes 5-panel meme !american-chopper with 5 pipe-delimited panels', async () => {
@@ -280,10 +280,10 @@ describe('MemeCommand (TASK-1312)', () => {
 
       await createMemeCommand(services).execute(ctx);
 
-      expect(generateMeme).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'always-been' }),
-        ['Wait its all tests?', 'Always has been.'],
-      );
+      expect(generateMeme).toHaveBeenCalledWith(expect.objectContaining({ id: 'always-been' }), [
+        'Wait its all tests?',
+        'Always has been.',
+      ]);
     });
 
     it('handles synthesis errors gracefully with user-facing message', async () => {

@@ -28,7 +28,8 @@ export interface MusicPlayerServiceOptions {
   idleTimeoutMs?: number | undefined;
   youtubeOptions?: ExtractorPipelineOptions['youtubeOptions'];
   lavalink?: LavalinkClientOptions | undefined;
-  resolveGuildVolume?: ((guildId: string) => Promise<number | undefined> | number | undefined) | undefined;
+  resolveGuildVolume?:
+    ((guildId: string) => Promise<number | undefined> | number | undefined) | undefined;
 }
 
 export class MusicPlayerService extends EventEmitter {
@@ -43,7 +44,8 @@ export class MusicPlayerService extends EventEmitter {
   private readonly skipInitiated = new Set<string>();
   private readonly defaultVolume: number;
   private readonly idleTimeoutMs: number;
-  private readonly resolveGuildVolume?: ((guildId: string) => Promise<number | undefined> | number | undefined) | undefined;
+  private readonly resolveGuildVolume?:
+    ((guildId: string) => Promise<number | undefined> | number | undefined) | undefined;
   private readonly guildVolumeCache = new Map<string, number>();
 
   constructor(options?: MusicPlayerServiceOptions) {
@@ -69,14 +71,28 @@ export class MusicPlayerService extends EventEmitter {
 
   private wireLavalinkEvents(): void {
     if (!this.lavalinkService) return;
-    this.lavalinkService.on('trackStart', (guildId, track) => this.emit('trackStart', guildId, track));
-    this.lavalinkService.on('trackEnd', (guildId, track, reason) => this.emit('trackEnd', guildId, track, reason));
-    this.lavalinkService.on('stateChange', (guildId, oldState, newState) => this.emit('stateChange', guildId, oldState, newState));
+    this.lavalinkService.on('trackStart', (guildId, track) =>
+      this.emit('trackStart', guildId, track),
+    );
+    this.lavalinkService.on('trackEnd', (guildId, track, reason) =>
+      this.emit('trackEnd', guildId, track, reason),
+    );
+    this.lavalinkService.on('stateChange', (guildId, oldState, newState) =>
+      this.emit('stateChange', guildId, oldState, newState),
+    );
     this.lavalinkService.on('queueEnd', (guildId) => this.emit('queueEnd', guildId));
-    this.lavalinkService.on('volumeChange', (guildId, oldVol, newVol) => this.emit('volumeChange', guildId, oldVol, newVol));
-    this.lavalinkService.on('loopChange', (guildId, oldMode, newMode) => this.emit('loopChange', guildId, oldMode, newMode));
-    this.lavalinkService.on('filterChange', (guildId, filters, args) => this.emit('filterChange', guildId, filters, args));
-    this.lavalinkService.on('queueShuffled', (guildId, count) => this.emit('queueShuffled', guildId, count));
+    this.lavalinkService.on('volumeChange', (guildId, oldVol, newVol) =>
+      this.emit('volumeChange', guildId, oldVol, newVol),
+    );
+    this.lavalinkService.on('loopChange', (guildId, oldMode, newMode) =>
+      this.emit('loopChange', guildId, oldMode, newMode),
+    );
+    this.lavalinkService.on('filterChange', (guildId, filters, args) =>
+      this.emit('filterChange', guildId, filters, args),
+    );
+    this.lavalinkService.on('queueShuffled', (guildId, count) =>
+      this.emit('queueShuffled', guildId, count),
+    );
   }
 
   isLavalinkActive(): boolean {
@@ -608,7 +624,11 @@ export class MusicPlayerService extends EventEmitter {
           console.error(`[MusicPlayerService] Audio stream error in guild ${guildId}:`, streamErr);
           const q = this.getQueue(guildId);
           if (q && q.currentTrack?.id === track.id) {
-            q.emit('error', streamErr instanceof Error ? streamErr : new Error(String(streamErr)), track);
+            q.emit(
+              'error',
+              streamErr instanceof Error ? streamErr : new Error(String(streamErr)),
+              track,
+            );
             this.handlePlaybackFailure(guildId, track, streamErr);
           }
         });

@@ -18,9 +18,14 @@ export interface PoTokenServiceOptions {
 }
 
 const require = createRequire(import.meta.url);
-let cachedAssets: { domContent: string; baseContent: string; baseAppendContent: string } | null = null;
+let cachedAssets: { domContent: string; baseContent: string; baseAppendContent: string } | null =
+  null;
 
-async function loadAssets(): Promise<{ domContent: string; baseContent: string; baseAppendContent: string }> {
+async function loadAssets(): Promise<{
+  domContent: string;
+  baseContent: string;
+  baseAppendContent: string;
+}> {
   if (cachedAssets) {
     return cachedAssets;
   }
@@ -40,7 +45,7 @@ async function loadAssets(): Promise<{ domContent: string; baseContent: string; 
  * and visitorData by executing the BotGuard player challenge in a secure JSDOM runtime.
  */
 export async function generateYouTubePoToken(
-  options: { timeoutMs?: number; userAgent?: string } = {}
+  options: { timeoutMs?: number; userAgent?: string } = {},
 ): Promise<YouTubePoTokenResult> {
   const timeoutMs = options.timeoutMs ?? 8000;
   const userAgent =
@@ -51,14 +56,16 @@ export async function generateYouTubePoToken(
   const visitorRes = await fetch('https://www.youtube.com/embed/dQw4w9WgXcQ', {
     headers: {
       'User-Agent': userAgent,
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'Accept-Language': 'en-US,en;q=0.9',
     },
     signal: AbortSignal.timeout(Math.min(timeoutMs, 5000)),
   });
 
   if (!visitorRes.ok) {
-    throw new Error(`Failed to fetch YouTube embed page: HTTP ${visitorRes.status} ${visitorRes.statusText}`);
+    throw new Error(
+      `Failed to fetch YouTube embed page: HTTP ${visitorRes.status} ${visitorRes.statusText}`,
+    );
   }
 
   const html = await visitorRes.text();
@@ -133,7 +140,7 @@ export async function generateYouTubePoToken(
   try {
     const code = baseContent.replace(
       /}\s*\)\(_yt_player\);\s*$/,
-      (matched: string) => `;${baseAppendContent};${matched}`
+      (matched: string) => `;${baseAppendContent};${matched}`,
     );
     win.eval(code);
   } catch (evalErr) {

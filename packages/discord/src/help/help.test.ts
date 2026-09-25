@@ -285,10 +285,12 @@ describe('Interactive Help Center Subsystem (TASK-0331)', () => {
 
     it('correctly handles $ prefix without regex replacement token collision ($1, $3)', () => {
       // Direct unit test of formatPrefixCommand with $ prefix
-      expect(formatPrefixCommand('!imagine a magical forest', '$')).toBe('$imagine a magical forest');
-      expect(formatPrefixCommand('!imagine cybernetic samurai --provider comfyui --ar 1:1', '$')).toBe(
-        '$imagine cybernetic samurai --provider comfyui --ar 1:1',
+      expect(formatPrefixCommand('!imagine a magical forest', '$')).toBe(
+        '$imagine a magical forest',
       );
+      expect(
+        formatPrefixCommand('!imagine cybernetic samurai --provider comfyui --ar 1:1', '$'),
+      ).toBe('$imagine cybernetic samurai --provider comfyui --ar 1:1');
       expect(formatPrefixCommand('/imagine prompt:foo | !imagine foo', '$')).toBe(
         '/imagine prompt:foo | $imagine foo',
       );

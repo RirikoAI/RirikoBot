@@ -96,7 +96,8 @@ export class EconomyService {
 
     // 2. Determine base rewards & multipliers
     const rule = this.rules[event.type as EconomyEventType] ?? { credits: 0, xp: 0 };
-    const metaMultiplier = typeof event.metadata?.multiplier === 'number' ? event.metadata.multiplier : 1;
+    const metaMultiplier =
+      typeof event.metadata?.multiplier === 'number' ? event.metadata.multiplier : 1;
     const finalCredits = Math.max(0, Math.floor(rule.credits * metaMultiplier));
     const finalXp = Math.max(0, Math.floor(rule.xp * metaMultiplier));
 

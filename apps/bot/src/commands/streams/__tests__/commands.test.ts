@@ -85,7 +85,8 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
         formatGameEmbed: vi.fn().mockReturnValue({
           title: '🎮 Free Game: Test Free Epic Game',
           url: 'https://store.epicgames.com/p/test-game',
-          description: '**[Claim on Epic Games](https://store.epicgames.com/p/test-game)**\n\n💰 **Original Price:** ~~$19.99~~ **FREE!**',
+          description:
+            '**[Claim on Epic Games](https://store.epicgames.com/p/test-game)**\n\n💰 **Original Price:** ~~$19.99~~ **FREE!**',
           color: 0x0078f2,
         }),
       } as any,
@@ -231,7 +232,10 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
 
       await streamCmd.execute(mockCtx);
 
-      expect(mockServices.streamRepo?.removeSubscription).toHaveBeenCalledWith('guild-1', 'twitch_shroud');
+      expect(mockServices.streamRepo?.removeSubscription).toHaveBeenCalledWith(
+        'guild-1',
+        'twitch_shroud',
+      );
       expect(mockCtx.editReply).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining('Successfully unsubscribed'),
@@ -240,18 +244,20 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
     });
 
     it('unsubscribes a YouTube streamer without requiring Twitch platform default', async () => {
-      (mockServices.streamRepo!.listGuildSubscriptionsWithStreamers as any) = vi.fn().mockResolvedValue([
-        {
-          subscription: { id: 'sub_yt_1', guildId: 'guild-1', streamerId: 'youtube_lofigirl' },
-          streamer: {
-            id: 'youtube_lofigirl',
-            platform: 'YOUTUBE',
-            platformUserId: 'UC_lofigirl',
-            username: 'lofigirl',
-            displayName: 'Lofi Girl',
+      (mockServices.streamRepo!.listGuildSubscriptionsWithStreamers as any) = vi
+        .fn()
+        .mockResolvedValue([
+          {
+            subscription: { id: 'sub_yt_1', guildId: 'guild-1', streamerId: 'youtube_lofigirl' },
+            streamer: {
+              id: 'youtube_lofigirl',
+              platform: 'YOUTUBE',
+              platformUserId: 'UC_lofigirl',
+              username: 'lofigirl',
+              displayName: 'Lofi Girl',
+            },
           },
-        },
-      ]);
+        ]);
 
       const commands = createStreamCommands(mockServices as BotServices);
       const streamCmd = commands.find((c) => c.metadata.name === 'stream')!;
@@ -277,7 +283,10 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
 
       await streamCmd.execute(mockCtx);
 
-      expect(mockServices.streamRepo?.removeSubscription).toHaveBeenCalledWith('guild-1', 'youtube_lofigirl');
+      expect(mockServices.streamRepo?.removeSubscription).toHaveBeenCalledWith(
+        'guild-1',
+        'youtube_lofigirl',
+      );
       expect(mockCtx.editReply).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining('Lofi Girl'),

@@ -7,11 +7,7 @@ import {
   type TextChannel,
   type Role,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
 function hasAdminPermission(ctx: CommandContext): boolean {
@@ -46,7 +42,8 @@ export function createAutoRoleCommand(services: BotServices): Command {
     metadata: {
       name: 'autorole',
       category: CommandCategory.UTILITY,
-      description: 'Configure automatic join roles for humans and bots, or setup verification roles',
+      description:
+        'Configure automatic join roles for humans and bots, or setup verification roles',
       aliases: ['auto-role', 'joinrole'],
       usage: '/autorole <action> [role] [target] [channel] [message]',
       examples: [
@@ -128,7 +125,11 @@ export function createAutoRoleCommand(services: BotServices): Command {
       let action = ctx.options.getString('action')?.toLowerCase();
       if (!action) {
         const first = rawArgs[0]?.toLowerCase();
-        if (['show', 'humans', 'bots', 'verify', 'disable', 'send-verify', 'sendverify'].includes(first ?? '')) {
+        if (
+          ['show', 'humans', 'bots', 'verify', 'disable', 'send-verify', 'sendverify'].includes(
+            first ?? '',
+          )
+        ) {
           action = first === 'sendverify' ? 'send-verify' : first;
         } else {
           action = 'show';
@@ -138,7 +139,8 @@ export function createAutoRoleCommand(services: BotServices): Command {
       // Check bot permission
       if (!services.autoRoleService.hasManageRolesPermission(ctx.guild)) {
         await ctx.reply({
-          content: '❌ I do not have the **Manage Roles** permission. Please grant it in Server Settings.',
+          content:
+            '❌ I do not have the **Manage Roles** permission. Please grant it in Server Settings.',
         });
         return;
       }
@@ -160,7 +162,9 @@ export function createAutoRoleCommand(services: BotServices): Command {
           config?.botRoleIds && config.botRoleIds.length > 0
             ? config.botRoleIds.map((id) => `<@&${id}>`).join(', ')
             : '`None`';
-        const verifyRoleText = config?.verificationRoleId ? `<@&${config.verificationRoleId}>` : '`None`';
+        const verifyRoleText = config?.verificationRoleId
+          ? `<@&${config.verificationRoleId}>`
+          : '`None`';
         const isEnabled = config?.isEnabled ?? false;
 
         embed.addFields(
@@ -210,7 +214,9 @@ export function createAutoRoleCommand(services: BotServices): Command {
 
         const embed = new EmbedBuilder()
           .setTitle('✅ AutoRole Updated')
-          .setDescription(`Successfully configured **${actionLabel}** to <@&${role.id}> (${role.name}).`)
+          .setDescription(
+            `Successfully configured **${actionLabel}** to <@&${role.id}> (${role.name}).`,
+          )
           .setColor('#00FF00')
           .setTimestamp();
 
@@ -279,7 +285,8 @@ export function createAutoRoleCommand(services: BotServices): Command {
         const config = await services.autoRoleRepo.getGuildAutoRoles(ctx.guildId);
         if (!config?.verificationRoleId) {
           await ctx.reply({
-            content: '❌ No verification role has been set up yet! Please configure one first using `/autorole action:verify role:@Role`.',
+            content:
+              '❌ No verification role has been set up yet! Please configure one first using `/autorole action:verify role:@Role`.',
           });
           return;
         }
@@ -299,7 +306,9 @@ export function createAutoRoleCommand(services: BotServices): Command {
         }
 
         if (!targetChannel || !('send' in targetChannel)) {
-          await ctx.reply({ content: '❌ Could not find a valid text channel to send the verification message.' });
+          await ctx.reply({
+            content: '❌ Could not find a valid text channel to send the verification message.',
+          });
           return;
         }
 

@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import { WALLPAPER_SOURCES, WallpaperService, type WallpaperProvider } from '../wallpaper.service.js';
+import {
+  WALLPAPER_SOURCES,
+  WallpaperService,
+  type WallpaperProvider,
+} from '../wallpaper.service.js';
 import type { Wallpaper } from '../types.js';
 
 const wp = (id: string, imageUrl = `https://img/${id}.jpg`): Wallpaper => ({
@@ -30,7 +34,10 @@ describe('WallpaperService', () => {
       [wp('a'), wp('b'), wp('c'), wp('d')],
       [wp('d'), wp('e')],
     ]);
-    const service = new WallpaperService({ wallhaven, zerochan: empty(), konachan: empty() }, () => 0);
+    const service = new WallpaperService(
+      { wallhaven, zerochan: empty(), konachan: empty() },
+      () => 0,
+    );
     const session = service.createSession(' frieren ');
 
     expect((await session.next('wallhaven')).map((w) => w.id)).toEqual(['a', 'b', 'c']);
@@ -46,7 +53,10 @@ describe('WallpaperService', () => {
   it('keeps separate progress per source', async () => {
     const wallhaven = provider([[wp('w1')]]);
     const konachan = provider([[wp('k1'), wp('k2')]]);
-    const session = new WallpaperService({ wallhaven, zerochan: empty(), konachan }, () => 0).createSession('x');
+    const session = new WallpaperService(
+      { wallhaven, zerochan: empty(), konachan },
+      () => 0,
+    ).createSession('x');
 
     expect((await session.next('wallhaven', 1)).map((w) => w.id)).toEqual(['w1']);
     expect((await session.next('konachan', 1)).map((w) => w.id)).toEqual(['k1']);
@@ -56,9 +66,10 @@ describe('WallpaperService', () => {
   it('resolves missing image URLs and skips results that cannot be resolved', async () => {
     const resolve = vi.fn(async (id: string) => (id === 'b' ? null : `https://resolved/${id}.jpg`));
     const zerochan = provider([[wp('a', ''), wp('b', ''), wp('c')]], resolve);
-    const session = new WallpaperService({ wallhaven: empty(), zerochan, konachan: empty() }, () => 0).createSession(
-      'x',
-    );
+    const session = new WallpaperService(
+      { wallhaven: empty(), zerochan, konachan: empty() },
+      () => 0,
+    ).createSession('x');
 
     const shown = await session.next('zerochan');
 

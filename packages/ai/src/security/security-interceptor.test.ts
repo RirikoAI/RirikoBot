@@ -258,7 +258,7 @@ describe('ToolSecurityInterceptor & Application Mediation (TASK-0622)', () => {
       expect(verdict.allowed).toBe(false);
       if (!verdict.allowed) {
         expect(verdict.reason).toBe('ROLE_HIERARCHY_VIOLATION');
-        expect(verdict.message).toContain('Ririko\'s role must be higher');
+        expect(verdict.message).toContain("Ririko's role must be higher");
       }
     });
 

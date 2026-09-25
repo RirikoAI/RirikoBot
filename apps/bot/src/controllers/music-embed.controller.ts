@@ -168,8 +168,7 @@ export function buildIdleEmbed(): EmbedBuilder {
     )
     .addFields({
       name: '✨ Quick Controls',
-      value:
-        '`/play` • `/queue` • `/volume` • `/loop` • `/filter` • `/lyrics` • `/playlist`',
+      value: '`/play` • `/queue` • `/volume` • `/loop` • `/filter` • `/lyrics` • `/playlist`',
     })
     .setFooter({
       text: 'Ririko Music 2.0 • Idle',
@@ -254,7 +253,9 @@ export class MusicEmbedController {
       try {
         const musicChannelData = await this.services.musicRepo.getMusicChannel(guildId);
         if (musicChannelData) {
-          const channel = await this.client.channels.fetch(musicChannelData.channelId).catch(() => null);
+          const channel = await this.client.channels
+            .fetch(musicChannelData.channelId)
+            .catch(() => null);
           if (channel && 'send' in channel && typeof channel.send === 'function') {
             const trackTitle = track?.title ? `"${track.title}"` : 'the requested track';
             const tempMsg = await (channel as TextChannel)
@@ -305,7 +306,9 @@ export class MusicEmbedController {
       const musicChannelData = await this.services.musicRepo.getMusicChannel(guildId);
       if (!musicChannelData) return;
 
-      const channel = await this.client.channels.fetch(musicChannelData.channelId).catch(() => null);
+      const channel = await this.client.channels
+        .fetch(musicChannelData.channelId)
+        .catch(() => null);
       if (!channel || !('send' in channel) || !('messages' in channel)) return;
 
       const textChannel = channel as unknown as TextChannel;
@@ -315,7 +318,8 @@ export class MusicEmbedController {
       const state: MusicEmbedState = {
         hasCurrentTrack: queue?.currentTrack !== null && queue?.currentTrack !== undefined,
         hasPrevious: (queue?.history.length ?? 0) > 0,
-        hasNextTrack: (queue?.size ?? 0) > 0 || (queue?.loopMode === 'QUEUE' && Boolean(queue?.currentTrack)),
+        hasNextTrack:
+          (queue?.size ?? 0) > 0 || (queue?.loopMode === 'QUEUE' && Boolean(queue?.currentTrack)),
         isPaused: queue?.state === 'PAUSED',
         isMuted: (queue?.volume ?? 80) === 0,
         loopMode: queue?.loopMode ?? 'OFF',
@@ -389,7 +393,8 @@ export class MusicEmbedController {
     const state: MusicEmbedState = {
       hasCurrentTrack: queue?.currentTrack !== null && queue?.currentTrack !== undefined,
       hasPrevious: (queue?.history.length ?? 0) > 0,
-      hasNextTrack: (queue?.size ?? 0) > 0 || (queue?.loopMode === 'QUEUE' && Boolean(queue?.currentTrack)),
+      hasNextTrack:
+        (queue?.size ?? 0) > 0 || (queue?.loopMode === 'QUEUE' && Boolean(queue?.currentTrack)),
       isPaused: queue?.state === 'PAUSED',
       isMuted: (queue?.volume ?? 80) === 0,
       loopMode: queue?.loopMode ?? 'OFF',
@@ -505,7 +510,10 @@ export class MusicEmbedController {
 
     const guildId = interaction.guildId;
     if (!guildId) {
-      await interaction.reply({ content: '⚠️ This button can only be used in a server.', ephemeral: true });
+      await interaction.reply({
+        content: '⚠️ This button can only be used in a server.',
+        ephemeral: true,
+      });
       return;
     }
 
@@ -631,7 +639,9 @@ export class MusicEmbedController {
         const lyricsEmbed = new EmbedBuilder()
           .setColor(0x5865f2)
           .setTitle(`📝 Lyrics: ${track.title}`)
-          .setDescription(`*Lyrics search for [${track.title}](${track.url})*\n\n*(Full dynamic lyrics available via \`/lyrics\` command)*`)
+          .setDescription(
+            `*Lyrics search for [${track.title}](${track.url})*\n\n*(Full dynamic lyrics available via \`/lyrics\` command)*`,
+          )
           .setFooter({ text: 'Ririko Music 2.0 • Lyrics' });
 
         await interaction.editReply({ embeds: [lyricsEmbed] });

@@ -123,7 +123,9 @@ describe('PurgeService — TASK-0712', () => {
       messages: {
         fetch: vi.fn().mockResolvedValue(messages),
       },
-      bulkDelete: vi.fn().mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
+      bulkDelete: vi
+        .fn()
+        .mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
     } as unknown as GuildTextBasedChannel;
 
     const eventSpy = vi.fn();
@@ -170,7 +172,9 @@ describe('PurgeService — TASK-0712', () => {
       messages: {
         fetch: vi.fn().mockResolvedValue(messages),
       },
-      bulkDelete: vi.fn().mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
+      bulkDelete: vi
+        .fn()
+        .mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
     } as unknown as GuildTextBasedChannel;
 
     const result = await purgeService.purgeMessages({
@@ -199,7 +203,10 @@ describe('PurgeService — TASK-0712', () => {
     const messages = new Collection<string, Message>();
     messages.set('m_1', createMockMessage('m_1', 'user_1', 'Join my discord.gg/test-server'));
     messages.set('m_2', createMockMessage('m_2', 'user_1', 'Regular message'));
-    messages.set('m_3', createMockMessage('m_3', 'user_2', 'Check https://discord.com/invite/abc123'));
+    messages.set(
+      'm_3',
+      createMockMessage('m_3', 'user_2', 'Check https://discord.com/invite/abc123'),
+    );
 
     const mockChannel = {
       id: 'chan_1',
@@ -207,7 +214,9 @@ describe('PurgeService — TASK-0712', () => {
       messages: {
         fetch: vi.fn().mockResolvedValue(messages),
       },
-      bulkDelete: vi.fn().mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
+      bulkDelete: vi
+        .fn()
+        .mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
     } as unknown as GuildTextBasedChannel;
 
     const result = await purgeService.purgeMessages({
@@ -237,7 +246,9 @@ describe('PurgeService — TASK-0712', () => {
       messages: {
         fetch: vi.fn().mockResolvedValue(messages),
       },
-      bulkDelete: vi.fn().mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
+      bulkDelete: vi
+        .fn()
+        .mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
     } as unknown as GuildTextBasedChannel;
 
     const result = await purgeService.purgeMessages({
@@ -266,7 +277,9 @@ describe('PurgeService — TASK-0712', () => {
       messages: {
         fetch: vi.fn().mockResolvedValue(messages),
       },
-      bulkDelete: vi.fn().mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
+      bulkDelete: vi
+        .fn()
+        .mockImplementation(async (msgs: Message[]) => new Collection(msgs.map((m) => [m.id, m]))),
     } as unknown as GuildTextBasedChannel;
 
     const result = await purgeService.purgeMessages({
@@ -279,6 +292,9 @@ describe('PurgeService — TASK-0712', () => {
     expect(result.success).toBe(true);
     expect(result.deletedCount).toBe(1);
     expect(result.skippedOlderThan14Days).toBe(1);
-    expect(mockChannel.bulkDelete).toHaveBeenCalledWith([expect.objectContaining({ id: 'm_new' })], true);
+    expect(mockChannel.bulkDelete).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: 'm_new' })],
+      true,
+    );
   });
 });

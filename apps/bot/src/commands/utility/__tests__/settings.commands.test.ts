@@ -12,14 +12,16 @@ import { createTimezoneCommand } from '../timezone.command.js';
 
 describe('Server Settings Commands Suite', () => {
   describe('/prefix command', () => {
-    function setupPrefix(options: {
-      source?: 'slash' | 'prefix';
-      args?: string[];
-      slash?: Record<string, string>;
-      hasManageGuild?: boolean;
-      inGuild?: boolean;
-      currentPrefix?: string;
-    } = {}) {
+    function setupPrefix(
+      options: {
+        source?: 'slash' | 'prefix';
+        args?: string[];
+        slash?: Record<string, string>;
+        hasManageGuild?: boolean;
+        inGuild?: boolean;
+        currentPrefix?: string;
+      } = {},
+    ) {
       const currentPrefix = options.currentPrefix ?? '!';
       const guildSettingsService = {
         getPrefix: vi.fn(async () => currentPrefix),
@@ -133,15 +135,17 @@ describe('Server Settings Commands Suite', () => {
   });
 
   describe('/timezone command', () => {
-    function setupTimezone(options: {
-      source?: 'slash' | 'prefix';
-      args?: string[];
-      slash?: Record<string, string>;
-      hasManageGuild?: boolean;
-      inGuild?: boolean;
-      serverTz?: string;
-      userTz?: string | null;
-    } = {}) {
+    function setupTimezone(
+      options: {
+        source?: 'slash' | 'prefix';
+        args?: string[];
+        slash?: Record<string, string>;
+        hasManageGuild?: boolean;
+        inGuild?: boolean;
+        serverTz?: string;
+        userTz?: string | null;
+      } = {},
+    ) {
       const serverTz = options.serverTz ?? 'Asia/Kuala_Lumpur';
       const userTz = options.userTz !== undefined ? options.userTz : null;
 
@@ -212,8 +216,12 @@ describe('Server Settings Commands Suite', () => {
 
       const replyCall = raw.reply.mock.calls[0]![0];
       expect(replyCall.embeds[0].data.title).toContain('Timezone');
-      expect(replyCall.embeds[0].data.fields.some((f: any) => f.name.includes('Server'))).toBe(true);
-      expect(replyCall.embeds[0].data.fields.some((f: any) => f.name.includes('Personal'))).toBe(true);
+      expect(replyCall.embeds[0].data.fields.some((f: any) => f.name.includes('Server'))).toBe(
+        true,
+      );
+      expect(replyCall.embeds[0].data.fields.some((f: any) => f.name.includes('Personal'))).toBe(
+        true,
+      );
     });
 
     it('sets server timezone when requested by administrator (slash)', async () => {
@@ -224,7 +232,10 @@ describe('Server Settings Commands Suite', () => {
 
       await command.execute(ctx);
 
-      expect(services.guildSettingsService.setTimezone).toHaveBeenCalledWith('guild-1', 'Asia/Tokyo');
+      expect(services.guildSettingsService.setTimezone).toHaveBeenCalledWith(
+        'guild-1',
+        'Asia/Tokyo',
+      );
       expect(raw.reply).toHaveBeenCalled();
       const replyCall = raw.reply.mock.calls[0]![0];
       expect(replyCall.embeds[0].data.title).toContain('Server Timezone Updated');
@@ -266,7 +277,10 @@ describe('Server Settings Commands Suite', () => {
 
       await command.execute(ctx);
 
-      expect(services.guildSettingsService.setTimezone).toHaveBeenCalledWith('guild-1', 'Europe/Paris');
+      expect(services.guildSettingsService.setTimezone).toHaveBeenCalledWith(
+        'guild-1',
+        'Europe/Paris',
+      );
     });
 
     it('parses prefix !tz user <zone>', async () => {

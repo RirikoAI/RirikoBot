@@ -1,13 +1,5 @@
-import {
-  EmbedBuilder,
-  PermissionFlagsBits,
-  type TextChannel,
-} from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { EmbedBuilder, PermissionFlagsBits, type TextChannel } from 'discord.js';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
 function hasAdminPermission(ctx: CommandContext): boolean {
@@ -81,7 +73,8 @@ export function createReactionRolesCommand(services: BotServices): Command {
         const id = ctx.options.getString('id') || rawArgs[1];
         if (!id) {
           await ctx.reply({
-            content: '❌ Please specify the ID of the reaction role to remove.\nUsage: `/reaction-roles action:remove id:<id>` or `!reaction-roles remove <id>`',
+            content:
+              '❌ Please specify the ID of the reaction role to remove.\nUsage: `/reaction-roles action:remove id:<id>` or `!reaction-roles remove <id>`',
           });
           return;
         }
@@ -98,7 +91,9 @@ export function createReactionRolesCommand(services: BotServices): Command {
           // Attempt best-effort cleanup of emoji reaction if applicable
           if (existing.type === 'EMOJI' && existing.channelId) {
             try {
-              const channel = (await ctx.guild.channels.fetch(existing.channelId).catch(() => null)) as TextChannel | null;
+              const channel = (await ctx.guild.channels
+                .fetch(existing.channelId)
+                .catch(() => null)) as TextChannel | null;
               if (channel && 'messages' in channel) {
                 const msg = await channel.messages.fetch(existing.messageId).catch(() => null);
                 if (msg) {

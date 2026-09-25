@@ -36,7 +36,10 @@ import {
   type CardProgressionService,
 } from '../card/card-progression.service.js';
 
-export function getDungeonFloorEnergyCost(floorNumber: number, isTutorial: boolean = false): number {
+export function getDungeonFloorEnergyCost(
+  floorNumber: number,
+  isTutorial: boolean = false,
+): number {
   if (isTutorial || floorNumber <= 0) return 0; // Section 7.1: Tutorial = 0 Energy
   if (floorNumber <= 10) return 10;
   if (floorNumber <= 25) return 15;
@@ -200,11 +203,23 @@ export class DungeonRunner {
         ' ' +
         (season.themeElement ?? '')
       ).toUpperCase();
-      if (affixString.includes('INFERNAL') || affixString.includes('SCORCHED') || season.themeElement === 'FIRE')
+      if (
+        affixString.includes('INFERNAL') ||
+        affixString.includes('SCORCHED') ||
+        season.themeElement === 'FIRE'
+      )
         return 'INFERNAL_CRUCIBLE';
-      if (affixString.includes('ABYSSAL') || affixString.includes('TORRENTIAL') || season.themeElement === 'WATER')
+      if (
+        affixString.includes('ABYSSAL') ||
+        affixString.includes('TORRENTIAL') ||
+        season.themeElement === 'WATER'
+      )
         return 'ABYSSAL_MAELSTROM';
-      if (affixString.includes('CELESTIAL') || affixString.includes('TWILIGHT') || season.themeElement === 'LIGHT')
+      if (
+        affixString.includes('CELESTIAL') ||
+        affixString.includes('TWILIGHT') ||
+        season.themeElement === 'LIGHT'
+      )
         return 'CELESTIAL_TWILIGHT';
       return 'NONE';
     }
@@ -245,7 +260,12 @@ export class DungeonRunner {
       };
     }
 
-    const { encounter, energyCost } = await this.buildEncounter(userId, seasonId, floorNumber, playerParty);
+    const { encounter, energyCost } = await this.buildEncounter(
+      userId,
+      seasonId,
+      floorNumber,
+      playerParty,
+    );
 
     // 2. Energy
     if (!skipEnergyDeduction && energyCost > 0) {
@@ -261,7 +281,6 @@ export class DungeonRunner {
         };
       }
     }
-
 
     return { success: true, energyCost, highestCleared, encounter };
   }
@@ -284,7 +303,9 @@ export class DungeonRunner {
         ? await this.floorRepo.findBySeasonAndFloor(seasonId, floorNumber)
         : null;
 
-    const energyCost = isTutorial ? 0 : (floorRow?.energyCost ?? getDungeonFloorEnergyCost(floorNumber));
+    const energyCost = isTutorial
+      ? 0
+      : (floorRow?.energyCost ?? getDungeonFloorEnergyCost(floorNumber));
 
     // Environmental affixes (switched off below the season's affixStartFloor)
     const curve = parseSeasonCurve(season?.scalingParams);
@@ -329,12 +350,17 @@ export class DungeonRunner {
       name: bossRow?.name ?? this.generateEnemyName(floorNumber, floorType, element),
       team: 'TEAM_B',
       element,
-      rarity: floorType === 'MAJOR_BOSS' ? 'MYTHIC' : floorType === 'MINI_BOSS' ? 'SECRET_RARE' : 'RARE',
+      rarity:
+        floorType === 'MAJOR_BOSS' ? 'MYTHIC' : floorType === 'MINI_BOSS' ? 'SECRET_RARE' : 'RARE',
       level: Math.max(1, floorNumber * 2),
       maxHealth: hp,
       currentHealth: hp,
-      attack: Math.round(def.stats?.attack ?? curveStats.attack * (def.statMultipliers?.attack ?? 1)),
-      defense: Math.round(def.stats?.defense ?? curveStats.defense * (def.statMultipliers?.defense ?? 1)),
+      attack: Math.round(
+        def.stats?.attack ?? curveStats.attack * (def.statMultipliers?.attack ?? 1),
+      ),
+      defense: Math.round(
+        def.stats?.defense ?? curveStats.defense * (def.statMultipliers?.defense ?? 1),
+      ),
       speed: Math.round(def.stats?.speed ?? curveStats.speed * (def.statMultipliers?.speed ?? 1)),
       critRate: def.critRate ?? 0.1,
       critDamage: def.critDamage ?? 1.5,
@@ -462,7 +488,11 @@ export class DungeonRunner {
     const isTutorial = options.seasonId.toLowerCase().includes('tutorial');
     const pityBonus =
       !isTutorial && this.progressService
-        ? await this.progressService.getPityBonus(options.userId, options.seasonId, options.floorNumber)
+        ? await this.progressService.getPityBonus(
+            options.userId,
+            options.seasonId,
+            options.floorNumber,
+          )
         : 0;
 
     const session = startEncounterSession({
@@ -493,15 +523,23 @@ export class DungeonRunner {
     const isWin = snapshot.winner === 'TEAM_A';
     const isTutorial = session.seasonId.toLowerCase().includes('tutorial');
 
-    const currentProgress = await this.progressRepo.getOrCreateProgress(session.userId, session.seasonId);
+    const currentProgress = await this.progressRepo.getOrCreateProgress(
+      session.userId,
+      session.seasonId,
+    );
     const isFirstClear = isWin && session.floorNumber > currentProgress.highestClearedFloor;
 
     let loot: DungeonLootResult | undefined;
     if (isWin) {
       if (!isTutorial && this.lootService) {
-        loot = await this.lootService.generateAndDispatchLoot(session.userId, session.floorNumber, isFirstClear, {
-          signatureDropCode: session.bossProfile?.signatureDropCode,
-        });
+        loot = await this.lootService.generateAndDispatchLoot(
+          session.userId,
+          session.floorNumber,
+          isFirstClear,
+          {
+            signatureDropCode: session.bossProfile?.signatureDropCode,
+          },
+        );
       }
       if (this.cardRepo && snapshot.player?.id) {
         await this.cardRepo.incrementUserCardBattlesWon(snapshot.player.id).catch(() => {});
@@ -523,13 +561,18 @@ export class DungeonRunner {
 
     const progress =
       !isTutorial && this.progressService
-        ? await this.progressService.recordOutcome(session.userId, session.seasonId, session.floorNumber, {
-            victory: isWin,
-            forfeited: session.wasForfeited,
-            turns: snapshot.turn,
-            potionsUsed: session.potionCount,
-            energySpent: options.energySpent,
-          })
+        ? await this.progressService.recordOutcome(
+            session.userId,
+            session.seasonId,
+            session.floorNumber,
+            {
+              victory: isWin,
+              forfeited: session.wasForfeited,
+              turns: snapshot.turn,
+              potionsUsed: session.potionCount,
+              energySpent: options.energySpent,
+            },
+          )
         : undefined;
 
     return {
@@ -585,7 +628,15 @@ export class DungeonRunner {
     if (theme === 'CELESTIAL_TWILIGHT') {
       return floorNumber % 2 === 0 ? 'LIGHT' : 'SHADOW';
     }
-    const elements: CardElement[] = ['FIRE', 'ICE', 'EARTH', 'LIGHTNING', 'WATER', 'LIGHT', 'SHADOW'];
+    const elements: CardElement[] = [
+      'FIRE',
+      'ICE',
+      'EARTH',
+      'LIGHTNING',
+      'WATER',
+      'LIGHT',
+      'SHADOW',
+    ];
     return elements[(floorNumber - 1) % elements.length]!;
   }
 
@@ -598,7 +649,10 @@ export class DungeonRunner {
         `Chronos Titan of Void`,
         `Ririko the Ascended Arbiter`,
       ];
-      return names[Math.min(names.length - 1, Math.floor(floorNumber / 10) - 1)] ?? `Elder Primordial [${element}]`;
+      return (
+        names[Math.min(names.length - 1, Math.floor(floorNumber / 10) - 1)] ??
+        `Elder Primordial [${element}]`
+      );
     }
     if (floorType === 'MINI_BOSS') {
       return `Dread Commander [${element}]`;

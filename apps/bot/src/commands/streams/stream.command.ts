@@ -4,11 +4,7 @@ import {
   type GuildTextBasedChannel,
   type Role,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { StreamPlatform } from '@ririko/services';
 
@@ -19,7 +15,10 @@ const PLATFORM_CHOICES = [
 ];
 
 export function inferPlatform(input: string, explicitPlatform?: string | null): StreamPlatform {
-  if (explicitPlatform && ['TWITCH', 'YOUTUBE', 'TIKTOK'].includes(explicitPlatform.toUpperCase())) {
+  if (
+    explicitPlatform &&
+    ['TWITCH', 'YOUTUBE', 'TIKTOK'].includes(explicitPlatform.toUpperCase())
+  ) {
     return explicitPlatform.toUpperCase() as StreamPlatform;
   }
 
@@ -110,7 +109,8 @@ export function createStreamCommands(services: BotServices): Command[] {
         },
         {
           name: 'custom_message',
-          description: 'Custom message template (Variables: {streamer}, {title}, {game}, {url}, {role})',
+          description:
+            'Custom message template (Variables: {streamer}, {title}, {game}, {url}, {role})',
           type: 'STRING',
           required: false,
         },
@@ -200,7 +200,8 @@ export function createStreamCommands(services: BotServices): Command[] {
     metadata: {
       name: 'unsubscribe',
       category: CommandCategory.UTILITY,
-      description: 'Unsubscribe this server from live alerts for a streamer (Twitch, YouTube, TikTok)',
+      description:
+        'Unsubscribe this server from live alerts for a streamer (Twitch, YouTube, TikTok)',
       aliases: ['unsub', 'stream-unsub', 'streamunsub'],
       usage: '!unsubscribe <streamer> [platform]',
       examples: ['!unsubscribe shroud', '!unsubscribe @LofiGirl', '!unsubscribe shroud twitch'],
@@ -215,7 +216,8 @@ export function createStreamCommands(services: BotServices): Command[] {
     metadata: {
       name: 'setup-stream-notification',
       category: CommandCategory.UTILITY,
-      description: 'Set default channel for live stream announcements across Twitch, YouTube, and TikTok',
+      description:
+        'Set default channel for live stream announcements across Twitch, YouTube, and TikTok',
       aliases: [
         'setup-twitch',
         'setup-stream',
@@ -245,7 +247,8 @@ export function createStreamCommands(services: BotServices): Command[] {
     metadata: {
       name: 'stream-status',
       category: CommandCategory.UTILITY,
-      description: 'List all currently monitored streamers across Twitch, YouTube, and TikTok and their live status',
+      description:
+        'List all currently monitored streamers across Twitch, YouTube, and TikTok and their live status',
       aliases: ['twitch-status', 'streamstatus', 'streams', 'streamers'],
       usage: '!stream-status',
       examples: ['!stream-status', '!twitch-status'],
@@ -266,7 +269,10 @@ export function createStreamCommands(services: BotServices): Command[] {
 
 async function handleSubscribeStream(ctx: CommandContext, services: BotServices): Promise<void> {
   if (!ctx.guildId) {
-    await ctx.reply({ content: '❌ Stream alerts can only be configured inside a Discord server.', ephemeral: true });
+    await ctx.reply({
+      content: '❌ Stream alerts can only be configured inside a Discord server.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -276,7 +282,8 @@ async function handleSubscribeStream(ctx: CommandContext, services: BotServices)
 
   if (!canManage) {
     await ctx.reply({
-      content: '❌ You require **Manage Server** permissions to configure stream alert subscriptions.',
+      content:
+        '❌ You require **Manage Server** permissions to configure stream alert subscriptions.',
       ephemeral: true,
     });
     return;
@@ -390,7 +397,10 @@ async function handleSubscribeStream(ctx: CommandContext, services: BotServices)
 
 async function handleUnsubscribeStream(ctx: CommandContext, services: BotServices): Promise<void> {
   if (!ctx.guildId) {
-    await ctx.reply({ content: '❌ Stream alerts can only be configured inside a Discord server.', ephemeral: true });
+    await ctx.reply({
+      content: '❌ Stream alerts can only be configured inside a Discord server.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -523,7 +533,10 @@ async function handleUnsubscribeStream(ctx: CommandContext, services: BotService
 
 async function handleListStreams(ctx: CommandContext, services: BotServices): Promise<void> {
   if (!ctx.guildId) {
-    await ctx.reply({ content: '❌ Stream alerts can only be viewed inside a Discord server.', ephemeral: true });
+    await ctx.reply({
+      content: '❌ Stream alerts can only be viewed inside a Discord server.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -558,7 +571,9 @@ async function handleListStreams(ctx: CommandContext, services: BotServices): Pr
     const embed = new EmbedBuilder()
       .setTitle('📡 Subscribed Streamers')
       .setColor(0x5865f2)
-      .setDescription(`This server is currently monitoring **${subsWithStreamers.length}** streamer(s) across Twitch, YouTube, and TikTok:`)
+      .setDescription(
+        `This server is currently monitoring **${subsWithStreamers.length}** streamer(s) across Twitch, YouTube, and TikTok:`,
+      )
       .setFooter({ text: 'Ririko AI Stream Watcher' })
       .setTimestamp();
 
@@ -584,7 +599,10 @@ async function handleListStreams(ctx: CommandContext, services: BotServices): Pr
 
 async function handleSetStreamChannel(ctx: CommandContext, services: BotServices): Promise<void> {
   if (!ctx.guildId) {
-    await ctx.reply({ content: '❌ Stream alert channel can only be configured inside a Discord server.', ephemeral: true });
+    await ctx.reply({
+      content: '❌ Stream alert channel can only be configured inside a Discord server.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -629,7 +647,10 @@ async function handleSetStreamChannel(ctx: CommandContext, services: BotServices
 
 async function handleCheckStreams(ctx: CommandContext, services: BotServices): Promise<void> {
   if (!ctx.guildId) {
-    await ctx.reply({ content: '❌ Stream checks can only be run inside a Discord server.', ephemeral: true });
+    await ctx.reply({
+      content: '❌ Stream checks can only be run inside a Discord server.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -648,14 +669,15 @@ async function handleCheckStreams(ctx: CommandContext, services: BotServices): P
   await ctx.deferReply();
 
   try {
-    const result = typeof (services.streamWatcher as any).checkStreamsDetailed === 'function'
-      ? await (services.streamWatcher as any).checkStreamsDetailed()
-      : {
-          totalChecked: 0,
-          liveCount: await services.streamWatcher.checkStreams(),
-          errors: 0,
-          durationMs: 0,
-        };
+    const result =
+      typeof (services.streamWatcher as any).checkStreamsDetailed === 'function'
+        ? await (services.streamWatcher as any).checkStreamsDetailed()
+        : {
+            totalChecked: 0,
+            liveCount: await services.streamWatcher.checkStreams(),
+            errors: 0,
+            durationMs: 0,
+          };
 
     const monitored = await services.streamRepo.listActiveMonitoredStreamers();
     const liveStreamers = monitored.filter((s) => s.isLive);
@@ -665,9 +687,17 @@ async function handleCheckStreams(ctx: CommandContext, services: BotServices): P
       .setColor(0x5865f2)
       .setDescription(`Manual stream check cycle executed in **${result.durationMs}ms**.`)
       .addFields(
-        { name: 'Checked Streamers', value: `\`${result.totalChecked || monitored.length}\``, inline: true },
+        {
+          name: 'Checked Streamers',
+          value: `\`${result.totalChecked || monitored.length}\``,
+          inline: true,
+        },
         { name: 'Live Now', value: `\`${result.liveCount}\``, inline: true },
-        { name: 'Check Interval', value: `${((services.streamWatcher as any).getCheckIntervalMs?.() ?? 60000) / 1000}s`, inline: true },
+        {
+          name: 'Check Interval',
+          value: `${((services.streamWatcher as any).getCheckIntervalMs?.() ?? 60000) / 1000}s`,
+          inline: true,
+        },
       )
       .setFooter({ text: 'Ririko AI Stream Watcher' })
       .setTimestamp();

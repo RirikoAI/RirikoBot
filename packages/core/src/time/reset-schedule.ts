@@ -57,7 +57,9 @@ function assertValidSchedule(schedule: ResetSchedule): void {
     );
   }
   if (!Number.isInteger(resetHour) || resetHour < 0 || resetHour > 23) {
-    throw new ResetScheduleError(`resetHour must be an integer between 0 and 23, received ${resetHour}`);
+    throw new ResetScheduleError(
+      `resetHour must be an integer between 0 and 23, received ${resetHour}`,
+    );
   }
   if (!Number.isInteger(resetMinute) || resetMinute < 0 || resetMinute > 59) {
     throw new ResetScheduleError(

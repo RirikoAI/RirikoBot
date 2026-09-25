@@ -1,11 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  createCanvas,
-  type Canvas,
-} from '@napi-rs/canvas';
-import {
-  ProfileCardRenderer,
-} from './profile-card.renderer.js';
+import { createCanvas, type Canvas } from '@napi-rs/canvas';
+import { ProfileCardRenderer } from './profile-card.renderer.js';
 import { parseImageDimensions } from './profile-background.manager.js';
 import type { ProfileCardData, EquippedTcgCardView } from './types.js';
 import {

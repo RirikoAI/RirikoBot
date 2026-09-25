@@ -112,7 +112,10 @@ export class ReactionRoleService {
               .map((b) => b.roleId);
 
             if (rolesToRemove.length > 0) {
-              await member.roles.remove(rolesToRemove, 'ReactionRole: Mutually exclusive group selection');
+              await member.roles.remove(
+                rolesToRemove,
+                'ReactionRole: Mutually exclusive group selection',
+              );
             }
           }
 
@@ -159,7 +162,10 @@ export class ReactionRoleService {
         }
       }
     } catch (err: any) {
-      console.error(`[ReactionRoleService] Error updating role ${role.id} for member ${member.id}:`, err);
+      console.error(
+        `[ReactionRoleService] Error updating role ${role.id} for member ${member.id}:`,
+        err,
+      );
       return {
         success: false,
         action: 'FAILED',
@@ -277,7 +283,12 @@ export class ReactionRoleService {
   async handleButtonInteraction(interaction: ButtonInteraction): Promise<RoleAssignmentResult> {
     const { guild, member, customId } = interaction;
     if (!guild || !member) {
-      return { success: false, action: 'FAILED', roleId: '', message: 'Interaction outside of guild.' };
+      return {
+        success: false,
+        action: 'FAILED',
+        roleId: '',
+        message: 'Interaction outside of guild.',
+      };
     }
 
     const guildMember =
@@ -286,7 +297,12 @@ export class ReactionRoleService {
         : await guild.members.fetch(interaction.user.id).catch(() => null);
 
     if (!guildMember) {
-      return { success: false, action: 'FAILED', roleId: '', message: 'Could not resolve guild member.' };
+      return {
+        success: false,
+        action: 'FAILED',
+        roleId: '',
+        message: 'Could not resolve guild member.',
+      };
     }
 
     // Parse customId: rr:btn:<bindingId> OR rr:btn:role:<roleId>:<mode>:<groupId?>
@@ -359,7 +375,9 @@ export class ReactionRoleService {
         roleId: targetRoleId,
         message: 'Role not found in guild.',
       };
-      await interaction.reply({ content: result.message ?? 'Role not found in guild.', ephemeral: true }).catch(() => null);
+      await interaction
+        .reply({ content: result.message ?? 'Role not found in guild.', ephemeral: true })
+        .catch(() => null);
       return result;
     }
 
@@ -405,7 +423,9 @@ export class ReactionRoleService {
   ): Promise<RoleAssignmentResult[]> {
     const { guild, member, values, customId } = interaction;
     if (!guild || !member) {
-      await interaction.reply({ content: 'Interaction outside of guild.', ephemeral: true }).catch(() => null);
+      await interaction
+        .reply({ content: 'Interaction outside of guild.', ephemeral: true })
+        .catch(() => null);
       return [];
     }
 
@@ -415,7 +435,9 @@ export class ReactionRoleService {
         : await guild.members.fetch(interaction.user.id).catch(() => null);
 
     if (!guildMember) {
-      await interaction.reply({ content: 'Could not resolve guild member.', ephemeral: true }).catch(() => null);
+      await interaction
+        .reply({ content: 'Could not resolve guild member.', ephemeral: true })
+        .catch(() => null);
       return [];
     }
 

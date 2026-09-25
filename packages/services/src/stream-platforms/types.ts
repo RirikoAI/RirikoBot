@@ -27,7 +27,10 @@ export interface StreamPlatformAdapter {
   readonly name: string;
   isConfigured(): boolean;
   resolveStreamer(usernameOrId: string): Promise<StreamerInfo | null>;
-  getStreamStatus(streamer: { platformUserId: string; username: string }): Promise<LiveStreamInfo | null>;
+  getStreamStatus(streamer: {
+    platformUserId: string;
+    username: string;
+  }): Promise<LiveStreamInfo | null>;
   getBatchStreamStatus?(
     streamers: Array<{ platformUserId: string; username: string }>,
   ): Promise<Map<string, LiveStreamInfo | null>>;

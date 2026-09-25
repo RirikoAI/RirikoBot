@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  RarityEngine,
-  RARITY_TIERS,
-  createMulberry32,
-} from '../rarity/rarity-engine.js';
+import { RarityEngine, RARITY_TIERS, createMulberry32 } from '../rarity/rarity-engine.js';
 import {
   CardGenerator,
   formatCardSerialNumber,
@@ -44,14 +40,14 @@ describe('Rarity Math, Card Generation & Leveling Engine (TASK-1011)', () => {
     });
 
     it('should map specific roll thresholds to exact rarity tiers', () => {
-      expect(engine.rollRarity(0.00005)).toBe('MYTHIC');       // < 0.0001 (0.01%)
-      expect(engine.rollRarity(0.0005)).toBe('SIR');           // < 0.001 (0.09%)
-      expect(engine.rollRarity(0.005)).toBe('SECRET_RARE');    // < 0.01 (0.90%)
-      expect(engine.rollRarity(0.025)).toBe('ULTRA_RARE');     // < 0.04 (3.00%)
-      expect(engine.rollRarity(0.07)).toBe('SUPER_RARE');      // < 0.10 (6.00%)
-      expect(engine.rollRarity(0.15)).toBe('RARE');            // < 0.20 (10.00%)
-      expect(engine.rollRarity(0.30)).toBe('UNCOMMON');        // < 0.40 (20.00%)
-      expect(engine.rollRarity(0.75)).toBe('COMMON');          // <= 1.0 (60.00%)
+      expect(engine.rollRarity(0.00005)).toBe('MYTHIC'); // < 0.0001 (0.01%)
+      expect(engine.rollRarity(0.0005)).toBe('SIR'); // < 0.001 (0.09%)
+      expect(engine.rollRarity(0.005)).toBe('SECRET_RARE'); // < 0.01 (0.90%)
+      expect(engine.rollRarity(0.025)).toBe('ULTRA_RARE'); // < 0.04 (3.00%)
+      expect(engine.rollRarity(0.07)).toBe('SUPER_RARE'); // < 0.10 (6.00%)
+      expect(engine.rollRarity(0.15)).toBe('RARE'); // < 0.20 (10.00%)
+      expect(engine.rollRarity(0.3)).toBe('UNCOMMON'); // < 0.40 (20.00%)
+      expect(engine.rollRarity(0.75)).toBe('COMMON'); // <= 1.0 (60.00%)
     });
 
     it('should approximate theoretical distribution across 10,000 deterministic seeded rolls', () => {
@@ -147,7 +143,7 @@ describe('Rarity Math, Card Generation & Leveling Engine (TASK-1011)', () => {
       expect(card.stats.speed).toBeLessThanOrEqual(300);
 
       expect(card.stats.critRate).toBeGreaterThanOrEqual(0.05);
-      expect(card.stats.critRate).toBeLessThanOrEqual(0.50);
+      expect(card.stats.critRate).toBeLessThanOrEqual(0.5);
 
       expect(card.stats.mp).toBe(100);
 

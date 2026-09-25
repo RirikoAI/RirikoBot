@@ -312,11 +312,7 @@ export class WaifuGuildService {
     return withTransaction(this.dbClient, async (tx) => {
       await this.guildRepo.updateMemberRank(leaderGuild.guild.id, leaderUserId, 'OFFICER', tx);
       await this.guildRepo.updateMemberRank(leaderGuild.guild.id, newLeaderUserId, 'LEADER', tx);
-      return this.guildRepo.update(
-        leaderGuild.guild.id,
-        { leaderUserId: newLeaderUserId },
-        tx,
-      );
+      return this.guildRepo.update(leaderGuild.guild.id, { leaderUserId: newLeaderUserId }, tx);
     });
   }
 

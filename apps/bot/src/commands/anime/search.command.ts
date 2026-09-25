@@ -36,7 +36,10 @@ function isNsfwChannel(ctx: CommandContext): boolean {
 async function runSearchFlow<T>(ctx: CommandContext, flow: SearchFlow<T>): Promise<void> {
   const query = ctx.options.getString('search')?.trim().slice(0, MAX_QUERY_LENGTH);
   if (!query) {
-    await ctx.reply({ content: `❌ Please tell me which ${flow.noun} to search for.`, ephemeral: true });
+    await ctx.reply({
+      content: `❌ Please tell me which ${flow.noun} to search for.`,
+      ephemeral: true,
+    });
     return;
   }
 
@@ -61,7 +64,14 @@ async function runSearchFlow<T>(ctx: CommandContext, flow: SearchFlow<T>): Promi
 
   const menu = buildResultMenu(items.map(flow.toOption), 'Pick a result to view its details');
   const message: Message = await ctx.editReply({
-    embeds: [buildResultListEmbed(result.source, `🔍 ${capitalize(flow.noun)} search`, query, items.length)],
+    embeds: [
+      buildResultListEmbed(
+        result.source,
+        `🔍 ${capitalize(flow.noun)} search`,
+        query,
+        items.length,
+      ),
+    ],
     components: [menu],
   });
   attachOwnerCollector(message, {
@@ -69,7 +79,8 @@ async function runSearchFlow<T>(ctx: CommandContext, flow: SearchFlow<T>): Promi
     customIds: [ANIME_SELECT_ID],
     notOwnerHint: `⏳ This menu belongs to someone else. Run \`/${ctx.commandName}\` to start your own search.`,
     onCollect: async (interaction) => {
-      if (interaction.isStringSelectMenu()) await showSelection(interaction, items, result.source, flow, menu);
+      if (interaction.isStringSelectMenu())
+        await showSelection(interaction, items, result.source, flow, menu);
     },
   });
 }
@@ -130,7 +141,8 @@ export function createAnimeCommand(services: BotServices): Command {
     execute: (ctx) =>
       runSearchFlow(ctx, {
         noun: 'anime',
-        search: (query, includeAdult) => services.animeSearchService.searchAnime(query, { includeAdult }),
+        search: (query, includeAdult) =>
+          services.animeSearchService.searchAnime(query, { includeAdult }),
         toOption: mediaOption,
         render: async (media) => buildMediaEmbed(media),
       }),
@@ -151,7 +163,8 @@ export function createMangaCommand(services: BotServices): Command {
     execute: (ctx) =>
       runSearchFlow(ctx, {
         noun: 'manga',
-        search: (query, includeAdult) => services.animeSearchService.searchManga(query, { includeAdult }),
+        search: (query, includeAdult) =>
+          services.animeSearchService.searchManga(query, { includeAdult }),
         toOption: mediaOption,
         render: async (media) => buildMediaEmbed(media),
       }),

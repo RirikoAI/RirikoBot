@@ -171,7 +171,9 @@ describe('Moderation Subsystem — TASK-0701', () => {
 
     it('rejects bot missing required Discord bitfield permissions', async () => {
       const guild = createMockGuild();
-      const botMember = (guild.members as unknown as { me: { permissions: { has: ReturnType<typeof vi.fn> } } }).me;
+      const botMember = (
+        guild.members as unknown as { me: { permissions: { has: ReturnType<typeof vi.fn> } } }
+      ).me;
       botMember.permissions.has.mockReturnValue(false); // bot has no perms
 
       const invoker = createMockMember('admin_user', 40);

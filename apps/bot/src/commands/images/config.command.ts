@@ -1,7 +1,4 @@
-import {
-  EmbedBuilder,
-  PermissionFlagsBits,
-} from 'discord.js';
+import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { VALID_PRESETS, VALID_PROVIDERS } from './imagine.command.js';
@@ -20,10 +17,12 @@ export function createSdModelCommand(services: BotServices): Command {
     metadata: {
       name: SD_MODEL_COMMAND_NAME,
       category: CommandCategory.AI,
-      description: 'Configure or inspect the default image generation preset and model for this server',
+      description:
+        'Configure or inspect the default image generation preset and model for this server',
       aliases: SD_MODEL_ALIASES,
       userPermissions: [PermissionFlagsBits.ManageGuild],
-      usage: '/stablediffusion-model [preset] [provider] | !stablediffusion-model [preset] [provider]',
+      usage:
+        '/stablediffusion-model [preset] [provider] | !stablediffusion-model [preset] [provider]',
       examples: [
         '/stablediffusion-model preset:anime provider:gemini',
         '/stablediffusion-model preset:photoreal',
@@ -33,7 +32,8 @@ export function createSdModelCommand(services: BotServices): Command {
       options: [
         {
           name: 'preset',
-          description: 'Default style preset (e.g. anime, photoreal, pixel-art, fantasy, cyberpunk, none)',
+          description:
+            'Default style preset (e.g. anime, photoreal, pixel-art, fantasy, cyberpunk, none)',
           type: 'STRING',
           required: false,
           choices: VALID_PRESETS.map((p) => ({
@@ -184,7 +184,8 @@ export function createSetupSdApiCommand(): Command {
           },
           {
             name: 'Need Help?',
-            value: 'Run `pnpm ririko doctor` on the host to verify your configured AI and Image provider connections.',
+            value:
+              'Run `pnpm ririko doctor` on the host to verify your configured AI and Image provider connections.',
           },
         )
         .setFooter({ text: 'Ririko AI 2.0.0 • Security & Modernization Architecture' })

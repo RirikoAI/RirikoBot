@@ -67,10 +67,7 @@ describe('AutoVoiceService (TASK-0911)', () => {
         parent: { id: 'category-1' },
         permissionOverwrites: {
           cache: new Map([
-            [
-              'role-1',
-              { id: 'role-1', allow: BigInt(1024), deny: BigInt(0), type: 0 },
-            ],
+            ['role-1', { id: 'role-1', allow: BigInt(1024), deny: BigInt(0), type: 0 }],
           ]),
         },
       };
@@ -394,9 +391,13 @@ describe('AutoVoiceService (TASK-0911)', () => {
       await recordChannel('child-unknown');
       await recordChannel('child-forbidden');
       const unknown = voiceChannel('child-unknown');
-      unknown.delete.mockRejectedValue(Object.assign(new Error('Unknown Channel'), { code: 10003 }));
+      unknown.delete.mockRejectedValue(
+        Object.assign(new Error('Unknown Channel'), { code: 10003 }),
+      );
       const forbidden = voiceChannel('child-forbidden');
-      forbidden.delete.mockRejectedValue(Object.assign(new Error('Missing Permissions'), { code: 50013 }));
+      forbidden.delete.mockRejectedValue(
+        Object.assign(new Error('Missing Permissions'), { code: 50013 }),
+      );
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const deleted = await service.cleanupOrphans(guildWith(unknown, forbidden));

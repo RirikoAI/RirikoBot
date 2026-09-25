@@ -24,11 +24,7 @@ export interface OpenAIProviderOptions {
 export class OpenAIProvider implements ChatModelProvider {
   public readonly id = 'openai';
   public readonly name = 'OpenAI';
-  public readonly supportedModels = [
-    'gpt-4o-mini',
-    'gpt-4o',
-    'o3-mini',
-  ] as const;
+  public readonly supportedModels = ['gpt-4o-mini', 'gpt-4o', 'o3-mini'] as const;
   public readonly defaultModel: string;
 
   private readonly apiKey?: string | undefined;
@@ -77,7 +73,10 @@ export class OpenAIProvider implements ChatModelProvider {
     return name;
   }
 
-  private mapMessages(messages: ChatMessage[], systemInstruction?: string): ChatCompletionMessageParam[] {
+  private mapMessages(
+    messages: ChatMessage[],
+    systemInstruction?: string,
+  ): ChatCompletionMessageParam[] {
     const result: ChatCompletionMessageParam[] = [];
 
     if (systemInstruction) {
@@ -118,7 +117,8 @@ export class OpenAIProvider implements ChatModelProvider {
           });
         }
       } else if (msg.role === 'assistant') {
-        const validToolCalls = msg.toolCalls?.filter((tc) => respondingToolCallIds.has(tc.id)) ?? [];
+        const validToolCalls =
+          msg.toolCalls?.filter((tc) => respondingToolCallIds.has(tc.id)) ?? [];
         if (validToolCalls.length > 0) {
           result.push({
             role: 'assistant',
@@ -173,7 +173,9 @@ export class OpenAIProvider implements ChatModelProvider {
         messages,
         ...(tools ? { tools, tool_choice: request.toolChoice ?? 'auto' } : {}),
         ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
-        ...(request.maxOutputTokens !== undefined ? { max_completion_tokens: request.maxOutputTokens } : {}),
+        ...(request.maxOutputTokens !== undefined
+          ? { max_completion_tokens: request.maxOutputTokens }
+          : {}),
       });
 
       const choice = response.choices[0];
@@ -236,7 +238,9 @@ export class OpenAIProvider implements ChatModelProvider {
         stream: true,
         ...(tools ? { tools, tool_choice: request.toolChoice ?? 'auto' } : {}),
         ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
-        ...(request.maxOutputTokens !== undefined ? { max_completion_tokens: request.maxOutputTokens } : {}),
+        ...(request.maxOutputTokens !== undefined
+          ? { max_completion_tokens: request.maxOutputTokens }
+          : {}),
       });
 
       const toolCallMap = new Map<number, { id: string; name: string; args: string }>();
@@ -248,7 +252,11 @@ export class OpenAIProvider implements ChatModelProvider {
         if (delta?.tool_calls) {
           for (const tc of delta.tool_calls) {
             const index = tc.index;
-            const existing = toolCallMap.get(index) ?? { id: tc.id ?? '', name: tc.function?.name ?? '', args: '' };
+            const existing = toolCallMap.get(index) ?? {
+              id: tc.id ?? '',
+              name: tc.function?.name ?? '',
+              args: '',
+            };
             if (tc.id) existing.id = tc.id;
             if (tc.function?.name) existing.name = tc.function.name;
             if (tc.function?.arguments) existing.args += tc.function.arguments;

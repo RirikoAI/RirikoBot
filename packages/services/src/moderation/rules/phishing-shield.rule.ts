@@ -139,9 +139,7 @@ export class PhishingShieldRule implements AutoModRule {
     const decodedDomains = this.extractDomains(decodedText);
     const domains = Array.from(new Set([...directDomains, ...decodedDomains]));
 
-    const blacklist = new Set(
-      (config?.blacklist ?? []).map((b) => b.trim().toLowerCase()),
-    );
+    const blacklist = new Set((config?.blacklist ?? []).map((b) => b.trim().toLowerCase()));
 
     // Check custom blacklist first
     for (const domain of domains) {
@@ -190,9 +188,8 @@ export class PhishingShieldRule implements AutoModRule {
 
       // Bare deceptive domains mimicking discord with alternate TLDs or hyphens
       const isDiscordSpoof =
-        /^([a-z0-9-]+\.)*(?:discord|discrod|dlscord)[a-z0-9-]*\.[a-z]{2,}$/.test(
-          decodedDomain,
-        ) && !isLegit;
+        /^([a-z0-9-]+\.)*(?:discord|discrod|dlscord)[a-z0-9-]*\.[a-z]{2,}$/.test(decodedDomain) &&
+        !isLegit;
 
       // Check Steam phishing signatures (e.g., steamcommunilty, steam-gifts, steamcommunity-nitro)
       const isSteamPhish =

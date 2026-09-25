@@ -40,11 +40,7 @@ export class MediatedToolExecutor {
 
     // 2. Execute with parameter validation
     try {
-      const result = await this.registry.execute(
-        toolCall.name,
-        toolCall.arguments,
-        context,
-      );
+      const result = await this.registry.execute(toolCall.name, toolCall.arguments, context);
 
       return {
         toolCallId: toolCall.id,

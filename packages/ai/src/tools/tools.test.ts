@@ -99,7 +99,7 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
   describe('3. AnimeSearchTool (anime.search)', () => {
     it('executes using custom search provider', async () => {
       const mockProvider = async (_title: string) => ({
-        title: 'Frieren: Beyond Journey\'s End',
+        title: "Frieren: Beyond Journey's End",
         synopsis: 'An elf mage explores life after defeating the demon king.',
         score: 9.3,
         episodes: 28,
@@ -109,7 +109,7 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
       const tool = new AnimeSearchTool(mockProvider);
       const result = await tool.execute({ title: 'Frieren' }, baseContext);
 
-      expect(result.title).toBe('Frieren: Beyond Journey\'s End');
+      expect(result.title).toBe("Frieren: Beyond Journey's End");
       expect(result.score).toBe(9.3);
       expect(result.episodes).toBe(28);
     });
@@ -151,9 +151,15 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
       }));
       const tool = new ReminderTool(scheduler);
 
-      const result = await tool.execute({ timeString: '15m', message: 'Check laundry' }, baseContext);
+      const result = await tool.execute(
+        { timeString: '15m', message: 'Check laundry' },
+        baseContext,
+      );
 
-      expect(scheduler).toHaveBeenCalledWith({ timeString: '15m', message: 'Check laundry' }, baseContext);
+      expect(scheduler).toHaveBeenCalledWith(
+        { timeString: '15m', message: 'Check laundry' },
+        baseContext,
+      );
       expect(result).toEqual({
         scheduled: true,
         message: 'Check laundry',
@@ -171,7 +177,10 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
     });
 
     it('never claims success without a scheduler', async () => {
-      const result = await new ReminderTool().execute({ timeString: '15m', message: 'x' }, baseContext);
+      const result = await new ReminderTool().execute(
+        { timeString: '15m', message: 'x' },
+        baseContext,
+      );
       expect(result.scheduled).toBe(false);
     });
 
@@ -322,9 +331,9 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
 
     it('throws error when tool is not registered', async () => {
       const registry = ToolRegistry.createDefault();
-      await expect(
-        registry.execute('unregistered.tool', {}, baseContext),
-      ).rejects.toThrow('Tool "unregistered.tool" is not registered');
+      await expect(registry.execute('unregistered.tool', {}, baseContext)).rejects.toThrow(
+        'Tool "unregistered.tool" is not registered',
+      );
     });
   });
 });

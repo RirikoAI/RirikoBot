@@ -96,7 +96,9 @@ describe('Waifu Ingestion Pipeline & Validation (TASK-1001)', () => {
     });
 
     it('falls back to a numbered name when only generic tags exist', () => {
-      expect(extractWaifuImMetadata(waifuImItem(12345, ['waifu'])).characterName).toBe('Waifu #2345');
+      expect(extractWaifuImMetadata(waifuImItem(12345, ['waifu'])).characterName).toBe(
+        'Waifu #2345',
+      );
     });
   });
 

@@ -302,12 +302,7 @@ export class InventoryService {
         const totalXp = xpPerItem * quantity;
 
         if (this.levelingService && guildId) {
-          await this.levelingService.addExperience(
-            userId,
-            guildId,
-            totalXp,
-            `ITEM_USE:${item.id}`,
-          );
+          await this.levelingService.addExperience(userId, guildId, totalXp, `ITEM_USE:${item.id}`);
         }
 
         xpAwarded = totalXp;
@@ -333,7 +328,8 @@ export class InventoryService {
       }
 
       case 'PROFILE_BG_TOKEN': {
-        effectSummary = 'Profile Background Voucher redeemed. You can now configure your profile banner via /profile background <url>.';
+        effectSummary =
+          'Profile Background Voucher redeemed. You can now configure your profile banner via /profile background <url>.';
         break;
       }
 

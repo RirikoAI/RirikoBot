@@ -413,15 +413,29 @@ describe('Waifu TCG: Equipment, Loadouts, Enhancement & Consumables (STORY-103 /
 
   describe('5. Unequip All & Gear Lock (BUG-0014)', () => {
     async function gearUp(userId: string, cardId: string) {
-      const blade = await inventoryRepo.create({ userId, itemId: (await itemRepo.findByCode('WEAPON_NOVICE_BLADE'))!.id });
-      const armor = await inventoryRepo.create({ userId, itemId: (await itemRepo.findByCode('ARMOR_IRON_HAUBERK'))!.id });
+      const blade = await inventoryRepo.create({
+        userId,
+        itemId: (await itemRepo.findByCode('WEAPON_NOVICE_BLADE'))!.id,
+      });
+      const armor = await inventoryRepo.create({
+        userId,
+        itemId: (await itemRepo.findByCode('ARMOR_IRON_HAUBERK'))!.id,
+      });
       await loadoutService.equip(userId, cardId, blade.id, 'WEAPON');
       await loadoutService.equip(userId, cardId, armor.id, 'ARMOR');
     }
 
     it('unequips every piece from one card and leaves other cards alone', async () => {
-      const a = await cardRepo.createUserCard({ userId: 'u1', cardId: 'card_def_1', serialNumber: 1 });
-      const b = await cardRepo.createUserCard({ userId: 'u1', cardId: 'card_def_1', serialNumber: 2 });
+      const a = await cardRepo.createUserCard({
+        userId: 'u1',
+        cardId: 'card_def_1',
+        serialNumber: 1,
+      });
+      const b = await cardRepo.createUserCard({
+        userId: 'u1',
+        cardId: 'card_def_1',
+        serialNumber: 2,
+      });
       await gearUp('u1', a.id);
       await gearUp('u1', b.id);
 
@@ -433,7 +447,11 @@ describe('Waifu TCG: Equipment, Loadouts, Enhancement & Consumables (STORY-103 /
     });
 
     it('without a card, unequips everything, including gear stranded on a card now owned by someone else', async () => {
-      const card = await cardRepo.createUserCard({ userId: 'u1', cardId: 'card_def_1', serialNumber: 1 });
+      const card = await cardRepo.createUserCard({
+        userId: 'u1',
+        cardId: 'card_def_1',
+        serialNumber: 1,
+      });
       await gearUp('u1', card.id);
       await cardRepo.updateUserCardOwner(card.id, 'u2', 'IDLE');
 
@@ -446,25 +464,49 @@ describe('Waifu TCG: Equipment, Loadouts, Enhancement & Consumables (STORY-103 /
     });
 
     it("rejects unequip-all on someone else's card", async () => {
-      const card = await cardRepo.createUserCard({ userId: 'u2', cardId: 'card_def_1', serialNumber: 1 });
-      await expect(loadoutService.unequipAll('u1', card.id)).rejects.toThrow(/does not belong to you/);
+      const card = await cardRepo.createUserCard({
+        userId: 'u2',
+        cardId: 'card_def_1',
+        serialNumber: 1,
+      });
+      await expect(loadoutService.unequipAll('u1', card.id)).rejects.toThrow(
+        /does not belong to you/,
+      );
     });
 
     it('refuses to equip gear onto a card that is listed or in a trade', async () => {
-      const card = await cardRepo.createUserCard({ userId: 'u1', cardId: 'card_def_1', serialNumber: 1 });
-      const blade = await inventoryRepo.create({ userId: 'u1', itemId: (await itemRepo.findByCode('WEAPON_NOVICE_BLADE'))!.id });
+      const card = await cardRepo.createUserCard({
+        userId: 'u1',
+        cardId: 'card_def_1',
+        serialNumber: 1,
+      });
+      const blade = await inventoryRepo.create({
+        userId: 'u1',
+        itemId: (await itemRepo.findByCode('WEAPON_NOVICE_BLADE'))!.id,
+      });
 
       await cardRepo.updateUserCardState(card.id, 'IN_MARKET');
-      await expect(loadoutService.equip('u1', card.id, blade.id, 'WEAPON')).rejects.toThrow(/listed on the market/);
+      await expect(loadoutService.equip('u1', card.id, blade.id, 'WEAPON')).rejects.toThrow(
+        /listed on the market/,
+      );
       await cardRepo.updateUserCardState(card.id, 'IN_TRADE');
-      await expect(loadoutService.equip('u1', card.id, blade.id, 'WEAPON')).rejects.toThrow(/pending trade/);
+      await expect(loadoutService.equip('u1', card.id, blade.id, 'WEAPON')).rejects.toThrow(
+        /pending trade/,
+      );
     });
 
     it('dismantling a card returns its gear to the inventory', async () => {
-      const card = await cardRepo.createUserCard({ userId: 'u1', cardId: 'card_def_1', serialNumber: 1 });
+      const card = await cardRepo.createUserCard({
+        userId: 'u1',
+        cardId: 'card_def_1',
+        serialNumber: 1,
+      });
       await gearUp('u1', card.id);
 
-      const result = await new CardDismantleService(cardRepo, inventoryRepo).dismantleCard('u1', card.id);
+      const result = await new CardDismantleService(cardRepo, inventoryRepo).dismantleCard(
+        'u1',
+        card.id,
+      );
       expect(result.success).toBe(true);
       expect(result.gearReturned).toBe(2);
       const idle = await inventoryRepo.findByUser('u1', { state: 'IDLE' });

@@ -112,7 +112,9 @@ interface RawMedia {
   genres: string[] | null;
   startDate: RawFuzzyDate | null;
   endDate: RawFuzzyDate | null;
-  studios: { edges: Array<{ isMain: boolean; node: { name: string; isAnimationStudio: boolean } }> } | null;
+  studios: {
+    edges: Array<{ isMain: boolean; node: { name: string; isAnimationStudio: boolean } }>;
+  } | null;
   staff: { edges: Array<{ role: string | null; node: { name: { full: string | null } } }> } | null;
   coverImage: { large: string | null } | null;
   siteUrl: string | null;
@@ -176,7 +178,8 @@ query ($search: String, $type: MediaType, $perPage: Int, $isAdult: Boolean) {
 }`;
 
 // Matches "Story", "Art", "Story & Art", "Original Creator"; excludes assistants.
-const isAuthorRole = (role: string) => /^(story|art|original creator)\b/i.test(role) && !/assist/i.test(role);
+const isAuthorRole = (role: string) =>
+  /^(story|art|original creator)\b/i.test(role) && !/assist/i.test(role);
 
 function fuzzyDate(date: RawFuzzyDate | null): string | null {
   if (!date?.year) return null;
@@ -294,7 +297,10 @@ export class AniListClient {
   }
 
   /** Searches characters, best match first, then by favourites. */
-  async searchCharacters(search: string, options: { perPage?: number } = {}): Promise<AniListCharacter[]> {
+  async searchCharacters(
+    search: string,
+    options: { perPage?: number } = {},
+  ): Promise<AniListCharacter[]> {
     const data = await this.query<{ Page?: { characters?: RawCharacter[] } }>(
       CHARACTER_SEARCH_QUERY,
       { search, perPage: clampPerPage(options.perPage) },
@@ -314,7 +320,10 @@ export class AniListClient {
   }
 
   /** Searches anime or manga, best match first. */
-  async searchMedia(search: string, options: AniListMediaSearchOptions = {}): Promise<AniListMedia[]> {
+  async searchMedia(
+    search: string,
+    options: AniListMediaSearchOptions = {},
+  ): Promise<AniListMedia[]> {
     const data = await this.query<{ Page?: { media?: RawMedia[] } }>(
       MEDIA_SEARCH_QUERY,
       {

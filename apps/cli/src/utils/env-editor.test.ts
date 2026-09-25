@@ -107,10 +107,7 @@ describe('env-editor utility', () => {
     });
 
     it('uncomments commented out variable if present', () => {
-      const sample = [
-        '# GEMINI_API_KEY=',
-        'DEFAULT_PREFIX=!',
-      ].join('\n');
+      const sample = ['# GEMINI_API_KEY=', 'DEFAULT_PREFIX=!'].join('\n');
       writeFileSync(testEnvPath, sample, 'utf-8');
 
       const result = updateEnvFile(testEnvPath, {

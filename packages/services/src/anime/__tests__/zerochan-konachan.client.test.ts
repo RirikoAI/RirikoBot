@@ -11,7 +11,10 @@ function withUrl(res: Response, url: string): Response {
 }
 
 const jsonResponse = (body: unknown, url = '') =>
-  withUrl(new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json' } }), url);
+  withUrl(
+    new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json' } }),
+    url,
+  );
 
 const htmlResponse = (url: string) =>
   withUrl(new Response('<html></html>', { headers: { 'content-type': 'text/html' } }), url);
@@ -33,7 +36,9 @@ describe('ZerochanClient', () => {
 
     const [wallpaper] = await client.search('Raiden Shogun', 2);
 
-    expect(String(fetchFn.mock.calls[0]![0])).toBe('https://www.zerochan.net/Raiden%20Shogun?json&l=24&p=2');
+    expect(String(fetchFn.mock.calls[0]![0])).toBe(
+      'https://www.zerochan.net/Raiden%20Shogun?json&l=24&p=2',
+    );
     const headers = fetchFn.mock.calls[0]![1]!.headers as Record<string, string>;
     expect(headers['User-Agent']).toBe('RirikoBot - RirikoAI');
     expect(wallpaper).toEqual({
@@ -52,7 +57,9 @@ describe('ZerochanClient', () => {
     const fetchFn = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(htmlResponse('https://www.zerochan.net/Fern'))
-      .mockResolvedValueOnce(jsonResponse({ items: [zeroItem(1, 'Fern'), zeroItem(2, 'Saber (Fate)')] }));
+      .mockResolvedValueOnce(
+        jsonResponse({ items: [zeroItem(1, 'Fern'), zeroItem(2, 'Saber (Fate)')] }),
+      );
     const client = new ZerochanClient({ limiter: instantLimiter(), fetchFn });
 
     const results = await client.search('Fern (Sousou no Frieren)');
@@ -88,7 +95,9 @@ describe('KonachanClient', () => {
   });
 
   it('searches konachan.net as one safe-rated tag and keeps only safe posts', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse([post(1, 's'), post(2, 'q')]));
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(jsonResponse([post(1, 's'), post(2, 'q')]));
     const client = new KonachanClient({ limiter: instantLimiter(), fetchFn });
 
     const results = await client.search('Raiden  Shogun', 3);

@@ -59,9 +59,10 @@ export class ItemRepository extends BaseRepository<
       }
 
       const query = client.db.select().from(sqliteSchema.economyItems);
-      const rows = conditions.length > 0
-        ? await query.where(and(...conditions)).orderBy(asc(sqliteSchema.economyItems.price))
-        : await query.orderBy(asc(sqliteSchema.economyItems.price));
+      const rows =
+        conditions.length > 0
+          ? await query.where(and(...conditions)).orderBy(asc(sqliteSchema.economyItems.price))
+          : await query.orderBy(asc(sqliteSchema.economyItems.price));
 
       return rows as EconomyItem[];
     } else {
@@ -73,9 +74,10 @@ export class ItemRepository extends BaseRepository<
       }
 
       const query = client.db.select().from(pgSchema.economyItems);
-      const rows = conditions.length > 0
-        ? await query.where(and(...conditions)).orderBy(asc(pgSchema.economyItems.price))
-        : await query.orderBy(asc(pgSchema.economyItems.price));
+      const rows =
+        conditions.length > 0
+          ? await query.where(and(...conditions)).orderBy(asc(pgSchema.economyItems.price))
+          : await query.orderBy(asc(pgSchema.economyItems.price));
 
       return rows.map((r) => ({
         ...r,
@@ -91,10 +93,7 @@ export class ItemRepository extends BaseRepository<
   async create(data: NewEconomyItem, tx?: DatabaseClient): Promise<EconomyItem> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
-      const [created] = await client.db
-        .insert(sqliteSchema.economyItems)
-        .values(data)
-        .returning();
+      const [created] = await client.db.insert(sqliteSchema.economyItems).values(data).returning();
       if (!created) throw new DatabaseError(`Failed to create item ${data.id} in SQLite`);
       return created as EconomyItem;
     } else {
@@ -199,7 +198,8 @@ export class ItemRepository extends BaseRepository<
       {
         id: 'stamina_potion',
         name: 'Stamina Potion',
-        description: 'Restores 50 stamina. Hard anti-abuse ceiling: max 3 potions consumed per day.',
+        description:
+          'Restores 50 stamina. Hard anti-abuse ceiling: max 3 potions consumed per day.',
         price: 350,
         rarity: 'UNCOMMON',
         categoryId: 'consumable',
@@ -226,7 +226,8 @@ export class ItemRepository extends BaseRepository<
       {
         id: 'profile_bg_voucher',
         name: 'Profile Background Voucher',
-        description: 'Voucher allowing you to set a custom validated profile banner (/profile background <url>).',
+        description:
+          'Voucher allowing you to set a custom validated profile banner (/profile background <url>).',
         price: 1500,
         rarity: 'RARE',
         categoryId: 'cosmetic',

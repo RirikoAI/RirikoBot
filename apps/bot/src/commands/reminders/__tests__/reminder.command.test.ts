@@ -9,7 +9,14 @@ import { REMINDER_CANCEL_ID, createReminderCommand } from '../reminder.command.j
 interface Payload {
   content?: string;
   ephemeral?: boolean;
-  embeds: Array<{ data: { title?: string; description?: string; fields: Array<{ value: string }>; footer: { text: string } } }>;
+  embeds: Array<{
+    data: {
+      title?: string;
+      description?: string;
+      fields: Array<{ value: string }>;
+      footer: { text: string };
+    };
+  }>;
   components: Array<{ components: Array<{ data: { custom_id: string } }> }>;
 }
 
@@ -25,12 +32,20 @@ const reminder = (id: string, overrides: Partial<Reminder> = {}): Reminder => ({
   ...overrides,
 });
 
-function setup(options: { source?: 'slash' | 'prefix'; args?: string[]; slash?: Record<string, string> } = {}) {
+function setup(
+  options: { source?: 'slash' | 'prefix'; args?: string[]; slash?: Record<string, string> } = {},
+) {
   const reminderService = {
     create: vi.fn(async (input: { message?: string }) =>
-      reminder('1a2b3c4d-0000-0000-0000-000000000000', { message: input.message ?? 'call mom', repeatInterval: 'DAILY' }),
+      reminder('1a2b3c4d-0000-0000-0000-000000000000', {
+        message: input.message ?? 'call mom',
+        repeatInterval: 'DAILY',
+      }),
     ),
-    list: vi.fn(async () => [reminder('aaaa1111-x'), reminder('bbbb2222-x', { repeatInterval: 'WEEKLY' })]),
+    list: vi.fn(async () => [
+      reminder('aaaa1111-x'),
+      reminder('bbbb2222-x', { repeatInterval: 'WEEKLY' }),
+    ]),
     cancel: vi.fn(async (_user: string, id: string) => reminder(id)),
   };
   const services = {
@@ -40,7 +55,10 @@ function setup(options: { source?: 'slash' | 'prefix'; args?: string[]; slash?: 
   } as unknown as BotServices;
 
   const collector = Object.assign(new EventEmitter(), { resetTimer: vi.fn() });
-  const message = { createMessageComponentCollector: vi.fn(() => collector), edit: vi.fn(async () => undefined) };
+  const message = {
+    createMessageComponentCollector: vi.fn(() => collector),
+    edit: vi.fn(async () => undefined),
+  };
   const slash = options.slash ?? {};
   const raw = {
     source: options.source ?? 'slash',
@@ -100,7 +118,10 @@ describe('/reminder (TASK-1413)', () => {
 
   it.each([
     [['1h', 'Take', 'a', 'break'], { when: '1h Take a break', repeat: undefined }],
-    [['call', 'mom', 'tomorrow', 'at', '6pm'], { when: 'call mom tomorrow at 6pm', repeat: undefined }],
+    [
+      ['call', 'mom', 'tomorrow', 'at', '6pm'],
+      { when: 'call mom tomorrow at 6pm', repeat: undefined },
+    ],
     [['daily', '9am', 'take', 'pills'], { when: '9am take pills', repeat: 'DAILY' }],
     [['set', 'weekly', 'friday', '8pm', 'raid'], { when: 'friday 8pm raid', repeat: 'WEEKLY' }],
   ])('parses the legacy prefix form %j', async (args, expected) => {
@@ -119,7 +140,9 @@ describe('/reminder (TASK-1413)', () => {
     expect(raw.deferReply).toHaveBeenCalledWith({ ephemeral: true });
     const view = raw.editReply.mock.calls[0]![0];
     expect(view.embeds[0]!.data.title).toBe('⏰ Your reminders (2)');
-    expect(view.embeds[0]!.data.description).toContain('`aaaa1111` · <t:1790125200:f> (<t:1790125200:R>)');
+    expect(view.embeds[0]!.data.description).toContain(
+      '`aaaa1111` · <t:1790125200:f> (<t:1790125200:R>)',
+    );
     expect(view.embeds[0]!.data.description).toContain('🔁 Weekly');
     expect(view.components[0]!.components[0]!.data.custom_id).toBe(REMINDER_CANCEL_ID);
 
@@ -135,7 +158,12 @@ describe('/reminder (TASK-1413)', () => {
     await flush();
     expect(services.reminderService.cancel).not.toHaveBeenCalled();
 
-    const owner = { ...intruder, user: { id: 'user-1' }, reply: vi.fn(), update: vi.fn(async () => undefined) };
+    const owner = {
+      ...intruder,
+      user: { id: 'user-1' },
+      reply: vi.fn(),
+      update: vi.fn(async () => undefined),
+    };
     collector.emit('collect', owner);
     await flush();
     expect(services.reminderService.cancel).toHaveBeenCalledWith('user-1', 'aaaa1111-x');

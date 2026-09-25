@@ -6,11 +6,7 @@ import {
   ButtonStyle,
   type TextChannel,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { ReactionRoleMode, ReactionRoleType } from '@ririko/services';
 
@@ -126,7 +122,8 @@ export function createCreateReactionRoleCommand(services: BotServices): Command 
 
       if (!messageId || !emoji || !role) {
         await ctx.reply({
-          content: '❌ Please provide a message ID, emoji/label, and role.\nUsage: `/create-reaction-role <message-id> <emoji> <role>`',
+          content:
+            '❌ Please provide a message ID, emoji/label, and role.\nUsage: `/create-reaction-role <message-id> <emoji> <role>`',
         });
         return;
       }
@@ -134,21 +131,25 @@ export function createCreateReactionRoleCommand(services: BotServices): Command 
       // Validate bot permissions and role hierarchy
       if (!services.reactionRoleService.hasPermission(ctx.guild)) {
         await ctx.reply({
-          content: "❌ I don't have permission to manage roles in this server. Please grant me the **Manage Roles** permission.",
+          content:
+            "❌ I don't have permission to manage roles in this server. Please grant me the **Manage Roles** permission.",
         });
         return;
       }
 
       if (!services.reactionRoleService.isValidRole(ctx.guild, role.id)) {
         await ctx.reply({
-          content: '❌ Invalid role. Make sure the role is not `@everyone`, is not managed by an integration, and is positioned **below** my highest role.',
+          content:
+            '❌ Invalid role. Make sure the role is not `@everyone`, is not managed by an integration, and is positioned **below** my highest role.',
         });
         return;
       }
 
       // Resolve options
       const rawMode = (ctx.options.getString('mode') || rawArgs[3] || 'toggle').toUpperCase();
-      const mode: ReactionRoleMode = ['TOGGLE', 'GIVE_ONLY', 'REMOVE_ONLY', 'UNIQUE'].includes(rawMode)
+      const mode: ReactionRoleMode = ['TOGGLE', 'GIVE_ONLY', 'REMOVE_ONLY', 'UNIQUE'].includes(
+        rawMode,
+      )
         ? (rawMode as ReactionRoleMode)
         : 'TOGGLE';
 
@@ -235,7 +236,11 @@ export function createCreateReactionRoleCommand(services: BotServices): Command 
           .setDescription(`Successfully bound **${emoji}** to role **${role.name}**!`)
           .setColor('#00FF00')
           .addFields(
-            { name: 'Target Message', value: `[\`Jump to Message\`](${targetMessage.url})`, inline: true },
+            {
+              name: 'Target Message',
+              value: `[\`Jump to Message\`](${targetMessage.url})`,
+              inline: true,
+            },
             { name: 'Role', value: `<@&${role.id}>`, inline: true },
             { name: 'Type', value: `\`${type}\``, inline: true },
             { name: 'Mode', value: `\`${mode}\``, inline: true },

@@ -181,9 +181,7 @@ export class GiveawayEngine {
 
     // 4. Required roles check
     if (requirements.requiredRoleIds && requirements.requiredRoleIds.length > 0) {
-      const hasRequired = member.roleIds.some((id) =>
-        requirements.requiredRoleIds!.includes(id),
-      );
+      const hasRequired = member.roleIds.some((id) => requirements.requiredRoleIds!.includes(id));
       if (!hasRequired) {
         return {
           allowed: false,
@@ -265,10 +263,7 @@ export class GiveawayEngine {
   /**
    * Rerolls winner(s) for an already ended giveaway, excluding prior winners.
    */
-  async reroll(
-    giveawayId: string,
-    customWinnerCount?: number,
-  ): Promise<GiveawayEndResult | null> {
+  async reroll(giveawayId: string, customWinnerCount?: number): Promise<GiveawayEndResult | null> {
     const giveaway = await this.giveawayRepo.findById(giveawayId);
     if (!giveaway || !giveaway.isEnded) {
       return null;
@@ -278,9 +273,8 @@ export class GiveawayEngine {
     const existingWinners = await this.giveawayRepo.getWinners(giveawayId);
     const existingWinnerIds = existingWinners.map((w) => w.userId);
 
-    const count = customWinnerCount && customWinnerCount > 0
-      ? customWinnerCount
-      : giveaway.winnerCount;
+    const count =
+      customWinnerCount && customWinnerCount > 0 ? customWinnerCount : giveaway.winnerCount;
 
     const newWinnerIds = this.selectWinners(entries, count, existingWinnerIds, this.rngFn);
 
@@ -347,7 +341,9 @@ export class GiveawayEngine {
         reqNotes.push(`• Min Server Tenure: **${reqs.minServerTenureDays} days**`);
       }
       if (reqs?.requiredRoleIds && reqs.requiredRoleIds.length > 0) {
-        reqNotes.push(`• Required Roles: ${reqs.requiredRoleIds.map((r) => `<@&${r}>`).join(', ')}`);
+        reqNotes.push(
+          `• Required Roles: ${reqs.requiredRoleIds.map((r) => `<@&${r}>`).join(', ')}`,
+        );
       }
       if (reqs?.bonusRoles && reqs.bonusRoles.length > 0) {
         reqNotes.push(
@@ -372,9 +368,10 @@ export class GiveawayEngine {
         timestamp: new Date(giveaway.endsAt),
       };
     } else {
-      const winnerDisplay = winners && winners.length > 0
-        ? winners.map((id) => `<@${id}>`).join(', ')
-        : 'None (No eligible entries)';
+      const winnerDisplay =
+        winners && winners.length > 0
+          ? winners.map((id) => `<@${id}>`).join(', ')
+          : 'None (No eligible entries)';
 
       fields.push({
         name: '🎉 Winners Announced',

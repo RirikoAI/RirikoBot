@@ -1,7 +1,4 @@
-import {
-  EmbedBuilder,
-  ChannelType,
-} from 'discord.js';
+import { EmbedBuilder, ChannelType } from 'discord.js';
 import {
   CommandCategory,
   type Command,
@@ -48,9 +45,15 @@ export function createGuildInfoCommand(services: BotServices): Command {
       let categoryChannels = 0;
 
       for (const channel of channels.values()) {
-        if (channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement) {
+        if (
+          channel.type === ChannelType.GuildText ||
+          channel.type === ChannelType.GuildAnnouncement
+        ) {
           textChannels++;
-        } else if (channel.type === ChannelType.GuildVoice || channel.type === ChannelType.GuildStageVoice) {
+        } else if (
+          channel.type === ChannelType.GuildVoice ||
+          channel.type === ChannelType.GuildStageVoice
+        ) {
           voiceChannels++;
         } else if (channel.type === ChannelType.GuildCategory) {
           categoryChannels++;

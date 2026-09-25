@@ -8,10 +8,7 @@ import {
   parseImaginePrefixArgs,
   handleImagineButtonInteraction,
 } from '../imagine.command.js';
-import {
-  createSdModelCommand,
-  createSetupSdApiCommand,
-} from '../config.command.js';
+import { createSdModelCommand, createSetupSdApiCommand } from '../config.command.js';
 
 interface MockCollector extends EventEmitter {
   resetTimer: ReturnType<typeof vi.fn>;
@@ -403,7 +400,9 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
       expect(ctx.reply).toHaveBeenCalled();
       const call = (ctx.reply as Mock).mock.calls[0]![0];
       expect(call.embeds).toHaveLength(1);
-      expect(call.embeds[0].data.title).toContain('Security Notice: Plaintext Token Storage Deprecation');
+      expect(call.embeds[0].data.title).toContain(
+        'Security Notice: Plaintext Token Storage Deprecation',
+      );
       expect(call.embeds[0].data.description).toContain('permanently discontinued');
     });
 
@@ -439,4 +438,3 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
     });
   });
 });
-

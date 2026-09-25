@@ -130,7 +130,9 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
       });
 
       if (!res.ok) {
-        console.warn(`[SpotifyAdapter] Failed to obtain Client Credentials token: HTTP ${res.status}`);
+        console.warn(
+          `[SpotifyAdapter] Failed to obtain Client Credentials token: HTTP ${res.status}`,
+        );
         return null;
       }
 
@@ -174,7 +176,9 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
   canResolve(input: string): boolean {
     if (!input || typeof input !== 'string') return false;
     const clean = input.trim();
-    return SpotifyAdapter.SPOTIFY_URL_REGEX.test(clean) || SpotifyAdapter.SPOTIFY_URI_REGEX.test(clean);
+    return (
+      SpotifyAdapter.SPOTIFY_URL_REGEX.test(clean) || SpotifyAdapter.SPOTIFY_URI_REGEX.test(clean)
+    );
   }
 
   parseUrl(input: string): ParsedSpotifyUrl | null {
@@ -304,7 +308,8 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
             const artist = trackData.artists.map((a) => a.name).join(', ') || 'Spotify Artist';
             const title = trackData.name;
             const durationSeconds = Math.round(trackData.duration_ms / 1000);
-            const coverUrl = trackData.album?.images?.[0]?.url || 'https://open.spotify.com/favicon.ico';
+            const coverUrl =
+              trackData.album?.images?.[0]?.url || 'https://open.spotify.com/favicon.ico';
             const previewUrl = trackData.preview_url ?? undefined;
 
             return {
@@ -408,9 +413,12 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
           }>(`/playlists/${parsed.id}`);
 
           if (playlistData) {
-            const coverUrl = playlistData.images?.[0]?.url || 'https://open.spotify.com/favicon.ico';
+            const coverUrl =
+              playlistData.images?.[0]?.url || 'https://open.spotify.com/favicon.ico';
             const tracks: ResolvedTrack[] = playlistData.tracks.items
-              .filter((item): item is { track: NonNullable<(typeof item)['track']> } => Boolean(item.track))
+              .filter((item): item is { track: NonNullable<(typeof item)['track']> } =>
+                Boolean(item.track),
+              )
               .map((item, idx) => {
                 const t = item.track;
                 const artist = t.artists.map((a) => a.name).join(', ') || 'Various Artists';
@@ -466,9 +474,7 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
 
     if (parsed.type === 'track') {
       const artist =
-        data?.artist ||
-        data?.artists?.map((a: any) => a.name).join(', ') ||
-        'Spotify Artist';
+        data?.artist || data?.artists?.map((a: any) => a.name).join(', ') || 'Spotify Artist';
       const title = data?.name || data?.title || `Spotify Track [${parsed.id}]`;
       const durationSeconds = Math.round((data?.duration || data?.duration_ms || 180000) / 1000);
       const previewUrl = data?.previewUrl || data?.preview_url || undefined;
@@ -501,10 +507,7 @@ export class SpotifyAdapter implements CanonicalMetadataResolver {
     const rawTracks: any[] = await this.spotifyInfo.getTracks(cleanUrl);
     const tracks: ResolvedTrack[] = rawTracks.map((t: any, idx: number) => {
       const trackId = t.id || `${parsed.id}_${idx + 1}`;
-      const artist =
-        t.artist ||
-        t.artists?.map((a: any) => a.name).join(', ') ||
-        'Various Artists';
+      const artist = t.artist || t.artists?.map((a: any) => a.name).join(', ') || 'Various Artists';
       const title = t.name || t.title || `Track #${idx + 1}`;
       const durationSeconds = Math.round((t.duration || t.duration_ms || 180000) / 1000);
       const previewUrl = t.previewUrl || t.preview_url || undefined;

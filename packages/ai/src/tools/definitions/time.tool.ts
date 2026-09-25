@@ -10,13 +10,15 @@ export type TimeToolArgs = z.infer<typeof TimeToolArgsSchema>;
 export class TimeTool implements SafeTool<TimeToolArgs, TimeToolResult> {
   readonly definition = {
     name: 'get_current_time',
-    description: 'Retrieves the accurate current wall-clock date and time in the user or server timezone.',
+    description:
+      'Retrieves the accurate current wall-clock date and time in the user or server timezone.',
     parameters: {
       type: 'object',
       properties: {
         timezone: {
           type: 'string',
-          description: 'Optional IANA timezone name (e.g. "America/New_York", "Asia/Tokyo", "Europe/London"). If omitted, resolves user or server preferences automatically.',
+          description:
+            'Optional IANA timezone name (e.g. "America/New_York", "Asia/Tokyo", "Europe/London"). If omitted, resolves user or server preferences automatically.',
         },
       },
     },
@@ -32,12 +34,7 @@ export class TimeTool implements SafeTool<TimeToolArgs, TimeToolResult> {
    * 4. UTC
    */
   resolveTimezone(args: TimeToolArgs, context: ToolExecutionContext): string {
-    const candidates = [
-      args.timezone,
-      context.userTimezone,
-      context.guildTimezone,
-      'UTC',
-    ];
+    const candidates = [args.timezone, context.userTimezone, context.guildTimezone, 'UTC'];
 
     for (const tz of candidates) {
       if (tz && this.isValidTimezone(tz)) {

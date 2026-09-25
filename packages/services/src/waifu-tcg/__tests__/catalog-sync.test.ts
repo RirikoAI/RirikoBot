@@ -96,10 +96,7 @@ describe('Catalog Seed Upsert (BUG-0015)', () => {
 
   it('handles partial additions (creates new, updates existing)', async () => {
     // Start with small subset
-    const subset: NewGameItem[] = [
-      CANONICAL_ITEMS[0]!,
-      CANONICAL_ITEMS[1]!,
-    ];
+    const subset: NewGameItem[] = [CANONICAL_ITEMS[0]!, CANONICAL_ITEMS[1]!];
     const firstSync = await syncCanonicalItems(itemRepo, subset);
     expect(firstSync.created).toBe(2);
     expect(firstSync.updated).toBe(0);

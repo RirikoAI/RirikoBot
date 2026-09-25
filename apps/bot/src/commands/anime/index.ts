@@ -1,6 +1,10 @@
 import type { Command } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
-import { createAnimeCharacterCommand, createAnimeCommand, createMangaCommand } from './search.command.js';
+import {
+  createAnimeCharacterCommand,
+  createAnimeCommand,
+  createMangaCommand,
+} from './search.command.js';
 import { createWaifuCommand } from './waifu.command.js';
 import { createWallpaperCommand } from './wallpaper.command.js';
 

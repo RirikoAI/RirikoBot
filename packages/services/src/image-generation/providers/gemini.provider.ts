@@ -15,10 +15,7 @@ export class GeminiImageProvider implements ImageGenerationProvider {
   public readonly id = 'gemini';
   public readonly name = 'Google Gemini Imagen';
   public readonly defaultModel: string;
-  public readonly supportedModels = [
-    'imagen-3.0-generate-002',
-    'imagen-4.0-generate-001',
-  ] as const;
+  public readonly supportedModels = ['imagen-3.0-generate-002', 'imagen-4.0-generate-001'] as const;
 
   public readonly capabilities: ImageGenerationCapabilities = {
     aspectRatios: ['1:1', '16:9', '9:16', '4:3', '3:4'],

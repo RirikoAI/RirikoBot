@@ -1,8 +1,4 @@
-import {
-  EmbedBuilder,
-  PermissionsBitField,
-  type User,
-} from 'discord.js';
+import { EmbedBuilder, PermissionsBitField, type User } from 'discord.js';
 import {
   CommandCategory,
   type Command,
@@ -22,7 +18,8 @@ export function createMemberInfoCommand(services: BotServices): Command {
       category: CommandCategory.UTILITY,
       description: 'Display detailed member profile, roles, permissions, and timezone information',
       aliases: ['memberinfo', 'user-info', 'userinfo', 'whois'],
-      usage: '/member-info [user:<target>] | !memberinfo [@user|id] | !userinfo [@user] | !whois [@user]',
+      usage:
+        '/member-info [user:<target>] | !memberinfo [@user|id] | !userinfo [@user] | !whois [@user]',
       examples: [
         '/member-info',
         '/member-info user:@Ririko',

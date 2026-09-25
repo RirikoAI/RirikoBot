@@ -83,14 +83,16 @@ export class PlayerEnergyRepository extends BaseRepository<
         .insert(sqliteSchema.playerEnergy)
         .values(insertData)
         .returning();
-      if (!created) throw new DatabaseError(`Failed to create player energy for ${data.userId} in SQLite`);
+      if (!created)
+        throw new DatabaseError(`Failed to create player energy for ${data.userId} in SQLite`);
       return created as PlayerEnergy;
     } else {
       const [created] = await client.db
         .insert(pgSchema.playerEnergy)
         .values(insertData as unknown as typeof pgSchema.playerEnergy.$inferInsert)
         .returning();
-      if (!created) throw new DatabaseError(`Failed to create player energy for ${data.userId} in PostgreSQL`);
+      if (!created)
+        throw new DatabaseError(`Failed to create player energy for ${data.userId} in PostgreSQL`);
       return created as unknown as PlayerEnergy;
     }
   }
@@ -162,7 +164,8 @@ export class PlayerEnergyRepository extends BaseRepository<
         .set(updateData)
         .where(eq(sqliteSchema.playerEnergy.userId, userId))
         .returning();
-      if (!updated) throw new DatabaseError(`Player energy ${userId} not found for update in SQLite`);
+      if (!updated)
+        throw new DatabaseError(`Player energy ${userId} not found for update in SQLite`);
       return updated as PlayerEnergy;
     } else {
       const [updated] = await client.db
@@ -170,7 +173,8 @@ export class PlayerEnergyRepository extends BaseRepository<
         .set(updateData as unknown as Partial<typeof pgSchema.playerEnergy.$inferInsert>)
         .where(eq(pgSchema.playerEnergy.userId, userId))
         .returning();
-      if (!updated) throw new DatabaseError(`Player energy ${userId} not found for update in PostgreSQL`);
+      if (!updated)
+        throw new DatabaseError(`Player energy ${userId} not found for update in PostgreSQL`);
       return updated as unknown as PlayerEnergy;
     }
   }
@@ -240,7 +244,10 @@ export class PlayerEnergyRepository extends BaseRepository<
       }
 
       const totalCap = energyRecord.maxEnergy + energyRecord.bonusEnergy;
-      const actualRestored = Math.min(energyRestored, Math.max(0, totalCap - energyRecord.currentEnergy));
+      const actualRestored = Math.min(
+        energyRestored,
+        Math.max(0, totalCap - energyRecord.currentEnergy),
+      );
       const newEnergy = Math.min(totalCap, energyRecord.currentEnergy + energyRestored);
       const newPotsUsed = currentPotsUsed + 1;
 

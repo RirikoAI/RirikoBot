@@ -76,11 +76,7 @@ export class VoiceSessionAccumulator {
    */
   public isParticipantActiveHuman(p: VoiceParticipant): boolean {
     return (
-      !p.isBot &&
-      !p.isSelfMuted &&
-      !p.isSelfDeafened &&
-      !p.isServerMuted &&
-      !p.isServerDeafened
+      !p.isBot && !p.isSelfMuted && !p.isSelfDeafened && !p.isServerMuted && !p.isServerDeafened
     );
   }
 

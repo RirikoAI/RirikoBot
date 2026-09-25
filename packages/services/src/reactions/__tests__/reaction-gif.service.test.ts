@@ -27,7 +27,9 @@ describe('ReactionGifService (TASK-1302)', () => {
 
   it('fetches synchronously until the pool is warm, then serves from cache without a network call', async () => {
     const now = 0;
-    const fetchGifUrl = vi.fn(async () => `https://otakugifs.xyz/hug-${fetchGifUrl.mock.calls.length}.gif`);
+    const fetchGifUrl = vi.fn(
+      async () => `https://otakugifs.xyz/hug-${fetchGifUrl.mock.calls.length}.gif`,
+    );
     const service = new ReactionGifService({
       client: fakeClient(fetchGifUrl),
       minWarmSize: 3,
@@ -85,7 +87,9 @@ describe('ReactionGifService (TASK-1302)', () => {
 
   it('treats entries older than the TTL as cold again for the warm check', async () => {
     let now = 0;
-    const fetchGifUrl = vi.fn(async () => `https://otakugifs.xyz/${fetchGifUrl.mock.calls.length}.gif`);
+    const fetchGifUrl = vi.fn(
+      async () => `https://otakugifs.xyz/${fetchGifUrl.mock.calls.length}.gif`,
+    );
     const service = new ReactionGifService({
       client: fakeClient(fetchGifUrl),
       ttlMs: 1000,

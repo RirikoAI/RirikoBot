@@ -23,7 +23,7 @@ export class AutoplayEngine {
   async getRecommendation(
     seedTrack: ResolvedTrack,
     history: readonly ResolvedTrack[] = [],
-    upcoming: readonly ResolvedTrack[] = []
+    upcoming: readonly ResolvedTrack[] = [],
   ): Promise<QueuedTrack | null> {
     const knownUrls = new Set<string>();
     const knownTitles = new Set<string>();
@@ -67,7 +67,7 @@ export class AutoplayEngine {
           if ('tracks' in resolved) {
             // It's a playlist; pick the first non-known track
             const matchingTrack = resolved.tracks.find(
-              (t) => !knownUrls.has(t.url) && !knownTitles.has(t.title.toLowerCase().trim())
+              (t) => !knownUrls.has(t.url) && !knownTitles.has(t.title.toLowerCase().trim()),
             );
             if (matchingTrack) {
               return this.createAutoplayQueuedTrack(matchingTrack);

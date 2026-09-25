@@ -1,5 +1,11 @@
 import type { DiscordGatewayAdapterCreator } from '@discordjs/voice';
-import type { AudioFilterName, LoopMode, QueueState, QueuedTrack, TrackRequester } from '../queue/types.js';
+import type {
+  AudioFilterName,
+  LoopMode,
+  QueueState,
+  QueuedTrack,
+  TrackRequester,
+} from '../queue/types.js';
 import type { ResolvedPlaylist } from '../types.js';
 
 export interface PlayOptions {

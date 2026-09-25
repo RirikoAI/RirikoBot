@@ -4,10 +4,7 @@ import type {
   WaifuCardRepository,
   TcgConfigRepository,
 } from '@ririko/database';
-import {
-  TutorialService,
-  getCounterElement,
-} from '../dungeon/tutorial-service.js';
+import { TutorialService, getCounterElement } from '../dungeon/tutorial-service.js';
 
 describe('Tutorial Floor T4 Dynamic Elemental Disadvantage & Counter Card Grant', () => {
   it('correctly computes counter elements across all 7 affinities', () => {
@@ -25,11 +22,41 @@ describe('Tutorial Floor T4 Dynamic Elemental Disadvantage & Counter Card Grant'
     const userCards: any[] = [];
 
     const dbCards = [
-      { id: 'card_fire_c', name: 'Blaze Maiden', element: 'FIRE', rarity: 'COMMON', isActive: true },
-      { id: 'card_water_c', name: 'River Nymph', element: 'WATER', rarity: 'COMMON', isActive: true },
-      { id: 'card_ice_c', name: 'Glacial Spirit', element: 'ICE', rarity: 'COMMON', isActive: true },
-      { id: 'card_earth_c', name: 'Terra Golem', element: 'EARTH', rarity: 'COMMON', isActive: true },
-      { id: 'card_lightning_c', name: 'Storm Pixie', element: 'LIGHTNING', rarity: 'COMMON', isActive: true },
+      {
+        id: 'card_fire_c',
+        name: 'Blaze Maiden',
+        element: 'FIRE',
+        rarity: 'COMMON',
+        isActive: true,
+      },
+      {
+        id: 'card_water_c',
+        name: 'River Nymph',
+        element: 'WATER',
+        rarity: 'COMMON',
+        isActive: true,
+      },
+      {
+        id: 'card_ice_c',
+        name: 'Glacial Spirit',
+        element: 'ICE',
+        rarity: 'COMMON',
+        isActive: true,
+      },
+      {
+        id: 'card_earth_c',
+        name: 'Terra Golem',
+        element: 'EARTH',
+        rarity: 'COMMON',
+        isActive: true,
+      },
+      {
+        id: 'card_lightning_c',
+        name: 'Storm Pixie',
+        element: 'LIGHTNING',
+        rarity: 'COMMON',
+        isActive: true,
+      },
     ];
 
     const tcgConfigRepo = {
@@ -59,11 +86,13 @@ describe('Tutorial Floor T4 Dynamic Elemental Disadvantage & Counter Card Grant'
         return list;
       }),
       getHighestSerialNumber: vi.fn().mockResolvedValue(10),
-      createUserCard: vi.fn(async (data: { userId: string; cardId: string; serialNumber: number; state: string }) => {
-        const row = { id: `uc_${userCards.length + 1}`, ...data };
-        userCards.push(row);
-        return row;
-      }),
+      createUserCard: vi.fn(
+        async (data: { userId: string; cardId: string; serialNumber: number; state: string }) => {
+          const row = { id: `uc_${userCards.length + 1}`, ...data };
+          userCards.push(row);
+          return row;
+        },
+      ),
       updateUserCardState: vi.fn(async (id: string, state: string) => {
         const found = userCards.find((c) => c.id === id);
         if (found) found.state = state;

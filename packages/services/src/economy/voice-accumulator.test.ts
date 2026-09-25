@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createDatabaseClient, EconomyRepository, type SqliteDatabaseClient } from '@ririko/database';
+import {
+  createDatabaseClient,
+  EconomyRepository,
+  type SqliteDatabaseClient,
+} from '@ririko/database';
 import { EventBus } from '@ririko/core';
 import { VoiceSessionAccumulator } from './voice-accumulator.js';
 import { EconomyService } from './economy.service.js';

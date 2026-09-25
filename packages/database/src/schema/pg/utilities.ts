@@ -36,12 +36,8 @@ export const guildAutoRoles = pgTable('guild_auto_roles', {
   verificationChannelId: varchar('verification_channel_id', { length: 32 }),
   verificationMessageId: varchar('verification_message_id', { length: 32 }),
   isEnabled: boolean('is_enabled').notNull().default(true),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const temporaryRoles = pgTable(
@@ -54,9 +50,7 @@ export const temporaryRoles = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     assignedBy: varchar('assigned_by', { length: 32 }).notNull(),
     reason: text('reason'),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index('idx_pg_temporary_roles_expires').on(table.expiresAt)],
 );

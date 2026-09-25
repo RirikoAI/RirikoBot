@@ -340,9 +340,17 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
 
       // 9. Reminders
       expect(data.reminders.length).toBe(2);
-      expect(data.reminders[0]).toMatchObject({ message: 'Meeting in 1h', guildId: 'guild_alpha', isCompleted: false });
+      expect(data.reminders[0]).toMatchObject({
+        message: 'Meeting in 1h',
+        guildId: 'guild_alpha',
+        isCompleted: false,
+      });
       // 1.4.0 stored the literal 'DM' as the guild of direct-message reminders.
-      expect(data.reminders[1]).toMatchObject({ message: 'Water plants', guildId: null, isCompleted: true });
+      expect(data.reminders[1]).toMatchObject({
+        message: 'Water plants',
+        guildId: null,
+        isCompleted: true,
+      });
 
       // 10. Free Game Announcements
       expect(data.freeGameAnnouncements.length).toBe(1);

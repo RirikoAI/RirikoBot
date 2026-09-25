@@ -18,7 +18,13 @@ function ensureDirectories(): void {
 
 // ─── 1. ELEMENT ICONS (128x128 px) ──────────────────────────────────────────
 
-function drawCircleBase(ctx: SKRSContext2D, size: number, c1: string, c2: string, border: string): void {
+function drawCircleBase(
+  ctx: SKRSContext2D,
+  size: number,
+  c1: string,
+  c2: string,
+  border: string,
+): void {
   const r = size / 2 - 4;
   const cx = size / 2;
   const cy = size / 2;
@@ -294,7 +300,13 @@ function generateShadowElement(): Buffer {
 
 // ─── 2. RARITY STARS (64x64 px) ─────────────────────────────────────────────
 
-function draw5PointStar(ctx: SKRSContext2D, cx: number, cy: number, rOut: number, rIn: number): void {
+function draw5PointStar(
+  ctx: SKRSContext2D,
+  cx: number,
+  cy: number,
+  rOut: number,
+  rIn: number,
+): void {
   ctx.beginPath();
   for (let i = 0; i < 10; i++) {
     const angle = (i * Math.PI) / 5 - Math.PI / 2;

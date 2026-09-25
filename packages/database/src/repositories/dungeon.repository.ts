@@ -132,7 +132,11 @@ export class DungeonSeasonRepository extends BaseRepository<
     }
   }
 
-  async update(id: string, data: Partial<NewDungeonSeason>, tx?: DatabaseClient): Promise<DungeonSeason> {
+  async update(
+    id: string,
+    data: Partial<NewDungeonSeason>,
+    tx?: DatabaseClient,
+  ): Promise<DungeonSeason> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [updated] = await client.db
@@ -290,7 +294,11 @@ export class DungeonFloorRepository extends BaseRepository<
     }
   }
 
-  async update(id: string, data: Partial<NewDungeonFloor>, tx?: DatabaseClient): Promise<DungeonFloor> {
+  async update(
+    id: string,
+    data: Partial<NewDungeonFloor>,
+    tx?: DatabaseClient,
+  ): Promise<DungeonFloor> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [updated] = await client.db
@@ -440,7 +448,11 @@ export class UserDungeonProgressRepository extends BaseRepository<
     }
   }
 
-  async update(id: string, data: Partial<NewUserDungeonProgress>, tx?: DatabaseClient): Promise<UserDungeonProgress> {
+  async update(
+    id: string,
+    data: Partial<NewUserDungeonProgress>,
+    tx?: DatabaseClient,
+  ): Promise<UserDungeonProgress> {
     const client = this.getClient(tx);
     const payload = {
       ...data,
@@ -499,13 +511,13 @@ export class UserDungeonProgressRepository extends BaseRepository<
     const client = this.getClient(tx);
     const now = new Date();
 
-    const newHighest = cleared && floorNumber > progress.highestClearedFloor
-      ? floorNumber
-      : progress.highestClearedFloor;
+    const newHighest =
+      cleared && floorNumber > progress.highestClearedFloor
+        ? floorNumber
+        : progress.highestClearedFloor;
 
-    const firstClearedAt = cleared && !progress.firstClearedAt && floorNumber > 0
-      ? now
-      : progress.firstClearedAt;
+    const firstClearedAt =
+      cleared && !progress.firstClearedAt && floorNumber > 0 ? now : progress.firstClearedAt;
 
     const updates = {
       attemptsCount: progress.attemptsCount + 1,
@@ -666,7 +678,11 @@ export class DungeonBossRepository extends BaseRepository<
     } else {
       const [row] = await client.db
         .insert(pgSchema.dungeonBosses)
-        .values({ ...boss, createdAt: boss.createdAt ?? now, updatedAt: now } as typeof pgSchema.dungeonBosses.$inferInsert)
+        .values({
+          ...boss,
+          createdAt: boss.createdAt ?? now,
+          updatedAt: now,
+        } as typeof pgSchema.dungeonBosses.$inferInsert)
         .onConflictDoUpdate({
           target: pgSchema.dungeonBosses.id,
           set: updateSet as Partial<typeof pgSchema.dungeonBosses.$inferInsert>,
@@ -676,7 +692,11 @@ export class DungeonBossRepository extends BaseRepository<
     }
   }
 
-  async update(id: string, data: Partial<NewDungeonBoss>, tx?: DatabaseClient): Promise<DungeonBoss> {
+  async update(
+    id: string,
+    data: Partial<NewDungeonBoss>,
+    tx?: DatabaseClient,
+  ): Promise<DungeonBoss> {
     const client = this.getClient(tx);
     const updateData = { ...data, updatedAt: new Date() };
     if (this.isSqlite(client)) {

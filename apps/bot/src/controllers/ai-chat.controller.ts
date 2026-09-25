@@ -31,7 +31,8 @@ export class AiChatController {
     this.client = client;
     this.services = services;
     this.minEditIntervalMs = options.minEditIntervalMs ?? 1500;
-    this.defaultPrefix = options.defaultPrefix || process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX;
+    this.defaultPrefix =
+      options.defaultPrefix || process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX;
     this.musicController = options.musicController;
   }
 
@@ -128,9 +129,11 @@ export class AiChatController {
     // If empty mention, provide a friendly greeting
     if (!prompt) {
       if ('reply' in message) {
-        await message.reply({
-          content: 'Konnichiwa! I am Ririko! Ask me anything or chat with me here! ✨',
-        }).catch(() => {});
+        await message
+          .reply({
+            content: 'Konnichiwa! I am Ririko! Ask me anything or chat with me here! ✨',
+          })
+          .catch(() => {});
       }
       return true;
     }
@@ -182,7 +185,8 @@ export class AiChatController {
         pendingTimer = setTimeout(async () => {
           pendingTimer = null;
           lastEditTime = Date.now();
-          const truncated = displayedText.length > 2000 ? `${displayedText.slice(0, 1990)}...` : displayedText;
+          const truncated =
+            displayedText.length > 2000 ? `${displayedText.slice(0, 1990)}...` : displayedText;
           await replyMessage?.edit({ content: truncated || '...' }).catch(() => {});
         }, this.minEditIntervalMs - elapsed);
       }
@@ -229,10 +233,7 @@ export class AiChatController {
       const toolDefs = this.services.toolRegistry.getDefinitions(allowedTools);
 
       // 7. Construct ChatRequest
-      const messages: ChatMessage[] = [
-        ...history,
-        { role: 'user', content: prompt },
-      ];
+      const messages: ChatMessage[] = [...history, { role: 'user', content: prompt }];
 
       const chatRequest: ChatRequest = {
         messages,
@@ -304,11 +305,15 @@ export class AiChatController {
           member = await message.guild.members.fetch(message.author.id).catch(() => null);
         }
         const voiceChannel = member?.voice?.channel;
-        const voiceChannelPerms = voiceChannel && member ? voiceChannel.permissionsFor(member)?.bitfield : undefined;
+        const voiceChannelPerms =
+          voiceChannel && member ? voiceChannel.permissionsFor(member)?.bitfield : undefined;
         const userPermissions = voiceChannelPerms ?? member?.permissions?.bitfield;
 
-        const botMember = message.guild?.members?.me ?? (message.guild ? await message.guild.members.fetchMe().catch(() => null) : null);
-        const botVoicePerms = voiceChannel && botMember ? voiceChannel.permissionsFor(botMember)?.bitfield : undefined;
+        const botMember =
+          message.guild?.members?.me ??
+          (message.guild ? await message.guild.members.fetchMe().catch(() => null) : null);
+        const botVoicePerms =
+          voiceChannel && botMember ? voiceChannel.permissionsFor(botMember)?.bitfield : undefined;
         const botPermissions = botVoicePerms ?? botMember?.permissions?.bitfield;
 
         const toolContext: SecurityExecutionContext & ToolExecutionContext = {
@@ -342,7 +347,8 @@ export class AiChatController {
             if (!voiceChannelId) {
               return {
                 success: false,
-                message: 'You need to be connected to a voice channel so I know where to play music! Please join a voice channel and ask me again! 🎵',
+                message:
+                  'You need to be connected to a voice channel so I know where to play music! Please join a voice channel and ask me again! 🎵',
               };
             }
 
@@ -354,7 +360,9 @@ export class AiChatController {
                 member: {
                   id: message.author.id,
                   username: message.author.username,
-                  avatarUrl: message.author.displayAvatarURL ? message.author.displayAvatarURL() : undefined,
+                  avatarUrl: message.author.displayAvatarURL
+                    ? message.author.displayAvatarURL()
+                    : undefined,
                 },
                 query,
                 adapterCreator: message.guild.voiceAdapterCreator,
@@ -412,7 +420,9 @@ export class AiChatController {
             toolCallId: tr.toolCallId,
             name: tr.name,
             content: tr.success
-              ? (typeof tr.result === 'string' ? tr.result : JSON.stringify(tr.result))
+              ? typeof tr.result === 'string'
+                ? tr.result
+                : JSON.stringify(tr.result)
               : JSON.stringify({ error: tr.error ?? 'Execution failed' }),
           })),
         ];
@@ -441,11 +451,15 @@ export class AiChatController {
           }
 
           if (!synthesizedText) {
-            const synthResponse = await this.services.fallbackChainManager.generate(synthesisRequest);
+            const synthResponse =
+              await this.services.fallbackChainManager.generate(synthesisRequest);
             synthesizedText = synthResponse.content;
           }
         } catch (err) {
-          console.warn('[AiChatController] LLM synthesis from tool result failed, using formatted fallback:', err);
+          console.warn(
+            '[AiChatController] LLM synthesis from tool result failed, using formatted fallback:',
+            err,
+          );
         }
 
         if (synthesizedText) {
@@ -467,20 +481,25 @@ export class AiChatController {
       }
 
       // 12. Record Turn in Isolated User Memory
-      await this.services.conversationManager.recordTurn(
-        userContext,
-        prompt,
-        accumulatedContent,
-        uniqueToolCalls.length > 0 ? { toolCalls: uniqueToolCalls } : undefined,
-      ).catch((err) => {
-        console.error('[AiChatController] Failed to record conversation turn:', err);
-      });
+      await this.services.conversationManager
+        .recordTurn(
+          userContext,
+          prompt,
+          accumulatedContent,
+          uniqueToolCalls.length > 0 ? { toolCalls: uniqueToolCalls } : undefined,
+        )
+        .catch((err) => {
+          console.error('[AiChatController] Failed to record conversation turn:', err);
+        });
     } catch (err) {
       console.error('[AiChatController] Error processing AI chat message:', err);
       if (replyMessage) {
-        await replyMessage.edit({
-          content: 'Sorry, I encountered an error while processing your request. Please try again!',
-        }).catch(() => {});
+        await replyMessage
+          .edit({
+            content:
+              'Sorry, I encountered an error while processing your request. Please try again!',
+          })
+          .catch(() => {});
       }
     } finally {
       clearInterval(typingInterval);

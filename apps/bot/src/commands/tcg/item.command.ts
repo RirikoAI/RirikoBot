@@ -6,11 +6,7 @@ import {
   StringSelectMenuBuilder,
   type Message,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { enhanceGear } from './gear-actions.js';
 import { openCraftMenu } from './craft-menu.js';
@@ -24,7 +20,8 @@ export function createItemCommand(services: BotServices): Command {
       category: CommandCategory.TCG,
       description: 'Manage, inspect, enhance, and consume TCG equipment, accessories, and potions.',
       aliases: ['tcgitem', 'items'],
-      usage: '/item [action: inventory|enhance|use|craft] [id] [filter] [card_id] [recipe] [quantity]',
+      usage:
+        '/item [action: inventory|enhance|use|craft] [id] [filter] [card_id] [recipe] [quantity]',
       examples: [
         '/item action:inventory filter:EQUIPMENT',
         '/item action:enhance id:12345678',
@@ -102,7 +99,11 @@ export function createItemCommand(services: BotServices): Command {
 
       if (!sub && rawArgs.length > 0) {
         const firstArg = rawArgs[0]!.toLowerCase();
-        if (['inventory', 'inv', 'enhance', 'upgrade', 'use', 'consume', 'craft', 'forge'].includes(firstArg)) {
+        if (
+          ['inventory', 'inv', 'enhance', 'upgrade', 'use', 'consume', 'craft', 'forge'].includes(
+            firstArg,
+          )
+        ) {
           sub = firstArg;
         }
       }
@@ -139,7 +140,8 @@ async function handleInventory(
   const userId = ctx.user.id;
   let activeFilter: 'ALL' | 'GEAR' | 'POTIONS' = 'ALL';
 
-  const rawFilter = (ctx.options.getString('filter')?.toUpperCase() ?? rawArgs[1]?.toUpperCase() ?? '');
+  const rawFilter =
+    ctx.options.getString('filter')?.toUpperCase() ?? rawArgs[1]?.toUpperCase() ?? '';
   if (rawFilter === 'EQUIPMENT' || rawFilter === 'ACCESSORY' || rawFilter === 'GEAR') {
     activeFilter = 'GEAR';
   } else if (rawFilter === 'CONSUMABLE' || rawFilter === 'POTIONS' || rawFilter === 'POTION') {
@@ -157,16 +159,18 @@ async function handleInventory(
       }),
     );
 
-    return detailed.filter((entry): entry is { inv: typeof entry.inv; def: NonNullable<typeof entry.def> } => {
-      if (!entry.def) return false;
-      if (activeFilter === 'GEAR') {
-        return entry.def.type === 'EQUIPMENT' || entry.def.type === 'ACCESSORY';
-      }
-      if (activeFilter === 'POTIONS') {
-        return entry.def.type === 'CONSUMABLE';
-      }
-      return true;
-    });
+    return detailed.filter(
+      (entry): entry is { inv: typeof entry.inv; def: NonNullable<typeof entry.def> } => {
+        if (!entry.def) return false;
+        if (activeFilter === 'GEAR') {
+          return entry.def.type === 'EQUIPMENT' || entry.def.type === 'ACCESSORY';
+        }
+        if (activeFilter === 'POTIONS') {
+          return entry.def.type === 'CONSUMABLE';
+        }
+        return true;
+      },
+    );
   };
 
   let items = await loadItems();
@@ -190,8 +194,12 @@ async function handleInventory(
       const marker = isCurrent ? '👉 ' : '• ';
       const enhancementTag = inv.enhancementLevel > 0 ? ` **+${inv.enhancementLevel}**` : '';
       const stateTag = inv.state === 'EQUIPPED' ? ` \`[EQUIPPED: ${inv.slot}]\`` : '';
-      const qtyTag = def.type === 'CONSUMABLE' || def.type === 'MATERIAL' ? ` (x${inv.quantity})` : '';
-      const perkText = def.battlePerks && def.battlePerks.length > 0 ? ` | *Perk: ${def.battlePerks.join(', ')}*` : '';
+      const qtyTag =
+        def.type === 'CONSUMABLE' || def.type === 'MATERIAL' ? ` (x${inv.quantity})` : '';
+      const perkText =
+        def.battlePerks && def.battlePerks.length > 0
+          ? ` | *Perk: ${def.battlePerks.join(', ')}*`
+          : '';
       return `${marker}**${def.name}**${enhancementTag}${qtyTag}${stateTag} — [${def.rarity}]\n  *${def.description}*${perkText}`;
     });
 
@@ -200,14 +208,18 @@ async function handleInventory(
       .setTitle(`🎒 ${ctx.user.username}'s Gear & Consumables (${itemsList.length} items)`)
       .setDescription(
         (actionNotice ? `${actionNotice}\n\n` : '') +
-        lines.join('\n\n') +
-        (selected
-          ? `\n\n🎯 **Selected Item**: **${selected.def.name}** [${selected.def.rarity} ${selected.def.subtype}]` +
-            (selected.def.type === 'CONSUMABLE' || selected.def.type === 'MATERIAL' ? ` (Quantity: ${selected.inv.quantity})` : ` (Enhancement: +${selected.inv.enhancementLevel})`) +
-            `\n*${selected.def.description}*`
-          : ''),
+          lines.join('\n\n') +
+          (selected
+            ? `\n\n🎯 **Selected Item**: **${selected.def.name}** [${selected.def.rarity} ${selected.def.subtype}]` +
+              (selected.def.type === 'CONSUMABLE' || selected.def.type === 'MATERIAL'
+                ? ` (Quantity: ${selected.inv.quantity})`
+                : ` (Enhancement: +${selected.inv.enhancementLevel})`) +
+              `\n*${selected.def.description}*`
+            : ''),
       )
-      .setFooter({ text: 'Select an item to use or enhance | Filter categories with buttons below' });
+      .setFooter({
+        text: 'Select an item to use or enhance | Filter categories with buttons below',
+      });
 
     return embed;
   };
@@ -222,8 +234,19 @@ async function handleInventory(
     for (let i = 0; i < Math.min(25, itemsList.length); i++) {
       const { inv, def } = itemsList[i]!;
       const isConsumable = def.type === 'CONSUMABLE';
-      const icon = def.subtype === 'HP_POTION' ? '🧪' : def.subtype === 'MANA_POTION' ? '🔷' : isConsumable ? '⚡' : '⚔️';
-      const detailTag = isConsumable ? `(x${inv.quantity})` : inv.enhancementLevel > 0 ? `(+${inv.enhancementLevel})` : '';
+      const icon =
+        def.subtype === 'HP_POTION'
+          ? '🧪'
+          : def.subtype === 'MANA_POTION'
+            ? '🔷'
+            : isConsumable
+              ? '⚡'
+              : '⚔️';
+      const detailTag = isConsumable
+        ? `(x${inv.quantity})`
+        : inv.enhancementLevel > 0
+          ? `(+${inv.enhancementLevel})`
+          : '';
 
       selectMenu.addOptions({
         label: `${icon} ${def.name} ${detailTag}`.trim(),
@@ -244,7 +267,10 @@ async function handleInventory(
           .setLabel(`🧪 Use ${selected.def.name}`)
           .setStyle(ButtonStyle.Success),
       );
-    } else if (selected && (selected.def.type === 'EQUIPMENT' || selected.def.type === 'ACCESSORY')) {
+    } else if (
+      selected &&
+      (selected.def.type === 'EQUIPMENT' || selected.def.type === 'ACCESSORY')
+    ) {
       buttonRow.addComponents(
         new ButtonBuilder()
           .setCustomId(`inv:action:enhance:${selected.inv.id}`)
@@ -281,7 +307,11 @@ async function handleInventory(
       : replyMsg
   ) as Message | undefined;
 
-  if (!discordMsg || typeof discordMsg !== 'object' || !('createMessageComponentCollector' in discordMsg)) {
+  if (
+    !discordMsg ||
+    typeof discordMsg !== 'object' ||
+    !('createMessageComponentCollector' in discordMsg)
+  ) {
     return;
   }
 
@@ -302,7 +332,9 @@ async function handleInventory(
       }
       const updatedEmbed = buildInvEmbed(items, selectedIndex);
       const updatedComponents = buildInvComponents(items, selectedIndex);
-      await interaction.update({ embeds: [updatedEmbed], components: updatedComponents }).catch(() => {});
+      await interaction
+        .update({ embeds: [updatedEmbed], components: updatedComponents })
+        .catch(() => {});
       return;
     }
 
@@ -316,7 +348,9 @@ async function handleInventory(
         selectedIndex = 0;
         const updatedEmbed = buildInvEmbed(items, selectedIndex);
         const updatedComponents = items.length > 0 ? buildInvComponents(items, selectedIndex) : [];
-        await interaction.update({ embeds: [updatedEmbed], components: updatedComponents }).catch(() => {});
+        await interaction
+          .update({ embeds: [updatedEmbed], components: updatedComponents })
+          .catch(() => {});
         return;
       }
 
@@ -337,8 +371,11 @@ async function handleInventory(
           items = await loadItems();
           if (selectedIndex >= items.length) selectedIndex = Math.max(0, items.length - 1);
           const updatedEmbed = buildInvEmbed(items, selectedIndex, notice);
-          const updatedComponents = items.length > 0 ? buildInvComponents(items, selectedIndex) : [];
-          await interaction.update({ embeds: [updatedEmbed], components: updatedComponents }).catch(() => {});
+          const updatedComponents =
+            items.length > 0 ? buildInvComponents(items, selectedIndex) : [];
+          await interaction
+            .update({ embeds: [updatedEmbed], components: updatedComponents })
+            .catch(() => {});
         } catch (err: unknown) {
           await interaction.reply({
             content: `❌ Error using item: ${err instanceof Error ? err.message : String(err)}`,
@@ -374,7 +411,9 @@ async function handleInventory(
           items = await loadItems();
           const updatedEmbed = buildInvEmbed(items, selectedIndex, notice);
           const updatedComponents = buildInvComponents(items, selectedIndex);
-          await interaction.update({ embeds: [updatedEmbed], components: updatedComponents }).catch(() => {});
+          await interaction
+            .update({ embeds: [updatedEmbed], components: updatedComponents })
+            .catch(() => {});
         } catch (err: unknown) {
           await interaction.reply({
             content: `❌ **Enhancement Failed**: ${err instanceof Error ? err.message : String(err)}`,
@@ -409,7 +448,8 @@ async function handleEnhance(
 
   if (!userItemId) {
     await ctx.reply({
-      content: '❌ Please specify the inventory item ID to enhance. Usage: `/item action:enhance id:<item_id>`',
+      content:
+        '❌ Please specify the inventory item ID to enhance. Usage: `/item action:enhance id:<item_id>`',
     });
     return;
   }
@@ -468,7 +508,8 @@ async function handleUse(
 
   if (!userItemId) {
     await ctx.reply({
-      content: '❌ Please specify the inventory item ID to consume. Usage: `/item action:use id:<item_id>`',
+      content:
+        '❌ Please specify the inventory item ID to consume. Usage: `/item action:use id:<item_id>`',
     });
     return;
   }
@@ -503,7 +544,9 @@ async function handleUse(
       .setTitle('🧪 Consumable Used!')
       .setDescription(
         `Successfully restored **+${result.restoredAmount} ${result.type}**!` +
-          (result.cleansedDebuffs ? '\n✨ All active status effects and debuffs were cleansed!' : ''),
+          (result.cleansedDebuffs
+            ? '\n✨ All active status effects and debuffs were cleansed!'
+            : ''),
       );
 
     await ctx.reply({ embeds: [embed] });
@@ -525,7 +568,8 @@ export function createCraftCommand(services: BotServices): Command {
     metadata: {
       name: 'craft',
       category: CommandCategory.TCG,
-      description: 'Craft gear & potions from Crafting Dust (opens the crafting menu when no recipe is given).',
+      description:
+        'Craft gear & potions from Crafting Dust (opens the crafting menu when no recipe is given).',
       aliases: ['forge'],
       usage: '/craft [recipe] [quantity]',
       examples: [
@@ -536,7 +580,8 @@ export function createCraftCommand(services: BotServices): Command {
       options: [
         {
           name: 'recipe',
-          description: 'Recipe code or item code to craft directly (omit to open the crafting menu)',
+          description:
+            'Recipe code or item code to craft directly (omit to open the crafting menu)',
           type: 'STRING',
           required: false,
         },
@@ -573,8 +618,11 @@ export async function handleCraft(
 ): Promise<void> {
   const userId = ctx.user.id;
   const recipeInput = ctx.options.getString('recipe') ?? rawArgs[1];
-  const rawQuantity = ctx.options.getInteger('quantity') ?? (rawArgs[2] ? Number.parseInt(rawArgs[2], 10) : undefined);
-  const quantity = rawQuantity && Number.isInteger(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
+  const rawQuantity =
+    ctx.options.getInteger('quantity') ??
+    (rawArgs[2] ? Number.parseInt(rawArgs[2], 10) : undefined);
+  const quantity =
+    rawQuantity && Number.isInteger(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
 
   // No recipe given: open the interactive crafting menu instead of a direct craft.
   if (!recipeInput) {
@@ -607,7 +655,9 @@ export async function handleCraft(
         `Successfully forged **${receipt.outputQuantity}x ${receipt.outputItem.name}**!\n\n` +
           `• **Crafting Dust Spent**: \`${receipt.dustSpent} Dust\` (${dustLeft} left)\n` +
           `• **Credits Spent**: \`${receipt.creditsSpent} credits\` (Wallet: ${receipt.walletBalanceAfter.toLocaleString()})\n` +
-          (ingredientNames.length > 0 ? `• **Ingredients Used**: ${ingredientNames.join(', ')}\n` : ''),
+          (ingredientNames.length > 0
+            ? `• **Ingredients Used**: ${ingredientNames.join(', ')}\n`
+            : ''),
       )
       .setFooter({ text: 'The Celestial Forge answers your call.' });
 

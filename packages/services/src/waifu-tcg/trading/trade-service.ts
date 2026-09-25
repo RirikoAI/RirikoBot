@@ -89,7 +89,9 @@ export class TradeService {
         throw new Error(`You do not own offered card ${cardId}.`);
       }
       if (card.state !== 'IDLE') {
-        throw new Error(`Offered card ${cardId} is not available for trade (current state: ${card.state}).`);
+        throw new Error(
+          `Offered card ${cardId} is not available for trade (current state: ${card.state}).`,
+        );
       }
       if (card.isFavorite) {
         throw new Error(`Offered card ${cardId} is marked as favorite. Unfavorite it first.`);
@@ -107,7 +109,9 @@ export class TradeService {
         throw new Error(`The other user does not own requested card ${cardId}.`);
       }
       if (card.state !== 'IDLE') {
-        throw new Error(`Requested card ${cardId} is not available for trade (current state: ${card.state}).`);
+        throw new Error(
+          `Requested card ${cardId} is not available for trade (current state: ${card.state}).`,
+        );
       }
       if (card.isFavorite) {
         throw new Error(`Requested card ${cardId} is marked as favorite by its owner.`);
@@ -126,7 +130,9 @@ export class TradeService {
       const senderBalance = await this.economyRepo.findById(senderUserId);
       const availableWallet = Number(senderBalance?.walletBalance ?? 0);
       if (availableWallet < offeredCredits) {
-        throw new Error(`Insufficient credits. You have ${availableWallet} credits, but offered ${offeredCredits}.`);
+        throw new Error(
+          `Insufficient credits. You have ${availableWallet} credits, but offered ${offeredCredits}.`,
+        );
       }
     }
 
@@ -135,7 +141,9 @@ export class TradeService {
       const receiverBalance = await this.economyRepo.findById(receiverUserId);
       const availableWallet = Number(receiverBalance?.walletBalance ?? 0);
       if (availableWallet < requestedCredits) {
-        throw new Error(`The other user has insufficient credits (${availableWallet}) for the requested ${requestedCredits}.`);
+        throw new Error(
+          `The other user has insufficient credits (${availableWallet}) for the requested ${requestedCredits}.`,
+        );
       }
     }
 
@@ -186,7 +194,14 @@ export class TradeService {
       // Re-check inside the swap: gear never changes hands with a card.
       for (const cardId of [...trade.offeredCardIds, ...trade.requestedCardIds]) {
         const card = await this.waifuCardRepo.findUserCardById(cardId, tx);
-        if (card) await assertCardHasNoGear(this.inventoryRepo, card, 'traded', await this.cardName(card), tx);
+        if (card)
+          await assertCardHasNoGear(
+            this.inventoryRepo,
+            card,
+            'traded',
+            await this.cardName(card),
+            tx,
+          );
       }
 
       // Transfer credits if offered by sender

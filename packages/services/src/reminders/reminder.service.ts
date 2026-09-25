@@ -105,7 +105,9 @@ export class ReminderService {
       });
     }
 
-    const matches = (await this.repo.listActiveByUser(userId)).filter((r) => r.id.toLowerCase().startsWith(needle));
+    const matches = (await this.repo.listActiveByUser(userId)).filter((r) =>
+      r.id.toLowerCase().startsWith(needle),
+    );
     if (matches.length === 0) {
       throw new ValidationError(`No reminder ${needle}`, {
         userMessage: `You have no active reminder with id \`${needle}\`.`,

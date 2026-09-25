@@ -1,9 +1,5 @@
 import { EmbedBuilder, type GuildMember } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import {
   type AudioFilterName,
@@ -32,10 +28,10 @@ export function parseDuration(input: string): number | null {
   const parts = clean.split(':').map((p) => parseInt(p, 10));
   if (parts.some((p) => Number.isNaN(p))) return null;
   if (parts.length === 2) {
-    return (parts[0]! * 60) + parts[1]!;
+    return parts[0]! * 60 + parts[1]!;
   }
   if (parts.length === 3) {
-    return (parts[0]! * 3600) + (parts[1]! * 60) + parts[2]!;
+    return parts[0]! * 3600 + parts[1]! * 60 + parts[2]!;
   }
   return null;
 }
@@ -153,7 +149,11 @@ export function createMusicCommands(
             .setDescription(`**[${result.playlist.title}](${result.playlist.url})**`)
             .addFields(
               { name: 'Tracks Added', value: `${result.tracksAdded}`, inline: true },
-              { name: 'Position', value: result.position === 0 ? 'Now Playing' : `#${result.position}`, inline: true },
+              {
+                name: 'Position',
+                value: result.position === 0 ? 'Now Playing' : `#${result.position}`,
+                inline: true,
+              },
               { name: 'Source', value: result.playlist.source.toUpperCase(), inline: true },
             );
           if (result.playlist.thumbnailUrl) {
@@ -179,8 +179,16 @@ export function createMusicCommands(
             .setDescription(`**[${result.track.title}](${result.track.url})**`)
             .addFields(
               { name: 'Artist', value: result.track.artist || 'Unknown', inline: true },
-              { name: 'Duration', value: formatDuration(result.track.durationSeconds), inline: true },
-              { name: 'Position', value: isNowPlaying ? 'Now Playing' : `#${result.position}`, inline: true },
+              {
+                name: 'Duration',
+                value: formatDuration(result.track.durationSeconds),
+                inline: true,
+              },
+              {
+                name: 'Position',
+                value: isNowPlaying ? 'Now Playing' : `#${result.position}`,
+                inline: true,
+              },
             );
           if (result.track.thumbnailUrl) {
             embed.setThumbnail(result.track.thumbnailUrl);
@@ -396,7 +404,9 @@ export function createMusicCommands(
       const embed = new EmbedBuilder()
         .setColor(0x5865f2)
         .setTitle('🎵 Now Playing')
-        .setDescription(`**[${track.title}](${track.url})**\n\n\`${formatDuration(elapsed)}\` ${bar} \`${formatDuration(total)}\``)
+        .setDescription(
+          `**[${track.title}](${track.url})**\n\n\`${formatDuration(elapsed)}\` ${bar} \`${formatDuration(total)}\``,
+        )
         .addFields(
           { name: 'Artist', value: track.artist || 'Unknown', inline: true },
           { name: 'Volume', value: `${queue.volume}%`, inline: true },
@@ -423,7 +433,8 @@ export function createMusicCommands(
     metadata: {
       name: 'volume',
       category: CommandCategory.MUSIC,
-      description: 'Adjust or view software playback volume (0% to 150%, clamped for hearing safety).',
+      description:
+        'Adjust or view software playback volume (0% to 150%, clamped for hearing safety).',
       aliases: ['vol', 'v'],
       usage: '/volume [level]',
       isGuildOnly: true,
@@ -446,9 +457,13 @@ export function createMusicCommands(
         const queue = services.musicPlayer.getQueue(ctx.guildId);
         const savedVolume = await services.musicPlayer.resolveVolumeForGuild(ctx.guildId);
         if (queue && queue.currentTrack) {
-          await ctx.reply({ content: `🔊 Current playback volume is **${queue.volume}%** (server default: **${savedVolume}%**).` });
+          await ctx.reply({
+            content: `🔊 Current playback volume is **${queue.volume}%** (server default: **${savedVolume}%**).`,
+          });
         } else {
-          await ctx.reply({ content: `🔊 Current playback volume is **${savedVolume}%** (server default).` });
+          await ctx.reply({
+            content: `🔊 Current playback volume is **${savedVolume}%** (server default).`,
+          });
         }
         return;
       }
@@ -457,7 +472,9 @@ export function createMusicCommands(
       // Persist default volume in database
       void services.musicRepo.upsertGuildSettings(ctx.guildId, { defaultVolume: clamped });
 
-      await ctx.reply({ content: `🔊 Playback volume adjusted to **${clamped}%** (saved as server default).` });
+      await ctx.reply({
+        content: `🔊 Playback volume adjusted to **${clamped}%** (saved as server default).`,
+      });
     },
   };
 
@@ -554,7 +571,9 @@ export function createMusicCommands(
       const seconds = input ? parseDuration(input) : null;
 
       if (seconds === null || seconds < 0) {
-        await ctx.reply({ content: '❌ Invalid timestamp format. Use seconds (e.g. `90`) or `MM:SS` (e.g. `1:30`).' });
+        await ctx.reply({
+          content: '❌ Invalid timestamp format. Use seconds (e.g. `90`) or `MM:SS` (e.g. `1:30`).',
+        });
         return;
       }
 
@@ -568,7 +587,8 @@ export function createMusicCommands(
     metadata: {
       name: 'filter',
       category: CommandCategory.MUSIC,
-      description: 'Apply or toggle audio filter presets (bassboost, nightcore, 8D, vaporwave, etc.).',
+      description:
+        'Apply or toggle audio filter presets (bassboost, nightcore, 8D, vaporwave, etc.).',
       aliases: ['f', 'effects'],
       usage: '/filter <preset>',
       isGuildOnly: true,
@@ -674,9 +694,13 @@ export function createMusicCommands(
           vContext.voiceChannelId,
           ctx.guild!.voiceAdapterCreator,
         );
-        await ctx.reply({ content: `🔊 Connected to voice channel <#${vContext.voiceChannelId}>!` });
+        await ctx.reply({
+          content: `🔊 Connected to voice channel <#${vContext.voiceChannelId}>!`,
+        });
       } catch (err) {
-        await ctx.reply({ content: `❌ Failed to join voice channel: ${err instanceof Error ? err.message : String(err)}` });
+        await ctx.reply({
+          content: `❌ Failed to join voice channel: ${err instanceof Error ? err.message : String(err)}`,
+        });
       }
     },
   };
@@ -744,7 +768,10 @@ export function createMusicCommands(
         case 'list': {
           const playlists = await services.musicRepo.getUserPlaylists(ctx.user.id);
           if (playlists.length === 0) {
-            await ctx.reply({ content: "📁 You don't have any saved playlists yet. Use `/playlist create <name>` to start one!" });
+            await ctx.reply({
+              content:
+                "📁 You don't have any saved playlists yet. Use `/playlist create <name>` to start one!",
+            });
             return;
           }
 
@@ -753,7 +780,10 @@ export function createMusicCommands(
             .setTitle(`📁 ${ctx.user.username}'s Saved Playlists`)
             .setDescription(
               playlists
-                .map((p, i) => `\`${i + 1}.\` **${p.name}** — Plays: \`${p.playCount}\`${p.isPublic ? ' *(Public)*' : ''}`)
+                .map(
+                  (p, i) =>
+                    `\`${i + 1}.\` **${p.name}** — Plays: \`${p.playCount}\`${p.isPublic ? ' *(Public)*' : ''}`,
+                )
                 .join('\n'),
             );
           await ctx.reply({ embeds: [embed] });
@@ -762,7 +792,9 @@ export function createMusicCommands(
 
         case 'create': {
           if (!name) {
-            await ctx.reply({ content: '❌ Please specify a name for the playlist: `/playlist create <name>`' });
+            await ctx.reply({
+              content: '❌ Please specify a name for the playlist: `/playlist create <name>`',
+            });
             return;
           }
           const playlist = await services.musicRepo.createPlaylist(ctx.user.id, name);
@@ -778,7 +810,9 @@ export function createMusicCommands(
           const userPlaylists = await services.musicRepo.getUserPlaylists(ctx.user.id);
           const target = userPlaylists.find((p) => p.name.toLowerCase() === name.toLowerCase());
           if (!target) {
-            await ctx.reply({ content: `❌ Playlist **${name}** not found. Check your playlists with \`/playlist list\`.` });
+            await ctx.reply({
+              content: `❌ Playlist **${name}** not found. Check your playlists with \`/playlist list\`.`,
+            });
             return;
           }
 
@@ -798,16 +832,22 @@ export function createMusicCommands(
               thumbnailUrl: track.thumbnailUrl ?? null,
             });
 
-            await ctx.reply({ content: `✅ Added **${track.title}** to playlist **${target.name}**!` });
+            await ctx.reply({
+              content: `✅ Added **${track.title}** to playlist **${target.name}**!`,
+            });
           } catch (err) {
-            await ctx.reply({ content: `❌ Failed to resolve track: ${err instanceof Error ? err.message : String(err)}` });
+            await ctx.reply({
+              content: `❌ Failed to resolve track: ${err instanceof Error ? err.message : String(err)}`,
+            });
           }
           break;
         }
 
         case 'play': {
           if (!name) {
-            await ctx.reply({ content: '❌ Please specify the playlist name to play: `/playlist play <name>`' });
+            await ctx.reply({
+              content: '❌ Please specify the playlist name to play: `/playlist play <name>`',
+            });
             return;
           }
 
@@ -823,7 +863,9 @@ export function createMusicCommands(
 
           const tracks = await services.musicRepo.getPlaylistTracks(target.id);
           if (tracks.length === 0) {
-            await ctx.reply({ content: `⚠️ Playlist **${target.name}** has no tracks. Add songs with \`/playlist add\`.` });
+            await ctx.reply({
+              content: `⚠️ Playlist **${target.name}** has no tracks. Add songs with \`/playlist add\`.`,
+            });
             return;
           }
 
@@ -849,7 +891,9 @@ export function createMusicCommands(
               source: 'youtube',
               getStream: async () => {
                 const resolved = await services.musicPlayer.pipeline.resolve(t.url);
-                return 'tracks' in resolved ? await resolved.tracks[0]!.getStream() : await resolved.getStream();
+                return 'tracks' in resolved
+                  ? await resolved.tracks[0]!.getStream()
+                  : await resolved.getStream();
               },
               requestedBy: {
                 id: ctx.user.id,
@@ -874,7 +918,9 @@ export function createMusicCommands(
 
         case 'delete': {
           if (!name) {
-            await ctx.reply({ content: '❌ Please specify the playlist name to delete: `/playlist delete <name>`' });
+            await ctx.reply({
+              content: '❌ Please specify the playlist name to delete: `/playlist delete <name>`',
+            });
             return;
           }
           const userPlaylists = await services.musicRepo.getUserPlaylists(ctx.user.id);
@@ -894,7 +940,9 @@ export function createMusicCommands(
         }
 
         default:
-          await ctx.reply({ content: '❌ Unknown action. Valid actions: `play`, `create`, `list`, `add`, `delete`.' });
+          await ctx.reply({
+            content: '❌ Unknown action. Valid actions: `play`, `create`, `list`, `add`, `delete`.',
+          });
       }
     },
   };

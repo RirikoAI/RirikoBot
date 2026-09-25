@@ -83,7 +83,10 @@ describe('Gear menu (STORY-157)', () => {
 
   it('disables Unequip All when the card wears no gear', () => {
     const view = buildGearMenuView(
-      state({ loadout: { cardId: 'c1', aggregateStats: {}, activePerks: [] }, enhanceCost: undefined }),
+      state({
+        loadout: { cardId: 'c1', aggregateStats: {}, activePerks: [] },
+        enhanceCost: undefined,
+      }),
     );
     expect(buttons(view)['gear:unequip_all']!.disabled).toBe(true);
   });

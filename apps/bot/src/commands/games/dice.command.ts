@@ -1,9 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { rollDice, rollVsBot } from '@ririko/services';
 
@@ -134,7 +130,13 @@ export function createDiceCommand(services: BotServices): Command {
         const embed = new EmbedBuilder()
           .setTitle('Dice Roll-off')
           .setDescription(desc)
-          .setColor(vsResult.outcome === 'WIN' ? '#57F287' : vsResult.outcome === 'TIE' ? '#FEE75C' : '#ED4245')
+          .setColor(
+            vsResult.outcome === 'WIN'
+              ? '#57F287'
+              : vsResult.outcome === 'TIE'
+                ? '#FEE75C'
+                : '#ED4245',
+          )
           .setTimestamp();
 
         await ctx.reply({ embeds: [embed] });

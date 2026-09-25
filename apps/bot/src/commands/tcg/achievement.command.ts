@@ -1,9 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
 export function createAchievementCommand(services: BotServices): Command {
@@ -11,7 +7,8 @@ export function createAchievementCommand(services: BotServices): Command {
     metadata: {
       name: 'achievement',
       category: CommandCategory.TCG,
-      description: 'Track and claim game achievements across 6 tracks and 5 tiers with multi-asset rewards.',
+      description:
+        'Track and claim game achievements across 6 tracks and 5 tiers with multi-asset rewards.',
       aliases: ['ach', 'achievements'],
       usage: '/achievement [action: list|claim] [code: <code|all>]',
       examples: [
@@ -49,16 +46,11 @@ export function createAchievementCommand(services: BotServices): Command {
 
       const rawArgs = ctx.options.getRawArgs?.() ?? [];
       const action =
-        ctx.options.getString('action')?.toLowerCase() ??
-        rawArgs[0]?.toLowerCase() ??
-        'list';
+        ctx.options.getString('action')?.toLowerCase() ?? rawArgs[0]?.toLowerCase() ?? 'list';
 
       switch (action) {
         case 'claim': {
-          const rawCode =
-            ctx.options.getString('code') ??
-            rawArgs[1] ??
-            'all';
+          const rawCode = ctx.options.getString('code') ?? rawArgs[1] ?? 'all';
 
           try {
             if (rawCode.toLowerCase() === 'all') {
@@ -113,7 +105,9 @@ export function createAchievementCommand(services: BotServices): Command {
                       ? `🎖️ **Badge Unlocked:** ${res.rewardsDispatched.badge}\n`
                       : ''),
                 )
-                .setFooter({ text: `Tier: ${res.achievement.tier} • Code: ${res.achievement.code}` })
+                .setFooter({
+                  text: `Tier: ${res.achievement.tier} • Code: ${res.achievement.code}`,
+                })
                 .setTimestamp();
 
               await ctx.reply({ embeds: [embed] });

@@ -112,7 +112,6 @@ export class AutoRoleService {
         };
       }
 
-
       const isBot = member.user.bot;
       const targetRoleIds = isBot ? config.botRoleIds : config.humanRoleIds;
 
@@ -209,7 +208,6 @@ export class AutoRoleService {
         };
       }
 
-
       await member.roles.add(validation.role, 'AutoRole: Member verification passed');
 
       const userTag = member.user?.tag ?? member.user?.username ?? member.id;
@@ -267,7 +265,6 @@ export class AutoRoleService {
         };
       }
 
-
       const expiresAt = new Date(Date.now() + durationMs);
 
       // Add role to member on Discord
@@ -310,11 +307,7 @@ export class AutoRoleService {
   /**
    * Manually removes a temporary role and removes the DB record.
    */
-  async removeTemporaryRole(
-    guild: Guild,
-    member: GuildMember,
-    roleId: string,
-  ): Promise<boolean> {
+  async removeTemporaryRole(guild: Guild, member: GuildMember, roleId: string): Promise<boolean> {
     try {
       const role = guild.roles.cache.get(roleId);
       const roleName = role?.name ?? roleId;

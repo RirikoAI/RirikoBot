@@ -3,13 +3,7 @@ import { createDatabaseClient, type SqliteDatabaseClient } from '@ririko/databas
 import { createBotServices, type BotServices } from '../services.js';
 import { AiChatController } from './ai-chat.controller.js';
 import type { Client, Message, TextChannel } from 'discord.js';
-import type {
-  ChatModelProvider,
-  ChatRequest,
-  ChatResponse,
-  ChatToken,
-  ToolCall,
-} from '@ririko/ai';
+import type { ChatModelProvider, ChatRequest, ChatResponse, ChatToken, ToolCall } from '@ririko/ai';
 
 class MockAiProvider implements ChatModelProvider {
   readonly id = 'mock-provider';
@@ -27,7 +21,8 @@ class MockAiProvider implements ChatModelProvider {
   async generate(request: ChatRequest): Promise<ChatResponse> {
     this.recordedRequests.push(request);
     const isSynthesis = !request.tools && request.messages.some((m) => m.role === 'tool');
-    const content = isSynthesis && this.synthesisText !== undefined ? this.synthesisText : this.responseText;
+    const content =
+      isSynthesis && this.synthesisText !== undefined ? this.synthesisText : this.responseText;
 
     return {
       content,
@@ -210,17 +205,20 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       content: options.content,
       channelId: options.channelId ?? 'channel-general',
       channel: mockChannel,
-      guild: options.guildId !== null ? {
-        id: options.guildId ?? 'guild-1',
-        name: 'Test Guild',
-        voiceAdapterCreator: () => ({}),
-        members: {
-          me: {
-            permissions: { bitfield: 3145728n },
-            roles: { highest: { position: 99 } },
-          },
-        },
-      } : null,
+      guild:
+        options.guildId !== null
+          ? {
+              id: options.guildId ?? 'guild-1',
+              name: 'Test Guild',
+              voiceAdapterCreator: () => ({}),
+              members: {
+                me: {
+                  permissions: { bitfield: 3145728n },
+                  roles: { highest: { position: 99 } },
+                },
+              },
+            }
+          : null,
       author: {
         id: options.userId ?? 'user-alice',
         username: 'Alice',
@@ -512,7 +510,8 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         },
       ];
       mockProvider.streamTokens = [''];
-      mockProvider.synthesisText = 'You have 250 credits in your wallet and 500 credits in the bank!';
+      mockProvider.synthesisText =
+        'You have 250 credits in your wallet and 500 credits in the bank!';
 
       const { message, edits } = createMockMessage({
         content: 'Check my balance please',
@@ -533,7 +532,9 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       expect(toolResult.bank).toBe(500);
       expect(toolResult.netWorth).toBe(750);
       expect(toolResult.message).toContain('250 credits in wallet');
-      expect(edits[edits.length - 1]).toBe('You have 250 credits in your wallet and 500 credits in the bank!');
+      expect(edits[edits.length - 1]).toBe(
+        'You have 250 credits in your wallet and 500 credits in the bank!',
+      );
     });
 
     it('reports actionable message when music.play is invoked and user is not in a voice channel', async () => {
@@ -566,7 +567,9 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       const toolResult = JSON.parse(toolMessage?.content || '{}');
       expect(toolResult.action).toBe('error');
       expect(toolResult.message).toContain('connected to a voice channel');
-      expect(edits[edits.length - 1]).toBe('Please join a voice channel first so I can play music for you!');
+      expect(edits[edits.length - 1]).toBe(
+        'Please join a voice channel first so I can play music for you!',
+      );
     });
 
     it('queues music through real musicPlayer service when user is in a voice channel', async () => {
@@ -593,7 +596,8 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         },
       ];
       mockProvider.streamTokens = [''];
-      mockProvider.synthesisText = 'Yatta! I’ve queued “Yuusha” by YOASOBI for you in the music player. ✨';
+      mockProvider.synthesisText =
+        'Yatta! I’ve queued “Yuusha” by YOASOBI for you in the music player. ✨';
 
       const { message, edits } = createMockMessage({
         content: 'Please play me the intro song for Frieren',
@@ -621,7 +625,9 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       expect(toolResult.action).toBe('queued');
       expect(toolResult.trackTitle).toBe('Yuusha');
       expect(toolResult.trackUrl).toBe('https://www.youtube.com/watch?v=mock-yuusha');
-      expect(edits[edits.length - 1]).toBe('Yatta! I’ve queued “Yuusha” by YOASOBI for you in the music player. ✨');
+      expect(edits[edits.length - 1]).toBe(
+        'Yatta! I’ve queued “Yuusha” by YOASOBI for you in the music player. ✨',
+      );
     });
   });
 

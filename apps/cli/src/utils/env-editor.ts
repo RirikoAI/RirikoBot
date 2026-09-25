@@ -9,10 +9,7 @@ export function resolveEnvFilePath(customPath?: string): string {
     return resolve(process.cwd(), customPath);
   }
 
-  const candidatePaths = [
-    resolve(process.cwd(), '.env'),
-    resolve(process.cwd(), '../../.env'),
-  ];
+  const candidatePaths = [resolve(process.cwd(), '.env'), resolve(process.cwd(), '../../.env')];
 
   for (const candidate of candidatePaths) {
     if (existsSync(candidate)) {

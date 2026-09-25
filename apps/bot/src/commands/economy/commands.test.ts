@@ -27,7 +27,8 @@ function createMockContext(params: {
     : ({ id: 'guild_01', name: 'Avalon Guild' } as Guild);
 
   const optionsMap = params.optionsMap ?? {};
-  const reply = (params.replyFn ?? vi.fn().mockResolvedValue({})) as unknown as CommandContext['reply'];
+  const reply = (params.replyFn ??
+    vi.fn().mockResolvedValue({})) as unknown as CommandContext['reply'];
 
   return {
     source: params.source ?? 'slash',

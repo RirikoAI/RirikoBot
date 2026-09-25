@@ -104,10 +104,7 @@ export class StreamRepository extends BaseRepository<Streamer, NewStreamer, Part
     };
 
     if (this.isSqlite(client)) {
-      const [created] = await client.db
-        .insert(sqliteSchema.streamers)
-        .values(payload)
-        .returning();
+      const [created] = await client.db.insert(sqliteSchema.streamers).values(payload).returning();
       if (!created) throw new DatabaseError(`Failed to create streamer ${data.username}`);
       return created as Streamer;
     } else {
@@ -386,8 +383,10 @@ export class StreamRepository extends BaseRepository<Streamer, NewStreamer, Part
     if (existing) {
       const updateData = {
         channelId: data.channelId,
-        customMessage: data.customMessage !== undefined ? data.customMessage : existing.customMessage,
-        mentionRoleId: data.mentionRoleId !== undefined ? data.mentionRoleId : existing.mentionRoleId,
+        customMessage:
+          data.customMessage !== undefined ? data.customMessage : existing.customMessage,
+        mentionRoleId:
+          data.mentionRoleId !== undefined ? data.mentionRoleId : existing.mentionRoleId,
       };
 
       if (this.isSqlite(client)) {
@@ -575,10 +574,7 @@ export class StreamRepository extends BaseRepository<Streamer, NewStreamer, Part
   // Stream Events
   // ==========================================
 
-  async recordStreamEvent(
-    data: RecordStreamEventInput,
-    tx?: DatabaseClient,
-  ): Promise<StreamEvent> {
+  async recordStreamEvent(data: RecordStreamEventInput, tx?: DatabaseClient): Promise<StreamEvent> {
     const client = this.getClient(tx);
     const eventId = data.id ?? randomUUID();
     const insertPayload = {
@@ -609,11 +605,7 @@ export class StreamRepository extends BaseRepository<Streamer, NewStreamer, Part
     }
   }
 
-  async endStreamEvent(
-    streamId: string,
-    endedAt?: Date,
-    tx?: DatabaseClient,
-  ): Promise<void> {
+  async endStreamEvent(streamId: string, endedAt?: Date, tx?: DatabaseClient): Promise<void> {
     const client = this.getClient(tx);
     const timestamp = endedAt ?? new Date();
 

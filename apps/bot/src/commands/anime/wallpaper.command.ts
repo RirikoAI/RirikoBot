@@ -24,7 +24,8 @@ const COLOR = '#6D5BA3';
 
 type WallpaperAction = 'more' | 'sources' | 'done';
 
-const sourceLabel = (id: WallpaperSourceId) => WALLPAPER_SOURCES.find((s) => s.id === id)?.label ?? id;
+const sourceLabel = (id: WallpaperSourceId) =>
+  WALLPAPER_SOURCES.find((s) => s.id === id)?.label ?? id;
 
 function sourceMenu(query: string): ActionRowBuilder<StringSelectMenuBuilder> {
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
@@ -44,7 +45,11 @@ function sourceMenu(query: string): ActionRowBuilder<StringSelectMenuBuilder> {
 function actionMenu(source: WallpaperSourceId): ActionRowBuilder<StringSelectMenuBuilder> {
   const label = sourceLabel(source);
   const options: Array<{ label: string; value: WallpaperAction; description: string }> = [
-    { label: 'Load another wallpaper', value: 'more', description: `Get more wallpapers from ${label}` },
+    {
+      label: 'Load another wallpaper',
+      value: 'more',
+      description: `Get more wallpapers from ${label}`,
+    },
     { label: 'Select another source', value: 'sources', description: 'Search on another source' },
     { label: 'No, I am done', value: 'done', description: 'Close this menu' },
   ];
@@ -78,7 +83,11 @@ function sourcePrompt(query: string, note?: string): InteractionEditReplyOptions
   const embed = new EmbedBuilder()
     .setColor(COLOR)
     .setTitle('🖼️ Anime wallpapers')
-    .setDescription([note, `Select a source to search for **${truncate(query, 200)}**:`].filter(Boolean).join('\n\n'))
+    .setDescription(
+      [note, `Select a source to search for **${truncate(query, 200)}**:`]
+        .filter(Boolean)
+        .join('\n\n'),
+    )
     .setFooter({ text: 'Made with ❤️ by Ririko' });
   return { content: '', embeds: [embed], components: [sourceMenu(query)] };
 }
@@ -107,7 +116,10 @@ export function createWallpaperCommand(services: BotServices): Command {
     execute: async (ctx: CommandContext) => {
       const query = ctx.options.getString('search')?.trim().slice(0, MAX_QUERY_LENGTH);
       if (!query) {
-        await ctx.reply({ content: '❌ Please tell me what wallpaper to search for.', ephemeral: true });
+        await ctx.reply({
+          content: '❌ Please tell me what wallpaper to search for.',
+          ephemeral: true,
+        });
         return;
       }
 
@@ -120,13 +132,18 @@ export function createWallpaperCommand(services: BotServices): Command {
         let batch: Wallpaper[];
         try {
           // discord.js rejects non-http(s) URLs in embeds.
-          batch = (await session.next(source, PER_LOAD)).filter((w) => httpUrl(w.imageUrl) && httpUrl(w.pageUrl));
+          batch = (await session.next(source, PER_LOAD)).filter(
+            (w) => httpUrl(w.imageUrl) && httpUrl(w.pageUrl),
+          );
         } catch (err) {
           console.error(`[Wallpaper] ${label} request failed:`, err);
           return sourcePrompt(query, `❌ ${label} is unreachable right now. Try another source.`);
         }
         if (batch.length === 0) {
-          return sourcePrompt(query, `🔍 No ${current === source ? 'more ' : ''}wallpapers for **${truncate(query, 100)}** on ${label}.`);
+          return sourcePrompt(
+            query,
+            `🔍 No ${current === source ? 'more ' : ''}wallpapers for **${truncate(query, 100)}** on ${label}.`,
+          );
         }
         current = source;
         return {

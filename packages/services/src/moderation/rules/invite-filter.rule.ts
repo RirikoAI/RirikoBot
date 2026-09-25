@@ -34,9 +34,7 @@ export class InviteFilterRule implements AutoModRule {
       };
     }
 
-    const whitelist = new Set(
-      (config?.whitelist ?? []).map((w) => w.trim().toLowerCase()),
-    );
+    const whitelist = new Set((config?.whitelist ?? []).map((w) => w.trim().toLowerCase()));
 
     // Reset regex index for stateful global regex
     InviteFilterRule.INVITE_REGEX.lastIndex = 0;

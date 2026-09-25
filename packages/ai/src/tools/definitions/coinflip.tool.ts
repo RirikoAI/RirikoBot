@@ -10,7 +10,8 @@ export type CoinFlipArgs = z.infer<typeof CoinFlipArgsSchema>;
 export class CoinFlipTool implements SafeTool<CoinFlipArgs, CoinFlipResult> {
   readonly definition = {
     name: 'games.coinflip',
-    description: 'Flips a two-sided coin (heads or tails) and optionally checks if the user predicted correctly.',
+    description:
+      'Flips a two-sided coin (heads or tails) and optionally checks if the user predicted correctly.',
     parameters: {
       type: 'object',
       properties: {
