@@ -117,9 +117,10 @@ The dashboard and CLI run in separate processes from the bot, so they cannot cle
 
 The dashboard provides dedicated management views for all 20+ bot modules:
 1. **Overview**: Live server stats (member count, active voice channels, command usage graphs, bot latency).
+   - *Shipped in STORY-113:* member and online counts, active voice channels (members in voice, bots not counted), a 30-day command usage chart with a table view, the most used commands, and Ririko's latency, version and uptime. See Section 5.
 2. **General**: Server prefix, default embed color, bot language, timezone.
 3. **Moderation**: Case logs, warning escalation policy builder, moderation history inspector.
-   - *Shipped in STORY-114:* the escalation policy builder. Steps are stored in `guild_settings.escalation_steps` (null means the default policy, an empty list turns escalation off), and saving needs a fresh passkey check. The case log and history inspector are STORY-113.
+   - *Shipped in STORY-114:* the escalation policy builder. Steps are stored in `guild_settings.escalation_steps` (null means the default policy, an empty list turns escalation off), and saving needs a fresh passkey check. The case log and history inspector shipped in STORY-113 as the separate **Case Log** page (`/dashboard/{guildId}/cases`).
 4. **AutoMod**: Toggles and threshold sliders for invite spam, phishing shields, caps lock, and mention limits.
    - *Shipped in STORY-114:* per rule (phishing shield, invite filter, mention spam, burst spam) an on/off switch, the action (delete, or delete plus warn, 10-minute timeout, kick or ban), the mention or message limit, and exempt roles and channels, stored in `moderation_rules`. There is no caps-lock rule, so the page has none. Warnings from AutoMod count toward the escalation policy.
 5. **Music**: Default volume, DJ role picker, music channel binding, audio filter presets.
@@ -158,13 +159,13 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 ---
 
 ## 5. Overview Data Sources & Analytics
-- **Member and online counts**: Discord REST `GET /guilds/{id}?with_counts=true` with the bot token.
-- **Command usage graph**: no command usage is recorded today. A dual-dialect `command_usage_daily` table (guild, command, day, count) is incremented by the command router after dispatch (TASK-1131).
-- **Bot latency, guild count and uptime**: the bot has no HTTP server today. It refreshes a small bot status record on a fixed interval, and the dashboard reads it. The EPIC-012 `/health` and `/ready` probes can reuse the same record.
-- **Moderation case log**: read-only inspector over `moderation_cases`, `moderation_warnings` and `moderation_notes`, with filters by user, moderator, action and date, and cursor pagination (TASK-1132).
-- **Dashboard audit viewer**: renders `audit_logs` entries with their field diffs (TASK-1132).
-
----
+Shipped in STORY-113. The bot is the only writer of the three activity tables; the dashboard only reads them.
+- **Member and online counts**: Discord REST `GET /guilds/{id}?with_counts=true` with the bot token, cached for 60 seconds. When Discord does not answer, the tiles show a dash and the rest of the page still loads.
+- **Command usage graph**: `command_usage_daily` (guild, UTC day, command, count). The command router calls its `onCommandRun` hook when a command passes the middleware pipeline, just before it executes; commands stopped by a middleware and commands outside a guild are not counted. `CommandUsageRecorder` keeps the counts in memory and adds them to the table every 60 seconds and on shutdown, and deletes rows older than 90 days once a day. A crash loses at most one minute of counts.
+- **Bot latency, guild count and uptime**: `BotStatusReporter` writes the `bot_status` row (`id = 'bot'`: gateway ping, guild count, version, start time) every 30 seconds from gateway READY. A row older than 90 seconds (`BOT_STATUS_STALE_MS`) means Ririko is offline. The EPIC-012 `/health` and `/ready` probes can reuse the same row.
+- **Active voice channels**: Discord REST cannot list a guild's voice states, so the same reporter writes `guild_voice_activity` (per guild, the channels with at least one member who is not a bot). It writes a guild only when its channels changed and removes the row when voice empties. The first write after start-up clears the table, because rows from an earlier run may be stale. While the bot is offline, the page shows voice activity as unknown.
+- **Moderation case log** (`/dashboard/{guildId}/cases`): read-only, newest first, 25 cases per page with a case-number cursor (`?before=`). Filters: member and moderator by user ID, action (the types the guild has used), and a UTC date range; clicking a member filters by them. The case page (`/cases/{number}`) shows the case with its metadata, and the member's warnings (whether each still counts toward escalation), staff notes and other cases. User names come from Discord REST `GET /users/{id}`, cached for 10 minutes.
+- **Dashboard audit viewer** (`/dashboard/{guildId}/audit-log`): the guild's `audit_logs` entries, newest first, 25 per page with a `(created_at, id)` cursor. Each entry shows the actor, the source (Dashboard or CLI) and a before/after table per changed field; channel and role IDs are shown as `#name` and `@name`. IP addresses and user agents are not shown, because every manager of the guild can open the page and those belong to the actor.
 
 ## 6. Shared Zod Validation & Dashboard-to-CLI Parity
 
@@ -209,7 +210,7 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-110 | 8 | `apps/web` scaffold, Discord OAuth2, server-side sessions, guild authorization guard | 1.1, 2, 2.1, 2.2 |
 | STORY-111 | 8 | Shared Zod schemas, `GuildConfigService` and audit writer, dashboard shell and General tab, `ririko guild:config` | 3, 4 (General), 6 |
 | STORY-112 | 8 | TCG settings, owner-only season editor and curve visualizer, card album, shop and achievement managers | 4 (TCG) |
-| STORY-113 | 5 | Overview tab, command usage counters, bot status record, case log and audit viewers | 4 (Overview), 5 |
+| STORY-113 | 5 | Overview tab, command usage counters, bot status record, voice activity, case log and audit viewers | 4 (Overview), 5 |
 | STORY-114 | 8 | Typed settings and step-up settings forms, Logging, Moderation escalation and AutoMod pages, real AutoMod actions | 3.4, 4 (3, 4, 18) |
 | STORY-115 | 5 | Economy, XP, Games, Giveaways pages | 4 (8, 9, 11, 12) |
 | STORY-116 | 8 | Music, AI, Image Generation, Stream Alerts, Free Games, Welcome & Farewell, Integrations pages; needs STORY-133 | 4 (5, 6, 7, 15, 16, 17, 20) |

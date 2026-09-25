@@ -97,6 +97,7 @@ export class CommandRouter {
 
     try {
       await this.pipeline.execute(ctx, async () => {
+        this.notifyCommandRun(ctx);
         await command.execute(ctx);
       });
       return true;
@@ -182,12 +183,21 @@ export class CommandRouter {
 
     try {
       await this.pipeline.execute(ctx, async () => {
+        this.notifyCommandRun(ctx);
         await command.execute(ctx);
       });
       return true;
     } catch (error) {
       await this.handleError(ctx, error);
       return true;
+    }
+  }
+
+  private notifyCommandRun(ctx: CommandContext): void {
+    try {
+      this.options.onCommandRun?.(ctx);
+    } catch (error) {
+      console.error('onCommandRun hook failed in CommandRouter:', error);
     }
   }
 

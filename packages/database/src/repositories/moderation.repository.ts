@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, gte, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
@@ -21,6 +21,15 @@ export interface ListCasesOptions extends PaginationOptions {
   targetUserId?: string | undefined;
   moderatorUserId?: string | undefined;
   type?: string | undefined;
+  /** Only cases created at or after this time. */
+  createdFrom?: Date | undefined;
+  /** Only cases created before this time. */
+  createdBefore?: Date | undefined;
+  /**
+   * Cursor: only cases numbered below this. `total` ignores it, so it stays the count of all
+   * cases matching the filters.
+   */
+  beforeCaseNumber?: number | undefined;
 }
 
 export type InsertModerationCase = Omit<NewModerationCase, 'id' | 'caseNumber' | 'createdAt'> & {
@@ -270,6 +279,12 @@ export class ModerationRepository extends BaseRepository<
       if (options.type) {
         conditions.push(eq(sqliteSchema.moderationCases.type, options.type));
       }
+      if (options.createdFrom) {
+        conditions.push(gte(sqliteSchema.moderationCases.createdAt, options.createdFrom));
+      }
+      if (options.createdBefore) {
+        conditions.push(lt(sqliteSchema.moderationCases.createdAt, options.createdBefore));
+      }
 
       const whereClause = and(...conditions);
 
@@ -282,7 +297,14 @@ export class ModerationRepository extends BaseRepository<
       const items = await client.db
         .select()
         .from(sqliteSchema.moderationCases)
-        .where(whereClause)
+        .where(
+          options.beforeCaseNumber === undefined
+            ? whereClause
+            : and(
+                whereClause,
+                lt(sqliteSchema.moderationCases.caseNumber, options.beforeCaseNumber),
+              ),
+        )
         .orderBy(desc(sqliteSchema.moderationCases.caseNumber))
         .limit(limit)
         .offset(offset);
@@ -304,6 +326,12 @@ export class ModerationRepository extends BaseRepository<
       if (options.type) {
         conditions.push(eq(pgSchema.moderationCases.type, options.type));
       }
+      if (options.createdFrom) {
+        conditions.push(gte(pgSchema.moderationCases.createdAt, options.createdFrom));
+      }
+      if (options.createdBefore) {
+        conditions.push(lt(pgSchema.moderationCases.createdAt, options.createdBefore));
+      }
 
       const whereClause = and(...conditions);
 
@@ -316,7 +344,11 @@ export class ModerationRepository extends BaseRepository<
       const items = await client.db
         .select()
         .from(pgSchema.moderationCases)
-        .where(whereClause)
+        .where(
+          options.beforeCaseNumber === undefined
+            ? whereClause
+            : and(whereClause, lt(pgSchema.moderationCases.caseNumber, options.beforeCaseNumber)),
+        )
         .orderBy(desc(pgSchema.moderationCases.caseNumber))
         .limit(limit)
         .offset(offset);
@@ -328,6 +360,21 @@ export class ModerationRepository extends BaseRepository<
         offset,
       };
     }
+  }
+
+  /** Case types recorded in a guild, for filters. */
+  async listCaseTypes(guildId: string, tx?: DatabaseClient): Promise<string[]> {
+    const client = this.getClient(tx);
+    const rows = this.isSqlite(client)
+      ? await client.db
+          .selectDistinct({ type: sqliteSchema.moderationCases.type })
+          .from(sqliteSchema.moderationCases)
+          .where(eq(sqliteSchema.moderationCases.guildId, guildId))
+      : await client.db
+          .selectDistinct({ type: pgSchema.moderationCases.type })
+          .from(pgSchema.moderationCases)
+          .where(eq(pgSchema.moderationCases.guildId, guildId));
+    return rows.map((row) => row.type).sort();
   }
 
   // --- Warning Management ---
@@ -432,6 +479,39 @@ export class ModerationRepository extends BaseRepository<
     }
   }
 
+  /** Every warning a user received in a guild, active or not, newest first. */
+  async listWarnings(
+    guildId: string,
+    userId: string,
+    tx?: DatabaseClient,
+  ): Promise<ModerationWarning[]> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const rows = await client.db
+        .select()
+        .from(sqliteSchema.moderationWarnings)
+        .where(
+          and(
+            eq(sqliteSchema.moderationWarnings.guildId, guildId),
+            eq(sqliteSchema.moderationWarnings.userId, userId),
+          ),
+        )
+        .orderBy(desc(sqliteSchema.moderationWarnings.createdAt));
+      return rows as ModerationWarning[];
+    }
+    const rows = await client.db
+      .select()
+      .from(pgSchema.moderationWarnings)
+      .where(
+        and(
+          eq(pgSchema.moderationWarnings.guildId, guildId),
+          eq(pgSchema.moderationWarnings.userId, userId),
+        ),
+      )
+      .orderBy(desc(pgSchema.moderationWarnings.createdAt));
+    return rows as unknown as ModerationWarning[];
+  }
+
   /**
    * Deactivates a specific warning by ID.
    */
@@ -457,11 +537,7 @@ export class ModerationRepository extends BaseRepository<
   /**
    * Clears (deactivates) all active warnings for a user in a guild.
    */
-  async clearUserWarnings(
-    guildId: string,
-    userId: string,
-    tx?: DatabaseClient,
-  ): Promise<number> {
+  async clearUserWarnings(guildId: string, userId: string, tx?: DatabaseClient): Promise<number> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const updated = await client.db
@@ -497,10 +573,7 @@ export class ModerationRepository extends BaseRepository<
   /**
    * Adds a staff note to a member.
    */
-  async createNote(
-    data: InsertModerationNote,
-    tx?: DatabaseClient,
-  ): Promise<ModerationNote> {
+  async createNote(data: InsertModerationNote, tx?: DatabaseClient): Promise<ModerationNote> {
     const client = this.getClient(tx);
     const id = data.id ?? randomUUID();
     const now = new Date();
@@ -659,10 +732,7 @@ export class ModerationRepository extends BaseRepository<
   /**
    * Upserts a moderation rule by guildId and ruleType.
    */
-  async upsertRule(
-    rule: InsertModerationRule,
-    tx?: DatabaseClient,
-  ): Promise<ModerationRule> {
+  async upsertRule(rule: InsertModerationRule, tx?: DatabaseClient): Promise<ModerationRule> {
     const client = this.getClient(tx);
     const existing = await this.getRuleByType(rule.guildId, rule.ruleType, tx);
 

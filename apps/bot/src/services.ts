@@ -5,6 +5,7 @@ import {
   XpRepository,
   GuildSettingsRepository,
   GuildConfigVersionRepository,
+  BotActivityRepository,
   LeaderboardRepository,
   ItemRepository,
   InventoryRepository,
@@ -63,7 +64,7 @@ import {
   MusicPlayTool,
   EconomyBalanceTool,
 } from '@ririko/ai';
-import { EventBus, resolveResetSchedulesFromEnv } from '@ririko/core';
+import { CORE_VERSION, EventBus, resolveResetSchedulesFromEnv } from '@ririko/core';
 import {
   EconomyService,
   BankingService,
@@ -143,6 +144,8 @@ import {
   resolveTimeZone,
   GuildSettingsService,
   GuildConfigWatcher,
+  CommandUsageRecorder,
+  BotStatusReporter,
   ReactionGifService,
   MemeSynthesizer,
   ImageGenerationService,
@@ -206,6 +209,10 @@ export interface BotServices {
   guildSettingsService: GuildSettingsService;
   /** Polls the guild config change feed; started on gateway READY. */
   guildConfigWatcher: GuildConfigWatcher;
+  /** Counts commands run per guild for the dashboard; fed by the command router. */
+  commandUsageRecorder: CommandUsageRecorder;
+  /** Null when no Discord client was supplied (tests); started on gateway READY. */
+  botStatusReporter: BotStatusReporter | null;
   /** Zone for reading reminder times: the user's saved zone, then the guild's, then UTC. */
   resolveUserTimeZone: (userId: string, guildId: string | null) => Promise<string>;
   /** Zone for reading guild times: the guild's saved zone, then UTC. */
@@ -492,6 +499,11 @@ export async function createBotServices(
   // Settings saved by the dashboard or CLI reach this process through the config change feed.
   eventBus.on('guild:configChanged', ({ guildId }) => guildSettingsService.invalidate(guildId));
   const guildConfigWatcher = new GuildConfigWatcher(new GuildConfigVersionRepository(db), eventBus);
+  const botActivityRepo = new BotActivityRepository(db);
+  const commandUsageRecorder = new CommandUsageRecorder(botActivityRepo);
+  const botStatusReporter = discordClient
+    ? new BotStatusReporter(discordClient, botActivityRepo, { version: CORE_VERSION })
+    : null;
   const resolveUserTimeZone = async (userId: string, guildId: string | null): Promise<string> => {
     const [userPrefs, guildTz] = await Promise.all([
       conversationManager.getUserPreferences(userId).catch(() => null),
@@ -916,6 +928,8 @@ export async function createBotServices(
     reminderScheduler,
     guildSettingsService,
     guildConfigWatcher,
+    commandUsageRecorder,
+    botStatusReporter,
     resolveUserTimeZone,
     resolveGuildTimeZone,
     wallpaperService,

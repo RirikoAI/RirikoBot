@@ -191,3 +191,9 @@ export type WebKnownDevice = typeof sqlite.webKnownDevices.$inferSelect;
 
 // Guild Config Change Feed
 export type GuildConfigVersion = typeof sqlite.guildConfigVersions.$inferSelect;
+
+// Bot Activity (dashboard overview, TASK-1131)
+export type CommandUsageDaily = typeof sqlite.commandUsageDaily.$inferSelect;
+export type BotStatus = typeof sqlite.botStatus.$inferSelect;
+export type GuildVoiceActivity = typeof sqlite.guildVoiceActivity.$inferSelect;
+export type VoiceChannelActivity = GuildVoiceActivity['channels'][number];
