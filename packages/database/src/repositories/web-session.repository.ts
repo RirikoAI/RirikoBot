@@ -1,10 +1,12 @@
-import { eq, lte, or } from 'drizzle-orm';
+import { and, eq, gt, lte, or } from 'drizzle-orm';
 
 import type { DatabaseClient } from '../client/types.js';
 import type { NewWebSession, WebSession } from '../schema/types/index.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
+
+export type WebSessionPatch = Partial<Omit<NewWebSession, 'userId' | 'createdAt'>>;
 
 export interface WebSessionDiscordTokens {
   discordAccessToken: string;
@@ -48,19 +50,26 @@ export class WebSessionRepository {
     return row ?? null;
   }
 
-  async touch(id: string, lastSeenAt: Date, tx?: DatabaseClient): Promise<void> {
+  /** Applies `patch` to one session; `patch.id` renames the row (session ID rotation). */
+  async update(id: string, patch: WebSessionPatch, tx?: DatabaseClient): Promise<boolean> {
     const client = this.getClient(tx);
-    if (client.dialect === 'sqlite') {
-      await client.db
-        .update(sqliteSchema.webSessions)
-        .set({ lastSeenAt })
-        .where(eq(sqliteSchema.webSessions.id, id));
-    } else {
-      await client.db
-        .update(pgSchema.webSessions)
-        .set({ lastSeenAt })
-        .where(eq(pgSchema.webSessions.id, id));
-    }
+    const updated =
+      client.dialect === 'sqlite'
+        ? await client.db
+            .update(sqliteSchema.webSessions)
+            .set(patch)
+            .where(eq(sqliteSchema.webSessions.id, id))
+            .returning({ id: sqliteSchema.webSessions.id })
+        : await client.db
+            .update(pgSchema.webSessions)
+            .set(patch)
+            .where(eq(pgSchema.webSessions.id, id))
+            .returning({ id: pgSchema.webSessions.id });
+    return updated.length > 0;
+  }
+
+  async touch(id: string, lastSeenAt: Date, tx?: DatabaseClient): Promise<void> {
+    await this.update(id, { lastSeenAt }, tx);
   }
 
   async updateDiscordTokens(
@@ -68,18 +77,46 @@ export class WebSessionRepository {
     tokens: WebSessionDiscordTokens,
     tx?: DatabaseClient,
   ): Promise<void> {
+    await this.update(id, tokens, tx);
+  }
+
+  /**
+   * Clears the pending WebAuthn challenge if it equals `challenge` and has not expired. Returns
+   * true only for the one caller that consumed it, so a challenge can be used once.
+   */
+  async consumeChallenge(
+    id: string,
+    challenge: string,
+    now: Date,
+    tx?: DatabaseClient,
+  ): Promise<boolean> {
     const client = this.getClient(tx);
-    if (client.dialect === 'sqlite') {
-      await client.db
-        .update(sqliteSchema.webSessions)
-        .set(tokens)
-        .where(eq(sqliteSchema.webSessions.id, id));
-    } else {
-      await client.db
-        .update(pgSchema.webSessions)
-        .set(tokens)
-        .where(eq(pgSchema.webSessions.id, id));
-    }
+    const cleared = { webauthnChallenge: null, webauthnChallengeExpiresAt: null };
+    const consumed =
+      client.dialect === 'sqlite'
+        ? await client.db
+            .update(sqliteSchema.webSessions)
+            .set(cleared)
+            .where(
+              and(
+                eq(sqliteSchema.webSessions.id, id),
+                eq(sqliteSchema.webSessions.webauthnChallenge, challenge),
+                gt(sqliteSchema.webSessions.webauthnChallengeExpiresAt, now),
+              ),
+            )
+            .returning({ id: sqliteSchema.webSessions.id })
+        : await client.db
+            .update(pgSchema.webSessions)
+            .set(cleared)
+            .where(
+              and(
+                eq(pgSchema.webSessions.id, id),
+                eq(pgSchema.webSessions.webauthnChallenge, challenge),
+                gt(pgSchema.webSessions.webauthnChallengeExpiresAt, now),
+              ),
+            )
+            .returning({ id: pgSchema.webSessions.id });
+    return consumed.length > 0;
   }
 
   async delete(id: string, tx?: DatabaseClient): Promise<boolean> {

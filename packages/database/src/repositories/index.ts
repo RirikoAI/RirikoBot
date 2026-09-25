@@ -32,3 +32,4 @@ export * from './welcomer.repository.js';
 export * from './web-session.repository.js';
 export * from './guild-config-version.repository.js';
 export * from './audit-log.repository.js';
+export * from './web-passkey.repository.js';

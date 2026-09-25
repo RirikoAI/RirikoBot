@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 // `server-only` throws unless bundled for React Server Components; tests load the no-op entry
@@ -9,7 +10,14 @@ const serverOnlyNoop = join(dirname(requireFromWeb.resolve('server-only')), 'emp
 
 export default defineConfig({
   resolve: {
-    alias: { 'server-only': serverOnlyNoop },
+    alias: [
+      { find: 'server-only', replacement: serverOnlyNoop },
+      // apps/web path alias (tsconfig "@/*"); no other workspace package uses "@/".
+      {
+        find: /^@\//,
+        replacement: `${fileURLToPath(new URL('./apps/web/src/', import.meta.url))}`,
+      },
+    ],
   },
   test: {
     globals: true,

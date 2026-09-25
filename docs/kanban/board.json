@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "TASK-1174",
   "epics": [
     {
       "id": "EPIC-000",
@@ -2748,7 +2748,7 @@
       "parent": "STORY-117",
       "title": "WebAuthn Passkeys: web_passkeys Table, Security Page (Add/Remove), Sign-In Gate for Enrolled Users & requireStepUp",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
@@ -2762,7 +2762,7 @@
       "parent": "STORY-117",
       "title": "BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & ririko passkeys:reset Recovery CLI",
       "points": 2,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "TASK-1171"
       ],

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { NextResponse } from 'next/server';
 import { getWebServices } from '../services';
+import { needsPasskeyCheck, stepUpState, type StepUpState } from './passkey-policy';
 import type { ActiveSession } from './session-service';
 
 /** `__Host-` pins the cookie to this origin: Secure, Path=/, no Domain attribute. */
@@ -53,11 +54,46 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   };
 });
 
-/** Sends visitors without a live session through Discord login, then back to `returnTo`. */
-export async function requireSession(returnTo: string): Promise<ActiveSession> {
+/** Sets the session cookie from a Server Action (route handlers use `setCookie`). */
+export async function writeSessionCookie(token: string, session: ActiveSession): Promise<void> {
+  const maxAge = Math.max(0, Math.floor((session.expiresAt.getTime() - Date.now()) / 1000));
+  (await cookies()).set(SESSION_COOKIE, token, { ...BASE_COOKIE, maxAge });
+}
+
+/** How many passkeys the user has, read once per request. */
+export const getPasskeyCount = cache(async (userId: string): Promise<number> => {
+  const { passkeys } = await getWebServices();
+  return passkeys.count(userId);
+});
+
+/**
+ * A signed-in session that may still owe its passkey check. Only the passkey check itself (the
+ * verify page and its actions) may use this; everything else uses `requireSession`.
+ */
+export async function requireSessionForPasskeyCheck(returnTo: string): Promise<ActiveSession> {
   const session = await getSession();
   if (!session) {
     redirect(`/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
   return session;
+}
+
+/**
+ * A usable session: signed in with Discord and, for users who have a passkey, verified with it
+ * (ADR-013 sign-in gate). Otherwise redirects to login or to the passkey check.
+ */
+export async function requireSession(returnTo: string): Promise<ActiveSession> {
+  const session = await requireSessionForPasskeyCheck(returnTo);
+  if (needsPasskeyCheck(session, await getPasskeyCount(session.userId))) {
+    redirect(`/verify?returnTo=${encodeURIComponent(returnTo)}`);
+  }
+  return session;
+}
+
+/**
+ * Sensitive writes need a passkey check newer than five minutes. Returns `ok`, or the reason the
+ * caller must report so the client can run a passkey check (or tell the user to add a passkey).
+ */
+export async function requireStepUp(session: ActiveSession): Promise<StepUpState> {
+  return stepUpState(session, await getPasskeyCount(session.userId), Date.now());
 }
