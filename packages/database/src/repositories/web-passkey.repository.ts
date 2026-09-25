@@ -89,6 +89,22 @@ export class WebPasskeyRepository {
     }
   }
 
+  /** Deletes every passkey of the user (operator recovery); returns how many were removed. */
+  async deleteByUser(userId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    const deleted =
+      client.dialect === 'sqlite'
+        ? await client.db
+            .delete(sqliteSchema.webPasskeys)
+            .where(eq(sqliteSchema.webPasskeys.userId, userId))
+            .returning({ id: sqliteSchema.webPasskeys.id })
+        : await client.db
+            .delete(pgSchema.webPasskeys)
+            .where(eq(pgSchema.webPasskeys.userId, userId))
+            .returning({ id: pgSchema.webPasskeys.id });
+    return deleted.length;
+  }
+
   /** Deletes the user's passkey; returns false when it does not exist or is not theirs. */
   async deleteForUser(userId: string, id: string, tx?: DatabaseClient): Promise<boolean> {
     const client = this.getClient(tx);

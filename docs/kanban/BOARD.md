@@ -8,12 +8,14 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| `TASK-1174` | Task | BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & `ririko passkeys:reset` Recovery CLI | 2 | `STORY-117` (`EPIC-011`) |
+| | | | | |
 
 ---
 
 ## 🔍 In Review
-*No tickets currently in review.*
+| ID | Type | Title | Pts | Epic / Parent | Handover Note |
+|---|---|---|---|---|---|
+| `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | `EPIC-011` | [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) |
 
 ---
 
@@ -250,9 +252,9 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1161` | Task | Music Page (Volume, DJ Role, Music Channel), AI Chatbot Page (Persona, Provider/Model, Tool Toggles) & Image Generation Page (Provider, Quotas, Presets) | 3 | `STORY-116` | 🎯 To Do | `STORY-111` |
 | `TASK-1162` | Task | Stream Alerts Page (Streamer Subscriptions, Templates, Mention Roles) & Free Games Page (Channels, Ping Roles) | 2 | `STORY-116` | 🎯 To Do | `TASK-1161` |
 | `TASK-1163` | Task | Welcome & Farewell Live Canvas Preview Editor (SSRF-Safe Background Upload) & Integrations Status Page (Zero Secret Exposure) | 3 | `STORY-116` | 🎯 To Do | `TASK-1162`, `STORY-133` |
-| `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | `EPIC-011` | 🔍 Review · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `STORY-111` |
 | `TASK-1171` | Task | WebAuthn Passkeys: web_passkeys Table, Security Page (Add/Remove), Sign-In Gate for Enrolled Users & requireStepUp | 3 | `STORY-117` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `STORY-111` |
-| `TASK-1174` | Task | BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & `ririko passkeys:reset` Recovery CLI | 2 | `STORY-117` | ⚡ In Progress | `TASK-1171` |
+| `TASK-1174` | Task | BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & `ririko passkeys:reset` Recovery CLI | 2 | `STORY-117` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `TASK-1171` |
 | `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | `EPIC-011` | 🎯 To Do | `STORY-117` |
 | `TASK-1172` | Task | Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel | 2 | `STORY-118` | 🎯 To Do | `STORY-117` |
 | `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-118` | 🎯 To Do | `TASK-1172` |

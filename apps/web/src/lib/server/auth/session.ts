@@ -1,7 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { NextResponse } from 'next/server';
 import { getWebServices } from '../services';
 import { needsPasskeyCheck, stepUpState, type StepUpState } from './passkey-policy';
@@ -96,4 +96,21 @@ export async function requireSession(returnTo: string): Promise<ActiveSession> {
  */
 export async function requireStepUp(session: ActiveSession): Promise<StepUpState> {
   return stepUpState(session, await getPasskeyCount(session.userId), Date.now());
+}
+
+/**
+ * Owner console guard: only `BOT_OWNER_ID` users, only with a passkey, and only within five
+ * minutes of a passkey check. Other users get a 404; owners are sent to add a passkey or to
+ * the passkey check, then back to `returnTo`.
+ */
+export async function requireOwner(returnTo: string): Promise<ActiveSession> {
+  const session = await requireSession(returnTo);
+  const { config } = await getWebServices();
+  if (!config.BOT_OWNER_ID.includes(session.userId)) notFound();
+  const state = await requireStepUp(session);
+  if (state === 'passkey-required') redirect('/account/security');
+  if (state === 'passkey-check-required') {
+    redirect(`/verify?returnTo=${encodeURIComponent(returnTo)}`);
+  }
+  return session;
 }

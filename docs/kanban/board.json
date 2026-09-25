@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-1174",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -920,7 +920,7 @@
       "epic": "EPIC-011",
       "title": "Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard",
       "points": 5,
-      "status": "TODO",
+      "status": "REVIEW",
       "requires": [
         "STORY-111"
       ],
@@ -2762,7 +2762,7 @@
       "parent": "STORY-117",
       "title": "BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & ririko passkeys:reset Recovery CLI",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": [
         "TASK-1171"
       ],
