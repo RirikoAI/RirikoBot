@@ -8,15 +8,14 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| | | | | |
+| `STORY-114` | Story | Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages | 8 | `EPIC-011` |
 
 ---
 
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | `EPIC-011` | [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) |
-| `BUG-0020` | Bug | Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors | 2 | `STORY-117` | [BUG-0020.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0020.md) |
+| | | | | | |
 
 ---
 
@@ -28,7 +27,7 @@
 ## 🎯 To Do (Groomed & Estimated)
 Ready tickets are listed once, in their epic section at the bottom of the board.
 
-- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 62): see **Groomed Stories & Tasks for EPIC-011**
+- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 75): see **Groomed Stories & Tasks for EPIC-011**
 - `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
 
 ---
@@ -41,6 +40,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0020` | Bug | Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors | 2 | `STORY-117` | [BUG-0020.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0020.md) |
 | `BUG-0019` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | `STORY-132` | [BUG-0019.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0019.md) |
 | `CHORE-1321` | Chore | CLI Command to Configure Image Generation Providers & Keys (image-configure) | 2 | — | [CHORE-1321.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1321.md) |
 | `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | `EPIC-004` | [STORY-161.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-161.md) |
@@ -229,7 +229,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ✅ Done · [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) | `EPIC-002`, `EPIC-003` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-011 (Web Dashboard)
-> Groomed 2026-09-24, re-groomed 2026-09-25. Children total 62 pts (STORY-119 parked in the backlog, not counted). Delivery order: STORY-110, CHORE-1101, STORY-111, STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112 (security hardening first because owner-console and step-up writes depend on it). Pages expose only settings the bot actually reads (no placeholder UI).
+> Groomed 2026-09-24, re-groomed 2026-09-25. Children total 75 pts (STORY-119 parked in the backlog, not counted). Delivery order: STORY-110, CHORE-1101, STORY-111, STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112 (security hardening first because owner-console and step-up writes depend on it). Pages expose only settings the bot actually reads (no placeholder UI). STORY-114 was re-groomed on 2026-09-25 after an audit of the bot: Command Overrides moved to STORY-163 (nothing read `command_settings`), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164; both follow STORY-114.
 
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
@@ -242,10 +242,17 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1111` | Task | Shared Zod Guild Config Schemas in @ririko/core, GuildConfigService & audit_logs Field-Diff Writer | 3 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `STORY-110`, `CHORE-1101` |
 | `TASK-1112` | Task | Dashboard Shell: Guild Layout & Module Nav, Channel/Role Pickers, Server Action Form Kit & General Tab | 3 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `TASK-1111` |
 | `TASK-1113` | Task | `ririko guild:config <guild_id> [key] [value]` CLI Parity (get, set, list) on the Same Schemas & Service | 2 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `TASK-1111` |
-| `STORY-114` | Story | Moderation, AutoMod, Logging, Command Overrides, Reaction Roles & Auto Voice Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-117` |
-| `TASK-1141` | Task | Moderation Page (Warning Escalation Policy Builder) & AutoMod Page (Toggles & Thresholds) | 3 | `STORY-114` | 🎯 To Do | `STORY-111` |
-| `TASK-1142` | Task | Logging Channel Bindings & Command Overrides Page (command_settings Enable/Disable, Allowed/Blocked Roles, Cooldowns) | 2 | `STORY-114` | 🎯 To Do | `TASK-1141` |
-| `TASK-1143` | Task | Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages | 3 | `STORY-114` | 🎯 To Do | `TASK-1142` |
+| `STORY-114` | Story | Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages | 8 | `EPIC-011` | ⚡ In Progress | `STORY-111`, `STORY-117` |
+| `TASK-1141` | Task | Typed Settings & Step-Up Settings Forms (Toggle, Number, Role/Channel Lists, Row Editor), CLI Typed Values & Logging Page (Log Channel, Case Log Wiring) | 3 | `STORY-114` | 🎯 To Do | `STORY-111`, `STORY-117` |
+| `TASK-1142` | Task | Moderation Escalation Policy Builder (guild_settings.escalation_steps, Step-Up) & AutoMod Page (Per-Rule Toggle, Action, Limit, Exemptions) with Real AutoMod Actions | 5 | `STORY-114` | 🎯 To Do | `TASK-1141` |
+| `TASK-1143` | Task | Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages | 3 | `STORY-114` | ❌ Abandoned (re-groomed into `STORY-164` before work started) | `TASK-1142` |
+| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | `EPIC-011` | 🎯 To Do | `STORY-114` |
+| `TASK-1631` | Task | CommandSettingsRepository, Web-Readable Command Catalog & Override Middleware (Guild/Channel Precedence, Allowed/Blocked Roles, Cached with guild:configChanged) | 3 | `STORY-163` | 🎯 To Do | `STORY-114` |
+| `TASK-1632` | Task | Command Overrides Page & guild:config Keys | 2 | `STORY-163` | 🎯 To Do | `TASK-1631` |
+| `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-114` |
+| `TASK-1641` | Task | Guild Resources (Voice Channels, Role Positions & Bot Top Role, Boost Tier) & Auto Roles and Auto Voice Pages | 3 | `STORY-164` | 🎯 To Do | `STORY-114` |
+| `TASK-1642` | Task | Reaction Role Message Builder: Publish Buttons & Select Menus via Bot REST (Step-Up, Audit) | 3 | `STORY-164` | 🎯 To Do | `TASK-1641` |
+| `TASK-1643` | Task | Edit & Remove Reaction Role Bindings (Strip Removed Components from the Message) | 2 | `STORY-164` | 🎯 To Do | `TASK-1642` |
 | `STORY-115` | Story | Economy & Banking, XP & Ranking, Games & Giveaways Pages | 5 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-117` |
 | `TASK-1151` | Task | Economy & Banking Page (Rewards, Interest, Item Shop Manager) & XP & Ranking Page (Multipliers, Voice XP, Level-Up Channel) | 3 | `STORY-115` | 🎯 To Do | `STORY-111` |
 | `TASK-1152` | Task | Games Page (Enable/Disable, Wager Limits, Cooldowns) & Giveaways Page (Active List, End, Reroll, History) | 2 | `STORY-115` | 🎯 To Do | `TASK-1151` |
@@ -256,7 +263,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | `EPIC-011` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `STORY-111` |
 | `TASK-1171` | Task | WebAuthn Passkeys: web_passkeys Table, Security Page (Add/Remove), Sign-In Gate for Enrolled Users & requireStepUp | 3 | `STORY-117` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `STORY-111` |
 | `TASK-1174` | Task | BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & `ririko passkeys:reset` Recovery CLI | 2 | `STORY-117` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `TASK-1171` |
-| `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | `EPIC-011` | 🔍 Review · [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) | `STORY-117` |
+| `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | `EPIC-011` | ✅ Done · [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) | `STORY-117` |
 | `TASK-1172` | Task | Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel | 2 | `STORY-118` | ✅ Done · [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) | `STORY-117` |
 | `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-118` | ✅ Done · [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) | `TASK-1172` |
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | `EPIC-011` | 📥 Backlog (estimate provisional) | `STORY-118` |

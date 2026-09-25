@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "STORY-114",
   "epics": [
     {
       "id": "EPIC-000",
@@ -182,7 +182,7 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164."
     },
     {
       "id": "EPIC-012",
@@ -878,15 +878,15 @@
     {
       "id": "STORY-114",
       "epic": "EPIC-011",
-      "title": "Moderation, AutoMod, Logging, Command Overrides, Reaction Roles & Auto Voice Pages",
+      "title": "Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages",
       "points": 8,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "STORY-111",
         "STORY-117"
       ],
       "blocks": [],
-      "description": "Module pages for moderation and community tooling (dashboard.md sections 3, 4, 13, 14, 18, 19), built on the STORY-111 form kit and GuildConfigService."
+      "description": "Module pages for Logging, Moderation and AutoMod (dashboard.md section 4, items 3, 4 and 18), built on the STORY-111 form kit and GuildConfigService. Re-groomed 2026-09-25 after an audit of the bot: the escalation policy was stored in moderation_rules.exempt_roles and only a test wrote it, AutoMod TIMEOUT only recorded a case while KICK and BAN did nothing and WARN skipped escalation, and moderation case logs were never posted. This story adds typed settings (flags, numbers, ID lists, JSON rows) with CLI parity, passkey step-up in settings forms, moves the escalation policy to guild_settings.escalation_steps, makes every AutoMod action real, and starts the moderation case log. Command Overrides moved to STORY-163; Reaction Roles, Auto Roles and Auto Voice moved to STORY-164."
     },
     {
       "id": "STORY-115",
@@ -938,7 +938,7 @@
       "epic": "EPIC-011",
       "title": "Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-117"
       ],
@@ -958,6 +958,30 @@
       ],
       "blocks": [],
       "description": "Optional enhancement from ADR-013 decision 4, parked 2026-09-25. Where the browser supports DBSC, bind the dashboard session to a TPM-held key and issue short-lived cookies that must be refreshed with a signature, so a cookie copied by malware stops working within minutes. Estimate is provisional: confirm current browser and platform support before grooming."
+    },
+    {
+      "id": "STORY-163",
+      "epic": "EPIC-011",
+      "title": "Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles)",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-114"
+      ],
+      "blocks": [],
+      "description": "Split from STORY-114 on 2026-09-25. Nothing in the bot reads command_settings today: there is no repository, the command router runs an empty middleware pipeline, and even base cooldowns are not enforced. Build the engine first (repository, a command catalog the web can read, an override middleware with a guild:configChanged-invalidated cache and an exempt list), then the dashboard page and CLI keys. Whether base cooldowns and cooldown overrides are enforced is decided when the story starts."
+    },
+    {
+      "id": "STORY-164",
+      "epic": "EPIC-011",
+      "title": "Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages",
+      "points": 8,
+      "status": "TODO",
+      "requires": [
+        "STORY-114"
+      ],
+      "blocks": [],
+      "description": "Split from STORY-114 on 2026-09-25 (dashboard.md section 4, items 13 and 14, plus Auto Roles). The bot only attaches emoji or button bindings to existing messages; nothing builds select menus or publishes new messages. Publishing goes through the web bot-token REST client and needs a fresh passkey check. Role pickers mirror the bot-side hierarchy check (bot top role above the target, no managed roles or @everyone). Auto Voice must warn that the bot deletes empty voice channels in a hub's category."
     },
     {
       "id": "STORY-120",
@@ -2639,42 +2663,107 @@
     {
       "id": "TASK-1141",
       "parent": "STORY-114",
-      "title": "Moderation Page (Warning Escalation Policy Builder) & AutoMod Page (Toggles & Thresholds)",
+      "title": "Typed Settings & Step-Up Settings Forms (Toggle, Number, Role/Channel Lists, Row Editor), CLI Typed Values & Logging Page (Log Channel, Case Log Wiring)",
       "points": 3,
       "status": "TODO",
       "requires": [
-        "STORY-111"
+        "STORY-111",
+        "STORY-117"
       ],
       "blocks": [
         "TASK-1142"
       ],
-      "description": "Escalation policy builder over moderation_rules (warn count -> action and duration) and AutoMod toggles and thresholds (invite spam, phishing, caps, mention limits) using the existing moderation and automod services."
+      "description": "Shared schema helpers in @ririko/core accept typed values from the dashboard and strings from ririko guild:config (flags, bounded integers, snowflake lists, JSON rows). saveGuildSettings takes typed patches and an optional passkey step-up; the settings form offers \"Confirm with passkey\" and resubmits. New form fields: toggle, number, role and channel lists, row editor. Logging page binds guild_settings.log_channel_id, and the bot starts ModerationLogService so moderation cases are posted there."
     },
     {
       "id": "TASK-1142",
       "parent": "STORY-114",
-      "title": "Logging Channel Bindings & Command Overrides Page (command_settings Enable/Disable, Allowed/Blocked Roles, Cooldowns)",
-      "points": 2,
+      "title": "Moderation Escalation Policy Builder (guild_settings.escalation_steps, Step-Up) & AutoMod Page (Per-Rule Toggle, Action, Limit, Exemptions) with Real AutoMod Actions",
+      "points": 5,
       "status": "TODO",
       "requires": [
         "TASK-1141"
       ],
-      "blocks": [
-        "TASK-1143"
-      ],
-      "description": "Logging page binds the log channel(s) the bot actually emits to. Command overrides page lists the registered command catalog and edits command_settings per guild and optional channel."
+      "blocks": [],
+      "description": "Escalation steps move from the moderation_rules.exempt_roles hack to a nullable guild_settings.escalation_steps JSON column (null = default policy) with one shared Zod schema; the page needs a fresh passkey check. AutoMod rules are edited per rule (enabled, action, mention and burst limits, exempt roles and channels) through moderation_rules, and the bot drops its 5-minute rule cache on guild:configChanged. AutoMod WARN now goes through the escalation service and TIMEOUT, KICK and BAN run through ModerationActionService with the bot as the acting member. /automod enable|disable inserts the code defaults instead of the repository defaults."
     },
     {
       "id": "TASK-1143",
       "parent": "STORY-114",
       "title": "Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages",
       "points": 3,
-      "status": "TODO",
+      "status": "ABANDONED",
       "requires": [
         "TASK-1142"
       ],
       "blocks": [],
-      "description": "Visual reaction-role builder (buttons and select menus) that publishes or updates the message through the existing reaction role service; auto role and join-to-create auto voice configuration (user limit, bitrate). Role hierarchy checks mirror the bot-side validation."
+      "description": "Re-groomed into STORY-164 on 2026-09-25 before any work started (no effort spent). The bot had no select-menu or new-message reaction-role builder, so the scope grew past this task; Auto Roles and Auto Voice moved with it because they share the role hierarchy check and guild resource lookups."
+    },
+    {
+      "id": "TASK-1631",
+      "parent": "STORY-163",
+      "title": "CommandSettingsRepository, Web-Readable Command Catalog & Override Middleware (Guild/Channel Precedence, Allowed/Blocked Roles, Cached with guild:configChanged)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-114"
+      ],
+      "blocks": [
+        "TASK-1632"
+      ],
+      "description": "Dual-dialect repository for command_settings, the registered command catalog made readable by the web process (for example synced into the unused commands table at startup), and a router middleware that applies channel rows over guild rows, allowed and blocked roles and enable/disable, with commands that can never be disabled."
+    },
+    {
+      "id": "TASK-1632",
+      "parent": "STORY-163",
+      "title": "Command Overrides Page & guild:config Keys",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1631"
+      ],
+      "blocks": [],
+      "description": "Dashboard page listing the catalog by category with per-guild and per-channel overrides, written through GuildConfigService with audit and change notices, and matching CLI keys."
+    },
+    {
+      "id": "TASK-1641",
+      "parent": "STORY-164",
+      "title": "Guild Resources (Voice Channels, Role Positions & Bot Top Role, Boost Tier) & Auto Roles and Auto Voice Pages",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-114"
+      ],
+      "blocks": [
+        "TASK-1642"
+      ],
+      "description": "GuildResourceDirectory gains voice channels, role positions, the bot member top role and the guild premium tier. Auto Roles page (enabled, human and bot roles, verification role) and Auto Voice page (hubs: voice channel, name template, user limit, bitrate capped by boost tier) through GuildConfigService stores and CLI keys."
+    },
+    {
+      "id": "TASK-1642",
+      "parent": "STORY-164",
+      "title": "Reaction Role Message Builder: Publish Buttons & Select Menus via Bot REST (Step-Up, Audit)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1641"
+      ],
+      "blocks": [
+        "TASK-1643"
+      ],
+      "description": "Compose a message with buttons (up to 25, 5 per row) or a select menu group, post it or edit a bot-authored message through the web bot-token REST client, and create the bindings in one transaction; needs a fresh passkey check and writes audit_logs."
+    },
+    {
+      "id": "TASK-1643",
+      "parent": "STORY-164",
+      "title": "Edit & Remove Reaction Role Bindings (Strip Removed Components from the Message)",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1642"
+      ],
+      "blocks": [],
+      "description": "List, edit and remove bindings; removing a binding also removes its button or option from the message (today /reaction-roles remove leaves the button behind)."
     },
     {
       "id": "TASK-1151",
@@ -3503,7 +3592,7 @@
       "id": "BUG-0020",
       "title": "Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors",
       "points": 2,
-      "status": "REVIEW",
+      "status": "DONE",
       "parent": "STORY-117",
       "requires": [
         "STORY-117"
