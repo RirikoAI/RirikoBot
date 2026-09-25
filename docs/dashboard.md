@@ -72,11 +72,17 @@ Server Action
  ├── requireGuildAccess(guildId) or owner guard
  ├── passkey step-up check (sensitive writes only)
  ├── Zod parse with the shared schema from @ririko/core
- └── GuildConfigService (packages/services)
+ └── GuildConfigService (packages/services), in one transaction
       ├── write through the existing repositories
-      ├── invalidate the GuildSettingsService cache
+      ├── bump guild_config_versions (guild, module)
       └── write audit_logs (actor, IP, user agent, before/after field diffs)
+
+Bot process
+ └── GuildConfigWatcher polls guild_config_versions every 5 seconds
+      └── emits guild:configChanged on the EventBus; each service evicts its cached settings
 ```
+
+The dashboard and CLI run in separate processes from the bot, so they cannot clear the bot's in-memory caches directly (CHORE-1101). The watcher compares versions over a 60-second overlap window, so a second write in the same millisecond, or a write committed after a newer one, is still picked up. A module whose bot-side service caches settings must subscribe to `guild:configChanged` when its dashboard page is added.
 
 ---
 
