@@ -6,6 +6,8 @@ node_modules/
 # Build outputs
 dist/
 out-tsc/
+.next/
+next-env.d.ts
 *.tsbuildinfo
 
 # Logs & Temp
