@@ -8,7 +8,7 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| | | | | |
+| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | `EPIC-011` |
 
 ---
 
@@ -272,7 +272,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1121` | Task | TCG Settings: Guild Drop Settings, TCG Manager Role & Owner-Gated Global Rules (Market Tax, Listing Expiry, Energy Governance) | 3 | `STORY-112` | 🎯 To Do | `STORY-111` |
 | `TASK-1122` | Task | Owner-Only Dungeon Season Editor, Difficulty Curve Visualizer & Boss Enrage/Shield/Loot Configurator | 3 | `STORY-112` | 🎯 To Do | `TASK-1121` |
 | `TASK-1123` | Task | Card Album Viewer (CardSynthesizer Renders), Shop Catalog Manager & Achievement Manager | 2 | `STORY-112` | 🎯 To Do | `TASK-1122` |
-| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | `EPIC-011` | ⚡ In Progress | `STORY-111` |
 | `TASK-1131` | Task | Command Usage Daily Counters (Dual-Dialect Table & Router Hook), Bot Status Heartbeat & Overview Tab | 3 | `STORY-113` | 🎯 To Do | `STORY-111` |
 | `TASK-1132` | Task | Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer | 2 | `STORY-113` | 🎯 To Do | `TASK-1131` |
 
