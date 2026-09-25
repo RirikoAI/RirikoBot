@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "STORY-114",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -880,7 +880,7 @@
       "epic": "EPIC-011",
       "title": "Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages",
       "points": 8,
-      "status": "IN_PROGRESS",
+      "status": "REVIEW",
       "requires": [
         "STORY-111",
         "STORY-117"
@@ -2665,7 +2665,7 @@
       "parent": "STORY-114",
       "title": "Typed Settings & Step-Up Settings Forms (Toggle, Number, Role/Channel Lists, Row Editor), CLI Typed Values & Logging Page (Log Channel, Case Log Wiring)",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111",
         "STORY-117"
@@ -2680,7 +2680,7 @@
       "parent": "STORY-114",
       "title": "Moderation Escalation Policy Builder (guild_settings.escalation_steps, Step-Up) & AutoMod Page (Per-Rule Toggle, Action, Limit, Exemptions) with Real AutoMod Actions",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1141"
       ],
