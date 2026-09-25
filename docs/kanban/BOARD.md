@@ -13,9 +13,7 @@
 ---
 
 ## 🔍 In Review
-| ID | Type | Title | Pts | Epic / Parent | Handover Note |
-|---|---|---|---|---|---|
-| `STORY-111` | Story | Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity | 8 | `EPIC-011` | [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) |
+*No tickets currently in review.*
 
 ---
 
@@ -27,7 +25,7 @@
 ## 🎯 To Do (Groomed & Estimated)
 Ready tickets are listed once, in their epic section at the bottom of the board.
 
-- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 60): see **Groomed Stories & Tasks for EPIC-011**
+- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 62): see **Groomed Stories & Tasks for EPIC-011**
 - `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
 
 ---
@@ -228,7 +226,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ✅ Done · [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) | `EPIC-002`, `EPIC-003` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-011 (Web Dashboard)
-> Groomed 2026-09-24, re-groomed 2026-09-25. Children total 60 pts. Delivery order: STORY-110, CHORE-1101, STORY-111, STORY-117, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112 (security hardening first because owner-console and step-up writes depend on it). Pages expose only settings the bot actually reads (no placeholder UI).
+> Groomed 2026-09-24, re-groomed 2026-09-25. Children total 62 pts (STORY-119 parked in the backlog, not counted). Delivery order: STORY-110, CHORE-1101, STORY-111, STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112 (security hardening first because owner-console and step-up writes depend on it). Pages expose only settings the bot actually reads (no placeholder UI).
 
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
@@ -237,26 +235,29 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1102` | Task | Discord OAuth2 (identify, guilds) Login/Callback/Logout & Revocable Server-Side Sessions (Hashed Session IDs, Encrypted Discord Tokens) | 3 | `STORY-110` | ✅ Done · [STORY-110.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-110.md) | `TASK-1101` |
 | `TASK-1103` | Task | Guild Discovery & requireGuildAccess Guard (ManageGuild/Administrator, Bot Membership, Per-Request Re-Verification) & Server Selector | 2 | `STORY-110` | ✅ Done · [STORY-110.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-110.md) | `TASK-1102` |
 | `CHORE-1101` | Chore | Cross-Process Guild Config Change Feed (guild_config_versions Table, Bot Watcher & Cache Invalidation Events) | 2 | `EPIC-011` | ✅ Done · [CHORE-1101.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/CHORE-1101.md) | `STORY-110` |
-| `STORY-111` | Story | Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity | 8 | `EPIC-011` | 🔍 Review · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `STORY-110` |
+| `STORY-111` | Story | Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity | 8 | `EPIC-011` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `STORY-110` |
 | `TASK-1111` | Task | Shared Zod Guild Config Schemas in @ririko/core, GuildConfigService & audit_logs Field-Diff Writer | 3 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `STORY-110`, `CHORE-1101` |
 | `TASK-1112` | Task | Dashboard Shell: Guild Layout & Module Nav, Channel/Role Pickers, Server Action Form Kit & General Tab | 3 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `TASK-1111` |
 | `TASK-1113` | Task | `ririko guild:config <guild_id> [key] [value]` CLI Parity (get, set, list) on the Same Schemas & Service | 2 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `TASK-1111` |
-| `STORY-114` | Story | Moderation, AutoMod, Logging, Command Overrides, Reaction Roles & Auto Voice Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `STORY-114` | Story | Moderation, AutoMod, Logging, Command Overrides, Reaction Roles & Auto Voice Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-117` |
 | `TASK-1141` | Task | Moderation Page (Warning Escalation Policy Builder) & AutoMod Page (Toggles & Thresholds) | 3 | `STORY-114` | 🎯 To Do | `STORY-111` |
 | `TASK-1142` | Task | Logging Channel Bindings & Command Overrides Page (command_settings Enable/Disable, Allowed/Blocked Roles, Cooldowns) | 2 | `STORY-114` | 🎯 To Do | `TASK-1141` |
 | `TASK-1143` | Task | Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages | 3 | `STORY-114` | 🎯 To Do | `TASK-1142` |
-| `STORY-115` | Story | Economy & Banking, XP & Ranking, Games & Giveaways Pages | 5 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `STORY-115` | Story | Economy & Banking, XP & Ranking, Games & Giveaways Pages | 5 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-117` |
 | `TASK-1151` | Task | Economy & Banking Page (Rewards, Interest, Item Shop Manager) & XP & Ranking Page (Multipliers, Voice XP, Level-Up Channel) | 3 | `STORY-115` | 🎯 To Do | `STORY-111` |
 | `TASK-1152` | Task | Games Page (Enable/Disable, Wager Limits, Cooldowns) & Giveaways Page (Active List, End, Reroll, History) | 2 | `STORY-115` | 🎯 To Do | `TASK-1151` |
-| `STORY-116` | Story | Music, AI Chatbot, Image Generation, Stream Alerts, Free Games, Welcome & Integrations Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-133` |
+| `STORY-116` | Story | Music, AI Chatbot, Image Generation, Stream Alerts, Free Games, Welcome & Integrations Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-133`, `STORY-117` |
 | `TASK-1161` | Task | Music Page (Volume, DJ Role, Music Channel), AI Chatbot Page (Persona, Provider/Model, Tool Toggles) & Image Generation Page (Provider, Quotas, Presets) | 3 | `STORY-116` | 🎯 To Do | `STORY-111` |
 | `TASK-1162` | Task | Stream Alerts Page (Streamer Subscriptions, Templates, Mention Roles) & Free Games Page (Channels, Ping Roles) | 2 | `STORY-116` | 🎯 To Do | `TASK-1161` |
 | `TASK-1163` | Task | Welcome & Farewell Live Canvas Preview Editor (SSRF-Safe Background Upload) & Integrations Status Page (Zero Secret Exposure) | 3 | `STORY-116` | 🎯 To Do | `TASK-1162`, `STORY-133` |
-| `STORY-117` | Story | Dashboard Security Hardening: Passkey Step-Up, Session Management & Alerts, CSP & Authorization Coverage | 8 | `EPIC-011` | 🎯 To Do | `STORY-111` |
-| `TASK-1171` | Task | WebAuthn Passkey Enrollment & Step-Up Re-Verification for Sensitive Writes (Mandatory for Bot-Owner Console) | 3 | `STORY-117` | 🎯 To Do | `STORY-111` |
-| `TASK-1172` | Task | Active Sessions Page (Revoke, Sign Out Everywhere), New Sign-In DM Alerts & Dashboard Change Notices to the Guild Log Channel | 2 | `STORY-117` | 🎯 To Do | `TASK-1171` |
-| `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-117` | 🎯 To Do | `TASK-1172` |
-| `STORY-112` | Story | Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer | 8 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | `EPIC-011` | 🎯 To Do | `STORY-111` |
+| `TASK-1171` | Task | WebAuthn Passkeys: web_passkeys Table, Security Page (Add/Remove), Sign-In Gate for Enrolled Users & requireStepUp | 3 | `STORY-117` | 🎯 To Do | `STORY-111` |
+| `TASK-1174` | Task | BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & `ririko passkeys:reset` Recovery CLI | 2 | `STORY-117` | 🎯 To Do | `TASK-1171` |
+| `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | `EPIC-011` | 🎯 To Do | `STORY-117` |
+| `TASK-1172` | Task | Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel | 2 | `STORY-118` | 🎯 To Do | `STORY-117` |
+| `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-118` | 🎯 To Do | `TASK-1172` |
+| `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | `EPIC-011` | 📥 Backlog (estimate provisional) | `STORY-118` |
+| `STORY-112` | Story | Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-117` |
 | `TASK-1121` | Task | TCG Settings: Guild Drop Settings, TCG Manager Role & Owner-Gated Global Rules (Market Tax, Listing Expiry, Energy Governance) | 3 | `STORY-112` | 🎯 To Do | `STORY-111` |
 | `TASK-1122` | Task | Owner-Only Dungeon Season Editor, Difficulty Curve Visualizer & Boss Enrage/Shield/Loot Configurator | 3 | `STORY-112` | 🎯 To Do | `TASK-1121` |
 | `TASK-1123` | Task | Card Album Viewer (CardSynthesizer Renders), Shop Catalog Manager & Achievement Manager | 2 | `STORY-112` | 🎯 To Do | `TASK-1122` |

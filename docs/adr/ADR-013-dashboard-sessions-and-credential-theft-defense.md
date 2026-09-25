@@ -1,7 +1,7 @@
 # ADR-013: Dashboard Sessions and Credential Theft Defense
 
 ## Status
-Accepted (2026-09-24, EPIC-011 grooming). Amends decision 2 of [ADR-008](ADR-008-web-dashboard-architecture.md).
+Accepted (2026-09-24, EPIC-011 grooming). Amends decision 2 of [ADR-008](ADR-008-web-dashboard-architecture.md). Revisited 2026-09-25 before implementation; see [Revision 2026-09-25](#revision-2026-09-25).
 
 ## Context
 ADR-008 left the dashboard session format open ("`iron-session` or standard JWT"). During EPIC-011 grooming, two questions were raised:
@@ -52,5 +52,23 @@ No design can make a stolen credential impossible. The goal is that a stolen cre
 - Passkey enrollment adds friction for bot owners and for users who opt in.
 - A WebAuthn library dependency must be evaluated in [dependency-evaluation.md](../dependency-evaluation.md).
 
+## Revision 2026-09-25
+Questions raised before STORY-117 started, and the answers:
+
+1. **Can users turn passkeys off?** Yes, by removing them. A setting that keeps passkeys but stops asking for them would be an unprotected downgrade, so there is none.
+   - Removing a passkey needs a passkey check newer than 5 minutes, so a cookie thief or a Discord account thief cannot remove it.
+   - Removal writes an audit entry and sends the user a DM.
+   - Users without a passkey cannot perform sensitive writes at all; they are not merely waved through.
+   - Bot owners must always have one.
+2. **Recovery** from lost authenticators is `ririko passkeys:reset <user_id>`, run by an operator with shell access. Recovery codes were not added: they would be the weakest way in.
+3. **What is stored in the browser.**
+   - The passkey private key stays in the authenticator (platform keychain, TPM or security key). Neither page scripts nor the server can read it; the server stores only the public key.
+   - Cookies hold only random values (session, device) or a short-lived vault-sealed login state.
+   - Nothing is stored in `localStorage` or IndexedDB.
+4. **JWE re-evaluated and rejected again.** Encrypting the cookie protects what it contains, not who presents it. A stolen cookie is replayed unchanged and the server decrypts it as usual, so JWE makes it no less useful to a thief, while making revocation impossible without a server-side list.
+   - What limits a stolen cookie is binding the session to something the thief lacks: passkey checks for sign-in and sensitive writes (now), and Chrome DBSC where supported (parked as STORY-119).
+5. **Risk-based re-checks on IP or user-agent changes: not adopted.** Infostealer malware copies the device cookie together with the session cookie, IP binding misfires for mobile and VPN users, and user agents are trivially copied. New-device DMs, the sessions page and short expiry cover detection instead.
+6. **Device-bound (non-synced) passkeys are not required for owners.** Lockout risk outweighs the gain. The synced or device-only flags are recorded and shown so owners can choose a hardware key themselves.
+
 ## Implementation
-Tracked in EPIC-011: TASK-1102 (sessions), TASK-1103 (guild authorization guard), and STORY-117 (TASK-1171 passkeys, TASK-1172 session management and alerts, TASK-1173 CSP, taint guards and authorization coverage test). See [docs/dashboard.md](../dashboard.md).
+Tracked in EPIC-011: TASK-1102 (sessions), TASK-1103 (guild authorization guard), STORY-117 (TASK-1171 passkeys, sign-in gate and step-up; TASK-1174 owner guard and recovery CLI), STORY-118 (TASK-1172 session management and alerts; TASK-1173 CSP, taint guards, rate limits and the authorization coverage test) and, parked, STORY-119 (DBSC). See [docs/dashboard.md](../dashboard.md).
