@@ -1,17 +1,10 @@
 import { EventEmitter } from 'node:events';
-import {
-  LavalinkManager,
-  type Player,
-  EQList,
-} from 'lavalink-client';
+import { LavalinkManager, type Player, EQList } from 'lavalink-client';
 import type { AudioFilterName, LoopMode, QueueState, QueuedTrack } from '../queue/types.js';
 import type { PlayOptions, PlayResult } from '../player/types.js';
 import type { LavalinkClientOptions } from './types.js';
 
-export function lavalinkTrackToQueuedTrack(
-  track: any,
-  requester?: any,
-): QueuedTrack {
+export function lavalinkTrackToQueuedTrack(track: any, requester?: any): QueuedTrack {
   const info = track?.info || {};
   const pluginInfo = track?.pluginInfo || {};
   const req = requester || track?.userData?.requester;
@@ -22,8 +15,7 @@ export function lavalinkTrackToQueuedTrack(
     artist: info.author || 'Unknown Artist',
     durationSeconds: Math.max(0, Math.round((info.duration || 0) / 1000)),
     url: info.uri || `https://www.youtube.com/watch?v=${info.identifier}`,
-    thumbnailUrl:
-      info.artworkUrl || `https://img.youtube.com/vi/${info.identifier}/hqdefault.jpg`,
+    thumbnailUrl: info.artworkUrl || `https://img.youtube.com/vi/${info.identifier}/hqdefault.jpg`,
     source: (info.sourceName as any) || 'lavalink',
     requestedBy: {
       id: req?.id ? String(req.id) : 'unknown',
@@ -84,7 +76,10 @@ export class LavalinkQueueAdapter extends EventEmitter {
 
   get currentTrack(): QueuedTrack | null {
     if (!this.player.queue.current) return null;
-    return lavalinkTrackToQueuedTrack(this.player.queue.current, this.player.queue.current.requester);
+    return lavalinkTrackToQueuedTrack(
+      this.player.queue.current,
+      this.player.queue.current.requester,
+    );
   }
 
   get tracks(): readonly QueuedTrack[] {
@@ -119,9 +114,16 @@ export class LavalinkQueueAdapter extends EventEmitter {
   }
 
   get totalDurationSeconds(): number {
-    const queueSum = this.player.queue.tracks.reduce((acc, t) => acc + Math.round((t.info.duration || 0) / 1000), 0);
+    const queueSum = this.player.queue.tracks.reduce(
+      (acc, t) => acc + Math.round((t.info.duration || 0) / 1000),
+      0,
+    );
     const currentRemaining = this.player.queue.current
-      ? Math.max(0, Math.round((this.player.queue.current.info.duration || 0) / 1000) - this.playbackPositionSeconds)
+      ? Math.max(
+          0,
+          Math.round((this.player.queue.current.info.duration || 0) / 1000) -
+            this.playbackPositionSeconds,
+        )
       : 0;
     return queueSum + currentRemaining;
   }
@@ -139,16 +141,18 @@ export class LavalinkQueueAdapter extends EventEmitter {
       }
       return true;
     }
-    void this.player.node.search({ query: track.url || track.title }, track.requestedBy).then((res) => {
-      if (res?.tracks && res.tracks.length > 0) {
-        const t = res.tracks[0]!;
-        (t as any).requester = track.requestedBy;
-        this.player.queue.add(t);
-        if (!this.player.playing && !this.player.paused) {
-          void this.player.play();
+    void this.player.node
+      .search({ query: track.url || track.title }, track.requestedBy)
+      .then((res) => {
+        if (res?.tracks && res.tracks.length > 0) {
+          const t = res.tracks[0]!;
+          (t as any).requester = track.requestedBy;
+          this.player.queue.add(t);
+          if (!this.player.playing && !this.player.paused) {
+            void this.player.play();
+          }
         }
-      }
-    });
+      });
     return true;
   }
 
@@ -184,7 +188,6 @@ export class LavalinkQueueAdapter extends EventEmitter {
     this.player.queue.shuffle();
   }
 }
-
 
 export class LavalinkService extends EventEmitter {
   readonly manager: LavalinkManager;
@@ -240,18 +243,26 @@ export class LavalinkService extends EventEmitter {
   private wireManagerEvents(): void {
     this.manager.nodeManager.on('connect', (node) => {
       this.isConnectedNode = true;
-      console.log(`[LavalinkService] Connected to Lavalink node: ${node.options.host}:${node.options.port}`);
+      console.log(
+        `[LavalinkService] Connected to Lavalink node: ${node.options.host}:${node.options.port}`,
+      );
       this.emit('nodeConnect', node);
     });
 
     this.manager.nodeManager.on('disconnect', (node, reason) => {
       this.isConnectedNode = false;
-      console.warn(`[LavalinkService] Disconnected from Lavalink node: ${node.options.host}:${node.options.port}. Reason:`, reason);
+      console.warn(
+        `[LavalinkService] Disconnected from Lavalink node: ${node.options.host}:${node.options.port}. Reason:`,
+        reason,
+      );
       this.emit('nodeDisconnect', node, reason);
     });
 
     this.manager.nodeManager.on('error', (node, error) => {
-      console.warn(`[LavalinkService] Lavalink node error: ${node.options.host}:${node.options.port}:`, error.message);
+      console.warn(
+        `[LavalinkService] Lavalink node error: ${node.options.host}:${node.options.port}:`,
+        error.message,
+      );
     });
 
     // Player Event Bridges for Reactive Controller & Commands
@@ -415,7 +426,9 @@ export class LavalinkService extends EventEmitter {
   skip(guildId: string): QueuedTrack | null {
     const player = this.manager.players.get(guildId);
     if (!player) return null;
-    const current = player.queue.current ? lavalinkTrackToQueuedTrack(player.queue.current, player.queue.current.requester) : null;
+    const current = player.queue.current
+      ? lavalinkTrackToQueuedTrack(player.queue.current, player.queue.current.requester)
+      : null;
     void player.skip();
     return current;
   }
@@ -452,7 +465,8 @@ export class LavalinkService extends EventEmitter {
   setLoopMode(guildId: string, mode: LoopMode): boolean {
     const player = this.manager.players.get(guildId);
     if (!player) return false;
-    const oldMode: LoopMode = player.repeatMode === 'track' ? 'TRACK' : (player.repeatMode === 'queue' ? 'QUEUE' : 'OFF');
+    const oldMode: LoopMode =
+      player.repeatMode === 'track' ? 'TRACK' : player.repeatMode === 'queue' ? 'QUEUE' : 'OFF';
     if (mode === 'TRACK') player.setRepeatMode('track');
     else if (mode === 'QUEUE') player.setRepeatMode('queue');
     else player.setRepeatMode('off');

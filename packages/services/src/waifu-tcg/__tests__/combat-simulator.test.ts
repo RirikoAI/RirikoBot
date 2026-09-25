@@ -11,7 +11,7 @@ function createMockCombatant(overrides: Partial<Combatant>): Combatant {
     rarity: overrides.rarity ?? 'MYTHIC',
     level: overrides.level ?? 50,
     maxHealth: overrides.maxHealth ?? 3000,
-    currentHealth: overrides.currentHealth ?? (overrides.maxHealth ?? 3000),
+    currentHealth: overrides.currentHealth ?? overrides.maxHealth ?? 3000,
     attack: overrides.attack ?? 500,
     defense: overrides.defense ?? 200,
     speed: overrides.speed ?? 100,
@@ -61,7 +61,9 @@ describe('CombatSimulator Core (TASK-1021)', () => {
     expect(result.logs.length).toBeGreaterThan(0);
 
     // Verify logs include damage and elemental advantage
-    const damageLogs = result.logs.filter((l) => l.actionType === 'ATTACK' || l.actionType === 'SKILL');
+    const damageLogs = result.logs.filter(
+      (l) => l.actionType === 'ATTACK' || l.actionType === 'SKILL',
+    );
     expect(damageLogs.length).toBeGreaterThan(0);
     expect(damageLogs.some((l) => l.message.includes('1.5x'))).toBe(true);
   });
@@ -84,7 +86,9 @@ describe('CombatSimulator Core (TASK-1021)', () => {
     const result = simulator.simulate([fastCard], [slowCard]);
 
     // First attack log in turn 1 must be from fastCard
-    const firstAttack = result.logs.find((l) => l.actionType === 'ATTACK' || l.actionType === 'SKILL');
+    const firstAttack = result.logs.find(
+      (l) => l.actionType === 'ATTACK' || l.actionType === 'SKILL',
+    );
     expect(firstAttack?.actorId).toBe('fast_card');
   });
 
@@ -100,7 +104,9 @@ describe('CombatSimulator Core (TASK-1021)', () => {
     const simulator = new CombatSimulator({ rng: () => 0.5 });
     const result = simulator.simulate([card], [dummy]);
 
-    const perkLog = result.logs.find((l) => l.actionType === 'PERK' && l.message.includes('Mana Conduit'));
+    const perkLog = result.logs.find(
+      (l) => l.actionType === 'PERK' && l.message.includes('Mana Conduit'),
+    );
     expect(perkLog).toBeDefined();
     // Mana Conduit grants +25 starting MP
     expect(perkLog?.message).toContain('+25 Start MP');
@@ -149,7 +155,9 @@ describe('CombatSimulator Core (TASK-1021)', () => {
     const simulator = new CombatSimulator({ maxTurns: 4, rng: () => 0.5 });
     const result = simulator.simulate([cardCosmic], [targetTank]);
 
-    const cataclysmLogs = result.logs.filter((l) => l.actionType === 'PERK' && l.message.includes('Cosmic Cataclysm'));
+    const cataclysmLogs = result.logs.filter(
+      (l) => l.actionType === 'PERK' && l.message.includes('Cosmic Cataclysm'),
+    );
     expect(cataclysmLogs.length).toBeGreaterThan(0);
     // 200% of 300 ATK = 600 true damage
     expect(cataclysmLogs[0]?.message).toContain('600 true damage');

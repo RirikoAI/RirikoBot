@@ -13,7 +13,6 @@ import { registerImageConfigureCommand } from './commands/image-configure.js';
 import { registerGuildConfigCommand } from './commands/guild-config.js';
 import { registerPasskeysResetCommand } from './commands/passkeys-reset.js';
 
-
 export function loadEnvConfig(customPath?: string): void {
   if (customPath) {
     const resolved = resolve(process.cwd(), customPath);
@@ -27,10 +26,7 @@ export function loadEnvConfig(customPath?: string): void {
     return;
   }
 
-  const candidatePaths = [
-    resolve(process.cwd(), '.env'),
-    resolve(process.cwd(), '../../.env'),
-  ];
+  const candidatePaths = [resolve(process.cwd(), '.env'), resolve(process.cwd(), '../../.env')];
   for (const p of candidatePaths) {
     if (existsSync(p)) {
       try {
@@ -67,7 +63,6 @@ export function createProgram(): Command {
   registerImageConfigureCommand(program);
   registerGuildConfigCommand(program);
   registerPasskeysResetCommand(program);
-
 
   // Global error handler
   program.exitOverride();

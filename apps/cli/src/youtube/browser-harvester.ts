@@ -25,7 +25,7 @@ export interface BrowserHarvesterResult {
 async function launchBrowser(
   browserType: SupportedBrowser,
   isHeaded: boolean,
-  logProgress: (msg: string) => void
+  logProgress: (msg: string) => void,
 ): Promise<{ browser: Browser; browserName: string }> {
   if (browserType === 'firefox') {
     logProgress(`Launching Firefox browser (${isHeaded ? 'interactive window' : 'headless'})...`);
@@ -70,7 +70,7 @@ async function launchBrowser(
  * YouTube cookies, user-agent fingerprint, visitor context, and matching BotGuard Proof of Origin token.
  */
 export async function harvestYouTubeBrowserSession(
-  options: BrowserHarvesterOptions = {}
+  options: BrowserHarvesterOptions = {},
 ): Promise<BrowserHarvesterResult> {
   const isHeaded = Boolean(options.login);
   const browserType: SupportedBrowser = options.browser ?? 'chrome';
@@ -109,11 +109,17 @@ export async function harvestYouTubeBrowserSession(
       logProgress('Navigating to YouTube Sign-In page...');
       await page.goto(
         'https://accounts.google.com/ServiceLogin?service=youtube&continue=https://www.youtube.com/',
-        { waitUntil: 'domcontentloaded' }
+        { waitUntil: 'domcontentloaded' },
       );
 
-      console.log(pc.bold(pc.yellow('\n  🔑 Browser opened. Please sign in to your YouTube/Google account.')));
-      console.log(pc.gray('  Once signed in and redirected to YouTube, return here and press [Enter] to continue...\n'));
+      console.log(
+        pc.bold(pc.yellow('\n  🔑 Browser opened. Please sign in to your YouTube/Google account.')),
+      );
+      console.log(
+        pc.gray(
+          '  Once signed in and redirected to YouTube, return here and press [Enter] to continue...\n',
+        ),
+      );
 
       const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
       await new Promise<void>((resolve) => {
@@ -143,11 +149,11 @@ export async function harvestYouTubeBrowserSession(
       'https://google.com',
     ]);
     const ytCookies = allCookies.filter(
-      (c) => c.domain.includes('youtube.com') || c.domain.includes('.google.com')
+      (c) => c.domain.includes('youtube.com') || c.domain.includes('.google.com'),
     );
     const cookieString = ytCookies.map((c) => `${c.name}=${c.value}`).join('; ');
     const isAuthenticated = ytCookies.some(
-      (c) => c.name === 'LOGIN_INFO' || c.name === '__Secure-3PSID' || c.name === 'SAPISID'
+      (c) => c.name === 'LOGIN_INFO' || c.name === '__Secure-3PSID' || c.name === 'SAPISID',
     );
 
     // Extract visitorData from page runtime ytcfg
@@ -172,7 +178,9 @@ export async function harvestYouTubeBrowserSession(
       );
     });
 
-    logProgress(`Generating BotGuard Proof of Origin (poToken) matched to ${browserName} fingerprint...`);
+    logProgress(
+      `Generating BotGuard Proof of Origin (poToken) matched to ${browserName} fingerprint...`,
+    );
     const tokenResult = await generateYouTubePoToken({
       userAgent,
       timeoutMs: options.timeoutMs ?? 10000,

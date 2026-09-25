@@ -1,10 +1,5 @@
 export type SpeakingStyle =
-  | 'FRIENDLY_ANIME'
-  | 'TSUNDERE'
-  | 'KUUDERE'
-  | 'DANDERE'
-  | 'GENKI'
-  | 'FORMAL';
+  'FRIENDLY_ANIME' | 'TSUNDERE' | 'KUUDERE' | 'DANDERE' | 'GENKI' | 'FORMAL';
 
 export interface SanitizedIdentity {
   username: string;

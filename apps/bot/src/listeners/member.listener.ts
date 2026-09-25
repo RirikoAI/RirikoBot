@@ -1,14 +1,16 @@
-import { AttachmentBuilder, type Client, type GuildMember, type PartialGuildMember } from 'discord.js';
+import {
+  AttachmentBuilder,
+  type Client,
+  type GuildMember,
+  type PartialGuildMember,
+} from 'discord.js';
 import type { BotServices } from '../services.js';
 
 /**
  * Gateway Member Listener: Monitors member join events, evaluates join velocity
  * and suspicious fresh account surges via AntiRaidService, and posts alerts to the staff mod-log channel.
  */
-export function registerMemberListener(
-  client: Client,
-  services: BotServices,
-): void {
+export function registerMemberListener(client: Client, services: BotServices): void {
   client.on('guildMemberAdd', async (member: GuildMember) => {
     try {
       // 1. Evaluate join event in AntiRaidService
@@ -56,9 +58,13 @@ export function registerMemberListener(
       });
 
       // 4. Send Welcome Card
-      const welcomeConfig = await services.welcomerRepo.getWelcomeConfig(member.guild.id).catch(() => null);
+      const welcomeConfig = await services.welcomerRepo
+        .getWelcomeConfig(member.guild.id)
+        .catch(() => null);
       if (welcomeConfig?.isEnabled && welcomeConfig.channelId) {
-        const channel = member.guild.channels.cache.get(welcomeConfig.channelId) ?? await member.guild.channels.fetch(welcomeConfig.channelId).catch(() => null);
+        const channel =
+          member.guild.channels.cache.get(welcomeConfig.channelId) ??
+          (await member.guild.channels.fetch(welcomeConfig.channelId).catch(() => null));
         if (channel && channel.isTextBased() && 'send' in channel) {
           const cardBuf = await services.welcomerService.renderCard({
             userTag: member.user.tag,
@@ -83,14 +89,20 @@ export function registerMemberListener(
 
   client.on('guildMemberRemove', async (member: GuildMember | PartialGuildMember) => {
     try {
-      const farewellConfig = await services.welcomerRepo.getFarewellConfig(member.guild.id).catch(() => null);
+      const farewellConfig = await services.welcomerRepo
+        .getFarewellConfig(member.guild.id)
+        .catch(() => null);
       if (farewellConfig?.isEnabled && farewellConfig.channelId) {
-        const channel = member.guild.channels.cache.get(farewellConfig.channelId) ?? await member.guild.channels.fetch(farewellConfig.channelId).catch(() => null);
+        const channel =
+          member.guild.channels.cache.get(farewellConfig.channelId) ??
+          (await member.guild.channels.fetch(farewellConfig.channelId).catch(() => null));
         if (channel && channel.isTextBased() && 'send' in channel) {
           const user = member.user;
           const cardBuf = await services.welcomerService.renderCard({
-            userTag: user ? (user.tag || user.username) : 'Unknown User',
-            avatarUrl: user?.displayAvatarURL({ extension: 'png', size: 256 }) ?? 'https://cdn.discordapp.com/embed/avatars/0.png',
+            userTag: user ? user.tag || user.username : 'Unknown User',
+            avatarUrl:
+              user?.displayAvatarURL({ extension: 'png', size: 256 }) ??
+              'https://cdn.discordapp.com/embed/avatars/0.png',
             memberCount: member.guild.memberCount,
             serverName: member.guild.name,
             messageText: farewellConfig.messageTemplate,

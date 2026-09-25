@@ -1,19 +1,13 @@
-import {
-  EmbedBuilder,
-  PermissionFlagsBits,
-  type Role,
-} from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { EmbedBuilder, PermissionFlagsBits, type Role } from 'discord.js';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
 export function parseRoleDuration(input: string): number | null {
-  const match = input.trim().match(
-    /^(\d+(?:\.\d+)?)\s*(s|sec|secs|second|seconds|m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days|w|week|weeks)$/i,
-  );
+  const match = input
+    .trim()
+    .match(
+      /^(\d+(?:\.\d+)?)\s*(s|sec|secs|second|seconds|m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days|w|week|weeks)$/i,
+    );
   if (!match) return null;
   const val = parseFloat(match[1]!);
   const unit = match[2]!.toLowerCase();
@@ -127,7 +121,8 @@ export function createTempRoleCommand(services: BotServices): Command {
       // Check bot manage roles permission
       if (!services.autoRoleService.hasManageRolesPermission(ctx.guild)) {
         await ctx.reply({
-          content: '❌ I do not have the **Manage Roles** permission. Please grant it in Server Settings.',
+          content:
+            '❌ I do not have the **Manage Roles** permission. Please grant it in Server Settings.',
         });
         return;
       }
@@ -135,7 +130,8 @@ export function createTempRoleCommand(services: BotServices): Command {
       // 1. List
       if (action === 'list') {
         const userOpt = await ctx.options.getUser('user');
-        const targetUserId = userOpt?.id || (rawArgs[1] ? rawArgs[1].replace(/[<@!>]/g, '') : undefined);
+        const targetUserId =
+          userOpt?.id || (rawArgs[1] ? rawArgs[1].replace(/[<@!>]/g, '') : undefined);
 
         const allTemp = await services.autoRoleRepo.listTemporaryRoles(ctx.guildId);
         const filtered = targetUserId ? allTemp.filter((r) => r.userId === targetUserId) : allTemp;
@@ -189,7 +185,8 @@ export function createTempRoleCommand(services: BotServices): Command {
 
         if (!targetUserId || !role || !durationStr) {
           await ctx.reply({
-            content: '❌ Missing required parameters.\nUsage: `/temprole action:add user:@User role:@Role duration:<duration>`\nExample: `/temprole action:add user:@User role:@Role duration:1d`',
+            content:
+              '❌ Missing required parameters.\nUsage: `/temprole action:add user:@User role:@Role duration:<duration>`\nExample: `/temprole action:add user:@User role:@Role duration:1d`',
           });
           return;
         }
@@ -197,7 +194,8 @@ export function createTempRoleCommand(services: BotServices): Command {
         const durationMs = parseRoleDuration(durationStr);
         if (!durationMs || durationMs <= 0) {
           await ctx.reply({
-            content: '❌ Invalid duration format. Use units like `30m`, `2h`, `1d`, `1w`.\nExample: `7d` for 7 days.',
+            content:
+              '❌ Invalid duration format. Use units like `30m`, `2h`, `1d`, `1w`.\nExample: `7d` for 7 days.',
           });
           return;
         }
@@ -205,7 +203,9 @@ export function createTempRoleCommand(services: BotServices): Command {
         const member = await ctx.guild.members.fetch(targetUserId).catch(() => null);
 
         if (!member) {
-          await ctx.reply({ content: `❌ Member with ID \`${targetUserId}\` not found in this server.` });
+          await ctx.reply({
+            content: `❌ Member with ID \`${targetUserId}\` not found in this server.`,
+          });
           return;
         }
 
@@ -248,7 +248,8 @@ export function createTempRoleCommand(services: BotServices): Command {
 
         if (!targetUserId || !role) {
           await ctx.reply({
-            content: '❌ Missing required parameters.\nUsage: `/temprole action:remove user:@User role:@Role`',
+            content:
+              '❌ Missing required parameters.\nUsage: `/temprole action:remove user:@User role:@Role`',
           });
           return;
         }
@@ -256,11 +257,17 @@ export function createTempRoleCommand(services: BotServices): Command {
         const member = await ctx.guild.members.fetch(targetUserId).catch(() => null);
 
         if (!member) {
-          await ctx.reply({ content: `❌ Member with ID \`${targetUserId}\` not found in this server.` });
+          await ctx.reply({
+            content: `❌ Member with ID \`${targetUserId}\` not found in this server.`,
+          });
           return;
         }
 
-        const success = await services.autoRoleService.removeTemporaryRole(ctx.guild, member, role.id);
+        const success = await services.autoRoleService.removeTemporaryRole(
+          ctx.guild,
+          member,
+          role.id,
+        );
         if (!success) {
           await ctx.reply({
             content: `❌ Failed to remove temporary role <@&${role.id}> from <@${member.id}>.`,

@@ -1,13 +1,6 @@
 import { DatabaseError } from '@ririko/core';
-import type {
-  GameItemRepository,
-  UserInventoryItemRepository,
-} from '@ririko/database';
-import type {
-  EnhancementCost,
-  EnhancementResult,
-  EquipmentStats,
-} from './types.js';
+import type { GameItemRepository, UserInventoryItemRepository } from '@ririko/database';
+import type { EnhancementCost, EnhancementResult, EquipmentStats } from './types.js';
 import { CRAFTING_DUST_CODE } from './catalog.js';
 import { ItemGrantService } from './item-grant.service.js';
 
@@ -134,7 +127,10 @@ export class EnhancementService {
     };
   }
 
-  getScaledStats(baseStats: Record<string, number> | null | undefined, level: number): EquipmentStats {
+  getScaledStats(
+    baseStats: Record<string, number> | null | undefined,
+    level: number,
+  ): EquipmentStats {
     return scaleEquipmentStats(baseStats, level);
   }
 
@@ -146,7 +142,11 @@ export class EnhancementService {
    * Performs an equipment enhancement from +N to +(N+1), spending the user's Crafting Dust.
    * Credits are checked here; the caller debits them through the economy ledger.
    */
-  async enhance(userId: string, userItemId: string, userCredits: bigint | number): Promise<EnhancementResult> {
+  async enhance(
+    userId: string,
+    userItemId: string,
+    userCredits: bigint | number,
+  ): Promise<EnhancementResult> {
     const invItem = await this.inventoryRepo.findById(userItemId);
     if (!invItem || invItem.userId !== userId) {
       throw new DatabaseError('Item not found or does not belong to you');

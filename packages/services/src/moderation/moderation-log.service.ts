@@ -8,7 +8,11 @@ import {
   type GuildMember,
 } from 'discord.js';
 import type { EventBus, CoreEvents } from '@ririko/core';
-import type { GuildSettingsRepository, ModerationRepository, ModerationCase } from '@ririko/database';
+import type {
+  GuildSettingsRepository,
+  ModerationRepository,
+  ModerationCase,
+} from '@ririko/database';
 
 export const MODERATION_COLORS: Record<string, number> = {
   BAN: 0xed4245, // Red
@@ -124,7 +128,10 @@ export class ModerationLogService {
 
     const textChannel = channel as GuildTextBasedChannel;
     const botMember = guild.members.me ?? (await guild.members.fetchMe().catch(() => null));
-    if (botMember && !textChannel.permissionsFor(botMember)?.has(['ViewChannel', 'SendMessages', 'EmbedLinks'])) {
+    if (
+      botMember &&
+      !textChannel.permissionsFor(botMember)?.has(['ViewChannel', 'SendMessages', 'EmbedLinks'])
+    ) {
       return null;
     }
 
@@ -139,7 +146,10 @@ export class ModerationLogService {
     try {
       return await textChannel.send({ embeds: [embed] });
     } catch (err: unknown) {
-      console.error(`[ModerationLogService] Failed to send case embed to channel ${settings.logChannelId}:`, err);
+      console.error(
+        `[ModerationLogService] Failed to send case embed to channel ${settings.logChannelId}:`,
+        err,
+      );
       return null;
     }
   }
@@ -152,7 +162,9 @@ export class ModerationLogService {
 
     return this.eventBus.on('moderation:caseCreated', async (payload) => {
       try {
-        const guild = client.guilds.cache.get(payload.guildId) ?? (await client.guilds.fetch(payload.guildId).catch(() => null));
+        const guild =
+          client.guilds.cache.get(payload.guildId) ??
+          (await client.guilds.fetch(payload.guildId).catch(() => null));
         if (!guild) return;
 
         const modCase = await this.modRepo.getCaseByNumber(payload.guildId, payload.caseNumber);
@@ -160,7 +172,10 @@ export class ModerationLogService {
 
         await this.logCase(guild, modCase);
       } catch (err: unknown) {
-        console.error('[ModerationLogService] Event listener error on moderation:caseCreated:', err);
+        console.error(
+          '[ModerationLogService] Event listener error on moderation:caseCreated:',
+          err,
+        );
       }
     });
   }

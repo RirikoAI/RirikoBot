@@ -116,9 +116,7 @@ export class AiRepository extends BaseRepository<
         .returning({ id: sqliteSchema.aiConversations.id });
       return deleted.length > 0;
     } else {
-      await client.db
-        .delete(pgSchema.aiMessages)
-        .where(eq(pgSchema.aiMessages.conversationId, id));
+      await client.db.delete(pgSchema.aiMessages).where(eq(pgSchema.aiMessages.conversationId, id));
 
       const deleted = await client.db
         .delete(pgSchema.aiConversations)
@@ -321,7 +319,8 @@ export class AiRepository extends BaseRepository<
         .insert(sqliteSchema.aiMessages)
         .values(insertData)
         .returning();
-      if (!created) throw new DatabaseError(`Failed to save AI message in conv ${data.conversationId}`);
+      if (!created)
+        throw new DatabaseError(`Failed to save AI message in conv ${data.conversationId}`);
 
       // Touch parent conversation updatedAt
       await client.db
@@ -335,7 +334,8 @@ export class AiRepository extends BaseRepository<
         .insert(pgSchema.aiMessages)
         .values(insertData as unknown as typeof pgSchema.aiMessages.$inferInsert)
         .returning();
-      if (!created) throw new DatabaseError(`Failed to save AI message in conv ${data.conversationId}`);
+      if (!created)
+        throw new DatabaseError(`Failed to save AI message in conv ${data.conversationId}`);
 
       await client.db
         .update(pgSchema.aiConversations)
@@ -456,10 +456,7 @@ export class AiRepository extends BaseRepository<
 
   // --- User Preferences ---
 
-  async getUserPreferences(
-    userId: string,
-    tx?: DatabaseClient,
-  ): Promise<AiUserPreferences | null> {
+  async getUserPreferences(userId: string, tx?: DatabaseClient): Promise<AiUserPreferences | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [row] = await client.db
@@ -509,4 +506,3 @@ export class AiRepository extends BaseRepository<
     }
   }
 }
-

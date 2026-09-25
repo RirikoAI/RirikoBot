@@ -47,8 +47,7 @@ export const CLIENT_PROFILES: Record<YouTubeClientType, ClientProfile> = {
   FIREFOX: {
     clientName: 'WEB',
     clientVersion: '2.20260315.01.00',
-    userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0',
     osName: 'Windows',
     osVersion: '10.0',
   },
@@ -65,7 +64,8 @@ export function buildClientHeaders(
   const headers: Record<string, string> = {
     'User-Agent': profile.userAgent,
     'Accept-Language': 'en-US,en;q=0.9',
-    'X-YouTube-Client-Name': profile.clientName === 'WEB' ? '1' : profile.clientName === 'IOS' ? '5' : '3',
+    'X-YouTube-Client-Name':
+      profile.clientName === 'WEB' ? '1' : profile.clientName === 'IOS' ? '5' : '3',
     'X-YouTube-Client-Version': profile.clientVersion,
   };
 

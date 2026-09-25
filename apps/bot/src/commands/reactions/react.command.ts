@@ -33,7 +33,10 @@ function truncate(text: string, max: number): string {
  * `!hug @user` has no `type` argument occupying the slot before `target`), so it resolves the
  * mention directly from the raw args instead.
  */
-async function resolveMentionedUser(ctx: CommandContext, raw: string | undefined): Promise<User | null> {
+async function resolveMentionedUser(
+  ctx: CommandContext,
+  raw: string | undefined,
+): Promise<User | null> {
   if (!raw) return null;
   const match = raw.match(/^(?:<@!?)?(\d{17,20})>?$/);
   if (!match) return null;
@@ -44,8 +47,6 @@ async function resolveMentionedUser(ctx: CommandContext, raw: string | undefined
     return null;
   }
 }
-
-
 
 function buildUnknownReactionMessage(attempted: string, prefix: string): string {
   const suggestions = attempted ? searchReactions(attempted, 5).map((r) => r.name) : [];
@@ -74,7 +75,8 @@ export function createReactCommand(services: BotServices): Command {
     metadata: {
       name: COMMAND_NAME,
       category: CommandCategory.REACTIONS,
-      description: 'Send an anime-style reaction GIF to someone (or to yourself), e.g. hug, poke, slap',
+      description:
+        'Send an anime-style reaction GIF to someone (or to yourself), e.g. hug, poke, slap',
       aliases: REACT_ALIASES,
       usage: '/react type:<reaction> [target:@user] | !react <reaction> [@user] | !hug @user',
       examples: ['/react type:hug target:@user', '!react hug @user', '!hug @user', '!poke'],
@@ -101,7 +103,10 @@ export function createReactCommand(services: BotServices): Command {
       const matches = searchReactions(focused);
       await interaction.respond(
         matches.map((reaction) => ({
-          name: truncate(`${reaction.name} — ${reaction.description}`, MAX_AUTOCOMPLETE_NAME_LENGTH),
+          name: truncate(
+            `${reaction.name} — ${reaction.description}`,
+            MAX_AUTOCOMPLETE_NAME_LENGTH,
+          ),
           value: reaction.name,
         })),
       );
@@ -130,7 +135,10 @@ export function createReactCommand(services: BotServices): Command {
       const reaction = getReaction(reactionName);
       if (!reaction) {
         const prefix = await resolveContextPrefix(ctx, services);
-        await ctx.reply({ content: buildUnknownReactionMessage(reactionName, prefix), ephemeral: true });
+        await ctx.reply({
+          content: buildUnknownReactionMessage(reactionName, prefix),
+          ephemeral: true,
+        });
         return;
       }
 
@@ -148,7 +156,9 @@ export function createReactCommand(services: BotServices): Command {
       if (result) {
         embed.setImage(result.url);
       } else {
-        embed.setDescription("Error fetching the image.\nYou'll have to use your imagination for this one!");
+        embed.setDescription(
+          "Error fetching the image.\nYou'll have to use your imagination for this one!",
+        );
       }
 
       await ctx.reply({ content, embeds: [embed] });

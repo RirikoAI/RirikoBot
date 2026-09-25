@@ -191,7 +191,12 @@ describe('Card Command Suite (TASK-1012)', () => {
         getSubcommand: () => options.subcommand ?? '',
         getRawArgs: () => rawArgs,
         getString: (name: string, required?: boolean) => {
-          if (name === 'action' && options.args?.['action'] === undefined && !options.rawArgs && options.subcommand) {
+          if (
+            name === 'action' &&
+            options.args?.['action'] === undefined &&
+            !options.rawArgs &&
+            options.subcommand
+          ) {
             return options.subcommand;
           }
           const val = options.args?.[name];
@@ -420,7 +425,9 @@ describe('Card Command Suite (TASK-1012)', () => {
       args: { id: userCard.id, item_id: 'inv_weapon_1', slot: 'WEAPON' },
     });
     await command.execute(ctxEquipGear);
-    expect(repEquipGear[0].content).toContain('Successfully equipped gear piece into the **WEAPON** slot');
+    expect(repEquipGear[0].content).toContain(
+      'Successfully equipped gear piece into the **WEAPON** slot',
+    );
 
     // 3. Unequip gear piece
     const { ctx: ctxUnequipGear, replies: repUnequipGear } = createMockContext({
@@ -435,7 +442,10 @@ describe('Card Command Suite (TASK-1012)', () => {
   it('unequips all gear from one card, or from every card when no id is given', async () => {
     const command = createCardCommand(services);
 
-    const { ctx: oneCard, replies: oneReplies } = createMockContext({ subcommand: 'unequip-all', args: { id: 'card_1' } });
+    const { ctx: oneCard, replies: oneReplies } = createMockContext({
+      subcommand: 'unequip-all',
+      args: { id: 'card_1' },
+    });
     await command.execute(oneCard);
     expect(oneReplies[0].content).toContain('Unequipped 2 gear piece(s) from that card');
     expect(oneReplies[0].content).toContain('**Iron Hauberk**');
@@ -444,7 +454,10 @@ describe('Card Command Suite (TASK-1012)', () => {
     await command.execute(allCards);
     expect(allReplies[0].content).toContain('from all your cards');
 
-    const { ctx: bare, replies: bareReplies } = createMockContext({ subcommand: 'unequip-all', args: { id: 'bare_card' } });
+    const { ctx: bare, replies: bareReplies } = createMockContext({
+      subcommand: 'unequip-all',
+      args: { id: 'bare_card' },
+    });
     await command.execute(bare);
     expect(bareReplies[0].content).toContain('no gear equipped');
   });

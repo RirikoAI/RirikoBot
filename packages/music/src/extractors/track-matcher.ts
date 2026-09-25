@@ -53,7 +53,9 @@ export class PrecisionTrackMatcher {
       .replace(/\s+/g, ' ')
       .trim();
 
-    const words = cleaned.split(' ').filter((w) => w.length > 0 && !PrecisionTrackMatcher.STOP_WORDS.has(w));
+    const words = cleaned
+      .split(' ')
+      .filter((w) => w.length > 0 && !PrecisionTrackMatcher.STOP_WORDS.has(w));
     return new Set(words);
   }
 
@@ -75,7 +77,7 @@ export class PrecisionTrackMatcher {
     if (diff <= 2) return 1.0;
     if (diff <= 5) return 0.95;
     if (diff <= 10) return 0.85;
-    if (diff <= 15) return 0.70;
+    if (diff <= 15) return 0.7;
 
     return Math.max(0, 1 - diff / 25);
   }
@@ -201,7 +203,7 @@ export class PrecisionTrackMatcher {
     }
 
     // Balanced composite formula: Artist (40%), Title (35%), Duration (25%)
-    let composite = artistScore * 0.40 + titleScore * 0.35 + durationScore * 0.25;
+    let composite = artistScore * 0.4 + titleScore * 0.35 + durationScore * 0.25;
 
     // Official Audio bonus
     const titleLower = candidate.title.toLowerCase();

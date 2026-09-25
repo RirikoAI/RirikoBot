@@ -1,10 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { CookieRotator } from './cookie-rotator.js';
-import {
-  buildClientHeaders,
-  getFallbackClient,
-  CLIENT_PROFILES,
-} from './client-spoofing.js';
+import { buildClientHeaders, getFallbackClient, CLIENT_PROFILES } from './client-spoofing.js';
 import { YouTubeAdapter } from './youtube.adapter.js';
 import { ExtractorPipeline } from './pipeline.js';
 
@@ -89,7 +85,9 @@ describe('Session Cookie Rotation, Client Spoofing & Health Checks (TASK-0502)',
       const androidHeaders = buildClientHeaders('ANDROID');
       expect(androidHeaders['User-Agent']).toBe(CLIENT_PROFILES.ANDROID.userAgent);
       expect(androidHeaders['X-YouTube-Client-Name']).toBe('3');
-      expect(androidHeaders['X-YouTube-Client-Version']).toBe(CLIENT_PROFILES.ANDROID.clientVersion);
+      expect(androidHeaders['X-YouTube-Client-Version']).toBe(
+        CLIENT_PROFILES.ANDROID.clientVersion,
+      );
       expect(androidHeaders['Cookie']).toBeUndefined();
 
       const iosHeaders = buildClientHeaders('IOS', 'SESSION=test_cookie');
@@ -165,7 +163,9 @@ describe('Session Cookie Rotation, Client Spoofing & Health Checks (TASK-0502)',
         priority: 40,
         canResolve: () => false,
         search: async () => [],
-        resolve: async () => { throw new Error('Failed'); },
+        resolve: async () => {
+          throw new Error('Failed');
+        },
         healthCheck: async () => ({
           source: 'deezer' as const,
           isHealthy: false,

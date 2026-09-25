@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PermissionFlagsBits } from 'discord.js';
-import {
-  createGiveawayCommands,
-  parseGiveawayDuration,
-} from '../giveaway.command.js';
+import { createGiveawayCommands, parseGiveawayDuration } from '../giveaway.command.js';
 import { handleGiveawayButtonInteraction } from '../components.js';
 import type { BotServices } from '../../../services.js';
 import type { Giveaway } from '@ririko/database';
@@ -41,9 +38,9 @@ describe('Giveaway Commands & Components Suite (TASK-0902)', () => {
           return Promise.resolve(null);
         }),
         create: vi.fn().mockResolvedValue({ ...sampleGiveaway }),
-        update: vi.fn().mockImplementation((id, data) =>
-          Promise.resolve({ ...sampleGiveaway, ...data }),
-        ),
+        update: vi
+          .fn()
+          .mockImplementation((id, data) => Promise.resolve({ ...sampleGiveaway, ...data })),
         delete: vi.fn().mockResolvedValue(true),
         listActiveGiveaways: vi.fn().mockResolvedValue([sampleGiveaway]),
         getEntries: vi.fn().mockResolvedValue([]),
@@ -149,7 +146,11 @@ describe('Giveaway Commands & Components Suite (TASK-0902)', () => {
   });
 
   describe('Subcommands Execution', () => {
-    function createMockContext(action: string, options: Record<string, any> = {}, args: string[] = []): any {
+    function createMockContext(
+      action: string,
+      options: Record<string, any> = {},
+      args: string[] = [],
+    ): any {
       const sentMsg = {
         id: 'msg-new-123',
         url: 'https://discord.com/channels/1/2/3',

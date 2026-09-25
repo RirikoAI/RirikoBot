@@ -1,15 +1,6 @@
-import type {
-  XpRepository,
-  UserRepository,
-  GuildSettingsRepository,
-} from '@ririko/database';
+import type { XpRepository, UserRepository, GuildSettingsRepository } from '@ririko/database';
 import type { EventBus } from '@ririko/core';
-import type {
-  LevelProgress,
-  LevelUpEvent,
-  AddXpServiceResult,
-  KarmaProfile,
-} from './types.js';
+import type { LevelProgress, LevelUpEvent, AddXpServiceResult, KarmaProfile } from './types.js';
 import type { BankingService } from './banking.service.js';
 
 export interface LevelingServiceOptions {
@@ -292,11 +283,7 @@ export class LevelingService {
   /**
    * Awards or adjusts Karma for a user in a guild.
    */
-  public async awardKarma(
-    userId: string,
-    guildId: string,
-    karmaDelta: number,
-  ): Promise<number> {
+  public async awardKarma(userId: string, guildId: string, karmaDelta: number): Promise<number> {
     const updated = await this.xpRepository.addKarma(userId, guildId, karmaDelta);
     return updated.karma;
   }

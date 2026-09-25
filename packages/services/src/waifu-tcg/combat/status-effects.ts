@@ -3,13 +3,13 @@ import type { ActiveStatusEffect, Combatant, StatusEffectType } from './types.js
 /**
  * Constants for elemental status effects matching docs/waifu-tcg.md Section 4.2
  */
-export const BURN_DOT_PERCENT = 0.10; // 10% ATK DoT per turn
+export const BURN_DOT_PERCENT = 0.1; // 10% ATK DoT per turn
 export const CHILL_SPEED_REDUCTION = 0.25; // -25% SPD
 export const FREEZE_SKIP_CHANCE = 0.15; // 15% chance to skip turn while chilled/frozen
 export const SURGE_CRIT_BONUS = 0.15; // +15% CRIT chance
 export const PURIFY_FLOW_HEAL_PERCENT = 0.08; // 8% max HP per turn
 export const RADIANCE_ATK_BONUS = 0.15; // +15% ATK
-export const DECAY_LEECH_PERCENT = 0.20; // 20% lifesteal
+export const DECAY_LEECH_PERCENT = 0.2; // 20% lifesteal
 
 /**
  * Applies a status effect to a combatant, refreshing duration or adding if new.
@@ -67,7 +67,7 @@ export function calculateEffectiveStats(combatant: Combatant): {
         critRate += SURGE_CRIT_BONUS;
         break;
       case 'FORTIFY':
-        defMult += 0.20; // +20% DEF mitigation
+        defMult += 0.2; // +20% DEF mitigation
         break;
       case 'RADIANCE':
         attackMult += RADIANCE_ATK_BONUS;
@@ -113,7 +113,7 @@ export function processStartOfTurnStatusEffects(
     const heal = Math.round(combatant.maxHealth * PURIFY_FLOW_HEAL_PERCENT);
     const prevHp = combatant.currentHealth;
     combatant.currentHealth = Math.min(combatant.maxHealth, combatant.currentHealth + heal);
-    healingDone += (combatant.currentHealth - prevHp);
+    healingDone += combatant.currentHealth - prevHp;
     logs.push(
       `💧 **Purify & Flow** restored **${combatant.currentHealth - prevHp} HP** (${combatant.currentHealth}/${combatant.maxHealth} HP).`,
     );
@@ -131,7 +131,8 @@ export function processStartOfTurnStatusEffects(
   const burnEffect = combatant.statusEffects.find((e) => e.type === 'BURN' && e.duration > 0);
   if (burnEffect) {
     // 10% of attacker's ATK or target's base ATK as default
-    const burnDmg = burnEffect.value ?? Math.max(20, Math.round(combatant.attack * BURN_DOT_PERCENT));
+    const burnDmg =
+      burnEffect.value ?? Math.max(20, Math.round(combatant.attack * BURN_DOT_PERCENT));
     dotDamage += burnDmg;
     combatant.currentHealth = Math.max(0, combatant.currentHealth - burnDmg);
     if (combatant.currentHealth === 0) {

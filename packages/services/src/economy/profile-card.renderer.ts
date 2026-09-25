@@ -238,7 +238,9 @@ export class ProfileCardRenderer {
           data.customBackgroundPathOrUrl.startsWith('http://') ||
           data.customBackgroundPathOrUrl.startsWith('https://')
         ) {
-          const res = await fetch(data.customBackgroundPathOrUrl, { signal: AbortSignal.timeout(3000) });
+          const res = await fetch(data.customBackgroundPathOrUrl, {
+            signal: AbortSignal.timeout(3000),
+          });
           if (res.ok) {
             const arr = await res.arrayBuffer();
             bgImage = await loadImage(Buffer.from(arr));
@@ -325,7 +327,12 @@ export class ProfileCardRenderer {
     ctx.save();
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius + 5, 0, Math.PI * 2);
-    const ringGrad = ctx.createLinearGradient(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+    const ringGrad = ctx.createLinearGradient(
+      centerX - radius,
+      centerY - radius,
+      centerX + radius,
+      centerY + radius,
+    );
     ringGrad.addColorStop(0, '#00f2fe');
     ringGrad.addColorStop(1, '#8b5cf6');
     ctx.strokeStyle = ringGrad;
@@ -343,7 +350,12 @@ export class ProfileCardRenderer {
       ctx.drawImage(avatarImg, centerX - radius, centerY - radius, radius * 2, radius * 2);
     } else {
       // Fallback Initials Avatar
-      const initGrad = ctx.createLinearGradient(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+      const initGrad = ctx.createLinearGradient(
+        centerX - radius,
+        centerY - radius,
+        centerX + radius,
+        centerY + radius,
+      );
       initGrad.addColorStop(0, '#1e293b');
       initGrad.addColorStop(1, '#0f172a');
       ctx.fillStyle = initGrad;
@@ -427,8 +439,24 @@ export class ProfileCardRenderer {
     ctx.restore();
 
     // Server & Global Rank Badges (Top Right of middle section)
-    this.drawRankBadge(ctx, 640, 42, 'SERVER', data.serverRank, '#fbbf24', 'rgba(245, 158, 11, 0.18)');
-    this.drawRankBadge(ctx, 780, 42, 'GLOBAL', data.globalRank, '#a78bfa', 'rgba(139, 92, 246, 0.18)');
+    this.drawRankBadge(
+      ctx,
+      640,
+      42,
+      'SERVER',
+      data.serverRank,
+      '#fbbf24',
+      'rgba(245, 158, 11, 0.18)',
+    );
+    this.drawRankBadge(
+      ctx,
+      780,
+      42,
+      'GLOBAL',
+      data.globalRank,
+      '#a78bfa',
+      'rgba(139, 92, 246, 0.18)',
+    );
 
     // 3 Financial / Stats Glass Cards
     const cardY = 118;
@@ -436,13 +464,40 @@ export class ProfileCardRenderer {
     const cardH = 64;
 
     // Wallet Card
-    this.drawStatCard(ctx, startX, cardY, cardW, cardH, 'WALLET', `🪙 ${formatNumber(data.walletBalance)}`, '#facc15');
+    this.drawStatCard(
+      ctx,
+      startX,
+      cardY,
+      cardW,
+      cardH,
+      'WALLET',
+      `🪙 ${formatNumber(data.walletBalance)}`,
+      '#facc15',
+    );
 
     // Bank Card
-    this.drawStatCard(ctx, startX + cardW + 15, cardY, cardW, cardH, 'BANK', `🏦 ${formatNumber(data.bankBalance)}`, '#38bdf8');
+    this.drawStatCard(
+      ctx,
+      startX + cardW + 15,
+      cardY,
+      cardW,
+      cardH,
+      'BANK',
+      `🏦 ${formatNumber(data.bankBalance)}`,
+      '#38bdf8',
+    );
 
     // Total XP Card
-    this.drawStatCard(ctx, startX + (cardW + 15) * 2, cardY, cardW, cardH, 'TOTAL EXP', `⭐ ${formatNumber(data.totalXp)}`, '#c084fc');
+    this.drawStatCard(
+      ctx,
+      startX + (cardW + 15) * 2,
+      cardY,
+      cardW,
+      cardH,
+      'TOTAL EXP',
+      `⭐ ${formatNumber(data.totalXp)}`,
+      '#c084fc',
+    );
   }
 
   private drawRankBadge(
@@ -466,7 +521,12 @@ export class ProfileCardRenderer {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    const rankStr = rank === undefined || rank === null || rank === 0 ? 'N/A' : typeof rank === 'number' ? `#${rank}` : String(rank);
+    const rankStr =
+      rank === undefined || rank === null || rank === 0
+        ? 'N/A'
+        : typeof rank === 'number'
+          ? `#${rank}`
+          : String(rank);
 
     ctx.fillStyle = color;
     ctx.font = 'bold 12px sans-serif';

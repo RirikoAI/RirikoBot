@@ -94,7 +94,10 @@ describe('MemeSynthesizer', () => {
   });
 
   it('should synthesize a meme PNG buffer for 0days', async () => {
-    const result = await synthesizer.generateMeme('0days', ['Accident free', 'Until Fariz arrived']);
+    const result = await synthesizer.generateMeme('0days', [
+      'Accident free',
+      'Until Fariz arrived',
+    ]);
     expect(result.mimeType).toBe('image/png');
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer.length).toBeGreaterThan(1000);
@@ -120,7 +123,9 @@ describe('MemeSynthesizer', () => {
   });
 
   it('should throw NotFoundError for unknown template', async () => {
-    await expect(synthesizer.generateMeme('unknown_meme_xyz', ['Test'])).rejects.toThrow(NotFoundError);
+    await expect(synthesizer.generateMeme('unknown_meme_xyz', ['Test'])).rejects.toThrow(
+      NotFoundError,
+    );
   });
 
   it('should throw ValidationError when all texts are empty', async () => {

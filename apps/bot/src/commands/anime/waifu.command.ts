@@ -25,7 +25,11 @@ export function buildWaifuEmbed(image: WaifuImImage): EmbedBuilder {
     .setColor('#FF00FF')
     .setImage(image.url)
     .addFields(
-      { name: 'Tags', value: truncate(image.tags.map((t) => t.name).join(', ') || 'N/A', 1024), inline: true },
+      {
+        name: 'Tags',
+        value: truncate(image.tags.map((t) => t.name).join(', ') || 'N/A', 1024),
+        inline: true,
+      },
       { name: 'Favorites', value: String(image.favorites), inline: true },
     )
     .setFooter({ text: 'Collect waifus as cards with /tcg-info • Made with ❤️ by Ririko' })
@@ -40,7 +44,10 @@ export function buildWaifuEmbed(image: WaifuImImage): EmbedBuilder {
     : null;
   embed.setAuthor(
     artist
-      ? { name: truncate(`${artist.name} via Waifu.im`, 256), ...(artistUrl ? { url: artistUrl } : {}) }
+      ? {
+          name: truncate(`${artist.name} via Waifu.im`, 256),
+          ...(artistUrl ? { url: artistUrl } : {}),
+        }
       : { name: 'via Waifu.im', url: 'https://waifu.im' },
   );
   return embed;
@@ -48,7 +55,11 @@ export function buildWaifuEmbed(image: WaifuImImage): EmbedBuilder {
 
 const rerollRow = () =>
   new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder().setCustomId(WAIFU_REROLL_ID).setLabel('Another one').setEmoji('🔄').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(WAIFU_REROLL_ID)
+      .setLabel('Another one')
+      .setEmoji('🔄')
+      .setStyle(ButtonStyle.Primary),
   );
 
 export function createWaifuCommand(services: BotServices): Command {
@@ -67,9 +78,9 @@ export function createWaifuCommand(services: BotServices): Command {
       // image this user has not seen yet. Entries with URLs discord.js would reject are skipped.
       const shown = new Set<number>();
       const fetchImage = async () => {
-        const batch = (await services.waifuImClient.search({ tags: [WAIFU_TAG], limit: BATCH_SIZE })).filter((i) =>
-          httpUrl(i.url),
-        );
+        const batch = (
+          await services.waifuImClient.search({ tags: [WAIFU_TAG], limit: BATCH_SIZE })
+        ).filter((i) => httpUrl(i.url));
         const image = batch.find((i) => !shown.has(i.id)) ?? batch[0] ?? null;
         if (image) shown.add(image.id);
         return image;
@@ -81,7 +92,9 @@ export function createWaifuCommand(services: BotServices): Command {
         image = await fetchImage();
       } catch (err) {
         console.error('[Waifu] waifu.im request failed:', err);
-        await ctx.editReply({ content: '❌ waifu.im is unreachable right now. Please try again in a moment.' });
+        await ctx.editReply({
+          content: '❌ waifu.im is unreachable right now. Please try again in a moment.',
+        });
         return;
       }
       if (!image) {
@@ -89,7 +102,10 @@ export function createWaifuCommand(services: BotServices): Command {
         return;
       }
 
-      const message: Message = await ctx.editReply({ embeds: [buildWaifuEmbed(image)], components: [rerollRow()] });
+      const message: Message = await ctx.editReply({
+        embeds: [buildWaifuEmbed(image)],
+        components: [rerollRow()],
+      });
       attachOwnerCollector(message, {
         ownerId: ctx.user.id,
         customIds: [WAIFU_REROLL_ID],
@@ -98,10 +114,17 @@ export function createWaifuCommand(services: BotServices): Command {
           await interaction.deferUpdate();
           try {
             const next = await fetchImage();
-            if (next) await interaction.editReply({ embeds: [buildWaifuEmbed(next)], components: [rerollRow()] });
+            if (next)
+              await interaction.editReply({
+                embeds: [buildWaifuEmbed(next)],
+                components: [rerollRow()],
+              });
           } catch (err) {
             console.error('[Waifu] waifu.im reroll failed:', err);
-            await interaction.followUp({ content: '❌ Could not fetch another image right now.', ephemeral: true });
+            await interaction.followUp({
+              content: '❌ Could not fetch another image right now.',
+              ephemeral: true,
+            });
           }
         },
       });

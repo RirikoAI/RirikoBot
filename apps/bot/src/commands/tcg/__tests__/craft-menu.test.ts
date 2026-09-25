@@ -72,7 +72,12 @@ describe('Crafting menu (TASK-1602)', () => {
   });
 
   it('disables Craft and shows a lock icon for a locked recipe', () => {
-    const locked = recipeStatus({ unlocked: false, affordable: false, requiredFloor: 30, userHighestFloor: 12 });
+    const locked = recipeStatus({
+      unlocked: false,
+      affordable: false,
+      requiredFloor: 30,
+      userHighestFloor: 12,
+    });
     const view = buildCraftMenuView(state({ recipes: [locked] }));
     const text = view.embed.data.description ?? '';
     expect(text).toContain('🔒 Floor 30');
@@ -84,7 +89,15 @@ describe('Crafting menu (TASK-1602)', () => {
     const short = recipeStatus({
       affordable: false,
       ownedDust: 10,
-      ingredients: [{ code: 'WEAPON_OBSIDIAN_KATANA', name: 'Obsidian Katana', requiredPerCraft: 1, owned: 0, sufficient: false }],
+      ingredients: [
+        {
+          code: 'WEAPON_OBSIDIAN_KATANA',
+          name: 'Obsidian Katana',
+          requiredPerCraft: 1,
+          owned: 0,
+          sufficient: false,
+        },
+      ],
     });
     const view = buildCraftMenuView(state({ recipes: [short], dust: 10 }));
     const text = view.embed.data.description ?? '';

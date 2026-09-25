@@ -92,11 +92,7 @@ export class RpsEngine {
    * Submits a player's secret choice.
    * Choices remain hidden until both players submit.
    */
-  public submitChoice(
-    sessionId: string,
-    playerId: string,
-    choice: RpsChoice,
-  ): RpsSubmitResult {
+  public submitChoice(sessionId: string, playerId: string, choice: RpsChoice): RpsSubmitResult {
     const session = this.sessionManager.getSession<RpsMetadata>(sessionId);
     if (!session) {
       throw new Error(`RPS session ${sessionId} not found`);
@@ -170,17 +166,16 @@ export class RpsEngine {
   /**
    * Forfeits game due to timeout. If one player submitted, the submitter wins.
    */
-  public forfeitOnTimeout(
-    sessionId: string,
-    timedOutPlayerId: string,
-  ): GameSession<RpsMetadata> {
+  public forfeitOnTimeout(sessionId: string, timedOutPlayerId: string): GameSession<RpsMetadata> {
     const session = this.sessionManager.getSession<RpsMetadata>(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
     }
 
     const otherPlayer = session.players.find((p) => p.id !== timedOutPlayerId);
-    const otherPlayerChoice = otherPlayer ? session.metadata.submissions[otherPlayer.id] : undefined;
+    const otherPlayerChoice = otherPlayer
+      ? session.metadata.submissions[otherPlayer.id]
+      : undefined;
 
     if (otherPlayer && otherPlayerChoice) {
       // The other player submitted in time, so they win by opponent timeout

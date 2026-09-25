@@ -133,7 +133,9 @@ describe('Catalog item grants (BUG-0010)', () => {
 
       expect(await grants.countOwned('u1', 'POTION_MINOR_HP')).toBe(2);
       const potionId = await catalogId('POTION_MINOR_HP');
-      expect((await inventoryRepo.findByUser('u1')).filter((r) => r.itemId === potionId)).toHaveLength(1);
+      expect(
+        (await inventoryRepo.findByUser('u1')).filter((r) => r.itemId === potionId),
+      ).toHaveLength(1);
     });
   });
 

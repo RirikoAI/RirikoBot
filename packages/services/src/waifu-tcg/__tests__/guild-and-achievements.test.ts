@@ -263,11 +263,7 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
       expect(updatedDetails.maxMembers).toBe(14); // 10 + 2 * 2
 
       // 6. Promote member
-      const promoted = await guildService.updateMemberRank(
-        'user-leader',
-        'user-member',
-        'OFFICER',
-      );
+      const promoted = await guildService.updateMemberRank('user-leader', 'user-member', 'OFFICER');
       expect(promoted.rank).toBe('OFFICER');
 
       // 7. Member leaves

@@ -43,7 +43,26 @@ describe('parseReminderTime', () => {
   });
 
   it('reads wall-clock times in the given zone', () => {
-    expect(parseReminderTime('tomorrow 9am', NOW, 'UTC')?.triggerAt.toISOString()).toBe('2026-09-23T09:00:00.000Z');
+    expect(parseReminderTime('tomorrow 9am', NOW, 'UTC')?.triggerAt.toISOString()).toBe(
+      '2026-09-23T09:00:00.000Z',
+    );
+  });
+
+  it('uses the offset of the target date across a DST change', () => {
+    // London is on BST (UTC+1) on 2026-09-22 and on GMT (UTC+0) at Christmas.
+    const london = 'Europe/London';
+    expect(parseReminderTime('tomorrow 9am', NOW, london)?.triggerAt.toISOString()).toBe(
+      '2026-09-23T08:00:00.000Z',
+    );
+    expect(parseReminderTime('2026-12-25 08:00', NOW, london)?.triggerAt.toISOString()).toBe(
+      '2026-12-25T08:00:00.000Z',
+    );
+  });
+
+  it('keeps an explicit timezone written in the text', () => {
+    expect(parseReminderTime('tomorrow 9am UTC', NOW, KL)?.triggerAt.toISOString()).toBe(
+      '2026-09-23T09:00:00.000Z',
+    );
   });
 
   it('splits the time phrase from the message wherever it appears', () => {
@@ -73,11 +92,17 @@ describe('repeats', () => {
   it('returns the next daily or weekly slot after now and skips missed ones', () => {
     const trigger = new Date('2026-09-22T01:00:00Z');
     expect(nextOccurrence(trigger, 'NONE', KL, NOW)).toBeNull();
-    expect(nextOccurrence(trigger, 'DAILY', KL, NOW)?.toISOString()).toBe('2026-09-23T01:00:00.000Z');
-    expect(nextOccurrence(trigger, 'WEEKLY', KL, NOW)?.toISOString()).toBe('2026-09-29T01:00:00.000Z');
+    expect(nextOccurrence(trigger, 'DAILY', KL, NOW)?.toISOString()).toBe(
+      '2026-09-23T01:00:00.000Z',
+    );
+    expect(nextOccurrence(trigger, 'WEEKLY', KL, NOW)?.toISOString()).toBe(
+      '2026-09-29T01:00:00.000Z',
+    );
 
     // Bot was offline for five days: resume at the next slot, do not replay.
     const later = new Date('2026-09-27T12:00:00Z');
-    expect(nextOccurrence(trigger, 'DAILY', KL, later)?.toISOString()).toBe('2026-09-28T01:00:00.000Z');
+    expect(nextOccurrence(trigger, 'DAILY', KL, later)?.toISOString()).toBe(
+      '2026-09-28T01:00:00.000Z',
+    );
   });
 });

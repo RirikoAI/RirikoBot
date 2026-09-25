@@ -7,15 +7,14 @@ import {
   type Message,
   type ButtonInteraction,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { RpsChoice } from '@ririko/services';
 
-export function buildRpsButtons(sessionId: string, disabled: boolean): ActionRowBuilder<ButtonBuilder>[] {
+export function buildRpsButtons(
+  sessionId: string,
+  disabled: boolean,
+): ActionRowBuilder<ButtonBuilder>[] {
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`rps:choose:${sessionId}:ROCK`)
@@ -50,14 +49,10 @@ export function createRpsCommand(services: BotServices): Command {
     metadata: {
       name: 'rps',
       category: CommandCategory.GAMES,
-      description: 'Play Rock-Paper-Scissors secretly with interactive buttons against AI or a friend',
+      description:
+        'Play Rock-Paper-Scissors secretly with interactive buttons against AI or a friend',
       usage: '/rps [opponent:@user] [wager:credits]',
-      examples: [
-        '/rps',
-        '/rps opponent:@friend wager:100',
-        '!rps rock',
-        '!rps @friend 50',
-      ],
+      examples: ['/rps', '/rps opponent:@friend wager:100', '!rps rock', '!rps @friend 50'],
       aliases: ['rock-paper-scissors'],
       cooldownSeconds: 5,
       options: [
@@ -210,7 +205,9 @@ export function createRpsCommand(services: BotServices): Command {
         const embed = new EmbedBuilder()
           .setTitle('✂️ Rock-Paper-Scissors')
           .setDescription(desc)
-          .setColor(winnerId === player1.id ? '#57F287' : winnerId === 'ai' ? '#ED4245' : '#FEE75C');
+          .setColor(
+            winnerId === player1.id ? '#57F287' : winnerId === 'ai' ? '#ED4245' : '#FEE75C',
+          );
 
         await ctx.reply({ embeds: [embed] });
         return;
@@ -223,11 +220,11 @@ export function createRpsCommand(services: BotServices): Command {
         .setTitle('✂️ Rock-Paper-Scissors')
         .setDescription(
           `**${player1.username}** vs **${player2.username}**\n` +
-          `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits each\n` : ''}` +
-          `\n**Status**:\n` +
-          `• ${player1.username}: Thinking 🤔\n` +
-          `• ${player2.username}: ${isVsAi ? 'Ready ✅' : 'Thinking 🤔'}\n\n` +
-          `Click a button below to submit your secret choice (60s limit). Choices remain hidden until both players choose!`,
+            `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits each\n` : ''}` +
+            `\n**Status**:\n` +
+            `• ${player1.username}: Thinking 🤔\n` +
+            `• ${player2.username}: ${isVsAi ? 'Ready ✅' : 'Thinking 🤔'}\n\n` +
+            `Click a button below to submit your secret choice (60s limit). Choices remain hidden until both players choose!`,
         )
         .setColor('#5865F2');
 
@@ -317,7 +314,9 @@ export function createRpsCommand(services: BotServices): Command {
               .setColor(winnerId ? '#57F287' : '#FEE75C');
 
             const disabledButtons = buildRpsButtons(session.id, true);
-            await discordMsg.edit({ embeds: [finalEmbed], components: disabledButtons }).catch(() => null);
+            await discordMsg
+              .edit({ embeds: [finalEmbed], components: disabledButtons })
+              .catch(() => null);
             collector.stop('game_over');
           } else {
             // Update status showing who has submitted
@@ -328,11 +327,11 @@ export function createRpsCommand(services: BotServices): Command {
               .setTitle('✂️ Rock-Paper-Scissors')
               .setDescription(
                 `**${player1.username}** vs **${player2.username}**\n` +
-                `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits each\n` : ''}` +
-                `\n**Status**:\n` +
-                `• ${player1.username}: ${p1Submitted ? 'Chosen ✅' : 'Thinking 🤔'}\n` +
-                `• ${player2.username}: ${p2Submitted ? 'Chosen ✅' : 'Thinking 🤔'}\n\n` +
-                `Choices remain hidden until both players choose!`,
+                  `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits each\n` : ''}` +
+                  `\n**Status**:\n` +
+                  `• ${player1.username}: ${p1Submitted ? 'Chosen ✅' : 'Thinking 🤔'}\n` +
+                  `• ${player2.username}: ${p2Submitted ? 'Chosen ✅' : 'Thinking 🤔'}\n\n` +
+                  `Choices remain hidden until both players choose!`,
               )
               .setColor('#5865F2');
 
@@ -377,7 +376,9 @@ export function createRpsCommand(services: BotServices): Command {
             .setColor('#ED4245');
 
           const disabledButtons = buildRpsButtons(session.id, true);
-          await discordMsg.edit({ embeds: [timeoutEmbed], components: disabledButtons }).catch(() => null);
+          await discordMsg
+            .edit({ embeds: [timeoutEmbed], components: disabledButtons })
+            .catch(() => null);
         }
       });
     },

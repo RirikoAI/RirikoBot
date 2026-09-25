@@ -18,9 +18,7 @@ export function applyBattleStartPerks(combatants: Combatant[]): string[] {
     if (c.perks.includes('MANA_CONDUIT')) {
       c.currentMp = Math.min(c.maxMp, c.currentMp + MANA_CONDUIT_BONUS_START_MP);
       c.skillManaCost = Math.round(c.skillManaCost * (1 - MANA_CONDUIT_COST_REDUCTION));
-      logs.push(
-        `🔮 **Mana Conduit** activated for **${c.name}** (+25 Start MP, -25% Skill Cost)!`,
-      );
+      logs.push(`🔮 **Mana Conduit** activated for **${c.name}** (+25 Start MP, -25% Skill Cost)!`);
     }
   }
   return logs;
@@ -42,9 +40,7 @@ export function applyAttackPerks(
   if (attacker.perks.includes('SHARPENED_EDGE') && defender.defense >= 100) {
     const bonus = Math.round(damage * SHARPENED_EDGE_BONUS);
     damage += bonus;
-    logs.push(
-      `🗡️ **Sharpened Edge** punctured **${defender.name}**'s armor (+${bonus} DMG)!`,
-    );
+    logs.push(`🗡️ **Sharpened Edge** punctured **${defender.name}**'s armor (+${bonus} DMG)!`);
   }
 
   // Vampiric Touch: Convert 12% of physical damage dealt into HP healing
@@ -54,9 +50,7 @@ export function applyAttackPerks(
       const prev = attacker.currentHealth;
       attacker.currentHealth = Math.min(attacker.maxHealth, attacker.currentHealth + heal);
       vampiricHeal = attacker.currentHealth - prev;
-      logs.push(
-        `🩸 **Vampiric Touch** siphoned **${vampiricHeal} HP** for **${attacker.name}**!`,
-      );
+      logs.push(`🩸 **Vampiric Touch** siphoned **${vampiricHeal} HP** for **${attacker.name}**!`);
     }
   }
 

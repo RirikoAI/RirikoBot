@@ -2,12 +2,7 @@ import { eq, and, desc, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
-import type {
-  WaifuCard,
-  NewWaifuCard,
-  UserCard,
-  NewUserCard,
-} from '../schema/types/index.js';
+import type { WaifuCard, NewWaifuCard, UserCard, NewUserCard } from '../schema/types/index.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
@@ -136,7 +131,8 @@ export class WaifuCardRepository extends BaseRepository<
       const conditions = [];
       if (options?.rarity) conditions.push(eq(sqliteSchema.waifuCards.rarity, options.rarity));
       if (options?.element) conditions.push(eq(sqliteSchema.waifuCards.element, options.element));
-      if (options?.isActive !== undefined) conditions.push(eq(sqliteSchema.waifuCards.isActive, options.isActive));
+      if (options?.isActive !== undefined)
+        conditions.push(eq(sqliteSchema.waifuCards.isActive, options.isActive));
 
       const query = client.db
         .select()
@@ -151,7 +147,8 @@ export class WaifuCardRepository extends BaseRepository<
       const conditions = [];
       if (options?.rarity) conditions.push(eq(pgSchema.waifuCards.rarity, options.rarity));
       if (options?.element) conditions.push(eq(pgSchema.waifuCards.element, options.element));
-      if (options?.isActive !== undefined) conditions.push(eq(pgSchema.waifuCards.isActive, options.isActive));
+      if (options?.isActive !== undefined)
+        conditions.push(eq(pgSchema.waifuCards.isActive, options.isActive));
 
       const query = client.db
         .select()
@@ -197,11 +194,7 @@ export class WaifuCardRepository extends BaseRepository<
     return this.countCards(undefined, tx);
   }
 
-  async update(
-    id: string,
-    data: Partial<NewWaifuCard>,
-    tx?: DatabaseClient,
-  ): Promise<WaifuCard> {
+  async update(id: string, data: Partial<NewWaifuCard>, tx?: DatabaseClient): Promise<WaifuCard> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [updated] = await client.db
@@ -320,7 +313,8 @@ export class WaifuCardRepository extends BaseRepository<
     if (this.isSqlite(client)) {
       const conditions = [eq(sqliteSchema.userCards.userId, userId)];
       if (options?.state) conditions.push(eq(sqliteSchema.userCards.state, options.state));
-      if (options?.isFavorite !== undefined) conditions.push(eq(sqliteSchema.userCards.isFavorite, options.isFavorite));
+      if (options?.isFavorite !== undefined)
+        conditions.push(eq(sqliteSchema.userCards.isFavorite, options.isFavorite));
 
       const rows = await client.db
         .select()
@@ -334,7 +328,8 @@ export class WaifuCardRepository extends BaseRepository<
     } else {
       const conditions = [eq(pgSchema.userCards.userId, userId)];
       if (options?.state) conditions.push(eq(pgSchema.userCards.state, options.state));
-      if (options?.isFavorite !== undefined) conditions.push(eq(pgSchema.userCards.isFavorite, options.isFavorite));
+      if (options?.isFavorite !== undefined)
+        conditions.push(eq(pgSchema.userCards.isFavorite, options.isFavorite));
 
       const rows = await client.db
         .select()

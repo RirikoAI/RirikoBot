@@ -1,9 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { MarketListing } from '@ririko/database';
 import type { EnrichedMarketListing } from '@ririko/services';
@@ -13,9 +9,11 @@ export function createMarketCommand(services: BotServices): Command {
     metadata: {
       name: 'market',
       category: CommandCategory.TCG,
-      description: 'Community Player Marketplace: Buy and sell cards with 5% market tax and 7-day automatic expiration.',
+      description:
+        'Community Player Marketplace: Buy and sell cards with 5% market tax and 7-day automatic expiration.',
       aliases: ['marketplace', 'tcgmarket'],
-      usage: '/market [action: list|browse|buy|cancel|my-listings] [card_id] [price] [listing_id] [page]',
+      usage:
+        '/market [action: list|browse|buy|cancel|my-listings] [card_id] [price] [listing_id] [page]',
       examples: [
         '/market action:list card_id:card_123 price:2000',
         '/market action:browse page:1',
@@ -66,9 +64,7 @@ export function createMarketCommand(services: BotServices): Command {
     execute: async (ctx: CommandContext): Promise<void> => {
       const rawArgs = ctx.options.getRawArgs?.() ?? [];
       const action =
-        ctx.options.getString('action')?.toLowerCase() ??
-        rawArgs[0]?.toLowerCase() ??
-        'browse';
+        ctx.options.getString('action')?.toLowerCase() ?? rawArgs[0]?.toLowerCase() ?? 'browse';
 
       const marketService = services.marketService;
       if (!marketService) {
@@ -78,7 +74,8 @@ export function createMarketCommand(services: BotServices): Command {
 
       if (action === 'list') {
         const cardId = ctx.options.getString('card_id') ?? rawArgs[1];
-        const price = ctx.options.getInteger('price') ?? (rawArgs[2] ? parseInt(rawArgs[2], 10) : NaN);
+        const price =
+          ctx.options.getInteger('price') ?? (rawArgs[2] ? parseInt(rawArgs[2], 10) : NaN);
 
         if (!cardId || isNaN(price) || price <= 0) {
           await ctx.reply({
@@ -121,7 +118,9 @@ export function createMarketCommand(services: BotServices): Command {
       if (action === 'buy') {
         const listingId = ctx.options.getString('listing_id') ?? rawArgs[1];
         if (!listingId) {
-          await ctx.reply({ content: '❌ Please specify a listing ID to buy: `/market action:buy listing_id:<id>`' });
+          await ctx.reply({
+            content: '❌ Please specify a listing ID to buy: `/market action:buy listing_id:<id>`',
+          });
           return;
         }
 
@@ -155,7 +154,10 @@ export function createMarketCommand(services: BotServices): Command {
       if (action === 'cancel') {
         const listingId = ctx.options.getString('listing_id') ?? rawArgs[1];
         if (!listingId) {
-          await ctx.reply({ content: '❌ Please specify a listing ID to cancel: `/market action:cancel listing_id:<id>`' });
+          await ctx.reply({
+            content:
+              '❌ Please specify a listing ID to cancel: `/market action:cancel listing_id:<id>`',
+          });
           return;
         }
 
@@ -183,7 +185,8 @@ export function createMarketCommand(services: BotServices): Command {
 
           if (activeListings.length === 0) {
             await ctx.reply({
-              content: 'ℹ️ You currently have no active listings. List a card with `/market action:list card_id:<id> price:<credits>`.',
+              content:
+                'ℹ️ You currently have no active listings. List a card with `/market action:list card_id:<id> price:<credits>`.',
             });
             return;
           }
@@ -221,7 +224,8 @@ export function createMarketCommand(services: BotServices): Command {
 
         if (result.listings.length === 0) {
           await ctx.reply({
-            content: 'ℹ️ The marketplace has no active listings right now. Be the first to list a card with `/market action:list`!',
+            content:
+              'ℹ️ The marketplace has no active listings right now. Be the first to list a card with `/market action:list`!',
           });
           return;
         }

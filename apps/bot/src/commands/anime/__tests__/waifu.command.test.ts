@@ -18,7 +18,15 @@ const image = (id: number, overrides: Partial<WaifuImImage> = {}): WaifuImImage 
     { name: 'Selfies', slug: 'selfies' },
     { name: 'Waifu', slug: 'waifu' },
   ],
-  artists: [{ name: 'LU', pixiv: 'https://www.pixiv.net/users/1', twitter: null, deviantArt: null, patreon: null }],
+  artists: [
+    {
+      name: 'LU',
+      pixiv: 'https://www.pixiv.net/users/1',
+      twitter: null,
+      deviantArt: null,
+      patreon: null,
+    },
+  ],
   ...overrides,
 });
 
@@ -37,7 +45,10 @@ describe('/waifu (TASK-1441)', () => {
     const embed = payload.embeds[0].data;
     expect(embed.title).toBe('Random Waifu Image');
     expect(embed.image.url).toBe('https://cdn.waifu.im/7567.jpg');
-    expect(embed.author).toMatchObject({ name: 'LU via Waifu.im', url: 'https://www.pixiv.net/users/1' });
+    expect(embed.author).toMatchObject({
+      name: 'LU via Waifu.im',
+      url: 'https://www.pixiv.net/users/1',
+    });
     expect(embed.fields).toEqual([
       { name: 'Tags', value: 'Selfies, Waifu', inline: true },
       { name: 'Favorites', value: '8', inline: true },
@@ -47,7 +58,10 @@ describe('/waifu (TASK-1441)', () => {
 
   it('rerolls for the invoker only', async () => {
     // waifu.im may hand back the same "random" image again; the unseen one must win.
-    const search = vi.fn().mockResolvedValueOnce([image(1)]).mockResolvedValueOnce([image(1), image(2)]);
+    const search = vi
+      .fn()
+      .mockResolvedValueOnce([image(1)])
+      .mockResolvedValueOnce([image(1), image(2)]);
     const { ctx, collector } = makeContext(null);
     await createWaifuCommand(servicesWith(search)).execute(ctx);
 
@@ -60,13 +74,17 @@ describe('/waifu (TASK-1441)', () => {
     collector.emit('collect', owner);
     await flush();
     expect(search).toHaveBeenLastCalledWith({ tags: ['waifu'], limit: 10 });
-    expect(owner.editReply.mock.calls[0]![0].embeds[0].data.image.url).toBe('https://cdn.waifu.im/2.jpg');
+    expect(owner.editReply.mock.calls[0]![0].embeds[0].data.image.url).toBe(
+      'https://cdn.waifu.im/2.jpg',
+    );
   });
 
   it('reports an unreachable API', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const { ctx, raw } = makeContext(null);
-    await createWaifuCommand(servicesWith(vi.fn().mockRejectedValue(new Error('403')))).execute(ctx);
+    await createWaifuCommand(servicesWith(vi.fn().mockRejectedValue(new Error('403')))).execute(
+      ctx,
+    );
     expect(raw.editReply.mock.calls[0]![0].content).toMatch(/unreachable/);
   });
 

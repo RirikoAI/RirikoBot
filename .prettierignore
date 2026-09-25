@@ -9,3 +9,5 @@ coverage/
 docs/
 *.md
 assets/tcg/catalog/
+test-results/
+site-dist/

@@ -30,7 +30,8 @@ export type MusicPlayResolver = (
 export class MusicPlayTool implements SafeTool<MusicPlayArgs, MusicPlayResult> {
   readonly definition = {
     name: 'music.play',
-    description: 'Queues and plays audio from YouTube, Spotify, SoundCloud, or Deezer in the current voice channel.',
+    description:
+      'Queues and plays audio from YouTube, Spotify, SoundCloud, or Deezer in the current voice channel.',
     parameters: {
       type: 'object',
       properties: {

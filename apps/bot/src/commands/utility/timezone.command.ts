@@ -1,7 +1,4 @@
-import {
-  EmbedBuilder,
-  PermissionsBitField,
-} from 'discord.js';
+import { EmbedBuilder, PermissionsBitField } from 'discord.js';
 import {
   CommandCategory,
   type Command,
@@ -9,10 +6,7 @@ import {
   CommandGuildOnlyError,
   CommandPermissionError,
 } from '@ririko/discord';
-import {
-  canonicalTimeZone,
-  formatLocalTime,
-} from '@ririko/services';
+import { canonicalTimeZone, formatLocalTime } from '@ririko/services';
 import { ValidationError } from '@ririko/core';
 import type { BotServices } from '../../services.js';
 import { resolveContextPrefix } from '../shared/prefix-resolver.js';
@@ -29,7 +23,8 @@ export function createTimezoneCommand(services: BotServices): Command {
       category: CommandCategory.UTILITY,
       description: 'View or configure the server timezone or your personal timezone override',
       aliases: ['tz', 'settimezone', 'set-timezone'],
-      usage: '/timezone [set:<zone>] [scope:<server|user>] | !timezone [zone] | !tz user <zone> | !tz server <zone>',
+      usage:
+        '/timezone [set:<zone>] [scope:<server|user>] | !timezone [zone] | !tz user <zone> | !tz server <zone>',
       examples: [
         '/timezone',
         '/timezone set:Asia/Kuala_Lumpur scope:server',
@@ -42,7 +37,8 @@ export function createTimezoneCommand(services: BotServices): Command {
       options: [
         {
           name: 'set',
-          description: 'IANA timezone name (e.g. Asia/Kuala_Lumpur, America/New_York, Europe/London, UTC)',
+          description:
+            'IANA timezone name (e.g. Asia/Kuala_Lumpur, America/New_York, Europe/London, UTC)',
           type: 'STRING',
           required: false,
         },

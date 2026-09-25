@@ -5,7 +5,10 @@ import { WaifuImClient } from '../waifu-im.client.js';
 const instantLimiter = () => new RateLimiter(0, { sleep: () => Promise.resolve() });
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
 }
 
 const rawItem = {
@@ -20,7 +23,14 @@ const rawItem = {
   favorites: 8,
   tags: [{ id: 12, name: 'Waifu', slug: 'waifu', description: 'x' }],
   artists: [
-    { id: 950, name: 'yejji', pixiv: 'https://www.pixiv.net/users/12131266', twitter: null, deviantArt: null, patreon: null },
+    {
+      id: 950,
+      name: 'yejji',
+      pixiv: 'https://www.pixiv.net/users/12131266',
+      twitter: null,
+      deviantArt: null,
+      patreon: null,
+    },
   ],
 };
 
@@ -71,7 +81,9 @@ describe('WaifuImClient', () => {
   });
 
   it('downloads image binaries', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(new Response(new Uint8Array([1, 2, 3])));
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response(new Uint8Array([1, 2, 3])));
     const client = new WaifuImClient({ limiter: instantLimiter(), fetchFn });
     expect([...(await client.downloadImage('https://cdn.waifu.im/1.png'))]).toEqual([1, 2, 3]);
   });

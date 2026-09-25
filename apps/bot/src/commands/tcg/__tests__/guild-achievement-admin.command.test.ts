@@ -48,7 +48,13 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
           createdAt: new Date(),
         },
         members: [
-          { guildId: 'guild_123', userId: 'user_1', rank: 'LEADER', contributionXp: 500, joinedAt: new Date() },
+          {
+            guildId: 'guild_123',
+            userId: 'user_1',
+            rank: 'LEADER',
+            contributionXp: 500,
+            joinedAt: new Date(),
+          },
         ],
         memberCount: 1,
         maxMembers: 12,
@@ -65,7 +71,13 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
           createdAt: new Date(),
         },
         members: [
-          { guildId: 'guild_123', userId: 'user_1', rank: 'LEADER', contributionXp: 500, joinedAt: new Date() },
+          {
+            guildId: 'guild_123',
+            userId: 'user_1',
+            rank: 'LEADER',
+            contributionXp: 500,
+            joinedAt: new Date(),
+          },
         ],
         memberCount: 1,
         maxMembers: 12,
@@ -176,35 +188,36 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
     options: Record<string, any> = {},
     args: string[] = [],
     isPrefix = false,
-  ): CommandContext => ({
-    source: isPrefix ? 'prefix' : 'slash',
-    id: 'interaction_123',
-    guildId: 'guild_discord',
-    channelId: 'channel_1',
-    user: { id: 'user_1', username: 'TestUser' } as any,
-    member: {
-      roles: ['role_admin'],
-      permissions: { has: vi.fn().mockReturnValue(true) },
-    } as any,
-    guild: { id: 'guild_discord' } as any,
-    channel: { id: 'channel_1' } as any,
-    client: {} as any,
-    options: {
-      getString: vi.fn((key: string) => options[key] ?? null),
-      getInteger: vi.fn((key: string) => options[key] ?? null),
-      getNumber: vi.fn((key: string) => options[key] ?? null),
-      getBoolean: vi.fn((key: string) => options[key] ?? null),
-      getUser: vi.fn().mockResolvedValue(options['user'] ?? null),
-      getMember: vi.fn().mockResolvedValue(null),
-      getChannel: vi.fn().mockResolvedValue(null),
-      getAttachment: vi.fn().mockReturnValue(null),
-      getRawArgs: vi.fn().mockReturnValue(args),
-    },
-    reply: replyMock,
-    deferReply: vi.fn().mockResolvedValue(undefined),
-    editReply: vi.fn().mockResolvedValue(undefined),
-    followUp: vi.fn().mockResolvedValue(undefined),
-  }) as unknown as CommandContext;
+  ): CommandContext =>
+    ({
+      source: isPrefix ? 'prefix' : 'slash',
+      id: 'interaction_123',
+      guildId: 'guild_discord',
+      channelId: 'channel_1',
+      user: { id: 'user_1', username: 'TestUser' } as any,
+      member: {
+        roles: ['role_admin'],
+        permissions: { has: vi.fn().mockReturnValue(true) },
+      } as any,
+      guild: { id: 'guild_discord' } as any,
+      channel: { id: 'channel_1' } as any,
+      client: {} as any,
+      options: {
+        getString: vi.fn((key: string) => options[key] ?? null),
+        getInteger: vi.fn((key: string) => options[key] ?? null),
+        getNumber: vi.fn((key: string) => options[key] ?? null),
+        getBoolean: vi.fn((key: string) => options[key] ?? null),
+        getUser: vi.fn().mockResolvedValue(options['user'] ?? null),
+        getMember: vi.fn().mockResolvedValue(null),
+        getChannel: vi.fn().mockResolvedValue(null),
+        getAttachment: vi.fn().mockReturnValue(null),
+        getRawArgs: vi.fn().mockReturnValue(args),
+      },
+      reply: replyMock,
+      deferReply: vi.fn().mockResolvedValue(undefined),
+      editReply: vi.fn().mockResolvedValue(undefined),
+      followUp: vi.fn().mockResolvedValue(undefined),
+    }) as unknown as CommandContext;
 
   describe('WaifuGuild Command', () => {
     it('creates a new guild', async () => {
@@ -234,7 +247,10 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
       });
 
       await cmd.execute(ctx);
-      expect(services.waifuGuildService.joinGuild).toHaveBeenCalledWith('user_1', 'Starlight Order');
+      expect(services.waifuGuildService.joinGuild).toHaveBeenCalledWith(
+        'user_1',
+        'Starlight Order',
+      );
       expect(replyMock).toHaveBeenCalledWith(
         expect.objectContaining({
           embeds: expect.any(Array),
@@ -298,7 +314,10 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
       });
 
       await cmd.execute(ctx);
-      expect(services.achievementService.claimAchievement).toHaveBeenCalledWith('user_1', 'COLL_INITIATE');
+      expect(services.achievementService.claimAchievement).toHaveBeenCalledWith(
+        'user_1',
+        'COLL_INITIATE',
+      );
       expect(replyMock).toHaveBeenCalledWith(
         expect.objectContaining({
           embeds: expect.any(Array),

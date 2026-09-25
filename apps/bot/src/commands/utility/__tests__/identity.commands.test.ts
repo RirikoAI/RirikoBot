@@ -8,20 +8,25 @@ import { createMemberInfoCommand } from '../member-info.command.js';
 
 describe('Server Identity Commands Suite', () => {
   describe('/get-avatar command', () => {
-    function setupAvatar(options: {
-      source?: 'slash' | 'prefix';
-      args?: string[];
-      targetUser?: any;
-      authorUser?: any;
-      serverAvatar?: boolean;
-      memberAvatar?: string | null;
-      isAnimated?: boolean;
-    } = {}) {
+    function setupAvatar(
+      options: {
+        source?: 'slash' | 'prefix';
+        args?: string[];
+        targetUser?: any;
+        authorUser?: any;
+        serverAvatar?: boolean;
+        memberAvatar?: string | null;
+        isAnimated?: boolean;
+      } = {},
+    ) {
       const authorUser = options.authorUser ?? {
         id: 'user-1',
         username: 'UserOne',
         displayName: 'User One',
-        displayAvatarURL: vi.fn(({ extension, size }) => `https://cdn.discordapp.com/avatars/user-1/hash.${extension || 'webp'}?size=${size || 4096}`),
+        displayAvatarURL: vi.fn(
+          ({ extension, size }) =>
+            `https://cdn.discordapp.com/avatars/user-1/hash.${extension || 'webp'}?size=${size || 4096}`,
+        ),
         avatar: options.isAnimated ? 'a_animatedhash' : 'static_hash',
       };
 
@@ -30,7 +35,10 @@ describe('Server Identity Commands Suite', () => {
       const member = {
         displayName: 'Guild Member Display',
         avatar: options.memberAvatar ?? null,
-        displayAvatarURL: vi.fn(({ extension, size }) => `https://cdn.discordapp.com/guilds/guild-1/users/user-1/avatars/memberhash.${extension || 'webp'}?size=${size || 4096}`),
+        displayAvatarURL: vi.fn(
+          ({ extension, size }) =>
+            `https://cdn.discordapp.com/guilds/guild-1/users/user-1/avatars/memberhash.${extension || 'webp'}?size=${size || 4096}`,
+        ),
       };
 
       const guild = {
@@ -46,7 +54,10 @@ describe('Server Identity Commands Suite', () => {
             id,
             username: `FetchedUser_${id}`,
             displayName: `Fetched User ${id}`,
-            displayAvatarURL: vi.fn(({ extension }) => `https://cdn.discordapp.com/avatars/${id}/hash.${extension || 'webp'}`),
+            displayAvatarURL: vi.fn(
+              ({ extension }) =>
+                `https://cdn.discordapp.com/avatars/${id}/hash.${extension || 'webp'}`,
+            ),
             avatar: 'fetchedhash',
           })),
         },
@@ -99,7 +110,10 @@ describe('Server Identity Commands Suite', () => {
         id: 'user-2',
         username: 'UserTwo',
         displayName: 'User Two',
-        displayAvatarURL: vi.fn(({ extension }) => `https://cdn.discordapp.com/avatars/user-2/hash2.${extension || 'webp'}`),
+        displayAvatarURL: vi.fn(
+          ({ extension }) =>
+            `https://cdn.discordapp.com/avatars/user-2/hash2.${extension || 'webp'}`,
+        ),
         avatar: 'hash2',
       };
       const { command, ctx, raw } = setupAvatar({ targetUser });
@@ -227,19 +241,37 @@ describe('Server Identity Commands Suite', () => {
       const embed = replyCall.embeds[0].data;
 
       expect(embed.title).toContain('Ririko Paradise');
-      expect(embed.fields.some((f: any) => f.name.includes('Owner') && f.value.includes('GuildMaster#0001'))).toBe(true);
-      expect(embed.fields.some((f: any) => f.name.includes('Timezone') && f.value.includes('Asia/Kuala_Lumpur'))).toBe(true);
-      expect(embed.fields.some((f: any) => f.name.includes('Members') && f.value.includes('250'))).toBe(true);
-      expect(embed.fields.some((f: any) => f.name.includes('Channels') && f.value.includes('Text: **1**'))).toBe(true);
-      expect(embed.fields.some((f: any) => f.name.includes('Boost') && f.value.includes('Level **2**'))).toBe(true);
+      expect(
+        embed.fields.some(
+          (f: any) => f.name.includes('Owner') && f.value.includes('GuildMaster#0001'),
+        ),
+      ).toBe(true);
+      expect(
+        embed.fields.some(
+          (f: any) => f.name.includes('Timezone') && f.value.includes('Asia/Kuala_Lumpur'),
+        ),
+      ).toBe(true);
+      expect(
+        embed.fields.some((f: any) => f.name.includes('Members') && f.value.includes('250')),
+      ).toBe(true);
+      expect(
+        embed.fields.some(
+          (f: any) => f.name.includes('Channels') && f.value.includes('Text: **1**'),
+        ),
+      ).toBe(true);
+      expect(
+        embed.fields.some((f: any) => f.name.includes('Boost') && f.value.includes('Level **2**')),
+      ).toBe(true);
     });
   });
 
   describe('/member-info command', () => {
-    function setupMemberInfo(options: {
-      inGuild?: boolean;
-      hasEconomy?: boolean;
-    } = {}) {
+    function setupMemberInfo(
+      options: {
+        inGuild?: boolean;
+        hasEconomy?: boolean;
+      } = {},
+    ) {
       const inGuild = options.inGuild ?? true;
       const targetUser = {
         id: 'target-user-1',
@@ -269,7 +301,9 @@ describe('Server Identity Commands Suite', () => {
           ]),
           highest: { name: 'Moderator' },
         },
-        displayAvatarURL: vi.fn(() => 'https://cdn.discordapp.com/guilds/guild-1/users/target/avatar.png'),
+        displayAvatarURL: vi.fn(
+          () => 'https://cdn.discordapp.com/guilds/guild-1/users/target/avatar.png',
+        ),
       };
 
       const guild = inGuild
@@ -285,15 +319,11 @@ describe('Server Identity Commands Suite', () => {
         resolveUserTimeZone: vi.fn(async () => 'America/New_York'),
         economyRepo: {
           findById: vi.fn(async () =>
-            options.hasEconomy
-              ? { walletBalance: 15000, bankBalance: 50000 }
-              : null,
+            options.hasEconomy ? { walletBalance: 15000, bankBalance: 50000 } : null,
           ),
         },
         xpRepo: {
-          findById: vi.fn(async () =>
-            options.hasEconomy ? { level: 25, karma: 120 } : null,
-          ),
+          findById: vi.fn(async () => (options.hasEconomy ? { level: 25, karma: 120 } : null)),
         },
       } as unknown as BotServices;
 
@@ -333,9 +363,21 @@ describe('Server Identity Commands Suite', () => {
       const embed = replyCall.embeds[0].data;
 
       expect(embed.title).toContain('Target Nickname');
-      expect(embed.fields.some((f: any) => f.name.includes('Effective Timezone') && f.value.includes('America/New_York'))).toBe(true);
-      expect(embed.fields.some((f: any) => f.name.includes('Key Permissions') && f.value.includes('Manage Server'))).toBe(true);
-      expect(embed.fields.some((f: any) => f.name.includes('Economy') && f.value.includes('Level: **25**'))).toBe(true);
+      expect(
+        embed.fields.some(
+          (f: any) => f.name.includes('Effective Timezone') && f.value.includes('America/New_York'),
+        ),
+      ).toBe(true);
+      expect(
+        embed.fields.some(
+          (f: any) => f.name.includes('Key Permissions') && f.value.includes('Manage Server'),
+        ),
+      ).toBe(true);
+      expect(
+        embed.fields.some(
+          (f: any) => f.name.includes('Economy') && f.value.includes('Level: **25**'),
+        ),
+      ).toBe(true);
     });
   });
 });

@@ -23,7 +23,9 @@ describe('JikanClient', () => {
   it('searches anime and manga with the SFW flag and a clamped limit', async () => {
     const fetchFn = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ data: [{ mal_id: 52991, title: 'Sousou no Frieren' }] }))
+      .mockResolvedValueOnce(
+        jsonResponse({ data: [{ mal_id: 52991, title: 'Sousou no Frieren' }] }),
+      )
       .mockResolvedValueOnce(jsonResponse({ data: [] }));
     const client = clientWith(fetchFn);
 

@@ -106,8 +106,11 @@ export class CardImageService {
     for (const candidate of [asset.discordCdnUrl, asset.localStoragePath]) {
       if (!candidate) continue;
       if (/^https?:\/\//.test(candidate)) return { imageUrl: candidate };
-      const local = resolveWorkspacePath(candidate.replace(/^\/+/, ''));
-      if (fs.existsSync(local)) return { imagePath: local };
+      // Ingestion stores workspace paths with a leading slash (`/assets/...`), which on POSIX
+      // also looks absolute, so try the workspace first and the literal absolute path second.
+      for (const local of [resolveWorkspacePath(candidate.replace(/^\/+/, '')), candidate]) {
+        if (path.isAbsolute(local) && fs.existsSync(local)) return { imagePath: local };
+      }
     }
     return {};
   }

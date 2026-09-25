@@ -51,7 +51,10 @@ describe('TASK-1043: DungeonBattleSession Interactive Real-Time Combat', () => {
       speed: 30,
     });
 
-    const affixHandler = new SeasonalAffixHandler('INFERNAL_CRUCIBLE', 'Season 1: Infernal Crucible');
+    const affixHandler = new SeasonalAffixHandler(
+      'INFERNAL_CRUCIBLE',
+      'Season 1: Infernal Crucible',
+    );
     const session = new DungeonBattleSession({
       floorNumber: 5,
       seasonId: 's1_infernal',
@@ -289,7 +292,14 @@ describe('TASK-1043: DungeonBattleSession Interactive Real-Time Combat', () => {
 
   it('should trigger soft enrage on turn 10+ with massive true damage strikes', () => {
     const player = createMockCombatant({ maxHealth: 20000, currentHealth: 20000, speed: 10 });
-    const boss = createMockCombatant({ id: 'enrage_boss', team: 'TEAM_B', maxHealth: 50000, currentHealth: 50000, attack: 500, speed: 50 });
+    const boss = createMockCombatant({
+      id: 'enrage_boss',
+      team: 'TEAM_B',
+      maxHealth: 50000,
+      currentHealth: 50000,
+      attack: 500,
+      speed: 50,
+    });
 
     const session = new DungeonBattleSession({
       floorNumber: 15,
@@ -368,7 +378,12 @@ describe('TASK-1043: DungeonBattleSession Interactive Real-Time Combat', () => {
     expect(result.victory).toBe(true);
     expect(result.highestFloorCleared).toBe(1);
     expect(result.isFirstClear).toBe(true);
-    expect(mockProgressRepo.recordFloorAttempt).toHaveBeenCalledWith('u1', 'season_tutorial', 1, true);
+    expect(mockProgressRepo.recordFloorAttempt).toHaveBeenCalledWith(
+      'u1',
+      'season_tutorial',
+      1,
+      true,
+    );
   });
 
   describe('executeItemTurn', () => {
@@ -415,7 +430,9 @@ describe('TASK-1043: DungeonBattleSession Interactive Real-Time Combat', () => {
       expect(itemState.potionUsedThisTurn).toBe(true);
       expect(itemState.allLogs.some((l) => l.message.includes('Minor HP Potion'))).toBe(true);
       // Boss did NOT attack
-      expect(itemState.allLogs.some((l) => l.actorName === 'Training Boss' && l.actionType === 'ATTACK')).toBe(false);
+      expect(
+        itemState.allLogs.some((l) => l.actorName === 'Training Boss' && l.actionType === 'ATTACK'),
+      ).toBe(false);
 
       // Attempting to use a second potion on the same turn should be blocked
       const secondPotionState = session.executeItemTurn({
@@ -425,7 +442,11 @@ describe('TASK-1043: DungeonBattleSession Interactive Real-Time Combat', () => {
         subtype: 'HP_POTION',
         consumableEffect: { healFlat: 50 },
       });
-      expect(secondPotionState.allLogs.some((l) => l.message.includes('can only use 1 potion at a time per turn'))).toBe(true);
+      expect(
+        secondPotionState.allLogs.some((l) =>
+          l.message.includes('can only use 1 potion at a time per turn'),
+        ),
+      ).toBe(true);
 
       // Executing a combat action (e.g. ATTACK) completes the turn and resets potionUsedThisTurn
       const attackState = session.executeTurn('ATTACK');

@@ -50,11 +50,7 @@ export class BankingService {
   /**
    * Synchronizes and updates the user's bank capacity based on their current level and expansions.
    */
-  public async syncBankCapacity(
-    userId: string,
-    level: number,
-    expansions = 0,
-  ): Promise<number> {
+  public async syncBankCapacity(userId: string, level: number, expansions = 0): Promise<number> {
     const targetCapacity = this.calculateBankCapacity(level, expansions);
     const balance = await this.repository.getOrCreateBalance(userId, targetCapacity);
 

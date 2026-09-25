@@ -215,7 +215,7 @@ export class ExtractorPipeline {
           for (const query of queries) {
             try {
               const candidates = await ytAdapter.search(query, 5);
-              const bestMatch = PrecisionTrackMatcher.selectBestCandidate(track, candidates, 0.70);
+              const bestMatch = PrecisionTrackMatcher.selectBestCandidate(track, candidates, 0.7);
               if (bestMatch) {
                 const ytTrack = (await ytAdapter.resolve(bestMatch.candidate.url)) as ResolvedTrack;
                 return await ytTrack.getStream();
@@ -231,10 +231,7 @@ export class ExtractorPipeline {
         const scAdapter = this.getAdapter('soundcloud');
         if (scAdapter) {
           const cleanTitle = PrecisionTrackMatcher.cleanTitle(track.title) || track.title;
-          const scQueries = [
-            `${track.artist} - ${cleanTitle}`,
-            `${track.artist} ${track.title}`,
-          ];
+          const scQueries = [`${track.artist} - ${cleanTitle}`, `${track.artist} ${track.title}`];
           for (const query of scQueries) {
             try {
               const scCandidates = await scAdapter.search(query, 5);
@@ -267,13 +264,7 @@ export class ExtractorPipeline {
     if (!cleanQuery) return [];
 
     // Fallback chain: preferred (default SoundCloud) -> Spotify -> YouTube -> Deezer
-    const rawChain: MusicSource[] = [
-      preferredSource,
-      'soundcloud',
-      'spotify',
-      'youtube',
-      'deezer',
-    ];
+    const rawChain: MusicSource[] = [preferredSource, 'soundcloud', 'spotify', 'youtube', 'deezer'];
     const chain = rawChain.filter((val, idx, arr) => arr.indexOf(val) === idx);
 
     for (const source of chain) {

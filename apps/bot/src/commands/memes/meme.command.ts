@@ -88,9 +88,11 @@ export function createMemeCommand(services: BotServices): Command {
     metadata: {
       name: COMMAND_NAME,
       category: CommandCategory.MEMES,
-      description: 'Generate dynamic memes using classic templates (0days, chad, chopper, cat, etc.)',
+      description:
+        'Generate dynamic memes using classic templates (0days, chad, chopper, cat, etc.)',
       aliases: MEME_PREFIX_ALIASES,
-      usage: '/meme template:<template> text1:<text> [text2] [text3]... | !meme <template> text1 | text2 | !0days text1 | text2',
+      usage:
+        '/meme template:<template> text1:<text> [text2] [text3]... | !meme <template> text1 | text2 | !0days text1 | text2',
       examples: [
         '/meme template:0days text1:No Accidents text2:Since Fariz Joined',
         '!meme 0days No Accidents | Since Fariz Joined',
@@ -145,7 +147,10 @@ export function createMemeCommand(services: BotServices): Command {
       const matches = searchMemeTemplates(focused, 25);
       await interaction.respond(
         matches.map((template) => ({
-          name: truncate(`${template.title} (${template.name}) — ${template.description}`, MAX_AUTOCOMPLETE_LENGTH),
+          name: truncate(
+            `${template.title} (${template.name}) — ${template.description}`,
+            MAX_AUTOCOMPLETE_LENGTH,
+          ),
           value: template.id,
         })),
       );

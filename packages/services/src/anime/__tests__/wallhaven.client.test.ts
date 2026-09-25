@@ -5,7 +5,10 @@ import { WallhavenClient } from '../wallhaven.client.js';
 const instantLimiter = () => new RateLimiter(0, { sleep: () => Promise.resolve() });
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
 }
 
 const raw = (id: string, purity = 'sfw') => ({
@@ -22,7 +25,9 @@ const raw = (id: string, purity = 'sfw') => ({
 
 describe('WallhavenClient', () => {
   it('pins every search to the Anime category and SFW purity, by relevance', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ data: [raw('k8831q')] }));
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(jsonResponse({ data: [raw('k8831q')] }));
     const client = new WallhavenClient({ limiter: instantLimiter(), fetchFn });
 
     const [wallpaper] = await client.search(' frieren ', 2);
@@ -59,6 +64,8 @@ describe('WallhavenClient', () => {
 
   it('throws on failures', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(new Response('', { status: 401 }));
-    await expect(new WallhavenClient({ limiter: instantLimiter(), fetchFn }).search('x')).rejects.toThrow('HTTP 401');
+    await expect(
+      new WallhavenClient({ limiter: instantLimiter(), fetchFn }).search('x'),
+    ).rejects.toThrow('HTTP 401');
   });
 });

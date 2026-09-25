@@ -16,13 +16,15 @@ export type AnimeSearchProvider = (title: string) => Promise<AnimeSearchResult |
 export class AnimeSearchTool implements SafeTool<AnimeSearchArgs, AnimeSearchResult> {
   readonly definition = {
     name: 'anime.search',
-    description: 'Searches AniList database for anime synopsis, episode count, status, and community rating score.',
+    description:
+      'Searches AniList database for anime synopsis, episode count, status, and community rating score.',
     parameters: {
       type: 'object',
       properties: {
         title: {
           type: 'string',
-          description: 'The anime title or keyword to search for (e.g. "Frieren", "Steins;Gate", "Attack on Titan").',
+          description:
+            'The anime title or keyword to search for (e.g. "Frieren", "Steins;Gate", "Attack on Titan").',
         },
       },
       required: ['title'],

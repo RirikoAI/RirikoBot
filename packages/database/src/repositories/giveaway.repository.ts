@@ -69,10 +69,7 @@ export class GiveawayRepository extends BaseRepository<
     };
 
     if (this.isSqlite(client)) {
-      const [created] = await client.db
-        .insert(sqliteSchema.giveaways)
-        .values(payload)
-        .returning();
+      const [created] = await client.db.insert(sqliteSchema.giveaways).values(payload).returning();
       if (!created) throw new DatabaseError(`Failed to insert giveaway ${id}`);
       return created as Giveaway;
     } else {
@@ -85,11 +82,7 @@ export class GiveawayRepository extends BaseRepository<
     }
   }
 
-  async update(
-    id: string,
-    data: Partial<NewGiveaway>,
-    tx?: DatabaseClient,
-  ): Promise<Giveaway> {
+  async update(id: string, data: Partial<NewGiveaway>, tx?: DatabaseClient): Promise<Giveaway> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [updated] = await client.db
@@ -192,22 +185,14 @@ export class GiveawayRepository extends BaseRepository<
         .select()
         .from(sqliteSchema.giveaways)
         .where(
-          and(
-            eq(sqliteSchema.giveaways.isEnded, false),
-            lte(sqliteSchema.giveaways.endsAt, now),
-          ),
+          and(eq(sqliteSchema.giveaways.isEnded, false), lte(sqliteSchema.giveaways.endsAt, now)),
         );
       return rows as Giveaway[];
     } else {
       const rows = await client.db
         .select()
         .from(pgSchema.giveaways)
-        .where(
-          and(
-            eq(pgSchema.giveaways.isEnded, false),
-            lte(pgSchema.giveaways.endsAt, now),
-          ),
-        );
+        .where(and(eq(pgSchema.giveaways.isEnded, false), lte(pgSchema.giveaways.endsAt, now)));
       return rows as unknown as Giveaway[];
     }
   }
@@ -274,11 +259,7 @@ export class GiveawayRepository extends BaseRepository<
     }
   }
 
-  async removeEntry(
-    giveawayId: string,
-    userId: string,
-    tx?: DatabaseClient,
-  ): Promise<boolean> {
+  async removeEntry(giveawayId: string, userId: string, tx?: DatabaseClient): Promise<boolean> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const result = await client.db
@@ -305,10 +286,7 @@ export class GiveawayRepository extends BaseRepository<
     }
   }
 
-  async getEntries(
-    giveawayId: string,
-    tx?: DatabaseClient,
-  ): Promise<GiveawayEntry[]> {
+  async getEntries(giveawayId: string, tx?: DatabaseClient): Promise<GiveawayEntry[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const rows = await client.db
@@ -325,10 +303,7 @@ export class GiveawayRepository extends BaseRepository<
     }
   }
 
-  async getEntryCount(
-    giveawayId: string,
-    tx?: DatabaseClient,
-  ): Promise<number> {
+  async getEntryCount(giveawayId: string, tx?: DatabaseClient): Promise<number> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [row] = await client.db
@@ -345,11 +320,7 @@ export class GiveawayRepository extends BaseRepository<
     }
   }
 
-  async hasUserEntered(
-    giveawayId: string,
-    userId: string,
-    tx?: DatabaseClient,
-  ): Promise<boolean> {
+  async hasUserEntered(giveawayId: string, userId: string, tx?: DatabaseClient): Promise<boolean> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [row] = await client.db
@@ -403,16 +374,13 @@ export class GiveawayRepository extends BaseRepository<
     } else {
       const created = await client.db
         .insert(pgSchema.giveawayWinners)
-        .values(payloads as unknown as typeof pgSchema.giveawayWinners.$inferInsert[])
+        .values(payloads as unknown as (typeof pgSchema.giveawayWinners.$inferInsert)[])
         .returning();
       return created as unknown as GiveawayWinner[];
     }
   }
 
-  async getWinners(
-    giveawayId: string,
-    tx?: DatabaseClient,
-  ): Promise<GiveawayWinner[]> {
+  async getWinners(giveawayId: string, tx?: DatabaseClient): Promise<GiveawayWinner[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const rows = await client.db

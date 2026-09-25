@@ -1,17 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createDatabaseClient, type SqliteDatabaseClient } from '@ririko/database';
 import type { CommandContext } from '@ririko/discord';
-import { PermissionFlagsBits, type User, type Guild, type GuildMember, type TextBasedChannel, type Client, type Message, type Channel } from 'discord.js';
+import {
+  PermissionFlagsBits,
+  type User,
+  type Guild,
+  type GuildMember,
+  type TextBasedChannel,
+  type Client,
+  type Message,
+  type Channel,
+} from 'discord.js';
 import { createBotServices, type BotServices } from '../../services.js';
 import { AiChatController } from '../../controllers/ai-chat.controller.js';
 import { createAiCommands } from './commands.js';
-import type {
-  ChatModelProvider,
-  ChatRequest,
-  ChatResponse,
-  ChatToken,
-  ToolCall,
-} from '@ririko/ai';
+import type { ChatModelProvider, ChatRequest, ChatResponse, ChatToken, ToolCall } from '@ririko/ai';
 
 class MockAiProvider implements ChatModelProvider {
   readonly id = 'mock-provider';
@@ -28,7 +31,8 @@ class MockAiProvider implements ChatModelProvider {
   async generate(request: ChatRequest): Promise<ChatResponse> {
     this.recordedRequests.push(request);
     const isSynthesis = !request.tools && request.messages.some((m) => m.role === 'tool');
-    const content = isSynthesis && this.synthesisText !== undefined ? this.synthesisText : this.responseText;
+    const content =
+      isSynthesis && this.synthesisText !== undefined ? this.synthesisText : this.responseText;
 
     return {
       content,
@@ -74,15 +78,21 @@ function createMockContext(params: {
     username: params.username ?? 'Alice',
   } as User;
 
-  const guild = params.guildId !== null
-    ? ({ id: params.guildId ?? 'guild-test', name: 'Test Guild', members: { me: { permissions: { bitfield: 3145728n } } } } as unknown as Guild)
-    : null;
+  const guild =
+    params.guildId !== null
+      ? ({
+          id: params.guildId ?? 'guild-test',
+          name: 'Test Guild',
+          members: { me: { permissions: { bitfield: 3145728n } } },
+        } as unknown as Guild)
+      : null;
 
   const member = guild
     ? ({
         displayName: 'Alice In Wonderland',
         permissions: {
-          has: (perm: bigint) => ((params.permissions ?? PermissionFlagsBits.Administrator) & perm) !== 0n,
+          has: (perm: bigint) =>
+            ((params.permissions ?? PermissionFlagsBits.Administrator) & perm) !== 0n,
           bitfield: params.permissions ?? PermissionFlagsBits.Administrator,
         },
         roles: { highest: { position: 10 } },
@@ -91,15 +101,17 @@ function createMockContext(params: {
     : null;
 
   const optionsMap = params.optionsMap ?? {};
-  const reply = (params.replyFn ?? vi.fn(async (res: unknown) => {
-    replies.push(res);
-    return {} as Message;
-  })) as unknown as CommandContext['reply'];
+  const reply = (params.replyFn ??
+    vi.fn(async (res: unknown) => {
+      replies.push(res);
+      return {} as Message;
+    })) as unknown as CommandContext['reply'];
 
-  const editReply = (params.editReplyFn ?? vi.fn(async (res: unknown) => {
-    edits.push(res);
-    return {} as Message;
-  })) as unknown as CommandContext['editReply'];
+  const editReply = (params.editReplyFn ??
+    vi.fn(async (res: unknown) => {
+      edits.push(res);
+      return {} as Message;
+    })) as unknown as CommandContext['editReply'];
 
   const ctx: CommandContext = {
     source: params.source ?? 'slash',
@@ -483,7 +495,9 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
         (r) => !r.tools && r.messages.some((m) => m.role === 'tool'),
       );
       expect(synthesisReq).toBeDefined();
-      expect(synthesisReq?.messages.some((m) => m.role === 'tool' && m.toolCallId === 'call-clock-1')).toBe(true);
+      expect(
+        synthesisReq?.messages.some((m) => m.role === 'tool' && m.toolCallId === 'call-clock-1'),
+      ).toBe(true);
     });
 
     it('falls back to clean formatted markdown when slash tool synthesis fails', async () => {

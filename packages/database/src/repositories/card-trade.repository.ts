@@ -24,7 +24,10 @@ export class CardTradeRepository extends BaseRepository<
       offeredCredits: Number(row['offeredCredits'] ?? 0),
       requestedCredits: Number(row['requestedCredits'] ?? 0),
       status: String(row['status']),
-      createdAt: row['createdAt'] instanceof Date ? row['createdAt'] : new Date(row['createdAt'] as string | number),
+      createdAt:
+        row['createdAt'] instanceof Date
+          ? row['createdAt']
+          : new Date(row['createdAt'] as string | number),
       resolvedAt: row['resolvedAt']
         ? row['resolvedAt'] instanceof Date
           ? row['resolvedAt']
@@ -111,8 +114,10 @@ export class CardTradeRepository extends BaseRepository<
     try {
       if (this.isSqlite(client)) {
         const updateData: Record<string, unknown> = { ...data };
-        if (data.offeredCredits !== undefined) updateData['offeredCredits'] = Number(data.offeredCredits);
-        if (data.requestedCredits !== undefined) updateData['requestedCredits'] = Number(data.requestedCredits);
+        if (data.offeredCredits !== undefined)
+          updateData['offeredCredits'] = Number(data.offeredCredits);
+        if (data.requestedCredits !== undefined)
+          updateData['requestedCredits'] = Number(data.requestedCredits);
 
         const [row] = await client.db
           .update(sqliteSchema.cardTrades)
@@ -123,8 +128,10 @@ export class CardTradeRepository extends BaseRepository<
         return this.normalizeTrade(row as unknown as Record<string, unknown>);
       } else {
         const updateData: Record<string, unknown> = { ...data };
-        if (data.offeredCredits !== undefined) updateData['offeredCredits'] = BigInt(data.offeredCredits);
-        if (data.requestedCredits !== undefined) updateData['requestedCredits'] = BigInt(data.requestedCredits);
+        if (data.offeredCredits !== undefined)
+          updateData['offeredCredits'] = BigInt(data.offeredCredits);
+        if (data.requestedCredits !== undefined)
+          updateData['requestedCredits'] = BigInt(data.requestedCredits);
 
         const [row] = await client.db
           .update(pgSchema.cardTrades)
@@ -183,7 +190,11 @@ export class CardTradeRepository extends BaseRepository<
     }
   }
 
-  async findActiveTradeBetween(user1Id: string, user2Id: string, tx?: DatabaseClient): Promise<CardTrade | null> {
+  async findActiveTradeBetween(
+    user1Id: string,
+    user2Id: string,
+    tx?: DatabaseClient,
+  ): Promise<CardTrade | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [row] = await client.db

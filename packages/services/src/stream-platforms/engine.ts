@@ -1,10 +1,6 @@
 import type { StreamRepository } from '@ririko/database';
 import type { Streamer } from '@ririko/database';
-import type {
-  StreamPlatform,
-  StreamPlatformAdapter,
-  LiveStreamInfo,
-} from './types.js';
+import type { StreamPlatform, StreamPlatformAdapter, LiveStreamInfo } from './types.js';
 
 export interface StreamWatcherOptions {
   checkIntervalMs?: number | undefined;
@@ -22,7 +18,8 @@ export interface StreamCheckResult {
 export class StreamWatcherEngine {
   private readonly adapters = new Map<StreamPlatform, StreamPlatformAdapter>();
   private readonly checkIntervalMs: number;
-  private readonly onStreamLive?: ((streamer: Streamer, stream: LiveStreamInfo) => Promise<void> | void) | undefined;
+  private readonly onStreamLive?:
+    ((streamer: Streamer, stream: LiveStreamInfo) => Promise<void> | void) | undefined;
   private readonly onStreamOffline?: ((streamer: Streamer) => Promise<void> | void) | undefined;
 
   private timer: NodeJS.Timeout | null = null;
@@ -34,8 +31,7 @@ export class StreamWatcherEngine {
     options: StreamWatcherOptions = {},
   ) {
     this.checkIntervalMs =
-      options.checkIntervalMs ??
-      Number(process.env.STREAM_CHECK_INTERVAL_MS || 60_000);
+      options.checkIntervalMs ?? Number(process.env.STREAM_CHECK_INTERVAL_MS || 60_000);
     this.onStreamLive = options.onStreamLive;
     this.onStreamOffline = options.onStreamOffline;
   }
@@ -167,7 +163,10 @@ export class StreamWatcherEngine {
                       try {
                         await this.onStreamLive(s, liveData);
                       } catch (handlerErr) {
-                        console.error(`[StreamWatcher] onStreamLive error for ${s.username}:`, handlerErr);
+                        console.error(
+                          `[StreamWatcher] onStreamLive error for ${s.username}:`,
+                          handlerErr,
+                        );
                       }
                     }
                   }
@@ -178,7 +177,10 @@ export class StreamWatcherEngine {
                     try {
                       await this.onStreamOffline(s);
                     } catch (handlerErr) {
-                      console.error(`[StreamWatcher] onStreamOffline error for ${s.username}:`, handlerErr);
+                      console.error(
+                        `[StreamWatcher] onStreamOffline error for ${s.username}:`,
+                        handlerErr,
+                      );
                     }
                   }
                 } else {
@@ -186,7 +188,10 @@ export class StreamWatcherEngine {
                 }
               } catch (itemErr) {
                 errorCount++;
-                console.error(`[StreamWatcherEngine] Error processing streamer ${s.username}:`, itemErr);
+                console.error(
+                  `[StreamWatcherEngine] Error processing streamer ${s.username}:`,
+                  itemErr,
+                );
               }
             }
           } else {
@@ -216,7 +221,10 @@ export class StreamWatcherEngine {
                       try {
                         await this.onStreamLive(s, liveData);
                       } catch (handlerErr) {
-                        console.error(`[StreamWatcher] onStreamLive error for ${s.username}:`, handlerErr);
+                        console.error(
+                          `[StreamWatcher] onStreamLive error for ${s.username}:`,
+                          handlerErr,
+                        );
                       }
                     }
                   }
@@ -227,7 +235,10 @@ export class StreamWatcherEngine {
                     try {
                       await this.onStreamOffline(s);
                     } catch (handlerErr) {
-                      console.error(`[StreamWatcher] onStreamOffline error for ${s.username}:`, handlerErr);
+                      console.error(
+                        `[StreamWatcher] onStreamOffline error for ${s.username}:`,
+                        handlerErr,
+                      );
                     }
                   }
                 } else {
@@ -235,13 +246,19 @@ export class StreamWatcherEngine {
                 }
               } catch (itemErr) {
                 errorCount++;
-                console.error(`[StreamWatcherEngine] Error checking streamer ${s.username} (${platform}):`, itemErr);
+                console.error(
+                  `[StreamWatcherEngine] Error checking streamer ${s.username} (${platform}):`,
+                  itemErr,
+                );
               }
             }
           }
         } catch (platformErr) {
           errorCount++;
-          console.error(`[StreamWatcherEngine] Error in platform check cycle for ${platform}:`, platformErr);
+          console.error(
+            `[StreamWatcherEngine] Error in platform check cycle for ${platform}:`,
+            platformErr,
+          );
         }
       }
 

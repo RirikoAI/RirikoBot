@@ -94,7 +94,11 @@ export class ReactionRoleRepository extends BaseRepository<
     }
   }
 
-  async findByGroup(guildId: string, groupId: string, tx?: DatabaseClient): Promise<ReactionRole[]> {
+  async findByGroup(
+    guildId: string,
+    groupId: string,
+    tx?: DatabaseClient,
+  ): Promise<ReactionRole[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const rows = await client.db
@@ -193,7 +197,7 @@ export class ReactionRoleRepository extends BaseRepository<
           ),
         );
       return (result as unknown as { changes?: number }).changes !== undefined
-        ? ((result as unknown as { changes: number }).changes > 0)
+        ? (result as unknown as { changes: number }).changes > 0
         : true;
     } else {
       const result = await client.db

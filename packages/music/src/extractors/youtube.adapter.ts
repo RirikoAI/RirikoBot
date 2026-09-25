@@ -185,7 +185,6 @@ export class YouTubeAdapter implements MusicSourceAdapter {
     return match ? `${match.artist} - ${match.title}` : null;
   }
 
-
   getCookieRotator(): CookieRotator {
     return this.cookieRotator;
   }
@@ -318,7 +317,10 @@ export class YouTubeAdapter implements MusicSourceAdapter {
     return null;
   }
 
-  private async streamFromPlayDl(_videoId: string, _originalUrl?: string): Promise<Readable | null> {
+  private async streamFromPlayDl(
+    _videoId: string,
+    _originalUrl?: string,
+  ): Promise<Readable | null> {
     // play-dl lacks modern YouTube PO-Token support and triggers 429 rate limit errors from YouTube
     return null;
   }
@@ -457,7 +459,9 @@ export class YouTubeAdapter implements MusicSourceAdapter {
           !cleanAuthor.toLowerCase().includes('unknown');
 
         // Tier 4: In-YouTube Alternate Track / Topic Discovery (stay on YouTube)
-        const primaryYtQuery = isAuthorValid ? `${cleanAuthor} - ${cleanTitle} audio` : `${cleanTitle} audio`;
+        const primaryYtQuery = isAuthorValid
+          ? `${cleanAuthor} - ${cleanTitle} audio`
+          : `${cleanTitle} audio`;
         try {
           const searchRes = await yt.search(primaryYtQuery, { type: 'video' });
           const altVideos: any[] = (searchRes.videos || []).filter((v: any) => {
@@ -529,10 +533,15 @@ export class YouTubeAdapter implements MusicSourceAdapter {
                 source: 'soundcloud',
               }));
 
-              const bestSc = PrecisionTrackMatcher.selectBestCandidate(targetRef, scCandidates, 0.70);
+              const bestSc = PrecisionTrackMatcher.selectBestCandidate(
+                targetRef,
+                scCandidates,
+                0.7,
+              );
               if (bestSc) {
                 const scTrack = (scResults || []).find(
-                  (t: any) => String(t.id || '') === bestSc.candidate.id || t.url === bestSc.candidate.url,
+                  (t: any) =>
+                    String(t.id || '') === bestSc.candidate.id || t.url === bestSc.candidate.url,
                 );
                 if (scTrack) {
                   const scStream = await play.stream_from_info(scTrack);
@@ -567,9 +576,15 @@ export class YouTubeAdapter implements MusicSourceAdapter {
                 source: 'deezer',
               }));
 
-              const bestDz = PrecisionTrackMatcher.selectBestCandidate(targetRef, dzCandidates, 0.70);
+              const bestDz = PrecisionTrackMatcher.selectBestCandidate(
+                targetRef,
+                dzCandidates,
+                0.7,
+              );
               if (bestDz) {
-                const matchedItem = dzItems.find((item: any) => String(item.id) === bestDz.candidate.id);
+                const matchedItem = dzItems.find(
+                  (item: any) => String(item.id) === bestDz.candidate.id,
+                );
                 if (matchedItem?.preview) {
                   const audioRes = await fetch(matchedItem.preview);
                   if (audioRes.ok && audioRes.body) {
@@ -590,7 +605,10 @@ export class YouTubeAdapter implements MusicSourceAdapter {
     };
   }
 
-  private async resolvePlaylist(playlistId: string, playlistUrl: string): Promise<ResolvedPlaylist> {
+  private async resolvePlaylist(
+    playlistId: string,
+    playlistUrl: string,
+  ): Promise<ResolvedPlaylist> {
     try {
       const yt = await this.getInnertube();
       const playlist = await yt.getPlaylist(playlistId);
@@ -635,7 +653,10 @@ export class YouTubeAdapter implements MusicSourceAdapter {
         streamUrl: `https://www.youtube.com/watch?v=${vidId}`,
         getStream: async () => {
           await this.ensureSoundcloudClientId();
-          const scRes = await play.search('YouTube Music', { source: { soundcloud: 'tracks' }, limit: 1 });
+          const scRes = await play.search('YouTube Music', {
+            source: { soundcloud: 'tracks' },
+            limit: 1,
+          });
           if (scRes[0]) {
             const stream = await play.stream_from_info(scRes[0]);
             return stream.stream as Readable;

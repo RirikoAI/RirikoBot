@@ -65,10 +65,7 @@ export class LeaderboardRepository extends BaseRepository<
     return found !== null;
   }
 
-  async create(
-    data: NewLeaderboardSnapshot,
-    tx?: DatabaseClient,
-  ): Promise<LeaderboardSnapshot> {
+  async create(data: NewLeaderboardSnapshot, tx?: DatabaseClient): Promise<LeaderboardSnapshot> {
     const client = this.getClient(tx);
     const now = new Date();
     const insertData = {
@@ -133,10 +130,7 @@ export class LeaderboardRepository extends BaseRepository<
   /**
    * Performs high-speed bulk upsert of materialized rank snapshots.
    */
-  async upsertBatch(
-    snapshots: NewLeaderboardSnapshot[],
-    tx?: DatabaseClient,
-  ): Promise<number> {
+  async upsertBatch(snapshots: NewLeaderboardSnapshot[], tx?: DatabaseClient): Promise<number> {
     if (snapshots.length === 0) return 0;
     const client = this.getClient(tx);
 
@@ -159,12 +153,9 @@ export class LeaderboardRepository extends BaseRepository<
       } else {
         await txClient.db
           .insert(pgSchema.leaderboardSnapshots)
-          .values(snapshots as unknown as typeof pgSchema.leaderboardSnapshots.$inferInsert[])
+          .values(snapshots as unknown as (typeof pgSchema.leaderboardSnapshots.$inferInsert)[])
           .onConflictDoUpdate({
-            target: [
-              pgSchema.leaderboardSnapshots.userId,
-              pgSchema.leaderboardSnapshots.guildId,
-            ],
+            target: [pgSchema.leaderboardSnapshots.userId, pgSchema.leaderboardSnapshots.guildId],
             set: {
               globalRank: sql`excluded.global_rank`,
               serverRank: sql`excluded.server_rank`,

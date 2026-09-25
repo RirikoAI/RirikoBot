@@ -5,12 +5,17 @@ import { OtakuGifsClient, UnknownReactionError } from '../otakugifs.client.js';
 const instantLimiter = () => new RateLimiter(0, { sleep: () => Promise.resolve() });
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
 }
 
 describe('OtakuGifsClient (TASK-1302)', () => {
   it('requests the reactionType slug (not the catalog name) and returns the url', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ url: 'https://otakugifs.xyz/hug.gif' }));
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(jsonResponse({ url: 'https://otakugifs.xyz/hug.gif' }));
     const client = new OtakuGifsClient({ limiter: instantLimiter(), fetchFn });
 
     const url = await client.fetchGifUrl('hug');
@@ -23,7 +28,9 @@ describe('OtakuGifsClient (TASK-1302)', () => {
   });
 
   it('maps a catalog alias to its reactionType slug (stopit -> stop)', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ url: 'https://otakugifs.xyz/stop.gif' }));
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(jsonResponse({ url: 'https://otakugifs.xyz/stop.gif' }));
     const client = new OtakuGifsClient({ limiter: instantLimiter(), fetchFn });
 
     await client.fetchGifUrl('stopit');
@@ -33,7 +40,9 @@ describe('OtakuGifsClient (TASK-1302)', () => {
   });
 
   it('URL-encodes the reactionType slug', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ url: 'https://otakugifs.xyz/x.gif' }));
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(jsonResponse({ url: 'https://otakugifs.xyz/x.gif' }));
     const client = new OtakuGifsClient({ limiter: instantLimiter(), fetchFn });
 
     await client.fetchGifUrl('HUG');

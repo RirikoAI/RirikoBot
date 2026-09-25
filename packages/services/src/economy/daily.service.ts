@@ -78,7 +78,11 @@ export class DailyService {
    * forgiveness threshold the streak simply advances by one — the missed days are skipped,
    * never counted — so a 15-day streak interrupted by two missed days resumes at 16.
    */
-  private resolveStreak(lastDailyAt: Date | null, currentStreak: number, nowMs: number): StreakOutcome {
+  private resolveStreak(
+    lastDailyAt: Date | null,
+    currentStreak: number,
+    nowMs: number,
+  ): StreakOutcome {
     if (!lastDailyAt) {
       return { nextStreak: 1, missedDays: 0, wasReset: false };
     }

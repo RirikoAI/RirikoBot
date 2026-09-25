@@ -17,10 +17,7 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
     services = {} as BotServices;
   });
 
-  const createMockContext = (options: {
-    topic?: string;
-    rawArgs?: string[];
-  }): CommandContext => {
+  const createMockContext = (options: { topic?: string; rawArgs?: string[] }): CommandContext => {
     return {
       commandName: 'tcg-info',
       source: 'slash',
@@ -104,7 +101,9 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
     expect(replyMock).toHaveBeenCalledTimes(1);
     const embed = replyMock.mock.calls[0][0].embeds[0];
     expect(embed.data.title).toContain('7-Element Affinity Matrix & Status Effects');
-    expect(embed.data.description).toContain('FIRE ──► ICE ──► EARTH ──► LIGHTNING ──► WATER ──► FIRE');
+    expect(embed.data.description).toContain(
+      'FIRE ──► ICE ──► EARTH ──► LIGHTNING ──► WATER ──► FIRE',
+    );
     expect(embed.data.description).toContain('2.0x mutual extreme damage');
     expect(embed.data.description).toContain('Freeze / Chill');
   });

@@ -1,14 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FallbackChainManager } from './fallback-chain-manager.js';
-import {
-  ChatModelProvider,
-  ChatRequest,
-  ChatResponse,
-  ChatToken,
-} from '../types/index.js';
+import { ChatModelProvider, ChatRequest, ChatResponse, ChatToken } from '../types/index.js';
 import { AiProviderExhaustionError, AiRateLimitError } from '../errors/index.js';
 
-function createMockProvider(overrides: Partial<ChatModelProvider> & { id: string }): ChatModelProvider {
+function createMockProvider(
+  overrides: Partial<ChatModelProvider> & { id: string },
+): ChatModelProvider {
   return {
     name: overrides.id.toUpperCase(),
     isAvailable: true,

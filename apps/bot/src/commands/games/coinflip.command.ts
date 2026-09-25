@@ -1,9 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { flipCoin, type CoinSide } from '@ririko/services';
 

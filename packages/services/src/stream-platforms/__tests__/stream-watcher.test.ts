@@ -150,7 +150,8 @@ describe('Stream Platforms & Watcher Engine (TASK-0801)', () => {
                   title: 'Ranked Grind To Radiant',
                   viewer_count: 1450,
                   started_at: '2026-09-17T12:00:00Z',
-                  thumbnail_url: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_teststreamer-{width}x{height}.jpg',
+                  thumbnail_url:
+                    'https://static-cdn.jtvnw.net/previews-ttv/live_user_teststreamer-{width}x{height}.jpg',
                 },
               ],
             }),
@@ -354,7 +355,9 @@ describe('Stream Platforms & Watcher Engine (TASK-0801)', () => {
       expect(onOfflineSpy).not.toHaveBeenCalled();
 
       // Verify stream_events record created
-      const events = client.raw.prepare('SELECT * FROM stream_events WHERE streamer_id = ?').all(streamer.id) as any[];
+      const events = client.raw
+        .prepare('SELECT * FROM stream_events WHERE streamer_id = ?')
+        .all(streamer.id) as any[];
       expect(events).toHaveLength(1);
       expect(events[0].stream_id).toBe('stream_live_100');
       expect(events[0].game_name).toBe('Apex Legends');
@@ -400,7 +403,9 @@ describe('Stream Platforms & Watcher Engine (TASK-0801)', () => {
       expect(updated?.isLive).toBe(false);
 
       expect(onOfflineSpy).toHaveBeenCalledTimes(1);
-      expect(onOfflineSpy).toHaveBeenCalledWith(expect.objectContaining({ id: streamer.id, username: 'night_owl' }));
+      expect(onOfflineSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ id: streamer.id, username: 'night_owl' }),
+      );
       expect(onLiveSpy).not.toHaveBeenCalled();
     });
   });

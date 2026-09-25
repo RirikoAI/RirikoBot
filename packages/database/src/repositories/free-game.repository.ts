@@ -47,10 +47,7 @@ export class FreeGameRepository extends BaseRepository<
     };
 
     if (this.isSqlite(client)) {
-      const [created] = await client.db
-        .insert(sqliteSchema.freeGames)
-        .values(payload)
-        .returning();
+      const [created] = await client.db.insert(sqliteSchema.freeGames).values(payload).returning();
       if (!created) throw new DatabaseError(`Failed to insert free game ${data.title}`);
       return created as FreeGame;
     } else {
@@ -63,11 +60,7 @@ export class FreeGameRepository extends BaseRepository<
     }
   }
 
-  async update(
-    id: string,
-    data: Partial<NewFreeGame>,
-    tx?: DatabaseClient,
-  ): Promise<FreeGame> {
+  async update(id: string, data: Partial<NewFreeGame>, tx?: DatabaseClient): Promise<FreeGame> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [updated] = await client.db
@@ -170,11 +163,7 @@ export class FreeGameRepository extends BaseRepository<
     }
   }
 
-  async isGameAnnounced(
-    gameId: string,
-    guildId: string,
-    tx?: DatabaseClient,
-  ): Promise<boolean> {
+  async isGameAnnounced(gameId: string, guildId: string, tx?: DatabaseClient): Promise<boolean> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [row] = await client.db
@@ -302,7 +291,11 @@ export class FreeGameRepository extends BaseRepository<
       } else {
         const [created] = await client.db
           .insert(pgSchema.freeGameChannels)
-          .values({ guildId, channelId, createdAt: new Date() } as unknown as typeof pgSchema.freeGameChannels.$inferInsert)
+          .values({
+            guildId,
+            channelId,
+            createdAt: new Date(),
+          } as unknown as typeof pgSchema.freeGameChannels.$inferInsert)
           .returning();
         return created as unknown as FreeGameChannel;
       }

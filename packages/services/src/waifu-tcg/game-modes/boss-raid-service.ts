@@ -89,10 +89,7 @@ export class BossRaidService {
   /**
    * Attacks the world boss, consuming 30 energy.
    */
-  public async attackBoss(
-    userId: string,
-    attackerCard: Combatant,
-  ): Promise<BossAttackResult> {
+  public async attackBoss(userId: string, attackerCard: Combatant): Promise<BossAttackResult> {
     if (this.currentBoss.isDefeated || this.currentBoss.currentHp <= 0) {
       return {
         success: false,

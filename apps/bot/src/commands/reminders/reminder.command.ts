@@ -23,7 +23,8 @@ type ReminderAction = 'set' | 'list' | 'cancel' | 'timezone';
 const REPEAT_LABEL: Record<string, string> = { NONE: 'No', DAILY: 'Daily', WEEKLY: 'Weekly' };
 
 const unix = (date: Date) => Math.floor(date.getTime() / 1000);
-const truncate = (text: string, max: number) => (text.length <= max ? text : `${text.slice(0, max - 1)}…`);
+const truncate = (text: string, max: number) =>
+  text.length <= max ? text : `${text.slice(0, max - 1)}…`;
 
 interface ParsedRequest {
   action: ReminderAction;
@@ -44,7 +45,8 @@ function parsePrefix(rawArgs: readonly string[]): ParsedRequest {
   const keyword = first.toLowerCase();
   if (keyword === 'list' || rawArgs.length === 0) return { action: 'list' };
   if (keyword === 'cancel' || keyword === 'delete') return { action: 'cancel', id: rest[0] };
-  if (keyword === 'timezone' || keyword === 'tz') return { action: 'timezone', zone: rest.join(' ') || undefined };
+  if (keyword === 'timezone' || keyword === 'tz')
+    return { action: 'timezone', zone: rest.join(' ') || undefined };
 
   const words = keyword === 'set' ? rest : rawArgs;
   const repeatWord = words[0]?.toLowerCase();
@@ -68,9 +70,13 @@ function parseSlash(ctx: CommandContext): ParsedRequest {
 }
 
 function buildListView(reminders: Reminder[]): InteractionEditReplyOptions {
-  const embed = new EmbedBuilder().setColor(COLOR).setTitle(`⏰ Your reminders (${reminders.length})`);
+  const embed = new EmbedBuilder()
+    .setColor(COLOR)
+    .setTitle(`⏰ Your reminders (${reminders.length})`);
   if (reminders.length === 0) {
-    embed.setDescription('You have no active reminders.\nSet one with `/reminder time:tomorrow 9am message:Stand-up`.');
+    embed.setDescription(
+      'You have no active reminders.\nSet one with `/reminder time:tomorrow 9am message:Stand-up`.',
+    );
     return { content: '', embeds: [embed], components: [] };
   }
 
@@ -78,7 +84,9 @@ function buildListView(reminders: Reminder[]): InteractionEditReplyOptions {
     const repeat = r.repeatInterval !== 'NONE' ? ` · 🔁 ${REPEAT_LABEL[r.repeatInterval]}` : '';
     return `\`${shortReminderId(r.id)}\` · <t:${unix(r.triggerAt)}:f> (<t:${unix(r.triggerAt)}:R>)${repeat}\n${truncate(r.message, 150)}`;
   });
-  embed.setDescription(truncate(lines.join('\n\n'), 4096)).setFooter({ text: 'Times are shown in your own timezone.' });
+  embed
+    .setDescription(truncate(lines.join('\n\n'), 4096))
+    .setFooter({ text: 'Times are shown in your own timezone.' });
 
   const menu = new StringSelectMenuBuilder()
     .setCustomId(REMINDER_CANCEL_ID)
@@ -98,7 +106,11 @@ function buildListView(reminders: Reminder[]): InteractionEditReplyOptions {
 }
 
 function formatLocalTime(timeZone: string, now = new Date()): string {
-  return new Intl.DateTimeFormat('en-GB', { timeZone, dateStyle: 'full', timeStyle: 'short' }).format(now);
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    dateStyle: 'full',
+    timeStyle: 'short',
+  }).format(now);
 }
 
 export function createReminderCommand(services: BotServices): Command {
@@ -108,7 +120,8 @@ export function createReminderCommand(services: BotServices): Command {
       category: CommandCategory.UTILITY,
       description: 'Set, list, or cancel reminders, and set your timezone',
       aliases: ['remindme', 'reminders'],
-      usage: '/reminder [time] [message] [repeat] | action:list | action:cancel id | action:timezone zone',
+      usage:
+        '/reminder [time] [message] [repeat] | action:list | action:cancel id | action:timezone zone',
       examples: [
         '/reminder time:30m message:Check the oven',
         '/reminder time:tomorrow 9am message:Stand-up repeat:daily',
@@ -157,10 +170,16 @@ export function createReminderCommand(services: BotServices): Command {
             { name: 'Show or set my timezone', value: 'timezone' },
           ],
         },
-        { name: 'id', description: 'Reminder id to cancel (from the list)', type: 'STRING', required: false },
+        {
+          name: 'id',
+          description: 'Reminder id to cancel (from the list)',
+          type: 'STRING',
+          required: false,
+        },
         {
           name: 'zone',
-          description: 'Your IANA timezone, e.g. Asia/Kuala_Lumpur, Europe/London, America/New_York',
+          description:
+            'Your IANA timezone, e.g. Asia/Kuala_Lumpur, Europe/London, America/New_York',
           type: 'STRING',
           required: false,
         },
@@ -168,14 +187,18 @@ export function createReminderCommand(services: BotServices): Command {
     },
 
     execute: async (ctx: CommandContext) => {
-      const request = ctx.source === 'prefix' ? parsePrefix(ctx.options.getRawArgs()) : parseSlash(ctx);
+      const request =
+        ctx.source === 'prefix' ? parsePrefix(ctx.options.getRawArgs()) : parseSlash(ctx);
       const userId = ctx.user.id;
       const guildId = ctx.guild?.id ?? null;
 
       switch (request.action) {
         case 'set': {
           if (!request.when) {
-            await ctx.reply({ content: '❌ When should I remind you? For example `30m` or `tomorrow 9am`.', ephemeral: true });
+            await ctx.reply({
+              content: '❌ When should I remind you? For example `30m` or `tomorrow 9am`.',
+              ephemeral: true,
+            });
             return;
           }
           const timeZone = await services.resolveUserTimeZone(userId, guildId);
@@ -195,7 +218,11 @@ export function createReminderCommand(services: BotServices): Command {
             .setDescription(truncate(reminder.message, 4096))
             .addFields(
               { name: 'When', value: `<t:${at}:F>\n<t:${at}:R>`, inline: true },
-              { name: 'Repeats', value: REPEAT_LABEL[reminder.repeatInterval] ?? 'No', inline: true },
+              {
+                name: 'Repeats',
+                value: REPEAT_LABEL[reminder.repeatInterval] ?? 'No',
+                inline: true,
+              },
               { name: 'ID', value: `\`${shortReminderId(reminder.id)}\``, inline: true },
             )
             .setFooter({
@@ -207,7 +234,10 @@ export function createReminderCommand(services: BotServices): Command {
 
         case 'cancel': {
           if (!request.id) {
-            await ctx.reply({ content: '❌ Which reminder? Use the id shown in `/reminder action:list`.', ephemeral: true });
+            await ctx.reply({
+              content: '❌ Which reminder? Use the id shown in `/reminder action:list`.',
+              ephemeral: true,
+            });
             return;
           }
           const cancelled = await services.reminderService.cancel(userId, request.id);
@@ -245,7 +275,9 @@ export function createReminderCommand(services: BotServices): Command {
 
         case 'list': {
           await ctx.deferReply({ ephemeral: true });
-          const message: Message = await ctx.editReply(buildListView(await services.reminderService.list(userId)));
+          const message: Message = await ctx.editReply(
+            buildListView(await services.reminderService.list(userId)),
+          );
           attachOwnerCollector(message, {
             ownerId: userId,
             customIds: [REMINDER_CANCEL_ID],

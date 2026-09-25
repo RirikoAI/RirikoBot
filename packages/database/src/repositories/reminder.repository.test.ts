@@ -42,11 +42,13 @@ describe('ReminderRepository (TASK-1411)', () => {
     });
     expect(created.id).toMatch(/[0-9a-f-]{36}/);
     expect(created).toMatchObject({ repeatInterval: 'NONE', isCompleted: false, guildId: null });
-    expect((await repo.findById(created.id))?.triggerAt.toISOString()).toBe('2026-09-23T01:00:00.000Z');
+    expect((await repo.findById(created.id))?.triggerAt.toISOString()).toBe(
+      '2026-09-23T01:00:00.000Z',
+    );
     expect(await repo.count()).toBe(1);
   });
 
-  it('lists and counts a user\'s active reminders soonest first', async () => {
+  it("lists and counts a user's active reminders soonest first", async () => {
     await add('b', 'u1', '2026-09-24T00:00:00Z');
     await add('a', 'u1', '2026-09-23T00:00:00Z');
     await add('done', 'u1', '2026-09-22T00:00:00Z', true);
@@ -79,7 +81,7 @@ describe('ReminderRepository (TASK-1411)', () => {
     expect(rearmed.triggerAt.toISOString()).toBe('2026-09-29T10:00:00.000Z');
   });
 
-  it('deletes only the owner\'s reminder', async () => {
+  it("deletes only the owner's reminder", async () => {
     await add('r', 'u1', '2026-09-22T10:00:00Z');
     expect(await repo.deleteForUser('r', 'u2')).toBe(false);
     expect(await repo.deleteForUser('r', 'u1')).toBe(true);

@@ -223,10 +223,7 @@ export class MiniGameSessionManager {
 
   private isTerminalState(state: GameState): boolean {
     return (
-      state === 'COMPLETED' ||
-      state === 'TIED' ||
-      state === 'TIMEOUT' ||
-      state === 'CANCELLED'
+      state === 'COMPLETED' || state === 'TIED' || state === 'TIMEOUT' || state === 'CANCELLED'
     );
   }
 

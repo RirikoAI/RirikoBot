@@ -199,7 +199,8 @@ export const twitchCheck: DiagnosticCheck = {
     }
     return {
       status: 'warn',
-      message: 'TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET not configured (Run `ririko stream-configure`)',
+      message:
+        'TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET not configured (Run `ririko stream-configure`)',
     };
   },
 };
@@ -216,7 +217,8 @@ export const youtubeStreamCheck: DiagnosticCheck = {
     }
     return {
       status: 'pass',
-      message: 'Active via public web & RSS fallback (Optional: set YOUTUBE_API_KEY for higher quota)',
+      message:
+        'Active via public web & RSS fallback (Optional: set YOUTUBE_API_KEY for higher quota)',
     };
   },
 };
@@ -233,7 +235,8 @@ export const tiktokStreamCheck: DiagnosticCheck = {
     }
     return {
       status: 'pass',
-      message: 'Active via public room alive checks (Optional: set TIKTOK_SESSION_ID to bypass anti-bot challenges)',
+      message:
+        'Active via public room alive checks (Optional: set TIKTOK_SESSION_ID to bypass anti-bot challenges)',
     };
   },
 };
@@ -308,7 +311,8 @@ export const imageGenerationCheck: DiagnosticCheck = {
 
     return {
       status: 'pass',
-      message: 'Active via offline Mock synthesizer (Run `ririko image-configure` to configure external providers)',
+      message:
+        'Active via offline Mock synthesizer (Run `ririko image-configure` to configure external providers)',
     };
   },
 };
@@ -329,4 +333,3 @@ export const allChecks: DiagnosticCheck[] = [
   spotifyCheck,
   imageGenerationCheck,
 ];
-

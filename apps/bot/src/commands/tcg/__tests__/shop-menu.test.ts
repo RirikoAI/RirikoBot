@@ -72,18 +72,22 @@ describe('Town shop menu (STORY-158)', () => {
   });
 
   it('paginates shop items when catalog exceeds 25 items (BUG-0016)', () => {
-    const manyItems = Array.from({ length: 28 }, (_, i) => ({
-      code: `SHOP_ITEM_${i + 1}`,
-      name: `Shop Item ${i + 1}`,
-      description: `Item description ${i + 1}`,
-      type: 'EQUIPMENT',
-      subtype: 'WEAPON',
-      rarity: 'COMMON',
-      baseStats: { attack: 10 + i },
-      battlePerks: [],
-      shopPrice: 100 * (i + 1),
-      maxDailyPurchases: 5,
-    } as unknown as GameItem));
+    const manyItems = Array.from(
+      { length: 28 },
+      (_, i) =>
+        ({
+          code: `SHOP_ITEM_${i + 1}`,
+          name: `Shop Item ${i + 1}`,
+          description: `Item description ${i + 1}`,
+          type: 'EQUIPMENT',
+          subtype: 'WEAPON',
+          rarity: 'COMMON',
+          baseStats: { attack: 10 + i },
+          battlePerks: [],
+          shopPrice: 100 * (i + 1),
+          maxDailyPurchases: 5,
+        }) as unknown as GameItem,
+    );
 
     // Page 0 (items 1-25)
     const view0 = buildShopView({ category: 'ALL', items: manyItems, selectedIndex: 0, page: 0 });

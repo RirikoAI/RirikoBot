@@ -1,10 +1,5 @@
 import { createHash } from 'node:crypto';
-import {
-  EmbedBuilder,
-  AttachmentBuilder,
-  type Client,
-  type TextBasedChannel,
-} from 'discord.js';
+import { EmbedBuilder, AttachmentBuilder, type Client, type TextBasedChannel } from 'discord.js';
 import type { StreamRepository, Streamer } from '@ririko/database';
 import type { LiveStreamInfo } from './types.js';
 
@@ -73,7 +68,11 @@ export class StreamNotificationDispatcher {
       embed.addFields({ name: 'Category', value: stream.gameName, inline: true });
     }
     if (stream.viewerCount > 0) {
-      embed.addFields({ name: 'Viewers', value: stream.viewerCount.toLocaleString(), inline: true });
+      embed.addFields({
+        name: 'Viewers',
+        value: stream.viewerCount.toLocaleString(),
+        inline: true,
+      });
     }
 
     // Proxy and cache thumbnail
@@ -103,7 +102,10 @@ export class StreamNotificationDispatcher {
           embed.setImage(stream.thumbnailUrl);
         }
       } catch (thumbErr) {
-        console.warn(`[StreamDispatcher] Failed to proxy thumbnail for ${stream.streamId}:`, thumbErr);
+        console.warn(
+          `[StreamDispatcher] Failed to proxy thumbnail for ${stream.streamId}:`,
+          thumbErr,
+        );
         embed.setImage(stream.thumbnailUrl);
       }
     }
@@ -129,7 +131,9 @@ export class StreamNotificationDispatcher {
       if (alreadySent) continue;
 
       try {
-        const channel = (await this.client.channels.fetch(sub.channelId)) as TextBasedChannel | null;
+        const channel = (await this.client.channels.fetch(
+          sub.channelId,
+        )) as TextBasedChannel | null;
         if (!channel || !('send' in channel)) {
           console.warn(`[StreamDispatcher] Channel ${sub.channelId} not found or not text-based`);
           continue;

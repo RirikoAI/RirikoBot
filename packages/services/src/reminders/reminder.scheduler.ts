@@ -88,7 +88,9 @@ export class ReminderScheduler {
     }
     if (!delivered) {
       result.dropped += 1;
-      logger.warn(`[ReminderScheduler] Dropped reminder ${reminder.id}: user ${reminder.userId} unreachable by DM and channel.`);
+      logger.warn(
+        `[ReminderScheduler] Dropped reminder ${reminder.id}: user ${reminder.userId} unreachable by DM and channel.`,
+      );
       return;
     }
     result.delivered += 1;
@@ -108,7 +110,10 @@ export class ReminderScheduler {
   }
 }
 
-const REPEAT_NOTE: Record<string, string> = { DAILY: ' *(repeats daily)*', WEEKLY: ' *(repeats weekly)*' };
+const REPEAT_NOTE: Record<string, string> = {
+  DAILY: ' *(repeats daily)*',
+  WEEKLY: ' *(repeats weekly)*',
+};
 
 /**
  * 1.4.0 delivery order: DM first, then the channel where the reminder was set, mentioning only

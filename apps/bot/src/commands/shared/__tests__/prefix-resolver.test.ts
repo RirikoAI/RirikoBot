@@ -5,11 +5,13 @@ import { resolveContextPrefix } from '../prefix-resolver.js';
 import type { BotServices } from '../../../services.js';
 
 describe('resolveContextPrefix shared utility', () => {
-  const createMockContext = (options: {
-    source?: 'slash' | 'prefix';
-    invokedPrefix?: string;
-    guildId?: string | null;
-  } = {}): CommandContext => {
+  const createMockContext = (
+    options: {
+      source?: 'slash' | 'prefix';
+      invokedPrefix?: string;
+      guildId?: string | null;
+    } = {},
+  ): CommandContext => {
     return {
       source: options.source ?? 'prefix',
       invokedPrefix: options.invokedPrefix ?? '!',
@@ -43,7 +45,10 @@ describe('resolveContextPrefix shared utility', () => {
 
     const prefix = await resolveContextPrefix(ctx, mockServices);
     expect(prefix).toBe('?');
-    expect(mockServices.guildSettingsService.getPrefix).toHaveBeenCalledWith('guild-abc', DEFAULT_COMMAND_PREFIX);
+    expect(mockServices.guildSettingsService.getPrefix).toHaveBeenCalledWith(
+      'guild-abc',
+      DEFAULT_COMMAND_PREFIX,
+    );
   });
 
   it('falls back to DEFAULT_COMMAND_PREFIX when outside guild and not invoked via custom prefix', async () => {
