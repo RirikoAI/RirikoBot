@@ -186,7 +186,8 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
       // Execute the bridged getStream()
       const stream = await resolved.getStream();
       expect(stream).toBeDefined();
-    }, 15000);
+      // Live network: the YouTube search fallback alone can take ~15s from CI runners.
+    }, 30000);
 
     it('bridges Spotify album tracks to playable audio stream', async () => {
       const spotifyAlbumUrl = 'https://open.spotify.com/album/1DFixLWuPkv3KT3TnV35m3';

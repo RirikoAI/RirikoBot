@@ -64,6 +64,13 @@ jobs:
   test:
     executor: node
     steps:
+      - run:
+          # FFmpeg is a runtime prerequisite (docs/development.md) that the music player tests
+          # exercise; canvas renderers draw text with system `sans-serif` fonts.
+          name: Install FFmpeg and fonts
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends ffmpeg fonts-dejavu-core
       - setup
       - run:
           name: Vitest with coverage
