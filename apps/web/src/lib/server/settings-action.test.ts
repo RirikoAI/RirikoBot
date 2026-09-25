@@ -10,7 +10,10 @@ const mocks = vi.hoisted(() => ({
   guildSettingsChanged: vi.fn(),
 }));
 
-vi.mock('next/headers', () => ({ headers: async () => mocks.headers }));
+vi.mock('next/headers', () => ({
+  headers: async () => mocks.headers,
+  cookies: async () => ({ get: () => undefined }),
+}));
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock('next/server', () => ({ after: (task: () => unknown) => mocks.after.push(task) }));
 vi.mock('./guilds/require-guild-access', () => ({ requireGuildAccess: mocks.requireGuildAccess }));

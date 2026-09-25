@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { revokeOtherSessions, revokeSession } from '@/app/account/sessions/actions';
+import { LocalTime } from './local-time';
 
 export interface SessionEntry {
   id: string;
@@ -13,8 +14,6 @@ export interface SessionEntry {
   createdAt: string;
   lastSeenAt: string;
 }
-
-const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
 export function SessionList({ sessions }: { sessions: SessionEntry[] }) {
   const router = useRouter();
@@ -57,10 +56,14 @@ export function SessionList({ sessions }: { sessions: SessionEntry[] }) {
               </p>
               <p className="text-xs text-zinc-400">
                 {session.ipAddress ?? 'Unknown IP address'} · signed in{' '}
-                {dateFormat.format(new Date(session.createdAt))} ·{' '}
-                {session.current
-                  ? 'active now'
-                  : `last active ${dateFormat.format(new Date(session.lastSeenAt))}`}
+                <LocalTime value={session.createdAt} /> ·{' '}
+                {session.current ? (
+                  'active now'
+                ) : (
+                  <>
+                    last active <LocalTime value={session.lastSeenAt} />
+                  </>
+                )}
               </p>
             </div>
             {session.current ? null : (

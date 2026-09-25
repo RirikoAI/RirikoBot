@@ -5,6 +5,7 @@ import { openPendingLogin } from '@/lib/server/auth/oauth-state';
 import { clientIp, userAgent } from '@/lib/server/auth/request';
 import { clearCookie, OAUTH_COOKIE, SESSION_COOKIE, setCookie } from '@/lib/server/auth/session';
 import { userAvatarUrl } from '@/lib/server/discord-cdn';
+import { limitAuthRequest } from '@/lib/server/rate-limit';
 import { getWebServices } from '@/lib/server/services';
 import type { LoginError } from '@/lib/login-errors';
 
@@ -13,6 +14,8 @@ import type { LoginError } from '@/lib/login-errors';
  * user has not used before is reported to them by DM after the response is sent.
  */
 export async function GET(request: NextRequest) {
+  const limited = limitAuthRequest(request);
+  if (limited) return limited;
   const { config, knownDevices, notifier, oauth, sessions, users, vault } = await getWebServices();
   const params = request.nextUrl.searchParams;
 

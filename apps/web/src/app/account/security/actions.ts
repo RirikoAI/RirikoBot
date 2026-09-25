@@ -13,19 +13,16 @@ import {
   requireStepUp,
   writeSessionCookie,
 } from '@/lib/server/auth/session';
-import { isDashboardRequest, requestActor } from '@/lib/server/request-context';
+import { checkDashboardRequest, requestActor } from '@/lib/server/request-context';
 import { getWebServices } from '@/lib/server/services';
 
 const PAGE = '/account/security';
-const FOREIGN_ORIGIN: PasskeyActionResult<never> = {
-  ok: false,
-  error: 'This request did not come from the dashboard.',
-};
 
 async function checkEnrollment(): Promise<
   PasskeyActionResult<Awaited<ReturnType<typeof requireSession>>>
 > {
-  if (!(await isDashboardRequest())) return FOREIGN_ORIGIN;
+  const rejected = await checkDashboardRequest();
+  if (rejected) return { ok: false, error: rejected };
   const session = await requireSession(PAGE);
   const state = enrollmentState(session, await getPasskeyCount(session.userId), Date.now());
   return state === 'ok'
@@ -80,7 +77,8 @@ export async function finishPasskeyRegistration(
 
 /** Removes a passkey; needs a passkey check from the last five minutes. The user gets a DM. */
 export async function removePasskey(passkeyId: unknown): Promise<PasskeyActionResult> {
-  if (!(await isDashboardRequest())) return FOREIGN_ORIGIN;
+  const rejected = await checkDashboardRequest();
+  if (rejected) return { ok: false, error: rejected };
   if (typeof passkeyId !== 'string' || passkeyId.length > 1024) {
     return { ok: false, error: 'Unknown passkey.' };
   }
