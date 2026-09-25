@@ -3604,7 +3604,7 @@
       "id": "BUG-0021",
       "title": "Auto Voice Deleted Every Empty Voice Channel in a Join-to-Create Hub's Category, Including Permanent Server Channels",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "parent": "STORY-091",
       "requires": [
         "STORY-091"
