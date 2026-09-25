@@ -60,6 +60,21 @@ export const autoVoiceConfigs = sqliteTable('auto_voice_configs', {
   bitrate: integer('bitrate').notNull().default(64000),
 });
 
+// Voice channels the auto voice service created. Only channels listed here are ever deleted
+// by the service, so permanent channels that share a hub's category are left alone.
+export const autoVoiceChannels = sqliteTable(
+  'auto_voice_channels',
+  {
+    channelId: text('channel_id').primaryKey(),
+    guildId: text('guild_id').notNull(),
+    parentChannelId: text('parent_channel_id').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [index('idx_auto_voice_channels_guild').on(table.guildId)],
+);
+
 export const reminders = sqliteTable(
   'reminders',
   {
