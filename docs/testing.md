@@ -75,3 +75,7 @@ CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` wor
 - **Test results**: the CircleCI `test` job's *Tests* tab (from `junit.xml`) shows failures, per-test timing and flaky tests.
 - **Coverage report**: the `test` job's *Artifacts* tab has the HTML report under `coverage/index.html`.
 - **Codecov**: the `test` job uploads `lcov.info` and `junit.xml` to Codecov (needs the `CODECOV_TOKEN` project variable in CircleCI). Codecov comments on PRs with the coverage diff. `codecov.yml` fails the project status only when coverage drops more than 1% from the base commit; patch coverage is informational.
+
+### 4.3. CI Environment
+- The `test` job runs on Linux in UTC with FFmpeg and `fonts-dejavu-core` installed. Tests must not depend on the host time zone, path style or locally installed fonts.
+- `packages/music/src/extractors/extractors.test.ts` calls YouTube, Spotify, SoundCloud and Deezer live. A live test that an upstream service blocks from CircleCI IPs may use `it.skipIf(process.env.CI)` only when another CI-run test covers the same code path; say which one in a comment.
