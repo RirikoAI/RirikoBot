@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 5 pts (`TASK-1231` = 2, `TASK-1232` = 2, `TASK-1233` = 1) + `BUG-0022` (2 pts, found by the first CI run)
 - **Epic**: `EPIC-012` (pulled forward during EPIC-011 so the remaining dashboard PRs run in CI)
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #649)
 - **Timestamp**: 2026-09-26
 - **Branch**: `feat/STORY-123-ci-pipeline` (targets `develop/2.0.0`)
 
