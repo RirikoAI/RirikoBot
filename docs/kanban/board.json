@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "TASK-1172",
   "epics": [
     {
       "id": "EPIC-000",
@@ -920,7 +920,7 @@
       "epic": "EPIC-011",
       "title": "Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
@@ -2776,7 +2776,7 @@
       "parent": "STORY-118",
       "title": "Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel",
       "points": 2,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "STORY-117"
       ],
