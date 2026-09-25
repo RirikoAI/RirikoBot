@@ -3,9 +3,9 @@
 - **Ticket Type & Points**: Story | 8 pts (`TASK-1141` = 3, `TASK-1142` = 5)
 - **Epic**: `EPIC-011`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #646)
 - **Timestamp**: 2026-09-26
-- **Branch**: `feat/STORY-114-moderation-pages` (targets `develop/2.0.0`; not pushed yet)
+- **Branch**: `feat/STORY-114-moderation-pages` (targets `develop/2.0.0`)
 
 ## 0. Re-Grooming (2026-09-25)
 An audit of the bot before implementation showed the original STORY-114 could not ship as groomed:
@@ -123,5 +123,5 @@ The user chose to split the story three ways, fix AutoMod so every action runs, 
    1. Logging: pick a channel, then `/warn` someone. The case embed should appear there, followed by the dashboard change notice.
    2. Moderation: save a policy after more than 5 minutes. "Confirm with passkey and save" should appear, and the save should complete after the passkey prompt. `/warn` then follows the new steps.
    3. AutoMod: set the mention limit to 2 and the action to timeout, and send a message with 3 mentions from a non-staff account. The message should be deleted and the account timed out for 10 minutes, with a case in the log channel within about 5 seconds of the save (feed tick).
-3. Open the STORY-114 PR against `develop/2.0.0` once the user asks.
+3. PR #646 is merged into `develop/2.0.0`.
 4. Next in the delivery order: STORY-113 and STORY-115; STORY-163 and STORY-164 follow STORY-114.

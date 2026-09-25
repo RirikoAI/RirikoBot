@@ -880,7 +880,7 @@
       "epic": "EPIC-011",
       "title": "Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-111",
         "STORY-117"

@@ -15,7 +15,7 @@
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| `STORY-114` | Story | Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages | 8 | `EPIC-011` | [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) |
+| | | | | | |
 
 ---
 
@@ -242,7 +242,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1111` | Task | Shared Zod Guild Config Schemas in @ririko/core, GuildConfigService & audit_logs Field-Diff Writer | 3 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `STORY-110`, `CHORE-1101` |
 | `TASK-1112` | Task | Dashboard Shell: Guild Layout & Module Nav, Channel/Role Pickers, Server Action Form Kit & General Tab | 3 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `TASK-1111` |
 | `TASK-1113` | Task | `ririko guild:config <guild_id> [key] [value]` CLI Parity (get, set, list) on the Same Schemas & Service | 2 | `STORY-111` | ✅ Done · [STORY-111.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-111.md) | `TASK-1111` |
-| `STORY-114` | Story | Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages | 8 | `EPIC-011` | 🔍 Review · [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) | `STORY-111`, `STORY-117` |
+| `STORY-114` | Story | Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages | 8 | `EPIC-011` | ✅ Done · [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) | `STORY-111`, `STORY-117` |
 | `TASK-1141` | Task | Typed Settings & Step-Up Settings Forms (Toggle, Number, Role/Channel Lists, Row Editor), CLI Typed Values & Logging Page (Log Channel, Case Log Wiring) | 3 | `STORY-114` | ✅ Done · [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) | `STORY-111`, `STORY-117` |
 | `TASK-1142` | Task | Moderation Escalation Policy Builder (guild_settings.escalation_steps, Step-Up) & AutoMod Page (Per-Rule Toggle, Action, Limit, Exemptions) with Real AutoMod Actions | 5 | `STORY-114` | ✅ Done · [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) | `TASK-1141` |
 | `TASK-1143` | Task | Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages | 3 | `STORY-114` | ❌ Abandoned (re-groomed into `STORY-164` before work started) | `TASK-1142` |
