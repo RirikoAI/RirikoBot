@@ -1,6 +1,5 @@
 import 'server-only';
 import { createHash } from 'node:crypto';
-import { SecurityError, ValidationError } from '@ririko/core';
 import type { AuditLogRepository, WebPasskey, WebPasskeyRepository } from '@ririko/database';
 import {
   generateAuthenticationOptions,
@@ -55,12 +54,14 @@ export const PasskeyNameSchema = z
   .min(1, 'Give the passkey a name, e.g. "Laptop" or "Phone".')
   .max(PASSKEY_NAME_MAX_LENGTH, `Passkey names are at most ${PASSKEY_NAME_MAX_LENGTH} characters.`);
 
-/** The passkey could not be verified; the message is safe to show to the user. */
-export class PasskeyVerificationError extends SecurityError {
-  constructor(message = 'The passkey could not be verified. Please try again.', cause?: unknown) {
-    super(message, { userMessage: message, cause: cause instanceof Error ? cause : undefined });
-  }
-}
+const VERIFICATION_FAILED = 'The passkey could not be verified. Please try again.';
+
+/**
+ * Outcome of a passkey ceremony. Failures are returned, not thrown: an error class can exist in
+ * more than one module instance (bundler layers, hot reload), so `instanceof` checks in callers
+ * are not reliable. `message` is safe to show to the user.
+ */
+export type PasskeyOutcome<T> = { ok: true; value: T } | { ok: false; message: string };
 
 export interface PasskeyActor {
   ipAddress: string | null;
@@ -78,8 +79,14 @@ export interface PasskeyServiceDeps {
 
 /**
  * WebAuthn passkey enrollment and verification (ADR-013). Challenges are stored on the session
- * row and consumed once; user verification (biometric or PIN) is required; attestation is not
- * requested because any authenticator the user trusts is accepted.
+ * row and consumed once; attestation is not requested because any authenticator the user trusts
+ * is accepted.
+ *
+ * User verification (biometric or PIN) is requested but not required, while user presence is.
+ * The passkey is a second factor after Discord sign-in: a stolen cookie or Discord account still
+ * cannot pass without the authenticator. Some authenticators, including passkey providers used
+ * through Edge, answer without the verification flag, and requiring it rejected them
+ * (BUG-0020).
  */
 export class PasskeyService {
   private readonly rpID: string;
@@ -114,7 +121,7 @@ export class PasskeyService {
         id: passkey.id,
         transports: passkey.transports,
       })),
-      authenticatorSelection: { residentKey: 'preferred', userVerification: 'required' },
+      authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred' },
     });
     await this.deps.sessions.storeChallenge(session, 'register', options.challenge);
     return options;
@@ -125,13 +132,13 @@ export class PasskeyService {
     rawName: unknown,
     rawResponse: unknown,
     actor: PasskeyActor,
-  ): Promise<WebPasskey> {
+  ): Promise<PasskeyOutcome<WebPasskey>> {
     const name = PasskeyNameSchema.safeParse(rawName);
     if (!name.success) {
-      throw new ValidationError(name.error.issues[0]?.message ?? 'Invalid passkey name.');
+      return { ok: false, message: name.error.issues[0]?.message ?? 'Invalid passkey name.' };
     }
     const response = RegistrationResponseSchema.safeParse(rawResponse);
-    if (!response.success) throw new PasskeyVerificationError();
+    if (!response.success) return rejected('registration', session, shapeProblem(response.error));
 
     let verification: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
     try {
@@ -141,12 +148,12 @@ export class PasskeyService {
           this.deps.sessions.consumeChallenge(session, 'register', challenge),
         expectedOrigin: this.deps.origin,
         expectedRPID: this.rpID,
-        requireUserVerification: true,
+        requireUserVerification: false,
       });
     } catch (error) {
-      throw new PasskeyVerificationError(undefined, error);
+      return rejected('registration', session, error);
     }
-    if (!verification.verified) throw new PasskeyVerificationError();
+    if (!verification.verified) return rejected('registration', session, 'not verified');
 
     const info = verification.registrationInfo;
     const now = this.now();
@@ -168,7 +175,7 @@ export class PasskeyService {
       actor,
       now,
     );
-    return passkey;
+    return { ok: true, value: passkey };
   }
 
   /** Options for a passkey check, or null when the user has no passkey. */
@@ -183,19 +190,25 @@ export class PasskeyService {
         id: passkey.id,
         transports: passkey.transports,
       })),
-      userVerification: 'required',
+      userVerification: 'preferred',
     });
     await this.deps.sessions.storeChallenge(session, 'authenticate', options.challenge);
     return options;
   }
 
-  /** Verifies a passkey check for the session's user; throws PasskeyVerificationError. */
-  async authenticate(session: ActiveSession, rawResponse: unknown): Promise<void> {
+  /** Verifies a passkey check for the session's user. */
+  async authenticate(session: ActiveSession, rawResponse: unknown): Promise<PasskeyOutcome<null>> {
     const response = AuthenticationResponseSchema.safeParse(rawResponse);
-    if (!response.success) throw new PasskeyVerificationError();
+    if (!response.success) return rejected('check', session, shapeProblem(response.error));
     const passkey = await this.deps.repo.findForUser(session.userId, response.data.id);
-    if (!passkey)
-      throw new PasskeyVerificationError('This passkey is not registered to your account.');
+    if (!passkey) {
+      return rejected(
+        'check',
+        session,
+        'unknown credential',
+        'This passkey is not registered to your account.',
+      );
+    }
 
     let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
     try {
@@ -211,19 +224,20 @@ export class PasskeyService {
           counter: passkey.counter,
           transports: passkey.transports,
         },
-        requireUserVerification: true,
+        requireUserVerification: false,
       });
     } catch (error) {
       // Includes a signature counter that did not increase: a sign of a cloned authenticator.
-      throw new PasskeyVerificationError(undefined, error);
+      return rejected('check', session, error);
     }
-    if (!verification.verified) throw new PasskeyVerificationError();
+    if (!verification.verified) return rejected('check', session, 'signature not verified');
 
     await this.deps.repo.recordUse(passkey.id, {
       counter: verification.authenticationInfo.newCounter,
       backedUp: verification.authenticationInfo.credentialBackedUp,
       lastUsedAt: this.now(),
     });
+    return { ok: true, value: null };
   }
 
   /** Removes one of the user's passkeys. Callers must require a fresh passkey check first. */
@@ -260,6 +274,31 @@ export class PasskeyService {
       now,
     );
   }
+}
+
+/**
+ * Logs why a passkey was rejected and returns the failed outcome. The user sees a generic
+ * message; operators need the real reason (wrong origin, missing user verification, counter
+ * rollback, signature) to tell an attack from a misconfiguration.
+ */
+function rejected(
+  ceremony: 'registration' | 'check',
+  session: ActiveSession,
+  cause: unknown,
+  message = VERIFICATION_FAILED,
+): { ok: false; message: string } {
+  const reason = cause instanceof Error ? cause.message : String(cause);
+  console.warn(
+    `[web] Passkey ${ceremony} rejected for user ${session.userId}: ${reason.slice(0, 300)}`,
+  );
+  return { ok: false, message };
+}
+
+/** Field paths and messages of a malformed browser response, without the submitted values. */
+function shapeProblem(error: z.ZodError): string {
+  return `malformed response (${error.issues
+    .map((issue) => `${issue.path.join('.') || 'root'}: ${issue.message}`)
+    .join('; ')})`;
 }
 
 /**

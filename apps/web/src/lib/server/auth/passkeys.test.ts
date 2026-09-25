@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SecretVault, ValidationError } from '@ririko/core';
+import { SecretVault } from '@ririko/core';
 import {
   AuditLogRepository,
   createDatabaseClient,
@@ -7,7 +7,7 @@ import {
   WebSessionRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
-import { PasskeyService, PasskeyVerificationError } from './passkeys';
+import { PasskeyService, type PasskeyOutcome } from './passkeys';
 import {
   enrollmentState,
   FIRST_PASSKEY_SIGN_IN_WINDOW_MS,
@@ -22,6 +22,12 @@ const ORIGIN = 'https://dash.example.com';
 const T0 = new Date('2026-09-25T00:00:00Z').getTime();
 const actor = { ipAddress: '203.0.113.7', userAgent: 'vitest' };
 const user = { name: 'ririko-fan', displayName: 'Ririko Fan' };
+const FAILED = { ok: false, message: 'The passkey could not be verified. Please try again.' };
+
+function unwrap<T>(outcome: PasskeyOutcome<T>): T {
+  if (!outcome.ok) throw new Error(`Expected success, got: ${outcome.message}`);
+  return outcome.value;
+}
 
 describe('PasskeyService (TASK-1171)', () => {
   let db: SqliteDatabaseClient;
@@ -74,7 +80,9 @@ describe('PasskeyService (TASK-1171)', () => {
 
   async function enroll(authenticator = new SoftAuthenticator(ORIGIN), name = 'Laptop') {
     const options = await passkeys.registrationOptions(session, user);
-    return passkeys.register(session, name, authenticator.register(options.challenge), actor);
+    return unwrap(
+      await passkeys.register(session, name, authenticator.register(options.challenge), actor),
+    );
   }
 
   async function check(authenticator: SoftAuthenticator, counter?: number, origin?: string) {
@@ -110,51 +118,53 @@ describe('PasskeyService (TASK-1171)', () => {
     await enroll(authenticator);
     const options = await passkeys.registrationOptions(session, user);
     expect(options.excludeCredentials?.map((c) => c.id)).toEqual([authenticator.id]);
-    expect(options.authenticatorSelection?.userVerification).toBe('required');
+    expect(options.authenticatorSelection?.userVerification).toBe('preferred');
   });
 
   it('uses each challenge once and rejects expired ones', async () => {
     const authenticator = new SoftAuthenticator(ORIGIN);
     const options = await passkeys.registrationOptions(session, user);
     const response = authenticator.register(options.challenge);
-    await passkeys.register(session, 'Laptop', response, actor);
+    unwrap(await passkeys.register(session, 'Laptop', response, actor));
 
-    await expect(passkeys.register(session, 'Again', response, actor)).rejects.toBeInstanceOf(
-      PasskeyVerificationError,
-    );
+    expect(await passkeys.register(session, 'Again', response, actor)).toEqual(FAILED);
 
     await enroll(new SoftAuthenticator(ORIGIN), 'Second');
     const authOptions = await passkeys.authenticationOptions(session);
     now += 5 * 60_000;
-    await expect(
-      passkeys.authenticate(session, authenticator.authenticate(authOptions!.challenge)),
-    ).rejects.toBeInstanceOf(PasskeyVerificationError);
+    expect(
+      await passkeys.authenticate(session, authenticator.authenticate(authOptions!.challenge)),
+    ).toEqual(FAILED);
   });
 
-  it('rejects registrations from another origin, without user verification or badly named', async () => {
+  it('rejects registrations from another origin, without user presence or badly named', async () => {
     let options = await passkeys.registrationOptions(session, user);
-    await expect(
-      passkeys.register(
+    expect(
+      await passkeys.register(
         session,
         'Laptop',
         new SoftAuthenticator(ORIGIN).register(options.challenge, 'https://evil.example'),
         actor,
       ),
-    ).rejects.toBeInstanceOf(PasskeyVerificationError);
+    ).toEqual(FAILED);
 
     options = await passkeys.registrationOptions(session, user);
-    await expect(
-      passkeys.register(
+    expect(
+      await passkeys.register(
         session,
         'Laptop',
-        new SoftAuthenticator(ORIGIN, { userVerified: false }).register(options.challenge),
+        new SoftAuthenticator(ORIGIN, { userPresent: false }).register(options.challenge),
         actor,
       ),
-    ).rejects.toBeInstanceOf(PasskeyVerificationError);
+    ).toEqual(FAILED);
 
-    await expect(
-      passkeys.register(session, '   ', { not: 'a response' }, actor),
-    ).rejects.toBeInstanceOf(ValidationError);
+    expect(await passkeys.register(session, '   ', { not: 'a response' }, actor)).toEqual({
+      ok: false,
+      message: 'Give the passkey a name, e.g. "Laptop" or "Phone".',
+    });
+    expect(await passkeys.register(session, 'Laptop', { not: 'a response' }, actor)).toEqual(
+      FAILED,
+    );
     expect(await passkeys.count('user-1')).toBe(0);
   });
 
@@ -162,26 +172,39 @@ describe('PasskeyService (TASK-1171)', () => {
     const authenticator = new SoftAuthenticator(ORIGIN);
     await enroll(authenticator);
     now += 60_000;
-    await check(authenticator);
+    expect(await check(authenticator)).toEqual({ ok: true, value: null });
     const [stored] = await passkeys.list('user-1');
     expect(stored?.counter).toBe(1);
     expect(stored?.lastUsedAt?.getTime()).toBe(now);
   });
 
+  it('accepts authenticators that skip user verification but not user presence (BUG-0020)', async () => {
+    const noVerification = new SoftAuthenticator(ORIGIN, { userVerified: false });
+    await enroll(noVerification);
+    expect(await check(noVerification)).toEqual({ ok: true, value: null });
+
+    const options = await passkeys.authenticationOptions(session);
+    expect(options?.userVerification).toBe('preferred');
+    expect(
+      await passkeys.authenticate(
+        session,
+        noVerification.authenticate(options!.challenge, { userPresent: false }),
+      ),
+    ).toEqual(FAILED);
+  });
+
   it('rejects a signature counter that did not increase (cloned authenticator)', async () => {
     const authenticator = new SoftAuthenticator(ORIGIN);
     await enroll(authenticator);
-    await check(authenticator, 5);
-    await expect(check(authenticator, 5)).rejects.toBeInstanceOf(PasskeyVerificationError);
-    await expect(check(authenticator, 3)).rejects.toBeInstanceOf(PasskeyVerificationError);
+    unwrap(await check(authenticator, 5));
+    expect(await check(authenticator, 5)).toEqual(FAILED);
+    expect(await check(authenticator, 3)).toEqual(FAILED);
   });
 
   it("rejects another user's passkey and a phishing origin", async () => {
     const authenticator = new SoftAuthenticator(ORIGIN);
     await enroll(authenticator);
-    await expect(check(authenticator, undefined, 'https://evil.example')).rejects.toBeInstanceOf(
-      PasskeyVerificationError,
-    );
+    expect(await check(authenticator, undefined, 'https://evil.example')).toEqual(FAILED);
 
     const other = await sessions.create({
       userId: 'user-2',
@@ -214,7 +237,7 @@ describe('PasskeyService (TASK-1171)', () => {
   it('rotates the session on a passkey check and keeps the Discord tokens readable', async () => {
     const authenticator = new SoftAuthenticator(ORIGIN);
     await enroll(authenticator);
-    await check(authenticator);
+    unwrap(await check(authenticator));
     now += 1_000;
     const rotated = await sessions.completePasskeyCheck(session);
 

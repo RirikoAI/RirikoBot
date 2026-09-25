@@ -54,6 +54,7 @@ Guild Discovery Pipeline
 - Sensitive writes always need a passkey check newer than 5 minutes: the owner console, the moderation escalation policy, reaction-role publishing, and integrations. Users without a passkey cannot perform them.
 - Bot owners (`BOT_OWNER_ID`) must have a passkey to use the owner console.
 - A passkey check rotates the session ID.
+- Authenticators are asked for a fingerprint, face or PIN but only user presence is required, because some (for example a Windows passkey used through Edge) do not report verification (ADR-013 revision item 7, BUG-0020). Every rejected passkey is logged with its reason (`[web] Passkey check rejected …`).
 - Lost authenticators are recovered with `ririko passkeys:reset <user_id>` by an operator.
 - Sessions stay opaque and server-side; JWE was re-evaluated and rejected (ADR-013, revision 2026-09-25).
 

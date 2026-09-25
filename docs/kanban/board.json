@@ -3498,6 +3498,18 @@
       ],
       "blocks": [],
       "description": "Implement dual-dispatch /imagine command in apps/bot/src/commands/images/imagine.command.ts with Slash and Prefix (!imagine) parity, aspect ratio and preset choices, Discord attachment delivery, interactive Action Row buttons (Regenerate, Dismiss), /stablediffusion-model configuration, and legacy token deprecation handling. Wire into BotServices and main.ts with comprehensive Vitest suite."
+    },
+    {
+      "id": "BUG-0020",
+      "title": "Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors",
+      "points": 2,
+      "status": "REVIEW",
+      "parent": "STORY-117",
+      "requires": [
+        "STORY-117"
+      ],
+      "blocks": [],
+      "description": "Reported 2026-09-25: the passkey check failed with 'The passkey could not be verified' in Edge while registration worked. Root cause: the authenticator Edge used signed assertions without the user-verification (UV) flag, and verification required it. The reason was invisible because verification failures were not logged. Two more defects hid it: getWebServices() cached services on globalThis, so after a hot reload the server kept running old code, and its PasskeyVerificationError class no longer matched the action's instanceof check, so failures escaped as unhandled rejections. Fix: request UV but only require user presence (the passkey is a second factor after Discord sign-in), return passkey outcomes instead of throwing, log every rejection reason, and cache only the database connection process-wide."
     }
   ]
 }
