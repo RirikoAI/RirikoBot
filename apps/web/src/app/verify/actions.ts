@@ -2,7 +2,6 @@
 
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server';
 import type { PasskeyActionResult } from '@/lib/passkey-action-result';
-import { PasskeyVerificationError } from '@/lib/server/auth/passkeys';
 import { requireSessionForPasskeyCheck, writeSessionCookie } from '@/lib/server/auth/session';
 import { checkDashboardRequest } from '@/lib/server/request-context';
 import { getWebServices } from '@/lib/server/services';
@@ -30,12 +29,8 @@ export async function finishPasskeyCheck(response: unknown): Promise<PasskeyActi
   if (rejected) return { ok: false, error: rejected };
   const session = await requireSessionForPasskeyCheck('/verify');
   const { passkeys, sessions } = await getWebServices();
-  try {
-    await passkeys.authenticate(session, response);
-  } catch (error) {
-    if (error instanceof PasskeyVerificationError) return { ok: false, error: error.userMessage };
-    throw error;
-  }
+  const outcome = await passkeys.authenticate(session, response);
+  if (!outcome.ok) return { ok: false, error: outcome.message };
   const rotated = await sessions.completePasskeyCheck(session);
   await writeSessionCookie(rotated.token, rotated.session);
   return { ok: true, data: null };
