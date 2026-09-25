@@ -33,7 +33,9 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ---
 
 ## 🔍 Review / Quality Gate
-*No tickets currently in review.*
+| ID | Type | Title | Pts | Parent | Handover Note |
+|---|---|---|---|---|---|
+| `BUG-0021` | Bug | Auto Voice Deleted Every Empty Voice Channel in a Join-to-Create Hub's Category, Including Permanent Server Channels | 3 | `STORY-091` | [BUG-0021.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0021.md) |
 
 ---
 
