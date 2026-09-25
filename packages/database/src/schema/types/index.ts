@@ -173,6 +173,8 @@ export type AutoVoiceConfig = typeof sqlite.autoVoiceConfigs.$inferSelect;
 export type NewAutoVoiceConfig = Omit<typeof sqlite.autoVoiceConfigs.$inferInsert, 'id'> & {
   id?: string;
 };
+export type AutoVoiceChannel = typeof sqlite.autoVoiceChannels.$inferSelect;
+export type NewAutoVoiceChannel = typeof sqlite.autoVoiceChannels.$inferInsert;
 export type Reminder = typeof sqlite.reminders.$inferSelect;
 export type NewReminder = typeof sqlite.reminders.$inferInsert;
 export type WelcomeConfig = typeof sqlite.guildWelcomer.$inferSelect;

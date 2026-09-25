@@ -16,6 +16,7 @@ import {
   FreeGameRepository,
   GiveawayRepository,
   AutoVoiceRepository,
+  AutoVoiceChannelRepository,
   WaifuAssetRepository,
   WaifuCardRepository,
   GameItemRepository,
@@ -301,7 +302,8 @@ export async function createBotServices(
   const streamRepo = new StreamRepository(db);
   const freeGameRepo = new FreeGameRepository(db);
   const autoVoiceRepo = new AutoVoiceRepository(db);
-  const autoVoiceService = new AutoVoiceService(autoVoiceRepo);
+  const autoVoiceChannelRepo = new AutoVoiceChannelRepository(db);
+  const autoVoiceService = new AutoVoiceService(autoVoiceRepo, autoVoiceChannelRepo);
   const waifuAssetRepo = new WaifuAssetRepository(db);
   const waifuCardRepo = new WaifuCardRepository(db);
   const reactionRoleRepo = new ReactionRoleRepository(db);

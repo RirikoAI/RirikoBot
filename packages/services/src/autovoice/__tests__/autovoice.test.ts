@@ -1,10 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ChannelType, PermissionFlagsBits } from 'discord.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { ChannelType } from 'discord.js';
+import { AutoVoiceChannelRepository, createDatabaseClient } from '@ririko/database';
+import type { AutoVoiceRepository, AutoVoiceConfig, SqliteDatabaseClient } from '@ririko/database';
+import { SQLITE_SCHEMA_DDL } from '../../../../database/src/schema/sqlite/ddl.js';
 import { AutoVoiceService } from '../service.js';
-import type { AutoVoiceRepository, AutoVoiceConfig } from '@ririko/database';
 
 describe('AutoVoiceService (TASK-0911)', () => {
   let mockRepo: Partial<AutoVoiceRepository>;
+  let client: SqliteDatabaseClient;
+  let channelRepo: AutoVoiceChannelRepository;
   let service: AutoVoiceService;
 
   const sampleConfig: AutoVoiceConfig = {
@@ -16,7 +20,13 @@ describe('AutoVoiceService (TASK-0911)', () => {
     bitrate: 64000,
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    client = raw;
+    client.raw.exec(SQLITE_SCHEMA_DDL);
+    channelRepo = new AutoVoiceChannelRepository(client);
+
     mockRepo = {
       findByParentChannelId: vi.fn().mockImplementation((guildId: string, parentId: string) => {
         if (guildId === sampleConfig.guildId && parentId === sampleConfig.parentChannelId) {
@@ -32,7 +42,11 @@ describe('AutoVoiceService (TASK-0911)', () => {
       }),
     };
 
-    service = new AutoVoiceService(mockRepo as AutoVoiceRepository);
+    service = new AutoVoiceService(mockRepo as AutoVoiceRepository, channelRepo);
+  });
+
+  afterEach(async () => {
+    await client.close();
   });
 
   describe('Dynamic Voice Channel Provisioning', () => {
@@ -122,6 +136,11 @@ describe('AutoVoiceService (TASK-0911)', () => {
       expect(active?.ownerId).toBe('user-alice');
       expect(service.isOwner('new-child-vc-1', 'user-alice')).toBe(true);
       expect(service.isOwner('new-child-vc-1', 'user-bob')).toBe(false);
+
+      // Verify channel is recorded as created by the service
+      const record = await channelRepo.findById('new-child-vc-1');
+      expect(record?.guildId).toBe('guild-1');
+      expect(record?.parentChannelId).toBe('parent-vc-1');
     });
 
     it('ignores joins to non-parent voice channels', async () => {
@@ -289,39 +308,111 @@ describe('AutoVoiceService (TASK-0911)', () => {
     });
   });
 
-  describe('Orphan Cleanup', () => {
-    it('scans and cleans up empty orphaned child channels but never deletes parents', async () => {
-      const mockParentChannel: any = {
-        id: 'parent-vc-1',
-        type: ChannelType.GuildVoice,
-        parentId: 'category-1',
-        members: new Map(), // 0 members in parent
-        delete: vi.fn(),
-      };
+  describe('Created Channel Record (BUG-0021)', () => {
+    const voiceChannel = (id: string, memberCount = 0): any => ({
+      id,
+      type: ChannelType.GuildVoice,
+      parentId: 'category-1',
+      parent: { id: 'category-1' },
+      members: new Map(Array.from({ length: memberCount }, (_, i) => [`member-${i}`, {}])),
+      delete: vi.fn().mockResolvedValue({}),
+    });
 
-      const mockOrphanChild: any = {
-        id: 'orphan-vc-1',
-        type: ChannelType.GuildVoice,
-        parentId: 'category-1',
-        members: new Map(), // 0 members in orphan child
-        delete: vi.fn().mockResolvedValue({}),
-      };
+    const guildWith = (...channels: any[]): any => ({
+      id: 'guild-1',
+      channels: { cache: new Map(channels.map((c) => [c.id, c])) },
+    });
 
-      const mockGuild: any = {
-        id: 'guild-1',
-        channels: {
-          cache: new Map([
-            ['parent-vc-1', mockParentChannel],
-            ['orphan-vc-1', mockOrphanChild],
-          ]),
-        },
-      };
+    const leave = (guild: any, channel: any) =>
+      service.handleVoiceStateUpdate(
+        { channelId: channel.id, channel, guild } as any,
+        { channelId: null, guild } as any,
+      );
 
-      const deleted = await service.cleanupOrphans(mockGuild);
+    const recordChannel = (channelId: string) =>
+      channelRepo.create({ channelId, guildId: 'guild-1', parentChannelId: 'parent-vc-1' });
+
+    it('never deletes a permanent empty channel in the hub category on leave', async () => {
+      const hub = voiceChannel('parent-vc-1');
+      const permanent = voiceChannel('permanent-vc-1');
+      const guild = guildWith(hub, permanent);
+
+      await leave(guild, permanent);
+
+      expect(permanent.delete).not.toHaveBeenCalled();
+    });
+
+    it('never deletes a permanent empty channel in the hub category at startup cleanup', async () => {
+      const hub = voiceChannel('parent-vc-1');
+      const permanent = voiceChannel('permanent-vc-1');
+      const guild = guildWith(hub, permanent);
+
+      const deleted = await service.cleanupOrphans(guild);
+
+      expect(deleted).toBe(0);
+      expect(hub.delete).not.toHaveBeenCalled();
+      expect(permanent.delete).not.toHaveBeenCalled();
+    });
+
+    it('deletes a bot-created empty channel on leave after a simulated restart', async () => {
+      await recordChannel('child-vc-1');
+      const restarted = new AutoVoiceService(mockRepo as AutoVoiceRepository, channelRepo);
+      service = restarted;
+      const child = voiceChannel('child-vc-1');
+      const guild = guildWith(voiceChannel('parent-vc-1'), child);
+
+      await leave(guild, child);
+
+      expect(child.delete).toHaveBeenCalled();
+      expect(await channelRepo.exists('child-vc-1')).toBe(false);
+    });
+
+    it('deletes only empty bot-created channels at startup cleanup after a simulated restart', async () => {
+      await recordChannel('child-empty');
+      await recordChannel('child-occupied');
+      await recordChannel('child-gone');
+      const restarted = new AutoVoiceService(mockRepo as AutoVoiceRepository, channelRepo);
+      const hub = voiceChannel('parent-vc-1');
+      const permanent = voiceChannel('permanent-vc-1');
+      const empty = voiceChannel('child-empty');
+      const occupied = voiceChannel('child-occupied', 1);
+      const guild = guildWith(hub, permanent, empty, occupied);
+
+      const deleted = await restarted.cleanupOrphans(guild);
 
       expect(deleted).toBe(1);
-      expect(mockParentChannel.delete).not.toHaveBeenCalled();
-      expect(mockOrphanChild.delete).toHaveBeenCalled();
+      expect(empty.delete).toHaveBeenCalled();
+      expect(occupied.delete).not.toHaveBeenCalled();
+      expect(hub.delete).not.toHaveBeenCalled();
+      expect(permanent.delete).not.toHaveBeenCalled();
+      expect(await channelRepo.exists('child-empty')).toBe(false);
+      expect(await channelRepo.exists('child-occupied')).toBe(true);
+      expect(await channelRepo.exists('child-gone')).toBe(false);
+    });
+
+    it('forgets a channel that is already gone on Discord but keeps it on other delete failures', async () => {
+      await recordChannel('child-unknown');
+      await recordChannel('child-forbidden');
+      const unknown = voiceChannel('child-unknown');
+      unknown.delete.mockRejectedValue(Object.assign(new Error('Unknown Channel'), { code: 10003 }));
+      const forbidden = voiceChannel('child-forbidden');
+      forbidden.delete.mockRejectedValue(Object.assign(new Error('Missing Permissions'), { code: 50013 }));
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const deleted = await service.cleanupOrphans(guildWith(unknown, forbidden));
+
+      expect(deleted).toBe(1);
+      expect(await channelRepo.exists('child-unknown')).toBe(false);
+      expect(await channelRepo.exists('child-forbidden')).toBe(true);
+      errorSpy.mockRestore();
+    });
+
+    it('forgets a created channel deleted outside the service', async () => {
+      await recordChannel('child-vc-1');
+
+      await service.handleChannelDelete('child-vc-1');
+
+      expect(await channelRepo.exists('child-vc-1')).toBe(false);
     });
   });
 

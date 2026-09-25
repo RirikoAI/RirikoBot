@@ -70,6 +70,19 @@ export const autoVoiceConfigs = pgTable('auto_voice_configs', {
   bitrate: integer('bitrate').notNull().default(64000),
 });
 
+// Voice channels the auto voice service created. Only channels listed here are ever deleted
+// by the service, so permanent channels that share a hub's category are left alone.
+export const autoVoiceChannels = pgTable(
+  'auto_voice_channels',
+  {
+    channelId: varchar('channel_id', { length: 32 }).primaryKey(),
+    guildId: varchar('guild_id', { length: 32 }).notNull(),
+    parentChannelId: varchar('parent_channel_id', { length: 32 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('idx_pg_auto_voice_channels_guild').on(table.guildId)],
+);
+
 export const reminders = pgTable(
   'reminders',
   {
