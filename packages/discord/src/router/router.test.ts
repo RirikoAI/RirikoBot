@@ -421,3 +421,78 @@ describe('CommandRouter Dual Dispatcher (TASK-0312)', () => {
     });
   });
 });
+
+describe('CommandRouter onCommandRun hook (TASK-1131)', () => {
+  const command: Command = {
+    metadata: { name: 'echo', category: CommandCategory.GENERAL, description: 'Echo' },
+    execute: vi.fn(),
+  };
+
+  const interaction = () =>
+    ({
+      isAutocomplete: () => false,
+      isChatInputCommand: () => true,
+      commandName: 'echo',
+      client: {} as unknown as Client,
+      user: { id: 'user-1' } as unknown as User,
+      replied: false,
+      deferred: false,
+      reply: vi.fn().mockResolvedValue(undefined),
+      options: {},
+    }) as unknown as ChatInputCommandInteraction;
+
+  const routerWith = (options: ConstructorParameters<typeof CommandRouter>[1]) => {
+    const registry = new CommandRegistry();
+    registry.register(command);
+    return new CommandRouter(registry, options);
+  };
+
+  beforeEach(() => {
+    vi.mocked(command.execute).mockClear();
+  });
+
+  it('reports each command that passes the pipeline, before it executes', async () => {
+    const order: string[] = [];
+    vi.mocked(command.execute).mockImplementationOnce(async () => {
+      order.push('execute');
+    });
+    const router = routerWith({
+      onCommandRun: (ctx) => order.push(`run:${ctx.commandName}`),
+    });
+
+    await router.dispatchInteraction(interaction());
+
+    expect(order).toEqual(['run:echo', 'execute']);
+  });
+
+  it('does not report a command a middleware stops', async () => {
+    const onCommandRun = vi.fn();
+    const router = routerWith({
+      onCommandRun,
+      middlewares: [
+        async () => {
+          throw new RirikoError('Blocked', { code: ErrorCode.UNAUTHORIZED, statusCode: 403 });
+        },
+      ],
+    });
+
+    await router.dispatchInteraction(interaction());
+
+    expect(onCommandRun).not.toHaveBeenCalled();
+    expect(command.execute).not.toHaveBeenCalled();
+  });
+
+  it('still executes the command when the hook throws', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const router = routerWith({
+      onCommandRun: () => {
+        throw new Error('hook failed');
+      },
+    });
+
+    await router.dispatchInteraction(interaction());
+
+    expect(command.execute).toHaveBeenCalledOnce();
+    errorSpy.mockRestore();
+  });
+});

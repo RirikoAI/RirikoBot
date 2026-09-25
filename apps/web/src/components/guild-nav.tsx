@@ -11,7 +11,7 @@ export function GuildNav({ guildId }: { guildId: string }) {
       <ul className="flex gap-1 overflow-x-auto md:flex-col">
         {GUILD_NAV_ITEMS.map((item) => {
           const href = `/dashboard/${guildId}/${item.slug}`;
-          const active = pathname === href;
+          const active = pathname === href || pathname.startsWith(`${href}/`);
           return (
             <li key={item.slug}>
               <Link

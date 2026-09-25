@@ -5,6 +5,7 @@ import {
   Routes,
   type APIRole,
   type RESTGetAPIGuildChannelsResult,
+  type RESTGetAPIGuildResult,
   type RESTGetAPIGuildRolesResult,
 } from 'discord-api-types/v10';
 import { TtlCache } from '../ttl-cache';
@@ -16,6 +17,12 @@ export interface ChannelOption {
   name: string;
   /** Category the channel sits in, for grouping in pickers. */
   category: string | null;
+}
+
+/** Approximate counts from Discord; `online` counts members who are not offline. */
+export interface GuildCounts {
+  members: number;
+  online: number;
 }
 
 export interface RoleOption {
@@ -30,12 +37,13 @@ const MESSAGE_CHANNEL_TYPES = new Set<ChannelType>([
 ]);
 
 /**
- * Channels and roles for dashboard pickers, read with the bot token. Callers must have passed
- * `requireGuildAccess(guildId)` first.
+ * Channels, roles and member counts for dashboard pages, read with the bot token. Callers must
+ * have passed `requireGuildAccess(guildId)` first.
  */
 export class GuildResourceDirectory {
   private readonly channels: TtlCache<string, RESTGetAPIGuildChannelsResult>;
   private readonly roles: TtlCache<string, RESTGetAPIGuildRolesResult>;
+  private readonly counts: TtlCache<string, GuildCounts>;
 
   constructor(
     private readonly rest: Pick<REST, 'get'>,
@@ -43,15 +51,31 @@ export class GuildResourceDirectory {
   ) {
     this.channels = new TtlCache(GUILD_RESOURCES_TTL_MS, now);
     this.roles = new TtlCache(GUILD_RESOURCES_TTL_MS, now);
+    this.counts = new TtlCache(GUILD_RESOURCES_TTL_MS, now);
+  }
+
+  /** Member and online counts (`GET /guilds/{id}?with_counts=true`). */
+  async memberCounts(guildId: string): Promise<GuildCounts> {
+    return this.counts.get(guildId, async () => {
+      const guild = (await this.rest.get(Routes.guild(guildId), {
+        query: new URLSearchParams({ with_counts: 'true' }),
+      })) as RESTGetAPIGuildResult;
+      return {
+        members: guild.approximate_member_count ?? 0,
+        online: guild.approximate_presence_count ?? 0,
+      };
+    });
+  }
+
+  /** Every channel's name by ID, for showing channels the bot reports by ID. */
+  async channelNames(guildId: string): Promise<Map<string, string>> {
+    const channels = await this.loadChannels(guildId);
+    return new Map(channels.map((channel) => [channel.id, channel.name ?? channel.id]));
   }
 
   /** Text and announcement channels in Discord's sidebar order. */
   async messageChannels(guildId: string): Promise<ChannelOption[]> {
-    const channels = await this.channels.get(
-      guildId,
-      async () =>
-        (await this.rest.get(Routes.guildChannels(guildId))) as RESTGetAPIGuildChannelsResult,
-    );
+    const channels = await this.loadChannels(guildId);
     const categories = new Map(
       channels
         .filter((channel) => channel.type === ChannelType.GuildCategory)
@@ -90,6 +114,14 @@ export class GuildResourceDirectory {
    */
   async memberRoles(guildId: string): Promise<RoleOption[]> {
     return this.roleOptions(guildId, () => true);
+  }
+
+  private loadChannels(guildId: string): Promise<RESTGetAPIGuildChannelsResult> {
+    return this.channels.get(
+      guildId,
+      async () =>
+        (await this.rest.get(Routes.guildChannels(guildId))) as RESTGetAPIGuildChannelsResult,
+    );
   }
 
   private async roleOptions(

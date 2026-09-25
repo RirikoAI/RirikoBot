@@ -53,6 +53,10 @@
     "./guild": {
       "types": "./dist/guild/index.d.ts",
       "import": "./dist/guild/index.js"
+    },
+    "./activity": {
+      "types": "./dist/activity/index.d.ts",
+      "import": "./dist/activity/index.js"
     }
   },
   "scripts": {
