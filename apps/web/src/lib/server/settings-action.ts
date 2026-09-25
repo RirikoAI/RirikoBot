@@ -1,5 +1,6 @@
 import 'server-only';
 import { revalidatePath } from 'next/cache';
+import { after } from 'next/server';
 import type { GuildConfigModule } from '@ririko/core';
 import { GuildConfigValidationError } from '@ririko/services/guild';
 import type { SettingsFormState } from '@/lib/settings-form-state';
@@ -23,7 +24,8 @@ export function pickFormFields(
 /**
  * The body of every settings Server Action. Server Actions are public endpoints, so the guild
  * ID is checked here on every call: dashboard Origin, then `requireGuildAccess`, then the
- * shared schema inside `GuildConfigService`, which also writes the audit entry.
+ * shared schema inside `GuildConfigService`, which also writes the audit entry. A save that
+ * changes something is announced in the guild's log channel after the response is sent.
  */
 export async function saveGuildSettings(
   guildId: string,
@@ -34,7 +36,7 @@ export async function saveGuildSettings(
     return { status: 'error', message: 'This request did not come from the dashboard.' };
   }
   const { session } = await requireGuildAccess(guildId);
-  const { guildConfig } = await getWebServices();
+  const { guildConfig, notifier } = await getWebServices();
 
   try {
     const { values, changes } = await guildConfig.update(guildId, module, patch, {
@@ -42,6 +44,10 @@ export async function saveGuildSettings(
       source: 'dashboard',
       ...(await requestActor()),
     });
+    if (changes.length > 0) {
+      const change = { userId: session.userId, module, changes };
+      after(() => notifier.guildSettingsChanged(guildId, change));
+    }
     revalidatePath(`/dashboard/${guildId}`, 'layout');
     return {
       status: 'saved',
