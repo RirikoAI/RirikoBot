@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "STORY-123",
   "epics": [
     {
       "id": "EPIC-000",
@@ -1017,6 +1017,16 @@
         "STORY-121"
       ],
       "blocks": []
+    },
+    {
+      "id": "STORY-123",
+      "epic": "EPIC-012",
+      "title": "CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site",
+      "points": 5,
+      "status": "IN_PROGRESS",
+      "requires": [],
+      "blocks": [],
+      "description": "Pulled forward on 2026-09-26 so the remaining EPIC-011 web PRs are verified in CI. CircleCI runs lint, Prettier check, typecheck, tests with coverage (JUnit results + Codecov upload), the Next.js production build and a gitleaks history scan on every push. Vercel deploys a zero-dependency project status page generated from this board until the bot and dashboard are hosted (STORY-121/122). Replaces the GitHub Actions CI/CD item dropped from STORY-122 during regrooming."
     },
     {
       "id": "STORY-130",
@@ -3206,6 +3216,37 @@
       "parent": "STORY-122",
       "title": "docker-compose.production.yml with Redis, PostgreSQL, and App Services",
       "points": 2,
+      "status": "TODO",
+      "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1231",
+      "parent": "STORY-123",
+      "title": "One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks)",
+      "points": 2,
+      "status": "TODO",
+      "requires": [],
+      "blocks": [
+        "TASK-1232"
+      ]
+    },
+    {
+      "id": "TASK-1232",
+      "parent": "STORY-123",
+      "title": "Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1231"
+      ],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1233",
+      "parent": "STORY-123",
+      "title": "Vercel Project Status Site Generated from the Kanban Board",
+      "points": 1,
       "status": "TODO",
       "requires": [],
       "blocks": []
