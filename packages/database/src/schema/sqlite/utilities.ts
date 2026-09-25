@@ -104,6 +104,7 @@ export const auditLogs = sqliteTable(
     action: text('action').notNull(),
     details: text('details', { mode: 'json' }).$type<Record<string, unknown>>().default({}),
     ipAddress: text('ip_address'),
+    userAgent: text('user_agent'),
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .notNull()
       .$defaultFn(() => new Date()),

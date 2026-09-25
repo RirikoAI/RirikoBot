@@ -178,6 +178,7 @@ export type NewReminder = typeof sqlite.reminders.$inferInsert;
 export type WelcomeConfig = typeof sqlite.guildWelcomer.$inferSelect;
 export type FarewellConfig = typeof sqlite.guildFarewell.$inferSelect;
 export type AuditLog = typeof sqlite.auditLogs.$inferSelect;
+export type NewAuditLog = Omit<typeof sqlite.auditLogs.$inferInsert, 'id' | 'createdAt'>;
 
 // Web Dashboard
 export type WebSession = typeof sqlite.webSessions.$inferSelect;

@@ -114,6 +114,7 @@ export const auditLogs = pgTable(
     action: varchar('action', { length: 64 }).notNull(),
     details: jsonb('details').$type<Record<string, unknown>>().default({}),
     ipAddress: varchar('ip_address', { length: 64 }),
+    userAgent: text('user_agent'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index('idx_pg_audit_logs_guild_created').on(table.guildId, table.createdAt)],
