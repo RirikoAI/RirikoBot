@@ -1,11 +1,10 @@
 import 'server-only';
 import { revalidatePath } from 'next/cache';
-import { headers } from 'next/headers';
 import type { GuildConfigModule } from '@ririko/core';
 import { GuildConfigValidationError } from '@ririko/services/guild';
 import type { SettingsFormState } from '@/lib/settings-form-state';
-import { clientIp, isSameOrigin, userAgent } from './auth/request';
 import { requireGuildAccess } from './guilds/require-guild-access';
+import { isDashboardRequest, requestActor } from './request-context';
 import { getWebServices } from './services';
 
 /** String values of the named fields that were submitted; absent fields keep their value. */
@@ -31,19 +30,17 @@ export async function saveGuildSettings(
   module: GuildConfigModule,
   patch: Record<string, string>,
 ): Promise<SettingsFormState> {
-  const requestHeaders = await headers();
-  const { config, guildConfig } = await getWebServices();
-  if (!isSameOrigin(requestHeaders, config.DASHBOARD_URL)) {
+  if (!(await isDashboardRequest())) {
     return { status: 'error', message: 'This request did not come from the dashboard.' };
   }
   const { session } = await requireGuildAccess(guildId);
+  const { guildConfig } = await getWebServices();
 
   try {
     const { values, changes } = await guildConfig.update(guildId, module, patch, {
       userId: session.userId,
       source: 'dashboard',
-      ipAddress: clientIp(requestHeaders),
-      userAgent: userAgent(requestHeaders),
+      ...(await requestActor()),
     });
     revalidatePath(`/dashboard/${guildId}`, 'layout');
     return {

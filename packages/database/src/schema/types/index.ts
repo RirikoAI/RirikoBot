@@ -183,6 +183,8 @@ export type NewAuditLog = Omit<typeof sqlite.auditLogs.$inferInsert, 'id' | 'cre
 // Web Dashboard
 export type WebSession = typeof sqlite.webSessions.$inferSelect;
 export type NewWebSession = typeof sqlite.webSessions.$inferInsert;
+export type WebPasskey = typeof sqlite.webPasskeys.$inferSelect;
+export type NewWebPasskey = typeof sqlite.webPasskeys.$inferInsert;
 
 // Guild Config Change Feed
 export type GuildConfigVersion = typeof sqlite.guildConfigVersions.$inferSelect;
