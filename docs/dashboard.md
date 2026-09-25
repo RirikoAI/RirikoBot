@@ -3,12 +3,12 @@
 ## 1. Overview & Fullstack Architecture
 The **Ririko Management Dashboard** (`apps/web`) is a modern web application built on **Next.js 16 (App Router)** and **React 19**. It provides server administrators with complete graphical control over bot settings, server analytics, card collections, and moderation cases without requiring Discord commands.
 
-> **Status (2026-09-24):** `apps/web` does not exist yet. The dashboard is groomed as EPIC-011 (STORY-110..117) on [BOARD.md](kanban/BOARD.md). Section 8 maps each part of this spec to its ticket. Security decisions are recorded in [ADR-013](adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md).
+> **Status (2026-09-25):** STORY-110 is implemented: the `apps/web` scaffold, Discord OAuth2 login, server-side sessions, the server selector and the `requireGuildAccess` guard. The module pages (STORY-111..117) are not built yet. Section 8 maps each part of this spec to its ticket. Security decisions are recorded in [ADR-013](adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md). Local setup is in [SETUP.md](../SETUP.md#81-run-the-web-dashboard).
 
 ### 1.1. Integration with the Monorepo
 - `apps/web` is a pnpm workspace package (`@ririko/web`) wired into `tsc -b`, ESLint and Vitest like the other apps.
-- Web environment variables (Discord client ID and secret, OAuth redirect URI, session encryption key) are validated by the `@ririko/core` config loader.
-- A server-only module opens the dual-dialect database client and constructs the services the dashboard needs. It reuses the bot composition in `apps/bot/src/services.ts` instead of duplicating it.
+- Web environment variables are validated by `loadWebConfig()` in `@ririko/core`: `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL` (the OAuth redirect URI is `${DASHBOARD_URL}/api/auth/callback`) and `SECRET_VAULT_KEY` are required for the dashboard only. `SECRET_VAULT_KEY_VERSION` and `SECRET_VAULT_PREVIOUS_KEYS` rotate the vault key without breaking stored ciphertexts.
+- A server-only module (`apps/web/src/lib/server/services.ts`) opens the dual-dialect database client and constructs only what the dashboard uses. It does not import `@ririko/bot`, which would pull the gateway client, commands and audio stack into the web server. When STORY-111 needs the domain services, their wiring moves out of `apps/bot/src/services.ts` into a shared factory in `packages/services` that both apps call.
 - The dashboard never reimplements domain logic. It calls the same services the bot commands and the CLI call.
 
 ---
@@ -20,7 +20,7 @@ User Browser
      │
      ▼
 Discord OAuth2 Flow (/api/auth/login → /api/auth/callback)
-     │ [Scopes: identify, guilds] [signed state parameter]
+     │ [Scopes: identify, guilds] [state + PKCE S256, sealed in a 10-minute __Host- cookie]
      ▼
 Server-Side Session
  ├── __Host- cookie holds 32 random bytes (HttpOnly, Secure, SameSite=Lax, Path=/)
@@ -41,7 +41,8 @@ Guild Discovery Pipeline
 - Logout, per-session revoke and "sign out everywhere" take effect on the next request.
 
 ### 2.2. Authorization Rules
-- Every Server Action and route handler calls `requireGuildAccess(guildId)`. It re-verifies `ManageGuild` or `Administrator` against a short-TTL cache on every call, so a user who loses the permission on Discord is rejected on the next request.
+- Every guild page, Server Action and route handler calls `requireGuildAccess(guildId)` (`apps/web/src/lib/server/guilds/require-guild-access.ts`). It re-verifies guild ownership, `ManageGuild` or `Administrator`, and bot membership on every call. The user's guild list is cached for 30 seconds per session and the bot's guild list for 60 seconds, so a user who loses the permission on Discord is rejected within 30 seconds, and a guild the bot leaves is rejected within 60 seconds. Unauthorized and unknown guilds both return 404.
+- A Discord `401` on the user's guild list (the user deauthorized the app) ends the session and sends the user back through login.
 - Server Actions are public HTTP endpoints. The `guildId` from the client is never trusted until the guard has checked it.
 - Next.js middleware (`proxy.ts`) is **never** the authorization layer (CVE-2025-29927 bypassed middleware-only checks). Authorization runs in the data path.
 - A test enumerates every Server Action and route handler and fails if one skips the guard.

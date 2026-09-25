@@ -12,3 +12,4 @@ export * from './free-games.js';
 export * from './tcg.js';
 export * from './games.js';
 export * from './utilities.js';
+export * from './web.js';
