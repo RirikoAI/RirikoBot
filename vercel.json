@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo 'The status site has no dependencies'",
+  "buildCommand": "node --experimental-strip-types scripts/build-status-site.ts",
+  "outputDirectory": "site-dist"
+}
