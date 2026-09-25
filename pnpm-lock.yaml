@@ -130,6 +130,9 @@ importers:
       '@ririko/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@ririko/services':
+        specifier: workspace:^
+        version: link:../../packages/services
       discord-api-types:
         specifier: ^0.38.55
         version: 0.38.55

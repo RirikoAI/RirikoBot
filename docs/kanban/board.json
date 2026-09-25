@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-1112",
+  "active_in_progress_ticket": "TASK-1113",
   "epics": [
     {
       "id": "EPIC-000",
@@ -2508,7 +2508,7 @@
       "parent": "STORY-111",
       "title": "Dashboard Shell: Guild Layout & Module Nav, Channel/Role Pickers, Server Action Form Kit & General Tab",
       "points": 3,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": [
         "TASK-1111"
       ],
@@ -2526,7 +2526,7 @@
       "parent": "STORY-111",
       "title": "`ririko guild:config <guild_id> [key] [value]` CLI Parity (get, set, list) on the Same Schemas & Service",
       "points": 2,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "TASK-1111"
       ],

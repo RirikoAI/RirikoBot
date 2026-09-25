@@ -2,15 +2,20 @@ import 'server-only';
 import { REST } from '@discordjs/rest';
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
+  AuditLogRepository,
   createDatabaseClient,
+  GuildConfigVersionRepository,
+  GuildSettingsRepository,
   UserRepository,
   WebSessionRepository,
   type DatabaseClient,
 } from '@ririko/database';
+import { GuildConfigService } from '@ririko/services/guild';
 import { DiscordOAuthClient } from './auth/discord-oauth';
 import { SessionService } from './auth/session-service';
 import { BotGuildDirectory } from './guilds/bot-guilds';
 import { GuildAccessService } from './guilds/guild-access';
+import { GuildResourceDirectory } from './guilds/guild-resources';
 
 /**
  * Server-side dependencies of the dashboard. Built once per process from the shared monorepo
@@ -26,6 +31,9 @@ export interface WebServices {
   /** Discord REST client authenticated with the bot token; server-side only. */
   botRest: REST;
   guildAccess: GuildAccessService;
+  /** Channels and roles for pickers; only after `requireGuildAccess`. */
+  guildResources: GuildResourceDirectory;
+  guildConfig: GuildConfigService;
 }
 
 async function createWebServices(): Promise<WebServices> {
@@ -48,6 +56,13 @@ async function createWebServices(): Promise<WebServices> {
     oauth,
     botGuildIds: () => botGuilds.guildIds(),
   });
+  const guildConfig = new GuildConfigService({
+    db,
+    guildSettings: new GuildSettingsRepository(db),
+    versions: new GuildConfigVersionRepository(db),
+    audit: new AuditLogRepository(db),
+    defaultPrefix: config.DEFAULT_PREFIX,
+  });
   return {
     config,
     db,
@@ -57,6 +72,8 @@ async function createWebServices(): Promise<WebServices> {
     users: new UserRepository(db),
     botRest,
     guildAccess,
+    guildResources: new GuildResourceDirectory(botRest),
+    guildConfig,
   };
 }
 
