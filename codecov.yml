@@ -1,0 +1,21 @@
+# Codecov settings (STORY-123). Coverage is uploaded by the CircleCI `test` job.
+coverage:
+  status:
+    project:
+      default:
+        # Compare against the base commit; allow 1% noise before failing.
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        # Reported on PRs but not blocking while the suite catches up with older code.
+        informational: true
+
+comment:
+  layout: 'condensed_header, diff, flags, files'
+  require_changes: false
+
+ignore:
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - 'scripts/**'

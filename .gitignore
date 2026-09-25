@@ -51,3 +51,10 @@ temp-*/
 # Rendered TCG cards (rebuilt by `pnpm tcg:card-builder --rerender`; the bot renders missing ones on demand)
 public/cards/
 public/bosses/
+
+# Test and coverage reports (pnpm test:ci / test:coverage)
+coverage/
+test-results/
+
+# Vercel status site build output (pnpm site:build)
+site-dist/

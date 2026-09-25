@@ -9,6 +9,9 @@ const requireFromWeb = createRequire(new URL('./apps/web/package.json', import.m
 const serverOnlyNoop = join(dirname(requireFromWeb.resolve('server-only')), 'empty.js');
 
 export default defineConfig({
+  // apps/web's tsconfig uses `jsx: preserve` for Next.js; compile JSX here so coverage can parse
+  // .tsx files that no test imports.
+  oxc: { jsx: { runtime: 'automatic' } },
   resolve: {
     alias: [
       { find: 'server-only', replacement: serverOnlyNoop },
@@ -22,7 +25,17 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['packages/**/*.test.ts', 'apps/**/*.test.ts'],
+    include: ['packages/**/*.test.ts', 'apps/**/*.test.ts', 'scripts/**/*.test.ts'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**', '.local/**'],
+    coverage: {
+      provider: 'v8',
+      include: ['packages/*/src/**/*.{ts,tsx}', 'apps/*/src/**/*.{ts,tsx}'],
+      exclude: ['**/*.test.{ts,tsx}', '**/*.d.ts'],
+      reporter: ['text-summary', 'lcov', 'html', 'json-summary'],
+      reportsDirectory: 'coverage',
+      // Ratchet: the measured baseline rounded down. Raise these as coverage grows; never lower
+      // them to get a build through.
+      thresholds: { statements: 65, branches: 54, functions: 69, lines: 67 },
+    },
   },
 });
