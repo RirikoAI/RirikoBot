@@ -10,6 +10,7 @@ import { registerGeneratePoTokenCommand } from './commands/generate-po-token.js'
 import { registerAiConfigureCommand } from './commands/ai-configure.js';
 import { registerStreamConfigureCommand } from './commands/stream-configure.js';
 import { registerImageConfigureCommand } from './commands/image-configure.js';
+import { registerGuildConfigCommand } from './commands/guild-config.js';
 
 
 export function loadEnvConfig(customPath?: string): void {
@@ -63,6 +64,7 @@ export function createProgram(): Command {
   registerAiConfigureCommand(program);
   registerStreamConfigureCommand(program);
   registerImageConfigureCommand(program);
+  registerGuildConfigCommand(program);
 
 
   // Global error handler
