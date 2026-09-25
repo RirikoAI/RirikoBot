@@ -131,12 +131,21 @@ export default async function GuildOverviewPage({
                       {numberFormat.format(command.count)}
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-ink" aria-hidden>
-                    <div
-                      className="h-full rounded-full bg-sakura-strong"
-                      style={{ width: `${(command.count / usage.top[0]!.count) * 100}%` }}
+                  {/* SVG geometry, not a style attribute: the production CSP blocks those. */}
+                  <svg
+                    viewBox="0 0 100 6"
+                    preserveAspectRatio="none"
+                    className="h-1.5 w-full"
+                    aria-hidden
+                  >
+                    <rect width="100" height="6" rx="3" className="fill-ink" />
+                    <rect
+                      width={(command.count / usage.top[0]!.count) * 100}
+                      height="6"
+                      rx="3"
+                      className="fill-sakura-strong"
                     />
-                  </div>
+                  </svg>
                 </li>
               ))}
             </ol>

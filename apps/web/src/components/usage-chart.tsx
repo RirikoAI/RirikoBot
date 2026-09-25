@@ -53,7 +53,7 @@ export function UsageChart({ days }: { days: DailyCount[] }) {
               x2={WIDTH}
               y1={y(tick)}
               y2={y(tick)}
-              stroke="var(--color-edge)"
+              className="stroke-edge"
               strokeWidth={1}
             />
             <text
@@ -75,14 +75,14 @@ export function UsageChart({ days }: { days: DailyCount[] }) {
               {entry.count > 0 ? (
                 <path
                   d={barPath(x, y(entry.count), barWidth, height)}
-                  fill={active === index ? 'var(--color-sakura)' : 'var(--color-sakura-strong)'}
+                  className={active === index ? 'fill-sakura' : 'fill-sakura-strong'}
                 />
               ) : null}
               {labelled.has(index) ? (
                 <text
-                  x={x + barWidth / 2}
+                  x={index === 0 ? x : index === days.length - 1 ? x + barWidth : x + barWidth / 2}
                   y={HEIGHT - 6}
-                  textAnchor="middle"
+                  textAnchor={index === 0 ? 'start' : index === days.length - 1 ? 'end' : 'middle'}
                   className="fill-zinc-400 text-[11px]"
                 >
                   {formatDay(entry.day)}
@@ -111,7 +111,10 @@ export function UsageChart({ days }: { days: DailyCount[] }) {
         <div
           role="presentation"
           className="pointer-events-none absolute top-0 -translate-x-1/2 rounded-md border border-edge bg-ink px-2 py-1 text-xs whitespace-nowrap shadow-lg"
-          style={{ left: `${((PLOT_LEFT + (active + 0.5) * slot) / WIDTH) * 100}%` }}
+          // Set after hydration through the CSSOM, which the CSP allows (unlike server-rendered styles).
+          style={{
+            left: `${Math.min(88, Math.max(18, ((PLOT_LEFT + (active + 0.5) * slot) / WIDTH) * 100))}%`,
+          }}
         >
           <strong className="font-semibold text-zinc-100 tabular-nums">
             {numberFormat.format(activeDay.count)}
