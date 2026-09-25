@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-1113",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -834,7 +834,7 @@
       "epic": "EPIC-011",
       "title": "Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity",
       "points": 8,
-      "status": "TODO",
+      "status": "REVIEW",
       "requires": [
         "STORY-110"
       ],
@@ -2526,7 +2526,7 @@
       "parent": "STORY-111",
       "title": "`ririko guild:config <guild_id> [key] [value]` CLI Parity (get, set, list) on the Same Schemas & Service",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": [
         "TASK-1111"
       ],
