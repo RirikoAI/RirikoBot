@@ -5,6 +5,7 @@ import { experimental_taintObjectReference, experimental_taintUniqueValue } from
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
   AuditLogRepository,
+  BotActivityRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -46,6 +47,8 @@ export interface WebServices {
   /** Channels and roles for pickers; only after `requireGuildAccess`. */
   guildResources: GuildResourceDirectory;
   guildConfig: GuildConfigService;
+  /** Command usage, bot status and voice activity written by the bot; read-only here. */
+  botActivity: BotActivityRepository;
   /** Security DMs and guild change notices (best effort). */
   notifier: DiscordNotifier;
 }
@@ -126,6 +129,7 @@ async function createWebServices(): Promise<WebServices> {
     guildAccess,
     guildResources: new GuildResourceDirectory(botRest),
     guildConfig,
+    botActivity: new BotActivityRepository(db),
     notifier: new DiscordNotifier({
       rest: botRest,
       guildSettings,

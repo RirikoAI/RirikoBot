@@ -60,3 +60,34 @@ describe('GuildResourceDirectory (TASK-1112)', () => {
     expect(get).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('GuildResourceDirectory counts and channel names (TASK-1131)', () => {
+  it('reads approximate member and online counts once per TTL', async () => {
+    const get = vi.fn().mockResolvedValue({
+      id: GUILD,
+      approximate_member_count: 120,
+      approximate_presence_count: 33,
+    });
+    const directory = new GuildResourceDirectory({ get }, () => 0);
+
+    expect(await directory.memberCounts(GUILD)).toEqual({ members: 120, online: 33 });
+    await directory.memberCounts(GUILD);
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(get.mock.calls[0]![1].query.get('with_counts')).toBe('true');
+  });
+
+  it('maps every channel ID to its name from the shared channel list', async () => {
+    const get = vi
+      .fn()
+      .mockResolvedValue([
+        channel('c-voice', 'Lounge', ChannelType.GuildVoice, 0),
+        channel('c-general', 'general', ChannelType.GuildText, 1),
+      ]);
+    const directory = new GuildResourceDirectory({ get }, () => 0);
+
+    const names = await directory.channelNames(GUILD);
+    expect(names.get('c-voice')).toBe('Lounge');
+    await directory.messageChannels(GUILD);
+    expect(get).toHaveBeenCalledTimes(1);
+  });
+});

@@ -91,6 +91,7 @@ export async function main(): Promise<void> {
     onError: (ctx, err) => {
       console.error(`[Command:${ctx.commandName}] Execution error:`, err);
     },
+    onCommandRun: (ctx) => services.commandUsageRecorder.record(ctx.guildId, ctx.commandName),
   });
 
   // 3. Register standard test & diagnostic commands
@@ -296,6 +297,10 @@ export async function main(): Promise<void> {
       services.freeGamesEngine.stop();
       services.giveawayEngine.stop();
       services.guildConfigWatcher.stop();
+      services.botStatusReporter?.stop();
+      await services.commandUsageRecorder.stop().catch((err: unknown) => {
+        console.error('[CommandUsageRecorder] Failed to write command usage on shutdown:', err);
+      });
       stopCaseLog?.();
       services.autoRoleService.stopSweeper();
       await bot.gateway.destroy();
@@ -353,7 +358,9 @@ export async function main(): Promise<void> {
       services.autoRoleService.startSweeper(bot.client);
       services.reminderScheduler?.start();
       services.guildConfigWatcher.start();
-      console.log('📡 Stream Watcher, Free Games Announcer, Giveaways, AutoRole & Reminder engines active!');
+      services.commandUsageRecorder.start();
+      services.botStatusReporter?.start();
+      console.log('📡 Stream Watcher, Free Games Announcer, Giveaways, AutoRole, Reminder & Bot Status engines active!');
 
       // Clean up orphaned dynamic voice channels across guilds
       for (const [, guild] of bot.client.guilds.cache) {
