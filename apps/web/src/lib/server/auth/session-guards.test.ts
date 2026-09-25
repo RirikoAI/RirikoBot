@@ -20,22 +20,25 @@ vi.mock('next/navigation', () => ({
   redirect: (url: string) => {
     throw new Error(`REDIRECT ${url}`);
   },
+  notFound: () => {
+    throw new Error('NOT_FOUND');
+  },
 }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 vi.mock('../services', () => ({
   getWebServices: async () => ({
-    config: { DASHBOARD_URL: 'https://dash.example.com' },
+    config: { DASHBOARD_URL: 'https://dash.example.com', BOT_OWNER_ID: ['owner-1'] },
     sessions: { resolve: async () => mocks.session },
     passkeys: { count: async () => mocks.passkeyCount, remove: mocks.remove },
   }),
 }));
 
-const { requireSession, requireSessionForPasskeyCheck } = await import('./session');
+const { requireOwner, requireSession, requireSessionForPasskeyCheck } = await import('./session');
 const { removePasskey } = await import('@/app/account/security/actions');
 
-const session = (stepUpAt: Date | null): ActiveSession => ({
+const session = (stepUpAt: Date | null, userId = 'user-1'): ActiveSession => ({
   id: 'hash',
-  userId: 'user-1',
+  userId,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 3_600_000),
   stepUpAt,
@@ -105,5 +108,31 @@ describe('removePasskey (TASK-1171)', () => {
     mocks.session = session(new Date());
     expect(await removePasskey('cred-1')).toMatchObject({ ok: false });
     expect(mocks.remove).not.toHaveBeenCalled();
+  });
+});
+
+describe('requireOwner (TASK-1174)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.passkeyCount = 1;
+  });
+
+  it('hides the owner console from users who are not bot owners', async () => {
+    mocks.session = session(new Date(), 'user-1');
+    await expect(requireOwner('/owner')).rejects.toThrow('NOT_FOUND');
+  });
+
+  it('sends owners without a passkey to add one', async () => {
+    mocks.session = session(null, 'owner-1');
+    mocks.passkeyCount = 0;
+    await expect(requireOwner('/owner')).rejects.toThrow('REDIRECT /account/security');
+  });
+
+  it('asks owners for a fresh passkey check, then lets them in', async () => {
+    mocks.session = session(new Date(Date.now() - 6 * 60_000), 'owner-1');
+    await expect(requireOwner('/owner')).rejects.toThrow('REDIRECT /verify?returnTo=%2Fowner');
+
+    mocks.session = session(new Date(), 'owner-1');
+    await expect(requireOwner('/owner')).resolves.toMatchObject({ userId: 'owner-1' });
   });
 });

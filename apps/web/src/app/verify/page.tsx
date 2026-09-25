@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { PasskeyCheckButton } from '@/components/passkeys/passkey-check-button';
 import { sanitizeReturnTo } from '@/lib/server/auth/request';
+import { stepUpState } from '@/lib/server/auth/passkey-policy';
 import { getPasskeyCount, requireSessionForPasskeyCheck } from '@/lib/server/auth/session';
 
 export const metadata: Metadata = { title: 'Confirm it is you · Ririko Dashboard' };
@@ -14,7 +15,9 @@ export default async function VerifyPage({
   const { returnTo: rawReturnTo } = await searchParams;
   const returnTo = sanitizeReturnTo(typeof rawReturnTo === 'string' ? rawReturnTo : null);
   const session = await requireSessionForPasskeyCheck(returnTo);
-  if (session.stepUpAt || (await getPasskeyCount(session.userId)) === 0) redirect(returnTo);
+  // Used for both the sign-in gate and step-up, so only a recent check skips the prompt.
+  const state = stepUpState(session, await getPasskeyCount(session.userId), Date.now());
+  if (state !== 'passkey-check-required') redirect(returnTo);
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-6 px-4 text-center">

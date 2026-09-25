@@ -131,6 +131,18 @@ describe('Config Loader', () => {
     expect(config.DISCORD_CLIENT_SECRET).toBe('secret');
   });
 
+  it('parses BOT_OWNER_ID as a list of Discord user IDs', () => {
+    const base = { DISCORD_TOKEN: 'mock-token', DISCORD_CLIENT_ID: 'mock-client-id' };
+    expect(loadConfig(base).BOT_OWNER_ID).toEqual([]);
+    expect(
+      loadConfig({ ...base, BOT_OWNER_ID: ' 123456789012345678, 223456789012345678 ' })
+        .BOT_OWNER_ID,
+    ).toEqual(['123456789012345678', '223456789012345678']);
+    expect(() => loadConfig({ ...base, BOT_OWNER_ID: 'your_discord_user_id' })).toThrow(
+      ConfigurationError,
+    );
+  });
+
   it('supports legacy 1.4.0 DISCORD_BOT_TOKEN and DISCORD_APPLICATION_ID aliases', () => {
     const config = loadConfig({
       DISCORD_BOT_TOKEN: 'legacy-token-123',

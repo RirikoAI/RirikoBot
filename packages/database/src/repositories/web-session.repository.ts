@@ -134,6 +134,22 @@ export class WebSessionRepository {
     return deleted.length > 0;
   }
 
+  /** Ends every session of the user; returns how many were removed. */
+  async deleteByUser(userId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    const deleted =
+      client.dialect === 'sqlite'
+        ? await client.db
+            .delete(sqliteSchema.webSessions)
+            .where(eq(sqliteSchema.webSessions.userId, userId))
+            .returning({ id: sqliteSchema.webSessions.id })
+        : await client.db
+            .delete(pgSchema.webSessions)
+            .where(eq(pgSchema.webSessions.userId, userId))
+            .returning({ id: pgSchema.webSessions.id });
+    return deleted.length;
+  }
+
   /** Removes sessions past their absolute expiry or idle since `idleBefore`. */
   async deleteExpired(now: Date, idleBefore: Date, tx?: DatabaseClient): Promise<number> {
     const client = this.getClient(tx);
