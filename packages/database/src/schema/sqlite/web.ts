@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index, primaryKey } from 'drizzle-orm/sqlite-core';
 
 /**
  * Web dashboard sessions (ADR-013). The primary key is the SHA-256 hash of the session cookie,
@@ -51,4 +51,22 @@ export const webPasskeys = sqliteTable(
     lastUsedAt: integer('last_used_at', { mode: 'timestamp_ms' }),
   },
   (table) => [index('idx_web_passkeys_user').on(table.userId)],
+);
+
+/**
+ * Browsers a user has signed in from (TASK-1172). `device_hash` is the SHA-256 of the random
+ * `__Host-ririko_device` cookie; a sign-in whose cookie is not listed triggers a new-device DM.
+ */
+export const webKnownDevices = sqliteTable(
+  'web_known_devices',
+  {
+    userId: text('user_id').notNull(),
+    deviceHash: text('device_hash').notNull(),
+    firstSeenAt: integer('first_seen_at', { mode: 'timestamp_ms' }).notNull(),
+    lastSeenAt: integer('last_seen_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.deviceHash] }),
+    index('idx_web_known_devices_last_seen').on(table.lastSeenAt),
+  ],
 );

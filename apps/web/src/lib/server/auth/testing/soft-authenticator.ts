@@ -26,7 +26,11 @@ export class SoftAuthenticator {
 
   constructor(
     private readonly origin: string,
-    private readonly options: { synced?: boolean; userVerified?: boolean } = {},
+    private readonly options: {
+      synced?: boolean;
+      userVerified?: boolean;
+      userPresent?: boolean;
+    } = {},
   ) {}
 
   get id(): string {
@@ -65,12 +69,12 @@ export class SoftAuthenticator {
   /** Signs a challenge; `counter` overrides the next signature counter (for replay tests). */
   authenticate(
     challenge: string,
-    options: { origin?: string; counter?: number } = {},
+    options: { origin?: string; counter?: number; userPresent?: boolean } = {},
   ): AuthenticationResponseJSON {
     const origin = options.origin ?? this.origin;
     this.counter = options.counter ?? this.counter + 1;
     const clientDataJSON = this.clientData('webauthn.get', challenge, origin);
-    const authenticatorData = this.header(origin, 0);
+    const authenticatorData = this.header(origin, 0, options.userPresent);
     const signature = sign(
       'sha256',
       Buffer.concat([authenticatorData, createHash('sha256').update(clientDataJSON).digest()]),
@@ -89,9 +93,10 @@ export class SoftAuthenticator {
     };
   }
 
-  private header(origin: string, extraFlags: number): Buffer {
+  private header(origin: string, extraFlags: number, userPresent?: boolean): Buffer {
     const rpIdHash = createHash('sha256').update(new URL(origin).hostname).digest();
-    let flags = FLAG_UP | extraFlags;
+    let flags = extraFlags;
+    if ((userPresent ?? this.options.userPresent) !== false) flags |= FLAG_UP;
     if (this.options.userVerified !== false) flags |= FLAG_UV;
     if (this.options.synced) flags |= FLAG_BE | FLAG_BS;
     return Buffer.concat([rpIdHash, Buffer.from([flags]), u32(this.counter)]);

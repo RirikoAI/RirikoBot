@@ -8,6 +8,9 @@ dist/
 out-tsc/
 .next/
 next-env.d.ts
+# Written by `next dev` when it detects an AI agent; project rules live in the root AGENTS.md / CLAUDE.md
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
 *.tsbuildinfo
 
 # Logs & Temp

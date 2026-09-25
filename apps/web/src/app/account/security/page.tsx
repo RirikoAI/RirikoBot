@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AccountNav } from '@/components/account-nav';
 import { PasskeyManager } from '@/components/passkeys/passkey-manager';
 import { SiteHeader } from '@/components/site-header';
 import { requireSession } from '@/lib/server/auth/session';
@@ -19,6 +20,7 @@ export default async function SecurityPage() {
         <Link href="/servers" className="text-sm text-zinc-400 hover:text-zinc-200">
           ← Your servers
         </Link>
+        <AccountNav current="/account/security" />
         <header>
           <h1 className="text-2xl font-bold">Passkeys</h1>
           <p className="mt-2 text-sm text-zinc-400">

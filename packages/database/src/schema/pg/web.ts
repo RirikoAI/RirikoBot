@@ -7,6 +7,7 @@ import {
   jsonb,
   timestamp,
   index,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 /**
@@ -60,4 +61,22 @@ export const webPasskeys = pgTable(
     lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
   },
   (table) => [index('idx_pg_web_passkeys_user').on(table.userId)],
+);
+
+/**
+ * Browsers a user has signed in from (TASK-1172). `device_hash` is the SHA-256 of the random
+ * `__Host-ririko_device` cookie; a sign-in whose cookie is not listed triggers a new-device DM.
+ */
+export const webKnownDevices = pgTable(
+  'web_known_devices',
+  {
+    userId: varchar('user_id', { length: 32 }).notNull(),
+    deviceHash: varchar('device_hash', { length: 64 }).notNull(),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.deviceHash] }),
+    index('idx_pg_web_known_devices_last_seen').on(table.lastSeenAt),
+  ],
 );

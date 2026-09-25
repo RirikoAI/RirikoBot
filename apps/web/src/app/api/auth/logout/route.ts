@@ -1,10 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { isSameOrigin } from '@/lib/server/auth/request';
 import { clearCookie, SESSION_COOKIE } from '@/lib/server/auth/session';
+import { limitAuthRequest } from '@/lib/server/rate-limit';
 import { getWebServices } from '@/lib/server/services';
 
 /** Ends the session immediately: the row is deleted, so the cookie is dead on the next request. */
 export async function POST(request: NextRequest) {
+  const limited = limitAuthRequest(request);
+  if (limited) return limited;
   const { config, sessions } = await getWebServices();
   if (!isSameOrigin(request.headers, config.DASHBOARD_URL)) {
     return new NextResponse('Forbidden', { status: 403 });

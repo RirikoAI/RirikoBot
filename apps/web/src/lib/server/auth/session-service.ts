@@ -26,6 +26,15 @@ export interface ActiveSession {
   stepUpAt: Date | null;
 }
 
+/** A session as the user sees it on the active sessions page. */
+export interface SessionSummary {
+  id: string;
+  createdAt: Date;
+  lastSeenAt: Date;
+  ipAddress: string | null;
+  userAgent: string | null;
+}
+
 export interface CreateSessionInput {
   userId: string;
   tokens: DiscordTokenSet;
@@ -90,12 +99,11 @@ export class SessionService {
     if (!row) return null;
 
     const now = this.now().getTime();
-    const idleFor = now - row.lastSeenAt.getTime();
-    if (now >= row.expiresAt.getTime() || idleFor >= SESSION_IDLE_TIMEOUT_MS) {
+    if (!isLive(row, now)) {
       await this.deps.repo.delete(id);
       return null;
     }
-    if (idleFor >= TOUCH_INTERVAL_MS) {
+    if (now - row.lastSeenAt.getTime() >= TOUCH_INTERVAL_MS) {
       await this.deps.repo.touch(id, new Date(now));
     }
     return toActiveSession(row);
@@ -103,6 +111,31 @@ export class SessionService {
 
   async revoke(token: string): Promise<void> {
     await this.deps.repo.delete(hashSessionToken(token));
+  }
+
+  /** The user's live sessions, most recently used first. */
+  async listForUser(userId: string): Promise<SessionSummary[]> {
+    const now = this.now().getTime();
+    const rows = await this.deps.repo.listByUser(userId);
+    return rows
+      .filter((row) => isLive(row, now))
+      .map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt,
+        lastSeenAt: row.lastSeenAt,
+        ipAddress: row.ipAddress,
+        userAgent: row.userAgent,
+      }));
+  }
+
+  /** Ends one of the user's sessions; false when the ID is unknown or someone else's. */
+  revokeForUser(userId: string, sessionId: string): Promise<boolean> {
+    return this.deps.repo.deleteForUser(userId, sessionId);
+  }
+
+  /** Ends every session of the user except `session`; returns how many ended. */
+  revokeOthers(session: ActiveSession): Promise<number> {
+    return this.deps.repo.deleteOthersForUser(session.userId, session.id);
   }
 
   /** Stores the session's pending WebAuthn challenge, replacing any earlier one. */
@@ -228,6 +261,10 @@ export class SessionService {
 /** Binds each ciphertext to its column and row, so a copied value fails to decrypt elsewhere. */
 function tokenContext(kind: 'access' | 'refresh', sessionId: string): string {
   return `web_sessions.discord_${kind}_token:${sessionId}`;
+}
+
+function isLive(row: WebSession, now: number): boolean {
+  return now < row.expiresAt.getTime() && now - row.lastSeenAt.getTime() < SESSION_IDLE_TIMEOUT_MS;
 }
 
 function toActiveSession(row: WebSession): ActiveSession {
