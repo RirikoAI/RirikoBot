@@ -113,7 +113,7 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 - `reminders`: Persistent reminder scheduler (`id` UUID PK, `user_id`, `guild_id`, `channel_id`, `message`, `trigger_at`, `repeat_interval` [NONE, DAILY, WEEKLY], `is_completed`).
 - `welcome_configs`: Welcomer customization settings (`guild_id` PK, `channel_id`, `message_template`, `card_theme`, `is_enabled`).
 - `farewell_configs`: Farewell customization settings (`guild_id` PK, `channel_id`, `message_template`, `card_theme`, `is_enabled`).
-- `audit_logs`: Security and administrative action audit trails (`id` UUID PK, `guild_id`, `actor_user_id`, `action`, `details` JSON, `ip_address`, `created_at`).
+- `audit_logs`: Security and administrative action audit trails (`id` UUID PK, `guild_id`, `actor_user_id`, `action`, `details` JSON, `ip_address`, `user_agent`, `created_at`). `GuildConfigService` writes `guild_config.<module>.update` entries with `details = { source: 'dashboard' | 'cli', changes: [{ field, before, after }] }`.
 
 ### 2.15. Web Dashboard (EPIC-011)
 `web_sessions` and `guild_config_versions` exist. The other tables are the groomed design from [docs/dashboard.md](file:///Z:/Projects/ririko-v2-2026/docs/dashboard.md) and [ADR-013](file:///Z:/Projects/ririko-v2-2026/docs/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md); final names are set when the tickets are implemented.

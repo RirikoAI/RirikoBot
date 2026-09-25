@@ -1,6 +1,6 @@
-import { ValidationError } from '@ririko/core';
+import { PrefixSchema, TimezoneSchema, ValidationError } from '@ririko/core';
 import type { GuildSettingsRepository, GuildSettings } from '@ririko/database';
-import { canonicalTimeZone } from '../reminders/reminder-time.js';
+import type { z } from 'zod';
 
 export interface CachedGuildSettings {
   prefix: string;
@@ -73,36 +73,7 @@ export class GuildSettingsService {
    * Validates and sets the command prefix for a guild.
    */
   async setPrefix(guildId: string, rawPrefix: string): Promise<GuildSettings> {
-    const prefix = rawPrefix.trim();
-    if (!prefix) {
-      throw new ValidationError('Prefix cannot be empty.', {
-        userMessage: 'The command prefix cannot be empty.',
-      });
-    }
-
-    if (prefix.length > 5) {
-      throw new ValidationError('Prefix must be between 1 and 5 characters.', {
-        userMessage: 'The command prefix must be between 1 and 5 characters long.',
-      });
-    }
-
-    if (/\s/.test(prefix)) {
-      throw new ValidationError('Prefix cannot contain whitespace.', {
-        userMessage: 'The command prefix cannot contain spaces or tabs.',
-      });
-    }
-
-    if (prefix.includes('`')) {
-      throw new ValidationError('Prefix cannot contain backticks.', {
-        userMessage: 'The command prefix cannot contain backtick (`) characters.',
-      });
-    }
-
-    if (prefix.startsWith('@') || prefix.startsWith('#')) {
-      throw new ValidationError('Prefix cannot start with @ or #.', {
-        userMessage: 'The command prefix cannot start with `@` or `#` to avoid collisions with mentions.',
-      });
-    }
+    const prefix = parseSetting(PrefixSchema, rawPrefix);
 
     const updated = await this.repo.upsert({
       guildId,
@@ -125,12 +96,7 @@ export class GuildSettingsService {
    * Validates and sets the server timezone for a guild.
    */
   async setTimezone(guildId: string, rawTimezone: string): Promise<GuildSettings> {
-    const canonical = canonicalTimeZone(rawTimezone);
-    if (!canonical) {
-      throw new ValidationError(`Invalid IANA timezone: "${rawTimezone}"`, {
-        userMessage: `\`${rawTimezone}\` is not a valid IANA timezone name. Please use standard format like \`Asia/Kuala_Lumpur\`, \`America/New_York\`, or \`Europe/London\`.`,
-      });
-    }
+    const canonical = parseSetting(TimezoneSchema, rawTimezone);
 
     const updated = await this.repo.upsert({
       guildId,
@@ -162,4 +128,14 @@ export class GuildSettingsService {
   clearCache(): void {
     this.cache.clear();
   }
+}
+
+/** Validates one setting with its shared schema; the first issue becomes the user message. */
+function parseSetting<TSchema extends z.ZodTypeAny>(schema: TSchema, raw: string): z.output<TSchema> {
+  const result = schema.safeParse(raw);
+  if (!result.success) {
+    const message = result.error.issues[0]?.message ?? 'Invalid value.';
+    throw new ValidationError(message, { userMessage: message });
+  }
+  return result.data;
 }

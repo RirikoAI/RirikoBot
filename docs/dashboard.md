@@ -139,7 +139,7 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 ## 6. Shared Zod Validation & Dashboard-to-CLI Parity
 
 In compliance with Sections 43 and 72 of `BLUEPRINT.md`:
-- Configuration schemas are defined once in `packages/core` using **Zod**, and only for keys the bot reads.
+- Configuration schemas are defined once in `packages/core/src/config/guild-config.ts` (`GuildConfigSchemas`, one strict Zod object per module) and only for keys the bot reads. The `/prefix` and `/timezone` commands validate with the same `PrefixSchema` and `TimezoneSchema`.
 - Both the **Web Dashboard** and the **CLI** invoke the exact same application services (`GuildConfigService`) and validation schemas.
 - Any change that can be configured via the web UI can also be executed via `ririko guild:config <guild_id> [key] [value]`: no key lists all keys, a key alone reads its value, and a key with a value sets it. CLI changes are written to `audit_logs` with a CLI actor marker.
 

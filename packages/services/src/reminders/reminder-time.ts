@@ -1,34 +1,18 @@
 import * as chrono from 'chrono-node';
+import { isValidTimeZone } from '@ririko/core';
+
+// Shared with guild settings validation; re-exported for existing importers.
+export { canonicalTimeZone, isValidTimeZone } from '@ririko/core';
 
 export type ReminderRepeat = 'NONE' | 'DAILY' | 'WEEKLY';
 
 const DAY_MS = 86_400_000;
 
-/** True for IANA zone names the runtime knows, e.g. `Asia/Kuala_Lumpur`. */
-export function isValidTimeZone(timeZone: string): boolean {
-  if (!timeZone) return false;
-  try {
-    new Intl.DateTimeFormat('en-US', { timeZone });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Canonical IANA name for user input, matched case-insensitively (`asia/tokyo` → `Asia/Tokyo`).
- * Offsets and abbreviations are rejected so stored zones always follow DST rules.
- */
-export function canonicalTimeZone(input: string): string | null {
-  const wanted = input.trim().replace(/\s+/g, '_').toLowerCase();
-  if (!wanted) return null;
-  if (wanted === 'utc' || wanted === 'etc/utc') return 'UTC';
-  return Intl.supportedValuesOf('timeZone').find((zone) => zone.toLowerCase() === wanted) ?? null;
-}
-
 /** First valid zone among the candidates (user, then guild), else UTC. */
 export function resolveTimeZone(...candidates: Array<string | null | undefined>): string {
-  return candidates.find((tz): tz is string => typeof tz === 'string' && isValidTimeZone(tz)) ?? 'UTC';
+  return (
+    candidates.find((tz): tz is string => typeof tz === 'string' && isValidTimeZone(tz)) ?? 'UTC'
+  );
 }
 
 /** Formats a Date in the given timeZone with full date and short time. */
@@ -55,15 +39,20 @@ export interface ParsedReminderTime {
  * shorthand ("30m", "1h", "2d") and ISO-like dates ("2026-12-25 08:00"). Ambiguous dates resolve
  * forward ("friday" means the coming Friday).
  */
-export function parseReminderTime(text: string, now: Date, timeZone: string): ParsedReminderTime | null {
+export function parseReminderTime(
+  text: string,
+  now: Date,
+  timeZone: string,
+): ParsedReminderTime | null {
   const [result] = chrono.parse(text, { instant: now, timezone: timeZone }, { forwardDate: true });
   if (!result) return null;
 
-  const remainder = `${text.slice(0, result.index)} ${text.slice(result.index + result.text.length)}`
-    .replace(/\s+/g, ' ')
-    .trim()
-    // "remind me in 10 minutes to stretch" → "stretch"
-    .replace(/^(to|that|about)\s+/i, '');
+  const remainder =
+    `${text.slice(0, result.index)} ${text.slice(result.index + result.text.length)}`
+      .replace(/\s+/g, ' ')
+      .trim()
+      // "remind me in 10 minutes to stretch" → "stretch"
+      .replace(/^(to|that|about)\s+/i, '');
   return { triggerAt: result.date(), timeText: result.text, remainder };
 }
 
@@ -80,7 +69,14 @@ function zoneOffsetMs(date: Date, timeZone: string): number {
     second: '2-digit',
   }).formatToParts(date);
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-  const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
+  const asUtc = Date.UTC(
+    get('year'),
+    get('month') - 1,
+    get('day'),
+    get('hour'),
+    get('minute'),
+    get('second'),
+  );
   return asUtc - Math.floor(date.getTime() / 1000) * 1000;
 }
 
