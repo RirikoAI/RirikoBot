@@ -21,7 +21,7 @@ import type { CommandMiddleware } from '../middleware/types.js';
  * Standard default fallback command prefix across the entire bot system.
  * Preserves 100% parity with legacy Ririko 1.4.0 and database schema defaults.
  */
-export const DEFAULT_COMMAND_PREFIX = '!';
+export { DEFAULT_COMMAND_PREFIX } from '@ririko/core';
 
 export const CommandCategory = {
   AI: 'ai',
