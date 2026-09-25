@@ -9,6 +9,7 @@ import {
   removePasskey,
 } from '@/app/account/security/actions';
 import type { PasskeyActionResult } from '@/lib/passkey-action-result';
+import { LocalTime } from '../local-time';
 import { passkeyPromptError, runPasskeyCheck } from './run-passkey-check';
 
 export interface PasskeySummary {
@@ -18,8 +19,6 @@ export interface PasskeySummary {
   createdAt: string;
   lastUsedAt: string | null;
 }
-
-const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
 /**
  * Runs an action; when it asks for a passkey check, runs one and retries once. Returns the
@@ -99,10 +98,13 @@ export function PasskeyManager({ passkeys }: { passkeys: PasskeySummary[] }) {
                 <p className="truncate font-medium">{passkey.name}</p>
                 <p className="text-xs text-zinc-400">
                   {passkey.synced ? 'Synced passkey' : 'This device only'} · added{' '}
-                  {dateFormat.format(new Date(passkey.createdAt))}
-                  {passkey.lastUsedAt
-                    ? ` · last used ${dateFormat.format(new Date(passkey.lastUsedAt))}`
-                    : ''}
+                  <LocalTime value={passkey.createdAt} />
+                  {passkey.lastUsedAt ? (
+                    <>
+                      {' '}
+                      · last used <LocalTime value={passkey.lastUsedAt} />
+                    </>
+                  ) : null}
                 </p>
               </div>
               <button

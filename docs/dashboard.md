@@ -45,7 +45,7 @@ Guild Discovery Pipeline
 - A Discord `401` on the user's guild list (the user deauthorized the app) ends the session and sends the user back through login.
 - Server Actions are public HTTP endpoints. The `guildId` from the client is never trusted until the guard has checked it.
 - Next.js middleware (`proxy.ts`) is **never** the authorization layer (CVE-2025-29927 bypassed middleware-only checks). Authorization runs in the data path.
-- A test enumerates every Server Action and route handler and fails if one skips the guard.
+- A test enumerates every Server Action and route handler and fails if one skips the guard ([authorization-coverage.test.ts](file:///Z:/Projects/ririko-v2-2026/apps/web/src/lib/server/authorization-coverage.test.ts), TASK-1173). It parses each `'use server'` module and `route.ts` with the TypeScript compiler API and follows calls through functions in the same file. Every export must call `saveGuildSettings`, `requireGuildAccess`, `requireSession`, `requireStepUp` or `requireOwner` (`requireSessionForPasskeyCheck` only in `app/verify/actions.ts`), and every Server Action must also call `checkDashboardRequest`. The auth routes (login, callback, logout) are an explicit allowlist and must call `limitAuthRequest` instead. Re-exports, default exports and inline `'use server'` functions are rejected because the check cannot follow them.
 - Global (non-guild) settings use an owner guard that checks the bot `ownerIds` (see Section 3.1).
 
 ### 2.3. Passkey Sign-In Gate & Step-Up
@@ -98,7 +98,7 @@ The dashboard and CLI run in separate processes from the bot, so they cannot cle
 ### 3.4. Adding a Settings Page
 1. Add the module's strict schema to `GuildConfigSchemas` in `packages/core/src/config/guild-config.ts` (only keys the bot reads) and its read/write store to `GuildConfigService` in `packages/services/src/guild/guild-config.service.ts`.
 2. If a bot service caches those settings, subscribe it to `guild:configChanged` in `apps/bot/src/services.ts`.
-3. Add `app/dashboard/[guildId]/<module>/actions.ts` (`'use server'`) whose action returns `saveGuildSettings(guildId, '<module>', pickFormFields(formData, [...]))`. That helper runs the Origin check, `requireGuildAccess`, validation, the audited write and `revalidatePath`.
+3. Add `app/dashboard/[guildId]/<module>/actions.ts` (`'use server'`) whose action returns `saveGuildSettings(guildId, '<module>', pickFormFields(formData, [...]))`. That helper runs `checkDashboardRequest` (Origin and rate limit), `requireGuildAccess`, validation, the audited write, `revalidatePath` and the log-channel change notice. Any other Server Action must call `checkDashboardRequest` and a guard itself, or the coverage test fails.
 4. Add `page.tsx` that calls `requireGuildAccess(guildId)`, reads `guildConfig.get(guildId, '<module>')` and renders `SettingsForm` with `TextField`, `SelectField`, `ChannelSelectField` or `RoleSelectField`. Field errors and saved values come back through `useActionState`.
 5. Add the page to `GUILD_NAV_ITEMS` in `apps/web/src/lib/dashboard-nav.ts`.
 
@@ -174,7 +174,7 @@ The decisions and rejected alternatives (JWKS, JWE, browser-side request signing
 | Stolen user OAuth token | Scopes are `identify` and `guilds` only (read-only). Mutations use the bot token on the server after authorization. |
 | Guild ID tampering (IDOR) | `requireGuildAccess` in every Server Action and route handler, never in middleware, enforced by a coverage test. |
 | Cross-site request forgery | SameSite=Lax cookie, Server Action origin verification, Origin checks on route handlers, signed OAuth2 `state` (plus PKCE if Discord accepts it for this application type). |
-| Secret leakage to the client | `server-only` imports and React taint APIs (`experimental_taintUniqueValue`, `experimental_taintObjectReference`) on secrets and tokens. |
+| Secret leakage to the client | `server-only` imports and React taint APIs: `experimental.taint` is on, `createWebServices` taints the config object and every credential in it (bot token, OAuth client secret, vault keys including previous ones, `DATABASE_URL`, provider API keys), so rendering one into a Client Component fails. |
 | Silent account takeover | New-device DM alerts, dashboard change notices in the guild log channel, `audit_logs` with IP and user agent, active sessions page. |
 
 1. **Zero Secret Exposure**: Third-party tokens, Discord bot tokens, and database passwords are never rendered to HTML or sent to client React components. The UI displays only whether each integration is configured:
@@ -182,9 +182,9 @@ The decisions and rejected alternatives (JWKS, JWE, browser-side request signing
    Twitch Integration: Configured ✓
    Gemini API:         Configured ✓
    ```
-2. **Browser Hardening**: Nonce-based CSP without `unsafe-inline`, `frame-ancestors 'none'`, HSTS, `X-Content-Type-Options: nosniff`, strict `Referrer-Policy`, COOP. No `dangerouslySetInnerHTML`.
+2. **Browser Hardening** (TASK-1173): [proxy.ts](file:///Z:/Projects/ririko-v2-2026/apps/web/src/proxy.ts) sets a per-request nonce CSP (`script-src 'self' 'nonce-…' 'strict-dynamic'`, no `unsafe-inline` for scripts or, in production, styles; `frame-ancestors 'none'`, `form-action 'self'`, `base-uri 'self'`, `object-src 'none'`, images from `'self'` and `cdn.discordapp.com`). It only sets headers and never authorizes. The root layout calls `connection()` so every page, including the 404 page, renders per request and gets the nonce. `next.config.ts` sends `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, `Cross-Origin-Opener-Policy: same-origin`, a `Permissions-Policy` that disables camera, microphone, geolocation, payment, USB and topics, and HSTS in production. Both header sets are defined in `src/lib/security-headers.ts`. No `dangerouslySetInnerHTML`.
 3. **CSRF Protection**: All mutation endpoints use Next.js Server Actions with built-in origin verification; route handlers check the `Origin` header.
-4. **Rate Limiting**: Auth routes and Server Actions are rate limited.
+4. **Rate Limiting** (TASK-1173): in-process token buckets in `src/lib/server/rate-limit.ts`, enough for one dashboard instance (ADR-013). Auth routes allow 20 requests per client IP, refilling 20 per minute, and answer `429` with `Retry-After`. Server Actions allow a burst of 30 per signed-in user (per IP before sign-in), refilling one per second; `checkDashboardRequest` returns an error message instead. Client IPs come from `X-Forwarded-For`, so run the dashboard behind a proxy that overwrites it.
 5. **Audit Trail**: Every modification performed on the dashboard or through `ririko guild:config` generates an entry in `audit_logs` capturing actor, IP address, user agent, timestamp, and field diffs.
 
 ---

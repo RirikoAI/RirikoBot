@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { requireSession } from '@/lib/server/auth/session';
-import { isDashboardRequest, requestActor } from '@/lib/server/request-context';
+import { checkDashboardRequest, requestActor } from '@/lib/server/request-context';
 import { getWebServices } from '@/lib/server/services';
 
 const PAGE = '/account/sessions';
@@ -10,10 +10,6 @@ const SESSION_ID_PATTERN = /^[0-9a-f]{64}$/;
 
 type SessionActionResult = { ok: true } | { ok: false; error: string };
 
-const FOREIGN_ORIGIN: SessionActionResult = {
-  ok: false,
-  error: 'This request did not come from the dashboard.',
-};
 const UNKNOWN_SESSION: SessionActionResult = {
   ok: false,
   error: 'That session has already ended.',
@@ -24,7 +20,8 @@ const UNKNOWN_SESSION: SessionActionResult = {
  * passkey check: a user must always be able to end a stolen session.
  */
 export async function revokeSession(sessionId: unknown): Promise<SessionActionResult> {
-  if (!(await isDashboardRequest())) return FOREIGN_ORIGIN;
+  const rejected = await checkDashboardRequest();
+  if (rejected) return { ok: false, error: rejected };
   const session = await requireSession(PAGE);
   if (typeof sessionId !== 'string' || !SESSION_ID_PATTERN.test(sessionId)) {
     return UNKNOWN_SESSION;
@@ -42,7 +39,8 @@ export async function revokeSession(sessionId: unknown): Promise<SessionActionRe
 
 /** Signs out every session of the user except this one. */
 export async function revokeOtherSessions(): Promise<SessionActionResult> {
-  if (!(await isDashboardRequest())) return FOREIGN_ORIGIN;
+  const rejected = await checkDashboardRequest();
+  if (rejected) return { ok: false, error: rejected };
   const session = await requireSession(PAGE);
 
   const { sessions } = await getWebServices();

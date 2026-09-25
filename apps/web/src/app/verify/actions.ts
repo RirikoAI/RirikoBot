@@ -4,19 +4,15 @@ import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/serv
 import type { PasskeyActionResult } from '@/lib/passkey-action-result';
 import { PasskeyVerificationError } from '@/lib/server/auth/passkeys';
 import { requireSessionForPasskeyCheck, writeSessionCookie } from '@/lib/server/auth/session';
-import { isDashboardRequest } from '@/lib/server/request-context';
+import { checkDashboardRequest } from '@/lib/server/request-context';
 import { getWebServices } from '@/lib/server/services';
-
-const FOREIGN_ORIGIN: PasskeyActionResult<never> = {
-  ok: false,
-  error: 'This request did not come from the dashboard.',
-};
 
 /** Starts a passkey check (sign-in gate or step-up) for the signed-in user. */
 export async function beginPasskeyCheck(): Promise<
   PasskeyActionResult<PublicKeyCredentialRequestOptionsJSON>
 > {
-  if (!(await isDashboardRequest())) return FOREIGN_ORIGIN;
+  const rejected = await checkDashboardRequest();
+  if (rejected) return { ok: false, error: rejected };
   const session = await requireSessionForPasskeyCheck('/verify');
   const { passkeys } = await getWebServices();
   const options = await passkeys.authenticationOptions(session);
@@ -30,7 +26,8 @@ export async function beginPasskeyCheck(): Promise<
  * (and a new cookie), so a cookie copied before the check no longer works.
  */
 export async function finishPasskeyCheck(response: unknown): Promise<PasskeyActionResult> {
-  if (!(await isDashboardRequest())) return FOREIGN_ORIGIN;
+  const rejected = await checkDashboardRequest();
+  if (rejected) return { ok: false, error: rejected };
   const session = await requireSessionForPasskeyCheck('/verify');
   const { passkeys, sessions } = await getWebServices();
   try {

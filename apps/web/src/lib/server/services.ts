@@ -1,5 +1,7 @@
+/// <reference types="react/experimental" />
 import 'server-only';
 import { REST } from '@discordjs/rest';
+import { experimental_taintObjectReference, experimental_taintUniqueValue } from 'react';
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
   AuditLogRepository,
@@ -47,8 +49,37 @@ export interface WebServices {
   notifier: DiscordNotifier;
 }
 
+/** Config keys holding credentials; long values only, as taint needs high-entropy strings. */
+const SECRET_CONFIG_KEY = /TOKEN|SECRET|KEY|PASSWORD/;
+const MIN_TAINTED_LENGTH = 16;
+
+/**
+ * Makes React refuse to send secrets to a Client Component (enabled by `experimental.taint`).
+ * This backs up `server-only`, which already keeps these modules out of client bundles. The
+ * config object lives as long as the process, so the taints never expire.
+ */
+function taintSecrets(config: WebConfig): void {
+  experimental_taintObjectReference(
+    'Do not pass the dashboard configuration to the client; pick the fields you need.',
+    config,
+  );
+  const secrets = [
+    config.DATABASE_URL,
+    ...(config.SECRET_VAULT_PREVIOUS_KEYS ?? '').split(',').map((pair) => pair.split(':')[1]),
+    ...Object.entries(config)
+      .filter(([key]) => SECRET_CONFIG_KEY.test(key))
+      .map(([, value]) => value),
+  ];
+  for (const secret of secrets) {
+    if (typeof secret === 'string' && secret.length >= MIN_TAINTED_LENGTH) {
+      experimental_taintUniqueValue('Do not pass secrets to the client.', config, secret);
+    }
+  }
+}
+
 async function createWebServices(): Promise<WebServices> {
   const config = loadWebConfig();
+  taintSecrets(config);
   const db = await createDatabaseClient({
     dialect: config.DATABASE_DIALECT,
     url: config.DATABASE_URL,

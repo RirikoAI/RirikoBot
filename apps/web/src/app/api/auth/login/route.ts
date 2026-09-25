@@ -3,10 +3,13 @@ import { createPkcePair, randomToken } from '@/lib/server/auth/discord-oauth';
 import { OAUTH_STATE_TTL_MS, sealPendingLogin } from '@/lib/server/auth/oauth-state';
 import { sanitizeReturnTo } from '@/lib/server/auth/request';
 import { OAUTH_COOKIE, setCookie } from '@/lib/server/auth/session';
+import { limitAuthRequest } from '@/lib/server/rate-limit';
 import { getWebServices } from '@/lib/server/services';
 
 /** Starts Discord OAuth2: the state and PKCE verifier travel in a sealed, short-lived cookie. */
 export async function GET(request: NextRequest) {
+  const limited = limitAuthRequest(request);
+  if (limited) return limited;
   const { oauth, vault } = await getWebServices();
   const state = randomToken();
   const { verifier, challenge } = createPkcePair();
