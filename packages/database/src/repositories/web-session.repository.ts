@@ -1,4 +1,4 @@
-import { and, eq, gt, lte, or } from 'drizzle-orm';
+import { and, desc, eq, gt, lte, ne, or } from 'drizzle-orm';
 
 import type { DatabaseClient } from '../client/types.js';
 import type { NewWebSession, WebSession } from '../schema/types/index.js';
@@ -117,6 +117,63 @@ export class WebSessionRepository {
             )
             .returning({ id: pgSchema.webSessions.id });
     return consumed.length > 0;
+  }
+
+  /** The user's sessions, most recently used first (including ones not yet cleaned up). */
+  async listByUser(userId: string, tx?: DatabaseClient): Promise<WebSession[]> {
+    const client = this.getClient(tx);
+    return client.dialect === 'sqlite'
+      ? client.db
+          .select()
+          .from(sqliteSchema.webSessions)
+          .where(eq(sqliteSchema.webSessions.userId, userId))
+          .orderBy(desc(sqliteSchema.webSessions.lastSeenAt))
+      : client.db
+          .select()
+          .from(pgSchema.webSessions)
+          .where(eq(pgSchema.webSessions.userId, userId))
+          .orderBy(desc(pgSchema.webSessions.lastSeenAt));
+  }
+
+  /** Deletes one session only if it belongs to the user, so a client-supplied ID is safe. */
+  async deleteForUser(userId: string, id: string, tx?: DatabaseClient): Promise<boolean> {
+    const client = this.getClient(tx);
+    const deleted =
+      client.dialect === 'sqlite'
+        ? await client.db
+            .delete(sqliteSchema.webSessions)
+            .where(
+              and(eq(sqliteSchema.webSessions.id, id), eq(sqliteSchema.webSessions.userId, userId)),
+            )
+            .returning({ id: sqliteSchema.webSessions.id })
+        : await client.db
+            .delete(pgSchema.webSessions)
+            .where(and(eq(pgSchema.webSessions.id, id), eq(pgSchema.webSessions.userId, userId)))
+            .returning({ id: pgSchema.webSessions.id });
+    return deleted.length > 0;
+  }
+
+  /** Ends every session of the user except `keepId`; returns how many were removed. */
+  async deleteOthersForUser(userId: string, keepId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    const deleted =
+      client.dialect === 'sqlite'
+        ? await client.db
+            .delete(sqliteSchema.webSessions)
+            .where(
+              and(
+                eq(sqliteSchema.webSessions.userId, userId),
+                ne(sqliteSchema.webSessions.id, keepId),
+              ),
+            )
+            .returning({ id: sqliteSchema.webSessions.id })
+        : await client.db
+            .delete(pgSchema.webSessions)
+            .where(
+              and(eq(pgSchema.webSessions.userId, userId), ne(pgSchema.webSessions.id, keepId)),
+            )
+            .returning({ id: pgSchema.webSessions.id });
+    return deleted.length;
   }
 
   async delete(id: string, tx?: DatabaseClient): Promise<boolean> {

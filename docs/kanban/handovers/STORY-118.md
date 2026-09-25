@@ -9,6 +9,18 @@
 
 ---
 
+## Progress
+- **TASK-1172: DONE** (branch `feat/STORY-118-session-hardening`).
+  - `/account/sessions` (with an `AccountNav` shared with `/account/security`), `revokeSession` and `revokeOtherSessions` actions, audited as `web.session.revoke` and `web.session.revoke_all`.
+  - `WebSessionRepository.listByUser`, `deleteForUser`, `deleteOthersForUser`; `SessionService.listForUser`, `revokeForUser`, `revokeOthers`.
+  - `web_known_devices` table, `WebKnownDeviceRepository`, `KnownDeviceService` and the `__Host-ririko_device` cookie set in `/api/auth/callback`.
+  - `DiscordNotifier` in `lib/server/discord-notifier.ts`: new-device, passkey-added and passkey-removed DMs, and guild change notices from `saveGuildSettings`, all scheduled with `after()`.
+  - `WebServices` gained `knownDevices`, `audit` and `notifier`.
+  - **Dev databases need `pnpm db:push` again** for `web_known_devices`; without it, Discord sign-in fails with `login_failed`.
+- **TASK-1173: IN PROGRESS.** The action inventory in §1.3 gains `app/account/sessions/actions.ts` (`revokeSession`, `revokeOtherSessions`, both `isDashboardRequest` + `requireSession`).
+
+---
+
 ## 0. First Steps for the Next Agent
 1. Read [GEMINI.md](file:///Z:/Projects/ririko-v2-2026/GEMINI.md) (project rules) and [docs/kanban/protocol.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/protocol.md).
    - The WIP limit is 1.

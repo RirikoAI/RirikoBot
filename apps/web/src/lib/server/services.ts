@@ -7,14 +7,17 @@ import {
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   UserRepository,
+  WebKnownDeviceRepository,
   WebPasskeyRepository,
   WebSessionRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
 import { DiscordOAuthClient } from './auth/discord-oauth';
+import { KnownDeviceService } from './auth/known-devices';
 import { PasskeyService } from './auth/passkeys';
 import { SessionService } from './auth/session-service';
+import { DiscordNotifier } from './discord-notifier';
 import { BotGuildDirectory } from './guilds/bot-guilds';
 import { GuildAccessService } from './guilds/guild-access';
 import { GuildResourceDirectory } from './guilds/guild-resources';
@@ -30,13 +33,18 @@ export interface WebServices {
   oauth: DiscordOAuthClient;
   sessions: SessionService;
   passkeys: PasskeyService;
+  knownDevices: KnownDeviceService;
   users: UserRepository;
+  /** Append-only `audit_logs` writer for account events. */
+  audit: AuditLogRepository;
   /** Discord REST client authenticated with the bot token; server-side only. */
   botRest: REST;
   guildAccess: GuildAccessService;
   /** Channels and roles for pickers; only after `requireGuildAccess`. */
   guildResources: GuildResourceDirectory;
   guildConfig: GuildConfigService;
+  /** Security DMs and guild change notices (best effort). */
+  notifier: DiscordNotifier;
 }
 
 async function createWebServices(): Promise<WebServices> {
@@ -66,9 +74,10 @@ async function createWebServices(): Promise<WebServices> {
     audit,
     origin: config.DASHBOARD_URL,
   });
+  const guildSettings = new GuildSettingsRepository(db);
   const guildConfig = new GuildConfigService({
     db,
-    guildSettings: new GuildSettingsRepository(db),
+    guildSettings,
     versions: new GuildConfigVersionRepository(db),
     audit,
     defaultPrefix: config.DEFAULT_PREFIX,
@@ -80,11 +89,18 @@ async function createWebServices(): Promise<WebServices> {
     oauth,
     sessions,
     passkeys,
+    knownDevices: new KnownDeviceService({ repo: new WebKnownDeviceRepository(db) }),
     users: new UserRepository(db),
+    audit,
     botRest,
     guildAccess,
     guildResources: new GuildResourceDirectory(botRest),
     guildConfig,
+    notifier: new DiscordNotifier({
+      rest: botRest,
+      guildSettings,
+      dashboardUrl: config.DASHBOARD_URL,
+    }),
   };
 }
 

@@ -57,6 +57,12 @@ Guild Discovery Pipeline
 - Lost authenticators are recovered with `ririko passkeys:reset <user_id>` by an operator.
 - Sessions stay opaque and server-side; JWE was re-evaluated and rejected (ADR-013, revision 2026-09-25).
 
+### 2.4. Session Management & Alerts (TASK-1172)
+- `/account/sessions` lists the user's live sessions (browser, IP, sign-in and last-active times, current one marked). Each other session can be signed out, and "Sign out everywhere else" ends all of them. Revoking needs no fresh passkey check, so a user can always end a stolen session; the delete is scoped to the user's own sessions. Revokes are audited as `web.session.revoke` and `web.session.revoke_all`.
+- A long-lived random `__Host-ririko_device` cookie (1 year, renewed at every sign-in) marks known browsers; only its SHA-256 is stored in `web_known_devices`. A sign-in from a browser the user has not used before sends them a Discord DM. Malware that copies the browser profile copies this cookie too, so it is an alert, never an authorization check.
+- Adding or removing a passkey also sends a DM.
+- DMs and change notices go through the bot-token REST client after the response is sent (`after()` from `next/server`). They are best effort: users who block DMs (Discord error 50007) and guilds without a log channel are skipped, and failures are only logged. User-controlled text (passkey names, setting values) is shown as inline code and mentions are disabled, so it cannot become a link or a ping; the browser is described from fixed names, never the raw user agent.
+
 ---
 
 ## 3. Configuration Scope & Mutation Path
@@ -79,6 +85,8 @@ Server Action
       ├── write through the existing repositories
       ├── bump guild_config_versions (guild, module)
       └── write audit_logs (actor, IP, user agent, before/after field diffs)
+ └── after the response: post a change notice (who, module, field diffs) to the guild's
+     log_channel_id when something changed
 
 Bot process
  └── GuildConfigWatcher polls guild_config_versions every 5 seconds

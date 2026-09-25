@@ -122,6 +122,44 @@ describe('SessionService (TASK-1102)', () => {
     expect(await service.resolve(second.token)).toBeNull();
   });
 
+  it('lists only the live sessions of one user, most recently used first (TASK-1172)', async () => {
+    const idle = await login('user-1');
+    now = T0 + 20 * MINUTE;
+    const older = await login('user-1');
+    now = T0 + 25 * MINUTE;
+    const newer = await login('user-1');
+    await login('user-2');
+    now = T0 + SESSION_IDLE_TIMEOUT_MS + 5 * MINUTE;
+
+    const list = await service.listForUser('user-1');
+    expect(list.map((entry) => entry.id)).toEqual([newer.session.id, older.session.id]);
+    expect(list.map((entry) => entry.id)).not.toContain(idle.session.id);
+    expect(list[0]).toEqual({
+      id: newer.session.id,
+      createdAt: new Date(T0 + 25 * MINUTE),
+      lastSeenAt: new Date(T0 + 25 * MINUTE),
+      ipAddress: '203.0.113.7',
+      userAgent: 'vitest',
+    });
+  });
+
+  it("revokes a session by ID only for its owner, and all of a user's other sessions", async () => {
+    const mine = await login('user-1');
+    const other = await login('user-1');
+    const third = await login('user-1');
+    const foreign = await login('user-2');
+
+    expect(await service.revokeForUser('user-1', foreign.session.id)).toBe(false);
+    expect(await service.resolve(foreign.token)).not.toBeNull();
+    expect(await service.revokeForUser('user-1', other.session.id)).toBe(true);
+    expect(await service.resolve(other.token)).toBeNull();
+
+    expect(await service.revokeOthers(mine.session)).toBe(1);
+    expect(await service.resolve(third.token)).toBeNull();
+    expect(await service.resolve(mine.token)).not.toBeNull();
+    expect(await service.resolve(foreign.token)).not.toBeNull();
+  });
+
   it('removes expired sessions of other users on login', async () => {
     const stale = await login('user-2');
     now = T0 + SESSION_IDLE_TIMEOUT_MS + MINUTE;

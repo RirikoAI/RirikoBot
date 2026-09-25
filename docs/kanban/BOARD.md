@@ -8,7 +8,7 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| `TASK-1172` | Task | Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel | 2 | `STORY-118` |
+| `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-118` (`EPIC-011`) |
 
 ---
 
@@ -254,8 +254,8 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1171` | Task | WebAuthn Passkeys: web_passkeys Table, Security Page (Add/Remove), Sign-In Gate for Enrolled Users & requireStepUp | 3 | `STORY-117` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `STORY-111` |
 | `TASK-1174` | Task | BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & `ririko passkeys:reset` Recovery CLI | 2 | `STORY-117` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `TASK-1171` |
 | `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | `EPIC-011` | 🎯 To Do · kickoff briefing [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) | `STORY-117` |
-| `TASK-1172` | Task | Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel | 2 | `STORY-118` | ⚡ In Progress | `STORY-117` |
-| `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-118` | 🎯 To Do | `TASK-1172` |
+| `TASK-1172` | Task | Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel | 2 | `STORY-118` | ✅ Done · [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) | `STORY-117` |
+| `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-118` | ⚡ In Progress | `TASK-1172` |
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | `EPIC-011` | 📥 Backlog (estimate provisional) | `STORY-118` |
 | `STORY-112` | Story | Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-117` |
 | `TASK-1121` | Task | TCG Settings: Guild Drop Settings, TCG Manager Role & Owner-Gated Global Rules (Market Tax, Listing Expiry, Energy Governance) | 3 | `STORY-112` | 🎯 To Do | `STORY-111` |

@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "TASK-1172",
+  "active_in_progress_ticket": "TASK-1173",
   "epics": [
     {
       "id": "EPIC-000",
@@ -2776,7 +2776,7 @@
       "parent": "STORY-118",
       "title": "Active Sessions Page (Revoke, Sign Out Everywhere), New-Device Sign-In & Passkey Removal DMs, Dashboard Change Notices to the Guild Log Channel",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": [
         "STORY-117"
       ],
@@ -2790,7 +2790,7 @@
       "parent": "STORY-118",
       "title": "Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test",
       "points": 3,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "TASK-1172"
       ],
