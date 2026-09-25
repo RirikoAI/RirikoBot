@@ -85,9 +85,10 @@ export class OllamaProvider implements ChatModelProvider {
           });
         }
       } else if (msg.role === 'assistant') {
-        const validToolCalls = msg.toolCalls?.filter(
-          (tc) => respondingToolCallIds.has(tc.id) || (hasAnyToolResponses && !tc.id),
-        ) ?? [];
+        const validToolCalls =
+          msg.toolCalls?.filter(
+            (tc) => respondingToolCallIds.has(tc.id) || (hasAnyToolResponses && !tc.id),
+          ) ?? [];
 
         if (validToolCalls.length > 0) {
           result.push({
@@ -267,7 +268,9 @@ export class OllamaProvider implements ChatModelProvider {
             const data = JSON.parse(trimmed) as {
               message?: {
                 content?: string;
-                tool_calls?: Array<{ function: { name: string; arguments: Record<string, unknown> } }>;
+                tool_calls?: Array<{
+                  function: { name: string; arguments: Record<string, unknown> };
+                }>;
               };
               done?: boolean;
             };

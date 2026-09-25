@@ -156,7 +156,9 @@ export class ModerationRepository extends BaseRepository<
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [result] = await client.db
-        .select({ maxCase: sql<number>`COALESCE(MAX(${sqliteSchema.moderationCases.caseNumber}), 0)` })
+        .select({
+          maxCase: sql<number>`COALESCE(MAX(${sqliteSchema.moderationCases.caseNumber}), 0)`,
+        })
         .from(sqliteSchema.moderationCases)
         .where(eq(sqliteSchema.moderationCases.guildId, guildId));
       return Number(result?.maxCase ?? 0) + 1;

@@ -25,13 +25,15 @@ export function formatToolResultFallback(toolResponses: MediatedToolResponse[]):
       const formatted = typeof res.formatted === 'string' ? res.formatted : String(res.iso ?? '');
       lines.push(`🕒 **Current Time**: ${formatted}`);
     } else if (normName.includes('coinflip')) {
-      const msg = typeof res.message === 'string' ? res.message : `The coin landed on ${res.result}!`;
+      const msg =
+        typeof res.message === 'string' ? res.message : `The coin landed on ${res.result}!`;
       lines.push(`🪙 **Coin Flip**: ${msg}`);
     } else if (normName.includes('anime')) {
       const title = String(res.title ?? 'Anime Search');
       const score = res.score ? ` (⭐ Score: ${res.score}/10)` : '';
       const episodes = res.episodes ? ` [${res.episodes} eps]` : '';
-      let synopsis = typeof res.synopsis === 'string' ? res.synopsis.replace(/<[^>]*>/g, '').trim() : '';
+      let synopsis =
+        typeof res.synopsis === 'string' ? res.synopsis.replace(/<[^>]*>/g, '').trim() : '';
       if (synopsis.length > 300) {
         synopsis = `${synopsis.slice(0, 297)}...`;
       }
@@ -44,10 +46,12 @@ export function formatToolResultFallback(toolResponses: MediatedToolResponse[]):
     } else if (normName.includes('reminder')) {
       const msg = typeof res.message === 'string' ? res.message : 'Reminder';
       if (res.scheduled === false) {
-        const reason = typeof res.error === 'string' ? res.error : 'The reminder could not be saved.';
+        const reason =
+          typeof res.error === 'string' ? res.error : 'The reminder could not be saved.';
         lines.push(`⚠️ **Reminder not set**: ${reason}`);
       } else {
-        const rel = typeof res.relativeDescription === 'string' ? ` (${res.relativeDescription})` : '';
+        const rel =
+          typeof res.relativeDescription === 'string' ? ` (${res.relativeDescription})` : '';
         lines.push(`⏰ **Reminder Set**: "${msg}"${rel}`);
       }
     } else if (normName.includes('music')) {

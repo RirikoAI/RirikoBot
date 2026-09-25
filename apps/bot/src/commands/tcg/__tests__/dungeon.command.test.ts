@@ -75,9 +75,9 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     };
 
     const mockCardRepo: any = {
-      listUserCards: vi.fn().mockResolvedValue([
-        { id: 'uc_1', cardId: 'base_card_1', level: 10, state: 'EQUIPPED' },
-      ]),
+      listUserCards: vi
+        .fn()
+        .mockResolvedValue([{ id: 'uc_1', cardId: 'base_card_1', level: 10, state: 'EQUIPPED' }]),
       findById: vi.fn().mockResolvedValue({
         id: 'base_card_1',
         name: 'Flame Valkyrie',
@@ -149,16 +149,20 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
     } as unknown as BotServices;
   });
 
-  const createMockContext = (options: Record<string, any> = {}, rawArgs: string[] = []): CommandContext => ({
-    user: { id: 'user_123', username: 'TestHero' } as any,
-    guild: { id: 'guild_123' } as any,
-    options: {
-      getString: (key: string) => options[key] ?? null,
-      getInteger: (key: string) => options[key] ?? null,
-      getRawArgs: () => rawArgs,
-    } as any,
-    reply: replyMock,
-  } as unknown as CommandContext);
+  const createMockContext = (
+    options: Record<string, any> = {},
+    rawArgs: string[] = [],
+  ): CommandContext =>
+    ({
+      user: { id: 'user_123', username: 'TestHero' } as any,
+      guild: { id: 'guild_123' } as any,
+      options: {
+        getString: (key: string) => options[key] ?? null,
+        getInteger: (key: string) => options[key] ?? null,
+        getRawArgs: () => rawArgs,
+      } as any,
+      reply: replyMock,
+    }) as unknown as CommandContext;
 
   it('should display tower status including active season, highest floor, and energy', async () => {
     const cmd = createDungeonCommand(services);
@@ -332,7 +336,11 @@ describe('TASK-1042: Dungeon Command Suite & Loot Integration', () => {
 
   it('should support auto mode option with pause and skip controls', async () => {
     const cmd = createDungeonCommand(services);
-    const ctx = createMockContext({ action: 'climb', floor_number: 1, mode: 'auto' }, ['climb', '1', 'auto']);
+    const ctx = createMockContext({ action: 'climb', floor_number: 1, mode: 'auto' }, [
+      'climb',
+      '1',
+      'auto',
+    ]);
 
     await cmd.execute(ctx);
 

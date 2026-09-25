@@ -75,7 +75,11 @@ describe('CraftingService (TASK-1601)', () => {
   const SEASON_ID = 'S1';
 
   beforeEach(async () => {
-    const raw = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
     if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
     client = raw;
 
@@ -88,7 +92,14 @@ describe('CraftingService (TASK-1601)', () => {
 
     for (const item of CANONICAL_ITEMS) await itemRepo.create(item);
     grants = new ItemGrantService(itemRepo, inventoryRepo);
-    crafting = new CraftingService(itemRepo, inventoryRepo, economyRepo, progressRepo, seasonRepo, client);
+    crafting = new CraftingService(
+      itemRepo,
+      inventoryRepo,
+      economyRepo,
+      progressRepo,
+      seasonRepo,
+      client,
+    );
 
     await seasonRepo.create({
       id: SEASON_ID,
@@ -142,7 +153,9 @@ describe('CraftingService (TASK-1601)', () => {
     await grantCredits('u1', 100_000);
     // no dust granted
 
-    await expect(crafting.craft('u1', 'CRAFT_WEAPON_OBSIDIAN_KATANA')).rejects.toThrow(/Crafting Dust/i);
+    await expect(crafting.craft('u1', 'CRAFT_WEAPON_OBSIDIAN_KATANA')).rejects.toThrow(
+      /Crafting Dust/i,
+    );
 
     expect(await grants.countOwned('u1', 'CRAFTING_DUST')).toBe(0);
     expect((await economyRepo.findById('u1'))?.walletBalance).toBe(100_000);
@@ -159,7 +172,9 @@ describe('CraftingService (TASK-1601)', () => {
     expect(await grants.countOwned('u1', 'CRAFTING_DUST')).toBe(10_000);
     expect((await economyRepo.findById('u1'))?.walletBalance ?? 0).toBe(0);
     const katanaId = await catalogId('WEAPON_OBSIDIAN_KATANA');
-    expect((await inventoryRepo.findByUser('u1')).filter((r) => r.itemId === katanaId)).toHaveLength(0);
+    expect(
+      (await inventoryRepo.findByUser('u1')).filter((r) => r.itemId === katanaId),
+    ).toHaveLength(0);
   });
 
   it('rejects a craft missing its ingredient, spending nothing', async () => {
@@ -233,7 +248,11 @@ describe('CraftingService (TASK-1601)', () => {
       health: 1,
       collectionNumber: 1,
     });
-    const userCard = await cardRepo.createUserCard({ userId: 'u1', cardId: card.id, serialNumber: 1 });
+    const userCard = await cardRepo.createUserCard({
+      userId: 'u1',
+      cardId: card.id,
+      serialNumber: 1,
+    });
 
     // Only one Magma Mail owned, and it's equipped - craft must fail rather than steal it.
     const granted = await grants.grant('u1', 'ARMOR_MAGMA_MAIL', 1, 'TEST');
@@ -277,7 +296,9 @@ describe('CraftingService (TASK-1601)', () => {
     await grantCredits('u1', 1_000_000);
     await grants.grant('u1', 'POTION_MINOR_HP', 33, 'TEST');
 
-    await expect(crafting.craft('u1', 'CRAFT_POTION_MAJOR_HP', 11)).rejects.toThrow(/per-order limit/i);
+    await expect(crafting.craft('u1', 'CRAFT_POTION_MAJOR_HP', 11)).rejects.toThrow(
+      /per-order limit/i,
+    );
   });
 
   it('batches a potion craft, scaling dust/credits/ingredients by quantity', async () => {

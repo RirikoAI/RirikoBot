@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createEventBus } from '@ririko/core';
 import type { CoreEvents } from '@ririko/core';
-import type { ModerationCase, ModerationWarning, ModerationNote, ModerationRepository, GuildSettingsRepository } from '@ririko/database';
+import type {
+  ModerationCase,
+  ModerationWarning,
+  ModerationNote,
+  ModerationRepository,
+  GuildSettingsRepository,
+} from '@ririko/database';
 import type { Guild, Client, GuildTextBasedChannel, User, Message } from 'discord.js';
 import { ModerationLogService, MODERATION_COLORS } from './moderation-log.service.js';
 import { DisciplinaryHistoryService } from './disciplinary-history.service.js';
@@ -171,7 +177,9 @@ describe('Moderation Audit Logging & Disciplinary History — TASK-0702', () => 
       };
 
       mockModRepo.getCaseByNumber.mockResolvedValue(sampleCase);
-      const logCaseSpy = vi.spyOn(logService, 'logCase').mockResolvedValue({} as unknown as Message);
+      const logCaseSpy = vi
+        .spyOn(logService, 'logCase')
+        .mockResolvedValue({} as unknown as Message);
 
       const mockGuild = { id: 'guild_1' };
       const mockClient = {
@@ -205,7 +213,9 @@ describe('Moderation Audit Logging & Disciplinary History — TASK-0702', () => 
     let historyService: DisciplinaryHistoryService;
 
     beforeEach(() => {
-      historyService = new DisciplinaryHistoryService(mockModRepo as unknown as ModerationRepository);
+      historyService = new DisciplinaryHistoryService(
+        mockModRepo as unknown as ModerationRepository,
+      );
     });
 
     it('aggregates summary and computes risk level correctly', async () => {
@@ -396,12 +406,7 @@ describe('Moderation Audit Logging & Disciplinary History — TASK-0702', () => 
       mockModRepo.getNotesByUser.mockResolvedValue([createdNote]);
       mockModRepo.deleteNote.mockResolvedValue(true);
 
-      const added = await historyService.addNote(
-        'guild_1',
-        'user_1',
-        'mod_1',
-        'Staff observation',
-      );
+      const added = await historyService.addNote('guild_1', 'user_1', 'mod_1', 'Staff observation');
       expect(added.id).toBe('note_uuid');
       expect(mockModRepo.createNote).toHaveBeenCalledWith({
         guildId: 'guild_1',

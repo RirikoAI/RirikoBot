@@ -1,9 +1,5 @@
 import { PermissionFlagsBits, EmbedBuilder, type GuildMember } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type {
   ChatMessage,
   ChatRequest,
@@ -81,10 +77,7 @@ export async function executeAiChatTurn(
     const toolDefs = services.toolRegistry.getDefinitions(allowedTools);
 
     // 5. Construct chat request
-    const messages: ChatMessage[] = [
-      ...history,
-      { role: 'user', content: prompt },
-    ];
+    const messages: ChatMessage[] = [...history, { role: 'user', content: prompt }];
 
     const chatRequest: ChatRequest = {
       messages,
@@ -108,11 +101,15 @@ export async function executeAiChatTurn(
         member = await ctx.guild.members.fetch(ctx.user.id).catch(() => null);
       }
       const voiceChannel = member?.voice?.channel;
-      const voiceChannelPerms = voiceChannel && member ? voiceChannel.permissionsFor(member)?.bitfield : undefined;
+      const voiceChannelPerms =
+        voiceChannel && member ? voiceChannel.permissionsFor(member)?.bitfield : undefined;
       const userPermissions = voiceChannelPerms ?? ctx.member?.permissions?.bitfield;
 
-      const botMember = ctx.guild?.members?.me ?? (ctx.guild ? await ctx.guild.members.fetchMe().catch(() => null) : null);
-      const botVoicePerms = voiceChannel && botMember ? voiceChannel.permissionsFor(botMember)?.bitfield : undefined;
+      const botMember =
+        ctx.guild?.members?.me ??
+        (ctx.guild ? await ctx.guild.members.fetchMe().catch(() => null) : null);
+      const botVoicePerms =
+        voiceChannel && botMember ? voiceChannel.permissionsFor(botMember)?.bitfield : undefined;
       const botPermissions = botVoicePerms ?? botMember?.permissions?.bitfield;
 
       const toolContext: SecurityExecutionContext & ToolExecutionContext = {
@@ -141,12 +138,12 @@ export async function executeAiChatTurn(
           }
 
           const voiceChannelId =
-            member?.voice?.channelId ??
-            ctx.guild.voiceStates?.cache?.get(ctx.user.id)?.channelId;
+            member?.voice?.channelId ?? ctx.guild.voiceStates?.cache?.get(ctx.user.id)?.channelId;
           if (!voiceChannelId) {
             return {
               success: false,
-              message: 'You need to be connected to a voice channel so I know where to play music! Please join a voice channel and ask me again! 🎵',
+              message:
+                'You need to be connected to a voice channel so I know where to play music! Please join a voice channel and ask me again! 🎵',
             };
           }
 
@@ -198,10 +195,7 @@ export async function executeAiChatTurn(
         },
       };
 
-      const toolResults = await services.toolExecutor.executeBatch(
-        response.toolCalls,
-        toolContext,
-      );
+      const toolResults = await services.toolExecutor.executeBatch(response.toolCalls, toolContext);
 
       // Synthesize natural conversational response with LLM from tool outputs
       const synthesisMessages: ChatMessage[] = [
@@ -216,7 +210,9 @@ export async function executeAiChatTurn(
           toolCallId: tr.toolCallId,
           name: tr.name,
           content: tr.success
-            ? (typeof tr.result === 'string' ? tr.result : JSON.stringify(tr.result))
+            ? typeof tr.result === 'string'
+              ? tr.result
+              : JSON.stringify(tr.result)
             : JSON.stringify({ error: tr.error ?? 'Execution failed' }),
         })),
       ];
@@ -238,16 +234,11 @@ export async function executeAiChatTurn(
     }
 
     // 8. Record conversational turn
-    await services.conversationManager.recordTurn(
-      userContext,
-      prompt,
-      replyText,
-      {
-        provider: response.provider,
-        model: response.model,
-        toolCalls: response.toolCalls,
-      },
-    );
+    await services.conversationManager.recordTurn(userContext, prompt, replyText, {
+      provider: response.provider,
+      model: response.model,
+      toolCalls: response.toolCalls,
+    });
 
     // 9. Send response
     await ctx.editReply({ content: replyText });
@@ -268,16 +259,14 @@ export async function executeAiChatTurn(
  * - /aipersona (configure guild AI personality)
  * - /aimodel (view or switch active model)
  */
-export function createAiCommands(
-  services: BotServices,
-  aiController: AiChatController,
-): Command[] {
+export function createAiCommands(services: BotServices, aiController: AiChatController): Command[] {
   // 1. Root Unified /ai Command
   const aiCommand: Command = {
     metadata: {
       name: 'ai',
       category: CommandCategory.AI,
-      description: 'Interact with Ririko AI: chat, model selection, persona customization, channel setup, or clear memory.',
+      description:
+        'Interact with Ririko AI: chat, model selection, persona customization, channel setup, or clear memory.',
       aliases: ['ask'],
       usage: '/ai [action] [prompt|model|channel|style]',
       options: [
@@ -344,7 +333,8 @@ export function createAiCommands(
         };
         await services.conversationManager.clearMemory(userContext);
         await ctx.reply({
-          content: '🧹 **Ririko AI Memory Cleared!**\nYour conversational history in this context has been reset.',
+          content:
+            '🧹 **Ririko AI Memory Cleared!**\nYour conversational history in this context has been reset.',
         });
         return;
       }
@@ -352,7 +342,9 @@ export function createAiCommands(
       // 2. Handle "channel" (Admin)
       if (action === 'channel') {
         if (!ctx.guildId) {
-          await ctx.reply({ content: '❌ The dedicated AI channel can only be configured in a server.' });
+          await ctx.reply({
+            content: '❌ The dedicated AI channel can only be configured in a server.',
+          });
           return;
         }
 
@@ -362,7 +354,8 @@ export function createAiCommands(
 
         if (!canManage) {
           await ctx.reply({
-            content: '❌ You need the **Manage Server** or **Manage Channels** permission to configure the dedicated AI channel.',
+            content:
+              '❌ You need the **Manage Server** or **Manage Channels** permission to configure the dedicated AI channel.',
           });
           return;
         }
@@ -374,7 +367,8 @@ export function createAiCommands(
           await services.conversationManager.removeDedicatedChannel(ctx.guildId);
           aiController.invalidateChannelCache(ctx.guildId);
           await ctx.reply({
-            content: '🤖 Dedicated AI channel has been unset. Ririko will now only respond to mentions or `/ai chat`.',
+            content:
+              '🤖 Dedicated AI channel has been unset. Ririko will now only respond to mentions or `/ai chat`.',
           });
           return;
         }
@@ -389,14 +383,17 @@ export function createAiCommands(
         }
 
         // Show current dedicated channel
-        const currentChannelId = await services.conversationManager.getDedicatedChannel(ctx.guildId);
+        const currentChannelId = await services.conversationManager.getDedicatedChannel(
+          ctx.guildId,
+        );
         if (currentChannelId) {
           await ctx.reply({
             content: `🤖 Current dedicated AI channel is <#${currentChannelId}>.\nTo change it, use \`/ai action:channel channel:#channel\` or \`!ai channel #channel\`.`,
           });
         } else {
           await ctx.reply({
-            content: '🤖 No dedicated AI channel is currently configured for this server.\nUse `/ai action:channel channel:#channel` to set one!',
+            content:
+              '🤖 No dedicated AI channel is currently configured for this server.\nUse `/ai action:channel channel:#channel` to set one!',
           });
         }
         return;
@@ -405,7 +402,9 @@ export function createAiCommands(
       // 3. Handle "persona" (Admin)
       if (action === 'persona') {
         if (!ctx.guildId) {
-          await ctx.reply({ content: '❌ Guild persona customization is only available in a server.' });
+          await ctx.reply({
+            content: '❌ Guild persona customization is only available in a server.',
+          });
           return;
         }
 
@@ -414,7 +413,11 @@ export function createAiCommands(
 
         if (ctx.source === 'prefix' && rawArgs.length > 1) {
           const secondArg = rawArgs[1]!.toUpperCase();
-          if (['FRIENDLY_ANIME', 'TSUNDERE', 'KUUDERE', 'DANDERE', 'GENKI', 'FORMAL'].includes(secondArg)) {
+          if (
+            ['FRIENDLY_ANIME', 'TSUNDERE', 'KUUDERE', 'DANDERE', 'GENKI', 'FORMAL'].includes(
+              secondArg,
+            )
+          ) {
             prompt = rawArgs.slice(2).join(' ') || null;
           } else {
             prompt = rawArgs.slice(1).join(' ') || null;
@@ -425,7 +428,8 @@ export function createAiCommands(
           const canManage = ctx.member?.permissions.has(PermissionFlagsBits.ManageGuild);
           if (!canManage) {
             await ctx.reply({
-              content: '❌ You need the **Manage Server** permission to customize the guild AI persona.',
+              content:
+                '❌ You need the **Manage Server** permission to customize the guild AI persona.',
             });
             return;
           }
@@ -455,7 +459,9 @@ export function createAiCommands(
             },
             {
               name: 'Custom Prompt',
-              value: prefs?.personalityPrompt ? `\`${prefs.personalityPrompt}\`` : '*None (using defaults)*',
+              value: prefs?.personalityPrompt
+                ? `\`${prefs.personalityPrompt}\``
+                : '*None (using defaults)*',
               inline: false,
             },
             {
@@ -470,7 +476,8 @@ export function createAiCommands(
 
       // 4. Handle "model"
       if (action === 'model') {
-        const modelArg = ctx.options.getString('model') ?? (rawArgs.length > 1 ? rawArgs[1] : undefined);
+        const modelArg =
+          ctx.options.getString('model') ?? (rawArgs.length > 1 ? rawArgs[1] : undefined);
 
         if (modelArg) {
           if (ctx.guildId) {
@@ -486,7 +493,9 @@ export function createAiCommands(
 
         // List providers and active model
         const providers = services.fallbackChainManager.getProviders();
-        const guildPrefs = ctx.guildId ? await services.conversationManager.getGuildPreferences(ctx.guildId) : null;
+        const guildPrefs = ctx.guildId
+          ? await services.conversationManager.getGuildPreferences(ctx.guildId)
+          : null;
         const currentModel = guildPrefs?.modelOverride ?? '(System Default)';
 
         const embed = new EmbedBuilder()
@@ -517,7 +526,8 @@ export function createAiCommands(
 
       if (!prompt) {
         await ctx.reply({
-          content: '👋 **Konnichiwa!** How can I help you today?\nAsk me a question with `/ai prompt: "Your question here"` or `/chat <prompt>`.',
+          content:
+            '👋 **Konnichiwa!** How can I help you today?\nAsk me a question with `/ai prompt: "Your question here"` or `/chat <prompt>`.',
         });
         return;
       }
@@ -547,7 +557,8 @@ export function createAiCommands(
       const prompt = ctx.options.getString('prompt') ?? ctx.options.getRawArgs().join(' ').trim();
       if (!prompt) {
         await ctx.reply({
-          content: '👋 Please provide a question or topic to chat about! (e.g. `/chat prompt: What is an anime?`)',
+          content:
+            '👋 Please provide a question or topic to chat about! (e.g. `/chat prompt: What is an anime?`)',
         });
         return;
       }
@@ -574,7 +585,8 @@ export function createAiCommands(
       };
       await services.conversationManager.clearMemory(userContext);
       await ctx.reply({
-        content: '🧹 **Ririko AI Memory Cleared!**\nYour conversational history in this context has been reset.',
+        content:
+          '🧹 **Ririko AI Memory Cleared!**\nYour conversational history in this context has been reset.',
       });
     },
   };
@@ -606,7 +618,8 @@ export function createAiCommands(
 
       if (!canManage) {
         await ctx.reply({
-          content: '❌ You need the **Manage Server** or **Manage Channels** permission to configure the dedicated AI channel.',
+          content:
+            '❌ You need the **Manage Server** or **Manage Channels** permission to configure the dedicated AI channel.',
         });
         return;
       }
@@ -616,7 +629,8 @@ export function createAiCommands(
         await services.conversationManager.removeDedicatedChannel(ctx.guildId);
         aiController.invalidateChannelCache(ctx.guildId);
         await ctx.reply({
-          content: '🤖 Dedicated AI channel has been unset. Ririko will now only respond to mentions or `/ai chat`.',
+          content:
+            '🤖 Dedicated AI channel has been unset. Ririko will now only respond to mentions or `/ai chat`.',
         });
         return;
       }
@@ -674,7 +688,9 @@ export function createAiCommands(
 
       if (ctx.source === 'prefix' && rawArgs.length > 0) {
         const firstArg = rawArgs[0]!.toUpperCase();
-        if (['FRIENDLY_ANIME', 'TSUNDERE', 'KUUDERE', 'DANDERE', 'GENKI', 'FORMAL'].includes(firstArg)) {
+        if (
+          ['FRIENDLY_ANIME', 'TSUNDERE', 'KUUDERE', 'DANDERE', 'GENKI', 'FORMAL'].includes(firstArg)
+        ) {
           prompt = rawArgs.slice(1).join(' ') || null;
         } else {
           prompt = rawArgs.join(' ') || null;
@@ -685,7 +701,8 @@ export function createAiCommands(
         const canManage = ctx.member?.permissions.has(PermissionFlagsBits.ManageGuild);
         if (!canManage) {
           await ctx.reply({
-            content: '❌ You need the **Manage Server** permission to customize the guild AI persona.',
+            content:
+              '❌ You need the **Manage Server** permission to customize the guild AI persona.',
           });
           return;
         }
@@ -714,7 +731,9 @@ export function createAiCommands(
           },
           {
             name: 'Custom Prompt',
-            value: prefs?.personalityPrompt ? `\`${prefs.personalityPrompt}\`` : '*None (using defaults)*',
+            value: prefs?.personalityPrompt
+              ? `\`${prefs.personalityPrompt}\``
+              : '*None (using defaults)*',
             inline: false,
           },
           {
@@ -760,7 +779,9 @@ export function createAiCommands(
       }
 
       const providers = services.fallbackChainManager.getProviders();
-      const guildPrefs = ctx.guildId ? await services.conversationManager.getGuildPreferences(ctx.guildId) : null;
+      const guildPrefs = ctx.guildId
+        ? await services.conversationManager.getGuildPreferences(ctx.guildId)
+        : null;
       const currentModel = guildPrefs?.modelOverride ?? '(System Default)';
 
       const embed = new EmbedBuilder()
@@ -779,12 +800,5 @@ export function createAiCommands(
     },
   };
 
-  return [
-    aiCommand,
-    chatCommand,
-    clearCommand,
-    channelCommand,
-    personaCommand,
-    modelCommand,
-  ];
+  return [aiCommand, chatCommand, clearCommand, channelCommand, personaCommand, modelCommand];
 }

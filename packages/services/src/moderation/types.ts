@@ -1,9 +1,4 @@
-import type {
-  Guild,
-  GuildMember,
-  GuildBasedChannel,
-  PermissionResolvable,
-} from 'discord.js';
+import type { Guild, GuildMember, GuildBasedChannel, PermissionResolvable } from 'discord.js';
 
 export type PermissionViolationCode =
   | 'INVOKER_MISSING_PERMISSIONS'

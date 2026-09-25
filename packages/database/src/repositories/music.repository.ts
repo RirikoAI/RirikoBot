@@ -121,7 +121,8 @@ export class MusicRepository extends BaseRepository<
           set: settings,
         })
         .returning();
-      if (!upserted) throw new DatabaseError(`Failed to upsert music settings for guild ${guildId}`);
+      if (!upserted)
+        throw new DatabaseError(`Failed to upsert music settings for guild ${guildId}`);
       return upserted as MusicGuildSettings;
     } else {
       const [upserted] = await client.db
@@ -132,7 +133,8 @@ export class MusicRepository extends BaseRepository<
           set: settings as unknown as Partial<typeof pgSchema.musicGuildSettings.$inferInsert>,
         })
         .returning();
-      if (!upserted) throw new DatabaseError(`Failed to upsert music settings for guild ${guildId}`);
+      if (!upserted)
+        throw new DatabaseError(`Failed to upsert music settings for guild ${guildId}`);
       return upserted as unknown as MusicGuildSettings;
     }
   }
@@ -324,7 +326,10 @@ export class MusicRepository extends BaseRepository<
     };
 
     if (this.isSqlite(client)) {
-      const [created] = await client.db.insert(sqliteSchema.musicSavedPlaylists).values(data).returning();
+      const [created] = await client.db
+        .insert(sqliteSchema.musicSavedPlaylists)
+        .values(data)
+        .returning();
       if (!created) throw new DatabaseError(`Failed to create playlist "${name}"`);
       return created as MusicPlaylist;
     } else {
@@ -458,13 +463,17 @@ export class MusicRepository extends BaseRepository<
     let nextPosition: number;
     if (this.isSqlite(client)) {
       const [posRow] = await client.db
-        .select({ maxPos: sql<number>`COALESCE(MAX(${sqliteSchema.musicPlaylistTracks.position}), -1)` })
+        .select({
+          maxPos: sql<number>`COALESCE(MAX(${sqliteSchema.musicPlaylistTracks.position}), -1)`,
+        })
         .from(sqliteSchema.musicPlaylistTracks)
         .where(eq(sqliteSchema.musicPlaylistTracks.playlistId, playlistId));
       nextPosition = (posRow?.maxPos ?? -1) + 1;
     } else {
       const [posRow] = await client.db
-        .select({ maxPos: sql<number>`COALESCE(MAX(${pgSchema.musicPlaylistTracks.position}), -1)` })
+        .select({
+          maxPos: sql<number>`COALESCE(MAX(${pgSchema.musicPlaylistTracks.position}), -1)`,
+        })
         .from(pgSchema.musicPlaylistTracks)
         .where(eq(pgSchema.musicPlaylistTracks.playlistId, playlistId));
       nextPosition = (posRow?.maxPos ?? -1) + 1;
@@ -481,7 +490,10 @@ export class MusicRepository extends BaseRepository<
     };
 
     if (this.isSqlite(client)) {
-      const [created] = await client.db.insert(sqliteSchema.musicPlaylistTracks).values(data).returning();
+      const [created] = await client.db
+        .insert(sqliteSchema.musicPlaylistTracks)
+        .values(data)
+        .returning();
       if (!created) throw new DatabaseError(`Failed to add track to playlist ${playlistId}`);
       return created as MusicTrack;
     } else {

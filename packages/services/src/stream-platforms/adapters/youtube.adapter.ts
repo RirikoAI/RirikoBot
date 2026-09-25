@@ -259,7 +259,10 @@ export class YouTubeStreamAdapter implements StreamPlatformAdapter {
         streamUrl: `https://www.youtube.com/watch?v=${videoId}`,
       };
     } catch (err) {
-      console.error(`[YouTubeAdapter] Error checking API stream status for '${streamer.username}':`, err);
+      console.error(
+        `[YouTubeAdapter] Error checking API stream status for '${streamer.username}':`,
+        err,
+      );
       return null;
     }
   }
@@ -298,8 +301,9 @@ export class YouTubeStreamAdapter implements StreamPlatformAdapter {
 
       // Extract video ID, title, and thumbnail
       const videoIdMatch =
-        html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([^"&?]+)">/) ||
-        html.match(/"videoId":"([^"]{11})"/);
+        html.match(
+          /<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([^"&?]+)">/,
+        ) || html.match(/"videoId":"([^"]{11})"/);
 
       if (!videoIdMatch || !videoIdMatch[1]) return null;
       const videoId = videoIdMatch[1];
@@ -322,7 +326,10 @@ export class YouTubeStreamAdapter implements StreamPlatformAdapter {
         streamUrl: `https://www.youtube.com/watch?v=${videoId}`,
       };
     } catch (err) {
-      console.error(`[YouTubeAdapter] Error checking web stream status for '${streamer.username}':`, err);
+      console.error(
+        `[YouTubeAdapter] Error checking web stream status for '${streamer.username}':`,
+        err,
+      );
       return null;
     }
   }

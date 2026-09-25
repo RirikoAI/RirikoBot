@@ -13,7 +13,9 @@ export const imageProviders = sqliteTable('image_providers', {
 export const imageJobs = sqliteTable(
   'image_jobs',
   {
-    id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => randomUUID()),
     userId: text('user_id').notNull(),
     guildId: text('guild_id'),
     providerId: text('provider_id').notNull(),
@@ -31,7 +33,9 @@ export const imageJobs = sqliteTable(
 );
 
 export const imagePresets = sqliteTable('image_presets', {
-  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
   name: text('name').notNull(),
   positivePromptPrefix: text('positive_prompt_prefix').notNull(),
   negativePromptPreset: text('negative_prompt_preset'),

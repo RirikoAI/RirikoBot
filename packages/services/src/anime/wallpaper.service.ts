@@ -69,7 +69,10 @@ export class WallpaperSession {
     return picked;
   }
 
-  private async resolve(provider: WallpaperProvider, wallpaper: Wallpaper): Promise<Wallpaper | null> {
+  private async resolve(
+    provider: WallpaperProvider,
+    wallpaper: Wallpaper,
+  ): Promise<Wallpaper | null> {
     if (wallpaper.imageUrl) return wallpaper;
     const imageUrl = await provider.resolveImageUrl?.(wallpaper.id);
     return imageUrl ? { ...wallpaper, imageUrl } : null;

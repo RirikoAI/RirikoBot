@@ -111,7 +111,11 @@ export class WaifuAssetRepository extends BaseRepository<
   }
 
   /** Active (not taken down) assets whose `tags` array contains `tag` exactly. */
-  async findActiveAssetsByTag(tag: string, limit = 100, tx?: DatabaseClient): Promise<WaifuAsset[]> {
+  async findActiveAssetsByTag(
+    tag: string,
+    limit = 100,
+    tx?: DatabaseClient,
+  ): Promise<WaifuAsset[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const t = sqliteSchema.waifuAssets;
@@ -131,7 +135,9 @@ export class WaifuAssetRepository extends BaseRepository<
       const rows = await client.db
         .select()
         .from(t)
-        .where(and(eq(t.isDeletedByRequest, false), sql`${t.tags} @> ${JSON.stringify([tag])}::jsonb`))
+        .where(
+          and(eq(t.isDeletedByRequest, false), sql`${t.tags} @> ${JSON.stringify([tag])}::jsonb`),
+        )
         .limit(limit);
       return rows as unknown as WaifuAsset[];
     }
@@ -190,11 +196,7 @@ export class WaifuAssetRepository extends BaseRepository<
     }
   }
 
-  async update(
-    id: string,
-    data: Partial<NewWaifuAsset>,
-    tx?: DatabaseClient,
-  ): Promise<WaifuAsset> {
+  async update(id: string, data: Partial<NewWaifuAsset>, tx?: DatabaseClient): Promise<WaifuAsset> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [updated] = await client.db
@@ -283,10 +285,7 @@ export class WaifuAssetRepository extends BaseRepository<
   async createSource(data: NewWaifuSource, tx?: DatabaseClient): Promise<WaifuSource> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
-      const [created] = await client.db
-        .insert(sqliteSchema.waifuSources)
-        .values(data)
-        .returning();
+      const [created] = await client.db.insert(sqliteSchema.waifuSources).values(data).returning();
       if (!created) throw new DatabaseError(`Failed to insert waifu source ${data.id}`);
       return created as WaifuSource;
     } else {

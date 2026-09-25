@@ -7,18 +7,16 @@ import {
   type GuildTextBasedChannel,
   type Role,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { Giveaway } from '@ririko/database';
 
 export function parseGiveawayDuration(input: string): number | null {
-  const match = input.trim().match(
-    /^(\d+(?:\.\d+)?)\s*(s|sec|secs|second|seconds|m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days|w|week|weeks)$/i,
-  );
+  const match = input
+    .trim()
+    .match(
+      /^(\d+(?:\.\d+)?)\s*(s|sec|secs|second|seconds|m|min|mins|minute|minutes|h|hr|hrs|hour|hours|d|day|days|w|week|weeks)$/i,
+    );
   if (!match) return null;
   const val = parseFloat(match[1]!);
   const unit = match[2]!.toLowerCase();
@@ -144,7 +142,8 @@ export function createGiveawayCommands(services: BotServices): Command[] {
       // Check permissions for administrative actions
       if (action !== 'list' && !hasGiveawayPermission(ctx)) {
         await ctx.reply({
-          content: '❌ You need the **Manage Messages** or **Manage Server** permission to manage giveaways.',
+          content:
+            '❌ You need the **Manage Messages** or **Manage Server** permission to manage giveaways.',
         });
         return;
       }
@@ -176,7 +175,8 @@ export function createGiveawayCommands(services: BotServices): Command[] {
 
         if (!prize) {
           await ctx.reply({
-            content: '❌ Please specify what prize you are giving away. Example: `/giveaway create prize:Nitro duration:1d`',
+            content:
+              '❌ Please specify what prize you are giving away. Example: `/giveaway create prize:Nitro duration:1d`',
           });
           return;
         }
@@ -203,15 +203,19 @@ export function createGiveawayCommands(services: BotServices): Command[] {
           return;
         }
 
-        const targetChannel = (channelOpt as GuildTextBasedChannel | null) ?? (ctx.channel as GuildTextBasedChannel);
+        const targetChannel =
+          (channelOpt as GuildTextBasedChannel | null) ?? (ctx.channel as GuildTextBasedChannel);
         if (!targetChannel || !('send' in targetChannel)) {
-          await ctx.reply({ content: '❌ Could not resolve a valid text channel for the giveaway.' });
+          await ctx.reply({
+            content: '❌ Could not resolve a valid text channel for the giveaway.',
+          });
           return;
         }
 
-        const roleOpt = ctx.source === 'slash' && 'options' in ctx.raw
-          ? (ctx.raw as any).options?.getRole?.('role') as Role | null
-          : null;
+        const roleOpt =
+          ctx.source === 'slash' && 'options' in ctx.raw
+            ? ((ctx.raw as any).options?.getRole?.('role') as Role | null)
+            : null;
 
         const requirements: Record<string, unknown> = {};
         if (roleOpt) {
@@ -265,7 +269,9 @@ export function createGiveawayCommands(services: BotServices): Command[] {
 
         const giveaway = await resolveGiveaway(services, giveawayIdInput, ctx.guildId);
         if (!giveaway) {
-          await ctx.reply({ content: `❌ No active giveaway found with ID or Message ID: \`${giveawayIdInput}\`.` });
+          await ctx.reply({
+            content: `❌ No active giveaway found with ID or Message ID: \`${giveawayIdInput}\`.`,
+          });
           return;
         }
 
@@ -280,9 +286,10 @@ export function createGiveawayCommands(services: BotServices): Command[] {
           return;
         }
 
-        const winnersDisplay = result.winnerIds.length > 0
-          ? result.winnerIds.map((id) => `<@${id}>`).join(', ')
-          : 'None (No eligible entries)';
+        const winnersDisplay =
+          result.winnerIds.length > 0
+            ? result.winnerIds.map((id) => `<@${id}>`).join(', ')
+            : 'None (No eligible entries)';
 
         await ctx.reply({
           content: `🎉 Giveaway for **${giveaway.prize}** ended!\n🏆 **Winner(s)**: ${winnersDisplay}`,
@@ -292,28 +299,36 @@ export function createGiveawayCommands(services: BotServices): Command[] {
 
       if (action === 'reroll') {
         const giveawayIdInput = ctx.options.getString('giveaway') ?? rawArgs[1];
-        const winnersCount = ctx.options.getInteger('winners') ?? (rawArgs[2] ? parseInt(rawArgs[2], 10) : undefined);
+        const winnersCount =
+          ctx.options.getInteger('winners') ?? (rawArgs[2] ? parseInt(rawArgs[2], 10) : undefined);
 
         if (!giveawayIdInput) {
-          await ctx.reply({ content: '❌ Please provide the Message ID or Giveaway ID to reroll.' });
+          await ctx.reply({
+            content: '❌ Please provide the Message ID or Giveaway ID to reroll.',
+          });
           return;
         }
 
         const giveaway = await resolveGiveaway(services, giveawayIdInput, ctx.guildId);
         if (!giveaway) {
-          await ctx.reply({ content: `❌ No giveaway found with ID or Message ID: \`${giveawayIdInput}\`.` });
+          await ctx.reply({
+            content: `❌ No giveaway found with ID or Message ID: \`${giveawayIdInput}\`.`,
+          });
           return;
         }
 
         if (!giveaway.isEnded) {
-          await ctx.reply({ content: '⚠️ This giveaway is still active! Use `/giveaway end` to end it first.' });
+          await ctx.reply({
+            content: '⚠️ This giveaway is still active! Use `/giveaway end` to end it first.',
+          });
           return;
         }
 
         const result = await services.giveawayEngine.reroll(giveaway.id, winnersCount);
         if (!result || result.winnerIds.length === 0) {
           await ctx.reply({
-            content: '⚠️ No new eligible winners could be selected (no more unique entrants available).',
+            content:
+              '⚠️ No new eligible winners could be selected (no more unique entrants available).',
           });
           return;
         }
@@ -341,13 +356,17 @@ export function createGiveawayCommands(services: BotServices): Command[] {
       if (action === 'delete') {
         const giveawayIdInput = ctx.options.getString('giveaway') ?? rawArgs[1];
         if (!giveawayIdInput) {
-          await ctx.reply({ content: '❌ Please provide the Message ID or Giveaway ID to delete.' });
+          await ctx.reply({
+            content: '❌ Please provide the Message ID or Giveaway ID to delete.',
+          });
           return;
         }
 
         const giveaway = await resolveGiveaway(services, giveawayIdInput, ctx.guildId);
         if (!giveaway) {
-          await ctx.reply({ content: `❌ No giveaway found with ID or Message ID: \`${giveawayIdInput}\`.` });
+          await ctx.reply({
+            content: `❌ No giveaway found with ID or Message ID: \`${giveawayIdInput}\`.`,
+          });
           return;
         }
 
@@ -379,7 +398,9 @@ export function createGiveawayCommands(services: BotServices): Command[] {
 
         const giveaway = await resolveGiveaway(services, giveawayIdInput, ctx.guildId);
         if (!giveaway) {
-          await ctx.reply({ content: `❌ No giveaway found with ID or Message ID: \`${giveawayIdInput}\`.` });
+          await ctx.reply({
+            content: `❌ No giveaway found with ID or Message ID: \`${giveawayIdInput}\`.`,
+          });
           return;
         }
 
@@ -403,7 +424,10 @@ export function createGiveawayCommands(services: BotServices): Command[] {
         }
 
         if (Object.keys(updates).length === 0) {
-          await ctx.reply({ content: '⚠️ Please provide at least one field to edit (`prize`, `winners`, or `duration`).' });
+          await ctx.reply({
+            content:
+              '⚠️ Please provide at least one field to edit (`prize`, `winners`, or `duration`).',
+          });
           return;
         }
 
@@ -432,7 +456,9 @@ export function createGiveawayCommands(services: BotServices): Command[] {
       if (action === 'list') {
         const activeGiveaways = await services.giveawayRepo.listActiveGiveaways(ctx.guildId);
         if (activeGiveaways.length === 0) {
-          await ctx.reply({ content: '📋 There are currently no active giveaways in this server.' });
+          await ctx.reply({
+            content: '📋 There are currently no active giveaways in this server.',
+          });
           return;
         }
 

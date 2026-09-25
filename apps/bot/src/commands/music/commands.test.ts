@@ -43,19 +43,21 @@ function createMockContext(params: {
     },
   } as unknown as GuildMember;
 
-  const guild = params.guildId !== null
-    ? ({
-        id: params.guildId ?? 'guild_music_01',
-        name: 'Harmonic Guild',
-        voiceAdapterCreator: (() => ({
-          sendPayload: () => true,
-          destroy: () => {},
-        })) as never,
-      } as unknown as Guild)
-    : null;
+  const guild =
+    params.guildId !== null
+      ? ({
+          id: params.guildId ?? 'guild_music_01',
+          name: 'Harmonic Guild',
+          voiceAdapterCreator: (() => ({
+            sendPayload: () => true,
+            destroy: () => {},
+          })) as never,
+        } as unknown as Guild)
+      : null;
 
   const optionsMap = params.optionsMap ?? {};
-  const reply = (params.replyFn ?? vi.fn().mockResolvedValue({})) as unknown as CommandContext['reply'];
+  const reply = (params.replyFn ??
+    vi.fn().mockResolvedValue({})) as unknown as CommandContext['reply'];
 
   return {
     source: 'slash',
@@ -201,7 +203,9 @@ describe('Dual-Dispatch Music Commands Suite (TASK-0521)', () => {
     services.musicPlayer.pipeline.registerAdapter(mockAdapter);
 
     // Mock voice manager join and audio playback to avoid connecting to real discord gateway in unit tests
-    vi.spyOn(VoiceLifecycleManager.prototype, 'join').mockImplementation(async function (this: VoiceLifecycleManager) {
+    vi.spyOn(VoiceLifecycleManager.prototype, 'join').mockImplementation(async function (
+      this: VoiceLifecycleManager,
+    ) {
       const fakeConnection = {
         state: { status: 'ready' },
         subscribe: vi.fn(),
@@ -225,8 +229,14 @@ describe('Dual-Dispatch Music Commands Suite (TASK-0521)', () => {
       stop: vi.fn(),
       on: vi.fn(),
     };
-    vi.spyOn(services.musicPlayer as unknown as { getOrCreateAudioPlayer: (guildId: string) => unknown }, 'getOrCreateAudioPlayer').mockImplementation((guildId: string) => {
-      (services.musicPlayer as unknown as { audioPlayers: Map<string, unknown> }).audioPlayers.set(guildId, fakeAudioPlayer);
+    vi.spyOn(
+      services.musicPlayer as unknown as { getOrCreateAudioPlayer: (guildId: string) => unknown },
+      'getOrCreateAudioPlayer',
+    ).mockImplementation((guildId: string) => {
+      (services.musicPlayer as unknown as { audioPlayers: Map<string, unknown> }).audioPlayers.set(
+        guildId,
+        fakeAudioPlayer,
+      );
       return fakeAudioPlayer;
     });
   });
@@ -294,7 +304,9 @@ describe('Dual-Dispatch Music Commands Suite (TASK-0521)', () => {
 
       await playCmd.execute(ctx);
       expect(replyFn).toHaveBeenCalledWith(
-        expect.objectContaining({ content: expect.stringContaining('connected to a voice channel') }),
+        expect.objectContaining({
+          content: expect.stringContaining('connected to a voice channel'),
+        }),
       );
     });
 
@@ -560,7 +572,9 @@ describe('Dual-Dispatch Music Commands Suite (TASK-0521)', () => {
       const leaveCtx = createMockContext({ replyFn: vi.fn() });
       await leaveCmd.execute(leaveCtx);
       expect(leaveCtx.reply).toHaveBeenCalledWith(
-        expect.objectContaining({ content: expect.stringContaining('Disconnected from voice channel') }),
+        expect.objectContaining({
+          content: expect.stringContaining('Disconnected from voice channel'),
+        }),
       );
     });
   });

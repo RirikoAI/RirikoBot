@@ -1,7 +1,4 @@
-import type {
-  AntiSpamConfig,
-  AntiSpamEvaluation,
-} from './types.js';
+import type { AntiSpamConfig, AntiSpamEvaluation } from './types.js';
 
 /**
  * Calculates the Levenshtein edit distance between two strings using

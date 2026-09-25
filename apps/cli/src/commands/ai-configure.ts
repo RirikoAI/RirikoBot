@@ -3,12 +3,7 @@ import pc from 'picocolors';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { GeminiProvider, OpenAIProvider, OllamaProvider } from '@ririko/ai';
-import {
-  maskSecret,
-  readEnvFile,
-  resolveEnvFilePath,
-  updateEnvFile,
-} from '../utils/env-editor.js';
+import { maskSecret, readEnvFile, resolveEnvFilePath, updateEnvFile } from '../utils/env-editor.js';
 
 export interface AiConfigureOptions {
   provider?: string | undefined;
@@ -39,7 +34,12 @@ export const PROVIDER_METADATA: Record<
   gemini: {
     name: 'Google Gemini',
     recommendedModel: 'gemini-2.5-flash',
-    supportedModels: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3.5-flash-lite', 'gemini-3.7-flash'],
+    supportedModels: [
+      'gemini-2.5-flash',
+      'gemini-2.5-pro',
+      'gemini-3.5-flash-lite',
+      'gemini-3.7-flash',
+    ],
     description: 'Fast, multimodal, cost-efficient, 1M+ token context (Recommended flagship)',
   },
   openai: {
@@ -68,7 +68,9 @@ export function printAiStatus(env: Record<string, string>, targetPath: string): 
   console.log(pc.bold(pc.magenta('╰──────────────────────────────────────────────────╯\n')));
 
   console.log(`  ${pc.bold('Target File:')}         ${pc.gray(targetPath)}`);
-  console.log(`  ${pc.bold('Default Provider:')}    ${pc.cyan(pc.bold(currentProvider.toUpperCase()))}`);
+  console.log(
+    `  ${pc.bold('Default Provider:')}    ${pc.cyan(pc.bold(currentProvider.toUpperCase()))}`,
+  );
   console.log(`  ${pc.bold('Default Model:')}       ${pc.green(currentModel)}\n`);
 
   console.log(pc.bold('  ── Provider Details ──────────────────────────────'));
@@ -82,7 +84,9 @@ export function printAiStatus(env: Record<string, string>, targetPath: string): 
     } ${isGeminiPrimary ? pc.yellow('(PRIMARY)') : ''}`,
   );
   console.log(`    ${pc.gray('API Key:')}           ${pc.gray(maskSecret(env.GEMINI_API_KEY))}`);
-  console.log(`    ${pc.gray('Default Model:')}     ${pc.gray(PROVIDER_METADATA.gemini.recommendedModel)}`);
+  console.log(
+    `    ${pc.gray('Default Model:')}     ${pc.gray(PROVIDER_METADATA.gemini.recommendedModel)}`,
+  );
 
   // OpenAI
   const hasOpenai = Boolean(env.OPENAI_API_KEY);
@@ -96,7 +100,9 @@ export function printAiStatus(env: Record<string, string>, targetPath: string): 
   if (env.OPENAI_BASE_URL) {
     console.log(`    ${pc.gray('Base URL:')}          ${pc.gray(env.OPENAI_BASE_URL)}`);
   }
-  console.log(`    ${pc.gray('Default Model:')}     ${pc.gray(PROVIDER_METADATA.openai.recommendedModel)}`);
+  console.log(
+    `    ${pc.gray('Default Model:')}     ${pc.gray(PROVIDER_METADATA.openai.recommendedModel)}`,
+  );
 
   // Ollama
   const ollamaUrl = env.OLLAMA_BASE_URL || 'http://localhost:11434';
@@ -107,7 +113,9 @@ export function printAiStatus(env: Record<string, string>, targetPath: string): 
     )} ${isOllamaPrimary ? pc.yellow('(PRIMARY)') : ''}`,
   );
   console.log(`    ${pc.gray('Base URL:')}          ${pc.gray(ollamaUrl)}`);
-  console.log(`    ${pc.gray('Default Model:')}     ${pc.gray(PROVIDER_METADATA.ollama.recommendedModel)}\n`);
+  console.log(
+    `    ${pc.gray('Default Model:')}     ${pc.gray(PROVIDER_METADATA.ollama.recommendedModel)}\n`,
+  );
 }
 
 /**
@@ -162,9 +170,15 @@ export async function testAiProviders(env: Record<string, string>): Promise<void
     const provider = new OllamaProvider({ baseURL: ollamaUrl });
     const health = await provider.checkHealth();
     if (health.healthy) {
-      console.log(pc.green(`✔ Connected (${health.latencyMs}ms) [Models: ${health.models?.join(', ') || 'none'}]`));
+      console.log(
+        pc.green(
+          `✔ Connected (${health.latencyMs}ms) [Models: ${health.models?.join(', ') || 'none'}]`,
+        ),
+      );
     } else {
-      console.log(pc.yellow(`! Unreachable or no models: ${health.error || 'Server did not respond'}`));
+      console.log(
+        pc.yellow(`! Unreachable or no models: ${health.error || 'Server did not respond'}`),
+      );
     }
   } catch (err: unknown) {
     console.log(pc.yellow(`! Unreachable: ${err instanceof Error ? err.message : String(err)}`));
@@ -194,11 +208,12 @@ export async function runInteractiveWizard(envFilePath: string): Promise<void> {
     console.log(`  1. ${pc.cyan('Google Gemini')} (Recommended - Fast, Multimodal, Flagship)`);
     console.log(`  2. ${pc.cyan('OpenAI')} (GPT-4o, GPT-4o-mini, o3-mini)`);
     console.log(`  3. ${pc.cyan('Ollama / Local')} (Self-hosted, Private, Zero-cost)`);
-    const defaultChoice = currentPrimary === 'openai' ? '2' : currentPrimary === 'ollama' ? '3' : '1';
+    const defaultChoice =
+      currentPrimary === 'openai' ? '2' : currentPrimary === 'ollama' ? '3' : '1';
 
-    const providerAns = (
-      await rl.question(`\nSelect provider [1-3] (default: ${defaultChoice}): `)
-    ).trim() || defaultChoice;
+    const providerAns =
+      (await rl.question(`\nSelect provider [1-3] (default: ${defaultChoice}): `)).trim() ||
+      defaultChoice;
 
     let selectedProvider: SupportedProvider = 'gemini';
     if (providerAns === '2' || providerAns.toLowerCase() === 'openai') {
@@ -211,7 +226,9 @@ export async function runInteractiveWizard(envFilePath: string): Promise<void> {
       DEFAULT_AI_PROVIDER: selectedProvider,
     };
 
-    console.log(pc.green(`\n✔ Primary provider set to: ${PROVIDER_METADATA[selectedProvider].name}\n`));
+    console.log(
+      pc.green(`\n✔ Primary provider set to: ${PROVIDER_METADATA[selectedProvider].name}\n`),
+    );
 
     // 2. Configure credentials for selected provider
     if (selectedProvider === 'gemini') {
@@ -224,7 +241,11 @@ export async function runInteractiveWizard(envFilePath: string): Promise<void> {
       if (inputKey) {
         updates.GEMINI_API_KEY = inputKey;
       } else if (!existingKey) {
-        console.log(pc.yellow('⚠ Note: Gemini API key is missing. AI chat will fall back until a key is added.'));
+        console.log(
+          pc.yellow(
+            '⚠ Note: Gemini API key is missing. AI chat will fall back until a key is added.',
+          ),
+        );
       }
     } else if (selectedProvider === 'openai') {
       const existingKey = currentEnv.OPENAI_API_KEY;
@@ -270,8 +291,12 @@ export async function runInteractiveWizard(envFilePath: string): Promise<void> {
     // 4. Optional fallback setup
     console.log(pc.bold('\nStep 3: Secondary / Fallback Providers (Optional)'));
     const configureFallback = (
-      await rl.question('Would you like to configure another provider for automated fallback? [y/N]: ')
-    ).trim().toLowerCase();
+      await rl.question(
+        'Would you like to configure another provider for automated fallback? [y/N]: ',
+      )
+    )
+      .trim()
+      .toLowerCase();
 
     if (configureFallback === 'y' || configureFallback === 'yes') {
       if (selectedProvider !== 'gemini') {
@@ -306,7 +331,9 @@ export async function runInteractiveWizard(envFilePath: string): Promise<void> {
     console.log('');
     const shouldTest = (
       await rl.question('Would you like to test connectivity with these providers now? [Y/n]: ')
-    ).trim().toLowerCase();
+    )
+      .trim()
+      .toLowerCase();
 
     const mergedEnv = { ...currentEnv, ...updates } as Record<string, string>;
 
@@ -317,7 +344,9 @@ export async function runInteractiveWizard(envFilePath: string): Promise<void> {
     // 6. Confirmation & Save
     const confirmSave = (
       await rl.question(`\nSave updated configuration to ${envFilePath}? [Y/n]: `)
-    ).trim().toLowerCase();
+    )
+      .trim()
+      .toLowerCase();
 
     if (confirmSave === 'n' || confirmSave === 'no') {
       console.log(pc.yellow('\n✖ Configuration changes discarded.'));
@@ -327,11 +356,13 @@ export async function runInteractiveWizard(envFilePath: string): Promise<void> {
     const result = updateEnvFile(envFilePath, updates);
     console.log(pc.green(pc.bold(`\n✔ Configuration successfully saved to ${result.filePath}!`)));
     console.log(
-      pc.gray(
-        `Updated keys: ${result.updatedKeys.concat(result.addedKeys).join(', ') || 'None'}`,
+      pc.gray(`Updated keys: ${result.updatedKeys.concat(result.addedKeys).join(', ') || 'None'}`),
+    );
+    console.log(
+      pc.cyan(
+        '\nTip: You can re-run this anytime using `ririko ai:configure` or `pnpm ai:configure`.\n',
       ),
     );
-    console.log(pc.cyan('\nTip: You can re-run this anytime using `ririko ai:configure` or `pnpm ai:configure`.\n'));
   } finally {
     rl.close();
   }
@@ -362,7 +393,14 @@ export function registerAiConfigureCommand(program: Command): void {
       const currentEnv = readEnvFile(envPath);
 
       // 1. If only --show was requested
-      if (options.show && !options.provider && !options.geminiKey && !options.openaiKey && !options.ollamaUrl && !options.model) {
+      if (
+        options.show &&
+        !options.provider &&
+        !options.geminiKey &&
+        !options.openaiKey &&
+        !options.ollamaUrl &&
+        !options.model
+      ) {
         printAiStatus(currentEnv, envPath);
         if (options.test) {
           await testAiProviders(currentEnv);
@@ -371,7 +409,15 @@ export function registerAiConfigureCommand(program: Command): void {
       }
 
       // 2. If only --test was requested
-      if (options.test && !options.provider && !options.geminiKey && !options.openaiKey && !options.ollamaUrl && !options.model && !options.interactive) {
+      if (
+        options.test &&
+        !options.provider &&
+        !options.geminiKey &&
+        !options.openaiKey &&
+        !options.ollamaUrl &&
+        !options.model &&
+        !options.interactive
+      ) {
         printAiStatus(currentEnv, envPath);
         await testAiProviders(currentEnv);
         return;
@@ -385,7 +431,7 @@ export function registerAiConfigureCommand(program: Command): void {
         options.openaiKey ||
         options.openaiBaseUrl ||
         options.ollamaUrl ||
-        options.yes
+        options.yes,
       );
 
       if (options.interactive || (!hasFlags && process.stdin.isTTY)) {
@@ -400,7 +446,9 @@ export function registerAiConfigureCommand(program: Command): void {
         const p = options.provider.toLowerCase();
         if (!SUPPORTED_PROVIDERS.includes(p as SupportedProvider)) {
           console.error(
-            pc.red(`\n✖ Invalid provider: '${options.provider}'. Must be one of: ${SUPPORTED_PROVIDERS.join(', ')}`),
+            pc.red(
+              `\n✖ Invalid provider: '${options.provider}'. Must be one of: ${SUPPORTED_PROVIDERS.join(', ')}`,
+            ),
           );
           process.exit(1);
         }
@@ -433,7 +481,7 @@ export function registerAiConfigureCommand(program: Command): void {
         for (const k of [...result.updatedKeys, ...result.addedKeys]) {
           const val = updates[k];
           const isSecret = k.toLowerCase().includes('key') || k.toLowerCase().includes('secret');
-          console.log(`  • ${pc.bold(k)} = ${pc.cyan(isSecret ? maskSecret(val) : val ?? '')}`);
+          console.log(`  • ${pc.bold(k)} = ${pc.cyan(isSecret ? maskSecret(val) : (val ?? ''))}`);
         }
 
         if (options.test) {
@@ -443,7 +491,11 @@ export function registerAiConfigureCommand(program: Command): void {
       } else {
         // No updates provided and not interactive: display status & help hint
         printAiStatus(currentEnv, envPath);
-        console.log(pc.gray('Tip: Run `ririko ai:configure -i` for the interactive wizard or see `ririko ai:configure --help`.\n'));
+        console.log(
+          pc.gray(
+            'Tip: Run `ririko ai:configure -i` for the interactive wizard or see `ririko ai:configure --help`.\n',
+          ),
+        );
       }
     });
 }

@@ -131,7 +131,10 @@ export class GuildSettingsService {
 }
 
 /** Validates one setting with its shared schema; the first issue becomes the user message. */
-function parseSetting<TSchema extends z.ZodTypeAny>(schema: TSchema, raw: string): z.output<TSchema> {
+function parseSetting<TSchema extends z.ZodTypeAny>(
+  schema: TSchema,
+  raw: string,
+): z.output<TSchema> {
   const result = schema.safeParse(raw);
   if (!result.success) {
     const message = result.error.issues[0]?.message ?? 'Invalid value.';

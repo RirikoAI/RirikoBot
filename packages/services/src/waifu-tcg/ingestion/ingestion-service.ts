@@ -1,5 +1,9 @@
 import type { WaifuAssetRepository } from '@ririko/database';
-import type { WaifuImClient, WaifuImImage, WaifuImSearchOptions } from '../../anime/waifu-im.client.js';
+import type {
+  WaifuImClient,
+  WaifuImImage,
+  WaifuImSearchOptions,
+} from '../../anime/waifu-im.client.js';
 import type { ImageValidator } from './image-validator.js';
 import type { IngestionResult } from '../types.js';
 import { CANONICAL_SEED_ASSETS, createMockPngBuffer } from './seed-assets.js';

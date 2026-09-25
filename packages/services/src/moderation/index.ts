@@ -9,4 +9,3 @@ export * from './automod.types.js';
 export * from './rules/index.js';
 export * from './automod.service.js';
 export * from './anti-raid.service.js';
-

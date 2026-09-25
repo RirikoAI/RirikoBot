@@ -56,11 +56,7 @@ export interface AntiSpamConfig {
  * Result of evaluating a user message against anti-spam heuristics.
  */
 export type AntiSpamRejectionReason =
-  | 'COOLDOWN'
-  | 'SIMILARITY_EXCEEDED'
-  | 'MIN_LENGTH'
-  | 'AUTOMATED_BURST'
-  | 'SHADOW_COOLDOWN';
+  'COOLDOWN' | 'SIMILARITY_EXCEEDED' | 'MIN_LENGTH' | 'AUTOMATED_BURST' | 'SHADOW_COOLDOWN';
 
 export interface AntiSpamEvaluation {
   isAllowed: boolean;
@@ -358,11 +354,7 @@ export interface LeaderboardConfig {
  * Standard item effect categories.
  */
 export type ItemEffectType =
-  | 'ENERGY_RESTORE'
-  | 'XP_GRANT'
-  | 'CREDITS_GRANT'
-  | 'PROFILE_BG_TOKEN'
-  | 'GENERIC';
+  'ENERGY_RESTORE' | 'XP_GRANT' | 'CREDITS_GRANT' | 'PROFILE_BG_TOKEN' | 'GENERIC';
 
 /**
  * Metadata stored with shop items.
@@ -561,7 +553,3 @@ export interface ProfileCardRendererOptions {
   bankingService?: import('./banking.service.js').BankingService | undefined;
   leaderboardService?: import('./leaderboard.service.js').LeaderboardService | undefined;
 }
-
-
-
-

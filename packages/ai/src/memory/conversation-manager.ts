@@ -7,12 +7,7 @@ import type {
   NewAiUserPreferences,
   NewAiGuildPreferences,
 } from '@ririko/database';
-import type {
-  ChatMessage,
-  ChatRole,
-  ToolCall,
-  UserContext,
-} from '../types/index.js';
+import type { ChatMessage, ChatRole, ToolCall, UserContext } from '../types/index.js';
 
 export interface ConversationManagerOptions {
   repository: AiRepository;
@@ -48,10 +43,7 @@ export class ConversationManager {
    * Gets the sliding window of historical messages for a user's isolated context,
    * formatted as standard domain ChatMessage objects.
    */
-  async getContextMessages(
-    userContext: UserContext,
-    windowSize?: number,
-  ): Promise<ChatMessage[]> {
+  async getContextMessages(userContext: UserContext, windowSize?: number): Promise<ChatMessage[]> {
     const limit = windowSize ?? this.defaultWindowSize;
     const conv = await this.repository.findConversationByUserContext({
       userId: userContext.userId,

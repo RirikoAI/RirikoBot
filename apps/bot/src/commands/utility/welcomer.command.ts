@@ -1,7 +1,4 @@
-import {
-  EmbedBuilder,
-  PermissionsBitField,
-} from 'discord.js';
+import { EmbedBuilder, PermissionsBitField } from 'discord.js';
 import {
   CommandCategory,
   type Command,
@@ -25,7 +22,7 @@ export function createWelcomerCommand(services: BotServices): Command {
         '/welcomer message:Welcome {user} to {server}!',
         '/welcomer background:https://example.com/bg.png',
         '/welcomer color:#ff0000',
-        '/welcomer enable:false'
+        '/welcomer enable:false',
       ],
       options: [
         {
@@ -89,8 +86,8 @@ export function createWelcomerCommand(services: BotServices): Command {
         const rawArgs = ctx.options.getRawArgs();
         if (rawArgs.length > 0) {
           // Simplistic parsing for prefix: e.g. !welcomer channel #welcome message Hello
-          // For simplicity, we just recommend slash commands for complex configs, 
-          // or we can parse simple key-values. 
+          // For simplicity, we just recommend slash commands for complex configs,
+          // or we can parse simple key-values.
           // If no args, just show config.
           // Let's rely on slash commands for setting fields, or require the user to use slash commands.
           // Wait, the requirement says "dual-dispatch configuration commands".
@@ -102,7 +99,8 @@ export function createWelcomerCommand(services: BotServices): Command {
           else if (action === 'message') messageTemplate = value;
           else if (action === 'background') backgroundUrl = value;
           else if (action === 'color') textColor = value;
-          else if (action === 'enable') enable = ['true', 'on', 'yes', '1'].includes(value.toLowerCase());
+          else if (action === 'enable')
+            enable = ['true', 'on', 'yes', '1'].includes(value.toLowerCase());
           else if (action === 'disable') enable = false;
         }
       } else {
@@ -116,14 +114,21 @@ export function createWelcomerCommand(services: BotServices): Command {
       }
 
       let config = await services.welcomerRepo.getWelcomeConfig(ctx.guild!.id);
-      
-      const isUpdate = channelId !== undefined || messageTemplate !== undefined || backgroundUrl !== undefined || textColor !== undefined || enable !== undefined;
+
+      const isUpdate =
+        channelId !== undefined ||
+        messageTemplate !== undefined ||
+        backgroundUrl !== undefined ||
+        textColor !== undefined ||
+        enable !== undefined;
 
       if (isUpdate) {
         if (backgroundUrl) {
           const isValid = await services.welcomerService.validateBackgroundUrl(backgroundUrl);
           if (!isValid) {
-            await ctx.reply('❌ The provided background URL is invalid or points to a restricted IP address. Please provide a valid public image URL.');
+            await ctx.reply(
+              '❌ The provided background URL is invalid or points to a restricted IP address. Please provide a valid public image URL.',
+            );
             return;
           }
         }
@@ -131,25 +136,31 @@ export function createWelcomerCommand(services: BotServices): Command {
         const newData = {
           guildId: ctx.guild!.id,
           channelId: channelId ?? config?.channelId ?? '',
-          messageTemplate: messageTemplate ?? config?.messageTemplate ?? 'Welcome to {server}, {user}!',
+          messageTemplate:
+            messageTemplate ?? config?.messageTemplate ?? 'Welcome to {server}, {user}!',
           cardTheme: config?.cardTheme ?? 'DEFAULT',
-          backgroundUrl: backgroundUrl === 'none' ? null : (backgroundUrl ?? config?.backgroundUrl ?? null),
+          backgroundUrl:
+            backgroundUrl === 'none' ? null : (backgroundUrl ?? config?.backgroundUrl ?? null),
           textColor: textColor ?? config?.textColor ?? '#ffffff',
           isEnabled: enable ?? config?.isEnabled ?? true,
         };
 
         if (!newData.channelId && newData.isEnabled) {
-           await ctx.reply('❌ You must set a channel before enabling the welcomer. Example: `/welcomer channel:#welcome`');
-           return;
+          await ctx.reply(
+            '❌ You must set a channel before enabling the welcomer. Example: `/welcomer channel:#welcome`',
+          );
+          return;
         }
 
         config = await services.welcomerRepo.setWelcomeConfig(newData);
-        
+
         await ctx.reply(`✅ Welcomer configuration updated.`);
       }
 
       if (!config) {
-        await ctx.reply('ℹ️ Welcomer is not configured for this server. Use `/welcomer channel:#welcome` to set it up.');
+        await ctx.reply(
+          'ℹ️ Welcomer is not configured for this server. Use `/welcomer channel:#welcome` to set it up.',
+        );
         return;
       }
 
@@ -158,10 +169,18 @@ export function createWelcomerCommand(services: BotServices): Command {
         .setTitle('👋 Server Welcomer Configuration')
         .addFields([
           { name: 'Status', value: config.isEnabled ? '✅ Enabled' : '❌ Disabled', inline: true },
-          { name: 'Channel', value: config.channelId ? `<#${config.channelId}>` : 'Not set', inline: true },
+          {
+            name: 'Channel',
+            value: config.channelId ? `<#${config.channelId}>` : 'Not set',
+            inline: true,
+          },
           { name: 'Text Color', value: `\`${config.textColor}\``, inline: true },
           { name: 'Message Template', value: `\`${config.messageTemplate}\``, inline: false },
-          { name: 'Background URL', value: config.backgroundUrl ? `[Link](${config.backgroundUrl})` : 'Default', inline: false },
+          {
+            name: 'Background URL',
+            value: config.backgroundUrl ? `[Link](${config.backgroundUrl})` : 'Default',
+            inline: false,
+          },
         ])
         .setFooter({ text: 'Ririko AI 2.0 • Server Utilities' });
 

@@ -111,9 +111,7 @@ async function main(): Promise<void> {
       results.push({ table: 'user_cards', changes: delCards.changes });
 
       // 6. Player energy
-      const delEnergy = rawDb
-        .prepare('DELETE FROM player_energy WHERE user_id = ?')
-        .run(userId);
+      const delEnergy = rawDb.prepare('DELETE FROM player_energy WHERE user_id = ?').run(userId);
       results.push({ table: 'player_energy', changes: delEnergy.changes });
 
       // 7. User dungeon progress
@@ -135,9 +133,7 @@ async function main(): Promise<void> {
       results.push({ table: 'waifu_guild_members', changes: delGuildMembers.changes });
 
       // 10. Boss runs
-      const delBossRuns = rawDb
-        .prepare('DELETE FROM boss_runs WHERE user_id = ?')
-        .run(userId);
+      const delBossRuns = rawDb.prepare('DELETE FROM boss_runs WHERE user_id = ?').run(userId);
       results.push({ table: 'boss_runs', changes: delBossRuns.changes });
 
       // 11. TCG system configs (tutorial metadata, rewards)
@@ -235,10 +231,9 @@ async function main(): Promise<void> {
         for (const g of ledGuilds.rows) {
           await client.query('DELETE FROM waifu_guild_members WHERE guild_id = $1', [g.id]);
         }
-        const delG = await client.query(
-          'DELETE FROM waifu_guilds WHERE leader_user_id = $1',
-          [userId],
-        );
+        const delG = await client.query('DELETE FROM waifu_guilds WHERE leader_user_id = $1', [
+          userId,
+        ]);
         results.push({ table: 'waifu_guilds', changes: delG.rowCount ?? 0 });
       }
 
@@ -267,7 +262,10 @@ async function main(): Promise<void> {
           sql: 'DELETE FROM waifu_guild_members WHERE user_id = $1',
         },
         { table: 'boss_runs', sql: 'DELETE FROM boss_runs WHERE user_id = $1' },
-        { table: 'tcg_system_configs', sql: "DELETE FROM tcg_system_configs WHERE key LIKE '%:' || $1" },
+        {
+          table: 'tcg_system_configs',
+          sql: "DELETE FROM tcg_system_configs WHERE key LIKE '%:' || $1",
+        },
       ];
 
       for (const q of qList) {

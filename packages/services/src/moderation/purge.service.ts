@@ -55,14 +55,7 @@ export class PurgeService {
    * Purges messages matching optional filters while respecting Discord 14-day API bulk-delete limits.
    */
   async purgeMessages(params: PurgeParams): Promise<PurgeResult> {
-    const {
-      guild,
-      invoker,
-      channel,
-      count,
-      filters = {},
-      reason = 'Bulk message purge',
-    } = params;
+    const { guild, invoker, channel, count, filters = {}, reason = 'Bulk message purge' } = params;
 
     // 1. Validate permissions
     const permCheck = await this.permissionService.validate({

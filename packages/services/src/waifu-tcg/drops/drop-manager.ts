@@ -1,5 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import type { WaifuCardRepository, WaifuAssetRepository, WaifuCard, WaifuAsset, UserCard } from '@ririko/database';
+import type {
+  WaifuCardRepository,
+  WaifuAssetRepository,
+  WaifuCard,
+  WaifuAsset,
+  UserCard,
+} from '@ririko/database';
 import { CardGenerator, formatCardSerialNumber } from '../card/card-generator.js';
 
 export interface GuildDropConfig {
@@ -222,11 +228,7 @@ export class DropManager {
   /**
    * Claims an active card drop with anti-sniping validation and atomic concurrency lock.
    */
-  async claimDrop(
-    dropId: string,
-    userId: string,
-    now: number = Date.now(),
-  ): Promise<ClaimResult> {
+  async claimDrop(dropId: string, userId: string, now: number = Date.now()): Promise<ClaimResult> {
     const drop = this.activeDrops.get(dropId);
     if (!drop) {
       return { success: false, error: 'Drop does not exist or has expired.' };

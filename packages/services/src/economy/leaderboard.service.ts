@@ -1,8 +1,4 @@
-import type {
-  LeaderboardRepository,
-  XpRepository,
-  NewLeaderboardSnapshot,
-} from '@ririko/database';
+import type { LeaderboardRepository, XpRepository, NewLeaderboardSnapshot } from '@ririko/database';
 import type {
   LeaderboardConfig,
   LeaderboardEntry,
@@ -91,10 +87,7 @@ export class LeaderboardService {
   /**
    * Computes server rankings for a specific guild and upserts snapshots.
    */
-  public async materializeGuild(
-    guildId: string,
-    globalMap?: Map<string, number>,
-  ): Promise<number> {
+  public async materializeGuild(guildId: string, globalMap?: Map<string, number>): Promise<number> {
     const resolvedGlobalMap = globalMap ?? (await this.materializeGlobal());
     const accounts = await this.xpRepository.getAllGuildAccounts(guildId);
     if (accounts.length === 0) return 0;
@@ -158,10 +151,7 @@ export class LeaderboardService {
    * If the cached snapshot is missing or stale beyond snapshotTtlMs,
    * performs dynamic fallback calculation and caches the updated snapshot.
    */
-  public async getUserRank(
-    userId: string,
-    guildId: string,
-  ): Promise<UserRankInfo | null> {
+  public async getUserRank(userId: string, guildId: string): Promise<UserRankInfo | null> {
     const cached = await this.leaderboardRepository.getUserRank(userId, guildId);
     const now = Date.now();
 
@@ -278,10 +268,7 @@ export class LeaderboardService {
    * Retrieves paginated global rankings ordered by globalRank ascending.
    * Automatically materializes global snapshots if not yet calculated.
    */
-  public async getGlobalLeaderboard(
-    page = 1,
-    pageSize = 10,
-  ): Promise<LeaderboardPage> {
+  public async getGlobalLeaderboard(page = 1, pageSize = 10): Promise<LeaderboardPage> {
     const validPage = Math.max(1, Math.floor(page));
     const validPageSize = Math.max(1, Math.min(100, Math.floor(pageSize)));
     const offset = (validPage - 1) * validPageSize;

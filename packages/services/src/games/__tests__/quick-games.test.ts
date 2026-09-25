@@ -1,10 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { flipCoin } from '../quick-games/coin-flip.js';
 import { rollDice, rollVsBot } from '../quick-games/dice.js';
-import {
-  generateHighLowInitial,
-  evaluateHighLow,
-} from '../quick-games/high-low.js';
+import { generateHighLowInitial, evaluateHighLow } from '../quick-games/high-low.js';
 
 describe('Quick Games Suite (TASK-0922)', () => {
   describe('Coin Flip', () => {

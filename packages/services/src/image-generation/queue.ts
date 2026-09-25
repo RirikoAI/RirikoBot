@@ -87,22 +87,22 @@ export class ImageJobQueue {
       timer = setTimeout(() => {
         if (!isDone) {
           isDone = true;
-          task.cancel(new Error(`Image generation job ${task.id} timed out after ${task.timeoutMs}ms`));
+          task.cancel(
+            new Error(`Image generation job ${task.id} timed out after ${task.timeoutMs}ms`),
+          );
           this.activeJobs--;
           this.processNext();
         }
       }, task.timeoutMs);
     }
 
-    task
-      .run()
-      .finally(() => {
-        if (!isDone) {
-          isDone = true;
-          if (timer) clearTimeout(timer);
-          this.activeJobs--;
-          this.processNext();
-        }
-      });
+    task.run().finally(() => {
+      if (!isDone) {
+        isDone = true;
+        if (timer) clearTimeout(timer);
+        this.activeJobs--;
+        this.processNext();
+      }
+    });
   }
 }

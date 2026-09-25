@@ -7,11 +7,7 @@ import {
   type Message,
   type ButtonInteraction,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { TttBoard } from '@ririko/services';
 
@@ -48,7 +44,8 @@ export function createTicTacToeCommand(services: BotServices): Command {
     metadata: {
       name: 'tictactoe',
       category: CommandCategory.GAMES,
-      description: 'Play an interactive 3x3 Tic-Tac-Toe match against unbeatable Minimax AI or another player',
+      description:
+        'Play an interactive 3x3 Tic-Tac-Toe match against unbeatable Minimax AI or another player',
       usage: '/tictactoe opponent:@user [wager:credits]',
       examples: [
         '/tictactoe opponent:@friend',
@@ -107,7 +104,8 @@ export function createTicTacToeCommand(services: BotServices): Command {
 
       if (!opponentUser) {
         await ctx.reply({
-          content: '❌ Please specify an opponent (e.g. `/tictactoe opponent:@user` or `!ttt ai [wager]`).',
+          content:
+            '❌ Please specify an opponent (e.g. `/tictactoe opponent:@user` or `!ttt ai [wager]`).',
           ephemeral: true,
         });
         return;
@@ -117,7 +115,8 @@ export function createTicTacToeCommand(services: BotServices): Command {
 
       if (!isVsAi && opponentUser.id === challenger.id) {
         await ctx.reply({
-          content: '❌ You cannot play Tic-Tac-Toe against yourself! Choose another player or play against AI.',
+          content:
+            '❌ You cannot play Tic-Tac-Toe against yourself! Choose another player or play against AI.',
           ephemeral: true,
         });
         return;
@@ -133,7 +132,8 @@ export function createTicTacToeCommand(services: BotServices): Command {
       // Check active game concurrency in channel
       if (services.gameSessionManager.isPlayerActiveInChannel(player1.id, channelId)) {
         await ctx.reply({
-          content: '❌ You already have an active game in this channel! Please finish it before starting a new one.',
+          content:
+            '❌ You already have an active game in this channel! Please finish it before starting a new one.',
           ephemeral: true,
         });
         return;
@@ -179,8 +179,8 @@ export function createTicTacToeCommand(services: BotServices): Command {
         .setTitle('🎮 Tic-Tac-Toe')
         .setDescription(
           `**${player1.username}** (❌) vs **${player2.username}** (⭕)\n` +
-          `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits each\n` : ''}` +
-          `👉 Current turn: <@${session.currentTurnPlayerId}>`,
+            `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits each\n` : ''}` +
+            `👉 Current turn: <@${session.currentTurnPlayerId}>`,
         )
         .setColor('#5865F2')
         .setFooter({ text: 'Click an empty square to make your move (60s turn limit)' });
@@ -232,7 +232,8 @@ export function createTicTacToeCommand(services: BotServices): Command {
           const moveResult = services.tictactoeEngine.makeMove(session.id, clickerId, cellIndex);
           const updatedSession = moveResult.session;
 
-          const isGameOver = updatedSession.state === 'COMPLETED' || updatedSession.state === 'TIED';
+          const isGameOver =
+            updatedSession.state === 'COMPLETED' || updatedSession.state === 'TIED';
           const updatedRows = buildTttGrid(updatedSession.metadata.board, session.id, isGameOver);
 
           let updatedDescription =
@@ -240,7 +241,9 @@ export function createTicTacToeCommand(services: BotServices): Command {
             `${wagerAmount ? `💰 **Wager**: ${wagerAmount.toLocaleString()} credits each\n` : ''}`;
 
           if (updatedSession.state === 'COMPLETED') {
-            const winner = updatedSession.players.find((p: any) => p.id === updatedSession.winnerId);
+            const winner = updatedSession.players.find(
+              (p: any) => p.id === updatedSession.winnerId,
+            );
             updatedDescription += `\n🏆 **Winner**: <@${updatedSession.winnerId}> (${winner?.username ?? 'Player'}) wins!\n`;
 
             if (wagerAmount) {
@@ -276,11 +279,13 @@ export function createTicTacToeCommand(services: BotServices): Command {
               updatedSession.state === 'COMPLETED'
                 ? '#57F287'
                 : updatedSession.state === 'TIED'
-                ? '#FEE75C'
-                : '#5865F2',
+                  ? '#FEE75C'
+                  : '#5865F2',
             )
             .setFooter({
-              text: isGameOver ? 'Game concluded' : 'Click an empty square to make your move (60s turn limit)',
+              text: isGameOver
+                ? 'Game concluded'
+                : 'Click an empty square to make your move (60s turn limit)',
             });
 
           await interaction.update({
@@ -322,11 +327,15 @@ export function createTicTacToeCommand(services: BotServices): Command {
 
           const timeoutEmbed = new EmbedBuilder()
             .setTitle('🎮 Tic-Tac-Toe — Timed Out')
-            .setDescription('⏰ The game has timed out due to inactivity. Wagers (if any) refunded.')
+            .setDescription(
+              '⏰ The game has timed out due to inactivity. Wagers (if any) refunded.',
+            )
             .setColor('#ED4245');
 
           const disabledRows = buildTttGrid(currentSession.metadata.board, session.id, true);
-          await discordMsg.edit({ embeds: [timeoutEmbed], components: disabledRows }).catch(() => null);
+          await discordMsg
+            .edit({ embeds: [timeoutEmbed], components: disabledRows })
+            .catch(() => null);
         }
       });
     },

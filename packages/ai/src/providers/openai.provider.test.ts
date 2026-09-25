@@ -156,7 +156,10 @@ describe('OpenAIProvider', () => {
 
     // Verify returned tool call restored original dotted name
     expect(response.toolCalls?.[0]?.name).toBe('reminders.create');
-    expect(response.toolCalls?.[0]?.arguments).toEqual({ timeString: '10m', message: 'Take pizza out' });
+    expect(response.toolCalls?.[0]?.arguments).toEqual({
+      timeString: '10m',
+      message: 'Take pizza out',
+    });
   });
 
   it('omits unresponded assistant tool calls in historical context to prevent OpenAI 400 error', async () => {

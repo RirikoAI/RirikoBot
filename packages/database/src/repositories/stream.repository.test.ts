@@ -188,7 +188,9 @@ describe('StreamRepository (TASK-0801)', () => {
       const endTime = new Date('2026-09-17T21:30:00.000Z');
       await streamRepo.endStreamEvent('stream-xyz', endTime);
 
-      const rows = client.raw.prepare('SELECT * FROM stream_events WHERE stream_id = ?').all('stream-xyz') as any[];
+      const rows = client.raw
+        .prepare('SELECT * FROM stream_events WHERE stream_id = ?')
+        .all('stream-xyz') as any[];
       expect(rows[0].ended_at).toBe(endTime.getTime());
     });
   });

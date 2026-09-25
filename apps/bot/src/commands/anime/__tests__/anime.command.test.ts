@@ -98,7 +98,9 @@ describe('Anime search commands (TASK-1423)', () => {
   });
 
   it('removes the menu when the collector ends', async () => {
-    const searchManga = vi.fn().mockResolvedValue({ source: 'anilist', items: [{ ...frieren, kind: 'MANGA' }] });
+    const searchManga = vi
+      .fn()
+      .mockResolvedValue({ source: 'anilist', items: [{ ...frieren, kind: 'MANGA' }] });
     const { ctx, collector, message } = makeContext('Berserk');
     await createMangaCommand(servicesWith({ searchManga })).execute(ctx);
 
@@ -132,12 +134,23 @@ describe('Anime search commands (TASK-1423)', () => {
   it('loads character details from the source of the hit', async () => {
     const searchCharacters = vi.fn().mockResolvedValue({
       source: 'anilist',
-      items: [{ source: 'anilist', id: 88, name: 'Rem', nativeName: 'レム', imageUrl: null, favourites: 5000 }],
+      items: [
+        {
+          source: 'anilist',
+          id: 88,
+          name: 'Rem',
+          nativeName: 'レム',
+          imageUrl: null,
+          favourites: 5000,
+        },
+      ],
     });
     const getCharacter = vi.fn().mockResolvedValue(rem);
     const { ctx, collector } = makeContext('Rem');
 
-    await createAnimeCharacterCommand(servicesWith({ searchCharacters, getCharacter })).execute(ctx);
+    await createAnimeCharacterCommand(servicesWith({ searchCharacters, getCharacter })).execute(
+      ctx,
+    );
     expect(searchCharacters).toHaveBeenCalledWith('Rem');
 
     const pick = selectInteraction('0');
@@ -147,7 +160,9 @@ describe('Anime search commands (TASK-1423)', () => {
     expect(getCharacter).toHaveBeenCalledWith('anilist', 88);
     const embed = pick.editReply.mock.calls[0]![0].embeds[0].data;
     expect(embed.author.name).toBe('AniList');
-    expect(embed.fields.find((f: { name: string }) => f.name === 'Voice Actors').value).toBe('Inori Minase');
+    expect(embed.fields.find((f: { name: string }) => f.name === 'Voice Actors').value).toBe(
+      'Inori Minase',
+    );
   });
 });
 
@@ -178,13 +193,22 @@ describe('anime embeds', () => {
   });
 
   it('drops non-http image and page URLs from upstream data', () => {
-    const embed = buildMediaEmbed({ ...frieren, url: 'javascript:alert(1)', imageUrl: 'large.jpg' });
+    const embed = buildMediaEmbed({
+      ...frieren,
+      url: 'javascript:alert(1)',
+      imageUrl: 'large.jpg',
+    });
     expect(embed.data.url).toBeUndefined();
     expect(embed.data.image).toBeUndefined();
   });
 
   it('shows member counts when there is no popularity rank', () => {
-    const embed = buildMediaEmbed({ ...frieren, source: 'anilist', popularityRank: null, members: 400_000 });
+    const embed = buildMediaEmbed({
+      ...frieren,
+      source: 'anilist',
+      popularityRank: null,
+      members: 400_000,
+    });
     expect(embed.data.fields!.find((f) => f.name === 'Popularity')!.value).toBe('400,000 members');
   });
 });

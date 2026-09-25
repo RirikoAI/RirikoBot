@@ -9,11 +9,7 @@ import {
   type StringSelectMenuInteraction,
   type Message,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import {
   formatCardEmbedFooter,
@@ -58,9 +54,7 @@ async function attachCardImage(
 ): Promise<Array<{ attachment: Buffer; name: string }>> {
   try {
     const totalCount =
-      typeof services.waifuCardRepo.count === 'function'
-        ? await services.waifuCardRepo.count()
-        : 0;
+      typeof services.waifuCardRepo.count === 'function' ? await services.waifuCardRepo.count() : 0;
 
     const png = await services.cardImageService.getCardImage(card, asset, {
       attributionText,
@@ -159,7 +153,11 @@ export function buildCardListComponents(
 
           return {
             label: `${num}. ${eq}${fav}${item.base.name} (Lv.${item.userCard.level})`.slice(0, 100),
-            description: `${item.base.rarity} | ${item.base.element} • ID: ${shortId} • ${catNo} • Mint #${item.userCard.serialNumber}`.slice(0, 100),
+            description:
+              `${item.base.rarity} | ${item.base.element} • ID: ${shortId} • ${catNo} • Mint #${item.userCard.serialNumber}`.slice(
+                0,
+                100,
+              ),
             value: `card:${item.userCard.id}`,
           };
         }),
@@ -210,9 +208,7 @@ export async function buildCardInspectEmbed(
 ): Promise<{ embed: EmbedBuilder; files: Array<{ attachment: Buffer; name: string }> }> {
   const { userCard, base, asset } = item;
   const tier = RARITY_TIERS[(base.rarity as CardRarity) ?? 'COMMON'];
-  const source = asset
-    ? await services.waifuAssetRepo.findSourceById(asset.sourceId)
-    : null;
+  const source = asset ? await services.waifuAssetRepo.findSourceById(asset.sourceId) : null;
 
   // Scaled stats
   const scaled = levelingEngine.calculateScaledStats(
@@ -246,7 +242,10 @@ export async function buildCardInspectEmbed(
       const loadout = await services.loadoutService.getCardLoadout(userCard.id);
       const renderPiece = (piece: typeof loadout.weapon, name: string) => {
         if (!piece) return `• **${name}**: *None*`;
-        const enhance = piece.inventoryItem.enhancementLevel > 0 ? ` +${piece.inventoryItem.enhancementLevel}` : '';
+        const enhance =
+          piece.inventoryItem.enhancementLevel > 0
+            ? ` +${piece.inventoryItem.enhancementLevel}`
+            : '';
         return `• **${name}**: **${piece.item.name}**${enhance}`;
       };
       loadoutText =
@@ -255,7 +254,8 @@ export async function buildCardInspectEmbed(
         `${renderPiece(loadout.ring, 'Ring')} | ${renderPiece(loadout.amulet, 'Amulet')} | ${renderPiece(loadout.talisman, 'Talisman')}`;
 
       if (loadout.activePerks.length > 0) {
-        loadoutText += `\n🔥 **Active Perks**: ` + loadout.activePerks.map((p) => `\`${p}\``).join(', ');
+        loadoutText +=
+          `\n🔥 **Active Perks**: ` + loadout.activePerks.map((p) => `\`${p}\``).join(', ');
       }
     } catch {
       // ignore
@@ -321,9 +321,7 @@ export async function buildCardInspectEmbed(
 /**
  * Builds the interactive action buttons for card inspection (Equip, Favorite, Back).
  */
-export function buildCardInspectComponents(
-  userCard: UserCard,
-): ActionRowBuilder<ButtonBuilder>[] {
+export function buildCardInspectComponents(userCard: UserCard): ActionRowBuilder<ButtonBuilder>[] {
   const isEquipped = userCard.state === 'EQUIPPED';
   const isLocked = userCard.state === 'IN_TRADE' || userCard.state === 'IN_MARKET';
 
@@ -386,12 +384,7 @@ export function createCardsCommand(services: BotServices): Command {
         'Interactive Waifu TCG card album with pagination, detailed inspection, and one-click equip menu.',
       aliases: ['album', 'mycards'],
       usage: '/cards [filter:FIRE|ICE|...] [sort:level|rarity|name|battles] [page]',
-      examples: [
-        '/cards',
-        '/cards filter:ICE sort:level',
-        '/cards sort:battles',
-        '/cards page:2',
-      ],
+      examples: ['/cards', '/cards filter:ICE sort:level', '/cards sort:battles', '/cards page:2'],
       options: [
         {
           name: 'filter',
@@ -467,9 +460,10 @@ export async function handleCardsCommand(
   for (const uc of userCards) {
     const base = await services.waifuCardRepo.findById(uc.cardId);
     if (!base) continue;
-    const asset = base.assetId && services.waifuAssetRepo
-      ? await services.waifuAssetRepo.findById(base.assetId)
-      : null;
+    const asset =
+      base.assetId && services.waifuAssetRepo
+        ? await services.waifuAssetRepo.findById(base.assetId)
+        : null;
     populated.push({ userCard: uc, base, asset });
   }
 
@@ -525,7 +519,11 @@ export async function handleCardsCommand(
       : replyMsg
   ) as Message | undefined;
 
-  if (!discordMsg || typeof discordMsg !== 'object' || !('createMessageComponentCollector' in discordMsg)) {
+  if (
+    !discordMsg ||
+    typeof discordMsg !== 'object' ||
+    !('createMessageComponentCollector' in discordMsg)
+  ) {
     return;
   }
 
@@ -582,7 +580,14 @@ export async function handleCardsCommand(
       // 1. Pagination
       if (customId === 'cards:first') {
         currentPage = 1;
-        const embed = buildCardListEmbed(ctx.user.username, filtered, currentPage, totalPages, userCards.length, filter);
+        const embed = buildCardListEmbed(
+          ctx.user.username,
+          filtered,
+          currentPage,
+          totalPages,
+          userCards.length,
+          filter,
+        );
         const rows = buildCardListComponents(filtered, currentPage, totalPages);
         await interaction.update({ embeds: [embed], components: rows, files: [] });
         return;
@@ -590,7 +595,14 @@ export async function handleCardsCommand(
 
       if (customId === 'cards:prev') {
         currentPage = Math.max(1, currentPage - 1);
-        const embed = buildCardListEmbed(ctx.user.username, filtered, currentPage, totalPages, userCards.length, filter);
+        const embed = buildCardListEmbed(
+          ctx.user.username,
+          filtered,
+          currentPage,
+          totalPages,
+          userCards.length,
+          filter,
+        );
         const rows = buildCardListComponents(filtered, currentPage, totalPages);
         await interaction.update({ embeds: [embed], components: rows, files: [] });
         return;
@@ -598,7 +610,14 @@ export async function handleCardsCommand(
 
       if (customId === 'cards:next') {
         currentPage = Math.min(totalPages, currentPage + 1);
-        const embed = buildCardListEmbed(ctx.user.username, filtered, currentPage, totalPages, userCards.length, filter);
+        const embed = buildCardListEmbed(
+          ctx.user.username,
+          filtered,
+          currentPage,
+          totalPages,
+          userCards.length,
+          filter,
+        );
         const rows = buildCardListComponents(filtered, currentPage, totalPages);
         await interaction.update({ embeds: [embed], components: rows, files: [] });
         return;
@@ -606,7 +625,14 @@ export async function handleCardsCommand(
 
       if (customId === 'cards:last') {
         currentPage = totalPages;
-        const embed = buildCardListEmbed(ctx.user.username, filtered, currentPage, totalPages, userCards.length, filter);
+        const embed = buildCardListEmbed(
+          ctx.user.username,
+          filtered,
+          currentPage,
+          totalPages,
+          userCards.length,
+          filter,
+        );
         const rows = buildCardListComponents(filtered, currentPage, totalPages);
         await interaction.update({ embeds: [embed], components: rows, files: [] });
         return;
@@ -616,7 +642,14 @@ export async function handleCardsCommand(
       if (customId === 'cards:back') {
         viewMode = 'LIST';
         inspectedUserCardId = null;
-        const embed = buildCardListEmbed(ctx.user.username, filtered, currentPage, totalPages, userCards.length, filter);
+        const embed = buildCardListEmbed(
+          ctx.user.username,
+          filtered,
+          currentPage,
+          totalPages,
+          userCards.length,
+          filter,
+        );
         const rows = buildCardListComponents(filtered, currentPage, totalPages);
         await interaction.update({ embeds: [embed], components: rows, files: [] });
         return;
@@ -641,7 +674,9 @@ export async function handleCardsCommand(
         }
 
         // Set all existing equipped cards to IDLE
-        const equipped = await services.waifuCardRepo.listUserCards(ctx.user.id, { state: 'EQUIPPED' });
+        const equipped = await services.waifuCardRepo.listUserCards(ctx.user.id, {
+          state: 'EQUIPPED',
+        });
         for (const eq of equipped) {
           await services.waifuCardRepo.updateUserCardState(eq.id, 'IDLE');
           const match = filtered.find((f) => f.userCard.id === eq.id);

@@ -7,7 +7,9 @@ describe('ImageStylePresets (TASK-1321)', () => {
     expect(result.presetUsed).toBe('anime');
     expect(result.prompt).toContain(IMAGE_STYLE_PRESETS[DEFAULT_PRESET_NAME]!.positivePrefix);
     expect(result.prompt).toContain('silver haired shrine maiden');
-    expect(result.negativePrompt).toContain(IMAGE_STYLE_PRESETS[DEFAULT_PRESET_NAME]!.negativePreset!);
+    expect(result.negativePrompt).toContain(
+      IMAGE_STYLE_PRESETS[DEFAULT_PRESET_NAME]!.negativePreset!,
+    );
   });
 
   it('appends user negative prompt to preset negative prompt', () => {

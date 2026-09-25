@@ -49,9 +49,9 @@ describe('ImageGenerationProviders (TASK-1321)', () => {
 
     it('throws descriptive error if generated without client', async () => {
       const unavail = new GeminiImageProvider({ apiKey: '' });
-      await expect(
-        unavail.generate({ userId: 'u1', prompt: 'test' }),
-      ).rejects.toThrow(/GEMINI_API_KEY missing/i);
+      await expect(unavail.generate({ userId: 'u1', prompt: 'test' })).rejects.toThrow(
+        /GEMINI_API_KEY missing/i,
+      );
     });
   });
 
@@ -64,9 +64,9 @@ describe('ImageGenerationProviders (TASK-1321)', () => {
 
     it('throws error when server responds with non-200', async () => {
       const provider = new ComfyUiImageProvider({ baseUrl: 'http://localhost:9999' });
-      await expect(
-        provider.generate({ userId: 'u1', prompt: 'test' }),
-      ).rejects.toThrow(/ComfyUI\/SD/i);
+      await expect(provider.generate({ userId: 'u1', prompt: 'test' })).rejects.toThrow(
+        /ComfyUI\/SD/i,
+      );
     });
   });
 
@@ -81,9 +81,9 @@ describe('ImageGenerationProviders (TASK-1321)', () => {
 
     it('throws error if generated without token', async () => {
       const unavail = new ReplicateImageProvider({ apiToken: '' });
-      await expect(
-        unavail.generate({ userId: 'u1', prompt: 'test' }),
-      ).rejects.toThrow(/REPLICATE_API_TOKEN missing/i);
+      await expect(unavail.generate({ userId: 'u1', prompt: 'test' })).rejects.toThrow(
+        /REPLICATE_API_TOKEN missing/i,
+      );
     });
   });
 });

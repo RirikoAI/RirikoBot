@@ -39,7 +39,10 @@ export class EconomyBalanceTool implements SafeTool<EconomyBalanceArgs, EconomyB
 
   constructor(private readonly balanceResolver?: EconomyBalanceResolver) {}
 
-  async execute(args: EconomyBalanceArgs, context: ToolExecutionContext): Promise<EconomyBalanceResult> {
+  async execute(
+    args: EconomyBalanceArgs,
+    context: ToolExecutionContext,
+  ): Promise<EconomyBalanceResult> {
     const targetUserId = args.targetUserId || context.userId;
 
     let balance: { wallet: number; bank: number; netWorth: number } | null = null;

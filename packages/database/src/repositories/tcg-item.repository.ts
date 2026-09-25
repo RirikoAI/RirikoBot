@@ -659,7 +659,12 @@ export class UserInventoryItemRepository extends BaseRepository<
     tx?: DatabaseClient,
   ): Promise<UserInventoryItem[]> {
     const client = this.getClient(tx);
-    const updateData = { equippedToCardId: null, slot: 'NONE', state: 'IDLE', updatedAt: new Date() };
+    const updateData = {
+      equippedToCardId: null,
+      slot: 'NONE',
+      state: 'IDLE',
+      updatedAt: new Date(),
+    };
     try {
       if (this.isSqlite(client)) {
         const t = sqliteSchema.userInventoryItems;

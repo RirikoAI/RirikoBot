@@ -1,9 +1,15 @@
 export type TttCell = 'X' | 'O' | null;
 
 export type TttBoard = [
-  TttCell, TttCell, TttCell,
-  TttCell, TttCell, TttCell,
-  TttCell, TttCell, TttCell,
+  TttCell,
+  TttCell,
+  TttCell,
+  TttCell,
+  TttCell,
+  TttCell,
+  TttCell,
+  TttCell,
+  TttCell,
 ];
 
 export type TttWinningLine = [number, number, number];

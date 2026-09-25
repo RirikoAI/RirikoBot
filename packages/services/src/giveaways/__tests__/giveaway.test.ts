@@ -213,7 +213,12 @@ describe('GiveawayEngine (TASK-0901)', () => {
       };
 
       const entries: GiveawayEntry[] = [
-        { giveawayId: 'gw-reboot-recovery', userId: 'lucky-winner', bonusMultiplier: 1, enteredAt: new Date() },
+        {
+          giveawayId: 'gw-reboot-recovery',
+          userId: 'lucky-winner',
+          bonusMultiplier: 1,
+          enteredAt: new Date(),
+        },
       ];
 
       vi.mocked(mockRepo.listExpiredPendingGiveaways!).mockResolvedValue([expiredGiveaway]);
@@ -248,8 +253,18 @@ describe('GiveawayEngine (TASK-0901)', () => {
       };
 
       const entries: GiveawayEntry[] = [
-        { giveawayId: 'gw-ended-reroll', userId: 'winner-1', bonusMultiplier: 1, enteredAt: new Date() },
-        { giveawayId: 'gw-ended-reroll', userId: 'winner-2-new', bonusMultiplier: 1, enteredAt: new Date() },
+        {
+          giveawayId: 'gw-ended-reroll',
+          userId: 'winner-1',
+          bonusMultiplier: 1,
+          enteredAt: new Date(),
+        },
+        {
+          giveawayId: 'gw-ended-reroll',
+          userId: 'winner-2-new',
+          bonusMultiplier: 1,
+          enteredAt: new Date(),
+        },
       ];
 
       const pastWinners: GiveawayWinner[] = [
@@ -266,7 +281,11 @@ describe('GiveawayEngine (TASK-0901)', () => {
       expect(rerollResult).not.toBeNull();
       expect(rerollResult?.winnerIds).toEqual(['winner-2-new']);
       expect(rerollResult?.isReroll).toBe(true);
-      expect(mockRepo.recordWinners).toHaveBeenCalledWith('gw-ended-reroll', ['winner-2-new'], true);
+      expect(mockRepo.recordWinners).toHaveBeenCalledWith(
+        'gw-ended-reroll',
+        ['winner-2-new'],
+        true,
+      );
     });
   });
 

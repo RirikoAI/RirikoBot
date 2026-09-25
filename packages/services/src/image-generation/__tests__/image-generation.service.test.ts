@@ -72,9 +72,9 @@ describe('ImageGenerationService (TASK-1321)', () => {
     await service.generateImage({ userId: 'u-quota', prompt: 'prompt 2' });
 
     // 3rd generation should throw quota exceeded
-    await expect(
-      service.generateImage({ userId: 'u-quota', prompt: 'prompt 3' }),
-    ).rejects.toThrow(/Daily image generation quota reached/i);
+    await expect(service.generateImage({ userId: 'u-quota', prompt: 'prompt 3' })).rejects.toThrow(
+      /Daily image generation quota reached/i,
+    );
   });
 
   it('falls back to secondary provider if primary throws and auto provider was requested', async () => {

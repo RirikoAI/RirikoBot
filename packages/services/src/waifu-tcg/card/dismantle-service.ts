@@ -47,7 +47,8 @@ export class CardDismantleService {
     if (userCard.isFavorite) {
       return {
         success: false,
-        error: 'This card is marked as favorite and protected from dismantling. Unfavorite it first with /card favorite.',
+        error:
+          'This card is marked as favorite and protected from dismantling. Unfavorite it first with /card favorite.',
       };
     }
 

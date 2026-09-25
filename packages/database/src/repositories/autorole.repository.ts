@@ -55,7 +55,8 @@ export class AutoRoleRepository extends BaseRepository<
           set: payload,
         })
         .returning();
-      if (!upserted) throw new DatabaseError(`Failed to upsert auto-roles for guild ${data.guildId}`);
+      if (!upserted)
+        throw new DatabaseError(`Failed to upsert auto-roles for guild ${data.guildId}`);
       return upserted as GuildAutoRole;
     } else {
       const [upserted] = await client.db
@@ -66,7 +67,8 @@ export class AutoRoleRepository extends BaseRepository<
           set: payload as unknown as Partial<typeof pgSchema.guildAutoRoles.$inferInsert>,
         })
         .returning();
-      if (!upserted) throw new DatabaseError(`Failed to upsert auto-roles for guild ${data.guildId}`);
+      if (!upserted)
+        throw new DatabaseError(`Failed to upsert auto-roles for guild ${data.guildId}`);
       return upserted as unknown as GuildAutoRole;
     }
   }

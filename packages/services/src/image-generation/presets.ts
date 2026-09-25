@@ -4,10 +4,12 @@ export const IMAGE_STYLE_PRESETS: Record<string, ImageStylePreset> = {
   anime: {
     name: 'anime',
     label: 'Anime Illustration',
-    description: 'High quality anime style with detailed character art and expressive lighting (Default)',
+    description:
+      'High quality anime style with detailed character art and expressive lighting (Default)',
     positivePrefix:
       'high quality anime illustration, detailed character design, beautiful composition, clean line art, expressive eyes, cinematic lighting, detailed background',
-    negativePreset: 'low quality, blurry, distorted anatomy, bad hands, missing fingers, cropped, watermark',
+    negativePreset:
+      'low quality, blurry, distorted anatomy, bad hands, missing fingers, cropped, watermark',
   },
   photoreal: {
     name: 'photoreal',

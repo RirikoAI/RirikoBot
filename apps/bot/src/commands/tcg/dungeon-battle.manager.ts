@@ -86,9 +86,10 @@ export class DungeonBattleManager {
       const userCardRow = await this.services.waifuCardRepo.findUserCardById(activeCombatant.id);
       if (userCardRow) baseCardId = userCardRow.cardId;
     }
-    const baseCard = typeof this.services.waifuCardRepo.findById === 'function'
-      ? await this.services.waifuCardRepo.findById(baseCardId)
-      : null;
+    const baseCard =
+      typeof this.services.waifuCardRepo.findById === 'function'
+        ? await this.services.waifuCardRepo.findById(baseCardId)
+        : null;
 
     let cardPngBuffer: Buffer | null = null;
     if (baseCard && this.services.cardImageService) {
@@ -135,9 +136,15 @@ export class DungeonBattleManager {
     let bossPngBuffer: Buffer | null = null;
     if (session.bossProfile && this.services.bossImageService) {
       try {
-        bossPngBuffer = await this.services.bossImageService.getBossImage(session.bossProfile, floorNumber);
+        bossPngBuffer = await this.services.bossImageService.getBossImage(
+          session.bossProfile,
+          floorNumber,
+        );
       } catch (err) {
-        console.warn(`[dungeon-battle] Failed to render boss image for ${session.bossProfile.id}:`, err);
+        console.warn(
+          `[dungeon-battle] Failed to render boss image for ${session.bossProfile.id}:`,
+          err,
+        );
       }
     }
     const images: BattleImages = { card: Boolean(cardPngBuffer), boss: Boolean(bossPngBuffer) };
@@ -181,7 +188,11 @@ export class DungeonBattleManager {
       ) as Message | undefined;
     }
 
-    if (!discordMsg || typeof discordMsg !== 'object' || !('createMessageComponentCollector' in discordMsg)) {
+    if (
+      !discordMsg ||
+      typeof discordMsg !== 'object' ||
+      !('createMessageComponentCollector' in discordMsg)
+    ) {
       return;
     }
 
@@ -203,12 +214,24 @@ export class DungeonBattleManager {
       if (isTutorial && runResult.victory && floorNumber >= 4) {
         const completion = await this.services.tutorialService.completeTutorial(ctx.user.id);
         tutorialCompletionMsg = completion.message;
-      } else if (isTutorial && runResult.victory && floorNumber === 3 && this.services.tutorialService) {
-        const f3Reward = await this.services.tutorialService.handleTutorialFloor3Victory(ctx.user.id);
+      } else if (
+        isTutorial &&
+        runResult.victory &&
+        floorNumber === 3 &&
+        this.services.tutorialService
+      ) {
+        const f3Reward = await this.services.tutorialService.handleTutorialFloor3Victory(
+          ctx.user.id,
+        );
         if (f3Reward.granted && f3Reward.message) {
           tutorialCompletionMsg = f3Reward.message;
         }
-      } else if (isTutorial && !runResult.victory && floorNumber === 4 && this.services.tutorialService) {
+      } else if (
+        isTutorial &&
+        !runResult.victory &&
+        floorNumber === 4 &&
+        this.services.tutorialService
+      ) {
         floor4DefeatResult = await this.services.tutorialService.handleTutorialFloor4Defeat(
           ctx.user.id,
           session.getSnapshot().boss.element as any,
@@ -295,7 +318,8 @@ export class DungeonBattleManager {
 
         if (session.getSnapshot().potionUsedThisTurn) {
           await interaction.reply({
-            content: '⚠️ You can only use 1 potion per turn! Complete your turn with Attack, Skill, or Defend first.',
+            content:
+              '⚠️ You can only use 1 potion per turn! Complete your turn with Attack, Skill, or Defend first.',
             ephemeral: true,
           });
           return;
@@ -418,7 +442,9 @@ export class DungeonBattleManager {
       if (customId.startsWith('dungeon:action:equip_retry:')) {
         const userCardId = customId.split(':')[3];
         if (userCardId && this.services.waifuCardRepo) {
-          const equipped = await this.services.waifuCardRepo.listUserCards(ctx.user.id, { state: 'EQUIPPED' });
+          const equipped = await this.services.waifuCardRepo.listUserCards(ctx.user.id, {
+            state: 'EQUIPPED',
+          });
           for (const eqCard of equipped) {
             await this.services.waifuCardRepo.updateUserCardState(eqCard.id, 'IDLE');
           }
@@ -670,7 +696,9 @@ export class DungeonBattleManager {
           text: '🎉 Tutorial Graduated! Click "Enter Season 1" below to start the seasonal tower!',
         });
       } else {
-        embed.setFooter({ text: 'Proceed to the next floor with /dungeon climb or click Next Floor!' });
+        embed.setFooter({
+          text: 'Proceed to the next floor with /dungeon climb or click Next Floor!',
+        });
       }
     } else if (isDefeat) {
       embed.setFooter({
@@ -698,8 +726,7 @@ export class DungeonBattleManager {
     }[] = [],
   ): ActionRowBuilder<any>[] {
     const { player } = state;
-    const canUseSkill =
-      player.currentMp >= player.skillManaCost && Boolean(player.skillName);
+    const canUseSkill = player.currentMp >= player.skillManaCost && Boolean(player.skillName);
 
     const buttonRow = new ActionRowBuilder<ButtonBuilder>();
 
@@ -728,9 +755,7 @@ export class DungeonBattleManager {
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
         .setCustomId('dungeon:action:skill')
-        .setLabel(
-          `✨ ${player.skillName ?? 'Skill'} (${player.skillManaCost} MP)`,
-        )
+        .setLabel(`✨ ${player.skillName ?? 'Skill'} (${player.skillManaCost} MP)`)
         .setStyle(ButtonStyle.Success)
         .setDisabled(!canUseSkill),
       new ButtonBuilder()
@@ -747,8 +772,7 @@ export class DungeonBattleManager {
         .setStyle(ButtonStyle.Danger),
     );
 
-    const selectMenu = new StringSelectMenuBuilder()
-      .setCustomId('dungeon:action:use_item');
+    const selectMenu = new StringSelectMenuBuilder().setCustomId('dungeon:action:use_item');
 
     if (state.potionUsedThisTurn) {
       selectMenu.setPlaceholder('🧪 Potion already used this turn!');
@@ -859,7 +883,9 @@ export class DungeonBattleManager {
     if (!this.services.userInventoryItemRepo || !this.services.gameItemRepo) {
       return [];
     }
-    const inventory = await this.services.userInventoryItemRepo.findByUser(userId, { state: 'IDLE' });
+    const inventory = await this.services.userInventoryItemRepo.findByUser(userId, {
+      state: 'IDLE',
+    });
     const potions: {
       id: string;
       itemId: string;
@@ -873,7 +899,10 @@ export class DungeonBattleManager {
       if (slot.quantity <= 0) continue;
       const def = await this.services.gameItemRepo.findById(slot.itemId);
       if (!def) continue;
-      if (def.type === 'CONSUMABLE' && (def.subtype === 'HP_POTION' || def.subtype === 'MANA_POTION')) {
+      if (
+        def.type === 'CONSUMABLE' &&
+        (def.subtype === 'HP_POTION' || def.subtype === 'MANA_POTION')
+      ) {
         potions.push({
           id: slot.id,
           itemId: def.id,

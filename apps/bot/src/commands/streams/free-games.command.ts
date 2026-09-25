@@ -6,11 +6,7 @@ import {
   ButtonStyle,
   type GuildTextBasedChannel,
 } from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import type { FreeGameItem } from '@ririko/services';
 
@@ -93,7 +89,8 @@ async function handleShowFreeGames(ctx: CommandContext, services: BotServices): 
 
     if (activeGames.length === 0 && upcomingGames.length === 0) {
       await ctx.editReply({
-        content: '🎮 **No Free Games Found Right Now.**\nCheck back soon or set up alerts with `/freegames setchannel` to be notified immediately when a new free game drops!',
+        content:
+          '🎮 **No Free Games Found Right Now.**\nCheck back soon or set up alerts with `/freegames setchannel` to be notified immediately when a new free game drops!',
       });
       return;
     }
@@ -181,7 +178,10 @@ async function handleShowFreeGames(ctx: CommandContext, services: BotServices): 
 
 async function handleSetChannel(ctx: CommandContext, services: BotServices): Promise<void> {
   if (!ctx.guildId) {
-    await ctx.reply({ content: '❌ Free games announcement channel can only be configured in a server.', ephemeral: true });
+    await ctx.reply({
+      content: '❌ Free games announcement channel can only be configured in a server.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -191,7 +191,8 @@ async function handleSetChannel(ctx: CommandContext, services: BotServices): Pro
 
   if (!canManage) {
     await ctx.reply({
-      content: '❌ You require **Manage Server** permissions to configure free game alert channels.',
+      content:
+        '❌ You require **Manage Server** permissions to configure free game alert channels.',
       ephemeral: true,
     });
     return;
@@ -203,7 +204,8 @@ async function handleSetChannel(ctx: CommandContext, services: BotServices): Pro
 
   if (!targetChannel) {
     await ctx.reply({
-      content: '❌ Please specify or mention a valid text channel.\nExample: `/freegames setchannel channel:#free-games` or `!freegames setchannel #free-games`',
+      content:
+        '❌ Please specify or mention a valid text channel.\nExample: `/freegames setchannel channel:#free-games` or `!freegames setchannel #free-games`',
       ephemeral: true,
     });
     return;
@@ -236,7 +238,10 @@ async function handleSetChannel(ctx: CommandContext, services: BotServices): Pro
 
 async function handleRemoveChannel(ctx: CommandContext, services: BotServices): Promise<void> {
   if (!ctx.guildId) {
-    await ctx.reply({ content: '❌ Free games alert settings can only be managed in a server.', ephemeral: true });
+    await ctx.reply({
+      content: '❌ Free games alert settings can only be managed in a server.',
+      ephemeral: true,
+    });
     return;
   }
 
@@ -265,7 +270,8 @@ async function handleRemoveChannel(ctx: CommandContext, services: BotServices): 
     }
 
     await ctx.editReply({
-      content: '✅ **Free Games Alerts Disabled!**\nAutomatic announcements for free games on Epic Games Store and Steam have been removed.',
+      content:
+        '✅ **Free Games Alerts Disabled!**\nAutomatic announcements for free games on Epic Games Store and Steam have been removed.',
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

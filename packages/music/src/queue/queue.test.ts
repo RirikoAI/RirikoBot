@@ -15,7 +15,12 @@ import {
 import { ExtractorPipeline } from '../extractors/pipeline.js';
 import type { MusicSourceAdapter, MusicSearchResult } from '../types.js';
 
-function createMockTrack(id: string, title = `Track ${id}`, artist = `Artist ${id}`, duration = 180): QueuedTrack {
+function createMockTrack(
+  id: string,
+  title = `Track ${id}`,
+  artist = `Artist ${id}`,
+  duration = 180,
+): QueuedTrack {
   return {
     id,
     title,
@@ -414,8 +419,8 @@ describe('Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping
       const t3 = createMockTrack('3');
       queue.addTracks([t1, t2, t3]);
       queue.start(); // t1 playing
-      queue.skip();  // t2 playing, t1 in history
-      queue.skip();  // t3 playing, [t1, t2] in history
+      queue.skip(); // t2 playing, t1 in history
+      queue.skip(); // t3 playing, [t1, t2] in history
 
       expect(queue.currentTrack?.id).toBe('3');
       expect(queue.history.map((t) => t.id)).toEqual(['1', '2']);
@@ -525,15 +530,17 @@ describe('Audio Queue State Machine, Loop Modes, Audio Filters & Volume Clamping
 
       // If rec-1 is already in history, it must pick rec-2
       const historyTrack = createMockTrack('rec-1', 'Related Song 1', 'YOASOBI', 210);
-      (mockAdapter.resolve as ReturnType<typeof vi.fn>).mockImplementationOnce(async (url: string) => ({
-        id: 'rec-2',
-        title: 'Related Song 2',
-        artist: 'YOASOBI',
-        durationSeconds: 190,
-        url,
-        source: 'youtube',
-        getStream: async () => Readable.from(['stream']),
-      }));
+      (mockAdapter.resolve as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        async (url: string) => ({
+          id: 'rec-2',
+          title: 'Related Song 2',
+          artist: 'YOASOBI',
+          durationSeconds: 190,
+          url,
+          source: 'youtube',
+          getStream: async () => Readable.from(['stream']),
+        }),
+      );
 
       const recommendation = await autoplay.getRecommendation(seedTrack, [historyTrack], []);
       expect(recommendation).not.toBeNull();

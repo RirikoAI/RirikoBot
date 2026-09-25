@@ -108,3 +108,13 @@ The application provides HTTP health and readiness probes for monitoring and con
   }
   ```
 - `GET /ready` — Evaluates whether all initial database migrations have completed and Discord Gateway shard handshakes are established before traffic routing.
+
+---
+
+## 4. Current Hosting: Vercel Status Site
+
+The bot and dashboard are not hosted yet (STORY-121 and STORY-122 add the containers). Until then the Vercel project `ririko-bot` deploys only a static project status page:
+- `vercel.json` skips dependency installation and runs `scripts/build-status-site.ts` with Node's TypeScript type stripping. The script reads `docs/kanban/board.json` and the `docs/` tree and writes `site-dist/index.html`.
+- Every branch gets a preview URL, so each PR shows the board as it stands on that branch.
+- Vercel project settings must leave Root Directory empty, use the "Other" framework preset and have no install, build or output overrides, so `vercel.json` applies.
+- Preview locally with `pnpm site:build`.

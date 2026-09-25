@@ -50,7 +50,8 @@ export class SeasonalAffixHandler {
           actorId: 'environmental_affix',
           actorName: 'Infernal Crucible',
           actionType: 'STATUS_TICK',
-          message: '🔥 **Affix: Heat Haze** active! Non-Fire units suffer -15% Critical Hit Chance under blistering heat!',
+          message:
+            '🔥 **Affix: Heat Haze** active! Non-Fire units suffer -15% Critical Hit Chance under blistering heat!',
         });
         break;
       }
@@ -65,7 +66,8 @@ export class SeasonalAffixHandler {
           actorId: 'environmental_affix',
           actorName: 'Abyssal Maelstrom',
           actionType: 'STATUS_TICK',
-          message: '🌊 **Affix: Torrential Deluge** active! All combatants suffer -25% Speed in torrential currents!',
+          message:
+            '🌊 **Affix: Torrential Deluge** active! All combatants suffer -25% Speed in torrential currents!',
         });
         break;
       }
@@ -76,7 +78,8 @@ export class SeasonalAffixHandler {
           actorId: 'environmental_affix',
           actorName: 'Celestial Twilight',
           actionType: 'STATUS_TICK',
-          message: '✨🌑 **Affix: Radiant Flare & Void Drain** active! Light/Shadow deal 2.0x Catastrophe, and healing is suppressed by 40%!',
+          message:
+            '✨🌑 **Affix: Radiant Flare & Void Drain** active! Light/Shadow deal 2.0x Catastrophe, and healing is suppressed by 40%!',
         });
         break;
       }
@@ -91,7 +94,11 @@ export class SeasonalAffixHandler {
   /**
    * Applies periodic turn-based environmental effects at the end of each turn.
    */
-  public applyEndOfTurnAffixes(turn: number, playerTeam: Combatant[], boss: Combatant): CombatActionLog[] {
+  public applyEndOfTurnAffixes(
+    turn: number,
+    playerTeam: Combatant[],
+    boss: Combatant,
+  ): CombatActionLog[] {
     const logs: CombatActionLog[] = [];
 
     switch (this.theme) {
@@ -102,7 +109,9 @@ export class SeasonalAffixHandler {
           for (const c of playerTeam) {
             if (!c.isAlive || c.currentHealth <= 0) continue;
 
-            const hasEarthShield = (c.shield > 0 && c.element === 'EARTH') || c.statusEffects.some((s) => s.type === 'FORTIFY');
+            const hasEarthShield =
+              (c.shield > 0 && c.element === 'EARTH') ||
+              c.statusEffects.some((s) => s.type === 'FORTIFY');
             const hasWaterPurify = c.statusEffects.some((s) => s.type === 'PURIFY_FLOW');
 
             if (hasEarthShield || hasWaterPurify) {

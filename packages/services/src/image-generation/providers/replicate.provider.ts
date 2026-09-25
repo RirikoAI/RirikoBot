@@ -109,7 +109,8 @@ export class ReplicateImageProvider implements ImageGenerationProvider {
       attempts++;
       await new Promise((resolve) => setTimeout(resolve, this.pollIntervalMs));
 
-      const pollUrl = prediction.urls?.get ?? `https://api.replicate.com/v1/predictions/${prediction.id}`;
+      const pollUrl =
+        prediction.urls?.get ?? `https://api.replicate.com/v1/predictions/${prediction.id}`;
       const pollRes = await fetchWithRetry(
         pollUrl,
         {
@@ -147,7 +148,9 @@ export class ReplicateImageProvider implements ImageGenerationProvider {
           signal: AbortSignal.timeout(25000),
         });
         if (!imgRes.ok) {
-          throw new Error(`Failed to download Replicate image from ${imageUrl} (status: ${imgRes.status})`);
+          throw new Error(
+            `Failed to download Replicate image from ${imageUrl} (status: ${imgRes.status})`,
+          );
         }
         const arrayBuf = await imgRes.arrayBuffer();
         const contentType = imgRes.headers.get('content-type') || 'image/webp';

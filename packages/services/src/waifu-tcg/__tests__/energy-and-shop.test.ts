@@ -183,7 +183,13 @@ describe('Waifu TCG: Energy Lifecycle & Town Item Shop (STORY-103 / TASK-1032)',
       // 2026-03-01 (GMT+8) rotates RING_BLAZING_SUN + ARMOR_MAGMA_MAIL.
       const katanaOutOfRotation = new Date('2026-02-28T16:00:00.000Z');
       await expect(
-        shopService.buyItem('user_buyer', 'WEAPON_OBSIDIAN_KATANA', 1, undefined, katanaOutOfRotation),
+        shopService.buyItem(
+          'user_buyer',
+          'WEAPON_OBSIDIAN_KATANA',
+          1,
+          undefined,
+          katanaOutOfRotation,
+        ),
       ).rejects.toThrow(/cannot be purchased with credits/);
     });
 

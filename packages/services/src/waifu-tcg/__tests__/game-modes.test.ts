@@ -43,11 +43,18 @@ class MockEconomyRepository {
     this.balances.set(userId, amount);
   }
 
-  async getOrCreateBalance(userId: string): Promise<{ walletBalance: number; bankBalance: number }> {
+  async getOrCreateBalance(
+    userId: string,
+  ): Promise<{ walletBalance: number; bankBalance: number }> {
     return { walletBalance: this.balances.get(userId) ?? 0, bankBalance: 0 };
   }
 
-  async transferBalance(params: { fromUserId: string; toUserId: string; amount: number | bigint; source?: string }) {
+  async transferBalance(params: {
+    fromUserId: string;
+    toUserId: string;
+    amount: number | bigint;
+    source?: string;
+  }) {
     const amt = Number(params.amount);
     const fromBal = this.balances.get(params.fromUserId) ?? 0;
     const toBal = this.balances.get(params.toUserId) ?? 0;
@@ -57,7 +64,11 @@ class MockEconomyRepository {
   }
 }
 
-function createCombatant(id: string, name: string, element: Combatant['element'] = 'FIRE'): Combatant {
+function createCombatant(
+  id: string,
+  name: string,
+  element: Combatant['element'] = 'FIRE',
+): Combatant {
   return {
     id,
     name,

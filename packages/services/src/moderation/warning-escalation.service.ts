@@ -1,9 +1,10 @@
+import { PermissionFlagsBits, type Guild, type GuildMember } from 'discord.js';
 import {
-  PermissionFlagsBits,
-  type Guild,
-  type GuildMember,
-} from 'discord.js';
-import { DEFAULT_ESCALATION_STEPS, type CoreEvents, type EscalationStep, type EventBus } from '@ririko/core';
+  DEFAULT_ESCALATION_STEPS,
+  type CoreEvents,
+  type EscalationStep,
+  type EventBus,
+} from '@ririko/core';
 import type {
   GuildSettingsRepository,
   ModerationRepository,
@@ -90,8 +91,7 @@ export class WarningEscalationService {
     }
 
     // 2. Compute Expiration Date (Sliding window)
-    const expiresAt =
-      expirationDays > 0 ? new Date(Date.now() + expirationDays * 86400000) : null;
+    const expiresAt = expirationDays > 0 ? new Date(Date.now() + expirationDays * 86400000) : null;
 
     // 3. Persist Warning Record
     const warning = await this.modRepo.createWarning({
@@ -359,7 +359,9 @@ export class WarningEscalationService {
       if (escalation.action === 'TIMEOUT' && escalation.durationSeconds) {
         actionText = `TIMEOUT (${Math.floor(escalation.durationSeconds / 60)} minutes)`;
       }
-      lines.push(`\n🚨 **Warning Threshold Reached:** An automated disciplinary action (**${actionText}**) has been enacted.`);
+      lines.push(
+        `\n🚨 **Warning Threshold Reached:** An automated disciplinary action (**${actionText}**) has been enacted.`,
+      );
     }
 
     try {

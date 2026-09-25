@@ -155,7 +155,9 @@ export class MemeSynthesizer {
     const cleanedTexts = texts.map((t) => (t ? t.trim() : ''));
     const hasAnyText = cleanedTexts.some((t) => t.length > 0);
     if (!hasAnyText) {
-      throw new ValidationError(`At least one non-empty text string must be provided for meme template "${template.id}".`);
+      throw new ValidationError(
+        `At least one non-empty text string must be provided for meme template "${template.id}".`,
+      );
     }
 
     const bgImage = await this.loadTemplateImage(template.fileName);

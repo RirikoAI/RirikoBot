@@ -1,12 +1,5 @@
-import type {
-  CombatActionLog,
-  Combatant,
-  CombatResult,
-} from './types.js';
-import {
-  getElementalMultiplier,
-  getElementAdvantageDescription,
-} from './elemental-matrix.js';
+import type { CombatActionLog, Combatant, CombatResult } from './types.js';
+import { getElementalMultiplier, getElementAdvantageDescription } from './elemental-matrix.js';
 import {
   calculateEffectiveStats,
   processLeech,
@@ -194,7 +187,10 @@ export class CombatSimulator {
         } else {
           // Basic attack generates 15 MP
           actor.currentMp = Math.min(actor.maxMp, actor.currentMp + 15);
-          baseDamage = Math.max(10, actorStats.effectiveAttack - Math.round(targetStats.effectiveDefense * 0.4));
+          baseDamage = Math.max(
+            10,
+            actorStats.effectiveAttack - Math.round(targetStats.effectiveDefense * 0.4),
+          );
         }
 
         // Apply Critical Strike check
@@ -241,7 +237,10 @@ export class CombatSimulator {
         // Format Action Message
         const actionLabel = isSkill ? `✨ Skill [**${actor.skillName}**]` : '⚔️ Basic Strike';
         const critLabel = isCritical ? ' **CRITICAL HIT!**' : '';
-        const elemDesc = elemMult !== 1.0 ? ` (${elemMult}x ${getElementAdvantageDescription(actor.element, target.element)})` : '';
+        const elemDesc =
+          elemMult !== 1.0
+            ? ` (${elemMult}x ${getElementAdvantageDescription(actor.element, target.element)})`
+            : '';
         const shieldDesc = shieldAbsorbed > 0 ? ` [${shieldAbsorbed} absorbed by shield]` : '';
         const enrageDesc = enrageMultiplier > 1.0 ? ' ⚡[Enraged]' : '';
 

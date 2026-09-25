@@ -3,14 +3,7 @@ import type { CardRarity, CardElement } from '../types.js';
 export type CombatElement = CardElement;
 
 export type StatusEffectType =
-  | 'BURN'
-  | 'FREEZE'
-  | 'CHILL'
-  | 'FORTIFY'
-  | 'SURGE'
-  | 'PURIFY_FLOW'
-  | 'RADIANCE'
-  | 'DECAY_LEECH';
+  'BURN' | 'FREEZE' | 'CHILL' | 'FORTIFY' | 'SURGE' | 'PURIFY_FLOW' | 'RADIANCE' | 'DECAY_LEECH';
 
 export type BattlePerkType =
   | 'SHARPENED_EDGE'
@@ -69,13 +62,7 @@ export interface Combatant {
 }
 
 export type ActionType =
-  | 'ATTACK'
-  | 'SKILL'
-  | 'POTION'
-  | 'PERK'
-  | 'STATUS_TICK'
-  | 'REVIVE'
-  | 'ENRAGE';
+  'ATTACK' | 'SKILL' | 'POTION' | 'PERK' | 'STATUS_TICK' | 'REVIVE' | 'ENRAGE';
 
 export interface CombatActionLog {
   turn: number;

@@ -19,8 +19,7 @@ export class FreeGamesEngine {
     | ((guildId: string, channelId: string, game: FreeGameItem) => Promise<string | null | void>)
     | undefined;
   private readonly getGuildAnnounceTargets?:
-    | (() => Promise<Array<{ guildId: string; channelId: string }>>)
-    | undefined;
+    (() => Promise<Array<{ guildId: string; channelId: string }>>) | undefined;
 
   private timer: NodeJS.Timeout | null = null;
   private isChecking = false;
@@ -165,7 +164,9 @@ export class FreeGamesEngine {
     }
 
     if (game.isUpcoming) {
-      descriptionParts.push(`⏳ **Available On:** <t:${startTimestamp}:f> (<t:${startTimestamp}:R>)`);
+      descriptionParts.push(
+        `⏳ **Available On:** <t:${startTimestamp}:f> (<t:${startTimestamp}:R>)`,
+      );
     } else {
       descriptionParts.push(`⏰ **Claim Before:** <t:${endTimestamp}:f> (<t:${endTimestamp}:R>)`);
     }

@@ -1019,6 +1019,16 @@
       "blocks": []
     },
     {
+      "id": "STORY-123",
+      "epic": "EPIC-012",
+      "title": "CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site",
+      "points": 5,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [],
+      "description": "Pulled forward on 2026-09-26 so the remaining EPIC-011 web PRs are verified in CI. CircleCI runs lint, Prettier check, typecheck, tests with coverage (JUnit results + Codecov upload), the Next.js production build and a gitleaks history scan on every push. Vercel deploys a zero-dependency project status page generated from this board until the bot and dashboard are hosted (STORY-121/122). Replaces the GitHub Actions CI/CD item dropped from STORY-122 during regrooming."
+    },
+    {
       "id": "STORY-130",
       "epic": "EPIC-013",
       "title": "Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache",
@@ -3211,6 +3221,37 @@
       "blocks": []
     },
     {
+      "id": "TASK-1231",
+      "parent": "STORY-123",
+      "title": "One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks)",
+      "points": 2,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [
+        "TASK-1232"
+      ]
+    },
+    {
+      "id": "TASK-1232",
+      "parent": "STORY-123",
+      "title": "Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload",
+      "points": 2,
+      "status": "DONE",
+      "requires": [
+        "TASK-1231"
+      ],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1233",
+      "parent": "STORY-123",
+      "title": "Vercel Project Status Site Generated from the Kanban Board",
+      "points": 1,
+      "status": "DONE",
+      "requires": [],
+      "blocks": []
+    },
+    {
       "id": "TASK-1331",
       "parent": "STORY-133",
       "title": "Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests",
@@ -3611,6 +3652,16 @@
       ],
       "blocks": [],
       "description": "Reported 2026-09-26: AutoVoiceService deleted any empty voice channel in the category of a join-to-create hub, not only the temporary channels it created. Both the member-leave handler and cleanupOrphans (run on READY) matched channels by category, and the set of created channels lived only in memory, so after a restart the bot could not tell its channels from the server's own. A guild with permanent voice channels next to a hub lost them whenever they were empty. Fix: persist the IDs of created channels in a new dual-dialect auto_voice_channels table (AutoVoiceChannelRepository), delete only recorded channels, forget records when the channel is deleted or no longer exists (including the channelDelete gateway event), and make cleanupOrphans iterate the records instead of scanning the category. Existing databases need pnpm db:push."
+    },
+    {
+      "id": "BUG-0022",
+      "title": "Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-123",
+      "requires": [],
+      "blocks": [],
+      "description": "Found by the first CircleCI run (UTC host). parseReminderTime passed the IANA zone name to chrono-node, which only understands abbreviations or offset minutes and silently fell back to the host zone, so wall-clock reminders fired hours off on any server not in the user's zone. Now passes the zone's offset in minutes and re-parses with the target date's offset across DST changes."
     }
   ]
 }

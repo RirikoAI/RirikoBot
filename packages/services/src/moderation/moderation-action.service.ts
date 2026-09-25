@@ -1,8 +1,4 @@
-import {
-  PermissionFlagsBits,
-  type GuildMember,
-  type TextChannel,
-} from 'discord.js';
+import { PermissionFlagsBits, type GuildMember, type TextChannel } from 'discord.js';
 import type { EventBus, CoreEvents } from '@ririko/core';
 import type { ModerationRepository } from '@ririko/database';
 import { PermissionService } from './permission.service.js';
@@ -623,7 +619,10 @@ export class ModerationActionService {
     const auditReason = `[Lock by ${this.getInvokerTag(invoker)}] ${reason}`;
     try {
       const textChannel = channel as TextChannel;
-      if (textChannel.permissionOverwrites && typeof textChannel.permissionOverwrites.edit === 'function') {
+      if (
+        textChannel.permissionOverwrites &&
+        typeof textChannel.permissionOverwrites.edit === 'function'
+      ) {
         await textChannel.permissionOverwrites.edit(
           guild.roles.everyone,
           { SendMessages: false },
@@ -691,7 +690,10 @@ export class ModerationActionService {
     const auditReason = `[Unlock by ${this.getInvokerTag(invoker)}] ${reason}`;
     try {
       const textChannel = channel as TextChannel;
-      if (textChannel.permissionOverwrites && typeof textChannel.permissionOverwrites.edit === 'function') {
+      if (
+        textChannel.permissionOverwrites &&
+        typeof textChannel.permissionOverwrites.edit === 'function'
+      ) {
         await textChannel.permissionOverwrites.edit(
           guild.roles.everyone,
           { SendMessages: null },

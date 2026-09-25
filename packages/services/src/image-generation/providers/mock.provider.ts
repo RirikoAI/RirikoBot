@@ -81,15 +81,18 @@ export class MockImageProvider implements ImageGenerationProvider {
       // Render prompt (wrapped or truncated)
       ctx.fillStyle = '#f0f0f0';
       ctx.font = 'italic 16px sans-serif';
-      const cleanPrompt = request.prompt.length > 100
-        ? `${request.prompt.slice(0, 97)}...`
-        : request.prompt;
+      const cleanPrompt =
+        request.prompt.length > 100 ? `${request.prompt.slice(0, 97)}...` : request.prompt;
       ctx.fillText(`"${cleanPrompt}"`, width / 2, height / 2);
 
       // Footer
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.font = '12px sans-serif';
-      ctx.fillText(`Ratio: ${request.aspectRatio ?? '1:1'} | Size: ${width}x${height} | Seed: ${request.seed ?? 42}`, width / 2, height - 40);
+      ctx.fillText(
+        `Ratio: ${request.aspectRatio ?? '1:1'} | Size: ${width}x${height} | Seed: ${request.seed ?? 42}`,
+        width / 2,
+        height - 40,
+      );
 
       const buffer = await canvas.encode('png');
       images.push({

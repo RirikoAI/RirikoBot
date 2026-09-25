@@ -15,7 +15,12 @@ describe('Gateway Role Listeners Suite (TASK-1405)', () => {
 
     mockMember = {
       id: 'user-1',
-      user: { id: 'user-1', bot: false, username: 'testuser', createdTimestamp: Date.now() - 100000 },
+      user: {
+        id: 'user-1',
+        bot: false,
+        username: 'testuser',
+        createdTimestamp: Date.now() - 100000,
+      },
       joinedTimestamp: Date.now(),
       guild: null as any,
     };
@@ -96,7 +101,10 @@ describe('Gateway Role Listeners Suite (TASK-1405)', () => {
       mockClient.emit('messageReactionAdd', mockReaction, mockUser);
       await new Promise((r) => setTimeout(r, 20));
 
-      expect(mockServices.reactionRoleRepo?.findByMessageAndEmoji).toHaveBeenCalledWith('msg-1', '🎮');
+      expect(mockServices.reactionRoleRepo?.findByMessageAndEmoji).toHaveBeenCalledWith(
+        'msg-1',
+        '🎮',
+      );
       expect(mockServices.reactionRoleService?.handleReactionAdd).toHaveBeenCalledWith(
         mockGuild,
         'msg-1',

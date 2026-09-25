@@ -98,8 +98,10 @@ export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
     floorNumber: 1,
     title: 'Floor T1: Elemental Resonance',
     topic: 'Elemental Multipliers',
-    description: 'Learn the 7-element counter loop (Fire > Ice > Earth > Lightning > Water > Fire).',
-    guideMessage: 'Striking with an advantageous element deals 1.5x damage! Counter the training dummy with resonant strikes.',
+    description:
+      'Learn the 7-element counter loop (Fire > Ice > Earth > Lightning > Water > Fire).',
+    guideMessage:
+      'Striking with an advantageous element deals 1.5x damage! Counter the training dummy with resonant strikes.',
     dummyEnemy: {
       id: 'dummy_t1',
       name: 'Training Automaton [ICE]',
@@ -130,7 +132,8 @@ export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
     title: 'Floor T2: Mana & Active Skills',
     topic: 'MP Management & Tactical Skills',
     description: 'Demonstrates card MP consumption and tactical active skill execution.',
-    guideMessage: 'Every basic attack generates MP. When MP is full, your card automatically unleashes its signature tactical skill!',
+    guideMessage:
+      'Every basic attack generates MP. When MP is full, your card automatically unleashes its signature tactical skill!',
     dummyEnemy: {
       id: 'dummy_t2',
       name: 'Reinforced Dummy [EARTH]',
@@ -161,7 +164,8 @@ export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
     title: 'Floor T3: Consumables & Survival',
     topic: 'HP & MP Potions',
     description: 'Introduces battle consumables and tactical survival.',
-    guideMessage: 'Potions restore health and mana during intense battles. Equip potions in your loadout to sustain against formidable foes.',
+    guideMessage:
+      'Potions restore health and mana during intense battles. Equip potions in your loadout to sustain against formidable foes.',
     dummyEnemy: {
       id: 'dummy_t3',
       name: 'Aggressive Sparring Bot [LIGHTNING]',
@@ -192,7 +196,8 @@ export const TUTORIAL_FLOORS: readonly TutorialFloorInfo[] = Object.freeze([
     title: 'Floor T4: Boss Break Shields',
     topic: 'Multi-Elemental Barrier Breaking',
     description: 'Break through multi-elemental barrier layers on an elite training dummy.',
-    guideMessage: 'High-floor dungeon bosses possess Elemental Wards! Attacks with non-matching elements deal ZERO damage. Strike with the matching element to shatter their barrier!',
+    guideMessage:
+      'High-floor dungeon bosses possess Elemental Wards! Attacks with non-matching elements deal ZERO damage. Strike with the matching element to shatter their barrier!',
     dummyEnemy: {
       id: 'dummy_t4',
       name: 'Warded Guardian Automaton [WATER]',
@@ -553,7 +558,8 @@ export class TutorialService {
 
     return {
       granted: true,
-      message: '🎁 **Tutorial Floor T3 Bonus**: Received 5x Minor HP Potions and 5x Mana Draughts (10 Potions)!',
+      message:
+        '🎁 **Tutorial Floor T3 Bonus**: Received 5x Minor HP Potions and 5x Mana Draughts (10 Potions)!',
     };
   }
 
@@ -590,7 +596,12 @@ export class TutorialService {
   private async grantStarterGear(
     userId: string,
     starter: UserCard | null,
-  ): Promise<{ weapon: GameItem | null; weaponEquipped: boolean; potion: GameItem | null; potionsGranted: number }> {
+  ): Promise<{
+    weapon: GameItem | null;
+    weaponEquipped: boolean;
+    potion: GameItem | null;
+    potionsGranted: number;
+  }> {
     if (!this.grants || !this.inventoryRepo) {
       return { weapon: null, weaponEquipped: false, potion: null, potionsGranted: 0 };
     }
@@ -604,7 +615,11 @@ export class TutorialService {
         (await this.grants.grantItem(userId, weapon, 1, 'TUTORIAL')).inventoryItems[0];
       if (bladeRow?.state === 'EQUIPPED') {
         weaponEquipped = true;
-      } else if (bladeRow && starter && !(await this.inventoryRepo.findCardSlot(starter.id, 'WEAPON'))) {
+      } else if (
+        bladeRow &&
+        starter &&
+        !(await this.inventoryRepo.findCardSlot(starter.id, 'WEAPON'))
+      ) {
         await this.inventoryRepo.equipToCard(userId, bladeRow.id, starter.id, 'WEAPON');
         weaponEquipped = true;
       }
@@ -649,7 +664,9 @@ export class TutorialService {
       const equipmentGranted = gear.weapon
         ? `${gear.weapon.name} (+${gear.weapon.baseStats?.['attack'] ?? 0} ATK)${gear.weaponEquipped ? ', equipped' : ''}`
         : undefined;
-      const consumablesGranted = gear.potion ? `${gear.potionsGranted}x ${gear.potion.name}` : undefined;
+      const consumablesGranted = gear.potion
+        ? `${gear.potionsGranted}x ${gear.potion.name}`
+        : undefined;
 
       if (this.achievementService) {
         try {
@@ -692,4 +709,3 @@ export class TutorialService {
     };
   }
 }
-

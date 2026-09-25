@@ -38,7 +38,9 @@ export class DeezerAdapter implements MusicSourceAdapter {
 
     const count = Math.min(Math.max(1, limit), 20);
     try {
-      const res = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(cleanQuery)}&limit=${count}`);
+      const res = await fetch(
+        `https://api.deezer.com/search?q=${encodeURIComponent(cleanQuery)}&limit=${count}`,
+      );
       if (!res.ok) return [];
 
       const data = (await res.json()) as any;
@@ -98,7 +100,9 @@ export class DeezerAdapter implements MusicSourceAdapter {
               return Readable.fromWeb(audioRes.body as any);
             }
           }
-          throw new Error(`No direct stream available for Deezer track "${title}". Must be bridged to SoundCloud.`);
+          throw new Error(
+            `No direct stream available for Deezer track "${title}". Must be bridged to SoundCloud.`,
+          );
         },
       };
     }
@@ -113,8 +117,10 @@ export class DeezerAdapter implements MusicSourceAdapter {
         throw new Error(`Deezer API error: ${data.error.message || JSON.stringify(data.error)}`);
       }
 
-      const collectionTitle = data.title || `Deezer ${type === 'album' ? 'Album' : 'Playlist'} [${id}]`;
-      const coverUrl = data.cover_big || data.picture_big || data.cover_medium || data.picture_medium;
+      const collectionTitle =
+        data.title || `Deezer ${type === 'album' ? 'Album' : 'Playlist'} [${id}]`;
+      const coverUrl =
+        data.cover_big || data.picture_big || data.cover_medium || data.picture_medium;
       const rawTracks: any[] = data.tracks?.data || [];
 
       const tracks: ResolvedTrack[] = rawTracks.map((t: any) => ({
@@ -133,7 +139,9 @@ export class DeezerAdapter implements MusicSourceAdapter {
               return Readable.fromWeb(audioRes.body as any);
             }
           }
-          throw new Error(`No direct stream available for Deezer track "${t.title}". Must be bridged to SoundCloud.`);
+          throw new Error(
+            `No direct stream available for Deezer track "${t.title}". Must be bridged to SoundCloud.`,
+          );
         },
       }));
 

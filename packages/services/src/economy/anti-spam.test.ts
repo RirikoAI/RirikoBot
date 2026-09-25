@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  AntiSpamEvaluator,
-  levenshteinDistance,
-  calculateSimilarity,
-} from './anti-spam.js';
+import { AntiSpamEvaluator, levenshteinDistance, calculateSimilarity } from './anti-spam.js';
 
 describe('Anti-Spam & Abuse Protection Engine', () => {
   describe('Levenshtein Distance & Similarity Math', () => {
@@ -125,7 +121,12 @@ describe('Anti-Spam & Abuse Protection Engine', () => {
       evaluator.evaluateMessage('bot1', 'g1', 'Automated message number 3', t0 + 1000);
       evaluator.evaluateMessage('bot1', 'g1', 'Automated message number 4', t0 + 1500);
 
-      const rBurst = evaluator.evaluateMessage('bot1', 'g1', 'Automated message number 5', t0 + 2000);
+      const rBurst = evaluator.evaluateMessage(
+        'bot1',
+        'g1',
+        'Automated message number 5',
+        t0 + 2000,
+      );
       expect(rBurst.isAllowed).toBe(false);
       expect(rBurst.reason).toBe('AUTOMATED_BURST');
 

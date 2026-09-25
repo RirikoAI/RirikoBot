@@ -75,19 +75,12 @@ export class InventoryRepository extends BaseRepository<
     }
   }
 
-  async getItemQuantity(
-    userId: string,
-    itemId: string,
-    tx?: DatabaseClient,
-  ): Promise<number> {
+  async getItemQuantity(userId: string, itemId: string, tx?: DatabaseClient): Promise<number> {
     const slot = await this.getItemSlot(userId, itemId, tx);
     return slot ? slot.quantity : 0;
   }
 
-  async getUserInventory(
-    userId: string,
-    tx?: DatabaseClient,
-  ): Promise<EconomyInventory[]> {
+  async getUserInventory(userId: string, tx?: DatabaseClient): Promise<EconomyInventory[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const rows = await client.db
@@ -257,11 +250,7 @@ export class InventoryRepository extends BaseRepository<
     return withTransaction(client, async (txClient) => {
       const existing = await this.getItemSlot(userId, itemId, txClient);
       if (existing) {
-        return this.update(
-          existing.id,
-          { quantity: existing.quantity + quantity },
-          txClient,
-        );
+        return this.update(existing.id, { quantity: existing.quantity + quantity }, txClient);
       } else {
         return this.create(
           {
@@ -303,11 +292,7 @@ export class InventoryRepository extends BaseRepository<
         await this.delete(existing.id, txClient);
         return null;
       } else {
-        return this.update(
-          existing.id,
-          { quantity: existing.quantity - quantity },
-          txClient,
-        );
+        return this.update(existing.id, { quantity: existing.quantity - quantity }, txClient);
       }
     });
   }

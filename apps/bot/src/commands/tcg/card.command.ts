@@ -1,11 +1,5 @@
-import {
-  EmbedBuilder,
-} from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { EmbedBuilder } from 'discord.js';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import {
   formatCardEmbedFooter,
@@ -76,7 +70,9 @@ export function createLoadoutCommand(services: BotServices): Command {
     },
     async execute(ctx: CommandContext): Promise<void> {
       const rawId = ctx.options.getString('card_id') ?? ctx.options.getRawArgs?.()[0];
-      const userCard = rawId ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId) : null;
+      const userCard = rawId
+        ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId)
+        : null;
       await openGearMenu(ctx, services, userCard ? userCard.id : rawId);
     },
   };
@@ -91,11 +87,7 @@ function levenshteinDistance(a: string, b: string): number {
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i]![j] = Math.min(
-        dp[i - 1]![j]! + 1,
-        dp[i]![j - 1]! + 1,
-        dp[i - 1]![j - 1]! + cost,
-      );
+      dp[i]![j] = Math.min(dp[i - 1]![j]! + 1, dp[i]![j - 1]! + 1, dp[i - 1]![j - 1]! + cost);
     }
   }
   return dp[m]![n]!;
@@ -139,9 +131,11 @@ export function createCardCommand(services: BotServices): Command {
     metadata: {
       name: 'card',
       category: CommandCategory.TCG,
-      description: 'Waifu TCG collection, inspection, claim, favorite, equip, and dismantling commands.',
+      description:
+        'Waifu TCG collection, inspection, claim, favorite, equip, and dismantling commands.',
       aliases: ['tcg'],
-      usage: '/card [action: collection|inspect|claim|favorite|equip|dismantle|gear|equip-gear|unequip-gear|unequip-all|guide] [id] [filter] [sort] [item_id] [slot]',
+      usage:
+        '/card [action: collection|inspect|claim|favorite|equip|dismantle|gear|equip-gear|unequip-gear|unequip-all|guide] [id] [filter] [sort] [item_id] [slot]',
       examples: [
         '/card action:collection filter:ICE sort:level',
         '/card action:inspect id:12345678',
@@ -158,7 +152,8 @@ export function createCardCommand(services: BotServices): Command {
       options: [
         {
           name: 'action',
-          description: 'Subcommand action to execute (collection, inspect, claim, favorite, equip, dismantle)',
+          description:
+            'Subcommand action to execute (collection, inspect, claim, favorite, equip, dismantle)',
           type: 'STRING',
           required: false,
           choices: [
@@ -170,7 +165,10 @@ export function createCardCommand(services: BotServices): Command {
             { name: 'Dismantle (Dismantle card for Crafting Dust)', value: 'dismantle' },
             { name: 'Gear (Interactive menu: equip, compare & enhance gear)', value: 'gear' },
             { name: 'Loadout (View card 6-slot equipped gear & bonuses)', value: 'loadout' },
-            { name: 'Equip Gear (Equip weapon/armor/relic/ring/amulet/talisman)', value: 'equip-gear' },
+            {
+              name: 'Equip Gear (Equip weapon/armor/relic/ring/amulet/talisman)',
+              value: 'equip-gear',
+            },
             { name: 'Unequip Gear (Unequip gear from slot)', value: 'unequip-gear' },
             { name: 'Unequip All (Empty a card, or every card when no id)', value: 'unequip-all' },
             { name: 'Guide / Info (Tutorials, type advantages, rules)', value: 'guide' },
@@ -249,9 +247,10 @@ export function createCardCommand(services: BotServices): Command {
       if (!sub) {
         try {
           const optionsRecord = ctx.options as unknown as Record<string, unknown>;
-          const sc = typeof optionsRecord['getSubcommand'] === 'function'
-            ? (optionsRecord['getSubcommand'] as () => string)()
-            : null;
+          const sc =
+            typeof optionsRecord['getSubcommand'] === 'function'
+              ? (optionsRecord['getSubcommand'] as () => string)()
+              : null;
           if (sc) sub = String(sc).toLowerCase();
         } catch {
           // ignore
@@ -273,7 +272,9 @@ export function createCardCommand(services: BotServices): Command {
             const prefix = await resolveContextPrefix(ctx, services);
             const didYouMean = findClosestCardAction(firstArg);
             const suggestion = didYouMean
-              ? (ctx.source === 'prefix' ? ` Did you mean \`${prefix}card ${didYouMean}\`?` : ` Did you mean \`/card ${didYouMean}\`?`)
+              ? ctx.source === 'prefix'
+                ? ` Did you mean \`${prefix}card ${didYouMean}\`?`
+                : ` Did you mean \`/card ${didYouMean}\`?`
               : '';
             await ctx.reply({
               content:
@@ -359,7 +360,10 @@ export function createCardCommand(services: BotServices): Command {
         case 'inspect': {
           const rawId = ctx.options.getString('id') ?? implicitCardId ?? rawArgs[1];
           if (!rawId) {
-            await ctx.reply({ content: '❌ Please specify a Card ID. Usage: `/card action:inspect id:<id>`', ephemeral: true });
+            await ctx.reply({
+              content: '❌ Please specify a Card ID. Usage: `/card action:inspect id:<id>`',
+              ephemeral: true,
+            });
             return;
           }
 
@@ -379,9 +383,10 @@ export function createCardCommand(services: BotServices): Command {
             return;
           }
 
-          const asset = baseCard.assetId && services.waifuAssetRepo
-            ? await services.waifuAssetRepo.findById(baseCard.assetId)
-            : null;
+          const asset =
+            baseCard.assetId && services.waifuAssetRepo
+              ? await services.waifuAssetRepo.findById(baseCard.assetId)
+              : null;
 
           const { embed, files } = await buildCardInspectEmbed(services, {
             userCard,
@@ -402,7 +407,10 @@ export function createCardCommand(services: BotServices): Command {
         case 'favorite': {
           const rawId = ctx.options.getString('id') ?? rawArgs[1];
           if (!rawId) {
-            await ctx.reply({ content: '❌ Please specify a Card ID. Usage: `/card action:favorite id:<id>`', ephemeral: true });
+            await ctx.reply({
+              content: '❌ Please specify a Card ID. Usage: `/card action:favorite id:<id>`',
+              ephemeral: true,
+            });
             return;
           }
 
@@ -428,7 +436,10 @@ export function createCardCommand(services: BotServices): Command {
         case 'equip': {
           const rawId = ctx.options.getString('id') ?? rawArgs[1];
           if (!rawId) {
-            await ctx.reply({ content: '❌ Please specify a Card ID. Usage: `/card action:equip id:<id>`', ephemeral: true });
+            await ctx.reply({
+              content: '❌ Please specify a Card ID. Usage: `/card action:equip id:<id>`',
+              ephemeral: true,
+            });
             return;
           }
 
@@ -448,7 +459,9 @@ export function createCardCommand(services: BotServices): Command {
           }
 
           // Set existing equipped cards to IDLE first
-          const equipped = await services.waifuCardRepo.listUserCards(ctx.user.id, { state: 'EQUIPPED' });
+          const equipped = await services.waifuCardRepo.listUserCards(ctx.user.id, {
+            state: 'EQUIPPED',
+          });
           for (const eqCard of equipped) {
             await services.waifuCardRepo.updateUserCardState(eqCard.id, 'IDLE');
           }
@@ -465,7 +478,10 @@ export function createCardCommand(services: BotServices): Command {
         case 'dismantle': {
           const rawId = ctx.options.getString('id') ?? rawArgs[1];
           if (!rawId) {
-            await ctx.reply({ content: '❌ Please specify a Card ID. Usage: `/card action:dismantle id:<id>`', ephemeral: true });
+            await ctx.reply({
+              content: '❌ Please specify a Card ID. Usage: `/card action:dismantle id:<id>`',
+              ephemeral: true,
+            });
             return;
           }
 
@@ -485,8 +501,10 @@ export function createCardCommand(services: BotServices): Command {
           await ctx.reply({
             content:
               `🔨 Dismantled **${result.cardName}** (\`${result.rarity}\`) into **${result.dustAwarded} Crafting Dust**!` +
-              (result.gearReturned ? `
-🎒 ${result.gearReturned} gear piece(s) it wore went back to your inventory.` : ''),
+              (result.gearReturned
+                ? `
+🎒 ${result.gearReturned} gear piece(s) it wore went back to your inventory.`
+                : ''),
           });
           break;
         }
@@ -494,14 +512,18 @@ export function createCardCommand(services: BotServices): Command {
         case 'gear':
         case 'loadout': {
           const rawId = ctx.options.getString('id') ?? rawArgs[1];
-          const userCard = rawId ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId) : null;
+          const userCard = rawId
+            ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId)
+            : null;
           await openGearMenu(ctx, services, userCard ? userCard.id : rawId);
           break;
         }
 
         case 'equip-gear': {
           const rawId = ctx.options.getString('id') ?? rawArgs[1];
-          const userCard = rawId ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId) : null;
+          const userCard = rawId
+            ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId)
+            : null;
           const cardId = userCard ? userCard.id : rawId;
           const itemId = ctx.options.getString('item_id') ?? rawArgs[2];
           const slot = (ctx.options.getString('slot') ?? rawArgs[3])?.toUpperCase();
@@ -546,14 +568,18 @@ export function createCardCommand(services: BotServices): Command {
           const itemId = ctx.options.getString('item_id') ?? rawArgs[1];
           if (!itemId) {
             await ctx.reply({
-              content: '❌ Please specify the inventory item ID to unequip. Usage: `/card action:unequip-gear item_id:<item_id>`',
+              content:
+                '❌ Please specify the inventory item ID to unequip. Usage: `/card action:unequip-gear item_id:<item_id>`',
               ephemeral: true,
             });
             return;
           }
 
           try {
-            const { unequippedItemName } = await services.loadoutService.unequip(ctx.user.id, itemId);
+            const { unequippedItemName } = await services.loadoutService.unequip(
+              ctx.user.id,
+              itemId,
+            );
             await ctx.reply({
               content: `🛡️ Unequipped **${unequippedItemName}**! The gear piece was safely returned to your inventory.`,
             });
@@ -569,10 +595,15 @@ export function createCardCommand(services: BotServices): Command {
         case 'unequip-all': {
           // With a card: empty that card. Without: empty every card, including gear left on cards you no longer own.
           const rawId = ctx.options.getString('id') ?? rawArgs[1];
-          const userCard = rawId ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId) : null;
+          const userCard = rawId
+            ? await resolveUserCard(services.waifuCardRepo, ctx.user.id, rawId)
+            : null;
           const cardId = userCard ? userCard.id : rawId;
           try {
-            const { unequippedItemNames } = await services.loadoutService.unequipAll(ctx.user.id, cardId);
+            const { unequippedItemNames } = await services.loadoutService.unequipAll(
+              ctx.user.id,
+              cardId,
+            );
             await ctx.reply({
               content:
                 unequippedItemNames.length === 0

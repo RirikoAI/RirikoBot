@@ -6,4 +6,3 @@ export * from './schema/types/index.js';
 export * from './transactions/index.js';
 export * from './repositories/index.js';
 export * as migration from './migration/index.js';
-

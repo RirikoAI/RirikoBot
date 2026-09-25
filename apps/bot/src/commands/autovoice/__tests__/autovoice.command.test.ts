@@ -249,7 +249,13 @@ describe('Auto-Voice Commands Suite (TASK-0912)', () => {
       const commands = createAutoVoiceCommands(mockServices as BotServices);
       const cmd = commands.find((c) => c.metadata.name === 'voice')!;
 
-      const ctx = createVoiceControlContext('user-alice', 'name', { name: 'New Name' }, true, false);
+      const ctx = createVoiceControlContext(
+        'user-alice',
+        'name',
+        { name: 'New Name' },
+        true,
+        false,
+      );
       await cmd.execute(ctx);
 
       expect(ctx.reply).toHaveBeenCalledWith(

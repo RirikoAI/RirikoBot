@@ -207,6 +207,8 @@ describe('AntiRaidService Suite', () => {
     expect(embed.color).toBe(0xff0033);
     expect(embed.fields).toHaveLength(5);
     expect(embed.fields.find((f) => f.name.includes('Suspicious Fresh Accounts'))?.value).toBe('7');
-    expect(embed.fields.find((f) => f.name === 'Status')?.value).toContain('Server Lockdown Active');
+    expect(embed.fields.find((f) => f.name === 'Status')?.value).toContain(
+      'Server Lockdown Active',
+    );
   });
 });

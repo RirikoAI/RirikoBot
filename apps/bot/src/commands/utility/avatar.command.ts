@@ -1,13 +1,5 @@
-import {
-  EmbedBuilder,
-  type User,
-  type GuildMember,
-} from 'discord.js';
-import {
-  CommandCategory,
-  type Command,
-  type CommandContext,
-} from '@ririko/discord';
+import { EmbedBuilder, type User, type GuildMember } from 'discord.js';
+import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
 /**
@@ -108,18 +100,14 @@ export function createAvatarCommand(_services: BotServices): Command {
           : targetUser.displayAvatarURL({ extension: 'gif', size: 4096 })
         : null;
 
-      const formatLinks = [
-        `[PNG](${pngUrl})`,
-        `[JPG](${jpgUrl})`,
-        `[WebP](${webpUrl})`,
-      ];
+      const formatLinks = [`[PNG](${pngUrl})`, `[JPG](${jpgUrl})`, `[WebP](${webpUrl})`];
       if (gifUrl) {
         formatLinks.push(`[GIF](${gifUrl})`);
       }
 
       const titleName = useServerAvatar
-        ? (member?.displayName || targetUser.displayName || targetUser.username)
-        : (targetUser.displayName || targetUser.username);
+        ? member?.displayName || targetUser.displayName || targetUser.username
+        : targetUser.displayName || targetUser.username;
       const subtitle = useServerAvatar ? ' (Server Avatar)' : '';
 
       const embed = new EmbedBuilder()

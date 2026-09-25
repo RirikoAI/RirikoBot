@@ -1,9 +1,4 @@
-import {
-  ChatModelProvider,
-  ChatRequest,
-  ChatResponse,
-  ChatToken,
-} from '../types/index.js';
+import { ChatModelProvider, ChatRequest, ChatResponse, ChatToken } from '../types/index.js';
 import {
   AiProviderError,
   AiProviderExhaustionError,
@@ -175,10 +170,7 @@ export class FallbackChainManager {
   /**
    * Generates a completion with automatic fallback across the candidate chain.
    */
-  public async generate(
-    request: ChatRequest,
-    preferredProviderId?: string,
-  ): Promise<ChatResponse> {
+  public async generate(request: ChatRequest, preferredProviderId?: string): Promise<ChatResponse> {
     const candidates = this.getCandidateProviders(preferredProviderId);
     if (candidates.length === 0) {
       throw new AiProviderExhaustionError([

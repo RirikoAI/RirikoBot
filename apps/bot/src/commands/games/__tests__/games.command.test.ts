@@ -115,7 +115,10 @@ describe('Mini-Games Commands Suite (TASK-0922)', () => {
         type: 'TICTACTOE',
         guildId: 'guild-1',
         channelId: 'channel-1',
-        players: [{ id: 'user-1', username: 'Alice' }, { id: 'user-2', username: 'Bob' }],
+        players: [
+          { id: 'user-1', username: 'Alice' },
+          { id: 'user-2', username: 'Bob' },
+        ],
         metadata: {},
       });
 
@@ -338,7 +341,9 @@ describe('Mini-Games Commands Suite (TASK-0922)', () => {
             expect.objectContaining({
               data: expect.objectContaining({
                 title: 'Dice Roll',
-                description: expect.stringMatching(/You rolled a dice and it landed on \*\*\d+\*\*/),
+                description: expect.stringMatching(
+                  /You rolled a dice and it landed on \*\*\d+\*\*/,
+                ),
               }),
             }),
           ]),

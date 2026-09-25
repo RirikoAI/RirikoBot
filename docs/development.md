@@ -24,6 +24,20 @@ pnpm install
 cp .env.example .env
 ```
 
+### 2.3. Quality Commands
+These are the same checks CircleCI runs (see [testing.md](testing.md#4-continuous-integration)):
+```bash
+pnpm lint            # ESLint
+pnpm format:check    # Prettier (pnpm format fixes)
+pnpm typecheck       # tsc --noEmit in every workspace package
+pnpm test            # Vitest
+pnpm test:coverage   # Vitest with v8 coverage, report in coverage/index.html
+```
+
+`pnpm site:build` writes the Vercel status page to `site-dist/index.html` (see [deployment.md](deployment.md#4-current-hosting-vercel-status-site)).
+
+The Prettier baseline commit is listed in `.git-blame-ignore-revs`. Run `git config blame.ignoreRevsFile .git-blame-ignore-revs` once so local `git blame` skips it.
+
 ---
 
 ## 3. The Ririko CLI (`ririko`)

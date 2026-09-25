@@ -102,12 +102,7 @@ export function parseImageDimensions(buffer: Buffer): ImageDimensions | null {
   }
 
   // 2. GIF: GIF87a or GIF89a
-  if (
-    buffer[0] === 0x47 &&
-    buffer[1] === 0x49 &&
-    buffer[2] === 0x46 &&
-    buffer.length >= 10
-  ) {
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer.length >= 10) {
     const width = buffer.readUInt16LE(6);
     const height = buffer.readUInt16LE(8);
     return { width, height, format: 'gif' };
@@ -213,7 +208,8 @@ export class ProfileBackgroundManager {
       maxHeight: options?.config?.maxHeight ?? 400,
       maxSizeBytes: options?.config?.maxSizeBytes ?? 5 * 1024 * 1024, // 5MB
       timeoutMs: options?.config?.timeoutMs ?? 10000,
-      cacheDir: options?.config?.cacheDir ?? path.resolve(process.cwd(), 'storage/profile-backgrounds'),
+      cacheDir:
+        options?.config?.cacheDir ?? path.resolve(process.cwd(), 'storage/profile-backgrounds'),
     };
   }
 
@@ -221,7 +217,9 @@ export class ProfileBackgroundManager {
    * Verifies the target URL for DNS SSRF security vulnerabilities.
    * Throws SecurityError if the target resolves to private, loopback, or reserved networks.
    */
-  public async validateUrlSecurity(urlString: string): Promise<{ url: URL; resolvedIps: string[] }> {
+  public async validateUrlSecurity(
+    urlString: string,
+  ): Promise<{ url: URL; resolvedIps: string[] }> {
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(urlString);
@@ -230,7 +228,9 @@ export class ProfileBackgroundManager {
     }
 
     if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-      throw new SecurityError(`Unsupported protocol "${parsedUrl.protocol}". Only HTTP and HTTPS are allowed.`);
+      throw new SecurityError(
+        `Unsupported protocol "${parsedUrl.protocol}". Only HTTP and HTTPS are allowed.`,
+      );
     }
 
     const hostname = parsedUrl.hostname.toLowerCase();
@@ -243,7 +243,9 @@ export class ProfileBackgroundManager {
       hostname.endsWith('.local') ||
       hostname.endsWith('.internal')
     ) {
-      throw new SecurityError(`SSRF_ATTEMPT_DETECTED: Target hostname "${hostname}" is a restricted local address.`);
+      throw new SecurityError(
+        `SSRF_ATTEMPT_DETECTED: Target hostname "${hostname}" is a restricted local address.`,
+      );
     }
 
     // Perform DNS lookup to inspect all resolved IPs
@@ -251,7 +253,9 @@ export class ProfileBackgroundManager {
     try {
       lookupResults = await dns.lookup(hostname, { all: true });
     } catch (err: unknown) {
-      throw new SecurityError(`Failed to resolve DNS for hostname "${hostname}": ${err instanceof Error ? err.message : String(err)}`);
+      throw new SecurityError(
+        `Failed to resolve DNS for hostname "${hostname}": ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
 
     if (lookupResults.length === 0) {
@@ -289,7 +293,9 @@ export class ProfileBackgroundManager {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to download image from server (HTTP ${response.status}: ${response.statusText})`);
+        throw new Error(
+          `Failed to download image from server (HTTP ${response.status}: ${response.statusText})`,
+        );
       }
 
       const contentType = response.headers.get('content-type')?.toLowerCase() ?? '';
@@ -301,7 +307,9 @@ export class ProfileBackgroundManager {
           !contentType.includes('webp') &&
           !contentType.includes('gif'))
       ) {
-        throw new Error(`Invalid content type "${contentType}". Only PNG, JPEG, WebP, and GIF images are permitted.`);
+        throw new Error(
+          `Invalid content type "${contentType}". Only PNG, JPEG, WebP, and GIF images are permitted.`,
+        );
       }
 
       const contentLengthHeader = response.headers.get('content-length');
@@ -335,7 +343,9 @@ export class ProfileBackgroundManager {
   public validateDimensions(buffer: Buffer): ImageDimensions {
     const dimensions = parseImageDimensions(buffer);
     if (!dimensions) {
-      throw new Error('Unable to parse image dimensions. File may be corrupted or in an unsupported format.');
+      throw new Error(
+        'Unable to parse image dimensions. File may be corrupted or in an unsupported format.',
+      );
     }
 
     if (dimensions.width > this.config.maxWidth || dimensions.height > this.config.maxHeight) {
@@ -359,7 +369,8 @@ export class ProfileBackgroundManager {
       if (voucherQty <= 0) {
         return {
           success: false,
-          reason: 'You do not have a Profile Background Voucher in your inventory. Purchase one from /shop buy.',
+          reason:
+            'You do not have a Profile Background Voucher in your inventory. Purchase one from /shop buy.',
         };
       }
     }

@@ -12,10 +12,7 @@ export function getEnergyMilestoneBonus(level: number): number {
   return 0;
 }
 
-export function calculateMaxEnergy(
-  level: number,
-  globalCap = DEFAULT_GLOBAL_ENERGY_CAP,
-): number {
+export function calculateMaxEnergy(level: number, globalCap = DEFAULT_GLOBAL_ENERGY_CAP): number {
   const clampedLevel = Math.max(1, level);
   const base = 100 + Math.floor((clampedLevel - 1) * 2);
   const milestone = getEnergyMilestoneBonus(clampedLevel);

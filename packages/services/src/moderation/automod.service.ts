@@ -141,10 +141,7 @@ export class AutoModService {
   /**
    * Checks whether the context author or channel is exempt from moderation for this rule.
    */
-  public isExempt(
-    context: ModerationContext,
-    config: AutoModRuleConfig,
-  ): boolean {
+  public isExempt(context: ModerationContext, config: AutoModRuleConfig): boolean {
     // 1. Bots are always ignored by AutoMod
     if (context.isBot) {
       return true;
@@ -201,9 +198,7 @@ export class AutoModService {
    *
    * Short-circuits on the first rule violation detected.
    */
-  public async evaluate(
-    context: ModerationContext,
-  ): Promise<RuleEvaluationResult | null> {
+  public async evaluate(context: ModerationContext): Promise<RuleEvaluationResult | null> {
     const configs = await this.getGuildRuleConfigs(context.guildId);
 
     const priorityOrder: AutoModRuleType[] = [
@@ -244,9 +239,7 @@ export class AutoModService {
    * 2. Executes appropriate action (delete message, warn, timeout)
    * 3. Dispatches EventBus notifications
    */
-  public async processMessage(
-    context: ModerationContext,
-  ): Promise<AutoModExecutionResult> {
+  public async processMessage(context: ModerationContext): Promise<AutoModExecutionResult> {
     const evaluation = await this.evaluate(context);
 
     if (!evaluation || !evaluation.matched) {

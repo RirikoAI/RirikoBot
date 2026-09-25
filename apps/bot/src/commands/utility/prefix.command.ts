@@ -1,7 +1,4 @@
-import {
-  EmbedBuilder,
-  PermissionsBitField,
-} from 'discord.js';
+import { EmbedBuilder, PermissionsBitField } from 'discord.js';
 import {
   CommandCategory,
   DEFAULT_COMMAND_PREFIX,
@@ -24,13 +21,7 @@ export function createPrefixCommand(services: BotServices): Command {
       description: 'View or update the command prefix for this server',
       aliases: ['setprefix'],
       usage: '/prefix [set:<new_prefix>] | !prefix [new_prefix] | !setprefix <new_prefix>',
-      examples: [
-        '/prefix',
-        '/prefix set:?',
-        '!prefix',
-        '!prefix ?',
-        '!setprefix !',
-      ],
+      examples: ['/prefix', '/prefix set:?', '!prefix', '!prefix ?', '!setprefix !'],
       options: [
         {
           name: 'set',
@@ -84,7 +75,8 @@ export function createPrefixCommand(services: BotServices): Command {
           .addFields([
             {
               name: 'ℹ️ Permission Requirement',
-              value: 'Changing the server prefix requires the **Manage Server** (`ManageGuild`) permission.',
+              value:
+                'Changing the server prefix requires the **Manage Server** (`ManageGuild`) permission.',
             },
           ])
           .setFooter({ text: 'Ririko AI 2.0 • Server Utilities' });
@@ -100,8 +92,7 @@ export function createPrefixCommand(services: BotServices): Command {
 
       // Check user permissions
       const member = ctx.member;
-      const hasPermission =
-        member && member.permissions.has(PermissionsBitField.Flags.ManageGuild);
+      const hasPermission = member && member.permissions.has(PermissionsBitField.Flags.ManageGuild);
 
       if (!hasPermission) {
         throw new CommandPermissionError(
@@ -113,10 +104,7 @@ export function createPrefixCommand(services: BotServices): Command {
         );
       }
 
-      const updated = await services.guildSettingsService.setPrefix(
-        ctx.guild.id,
-        requestedPrefix,
-      );
+      const updated = await services.guildSettingsService.setPrefix(ctx.guild.id, requestedPrefix);
 
       const embed = new EmbedBuilder()
         .setColor(0x57f287) // Success Green

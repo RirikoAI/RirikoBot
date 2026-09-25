@@ -3,12 +3,7 @@ import pc from 'picocolors';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { MockImageProvider } from '@ririko/services';
-import {
-  maskSecret,
-  readEnvFile,
-  resolveEnvFilePath,
-  updateEnvFile,
-} from '../utils/env-editor.js';
+import { maskSecret, readEnvFile, resolveEnvFilePath, updateEnvFile } from '../utils/env-editor.js';
 
 export interface ImageConfigureOptions {
   provider?: string | undefined;
@@ -23,7 +18,13 @@ export interface ImageConfigureOptions {
   envFile?: string | undefined;
 }
 
-export const SUPPORTED_IMAGE_PROVIDERS = ['gemini', 'comfyui', 'replicate', 'mock', 'auto'] as const;
+export const SUPPORTED_IMAGE_PROVIDERS = [
+  'gemini',
+  'comfyui',
+  'replicate',
+  'mock',
+  'auto',
+] as const;
 export type SupportedImageProvider = (typeof SUPPORTED_IMAGE_PROVIDERS)[number];
 
 export const IMAGE_PROVIDER_METADATA: Record<
@@ -36,7 +37,8 @@ export const IMAGE_PROVIDER_METADATA: Record<
 > = {
   gemini: {
     name: 'Google Gemini Imagen',
-    description: 'Official Google Gemini Imagen 3/4 cloud generation via @google/genai (Recommended)',
+    description:
+      'Official Google Gemini Imagen 3/4 cloud generation via @google/genai (Recommended)',
     envKey: 'GEMINI_API_KEY',
   },
   comfyui: {
@@ -51,7 +53,8 @@ export const IMAGE_PROVIDER_METADATA: Record<
   },
   mock: {
     name: 'Offline Mock Synthesizer',
-    description: 'Deterministic offline @napi-rs/canvas synthesizer (Zero external API dependencies)',
+    description:
+      'Deterministic offline @napi-rs/canvas synthesizer (Zero external API dependencies)',
   },
   auto: {
     name: 'Auto (Best Available)',
@@ -71,7 +74,9 @@ export function printImageStatus(env: Record<string, string>, targetPath: string
   console.log(pc.bold(pc.magenta('╰──────────────────────────────────────────────────╯\n')));
 
   console.log(`  ${pc.bold('Target File:')}         ${pc.gray(targetPath)}`);
-  console.log(`  ${pc.bold('Default Provider:')}    ${pc.cyan(pc.bold(currentProvider.toUpperCase()))}`);
+  console.log(
+    `  ${pc.bold('Default Provider:')}    ${pc.cyan(pc.bold(currentProvider.toUpperCase()))}`,
+  );
   console.log(`  ${pc.bold('Daily User Quota:')}    ${pc.green(`${currentQuota} images/day`)}\n`);
 
   console.log(pc.bold('  ── Provider Details ──────────────────────────────'));
@@ -84,7 +89,9 @@ export function printImageStatus(env: Record<string, string>, targetPath: string
       hasGemini ? pc.green('✔ Configured') : pc.red('✖ Missing Key')
     } ${isGeminiPrimary ? pc.yellow('(PRIMARY)') : ''}`,
   );
-  console.log(`    ${pc.gray('GEMINI_API_KEY:')}          ${pc.gray(maskSecret(env.GEMINI_API_KEY))}`);
+  console.log(
+    `    ${pc.gray('GEMINI_API_KEY:')}          ${pc.gray(maskSecret(env.GEMINI_API_KEY))}`,
+  );
 
   // ComfyUI
   const comfyUrl = env.COMFYUI_BASE_URL;
@@ -94,7 +101,9 @@ export function printImageStatus(env: Record<string, string>, targetPath: string
       comfyUrl ? pc.green('✔ Configured') : pc.gray('○ Not Configured')
     } ${isComfyPrimary ? pc.yellow('(PRIMARY)') : ''}`,
   );
-  console.log(`    ${pc.gray('COMFYUI_BASE_URL:')}        ${pc.gray(comfyUrl || '(none, default: http://127.0.0.1:8188)')}`);
+  console.log(
+    `    ${pc.gray('COMFYUI_BASE_URL:')}        ${pc.gray(comfyUrl || '(none, default: http://127.0.0.1:8188)')}`,
+  );
 
   // Replicate
   const hasReplicate = Boolean(env.REPLICATE_API_TOKEN);
@@ -104,7 +113,9 @@ export function printImageStatus(env: Record<string, string>, targetPath: string
       hasReplicate ? pc.green('✔ Configured') : pc.gray('○ Not Configured')
     } ${isReplicatePrimary ? pc.yellow('(PRIMARY)') : ''}`,
   );
-  console.log(`    ${pc.gray('REPLICATE_API_TOKEN:')}    ${pc.gray(maskSecret(env.REPLICATE_API_TOKEN))}`);
+  console.log(
+    `    ${pc.gray('REPLICATE_API_TOKEN:')}    ${pc.gray(maskSecret(env.REPLICATE_API_TOKEN))}`,
+  );
 
   // Mock
   const isMockPrimary = currentProvider === 'mock';
@@ -124,12 +135,18 @@ export async function testImageProviders(env: Record<string, string>): Promise<v
   // 1. Gemini
   if (env.GEMINI_API_KEY) {
     if (env.GEMINI_API_KEY.startsWith('AIzaSy')) {
-      console.log(`  ${pc.green('✔')} ${pc.bold('Google Gemini Imagen:')} API key structure validated`);
+      console.log(
+        `  ${pc.green('✔')} ${pc.bold('Google Gemini Imagen:')} API key structure validated`,
+      );
     } else {
-      console.log(`  ${pc.yellow('!')} ${pc.bold('Google Gemini Imagen:')} Key configured (non-standard prefix)`);
+      console.log(
+        `  ${pc.yellow('!')} ${pc.bold('Google Gemini Imagen:')} Key configured (non-standard prefix)`,
+      );
     }
   } else {
-    console.log(`  ${pc.gray('○')} ${pc.bold('Google Gemini Imagen:')} Not configured (GEMINI_API_KEY missing)`);
+    console.log(
+      `  ${pc.gray('○')} ${pc.bold('Google Gemini Imagen:')} Not configured (GEMINI_API_KEY missing)`,
+    );
   }
 
   // 2. ComfyUI
@@ -146,22 +163,34 @@ export async function testImageProviders(env: Record<string, string>): Promise<v
       });
       clearTimeout(timeout);
       if (res && res.status < 500) {
-        console.log(`  ${pc.green('✔')} ${pc.bold('ComfyUI / SD-WebUI:')} Server responded (${res.status} OK at ${comfyUrl})`);
+        console.log(
+          `  ${pc.green('✔')} ${pc.bold('ComfyUI / SD-WebUI:')} Server responded (${res.status} OK at ${comfyUrl})`,
+        );
       } else {
-        console.log(`  ${pc.yellow('!')} ${pc.bold('ComfyUI / SD-WebUI:')} Server returned status ${res?.status} at ${comfyUrl}`);
+        console.log(
+          `  ${pc.yellow('!')} ${pc.bold('ComfyUI / SD-WebUI:')} Server returned status ${res?.status} at ${comfyUrl}`,
+        );
       }
     } catch {
-      console.log(`  ${pc.yellow('!')} ${pc.bold('ComfyUI / SD-WebUI:')} Could not reach ${comfyUrl} (Ensure ComfyUI is running)`);
+      console.log(
+        `  ${pc.yellow('!')} ${pc.bold('ComfyUI / SD-WebUI:')} Could not reach ${comfyUrl} (Ensure ComfyUI is running)`,
+      );
     }
   } else {
-    console.log(`  ${pc.gray('○')} ${pc.bold('ComfyUI / SD-WebUI:')} Not configured (COMFYUI_BASE_URL missing)`);
+    console.log(
+      `  ${pc.gray('○')} ${pc.bold('ComfyUI / SD-WebUI:')} Not configured (COMFYUI_BASE_URL missing)`,
+    );
   }
 
   // 3. Replicate
   if (env.REPLICATE_API_TOKEN) {
-    console.log(`  ${pc.green('✔')} ${pc.bold('Replicate Cloud:')} Token configured (${maskSecret(env.REPLICATE_API_TOKEN)})`);
+    console.log(
+      `  ${pc.green('✔')} ${pc.bold('Replicate Cloud:')} Token configured (${maskSecret(env.REPLICATE_API_TOKEN)})`,
+    );
   } else {
-    console.log(`  ${pc.gray('○')} ${pc.bold('Replicate Cloud:')} Not configured (REPLICATE_API_TOKEN missing)`);
+    console.log(
+      `  ${pc.gray('○')} ${pc.bold('Replicate Cloud:')} Not configured (REPLICATE_API_TOKEN missing)`,
+    );
   }
 
   // 4. Mock Provider
@@ -172,10 +201,14 @@ export async function testImageProviders(env: Record<string, string>): Promise<v
       userId: 'cli',
     });
     if (mockRes.images.length > 0 && mockRes.images[0]?.buffer.length) {
-      console.log(`  ${pc.green('✔')} ${pc.bold('Offline Mock Synthesizer:')} Synthesis verified (Generated ${mockRes.images[0].buffer.length} bytes in ${mockRes.durationMs}ms)`);
+      console.log(
+        `  ${pc.green('✔')} ${pc.bold('Offline Mock Synthesizer:')} Synthesis verified (Generated ${mockRes.images[0].buffer.length} bytes in ${mockRes.durationMs}ms)`,
+      );
     }
   } catch (err: unknown) {
-    console.log(`  ${pc.red('✖')} ${pc.bold('Offline Mock Synthesizer:')} Failed (${err instanceof Error ? err.message : String(err)})`);
+    console.log(
+      `  ${pc.red('✖')} ${pc.bold('Offline Mock Synthesizer:')} Failed (${err instanceof Error ? err.message : String(err)})`,
+    );
   }
 
   console.log('');
@@ -208,9 +241,9 @@ export async function runInteractiveWizard(envPath: string): Promise<void> {
     else if (currentProvider === 'mock') defaultChoice = '4';
     else if (currentProvider === 'auto') defaultChoice = '5';
 
-    const providerAns = (
-      await rl.question(`\nSelect provider [1-5] (default: ${defaultChoice}): `)
-    ).trim() || defaultChoice;
+    const providerAns =
+      (await rl.question(`\nSelect provider [1-5] (default: ${defaultChoice}): `)).trim() ||
+      defaultChoice;
 
     let selectedProvider: SupportedImageProvider = 'gemini';
     if (providerAns === '2' || providerAns.toLowerCase() === 'comfyui') {
@@ -227,7 +260,9 @@ export async function runInteractiveWizard(envPath: string): Promise<void> {
       IMAGE_DEFAULT_PROVIDER: selectedProvider,
     };
 
-    console.log(pc.green(`\n✔ Default provider set to: ${IMAGE_PROVIDER_METADATA[selectedProvider].name}\n`));
+    console.log(
+      pc.green(`\n✔ Default provider set to: ${IMAGE_PROVIDER_METADATA[selectedProvider].name}\n`),
+    );
 
     // 2. Configure credentials
     if (selectedProvider === 'gemini' || selectedProvider === 'auto') {
@@ -279,13 +314,15 @@ export async function runInteractiveWizard(envPath: string): Promise<void> {
     for (const k of [...result.updatedKeys, ...result.addedKeys]) {
       const val = updates[k];
       const isSecret = k.toLowerCase().includes('key') || k.toLowerCase().includes('token');
-      console.log(`  • ${pc.bold(k)} = ${pc.cyan(isSecret ? maskSecret(val) : val ?? '')}`);
+      console.log(`  • ${pc.bold(k)} = ${pc.cyan(isSecret ? maskSecret(val) : (val ?? ''))}`);
     }
 
     // 5. Test prompt
     const testAns = (
       await rl.question('\nWould you like to test the configured provider connections now? [Y/n]: ')
-    ).trim().toLowerCase();
+    )
+      .trim()
+      .toLowerCase();
     if (testAns !== 'n' && testAns !== 'no') {
       const updatedEnv = readEnvFile(envPath);
       await testImageProviders(updatedEnv);
@@ -302,8 +339,13 @@ export function registerImageConfigureCommand(program: Command): void {
   program
     .command('image-configure')
     .alias('image:configure')
-    .description('Configure AI Image Generation providers (Gemini, ComfyUI, Replicate), API keys, and daily quotas')
-    .option('-p, --provider <provider>', 'Default image provider (gemini, comfyui, replicate, mock, auto)')
+    .description(
+      'Configure AI Image Generation providers (Gemini, ComfyUI, Replicate), API keys, and daily quotas',
+    )
+    .option(
+      '-p, --provider <provider>',
+      'Default image provider (gemini, comfyui, replicate, mock, auto)',
+    )
     .option('--gemini-key <key>', 'Google Gemini API key (GEMINI_API_KEY)')
     .option('--comfyui-url <url>', 'ComfyUI / SD-WebUI REST API base URL (COMFYUI_BASE_URL)')
     .option('--replicate-token <token>', 'Replicate API token (REPLICATE_API_TOKEN)')
@@ -324,7 +366,13 @@ export function registerImageConfigureCommand(program: Command): void {
       }
 
       // 2. Test providers only
-      if (options.test && !options.provider && !options.geminiKey && !options.comfyuiUrl && !options.replicateToken) {
+      if (
+        options.test &&
+        !options.provider &&
+        !options.geminiKey &&
+        !options.comfyuiUrl &&
+        !options.replicateToken
+      ) {
         await testImageProviders(currentEnv);
         return;
       }
@@ -336,7 +384,7 @@ export function registerImageConfigureCommand(program: Command): void {
         options.comfyuiUrl ||
         options.replicateToken ||
         options.dailyQuota ||
-        options.yes
+        options.yes,
       );
 
       if (options.interactive || (!hasFlags && process.stdin.isTTY)) {
@@ -378,11 +426,13 @@ export function registerImageConfigureCommand(program: Command): void {
 
       if (Object.keys(updates).length > 0) {
         const result = updateEnvFile(envPath, updates);
-        console.log(pc.green(`\n✔ Successfully updated image configuration in ${result.filePath}:`));
+        console.log(
+          pc.green(`\n✔ Successfully updated image configuration in ${result.filePath}:`),
+        );
         for (const k of [...result.updatedKeys, ...result.addedKeys]) {
           const val = updates[k];
           const isSecret = k.toLowerCase().includes('key') || k.toLowerCase().includes('token');
-          console.log(`  • ${pc.bold(k)} = ${pc.cyan(isSecret ? maskSecret(val) : val ?? '')}`);
+          console.log(`  • ${pc.bold(k)} = ${pc.cyan(isSecret ? maskSecret(val) : (val ?? ''))}`);
         }
 
         if (options.test) {
@@ -391,7 +441,11 @@ export function registerImageConfigureCommand(program: Command): void {
         }
       } else {
         printImageStatus(currentEnv, envPath);
-        console.log(pc.gray('Tip: Run `ririko image-configure -i` for the interactive wizard or see `ririko image-configure --help`.\n'));
+        console.log(
+          pc.gray(
+            'Tip: Run `ririko image-configure -i` for the interactive wizard or see `ririko image-configure --help`.\n',
+          ),
+        );
       }
     });
 }

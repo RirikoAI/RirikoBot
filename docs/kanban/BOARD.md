@@ -40,6 +40,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0022` | Bug | Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone | 2 | `STORY-123` | [BUG-0022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0022.md) |
 | `BUG-0021` | Bug | Auto Voice Deleted Every Empty Voice Channel in a Join-to-Create Hub's Category, Including Permanent Server Channels | 3 | `STORY-091` | [BUG-0021.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0021.md) |
 | `BUG-0020` | Bug | Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors | 2 | `STORY-117` | [BUG-0020.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0020.md) |
 | `BUG-0019` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | `STORY-132` | [BUG-0019.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0019.md) |
@@ -277,7 +278,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1132` | Task | Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer | 2 | `STORY-113` | ✅ Done · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `TASK-1131` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-012 (Quality Gates & Production Deployment)
-> Scope gap from the regrooming: the original STORY-120 targeted 80%+ test coverage and the original STORY-122 included GitHub Actions CI/CD. Neither is covered by the tasks below; add them back before EPIC-012 closes. TASK-1221 can reuse the bot status record from TASK-1131 (EPIC-011).
+> Scope gap from the regrooming: the original STORY-120 targeted 80%+ test coverage and the original STORY-122 included GitHub Actions CI/CD. CI/CD and coverage tracking were pulled forward on 2026-09-26 as STORY-123 (CircleCI + Codecov instead of GitHub Actions); the 80%+ coverage target is still open. TASK-1221 can reuse the bot status record from TASK-1131 (EPIC-011).
 
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
@@ -290,6 +291,10 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-122` | Story | Production Orchestration & Health Probes | 3 | `EPIC-012` | 🎯 To Do | `STORY-121` |
 | `TASK-1221` | Task | Implement `/health` and `/ready` probes for Bot and Web | 1 | `STORY-122` | 🎯 To Do | — |
 | `TASK-1222` | Task | docker-compose.production.yml with Redis, PostgreSQL, and App Services | 2 | `STORY-122` | 🎯 To Do | — |
+| `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | `EPIC-012` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | — |
+| `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | — |
+| `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | `TASK-1231` |
+| `TASK-1233` | Task | Vercel Project Status Site Generated from the Kanban Board | 1 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | — |
 
 ### 📋 Groomed Stories for EPIC-013 (Media Synthesis, Reactions & AI Images)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |

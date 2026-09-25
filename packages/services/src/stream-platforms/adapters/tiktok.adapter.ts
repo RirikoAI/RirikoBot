@@ -35,7 +35,8 @@ export class TikTokStreamAdapter implements StreamPlatformAdapter {
   private getRequestHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'User-Agent': BROWSER_USER_AGENT,
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+      Accept:
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
       'Accept-Language': 'en-US,en;q=0.9',
       'Sec-Ch-Ua': '"Chromium";v="126", "Google Chrome";v="126", "Not=A?Brand";v="99"',
       'Sec-Ch-Ua-Mobile': '?0',
@@ -73,7 +74,9 @@ export class TikTokStreamAdapter implements StreamPlatformAdapter {
       const html = await response.text();
 
       // 1. Try parsing JSON rehydration script
-      const scriptMatch = html.match(/<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/);
+      const scriptMatch = html.match(
+        /<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/,
+      );
       if (scriptMatch && scriptMatch[1]) {
         try {
           const parsed = JSON.parse(scriptMatch[1]) as Record<string, any>;
@@ -97,7 +100,9 @@ export class TikTokStreamAdapter implements StreamPlatformAdapter {
       // 2. Fallback to OpenGraph meta tags
       const titleMatch = html.match(/<meta property="og:title" content="([^"]+)">/);
       const imageMatch = html.match(/<meta property="og:image" content="([^"]+)">/);
-      const rawTitle = titleMatch?.[1] ? titleMatch[1].replace(/\s*\(.*?\)\s*\|.*$/, '').trim() : sanitized;
+      const rawTitle = titleMatch?.[1]
+        ? titleMatch[1].replace(/\s*\(.*?\)\s*\|.*$/, '').trim()
+        : sanitized;
       const displayName = rawTitle || sanitized;
 
       return {
@@ -130,7 +135,9 @@ export class TikTokStreamAdapter implements StreamPlatformAdapter {
       const html = await response.text();
 
       // 1. Check Next.js rehydration JSON payload
-      const scriptMatch = html.match(/<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/);
+      const scriptMatch = html.match(
+        /<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/,
+      );
       if (scriptMatch && scriptMatch[1]) {
         try {
           const parsed = JSON.parse(scriptMatch[1]) as Record<string, any>;
@@ -213,7 +220,10 @@ export class TikTokStreamAdapter implements StreamPlatformAdapter {
         streamUrl: liveUrl,
       };
     } catch (err) {
-      console.error(`[TikTokAdapter] Error checking stream status for '${streamer.username}':`, err);
+      console.error(
+        `[TikTokAdapter] Error checking stream status for '${streamer.username}':`,
+        err,
+      );
       return null;
     }
   }

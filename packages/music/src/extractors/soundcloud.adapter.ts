@@ -47,7 +47,9 @@ export class SoundCloudAdapter implements MusicSourceAdapter {
           return clientId;
         } catch (err) {
           this.clientIdPromise = null;
-          throw new Error(`Failed to acquire SoundCloud client ID: ${(err as Error).message}`, { cause: err });
+          throw new Error(`Failed to acquire SoundCloud client ID: ${(err as Error).message}`, {
+            cause: err,
+          });
         }
       })();
     }
@@ -151,12 +153,18 @@ export class SoundCloudAdapter implements MusicSourceAdapter {
     } catch {
       // Fallback if URL is 404/deleted/mock: parse slug from URL
       const parts = clean.replace(/https?:\/\/(www\.|m\.)?soundcloud\.com\//, '').split('/');
-      const artist = (parts[0] ?? 'SoundCloud Artist').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-      const slug = (parts[1] ?? 'track').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      const artist = (parts[0] ?? 'SoundCloud Artist')
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+      const slug = (parts[1] ?? 'track')
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
       const isSet = this.isSetUrl(clean);
 
       if (isSet) {
-        const setTitle = (parts[2] ?? slug).replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        const setTitle = (parts[2] ?? slug)
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
         const tracks: ResolvedTrack[] = [];
         for (let i = 1; i <= 6; i++) {
           tracks.push({
@@ -171,7 +179,10 @@ export class SoundCloudAdapter implements MusicSourceAdapter {
             getStream: async () => {
               const scRes = await this.search(`${artist} ${setTitle}`, 1);
               if (scRes[0]) {
-                const searchItems = (await play.search(scRes[0].title, { source: { soundcloud: 'tracks' }, limit: 1 })) as SoundCloudTrack[];
+                const searchItems = (await play.search(scRes[0].title, {
+                  source: { soundcloud: 'tracks' },
+                  limit: 1,
+                })) as SoundCloudTrack[];
                 if (searchItems[0]) {
                   return (await play.stream_from_info(searchItems[0])).stream;
                 }
@@ -203,7 +214,10 @@ export class SoundCloudAdapter implements MusicSourceAdapter {
         getStream: async () => {
           const scRes = await this.search(`${artist} ${slug}`, 1);
           if (scRes[0]) {
-            const searchItems = (await play.search(scRes[0].title, { source: { soundcloud: 'tracks' }, limit: 1 })) as SoundCloudTrack[];
+            const searchItems = (await play.search(scRes[0].title, {
+              source: { soundcloud: 'tracks' },
+              limit: 1,
+            })) as SoundCloudTrack[];
             if (searchItems[0]) {
               return (await play.stream_from_info(searchItems[0])).stream;
             }

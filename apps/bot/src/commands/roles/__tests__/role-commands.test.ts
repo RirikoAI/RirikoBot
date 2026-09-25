@@ -173,7 +173,9 @@ describe('Role Commands Suite (TASK-1404)', () => {
       } as any,
       autoRoleService: {
         hasManageRolesPermission: vi.fn().mockReturnValue(true),
-        isValidAssignableRole: vi.fn().mockReturnValue({ valid: true, role: { id: 'role-1', name: 'Member' } }),
+        isValidAssignableRole: vi
+          .fn()
+          .mockReturnValue({ valid: true, role: { id: 'role-1', name: 'Member' } }),
         assignTemporaryRole: vi.fn().mockResolvedValue({ success: true, roleId: 'role-1' }),
         removeTemporaryRole: vi.fn().mockResolvedValue(true),
       } as any,
@@ -384,7 +386,9 @@ describe('Role Commands Suite (TASK-1404)', () => {
 
       await cmd.execute(ctx);
 
-      expect(mockServices.autoRoleRepo?.setHumanRoleIds).toHaveBeenCalledWith('guild-1', ['role-1']);
+      expect(mockServices.autoRoleRepo?.setHumanRoleIds).toHaveBeenCalledWith('guild-1', [
+        'role-1',
+      ]);
       expect(ctx.reply).toHaveBeenCalled();
     });
 
@@ -403,7 +407,9 @@ describe('Role Commands Suite (TASK-1404)', () => {
 
       await cmd.execute(ctx);
 
-      expect(mockServices.autoRoleRepo?.setBotRoleIds).toHaveBeenCalledWith('guild-1', ['role-bot']);
+      expect(mockServices.autoRoleRepo?.setBotRoleIds).toHaveBeenCalledWith('guild-1', [
+        'role-bot',
+      ]);
       expect(ctx.reply).toHaveBeenCalled();
     });
 
@@ -422,7 +428,10 @@ describe('Role Commands Suite (TASK-1404)', () => {
 
       await cmd.execute(ctx);
 
-      expect(mockServices.autoRoleRepo?.setVerificationRole).toHaveBeenCalledWith('guild-1', 'role-verify');
+      expect(mockServices.autoRoleRepo?.setVerificationRole).toHaveBeenCalledWith(
+        'guild-1',
+        'role-verify',
+      );
       expect(ctx.reply).toHaveBeenCalled();
     });
 
@@ -430,7 +439,9 @@ describe('Role Commands Suite (TASK-1404)', () => {
       const cmd = createAutoRoleCommand(mockServices as BotServices);
       const ctx = createMockContext({
         options: {
-          getString: vi.fn().mockImplementation((name) => (name === 'action' ? 'send-verify' : null)),
+          getString: vi
+            .fn()
+            .mockImplementation((name) => (name === 'action' ? 'send-verify' : null)),
           getChannel: vi.fn().mockResolvedValue(mockChannel),
           getRawArgs: vi.fn().mockReturnValue([]),
         } as any,

@@ -56,7 +56,8 @@ export class ConsumableService {
         const energyRecord = this.energyLifecycle
           ? await this.energyLifecycle.getOrReconcileUserEnergy(userId)
           : await this.energyRepo.getOrCreate(userId);
-        energyAmount = energyRecord.maxEnergy + energyRecord.bonusEnergy - energyRecord.currentEnergy;
+        energyAmount =
+          energyRecord.maxEnergy + energyRecord.bonusEnergy - energyRecord.currentEnergy;
       }
 
       const potionResult = this.energyLifecycle
@@ -68,7 +69,9 @@ export class ConsumableService {
           success: false,
           type: 'ENERGY',
           restoredAmount: 0,
-          reason: potionResult.reason ?? `You have reached your daily stamina potion limit (${DAILY_ENERGY_POTION_CAP}/${DAILY_ENERGY_POTION_CAP}). Rest well, summoner!`,
+          reason:
+            potionResult.reason ??
+            `You have reached your daily stamina potion limit (${DAILY_ENERGY_POTION_CAP}/${DAILY_ENERGY_POTION_CAP}). Rest well, summoner!`,
           userEnergy: potionResult.energy.currentEnergy,
           potsUsedToday: potionResult.potsUsedToday,
         };
