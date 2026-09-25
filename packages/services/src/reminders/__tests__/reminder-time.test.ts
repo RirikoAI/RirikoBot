@@ -48,6 +48,23 @@ describe('parseReminderTime', () => {
     );
   });
 
+  it('uses the offset of the target date across a DST change', () => {
+    // London is on BST (UTC+1) on 2026-09-22 and on GMT (UTC+0) at Christmas.
+    const london = 'Europe/London';
+    expect(parseReminderTime('tomorrow 9am', NOW, london)?.triggerAt.toISOString()).toBe(
+      '2026-09-23T08:00:00.000Z',
+    );
+    expect(parseReminderTime('2026-12-25 08:00', NOW, london)?.triggerAt.toISOString()).toBe(
+      '2026-12-25T08:00:00.000Z',
+    );
+  });
+
+  it('keeps an explicit timezone written in the text', () => {
+    expect(parseReminderTime('tomorrow 9am UTC', NOW, KL)?.triggerAt.toISOString()).toBe(
+      '2026-09-23T09:00:00.000Z',
+    );
+  });
+
   it('splits the time phrase from the message wherever it appears', () => {
     expect(parseReminderTime('call mom tomorrow at 6pm', NOW, KL)).toMatchObject({
       timeText: 'tomorrow at 6pm',
