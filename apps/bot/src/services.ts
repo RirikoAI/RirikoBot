@@ -4,6 +4,7 @@ import {
   EconomyRepository,
   XpRepository,
   GuildSettingsRepository,
+  GuildConfigVersionRepository,
   LeaderboardRepository,
   ItemRepository,
   InventoryRepository,
@@ -140,6 +141,7 @@ import {
   createDiscordReminderDelivery,
   resolveTimeZone,
   GuildSettingsService,
+  GuildConfigWatcher,
   ReactionGifService,
   MemeSynthesizer,
   ImageGenerationService,
@@ -201,6 +203,8 @@ export interface BotServices {
   /** Null when no Discord client was supplied (tests); started on gateway READY. */
   reminderScheduler: ReminderScheduler | null;
   guildSettingsService: GuildSettingsService;
+  /** Polls the guild config change feed; started on gateway READY. */
+  guildConfigWatcher: GuildConfigWatcher;
   /** Zone for reading reminder times: the user's saved zone, then the guild's, then UTC. */
   resolveUserTimeZone: (userId: string, guildId: string | null) => Promise<string>;
   /** Zone for reading guild times: the guild's saved zone, then UTC. */
@@ -483,6 +487,9 @@ export async function createBotServices(
     defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
     defaultTimezone: 'UTC',
   });
+  // Settings saved by the dashboard or CLI reach this process through the config change feed.
+  eventBus.on('guild:configChanged', ({ guildId }) => guildSettingsService.invalidate(guildId));
+  const guildConfigWatcher = new GuildConfigWatcher(new GuildConfigVersionRepository(db), eventBus);
   const resolveUserTimeZone = async (userId: string, guildId: string | null): Promise<string> => {
     const [userPrefs, guildTz] = await Promise.all([
       conversationManager.getUserPreferences(userId).catch(() => null),
@@ -900,6 +907,7 @@ export async function createBotServices(
     reminderService,
     reminderScheduler,
     guildSettingsService,
+    guildConfigWatcher,
     resolveUserTimeZone,
     resolveGuildTimeZone,
     wallpaperService,

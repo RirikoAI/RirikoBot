@@ -182,3 +182,6 @@ export type AuditLog = typeof sqlite.auditLogs.$inferSelect;
 // Web Dashboard
 export type WebSession = typeof sqlite.webSessions.$inferSelect;
 export type NewWebSession = typeof sqlite.webSessions.$inferInsert;
+
+// Guild Config Change Feed
+export type GuildConfigVersion = typeof sqlite.guildConfigVersions.$inferSelect;

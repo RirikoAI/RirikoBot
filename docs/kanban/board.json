@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "CHORE-1101",
+  "active_in_progress_ticket": "TASK-1111",
   "epics": [
     {
       "id": "EPIC-000",
@@ -2492,7 +2492,7 @@
       "parent": "STORY-111",
       "title": "Shared Zod Guild Config Schemas in @ririko/core, GuildConfigService & audit_logs Field-Diff Writer",
       "points": 3,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "STORY-110",
         "CHORE-1101"
@@ -3159,7 +3159,7 @@
       "id": "CHORE-1101",
       "title": "Cross-Process Guild Config Change Feed (guild_config_versions Table, Bot Watcher & Cache Invalidation Events)",
       "points": 2,
-      "status": "IN_PROGRESS",
+      "status": "DONE",
       "requires": [
         "STORY-110"
       ],
