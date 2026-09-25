@@ -329,6 +329,13 @@ export async function main(): Promise<void> {
       console.error('[AutoVoice] Error handling voice state update:', err);
     }
   });
+  bot.client.on('channelDelete', async (channel) => {
+    try {
+      await services.autoVoiceService.handleChannelDelete(channel.id);
+    } catch (err) {
+      console.error('[AutoVoice] Error forgetting deleted channel:', err);
+    }
+  });
 
   // 7. Track Gateway State Transitions
   bot.gateway.on('stateChange', async (event) => {
