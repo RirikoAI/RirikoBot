@@ -40,6 +40,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0022` | Bug | Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone | 2 | `STORY-123` | [BUG-0022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0022.md) |
 | `BUG-0021` | Bug | Auto Voice Deleted Every Empty Voice Channel in a Join-to-Create Hub's Category, Including Permanent Server Channels | 3 | `STORY-091` | [BUG-0021.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0021.md) |
 | `BUG-0020` | Bug | Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors | 2 | `STORY-117` | [BUG-0020.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0020.md) |
 | `BUG-0019` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | `STORY-132` | [BUG-0019.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0019.md) |

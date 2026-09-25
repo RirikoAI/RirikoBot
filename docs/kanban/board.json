@@ -3652,6 +3652,16 @@
       ],
       "blocks": [],
       "description": "Reported 2026-09-26: AutoVoiceService deleted any empty voice channel in the category of a join-to-create hub, not only the temporary channels it created. Both the member-leave handler and cleanupOrphans (run on READY) matched channels by category, and the set of created channels lived only in memory, so after a restart the bot could not tell its channels from the server's own. A guild with permanent voice channels next to a hub lost them whenever they were empty. Fix: persist the IDs of created channels in a new dual-dialect auto_voice_channels table (AutoVoiceChannelRepository), delete only recorded channels, forget records when the channel is deleted or no longer exists (including the channelDelete gateway event), and make cleanupOrphans iterate the records instead of scanning the category. Existing databases need pnpm db:push."
+    },
+    {
+      "id": "BUG-0022",
+      "title": "Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-123",
+      "requires": [],
+      "blocks": [],
+      "description": "Found by the first CircleCI run (UTC host). parseReminderTime passed the IANA zone name to chrono-node, which only understands abbreviations or offset minutes and silently fell back to the host zone, so wall-clock reminders fired hours off on any server not in the user's zone. Now passes the zone's offset in minutes and re-parses with the target date's offset across DST changes."
     }
   ]
 }

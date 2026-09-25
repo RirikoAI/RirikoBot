@@ -44,8 +44,20 @@ export function parseReminderTime(
   now: Date,
   timeZone: string,
 ): ParsedReminderTime | null {
-  const [result] = chrono.parse(text, { instant: now, timezone: timeZone }, { forwardDate: true });
+  // chrono reads `timezone` only as an abbreviation ("JST") or offset minutes; an IANA name
+  // silently falls back to the host's zone. Pass the zone's offset at `now`, then re-parse with
+  // the offset on the target date when a DST change lies in between.
+  const safeTz = isValidTimeZone(timeZone) ? timeZone : 'UTC';
+  const parseWithOffset = (offsetMinutes: number) =>
+    chrono.parse(text, { instant: now, timezone: offsetMinutes }, { forwardDate: true })[0];
+
+  const nowOffset = zoneOffsetMs(now, safeTz) / 60_000;
+  let result = parseWithOffset(nowOffset);
   if (!result) return null;
+  if (!result.start.isCertain('timezoneOffset')) {
+    const targetOffset = zoneOffsetMs(result.date(), safeTz) / 60_000;
+    if (targetOffset !== nowOffset) result = parseWithOffset(targetOffset) ?? result;
+  }
 
   const remainder =
     `${text.slice(0, result.index)} ${text.slice(result.index + result.text.length)}`
