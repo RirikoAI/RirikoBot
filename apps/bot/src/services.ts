@@ -587,6 +587,7 @@ export async function createBotServices(
   const disciplinaryHistoryService = new DisciplinaryHistoryService(moderationRepo);
   const warningEscalationService = new WarningEscalationService(
     moderationRepo,
+    guildSettingsRepo,
     permissionService,
     moderationActionService,
     eventBus,
@@ -602,6 +603,11 @@ export async function createBotServices(
     warningEscalationService,
     eventBus,
   );
+  // AutoMod caches each guild's rules for five minutes; drop them as soon as the dashboard or
+  // CLI saves new ones (the change feed reaches this process through GuildConfigWatcher).
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'automod') autoModService.invalidateRuleCache(guildId);
+  });
   const antiRaidService = new AntiRaidService(
     moderationRepo,
     moderationActionService,

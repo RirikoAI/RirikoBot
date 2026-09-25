@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { canonicalTimeZone } from '../time/time-zone.js';
+import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
 export const DEFAULT_COMMAND_PREFIX = '!';
@@ -33,6 +34,80 @@ export const TimezoneSchema = z.string().transform((value, ctx) => {
   return canonical;
 });
 
+const SNOWFLAKE = /^\d{17,20}$/;
+const TRUE_WORDS = new Set(['true', 'on', 'yes', '1']);
+const FALSE_WORDS = new Set(['false', 'off', 'no', '0']);
+
+/*
+ * Setting types below accept typed values from the dashboard and plain strings from
+ * `ririko guild:config`, so both paths share one schema.
+ */
+
+/** A boolean; the CLI may pass `true`/`false`, `on`/`off`, `yes`/`no` or `1`/`0`. */
+export const FlagSetting = z.preprocess(
+  (value) => {
+    if (typeof value !== 'string') return value;
+    const word = value.trim().toLowerCase();
+    if (TRUE_WORDS.has(word)) return true;
+    if (FALSE_WORDS.has(word)) return false;
+    return value;
+  },
+  z.boolean({ invalid_type_error: 'Use true or false.', required_error: 'Use true or false.' }),
+);
+
+/** A whole number from `min` to `max`; numeric strings are converted. */
+export function IntSetting(min: number, max: number) {
+  const message = `Enter a whole number from ${min} to ${max}.`;
+  return z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() !== '' ? Number(value.trim()) : value),
+    z
+      .number({ invalid_type_error: message, required_error: message })
+      .int(message)
+      .min(min, message)
+      .max(max, message),
+  );
+}
+
+/** A Discord ID, or `null` for none; an empty string (or `none` from the CLI) clears it. */
+export const OptionalSnowflakeSetting = z.preprocess((value) => {
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim();
+  return trimmed === '' || trimmed.toLowerCase() === 'none' ? null : trimmed;
+}, z.string().regex(SNOWFLAKE, 'Must be a Discord ID.').nullable());
+
+/** Up to `max` distinct Discord IDs; the CLI may pass them comma or space separated. */
+export function SnowflakeListSetting(max: number) {
+  return z.preprocess(
+    (value) => {
+      const list = typeof value === 'string' ? value.split(/[\s,]+/).filter(Boolean) : value;
+      return Array.isArray(list) ? [...new Set(list)] : list;
+    },
+    z
+      .array(z.string().regex(SNOWFLAKE, 'Each entry must be a Discord ID.'), {
+        invalid_type_error: 'Enter a list of Discord IDs.',
+      })
+      .max(max, `Choose at most ${max}.`),
+  );
+}
+
+/** A structured value (such as a list of rows); the CLI and forms may pass it as JSON text. */
+export function JsonSetting<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((value) => {
+    if (typeof value !== 'string') return value;
+    try {
+      return JSON.parse(value) as unknown;
+    } catch {
+      return value;
+    }
+  }, schema);
+}
+
+const AutoModActionSetting = z.enum(AUTOMOD_ACTIONS, {
+  errorMap: () => ({ message: `Choose one of ${AUTOMOD_ACTIONS.join(', ')}.` }),
+});
+const MAX_EXEMPTIONS = 25;
+const AUTOMOD_ACTION_HELP = `${AUTOMOD_ACTIONS.join(', ')}; every match also deletes the message`;
+
 /**
  * Guild settings editable from the dashboard and the CLI, one strict schema per module. Only
  * keys the bot reads belong here (docs/dashboard.md section 3.2).
@@ -42,6 +117,68 @@ export const GuildConfigSchemas = {
     .object({
       prefix: PrefixSchema.describe('Prefix for text commands, 1 to 5 characters'),
       timezone: TimezoneSchema.describe('IANA time zone used for reminders and guild times'),
+    })
+    .strict(),
+  moderation: z
+    .object({
+      escalationSteps: JsonSetting(EscalationPolicySchema).describe(
+        'Warning escalation steps as JSON, e.g. [{"warnThreshold":3,"action":"TIMEOUT","durationSeconds":600}]',
+      ),
+    })
+    .strict(),
+  automod: z
+    .object({
+      inviteFilterEnabled: FlagSetting.describe('Invite filter on or off'),
+      inviteFilterAction: AutoModActionSetting.describe(
+        `Invite filter action: ${AUTOMOD_ACTION_HELP}`,
+      ),
+      inviteFilterExemptRoleIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Role IDs the invite filter ignores, comma separated',
+      ),
+      inviteFilterExemptChannelIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Channel IDs where invites are allowed, comma separated',
+      ),
+      phishingShieldEnabled: FlagSetting.describe('Phishing shield on or off'),
+      phishingShieldAction: AutoModActionSetting.describe(
+        `Phishing shield action: ${AUTOMOD_ACTION_HELP}`,
+      ),
+      phishingShieldExemptRoleIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Role IDs the phishing shield ignores, comma separated',
+      ),
+      phishingShieldExemptChannelIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Channel IDs the phishing shield ignores, comma separated',
+      ),
+      mentionSpamEnabled: FlagSetting.describe('Mention spam filter on or off'),
+      mentionSpamAction: AutoModActionSetting.describe(
+        `Mention spam action: ${AUTOMOD_ACTION_HELP}`,
+      ),
+      mentionSpamLimit: IntSetting(1, 50).describe(
+        'Mentions allowed in one message (1 to 50); more is a match',
+      ),
+      mentionSpamExemptRoleIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Role IDs the mention spam filter ignores, comma separated',
+      ),
+      mentionSpamExemptChannelIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Channel IDs the mention spam filter ignores, comma separated',
+      ),
+      burstSpamEnabled: FlagSetting.describe('Burst spam filter on or off'),
+      burstSpamAction: AutoModActionSetting.describe(`Burst spam action: ${AUTOMOD_ACTION_HELP}`),
+      burstSpamLimit: IntSetting(2, 20).describe(
+        'Messages allowed within 3 seconds (2 to 20); more is a match',
+      ),
+      burstSpamExemptRoleIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Role IDs the burst spam filter ignores, comma separated',
+      ),
+      burstSpamExemptChannelIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Channel IDs the burst spam filter ignores, comma separated',
+      ),
+    })
+    .strict(),
+  logging: z
+    .object({
+      logChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for moderation cases, anti-raid alerts and dashboard change notices; empty for none',
+      ),
     })
     .strict(),
 } as const;

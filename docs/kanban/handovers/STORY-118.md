@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 5 pts (`TASK-1172` = 2, `TASK-1173` = 3)
 - **Epic**: `EPIC-011`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #645)
 - **Timestamp**: 2026-09-25
 - **Branch**: `feat/STORY-118-session-hardening` (targets `develop/2.0.0`)
 - **Decisions**: [ADR-013](file:///Z:/Projects/ririko-v2-2026/docs/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md) (including the 2026-09-25 revision); details in [docs/dashboard.md](file:///Z:/Projects/ririko-v2-2026/docs/dashboard.md) §2.2, §2.4 and §7.

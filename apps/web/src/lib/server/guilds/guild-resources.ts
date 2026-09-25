@@ -81,12 +81,27 @@ export class GuildResourceDirectory {
 
   /** Roles members can be given: excludes @everyone and roles managed by integrations. */
   async assignableRoles(guildId: string): Promise<RoleOption[]> {
+    return this.roleOptions(guildId, (role) => !role.managed);
+  }
+
+  /**
+   * Every role a member can hold, including integration-managed ones such as Server Booster;
+   * excludes @everyone. For settings that match members by role, like AutoMod exemptions.
+   */
+  async memberRoles(guildId: string): Promise<RoleOption[]> {
+    return this.roleOptions(guildId, () => true);
+  }
+
+  private async roleOptions(
+    guildId: string,
+    include: (role: APIRole) => boolean,
+  ): Promise<RoleOption[]> {
     const roles = await this.roles.get(
       guildId,
       async () => (await this.rest.get(Routes.guildRoles(guildId))) as RESTGetAPIGuildRolesResult,
     );
     return roles
-      .filter((role: APIRole) => role.id !== guildId && !role.managed)
+      .filter((role: APIRole) => role.id !== guildId && include(role))
       .sort((a, b) => b.position - a.position)
       .map((role) => ({ id: role.id, name: role.name, color: role.color }));
   }
