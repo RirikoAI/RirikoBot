@@ -40,7 +40,7 @@
 ## 2. Current State & Verification
 - `pnpm build`, `pnpm typecheck`, `pnpm lint` (0 errors) and `pnpm build:web` pass. Prettier is clean on every file this branch created. The six touched files that fail Prettier already failed it on `develop/2.0.0`.
 - `pnpm test`: 189 files, 1718 tests pass. New tests:
-  - Schemas (10), `GuildConfigService` (7), CLI (5).
+  - Schemas (11), `GuildConfigService` (7), CLI (5).
   - Watcher (4), version repository (3), bot sync (1).
   - Resource directory (2), settings action (5).
 - `drizzle-kit push` against a copy of the dev database (including its WAL) applied only the additive statements `CREATE TABLE guild_config_versions` (plus its index) and `ALTER TABLE audit_logs ADD user_agent text`.
