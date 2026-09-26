@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "STORY-163",
   "epics": [
     {
       "id": "EPIC-000",
@@ -964,7 +964,7 @@
       "epic": "EPIC-011",
       "title": "Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles)",
       "points": 5,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "STORY-114"
       ],
