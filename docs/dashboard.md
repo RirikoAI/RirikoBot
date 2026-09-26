@@ -128,7 +128,9 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 6. **AI Chatbot**: Personality prompt editor, model selection (Gemini / OpenAI / Ollama), tool toggles.
 7. **Image Generation**: Provider selector, daily user quota limits, style presets.
 8. **Economy & Banking**: Currency name, daily reward base amount, bank interest rates, item shop manager. The item catalog (`economy_items`, `economy_item_categories`) is global, so the shop manager lives in the owner console.
+   - *Moved to STORY-165 (2026-09-27):* balances, the daily reward and the bank are global per user and nothing economy-related is read per guild, so there is no guild Economy page. The owner console edits the daily reward, streak bonus and bank capacity, and the item catalog. The currency name is fixed ("credits"), and bank interest is not live yet (`applyDailyInterest` has no caller).
 9. **XP & Ranking**: XP rate multipliers, voice XP toggles, level-up announcement channel.
+   - *Shipped in STORY-115 as `/dashboard/[guildId]/xp` (module `xp`):* level-up announcements on/off and channel, the XP rate (0 to 300%), no-XP channels (text and voice) and roles, and voice rewards (off by default). See docs/economy.md 3.2 and 6.2.
 10. **Waifu TCG & Gamification Settings** (items marked *owner console* edit global tables and are gated to bot owners with a passkey; see Section 3.1):
     - **Card Drop Management**: Drop channel selector, message frequency slider (50–200 messages), active hours timepicker, claim window timer. *Current gap:* `DropManager` keeps `GuildDropConfig` in an in-memory `Map` and nothing calls `setGuildConfig` outside tests, so every guild runs on `DEFAULT_DROP_CONFIG`. These settings must be persisted and loaded by the bot before the page can expose them (TASK-1121).
     - **Rarity & Market Controls** (*owner console*, `tcg_system_configs`): Drop weight fine-tuning, marketplace tax rate slider (1%–20%), listing expiration duration.
@@ -146,7 +148,9 @@ The dashboard provides dedicated management views for all 20+ bot modules:
     - **Shop Catalog Manager** (*owner console*, `game_items`; respects catalog-code seeding from BUG-0015): Visual catalog editor to manage basic shop equipment, accessories, potions, and daily purchase quotas.
     - **Achievement Manager** (*owner console* for edits, `game_achievements` is global): Live inspector for achievement completion telemetry, active reward tables, and toggleable seasonal achievements.
 11. **Games**: Enable/disable specific mini-games, wager limits, cooldown sliders.
+   - *Shipped in STORY-115 as `/dashboard/[guildId]/games` (module `games`):* a maximum wager (`guild_settings.max_game_wager`, empty for no limit) that coinflip, dice, highlow, rps and tictactoe check before taking credits, and per game an on/off switch and a cooldown. The rules are the games' server-wide `command_settings` rows, so the Commands page shows them too; saving the Games page keeps their roles and every channel rule. The TCG `/game` wager is not limited.
 12. **Giveaways**: Active giveaway list, winner reroll buttons, historical log.
+   - *Shipped in STORY-115 as `/dashboard/[guildId]/giveaways`:* running giveaways (end time, entries) with **End now**, and the last 25 ended ones with winners, rerolled winners and **Reroll** (optional winner count, up to 20). The web process runs the same `GiveawayEngine` without its scheduler and posts through the bot-token REST client. `endGiveaway` claims a giveaway only once, so the scheduler, `/giveaway end` and the dashboard cannot all end it. Ends and rerolls are audited (`giveaways.end`, `giveaways.reroll`) and post change notices; they need no passkey check. Giveaways are still created in Discord.
 13. **Reaction Roles**: Visual message builder and role mapping manager.
    - *Shipped in STORY-164 as `/dashboard/[guildId]/reaction-roles`:* a builder for a message (text and an optional embed) with up to 25 role buttons (5 per row, one click mode for the panel: toggle, give only, remove only or pick one) or one role menu (up to 25 options, a pick limit; a member's choice replaces their roles from that menu), with a live preview. Ririko posts it through the bot-token REST client, or edits one of its own messages that carries no other feature's components. Bindings are stored in `reaction_roles` (buttons by `rr:btn:<binding id>`, menu options by role under the panel's `group_id`) in one transaction with an audit entry; if that fails, the new message is deleted or the edited one restored. The panel list shows every message with bindings, including emoji reactions from `/create-reaction-role`; each role can be removed (its button, option or Ririko's reaction goes too), and a panel can lose all its roles or, for Ririko's own messages, be deleted. Every write needs a fresh passkey check, is audited and posts a change notice. Roles are checked against Ririko's highest role, as in the bot.
 14. **Auto Voice**: Join-to-create channel assigner, user limit, bitrate presets.
@@ -217,10 +221,11 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-112 | 8 | TCG settings, owner-only season editor and curve visualizer, card album, shop and achievement managers | 4 (TCG) |
 | STORY-113 | 5 | Overview tab, command usage counters, bot status record, voice activity, case log and audit viewers | 4 (Overview), 5 |
 | STORY-114 | 8 | Typed settings and step-up settings forms, Logging, Moderation escalation and AutoMod pages, real AutoMod actions | 3.4, 4 (3, 4, 18) |
-| STORY-115 | 5 | Economy, XP, Games, Giveaways pages | 4 (8, 9, 11, 12) |
+| STORY-115 | 8 | XP, Games, Giveaways pages, voice rewards, giveaway end guard | 4 (9, 11, 12) |
 | STORY-116 | 8 | Music, AI, Image Generation, Stream Alerts, Free Games, Welcome & Farewell, Integrations pages; needs STORY-133 | 4 (5, 6, 7, 15, 16, 17, 20) |
 | STORY-117 | 5 | Passkey sign-in gate, step-up, owner guard, recovery CLI | 2.3 |
 | STORY-118 | 5 | Session management and alerts, CSP and taint guards, rate limits, authorization coverage test | 7 |
 | STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
 | STORY-163 | 5 | Command Overrides engine (repository, catalog, override middleware) and page | 4 (19) |
 | STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 2.3, 4 (13, 14) |
+| STORY-165 | 8 | Owner console: global economy settings and item shop manager | 3.1, 4 (8) |

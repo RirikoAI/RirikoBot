@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "STORY-115",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -893,7 +893,7 @@
       "epic": "EPIC-011",
       "title": "XP & Ranking, Games & Giveaways Pages",
       "points": 8,
-      "status": "IN_PROGRESS",
+      "status": "REVIEW",
       "requires": [
         "STORY-111",
         "STORY-117"
@@ -2792,7 +2792,7 @@
       "parent": "STORY-115",
       "title": "XP & Ranking Page (Level-Up Announcements & Channel, XP Rate, No-XP Channels & Roles, Voice XP) & Voice Reward Accrual",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
@@ -2806,7 +2806,7 @@
       "parent": "STORY-115",
       "title": "Games Page (Per-Game On/Off & Cooldown via command_settings, Maximum Wager Enforced by the Bot)",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1151"
       ],
@@ -2820,7 +2820,7 @@
       "parent": "STORY-115",
       "title": "Giveaways Page (Active List, End Now, Reroll, History) with a Guard Against Ending Twice",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1152"
       ],
