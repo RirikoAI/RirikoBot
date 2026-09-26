@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { canonicalTimeZone } from '../time/time-zone.js';
 import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.js';
+import { CommandOverridesSchema } from './command-overrides.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
 export const DEFAULT_COMMAND_PREFIX = '!';
@@ -178,6 +179,13 @@ export const GuildConfigSchemas = {
     .object({
       logChannelId: OptionalSnowflakeSetting.describe(
         'Channel for moderation cases, anti-raid alerts and dashboard change notices; empty for none',
+      ),
+    })
+    .strict(),
+  commands: z
+    .object({
+      overrides: JsonSetting(CommandOverridesSchema).describe(
+        'Command overrides as JSON; channelId null is server wide, e.g. [{"command":"rps","channelId":null,"enabled":false}]',
       ),
     })
     .strict(),

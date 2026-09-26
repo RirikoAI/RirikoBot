@@ -9,6 +9,8 @@ import {
 } from '@ririko/core';
 import {
   AuditLogRepository,
+  CommandCatalogRepository,
+  CommandSettingsRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -139,6 +141,8 @@ export function createGuildConfigService(db: DatabaseClient): GuildConfigService
     db,
     guildSettings: new GuildSettingsRepository(db),
     moderation: new ModerationRepository(db),
+    commandSettings: new CommandSettingsRepository(db),
+    commandCatalog: new CommandCatalogRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
