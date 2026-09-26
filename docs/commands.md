@@ -53,7 +53,13 @@ export interface CommandMetadata {
 
 ## 3. Middleware Pipeline
 
-Prior to command invocation, the dispatcher passes the execution context through an extensible middleware chain:
+Prior to command invocation, the dispatcher passes the execution context through an extensible middleware chain.
+
+**Wired today (STORY-163):** `apps/bot/src/main.ts` runs two middlewares, in this order:
+1. **Command Override Middleware** (`createCommandOverrideMiddleware`): applies the guild's `command_settings`. The channel's rule replaces the server rule (threads use their parent channel). A disabled command, a blocked role, or a missing allowed role stops the command. `help`, `ping` and `prefix` are exempt, and members with Manage Server bypass it.
+2. **Cooldown Middleware** (`createCooldownMiddleware`): per member and command. The seconds come from the rule's cooldown override, else the command's `cooldownSeconds`; `0` turns it off. It runs after overrides, so a blocked command starts no cooldown.
+
+Autocomplete and help menu interactions do not pass through the pipeline. The remaining middlewares below exist in `packages/discord/src/middleware/` but are not wired yet:
 1. **Maintenance Middleware**: Blocks command execution if maintenance mode is enabled (except for bot developers).
 2. **Module Toggle Middleware**: Verifies whether the command's parent module is enabled for the guild.
 3. **Channel Override Middleware**: Checks if the command is disabled in the specific channel.

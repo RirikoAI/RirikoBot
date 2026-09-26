@@ -153,7 +153,8 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 17. **Welcome & Farewell**: Interactive canvas preview card editor with custom background uploads.
 18. **Logging**: Channel bindings for message edits, deletes, voice joins, and role updates.
    - *Shipped in STORY-114:* the one channel the bot has, `guild_settings.log_channel_id`. It receives moderation cases, anti-raid alerts and dashboard change notices. The bot writes no message, voice or role logs, so per-event bindings would be placeholders.
-19. **Command Overrides**: Enable/disable specific commands or limit them to staff roles (STORY-163; the bot does not read `command_settings` yet).
+19. **Command Overrides**: Enable/disable specific commands or limit them to staff roles.
+   - *Shipped in STORY-163 as `/dashboard/[guildId]/commands`:* per command, a server-wide rule and per-channel rules, each with on/off, allowed roles, blocked roles and a cooldown override, stored in `command_settings` (module `commands`, CLI key `commands.overrides`). The command list comes from the `commands` table, which the bot rewrites at startup. `help`, `ping` and `prefix` cannot be overridden, and members with Manage Server bypass every rule except cooldowns.
 20. **Integrations & Secrets**: Third-party API status (`Configured ✓`). Secrets are **never** displayed.
 
 ---
