@@ -77,6 +77,7 @@ describe('ReactionRolePanelService (TASK-1642)', () => {
       rest: rest as unknown as ConstructorParameters<typeof ReactionRolePanelService>[0]['rest'],
       resources: {
         messageChannels: async () => [{ id: CHANNEL, name: 'roles', category: null }],
+        channelNames: async () => new Map([[CHANNEL, 'roles']]),
         assignableRoles: async () => [
           { id: MEMBER, name: 'Member', color: 0 },
           { id: VIP, name: 'VIP', color: 0 },
@@ -253,5 +254,196 @@ describe('ReactionRolePanelService (TASK-1642)', () => {
       body: { content: 'before', embeds: [{ title: 'Old' }], components: [] },
     });
     expect(auditRows()).toEqual([]);
+  });
+});
+
+describe('ReactionRolePanelService list, edit and remove (TASK-1643)', () => {
+  let db: SqliteDatabaseClient;
+  let reactionRoles: ReactionRoleRepository;
+  let rest: Record<'get' | 'post' | 'patch' | 'delete', ReturnType<typeof vi.fn>>;
+  let service: ReactionRolePanelService;
+  /** The message Discord holds, as the fake REST client sees it. */
+  let stored: Record<string, unknown> | null;
+
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    db = raw;
+    reactionRoles = new ReactionRoleRepository(db);
+    stored = null;
+    const save = async (_route: string, { body }: { body: Record<string, unknown> }) => {
+      stored = { id: MESSAGE, channel_id: CHANNEL, author: { id: BOT }, ...stored, ...body };
+      return stored;
+    };
+    rest = {
+      get: vi.fn(async () => {
+        if (!stored) throw discordError(10008, 404, 'Unknown Message');
+        return stored;
+      }),
+      post: vi.fn(save),
+      patch: vi.fn(save),
+      delete: vi.fn(async () => undefined),
+    };
+    service = new ReactionRolePanelService({
+      db,
+      reactionRoles,
+      audit: new AuditLogRepository(db),
+      rest: rest as unknown as ConstructorParameters<typeof ReactionRolePanelService>[0]['rest'],
+      resources: {
+        messageChannels: async () => [{ id: CHANNEL, name: 'roles', category: null }],
+        channelNames: async () => new Map([[CHANNEL, 'roles']]),
+        assignableRoles: async () => [
+          { id: MEMBER, name: 'Member', color: 0 },
+          { id: VIP, name: 'VIP', color: 0 },
+        ],
+        memberRoles: async () => [
+          { id: MEMBER, name: 'Member', color: 0 },
+          { id: VIP, name: 'VIP', color: 0 },
+        ],
+        botUserId: async () => BOT,
+      },
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  const actions = () =>
+    (db.raw.prepare('SELECT action FROM audit_logs').all() as Array<{ action: string }>).map(
+      (row) => row.action,
+    );
+
+  it('lists panels with role names and loads a published panel back into the builder', async () => {
+    await service.publish(GUILD, panel(), actor);
+    await reactionRoles.create({
+      guildId: GUILD,
+      channelId: CHANNEL,
+      messageId: '400000000000000000',
+      emojiOrComponentId: '⭐',
+      roleId: VIP,
+      type: 'EMOJI',
+      mode: 'TOGGLE',
+    });
+
+    const panels = await service.listPanels(GUILD);
+    expect(panels.map((summary) => [summary.messageId, summary.editable])).toEqual([
+      [MESSAGE, true],
+      ['400000000000000000', false],
+    ]);
+    expect(panels[0]!.channelName).toBe('roles');
+    expect(panels[0]!.url).toBe(`https://discord.com/channels/${GUILD}/${CHANNEL}/${MESSAGE}`);
+    expect(panels[0]!.bindings.map((binding) => binding.roleName)).toEqual(['Member', 'VIP']);
+    expect(panels[1]!.bindings[0]).toMatchObject({ type: 'EMOJI', emoji: '⭐' });
+
+    expect(await service.loadPanel(GUILD, MESSAGE)).toMatchObject({
+      messageId: MESSAGE,
+      kind: 'BUTTONS',
+      items: [
+        { roleId: MEMBER, label: 'Member', emoji: '🎮' },
+        { roleId: VIP, label: 'VIP', style: 'SUCCESS' },
+      ],
+    });
+    expect(await service.loadPanel(GUILD, '400000000000000000')).toBeNull();
+    expect(await service.loadPanel('100000000000000002', MESSAGE)).toBeNull();
+  });
+
+  it('removes one binding together with its button', async () => {
+    await service.publish(GUILD, panel(), actor);
+    const [member] = (await reactionRoles.findByMessageId(MESSAGE)).filter(
+      (row) => row.roleId === MEMBER,
+    );
+
+    expect(await service.removeBinding(GUILD, member!.id, actor)).toEqual([
+      { field: 'roleIds', before: [MEMBER], after: [] },
+    ]);
+
+    const buttons = (stored!.components as Array<{ components: Array<{ custom_id: string }> }>)[0]!
+      .components;
+    expect(buttons.map((button) => button.custom_id)).not.toContain(`rr:btn:${member!.id}`);
+    expect(buttons).toHaveLength(1);
+    expect((await reactionRoles.findByMessageId(MESSAGE)).map((row) => row.roleId)).toEqual([VIP]);
+    expect(actions()).toEqual(['reaction_roles.publish', 'reaction_roles.remove']);
+    await expect(service.removeBinding(GUILD, member!.id, actor)).rejects.toThrow(
+      'That reaction role no longer exists.',
+    );
+  });
+
+  it('removes an emoji binding with Ririko’s own reaction, and a binding whose message is gone', async () => {
+    const emoji = await reactionRoles.create({
+      guildId: GUILD,
+      channelId: CHANNEL,
+      messageId: MESSAGE,
+      emojiOrComponentId: '<:blob:123456789012345678>',
+      roleId: VIP,
+      type: 'EMOJI',
+      mode: 'TOGGLE',
+    });
+    await service.removeBinding(GUILD, emoji.id, actor);
+    expect(rest.delete).toHaveBeenCalledWith(
+      `/channels/${CHANNEL}/messages/${MESSAGE}/reactions/blob%3A123456789012345678/@me`,
+    );
+
+    const button = await reactionRoles.create({
+      guildId: GUILD,
+      channelId: CHANNEL,
+      messageId: MESSAGE,
+      emojiOrComponentId: 'rr:btn:x',
+      roleId: VIP,
+      type: 'BUTTON',
+      mode: 'TOGGLE',
+    });
+    await service.removeBinding(GUILD, button.id, actor);
+    expect(rest.patch).not.toHaveBeenCalled();
+    expect(await reactionRoles.findByMessageId(MESSAGE)).toEqual([]);
+  });
+
+  it('deletes a panel by clearing its components, or by deleting Ririko’s message', async () => {
+    await service.publish(GUILD, panel(), actor);
+    stored = {
+      ...stored,
+      components: [
+        ...(stored!.components as unknown[]),
+        { type: 1, components: [{ type: 2, custom_id: 'giveaway:enter:1' }] },
+      ],
+    };
+
+    await service.deletePanel(GUILD, MESSAGE, { deleteMessage: false }, actor);
+    expect(stored!.components).toEqual([
+      { type: 1, components: [{ type: 2, custom_id: 'giveaway:enter:1' }] },
+    ]);
+    expect(await reactionRoles.findByMessageId(MESSAGE)).toEqual([]);
+
+    await service.publish(GUILD, panel({ messageId: null }), actor);
+    await service.deletePanel(GUILD, MESSAGE, { deleteMessage: true }, actor);
+    expect(rest.delete).toHaveBeenCalledWith(`/channels/${CHANNEL}/messages/${MESSAGE}`);
+    expect(actions()).toEqual([
+      'reaction_roles.publish',
+      'reaction_roles.delete_panel',
+      'reaction_roles.publish',
+      'reaction_roles.delete_panel',
+    ]);
+  });
+
+  it('never deletes another author’s message', async () => {
+    await reactionRoles.create({
+      guildId: GUILD,
+      channelId: CHANNEL,
+      messageId: MESSAGE,
+      emojiOrComponentId: '⭐',
+      roleId: VIP,
+      type: 'EMOJI',
+      mode: 'TOGGLE',
+    });
+    stored = { id: MESSAGE, channel_id: CHANNEL, author: { id: '900000000000000002' } };
+    await expect(
+      service.deletePanel(GUILD, MESSAGE, { deleteMessage: true }, actor),
+    ).rejects.toThrow('Ririko can only delete messages it sent.');
+    expect(rest.delete).not.toHaveBeenCalled();
+    expect(await reactionRoles.findByMessageId(MESSAGE)).toHaveLength(1);
   });
 });
