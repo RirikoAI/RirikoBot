@@ -11,6 +11,7 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'reaction-roles', label: 'Reaction Roles' },
   { slug: 'xp', label: 'XP & Ranking' },
   { slug: 'games', label: 'Games' },
+  { slug: 'giveaways', label: 'Giveaways' },
   { slug: 'cases', label: 'Case Log' },
   { slug: 'audit-log', label: 'Audit Log' },
 ] as const;
