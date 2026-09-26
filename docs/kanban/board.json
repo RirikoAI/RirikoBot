@@ -964,7 +964,7 @@
       "epic": "EPIC-011",
       "title": "Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles)",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-114"
       ],
