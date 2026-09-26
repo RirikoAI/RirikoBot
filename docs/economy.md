@@ -56,6 +56,7 @@ Voice participation generates higher XP rewards than text chatting, but AFK farm
 - **Mute & Deafen Disqualification**: Self-deafened, self-muted, or server-muted users earn zero XP/coins.
 - **AFK Channel Exclusions**: The guild's designated AFK voice channel is hard-excluded.
 - **Interval Accrual**: XP is accrued in 60-second discrete buckets validated against gateway voice state updates.
+- **Per-guild switch (STORY-115)**: voice rewards are off until a manager turns on **Voice rewards** on the XP & Ranking page (`xp.voiceXpEnabled`). `VoiceRewardService` runs the accumulator every minute and pays credits and XP only in those guilds; no-XP channels and roles and the guild's XP rate apply. Before STORY-115 nothing called the accumulator, so voice never paid. Members already in voice are tracked from the gateway cache on every READY.
 
 ---
 
@@ -133,7 +134,16 @@ Legacy bots suffer severe query latency when calculating ranks by scanning the e
    - **Global Leaderboard (`/leaderboard global`)**: Ranks all users across all servers.
    - **Guild Leaderboard (`/leaderboard server`)**: Ranks active members within the current Discord server.
 
-### 6.2. Profile Card 2.0 Rendering (`/profile`)
+### 6.2. Per-Guild XP Settings (STORY-115)
+XP is stored per guild, and each guild sets on the dashboard's XP & Ranking page (module `xp`, CLI keys `xp.*`, columns in `guild_settings`):
+- **Level-up announcements** on or off (`karma_notifications_enabled`; a member's own opt-out still applies), and an optional **level-up channel**. Without one, message level-ups are posted where the member levelled up; voice level-ups are only announced in the level-up channel. If Ririko cannot post in the level-up channel, it falls back to the current channel.
+- **XP rate** in percent, 0 to 300 (100 is normal). Levels also raise the global bank capacity, so the rate is capped.
+- **No-XP channels** (a thread follows its parent; voice channels count too) and **no-XP roles**.
+- **Voice rewards** (see 3.2).
+
+Credits stay global: nothing about credits can be set per guild, because one server could otherwise mint credits for everyone. Global economy values move to the owner console in STORY-165.
+
+### 6.3. Profile Card 2.0 Rendering (`/profile`)
 Rendered dynamically via `@napi-rs/canvas`:
 - Discord avatar & display name.
 - Server Rank & Global Rank badges.

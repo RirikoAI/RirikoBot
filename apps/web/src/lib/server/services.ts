@@ -15,6 +15,7 @@ import {
   GuildSettingsRepository,
   ModerationRepository,
   ReactionRoleRepository,
+  GiveawayRepository,
   UserRepository,
   WebKnownDeviceRepository,
   WebPasskeyRepository,
@@ -28,6 +29,7 @@ import { PasskeyService } from './auth/passkeys';
 import { SessionService } from './auth/session-service';
 import { DiscordNotifier } from './discord-notifier';
 import { BotGuildDirectory } from './guilds/bot-guilds';
+import { GiveawayManagementService } from './guilds/giveaways';
 import { GuildAccessService } from './guilds/guild-access';
 import { GuildResourceDirectory } from './guilds/guild-resources';
 import { ReactionRolePanelService } from './guilds/reaction-role-panels';
@@ -60,6 +62,7 @@ export interface WebServices {
   guildConfig: GuildConfigService;
   /** Publishes and edits reaction role panels (after guard and passkey step-up). */
   reactionRolePanels: ReactionRolePanelService;
+  giveaways: GiveawayManagementService;
   /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
   commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
@@ -156,6 +159,12 @@ async function createWebServices(): Promise<WebServices> {
     reactionRolePanels: new ReactionRolePanelService({
       db,
       reactionRoles: new ReactionRoleRepository(db),
+      audit,
+      rest: botRest,
+      resources: guildResources,
+    }),
+    giveaways: new GiveawayManagementService({
+      giveaways: new GiveawayRepository(db),
       audit,
       rest: botRest,
       resources: guildResources,

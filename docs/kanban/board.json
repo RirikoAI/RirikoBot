@@ -182,7 +182,7 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115."
     },
     {
       "id": "EPIC-012",
@@ -891,15 +891,27 @@
     {
       "id": "STORY-115",
       "epic": "EPIC-011",
-      "title": "Economy & Banking, XP & Ranking, Games & Giveaways Pages",
-      "points": 5,
-      "status": "TODO",
+      "title": "XP & Ranking, Games & Giveaways Pages",
+      "points": 8,
+      "status": "REVIEW",
       "requires": [
         "STORY-111",
         "STORY-117"
       ],
       "blocks": [],
-      "description": "Module pages for engagement systems (dashboard.md sections 8, 9, 11, 12)."
+      "description": "Module pages for engagement systems (dashboard.md sections 9, 11, 12). Re-groomed 2026-09-27 after an audit: the economy is global per user and nothing economy-related is read per guild, so the economy settings and item shop manager moved to STORY-165 (owner console). XP gains per-guild settings the bot now reads (announcements and channel, rate, no-XP channels and roles, voice XP). Voice rewards never accrued because nothing called VoiceSessionAccumulator.tick(); that is fixed here because Voice XP needs it. Games reuse command_settings for on/off and cooldowns and add a maximum wager. Giveaways end and reroll through GiveawayEngine from the web with a guard against a second end."
+    },
+    {
+      "id": "STORY-165",
+      "epic": "EPIC-011",
+      "title": "Owner Console: Global Economy Settings & Item Shop Manager",
+      "points": 8,
+      "status": "TODO",
+      "requires": [
+        "STORY-115"
+      ],
+      "blocks": [],
+      "description": "Split from STORY-115 on 2026-09-27 (dashboard.md section 4, item 8). Balances, the daily reward and the bank are global per user, so they are edited only in the owner console (bot owners, passkey). The bot reads the values on each use instead of constants."
     },
     {
       "id": "STORY-116",
@@ -976,7 +988,7 @@
       "epic": "EPIC-011",
       "title": "Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-114"
       ],
@@ -2778,28 +2790,68 @@
     {
       "id": "TASK-1151",
       "parent": "STORY-115",
-      "title": "Economy & Banking Page (Rewards, Interest, Item Shop Manager) & XP & Ranking Page (Multipliers, Voice XP, Level-Up Channel)",
+      "title": "XP & Ranking Page (Level-Up Announcements & Channel, XP Rate, No-XP Channels & Roles, Voice XP) & Voice Reward Accrual",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
       "blocks": [
         "TASK-1152"
       ],
-      "description": "Expose the economy and XP settings the services read today; add backing columns only where the bot consumes them. The item shop manager edits the global economy_items and economy_item_categories catalog, so it lives in the owner console (bot owners, passkey required), not on the guild page."
+      "description": "New guild_settings columns read by the bot: level-up channel, XP rate percent (0 to 300), no-XP channels and roles, voice XP switch (off by default). The message listener applies them; a 60-second loop now calls VoiceSessionAccumulator.tick() and awards voice credits and XP only in guilds that turned voice XP on. Module xp in GuildConfigService, page, CLI keys."
     },
     {
       "id": "TASK-1152",
       "parent": "STORY-115",
-      "title": "Games Page (Enable/Disable, Wager Limits, Cooldowns) & Giveaways Page (Active List, End, Reroll, History)",
+      "title": "Games Page (Per-Game On/Off & Cooldown via command_settings, Maximum Wager Enforced by the Bot)",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1151"
       ],
+      "blocks": [
+        "TASK-1153"
+      ],
+      "description": "Module games: guild_settings.max_game_wager (null means no limit) checked by coinflip, dice, highlow, rps and tictactoe before any escrow, and the server-wide command_settings rows of those commands merged without touching roles or channel rules."
+    },
+    {
+      "id": "TASK-1153",
+      "parent": "STORY-115",
+      "title": "Giveaways Page (Active List, End Now, Reroll, History) with a Guard Against Ending Twice",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "TASK-1152"
+      ],
       "blocks": [],
-      "description": "Mini-game settings and giveaway management. End and reroll call GiveawayService so results match the Discord commands and the crash-resistant scheduler."
+      "description": "endGiveaway only claims a giveaway that is not ended yet, so the scheduler, /giveaway end and the dashboard cannot end one twice. Shared message builders for the ended embed and announcements, used by the bot and by the web through the bot-token REST client. End and reroll are audited and post change notices."
+    },
+    {
+      "id": "TASK-1651",
+      "parent": "STORY-165",
+      "title": "Owner Console Shell, Global Economy Settings (Daily Reward, Streak Bonus, Bank Capacity) & ririko economy:config",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "STORY-115"
+      ],
+      "blocks": [
+        "TASK-1652"
+      ],
+      "description": "/owner layout behind requireOwner, a single-row economy_config table read by DailyService and BankingService on each use, audited owner writes with a passkey check, and CLI parity."
+    },
+    {
+      "id": "TASK-1652",
+      "parent": "STORY-165",
+      "title": "Item Shop Manager (economy_items & economy_item_categories: Create, Edit, Retire, Delete Unowned)",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "TASK-1651"
+      ],
+      "blocks": [],
+      "description": "Owner-console editor for the global item catalog, including the effect metadata the inventory service reads. Items held by members are retired (not purchasable) instead of deleted. Every write is audited."
     },
     {
       "id": "TASK-1161",
@@ -3662,6 +3714,26 @@
       "requires": [],
       "blocks": [],
       "description": "Found by the first CircleCI run (UTC host). parseReminderTime passed the IANA zone name to chrono-node, which only understands abbreviations or offset minutes and silently fell back to the host zone, so wall-clock reminders fired hours off on any server not in the user's zone. Now passes the zone's offset in minutes and re-parses with the target date's offset across DST changes."
+    },
+    {
+      "id": "BUG-0023",
+      "title": "Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message",
+      "points": 2,
+      "status": "TODO",
+      "parent": "STORY-040",
+      "requires": [],
+      "blocks": [],
+      "description": "Found in the STORY-115 audit. The message listener evaluates anti-spam (apps/bot/src/listeners/message.listener.ts), which records the message, then EconomyService.handleEvent evaluates it again without the message content (packages/services/src/economy/economy.service.ts). The second check fails on minimum length and the cooldown, so MESSAGE_SENT never pays credits."
+    },
+    {
+      "id": "BUG-0024",
+      "title": "Postgres Item Seed Uses Slug IDs on a uuid Column; Legacy Migration Reads the Wrong Karma and Welcomer Keys",
+      "points": 3,
+      "status": "TODO",
+      "parent": "STORY-043",
+      "requires": [],
+      "blocks": [],
+      "description": "Found in the STORY-115 audit. ItemRepository.seedDefaultCatalog inserts slug IDs (candy_minor, ...) into economy_items.id, which is uuid on Postgres; the error is swallowed at bot start. The seed also references categories that have no rows. The legacy transformer maps karma.enabled and welcomer.channel, but 1.4.0 stored karma-notification-enabled (enabled/disabled) and welcomer_channel."
     }
   ]
 }

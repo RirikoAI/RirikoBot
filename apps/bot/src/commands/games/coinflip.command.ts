@@ -1,6 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
+import { wagerLimitRefusal } from './wager-limit.js';
 import { flipCoin, type CoinSide } from '@ririko/services';
 
 export function createCoinFlipCommand(services: BotServices): Command {
@@ -66,6 +67,12 @@ export function createCoinFlipCommand(services: BotServices): Command {
           content: '❌ You must specify a guess (`heads` or `tails`) when placing a wager!',
           ephemeral: true,
         });
+        return;
+      }
+
+      const wagerRefusal = await wagerLimitRefusal(services, ctx.guild?.id, wagerAmount);
+      if (wagerRefusal) {
+        await ctx.reply({ content: wagerRefusal, ephemeral: true });
         return;
       }
 

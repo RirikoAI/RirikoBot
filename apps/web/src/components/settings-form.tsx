@@ -118,19 +118,22 @@ export function SettingsForm({
 
 /**
  * A single-button form for one action on a list item (such as removing a role), with the same
- * passkey handling as `SettingsForm`. `fields` are sent as hidden inputs.
+ * passkey handling as `SettingsForm`. `fields` are sent as hidden inputs; `children` (such as
+ * a small input) go before the button.
  */
 export function ActionButtonForm({
   action,
   fields,
   label,
   confirmMessage,
+  children,
 }: {
   action: SettingsAction;
   fields: Record<string, string>;
   label: string;
   /** Asked with the browser's confirm dialog before submitting. */
   confirmMessage?: string;
+  children?: ReactNode;
 }) {
   const { submit, passkeyControls } = usePasskeyAction(action);
   return (
@@ -144,6 +147,7 @@ export function ActionButtonForm({
       {Object.entries(fields).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
+      {children}
       <ActionButton label={label} />
       {passkeyControls}
     </form>

@@ -38,6 +38,7 @@ import {
   AiChatController,
   registerMessageListener,
   registerVoiceListener,
+  trackCurrentVoiceMembers,
   registerMemberListener,
   registerReactionListener,
 } from './index.js';
@@ -319,6 +320,7 @@ export async function main(): Promise<void> {
       services.streamWatcher.stop();
       services.freeGamesEngine.stop();
       services.giveawayEngine.stop();
+      services.voiceRewardService?.stop();
       services.guildConfigWatcher.stop();
       services.botStatusReporter?.stop();
       await services.commandUsageRecorder.stop().catch((err: unknown) => {
@@ -378,6 +380,8 @@ export async function main(): Promise<void> {
       services.streamWatcher.start();
       services.freeGamesEngine.start();
       services.giveawayEngine.start();
+      trackCurrentVoiceMembers(bot.client, services);
+      services.voiceRewardService?.start();
       services.autoRoleService.startSweeper(bot.client);
       services.reminderScheduler?.start();
       services.guildConfigWatcher.start();

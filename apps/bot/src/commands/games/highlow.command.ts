@@ -10,6 +10,7 @@ import {
 import { randomUUID } from 'node:crypto';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
+import { wagerLimitRefusal } from './wager-limit.js';
 import { generateHighLowInitial, evaluateHighLow, type HighLowGuess } from '@ririko/services';
 
 export function createHighLowCommand(services: BotServices): Command {
@@ -41,6 +42,12 @@ export function createHighLowCommand(services: BotServices): Command {
       const rawArgs = ctx.options.getRawArgs();
       if (!wagerAmount && rawArgs && rawArgs[0] && !isNaN(parseInt(rawArgs[0], 10))) {
         wagerAmount = Math.max(1, parseInt(rawArgs[0], 10));
+      }
+
+      const wagerRefusal = await wagerLimitRefusal(services, ctx.guild?.id, wagerAmount);
+      if (wagerRefusal) {
+        await ctx.reply({ content: wagerRefusal, ephemeral: true });
+        return;
       }
 
       // Escrow wager if provided

@@ -179,6 +179,179 @@ describe('GuildConfigService (TASK-1111)', () => {
     });
   });
 
+  describe('xp (TASK-1151)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+
+    it('reads the defaults for a guild without settings', async () => {
+      expect(await service.get('g1', 'xp')).toEqual({
+        levelUpAnnouncements: true,
+        levelUpChannelId: null,
+        xpRatePercent: 100,
+        noXpChannelIds: [],
+        noXpRoleIds: [],
+        voiceXpEnabled: false,
+      });
+    });
+
+    it('saves CLI strings, keeps other settings and audits the diff', async () => {
+      await service.update('g1', 'general', { prefix: '$' }, dashboardActor);
+      const { changes } = await service.update(
+        'g1',
+        'xp',
+        {
+          levelUpAnnouncements: 'off',
+          levelUpChannelId: CHANNEL,
+          xpRatePercent: '150',
+          noXpChannelIds: `${CHANNEL},${CHANNEL}`,
+          noXpRoleIds: ROLE,
+          voiceXpEnabled: 'on',
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'levelUpAnnouncements',
+        'levelUpChannelId',
+        'xpRatePercent',
+        'noXpChannelIds',
+        'noXpRoleIds',
+        'voiceXpEnabled',
+      ]);
+      expect(await service.get('g1', 'xp')).toEqual({
+        levelUpAnnouncements: false,
+        levelUpChannelId: CHANNEL,
+        xpRatePercent: 150,
+        noXpChannelIds: [CHANNEL],
+        noXpRoleIds: [ROLE],
+        voiceXpEnabled: true,
+      });
+      expect(await service.get('g1', 'general')).toEqual({ prefix: '$', timezone: 'UTC' });
+    });
+
+    it('rejects a rate above the cap', async () => {
+      await expect(
+        service.update('g1', 'xp', { xpRatePercent: 301 }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { xpRatePercent: [expect.any(String)] } });
+    });
+  });
+
+  describe('games (TASK-1152)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+    const override = (command: string, fields: Record<string, unknown> = {}) => ({
+      commandName: command,
+      channelId: null,
+      isEnabled: true,
+      cooldownOverride: null,
+      allowedRoles: [],
+      blockedRoles: [],
+      ...fields,
+    });
+
+    it('reads no limit and no rules for a new guild', async () => {
+      expect(await service.get('g1', 'games')).toEqual({ maxWager: null, rules: [] });
+    });
+
+    it('merges game rules into the command overrides without losing roles or channel rules', async () => {
+      await commandSettings.replaceForGuild('g1', [
+        override('rps', { allowedRoles: [ROLE] }),
+        override('dice', { channelId: CHANNEL, isEnabled: false }),
+        override('highlow', { cooldownOverride: 30 }),
+        override('play', { cooldownOverride: 10 }),
+      ]);
+
+      await service.update(
+        'g1',
+        'games',
+        {
+          maxWager: '500',
+          rules: JSON.stringify([
+            { command: 'rps', enabled: false },
+            { command: 'dice', cooldownSeconds: 0 },
+          ]),
+        },
+        dashboardActor,
+      );
+
+      expect(await service.get('g1', 'games')).toEqual({
+        maxWager: 500,
+        rules: [
+          { command: 'dice', enabled: true, cooldownSeconds: 0 },
+          { command: 'rps', enabled: false, cooldownSeconds: null },
+        ],
+      });
+      // highlow's rule was not submitted, so its server row went; the rps roles, the dice
+      // channel rule and the music override stay.
+      expect((await service.get('g1', 'commands')).overrides).toEqual([
+        {
+          command: 'dice',
+          channelId: null,
+          enabled: true,
+          allowedRoleIds: [],
+          blockedRoleIds: [],
+          cooldownSeconds: 0,
+        },
+        {
+          command: 'dice',
+          channelId: CHANNEL,
+          enabled: false,
+          allowedRoleIds: [],
+          blockedRoleIds: [],
+          cooldownSeconds: null,
+        },
+        {
+          command: 'play',
+          channelId: null,
+          enabled: true,
+          allowedRoleIds: [],
+          blockedRoleIds: [],
+          cooldownSeconds: 10,
+        },
+        {
+          command: 'rps',
+          channelId: null,
+          enabled: false,
+          allowedRoleIds: [ROLE],
+          blockedRoleIds: [],
+          cooldownSeconds: null,
+        },
+      ]);
+    });
+
+    it('keeps a role-only row when its rule is cleared, and clears the limit', async () => {
+      await commandSettings.replaceForGuild('g1', [
+        override('rps', { allowedRoles: [ROLE], isEnabled: false }),
+      ]);
+      await service.update('g1', 'games', { maxWager: '10', rules: '[]' }, dashboardActor);
+      await service.update('g1', 'games', { maxWager: '' }, dashboardActor);
+      expect(await service.get('g1', 'games')).toEqual({ maxWager: null, rules: [] });
+      expect((await service.get('g1', 'commands')).overrides).toEqual([
+        expect.objectContaining({ command: 'rps', enabled: true, allowedRoleIds: [ROLE] }),
+      ]);
+    });
+
+    it('rejects unknown games, duplicates and a zero limit with row numbers', async () => {
+      const error = await service
+        .update(
+          'g1',
+          'games',
+          {
+            maxWager: '0',
+            rules: JSON.stringify([{ command: 'play' }, { command: 'rps', cooldownSeconds: 9999 }]),
+          },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(GuildConfigValidationError);
+      const { fieldErrors } = error as GuildConfigValidationError;
+      expect(fieldErrors.maxWager?.[0]).toContain('whole number from 1');
+      expect(fieldErrors.rules).toEqual([
+        expect.stringMatching(/^Row 1: Choose one of coinflip/),
+        'Row 2: Cooldowns can last at most 1 hour.',
+      ]);
+    });
+  });
+
   describe('moderation (TASK-1142)', () => {
     it('returns the default policy until one is saved', async () => {
       expect(await service.get('g1', 'moderation')).toEqual({

@@ -1,6 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
+import { wagerLimitRefusal } from './wager-limit.js';
 import { rollDice, rollVsBot } from '@ririko/services';
 
 export function createDiceCommand(services: BotServices): Command {
@@ -72,6 +73,12 @@ export function createDiceCommand(services: BotServices): Command {
       }
 
       // Wager match against Ririko
+      const wagerRefusal = await wagerLimitRefusal(services, ctx.guild?.id, wagerAmount);
+      if (wagerRefusal) {
+        await ctx.reply({ content: wagerRefusal, ephemeral: true });
+        return;
+      }
+
       if (wagerAmount && wagerAmount > 0) {
         const isFrozen = await services.economyRepo.isAccountFrozen(user.id);
         if (isFrozen) {

@@ -69,6 +69,19 @@ export const guildSettings = sqliteTable('guild_settings', {
   karmaNotificationsEnabled: integer('karma_notifications_enabled', { mode: 'boolean' })
     .notNull()
     .default(true),
+  /** Level-up messages go here; null posts in the channel where the member levelled up. */
+  levelUpChannelId: text('level_up_channel_id'),
+  /** Message and voice XP rate in percent; 100 is normal, 0 turns XP off. */
+  xpRatePercent: integer('xp_rate_percent').notNull().default(100),
+  noXpChannelIds: text('no_xp_channel_ids', { mode: 'json' })
+    .$type<string[]>()
+    .notNull()
+    .default([]),
+  noXpRoleIds: text('no_xp_role_ids', { mode: 'json' }).$type<string[]>().notNull().default([]),
+  /** Voice credits and XP; off until a manager turns it on. */
+  voiceXpEnabled: integer('voice_xp_enabled', { mode: 'boolean' }).notNull().default(false),
+  /** Largest mini-game wager in credits; null means no limit. */
+  maxGameWager: integer('max_game_wager'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

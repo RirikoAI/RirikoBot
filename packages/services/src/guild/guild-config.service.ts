@@ -5,10 +5,12 @@ import {
   DEFAULT_ESCALATION_STEPS,
   GuildConfigSchemas,
   ValidationError,
+  WAGER_GAME_COMMANDS,
   type AutoModConfigurableAction,
   type AutoModRuleTypeName,
   type AutoVoiceHub,
   type CommandOverride,
+  type GameRule,
   type GuildConfigModule,
   type GuildConfigValues,
 } from '@ririko/core';
@@ -135,6 +137,43 @@ export function toCommandOverrides(rows: readonly CommandSettings[]): CommandOve
     .sort(compareCommandOverrides);
 }
 
+function toCommandSettingsRows(overrides: readonly CommandOverride[]) {
+  return overrides.map((row) => ({
+    commandName: row.command,
+    channelId: row.channelId,
+    isEnabled: row.enabled,
+    cooldownOverride: row.cooldownSeconds,
+    allowedRoles: row.allowedRoleIds,
+    blockedRoles: row.blockedRoleIds,
+  }));
+}
+
+function isDefaultOverride(row: CommandOverride): boolean {
+  return (
+    row.enabled &&
+    row.cooldownSeconds === null &&
+    row.allowedRoleIds.length === 0 &&
+    row.blockedRoleIds.length === 0
+  );
+}
+
+function isWagerGame(name: string): name is GameRule['command'] {
+  return (WAGER_GAME_COMMANDS as readonly string[]).includes(name);
+}
+
+/** The games' server-wide on/off state and cooldowns from `command_settings`, sorted by game. */
+export function toGameRules(rows: readonly CommandSettings[]): GameRule[] {
+  return rows
+    .filter((row) => row.channelId === null && isWagerGame(row.commandName))
+    .map((row) => ({
+      command: row.commandName as GameRule['command'],
+      enabled: row.isEnabled,
+      cooldownSeconds: row.cooldownOverride,
+    }))
+    .filter((rule) => !rule.enabled || rule.cooldownSeconds !== null)
+    .sort((a, b) => (a.command < b.command ? -1 : a.command > b.command ? 1 : 0));
+}
+
 /** Stored `auto_voice_configs` rows in the shape the schema uses, sorted by channel. */
 export function toAutoVoiceHubs(rows: readonly AutoVoiceConfig[]): AutoVoiceHub[] {
   return rows
@@ -257,14 +296,7 @@ export class GuildConfigService {
           }
           await deps.commandSettings.replaceForGuild(
             guildId,
-            values.overrides.map((row) => ({
-              commandName: row.command,
-              channelId: row.channelId,
-              isEnabled: row.enabled,
-              cooldownOverride: row.cooldownSeconds,
-              allowedRoles: row.allowedRoleIds,
-              blockedRoles: row.blockedRoleIds,
-            })),
+            toCommandSettingsRows(values.overrides),
             tx,
           );
         },
@@ -314,6 +346,62 @@ export class GuildConfigService {
               tx,
             );
           }
+        },
+      },
+      xp: {
+        read: async (guildId, tx) => {
+          const row = await deps.guildSettings.findById(guildId, tx);
+          return {
+            levelUpAnnouncements: row?.karmaNotificationsEnabled ?? true,
+            levelUpChannelId: row?.levelUpChannelId ?? null,
+            xpRatePercent: row?.xpRatePercent ?? 100,
+            noXpChannelIds: row?.noXpChannelIds ?? [],
+            noXpRoleIds: row?.noXpRoleIds ?? [],
+            voiceXpEnabled: row?.voiceXpEnabled ?? false,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const { levelUpAnnouncements, ...rest } = values;
+          await deps.guildSettings.upsert(
+            { guildId, karmaNotificationsEnabled: levelUpAnnouncements, ...rest },
+            tx,
+          );
+        },
+      },
+      games: {
+        read: async (guildId, tx) => {
+          const [row, overrides] = await Promise.all([
+            deps.guildSettings.findById(guildId, tx),
+            deps.commandSettings.listForGuild(guildId, tx),
+          ]);
+          return { maxWager: row?.maxGameWager ?? null, rules: toGameRules(overrides) };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.guildSettings.upsert({ guildId, maxGameWager: values.maxWager }, tx);
+          const overrides = toCommandOverrides(
+            await deps.commandSettings.listForGuild(guildId, tx),
+          );
+          const isGameServerRow = (row: CommandOverride) =>
+            row.channelId === null && isWagerGame(row.command);
+          const next = overrides.filter((row) => !isGameServerRow(row));
+          // A game's server-wide row keeps its roles (set on the Commands page); only the on/off
+          // state and the cooldown come from the Games page.
+          for (const command of WAGER_GAME_COMMANDS) {
+            const current = overrides.find(
+              (row) => isGameServerRow(row) && row.command === command,
+            );
+            const rule = values.rules.find((entry) => entry.command === command);
+            const row: CommandOverride = {
+              command,
+              channelId: null,
+              enabled: rule?.enabled ?? true,
+              cooldownSeconds: rule?.cooldownSeconds ?? null,
+              allowedRoleIds: current?.allowedRoleIds ?? [],
+              blockedRoleIds: current?.blockedRoleIds ?? [],
+            };
+            if (!isDefaultOverride(row)) next.push(row);
+          }
+          await deps.commandSettings.replaceForGuild(guildId, toCommandSettingsRows(next), tx);
         },
       },
     };
