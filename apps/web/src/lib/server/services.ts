@@ -5,6 +5,8 @@ import { experimental_taintObjectReference, experimental_taintUniqueValue } from
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
   AuditLogRepository,
+  AutoRoleRepository,
+  AutoVoiceRepository,
   BotActivityRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
@@ -124,6 +126,8 @@ async function createWebServices(): Promise<WebServices> {
     moderation,
     commandSettings: new CommandSettingsRepository(db),
     commandCatalog,
+    autoRoles: new AutoRoleRepository(db),
+    autoVoice: new AutoVoiceRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit,
     defaultPrefix: config.DEFAULT_PREFIX,

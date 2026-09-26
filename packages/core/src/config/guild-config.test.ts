@@ -161,11 +161,20 @@ describe('GuildConfigSchemas', () => {
       'automod',
       'logging',
       'commands',
+      'autoroles',
+      'autovoice',
     ]);
     expect(Object.keys(GuildConfigSchemas.general.shape)).toEqual(['prefix', 'timezone']);
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);
     expect(Object.keys(GuildConfigSchemas.moderation.shape)).toEqual(['escalationSteps']);
     expect(Object.keys(GuildConfigSchemas.commands.shape)).toEqual(['overrides']);
+    expect(Object.keys(GuildConfigSchemas.autoroles.shape)).toEqual([
+      'enabled',
+      'humanRoleIds',
+      'botRoleIds',
+      'verificationRoleId',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.autovoice.shape)).toEqual(['hubs']);
     expect(isGuildConfigModule('general')).toBe(true);
     expect(isGuildConfigModule('toString')).toBe(false);
   });

@@ -7,6 +7,7 @@ import {
   ValidationError,
   type AutoModConfigurableAction,
   type AutoModRuleTypeName,
+  type AutoVoiceHub,
   type CommandOverride,
   type GuildConfigModule,
   type GuildConfigValues,
@@ -14,6 +15,9 @@ import {
 import {
   withTransaction,
   type AuditLogRepository,
+  type AutoRoleRepository,
+  type AutoVoiceConfig,
+  type AutoVoiceRepository,
   type CommandCatalogRepository,
   type CommandSettings,
   type CommandSettingsRepository,
@@ -131,6 +135,18 @@ export function toCommandOverrides(rows: readonly CommandSettings[]): CommandOve
     .sort(compareCommandOverrides);
 }
 
+/** Stored `auto_voice_configs` rows in the shape the schema uses, sorted by channel. */
+export function toAutoVoiceHubs(rows: readonly AutoVoiceConfig[]): AutoVoiceHub[] {
+  return rows
+    .map((row) => ({
+      channelId: row.parentChannelId,
+      nameTemplate: row.channelNameTemplate,
+      userLimit: row.userLimit,
+      bitrate: row.bitrate,
+    }))
+    .sort((a, b) => (a.channelId === b.channelId ? 0 : a.channelId < b.channelId ? -1 : 1));
+}
+
 interface ModuleStore<M extends GuildConfigModule> {
   read(guildId: string, tx?: DatabaseClient): Promise<GuildConfigValues<M>>;
   write(guildId: string, values: GuildConfigValues<M>, tx: DatabaseClient): Promise<void>;
@@ -142,6 +158,8 @@ export interface GuildConfigServiceDeps {
   moderation: ModerationRepository;
   commandSettings: CommandSettingsRepository;
   commandCatalog: CommandCatalogRepository;
+  autoRoles: AutoRoleRepository;
+  autoVoice: AutoVoiceRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -249,6 +267,53 @@ export class GuildConfigService {
             })),
             tx,
           );
+        },
+      },
+      autoroles: {
+        read: async (guildId, tx) => {
+          const row = await deps.autoRoles.getGuildAutoRoles(guildId, tx);
+          return {
+            enabled: row?.isEnabled ?? false,
+            humanRoleIds: row?.humanRoleIds ?? [],
+            botRoleIds: row?.botRoleIds ?? [],
+            verificationRoleId: row?.verificationRoleId ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          // The verification channel and message columns belong to `/autorole send-verify`.
+          await deps.autoRoles.upsertGuildAutoRoles(
+            {
+              guildId,
+              isEnabled: values.enabled,
+              humanRoleIds: values.humanRoleIds,
+              botRoleIds: values.botRoleIds,
+              verificationRoleId: values.verificationRoleId,
+            },
+            tx,
+          );
+        },
+      },
+      autovoice: {
+        read: async (guildId, tx) => ({
+          hubs: toAutoVoiceHubs(await deps.autoVoice.listByGuildId(guildId, tx)),
+        }),
+        write: async (guildId, values, tx) => {
+          const kept = new Set(values.hubs.map((hub) => hub.channelId));
+          for (const row of await deps.autoVoice.listByGuildId(guildId, tx)) {
+            if (!kept.has(row.parentChannelId)) await deps.autoVoice.delete(row.id, tx);
+          }
+          for (const hub of values.hubs) {
+            await deps.autoVoice.upsert(
+              {
+                guildId,
+                parentChannelId: hub.channelId,
+                channelNameTemplate: hub.nameTemplate,
+                userLimit: hub.userLimit,
+                bitrate: hub.bitrate,
+              },
+              tx,
+            );
+          }
         },
       },
     };

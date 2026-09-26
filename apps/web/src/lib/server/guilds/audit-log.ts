@@ -45,6 +45,8 @@ const MODULE_LABELS: Record<string, string> = {
   automod: 'AutoMod',
   logging: 'Logging',
   commands: 'Command',
+  autoroles: 'Auto Roles',
+  autovoice: 'Auto Voice',
 };
 
 /** `guild_config.automod.update` as `AutoMod settings changed`; other actions as they are. */

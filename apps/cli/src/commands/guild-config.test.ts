@@ -42,7 +42,9 @@ describe('ririko guild:config (TASK-1113)', () => {
     expect(keys).toContain('automod.mentionSpamLimit');
     expect(keys).toContain('automod.burstSpamExemptRoleIds');
     expect(keys).toContain('logging.logChannelId');
-    expect(keys.at(-1)).toBe('commands.overrides');
+    expect(keys).toContain('commands.overrides');
+    expect(keys).toContain('autoroles.humanRoleIds');
+    expect(keys.at(-1)).toBe('autovoice.hubs');
     expect(listConfigKeys().every((entry) => entry.description.length > 0)).toBe(true);
   });
 
@@ -117,6 +119,21 @@ describe('ririko guild:config (TASK-1113)', () => {
     await expect(
       runGuildConfig(service, GUILD, 'commands.overrides', '[{"command":"nope","enabled":false}]'),
     ).rejects.toThrow(/Unknown command: `nope`\./);
+  });
+
+  it('round-trips auto roles and auto voice hubs (TASK-1641)', async () => {
+    await runGuildConfig(service, GUILD, 'autoroles.enabled', 'on');
+    await runGuildConfig(service, GUILD, 'autoroles.humanRoleIds', '200000000000000001');
+    expect(await runGuildConfig(service, GUILD, 'autoroles.humanRoleIds')).toEqual([
+      '200000000000000001',
+    ]);
+    const hubs =
+      '[{"channelId":"300000000000000001","nameTemplate":"Room of {user}","userLimit":4,"bitrate":96000}]';
+    await runGuildConfig(service, GUILD, 'autovoice.hubs', hubs);
+    expect(await runGuildConfig(service, GUILD, 'autovoice.hubs')).toEqual([hubs]);
+    await expect(
+      runGuildConfig(service, GUILD, 'autovoice.hubs', '[{"channelId":"x"}]'),
+    ).rejects.toThrow('Row 1: Choose a voice channel.');
   });
 
   it('lists all settings with their current values', async () => {
