@@ -148,4 +148,50 @@ describe('ReactionRoleRepository (TASK-1401)', () => {
     const deletedCount = await reactionRoleRepo.deleteByMessageId('msg-bulk');
     expect(deletedCount).toBe(2);
   });
+  it('replaces only button and menu bindings of one message (TASK-1642)', async () => {
+    const base = { guildId: 'guild-1', channelId: 'channel-1', mode: 'TOGGLE' };
+    await reactionRoleRepo.create({
+      ...base,
+      messageId: 'msg-1',
+      emojiOrComponentId: '⭐',
+      roleId: 'role-star',
+      type: 'EMOJI',
+    });
+    await reactionRoleRepo.create({
+      ...base,
+      messageId: 'msg-1',
+      emojiOrComponentId: 'rr:btn:old',
+      roleId: 'role-old',
+      type: 'BUTTON',
+    });
+    await reactionRoleRepo.create({
+      ...base,
+      messageId: 'msg-2',
+      emojiOrComponentId: 'rr:btn:other',
+      roleId: 'role-other',
+      type: 'BUTTON',
+    });
+
+    await reactionRoleRepo.replaceComponentBindings('msg-1', [
+      {
+        ...base,
+        id: 'new-1',
+        messageId: 'msg-1',
+        emojiOrComponentId: 'rr:btn:new-1',
+        roleId: 'role-new',
+        type: 'BUTTON',
+        groupId: 'group-1',
+      },
+    ]);
+
+    const rows = await reactionRoleRepo.findByMessageId('msg-1');
+    expect(rows.map((row) => row.roleId).sort()).toEqual(['role-new', 'role-star']);
+    expect(await reactionRoleRepo.findById('new-1')).toMatchObject({ groupId: 'group-1' });
+    expect(await reactionRoleRepo.findByMessageId('msg-2')).toHaveLength(1);
+
+    await reactionRoleRepo.replaceComponentBindings('msg-1', []);
+    expect((await reactionRoleRepo.findByMessageId('msg-1')).map((row) => row.type)).toEqual([
+      'EMOJI',
+    ]);
+  });
 });
