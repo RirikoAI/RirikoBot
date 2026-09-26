@@ -15,6 +15,8 @@ export interface CachedGuildSettings {
   noXpChannelIds: string[];
   noXpRoleIds: string[];
   voiceXpEnabled: boolean;
+  /** Largest mini-game wager in credits; null means no limit. */
+  maxGameWager: number | null;
   cachedAt: number;
 }
 
@@ -67,6 +69,7 @@ export class GuildSettingsService {
       noXpChannelIds: row?.noXpChannelIds ?? [],
       noXpRoleIds: row?.noXpRoleIds ?? [],
       voiceXpEnabled: row?.voiceXpEnabled ?? false,
+      maxGameWager: row?.maxGameWager ?? null,
       cachedAt: now,
     };
   }

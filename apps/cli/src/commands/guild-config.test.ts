@@ -46,7 +46,8 @@ describe('ririko guild:config (TASK-1113)', () => {
     expect(keys).toContain('autoroles.humanRoleIds');
     expect(keys).toContain('autovoice.hubs');
     expect(keys).toContain('xp.noXpChannelIds');
-    expect(keys.at(-1)).toBe('xp.voiceXpEnabled');
+    expect(keys).toContain('xp.voiceXpEnabled');
+    expect(keys.at(-1)).toBe('games.rules');
     expect(listConfigKeys().every((entry) => entry.description.length > 0)).toBe(true);
   });
 
@@ -136,6 +137,17 @@ describe('ririko guild:config (TASK-1113)', () => {
     await expect(
       runGuildConfig(service, GUILD, 'autovoice.hubs', '[{"channelId":"x"}]'),
     ).rejects.toThrow('Row 1: Choose a voice channel.');
+  });
+
+  it('round-trips the maximum wager and game rules (TASK-1152)', async () => {
+    await runGuildConfig(service, GUILD, 'games.maxWager', '250');
+    await runGuildConfig(service, GUILD, 'games.rules', '[{"command":"rps","enabled":false}]');
+    expect(await runGuildConfig(service, GUILD, 'games.maxWager')).toEqual(['250']);
+    expect(await runGuildConfig(service, GUILD, 'games.rules')).toEqual([
+      '[{"command":"rps","enabled":false,"cooldownSeconds":null}]',
+    ]);
+    await runGuildConfig(service, GUILD, 'games.maxWager', 'none');
+    expect(await runGuildConfig(service, GUILD, 'games.maxWager')).toEqual(['']);
   });
 
   it('round-trips XP settings (TASK-1151)', async () => {

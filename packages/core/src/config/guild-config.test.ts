@@ -163,6 +163,8 @@ describe('GuildConfigSchemas', () => {
       'commands',
       'autoroles',
       'autovoice',
+      'xp',
+      'games',
     ]);
     expect(Object.keys(GuildConfigSchemas.general.shape)).toEqual(['prefix', 'timezone']);
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);
@@ -175,8 +177,38 @@ describe('GuildConfigSchemas', () => {
       'verificationRoleId',
     ]);
     expect(Object.keys(GuildConfigSchemas.autovoice.shape)).toEqual(['hubs']);
+    expect(Object.keys(GuildConfigSchemas.xp.shape)).toEqual([
+      'levelUpAnnouncements',
+      'levelUpChannelId',
+      'xpRatePercent',
+      'noXpChannelIds',
+      'noXpRoleIds',
+      'voiceXpEnabled',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.games.shape)).toEqual(['maxWager', 'rules']);
     expect(isGuildConfigModule('general')).toBe(true);
     expect(isGuildConfigModule('toString')).toBe(false);
+  });
+
+  it('reads an optional wager limit and drops game rules that change nothing', () => {
+    const parsed = GuildConfigSchemas.games.parse({
+      maxWager: ' none ',
+      rules:
+        '[{"command":"rps"},{"command":"dice","cooldownSeconds":5},{"command":"coinflip","enabled":false}]',
+    });
+    expect(parsed).toEqual({
+      maxWager: null,
+      rules: [
+        { command: 'coinflip', enabled: false, cooldownSeconds: null },
+        { command: 'dice', enabled: true, cooldownSeconds: 5 },
+      ],
+    });
+    expect(GuildConfigSchemas.games.shape.maxWager.parse('250')).toBe(250);
+    expect(GuildConfigSchemas.games.shape.maxWager.safeParse('1.5').success).toBe(false);
+    expect(
+      GuildConfigSchemas.games.shape.rules.safeParse('[{"command":"rps"},{"command":"rps"}]')
+        .success,
+    ).toBe(false);
   });
 
   it('rejects unknown keys', () => {

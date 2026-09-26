@@ -267,6 +267,7 @@ describe('ProfileCardRenderer', () => {
           no_xp_channel_ids TEXT NOT NULL DEFAULT '[]',
           no_xp_role_ids TEXT NOT NULL DEFAULT '[]',
           voice_xp_enabled INTEGER NOT NULL DEFAULT 0,
+          max_game_wager INTEGER,
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL
         );

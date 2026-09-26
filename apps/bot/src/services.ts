@@ -535,7 +535,8 @@ export async function createBotServices(
     repo: new CommandSettingsRepository(db),
   });
   eventBus.on('guild:configChanged', ({ guildId, module }) => {
-    if (module === 'commands') commandOverrideService.invalidate(guildId);
+    // The Games page writes the games' server-wide overrides too.
+    if (module === 'commands' || module === 'games') commandOverrideService.invalidate(guildId);
   });
   const commandCatalogRepo = new CommandCatalogRepository(db);
   const botActivityRepo = new BotActivityRepository(db);

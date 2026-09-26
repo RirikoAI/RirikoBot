@@ -3,6 +3,7 @@ import { canonicalTimeZone } from '../time/time-zone.js';
 import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.js';
 import { CommandOverridesSchema } from './command-overrides.js';
 import { AutoVoiceHubsSchema } from './auto-voice.js';
+import { GameRulesSchema, MAX_GAME_WAGER_LIMIT } from './games.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
 export const DEFAULT_COMMAND_PREFIX = '!';
@@ -78,6 +79,24 @@ export function IntSetting(min: number, max: number) {
       .int(message)
       .min(min, message)
       .max(max, message),
+  );
+}
+
+/** A whole number from `min` to `max`, or `null` for none; an empty string (or `none`) clears it. */
+export function OptionalIntSetting(min: number, max: number) {
+  const message = `Enter a whole number from ${min} to ${max}, or leave it empty.`;
+  return z.preprocess(
+    (value) => {
+      if (typeof value !== 'string') return value;
+      const trimmed = value.trim();
+      return trimmed === '' || trimmed.toLowerCase() === 'none' ? null : Number(trimmed);
+    },
+    z
+      .number({ invalid_type_error: message })
+      .int(message)
+      .min(min, message)
+      .max(max, message)
+      .nullable(),
   );
 }
 
@@ -243,6 +262,16 @@ export const GuildConfigSchemas = {
       ),
       voiceXpEnabled: FlagSetting.describe(
         'Voice rewards on or off (credits and XP for time in voice with another unmuted member)',
+      ),
+    })
+    .strict(),
+  games: z
+    .object({
+      maxWager: OptionalIntSetting(1, MAX_GAME_WAGER_LIMIT).describe(
+        'Most credits a member can wager on coinflip, dice, highlow, rps and tictactoe; empty for no limit',
+      ),
+      rules: JsonSetting(GameRulesSchema).describe(
+        'Server-wide game rules as JSON; cooldownSeconds null keeps the game default, e.g. [{"command":"rps","enabled":false}]',
       ),
     })
     .strict(),
