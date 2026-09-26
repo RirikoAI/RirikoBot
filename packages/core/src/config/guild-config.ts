@@ -120,6 +120,9 @@ const AutoModActionSetting = z.enum(AUTOMOD_ACTIONS, {
 });
 const MAX_EXEMPTIONS = 25;
 const MAX_JOIN_ROLES = 10;
+const MAX_NO_XP_CHANNELS = 50;
+/** Highest per-guild XP rate. Levels also raise the global bank capacity, so the rate is capped. */
+export const MAX_XP_RATE_PERCENT = 300;
 const AUTOMOD_ACTION_HELP = `${AUTOMOD_ACTIONS.join(', ')}; every match also deletes the message`;
 
 /**
@@ -220,6 +223,26 @@ export const GuildConfigSchemas = {
     .object({
       hubs: JsonSetting(AutoVoiceHubsSchema).describe(
         'Join-to-create hubs as JSON, e.g. [{"channelId":"123...","nameTemplate":"Room of {user}","userLimit":0,"bitrate":64000}]',
+      ),
+    })
+    .strict(),
+  xp: z
+    .object({
+      levelUpAnnouncements: FlagSetting.describe('Announce level-ups on or off'),
+      levelUpChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for level-up messages; empty posts in the channel where the member levelled up',
+      ),
+      xpRatePercent: IntSetting(0, MAX_XP_RATE_PERCENT).describe(
+        `XP rate in percent (0 to ${MAX_XP_RATE_PERCENT}); 100 is normal, 0 turns XP off`,
+      ),
+      noXpChannelIds: SnowflakeListSetting(MAX_NO_XP_CHANNELS).describe(
+        'Channel IDs where members earn no XP, comma separated',
+      ),
+      noXpRoleIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Role IDs whose members earn no XP, comma separated',
+      ),
+      voiceXpEnabled: FlagSetting.describe(
+        'Voice rewards on or off (credits and XP for time in voice with another unmuted member)',
       ),
     })
     .strict(),

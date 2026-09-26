@@ -316,6 +316,26 @@ export class GuildConfigService {
           }
         },
       },
+      xp: {
+        read: async (guildId, tx) => {
+          const row = await deps.guildSettings.findById(guildId, tx);
+          return {
+            levelUpAnnouncements: row?.karmaNotificationsEnabled ?? true,
+            levelUpChannelId: row?.levelUpChannelId ?? null,
+            xpRatePercent: row?.xpRatePercent ?? 100,
+            noXpChannelIds: row?.noXpChannelIds ?? [],
+            noXpRoleIds: row?.noXpRoleIds ?? [],
+            voiceXpEnabled: row?.voiceXpEnabled ?? false,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const { levelUpAnnouncements, ...rest } = values;
+          await deps.guildSettings.upsert(
+            { guildId, karmaNotificationsEnabled: levelUpAnnouncements, ...rest },
+            tx,
+          );
+        },
+      },
     };
   }
 

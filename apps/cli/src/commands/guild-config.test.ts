@@ -44,7 +44,9 @@ describe('ririko guild:config (TASK-1113)', () => {
     expect(keys).toContain('logging.logChannelId');
     expect(keys).toContain('commands.overrides');
     expect(keys).toContain('autoroles.humanRoleIds');
-    expect(keys.at(-1)).toBe('autovoice.hubs');
+    expect(keys).toContain('autovoice.hubs');
+    expect(keys).toContain('xp.noXpChannelIds');
+    expect(keys.at(-1)).toBe('xp.voiceXpEnabled');
     expect(listConfigKeys().every((entry) => entry.description.length > 0)).toBe(true);
   });
 
@@ -134,6 +136,18 @@ describe('ririko guild:config (TASK-1113)', () => {
     await expect(
       runGuildConfig(service, GUILD, 'autovoice.hubs', '[{"channelId":"x"}]'),
     ).rejects.toThrow('Row 1: Choose a voice channel.');
+  });
+
+  it('round-trips XP settings (TASK-1151)', async () => {
+    await runGuildConfig(service, GUILD, 'xp.xpRatePercent', '150');
+    await runGuildConfig(service, GUILD, 'xp.voiceXpEnabled', 'on');
+    await runGuildConfig(service, GUILD, 'xp.noXpRoleIds', '200000000000000001');
+    expect(await runGuildConfig(service, GUILD, 'xp.xpRatePercent')).toEqual(['150']);
+    expect(await runGuildConfig(service, GUILD, 'xp.voiceXpEnabled')).toEqual(['true']);
+    expect(await runGuildConfig(service, GUILD, 'xp.noXpRoleIds')).toEqual(['200000000000000001']);
+    await expect(runGuildConfig(service, GUILD, 'xp.xpRatePercent', '500')).rejects.toThrow(
+      'Enter a whole number from 0 to 300.',
+    );
   });
 
   it('lists all settings with their current values', async () => {
