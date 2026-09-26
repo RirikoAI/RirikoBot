@@ -47,6 +47,8 @@ const MODULE_LABELS: Record<string, string> = {
   commands: 'Command',
   autoroles: 'Auto Roles',
   autovoice: 'Auto Voice',
+  xp: 'XP & Ranking',
+  games: 'Games',
 };
 
 /** Guild actions other than settings saves. */
@@ -54,6 +56,8 @@ const ACTION_LABELS: Record<string, string> = {
   'reaction_roles.publish': 'Reaction role panel published',
   'reaction_roles.remove': 'Reaction role removed',
   'reaction_roles.delete_panel': 'Reaction role panel deleted',
+  'giveaways.end': 'Giveaway ended early',
+  'giveaways.reroll': 'Giveaway rerolled',
 };
 
 /** `guild_config.automod.update` as `AutoMod settings changed`; other actions as they are. */

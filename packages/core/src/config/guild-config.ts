@@ -3,6 +3,7 @@ import { canonicalTimeZone } from '../time/time-zone.js';
 import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.js';
 import { CommandOverridesSchema } from './command-overrides.js';
 import { AutoVoiceHubsSchema } from './auto-voice.js';
+import { GameRulesSchema, MAX_GAME_WAGER_LIMIT } from './games.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
 export const DEFAULT_COMMAND_PREFIX = '!';
@@ -81,6 +82,24 @@ export function IntSetting(min: number, max: number) {
   );
 }
 
+/** A whole number from `min` to `max`, or `null` for none; an empty string (or `none`) clears it. */
+export function OptionalIntSetting(min: number, max: number) {
+  const message = `Enter a whole number from ${min} to ${max}, or leave it empty.`;
+  return z.preprocess(
+    (value) => {
+      if (typeof value !== 'string') return value;
+      const trimmed = value.trim();
+      return trimmed === '' || trimmed.toLowerCase() === 'none' ? null : Number(trimmed);
+    },
+    z
+      .number({ invalid_type_error: message })
+      .int(message)
+      .min(min, message)
+      .max(max, message)
+      .nullable(),
+  );
+}
+
 /** A Discord ID, or `null` for none; an empty string (or `none` from the CLI) clears it. */
 export const OptionalSnowflakeSetting = z.preprocess((value) => {
   if (typeof value !== 'string') return value;
@@ -120,6 +139,9 @@ const AutoModActionSetting = z.enum(AUTOMOD_ACTIONS, {
 });
 const MAX_EXEMPTIONS = 25;
 const MAX_JOIN_ROLES = 10;
+const MAX_NO_XP_CHANNELS = 50;
+/** Highest per-guild XP rate. Levels also raise the global bank capacity, so the rate is capped. */
+export const MAX_XP_RATE_PERCENT = 300;
 const AUTOMOD_ACTION_HELP = `${AUTOMOD_ACTIONS.join(', ')}; every match also deletes the message`;
 
 /**
@@ -220,6 +242,36 @@ export const GuildConfigSchemas = {
     .object({
       hubs: JsonSetting(AutoVoiceHubsSchema).describe(
         'Join-to-create hubs as JSON, e.g. [{"channelId":"123...","nameTemplate":"Room of {user}","userLimit":0,"bitrate":64000}]',
+      ),
+    })
+    .strict(),
+  xp: z
+    .object({
+      levelUpAnnouncements: FlagSetting.describe('Announce level-ups on or off'),
+      levelUpChannelId: OptionalSnowflakeSetting.describe(
+        'Channel for level-up messages; empty posts in the channel where the member levelled up',
+      ),
+      xpRatePercent: IntSetting(0, MAX_XP_RATE_PERCENT).describe(
+        `XP rate in percent (0 to ${MAX_XP_RATE_PERCENT}); 100 is normal, 0 turns XP off`,
+      ),
+      noXpChannelIds: SnowflakeListSetting(MAX_NO_XP_CHANNELS).describe(
+        'Channel IDs where members earn no XP, comma separated',
+      ),
+      noXpRoleIds: SnowflakeListSetting(MAX_EXEMPTIONS).describe(
+        'Role IDs whose members earn no XP, comma separated',
+      ),
+      voiceXpEnabled: FlagSetting.describe(
+        'Voice rewards on or off (credits and XP for time in voice with another unmuted member)',
+      ),
+    })
+    .strict(),
+  games: z
+    .object({
+      maxWager: OptionalIntSetting(1, MAX_GAME_WAGER_LIMIT).describe(
+        'Most credits a member can wager on coinflip, dice, highlow, rps and tictactoe; empty for no limit',
+      ),
+      rules: JsonSetting(GameRulesSchema).describe(
+        'Server-wide game rules as JSON; cooldownSeconds null keeps the game default, e.g. [{"command":"rps","enabled":false}]',
       ),
     })
     .strict(),

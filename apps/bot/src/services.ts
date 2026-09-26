@@ -40,13 +40,7 @@ import {
   WelcomerRepository,
   type DatabaseClient,
 } from '@ririko/database';
-import {
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  type ButtonStyle,
-  type Client,
-} from 'discord.js';
+import type { Client } from 'discord.js';
 import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 import { MusicPlayerService } from '@ririko/music';
 import {
@@ -78,6 +72,7 @@ import {
   ProfileCardRenderer,
   AntiSpamEvaluator,
   VoiceSessionAccumulator,
+  VoiceRewardService,
   PermissionService,
   ModerationActionService,
   ModerationLogService,
@@ -95,6 +90,7 @@ import {
   EpicGamesProvider,
   SteamFreeGamesProvider,
   GiveawayEngine,
+  buildEndedMessages,
   AutoVoiceService,
   MiniGameSessionManager,
   GameEscrowService,
@@ -155,6 +151,7 @@ import {
   WelcomerService,
   type FreeGameItem,
 } from '@ririko/services';
+import { sendLevelUpMessage } from './listeners/level-up.js';
 
 export interface BotServices {
   db: DatabaseClient;
@@ -194,6 +191,8 @@ export interface BotServices {
   profileCardRenderer: ProfileCardRenderer;
   antiSpamEvaluator: AntiSpamEvaluator;
   voiceAccumulator: VoiceSessionAccumulator;
+  /** Pays voice credits and XP each minute; null without a Discord client (tests). Started on READY. */
+  voiceRewardService: VoiceRewardService | null;
   conversationManager: ConversationManager;
   personalityEngine: PersonalityEngine;
   toolRegistry: ToolRegistry;
@@ -451,8 +450,8 @@ export async function createBotServices(
     antiSpam: antiSpamEvaluator,
   });
 
+  // VoiceRewardService pays the events, so guild settings apply before anything is awarded.
   const voiceAccumulator = new VoiceSessionAccumulator({
-    economyService,
     config: {
       minQuorum: 2,
       intervalSeconds: 60,
@@ -509,12 +508,30 @@ export async function createBotServices(
   });
   // Settings saved by the dashboard or CLI reach this process through the config change feed.
   eventBus.on('guild:configChanged', ({ guildId }) => guildSettingsService.invalidate(guildId));
+  const voiceRewardService = discordClient
+    ? new VoiceRewardService({
+        accumulator: voiceAccumulator,
+        economyService,
+        levelingService,
+        getRules: (guildId) => guildSettingsService.getSettings(guildId),
+        getMemberRoleIds: (guildId, userId) => [
+          ...(discordClient.guilds.cache
+            .get(guildId)
+            ?.members.cache.get(userId)
+            ?.roles.cache.keys() ?? []),
+        ],
+        onLevelUp: async ({ channelId, userId, newLevel }) => {
+          await sendLevelUpMessage(discordClient, channelId, userId, newLevel);
+        },
+      })
+    : null;
   const guildConfigWatcher = new GuildConfigWatcher(new GuildConfigVersionRepository(db), eventBus);
   const commandOverrideService = new CommandOverrideService({
     repo: new CommandSettingsRepository(db),
   });
   eventBus.on('guild:configChanged', ({ guildId, module }) => {
-    if (module === 'commands') commandOverrideService.invalidate(guildId);
+    // The Games page writes the games' server-wide overrides too.
+    if (module === 'commands' || module === 'games') commandOverrideService.invalidate(guildId);
   });
   const commandCatalogRepo = new CommandCatalogRepository(db);
   const botActivityRepo = new BotActivityRepository(db);
@@ -702,45 +719,24 @@ export async function createBotServices(
       try {
         const giveaway = result.giveaway;
         const channel = await discordClient.channels.fetch(giveaway.channelId).catch(() => null);
-        if (channel && channel.isTextBased() && 'messages' in channel) {
-          const msg = await (channel as any).messages.fetch(giveaway.messageId).catch(() => null);
+        if (channel?.isSendable()) {
           const entryCount = await giveawayRepo.getEntryCount(giveaway.id);
-          const embedData = giveawayEngine.formatGiveawayEmbed(
+          const messages = buildEndedMessages(
+            giveawayEngine,
             giveaway,
             entryCount,
             result.winnerIds,
           );
-          const buttonData = giveawayEngine.formatGiveawayButton(giveaway.id, true, entryCount);
-          const embed = new EmbedBuilder(embedData);
-          const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-              .setCustomId(buttonData.customId)
-              .setLabel(buttonData.label)
-              .setStyle(buttonData.style as ButtonStyle)
-              .setDisabled(true)
-              .setEmoji(buttonData.emoji),
-          );
-          if (msg) {
-            await msg.edit({ embeds: [embed], components: [row] }).catch(() => null);
+          if (giveaway.messageId) {
+            const msg = await channel.messages.fetch(giveaway.messageId).catch(() => null);
+            await msg?.edit(messages.edit).catch(() => null);
           }
-
-          const winnerText =
-            result.winnerIds.length > 0
-              ? result.winnerIds.map((id) => `<@${id}>`).join(', ')
-              : 'None (No eligible entries)';
-          if (result.winnerIds.length > 0) {
-            await (channel as any)
-              .send({
-                content: `🎉 Congratulations ${winnerText}! You won **${giveaway.prize}**!\n${msg ? msg.url : ''}`,
-              })
-              .catch(() => null);
-          } else {
-            await (channel as any)
-              .send({
-                content: `⚠️ Giveaway for **${giveaway.prize}** has ended with no eligible winners.`,
-              })
-              .catch(() => null);
-          }
+          await channel
+            .send({
+              content: messages.announcement.content,
+              allowedMentions: { parse: [], users: messages.announcement.mentionUserIds },
+            })
+            .catch(() => null);
         }
       } catch (err) {
         console.error(`[GiveawayEngine] onGiveawayEnded failed for ${result.giveaway.id}:`, err);
@@ -956,6 +952,7 @@ export async function createBotServices(
     profileCardRenderer,
     antiSpamEvaluator,
     voiceAccumulator,
+    voiceRewardService,
     conversationManager,
     personalityEngine,
     toolRegistry,

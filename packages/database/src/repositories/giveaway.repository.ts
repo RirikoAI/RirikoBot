@@ -397,30 +397,42 @@ export class GiveawayRepository extends BaseRepository<
     }
   }
 
+  /**
+   * Marks the giveaway ended and records its winners, only if it was not ended yet. Returns
+   * false when another caller (the scheduler, `/giveaway end` or the dashboard) ended it first,
+   * in which case nothing is written.
+   */
   async endGiveaway(
     giveawayId: string,
     winnerUserIds: string[],
     tx?: DatabaseClient,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const client = this.getClient(tx);
-    await withTransaction(client, async (txClient) => {
-      // 1. Mark giveaway as ended
-      if (this.isSqlite(txClient)) {
-        await txClient.db
-          .update(sqliteSchema.giveaways)
-          .set({ isEnded: true })
-          .where(eq(sqliteSchema.giveaways.id, giveawayId));
-      } else {
-        await txClient.db
-          .update(pgSchema.giveaways)
-          .set({ isEnded: true })
-          .where(eq(pgSchema.giveaways.id, giveawayId));
-      }
+    return withTransaction(client, async (txClient) => {
+      const claimed = this.isSqlite(txClient)
+        ? await txClient.db
+            .update(sqliteSchema.giveaways)
+            .set({ isEnded: true })
+            .where(
+              and(
+                eq(sqliteSchema.giveaways.id, giveawayId),
+                eq(sqliteSchema.giveaways.isEnded, false),
+              ),
+            )
+            .returning({ id: sqliteSchema.giveaways.id })
+        : await txClient.db
+            .update(pgSchema.giveaways)
+            .set({ isEnded: true })
+            .where(
+              and(eq(pgSchema.giveaways.id, giveawayId), eq(pgSchema.giveaways.isEnded, false)),
+            )
+            .returning({ id: pgSchema.giveaways.id });
+      if (claimed.length === 0) return false;
 
-      // 2. Record winners if any
       if (winnerUserIds.length > 0) {
         await this.recordWinners(giveawayId, winnerUserIds, false, txClient);
       }
+      return true;
     });
   }
 }

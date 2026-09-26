@@ -74,19 +74,36 @@ interface ListPickerProps {
   defaultValue: string[];
 }
 
-/** Multi-channel picker (text and announcement channels) for a settings form. */
-export async function ChannelListField({ guildId, ...field }: ListPickerProps) {
+/**
+ * Multi-channel picker (text and announcement channels, plus voice channels with
+ * `includeVoice`) for a settings form.
+ */
+export async function ChannelListField({
+  guildId,
+  includeVoice = false,
+  ...field
+}: ListPickerProps & { includeVoice?: boolean }) {
   const { guildResources } = await getWebServices();
-  const channels = await guildResources.messageChannels(guildId);
+  const [channels, voice] = await Promise.all([
+    guildResources.messageChannels(guildId),
+    includeVoice ? guildResources.voiceChannels(guildId) : [],
+  ]);
   return (
     <ListField
       {...field}
       addLabel="Add a channel…"
-      options={channels.map((channel) => ({
-        value: channel.id,
-        label: `#${channel.name}`,
-        group: channel.category,
-      }))}
+      options={[
+        ...channels.map((channel) => ({
+          value: channel.id,
+          label: `#${channel.name}`,
+          group: channel.category,
+        })),
+        ...voice.map((channel) => ({
+          value: channel.id,
+          label: `🔊 ${channel.name}`,
+          group: channel.category,
+        })),
+      ]}
     />
   );
 }

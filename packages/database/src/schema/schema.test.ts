@@ -240,6 +240,12 @@ describe('Dual-Dialect Complete Schema Catalog (70+ Tables)', () => {
           farewell_enabled INTEGER NOT NULL DEFAULT 0,
           farewell_bg TEXT,
           karma_notifications_enabled INTEGER NOT NULL DEFAULT 1,
+          level_up_channel_id TEXT,
+          xp_rate_percent INTEGER NOT NULL DEFAULT 100,
+          no_xp_channel_ids TEXT NOT NULL DEFAULT '[]',
+          no_xp_role_ids TEXT NOT NULL DEFAULT '[]',
+          voice_xp_enabled INTEGER NOT NULL DEFAULT 0,
+          max_game_wager INTEGER,
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL
         );

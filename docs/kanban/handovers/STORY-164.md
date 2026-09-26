@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 8 pts (`TASK-1641` = 3, `TASK-1642` = 3, `TASK-1643` = 2)
 - **Epic**: `EPIC-011`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #652)
 - **Timestamp**: 2026-09-26
 - **Branch**: `feat/STORY-164-reaction-roles-autoroles-autovoice` (targets `develop/2.0.0`)
 
