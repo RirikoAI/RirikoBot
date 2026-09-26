@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "STORY-163",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -964,7 +964,7 @@
       "epic": "EPIC-011",
       "title": "Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles)",
       "points": 5,
-      "status": "IN_PROGRESS",
+      "status": "REVIEW",
       "requires": [
         "STORY-114"
       ],
@@ -2714,7 +2714,7 @@
       "parent": "STORY-163",
       "title": "CommandSettingsRepository, Web-Readable Command Catalog & Override Middleware (Guild/Channel Precedence, Allowed/Blocked Roles, Cached with guild:configChanged)",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-114"
       ],
@@ -2728,7 +2728,7 @@
       "parent": "STORY-163",
       "title": "Command Overrides Page & guild:config Keys",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1631"
       ],
