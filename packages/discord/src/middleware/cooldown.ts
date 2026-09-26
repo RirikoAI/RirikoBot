@@ -12,8 +12,7 @@ export interface CooldownMiddlewareOptions {
    * Custom duration override resolver; `undefined` falls back to the command's own cooldown.
    */
   getCooldownSeconds?:
-    | ((ctx: CommandContext) => number | undefined | Promise<number | undefined>)
-    | undefined;
+    ((ctx: CommandContext) => number | undefined | Promise<number | undefined>) | undefined;
 
   /**
    * Scope of the cooldown: 'user' (default) or 'channel' or 'guild'.
