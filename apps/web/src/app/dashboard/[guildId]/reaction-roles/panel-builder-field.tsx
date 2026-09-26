@@ -15,21 +15,30 @@ type Style = 'PRIMARY' | 'SECONDARY' | 'SUCCESS' | 'DANGER';
 
 /** A panel as the page loads it for editing (the builder input the shared schema accepts). */
 export interface PanelDraftInput {
-  channelId?: string;
-  messageId?: string | null;
-  content?: string;
-  embed?: { title?: string; description?: string; color?: number } | null;
-  kind?: Kind;
-  mode?: Mode;
-  placeholder?: string;
-  maxValues?: number | null;
-  items?: {
-    roleId?: string;
-    label?: string;
-    description?: string;
-    emoji?: string | null;
-    style?: Style;
-  }[];
+  channelId?: string | undefined;
+  messageId?: string | null | undefined;
+  content?: string | undefined;
+  embed?:
+    | {
+        title?: string | undefined;
+        description?: string | undefined;
+        color?: number | undefined;
+      }
+    | null
+    | undefined;
+  kind?: Kind | undefined;
+  mode?: Mode | undefined;
+  placeholder?: string | undefined;
+  maxValues?: number | null | undefined;
+  items?:
+    | {
+        roleId?: string | undefined;
+        label?: string | undefined;
+        description?: string | undefined;
+        emoji?: string | null | undefined;
+        style?: Style | undefined;
+      }[]
+    | undefined;
 }
 
 interface Item {

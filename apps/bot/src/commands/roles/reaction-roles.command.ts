@@ -1,4 +1,11 @@
-import { EmbedBuilder, PermissionFlagsBits, type TextChannel } from 'discord.js';
+import {
+  EmbedBuilder,
+  PermissionFlagsBits,
+  type APIActionRowComponent,
+  type APIComponentInMessageActionRow,
+  type TextChannel,
+} from 'discord.js';
+import { stripPanelBinding, type ApiComponent } from '@ririko/core';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
@@ -88,24 +95,32 @@ export function createReactionRolesCommand(services: BotServices): Command {
         }
 
         try {
-          // Attempt best-effort cleanup of emoji reaction if applicable
-          if (existing.type === 'EMOJI' && existing.channelId) {
-            try {
-              const channel = (await ctx.guild.channels
-                .fetch(existing.channelId)
-                .catch(() => null)) as TextChannel | null;
-              if (channel && 'messages' in channel) {
-                const msg = await channel.messages.fetch(existing.messageId).catch(() => null);
-                if (msg) {
-                  const reaction = msg.reactions.cache.get(existing.emojiOrComponentId);
-                  if (reaction) {
-                    await reaction.users.remove(ctx.guild.members.me?.id ?? '').catch(() => {});
-                  }
-                }
+          // Best effort: take Ririko's reaction, or the button or menu option, off the message
+          try {
+            const channel = (await ctx.guild.channels
+              .fetch(existing.channelId)
+              .catch(() => null)) as TextChannel | null;
+            const msg =
+              channel && 'messages' in channel
+                ? await channel.messages.fetch(existing.messageId).catch(() => null)
+                : null;
+            if (msg && existing.type === 'EMOJI') {
+              const reaction = msg.reactions.cache.get(existing.emojiOrComponentId);
+              if (reaction) {
+                await reaction.users.remove(ctx.guild.members.me?.id ?? '').catch(() => {});
               }
-            } catch {
-              // Non-fatal if message/channel no longer exists
+            } else if (msg?.editable) {
+              const rows = msg.components.map((row) => row.toJSON()) as ApiComponent[];
+              const stripped = stripPanelBinding(rows, existing);
+              if (JSON.stringify(stripped) !== JSON.stringify(rows)) {
+                await msg.edit({
+                  components:
+                    stripped as unknown as APIActionRowComponent<APIComponentInMessageActionRow>[],
+                });
+              }
             }
+          } catch {
+            // Non-fatal if message/channel no longer exists
           }
 
           await services.reactionRoleRepo.delete(id);

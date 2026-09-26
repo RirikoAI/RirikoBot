@@ -51,7 +51,7 @@ Guild Discovery Pipeline
 ### 2.3. Passkey Sign-In Gate & Step-Up
 - Passkeys are optional. Once a user has at least one, every sign-in must complete a passkey check before any page or Server Action works, so a compromised Discord account alone cannot reach the dashboard.
 - Removing a passkey needs a passkey check newer than 5 minutes, is audited, and sends the user a DM. There is no "keep passkeys but stop asking" setting.
-- Sensitive writes always need a passkey check newer than 5 minutes: the owner console, the moderation escalation policy, reaction-role publishing, and integrations. Users without a passkey cannot perform them.
+- Sensitive writes always need a passkey check newer than 5 minutes: the owner console, the moderation escalation policy, every reaction role panel write (publish, edit, remove a role, delete a panel), and integrations. Users without a passkey cannot perform them.
 - Bot owners (`BOT_OWNER_ID`) must have a passkey to use the owner console.
 - A passkey check rotates the session ID.
 - Authenticators are asked for a fingerprint, face or PIN but only user presence is required, because some (for example a Windows passkey used through Edge) do not report verification (ADR-013 revision item 7, BUG-0020). Every rejected passkey is logged with its reason (`[web] Passkey check rejected …`).
@@ -104,6 +104,7 @@ The dashboard and CLI run in separate processes from the bot, so they cannot cle
 3. Add `app/dashboard/[guildId]/<module>/actions.ts` (`'use server'`) whose action returns `saveGuildSettings(guildId, '<module>', fields)`.
    - Read `fields` with `pickFormFields(formData, [...])` for text fields, or `readFormFields(formData, { text, list, flag })` when the form has lists or checkboxes.
    - `saveGuildSettings` runs `checkDashboardRequest` (Origin and rate limit), `requireGuildAccess`, validation, the audited write, `revalidatePath` and the log-channel change notice.
+   - Settings that must match the guild (a role Ririko can give, a channel of the right type) pass `{ check }`, which runs after the guards and returns field errors before anything is written (`lib/server/guilds/setting-checks.ts`). The CLI has no Discord access, so the schema must still keep the bot safe on its own.
    - Sensitive modules (Section 2.3) pass `{ stepUp: true }`. Without a passkey check from the last five minutes nothing is written; the form offers "Confirm with passkey and save" and submits the same values again, or links to the Security page if the user has no passkey.
    - Any other Server Action must call `checkDashboardRequest` and a guard itself, or the coverage test fails.
 4. Add `page.tsx` that calls `requireGuildAccess(guildId)`, reads `guildConfig.get(guildId, '<module>')` and renders `SettingsForm`. Field errors and saved values come back through `useActionState`.
@@ -146,8 +147,11 @@ The dashboard provides dedicated management views for all 20+ bot modules:
     - **Achievement Manager** (*owner console* for edits, `game_achievements` is global): Live inspector for achievement completion telemetry, active reward tables, and toggleable seasonal achievements.
 11. **Games**: Enable/disable specific mini-games, wager limits, cooldown sliders.
 12. **Giveaways**: Active giveaway list, winner reroll buttons, historical log.
-13. **Reaction Roles**: Visual message builder and role mapping manager (STORY-164).
-14. **Auto Voice**: Join-to-create channel assigner, user limit, bitrate presets (STORY-164). The bot deletes every empty voice channel in a hub's category, so the page must tell users to keep hubs in their own category.
+13. **Reaction Roles**: Visual message builder and role mapping manager.
+   - *Shipped in STORY-164 as `/dashboard/[guildId]/reaction-roles`:* a builder for a message (text and an optional embed) with up to 25 role buttons (5 per row, one click mode for the panel: toggle, give only, remove only or pick one) or one role menu (up to 25 options, a pick limit; a member's choice replaces their roles from that menu), with a live preview. Ririko posts it through the bot-token REST client, or edits one of its own messages that carries no other feature's components. Bindings are stored in `reaction_roles` (buttons by `rr:btn:<binding id>`, menu options by role under the panel's `group_id`) in one transaction with an audit entry; if that fails, the new message is deleted or the edited one restored. The panel list shows every message with bindings, including emoji reactions from `/create-reaction-role`; each role can be removed (its button, option or Ririko's reaction goes too), and a panel can lose all its roles or, for Ririko's own messages, be deleted. Every write needs a fresh passkey check, is audited and posts a change notice. Roles are checked against Ririko's highest role, as in the bot.
+14. **Auto Voice**: Join-to-create channel assigner, user limit, bitrate presets.
+   - *Shipped in STORY-164 as `/dashboard/[guildId]/autovoice` (module `autovoice`, CLI key `autovoice.hubs`):* up to 20 hubs, each with its voice channel, a name template (`{user}`), a user limit and a bitrate preset capped at the guild's boost tier. The bot deletes only the channels it created (BUG-0021), and lowers a saved bitrate to what the guild allows when it creates a channel.
+   - **Auto Roles** (`/dashboard/[guildId]/autoroles`, module `autoroles`, STORY-164): join roles for members and for bots (up to 10 each) with an on/off switch, and the verification role that `/autorole send-verify` buttons give. The pickers offer only roles Ririko can give, and the save checks them again against Discord.
 15. **Stream Alerts**: Streamer subscription list (Twitch/YouTube/TikTok), announcement templates, mention roles.
 16. **Free Games**: Epic/Steam/GOG announcement channels and notification ping roles.
 17. **Welcome & Farewell**: Interactive canvas preview card editor with custom background uploads.
@@ -219,4 +223,4 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-118 | 5 | Session management and alerts, CSP and taint guards, rate limits, authorization coverage test | 7 |
 | STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
 | STORY-163 | 5 | Command Overrides engine (repository, catalog, override middleware) and page | 4 (19) |
-| STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 4 (13, 14) |
+| STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 2.3, 4 (13, 14) |
