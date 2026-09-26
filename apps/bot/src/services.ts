@@ -40,13 +40,7 @@ import {
   WelcomerRepository,
   type DatabaseClient,
 } from '@ririko/database';
-import {
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  type ButtonStyle,
-  type Client,
-} from 'discord.js';
+import type { Client } from 'discord.js';
 import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 import { MusicPlayerService } from '@ririko/music';
 import {
@@ -96,6 +90,7 @@ import {
   EpicGamesProvider,
   SteamFreeGamesProvider,
   GiveawayEngine,
+  buildEndedMessages,
   AutoVoiceService,
   MiniGameSessionManager,
   GameEscrowService,
@@ -724,45 +719,24 @@ export async function createBotServices(
       try {
         const giveaway = result.giveaway;
         const channel = await discordClient.channels.fetch(giveaway.channelId).catch(() => null);
-        if (channel && channel.isTextBased() && 'messages' in channel) {
-          const msg = await (channel as any).messages.fetch(giveaway.messageId).catch(() => null);
+        if (channel?.isSendable()) {
           const entryCount = await giveawayRepo.getEntryCount(giveaway.id);
-          const embedData = giveawayEngine.formatGiveawayEmbed(
+          const messages = buildEndedMessages(
+            giveawayEngine,
             giveaway,
             entryCount,
             result.winnerIds,
           );
-          const buttonData = giveawayEngine.formatGiveawayButton(giveaway.id, true, entryCount);
-          const embed = new EmbedBuilder(embedData);
-          const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-              .setCustomId(buttonData.customId)
-              .setLabel(buttonData.label)
-              .setStyle(buttonData.style as ButtonStyle)
-              .setDisabled(true)
-              .setEmoji(buttonData.emoji),
-          );
-          if (msg) {
-            await msg.edit({ embeds: [embed], components: [row] }).catch(() => null);
+          if (giveaway.messageId) {
+            const msg = await channel.messages.fetch(giveaway.messageId).catch(() => null);
+            await msg?.edit(messages.edit).catch(() => null);
           }
-
-          const winnerText =
-            result.winnerIds.length > 0
-              ? result.winnerIds.map((id) => `<@${id}>`).join(', ')
-              : 'None (No eligible entries)';
-          if (result.winnerIds.length > 0) {
-            await (channel as any)
-              .send({
-                content: `🎉 Congratulations ${winnerText}! You won **${giveaway.prize}**!\n${msg ? msg.url : ''}`,
-              })
-              .catch(() => null);
-          } else {
-            await (channel as any)
-              .send({
-                content: `⚠️ Giveaway for **${giveaway.prize}** has ended with no eligible winners.`,
-              })
-              .catch(() => null);
-          }
+          await channel
+            .send({
+              content: messages.announcement.content,
+              allowedMentions: { parse: [], users: messages.announcement.mentionUserIds },
+            })
+            .catch(() => null);
         }
       } catch (err) {
         console.error(`[GiveawayEngine] onGiveawayEnded failed for ${result.giveaway.id}:`, err);

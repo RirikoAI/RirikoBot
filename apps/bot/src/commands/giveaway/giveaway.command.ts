@@ -8,6 +8,7 @@ import {
   type Role,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
+import { buildRerollAnnouncement } from '@ririko/services';
 import type { BotServices } from '../../services.js';
 import type { Giveaway } from '@ririko/database';
 
@@ -282,7 +283,8 @@ export function createGiveawayCommands(services: BotServices): Command[] {
 
         const result = await services.giveawayEngine.rollAndEndGiveaway(giveaway.id);
         if (!result) {
-          await ctx.reply({ content: '❌ Failed to end the giveaway.' });
+          // The scheduler or the dashboard ended it first.
+          await ctx.reply({ content: '⚠️ This giveaway has already ended.' });
           return;
         }
 
@@ -338,9 +340,11 @@ export function createGiveawayCommands(services: BotServices): Command[] {
         // Post announcement in host channel
         try {
           const channel = await ctx.client.channels.fetch(giveaway.channelId).catch(() => null);
-          if (channel && channel.isTextBased() && 'send' in channel) {
-            await (channel as any).send({
-              content: `🎉 **Giveaway Rerolled!**\nNew Winner(s): ${newWinners}!\nYou won **${giveaway.prize}**!`,
+          if (channel?.isSendable()) {
+            const announcement = buildRerollAnnouncement(giveaway, result.winnerIds);
+            await channel.send({
+              content: announcement.content,
+              allowedMentions: { parse: [], users: announcement.mentionUserIds },
             });
           }
         } catch (err) {
