@@ -72,6 +72,8 @@ export const guildSettings = pgTable('guild_settings', {
   noXpRoleIds: jsonb('no_xp_role_ids').$type<string[]>().notNull().default([]),
   /** Voice credits and XP; off until a manager turns it on. */
   voiceXpEnabled: boolean('voice_xp_enabled').notNull().default(false),
+  /** Largest mini-game wager in credits; null means no limit. */
+  maxGameWager: integer('max_game_wager'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

@@ -80,6 +80,8 @@ export const guildSettings = sqliteTable('guild_settings', {
   noXpRoleIds: text('no_xp_role_ids', { mode: 'json' }).$type<string[]>().notNull().default([]),
   /** Voice credits and XP; off until a manager turns it on. */
   voiceXpEnabled: integer('voice_xp_enabled', { mode: 'boolean' }).notNull().default(false),
+  /** Largest mini-game wager in credits; null means no limit. */
+  maxGameWager: integer('max_game_wager'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

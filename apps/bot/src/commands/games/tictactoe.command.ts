@@ -9,6 +9,7 @@ import {
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
+import { wagerLimitRefusal } from './wager-limit.js';
 import type { TttBoard } from '@ririko/services';
 
 export function buildTttGrid(
@@ -144,6 +145,12 @@ export function createTicTacToeCommand(services: BotServices): Command {
           content: `❌ <@${player2.id}> already has an active game in this channel!`,
           ephemeral: true,
         });
+        return;
+      }
+
+      const wagerRefusal = await wagerLimitRefusal(services, ctx.guild?.id, wagerAmount);
+      if (wagerRefusal) {
+        await ctx.reply({ content: wagerRefusal, ephemeral: true });
         return;
       }
 
