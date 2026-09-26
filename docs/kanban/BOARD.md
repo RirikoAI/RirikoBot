@@ -15,7 +15,7 @@
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| | | | | | |
+| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | `EPIC-011` | [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) |
 
 ---
 
@@ -248,9 +248,9 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1141` | Task | Typed Settings & Step-Up Settings Forms (Toggle, Number, Role/Channel Lists, Row Editor), CLI Typed Values & Logging Page (Log Channel, Case Log Wiring) | 3 | `STORY-114` | ✅ Done · [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) | `STORY-111`, `STORY-117` |
 | `TASK-1142` | Task | Moderation Escalation Policy Builder (guild_settings.escalation_steps, Step-Up) & AutoMod Page (Per-Rule Toggle, Action, Limit, Exemptions) with Real AutoMod Actions | 5 | `STORY-114` | ✅ Done · [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) | `TASK-1141` |
 | `TASK-1143` | Task | Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages | 3 | `STORY-114` | ❌ Abandoned (re-groomed into `STORY-164` before work started) | `TASK-1142` |
-| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | `EPIC-011` | 🎯 To Do | `STORY-114` |
-| `TASK-1631` | Task | CommandSettingsRepository, Web-Readable Command Catalog & Override Middleware (Guild/Channel Precedence, Allowed/Blocked Roles, Cached with guild:configChanged) | 3 | `STORY-163` | 🎯 To Do | `STORY-114` |
-| `TASK-1632` | Task | Command Overrides Page & guild:config Keys | 2 | `STORY-163` | 🎯 To Do | `TASK-1631` |
+| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | `EPIC-011` | 🔍 Review · [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) | `STORY-114` |
+| `TASK-1631` | Task | CommandSettingsRepository, Web-Readable Command Catalog & Override Middleware (Guild/Channel Precedence, Allowed/Blocked Roles, Cached with guild:configChanged) | 3 | `STORY-163` | ✅ Done · [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) | `STORY-114` |
+| `TASK-1632` | Task | Command Overrides Page & guild:config Keys | 2 | `STORY-163` | ✅ Done · [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) | `TASK-1631` |
 | `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-114` |
 | `TASK-1641` | Task | Guild Resources (Voice Channels, Role Positions & Bot Top Role, Boost Tier) & Auto Roles and Auto Voice Pages | 3 | `STORY-164` | 🎯 To Do | `STORY-114` |
 | `TASK-1642` | Task | Reaction Role Message Builder: Publish Buttons & Select Menus via Bot REST (Step-Up, Audit) | 3 | `STORY-164` | 🎯 To Do | `TASK-1641` |

@@ -36,3 +36,5 @@ export * from './audit-log.repository.js';
 export * from './web-passkey.repository.js';
 export * from './web-known-device.repository.js';
 export * from './bot-activity.repository.js';
+export * from './command-settings.repository.js';
+export * from './command-catalog.repository.js';

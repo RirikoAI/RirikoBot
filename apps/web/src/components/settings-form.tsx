@@ -289,7 +289,7 @@ export interface SelectOption {
 }
 
 /** `<option>`s, with options sharing a `group` under one `<optgroup>`. */
-function OptionList({ options }: { options: SelectOption[] }) {
+export function OptionList({ options }: { options: SelectOption[] }) {
   const groups = new Map<string, SelectOption[]>();
   for (const option of options) {
     const group = option.group ?? '';

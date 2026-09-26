@@ -41,6 +41,7 @@ import {
   registerMemberListener,
   registerReactionListener,
 } from './index.js';
+import { syncCommandCatalog } from './command-catalog.js';
 import {
   CommandRouter,
   createHelpCommand,
@@ -50,6 +51,9 @@ import {
   createRestClient,
   CommandCategory,
   DEFAULT_COMMAND_PREFIX,
+  createCommandOverrideMiddleware,
+  createCooldownMiddleware,
+  overrideChannelId,
   type Command,
   type CommandContext,
 } from '@ririko/discord';
@@ -92,6 +96,24 @@ export async function main(): Promise<void> {
       console.error(`[Command:${ctx.commandName}] Execution error:`, err);
     },
     onCommandRun: (ctx) => services.commandUsageRecorder.record(ctx.guildId, ctx.commandName),
+    // Overrides run first, so a blocked command does not start a cooldown.
+    middlewares: [
+      createCommandOverrideMiddleware({
+        resolve: (guildId, channelId, commandName) =>
+          services.commandOverrideService.resolve(guildId, channelId, commandName),
+      }),
+      createCooldownMiddleware({
+        getCooldownSeconds: async (ctx) => {
+          if (!ctx.guildId || !ctx.command) return undefined;
+          const override = await services.commandOverrideService.resolve(
+            ctx.guildId,
+            overrideChannelId(ctx),
+            ctx.command.metadata.name,
+          );
+          return override?.cooldownSeconds ?? undefined;
+        },
+      }),
+    ],
   });
 
   // 3. Register standard test & diagnostic commands
@@ -228,6 +250,7 @@ export async function main(): Promise<void> {
       .map((c) => c.metadata.name)
       .join(', ')}`,
   );
+  await syncCommandCatalog(router.registry.getAll(), services.commandCatalogRepo);
 
   // 6. Bind Gateway Interaction & Message Listeners
   router.bindClient(bot.client);

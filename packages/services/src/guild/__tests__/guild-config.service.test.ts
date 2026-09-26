@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   AuditLogRepository,
+  CommandCatalogRepository,
+  CommandSettingsRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -27,6 +29,8 @@ describe('GuildConfigService (TASK-1111)', () => {
   let db: SqliteDatabaseClient;
   let versions: GuildConfigVersionRepository;
   let moderation: ModerationRepository;
+  let commandSettings: CommandSettingsRepository;
+  let commandCatalog: CommandCatalogRepository;
   let service: GuildConfigService;
 
   beforeEach(async () => {
@@ -39,10 +43,14 @@ describe('GuildConfigService (TASK-1111)', () => {
     db = raw;
     versions = new GuildConfigVersionRepository(db);
     moderation = new ModerationRepository(db);
+    commandSettings = new CommandSettingsRepository(db);
+    commandCatalog = new CommandCatalogRepository(db);
     service = new GuildConfigService({
       db,
       guildSettings: new GuildSettingsRepository(db),
       moderation,
+      commandSettings,
+      commandCatalog,
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -288,6 +296,117 @@ describe('GuildConfigService (TASK-1111)', () => {
         'burstSpamAction',
       ]);
       expect(await moderation.getRules('g1')).toEqual([]);
+    });
+  });
+
+  describe('commands (TASK-1631)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+    const catalogEntry = (name: string, category: string) => ({
+      name,
+      category,
+      description: name,
+      slashEnabled: true,
+      prefixEnabled: true,
+      defaultPermission: null,
+      cooldownSeconds: 0,
+    });
+
+    beforeEach(async () => {
+      await commandCatalog.replaceAll([
+        catalogEntry('rps', 'games'),
+        catalogEntry('play', 'music'),
+      ]);
+    });
+
+    it('reads no overrides for a new guild', async () => {
+      expect(await service.get('g1', 'commands')).toEqual({ overrides: [] });
+    });
+
+    it('replaces the rows, bumps the feed and audits the change', async () => {
+      await service.update(
+        'g1',
+        'commands',
+        {
+          overrides: JSON.stringify([
+            { command: 'rps', channelId: CHANNEL, blockedRoleIds: [ROLE] },
+            { command: 'rps', enabled: false },
+            { command: 'play', cooldownSeconds: 30 },
+          ]),
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+
+      const { overrides } = await service.get('g1', 'commands');
+      expect(overrides.map((row) => [row.command, row.channelId])).toEqual([
+        ['play', null],
+        ['rps', null],
+        ['rps', CHANNEL],
+      ]);
+      expect(await commandSettings.listForGuild('g1')).toHaveLength(3);
+      expect((await versions.listChangedSince(new Date(0)))[0]).toMatchObject({
+        module: 'commands',
+      });
+      expect(auditRows()[0]?.action).toBe('guild_config.commands.update');
+
+      // Saving the same rows in another order changes nothing.
+      const again = await service.update(
+        'g1',
+        'commands',
+        { overrides: [...overrides].reverse() },
+        dashboardActor,
+      );
+      expect(again.changes).toEqual([]);
+    });
+
+    it('rejects commands the bot did not record and writes nothing', async () => {
+      const error = await service
+        .update(
+          'g1',
+          'commands',
+          { overrides: [{ command: 'nope', enabled: false }] },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect((error as GuildConfigValidationError).fieldErrors).toEqual({
+        overrides: ['Unknown command: `nope`.'],
+      });
+      expect(await commandSettings.listForGuild('g1')).toEqual([]);
+      expect(await versions.listChangedSince(new Date(0))).toEqual([]);
+    });
+
+    it('explains an empty catalog', async () => {
+      await commandCatalog.replaceAll([]);
+      const error = await service
+        .update(
+          'g1',
+          'commands',
+          { overrides: [{ command: 'rps', enabled: false }] },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect((error as GuildConfigValidationError).fieldErrors.overrides?.[0]).toMatch(
+        /Start the bot once/,
+      );
+    });
+
+    it('keeps row numbers in schema errors', async () => {
+      const error = await service
+        .update(
+          'g1',
+          'commands',
+          {
+            overrides: [
+              { command: 'rps', enabled: false },
+              { command: 'help', enabled: false },
+            ],
+          },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect((error as GuildConfigValidationError).fieldErrors).toEqual({
+        overrides: ['Row 2: `help` is always available and cannot be overridden.'],
+      });
     });
   });
 });
