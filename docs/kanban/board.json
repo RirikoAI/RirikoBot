@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "STORY-164",
   "epics": [
     {
       "id": "EPIC-000",
@@ -976,7 +976,7 @@
       "epic": "EPIC-011",
       "title": "Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages",
       "points": 8,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "STORY-114"
       ],
