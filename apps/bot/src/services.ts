@@ -6,6 +6,8 @@ import {
   GuildSettingsRepository,
   GuildConfigVersionRepository,
   BotActivityRepository,
+  CommandCatalogRepository,
+  CommandSettingsRepository,
   LeaderboardRepository,
   ItemRepository,
   InventoryRepository,
@@ -145,6 +147,7 @@ import {
   GuildSettingsService,
   GuildConfigWatcher,
   CommandUsageRecorder,
+  CommandOverrideService,
   BotStatusReporter,
   ReactionGifService,
   MemeSynthesizer,
@@ -211,6 +214,10 @@ export interface BotServices {
   guildConfigWatcher: GuildConfigWatcher;
   /** Counts commands run per guild for the dashboard; fed by the command router. */
   commandUsageRecorder: CommandUsageRecorder;
+  /** Per-guild and per-channel command overrides read by the router middlewares. */
+  commandOverrideService: CommandOverrideService;
+  /** Registered commands, written at startup so the dashboard and CLI can list them. */
+  commandCatalogRepo: CommandCatalogRepository;
   /** Null when no Discord client was supplied (tests); started on gateway READY. */
   botStatusReporter: BotStatusReporter | null;
   /** Zone for reading reminder times: the user's saved zone, then the guild's, then UTC. */
@@ -503,6 +510,13 @@ export async function createBotServices(
   // Settings saved by the dashboard or CLI reach this process through the config change feed.
   eventBus.on('guild:configChanged', ({ guildId }) => guildSettingsService.invalidate(guildId));
   const guildConfigWatcher = new GuildConfigWatcher(new GuildConfigVersionRepository(db), eventBus);
+  const commandOverrideService = new CommandOverrideService({
+    repo: new CommandSettingsRepository(db),
+  });
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'commands') commandOverrideService.invalidate(guildId);
+  });
+  const commandCatalogRepo = new CommandCatalogRepository(db);
   const botActivityRepo = new BotActivityRepository(db);
   const commandUsageRecorder = new CommandUsageRecorder(botActivityRepo);
   const botStatusReporter = discordClient
@@ -955,6 +969,8 @@ export async function createBotServices(
     guildSettingsService,
     guildConfigWatcher,
     commandUsageRecorder,
+    commandOverrideService,
+    commandCatalogRepo,
     botStatusReporter,
     resolveUserTimeZone,
     resolveGuildTimeZone,

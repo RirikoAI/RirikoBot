@@ -1,17 +1,22 @@
 import {
   AUTOMOD_ACTIONS,
   AUTOMOD_RULE_DEFAULTS,
+  compareCommandOverrides,
   DEFAULT_ESCALATION_STEPS,
   GuildConfigSchemas,
   ValidationError,
   type AutoModConfigurableAction,
   type AutoModRuleTypeName,
+  type CommandOverride,
   type GuildConfigModule,
   type GuildConfigValues,
 } from '@ririko/core';
 import {
   withTransaction,
   type AuditLogRepository,
+  type CommandCatalogRepository,
+  type CommandSettings,
+  type CommandSettingsRepository,
   type DatabaseClient,
   type GuildConfigVersionRepository,
   type GuildSettingsRepository,
@@ -112,6 +117,20 @@ function readAutoModValues(rules: ModerationRule[]): GuildConfigValues<'automod'
   return values as GuildConfigValues<'automod'>;
 }
 
+/** Stored `command_settings` rows in the shape the schema and the bot use. */
+export function toCommandOverrides(rows: readonly CommandSettings[]): CommandOverride[] {
+  return rows
+    .map((row) => ({
+      command: row.commandName,
+      channelId: row.channelId,
+      enabled: row.isEnabled,
+      allowedRoleIds: row.allowedRoles,
+      blockedRoleIds: row.blockedRoles,
+      cooldownSeconds: row.cooldownOverride,
+    }))
+    .sort(compareCommandOverrides);
+}
+
 interface ModuleStore<M extends GuildConfigModule> {
   read(guildId: string, tx?: DatabaseClient): Promise<GuildConfigValues<M>>;
   write(guildId: string, values: GuildConfigValues<M>, tx: DatabaseClient): Promise<void>;
@@ -121,6 +140,8 @@ export interface GuildConfigServiceDeps {
   db: DatabaseClient;
   guildSettings: GuildSettingsRepository;
   moderation: ModerationRepository;
+  commandSettings: CommandSettingsRepository;
+  commandCatalog: CommandCatalogRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -195,6 +216,39 @@ export class GuildConfigService {
         },
         write: async (guildId, values, tx) => {
           await deps.guildSettings.upsert({ guildId, logChannelId: values.logChannelId }, tx);
+        },
+      },
+      commands: {
+        read: async (guildId, tx) => ({
+          overrides: toCommandOverrides(await deps.commandSettings.listForGuild(guildId, tx)),
+        }),
+        write: async (guildId, values, tx) => {
+          // Only the bot knows its commands; it writes them to the catalog at startup.
+          const known = new Set((await deps.commandCatalog.list(tx)).map((entry) => entry.name));
+          const unknown = [...new Set(values.overrides.map((row) => row.command))].filter(
+            (name) => !known.has(name),
+          );
+          if (unknown.length > 0) {
+            throw new GuildConfigValidationError({
+              overrides: [
+                known.size === 0
+                  ? 'The command list is empty. Start the bot once so it can record its commands.'
+                  : `Unknown command: ${unknown.map((name) => `\`${name}\``).join(', ')}.`,
+              ],
+            });
+          }
+          await deps.commandSettings.replaceForGuild(
+            guildId,
+            values.overrides.map((row) => ({
+              commandName: row.command,
+              channelId: row.channelId,
+              isEnabled: row.enabled,
+              cooldownOverride: row.cooldownSeconds,
+              allowedRoles: row.allowedRoleIds,
+              blockedRoles: row.blockedRoleIds,
+            })),
+            tx,
+          );
         },
       },
     };
