@@ -38,6 +38,7 @@ describe('audit log formatting (TASK-1132)', () => {
 
   it('describes settings changes and humanizes field names', () => {
     expect(describeAuditAction('guild_config.automod.update')).toBe('AutoMod settings changed');
+    expect(describeAuditAction('guild_config.commands.update')).toBe('Command settings changed');
     expect(describeAuditAction('guild_config.music.update')).toBe('music settings changed');
     expect(describeAuditAction('web.session.revoke')).toBe('web.session.revoke');
     expect(fieldLabel('logChannelId')).toBe('Log channel ID');

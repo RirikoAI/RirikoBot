@@ -83,6 +83,8 @@ describe('setting types', () => {
     ]);
     expect(list.parse([])).toEqual([]);
     expect(list.parse('')).toEqual([]);
+    expect(list.parse('[]')).toEqual([]);
+    expect(list.parse('["123456789012345678"]')).toEqual(['123456789012345678']);
     expect(list.safeParse(['123456789012345678', '1']).success).toBe(false);
     expect(
       list.safeParse(['123456789012345678', '223456789012345678', '323456789012345678']).error
@@ -153,10 +155,17 @@ describe('EscalationPolicySchema', () => {
 
 describe('GuildConfigSchemas', () => {
   it('lists the modules with only keys the bot reads', () => {
-    expect(GUILD_CONFIG_MODULES).toEqual(['general', 'moderation', 'automod', 'logging']);
+    expect(GUILD_CONFIG_MODULES).toEqual([
+      'general',
+      'moderation',
+      'automod',
+      'logging',
+      'commands',
+    ]);
     expect(Object.keys(GuildConfigSchemas.general.shape)).toEqual(['prefix', 'timezone']);
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);
     expect(Object.keys(GuildConfigSchemas.moderation.shape)).toEqual(['escalationSteps']);
+    expect(Object.keys(GuildConfigSchemas.commands.shape)).toEqual(['overrides']);
     expect(isGuildConfigModule('general')).toBe(true);
     expect(isGuildConfigModule('toString')).toBe(false);
   });

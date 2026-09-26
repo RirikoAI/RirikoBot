@@ -9,9 +9,10 @@ export interface CooldownMiddlewareOptions {
   bypass?: ((ctx: CommandContext) => boolean | Promise<boolean>) | undefined;
 
   /**
-   * Custom duration override resolver.
+   * Custom duration override resolver; `undefined` falls back to the command's own cooldown.
    */
-  getCooldownSeconds?: ((ctx: CommandContext) => number | undefined) | undefined;
+  getCooldownSeconds?:
+    ((ctx: CommandContext) => number | undefined | Promise<number | undefined>) | undefined;
 
   /**
    * Scope of the cooldown: 'user' (default) or 'channel' or 'guild'.
@@ -44,7 +45,8 @@ export function createCooldownMiddleware(
       return;
     }
 
-    const duration = options.getCooldownSeconds?.(ctx) ?? ctx.command.metadata.cooldownSeconds ?? 0;
+    const duration =
+      (await options.getCooldownSeconds?.(ctx)) ?? ctx.command.metadata.cooldownSeconds ?? 0;
 
     if (duration <= 0) {
       await next();

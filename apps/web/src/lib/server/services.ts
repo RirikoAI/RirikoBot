@@ -6,6 +6,8 @@ import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
   AuditLogRepository,
   BotActivityRepository,
+  CommandCatalogRepository,
+  CommandSettingsRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -52,6 +54,8 @@ export interface WebServices {
   /** Moderation cases, warnings and notes, for the read-only case log. */
   moderation: ModerationRepository;
   guildConfig: GuildConfigService;
+  /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
+  commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
   botActivity: BotActivityRepository;
   /** Security DMs and guild change notices (best effort). */
@@ -113,10 +117,13 @@ async function createWebServices(): Promise<WebServices> {
   });
   const guildSettings = new GuildSettingsRepository(db);
   const moderation = new ModerationRepository(db);
+  const commandCatalog = new CommandCatalogRepository(db);
   const guildConfig = new GuildConfigService({
     db,
     guildSettings,
     moderation,
+    commandSettings: new CommandSettingsRepository(db),
+    commandCatalog,
     versions: new GuildConfigVersionRepository(db),
     audit,
     defaultPrefix: config.DEFAULT_PREFIX,
@@ -137,6 +144,7 @@ async function createWebServices(): Promise<WebServices> {
     userDirectory: new UserDirectory(botRest),
     moderation,
     guildConfig,
+    commandCatalog,
     botActivity: new BotActivityRepository(db),
     notifier: new DiscordNotifier({
       rest: botRest,
