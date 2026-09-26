@@ -47,6 +47,7 @@ const MODULE_LABELS: Record<string, string> = {
   commands: 'Command',
   autoroles: 'Auto Roles',
   autovoice: 'Auto Voice',
+  xp: 'XP & Ranking',
 };
 
 /** Guild actions other than settings saves. */

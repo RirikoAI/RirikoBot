@@ -179,6 +179,62 @@ describe('GuildConfigService (TASK-1111)', () => {
     });
   });
 
+  describe('xp (TASK-1151)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+
+    it('reads the defaults for a guild without settings', async () => {
+      expect(await service.get('g1', 'xp')).toEqual({
+        levelUpAnnouncements: true,
+        levelUpChannelId: null,
+        xpRatePercent: 100,
+        noXpChannelIds: [],
+        noXpRoleIds: [],
+        voiceXpEnabled: false,
+      });
+    });
+
+    it('saves CLI strings, keeps other settings and audits the diff', async () => {
+      await service.update('g1', 'general', { prefix: '$' }, dashboardActor);
+      const { changes } = await service.update(
+        'g1',
+        'xp',
+        {
+          levelUpAnnouncements: 'off',
+          levelUpChannelId: CHANNEL,
+          xpRatePercent: '150',
+          noXpChannelIds: `${CHANNEL},${CHANNEL}`,
+          noXpRoleIds: ROLE,
+          voiceXpEnabled: 'on',
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'levelUpAnnouncements',
+        'levelUpChannelId',
+        'xpRatePercent',
+        'noXpChannelIds',
+        'noXpRoleIds',
+        'voiceXpEnabled',
+      ]);
+      expect(await service.get('g1', 'xp')).toEqual({
+        levelUpAnnouncements: false,
+        levelUpChannelId: CHANNEL,
+        xpRatePercent: 150,
+        noXpChannelIds: [CHANNEL],
+        noXpRoleIds: [ROLE],
+        voiceXpEnabled: true,
+      });
+      expect(await service.get('g1', 'general')).toEqual({ prefix: '$', timezone: 'UTC' });
+    });
+
+    it('rejects a rate above the cap', async () => {
+      await expect(
+        service.update('g1', 'xp', { xpRatePercent: 301 }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { xpRatePercent: [expect.any(String)] } });
+    });
+  });
+
   describe('moderation (TASK-1142)', () => {
     it('returns the default policy until one is saved', async () => {
       expect(await service.get('g1', 'moderation')).toEqual({

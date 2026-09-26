@@ -78,6 +78,7 @@ import {
   ProfileCardRenderer,
   AntiSpamEvaluator,
   VoiceSessionAccumulator,
+  VoiceRewardService,
   PermissionService,
   ModerationActionService,
   ModerationLogService,
@@ -155,6 +156,7 @@ import {
   WelcomerService,
   type FreeGameItem,
 } from '@ririko/services';
+import { sendLevelUpMessage } from './listeners/level-up.js';
 
 export interface BotServices {
   db: DatabaseClient;
@@ -194,6 +196,8 @@ export interface BotServices {
   profileCardRenderer: ProfileCardRenderer;
   antiSpamEvaluator: AntiSpamEvaluator;
   voiceAccumulator: VoiceSessionAccumulator;
+  /** Pays voice credits and XP each minute; null without a Discord client (tests). Started on READY. */
+  voiceRewardService: VoiceRewardService | null;
   conversationManager: ConversationManager;
   personalityEngine: PersonalityEngine;
   toolRegistry: ToolRegistry;
@@ -451,8 +455,8 @@ export async function createBotServices(
     antiSpam: antiSpamEvaluator,
   });
 
+  // VoiceRewardService pays the events, so guild settings apply before anything is awarded.
   const voiceAccumulator = new VoiceSessionAccumulator({
-    economyService,
     config: {
       minQuorum: 2,
       intervalSeconds: 60,
@@ -509,6 +513,23 @@ export async function createBotServices(
   });
   // Settings saved by the dashboard or CLI reach this process through the config change feed.
   eventBus.on('guild:configChanged', ({ guildId }) => guildSettingsService.invalidate(guildId));
+  const voiceRewardService = discordClient
+    ? new VoiceRewardService({
+        accumulator: voiceAccumulator,
+        economyService,
+        levelingService,
+        getRules: (guildId) => guildSettingsService.getSettings(guildId),
+        getMemberRoleIds: (guildId, userId) => [
+          ...(discordClient.guilds.cache
+            .get(guildId)
+            ?.members.cache.get(userId)
+            ?.roles.cache.keys() ?? []),
+        ],
+        onLevelUp: async ({ channelId, userId, newLevel }) => {
+          await sendLevelUpMessage(discordClient, channelId, userId, newLevel);
+        },
+      })
+    : null;
   const guildConfigWatcher = new GuildConfigWatcher(new GuildConfigVersionRepository(db), eventBus);
   const commandOverrideService = new CommandOverrideService({
     repo: new CommandSettingsRepository(db),
@@ -956,6 +977,7 @@ export async function createBotServices(
     profileCardRenderer,
     antiSpamEvaluator,
     voiceAccumulator,
+    voiceRewardService,
     conversationManager,
     personalityEngine,
     toolRegistry,

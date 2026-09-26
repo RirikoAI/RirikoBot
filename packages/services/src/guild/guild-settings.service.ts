@@ -6,6 +6,15 @@ export interface CachedGuildSettings {
   prefix: string;
   timezone: string;
   locale: string;
+  /** Level-up messages are posted; they also need the member's own opt-in. */
+  levelUpAnnouncements: boolean;
+  /** Channel for level-up messages; null posts where the member levelled up. */
+  levelUpChannelId: string | null;
+  /** XP rate in percent; 100 is normal. */
+  xpRatePercent: number;
+  noXpChannelIds: string[];
+  noXpRoleIds: string[];
+  voiceXpEnabled: boolean;
   cachedAt: number;
 }
 
@@ -42,15 +51,24 @@ export class GuildSettingsService {
     }
 
     const row = await this.repo.findById(guildId).catch(() => null);
-    const settings: CachedGuildSettings = {
+    const settings = this.toCached(row, now);
+    this.cache.set(guildId, settings);
+    return settings;
+  }
+
+  private toCached(row: Partial<GuildSettings> | null, now = Date.now()): CachedGuildSettings {
+    return {
       prefix: row?.prefix || this.defaultPrefix,
       timezone: row?.timezone || this.defaultTimezone,
       locale: row?.locale || 'en-US',
+      levelUpAnnouncements: row?.karmaNotificationsEnabled ?? true,
+      levelUpChannelId: row?.levelUpChannelId ?? null,
+      xpRatePercent: row?.xpRatePercent ?? 100,
+      noXpChannelIds: row?.noXpChannelIds ?? [],
+      noXpRoleIds: row?.noXpRoleIds ?? [],
+      voiceXpEnabled: row?.voiceXpEnabled ?? false,
       cachedAt: now,
     };
-
-    this.cache.set(guildId, settings);
-    return settings;
   }
 
   /**
@@ -80,14 +98,7 @@ export class GuildSettingsService {
       prefix,
     });
 
-    // Update in-memory cache
-    const existing = this.cache.get(guildId);
-    this.cache.set(guildId, {
-      prefix,
-      timezone: existing?.timezone || updated.timezone || this.defaultTimezone,
-      locale: existing?.locale || updated.locale || 'en-US',
-      cachedAt: Date.now(),
-    });
+    this.cache.set(guildId, this.toCached(updated));
 
     return updated;
   }
@@ -103,14 +114,7 @@ export class GuildSettingsService {
       timezone: canonical,
     });
 
-    // Update in-memory cache
-    const existing = this.cache.get(guildId);
-    this.cache.set(guildId, {
-      prefix: existing?.prefix || updated.prefix || this.defaultPrefix,
-      timezone: canonical,
-      locale: existing?.locale || updated.locale || 'en-US',
-      cachedAt: Date.now(),
-    });
+    this.cache.set(guildId, this.toCached(updated));
 
     return updated;
   }

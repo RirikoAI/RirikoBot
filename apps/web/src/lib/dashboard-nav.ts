@@ -9,6 +9,7 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'autoroles', label: 'Auto Roles' },
   { slug: 'autovoice', label: 'Auto Voice' },
   { slug: 'reaction-roles', label: 'Reaction Roles' },
+  { slug: 'xp', label: 'XP & Ranking' },
   { slug: 'cases', label: 'Case Log' },
   { slug: 'audit-log', label: 'Audit Log' },
 ] as const;

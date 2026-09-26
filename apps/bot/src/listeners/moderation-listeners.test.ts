@@ -42,7 +42,120 @@ describe('Gateway Moderation Listeners', () => {
           logChannelId: 'mod-log-channel-1',
         }),
       } as any,
+      guildSettingsService: {
+        getSettings: vi.fn().mockResolvedValue(xpRules()),
+      } as any,
     };
+  });
+
+  function xpRules(overrides: Record<string, unknown> = {}) {
+    return {
+      levelUpAnnouncements: true,
+      levelUpChannelId: null,
+      xpRatePercent: 100,
+      noXpChannelIds: [],
+      noXpRoleIds: [],
+      voiceXpEnabled: false,
+      ...overrides,
+    };
+  }
+
+  function chatMessage(overrides: Record<string, unknown> = {}) {
+    return {
+      id: 'msg-1',
+      channelId: 'chan-1',
+      channel: {
+        isThread: () => false,
+        isSendable: () => true,
+        send: vi.fn().mockResolvedValue({}),
+      },
+      content: 'Hello friends!',
+      createdTimestamp: Date.now(),
+      author: { id: 'user-1', bot: false, username: 'tester', displayName: 'Tester' },
+      guild: { id: 'guild-1', ownerId: 'owner-1' },
+      member: {
+        roles: { cache: new Map() },
+        permissions: { toArray: () => ['SendMessages'] },
+      },
+      mentions: { users: new Map(), roles: new Map(), everyone: false },
+      delete: vi.fn().mockResolvedValue(undefined),
+      ...overrides,
+    };
+  }
+
+  describe('registerMessageListener - XP rules (TASK-1151)', () => {
+    beforeEach(() => {
+      (mockServices.autoModService!.processMessage as any).mockResolvedValue({ matched: false });
+    });
+
+    async function send(message: ReturnType<typeof chatMessage>, client: any = mockClient) {
+      registerMessageListener(client, mockServices as BotServices);
+      client.emit('messageCreate', message);
+      await new Promise((r) => setTimeout(r, 20));
+    }
+
+    it('gives no XP in a no-XP channel, its threads, or to members with a no-XP role', async () => {
+      (mockServices.guildSettingsService!.getSettings as any).mockResolvedValue(
+        xpRules({ noXpChannelIds: ['chan-1'], noXpRoleIds: ['muted'] }),
+      );
+      await send(chatMessage());
+      await send(
+        chatMessage({
+          channelId: 'thread-1',
+          channel: { isThread: () => true, parentId: 'chan-1', isSendable: () => true },
+        }),
+        new EventEmitter(),
+      );
+      await send(
+        chatMessage({
+          channelId: 'chan-2',
+          member: {
+            roles: { cache: new Map([['muted', {}]]) },
+            permissions: { toArray: () => [] },
+          },
+        }),
+        new EventEmitter(),
+      );
+      expect(mockServices.levelingService!.addExperience).not.toHaveBeenCalled();
+    });
+
+    it('scales XP by the guild rate', async () => {
+      (mockServices.guildSettingsService!.getSettings as any).mockResolvedValue(
+        xpRules({ xpRatePercent: 200 }),
+      );
+      await send(chatMessage());
+      const xp = (mockServices.levelingService!.addExperience as any).mock.calls[0][2];
+      expect(xp).toBeGreaterThanOrEqual(30);
+      expect(xp).toBeLessThanOrEqual(50);
+    });
+
+    it('posts level-ups in the level-up channel, or here when Ririko cannot post there', async () => {
+      (mockServices.levelingService!.addExperience as any).mockResolvedValue({
+        didLevelUp: true,
+        shouldNotify: true,
+        newLevel: 4,
+      });
+      (mockServices.guildSettingsService!.getSettings as any).mockResolvedValue(
+        xpRules({ levelUpChannelId: 'levels' }),
+      );
+      const levelChannel = { isSendable: () => true, send: vi.fn().mockResolvedValue({}) };
+      const client = Object.assign(new EventEmitter(), {
+        channels: { fetch: vi.fn().mockResolvedValue(levelChannel) },
+      });
+      const message = chatMessage();
+      await send(message, client);
+      expect(levelChannel.send).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('Level 4') }),
+      );
+      expect(message.channel.send).not.toHaveBeenCalled();
+
+      client.channels.fetch.mockResolvedValue(null);
+      const fallback = chatMessage();
+      await send(fallback, client);
+      expect(fallback.channel.send).toHaveBeenCalledWith(
+        expect.objectContaining({ allowedMentions: { users: ['user-1'] } }),
+      );
+    });
   });
 
   describe('registerMessageListener - AutoMod Wiring', () => {
@@ -90,6 +203,7 @@ describe('Gateway Moderation Listeners', () => {
       const mockMessage = {
         id: 'msg-1',
         channelId: 'chan-1',
+        channel: { isThread: () => false, isSendable: () => true },
         content: 'Hello friends!',
         createdTimestamp: Date.now(),
         author: { id: 'user-1', bot: false, username: 'tester', displayName: 'Tester' },
