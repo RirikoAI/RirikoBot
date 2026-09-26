@@ -15,33 +15,52 @@ function idsOf(value: unknown): string[] {
 }
 
 /**
- * Errors for submitted roles Ririko cannot give, by field. The bot skips such roles, so saving
- * them would silently do nothing.
+ * Why Ririko cannot give each of `roleIds`, by role ID; roles it can give are left out. The bot
+ * skips such roles, so saving them would silently do nothing.
  */
-export async function checkAssignableRoles(
-  resources: Resources,
+export async function unassignableRoles(
+  resources: Pick<Resources, 'assignableRoles' | 'memberRoles'>,
   guildId: string,
-  fields: Record<string, unknown>,
-): Promise<Record<string, string[]>> {
-  const submitted = Object.entries(fields).map(([field, value]) => [field, idsOf(value)] as const);
-  if (submitted.every(([, ids]) => ids.length === 0)) return {};
-
+  roleIds: readonly string[],
+): Promise<Map<string, string>> {
+  const problems = new Map<string, string>();
+  if (roleIds.length === 0) return problems;
   const [assignable, all] = await Promise.all([
     resources.assignableRoles(guildId),
     resources.memberRoles(guildId),
   ]);
   const allowed = new Set(assignable.map((role) => role.id));
   const names = new Map(all.map((role) => [role.id, role.name]));
+  for (const id of roleIds) {
+    if (allowed.has(id)) continue;
+    const name = names.get(id);
+    problems.set(
+      id,
+      name === undefined
+        ? `Role ${id} no longer exists.`
+        : `Ririko cannot give @${name}: it is managed by an integration or is not below Ririko’s highest role.`,
+    );
+  }
+  return problems;
+}
+
+/** Errors for submitted roles Ririko cannot give, by field. */
+export async function checkAssignableRoles(
+  resources: Resources,
+  guildId: string,
+  fields: Record<string, unknown>,
+): Promise<Record<string, string[]>> {
+  const submitted = Object.entries(fields).map(([field, value]) => [field, idsOf(value)] as const);
+  const problems = await unassignableRoles(
+    resources,
+    guildId,
+    submitted.flatMap(([, ids]) => ids),
+  );
   const errors: Record<string, string[]> = {};
   for (const [field, ids] of submitted) {
     for (const id of ids) {
-      if (allowed.has(id)) continue;
-      const name = names.get(id);
-      (errors[field] ??= []).push(
-        name === undefined
-          ? `Role ${id} no longer exists.`
-          : `Ririko cannot give @${name}: it is managed by an integration or is not below Ririko’s highest role.`,
-      );
+      const problem = problems.get(id);
+      if (problem) (errors[field] ??= []).push(problem);
     }
   }
   return errors;

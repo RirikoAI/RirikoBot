@@ -42,6 +42,7 @@ describe('audit log formatting (TASK-1132)', () => {
     expect(describeAuditAction('guild_config.autovoice.update')).toBe(
       'Auto Voice settings changed',
     );
+    expect(describeAuditAction('reaction_roles.publish')).toBe('Reaction role panel published');
     expect(describeAuditAction('guild_config.music.update')).toBe('music settings changed');
     expect(describeAuditAction('web.session.revoke')).toBe('web.session.revoke');
     expect(fieldLabel('logChannelId')).toBe('Log channel ID');

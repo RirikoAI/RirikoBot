@@ -59,7 +59,7 @@ export class GuildResourceDirectory {
   private readonly channels: TtlCache<string, RESTGetAPIGuildChannelsResult>;
   private readonly roles: TtlCache<string, RESTGetAPIGuildRolesResult>;
   private readonly botMembers: TtlCache<string, APIGuildMember>;
-  private botUserId: Promise<string> | undefined;
+  private botUser: Promise<string> | undefined;
 
   constructor(
     private readonly rest: Pick<REST, 'get'>,
@@ -197,21 +197,21 @@ export class GuildResourceDirectory {
 
   private loadBotMember(guildId: string): Promise<APIGuildMember> {
     return this.botMembers.get(guildId, async () => {
-      const botId = await this.loadBotUserId();
+      const botId = await this.botUserId();
       return (await this.rest.get(Routes.guildMember(guildId, botId))) as APIGuildMember;
     });
   }
 
   /** The bot's own user ID, read once per process (a failed read is retried next time). */
-  private loadBotUserId(): Promise<string> {
-    this.botUserId ??= (this.rest.get(Routes.user()) as Promise<APIUser>).then(
+  botUserId(): Promise<string> {
+    this.botUser ??= (this.rest.get(Routes.user()) as Promise<APIUser>).then(
       (user) => user.id,
       (error: unknown) => {
-        this.botUserId = undefined;
+        this.botUser = undefined;
         throw error;
       },
     );
-    return this.botUserId;
+    return this.botUser;
   }
 
   private loadChannels(guildId: string): Promise<RESTGetAPIGuildChannelsResult> {

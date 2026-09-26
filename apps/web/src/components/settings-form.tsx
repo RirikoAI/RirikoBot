@@ -33,9 +33,12 @@ const SECONDARY_BUTTON_CLASS =
 export function SettingsForm({
   action,
   children,
+  submitLabel = 'Save changes',
 }: {
   action: SettingsAction;
   children: ReactNode;
+  /** Text of the submit button, such as "Publish panel". */
+  submitLabel?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, INITIAL_SETTINGS_FORM_STATE);
   const lastSubmission = useRef<FormData | null>(null);
@@ -66,7 +69,7 @@ export function SettingsForm({
     <form action={submit} noValidate className="flex max-w-2xl flex-col gap-6">
       <FormStateContext value={state}>{children}</FormStateContext>
       <div className="flex flex-wrap items-center gap-4">
-        <SubmitButton />
+        <SubmitButton label={submitLabel} />
         {state.status !== 'idle' ? (
           <p
             role={state.status === 'error' ? 'alert' : 'status'}
@@ -102,7 +105,7 @@ export function SettingsForm({
   );
 }
 
-function SubmitButton() {
+function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -110,7 +113,7 @@ function SubmitButton() {
       disabled={pending}
       className="rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura disabled:opacity-60"
     >
-      {pending ? 'Saving…' : 'Save changes'}
+      {pending ? 'Saving…' : label}
     </button>
   );
 }

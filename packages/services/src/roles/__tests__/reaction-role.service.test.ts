@@ -259,5 +259,22 @@ describe('ReactionRoleService (TASK-1403)', () => {
       expect(member.roles.remove).toHaveBeenCalledWith(['role-gamer'], expect.any(String));
       expect(member.roles.add).toHaveBeenCalled();
     });
+
+    it('ignores options whose binding was removed from the group (TASK-1642)', async () => {
+      const { guild } = createMockGuild(10);
+      const member = createMockMember(guild, 'user-1');
+      reactionRoleRepo.findByGroup.mockResolvedValue([{ roleId: 'role-gamer' }]);
+
+      const results = await service.handleSelectMenuInteraction({
+        guild,
+        member,
+        user: { id: 'user-1' },
+        values: ['role-gamer', 'role-artist'],
+        customId: 'rr:select:group:hobby-group',
+        reply: vi.fn().mockResolvedValue(undefined),
+      } as any);
+
+      expect(results.map((result) => result.roleId)).toEqual(['role-gamer']);
+    });
   });
 });
