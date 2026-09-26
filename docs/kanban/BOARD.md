@@ -15,7 +15,7 @@
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | `EPIC-011` | [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) |
+| `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | `EPIC-011` | [STORY-164.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-164.md) |
 
 ---
 
@@ -248,13 +248,13 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1141` | Task | Typed Settings & Step-Up Settings Forms (Toggle, Number, Role/Channel Lists, Row Editor), CLI Typed Values & Logging Page (Log Channel, Case Log Wiring) | 3 | `STORY-114` | ✅ Done · [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) | `STORY-111`, `STORY-117` |
 | `TASK-1142` | Task | Moderation Escalation Policy Builder (guild_settings.escalation_steps, Step-Up) & AutoMod Page (Per-Rule Toggle, Action, Limit, Exemptions) with Real AutoMod Actions | 5 | `STORY-114` | ✅ Done · [STORY-114.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-114.md) | `TASK-1141` |
 | `TASK-1143` | Task | Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages | 3 | `STORY-114` | ❌ Abandoned (re-groomed into `STORY-164` before work started) | `TASK-1142` |
-| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | `EPIC-011` | 🔍 Review · [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) | `STORY-114` |
+| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | `EPIC-011` | ✅ Done · [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) | `STORY-114` |
 | `TASK-1631` | Task | CommandSettingsRepository, Web-Readable Command Catalog & Override Middleware (Guild/Channel Precedence, Allowed/Blocked Roles, Cached with guild:configChanged) | 3 | `STORY-163` | ✅ Done · [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) | `STORY-114` |
 | `TASK-1632` | Task | Command Overrides Page & guild:config Keys | 2 | `STORY-163` | ✅ Done · [STORY-163.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-163.md) | `TASK-1631` |
-| `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-114` |
-| `TASK-1641` | Task | Guild Resources (Voice Channels, Role Positions & Bot Top Role, Boost Tier) & Auto Roles and Auto Voice Pages | 3 | `STORY-164` | 🎯 To Do | `STORY-114` |
-| `TASK-1642` | Task | Reaction Role Message Builder: Publish Buttons & Select Menus via Bot REST (Step-Up, Audit) | 3 | `STORY-164` | 🎯 To Do | `TASK-1641` |
-| `TASK-1643` | Task | Edit & Remove Reaction Role Bindings (Strip Removed Components from the Message) | 2 | `STORY-164` | 🎯 To Do | `TASK-1642` |
+| `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | `EPIC-011` | 🔍 Review · [STORY-164.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-164.md) | `STORY-114` |
+| `TASK-1641` | Task | Guild Resources (Voice Channels, Role Positions & Bot Top Role, Boost Tier) & Auto Roles and Auto Voice Pages | 3 | `STORY-164` | ✅ Done · [STORY-164.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-164.md) | `STORY-114` |
+| `TASK-1642` | Task | Reaction Role Message Builder: Publish Buttons & Select Menus via Bot REST (Step-Up, Audit) | 3 | `STORY-164` | ✅ Done · [STORY-164.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-164.md) | `TASK-1641` |
+| `TASK-1643` | Task | Edit & Remove Reaction Role Bindings (Strip Removed Components from the Message) | 2 | `STORY-164` | ✅ Done · [STORY-164.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-164.md) | `TASK-1642` |
 | `STORY-115` | Story | Economy & Banking, XP & Ranking, Games & Giveaways Pages | 5 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-117` |
 | `TASK-1151` | Task | Economy & Banking Page (Rewards, Interest, Item Shop Manager) & XP & Ranking Page (Multipliers, Voice XP, Level-Up Channel) | 3 | `STORY-115` | 🎯 To Do | `STORY-111` |
 | `TASK-1152` | Task | Games Page (Enable/Disable, Wager Limits, Cooldowns) & Giveaways Page (Active List, End, Reroll, History) | 2 | `STORY-115` | 🎯 To Do | `TASK-1151` |

@@ -349,6 +349,62 @@ describe('Role Commands Suite (TASK-1404)', () => {
         }),
       );
     });
+
+    it('takes the removed button off the message (TASK-1643)', async () => {
+      const row = (ids: string[]) => ({
+        toJSON: () => ({
+          type: 1,
+          components: ids.map((id) => ({
+            type: 2,
+            style: 1,
+            label: id,
+            custom_id: `rr:btn:${id}`,
+          })),
+        }),
+      });
+      const message = {
+        editable: true,
+        components: [row(['rr-2', 'rr-3'])],
+        edit: vi.fn().mockResolvedValue(true),
+      };
+      mockChannel.messages.fetch = vi.fn().mockResolvedValue(message);
+      vi.mocked(mockServices.reactionRoleRepo!.findById).mockResolvedValueOnce({
+        id: 'rr-2',
+        guildId: 'guild-1',
+        channelId: 'channel-1',
+        messageId: 'msg-123',
+        emojiOrComponentId: 'rr:btn:rr-2',
+        roleId: 'role-1',
+        type: 'BUTTON',
+        mode: 'TOGGLE',
+        groupId: 'group-1',
+        label: 'Member',
+        description: null,
+      });
+      const cmd = createReactionRolesCommand(mockServices as BotServices);
+      const ctx = createMockContext({
+        options: {
+          getString: vi.fn().mockImplementation((name) => {
+            if (name === 'action') return 'remove';
+            if (name === 'id') return 'rr-2';
+            return null;
+          }),
+          getRawArgs: vi.fn().mockReturnValue([]),
+        } as any,
+      });
+
+      await cmd.execute(ctx);
+
+      expect(message.edit).toHaveBeenCalledWith({
+        components: [
+          {
+            type: 1,
+            components: [{ type: 2, style: 1, label: 'rr-3', custom_id: 'rr:btn:rr-3' }],
+          },
+        ],
+      });
+      expect(mockServices.reactionRoleRepo?.delete).toHaveBeenCalledWith('rr-2');
+    });
   });
 
   describe('autorole command', () => {

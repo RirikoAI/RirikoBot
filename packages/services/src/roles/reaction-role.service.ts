@@ -462,12 +462,16 @@ export class ReactionRoleService {
       groupId = customId.replace('rr:select:group:', '');
     }
 
+    // Only roles still bound to the menu's group count; an option whose binding was removed
+    // no longer gives its role.
+    let selected: readonly string[] = values;
     // If groupId is present, remove other roles in the group that weren't selected
     if (groupId) {
       const groupBindings = await this.reactionRoleRepo.findByGroup(guild.id, groupId);
       const rolesInGroup = groupBindings.map((b) => b.roleId);
+      selected = values.filter((rId) => rolesInGroup.includes(rId));
       const rolesToRemove = rolesInGroup.filter(
-        (rId) => !values.includes(rId) && guildMember.roles.cache.has(rId),
+        (rId) => !selected.includes(rId) && guildMember.roles.cache.has(rId),
       );
 
       if (rolesToRemove.length > 0) {
@@ -492,7 +496,7 @@ export class ReactionRoleService {
       }
     }
 
-    for (const roleId of values) {
+    for (const roleId of selected) {
       if (!this.isValidRole(guild, roleId)) continue;
       const role = guild.roles.cache.get(roleId);
       if (!role) continue;

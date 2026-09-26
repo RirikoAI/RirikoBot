@@ -110,7 +110,7 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
           parentChannelId: channelIdInput,
           channelNameTemplate: template,
           userLimit: Math.max(0, Math.min(99, limit)),
-          bitrate: Math.max(8000, Math.min(384000, bitrate)),
+          bitrate: Math.max(8000, Math.min(ctx.guild?.maximumBitrate ?? 384000, bitrate)),
         });
 
         const embed = new EmbedBuilder()

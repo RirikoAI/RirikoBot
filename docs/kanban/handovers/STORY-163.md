@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 5 pts (`TASK-1631` = 3, `TASK-1632` = 2)
 - **Epic**: `EPIC-011`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #651)
 - **Timestamp**: 2026-09-26
 - **Branch**: `feat/STORY-163-command-overrides` (targets `develop/2.0.0`)
 

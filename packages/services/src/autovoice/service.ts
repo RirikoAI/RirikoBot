@@ -86,7 +86,8 @@ export class AutoVoiceService {
         createOptions.userLimit = config.userLimit;
       }
       if (config.bitrate > 0) {
-        createOptions.bitrate = config.bitrate;
+        // A guild that lost boosts allows less than the saved bitrate; Discord rejects more.
+        createOptions.bitrate = Math.min(config.bitrate, guild.maximumBitrate);
       }
 
       createdChannel = (await guild.channels.create(createOptions)) as VoiceChannel;
