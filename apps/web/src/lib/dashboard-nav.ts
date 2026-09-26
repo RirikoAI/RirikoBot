@@ -6,6 +6,8 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'automod', label: 'AutoMod' },
   { slug: 'logging', label: 'Logging' },
   { slug: 'commands', label: 'Commands' },
+  { slug: 'autoroles', label: 'Auto Roles' },
+  { slug: 'autovoice', label: 'Auto Voice' },
   { slug: 'cases', label: 'Case Log' },
   { slug: 'audit-log', label: 'Audit Log' },
 ] as const;

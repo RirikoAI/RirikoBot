@@ -10,6 +10,9 @@ import { requireGuildAccess } from './guilds/require-guild-access';
 import { checkDashboardRequest, requestActor } from './request-context';
 import { getWebServices } from './services';
 
+const DISCORD_UNREACHABLE_MESSAGE =
+  'Could not check the channels and roles with Discord. Try again in a moment.';
+
 /** String values of the named fields that were submitted; absent fields keep their value. */
 export function pickFormFields(
   formData: FormData,
@@ -54,7 +57,14 @@ export async function saveGuildSettings(
   guildId: string,
   module: GuildConfigModule,
   patch: Record<string, unknown>,
-  options: { stepUp?: boolean } = {},
+  options: {
+    stepUp?: boolean;
+    /**
+     * Checks against Discord that the schema cannot make (a role Ririko can give, a channel of
+     * the right type). Returns field errors; runs after the guards, before anything is written.
+     */
+    check?: (patch: Record<string, unknown>) => Promise<Record<string, string[]>>;
+  } = {},
 ): Promise<SettingsFormState> {
   const rejected = await checkDashboardRequest();
   if (rejected) return { status: 'error', message: rejected };
@@ -66,6 +76,23 @@ export async function saveGuildSettings(
         status: 'error',
         message: PASSKEY_REASON_MESSAGES[state],
         reason: state,
+        values: patch,
+      };
+    }
+  }
+  if (options.check) {
+    let fieldErrors: Record<string, string[]>;
+    try {
+      fieldErrors = await options.check(patch);
+    } catch (error) {
+      console.error(`[web] Could not check ${module} settings for guild ${guildId}:`, error);
+      return { status: 'error', message: DISCORD_UNREACHABLE_MESSAGE, values: patch };
+    }
+    if (Object.keys(fieldErrors).length > 0) {
+      return {
+        status: 'error',
+        message: 'Please fix the highlighted fields.',
+        fieldErrors,
         values: patch,
       };
     }

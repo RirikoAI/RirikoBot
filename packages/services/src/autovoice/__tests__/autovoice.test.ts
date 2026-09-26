@@ -74,6 +74,7 @@ describe('AutoVoiceService (TASK-0911)', () => {
 
       const mockGuild: any = {
         id: 'guild-1',
+        maximumBitrate: 96000,
         channels: {
           create: vi.fn().mockResolvedValue(mockCreatedChannel),
           cache: new Map([['parent-vc-1', mockParentChannel]]),
@@ -138,6 +139,43 @@ describe('AutoVoiceService (TASK-0911)', () => {
       const record = await channelRepo.findById('new-child-vc-1');
       expect(record?.guildId).toBe('guild-1');
       expect(record?.parentChannelId).toBe('parent-vc-1');
+    });
+
+    it('lowers a saved bitrate to what the guild allows now (TASK-1641)', async () => {
+      vi.mocked(mockRepo.findByParentChannelId!).mockResolvedValueOnce({
+        ...sampleConfig,
+        bitrate: 256000,
+      });
+      const created: any = {
+        id: 'new-child-vc-2',
+        permissionOverwrites: { edit: vi.fn().mockResolvedValue({}) },
+        delete: vi.fn(),
+      };
+      const guild: any = {
+        id: 'guild-1',
+        maximumBitrate: 96000,
+        channels: { create: vi.fn().mockResolvedValue(created), cache: new Map() },
+      };
+      const member: any = {
+        id: 'user-carol',
+        displayName: 'Carol',
+        user: { username: 'carol' },
+        voice: { setChannel: vi.fn().mockResolvedValue({}) },
+      };
+
+      await service.handleVoiceStateUpdate(
+        { channelId: null, guild } as any,
+        {
+          channelId: 'parent-vc-1',
+          guild,
+          member,
+          channel: { id: 'parent-vc-1', position: 0 },
+        } as any,
+      );
+
+      expect(guild.channels.create).toHaveBeenCalledWith(
+        expect.objectContaining({ bitrate: 96000 }),
+      );
     });
 
     it('ignores joins to non-parent voice channels', async () => {

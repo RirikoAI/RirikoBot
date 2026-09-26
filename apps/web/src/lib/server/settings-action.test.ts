@@ -154,6 +154,39 @@ describe('saveGuildSettings (TASK-1112)', () => {
     await saveGuildSettings(GUILD, 'logging', { logChannelId: '' });
     expect(mocks.requireStepUp).not.toHaveBeenCalled();
   });
+
+  it('runs the Discord check after the guard and writes nothing when it reports errors (TASK-1641)', async () => {
+    const patch = { humanRoleIds: ['200000000000000001'] };
+    const check = vi.fn().mockResolvedValue({ humanRoleIds: ['Ririko cannot give @Admin.'] });
+
+    const state = await saveGuildSettings(GUILD, 'autoroles', patch, { check });
+
+    expect(check).toHaveBeenCalledWith(patch);
+    expect(mocks.requireGuildAccess.mock.invocationCallOrder[0]).toBeLessThan(
+      check.mock.invocationCallOrder[0]!,
+    );
+    expect(state).toEqual({
+      status: 'error',
+      message: 'Please fix the highlighted fields.',
+      fieldErrors: { humanRoleIds: ['Ririko cannot give @Admin.'] },
+      values: patch,
+    });
+    expect(mocks.update).not.toHaveBeenCalled();
+
+    check.mockRejectedValue(new Error('Discord is down'));
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(await saveGuildSettings(GUILD, 'autoroles', patch, { check })).toMatchObject({
+      status: 'error',
+      message: 'Could not check the channels and roles with Discord. Try again in a moment.',
+    });
+    errorSpy.mockRestore();
+    expect(mocks.update).not.toHaveBeenCalled();
+
+    check.mockResolvedValue({});
+    mocks.update.mockResolvedValue({ values: {}, changes: [] });
+    await saveGuildSettings(GUILD, 'autoroles', patch, { check });
+    expect(mocks.update).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('readFormFields (TASK-1141)', () => {

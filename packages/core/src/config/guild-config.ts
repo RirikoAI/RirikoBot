@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { canonicalTimeZone } from '../time/time-zone.js';
 import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.js';
 import { CommandOverridesSchema } from './command-overrides.js';
+import { AutoVoiceHubsSchema } from './auto-voice.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
 export const DEFAULT_COMMAND_PREFIX = '!';
@@ -118,6 +119,7 @@ const AutoModActionSetting = z.enum(AUTOMOD_ACTIONS, {
   errorMap: () => ({ message: `Choose one of ${AUTOMOD_ACTIONS.join(', ')}.` }),
 });
 const MAX_EXEMPTIONS = 25;
+const MAX_JOIN_ROLES = 10;
 const AUTOMOD_ACTION_HELP = `${AUTOMOD_ACTIONS.join(', ')}; every match also deletes the message`;
 
 /**
@@ -197,6 +199,27 @@ export const GuildConfigSchemas = {
     .object({
       overrides: JsonSetting(CommandOverridesSchema).describe(
         'Command overrides as JSON; channelId null is server wide, e.g. [{"command":"rps","channelId":null,"enabled":false}]',
+      ),
+    })
+    .strict(),
+  autoroles: z
+    .object({
+      enabled: FlagSetting.describe('Give join roles to new members and bots'),
+      humanRoleIds: SnowflakeListSetting(MAX_JOIN_ROLES).describe(
+        'Role IDs given to members who join, comma separated',
+      ),
+      botRoleIds: SnowflakeListSetting(MAX_JOIN_ROLES).describe(
+        'Role IDs given to bots that join, comma separated',
+      ),
+      verificationRoleId: OptionalSnowflakeSetting.describe(
+        'Role given by the verification button (/autorole send-verify); empty for none',
+      ),
+    })
+    .strict(),
+  autovoice: z
+    .object({
+      hubs: JsonSetting(AutoVoiceHubsSchema).describe(
+        'Join-to-create hubs as JSON, e.g. [{"channelId":"123...","nameTemplate":"Room of {user}","userLimit":0,"bitrate":64000}]',
       ),
     })
     .strict(),
