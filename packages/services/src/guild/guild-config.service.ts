@@ -280,8 +280,10 @@ export class GuildConfigService {
       if (changes.length === 0) return { values: before, changes };
 
       const now = this.now();
-      await store.write(guildId, values, tx);
+      // Bump first: on Postgres its row lock orders concurrent saves of the same module, so a
+      // store that replaces rows (commands) never interleaves two deletes and two inserts.
       await this.deps.versions.bump(guildId, module, now, tx);
+      await store.write(guildId, values, tx);
       await this.deps.audit.create(
         {
           guildId,
