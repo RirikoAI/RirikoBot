@@ -83,6 +83,8 @@ describe('setting types', () => {
     ]);
     expect(list.parse([])).toEqual([]);
     expect(list.parse('')).toEqual([]);
+    expect(list.parse('[]')).toEqual([]);
+    expect(list.parse('["123456789012345678"]')).toEqual(['123456789012345678']);
     expect(list.safeParse(['123456789012345678', '1']).success).toBe(false);
     expect(
       list.safeParse(['123456789012345678', '223456789012345678', '323456789012345678']).error

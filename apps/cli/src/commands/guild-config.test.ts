@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ValidationError } from '@ririko/core';
-import { createDatabaseClient, type SqliteDatabaseClient } from '@ririko/database';
+import {
+  CommandCatalogRepository,
+  createDatabaseClient,
+  type SqliteDatabaseClient,
+} from '@ririko/database';
 import type { GuildConfigService } from '@ririko/services/guild';
 import { createGuildConfigService, listConfigKeys, runGuildConfig } from './guild-config.js';
 
@@ -37,7 +41,8 @@ describe('ririko guild:config (TASK-1113)', () => {
     ]);
     expect(keys).toContain('automod.mentionSpamLimit');
     expect(keys).toContain('automod.burstSpamExemptRoleIds');
-    expect(keys.at(-1)).toBe('logging.logChannelId');
+    expect(keys).toContain('logging.logChannelId');
+    expect(keys.at(-1)).toBe('commands.overrides');
     expect(listConfigKeys().every((entry) => entry.description.length > 0)).toBe(true);
   });
 
@@ -83,6 +88,35 @@ describe('ririko guild:config (TASK-1113)', () => {
         '[{"warnThreshold":2,"action":"TIMEOUT"}]',
       ),
     ).rejects.toThrow(/Row 1: Timeout steps need a length\./);
+  });
+
+  it('round-trips command overrides as JSON and rejects unknown commands (TASK-1632)', async () => {
+    await new CommandCatalogRepository(db).replaceAll([
+      {
+        name: 'rps',
+        category: 'games',
+        description: 'Rock paper scissors',
+        slashEnabled: true,
+        prefixEnabled: true,
+        defaultPermission: null,
+        cooldownSeconds: 3,
+      },
+    ]);
+    const rows =
+      '[{"command":"rps","channelId":null,"enabled":false,"allowedRoleIds":[],"blockedRoleIds":[],"cooldownSeconds":null}]';
+    await runGuildConfig(service, GUILD, 'commands.overrides', rows);
+    expect(await runGuildConfig(service, GUILD, 'commands.overrides')).toEqual([rows]);
+
+    await runGuildConfig(service, GUILD, 'commands.overrides', '[]');
+    expect(await runGuildConfig(service, GUILD, 'commands.overrides')).toEqual(['[]']);
+    await runGuildConfig(service, GUILD, 'moderation.escalationSteps', '[]');
+    expect(await runGuildConfig(service, GUILD, 'moderation.escalationSteps')).toEqual(['[]']);
+    expect(await runGuildConfig(service, GUILD, 'automod.burstSpamExemptRoleIds')).toEqual(['[]']);
+    await runGuildConfig(service, GUILD, 'automod.burstSpamExemptRoleIds', '[]');
+
+    await expect(
+      runGuildConfig(service, GUILD, 'commands.overrides', '[{"command":"nope","enabled":false}]'),
+    ).rejects.toThrow(/Unknown command: `nope`\./);
   });
 
   it('lists all settings with their current values', async () => {

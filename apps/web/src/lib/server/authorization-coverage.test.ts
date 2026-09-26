@@ -32,6 +32,7 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         'app/dashboard/[guildId]/moderation/actions.ts#saveModerationSettings',
         'app/dashboard/[guildId]/automod/actions.ts#saveAutoModSettings',
         'app/dashboard/[guildId]/logging/actions.ts#saveLoggingSettings',
+        'app/dashboard/[guildId]/commands/actions.ts#saveCommandOverrides',
         'app/account/security/actions.ts#removePasskey',
         'app/account/sessions/actions.ts#revokeOtherSessions',
         'app/verify/actions.ts#finishPasskeyCheck',

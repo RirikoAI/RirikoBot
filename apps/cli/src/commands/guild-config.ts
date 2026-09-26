@@ -58,15 +58,21 @@ function resolveKey(key: string): ConfigKey {
 }
 
 /**
- * A setting value in the form `guild:config` accepts back: ID lists comma separated, rows as
- * JSON, and nothing (an empty string) for an unset ID.
+ * A setting value in the form `guild:config` accepts back: ID lists comma separated, rows and
+ * empty lists as JSON, and nothing (an empty string) for an unset ID.
  */
 export function formatConfigValue(value: unknown): string {
   if (value === null || value === undefined) return '';
-  if (Array.isArray(value) && value.every((item) => typeof item === 'string'))
+  if (Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === 'string'))
     return value.join(',');
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
+}
+
+/** A value for people to read: unset IDs and empty lists show as `(none)`. */
+function displayConfigValue(value: unknown): string {
+  const text = formatConfigValue(value);
+  return text === '' || text === '[]' ? '(none)' : text;
 }
 
 /** `cli:<os user>` so audit entries show who ran the command. */
@@ -100,7 +106,7 @@ export async function runGuildConfig(
       const values: Record<string, unknown> = await service.get(guildId, module);
       for (const entry of listConfigKeys().filter((candidate) => candidate.module === module)) {
         lines.push(
-          `  ${pc.cyan(entry.key.padEnd(keyWidth))} ${(formatConfigValue(values[entry.field]) || '(none)').padEnd(24)} ${pc.gray(entry.description)}`,
+          `  ${pc.cyan(entry.key.padEnd(keyWidth))} ${displayConfigValue(values[entry.field]).padEnd(24)} ${pc.gray(entry.description)}`,
         );
       }
     }
@@ -123,7 +129,7 @@ export async function runGuildConfig(
     const change = changes.find((candidate) => candidate.field === entry.field);
     return change
       ? [
-          `${pc.green('✔')} ${entry.key}: ${formatConfigValue(change.before) || '(none)'} → ${formatConfigValue(change.after) || '(none)'}`,
+          `${pc.green('✔')} ${entry.key}: ${displayConfigValue(change.before)} → ${displayConfigValue(change.after)}`,
         ]
       : [`${entry.key} is already ${value.trim()}; nothing changed.`];
   } catch (error) {

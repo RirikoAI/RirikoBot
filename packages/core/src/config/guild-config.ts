@@ -36,6 +36,17 @@ export const TimezoneSchema = z.string().transform((value, ctx) => {
 });
 
 const SNOWFLAKE = /^\d{17,20}$/;
+
+function splitIdList(text: string): unknown {
+  if (text.trim().startsWith('[')) {
+    try {
+      return JSON.parse(text) as unknown;
+    } catch {
+      return text;
+    }
+  }
+  return text.split(/[\s,]+/).filter(Boolean);
+}
 const TRUE_WORDS = new Set(['true', 'on', 'yes', '1']);
 const FALSE_WORDS = new Set(['false', 'off', 'no', '0']);
 
@@ -76,11 +87,11 @@ export const OptionalSnowflakeSetting = z.preprocess((value) => {
   return trimmed === '' || trimmed.toLowerCase() === 'none' ? null : trimmed;
 }, z.string().regex(SNOWFLAKE, 'Must be a Discord ID.').nullable());
 
-/** Up to `max` distinct Discord IDs; the CLI may pass them comma or space separated. */
+/** Up to `max` distinct Discord IDs; the CLI may pass them comma or space separated, or as a JSON list. */
 export function SnowflakeListSetting(max: number) {
   return z.preprocess(
     (value) => {
-      const list = typeof value === 'string' ? value.split(/[\s,]+/).filter(Boolean) : value;
+      const list = typeof value === 'string' ? splitIdList(value) : value;
       return Array.isArray(list) ? [...new Set(list)] : list;
     },
     z
