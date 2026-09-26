@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   AuditLogRepository,
+  AutoRoleRepository,
+  AutoVoiceRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
   createDatabaseClient,
@@ -31,6 +33,8 @@ describe('GuildConfigService (TASK-1111)', () => {
   let moderation: ModerationRepository;
   let commandSettings: CommandSettingsRepository;
   let commandCatalog: CommandCatalogRepository;
+  let autoRoles: AutoRoleRepository;
+  let autoVoice: AutoVoiceRepository;
   let service: GuildConfigService;
 
   beforeEach(async () => {
@@ -45,12 +49,16 @@ describe('GuildConfigService (TASK-1111)', () => {
     moderation = new ModerationRepository(db);
     commandSettings = new CommandSettingsRepository(db);
     commandCatalog = new CommandCatalogRepository(db);
+    autoRoles = new AutoRoleRepository(db);
+    autoVoice = new AutoVoiceRepository(db);
     service = new GuildConfigService({
       db,
       guildSettings: new GuildSettingsRepository(db),
       moderation,
       commandSettings,
       commandCatalog,
+      autoRoles,
+      autoVoice,
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -407,6 +415,119 @@ describe('GuildConfigService (TASK-1111)', () => {
       expect((error as GuildConfigValidationError).fieldErrors).toEqual({
         overrides: ['Row 2: `help` is always available and cannot be overridden.'],
       });
+    });
+  });
+  describe('autoroles (TASK-1641)', () => {
+    const HUMAN = '200000000000000001';
+    const BOT = '200000000000000002';
+    const VERIFY = '200000000000000003';
+
+    it('reads a guild without a row as off with no roles', async () => {
+      expect(await service.get('g1', 'autoroles')).toEqual({
+        enabled: false,
+        humanRoleIds: [],
+        botRoleIds: [],
+        verificationRoleId: null,
+      });
+    });
+
+    it('saves roles from the dashboard and the CLI and keeps the verification message', async () => {
+      await autoRoles.setVerificationRole('g1', VERIFY, '300000000000000001', '400000000000000001');
+      const { changes } = await service.update(
+        'g1',
+        'autoroles',
+        { enabled: true, humanRoleIds: [HUMAN, HUMAN], botRoleIds: BOT },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual(['humanRoleIds', 'botRoleIds']);
+      await service.update(
+        'g1',
+        'autoroles',
+        { verificationRoleId: 'none', enabled: 'off' },
+        { userId: 'cli', source: 'cli' },
+      );
+
+      expect(await service.get('g1', 'autoroles')).toEqual({
+        enabled: false,
+        humanRoleIds: [HUMAN],
+        botRoleIds: [BOT],
+        verificationRoleId: null,
+      });
+      expect(await autoRoles.getGuildAutoRoles('g1')).toMatchObject({
+        verificationChannelId: '300000000000000001',
+        verificationMessageId: '400000000000000001',
+      });
+      expect(auditRows().map((audit) => audit.action)).toEqual([
+        'guild_config.autoroles.update',
+        'guild_config.autoroles.update',
+      ]);
+    });
+
+    it('rejects more than 10 join roles', async () => {
+      const ids = Array.from({ length: 11 }, (_, i) => `2000000000000001${10 + i}`);
+      await expect(
+        service.update('g1', 'autoroles', { humanRoleIds: ids }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { humanRoleIds: ['Choose at most 10.'] } });
+    });
+  });
+
+  describe('autovoice (TASK-1641)', () => {
+    const HUB_A = '500000000000000001';
+    const HUB_B = '500000000000000002';
+
+    it('adds, updates and removes hubs in one save', async () => {
+      await autoVoice.upsert({ guildId: 'g1', parentChannelId: HUB_A, bitrate: 96_000 });
+      await autoVoice.upsert({ guildId: 'g2', parentChannelId: HUB_A });
+      expect((await service.get('g1', 'autovoice')).hubs).toEqual([
+        { channelId: HUB_A, nameTemplate: "{user}'s Room", userLimit: 0, bitrate: 96_000 },
+      ]);
+
+      const { changes } = await service.update(
+        'g1',
+        'autovoice',
+        {
+          hubs: JSON.stringify([
+            { channelId: HUB_B, nameTemplate: 'Squad {user}', userLimit: 4, bitrate: 64_000 },
+          ]),
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(changes).toHaveLength(1);
+      expect(await autoVoice.listByGuildId('g1')).toEqual([
+        expect.objectContaining({
+          parentChannelId: HUB_B,
+          channelNameTemplate: 'Squad {user}',
+          userLimit: 4,
+          bitrate: 64_000,
+        }),
+      ]);
+      // Other guilds' hubs are untouched.
+      expect(await autoVoice.listByGuildId('g2')).toHaveLength(1);
+    });
+
+    it('keeps row numbers in errors', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'autovoice',
+          { hubs: [{ channelId: HUB_A }, { channelId: HUB_B, userLimit: 120 }] },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({
+        fieldErrors: { hubs: ['Row 2: User limit must be a whole number from 0 to 99.'] },
+      });
+    });
+
+    it('treats a reordered list as unchanged', async () => {
+      const hubs = [{ channelId: HUB_B }, { channelId: HUB_A }];
+      await service.update('g1', 'autovoice', { hubs }, dashboardActor);
+      const { changes } = await service.update(
+        'g1',
+        'autovoice',
+        { hubs: [...hubs].reverse() },
+        dashboardActor,
+      );
+      expect(changes).toEqual([]);
     });
   });
 });

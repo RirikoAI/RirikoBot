@@ -45,10 +45,21 @@ const MODULE_LABELS: Record<string, string> = {
   automod: 'AutoMod',
   logging: 'Logging',
   commands: 'Command',
+  autoroles: 'Auto Roles',
+  autovoice: 'Auto Voice',
+};
+
+/** Guild actions other than settings saves. */
+const ACTION_LABELS: Record<string, string> = {
+  'reaction_roles.publish': 'Reaction role panel published',
+  'reaction_roles.remove': 'Reaction role removed',
+  'reaction_roles.delete_panel': 'Reaction role panel deleted',
 };
 
 /** `guild_config.automod.update` as `AutoMod settings changed`; other actions as they are. */
 export function describeAuditAction(action: string): string {
+  const label = ACTION_LABELS[action];
+  if (label) return label;
   const match = /^guild_config\.([\w-]+)\.update$/.exec(action);
   if (!match) return action;
   const name = match[1]!;

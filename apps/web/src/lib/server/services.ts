@@ -5,6 +5,8 @@ import { experimental_taintObjectReference, experimental_taintUniqueValue } from
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
   AuditLogRepository,
+  AutoRoleRepository,
+  AutoVoiceRepository,
   BotActivityRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
@@ -12,6 +14,7 @@ import {
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
+  ReactionRoleRepository,
   UserRepository,
   WebKnownDeviceRepository,
   WebPasskeyRepository,
@@ -27,6 +30,7 @@ import { DiscordNotifier } from './discord-notifier';
 import { BotGuildDirectory } from './guilds/bot-guilds';
 import { GuildAccessService } from './guilds/guild-access';
 import { GuildResourceDirectory } from './guilds/guild-resources';
+import { ReactionRolePanelService } from './guilds/reaction-role-panels';
 import { UserDirectory } from './guilds/user-directory';
 
 /**
@@ -54,6 +58,8 @@ export interface WebServices {
   /** Moderation cases, warnings and notes, for the read-only case log. */
   moderation: ModerationRepository;
   guildConfig: GuildConfigService;
+  /** Publishes and edits reaction role panels (after guard and passkey step-up). */
+  reactionRolePanels: ReactionRolePanelService;
   /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
   commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
@@ -124,10 +130,13 @@ async function createWebServices(): Promise<WebServices> {
     moderation,
     commandSettings: new CommandSettingsRepository(db),
     commandCatalog,
+    autoRoles: new AutoRoleRepository(db),
+    autoVoice: new AutoVoiceRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit,
     defaultPrefix: config.DEFAULT_PREFIX,
   });
+  const guildResources = new GuildResourceDirectory(botRest);
   return {
     config,
     db,
@@ -140,10 +149,17 @@ async function createWebServices(): Promise<WebServices> {
     audit,
     botRest,
     guildAccess,
-    guildResources: new GuildResourceDirectory(botRest),
+    guildResources,
     userDirectory: new UserDirectory(botRest),
     moderation,
     guildConfig,
+    reactionRolePanels: new ReactionRolePanelService({
+      db,
+      reactionRoles: new ReactionRoleRepository(db),
+      audit,
+      rest: botRest,
+      resources: guildResources,
+    }),
     commandCatalog,
     botActivity: new BotActivityRepository(db),
     notifier: new DiscordNotifier({
