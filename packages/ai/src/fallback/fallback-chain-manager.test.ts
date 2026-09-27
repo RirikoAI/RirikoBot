@@ -81,6 +81,28 @@ describe('FallbackChainManager', () => {
     expect(primaryProvider.generate).not.toHaveBeenCalled();
   });
 
+  it('sends a preferred model only to the preferred provider (TASK-1162)', async () => {
+    vi.mocked(secondaryProvider.generate).mockRejectedValueOnce(new Error('OpenAI is down'));
+
+    await manager.generate(mockRequest, { providerId: 'openai', model: 'gpt-4o' });
+
+    expect(secondaryProvider.generate).toHaveBeenCalledWith({ ...mockRequest, model: 'gpt-4o' });
+    // The fallback provider gets the request without the other provider's model.
+    expect(primaryProvider.generate).toHaveBeenCalledWith(mockRequest);
+  });
+
+  it('streams with the preferred model on the preferred provider (TASK-1162)', async () => {
+    const tokens: string[] = [];
+    for await (const token of manager.stream(mockRequest, {
+      providerId: 'ollama',
+      model: 'mistral',
+    })) {
+      tokens.push(token.text);
+    }
+    expect(tokens).toEqual(['Chunk from ollama']);
+    expect(tertiaryProvider.stream).toHaveBeenCalledWith({ ...mockRequest, model: 'mistral' });
+  });
+
   it('transparently falls back to secondary provider when primary throws error', async () => {
     vi.mocked(primaryProvider.generate).mockRejectedValueOnce(new Error('Gemini connection reset'));
 

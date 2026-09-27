@@ -10,6 +10,7 @@ import {
   GuildSettingsRepository,
   ModerationRepository,
   MusicRepository,
+  AiRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { DEFAULT_ESCALATION_STEPS } from '@ririko/core';
@@ -61,6 +62,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       autoRoles,
       autoVoice,
       music: new MusicRepository(db),
+      ai: new AiRepository(db),
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -767,6 +769,112 @@ describe('GuildConfigService (TASK-1111)', () => {
         fieldErrors: { defaultVolume: ['Enter a whole number from 0 to 150.'] },
       });
     });
+  });
+});
+
+describe('GuildConfigService ai (TASK-1162)', () => {
+  let db: SqliteDatabaseClient;
+  let ai: AiRepository;
+  let service: GuildConfigService;
+  const CHANNEL = '800000000000000001';
+
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    db = raw;
+    ai = new AiRepository(db);
+    service = new GuildConfigService({
+      db,
+      guildSettings: new GuildSettingsRepository(db),
+      moderation: new ModerationRepository(db),
+      commandSettings: new CommandSettingsRepository(db),
+      commandCatalog: new CommandCatalogRepository(db),
+      autoRoles: new AutoRoleRepository(db),
+      autoVoice: new AutoVoiceRepository(db),
+      music: new MusicRepository(db),
+      ai,
+      versions: new GuildConfigVersionRepository(db),
+      audit: new AuditLogRepository(db),
+      defaultPrefix: '!',
+      now: () => NOW,
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  it('shows every tool and the defaults for a guild without settings', async () => {
+    const values = await service.get('g1', 'ai');
+    expect(values).toMatchObject({
+      channelId: null,
+      speakingStyle: 'FRIENDLY_ANIME',
+      personalityPrompt: null,
+      model: null,
+    });
+    expect(values.tools).toHaveLength(6);
+  });
+
+  it('saves the channel, persona, tools and provider and model', async () => {
+    await service.update(
+      'g1',
+      'ai',
+      {
+        channelId: CHANNEL,
+        speakingStyle: 'KUUDERE',
+        personalityPrompt: 'Answer in haiku.',
+        tools: ['music.play'],
+        model: 'openai/gpt-4o',
+      },
+      dashboardActor,
+    );
+
+    expect(await ai.getAiChannel('g1')).toBe(CHANNEL);
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      speakingStyle: 'KUUDERE',
+      personalityPrompt: 'Answer in haiku.',
+      toolsEnabled: true,
+      allowedTools: ['music.play'],
+      providerOverride: 'openai',
+      modelOverride: 'gpt-4o',
+    });
+
+    await service.update('g1', 'ai', { channelId: '', tools: [], model: 'ollama' }, dashboardActor);
+    expect(await ai.getAiChannel('g1')).toBeNull();
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      toolsEnabled: false,
+      allowedTools: [],
+      providerOverride: 'ollama',
+      modelOverride: null,
+    });
+    expect((await service.get('g1', 'ai')).tools).toEqual([]);
+  });
+
+  it('stores every tool as the empty list so new tools are allowed too', async () => {
+    const all = (await service.get('g1', 'ai')).tools;
+    await service.update('g1', 'ai', { tools: all, speakingStyle: 'GENKI' }, dashboardActor);
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      toolsEnabled: true,
+      allowedTools: [],
+    });
+  });
+
+  it('shows what the bot uses of values saved by commands', async () => {
+    await ai.upsertGuildPreferences('g1', {
+      speakingStyle: 'UNKNOWN',
+      personalityPrompt: 'y'.repeat(2000),
+      modelOverride: 'gpt-4o',
+    });
+    const values = await service.get('g1', 'ai');
+    expect(values.speakingStyle).toBe('FRIENDLY_ANIME');
+    expect(values.personalityPrompt).toHaveLength(1500);
+    expect(values.model).toBeNull();
+    // So saving another field does not fail on those values.
+    await expect(service.update('g1', 'ai', { tools: [] }, dashboardActor)).resolves.toBeDefined();
   });
 });
 

@@ -1,3 +1,4 @@
+import { AI_TOOL_NAMES } from '@ririko/core';
 import { describe, it, expect, vi } from 'vitest';
 import {
   ToolRegistry,
@@ -316,6 +317,10 @@ describe('AI Tools & Explicit Clock Service (TASK-0621)', () => {
       expect(filteredDefs).toHaveLength(2);
       expect(filteredDefs[0]?.name).toBe('get_current_time');
       expect(filteredDefs[1]?.name).toBe('games.coinflip');
+      // An empty list means no tools (TASK-1162).
+      expect(registry.getDefinitions([])).toEqual([]);
+      // The dashboard offers exactly the tools the bot has.
+      expect(allDefs.map((def) => def.name).sort()).toEqual([...AI_TOOL_NAMES].sort());
     });
 
     it('validates and executes tool call end-to-end', async () => {

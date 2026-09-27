@@ -137,6 +137,8 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         personality_prompt TEXT,
         speaking_style TEXT NOT NULL DEFAULT 'FRIENDLY_ANIME',
         allowed_tools TEXT NOT NULL DEFAULT '[]',
+        tools_enabled INTEGER NOT NULL DEFAULT 1,
+        provider_override TEXT,
         model_override TEXT
       );
 

@@ -291,6 +291,28 @@ export function TextField({
   );
 }
 
+/** Multi-line text; `maxLength` guides the browser, the shared schema enforces it. */
+export function TextAreaField({
+  maxLength,
+  rows = 5,
+  ...field
+}: FieldProps & { maxLength?: number; rows?: number }) {
+  return (
+    <Field
+      {...field}
+      control={(props) => (
+        <textarea
+          key={props.defaultValue}
+          {...props}
+          rows={rows}
+          maxLength={maxLength}
+          className={INPUT_CLASS}
+        />
+      )}
+    />
+  );
+}
+
 /**
  * Whole-number input; the shared schema enforces the range, `min`/`max` guide the browser.
  * A `null` value shows an empty input, for optional numbers.

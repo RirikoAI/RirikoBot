@@ -1,3 +1,4 @@
+import { AI_PROVIDER_MODELS } from '@ririko/core';
 import {
   ChatModelProvider,
   ChatMessage,
@@ -18,13 +19,7 @@ export interface OllamaProviderOptions {
 export class OllamaProvider implements ChatModelProvider {
   public readonly id = 'ollama';
   public readonly name = 'Ollama / Local';
-  public readonly supportedModels = [
-    'llama3.3',
-    'llama3.2',
-    'mistral',
-    'qwen2.5',
-    'deepseek-r1',
-  ] as const;
+  public readonly supportedModels = AI_PROVIDER_MODELS.ollama;
   public readonly defaultModel: string;
 
   private readonly baseURL: string;

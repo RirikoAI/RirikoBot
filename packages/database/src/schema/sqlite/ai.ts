@@ -46,6 +46,9 @@ export const aiGuildPreferences = sqliteTable('ai_guild_preferences', {
   personalityPrompt: text('personality_prompt'),
   speakingStyle: text('speaking_style').notNull().default('FRIENDLY_ANIME'),
   allowedTools: text('allowed_tools', { mode: 'json' }).$type<string[]>().notNull().default([]),
+  // false turns tools off; otherwise allowed_tools lists them, empty meaning all.
+  toolsEnabled: integer('tools_enabled', { mode: 'boolean' }).notNull().default(true),
+  providerOverride: text('provider_override'), // 'gemini' | 'openai' | 'ollama'
   modelOverride: text('model_override'),
 });
 

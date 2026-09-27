@@ -10,6 +10,7 @@ import type {
   SecurityExecutionContext,
 } from '@ririko/ai';
 import { formatToolResultFallback } from '@ririko/ai';
+import { allowedAiTools, preferredAiModel } from '@ririko/core';
 import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 
 export interface AiChatControllerOptions {
@@ -226,11 +227,10 @@ export class AiChatController {
       const history = await this.services.conversationManager.getContextMessages(userContext, 20);
 
       // 6. Tool Definitions & Allowlist
-      const allowedTools =
-        guildPrefs?.allowedTools && guildPrefs.allowedTools.length > 0
-          ? guildPrefs.allowedTools
-          : undefined;
+      const allowedTools = allowedAiTools(guildPrefs);
       const toolDefs = this.services.toolRegistry.getDefinitions(allowedTools);
+      // The guild's provider and model are tried first; others remain the fallback.
+      const preference = preferredAiModel(guildPrefs);
 
       // 7. Construct ChatRequest
       const messages: ChatMessage[] = [...history, { role: 'user', content: prompt }];
@@ -254,7 +254,7 @@ export class AiChatController {
       let streamSucceeded = false;
       if (canStream) {
         try {
-          const stream = this.services.fallbackChainManager.stream(chatRequest);
+          const stream = this.services.fallbackChainManager.stream(chatRequest, preference);
           for await (const token of stream) {
             if (token.text) {
               accumulatedContent += token.text;
@@ -276,7 +276,7 @@ export class AiChatController {
 
       // If streaming produced neither text nor tool calls, use standard generate
       if (!streamSucceeded) {
-        const response = await this.services.fallbackChainManager.generate(chatRequest);
+        const response = await this.services.fallbackChainManager.generate(chatRequest, preference);
         accumulatedContent = response.content;
         if (response.toolCalls && response.toolCalls.length > 0) {
           accumulatedToolCalls.push(...response.toolCalls);
@@ -437,7 +437,10 @@ export class AiChatController {
         try {
           if (canStream) {
             try {
-              const synthStream = this.services.fallbackChainManager.stream(synthesisRequest);
+              const synthStream = this.services.fallbackChainManager.stream(
+                synthesisRequest,
+                preference,
+              );
               for await (const token of synthStream) {
                 if (token.text) {
                   synthesizedText += token.text;
@@ -451,8 +454,10 @@ export class AiChatController {
           }
 
           if (!synthesizedText) {
-            const synthResponse =
-              await this.services.fallbackChainManager.generate(synthesisRequest);
+            const synthResponse = await this.services.fallbackChainManager.generate(
+              synthesisRequest,
+              preference,
+            );
             synthesizedText = synthResponse.content;
           }
         } catch (err) {
