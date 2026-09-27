@@ -96,6 +96,8 @@ export const guildWelcomer = sqliteTable('guild_welcomer', {
   messageTemplate: text('message_template').notNull().default('Welcome to {server}, {user}!'),
   cardTheme: text('card_theme').notNull().default('DEFAULT'),
   backgroundUrl: text('background_url'),
+  /** Uploaded background in storage/welcomer-backgrounds; never set together with the URL. */
+  backgroundFile: text('background_file'),
   textColor: text('text_color').notNull().default('#ffffff'),
   isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
 });
@@ -106,6 +108,8 @@ export const guildFarewell = sqliteTable('guild_farewell', {
   messageTemplate: text('message_template').notNull().default('Goodbye {user}!'),
   cardTheme: text('card_theme').notNull().default('DEFAULT'),
   backgroundUrl: text('background_url'),
+  /** Uploaded background in storage/welcomer-backgrounds; never set together with the URL. */
+  backgroundFile: text('background_file'),
   textColor: text('text_color').notNull().default('#ffffff'),
   isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
 });
