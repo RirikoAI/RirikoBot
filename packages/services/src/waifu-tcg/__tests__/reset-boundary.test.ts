@@ -111,6 +111,13 @@ describe('STORY-161 shared reset boundary', () => {
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS economy_item_categories (
+        id TEXT PRIMARY KEY,
+        code TEXT UNIQUE,
+        name TEXT NOT NULL,
+        description TEXT
+      );
+
       CREATE TABLE IF NOT EXISTS economy_items (
         id TEXT PRIMARY KEY,
         code TEXT UNIQUE,

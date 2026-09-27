@@ -108,6 +108,19 @@ describe('ProfileBackgroundManager', () => {
         updated_at INTEGER NOT NULL
       );
 
+      CREATE TABLE economy_item_categories (
+
+        id TEXT PRIMARY KEY,
+
+        code TEXT UNIQUE,
+
+        name TEXT NOT NULL,
+
+        description TEXT
+
+      );
+
+
       CREATE TABLE economy_items (
         id TEXT PRIMARY KEY,
         code TEXT UNIQUE,
@@ -524,7 +537,7 @@ describe('ProfileBackgroundManager', () => {
       } as Response);
 
       // Add voucher to user inventory
-      await inventoryRepo.addItem(userId, 'profile_bg_voucher', 1);
+      await inventoryRepo.addItem(userId, (await itemRepo.findByCode('profile_bg_voucher'))!.id, 1);
       const qtyBefore = await inventoryService.getItemQuantity(userId, 'profile_bg_voucher');
       expect(qtyBefore).toBe(1);
 
