@@ -8,14 +8,14 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 13 | `EPIC-011` |
+| | | | | |
 
 ---
 
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| | | | | | |
+| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 13 | `EPIC-011` | [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) |
 
 ---
 
@@ -260,10 +260,10 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1151` | Task | XP & Ranking Page (Level-Up Announcements & Channel, XP Rate, No-XP Channels & Roles, Voice XP) & Voice Reward Accrual | 3 | `STORY-115` | ✅ Done · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) | `STORY-111` |
 | `TASK-1152` | Task | Games Page (Per-Game On/Off & Cooldown via command_settings, Maximum Wager Enforced by the Bot) | 2 | `STORY-115` | ✅ Done · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) | `TASK-1151` |
 | `TASK-1153` | Task | Giveaways Page (Active List, End Now, Reroll, History) with a Guard Against Ending Twice | 3 | `STORY-115` | ✅ Done · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) | `TASK-1152` |
-| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 13 | `EPIC-011` | ⚡ In Progress | `STORY-115` |
-| `TASK-1651` | Task | Owner Console Shell, Global Economy Settings (Daily Reward, Streak Bonus, Bank Capacity), Live Bank Capacity from Account Level & ririko economy:config | 5 | `STORY-165` | 🎯 To Do | `STORY-115` |
-| `TASK-1652` | Task | Item Shop Manager (economy_items & economy_item_categories: Create, Edit, Retire, Delete Unowned; Category Management) | 5 | `STORY-165` | 🎯 To Do | `TASK-1651` |
-| `TASK-1653` | Task | Item Codes, Item Seed That Works on Postgres & SQLite, /shop Grouped by Category (Seed Part of BUG-0024) | 3 | `STORY-165` | 🎯 To Do | `TASK-1652` |
+| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 13 | `EPIC-011` | 🔍 Review · [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) | `STORY-115` |
+| `TASK-1651` | Task | Owner Console Shell, Global Economy Settings (Daily Reward, Streak Bonus, Bank Capacity), Live Bank Capacity from Account Level & ririko economy:config | 5 | `STORY-165` | ✅ Done · [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) | `STORY-115` |
+| `TASK-1652` | Task | Item Shop Manager (economy_items & economy_item_categories: Create, Edit, Retire, Delete Unowned; Category Management) | 5 | `STORY-165` | ✅ Done · [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) | `TASK-1651` |
+| `TASK-1653` | Task | Item Codes, Item Seed That Works on Postgres & SQLite, /shop Grouped by Category (Seed Part of BUG-0024) | 3 | `STORY-165` | ✅ Done · [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) | `TASK-1652` |
 | `STORY-116` | Story | Music, AI Chatbot, Image Generation, Stream Alerts, Free Games, Welcome & Integrations Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-133`, `STORY-117` |
 | `TASK-1161` | Task | Music Page (Volume, DJ Role, Music Channel), AI Chatbot Page (Persona, Provider/Model, Tool Toggles) & Image Generation Page (Provider, Quotas, Presets) | 3 | `STORY-116` | 🎯 To Do | `STORY-111` |
 | `TASK-1162` | Task | Stream Alerts Page (Streamer Subscriptions, Templates, Mention Roles) & Free Games Page (Channels, Ping Roles) | 2 | `STORY-116` | 🎯 To Do | `TASK-1161` |
