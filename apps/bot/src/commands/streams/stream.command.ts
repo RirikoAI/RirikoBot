@@ -6,48 +6,19 @@ import {
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
-import type { StreamPlatform } from '@ririko/services';
+import {
+  cleanStreamerIdentifier,
+  inferPlatform,
+  parseStreamPlatform,
+  StreamAlertError,
+  type StreamAlertActor,
+} from '@ririko/services';
 
 const PLATFORM_CHOICES = [
   { name: 'Twitch', value: 'TWITCH' },
   { name: 'YouTube Live', value: 'YOUTUBE' },
   { name: 'TikTok Live', value: 'TIKTOK' },
 ];
-
-export function inferPlatform(input: string, explicitPlatform?: string | null): StreamPlatform {
-  if (
-    explicitPlatform &&
-    ['TWITCH', 'YOUTUBE', 'TIKTOK'].includes(explicitPlatform.toUpperCase())
-  ) {
-    return explicitPlatform.toUpperCase() as StreamPlatform;
-  }
-
-  const lower = input.toLowerCase().trim();
-  if (lower.includes('youtube.com') || lower.includes('youtu.be') || lower.startsWith('uc')) {
-    return 'YOUTUBE';
-  }
-  if (lower.includes('tiktok.com')) {
-    return 'TIKTOK';
-  }
-  if (lower.includes('twitch.tv')) {
-    return 'TWITCH';
-  }
-
-  return 'TWITCH';
-}
-
-export function cleanStreamerIdentifier(input: string): string {
-  let clean = input.trim();
-  clean = clean.replace(/^https?:\/\/(www\.)?twitch\.tv\//i, '');
-  clean = clean.replace(/^https?:\/\/(www\.)?tiktok\.com\/@/i, '');
-  clean = clean.replace(/^https?:\/\/(www\.)?tiktok\.com\//i, '');
-  clean = clean.replace(/^https?:\/\/(www\.)?youtube\.com\/(@|channel\/|c\/)?/i, '');
-  clean = clean.replace(/^https?:\/\/youtu\.be\//i, '');
-  clean = clean.replace(/^@/, '');
-  clean = clean.split('/')[0]!;
-  clean = clean.split('?')[0]!;
-  return clean.trim();
-}
 
 /**
  * Creates the complete Stream alerts dual-dispatch command suite across Twitch, YouTube, and TikTok.
@@ -292,24 +263,24 @@ async function handleSubscribeStream(ctx: CommandContext, services: BotServices)
   const rawArgs = ctx.options.getRawArgs();
   let streamerInput = ctx.options.getString('streamer');
   let platformInput = ctx.options.getString('platform');
-  const targetChannel =
-    ((await ctx.options.getChannel('channel')) as GuildTextBasedChannel | null) ??
-    (ctx.channel as GuildTextBasedChannel | null);
-  const mentionRole =
+  let channelId = ((await ctx.options.getChannel('channel')) as GuildTextBasedChannel | null)?.id;
+  let mentionRoleId =
     ctx.source === 'slash' && 'options' in ctx.raw
-      ? ((ctx.raw as any).options?.getRole?.('role') as Role | null)
+      ? (((ctx.raw as any).options?.getRole?.('role') as Role | null)?.id ?? null)
       : null;
   const customMessage = ctx.options.getString('custom_message');
 
-  // Prefix argument fallback: !subscribe <streamer> [platform]
+  // Prefix arguments: !subscribe <streamer> [platform] [#channel] [@role]
   if (!streamerInput && rawArgs.length > 0) {
     const offset = ['subscribe', 'sub', 'add'].includes(rawArgs[0]!.toLowerCase()) ? 1 : 0;
     streamerInput = rawArgs[offset] ?? null;
-    if (rawArgs[offset + 1]) {
-      const maybePlatform = rawArgs[offset + 1]!.toUpperCase();
-      if (['TWITCH', 'YOUTUBE', 'TIKTOK'].includes(maybePlatform)) {
-        platformInput = maybePlatform;
-      }
+    for (const arg of rawArgs.slice(offset + 1)) {
+      const platform = parseStreamPlatform(arg);
+      const channel = /^<#(\d{17,20})>$/.exec(arg);
+      const role = /^<@&(\d{17,20})>$/.exec(arg);
+      if (platform) platformInput = platform;
+      else if (channel) channelId = channel[1];
+      else if (role) mentionRoleId = role[1]!;
     }
   }
 
@@ -322,55 +293,43 @@ async function handleSubscribeStream(ctx: CommandContext, services: BotServices)
     return;
   }
 
-  const platform = inferPlatform(streamerInput, platformInput);
-  const identifier = cleanStreamerIdentifier(streamerInput);
+  channelId ??= ctx.channelId;
+  const channel = ctx.guild?.channels.cache.get(channelId);
+  if (ctx.guild && (!channel || !channel.isTextBased())) {
+    await ctx.reply({
+      content: '❌ Choose a text channel of this server for the alerts.',
+      ephemeral: true,
+    });
+    return;
+  }
+  if (mentionRoleId && ctx.guild) {
+    const role = await ctx.guild.roles.fetch(mentionRoleId).catch(() => null);
+    if (!role) {
+      await ctx.reply({ content: '❌ Choose a role of this server to mention.', ephemeral: true });
+      return;
+    }
+  }
 
   await ctx.deferReply();
 
   try {
-    const adapter = services.streamWatcher.getAdapter(platform);
-    let displayName = identifier;
-    let avatarUrl: string | null = null;
-    let platformUserId = identifier.toLowerCase();
-
-    if (adapter) {
-      const profile = await adapter.resolveStreamer(identifier).catch(() => null);
-      if (profile) {
-        platformUserId = profile.platformUserId;
-        displayName = profile.displayName || profile.username;
-        avatarUrl = profile.avatarUrl;
-      }
-    }
-
-    const streamerId = `${platform.toLowerCase()}_${platformUserId}`;
-
-    // 1. Upsert streamer in database
-    const streamer = await services.streamRepo.upsertStreamer({
-      id: streamerId,
-      platform,
-      platformUserId,
-      username: identifier.toLowerCase(),
-      displayName,
-      avatarUrl,
-      isLive: false,
-      lastCheckedAt: new Date(),
-    });
-
-    // 2. Add subscription
-    const channelId = targetChannel?.id || ctx.channelId;
-    const subscriptionId = `sub_${ctx.guildId}_${streamer.id}`;
-
-    await services.streamRepo.addSubscription({
-      id: subscriptionId,
-      streamerId: streamer.id,
-      guildId: ctx.guildId,
-      channelId,
-      mentionRoleId: mentionRole?.id ?? null,
-      customMessage: customMessage || null,
-    });
+    const { alert, created } = await services.streamAlertService.subscribe(
+      {
+        guildId: ctx.guildId,
+        streamer: streamerInput,
+        platform: parseStreamPlatform(platformInput),
+        channelId,
+        mentionRoleId,
+        customMessage,
+      },
+      commandActor(ctx),
+    );
+    const { streamer, subscription } = alert;
+    const platform = streamer.platform;
+    const displayName = streamer.displayName || streamer.username;
 
     const embed = new EmbedBuilder()
-      .setTitle('🔴 Streamer Alert Added')
+      .setTitle(created ? '🔴 Streamer Alert Added' : '🔴 Streamer Alert Updated')
       .setColor(platform === 'TWITCH' ? 0x9146ff : platform === 'YOUTUBE' ? 0xff0000 : 0x00f2fe)
       .setDescription(
         `Subscribed server to live announcements for **${displayName}** on **${platform}**!`,
@@ -378,21 +337,33 @@ async function handleSubscribeStream(ctx: CommandContext, services: BotServices)
       .addFields(
         { name: '📺 Streamer', value: `\`${displayName}\``, inline: true },
         { name: '🌐 Platform', value: platform, inline: true },
-        { name: '📢 Alerts Channel', value: `<#${channelId}>`, inline: true },
+        { name: '📢 Alerts Channel', value: `<#${subscription.channelId}>`, inline: true },
       )
-      .setThumbnail(avatarUrl ?? null)
+      .setThumbnail(streamer.avatarUrl ?? null)
       .setFooter({ text: 'Ririko AI Stream Watcher' })
       .setTimestamp();
 
-    if (mentionRole) {
-      embed.addFields({ name: '🔔 Mention Role', value: `<@&${mentionRole.id}>`, inline: true });
+    if (subscription.mentionRoleId) {
+      embed.addFields({
+        name: '🔔 Mention Role',
+        value: `<@&${subscription.mentionRoleId}>`,
+        inline: true,
+      });
     }
 
     await ctx.editReply({ embeds: [embed] });
   } catch (err: unknown) {
+    if (err instanceof StreamAlertError) {
+      await ctx.editReply({ content: `❌ ${err.message}` });
+      return;
+    }
     const message = err instanceof Error ? err.message : String(err);
     await ctx.editReply({ content: `❌ Failed to subscribe to streamer: ${message}` });
   }
+}
+
+function commandActor(ctx: CommandContext): StreamAlertActor {
+  return { userId: ctx.user.id, source: 'command' };
 }
 
 async function handleUnsubscribeStream(ctx: CommandContext, services: BotServices): Promise<void> {
@@ -447,22 +418,7 @@ async function handleUnsubscribeStream(ctx: CommandContext, services: BotService
 
   try {
     // 1. Fetch guild subscriptions
-    let subsWithStreamers: Array<{ subscription: any; streamer: any }> = [];
-    if (typeof services.streamRepo.listGuildSubscriptionsWithStreamers === 'function') {
-      subsWithStreamers = await services.streamRepo
-        .listGuildSubscriptionsWithStreamers(ctx.guildId)
-        .catch(() => []);
-    }
-
-    if (subsWithStreamers.length === 0) {
-      const rawSubs = await services.streamRepo.getSubscriptionsByGuild(ctx.guildId);
-      for (const sub of rawSubs) {
-        const streamer = await services.streamRepo.findById(sub.streamerId);
-        if (streamer) {
-          subsWithStreamers.push({ subscription: sub, streamer });
-        }
-      }
-    }
+    const subsWithStreamers = await services.streamAlertService.list(ctx.guildId);
 
     // 2. Find matching subscriptions in this guild across all platforms
     const matches = subsWithStreamers.filter(({ streamer }) => {
@@ -479,18 +435,6 @@ async function handleUnsubscribeStream(ctx: CommandContext, services: BotService
       }
       return true;
     });
-
-    // 3. Fallback: if not found in local joined cache, try repository findByUsername
-    if (matches.length === 0) {
-      const platformToSearch = explicitPlatform || inferPlatform(streamerInput, null);
-      const streamer = await services.streamRepo.findByUsername(platformToSearch, identifier);
-      if (streamer) {
-        matches.push({
-          subscription: { streamerId: streamer.id, guildId: ctx.guildId },
-          streamer,
-        });
-      }
-    }
 
     if (matches.length === 0) {
       const activeList =
@@ -520,12 +464,20 @@ async function handleUnsubscribeStream(ctx: CommandContext, services: BotService
     }
 
     const target = matches[0]!;
-    await services.streamRepo.removeSubscription(ctx.guildId, target.streamer.id);
+    await services.streamAlertService.remove(
+      ctx.guildId,
+      target.subscription.id,
+      commandActor(ctx),
+    );
 
     await ctx.editReply({
       content: `✅ Successfully unsubscribed from live alerts for **${target.streamer.displayName || target.streamer.username}** on **${target.streamer.platform}**.`,
     });
   } catch (err: unknown) {
+    if (err instanceof StreamAlertError) {
+      await ctx.editReply({ content: `❌ ${err.message}` });
+      return;
+    }
     const message = err instanceof Error ? err.message : String(err);
     await ctx.editReply({ content: `❌ Error unsubscribing: ${message}` });
   }
@@ -543,22 +495,7 @@ async function handleListStreams(ctx: CommandContext, services: BotServices): Pr
   await ctx.deferReply();
 
   try {
-    let subsWithStreamers: Array<{ subscription: any; streamer: any }> = [];
-    if (typeof services.streamRepo.listGuildSubscriptionsWithStreamers === 'function') {
-      subsWithStreamers = await services.streamRepo
-        .listGuildSubscriptionsWithStreamers(ctx.guildId)
-        .catch(() => []);
-    }
-
-    if (subsWithStreamers.length === 0) {
-      const subscriptions = await services.streamRepo.getSubscriptionsByGuild(ctx.guildId);
-      for (const sub of subscriptions) {
-        const streamer = await services.streamRepo.findById(sub.streamerId);
-        if (streamer) {
-          subsWithStreamers.push({ subscription: sub, streamer });
-        }
-      }
-    }
+    const subsWithStreamers = await services.streamAlertService.list(ctx.guildId);
 
     if (subsWithStreamers.length === 0) {
       await ctx.editReply({

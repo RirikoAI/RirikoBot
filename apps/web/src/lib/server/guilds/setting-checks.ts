@@ -98,6 +98,21 @@ export function checkConfiguredProvider(
   return { [field]: [`${labels[provider]} is not configured for this bot.`] };
 }
 
+/** An error for `field` when it names a role the guild does not have. An empty value is fine. */
+export async function checkMemberRole(
+  resources: Pick<GuildResourceDirectory, 'memberRoles'>,
+  guildId: string,
+  field: string,
+  fields: Record<string, unknown>,
+): Promise<Record<string, string[]>> {
+  const [roleId] = idsOf(fields[field]);
+  if (!roleId) return {};
+  const roles = await resources.memberRoles(guildId);
+  return roles.some((role) => role.id === roleId)
+    ? {}
+    : { [field]: ['Choose a role of this server.'] };
+}
+
 /**
  * Errors for a music channel that is not a text channel of the guild, or a DJ role the guild
  * does not have. An empty value (none) is fine.
@@ -107,15 +122,11 @@ export async function checkMusicSettings(
   guildId: string,
   fields: Record<string, unknown>,
 ): Promise<Record<string, string[]>> {
-  const [roleId] = idsOf(fields.djRoleId);
-  const errors = await checkMessageChannel(resources, guildId, 'musicChannelId', fields);
-  if (roleId) {
-    const roles = await resources.memberRoles(guildId);
-    if (!roles.some((role) => role.id === roleId)) {
-      errors.djRoleId = ['Choose a role of this server.'];
-    }
-  }
-  return errors;
+  const [channelErrors, roleErrors] = await Promise.all([
+    checkMessageChannel(resources, guildId, 'musicChannelId', fields),
+    checkMemberRole(resources, guildId, 'djRoleId', fields),
+  ]);
+  return { ...channelErrors, ...roleErrors };
 }
 
 /**

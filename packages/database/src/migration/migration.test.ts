@@ -6,6 +6,16 @@ import { tmpdir } from 'node:os';
 import { unlinkSync, existsSync } from 'node:fs';
 import { LegacySqliteInspector } from './inspector.js';
 import { LegacyTransformer } from './transformer.js';
+import { legacyUuid, uuidV5 } from './uuid.js';
+
+describe('uuidV5 (TASK-1661)', () => {
+  it('matches the RFC 9562 example', () => {
+    // Version 5 UUID for "www.example.com" in the DNS namespace.
+    expect(uuidV5('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'www.example.com')).toBe(
+      '2ed6657d-e927-568b-95e1-2665a8aea6a2',
+    );
+  });
+});
 
 describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
   let tempDbPath: string;
@@ -333,6 +343,12 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       expect(data.streamers.length).toBe(1);
       expect(data.streamers[0]?.platform).toBe('TWITCH');
       expect(data.streamSubscriptions.length).toBe(1);
+      // uuid IDs (Postgres columns are uuid), derived so re-runs match and the link holds.
+      expect(data.streamers[0]?.id).toBe(legacyUuid('twitch_streamer:twitch_streamer_1'));
+      expect(data.streamers[0]?.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      );
+      expect(data.streamSubscriptions[0]?.streamerId).toBe(data.streamers[0]?.id);
 
       // 8. Reaction Roles
       expect(data.reactionRoles.length).toBe(1);
