@@ -35,7 +35,10 @@ export const imageJobs = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     completedAt: timestamp('completed_at', { withTimezone: true }),
   },
-  (table) => [index('idx_pg_image_jobs_user_status').on(table.userId, table.status)],
+  (table) => [
+    index('idx_pg_image_jobs_user_status').on(table.userId, table.status),
+    index('idx_pg_image_jobs_user_created').on(table.userId, table.createdAt),
+  ],
 );
 
 export const imagePresets = pgTable('image_presets', {
@@ -44,6 +47,14 @@ export const imagePresets = pgTable('image_presets', {
   positivePromptPrefix: text('positive_prompt_prefix').notNull(),
   negativePromptPreset: text('negative_prompt_preset'),
   isSystemPreset: boolean('is_system_preset').notNull().default(false),
+});
+
+/** A guild's /imagine defaults and per-member daily limit. */
+export const imageGuildSettings = pgTable('image_guild_settings', {
+  guildId: varchar('guild_id', { length: 32 }).primaryKey(),
+  defaultProvider: varchar('default_provider', { length: 32 }), // null for the bot default
+  memberDailyLimit: integer('member_daily_limit'), // null for the bot quota only
+  defaultPreset: varchar('default_preset', { length: 32 }), // null for anime
 });
 
 export const imageUsage = pgTable(

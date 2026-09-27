@@ -1,4 +1,4 @@
-import { EmbedBuilder, type GuildMember } from 'discord.js';
+import { EmbedBuilder, PermissionFlagsBits, type GuildMember } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import {
@@ -8,6 +8,7 @@ import {
   FILTER_DESCRIPTIONS,
 } from '@ririko/music';
 import type { MusicEmbedController } from '../../controllers/music-embed.controller.js';
+import { createDjRoleMiddleware } from './dj-role.js';
 
 export function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0 || !Number.isFinite(seconds)) return '0:00';
@@ -947,23 +948,38 @@ export function createMusicCommands(
     },
   };
 
+  // With a DJ role set, only DJs and members with Manage Server change playback.
+  const getDjRoleId = async (guildId: string) =>
+    (await services.musicRepo.getGuildSettings(guildId))?.djRoleId ?? null;
+  const djOnly = (command: Command, middleware = createDjRoleMiddleware(getDjRoleId)): Command => ({
+    ...command,
+    metadata: {
+      ...command.metadata,
+      middlewares: [...(command.metadata.middlewares ?? []), middleware],
+    },
+  });
+
   return [
     playCommand,
-    pauseCommand,
-    resumeCommand,
-    skipCommand,
-    backCommand,
-    stopCommand,
+    djOnly(pauseCommand),
+    djOnly(resumeCommand),
+    djOnly(skipCommand),
+    djOnly(backCommand),
+    djOnly(stopCommand),
     queueCommand,
     nowplayingCommand,
-    volumeCommand,
-    loopCommand,
-    shuffleCommand,
-    seekCommand,
-    filterCommand,
+    // Anyone may read the volume; changing it needs the DJ role.
+    djOnly(
+      volumeCommand,
+      createDjRoleMiddleware(getDjRoleId, (ctx) => ctx.options.getInteger('level') !== null),
+    ),
+    djOnly(loopCommand),
+    djOnly(shuffleCommand),
+    djOnly(seekCommand),
+    djOnly(filterCommand),
     lyricsCommand,
     joinCommand,
-    leaveCommand,
+    djOnly(leaveCommand),
     playlistCommand,
   ];
 }
@@ -982,6 +998,7 @@ export function createSetupMusicCommand(
       description: 'Initialize a dedicated interactive music channel with live player controls.',
       usage: '/setup-music [channel]',
       isGuildOnly: true,
+      userPermissions: [PermissionFlagsBits.ManageGuild],
       options: [
         {
           name: 'channel',

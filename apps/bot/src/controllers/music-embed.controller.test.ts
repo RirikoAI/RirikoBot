@@ -448,6 +448,37 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
       );
     });
 
+    it('keeps playback buttons for DJs when the guild has a DJ role (TASK-1161)', async () => {
+      await services.musicRepo.upsertGuildSettings('guild_01', { djRoleId: 'role-dj' });
+      const withRoles = (roleIds: string[]) => {
+        const interaction = createMockButtonInteraction('music_play_pause');
+        Object.assign(interaction.member as object, {
+          roles: { cache: new Map(roleIds.map((id) => [id, {}])) },
+          permissions: { has: () => false },
+        });
+        return interaction;
+      };
+
+      const listener = withRoles([]);
+      await controller.handleButtonInteraction(listener);
+      expect(listener.reply).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('DJ role') }),
+      );
+      expect(services.musicPlayer.isPaused('guild_01')).toBe(false);
+
+      // The queue button is not a playback control.
+      const queue = createMockButtonInteraction('music_queue');
+      Object.assign(queue.member as object, { roles: { cache: new Map() } });
+      await controller.handleButtonInteraction(queue);
+      expect(queue.reply).not.toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('DJ role') }),
+      );
+
+      const dj = withRoles(['role-dj']);
+      await controller.handleButtonInteraction(dj);
+      expect(services.musicPlayer.isPaused('guild_01')).toBe(true);
+    });
+
     it('toggles pause and resume via music_play_pause button', async () => {
       const interaction = createMockButtonInteraction('music_play_pause');
 

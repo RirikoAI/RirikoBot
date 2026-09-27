@@ -4,6 +4,17 @@ import { AUTOMOD_ACTIONS, EscalationPolicySchema } from './moderation-settings.j
 import { CommandOverridesSchema } from './command-overrides.js';
 import { AutoVoiceHubsSchema } from './auto-voice.js';
 import { GameRulesSchema, MAX_GAME_WAGER_LIMIT } from './games.js';
+import {
+  AI_MODEL_CHOICES,
+  AI_SPEAKING_STYLES,
+  AI_TOOL_NAMES,
+  MAX_AI_PERSONA_PROMPT_LENGTH,
+} from './ai.js';
+import {
+  IMAGE_PROVIDER_IDS,
+  IMAGE_STYLE_PRESET_IDS,
+  MAX_IMAGE_MEMBER_DAILY_LIMIT,
+} from './images.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
 export const DEFAULT_COMMAND_PREFIX = '!';
@@ -134,6 +145,57 @@ export function JsonSetting<T extends z.ZodTypeAny>(schema: T) {
   }, schema);
 }
 
+/** Text that may be empty; an empty string (or `none` from the CLI) clears it. */
+export function OptionalTextSetting(max: number) {
+  return z.preprocess(
+    (value) => {
+      if (typeof value !== 'string') return value;
+      const trimmed = value.trim();
+      return trimmed === '' || trimmed.toLowerCase() === 'none' ? null : trimmed;
+    },
+    z
+      .string({ invalid_type_error: 'Enter text.' })
+      .max(max, `Use at most ${max} characters.`)
+      .nullable(),
+  );
+}
+
+/**
+ * One of `values`, or `null`; an empty string clears it, and so does `none` from the CLI
+ * unless `none` is one of the values.
+ */
+export function OptionalChoiceSetting<T extends [string, ...string[]]>(values: T) {
+  const clears = (text: string) =>
+    text === '' || (text.toLowerCase() === 'none' && !values.includes('none'));
+  return z.preprocess(
+    (value) => {
+      if (typeof value !== 'string') return value;
+      const trimmed = value.trim();
+      return clears(trimmed) ? null : trimmed;
+    },
+    z
+      .enum(values, { errorMap: () => ({ message: `Choose one of ${values.join(', ')}.` }) })
+      .nullable(),
+  );
+}
+
+/** Distinct entries of `values`; the CLI may pass them comma separated or as a JSON list. */
+export function ChoiceListSetting<T extends [string, ...string[]]>(values: T) {
+  return z.preprocess(
+    (value) => {
+      const list = typeof value === 'string' ? splitIdList(value) : value;
+      return Array.isArray(list) ? [...new Set(list)] : list;
+    },
+    z
+      .array(
+        z.enum(values, { errorMap: () => ({ message: `Choose from ${values.join(', ')}.` }) }),
+        { invalid_type_error: 'Enter a list.' },
+      )
+      // In the order of `values`, so the same choices always compare equal.
+      .transform((chosen) => values.filter((value) => chosen.includes(value))),
+  );
+}
+
 const AutoModActionSetting = z.enum(AUTOMOD_ACTIONS, {
   errorMap: () => ({ message: `Choose one of ${AUTOMOD_ACTIONS.join(', ')}.` }),
 });
@@ -142,6 +204,14 @@ const MAX_JOIN_ROLES = 10;
 const MAX_NO_XP_CHANNELS = 50;
 /** Highest per-guild XP rate. Levels also raise the global bank capacity, so the rate is capped. */
 export const MAX_XP_RATE_PERCENT = 300;
+/** Highest music volume in percent; the player clamps to it too. */
+export const MAX_MUSIC_VOLUME = 150;
+/** Volume a music session starts at when the guild has not chosen one. */
+export const DEFAULT_MUSIC_VOLUME = 80;
+const AI_SPEAKING_STYLE_IDS = AI_SPEAKING_STYLES.map((style) => style.id) as [
+  (typeof AI_SPEAKING_STYLES)[number]['id'],
+  ...(typeof AI_SPEAKING_STYLES)[number]['id'][],
+];
 const AUTOMOD_ACTION_HELP = `${AUTOMOD_ACTIONS.join(', ')}; every match also deletes the message`;
 
 /**
@@ -272,6 +342,56 @@ export const GuildConfigSchemas = {
       ),
       rules: JsonSetting(GameRulesSchema).describe(
         'Server-wide game rules as JSON; cooldownSeconds null keeps the game default, e.g. [{"command":"rps","enabled":false}]',
+      ),
+    })
+    .strict(),
+  music: z
+    .object({
+      defaultVolume: IntSetting(0, MAX_MUSIC_VOLUME).describe(
+        `Volume a new music session starts at, 0 to ${MAX_MUSIC_VOLUME} percent`,
+      ),
+      musicChannelId: OptionalSnowflakeSetting.describe(
+        'Channel with the music controller, where song names and links are played; empty for none',
+      ),
+      djRoleId: OptionalSnowflakeSetting.describe(
+        'Role needed to pause, skip, stop, loop, shuffle, seek, filter or change the volume; empty lets everyone (Manage Server always can)',
+      ),
+      autoLeaveEmpty: FlagSetting.describe(
+        'Leave the voice channel 3 minutes after the last member leaves it',
+      ),
+    })
+    .strict(),
+  ai: z
+    .object({
+      channelId: OptionalSnowflakeSetting.describe(
+        'Channel where Ririko answers every message; empty for none',
+      ),
+      speakingStyle: z
+        .enum(AI_SPEAKING_STYLE_IDS, {
+          errorMap: () => ({ message: `Choose one of ${AI_SPEAKING_STYLE_IDS.join(', ')}.` }),
+        })
+        .describe(`Speaking style: ${AI_SPEAKING_STYLE_IDS.join(', ')}`),
+      personalityPrompt: OptionalTextSetting(MAX_AI_PERSONA_PROMPT_LENGTH).describe(
+        `Extra persona instructions, up to ${MAX_AI_PERSONA_PROMPT_LENGTH} characters; empty for none`,
+      ),
+      tools: ChoiceListSetting(AI_TOOL_NAMES).describe(
+        `Tools Ririko may use, comma separated (${AI_TOOL_NAMES.join(', ')}); empty for none`,
+      ),
+      model: OptionalChoiceSetting(AI_MODEL_CHOICES).describe(
+        'Preferred provider and model as provider or provider/model, e.g. gemini/gemini-2.5-pro; empty for the bot default',
+      ),
+    })
+    .strict(),
+  images: z
+    .object({
+      defaultProvider: OptionalChoiceSetting([...IMAGE_PROVIDER_IDS]).describe(
+        `Provider /imagine uses when the member picks none: ${IMAGE_PROVIDER_IDS.join(', ')}; empty for the bot default`,
+      ),
+      memberDailyLimit: OptionalIntSetting(1, MAX_IMAGE_MEMBER_DAILY_LIMIT).describe(
+        `Images each member may generate here in 24 hours (1 to ${MAX_IMAGE_MEMBER_DAILY_LIMIT}), never more than the bot quota; empty for the bot quota only`,
+      ),
+      defaultPreset: OptionalChoiceSetting(IMAGE_STYLE_PRESET_IDS).describe(
+        `Style preset /imagine uses when the member picks none: ${IMAGE_STYLE_PRESET_IDS.join(', ')}; empty for anime`,
       ),
     })
     .strict(),

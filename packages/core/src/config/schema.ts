@@ -1,3 +1,4 @@
+import { DEFAULT_IMAGE_DAILY_QUOTA } from './images.js';
 import { z } from 'zod';
 import { ResetConfigShape } from '../time/reset-config.js';
 import { DEFAULT_COMMAND_PREFIX, PrefixSchema } from './guild-config.js';
@@ -71,6 +72,14 @@ const BaseAppConfigSchema = z.object({
   OPENAI_BASE_URL: z.string().url().optional(),
   OLLAMA_BASE_URL: z.string().url().optional(),
 
+  // Optional Image Generation Providers & Quota
+  IMAGE_DEFAULT_PROVIDER: z.enum(['gemini', 'replicate', 'comfyui', 'mock']).default('gemini'),
+  IMAGE_DAILY_QUOTA: z.coerce.number().int().min(0).default(DEFAULT_IMAGE_DAILY_QUOTA),
+  REPLICATE_API_TOKEN: z.string().optional(),
+  COMFYUI_URL: z.string().url().optional(),
+  COMFYUI_BASE_URL: z.string().url().optional(),
+  SD_WEBUI_URL: z.string().url().optional(),
+
   // Optional Streaming & External Integrations
   TWITCH_CLIENT_ID: z.string().optional(),
   TWITCH_CLIENT_SECRET: z.string().optional(),
@@ -83,6 +92,10 @@ const BaseAppConfigSchema = z.object({
   SPOTIFY_REFRESH_TOKEN: z.string().optional(),
   SPOTIFY_DC: z.string().optional(),
   SPOTIFY_KEY: z.string().optional(),
+
+  // Optional Lavalink audio node (the bot uses its built-in player without one)
+  LAVALINK_ENABLED: z.string().optional(),
+  LAVALINK_HOST: z.string().optional(),
 
   // Optional YouTube BotGuard & Authentication Credentials
   YOUTUBE_COOKIE: z.string().optional(),

@@ -140,8 +140,14 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 4. **AutoMod**: Toggles and threshold sliders for invite spam, phishing shields, caps lock, and mention limits.
    - *Shipped in STORY-114:* per rule (phishing shield, invite filter, mention spam, burst spam) an on/off switch, the action (delete, or delete plus warn, 10-minute timeout, kick or ban), the mention or message limit, and exempt roles and channels, stored in `moderation_rules`. There is no caps-lock rule, so the page has none. Warnings from AutoMod count toward the escalation policy.
 5. **Music**: Default volume, DJ role picker, music channel binding, audio filter presets.
+   - *Shipped in STORY-116 as `/dashboard/[guildId]/music` (module `music`):* default volume, music channel (the bot posts a new controller there), a DJ role the bot now enforces on playback commands and controller buttons, and leaving empty voice channels, which the bot now does. Filters are per session and are not saved, so they are not on the page. See docs/music.md 9.1.
 6. **AI Chatbot**: Personality prompt editor, model selection (Gemini / OpenAI / Ollama), tool toggles.
+   - *Shipped in STORY-116 as `/dashboard/[guildId]/ai` (module `ai`):* AI channel, speaking style, persona prompt (1500 characters), allowed tools (none turns tools off), and a provider and model the fallback chain tries first. Only providers with credentials are offered. Before STORY-116 the saved model was never used. See docs/ai.md 4.2 and 6.1.
 7. **Image Generation**: Provider selector, daily user quota limits, style presets.
+   - *Shipped in STORY-116 as `/dashboard/[guildId]/images` (module `images`, table `image_guild_settings`):*
+     - The default provider (configured ones only) and style preset `/imagine` uses when a member picks none.
+     - Images per member in 24 hours on this server. It is capped by the bot quota `IMAGE_DAILY_QUOTA`, which now counts completed images across all providers (before, each provider had its own count).
+     - `/stablediffusion-model` sets the same row.
 8. **Economy & Banking**: Currency name, daily reward base amount, bank interest rates, item shop manager. The item catalog (`economy_items`, `economy_item_categories`) is global, so the shop manager lives in the owner console.
    - *Moved to STORY-165 (2026-09-27):* balances, the daily reward and the bank are global per user and nothing economy-related is read per guild, so there is no guild Economy page. The owner console edits the daily reward, streak bonus and bank capacity, and the item catalog. The currency name is fixed ("credits"), and bank interest is not live yet (`applyDailyInterest` has no caller).
    - *Shipped in STORY-165 (owner console, Section 3.1.1):*
@@ -176,6 +182,7 @@ The dashboard provides dedicated management views for all 20+ bot modules:
    - *Shipped in STORY-164 as `/dashboard/[guildId]/autovoice` (module `autovoice`, CLI key `autovoice.hubs`):* up to 20 hubs, each with its voice channel, a name template (`{user}`), a user limit and a bitrate preset capped at the guild's boost tier. The bot deletes only the channels it created (BUG-0021), and lowers a saved bitrate to what the guild allows when it creates a channel.
    - **Auto Roles** (`/dashboard/[guildId]/autoroles`, module `autoroles`, STORY-164): join roles for members and for bots (up to 10 each) with an on/off switch, and the verification role that `/autorole send-verify` buttons give. The pickers offer only roles Ririko can give, and the save checks them again against Discord.
 15. **Stream Alerts**: Streamer subscription list (Twitch/YouTube/TikTok), announcement templates, mention roles.
+   - *Moved to STORY-166 (2026-09-27)*, together with items 16 and 17.
 16. **Free Games**: Epic/Steam/GOG announcement channels and notification ping roles.
 17. **Welcome & Farewell**: Interactive canvas preview card editor with custom background uploads.
 18. **Logging**: Channel bindings for message edits, deletes, voice joins, and role updates.
@@ -183,6 +190,7 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 19. **Command Overrides**: Enable/disable specific commands or limit them to staff roles.
    - *Shipped in STORY-163 as `/dashboard/[guildId]/commands`:* per command, a server-wide rule and per-channel rules, each with on/off, allowed roles, blocked roles and a cooldown override, stored in `command_settings` (module `commands`, CLI key `commands.overrides`). The command list comes from the `commands` table, which the bot rewrites at startup. `help`, `ping` and `prefix` cannot be overridden, and members with Manage Server bypass every rule except cooldowns.
 20. **Integrations & Secrets**: Third-party API status (`Configured ✓`). Secrets are **never** displayed.
+   - *Shipped in STORY-116 as `/dashboard/[guildId]/integrations`:* read-only, grouped by Discord, AI chat, image generation, stream alerts and music. `integrationStatus` in `@ririko/core` returns only whether each integration is configured, so no configured value reaches the page. `ririko doctor` uses the same image provider list.
 
 ---
 
@@ -241,10 +249,11 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-113 | 5 | Overview tab, command usage counters, bot status record, voice activity, case log and audit viewers | 4 (Overview), 5 |
 | STORY-114 | 8 | Typed settings and step-up settings forms, Logging, Moderation escalation and AutoMod pages, real AutoMod actions | 3.4, 4 (3, 4, 18) |
 | STORY-115 | 8 | XP, Games, Giveaways pages, voice rewards, giveaway end guard | 4 (9, 11, 12) |
-| STORY-116 | 8 | Music, AI, Image Generation, Stream Alerts, Free Games, Welcome & Farewell, Integrations pages; needs STORY-133 | 4 (5, 6, 7, 15, 16, 17, 20) |
+| STORY-116 | 13 | Music (DJ role, auto-leave), AI (per-guild provider and model), Image Generation (per-guild settings) and Integrations pages | 4 (5, 6, 7, 20) |
 | STORY-117 | 5 | Passkey sign-in gate, step-up, owner guard, recovery CLI | 2.3 |
 | STORY-118 | 5 | Session management and alerts, CSP and taint guards, rate limits, authorization coverage test | 7 |
 | STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
 | STORY-163 | 5 | Command Overrides engine (repository, catalog, override middleware) and page | 4 (19) |
 | STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 2.3, 4 (13, 14) |
 | STORY-165 | 13 | Owner console: global economy settings, live bank capacity, item shop manager, item codes and a seed that works on Postgres | 3.1, 4 (8) |
+| STORY-166 | 13 | Stream Alerts, Free Games (ping role), Welcome & Farewell editor (preview, background upload); needs STORY-133 | 4 (15, 16, 17) |

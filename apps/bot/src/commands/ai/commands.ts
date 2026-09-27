@@ -9,6 +9,14 @@ import type {
   UserContext,
 } from '@ririko/ai';
 import { formatToolResultFallback } from '@ririko/ai';
+import {
+  AI_PROVIDER_LABELS,
+  allowedAiTools,
+  formatAiModelChoice,
+  parseAiModelChoice,
+  preferredAiModel,
+  readAiModelChoice,
+} from '@ririko/core';
 import type { BotServices } from '../../services.js';
 import type { AiChatController } from '../../controllers/ai-chat.controller.js';
 import type { MusicEmbedController } from '../../controllers/music-embed.controller.js';
@@ -21,6 +29,73 @@ export const SPEAKING_STYLE_CHOICES = [
   { name: 'Genki', value: 'GENKI' },
   { name: 'Formal / Professional', value: 'FORMAL' },
 ];
+
+/**
+ * `/aimodel` and `/ai action:model`: with a value, sets the server's preferred provider and
+ * model (Manage Server; the same choices as the dashboard); without one, lists them.
+ */
+export async function handleModelChoice(
+  ctx: CommandContext,
+  services: BotServices,
+  modelArg: string | null | undefined,
+  usage: string,
+): Promise<void> {
+  if (modelArg) {
+    if (!ctx.guildId) {
+      await ctx.reply({ content: '❌ The AI model is chosen per server.' });
+      return;
+    }
+    if (!ctx.member?.permissions.has(PermissionFlagsBits.ManageGuild)) {
+      await ctx.reply({
+        content: '❌ You need the **Manage Server** permission to choose the AI model.',
+      });
+      return;
+    }
+    const choice = readAiModelChoice(modelArg);
+    if (choice === undefined) {
+      await ctx.reply({
+        content: `❌ \`${modelArg}\` is not a model Ririko offers. Run the command without a model to see the list, or use \`default\`.`,
+      });
+      return;
+    }
+    const parsed = parseAiModelChoice(choice);
+    if (parsed && !services.fallbackChainManager.getProvider(parsed.provider)?.isAvailable) {
+      await ctx.reply({
+        content: `❌ ${AI_PROVIDER_LABELS[parsed.provider]} is not configured for this bot.`,
+      });
+      return;
+    }
+    await services.conversationManager.setGuildPreferences(ctx.guildId, {
+      providerOverride: parsed?.provider ?? null,
+      modelOverride: parsed?.model ?? null,
+    });
+    await ctx.reply({
+      content: parsed
+        ? `🧠 **AI model saved!** Ririko now tries \`${choice}\` first on this server, and other providers when it is unavailable.`
+        : '🧠 **AI model reset!** This server uses the default provider and model again.',
+    });
+    return;
+  }
+
+  const guildPrefs = ctx.guildId
+    ? await services.conversationManager.getGuildPreferences(ctx.guildId)
+    : null;
+  const current =
+    formatAiModelChoice(guildPrefs?.providerOverride, guildPrefs?.modelOverride) ??
+    '(System Default)';
+  const embed = new EmbedBuilder()
+    .setColor(0x5865f2)
+    .setTitle('🧠 Ririko AI Available Models & Providers')
+    .setDescription(`Active server model: **\`${current}\`**`)
+    .addFields(
+      services.fallbackChainManager.getProviders().map((p) => ({
+        name: `${p.name} (${p.id}) ${p.isAvailable ? '🟢 Available' : '🔴 Unavailable'}`,
+        value: `• Default: \`${p.defaultModel}\`\n• Supported: ${p.supportedModels.map((m) => `\`${m}\``).join(', ')}`,
+      })),
+    )
+    .setFooter({ text: `To change it (Manage Server): ${usage}, or default to reset` });
+  await ctx.reply({ embeds: [embed] });
+}
 
 /**
  * Executes a conversational AI inference turn for the given context and user prompt.
@@ -70,11 +145,10 @@ export async function executeAiChatTurn(
     const history = await services.conversationManager.getContextMessages(userContext, 20);
 
     // 4. Resolve allowed tools
-    const allowedTools =
-      guildPrefs?.allowedTools && guildPrefs.allowedTools.length > 0
-        ? guildPrefs.allowedTools
-        : undefined;
+    const allowedTools = allowedAiTools(guildPrefs);
     const toolDefs = services.toolRegistry.getDefinitions(allowedTools);
+    // The guild's provider and model are tried first; others remain the fallback.
+    const preference = preferredAiModel(guildPrefs);
 
     // 5. Construct chat request
     const messages: ChatMessage[] = [...history, { role: 'user', content: prompt }];
@@ -87,7 +161,7 @@ export async function executeAiChatTurn(
     };
 
     // 6. Generate AI response
-    const response = await services.fallbackChainManager.generate(chatRequest);
+    const response = await services.fallbackChainManager.generate(chatRequest, preference);
 
     let replyText = response.content.trim();
     if (!replyText && (!response.toolCalls || response.toolCalls.length === 0)) {
@@ -218,11 +292,10 @@ export async function executeAiChatTurn(
       ];
 
       try {
-        const followUpResponse = await services.fallbackChainManager.generate({
-          ...chatRequest,
-          messages: synthesisMessages,
-          tools: undefined,
-        });
+        const followUpResponse = await services.fallbackChainManager.generate(
+          { ...chatRequest, messages: synthesisMessages, tools: undefined },
+          preference,
+        );
         if (followUpResponse.content) {
           replyText = followUpResponse.content;
         } else {
@@ -478,39 +551,7 @@ export function createAiCommands(services: BotServices, aiController: AiChatCont
       if (action === 'model') {
         const modelArg =
           ctx.options.getString('model') ?? (rawArgs.length > 1 ? rawArgs[1] : undefined);
-
-        if (modelArg) {
-          if (ctx.guildId) {
-            await services.conversationManager.setGuildPreferences(ctx.guildId, {
-              modelOverride: modelArg,
-            });
-          }
-          await ctx.reply({
-            content: `🧠 **AI Model Preference Saved!**\nDefault model is now set to \`${modelArg}\`.`,
-          });
-          return;
-        }
-
-        // List providers and active model
-        const providers = services.fallbackChainManager.getProviders();
-        const guildPrefs = ctx.guildId
-          ? await services.conversationManager.getGuildPreferences(ctx.guildId)
-          : null;
-        const currentModel = guildPrefs?.modelOverride ?? '(System Default)';
-
-        const embed = new EmbedBuilder()
-          .setColor(0x5865f2)
-          .setTitle('🧠 Ririko AI Available Models & Providers')
-          .setDescription(`Active server model: **\`${currentModel}\`**`)
-          .addFields(
-            providers.map((p) => ({
-              name: `${p.name} (${p.id}) ${p.isAvailable ? '🟢 Available' : '🔴 Unavailable'}`,
-              value: `• Default: \`${p.defaultModel}\`\n• Supported: ${p.supportedModels.map((m) => `\`${m}\``).join(', ')}`,
-            })),
-          )
-          .setFooter({ text: 'To change your preference: /ai action:model model:<model-name>' });
-
-        await ctx.reply({ embeds: [embed] });
+        await handleModelChoice(ctx, services, modelArg, '/ai action:model model:<model>');
         return;
       }
 
@@ -765,38 +806,7 @@ export function createAiCommands(services: BotServices, aiController: AiChatCont
     },
     async execute(ctx: CommandContext): Promise<void> {
       const modelArg = ctx.options.getString('model') ?? ctx.options.getRawArgs()[0];
-
-      if (modelArg) {
-        if (ctx.guildId) {
-          await services.conversationManager.setGuildPreferences(ctx.guildId, {
-            modelOverride: modelArg,
-          });
-        }
-        await ctx.reply({
-          content: `🧠 **AI Model Preference Saved!**\nDefault model is now set to \`${modelArg}\`.`,
-        });
-        return;
-      }
-
-      const providers = services.fallbackChainManager.getProviders();
-      const guildPrefs = ctx.guildId
-        ? await services.conversationManager.getGuildPreferences(ctx.guildId)
-        : null;
-      const currentModel = guildPrefs?.modelOverride ?? '(System Default)';
-
-      const embed = new EmbedBuilder()
-        .setColor(0x5865f2)
-        .setTitle('🧠 Ririko AI Available Models & Providers')
-        .setDescription(`Active server model: **\`${currentModel}\`**`)
-        .addFields(
-          providers.map((p) => ({
-            name: `${p.name} (${p.id}) ${p.isAvailable ? '🟢 Available' : '🔴 Unavailable'}`,
-            value: `• Default: \`${p.defaultModel}\`\n• Supported: ${p.supportedModels.map((m) => `\`${m}\``).join(', ')}`,
-          })),
-        )
-        .setFooter({ text: 'To change your preference: /aimodel [model-name]' });
-
-      await ctx.reply({ embeds: [embed] });
+      await handleModelChoice(ctx, services, modelArg, '/aimodel <model>');
     },
   };
 

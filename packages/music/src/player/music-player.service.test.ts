@@ -112,3 +112,54 @@ describe('LavalinkQueueAdapter - setVolume (BUG-0018)', () => {
     expect(mockPlayer.setVolume).toHaveBeenCalledWith(150);
   });
 });
+
+describe('MusicPlayerService - auto-leave and settings changes (TASK-1161)', () => {
+  it('stops after the idle timeout when the channel stays empty', () => {
+    vi.useFakeTimers();
+    try {
+      const service = new MusicPlayerService({ idleTimeoutMs: 1000 });
+      const stop = vi.spyOn(service, 'stop');
+
+      service.handleChannelOccupancy('g1', 0, true);
+      expect(service.hasEmptyChannelTimer('g1')).toBe(true);
+      // A second report does not restart the countdown.
+      vi.advanceTimersByTime(600);
+      service.handleChannelOccupancy('g1', 0, true);
+      vi.advanceTimersByTime(400);
+
+      expect(stop).toHaveBeenCalledWith('g1');
+      expect(service.hasEmptyChannelTimer('g1')).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('cancels when a member joins, and never starts with auto-leave off', () => {
+    vi.useFakeTimers();
+    try {
+      const service = new MusicPlayerService({ idleTimeoutMs: 1000 });
+      const stop = vi.spyOn(service, 'stop');
+
+      service.handleChannelOccupancy('g1', 0, true);
+      service.handleChannelOccupancy('g1', 1, true);
+      service.handleChannelOccupancy('g2', 0, false);
+      vi.advanceTimersByTime(5000);
+
+      expect(stop).not.toHaveBeenCalled();
+      expect(service.hasEmptyChannelTimer('g1')).toBe(false);
+      expect(service.hasEmptyChannelTimer('g2')).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('reads the default volume again after forgetGuildSettings', async () => {
+    let saved = 30;
+    const service = new MusicPlayerService({ resolveGuildVolume: () => saved });
+    expect(await service.resolveVolumeForGuild('g1')).toBe(30);
+    saved = 90;
+    expect(await service.resolveVolumeForGuild('g1')).toBe(30);
+    service.forgetGuildSettings('g1');
+    expect(await service.resolveVolumeForGuild('g1')).toBe(90);
+  });
+});

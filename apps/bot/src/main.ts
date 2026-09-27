@@ -38,6 +38,7 @@ import {
   AiChatController,
   registerMessageListener,
   registerVoiceListener,
+  registerMusicVoiceListener,
   trackCurrentVoiceMembers,
   registerMemberListener,
   registerReactionListener,
@@ -167,11 +168,23 @@ export async function main(): Promise<void> {
   const setupMusicCommand = createSetupMusicCommand(services, musicController);
   router.registry.register(setupMusicCommand);
 
+  // Music settings saved on the dashboard or with `ririko guild:config`.
+  services.eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module !== 'music') return;
+    services.musicPlayer.forgetGuildSettings(guildId);
+    // Posts the controller in a newly chosen music channel (the row has no message yet).
+    void musicController.updateController(guildId);
+  });
+
   const aiController = new AiChatController(bot.client, services, {
     defaultPrefix: prefix,
     musicController,
   });
   const aiCommands = createAiCommands(services, aiController);
+  // AI settings saved on the dashboard or with `ririko guild:config` (the channel is cached).
+  services.eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'ai') aiController.invalidateChannelCache(guildId);
+  });
   for (const cmd of aiCommands) {
     router.registry.register(cmd);
   }
@@ -259,6 +272,7 @@ export async function main(): Promise<void> {
   // Register Gateway message, voice & member event listeners
   registerMessageListener(bot.client, services, musicController, aiController);
   registerVoiceListener(bot.client, services);
+  registerMusicVoiceListener(bot.client, services);
   registerMemberListener(bot.client, services);
   registerReactionListener(bot.client, services);
 

@@ -9,6 +9,9 @@ import {
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
+  MusicRepository,
+  AiRepository,
+  ImageRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { DEFAULT_ESCALATION_STEPS } from '@ririko/core';
@@ -59,6 +62,9 @@ describe('GuildConfigService (TASK-1111)', () => {
       commandCatalog,
       autoRoles,
       autoVoice,
+      music: new MusicRepository(db),
+      ai: new AiRepository(db),
+      images: new ImageRepository(db),
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -701,6 +707,246 @@ describe('GuildConfigService (TASK-1111)', () => {
         dashboardActor,
       );
       expect(changes).toEqual([]);
+    });
+  });
+
+  describe('music (TASK-1161)', () => {
+    const CHANNEL_A = '600000000000000001';
+    const CHANNEL_B = '600000000000000002';
+    const DJ = '600000000000000003';
+
+    it('returns the player defaults for a guild without settings', async () => {
+      expect(await service.get('g1', 'music')).toEqual({
+        defaultVolume: 80,
+        musicChannelId: null,
+        djRoleId: null,
+        autoLeaveEmpty: true,
+      });
+    });
+
+    it('saves the settings and keeps the columns the page does not edit', async () => {
+      const music = new MusicRepository(db);
+      await music.upsertGuildSettings('g1', { defaultVolume: 40, lyricsProvider: 'OTHER' });
+
+      await service.update(
+        'g1',
+        'music',
+        { defaultVolume: '120', djRoleId: DJ, autoLeaveEmpty: false },
+        dashboardActor,
+      );
+
+      expect(await music.getGuildSettings('g1')).toMatchObject({
+        defaultVolume: 120,
+        djRoleId: DJ,
+        autoLeaveEmpty: false,
+        lyricsProvider: 'OTHER',
+      });
+    });
+
+    it('resets the controller message only when the channel changes, and clears it', async () => {
+      const music = new MusicRepository(db);
+      await music.setMusicChannel('g1', CHANNEL_A, 'message-1');
+
+      await service.update('g1', 'music', { defaultVolume: 50 }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toMatchObject({
+        channelId: CHANNEL_A,
+        lastMessageId: 'message-1',
+      });
+
+      await service.update('g1', 'music', { musicChannelId: CHANNEL_B }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toMatchObject({
+        channelId: CHANNEL_B,
+        lastMessageId: null,
+      });
+
+      await service.update('g1', 'music', { musicChannelId: '' }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toBeNull();
+      expect((await service.get('g1', 'music')).musicChannelId).toBeNull();
+    });
+
+    it('rejects a volume above 150', async () => {
+      await expect(
+        service.update('g1', 'music', { defaultVolume: 151 }, dashboardActor),
+      ).rejects.toMatchObject({
+        fieldErrors: { defaultVolume: ['Enter a whole number from 0 to 150.'] },
+      });
+    });
+  });
+});
+
+describe('GuildConfigService ai (TASK-1162)', () => {
+  let db: SqliteDatabaseClient;
+  let ai: AiRepository;
+  let service: GuildConfigService;
+  const CHANNEL = '800000000000000001';
+
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    db = raw;
+    ai = new AiRepository(db);
+    service = new GuildConfigService({
+      db,
+      guildSettings: new GuildSettingsRepository(db),
+      moderation: new ModerationRepository(db),
+      commandSettings: new CommandSettingsRepository(db),
+      commandCatalog: new CommandCatalogRepository(db),
+      autoRoles: new AutoRoleRepository(db),
+      autoVoice: new AutoVoiceRepository(db),
+      music: new MusicRepository(db),
+      ai,
+      images: new ImageRepository(db),
+      versions: new GuildConfigVersionRepository(db),
+      audit: new AuditLogRepository(db),
+      defaultPrefix: '!',
+      now: () => NOW,
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  it('shows every tool and the defaults for a guild without settings', async () => {
+    const values = await service.get('g1', 'ai');
+    expect(values).toMatchObject({
+      channelId: null,
+      speakingStyle: 'FRIENDLY_ANIME',
+      personalityPrompt: null,
+      model: null,
+    });
+    expect(values.tools).toHaveLength(6);
+  });
+
+  it('saves the channel, persona, tools and provider and model', async () => {
+    await service.update(
+      'g1',
+      'ai',
+      {
+        channelId: CHANNEL,
+        speakingStyle: 'KUUDERE',
+        personalityPrompt: 'Answer in haiku.',
+        tools: ['music.play'],
+        model: 'openai/gpt-4o',
+      },
+      dashboardActor,
+    );
+
+    expect(await ai.getAiChannel('g1')).toBe(CHANNEL);
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      speakingStyle: 'KUUDERE',
+      personalityPrompt: 'Answer in haiku.',
+      toolsEnabled: true,
+      allowedTools: ['music.play'],
+      providerOverride: 'openai',
+      modelOverride: 'gpt-4o',
+    });
+
+    await service.update('g1', 'ai', { channelId: '', tools: [], model: 'ollama' }, dashboardActor);
+    expect(await ai.getAiChannel('g1')).toBeNull();
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      toolsEnabled: false,
+      allowedTools: [],
+      providerOverride: 'ollama',
+      modelOverride: null,
+    });
+    expect((await service.get('g1', 'ai')).tools).toEqual([]);
+  });
+
+  it('stores every tool as the empty list so new tools are allowed too', async () => {
+    const all = (await service.get('g1', 'ai')).tools;
+    await service.update('g1', 'ai', { tools: all, speakingStyle: 'GENKI' }, dashboardActor);
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      toolsEnabled: true,
+      allowedTools: [],
+    });
+  });
+
+  it('shows what the bot uses of values saved by commands', async () => {
+    await ai.upsertGuildPreferences('g1', {
+      speakingStyle: 'UNKNOWN',
+      personalityPrompt: 'y'.repeat(2000),
+      modelOverride: 'gpt-4o',
+    });
+    const values = await service.get('g1', 'ai');
+    expect(values.speakingStyle).toBe('FRIENDLY_ANIME');
+    expect(values.personalityPrompt).toHaveLength(1500);
+    expect(values.model).toBeNull();
+    // So saving another field does not fail on those values.
+    await expect(service.update('g1', 'ai', { tools: [] }, dashboardActor)).resolves.toBeDefined();
+  });
+});
+
+describe('GuildConfigService images (TASK-1163)', () => {
+  let db: SqliteDatabaseClient;
+  let images: ImageRepository;
+  let service: GuildConfigService;
+
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    db = raw;
+    images = new ImageRepository(db);
+    service = new GuildConfigService({
+      db,
+      guildSettings: new GuildSettingsRepository(db),
+      moderation: new ModerationRepository(db),
+      commandSettings: new CommandSettingsRepository(db),
+      commandCatalog: new CommandCatalogRepository(db),
+      autoRoles: new AutoRoleRepository(db),
+      autoVoice: new AutoVoiceRepository(db),
+      music: new MusicRepository(db),
+      ai: new AiRepository(db),
+      images,
+      versions: new GuildConfigVersionRepository(db),
+      audit: new AuditLogRepository(db),
+      defaultPrefix: '!',
+      now: () => NOW,
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  it('saves and clears the defaults and the member limit', async () => {
+    expect(await service.get('g1', 'images')).toEqual({
+      defaultProvider: null,
+      memberDailyLimit: null,
+      defaultPreset: null,
+    });
+
+    await service.update(
+      'g1',
+      'images',
+      { defaultProvider: 'gemini', memberDailyLimit: '10', defaultPreset: 'fantasy' },
+      dashboardActor,
+    );
+    expect(await images.getGuildSettings('g1')).toEqual({
+      guildId: 'g1',
+      defaultProvider: 'gemini',
+      memberDailyLimit: 10,
+      defaultPreset: 'fantasy',
+    });
+
+    await service.update(
+      'g1',
+      'images',
+      { defaultProvider: '', memberDailyLimit: '' },
+      dashboardActor,
+    );
+    expect(await service.get('g1', 'images')).toEqual({
+      defaultProvider: null,
+      memberDailyLimit: null,
+      defaultPreset: 'fantasy',
     });
   });
 });
