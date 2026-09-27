@@ -4,6 +4,14 @@ import {
   compareCommandOverrides,
   DEFAULT_ESCALATION_STEPS,
   DEFAULT_MUSIC_VOLUME,
+  AI_SPEAKING_STYLES,
+  AI_TOOL_NAMES,
+  allowedAiTools,
+  DEFAULT_AI_SPEAKING_STYLE,
+  formatAiModelChoice,
+  MAX_AI_PERSONA_PROMPT_LENGTH,
+  parseAiModelChoice,
+  type AiSpeakingStyle,
   GuildConfigSchemas,
   ValidationError,
   WAGER_GAME_COMMANDS,
@@ -30,6 +38,7 @@ import {
   type ModerationRepository,
   type ModerationRule,
   type MusicRepository,
+  type AiRepository,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
@@ -208,6 +217,7 @@ export interface GuildConfigServiceDeps {
   autoRoles: AutoRoleRepository;
   autoVoice: AutoVoiceRepository;
   music: MusicRepository;
+  ai: AiRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -436,6 +446,44 @@ export class GuildConfigService {
             // No message yet: the bot posts the controller when it sees the change.
             await deps.music.setMusicChannel(guildId, musicChannelId, null, tx);
           }
+        },
+      },
+      ai: {
+        read: async (guildId, tx) => {
+          const [prefs, channelId] = await Promise.all([
+            deps.ai.getGuildPreferences(guildId, tx),
+            deps.ai.getAiChannel(guildId, tx),
+          ]);
+          const allowed = allowedAiTools(prefs);
+          const style = AI_SPEAKING_STYLES.find(({ id }) => id === prefs?.speakingStyle)?.id;
+          return {
+            channelId,
+            speakingStyle: style ?? DEFAULT_AI_SPEAKING_STYLE,
+            // The personality engine uses at most this much of a longer prompt from /aipersona.
+            personalityPrompt:
+              prefs?.personalityPrompt?.trim().slice(0, MAX_AI_PERSONA_PROMPT_LENGTH) || null,
+            tools: AI_TOOL_NAMES.filter((name) => allowed === undefined || allowed.includes(name)),
+            model: formatAiModelChoice(prefs?.providerOverride, prefs?.modelOverride),
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const choice = parseAiModelChoice(values.model);
+          const everyTool = AI_TOOL_NAMES.every((name) => values.tools.includes(name));
+          await deps.ai.upsertGuildPreferences(
+            guildId,
+            {
+              speakingStyle: values.speakingStyle satisfies AiSpeakingStyle,
+              personalityPrompt: values.personalityPrompt,
+              toolsEnabled: values.tools.length > 0,
+              // Every tool is stored as the empty list, so tools added later are allowed too.
+              allowedTools: everyTool ? [] : values.tools,
+              providerOverride: choice?.provider ?? null,
+              modelOverride: choice?.model ?? null,
+            },
+            tx,
+          );
+          if (values.channelId === null) await deps.ai.removeAiChannel(guildId, tx);
+          else await deps.ai.setAiChannel(guildId, values.channelId, tx);
         },
       },
     };

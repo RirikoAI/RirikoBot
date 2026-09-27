@@ -181,6 +181,10 @@ export async function main(): Promise<void> {
     musicController,
   });
   const aiCommands = createAiCommands(services, aiController);
+  // AI settings saved on the dashboard or with `ririko guild:config` (the channel is cached).
+  services.eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'ai') aiController.invalidateChannelCache(guildId);
+  });
   for (const cmd of aiCommands) {
     router.registry.register(cmd);
   }

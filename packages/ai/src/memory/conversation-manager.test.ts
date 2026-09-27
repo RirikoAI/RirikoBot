@@ -48,6 +48,8 @@ describe('ConversationManager — Per-User Context Isolation & Memory (TASK-0611
         personality_prompt TEXT,
         speaking_style TEXT NOT NULL DEFAULT 'FRIENDLY_ANIME',
         allowed_tools TEXT NOT NULL DEFAULT '[]',
+        tools_enabled INTEGER NOT NULL DEFAULT 1,
+        provider_override TEXT,
         model_override TEXT
       );
 

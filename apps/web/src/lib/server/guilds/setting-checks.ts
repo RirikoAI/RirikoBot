@@ -66,6 +66,38 @@ export async function checkAssignableRoles(
   return errors;
 }
 
+/** An error for `field` when it names a channel that is not a text channel of the guild. */
+export async function checkMessageChannel(
+  resources: Pick<GuildResourceDirectory, 'messageChannels'>,
+  guildId: string,
+  field: string,
+  fields: Record<string, unknown>,
+): Promise<Record<string, string[]>> {
+  const [channelId] = idsOf(fields[field]);
+  if (!channelId) return {};
+  const channels = await resources.messageChannels(guildId);
+  return channels.some((channel) => channel.id === channelId)
+    ? {}
+    : { [field]: ['Choose a text channel of this server.'] };
+}
+
+/**
+ * An error for `field` when its `provider` or `provider/model` value names a provider this
+ * bot has no credentials for; the bot would only fall back to another one.
+ */
+export function checkConfiguredProvider(
+  configured: readonly string[],
+  labels: Readonly<Record<string, string>>,
+  field: string,
+  fields: Record<string, unknown>,
+): Record<string, string[]> {
+  const value = fields[field];
+  if (typeof value !== 'string' || value.trim() === '') return {};
+  const provider = value.trim().split('/')[0] ?? '';
+  if (!(provider in labels) || configured.includes(provider)) return {};
+  return { [field]: [`${labels[provider]} is not configured for this bot.`] };
+}
+
 /**
  * Errors for a music channel that is not a text channel of the guild, or a DJ role the guild
  * does not have. An empty value (none) is fine.
@@ -75,15 +107,8 @@ export async function checkMusicSettings(
   guildId: string,
   fields: Record<string, unknown>,
 ): Promise<Record<string, string[]>> {
-  const [channelId] = idsOf(fields.musicChannelId);
   const [roleId] = idsOf(fields.djRoleId);
-  const errors: Record<string, string[]> = {};
-  if (channelId) {
-    const channels = await resources.messageChannels(guildId);
-    if (!channels.some((channel) => channel.id === channelId)) {
-      errors.musicChannelId = ['Choose a text channel of this server.'];
-    }
-  }
+  const errors = await checkMessageChannel(resources, guildId, 'musicChannelId', fields);
   if (roleId) {
     const roles = await resources.memberRoles(guildId);
     if (!roles.some((role) => role.id === roleId)) {
