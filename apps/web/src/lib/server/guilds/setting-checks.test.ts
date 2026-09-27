@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { checkAssignableRoles, checkAutoVoiceHubs } from './setting-checks';
+import { checkAssignableRoles, checkAutoVoiceHubs, checkMusicSettings } from './setting-checks';
 
 const GUILD = '100000000000000001';
 const MEMBER = '200000000000000001';
@@ -67,5 +67,30 @@ describe('checkAutoVoiceHubs (TASK-1641)', () => {
     ).toEqual({});
     expect(directory.voiceChannels).not.toHaveBeenCalled();
     expect(await checkAutoVoiceHubs(directory, GUILD, [{ channelId: HUB }])).toEqual({});
+  });
+});
+
+describe('checkMusicSettings (TASK-1161)', () => {
+  const music = () => ({
+    messageChannels: vi.fn().mockResolvedValue([{ id: TEXT, name: 'music', category: null }]),
+    memberRoles: resources().memberRoles,
+  });
+
+  it('accepts a text channel and a role of the guild, or none', async () => {
+    expect(
+      await checkMusicSettings(music(), GUILD, { musicChannelId: TEXT, djRoleId: ADMIN }),
+    ).toEqual({});
+    expect(await checkMusicSettings(music(), GUILD, { musicChannelId: '', djRoleId: '' })).toEqual(
+      {},
+    );
+  });
+
+  it('rejects channels and roles the guild does not have', async () => {
+    expect(
+      await checkMusicSettings(music(), GUILD, { musicChannelId: HUB, djRoleId: GONE }),
+    ).toEqual({
+      musicChannelId: ['Choose a text channel of this server.'],
+      djRoleId: ['Choose a role of this server.'],
+    });
   });
 });

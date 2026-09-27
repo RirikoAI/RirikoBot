@@ -66,6 +66,20 @@ export async function RoleSelectField({ guildId, defaultValue, ...field }: Picke
   );
 }
 
+/**
+ * Picker for a role that members are matched by (such as a DJ role), so it includes
+ * integration-managed roles like Server Booster; excludes @everyone.
+ */
+export async function MemberRoleSelectField({ guildId, defaultValue, ...field }: PickerProps) {
+  const { guildResources } = await getWebServices();
+  const roles = await guildResources.memberRoles(guildId);
+  const options = roles.map((role) => ({ value: role.id, label: `@${role.name}` }));
+  if (defaultValue && !roles.some((role) => role.id === defaultValue)) {
+    options.unshift({ value: defaultValue, label: `Deleted role (${defaultValue})` });
+  }
+  return <SelectField {...field} defaultValue={defaultValue ?? ''} options={options} />;
+}
+
 interface ListPickerProps {
   guildId: string;
   name: string;

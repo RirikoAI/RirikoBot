@@ -9,6 +9,7 @@ import {
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
+  MusicRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { DEFAULT_ESCALATION_STEPS } from '@ririko/core';
@@ -59,6 +60,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       commandCatalog,
       autoRoles,
       autoVoice,
+      music: new MusicRepository(db),
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -701,6 +703,69 @@ describe('GuildConfigService (TASK-1111)', () => {
         dashboardActor,
       );
       expect(changes).toEqual([]);
+    });
+  });
+
+  describe('music (TASK-1161)', () => {
+    const CHANNEL_A = '600000000000000001';
+    const CHANNEL_B = '600000000000000002';
+    const DJ = '600000000000000003';
+
+    it('returns the player defaults for a guild without settings', async () => {
+      expect(await service.get('g1', 'music')).toEqual({
+        defaultVolume: 80,
+        musicChannelId: null,
+        djRoleId: null,
+        autoLeaveEmpty: true,
+      });
+    });
+
+    it('saves the settings and keeps the columns the page does not edit', async () => {
+      const music = new MusicRepository(db);
+      await music.upsertGuildSettings('g1', { defaultVolume: 40, lyricsProvider: 'OTHER' });
+
+      await service.update(
+        'g1',
+        'music',
+        { defaultVolume: '120', djRoleId: DJ, autoLeaveEmpty: false },
+        dashboardActor,
+      );
+
+      expect(await music.getGuildSettings('g1')).toMatchObject({
+        defaultVolume: 120,
+        djRoleId: DJ,
+        autoLeaveEmpty: false,
+        lyricsProvider: 'OTHER',
+      });
+    });
+
+    it('resets the controller message only when the channel changes, and clears it', async () => {
+      const music = new MusicRepository(db);
+      await music.setMusicChannel('g1', CHANNEL_A, 'message-1');
+
+      await service.update('g1', 'music', { defaultVolume: 50 }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toMatchObject({
+        channelId: CHANNEL_A,
+        lastMessageId: 'message-1',
+      });
+
+      await service.update('g1', 'music', { musicChannelId: CHANNEL_B }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toMatchObject({
+        channelId: CHANNEL_B,
+        lastMessageId: null,
+      });
+
+      await service.update('g1', 'music', { musicChannelId: '' }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toBeNull();
+      expect((await service.get('g1', 'music')).musicChannelId).toBeNull();
+    });
+
+    it('rejects a volume above 150', async () => {
+      await expect(
+        service.update('g1', 'music', { defaultVolume: 151 }, dashboardActor),
+      ).rejects.toMatchObject({
+        fieldErrors: { defaultVolume: ['Enter a whole number from 0 to 150.'] },
+      });
     });
   });
 });

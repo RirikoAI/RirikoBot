@@ -62,3 +62,33 @@ export function trackCurrentVoiceMembers(client: Client, services: BotServices):
     }
   }
 }
+
+/**
+ * Reports to the music player how many members who are not bots share Ririko's voice
+ * channel, so it can leave an empty channel when the guild's auto-leave setting is on.
+ */
+export function registerMusicVoiceListener(client: Client, services: BotServices): void {
+  client.on('voiceStateUpdate', (oldState: VoiceState, newState: VoiceState) => {
+    const guild = newState.guild;
+    const botChannelId = guild.members.me?.voice.channelId;
+    if (!botChannelId) return;
+    if (oldState.channelId !== botChannelId && newState.channelId !== botChannelId) return;
+
+    const channel = guild.channels.cache.get(botChannelId);
+    if (!channel?.isVoiceBased()) return;
+    const listeners = channel.members.filter((member) => !member.user.bot).size;
+
+    services.musicRepo
+      .getGuildSettings(guild.id)
+      .then((settings) =>
+        services.musicPlayer.handleChannelOccupancy(
+          guild.id,
+          listeners,
+          settings?.autoLeaveEmpty ?? true,
+        ),
+      )
+      .catch((err: unknown) => {
+        console.error(`[Music] Could not check auto-leave for guild ${guild.id}:`, err);
+      });
+  });
+}

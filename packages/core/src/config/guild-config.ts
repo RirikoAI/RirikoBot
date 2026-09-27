@@ -142,6 +142,10 @@ const MAX_JOIN_ROLES = 10;
 const MAX_NO_XP_CHANNELS = 50;
 /** Highest per-guild XP rate. Levels also raise the global bank capacity, so the rate is capped. */
 export const MAX_XP_RATE_PERCENT = 300;
+/** Highest music volume in percent; the player clamps to it too. */
+export const MAX_MUSIC_VOLUME = 150;
+/** Volume a music session starts at when the guild has not chosen one. */
+export const DEFAULT_MUSIC_VOLUME = 80;
 const AUTOMOD_ACTION_HELP = `${AUTOMOD_ACTIONS.join(', ')}; every match also deletes the message`;
 
 /**
@@ -272,6 +276,22 @@ export const GuildConfigSchemas = {
       ),
       rules: JsonSetting(GameRulesSchema).describe(
         'Server-wide game rules as JSON; cooldownSeconds null keeps the game default, e.g. [{"command":"rps","enabled":false}]',
+      ),
+    })
+    .strict(),
+  music: z
+    .object({
+      defaultVolume: IntSetting(0, MAX_MUSIC_VOLUME).describe(
+        `Volume a new music session starts at, 0 to ${MAX_MUSIC_VOLUME} percent`,
+      ),
+      musicChannelId: OptionalSnowflakeSetting.describe(
+        'Channel with the music controller, where song names and links are played; empty for none',
+      ),
+      djRoleId: OptionalSnowflakeSetting.describe(
+        'Role needed to pause, skip, stop, loop, shuffle, seek, filter or change the volume; empty lets everyone (Manage Server always can)',
+      ),
+      autoLeaveEmpty: FlagSetting.describe(
+        'Leave the voice channel 3 minutes after the last member leaves it',
       ),
     })
     .strict(),

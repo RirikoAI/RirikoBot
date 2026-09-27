@@ -3,6 +3,7 @@ import {
   AUTOMOD_RULE_DEFAULTS,
   compareCommandOverrides,
   DEFAULT_ESCALATION_STEPS,
+  DEFAULT_MUSIC_VOLUME,
   GuildConfigSchemas,
   ValidationError,
   WAGER_GAME_COMMANDS,
@@ -28,6 +29,7 @@ import {
   type GuildSettingsRepository,
   type ModerationRepository,
   type ModerationRule,
+  type MusicRepository,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
@@ -205,6 +207,7 @@ export interface GuildConfigServiceDeps {
   commandCatalog: CommandCatalogRepository;
   autoRoles: AutoRoleRepository;
   autoVoice: AutoVoiceRepository;
+  music: MusicRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -408,6 +411,31 @@ export class GuildConfigService {
             if (!isDefaultOverride(row)) next.push(row);
           }
           await deps.commandSettings.replaceForGuild(guildId, toCommandSettingsRows(next), tx);
+        },
+      },
+      music: {
+        read: async (guildId, tx) => {
+          const [row, channel] = await Promise.all([
+            deps.music.getGuildSettings(guildId, tx),
+            deps.music.getMusicChannel(guildId, tx),
+          ]);
+          return {
+            defaultVolume: row?.defaultVolume ?? DEFAULT_MUSIC_VOLUME,
+            musicChannelId: channel?.channelId ?? null,
+            djRoleId: row?.djRoleId ?? null,
+            autoLeaveEmpty: row?.autoLeaveEmpty ?? true,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const { musicChannelId, ...settings } = values;
+          await deps.music.upsertGuildSettings(guildId, settings, tx);
+          const current = await deps.music.getMusicChannel(guildId, tx);
+          if (musicChannelId === null) {
+            if (current) await deps.music.deleteMusicChannel(guildId, tx);
+          } else if (current?.channelId !== musicChannelId) {
+            // No message yet: the bot posts the controller when it sees the change.
+            await deps.music.setMusicChannel(guildId, musicChannelId, null, tx);
+          }
         },
       },
     };
