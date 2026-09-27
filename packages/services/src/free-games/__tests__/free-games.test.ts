@@ -246,8 +246,8 @@ describe('FreeGamesEngine', () => {
 
     const onAnnounce = vi.fn().mockResolvedValue('msg-12345');
     const getTargets = vi.fn().mockResolvedValue([
-      { guildId: 'guild-1', channelId: 'channel-1' },
-      { guildId: 'guild-2', channelId: 'channel-2' },
+      { guildId: 'guild-1', channelId: 'channel-1', mentionRoleId: 'role-1' },
+      { guildId: 'guild-2', channelId: 'channel-2', mentionRoleId: null },
     ]);
 
     // Guild-2 already had this game announced
@@ -266,13 +266,39 @@ describe('FreeGamesEngine', () => {
     expect(result.discovered).toBe(1);
     expect(result.announced).toBe(1);
     expect(onAnnounce).toHaveBeenCalledTimes(1);
-    expect(onAnnounce).toHaveBeenCalledWith('guild-1', 'channel-1', sampleGame);
+    expect(onAnnounce).toHaveBeenCalledWith(
+      { guildId: 'guild-1', channelId: 'channel-1', mentionRoleId: 'role-1' },
+      sampleGame,
+    );
     expect(mockRepo.recordAnnouncement).toHaveBeenCalledWith({
       gameId: 'epic-free-1',
       guildId: 'guild-1',
       channelId: 'channel-1',
       messageId: 'msg-12345',
     });
+  });
+
+  it('mentions only the ping role above the embed (TASK-1662)', () => {
+    const game: FreeGameItem = {
+      id: 'steam-1',
+      provider: 'STEAM',
+      title: '@everyone Free Title',
+      storeUrl: 'https://store.steampowered.com/app/1',
+      thumbnailUrl: null,
+      startDate: new Date(1789700000000),
+      endDate: new Date(1790300000000),
+      isUpcoming: false,
+    };
+    const engine = new FreeGamesEngine(mockRepo as FreeGameRepository);
+
+    const withRole = engine.formatAnnouncement(game, '123');
+    expect(withRole.content).toBe('<@&123>');
+    expect(withRole.allowedMentions).toEqual({ parse: [], roles: ['123'] });
+    expect(withRole.embeds).toHaveLength(1);
+
+    const withoutRole = engine.formatAnnouncement(game, null);
+    expect(withoutRole).not.toHaveProperty('content');
+    expect(withoutRole.allowedMentions).toEqual({ parse: [], roles: [] });
   });
 
   it('formats Discord embed with correct markdown and timestamps', () => {

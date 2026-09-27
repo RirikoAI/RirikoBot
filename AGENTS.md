@@ -81,9 +81,10 @@ Every agent (main coordinator and specialized subagent) is bound by these operat
      ```bash
      pnpm lint
      pnpm typecheck
-     pnpm test
+     pnpm test:coverage
      pnpm build
      ```
+   - **Coverage gate (standing rule for every agent that touches code)**: a PR is **NOT MERGED** unless `pnpm test:coverage` passes every threshold in `vitest.config.ts` (lines ≥ 67%, functions ≥ 69%, statements ≥ 65%, branches ≥ 54% as of 2026-09-28). Cover the code you add or change with real tests. Never lower a threshold. See [docs/testing.md §4.1](file:///Z:/Projects/ririko-v2-2026/docs/testing.md).
    - All tests involving randomness (TCG drops, gambling, giveaways) MUST use deterministic random seeds.
    - The `code-reviewer` agent has the authority to reject PRs for unhandled promises, missing error boundaries, or non-compliant typing.
 4. **Zero Legacy Mutation**:

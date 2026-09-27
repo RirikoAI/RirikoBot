@@ -1,25 +1,22 @@
-import type { FreeGameRepository } from '@ririko/database';
+import type { FreeGameAnnounceTarget, FreeGameRepository } from '@ririko/database';
 import type { FreeGameItem, FreeGameProvider, FreeGameProviderType } from './types.js';
 
 export interface FreeGamesEngineOptions {
   checkIntervalMs?: number;
   providers?: FreeGameProvider[];
+  /** Posts one game for one guild; returns the message ID when it was sent. */
   onAnnounceGame?: (
-    guildId: string,
-    channelId: string,
+    target: FreeGameAnnounceTarget,
     game: FreeGameItem,
-  ) => Promise<string | null | void>; // Returns message ID if sent
-  getGuildAnnounceTargets?: () => Promise<Array<{ guildId: string; channelId: string }>>;
+  ) => Promise<string | null | void>;
+  getGuildAnnounceTargets?: () => Promise<FreeGameAnnounceTarget[]>;
 }
 
 export class FreeGamesEngine {
   private readonly providers = new Map<FreeGameProviderType, FreeGameProvider>();
   private readonly checkIntervalMs: number;
-  private readonly onAnnounceGame?:
-    | ((guildId: string, channelId: string, game: FreeGameItem) => Promise<string | null | void>)
-    | undefined;
-  private readonly getGuildAnnounceTargets?:
-    (() => Promise<Array<{ guildId: string; channelId: string }>>) | undefined;
+  private readonly onAnnounceGame?: FreeGamesEngineOptions['onAnnounceGame'];
+  private readonly getGuildAnnounceTargets?: FreeGamesEngineOptions['getGuildAnnounceTargets'];
 
   private timer: NodeJS.Timeout | null = null;
   private isChecking = false;
@@ -122,7 +119,7 @@ export class FreeGamesEngine {
             );
             if (alreadyAnnounced) continue;
 
-            const messageId = await this.onAnnounceGame(target.guildId, target.channelId, game);
+            const messageId = await this.onAnnounceGame(target, game);
             if (messageId) {
               await this.freeGameRepo.recordAnnouncement({
                 gameId: game.id,
@@ -145,6 +142,18 @@ export class FreeGamesEngine {
     } finally {
       this.isChecking = false;
     }
+  }
+
+  /**
+   * The message for one game: the embed, with the guild's ping role mentioned above it. Only
+   * that role may be pinged, never users or @everyone from a store title.
+   */
+  formatAnnouncement(game: FreeGameItem, mentionRoleId: string | null) {
+    return {
+      ...(mentionRoleId ? { content: `<@&${mentionRoleId}>` } : {}),
+      embeds: [this.formatGameEmbed(game)],
+      allowedMentions: { parse: [] as [], roles: mentionRoleId ? [mentionRoleId] : [] },
+    };
   }
 
   formatGameEmbed(game: FreeGameItem) {

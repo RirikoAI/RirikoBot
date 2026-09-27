@@ -12,6 +12,13 @@ import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
 
+/** Where a guild's free game announcements go and the role they mention. */
+export interface FreeGameAnnounceTarget {
+  guildId: string;
+  channelId: string;
+  mentionRoleId: string | null;
+}
+
 export class FreeGameRepository extends BaseRepository<
   FreeGame,
   NewFreeGame,
@@ -240,65 +247,58 @@ export class FreeGameRepository extends BaseRepository<
     }
   }
 
-  async getGuildChannel(guildId: string, tx?: DatabaseClient): Promise<string | null> {
+  /** Where the guild's free game announcements go and whom they mention, or null for nowhere. */
+  async getGuildChannel(
+    guildId: string,
+    tx?: DatabaseClient,
+  ): Promise<FreeGameAnnounceTarget | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [row] = await client.db
-        .select({ channelId: sqliteSchema.freeGameChannels.channelId })
+        .select()
         .from(sqliteSchema.freeGameChannels)
         .where(eq(sqliteSchema.freeGameChannels.guildId, guildId));
-      return row?.channelId ?? null;
+      return row ? toTarget(row) : null;
     } else {
       const [row] = await client.db
-        .select({ channelId: pgSchema.freeGameChannels.channelId })
+        .select()
         .from(pgSchema.freeGameChannels)
         .where(eq(pgSchema.freeGameChannels.guildId, guildId));
-      return row?.channelId ?? null;
+      return row ? toTarget(row) : null;
     }
   }
 
+  /** Sets the announcement channel; a `mentionRoleId` left out keeps the saved role. */
   async setGuildChannel(
     guildId: string,
-    channelId: string,
+    data: { channelId: string; mentionRoleId?: string | null | undefined },
     tx?: DatabaseClient,
   ): Promise<FreeGameChannel> {
     const client = this.getClient(tx);
-    const existing = await this.getGuildChannel(guildId, tx);
-
-    if (existing) {
-      if (this.isSqlite(client)) {
-        const [updated] = await client.db
-          .update(sqliteSchema.freeGameChannels)
-          .set({ channelId })
-          .where(eq(sqliteSchema.freeGameChannels.guildId, guildId))
-          .returning();
-        return updated as FreeGameChannel;
-      } else {
-        const [updated] = await client.db
-          .update(pgSchema.freeGameChannels)
-          .set({ channelId })
-          .where(eq(pgSchema.freeGameChannels.guildId, guildId))
-          .returning();
-        return updated as unknown as FreeGameChannel;
-      }
+    const set = {
+      channelId: data.channelId,
+      ...(data.mentionRoleId !== undefined ? { mentionRoleId: data.mentionRoleId } : {}),
+    };
+    const values = {
+      guildId,
+      channelId: data.channelId,
+      mentionRoleId: data.mentionRoleId ?? null,
+      createdAt: new Date(),
+    };
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .insert(sqliteSchema.freeGameChannels)
+        .values(values)
+        .onConflictDoUpdate({ target: sqliteSchema.freeGameChannels.guildId, set })
+        .returning();
+      return row as FreeGameChannel;
     } else {
-      if (this.isSqlite(client)) {
-        const [created] = await client.db
-          .insert(sqliteSchema.freeGameChannels)
-          .values({ guildId, channelId, createdAt: new Date() })
-          .returning();
-        return created as FreeGameChannel;
-      } else {
-        const [created] = await client.db
-          .insert(pgSchema.freeGameChannels)
-          .values({
-            guildId,
-            channelId,
-            createdAt: new Date(),
-          } as unknown as typeof pgSchema.freeGameChannels.$inferInsert)
-          .returning();
-        return created as unknown as FreeGameChannel;
-      }
+      const [row] = await client.db
+        .insert(pgSchema.freeGameChannels)
+        .values(values)
+        .onConflictDoUpdate({ target: pgSchema.freeGameChannels.guildId, set })
+        .returning();
+      return row as unknown as FreeGameChannel;
     }
   }
 
@@ -319,26 +319,16 @@ export class FreeGameRepository extends BaseRepository<
     }
   }
 
-  async listAllConfiguredGuildChannels(
-    tx?: DatabaseClient,
-  ): Promise<Array<{ guildId: string; channelId: string }>> {
+  async listAllConfiguredGuildChannels(tx?: DatabaseClient): Promise<FreeGameAnnounceTarget[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
-      const rows = await client.db
-        .select({
-          guildId: sqliteSchema.freeGameChannels.guildId,
-          channelId: sqliteSchema.freeGameChannels.channelId,
-        })
-        .from(sqliteSchema.freeGameChannels);
-      return rows;
+      return (await client.db.select().from(sqliteSchema.freeGameChannels)).map(toTarget);
     } else {
-      const rows = await client.db
-        .select({
-          guildId: pgSchema.freeGameChannels.guildId,
-          channelId: pgSchema.freeGameChannels.channelId,
-        })
-        .from(pgSchema.freeGameChannels);
-      return rows;
+      return (await client.db.select().from(pgSchema.freeGameChannels)).map(toTarget);
     }
   }
+}
+
+function toTarget(row: FreeGameAnnounceTarget): FreeGameAnnounceTarget {
+  return { guildId: row.guildId, channelId: row.channelId, mentionRoleId: row.mentionRoleId };
 }

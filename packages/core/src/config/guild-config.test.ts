@@ -168,8 +168,21 @@ describe('GuildConfigSchemas', () => {
       'music',
       'ai',
       'images',
+      'freegames',
+      'welcome',
+      'farewell',
     ]);
     expect(Object.keys(GuildConfigSchemas.general.shape)).toEqual(['prefix', 'timezone']);
+    expect(Object.keys(GuildConfigSchemas.freegames.shape)).toEqual(['channelId', 'pingRoleId']);
+    for (const card of ['welcome', 'farewell'] as const) {
+      expect(Object.keys(GuildConfigSchemas[card].shape)).toEqual([
+        'enabled',
+        'channelId',
+        'messageTemplate',
+        'textColor',
+        'backgroundUrl',
+      ]);
+    }
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);
     expect(Object.keys(GuildConfigSchemas.moderation.shape)).toEqual(['escalationSteps']);
     expect(Object.keys(GuildConfigSchemas.commands.shape)).toEqual(['overrides']);

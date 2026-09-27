@@ -5,6 +5,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   type GuildTextBasedChannel,
+  type Role,
 } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
@@ -20,14 +21,16 @@ export function createFreeGamesCommand(services: BotServices): Command {
       category: CommandCategory.GENERAL,
       description: 'Check active free game promotions from Epic Games Store and Steam',
       aliases: ['free-games', 'freegame'],
-      usage: '/freegames [action] [channel]',
+      usage: '/freegames [action] [channel] [role]',
       examples: [
         '/freegames',
         '/freegames action:show',
         '/freegames action:setchannel channel:#free-games',
+        '/freegames action:setchannel channel:#free-games role:@Gamers',
         '/freegames action:remove',
         '!freegames',
         '!freegames setchannel #free-games',
+        '!freegames setchannel #free-games @Gamers',
         '!freegames remove',
       ],
       options: [
@@ -46,6 +49,12 @@ export function createFreeGamesCommand(services: BotServices): Command {
           name: 'channel',
           description: 'Channel to send free game announcements to',
           type: 'CHANNEL',
+          required: false,
+        },
+        {
+          name: 'role',
+          description: 'Role to ping with each announcement (kept when left out)',
+          type: 'ROLE',
           required: false,
         },
       ],
@@ -95,10 +104,9 @@ async function handleShowFreeGames(ctx: CommandContext, services: BotServices): 
       return;
     }
 
-    let configuredChannel: string | null = null;
-    if (ctx.guildId) {
-      configuredChannel = await services.freeGameRepo.getGuildChannel(ctx.guildId);
-    }
+    const configured = ctx.guildId
+      ? await services.freeGameRepo.getGuildChannel(ctx.guildId)
+      : null;
 
     const embeds: EmbedBuilder[] = [];
 
@@ -108,8 +116,10 @@ async function handleShowFreeGames(ctx: CommandContext, services: BotServices): 
       .setColor(0x0078f2)
       .setDescription(
         `Currently available 100% free-to-keep promotional games!\n${
-          configuredChannel
-            ? `🔔 Auto-alerts are enabled in <#${configuredChannel}>.`
+          configured
+            ? `🔔 Auto-alerts are enabled in <#${configured.channelId}>${
+                configured.mentionRoleId ? `, pinging <@&${configured.mentionRoleId}>` : ''
+              }.`
             : '💡 Tip: Run `/freegames setchannel` to get automatic alerts when new free games drop.'
         }`,
       )
@@ -211,10 +221,19 @@ async function handleSetChannel(ctx: CommandContext, services: BotServices): Pro
     return;
   }
 
+  const mentionRoleId = await readMentionRole(ctx);
+  if (mentionRoleId === false) {
+    await ctx.reply({ content: '❌ Choose a role of this server to ping.', ephemeral: true });
+    return;
+  }
+
   await ctx.deferReply();
 
   try {
-    await services.freeGameRepo.setGuildChannel(ctx.guildId, targetChannel.id);
+    const saved = await services.freeGameRepo.setGuildChannel(ctx.guildId, {
+      channelId: targetChannel.id,
+      ...(mentionRoleId ? { mentionRoleId } : {}),
+    });
 
     const embed = new EmbedBuilder()
       .setTitle('✅ Free Games Channel Configured')
@@ -225,6 +244,11 @@ async function handleSetChannel(ctx: CommandContext, services: BotServices): Pro
       .addFields(
         { name: '📢 Channel', value: `<#${targetChannel.id}>`, inline: true },
         { name: '🎮 Supported Stores', value: 'Epic Games Store, Steam', inline: true },
+        {
+          name: '🔔 Ping Role',
+          value: saved.mentionRoleId ? `<@&${saved.mentionRoleId}>` : 'None',
+          inline: true,
+        },
       )
       .setFooter({ text: 'Ririko AI Free Games Announcer' })
       .setTimestamp();
@@ -234,6 +258,25 @@ async function handleSetChannel(ctx: CommandContext, services: BotServices): Pro
     const message = err instanceof Error ? err.message : String(err);
     await ctx.editReply({ content: `❌ Failed to configure free games channel: ${message}` });
   }
+}
+
+/**
+ * The role from the slash option or a `<@&id>` prefix argument: its ID, null when none was
+ * given, or false when it is not a role of this server.
+ */
+async function readMentionRole(ctx: CommandContext): Promise<string | null | false> {
+  let roleId: string | null = null;
+  if (ctx.source === 'slash' && 'options' in ctx.raw) {
+    roleId = ((ctx.raw as any).options?.getRole?.('role') as Role | null)?.id ?? null;
+  } else {
+    for (const arg of ctx.options.getRawArgs()) {
+      const match = /^<@&(\d{17,20})>$/.exec(arg);
+      if (match) roleId = match[1]!;
+    }
+  }
+  if (!roleId || !ctx.guild) return roleId;
+  const role = await ctx.guild.roles.fetch(roleId).catch(() => null);
+  return role ? roleId : false;
 }
 
 async function handleRemoveChannel(ctx: CommandContext, services: BotServices): Promise<void> {

@@ -1,6 +1,6 @@
-import { createCanvas, loadImage, GlobalFonts, type SKRSContext2D } from '@napi-rs/canvas';
-import { promises as dns } from 'node:dns';
-import { isIPv4, isIPv6 } from 'node:net';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { fetchRemoteImage } from '../net/remote-image.js';
+import { WelcomerBackgroundStore } from './background-store.js';
 
 export interface WelcomerCardOptions {
   userTag: string;
@@ -8,83 +8,58 @@ export interface WelcomerCardOptions {
   memberCount: number;
   serverName: string;
   messageText: string;
-  backgroundUrl?: string | null;
+  /** Image bytes from `loadBackground`; null or absent draws the default gradient. */
+  background?: Buffer | null | undefined;
   textColor?: string;
   isFarewell?: boolean;
 }
 
+/** Where a card's background comes from: an uploaded file or a public link, never both. */
+export interface WelcomerBackgroundSource {
+  backgroundUrl: string | null;
+  backgroundFile: string | null;
+}
+
+/** Largest background image fetched from a link. */
+const MAX_BACKGROUND_DOWNLOAD_BYTES = 5 * 1024 * 1024;
+const BACKGROUND_TIMEOUT_MS = 5000;
+
+/** Replaces {user}, {server} and {memberCount} everywhere in a card message. */
+export function fillWelcomerMessage(
+  template: string,
+  values: { userTag: string; serverName: string; memberCount: number },
+): string {
+  return template.replace(/\{(user|server|memberCount)\}/g, (_match, name: string) =>
+    name === 'user'
+      ? values.userTag
+      : name === 'server'
+        ? values.serverName
+        : values.memberCount.toString(),
+  );
+}
+
 export class WelcomerService {
-  constructor() {}
+  constructor(readonly backgrounds: WelcomerBackgroundStore = new WelcomerBackgroundStore()) {}
 
   /**
-   * Validates a URL against SSRF attacks by resolving its IP address
-   * and ensuring it is not a private or loopback address.
+   * The background bytes for a card: the uploaded file, or the image behind the link fetched
+   * through `fetchRemoteImage` (public addresses only, redirects checked, size capped). Null
+   * when there is none or it cannot be loaded; the card then uses the default background.
    */
-  public async validateBackgroundUrl(urlStr: string): Promise<boolean> {
-    if (!urlStr) return false;
-
-    let url: URL;
+  async loadBackground(
+    source: WelcomerBackgroundSource | null | undefined,
+  ): Promise<Buffer | null> {
+    if (source?.backgroundFile) return this.backgrounds.read(source.backgroundFile);
+    if (!source?.backgroundUrl) return null;
     try {
-      url = new URL(urlStr);
+      const { buffer } = await fetchRemoteImage(source.backgroundUrl, {
+        maxBytes: MAX_BACKGROUND_DOWNLOAD_BYTES,
+        timeoutMs: BACKGROUND_TIMEOUT_MS,
+      });
+      return buffer;
     } catch {
-      return false;
+      return null;
     }
-
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-      return false;
-    }
-
-    try {
-      const addresses = await dns.resolve(url.hostname);
-      if (!addresses || addresses.length === 0) return false;
-
-      for (const ip of addresses) {
-        if (this.isPrivateIp(ip)) {
-          return false;
-        }
-      }
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  private isPrivateIp(ip: string): boolean {
-    if (isIPv4(ip)) {
-      const parts = ip.split('.').map((p) => parseInt(p, 10));
-      // 10.0.0.0/8
-      if (parts[0] === 10) return true;
-      // 172.16.0.0/12
-      if (parts[0] === 172 && parts[1] !== undefined && parts[1] >= 16 && parts[1] <= 31)
-        return true;
-      // 192.168.0.0/16
-      if (parts[0] === 192 && parts[1] === 168) return true;
-      // 127.0.0.0/8 (Loopback)
-      if (parts[0] === 127) return true;
-      // 169.254.0.0/16 (Link-local)
-      if (parts[0] === 169 && parts[1] === 254) return true;
-      // 0.0.0.0/8
-      if (parts[0] === 0) return true;
-      return false;
-    }
-
-    if (isIPv6(ip)) {
-      const lower = ip.toLowerCase();
-      // ::1 loopback
-      if (lower === '::1') return true;
-      // fd00::/8 Unique Local
-      if (lower.startsWith('fd') || lower.startsWith('fc')) return true;
-      // fe80::/10 Link Local
-      if (
-        lower.startsWith('fe8') ||
-        lower.startsWith('fe9') ||
-        lower.startsWith('fea') ||
-        lower.startsWith('feb')
-      )
-        return true;
-      return false;
-    }
-    return true; // If not valid IPv4 or IPv6, consider it unsafe
   }
 
   public async renderCard(options: WelcomerCardOptions): Promise<Buffer> {
@@ -99,9 +74,9 @@ export class WelcomerService {
     ctx.fillStyle = '#1e1e2e';
     ctx.fillRect(0, 0, width, height);
 
-    if (options.backgroundUrl && (await this.validateBackgroundUrl(options.backgroundUrl))) {
+    if (options.background) {
       try {
-        const bg = await loadImage(options.backgroundUrl);
+        const bg = await loadImage(options.background);
         // Draw cover
         const bgRatio = bg.width / bg.height;
         const canvasRatio = width / height;
@@ -183,18 +158,20 @@ export class WelcomerService {
       `${options.isFarewell ? 'Goodbye' : 'Welcome'} ${options.userTag}`,
       width / 2,
       340,
+      width - 60,
     );
 
-    // Message Text
-    ctx.font = '32px sans-serif';
+    // Message Text, shrunk until it fits on the card
     ctx.fillStyle = textColor;
-    // Replace placeholders just in case they weren't replaced beforehand, though normally the caller handles this
-    const msg = options.messageText
-      .replace('{user}', options.userTag)
-      .replace('{server}', options.serverName)
-      .replace('{memberCount}', options.memberCount.toString());
+    const msg = fillWelcomerMessage(options.messageText, options);
+    let fontSize = 32;
+    ctx.font = `${fontSize}px sans-serif`;
+    while (fontSize > 14 && ctx.measureText(msg).width > width - 60) {
+      fontSize -= 2;
+      ctx.font = `${fontSize}px sans-serif`;
+    }
 
-    ctx.fillText(msg, width / 2, 380);
+    ctx.fillText(msg, width / 2, 380, width - 60);
 
     return canvas.toBuffer('image/png');
   }
