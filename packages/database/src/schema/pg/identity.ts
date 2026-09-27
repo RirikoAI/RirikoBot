@@ -64,6 +64,16 @@ export const guildSettings = pgTable('guild_settings', {
   farewellEnabled: boolean('farewell_enabled').notNull().default(false),
   farewellBg: text('farewell_bg'),
   karmaNotificationsEnabled: boolean('karma_notifications_enabled').notNull().default(true),
+  /** Level-up messages go here; null posts in the channel where the member levelled up. */
+  levelUpChannelId: varchar('level_up_channel_id', { length: 32 }),
+  /** Message and voice XP rate in percent; 100 is normal, 0 turns XP off. */
+  xpRatePercent: integer('xp_rate_percent').notNull().default(100),
+  noXpChannelIds: jsonb('no_xp_channel_ids').$type<string[]>().notNull().default([]),
+  noXpRoleIds: jsonb('no_xp_role_ids').$type<string[]>().notNull().default([]),
+  /** Voice credits and XP; off until a manager turns it on. */
+  voiceXpEnabled: boolean('voice_xp_enabled').notNull().default(false),
+  /** Largest mini-game wager in credits; null means no limit. */
+  maxGameWager: integer('max_game_wager'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

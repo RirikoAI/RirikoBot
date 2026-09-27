@@ -95,6 +95,12 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         farewell_enabled INTEGER NOT NULL DEFAULT 0,
         farewell_bg TEXT,
         karma_notifications_enabled INTEGER NOT NULL DEFAULT 1,
+        level_up_channel_id TEXT,
+        xp_rate_percent INTEGER NOT NULL DEFAULT 100,
+        no_xp_channel_ids TEXT NOT NULL DEFAULT '[]',
+        no_xp_role_ids TEXT NOT NULL DEFAULT '[]',
+        voice_xp_enabled INTEGER NOT NULL DEFAULT 0,
+        max_game_wager INTEGER,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );
@@ -131,6 +137,8 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         personality_prompt TEXT,
         speaking_style TEXT NOT NULL DEFAULT 'FRIENDLY_ANIME',
         allowed_tools TEXT NOT NULL DEFAULT '[]',
+        tools_enabled INTEGER NOT NULL DEFAULT 1,
+        provider_override TEXT,
         model_override TEXT
       );
 

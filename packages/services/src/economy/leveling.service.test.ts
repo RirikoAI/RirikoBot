@@ -10,6 +10,7 @@ import {
 import { EventBus } from '@ririko/core';
 import { LevelingService } from './leveling.service.js';
 import { BankingService } from './banking.service.js';
+import { createXpLevelResolver } from '../waifu-tcg/energy/energy-lifecycle.service.js';
 import type { LevelUpEvent } from './types.js';
 
 describe('LevelingService', () => {
@@ -57,6 +58,12 @@ describe('LevelingService', () => {
         farewell_enabled INTEGER NOT NULL DEFAULT 0,
         farewell_bg TEXT,
         karma_notifications_enabled INTEGER NOT NULL DEFAULT 1,
+        level_up_channel_id TEXT,
+        xp_rate_percent INTEGER NOT NULL DEFAULT 100,
+        no_xp_channel_ids TEXT NOT NULL DEFAULT '[]',
+        no_xp_role_ids TEXT NOT NULL DEFAULT '[]',
+        voice_xp_enabled INTEGER NOT NULL DEFAULT 0,
+        max_game_wager INTEGER,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );
@@ -97,8 +104,10 @@ describe('LevelingService', () => {
 
     bankingService = new BankingService({
       repository: economyRepo,
-      baseCapacity: 10000,
-      capacityPerLevel: 2500,
+      levelResolver: createXpLevelResolver(
+        xpRepo,
+        (totalXp) => levelingService.getLevelProgress(totalXp).level,
+      ),
     });
 
     levelingService = new LevelingService({

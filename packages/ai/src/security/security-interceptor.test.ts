@@ -85,6 +85,15 @@ describe('ToolSecurityInterceptor & Application Mediation (TASK-0622)', () => {
   });
 
   describe('3. Guild Allowed Tools Filter', () => {
+    it('blocks every tool when the guild turned tools off (TASK-1162)', () => {
+      const verdict = interceptor.evaluate({
+        toolName: 'get_current_time',
+        args: {},
+        context: { userId: 'user-1', guildId: 'guild-1', allowedTools: [] },
+      });
+      expect(verdict.allowed).toBe(false);
+    });
+
     it('blocks tools not present in guild allowedTools list', () => {
       const context: SecurityExecutionContext = {
         userId: 'user-1',

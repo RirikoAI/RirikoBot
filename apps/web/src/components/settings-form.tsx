@@ -26,17 +26,10 @@ const SECONDARY_BUTTON_CLASS =
   'rounded-md border border-edge px-3 py-1.5 text-sm text-zinc-200 hover:border-sakura disabled:opacity-60';
 
 /**
- * A settings form bound to a Server Action; fields read errors and values from its state.
- * When the action answers that a passkey check is needed (sensitive modules), the form offers
- * one and then submits the same values again.
+ * Runs a Server Action from a form. When the action answers that a passkey check is needed
+ * (sensitive writes), `passkeyControls` offers one and then submits the same values again.
  */
-export function SettingsForm({
-  action,
-  children,
-}: {
-  action: SettingsAction;
-  children: ReactNode;
-}) {
+function usePasskeyAction(action: SettingsAction) {
   const [state, formAction, pending] = useActionState(action, INITIAL_SETTINGS_FORM_STATE);
   const lastSubmission = useRef<FormData | null>(null);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
@@ -61,48 +54,120 @@ export function SettingsForm({
   }
 
   const reason = state.status === 'error' ? state.reason : undefined;
+  const passkeyControls = (
+    <>
+      {state.status !== 'idle' ? (
+        <p
+          role={state.status === 'error' ? 'alert' : 'status'}
+          className={state.status === 'error' ? 'text-sm text-red-300' : 'text-sm text-emerald-300'}
+        >
+          {state.message}
+        </p>
+      ) : null}
+      {reason === 'passkey-check-required' ? (
+        <button
+          type="button"
+          onClick={confirmWithPasskey}
+          disabled={checking || pending}
+          className={SECONDARY_BUTTON_CLASS}
+        >
+          {checking ? 'Waiting for your passkey…' : 'Confirm with passkey and save'}
+        </button>
+      ) : null}
+      {reason === 'passkey-required' ? (
+        <Link href="/account/security" className="text-sm text-sakura underline">
+          Add a passkey
+        </Link>
+      ) : null}
+      {passkeyError ? (
+        <p role="alert" className="text-sm text-red-300">
+          {passkeyError}
+        </p>
+      ) : null}
+    </>
+  );
+  return { state, submit, passkeyControls };
+}
 
+/**
+ * A settings form bound to a Server Action; fields read errors and values from its state.
+ * When the action answers that a passkey check is needed (sensitive modules), the form offers
+ * one and then submits the same values again.
+ */
+export function SettingsForm({
+  action,
+  children,
+  submitLabel = 'Save changes',
+}: {
+  action: SettingsAction;
+  children: ReactNode;
+  /** Text of the submit button, such as "Publish panel". */
+  submitLabel?: string;
+}) {
+  const { state, submit, passkeyControls } = usePasskeyAction(action);
   return (
     <form action={submit} noValidate className="flex max-w-2xl flex-col gap-6">
       <FormStateContext value={state}>{children}</FormStateContext>
       <div className="flex flex-wrap items-center gap-4">
-        <SubmitButton />
-        {state.status !== 'idle' ? (
-          <p
-            role={state.status === 'error' ? 'alert' : 'status'}
-            className={
-              state.status === 'error' ? 'text-sm text-red-300' : 'text-sm text-emerald-300'
-            }
-          >
-            {state.message}
-          </p>
-        ) : null}
-        {reason === 'passkey-check-required' ? (
-          <button
-            type="button"
-            onClick={confirmWithPasskey}
-            disabled={checking || pending}
-            className={SECONDARY_BUTTON_CLASS}
-          >
-            {checking ? 'Waiting for your passkey…' : 'Confirm with passkey and save'}
-          </button>
-        ) : null}
-        {reason === 'passkey-required' ? (
-          <Link href="/account/security" className="text-sm text-sakura underline">
-            Add a passkey
-          </Link>
-        ) : null}
-        {passkeyError ? (
-          <p role="alert" className="text-sm text-red-300">
-            {passkeyError}
-          </p>
-        ) : null}
+        <SubmitButton label={submitLabel} />
+        {passkeyControls}
       </div>
     </form>
   );
 }
 
-function SubmitButton() {
+/**
+ * A single-button form for one action on a list item (such as removing a role), with the same
+ * passkey handling as `SettingsForm`. `fields` are sent as hidden inputs; `children` (such as
+ * a small input) go before the button.
+ */
+export function ActionButtonForm({
+  action,
+  fields,
+  label,
+  confirmMessage,
+  children,
+}: {
+  action: SettingsAction;
+  fields: Record<string, string>;
+  label: string;
+  /** Asked with the browser's confirm dialog before submitting. */
+  confirmMessage?: string;
+  children?: ReactNode;
+}) {
+  const { submit, passkeyControls } = usePasskeyAction(action);
+  return (
+    <form
+      action={submit}
+      onSubmit={(event) => {
+        if (confirmMessage && !window.confirm(confirmMessage)) event.preventDefault();
+      }}
+      className="flex flex-wrap items-center gap-2"
+    >
+      {Object.entries(fields).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+      {children}
+      <ActionButton label={label} />
+      {passkeyControls}
+    </form>
+  );
+}
+
+function ActionButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="rounded-md px-2 py-1 text-sm text-zinc-400 hover:text-red-300 disabled:opacity-60"
+    >
+      {pending ? 'Working…' : label}
+    </button>
+  );
+}
+
+function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -110,7 +175,7 @@ function SubmitButton() {
       disabled={pending}
       className="rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura disabled:opacity-60"
     >
-      {pending ? 'Saving…' : 'Save changes'}
+      {pending ? 'Saving…' : label}
     </button>
   );
 }
@@ -226,17 +291,42 @@ export function TextField({
   );
 }
 
-/** Whole-number input; the shared schema enforces the range, `min`/`max` guide the browser. */
+/** Multi-line text; `maxLength` guides the browser, the shared schema enforces it. */
+export function TextAreaField({
+  maxLength,
+  rows = 5,
+  ...field
+}: FieldProps & { maxLength?: number; rows?: number }) {
+  return (
+    <Field
+      {...field}
+      control={(props) => (
+        <textarea
+          key={props.defaultValue}
+          {...props}
+          rows={rows}
+          maxLength={maxLength}
+          className={INPUT_CLASS}
+        />
+      )}
+    />
+  );
+}
+
+/**
+ * Whole-number input; the shared schema enforces the range, `min`/`max` guide the browser.
+ * A `null` value shows an empty input, for optional numbers.
+ */
 export function NumberField({
   min,
   max,
   defaultValue,
   ...field
-}: Omit<FieldProps, 'defaultValue'> & { min: number; max: number; defaultValue: number }) {
+}: Omit<FieldProps, 'defaultValue'> & { min: number; max: number; defaultValue: number | null }) {
   return (
     <Field
       {...field}
-      defaultValue={String(defaultValue)}
+      defaultValue={defaultValue === null ? '' : String(defaultValue)}
       control={(props) => (
         <input
           key={props.defaultValue}
@@ -289,7 +379,7 @@ export interface SelectOption {
 }
 
 /** `<option>`s, with options sharing a `group` under one `<optgroup>`. */
-function OptionList({ options }: { options: SelectOption[] }) {
+export function OptionList({ options }: { options: SelectOption[] }) {
   const groups = new Map<string, SelectOption[]>();
   for (const option of options) {
     const group = option.group ?? '';

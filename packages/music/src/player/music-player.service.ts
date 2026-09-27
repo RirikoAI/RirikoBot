@@ -47,6 +47,7 @@ export class MusicPlayerService extends EventEmitter {
   private readonly resolveGuildVolume?:
     ((guildId: string) => Promise<number | undefined> | number | undefined) | undefined;
   private readonly guildVolumeCache = new Map<string, number>();
+  private readonly emptyChannelTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   constructor(options?: MusicPlayerServiceOptions) {
     super();
@@ -140,6 +141,40 @@ export class MusicPlayerService extends EventEmitter {
 
   setGuildCachedVolume(guildId: string, volume: number): void {
     this.guildVolumeCache.set(guildId, Math.max(0, Math.min(150, volume)));
+  }
+
+  /** Drops cached guild settings (the default volume) so the next session reads them again. */
+  forgetGuildSettings(guildId: string): void {
+    this.guildVolumeCache.delete(guildId);
+  }
+
+  /**
+   * Reports how many members who are not bots are in Ririko's voice channel. With auto-leave
+   * on, Ririko stops and leaves after `idleTimeoutMs` alone; anyone joining cancels it. Works
+   * the same for the local player and Lavalink.
+   */
+  handleChannelOccupancy(guildId: string, listeners: number, autoLeaveEmpty: boolean): void {
+    if (listeners > 0 || !autoLeaveEmpty) {
+      this.cancelEmptyChannelTimer(guildId);
+      return;
+    }
+    if (this.emptyChannelTimers.has(guildId)) return;
+    const timer = setTimeout(() => {
+      this.emptyChannelTimers.delete(guildId);
+      this.stop(guildId);
+    }, this.idleTimeoutMs);
+    timer.unref?.();
+    this.emptyChannelTimers.set(guildId, timer);
+  }
+
+  hasEmptyChannelTimer(guildId: string): boolean {
+    return this.emptyChannelTimers.has(guildId);
+  }
+
+  private cancelEmptyChannelTimer(guildId: string): void {
+    const timer = this.emptyChannelTimers.get(guildId);
+    if (timer) clearTimeout(timer);
+    this.emptyChannelTimers.delete(guildId);
   }
 
   getQueue(guildId: string): GuildQueue | undefined {
@@ -370,6 +405,7 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   stop(guildId: string): void {
+    this.cancelEmptyChannelTimer(guildId);
     if (this.isLavalinkActive()) {
       this.lavalinkService!.stop(guildId);
       return;
@@ -675,6 +711,7 @@ export class MusicPlayerService extends EventEmitter {
   }
 
   private cleanupGuild(guildId: string): void {
+    this.cancelEmptyChannelTimer(guildId);
     const player = this.audioPlayers.get(guildId);
     if (player) {
       player.stop();

@@ -3,6 +3,8 @@ export * from './base.js';
 export * from './user.repository.js';
 export * from './guild-settings.repository.js';
 export * from './economy.repository.js';
+export * from './economy-config.repository.js';
+export * from './item-category.repository.js';
 export * from './xp.repository.js';
 export * from './leaderboard.repository.js';
 export * from './item.repository.js';
@@ -37,3 +39,6 @@ export * from './web-passkey.repository.js';
 export * from './web-known-device.repository.js';
 export * from './bot-activity.repository.js';
 export * from './adventure-session.repository.js';
+
+export * from './command-settings.repository.js';
+export * from './command-catalog.repository.js';

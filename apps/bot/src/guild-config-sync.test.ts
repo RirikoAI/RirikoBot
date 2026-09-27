@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  CommandSettingsRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -48,5 +49,28 @@ describe('guild config changes from other processes (CHORE-1101)', () => {
     expect(await mentionSpam()).toMatchObject({ isEnabled: true });
     await services.guildConfigWatcher.tick();
     expect(await mentionSpam()).toMatchObject({ isEnabled: false, threshold: 9 });
+  });
+
+  it('drops the cached command overrides once the change feed reports a commands write (TASK-1631)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    const rps = () => services.commandOverrideService.resolve('guild-1', null, 'rps');
+    expect(await rps()).toBeNull();
+
+    await new CommandSettingsRepository(db).replaceForGuild('guild-1', [
+      {
+        commandName: 'rps',
+        channelId: null,
+        isEnabled: false,
+        cooldownOverride: null,
+        allowedRoles: [],
+        blockedRoles: [],
+      },
+    ]);
+    await new GuildConfigVersionRepository(db).bump('guild-1', 'commands', new Date());
+
+    expect(await rps()).toBeNull();
+    await services.guildConfigWatcher.tick();
+    expect(await rps()).toMatchObject({ enabled: false });
   });
 });

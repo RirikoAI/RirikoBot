@@ -38,10 +38,10 @@ export class ToolRegistry {
 
   /**
    * Returns tool definitions formatted for LLM function calling schemas,
-   * optionally filtered by allowed tool names.
+   * optionally filtered by allowed tool names (undefined for all, an empty list for none).
    */
-  getDefinitions(filterNames?: string[]): ToolDefinition[] {
-    if (!filterNames || filterNames.length === 0) {
+  getDefinitions(filterNames?: readonly string[]): ToolDefinition[] {
+    if (!filterNames) {
       return this.getAll().map((t) => t.definition);
     }
 

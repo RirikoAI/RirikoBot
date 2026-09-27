@@ -1,4 +1,4 @@
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
 import type { ReactionRole, NewReactionRole } from '../schema/types/index.js';
@@ -210,6 +210,44 @@ export class ReactionRoleRepository extends BaseRepository<
         )
         .returning();
       return result.length > 0;
+    }
+  }
+
+  /**
+   * Replaces the message's button and menu bindings with `rows` (emoji bindings stay). Rows
+   * must carry their `id`, because the published components already refer to it.
+   */
+  async replaceComponentBindings(
+    messageId: string,
+    rows: readonly (NewReactionRole & { id: string })[],
+    tx?: DatabaseClient,
+  ): Promise<void> {
+    const client = this.getClient(tx);
+    const types = ['BUTTON', 'SELECT_MENU'];
+    if (this.isSqlite(client)) {
+      await client.db
+        .delete(sqliteSchema.reactionRoles)
+        .where(
+          and(
+            eq(sqliteSchema.reactionRoles.messageId, messageId),
+            inArray(sqliteSchema.reactionRoles.type, types),
+          ),
+        );
+      if (rows.length > 0) await client.db.insert(sqliteSchema.reactionRoles).values([...rows]);
+    } else {
+      await client.db
+        .delete(pgSchema.reactionRoles)
+        .where(
+          and(
+            eq(pgSchema.reactionRoles.messageId, messageId),
+            inArray(pgSchema.reactionRoles.type, types),
+          ),
+        );
+      if (rows.length > 0) {
+        await client.db
+          .insert(pgSchema.reactionRoles)
+          .values(rows as unknown as (typeof pgSchema.reactionRoles.$inferInsert)[]);
+      }
     }
   }
 

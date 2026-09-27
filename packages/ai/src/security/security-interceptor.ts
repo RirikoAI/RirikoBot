@@ -56,8 +56,8 @@ export class ToolSecurityInterceptor {
       };
     }
 
-    // 3. Guild Allowed Tools Policy
-    if (context.allowedTools && context.allowedTools.length > 0) {
+    // 3. Guild Allowed Tools Policy (undefined allows every tool, an empty list none)
+    if (context.allowedTools) {
       const isAllowed = context.allowedTools.some(
         (allowed) =>
           allowed === toolName ||

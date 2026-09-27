@@ -40,9 +40,12 @@ import {
   AiChatController,
   registerMessageListener,
   registerVoiceListener,
+  registerMusicVoiceListener,
+  trackCurrentVoiceMembers,
   registerMemberListener,
   registerReactionListener,
 } from './index.js';
+import { syncCommandCatalog } from './command-catalog.js';
 import {
   CommandRouter,
   createHelpCommand,
@@ -52,6 +55,9 @@ import {
   createRestClient,
   CommandCategory,
   DEFAULT_COMMAND_PREFIX,
+  createCommandOverrideMiddleware,
+  createCooldownMiddleware,
+  overrideChannelId,
   type Command,
   type CommandContext,
 } from '@ririko/discord';
@@ -98,6 +104,24 @@ export async function main(): Promise<void> {
       console.error(`[Command:${ctx.commandName}] Execution error:`, err);
     },
     onCommandRun: (ctx) => services.commandUsageRecorder.record(ctx.guildId, ctx.commandName),
+    // Overrides run first, so a blocked command does not start a cooldown.
+    middlewares: [
+      createCommandOverrideMiddleware({
+        resolve: (guildId, channelId, commandName) =>
+          services.commandOverrideService.resolve(guildId, channelId, commandName),
+      }),
+      createCooldownMiddleware({
+        getCooldownSeconds: async (ctx) => {
+          if (!ctx.guildId || !ctx.command) return undefined;
+          const override = await services.commandOverrideService.resolve(
+            ctx.guildId,
+            overrideChannelId(ctx),
+            ctx.command.metadata.name,
+          );
+          return override?.cooldownSeconds ?? undefined;
+        },
+      }),
+    ],
   });
 
   // 3. Register standard test & diagnostic commands
@@ -150,11 +174,23 @@ export async function main(): Promise<void> {
   const setupMusicCommand = createSetupMusicCommand(services, musicController);
   router.registry.register(setupMusicCommand);
 
+  // Music settings saved on the dashboard or with `ririko guild:config`.
+  services.eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module !== 'music') return;
+    services.musicPlayer.forgetGuildSettings(guildId);
+    // Posts the controller in a newly chosen music channel (the row has no message yet).
+    void musicController.updateController(guildId);
+  });
+
   const aiController = new AiChatController(bot.client, services, {
     defaultPrefix: prefix,
     musicController,
   });
   const aiCommands = createAiCommands(services, aiController);
+  // AI settings saved on the dashboard or with `ririko guild:config` (the channel is cached).
+  services.eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'ai') aiController.invalidateChannelCache(guildId);
+  });
   for (const cmd of aiCommands) {
     router.registry.register(cmd);
   }
@@ -235,6 +271,7 @@ export async function main(): Promise<void> {
       .map((c) => c.metadata.name)
       .join(', ')}`,
   );
+  await syncCommandCatalog(router.registry.getAll(), services.commandCatalogRepo);
 
   // 6. Bind Gateway Interaction & Message Listeners
   router.bindClient(bot.client);
@@ -242,6 +279,7 @@ export async function main(): Promise<void> {
   // Register Gateway message, voice & member event listeners
   registerMessageListener(bot.client, services, musicController, aiController);
   registerVoiceListener(bot.client, services);
+  registerMusicVoiceListener(bot.client, services);
   registerMemberListener(bot.client, services);
   registerReactionListener(bot.client, services);
 
@@ -308,6 +346,7 @@ export async function main(): Promise<void> {
       services.streamWatcher.stop();
       services.freeGamesEngine.stop();
       services.giveawayEngine.stop();
+      services.voiceRewardService?.stop();
       services.guildConfigWatcher.stop();
       services.botStatusReporter?.stop();
       await services.commandUsageRecorder.stop().catch((err: unknown) => {
@@ -368,6 +407,8 @@ export async function main(): Promise<void> {
       services.streamWatcher.start();
       services.freeGamesEngine.start();
       services.giveawayEngine.start();
+      trackCurrentVoiceMembers(bot.client, services);
+      services.voiceRewardService?.start();
       services.autoRoleService.startSweeper(bot.client);
       services.reminderScheduler?.start();
       services.guildConfigWatcher.start();

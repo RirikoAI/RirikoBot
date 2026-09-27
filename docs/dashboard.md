@@ -51,7 +51,7 @@ Guild Discovery Pipeline
 ### 2.3. Passkey Sign-In Gate & Step-Up
 - Passkeys are optional. Once a user has at least one, every sign-in must complete a passkey check before any page or Server Action works, so a compromised Discord account alone cannot reach the dashboard.
 - Removing a passkey needs a passkey check newer than 5 minutes, is audited, and sends the user a DM. There is no "keep passkeys but stop asking" setting.
-- Sensitive writes always need a passkey check newer than 5 minutes: the owner console, the moderation escalation policy, reaction-role publishing, and integrations. Users without a passkey cannot perform them.
+- Sensitive writes always need a passkey check newer than 5 minutes: the owner console, the moderation escalation policy, every reaction role panel write (publish, edit, remove a role, delete a panel), and integrations. Users without a passkey cannot perform them.
 - Bot owners (`BOT_OWNER_ID`) must have a passkey to use the owner console.
 - A passkey check rotates the session ID.
 - Authenticators are asked for a fingerprint, face or PIN but only user presence is required, because some (for example a Windows passkey used through Edge) do not report verification (ADR-013 revision item 7, BUG-0020). Every rejected passkey is logged with its reason (`[web] Passkey check rejected …`).
@@ -70,7 +70,22 @@ Guild Discovery Pipeline
 
 ### 3.1. Guild-Scoped vs Global Settings
 - **Guild-scoped settings** (most modules) are edited by users who pass `requireGuildAccess` for that guild.
-- **Global settings** are shared by every guild because their tables have no guild column: `tcg_system_configs` (market tax, listing expiry, energy governance), `dungeon_seasons` / `dungeon_bosses`, and the item and achievement catalogs (`economy_items`, `economy_item_categories`, `game_items`, `game_achievements`). They are edited only in the **owner console**, gated to bot owners with a passkey. A guild manager must never be able to change data that other guilds share.
+- **Global settings** are shared by every guild because their tables have no guild column: `economy_config` (daily reward, bank capacity), `tcg_system_configs` (market tax, listing expiry, energy governance), `dungeon_seasons` / `dungeon_bosses`, and the item and achievement catalogs (`economy_items`, `economy_item_categories`, `game_items`, `game_achievements`). They are edited only in the **owner console**, gated to bot owners with a passkey. A guild manager must never be able to change data that other guilds share.
+
+### 3.1.1. Owner Console (STORY-165)
+- `/owner` is shown to `BOT_OWNER_ID` users only. Everyone else gets a 404, and the header shows the "Owner console" link only to owners. The layout and every page call `requireOwner`, so an owner must have a passkey and a passkey check from the last five minutes.
+- Every owner Server Action runs `runOwnerAction` ([owner-action.ts](file:///Z:/Projects/ririko-v2-2026/apps/web/src/lib/server/owner-action.ts)), which checks, in order:
+  1. The dashboard Origin and the rate limit.
+  2. That the user is a bot owner.
+  3. The five-minute passkey check. If it is missing, the form offers "Confirm with passkey and save".
+
+  The authorization coverage test accepts `runOwnerAction` as both the request guard and the authorization guard.
+- Owner writes go through the owner services in `@ririko/services/owner`: `EconomyConfigService` and `ItemCatalogService`. Their audit entries have no guild (`guild_id` is null), with the actions `owner.economy_config.update` and `owner.shop_item.*` / `owner.shop_category.*`. The guild audit viewer does not show them yet.
+- Pages:
+  - `/owner/economy` edits the global economy values (docs/economy.md 5.4).
+  - `/owner/shop` lists the item catalog with holder counts and manages categories.
+  - `/owner/shop/new` and `/owner/shop/[itemId]` edit an item.
+- `ririko economy:config [key] [value]` is the CLI for the economy values. It uses the same schema, service and audit trail as the owner console.
 - Guild-scoped TCG settings (such as drop settings and the TCG Manager Role) stay with guild managers.
 
 ### 3.2. No Placeholder Settings
@@ -104,6 +119,7 @@ The dashboard and CLI run in separate processes from the bot, so they cannot cle
 3. Add `app/dashboard/[guildId]/<module>/actions.ts` (`'use server'`) whose action returns `saveGuildSettings(guildId, '<module>', fields)`.
    - Read `fields` with `pickFormFields(formData, [...])` for text fields, or `readFormFields(formData, { text, list, flag })` when the form has lists or checkboxes.
    - `saveGuildSettings` runs `checkDashboardRequest` (Origin and rate limit), `requireGuildAccess`, validation, the audited write, `revalidatePath` and the log-channel change notice.
+   - Settings that must match the guild (a role Ririko can give, a channel of the right type) pass `{ check }`, which runs after the guards and returns field errors before anything is written (`lib/server/guilds/setting-checks.ts`). The CLI has no Discord access, so the schema must still keep the bot safe on its own.
    - Sensitive modules (Section 2.3) pass `{ stepUp: true }`. Without a passkey check from the last five minutes nothing is written; the form offers "Confirm with passkey and save" and submits the same values again, or links to the Security page if the user has no passkey.
    - Any other Server Action must call `checkDashboardRequest` and a guard itself, or the coverage test fails.
 4. Add `page.tsx` that calls `requireGuildAccess(guildId)`, reads `guildConfig.get(guildId, '<module>')` and renders `SettingsForm`. Field errors and saved values come back through `useActionState`.
@@ -124,10 +140,22 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 4. **AutoMod**: Toggles and threshold sliders for invite spam, phishing shields, caps lock, and mention limits.
    - *Shipped in STORY-114:* per rule (phishing shield, invite filter, mention spam, burst spam) an on/off switch, the action (delete, or delete plus warn, 10-minute timeout, kick or ban), the mention or message limit, and exempt roles and channels, stored in `moderation_rules`. There is no caps-lock rule, so the page has none. Warnings from AutoMod count toward the escalation policy.
 5. **Music**: Default volume, DJ role picker, music channel binding, audio filter presets.
+   - *Shipped in STORY-116 as `/dashboard/[guildId]/music` (module `music`):* default volume, music channel (the bot posts a new controller there), a DJ role the bot now enforces on playback commands and controller buttons, and leaving empty voice channels, which the bot now does. Filters are per session and are not saved, so they are not on the page. See docs/music.md 9.1.
 6. **AI Chatbot**: Personality prompt editor, model selection (Gemini / OpenAI / Ollama), tool toggles.
+   - *Shipped in STORY-116 as `/dashboard/[guildId]/ai` (module `ai`):* AI channel, speaking style, persona prompt (1500 characters), allowed tools (none turns tools off), and a provider and model the fallback chain tries first. Only providers with credentials are offered. Before STORY-116 the saved model was never used. See docs/ai.md 4.2 and 6.1.
 7. **Image Generation**: Provider selector, daily user quota limits, style presets.
+   - *Shipped in STORY-116 as `/dashboard/[guildId]/images` (module `images`, table `image_guild_settings`):*
+     - The default provider (configured ones only) and style preset `/imagine` uses when a member picks none.
+     - Images per member in 24 hours on this server. It is capped by the bot quota `IMAGE_DAILY_QUOTA`, which now counts completed images across all providers (before, each provider had its own count).
+     - `/stablediffusion-model` sets the same row.
 8. **Economy & Banking**: Currency name, daily reward base amount, bank interest rates, item shop manager. The item catalog (`economy_items`, `economy_item_categories`) is global, so the shop manager lives in the owner console.
+   - *Moved to STORY-165 (2026-09-27):* balances, the daily reward and the bank are global per user and nothing economy-related is read per guild, so there is no guild Economy page. The owner console edits the daily reward, streak bonus and bank capacity, and the item catalog. The currency name is fixed ("credits"), and bank interest is not live yet (`applyDailyInterest` has no caller).
+   - *Shipped in STORY-165 (owner console, Section 3.1.1):*
+     - `/owner/economy`: the daily reward, the streak bonus per day, the largest streak bonus, the bank capacity at level 0 and per level.
+     - `/owner/shop`: items (code, name, description, price, rarity, category, icon, on sale, daily purchase limit, effect and its amount) and categories.
+     - Items members hold, and items or categories from the default catalog, can only be retired. An item must be retired before it can be deleted.
 9. **XP & Ranking**: XP rate multipliers, voice XP toggles, level-up announcement channel.
+   - *Shipped in STORY-115 as `/dashboard/[guildId]/xp` (module `xp`):* level-up announcements on/off and channel, the XP rate (0 to 300%), no-XP channels (text and voice) and roles, and voice rewards (off by default). See docs/economy.md 3.2 and 6.2.
 10. **Waifu TCG & Gamification Settings** (items marked *owner console* edit global tables and are gated to bot owners with a passkey; see Section 3.1):
     - **Card Drop Management**: Drop channel selector, message frequency slider (50–200 messages), active hours timepicker, claim window timer. *Current gap:* `DropManager` keeps `GuildDropConfig` in an in-memory `Map` and nothing calls `setGuildConfig` outside tests, so every guild runs on `DEFAULT_DROP_CONFIG`. These settings must be persisted and loaded by the bot before the page can expose them (TASK-1121).
     - **Rarity & Market Controls** (*owner console*, `tcg_system_configs`): Drop weight fine-tuning, marketplace tax rate slider (1%–20%), listing expiration duration.
@@ -145,16 +173,24 @@ The dashboard provides dedicated management views for all 20+ bot modules:
     - **Shop Catalog Manager** (*owner console*, `game_items`; respects catalog-code seeding from BUG-0015): Visual catalog editor to manage basic shop equipment, accessories, potions, and daily purchase quotas.
     - **Achievement Manager** (*owner console* for edits, `game_achievements` is global): Live inspector for achievement completion telemetry, active reward tables, and toggleable seasonal achievements.
 11. **Games**: Enable/disable specific mini-games, wager limits, cooldown sliders.
+   - *Shipped in STORY-115 as `/dashboard/[guildId]/games` (module `games`):* a maximum wager (`guild_settings.max_game_wager`, empty for no limit) that coinflip, dice, highlow, rps and tictactoe check before taking credits, and per game an on/off switch and a cooldown. The rules are the games' server-wide `command_settings` rows, so the Commands page shows them too; saving the Games page keeps their roles and every channel rule. The TCG `/game` wager is not limited.
 12. **Giveaways**: Active giveaway list, winner reroll buttons, historical log.
-13. **Reaction Roles**: Visual message builder and role mapping manager (STORY-164).
-14. **Auto Voice**: Join-to-create channel assigner, user limit, bitrate presets (STORY-164). The bot deletes every empty voice channel in a hub's category, so the page must tell users to keep hubs in their own category.
+   - *Shipped in STORY-115 as `/dashboard/[guildId]/giveaways`:* running giveaways (end time, entries) with **End now**, and the last 25 ended ones with winners, rerolled winners and **Reroll** (optional winner count, up to 20). The web process runs the same `GiveawayEngine` without its scheduler and posts through the bot-token REST client. `endGiveaway` claims a giveaway only once, so the scheduler, `/giveaway end` and the dashboard cannot all end it. Ends and rerolls are audited (`giveaways.end`, `giveaways.reroll`) and post change notices; they need no passkey check. Giveaways are still created in Discord.
+13. **Reaction Roles**: Visual message builder and role mapping manager.
+   - *Shipped in STORY-164 as `/dashboard/[guildId]/reaction-roles`:* a builder for a message (text and an optional embed) with up to 25 role buttons (5 per row, one click mode for the panel: toggle, give only, remove only or pick one) or one role menu (up to 25 options, a pick limit; a member's choice replaces their roles from that menu), with a live preview. Ririko posts it through the bot-token REST client, or edits one of its own messages that carries no other feature's components. Bindings are stored in `reaction_roles` (buttons by `rr:btn:<binding id>`, menu options by role under the panel's `group_id`) in one transaction with an audit entry; if that fails, the new message is deleted or the edited one restored. The panel list shows every message with bindings, including emoji reactions from `/create-reaction-role`; each role can be removed (its button, option or Ririko's reaction goes too), and a panel can lose all its roles or, for Ririko's own messages, be deleted. Every write needs a fresh passkey check, is audited and posts a change notice. Roles are checked against Ririko's highest role, as in the bot.
+14. **Auto Voice**: Join-to-create channel assigner, user limit, bitrate presets.
+   - *Shipped in STORY-164 as `/dashboard/[guildId]/autovoice` (module `autovoice`, CLI key `autovoice.hubs`):* up to 20 hubs, each with its voice channel, a name template (`{user}`), a user limit and a bitrate preset capped at the guild's boost tier. The bot deletes only the channels it created (BUG-0021), and lowers a saved bitrate to what the guild allows when it creates a channel.
+   - **Auto Roles** (`/dashboard/[guildId]/autoroles`, module `autoroles`, STORY-164): join roles for members and for bots (up to 10 each) with an on/off switch, and the verification role that `/autorole send-verify` buttons give. The pickers offer only roles Ririko can give, and the save checks them again against Discord.
 15. **Stream Alerts**: Streamer subscription list (Twitch/YouTube/TikTok), announcement templates, mention roles.
+   - *Moved to STORY-166 (2026-09-27)*, together with items 16 and 17.
 16. **Free Games**: Epic/Steam/GOG announcement channels and notification ping roles.
 17. **Welcome & Farewell**: Interactive canvas preview card editor with custom background uploads.
 18. **Logging**: Channel bindings for message edits, deletes, voice joins, and role updates.
    - *Shipped in STORY-114:* the one channel the bot has, `guild_settings.log_channel_id`. It receives moderation cases, anti-raid alerts and dashboard change notices. The bot writes no message, voice or role logs, so per-event bindings would be placeholders.
-19. **Command Overrides**: Enable/disable specific commands or limit them to staff roles (STORY-163; the bot does not read `command_settings` yet).
+19. **Command Overrides**: Enable/disable specific commands or limit them to staff roles.
+   - *Shipped in STORY-163 as `/dashboard/[guildId]/commands`:* per command, a server-wide rule and per-channel rules, each with on/off, allowed roles, blocked roles and a cooldown override, stored in `command_settings` (module `commands`, CLI key `commands.overrides`). The command list comes from the `commands` table, which the bot rewrites at startup. `help`, `ping` and `prefix` cannot be overridden, and members with Manage Server bypass every rule except cooldowns.
 20. **Integrations & Secrets**: Third-party API status (`Configured ✓`). Secrets are **never** displayed.
+   - *Shipped in STORY-116 as `/dashboard/[guildId]/integrations`:* read-only, grouped by Discord, AI chat, image generation, stream alerts and music. `integrationStatus` in `@ririko/core` returns only whether each integration is configured, so no configured value reaches the page. `ririko doctor` uses the same image provider list.
 
 ---
 
@@ -212,10 +248,12 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-112 | 8 | TCG settings, owner-only season editor and curve visualizer, card album, shop and achievement managers | 4 (TCG) |
 | STORY-113 | 5 | Overview tab, command usage counters, bot status record, voice activity, case log and audit viewers | 4 (Overview), 5 |
 | STORY-114 | 8 | Typed settings and step-up settings forms, Logging, Moderation escalation and AutoMod pages, real AutoMod actions | 3.4, 4 (3, 4, 18) |
-| STORY-115 | 5 | Economy, XP, Games, Giveaways pages | 4 (8, 9, 11, 12) |
-| STORY-116 | 8 | Music, AI, Image Generation, Stream Alerts, Free Games, Welcome & Farewell, Integrations pages; needs STORY-133 | 4 (5, 6, 7, 15, 16, 17, 20) |
+| STORY-115 | 8 | XP, Games, Giveaways pages, voice rewards, giveaway end guard | 4 (9, 11, 12) |
+| STORY-116 | 13 | Music (DJ role, auto-leave), AI (per-guild provider and model), Image Generation (per-guild settings) and Integrations pages | 4 (5, 6, 7, 20) |
 | STORY-117 | 5 | Passkey sign-in gate, step-up, owner guard, recovery CLI | 2.3 |
 | STORY-118 | 5 | Session management and alerts, CSP and taint guards, rate limits, authorization coverage test | 7 |
 | STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
 | STORY-163 | 5 | Command Overrides engine (repository, catalog, override middleware) and page | 4 (19) |
-| STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 4 (13, 14) |
+| STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 2.3, 4 (13, 14) |
+| STORY-165 | 13 | Owner console: global economy settings, live bank capacity, item shop manager, item codes and a seed that works on Postgres | 3.1, 4 (8) |
+| STORY-166 | 13 | Stream Alerts, Free Games (ping role), Welcome & Farewell editor (preview, background upload); needs STORY-133 | 4 (15, 16, 17) |

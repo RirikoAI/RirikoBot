@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { imageDailyLimit } from '@ririko/core';
 import type { ImageRepository } from '@ririko/database';
 import type {
   ImageGenerationProvider,
@@ -19,6 +20,8 @@ export interface ImageGenerationServiceOptions {
   readonly dailyQuotaPerUser?: number | undefined;
   readonly providers?: ImageGenerationProvider[] | undefined;
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export class ImageGenerationService {
   private readonly repository?: ImageRepository | undefined;
@@ -93,23 +96,24 @@ export class ImageGenerationService {
     },
   ): Promise<ImageGenerationResult> {
     const jobId = randomUUID();
-    const provider = this.resolveProvider(request.providerId);
+    // The member's choices win; otherwise the guild's defaults from the dashboard apply.
+    const guild =
+      request.guildId && this.repository
+        ? await this.repository.getGuildSettings(request.guildId)
+        : null;
+    const requestedProvider =
+      request.providerId && request.providerId !== 'auto' ? request.providerId : undefined;
+    const provider = this.resolveProvider(requestedProvider ?? guild?.defaultProvider ?? undefined);
+    const preset = request.preset ?? guild?.defaultPreset ?? undefined;
 
-    // 1. Quota Check (if repository attached)
-    if (this.repository && this.dailyQuotaPerUser > 0) {
-      const usage = await this.repository.getUsage(request.userId, provider.id);
-      if (usage && usage.imagesGeneratedToday >= this.dailyQuotaPerUser) {
-        throw new Error(
-          `Daily image generation quota reached (${this.dailyQuotaPerUser}/${this.dailyQuotaPerUser} images for today). Please try again tomorrow.`,
-        );
-      }
-    }
+    // 1. Daily limits (if repository attached)
+    await this.checkDailyLimits(request.userId, request.guildId, guild?.memberDailyLimit);
 
     // 2. Style Preset Application
     const { prompt: appliedPrompt, negativePrompt: appliedNegative } = applyStylePreset(
       request.prompt,
       request.negativePrompt,
-      request.preset,
+      preset,
     );
 
     const enrichedRequest: ImageGenerationRequest = {
@@ -160,21 +164,18 @@ export class ImageGenerationService {
         }
       });
 
-      // 5. Success Recording
+      // 5. Success Recording (completed jobs are what the daily limits count)
       if (this.repository) {
-        await Promise.all([
-          this.repository.updateJobStatus(jobId, 'COMPLETED', {
-            resultUrl: 'attachment://imagine.png',
-          }),
-          this.repository.incrementUsage(request.userId, result.providerId),
-        ]);
+        await this.repository.updateJobStatus(jobId, 'COMPLETED', {
+          resultUrl: 'attachment://imagine.png',
+        });
       }
 
       return {
         ...result,
         jobId,
         providerName: result.providerName ?? provider.name,
-        preset: request.preset ?? 'anime',
+        preset: preset ?? 'anime',
         aspectRatio: request.aspectRatio ?? '1:1',
       };
     } catch (err: unknown) {
@@ -185,6 +186,36 @@ export class ImageGenerationService {
         });
       }
       throw err;
+    }
+  }
+
+  /**
+   * Refuses a request past the bot's quota (images in 24 hours anywhere, from any provider) or
+   * past the guild's per-member limit, which can only be lower.
+   */
+  private async checkDailyLimits(
+    userId: string,
+    guildId: string | undefined,
+    guildLimit: number | null | undefined,
+  ): Promise<void> {
+    if (!this.repository) return;
+    const since = new Date(Date.now() - DAY_MS);
+    if (this.dailyQuotaPerUser > 0) {
+      const used = await this.repository.countCompletedJobsSince(userId, since);
+      if (used >= this.dailyQuotaPerUser) {
+        throw new Error(
+          `Daily image generation quota reached (${this.dailyQuotaPerUser}/${this.dailyQuotaPerUser} images in the last 24 hours). Please try again later.`,
+        );
+      }
+    }
+    const limit = guildId ? imageDailyLimit(this.dailyQuotaPerUser, guildLimit) : 0;
+    if (guildId && guildLimit && limit > 0) {
+      const used = await this.repository.countCompletedJobsSince(userId, since, guildId);
+      if (used >= limit) {
+        throw new Error(
+          `This server allows ${limit} images per member every 24 hours (${used}/${limit} used). Please try again later.`,
+        );
+      }
     }
   }
 

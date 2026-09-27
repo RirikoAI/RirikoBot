@@ -1,5 +1,6 @@
 import type {
   ItemRepository,
+  ItemCategoryRepository,
   InventoryRepository,
   EconomyRepository,
   PlayerEnergyRepository,
@@ -24,6 +25,8 @@ import type { EnergyLifecycleService } from '../waifu-tcg/energy/energy-lifecycl
 
 export interface InventoryServiceOptions {
   itemRepository: ItemRepository;
+  /** Groups `/shop` by category; without it every item is listed under "Other". */
+  categoryRepository?: ItemCategoryRepository | undefined;
   inventoryRepository: InventoryRepository;
   economyRepository: EconomyRepository;
   playerEnergyRepository?: PlayerEnergyRepository | undefined;
@@ -43,6 +46,7 @@ export interface InventoryServiceOptions {
  */
 export class InventoryService {
   private readonly itemRepository: ItemRepository;
+  private readonly categoryRepository: ItemCategoryRepository | undefined;
   private readonly inventoryRepository: InventoryRepository;
   private readonly economyRepository: EconomyRepository;
   private readonly playerEnergyRepository?: PlayerEnergyRepository | undefined;
@@ -53,6 +57,7 @@ export class InventoryService {
 
   constructor(options: InventoryServiceOptions) {
     this.itemRepository = options.itemRepository;
+    this.categoryRepository = options.categoryRepository;
     this.inventoryRepository = options.inventoryRepository;
     this.economyRepository = options.economyRepository;
     this.playerEnergyRepository = options.playerEnergyRepository;
@@ -73,10 +78,31 @@ export class InventoryService {
   }
 
   /**
-   * Retrieves an item definition by ID.
+   * Purchasable items grouped by category name, categories alphabetical and uncategorized
+   * items last under "Other".
    */
-  public async getItem(itemId: string): Promise<EconomyItem | null> {
-    return this.itemRepository.findById(itemId);
+  public async getCatalogSections(): Promise<{ name: string; items: EconomyItem[] }[]> {
+    const [items, categories] = await Promise.all([
+      this.getCatalog(),
+      this.categoryRepository?.findAll() ?? Promise.resolve([]),
+    ]);
+    const sections = categories.map((category) => ({
+      name: category.name,
+      items: items.filter((item) => item.categoryId === category.id),
+    }));
+    const known = new Set(categories.map((category) => category.id));
+    const other = items.filter((item) => !item.categoryId || !known.has(item.categoryId));
+    return [...sections, { name: 'Other', items: other }].filter(
+      (section) => section.items.length > 0,
+    );
+  }
+
+  /**
+   * Finds an item by what a member typed: its code (`candy_minor`) first, then its ID.
+   */
+  public async getItem(ref: string): Promise<EconomyItem | null> {
+    const code = ref.trim().toLowerCase();
+    return (await this.itemRepository.findByCode(code)) ?? this.itemRepository.findById(ref.trim());
   }
 
   /**
@@ -95,17 +121,18 @@ export class InventoryService {
   }
 
   /**
-   * Checks the quantity of a specific item in the user's inventory.
+   * Checks the quantity of a specific item (by code or ID) in the user's inventory.
    */
-  public async getItemQuantity(userId: string, itemId: string): Promise<number> {
-    return this.inventoryRepository.getItemQuantity(userId, itemId);
+  public async getItemQuantity(userId: string, itemRef: string): Promise<number> {
+    const item = await this.getItem(itemRef);
+    return this.inventoryRepository.getItemQuantity(userId, item?.id ?? itemRef);
   }
 
   /**
    * Executes an item purchase from the shop catalog as a deflationary currency sink.
    */
   public async buyItem(params: BuyItemParams): Promise<BuyItemResult> {
-    const { userId, itemId, guildId } = params;
+    const { userId, guildId } = params;
     const quantity = params.quantity ?? 1;
 
     if (quantity <= 0) {
@@ -117,7 +144,7 @@ export class InventoryService {
       };
     }
 
-    const item = await this.itemRepository.findById(itemId);
+    const item = await this.getItem(params.itemId);
     if (!item || !item.isPurchasable) {
       return {
         success: false,
@@ -127,6 +154,7 @@ export class InventoryService {
       };
     }
 
+    const itemId = item.id;
     const metadata = (item.metadata ?? {}) as ItemMetadata;
 
     // Enforce daily purchase limit if defined (e.g. 1 minor candy per day)
@@ -214,7 +242,7 @@ export class InventoryService {
    * Consumes an item from the user's inventory and dispatches its designated effect.
    */
   public async useItem(params: UseItemParams): Promise<UseItemResult> {
-    const { userId, itemId, guildId } = params;
+    const { userId, guildId } = params;
     const quantity = params.quantity ?? 1;
 
     if (quantity <= 0) {
@@ -226,6 +254,8 @@ export class InventoryService {
       };
     }
 
+    const item = await this.getItem(params.itemId);
+    const itemId = item?.id ?? params.itemId;
     const currentQty = await this.inventoryRepository.getItemQuantity(userId, itemId);
     if (currentQty < quantity) {
       return {
@@ -236,7 +266,6 @@ export class InventoryService {
       };
     }
 
-    const item = await this.itemRepository.findById(itemId);
     if (!item) {
       return {
         success: false,

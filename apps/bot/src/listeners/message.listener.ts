@@ -1,8 +1,9 @@
 import type { Client, Message } from 'discord.js';
-import { EconomyEventType } from '@ririko/services';
+import { EconomyEventType, earnsXp, scaleXp } from '@ririko/services';
 import type { BotServices } from '../services.js';
 import type { MusicEmbedController } from '../controllers/music-embed.controller.js';
 import type { AiChatController } from '../controllers/ai-chat.controller.js';
+import { levelUpText, sendLevelUpMessage } from './level-up.js';
 
 /**
  * Gateway Message Listener: Evaluates anti-spam heuristics, dispatches Economy events,
@@ -112,8 +113,17 @@ export function registerMessageListener(
         },
       });
 
-      // 3. Award chat experience points (e.g. 15-25 XP random roll)
-      const xpReward = Math.floor(Math.random() * 11) + 15; // 15 to 25 XP
+      // 3. Award chat experience points: a 15-25 XP roll at the guild's rate, except in no-XP
+      // channels (a thread follows its parent) and for members with a no-XP role.
+      const rules = await services.guildSettingsService.getSettings(guildId);
+      const channelIds = [
+        message.channelId,
+        message.channel.isThread() ? message.channel.parentId : null,
+      ];
+      const roleIds = message.member ? [...message.member.roles.cache.keys()] : [];
+      if (!earnsXp(rules, channelIds, roleIds)) return;
+      const xpReward = scaleXp(Math.floor(Math.random() * 11) + 15, rules.xpRatePercent);
+      if (xpReward <= 0) return;
       const xpRes = await services.levelingService.addExperience(
         userId,
         guildId,
@@ -121,13 +131,20 @@ export function registerMessageListener(
         'CHAT_MESSAGE',
       );
 
-      // 4. Send level-up announcement if user reached new level and opted in
-      if (xpRes.didLevelUp && xpRes.shouldNotify && 'send' in message.channel) {
-        await message.channel
-          .send({
-            content: `🎉 Congratulations <@${userId}>! You leveled up to **Level ${xpRes.newLevel}**!`,
-          })
-          .catch(() => {});
+      // 4. Announce the level-up (the member and the guild can opt out) in the guild's level-up
+      // channel, or here when it has none or Ririko cannot post there.
+      if (xpRes.didLevelUp && xpRes.shouldNotify) {
+        const posted = rules.levelUpChannelId
+          ? await sendLevelUpMessage(client, rules.levelUpChannelId, userId, xpRes.newLevel)
+          : false;
+        if (!posted && message.channel.isSendable()) {
+          await message.channel
+            .send({
+              content: levelUpText(userId, xpRes.newLevel),
+              allowedMentions: { users: [userId] },
+            })
+            .catch(() => {});
+        }
       }
     } catch (err) {
       console.error('[MessageListener] Error processing message economy event:', err);

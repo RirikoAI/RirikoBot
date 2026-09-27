@@ -41,7 +41,54 @@ describe('Mini-Games Commands Suite (TASK-0922)', () => {
       tictactoeEngine,
       rpsEngine,
       economyRepo: mockEconomyRepo,
+      guildSettingsService: {
+        getSettings: vi.fn().mockResolvedValue({ maxGameWager: null }),
+      },
     } as any;
+  });
+
+  describe('Maximum wager (TASK-1152)', () => {
+    function wagerContext(replyFn: ReturnType<typeof vi.fn>, opponent: unknown = null) {
+      return {
+        guild: { id: 'guild-1' } as any,
+        channel: { id: 'channel-1' } as any,
+        channelId: 'channel-1',
+        user: { id: 'user-1', username: 'Alice', bot: false } as any,
+        client: { user: { id: 'bot-id' }, users: { cache: new Map() } } as any,
+        options: {
+          getUser: vi.fn().mockResolvedValue(opponent),
+          getInteger: vi.fn().mockImplementation((name: string) => (name === 'wager' ? 100 : null)),
+          getString: vi
+            .fn()
+            .mockImplementation((name: string) => (name === 'guess' ? 'heads' : null)),
+          getRawArgs: vi.fn().mockReturnValue([]),
+        } as any,
+        reply: replyFn,
+      } as unknown as CommandContext;
+    }
+
+    it.each(['coinflip', 'dice', 'highlow', 'rps', 'tictactoe'])(
+      '%s refuses a wager above the server maximum before taking any credits',
+      async (name) => {
+        (mockServices.guildSettingsService.getSettings as any).mockResolvedValue({
+          maxGameWager: 50,
+        });
+        const escrow = vi.spyOn(escrowService, 'escrowWagers');
+        const command = createGamesCommands(mockServices).find((c) => c.metadata.name === name)!;
+        const replyFn = vi.fn().mockResolvedValue({} as any);
+        const opponent =
+          name === 'tictactoe' ? { id: 'user-2', username: 'Bob', bot: false } : null;
+
+        await command.execute(wagerContext(replyFn, opponent));
+
+        expect(replyFn).toHaveBeenCalledWith({
+          content: '❌ This server allows wagers of at most **50 credits**.',
+          ephemeral: true,
+        });
+        expect(mockEconomyRepo.modifyBalance).not.toHaveBeenCalled();
+        expect(escrow).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('Command Registration & Aliases', () => {

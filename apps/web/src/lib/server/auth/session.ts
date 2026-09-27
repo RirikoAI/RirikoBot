@@ -98,6 +98,12 @@ export async function requireStepUp(session: ActiveSession): Promise<StepUpState
   return stepUpState(session, await getPasskeyCount(session.userId), Date.now());
 }
 
+/** Whether the user is a bot owner (`BOT_OWNER_ID`), who may use the owner console. */
+export async function isBotOwner(userId: string): Promise<boolean> {
+  const { config } = await getWebServices();
+  return config.BOT_OWNER_ID.includes(userId);
+}
+
 /**
  * Owner console guard: only `BOT_OWNER_ID` users, only with a passkey, and only within five
  * minutes of a passkey check. Other users get a 404; owners are sent to add a passkey or to
@@ -105,8 +111,7 @@ export async function requireStepUp(session: ActiveSession): Promise<StepUpState
  */
 export async function requireOwner(returnTo: string): Promise<ActiveSession> {
   const session = await requireSession(returnTo);
-  const { config } = await getWebServices();
-  if (!config.BOT_OWNER_ID.includes(session.userId)) notFound();
+  if (!(await isBotOwner(session.userId))) notFound();
   const state = await requireStepUp(session);
   if (state === 'passkey-required') redirect('/account/security');
   if (state === 'passkey-check-required') {

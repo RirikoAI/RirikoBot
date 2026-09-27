@@ -52,10 +52,6 @@ describe('ImageGenerationService (TASK-1321)', () => {
     expect(recent).toHaveLength(1);
     expect(recent[0]?.status).toBe('COMPLETED');
     expect(recent[0]?.resultUrl).toBe('attachment://imagine.png');
-
-    // Verify usage tracking
-    const usage = await repo.getUsage('user-service-1', 'mock');
-    expect(usage?.imagesGeneratedToday).toBe(1);
   });
 
   it('enforces daily per-user generation quota', async () => {
@@ -75,6 +71,60 @@ describe('ImageGenerationService (TASK-1321)', () => {
     await expect(service.generateImage({ userId: 'u-quota', prompt: 'prompt 3' })).rejects.toThrow(
       /Daily image generation quota reached/i,
     );
+  });
+
+  it('counts the quota across providers (TASK-1163)', async () => {
+    const other = new MockImageProvider();
+    Object.defineProperty(other, 'id', { value: 'mock-2' });
+    const service = new ImageGenerationService({
+      repository: repo,
+      providers: [new MockImageProvider(), other],
+      defaultProviderId: 'mock',
+      dailyQuotaPerUser: 2,
+    });
+
+    await service.generateImage({ userId: 'u-hop', prompt: 'one', providerId: 'mock' });
+    await service.generateImage({ userId: 'u-hop', prompt: 'two', providerId: 'mock-2' });
+    await expect(
+      service.generateImage({ userId: 'u-hop', prompt: 'three', providerId: 'mock' }),
+    ).rejects.toThrow(/Daily image generation quota reached/i);
+  });
+
+  it("applies the guild's defaults and per-member limit (TASK-1163)", async () => {
+    await repo.saveGuildSettings({
+      guildId: 'guild-limit',
+      defaultProvider: 'mock',
+      memberDailyLimit: 1,
+      defaultPreset: 'pixel-art',
+    });
+    const service = new ImageGenerationService({
+      repository: repo,
+      providers: [new MockImageProvider()],
+      defaultProviderId: 'mock',
+      dailyQuotaPerUser: 5,
+    });
+
+    const first = await service.generateImage({
+      userId: 'u-guild',
+      guildId: 'guild-limit',
+      prompt: 'castle',
+    });
+    expect(first.prompt).toContain('16-bit pixel art');
+    expect(first.preset).toBe('pixel-art');
+
+    // A member's own preset still wins, but the guild limit is reached.
+    await expect(
+      service.generateImage({
+        userId: 'u-guild',
+        guildId: 'guild-limit',
+        prompt: 'x',
+        preset: 'none',
+      }),
+    ).rejects.toThrow(/This server allows 1 images per member/);
+    // Other servers only count against the bot quota.
+    await expect(
+      service.generateImage({ userId: 'u-guild', guildId: 'guild-other', prompt: 'y' }),
+    ).resolves.toBeDefined();
   });
 
   it('falls back to secondary provider if primary throws and auto provider was requested', async () => {

@@ -241,7 +241,8 @@ export class GiveawayEngine {
     const entries = await this.giveawayRepo.getEntries(giveawayId);
     const winnerIds = this.selectWinners(entries, giveaway.winnerCount, [], this.rngFn);
 
-    await this.giveawayRepo.endGiveaway(giveawayId, winnerIds);
+    // Only one caller ends a giveaway: the scheduler, `/giveaway end` and the dashboard can race.
+    if (!(await this.giveawayRepo.endGiveaway(giveawayId, winnerIds))) return null;
 
     const result: GiveawayEndResult = {
       giveaway: { ...giveaway, isEnded: true },
