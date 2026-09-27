@@ -70,7 +70,7 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 
 ### 2.10. Streamer Platforms (Twitch, YouTube, TikTok)
 - `streamers`: Multi-platform creator registry (`id` UUID PK, `platform` [TWITCH, YOUTUBE, TIKTOK, FACEBOOK], `platform_user_id`, `username`, `display_name`, `avatar_url`, `is_live`, `last_checked_at`).
-- `stream_subscriptions`: Guild notification subscriptions (`id` UUID PK, `streamer_id`, `guild_id`, `channel_id`, `custom_message`, `mention_role_id`, `created_at`).
+- `stream_subscriptions`: Guild notification subscriptions (`id` UUID PK, `streamer_id`, `guild_id`, `channel_id`, `custom_message`, `mention_role_id`, `created_at`). At most 25 per guild; `StreamAlertService` (used by `/stream` and the dashboard) lets the repository generate the uuid IDs. The 1.4.0 migration derives UUID v5 IDs from the legacy IDs (`legacyUuid`), so re-runs match.
 - `stream_events`: Live broadcast session tracking (`id` UUID PK, `streamer_id`, `stream_id`, `title`, `game_name`, `viewer_count`, `started_at`, `ended_at`).
 - `stream_announcements`: Idempotency records guaranteeing exactly-once delivery (`id` UUID PK, `idempotency_key` UNIQUE, `guild_id`, `channel_id`, `message_id`, `announced_at`).
 - `stream_assets`: Downloaded and validated thumbnails cached on Discord CDN (`stream_id` PK, `original_url`, `discord_attachment_url`, `file_hash`, `cached_at`).
@@ -78,6 +78,7 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 ### 2.11. Free Games Announcer
 - `free_games`: Free promotional games registry (`id` String PK, `provider` [EPIC, STEAM, GOG], `title`, `store_url`, `thumbnail_url`, `start_date`, `end_date`).
 - `free_game_announcements`: Recorded guild announcements preventing re-announcement (`game_id`, `guild_id`, `channel_id`, `message_id`, `announced_at`).
+- `free_game_channels`: Where a guild's announcements go (`guild_id` PK, `channel_id`, `mention_role_id` nullable, `created_at`). The role is the only mention an announcement may ping.
 
 ### 2.12. Waifu Trading Card Game & Gamification (Flagship Subsystem)
 - `waifu_sources`: Ingestion sources (`id` String PK, `name`, `base_url`, `attribution_text`, `is_active`).
@@ -111,8 +112,7 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 - `reaction_roles`: Message-to-role bindings (`id` UUID PK, `guild_id`, `channel_id`, `message_id`, `emoji_or_component_id`, `role_id`).
 - `auto_voice_configs`: Auto voice channel generators (`id` UUID PK, `guild_id`, `parent_channel_id`, `channel_name_template`, `user_limit`, `bitrate`).
 - `reminders`: Persistent reminder scheduler (`id` UUID PK, `user_id`, `guild_id`, `channel_id`, `message`, `trigger_at`, `repeat_interval` [NONE, DAILY, WEEKLY], `is_completed`).
-- `welcome_configs`: Welcomer customization settings (`guild_id` PK, `channel_id`, `message_template`, `card_theme`, `is_enabled`).
-- `farewell_configs`: Farewell customization settings (`guild_id` PK, `channel_id`, `message_template`, `card_theme`, `is_enabled`).
+- `guild_welcomer` / `guild_farewell`: Welcome and farewell cards (`guild_id` PK, `channel_id` (empty when not set up), `message_template`, `card_theme`, `background_url`, `background_file`, `text_color`, `is_enabled`). At most one of `background_url` and `background_file` is set; `background_file` names an upload in `storage/welcomer-backgrounds`.
 - `audit_logs`: Security and administrative action audit trails (`id` UUID PK, `guild_id`, `actor_user_id`, `action`, `details` JSON, `ip_address`, `user_agent`, `created_at`). `GuildConfigService` writes `guild_config.<module>.update` entries with `details = { source: 'dashboard' | 'cli', changes: [{ field, before, after }] }`.
 
 ### 2.15. Web Dashboard (EPIC-011)

@@ -1,5 +1,6 @@
 import type Database from 'better-sqlite3';
 import { randomUUID } from 'node:crypto';
+import { legacyUuid } from './uuid.js';
 import type {
   TransformedData,
   LegacyUser,
@@ -290,9 +291,10 @@ export class LegacyTransformer {
     ]);
     for (const sub of legacySubs) {
       if (!sub.id || !sub.twitchUserId || !sub.guildId) continue;
+      // 2.0 stream IDs are uuids on Postgres; derive them so re-runs give the same rows.
       transformed.streamSubscriptions.push({
-        id: String(sub.id),
-        streamerId: sub.twitchUserId,
+        id: legacyUuid(`stream_subscription:${sub.id}`),
+        streamerId: legacyUuid(`twitch_streamer:${sub.twitchUserId}`),
         guildId: sub.guildId,
         channelId: sub.channelId,
         customMessage: null,
@@ -308,7 +310,7 @@ export class LegacyTransformer {
     for (const s of legacyStreamers) {
       if (!s.twitchUserId) continue;
       transformed.streamers.push({
-        id: s.twitchUserId,
+        id: legacyUuid(`twitch_streamer:${s.twitchUserId}`),
         platform: 'TWITCH',
         platformUserId: s.twitchUserId,
         username: s.twitchUserId,

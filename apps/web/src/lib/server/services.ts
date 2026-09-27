@@ -21,7 +21,10 @@ import {
   MusicRepository,
   AiRepository,
   ImageRepository,
+  FreeGameRepository,
+  WelcomerRepository,
   ReactionRoleRepository,
+  StreamRepository,
   GiveawayRepository,
   UserRepository,
   WebKnownDeviceRepository,
@@ -31,6 +34,8 @@ import {
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
 import { EconomyConfigService, ItemCatalogService } from '@ririko/services/owner';
+import { createStreamAdapters, StreamAlertService } from '@ririko/services/stream-alerts';
+import { WelcomerBackgroundStore } from '@ririko/services/welcomer-backgrounds';
 import { DiscordOAuthClient } from './auth/discord-oauth';
 import { KnownDeviceService } from './auth/known-devices';
 import { PasskeyService } from './auth/passkeys';
@@ -42,6 +47,7 @@ import { GuildAccessService } from './guilds/guild-access';
 import { GuildResourceDirectory } from './guilds/guild-resources';
 import { ReactionRolePanelService } from './guilds/reaction-role-panels';
 import { UserDirectory } from './guilds/user-directory';
+import { WelcomerBackgroundService } from './guilds/welcomer-backgrounds';
 
 /**
  * Server-side dependencies of the dashboard. Built once per process from the shared monorepo
@@ -71,6 +77,10 @@ export interface WebServices {
   /** Publishes and edits reaction role panels (after guard and passkey step-up). */
   reactionRolePanels: ReactionRolePanelService;
   giveaways: GiveawayManagementService;
+  /** Stream alert subscriptions, shared with `/stream` (after `requireGuildAccess`). */
+  streamAlerts: StreamAlertService;
+  /** Uploaded welcome and farewell backgrounds (after `requireGuildAccess`). */
+  welcomerBackgrounds: WelcomerBackgroundService;
   /** Global economy values for the owner console (after `requireOwner` or `runOwnerAction`). */
   economyConfig: EconomyConfigService;
   /** Global item shop for the owner console (after `requireOwner` or `runOwnerAction`). */
@@ -150,6 +160,8 @@ async function createWebServices(): Promise<WebServices> {
     music: new MusicRepository(db),
     ai: new AiRepository(db),
     images: new ImageRepository(db),
+    freeGames: new FreeGameRepository(db),
+    welcomer: new WelcomerRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit,
     defaultPrefix: config.DEFAULT_PREFIX,
@@ -183,6 +195,20 @@ async function createWebServices(): Promise<WebServices> {
       audit,
       rest: botRest,
       resources: guildResources,
+    }),
+    // Handles are resolved with the same platform credentials as the bot; without them the
+    // cleaned handle is stored, as `/stream` does.
+    streamAlerts: new StreamAlertService({
+      db,
+      streams: new StreamRepository(db),
+      audit,
+      adapters: createStreamAdapters(config),
+    }),
+    welcomerBackgrounds: new WelcomerBackgroundService({
+      db,
+      welcomer: new WelcomerRepository(db),
+      store: new WelcomerBackgroundStore(),
+      audit,
     }),
     economyConfig: new EconomyConfigService({
       db,
