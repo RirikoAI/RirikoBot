@@ -27,6 +27,8 @@ export const freeGameAnnouncements = sqliteTable(
 export const freeGameChannels = sqliteTable('free_game_channels', {
   guildId: text('guild_id').primaryKey(),
   channelId: text('channel_id').notNull(),
+  /** Role mentioned with each announcement; null mentions nobody. */
+  mentionRoleId: text('mention_role_id'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

@@ -43,7 +43,7 @@ import {
   ItemCategoryRepository,
   type DatabaseClient,
 } from '@ririko/database';
-import type { Client } from 'discord.js';
+import type { Client, MessageCreateOptions } from 'discord.js';
 import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 import { MusicPlayerService } from '@ririko/music';
 import {
@@ -695,21 +695,25 @@ export async function createBotServices(
 
   const freeGamesEngine: FreeGamesEngine = new FreeGamesEngine(freeGameRepo, {
     providers: [new EpicGamesProvider(), new SteamFreeGamesProvider()],
-    onAnnounceGame: async (
-      _guildId: string,
-      channelId: string,
-      game: FreeGameItem,
-    ): Promise<string | null> => {
+    onAnnounceGame: async (target, game: FreeGameItem): Promise<string | null> => {
       if (!discordClient) return null;
       try {
-        const channel = await discordClient.channels.fetch(channelId).catch(() => null);
+        const channel = await discordClient.channels.fetch(target.channelId).catch(() => null);
         if (channel && channel.isTextBased() && 'send' in channel) {
-          const embed = freeGamesEngine.formatGameEmbed(game);
-          const msg = await (channel as any).send({ embeds: [embed] });
-          return (msg?.id as string) ?? null;
+          // The embed is plain JSON with optional keys set to undefined, which discord.js accepts.
+          const msg = await channel.send(
+            freeGamesEngine.formatAnnouncement(
+              game,
+              target.mentionRoleId,
+            ) as unknown as MessageCreateOptions,
+          );
+          return msg.id;
         }
       } catch (err) {
-        console.error(`[FreeGamesEngine] Failed to post alert in channel ${channelId}:`, err);
+        console.error(
+          `[FreeGamesEngine] Failed to post alert in channel ${target.channelId}:`,
+          err,
+        );
       }
       return null;
     },

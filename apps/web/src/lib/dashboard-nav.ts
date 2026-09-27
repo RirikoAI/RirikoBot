@@ -16,6 +16,7 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'ai', label: 'AI Chatbot' },
   { slug: 'images', label: 'Image Generation' },
   { slug: 'streams', label: 'Stream Alerts' },
+  { slug: 'freegames', label: 'Free Games' },
   { slug: 'integrations', label: 'Integrations' },
   { slug: 'cases', label: 'Case Log' },
   { slug: 'audit-log', label: 'Audit Log' },

@@ -12,6 +12,7 @@ import {
   MusicRepository,
   AiRepository,
   ImageRepository,
+  FreeGameRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { DEFAULT_ESCALATION_STEPS } from '@ririko/core';
@@ -65,6 +66,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       music: new MusicRepository(db),
       ai: new AiRepository(db),
       images: new ImageRepository(db),
+      freeGames: new FreeGameRepository(db),
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -772,6 +774,43 @@ describe('GuildConfigService (TASK-1111)', () => {
       });
     });
   });
+
+  describe('freegames (TASK-1662)', () => {
+    const CHANNEL = '700000000000000001';
+    const ROLE = '700000000000000002';
+
+    it('saves the channel and ping role, and clears both without a channel', async () => {
+      const freeGames = new FreeGameRepository(db);
+      expect(await service.get('g1', 'freegames')).toEqual({ channelId: null, pingRoleId: null });
+
+      await service.update(
+        'g1',
+        'freegames',
+        { channelId: CHANNEL, pingRoleId: ROLE },
+        dashboardActor,
+      );
+      expect(await freeGames.getGuildChannel('g1')).toEqual({
+        guildId: 'g1',
+        channelId: CHANNEL,
+        mentionRoleId: ROLE,
+      });
+
+      await service.update('g1', 'freegames', { pingRoleId: '' }, dashboardActor);
+      expect(await service.get('g1', 'freegames')).toEqual({
+        channelId: CHANNEL,
+        pingRoleId: null,
+      });
+
+      await service.update('g1', 'freegames', { channelId: '', pingRoleId: ROLE }, dashboardActor);
+      expect(await freeGames.getGuildChannel('g1')).toBeNull();
+    });
+
+    it('rejects an ID that is not a snowflake', async () => {
+      await expect(
+        service.update('g1', 'freegames', { channelId: 'general' }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { channelId: expect.any(Array) } });
+    });
+  });
 });
 
 describe('GuildConfigService ai (TASK-1162)', () => {
@@ -800,6 +839,7 @@ describe('GuildConfigService ai (TASK-1162)', () => {
       music: new MusicRepository(db),
       ai,
       images: new ImageRepository(db),
+      freeGames: new FreeGameRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -906,6 +946,7 @@ describe('GuildConfigService images (TASK-1163)', () => {
       music: new MusicRepository(db),
       ai: new AiRepository(db),
       images,
+      freeGames: new FreeGameRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',

@@ -87,10 +87,15 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
         }),
       } as any,
       freeGameRepo: {
-        getGuildChannel: vi.fn().mockResolvedValue('channel-free-1'),
+        getGuildChannel: vi.fn().mockResolvedValue({
+          guildId: 'guild-1',
+          channelId: 'channel-free-1',
+          mentionRoleId: null,
+        }),
         setGuildChannel: vi.fn().mockResolvedValue({
           guildId: 'guild-1',
           channelId: 'channel-free-2',
+          mentionRoleId: null,
         }),
         removeGuildChannel: vi.fn().mockResolvedValue(true),
       } as any,
@@ -467,14 +472,67 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
 
       await cmd.execute(mockCtx);
 
-      expect(mockServices.freeGameRepo?.setGuildChannel).toHaveBeenCalledWith(
-        'guild-1',
-        'channel-free-2',
-      );
+      expect(mockServices.freeGameRepo?.setGuildChannel).toHaveBeenCalledWith('guild-1', {
+        channelId: 'channel-free-2',
+      });
       expect(mockCtx.editReply).toHaveBeenCalledWith(
         expect.objectContaining({
           embeds: expect.any(Array),
         }),
+      );
+    });
+
+    it('sets the ping role from a prefix role mention (TASK-1662)', async () => {
+      const cmd = createFreeGamesCommand(mockServices as BotServices);
+      const mockCtx: any = {
+        source: 'prefix',
+        guildId: 'guild-1',
+        guild: { roles: { fetch: vi.fn().mockResolvedValue({ id: '223456789012345678' }) } },
+        user: { id: 'user-1' },
+        member: { permissions: { has: vi.fn().mockReturnValue(true) } },
+        options: {
+          getString: vi.fn().mockReturnValue(null),
+          getChannel: vi.fn().mockResolvedValue({ id: 'channel-free-2' }),
+          getRawArgs: vi
+            .fn()
+            .mockReturnValue(['setchannel', '<#123456789012345678>', '<@&223456789012345678>']),
+        },
+        deferReply: vi.fn().mockResolvedValue(undefined),
+        editReply: vi.fn().mockResolvedValue(undefined),
+        reply: vi.fn(),
+      };
+
+      await cmd.execute(mockCtx);
+
+      expect(mockServices.freeGameRepo?.setGuildChannel).toHaveBeenCalledWith('guild-1', {
+        channelId: 'channel-free-2',
+        mentionRoleId: '223456789012345678',
+      });
+    });
+
+    it('refuses a ping role of another server', async () => {
+      const cmd = createFreeGamesCommand(mockServices as BotServices);
+      const mockCtx: any = {
+        source: 'prefix',
+        guildId: 'guild-1',
+        guild: { roles: { fetch: vi.fn().mockRejectedValue(new Error('Unknown Role')) } },
+        user: { id: 'user-1' },
+        member: { permissions: { has: vi.fn().mockReturnValue(true) } },
+        options: {
+          getString: vi.fn().mockReturnValue(null),
+          getChannel: vi.fn().mockResolvedValue({ id: 'channel-free-2' }),
+          getRawArgs: vi.fn().mockReturnValue(['setchannel', '<@&223456789012345678>']),
+        },
+        deferReply: vi.fn(),
+        editReply: vi.fn(),
+        reply: vi.fn(),
+      };
+
+      await cmd.execute(mockCtx);
+
+      expect(mockServices.freeGameRepo?.setGuildChannel).not.toHaveBeenCalled();
+      expect(mockCtx.reply).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('role of this server') }),
       );
     });
 
