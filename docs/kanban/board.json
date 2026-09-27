@@ -893,7 +893,7 @@
       "epic": "EPIC-011",
       "title": "XP & Ranking, Games & Giveaways Pages",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-111",
         "STORY-117"
@@ -905,13 +905,13 @@
       "id": "STORY-165",
       "epic": "EPIC-011",
       "title": "Owner Console: Global Economy Settings & Item Shop Manager",
-      "points": 8,
-      "status": "TODO",
+      "points": 13,
+      "status": "REVIEW",
       "requires": [
         "STORY-115"
       ],
       "blocks": [],
-      "description": "Split from STORY-115 on 2026-09-27 (dashboard.md section 4, item 8). Balances, the daily reward and the bank are global per user, so they are edited only in the owner console (bot owners, passkey). The bot reads the values on each use instead of constants."
+      "description": "Split from STORY-115 on 2026-09-27 (dashboard.md section 4, item 8). Balances, the daily reward and the bank are global per user, so they are edited only in the owner console (bot owners, passkey). The bot reads the values on each use instead of constants. Re-groomed 2026-09-27 at story start: bank capacity is computed live from the account-wide level (it was saved once per user and synced only on level-up with a per-guild level), categories are managed and group /shop, and the item seed part of BUG-0024 is folded in as TASK-1653 (item codes)."
     },
     {
       "id": "STORY-116",
@@ -2830,28 +2830,42 @@
     {
       "id": "TASK-1651",
       "parent": "STORY-165",
-      "title": "Owner Console Shell, Global Economy Settings (Daily Reward, Streak Bonus, Bank Capacity) & ririko economy:config",
-      "points": 3,
-      "status": "TODO",
+      "title": "Owner Console Shell, Global Economy Settings (Daily Reward, Streak Bonus, Bank Capacity), Live Bank Capacity from Account Level & ririko economy:config",
+      "points": 5,
+      "status": "DONE",
       "requires": [
         "STORY-115"
       ],
       "blocks": [
         "TASK-1652"
       ],
-      "description": "/owner layout behind requireOwner, a single-row economy_config table read by DailyService and BankingService on each use, audited owner writes with a passkey check, and CLI parity."
+      "description": "/owner layout behind requireOwner, a single-row economy_config table read by DailyService and BankingService on each use, bank capacity computed from the config and the account-wide level (createXpLevelResolver) at deposit, withdraw, balance and level-up, audited owner writes with a passkey check, and CLI parity."
     },
     {
       "id": "TASK-1652",
       "parent": "STORY-165",
-      "title": "Item Shop Manager (economy_items & economy_item_categories: Create, Edit, Retire, Delete Unowned)",
+      "title": "Item Shop Manager (economy_items & economy_item_categories: Create, Edit, Retire, Delete Unowned; Category Management)",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1651"
       ],
+      "blocks": [
+        "TASK-1653"
+      ],
+      "description": "Owner-console editor for the global item catalog, including the effect metadata the inventory service reads, and for item categories (create, rename, delete when empty). Items held by members or seeded by the bot are retired (not purchasable) instead of deleted. Every write is audited."
+    },
+    {
+      "id": "TASK-1653",
+      "parent": "STORY-165",
+      "title": "Item Codes, Item Seed That Works on Postgres & SQLite, /shop Grouped by Category (Seed Part of BUG-0024)",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "TASK-1652"
+      ],
       "blocks": [],
-      "description": "Owner-console editor for the global item catalog, including the effect metadata the inventory service reads. Items held by members are retired (not purchasable) instead of deleted. Every write is audited."
+      "description": "Unique code column on economy_items and economy_item_categories. The default catalog seeds missing rows by code with uuid IDs (it failed on Postgres because of slug IDs) and fills codes on existing SQLite slug rows. Profile backgrounds find the voucher by code, /shop buy accepts a code, and /shop list groups items by category."
     },
     {
       "id": "TASK-1161",
@@ -3727,13 +3741,13 @@
     },
     {
       "id": "BUG-0024",
-      "title": "Postgres Item Seed Uses Slug IDs on a uuid Column; Legacy Migration Reads the Wrong Karma and Welcomer Keys",
-      "points": 3,
+      "title": "Legacy Migration Reads the Wrong Karma and Welcomer Keys",
+      "points": 2,
       "status": "TODO",
       "parent": "STORY-043",
       "requires": [],
       "blocks": [],
-      "description": "Found in the STORY-115 audit. ItemRepository.seedDefaultCatalog inserts slug IDs (candy_minor, ...) into economy_items.id, which is uuid on Postgres; the error is swallowed at bot start. The seed also references categories that have no rows. The legacy transformer maps karma.enabled and welcomer.channel, but 1.4.0 stored karma-notification-enabled (enabled/disabled) and welcomer_channel."
+      "description": "Found in the STORY-115 audit. The legacy transformer maps karma.enabled and welcomer.channel, but 1.4.0 stored karma-notification-enabled (enabled/disabled) and welcomer_channel. The item seed part (slug IDs on a uuid column on Postgres, categories without rows) moved to TASK-1653 in STORY-165 on 2026-09-27."
     }
   ]
 }

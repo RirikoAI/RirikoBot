@@ -233,6 +233,39 @@ export class InventoryRepository extends BaseRepository<
     }
   }
 
+  /** How many members hold the item (a slot is removed when its quantity reaches 0). */
+  async countHolders(itemId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    const [res] = this.isSqlite(client)
+      ? await client.db
+          .select({ count: sql<number>`count(*)` })
+          .from(sqliteSchema.economyInventories)
+          .where(eq(sqliteSchema.economyInventories.itemId, itemId))
+      : await client.db
+          .select({ count: sql<number>`count(*)` })
+          .from(pgSchema.economyInventories)
+          .where(eq(pgSchema.economyInventories.itemId, itemId));
+    return Number(res?.count ?? 0);
+  }
+
+  /** Members holding each item that anyone holds, by item ID. */
+  async holderCountsByItem(tx?: DatabaseClient): Promise<Map<string, number>> {
+    const client = this.getClient(tx);
+    const rows = this.isSqlite(client)
+      ? await client.db
+          .select({
+            itemId: sqliteSchema.economyInventories.itemId,
+            count: sql<number>`count(*)`,
+          })
+          .from(sqliteSchema.economyInventories)
+          .groupBy(sqliteSchema.economyInventories.itemId)
+      : await client.db
+          .select({ itemId: pgSchema.economyInventories.itemId, count: sql<number>`count(*)` })
+          .from(pgSchema.economyInventories)
+          .groupBy(pgSchema.economyInventories.itemId);
+    return new Map(rows.map((row) => [row.itemId, Number(row.count)]));
+  }
+
   /**
    * Atomically adds items to a user's inventory bag slot.
    */

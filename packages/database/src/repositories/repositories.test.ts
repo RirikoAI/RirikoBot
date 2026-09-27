@@ -7,6 +7,7 @@ import { EconomyRepository } from './economy.repository.js';
 import { XpRepository } from './xp.repository.js';
 import { LeaderboardRepository } from './leaderboard.repository.js';
 import { ItemRepository } from './item.repository.js';
+import { ItemCategoryRepository } from './item-category.repository.js';
 import { InventoryRepository } from './inventory.repository.js';
 import { PlayerEnergyRepository } from './player-energy.repository.js';
 
@@ -120,8 +121,22 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
         PRIMARY KEY (user_id, guild_id)
       );
 
+      CREATE TABLE economy_item_categories (
+
+        id TEXT PRIMARY KEY,
+
+        code TEXT UNIQUE,
+
+        name TEXT NOT NULL,
+
+        description TEXT
+
+      );
+
+
       CREATE TABLE economy_items (
         id TEXT PRIMARY KEY,
+        code TEXT UNIQUE,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
         price INTEGER NOT NULL,
@@ -573,30 +588,78 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       const items = await itemRepo.findAll();
       expect(items.length).toBe(4);
 
-      const candy = await itemRepo.findById('candy_minor');
+      const candy = await itemRepo.findByCode('candy_minor');
       expect(candy).not.toBeNull();
+      expect(candy?.id).toMatch(/^[0-9a-f-]{36}$/);
       expect(candy?.name).toBe('Minor Energy Candy');
       expect(candy?.price).toBe(100);
+      expect(await itemRepo.findById(candy!.id)).toMatchObject({ code: 'candy_minor' });
+
+      const categories = new ItemCategoryRepository(client);
+      const consumable = await categories.findByCode('consumable');
+      expect(consumable?.name).toBe('Consumables');
+      expect(candy?.categoryId).toBe(consumable?.id);
+      expect((await categories.findAll()).map((category) => category.code)).toEqual([
+        'consumable',
+        'cosmetic',
+      ]);
 
       const purchasable = await itemRepo.findPurchasable();
       expect(purchasable.length).toBe(4);
+    });
+
+    it('fills codes on items an older SQLite seed stored with the code as ID', async () => {
+      await itemRepo.create({
+        id: 'candy_minor',
+        name: 'Renamed Candy',
+        description: 'Owner edit',
+        price: 5,
+        categoryId: 'consumable',
+      });
+      await inventoryRepo.addItem('legacy_user', 'candy_minor', 2);
+
+      expect(await itemRepo.seedDefaultCatalog()).toBe(3);
+      expect(await itemRepo.seedDefaultCatalog()).toBe(0);
+
+      const candy = await itemRepo.findByCode('candy_minor');
+      const consumable = await new ItemCategoryRepository(client).findByCode('consumable');
+      expect(candy).toMatchObject({
+        id: 'candy_minor',
+        name: 'Renamed Candy',
+        price: 5,
+        categoryId: consumable?.id,
+      });
+      expect(await inventoryRepo.getItemQuantity('legacy_user', candy!.id)).toBe(2);
+      expect((await itemRepo.findAll()).length).toBe(4);
+    });
+
+    it('keeps owner edits to seeded items', async () => {
+      await itemRepo.seedDefaultCatalog();
+      const potion = await itemRepo.findByCode('stamina_potion');
+      await itemRepo.update(potion!.id, { price: 999, isPurchasable: false });
+      await itemRepo.seedDefaultCatalog();
+      expect(await itemRepo.findByCode('stamina_potion')).toMatchObject({
+        price: 999,
+        isPurchasable: false,
+      });
     });
   });
 
   describe('InventoryRepository', () => {
     it('adds, removes, and retrieves inventory bag slots atomically', async () => {
       await itemRepo.seedDefaultCatalog();
+      const candyId = (await itemRepo.findByCode('candy_minor'))!.id;
 
       // Add 2 candies
-      const slot = await inventoryRepo.addItem('inv_user_1', 'candy_minor', 2);
+      const slot = await inventoryRepo.addItem('inv_user_1', candyId, 2);
       expect(slot.quantity).toBe(2);
 
       // Add 1 more candy (updates quantity to 3)
-      const updated = await inventoryRepo.addItem('inv_user_1', 'candy_minor', 1);
+      const updated = await inventoryRepo.addItem('inv_user_1', candyId, 1);
       expect(updated.quantity).toBe(3);
 
       // Check quantity
-      const qty = await inventoryRepo.getItemQuantity('inv_user_1', 'candy_minor');
+      const qty = await inventoryRepo.getItemQuantity('inv_user_1', candyId);
       expect(qty).toBe(3);
 
       // Retrieve inventory with joined item details
@@ -606,14 +669,14 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       expect(bag[0]?.item?.name).toBe('Minor Energy Candy');
 
       // Remove 1 candy
-      const remaining = await inventoryRepo.removeItem('inv_user_1', 'candy_minor', 1);
+      const remaining = await inventoryRepo.removeItem('inv_user_1', candyId, 1);
       expect(remaining?.quantity).toBe(2);
 
       // Remove remaining 2 candies (deletes row)
-      const emptied = await inventoryRepo.removeItem('inv_user_1', 'candy_minor', 2);
+      const emptied = await inventoryRepo.removeItem('inv_user_1', candyId, 2);
       expect(emptied).toBeNull();
 
-      const finalQty = await inventoryRepo.getItemQuantity('inv_user_1', 'candy_minor');
+      const finalQty = await inventoryRepo.getItemQuantity('inv_user_1', candyId);
       expect(finalQty).toBe(0);
     });
   });

@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 8 pts (`TASK-1151` = 3, `TASK-1152` = 2, `TASK-1153` = 3)
 - **Epic**: `EPIC-011`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #653)
 - **Timestamp**: 2026-09-27
 - **Branch**: `feat/STORY-115-xp-games-giveaways` (targets `develop/2.0.0`)
 

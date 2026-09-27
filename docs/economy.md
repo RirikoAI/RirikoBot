@@ -92,11 +92,11 @@ export interface EconomyTransactionRecord {
 ### 5.1. Bank Features
 - **Wallet vs. Bank**: Wallet balance is vulnerable to loss in gambling or robbery (if robbery is enabled by the guild). Bank balance is 100% secure.
 - **Deposit & Withdrawal**: `/deposit <amount | all>` and `/withdraw <amount | all>`.
-- **Bank Capacity**: Base bank capacity scales with user level (e.g. $10,000 + \text{Level} \times 2,500$) and can be expanded through item purchases.
+- **Bank Capacity**: base capacity plus a step per account level, $10,000 + \text{Level} \times 2,500$ by default (both values are set in the owner console, 5.4). The account level comes from the member's XP on every server added together, because the bank is global while XP is kept per server. Capacity is recomputed on every deposit, withdrawal, interest payment, `/balance`, profile card and level-up, and saved to `economy_balances.bank_capacity`. Lowering it never removes credits: a member above the new capacity can withdraw but not deposit.
 - **Interest**: Guilds can enable a small daily bank interest yield (e.g. 0.5% - 1.0% per day, capped at max yield limits) to encourage saving.
 
 ### 5.2. Daily Claim Streaks (`/daily`)
-- Base reward: 250 credits.
+- Base reward: 250 credits by default (owner console, 5.4).
 - Daily streak multiplier: $+5\%$ per consecutive day, capping at 30 days ($+150\%$).
 - **One claim per reset day**, on the shared reset boundary described in Section 5.3 (default 00:00 GMT+8). A claim becomes available the moment the boundary passes, however recently the last one was made.
 - **Consecutive-miss forgiveness**: missing fewer than `RIRIKO_DAILY_STREAK_FORGIVENESS` consecutive reset days (default 3) preserves the streak. Missed days are *skipped, never counted*: a 15-day streak interrupted by 2 missed days resumes at **16**, not 18.
@@ -121,6 +121,19 @@ Every daily system in the bot resets on one configurable boundary rather than at
 - `RIRIKO_RESET_OFFSET_MINUTES` (default `480`, i.e. GMT+8) sets the timezone for **all** of them. One shared offset keeps "today" meaning the same calendar day everywhere in the bot.
 - `RIRIKO_RESET_TIME` (default `00:00`) is the wall-clock boundary inside that offset. Each system may override just the time, which lets operators stagger resets (for example rotating the shop at 06:00 instead of overnight).
 - Boundaries are evaluated lazily on access, so no scheduled job is required.
+
+### 5.4. Global Economy Settings (STORY-165)
+Balances, the daily reward and the bank are global per user, so their values are not guild settings. They live in the single-row `economy_config` table. Bot owners edit them at `/owner/economy` or with `ririko economy:config`. `DailyService` and `BankingService` read them on every use, so a change applies on the next `/daily` or deposit without a restart. Until an owner saves, the defaults apply.
+
+| Setting | Default | Range |
+|---|---|---|
+| `dailyBaseReward` | 250 | 0 to 1,000,000 credits |
+| `dailyStreakBonusPercent` (per further day of a streak) | 5 | 0 to 100 % |
+| `dailyMaxStreakBonusPercent` | 150 | 0 to 1,000 % |
+| `bankBaseCapacity` | 10,000 | 0 to 1,000,000,000 credits |
+| `bankCapacityPerLevel` | 2,500 | 0 to 10,000,000 credits |
+
+The formulas are in `packages/core/src/config/economy.ts` (`dailyReward`, `dailyStreakMultiplier`, `bankCapacityFor`). Voice reward amounts (3.2) are not part of this table yet.
 
 ---
 
@@ -159,6 +172,18 @@ Rendered dynamically via `@napi-rs/canvas`:
 ### 7.1. Shop Currency Sinks
 - The basic town shop (`/shop buy`) acts as a primary deflationary currency sink, removing credits from the economy.
 - Only entry-level Common/Uncommon items and minor potions are sold in the shop. High-tier items must be earned through gameplay (dungeons, raids, quests, achievements), preventing pay-to-win inflation.
+
+### 7.1.1. Item Codes & the Default Catalog (STORY-165)
+- Every item has a unique **code** (`candy_minor`): 2 to 32 lowercase letters, digits or underscores.
+  - Members type the code in `/shop buy` and `/use`, and `/shop` and `/inventory` show it.
+  - Lookups try the code first, then the item ID.
+  - A code cannot change once set. Items migrated from 1.4.0 have none until an owner sets one.
+- Item and category IDs are uuids on both dialects.
+- The default catalog (four items, and the `consumable` and `cosmetic` categories) is seeded by code when the bot starts:
+  - Only missing rows are added; owner edits are kept.
+  - On SQLite databases seeded before STORY-165, the items kept their old slug IDs and only got their codes, so existing inventories still match.
+  - Items and categories from the default catalog can be retired in the owner console but not deleted, since the seed would add them again.
+- `/shop list` groups items under their category, with uncategorized items last under "Other".
 
 ### 7.2. Anti-Abuse Stamina & Energy Potion Controls
 - Energy restores sold in the shop are hard-capped at **1 minor candy per user per day**.

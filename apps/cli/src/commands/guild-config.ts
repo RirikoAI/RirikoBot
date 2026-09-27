@@ -78,7 +78,7 @@ function displayConfigValue(value: unknown): string {
 }
 
 /** `cli:<os user>` so audit entries show who ran the command. */
-function cliActor(): string {
+export function cliActor(): string {
   try {
     return `cli:${userInfo().username}`;
   } catch {

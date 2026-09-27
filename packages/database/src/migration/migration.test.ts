@@ -563,12 +563,14 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
 
         CREATE TABLE economy_item_categories (
           id TEXT PRIMARY KEY,
+          code TEXT UNIQUE,
           name TEXT NOT NULL,
           description TEXT
         );
 
         CREATE TABLE economy_items (
           id TEXT PRIMARY KEY,
+          code TEXT UNIQUE,
           name TEXT NOT NULL,
           description TEXT NOT NULL,
           price INTEGER NOT NULL,
