@@ -70,7 +70,22 @@ Guild Discovery Pipeline
 
 ### 3.1. Guild-Scoped vs Global Settings
 - **Guild-scoped settings** (most modules) are edited by users who pass `requireGuildAccess` for that guild.
-- **Global settings** are shared by every guild because their tables have no guild column: `tcg_system_configs` (market tax, listing expiry, energy governance), `dungeon_seasons` / `dungeon_bosses`, and the item and achievement catalogs (`economy_items`, `economy_item_categories`, `game_items`, `game_achievements`). They are edited only in the **owner console**, gated to bot owners with a passkey. A guild manager must never be able to change data that other guilds share.
+- **Global settings** are shared by every guild because their tables have no guild column: `economy_config` (daily reward, bank capacity), `tcg_system_configs` (market tax, listing expiry, energy governance), `dungeon_seasons` / `dungeon_bosses`, and the item and achievement catalogs (`economy_items`, `economy_item_categories`, `game_items`, `game_achievements`). They are edited only in the **owner console**, gated to bot owners with a passkey. A guild manager must never be able to change data that other guilds share.
+
+### 3.1.1. Owner Console (STORY-165)
+- `/owner` is shown to `BOT_OWNER_ID` users only. Everyone else gets a 404, and the header shows the "Owner console" link only to owners. The layout and every page call `requireOwner`, so an owner must have a passkey and a passkey check from the last five minutes.
+- Every owner Server Action runs `runOwnerAction` ([owner-action.ts](file:///Z:/Projects/ririko-v2-2026/apps/web/src/lib/server/owner-action.ts)), which checks, in order:
+  1. The dashboard Origin and the rate limit.
+  2. That the user is a bot owner.
+  3. The five-minute passkey check. If it is missing, the form offers "Confirm with passkey and save".
+
+  The authorization coverage test accepts `runOwnerAction` as both the request guard and the authorization guard.
+- Owner writes go through the owner services in `@ririko/services/owner`: `EconomyConfigService` and `ItemCatalogService`. Their audit entries have no guild (`guild_id` is null), with the actions `owner.economy_config.update` and `owner.shop_item.*` / `owner.shop_category.*`. The guild audit viewer does not show them yet.
+- Pages:
+  - `/owner/economy` edits the global economy values (docs/economy.md 5.4).
+  - `/owner/shop` lists the item catalog with holder counts and manages categories.
+  - `/owner/shop/new` and `/owner/shop/[itemId]` edit an item.
+- `ririko economy:config [key] [value]` is the CLI for the economy values. It uses the same schema, service and audit trail as the owner console.
 - Guild-scoped TCG settings (such as drop settings and the TCG Manager Role) stay with guild managers.
 
 ### 3.2. No Placeholder Settings
@@ -129,6 +144,10 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 7. **Image Generation**: Provider selector, daily user quota limits, style presets.
 8. **Economy & Banking**: Currency name, daily reward base amount, bank interest rates, item shop manager. The item catalog (`economy_items`, `economy_item_categories`) is global, so the shop manager lives in the owner console.
    - *Moved to STORY-165 (2026-09-27):* balances, the daily reward and the bank are global per user and nothing economy-related is read per guild, so there is no guild Economy page. The owner console edits the daily reward, streak bonus and bank capacity, and the item catalog. The currency name is fixed ("credits"), and bank interest is not live yet (`applyDailyInterest` has no caller).
+   - *Shipped in STORY-165 (owner console, Section 3.1.1):*
+     - `/owner/economy`: the daily reward, the streak bonus per day, the largest streak bonus, the bank capacity at level 0 and per level.
+     - `/owner/shop`: items (code, name, description, price, rarity, category, icon, on sale, daily purchase limit, effect and its amount) and categories.
+     - Items members hold, and items or categories from the default catalog, can only be retired. An item must be retired before it can be deleted.
 9. **XP & Ranking**: XP rate multipliers, voice XP toggles, level-up announcement channel.
    - *Shipped in STORY-115 as `/dashboard/[guildId]/xp` (module `xp`):* level-up announcements on/off and channel, the XP rate (0 to 300%), no-XP channels (text and voice) and roles, and voice rewards (off by default). See docs/economy.md 3.2 and 6.2.
 10. **Waifu TCG & Gamification Settings** (items marked *owner console* edit global tables and are gated to bot owners with a passkey; see Section 3.1):
@@ -228,4 +247,4 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
 | STORY-163 | 5 | Command Overrides engine (repository, catalog, override middleware) and page | 4 (19) |
 | STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 2.3, 4 (13, 14) |
-| STORY-165 | 8 | Owner console: global economy settings and item shop manager | 3.1, 4 (8) |
+| STORY-165 | 13 | Owner console: global economy settings, live bank capacity, item shop manager, item codes and a seed that works on Postgres | 3.1, 4 (8) |
