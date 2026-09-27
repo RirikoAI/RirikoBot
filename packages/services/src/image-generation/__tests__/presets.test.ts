@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { applyStylePreset, IMAGE_STYLE_PRESETS, DEFAULT_PRESET_NAME } from '../presets.js';
+import { IMAGE_STYLE_PRESET_IDS } from '@ririko/core';
 
 describe('ImageStylePresets (TASK-1321)', () => {
   it('applies default anime preset when none is provided', () => {
@@ -38,5 +39,11 @@ describe('ImageStylePresets (TASK-1321)', () => {
   it('gracefully falls back to default preset for unknown preset key', () => {
     const fallback = applyStylePreset('fantasy castle', undefined, 'non-existent-preset');
     expect(fallback.presetUsed).toBe('anime');
+  });
+});
+
+describe('image style presets (TASK-1163)', () => {
+  it('match the IDs the dashboard and /stablediffusion-model offer', () => {
+    expect(Object.keys(IMAGE_STYLE_PRESETS).sort()).toEqual([...IMAGE_STYLE_PRESET_IDS].sort());
   });
 });

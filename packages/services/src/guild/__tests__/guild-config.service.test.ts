@@ -11,6 +11,7 @@ import {
   ModerationRepository,
   MusicRepository,
   AiRepository,
+  ImageRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { DEFAULT_ESCALATION_STEPS } from '@ririko/core';
@@ -63,6 +64,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       autoVoice,
       music: new MusicRepository(db),
       ai: new AiRepository(db),
+      images: new ImageRepository(db),
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -797,6 +799,7 @@ describe('GuildConfigService ai (TASK-1162)', () => {
       autoVoice: new AutoVoiceRepository(db),
       music: new MusicRepository(db),
       ai,
+      images: new ImageRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -875,6 +878,76 @@ describe('GuildConfigService ai (TASK-1162)', () => {
     expect(values.model).toBeNull();
     // So saving another field does not fail on those values.
     await expect(service.update('g1', 'ai', { tools: [] }, dashboardActor)).resolves.toBeDefined();
+  });
+});
+
+describe('GuildConfigService images (TASK-1163)', () => {
+  let db: SqliteDatabaseClient;
+  let images: ImageRepository;
+  let service: GuildConfigService;
+
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    db = raw;
+    images = new ImageRepository(db);
+    service = new GuildConfigService({
+      db,
+      guildSettings: new GuildSettingsRepository(db),
+      moderation: new ModerationRepository(db),
+      commandSettings: new CommandSettingsRepository(db),
+      commandCatalog: new CommandCatalogRepository(db),
+      autoRoles: new AutoRoleRepository(db),
+      autoVoice: new AutoVoiceRepository(db),
+      music: new MusicRepository(db),
+      ai: new AiRepository(db),
+      images,
+      versions: new GuildConfigVersionRepository(db),
+      audit: new AuditLogRepository(db),
+      defaultPrefix: '!',
+      now: () => NOW,
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  it('saves and clears the defaults and the member limit', async () => {
+    expect(await service.get('g1', 'images')).toEqual({
+      defaultProvider: null,
+      memberDailyLimit: null,
+      defaultPreset: null,
+    });
+
+    await service.update(
+      'g1',
+      'images',
+      { defaultProvider: 'gemini', memberDailyLimit: '10', defaultPreset: 'fantasy' },
+      dashboardActor,
+    );
+    expect(await images.getGuildSettings('g1')).toEqual({
+      guildId: 'g1',
+      defaultProvider: 'gemini',
+      memberDailyLimit: 10,
+      defaultPreset: 'fantasy',
+    });
+
+    await service.update(
+      'g1',
+      'images',
+      { defaultProvider: '', memberDailyLimit: '' },
+      dashboardActor,
+    );
+    expect(await service.get('g1', 'images')).toEqual({
+      defaultProvider: null,
+      memberDailyLimit: null,
+      defaultPreset: 'fantasy',
+    });
   });
 });
 

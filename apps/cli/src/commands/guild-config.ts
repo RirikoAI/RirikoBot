@@ -19,6 +19,7 @@ import {
   ModerationRepository,
   MusicRepository,
   AiRepository,
+  ImageRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService, GuildConfigValidationError } from '@ririko/services/guild';
@@ -157,6 +158,7 @@ export function createGuildConfigService(db: DatabaseClient): GuildConfigService
     autoVoice: new AutoVoiceRepository(db),
     music: new MusicRepository(db),
     ai: new AiRepository(db),
+    images: new ImageRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,

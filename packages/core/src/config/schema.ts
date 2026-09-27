@@ -1,3 +1,4 @@
+import { DEFAULT_IMAGE_DAILY_QUOTA } from './images.js';
 import { z } from 'zod';
 import { ResetConfigShape } from '../time/reset-config.js';
 import { DEFAULT_COMMAND_PREFIX, PrefixSchema } from './guild-config.js';
@@ -70,6 +71,14 @@ const BaseAppConfigSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_BASE_URL: z.string().url().optional(),
   OLLAMA_BASE_URL: z.string().url().optional(),
+
+  // Optional Image Generation Providers & Quota
+  IMAGE_DEFAULT_PROVIDER: z.enum(['gemini', 'replicate', 'comfyui', 'mock']).default('gemini'),
+  IMAGE_DAILY_QUOTA: z.coerce.number().int().min(0).default(DEFAULT_IMAGE_DAILY_QUOTA),
+  REPLICATE_API_TOKEN: z.string().optional(),
+  COMFYUI_URL: z.string().url().optional(),
+  COMFYUI_BASE_URL: z.string().url().optional(),
+  SD_WEBUI_URL: z.string().url().optional(),
 
   // Optional Streaming & External Integrations
   TWITCH_CLIENT_ID: z.string().optional(),
