@@ -211,7 +211,9 @@ describe('StreamNotificationDispatcher (TASK-0802)', () => {
         },
       } as any;
 
-      const dispatcher = new StreamNotificationDispatcher(mockClient, streamRepo);
+      const dispatcher = new StreamNotificationDispatcher(mockClient, streamRepo, {
+        fetchFn: vi.fn(async () => new Response(null, { status: 404 })) as unknown as typeof fetch,
+      });
 
       const stream: LiveStreamInfo = {
         streamId: 'run_123',
