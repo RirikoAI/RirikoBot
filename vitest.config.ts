@@ -25,6 +25,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // Blocks network access; see the file for why.
+    setupFiles: ['./vitest.setup.ts'],
+    env: {
+      // createBotServices builds a YouTube adapter that fetches a PO token from youtube.com in
+      // the background unless both values are set.
+      YOUTUBE_PO_TOKEN: 'test-po-token',
+      YOUTUBE_VISITOR_DATA: 'test-visitor-data',
+    },
     include: ['packages/**/*.test.ts', 'apps/**/*.test.ts', 'scripts/**/*.test.ts'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**', '.local/**'],
     coverage: {

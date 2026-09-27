@@ -66,10 +66,13 @@ CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` wor
 | `secrets` | `gitleaks git` over the full history with `.gitleaks.toml` | gitleaks finds a secret that is not listed in `.gitleaksignore` |
 
 ### 4.1. Coverage
+- **Merge gate (standing rule for every contributor and agent)**: a PR is **not merged** unless it passes every threshold in `vitest.config.ts` `coverage.thresholds`. On 2026-09-28 they are lines 67%, functions 69%, statements 65% and branches 54%. The CircleCI `test` job fails below any of them. Run `pnpm test:coverage` before opening a PR, and cover the code you add or change with real tests.
 - `pnpm test:ci` runs Vitest with v8 coverage and writes `coverage/` (HTML, `lcov.info`, `coverage-summary.json`) and `test-results/junit.xml`. Run `pnpm test:coverage` locally for the same numbers.
 - Coverage counts every source file under `packages/*/src` and `apps/*/src`, including files no test imports.
 - **Ratchet rule**: `coverage.thresholds` in `vitest.config.ts` hold the measured baseline, rounded down. Raise them when coverage grows. Never lower them to get a build through; add tests instead.
 - Baseline on 2026-09-26: statements 65.8%, branches 54.5%, functions 69.3%, lines 67.2%.
+- Measured on 2026-09-28 (PR #658): statements 67.1%, branches 56.4%, functions 69.4%, lines 68.5%.
+- A test that imports a workspace package (`@ririko/database`, `@ririko/music`, ...) runs its built `dist/`, which coverage does not count. To cover a package's code, test it from inside that package with a relative import.
 
 ### 4.2. Where to find results
 - **Test results**: the CircleCI `test` job's *Tests* tab (from `junit.xml`) shows failures, per-test timing and flaky tests.
@@ -78,4 +81,7 @@ CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` wor
 
 ### 4.3. CI Environment
 - The `test` job runs on Linux in UTC with FFmpeg and `fonts-dejavu-core` installed. Tests must not depend on the host time zone, path style or locally installed fonts.
-- `packages/music/src/extractors/extractors.test.ts` calls YouTube, Spotify, SoundCloud and Deezer live. A live test that an upstream service blocks from CircleCI IPs may use `it.skipIf(process.env.CI)` only when another CI-run test covers the same code path; say which one in a comment.
+- **Tests run offline.** `vitest.setup.ts` refuses every connection and DNS lookup to a host other than loopback (`localhost`, `127.*`, `::1`), and fails the test that tried with `This test tried to reach the network: <hosts>`. Live calls used to pass or time out depending on how fast YouTube, Spotify, SoundCloud or Deezer answered CircleCI.
+  - Replace the client with a fake: `vi.mock` the SDK module (see `packages/music/src/extractors/extractors.test.ts`), `vi.stubGlobal('fetch', ...)`, or pass a `fetchFn` where the class accepts one.
+  - A YouTube adapter generates a PO token from youtube.com in the background. Build it with `autoGeneratePoToken: false` (or `youtubeOptions: { autoGeneratePoToken: false }`). `vitest.config.ts` sets `YOUTUBE_PO_TOKEN` and `YOUTUBE_VISITOR_DATA` so `createBotServices` skips it too.
+  - Do not skip a test on CI to hide a live call. Fake the service instead.
