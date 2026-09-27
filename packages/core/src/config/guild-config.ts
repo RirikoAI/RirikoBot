@@ -10,6 +10,11 @@ import {
   AI_TOOL_NAMES,
   MAX_AI_PERSONA_PROMPT_LENGTH,
 } from './ai.js';
+import {
+  IMAGE_PROVIDER_IDS,
+  IMAGE_STYLE_PRESET_IDS,
+  MAX_IMAGE_MEMBER_DAILY_LIMIT,
+} from './images.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
 export const DEFAULT_COMMAND_PREFIX = '!';
@@ -155,13 +160,18 @@ export function OptionalTextSetting(max: number) {
   );
 }
 
-/** One of `values`, or `null`; an empty string (or `none` from the CLI) clears it. */
+/**
+ * One of `values`, or `null`; an empty string clears it, and so does `none` from the CLI
+ * unless `none` is one of the values.
+ */
 export function OptionalChoiceSetting<T extends [string, ...string[]]>(values: T) {
+  const clears = (text: string) =>
+    text === '' || (text.toLowerCase() === 'none' && !values.includes('none'));
   return z.preprocess(
     (value) => {
       if (typeof value !== 'string') return value;
       const trimmed = value.trim();
-      return trimmed === '' || trimmed.toLowerCase() === 'none' ? null : trimmed;
+      return clears(trimmed) ? null : trimmed;
     },
     z
       .enum(values, { errorMap: () => ({ message: `Choose one of ${values.join(', ')}.` }) })
@@ -369,6 +379,19 @@ export const GuildConfigSchemas = {
       ),
       model: OptionalChoiceSetting(AI_MODEL_CHOICES).describe(
         'Preferred provider and model as provider or provider/model, e.g. gemini/gemini-2.5-pro; empty for the bot default',
+      ),
+    })
+    .strict(),
+  images: z
+    .object({
+      defaultProvider: OptionalChoiceSetting([...IMAGE_PROVIDER_IDS]).describe(
+        `Provider /imagine uses when the member picks none: ${IMAGE_PROVIDER_IDS.join(', ')}; empty for the bot default`,
+      ),
+      memberDailyLimit: OptionalIntSetting(1, MAX_IMAGE_MEMBER_DAILY_LIMIT).describe(
+        `Images each member may generate here in 24 hours (1 to ${MAX_IMAGE_MEMBER_DAILY_LIMIT}), never more than the bot quota; empty for the bot quota only`,
+      ),
+      defaultPreset: OptionalChoiceSetting(IMAGE_STYLE_PRESET_IDS).describe(
+        `Style preset /imagine uses when the member picks none: ${IMAGE_STYLE_PRESET_IDS.join(', ')}; empty for anime`,
       ),
     })
     .strict(),

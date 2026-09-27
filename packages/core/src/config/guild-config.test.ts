@@ -167,6 +167,7 @@ describe('GuildConfigSchemas', () => {
       'games',
       'music',
       'ai',
+      'images',
     ]);
     expect(Object.keys(GuildConfigSchemas.general.shape)).toEqual(['prefix', 'timezone']);
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);

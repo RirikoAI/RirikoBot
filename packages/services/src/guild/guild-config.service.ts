@@ -12,6 +12,8 @@ import {
   MAX_AI_PERSONA_PROMPT_LENGTH,
   parseAiModelChoice,
   type AiSpeakingStyle,
+  IMAGE_PROVIDER_IDS,
+  IMAGE_STYLE_PRESET_IDS,
   GuildConfigSchemas,
   ValidationError,
   WAGER_GAME_COMMANDS,
@@ -39,6 +41,7 @@ import {
   type ModerationRule,
   type MusicRepository,
   type AiRepository,
+  type ImageRepository,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
@@ -218,6 +221,7 @@ export interface GuildConfigServiceDeps {
   autoVoice: AutoVoiceRepository;
   music: MusicRepository;
   ai: AiRepository;
+  images: ImageRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -484,6 +488,21 @@ export class GuildConfigService {
           );
           if (values.channelId === null) await deps.ai.removeAiChannel(guildId, tx);
           else await deps.ai.setAiChannel(guildId, values.channelId, tx);
+        },
+      },
+      images: {
+        read: async (guildId, tx) => {
+          const row = await deps.images.getGuildSettings(guildId, tx);
+          const provider = IMAGE_PROVIDER_IDS.find((id) => id === row?.defaultProvider);
+          const preset = IMAGE_STYLE_PRESET_IDS.find((id) => id === row?.defaultPreset);
+          return {
+            defaultProvider: provider ?? null,
+            memberDailyLimit: row?.memberDailyLimit ?? null,
+            defaultPreset: preset ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.images.saveGuildSettings({ guildId, ...values }, tx);
         },
       },
     };

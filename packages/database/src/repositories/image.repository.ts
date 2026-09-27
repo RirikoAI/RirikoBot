@@ -1,4 +1,4 @@
-import { eq, and, desc, inArray } from 'drizzle-orm';
+import { eq, and, desc, gte, inArray, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
@@ -11,6 +11,7 @@ import type {
   NewImageProvider,
   ImageUsage,
   NewImageUsage,
+  ImageGuildSettings,
 } from '../schema/types/index.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
@@ -285,6 +286,93 @@ export class ImageRepository extends BaseRepository<ImageJob, NewImageJob, Parti
         )
         .returning();
       return updated as unknown as ImageUsage;
+    }
+  }
+
+  /**
+   * Images a user generated since `since` (completed jobs), in one guild when `guildId` is
+   * given, otherwise everywhere. Daily limits count these, whichever provider made them.
+   */
+  async countCompletedJobsSince(
+    userId: string,
+    since: Date,
+    guildId?: string,
+    tx?: DatabaseClient,
+  ): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const t = sqliteSchema.imageJobs;
+      const [row] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(t)
+        .where(
+          and(
+            eq(t.userId, userId),
+            eq(t.status, 'COMPLETED'),
+            gte(t.createdAt, since),
+            guildId === undefined ? undefined : eq(t.guildId, guildId),
+          ),
+        );
+      return Number(row?.count ?? 0);
+    } else {
+      const t = pgSchema.imageJobs;
+      const [row] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(t)
+        .where(
+          and(
+            eq(t.userId, userId),
+            eq(t.status, 'COMPLETED'),
+            gte(t.createdAt, since),
+            guildId === undefined ? undefined : eq(t.guildId, guildId),
+          ),
+        );
+      return Number(row?.count ?? 0);
+    }
+  }
+
+  // --- Guild Settings ---
+
+  async getGuildSettings(guildId: string, tx?: DatabaseClient): Promise<ImageGuildSettings | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .select()
+        .from(sqliteSchema.imageGuildSettings)
+        .where(eq(sqliteSchema.imageGuildSettings.guildId, guildId));
+      return (row as ImageGuildSettings) ?? null;
+    } else {
+      const [row] = await client.db
+        .select()
+        .from(pgSchema.imageGuildSettings)
+        .where(eq(pgSchema.imageGuildSettings.guildId, guildId));
+      return (row as unknown as ImageGuildSettings) ?? null;
+    }
+  }
+
+  /** Replaces the guild's settings; `null` fields fall back to the bot's defaults. */
+  async saveGuildSettings(
+    settings: ImageGuildSettings,
+    tx?: DatabaseClient,
+  ): Promise<ImageGuildSettings> {
+    const client = this.getClient(tx);
+    const { guildId, ...values } = settings;
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .insert(sqliteSchema.imageGuildSettings)
+        .values(settings)
+        .onConflictDoUpdate({ target: sqliteSchema.imageGuildSettings.guildId, set: values })
+        .returning();
+      if (!row) throw new DatabaseError(`Failed to save image settings for guild ${guildId}`);
+      return row as ImageGuildSettings;
+    } else {
+      const [row] = await client.db
+        .insert(pgSchema.imageGuildSettings)
+        .values(settings)
+        .onConflictDoUpdate({ target: pgSchema.imageGuildSettings.guildId, set: values })
+        .returning();
+      if (!row) throw new DatabaseError(`Failed to save image settings for guild ${guildId}`);
+      return row as unknown as ImageGuildSettings;
     }
   }
 

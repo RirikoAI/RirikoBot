@@ -83,6 +83,8 @@ export type ImageProvider = typeof sqlite.imageProviders.$inferSelect;
 export type NewImageProvider = typeof sqlite.imageProviders.$inferInsert;
 export type ImageUsage = typeof sqlite.imageUsage.$inferSelect;
 export type NewImageUsage = typeof sqlite.imageUsage.$inferInsert;
+export type ImageGuildSettings = typeof sqlite.imageGuildSettings.$inferSelect;
+export type NewImageGuildSettings = typeof sqlite.imageGuildSettings.$inferInsert;
 
 // Giveaways
 export type Giveaway = typeof sqlite.giveaways.$inferSelect;
