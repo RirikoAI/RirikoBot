@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { MusicPlayerService } from './music-player.service.js';
 import { LavalinkQueueAdapter } from '../lavalink/lavalink-service.js';
 import type { Player } from 'lavalink-client';
+import type { QueuedTrack } from '../queue/types.js';
+import type { PlayOptions } from './types.js';
 
 // Skips the background PO token fetch from youtube.com; these tests never play YouTube.
 const offline = { youtubeOptions: { autoGeneratePoToken: false } };
@@ -181,5 +183,301 @@ describe('MusicPlayerService - auto-leave and settings changes (TASK-1161)', () 
     expect(await service.resolveVolumeForGuild('g1')).toBe(30);
     service.forgetGuildSettings('g1');
     expect(await service.resolveVolumeForGuild('g1')).toBe(90);
+  });
+});
+
+const requester = { id: 'user-1', username: 'alice' };
+
+function queuedTrack(id: string, getStream: QueuedTrack['getStream']): QueuedTrack {
+  return {
+    id,
+    title: `Song ${id}`,
+    artist: 'Artist',
+    durationSeconds: 180,
+    url: `https://example.test/${id}`,
+    source: 'direct',
+    requestedBy: requester,
+    addedAt: new Date(),
+    getStream,
+  };
+}
+
+const failingStream = async (): Promise<never> => {
+  throw new Error('stream gone');
+};
+const pendingStream = () => new Promise<never>(() => undefined);
+
+describe('MusicPlayerService - Lavalink backend', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function lavalinkBacked() {
+    const service = new MusicPlayerService({
+      ...offline,
+      lavalink: { node: { host: '127.0.0.1', port: 2333 } },
+    });
+    const lavalink = service.lavalinkService!;
+    vi.spyOn(lavalink, 'isReady').mockReturnValue(true);
+    return { service, lavalink };
+  }
+
+  it('is off unless Lavalink options are given and enabled', () => {
+    expect(new MusicPlayerService(offline).lavalinkService).toBeUndefined();
+    expect(
+      new MusicPlayerService({ ...offline, lavalink: { enabled: false } }).lavalinkService,
+    ).toBeUndefined();
+    expect(new MusicPlayerService(offline).isLavalinkActive()).toBe(false);
+  });
+
+  it('re-emits every Lavalink player event', () => {
+    const { service, lavalink } = lavalinkBacked();
+    const events: unknown[][] = [];
+    const names = [
+      'trackStart',
+      'trackEnd',
+      'stateChange',
+      'queueEnd',
+      'volumeChange',
+      'loopChange',
+      'filterChange',
+      'queueShuffled',
+    ];
+    for (const name of names) {
+      service.on(name, (...args: unknown[]) => events.push([name, ...args]));
+      lavalink.emit(name, 'guild-1', 'a', 'b');
+    }
+
+    expect(events).toEqual([
+      ['trackStart', 'guild-1', 'a'],
+      ['trackEnd', 'guild-1', 'a', 'b'],
+      ['stateChange', 'guild-1', 'a', 'b'],
+      ['queueEnd', 'guild-1'],
+      ['volumeChange', 'guild-1', 'a', 'b'],
+      ['loopChange', 'guild-1', 'a', 'b'],
+      ['filterChange', 'guild-1', 'a', 'b'],
+      ['queueShuffled', 'guild-1', 'a'],
+    ]);
+  });
+
+  it('forwards setup calls to the Lavalink service', async () => {
+    const { service, lavalink } = lavalinkBacked();
+    const init = vi.spyOn(lavalink, 'init').mockResolvedValue();
+    const raw = vi.spyOn(lavalink, 'sendRawData').mockImplementation(() => undefined);
+    const shard = vi.spyOn(lavalink, 'setSendToShard');
+    const send = vi.fn();
+
+    await service.initLavalink({ id: 'bot-1' });
+    service.sendRawData({ t: 'VOICE_STATE_UPDATE' });
+    service.setSendToShard(send);
+
+    expect(init).toHaveBeenCalledWith({ id: 'bot-1' });
+    expect(raw).toHaveBeenCalledWith({ t: 'VOICE_STATE_UPDATE' });
+    expect(shard).toHaveBeenCalledWith(send);
+  });
+
+  it('plays through Lavalink with the guild volume', async () => {
+    const { service, lavalink } = lavalinkBacked();
+    const result = { type: 'TRACK' as const, tracksAdded: 1, position: 0 };
+    const play = vi.spyOn(lavalink, 'play').mockResolvedValue(result);
+    const options = {
+      guildId: 'guild-1',
+      voiceChannelId: 'voice-1',
+      member: requester,
+      query: 'song',
+    } as PlayOptions;
+
+    expect(await service.play(options)).toBe(result);
+    expect(play).toHaveBeenCalledWith(options, 80);
+  });
+
+  it('routes every playback control to Lavalink', async () => {
+    const { service, lavalink } = lavalinkBacked();
+    const track = queuedTrack('a', failingStream);
+    const queue = { state: 'PLAYING', size: 3 };
+    vi.spyOn(lavalink, 'getQueue').mockReturnValue(queue as never);
+    const calls = {
+      pause: vi.spyOn(lavalink, 'pause').mockReturnValue(true),
+      resume: vi.spyOn(lavalink, 'resume').mockReturnValue(true),
+      skip: vi.spyOn(lavalink, 'skip').mockReturnValue(track),
+      previous: vi.spyOn(lavalink, 'previous').mockReturnValue(track),
+      stop: vi.spyOn(lavalink, 'stop').mockImplementation(() => undefined),
+      setVolume: vi.spyOn(lavalink, 'setVolume').mockReturnValue(true),
+      setLoopMode: vi.spyOn(lavalink, 'setLoopMode').mockReturnValue(true),
+      shuffle: vi.spyOn(lavalink, 'shuffle').mockReturnValue(true),
+      seek: vi.spyOn(lavalink, 'seek').mockReturnValue(true),
+      setFilter: vi.spyOn(lavalink, 'setFilter').mockReturnValue(true),
+      clearFilters: vi.spyOn(lavalink, 'clearFilters').mockReturnValue(true),
+      disconnect: vi.spyOn(lavalink, 'disconnect').mockImplementation(() => undefined),
+    };
+
+    expect(service.pause('guild-1')).toBe(true);
+    expect(service.resume('guild-1')).toBe(true);
+    expect(service.skip('guild-1')).toBe(track);
+    expect(service.previous('guild-1')).toBe(track);
+    expect(service.setVolume('guild-1', 400)).toBe(150);
+    expect(service.getGuildCachedVolume('guild-1')).toBe(150);
+    service.setLoopMode('guild-1', 'QUEUE');
+    expect(service.shuffle('guild-1')).toBe(3);
+    await service.seek('guild-1', 30);
+    expect(service.toggleFilter('guild-1', 'nightcore')).toBe(true);
+    service.setFilter('guild-1', 'karaoke', true);
+    service.setFilter('guild-1', 'karaoke', false);
+    service.clearFilters('guild-1');
+    expect(service.isPlaying('guild-1')).toBe(true);
+    expect(service.isPaused('guild-1')).toBe(false);
+    expect(service.getQueue('guild-1')).toBe(queue);
+    expect(service.getOrCreateQueue('guild-1', 'text-9')).toBe(queue);
+    service.leave('guild-1');
+    service.stop('guild-1');
+
+    expect(calls.setVolume).toHaveBeenCalledWith('guild-1', 400);
+    expect(calls.setLoopMode).toHaveBeenCalledWith('guild-1', 'QUEUE');
+    expect(calls.seek).toHaveBeenCalledWith('guild-1', 30);
+    expect(calls.setFilter).toHaveBeenCalledTimes(2);
+    expect(calls.clearFilters).toHaveBeenCalledTimes(2);
+    expect(calls.disconnect).toHaveBeenCalledWith('guild-1');
+    expect(calls.stop).toHaveBeenCalledWith('guild-1');
+    for (const spy of [calls.pause, calls.resume, calls.skip, calls.previous, calls.shuffle]) {
+      expect(spy).toHaveBeenCalledWith('guild-1');
+    }
+    expect((queue as { textChannelId?: string }).textChannelId).toBe('text-9');
+  });
+
+  it('joins voice by creating and connecting a Lavalink player', async () => {
+    const { service, lavalink } = lavalinkBacked();
+    const player = { connected: false, connect: vi.fn(async () => undefined) };
+    const createPlayer = vi
+      .spyOn(lavalink.manager, 'createPlayer')
+      .mockReturnValue(player as unknown as Player);
+
+    await service.join('guild-1', 'voice-1', vi.fn() as never);
+
+    expect(createPlayer).toHaveBeenCalledWith({
+      guildId: 'guild-1',
+      voiceChannelId: 'voice-1',
+      selfDeaf: true,
+      volume: 80,
+    });
+    expect(player.connect).toHaveBeenCalled();
+  });
+});
+
+describe('MusicPlayerService - built-in player', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('reports nothing for a guild without a queue', () => {
+    const service = new MusicPlayerService(offline);
+    expect(service.skip('guild-1')).toBeNull();
+    expect(service.previous('guild-1')).toBeNull();
+    expect(service.pause('guild-1')).toBe(false);
+    expect(service.resume('guild-1')).toBe(false);
+    expect(service.isPlaying('guild-1')).toBe(false);
+    expect(service.isPaused('guild-1')).toBe(false);
+    expect(service.getVoiceManager('guild-1')).toBeUndefined();
+  });
+
+  it('re-emits queue events for the guild', () => {
+    const service = new MusicPlayerService(offline);
+    const events: string[] = [];
+    for (const name of [
+      'trackAdded',
+      'tracksAdded',
+      'loopChange',
+      'queueShuffled',
+      'queueCleared',
+      'volumeChange',
+      'filterChange',
+    ]) {
+      service.on(name, (guildId: string) => events.push(`${name}:${guildId}`));
+    }
+
+    const queue = service.getOrCreateQueue('guild-1', 'text-1');
+    queue.addTrack(queuedTrack('a', pendingStream));
+    queue.addTracks([queuedTrack('b', pendingStream), queuedTrack('c', pendingStream)]);
+    service.setLoopMode('guild-1', 'QUEUE');
+    expect(service.shuffle('guild-1')).toBe(3);
+    expect(service.toggleFilter('guild-1', 'nightcore')).toBe(true);
+    service.setFilter('guild-1', 'vaporwave', true);
+    service.clearFilters('guild-1');
+    service.setVolume('guild-1', 40);
+    queue.clear();
+
+    expect(events).toEqual(
+      expect.arrayContaining([
+        'trackAdded:guild-1',
+        'tracksAdded:guild-1',
+        'loopChange:guild-1',
+        'queueShuffled:guild-1',
+        'queueCleared:guild-1',
+        'volumeChange:guild-1',
+        'filterChange:guild-1',
+      ]),
+    );
+    expect(service.getOrCreateQueue('guild-1', 'text-2').textChannelId).toBe('text-2');
+  });
+
+  it('skips tracks whose stream fails and reports the errors', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const service = new MusicPlayerService(offline);
+    const errors = vi.fn();
+    const queueEnd = vi.fn();
+    service.on('error', errors);
+    service.on('queueEnd', queueEnd);
+
+    const queue = service.getOrCreateQueue('guild-1');
+    queue.addTracks([queuedTrack('a', failingStream), queuedTrack('b', failingStream)]);
+    queue.start();
+
+    await vi.waitFor(() => expect(queueEnd).toHaveBeenCalledWith('guild-1'));
+    expect(errors).toHaveBeenCalledWith(
+      'guild-1',
+      expect.objectContaining({ message: 'stream gone' }),
+      expect.objectContaining({ id: 'a' }),
+    );
+    expect(errors).toHaveBeenCalledWith(
+      'guild-1',
+      expect.anything(),
+      expect.objectContaining({ id: 'b' }),
+    );
+  });
+
+  it('pauses, resumes, skips and goes back through the local queue', () => {
+    const service = new MusicPlayerService(offline);
+    const queue = service.getOrCreateQueue('guild-1');
+    queue.addTracks([queuedTrack('a', pendingStream), queuedTrack('b', pendingStream)]);
+    queue.start();
+    service.getOrCreateAudioPlayer('guild-1');
+
+    expect(service.isPlaying('guild-1')).toBe(false);
+    expect(service.pause('guild-1')).toBe(true);
+    expect(service.isPaused('guild-1')).toBe(true);
+    expect(service.resume('guild-1')).toBe(true);
+    expect(service.skip('guild-1')?.id).toBe('b');
+    expect(service.previous('guild-1')?.id).toBe('a');
+  });
+
+  it('cleans up the guild when its voice connection ends', () => {
+    const service = new MusicPlayerService(offline);
+    const voice = service.getOrCreateVoiceManager('guild-1');
+    expect(service.getOrCreateVoiceManager('guild-1')).toBe(voice);
+    service.getOrCreateAudioPlayer('guild-1');
+
+    voice.emit('disconnected', 'MANUAL');
+
+    expect(service.getVoiceManager('guild-1')).toBeUndefined();
+  });
+
+  it('logs error events that have no other listener', () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const service = new MusicPlayerService(offline);
+    service.emit('error', 'guild-1', new Error('boom'), { title: 'Song' });
+    expect(log).toHaveBeenCalledWith(
+      '[MusicPlayerService] Error event for guild guild-1:',
+      expect.any(Error),
+      'Song',
+    );
   });
 });
