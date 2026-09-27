@@ -22,6 +22,7 @@ import {
   AiRepository,
   ImageRepository,
   ReactionRoleRepository,
+  StreamRepository,
   GiveawayRepository,
   UserRepository,
   WebKnownDeviceRepository,
@@ -31,6 +32,7 @@ import {
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
 import { EconomyConfigService, ItemCatalogService } from '@ririko/services/owner';
+import { createStreamAdapters, StreamAlertService } from '@ririko/services/stream-alerts';
 import { DiscordOAuthClient } from './auth/discord-oauth';
 import { KnownDeviceService } from './auth/known-devices';
 import { PasskeyService } from './auth/passkeys';
@@ -71,6 +73,8 @@ export interface WebServices {
   /** Publishes and edits reaction role panels (after guard and passkey step-up). */
   reactionRolePanels: ReactionRolePanelService;
   giveaways: GiveawayManagementService;
+  /** Stream alert subscriptions, shared with `/stream` (after `requireGuildAccess`). */
+  streamAlerts: StreamAlertService;
   /** Global economy values for the owner console (after `requireOwner` or `runOwnerAction`). */
   economyConfig: EconomyConfigService;
   /** Global item shop for the owner console (after `requireOwner` or `runOwnerAction`). */
@@ -183,6 +187,14 @@ async function createWebServices(): Promise<WebServices> {
       audit,
       rest: botRest,
       resources: guildResources,
+    }),
+    // Handles are resolved with the same platform credentials as the bot; without them the
+    // cleaned handle is stored, as `/stream` does.
+    streamAlerts: new StreamAlertService({
+      db,
+      streams: new StreamRepository(db),
+      audit,
+      adapters: createStreamAdapters(config),
     }),
     economyConfig: new EconomyConfigService({
       db,

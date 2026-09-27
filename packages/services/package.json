@@ -22,6 +22,10 @@
       "types": "./dist/stream-platforms/index.d.ts",
       "import": "./dist/stream-platforms/index.js"
     },
+    "./stream-alerts": {
+      "types": "./dist/stream-alerts/index.d.ts",
+      "import": "./dist/stream-alerts/index.js"
+    },
     "./free-games": {
       "types": "./dist/free-games/index.d.ts",
       "import": "./dist/free-games/index.js"

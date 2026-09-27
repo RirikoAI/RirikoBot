@@ -87,9 +87,8 @@ import {
   AntiRaidService,
   StreamWatcherEngine,
   StreamNotificationDispatcher,
-  TwitchStreamAdapter,
-  YouTubeStreamAdapter,
-  TikTokStreamAdapter,
+  StreamAlertService,
+  createStreamAdapters,
   FreeGamesEngine,
   EpicGamesProvider,
   SteamFreeGamesProvider,
@@ -177,6 +176,8 @@ export interface BotServices {
   autoVoiceRepo: AutoVoiceRepository;
   autoVoiceService: AutoVoiceService;
   streamWatcher: StreamWatcherEngine;
+  /** Stream alert subscriptions, shared with the dashboard. */
+  streamAlertService: StreamAlertService;
   streamDispatcher: StreamNotificationDispatcher | undefined;
   freeGamesEngine: FreeGamesEngine;
   giveawayEngine: GiveawayEngine;
@@ -683,23 +684,14 @@ export async function createBotServices(
     },
   });
 
-  streamWatcher.registerAdapter(
-    new TwitchStreamAdapter({
-      clientId: process.env.TWITCH_CLIENT_ID,
-      clientSecret: process.env.TWITCH_CLIENT_SECRET,
-    }),
-  );
-  streamWatcher.registerAdapter(
-    new YouTubeStreamAdapter({
-      apiKey: process.env.YOUTUBE_API_KEY,
-    }),
-  );
-  streamWatcher.registerAdapter(
-    new TikTokStreamAdapter({
-      sessionId: process.env.TIKTOK_SESSION_ID,
-      apiKey: process.env.TIKTOK_API_KEY,
-    }),
-  );
+  const streamAdapters = createStreamAdapters(process.env);
+  for (const adapter of streamAdapters) streamWatcher.registerAdapter(adapter);
+  const streamAlertService = new StreamAlertService({
+    db,
+    streams: streamRepo,
+    audit: new AuditLogRepository(db),
+    adapters: streamAdapters,
+  });
 
   const freeGamesEngine: FreeGamesEngine = new FreeGamesEngine(freeGameRepo, {
     providers: [new EpicGamesProvider(), new SteamFreeGamesProvider()],
@@ -949,6 +941,7 @@ export async function createBotServices(
     autoVoiceRepo,
     autoVoiceService,
     streamWatcher,
+    streamAlertService,
     streamDispatcher,
     freeGamesEngine,
     giveawayEngine,
