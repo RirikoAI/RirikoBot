@@ -6,6 +6,20 @@ import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
 
+/** Categories of the default catalog, by code; the bot seeds any that are missing. */
+export const DEFAULT_ITEM_CATEGORY_CODES: readonly string[] = ['consumable', 'cosmetic'];
+
+/** Items of the default catalog, by code; the bot seeds any that are missing. */
+export const DEFAULT_SHOP_ITEM_CODES: readonly string[] = [
+  'candy_minor',
+  'stamina_potion',
+  'exp_potion_small',
+  'profile_bg_voucher',
+];
+
+/** Item and category IDs are uuids on Postgres; anything else can match no row there. */
+export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export interface ItemFindOptions {
   categoryId?: string | undefined;
   isPurchasable?: boolean | undefined;
@@ -29,6 +43,7 @@ export class ItemRepository extends BaseRepository<
         .where(eq(sqliteSchema.economyItems.id, id));
       return (row as EconomyItem) ?? null;
     } else {
+      if (!UUID_PATTERN.test(id)) return null;
       const [row] = await client.db
         .select()
         .from(pgSchema.economyItems)
@@ -39,6 +54,23 @@ export class ItemRepository extends BaseRepository<
         price: Number(row.price),
       } as unknown as EconomyItem;
     }
+  }
+
+  /** The item with the given stable code (`candy_minor`), if any. */
+  async findByCode(code: string, tx?: DatabaseClient): Promise<EconomyItem | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .select()
+        .from(sqliteSchema.economyItems)
+        .where(eq(sqliteSchema.economyItems.code, code));
+      return (row as EconomyItem) ?? null;
+    }
+    const [row] = await client.db
+      .select()
+      .from(pgSchema.economyItems)
+      .where(eq(pgSchema.economyItems.code, code));
+    return row ? ({ ...row, price: Number(row.price) } as unknown as EconomyItem) : null;
   }
 
   async exists(id: string, tx?: DatabaseClient): Promise<boolean> {

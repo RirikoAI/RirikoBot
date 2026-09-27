@@ -110,6 +110,7 @@ describe('ProfileBackgroundManager', () => {
 
       CREATE TABLE economy_items (
         id TEXT PRIMARY KEY,
+        code TEXT UNIQUE,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
         price INTEGER NOT NULL,

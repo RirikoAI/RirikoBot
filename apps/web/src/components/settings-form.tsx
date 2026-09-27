@@ -291,17 +291,20 @@ export function TextField({
   );
 }
 
-/** Whole-number input; the shared schema enforces the range, `min`/`max` guide the browser. */
+/**
+ * Whole-number input; the shared schema enforces the range, `min`/`max` guide the browser.
+ * A `null` value shows an empty input, for optional numbers.
+ */
 export function NumberField({
   min,
   max,
   defaultValue,
   ...field
-}: Omit<FieldProps, 'defaultValue'> & { min: number; max: number; defaultValue: number }) {
+}: Omit<FieldProps, 'defaultValue'> & { min: number; max: number; defaultValue: number | null }) {
   return (
     <Field
       {...field}
-      defaultValue={String(defaultValue)}
+      defaultValue={defaultValue === null ? '' : String(defaultValue)}
       control={(props) => (
         <input
           key={props.defaultValue}

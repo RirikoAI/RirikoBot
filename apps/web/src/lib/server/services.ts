@@ -11,6 +11,9 @@ import {
   CommandCatalogRepository,
   CommandSettingsRepository,
   EconomyConfigRepository,
+  InventoryRepository,
+  ItemCategoryRepository,
+  ItemRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -24,7 +27,7 @@ import {
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
-import { EconomyConfigService } from '@ririko/services/owner';
+import { EconomyConfigService, ItemCatalogService } from '@ririko/services/owner';
 import { DiscordOAuthClient } from './auth/discord-oauth';
 import { KnownDeviceService } from './auth/known-devices';
 import { PasskeyService } from './auth/passkeys';
@@ -67,6 +70,8 @@ export interface WebServices {
   giveaways: GiveawayManagementService;
   /** Global economy values for the owner console (after `requireOwner` or `runOwnerAction`). */
   economyConfig: EconomyConfigService;
+  /** Global item shop for the owner console (after `requireOwner` or `runOwnerAction`). */
+  itemCatalog: ItemCatalogService;
   /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
   commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
@@ -176,6 +181,13 @@ async function createWebServices(): Promise<WebServices> {
     economyConfig: new EconomyConfigService({
       db,
       repository: new EconomyConfigRepository(db),
+      audit,
+    }),
+    itemCatalog: new ItemCatalogService({
+      db,
+      items: new ItemRepository(db),
+      categories: new ItemCategoryRepository(db),
+      inventories: new InventoryRepository(db),
       audit,
     }),
     commandCatalog,

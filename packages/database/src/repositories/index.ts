@@ -4,6 +4,7 @@ export * from './user.repository.js';
 export * from './guild-settings.repository.js';
 export * from './economy.repository.js';
 export * from './economy-config.repository.js';
+export * from './item-category.repository.js';
 export * from './xp.repository.js';
 export * from './leaderboard.repository.js';
 export * from './item.repository.js';

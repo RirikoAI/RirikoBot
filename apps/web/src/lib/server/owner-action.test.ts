@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ValidationError } from '@ririko/core';
 import { GuildConfigValidationError } from '@ririko/services/guild';
 import { INITIAL_SETTINGS_FORM_STATE } from '@/lib/settings-form-state';
 import type { ActiveSession } from './auth/session-service';
@@ -8,6 +9,8 @@ const mocks = vi.hoisted(() => ({
   passkeyCount: 1,
   headers: new Headers({ origin: 'https://dash.example.com', 'user-agent': 'vitest' }),
   update: vi.fn(),
+  createItem: vi.fn(),
+  deleteItem: vi.fn(),
   revalidatePath: vi.fn(),
 }));
 
@@ -30,10 +33,12 @@ vi.mock('./services', () => ({
     sessions: { resolve: async () => mocks.session },
     passkeys: { count: async () => mocks.passkeyCount },
     economyConfig: { update: mocks.update },
+    itemCatalog: { createItem: mocks.createItem, deleteItem: mocks.deleteItem },
   }),
 }));
 
 const { saveEconomySettings } = await import('@/app/owner/economy/actions');
+const { createShopItem, deleteShopItem } = await import('@/app/owner/shop/actions');
 
 const session = (userId: string, stepUpAt: Date | null = new Date()): ActiveSession => ({
   id: 'hash',
@@ -49,7 +54,7 @@ function form(fields: Record<string, string>): FormData {
   return data;
 }
 
-describe('owner console actions (TASK-1651)', () => {
+describe('owner console actions (TASK-1651, TASK-1652)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.passkeyCount = 1;
@@ -131,5 +136,34 @@ describe('owner console actions (TASK-1651)', () => {
       fieldErrors: { dailyBaseReward: ['Enter a whole number from 0 to 1000000.'] },
       values: { dailyBaseReward: '-1' },
     });
+  });
+
+  it('shows refusals such as deleting a held item as the form message', async () => {
+    mocks.session = session('owner-1');
+    mocks.deleteItem.mockRejectedValue(
+      new ValidationError('2 members hold this item, so it can only be retired.'),
+    );
+    const state = await deleteShopItem(INITIAL_SETTINGS_FORM_STATE, form({ itemId: 'item-1' }));
+    expect(state).toEqual({
+      status: 'error',
+      message: '2 members hold this item, so it can only be retired.',
+      values: {},
+    });
+    expect(mocks.deleteItem).toHaveBeenCalledWith(
+      'item-1',
+      expect.objectContaining({ userId: 'owner-1' }),
+    );
+  });
+
+  it('opens the new item after creating it', async () => {
+    mocks.session = session('owner-1');
+    mocks.createItem.mockResolvedValue({ id: 'item-9' });
+    await expect(
+      createShopItem(INITIAL_SETTINGS_FORM_STATE, form({ code: 'gem', isPurchasable: 'on' })),
+    ).rejects.toThrow('REDIRECT /owner/shop/item-9');
+    expect(mocks.createItem).toHaveBeenCalledWith(
+      expect.objectContaining({ code: 'gem', isPurchasable: true }),
+      expect.objectContaining({ userId: 'owner-1', source: 'dashboard' }),
+    );
   });
 });
