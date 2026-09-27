@@ -14,6 +14,7 @@ In Ririko 1.4.0, stream monitoring was restricted to Twitch. It polled the Twitc
 2. **Idempotency & Deduplication Engine**: Record stream session IDs and notification dispatch states in an indexed `stream_notifications` table to guarantee that a live notification is sent exactly once per stream session per guild.
 3. **Thumbnail Proxy & CDN Caching**: Download live stream thumbnail assets, cache them in local storage / Redis, and attach them directly to Discord message payloads to prevent broken or expired image embeds.
 4. **Guild Customization**: Provide custom notification templates supporting dynamic placeholders (`{streamer}`, `{title}`, `{game}`, `{url}`, `{role}`) and custom ping roles.
+   - *Update (STORY-166, 2026-09-28):* `{platform}` is supported too. Announcements set `allowedMentions` to the subscription's role only, so text from a stream title can never ping users, `@everyone` or `@here`.
 
 ## Consequences
 ### Positive

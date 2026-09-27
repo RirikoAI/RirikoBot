@@ -182,9 +182,21 @@ The dashboard provides dedicated management views for all 20+ bot modules:
    - *Shipped in STORY-164 as `/dashboard/[guildId]/autovoice` (module `autovoice`, CLI key `autovoice.hubs`):* up to 20 hubs, each with its voice channel, a name template (`{user}`), a user limit and a bitrate preset capped at the guild's boost tier. The bot deletes only the channels it created (BUG-0021), and lowers a saved bitrate to what the guild allows when it creates a channel.
    - **Auto Roles** (`/dashboard/[guildId]/autoroles`, module `autoroles`, STORY-164): join roles for members and for bots (up to 10 each) with an on/off switch, and the verification role that `/autorole send-verify` buttons give. The pickers offer only roles Ririko can give, and the save checks them again against Discord.
 15. **Stream Alerts**: Streamer subscription list (Twitch/YouTube/TikTok), announcement templates, mention roles.
-   - *Moved to STORY-166 (2026-09-27)*, together with items 16 and 17.
+   - *Shipped in STORY-166 as `/dashboard/[guildId]/streams`:*
+     - Lists the server's subscriptions (platform, streamer, live state, channel, role) with a preview of each announcement, and adds, edits and removes them.
+     - `/stream` and the page share `StreamAlertService` (`@ririko/services/stream-alerts`). Both resolve handles with the same platform adapters and store uuid IDs; the command used to write text IDs, which Postgres refused.
+     - A server can follow up to 25 streamers, the most `/stream list` can show. An announcement message has at most 1000 characters and the variables `{streamer}`, `{title}`, `{game}`, `{platform}`, `{url}` and `{role}`.
+     - Announcements may ping only the subscription's role (`allowedMentions`), so a stream title with `@everyone` pings nobody.
+     - Changes are audited (`stream_alerts.subscribe`, `.update`, `.remove`, with `source` `dashboard` or `command`) and post change notices.
+     - The dashboard needs the same Twitch credentials as the bot to resolve Twitch handles; without them it stores the handle as typed, as `/stream` does.
 16. **Free Games**: Epic/Steam/GOG announcement channels and notification ping roles.
+   - *Shipped in STORY-166 as `/dashboard/[guildId]/freegames` (module `freegames`):* the announcement channel (empty turns announcements off) and a ping role, stored in `free_game_channels.mention_role_id`. The role is mentioned above each announcement and is the only mention allowed. `/freegames setchannel` takes an optional role too. The bot checks Epic Games Store and Steam; there is no GOG provider.
 17. **Welcome & Farewell**: Interactive canvas preview card editor with custom background uploads.
+   - *Shipped in STORY-166 as `/dashboard/[guildId]/welcome` and `/farewell` (modules `welcome` and `farewell`):*
+     - Settings: on/off, channel, message (up to 200 characters, `{user}`, `{server}`, `{memberCount}`), a `#rrggbb` text color and a background link. `/welcomer` and `/farewell` apply the same checks.
+     - The preview is the saved card drawn on the server by the bot's `WelcomerService`, with the viewer's name and avatar. `@napi-rs/canvas` is a server external package, loaded only by these pages.
+     - Background links must point to a public address. `assertPublicUrl` (`@ririko/services/net`, no canvas) checks the link when it is saved, from the dashboard, the CLI or the command, and again for every redirect when the bot or the preview fetches it.
+     - Uploads: PNG, JPEG, WebP or GIF, up to 2 MB and 4096 pixels a side, checked by their bytes. They are stored in `storage/welcomer-backgrounds` (shared by the bot and dashboard containers, see docs/deployment.md) and named in `guild_welcomer.background_file` / `guild_farewell.background_file`. An upload replaces the link and a link replaces the upload; older files are deleted.
 18. **Logging**: Channel bindings for message edits, deletes, voice joins, and role updates.
    - *Shipped in STORY-114:* the one channel the bot has, `guild_settings.log_channel_id`. It receives moderation cases, anti-raid alerts and dashboard change notices. The bot writes no message, voice or role logs, so per-event bindings would be placeholders.
 19. **Command Overrides**: Enable/disable specific commands or limit them to staff roles.
