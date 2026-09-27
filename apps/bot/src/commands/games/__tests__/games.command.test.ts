@@ -45,9 +45,9 @@ describe('Mini-Games Commands Suite (TASK-0922)', () => {
   });
 
   describe('Command Registration & Aliases', () => {
-    it('registers all 5 mini-game commands with proper metadata and legacy aliases', () => {
+    it('registers all 6 game commands with proper metadata and legacy aliases', () => {
       const commands = createGamesCommands(mockServices);
-      expect(commands).toHaveLength(5);
+      expect(commands).toHaveLength(6);
 
       const names = commands.map((c) => c.metadata.name);
       expect(names).toContain('tictactoe');
@@ -55,6 +55,7 @@ describe('Mini-Games Commands Suite (TASK-0922)', () => {
       expect(names).toContain('highlow');
       expect(names).toContain('coinflip');
       expect(names).toContain('dice');
+      expect(names).toContain('adventure');
 
       const ttt = commands.find((c) => c.metadata.name === 'tictactoe')!;
       expect(ttt.metadata.aliases).toContain('ttt');

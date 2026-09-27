@@ -70,6 +70,20 @@ export class ItemGrantService {
     obtainedFrom: string,
     tx?: DatabaseClient,
   ): Promise<ItemGrantResult> {
+    return this.inventoryRepo.inUserTransaction(
+      userId,
+      (client) => this.grantItemLocked(userId, item, quantity, obtainedFrom, client),
+      tx,
+    );
+  }
+
+  private async grantItemLocked(
+    userId: string,
+    item: GameItem,
+    quantity: number,
+    obtainedFrom: string,
+    tx: DatabaseClient,
+  ): Promise<ItemGrantResult> {
     if (quantity <= 0) return { item, quantity: 0, inventoryItems: [] };
 
     if (STACKABLE_TYPES.has(item.type)) {
@@ -117,6 +131,19 @@ export class ItemGrantService {
    * less than requested, before anything is changed.
    */
   async consume(userId: string, key: string, quantity: number, tx?: DatabaseClient): Promise<void> {
+    return this.inventoryRepo.inUserTransaction(
+      userId,
+      (client) => this.consumeLocked(userId, key, quantity, client),
+      tx,
+    );
+  }
+
+  private async consumeLocked(
+    userId: string,
+    key: string,
+    quantity: number,
+    tx: DatabaseClient,
+  ): Promise<void> {
     if (quantity <= 0) return;
     const item = await this.resolveItem(key, tx);
     if (!item) throw new Error(`Unknown item: ${key}`);

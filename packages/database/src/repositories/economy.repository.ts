@@ -210,6 +210,18 @@ export class EconomyRepository extends BaseRepository<
    * Modifies a user's wallet or bank balance atomically with negative-balance guardrails,
    * bank capacity validation, and an immutable double-entry ledger entry.
    */
+  async getBalanceForUpdate(userId: string, tx: DatabaseClient): Promise<EconomyBalance> {
+    const balance = await this.getOrCreateBalance(userId, 10000, tx);
+    if (tx.dialect === 'sqlite') return balance;
+    const [locked] = await tx.db
+      .select()
+      .from(pgSchema.economyBalances)
+      .where(eq(pgSchema.economyBalances.userId, userId))
+      .for('update');
+    if (!locked) throw new DatabaseError(`Missing balance ${userId}`);
+    return locked as unknown as EconomyBalance;
+  }
+
   async modifyBalance(
     params: ModifyBalanceParams,
     tx?: DatabaseClient,
@@ -217,7 +229,7 @@ export class EconomyRepository extends BaseRepository<
     const targetClient = this.getClient(tx);
 
     return withTransaction(targetClient, async (txClient) => {
-      const current = await this.getOrCreateBalance(params.userId, 10000, txClient);
+      const current = await this.getBalanceForUpdate(params.userId, txClient);
 
       const currentWallet = BigInt(current.walletBalance);
       const currentBank = BigInt(current.bankBalance);
@@ -356,8 +368,8 @@ export class EconomyRepository extends BaseRepository<
       const sortedUserIds = [params.fromUserId, params.toUserId].sort();
       const firstUserId = sortedUserIds[0];
       const secondUserId = sortedUserIds[1];
-      if (firstUserId) await this.getOrCreateBalance(firstUserId, 10000, txClient);
-      if (secondUserId) await this.getOrCreateBalance(secondUserId, 10000, txClient);
+      if (firstUserId) await this.getBalanceForUpdate(firstUserId, txClient);
+      if (secondUserId) await this.getBalanceForUpdate(secondUserId, txClient);
 
       // Debit sender
       const debitResult = await this.modifyBalance(

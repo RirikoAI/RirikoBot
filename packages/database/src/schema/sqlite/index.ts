@@ -11,6 +11,7 @@ export * from './streams.js';
 export * from './free-games.js';
 export * from './tcg.js';
 export * from './games.js';
+export * from './adventure.js';
 export * from './utilities.js';
 export * from './web.js';
 export * from './guild-config.js';

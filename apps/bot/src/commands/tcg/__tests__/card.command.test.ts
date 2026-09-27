@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   createDatabaseClient,
+  ensureCardSerialSchema,
   UserInventoryItemRepository,
   WaifuCardRepository,
   WaifuAssetRepository,
@@ -96,6 +97,7 @@ describe('Card Command Suite (TASK-1012)', () => {
       );
     `);
 
+    await ensureCardSerialSchema(client);
     cardRepo = new WaifuCardRepository(client);
     assetRepo = new WaifuAssetRepository(client);
 

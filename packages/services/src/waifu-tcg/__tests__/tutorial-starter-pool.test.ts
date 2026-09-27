@@ -51,12 +51,11 @@ function setup(options: {
       return list;
     }),
     getHighestSerialNumber: vi.fn().mockResolvedValue(4),
-    createUserCard: vi.fn(
-      async (data: { cardId: string; serialNumber: number; state: string }) => ({
-        id: 'uc1',
-        ...data,
-      }),
-    ),
+    mintUserCard: vi.fn(async (data: { cardId: string; serialNumber?: number; state: string }) => ({
+      id: 'uc1',
+      serialNumber: 5,
+      ...data,
+    })),
     create: vi.fn(),
   };
 

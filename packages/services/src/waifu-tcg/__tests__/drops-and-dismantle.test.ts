@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   createDatabaseClient,
+  ensureCardSerialSchema,
   UserInventoryItemRepository,
   WaifuCardRepository,
   WaifuAssetRepository,
@@ -92,6 +93,7 @@ describe('Waifu Chat Drops & Dismantle Engine (TASK-1012)', () => {
       );
     `);
 
+    await ensureCardSerialSchema(client);
     cardRepo = new WaifuCardRepository(client);
     assetRepo = new WaifuAssetRepository(client);
 

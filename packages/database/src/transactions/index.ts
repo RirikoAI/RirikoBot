@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { resolve } from 'node:path';
 import type {
   DatabaseClient,
   PostgresDatabaseClient,
@@ -31,10 +32,12 @@ class AsyncMutex {
 
 interface SqliteTxContext {
   depth: number;
+  raw: SqliteDatabaseClient['raw'];
 }
 
 const sqliteTxStorage = new AsyncLocalStorage<SqliteTxContext>();
 const SQLITE_MUTEX = Symbol('ririko:sqlite_tx_mutex');
+const sqliteFileMutexes = new Map<string, AsyncMutex>();
 
 type SqliteWithMutex = SqliteDatabaseClient['raw'] & {
   [SQLITE_MUTEX]?: AsyncMutex | undefined;
@@ -56,17 +59,29 @@ export async function withTransaction<T, TClient extends DatabaseClient = Databa
     const raw = client.raw as SqliteWithMutex;
     const parentContext = sqliteTxStorage.getStore();
 
-    if (!parentContext) {
+    if (!parentContext || parentContext.raw !== raw) {
+      if (parentContext && raw.name !== ':memory:' && parentContext.raw.name === raw.name) {
+        throw new DatabaseError(
+          'Cannot nest transactions across two connections to the same SQLite file',
+        );
+      }
       // Root transaction: acquire mutex across concurrent async tasks on this SQLite connection
       if (!raw[SQLITE_MUTEX]) {
-        raw[SQLITE_MUTEX] = new AsyncMutex();
+        if (raw.name === ':memory:' || raw.name === '') raw[SQLITE_MUTEX] = new AsyncMutex();
+        else {
+          const name =
+            process.platform === 'win32' ? resolve(raw.name).toLowerCase() : resolve(raw.name);
+          const mutex = sqliteFileMutexes.get(name) ?? new AsyncMutex();
+          sqliteFileMutexes.set(name, mutex);
+          raw[SQLITE_MUTEX] = mutex;
+        }
       }
       const releaseLock = await raw[SQLITE_MUTEX].acquire();
 
       try {
         raw.prepare('BEGIN IMMEDIATE').run();
         try {
-          const result = await sqliteTxStorage.run({ depth: 1 }, async () => {
+          const result = await sqliteTxStorage.run({ depth: 1, raw }, async () => {
             return await callback(client);
           });
           raw.prepare('COMMIT').run();
@@ -92,7 +107,7 @@ export async function withTransaction<T, TClient extends DatabaseClient = Databa
       const savepoint = `sp_${depth}`;
       raw.prepare(`SAVEPOINT ${savepoint}`).run();
       try {
-        const result = await sqliteTxStorage.run({ depth: depth + 1 }, async () => {
+        const result = await sqliteTxStorage.run({ depth: depth + 1, raw }, async () => {
           return await callback(client);
         });
         raw.prepare(`RELEASE SAVEPOINT ${savepoint}`).run();

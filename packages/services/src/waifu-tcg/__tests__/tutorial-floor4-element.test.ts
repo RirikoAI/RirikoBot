@@ -86,9 +86,9 @@ describe('Tutorial Floor T4 Dynamic Elemental Disadvantage & Counter Card Grant'
         return list;
       }),
       getHighestSerialNumber: vi.fn().mockResolvedValue(10),
-      createUserCard: vi.fn(
-        async (data: { userId: string; cardId: string; serialNumber: number; state: string }) => {
-          const row = { id: `uc_${userCards.length + 1}`, ...data };
+      mintUserCard: vi.fn(
+        async (data: { userId: string; cardId: string; serialNumber?: number; state: string }) => {
+          const row = { id: `uc_${userCards.length + 1}`, serialNumber: 11, ...data };
           userCards.push(row);
           return row;
         },
