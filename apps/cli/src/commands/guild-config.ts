@@ -17,6 +17,7 @@ import {
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
+  MusicRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService, GuildConfigValidationError } from '@ririko/services/guild';
@@ -153,6 +154,7 @@ export function createGuildConfigService(db: DatabaseClient): GuildConfigService
     commandCatalog: new CommandCatalogRepository(db),
     autoRoles: new AutoRoleRepository(db),
     autoVoice: new AutoVoiceRepository(db),
+    music: new MusicRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit: new AuditLogRepository(db),
     defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,

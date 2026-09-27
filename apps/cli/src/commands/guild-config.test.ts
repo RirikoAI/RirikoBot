@@ -47,7 +47,9 @@ describe('ririko guild:config (TASK-1113)', () => {
     expect(keys).toContain('autovoice.hubs');
     expect(keys).toContain('xp.noXpChannelIds');
     expect(keys).toContain('xp.voiceXpEnabled');
-    expect(keys.at(-1)).toBe('games.rules');
+    expect(keys).toContain('games.rules');
+    expect(keys).toContain('music.djRoleId');
+    expect(keys).toContain('music.autoLeaveEmpty');
     expect(listConfigKeys().every((entry) => entry.description.length > 0)).toBe(true);
   });
 

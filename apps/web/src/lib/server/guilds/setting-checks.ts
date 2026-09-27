@@ -67,6 +67,33 @@ export async function checkAssignableRoles(
 }
 
 /**
+ * Errors for a music channel that is not a text channel of the guild, or a DJ role the guild
+ * does not have. An empty value (none) is fine.
+ */
+export async function checkMusicSettings(
+  resources: Pick<GuildResourceDirectory, 'messageChannels' | 'memberRoles'>,
+  guildId: string,
+  fields: Record<string, unknown>,
+): Promise<Record<string, string[]>> {
+  const [channelId] = idsOf(fields.musicChannelId);
+  const [roleId] = idsOf(fields.djRoleId);
+  const errors: Record<string, string[]> = {};
+  if (channelId) {
+    const channels = await resources.messageChannels(guildId);
+    if (!channels.some((channel) => channel.id === channelId)) {
+      errors.musicChannelId = ['Choose a text channel of this server.'];
+    }
+  }
+  if (roleId) {
+    const roles = await resources.memberRoles(guildId);
+    if (!roles.some((role) => role.id === roleId)) {
+      errors.djRoleId = ['Choose a role of this server.'];
+    }
+  }
+  return errors;
+}
+
+/**
  * Errors for hubs that are not voice channels of the guild or ask for more bitrate than its
  * boost level allows, numbered by submitted row. Rows the schema rejects are left to it.
  */
