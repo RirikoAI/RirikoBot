@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import dns from 'node:dns/promises';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AuditLogRepository,
   AutoRoleRepository,
@@ -13,6 +14,7 @@ import {
   AiRepository,
   ImageRepository,
   FreeGameRepository,
+  WelcomerRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { DEFAULT_ESCALATION_STEPS } from '@ririko/core';
@@ -67,6 +69,7 @@ describe('GuildConfigService (TASK-1111)', () => {
       ai: new AiRepository(db),
       images: new ImageRepository(db),
       freeGames: new FreeGameRepository(db),
+      welcomer: new WelcomerRepository(db),
       versions,
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -811,6 +814,108 @@ describe('GuildConfigService (TASK-1111)', () => {
       ).rejects.toMatchObject({ fieldErrors: { channelId: expect.any(Array) } });
     });
   });
+
+  describe('welcome and farewell (TASK-1663)', () => {
+    const CHANNEL = '800000000000000001';
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('returns the defaults for a guild without a card', async () => {
+      expect(await service.get('g1', 'welcome')).toEqual({
+        enabled: false,
+        channelId: null,
+        messageTemplate: 'Welcome to {server}, {user}!',
+        textColor: '#ffffff',
+        backgroundUrl: null,
+      });
+      expect((await service.get('g1', 'farewell')).messageTemplate).toBe('Goodbye {user}!');
+    });
+
+    it('saves the card, and a link replaces an uploaded background', async () => {
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
+      const welcomer = new WelcomerRepository(db);
+      await welcomer.setWelcomeConfig({
+        guildId: 'g1',
+        channelId: CHANNEL,
+        messageTemplate: 'Hi',
+        cardTheme: 'DEFAULT',
+        backgroundUrl: null,
+        backgroundFile: 'upload.png',
+        textColor: '#ffffff',
+        isEnabled: true,
+      });
+
+      await service.update('g1', 'welcome', { textColor: '#FF0000' }, dashboardActor);
+      expect(await welcomer.getWelcomeConfig('g1')).toMatchObject({
+        textColor: '#ff0000',
+        backgroundFile: 'upload.png',
+      });
+
+      await service.update(
+        'g1',
+        'welcome',
+        { backgroundUrl: 'https://example.com/bg.png' },
+        dashboardActor,
+      );
+      expect(await welcomer.getWelcomeConfig('g1')).toMatchObject({
+        backgroundUrl: 'https://example.com/bg.png',
+        backgroundFile: null,
+      });
+    });
+
+    it('reads unchecked legacy values in a form that still saves', async () => {
+      const welcomer = new WelcomerRepository(db);
+      await welcomer.setFarewellConfig({
+        guildId: 'g1',
+        channelId: '',
+        messageTemplate: 'x'.repeat(500),
+        cardTheme: 'DEFAULT',
+        backgroundUrl: 'none',
+        backgroundFile: null,
+        textColor: 'red',
+        isEnabled: true,
+      });
+
+      const values = await service.get('g1', 'farewell');
+      expect(values).toMatchObject({
+        enabled: false,
+        channelId: null,
+        textColor: '#ffffff',
+        backgroundUrl: null,
+      });
+      expect(values.messageTemplate).toHaveLength(200);
+      await expect(
+        service.update('g1', 'farewell', { channelId: CHANNEL, enabled: 'true' }, dashboardActor),
+      ).resolves.toMatchObject({ values: { enabled: true, channelId: CHANNEL } });
+    });
+
+    it('rejects a background link to a local or private address', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'welcome',
+          { backgroundUrl: 'http://127.0.0.1/admin.png' },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({ fieldErrors: { backgroundUrl: expect.any(Array) } });
+      expect((await service.get('g1', 'welcome')).backgroundUrl).toBeNull();
+    });
+
+    it('rejects colors and links in the wrong form', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'welcome',
+          { textColor: 'blue', backgroundUrl: 'ftp://example.com/x.png' },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({
+        fieldErrors: { textColor: expect.any(Array), backgroundUrl: expect.any(Array) },
+      });
+    });
+  });
 });
 
 describe('GuildConfigService ai (TASK-1162)', () => {
@@ -840,6 +945,7 @@ describe('GuildConfigService ai (TASK-1162)', () => {
       ai,
       images: new ImageRepository(db),
       freeGames: new FreeGameRepository(db),
+      welcomer: new WelcomerRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',
@@ -947,6 +1053,7 @@ describe('GuildConfigService images (TASK-1163)', () => {
       ai: new AiRepository(db),
       images,
       freeGames: new FreeGameRepository(db),
+      welcomer: new WelcomerRepository(db),
       versions: new GuildConfigVersionRepository(db),
       audit: new AuditLogRepository(db),
       defaultPrefix: '!',

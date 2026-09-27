@@ -17,6 +17,8 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'images', label: 'Image Generation' },
   { slug: 'streams', label: 'Stream Alerts' },
   { slug: 'freegames', label: 'Free Games' },
+  { slug: 'welcome', label: 'Welcome Card' },
+  { slug: 'farewell', label: 'Farewell Card' },
   { slug: 'integrations', label: 'Integrations' },
   { slug: 'cases', label: 'Case Log' },
   { slug: 'audit-log', label: 'Audit Log' },

@@ -98,6 +98,8 @@ export const guildWelcomer = pgTable('guild_welcomer', {
   messageTemplate: text('message_template').notNull().default('Welcome to {server}, {user}!'),
   cardTheme: varchar('card_theme', { length: 64 }).notNull().default('DEFAULT'),
   backgroundUrl: text('background_url'),
+  /** Uploaded background in storage/welcomer-backgrounds; never set together with the URL. */
+  backgroundFile: text('background_file'),
   textColor: varchar('text_color', { length: 7 }).notNull().default('#ffffff'),
   isEnabled: boolean('is_enabled').notNull().default(true),
 });
@@ -108,6 +110,8 @@ export const guildFarewell = pgTable('guild_farewell', {
   messageTemplate: text('message_template').notNull().default('Goodbye {user}!'),
   cardTheme: varchar('card_theme', { length: 64 }).notNull().default('DEFAULT'),
   backgroundUrl: text('background_url'),
+  /** Uploaded background in storage/welcomer-backgrounds; never set together with the URL. */
+  backgroundFile: text('background_file'),
   textColor: varchar('text_color', { length: 7 }).notNull().default('#ffffff'),
   isEnabled: boolean('is_enabled').notNull().default(true),
 });
