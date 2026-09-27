@@ -93,6 +93,10 @@ const BaseAppConfigSchema = z.object({
   SPOTIFY_DC: z.string().optional(),
   SPOTIFY_KEY: z.string().optional(),
 
+  // Optional Lavalink audio node (the bot uses its built-in player without one)
+  LAVALINK_ENABLED: z.string().optional(),
+  LAVALINK_HOST: z.string().optional(),
+
   // Optional YouTube BotGuard & Authentication Credentials
   YOUTUBE_COOKIE: z.string().optional(),
   YOUTUBE_PO_TOKEN: z.string().optional(),

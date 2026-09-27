@@ -1,5 +1,6 @@
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
+import { configuredImageProviders, IMAGE_PROVIDER_LABELS } from '@ririko/core';
 import { createDatabaseClient, pingDatabase } from '@ririko/database';
 import { DiagnosticCheck } from './types.js';
 
@@ -292,13 +293,10 @@ export const imageGenerationCheck: DiagnosticCheck = {
   name: 'Image Generation Subsystem',
   required: false,
   run: () => {
-    const hasGemini = Boolean(process.env.GEMINI_API_KEY);
-    const hasComfyUi = Boolean(process.env.COMFYUI_BASE_URL);
-    const hasReplicate = Boolean(process.env.REPLICATE_API_TOKEN);
-    const configuredProviders: string[] = [];
-    if (hasGemini) configuredProviders.push('Gemini Imagen');
-    if (hasComfyUi) configuredProviders.push('ComfyUI');
-    if (hasReplicate) configuredProviders.push('Replicate');
+    // The same providers the dashboard offers.
+    const configuredProviders = configuredImageProviders(process.env).map(
+      (provider) => IMAGE_PROVIDER_LABELS[provider],
+    );
 
     const defaultProv = (process.env.IMAGE_DEFAULT_PROVIDER || 'gemini').toUpperCase();
 
