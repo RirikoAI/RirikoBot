@@ -44,7 +44,7 @@ import {
   ItemCategoryRepository,
   type DatabaseClient,
 } from '@ririko/database';
-import type { Client } from 'discord.js';
+import type { Client, MessageCreateOptions } from 'discord.js';
 import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 import { MusicPlayerService } from '@ririko/music';
 import {
@@ -92,9 +92,8 @@ import {
   AntiRaidService,
   StreamWatcherEngine,
   StreamNotificationDispatcher,
-  TwitchStreamAdapter,
-  YouTubeStreamAdapter,
-  TikTokStreamAdapter,
+  StreamAlertService,
+  createStreamAdapters,
   FreeGamesEngine,
   EpicGamesProvider,
   SteamFreeGamesProvider,
@@ -182,6 +181,8 @@ export interface BotServices {
   autoVoiceRepo: AutoVoiceRepository;
   autoVoiceService: AutoVoiceService;
   streamWatcher: StreamWatcherEngine;
+  /** Stream alert subscriptions, shared with the dashboard. */
+  streamAlertService: StreamAlertService;
   streamDispatcher: StreamNotificationDispatcher | undefined;
   freeGamesEngine: FreeGamesEngine;
   giveawayEngine: GiveawayEngine;
@@ -706,41 +707,36 @@ export async function createBotServices(
     },
   });
 
-  streamWatcher.registerAdapter(
-    new TwitchStreamAdapter({
-      clientId: process.env.TWITCH_CLIENT_ID,
-      clientSecret: process.env.TWITCH_CLIENT_SECRET,
-    }),
-  );
-  streamWatcher.registerAdapter(
-    new YouTubeStreamAdapter({
-      apiKey: process.env.YOUTUBE_API_KEY,
-    }),
-  );
-  streamWatcher.registerAdapter(
-    new TikTokStreamAdapter({
-      sessionId: process.env.TIKTOK_SESSION_ID,
-      apiKey: process.env.TIKTOK_API_KEY,
-    }),
-  );
+  const streamAdapters = createStreamAdapters(process.env);
+  for (const adapter of streamAdapters) streamWatcher.registerAdapter(adapter);
+  const streamAlertService = new StreamAlertService({
+    db,
+    streams: streamRepo,
+    audit: new AuditLogRepository(db),
+    adapters: streamAdapters,
+  });
 
   const freeGamesEngine: FreeGamesEngine = new FreeGamesEngine(freeGameRepo, {
     providers: [new EpicGamesProvider(), new SteamFreeGamesProvider()],
-    onAnnounceGame: async (
-      _guildId: string,
-      channelId: string,
-      game: FreeGameItem,
-    ): Promise<string | null> => {
+    onAnnounceGame: async (target, game: FreeGameItem): Promise<string | null> => {
       if (!discordClient) return null;
       try {
-        const channel = await discordClient.channels.fetch(channelId).catch(() => null);
+        const channel = await discordClient.channels.fetch(target.channelId).catch(() => null);
         if (channel && channel.isTextBased() && 'send' in channel) {
-          const embed = freeGamesEngine.formatGameEmbed(game);
-          const msg = await (channel as any).send({ embeds: [embed] });
-          return (msg?.id as string) ?? null;
+          // The embed is plain JSON with optional keys set to undefined, which discord.js accepts.
+          const msg = await channel.send(
+            freeGamesEngine.formatAnnouncement(
+              game,
+              target.mentionRoleId,
+            ) as unknown as MessageCreateOptions,
+          );
+          return msg.id;
         }
       } catch (err) {
-        console.error(`[FreeGamesEngine] Failed to post alert in channel ${channelId}:`, err);
+        console.error(
+          `[FreeGamesEngine] Failed to post alert in channel ${target.channelId}:`,
+          err,
+        );
       }
       return null;
     },
@@ -972,6 +968,7 @@ export async function createBotServices(
     autoVoiceRepo,
     autoVoiceService,
     streamWatcher,
+    streamAlertService,
     streamDispatcher,
     freeGamesEngine,
     giveawayEngine,

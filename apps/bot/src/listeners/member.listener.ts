@@ -72,7 +72,7 @@ export function registerMemberListener(client: Client, services: BotServices): v
             memberCount: member.guild.memberCount,
             serverName: member.guild.name,
             messageText: welcomeConfig.messageTemplate,
-            backgroundUrl: welcomeConfig.backgroundUrl,
+            background: await services.welcomerService.loadBackground(welcomeConfig),
             textColor: welcomeConfig.textColor,
             isFarewell: false,
           });
@@ -106,7 +106,7 @@ export function registerMemberListener(client: Client, services: BotServices): v
             memberCount: member.guild.memberCount,
             serverName: member.guild.name,
             messageText: farewellConfig.messageTemplate,
-            backgroundUrl: farewellConfig.backgroundUrl,
+            background: await services.welcomerService.loadBackground(farewellConfig),
             textColor: farewellConfig.textColor,
             isFarewell: true,
           });

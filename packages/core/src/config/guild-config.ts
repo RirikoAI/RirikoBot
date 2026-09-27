@@ -15,6 +15,12 @@ import {
   IMAGE_STYLE_PRESET_IDS,
   MAX_IMAGE_MEMBER_DAILY_LIMIT,
 } from './images.js';
+import {
+  HexColorSetting,
+  MAX_WELCOMER_MESSAGE_LENGTH,
+  OptionalImageUrlSetting,
+  WelcomerMessageSetting,
+} from './welcomer.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
 export const DEFAULT_COMMAND_PREFIX = '!';
@@ -392,6 +398,46 @@ export const GuildConfigSchemas = {
       ),
       defaultPreset: OptionalChoiceSetting(IMAGE_STYLE_PRESET_IDS).describe(
         `Style preset /imagine uses when the member picks none: ${IMAGE_STYLE_PRESET_IDS.join(', ')}; empty for anime`,
+      ),
+    })
+    .strict(),
+  freegames: z
+    .object({
+      channelId: OptionalSnowflakeSetting.describe(
+        'Channel for free game announcements from Epic Games Store and Steam; empty turns them off',
+      ),
+      pingRoleId: OptionalSnowflakeSetting.describe(
+        'Role pinged with each free game announcement (needs a channel); empty pings nobody',
+      ),
+    })
+    .strict(),
+  welcome: z
+    .object({
+      enabled: FlagSetting.describe('Welcome card on or off (needs a channel)'),
+      channelId: OptionalSnowflakeSetting.describe(
+        'Channel the welcome card is posted in when a member joins',
+      ),
+      messageTemplate: WelcomerMessageSetting.describe(
+        `Message under the name, up to ${MAX_WELCOMER_MESSAGE_LENGTH} characters; {user}, {server} and {memberCount} are replaced`,
+      ),
+      textColor: HexColorSetting.describe('Text and border color as #rrggbb'),
+      backgroundUrl: OptionalImageUrlSetting.describe(
+        'Background image link (public http or https); empty for the uploaded image or the default',
+      ),
+    })
+    .strict(),
+  farewell: z
+    .object({
+      enabled: FlagSetting.describe('Farewell card on or off (needs a channel)'),
+      channelId: OptionalSnowflakeSetting.describe(
+        'Channel the farewell card is posted in when a member leaves',
+      ),
+      messageTemplate: WelcomerMessageSetting.describe(
+        `Message under the name, up to ${MAX_WELCOMER_MESSAGE_LENGTH} characters; {user}, {server} and {memberCount} are replaced`,
+      ),
+      textColor: HexColorSetting.describe('Text and border color as #rrggbb'),
+      backgroundUrl: OptionalImageUrlSetting.describe(
+        'Background image link (public http or https); empty for the uploaded image or the default',
       ),
     })
     .strict(),

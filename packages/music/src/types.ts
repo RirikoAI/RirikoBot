@@ -68,6 +68,7 @@ export interface ExtractorPipelineOptions {
         visitorData?: string | undefined;
         clientType?: string | undefined;
         requestTimeoutMs?: number | undefined;
+        autoGeneratePoToken?: boolean | undefined;
       }
     | undefined;
 }

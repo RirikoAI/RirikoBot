@@ -12,3 +12,4 @@ export * from './games.js';
 export * from './reaction-roles.js';
 export * from './economy.js';
 export * from './shop.js';
+export * from './welcomer.js';

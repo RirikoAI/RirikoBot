@@ -38,6 +38,15 @@ export interface AddSubscriptionInput {
   mentionRoleId?: string | null | undefined;
 }
 
+export interface UpdateSubscriptionInput {
+  channelId?: string | undefined;
+  customMessage?: string | null | undefined;
+  mentionRoleId?: string | null | undefined;
+}
+
+/** Postgres stores stream IDs as uuid; comparing a uuid column with another string fails. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export interface RecordStreamEventInput {
   id?: string | undefined;
   streamerId: string;
@@ -514,6 +523,103 @@ export class StreamRepository extends BaseRepository<Streamer, NewStreamer, Part
         .where(eq(pgSchema.streamSubscriptions.guildId, guildId));
       return rows as unknown as StreamSubscription[];
     }
+  }
+
+  /** A subscription by ID. IDs are uuids on Postgres, so any other string finds nothing there. */
+  async findSubscriptionById(id: string, tx?: DatabaseClient): Promise<StreamSubscription | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .select()
+        .from(sqliteSchema.streamSubscriptions)
+        .where(eq(sqliteSchema.streamSubscriptions.id, id));
+      return (row as StreamSubscription) ?? null;
+    }
+    if (!UUID.test(id)) return null;
+    const [row] = await client.db
+      .select()
+      .from(pgSchema.streamSubscriptions)
+      .where(eq(pgSchema.streamSubscriptions.id, id));
+    return (row as unknown as StreamSubscription) ?? null;
+  }
+
+  async countSubscriptionsByGuild(guildId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(sqliteSchema.streamSubscriptions)
+        .where(eq(sqliteSchema.streamSubscriptions.guildId, guildId));
+      return Number(row?.count ?? 0);
+    }
+    const [row] = await client.db
+      .select({ count: sql<number>`count(*)` })
+      .from(pgSchema.streamSubscriptions)
+      .where(eq(pgSchema.streamSubscriptions.guildId, guildId));
+    return Number(row?.count ?? 0);
+  }
+
+  /** Changes a guild's subscription; null when it is not one of the guild's. */
+  async updateSubscription(
+    guildId: string,
+    id: string,
+    data: UpdateSubscriptionInput,
+    tx?: DatabaseClient,
+  ): Promise<StreamSubscription | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const [row] = await client.db
+        .update(sqliteSchema.streamSubscriptions)
+        .set(data)
+        .where(
+          and(
+            eq(sqliteSchema.streamSubscriptions.id, id),
+            eq(sqliteSchema.streamSubscriptions.guildId, guildId),
+          ),
+        )
+        .returning();
+      return (row as StreamSubscription) ?? null;
+    }
+    if (!UUID.test(id)) return null;
+    const [row] = await client.db
+      .update(pgSchema.streamSubscriptions)
+      .set(data)
+      .where(
+        and(
+          eq(pgSchema.streamSubscriptions.id, id),
+          eq(pgSchema.streamSubscriptions.guildId, guildId),
+        ),
+      )
+      .returning();
+    return (row as unknown as StreamSubscription) ?? null;
+  }
+
+  /** Deletes a guild's subscription by ID; false when it is not one of the guild's. */
+  async removeSubscriptionById(guildId: string, id: string, tx?: DatabaseClient): Promise<boolean> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const deleted = await client.db
+        .delete(sqliteSchema.streamSubscriptions)
+        .where(
+          and(
+            eq(sqliteSchema.streamSubscriptions.id, id),
+            eq(sqliteSchema.streamSubscriptions.guildId, guildId),
+          ),
+        )
+        .returning();
+      return deleted.length > 0;
+    }
+    if (!UUID.test(id)) return false;
+    const deleted = await client.db
+      .delete(pgSchema.streamSubscriptions)
+      .where(
+        and(
+          eq(pgSchema.streamSubscriptions.id, id),
+          eq(pgSchema.streamSubscriptions.guildId, guildId),
+        ),
+      )
+      .returning();
+    return deleted.length > 0;
   }
 
   async listGuildSubscriptionsWithStreamers(

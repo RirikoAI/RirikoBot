@@ -918,7 +918,7 @@
       "epic": "EPIC-011",
       "title": "Music, AI Chatbot, Image Generation & Integrations Pages",
       "points": 13,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-111",
         "STORY-117"
@@ -933,7 +933,7 @@
       "epic": "EPIC-011",
       "title": "Stream Alerts, Free Games & Welcome & Farewell Pages",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-116",
         "STORY-133"
@@ -2970,7 +2970,7 @@
       "parent": "STORY-166",
       "title": "Stream Alerts Page (Subscriptions, Templates, Mention Roles), uuid IDs on Postgres & Shared Handle Parsing",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-116"
       ],
@@ -2984,7 +2984,7 @@
       "parent": "STORY-166",
       "title": "Free Games Page (Channel, Ping Role Wired into Announcements)",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1661"
       ],
@@ -2998,7 +2998,7 @@
       "parent": "STORY-166",
       "title": "Welcome & Farewell Editor (Server-Rendered Preview, SSRF-Safe Background URL & Upload)",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1662",
         "STORY-133"
