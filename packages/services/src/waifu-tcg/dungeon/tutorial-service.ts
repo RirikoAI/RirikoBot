@@ -308,12 +308,9 @@ export class TutorialService {
     const byPower = [...candidates].sort((a, b) => starterPower(b) - starterPower(a));
     const pool = byPower.slice(0, Math.max(1, Math.ceil(byPower.length / 2)));
     const chosen = pool[Math.floor(this.randomFn() * pool.length)]!;
-    const serialNumber = (await this.cardRepo.getHighestSerialNumber(chosen.id)) + 1;
-
-    return this.cardRepo.createUserCard({
+    return this.cardRepo.mintUserCard({
       userId,
       cardId: chosen.id,
-      serialNumber,
       state: 'EQUIPPED',
     });
   }
@@ -465,11 +462,9 @@ export class TutorialService {
     }
 
     const chosen = candidates[Math.floor(this.randomFn() * candidates.length)]!;
-    const nextSerial = (await this.cardRepo.getHighestSerialNumber(chosen.id)) + 1;
-    const userCard = await this.cardRepo.createUserCard({
+    const userCard = await this.cardRepo.mintUserCard({
       userId,
       cardId: chosen.id,
-      serialNumber: nextSerial,
       state: 'IDLE',
     });
 

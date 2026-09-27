@@ -281,6 +281,17 @@ export class UserInventoryItemRepository extends BaseRepository<
   NewUserInventoryItem,
   Partial<NewUserInventoryItem>
 > {
+  async inUserTransaction<T>(
+    userId: string,
+    work: (tx: DatabaseClient) => Promise<T>,
+    tx?: DatabaseClient,
+  ): Promise<T> {
+    return withTransaction(this.getClient(tx), async (client) => {
+      if (client.dialect === 'postgres')
+        await client.db.execute(sql`SELECT pg_advisory_xact_lock(1703, hashtext(${userId}))`);
+      return work(client);
+    });
+  }
   async findById(id: string, tx?: DatabaseClient): Promise<UserInventoryItem | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {

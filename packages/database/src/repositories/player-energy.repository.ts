@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, and, gte } from 'drizzle-orm';
 import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
 import type { PlayerEnergy, NewPlayerEnergy } from '../schema/types/index.js';
@@ -223,7 +223,7 @@ export class PlayerEnergyRepository extends BaseRepository<
     const client = this.getClient(tx);
 
     return withTransaction(client, async (txClient) => {
-      const energyRecord = await this.getOrCreate(userId, txClient);
+      const energyRecord = await this.getForUpdate(userId, txClient);
       const today = this.currentDayKey();
 
       // Check if the reset day rolled over, which clears the daily usage count
@@ -278,25 +278,65 @@ export class PlayerEnergyRepository extends BaseRepository<
     amount: number,
     tx?: DatabaseClient,
   ): Promise<{ success: boolean; currentEnergy: number; reason?: string }> {
+    if (!Number.isSafeInteger(amount) || amount < 0)
+      throw new DatabaseError('Invalid energy amount');
     const client = this.getClient(tx);
     return withTransaction(client, async (txClient) => {
-      const record = await this.getOrCreate(userId, txClient);
-      if (record.currentEnergy < amount) {
+      await this.getOrCreate(userId, txClient);
+      const updatedRows =
+        txClient.dialect === 'sqlite'
+          ? await txClient.db
+              .update(sqliteSchema.playerEnergy)
+              .set({
+                currentEnergy: sql`${sqliteSchema.playerEnergy.currentEnergy} - ${amount}`,
+                updatedAt: new Date(),
+              })
+              .where(
+                and(
+                  eq(sqliteSchema.playerEnergy.userId, userId),
+                  gte(sqliteSchema.playerEnergy.currentEnergy, amount),
+                ),
+              )
+              .returning()
+          : await txClient.db
+              .update(pgSchema.playerEnergy)
+              .set({
+                currentEnergy: sql`${pgSchema.playerEnergy.currentEnergy} - ${amount}`,
+                updatedAt: new Date(),
+              })
+              .where(
+                and(
+                  eq(pgSchema.playerEnergy.userId, userId),
+                  gte(pgSchema.playerEnergy.currentEnergy, amount),
+                ),
+              )
+              .returning();
+      const updated = updatedRows[0];
+      if (!updated) {
+        const record = await this.getOrCreate(userId, txClient);
         return {
           success: false,
           currentEnergy: record.currentEnergy,
           reason: `Insufficient energy! Required: ${amount} Energy, but you only have ${record.currentEnergy} Energy.`,
         };
       }
-      const updated = await this.update(
-        userId,
-        { currentEnergy: record.currentEnergy - amount },
-        txClient,
-      );
       return {
         success: true,
         currentEnergy: updated.currentEnergy,
       };
     });
+  }
+
+  /** Call within a transaction; serialize read/modify/write refunds against energy consumers. */
+  async getForUpdate(userId: string, tx: DatabaseClient): Promise<PlayerEnergy> {
+    const record = await this.getOrCreate(userId, tx);
+    if (tx.dialect === 'sqlite') return record;
+    const [locked] = await tx.db
+      .select()
+      .from(pgSchema.playerEnergy)
+      .where(eq(pgSchema.playerEnergy.userId, userId))
+      .for('update');
+    if (!locked) throw new DatabaseError(`Missing energy account ${userId}`);
+    return locked as unknown as PlayerEnergy;
   }
 }

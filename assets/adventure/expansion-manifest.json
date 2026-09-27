@@ -1,0 +1,191 @@
+{
+  "tool": "image_gen.imagegen",
+  "mode": "generate",
+  "assets": [
+    {
+      "id": "the-clockwork-orchard",
+      "title": "The Clockwork Orchard",
+      "file": "scenes/the-clockwork-orchard.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a brass orchard beneath a glass dome, copper fruit on intricate mechanical trees, giant irrigation gears, warm green and gold light. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Clockwork Orchard."
+    },
+    {
+      "id": "the-lantern-marsh",
+      "title": "The Lantern Marsh",
+      "file": "scenes/the-lantern-marsh.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a misty wetland of floating blue lanterns, a narrow wooden ferry, drowned willow trees and a small lantern keeper hut. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Lantern Marsh."
+    },
+    {
+      "id": "the-glass-desert",
+      "title": "The Glass Desert",
+      "file": "scenes/the-glass-desert.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: vast dunes of pale translucent glass, a broken mirrored caravan, a buried glass aqueduct, violet sunset and fine rainbow reflections. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Glass Desert."
+    },
+    {
+      "id": "the-wandering-library",
+      "title": "The Wandering Library",
+      "file": "scenes/the-wandering-library.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a fantastical walking library on enormous wooden legs resting in a meadow, open doors revealing floating books and amber reading lamps. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Wandering Library."
+    },
+    {
+      "id": "the-ember-forge",
+      "title": "The Ember Forge",
+      "file": "scenes/the-ember-forge.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an underground dwarven forge over a lava channel, ancient bellows, a cracked glowing anvil and cooling channels, red fire and blue sparks. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Ember Forge."
+    },
+    {
+      "id": "the-moonlit-menagerie",
+      "title": "The Moonlit Menagerie",
+      "file": "scenes/the-moonlit-menagerie.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an abandoned moonlit zoological garden with open ornate cages, luminous moths, sleeping fantastical beasts and silver fountains. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Moonlit Menagerie."
+    },
+    {
+      "id": "the-storm-train",
+      "title": "The Storm Train",
+      "file": "scenes/the-storm-train.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an antique magical train crossing a high viaduct inside a thunderstorm, glowing blue lightning conductors and golden lit carriage windows. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Storm Train."
+    },
+    {
+      "id": "the-coral-court",
+      "title": "The Coral Court",
+      "file": "scenes/the-coral-court.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a magnificent coral palace throne room beneath shallow clear water, shell mosaics, pearl scales of justice and red coral arches. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Coral Court."
+    },
+    {
+      "id": "the-hollow-theater",
+      "title": "The Hollow Theater",
+      "file": "scenes/the-hollow-theater.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a haunted jewel box theater with a torn crimson curtain, wooden marionettes, empty velvet seats and a spectral spotlight. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Hollow Theater."
+    },
+    {
+      "id": "the-frostbound-lighthouse",
+      "title": "The Frostbound Lighthouse",
+      "file": "scenes/the-frostbound-lighthouse.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a tall lighthouse trapped in glacial sea ice, warm rotating beacon, frost-encrusted brass lens and distant ship silhouettes in aurora. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Frostbound Lighthouse."
+    },
+    {
+      "id": "the-sleeping-colossus",
+      "title": "The Sleeping Colossus",
+      "file": "scenes/the-sleeping-colossus.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a gigantic moss covered stone automaton sleeping across a valley, villages and rope bridges along its shoulders, a glowing chest door. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Sleeping Colossus."
+    },
+    {
+      "id": "the-mushroom-post",
+      "title": "The Mushroom Post",
+      "file": "scenes/the-mushroom-post.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a whimsical forest postal station built inside giant mushrooms, tiny parcel carts, firefly mail lamps and branching root tunnels. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Mushroom Post."
+    },
+    {
+      "id": "the-silver-mill",
+      "title": "The Silver Mill",
+      "file": "scenes/the-silver-mill.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an old watermill turning a silver moonlit river, fine luminous flour, a tangled waterwheel and a riverside granary. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Silver Mill.",
+      "refinement": {
+        "tool": "image_gen.imagegen",
+        "mode": "edit",
+        "prompt": "Edit this fantasy watermill illustration. Replace the entire lower-right corner foreground (the rightmost 25% of the bottom 20% of the image) with a dense clump of broad green fern leaves and mossy black river stones. Paint fresh vegetation over EVERYTHING currently in that small foreground region, including any pale letter-shaped marks. Keep the main mill, river, moon, and rest of the scene unchanged. The resulting corner must contain only plants and stones; absolutely no lettering, signature, watermark, or symbols."
+      }
+    },
+    {
+      "id": "the-thorn-castle",
+      "title": "The Thorn Castle",
+      "file": "scenes/the-thorn-castle.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a ruined fairytale castle enclosed in immense flowering thorn vines, a cracked rose glass gate and a hidden sunlit courtyard. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Thorn Castle."
+    },
+    {
+      "id": "the-starfall-crater",
+      "title": "The Starfall Crater",
+      "file": "scenes/the-starfall-crater.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a fresh meteor crater in a dark pine forest, a floating blue meteor heart above fractured stones and luminous star trails. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Starfall Crater."
+    },
+    {
+      "id": "the-paper-palace",
+      "title": "The Paper Palace",
+      "file": "scenes/the-paper-palace.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an elaborate folded paper palace beside a shallow ink river, origami cranes and bridges, paper lanterns glowing against a rainy sky. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Paper Palace."
+    },
+    {
+      "id": "the-dragon-kitchen",
+      "title": "The Dragon Kitchen",
+      "file": "scenes/the-dragon-kitchen.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an enormous cozy stone kitchen built for a dragon, copper cauldrons, a glowing oven, mountains of colorful ingredients and a dragon curled beyond the hearth. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Dragon Kitchen."
+    },
+    {
+      "id": "the-drowned-bell",
+      "title": "The Drowned Bell",
+      "file": "scenes/the-drowned-bell.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a ruined bell tower rising from a flooded village, enormous bronze bell suspended above dark water and warm rooftops reflected in moonlight. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Drowned Bell."
+    },
+    {
+      "id": "the-mirror-lake",
+      "title": "The Mirror Lake",
+      "file": "scenes/the-mirror-lake.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an unnaturally still forest lake whose reflection shows a different season, a narrow stone causeway and a half-submerged silver mirror arch. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Mirror Lake."
+    },
+    {
+      "id": "the-ash-caravan",
+      "title": "The Ash Caravan",
+      "file": "scenes/the-ash-caravan.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a caravan of covered wagons sheltering beside black volcanic cliffs, a red ash storm approaching, resilient orange flowers and ember lanterns. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Ash Caravan."
+    },
+    {
+      "id": "the-windmill-sky",
+      "title": "The Windmill Sky",
+      "file": "scenes/the-windmill-sky.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a floating island wind farm above white clouds, huge canvas windmill sails and rope bridges, a tiny skyship moored to a grain platform. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Windmill Sky."
+    },
+    {
+      "id": "the-forgotten-observatory",
+      "title": "The Forgotten Observatory",
+      "file": "scenes/the-forgotten-observatory.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an ivy-covered observatory with a broken dome opening onto a star-filled sky, giant brass telescope, celestial clockwork and a faint comet. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Forgotten Observatory."
+    },
+    {
+      "id": "the-silk-labyrinth",
+      "title": "The Silk Labyrinth",
+      "file": "scenes/the-silk-labyrinth.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a cavern labyrinth of luminous silk bridges and immense webs, jeweled spider shapes in the distance, amber cocoons and blue underground water. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Silk Labyrinth."
+    },
+    {
+      "id": "the-honey-citadel",
+      "title": "The Honey Citadel",
+      "file": "scenes/the-honey-citadel.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a fantastic citadel built from golden honeycomb inside a giant hollow tree, wax gates, flower gardens and tiny bee silhouettes in sunbeams. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Honey Citadel."
+    },
+    {
+      "id": "the-ghost-regatta",
+      "title": "The Ghost Regatta",
+      "file": "scenes/the-ghost-regatta.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: spectral sailing boats at a moonlit harbor regatta, tattered glowing sails, a distant finish buoy and an old brass harbor bell. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Ghost Regatta."
+    },
+    {
+      "id": "the-basalt-garden",
+      "title": "The Basalt Garden",
+      "file": "scenes/the-basalt-garden.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a solemn garden of black basalt statues and orange mineral flowers, a cracked irrigation fountain, immense stone gardener and volcanic cliffs. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Basalt Garden."
+    },
+    {
+      "id": "the-midnight-bakery",
+      "title": "The Midnight Bakery",
+      "file": "scenes/the-midnight-bakery.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a warm magical bakery open on a rainy cobblestone street at midnight, star shaped pastries, flour footprints and a clockwork oven. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Midnight Bakery."
+    },
+    {
+      "id": "the-thunderstep-arena",
+      "title": "The Thunderstep Arena",
+      "file": "scenes/the-thunderstep-arena.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: an ancient circular mountain arena with copper floor tiles and lightning rods, ceremonial drums, storm clouds and blue electric arcs. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Thunderstep Arena."
+    },
+    {
+      "id": "the-last-snowglobe",
+      "title": "The Last Snowglobe",
+      "file": "scenes/the-last-snowglobe.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a miniature winter village inside an enormous cracked snow globe on a wizard table, tiny lanterns, a tilted clocktower and magical swirling snow. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Last Snowglobe."
+    },
+    {
+      "id": "the-dawn-archive",
+      "title": "The Dawn Archive",
+      "file": "scenes/the-dawn-archive.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG location illustration for a Discord text adventure. Scene: a cliffside archive of bottled sunrises, luminous amber glass vessels on stone shelves, dark sea beyond and a mechanical sun dial. Richly painted anime-inspired fantasy environment, cinematic environmental storytelling, readable at small embed size, restrained vivid colors and atmospheric light. No prominent player character or companion. No text, letters, logos, watermark, UI, border, panels or collage. Show one coherent place, a shared setting for The Dawn Archive."
+    }
+  ]
+}

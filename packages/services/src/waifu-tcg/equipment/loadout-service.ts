@@ -4,6 +4,7 @@ import type {
   UserInventoryItemRepository,
   WaifuCardRepository,
   UserCard,
+  DatabaseClient,
 } from '@ririko/database';
 import type { Combatant } from '../combat/types.js';
 import type { CardElement, CardRarity } from '../types.js';
@@ -220,9 +221,9 @@ export class LoadoutService {
    * Only gear owned by the card's owner counts, so a piece stranded on a card that changed
    * hands never lends its stats to the new owner.
    */
-  async getCardLoadout(cardId: string): Promise<CardLoadout> {
-    const ownerId = (await this.cardRepo.findUserCardById(cardId))?.userId;
-    const equippedItems = (await this.inventoryRepo.findEquippedByCard(cardId)).filter(
+  async getCardLoadout(cardId: string, tx?: DatabaseClient): Promise<CardLoadout> {
+    const ownerId = (await this.cardRepo.findUserCardById(cardId, tx))?.userId;
+    const equippedItems = (await this.inventoryRepo.findEquippedByCard(cardId, tx)).filter(
       (inv) => inv.userId === ownerId,
     );
 
@@ -233,7 +234,7 @@ export class LoadoutService {
     };
 
     for (const inv of equippedItems) {
-      const itemDef = await this.itemRepo.findById(inv.itemId);
+      const itemDef = await this.itemRepo.findById(inv.itemId, tx);
       if (!itemDef) continue;
 
       const effectiveStats = this.enhancementService.getScaledStats(
@@ -277,8 +278,12 @@ export class LoadoutService {
    * Builds the battle-ready form of an owned card: level-scaled stats, the card's real
    * skill MP cost, and its equipped gear.
    */
-  async buildCombatant(userCard: UserCard, team: 'TEAM_A' | 'TEAM_B'): Promise<Combatant | null> {
-    const base = await this.cardRepo.findById(userCard.cardId);
+  async buildCombatant(
+    userCard: UserCard,
+    team: 'TEAM_A' | 'TEAM_B',
+    tx?: DatabaseClient,
+  ): Promise<Combatant | null> {
+    const base = await this.cardRepo.findById(userCard.cardId, tx);
     if (!base) return null;
 
     const combatant = createCardCombatant(
@@ -303,7 +308,7 @@ export class LoadoutService {
       team,
     );
 
-    this.applyLoadoutToCombatant(combatant, await this.getCardLoadout(userCard.id));
+    this.applyLoadoutToCombatant(combatant, await this.getCardLoadout(userCard.id, tx));
     return combatant;
   }
 

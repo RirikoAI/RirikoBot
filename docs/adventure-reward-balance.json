@@ -1,0 +1,7579 @@
+{
+  "economyVersion": 2,
+  "rankPolicyVersion": 1,
+  "seed": 1715,
+  "samplesPerRow": 10000,
+  "benchmark": {
+    "floor": 34,
+    "energy": 20,
+    "credits": 875,
+    "xp": 175,
+    "dust": 70.5,
+    "companionXp": 890,
+    "advantage": 1.1,
+    "rankMultiplier": 1.5
+  },
+  "assumptions": "Rank E / level 18 targets 10% above repeat floor 34 at 20 energy. 10,000 seeded runs per scenario/rank, fixed WATER companion with 150 ATK/DEF/SPD and sufficient currency/offering items. Standard policy chooses uniformly among all buttons, including paid and losing routes. Free-only E rows show choice-policy sensitivity; they do not set the target. Net credits subtract paid credits, losses and item offerings at canonical shop prices. Energy is actual modeled entry plus drain minus restoration (new cap 7), assuming 100 initial energy and no concurrent energy changes. Loot counts are successful card intents with available definitions; companion XP is the grant budget before rarity-cap clipping. Higher ranks intentionally retain the requested multipliers, rather than remaining only 10% ahead of floor 34. Solo runs grant no companion XP. These estimates are not guaranteed payouts or optimal-route claims.",
+  "rows": [
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 478.9758,
+        "xp": 102.132,
+        "dust": 41.842,
+        "companionXp": 520.6617,
+        "cards": 0.2814,
+        "energy": 15.8995,
+        "paidCredits": 77.245,
+        "offeringCredits": 0,
+        "losses": 55.0757,
+        "failedRuns": 0.284
+      },
+      "perEnergy": {
+        "credits": 30.12521148463788,
+        "xp": 6.42359822635932,
+        "dust": 2.6316550834931918,
+        "companionXp": 32.7470486493286
+      }
+    },
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 770.0132,
+        "xp": 153.0096,
+        "dust": 61.546,
+        "companionXp": 780.7432,
+        "cards": 0.3545,
+        "energy": 15.8995,
+        "paidCredits": 77.245,
+        "offeringCredits": 0,
+        "losses": 55.0757,
+        "failedRuns": 0.284
+      },
+      "perEnergy": {
+        "credits": 48.430026101449734,
+        "xp": 9.623547910311645,
+        "dust": 3.8709393377150225,
+        "companionXp": 49.10489009088336
+      }
+    },
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 797.3636,
+        "xp": 138.2602,
+        "dust": 61.3342,
+        "companionXp": 705.5336,
+        "cards": 0.3476,
+        "energy": 15.7185,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 80.995,
+        "failedRuns": 0.3451
+      },
+      "perEnergy": {
+        "credits": 50.72771574895823,
+        "xp": 8.796017431688774,
+        "dust": 3.902038998632185,
+        "companionXp": 44.885555237459045
+      }
+    },
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1061.4523,
+        "xp": 204.264,
+        "dust": 81.534,
+        "companionXp": 1041.3234,
+        "cards": 0.4244,
+        "energy": 15.8995,
+        "paidCredits": 77.245,
+        "offeringCredits": 0,
+        "losses": 55.0757,
+        "failedRuns": 0.284
+      },
+      "perEnergy": {
+        "credits": 66.76010566370012,
+        "xp": 12.84719645271864,
+        "dust": 5.128085788861285,
+        "companionXp": 65.4940972986572
+      }
+    },
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1352.4897,
+        "xp": 255.1416,
+        "dust": 101.238,
+        "companionXp": 1301.4049,
+        "cards": 0.4932,
+        "energy": 15.8995,
+        "paidCredits": 77.245,
+        "offeringCredits": 0,
+        "losses": 55.0757,
+        "failedRuns": 0.284
+      },
+      "perEnergy": {
+        "credits": 85.06492028051197,
+        "xp": 16.047146136670964,
+        "dust": 6.367370043083116,
+        "companionXp": 81.85193874021196
+      }
+    },
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1643.9288,
+        "xp": 306.396,
+        "dust": 121.226,
+        "companionXp": 1561.9851,
+        "cards": 0.5651,
+        "energy": 15.8995,
+        "paidCredits": 77.245,
+        "offeringCredits": 0,
+        "losses": 55.0757,
+        "failedRuns": 0.284
+      },
+      "perEnergy": {
+        "credits": 103.39499984276235,
+        "xp": 19.27079467907796,
+        "dust": 7.624516494229378,
+        "companionXp": 98.24114594798579
+      }
+    },
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2226.4053,
+        "xp": 408.528,
+        "dust": 160.918,
+        "companionXp": 2082.6468,
+        "cards": 0.7079,
+        "energy": 15.8995,
+        "paidCredits": 77.245,
+        "offeringCredits": 0,
+        "losses": 55.0757,
+        "failedRuns": 0.284
+      },
+      "perEnergy": {
+        "credits": 140.0298940218246,
+        "xp": 25.69439290543728,
+        "dust": 10.120947199597472,
+        "companionXp": 130.9881945973144
+      }
+    },
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2808.8818,
+        "xp": 510.66,
+        "dust": 200.61,
+        "companionXp": 2603.3085,
+        "cards": 0.8484,
+        "energy": 15.8995,
+        "paidCredits": 77.245,
+        "offeringCredits": 0,
+        "losses": 55.0757,
+        "failedRuns": 0.284
+      },
+      "perEnergy": {
+        "credits": 176.66478820088682,
+        "xp": 32.1179911317966,
+        "dust": 12.617377904965565,
+        "companionXp": 163.73524324664297
+      }
+    },
+    {
+      "scenario": "the-goblin-bazaar",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3391.3583,
+        "xp": 612.792,
+        "dust": 240.302,
+        "companionXp": 3123.9702,
+        "cards": 0.8844,
+        "energy": 15.8995,
+        "paidCredits": 77.245,
+        "offeringCredits": 0,
+        "losses": 55.0757,
+        "failedRuns": 0.284
+      },
+      "perEnergy": {
+        "credits": 213.29968237994905,
+        "xp": 38.54158935815592,
+        "dust": 15.113808610333658,
+        "companionXp": 196.48229189597157
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 528.9408,
+        "xp": 107.3997,
+        "dust": 43.2843,
+        "companionXp": 547.9166,
+        "cards": 0.2182,
+        "energy": 16.7107,
+        "paidCredits": 0,
+        "offeringCredits": 8.355,
+        "losses": 21.9,
+        "failedRuns": 0.219
+      },
+      "perEnergy": {
+        "credits": 31.65282124626736,
+        "xp": 6.427001861083019,
+        "dust": 2.5902146528870724,
+        "companionXp": 32.78836912876181
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 808.2475,
+        "xp": 160.9533,
+        "dust": 64.5354,
+        "companionXp": 821.6955,
+        "cards": 0.2965,
+        "energy": 16.7107,
+        "paidCredits": 0,
+        "offeringCredits": 8.355,
+        "losses": 21.9,
+        "failedRuns": 0.219
+      },
+      "perEnergy": {
+        "credits": 48.36706421634043,
+        "xp": 9.631750914084988,
+        "dust": 3.8619208052325757,
+        "companionXp": 49.171818056694214
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 773.9049,
+        "xp": 159.2597,
+        "dust": 60.5001,
+        "companionXp": 812.5501,
+        "cards": 0.3062,
+        "energy": 17.3947,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 27.23,
+        "failedRuns": 0.2723
+      },
+      "perEnergy": {
+        "credits": 44.490844912530825,
+        "xp": 9.155645110292216,
+        "dust": 3.478076655533007,
+        "companionXp": 46.71251013239665
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1088.1366,
+        "xp": 214.7994,
+        "dust": 86.5686,
+        "companionXp": 1095.8332,
+        "cards": 0.3725,
+        "energy": 16.7107,
+        "paidCredits": 0,
+        "offeringCredits": 8.355,
+        "losses": 21.9,
+        "failedRuns": 0.219
+      },
+      "perEnergy": {
+        "credits": 65.11615910763763,
+        "xp": 12.854003722166038,
+        "dust": 5.180429305774145,
+        "companionXp": 65.57673825752362
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1367.4433,
+        "xp": 268.353,
+        "dust": 107.8197,
+        "companionXp": 1369.6121,
+        "cards": 0.4471,
+        "energy": 16.7107,
+        "paidCredits": 0,
+        "offeringCredits": 8.355,
+        "losses": 21.9,
+        "failedRuns": 0.219
+      },
+      "perEnergy": {
+        "credits": 81.83040207771069,
+        "xp": 16.058752775168006,
+        "dust": 6.452135458119648,
+        "companionXp": 81.96018718545602
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1647.3324,
+        "xp": 322.1991,
+        "dust": 129.8529,
+        "companionXp": 1643.7498,
+        "cards": 0.5259,
+        "energy": 16.7107,
+        "paidCredits": 0,
+        "offeringCredits": 8.355,
+        "losses": 21.9,
+        "failedRuns": 0.219
+      },
+      "perEnergy": {
+        "credits": 98.57949696900788,
+        "xp": 19.281005583249055,
+        "dust": 7.770643958661217,
+        "companionXp": 98.36510738628543
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2206.5282,
+        "xp": 429.5988,
+        "dust": 173.1372,
+        "companionXp": 2191.6664,
+        "cards": 0.6798,
+        "energy": 16.7107,
+        "paidCredits": 0,
+        "offeringCredits": 8.355,
+        "losses": 21.9,
+        "failedRuns": 0.219
+      },
+      "perEnergy": {
+        "credits": 132.04283483037815,
+        "xp": 25.708007444332075,
+        "dust": 10.36085861154829,
+        "companionXp": 131.15347651504723
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2765.724,
+        "xp": 536.9985,
+        "dust": 216.4215,
+        "companionXp": 2739.583,
+        "cards": 0.8377,
+        "energy": 16.7107,
+        "paidCredits": 0,
+        "offeringCredits": 8.355,
+        "losses": 21.9,
+        "failedRuns": 0.219
+      },
+      "perEnergy": {
+        "credits": 165.5061726917484,
+        "xp": 32.135009305415096,
+        "dust": 12.951073264435362,
+        "companionXp": 163.94184564380905
+      }
+    },
+    {
+      "scenario": "the-sunken-shrine",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3324.9198,
+        "xp": 644.3982,
+        "dust": 259.7058,
+        "companionXp": 3287.4996,
+        "cards": 0.8918,
+        "energy": 16.7107,
+        "paidCredits": 0,
+        "offeringCredits": 8.355,
+        "losses": 21.9,
+        "failedRuns": 0.219
+      },
+      "perEnergy": {
+        "credits": 198.96951055311865,
+        "xp": 38.56201116649811,
+        "dust": 15.541287917322434,
+        "companionXp": 196.73021477257086
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 598.0318,
+        "xp": 127.3914,
+        "dust": 50.956,
+        "companionXp": 650.1784,
+        "cards": 0.1137,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 29.844884719033836,
+        "xp": 6.3574907675416705,
+        "dust": 2.54296836011578,
+        "companionXp": 32.447270186645376
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 959.7238,
+        "xp": 190.711,
+        "dust": 76.434,
+        "companionXp": 974.7676,
+        "cards": 0.1714,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 47.895189140632795,
+        "xp": 9.517466813055195,
+        "dust": 3.81445254017367,
+        "companionXp": 48.645952689889214
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 959.7238,
+        "xp": 190.711,
+        "dust": 76.434,
+        "companionXp": 974.7676,
+        "cards": 0.1714,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 47.895189140632795,
+        "xp": 9.517466813055195,
+        "dust": 3.81445254017367,
+        "companionXp": 48.645952689889214
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1321.6636,
+        "xp": 254.7828,
+        "dust": 101.912,
+        "companionXp": 1300.3568,
+        "cards": 0.2293,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 65.95786006587484,
+        "xp": 12.714981535083341,
+        "dust": 5.08593672023156,
+        "companionXp": 64.89454037329075
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1683.3556,
+        "xp": 318.1024,
+        "dust": 127.39,
+        "companionXp": 1624.946,
+        "cards": 0.2855,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 84.0081644874738,
+        "xp": 15.874957580596867,
+        "dust": 6.35742090028945,
+        "companionXp": 81.09322287653458
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2045.2954,
+        "xp": 382.1742,
+        "dust": 152.868,
+        "companionXp": 1950.5352,
+        "cards": 0.3456,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 102.07083541271584,
+        "xp": 19.072472302625012,
+        "dust": 7.62890508034734,
+        "companionXp": 97.34181055993612
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2768.9272,
+        "xp": 509.5656,
+        "dust": 203.824,
+        "companionXp": 2600.7136,
+        "cards": 0.4519,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 138.18381075955685,
+        "xp": 25.429963070166682,
+        "dust": 10.17187344046312,
+        "companionXp": 129.7890807465815
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3492.559,
+        "xp": 636.957,
+        "dust": 254.78,
+        "companionXp": 3250.892,
+        "cards": 0.5606,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 174.29678610639783,
+        "xp": 31.787453837708355,
+        "dust": 12.7148418005789,
+        "companionXp": 162.23635093322687
+      }
+    },
+    {
+      "scenario": "the-cursed-crypt",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 4216.1908,
+        "xp": 764.3484,
+        "dust": 305.736,
+        "companionXp": 3901.0704,
+        "cards": 0.678,
+        "energy": 20.038,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 125.6,
+        "failedRuns": 0.7522
+      },
+      "perEnergy": {
+        "credits": 210.40976145323884,
+        "xp": 38.144944605250025,
+        "dust": 15.25781016069468,
+        "companionXp": 194.68362111987224
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 429.9354,
+        "xp": 85.6507,
+        "dust": 34.3758,
+        "companionXp": 437.0254,
+        "cards": 0.2046,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 32.19718120001198,
+        "xp": 6.414245274540934,
+        "dust": 2.5743492196627025,
+        "companionXp": 32.72814007129377
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 644.4031,
+        "xp": 128.2221,
+        "dust": 51.5637,
+        "companionXp": 655.4061,
+        "cards": 0.3038,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.25832759188809,
+        "xp": 9.602349998502232,
+        "dust": 3.861523829494054,
+        "companionXp": 49.08232483599437
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 644.4031,
+        "xp": 128.2221,
+        "dust": 51.5637,
+        "companionXp": 655.4061,
+        "cards": 0.3038,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.25832759188809,
+        "xp": 9.602349998502232,
+        "dust": 3.861523829494054,
+        "companionXp": 49.08232483599437
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 859.8708,
+        "xp": 171.3014,
+        "dust": 68.7516,
+        "companionXp": 874.0508,
+        "cards": 0.4012,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.39436240002397,
+        "xp": 12.828490549081868,
+        "dust": 5.148698439325405,
+        "companionXp": 65.45628014258754
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1074.3385,
+        "xp": 213.8728,
+        "dust": 85.9395,
+        "companionXp": 1092.4315,
+        "cards": 0.4992,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.45550879190007,
+        "xp": 16.016595273043166,
+        "dust": 6.435873049156757,
+        "companionXp": 81.81046490728814
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1289.8062,
+        "xp": 256.9521,
+        "dust": 103.1274,
+        "companionXp": 1311.0762,
+        "cards": 0.5994,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.59154360003595,
+        "xp": 19.2427358236228,
+        "dust": 7.723047658988108,
+        "companionXp": 98.18442021388131
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1719.7416,
+        "xp": 342.6028,
+        "dust": 137.5032,
+        "companionXp": 1748.1016,
+        "cards": 0.7974,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.78872480004793,
+        "xp": 25.656981098163737,
+        "dust": 10.29739687865081,
+        "companionXp": 130.9125602851751
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2149.677,
+        "xp": 428.2535,
+        "dust": 171.879,
+        "companionXp": 2185.127,
+        "cards": 1,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 160.9859060000599,
+        "xp": 32.07122637270467,
+        "dust": 12.871746098313514,
+        "companionXp": 163.64070035646887
+      }
+    },
+    {
+      "scenario": "the-celestial-peaks",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2579.6124,
+        "xp": 513.9042,
+        "dust": 206.2548,
+        "companionXp": 2622.1524,
+        "cards": 1,
+        "energy": 13.3532,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 193.1830872000719,
+        "xp": 38.4854716472456,
+        "dust": 15.446095317976216,
+        "companionXp": 196.36884042776262
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 470.4191,
+        "xp": 98.4207,
+        "dust": 39.5822,
+        "companionXp": 502.6999,
+        "cards": 0.2865,
+        "energy": 15.493,
+        "paidCredits": 37.875,
+        "offeringCredits": 0,
+        "losses": 31.485,
+        "failedRuns": 0.1451
+      },
+      "perEnergy": {
+        "credits": 30.363331827276834,
+        "xp": 6.352591492932292,
+        "dust": 2.5548441231523915,
+        "companionXp": 32.44690505389531
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 739.854,
+        "xp": 147.3144,
+        "dust": 59.3033,
+        "companionXp": 753.9633,
+        "cards": 0.3558,
+        "energy": 15.493,
+        "paidCredits": 37.875,
+        "offeringCredits": 0,
+        "losses": 31.485,
+        "failedRuns": 0.1451
+      },
+      "perEnergy": {
+        "credits": 47.75408248886594,
+        "xp": 9.508448976957336,
+        "dust": 3.827748015232686,
+        "companionXp": 48.66477118698767
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 778.944,
+        "xp": 147.605,
+        "dust": 59.0716,
+        "companionXp": 755.4849,
+        "cards": 0.3699,
+        "energy": 15.481,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 34.285,
+        "failedRuns": 0.1594
+      },
+      "perEnergy": {
+        "credits": 50.316129449002005,
+        "xp": 9.534590788708739,
+        "dust": 3.8157483366707576,
+        "companionXp": 48.8007816032556
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1010.1982,
+        "xp": 196.8414,
+        "dust": 79.1644,
+        "companionXp": 1005.3998,
+        "cards": 0.4306,
+        "energy": 15.493,
+        "paidCredits": 37.875,
+        "offeringCredits": 0,
+        "losses": 31.485,
+        "failedRuns": 0.1451
+      },
+      "perEnergy": {
+        "credits": 65.2035241722068,
+        "xp": 12.705182985864584,
+        "dust": 5.109688246304783,
+        "companionXp": 64.89381010779061
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1279.6331,
+        "xp": 245.7351,
+        "dust": 98.8855,
+        "companionXp": 1256.6632,
+        "cards": 0.5023,
+        "energy": 15.493,
+        "paidCredits": 37.875,
+        "offeringCredits": 0,
+        "losses": 31.485,
+        "failedRuns": 0.1451
+      },
+      "perEnergy": {
+        "credits": 82.59427483379591,
+        "xp": 15.861040469889627,
+        "dust": 6.382592138385077,
+        "companionXp": 81.11167624088299
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1549.9773,
+        "xp": 295.2621,
+        "dust": 118.7466,
+        "companionXp": 1508.0997,
+        "cards": 0.5769,
+        "energy": 15.493,
+        "paidCredits": 37.875,
+        "offeringCredits": 0,
+        "losses": 31.485,
+        "failedRuns": 0.1451
+      },
+      "perEnergy": {
+        "credits": 100.04371651713677,
+        "xp": 19.057774478796876,
+        "dust": 7.6645323694571745,
+        "companionXp": 97.34071516168592
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2089.7564,
+        "xp": 393.6828,
+        "dust": 158.3288,
+        "companionXp": 2010.7996,
+        "cards": 0.7174,
+        "energy": 15.493,
+        "paidCredits": 37.875,
+        "offeringCredits": 0,
+        "losses": 31.485,
+        "failedRuns": 0.1451
+      },
+      "perEnergy": {
+        "credits": 134.88390886206673,
+        "xp": 25.410365971729167,
+        "dust": 10.219376492609566,
+        "companionXp": 129.78762021558123
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2629.5355,
+        "xp": 492.1035,
+        "dust": 197.911,
+        "companionXp": 2513.4995,
+        "cards": 0.8547,
+        "energy": 15.493,
+        "paidCredits": 37.875,
+        "offeringCredits": 0,
+        "losses": 31.485,
+        "failedRuns": 0.1451
+      },
+      "perEnergy": {
+        "credits": 169.72410120699672,
+        "xp": 31.76295746466146,
+        "dust": 12.774220615761957,
+        "companionXp": 162.23452526947653
+      }
+    },
+    {
+      "scenario": "the-bandit-ambush",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3169.3146,
+        "xp": 590.5242,
+        "dust": 237.4932,
+        "companionXp": 3016.1994,
+        "cards": 0.9108,
+        "energy": 15.493,
+        "paidCredits": 37.875,
+        "offeringCredits": 0,
+        "losses": 31.485,
+        "failedRuns": 0.1451
+      },
+      "perEnergy": {
+        "credits": 204.56429355192668,
+        "xp": 38.11554895759375,
+        "dust": 15.329064738914349,
+        "companionXp": 194.68143032337184
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 492.7707,
+        "xp": 98.8406,
+        "dust": 39.4069,
+        "companionXp": 504.995,
+        "cards": 0.1708,
+        "energy": 15.3948,
+        "paidCredits": 10.008,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1316
+      },
+      "perEnergy": {
+        "credits": 32.008905604489826,
+        "xp": 6.420388702678826,
+        "dust": 2.559753942889807,
+        "companionXp": 32.80295944085016
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 743.8408,
+        "xp": 147.7609,
+        "dust": 58.8569,
+        "companionXp": 757.4925,
+        "cards": 0.2576,
+        "energy": 15.3948,
+        "paidCredits": 10.008,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1316
+      },
+      "perEnergy": {
+        "credits": 48.31766570530309,
+        "xp": 9.598104554784733,
+        "dust": 3.8231675630732456,
+        "companionXp": 49.20443916127524
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 753.3296,
+        "xp": 147.8992,
+        "dust": 58.928,
+        "companionXp": 758.2152,
+        "cards": 0.2552,
+        "energy": 15.396,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 48.930215640426084,
+        "xp": 9.606339308911405,
+        "dust": 3.827487659132242,
+        "companionXp": 49.24754481683554
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 995.5494,
+        "xp": 197.6812,
+        "dust": 78.8138,
+        "companionXp": 1009.99,
+        "cards": 0.3378,
+        "energy": 15.3948,
+        "paidCredits": 10.008,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1316
+      },
+      "perEnergy": {
+        "credits": 64.66790084963753,
+        "xp": 12.840777405357652,
+        "dust": 5.119507885779614,
+        "companionXp": 65.60591888170032
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1246.6195,
+        "xp": 246.6015,
+        "dust": 98.2638,
+        "companionXp": 1262.4875,
+        "cards": 0.4231,
+        "energy": 15.3948,
+        "paidCredits": 10.008,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1316
+      },
+      "perEnergy": {
+        "credits": 80.9766609504508,
+        "xp": 16.018493257463557,
+        "dust": 6.382921505963052,
+        "companionXp": 82.00739860212539
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1498.3281,
+        "xp": 296.5218,
+        "dust": 118.2207,
+        "companionXp": 1514.985,
+        "cards": 0.5121,
+        "energy": 15.3948,
+        "paidCredits": 10.008,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1316
+      },
+      "perEnergy": {
+        "credits": 97.32689609478525,
+        "xp": 19.26116610803648,
+        "dust": 7.6792618286694205,
+        "companionXp": 98.40887832255048
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2001.1068,
+        "xp": 395.3624,
+        "dust": 157.6276,
+        "companionXp": 2019.98,
+        "cards": 0.6756,
+        "energy": 15.3948,
+        "paidCredits": 10.008,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1316
+      },
+      "perEnergy": {
+        "credits": 129.98589133993298,
+        "xp": 25.681554810715305,
+        "dust": 10.239015771559227,
+        "companionXp": 131.21183776340064
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2503.8855,
+        "xp": 494.203,
+        "dust": 197.0345,
+        "companionXp": 2524.975,
+        "cards": 0.8411,
+        "energy": 15.3948,
+        "paidCredits": 10.008,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1316
+      },
+      "perEnergy": {
+        "credits": 162.64488658508068,
+        "xp": 32.10194351339413,
+        "dust": 12.798769714449035,
+        "companionXp": 164.01479720425078
+      }
+    },
+    {
+      "scenario": "the-clockwork-orchard",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3006.6642,
+        "xp": 593.0436,
+        "dust": 236.4414,
+        "companionXp": 3029.97,
+        "cards": 0.9159,
+        "energy": 15.3948,
+        "paidCredits": 10.008,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1316
+      },
+      "perEnergy": {
+        "credits": 195.3038818302284,
+        "xp": 38.52233221607296,
+        "dust": 15.358523657338841,
+        "companionXp": 196.81775664510096
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 492.7344,
+        "xp": 98.2652,
+        "dust": 38.862,
+        "companionXp": 502.1332,
+        "cards": 0.1695,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 31.945954356846475,
+        "xp": 6.370928423236514,
+        "dust": 2.519579875518672,
+        "companionXp": 32.5553163900415
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 739.1016,
+        "xp": 147.3448,
+        "dust": 57.9948,
+        "companionXp": 753.1468,
+        "cards": 0.2537,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 47.91893153526971,
+        "xp": 9.55295643153527,
+        "dust": 3.7600363070539418,
+        "companionXp": 48.829538381742736
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 739.1016,
+        "xp": 147.3448,
+        "dust": 57.9948,
+        "companionXp": 753.1468,
+        "cards": 0.2537,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 47.91893153526971,
+        "xp": 9.55295643153527,
+        "dust": 3.7600363070539418,
+        "companionXp": 48.829538381742736
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 985.4688,
+        "xp": 196.5304,
+        "dust": 77.724,
+        "companionXp": 1004.2664,
+        "cards": 0.3357,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 63.89190871369295,
+        "xp": 12.741856846473029,
+        "dust": 5.039159751037344,
+        "companionXp": 65.110632780083
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1231.836,
+        "xp": 245.61,
+        "dust": 96.8568,
+        "companionXp": 1255.28,
+        "cards": 0.4115,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 79.86488589211618,
+        "xp": 15.923884854771785,
+        "dust": 6.279616182572614,
+        "companionXp": 81.38485477178423
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1478.2032,
+        "xp": 294.7956,
+        "dust": 116.586,
+        "companionXp": 1506.3996,
+        "cards": 0.4978,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 95.83786307053941,
+        "xp": 19.112785269709544,
+        "dust": 7.558739626556017,
+        "companionXp": 97.66594917012448
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1970.9376,
+        "xp": 393.0608,
+        "dust": 155.448,
+        "companionXp": 2008.5328,
+        "cards": 0.6601,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 127.7838174273859,
+        "xp": 25.483713692946058,
+        "dust": 10.078319502074688,
+        "companionXp": 130.221265560166
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2463.672,
+        "xp": 491.326,
+        "dust": 194.31,
+        "companionXp": 2510.666,
+        "cards": 0.8214,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 159.72977178423236,
+        "xp": 31.85464211618257,
+        "dust": 12.597899377593361,
+        "companionXp": 162.77658195020746
+      }
+    },
+    {
+      "scenario": "the-lantern-marsh",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2956.4064,
+        "xp": 589.5912,
+        "dust": 233.172,
+        "companionXp": 3012.7992,
+        "cards": 0.906,
+        "energy": 15.424,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.106
+      },
+      "perEnergy": {
+        "credits": 191.67572614107883,
+        "xp": 38.22557053941909,
+        "dust": 15.117479253112034,
+        "companionXp": 195.33189834024896
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 533.3985,
+        "xp": 106.4092,
+        "dust": 42.7932,
+        "companionXp": 544.364,
+        "cards": 0.1609,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 32.20538690044921,
+        "xp": 6.424745206008791,
+        "dust": 2.5837559773945804,
+        "companionXp": 32.86745882239289
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 805.0137,
+        "xp": 159.4988,
+        "dust": 64.0596,
+        "companionXp": 816.2912,
+        "cards": 0.2459,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 48.60489421822924,
+        "xp": 9.630174370864125,
+        "dust": 3.8677727865526736,
+        "companionXp": 49.28580398975994
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 805.0137,
+        "xp": 159.4988,
+        "dust": 64.0596,
+        "companionXp": 816.2912,
+        "cards": 0.2459,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 48.60489421822924,
+        "xp": 9.630174370864125,
+        "dust": 3.8677727865526736,
+        "companionXp": 49.28580398975994
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1077.1385,
+        "xp": 212.8184,
+        "dust": 85.5864,
+        "companionXp": 1088.728,
+        "cards": 0.3253,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 65.03517002366807,
+        "xp": 12.849490412017582,
+        "dust": 5.167511954789161,
+        "companionXp": 65.73491764478578
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1348.7537,
+        "xp": 265.908,
+        "dust": 106.8528,
+        "companionXp": 1360.6552,
+        "cards": 0.4079,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 81.4346773414481,
+        "xp": 16.054919576872916,
+        "dust": 6.451528763947254,
+        "companionXp": 82.15326281215283
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1620.8785,
+        "xp": 319.2276,
+        "dust": 128.3796,
+        "companionXp": 1633.092,
+        "cards": 0.4928,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 97.86495314688692,
+        "xp": 19.274235618026374,
+        "dust": 7.751267932183741,
+        "companionXp": 98.60237646717867
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2164.6185,
+        "xp": 425.6368,
+        "dust": 171.1728,
+        "companionXp": 2177.456,
+        "cards": 0.6535,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 130.69473627010578,
+        "xp": 25.698980824035164,
+        "dust": 10.335023909578322,
+        "companionXp": 131.46983528957156
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2708.3585,
+        "xp": 532.046,
+        "dust": 213.966,
+        "companionXp": 2721.82,
+        "cards": 0.8171,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 163.52451939332465,
+        "xp": 32.123726030043954,
+        "dust": 12.918779886972903,
+        "companionXp": 164.33729411196444
+      }
+    },
+    {
+      "scenario": "the-glass-desert",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3252.0985,
+        "xp": 638.4552,
+        "dust": 256.7592,
+        "companionXp": 3266.184,
+        "cards": 0.8773,
+        "energy": 16.5624,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 10.3415,
+        "failedRuns": 0.2604
+      },
+      "perEnergy": {
+        "credits": 196.3543025165435,
+        "xp": 38.54847123605275,
+        "dust": 15.502535864367482,
+        "companionXp": 197.20475293435734
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 477.476,
+        "xp": 95.8448,
+        "dust": 38.5712,
+        "companionXp": 489.4544,
+        "cards": 0.1982,
+        "energy": 15,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 31.831733333333332,
+        "xp": 6.389653333333333,
+        "dust": 2.5714133333333336,
+        "companionXp": 32.630293333333334
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 720.812,
+        "xp": 143.7232,
+        "dust": 57.8128,
+        "companionXp": 733.9344,
+        "cards": 0.2964,
+        "energy": 15,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.05413333333333,
+        "xp": 9.581546666666666,
+        "dust": 3.8541866666666666,
+        "companionXp": 48.92896
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 731.008,
+        "xp": 143.7232,
+        "dust": 57.8128,
+        "companionXp": 733.9344,
+        "cards": 0.2964,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.733866666666664,
+        "xp": 9.581546666666666,
+        "dust": 3.8541866666666666,
+        "companionXp": 48.92896
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 965.148,
+        "xp": 191.6896,
+        "dust": 77.1424,
+        "companionXp": 978.9088,
+        "cards": 0.3917,
+        "energy": 15,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.3432,
+        "xp": 12.779306666666667,
+        "dust": 5.142826666666667,
+        "companionXp": 65.26058666666667
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1208.484,
+        "xp": 239.568,
+        "dust": 96.384,
+        "companionXp": 1223.3888,
+        "cards": 0.4899,
+        "energy": 15,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.5656,
+        "xp": 15.9712,
+        "dust": 6.4256,
+        "companionXp": 81.55925333333333
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1452.82,
+        "xp": 287.5344,
+        "dust": 115.7136,
+        "companionXp": 1468.3632,
+        "cards": 0.586,
+        "energy": 15,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.85466666666666,
+        "xp": 19.16896,
+        "dust": 7.71424,
+        "companionXp": 97.89088
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1940.492,
+        "xp": 383.3792,
+        "dust": 154.2848,
+        "companionXp": 1957.8176,
+        "cards": 0.7775,
+        "energy": 15,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 129.36613333333332,
+        "xp": 25.558613333333334,
+        "dust": 10.285653333333334,
+        "companionXp": 130.52117333333334
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2428.164,
+        "xp": 479.224,
+        "dust": 192.856,
+        "companionXp": 2447.272,
+        "cards": 0.9772,
+        "energy": 15,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 161.8776,
+        "xp": 31.948266666666665,
+        "dust": 12.857066666666666,
+        "companionXp": 163.15146666666666
+      }
+    },
+    {
+      "scenario": "the-wandering-library",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2915.836,
+        "xp": 575.0688,
+        "dust": 231.4272,
+        "companionXp": 2936.7264,
+        "cards": 0.9908,
+        "energy": 15,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 194.38906666666668,
+        "xp": 38.33792,
+        "dust": 15.42848,
+        "companionXp": 195.78176
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 529.5198,
+        "xp": 105.5019,
+        "dust": 41.6875,
+        "companionXp": 539.0465,
+        "cards": 0.1612,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 32.11196012080195,
+        "xp": 6.398009678710475,
+        "dust": 2.5280779633470387,
+        "companionXp": 32.68969302235321
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 794.0325,
+        "xp": 158.1287,
+        "dust": 62.4082,
+        "companionXp": 808.1939,
+        "cards": 0.2477,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 48.15294909580468,
+        "xp": 9.58948562141445,
+        "dust": 3.784654756273575,
+        "companionXp": 49.011746655508254
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 794.0325,
+        "xp": 158.1287,
+        "dust": 62.4082,
+        "companionXp": 808.1939,
+        "cards": 0.2477,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 48.15294909580468,
+        "xp": 9.58948562141445,
+        "dust": 3.784654756273575,
+        "companionXp": 49.011746655508254
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1059.0396,
+        "xp": 211.0038,
+        "dust": 83.375,
+        "companionXp": 1078.093,
+        "cards": 0.3275,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 64.2239202416039,
+        "xp": 12.79601935742095,
+        "dust": 5.056155926694077,
+        "companionXp": 65.37938604470642
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1323.5523,
+        "xp": 263.6306,
+        "dust": 104.0957,
+        "companionXp": 1347.2404,
+        "cards": 0.4081,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 80.26490921660663,
+        "xp": 15.987495300124925,
+        "dust": 6.312732719620614,
+        "companionXp": 81.70143967786147
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1588.5594,
+        "xp": 316.5057,
+        "dust": 125.0625,
+        "companionXp": 1617.1395,
+        "cards": 0.4918,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 96.33588036240585,
+        "xp": 19.194029036131425,
+        "dust": 7.584233890041117,
+        "companionXp": 98.06907906705963
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2118.0792,
+        "xp": 422.0076,
+        "dust": 166.75,
+        "companionXp": 2156.186,
+        "cards": 0.6521,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 128.4478404832078,
+        "xp": 25.5920387148419,
+        "dust": 10.112311853388155,
+        "companionXp": 130.75877208941284
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2647.599,
+        "xp": 527.5095,
+        "dust": 208.4375,
+        "companionXp": 2695.2325,
+        "cards": 0.8146,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 160.55980060400975,
+        "xp": 31.990048393552378,
+        "dust": 12.640389816735194,
+        "companionXp": 163.44846511176607
+      }
+    },
+    {
+      "scenario": "the-ember-forge",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3177.1188,
+        "xp": 633.0114,
+        "dust": 250.125,
+        "companionXp": 3234.279,
+        "cards": 0.8794,
+        "energy": 16.4898,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2483
+      },
+      "perEnergy": {
+        "credits": 192.6717607248117,
+        "xp": 38.38805807226285,
+        "dust": 15.168467780082233,
+        "companionXp": 196.13815813411927
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 481.6214,
+        "xp": 95.639,
+        "dust": 38.3332,
+        "companionXp": 489.0054,
+        "cards": 0.1965,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 32.108093333333336,
+        "xp": 6.375933333333333,
+        "dust": 2.555546666666667,
+        "companionXp": 32.60036
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 722.1324,
+        "xp": 143.1588,
+        "dust": 57.4524,
+        "companionXp": 733.3078,
+        "cards": 0.2951,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.14216,
+        "xp": 9.54392,
+        "dust": 3.83016,
+        "companionXp": 48.887186666666665
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 722.1324,
+        "xp": 143.1588,
+        "dust": 57.4524,
+        "companionXp": 733.3078,
+        "cards": 0.2951,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.14216,
+        "xp": 9.54392,
+        "dust": 3.83016,
+        "companionXp": 48.887186666666665
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 963.2428,
+        "xp": 191.278,
+        "dust": 76.6664,
+        "companionXp": 978.0108,
+        "cards": 0.3921,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.21618666666667,
+        "xp": 12.751866666666666,
+        "dust": 5.111093333333334,
+        "companionXp": 65.20072
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1203.7538,
+        "xp": 238.7978,
+        "dust": 95.7856,
+        "companionXp": 1222.3132,
+        "cards": 0.4908,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.25025333333333,
+        "xp": 15.919853333333334,
+        "dust": 6.385706666666667,
+        "companionXp": 81.48754666666666
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1444.8642,
+        "xp": 286.917,
+        "dust": 114.9996,
+        "companionXp": 1467.0162,
+        "cards": 0.5903,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.32428,
+        "xp": 19.1278,
+        "dust": 7.66664,
+        "companionXp": 97.80108
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1926.4856,
+        "xp": 382.556,
+        "dust": 153.3328,
+        "companionXp": 1956.0216,
+        "cards": 0.7804,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.43237333333335,
+        "xp": 25.503733333333333,
+        "dust": 10.222186666666667,
+        "companionXp": 130.40144
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2408.107,
+        "xp": 478.195,
+        "dust": 191.666,
+        "companionXp": 2445.027,
+        "cards": 0.9788,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 160.54046666666667,
+        "xp": 31.879666666666665,
+        "dust": 12.777733333333334,
+        "companionXp": 163.0018
+      }
+    },
+    {
+      "scenario": "the-moonlit-menagerie",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2889.7284,
+        "xp": 573.834,
+        "dust": 229.9992,
+        "companionXp": 2934.0324,
+        "cards": 0.9922,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 192.64856,
+        "xp": 38.2556,
+        "dust": 15.33328,
+        "companionXp": 195.60216
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 526.174,
+        "xp": 105.487,
+        "dust": 42.182,
+        "companionXp": 537.751,
+        "cards": 0.1474,
+        "energy": 16.368,
+        "paidCredits": 12.745,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 32.14650537634409,
+        "xp": 6.444709188660801,
+        "dust": 2.577101661779081,
+        "companionXp": 32.85380009775171
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 795.385,
+        "xp": 157.979,
+        "dust": 62.773,
+        "companionXp": 806.492,
+        "cards": 0.2217,
+        "energy": 16.368,
+        "paidCredits": 12.745,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 48.5939027370479,
+        "xp": 9.65169843597263,
+        "dust": 3.835105083088954,
+        "companionXp": 49.272482893450636
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 808.13,
+        "xp": 157.979,
+        "dust": 62.773,
+        "companionXp": 806.492,
+        "cards": 0.2217,
+        "energy": 16.368,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 49.37255620723363,
+        "xp": 9.65169843597263,
+        "dust": 3.835105083088954,
+        "companionXp": 49.272482893450636
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1065.093,
+        "xp": 210.974,
+        "dust": 84.364,
+        "companionXp": 1075.502,
+        "cards": 0.3015,
+        "energy": 16.368,
+        "paidCredits": 12.745,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 65.0716642228739,
+        "xp": 12.889418377321602,
+        "dust": 5.154203323558162,
+        "companionXp": 65.70760019550342
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1334.304,
+        "xp": 263.466,
+        "dust": 104.955,
+        "companionXp": 1344.243,
+        "cards": 0.3777,
+        "energy": 16.368,
+        "paidCredits": 12.745,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 81.51906158357771,
+        "xp": 16.096407624633432,
+        "dust": 6.412206744868035,
+        "companionXp": 82.12628299120234
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1604.012,
+        "xp": 316.461,
+        "dust": 126.546,
+        "companionXp": 1613.253,
+        "cards": 0.4568,
+        "energy": 16.368,
+        "paidCredits": 12.745,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 97.99682306940372,
+        "xp": 19.334127565982406,
+        "dust": 7.7313049853372435,
+        "companionXp": 98.56140029325513
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2142.931,
+        "xp": 421.948,
+        "dust": 168.728,
+        "companionXp": 2151.004,
+        "cards": 0.603,
+        "energy": 16.368,
+        "paidCredits": 12.745,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 130.92198191593354,
+        "xp": 25.778836754643205,
+        "dust": 10.308406647116325,
+        "companionXp": 131.41520039100683
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2681.85,
+        "xp": 527.435,
+        "dust": 210.91,
+        "companionXp": 2688.755,
+        "cards": 0.7576,
+        "energy": 16.368,
+        "paidCredits": 12.745,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 163.84714076246334,
+        "xp": 32.22354594330401,
+        "dust": 12.885508308895405,
+        "companionXp": 164.26900048875856
+      }
+    },
+    {
+      "scenario": "the-storm-train",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3220.769,
+        "xp": 632.922,
+        "dust": 253.092,
+        "companionXp": 3226.506,
+        "cards": 0.8581,
+        "energy": 16.368,
+        "paidCredits": 12.745,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.228
+      },
+      "perEnergy": {
+        "credits": 196.77229960899317,
+        "xp": 38.66825513196481,
+        "dust": 15.462609970674487,
+        "companionXp": 197.12280058651027
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 489.067,
+        "xp": 97.327,
+        "dust": 38.72,
+        "companionXp": 496.888,
+        "cards": 0.1695,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 32.08258987142482,
+        "xp": 6.384610338493833,
+        "dust": 2.540015743899239,
+        "companionXp": 32.5956441878772
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 733.349,
+        "xp": 145.742,
+        "dust": 58.08,
+        "companionXp": 745.332,
+        "cards": 0.254,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 48.10738651272632,
+        "xp": 9.560614012070323,
+        "dust": 3.8100236158488587,
+        "companionXp": 48.8934662818158
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 733.349,
+        "xp": 145.742,
+        "dust": 58.08,
+        "companionXp": 745.332,
+        "cards": 0.254,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 48.10738651272632,
+        "xp": 9.560614012070323,
+        "dust": 3.8100236158488587,
+        "companionXp": 48.8934662818158
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 978.134,
+        "xp": 194.654,
+        "dust": 77.44,
+        "companionXp": 993.776,
+        "cards": 0.3416,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 64.16517974284965,
+        "xp": 12.769220676987667,
+        "dust": 5.080031487798478,
+        "companionXp": 65.1912883757544
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1222.416,
+        "xp": 243.069,
+        "dust": 96.8,
+        "companionXp": 1242.22,
+        "cards": 0.4255,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 80.18997638415114,
+        "xp": 15.945224350564157,
+        "dust": 6.350039359748098,
+        "companionXp": 81.48911046969299
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1467.201,
+        "xp": 291.981,
+        "dust": 116.16,
+        "companionXp": 1490.664,
+        "cards": 0.5132,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 96.24776961427447,
+        "xp": 19.1538310154815,
+        "dust": 7.6200472316977175,
+        "companionXp": 97.7869325636316
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1956.268,
+        "xp": 389.308,
+        "dust": 154.88,
+        "companionXp": 1987.552,
+        "cards": 0.676,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 128.3303594856993,
+        "xp": 25.538441353975333,
+        "dust": 10.160062975596956,
+        "companionXp": 130.3825767515088
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2445.335,
+        "xp": 486.635,
+        "dust": 193.6,
+        "companionXp": 2484.44,
+        "cards": 0.8432,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 160.41294935712412,
+        "xp": 31.92305169246917,
+        "dust": 12.700078719496195,
+        "companionXp": 162.97822093938598
+      }
+    },
+    {
+      "scenario": "the-coral-court",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2934.402,
+        "xp": 583.962,
+        "dust": 232.32,
+        "companionXp": 2981.328,
+        "cards": 0.9277,
+        "energy": 15.244,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.061
+      },
+      "perEnergy": {
+        "credits": 192.49553922854895,
+        "xp": 38.307662030963,
+        "dust": 15.240094463395435,
+        "companionXp": 195.5738651272632
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 497.8054,
+        "xp": 98.3176,
+        "dust": 39.2193,
+        "companionXp": 502.6738,
+        "cards": 0.1673,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 32.28142508819257,
+        "xp": 6.3756484747873,
+        "dust": 2.543272722556547,
+        "companionXp": 32.59712855364184
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 746.7081,
+        "xp": 146.9764,
+        "dust": 58.5203,
+        "companionXp": 754.0107,
+        "cards": 0.2531,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 48.42213763228886,
+        "xp": 9.531048972815936,
+        "dust": 3.7948939095247978,
+        "companionXp": 48.89569283046275
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 746.7081,
+        "xp": 146.9764,
+        "dust": 58.5203,
+        "companionXp": 754.0107,
+        "cards": 0.2531,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 48.42213763228886,
+        "xp": 9.531048972815936,
+        "dust": 3.7948939095247978,
+        "companionXp": 48.89569283046275
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 995.6108,
+        "xp": 196.6352,
+        "dust": 78.4386,
+        "companionXp": 1005.3476,
+        "cards": 0.333,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 64.56285017638514,
+        "xp": 12.7512969495746,
+        "dust": 5.086545445113094,
+        "companionXp": 65.19425710728368
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1244.5135,
+        "xp": 245.294,
+        "dust": 97.7396,
+        "companionXp": 1256.6845,
+        "cards": 0.4101,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 80.70356272048143,
+        "xp": 15.906697447603237,
+        "dust": 6.338166632081345,
+        "companionXp": 81.49282138410459
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1493.4162,
+        "xp": 294.9528,
+        "dust": 117.6579,
+        "companionXp": 1508.0214,
+        "cards": 0.4934,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 96.84427526457772,
+        "xp": 19.1269454243619,
+        "dust": 7.629818167669641,
+        "companionXp": 97.7913856609255
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1991.2216,
+        "xp": 393.2704,
+        "dust": 156.8772,
+        "companionXp": 2010.6952,
+        "cards": 0.6572,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 129.12570035277028,
+        "xp": 25.5025938991492,
+        "dust": 10.173090890226188,
+        "companionXp": 130.38851421456735
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2489.027,
+        "xp": 491.588,
+        "dust": 196.0965,
+        "companionXp": 2513.369,
+        "cards": 0.8197,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 161.40712544096286,
+        "xp": 31.8782423739365,
+        "dust": 12.716363612782734,
+        "companionXp": 162.98564276820917
+      }
+    },
+    {
+      "scenario": "the-hollow-theater",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2986.8324,
+        "xp": 589.9056,
+        "dust": 235.3158,
+        "companionXp": 3016.0428,
+        "cards": 0.912,
+        "energy": 15.4208,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1052
+      },
+      "perEnergy": {
+        "credits": 193.68855052915544,
+        "xp": 38.2538908487238,
+        "dust": 15.259636335339282,
+        "companionXp": 195.582771321851
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 499.2505,
+        "xp": 100.2966,
+        "dust": 40.1705,
+        "companionXp": 510.037,
+        "cards": 0.1674,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 31.745609349764095,
+        "xp": 6.37751325779253,
+        "dust": 2.554302900817723,
+        "companionXp": 32.43148550862869
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 748.6815,
+        "xp": 150.1997,
+        "dust": 60.0615,
+        "companionXp": 764.8007,
+        "cards": 0.2508,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 47.60606234023883,
+        "xp": 9.550678468327547,
+        "dust": 3.8191026668192745,
+        "companionXp": 48.631026413846605
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 748.6815,
+        "xp": 150.1997,
+        "dust": 60.0615,
+        "companionXp": 764.8007,
+        "cards": 0.2508,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 47.60606234023883,
+        "xp": 9.550678468327547,
+        "dust": 3.8191026668192745,
+        "companionXp": 48.631026413846605
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 998.501,
+        "xp": 200.5932,
+        "dust": 80.341,
+        "companionXp": 1020.074,
+        "cards": 0.3321,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 63.49121869952819,
+        "xp": 12.75502651558506,
+        "dust": 5.108605801635446,
+        "companionXp": 64.86297101725738
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1247.932,
+        "xp": 250.4963,
+        "dust": 100.232,
+        "companionXp": 1274.8377,
+        "cards": 0.4079,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 79.35167169000293,
+        "xp": 15.928191726120076,
+        "dust": 6.373405567636997,
+        "companionXp": 81.0625119224753
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1497.7515,
+        "xp": 300.8898,
+        "dust": 120.5115,
+        "companionXp": 1530.111,
+        "cards": 0.4936,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 95.23682804929228,
+        "xp": 19.13253977337759,
+        "dust": 7.662908702453168,
+        "companionXp": 97.29445652588608
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1997.002,
+        "xp": 401.1864,
+        "dust": 160.682,
+        "companionXp": 2040.148,
+        "cards": 0.6545,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 126.98243739905638,
+        "xp": 25.51005303117012,
+        "dust": 10.217211603270892,
+        "companionXp": 129.72594203451476
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2496.2525,
+        "xp": 501.483,
+        "dust": 200.8525,
+        "companionXp": 2550.185,
+        "cards": 0.8146,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 158.72804674882047,
+        "xp": 31.88756628896265,
+        "dust": 12.771514504088614,
+        "companionXp": 162.15742754314346
+      }
+    },
+    {
+      "scenario": "the-frostbound-lighthouse",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2995.503,
+        "xp": 601.7796,
+        "dust": 241.023,
+        "companionXp": 3060.222,
+        "cards": 0.9004,
+        "energy": 15.7266,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1211
+      },
+      "perEnergy": {
+        "credits": 190.47365609858457,
+        "xp": 38.26507954675518,
+        "dust": 15.325817404906337,
+        "companionXp": 194.58891305177215
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 502.6142,
+        "xp": 99.847,
+        "dust": 39.828,
+        "companionXp": 510.495,
+        "cards": 0.1886,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 32.22092441823194,
+        "xp": 6.400859029424963,
+        "dust": 2.5532405923456634,
+        "companionXp": 32.72613629078787
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 753.4812,
+        "xp": 149.3304,
+        "dust": 59.4922,
+        "companionXp": 765.4328,
+        "cards": 0.2848,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 48.303173280338484,
+        "xp": 9.573075197128022,
+        "dust": 3.813847041477018,
+        "companionXp": 49.069350599397396
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 753.4812,
+        "xp": 149.3304,
+        "dust": 59.4922,
+        "companionXp": 765.4328,
+        "cards": 0.2848,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 48.303173280338484,
+        "xp": 9.573075197128022,
+        "dust": 3.813847041477018,
+        "companionXp": 49.069350599397396
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1005.2284,
+        "xp": 199.694,
+        "dust": 79.656,
+        "companionXp": 1020.99,
+        "cards": 0.3772,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 64.44184883646388,
+        "xp": 12.801718058849927,
+        "dust": 5.106481184691327,
+        "companionXp": 65.45227258157574
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1256.0954,
+        "xp": 249.1774,
+        "dust": 99.3202,
+        "companionXp": 1275.9278,
+        "cards": 0.4647,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 80.52409769857042,
+        "xp": 15.973934226552984,
+        "dust": 6.367087633822681,
+        "companionXp": 81.79548689018527
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1507.8426,
+        "xp": 299.541,
+        "dust": 119.484,
+        "companionXp": 1531.485,
+        "cards": 0.5622,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 96.66277325469581,
+        "xp": 19.20257708827489,
+        "dust": 7.65972177703699,
+        "companionXp": 98.17840887236362
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2010.4568,
+        "xp": 399.388,
+        "dust": 159.312,
+        "companionXp": 2041.98,
+        "cards": 0.752,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 128.88369767292775,
+        "xp": 25.603436117699854,
+        "dust": 10.212962369382653,
+        "companionXp": 130.90454516315148
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2513.071,
+        "xp": 499.235,
+        "dust": 199.14,
+        "companionXp": 2552.475,
+        "cards": 0.9418,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 161.10462209115968,
+        "xp": 32.004295147124814,
+        "dust": 12.766202961728316,
+        "companionXp": 163.63068145393936
+      }
+    },
+    {
+      "scenario": "the-sleeping-colossus",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3015.6852,
+        "xp": 599.082,
+        "dust": 238.968,
+        "companionXp": 3062.97,
+        "cards": 0.9535,
+        "energy": 15.599,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 193.32554650939161,
+        "xp": 38.40515417654978,
+        "dust": 15.31944355407398,
+        "companionXp": 196.35681774472724
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 478.6079,
+        "xp": 96.1071,
+        "dust": 38.5402,
+        "companionXp": 489.5355,
+        "cards": 0.1989,
+        "energy": 15,
+        "paidCredits": 7.647,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 31.907193333333332,
+        "xp": 6.40714,
+        "dust": 2.5693466666666667,
+        "companionXp": 32.6357
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 721.4364,
+        "xp": 143.9596,
+        "dust": 57.7627,
+        "companionXp": 734.0043,
+        "cards": 0.2986,
+        "energy": 15,
+        "paidCredits": 7.647,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.09576,
+        "xp": 9.597306666666666,
+        "dust": 3.8508466666666665,
+        "companionXp": 48.93362
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 729.0834,
+        "xp": 143.9596,
+        "dust": 57.7627,
+        "companionXp": 734.0043,
+        "cards": 0.2986,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.60556,
+        "xp": 9.597306666666666,
+        "dust": 3.8508466666666665,
+        "companionXp": 48.93362
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 964.8628,
+        "xp": 192.2142,
+        "dust": 77.0804,
+        "companionXp": 979.071,
+        "cards": 0.3934,
+        "energy": 15,
+        "paidCredits": 7.647,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.32418666666666,
+        "xp": 12.81428,
+        "dust": 5.138693333333333,
+        "companionXp": 65.2714
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1207.6913,
+        "xp": 240.0667,
+        "dust": 96.3029,
+        "companionXp": 1223.5398,
+        "cards": 0.4886,
+        "energy": 15,
+        "paidCredits": 7.647,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.51275333333334,
+        "xp": 16.004446666666666,
+        "dust": 6.420193333333334,
+        "companionXp": 81.56932
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1451.1177,
+        "xp": 288.3213,
+        "dust": 115.6206,
+        "companionXp": 1468.6065,
+        "cards": 0.5875,
+        "energy": 15,
+        "paidCredits": 7.647,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.74118,
+        "xp": 19.22142,
+        "dust": 7.70804,
+        "companionXp": 97.9071
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1937.3726,
+        "xp": 384.4284,
+        "dust": 154.1608,
+        "companionXp": 1958.142,
+        "cards": 0.7822,
+        "energy": 15,
+        "paidCredits": 7.647,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 129.15817333333334,
+        "xp": 25.62856,
+        "dust": 10.277386666666667,
+        "companionXp": 130.5428
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2423.6275,
+        "xp": 480.5355,
+        "dust": 192.701,
+        "companionXp": 2447.6775,
+        "cards": 0.9778,
+        "energy": 15,
+        "paidCredits": 7.647,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 161.57516666666666,
+        "xp": 32.0357,
+        "dust": 12.846733333333333,
+        "companionXp": 163.1785
+      }
+    },
+    {
+      "scenario": "the-mushroom-post",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2909.8824,
+        "xp": 576.6426,
+        "dust": 231.2412,
+        "companionXp": 2937.213,
+        "cards": 0.9924,
+        "energy": 15,
+        "paidCredits": 7.647,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 193.99216,
+        "xp": 38.44284,
+        "dust": 15.41608,
+        "companionXp": 195.8142
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 487.8319,
+        "xp": 97.2692,
+        "dust": 38.9308,
+        "companionXp": 496.7384,
+        "cards": 0.167,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 32.062984725398955,
+        "xp": 6.393064647579988,
+        "dust": 2.558745432079291,
+        "companionXp": 32.6483686936404
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 732.7397,
+        "xp": 145.7414,
+        "dust": 58.3962,
+        "companionXp": 744.6076,
+        "cards": 0.2529,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 48.159666903278385,
+        "xp": 9.578923153771328,
+        "dust": 3.838118148118937,
+        "companionXp": 48.939690301548495
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 732.7397,
+        "xp": 145.7414,
+        "dust": 58.3962,
+        "companionXp": 744.6076,
+        "cards": 0.2529,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 48.159666903278385,
+        "xp": 9.578923153771328,
+        "dust": 3.838118148118937,
+        "companionXp": 48.939690301548495
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 978.1429,
+        "xp": 194.5384,
+        "dust": 77.8616,
+        "companionXp": 993.4768,
+        "cards": 0.3379,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 64.28890948287194,
+        "xp": 12.786129295159975,
+        "dust": 5.117490864158582,
+        "companionXp": 65.2967373872808
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1223.0507,
+        "xp": 243.0106,
+        "dust": 97.327,
+        "companionXp": 1241.346,
+        "cards": 0.42,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 80.38559166075137,
+        "xp": 15.971987801351316,
+        "dust": 6.396863580198228,
+        "companionXp": 81.58805899518889
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1468.4539,
+        "xp": 291.8076,
+        "dust": 116.7924,
+        "companionXp": 1490.2152,
+        "cards": 0.5072,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 96.51483424034492,
+        "xp": 19.179193942739964,
+        "dust": 7.676236296237874,
+        "companionXp": 97.9451060809212
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1958.7649,
+        "xp": 389.0768,
+        "dust": 155.7232,
+        "companionXp": 1986.9536,
+        "cards": 0.6715,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 128.74075899781792,
+        "xp": 25.57225859031995,
+        "dust": 10.234981728317164,
+        "companionXp": 130.5934747745616
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2449.0759,
+        "xp": 486.346,
+        "dust": 194.654,
+        "companionXp": 2483.692,
+        "cards": 0.8333,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 160.9666837552909,
+        "xp": 31.96532323789994,
+        "dust": 12.793727160396456,
+        "companionXp": 163.241843468202
+      }
+    },
+    {
+      "scenario": "the-silver-mill",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2939.3869,
+        "xp": 583.6152,
+        "dust": 233.5848,
+        "companionXp": 2980.4304,
+        "cards": 0.9219,
+        "energy": 15.2148,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.4791,
+        "failedRuns": 0.0716
+      },
+      "perEnergy": {
+        "credits": 193.19260851276388,
+        "xp": 38.35838788547993,
+        "dust": 15.352472592475747,
+        "companionXp": 195.8902121618424
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 496.8722,
+        "xp": 99.7331,
+        "dust": 39.7454,
+        "companionXp": 507.4417,
+        "cards": 0.1726,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 32.06702893874074,
+        "xp": 6.436552908072386,
+        "dust": 2.5650798977721556,
+        "companionXp": 32.749161008854585
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 745.0535,
+        "xp": 149.283,
+        "dust": 59.1181,
+        "companionXp": 760.7244,
+        "cards": 0.259,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 48.084099181660946,
+        "xp": 9.634393473939644,
+        "dust": 3.815350956449906,
+        "companionXp": 49.095464284792314
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 745.0535,
+        "xp": 149.283,
+        "dust": 59.1181,
+        "companionXp": 760.7244,
+        "cards": 0.259,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 48.084099181660946,
+        "xp": 9.634393473939644,
+        "dust": 3.815350956449906,
+        "companionXp": 49.095464284792314
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 993.7444,
+        "xp": 199.4662,
+        "dust": 79.4908,
+        "companionXp": 1014.8834,
+        "cards": 0.3392,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 64.13405787748148,
+        "xp": 12.873105816144772,
+        "dust": 5.130159795544311,
+        "companionXp": 65.49832201770917
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1241.9257,
+        "xp": 249.0161,
+        "dust": 98.8635,
+        "companionXp": 1268.1661,
+        "cards": 0.4211,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 80.15112812040168,
+        "xp": 16.07094638201203,
+        "dust": 6.380430854222062,
+        "companionXp": 81.8446252936469
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1490.6166,
+        "xp": 299.1993,
+        "dust": 119.2362,
+        "companionXp": 1522.3251,
+        "cards": 0.5127,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 96.20108681622222,
+        "xp": 19.309658724217158,
+        "dust": 7.695239693316467,
+        "companionXp": 98.24748302656376
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1987.4888,
+        "xp": 398.9324,
+        "dust": 158.9816,
+        "companionXp": 2029.7668,
+        "cards": 0.6797,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 128.26811575496296,
+        "xp": 25.746211632289544,
+        "dust": 10.260319591088622,
+        "companionXp": 130.99664403541834
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2484.361,
+        "xp": 498.6655,
+        "dust": 198.727,
+        "companionXp": 2537.2085,
+        "cards": 0.8506,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 160.33514469370368,
+        "xp": 32.18276454036193,
+        "dust": 12.825399488860779,
+        "companionXp": 163.7458050442729
+      }
+    },
+    {
+      "scenario": "the-thorn-castle",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2981.2332,
+        "xp": 598.3986,
+        "dust": 238.4724,
+        "companionXp": 3044.6502,
+        "cards": 0.9148,
+        "energy": 15.4948,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1237
+      },
+      "perEnergy": {
+        "credits": 192.40217363244443,
+        "xp": 38.619317448434316,
+        "dust": 15.390479386632935,
+        "companionXp": 196.4949660531275
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 539.488,
+        "xp": 108.8048,
+        "dust": 43.5739,
+        "companionXp": 554.0596,
+        "cards": 0.1627,
+        "energy": 16.8781,
+        "paidCredits": 19.664,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2683
+      },
+      "perEnergy": {
+        "credits": 31.963787393130744,
+        "xp": 6.446507604528946,
+        "dust": 2.5816827723499682,
+        "companionXp": 32.82713101593189
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 818.6754,
+        "xp": 162.8186,
+        "dust": 64.995,
+        "companionXp": 830.7008,
+        "cards": 0.2458,
+        "energy": 16.8781,
+        "paidCredits": 19.664,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2683
+      },
+      "perEnergy": {
+        "credits": 48.50518719524117,
+        "xp": 9.646737488224385,
+        "dust": 3.850848140489747,
+        "companionXp": 49.2176726053288
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 838.868,
+        "xp": 162.8072,
+        "dust": 65.0344,
+        "companionXp": 830.6384,
+        "cards": 0.2431,
+        "energy": 16.8732,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2676
+      },
+      "perEnergy": {
+        "credits": 49.715999336225494,
+        "xp": 9.648863286157932,
+        "dust": 3.8543014958632624,
+        "companionXp": 49.22826731147619
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1098.64,
+        "xp": 217.6096,
+        "dust": 87.1478,
+        "companionXp": 1108.1192,
+        "cards": 0.3245,
+        "energy": 16.8781,
+        "paidCredits": 19.664,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2683
+      },
+      "perEnergy": {
+        "credits": 65.09263483448966,
+        "xp": 12.893015209057891,
+        "dust": 5.1633655446999365,
+        "companionXp": 65.65426203186378
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1377.8274,
+        "xp": 271.6234,
+        "dust": 108.5689,
+        "companionXp": 1384.7604,
+        "cards": 0.4052,
+        "energy": 16.8781,
+        "paidCredits": 19.664,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2683
+      },
+      "perEnergy": {
+        "credits": 81.63403463660009,
+        "xp": 16.09324509275333,
+        "dust": 6.432530912839716,
+        "companionXp": 82.04480362126068
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1657.792,
+        "xp": 326.4144,
+        "dust": 130.7217,
+        "companionXp": 1662.1788,
+        "cards": 0.4911,
+        "energy": 16.8781,
+        "paidCredits": 19.664,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2683
+      },
+      "perEnergy": {
+        "credits": 98.22148227584859,
+        "xp": 19.339522813586836,
+        "dust": 7.745048317049905,
+        "companionXp": 98.48139304779566
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2216.944,
+        "xp": 435.2192,
+        "dust": 174.2956,
+        "companionXp": 2216.2384,
+        "cards": 0.6491,
+        "energy": 16.8781,
+        "paidCredits": 19.664,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2683
+      },
+      "perEnergy": {
+        "credits": 131.3503297172075,
+        "xp": 25.786030418115782,
+        "dust": 10.326731089399873,
+        "companionXp": 131.30852406372756
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2776.096,
+        "xp": 544.024,
+        "dust": 217.8695,
+        "companionXp": 2770.298,
+        "cards": 0.8122,
+        "energy": 16.8781,
+        "paidCredits": 19.664,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2683
+      },
+      "perEnergy": {
+        "credits": 164.47917715856642,
+        "xp": 32.23253802264473,
+        "dust": 12.90841386174984,
+        "companionXp": 164.13565507965944
+      }
+    },
+    {
+      "scenario": "the-starfall-crater",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3335.248,
+        "xp": 652.8288,
+        "dust": 261.4434,
+        "companionXp": 3324.3576,
+        "cards": 0.8758,
+        "energy": 16.8781,
+        "paidCredits": 19.664,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2683
+      },
+      "perEnergy": {
+        "credits": 197.60802459992536,
+        "xp": 38.67904562717367,
+        "dust": 15.49009663409981,
+        "companionXp": 196.96278609559133
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 489.3179,
+        "xp": 97.4746,
+        "dust": 38.941,
+        "companionXp": 498.1813,
+        "cards": 0.1786,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 32.16889861875366,
+        "xp": 6.408207272416491,
+        "dust": 2.560072053593147,
+        "companionXp": 32.75159918216542
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 733.512,
+        "xp": 145.9571,
+        "dust": 58.1567,
+        "companionXp": 746.982,
+        "cards": 0.2646,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 48.22278760625604,
+        "xp": 9.595559763064644,
+        "dust": 3.823356934829629,
+        "companionXp": 49.10833678480563
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 733.512,
+        "xp": 145.9571,
+        "dust": 58.1567,
+        "companionXp": 746.982,
+        "cards": 0.2646,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 48.22278760625604,
+        "xp": 9.595559763064644,
+        "dust": 3.823356934829629,
+        "companionXp": 49.10833678480563
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 978.6358,
+        "xp": 194.9492,
+        "dust": 77.882,
+        "companionXp": 996.3626,
+        "cards": 0.3491,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 64.33779723750732,
+        "xp": 12.816414544832982,
+        "dust": 5.120144107186294,
+        "companionXp": 65.50319836433084
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1222.8299,
+        "xp": 243.4317,
+        "dust": 97.0977,
+        "companionXp": 1245.1633,
+        "cards": 0.4314,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 80.39168622500969,
+        "xp": 16.003767035481136,
+        "dust": 6.383428988422776,
+        "companionXp": 81.85993596697105
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1467.9537,
+        "xp": 292.4238,
+        "dust": 116.823,
+        "companionXp": 1494.5439,
+        "cards": 0.5216,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 96.50669585626098,
+        "xp": 19.22462181724947,
+        "dust": 7.680216160779441,
+        "companionXp": 98.25479754649626
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1957.2716,
+        "xp": 389.8984,
+        "dust": 155.764,
+        "companionXp": 1992.7252,
+        "cards": 0.6904,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 128.67559447501463,
+        "xp": 25.632829089665965,
+        "dust": 10.240288214372589,
+        "companionXp": 131.00639672866168
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2446.5895,
+        "xp": 487.373,
+        "dust": 194.705,
+        "companionXp": 2490.9065,
+        "cards": 0.8593,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 160.84449309376828,
+        "xp": 32.04103636208245,
+        "dust": 12.800360267965734,
+        "companionXp": 163.7579959108271
+      }
+    },
+    {
+      "scenario": "the-paper-palace",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2935.9074,
+        "xp": 584.8476,
+        "dust": 233.646,
+        "companionXp": 2989.0878,
+        "cards": 0.9325,
+        "energy": 15.2109,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0703
+      },
+      "perEnergy": {
+        "credits": 193.01339171252195,
+        "xp": 38.44924363449894,
+        "dust": 15.360432321558882,
+        "companionXp": 196.50959509299253
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 480.5941,
+        "xp": 95.4039,
+        "dust": 38.2999,
+        "companionXp": 487.5525,
+        "cards": 0.1997,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 32.039606666666664,
+        "xp": 6.36026,
+        "dust": 2.5533266666666665,
+        "companionXp": 32.5035
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 720.6351,
+        "xp": 142.6526,
+        "dust": 57.2059,
+        "companionXp": 731.0727,
+        "cards": 0.2968,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.04234,
+        "xp": 9.510173333333332,
+        "dust": 3.8137266666666667,
+        "companionXp": 48.73818
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 720.6351,
+        "xp": 142.6526,
+        "dust": 57.2059,
+        "companionXp": 731.0727,
+        "cards": 0.2968,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.04234,
+        "xp": 9.510173333333332,
+        "dust": 3.8137266666666667,
+        "companionXp": 48.73818
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 961.1882,
+        "xp": 190.8078,
+        "dust": 76.5998,
+        "companionXp": 975.105,
+        "cards": 0.3943,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.07921333333333,
+        "xp": 12.72052,
+        "dust": 5.106653333333333,
+        "companionXp": 65.007
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1201.2292,
+        "xp": 238.0565,
+        "dust": 95.5058,
+        "companionXp": 1218.6252,
+        "cards": 0.4925,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.08194666666667,
+        "xp": 15.870433333333333,
+        "dust": 6.367053333333334,
+        "companionXp": 81.24168
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1441.7823,
+        "xp": 286.2117,
+        "dust": 114.8997,
+        "companionXp": 1462.6575,
+        "cards": 0.5907,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.11882,
+        "xp": 19.08078,
+        "dust": 7.65998,
+        "companionXp": 97.5105
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1922.3764,
+        "xp": 381.6156,
+        "dust": 153.1996,
+        "companionXp": 1950.21,
+        "cards": 0.7786,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.15842666666666,
+        "xp": 25.44104,
+        "dust": 10.213306666666666,
+        "companionXp": 130.014
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2402.9705,
+        "xp": 477.0195,
+        "dust": 191.4995,
+        "companionXp": 2437.7625,
+        "cards": 0.9758,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 160.19803333333334,
+        "xp": 31.8013,
+        "dust": 12.766633333333333,
+        "companionXp": 162.5175
+      }
+    },
+    {
+      "scenario": "the-dragon-kitchen",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2883.5646,
+        "xp": 572.4234,
+        "dust": 229.7994,
+        "companionXp": 2925.315,
+        "cards": 0.9909,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 192.23764,
+        "xp": 38.16156,
+        "dust": 15.31996,
+        "companionXp": 195.021
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 487.2767,
+        "xp": 97.3657,
+        "dust": 38.6694,
+        "companionXp": 497.2842,
+        "cards": 0.1731,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 32.040392682894755,
+        "xp": 6.40218434791757,
+        "dust": 2.542667771333886,
+        "companionXp": 32.698425849212924
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 730.6872,
+        "xp": 145.8207,
+        "dust": 57.7589,
+        "companionXp": 745.9263,
+        "cards": 0.264,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 48.04560697518444,
+        "xp": 9.588294472718665,
+        "dust": 3.797878775923515,
+        "companionXp": 49.047638773819386
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 730.6872,
+        "xp": 145.8207,
+        "dust": 57.7589,
+        "companionXp": 745.9263,
+        "cards": 0.264,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 48.04560697518444,
+        "xp": 9.588294472718665,
+        "dust": 3.797878775923515,
+        "companionXp": 49.047638773819386
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 974.5534,
+        "xp": 194.7314,
+        "dust": 77.3388,
+        "companionXp": 994.5684,
+        "cards": 0.3488,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 64.08078536578951,
+        "xp": 12.80436869583514,
+        "dust": 5.085335542667772,
+        "companionXp": 65.39685169842585
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1217.9639,
+        "xp": 243.1864,
+        "dust": 96.4283,
+        "companionXp": 1243.2105,
+        "cards": 0.434,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 80.08599965807919,
+        "xp": 15.990478820636236,
+        "dust": 6.340546547257401,
+        "companionXp": 81.74606462303231
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1461.8301,
+        "xp": 292.0971,
+        "dust": 116.0082,
+        "companionXp": 1491.8526,
+        "cards": 0.5258,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 96.12117804868426,
+        "xp": 19.206553043752713,
+        "dust": 7.628003314001657,
+        "companionXp": 98.09527754763877
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1949.1068,
+        "xp": 389.4628,
+        "dust": 154.6776,
+        "companionXp": 1989.1368,
+        "cards": 0.698,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 128.16157073157902,
+        "xp": 25.60873739167028,
+        "dust": 10.170671085335544,
+        "companionXp": 130.7937033968517
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2436.3835,
+        "xp": 486.8285,
+        "dust": 193.347,
+        "companionXp": 2486.421,
+        "cards": 0.8704,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 160.20196341447377,
+        "xp": 32.01092173958786,
+        "dust": 12.713338856669429,
+        "companionXp": 163.49212924606462
+      }
+    },
+    {
+      "scenario": "the-drowned-bell",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2923.6602,
+        "xp": 584.1942,
+        "dust": 232.0164,
+        "companionXp": 2983.7052,
+        "cards": 0.9426,
+        "energy": 15.2082,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.0347
+      },
+      "perEnergy": {
+        "credits": 192.2423560973685,
+        "xp": 38.413106087505426,
+        "dust": 15.256006628003314,
+        "companionXp": 196.19055509527755
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 495.1946,
+        "xp": 99.379,
+        "dust": 39.8184,
+        "companionXp": 506.657,
+        "cards": 0.1609,
+        "energy": 15.4792,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 31.990968525505195,
+        "xp": 6.420163832756215,
+        "dust": 2.57238100160215,
+        "companionXp": 32.73147191069306
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 747.83,
+        "xp": 148.6284,
+        "dust": 59.4778,
+        "companionXp": 759.5454,
+        "cards": 0.2453,
+        "energy": 15.4792,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 48.311928265026616,
+        "xp": 9.601814047237584,
+        "dust": 3.8424337175047807,
+        "companionXp": 49.06877616414285
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 758.026,
+        "xp": 148.6284,
+        "dust": 59.4778,
+        "companionXp": 759.5454,
+        "cards": 0.2453,
+        "energy": 15.4792,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 48.97061863662205,
+        "xp": 9.601814047237584,
+        "dust": 3.8424337175047807,
+        "companionXp": 49.06877616414285
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1000.5852,
+        "xp": 198.758,
+        "dust": 79.6368,
+        "companionXp": 1013.314,
+        "cards": 0.3257,
+        "energy": 15.4792,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 64.64062742260582,
+        "xp": 12.84032766551243,
+        "dust": 5.1447620032043,
+        "companionXp": 65.46294382138612
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1253.2206,
+        "xp": 248.0074,
+        "dust": 99.2962,
+        "companionXp": 1266.2024,
+        "cards": 0.4048,
+        "energy": 15.4792,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 80.96158716212724,
+        "xp": 16.0219778799938,
+        "dust": 6.41481471910693,
+        "companionXp": 81.8002480748359
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1505.9758,
+        "xp": 298.137,
+        "dust": 119.4552,
+        "companionXp": 1519.971,
+        "cards": 0.4904,
+        "energy": 15.4792,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 97.29028631970644,
+        "xp": 19.260491498268646,
+        "dust": 7.7171430048064495,
+        "companionXp": 98.19441573207918
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2011.3664,
+        "xp": 397.516,
+        "dust": 159.2736,
+        "companionXp": 2026.628,
+        "cards": 0.6531,
+        "energy": 15.4792,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 129.93994521680708,
+        "xp": 25.68065533102486,
+        "dust": 10.2895240064086,
+        "companionXp": 130.92588764277224
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2516.757,
+        "xp": 496.895,
+        "dust": 199.092,
+        "companionXp": 2533.285,
+        "cards": 0.8163,
+        "energy": 15.4792,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 162.58960411390768,
+        "xp": 32.100819163781075,
+        "dust": 12.86190500801075,
+        "companionXp": 163.65735955346528
+      }
+    },
+    {
+      "scenario": "the-mirror-lake",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3022.1476,
+        "xp": 596.274,
+        "dust": 238.9104,
+        "companionXp": 3039.942,
+        "cards": 0.9042,
+        "energy": 15.4792,
+        "paidCredits": 10.196,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1198
+      },
+      "perEnergy": {
+        "credits": 195.23926301100832,
+        "xp": 38.52098299653729,
+        "dust": 15.434286009612899,
+        "companionXp": 196.38883146415836
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 495.2835,
+        "xp": 100.2596,
+        "dust": 39.743,
+        "companionXp": 512.0334,
+        "cards": 0.1754,
+        "energy": 15.6181,
+        "paidCredits": 17.507,
+        "offeringCredits": 0,
+        "losses": 2.6626,
+        "failedRuns": 0.0883
+      },
+      "perEnergy": {
+        "credits": 31.71214808459416,
+        "xp": 6.419449228779429,
+        "dust": 2.5446757288018387,
+        "companionXp": 32.784615286110345
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 752.8084,
+        "xp": 150.3894,
+        "dust": 59.3687,
+        "companionXp": 767.8043,
+        "cards": 0.2619,
+        "energy": 15.6181,
+        "paidCredits": 17.507,
+        "offeringCredits": 0,
+        "losses": 2.6626,
+        "failedRuns": 0.0883
+      },
+      "perEnergy": {
+        "credits": 48.20102317183268,
+        "xp": 9.629173843169143,
+        "dust": 3.801275443235733,
+        "companionXp": 49.16118477919849
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 777.3517,
+        "xp": 150.2859,
+        "dust": 59.4074,
+        "companionXp": 767.1995,
+        "cards": 0.2617,
+        "energy": 15.5453,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 2.3261,
+        "failedRuns": 0.0779
+      },
+      "perEnergy": {
+        "credits": 50.005577248428786,
+        "xp": 9.667610145831858,
+        "dust": 3.821566647153802,
+        "companionXp": 49.35250525882421
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1010.7366,
+        "xp": 200.5192,
+        "dust": 79.486,
+        "companionXp": 1024.0668,
+        "cards": 0.3443,
+        "energy": 15.6181,
+        "paidCredits": 17.507,
+        "offeringCredits": 0,
+        "losses": 2.6626,
+        "failedRuns": 0.0883
+      },
+      "perEnergy": {
+        "credits": 64.7157208623328,
+        "xp": 12.838898457558859,
+        "dust": 5.089351457603677,
+        "companionXp": 65.56923057222069
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1268.2615,
+        "xp": 250.649,
+        "dust": 99.1117,
+        "companionXp": 1279.8377,
+        "cards": 0.426,
+        "energy": 15.6181,
+        "paidCredits": 17.507,
+        "offeringCredits": 0,
+        "losses": 2.6626,
+        "failedRuns": 0.0883
+      },
+      "perEnergy": {
+        "credits": 81.20459594957133,
+        "xp": 16.048623071948573,
+        "dust": 6.345951172037572,
+        "companionXp": 81.94580006530884
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1526.1897,
+        "xp": 300.7788,
+        "dust": 119.229,
+        "companionXp": 1536.1002,
+        "cards": 0.5186,
+        "energy": 15.6181,
+        "paidCredits": 17.507,
+        "offeringCredits": 0,
+        "losses": 2.6626,
+        "failedRuns": 0.0883
+      },
+      "perEnergy": {
+        "credits": 97.71929364007146,
+        "xp": 19.258347686338286,
+        "dust": 7.6340271864055165,
+        "companionXp": 98.35384585833104
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2041.6428,
+        "xp": 401.0384,
+        "dust": 158.972,
+        "companionXp": 2048.1336,
+        "cards": 0.6831,
+        "energy": 15.6181,
+        "paidCredits": 17.507,
+        "offeringCredits": 0,
+        "losses": 2.6626,
+        "failedRuns": 0.0883
+      },
+      "perEnergy": {
+        "credits": 130.7228664178101,
+        "xp": 25.677796915117717,
+        "dust": 10.178702915207355,
+        "companionXp": 131.13846114444138
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2557.0959,
+        "xp": 501.298,
+        "dust": 198.715,
+        "companionXp": 2560.167,
+        "cards": 0.8548,
+        "energy": 15.6181,
+        "paidCredits": 17.507,
+        "offeringCredits": 0,
+        "losses": 2.6626,
+        "failedRuns": 0.0883
+      },
+      "perEnergy": {
+        "credits": 163.72643919554875,
+        "xp": 32.097246143897145,
+        "dust": 12.723378644009195,
+        "companionXp": 163.92307643055173
+      }
+    },
+    {
+      "scenario": "the-ash-caravan",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3072.549,
+        "xp": 601.5576,
+        "dust": 238.458,
+        "companionXp": 3072.2004,
+        "cards": 0.9262,
+        "energy": 15.6181,
+        "paidCredits": 17.507,
+        "offeringCredits": 0,
+        "losses": 2.6626,
+        "failedRuns": 0.0883
+      },
+      "perEnergy": {
+        "credits": 196.7300119732874,
+        "xp": 38.51669537267657,
+        "dust": 15.268054372811033,
+        "companionXp": 196.70769171666208
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 476.8149,
+        "xp": 95.8114,
+        "dust": 38.2505,
+        "companionXp": 489.5734,
+        "cards": 0.1699,
+        "energy": 14.9869,
+        "paidCredits": 16.64,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1201
+      },
+      "perEnergy": {
+        "credits": 31.815445489060448,
+        "xp": 6.39300989530857,
+        "dust": 2.552262309083266,
+        "companionXp": 32.66675563325304
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 723.1024,
+        "xp": 143.4679,
+        "dust": 56.9358,
+        "companionXp": 734.1109,
+        "cards": 0.2597,
+        "energy": 14.9869,
+        "paidCredits": 16.64,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1201
+      },
+      "perEnergy": {
+        "credits": 48.2489640953099,
+        "xp": 9.572886987969493,
+        "dust": 3.7990378263683615,
+        "companionXp": 48.9835055948862
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 739.048,
+        "xp": 143.3615,
+        "dust": 56.905,
+        "companionXp": 733.5635,
+        "cards": 0.2622,
+        "energy": 15.486,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1215
+      },
+      "perEnergy": {
+        "credits": 47.72362133539971,
+        "xp": 9.25749063670412,
+        "dust": 3.6746093245512075,
+        "companionXp": 47.369462740539845
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 970.2698,
+        "xp": 191.6228,
+        "dust": 76.501,
+        "companionXp": 979.1468,
+        "cards": 0.3412,
+        "energy": 14.9869,
+        "paidCredits": 16.64,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1201
+      },
+      "perEnergy": {
+        "credits": 64.74119397607244,
+        "xp": 12.78601979061714,
+        "dust": 5.104524618166532,
+        "companionXp": 65.33351126650608
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1216.5573,
+        "xp": 239.2793,
+        "dust": 95.1863,
+        "companionXp": 1223.6843,
+        "cards": 0.4265,
+        "energy": 14.9869,
+        "paidCredits": 16.64,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1201
+      },
+      "perEnergy": {
+        "credits": 81.17471258232189,
+        "xp": 15.965896883278063,
+        "dust": 6.351300135451628,
+        "companionXp": 81.65026122813924
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1463.7247,
+        "xp": 287.4342,
+        "dust": 114.7515,
+        "companionXp": 1468.7202,
+        "cards": 0.5109,
+        "energy": 14.9869,
+        "paidCredits": 16.64,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1201
+      },
+      "perEnergy": {
+        "credits": 97.66694246308442,
+        "xp": 19.17902968592571,
+        "dust": 7.656786927249798,
+        "companionXp": 98.00026689975913
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1957.1796,
+        "xp": 383.2456,
+        "dust": 153.002,
+        "companionXp": 1958.2936,
+        "cards": 0.6735,
+        "energy": 14.9869,
+        "paidCredits": 16.64,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1201
+      },
+      "perEnergy": {
+        "credits": 130.59269095009643,
+        "xp": 25.57203958123428,
+        "dust": 10.209049236333064,
+        "companionXp": 130.66702253301216
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2450.6345,
+        "xp": 479.057,
+        "dust": 191.2525,
+        "companionXp": 2447.867,
+        "cards": 0.8457,
+        "energy": 14.9869,
+        "paidCredits": 16.64,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1201
+      },
+      "perEnergy": {
+        "credits": 163.5184394371084,
+        "xp": 31.96504947654285,
+        "dust": 12.76131154541633,
+        "companionXp": 163.3337781662652
+      }
+    },
+    {
+      "scenario": "the-windmill-sky",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2944.0894,
+        "xp": 574.8684,
+        "dust": 229.503,
+        "companionXp": 2937.4404,
+        "cards": 0.9159,
+        "energy": 14.9869,
+        "paidCredits": 16.64,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1201
+      },
+      "perEnergy": {
+        "credits": 196.4441879241204,
+        "xp": 38.35805937185142,
+        "dust": 15.313573854499596,
+        "companionXp": 196.00053379951825
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 490.0373,
+        "xp": 97.9498,
+        "dust": 39.2778,
+        "companionXp": 499.0526,
+        "cards": 0.2023,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 32.03235021113595,
+        "xp": 6.402700971356107,
+        "dust": 2.567478526885516,
+        "companionXp": 32.62165483520937
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 734.8073,
+        "xp": 146.4744,
+        "dust": 58.4664,
+        "companionXp": 748.0789,
+        "cards": 0.3021,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.0322717705351,
+        "xp": 9.57461662156332,
+        "dust": 3.8217829548574342,
+        "companionXp": 48.89979866912447
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 734.8073,
+        "xp": 146.4744,
+        "dust": 58.4664,
+        "companionXp": 748.0789,
+        "cards": 0.3021,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.0322717705351,
+        "xp": 9.57461662156332,
+        "dust": 3.8217829548574342,
+        "companionXp": 48.89979866912447
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 980.0746,
+        "xp": 195.8996,
+        "dust": 78.5556,
+        "companionXp": 998.1052,
+        "cards": 0.398,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.0647004222719,
+        "xp": 12.805401942712214,
+        "dust": 5.134957053771032,
+        "companionXp": 65.24330967041874
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1224.8446,
+        "xp": 244.4242,
+        "dust": 97.7442,
+        "companionXp": 1247.1315,
+        "cards": 0.494,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.06462198167105,
+        "xp": 15.977317592919428,
+        "dust": 6.38926148174295,
+        "companionXp": 81.52145350433385
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1470.1119,
+        "xp": 293.8494,
+        "dust": 117.8334,
+        "companionXp": 1497.1578,
+        "cards": 0.5917,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.09705063340785,
+        "xp": 19.208102914068323,
+        "dust": 7.702435580656548,
+        "companionXp": 97.86496450562811
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1960.1492,
+        "xp": 391.7992,
+        "dust": 157.1112,
+        "companionXp": 1996.2104,
+        "cards": 0.7792,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.1294008445438,
+        "xp": 25.610803885424428,
+        "dust": 10.269914107542064,
+        "companionXp": 130.48661934083748
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2450.1865,
+        "xp": 489.749,
+        "dust": 196.389,
+        "companionXp": 2495.263,
+        "cards": 0.9739,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 160.16175105567976,
+        "xp": 32.013504856780536,
+        "dust": 12.83739263442758,
+        "companionXp": 163.10827417604685
+      }
+    },
+    {
+      "scenario": "the-forgotten-observatory",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2940.2238,
+        "xp": 587.6988,
+        "dust": 235.6668,
+        "companionXp": 2994.3156,
+        "cards": 0.9893,
+        "energy": 15.2982,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 192.1941012668157,
+        "xp": 38.41620582813665,
+        "dust": 15.404871161313096,
+        "companionXp": 195.72992901125622
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 504.3225,
+        "xp": 100.3725,
+        "dust": 40.3847,
+        "companionXp": 512.195,
+        "cards": 0.173,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 32.18908568693155,
+        "xp": 6.4064145524174245,
+        "dust": 2.5776097016116166,
+        "companionXp": 32.69155895962981
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 756.2324,
+        "xp": 150.492,
+        "dust": 60.5103,
+        "companionXp": 767.7925,
+        "cards": 0.2614,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 48.26758576671454,
+        "xp": 9.605361416945907,
+        "dust": 3.8621541407371947,
+        "companionXp": 49.005425243338124
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 756.2324,
+        "xp": 150.492,
+        "dust": 60.5103,
+        "companionXp": 767.7925,
+        "cards": 0.2614,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 48.26758576671454,
+        "xp": 9.605361416945907,
+        "dust": 3.8621541407371947,
+        "companionXp": 49.005425243338124
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1008.645,
+        "xp": 200.745,
+        "dust": 80.7694,
+        "companionXp": 1024.39,
+        "cards": 0.3448,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 64.3781713738631,
+        "xp": 12.812829104834849,
+        "dust": 5.155219403223233,
+        "companionXp": 65.38311791925962
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1260.5549,
+        "xp": 250.8645,
+        "dust": 100.895,
+        "companionXp": 1279.9875,
+        "cards": 0.4302,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 80.45667145364608,
+        "xp": 16.01177596936333,
+        "dust": 6.439763842348811,
+        "companionXp": 81.69698420296793
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1512.9675,
+        "xp": 301.1175,
+        "dust": 121.1541,
+        "companionXp": 1536.585,
+        "cards": 0.5161,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 96.56725706079465,
+        "xp": 19.219243657252274,
+        "dust": 7.732829104834849,
+        "companionXp": 98.07467687888942
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2017.29,
+        "xp": 401.49,
+        "dust": 161.5388,
+        "companionXp": 2048.78,
+        "cards": 0.6743,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 128.7563427477262,
+        "xp": 25.625658209669698,
+        "dust": 10.310438806446466,
+        "companionXp": 130.76623583851924
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2521.6125,
+        "xp": 501.8625,
+        "dust": 201.9235,
+        "companionXp": 2560.975,
+        "cards": 0.8418,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 160.94542843465774,
+        "xp": 32.032072762087125,
+        "dust": 12.888048508058082,
+        "companionXp": 163.45779479814902
+      }
+    },
+    {
+      "scenario": "the-silk-labyrinth",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3025.935,
+        "xp": 602.235,
+        "dust": 242.3082,
+        "companionXp": 3073.17,
+        "cards": 0.9076,
+        "energy": 15.6675,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.1335
+      },
+      "perEnergy": {
+        "credits": 193.1345141215893,
+        "xp": 38.43848731450455,
+        "dust": 15.465658209669698,
+        "companionXp": 196.14935375777884
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 480.9199,
+        "xp": 96.1828,
+        "dust": 38.2318,
+        "companionXp": 490.254,
+        "cards": 0.1963,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 32.061326666666666,
+        "xp": 6.412186666666667,
+        "dust": 2.5487866666666665,
+        "companionXp": 32.6836
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 721.1754,
+        "xp": 144.0205,
+        "dust": 57.094,
+        "companionXp": 734.881,
+        "cards": 0.2996,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.07836,
+        "xp": 9.601366666666667,
+        "dust": 3.8062666666666667,
+        "companionXp": 48.992066666666666
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 721.1754,
+        "xp": 144.0205,
+        "dust": 57.094,
+        "companionXp": 734.881,
+        "cards": 0.2996,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.07836,
+        "xp": 9.601366666666667,
+        "dust": 3.8062666666666667,
+        "companionXp": 48.992066666666666
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 961.8398,
+        "xp": 192.3656,
+        "dust": 76.4636,
+        "companionXp": 980.508,
+        "cards": 0.3964,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.12265333333333,
+        "xp": 12.824373333333334,
+        "dust": 5.097573333333333,
+        "companionXp": 65.3672
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1202.0953,
+        "xp": 240.2033,
+        "dust": 95.3258,
+        "companionXp": 1225.135,
+        "cards": 0.4936,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.13968666666666,
+        "xp": 16.013553333333334,
+        "dust": 6.355053333333333,
+        "companionXp": 81.67566666666667
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1442.7597,
+        "xp": 288.5484,
+        "dust": 114.6954,
+        "companionXp": 1470.762,
+        "cards": 0.5921,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.18398,
+        "xp": 19.23656,
+        "dust": 7.64636,
+        "companionXp": 98.0508
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1923.6796,
+        "xp": 384.7312,
+        "dust": 152.9272,
+        "companionXp": 1961.016,
+        "cards": 0.7813,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.24530666666666,
+        "xp": 25.648746666666668,
+        "dust": 10.195146666666666,
+        "companionXp": 130.7344
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2404.5995,
+        "xp": 480.914,
+        "dust": 191.159,
+        "companionXp": 2451.27,
+        "cards": 0.9802,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 160.30663333333334,
+        "xp": 32.06093333333333,
+        "dust": 12.743933333333333,
+        "companionXp": 163.418
+      }
+    },
+    {
+      "scenario": "the-honey-citadel",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2885.5194,
+        "xp": 577.0968,
+        "dust": 229.3908,
+        "companionXp": 2941.524,
+        "cards": 0.993,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 192.36796,
+        "xp": 38.47312,
+        "dust": 15.29272,
+        "companionXp": 196.1016
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 485.5828,
+        "xp": 96.6394,
+        "dust": 38.7314,
+        "companionXp": 493.6379,
+        "cards": 0.2038,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 32.0510352930305,
+        "xp": 6.37871197270021,
+        "dust": 2.556477429489845,
+        "companionXp": 32.582714533705605
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 728.1257,
+        "xp": 144.4591,
+        "dust": 57.8456,
+        "companionXp": 740.1833,
+        "cards": 0.3066,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.06015062408005,
+        "xp": 9.535065312238041,
+        "dust": 3.818115812888194,
+        "companionXp": 48.85601605248741
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 728.1257,
+        "xp": 144.4591,
+        "dust": 57.8456,
+        "companionXp": 740.1833,
+        "cards": 0.3066,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.06015062408005,
+        "xp": 9.535065312238041,
+        "dust": 3.818115812888194,
+        "companionXp": 48.85601605248741
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 971.1656,
+        "xp": 193.2788,
+        "dust": 77.4628,
+        "companionXp": 987.2758,
+        "cards": 0.4051,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.102070586061,
+        "xp": 12.75742394540042,
+        "dust": 5.11295485897969,
+        "companionXp": 65.16542906741121
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1213.7085,
+        "xp": 241.0985,
+        "dust": 96.577,
+        "companionXp": 1233.8212,
+        "cards": 0.5037,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.11118591711055,
+        "xp": 15.913777284938252,
+        "dust": 6.3745932423780385,
+        "companionXp": 81.43873058619302
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1456.7484,
+        "xp": 289.9182,
+        "dust": 116.1942,
+        "companionXp": 1480.9137,
+        "cards": 0.5963,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.1531058790915,
+        "xp": 19.13613591810063,
+        "dust": 7.669432288469535,
+        "companionXp": 97.74814360111681
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1942.3312,
+        "xp": 386.5576,
+        "dust": 154.9256,
+        "companionXp": 1974.5516,
+        "cards": 0.7866,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.204141172122,
+        "xp": 25.51484789080084,
+        "dust": 10.22590971795938,
+        "companionXp": 130.33085813482242
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2427.914,
+        "xp": 483.197,
+        "dust": 193.657,
+        "companionXp": 2468.1895,
+        "cards": 0.9876,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 160.25517646515252,
+        "xp": 31.893559863501054,
+        "dust": 12.782387147449226,
+        "companionXp": 162.91357266852802
+      }
+    },
+    {
+      "scenario": "the-ghost-regatta",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2913.4968,
+        "xp": 579.8364,
+        "dust": 232.3884,
+        "companionXp": 2961.8274,
+        "cards": 0.9944,
+        "energy": 15.1503,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 192.306211758183,
+        "xp": 38.27227183620126,
+        "dust": 15.33886457693907,
+        "companionXp": 195.49628720223362
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 500.3216,
+        "xp": 99.9504,
+        "dust": 39.5288,
+        "companionXp": 508.9976,
+        "cards": 0.1692,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 32.22060793405461,
+        "xp": 6.436785162287481,
+        "dust": 2.5456465739309633,
+        "companionXp": 32.779340546110255
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 750.1616,
+        "xp": 149.4256,
+        "dust": 59.2272,
+        "companionXp": 763.2416,
+        "cards": 0.2552,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 48.31025244719217,
+        "xp": 9.622977846470892,
+        "dust": 3.8142194744976816,
+        "companionXp": 49.152601751674396
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 750.1616,
+        "xp": 149.4256,
+        "dust": 59.2272,
+        "companionXp": 763.2416,
+        "cards": 0.2552,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 48.31025244719217,
+        "xp": 9.622977846470892,
+        "dust": 3.8142194744976816,
+        "companionXp": 49.152601751674396
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1000.6432,
+        "xp": 199.9008,
+        "dust": 79.0576,
+        "companionXp": 1017.9952,
+        "cards": 0.3368,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 64.44121586810923,
+        "xp": 12.873570324574962,
+        "dust": 5.0912931478619265,
+        "companionXp": 65.55868109222051
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1250.4832,
+        "xp": 249.376,
+        "dust": 98.756,
+        "companionXp": 1272.2392,
+        "cards": 0.422,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 80.53086038124678,
+        "xp": 16.05976300875837,
+        "dust": 6.359866048428645,
+        "companionXp": 81.93194229778464
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1500.9648,
+        "xp": 299.8512,
+        "dust": 118.5864,
+        "companionXp": 1526.9928,
+        "cards": 0.5121,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 96.66182380216384,
+        "xp": 19.31035548686244,
+        "dust": 7.63693972179289,
+        "companionXp": 98.33802163833076
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2001.2864,
+        "xp": 399.8016,
+        "dust": 158.1152,
+        "companionXp": 2035.9904,
+        "cards": 0.6762,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 128.88243173621845,
+        "xp": 25.747140649149923,
+        "dust": 10.182586295723853,
+        "companionXp": 131.11736218444102
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2501.608,
+        "xp": 499.752,
+        "dust": 197.644,
+        "companionXp": 2544.988,
+        "cards": 0.8432,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 161.10303967027306,
+        "xp": 32.183925811437405,
+        "dust": 12.728232869654818,
+        "companionXp": 163.89670273055125
+      }
+    },
+    {
+      "scenario": "the-basalt-garden",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3001.9296,
+        "xp": 599.7024,
+        "dust": 237.1728,
+        "companionXp": 3053.9856,
+        "cards": 0.918,
+        "energy": 15.528,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.132
+      },
+      "perEnergy": {
+        "credits": 193.32364760432768,
+        "xp": 38.62071097372488,
+        "dust": 15.27387944358578,
+        "companionXp": 196.67604327666152
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 479.8676,
+        "xp": 95.8921,
+        "dust": 38.1415,
+        "companionXp": 489.3657,
+        "cards": 0.1975,
+        "energy": 15,
+        "paidCredits": 4.974,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 31.991173333333332,
+        "xp": 6.392806666666667,
+        "dust": 2.5427666666666666,
+        "companionXp": 32.62438
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 721.7884,
+        "xp": 143.6367,
+        "dust": 56.9611,
+        "companionXp": 733.7997,
+        "cards": 0.2996,
+        "energy": 15,
+        "paidCredits": 4.974,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.11922666666667,
+        "xp": 9.57578,
+        "dust": 3.797406666666667,
+        "companionXp": 48.91998
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 726.76,
+        "xp": 143.599,
+        "dust": 56.9678,
+        "companionXp": 733.6082,
+        "cards": 0.2976,
+        "energy": 15,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.45066666666666,
+        "xp": 9.573266666666667,
+        "dust": 3.7978533333333333,
+        "companionXp": 48.90721333333333
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 964.7092,
+        "xp": 191.7842,
+        "dust": 76.283,
+        "companionXp": 978.7314,
+        "cards": 0.3959,
+        "energy": 15,
+        "paidCredits": 4.974,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.31394666666667,
+        "xp": 12.785613333333334,
+        "dust": 5.085533333333333,
+        "companionXp": 65.24876
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1206.63,
+        "xp": 239.5288,
+        "dust": 95.1026,
+        "companionXp": 1223.1654,
+        "cards": 0.4909,
+        "energy": 15,
+        "paidCredits": 4.974,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.442,
+        "xp": 15.968586666666667,
+        "dust": 6.340173333333333,
+        "companionXp": 81.54436
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1449.5508,
+        "xp": 287.6763,
+        "dust": 114.4245,
+        "companionXp": 1468.0971,
+        "cards": 0.5886,
+        "energy": 15,
+        "paidCredits": 4.974,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.63672,
+        "xp": 19.17842,
+        "dust": 7.6283,
+        "companionXp": 97.87314
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1934.3924,
+        "xp": 383.5684,
+        "dust": 152.566,
+        "companionXp": 1957.4628,
+        "cards": 0.7781,
+        "energy": 15,
+        "paidCredits": 4.974,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.95949333333334,
+        "xp": 25.571226666666668,
+        "dust": 10.171066666666666,
+        "companionXp": 130.49752
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2419.234,
+        "xp": 479.4605,
+        "dust": 190.7075,
+        "companionXp": 2446.8285,
+        "cards": 0.9776,
+        "energy": 15,
+        "paidCredits": 4.974,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 161.28226666666666,
+        "xp": 31.964033333333333,
+        "dust": 12.713833333333334,
+        "companionXp": 163.1219
+      }
+    },
+    {
+      "scenario": "the-midnight-bakery",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2904.0756,
+        "xp": 575.3526,
+        "dust": 228.849,
+        "companionXp": 2936.1942,
+        "cards": 0.9913,
+        "energy": 15,
+        "paidCredits": 4.974,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 193.60504,
+        "xp": 38.35684,
+        "dust": 15.2566,
+        "companionXp": 195.74628
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 538.2876,
+        "xp": 106.7346,
+        "dust": 42.476,
+        "companionXp": 545.945,
+        "cards": 0.1784,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 32.44025263360895,
+        "xp": 6.432430152110503,
+        "dust": 2.559843791432635,
+        "companionXp": 32.90173082949642
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 807.4314,
+        "xp": 159.7344,
+        "dust": 63.3278,
+        "companionXp": 818.6712,
+        "cards": 0.27,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 48.660378950413424,
+        "xp": 9.62649760142709,
+        "dust": 3.8164910927367837,
+        "companionXp": 49.3377528144059
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 807.4314,
+        "xp": 159.7344,
+        "dust": 63.3278,
+        "companionXp": 818.6712,
+        "cards": 0.27,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 48.660378950413424,
+        "xp": 9.62649760142709,
+        "dust": 3.8164910927367837,
+        "companionXp": 49.3377528144059
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1076.5752,
+        "xp": 213.4692,
+        "dust": 84.952,
+        "companionXp": 1091.89,
+        "cards": 0.3557,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 64.8805052672179,
+        "xp": 12.864860304221006,
+        "dust": 5.11968758286527,
+        "companionXp": 65.80346165899284
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1345.719,
+        "xp": 266.469,
+        "dust": 105.8038,
+        "companionXp": 1364.6162,
+        "cards": 0.4425,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 81.10063158402237,
+        "xp": 16.058927753537592,
+        "dust": 6.3763348841694185,
+        "companionXp": 82.23948364390232
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1614.8628,
+        "xp": 320.2038,
+        "dust": 127.428,
+        "companionXp": 1637.835,
+        "cards": 0.5372,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 97.32075790082685,
+        "xp": 19.29729045633151,
+        "dust": 7.679531374297905,
+        "companionXp": 98.70519248848926
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2153.1504,
+        "xp": 426.9384,
+        "dust": 169.904,
+        "companionXp": 2183.78,
+        "cards": 0.7109,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 129.7610105344358,
+        "xp": 25.729720608442012,
+        "dust": 10.23937516573054,
+        "companionXp": 131.6069233179857
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2691.438,
+        "xp": 533.673,
+        "dust": 212.38,
+        "companionXp": 2729.725,
+        "cards": 0.89,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 162.20126316804473,
+        "xp": 32.162150760552514,
+        "dust": 12.799218957163175,
+        "companionXp": 164.5086541474821
+      }
+    },
+    {
+      "scenario": "the-thunderstep-arena",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 3229.7256,
+        "xp": 640.4076,
+        "dust": 254.856,
+        "companionXp": 3275.67,
+        "cards": 0.9118,
+        "energy": 16.5932,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0.2276
+      },
+      "perEnergy": {
+        "credits": 194.6415158016537,
+        "xp": 38.59458091266302,
+        "dust": 15.35906274859581,
+        "companionXp": 197.41038497697852
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 494.11,
+        "xp": 98.234,
+        "dust": 39.295,
+        "companionXp": 500.933,
+        "cards": 0.2014,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 32.1591981515832,
+        "xp": 6.393569592241856,
+        "dust": 2.557518956035016,
+        "companionXp": 32.60327378046796
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 741.165,
+        "xp": 147.0995,
+        "dust": 58.9425,
+        "companionXp": 751.151,
+        "cards": 0.3004,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.23879722737479,
+        "xp": 9.573985486022975,
+        "dust": 3.836278434052524,
+        "companionXp": 48.888737023658436
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 741.165,
+        "xp": 147.0995,
+        "dust": 58.9425,
+        "companionXp": 751.151,
+        "cards": 0.3004,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.23879722737479,
+        "xp": 9.573985486022975,
+        "dust": 3.836278434052524,
+        "companionXp": 48.888737023658436
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 988.22,
+        "xp": 196.468,
+        "dust": 78.59,
+        "companionXp": 1001.866,
+        "cards": 0.3958,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.3183963031664,
+        "xp": 12.787139184483712,
+        "dust": 5.115037912070032,
+        "companionXp": 65.20654756093592
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1235.275,
+        "xp": 245.3335,
+        "dust": 98.2375,
+        "companionXp": 1252.084,
+        "cards": 0.4906,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.39799537895799,
+        "xp": 15.967555078264832,
+        "dust": 6.393797390087539,
+        "companionXp": 81.4920108041264
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1482.33,
+        "xp": 294.702,
+        "dust": 117.885,
+        "companionXp": 1502.799,
+        "cards": 0.5888,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.47759445474958,
+        "xp": 19.18070877672557,
+        "dust": 7.672556868105048,
+        "companionXp": 97.80982134140389
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1976.44,
+        "xp": 392.936,
+        "dust": 157.18,
+        "companionXp": 2003.732,
+        "cards": 0.7751,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.6367926063328,
+        "xp": 25.574278368967423,
+        "dust": 10.230075824140064,
+        "companionXp": 130.41309512187183
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2470.55,
+        "xp": 491.17,
+        "dust": 196.475,
+        "companionXp": 2504.665,
+        "cards": 0.9681,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 160.79599075791597,
+        "xp": 31.96784796120928,
+        "dust": 12.787594780175079,
+        "companionXp": 163.01636890233982
+      }
+    },
+    {
+      "scenario": "the-last-snowglobe",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2964.66,
+        "xp": 589.404,
+        "dust": 235.77,
+        "companionXp": 3005.598,
+        "cards": 0.9868,
+        "energy": 15.3645,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 192.95518890949916,
+        "xp": 38.36141755345114,
+        "dust": 15.345113736210095,
+        "companionXp": 195.61964268280778
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "F",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 492.7915,
+        "xp": 97.955,
+        "dust": 39.3195,
+        "companionXp": 502.1609,
+        "cards": 0.198,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 32.05961186902694,
+        "xp": 6.372673393576257,
+        "dust": 2.5580147159279427,
+        "companionXp": 32.66915835561541
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 739.1254,
+        "xp": 146.4325,
+        "dust": 58.6626,
+        "companionXp": 753.058,
+        "cards": 0.2956,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.08539401864538,
+        "xp": 9.526481514010058,
+        "dust": 3.8164217264867184,
+        "companionXp": 48.99180930447398
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "E",
+      "samples": 10000,
+      "freeOnly": true,
+      "mean": {
+        "credits": 739.1254,
+        "xp": 146.4325,
+        "dust": 58.6626,
+        "companionXp": 753.058,
+        "cards": 0.2956,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 48.08539401864538,
+        "xp": 9.526481514010058,
+        "dust": 3.8164217264867184,
+        "companionXp": 48.99180930447398
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "D",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 985.583,
+        "xp": 195.91,
+        "dust": 78.639,
+        "companionXp": 1004.3218,
+        "cards": 0.39,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 64.11922373805388,
+        "xp": 12.745346787152513,
+        "dust": 5.116029431855885,
+        "companionXp": 65.33831671123082
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "C",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1231.9169,
+        "xp": 244.3875,
+        "dust": 97.9821,
+        "companionXp": 1255.2189,
+        "cards": 0.4836,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 80.14500588767233,
+        "xp": 15.899154907586315,
+        "dust": 6.374436442414662,
+        "companionXp": 81.66096766008938
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "B",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1478.3745,
+        "xp": 293.865,
+        "dust": 117.9585,
+        "companionXp": 1506.4827,
+        "cards": 0.5849,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 96.17883560708081,
+        "xp": 19.11802018072877,
+        "dust": 7.674044147783828,
+        "companionXp": 98.00747506684623
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "A",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 1971.166,
+        "xp": 391.82,
+        "dust": 157.278,
+        "companionXp": 2008.6436,
+        "cards": 0.7752,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 128.23844747610775,
+        "xp": 25.490693574305027,
+        "dust": 10.23205886371177,
+        "companionXp": 130.67663342246163
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "S",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2463.9575,
+        "xp": 489.775,
+        "dust": 196.5975,
+        "companionXp": 2510.8045,
+        "cards": 0.9683,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 160.2980593451347,
+        "xp": 31.863366967881284,
+        "dust": 12.790073579639714,
+        "companionXp": 163.34579177807703
+      }
+    },
+    {
+      "scenario": "the-dawn-archive",
+      "rank": "S+",
+      "samples": 10000,
+      "freeOnly": false,
+      "mean": {
+        "credits": 2956.749,
+        "xp": 587.73,
+        "dust": 235.917,
+        "companionXp": 3012.9654,
+        "cards": 0.9874,
+        "energy": 15.3711,
+        "paidCredits": 0,
+        "offeringCredits": 0,
+        "losses": 0,
+        "failedRuns": 0
+      },
+      "perEnergy": {
+        "credits": 192.35767121416163,
+        "xp": 38.23604036145754,
+        "dust": 15.348088295567656,
+        "companionXp": 196.01495013369245
+      }
+    }
+  ]
+}
