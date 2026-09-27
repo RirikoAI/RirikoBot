@@ -398,7 +398,20 @@ All commands support dual-dispatch: full Slash Command (`/play`) and Message Pre
 | `/filter` | `!fx` | `<bassboost \| nightcore \| 8d \| ...>` | Applies audio filter preset. |
 | `/lyrics` | `!ly` | `[song]` | Fetches synced or plain lyrics. |
 | `/join` | `!connect` | None | Summons bot to user's voice channel. |
-| `/setup-music` | None | None | Generates the dedicated `#music` interactive channel. |
+| `/setup-music` | None | None | Generates the dedicated `#music` interactive channel. Needs Manage Server. |
+
+### 9.1. Server Settings (STORY-116)
+The dashboard Music page, and `ririko guild:config <guild> music.<key>`, edit these settings:
+- **Default volume** (`music_guild_settings.default_volume`, 0 to 150, default 80): the volume a new session starts at. `/volume <level>` also saves it, as since BUG-0018. A dashboard change evicts the player's cached value.
+- **Music channel** (`music_channels`): when the channel changes, the row's message ID is cleared, and on the `guild:configChanged` event the bot posts a new controller there. The previous controller message is not deleted.
+- **DJ role** (`music_guild_settings.dj_role_id`): when set, only members with the role or Manage Server (or Administrator) can change playback:
+  - Commands: `/pause`, `/resume`, `/skip`, `/back`, `/stop`, `/volume <level>`, `/loop`, `/shuffle`, `/seek`, `/filter` and `/leave`.
+  - Controller buttons: previous, play/pause, skip, stop, mute, loop and shuffle.
+
+  Everyone can still add songs (`/play`, the music channel, `/playlist`) and use `/queue`, `/nowplaying`, `/lyrics` and `/join`. The check runs as command middleware (`commands/music/dj-role.ts`).
+- **Leave empty voice channels** (`music_guild_settings.auto_leave_empty`, default on): a `voiceStateUpdate` listener counts the members who are not bots in Ririko's voice channel. With nobody left, `MusicPlayerService.handleChannelOccupancy` stops the player and leaves after the idle timeout (3 minutes); anyone joining cancels it. This works for the built-in player and Lavalink. Before STORY-116, Ririko never left an empty channel.
+
+`restrict_voice_channel_id` and `lyrics_provider` are not read by the bot, so they are not on the page. Audio filters are per session and are not saved.
 
 ### Interactive Embed Buttons:
 - `music_pause_resume`: Toggles pause/play state.

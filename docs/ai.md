@@ -64,6 +64,12 @@ The AI is strictly limited to an audited tool allowlist:
 - `reminders.create(time, message)`: Schedules a real, persistent reminder through `ReminderService` (natural-language times in the user timezone; see `docs/commands.md` §7). Returns the reason when it cannot be scheduled.
 - `games.coinflip()`: Flips a random coin.
 
+Each server chooses which of these tools Ririko may use (the dashboard AI Chatbot page, or `ririko guild:config <guild> ai.tools`). The choice is stored in `ai_guild_preferences`:
+- `tools_enabled = false` turns every tool off.
+- Otherwise `allowed_tools` lists the allowed tools, and an empty list means every tool, including tools added later.
+
+The bot passes the resulting list both to the tool registry (so the model is only told about allowed tools) and to the security interceptor, which refuses any other tool call. An empty list refuses every tool (STORY-116).
+
 ---
 
 ## 5. Security & Application Mediation Boundaries
@@ -119,3 +125,14 @@ export interface ChatModelProvider {
 2. **OpenAI** (`openai`): GPT-4o and GPT-4o-mini adapters.
 3. **Local Ollama / OpenRouter**: Self-hosted local inference adapter for zero-cost or offline setups.
 4. **Fallback Chains**: If the primary provider triggers a 429 quota exhaustion or network timeout, requests automatically route to the configured fallback provider.
+
+### 6.1. Per-Server Provider & Model (STORY-116)
+- The provider and model lists live in `@ririko/core` (`AI_PROVIDER_MODELS`). The providers in `@ririko/ai` use the same lists, so the dashboard, the CLI and `/aimodel` offer only models the bot has.
+- A server's choice is stored in `ai_guild_preferences.provider_override` and `model_override`. It is written as `provider` (that provider's default model) or `provider/model`, and unset means the bot default (`DEFAULT_AI_PROVIDER`).
+- The bot passes the choice to `FallbackChainManager.generate/stream` as a `ProviderPreference`. The chosen provider is tried first. The chosen model is sent only to that provider; if the provider fails, the next provider answers with its own default model. The circuit breaker is unchanged.
+- The dashboard offers only providers with credentials (`configuredAiProviders`: `GEMINI_API_KEY`, `OPENAI_API_KEY`, or an explicit `OLLAMA_BASE_URL`). A provider without them is refused on save.
+- `/aimodel` and `/ai action:model`:
+  - Setting a model needs Manage Server.
+  - They accept a listed `provider/model`, a provider name, or a listed model name that belongs to one provider, and `default` to reset.
+  - They refuse a provider the bot has not registered as available.
+- A `model_override` saved before STORY-116, without a provider, was never used and stays unused. The page shows it as "Bot default".
