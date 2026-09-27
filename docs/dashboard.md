@@ -241,10 +241,11 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-113 | 5 | Overview tab, command usage counters, bot status record, voice activity, case log and audit viewers | 4 (Overview), 5 |
 | STORY-114 | 8 | Typed settings and step-up settings forms, Logging, Moderation escalation and AutoMod pages, real AutoMod actions | 3.4, 4 (3, 4, 18) |
 | STORY-115 | 8 | XP, Games, Giveaways pages, voice rewards, giveaway end guard | 4 (9, 11, 12) |
-| STORY-116 | 8 | Music, AI, Image Generation, Stream Alerts, Free Games, Welcome & Farewell, Integrations pages; needs STORY-133 | 4 (5, 6, 7, 15, 16, 17, 20) |
+| STORY-116 | 13 | Music (DJ role, auto-leave), AI (per-guild provider and model), Image Generation (per-guild settings) and Integrations pages | 4 (5, 6, 7, 20) |
 | STORY-117 | 5 | Passkey sign-in gate, step-up, owner guard, recovery CLI | 2.3 |
 | STORY-118 | 5 | Session management and alerts, CSP and taint guards, rate limits, authorization coverage test | 7 |
 | STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
 | STORY-163 | 5 | Command Overrides engine (repository, catalog, override middleware) and page | 4 (19) |
 | STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 2.3, 4 (13, 14) |
 | STORY-165 | 13 | Owner console: global economy settings, live bank capacity, item shop manager, item codes and a seed that works on Postgres | 3.1, 4 (8) |
+| STORY-166 | 13 | Stream Alerts, Free Games (ping role), Welcome & Farewell editor (preview, background upload); needs STORY-133 | 4 (15, 16, 17) |
