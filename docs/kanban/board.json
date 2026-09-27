@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "STORY-116",
   "epics": [
     {
       "id": "EPIC-000",
@@ -182,7 +182,7 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115. STORY-116 was re-groomed to 13 points on 2026-09-27 and split: Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166."
     },
     {
       "id": "EPIC-012",
@@ -906,7 +906,7 @@
       "epic": "EPIC-011",
       "title": "Owner Console: Global Economy Settings & Item Shop Manager",
       "points": 13,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-115"
       ],
@@ -916,16 +916,30 @@
     {
       "id": "STORY-116",
       "epic": "EPIC-011",
-      "title": "Music, AI Chatbot, Image Generation, Stream Alerts, Free Games, Welcome & Integrations Pages",
-      "points": 8,
-      "status": "TODO",
+      "title": "Music, AI Chatbot, Image Generation & Integrations Pages",
+      "points": 13,
+      "status": "IN_PROGRESS",
       "requires": [
         "STORY-111",
-        "STORY-133",
         "STORY-117"
       ],
+      "blocks": [
+        "STORY-166"
+      ],
+      "description": "Module pages for media systems and integrations (dashboard.md sections 5, 6, 7, 20). Re-groomed 2026-09-27 at story start after an audit: most listed settings had no backing the bot reads. The music DJ role was never enforced, auto_leave_empty was never passed and nothing reported channel occupancy, the AI model_override was saved but never read and there was no per-guild provider, and image generation had no per-guild settings (/stablediffusion-model wrote junk image_presets rows). The user chose to wire these end to end. Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166."
+    },
+    {
+      "id": "STORY-166",
+      "epic": "EPIC-011",
+      "title": "Stream Alerts, Free Games & Welcome & Farewell Pages",
+      "points": 13,
+      "status": "TODO",
+      "requires": [
+        "STORY-116",
+        "STORY-133"
+      ],
       "blocks": [],
-      "description": "Module pages for media and notification systems (dashboard.md sections 5, 6, 7, 15, 16, 17, 20). The Welcome & Farewell editor needs the STORY-133 WelcomerService renderer."
+      "description": "Split from STORY-116 on 2026-09-27 (dashboard.md sections 15, 16, 17). The audit found: /stream subscribe writes text IDs into uuid columns on Postgres, handle parsing lives in apps/bot, free_game_channels has no ping role, the welcomer SSRF check is private and weaker than the profile background one, backgrounds are URL only, and the web app cannot load @napi-rs/canvas. The user chose to add the free-games ping role and welcome background upload."
     },
     {
       "id": "STORY-117",
@@ -2870,8 +2884,8 @@
     {
       "id": "TASK-1161",
       "parent": "STORY-116",
-      "title": "Music Page (Volume, DJ Role, Music Channel), AI Chatbot Page (Persona, Provider/Model, Tool Toggles) & Image Generation Page (Provider, Quotas, Presets)",
-      "points": 3,
+      "title": "Music Page (Default Volume, Music Channel, DJ Role Enforcement, Auto-Leave on Empty Channel)",
+      "points": 5,
       "status": "TODO",
       "requires": [
         "STORY-111"
@@ -2879,13 +2893,13 @@
       "blocks": [
         "TASK-1162"
       ],
-      "description": "Edit music_guild_settings, ai_guild_preferences and image provider/quota/preset settings through the existing services. Provider selectors only list providers with configured credentials; credentials are never sent to the client."
+      "description": "Module music: default volume (the volume cache is evicted on guild:configChanged; /volume changes only the live queue), the music channel (the bot posts the controller embed when the row has no message), a DJ role that gates queue-control commands and buttons, and auto-leave when the voice channel empties (voiceStateUpdate reports occupancy to the local player and Lavalink)."
     },
     {
       "id": "TASK-1162",
       "parent": "STORY-116",
-      "title": "Stream Alerts Page (Streamer Subscriptions, Templates, Mention Roles) & Free Games Page (Channels, Ping Roles)",
-      "points": 2,
+      "title": "AI Chatbot Page (Channel, Persona & Style, Tool Toggles, Per-Guild Provider & Model)",
+      "points": 3,
       "status": "TODO",
       "requires": [
         "TASK-1161"
@@ -2893,20 +2907,74 @@
       "blocks": [
         "TASK-1163"
       ],
-      "description": "Manage stream_subscriptions for Twitch/YouTube/TikTok and free_game_channels through the existing stream and free-games services, with platform handle validation shared with the /stream command."
+      "description": "Module ai: channel, speaking style, persona prompt, tools on/off and which tools, and a provider and model the fallback chain prefers (the model goes only to that provider). Provider selectors list only providers with credentials. /aimodel validates with the same schema and needs Manage Server."
     },
     {
       "id": "TASK-1163",
       "parent": "STORY-116",
-      "title": "Welcome & Farewell Live Canvas Preview Editor (SSRF-Safe Background Upload) & Integrations Status Page (Zero Secret Exposure)",
+      "title": "Image Generation Page (Default Provider, Member Daily Limit, Default Style Preset) & /stablediffusion-model Rewrite",
       "points": 3,
       "status": "TODO",
       "requires": [
-        "TASK-1162",
+        "TASK-1162"
+      ],
+      "blocks": [
+        "TASK-1164"
+      ],
+      "description": "New image_guild_settings table. /imagine uses the guild's default provider and preset when the member gives none, and a per-member daily limit per guild within the env quota. The env quota now counts across providers. /stablediffusion-model sets the same row instead of writing image_presets."
+    },
+    {
+      "id": "TASK-1164",
+      "parent": "STORY-116",
+      "title": "Integrations Status Page (Configured / Not Configured, Zero Secret Exposure) & Shared Status Helper for the CLI Doctor",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1163"
+      ],
+      "blocks": [],
+      "description": "One core helper reports whether each provider is configured; the page and ririko doctor use it. The page renders booleans only; no secret value is rendered or serialized to the client."
+    },
+    {
+      "id": "TASK-1661",
+      "parent": "STORY-166",
+      "title": "Stream Alerts Page (Subscriptions, Templates, Mention Roles), uuid IDs on Postgres & Shared Handle Parsing",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-116"
+      ],
+      "blocks": [
+        "TASK-1662"
+      ],
+      "description": "Manage stream_subscriptions for Twitch/YouTube/TikTok from the dashboard. Move platform inference and handle cleaning from apps/bot into services so /stream and the page share them, fix the text IDs written into uuid columns on Postgres, limit subscriptions per guild, and restrict mentions to the chosen role."
+    },
+    {
+      "id": "TASK-1662",
+      "parent": "STORY-166",
+      "title": "Free Games Page (Channel, Ping Role Wired into Announcements)",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1661"
+      ],
+      "blocks": [
+        "TASK-1663"
+      ],
+      "description": "Add a ping role to free_game_channels on both dialects; announcements mention only that role. The page edits the channel and the role; /freegames keeps working."
+    },
+    {
+      "id": "TASK-1663",
+      "parent": "STORY-166",
+      "title": "Welcome & Farewell Editor (Server-Rendered Preview, SSRF-Safe Background URL & Upload)",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "TASK-1662",
         "STORY-133"
       ],
       "blocks": [],
-      "description": "Editor renders previews server-side with the STORY-133 WelcomerService and validates background URLs/uploads through its SSRF and DNS checks. Integrations page shows only \"Configured\" / \"Not configured\" per provider; no secret value is rendered or serialized to the client."
+      "description": "Previews are rendered server-side with the STORY-133 WelcomerService (a canvas-free subpath for the URL check, @napi-rs/canvas external in Next). The URL check reuses the stronger profile background check. Uploaded backgrounds are size and type checked and stored so the bot renders from them."
     },
     {
       "id": "TASK-1171",
