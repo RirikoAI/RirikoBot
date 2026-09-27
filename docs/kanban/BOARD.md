@@ -8,14 +8,14 @@
 ## ⚡ In Progress (WIP Limit: 1)
 | ID | Type | Title | Pts | Epic / Parent |
 |---|---|---|---|---|
-| `STORY-166` | Story | Stream Alerts, Free Games & Welcome & Farewell Pages | 13 | `EPIC-011` |
+| | | | | |
 
 ---
 
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| | | | | | |
+| `STORY-166` | Story | Stream Alerts, Free Games & Welcome & Farewell Pages | 13 | `EPIC-011` | [STORY-166.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-166.md) |
 
 ---
 
@@ -269,10 +269,10 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1162` | Task | AI Chatbot Page (Channel, Persona & Style, Tool Toggles, Per-Guild Provider & Model) | 3 | `STORY-116` | ✅ Done · [STORY-116.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-116.md) | `TASK-1161` |
 | `TASK-1163` | Task | Image Generation Page (Default Provider, Member Daily Limit, Default Style Preset) & /stablediffusion-model Rewrite | 3 | `STORY-116` | ✅ Done · [STORY-116.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-116.md) | `TASK-1162` |
 | `TASK-1164` | Task | Integrations Status Page (Configured / Not Configured, Zero Secret Exposure) & Shared Status Helper for the CLI Doctor | 2 | `STORY-116` | ✅ Done · [STORY-116.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-116.md) | `TASK-1163` |
-| `STORY-166` | Story | Stream Alerts, Free Games & Welcome & Farewell Pages | 13 | `EPIC-011` | ⚡ In Progress | `STORY-116`, `STORY-133` |
-| `TASK-1661` | Task | Stream Alerts Page (Subscriptions, Templates, Mention Roles), uuid IDs on Postgres & Shared Handle Parsing | 5 | `STORY-166` | 🎯 To Do | `STORY-116` |
-| `TASK-1662` | Task | Free Games Page (Channel, Ping Role Wired into Announcements) | 3 | `STORY-166` | 🎯 To Do | `TASK-1661` |
-| `TASK-1663` | Task | Welcome & Farewell Editor (Server-Rendered Preview, SSRF-Safe Background URL & Upload) | 5 | `STORY-166` | 🎯 To Do | `TASK-1662`, `STORY-133` |
+| `STORY-166` | Story | Stream Alerts, Free Games & Welcome & Farewell Pages | 13 | `EPIC-011` | 🔍 Review · [STORY-166.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-166.md) | `STORY-116`, `STORY-133` |
+| `TASK-1661` | Task | Stream Alerts Page (Subscriptions, Templates, Mention Roles), uuid IDs on Postgres & Shared Handle Parsing | 5 | `STORY-166` | ✅ Done · [STORY-166.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-166.md) | `STORY-116` |
+| `TASK-1662` | Task | Free Games Page (Channel, Ping Role Wired into Announcements) | 3 | `STORY-166` | ✅ Done · [STORY-166.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-166.md) | `TASK-1661` |
+| `TASK-1663` | Task | Welcome & Farewell Editor (Server-Rendered Preview, SSRF-Safe Background URL & Upload) | 5 | `STORY-166` | ✅ Done · [STORY-166.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-166.md) | `TASK-1662`, `STORY-133` |
 | `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | `EPIC-011` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `STORY-111` |
 | `TASK-1171` | Task | WebAuthn Passkeys: web_passkeys Table, Security Page (Add/Remove), Sign-In Gate for Enrolled Users & requireStepUp | 3 | `STORY-117` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `STORY-111` |
 | `TASK-1174` | Task | BOT_OWNER_ID Owner Guard (Passkey + Fresh Step-Up) & `ririko passkeys:reset` Recovery CLI | 2 | `STORY-117` | ✅ Done · [STORY-117.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-117.md) | `TASK-1171` |
