@@ -550,8 +550,8 @@ export class MusicEmbedController {
 
     const customId = interaction.customId;
     if (DJ_BUTTONS.has(customId)) {
-      const settings = await this.services.musicRepo.getGuildSettings(guildId);
-      if (!canControlPlayback(toPlaybackMember(member), settings?.djRoleId ?? null)) {
+      const djRoleId = (await this.services.musicRepo.getGuildSettings(guildId))?.djRoleId ?? null;
+      if (djRoleId && !canControlPlayback(toPlaybackMember(member), djRoleId)) {
         await interaction.reply({ content: DJ_ONLY_MESSAGE, ephemeral: true });
         return;
       }

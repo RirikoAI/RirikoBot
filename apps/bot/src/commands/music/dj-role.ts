@@ -28,7 +28,7 @@ export function canControlPlayback(
 export function toPlaybackMember(
   member: GuildMember | APIInteractionGuildMember | null | undefined,
 ): PlaybackMember | null {
-  if (!member) return null;
+  if (!member?.roles) return null;
   if ('cache' in member.roles) {
     const roles = member.roles.cache;
     return {
@@ -56,7 +56,7 @@ export function createDjRoleMiddleware(
   return async (ctx, next) => {
     if (!ctx.guildId || !applies(ctx)) return next();
     const djRoleId = await getDjRoleId(ctx.guildId);
-    if (!canControlPlayback(toPlaybackMember(ctx.member), djRoleId)) {
+    if (djRoleId && !canControlPlayback(toPlaybackMember(ctx.member), djRoleId)) {
       await ctx.reply({ content: DJ_ONLY_MESSAGE, ephemeral: true });
       return;
     }
