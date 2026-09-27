@@ -4,7 +4,7 @@ import {
   EconomyRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
-import { DEFAULT_RESET_SCHEDULE } from '@ririko/core';
+import { DEFAULT_ECONOMY_CONFIG, DEFAULT_RESET_SCHEDULE, type EconomyConfig } from '@ririko/core';
 import { DailyService } from './daily.service.js';
 
 /**
@@ -21,13 +21,12 @@ describe('DailyService', () => {
   let client: SqliteDatabaseClient;
   let repo: EconomyRepository;
   let dailyService: DailyService;
+  let config: EconomyConfig;
 
   const buildService = (streakForgiveness = 3): DailyService =>
     new DailyService({
       repository: repo,
-      baseReward: 250,
-      streakBonusPercent: 0.05,
-      maxStreakBonusPercent: 1.5,
+      config: { get: async () => config },
       resetSchedule: DEFAULT_RESET_SCHEDULE,
       streakForgiveness,
     });
@@ -71,6 +70,7 @@ describe('DailyService', () => {
     `);
 
     repo = new EconomyRepository(client);
+    config = { ...DEFAULT_ECONOMY_CONFIG };
     dailyService = buildService();
   });
 
@@ -78,22 +78,19 @@ describe('DailyService', () => {
     await client.close();
   });
 
-  describe('Multiplier and Reward Calculations', () => {
-    it('calculates 1.0x multiplier and base 250 credits for Day 1', () => {
-      expect(dailyService.calculateMultiplier(1)).toBe(1.0);
-      expect(dailyService.calculateReward(1)).toBe(250);
-    });
+  describe('Global config', () => {
+    it('pays the configured base reward and streak bonus, read on each claim', async () => {
+      const first = await dailyService.claimDaily('user_cfg', undefined, resetDay(0));
+      expect(first.creditsAwarded).toBe(250);
 
-    it('calculates +5% per day for Day 2 to Day 30', () => {
-      expect(dailyService.calculateMultiplier(2)).toBe(1.05);
-      expect(dailyService.calculateMultiplier(6)).toBe(1.25);
-      expect(dailyService.calculateReward(2)).toBe(263);
-    });
+      config = { ...config, dailyBaseReward: 400, dailyStreakBonusPercent: 10 };
+      const status = await dailyService.getStatus('user_cfg', resetDay(1));
+      expect(status.rewardCredits).toBe(440);
+      expect(status.multiplier).toBe(1.1);
 
-    it('caps streak bonus at +150% (2.50x multiplier, 625 credits) for 30+ days', () => {
-      expect(dailyService.calculateMultiplier(31)).toBe(2.5);
-      expect(dailyService.calculateMultiplier(100)).toBe(2.5);
-      expect(dailyService.calculateReward(31)).toBe(625);
+      const second = await dailyService.claimDaily('user_cfg', undefined, resetDay(1));
+      expect(second.creditsAwarded).toBe(440);
+      expect(second.multiplier).toBe(1.1);
     });
   });
 

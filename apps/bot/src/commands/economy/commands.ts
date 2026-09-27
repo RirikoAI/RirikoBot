@@ -35,11 +35,13 @@ export function createEconomyCommands(services: BotServices): Command[] {
     },
     async execute(ctx: CommandContext): Promise<void> {
       const target = (await ctx.options.getUser('target')) ?? ctx.user;
+      // Capacity follows the owner's config and the account level, so recompute it first.
+      const bankCapacity = await services.bankingService.refreshCapacity(target.id);
       const bal = await services.economyRepo.findById(target.id);
 
       const wallet = (bal?.walletBalance ?? 0).toLocaleString();
       const bank = (bal?.bankBalance ?? 0).toLocaleString();
-      const capacity = (bal?.bankCapacity ?? 10000).toLocaleString();
+      const capacity = bankCapacity.toLocaleString();
       const netWorth = (bal?.netWorth ?? 0).toLocaleString();
 
       await ctx.reply({

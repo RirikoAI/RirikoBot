@@ -44,13 +44,19 @@ export interface FieldChange {
   after: unknown;
 }
 
-/** Thrown when an update fails its schema; `fieldErrors` maps each field to its messages. */
+/**
+ * Thrown when an update fails its schema; `fieldErrors` maps each field to its messages. The
+ * owner console's global settings use it too, with their own `subject`.
+ */
 export class GuildConfigValidationError extends ValidationError {
-  constructor(readonly fieldErrors: Record<string, string[]>) {
+  constructor(
+    readonly fieldErrors: Record<string, string[]>,
+    subject = 'guild settings',
+  ) {
     const messages = Object.entries(fieldErrors).map(
       ([field, errors]) => `${field}: ${errors.join(' ')}`,
     );
-    super(`Invalid guild settings: ${messages.join('; ')}`, {
+    super(`Invalid ${subject}: ${messages.join('; ')}`, {
       userMessage: messages.join('\n'),
       validationErrors: messages,
     });
@@ -72,7 +78,7 @@ export function diffFields(
  * Field errors by top-level field. Errors inside a list keep their row number, which
  * `flatten()` would drop: `Row 3: Timeout steps need a length.`
  */
-function fieldErrorsOf(issues: readonly { path: (string | number)[]; message: string }[]) {
+export function fieldErrorsOf(issues: readonly { path: (string | number)[]; message: string }[]) {
   const fieldErrors: Record<string, string[]> = {};
   for (const { path, message } of issues) {
     const [field, row] = path;

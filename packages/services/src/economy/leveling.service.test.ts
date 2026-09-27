@@ -10,6 +10,7 @@ import {
 import { EventBus } from '@ririko/core';
 import { LevelingService } from './leveling.service.js';
 import { BankingService } from './banking.service.js';
+import { createXpLevelResolver } from '../waifu-tcg/energy/energy-lifecycle.service.js';
 import type { LevelUpEvent } from './types.js';
 
 describe('LevelingService', () => {
@@ -103,8 +104,10 @@ describe('LevelingService', () => {
 
     bankingService = new BankingService({
       repository: economyRepo,
-      baseCapacity: 10000,
-      capacityPerLevel: 2500,
+      levelResolver: createXpLevelResolver(
+        xpRepo,
+        (totalXp) => levelingService.getLevelProgress(totalXp).level,
+      ),
     });
 
     levelingService = new LevelingService({

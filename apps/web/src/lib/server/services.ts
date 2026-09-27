@@ -10,6 +10,7 @@ import {
   BotActivityRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
+  EconomyConfigRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -23,6 +24,7 @@ import {
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
+import { EconomyConfigService } from '@ririko/services/owner';
 import { DiscordOAuthClient } from './auth/discord-oauth';
 import { KnownDeviceService } from './auth/known-devices';
 import { PasskeyService } from './auth/passkeys';
@@ -63,6 +65,8 @@ export interface WebServices {
   /** Publishes and edits reaction role panels (after guard and passkey step-up). */
   reactionRolePanels: ReactionRolePanelService;
   giveaways: GiveawayManagementService;
+  /** Global economy values for the owner console (after `requireOwner` or `runOwnerAction`). */
+  economyConfig: EconomyConfigService;
   /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
   commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
@@ -168,6 +172,11 @@ async function createWebServices(): Promise<WebServices> {
       audit,
       rest: botRest,
       resources: guildResources,
+    }),
+    economyConfig: new EconomyConfigService({
+      db,
+      repository: new EconomyConfigRepository(db),
+      audit,
     }),
     commandCatalog,
     botActivity: new BotActivityRepository(db),

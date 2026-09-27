@@ -145,6 +145,17 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
         acquired_at INTEGER NOT NULL
       );
 
+      CREATE TABLE economy_config (
+        id TEXT PRIMARY KEY,
+        daily_base_reward INTEGER NOT NULL DEFAULT 250,
+        daily_streak_bonus_percent INTEGER NOT NULL DEFAULT 5,
+        daily_max_streak_bonus_percent INTEGER NOT NULL DEFAULT 150,
+        bank_base_capacity INTEGER NOT NULL DEFAULT 10000,
+        bank_capacity_per_level INTEGER NOT NULL DEFAULT 2500,
+        updated_by TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
       CREATE TABLE xp_accounts (
         user_id TEXT NOT NULL,
         guild_id TEXT NOT NULL,

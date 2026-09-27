@@ -38,6 +38,8 @@ import {
   ReminderRepository,
   ImageRepository,
   WelcomerRepository,
+  EconomyConfigRepository,
+  AuditLogRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import type { Client } from 'discord.js';
@@ -65,6 +67,7 @@ import {
   EconomyService,
   BankingService,
   DailyService,
+  EconomyConfigService,
   LevelingService,
   LeaderboardService,
   InventoryService,
@@ -361,17 +364,29 @@ export async function createBotServices(
   await itemRepo.seedDefaultCatalog().catch(() => {});
 
   // Services
+  // Daily reward and bank values set in the owner console; read on every use.
+  const economyConfigService = new EconomyConfigService({
+    db,
+    repository: new EconomyConfigRepository(db),
+    audit: new AuditLogRepository(db),
+  });
+
+  // Account-wide level from XP summed over every guild: energy and the bank are global per
+  // user while xp_accounts is per guild. Resolved lazily, after levelingService exists.
+  const accountLevel = createXpLevelResolver(
+    xpRepo,
+    (totalXp) => levelingService.getLevelProgress(totalXp).level,
+  );
+
   const bankingService = new BankingService({
     repository: economyRepo,
-    baseCapacity: 10000,
-    capacityPerLevel: 2500,
+    config: economyConfigService,
+    levelResolver: (userId) => accountLevel(userId),
   });
 
   const dailyService = new DailyService({
     repository: economyRepo,
-    baseReward: 250,
-    streakBonusPercent: 0.05,
-    maxStreakBonusPercent: 1.5,
+    config: economyConfigService,
     resetSchedule: resetSchedules.daily,
     streakForgiveness: resetConfig.RIRIKO_DAILY_STREAK_FORGIVENESS,
   });
@@ -387,15 +402,11 @@ export async function createBotServices(
   const tcgConfigRepo = new TcgConfigRepository(db);
   const tcgConfigService = new TcgConfigService(tcgConfigRepo);
 
-  // Energy lifecycle owns the daily boundary and level-scaled capacity. It resolves the
-  // player's account-wide level from summed XP, since energy is global while xp_accounts
-  // is per guild. It also reconciles incremental bonus energy up to the configured cap.
+  // Energy lifecycle owns the daily boundary and level-scaled capacity, sized by the
+  // account-wide level. It also reconciles incremental bonus energy up to the configured cap.
   const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, {
     resetSchedule: resetSchedules.energy,
-    levelResolver: createXpLevelResolver(
-      xpRepo,
-      (totalXp) => levelingService.getLevelProgress(totalXp).level,
-    ),
+    levelResolver: accountLevel,
     bonusConfigResolver: async () => {
       const [maxBonusCap, dailyIncrement] = await Promise.all([
         tcgConfigService.getConfig('max_bonus_energy_cap'),

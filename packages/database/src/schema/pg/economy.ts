@@ -99,3 +99,15 @@ export const economyInventories = pgTable(
   },
   (table) => [index('idx_pg_economy_inv_user').on(table.userId, table.itemId)],
 );
+
+/** Global economy values edited in the owner console; one row with id `global`. */
+export const economyConfig = pgTable('economy_config', {
+  id: varchar('id', { length: 16 }).primaryKey(),
+  dailyBaseReward: integer('daily_base_reward').notNull().default(250),
+  dailyStreakBonusPercent: integer('daily_streak_bonus_percent').notNull().default(5),
+  dailyMaxStreakBonusPercent: integer('daily_max_streak_bonus_percent').notNull().default(150),
+  bankBaseCapacity: integer('bank_base_capacity').notNull().default(10000),
+  bankCapacityPerLevel: integer('bank_capacity_per_level').notNull().default(2500),
+  updatedBy: varchar('updated_by', { length: 64 }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
