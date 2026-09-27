@@ -6,6 +6,7 @@ export * from './free-games/index.js';
 export * from './giveaways/index.js';
 export * from './autovoice/index.js';
 export * from './games/index.js';
+export * from './adventure/index.js';
 export * from './waifu-tcg/index.js';
 export * from './roles/index.js';
 export * from './http/index.js';

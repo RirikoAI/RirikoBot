@@ -6,13 +6,13 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-| ID | Type | Title | Pts | Epic / Parent |
-|---|---|---|---|---|
-| | | | | |
+None.
 
 ---
 
 ## 🔍 In Review
+See STORY-170 and TASK-1705 in the story table below.
+
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
 | | | | | | |
@@ -34,13 +34,15 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ---
 
 ## 🔍 Review / Quality Gate
-*No tickets currently in review.*
+`STORY-170` / `TASK-1705`: implementation and local checks complete; live PostgreSQL/Discord verification remains. See [verification handover](handovers/TASK-1705.md).
 
 ---
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `CHORE-1702` | Chore | Plan Companion-Level Adventure Reward Ranks | 2 | — | [CHORE-1702.md](handovers/CHORE-1702.md) |
+| `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | — | [CHORE-1701.md](handovers/CHORE-1701.md) |
 | `BUG-0022` | Bug | Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone | 2 | `STORY-123` | [BUG-0022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0022.md) |
 | `BUG-0021` | Bug | Auto Voice Deleted Every Empty Voice Channel in a Join-to-Create Hub's Category, Including Permanent Server Channels | 3 | `STORY-091` | [BUG-0021.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0021.md) |
 | `BUG-0020` | Bug | Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors | 2 | `STORY-117` | [BUG-0020.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0020.md) |
@@ -401,3 +403,26 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `BUG-0024` | Bug | Legacy Migration Reads the Wrong Karma and Welcomer Keys (Item Seed Part Moved to TASK-1653) | 2 | `STORY-043` | 🎯 To Do | |
 
 
+
+### 📋 Groomed Stories & Tasks for STORY-170 (Adventure RPG)
+
+Groomed 2026-09-26. WIP is held by the active child only. Parent points are the sum of Fibonacci-estimated children.
+
+| ID | Type | Title | Pts | Parent | Status | Requires |
+|---|---|---|---|---|---|---|
+| `STORY-170` | Story | Interactive Branching Adventure RPG | 67 | — | REVIEW · [handover](handovers/STORY-170.md) | EPIC-009, EPIC-010, EPIC-004 |
+| `TASK-1701` | Task | Adventure Contracts and Complete Scenario Catalog | 3 | STORY-170 | DONE · [handover](handovers/TASK-1701.md) | EPIC-009, EPIC-010, EPIC-004 |
+| `TASK-1702` | Task | Durable Global Adventure Sessions and Traversal | 8 | STORY-170 | DONE · [handover](handovers/TASK-1702.md) | TASK-1701 |
+| `TASK-1703` | Task | Atomic Adventure Payments, Rewards and Cancellation | 8 | STORY-170 | DONE · [handover](handovers/TASK-1703.md) | TASK-1702 |
+| `TASK-1704` | Task | Discord Adventure Command and Interactive UI | 5 | STORY-170 | DONE · [handover](handovers/TASK-1704.md) | TASK-1703 |
+| `TASK-1705` | Task | Adventure Integration Verification and Quality Gates | 3 | STORY-170 | REVIEW · [handover](handovers/TASK-1705.md) | TASK-1704 |
+| `TASK-1706` | Task | Simplify Adventure Presentation and Add Scene Artwork | 5 | STORY-170 | DONE · [handover](handovers/TASK-1706.md) | TASK-1704 |
+| `TASK-1707` | Task | Add Thirty Illustrated Branching Adventures | 8 | STORY-170 | DONE · [handover](handovers/TASK-1707.md) | TASK-1706 |
+| `TASK-1708` | Task | Adventure Reward Rank Policy and Snapshots | 3 | STORY-170 | DONE · [handover](handovers/TASK-1708.md) | TASK-1707 |
+| `TASK-1709` | Task | Adventure Reward Scaling and Frozen Settlement | 5 | STORY-170 | DONE · [handover](handovers/TASK-1709.md) | TASK-1708 |
+| `TASK-1710` | Task | Adventure Reward Rank Display and Help | 2 | STORY-170 | DONE · [handover](handovers/TASK-1710.md) | TASK-1709 |
+| `TASK-1711` | Task | Adventure Reward Rank Balance and Verification | 3 | STORY-170 | DONE · [handover](handovers/TASK-1711.md) | TASK-1710 |
+| `TASK-1712` | Task | Pin Requested Adventure User to S+ Reward Rank | 1 | STORY-170 | DONE · [handover](handovers/TASK-1712.md) | TASK-1711 |
+| `TASK-1713` | Task | Tower-Benchmarked Adventure Completion Rewards | 5 | STORY-170 | DONE · [handover](handovers/TASK-1713.md) | TASK-1712 |
+| `TASK-1714` | Task | Atomic Adventure Companion XP and Card Acquisition | 5 | STORY-170 | DONE · [handover](handovers/TASK-1714.md) | TASK-1713 |
+| `TASK-1715` | Task | Adventure Progression Balance Verification | 3 | STORY-170 | DONE · [handover](handovers/TASK-1715.md) | TASK-1714 |

@@ -81,10 +81,16 @@ export const userCards = sqliteTable(
       .$defaultFn(() => new Date()),
   },
   (table) => [
+    uniqueIndex('idx_user_cards_serial_unique').on(table.cardId, table.serialNumber),
     index('idx_user_cards_user_state').on(table.userId, table.state),
     index('idx_user_cards_card').on(table.cardId),
   ],
 );
+
+export const waifuCardSerials = sqliteTable('waifu_card_serials', {
+  cardId: text('card_id').primaryKey(),
+  nextSerial: integer('next_serial').notNull(),
+});
 
 export const gameItems = sqliteTable('game_items', {
   id: text('id').primaryKey(),

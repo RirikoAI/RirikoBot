@@ -81,10 +81,16 @@ export const userCards = pgTable(
     obtainedAt: timestamp('obtained_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
+    uniqueIndex('idx_user_cards_serial_unique').on(table.cardId, table.serialNumber),
     index('idx_pg_user_cards_user_state').on(table.userId, table.state),
     index('idx_pg_user_cards_card').on(table.cardId),
   ],
 );
+
+export const waifuCardSerials = pgTable('waifu_card_serials', {
+  cardId: text('card_id').primaryKey(),
+  nextSerial: integer('next_serial').notNull(),
+});
 
 export const gameItems = pgTable('game_items', {
   id: uuid('id').primaryKey().defaultRandom(),

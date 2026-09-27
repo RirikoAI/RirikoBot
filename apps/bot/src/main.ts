@@ -1,3 +1,4 @@
+import { ensureAdventureSchema, ensureCardSerialSchema } from '@ririko/database';
 import {
   createBot,
   getBotInfo,
@@ -12,6 +13,7 @@ import {
   createGiveawayCommands,
   createAutoVoiceCommands,
   createGamesCommands,
+  AdventureController,
   createCardCommand,
   createLoadoutCommand,
   createCraftCommand,
@@ -85,6 +87,10 @@ export async function main(): Promise<void> {
   // 2. Initialize Domain Services and Repositories
   console.log('• Initializing bot repositories and domain services...');
   const services = await createBotServices(undefined, bot.client);
+  // Upgrade gameplay storage before any gateway events or commands can run.
+  await ensureAdventureSchema(services.db);
+  await services.adventureEngine.assertCompatibleSessions();
+  await ensureCardSerialSchema(services.db);
 
   // 3. Initialize Dual-Dispatch Command Router with in-memory cached dynamic prefix resolution
   const router = new CommandRouter(undefined, {
@@ -212,7 +218,8 @@ export async function main(): Promise<void> {
     router.registry.register(cmd);
   }
 
-  const gamesCommands = createGamesCommands(services);
+  const adventureController = new AdventureController(services);
+  const gamesCommands = createGamesCommands(services, adventureController);
   for (const cmd of gamesCommands) {
     router.registry.register(cmd);
   }
@@ -280,6 +287,10 @@ export async function main(): Promise<void> {
   bot.client.on('interactionCreate', async (interaction) => {
     try {
       if (interaction.isButton()) {
+        if (interaction.customId.startsWith('adventure:')) {
+          await adventureController.button(interaction);
+          return;
+        }
         if (interaction.customId.startsWith('music_')) {
           await musicController.handleButtonInteraction(interaction);
           return;
@@ -331,6 +342,7 @@ export async function main(): Promise<void> {
     isShuttingDown = true;
     console.log(`\n[Bot] Received ${signal}. Shutting down gateway connection...`);
     try {
+      adventureController.stop();
       services.streamWatcher.stop();
       services.freeGamesEngine.stop();
       services.giveawayEngine.stop();
@@ -391,6 +403,7 @@ export async function main(): Promise<void> {
       console.log(`✨ Ready to process slash commands and prefix '${prefix}' messages!\n`);
 
       // Start background watcher, announcer, giveaway & autorole engines
+      adventureController.start(bot.client);
       services.streamWatcher.start();
       services.freeGamesEngine.start();
       services.giveawayEngine.start();

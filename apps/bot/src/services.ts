@@ -1,5 +1,6 @@
 import {
   createDatabaseClient,
+  AdventureSessionRepository,
   UserRepository,
   EconomyRepository,
   XpRepository,
@@ -65,6 +66,10 @@ import {
 } from '@ririko/ai';
 import { CORE_VERSION, EventBus, resolveResetSchedulesFromEnv } from '@ririko/core';
 import {
+  AdventureEngine,
+  validateAdventureRewardState,
+  AdventurePayoutService,
+  type ActiveAdventureSession,
   EconomyService,
   BankingService,
   DailyService,
@@ -181,6 +186,8 @@ export interface BotServices {
   streamDispatcher: StreamNotificationDispatcher | undefined;
   freeGamesEngine: FreeGamesEngine;
   giveawayEngine: GiveawayEngine;
+  adventureEngine: AdventureEngine;
+  adventureSessions: AdventureSessionRepository<ActiveAdventureSession>;
   gameSessionManager: MiniGameSessionManager;
   gameEscrowService: GameEscrowService;
   tictactoeEngine: TicTacToeEngine;
@@ -334,6 +341,22 @@ export async function createBotServices(
   const gameItemRepo = new GameItemRepository(db);
   const userInventoryItemRepo = new UserInventoryItemRepository(db);
   const itemGrantService = new ItemGrantService(gameItemRepo, userInventoryItemRepo);
+  const adventureSessions = new AdventureSessionRepository<ActiveAdventureSession>(
+    db,
+    validateAdventureRewardState,
+  );
+  const adventureEngine = new AdventureEngine({
+    sessions: adventureSessions,
+    energy: playerEnergyRepo,
+    payments: new AdventurePayoutService({
+      economy: economyRepo,
+      xp: xpRepo,
+      energy: playerEnergyRepo,
+      cards: waifuCardRepo,
+      assets: waifuAssetRepo,
+      items: itemGrantService,
+    }),
+  });
   const dismantleService = new CardDismantleService(
     waifuCardRepo,
     userInventoryItemRepo,
@@ -949,6 +972,8 @@ export async function createBotServices(
     streamDispatcher,
     freeGamesEngine,
     giveawayEngine,
+    adventureEngine,
+    adventureSessions,
     gameSessionManager,
     gameEscrowService,
     tictactoeEngine,
