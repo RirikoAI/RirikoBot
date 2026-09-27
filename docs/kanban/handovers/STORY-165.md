@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 13 pts (`TASK-1651` = 5, `TASK-1652` = 5, `TASK-1653` = 3)
 - **Epic**: `EPIC-011`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #654)
 - **Timestamp**: 2026-09-27
 - **Branch**: `feat/STORY-165-owner-economy-shop` (targets `develop/2.0.0`)
 

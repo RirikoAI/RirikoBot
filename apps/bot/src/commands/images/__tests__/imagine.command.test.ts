@@ -121,8 +121,13 @@ function createMockServices(overrides: Partial<BotServices> = {}): BotServices {
       providerId: 'mock',
       status: 'COMPLETED',
     }),
-    getPresetByName: vi.fn().mockResolvedValue(null),
-    savePreset: vi.fn().mockResolvedValue({ id: 'p-1', name: 'guild:guild-1' }),
+    getGuildSettings: vi.fn().mockResolvedValue({
+      guildId: 'guild-1',
+      defaultProvider: null,
+      memberDailyLimit: 5,
+      defaultPreset: null,
+    }),
+    saveGuildSettings: vi.fn(async (settings: unknown) => settings),
   };
 
   return {
@@ -334,6 +339,8 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
       expect(services.imageGenerationService.generateImage).toHaveBeenCalledWith({
         prompt: 'a futuristic anime city',
         negativePrompt: 'blurry',
+        // The saved prompt already carries its preset.
+        preset: 'none',
         aspectRatio: '1:1',
         providerId: 'mock',
         userId: 'user-1',
@@ -375,20 +382,39 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
       expect(call.embeds[0].data.title).toContain('Server Image Generation Settings');
     });
 
-    it('/stablediffusion-model saves preset if specified', async () => {
+    it('/stablediffusion-model saves the server preset and provider (TASK-1163)', async () => {
       const services = createMockServices();
       const command = createSdModelCommand(services);
-      const { ctx } = makeContext('slash', { preset: 'cyberpunk', provider: 'comfyui' });
+      const { ctx } = makeContext('slash', { preset: 'cyberpunk', provider: 'gemini' });
 
       await command.execute(ctx);
 
-      expect(services.imageRepo.savePreset).toHaveBeenCalledWith({
-        name: 'guild:guild-1',
-        positivePromptPrefix: '',
-        negativePromptPreset: null,
-        isSystemPreset: false,
+      // The member limit set on the dashboard is kept.
+      expect(services.imageRepo.saveGuildSettings).toHaveBeenCalledWith({
+        guildId: 'guild-1',
+        defaultProvider: 'gemini',
+        memberDailyLimit: 5,
+        defaultPreset: 'cyberpunk',
       });
       expect(ctx.reply).toHaveBeenCalled();
+    });
+
+    it('/stablediffusion-model resets the provider with auto and refuses unconfigured ones', async () => {
+      const services = createMockServices();
+      const command = createSdModelCommand(services);
+
+      const reset = makeContext('slash', { provider: 'auto' });
+      await command.execute(reset.ctx);
+      expect(services.imageRepo.saveGuildSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ defaultProvider: null }),
+      );
+
+      const missing = makeContext('slash', { provider: 'replicate' });
+      await command.execute(missing.ctx);
+      expect(missing.ctx.reply).toHaveBeenCalledWith({
+        content: expect.stringContaining('not configured for this bot'),
+      });
+      expect(services.imageRepo.saveGuildSettings).toHaveBeenCalledTimes(1);
     });
 
     it('/setup-stablediffusion-api displays ADR-011 plaintext token deprecation notice', async () => {

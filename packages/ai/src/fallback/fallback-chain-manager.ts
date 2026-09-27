@@ -15,6 +15,28 @@ export interface FallbackChainOptions {
   defaultProviderId?: string | undefined;
 }
 
+/**
+ * Provider (and model) a request should try first, such as a guild's choice. The model goes
+ * only to that provider; fallback providers use their own default model.
+ */
+export interface ProviderPreference {
+  providerId?: string | undefined;
+  model?: string | undefined;
+}
+
+function toPreference(preference?: string | ProviderPreference): ProviderPreference {
+  return typeof preference === 'string' ? { providerId: preference } : (preference ?? {});
+}
+
+/** The request as sent to `provider`: with the preferred model only for the preferred provider. */
+function requestFor(
+  provider: ChatModelProvider,
+  request: ChatRequest,
+  { providerId, model }: ProviderPreference,
+): ChatRequest {
+  return model && provider.id === providerId ? { ...request, model } : request;
+}
+
 interface ProviderCircuitState {
   consecutiveFailures: number;
   cooldownUntil: number | null;
@@ -170,7 +192,12 @@ export class FallbackChainManager {
   /**
    * Generates a completion with automatic fallback across the candidate chain.
    */
-  public async generate(request: ChatRequest, preferredProviderId?: string): Promise<ChatResponse> {
+  public async generate(
+    request: ChatRequest,
+    preferred?: string | ProviderPreference,
+  ): Promise<ChatResponse> {
+    const preference = toPreference(preferred);
+    const preferredProviderId = preference.providerId;
     const candidates = this.getCandidateProviders(preferredProviderId);
     if (candidates.length === 0) {
       throw new AiProviderExhaustionError([
@@ -185,7 +212,7 @@ export class FallbackChainManager {
 
     for (const provider of candidates) {
       try {
-        const response = await provider.generate(request);
+        const response = await provider.generate(requestFor(provider, request, preference));
         this.recordSuccess(provider.id);
         return response;
       } catch (err: unknown) {
@@ -210,8 +237,10 @@ export class FallbackChainManager {
    */
   public async *stream(
     request: ChatRequest,
-    preferredProviderId?: string,
+    preferred?: string | ProviderPreference,
   ): AsyncIterable<ChatToken> {
+    const preference = toPreference(preferred);
+    const preferredProviderId = preference.providerId;
     const candidates = this.getCandidateProviders(preferredProviderId);
     if (candidates.length === 0) {
       throw new AiProviderExhaustionError([
@@ -231,7 +260,7 @@ export class FallbackChainManager {
 
       let hasEmittedToken = false;
       try {
-        const tokenStream = provider.stream(request);
+        const tokenStream = provider.stream(requestFor(provider, request, preference));
         for await (const token of tokenStream) {
           hasEmittedToken = true;
           yield token;

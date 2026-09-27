@@ -33,6 +33,7 @@ export class ComfyUiImageProvider implements ImageGenerationProvider {
     this.baseUrl = (
       options.baseUrl ??
       process.env.COMFYUI_URL ??
+      process.env.COMFYUI_BASE_URL ??
       process.env.SD_WEBUI_URL ??
       'http://127.0.0.1:7860'
     ).replace(/\/$/, '');

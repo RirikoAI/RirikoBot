@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { checkAssignableRoles, checkAutoVoiceHubs } from './setting-checks';
+import {
+  checkAssignableRoles,
+  checkAutoVoiceHubs,
+  checkConfiguredProvider,
+  checkMessageChannel,
+  checkMusicSettings,
+} from './setting-checks';
 
 const GUILD = '100000000000000001';
 const MEMBER = '200000000000000001';
@@ -67,5 +73,54 @@ describe('checkAutoVoiceHubs (TASK-1641)', () => {
     ).toEqual({});
     expect(directory.voiceChannels).not.toHaveBeenCalled();
     expect(await checkAutoVoiceHubs(directory, GUILD, [{ channelId: HUB }])).toEqual({});
+  });
+});
+
+describe('checkMusicSettings (TASK-1161)', () => {
+  const music = () => ({
+    messageChannels: vi.fn().mockResolvedValue([{ id: TEXT, name: 'music', category: null }]),
+    memberRoles: resources().memberRoles,
+  });
+
+  it('accepts a text channel and a role of the guild, or none', async () => {
+    expect(
+      await checkMusicSettings(music(), GUILD, { musicChannelId: TEXT, djRoleId: ADMIN }),
+    ).toEqual({});
+    expect(await checkMusicSettings(music(), GUILD, { musicChannelId: '', djRoleId: '' })).toEqual(
+      {},
+    );
+  });
+
+  it('rejects channels and roles the guild does not have', async () => {
+    expect(
+      await checkMusicSettings(music(), GUILD, { musicChannelId: HUB, djRoleId: GONE }),
+    ).toEqual({
+      musicChannelId: ['Choose a text channel of this server.'],
+      djRoleId: ['Choose a role of this server.'],
+    });
+  });
+});
+
+describe('checkMessageChannel and checkConfiguredProvider (TASK-1162)', () => {
+  it('rejects a channel that is not a text channel of the guild', async () => {
+    const channels = { messageChannels: vi.fn().mockResolvedValue([{ id: TEXT, name: 'ai' }]) };
+    expect(await checkMessageChannel(channels, GUILD, 'channelId', { channelId: TEXT })).toEqual(
+      {},
+    );
+    expect(await checkMessageChannel(channels, GUILD, 'channelId', { channelId: HUB })).toEqual({
+      channelId: ['Choose a text channel of this server.'],
+    });
+  });
+
+  it('rejects a provider without credentials, and leaves unknown values to the schema', () => {
+    const labels = { gemini: 'Google Gemini', openai: 'OpenAI' };
+    expect(checkConfiguredProvider(['gemini'], labels, 'model', { model: 'gemini/x' })).toEqual({});
+    expect(checkConfiguredProvider(['gemini'], labels, 'model', { model: '' })).toEqual({});
+    expect(checkConfiguredProvider(['gemini'], labels, 'model', { model: 'foo/x' })).toEqual({});
+    expect(
+      checkConfiguredProvider(['gemini'], labels, 'model', { model: 'openai/gpt-4o' }),
+    ).toEqual({
+      model: ['OpenAI is not configured for this bot.'],
+    });
   });
 });

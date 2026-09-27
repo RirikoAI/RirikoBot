@@ -7,6 +7,7 @@ import {
   timestamp,
   jsonb,
   index,
+  boolean,
 } from 'drizzle-orm/pg-core';
 
 export const aiChannels = pgTable('ai_channels', {
@@ -49,6 +50,9 @@ export const aiGuildPreferences = pgTable('ai_guild_preferences', {
   personalityPrompt: text('personality_prompt'),
   speakingStyle: varchar('speaking_style', { length: 64 }).notNull().default('FRIENDLY_ANIME'),
   allowedTools: jsonb('allowed_tools').$type<string[]>().notNull().default([]),
+  // false turns tools off; otherwise allowed_tools lists them, empty meaning all.
+  toolsEnabled: boolean('tools_enabled').notNull().default(true),
+  providerOverride: varchar('provider_override', { length: 16 }), // 'gemini' | 'openai' | 'ollama'
   modelOverride: varchar('model_override', { length: 64 }),
 });
 

@@ -1,3 +1,4 @@
+import { IMAGE_STYLE_PRESET_IDS } from '@ririko/core';
 import {
   AttachmentBuilder,
   EmbedBuilder,
@@ -17,14 +18,7 @@ export const IMAGINE_COMMAND_NAME = 'imagine';
 export const IMAGINE_ALIASES = ['img', 'ai-image', 'generate-image'];
 
 export const VALID_ASPECT_RATIOS = ['1:1', '16:9', '9:16', '4:3', '3:4'] as const;
-export const VALID_PRESETS = [
-  'anime',
-  'photoreal',
-  'pixel-art',
-  'fantasy',
-  'cyberpunk',
-  'none',
-] as const;
+export const VALID_PRESETS = IMAGE_STYLE_PRESET_IDS;
 export const VALID_PROVIDERS = ['auto', 'gemini', 'comfyui', 'replicate', 'mock'] as const;
 
 export interface ParsedImagineArgs {
@@ -201,6 +195,8 @@ export async function handleImagineButtonInteraction(
       const result = await services.imageGenerationService.generateImage({
         prompt: originalJob.prompt,
         negativePrompt: originalJob.negativePrompt ?? undefined,
+        // The saved prompt already has its style preset; applying one again would double it.
+        preset: 'none',
         aspectRatio: '1:1',
         providerId: originalJob.providerId ?? undefined,
         userId: interaction.user.id,

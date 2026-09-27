@@ -225,6 +225,8 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
         personality_prompt TEXT,
         speaking_style TEXT NOT NULL DEFAULT 'FRIENDLY_ANIME',
         allowed_tools TEXT NOT NULL DEFAULT '[]',
+        tools_enabled INTEGER NOT NULL DEFAULT 1,
+        provider_override TEXT,
         model_override TEXT
       );
 
@@ -413,20 +415,42 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
   });
 
   describe('4. Model Selection & Inspection (/ai model & /aimodel)', () => {
-    it('saves server model preference', async () => {
+    it('saves the server provider and model (TASK-1162)', async () => {
+      // Ollama is always registered and available in the bot's services.
       const { ctx, replies } = createMockContext({
-        optionsMap: { action: 'model', model: 'gemini-2.5-flash' },
+        optionsMap: { action: 'model', model: 'mistral' },
+        permissions: PermissionFlagsBits.ManageGuild,
       });
 
       await commands.get('ai')!(ctx);
       expect(replies[0]).toEqual(
-        expect.objectContaining({
-          content: expect.stringContaining('gemini-2.5-flash'),
-        }),
+        expect.objectContaining({ content: expect.stringContaining('ollama/mistral') }),
       );
 
       const guildPrefs = await services.conversationManager.getGuildPreferences('guild-test');
-      expect(guildPrefs?.modelOverride).toBe('gemini-2.5-flash');
+      expect(guildPrefs?.providerOverride).toBe('ollama');
+      expect(guildPrefs?.modelOverride).toBe('mistral');
+    });
+
+    it('refuses models Ririko does not offer and members without Manage Server', async () => {
+      const unknown = createMockContext({
+        optionsMap: { action: 'model', model: 'gpt-9' },
+        permissions: PermissionFlagsBits.ManageGuild,
+      });
+      await commands.get('ai')!(unknown.ctx);
+      expect(unknown.replies[0]).toEqual(
+        expect.objectContaining({ content: expect.stringContaining('not a model Ririko offers') }),
+      );
+
+      const member = createMockContext({
+        optionsMap: { action: 'model', model: 'mistral' },
+        permissions: 0n,
+      });
+      await commands.get('ai')!(member.ctx);
+      expect(member.replies[0]).toEqual(
+        expect.objectContaining({ content: expect.stringContaining('Manage Server') }),
+      );
+      expect(await services.conversationManager.getGuildPreferences('guild-test')).toBeNull();
     });
 
     it('lists available models and active providers when no model option given', async () => {

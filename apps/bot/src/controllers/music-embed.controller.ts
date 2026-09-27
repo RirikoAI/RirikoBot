@@ -11,6 +11,22 @@ import {
 import type { BotServices } from '../services.js';
 import type { GuildQueue, LoopMode, QueuedTrack } from '@ririko/music';
 import { formatDuration, createProgressBar } from '../commands/music/commands.js';
+import {
+  canControlPlayback,
+  DJ_ONLY_MESSAGE,
+  toPlaybackMember,
+} from '../commands/music/dj-role.js';
+
+/** Controller buttons that change playback, so the DJ role applies to them. */
+const DJ_BUTTONS = new Set([
+  'music_previous',
+  'music_play_pause',
+  'music_skip',
+  'music_stop',
+  'music_mute_unmute',
+  'music_loop',
+  'music_shuffle',
+]);
 
 export interface MusicEmbedState {
   hasCurrentTrack: boolean;
@@ -532,8 +548,16 @@ export class MusicEmbedController {
       return;
     }
 
-    const queue = this.services.musicPlayer.getQueue(guildId);
     const customId = interaction.customId;
+    if (DJ_BUTTONS.has(customId)) {
+      const djRoleId = (await this.services.musicRepo.getGuildSettings(guildId))?.djRoleId ?? null;
+      if (djRoleId && !canControlPlayback(toPlaybackMember(member), djRoleId)) {
+        await interaction.reply({ content: DJ_ONLY_MESSAGE, ephemeral: true });
+        return;
+      }
+    }
+
+    const queue = this.services.musicPlayer.getQueue(guildId);
 
     switch (customId) {
       case 'music_previous': {

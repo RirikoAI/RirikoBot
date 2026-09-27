@@ -3,6 +3,17 @@ import {
   AUTOMOD_RULE_DEFAULTS,
   compareCommandOverrides,
   DEFAULT_ESCALATION_STEPS,
+  DEFAULT_MUSIC_VOLUME,
+  AI_SPEAKING_STYLES,
+  AI_TOOL_NAMES,
+  allowedAiTools,
+  DEFAULT_AI_SPEAKING_STYLE,
+  formatAiModelChoice,
+  MAX_AI_PERSONA_PROMPT_LENGTH,
+  parseAiModelChoice,
+  type AiSpeakingStyle,
+  IMAGE_PROVIDER_IDS,
+  IMAGE_STYLE_PRESET_IDS,
   GuildConfigSchemas,
   ValidationError,
   WAGER_GAME_COMMANDS,
@@ -28,6 +39,9 @@ import {
   type GuildSettingsRepository,
   type ModerationRepository,
   type ModerationRule,
+  type MusicRepository,
+  type AiRepository,
+  type ImageRepository,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
@@ -205,6 +219,9 @@ export interface GuildConfigServiceDeps {
   commandCatalog: CommandCatalogRepository;
   autoRoles: AutoRoleRepository;
   autoVoice: AutoVoiceRepository;
+  music: MusicRepository;
+  ai: AiRepository;
+  images: ImageRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -408,6 +425,84 @@ export class GuildConfigService {
             if (!isDefaultOverride(row)) next.push(row);
           }
           await deps.commandSettings.replaceForGuild(guildId, toCommandSettingsRows(next), tx);
+        },
+      },
+      music: {
+        read: async (guildId, tx) => {
+          const [row, channel] = await Promise.all([
+            deps.music.getGuildSettings(guildId, tx),
+            deps.music.getMusicChannel(guildId, tx),
+          ]);
+          return {
+            defaultVolume: row?.defaultVolume ?? DEFAULT_MUSIC_VOLUME,
+            musicChannelId: channel?.channelId ?? null,
+            djRoleId: row?.djRoleId ?? null,
+            autoLeaveEmpty: row?.autoLeaveEmpty ?? true,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const { musicChannelId, ...settings } = values;
+          await deps.music.upsertGuildSettings(guildId, settings, tx);
+          const current = await deps.music.getMusicChannel(guildId, tx);
+          if (musicChannelId === null) {
+            if (current) await deps.music.deleteMusicChannel(guildId, tx);
+          } else if (current?.channelId !== musicChannelId) {
+            // No message yet: the bot posts the controller when it sees the change.
+            await deps.music.setMusicChannel(guildId, musicChannelId, null, tx);
+          }
+        },
+      },
+      ai: {
+        read: async (guildId, tx) => {
+          const [prefs, channelId] = await Promise.all([
+            deps.ai.getGuildPreferences(guildId, tx),
+            deps.ai.getAiChannel(guildId, tx),
+          ]);
+          const allowed = allowedAiTools(prefs);
+          const style = AI_SPEAKING_STYLES.find(({ id }) => id === prefs?.speakingStyle)?.id;
+          return {
+            channelId,
+            speakingStyle: style ?? DEFAULT_AI_SPEAKING_STYLE,
+            // The personality engine uses at most this much of a longer prompt from /aipersona.
+            personalityPrompt:
+              prefs?.personalityPrompt?.trim().slice(0, MAX_AI_PERSONA_PROMPT_LENGTH) || null,
+            tools: AI_TOOL_NAMES.filter((name) => allowed === undefined || allowed.includes(name)),
+            model: formatAiModelChoice(prefs?.providerOverride, prefs?.modelOverride),
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const choice = parseAiModelChoice(values.model);
+          const everyTool = AI_TOOL_NAMES.every((name) => values.tools.includes(name));
+          await deps.ai.upsertGuildPreferences(
+            guildId,
+            {
+              speakingStyle: values.speakingStyle satisfies AiSpeakingStyle,
+              personalityPrompt: values.personalityPrompt,
+              toolsEnabled: values.tools.length > 0,
+              // Every tool is stored as the empty list, so tools added later are allowed too.
+              allowedTools: everyTool ? [] : values.tools,
+              providerOverride: choice?.provider ?? null,
+              modelOverride: choice?.model ?? null,
+            },
+            tx,
+          );
+          if (values.channelId === null) await deps.ai.removeAiChannel(guildId, tx);
+          else await deps.ai.setAiChannel(guildId, values.channelId, tx);
+        },
+      },
+      images: {
+        read: async (guildId, tx) => {
+          const row = await deps.images.getGuildSettings(guildId, tx);
+          const provider = IMAGE_PROVIDER_IDS.find((id) => id === row?.defaultProvider);
+          const preset = IMAGE_STYLE_PRESET_IDS.find((id) => id === row?.defaultPreset);
+          return {
+            defaultProvider: provider ?? null,
+            memberDailyLimit: row?.memberDailyLimit ?? null,
+            defaultPreset: preset ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.images.saveGuildSettings({ guildId, ...values }, tx);
         },
       },
     };

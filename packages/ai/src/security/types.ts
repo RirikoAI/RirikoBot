@@ -16,7 +16,8 @@ export interface SecurityExecutionContext {
   userHighestRolePosition?: number | undefined;
   botHighestRolePosition?: number | undefined;
   targetHighestRolePosition?: number | undefined;
-  allowedTools?: string[] | undefined;
+  /** Tools the guild allows; undefined allows every tool, an empty list none. */
+  allowedTools?: readonly string[] | undefined;
   isModuleEnabled?: ((moduleName: string) => boolean) | undefined;
 }
 

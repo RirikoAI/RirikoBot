@@ -1,7 +1,10 @@
 import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
-import { VALID_PRESETS, VALID_PROVIDERS } from './imagine.command.js';
+import { IMAGE_PROVIDER_IDS, IMAGE_STYLE_PRESET_IDS } from '@ririko/core';
+
+/** Providers a server may choose; `auto` resets to the bot default. */
+const SERVER_PROVIDER_CHOICES: string[] = [...IMAGE_PROVIDER_IDS, 'auto'];
 
 export const SD_MODEL_COMMAND_NAME = 'stablediffusion-model';
 export const SD_MODEL_ALIASES = ['sdmodel', 'sd-model', 'imagemodel', 'image-model'];
@@ -36,17 +39,18 @@ export function createSdModelCommand(services: BotServices): Command {
             'Default style preset (e.g. anime, photoreal, pixel-art, fantasy, cyberpunk, none)',
           type: 'STRING',
           required: false,
-          choices: VALID_PRESETS.map((p) => ({
+          choices: IMAGE_STYLE_PRESET_IDS.map((p) => ({
             name: p.charAt(0).toUpperCase() + p.slice(1),
             value: p,
           })),
         },
         {
           name: 'provider',
-          description: 'Default backend provider (e.g. gemini, comfyui, replicate, mock, auto)',
+          description:
+            'Default backend provider (gemini, replicate, comfyui; auto for the bot default)',
           type: 'STRING',
           required: false,
-          choices: VALID_PROVIDERS.map((pr) => ({
+          choices: SERVER_PROVIDER_CHOICES.map((pr) => ({
             name: pr.toUpperCase(),
             value: pr,
           })),
@@ -70,48 +74,58 @@ export function createSdModelCommand(services: BotServices): Command {
         preset = ctx.options.getString('preset') ?? undefined;
         provider = ctx.options.getString('provider') ?? undefined;
       } else {
-        const rawArgs = ctx.options.getRawArgs();
-        for (const arg of rawArgs) {
+        for (const arg of ctx.options.getRawArgs()) {
           const lower = arg.toLowerCase();
-          if ((VALID_PRESETS as readonly string[]).includes(lower) && !preset) {
+          if ((IMAGE_STYLE_PRESET_IDS as readonly string[]).includes(lower) && !preset) {
             preset = lower;
-          } else if ((VALID_PROVIDERS as readonly string[]).includes(lower) && !provider) {
+          } else if (SERVER_PROVIDER_CHOICES.includes(lower) && !provider) {
             provider = lower;
           }
         }
       }
 
-      // Check available providers from the service
-      const availableProviders = services.imageGenerationService
-        .getAvailableProviders()
-        .map((p) => `• **${p.name}** (\`${p.id}\`)`)
-        .join('\n');
+      const current = await services.imageRepo.getGuildSettings(ctx.guildId);
+      const available = services.imageGenerationService.getAvailableProviders();
 
       if (!preset && !provider) {
-        // View current defaults
-        const currentGuildPreset = await services.imageRepo.getPresetByName(`guild:${ctx.guildId}`);
-
+        const providerList = available
+          .filter((p) => p.id !== 'mock')
+          .map((p) => `• **${p.name}** (\`${p.id}\`)`)
+          .join('\n');
         const embed = new EmbedBuilder()
           .setTitle('🎨 Server Image Generation Settings')
           .setColor(0x8b5cf6)
           .setDescription(
-            `Configure image generation presets and backend provider for **${ctx.guild?.name ?? 'this server'}**.\n` +
-              `Use \`/stablediffusion-model [preset] [provider]\` to change default settings.`,
+            `Defaults /imagine uses in **${ctx.guild?.name ?? 'this server'}** when a member picks none.\n` +
+              `Use \`/stablediffusion-model [preset] [provider]\` to change them, or the dashboard.`,
           )
           .addFields(
             {
-              name: 'Active Style Preset',
-              value: `\`${currentGuildPreset?.name ? currentGuildPreset.name.replace(`guild:${ctx.guildId}:`, '') : 'anime (default)'}\``,
+              name: 'Default Style Preset',
+              value: `\`${current?.defaultPreset ?? 'anime (default)'}\``,
+              inline: true,
+            },
+            {
+              name: 'Default Provider',
+              value: `\`${current?.defaultProvider ?? 'auto (bot default)'}\``,
+              inline: true,
+            },
+            {
+              name: 'Images per Member (24 hours)',
+              value: current?.memberDailyLimit
+                ? `${current.memberDailyLimit} (and the bot quota)`
+                : 'Bot quota only',
               inline: true,
             },
             {
               name: 'Available Providers',
-              value: availableProviders || 'No external providers enabled (using offline Mock)',
+              value:
+                providerList || 'No image provider is configured (images use the offline mock).',
               inline: false,
             },
             {
               name: 'Supported Style Presets',
-              value: VALID_PRESETS.map((p) => `\`${p}\``).join(', '),
+              value: IMAGE_STYLE_PRESET_IDS.map((id) => `\`${id}\``).join(', '),
               inline: false,
             },
           )
@@ -122,15 +136,24 @@ export function createSdModelCommand(services: BotServices): Command {
         return;
       }
 
-      // Save new guild preset if specified
-      if (preset) {
-        await services.imageRepo.savePreset({
-          name: `guild:${ctx.guildId}`,
-          positivePromptPrefix: '',
-          negativePromptPreset: null,
-          isSystemPreset: false,
+      if (provider && provider !== 'auto' && !available.some((p) => p.id === provider)) {
+        await ctx.reply({
+          content: `❌ \`${provider}\` is not configured for this bot. Run the command without options to see the providers you can use.`,
         });
+        return;
       }
+
+      const saved = await services.imageRepo.saveGuildSettings({
+        guildId: ctx.guildId,
+        defaultProvider:
+          provider === undefined
+            ? (current?.defaultProvider ?? null)
+            : provider === 'auto'
+              ? null
+              : provider,
+        memberDailyLimit: current?.memberDailyLimit ?? null,
+        defaultPreset: preset ?? current?.defaultPreset ?? null,
+      });
 
       const embed = new EmbedBuilder()
         .setTitle('✅ Image Generation Settings Updated')
@@ -139,8 +162,16 @@ export function createSdModelCommand(services: BotServices): Command {
           `Image settings for **${ctx.guild?.name ?? 'this server'}** have been updated successfully!`,
         )
         .addFields(
-          { name: 'Default Preset', value: `\`${preset ?? 'unchanged'}\``, inline: true },
-          { name: 'Default Provider', value: `\`${provider ?? 'auto'}\``, inline: true },
+          {
+            name: 'Default Preset',
+            value: `\`${saved.defaultPreset ?? 'anime (default)'}\``,
+            inline: true,
+          },
+          {
+            name: 'Default Provider',
+            value: `\`${saved.defaultProvider ?? 'auto (bot default)'}\``,
+            inline: true,
+          },
         )
         .setFooter({ text: 'Ririko AI 2.0.0 • Settings Saved' })
         .setTimestamp();
