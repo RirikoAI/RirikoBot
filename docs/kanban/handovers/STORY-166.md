@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 13 pts (`TASK-1661` = 5, `TASK-1662` = 3, `TASK-1663` = 5)
 - **Epic**: `EPIC-011`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: DONE (merged in PR #657)
 - **Timestamp**: 2026-09-28
 - **Branch**: `feat/STORY-166-stream-freegames-welcome` (targets `develop/2.0.0`)
 

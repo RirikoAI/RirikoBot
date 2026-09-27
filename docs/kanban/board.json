@@ -933,7 +933,7 @@
       "epic": "EPIC-011",
       "title": "Stream Alerts, Free Games & Welcome & Farewell Pages",
       "points": 13,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-116",
         "STORY-133"
