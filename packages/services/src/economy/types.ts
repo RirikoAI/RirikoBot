@@ -1,3 +1,5 @@
+import type { EconomyConfig } from '@ririko/core';
+
 /**
  * Standard economy event types matching Section 33 of BLUEPRINT.md
  * and Section 2 of docs/economy.md.
@@ -552,4 +554,12 @@ export interface ProfileCardRendererOptions {
   levelingService?: import('./leveling.service.js').LevelingService | undefined;
   bankingService?: import('./banking.service.js').BankingService | undefined;
   leaderboardService?: import('./leaderboard.service.js').LeaderboardService | undefined;
+}
+
+/**
+ * Source of the global economy values (daily reward, bank capacity). The owner console's
+ * `EconomyConfigService` is the real one; services read it on every use.
+ */
+export interface EconomyConfigReader {
+  get(): Promise<EconomyConfig>;
 }

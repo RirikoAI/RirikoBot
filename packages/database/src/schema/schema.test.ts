@@ -149,6 +149,8 @@ describe('Dual-Dialect Complete Schema Catalog (70+ Tables)', () => {
       expect(pgSchema.userDungeonProgress).toBeDefined();
       expect(sqliteSchema.tcgSystemConfigs).toBeDefined();
       expect(pgSchema.tcgSystemConfigs).toBeDefined();
+      expect(sqliteSchema.economyConfig).toBeDefined();
+      expect(pgSchema.economyConfig).toBeDefined();
       expect(sqliteSchema.cardTrades).toBeDefined();
       expect(pgSchema.cardTrades).toBeDefined();
       expect(sqliteSchema.marketListings).toBeDefined();

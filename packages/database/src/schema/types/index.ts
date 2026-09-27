@@ -37,6 +37,8 @@ export type EconomyInventory = typeof sqlite.economyInventories.$inferSelect;
 export type NewEconomyInventory = typeof sqlite.economyInventories.$inferInsert;
 export type EconomyCooldown = typeof sqlite.economyCooldowns.$inferSelect;
 export type NewEconomyCooldown = typeof sqlite.economyCooldowns.$inferInsert;
+export type EconomyConfigRow = typeof sqlite.economyConfig.$inferSelect;
+export type NewEconomyConfigRow = typeof sqlite.economyConfig.$inferInsert;
 
 // Experience & Leveling
 export type XpAccount = typeof sqlite.xpAccounts.$inferSelect;

@@ -20,14 +20,18 @@ export const AUTHORIZATION_GUARDS = [
   'requireSession',
   'requireStepUp',
   'requireOwner',
+  'runOwnerAction',
 ];
 
 /** Accepts a session that still owes its passkey check, so only the passkey check may use it. */
 const PASSKEY_CHECK_GUARD = 'requireSessionForPasskeyCheck';
 const PASSKEY_CHECK_FILE = 'app/verify/actions.ts';
 
-/** Origin check and rate limit; `saveGuildSettings` runs it for settings actions. */
-const REQUEST_GUARDS = ['checkDashboardRequest', 'saveGuildSettings'];
+/**
+ * Origin check and rate limit; `saveGuildSettings` runs it for settings actions and
+ * `runOwnerAction` for owner console actions.
+ */
+const REQUEST_GUARDS = ['checkDashboardRequest', 'saveGuildSettings', 'runOwnerAction'];
 
 /** Auth routes run before a session exists, so they are rate limited instead of guarded. */
 export const AUTH_ROUTE_ALLOWLIST: Record<string, readonly string[]> = {

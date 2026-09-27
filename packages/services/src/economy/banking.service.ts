@@ -1,6 +1,8 @@
+import { bankCapacityFor, DEFAULT_ECONOMY_CONFIG } from '@ririko/core';
 import type { EconomyRepository } from '@ririko/database';
 import type {
   BankingOperationResult,
+  EconomyConfigReader,
   TransferParams,
   TransferResult,
   InterestResult,
@@ -8,8 +10,13 @@ import type {
 
 export interface BankingServiceOptions {
   repository: EconomyRepository;
-  baseCapacity?: number | undefined;
-  capacityPerLevel?: number | undefined;
+  /** Global bank capacity values, read on every use; the defaults when omitted. */
+  config?: EconomyConfigReader | undefined;
+  /**
+   * The member's account-wide level (XP summed over every guild), which sizes the bank.
+   * Level 0 when omitted.
+   */
+  levelResolver?: ((userId: string) => Promise<number>) | undefined;
   defaultInterestRatePercent?: number | undefined;
   maxDailyInterestCap?: number | undefined;
 }
@@ -17,48 +24,42 @@ export interface BankingServiceOptions {
 /**
  * Banking Service implementing Sections 4 and 5.1 of docs/economy.md:
  * - Deposit and Withdrawal with capacity scaling and negative-balance guardrails.
- * - Dynamic capacity scaling: Base 10,000 + (Level * 2,500) + Expansions.
+ * - Capacity from the global economy config and the account-wide level: base + level * step
+ *   (10,000 + level * 2,500 by default), recomputed on every bank operation.
  * - Deadlock-free peer-to-peer /pay transfers with deterministic resource ordering.
  * - Compound daily bank interest yield with configurable rates and caps.
  * - Anti-abuse: frozen accounts blocked from all banking and transfer operations.
  */
 export class BankingService {
   private readonly repository: EconomyRepository;
-  private readonly baseCapacity: number;
-  private readonly capacityPerLevel: number;
+  private readonly config: EconomyConfigReader;
+  private readonly levelResolver: (userId: string) => Promise<number>;
   private readonly defaultInterestRatePercent: number;
   private readonly maxDailyInterestCap: number;
 
   constructor(options: BankingServiceOptions) {
     this.repository = options.repository;
-    this.baseCapacity = options.baseCapacity ?? 10000;
-    this.capacityPerLevel = options.capacityPerLevel ?? 2500;
+    this.config = options.config ?? { get: async () => DEFAULT_ECONOMY_CONFIG };
+    this.levelResolver = options.levelResolver ?? (async () => 0);
     this.defaultInterestRatePercent = options.defaultInterestRatePercent ?? 0.5; // 0.5% per day
     this.maxDailyInterestCap = options.maxDailyInterestCap ?? 5000;
   }
 
   /**
-   * Calculates maximum bank capacity based on player level and purchased expansions.
-   * Formula: baseCapacity + (level * capacityPerLevel) + expansions
+   * The member's bank capacity from the current config and account level. The saved
+   * `bank_capacity` is updated when it differs, so profile cards and balances show it. A lower
+   * capacity never removes credits: deposits are refused until the balance is below it again.
    */
-  public calculateBankCapacity(level: number, expansions = 0): number {
-    const validLevel = Math.max(0, Math.floor(level));
-    const validExpansions = Math.max(0, Math.floor(expansions));
-    return this.baseCapacity + validLevel * this.capacityPerLevel + validExpansions;
-  }
+  public async refreshCapacity(userId: string): Promise<number> {
+    const [config, level] = await Promise.all([this.config.get(), this.levelResolver(userId)]);
+    const capacity = bankCapacityFor(level, config);
+    const balance = await this.repository.getOrCreateBalance(userId, capacity);
 
-  /**
-   * Synchronizes and updates the user's bank capacity based on their current level and expansions.
-   */
-  public async syncBankCapacity(userId: string, level: number, expansions = 0): Promise<number> {
-    const targetCapacity = this.calculateBankCapacity(level, expansions);
-    const balance = await this.repository.getOrCreateBalance(userId, targetCapacity);
-
-    if (Number(balance.bankCapacity) !== targetCapacity) {
-      await this.repository.setBankCapacity(userId, targetCapacity);
+    if (Number(balance.bankCapacity) !== capacity) {
+      await this.repository.setBankCapacity(userId, capacity);
     }
 
-    return targetCapacity;
+    return capacity;
   }
 
   /**
@@ -79,10 +80,10 @@ export class BankingService {
       };
     }
 
+    const bankCapacity = await this.refreshCapacity(userId);
     const balance = await this.repository.getOrCreateBalance(userId);
     const currentWallet = Number(balance.walletBalance);
     const currentBank = Number(balance.bankBalance);
-    const bankCapacity = Number(balance.bankCapacity);
 
     let depositAmount: number;
 
@@ -185,10 +186,10 @@ export class BankingService {
       };
     }
 
+    const bankCapacity = await this.refreshCapacity(userId);
     const balance = await this.repository.getOrCreateBalance(userId);
     const currentWallet = Number(balance.walletBalance);
     const currentBank = Number(balance.bankBalance);
-    const bankCapacity = Number(balance.bankCapacity);
 
     let withdrawAmount: number;
 
@@ -376,9 +377,9 @@ export class BankingService {
       };
     }
 
+    const bankCapacity = await this.refreshCapacity(userId);
     const balance = await this.repository.getOrCreateBalance(userId);
     const bankBalance = Number(balance.bankBalance);
-    const bankCapacity = Number(balance.bankCapacity);
 
     if (bankBalance <= 0) {
       return {

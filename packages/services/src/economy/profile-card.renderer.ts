@@ -150,12 +150,15 @@ export class ProfileCardRenderer {
     let walletBalance = 0;
     let bankBalance = 0;
     let bankCapacity = 10000;
+    if (this.bankingService) {
+      bankCapacity = await this.bankingService.refreshCapacity(userId);
+    }
     if (this.economyRepository) {
       const bal = await this.economyRepository.findById(userId);
       if (bal) {
         walletBalance = bal.walletBalance;
         bankBalance = bal.bankBalance;
-        bankCapacity = bal.bankCapacity;
+        if (!this.bankingService) bankCapacity = bal.bankCapacity;
       }
     }
 

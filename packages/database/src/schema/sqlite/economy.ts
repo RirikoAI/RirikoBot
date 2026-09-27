@@ -100,3 +100,17 @@ export const economyInventories = sqliteTable(
   },
   (table) => [index('idx_economy_inv_user').on(table.userId, table.itemId)],
 );
+
+/** Global economy values edited in the owner console; one row with id `global`. */
+export const economyConfig = sqliteTable('economy_config', {
+  id: text('id').primaryKey(),
+  dailyBaseReward: integer('daily_base_reward').notNull().default(250),
+  dailyStreakBonusPercent: integer('daily_streak_bonus_percent').notNull().default(5),
+  dailyMaxStreakBonusPercent: integer('daily_max_streak_bonus_percent').notNull().default(150),
+  bankBaseCapacity: integer('bank_base_capacity').notNull().default(10000),
+  bankCapacityPerLevel: integer('bank_capacity_per_level').notNull().default(2500),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
