@@ -47,6 +47,7 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         'app/dashboard/[guildId]/images/actions.ts#saveImageSettings',
         'app/dashboard/[guildId]/streams/actions.ts#saveStreamAlert',
         'app/dashboard/[guildId]/streams/actions.ts#removeStreamAlert',
+        'app/dashboard/[guildId]/freegames/actions.ts#saveFreeGamesSettings',
         'app/account/security/actions.ts#removePasskey',
         'app/account/sessions/actions.ts#revokeOtherSessions',
         'app/verify/actions.ts#finishPasskeyCheck',

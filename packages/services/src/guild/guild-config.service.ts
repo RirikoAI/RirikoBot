@@ -42,6 +42,7 @@ import {
   type MusicRepository,
   type AiRepository,
   type ImageRepository,
+  type FreeGameRepository,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
@@ -222,6 +223,7 @@ export interface GuildConfigServiceDeps {
   music: MusicRepository;
   ai: AiRepository;
   images: ImageRepository;
+  freeGames: FreeGameRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -503,6 +505,27 @@ export class GuildConfigService {
         },
         write: async (guildId, values, tx) => {
           await deps.images.saveGuildSettings({ guildId, ...values }, tx);
+        },
+      },
+      freegames: {
+        read: async (guildId, tx) => {
+          const target = await deps.freeGames.getGuildChannel(guildId, tx);
+          return {
+            channelId: target?.channelId ?? null,
+            pingRoleId: target?.mentionRoleId ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          // Without a channel nothing is announced, so there is nobody to ping either.
+          if (values.channelId === null) {
+            await deps.freeGames.removeGuildChannel(guildId, tx);
+            return;
+          }
+          await deps.freeGames.setGuildChannel(
+            guildId,
+            { channelId: values.channelId, mentionRoleId: values.pingRoleId },
+            tx,
+          );
         },
       },
     };

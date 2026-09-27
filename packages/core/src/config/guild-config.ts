@@ -395,6 +395,16 @@ export const GuildConfigSchemas = {
       ),
     })
     .strict(),
+  freegames: z
+    .object({
+      channelId: OptionalSnowflakeSetting.describe(
+        'Channel for free game announcements from Epic Games Store and Steam; empty turns them off',
+      ),
+      pingRoleId: OptionalSnowflakeSetting.describe(
+        'Role pinged with each free game announcement (needs a channel); empty pings nobody',
+      ),
+    })
+    .strict(),
 } as const;
 
 export type GuildConfigModule = keyof typeof GuildConfigSchemas;

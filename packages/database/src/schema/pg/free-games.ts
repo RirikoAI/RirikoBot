@@ -25,5 +25,7 @@ export const freeGameAnnouncements = pgTable(
 export const freeGameChannels = pgTable('free_game_channels', {
   guildId: varchar('guild_id', { length: 32 }).primaryKey(),
   channelId: varchar('channel_id', { length: 32 }).notNull(),
+  /** Role mentioned with each announcement; null mentions nobody. */
+  mentionRoleId: varchar('mention_role_id', { length: 32 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
