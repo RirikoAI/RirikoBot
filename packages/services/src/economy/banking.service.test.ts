@@ -4,12 +4,15 @@ import {
   EconomyRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
+import { DEFAULT_ECONOMY_CONFIG, type EconomyConfig } from '@ririko/core';
 import { BankingService } from './banking.service.js';
 
 describe('BankingService', () => {
   let client: SqliteDatabaseClient;
   let repo: EconomyRepository;
   let bankingService: BankingService;
+  let config: EconomyConfig;
+  let levels: Record<string, number>;
 
   beforeEach(async () => {
     const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
@@ -50,10 +53,12 @@ describe('BankingService', () => {
     `);
 
     repo = new EconomyRepository(client);
+    config = { ...DEFAULT_ECONOMY_CONFIG };
+    levels = {};
     bankingService = new BankingService({
       repository: repo,
-      baseCapacity: 10000,
-      capacityPerLevel: 2500,
+      config: { get: async () => config },
+      levelResolver: async (userId) => levels[userId] ?? 0,
       defaultInterestRatePercent: 0.5,
       maxDailyInterestCap: 5000,
     });
@@ -64,26 +69,60 @@ describe('BankingService', () => {
   });
 
   describe('Capacity Scaling', () => {
-    it('calculates bank capacity scaling accurately with levels and expansions', () => {
-      // Level 0: 10,000 base
-      expect(bankingService.calculateBankCapacity(0)).toBe(10000);
-      // Level 1: 10,000 + 2,500 = 12,500
-      expect(bankingService.calculateBankCapacity(1)).toBe(12500);
-      // Level 10: 10,000 + 25,000 = 35,000
-      expect(bankingService.calculateBankCapacity(10)).toBe(35000);
-      // Level 10 with 5,000 expansion: 40,000
-      expect(bankingService.calculateBankCapacity(10, 5000)).toBe(40000);
-      // Negative level clamps to 0
-      expect(bankingService.calculateBankCapacity(-2)).toBe(10000);
-    });
-
-    it('syncBankCapacity persists updated capacity to database balance', async () => {
+    it('refreshCapacity uses the account level and saves the capacity', async () => {
       await repo.getOrCreateBalance('user_cap');
-      const newCap = await bankingService.syncBankCapacity('user_cap', 4, 1000);
-      expect(newCap).toBe(10000 + 4 * 2500 + 1000); // 21,000
+      levels['user_cap'] = 4;
+      expect(await bankingService.refreshCapacity('user_cap')).toBe(10000 + 4 * 2500);
 
       const balance = await repo.findById('user_cap');
-      expect(balance?.bankCapacity).toBe(21000);
+      expect(balance?.bankCapacity).toBe(20000);
+    });
+
+    it('creates the balance with the computed capacity', async () => {
+      levels['user_new'] = 2;
+      expect(await bankingService.refreshCapacity('user_new')).toBe(15000);
+      expect((await repo.findById('user_new'))?.bankCapacity).toBe(15000);
+    });
+
+    it('follows an owner change to the config without a level-up', async () => {
+      levels['user_cfg'] = 3;
+      await bankingService.refreshCapacity('user_cfg');
+      config = { ...config, bankBaseCapacity: 50000, bankCapacityPerLevel: 1000 };
+      expect(await bankingService.refreshCapacity('user_cfg')).toBe(53000);
+      expect((await repo.findById('user_cfg'))?.bankCapacity).toBe(53000);
+    });
+
+    it('deposits against the live capacity', async () => {
+      await repo.modifyBalance({
+        userId: 'user_live',
+        walletDelta: 30000,
+        type: 'ADMIN',
+        source: 'TEST_SEED',
+      });
+      config = { ...config, bankBaseCapacity: 25000 };
+      const res = await bankingService.deposit('user_live', 'all');
+      expect(res.success).toBe(true);
+      expect(res.amount).toBe(25000);
+      expect(Number(res.bankCapacity)).toBe(25000);
+    });
+
+    it('keeps credits above a lowered capacity: deposits are refused, withdrawals work', async () => {
+      await repo.modifyBalance({
+        userId: 'user_low',
+        walletDelta: 9000,
+        type: 'ADMIN',
+        source: 'TEST_SEED',
+      });
+      expect((await bankingService.deposit('user_low', 8000)).success).toBe(true);
+      config = { ...config, bankBaseCapacity: 5000 };
+
+      const refused = await bankingService.deposit('user_low', 100);
+      expect(refused.success).toBe(false);
+      expect(refused.bankBalance).toBe(8000);
+
+      const withdrawn = await bankingService.withdraw('user_low', 'all');
+      expect(withdrawn.success).toBe(true);
+      expect(withdrawn.amount).toBe(8000);
     });
   });
 
@@ -357,8 +396,7 @@ describe('BankingService', () => {
     });
 
     it('applies daily interest to bank balance and generates ledger transaction', async () => {
-      await repo.getOrCreateBalance('user_interest', 25000);
-      await repo.setBankCapacity('user_interest', 25000);
+      levels['user_interest'] = 6; // 10,000 + 6 * 2,500 = 25,000 capacity
       await repo.modifyBalance({
         userId: 'user_interest',
         bankDelta: 10000,

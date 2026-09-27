@@ -15,7 +15,7 @@
 ## 🔍 In Review
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
-| `STORY-115` | Story | XP & Ranking, Games & Giveaways Pages | 8 | `EPIC-011` | [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) |
+| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 13 | `EPIC-011` | [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) |
 
 ---
 
@@ -24,11 +24,11 @@
 
 ---
 
-## ✅ Done · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) (Groomed & Estimated)
+## 🎯 To Do (Groomed & Estimated)
 Ready tickets are listed once, in their epic section at the bottom of the board.
 
-- `EPIC-004` Economy bugs `BUG-0023` and `BUG-0024` (5 pts): see **Groomed Tasks for EPIC-004**
-- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 86): see **Groomed Stories & Tasks for EPIC-011**
+- `EPIC-004` Economy bugs `BUG-0023` and `BUG-0024` (4 pts): see **Groomed Tasks for EPIC-004**
+- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 91): see **Groomed Stories & Tasks for EPIC-011**
 - `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
 
 ---
@@ -232,7 +232,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | `EPIC-008` | ✅ Done · [TASK-0812.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0812.md) | `EPIC-002`, `EPIC-003` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-011 (Web Dashboard)
-> Groomed 2026-09-24, re-groomed 2026-09-25. Children total 86 pts (STORY-119 parked in the backlog, not counted). Delivery order: STORY-110, CHORE-1101, STORY-111, STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112 (security hardening first because owner-console and step-up writes depend on it). Pages expose only settings the bot actually reads (no placeholder UI). STORY-114 was re-groomed on 2026-09-25 after an audit of the bot: Command Overrides moved to STORY-163 (nothing read `command_settings`), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164; both follow STORY-114. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115.
+> Groomed 2026-09-24, re-groomed 2026-09-25. Children total 91 pts (STORY-119 parked in the backlog, not counted). Delivery order: STORY-110, CHORE-1101, STORY-111, STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112 (security hardening first because owner-console and step-up writes depend on it). Pages expose only settings the bot actually reads (no placeholder UI). STORY-114 was re-groomed on 2026-09-25 after an audit of the bot: Command Overrides moved to STORY-163 (nothing read `command_settings`), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164; both follow STORY-114. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115. STORY-165 was re-groomed to 13 points on 2026-09-27: live bank capacity from the account level, category management, and the item seed part of BUG-0024 (TASK-1653).
 
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
@@ -256,13 +256,14 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1641` | Task | Guild Resources (Voice Channels, Role Positions & Bot Top Role, Boost Tier) & Auto Roles and Auto Voice Pages | 3 | `STORY-164` | ✅ Done · [STORY-164.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-164.md) | `STORY-114` |
 | `TASK-1642` | Task | Reaction Role Message Builder: Publish Buttons & Select Menus via Bot REST (Step-Up, Audit) | 3 | `STORY-164` | ✅ Done · [STORY-164.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-164.md) | `TASK-1641` |
 | `TASK-1643` | Task | Edit & Remove Reaction Role Bindings (Strip Removed Components from the Message) | 2 | `STORY-164` | ✅ Done · [STORY-164.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-164.md) | `TASK-1642` |
-| `STORY-115` | Story | XP & Ranking, Games & Giveaways Pages | 8 | `EPIC-011` | 🔍 Review · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) | `STORY-111`, `STORY-117` |
+| `STORY-115` | Story | XP & Ranking, Games & Giveaways Pages | 8 | `EPIC-011` | ✅ Done · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) | `STORY-111`, `STORY-117` |
 | `TASK-1151` | Task | XP & Ranking Page (Level-Up Announcements & Channel, XP Rate, No-XP Channels & Roles, Voice XP) & Voice Reward Accrual | 3 | `STORY-115` | ✅ Done · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) | `STORY-111` |
 | `TASK-1152` | Task | Games Page (Per-Game On/Off & Cooldown via command_settings, Maximum Wager Enforced by the Bot) | 2 | `STORY-115` | ✅ Done · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) | `TASK-1151` |
-| `TASK-1153` | Task | Giveaways Page (Active List, End Now, Reroll, History) with a Guard Against Ending Twice | 3 | `STORY-115` | 🎯 To Do | `TASK-1152` |
-| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 8 | `EPIC-011` | 🎯 To Do | `STORY-115` |
-| `TASK-1651` | Task | Owner Console Shell, Global Economy Settings (Daily Reward, Streak Bonus, Bank Capacity) & ririko economy:config | 3 | `STORY-165` | 🎯 To Do | `STORY-115` |
-| `TASK-1652` | Task | Item Shop Manager (economy_items & economy_item_categories: Create, Edit, Retire, Delete Unowned) | 5 | `STORY-165` | 🎯 To Do | `TASK-1651` |
+| `TASK-1153` | Task | Giveaways Page (Active List, End Now, Reroll, History) with a Guard Against Ending Twice | 3 | `STORY-115` | ✅ Done · [STORY-115.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-115.md) | `TASK-1152` |
+| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 13 | `EPIC-011` | 🔍 Review · [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) | `STORY-115` |
+| `TASK-1651` | Task | Owner Console Shell, Global Economy Settings (Daily Reward, Streak Bonus, Bank Capacity), Live Bank Capacity from Account Level & ririko economy:config | 5 | `STORY-165` | ✅ Done · [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) | `STORY-115` |
+| `TASK-1652` | Task | Item Shop Manager (economy_items & economy_item_categories: Create, Edit, Retire, Delete Unowned; Category Management) | 5 | `STORY-165` | ✅ Done · [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) | `TASK-1651` |
+| `TASK-1653` | Task | Item Codes, Item Seed That Works on Postgres & SQLite, /shop Grouped by Category (Seed Part of BUG-0024) | 3 | `STORY-165` | ✅ Done · [STORY-165.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-165.md) | `TASK-1652` |
 | `STORY-116` | Story | Music, AI Chatbot, Image Generation, Stream Alerts, Free Games, Welcome & Integrations Pages | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-133`, `STORY-117` |
 | `TASK-1161` | Task | Music Page (Volume, DJ Role, Music Channel), AI Chatbot Page (Persona, Provider/Model, Tool Toggles) & Image Generation Page (Provider, Quotas, Presets) | 3 | `STORY-116` | 🎯 To Do | `STORY-111` |
 | `TASK-1162` | Task | Stream Alerts Page (Streamer Subscriptions, Templates, Mention Roles) & Free Games Page (Channels, Ping Roles) | 2 | `STORY-116` | 🎯 To Do | `TASK-1161` |
@@ -392,6 +393,6 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-0441` | Task | Profile Card 2.0 Renderer with @napi-rs/canvas (Avatar, Ranks, XP Bar, Balances, Card Slot) | 3 | `STORY-044` | ✅ Done · [TASK-0441.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0441.md) | `TASK-0422`, `TASK-0432` |
 | `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | ✅ Done · [TASK-0442.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0442.md) | `TASK-0441` |
 | `BUG-0023` | Bug | Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message | 2 | `STORY-040` | 🎯 To Do | |
-| `BUG-0024` | Bug | Postgres Item Seed Uses Slug IDs on a uuid Column; Legacy Migration Reads the Wrong Karma and Welcomer Keys | 3 | `STORY-043` | 🎯 To Do | |
+| `BUG-0024` | Bug | Legacy Migration Reads the Wrong Karma and Welcomer Keys (Item Seed Part Moved to TASK-1653) | 2 | `STORY-043` | 🎯 To Do | |
 
 

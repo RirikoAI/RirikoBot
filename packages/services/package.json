@@ -57,6 +57,10 @@
     "./activity": {
       "types": "./dist/activity/index.d.ts",
       "import": "./dist/activity/index.js"
+    },
+    "./owner": {
+      "types": "./dist/owner/index.d.ts",
+      "import": "./dist/owner/index.js"
     }
   },
   "scripts": {
