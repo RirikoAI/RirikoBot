@@ -17,3 +17,4 @@ export * from './memes/index.js';
 export * from './image-generation/index.js';
 export * from './welcomer/index.js';
 export * from './activity/index.js';
+export * from './owner/index.js';

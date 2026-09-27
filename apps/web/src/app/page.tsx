@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { UserMenu } from '@/components/user-menu';
 import { loginErrorMessage } from '@/lib/login-errors';
-import { getCurrentUser } from '@/lib/server/auth/session';
+import { getCurrentUser, isBotOwner } from '@/lib/server/auth/session';
 
 export default async function HomePage({
   searchParams,
@@ -10,6 +10,7 @@ export default async function HomePage({
 }) {
   const [{ error }, user] = await Promise.all([searchParams, getCurrentUser()]);
   const errorMessage = loginErrorMessage(error);
+  const owner = user ? await isBotOwner(user.id) : false;
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col items-center justify-center gap-6 px-4 text-center">
@@ -31,7 +32,7 @@ export default async function HomePage({
 
       {user ? (
         <div className="flex flex-col items-center gap-4">
-          <UserMenu user={user} />
+          <UserMenu user={user} owner={owner} />
           <Link
             href="/servers"
             className="rounded-md bg-sakura-strong px-5 py-2.5 font-semibold text-white hover:bg-sakura"

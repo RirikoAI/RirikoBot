@@ -19,8 +19,8 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 - `guild_settings`: Unified guild configuration (`guild_id` PK, `prefix`, `locale`, `timezone`, `ai_channel_id`, `log_channel_id`, `music_channel_id`, `welcomer_channel_id`, `welcomer_enabled`, `welcomer_bg`, `farewell_channel_id`, `farewell_enabled`, `farewell_bg`, `karma_notifications_enabled`, `created_at`, `updated_at`).
 
 ### 2.2. Commands & Dynamic Module Settings
-- `commands`: Machine-readable command registry (`name` PK, `category`, `description`, `slash_enabled`, `prefix_enabled`, `default_permission`, `cooldown_seconds`).
-- `command_settings`: Per-guild or per-channel overrides (`id` UUID PK, `guild_id`, `channel_id`, `command_name`, `is_enabled`, `cooldown_override`, `allowed_roles`, `blocked_roles`).
+- `commands`: Machine-readable command registry (`name` PK, `category`, `description`, `slash_enabled`, `prefix_enabled`, `default_permission`, `cooldown_seconds`). The bot replaces it with its registered commands at every startup (hidden and owner-only commands left out) so the dashboard and CLI can list them.
+- `command_settings`: Per-guild or per-channel overrides (`id` UUID PK, `guild_id`, `channel_id`, `command_name`, `is_enabled`, `cooldown_override`, `allowed_roles`, `blocked_roles`). A row with a null `channel_id` applies server wide; a channel row replaces it in that channel. `GuildConfigService` replaces a guild's rows together, so the table has no unique key.
 
 ### 2.3. Moderation & Safety Engine
 - `moderation_cases`: Immutable audit logs of punitive actions (`id` Serial/UUID PK, `guild_id`, `case_number`, `type` [WARN, TIMEOUT, KICK, BAN, SOFTBAN, UNBAN], `target_user_id`, `moderator_user_id`, `reason`, `duration_seconds`, `metadata`, `created_at`).

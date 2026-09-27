@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ValidationError } from '@ririko/core';
-import { createDatabaseClient, type SqliteDatabaseClient } from '@ririko/database';
+import {
+  CommandCatalogRepository,
+  createDatabaseClient,
+  type SqliteDatabaseClient,
+} from '@ririko/database';
 import type { GuildConfigService } from '@ririko/services/guild';
 import { createGuildConfigService, listConfigKeys, runGuildConfig } from './guild-config.js';
 
@@ -37,7 +41,15 @@ describe('ririko guild:config (TASK-1113)', () => {
     ]);
     expect(keys).toContain('automod.mentionSpamLimit');
     expect(keys).toContain('automod.burstSpamExemptRoleIds');
-    expect(keys.at(-1)).toBe('logging.logChannelId');
+    expect(keys).toContain('logging.logChannelId');
+    expect(keys).toContain('commands.overrides');
+    expect(keys).toContain('autoroles.humanRoleIds');
+    expect(keys).toContain('autovoice.hubs');
+    expect(keys).toContain('xp.noXpChannelIds');
+    expect(keys).toContain('xp.voiceXpEnabled');
+    expect(keys).toContain('games.rules');
+    expect(keys).toContain('music.djRoleId');
+    expect(keys).toContain('music.autoLeaveEmpty');
     expect(listConfigKeys().every((entry) => entry.description.length > 0)).toBe(true);
   });
 
@@ -83,6 +95,73 @@ describe('ririko guild:config (TASK-1113)', () => {
         '[{"warnThreshold":2,"action":"TIMEOUT"}]',
       ),
     ).rejects.toThrow(/Row 1: Timeout steps need a length\./);
+  });
+
+  it('round-trips command overrides as JSON and rejects unknown commands (TASK-1632)', async () => {
+    await new CommandCatalogRepository(db).replaceAll([
+      {
+        name: 'rps',
+        category: 'games',
+        description: 'Rock paper scissors',
+        slashEnabled: true,
+        prefixEnabled: true,
+        defaultPermission: null,
+        cooldownSeconds: 3,
+      },
+    ]);
+    const rows =
+      '[{"command":"rps","channelId":null,"enabled":false,"allowedRoleIds":[],"blockedRoleIds":[],"cooldownSeconds":null}]';
+    await runGuildConfig(service, GUILD, 'commands.overrides', rows);
+    expect(await runGuildConfig(service, GUILD, 'commands.overrides')).toEqual([rows]);
+
+    await runGuildConfig(service, GUILD, 'commands.overrides', '[]');
+    expect(await runGuildConfig(service, GUILD, 'commands.overrides')).toEqual(['[]']);
+    await runGuildConfig(service, GUILD, 'moderation.escalationSteps', '[]');
+    expect(await runGuildConfig(service, GUILD, 'moderation.escalationSteps')).toEqual(['[]']);
+    expect(await runGuildConfig(service, GUILD, 'automod.burstSpamExemptRoleIds')).toEqual(['[]']);
+    await runGuildConfig(service, GUILD, 'automod.burstSpamExemptRoleIds', '[]');
+
+    await expect(
+      runGuildConfig(service, GUILD, 'commands.overrides', '[{"command":"nope","enabled":false}]'),
+    ).rejects.toThrow(/Unknown command: `nope`\./);
+  });
+
+  it('round-trips auto roles and auto voice hubs (TASK-1641)', async () => {
+    await runGuildConfig(service, GUILD, 'autoroles.enabled', 'on');
+    await runGuildConfig(service, GUILD, 'autoroles.humanRoleIds', '200000000000000001');
+    expect(await runGuildConfig(service, GUILD, 'autoroles.humanRoleIds')).toEqual([
+      '200000000000000001',
+    ]);
+    const hubs =
+      '[{"channelId":"300000000000000001","nameTemplate":"Room of {user}","userLimit":4,"bitrate":96000}]';
+    await runGuildConfig(service, GUILD, 'autovoice.hubs', hubs);
+    expect(await runGuildConfig(service, GUILD, 'autovoice.hubs')).toEqual([hubs]);
+    await expect(
+      runGuildConfig(service, GUILD, 'autovoice.hubs', '[{"channelId":"x"}]'),
+    ).rejects.toThrow('Row 1: Choose a voice channel.');
+  });
+
+  it('round-trips the maximum wager and game rules (TASK-1152)', async () => {
+    await runGuildConfig(service, GUILD, 'games.maxWager', '250');
+    await runGuildConfig(service, GUILD, 'games.rules', '[{"command":"rps","enabled":false}]');
+    expect(await runGuildConfig(service, GUILD, 'games.maxWager')).toEqual(['250']);
+    expect(await runGuildConfig(service, GUILD, 'games.rules')).toEqual([
+      '[{"command":"rps","enabled":false,"cooldownSeconds":null}]',
+    ]);
+    await runGuildConfig(service, GUILD, 'games.maxWager', 'none');
+    expect(await runGuildConfig(service, GUILD, 'games.maxWager')).toEqual(['']);
+  });
+
+  it('round-trips XP settings (TASK-1151)', async () => {
+    await runGuildConfig(service, GUILD, 'xp.xpRatePercent', '150');
+    await runGuildConfig(service, GUILD, 'xp.voiceXpEnabled', 'on');
+    await runGuildConfig(service, GUILD, 'xp.noXpRoleIds', '200000000000000001');
+    expect(await runGuildConfig(service, GUILD, 'xp.xpRatePercent')).toEqual(['150']);
+    expect(await runGuildConfig(service, GUILD, 'xp.voiceXpEnabled')).toEqual(['true']);
+    expect(await runGuildConfig(service, GUILD, 'xp.noXpRoleIds')).toEqual(['200000000000000001']);
+    await expect(runGuildConfig(service, GUILD, 'xp.xpRatePercent', '500')).rejects.toThrow(
+      'Enter a whole number from 0 to 300.',
+    );
   });
 
   it('lists all settings with their current values', async () => {

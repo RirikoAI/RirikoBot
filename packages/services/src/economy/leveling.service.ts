@@ -161,9 +161,9 @@ export class LevelingService {
       newLevel: newProgress.level,
     });
 
-    // 4. Synchronize bank capacity with new level if bankingService is available
+    // 4. Bank capacity follows the account-wide level, which grows with any guild's level
     if (didLevelUp && this.bankingService) {
-      await this.bankingService.syncBankCapacity(userId, newProgress.level);
+      await this.bankingService.refreshCapacity(userId);
     }
 
     // 5. Evaluate notification preferences

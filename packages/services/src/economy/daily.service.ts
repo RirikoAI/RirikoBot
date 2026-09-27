@@ -1,17 +1,19 @@
 import type { EconomyRepository } from '@ririko/database';
 import {
+  DEFAULT_ECONOMY_CONFIG,
   DEFAULT_RESET_SCHEDULE,
+  dailyReward,
+  dailyStreakMultiplier,
   getResetDayIndex,
   getNextResetAt,
   type ResetSchedule,
 } from '@ririko/core';
-import type { DailyClaimResult, DailyStatus } from './types.js';
+import type { DailyClaimResult, DailyStatus, EconomyConfigReader } from './types.js';
 
 export interface DailyServiceOptions {
   repository: EconomyRepository;
-  baseReward?: number | undefined;
-  streakBonusPercent?: number | undefined;
-  maxStreakBonusPercent?: number | undefined;
+  /** Global reward values, read on every status check and claim; the defaults when omitted. */
+  config?: EconomyConfigReader | undefined;
   /** Reset boundary governing when a new claim becomes available. */
   resetSchedule?: ResetSchedule | undefined;
   /** Consecutive missed days tolerated before the streak is wiped. 0 disables forgiveness. */
@@ -29,8 +31,8 @@ export const DEFAULT_STREAK_FORGIVENESS = 3;
 
 /**
  * Daily Claim & Streak Engine implementing Section 5.2 of docs/economy.md:
- * - Base reward: 250 credits.
- * - Daily streak multiplier: +5% per consecutive day, capping at 30 days (+150%).
+ * - Base reward and streak bonus from the global economy config (owner console); by default
+ *   250 credits and +5% per consecutive day, capping at +150% (day 31).
  * - One claim per reset day, on the shared configurable boundary (default 00:00 GMT+8).
  * - Consecutive-miss forgiveness: missing fewer than `streakForgiveness` consecutive reset
  *   days preserves the streak, and the missed days are skipped rather than counted. Reaching
@@ -39,36 +41,15 @@ export const DEFAULT_STREAK_FORGIVENESS = 3;
  */
 export class DailyService {
   private readonly repository: EconomyRepository;
-  private readonly baseReward: number;
-  private readonly streakBonusPercent: number;
-  private readonly maxStreakBonusPercent: number;
+  private readonly config: EconomyConfigReader;
   private readonly resetSchedule: ResetSchedule;
   private readonly streakForgiveness: number;
 
   constructor(options: DailyServiceOptions) {
     this.repository = options.repository;
-    this.baseReward = options.baseReward ?? 250;
-    this.streakBonusPercent = options.streakBonusPercent ?? 0.05; // 5% per day
-    this.maxStreakBonusPercent = options.maxStreakBonusPercent ?? 1.5; // Cap at +150% (30 days)
+    this.config = options.config ?? { get: async () => DEFAULT_ECONOMY_CONFIG };
     this.resetSchedule = options.resetSchedule ?? DEFAULT_RESET_SCHEDULE;
     this.streakForgiveness = options.streakForgiveness ?? DEFAULT_STREAK_FORGIVENESS;
-  }
-
-  /**
-   * Computes the streak multiplier (e.g. 1.0 for Day 1, 1.05 for Day 2, up to 2.5 for Day 31).
-   */
-  public calculateMultiplier(streak: number): number {
-    if (streak <= 1) return 1.0;
-    const bonus = Math.min(this.maxStreakBonusPercent, (streak - 1) * this.streakBonusPercent);
-    return Number((1.0 + bonus).toFixed(2));
-  }
-
-  /**
-   * Computes the final credit reward for a given streak number.
-   */
-  public calculateReward(streak: number): number {
-    const multiplier = this.calculateMultiplier(streak);
-    return Math.round(this.baseReward * multiplier);
   }
 
   /**
@@ -113,7 +94,10 @@ export class DailyService {
    * Inspects daily reward status, streak, and next reset time for a user.
    */
   public async getStatus(userId: string, nowMs = Date.now()): Promise<DailyStatus> {
-    const account = await this.repository.getOrCreateAccount(userId);
+    const [account, config] = await Promise.all([
+      this.repository.getOrCreateAccount(userId),
+      this.config.get(),
+    ]);
     const now = new Date(nowMs);
 
     const alreadyClaimedToday =
@@ -137,8 +121,8 @@ export class DailyService {
       isFrozen: account.isFrozen,
       currentStreak,
       nextStreak,
-      multiplier: this.calculateMultiplier(nextStreak),
-      rewardCredits: this.calculateReward(nextStreak),
+      multiplier: dailyStreakMultiplier(nextStreak, config),
+      rewardCredits: dailyReward(nextStreak, config),
       lastDailyAt: account.lastDailyAt,
       timeUntilNextClaimMs: alreadyClaimedToday ? timeUntilResetMs : 0,
       timeUntilResetMs,
@@ -155,7 +139,10 @@ export class DailyService {
     guildId?: string,
     nowMs = Date.now(),
   ): Promise<DailyClaimResult> {
-    const account = await this.repository.getOrCreateAccount(userId);
+    const [account, config] = await Promise.all([
+      this.repository.getOrCreateAccount(userId),
+      this.config.get(),
+    ]);
     const now = new Date(nowMs);
     const nextResetAt = getNextResetAt(now, this.resetSchedule);
 
@@ -184,7 +171,7 @@ export class DailyService {
         reason: `Daily reward already claimed today. Resets in ${remainingSeconds}s.`,
         creditsAwarded: 0,
         streak: account.dailyStreak,
-        multiplier: this.calculateMultiplier(account.dailyStreak),
+        multiplier: dailyStreakMultiplier(account.dailyStreak, config),
         nextClaimAt: nextResetAt,
         wasReset: false,
         missedDays: 0,
@@ -198,8 +185,8 @@ export class DailyService {
       nowMs,
     );
 
-    const multiplier = this.calculateMultiplier(nextStreak);
-    const creditsToAward = this.calculateReward(nextStreak);
+    const multiplier = dailyStreakMultiplier(nextStreak, config);
+    const creditsToAward = dailyReward(nextStreak, config);
 
     // 4. Atomically update account streak and credit wallet balance
     await this.repository.updateAccount(userId, {

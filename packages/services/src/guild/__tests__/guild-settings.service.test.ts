@@ -33,6 +33,36 @@ describe('GuildSettingsService', () => {
       expect(mockRepo.findById).toHaveBeenCalledWith('guild-1');
     });
 
+    it('reads the XP settings, with defaults for a guild without a row', async () => {
+      mockRepo.findById.mockResolvedValueOnce(null);
+      expect(await service.getSettings('guild-1')).toMatchObject({
+        levelUpAnnouncements: true,
+        levelUpChannelId: null,
+        xpRatePercent: 100,
+        noXpChannelIds: [],
+        noXpRoleIds: [],
+        voiceXpEnabled: false,
+      });
+
+      mockRepo.findById.mockResolvedValueOnce({
+        guildId: 'guild-2',
+        karmaNotificationsEnabled: false,
+        levelUpChannelId: 'c1',
+        xpRatePercent: 200,
+        noXpChannelIds: ['c2'],
+        noXpRoleIds: ['r1'],
+        voiceXpEnabled: true,
+      } as GuildSettings);
+      expect(await service.getSettings('guild-2')).toMatchObject({
+        levelUpAnnouncements: false,
+        levelUpChannelId: 'c1',
+        xpRatePercent: 200,
+        noXpChannelIds: ['c2'],
+        noXpRoleIds: ['r1'],
+        voiceXpEnabled: true,
+      });
+    });
+
     it('caches the result and does not call DB on second request within TTL', async () => {
       mockRepo.findById.mockResolvedValueOnce({
         guildId: 'guild-1',

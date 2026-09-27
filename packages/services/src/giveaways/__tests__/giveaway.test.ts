@@ -224,7 +224,7 @@ describe('GiveawayEngine (TASK-0901)', () => {
       vi.mocked(mockRepo.listExpiredPendingGiveaways!).mockResolvedValue([expiredGiveaway]);
       vi.mocked(mockRepo.findById!).mockResolvedValue(expiredGiveaway);
       vi.mocked(mockRepo.getEntries!).mockResolvedValue(entries);
-      vi.mocked(mockRepo.endGiveaway!).mockResolvedValue(undefined);
+      vi.mocked(mockRepo.endGiveaway!).mockResolvedValue(true);
 
       const results = await engine.tick();
 
@@ -233,6 +233,31 @@ describe('GiveawayEngine (TASK-0901)', () => {
       expect(results[0]?.winnerIds).toEqual(['lucky-winner']);
       expect(mockRepo.endGiveaway).toHaveBeenCalledWith('gw-reboot-recovery', ['lucky-winner']);
       expect(onEnded).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not fire the hook when another caller ended the giveaway first (TASK-1153)', async () => {
+      const onEnded = vi.fn();
+      const engine = new GiveawayEngine(mockRepo as GiveawayRepository, {
+        onGiveawayEnded: onEnded,
+      });
+      vi.mocked(mockRepo.findById!).mockResolvedValue({
+        id: 'gw-race',
+        guildId: 'guild-1',
+        channelId: 'chan-1',
+        messageId: 'msg-1',
+        prize: 'Nitro',
+        winnerCount: 1,
+        startsAt: new Date(),
+        endsAt: new Date(),
+        isEnded: false,
+        requirements: {},
+        createdBy: 'host-1',
+      });
+      vi.mocked(mockRepo.getEntries!).mockResolvedValue([]);
+      vi.mocked(mockRepo.endGiveaway!).mockResolvedValue(false);
+
+      expect(await engine.rollAndEndGiveaway('gw-race')).toBeNull();
+      expect(onEnded).not.toHaveBeenCalled();
     });
 
     it('should support rerolling winners excluding past winners', async () => {

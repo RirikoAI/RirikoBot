@@ -125,8 +125,22 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
         created_at INTEGER NOT NULL
       );
 
+      CREATE TABLE economy_item_categories (
+
+        id TEXT PRIMARY KEY,
+
+        code TEXT UNIQUE,
+
+        name TEXT NOT NULL,
+
+        description TEXT
+
+      );
+
+
       CREATE TABLE economy_items (
         id TEXT PRIMARY KEY,
+        code TEXT UNIQUE,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
         price INTEGER NOT NULL,
@@ -143,6 +157,17 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
         item_id TEXT NOT NULL,
         quantity INTEGER NOT NULL DEFAULT 1,
         acquired_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE economy_config (
+        id TEXT PRIMARY KEY,
+        daily_base_reward INTEGER NOT NULL DEFAULT 250,
+        daily_streak_bonus_percent INTEGER NOT NULL DEFAULT 5,
+        daily_max_streak_bonus_percent INTEGER NOT NULL DEFAULT 150,
+        bank_base_capacity INTEGER NOT NULL DEFAULT 10000,
+        bank_capacity_per_level INTEGER NOT NULL DEFAULT 2500,
+        updated_by TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
       );
 
       CREATE TABLE xp_accounts (
@@ -191,6 +216,12 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
         farewell_enabled INTEGER NOT NULL DEFAULT 0,
         farewell_bg TEXT,
         karma_notifications_enabled INTEGER NOT NULL DEFAULT 1,
+        level_up_channel_id TEXT,
+        xp_rate_percent INTEGER NOT NULL DEFAULT 100,
+        no_xp_channel_ids TEXT NOT NULL DEFAULT '[]',
+        no_xp_role_ids TEXT NOT NULL DEFAULT '[]',
+        voice_xp_enabled INTEGER NOT NULL DEFAULT 0,
+        max_game_wager INTEGER,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );
@@ -530,6 +561,8 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
 
       const callArgs = replyFn.mock.calls[0]?.[0];
       expect(callArgs.content).toContain('Town Item Shop Catalog');
+      expect(callArgs.content).toContain('__**Consumables**__');
+      expect(callArgs.content).toContain('__**Cosmetics**__');
       expect(callArgs.content).toContain('candy_minor');
       expect(callArgs.content).toContain('stamina_potion');
       expect(callArgs.content).toContain('profile_bg_voucher');
@@ -567,7 +600,11 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
   describe('9. /inventory command', () => {
     it('displays inventory items owned by user', async () => {
       const userId = 'user_inv_01';
-      await services.inventoryRepo.addItem(userId, 'candy_minor', 3);
+      await services.inventoryRepo.addItem(
+        userId,
+        (await services.itemRepo.findByCode('candy_minor'))!.id,
+        3,
+      );
 
       const replyFn = vi.fn().mockResolvedValue(undefined);
       const ctx = createMockContext({ userId, replyFn });
@@ -583,7 +620,11 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
   describe('10. /use command', () => {
     it('consumes item from inventory and applies effect', async () => {
       const userId = 'user_consumer_01';
-      await services.inventoryRepo.addItem(userId, 'candy_minor', 2);
+      await services.inventoryRepo.addItem(
+        userId,
+        (await services.itemRepo.findByCode('candy_minor'))!.id,
+        2,
+      );
 
       const replyFn = vi.fn().mockResolvedValue(undefined);
       const ctx = createMockContext({

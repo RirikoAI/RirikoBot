@@ -20,6 +20,7 @@ describe('CLI Program', () => {
     expect(commandNames).toContain('migrate:verify');
     expect(commandNames).toContain('generate:po-token');
     expect(commandNames).toContain('ai:configure');
+    expect(commandNames).toContain('economy:config');
   });
 
   it('registers ai:configure command options and aliases', () => {

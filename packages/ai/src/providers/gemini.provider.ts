@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { AI_PROVIDER_MODELS } from '@ririko/core';
 import {
   ChatModelProvider,
   ChatMessage,
@@ -19,12 +20,7 @@ export interface GeminiProviderOptions {
 export class GeminiProvider implements ChatModelProvider {
   public readonly id = 'gemini';
   public readonly name = 'Google Gemini';
-  public readonly supportedModels = [
-    'gemini-2.5-flash',
-    'gemini-2.5-pro',
-    'gemini-3.5-flash-lite',
-    'gemini-3.7-flash',
-  ] as const;
+  public readonly supportedModels = AI_PROVIDER_MODELS.gemini;
   public readonly defaultModel: string;
 
   private readonly apiKey?: string | undefined;

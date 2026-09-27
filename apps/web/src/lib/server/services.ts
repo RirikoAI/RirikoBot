@@ -5,11 +5,24 @@ import { experimental_taintObjectReference, experimental_taintUniqueValue } from
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
   AuditLogRepository,
+  AutoRoleRepository,
+  AutoVoiceRepository,
   BotActivityRepository,
+  CommandCatalogRepository,
+  CommandSettingsRepository,
+  EconomyConfigRepository,
+  InventoryRepository,
+  ItemCategoryRepository,
+  ItemRepository,
   createDatabaseClient,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
+  MusicRepository,
+  AiRepository,
+  ImageRepository,
+  ReactionRoleRepository,
+  GiveawayRepository,
   UserRepository,
   WebKnownDeviceRepository,
   WebPasskeyRepository,
@@ -17,14 +30,17 @@ import {
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
+import { EconomyConfigService, ItemCatalogService } from '@ririko/services/owner';
 import { DiscordOAuthClient } from './auth/discord-oauth';
 import { KnownDeviceService } from './auth/known-devices';
 import { PasskeyService } from './auth/passkeys';
 import { SessionService } from './auth/session-service';
 import { DiscordNotifier } from './discord-notifier';
 import { BotGuildDirectory } from './guilds/bot-guilds';
+import { GiveawayManagementService } from './guilds/giveaways';
 import { GuildAccessService } from './guilds/guild-access';
 import { GuildResourceDirectory } from './guilds/guild-resources';
+import { ReactionRolePanelService } from './guilds/reaction-role-panels';
 import { UserDirectory } from './guilds/user-directory';
 
 /**
@@ -52,6 +68,15 @@ export interface WebServices {
   /** Moderation cases, warnings and notes, for the read-only case log. */
   moderation: ModerationRepository;
   guildConfig: GuildConfigService;
+  /** Publishes and edits reaction role panels (after guard and passkey step-up). */
+  reactionRolePanels: ReactionRolePanelService;
+  giveaways: GiveawayManagementService;
+  /** Global economy values for the owner console (after `requireOwner` or `runOwnerAction`). */
+  economyConfig: EconomyConfigService;
+  /** Global item shop for the owner console (after `requireOwner` or `runOwnerAction`). */
+  itemCatalog: ItemCatalogService;
+  /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
+  commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
   botActivity: BotActivityRepository;
   /** Security DMs and guild change notices (best effort). */
@@ -113,14 +138,23 @@ async function createWebServices(): Promise<WebServices> {
   });
   const guildSettings = new GuildSettingsRepository(db);
   const moderation = new ModerationRepository(db);
+  const commandCatalog = new CommandCatalogRepository(db);
   const guildConfig = new GuildConfigService({
     db,
     guildSettings,
     moderation,
+    commandSettings: new CommandSettingsRepository(db),
+    commandCatalog,
+    autoRoles: new AutoRoleRepository(db),
+    autoVoice: new AutoVoiceRepository(db),
+    music: new MusicRepository(db),
+    ai: new AiRepository(db),
+    images: new ImageRepository(db),
     versions: new GuildConfigVersionRepository(db),
     audit,
     defaultPrefix: config.DEFAULT_PREFIX,
   });
+  const guildResources = new GuildResourceDirectory(botRest);
   return {
     config,
     db,
@@ -133,10 +167,36 @@ async function createWebServices(): Promise<WebServices> {
     audit,
     botRest,
     guildAccess,
-    guildResources: new GuildResourceDirectory(botRest),
+    guildResources,
     userDirectory: new UserDirectory(botRest),
     moderation,
     guildConfig,
+    reactionRolePanels: new ReactionRolePanelService({
+      db,
+      reactionRoles: new ReactionRoleRepository(db),
+      audit,
+      rest: botRest,
+      resources: guildResources,
+    }),
+    giveaways: new GiveawayManagementService({
+      giveaways: new GiveawayRepository(db),
+      audit,
+      rest: botRest,
+      resources: guildResources,
+    }),
+    economyConfig: new EconomyConfigService({
+      db,
+      repository: new EconomyConfigRepository(db),
+      audit,
+    }),
+    itemCatalog: new ItemCatalogService({
+      db,
+      items: new ItemRepository(db),
+      categories: new ItemCategoryRepository(db),
+      inventories: new InventoryRepository(db),
+      audit,
+    }),
+    commandCatalog,
     botActivity: new BotActivityRepository(db),
     notifier: new DiscordNotifier({
       rest: botRest,

@@ -29,7 +29,10 @@ export const imageJobs = sqliteTable(
       .$defaultFn(() => new Date()),
     completedAt: integer('completed_at', { mode: 'timestamp_ms' }),
   },
-  (table) => [index('idx_image_jobs_user_status').on(table.userId, table.status)],
+  (table) => [
+    index('idx_image_jobs_user_status').on(table.userId, table.status),
+    index('idx_image_jobs_user_created').on(table.userId, table.createdAt),
+  ],
 );
 
 export const imagePresets = sqliteTable('image_presets', {
@@ -40,6 +43,14 @@ export const imagePresets = sqliteTable('image_presets', {
   positivePromptPrefix: text('positive_prompt_prefix').notNull(),
   negativePromptPreset: text('negative_prompt_preset'),
   isSystemPreset: integer('is_system_preset', { mode: 'boolean' }).notNull().default(false),
+});
+
+/** A guild's /imagine defaults and per-member daily limit. */
+export const imageGuildSettings = sqliteTable('image_guild_settings', {
+  guildId: text('guild_id').primaryKey(),
+  defaultProvider: text('default_provider'), // 'gemini' | 'replicate' | 'comfyui'; null for the bot default
+  memberDailyLimit: integer('member_daily_limit'), // null for the bot quota only
+  defaultPreset: text('default_preset'), // style preset ID; null for anime
 });
 
 export const imageUsage = sqliteTable(

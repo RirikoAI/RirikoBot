@@ -226,10 +226,13 @@ describe('GiveawayRepository (TASK-0901)', () => {
       await giveawayRepo.addEntry(giveaway.id, 'user-win1', 1);
       await giveawayRepo.addEntry(giveaway.id, 'user-win2', 2);
 
-      await giveawayRepo.endGiveaway(giveaway.id, ['user-win1', 'user-win2']);
+      expect(await giveawayRepo.endGiveaway(giveaway.id, ['user-win1', 'user-win2'])).toBe(true);
 
       const updated = await giveawayRepo.findById(giveaway.id);
       expect(updated?.isEnded).toBe(true);
+
+      // A second end (the scheduler racing /giveaway end or the dashboard) writes nothing.
+      expect(await giveawayRepo.endGiveaway(giveaway.id, ['user-win1'])).toBe(false);
 
       const winners = await giveawayRepo.getWinners(giveaway.id);
       expect(winners).toHaveLength(2);

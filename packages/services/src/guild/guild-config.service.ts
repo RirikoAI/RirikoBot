@@ -1,22 +1,47 @@
 import {
   AUTOMOD_ACTIONS,
   AUTOMOD_RULE_DEFAULTS,
+  compareCommandOverrides,
   DEFAULT_ESCALATION_STEPS,
+  DEFAULT_MUSIC_VOLUME,
+  AI_SPEAKING_STYLES,
+  AI_TOOL_NAMES,
+  allowedAiTools,
+  DEFAULT_AI_SPEAKING_STYLE,
+  formatAiModelChoice,
+  MAX_AI_PERSONA_PROMPT_LENGTH,
+  parseAiModelChoice,
+  type AiSpeakingStyle,
+  IMAGE_PROVIDER_IDS,
+  IMAGE_STYLE_PRESET_IDS,
   GuildConfigSchemas,
   ValidationError,
+  WAGER_GAME_COMMANDS,
   type AutoModConfigurableAction,
   type AutoModRuleTypeName,
+  type AutoVoiceHub,
+  type CommandOverride,
+  type GameRule,
   type GuildConfigModule,
   type GuildConfigValues,
 } from '@ririko/core';
 import {
   withTransaction,
   type AuditLogRepository,
+  type AutoRoleRepository,
+  type AutoVoiceConfig,
+  type AutoVoiceRepository,
+  type CommandCatalogRepository,
+  type CommandSettings,
+  type CommandSettingsRepository,
   type DatabaseClient,
   type GuildConfigVersionRepository,
   type GuildSettingsRepository,
   type ModerationRepository,
   type ModerationRule,
+  type MusicRepository,
+  type AiRepository,
+  type ImageRepository,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
@@ -33,13 +58,19 @@ export interface FieldChange {
   after: unknown;
 }
 
-/** Thrown when an update fails its schema; `fieldErrors` maps each field to its messages. */
+/**
+ * Thrown when an update fails its schema; `fieldErrors` maps each field to its messages. The
+ * owner console's global settings use it too, with their own `subject`.
+ */
 export class GuildConfigValidationError extends ValidationError {
-  constructor(readonly fieldErrors: Record<string, string[]>) {
+  constructor(
+    readonly fieldErrors: Record<string, string[]>,
+    subject = 'guild settings',
+  ) {
     const messages = Object.entries(fieldErrors).map(
       ([field, errors]) => `${field}: ${errors.join(' ')}`,
     );
-    super(`Invalid guild settings: ${messages.join('; ')}`, {
+    super(`Invalid ${subject}: ${messages.join('; ')}`, {
       userMessage: messages.join('\n'),
       validationErrors: messages,
     });
@@ -61,7 +92,7 @@ export function diffFields(
  * Field errors by top-level field. Errors inside a list keep their row number, which
  * `flatten()` would drop: `Row 3: Timeout steps need a length.`
  */
-function fieldErrorsOf(issues: readonly { path: (string | number)[]; message: string }[]) {
+export function fieldErrorsOf(issues: readonly { path: (string | number)[]; message: string }[]) {
   const fieldErrors: Record<string, string[]> = {};
   for (const { path, message } of issues) {
     const [field, row] = path;
@@ -112,6 +143,69 @@ function readAutoModValues(rules: ModerationRule[]): GuildConfigValues<'automod'
   return values as GuildConfigValues<'automod'>;
 }
 
+/** Stored `command_settings` rows in the shape the schema and the bot use. */
+export function toCommandOverrides(rows: readonly CommandSettings[]): CommandOverride[] {
+  return rows
+    .map((row) => ({
+      command: row.commandName,
+      channelId: row.channelId,
+      enabled: row.isEnabled,
+      allowedRoleIds: row.allowedRoles,
+      blockedRoleIds: row.blockedRoles,
+      cooldownSeconds: row.cooldownOverride,
+    }))
+    .sort(compareCommandOverrides);
+}
+
+function toCommandSettingsRows(overrides: readonly CommandOverride[]) {
+  return overrides.map((row) => ({
+    commandName: row.command,
+    channelId: row.channelId,
+    isEnabled: row.enabled,
+    cooldownOverride: row.cooldownSeconds,
+    allowedRoles: row.allowedRoleIds,
+    blockedRoles: row.blockedRoleIds,
+  }));
+}
+
+function isDefaultOverride(row: CommandOverride): boolean {
+  return (
+    row.enabled &&
+    row.cooldownSeconds === null &&
+    row.allowedRoleIds.length === 0 &&
+    row.blockedRoleIds.length === 0
+  );
+}
+
+function isWagerGame(name: string): name is GameRule['command'] {
+  return (WAGER_GAME_COMMANDS as readonly string[]).includes(name);
+}
+
+/** The games' server-wide on/off state and cooldowns from `command_settings`, sorted by game. */
+export function toGameRules(rows: readonly CommandSettings[]): GameRule[] {
+  return rows
+    .filter((row) => row.channelId === null && isWagerGame(row.commandName))
+    .map((row) => ({
+      command: row.commandName as GameRule['command'],
+      enabled: row.isEnabled,
+      cooldownSeconds: row.cooldownOverride,
+    }))
+    .filter((rule) => !rule.enabled || rule.cooldownSeconds !== null)
+    .sort((a, b) => (a.command < b.command ? -1 : a.command > b.command ? 1 : 0));
+}
+
+/** Stored `auto_voice_configs` rows in the shape the schema uses, sorted by channel. */
+export function toAutoVoiceHubs(rows: readonly AutoVoiceConfig[]): AutoVoiceHub[] {
+  return rows
+    .map((row) => ({
+      channelId: row.parentChannelId,
+      nameTemplate: row.channelNameTemplate,
+      userLimit: row.userLimit,
+      bitrate: row.bitrate,
+    }))
+    .sort((a, b) => (a.channelId === b.channelId ? 0 : a.channelId < b.channelId ? -1 : 1));
+}
+
 interface ModuleStore<M extends GuildConfigModule> {
   read(guildId: string, tx?: DatabaseClient): Promise<GuildConfigValues<M>>;
   write(guildId: string, values: GuildConfigValues<M>, tx: DatabaseClient): Promise<void>;
@@ -121,6 +215,13 @@ export interface GuildConfigServiceDeps {
   db: DatabaseClient;
   guildSettings: GuildSettingsRepository;
   moderation: ModerationRepository;
+  commandSettings: CommandSettingsRepository;
+  commandCatalog: CommandCatalogRepository;
+  autoRoles: AutoRoleRepository;
+  autoVoice: AutoVoiceRepository;
+  music: MusicRepository;
+  ai: AiRepository;
+  images: ImageRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -197,6 +298,213 @@ export class GuildConfigService {
           await deps.guildSettings.upsert({ guildId, logChannelId: values.logChannelId }, tx);
         },
       },
+      commands: {
+        read: async (guildId, tx) => ({
+          overrides: toCommandOverrides(await deps.commandSettings.listForGuild(guildId, tx)),
+        }),
+        write: async (guildId, values, tx) => {
+          // Only the bot knows its commands; it writes them to the catalog at startup.
+          const known = new Set((await deps.commandCatalog.list(tx)).map((entry) => entry.name));
+          const unknown = [...new Set(values.overrides.map((row) => row.command))].filter(
+            (name) => !known.has(name),
+          );
+          if (unknown.length > 0) {
+            throw new GuildConfigValidationError({
+              overrides: [
+                known.size === 0
+                  ? 'The command list is empty. Start the bot once so it can record its commands.'
+                  : `Unknown command: ${unknown.map((name) => `\`${name}\``).join(', ')}.`,
+              ],
+            });
+          }
+          await deps.commandSettings.replaceForGuild(
+            guildId,
+            toCommandSettingsRows(values.overrides),
+            tx,
+          );
+        },
+      },
+      autoroles: {
+        read: async (guildId, tx) => {
+          const row = await deps.autoRoles.getGuildAutoRoles(guildId, tx);
+          return {
+            enabled: row?.isEnabled ?? false,
+            humanRoleIds: row?.humanRoleIds ?? [],
+            botRoleIds: row?.botRoleIds ?? [],
+            verificationRoleId: row?.verificationRoleId ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          // The verification channel and message columns belong to `/autorole send-verify`.
+          await deps.autoRoles.upsertGuildAutoRoles(
+            {
+              guildId,
+              isEnabled: values.enabled,
+              humanRoleIds: values.humanRoleIds,
+              botRoleIds: values.botRoleIds,
+              verificationRoleId: values.verificationRoleId,
+            },
+            tx,
+          );
+        },
+      },
+      autovoice: {
+        read: async (guildId, tx) => ({
+          hubs: toAutoVoiceHubs(await deps.autoVoice.listByGuildId(guildId, tx)),
+        }),
+        write: async (guildId, values, tx) => {
+          const kept = new Set(values.hubs.map((hub) => hub.channelId));
+          for (const row of await deps.autoVoice.listByGuildId(guildId, tx)) {
+            if (!kept.has(row.parentChannelId)) await deps.autoVoice.delete(row.id, tx);
+          }
+          for (const hub of values.hubs) {
+            await deps.autoVoice.upsert(
+              {
+                guildId,
+                parentChannelId: hub.channelId,
+                channelNameTemplate: hub.nameTemplate,
+                userLimit: hub.userLimit,
+                bitrate: hub.bitrate,
+              },
+              tx,
+            );
+          }
+        },
+      },
+      xp: {
+        read: async (guildId, tx) => {
+          const row = await deps.guildSettings.findById(guildId, tx);
+          return {
+            levelUpAnnouncements: row?.karmaNotificationsEnabled ?? true,
+            levelUpChannelId: row?.levelUpChannelId ?? null,
+            xpRatePercent: row?.xpRatePercent ?? 100,
+            noXpChannelIds: row?.noXpChannelIds ?? [],
+            noXpRoleIds: row?.noXpRoleIds ?? [],
+            voiceXpEnabled: row?.voiceXpEnabled ?? false,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const { levelUpAnnouncements, ...rest } = values;
+          await deps.guildSettings.upsert(
+            { guildId, karmaNotificationsEnabled: levelUpAnnouncements, ...rest },
+            tx,
+          );
+        },
+      },
+      games: {
+        read: async (guildId, tx) => {
+          const [row, overrides] = await Promise.all([
+            deps.guildSettings.findById(guildId, tx),
+            deps.commandSettings.listForGuild(guildId, tx),
+          ]);
+          return { maxWager: row?.maxGameWager ?? null, rules: toGameRules(overrides) };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.guildSettings.upsert({ guildId, maxGameWager: values.maxWager }, tx);
+          const overrides = toCommandOverrides(
+            await deps.commandSettings.listForGuild(guildId, tx),
+          );
+          const isGameServerRow = (row: CommandOverride) =>
+            row.channelId === null && isWagerGame(row.command);
+          const next = overrides.filter((row) => !isGameServerRow(row));
+          // A game's server-wide row keeps its roles (set on the Commands page); only the on/off
+          // state and the cooldown come from the Games page.
+          for (const command of WAGER_GAME_COMMANDS) {
+            const current = overrides.find(
+              (row) => isGameServerRow(row) && row.command === command,
+            );
+            const rule = values.rules.find((entry) => entry.command === command);
+            const row: CommandOverride = {
+              command,
+              channelId: null,
+              enabled: rule?.enabled ?? true,
+              cooldownSeconds: rule?.cooldownSeconds ?? null,
+              allowedRoleIds: current?.allowedRoleIds ?? [],
+              blockedRoleIds: current?.blockedRoleIds ?? [],
+            };
+            if (!isDefaultOverride(row)) next.push(row);
+          }
+          await deps.commandSettings.replaceForGuild(guildId, toCommandSettingsRows(next), tx);
+        },
+      },
+      music: {
+        read: async (guildId, tx) => {
+          const [row, channel] = await Promise.all([
+            deps.music.getGuildSettings(guildId, tx),
+            deps.music.getMusicChannel(guildId, tx),
+          ]);
+          return {
+            defaultVolume: row?.defaultVolume ?? DEFAULT_MUSIC_VOLUME,
+            musicChannelId: channel?.channelId ?? null,
+            djRoleId: row?.djRoleId ?? null,
+            autoLeaveEmpty: row?.autoLeaveEmpty ?? true,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const { musicChannelId, ...settings } = values;
+          await deps.music.upsertGuildSettings(guildId, settings, tx);
+          const current = await deps.music.getMusicChannel(guildId, tx);
+          if (musicChannelId === null) {
+            if (current) await deps.music.deleteMusicChannel(guildId, tx);
+          } else if (current?.channelId !== musicChannelId) {
+            // No message yet: the bot posts the controller when it sees the change.
+            await deps.music.setMusicChannel(guildId, musicChannelId, null, tx);
+          }
+        },
+      },
+      ai: {
+        read: async (guildId, tx) => {
+          const [prefs, channelId] = await Promise.all([
+            deps.ai.getGuildPreferences(guildId, tx),
+            deps.ai.getAiChannel(guildId, tx),
+          ]);
+          const allowed = allowedAiTools(prefs);
+          const style = AI_SPEAKING_STYLES.find(({ id }) => id === prefs?.speakingStyle)?.id;
+          return {
+            channelId,
+            speakingStyle: style ?? DEFAULT_AI_SPEAKING_STYLE,
+            // The personality engine uses at most this much of a longer prompt from /aipersona.
+            personalityPrompt:
+              prefs?.personalityPrompt?.trim().slice(0, MAX_AI_PERSONA_PROMPT_LENGTH) || null,
+            tools: AI_TOOL_NAMES.filter((name) => allowed === undefined || allowed.includes(name)),
+            model: formatAiModelChoice(prefs?.providerOverride, prefs?.modelOverride),
+          };
+        },
+        write: async (guildId, values, tx) => {
+          const choice = parseAiModelChoice(values.model);
+          const everyTool = AI_TOOL_NAMES.every((name) => values.tools.includes(name));
+          await deps.ai.upsertGuildPreferences(
+            guildId,
+            {
+              speakingStyle: values.speakingStyle satisfies AiSpeakingStyle,
+              personalityPrompt: values.personalityPrompt,
+              toolsEnabled: values.tools.length > 0,
+              // Every tool is stored as the empty list, so tools added later are allowed too.
+              allowedTools: everyTool ? [] : values.tools,
+              providerOverride: choice?.provider ?? null,
+              modelOverride: choice?.model ?? null,
+            },
+            tx,
+          );
+          if (values.channelId === null) await deps.ai.removeAiChannel(guildId, tx);
+          else await deps.ai.setAiChannel(guildId, values.channelId, tx);
+        },
+      },
+      images: {
+        read: async (guildId, tx) => {
+          const row = await deps.images.getGuildSettings(guildId, tx);
+          const provider = IMAGE_PROVIDER_IDS.find((id) => id === row?.defaultProvider);
+          const preset = IMAGE_STYLE_PRESET_IDS.find((id) => id === row?.defaultPreset);
+          return {
+            defaultProvider: provider ?? null,
+            memberDailyLimit: row?.memberDailyLimit ?? null,
+            defaultPreset: preset ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.images.saveGuildSettings({ guildId, ...values }, tx);
+        },
+      },
     };
   }
 
@@ -226,8 +534,10 @@ export class GuildConfigService {
       if (changes.length === 0) return { values: before, changes };
 
       const now = this.now();
-      await store.write(guildId, values, tx);
+      // Bump first: on Postgres its row lock orders concurrent saves of the same module, so a
+      // store that replaces rows (commands) never interleaves two deletes and two inserts.
       await this.deps.versions.bump(guildId, module, now, tx);
+      await store.write(guildId, values, tx);
       await this.deps.audit.create(
         {
           guildId,

@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const economyAccounts = sqliteTable('economy_accounts', {
   userId: text('user_id').primaryKey(),
@@ -69,23 +69,35 @@ export const economyCooldowns = sqliteTable(
   (table) => [index('idx_economy_cd_user_action').on(table.userId, table.actionType)],
 );
 
-export const economyItemCategories = sqliteTable('economy_item_categories', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  description: text('description'),
-});
+export const economyItemCategories = sqliteTable(
+  'economy_item_categories',
+  {
+    id: text('id').primaryKey(),
+    /** Stable slug (`consumable`); the default catalog seeds by it. */
+    code: text('code'),
+    name: text('name').notNull(),
+    description: text('description'),
+  },
+  (table) => [uniqueIndex('uq_economy_item_categories_code').on(table.code)],
+);
 
-export const economyItems = sqliteTable('economy_items', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  description: text('description').notNull(),
-  price: integer('price').notNull(),
-  rarity: text('rarity').notNull().default('COMMON'),
-  categoryId: text('category_id'),
-  iconUrl: text('icon_url'),
-  isPurchasable: integer('is_purchasable', { mode: 'boolean' }).notNull().default(true),
-  metadata: text('metadata', { mode: 'json' }).$type<Record<string, unknown>>().default({}),
-});
+export const economyItems = sqliteTable(
+  'economy_items',
+  {
+    id: text('id').primaryKey(),
+    /** Stable slug members type in `/shop buy`; the default catalog seeds by it. */
+    code: text('code'),
+    name: text('name').notNull(),
+    description: text('description').notNull(),
+    price: integer('price').notNull(),
+    rarity: text('rarity').notNull().default('COMMON'),
+    categoryId: text('category_id'),
+    iconUrl: text('icon_url'),
+    isPurchasable: integer('is_purchasable', { mode: 'boolean' }).notNull().default(true),
+    metadata: text('metadata', { mode: 'json' }).$type<Record<string, unknown>>().default({}),
+  },
+  (table) => [uniqueIndex('uq_economy_items_code').on(table.code)],
+);
 
 export const economyInventories = sqliteTable(
   'economy_inventories',
@@ -98,5 +110,22 @@ export const economyInventories = sqliteTable(
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [index('idx_economy_inv_user').on(table.userId, table.itemId)],
+  (table) => [
+    index('idx_economy_inv_user').on(table.userId, table.itemId),
+    index('idx_economy_inv_item').on(table.itemId),
+  ],
 );
+
+/** Global economy values edited in the owner console; one row with id `global`. */
+export const economyConfig = sqliteTable('economy_config', {
+  id: text('id').primaryKey(),
+  dailyBaseReward: integer('daily_base_reward').notNull().default(250),
+  dailyStreakBonusPercent: integer('daily_streak_bonus_percent').notNull().default(5),
+  dailyMaxStreakBonusPercent: integer('daily_max_streak_bonus_percent').notNull().default(150),
+  bankBaseCapacity: integer('bank_base_capacity').notNull().default(10000),
+  bankCapacityPerLevel: integer('bank_capacity_per_level').notNull().default(2500),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});

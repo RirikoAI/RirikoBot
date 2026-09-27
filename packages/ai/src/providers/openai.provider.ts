@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { AI_PROVIDER_MODELS } from '@ririko/core';
 import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
@@ -24,7 +25,7 @@ export interface OpenAIProviderOptions {
 export class OpenAIProvider implements ChatModelProvider {
   public readonly id = 'openai';
   public readonly name = 'OpenAI';
-  public readonly supportedModels = ['gpt-4o-mini', 'gpt-4o', 'o3-mini'] as const;
+  public readonly supportedModels = AI_PROVIDER_MODELS.openai;
   public readonly defaultModel: string;
 
   private readonly apiKey?: string | undefined;

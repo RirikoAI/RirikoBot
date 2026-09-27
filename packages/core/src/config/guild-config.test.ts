@@ -83,6 +83,8 @@ describe('setting types', () => {
     ]);
     expect(list.parse([])).toEqual([]);
     expect(list.parse('')).toEqual([]);
+    expect(list.parse('[]')).toEqual([]);
+    expect(list.parse('["123456789012345678"]')).toEqual(['123456789012345678']);
     expect(list.safeParse(['123456789012345678', '1']).success).toBe(false);
     expect(
       list.safeParse(['123456789012345678', '223456789012345678', '323456789012345678']).error
@@ -153,12 +155,63 @@ describe('EscalationPolicySchema', () => {
 
 describe('GuildConfigSchemas', () => {
   it('lists the modules with only keys the bot reads', () => {
-    expect(GUILD_CONFIG_MODULES).toEqual(['general', 'moderation', 'automod', 'logging']);
+    expect(GUILD_CONFIG_MODULES).toEqual([
+      'general',
+      'moderation',
+      'automod',
+      'logging',
+      'commands',
+      'autoroles',
+      'autovoice',
+      'xp',
+      'games',
+      'music',
+      'ai',
+      'images',
+    ]);
     expect(Object.keys(GuildConfigSchemas.general.shape)).toEqual(['prefix', 'timezone']);
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);
     expect(Object.keys(GuildConfigSchemas.moderation.shape)).toEqual(['escalationSteps']);
+    expect(Object.keys(GuildConfigSchemas.commands.shape)).toEqual(['overrides']);
+    expect(Object.keys(GuildConfigSchemas.autoroles.shape)).toEqual([
+      'enabled',
+      'humanRoleIds',
+      'botRoleIds',
+      'verificationRoleId',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.autovoice.shape)).toEqual(['hubs']);
+    expect(Object.keys(GuildConfigSchemas.xp.shape)).toEqual([
+      'levelUpAnnouncements',
+      'levelUpChannelId',
+      'xpRatePercent',
+      'noXpChannelIds',
+      'noXpRoleIds',
+      'voiceXpEnabled',
+    ]);
+    expect(Object.keys(GuildConfigSchemas.games.shape)).toEqual(['maxWager', 'rules']);
     expect(isGuildConfigModule('general')).toBe(true);
     expect(isGuildConfigModule('toString')).toBe(false);
+  });
+
+  it('reads an optional wager limit and drops game rules that change nothing', () => {
+    const parsed = GuildConfigSchemas.games.parse({
+      maxWager: ' none ',
+      rules:
+        '[{"command":"rps"},{"command":"dice","cooldownSeconds":5},{"command":"coinflip","enabled":false}]',
+    });
+    expect(parsed).toEqual({
+      maxWager: null,
+      rules: [
+        { command: 'coinflip', enabled: false, cooldownSeconds: null },
+        { command: 'dice', enabled: true, cooldownSeconds: 5 },
+      ],
+    });
+    expect(GuildConfigSchemas.games.shape.maxWager.parse('250')).toBe(250);
+    expect(GuildConfigSchemas.games.shape.maxWager.safeParse('1.5').success).toBe(false);
+    expect(
+      GuildConfigSchemas.games.shape.rules.safeParse('[{"command":"rps"},{"command":"rps"}]')
+        .success,
+    ).toBe(false);
   });
 
   it('rejects unknown keys', () => {

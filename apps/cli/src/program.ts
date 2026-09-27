@@ -11,6 +11,7 @@ import { registerAiConfigureCommand } from './commands/ai-configure.js';
 import { registerStreamConfigureCommand } from './commands/stream-configure.js';
 import { registerImageConfigureCommand } from './commands/image-configure.js';
 import { registerGuildConfigCommand } from './commands/guild-config.js';
+import { registerEconomyConfigCommand } from './commands/economy-config.js';
 import { registerPasskeysResetCommand } from './commands/passkeys-reset.js';
 
 export function loadEnvConfig(customPath?: string): void {
@@ -62,6 +63,7 @@ export function createProgram(): Command {
   registerStreamConfigureCommand(program);
   registerImageConfigureCommand(program);
   registerGuildConfigCommand(program);
+  registerEconomyConfigCommand(program);
   registerPasskeysResetCommand(program);
 
   // Global error handler

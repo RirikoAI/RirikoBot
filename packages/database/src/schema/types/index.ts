@@ -31,12 +31,16 @@ export type EconomyBalance = typeof sqlite.economyBalances.$inferSelect;
 export type NewEconomyBalance = typeof sqlite.economyBalances.$inferInsert;
 export type EconomyTransaction = typeof sqlite.economyTransactions.$inferSelect;
 export type NewEconomyTransaction = typeof sqlite.economyTransactions.$inferInsert;
+export type EconomyItemCategory = typeof sqlite.economyItemCategories.$inferSelect;
+export type NewEconomyItemCategory = typeof sqlite.economyItemCategories.$inferInsert;
 export type EconomyItem = typeof sqlite.economyItems.$inferSelect;
 export type NewEconomyItem = typeof sqlite.economyItems.$inferInsert;
 export type EconomyInventory = typeof sqlite.economyInventories.$inferSelect;
 export type NewEconomyInventory = typeof sqlite.economyInventories.$inferInsert;
 export type EconomyCooldown = typeof sqlite.economyCooldowns.$inferSelect;
 export type NewEconomyCooldown = typeof sqlite.economyCooldowns.$inferInsert;
+export type EconomyConfigRow = typeof sqlite.economyConfig.$inferSelect;
+export type NewEconomyConfigRow = typeof sqlite.economyConfig.$inferInsert;
 
 // Experience & Leveling
 export type XpAccount = typeof sqlite.xpAccounts.$inferSelect;
@@ -79,6 +83,8 @@ export type ImageProvider = typeof sqlite.imageProviders.$inferSelect;
 export type NewImageProvider = typeof sqlite.imageProviders.$inferInsert;
 export type ImageUsage = typeof sqlite.imageUsage.$inferSelect;
 export type NewImageUsage = typeof sqlite.imageUsage.$inferInsert;
+export type ImageGuildSettings = typeof sqlite.imageGuildSettings.$inferSelect;
+export type NewImageGuildSettings = typeof sqlite.imageGuildSettings.$inferInsert;
 
 // Giveaways
 export type Giveaway = typeof sqlite.giveaways.$inferSelect;
