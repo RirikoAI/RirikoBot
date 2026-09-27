@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { EmbedBuilder, AttachmentBuilder, type Client, type TextBasedChannel } from 'discord.js';
 import type { StreamRepository, Streamer } from '@ririko/database';
+import { formatStreamAnnouncement, streamAnnouncementMentions } from '../stream-alerts/format.js';
 import type { LiveStreamInfo } from './types.js';
 
 export interface StreamNotificationDispatcherOptions {
@@ -23,21 +24,14 @@ export class StreamNotificationDispatcher {
     stream: LiveStreamInfo,
     mentionRoleId?: string | null,
   ): string {
-    const defaultTemplate = '{role} 🔴 **{streamer}** is now live on **{platform}**!\n<{url}>';
-    const raw = template && template.trim().length > 0 ? template : defaultTemplate;
-
-    const roleMention = mentionRoleId ? `<@&${mentionRoleId}>` : '';
-    const streamerName = stream.streamerDisplayName || stream.streamerUsername;
-
-    return raw
-      .replace(/{role}/gi, roleMention)
-      .replace(/{streamer}/gi, streamerName)
-      .replace(/{title}/gi, stream.title)
-      .replace(/{game}/gi, stream.gameName || 'Streaming')
-      .replace(/{platform}/gi, stream.platform)
-      .replace(/{url}/gi, stream.streamUrl)
-      .replace(/\s+/g, ' ')
-      .trim();
+    return formatStreamAnnouncement(template, {
+      streamer: stream.streamerDisplayName || stream.streamerUsername,
+      title: stream.title,
+      game: stream.gameName,
+      platform: stream.platform,
+      url: stream.streamUrl,
+      mentionRoleId,
+    });
   }
 
   async buildNotificationPayload(
@@ -114,6 +108,7 @@ export class StreamNotificationDispatcher {
       content: formattedContent,
       embeds: [embed],
       files: attachment ? [attachment] : [],
+      allowedMentions: streamAnnouncementMentions(mentionRoleId),
     };
   }
 

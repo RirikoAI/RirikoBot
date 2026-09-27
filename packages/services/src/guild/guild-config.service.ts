@@ -24,7 +24,15 @@ import {
   type GameRule,
   type GuildConfigModule,
   type GuildConfigValues,
+  DEFAULT_CARD_TEXT_COLOR,
+  DEFAULT_FAREWELL_MESSAGE,
+  DEFAULT_WELCOME_MESSAGE,
+  MAX_WELCOMER_MESSAGE_LENGTH,
+  OptionalImageUrlSetting,
+  SecurityError,
+  type WelcomerCardKind,
 } from '@ririko/core';
+import { assertPublicUrl } from '../net/remote-image.js';
 import {
   withTransaction,
   type AuditLogRepository,
@@ -42,6 +50,9 @@ import {
   type MusicRepository,
   type AiRepository,
   type ImageRepository,
+  type FreeGameRepository,
+  type WelcomeConfig,
+  type WelcomerRepository,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
@@ -206,9 +217,76 @@ export function toAutoVoiceHubs(rows: readonly AutoVoiceConfig[]): AutoVoiceHub[
     .sort((a, b) => (a.channelId === b.channelId ? 0 : a.channelId < b.channelId ? -1 : 1));
 }
 
+/**
+ * Welcome or farewell card settings in `guild_welcomer` / `guild_farewell`. Values the bot
+ * commands once saved without checks (a named color, a long message) are read back in a form
+ * the schema accepts, so they never block saving other fields. A link replaces an upload.
+ */
+function welcomerCardStore<M extends 'welcome' | 'farewell'>(
+  repo: WelcomerRepository,
+  kind: M & WelcomerCardKind,
+): ModuleStore<M> {
+  const get = (guildId: string, tx?: DatabaseClient) =>
+    kind === 'welcome' ? repo.getWelcomeConfig(guildId, tx) : repo.getFarewellConfig(guildId, tx);
+  const defaultMessage = kind === 'welcome' ? DEFAULT_WELCOME_MESSAGE : DEFAULT_FAREWELL_MESSAGE;
+  return {
+    read: async (guildId, tx) => {
+      const row = await get(guildId, tx);
+      const channelId = row?.channelId || null;
+      return {
+        enabled: Boolean(row?.isEnabled && channelId),
+        channelId,
+        messageTemplate:
+          row?.messageTemplate.trim().slice(0, MAX_WELCOMER_MESSAGE_LENGTH) || defaultMessage,
+        textColor: /^#[0-9a-f]{6}$/i.test(row?.textColor ?? '')
+          ? row!.textColor.toLowerCase()
+          : DEFAULT_CARD_TEXT_COLOR,
+        backgroundUrl: /^https?:\/\//i.test(row?.backgroundUrl ?? '') ? row!.backgroundUrl : null,
+      } as GuildConfigValues<M>;
+    },
+    write: async (guildId, values, tx) => {
+      const current = await get(guildId, tx);
+      const data: WelcomeConfig = {
+        guildId,
+        // The column is required; an empty channel means the card is not set up.
+        channelId: values.channelId ?? '',
+        messageTemplate: values.messageTemplate,
+        cardTheme: current?.cardTheme ?? 'DEFAULT',
+        backgroundUrl: values.backgroundUrl,
+        backgroundFile: values.backgroundUrl ? null : (current?.backgroundFile ?? null),
+        textColor: values.textColor,
+        isEnabled: values.enabled && values.channelId !== null,
+      };
+      if (kind === 'welcome') await repo.setWelcomeConfig(data, tx);
+      else await repo.setFarewellConfig(data, tx);
+    },
+    // The bot and the dashboard preview fetch the background, so it must be a public address.
+    check: async (patch) => {
+      const link = OptionalImageUrlSetting.safeParse(patch.backgroundUrl);
+      if (!link.success || !link.data) return {};
+      try {
+        await assertPublicUrl(link.data);
+        return {};
+      } catch (error) {
+        if (!(error instanceof SecurityError)) throw error;
+        return {
+          backgroundUrl: [
+            'Use a link to a public image; local and private addresses are not allowed.',
+          ],
+        };
+      }
+    },
+  };
+}
+
 interface ModuleStore<M extends GuildConfigModule> {
   read(guildId: string, tx?: DatabaseClient): Promise<GuildConfigValues<M>>;
   write(guildId: string, values: GuildConfigValues<M>, tx: DatabaseClient): Promise<void>;
+  /**
+   * Checks the schema cannot make, such as where a link points. Runs on the submitted fields
+   * before the transaction, so no lock is held while it waits on the network.
+   */
+  check?(patch: Record<string, unknown>): Promise<Record<string, string[]>>;
 }
 
 export interface GuildConfigServiceDeps {
@@ -222,6 +300,8 @@ export interface GuildConfigServiceDeps {
   music: MusicRepository;
   ai: AiRepository;
   images: ImageRepository;
+  freeGames: FreeGameRepository;
+  welcomer: WelcomerRepository;
   versions: GuildConfigVersionRepository;
   audit: AuditLogRepository;
   defaultPrefix: string;
@@ -505,6 +585,29 @@ export class GuildConfigService {
           await deps.images.saveGuildSettings({ guildId, ...values }, tx);
         },
       },
+      freegames: {
+        read: async (guildId, tx) => {
+          const target = await deps.freeGames.getGuildChannel(guildId, tx);
+          return {
+            channelId: target?.channelId ?? null,
+            pingRoleId: target?.mentionRoleId ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          // Without a channel nothing is announced, so there is nobody to ping either.
+          if (values.channelId === null) {
+            await deps.freeGames.removeGuildChannel(guildId, tx);
+            return;
+          }
+          await deps.freeGames.setGuildChannel(
+            guildId,
+            { channelId: values.channelId, mentionRoleId: values.pingRoleId },
+            tx,
+          );
+        },
+      },
+      welcome: welcomerCardStore(deps.welcomer, 'welcome'),
+      farewell: welcomerCardStore(deps.welcomer, 'farewell'),
     };
   }
 
@@ -523,6 +626,8 @@ export class GuildConfigService {
     actor: GuildConfigActor,
   ): Promise<{ values: GuildConfigValues<M>; changes: FieldChange[] }> {
     const store = this.stores[module];
+    const checkErrors = (await store.check?.(patch)) ?? {};
+    if (Object.keys(checkErrors).length > 0) throw new GuildConfigValidationError(checkErrors);
     return withTransaction(this.deps.db, async (tx) => {
       const before = await store.read(guildId, tx);
       const parsed = GuildConfigSchemas[module].safeParse({ ...before, ...patch });

@@ -193,7 +193,8 @@ describe('StreamNotificationDispatcher (TASK-0802)', () => {
         streamerId: streamer.id,
         guildId: 'guild_alpha',
         channelId: 'channel_news',
-        customMessage: 'Speedrun alert: {streamer} is live!',
+        customMessage: 'Speedrun alert: {streamer} is live! {role}',
+        mentionRoleId: 'role_ping',
       });
 
       // 2. Mock Discord client
@@ -228,6 +229,13 @@ describe('StreamNotificationDispatcher (TASK-0802)', () => {
       const count1 = await dispatcher.dispatch(streamer, stream);
       expect(count1).toBe(1);
       expect(mockSend).toHaveBeenCalledTimes(1);
+      // Only the subscription's role may be pinged, whatever the stream title says.
+      expect(mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: 'Speedrun alert: speedrunner is live! <@&role_ping>',
+          allowedMentions: { parse: [], roles: ['role_ping'] },
+        }),
+      );
 
       // Verify idempotency record exists in stream_announcements
       const isAnnounced = await streamRepo.isAnnounced('TWITCH:run_123:guild_alpha:channel_news');

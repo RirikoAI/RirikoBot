@@ -62,6 +62,7 @@ services:
       ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
     volumes:
       - asset_cache:/app/assets/cache
+      - welcomer_backgrounds:/app/storage/welcomer-backgrounds
 
   web:
     build:
@@ -80,11 +81,16 @@ services:
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       NEXTAUTH_URL: ${NEXTAUTH_URL}
+    volumes:
+      # Welcome and farewell backgrounds uploaded on the dashboard; the bot draws the cards
+      # from the same files, so both containers mount this volume.
+      - welcomer_backgrounds:/app/storage/welcomer-backgrounds
 
 volumes:
   postgres_data:
   redis_data:
   asset_cache:
+  welcomer_backgrounds:
 ```
 
 ---

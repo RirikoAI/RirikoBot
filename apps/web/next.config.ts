@@ -11,8 +11,9 @@ if (existsSync(rootEnvFile)) {
 }
 
 const nextConfig: NextConfig = {
-  // Native drivers must be loaded by Node at runtime, never bundled.
-  serverExternalPackages: ['better-sqlite3', 'pg'],
+  // Native drivers and the canvas used for card previews must be loaded by Node at runtime,
+  // never bundled.
+  serverExternalPackages: ['better-sqlite3', 'pg', '@napi-rs/canvas'],
   poweredByHeader: false,
   reactStrictMode: true,
   images: {
@@ -22,6 +23,10 @@ const nextConfig: NextConfig = {
     // React taint APIs guard secrets in services.ts (this also switches app/ to React's
     // experimental channel, as Next.js requires for taint).
     taint: true,
+    serverActions: {
+      // Welcome and farewell backgrounds are uploaded through a Server Action (2 MB images).
+      bodySizeLimit: '3mb',
+    },
   },
   // The per-request CSP nonce is set in src/proxy.ts.
   async headers() {

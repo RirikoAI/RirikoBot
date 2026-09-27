@@ -35,6 +35,7 @@ describe('FreeGameRepository (TASK-0811)', () => {
       CREATE TABLE free_game_channels (
         guild_id TEXT PRIMARY KEY,
         channel_id TEXT NOT NULL,
+        mention_role_id TEXT,
         created_at INTEGER NOT NULL
       );
     `);
@@ -152,22 +153,36 @@ describe('FreeGameRepository (TASK-0811)', () => {
       expect(initialChannel).toBeNull();
 
       // 2. Set channel
-      const created = await freeGameRepo.setGuildChannel('guild_alpha', 'channel_alpha_1');
+      const created = await freeGameRepo.setGuildChannel('guild_alpha', {
+        channelId: 'channel_alpha_1',
+        mentionRoleId: 'role_ping',
+      });
       expect(created.guildId).toBe('guild_alpha');
       expect(created.channelId).toBe('channel_alpha_1');
 
       const fetchedChannel = await freeGameRepo.getGuildChannel('guild_alpha');
-      expect(fetchedChannel).toBe('channel_alpha_1');
+      expect(fetchedChannel).toEqual({
+        guildId: 'guild_alpha',
+        channelId: 'channel_alpha_1',
+        mentionRoleId: 'role_ping',
+      });
 
-      // 3. Update channel
-      const updated = await freeGameRepo.setGuildChannel('guild_alpha', 'channel_alpha_2');
+      // 3. Update channel; a role left out is kept, null clears it
+      const updated = await freeGameRepo.setGuildChannel('guild_alpha', {
+        channelId: 'channel_alpha_2',
+      });
       expect(updated.channelId).toBe('channel_alpha_2');
+      expect(updated.mentionRoleId).toBe('role_ping');
 
+      await freeGameRepo.setGuildChannel('guild_alpha', {
+        channelId: 'channel_alpha_2',
+        mentionRoleId: null,
+      });
       const updatedChannel = await freeGameRepo.getGuildChannel('guild_alpha');
-      expect(updatedChannel).toBe('channel_alpha_2');
+      expect(updatedChannel).toMatchObject({ channelId: 'channel_alpha_2', mentionRoleId: null });
 
       // 4. List all configured channels
-      await freeGameRepo.setGuildChannel('guild_beta', 'channel_beta_1');
+      await freeGameRepo.setGuildChannel('guild_beta', { channelId: 'channel_beta_1' });
       const allChannels = await freeGameRepo.listAllConfiguredGuildChannels();
       expect(allChannels).toHaveLength(2);
       expect(allChannels.map((c) => c.guildId)).toContain('guild_alpha');

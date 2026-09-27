@@ -22,6 +22,22 @@
       "types": "./dist/stream-platforms/index.d.ts",
       "import": "./dist/stream-platforms/index.js"
     },
+    "./stream-alerts": {
+      "types": "./dist/stream-alerts/index.d.ts",
+      "import": "./dist/stream-alerts/index.js"
+    },
+    "./net": {
+      "types": "./dist/net/index.d.ts",
+      "import": "./dist/net/index.js"
+    },
+    "./welcomer": {
+      "types": "./dist/welcomer/index.d.ts",
+      "import": "./dist/welcomer/index.js"
+    },
+    "./welcomer-backgrounds": {
+      "types": "./dist/welcomer/background-store.d.ts",
+      "import": "./dist/welcomer/background-store.js"
+    },
     "./free-games": {
       "types": "./dist/free-games/index.d.ts",
       "import": "./dist/free-games/index.js"
