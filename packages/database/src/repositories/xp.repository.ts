@@ -232,12 +232,28 @@ export class XpRepository extends BaseRepository<
   /**
    * Atomically adds XP to a user's account, updates their level, and logs an XP event.
    */
+  async getAccountForUpdate(
+    userId: string,
+    guildId: string,
+    tx: DatabaseClient,
+  ): Promise<XpAccount> {
+    const account = await this.getOrCreateAccount(userId, guildId, tx);
+    if (tx.dialect === 'sqlite') return account;
+    const [locked] = await tx.db
+      .select()
+      .from(pgSchema.xpAccounts)
+      .where(and(eq(pgSchema.xpAccounts.userId, userId), eq(pgSchema.xpAccounts.guildId, guildId)))
+      .for('update');
+    if (!locked) throw new DatabaseError(`Missing XP account ${userId}`);
+    return locked as unknown as XpAccount;
+  }
+
   async addXp(params: AddXpParams, tx?: DatabaseClient): Promise<AddXpResult> {
     const targetClient = this.getClient(tx);
     const { userId, guildId, xpDelta, source, newLevel } = params;
 
     return withTransaction(targetClient, async (txClient) => {
-      const current = await this.getOrCreateAccount(userId, guildId, txClient);
+      const current = await this.getAccountForUpdate(userId, guildId, txClient);
       const currentXp = Number(current.xp);
       const updatedXp = Math.max(0, currentXp + xpDelta);
       const updatedLevel = newLevel ?? current.level;

@@ -173,11 +173,10 @@ export class AchievementService {
       if (achievement.rewardCardId && this.waifuCardRepo) {
         const card = await this.waifuCardRepo.findById(achievement.rewardCardId, tx);
         if (card) {
-          await this.waifuCardRepo.createUserCard(
+          await this.waifuCardRepo.mintUserCard(
             {
               userId,
               cardId: card.id,
-              serialNumber: 1,
               level: 1,
               exp: 0,
               state: 'IDLE',

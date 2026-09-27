@@ -1,0 +1,67 @@
+{
+  "tool": "image_gen.imagegen",
+  "mode": "generate",
+  "date": "2026-09-26",
+  "assets": [
+    {
+      "file": "scenes/bazaar-market.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG scene illustration for a Discord text adventure. Scene: a goblin night market beneath a city, crooked stone sewer arches, hanging amber lanterns reflected in shallow water, crowded small stalls with velvet pouches and mysterious relics, shadowy goblin merchants, winding passages. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. This image establishes the Goblin Bazaar location."
+    },
+    {
+      "file": "scenes/bazaar-tavern.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Goblin Bazaar: a hidden underground tavern, crooked wooden tables, dice and coins, green glass bottles, amber lanterns, suspicious goblin silhouettes, secret doorway. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/bazaar-vault.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Goblin Bazaar: a secret stone vault and escape passage beneath the market, open ancient coffer, mysterious mountain-shaped amulet on velvet, candlelit relics, dark sewer arch beyond. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/shrine-entry.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Sunken Shrine: ancient turquoise temple half submerged beneath the sea, stone steps descending through shallow water, glowing fish and coral, immense leviathan carvings. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/shrine-sanctum.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Sunken Shrine: flooded inner sanctum, vast serpentine stone guardian rising from water, luminous turquoise runes, broken columns and strong underwater currents. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/shrine-treasure.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Sunken Shrine: hidden treasure chamber, open stone sarcophagus and gold relics above rising luminous blue water, leviathan mural, a narrow stairway to sunlight. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/crypt-entry.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Cursed Crypt: obsidian entrance and ancient catacombs, door bearing a crown split between golden sun and violet shadow, eerie mist, burial niches. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/crypt-throne.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Cursed Crypt: immense underground throne room of a forgotten king, empty skeletal stone throne, spectral golden crown floating above it, violet shadows and thin holy sunlight. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/crypt-armory.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Cursed Crypt: ancient royal armory and treasure vault, luminous lance and ornate shield resting among dusty weapons, sinister crown-shaped shadows, gold and violet light. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/peaks-trail.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Celestial Peaks: soaring mountain switchbacks above clouds, windswept pines, tiny remote hermit refuge, immense pale peaks, warm dawn over blue cliffs. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/peaks-cavern.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Celestial Peaks: sheltered crystal cavern high in a mountain, small abandoned campfire, iridescent crystals, entrance framing windswept clouds and a narrow ridge. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/peaks-summit.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Celestial Peaks: breathtaking summit above a sea of golden clouds, enormous feathered celestial bird circling a cliff nest, ancient altar and luminous sky. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/bandit-road.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Bandit Ambush: winding woodland trade road at dusk, overturned cart, broken crates, fallen log across the path, distant hooded silhouettes concealed behind trees. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/bandit-camp.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Bandit Ambush: hidden forest camp in a ruined watchtower clearing, red cloth tents, small campfire, locked treasure chest, weapons and stolen supplies. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    },
+    {
+      "file": "scenes/bandit-escape.png",
+      "prompt": "Use case: illustration-story. Create one landscape 16:9 fantasy RPG environment illustration for a Discord text adventure. Scene: Bandit Ambush: tangled forest escape trail, brambles and mossy ruins, sunlit open road visible beyond dense trees, a forgotten cache of supplies near a stream. Style: richly painted anime-inspired fantasy environment, cinematic but readable at small embed size, inviting danger, restrained vivid color. Environmental storytelling, no prominent player character or companion, no text, no letters, no UI, no borders, no collage. Consistent illustrated fantasy storybook art."
+    }
+  ]
+}

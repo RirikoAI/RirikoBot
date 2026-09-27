@@ -1,4 +1,4 @@
-import type { WaifuCardRepository } from '@ririko/database';
+import type { WaifuCardRepository, DatabaseClient } from '@ririko/database';
 import type { CardRarity } from '../types.js';
 import { RARITY_TIERS } from '../rarity/rarity-engine.js';
 import { LevelingEngine } from './leveling-engine.js';
@@ -44,29 +44,53 @@ export class CardProgressionService {
     private readonly leveling: LevelingEngine = new LevelingEngine(),
   ) {}
 
-  async grantExp(userCardId: string, amount: number): Promise<CardExpResult | null> {
+  async grantExp(
+    userCardId: string,
+    amount: number,
+    tx?: DatabaseClient,
+    expectedOwnerId?: string,
+  ): Promise<CardExpResult | null> {
+    if (!Number.isSafeInteger(amount) || amount < 0) throw new Error('Invalid card XP amount');
     if (amount <= 0) return null;
-    const userCard = await this.cardRepo.findUserCardById(userCardId);
-    if (!userCard) return null;
-    const base = await this.cardRepo.findById(userCard.cardId);
-    const maxLevel = RARITY_TIERS[(base?.rarity ?? 'COMMON') as CardRarity]?.maxLevel ?? 20;
-
-    const result = this.leveling.addExp(userCard.level, userCard.exp, amount, maxLevel);
-    const expGained = userCard.level >= maxLevel ? 0 : amount;
-    if (expGained > 0) {
-      await this.cardRepo.updateUserCardLevelAndExp(userCardId, result.newLevel, result.newExp);
-    }
-
-    return {
+    return this.cardRepo.withUserCardLock(
       userCardId,
-      cardName: base?.name ?? 'Card',
-      expGained,
-      previousLevel: userCard.level,
-      newLevel: result.newLevel,
-      levelsGained: result.levelsGained,
-      isMaxLevel: result.isMaxLevel,
-      expToNextLevel: result.expToNextLevel,
-    };
+      async (userCard, lockedTx) => {
+        if (!userCard) return null;
+        if (
+          expectedOwnerId &&
+          (userCard.userId !== expectedOwnerId || !['IDLE', 'EQUIPPED'].includes(userCard.state))
+        )
+          return null;
+        const base = await this.cardRepo.findById(userCard.cardId, lockedTx);
+        if (expectedOwnerId && !base) return null;
+        const maxLevel = RARITY_TIERS[(base?.rarity ?? 'COMMON') as CardRarity]?.maxLevel ?? 20;
+        let remaining = -userCard.exp;
+        for (let level = userCard.level; level < maxLevel; level++)
+          remaining += this.leveling.getExpForNextLevel(level);
+        const expGained = Math.min(amount, Math.max(0, remaining));
+        const result = this.leveling.addExp(userCard.level, userCard.exp, expGained, maxLevel);
+        if (expGained > 0) {
+          await this.cardRepo.updateUserCardLevelAndExp(
+            userCardId,
+            result.newLevel,
+            result.newExp,
+            lockedTx,
+          );
+        }
+
+        return {
+          userCardId,
+          cardName: base?.name ?? 'Card',
+          expGained,
+          previousLevel: userCard.level,
+          newLevel: result.newLevel,
+          levelsGained: result.levelsGained,
+          isMaxLevel: result.isMaxLevel,
+          expToNextLevel: result.expToNextLevel,
+        };
+      },
+      tx,
+    );
   }
 }
 

@@ -199,8 +199,7 @@ export class DropManager {
     }
 
     // Compute next serial number
-    const highestSerial = await this.cardRepo.getHighestSerialNumber(card.id);
-    const serialNumber = highestSerial + 1;
+    const serialNumber = await this.cardRepo.reserveSerialNumber(card.id);
     const formattedSerial = formatCardSerialNumber(serialNumber);
 
     const dropId = randomUUID();

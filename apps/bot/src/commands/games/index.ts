@@ -6,13 +6,20 @@ import { createHighLowCommand } from './highlow.command.js';
 import { createCoinFlipCommand } from './coinflip.command.js';
 import { createDiceCommand } from './dice.command.js';
 
-export function createGamesCommands(services: BotServices): Command[] {
+import { createAdventureCommand } from './adventure.command.js';
+import { AdventureController } from './adventure-controller.js';
+
+export function createGamesCommands(
+  services: BotServices,
+  adventures = new AdventureController(services),
+): Command[] {
   return [
     createTicTacToeCommand(services),
     createRpsCommand(services),
     createHighLowCommand(services),
     createCoinFlipCommand(services),
     createDiceCommand(services),
+    createAdventureCommand(services, adventures),
   ];
 }
 
@@ -21,3 +28,6 @@ export * from './rps.command.js';
 export * from './highlow.command.js';
 export * from './coinflip.command.js';
 export * from './dice.command.js';
+
+export * from './adventure.command.js';
+export * from './adventure-controller.js';

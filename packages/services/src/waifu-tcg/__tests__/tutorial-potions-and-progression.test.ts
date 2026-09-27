@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import type {
+  DatabaseClient,
   UserDungeonProgressRepository,
   UserInventoryItemRepository,
   GameItemRepository,
@@ -50,6 +51,9 @@ describe('Tutorial Potions and Progression Rules (TASK-1046)', () => {
     };
 
     const inventoryRepo = {
+      inUserTransaction: vi.fn(
+        async (_userId: string, work: (tx?: DatabaseClient) => Promise<unknown>) => work(),
+      ),
       findByUser: vi.fn(async (userId: string, filter?: { state?: string }) => {
         let list = inventory.filter((i) => i.userId === userId);
         if (filter?.state) list = list.filter((i) => i.state === filter.state);

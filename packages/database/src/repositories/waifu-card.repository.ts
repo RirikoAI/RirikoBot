@@ -6,6 +6,7 @@ import type { WaifuCard, NewWaifuCard, UserCard, NewUserCard } from '../schema/t
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
+import { withTransaction } from '../transactions/index.js';
 
 export class WaifuCardRepository extends BaseRepository<
   WaifuCard,
@@ -138,6 +139,7 @@ export class WaifuCardRepository extends BaseRepository<
         .select()
         .from(sqliteSchema.waifuCards)
         .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(sqliteSchema.waifuCards.id)
         .limit(limit)
         .offset(offset);
 
@@ -154,6 +156,7 @@ export class WaifuCardRepository extends BaseRepository<
         .select()
         .from(pgSchema.waifuCards)
         .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(pgSchema.waifuCards.id)
         .limit(limit)
         .offset(offset);
 
@@ -233,6 +236,64 @@ export class WaifuCardRepository extends BaseRepository<
 
   // ─── USER CARDS ───────────────────────────────────────────────────────────
 
+  /** Reserve at spawn time so a displayed drop serial remains valid until claim. Gaps are allowed. */
+  async reserveSerialNumber(cardId: string, tx?: DatabaseClient): Promise<number> {
+    return withTransaction(this.getClient(tx), async (client) => {
+      if (client.dialect === 'postgres') {
+        const [card] = await client.db
+          .select({ id: pgSchema.waifuCards.id })
+          .from(pgSchema.waifuCards)
+          .where(eq(pgSchema.waifuCards.id, cardId))
+          .for('update');
+        if (!card) throw new DatabaseError(`Unknown card ${cardId}`);
+      } else if (!(await this.findById(cardId, client)))
+        throw new DatabaseError(`Unknown card ${cardId}`);
+      const rows =
+        client.dialect === 'sqlite'
+          ? await client.db
+              .select()
+              .from(sqliteSchema.waifuCardSerials)
+              .where(eq(sqliteSchema.waifuCardSerials.cardId, cardId))
+          : await client.db
+              .select()
+              .from(pgSchema.waifuCardSerials)
+              .where(eq(pgSchema.waifuCardSerials.cardId, cardId));
+      const serial = Math.max(
+        rows[0]?.nextSerial ?? 1,
+        (await this.getHighestSerialNumber(cardId, client)) + 1,
+      );
+      if (!Number.isSafeInteger(serial) || serial >= 2147483647)
+        throw new DatabaseError('Card serial range exhausted');
+      if (client.dialect === 'sqlite')
+        await client.db
+          .insert(sqliteSchema.waifuCardSerials)
+          .values({ cardId, nextSerial: serial + 1 })
+          .onConflictDoUpdate({
+            target: sqliteSchema.waifuCardSerials.cardId,
+            set: { nextSerial: serial + 1 },
+          });
+      else
+        await client.db
+          .insert(pgSchema.waifuCardSerials)
+          .values({ cardId, nextSerial: serial + 1 })
+          .onConflictDoUpdate({
+            target: pgSchema.waifuCardSerials.cardId,
+            set: { nextSerial: serial + 1 },
+          });
+      return serial;
+    });
+  }
+
+  async mintUserCard(
+    data: Omit<NewUserCard, 'serialNumber'>,
+    tx?: DatabaseClient,
+  ): Promise<UserCard> {
+    return withTransaction(this.getClient(tx), async (client) => {
+      const serialNumber = await this.reserveSerialNumber(data.cardId, client);
+      return this.createUserCard({ ...data, serialNumber }, client);
+    });
+  }
+
   async createUserCard(data: NewUserCard, tx?: DatabaseClient): Promise<UserCard> {
     const client = this.getClient(tx);
     const id = data.id ?? randomUUID();
@@ -294,6 +355,24 @@ export class WaifuCardRepository extends BaseRepository<
         .where(eq(pgSchema.userCards.id, id));
       return (row as unknown as UserCard) ?? null;
     }
+  }
+
+  /** Serialize EXP read/modify/write with other card updates on both database dialects. */
+  async withUserCardLock<T>(
+    id: string,
+    work: (card: UserCard | null, tx: DatabaseClient) => Promise<T>,
+    tx?: DatabaseClient,
+  ): Promise<T> {
+    const run = async (client: DatabaseClient): Promise<T> => {
+      if (client.dialect === 'sqlite') return work(await this.findUserCardById(id, client), client);
+      const [row] = await client.db
+        .select()
+        .from(pgSchema.userCards)
+        .where(eq(pgSchema.userCards.id, id))
+        .for('update');
+      return work((row as unknown as UserCard) ?? null, client);
+    };
+    return tx ? run(tx) : withTransaction(this.getClient(), run);
   }
 
   async listUserCards(

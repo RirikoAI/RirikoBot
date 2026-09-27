@@ -1333,6 +1333,36 @@
       ],
       "blocks": [],
       "description": "Ungroomed. Crafted gear lands in the inventory and must be equipped separately; add a Craft & Equip button (onto the active card) like the shop's Buy & Equip. /item inventory tags worn gear [EQUIPPED: SLOT] without saying which card wears it; show the card name, and surface item IDs so /card action:equip-gear and unequip-gear are usable by hand."
+    },
+    {
+      "id": "STORY-170",
+      "title": "Interactive Branching Adventure RPG",
+      "points": 67,
+      "status": "REVIEW",
+      "requires": [
+        "EPIC-009",
+        "EPIC-010",
+        "EPIC-004"
+      ],
+      "blocks": [],
+      "children": [
+        "TASK-1701",
+        "TASK-1702",
+        "TASK-1703",
+        "TASK-1704",
+        "TASK-1705",
+        "TASK-1706",
+        "TASK-1707",
+        "TASK-1708",
+        "TASK-1709",
+        "TASK-1710",
+        "TASK-1711",
+        "TASK-1712",
+        "TASK-1713",
+        "TASK-1714",
+        "TASK-1715"
+      ],
+      "description": "User-authorized implementation of docs/adventure_game_plan.md. Points are the 27-point child roll-up; individual tasks have Fibonacci estimates."
     }
   ],
   "tasks": [
@@ -3404,9 +3434,207 @@
         "TASK-1331"
       ],
       "blocks": []
+    },
+    {
+      "id": "TASK-1701",
+      "parent": "STORY-170",
+      "title": "Adventure Contracts and Complete Scenario Catalog",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "EPIC-009",
+        "EPIC-010",
+        "EPIC-004"
+      ],
+      "blocks": [
+        "TASK-1702"
+      ],
+      "description": "Contracts/catalog complete; 21 targeted tests and lint/format/typecheck/build passed. User explicitly accepted documented pre-existing full-suite/coverage limitations and authorized DONE plus continuation on 2026-09-26."
+    },
+    {
+      "id": "TASK-1702",
+      "parent": "STORY-170",
+      "title": "Durable Global Adventure Sessions and Traversal",
+      "points": 8,
+      "status": "DONE",
+      "requires": [
+        "TASK-1701"
+      ],
+      "blocks": [
+        "TASK-1703"
+      ],
+      "description": "Durable dual-dialect session schema/repository, per-user database ownership, admission/cooldown, revision-safe seeded engine, cancellation/recovery and SQLite concurrency tests complete. New build/lint/tests pass; prior full-suite limitations remain user-accepted. PostgreSQL execution unavailable because Docker daemon is not running."
+    },
+    {
+      "id": "TASK-1703",
+      "parent": "STORY-170",
+      "title": "Atomic Adventure Payments, Rewards and Cancellation",
+      "points": 8,
+      "status": "DONE",
+      "requires": [
+        "TASK-1702"
+      ],
+      "blocks": [
+        "TASK-1704"
+      ]
+    },
+    {
+      "id": "TASK-1704",
+      "parent": "STORY-170",
+      "title": "Discord Adventure Command and Interactive UI",
+      "points": 5,
+      "status": "DONE",
+      "requires": [
+        "TASK-1703"
+      ],
+      "blocks": [
+        "TASK-1705"
+      ]
+    },
+    {
+      "id": "TASK-1705",
+      "parent": "STORY-170",
+      "title": "Adventure Integration Verification and Quality Gates",
+      "points": 3,
+      "status": "REVIEW",
+      "requires": [
+        "TASK-1704"
+      ],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1706",
+      "title": "Simplify Adventure Presentation and Add Scene Artwork",
+      "points": 5,
+      "status": "DONE",
+      "parent": "STORY-170",
+      "requires": [
+        "TASK-1704"
+      ],
+      "blocks": [],
+      "description": "User feedback: one start message, story-first decision embeds, concise nonzero outcome totals with net energy, no public route recap, and branch scene artwork."
+    },
+    {
+      "id": "TASK-1707",
+      "parent": "STORY-170",
+      "title": "Add Thirty Illustrated Branching Adventures",
+      "points": 8,
+      "status": "DONE",
+      "requires": [
+        "TASK-1706"
+      ],
+      "blocks": [],
+      "description": "Thirty authored four-decision stories with distinct illustrations, catalog-wide autocomplete, exhaustive traversal and delivery checks."
+    },
+    {
+      "id": "TASK-1708",
+      "parent": "STORY-170",
+      "title": "Adventure Reward Rank Policy and Snapshots",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "TASK-1707"
+      ],
+      "blocks": [
+        "TASK-1709"
+      ]
+    },
+    {
+      "id": "TASK-1709",
+      "parent": "STORY-170",
+      "title": "Adventure Reward Scaling and Frozen Settlement",
+      "points": 5,
+      "status": "DONE",
+      "requires": [
+        "TASK-1708"
+      ],
+      "blocks": [
+        "TASK-1710"
+      ]
+    },
+    {
+      "id": "TASK-1710",
+      "parent": "STORY-170",
+      "title": "Adventure Reward Rank Display and Help",
+      "points": 2,
+      "status": "DONE",
+      "requires": [
+        "TASK-1709"
+      ],
+      "blocks": [
+        "TASK-1711"
+      ]
+    },
+    {
+      "id": "TASK-1711",
+      "parent": "STORY-170",
+      "title": "Adventure Reward Rank Balance and Verification",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "TASK-1710"
+      ],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1712",
+      "parent": "STORY-170",
+      "title": "Pin Requested Adventure User to S+ Reward Rank",
+      "points": 1,
+      "status": "DONE",
+      "requires": [
+        "TASK-1711"
+      ],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1713",
+      "parent": "STORY-170",
+      "title": "Tower-Benchmarked Adventure Completion Rewards",
+      "points": 5,
+      "status": "DONE",
+      "requires": [
+        "TASK-1712"
+      ],
+      "blocks": [
+        "TASK-1714"
+      ]
+    },
+    {
+      "id": "TASK-1714",
+      "parent": "STORY-170",
+      "title": "Atomic Adventure Companion XP and Card Acquisition",
+      "points": 5,
+      "status": "DONE",
+      "requires": [
+        "TASK-1713"
+      ],
+      "blocks": [
+        "TASK-1715"
+      ]
+    },
+    {
+      "id": "TASK-1715",
+      "parent": "STORY-170",
+      "title": "Adventure Progression Balance Verification",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "TASK-1714"
+      ],
+      "blocks": []
     }
   ],
   "chores": [
+    {
+      "id": "CHORE-1701",
+      "title": "Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules",
+      "points": 2,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [],
+      "description": "Documentation-only corrections requested by the user: complete decision paths, global adventure locking, existing card APIs with rarity floors, and explicit energy and choice-payment semantics."
+    },
     {
       "id": "CHORE-0301",
       "title": "Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility",
@@ -3482,6 +3710,17 @@
         "TASK-1111"
       ],
       "description": "EPIC-011 prerequisite added during STORY-111 grooming (2026-09-25). The dashboard and CLI run in separate processes from the bot, so they cannot clear the bot's in-memory setting caches (GuildSettingsService caches for 5 minutes). Add a dual-dialect guild_config_versions table (guild_id, module, version, updated_at) that writers bump in the same transaction as the settings write, a bot-side watcher that polls it every few seconds and emits a guild:config-changed EventBus event, and subscribe GuildSettingsService to evict the guild. Later module stories subscribe their own caches."
+    },
+    {
+      "id": "CHORE-1702",
+      "title": "Plan Companion-Level Adventure Reward Ranks",
+      "points": 2,
+      "status": "DONE",
+      "requires": [
+        "TASK-1707"
+      ],
+      "blocks": [],
+      "description": "Documentation-only proposal for level-derived reward ranks, bounded amount/drop bonuses, durable snapshots, compatibility, and implementation acceptance criteria."
     }
   ],
   "bugs": [
