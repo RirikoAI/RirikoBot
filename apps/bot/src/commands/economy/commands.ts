@@ -451,7 +451,7 @@ export function createEconomyCommands(services: BotServices): Command[] {
         },
         {
           name: 'item',
-          description: 'Item ID to purchase',
+          description: 'Code of the item to buy, as /shop lists it',
           type: 'STRING',
           required: false,
         },
@@ -472,7 +472,8 @@ export function createEconomyCommands(services: BotServices): Command[] {
         const itemId = ctx.options.getString('item');
         if (!itemId) {
           await ctx.reply({
-            content: '❌ Please specify an item ID to purchase. Use `/shop list` to view catalog.',
+            content:
+              '❌ Please specify the code of the item to buy. Use `/shop list` to see the codes.',
           });
           return;
         }
@@ -495,19 +496,22 @@ export function createEconomyCommands(services: BotServices): Command[] {
           });
         }
       } else {
-        const catalog = await services.inventoryService.getCatalog();
-        if (catalog.length === 0) {
+        const sections = await services.inventoryService.getCatalogSections();
+        if (sections.length === 0) {
           await ctx.reply({ content: '🛒 The item shop is currently closed.' });
           return;
         }
 
-        const lines = catalog.map(
-          (item) =>
-            `• **${item.name}** (\`${item.id}\`) — 🪙 **${item.price.toLocaleString()} credits**\n  *${item.description}*`,
-        );
+        const blocks = sections.map(({ name, items }) => {
+          const lines = items.map(
+            (item) =>
+              `• **${item.name}** (\`${item.code ?? item.id}\`) — 🪙 **${item.price.toLocaleString()} credits**\n  *${item.description}*`,
+          );
+          return `__**${name}**__\n${lines.join('\n')}`;
+        });
 
         await ctx.reply({
-          content: `🏪 **Town Item Shop Catalog**\n\n${lines.join('\n\n')}\n\n*Purchase items using:* \`/shop buy <item_id> [quantity]\``,
+          content: `🏪 **Town Item Shop Catalog**\n\n${blocks.join('\n\n')}\n\n*Purchase items using:* \`/shop buy <code> [quantity]\``,
         });
       }
     },
@@ -544,11 +548,11 @@ export function createEconomyCommands(services: BotServices): Command[] {
       const lines = items.map((slot) => {
         const itemName = slot.item?.name ?? slot.itemId;
         const rarity = slot.item?.rarity ?? 'COMMON';
-        return `• **${itemName}** \`x${slot.quantity}\` [${rarity}] — ID: \`${slot.itemId}\`\n  *${slot.item?.description ?? 'No description'}*`;
+        return `• **${itemName}** \`x${slot.quantity}\` [${rarity}] — Code: \`${slot.item?.code ?? slot.itemId}\`\n  *${slot.item?.description ?? 'No description'}*`;
       });
 
       await ctx.reply({
-        content: `🎒 **${target.username}'s Inventory Bag** (${items.length} unique items)\n\n${lines.join('\n\n')}\n\n*Use an item with:* \`/use <item_id>\``,
+        content: `🎒 **${target.username}'s Inventory Bag** (${items.length} unique items)\n\n${lines.join('\n\n')}\n\n*Use an item with:* \`/use <code>\``,
       });
     },
   };
@@ -564,7 +568,7 @@ export function createEconomyCommands(services: BotServices): Command[] {
       options: [
         {
           name: 'item',
-          description: 'Item ID to consume',
+          description: 'Code of the item to use, as /inventory lists it',
           type: 'STRING',
           required: true,
         },
@@ -580,7 +584,7 @@ export function createEconomyCommands(services: BotServices): Command[] {
     async execute(ctx: CommandContext): Promise<void> {
       const itemId = ctx.options.getString('item', true);
       if (!itemId) {
-        await ctx.reply({ content: '❌ Please specify the item ID to use.' });
+        await ctx.reply({ content: '❌ Please specify the code of the item to use.' });
         return;
       }
 

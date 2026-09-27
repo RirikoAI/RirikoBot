@@ -40,6 +40,7 @@ import {
   WelcomerRepository,
   EconomyConfigRepository,
   AuditLogRepository,
+  ItemCategoryRepository,
   type DatabaseClient,
 } from '@ririko/database';
 import type { Client } from 'discord.js';
@@ -360,8 +361,10 @@ export async function createBotServices(
     },
   });
 
-  // Seed default shop catalog if empty
-  await itemRepo.seedDefaultCatalog().catch(() => {});
+  // Add any default shop items and categories that are missing (by code); owner edits stay.
+  await itemRepo.seedDefaultCatalog().catch((err: unknown) => {
+    console.error('[ItemRepository] Could not seed the default shop catalog:', err);
+  });
 
   // Services
   // Daily reward and bank values set in the owner console; read on every use.
@@ -427,6 +430,7 @@ export async function createBotServices(
 
   const inventoryService = new InventoryService({
     itemRepository: itemRepo,
+    categoryRepository: new ItemCategoryRepository(db),
     inventoryRepository: inventoryRepo,
     economyRepository: economyRepo,
     playerEnergyRepository: playerEnergyRepo,

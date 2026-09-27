@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   createDatabaseClient,
   ItemRepository,
+  ItemCategoryRepository,
   InventoryRepository,
   EconomyRepository,
   PlayerEnergyRepository,
@@ -13,6 +14,10 @@ import { InventoryService } from './inventory.service.js';
 import { LevelingService } from './leveling.service.js';
 
 describe('InventoryService', () => {
+  const idOf = async (code: string) => (await itemRepo.findByCode(code))!.id;
+  const categoryIdOf = async (code: string) =>
+    (await new ItemCategoryRepository(client).findByCode(code))!.id;
+
   let client: SqliteDatabaseClient;
   let itemRepo: ItemRepository;
   let inventoryRepo: InventoryRepository;
@@ -29,6 +34,13 @@ describe('InventoryService', () => {
     client = rawClient;
 
     client.raw.exec(`
+      CREATE TABLE economy_item_categories (
+        id TEXT PRIMARY KEY,
+        code TEXT UNIQUE,
+        name TEXT NOT NULL,
+        description TEXT
+      );
+
       CREATE TABLE economy_items (
         id TEXT PRIMARY KEY,
         code TEXT UNIQUE,
@@ -118,6 +130,7 @@ describe('InventoryService', () => {
 
     inventoryService = new InventoryService({
       itemRepository: itemRepo,
+      categoryRepository: new ItemCategoryRepository(client),
       inventoryRepository: inventoryRepo,
       economyRepository: economyRepo,
       playerEnergyRepository: playerEnergyRepo,
@@ -131,22 +144,45 @@ describe('InventoryService', () => {
       const catalog = await inventoryService.getCatalog();
       expect(catalog.length).toBe(4);
 
-      const consumables = await inventoryService.getCatalog('consumable');
+      const consumables = await inventoryService.getCatalog(await categoryIdOf('consumable'));
       expect(consumables.length).toBe(3);
-      expect(consumables.map((c) => c.id)).toContain('candy_minor');
-      expect(consumables.map((c) => c.id)).toContain('stamina_potion');
-      expect(consumables.map((c) => c.id)).toContain('exp_potion_small');
+      expect(consumables.map((c) => c.code)).toContain('candy_minor');
+      expect(consumables.map((c) => c.code)).toContain('stamina_potion');
+      expect(consumables.map((c) => c.code)).toContain('exp_potion_small');
 
-      const cosmetics = await inventoryService.getCatalog('cosmetic');
+      const cosmetics = await inventoryService.getCatalog(await categoryIdOf('cosmetic'));
       expect(cosmetics.length).toBe(1);
-      expect(cosmetics[0]?.id).toBe('profile_bg_voucher');
+      expect(cosmetics[0]?.code).toBe('profile_bg_voucher');
     });
 
-    it('fetches single item by id', async () => {
-      const item = await inventoryService.getItem('stamina_potion');
+    it('finds an item by code (any case) or by id', async () => {
+      const item = await inventoryService.getItem(' Stamina_Potion ');
       expect(item).not.toBeNull();
       expect(item?.price).toBe(350);
       expect(item?.rarity).toBe('UNCOMMON');
+      expect((await inventoryService.getItem(item!.id))?.code).toBe('stamina_potion');
+      expect(await inventoryService.getItem('no_such_item')).toBeNull();
+    });
+
+    it('groups the catalog by category, uncategorized items last, retired items left out', async () => {
+      await itemRepo.create({
+        id: 'loose-item',
+        code: 'loose',
+        name: 'Loose Item',
+        description: 'No category.',
+        price: 1,
+      });
+      const bg = await itemRepo.findByCode('profile_bg_voucher');
+      await itemRepo.update(bg!.id, { isPurchasable: false });
+
+      const sections = await inventoryService.getCatalogSections();
+      expect(sections.map((section) => section.name)).toEqual(['Consumables', 'Other']);
+      expect(sections[0]?.items.map((item) => item.code)).toEqual([
+        'candy_minor',
+        'exp_potion_small',
+        'stamina_potion',
+      ]);
+      expect(sections[1]?.items.map((item) => item.code)).toEqual(['loose']);
     });
   });
 
@@ -193,7 +229,7 @@ describe('InventoryService', () => {
 
       const bag = await inventoryService.getUserInventory('buyer_1');
       expect(bag.length).toBe(1);
-      expect(bag[0]?.itemId).toBe('exp_potion_small');
+      expect(bag[0]?.itemId).toBe(await idOf('exp_potion_small'));
       expect(bag[0]?.quantity).toBe(2);
       expect(bag[0]?.item?.name).toBe('Small EXP Potion');
     });
@@ -246,7 +282,7 @@ describe('InventoryService', () => {
       await playerEnergyRepo.update('stamina_user', { currentEnergy: 40 });
 
       // Give 2 potions
-      await inventoryRepo.addItem('stamina_user', 'stamina_potion', 2);
+      await inventoryRepo.addItem('stamina_user', await idOf('stamina_potion'), 2);
 
       const useRes = await inventoryService.useItem({
         userId: 'stamina_user',
@@ -264,7 +300,7 @@ describe('InventoryService', () => {
     it('enforces hard ceiling of max 3 stamina potions per day', async () => {
       await playerEnergyRepo.getOrCreate('chugger');
       await playerEnergyRepo.update('chugger', { currentEnergy: 10 });
-      await inventoryRepo.addItem('chugger', 'stamina_potion', 5);
+      await inventoryRepo.addItem('chugger', await idOf('stamina_potion'), 5);
 
       // Pot 1 -> OK (pots used = 1)
       const p1 = await inventoryService.useItem({ userId: 'chugger', itemId: 'stamina_potion' });
@@ -289,7 +325,7 @@ describe('InventoryService', () => {
     });
 
     it('consumes EXP potion and awards experience', async () => {
-      await inventoryRepo.addItem('level_grinder', 'exp_potion_small', 1);
+      await inventoryRepo.addItem('level_grinder', await idOf('exp_potion_small'), 1);
 
       const useRes = await inventoryService.useItem({
         userId: 'level_grinder',
@@ -307,7 +343,7 @@ describe('InventoryService', () => {
     });
 
     it('consumes Profile Background Voucher', async () => {
-      await inventoryRepo.addItem('cosmetic_fan', 'profile_bg_voucher', 1);
+      await inventoryRepo.addItem('cosmetic_fan', await idOf('profile_bg_voucher'), 1);
 
       const useRes = await inventoryService.useItem({
         userId: 'cosmetic_fan',
