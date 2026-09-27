@@ -120,6 +120,7 @@ describe('Session Cookie Rotation, Client Spoofing & Health Checks (TASK-0502)',
       const yt = new YouTubeAdapter({
         cookies: ['GPS=1', 'VISITOR=2'],
         clientType: 'ANDROID',
+        autoGeneratePoToken: false,
       });
 
       expect(yt.getClientType()).toBe('ANDROID');
@@ -132,7 +133,7 @@ describe('Session Cookie Rotation, Client Spoofing & Health Checks (TASK-0502)',
     });
 
     it('rotates client type when rotateClient() is called', () => {
-      const yt = new YouTubeAdapter({ clientType: 'ANDROID' });
+      const yt = new YouTubeAdapter({ clientType: 'ANDROID', autoGeneratePoToken: false });
       expect(yt.getClientType()).toBe('ANDROID');
 
       expect(yt.rotateClient()).toBe('IOS');
@@ -145,13 +146,21 @@ describe('Session Cookie Rotation, Client Spoofing & Health Checks (TASK-0502)',
 
   describe('4. ExtractorPipeline Health Summary', () => {
     it('computes overall health summary across all registered extractors', async () => {
-      const pipeline = new ExtractorPipeline();
+      // Each adapter's own health check is covered offline in extractors.test.ts.
+      const pipeline = new ExtractorPipeline({ youtubeOptions: { autoGeneratePoToken: false } });
+      pipeline.getAdapters().forEach((adapter, index) => {
+        vi.spyOn(adapter, 'healthCheck').mockResolvedValue({
+          source: adapter.id,
+          isHealthy: true,
+          latencyMs: (index + 1) * 10,
+        });
+      });
       const summary = await pipeline.getHealthSummary();
 
       expect(summary.status).toBe('HEALTHY');
       expect(summary.totalCount).toBe(5);
       expect(summary.healthyCount).toBe(5);
-      expect(summary.averageLatencyMs).toBeGreaterThanOrEqual(0);
+      expect(summary.averageLatencyMs).toBe(30);
       expect(summary.adapters).toHaveLength(5);
       expect(summary.checkedAt).toBeInstanceOf(Date);
     });

@@ -19,9 +19,10 @@ For any significant task or feature implementation:
    ```bash
    pnpm lint
    pnpm typecheck
-   pnpm test
+   pnpm test:coverage
    pnpm build
    ```
+   **Coverage is a merge gate**: a PR is not merged unless every coverage threshold in `vitest.config.ts` passes (see [testing.md §4.1](testing.md#41-coverage)).
 
 ---
 
