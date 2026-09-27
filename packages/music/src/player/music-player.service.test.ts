@@ -3,6 +3,9 @@ import { MusicPlayerService } from './music-player.service.js';
 import { LavalinkQueueAdapter } from '../lavalink/lavalink-service.js';
 import type { Player } from 'lavalink-client';
 
+// Skips the background PO token fetch from youtube.com; these tests never play YouTube.
+const offline = { youtubeOptions: { autoGeneratePoToken: false } };
+
 describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
   it('resolves and caches guild volume from resolver hook', async () => {
     const resolver = vi.fn().mockImplementation(async (guildId: string) => {
@@ -11,6 +14,7 @@ describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
     });
 
     const service = new MusicPlayerService({
+      ...offline,
       resolveGuildVolume: resolver,
       defaultVolume: 80,
     });
@@ -34,7 +38,10 @@ describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
   });
 
   it('updates cache and clamp volume on setVolume', () => {
-    const service = new MusicPlayerService({ defaultVolume: 80 });
+    const service = new MusicPlayerService({
+      ...offline,
+      defaultVolume: 80,
+    });
 
     const clamped1 = service.setVolume('guild-1', 25);
     expect(clamped1).toBe(25);
@@ -52,7 +59,10 @@ describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
   });
 
   it('creates new queue using the guild cached volume', () => {
-    const service = new MusicPlayerService({ defaultVolume: 80 });
+    const service = new MusicPlayerService({
+      ...offline,
+      defaultVolume: 80,
+    });
     service.setGuildCachedVolume('guild-1', 20);
 
     const queue = service.getOrCreateQueue('guild-1');
@@ -62,6 +72,7 @@ describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
   it('restores guild volume across sessions after stop', async () => {
     let savedDbVolume = 80;
     const service = new MusicPlayerService({
+      ...offline,
       resolveGuildVolume: async () => savedDbVolume,
       defaultVolume: 80,
     });
@@ -117,7 +128,10 @@ describe('MusicPlayerService - auto-leave and settings changes (TASK-1161)', () 
   it('stops after the idle timeout when the channel stays empty', () => {
     vi.useFakeTimers();
     try {
-      const service = new MusicPlayerService({ idleTimeoutMs: 1000 });
+      const service = new MusicPlayerService({
+        ...offline,
+        idleTimeoutMs: 1000,
+      });
       const stop = vi.spyOn(service, 'stop');
 
       service.handleChannelOccupancy('g1', 0, true);
@@ -137,7 +151,10 @@ describe('MusicPlayerService - auto-leave and settings changes (TASK-1161)', () 
   it('cancels when a member joins, and never starts with auto-leave off', () => {
     vi.useFakeTimers();
     try {
-      const service = new MusicPlayerService({ idleTimeoutMs: 1000 });
+      const service = new MusicPlayerService({
+        ...offline,
+        idleTimeoutMs: 1000,
+      });
       const stop = vi.spyOn(service, 'stop');
 
       service.handleChannelOccupancy('g1', 0, true);
@@ -155,7 +172,10 @@ describe('MusicPlayerService - auto-leave and settings changes (TASK-1161)', () 
 
   it('reads the default volume again after forgetGuildSettings', async () => {
     let saved = 30;
-    const service = new MusicPlayerService({ resolveGuildVolume: () => saved });
+    const service = new MusicPlayerService({
+      ...offline,
+      resolveGuildVolume: () => saved,
+    });
     expect(await service.resolveVolumeForGuild('g1')).toBe(30);
     saved = 90;
     expect(await service.resolveVolumeForGuild('g1')).toBe(30);
