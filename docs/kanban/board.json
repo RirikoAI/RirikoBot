@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "STORY-165",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -906,7 +906,7 @@
       "epic": "EPIC-011",
       "title": "Owner Console: Global Economy Settings & Item Shop Manager",
       "points": 13,
-      "status": "IN_PROGRESS",
+      "status": "REVIEW",
       "requires": [
         "STORY-115"
       ],
@@ -2832,7 +2832,7 @@
       "parent": "STORY-165",
       "title": "Owner Console Shell, Global Economy Settings (Daily Reward, Streak Bonus, Bank Capacity), Live Bank Capacity from Account Level & ririko economy:config",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-115"
       ],
@@ -2846,7 +2846,7 @@
       "parent": "STORY-165",
       "title": "Item Shop Manager (economy_items & economy_item_categories: Create, Edit, Retire, Delete Unowned; Category Management)",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1651"
       ],
@@ -2860,7 +2860,7 @@
       "parent": "STORY-165",
       "title": "Item Codes, Item Seed That Works on Postgres & SQLite, /shop Grouped by Category (Seed Part of BUG-0024)",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1652"
       ],
