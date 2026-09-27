@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "STORY-116",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -918,7 +918,7 @@
       "epic": "EPIC-011",
       "title": "Music, AI Chatbot, Image Generation & Integrations Pages",
       "points": 13,
-      "status": "IN_PROGRESS",
+      "status": "REVIEW",
       "requires": [
         "STORY-111",
         "STORY-117"
@@ -2886,7 +2886,7 @@
       "parent": "STORY-116",
       "title": "Music Page (Default Volume, Music Channel, DJ Role Enforcement, Auto-Leave on Empty Channel)",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
@@ -2900,7 +2900,7 @@
       "parent": "STORY-116",
       "title": "AI Chatbot Page (Channel, Persona & Style, Tool Toggles, Per-Guild Provider & Model)",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1161"
       ],
@@ -2914,7 +2914,7 @@
       "parent": "STORY-116",
       "title": "Image Generation Page (Default Provider, Member Daily Limit, Default Style Preset) & /stablediffusion-model Rewrite",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1162"
       ],
@@ -2928,7 +2928,7 @@
       "parent": "STORY-116",
       "title": "Integrations Status Page (Configured / Not Configured, Zero Secret Exposure) & Shared Status Helper for the CLI Doctor",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1163"
       ],
