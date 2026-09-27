@@ -9,6 +9,7 @@ import {
   timestamp,
   jsonb,
   index,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const economyAccounts = pgTable('economy_accounts', {
@@ -70,23 +71,35 @@ export const economyCooldowns = pgTable(
   (table) => [index('idx_pg_economy_cd_user_action').on(table.userId, table.actionType)],
 );
 
-export const economyItemCategories = pgTable('economy_item_categories', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 64 }).notNull(),
-  description: text('description'),
-});
+export const economyItemCategories = pgTable(
+  'economy_item_categories',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Stable slug (`consumable`); the default catalog seeds by it. */
+    code: varchar('code', { length: 32 }),
+    name: varchar('name', { length: 64 }).notNull(),
+    description: text('description'),
+  },
+  (table) => [uniqueIndex('uq_pg_economy_item_categories_code').on(table.code)],
+);
 
-export const economyItems = pgTable('economy_items', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 64 }).notNull(),
-  description: text('description').notNull(),
-  price: bigint('price', { mode: 'bigint' }).notNull(),
-  rarity: varchar('rarity', { length: 32 }).notNull().default('COMMON'),
-  categoryId: uuid('category_id'),
-  iconUrl: text('icon_url'),
-  isPurchasable: boolean('is_purchasable').notNull().default(true),
-  metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
-});
+export const economyItems = pgTable(
+  'economy_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Stable slug members type in `/shop buy`; the default catalog seeds by it. */
+    code: varchar('code', { length: 32 }),
+    name: varchar('name', { length: 64 }).notNull(),
+    description: text('description').notNull(),
+    price: bigint('price', { mode: 'bigint' }).notNull(),
+    rarity: varchar('rarity', { length: 32 }).notNull().default('COMMON'),
+    categoryId: uuid('category_id'),
+    iconUrl: text('icon_url'),
+    isPurchasable: boolean('is_purchasable').notNull().default(true),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
+  },
+  (table) => [uniqueIndex('uq_pg_economy_items_code').on(table.code)],
+);
 
 export const economyInventories = pgTable(
   'economy_inventories',
@@ -97,7 +110,10 @@ export const economyInventories = pgTable(
     quantity: integer('quantity').notNull().default(1),
     acquiredAt: timestamp('acquired_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('idx_pg_economy_inv_user').on(table.userId, table.itemId)],
+  (table) => [
+    index('idx_pg_economy_inv_user').on(table.userId, table.itemId),
+    index('idx_pg_economy_inv_item').on(table.itemId),
+  ],
 );
 
 /** Global economy values edited in the owner console; one row with id `global`. */

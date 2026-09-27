@@ -1,5 +1,6 @@
 import 'server-only';
 import { notFound } from 'next/navigation';
+import { ValidationError } from '@ririko/core';
 import { GuildConfigValidationError, type GuildConfigActor } from '@ririko/services/guild';
 import { PASSKEY_REASON_MESSAGES } from '@/lib/passkey-action-result';
 import type { SettingsFormState } from '@/lib/settings-form-state';
@@ -11,7 +12,8 @@ import { checkDashboardRequest, requestActor } from './request-context';
  * call checks the dashboard Origin and rate limit, then that the user is a bot owner (others
  * get a 404), then a passkey check from the last five minutes. Without one the form is told
  * why, so it can run the check and submit again. `write` runs only after all of that and gets
- * the actor for the audit entry; a schema error becomes field errors on the form.
+ * the actor for the audit entry. A schema error becomes field errors on the form, and any
+ * other `ValidationError` (such as deleting an item members hold) its message.
  */
 export async function runOwnerAction(
   values: Record<string, unknown>,
@@ -36,6 +38,9 @@ export async function runOwnerAction(
         fieldErrors: error.fieldErrors,
         values,
       };
+    }
+    if (error instanceof ValidationError) {
+      return { status: 'error', message: error.userMessage, values };
     }
     throw error;
   }
