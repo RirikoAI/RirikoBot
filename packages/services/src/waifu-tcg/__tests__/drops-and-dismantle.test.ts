@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   createDatabaseClient,
   ensureCardSerialSchema,
@@ -7,7 +7,7 @@ import {
   WaifuAssetRepository,
   type SqliteDatabaseClient,
 } from '@ririko/database';
-import { DropManager } from '../drops/drop-manager.js';
+import { DEFAULT_DROP_CONFIG, DropManager, type GuildDropConfig } from '../drops/drop-manager.js';
 import { CardDismantleService, CRAFTING_DUST_YIELD } from '../card/dismantle-service.js';
 import { CardGenerator } from '../card/card-generator.js';
 
@@ -131,6 +131,7 @@ describe('Waifu Chat Drops & Dismantle Engine (TASK-1012)', () => {
       const channelId = 'channel_drops';
 
       dropManager.setGuildConfig(guildId, {
+        enabled: true,
         messageThreshold: 3,
         startHour: 8,
         endHour: 23,
@@ -167,15 +168,111 @@ describe('Waifu Chat Drops & Dismantle Engine (TASK-1012)', () => {
       const channelId = 'channel_drops';
 
       dropManager.setGuildConfig(guildId, {
+        enabled: true,
         messageThreshold: 1,
         startHour: 8,
         endHour: 23,
       });
 
-      // 03:00 local time (night hours)
-      const nocturnal = new Date('2026-09-19T03:00:00');
+      // 03:00 UTC (night hours; the default time zone is UTC)
+      const nocturnal = new Date('2026-09-19T03:00:00Z');
       const drop = await dropManager.recordMessage(guildId, channelId, 'user_night', nocturnal);
       expect(drop).toBeNull();
+    });
+
+    it('does not count messages while drops are off', async () => {
+      const guildId = 'guild_off';
+      dropManager.setGuildConfig(guildId, { enabled: false, messageThreshold: 1 });
+      const at = new Date('2026-09-19T14:00:00Z');
+      expect(await dropManager.recordMessage(guildId, 'c', 'user_1', at)).toBeNull();
+    });
+
+    it('only counts messages in the drop channel when one is set', async () => {
+      const guildId = 'guild_channel';
+      dropManager.setGuildConfig(guildId, {
+        enabled: true,
+        messageThreshold: 1,
+        dropChannelId: 'drops',
+      });
+      const at = new Date('2026-09-19T14:00:00Z');
+      expect(await dropManager.recordMessage(guildId, 'general', 'user_1', at)).toBeNull();
+      const drop = await dropManager.recordMessage(guildId, 'drops', 'user_1', at);
+      expect(drop?.channelId).toBe('drops');
+    });
+
+    it('reads drop hours in the guild time zone and wraps past midnight', () => {
+      const tokyo = { ...DEFAULT_DROP_CONFIG, timezone: 'Asia/Tokyo', startHour: 8, endHour: 23 };
+      // 23:30 UTC is 08:30 in Tokyo.
+      expect(dropManager.isWithinActiveHours(new Date('2026-09-19T23:30:00Z'), tokyo)).toBe(true);
+      expect(dropManager.isWithinActiveHours(new Date('2026-09-19T15:00:00Z'), tokyo)).toBe(false);
+
+      const night = { ...DEFAULT_DROP_CONFIG, startHour: 20, endHour: 4 };
+      expect(dropManager.isWithinActiveHours(new Date('2026-09-19T22:00:00Z'), night)).toBe(true);
+      expect(dropManager.isWithinActiveHours(new Date('2026-09-19T02:00:00Z'), night)).toBe(true);
+      expect(dropManager.isWithinActiveHours(new Date('2026-09-19T12:00:00Z'), night)).toBe(false);
+
+      const allDay = { ...DEFAULT_DROP_CONFIG, startHour: 5, endHour: 5 };
+      expect(dropManager.isWithinActiveHours(new Date('2026-09-19T12:00:00Z'), allDay)).toBe(true);
+
+      const unknownZone = {
+        ...DEFAULT_DROP_CONFIG,
+        timezone: 'Not/AZone',
+        startHour: 8,
+        endHour: 9,
+      };
+      expect(dropManager.isWithinActiveHours(new Date('2026-09-19T08:30:00Z'), unknownZone)).toBe(
+        true,
+      );
+    });
+
+    it('loads saved settings once and reloads them after invalidate', async () => {
+      let threshold = 2;
+      const loadConfig = vi.fn(async () => ({
+        ...DEFAULT_DROP_CONFIG,
+        enabled: true,
+        messageThreshold: threshold,
+      }));
+      const loaded = new DropManager(cardRepo, assetRepo, new CardGenerator(), { loadConfig });
+      const at = new Date('2026-09-19T14:00:00Z');
+
+      const [first, second] = await Promise.all([
+        loaded.resolveGuildConfig('g'),
+        loaded.resolveGuildConfig('g'),
+      ]);
+      expect(first).toBe(second);
+      expect(loadConfig).toHaveBeenCalledTimes(1);
+
+      expect(await loaded.recordMessage('g', 'c', 'user_1', at)).toBeNull();
+      expect(loadConfig).toHaveBeenCalledTimes(1);
+
+      threshold = 1;
+      loaded.invalidate('g');
+      expect(await loaded.recordMessage('g', 'c', 'user_2', at)).not.toBeNull();
+      expect(loadConfig).toHaveBeenCalledTimes(2);
+    });
+
+    it('uses the defaults, with drops off, when nothing is saved', async () => {
+      const loaded = new DropManager(cardRepo, assetRepo, new CardGenerator(), {
+        loadConfig: async () => null,
+      });
+      expect(await loaded.resolveGuildConfig('g')).toEqual(DEFAULT_DROP_CONFIG);
+      expect(await new DropManager(cardRepo, assetRepo).resolveGuildConfig('g')).toEqual(
+        DEFAULT_DROP_CONFIG,
+      );
+    });
+
+    it('ignores a load that finishes after invalidate', async () => {
+      let release: (value: GuildDropConfig) => void = () => {};
+      const loaded = new DropManager(cardRepo, assetRepo, new CardGenerator(), {
+        loadConfig: () => new Promise<GuildDropConfig>((resolve) => (release = resolve)),
+      });
+      const stale = loaded.resolveGuildConfig('g');
+      loaded.invalidate('g');
+      release({ ...DEFAULT_DROP_CONFIG, messageThreshold: 99 });
+      expect((await stale).messageThreshold).toBe(99);
+      expect(loaded.getGuildConfig('g').messageThreshold).toBe(
+        DEFAULT_DROP_CONFIG.messageThreshold,
+      );
     });
 
     it('should allow first-come-first-served claim and block double claims', async () => {

@@ -124,7 +124,7 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 - `command_usage_daily` (TASK-1131): Command usage counters. Primary key (`guild_id`, `day`, `command_name`), where `day` is the UTC day as `YYYY-MM-DD`; `count`. The bot's `CommandUsageRecorder` buffers counts from the router's `onCommandRun` hook and adds them every 60 seconds with `count = count + excluded.count`; rows older than 90 days are deleted.
 - `bot_status` (TASK-1131): One row per bot process (`id = 'bot'`): `gateway_ping_ms` (null before the first heartbeat), `guild_count`, `version`, `started_at`, `updated_at`. Written by `BotStatusReporter` every 30 seconds; a row older than 90 seconds means the bot is offline. The EPIC-012 health probes can reuse it.
 - `guild_voice_activity` (TASK-1131): `guild_id` PK, `channels` (JSON list of `{ channelId, members }` for voice channels with at least one member who is not a bot), `updated_at`. Written by `BotStatusReporter` only when a guild's channels change; guilds with no active channel have no row.
-- Guild TCG drop settings (TASK-1121): `DropManager` currently keeps `GuildDropConfig` in memory only, so drop settings need a persisted home before the dashboard can edit them.
+- Guild TCG settings on `guild_settings` (TASK-1121): `tcg_drops_enabled` (default false), `tcg_drop_channel_id` (null counts every channel), `tcg_drop_message_threshold` (50), `tcg_drop_start_hour` (8), `tcg_drop_end_hour` (23), `tcg_drop_claim_timeout_seconds` (60), `tcg_drop_cooldown_minutes` (5) and `tcg_manager_role_id`. Edited through the `tcg` module of `GuildConfigService`; `DropManager` reads them through `dropConfigFromSettings`. Existing databases need `pnpm db:push`.
 
 ---
 

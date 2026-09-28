@@ -5,16 +5,30 @@ import type {
   WaifuCard,
   WaifuAsset,
   UserCard,
+  GuildSettings,
 } from '@ririko/database';
 import { CardGenerator, formatCardSerialNumber } from '../card/card-generator.js';
 
 export interface GuildDropConfig {
-  dropChannelId?: string;
-  messageThreshold: number; // 50-100
-  startHour: number; // e.g. 8 (08:00)
-  endHour: number; // e.g. 23 (23:00)
-  claimTimeoutSeconds: number; // 60s
-  antiSnipingCooldownMs: number; // 5 min = 300,000ms
+  /** Drops only happen when on; a guild's saved settings start off. */
+  enabled: boolean;
+  /** Only messages here count, and drops post here; unset counts every channel. */
+  dropChannelId?: string | undefined;
+  messageThreshold: number;
+  /** Drops happen from this hour (inclusive) until `endHour` (exclusive); equal hours mean all day. */
+  startHour: number;
+  endHour: number;
+  /** IANA time zone the hours are in. */
+  timezone: string;
+  claimTimeoutSeconds: number;
+  antiSnipingCooldownMs: number;
+}
+
+/** Loads a guild's saved drop settings; `null` uses the defaults. */
+export type GuildDropConfigLoader = (guildId: string) => Promise<GuildDropConfig | null>;
+
+export interface DropManagerOptions {
+  loadConfig?: GuildDropConfigLoader;
 }
 
 export interface ActiveDrop {
@@ -42,15 +56,45 @@ export interface ClaimResult {
 }
 
 export const DEFAULT_DROP_CONFIG: GuildDropConfig = {
+  enabled: false,
   messageThreshold: 50,
+  timezone: 'UTC',
   startHour: 8,
   endHour: 23,
   claimTimeoutSeconds: 60,
   antiSnipingCooldownMs: 5 * 60 * 1000,
 };
 
+/** A guild's saved drop settings (`guild_settings`, edited on the dashboard's TCG page). */
+export function dropConfigFromSettings(
+  row: Pick<
+    GuildSettings,
+    | 'timezone'
+    | 'tcgDropsEnabled'
+    | 'tcgDropChannelId'
+    | 'tcgDropMessageThreshold'
+    | 'tcgDropStartHour'
+    | 'tcgDropEndHour'
+    | 'tcgDropClaimTimeoutSeconds'
+    | 'tcgDropCooldownMinutes'
+  >,
+): GuildDropConfig {
+  return {
+    enabled: row.tcgDropsEnabled,
+    dropChannelId: row.tcgDropChannelId ?? undefined,
+    messageThreshold: row.tcgDropMessageThreshold,
+    startHour: row.tcgDropStartHour,
+    endHour: row.tcgDropEndHour,
+    timezone: row.timezone || DEFAULT_DROP_CONFIG.timezone,
+    claimTimeoutSeconds: row.tcgDropClaimTimeoutSeconds,
+    antiSnipingCooldownMs: row.tcgDropCooldownMinutes * 60 * 1000,
+  };
+}
+
 export class DropManager {
+  /** Saved settings by guild, loaded once and dropped by `invalidate` when they change. */
   private readonly configs = new Map<string, GuildDropConfig>();
+  private readonly pendingLoads = new Map<string, Promise<GuildDropConfig>>();
   private readonly uniqueSenders = new Map<string, Set<string>>();
   private readonly activeDrops = new Map<string, ActiveDrop>(); // dropId -> ActiveDrop
   private readonly guildActiveDrops = new Map<string, string>(); // guildId -> dropId
@@ -60,18 +104,50 @@ export class DropManager {
     private readonly cardRepo: WaifuCardRepository,
     private readonly assetRepo: WaifuAssetRepository,
     private readonly generator: CardGenerator = new CardGenerator(),
+    private readonly options: DropManagerOptions = {},
   ) {}
 
   /**
-   * Sets or updates guild drop configuration.
+   * Sets or updates guild drop configuration in memory (tests, or a bot without saved settings).
    */
   setGuildConfig(guildId: string, config: Partial<GuildDropConfig>): void {
     const existing = this.configs.get(guildId) ?? { ...DEFAULT_DROP_CONFIG };
     this.configs.set(guildId, { ...existing, ...config });
   }
 
+  /** The guild's settings as last loaded, or the defaults. */
   getGuildConfig(guildId: string): GuildDropConfig {
     return this.configs.get(guildId) ?? { ...DEFAULT_DROP_CONFIG };
+  }
+
+  /** The guild's settings, loading them through `loadConfig` the first time. */
+  async resolveGuildConfig(guildId: string): Promise<GuildDropConfig> {
+    const cached = this.configs.get(guildId);
+    if (cached) return cached;
+    const loader = this.options.loadConfig;
+    if (!loader) return { ...DEFAULT_DROP_CONFIG };
+    let pending = this.pendingLoads.get(guildId);
+    if (!pending) {
+      pending = loader(guildId)
+        .then((loaded) => {
+          const config = loaded ?? { ...DEFAULT_DROP_CONFIG };
+          // An invalidate while loading removed the pending entry; keep the stale value out.
+          if (this.pendingLoads.get(guildId) === pending) this.configs.set(guildId, config);
+          return config;
+        })
+        .finally(() => {
+          if (this.pendingLoads.get(guildId) === pending) this.pendingLoads.delete(guildId);
+        });
+      this.pendingLoads.set(guildId, pending);
+    }
+    return pending;
+  }
+
+  /** Forgets a guild's settings so the next message loads them again. */
+  invalidate(guildId: string): void {
+    this.configs.delete(guildId);
+    this.pendingLoads.delete(guildId);
+    this.uniqueSenders.delete(guildId);
   }
 
   getActiveDrop(guildId: string): ActiveDrop | null {
@@ -102,11 +178,16 @@ export class DropManager {
   }
 
   /**
-   * Evaluates whether current timestamp is within active drop hours (docs/waifu-tcg.md:L140).
+   * Whether `date` is within the guild's drop hours in its time zone (docs/waifu-tcg.md:L140).
+   * A start after the end wraps past midnight (20 to 4); equal hours mean all day.
    */
   isWithinActiveHours(date: Date, config: GuildDropConfig): boolean {
-    const hour = date.getHours();
-    return hour >= config.startHour && hour < config.endHour;
+    const { startHour, endHour } = config;
+    if (startHour === endHour) return true;
+    const hour = hourIn(date, config.timezone);
+    return startHour < endHour
+      ? hour >= startHour && hour < endHour
+      : hour >= startHour || hour < endHour;
   }
 
   /**
@@ -118,14 +199,15 @@ export class DropManager {
     userId: string,
     now: Date = new Date(),
   ): Promise<ActiveDrop | null> {
-    const config = this.getGuildConfig(guildId);
+    const config = await this.resolveGuildConfig(guildId);
+    if (!config.enabled) return null;
 
     // Channel check (if configured)
     if (config.dropChannelId && channelId !== config.dropChannelId) {
       return null;
     }
 
-    // Active hours check (08:00 - 23:00)
+    // Active hours check
     if (!this.isWithinActiveHours(now, config)) {
       return null;
     }
@@ -144,7 +226,7 @@ export class DropManager {
     }
     senders.add(userId);
 
-    // Threshold check (50 - 100 messages from unique members)
+    // Threshold check (unique members)
     if (senders.size < config.messageThreshold) {
       return null;
     }
@@ -289,5 +371,17 @@ export class DropManager {
       serialNumber: drop.serialNumber,
       formattedSerial: drop.formattedSerial,
     };
+  }
+}
+
+/** The hour (0 to 23) at `date` in `timeZone`; an unknown zone falls back to UTC. */
+function hourIn(date: Date, timeZone: string): number {
+  try {
+    const hour = new Intl.DateTimeFormat('en-US', { timeZone, hour: 'numeric', hourCycle: 'h23' })
+      .formatToParts(date)
+      .find((part) => part.type === 'hour');
+    return Number(hour?.value ?? date.getUTCHours());
+  } catch {
+    return date.getUTCHours();
   }
 }

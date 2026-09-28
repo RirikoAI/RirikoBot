@@ -246,6 +246,81 @@ describe('GuildConfigService (TASK-1111)', () => {
     });
   });
 
+  describe('tcg (TASK-1121)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+
+    it('reads drops off with the default rules for a guild without settings', async () => {
+      expect(await service.get('g1', 'tcg')).toEqual({
+        dropsEnabled: false,
+        dropChannelId: null,
+        dropMessageThreshold: 50,
+        dropStartHour: 8,
+        dropEndHour: 23,
+        dropClaimTimeoutSeconds: 60,
+        dropCooldownMinutes: 5,
+        managerRoleId: null,
+      });
+    });
+
+    it('saves drop settings and the manager role, keeps other settings and audits from Discord', async () => {
+      await service.update('g1', 'general', { timezone: 'Asia/Tokyo' }, dashboardActor);
+      const { changes } = await service.update(
+        'g1',
+        'tcg',
+        {
+          dropsEnabled: 'on',
+          dropChannelId: CHANNEL,
+          dropMessageThreshold: '20',
+          dropStartHour: 20,
+          dropEndHour: 4,
+          managerRoleId: ROLE,
+        },
+        { userId: 'user-2', source: 'discord' },
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'dropsEnabled',
+        'dropChannelId',
+        'dropMessageThreshold',
+        'dropStartHour',
+        'dropEndHour',
+        'managerRoleId',
+      ]);
+      expect(await service.get('g1', 'tcg')).toMatchObject({
+        dropsEnabled: true,
+        dropChannelId: CHANNEL,
+        dropMessageThreshold: 20,
+        dropStartHour: 20,
+        dropEndHour: 4,
+        managerRoleId: ROLE,
+      });
+      expect(await service.get('g1', 'general')).toEqual({ prefix: '!', timezone: 'Asia/Tokyo' });
+      const audit = auditRows().at(-1)!;
+      expect(audit.action).toBe('guild_config.tcg.update');
+      expect(JSON.parse(audit.details!).source).toBe('discord');
+      expect(await versions.listChangedSince(new Date(0))).toEqual(
+        expect.arrayContaining([expect.objectContaining({ guildId: 'g1', module: 'tcg' })]),
+      );
+    });
+
+    it('rejects out-of-range drop settings', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'tcg',
+          { dropMessageThreshold: 2, dropEndHour: 24, dropClaimTimeoutSeconds: 5 },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({
+        fieldErrors: {
+          dropMessageThreshold: [expect.any(String)],
+          dropEndHour: [expect.any(String)],
+          dropClaimTimeoutSeconds: [expect.any(String)],
+        },
+      });
+    });
+  });
+
   describe('games (TASK-1152)', () => {
     const CHANNEL = '123456789012345678';
     const ROLE = '223456789012345678';

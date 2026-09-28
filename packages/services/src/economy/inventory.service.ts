@@ -299,7 +299,14 @@ export class InventoryService {
         }
 
         const energyPerItem = metadata.energyRestored ?? 50;
-        const ceiling = metadata.dailyUsageCeiling ?? 3;
+        // The global TCG potion limit caps every energy item; an item may set a lower one.
+        const globalLimit = this.energyLifecycle
+          ? await this.energyLifecycle.dailyPotionLimit()
+          : undefined;
+        const ceiling = Math.min(
+          metadata.dailyUsageCeiling ?? globalLimit ?? 3,
+          globalLimit ?? Number.POSITIVE_INFINITY,
+        );
 
         const potRes = this.energyLifecycle
           ? await this.energyLifecycle.consumePotion(userId, energyPerItem * quantity, ceiling)

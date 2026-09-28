@@ -11,8 +11,12 @@ import {
   type Command,
   type CommandContext,
 } from '@ririko/discord';
+import type { MarketRules } from '@ririko/services';
 import type { BotServices } from '../../services.js';
 import { resolveContextPrefix } from '../shared/prefix-resolver.js';
+
+/** Market rules shown when the live ones are not known. */
+const DEFAULT_MARKET_TEXT: MarketRules = { taxRate: 0.05, listingDurationDays: 7 };
 
 export type TcgInfoTopic =
   | 'overview'
@@ -30,7 +34,10 @@ export type TcgInfoTopic =
 export function buildTcgInfoEmbed(
   topic: TcgInfoTopic,
   prefix: string = DEFAULT_COMMAND_PREFIX,
+  market: MarketRules = DEFAULT_MARKET_TEXT,
 ): EmbedBuilder {
+  const taxPercent = Math.round(market.taxRate * 100);
+  const listingDays = market.listingDurationDays;
   switch (topic) {
     case 'starter':
       return new EmbedBuilder()
@@ -247,12 +254,12 @@ export function buildTcgInfoEmbed(
             `\`\`\`\n/market action:browse page:1 filter_element:ICE filter_rarity:UR\n# or: ${prefix}market browse 1 ICE UR\n\`\`\`\n` +
             `• Filter by elemental affinity or rarity tier.\n` +
             `• Displays seller username, card level, stats, and asking price.\n\n` +
-            `### 💰 5% Market Tax Sink\n` +
-            `• A 5% platform fee is deducted from the seller's proceeds on sale (\`tax = Math.floor(price * 0.05)\`).\n` +
+            `### 💰 ${taxPercent}% Market Tax Sink\n` +
+            `• A ${taxPercent}% platform fee is deducted from the seller's proceeds on sale (\`tax = Math.floor(price * ${market.taxRate})\`).\n` +
             `• Helps control server inflation and maintains a balanced credit economy.\n\n` +
-            `### ⏳ 7-Day Auto-Expiration\n` +
-            `• Listings stay active for **7 days**.\n` +
-            `• If unsold after 7 days, listings automatically expire and cards return to your inventory in \`IDLE\` state!\n` +
+            `### ⏳ ${listingDays}-Day Auto-Expiration\n` +
+            `• Listings stay active for **${listingDays} days**.\n` +
+            `• If unsold after ${listingDays} days, listings automatically expire and cards return to your inventory in \`IDLE\` state!\n` +
             `• You can also manually cancel anytime with \`/market action:cancel listing_id:<id>\` or \`${prefix}market cancel <id>\`.`,
         )
         .setFooter({
@@ -334,7 +341,7 @@ export function buildTcgInfoEmbed(
             `• 🏰 **Tutorial vs. S1 Tower**: Why you must start with \`/dungeon tutorial\` before \`/dungeon climb\`.\n` +
             `• 🔥 **Dungeon Tower Mechanics**: S1 Infernal Crucible, energy scaling, and boss enrage.\n` +
             `• 🔄 **P2P Trading System**: Atomic card swaps, \`IN_TRADE\` locking, and dual confirmation.\n` +
-            `• 🏪 **Community Marketplace**: Listing cards, 5% tax sink, and 7-day auto-expiration.\n` +
+            `• 🏪 **Community Marketplace**: Listing cards, ${taxPercent}% tax sink, and ${listingDays}-day auto-expiration.\n` +
             `• 🏛️ **WaifuGuilds & Factions**: Creating a guild (5,000c), capacity, and guild bank.\n` +
             `• 🏆 **Achievements & Rewards**: 6 tracks, 5 tiers, and 7-asset reward dispatch.\n\n` +
             `*Tip: Use the dropdown menu below to navigate between guides immediately!*`,
@@ -403,7 +410,7 @@ export function buildTcgInfoSelectMenu(
       new StringSelectMenuOptionBuilder()
         .setLabel('Community Marketplace')
         .setValue('market')
-        .setDescription('Listing cards, 5% tax sink & 7-day expiration')
+        .setDescription('Listing cards, tax sink & auto-expiration')
         .setEmoji('🏪')
         .setDefault(currentTopic === 'market'),
       new StringSelectMenuOptionBuilder()
@@ -490,7 +497,8 @@ export function createTcgInfoCommand(services: BotServices): Command {
 
       const prefix = await resolveContextPrefix(ctx, services);
 
-      const embed = buildTcgInfoEmbed(topic, prefix);
+      const market = await services.marketService.getRules();
+      const embed = buildTcgInfoEmbed(topic, prefix, market);
       const row = buildTcgInfoSelectMenu(topic);
 
       const response = await ctx.reply({
@@ -516,7 +524,7 @@ export function createTcgInfoCommand(services: BotServices): Command {
           }
 
           const selected = interaction.values[0] as TcgInfoTopic;
-          const updatedEmbed = buildTcgInfoEmbed(selected, prefix);
+          const updatedEmbed = buildTcgInfoEmbed(selected, prefix, market);
           const updatedRow = buildTcgInfoSelectMenu(selected);
 
           await interaction.update({

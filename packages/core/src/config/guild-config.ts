@@ -214,6 +214,9 @@ export const MAX_XP_RATE_PERCENT = 300;
 export const MAX_MUSIC_VOLUME = 150;
 /** Volume a music session starts at when the guild has not chosen one. */
 export const DEFAULT_MUSIC_VOLUME = 80;
+/** Fewest and most unique chatters a Waifu TCG card drop can wait for. */
+export const MIN_TCG_DROP_MESSAGE_THRESHOLD = 5;
+export const MAX_TCG_DROP_MESSAGE_THRESHOLD = 500;
 const AI_SPEAKING_STYLE_IDS = AI_SPEAKING_STYLES.map((style) => style.id) as [
   (typeof AI_SPEAKING_STYLES)[number]['id'],
   ...(typeof AI_SPEAKING_STYLES)[number]['id'][],
@@ -438,6 +441,35 @@ export const GuildConfigSchemas = {
       textColor: HexColorSetting.describe('Text and border color as #rrggbb'),
       backgroundUrl: OptionalImageUrlSetting.describe(
         'Background image link (public http or https); empty for the uploaded image or the default',
+      ),
+    })
+    .strict(),
+  tcg: z
+    .object({
+      dropsEnabled: FlagSetting.describe('Waifu TCG card drops from chat activity on or off'),
+      dropChannelId: OptionalSnowflakeSetting.describe(
+        'Only messages in this channel count toward a drop, and drops post there; empty counts every channel',
+      ),
+      dropMessageThreshold: IntSetting(
+        MIN_TCG_DROP_MESSAGE_THRESHOLD,
+        MAX_TCG_DROP_MESSAGE_THRESHOLD,
+      ).describe(
+        `Unique members who must chat before a card drops (${MIN_TCG_DROP_MESSAGE_THRESHOLD} to ${MAX_TCG_DROP_MESSAGE_THRESHOLD})`,
+      ),
+      dropStartHour: IntSetting(0, 23).describe(
+        'Drops happen from this hour, 0 to 23 in the server time zone',
+      ),
+      dropEndHour: IntSetting(0, 23).describe(
+        'Drops stop at this hour, 0 to 23 in the server time zone; the same as the start hour means all day',
+      ),
+      dropClaimTimeoutSeconds: IntSetting(15, 600).describe(
+        'Seconds a drop stays claimable (15 to 600)',
+      ),
+      dropCooldownMinutes: IntSetting(0, 60).describe(
+        'Minutes the last claimant waits before claiming the next drop (0 to 60)',
+      ),
+      managerRoleId: OptionalSnowflakeSetting.describe(
+        'Role that may use /tcg-admin in this server without Manage Server; empty for none',
       ),
     })
     .strict(),

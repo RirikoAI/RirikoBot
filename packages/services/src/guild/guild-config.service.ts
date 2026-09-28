@@ -34,31 +34,31 @@ import {
 } from '@ririko/core';
 import { assertPublicUrl } from '../net/remote-image.js';
 import {
+  AiRepository,
+  AuditLogRepository,
+  AutoRoleRepository,
+  AutoVoiceRepository,
+  CommandCatalogRepository,
+  CommandSettingsRepository,
+  FreeGameRepository,
+  GuildConfigVersionRepository,
+  GuildSettingsRepository,
+  ImageRepository,
+  ModerationRepository,
+  MusicRepository,
+  WelcomerRepository,
   withTransaction,
-  type AuditLogRepository,
-  type AutoRoleRepository,
   type AutoVoiceConfig,
-  type AutoVoiceRepository,
-  type CommandCatalogRepository,
   type CommandSettings,
-  type CommandSettingsRepository,
   type DatabaseClient,
-  type GuildConfigVersionRepository,
-  type GuildSettingsRepository,
-  type ModerationRepository,
   type ModerationRule,
-  type MusicRepository,
-  type AiRepository,
-  type ImageRepository,
-  type FreeGameRepository,
   type WelcomeConfig,
-  type WelcomerRepository,
 } from '@ririko/database';
 
 /** Who changed a setting, recorded in `audit_logs`. */
 export interface GuildConfigActor {
   userId: string;
-  source: 'dashboard' | 'cli';
+  source: 'dashboard' | 'cli' | 'discord';
   ipAddress?: string | null | undefined;
   userAgent?: string | null | undefined;
 }
@@ -608,6 +608,37 @@ export class GuildConfigService {
       },
       welcome: welcomerCardStore(deps.welcomer, 'welcome'),
       farewell: welcomerCardStore(deps.welcomer, 'farewell'),
+      tcg: {
+        read: async (guildId, tx) => {
+          const row = await deps.guildSettings.findById(guildId, tx);
+          return {
+            dropsEnabled: row?.tcgDropsEnabled ?? false,
+            dropChannelId: row?.tcgDropChannelId ?? null,
+            dropMessageThreshold: row?.tcgDropMessageThreshold ?? 50,
+            dropStartHour: row?.tcgDropStartHour ?? 8,
+            dropEndHour: row?.tcgDropEndHour ?? 23,
+            dropClaimTimeoutSeconds: row?.tcgDropClaimTimeoutSeconds ?? 60,
+            dropCooldownMinutes: row?.tcgDropCooldownMinutes ?? 5,
+            managerRoleId: row?.tcgManagerRoleId ?? null,
+          };
+        },
+        write: async (guildId, values, tx) => {
+          await deps.guildSettings.upsert(
+            {
+              guildId,
+              tcgDropsEnabled: values.dropsEnabled,
+              tcgDropChannelId: values.dropChannelId,
+              tcgDropMessageThreshold: values.dropMessageThreshold,
+              tcgDropStartHour: values.dropStartHour,
+              tcgDropEndHour: values.dropEndHour,
+              tcgDropClaimTimeoutSeconds: values.dropClaimTimeoutSeconds,
+              tcgDropCooldownMinutes: values.dropCooldownMinutes,
+              tcgManagerRoleId: values.managerRoleId,
+            },
+            tx,
+          );
+        },
+      },
     };
   }
 
@@ -658,4 +689,28 @@ export class GuildConfigService {
       return { values, changes };
     });
   }
+}
+
+/** A `GuildConfigService` with its own repositories on `db` (bot and CLI). */
+export function createGuildConfigService(
+  db: DatabaseClient,
+  options: Pick<GuildConfigServiceDeps, 'defaultPrefix' | 'defaultTimezone' | 'now'>,
+): GuildConfigService {
+  return new GuildConfigService({
+    db,
+    guildSettings: new GuildSettingsRepository(db),
+    moderation: new ModerationRepository(db),
+    commandSettings: new CommandSettingsRepository(db),
+    commandCatalog: new CommandCatalogRepository(db),
+    autoRoles: new AutoRoleRepository(db),
+    autoVoice: new AutoVoiceRepository(db),
+    music: new MusicRepository(db),
+    ai: new AiRepository(db),
+    images: new ImageRepository(db),
+    freeGames: new FreeGameRepository(db),
+    welcomer: new WelcomerRepository(db),
+    versions: new GuildConfigVersionRepository(db),
+    audit: new AuditLogRepository(db),
+    ...options,
+  });
 }

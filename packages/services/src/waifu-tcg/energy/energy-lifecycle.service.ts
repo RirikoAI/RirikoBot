@@ -12,9 +12,33 @@ export function getEnergyMilestoneBonus(level: number): number {
   return 0;
 }
 
-export function calculateMaxEnergy(level: number, globalCap = DEFAULT_GLOBAL_ENERGY_CAP): number {
+/** The global energy rules (owner console `/owner/tcg`, `ririko tcg:rules`). */
+export interface EnergyRules {
+  globalCap: number;
+  baseCapacity: number;
+  scalingPerLevel: number;
+  dailyPotionLimit: number;
+  maxBonusCap: number;
+  dailyBonusIncrement: number;
+}
+
+export const DEFAULT_ENERGY_RULES: EnergyRules = {
+  globalCap: DEFAULT_GLOBAL_ENERGY_CAP,
+  baseCapacity: 100,
+  scalingPerLevel: 2,
+  dailyPotionLimit: 3,
+  maxBonusCap: 50,
+  dailyBonusIncrement: 5,
+};
+
+/** Energy capacity at `level`: the base, a step per level and milestone bonuses, up to the cap. */
+export function calculateMaxEnergy(
+  level: number,
+  globalCap = DEFAULT_GLOBAL_ENERGY_CAP,
+  capacity: Pick<EnergyRules, 'baseCapacity' | 'scalingPerLevel'> = DEFAULT_ENERGY_RULES,
+): number {
   const clampedLevel = Math.max(1, level);
-  const base = 100 + Math.floor((clampedLevel - 1) * 2);
+  const base = capacity.baseCapacity + Math.floor((clampedLevel - 1) * capacity.scalingPerLevel);
   const milestone = getEnergyMilestoneBonus(clampedLevel);
   const total = base + milestone;
   return Math.min(globalCap, total);
@@ -23,21 +47,20 @@ export function calculateMaxEnergy(level: number, globalCap = DEFAULT_GLOBAL_ENE
 /** Resolves a user's account-wide level. Injected so this service owns level lookup. */
 export type PlayerLevelResolver = (userId: string) => Promise<number>;
 
-export interface BonusEnergyConfig {
-  maxBonusCap: number;
-  dailyIncrement: number;
-}
-
-/** Resolves bonus energy configuration (daily increment and maximum cap). */
-export type BonusConfigResolver = () => Promise<BonusEnergyConfig>;
+/** Resolves the current energy rules; the bot reads the owner's saved TCG rules. */
+export type EnergyRulesResolver = () => Promise<EnergyRules>;
 
 export interface EnergyLifecycleOptions {
   resetSchedule?: ResetSchedule | undefined;
+  /** Cap used without a rules resolver. */
   globalCap?: number | undefined;
   /** Resolves account-wide player level; omit to keep each player's stored capacity. */
   levelResolver?: PlayerLevelResolver | undefined;
-  /** Resolves bonus energy configuration; omit to disable daily bonus energy increments. */
-  bonusConfigResolver?: BonusConfigResolver | undefined;
+  /**
+   * Resolves capacity, potion and bonus energy rules; omit to use the defaults with the
+   * `globalCap` above and no daily bonus energy.
+   */
+  rulesResolver?: EnergyRulesResolver | undefined;
 }
 
 /**
@@ -75,7 +98,7 @@ export class EnergyLifecycleService {
   private readonly resetSchedule: ResetSchedule;
   private readonly globalCap: number;
   private readonly levelResolver: PlayerLevelResolver | undefined;
-  private readonly bonusConfigResolver: BonusConfigResolver | undefined;
+  private readonly rulesResolver: EnergyRulesResolver | undefined;
 
   constructor(
     private readonly energyRepo: PlayerEnergyRepository,
@@ -90,7 +113,18 @@ export class EnergyLifecycleService {
     this.resetSchedule = options.resetSchedule ?? DEFAULT_RESET_SCHEDULE;
     this.globalCap = options.globalCap ?? DEFAULT_GLOBAL_ENERGY_CAP;
     this.levelResolver = options.levelResolver;
-    this.bonusConfigResolver = options.bonusConfigResolver;
+    this.rulesResolver = options.rulesResolver;
+  }
+
+  /** The energy rules in force now. */
+  async rules(): Promise<EnergyRules> {
+    if (this.rulesResolver) return this.rulesResolver();
+    return { ...DEFAULT_ENERGY_RULES, globalCap: this.globalCap, dailyBonusIncrement: 0 };
+  }
+
+  /** Energy potions a player may use per reset day. */
+  async dailyPotionLimit(): Promise<number> {
+    return (await this.rules()).dailyPotionLimit;
   }
 
   /**
@@ -102,16 +136,18 @@ export class EnergyLifecycleService {
   private async resolveMaxEnergy(
     userId: string,
     storedMax: number,
+    rules: EnergyRules,
     explicitLevel?: number,
+    globalCap = rules.globalCap,
   ): Promise<number> {
     if (explicitLevel !== undefined) {
-      return calculateMaxEnergy(explicitLevel, this.globalCap);
+      return calculateMaxEnergy(explicitLevel, globalCap, rules);
     }
     if (!this.levelResolver) {
       return storedMax;
     }
     const level = await this.levelResolver(userId);
-    return calculateMaxEnergy(level, this.globalCap);
+    return calculateMaxEnergy(level, globalCap, rules);
   }
 
   /**
@@ -127,11 +163,15 @@ export class EnergyLifecycleService {
   ): Promise<PlayerEnergy> {
     const record = await this.energyRepo.getOrCreate(userId);
     const today = getResetDayKey(new Date(), this.resetSchedule);
+    const rules = await this.rules();
 
-    const maxCapacity =
-      globalCap !== undefined && playerLevel !== undefined
-        ? calculateMaxEnergy(playerLevel, globalCap)
-        : await this.resolveMaxEnergy(userId, record.maxEnergy, playerLevel);
+    const maxCapacity = await this.resolveMaxEnergy(
+      userId,
+      record.maxEnergy,
+      rules,
+      playerLevel,
+      globalCap,
+    );
 
     let needsUpdate = false;
     const updateData: Partial<PlayerEnergy> = {};
@@ -149,14 +189,11 @@ export class EnergyLifecycleService {
       updateData.lastReplenishedAt = new Date();
 
       let currentBonus = record.bonusEnergy ?? 0;
-      if (this.bonusConfigResolver) {
-        const { maxBonusCap, dailyIncrement } = await this.bonusConfigResolver();
-        if (dailyIncrement > 0) {
-          const newBonus = Math.min(maxBonusCap, currentBonus + dailyIncrement);
-          if (newBonus !== currentBonus) {
-            updateData.bonusEnergy = newBonus;
-            currentBonus = newBonus;
-          }
+      if (rules.dailyBonusIncrement > 0) {
+        const newBonus = Math.min(rules.maxBonusCap, currentBonus + rules.dailyBonusIncrement);
+        if (newBonus !== currentBonus) {
+          updateData.bonusEnergy = newBonus;
+          currentBonus = newBonus;
         }
       }
 
@@ -198,10 +235,11 @@ export class EnergyLifecycleService {
   async consumePotion(
     userId: string,
     energyRestored: number,
-    maxDailyLimit: number,
+    maxDailyLimit?: number,
   ): ReturnType<PlayerEnergyRepository['consumeEnergyPotion']> {
     await this.getOrReconcileUserEnergy(userId);
-    return this.energyRepo.consumeEnergyPotion(userId, energyRestored, maxDailyLimit);
+    const limit = maxDailyLimit ?? (await this.dailyPotionLimit());
+    return this.energyRepo.consumeEnergyPotion(userId, energyRestored, limit);
   }
 
   /**
@@ -230,10 +268,13 @@ export class EnergyLifecycleService {
     const record = await this.energyRepo.getOrCreate(userId);
     const today = getResetDayKey(new Date(), this.resetSchedule);
 
-    const maxCapacity =
-      globalCap !== undefined && playerLevel !== undefined
-        ? calculateMaxEnergy(playerLevel, globalCap)
-        : await this.resolveMaxEnergy(userId, record.maxEnergy, playerLevel);
+    const maxCapacity = await this.resolveMaxEnergy(
+      userId,
+      record.maxEnergy,
+      await this.rules(),
+      playerLevel,
+      globalCap,
+    );
 
     const newCurrent = Math.max(record.currentEnergy, maxCapacity);
 

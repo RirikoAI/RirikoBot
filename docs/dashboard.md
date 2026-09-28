@@ -80,13 +80,14 @@ Guild Discovery Pipeline
   3. The five-minute passkey check. If it is missing, the form offers "Confirm with passkey and save".
 
   The authorization coverage test accepts `runOwnerAction` as both the request guard and the authorization guard.
-- Owner writes go through the owner services in `@ririko/services/owner`: `EconomyConfigService` and `ItemCatalogService`. Their audit entries have no guild (`guild_id` is null), with the actions `owner.economy_config.update` and `owner.shop_item.*` / `owner.shop_category.*`. The guild audit viewer does not show them yet.
+- Owner writes go through the owner services in `@ririko/services/owner`: `EconomyConfigService`, `ItemCatalogService` and `TcgRulesService`. Their audit entries have no guild (`guild_id` is null), with the actions `owner.economy_config.update`, `owner.shop_item.*` / `owner.shop_category.*` and `owner.tcg_rules.update`. The guild audit viewer does not show them yet.
 - Pages:
   - `/owner/economy` edits the global economy values (docs/economy.md 5.4).
+  - `/owner/tcg` edits the global Waifu TCG rules: market tax and listing expiry, energy and potions (TASK-1124).
   - `/owner/shop` lists the item catalog with holder counts and manages categories.
   - `/owner/shop/new` and `/owner/shop/[itemId]` edit an item.
-- `ririko economy:config [key] [value]` is the CLI for the economy values. It uses the same schema, service and audit trail as the owner console.
-- Guild-scoped TCG settings (such as drop settings and the TCG Manager Role) stay with guild managers.
+- `ririko economy:config [key] [value]` is the CLI for the economy values, and `ririko tcg:rules [key] [value]` for the TCG rules. They use the same schema, service and audit trail as the owner console.
+- Guild-scoped TCG settings (drop settings and the TCG Manager Role) stay with guild managers on `/dashboard/[guildId]/tcg` (TASK-1121).
 
 ### 3.2. No Placeholder Settings
 Each page exposes only settings the bot actually reads. A backing column is added only where the bot consumes it. Settings listed in Section 4 that the bot does not read yet are either wired end to end in the same ticket or left off the page.
@@ -157,8 +158,10 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 9. **XP & Ranking**: XP rate multipliers, voice XP toggles, level-up announcement channel.
    - *Shipped in STORY-115 as `/dashboard/[guildId]/xp` (module `xp`):* level-up announcements on/off and channel, the XP rate (0 to 300%), no-XP channels (text and voice) and roles, and voice rewards (off by default). See docs/economy.md 3.2 and 6.2.
 10. **Waifu TCG & Gamification Settings** (items marked *owner console* edit global tables and are gated to bot owners with a passkey; see Section 3.1):
-    - **Card Drop Management**: Drop channel selector, message frequency slider (50–200 messages), active hours timepicker, claim window timer. *Current gap:* `DropManager` keeps `GuildDropConfig` in an in-memory `Map` and nothing calls `setGuildConfig` outside tests, so every guild runs on `DEFAULT_DROP_CONFIG`. These settings must be persisted and loaded by the bot before the page can expose them (TASK-1121).
+    - **Card Drop Management**: Drop channel selector, message frequency slider (50–200 messages), active hours timepicker, claim window timer.
+      - *Shipped in TASK-1121 as `/dashboard/[guildId]/tcg` (module `tcg`, columns `guild_settings.tcg_*`):* drops on/off (off by default), drop channel (empty counts every channel), unique chatters before a drop (5 to 500), start and end hour in the server time zone (an end before the start runs past midnight; equal hours mean all day), claim window (15 to 600 s) and the repeat-claim cooldown (0 to 60 min). The bot's message listener counts messages that pass the anti-spam check and posts the drop; members claim it with `/card action:claim`. `DropManager` loads the settings once per guild and reloads them on `guild:configChanged` for `tcg` or `general` (time zone). `/tcg-admin action:drops` edits the same settings from Discord through `GuildConfigService` (audited with `source: 'discord'`).
     - **Rarity & Market Controls** (*owner console*, `tcg_system_configs`): Drop weight fine-tuning, marketplace tax rate slider (1%–20%), listing expiration duration.
+      - *Shipped in TASK-1124 as `/owner/tcg`:* market tax (1% to 20%, stored as the fraction `market_tax_rate`) and listing expiry (1 to 30 days, `listing_expiry_days`). `MarketService` reads them for every new listing; `/market` and `/tcg-info` show the live values. Drop weight tuning is not offered: rarity odds are fixed in `CardGenerator`.
     - **Dungeon Season & Tower Floor Manager** (*owner console*, `dungeon_seasons` / `dungeon_bosses`). The difficulty curve chart calls the same scaling functions the dungeon engine uses, imported from `@ririko/services`, never reimplemented:
       - **Tutorial Configuration**: Enable/disable tutorial gate, configure introductory starter rewards.
       - **Season Lifecycle Editor**: Create new seasons (S1, S2, S3...), set active dates, assign theme elements (Fire, Ice, Light, Shadow, etc.), and customize environmental affixes.
@@ -169,7 +172,9 @@ The dashboard provides dedicated management views for all 20+ bot modules:
       - Slider for **Base Energy** (50–200, default 100) and **Energy Scaling Per Level** (1–5).
       - Daily Consumable Energy Restore Limit slider (1–10/day, default 3).
       - Daily replenishment schedule cron string (default `'0 0 * * *'`).
+      - *Shipped in TASK-1124 on `/owner/tcg`:* energy cap, base capacity, capacity per level, energy potions per day, bonus energy cap and bonus energy per day. `EnergyLifecycleService` reads them through a rules resolver (capacity, potion limit, daily bonus); the economy `/use` potion path is capped by the same limit. The cron string is not offered: the daily reset comes from the `RIRIKO_RESET_*` environment settings, so the unused `daily_replenish_cron`, `dungeon_scaling_model` and `dungeon_growth_rate` keys are deleted at bot start. Rules are cached 30 seconds in each process. `ririko tcg:rules [key] [value]` is the CLI, and bot owners can set them with `/tcg-admin action:energy|market`; all three paths use `TcgRulesService` and audit `owner.tcg_rules.update`.
     - **Role Permissions**: Role selector for **TCG Manager Role** authorized to adjust game rules and run `/tcg-admin`.
+      - *Shipped in TASK-1121 on the same page:* the role is per guild (`guild_settings.tcg_manager_role_id`). Its members can run `/tcg-admin` in that server (view and drop settings) without Manage Server; only members with Manage Server can change the role. The old global `tcg_system_configs.tcg_manager_role_id` key is deleted at bot start with a warning, because its guild cannot be known.
     - **Shop Catalog Manager** (*owner console*, `game_items`; respects catalog-code seeding from BUG-0015): Visual catalog editor to manage basic shop equipment, accessories, potions, and daily purchase quotas.
     - **Achievement Manager** (*owner console* for edits, `game_achievements` is global): Live inspector for achievement completion telemetry, active reward tables, and toggleable seasonal achievements.
 11. **Games**: Enable/disable specific mini-games, wager limits, cooldown sliders.

@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   passkeyCount: 1,
   headers: new Headers({ origin: 'https://dash.example.com', 'user-agent': 'vitest' }),
   update: vi.fn(),
+  updateTcgRules: vi.fn(),
   createItem: vi.fn(),
   deleteItem: vi.fn(),
   revalidatePath: vi.fn(),
@@ -33,12 +34,14 @@ vi.mock('./services', () => ({
     sessions: { resolve: async () => mocks.session },
     passkeys: { count: async () => mocks.passkeyCount },
     economyConfig: { update: mocks.update },
+    tcgRules: { update: mocks.updateTcgRules },
     itemCatalog: { createItem: mocks.createItem, deleteItem: mocks.deleteItem },
   }),
 }));
 
 const { saveEconomySettings } = await import('@/app/owner/economy/actions');
 const { createShopItem, deleteShopItem } = await import('@/app/owner/shop/actions');
+const { saveTcgRules } = await import('@/app/owner/tcg/actions');
 
 const session = (userId: string, stepUpAt: Date | null = new Date()): ActiveSession => ({
   id: 'hash',
@@ -165,5 +168,42 @@ describe('owner console actions (TASK-1651, TASK-1652)', () => {
       expect.objectContaining({ code: 'gem', isPurchasable: true }),
       expect.objectContaining({ userId: 'owner-1', source: 'dashboard' }),
     );
+  });
+
+  it('saves global TCG rules for an owner and reports when nothing changed (TASK-1124)', async () => {
+    mocks.session = session('owner-1');
+    mocks.updateTcgRules.mockResolvedValueOnce({
+      values: { marketTaxPercent: 10 },
+      changes: [{ field: 'marketTaxPercent', before: 5, after: 10 }],
+    });
+    const state = await saveTcgRules(
+      INITIAL_SETTINGS_FORM_STATE,
+      form({ marketTaxPercent: '10', unrelated: 'x' }),
+    );
+    expect(state).toEqual({
+      status: 'saved',
+      message: 'Rules saved.',
+      values: { marketTaxPercent: 10 },
+    });
+    expect(mocks.updateTcgRules).toHaveBeenCalledWith(
+      { marketTaxPercent: '10' },
+      expect.objectContaining({ userId: 'owner-1', source: 'dashboard' }),
+    );
+    expect(mocks.revalidatePath).toHaveBeenCalledWith('/owner/tcg');
+
+    mocks.updateTcgRules.mockResolvedValueOnce({ values: { marketTaxPercent: 10 }, changes: [] });
+    const unchanged = await saveTcgRules(
+      INITIAL_SETTINGS_FORM_STATE,
+      form({ marketTaxPercent: '10' }),
+    );
+    expect(unchanged).toMatchObject({ status: 'saved', message: 'Nothing changed.' });
+  });
+
+  it('refuses global TCG rules to users who are not bot owners', async () => {
+    mocks.session = session('user-1');
+    await expect(
+      saveTcgRules(INITIAL_SETTINGS_FORM_STATE, form({ marketTaxPercent: '10' })),
+    ).rejects.toThrow('NOT_FOUND');
+    expect(mocks.updateTcgRules).not.toHaveBeenCalled();
   });
 });
