@@ -182,7 +182,7 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115. STORY-116 was re-groomed to 13 points on 2026-09-27 and split: Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts at first grooming). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115. STORY-116 was re-groomed to 13 points on 2026-09-27 and split: Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166. STORY-112 was re-groomed on 2026-09-28 after an audit showed its TCG settings had no runtime consumer: it keeps guild TCG settings and global rules (8), the dungeon season editor moved to STORY-167 (8) and the album, shop catalog and achievement managers moved to STORY-168 (5)."
     },
     {
       "id": "EPIC-012",
@@ -851,15 +851,43 @@
     {
       "id": "STORY-112",
       "epic": "EPIC-011",
-      "title": "Waifu TCG Web Management, Album Viewer & Dungeon Tower Visualizer",
+      "title": "Guild TCG Settings (Persisted Drops, Guild-Scoped TCG Manager Role) & Owner-Gated Global TCG Rules",
       "points": 8,
       "status": "TODO",
       "requires": [
         "STORY-111",
         "STORY-117"
       ],
+      "blocks": [
+        "STORY-167"
+      ],
+      "description": "Re-groomed 2026-09-28 after an audit showed most target settings had no runtime consumer: drops never spawn (nothing calls DropManager.recordMessage and its config is an in-memory Map), the TCG Manager Role is one global tcg_system_configs key, /tcg-admin lets any guild admin edit global rules, market tax / listing expiry / energy cap-base-scaling / restore-pot limit are stored but ignored at runtime, and global edits are not audited. The dungeon season editor moved to STORY-167 and the album, shop catalog and achievement managers moved to STORY-168. Originally estimated 5, then 8."
+    },
+    {
+      "id": "STORY-167",
+      "epic": "EPIC-011",
+      "title": "Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot",
+      "points": 8,
+      "status": "TODO",
+      "requires": [
+        "STORY-112"
+      ],
+      "blocks": [
+        "STORY-168"
+      ],
+      "description": "Split from STORY-112 on 2026-09-28. Seasons are only created by the bot start seed and pnpm tcg:boss-builder, findActiveSeason ignores dates and nothing deactivates older seasons, ScalingEngine is only reachable through the canvas-loading waifu-tcg barrel, and floor loot columns are never read."
+    },
+    {
+      "id": "STORY-168",
+      "epic": "EPIC-011",
+      "title": "Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-167"
+      ],
       "blocks": [],
-      "description": "TCG management pages. tcg_system_configs and dungeon_seasons are global, so global game rules and the season editor are gated to bot owners (ownerIds); guild-scoped TCG settings stay with guild managers and the TCG Manager Role. Re-estimated from 5 to 8 during grooming."
+      "description": "Split from STORY-112 on 2026-09-28. Card renders are cached on disk by CardImageService; canonical game_items are overwritten at bot start (BUG-0015 sync); only TUTORIAL_CLEARED achievement progress is tracked."
     },
     {
       "id": "STORY-113",
@@ -2663,42 +2691,80 @@
     {
       "id": "TASK-1121",
       "parent": "STORY-112",
-      "title": "TCG Settings: Guild Drop Settings, TCG Manager Role & Owner-Gated Global Rules (Market Tax, Listing Expiry, Energy Governance)",
-      "points": 3,
+      "title": "Guild tcg Config Module: Persisted Drop Settings, Drop Spawning from Messages, Guild-Scoped TCG Manager Role & TCG Settings Page",
+      "points": 5,
       "status": "TODO",
       "requires": [
         "STORY-111"
       ],
       "blocks": [
-        "TASK-1122"
+        "TASK-1124"
       ],
-      "description": "Guild managers edit guild-scoped drop settings and the TCG Manager Role. DropManager currently keeps GuildDropConfig in an in-memory Map and nothing calls setGuildConfig outside tests, so drop settings must first be persisted and loaded by the bot. Bot owners (ownerIds, passkey required) edit global tcg_system_configs rules in the owner console: market tax (1-20%), listing expiry, energy cap/base/scaling, daily restore limit. All values validated by shared schemas and audited."
+      "description": "Add a tcg module to GuildConfigSchemas backed by new guild_settings columns. DropManager loads config through the service (cache invalidated by guild:configChanged), respects an enabled flag and the guild timezone, and the message listener calls recordMessage and posts the drop. The TCG Manager Role becomes guild-scoped. Dashboard page at /dashboard/[guildId]/tcg. Handover plan: docs/kanban/handovers/TASK-1121.md."
     },
     {
-      "id": "TASK-1122",
+      "id": "TASK-1124",
       "parent": "STORY-112",
-      "title": "Owner-Only Dungeon Season Editor, Difficulty Curve Visualizer & Boss Enrage/Shield/Loot Configurator",
+      "title": "Global TCG Rules Wired at Runtime (Market Tax 1-20%, Listing Expiry, Energy Cap/Base/Scaling, Restore-Pot Limit), Audited Owner TCG Page, ririko tcg:rules & /tcg-admin Owner Lockdown",
       "points": 3,
       "status": "TODO",
       "requires": [
         "TASK-1121"
       ],
-      "blocks": [
-        "TASK-1123"
-      ],
-      "description": "Create and edit dungeon_seasons (dates, theme element, affixes, scaling model and params) and dungeon_bosses enrage turns, shield layers and first-clear/repeat loot. The HP/ATK/DEF curve chart across floors calls the same scaling functions the dungeon engine uses (imported from @ririko/services, not reimplemented)."
+      "blocks": [],
+      "description": "Shared TcgRulesSchema in @ririko/core, audited TcgRulesService in @ririko/services/owner (EconomyConfigService pattern) with a short TTL cache that MarketService, energy lifecycle, inventory and consumables read instead of hardcoded values. /tcg-admin global subcommands become bot-owner only. Handover plan: docs/kanban/handovers/TASK-1124.md."
     },
     {
-      "id": "TASK-1123",
-      "parent": "STORY-112",
-      "title": "Card Album Viewer (CardSynthesizer Renders), Shop Catalog Manager & Achievement Manager",
-      "points": 2,
+      "id": "TASK-1122",
+      "parent": "STORY-167",
+      "title": "Owner Dungeon Season & Boss Editor (Dates, Theme, Affixes, Scaling Curve, Enrage, Ward Shields) & Difficulty Curve Visualizer",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-112"
+      ],
+      "blocks": [
+        "TASK-1126"
+      ],
+      "description": "Owner console CRUD for dungeon_seasons and dungeon_bosses through an audited service. The HP/ATK/DEF curve uses the engine ScalingEngine and toScalingConfig through a new canvas-free @ririko/services/dungeon-scaling subpath. Handover plan: docs/kanban/handovers/TASK-1122.md."
+    },
+    {
+      "id": "TASK-1126",
+      "parent": "STORY-167",
+      "title": "Dungeon Floor Loot Tables Wired into DungeonLootService (First-Clear & Repeat) & Floor Loot Editor",
+      "points": 3,
       "status": "TODO",
       "requires": [
         "TASK-1122"
       ],
       "blocks": [],
-      "description": "Per-user card album gallery served from cached CardSynthesizer renders. The shop catalog editor (game_items, respecting catalog-code seeding from BUG-0015) and achievement edits (game_achievements) change global tables, so they live in the owner console; guild managers get a read-only achievement completion inspector."
+      "description": "dungeon_floors.first_clear_rewards and repeat_rewards_table are never read; loot is hardcoded in dungeon-loot.service. Validate both with Zod, use them when set (fall back to current brackets), and edit them in the season editor. Handover plan: docs/kanban/handovers/TASK-1126.md."
+    },
+    {
+      "id": "TASK-1123",
+      "parent": "STORY-168",
+      "title": "Card Album Viewer (Cached CardImageService Renders)",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "STORY-167"
+      ],
+      "blocks": [
+        "TASK-1125"
+      ],
+      "description": "Per-user paginated card album at /account/album, rendered server-side from cached CardImageService PNGs. Handover plan: docs/kanban/handovers/TASK-1123.md."
+    },
+    {
+      "id": "TASK-1125",
+      "parent": "STORY-168",
+      "title": "Override-Safe TCG Shop Catalog (game_items) Editor, Achievement Manager & Guild Achievement Completion Inspector",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1123"
+      ],
+      "blocks": [],
+      "description": "syncCanonicalItems overwrites canonical game_items at every bot start, so canonical items expose only owner-owned shop fields, preserved by the sync; custom items are fully editable. Achievement editing is restricted to tracked requirement types; guild managers get a read-only completion inspector. Handover plan: docs/kanban/handovers/TASK-1125.md."
     },
     {
       "id": "TASK-1131",
