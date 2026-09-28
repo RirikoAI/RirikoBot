@@ -41,6 +41,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `CHORE-1703` | Chore | Remove Adventure User-Specific S+ Rank Override | 1 | — | [CHORE-1703.md](handovers/CHORE-1703.md) |
 | `CHORE-1702` | Chore | Plan Companion-Level Adventure Reward Ranks | 2 | — | [CHORE-1702.md](handovers/CHORE-1702.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | — | [CHORE-1701.md](handovers/CHORE-1701.md) |
 | `BUG-0022` | Bug | Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone | 2 | `STORY-123` | [BUG-0022.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0022.md) |
