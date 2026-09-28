@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-None.
+- `TASK-1124` (`STORY-112`): Global TCG rules wired at runtime, audited owner TCG page, `ririko tcg:rules`, `/tcg-admin` owner lockdown. Plan: [TASK-1124.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1124.md)
 
 ---
 
@@ -283,8 +283,8 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1173` | Task | Strict Nonce CSP & Security Headers, React Taint & server-only Secret Guards, Server Action Authorization Coverage Test | 3 | `STORY-118` | ✅ Done · [STORY-118.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-118.md) | `TASK-1172` |
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | `EPIC-011` | 📥 Backlog (estimate provisional) | `STORY-118` |
 | `STORY-112` | Story | Guild TCG Settings (Persisted Drops, Guild-Scoped TCG Manager Role) & Owner-Gated Global TCG Rules | 8 | `EPIC-011` | 🎯 To Do | `STORY-111`, `STORY-117` |
-| `TASK-1121` | Task | Guild `tcg` Config Module: Persisted Drop Settings, Drop Spawning from Messages, Guild-Scoped TCG Manager Role & TCG Settings Page | 5 | `STORY-112` | 🎯 To Do · [TASK-1121.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1121.md) | `STORY-111` |
-| `TASK-1124` | Task | Global TCG Rules Wired at Runtime (Market Tax 1-20%, Listing Expiry, Energy Cap/Base/Scaling, Restore-Pot Limit), Audited Owner TCG Page, `ririko tcg:rules` & `/tcg-admin` Owner Lockdown | 3 | `STORY-112` | 🎯 To Do · [TASK-1124.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1124.md) | `TASK-1121` |
+| `TASK-1121` | Task | Guild `tcg` Config Module: Persisted Drop Settings, Drop Spawning from Messages, Guild-Scoped TCG Manager Role & TCG Settings Page | 5 | `STORY-112` | ✅ Done · [TASK-1121.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1121.md) | `STORY-111` |
+| `TASK-1124` | Task | Global TCG Rules Wired at Runtime (Market Tax 1-20%, Listing Expiry, Energy Cap/Base/Scaling, Restore-Pot Limit), Audited Owner TCG Page, `ririko tcg:rules` & `/tcg-admin` Owner Lockdown | 3 | `STORY-112` | ⚡ In Progress · [TASK-1124.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1124.md) | `TASK-1121` |
 | `STORY-167` | Story | Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot | 8 | `EPIC-011` | 🎯 To Do | `STORY-112` |
 | `TASK-1122` | Task | Owner Dungeon Season & Boss Editor (Dates, Theme, Affixes, Scaling Curve, Enrage, Ward Shields) & Difficulty Curve Visualizer | 5 | `STORY-167` | 🎯 To Do · [TASK-1122.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1122.md) | `STORY-112` |
 | `TASK-1126` | Task | Dungeon Floor Loot Tables Wired into DungeonLootService (First-Clear & Repeat) & Floor Loot Editor | 3 | `STORY-167` | 🎯 To Do · [TASK-1126.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1126.md) | `TASK-1122` |

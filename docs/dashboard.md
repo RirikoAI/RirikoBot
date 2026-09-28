@@ -86,7 +86,7 @@ Guild Discovery Pipeline
   - `/owner/shop` lists the item catalog with holder counts and manages categories.
   - `/owner/shop/new` and `/owner/shop/[itemId]` edit an item.
 - `ririko economy:config [key] [value]` is the CLI for the economy values. It uses the same schema, service and audit trail as the owner console.
-- Guild-scoped TCG settings (such as drop settings and the TCG Manager Role) stay with guild managers.
+- Guild-scoped TCG settings (drop settings and the TCG Manager Role) stay with guild managers on `/dashboard/[guildId]/tcg` (TASK-1121).
 
 ### 3.2. No Placeholder Settings
 Each page exposes only settings the bot actually reads. A backing column is added only where the bot consumes it. Settings listed in Section 4 that the bot does not read yet are either wired end to end in the same ticket or left off the page.
@@ -157,7 +157,8 @@ The dashboard provides dedicated management views for all 20+ bot modules:
 9. **XP & Ranking**: XP rate multipliers, voice XP toggles, level-up announcement channel.
    - *Shipped in STORY-115 as `/dashboard/[guildId]/xp` (module `xp`):* level-up announcements on/off and channel, the XP rate (0 to 300%), no-XP channels (text and voice) and roles, and voice rewards (off by default). See docs/economy.md 3.2 and 6.2.
 10. **Waifu TCG & Gamification Settings** (items marked *owner console* edit global tables and are gated to bot owners with a passkey; see Section 3.1):
-    - **Card Drop Management**: Drop channel selector, message frequency slider (50–200 messages), active hours timepicker, claim window timer. *Current gap:* `DropManager` keeps `GuildDropConfig` in an in-memory `Map` and nothing calls `setGuildConfig` outside tests, so every guild runs on `DEFAULT_DROP_CONFIG`. These settings must be persisted and loaded by the bot before the page can expose them (TASK-1121).
+    - **Card Drop Management**: Drop channel selector, message frequency slider (50–200 messages), active hours timepicker, claim window timer.
+      - *Shipped in TASK-1121 as `/dashboard/[guildId]/tcg` (module `tcg`, columns `guild_settings.tcg_*`):* drops on/off (off by default), drop channel (empty counts every channel), unique chatters before a drop (5 to 500), start and end hour in the server time zone (an end before the start runs past midnight; equal hours mean all day), claim window (15 to 600 s) and the repeat-claim cooldown (0 to 60 min). The bot's message listener counts messages that pass the anti-spam check and posts the drop; members claim it with `/card action:claim`. `DropManager` loads the settings once per guild and reloads them on `guild:configChanged` for `tcg` or `general` (time zone). `/tcg-admin action:drops` edits the same settings from Discord through `GuildConfigService` (audited with `source: 'discord'`).
     - **Rarity & Market Controls** (*owner console*, `tcg_system_configs`): Drop weight fine-tuning, marketplace tax rate slider (1%–20%), listing expiration duration.
     - **Dungeon Season & Tower Floor Manager** (*owner console*, `dungeon_seasons` / `dungeon_bosses`). The difficulty curve chart calls the same scaling functions the dungeon engine uses, imported from `@ririko/services`, never reimplemented:
       - **Tutorial Configuration**: Enable/disable tutorial gate, configure introductory starter rewards.
@@ -170,6 +171,7 @@ The dashboard provides dedicated management views for all 20+ bot modules:
       - Daily Consumable Energy Restore Limit slider (1–10/day, default 3).
       - Daily replenishment schedule cron string (default `'0 0 * * *'`).
     - **Role Permissions**: Role selector for **TCG Manager Role** authorized to adjust game rules and run `/tcg-admin`.
+      - *Shipped in TASK-1121 on the same page:* the role is per guild (`guild_settings.tcg_manager_role_id`). Its members can run `/tcg-admin` in that server (view and drop settings) without Manage Server; only members with Manage Server can change the role. The old global `tcg_system_configs.tcg_manager_role_id` key is deleted at bot start with a warning, because its guild cannot be known.
     - **Shop Catalog Manager** (*owner console*, `game_items`; respects catalog-code seeding from BUG-0015): Visual catalog editor to manage basic shop equipment, accessories, potions, and daily purchase quotas.
     - **Achievement Manager** (*owner console* for edits, `game_achievements` is global): Live inspector for achievement completion telemetry, active reward tables, and toggleable seasonal achievements.
 11. **Games**: Enable/disable specific mini-games, wager limits, cooldown sliders.

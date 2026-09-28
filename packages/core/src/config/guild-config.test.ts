@@ -171,6 +171,7 @@ describe('GuildConfigSchemas', () => {
       'freegames',
       'welcome',
       'farewell',
+      'tcg',
     ]);
     expect(Object.keys(GuildConfigSchemas.general.shape)).toEqual(['prefix', 'timezone']);
     expect(Object.keys(GuildConfigSchemas.freegames.shape)).toEqual(['channelId', 'pingRoleId']);
@@ -225,6 +226,35 @@ describe('GuildConfigSchemas', () => {
       GuildConfigSchemas.games.shape.rules.safeParse('[{"command":"rps"},{"command":"rps"}]')
         .success,
     ).toBe(false);
+  });
+
+  it('reads Waifu TCG drop settings from form and CLI values', () => {
+    const parsed = GuildConfigSchemas.tcg.parse({
+      dropsEnabled: 'on',
+      dropChannelId: '',
+      dropMessageThreshold: '25',
+      dropStartHour: '20',
+      dropEndHour: '4',
+      dropClaimTimeoutSeconds: 90,
+      dropCooldownMinutes: '0',
+      managerRoleId: '123456789012345678',
+    });
+    expect(parsed).toEqual({
+      dropsEnabled: true,
+      dropChannelId: null,
+      dropMessageThreshold: 25,
+      dropStartHour: 20,
+      dropEndHour: 4,
+      dropClaimTimeoutSeconds: 90,
+      dropCooldownMinutes: 0,
+      managerRoleId: '123456789012345678',
+    });
+    const shape = GuildConfigSchemas.tcg.shape;
+    expect(shape.dropMessageThreshold.safeParse(4).success).toBe(false);
+    expect(shape.dropMessageThreshold.safeParse(501).success).toBe(false);
+    expect(shape.dropEndHour.safeParse(24).success).toBe(false);
+    expect(shape.dropClaimTimeoutSeconds.safeParse(10).success).toBe(false);
+    expect(shape.managerRoleId.safeParse('abc').success).toBe(false);
   });
 
   it('rejects unknown keys', () => {

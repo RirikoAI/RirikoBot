@@ -7,24 +7,12 @@ import {
   ValidationError,
   type GuildConfigModule,
 } from '@ririko/core';
+import { createDatabaseClient, type DatabaseClient } from '@ririko/database';
 import {
-  AuditLogRepository,
-  AutoRoleRepository,
-  AutoVoiceRepository,
-  CommandCatalogRepository,
-  CommandSettingsRepository,
-  createDatabaseClient,
-  GuildConfigVersionRepository,
-  GuildSettingsRepository,
-  ModerationRepository,
-  MusicRepository,
-  AiRepository,
-  ImageRepository,
-  FreeGameRepository,
-  WelcomerRepository,
-  type DatabaseClient,
-} from '@ririko/database';
-import { GuildConfigService, GuildConfigValidationError } from '@ririko/services/guild';
+  createGuildConfigService as createService,
+  GuildConfigValidationError,
+  type GuildConfigService,
+} from '@ririko/services/guild';
 import type { Command } from 'commander';
 import pc from 'picocolors';
 
@@ -150,21 +138,7 @@ export async function runGuildConfig(
 }
 
 export function createGuildConfigService(db: DatabaseClient): GuildConfigService {
-  return new GuildConfigService({
-    db,
-    guildSettings: new GuildSettingsRepository(db),
-    moderation: new ModerationRepository(db),
-    commandSettings: new CommandSettingsRepository(db),
-    commandCatalog: new CommandCatalogRepository(db),
-    autoRoles: new AutoRoleRepository(db),
-    autoVoice: new AutoVoiceRepository(db),
-    music: new MusicRepository(db),
-    ai: new AiRepository(db),
-    images: new ImageRepository(db),
-    freeGames: new FreeGameRepository(db),
-    welcomer: new WelcomerRepository(db),
-    versions: new GuildConfigVersionRepository(db),
-    audit: new AuditLogRepository(db),
+  return createService(db, {
     defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
   });
 }

@@ -74,6 +74,20 @@ export const guildSettings = pgTable('guild_settings', {
   voiceXpEnabled: boolean('voice_xp_enabled').notNull().default(false),
   /** Largest mini-game wager in credits; null means no limit. */
   maxGameWager: integer('max_game_wager'),
+  /** Waifu TCG card drops in this guild; off until a manager turns them on. */
+  tcgDropsEnabled: boolean('tcg_drops_enabled').notNull().default(false),
+  /** Only messages here count toward a drop, and drops post here; null counts every channel. */
+  tcgDropChannelId: varchar('tcg_drop_channel_id', { length: 32 }),
+  /** Unique members who must chat before a card drops. */
+  tcgDropMessageThreshold: integer('tcg_drop_message_threshold').notNull().default(50),
+  /** Drops happen from this hour (guild time zone, inclusive) until the end hour (exclusive). */
+  tcgDropStartHour: integer('tcg_drop_start_hour').notNull().default(8),
+  tcgDropEndHour: integer('tcg_drop_end_hour').notNull().default(23),
+  tcgDropClaimTimeoutSeconds: integer('tcg_drop_claim_timeout_seconds').notNull().default(60),
+  /** Minutes the last claimant must wait before claiming the next drop. */
+  tcgDropCooldownMinutes: integer('tcg_drop_cooldown_minutes').notNull().default(5),
+  /** Members with this role may use the guild TCG admin commands without Manage Server. */
+  tcgManagerRoleId: varchar('tcg_manager_role_id', { length: 32 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

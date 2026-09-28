@@ -49,6 +49,7 @@ const MODULE_LABELS: Record<string, string> = {
   autovoice: 'Auto Voice',
   xp: 'XP & Ranking',
   games: 'Games',
+  tcg: 'Waifu TCG',
 };
 
 /** Guild actions other than settings saves. */

@@ -4,10 +4,12 @@ import { createAchievementCommand } from '../achievement.command.js';
 import { createTcgAdminCommand } from '../admin.command.js';
 import type { BotServices } from '../../../services.js';
 import type { CommandContext } from '@ririko/discord';
+import { GuildConfigValidationError } from '@ririko/services';
 
 describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
   let services: BotServices;
   let replyMock: any;
+  let guildTcg: Record<string, unknown>;
 
   beforeEach(() => {
     replyMock = vi.fn().mockResolvedValue(undefined);
@@ -159,7 +161,6 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
     };
 
     const mockTcgConfigService: any = {
-      isAuthorized: vi.fn().mockResolvedValue(true),
       getConfig: vi.fn().mockResolvedValue(300),
       setConfig: vi.fn().mockResolvedValue(350),
       getAllConfigs: vi.fn().mockResolvedValue({
@@ -173,14 +174,32 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
         dungeon_scaling_model: 'HYBRID',
         dungeon_growth_rate: 0.085,
         market_tax_rate: 0.05,
-        tcg_manager_role_id: '',
       }),
+    };
+
+    guildTcg = {
+      dropsEnabled: false,
+      dropChannelId: null,
+      dropMessageThreshold: 50,
+      dropStartHour: 8,
+      dropEndHour: 23,
+      dropClaimTimeoutSeconds: 60,
+      dropCooldownMinutes: 5,
+      managerRoleId: null,
+    };
+    const mockGuildConfigService: any = {
+      get: vi.fn(async () => guildTcg),
+      update: vi.fn(async (_guildId: string, _module: string, patch: Record<string, unknown>) => ({
+        values: { ...guildTcg, ...patch },
+        changes: [{ field: 'x', before: null, after: null }],
+      })),
     };
 
     services = {
       waifuGuildService: mockWaifuGuildService,
       achievementService: mockAchievementService,
       tcgConfigService: mockTcgConfigService,
+      guildConfigService: mockGuildConfigService,
     } as unknown as BotServices;
   });
 
@@ -188,6 +207,8 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
     options: Record<string, any> = {},
     args: string[] = [],
     isPrefix = false,
+    isAdmin = true,
+    roles: string[] = ['role_admin'],
   ): CommandContext =>
     ({
       source: isPrefix ? 'prefix' : 'slash',
@@ -196,8 +217,8 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
       channelId: 'channel_1',
       user: { id: 'user_1', username: 'TestUser' } as any,
       member: {
-        roles: ['role_admin'],
-        permissions: { has: vi.fn().mockReturnValue(true) },
+        roles,
+        permissions: { has: vi.fn().mockReturnValue(isAdmin) },
       } as any,
       guild: { id: 'guild_discord' } as any,
       channel: { id: 'channel_1' } as any,
@@ -209,7 +230,7 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
         getBoolean: vi.fn((key: string) => options[key] ?? null),
         getUser: vi.fn().mockResolvedValue(options['user'] ?? null),
         getMember: vi.fn().mockResolvedValue(null),
-        getChannel: vi.fn().mockResolvedValue(null),
+        getChannel: vi.fn().mockResolvedValue(options['channel'] ?? null),
         getAttachment: vi.fn().mockReturnValue(null),
         getRawArgs: vi.fn().mockReturnValue(args),
       },
@@ -344,12 +365,11 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
 
   describe('TCG Admin Command', () => {
     it('rejects unauthorized users', async () => {
-      (services.tcgConfigService.isAuthorized as any).mockResolvedValueOnce(false);
+      guildTcg.managerRoleId = 'role_tcg';
       const cmd = createTcgAdminCommand(services);
-      const ctx = createMockContext({
-        action: 'energy',
-        max_cap: 400,
-      });
+      const ctx = createMockContext({ action: 'energy', max_cap: 400 }, [], false, false, [
+        'role_other',
+      ]);
 
       await cmd.execute(ctx);
       expect(replyMock).toHaveBeenCalledWith(
@@ -407,6 +427,154 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
         'daily_bonus_energy_increment',
         15,
         'user_1',
+      );
+    });
+
+    it('refuses outside a server', async () => {
+      const cmd = createTcgAdminCommand(services);
+      const ctx = { ...createMockContext({ action: 'view' }), guildId: null } as CommandContext;
+      await cmd.execute(ctx);
+      expect(replyMock).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('only be used in a server') }),
+      );
+    });
+
+    it('lets holders of the guild TCG Manager Role manage drops', async () => {
+      guildTcg.managerRoleId = 'role_tcg';
+      const cmd = createTcgAdminCommand(services);
+      const ctx = createMockContext(
+        {
+          action: 'drops',
+          enabled: true,
+          channel: { id: '123456789012345678' },
+          threshold: 30,
+          start_hour: 20,
+          end_hour: 20,
+          claim_seconds: 90,
+          cooldown_minutes: 2,
+        },
+        [],
+        false,
+        false,
+        ['role_tcg'],
+      );
+
+      await cmd.execute(ctx);
+      expect(services.guildConfigService.update).toHaveBeenCalledWith(
+        'guild_discord',
+        'tcg',
+        {
+          dropsEnabled: true,
+          dropChannelId: '123456789012345678',
+          dropMessageThreshold: 30,
+          dropStartHour: 20,
+          dropEndHour: 20,
+          dropClaimTimeoutSeconds: 90,
+          dropCooldownMinutes: 2,
+        },
+        { userId: 'user_1', source: 'discord' },
+      );
+      const embed = replyMock.mock.calls[0][0].embeds[0].toJSON();
+      expect(embed.title).toBe('🃏 Card Drop Settings Updated');
+      expect(embed.description).toContain('all day');
+      expect(embed.description).toContain('<#123456789012345678>');
+    });
+
+    it('reads drop settings from prefix arguments', async () => {
+      const cmd = createTcgAdminCommand(services);
+      const ctx = createMockContext({}, [
+        'drops',
+        'enabled:on',
+        'channel:<#123456789012345678>',
+        'threshold:12',
+        'unknown:1',
+        'noseparator',
+      ]);
+
+      await cmd.execute(ctx);
+      expect(services.guildConfigService.update).toHaveBeenCalledWith(
+        'guild_discord',
+        'tcg',
+        { dropsEnabled: 'on', dropChannelId: '123456789012345678', dropMessageThreshold: '12' },
+        { userId: 'user_1', source: 'discord' },
+      );
+    });
+
+    it('explains the usage when no drop settings are given', async () => {
+      const cmd = createTcgAdminCommand(services);
+      await cmd.execute(createMockContext({ action: 'drops' }));
+      expect(services.guildConfigService.update).not.toHaveBeenCalled();
+      expect(replyMock).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('No drop settings provided') }),
+      );
+    });
+
+    it('shows validation errors for drop settings', async () => {
+      (services.guildConfigService.update as any).mockRejectedValueOnce(
+        new GuildConfigValidationError({ dropMessageThreshold: ['Enter a whole number.'] }),
+      );
+      const cmd = createTcgAdminCommand(services);
+      await cmd.execute(createMockContext({ action: 'drops', threshold: 1 }));
+      expect(replyMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.stringContaining('Enter a whole number.'),
+          ephemeral: true,
+        }),
+      );
+    });
+
+    it('sets and clears the guild TCG Manager Role for server admins', async () => {
+      const cmd = createTcgAdminCommand(services);
+      await cmd.execute(createMockContext({ action: 'role', role: '<@&123456789012345678>' }));
+      expect(services.guildConfigService.update).toHaveBeenCalledWith(
+        'guild_discord',
+        'tcg',
+        { managerRoleId: '123456789012345678' },
+        { userId: 'user_1', source: 'discord' },
+      );
+      expect(replyMock.mock.calls[0][0].embeds[0].toJSON().description).toContain(
+        '<@&123456789012345678>',
+      );
+
+      (services.guildConfigService.update as any).mockResolvedValueOnce({
+        values: { ...guildTcg, managerRoleId: null },
+        changes: [],
+      });
+      await cmd.execute(createMockContext({}, ['role', 'none']));
+      expect(replyMock.mock.calls[1][0].embeds[0].toJSON().description).toContain('removed');
+    });
+
+    it('asks for a role when none is given', async () => {
+      const cmd = createTcgAdminCommand(services);
+      await cmd.execute(createMockContext({ action: 'role' }));
+      expect(services.guildConfigService.update).not.toHaveBeenCalled();
+      expect(replyMock).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('Please specify a role') }),
+      );
+    });
+
+    it('rejects an invalid manager role', async () => {
+      (services.guildConfigService.update as any).mockRejectedValueOnce(
+        new GuildConfigValidationError({ managerRoleId: ['Must be a Discord ID.'] }),
+      );
+      const cmd = createTcgAdminCommand(services);
+      await cmd.execute(createMockContext({ action: 'role', role: 'abc' }));
+      expect(replyMock).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('Must be a Discord ID.') }),
+      );
+    });
+
+    it('does not let TCG Managers change the manager role', async () => {
+      guildTcg.managerRoleId = 'role_tcg';
+      const cmd = createTcgAdminCommand(services);
+      await cmd.execute(
+        createMockContext({ action: 'role', role: '123456789012345678' }, [], false, false, [
+          'role_tcg',
+        ]),
+      );
+      expect(services.guildConfigService.update).not.toHaveBeenCalled();
+      expect(replyMock).toHaveBeenCalledWith(
+        expect.objectContaining({ content: expect.stringContaining('Manage Server') }),
       );
     });
 

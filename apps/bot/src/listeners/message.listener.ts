@@ -4,10 +4,12 @@ import type { BotServices } from '../services.js';
 import type { MusicEmbedController } from '../controllers/music-embed.controller.js';
 import type { AiChatController } from '../controllers/ai-chat.controller.js';
 import { levelUpText, sendLevelUpMessage } from './level-up.js';
+import { handleCardDrop } from './card-drop.js';
 
 /**
- * Gateway Message Listener: Evaluates anti-spam heuristics, dispatches Economy events,
- * awards experience points, and routes dedicated music channel song requests or AI chat.
+ * Gateway Message Listener: Evaluates anti-spam heuristics, counts Waifu TCG card drops,
+ * dispatches Economy events, awards experience points, and routes dedicated music channel
+ * song requests or AI chat.
  */
 export function registerMessageListener(
   client: Client,
@@ -89,6 +91,9 @@ export function registerMessageListener(
       if (!evaluation.isAllowed) {
         return; // Spam or on cooldown; zero XP and zero rewards
       }
+
+      // Count the member toward the guild's Waifu TCG card drop (never throws).
+      await handleCardDrop(message, services);
 
       // Lazily ensure user record exists in database
       await services.userRepo
