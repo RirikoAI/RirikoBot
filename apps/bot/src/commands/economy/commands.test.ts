@@ -245,6 +245,13 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
         updated_at INTEGER NOT NULL
       );
 
+      CREATE TABLE tcg_system_configs (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_by TEXT,
+        updated_at INTEGER NOT NULL
+      );
+
       CREATE TABLE waifu_cards (
         id TEXT PRIMARY KEY,
         asset_id TEXT NOT NULL,

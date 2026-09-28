@@ -52,6 +52,7 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         'app/dashboard/[guildId]/welcome/actions.ts#saveCardSettings',
         'app/dashboard/[guildId]/welcome/actions.ts#uploadCardBackground',
         'app/dashboard/[guildId]/welcome/actions.ts#removeCardBackground',
+        'app/owner/tcg/actions.ts#saveTcgRules',
         'app/account/security/actions.ts#removePasskey',
         'app/account/sessions/actions.ts#revokeOtherSessions',
         'app/verify/actions.ts#finishPasskeyCheck',

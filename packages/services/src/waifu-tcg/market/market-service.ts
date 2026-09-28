@@ -33,14 +33,24 @@ export interface EnrichedMarketListing {
   cardInfo: WaifuCard | null;
 }
 
+/** Tax and listing lifetime for new listings. */
+export interface MarketRules {
+  /** Fraction of the price, e.g. 0.05 for 5%. */
+  taxRate: number;
+  listingDurationDays: number;
+}
+
 export interface MarketServiceOptions {
   marketTaxRate?: number;
   listingDurationDays?: number;
+  /** Reads the current rules (the bot: the owner's TCG rules); overrides the fixed values. */
+  rulesResolver?: () => Promise<MarketRules>;
 }
 
 export class MarketService {
   private readonly marketTaxRate: number;
   private readonly listingDurationDays: number;
+  private readonly rulesResolver: (() => Promise<MarketRules>) | undefined;
 
   constructor(
     private readonly marketRepo: MarketListingRepository,
@@ -52,6 +62,13 @@ export class MarketService {
   ) {
     this.marketTaxRate = options?.marketTaxRate ?? 0.05; // 5% default market tax
     this.listingDurationDays = options?.listingDurationDays ?? 7; // 7 days expiration
+    this.rulesResolver = options?.rulesResolver;
+  }
+
+  /** The tax and listing lifetime new listings get. */
+  async getRules(): Promise<MarketRules> {
+    if (this.rulesResolver) return this.rulesResolver();
+    return { taxRate: this.marketTaxRate, listingDurationDays: this.listingDurationDays };
   }
 
   async listCard(params: ListCardParams): Promise<MarketListing> {
@@ -83,8 +100,9 @@ export class MarketService {
     const cardName = (await this.waifuCardRepo.findById(card.cardId))?.name;
     await assertCardHasNoGear(this.inventoryRepo, card, 'sold', cardName);
 
-    const taxPaid = Math.floor(price * this.marketTaxRate);
-    const expiresAt = new Date(Date.now() + this.listingDurationDays * 24 * 60 * 60 * 1000);
+    const rules = await this.getRules();
+    const taxPaid = Math.floor(price * rules.taxRate);
+    const expiresAt = new Date(Date.now() + rules.listingDurationDays * 24 * 60 * 60 * 1000);
 
     return withTransaction(this.dbClient, async (tx) => {
       // Lock card to IN_MARKET

@@ -12,6 +12,10 @@ import {
 import { EventBus } from '@ririko/core';
 import { InventoryService } from './inventory.service.js';
 import { LevelingService } from './leveling.service.js';
+import {
+  DEFAULT_ENERGY_RULES,
+  EnergyLifecycleService,
+} from '../waifu-tcg/energy/energy-lifecycle.service.js';
 
 describe('InventoryService', () => {
   const idOf = async (code: string) => (await itemRepo.findByCode(code))!.id;
@@ -322,6 +326,30 @@ describe('InventoryService', () => {
       // Remaining inventory must NOT have been decremented on rejected 4th attempt
       const remaining = await inventoryService.getItemQuantity('chugger', 'stamina_potion');
       expect(remaining).toBe(2); // 5 - 3 = 2
+    });
+
+    it('caps stamina potions at the global TCG potion limit (TASK-1124)', async () => {
+      const ruled = new InventoryService({
+        itemRepository: itemRepo,
+        categoryRepository: new ItemCategoryRepository(client),
+        inventoryRepository: inventoryRepo,
+        economyRepository: economyRepo,
+        playerEnergyRepository: playerEnergyRepo,
+        energyLifecycle: new EnergyLifecycleService(playerEnergyRepo, {
+          rulesResolver: async () => ({ ...DEFAULT_ENERGY_RULES, dailyPotionLimit: 1 }),
+        }),
+        levelingService,
+        eventBus,
+      });
+      await playerEnergyRepo.getOrCreate('ruled_chugger');
+      await playerEnergyRepo.update('ruled_chugger', { currentEnergy: 10 });
+      await inventoryRepo.addItem('ruled_chugger', await idOf('stamina_potion'), 3);
+
+      const first = await ruled.useItem({ userId: 'ruled_chugger', itemId: 'stamina_potion' });
+      expect(first.success).toBe(true);
+      const second = await ruled.useItem({ userId: 'ruled_chugger', itemId: 'stamina_potion' });
+      expect(second.success).toBe(false);
+      expect(await ruled.getItemQuantity('ruled_chugger', 'stamina_potion')).toBe(2);
     });
 
     it('consumes EXP potion and awards experience', async () => {

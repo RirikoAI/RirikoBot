@@ -3,6 +3,7 @@ import { TabNav } from './tab-nav';
 const OWNER_PAGES = [
   { href: '/owner/economy', label: 'Economy' },
   { href: '/owner/shop', label: 'Item shop' },
+  { href: '/owner/tcg', label: 'Waifu TCG' },
 ] as const;
 
 /** Tabs for the owner console pages. */

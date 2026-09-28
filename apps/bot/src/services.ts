@@ -64,7 +64,12 @@ import {
   MusicPlayTool,
   EconomyBalanceTool,
 } from '@ririko/ai';
-import { CORE_VERSION, EventBus, resolveResetSchedulesFromEnv } from '@ririko/core';
+import {
+  BotOwnerIdsSchema,
+  CORE_VERSION,
+  EventBus,
+  resolveResetSchedulesFromEnv,
+} from '@ririko/core';
 import {
   AdventureEngine,
   validateAdventureRewardState,
@@ -134,7 +139,7 @@ import {
   MarketService,
   WaifuGuildService,
   AchievementService,
-  TcgConfigService,
+  TcgRulesService,
   AutoRoleService,
   ReactionRoleService,
   AniListClient,
@@ -287,7 +292,10 @@ export interface BotServices {
   tcgConfigRepo: TcgConfigRepository;
   waifuGuildService: WaifuGuildService;
   achievementService: AchievementService;
-  tcgConfigService: TcgConfigService;
+  /** Global TCG rules (market tax and expiry, energy, potions); owners edit them. */
+  tcgRulesService: TcgRulesService;
+  /** Discord user IDs from BOT_OWNER_ID; only they may change global rules from Discord. */
+  botOwnerIds: readonly string[];
   /** Audited guild settings writes from Discord commands (same path as the dashboard and CLI). */
   guildConfigService: GuildConfigService;
   reactionRoleRepo: ReactionRoleRepository;
@@ -437,23 +445,32 @@ export async function createBotServices(
   });
 
   const tcgConfigRepo = new TcgConfigRepository(db);
-  const tcgConfigService = new TcgConfigService(tcgConfigRepo);
+  const tcgRulesService = new TcgRulesService({
+    db,
+    repository: tcgConfigRepo,
+    audit: new AuditLogRepository(db),
+  });
+  const botOwnerIds = parseBotOwnerIds(process.env.BOT_OWNER_ID);
   const guildConfigService = createGuildConfigService(db, {
     defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
     defaultTimezone: 'UTC',
   });
 
   // Energy lifecycle owns the daily boundary and level-scaled capacity, sized by the
-  // account-wide level. It also reconciles incremental bonus energy up to the configured cap.
+  // account-wide level. Capacity, potion and bonus energy rules are the global TCG rules.
   const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, {
     resetSchedule: resetSchedules.energy,
     levelResolver: accountLevel,
-    bonusConfigResolver: async () => {
-      const [maxBonusCap, dailyIncrement] = await Promise.all([
-        tcgConfigService.getConfig('max_bonus_energy_cap'),
-        tcgConfigService.getConfig('daily_bonus_energy_increment'),
-      ]);
-      return { maxBonusCap, dailyIncrement };
+    rulesResolver: async () => {
+      const rules = await tcgRulesService.getRules();
+      return {
+        globalCap: rules.globalMaxEnergyCap,
+        baseCapacity: rules.baseEnergyCapacity,
+        scalingPerLevel: rules.energyScalingPerLevel,
+        dailyPotionLimit: rules.dailyEnergyPotionLimit,
+        maxBonusCap: rules.maxBonusEnergyCap,
+        dailyBonusIncrement: rules.dailyBonusEnergyIncrement,
+      };
     },
   });
 
@@ -876,6 +893,15 @@ export async function createBotServices(
     economyRepo,
     db,
     userInventoryItemRepo,
+    {
+      rulesResolver: async () => {
+        const rules = await tcgRulesService.getRules();
+        return {
+          taxRate: rules.marketTaxPercent / 100,
+          listingDurationDays: rules.listingExpiryDays,
+        };
+      },
+    },
   );
 
   const waifuGuildRepo = new WaifuGuildRepository(db);
@@ -930,9 +956,10 @@ export async function createBotServices(
     // In some unit tests with isolated in-memory databases, game_items may not be created.
   }
 
-  // The TCG Manager Role is per guild now; the old global key cannot be assigned to one.
+  // The TCG Manager Role is per guild now (its old global key cannot be assigned to one), and
+  // the dungeon curve and replenish cron keys were never read.
   try {
-    const retired = await tcgConfigService.retireGlobalManagerRole();
+    const retired = await tcgRulesService.retireUnusedKeys();
     if (retired) {
       console.warn(
         `[tcg] Removed the old global TCG Manager Role (${retired}). Set it again per server with /tcg-admin action:role or the dashboard.`,
@@ -1086,7 +1113,8 @@ export async function createBotServices(
     tcgConfigRepo,
     waifuGuildService,
     achievementService,
-    tcgConfigService,
+    tcgRulesService,
+    botOwnerIds,
     guildConfigService,
     reactionRoleRepo,
     autoRoleRepo,
@@ -1097,4 +1125,12 @@ export async function createBotServices(
     imageRepo,
     imageGenerationService,
   };
+}
+
+/** Bot owner IDs from `BOT_OWNER_ID`; an invalid value gives none, with a warning. */
+export function parseBotOwnerIds(value: string | undefined): readonly string[] {
+  const parsed = BotOwnerIdsSchema.safeParse(value);
+  if (parsed.success) return parsed.data;
+  console.warn('[config] BOT_OWNER_ID must list Discord user IDs; bot owner commands are off.');
+  return [];
 }

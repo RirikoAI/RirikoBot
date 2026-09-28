@@ -13,6 +13,7 @@ import {
   EnergyLifecycleService,
   TcgShopService,
   calculateMaxEnergy,
+  DEFAULT_ENERGY_RULES,
 } from '../index.js';
 
 describe('Waifu TCG: Energy Lifecycle & Town Item Shop (STORY-103 / TASK-1032)', () => {
@@ -164,6 +165,41 @@ describe('Waifu TCG: Energy Lifecycle & Town Item Shop (STORY-103 / TASK-1032)',
       const reconciled = await energyLifecycle.getOrReconcileUserEnergy('summoner_overflow', 20);
       expect(reconciled.currentEnergy).toBe(250); // Not reduced!
       expect(reconciled.dailyEnergyPotsUsed).toBe(0); // Potions reset
+    });
+
+    it('sizes capacity and the potion limit from the owner rules (TASK-1124)', async () => {
+      expect(calculateMaxEnergy(10, 500, { baseCapacity: 150, scalingPerLevel: 5 })).toBe(200); // 150 + 45 + 5
+      expect(calculateMaxEnergy(100, 250, { baseCapacity: 150, scalingPerLevel: 5 })).toBe(250);
+
+      const ruled = new EnergyLifecycleService(energyRepo, {
+        rulesResolver: async () => ({
+          ...DEFAULT_ENERGY_RULES,
+          globalCap: 180,
+          baseCapacity: 120,
+          scalingPerLevel: 3,
+          dailyPotionLimit: 1,
+        }),
+      });
+      await energyRepo.create({
+        userId: 'summoner_rules',
+        currentEnergy: 10,
+        maxEnergy: 100,
+        lastResetDate: getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE),
+      });
+
+      const reconciled = await ruled.getOrReconcileUserEnergy('summoner_rules', 20);
+      expect(reconciled.maxEnergy).toBe(180); // 120 + 57 + 5, capped at 180
+      expect(await ruled.dailyPotionLimit()).toBe(1);
+
+      const first = await ruled.consumePotion('summoner_rules', 20);
+      expect(first.success).toBe(true);
+      const second = await ruled.consumePotion('summoner_rules', 20);
+      expect(second.success).toBe(false);
+    });
+
+    it('keeps the defaults and no daily bonus without a rules resolver', async () => {
+      const rules = await energyLifecycle.rules();
+      expect(rules).toMatchObject({ globalCap: 300, dailyPotionLimit: 3, dailyBonusIncrement: 0 });
     });
   });
 

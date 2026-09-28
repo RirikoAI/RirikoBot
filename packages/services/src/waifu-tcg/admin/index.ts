@@ -1,1 +1,1 @@
-export * from './tcg-config.service.js';
+export * from './tcg-permissions.js';
