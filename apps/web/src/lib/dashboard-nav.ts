@@ -11,6 +11,7 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'reaction-roles', label: 'Reaction Roles' },
   { slug: 'xp', label: 'XP & Ranking' },
   { slug: 'games', label: 'Games' },
+  { slug: 'tcg', label: 'Waifu TCG' },
   { slug: 'giveaways', label: 'Giveaways' },
   { slug: 'music', label: 'Music' },
   { slug: 'ai', label: 'AI Chatbot' },

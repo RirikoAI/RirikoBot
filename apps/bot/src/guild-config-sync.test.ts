@@ -73,4 +73,34 @@ describe('guild config changes from other processes (CHORE-1101)', () => {
     await services.guildConfigWatcher.tick();
     expect(await rps()).toMatchObject({ enabled: false });
   });
+
+  it('reloads card drop settings once the change feed reports a tcg or general write (TASK-1121)', async () => {
+    db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+    const services = await createBotServices(db);
+    expect(await services.dropManager.resolveGuildConfig('guild-1')).toMatchObject({
+      enabled: false,
+    });
+
+    const settings = new GuildSettingsRepository(db);
+    const feed = new GuildConfigVersionRepository(db);
+    await settings.upsert({ guildId: 'guild-1', tcgDropsEnabled: true, tcgDropCooldownMinutes: 2 });
+    await feed.bump('guild-1', 'tcg', new Date());
+
+    expect(await services.dropManager.resolveGuildConfig('guild-1')).toMatchObject({
+      enabled: false,
+    });
+    await services.guildConfigWatcher.tick();
+    expect(await services.dropManager.resolveGuildConfig('guild-1')).toMatchObject({
+      enabled: true,
+      antiSnipingCooldownMs: 120_000,
+      timezone: 'UTC',
+    });
+
+    await settings.upsert({ guildId: 'guild-1', timezone: 'Asia/Tokyo' });
+    await feed.bump('guild-1', 'general', new Date(Date.now() + 1000));
+    await services.guildConfigWatcher.tick();
+    expect(await services.dropManager.resolveGuildConfig('guild-1')).toMatchObject({
+      timezone: 'Asia/Tokyo',
+    });
+  });
 });

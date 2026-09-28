@@ -291,7 +291,11 @@ export function createCardCommand(services: BotServices): Command {
         case 'guide':
         case 'info': {
           const prefix = await resolveContextPrefix(ctx, services);
-          const embed = buildTcgInfoEmbed('overview', prefix);
+          const embed = buildTcgInfoEmbed(
+            'overview',
+            prefix,
+            await services.marketService.getRules(),
+          );
           const row = buildTcgInfoSelectMenu('overview');
           await ctx.reply({
             embeds: [embed],

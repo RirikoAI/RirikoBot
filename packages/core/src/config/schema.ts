@@ -11,6 +11,18 @@ export type DatabaseDialect = z.infer<typeof DatabaseDialectSchema>;
 
 const HEX_KEY = /^[0-9a-fA-F]{64}$/;
 
+/** `BOT_OWNER_ID`: comma-separated Discord user IDs of the bot owners. */
+export const BotOwnerIdsSchema = z
+  .string()
+  .optional()
+  .transform((value) =>
+    (value ?? '')
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean),
+  )
+  .pipe(z.array(z.string().regex(/^\d{17,20}$/, 'BOT_OWNER_ID must list Discord user IDs')));
+
 export const LogLevelSchema = z
   .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
   .default('info');
@@ -31,17 +43,9 @@ const BaseAppConfigSchema = z.object({
     .min(1, 'DISCORD_CLIENT_ID cannot be empty'),
   DISCORD_CLIENT_SECRET: z.string().optional(),
   DISCORD_DEV_GUILD_ID: z.string().optional(),
-  // Bot owners (comma-separated Discord user IDs). The dashboard owner console is limited to them.
-  BOT_OWNER_ID: z
-    .string()
-    .optional()
-    .transform((value) =>
-      (value ?? '')
-        .split(',')
-        .map((id) => id.trim())
-        .filter(Boolean),
-    )
-    .pipe(z.array(z.string().regex(/^\d{17,20}$/, 'BOT_OWNER_ID must list Discord user IDs'))),
+  // Bot owners (comma-separated Discord user IDs). The dashboard owner console and the global
+  // `/tcg-admin` rules are limited to them.
+  BOT_OWNER_ID: BotOwnerIdsSchema,
   DEFAULT_PREFIX: PrefixSchema.default(DEFAULT_COMMAND_PREFIX),
 
   // Dual-Dialect Database

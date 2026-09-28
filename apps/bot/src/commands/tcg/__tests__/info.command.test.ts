@@ -14,7 +14,9 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
 
   beforeEach(() => {
     replyMock = vi.fn().mockResolvedValue(undefined);
-    services = {} as BotServices;
+    services = {
+      marketService: { getRules: async () => ({ taxRate: 0.1, listingDurationDays: 3 }) },
+    } as unknown as BotServices;
   });
 
   const createMockContext = (options: { topic?: string; rawArgs?: string[] }): CommandContext => {
@@ -170,8 +172,8 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
     expect(replyMock).toHaveBeenCalledTimes(1);
     const embed = replyMock.mock.calls[0][0].embeds[0];
     expect(embed.data.title).toContain('Community Player Marketplace');
-    expect(embed.data.description).toContain('5% Market Tax Sink');
-    expect(embed.data.description).toContain('7-Day Auto-Expiration');
+    expect(embed.data.description).toContain('10% Market Tax Sink');
+    expect(embed.data.description).toContain('3-Day Auto-Expiration');
   });
 
   it('should render WaifuGuilds guide when topic is "guild"', async () => {

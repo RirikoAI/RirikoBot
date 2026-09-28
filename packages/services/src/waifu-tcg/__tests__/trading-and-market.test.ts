@@ -336,6 +336,38 @@ describe('TradeService & MarketService (TASK-1051)', () => {
   });
 
   describe('MarketService', () => {
+    it('takes the tax and listing lifetime from the current rules (TASK-1124)', async () => {
+      let rules = { taxRate: 0.1, listingDurationDays: 3 };
+      const ruled = new MarketService(marketRepo, cardRepo, economyRepo, client, inventoryRepo, {
+        rulesResolver: async () => rules,
+      });
+      const listAt = async (serialNumber: number) => {
+        const card = await cardRepo.createUserCard({
+          userId: 'user-alice',
+          cardId: 'base-card-fire',
+          serialNumber,
+        });
+        const before = Date.now();
+        const listing = await ruled.listCard({
+          sellerUserId: 'user-alice',
+          userCardId: card.id,
+          price: 1000,
+        });
+        return { listing, days: (new Date(listing.expiresAt).getTime() - before) / 86_400_000 };
+      };
+
+      const first = await listAt(1);
+      expect(first.listing.taxPaid).toBe(100);
+      expect(first.days).toBeCloseTo(3, 2);
+
+      rules = { taxRate: 0.2, listingDurationDays: 14 };
+      const second = await listAt(2);
+      expect(second.listing.taxPaid).toBe(200);
+      expect(second.days).toBeCloseTo(14, 2);
+
+      expect(await marketService.getRules()).toEqual({ taxRate: 0.05, listingDurationDays: 7 });
+    });
+
     it('lists a card with 5% tax and locks state to IN_MARKET', async () => {
       const card = await cardRepo.createUserCard({
         userId: 'user-alice',

@@ -268,6 +268,14 @@ describe('ProfileCardRenderer', () => {
           no_xp_role_ids TEXT NOT NULL DEFAULT '[]',
           voice_xp_enabled INTEGER NOT NULL DEFAULT 0,
           max_game_wager INTEGER,
+          tcg_drops_enabled INTEGER NOT NULL DEFAULT 0,
+          tcg_drop_channel_id TEXT,
+          tcg_drop_message_threshold INTEGER NOT NULL DEFAULT 50,
+          tcg_drop_start_hour INTEGER NOT NULL DEFAULT 8,
+          tcg_drop_end_hour INTEGER NOT NULL DEFAULT 23,
+          tcg_drop_claim_timeout_seconds INTEGER NOT NULL DEFAULT 60,
+          tcg_drop_cooldown_minutes INTEGER NOT NULL DEFAULT 5,
+          tcg_manager_role_id TEXT,
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL
         );

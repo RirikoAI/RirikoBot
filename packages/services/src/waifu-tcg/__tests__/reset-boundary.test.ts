@@ -15,7 +15,10 @@ import {
   getResetDayKey,
   type ResetSchedule,
 } from '@ririko/core';
-import { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
+import {
+  DEFAULT_ENERGY_RULES,
+  EnergyLifecycleService,
+} from '../energy/energy-lifecycle.service.js';
 import { TcgShopService, shopDayKey } from '../equipment/tcg-shop.service.js';
 import { InventoryService } from '../../economy/inventory.service.js';
 import { CANONICAL_ITEMS } from '../equipment/catalog.js';
@@ -448,7 +451,11 @@ describe('BUG-0012 energy lifecycle wiring', () => {
     const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
     const service = new EnergyLifecycleService(repo, {
       resetSchedule: DEFAULT_RESET_SCHEDULE,
-      bonusConfigResolver: async () => ({ maxBonusCap: 50, dailyIncrement: 5 }),
+      rulesResolver: async () => ({
+        ...DEFAULT_ENERGY_RULES,
+        maxBonusCap: 50,
+        dailyBonusIncrement: 5,
+      }),
     });
 
     await repo.getOrCreate('user_bonus_inc');
@@ -469,7 +476,11 @@ describe('BUG-0012 energy lifecycle wiring', () => {
     const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
     const service = new EnergyLifecycleService(repo, {
       resetSchedule: DEFAULT_RESET_SCHEDULE,
-      bonusConfigResolver: async () => ({ maxBonusCap: 20, dailyIncrement: 10 }),
+      rulesResolver: async () => ({
+        ...DEFAULT_ENERGY_RULES,
+        maxBonusCap: 20,
+        dailyBonusIncrement: 10,
+      }),
     });
 
     await repo.getOrCreate('user_bonus_clamp');
@@ -490,7 +501,11 @@ describe('BUG-0012 energy lifecycle wiring', () => {
     const repo = new PlayerEnergyRepository(client, DEFAULT_RESET_SCHEDULE);
     const service = new EnergyLifecycleService(repo, {
       resetSchedule: DEFAULT_RESET_SCHEDULE,
-      bonusConfigResolver: async () => ({ maxBonusCap: 50, dailyIncrement: 5 }),
+      rulesResolver: async () => ({
+        ...DEFAULT_ENERGY_RULES,
+        maxBonusCap: 50,
+        dailyBonusIncrement: 5,
+      }),
     });
 
     await repo.getOrCreate('user_bonus_once');

@@ -21,6 +21,7 @@ describe('CLI Program', () => {
     expect(commandNames).toContain('generate:po-token');
     expect(commandNames).toContain('ai:configure');
     expect(commandNames).toContain('economy:config');
+    expect(commandNames).toContain('tcg:rules');
   });
 
   it('registers ai:configure command options and aliases', () => {

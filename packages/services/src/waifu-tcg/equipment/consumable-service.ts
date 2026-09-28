@@ -8,6 +8,7 @@ import type { Combatant } from '../combat/types.js';
 import type { ConsumableUseResult } from './types.js';
 import type { EnergyLifecycleService } from '../energy/energy-lifecycle.service.js';
 
+/** Daily potion limit without an energy lifecycle (tests); the bot uses the TCG rules. */
 export const DAILY_ENERGY_POTION_CAP = 3;
 
 export class ConsumableService {
@@ -60,9 +61,13 @@ export class ConsumableService {
           energyRecord.maxEnergy + energyRecord.bonusEnergy - energyRecord.currentEnergy;
       }
 
+      // The daily limit is a global TCG rule the energy lifecycle reads.
+      const potionLimit = this.energyLifecycle
+        ? await this.energyLifecycle.dailyPotionLimit()
+        : DAILY_ENERGY_POTION_CAP;
       const potionResult = this.energyLifecycle
-        ? await this.energyLifecycle.consumePotion(userId, energyAmount, DAILY_ENERGY_POTION_CAP)
-        : await this.energyRepo.consumeEnergyPotion(userId, energyAmount, DAILY_ENERGY_POTION_CAP);
+        ? await this.energyLifecycle.consumePotion(userId, energyAmount, potionLimit)
+        : await this.energyRepo.consumeEnergyPotion(userId, energyAmount, potionLimit);
 
       if (!potionResult.success) {
         return {
@@ -71,7 +76,7 @@ export class ConsumableService {
           restoredAmount: 0,
           reason:
             potionResult.reason ??
-            `You have reached your daily stamina potion limit (${DAILY_ENERGY_POTION_CAP}/${DAILY_ENERGY_POTION_CAP}). Rest well, summoner!`,
+            `You have reached your daily stamina potion limit (${potionLimit}/${potionLimit}). Rest well, summoner!`,
           userEnergy: potionResult.energy.currentEnergy,
           potsUsedToday: potionResult.potsUsedToday,
         };
