@@ -77,6 +77,10 @@
     "./owner": {
       "types": "./dist/owner/index.d.ts",
       "import": "./dist/owner/index.js"
+    },
+    "./dungeon": {
+      "types": "./dist/waifu-tcg/dungeon/public.d.ts",
+      "import": "./dist/waifu-tcg/dungeon/public.js"
     }
   },
   "scripts": {

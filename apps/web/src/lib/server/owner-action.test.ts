@@ -12,6 +12,10 @@ const mocks = vi.hoisted(() => ({
   updateTcgRules: vi.fn(),
   createItem: vi.fn(),
   deleteItem: vi.fn(),
+  createSeason: vi.fn(),
+  updateSeason: vi.fn(),
+  updateBoss: vi.fn(),
+  updateFloorLoot: vi.fn(),
   revalidatePath: vi.fn(),
 }));
 
@@ -36,12 +40,20 @@ vi.mock('./services', () => ({
     economyConfig: { update: mocks.update },
     tcgRules: { update: mocks.updateTcgRules },
     itemCatalog: { createItem: mocks.createItem, deleteItem: mocks.deleteItem },
+    dungeonSeasons: {
+      createSeason: mocks.createSeason,
+      updateSeason: mocks.updateSeason,
+      updateBoss: mocks.updateBoss,
+      updateFloorLoot: mocks.updateFloorLoot,
+    },
   }),
 }));
 
 const { saveEconomySettings } = await import('@/app/owner/economy/actions');
 const { createShopItem, deleteShopItem } = await import('@/app/owner/shop/actions');
 const { saveTcgRules } = await import('@/app/owner/tcg/actions');
+const { createDungeonSeason, updateDungeonBoss, updateDungeonFloorLoot, updateDungeonSeason } =
+  await import('@/app/owner/dungeon/actions');
 
 const session = (userId: string, stepUpAt: Date | null = new Date()): ActiveSession => ({
   id: 'hash',
@@ -205,5 +217,80 @@ describe('owner console actions (TASK-1651, TASK-1652)', () => {
       saveTcgRules(INITIAL_SETTINGS_FORM_STATE, form({ marketTaxPercent: '10' })),
     ).rejects.toThrow('NOT_FOUND');
     expect(mocks.updateTcgRules).not.toHaveBeenCalled();
+  });
+
+  it('creates a dungeon season and opens it (TASK-1122)', async () => {
+    mocks.session = session('owner-1');
+    mocks.createSeason.mockResolvedValue({ id: 's2_abyss' });
+    await expect(
+      createDungeonSeason(
+        INITIAL_SETTINGS_FORM_STATE,
+        form({ id: 's2_abyss', name: 'S2', isActive: 'on', growthRate: '0.07', unrelated: 'x' }),
+      ),
+    ).rejects.toThrow('REDIRECT /owner/dungeon/s2_abyss');
+    expect(mocks.createSeason).toHaveBeenCalledWith(
+      { id: 's2_abyss', name: 'S2', isActive: true, growthRate: '0.07' },
+      expect.objectContaining({ userId: 'owner-1', source: 'dashboard' }),
+    );
+  });
+
+  it('saves a season and a boss, and reports when nothing changed (TASK-1122)', async () => {
+    mocks.session = session('owner-1');
+    mocks.updateSeason.mockResolvedValueOnce({ changed: true });
+    const saved = await updateDungeonSeason(
+      's1',
+      INITIAL_SETTINGS_FORM_STATE,
+      form({ name: 'Season 1', id: 'ignored' }),
+    );
+    expect(saved).toEqual({
+      status: 'saved',
+      message: 'Season saved.',
+      values: { name: 'Season 1', isActive: false },
+    });
+    expect(mocks.updateSeason).toHaveBeenCalledWith(
+      's1',
+      { name: 'Season 1', isActive: false },
+      expect.objectContaining({ userId: 'owner-1' }),
+    );
+    expect(mocks.revalidatePath).toHaveBeenCalledWith('/owner/dungeon', 'layout');
+
+    mocks.updateBoss.mockResolvedValueOnce({ changed: false });
+    const boss = await updateDungeonBoss(
+      's1:megumin',
+      INITIAL_SETTINGS_FORM_STATE,
+      form({ ward1Element: 'ICE', ward1Percent: '30' }),
+    );
+    expect(boss).toMatchObject({ status: 'saved', message: 'Nothing changed.' });
+    expect(mocks.updateBoss).toHaveBeenCalledWith(
+      's1:megumin',
+      { ward1Element: 'ICE', ward1Percent: '30' },
+      expect.objectContaining({ userId: 'owner-1' }),
+    );
+  });
+
+  it('refuses dungeon edits to users who are not bot owners', async () => {
+    mocks.session = session('user-1');
+    await expect(
+      updateDungeonBoss('s1:megumin', INITIAL_SETTINGS_FORM_STATE, form({ maxTurns: '20' })),
+    ).rejects.toThrow('NOT_FOUND');
+    expect(mocks.updateBoss).not.toHaveBeenCalled();
+  });
+
+  it('saves floor loot for an owner (TASK-1126)', async () => {
+    mocks.session = session('owner-1');
+    mocks.updateFloorLoot.mockResolvedValueOnce({ changed: true });
+    const state = await updateDungeonFloorLoot(
+      's1',
+      10,
+      INITIAL_SETTINGS_FORM_STATE,
+      form({ firstCredits: '5000', pool1Code: 'RING_COPPER_BAND', unrelated: 'x' }),
+    );
+    expect(state).toMatchObject({ status: 'saved', message: 'Loot saved.' });
+    expect(mocks.updateFloorLoot).toHaveBeenCalledWith(
+      's1',
+      10,
+      { firstCredits: '5000', pool1Code: 'RING_COPPER_BAND' },
+      expect.objectContaining({ userId: 'owner-1', source: 'dashboard' }),
+    );
   });
 });

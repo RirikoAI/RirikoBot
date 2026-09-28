@@ -2,7 +2,8 @@ import { z } from 'zod';
 import type { CardElement } from '../types.js';
 import type { ScalingConfig, ScalingModel } from './scaling-engine.js';
 
-const ELEMENTS = [
+/** Elements a boss, a ward layer or a season theme can have. */
+export const DUNGEON_ELEMENTS = [
   'FIRE',
   'ICE',
   'EARTH',
@@ -62,7 +63,9 @@ export const bossDefinitionSchema = z
     /** Elemental ward layers; hpPercent is a share of the boss's max HP. */
     wardLayers: z
       .array(
-        z.object({ element: z.enum(ELEMENTS), hpPercent: z.number().min(0.01).max(2) }).strict(),
+        z
+          .object({ element: z.enum(DUNGEON_ELEMENTS), hpPercent: z.number().min(0.01).max(2) })
+          .strict(),
       )
       .optional(),
     maxTurns: z.number().int().min(5).max(50).optional(),
@@ -128,7 +131,12 @@ export const DEFAULT_ENRAGE: Readonly<EnrageConfig> = Object.freeze({
   trueDamage: true,
 });
 
-const SCALING_MODELS: readonly ScalingModel[] = ['LINEAR', 'POLYNOMIAL', 'EXPONENTIAL', 'HYBRID'];
+export const SCALING_MODELS = [
+  'LINEAR',
+  'POLYNOMIAL',
+  'EXPONENTIAL',
+  'HYBRID',
+] as const satisfies readonly ScalingModel[];
 
 /** Parses stored JSON; invalid data is reported and ignored so one bad row cannot break a climb. */
 function parseOrWarn<T>(schema: z.ZodType<T>, value: unknown, label: string): T | null {

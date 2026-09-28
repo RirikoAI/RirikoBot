@@ -13,6 +13,8 @@ import type { Combatant, CombatActionLog } from '../combat/types.js';
 import { ScalingEngine } from './scaling-engine.js';
 import { DEFAULT_OFF_ELEMENT_WARD_CHIP, ElementalWard } from './elemental-ward.js';
 import { SeasonalAffixHandler, type SeasonTheme } from './seasonal-affixes.js';
+import { resolveAffixTheme } from './season-affixes.js';
+import { parseFloorLoot } from './floor-loot.js';
 
 import { DungeonLootService, type DungeonLootResult } from './dungeon-loot.service.js';
 import { TUTORIAL_FLOORS, TutorialService, getCounterElement } from './tutorial-service.js';
@@ -197,32 +199,7 @@ export class DungeonRunner {
   }
 
   private resolveSeasonTheme(seasonId: string, season: DungeonSeason | null): SeasonTheme {
-    if (season) {
-      const affixString = (
-        (season.seasonalAffixes ?? []).join(' ') +
-        ' ' +
-        (season.themeElement ?? '')
-      ).toUpperCase();
-      if (
-        affixString.includes('INFERNAL') ||
-        affixString.includes('SCORCHED') ||
-        season.themeElement === 'FIRE'
-      )
-        return 'INFERNAL_CRUCIBLE';
-      if (
-        affixString.includes('ABYSSAL') ||
-        affixString.includes('TORRENTIAL') ||
-        season.themeElement === 'WATER'
-      )
-        return 'ABYSSAL_MAELSTROM';
-      if (
-        affixString.includes('CELESTIAL') ||
-        affixString.includes('TWILIGHT') ||
-        season.themeElement === 'LIGHT'
-      )
-        return 'CELESTIAL_TWILIGHT';
-      return 'NONE';
-    }
+    if (season) return resolveAffixTheme(season.seasonalAffixes);
     const id = seasonId.toLowerCase();
     if (id.includes('infernal') || seasonId === 's1') return 'INFERNAL_CRUCIBLE';
     if (id.includes('abyssal') || seasonId === 's2') return 'ABYSSAL_MAELSTROM';
@@ -532,12 +509,16 @@ export class DungeonRunner {
     let loot: DungeonLootResult | undefined;
     if (isWin) {
       if (!isTutorial && this.lootService) {
+        const floorRow = this.floorRepo
+          ? await this.floorRepo.findBySeasonAndFloor(session.seasonId, session.floorNumber)
+          : null;
         loot = await this.lootService.generateAndDispatchLoot(
           session.userId,
           session.floorNumber,
           isFirstClear,
           {
             signatureDropCode: session.bossProfile?.signatureDropCode,
+            floorLoot: floorRow ? parseFloorLoot(floorRow) : undefined,
           },
         );
       }

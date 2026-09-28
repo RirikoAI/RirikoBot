@@ -184,15 +184,25 @@ export function planSeasonFloors(catalog: BossCatalog): PlannedFloor[] {
 }
 
 /** The season row the catalog describes. Keeps an existing season's start date. */
-export function toSeasonRow(catalog: BossCatalog, startsAt: Date = new Date()): NewDungeonSeason {
+/**
+ * The season fields the catalog owns. Re-importing a catalog writes only these, so the
+ * schedule (on/off, start and end) set in the owner console survives.
+ */
+export function toSeasonContent(catalog: BossCatalog) {
   return {
-    id: catalog.seasonId,
     name: catalog.season.name,
     description: catalog.season.description,
     themeElement: catalog.season.themeElement,
     seasonalAffixes: catalog.season.seasonalAffixes,
     scalingModel: catalog.season.scalingModel,
     scalingParams: catalog.season.scalingParams,
+  } satisfies Partial<NewDungeonSeason>;
+}
+
+export function toSeasonRow(catalog: BossCatalog, startsAt: Date = new Date()): NewDungeonSeason {
+  return {
+    id: catalog.seasonId,
+    ...toSeasonContent(catalog),
     isTutorial: false,
     isActive: true,
     startsAt,
