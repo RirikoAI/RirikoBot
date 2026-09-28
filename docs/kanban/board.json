@@ -853,7 +853,7 @@
       "epic": "EPIC-011",
       "title": "Guild TCG Settings (Persisted Drops, Guild-Scoped TCG Manager Role) & Owner-Gated Global TCG Rules",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-111",
         "STORY-117"
@@ -868,7 +868,7 @@
       "epic": "EPIC-011",
       "title": "Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot",
       "points": 8,
-      "status": "TODO",
+      "status": "REVIEW",
       "requires": [
         "STORY-112"
       ],
@@ -2719,21 +2719,21 @@
       "parent": "STORY-167",
       "title": "Owner Dungeon Season & Boss Editor (Dates, Theme, Affixes, Scaling Curve, Enrage, Ward Shields) & Difficulty Curve Visualizer",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-112"
       ],
       "blocks": [
         "TASK-1126"
       ],
-      "description": "Owner console CRUD for dungeon_seasons and dungeon_bosses through an audited service. The HP/ATK/DEF curve uses the engine ScalingEngine and toScalingConfig through a new canvas-free @ririko/services/dungeon-scaling subpath. Handover plan: docs/kanban/handovers/TASK-1122.md."
+      "description": "Owner console CRUD for dungeon_seasons and dungeon_bosses through an audited service. The HP/ATK/DEF curve uses the engine ScalingEngine and toScalingConfig through a new canvas-free @ririko/services/dungeon subpath. Handover plan: docs/kanban/handovers/TASK-1122.md."
     },
     {
       "id": "TASK-1126",
       "parent": "STORY-167",
       "title": "Dungeon Floor Loot Tables Wired into DungeonLootService (First-Clear & Repeat) & Floor Loot Editor",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1122"
       ],

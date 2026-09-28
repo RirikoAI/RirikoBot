@@ -266,13 +266,14 @@ Where:
 | **F40** | Major Boss | 117,500 | 8,900 | 5,880 | 165 | Dual Elemental Barrier check |
 | **F50** | Final Boss | 265,000 | 19,500 | 12,900 | 230 | Mythic Endgame Master Challenge |
 
-### 7.6. Full Administrative Configurability
-The scaling parameters are completely dynamic and hot-reloadable:
-- Configurable via **Web Dashboard** under *Dungeon Tower Manager*:
-  - Dropdown selector for Scaling Model (`LINEAR`, `POLYNOMIAL`, `EXPONENTIAL`, `HYBRID`).
-  - Interactive curve visualizer previewing HP/ATK trajectories up to Floor 100.
-  - Sliders for $r$ (growth rate: 0.03 to 0.25) and Boss Floor Multipliers.
-- The curve belongs to each season (`dungeon_seasons.scaling_model` and `scaling_params`). The global `dungeon_scaling_model` and `dungeon_growth_rate` keys were never read and were removed from `/tcg-admin` in TASK-1124; the season editor (STORY-167) will edit the season curve.
+### 7.6. Owner Season Editor (`/owner/dungeon`, TASK-1122)
+The curve belongs to each season (`dungeon_seasons.scaling_model` and `scaling_params`); the old global `dungeon_scaling_model` and `dungeon_growth_rate` keys were never read and were removed in TASK-1124. Bot owners edit seasons on the owner console:
+- **Schedule**: start and end day (UTC) and an on/off switch. `DungeonSeasonRepository.findActiveSeason` returns the season that is on, not the tutorial, and inside its dates; when seasons overlap, the one that started last wins. A season can therefore be queued: it takes over on its start date, and the previous one stays live until then. The bot seeds Season 1 only when the `s1_infernal_crucible` row is missing.
+- **Affix set**: one of the three sets the combat engine implements (`SEASON_AFFIX_SETS`: Infernal Crucible, Abyssal Maelstrom, Celestial Twilight) or none. `resolveAffixTheme` picks the battle theme from the stored affixes only; the theme element is shown in `/dungeon` but no longer switches affixes on. Older rows whose affixes contain INFERNAL/SCORCHED, ABYSSAL/TORRENTIAL or CELESTIAL/TWILIGHT keep their theme.
+- **Curve**: growth model, floor-1 base stats, the model's parameters, mini and major boss multipliers, `affixStartFloor` and season enrage. `HYBRID` uses fixed rates and ignores the growth parameters. The page charts enemy HP per floor (tooltip: HP, ATK, DEF, SPD) from `seasonCurvePoints`, which runs `ScalingEngine`.
+- **Bosses**: stat multipliers, crit, named skill, enrage, up to three ward layers, turn limit and signature drop. Absolute `stats` in a boss definition are kept but not shown.
+- Every save is audited (`owner.dungeon_season.*`, `owner.dungeon_boss.update`). The tutorial season is fixed.
+- `pnpm tcg:boss-builder --import-db` still owns catalog content: re-importing replaces a season's name, description, theme, affixes and curve, and its bosses, but keeps the schedule (on/off, start, end) set in the editor.
 
 ### 7.7. Seasonal Anime Bosses & Season Data (`pnpm tcg:boss-builder`)
 Every season floor is guarded by a real anime character that fits the season theme. Season data lives in a hand-edited catalog, `assets/tcg/catalog/bosses/<seasonId>.json`:
@@ -286,7 +287,7 @@ Precedence at battle time: floor overrides > boss definition > season curve > co
 |---|---|
 | `pnpm tcg:boss-builder --sync` | Resolve AniList ids and Danbooru art for each boss and download images (resumable, rate-limited) |
 | `pnpm tcg:boss-builder --render` | Draw plain 720×960 boss portraits (element icon top-left, name, title, anime, tier/floor badge, no rarity frame) to `public/bosses/` |
-| `pnpm tcg:boss-builder --import-db [--dry-run]` | Upsert the season, boss assets, `dungeon_bosses` and all `dungeon_floors` rows |
+| `pnpm tcg:boss-builder --import-db [--dry-run]` | Upsert the season (an existing season keeps its schedule), boss assets, `dungeon_bosses` and all `dungeon_floors` rows |
 | `pnpm tcg:boss-builder --all` | All three steps in order |
 | `pnpm tcg:boss-builder --suggest --season=<id>` | List themed candidates from the card character catalog |
 | `pnpm tcg:simulate [--floors=] [--check]` | Monte Carlo win rates per floor for six player profiles, checked against the season's target bands |
@@ -667,6 +668,11 @@ Drops come from `DUNGEON_DROP_BRACKETS` in `dungeon-loot.service.ts`. Every drop
 
 - The first clear of a standard floor always rolls one bracket item.
 - Repeat clears of a boss floor drop its signature again 8% of the time.
+
+**Floor loot tables (TASK-1126).** Bot owners can override a floor's loot on `/owner/dungeon/<season>/floors/<n>`. The overrides are stored in `dungeon_floors.first_clear_rewards` and `repeat_rewards_table` (`floor-loot.ts` schemas) and read when a battle is won. Every field is optional and replaces only its part; `{}` (the default) keeps the brackets above exactly:
+- First clear: credits, EXP, crafting dust, and up to 5 items with quantities. Items replace the bracket roll on a standard floor, or the fallback gear on a boss floor; the boss's signature drop is still given.
+- Repeat clears: credits, EXP and dust (fixed instead of the random range), the item drop chance, and a weighted pool of up to 8 items, each with a quantity range. The 8% signature roll on boss floors is unchanged.
+- Item codes must exist in `game_items`. Invalid stored JSON is logged and ignored (the defaults apply). Saves are audited as `owner.dungeon_floor.update`, and `pnpm tcg:boss-builder --import-db` leaves the loot columns alone.
 
 **Secondary gear stats now affect dungeon combat:**
 

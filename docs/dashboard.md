@@ -80,12 +80,13 @@ Guild Discovery Pipeline
   3. The five-minute passkey check. If it is missing, the form offers "Confirm with passkey and save".
 
   The authorization coverage test accepts `runOwnerAction` as both the request guard and the authorization guard.
-- Owner writes go through the owner services in `@ririko/services/owner`: `EconomyConfigService`, `ItemCatalogService` and `TcgRulesService`. Their audit entries have no guild (`guild_id` is null), with the actions `owner.economy_config.update`, `owner.shop_item.*` / `owner.shop_category.*` and `owner.tcg_rules.update`. The guild audit viewer does not show them yet.
+- Owner writes go through the owner services in `@ririko/services/owner`: `EconomyConfigService`, `ItemCatalogService`, `TcgRulesService` and `DungeonSeasonAdminService`. Their audit entries have no guild (`guild_id` is null), with the actions `owner.economy_config.update`, `owner.shop_item.*` / `owner.shop_category.*`, `owner.tcg_rules.update` and `owner.dungeon_*`. The guild audit viewer does not show them yet.
 - Pages:
   - `/owner/economy` edits the global economy values (docs/economy.md 5.4).
   - `/owner/tcg` edits the global Waifu TCG rules: market tax and listing expiry, energy and potions (TASK-1124).
   - `/owner/shop` lists the item catalog with holder counts and manages categories.
   - `/owner/shop/new` and `/owner/shop/[itemId]` edit an item.
+  - `/owner/dungeon` lists dungeon seasons; `/owner/dungeon/new` and `/owner/dungeon/[seasonId]` edit a season and show its difficulty curve; `/owner/dungeon/[seasonId]/bosses/[bossKey]` edits a boss (TASK-1122); `/owner/dungeon/[seasonId]/floors/[floorNumber]` edits a floor's first-clear and repeat-clear loot (TASK-1126).
 - `ririko economy:config [key] [value]` is the CLI for the economy values, and `ririko tcg:rules [key] [value]` for the TCG rules. They use the same schema, service and audit trail as the owner console.
 - Guild-scoped TCG settings (drop settings and the TCG Manager Role) stay with guild managers on `/dashboard/[guildId]/tcg` (TASK-1121).
 
@@ -167,6 +168,8 @@ The dashboard provides dedicated management views for all 20+ bot modules:
       - **Season Lifecycle Editor**: Create new seasons (S1, S2, S3...), set active dates, assign theme elements (Fire, Ice, Light, Shadow, etc.), and customize environmental affixes.
       - **Interactive Difficulty Curve Visualizer**: Real-time chart displaying enemy HP/ATK/DEF trajectories across floors (F1–F50+) based on selected model (`Linear`, `Polynomial`, `Exponential`, `Hybrid`) and growth rate parameter $r$ (0.03 to 0.25).
       - **Boss Enrage & Shield Layer Configurator**: Set turn-count enrage limits, multi-layer elemental shield requirements, and first-clear vs repeat loot drop tables.
+      - *Shipped in TASK-1122 as `/owner/dungeon`:* a season list with status (live, waiting behind a later season, scheduled, ended, off), a season editor (ID, name, description, start and end day in UTC, on/off, theme element, affix set, growth model and curve parameters, season enrage) and a boss editor (stat multipliers, crit, named skill, enrage, up to three ward layers, turn limit, signature drop from `game_items`). The HP curve chart plots `seasonCurvePoints`, which runs the bot's `ScalingEngine`, from the canvas-free `@ririko/services/dungeon` subpath; the tooltip gives HP, ATK, DEF and SPD per floor. The tutorial season is fixed and not editable. Writes go through `DungeonSeasonAdminService` and audit `owner.dungeon_season.create|update` and `owner.dungeon_boss.update`. Tutorial configuration is not offered: the tutorial is fixed in `TutorialService`.
+      - *Shipped in TASK-1126:* first-clear vs repeat-clear loot tables per floor (`dungeon_floors.first_clear_rewards` / `repeat_rewards_table`), read by `DungeonLootService`; empty fields keep the bracket defaults. Audit `owner.dungeon_floor.update`.
     - **Energy & Stamina Governance** (*owner console*, `tcg_system_configs`):
       - Numerical input for **Global Energy Cap** (100–1000, default 300).
       - Slider for **Base Energy** (50–200, default 100) and **Energy Scaling Per Level** (1–5).
@@ -262,7 +265,9 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 |---|---|---|---|
 | STORY-110 | 8 | `apps/web` scaffold, Discord OAuth2, server-side sessions, guild authorization guard | 1.1, 2, 2.1, 2.2 |
 | STORY-111 | 8 | Shared Zod schemas, `GuildConfigService` and audit writer, dashboard shell and General tab, `ririko guild:config` | 3, 4 (General), 6 |
-| STORY-112 | 8 | TCG settings, owner-only season editor and curve visualizer, card album, shop and achievement managers | 4 (TCG) |
+| STORY-112 | 8 | Guild TCG settings (persisted drops, guild-scoped TCG Manager Role) and owner-gated global TCG rules | 4 (TCG) |
+| STORY-167 | 8 | Owner dungeon season and boss editor, difficulty curve chart, configurable floor loot | 4 (TCG) |
+| STORY-168 | 5 | Card album viewer, TCG shop catalog manager and achievement manager | 4 (TCG) |
 | STORY-113 | 5 | Overview tab, command usage counters, bot status record, voice activity, case log and audit viewers | 4 (Overview), 5 |
 | STORY-114 | 8 | Typed settings and step-up settings forms, Logging, Moderation escalation and AutoMod pages, real AutoMod actions | 3.4, 4 (3, 4, 18) |
 | STORY-115 | 8 | XP, Games, Giveaways pages, voice rewards, giveaway end guard | 4 (9, 11, 12) |

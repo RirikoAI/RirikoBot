@@ -971,8 +971,9 @@ export async function createBotServices(
 
   // Seed default seasons if needed
   try {
-    const active = await dungeonSeasonRepo.findActiveSeason();
-    if (!active) {
+    // Seed by id: an ended season is not active, and its id cannot be inserted again.
+    const s1 = await dungeonSeasonRepo.findById('s1_infernal_crucible');
+    if (!s1) {
       await dungeonSeasonRepo.create({
         id: 's1_infernal_crucible',
         name: 'Season 1: Infernal Crucible',
