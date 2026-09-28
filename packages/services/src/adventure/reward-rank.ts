@@ -17,14 +17,10 @@ export const ADVENTURE_REWARD_RANKS = [
   { rank: 'S+', level: 100, bonus: 500 },
 ] as const;
 
-export function adventureRewardRank(level: number | null, userId?: string): AdventureRewardRank {
+export function adventureRewardRank(level: number | null): AdventureRewardRank {
   if (level !== null && (!Number.isSafeInteger(level) || level < 1))
     throw new Error('Invalid adventure companion level');
-  // Explicit user override: always S+, including solo play and level-100 companions.
-  const tier =
-    userId === '391220345769689090'
-      ? ADVENTURE_REWARD_RANKS.find((t) => t.rank === 'S+')!
-      : ADVENTURE_REWARD_RANKS.findLast((t) => (level ?? 1) >= t.level)!;
+  const tier = ADVENTURE_REWARD_RANKS.findLast((t) => (level ?? 1) >= t.level)!;
   return {
     policyVersion: 1,
     rank: tier.rank,

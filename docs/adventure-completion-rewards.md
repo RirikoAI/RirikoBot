@@ -1,6 +1,6 @@
 # Adventure completion economy (version 2)
 
-Implemented locally on 2026-09-27 in TASK-1713–TASK-1715. This supersedes the original authored amount totals for **new admissions** across all 35 adventures. Rank policy version 1 remains unchanged, including the requested S+ user override. Existing sessions without `rewardEconomy` finish using their original rules.
+Implemented locally on 2026-09-27 in TASK-1713–TASK-1715. This supersedes the original authored amount totals for **new admissions** across all 35 adventures. Rank policy version 1 and its level thresholds remain unchanged. The temporary user-specific S+ override was removed in CHORE-1703; new runs use companion level for every user. Existing sessions without `rewardEconomy` finish using their original rules.
 
 ## Progression and the tower benchmark
 

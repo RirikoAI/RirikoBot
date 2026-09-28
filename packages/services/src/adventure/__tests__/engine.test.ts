@@ -293,33 +293,41 @@ describe('durable adventure engine', () => {
     expect(Number((await economy.getOrCreateBalance('alice')).walletBalance)).toBe(1800);
     expect((await energy.findById('alice'))?.currentEnergy).toBe(85);
   });
-  it.each([null, 1, 100])('pins the requested user to S+ at companion level %s', async (level) => {
-    const userId = '391220345769689090';
-    const card: AdventureCardSnapshot | null =
-      level === null
-        ? null
-        : {
-            name: 'Rem',
-            level,
-            element: 'WATER',
-            attack: 100,
-            defense: 100,
-            speed: 50,
-          };
-    let session = await engine.start({ ...input, userId, card });
-    expect(session.rewardRank).toMatchObject({
-      rank: 'S+',
-      companionLevel: level,
-      amountBps: 60000,
-      chanceBps: 60000,
-    });
-    for (const choice of ['3', '2', '2', '1', '1']) session = await choose(session, choice);
-    const done = await makeEngine().settle(userId, session.id);
-    expect(done.rewards.credits).toBe('1800');
-    expect((await sessions.findById(session.id))?.rewardRank?.rank).toBe('S+');
-    const ordinary = await engine.start({ ...input, userId: '391220345769689091', card });
-    expect(ordinary.rewardRank?.rank).toBe(level === 100 ? 'S+' : 'F');
-  });
+  it.each([
+    [null, 'F', 10000, '300'],
+    [1, 'F', 10000, '300'],
+    [18, 'E', 15000, '450'],
+    [100, 'S+', 60000, '1800'],
+  ] as const)(
+    'uses level-based rank for the formerly overridden user at level %s',
+    async (level, rank, bps, credits) => {
+      const userId = '391220345769689090';
+      const card: AdventureCardSnapshot | null =
+        level === null
+          ? null
+          : {
+              name: 'Rem',
+              level,
+              element: 'WATER',
+              attack: 100,
+              defense: 100,
+              speed: 50,
+            };
+      let session = await engine.start({ ...input, userId, card });
+      expect(session.rewardRank).toMatchObject({
+        rank,
+        companionLevel: level,
+        amountBps: bps,
+        chanceBps: bps,
+      });
+      for (const choice of ['3', '2', '2', '1', '1']) session = await choose(session, choice);
+      const done = await makeEngine().settle(userId, session.id);
+      expect(done.rewards.credits).toBe(credits);
+      expect((await sessions.findById(session.id))?.rewardRank?.rank).toBe(rank);
+      const ordinary = await engine.start({ ...input, userId: '391220345769689091', card });
+      expect(ordinary.rewardRank).toEqual(session.rewardRank);
+    },
+  );
   it('boosts actual card rolls without changing checks, rarity floors or RNG draws', async () => {
     const results: ActiveAdventureSession[] = [];
     for (const level of [1, 100]) {

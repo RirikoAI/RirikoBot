@@ -128,4 +128,4 @@ For manual verification run `pnpm dev:bot`, finish each scenario, inspect `/bala
 
 Completion economy TASK-1713 (5), companion XP/card acquisition TASK-1714 (5) and verification TASK-1715 (3) implement [tower-benchmarked completion rewards](adventure-completion-rewards.md). Failed endings earn progression, new runs cap restoration at seven energy, and the original companion receives atomic XP. See the [balance report](adventure-reward-balance.md).
 
-User override TASK-1712 (1 point): ID `391220345769689090` receives exactly S+ rank on new admissions, regardless of companion level.
+Historical user override TASK-1712 (1 point) was removed by CHORE-1703 on 2026-09-28. New admissions use companion level for every user; existing runs retain their saved rank.
