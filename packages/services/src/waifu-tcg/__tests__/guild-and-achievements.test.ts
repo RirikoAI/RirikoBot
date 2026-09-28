@@ -3,7 +3,6 @@ import {
   createDatabaseClient,
   WaifuGuildRepository,
   AchievementRepository,
-  TcgConfigRepository,
   EconomyRepository,
   XpRepository,
   UserInventoryItemRepository,
@@ -12,18 +11,13 @@ import {
 import type { SqliteDatabaseClient } from '@ririko/database';
 import { WaifuGuildService } from '../guild/waifu-guild.service.js';
 import { AchievementService } from '../achievements/achievement-service.js';
-import {
-  canManageGuildTcg,
-  LEGACY_TCG_MANAGER_ROLE_KEY,
-  TcgConfigService,
-} from '../admin/tcg-config.service.js';
+import { canManageGuildTcg } from '../admin/tcg-permissions.js';
 import { CANONICAL_ITEMS } from '../equipment/catalog.js';
 
-describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
+describe('Guild, Achievements & TCG Permissions (TASK-1052)', () => {
   let client: SqliteDatabaseClient;
   let guildRepo: WaifuGuildRepository;
   let achievementRepo: AchievementRepository;
-  let configRepo: TcgConfigRepository;
   let economyRepo: EconomyRepository;
   let xpRepo: XpRepository;
   let inventoryRepo: UserInventoryItemRepository;
@@ -31,7 +25,6 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
 
   let guildService: WaifuGuildService;
   let achievementService: AchievementService;
-  let configService: TcgConfigService;
 
   beforeEach(async () => {
     const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
@@ -178,7 +171,6 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
 
     guildRepo = new WaifuGuildRepository(client);
     achievementRepo = new AchievementRepository(client);
-    configRepo = new TcgConfigRepository(client);
     economyRepo = new EconomyRepository(client);
     xpRepo = new XpRepository(client);
     inventoryRepo = new UserInventoryItemRepository(client);
@@ -191,7 +183,6 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
       inventoryRepo,
       itemRepo,
     });
-    configService = new TcgConfigService(configRepo);
   });
 
   afterEach(async () => {
@@ -321,26 +312,7 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
     });
   });
 
-  describe('TcgConfigService', () => {
-    it('retrieves defaults, validates inputs with Zod, and updates settings', async () => {
-      // 1. Default config
-      const defaultCap = await configService.getConfig('global_max_energy_cap');
-      expect(defaultCap).toBe(300);
-
-      const defaultModel = await configService.getConfig('dungeon_scaling_model');
-      expect(defaultModel).toBe('HYBRID');
-
-      // 2. Set valid value
-      await configService.setConfig('global_max_energy_cap', 450, 'admin-user');
-      const updatedCap = await configService.getConfig('global_max_energy_cap');
-      expect(updatedCap).toBe(450);
-
-      // 3. Rejects invalid value
-      await expect(
-        configService.setConfig('global_max_energy_cap', 50, 'admin-user'), // min is 100
-      ).rejects.toThrow();
-    });
-
+  describe('canManageGuildTcg', () => {
     it('authorizes server admins and holders of the guild TCG Manager Role', () => {
       expect(canManageGuildTcg({ isServerAdmin: true })).toBe(true);
       expect(
@@ -351,18 +323,6 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
       ).toBe(false);
       expect(canManageGuildTcg({ memberRoles: ['role-mod-123'], managerRoleId: null })).toBe(false);
       expect(canManageGuildTcg({ managerRoleId: 'role-mod-123' })).toBe(false);
-    });
-
-    it('retires the old global TCG Manager Role key', async () => {
-      expect(await configService.retireGlobalManagerRole()).toBeNull();
-
-      await configRepo.setConfig(LEGACY_TCG_MANAGER_ROLE_KEY, 'role-mod-123', 'admin-user');
-      expect(await configService.retireGlobalManagerRole()).toBe('role-mod-123');
-      expect(await configRepo.getConfig(LEGACY_TCG_MANAGER_ROLE_KEY)).toBeNull();
-
-      await configRepo.setConfig(LEGACY_TCG_MANAGER_ROLE_KEY, '', 'admin-user');
-      expect(await configService.retireGlobalManagerRole()).toBeNull();
-      expect(await configRepo.getConfig(LEGACY_TCG_MANAGER_ROLE_KEY)).toBeNull();
     });
   });
 });

@@ -10,7 +10,7 @@ export function createMarketCommand(services: BotServices): Command {
       name: 'market',
       category: CommandCategory.TCG,
       description:
-        'Community Player Marketplace: Buy and sell cards with 5% market tax and 7-day automatic expiration.',
+        'Community Player Marketplace: Buy and sell cards with a market tax and automatic listing expiration.',
       aliases: ['marketplace', 'tcgmarket'],
       usage:
         '/market [action: list|browse|buy|cancel|my-listings] [card_id] [price] [listing_id] [page]',
@@ -90,6 +90,7 @@ export function createMarketCommand(services: BotServices): Command {
             userCardId: cardId,
             price,
           });
+          const taxPercent = Math.round((await marketService.getRules()).taxRate * 100);
 
           const embed = new EmbedBuilder()
             .setColor(0x5865f2)
@@ -99,8 +100,8 @@ export function createMarketCommand(services: BotServices): Command {
                 `**Listing ID**: \`${listing.id}\`\n` +
                 `**Card ID**: \`${listing.userCardId}\`\n` +
                 `**Price**: ${listing.price.toLocaleString()} Credits\n` +
-                `**Market Tax (5%)**: ${listing.taxPaid.toLocaleString()} Credits (deducted on sale)\n` +
-                `**Expires In**: 7 Days\n\n` +
+                `**Market Tax (${taxPercent}%)**: ${listing.taxPaid.toLocaleString()} Credits (deducted on sale)\n` +
+                `**Expires**: <t:${Math.floor(new Date(listing.expiresAt).getTime() / 1000)}:R>\n\n` +
                 `*Other players can buy with \`/market action:buy listing_id:${listing.id}\`.*`,
             )
             .setFooter({ text: 'Ririko Player Marketplace • State locked to IN_MARKET' })
@@ -250,7 +251,7 @@ export function createMarketCommand(services: BotServices): Command {
                 })
                 .join('\n\n'),
           )
-          .setFooter({ text: 'Ririko Player Marketplace • 5% Market Tax Sink' })
+          .setFooter({ text: 'Ririko Player Marketplace • Market Tax Sink' })
           .setTimestamp();
 
         await ctx.reply({ embeds: [embed] });

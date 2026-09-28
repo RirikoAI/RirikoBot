@@ -25,6 +25,7 @@ import {
   WelcomerRepository,
   ReactionRoleRepository,
   StreamRepository,
+  TcgConfigRepository,
   GiveawayRepository,
   UserRepository,
   WebKnownDeviceRepository,
@@ -33,7 +34,7 @@ import {
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
-import { EconomyConfigService, ItemCatalogService } from '@ririko/services/owner';
+import { EconomyConfigService, ItemCatalogService, TcgRulesService } from '@ririko/services/owner';
 import { createStreamAdapters, StreamAlertService } from '@ririko/services/stream-alerts';
 import { WelcomerBackgroundStore } from '@ririko/services/welcomer-backgrounds';
 import { DiscordOAuthClient } from './auth/discord-oauth';
@@ -85,6 +86,8 @@ export interface WebServices {
   economyConfig: EconomyConfigService;
   /** Global item shop for the owner console (after `requireOwner` or `runOwnerAction`). */
   itemCatalog: ItemCatalogService;
+  /** Global Waifu TCG rules for the owner console (after `requireOwner` or `runOwnerAction`). */
+  tcgRules: TcgRulesService;
   /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
   commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
@@ -222,6 +225,7 @@ async function createWebServices(): Promise<WebServices> {
       inventories: new InventoryRepository(db),
       audit,
     }),
+    tcgRules: new TcgRulesService({ db, repository: new TcgConfigRepository(db), audit }),
     commandCatalog,
     botActivity: new BotActivityRepository(db),
     notifier: new DiscordNotifier({

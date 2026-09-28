@@ -272,10 +272,7 @@ The scaling parameters are completely dynamic and hot-reloadable:
   - Dropdown selector for Scaling Model (`LINEAR`, `POLYNOMIAL`, `EXPONENTIAL`, `HYBRID`).
   - Interactive curve visualizer previewing HP/ATK trajectories up to Floor 100.
   - Sliders for $r$ (growth rate: 0.03 to 0.25) and Boss Floor Multipliers.
-- Configurable via **Discord Slash Command**:
-  - `/tcg-admin config dungeon scaling_model <LINEAR|POLYNOMIAL|EXPONENTIAL|HYBRID>`
-  - `/tcg-admin config dungeon growth_rate <0.05-0.20>`
-  - `/tcg-admin config dungeon season_affix <season_id> <affix_json>`
+- The curve belongs to each season (`dungeon_seasons.scaling_model` and `scaling_params`). The global `dungeon_scaling_model` and `dungeon_growth_rate` keys were never read and were removed from `/tcg-admin` in TASK-1124; the season editor (STORY-167) will edit the season curve.
 
 ### 7.7. Seasonal Anime Bosses & Season Data (`pnpm tcg:boss-builder`)
 Every season floor is guarded by a real anime character that fits the season theme. Season data lives in a hand-edited catalog, `assets/tcg/catalog/bosses/<seasonId>.json`:
@@ -587,7 +584,8 @@ Where **MilestoneBonus** rewards significant progression breakthroughs:
 - **Global Energy Cap**: A hard ceiling preventing runaway energy scaling (Default: **300 Energy**, range 100 – 1,000).
 - Configurable via:
   1. **Web Dashboard**: Located under *Waifu TCG Settings* -> *Energy & Stamina Governance*.
-  2. **Discord Admin Command**: `/tcg-admin config energy max_cap <value>` (Strictly protected by Discord `Administrator` permission or the designated `TCG Manager Role`).
+  2. **Discord Admin Command**: `/tcg-admin action:energy max_cap:<value>` (bot owners only, `BOT_OWNER_ID`: the rule applies to every server).
+  3. **CLI**: `ririko tcg:rules globalMaxEnergyCap <value>`.
 - **Temporary Overflow Rules**:
   - Gaining energy from rare consumables or leveling up can temporarily overflow past the normal cap (e.g. 115/100).
   - During the daily replenishment at the reset boundary, if a player's energy is already $\ge \text{MaxEnergy}$, it is not reduced or deleted, but no additional free energy is awarded.
@@ -744,43 +742,48 @@ Administrative control over energy ceilings, shop catalogs, and item drops must 
 │                 Governance & Configuration Control Plane                    │
 │                                                                             │
 │  [ Discord Slash Command ]              [ Next.js Web Dashboard ]           │
-│  /tcg-admin config energy max_cap: 350  Waifu TCG Settings Panel            │
-│  /tcg-admin config dungeon scaling...   Dungeon Tower Manager Panel         │
+│  /tcg-admin action:energy|market        /owner/tcg (owner console)          │
+│  ririko tcg:rules                                                           │
 │         │                                      │                            │
-│         ├── Role Guard Check:                  │ OAuth2 Admin Check:        │
-│         │   (TCG Manager Role / Administrator) │ (ManageGuild / Admin)      │
-│         │                                      │                            │
+│         ├── Bot owner check (BOT_OWNER_ID)     ├── Bot owner + passkey      │
+│         │                                      │   step-up (runOwnerAction) │
 │         ▼                                      ▼                            │
-│   Unified Configuration Service (packages/core: Zod Schema Validation)      │
+│   TcgRulesService (@ririko/services/owner; TcgRulesSchema in core, audit)   │
 │                                 │                                           │
 │                                 ▼                                           │
 │                 Database Table: `tcg_system_configs`                        │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 15.1. Configurable Game Parameters
-- `global_max_energy_cap`: Integer (Default: `300`, Range: `100` – `1000`).
-- `base_energy_capacity`: Integer (Default: `100`, Range: `50` – `200`).
-- `energy_scaling_per_level`: Integer (Default: `2`, Range: `1` – `5`).
-- `daily_energy_restore_pot_limit`: Integer (Default: `3`, Range: `1` – `10`).
-- `daily_replenish_cron`: String (Default: `'0 0 * * *'` - midnight UTC).
-- `dungeon_scaling_model`: String (Default: `'EXPONENTIAL'`, Enum: `['LINEAR', 'POLYNOMIAL', 'EXPONENTIAL', 'HYBRID']`).
-- `dungeon_growth_rate`: Float (Default: `0.085`, Range: `0.03` – `0.25`).
-- The TCG Manager Role is per guild (`guild_settings.tcg_manager_role_id`, TASK-1121), not a global key.
+Guild settings (card drops, TCG Manager Role) are per server and go through `GuildConfigService` (module `tcg`) instead: `/dashboard/[guildId]/tcg`, `/tcg-admin action:drops|role` and `ririko guild:config tcg.*`.
+
+### 15.1. Configurable Game Parameters (global, TASK-1124)
+| Rule (`TcgRulesSchema`) | Stored key | Default | Range |
+|---|---|---|---|
+| `marketTaxPercent` | `market_tax_rate` (fraction) | 5% | 1 – 20% |
+| `listingExpiryDays` | `listing_expiry_days` | 7 | 1 – 30 |
+| `globalMaxEnergyCap` | `global_max_energy_cap` | 300 | 100 – 1000 (not below the base) |
+| `baseEnergyCapacity` | `base_energy_capacity` | 100 | 50 – 200 |
+| `energyScalingPerLevel` | `energy_scaling_per_level` | 2 | 1 – 5 |
+| `dailyEnergyPotionLimit` | `daily_energy_restore_pot_limit` | 3 | 1 – 10 |
+| `maxBonusEnergyCap` | `max_bonus_energy_cap` | 50 | 0 – 500 |
+| `dailyBonusEnergyIncrement` | `daily_bonus_energy_increment` | 5 | 0 – 50 |
+
+- The bot caches the rules for 30 seconds. Older stored values outside a range are ignored (the default applies); an old tax above 20% is clamped to 20%.
+- `daily_replenish_cron`, `dungeon_scaling_model`, `dungeon_growth_rate` and the old global `tcg_manager_role_id` are deleted at bot start: nothing read them (the reset time comes from the environment, the dungeon curve from each season) and the TCG Manager Role is per guild (`guild_settings.tcg_manager_role_id`, TASK-1121).
 
 ### 15.2. Dual-Interface Access
 1. **Discord Command Line**:
-   - `/tcg-admin config energy max_cap <value>`
-   - `/tcg-admin config energy pot_limit <value>`
-   - `/tcg-admin config energy bonus_cap <value>`
-   - `/tcg-admin config energy bonus_increment <value>`
-   - `/tcg-admin config dungeon scaling_model <model>`
-   - `/tcg-admin config dungeon growth_rate <value>`
+   - `/tcg-admin action:energy max_cap:<n> base_capacity:<n> level_scaling:<n> pot_limit:<n> bonus_cap:<n> bonus_increment:<n>` (bot owners only; works in DMs)
+   - `/tcg-admin action:market tax_percent:<n> listing_days:<n>` (bot owners only; works in DMs)
    - `/tcg-admin action:role role:<@role>` (Manage Server only; sets this server's TCG Manager Role, `none` clears it)
    - `/tcg-admin action:drops enabled:<bool> channel:<#channel> threshold:<n> start_hour:<h> end_hour:<h> claim_seconds:<s> cooldown_minutes:<m>` (this server's card drops)
-   - *Security Middleware*: Rejects callers unless they hold the server's TCG Manager Role or Discord `Administrator` / `Manage Server` permissions.
+   - `/tcg-admin action:view` shows this server's drops and role plus the global rules.
+   - *Security*: global actions require `BOT_OWNER_ID`; server actions require the server's TCG Manager Role or `Administrator` / `Manage Server`. Every write is audited.
 2. **Web Dashboard Portal**:
-   - Under `/dashboard/[guildId]/waifu-tcg`, administrators can adjust numeric sliders, review live drop telemetry, manage item shop catalogs, configure seasonal dungeon towers with interactive curve visualizers, and toggle achievement reward packs with visual confirmation.
+   - `/dashboard/[guildId]/tcg`: card drops and the TCG Manager Role (guild managers).
+   - `/owner/tcg`: global rules (bot owners with a fresh passkey check).
+3. **CLI**: `ririko tcg:rules [key] [value]` and `ririko guild:config <guild> tcg.<field> [value]`.
 
 ---
 

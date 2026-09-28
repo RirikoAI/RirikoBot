@@ -5,6 +5,7 @@ import { createTcgAdminCommand } from '../admin.command.js';
 import type { BotServices } from '../../../services.js';
 import type { CommandContext } from '@ririko/discord';
 import { GuildConfigValidationError } from '@ririko/services';
+import { DEFAULT_TCG_RULES } from '@ririko/core';
 
 describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
   let services: BotServices;
@@ -160,21 +161,12 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
       ]),
     };
 
-    const mockTcgConfigService: any = {
-      getConfig: vi.fn().mockResolvedValue(300),
-      setConfig: vi.fn().mockResolvedValue(350),
-      getAllConfigs: vi.fn().mockResolvedValue({
-        global_max_energy_cap: 300,
-        base_energy_capacity: 100,
-        energy_scaling_per_level: 2,
-        daily_energy_restore_pot_limit: 3,
-        daily_replenish_cron: '0 0 * * *',
-        max_bonus_energy_cap: 50,
-        daily_bonus_energy_increment: 5,
-        dungeon_scaling_model: 'HYBRID',
-        dungeon_growth_rate: 0.085,
-        market_tax_rate: 0.05,
-      }),
+    const mockTcgRulesService: any = {
+      getRules: vi.fn().mockResolvedValue(DEFAULT_TCG_RULES),
+      update: vi.fn(async (patch: Record<string, unknown>) => ({
+        values: { ...DEFAULT_TCG_RULES, ...patch },
+        changes: [{ field: 'x', before: null, after: null }],
+      })),
     };
 
     guildTcg = {
@@ -198,7 +190,8 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
     services = {
       waifuGuildService: mockWaifuGuildService,
       achievementService: mockAchievementService,
-      tcgConfigService: mockTcgConfigService,
+      tcgRulesService: mockTcgRulesService,
+      botOwnerIds: ['owner_1'],
       guildConfigService: mockGuildConfigService,
     } as unknown as BotServices;
   });
@@ -367,11 +360,12 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
     it('rejects unauthorized users', async () => {
       guildTcg.managerRoleId = 'role_tcg';
       const cmd = createTcgAdminCommand(services);
-      const ctx = createMockContext({ action: 'energy', max_cap: 400 }, [], false, false, [
+      const ctx = createMockContext({ action: 'drops', enabled: true }, [], false, false, [
         'role_other',
       ]);
 
       await cmd.execute(ctx);
+      expect(services.guildConfigService.update).not.toHaveBeenCalled();
       expect(replyMock).toHaveBeenCalledWith(
         expect.objectContaining({
           content: expect.stringContaining('Access Denied'),
@@ -380,54 +374,88 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
       );
     });
 
-    it('updates energy parameters when authorized', async () => {
+    it('refuses global energy and market rules to server admins who are not bot owners', async () => {
       const cmd = createTcgAdminCommand(services);
-      const ctx = createMockContext({
-        action: 'energy',
-        max_cap: 400,
-        pot_limit: 5,
-        bonus_cap: 75,
-        bonus_increment: 10,
-      });
+      await cmd.execute(createMockContext({ action: 'energy', max_cap: 400 }));
+      await cmd.execute(createMockContext({}, ['market', 'tax_percent:10']));
 
-      await cmd.execute(ctx);
-      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
-        'global_max_energy_cap',
-        400,
-        'user_1',
-      );
-      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
-        'daily_energy_restore_pot_limit',
-        5,
-        'user_1',
-      );
-      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
-        'max_bonus_energy_cap',
-        75,
-        'user_1',
-      );
-      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
-        'daily_bonus_energy_increment',
-        10,
-        'user_1',
-      );
+      expect(services.tcgRulesService.update).not.toHaveBeenCalled();
+      for (const [reply] of replyMock.mock.calls) {
+        expect(reply.content).toContain('only the bot owner');
+      }
     });
 
-    it('updates energy parameters via prefix arguments', async () => {
+    it('updates global energy rules for bot owners, audited from Discord', async () => {
       const cmd = createTcgAdminCommand(services);
-      const ctx = createMockContext({}, ['energy', 'bonus_cap:100', 'bonus_increment:15']);
+      const ctx = {
+        ...createMockContext({
+          action: 'energy',
+          max_cap: 400,
+          base_capacity: 120,
+          level_scaling: 3,
+          pot_limit: 5,
+          bonus_cap: 75,
+          bonus_increment: 10,
+        }),
+        user: { id: 'owner_1', username: 'Owner' },
+      } as unknown as CommandContext;
 
       await cmd.execute(ctx);
-      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
-        'max_bonus_energy_cap',
-        100,
-        'user_1',
+      expect(services.tcgRulesService.update).toHaveBeenCalledWith(
+        {
+          globalMaxEnergyCap: 400,
+          baseEnergyCapacity: 120,
+          energyScalingPerLevel: 3,
+          dailyEnergyPotionLimit: 5,
+          maxBonusEnergyCap: 75,
+          dailyBonusEnergyIncrement: 10,
+        },
+        { userId: 'owner_1', source: 'discord' },
       );
-      expect(services.tcgConfigService.setConfig).toHaveBeenCalledWith(
-        'daily_bonus_energy_increment',
-        15,
-        'user_1',
+      const embed = replyMock.mock.calls[0][0].embeds[0].toJSON();
+      expect(embed.title).toBe('⚡ Energy Rules Updated');
+      expect(embed.description).toContain('`400`');
+    });
+
+    it('updates global market rules from prefix arguments for bot owners, even in DMs', async () => {
+      const cmd = createTcgAdminCommand(services);
+      const ctx = {
+        ...createMockContext({}, ['market', 'tax_percent:10', 'listing_days:3']),
+        user: { id: 'owner_1', username: 'Owner' },
+        guildId: null,
+      } as unknown as CommandContext;
+
+      await cmd.execute(ctx);
+      expect(services.tcgRulesService.update).toHaveBeenCalledWith(
+        { marketTaxPercent: '10', listingExpiryDays: '3' },
+        { userId: 'owner_1', source: 'discord' },
       );
+      const embed = replyMock.mock.calls[0][0].embeds[0].toJSON();
+      expect(embed.description).toContain('`10%`');
+      expect(embed.description).toContain('`3 days`');
+    });
+
+    it('explains the usage and shows validation errors for global rules', async () => {
+      const cmd = createTcgAdminCommand(services);
+      const asOwner = (ctx: CommandContext) =>
+        ({ ...ctx, user: { id: 'owner_1', username: 'Owner' } }) as unknown as CommandContext;
+
+      await cmd.execute(asOwner(createMockContext({ action: 'energy' })));
+      await cmd.execute(asOwner(createMockContext({ action: 'market' })));
+      expect(replyMock.mock.calls[0][0].content).toContain('No energy rules provided');
+      expect(replyMock.mock.calls[1][0].content).toContain('No market rules provided');
+
+      (services.tcgRulesService.update as any).mockRejectedValueOnce(
+        new GuildConfigValidationError(
+          { marketTaxPercent: ['Enter a whole number from 1 to 20.'] },
+          'TCG rules',
+        ),
+      );
+      await cmd.execute(asOwner(createMockContext({ action: 'market', tax_percent: 50 })));
+      expect(replyMock.mock.calls[2][0]).toMatchObject({
+        content: expect.stringContaining('from 1 to 20'),
+        ephemeral: true,
+      });
     });
 
     it('refuses outside a server', async () => {
@@ -585,12 +613,15 @@ describe('TASK-1052: Guild, Achievement & TCG Admin Command Suites', () => {
       });
 
       await cmd.execute(ctx);
-      expect(services.tcgConfigService.getAllConfigs).toHaveBeenCalled();
-      expect(replyMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          embeds: expect.any(Array),
-        }),
-      );
+      expect(services.tcgRulesService.getRules).toHaveBeenCalled();
+      const fields = replyMock.mock.calls[0][0].embeds[0].toJSON().fields;
+      expect(fields.map((field: { name: string }) => field.name)).toEqual([
+        '🃏 Card Drops (this server)',
+        '🛡️ TCG Manager Role (this server)',
+        '⚡ Energy (global)',
+        '🏪 Marketplace (global)',
+      ]);
+      expect(fields[3].value).toContain('`5%`');
     });
   });
 });
