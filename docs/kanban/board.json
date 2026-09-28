@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "TASK-1124",
   "epics": [
     {
       "id": "EPIC-000",
@@ -2693,7 +2693,7 @@
       "parent": "STORY-112",
       "title": "Guild tcg Config Module: Persisted Drop Settings, Drop Spawning from Messages, Guild-Scoped TCG Manager Role & TCG Settings Page",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-111"
       ],
@@ -2707,7 +2707,7 @@
       "parent": "STORY-112",
       "title": "Global TCG Rules Wired at Runtime (Market Tax 1-20%, Listing Expiry, Energy Cap/Base/Scaling, Restore-Pot Limit), Audited Owner TCG Page, ririko tcg:rules & /tcg-admin Owner Lockdown",
       "points": 3,
-      "status": "TODO",
+      "status": "IN_PROGRESS",
       "requires": [
         "TASK-1121"
       ],

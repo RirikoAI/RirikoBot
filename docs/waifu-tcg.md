@@ -132,13 +132,13 @@ damage multiplier**:
 
 ## 5. Waifu Drop System
 
-Guild administrators configure automated card drops to stimulate server chatter:
+Guild administrators (or the server's TCG Manager Role) configure automated card drops to stimulate server chatter, on the dashboard's Waifu TCG page or with `/tcg-admin action:drops`. Drops are off until turned on (TASK-1121):
 
-- **Drop Channel**: Configurable dedicated drop channel (e.g. `#waifu-drops`).
-- **Trigger Condition**: Configurable message threshold (e.g. every 50–100 active messages from unique members).
-- **Claim Window**: Cards spawn with an interactive `[Claim Card]` Discord button valid for 60 seconds.
-- **Allowed Hours**: Configurable active hours (e.g. 08:00 to 23:00) to prevent nocturnal spam.
-- **Anti-Sniping**: A user who claimed the previous drop enters a short cooldown (5 minutes) to give other server
+- **Drop Channel**: Optional dedicated drop channel (e.g. `#waifu-drops`); only its messages count and drops post there. Without one, every channel counts and the card drops where the last message was.
+- **Trigger Condition**: A threshold of unique members chatting (default 50, 5 to 500). Messages the anti-spam check rejects do not count.
+- **Claim Window**: The drop is posted with its card image and is claimed with `/card action:claim` (or `<prefix>card claim`) within the claim window (default 60 seconds, 15 to 600).
+- **Allowed Hours**: Active hours in the server time zone (default 08:00 to 23:00); an end before the start runs past midnight, equal hours mean all day.
+- **Anti-Sniping**: A user who claimed the previous drop enters a cooldown (default 5 minutes, 0 to 60) to give other server
   members a fair chance.
 
 ---
@@ -766,7 +766,7 @@ Administrative control over energy ceilings, shop catalogs, and item drops must 
 - `daily_replenish_cron`: String (Default: `'0 0 * * *'` - midnight UTC).
 - `dungeon_scaling_model`: String (Default: `'EXPONENTIAL'`, Enum: `['LINEAR', 'POLYNOMIAL', 'EXPONENTIAL', 'HYBRID']`).
 - `dungeon_growth_rate`: Float (Default: `0.085`, Range: `0.03` – `0.25`).
-- `tcg_manager_role_id`: Discord Snowflake (Role permitted to execute `/tcg-admin` commands).
+- The TCG Manager Role is per guild (`guild_settings.tcg_manager_role_id`, TASK-1121), not a global key.
 
 ### 15.2. Dual-Interface Access
 1. **Discord Command Line**:
@@ -776,8 +776,9 @@ Administrative control over energy ceilings, shop catalogs, and item drops must 
    - `/tcg-admin config energy bonus_increment <value>`
    - `/tcg-admin config dungeon scaling_model <model>`
    - `/tcg-admin config dungeon growth_rate <value>`
-   - `/tcg-admin config role <@role>`
-   - *Security Middleware*: Rejects callers unless they hold the designated `tcg_manager_role_id` or Discord `Administrator` permissions.
+   - `/tcg-admin action:role role:<@role>` (Manage Server only; sets this server's TCG Manager Role, `none` clears it)
+   - `/tcg-admin action:drops enabled:<bool> channel:<#channel> threshold:<n> start_hour:<h> end_hour:<h> claim_seconds:<s> cooldown_minutes:<m>` (this server's card drops)
+   - *Security Middleware*: Rejects callers unless they hold the server's TCG Manager Role or Discord `Administrator` / `Manage Server` permissions.
 2. **Web Dashboard Portal**:
    - Under `/dashboard/[guildId]/waifu-tcg`, administrators can adjust numeric sliders, review live drop telemetry, manage item shop catalogs, configure seasonal dungeon towers with interactive curve visualizers, and toggle achievement reward packs with visual confirmation.
 

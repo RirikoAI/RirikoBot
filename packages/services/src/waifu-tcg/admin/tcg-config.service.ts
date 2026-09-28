@@ -12,8 +12,13 @@ export const TcgConfigKeySchema = z.enum([
   'dungeon_scaling_model',
   'dungeon_growth_rate',
   'market_tax_rate',
-  'tcg_manager_role_id',
 ]);
+
+/**
+ * Key of the old global TCG Manager Role. The role is guild-scoped now (`guild_settings`), so
+ * the bot deletes this key at start.
+ */
+export const LEGACY_TCG_MANAGER_ROLE_KEY = 'tcg_manager_role_id';
 
 export type TcgConfigKey = z.infer<typeof TcgConfigKeySchema>;
 
@@ -30,7 +35,6 @@ export const TcgConfigSchemas = {
     .default('HYBRID'),
   dungeon_growth_rate: z.number().min(0.03).max(0.25).default(0.085),
   market_tax_rate: z.number().min(0.0).max(0.5).default(0.05),
-  tcg_manager_role_id: z.string().default(''),
 };
 
 export interface AllTcgConfigs {
@@ -44,7 +48,20 @@ export interface AllTcgConfigs {
   dungeon_scaling_model: 'LINEAR' | 'POLYNOMIAL' | 'EXPONENTIAL' | 'HYBRID';
   dungeon_growth_rate: number;
   market_tax_rate: number;
-  tcg_manager_role_id: string;
+}
+
+/**
+ * Whether a member may run the guild's TCG administration: server admins, and members with
+ * the guild's TCG Manager Role.
+ */
+export function canManageGuildTcg(options: {
+  isServerAdmin?: boolean | undefined;
+  memberRoles?: readonly string[] | undefined;
+  managerRoleId?: string | null | undefined;
+}): boolean {
+  if (options.isServerAdmin) return true;
+  if (!options.managerRoleId) return false;
+  return options.memberRoles?.includes(options.managerRoleId) ?? false;
 }
 
 export class TcgConfigService {
@@ -114,28 +131,17 @@ export class TcgConfigService {
         rawAll['dungeon_growth_rate'],
       ),
       market_tax_rate: TcgConfigSchemas.market_tax_rate.parse(rawAll['market_tax_rate']),
-      tcg_manager_role_id: TcgConfigSchemas.tcg_manager_role_id.parse(
-        rawAll['tcg_manager_role_id'],
-      ),
     };
   }
 
   /**
-   * Checks if an invoker is authorized to perform TCG administration.
+   * Deletes the old global TCG Manager Role key and returns the role it named, or `null`.
+   * Which guild owned the role cannot be known, so it is not copied anywhere.
    */
-  async isAuthorized(options: {
-    memberRoles?: string[] | undefined;
-    isServerAdmin?: boolean | undefined;
-  }): Promise<boolean> {
-    if (options.isServerAdmin) {
-      return true;
-    }
-
-    const managerRoleId = await this.getConfig('tcg_manager_role_id');
-    if (!managerRoleId) {
-      return false;
-    }
-
-    return options.memberRoles?.includes(managerRoleId) ?? false;
+  async retireGlobalManagerRole(): Promise<string | null> {
+    const roleId = await this.configRepo.getConfig<unknown>(LEGACY_TCG_MANAGER_ROLE_KEY);
+    if (roleId === null) return null;
+    await this.configRepo.delete(LEGACY_TCG_MANAGER_ROLE_KEY);
+    return typeof roleId === 'string' && roleId !== '' ? roleId : null;
   }
 }

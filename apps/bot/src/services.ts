@@ -105,6 +105,7 @@ import {
   TicTacToeEngine,
   RpsEngine,
   DropManager,
+  dropConfigFromSettings,
   CardDismantleService,
   CardImageService,
   CombatSimulator,
@@ -150,6 +151,8 @@ import {
   resolveTimeZone,
   GuildSettingsService,
   GuildConfigWatcher,
+  createGuildConfigService,
+  type GuildConfigService,
   CommandUsageRecorder,
   CommandOverrideService,
   BotStatusReporter,
@@ -285,6 +288,8 @@ export interface BotServices {
   waifuGuildService: WaifuGuildService;
   achievementService: AchievementService;
   tcgConfigService: TcgConfigService;
+  /** Audited guild settings writes from Discord commands (same path as the dashboard and CLI). */
+  guildConfigService: GuildConfigService;
   reactionRoleRepo: ReactionRoleRepository;
   autoRoleRepo: AutoRoleRepository;
   reactionRoleService: ReactionRoleService;
@@ -337,7 +342,12 @@ export async function createBotServices(
   const autoRoleService = new AutoRoleService(autoRoleRepo);
   const welcomerRepo = new WelcomerRepository(db);
   const welcomerService = new WelcomerService();
-  const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo);
+  const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo, undefined, {
+    loadConfig: async (guildId) => {
+      const row = await guildSettingsRepo.findById(guildId);
+      return row ? dropConfigFromSettings(row) : null;
+    },
+  });
   const gameItemRepo = new GameItemRepository(db);
   const userInventoryItemRepo = new UserInventoryItemRepository(db);
   const itemGrantService = new ItemGrantService(gameItemRepo, userInventoryItemRepo);
@@ -428,6 +438,10 @@ export async function createBotServices(
 
   const tcgConfigRepo = new TcgConfigRepository(db);
   const tcgConfigService = new TcgConfigService(tcgConfigRepo);
+  const guildConfigService = createGuildConfigService(db, {
+    defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
+    defaultTimezone: 'UTC',
+  });
 
   // Energy lifecycle owns the daily boundary and level-scaled capacity, sized by the
   // account-wide level. It also reconciles incremental bonus energy up to the configured cap.
@@ -546,7 +560,11 @@ export async function createBotServices(
     defaultTimezone: 'UTC',
   });
   // Settings saved by the dashboard or CLI reach this process through the config change feed.
-  eventBus.on('guild:configChanged', ({ guildId }) => guildSettingsService.invalidate(guildId));
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    guildSettingsService.invalidate(guildId);
+    // Drop hours are read in the guild time zone, which the General page sets.
+    if (module === 'tcg' || module === 'general') dropManager.invalidate(guildId);
+  });
   const voiceRewardService = discordClient
     ? new VoiceRewardService({
         accumulator: voiceAccumulator,
@@ -912,6 +930,18 @@ export async function createBotServices(
     // In some unit tests with isolated in-memory databases, game_items may not be created.
   }
 
+  // The TCG Manager Role is per guild now; the old global key cannot be assigned to one.
+  try {
+    const retired = await tcgConfigService.retireGlobalManagerRole();
+    if (retired) {
+      console.warn(
+        `[tcg] Removed the old global TCG Manager Role (${retired}). Set it again per server with /tcg-admin action:role or the dashboard.`,
+      );
+    }
+  } catch {
+    // Isolated test databases may lack tcg_system_configs.
+  }
+
   // Seed default seasons if needed
   try {
     const active = await dungeonSeasonRepo.findActiveSeason();
@@ -1057,6 +1087,7 @@ export async function createBotServices(
     waifuGuildService,
     achievementService,
     tcgConfigService,
+    guildConfigService,
     reactionRoleRepo,
     autoRoleRepo,
     reactionRoleService,

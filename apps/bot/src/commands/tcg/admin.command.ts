@@ -1,7 +1,57 @@
 import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
-import type { TcgConfigKey } from '@ririko/services';
+import { canManageGuildTcg, GuildConfigValidationError } from '@ririko/services';
+
+/** `/tcg-admin action:drops` options and the `tcg` settings each one sets. */
+const DROP_OPTIONS = {
+  enabled: 'dropsEnabled',
+  channel: 'dropChannelId',
+  threshold: 'dropMessageThreshold',
+  start_hour: 'dropStartHour',
+  end_hour: 'dropEndHour',
+  claim_seconds: 'dropClaimTimeoutSeconds',
+  cooldown_minutes: 'dropCooldownMinutes',
+} as const;
+
+/** Reads `key:value` prefix arguments into `tcg` settings; `<#id>` channels become IDs. */
+function readDropArgs(rawArgs: readonly string[]): Record<string, unknown> {
+  const patch: Record<string, unknown> = {};
+  for (const arg of rawArgs) {
+    const separator = arg.indexOf(':');
+    if (separator <= 0) continue;
+    const key = arg.slice(0, separator).toLowerCase();
+    if (!Object.hasOwn(DROP_OPTIONS, key)) continue;
+    patch[DROP_OPTIONS[key as keyof typeof DROP_OPTIONS]] = arg
+      .slice(separator + 1)
+      .replace(/^<#(\d+)>$/, '$1');
+  }
+  return patch;
+}
+
+function describeDrops(values: {
+  dropsEnabled: boolean;
+  dropChannelId: string | null;
+  dropMessageThreshold: number;
+  dropStartHour: number;
+  dropEndHour: number;
+  dropClaimTimeoutSeconds: number;
+  dropCooldownMinutes: number;
+}): string {
+  const hour = (value: number) => `${String(value).padStart(2, '0')}:00`;
+  const hours =
+    values.dropStartHour === values.dropEndHour
+      ? 'all day'
+      : `${hour(values.dropStartHour)} to ${hour(values.dropEndHour)}`;
+  return (
+    `• **Drops:** \`${values.dropsEnabled ? 'On' : 'Off'}\`\n` +
+    `• **Channel:** ${values.dropChannelId ? `<#${values.dropChannelId}>` : 'Every channel'}\n` +
+    `• **Unique Chatters:** \`${values.dropMessageThreshold}\`\n` +
+    `• **Hours:** ${hours} (server time zone)\n` +
+    `• **Claim Window:** \`${values.dropClaimTimeoutSeconds}s\`\n` +
+    `• **Repeat-Claim Cooldown:** \`${values.dropCooldownMinutes} min\``
+  );
+}
 
 export function createTcgAdminCommand(services: BotServices): Command {
   return {
@@ -11,9 +61,10 @@ export function createTcgAdminCommand(services: BotServices): Command {
       description:
         'TCG Administration: Manage game balance, energy caps, dungeon curves, and market taxes.',
       aliases: ['tcgadmin', 'tcgconfig'],
-      usage: '/tcg-admin [action: view|energy|dungeon|market|role] [value]',
+      usage: '/tcg-admin [action: view|drops|energy|dungeon|market|role] [value]',
       examples: [
         '/tcg-admin action:view',
+        '/tcg-admin action:drops enabled:true channel:#tcg-drops threshold:30',
         '/tcg-admin action:energy max_cap:350 pot_limit:5 bonus_cap:50 bonus_increment:5',
         '/tcg-admin action:dungeon scaling_model:EXPONENTIAL growth_rate:0.09',
         '/tcg-admin action:market tax_rate:0.05',
@@ -22,15 +73,16 @@ export function createTcgAdminCommand(services: BotServices): Command {
       options: [
         {
           name: 'action',
-          description: 'Admin action (view, energy, dungeon, market, role)',
+          description: 'Admin action (view, drops, energy, dungeon, market, role)',
           type: 'STRING',
           required: false,
           choices: [
             { name: 'View (View current TCG configuration)', value: 'view' },
+            { name: 'Drops (Configure card drops in this server)', value: 'drops' },
             { name: 'Energy (Configure energy capacity & potion limits)', value: 'energy' },
             { name: 'Dungeon (Configure PvE scaling model & growth rate)', value: 'dungeon' },
             { name: 'Market (Configure marketplace tax rate)', value: 'market' },
-            { name: 'Role (Configure TCG Manager Role)', value: 'role' },
+            { name: 'Role (Configure this server TCG Manager Role)', value: 'role' },
           ],
         },
         {
@@ -83,8 +135,50 @@ export function createTcgAdminCommand(services: BotServices): Command {
         },
         {
           name: 'role',
-          description: 'Role or role ID designated as TCG Manager',
+          description: 'Role or role ID designated as TCG Manager in this server (none to clear)',
           type: 'STRING',
+          required: false,
+        },
+        {
+          name: 'enabled',
+          description: 'Card drops on or off in this server',
+          type: 'BOOLEAN',
+          required: false,
+        },
+        {
+          name: 'channel',
+          description: 'Channel whose messages count toward drops and where drops post',
+          type: 'CHANNEL',
+          required: false,
+        },
+        {
+          name: 'threshold',
+          description: 'Unique members who must chat before a card drops (5 - 500)',
+          type: 'INTEGER',
+          required: false,
+        },
+        {
+          name: 'start_hour',
+          description: 'Drops happen from this hour (0 - 23, server time zone)',
+          type: 'INTEGER',
+          required: false,
+        },
+        {
+          name: 'end_hour',
+          description: 'Drops stop at this hour (0 - 23, server time zone)',
+          type: 'INTEGER',
+          required: false,
+        },
+        {
+          name: 'claim_seconds',
+          description: 'Seconds a drop stays claimable (15 - 600)',
+          type: 'INTEGER',
+          required: false,
+        },
+        {
+          name: 'cooldown_minutes',
+          description: 'Minutes the last claimant waits before the next claim (0 - 60)',
+          type: 'INTEGER',
           required: false,
         },
       ],
@@ -98,7 +192,16 @@ export function createTcgAdminCommand(services: BotServices): Command {
         return;
       }
 
-      // Security check
+      const guildId = ctx.guildId;
+      if (!guildId) {
+        await ctx.reply({
+          content: '❌ This command can only be used in a server.',
+          ephemeral: true,
+        });
+        return;
+      }
+
+      // Security check: server admins, or the server's TCG Manager Role.
       const memberRoles: string[] = ctx.member?.roles
         ? Array.from(
             ((ctx.member.roles as any).cache?.keys?.() ??
@@ -109,9 +212,11 @@ export function createTcgAdminCommand(services: BotServices): Command {
         Boolean(ctx.member?.permissions.has(PermissionFlagsBits.Administrator)) ||
         Boolean(ctx.member?.permissions.has(PermissionFlagsBits.ManageGuild));
 
-      const isAuth = await services.tcgConfigService.isAuthorized({
+      const guildTcg = await services.guildConfigService.get(guildId, 'tcg');
+      const isAuth = canManageGuildTcg({
         memberRoles,
         isServerAdmin,
+        managerRoleId: guildTcg.managerRoleId,
       });
 
       if (!isAuth) {
@@ -128,6 +233,55 @@ export function createTcgAdminCommand(services: BotServices): Command {
         ctx.options.getString('action')?.toLowerCase() ?? rawArgs[0]?.toLowerCase() ?? 'view';
 
       switch (action) {
+        case 'drops': {
+          const patch = readDropArgs(rawArgs.slice(1));
+          const enabled = ctx.options.getBoolean('enabled');
+          if (enabled !== null) patch.dropsEnabled = enabled;
+          const channel = await ctx.options.getChannel('channel');
+          if (channel) patch.dropChannelId = channel.id;
+          for (const option of [
+            'threshold',
+            'start_hour',
+            'end_hour',
+            'claim_seconds',
+            'cooldown_minutes',
+          ] as const) {
+            const value = ctx.options.getInteger(option);
+            if (value !== null) patch[DROP_OPTIONS[option]] = value;
+          }
+
+          if (Object.keys(patch).length === 0) {
+            await ctx.reply({
+              content:
+                'ℹ️ No drop settings provided. Usage: `/tcg-admin action:drops enabled:true channel:#tcg-drops threshold:30 start_hour:8 end_hour:23`',
+              ephemeral: true,
+            });
+            return;
+          }
+
+          try {
+            const { values, changes } = await services.guildConfigService.update(
+              guildId,
+              'tcg',
+              patch,
+              { userId: ctx.user.id, source: 'discord' },
+            );
+            const embed = new EmbedBuilder()
+              .setTitle(
+                changes.length > 0 ? '🃏 Card Drop Settings Updated' : '🃏 Card Drop Settings',
+              )
+              .setColor(0x57f287)
+              .setDescription(describeDrops(values))
+              .setFooter({ text: `Updated by @${ctx.user.username}` })
+              .setTimestamp();
+            await ctx.reply({ embeds: [embed] });
+          } catch (err: unknown) {
+            if (!(err instanceof GuildConfigValidationError)) throw err;
+            await ctx.reply({ content: `❌ ${err.userMessage}`, ephemeral: true });
+          }
+          break;
+        }
+
         case 'energy': {
           let maxCap = ctx.options.getInteger('max_cap');
           let potLimit = ctx.options.getInteger('pot_limit');
@@ -291,33 +445,50 @@ export function createTcgAdminCommand(services: BotServices): Command {
         }
 
         case 'role': {
+          // Holders of the role must not be able to hand it to another role.
+          if (!isServerAdmin) {
+            await ctx.reply({
+              content: '❌ Only members with `Manage Server` can change the TCG Manager Role.',
+              ephemeral: true,
+            });
+            return;
+          }
+
           const rawRole = ctx.options.getString('role') ?? rawArgs[1];
           const roleId = rawRole?.replace(/[<@&>]/g, '');
 
           if (!roleId) {
             await ctx.reply({
-              content: 'ℹ️ Please specify a role: `/tcg-admin action:role role:@Role`',
+              content:
+                'ℹ️ Please specify a role: `/tcg-admin action:role role:@Role` (`none` removes it)',
               ephemeral: true,
             });
             return;
           }
 
           try {
-            await services.tcgConfigService.setConfig('tcg_manager_role_id', roleId, ctx.user.id);
+            const { values } = await services.guildConfigService.update(
+              guildId,
+              'tcg',
+              { managerRoleId: roleId },
+              { userId: ctx.user.id, source: 'discord' },
+            );
 
             const embed = new EmbedBuilder()
               .setTitle('🛡️ TCG Manager Role Configured')
               .setColor(0x57f287)
               .setDescription(
-                `Members with <@&${roleId}> can now access and manage TCG administration settings.`,
+                values.managerRoleId
+                  ? `Members with <@&${values.managerRoleId}> can now manage Waifu TCG settings in this server.`
+                  : 'The TCG Manager Role was removed; only server admins can manage Waifu TCG settings here.',
               )
               .setFooter({ text: `Updated by @${ctx.user.username}` })
               .setTimestamp();
 
             await ctx.reply({ embeds: [embed] });
           } catch (err: unknown) {
-            const msg = err instanceof Error ? err.message : String(err);
-            await ctx.reply({ content: `❌ Configuration Error: ${msg}`, ephemeral: true });
+            if (!(err instanceof GuildConfigValidationError)) throw err;
+            await ctx.reply({ content: `❌ ${err.userMessage}`, ephemeral: true });
           }
           break;
         }
@@ -354,10 +525,20 @@ export function createTcgAdminCommand(services: BotServices): Command {
                   inline: false,
                 },
                 {
-                  name: '🏪 Marketplace & Roles',
-                  value:
-                    `• **Market Tax Rate:** \`${(configs.market_tax_rate * 100).toFixed(1)}%\`\n` +
-                    `• **TCG Manager Role:** ${configs.tcg_manager_role_id ? `<@&${configs.tcg_manager_role_id}>` : '*None configured (Server Admins only)*'}`,
+                  name: '🏪 Marketplace',
+                  value: `• **Market Tax Rate:** \`${(configs.market_tax_rate * 100).toFixed(1)}%\``,
+                  inline: false,
+                },
+                {
+                  name: '🃏 Card Drops (this server)',
+                  value: describeDrops(guildTcg),
+                  inline: false,
+                },
+                {
+                  name: '🛡️ TCG Manager Role (this server)',
+                  value: guildTcg.managerRoleId
+                    ? `<@&${guildTcg.managerRoleId}>`
+                    : '*None configured (Server Admins only)*',
                   inline: false,
                 },
               )

@@ -12,7 +12,11 @@ import {
 import type { SqliteDatabaseClient } from '@ririko/database';
 import { WaifuGuildService } from '../guild/waifu-guild.service.js';
 import { AchievementService } from '../achievements/achievement-service.js';
-import { TcgConfigService } from '../admin/tcg-config.service.js';
+import {
+  canManageGuildTcg,
+  LEGACY_TCG_MANAGER_ROLE_KEY,
+  TcgConfigService,
+} from '../admin/tcg-config.service.js';
 import { CANONICAL_ITEMS } from '../equipment/catalog.js';
 
 describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
@@ -335,18 +339,30 @@ describe('Guild, Achievements & TcgConfig Services (TASK-1052)', () => {
       await expect(
         configService.setConfig('global_max_energy_cap', 50, 'admin-user'), // min is 100
       ).rejects.toThrow();
+    });
 
-      // 4. Authorization checks
-      await configService.setConfig('tcg_manager_role_id', 'role-mod-123', 'admin-user');
+    it('authorizes server admins and holders of the guild TCG Manager Role', () => {
+      expect(canManageGuildTcg({ isServerAdmin: true })).toBe(true);
+      expect(
+        canManageGuildTcg({ memberRoles: ['role-mod-123'], managerRoleId: 'role-mod-123' }),
+      ).toBe(true);
+      expect(
+        canManageGuildTcg({ memberRoles: ['other-role'], managerRoleId: 'role-mod-123' }),
+      ).toBe(false);
+      expect(canManageGuildTcg({ memberRoles: ['role-mod-123'], managerRoleId: null })).toBe(false);
+      expect(canManageGuildTcg({ managerRoleId: 'role-mod-123' })).toBe(false);
+    });
 
-      const isAuthAdmin = await configService.isAuthorized({ isServerAdmin: true });
-      expect(isAuthAdmin).toBe(true);
+    it('retires the old global TCG Manager Role key', async () => {
+      expect(await configService.retireGlobalManagerRole()).toBeNull();
 
-      const isAuthRole = await configService.isAuthorized({ memberRoles: ['role-mod-123'] });
-      expect(isAuthRole).toBe(true);
+      await configRepo.setConfig(LEGACY_TCG_MANAGER_ROLE_KEY, 'role-mod-123', 'admin-user');
+      expect(await configService.retireGlobalManagerRole()).toBe('role-mod-123');
+      expect(await configRepo.getConfig(LEGACY_TCG_MANAGER_ROLE_KEY)).toBeNull();
 
-      const isAuthOther = await configService.isAuthorized({ memberRoles: ['other-role'] });
-      expect(isAuthOther).toBe(false);
+      await configRepo.setConfig(LEGACY_TCG_MANAGER_ROLE_KEY, '', 'admin-user');
+      expect(await configService.retireGlobalManagerRole()).toBeNull();
+      expect(await configRepo.getConfig(LEGACY_TCG_MANAGER_ROLE_KEY)).toBeNull();
     });
   });
 });
