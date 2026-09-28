@@ -16,7 +16,7 @@ Forty-five illustrated locations cover all 413 decision and ending nodes. The or
 
 New adventures snapshot the equipped companion’s owned level at admission. F (solo/1–9) is normal; E (10–19) gives +50%, D (20–29) +100%, C (30–39) +150%, B (40–59) +200%, A (60–79) +300%, S (80–99) +400%, and S+ (100+) +500%. Bonuses apply to calibrated earned credits, player XP, dust, companion XP and relative item/card drop chances, capped at 100%. At S+, a calibrated base of 300 credits becomes 1,800 and a 10% drop chance becomes 60%. Card quantities, costs and penalties are not multiplied. Fixed Bazaar winnings and their supplies exchange components are excluded.
 
-Explicit override: Discord user `391220345769689090` always receives exactly S+ rank (+500%) on new runs, even solo or with a level-100 companion. Existing runs retain their saved rank.
+All users receive the rank determined by their companion level. The temporary user-specific S+ override was removed on 2026-09-28; existing runs retain their saved rank.
 
 Use `/adventure action:ranks` or `!adv ranks` for the table without starting a run. The companion field and result footer show the frozen rank; level/equipment changes affect the next run. Old active/settling/completed sessions retain their original rewards. All workers must use compatible policy readers; startup rejects unsupported unfinished payloads. No new SQL column is needed because rank/calculation/receipt data lives in existing JSON payloads. Drain new-format sessions before rolling back to an older binary.
 

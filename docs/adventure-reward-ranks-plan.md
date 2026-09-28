@@ -25,7 +25,7 @@ Solo runs retain normal rewards. Show `Reward rank F` in the companion field for
 | 80–99 | S | +400% | +400% relative |
 | 100+ | S+ | +500% | +500% relative |
 
-Use absolute level, not percentage of a card's maximum. Current rarity caps are Common 20, Uncommon 30, Rare 40, Super Rare 50, Ultra Rare 60, Secret Rare 70, SIR 85 and Mythic 100. Consequently Common can reach D, Uncommon C, Rare/Super Rare B, Ultra Rare/Secret Rare A, SIR S and Mythic S+. This is an intentional consequence of the existing progression system, not an additional rarity multiplier. Equal levels earn equal bonuses except for the explicit user-requested override: Discord ID `391220345769689090` always starts at exactly S+ (+500%), including solo and level-100 runs. Its actual level is still snapshotted; older runs retain their saved rank.
+Use absolute level, not percentage of a card's maximum. Current rarity caps are Common 20, Uncommon 30, Rare 40, Super Rare 50, Ultra Rare 60, Secret Rare 70, SIR 85 and Mythic 100. Consequently Common can reach D, Uncommon C, Rare/Super Rare B, Ultra Rare/Secret Rare A, SIR S and Mythic S+. This is an intentional consequence of the existing progression system, not an additional rarity multiplier. Equal levels earn equal bonuses for every user. The temporary user-specific S+ override was removed in CHORE-1703 on 2026-09-28. Companion level remains snapshotted; older runs retain their saved rank.
 
 Bonuses increase at rank thresholds, not at every level. Clamp reward-rank evaluation to level 100 for future higher levels. A missing companion uses F; a new snapshot with a present but invalid level (noninteger, nonfinite or below 1) is rejected before entry payment. Legacy records have separate compatibility rules below.
 
