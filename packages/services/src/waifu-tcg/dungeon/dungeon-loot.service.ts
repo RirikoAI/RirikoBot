@@ -5,6 +5,7 @@ import type {
   XpRepository,
 } from '@ririko/database';
 import { ItemGrantService } from '../equipment/item-grant.service.js';
+import { defaultFirstClearCurrencies, type FloorLoot } from './floor-loot.js';
 
 export interface DungeonLootItem {
   code: string;
@@ -136,16 +137,6 @@ export const DUNGEON_DROP_BRACKETS: readonly DropBracket[] = [
 /** Chance that a repeat clear of a boss floor drops the boss's signature gear again. */
 export const SIGNATURE_REPEAT_CHANCE = 0.08;
 
-/** Extra credits and dust for the first clear of every 10th floor. */
-const MAJOR_FIRST_CLEAR_BONUS: Readonly<Record<number, { credits: number; craftingDust: number }>> =
-  {
-    10: { credits: 2500, craftingDust: 50 },
-    20: { credits: 5000, craftingDust: 150 },
-    30: { credits: 10000, craftingDust: 300 },
-    40: { credits: 20000, craftingDust: 600 },
-    50: { credits: 50000, craftingDust: 1500 },
-  };
-
 export function getDropBracket(floorNumber: number): DropBracket {
   return (
     DUNGEON_DROP_BRACKETS.find((b) => floorNumber >= b.fromFloor && floorNumber <= b.toFloor) ??
@@ -177,49 +168,65 @@ export class DungeonLootService {
     this.rng = options.rng ?? Math.random;
   }
 
-  private pickDrop(pool: readonly WeightedDrop[]): string {
+  private pickDrop<T extends { weight: number }>(pool: readonly T[]): T {
     const total = pool.reduce((sum, d) => sum + d.weight, 0);
     let roll = this.rng() * total;
     for (const drop of pool) {
       roll -= drop.weight;
-      if (roll < 0) return drop.code;
+      if (roll < 0) return drop;
     }
-    return pool[pool.length - 1]!.code;
+    return pool[pool.length - 1]!;
   }
 
+  /**
+   * Rolls a floor's rewards from its bracket. A floor loot table (set in the owner console)
+   * replaces only the parts it sets; the boss's signature drop always stays.
+   */
   private rollLoot(
     floorNumber: number,
     isFirstClear: boolean,
     signatureDropCode?: string,
+    floorLoot?: FloorLoot,
   ): LootRoll {
     const bracket = getDropBracket(floorNumber);
     const isBossFloor = floorNumber % 5 === 0;
     const items: LootRoll['items'] = [];
 
     if (isFirstClear) {
-      const bonus = MAJOR_FIRST_CLEAR_BONUS[floorNumber];
-      if (isBossFloor) {
+      const table = floorLoot?.firstClear ?? {};
+      const defaults = defaultFirstClearCurrencies(floorNumber);
+      if (table.items) {
+        if (isBossFloor && signatureDropCode) items.push({ code: signatureDropCode, quantity: 1 });
+        items.push(...table.items);
+      } else if (isBossFloor) {
         items.push({ code: signatureDropCode ?? bracket.bossFallbackCode, quantity: 1 });
       } else {
-        items.push({ code: this.pickDrop(bracket.pool), quantity: 1 });
+        items.push({ code: this.pickDrop(bracket.pool).code, quantity: 1 });
       }
       return {
-        credits: bonus?.credits ?? floorNumber * 100,
-        exp: floorNumber * 15,
-        craftingDust: bonus?.craftingDust ?? floorNumber * 5,
+        credits: table.credits ?? defaults.credits,
+        exp: table.exp ?? defaults.exp,
+        craftingDust: table.craftingDust ?? defaults.craftingDust,
         items,
       };
     }
 
+    const table = floorLoot?.repeat ?? {};
     if (isBossFloor && signatureDropCode && this.rng() < SIGNATURE_REPEAT_CHANCE) {
       items.push({ code: signatureDropCode, quantity: 1 });
-    } else if (this.rng() < bracket.repeatChance) {
-      items.push({ code: this.pickDrop(bracket.pool), quantity: 1 });
+    } else if (this.rng() < (table.dropChance ?? bracket.repeatChance)) {
+      if (table.pool) {
+        const drop = this.pickDrop(table.pool);
+        const quantity = drop.minQty + Math.floor(this.rng() * (drop.maxQty - drop.minQty + 1));
+        items.push({ code: drop.code, quantity });
+      } else {
+        items.push({ code: this.pickDrop(bracket.pool).code, quantity: 1 });
+      }
     }
     return {
-      credits: Math.round(floorNumber * 25 + this.rng() * 50),
-      exp: Math.round(floorNumber * 5 + this.rng() * 10),
-      craftingDust: Math.round(floorNumber * 2 + this.rng() * 5),
+      credits: table.credits ?? Math.round(floorNumber * 25 + this.rng() * 50),
+      exp: table.exp ?? Math.round(floorNumber * 5 + this.rng() * 10),
+      craftingDust: table.craftingDust ?? Math.round(floorNumber * 2 + this.rng() * 5),
       items,
     };
   }
@@ -232,14 +239,14 @@ export class DungeonLootService {
     userId: string,
     floorNumber: number,
     isFirstClear: boolean,
-    options: { signatureDropCode?: string | undefined } = {},
+    options: { signatureDropCode?: string | undefined; floorLoot?: FloorLoot | undefined } = {},
   ): Promise<DungeonLootResult> {
     const {
       credits,
       exp,
       craftingDust,
       items: rolledItems,
-    } = this.rollLoot(floorNumber, isFirstClear, options.signatureDropCode);
+    } = this.rollLoot(floorNumber, isFirstClear, options.signatureDropCode, options.floorLoot);
 
     if (this.economyRepo && credits > 0) {
       await this.economyRepo.modifyBalance({

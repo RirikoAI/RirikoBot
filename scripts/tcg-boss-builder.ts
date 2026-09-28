@@ -41,6 +41,7 @@ import {
   syncCatalogCharacter,
   toBossRow,
   toFloorRow,
+  toSeasonContent,
   toSeasonRow,
   type BossCatalog,
   type CardElement,
@@ -226,13 +227,10 @@ async function runImportDb(file: string): Promise<void> {
     await assets.upsertSource({ id, ...source, isActive: true });
   }
 
-  const existingSeason = await seasons.findById(catalog.seasonId);
-  const seasonRow = toSeasonRow(catalog, existingSeason?.startsAt ?? new Date());
-  if (existingSeason) {
-    const { id: _id, startsAt: _startsAt, ...fields } = seasonRow;
-    await seasons.update(catalog.seasonId, fields);
+  if (await seasons.findById(catalog.seasonId)) {
+    await seasons.update(catalog.seasonId, toSeasonContent(catalog));
   } else {
-    await seasons.create(seasonRow);
+    await seasons.create(toSeasonRow(catalog));
   }
 
   for (const boss of catalog.bosses) {
