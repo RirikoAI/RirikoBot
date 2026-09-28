@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, sql } from 'drizzle-orm';
+import { eq, and, desc, asc, sql, lte, gt } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
@@ -41,7 +41,15 @@ export class DungeonSeasonRepository extends BaseRepository<
     }
   }
 
-  async findActiveSeason(tx?: DatabaseClient): Promise<DungeonSeason | null> {
+  /**
+   * The season players climb now: switched on, not the tutorial, and inside its dates.
+   * When several overlap, the one that started last wins, so a queued season takes over
+   * from the previous one on its start date.
+   */
+  async findActiveSeason(
+    tx?: DatabaseClient,
+    now: Date = new Date(),
+  ): Promise<DungeonSeason | null> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
       const [row] = await client.db
@@ -51,6 +59,8 @@ export class DungeonSeasonRepository extends BaseRepository<
           and(
             eq(sqliteSchema.dungeonSeasons.isActive, true),
             eq(sqliteSchema.dungeonSeasons.isTutorial, false),
+            lte(sqliteSchema.dungeonSeasons.startsAt, now),
+            gt(sqliteSchema.dungeonSeasons.endsAt, now),
           ),
         )
         .orderBy(desc(sqliteSchema.dungeonSeasons.startsAt))
@@ -64,6 +74,8 @@ export class DungeonSeasonRepository extends BaseRepository<
           and(
             eq(pgSchema.dungeonSeasons.isActive, true),
             eq(pgSchema.dungeonSeasons.isTutorial, false),
+            lte(pgSchema.dungeonSeasons.startsAt, now),
+            gt(pgSchema.dungeonSeasons.endsAt, now),
           ),
         )
         .orderBy(desc(pgSchema.dungeonSeasons.startsAt))

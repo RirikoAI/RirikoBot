@@ -10,6 +10,9 @@ import {
   BotActivityRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
+  DungeonBossRepository,
+  DungeonFloorRepository,
+  DungeonSeasonRepository,
   EconomyConfigRepository,
   InventoryRepository,
   ItemCategoryRepository,
@@ -22,6 +25,7 @@ import {
   AiRepository,
   ImageRepository,
   FreeGameRepository,
+  GameItemRepository,
   WelcomerRepository,
   ReactionRoleRepository,
   StreamRepository,
@@ -34,7 +38,12 @@ import {
   type DatabaseClient,
 } from '@ririko/database';
 import { GuildConfigService } from '@ririko/services/guild';
-import { EconomyConfigService, ItemCatalogService, TcgRulesService } from '@ririko/services/owner';
+import {
+  DungeonSeasonAdminService,
+  EconomyConfigService,
+  ItemCatalogService,
+  TcgRulesService,
+} from '@ririko/services/owner';
 import { createStreamAdapters, StreamAlertService } from '@ririko/services/stream-alerts';
 import { WelcomerBackgroundStore } from '@ririko/services/welcomer-backgrounds';
 import { DiscordOAuthClient } from './auth/discord-oauth';
@@ -88,6 +97,8 @@ export interface WebServices {
   itemCatalog: ItemCatalogService;
   /** Global Waifu TCG rules for the owner console (after `requireOwner` or `runOwnerAction`). */
   tcgRules: TcgRulesService;
+  /** Dungeon seasons and bosses for the owner console (after `requireOwner` or `runOwnerAction`). */
+  dungeonSeasons: DungeonSeasonAdminService;
   /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
   commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
@@ -226,6 +237,14 @@ async function createWebServices(): Promise<WebServices> {
       audit,
     }),
     tcgRules: new TcgRulesService({ db, repository: new TcgConfigRepository(db), audit }),
+    dungeonSeasons: new DungeonSeasonAdminService({
+      db,
+      seasons: new DungeonSeasonRepository(db),
+      floors: new DungeonFloorRepository(db),
+      bosses: new DungeonBossRepository(db),
+      items: new GameItemRepository(db),
+      audit,
+    }),
     commandCatalog,
     botActivity: new BotActivityRepository(db),
     notifier: new DiscordNotifier({

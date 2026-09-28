@@ -148,8 +148,9 @@ async function resetDatabase(): Promise<void> {
 
     // 4. Seed default dungeon seasons
     const seasonRepo = new DungeonSeasonRepository(dbClient);
-    const active = await seasonRepo.findActiveSeason();
-    if (!active) {
+    // Seed by id: an ended season is not active, and its id cannot be inserted again.
+    const s1 = await seasonRepo.findById('s1_infernal_crucible');
+    if (!s1) {
       await seasonRepo.create({
         id: 's1_infernal_crucible',
         name: 'Season 1: Infernal Crucible',

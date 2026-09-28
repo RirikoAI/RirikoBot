@@ -125,6 +125,31 @@ describe('Dungeon Repositories (TASK-1041)', () => {
       const count = await seasonRepo.count();
       expect(count).toBe(2);
     });
+
+    it('picks the latest started season inside its dates', async () => {
+      const day = 86_400_000;
+      const now = new Date('2026-09-28T12:00:00Z');
+      const season = (id: string, startsAt: number, endsAt: number, isActive = true) =>
+        seasonRepo.create({
+          id,
+          name: id,
+          description: id,
+          scalingModel: 'EXPONENTIAL',
+          isActive,
+          startsAt: new Date(now.getTime() + startsAt * day),
+          endsAt: new Date(now.getTime() + endsAt * day),
+        });
+      await season('ended', -90, -1);
+      await season('current', -30, 60);
+      await season('queued', 5, 95);
+      await season('switched_off', -2, 30, false);
+
+      expect((await seasonRepo.findActiveSeason(undefined, now))?.id).toBe('current');
+      const afterQueuedStart = new Date(now.getTime() + 6 * day);
+      expect((await seasonRepo.findActiveSeason(undefined, afterQueuedStart))?.id).toBe('queued');
+      const afterAll = new Date(now.getTime() + 100 * day);
+      expect(await seasonRepo.findActiveSeason(undefined, afterAll)).toBeNull();
+    });
   });
 
   describe('DungeonFloorRepository', () => {

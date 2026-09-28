@@ -314,15 +314,22 @@ export function TextAreaField({
 }
 
 /**
- * Whole-number input; the shared schema enforces the range, `min`/`max` guide the browser.
- * A `null` value shows an empty input, for optional numbers.
+ * Number input; the shared schema enforces the range, `min`/`max`/`step` guide the browser.
+ * Whole numbers by default; pass `step="any"` for decimals. A `null` value shows an empty
+ * input, for optional numbers.
  */
 export function NumberField({
   min,
   max,
+  step = 1,
   defaultValue,
   ...field
-}: Omit<FieldProps, 'defaultValue'> & { min: number; max: number; defaultValue: number | null }) {
+}: Omit<FieldProps, 'defaultValue'> & {
+  min: number;
+  max: number;
+  step?: number | 'any';
+  defaultValue: number | null;
+}) {
   return (
     <Field
       {...field}
@@ -332,11 +339,28 @@ export function NumberField({
           key={props.defaultValue}
           {...props}
           type="number"
-          inputMode="numeric"
+          inputMode={step === 1 ? 'numeric' : 'decimal'}
           min={min}
           max={max}
-          step={1}
+          step={step}
           className={`${INPUT_CLASS} max-w-32`}
+        />
+      )}
+    />
+  );
+}
+
+/** A calendar day, submitted as `YYYY-MM-DD`. */
+export function DateField(field: FieldProps) {
+  return (
+    <Field
+      {...field}
+      control={(props) => (
+        <input
+          key={props.defaultValue}
+          {...props}
+          type="date"
+          className={`${INPUT_CLASS} max-w-48`}
         />
       )}
     />
