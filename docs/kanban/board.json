@@ -3721,6 +3721,15 @@
       ],
       "blocks": [],
       "description": "Documentation-only proposal for level-derived reward ranks, bounded amount/drop bonuses, durable snapshots, compatibility, and implementation acceptance criteria."
+    },
+    {
+      "id": "CHORE-1703",
+      "title": "Remove Adventure User-Specific S+ Rank Override",
+      "points": 1,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [],
+      "description": "Restore companion-level reward ranks for every user on new adventures; retain frozen existing sessions and open a separate PR."
     }
   ],
   "bugs": [

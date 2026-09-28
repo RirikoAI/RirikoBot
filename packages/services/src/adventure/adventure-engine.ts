@@ -167,7 +167,7 @@ export class AdventureEngine {
         const card = structuredClone(
           input.resolveCard ? await input.resolveCard(tx) : (input.card ?? null),
         );
-        const rewardRank = adventureRewardRank(card ? card.level! : null, input.userId);
+        const rewardRank = adventureRewardRank(card ? card.level! : null);
         await this.options.sessions.setLastStart(input.userId, now, tx);
         const { energyEnabled } = await this.options.sessions.getSettings(input.guildId, tx);
         if (energyEnabled) {
