@@ -212,14 +212,18 @@ export class PlayerEnergyRepository extends BaseRepository<
   }
 
   /**
-   * Consumes a stamina potion with automatic UTC daily reset and anti-abuse hard ceilings.
+   * Consumes a potion batch with the configured daily reset and anti-abuse ceiling.
+   * energyRestored is the batch's total energy; quantity counts individual potions.
    */
   async consumeEnergyPotion(
     userId: string,
     energyRestored = 50,
     maxDailyLimit = 3,
     tx?: DatabaseClient,
+    quantity = 1,
   ): Promise<ConsumePotionResult> {
+    if (!Number.isSafeInteger(quantity) || quantity < 1)
+      throw new DatabaseError('Potion quantity must be a positive safe integer');
     const client = this.getClient(tx);
 
     return withTransaction(client, async (txClient) => {
@@ -233,10 +237,10 @@ export class PlayerEnergyRepository extends BaseRepository<
       }
 
       // Enforce anti-abuse ceiling
-      if (currentPotsUsed >= maxDailyLimit) {
+      if (quantity > maxDailyLimit - currentPotsUsed) {
         return {
           success: false,
-          reason: `Daily stamina potion ceiling reached (max ${maxDailyLimit} per day)`,
+          reason: `Daily stamina potion ceiling reached (max ${maxDailyLimit} per day; ${Math.max(0, maxDailyLimit - currentPotsUsed)} remaining, requested ${quantity})`,
           energy: energyRecord,
           potsUsedToday: currentPotsUsed,
           energyRestored: 0,
@@ -249,7 +253,7 @@ export class PlayerEnergyRepository extends BaseRepository<
         Math.max(0, totalCap - energyRecord.currentEnergy),
       );
       const newEnergy = Math.min(totalCap, energyRecord.currentEnergy + energyRestored);
-      const newPotsUsed = currentPotsUsed + 1;
+      const newPotsUsed = currentPotsUsed + quantity;
 
       const updated = await this.update(
         userId,
