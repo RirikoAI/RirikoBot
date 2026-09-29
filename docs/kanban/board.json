@@ -166,7 +166,7 @@
       "id": "EPIC-011",
       "title": "Next.js 16 Web Dashboard & Management Portal",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "EPIC-002",
         "EPIC-004",
@@ -182,7 +182,7 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts at first grooming). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115. STORY-116 was re-groomed to 13 points on 2026-09-27 and split: Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166. STORY-112 was re-groomed on 2026-09-28 after an audit showed its TCG settings had no runtime consumer: it keeps guild TCG settings and global rules (8), the dungeon season editor moved to STORY-167 (8) and the album, shop catalog and achievement managers moved to STORY-168 (5)."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts at first grooming). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115. STORY-116 was re-groomed to 13 points on 2026-09-27 and split: Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166. STORY-112 was re-groomed on 2026-09-28 after an audit showed its TCG settings had no runtime consumer: it keeps guild TCG settings and global rules (8), the dungeon season editor moved to STORY-167 (8) and the album, shop catalog and achievement managers moved to STORY-168 (5). Completed 2026-09-29 with STORY-168; STORY-119 (DBSC) stays parked in the backlog."
     },
     {
       "id": "EPIC-012",
@@ -868,7 +868,7 @@
       "epic": "EPIC-011",
       "title": "Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-112"
       ],
@@ -882,7 +882,7 @@
       "epic": "EPIC-011",
       "title": "Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-167"
       ],
@@ -2745,7 +2745,7 @@
       "parent": "STORY-168",
       "title": "Card Album Viewer (Cached CardImageService Renders)",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-167"
       ],
@@ -2759,7 +2759,7 @@
       "parent": "STORY-168",
       "title": "Override-Safe TCG Shop Catalog (game_items) Editor, Achievement Manager & Guild Achievement Completion Inspector",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1123"
       ],
@@ -4130,6 +4130,16 @@
       "requires": [],
       "blocks": [],
       "description": "Found in the STORY-115 audit. The legacy transformer maps karma.enabled and welcomer.channel, but 1.4.0 stored karma-notification-enabled (enabled/disabled) and welcomer_channel. The item seed part (slug IDs on a uuid column on Postgres, categories without rows) moved to TASK-1653 in STORY-165 on 2026-09-27."
+    },
+    {
+      "id": "BUG-0025",
+      "title": "Achievement Progress Is Recorded Only for TUTORIAL_CLEARED",
+      "points": 5,
+      "status": "TODO",
+      "parent": "STORY-105",
+      "requires": [],
+      "blocks": [],
+      "description": "Found in TASK-1125. AchievementService.recordProgress is only called by the tutorial (TUTORIAL_CLEARED). The seeded CARD_COUNT, ELEMENTAL_COUNT, MYTHIC_CARD_COUNT, PVP_WINS, DUNGEON_FLOOR, BOSS_DAMAGE, EQUIPMENT_ENHANCE_10 and DAILY_STREAK achievements can never unlock. Record progress at each source, then add the types to TRACKED_ACHIEVEMENT_TYPES in @ririko/core so the owner console and guild inspector stop flagging them."
     }
   ]
 }

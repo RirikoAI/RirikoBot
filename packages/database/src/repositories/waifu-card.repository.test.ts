@@ -243,4 +243,66 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
     const check = await repo.findUserCardById(userCard.id);
     expect(check).toBeNull();
   });
+
+  it('lists one album page with definitions, assets and sources, filtered and counted', async () => {
+    client.raw.exec(`
+      INSERT INTO waifu_sources (id, name, base_url, attribution_text) VALUES ('src', 'waifu.im', 'https://api.waifu.im', 'Image source: waifu.im');
+      INSERT INTO waifu_assets (id, source_id, source_image_id, character_name, anime_title, image_hash, created_at)
+        VALUES ('asset_a', 'src', '1', 'Aqua', 'Konosuba', 'hash_a', 0);
+    `);
+    const aqua = await repo.create({
+      assetId: 'asset_a',
+      name: 'Aqua',
+      rarity: 'RARE',
+      element: 'WATER',
+      attack: 100,
+      defense: 100,
+      speed: 100,
+      health: 1000,
+      collectionNumber: 1,
+    });
+    const orphanArt = await repo.create({
+      assetId: 'asset_missing',
+      name: 'Darkness',
+      rarity: 'COMMON',
+      element: 'EARTH',
+      attack: 100,
+      defense: 100,
+      speed: 100,
+      health: 1000,
+      collectionNumber: 2,
+    });
+    const mint = (cardId: string, serialNumber: number, isFavorite: boolean, userId = 'u1') =>
+      repo.createUserCard({
+        userId,
+        cardId,
+        serialNumber,
+        isFavorite,
+        obtainedAt: new Date(1_000 * serialNumber),
+      });
+    await mint(aqua.id, 1, false);
+    await mint(aqua.id, 2, true);
+    await mint(orphanArt.id, 3, false);
+    await mint(aqua.id, 4, false, 'someone-else');
+    await mint('deleted-definition', 5, false);
+
+    const all = await repo.listUserAlbum('u1', { limit: 2, offset: 0 });
+    expect(all.total).toBe(3);
+    expect(all.entries.map((e) => e.userCard.serialNumber)).toEqual([3, 2]);
+    expect(all.entries[0]?.card.name).toBe('Darkness');
+    expect(all.entries[0]?.asset).toBeNull();
+    expect(all.entries[1]?.asset?.animeTitle).toBe('Konosuba');
+    expect(all.entries[1]?.source?.attributionText).toBe('Image source: waifu.im');
+
+    const second = await repo.listUserAlbum('u1', { limit: 2, offset: 2 });
+    expect(second.entries.map((e) => e.userCard.serialNumber)).toEqual([1]);
+
+    const favorites = await repo.listUserAlbum('u1', { favoritesOnly: true, limit: 10, offset: 0 });
+    expect(favorites.total).toBe(1);
+    expect(favorites.entries[0]?.userCard.serialNumber).toBe(2);
+
+    const commons = await repo.listUserAlbum('u1', { rarity: 'COMMON', limit: 10, offset: 0 });
+    expect(commons.total).toBe(1);
+    expect(commons.entries[0]?.card.id).toBe(orphanArt.id);
+  });
 });

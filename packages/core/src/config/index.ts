@@ -12,5 +12,6 @@ export * from './games.js';
 export * from './reaction-roles.js';
 export * from './economy.js';
 export * from './shop.js';
+export * from './tcg-catalog.js';
 export * from './tcg.js';
 export * from './welcomer.js';

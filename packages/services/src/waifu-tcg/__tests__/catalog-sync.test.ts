@@ -109,4 +109,33 @@ describe('Catalog Seed Upsert (BUG-0015)', () => {
     const total = await itemRepo.findAll();
     expect(total.length).toBe(CANONICAL_ITEMS.length);
   });
+
+  it('keeps shop fields the owner console overrode and still updates catalog-owned fields', async () => {
+    await syncCanonicalItems(itemRepo);
+    const katana = await itemRepo.findByCode('WEAPON_OBSIDIAN_KATANA');
+    await itemRepo.update(katana!.id, {
+      isShopBuyable: true,
+      shopPrice: 777,
+      maxDailyPurchases: 2,
+      ownerOverridden: true,
+    });
+    const blade = await itemRepo.findByCode('WEAPON_NOVICE_BLADE');
+    await itemRepo.update(blade!.id, { shopPrice: 9 });
+
+    const renamed = CANONICAL_ITEMS.map((item) =>
+      item.code === 'WEAPON_OBSIDIAN_KATANA' ? { ...item, name: 'Obsidian Katana II' } : item,
+    );
+    await syncCanonicalItems(itemRepo, renamed);
+
+    const keptKatana = await itemRepo.findByCode('WEAPON_OBSIDIAN_KATANA');
+    expect(keptKatana).toMatchObject({
+      name: 'Obsidian Katana II',
+      isShopBuyable: true,
+      shopPrice: 777,
+      maxDailyPurchases: 2,
+      ownerOverridden: true,
+    });
+    // Not overridden: the catalog price wins again.
+    expect((await itemRepo.findByCode('WEAPON_NOVICE_BLADE'))?.shopPrice).toBe(100);
+  });
 });
