@@ -41,6 +41,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `BUG-0026` | Bug | Canonical Game Item Seed Used Dynamic UUIDs Breaking Inventory Foreign Keys on Schema Recreation | 3 | `EPIC-010` | [BUG-0026.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0026.md) |
 | `EPIC-011` | Epic | Next.js 16 Web Dashboard & Management Portal | 21 | Self | [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) |
 | `STORY-168` | Story | Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager | 5 | `EPIC-011` | [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) |
 | `STORY-167` | Story | Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot | 8 | `EPIC-011` | [TASK-1126.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1126.md) |
