@@ -6,7 +6,7 @@ import {
   type SqliteDatabaseClient,
   type NewGameItem,
 } from '@ririko/database';
-import { syncCanonicalItems, CANONICAL_ITEMS } from '../equipment/catalog.js';
+import { syncCanonicalItems, CANONICAL_ITEMS, CANONICAL_ITEM_IDS } from '../equipment/catalog.js';
 
 describe('Catalog Seed Upsert (BUG-0015)', () => {
   let client: SqliteDatabaseClient;
@@ -137,5 +137,15 @@ describe('Catalog Seed Upsert (BUG-0015)', () => {
     });
     // Not overridden: the catalog price wins again.
     expect((await itemRepo.findByCode('WEAPON_NOVICE_BLADE'))?.shopPrice).toBe(100);
+  });
+
+  it('assigns deterministic stable UUIDs to canonical items on creation', async () => {
+    await syncCanonicalItems(itemRepo);
+
+    for (const [code, expectedId] of Object.entries(CANONICAL_ITEM_IDS)) {
+      const item = await itemRepo.findByCode(code);
+      expect(item).toBeDefined();
+      expect(item?.id).toBe(expectedId);
+    }
   });
 });
