@@ -32,8 +32,9 @@ Every agent (main coordinator and specialized subagent) is bound by these operat
 
 ### 2.5. Git & PR Control
 - Feature branches target `develop/2.0.0`.
-- Commits and PRs are batched by Story or Epic.
+- Commits and PRs are batched by Story, Bug, or Epic.
 - **Anti-Runaway Barrier**: When an Epic or Story finishes, stop and ask the user if they want to create a PR before continuing to the next Epic.
+- **CI/CD & Maintainer Merge Gate (Standing Rule)**: The agent creates the Pull Request targeting `develop/2.0.0` for user verification. The maintainer verifies and merges the PR only after all CI/CD checks pass. Agents MUST NEVER automatically merge PRs into `develop/2.0.0` or `main`.
 
 ---
 
