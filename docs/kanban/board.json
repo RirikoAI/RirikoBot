@@ -1404,7 +1404,7 @@
         "TASK-1721",
         "TASK-1722"
       ],
-      "description": "Let operators turn individual music sources (YouTube, Spotify, SoundCloud, Deezer, Direct) on or off without a code change, on both the in-process extractor pipeline and the Lavalink path. Move the YouTube-specific extractor code into its own private workspace package that the pipeline receives as an injected adapter, so the source can be removed or replaced in isolation. Private package only; not published to npm. STORY-171 is skipped because TASK-1711..1715 already belong to STORY-170."
+      "description": "Let operators turn individual music sources (YouTube, Spotify, SoundCloud, Deezer, Direct) on or off without a code change, on both the in-process extractor pipeline and the Lavalink path. Move the YouTube-specific extractor code into its own private workspace package that the pipeline receives as an injected adapter, so the source can be removed or replaced in isolation. Private package only; not published to npm. STORY-171 is skipped because TASK-1711..1715 already belong to STORY-170. Grooming handover: docs/kanban/handovers/STORY-172.md."
     }
   ],
   "tasks": [
