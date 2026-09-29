@@ -229,17 +229,18 @@ export class EnergyLifecycleService {
   }
 
   /**
-   * Consumes an energy potion, reconciling first so the daily potion ceiling is evaluated
+   * Consumes an energy potion batch, reconciling first so the daily potion ceiling is evaluated
    * against the current reset day rather than a stale one.
    */
   async consumePotion(
     userId: string,
     energyRestored: number,
     maxDailyLimit?: number,
+    quantity = 1,
   ): ReturnType<PlayerEnergyRepository['consumeEnergyPotion']> {
     await this.getOrReconcileUserEnergy(userId);
     const limit = maxDailyLimit ?? (await this.dailyPotionLimit());
-    return this.energyRepo.consumeEnergyPotion(userId, energyRestored, limit);
+    return this.energyRepo.consumeEnergyPotion(userId, energyRestored, limit, undefined, quantity);
   }
 
   /**
