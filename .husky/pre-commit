@@ -15,3 +15,6 @@ if ! command -v gitleaks >/dev/null 2>&1; then
 fi
 
 gitleaks git --pre-commit --staged --redact --no-banner --config .gitleaks.toml
+
+# Auto-fix staged files (ESLint --fix, Prettier --write) and re-stage them. Rules: package.json "lint-staged"
+pnpm exec lint-staged

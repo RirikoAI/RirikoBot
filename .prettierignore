@@ -4,6 +4,7 @@ node_modules/
 .local/
 pnpm-lock.yaml
 coverage/
+.vitest/
 .idea/
 .gemini/
 docs/
