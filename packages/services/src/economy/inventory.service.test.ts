@@ -269,6 +269,89 @@ describe('InventoryService', () => {
   });
 
   describe('useItem (Consumable Effects & Anti-Abuse Ceilings)', () => {
+    it.each([false, true])(
+      'counts bulk potions and rejects excess batches (lifecycle: %s)',
+      async (withLifecycle) => {
+        const service = withLifecycle
+          ? new InventoryService({
+              itemRepository: itemRepo,
+              categoryRepository: new ItemCategoryRepository(client),
+              inventoryRepository: inventoryRepo,
+              economyRepository: economyRepo,
+              playerEnergyRepository: playerEnergyRepo,
+              energyLifecycle: new EnergyLifecycleService(playerEnergyRepo),
+            })
+          : inventoryService;
+        const userId = 'bulk_potions';
+        await playerEnergyRepo.getOrCreate(userId);
+        await playerEnergyRepo.update(userId, { currentEnergy: 0 });
+        await inventoryRepo.addItem(userId, await idOf('stamina_potion'), 10);
+        const use = (quantity: number) =>
+          service.useItem({ userId, itemId: 'stamina_potion', quantity });
+
+        const first = await use(2);
+        expect(first).toMatchObject({
+          success: true,
+          quantityUsed: 2,
+          remainingQuantity: 8,
+          dailyEnergyPotsUsed: 2,
+          energyRestored: 100,
+        });
+        expect(first.effectSummary).toContain('2/3');
+        const before = await playerEnergyRepo.findById(userId);
+        for (const quantity of [4, 2]) {
+          expect(await use(quantity)).toMatchObject({
+            success: false,
+            quantityUsed: 0,
+            remainingQuantity: 8,
+          });
+          expect(await playerEnergyRepo.findById(userId)).toEqual(before);
+          expect(await service.getItemQuantity(userId, 'stamina_potion')).toBe(8);
+        }
+        expect(await use(1)).toMatchObject({
+          success: true,
+          dailyEnergyPotsUsed: 3,
+          remainingQuantity: 7,
+        });
+        expect(await use(1)).toMatchObject({
+          success: false,
+          quantityUsed: 0,
+          remainingQuantity: 7,
+        });
+      },
+    );
+
+    it('rejects a batch above a configured lower daily limit without consuming items', async () => {
+      const service = new InventoryService({
+        itemRepository: itemRepo,
+        categoryRepository: new ItemCategoryRepository(client),
+        inventoryRepository: inventoryRepo,
+        economyRepository: economyRepo,
+        playerEnergyRepository: playerEnergyRepo,
+        energyLifecycle: new EnergyLifecycleService(playerEnergyRepo, {
+          rulesResolver: async () => ({ ...DEFAULT_ENERGY_RULES, dailyPotionLimit: 1 }),
+        }),
+      });
+      await inventoryRepo.addItem('limited_batch', await idOf('stamina_potion'), 3);
+      expect(
+        await service.useItem({ userId: 'limited_batch', itemId: 'stamina_potion', quantity: 2 }),
+      ).toMatchObject({ success: false, quantityUsed: 0, remainingQuantity: 3 });
+      expect((await playerEnergyRepo.findById('limited_batch'))?.dailyEnergyPotsUsed).toBe(0);
+    });
+
+    it.each([0, -1, 0.5, NaN, Infinity])('rejects invalid potion quantity %s', async (quantity) => {
+      await inventoryRepo.addItem('invalid_batch', await idOf('stamina_potion'), 3);
+      expect(
+        await inventoryService.useItem({
+          userId: 'invalid_batch',
+          itemId: 'stamina_potion',
+          quantity,
+        }),
+      ).toMatchObject({ success: false, quantityUsed: 0 });
+      expect(await inventoryService.getItemQuantity('invalid_batch', 'stamina_potion')).toBe(3);
+      expect(await playerEnergyRepo.findById('invalid_batch')).toBeNull();
+    });
+
     it('fails if user does not own item or quantity is insufficient', async () => {
       const result = await inventoryService.useItem({
         userId: 'empty_bag_user',

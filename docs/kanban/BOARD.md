@@ -16,6 +16,7 @@ See STORY-170 and TASK-1705 in the story table below.
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
 | | | | | | |
+| `BUG-0027` | Bug | Count Every Stamina Potion in Multi-Quantity Uses | 2 | `STORY-043` | [BUG-0027.md](handovers/BUG-0027.md) |
 
 ---
 
