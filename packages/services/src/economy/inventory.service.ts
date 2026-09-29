@@ -245,7 +245,7 @@ export class InventoryService {
     const { userId, guildId } = params;
     const quantity = params.quantity ?? 1;
 
-    if (quantity <= 0) {
+    if (!Number.isSafeInteger(quantity) || quantity <= 0) {
       return {
         success: false,
         reason: 'Quantity used must be at least 1',
@@ -309,11 +309,18 @@ export class InventoryService {
         );
 
         const potRes = this.energyLifecycle
-          ? await this.energyLifecycle.consumePotion(userId, energyPerItem * quantity, ceiling)
+          ? await this.energyLifecycle.consumePotion(
+              userId,
+              energyPerItem * quantity,
+              ceiling,
+              quantity,
+            )
           : await this.playerEnergyRepository.consumeEnergyPotion(
               userId,
               energyPerItem * quantity,
               ceiling,
+              undefined,
+              quantity,
             );
 
         if (!potRes.success) {

@@ -4152,6 +4152,16 @@
       ],
       "blocks": [],
       "description": "When drizzle-kit push recreated the game_items table in SQLite, syncCanonicalItems generated new random UUIDs for all canonical items. Meanwhile, user_inventory_items retained their existing pre-push UUIDs, causing all player gear lookups to fail and rendering card loadouts and inventories empty. Fix: pin static deterministic UUIDs in CANONICAL_ITEM_IDS in packages/services/src/waifu-tcg/equipment/catalog.ts, pass them to itemRepo.create(), and author scripts/recover-player-gears.ts which mapped and restored all 70 orphaned player inventory items in data/ririko.sqlite with 0 data loss."
+    },
+    {
+      "id": "BUG-0027",
+      "title": "Count Every Stamina Potion in Multi-Quantity Uses",
+      "points": 2,
+      "status": "REVIEW",
+      "parent": "STORY-043",
+      "requires": [],
+      "blocks": [],
+      "description": "Bulk stamina potion use restores all requested energy but counts one daily use. Enforce remaining allowance for the entire batch and increment by quantity."
     }
   ]
 }

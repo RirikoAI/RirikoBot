@@ -690,6 +690,57 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
   });
 
   describe('PlayerEnergyRepository', () => {
+    it('keeps the potion allowance spent after gameplay drains the restored energy', async () => {
+      await playerEnergyRepo.create({ userId: 'batch_then_play', currentEnergy: 0 });
+      await playerEnergyRepo.consumeEnergyPotion('batch_then_play', 100, 3, undefined, 2);
+      expect(await playerEnergyRepo.consumeEnergy('batch_then_play', 75)).toMatchObject({
+        success: true,
+        currentEnergy: 25,
+      });
+      expect(
+        await playerEnergyRepo.consumeEnergyPotion('batch_then_play', 100, 3, undefined, 2),
+      ).toMatchObject({
+        success: false,
+        potsUsedToday: 2,
+        energyRestored: 0,
+        energy: { currentEnergy: 25 },
+      });
+      expect(await playerEnergyRepo.consumeEnergyPotion('batch_then_play', 50, 3)).toMatchObject({
+        success: true,
+        potsUsedToday: 3,
+        energy: { currentEnergy: 75 },
+      });
+    });
+
+    it('serializes competing batches against the remaining potion allowance', async () => {
+      await playerEnergyRepo.getOrCreate('bulk_race');
+      await playerEnergyRepo.update('bulk_race', { currentEnergy: 0 });
+      const results = await Promise.all([
+        playerEnergyRepo.consumeEnergyPotion('bulk_race', 100, 3, undefined, 2),
+        playerEnergyRepo.consumeEnergyPotion('bulk_race', 100, 3, undefined, 2),
+      ]);
+      expect(results.filter((r) => r.success)).toHaveLength(1);
+      expect((await playerEnergyRepo.findById('bulk_race'))?.dailyEnergyPotsUsed).toBe(2);
+      await playerEnergyRepo.update('bulk_race', {
+        lastResetDate: '2000-01-01',
+        dailyEnergyPotsUsed: 3,
+        currentEnergy: 0,
+      });
+      expect(
+        await playerEnergyRepo.consumeEnergyPotion('bulk_race', 150, 3, undefined, 3),
+      ).toMatchObject({ success: true, potsUsedToday: 3, energyRestored: 100 });
+    });
+
+    it.each([0, -1, 1.5, NaN, Infinity])(
+      'rejects invalid batch quantity %s before updating energy',
+      async (quantity) => {
+        await expect(
+          playerEnergyRepo.consumeEnergyPotion('invalid_batch', 50, 3, undefined, quantity),
+        ).rejects.toThrow('Potion quantity');
+        expect(await playerEnergyRepo.findById('invalid_batch')).toBeNull();
+      },
+    );
+
     it('tracks stamina consumption and enforces anti-abuse ceiling', async () => {
       const initial = await playerEnergyRepo.getOrCreate('energy_tester');
       expect(initial.currentEnergy).toBe(100);
