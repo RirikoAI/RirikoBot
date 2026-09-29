@@ -38,9 +38,10 @@ All agents and subagents are governed by the **Scrum Kanban Protocol** documente
   - Dedicated handover note: `docs/kanban/handovers/<ticket-id>.md` (summary, verification, gotchas, actionable next steps).
 
 ### 2.5. Git Operations & PR Governance
-- **Base Integration Branch**: `develop/2.0.0`. All feature branches (`feat/<ticket-id>-<slug>`) target `develop/2.0.0`.
-- **Grouped Batches**: Commits and PR creations must correspond to a complete Story or Epic (except standalone chores or bugs).
+- **Base Integration Branch**: `develop/2.0.0`. All feature branches (`feat/<ticket-id>-<slug>`, `fix/<ticket-id>-<slug>`) target `develop/2.0.0`.
+- **Grouped Batches**: Commits and PR creations must correspond to a complete Story, Bug, or Epic (except standalone chores).
 - **Anti-Runaway Session Boundary**: An agent session must NEVER silently complete multiple epics without user review checkpoints. When an Epic or Story completes, **STOP AND ASK THE USER** whether they want to create a Pull Request before proceeding.
+- **CI/CD & Maintainer Merge Gate (Standing Rule)**: Antigravity and subagents push branches and open Pull Requests targeting `develop/2.0.0`. The user/maintainer verifies changes and merges the PR once CI/CD pipelines pass. Agents never automatically merge PRs into `develop/2.0.0` or `main`.
 
 ---
 
