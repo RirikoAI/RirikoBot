@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { DEFAULT_RESET_SCHEDULE, getResetDayKey } from '@ririko/core';
 import { createDatabaseClient } from '../client/factory.js';
 import type { SqliteDatabaseClient } from '../client/types.js';
 import { UserRepository } from './user.repository.js';
@@ -691,7 +692,11 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
 
   describe('PlayerEnergyRepository', () => {
     it('keeps the potion allowance spent after gameplay drains the restored energy', async () => {
-      await playerEnergyRepo.create({ userId: 'batch_then_play', currentEnergy: 0 });
+      await playerEnergyRepo.create({
+        userId: 'batch_then_play',
+        currentEnergy: 0,
+        lastResetDate: getResetDayKey(new Date(), DEFAULT_RESET_SCHEDULE),
+      });
       await playerEnergyRepo.consumeEnergyPotion('batch_then_play', 100, 3, undefined, 2);
       expect(await playerEnergyRepo.consumeEnergy('batch_then_play', 75)).toMatchObject({
         success: true,
