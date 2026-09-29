@@ -776,10 +776,69 @@ export const DAILY_ROTATION_POOL: readonly string[] = [
 export const CRAFTING_DUST_CODE = 'CRAFTING_DUST';
 
 /**
+ * Canonical item UUIDs pinned for database stability.
+ * Prevents foreign key orphanage in `user_inventory_items` if `game_items` is ever recreated.
+ */
+export const CANONICAL_ITEM_IDS: Readonly<Record<string, string>> = Object.freeze({
+  AMULET_HARVEST_POUCH: '428f3185-8324-449a-9e69-e017997c92eb',
+  AMULET_LEATHER_CHOKER: 'eaf3923c-da28-4de9-89a1-6b6c8a26621a',
+  AMULET_MAGMA_CORE: '82df1934-064d-45a3-a833-f99f973d78e6',
+  AMULET_MOUNTAIN: '4fc9fb95-1428-4a06-ace9-3691429aedb4',
+  AMULET_OBSIDIAN_HEART: 'd99ff9f2-371e-4d28-9460-c3cbe110a141',
+  AMULET_PRIMORDIAL_FLAME: 'f268518d-fc57-4192-aadc-b28126aa8b8c',
+  ARMOR_AEGIS_BARRIER: '15d7d3dc-72dd-407b-97c1-35dae593b866',
+  ARMOR_CHAOS_DRAGON_SCALE: '62a25e14-2a37-40ca-bc28-a5536f1a8046',
+  ARMOR_CRUSADER_PLATE: 'd7504b5a-39b6-4721-8f29-8c1d7f8c2731',
+  ARMOR_DRAGONSCALE_PLATE: 'ba74fa00-e690-4d61-b8eb-d5aba1688acc',
+  ARMOR_ETERNAL_CRUCIBLE: '39401836-2515-4c9f-9e4c-157fe8dc22af',
+  ARMOR_IRON_HAUBERK: 'c4aabfc1-2bd9-4859-b5cc-67fa147ad61c',
+  ARMOR_MAGMA_MAIL: 'a67ec9bc-4a9d-4c37-84fc-0a49ffd3db3f',
+  ARMOR_WOODEN_BUCKLER: 'abbd578e-fc5e-452c-848a-7aa74152df2f',
+  CRAFTING_DUST: 'f3e71427-7629-4edd-8a25-e3dc375a9224',
+  POTION_COSMIC_ETHER: '2cdefda2-afc3-4258-915f-c2a559af945a',
+  POTION_ELIXIR_VITALITY: '8c5b3e05-662c-4a06-9344-0ea6ff0b9502',
+  POTION_GREATER_MANA: '0d0bf3a6-98d2-4a63-89c7-b8f0ee42715a',
+  POTION_MAJOR_HP: 'c85e0f7b-2431-40f8-845a-02d6ba9bfd88',
+  POTION_MANA_DRAUGHT: '780208b7-388e-444e-845f-4e2af85939bd',
+  POTION_MINOR_HP: 'f2e5d93e-842f-4cbc-baac-d37b96f2c743',
+  RELIC_CHRONOS_HOURGLASS: '55cd33e2-95f2-4d49-af65-4f18d009a802',
+  RELIC_CINDER_LANTERN: 'cdb53932-536f-404e-bb89-a8be5926588c',
+  RELIC_EMBER_CHARM: '64d0d72a-1d48-43a0-b9be-522d8a47d99e',
+  RELIC_FIRE_BRIGADE_BADGE: '3527440b-a694-4281-bbbe-bd83d6f31630',
+  RELIC_PHOENIX_ASH_CENSER: '4b3bc381-7d27-4ca9-ad2f-30291fdf70d8',
+  RELIC_PHOENIX_FEATHER: '5e7bfcfa-7d47-45f2-9cbf-dec171986ce6',
+  RESTORE_CELESTIAL_AMBROSIA: '27c8ab94-2392-4922-aa91-0d7d5dd16bf7',
+  RESTORE_DAILY_ENERGY_BISCUIT: 'ad22cc2e-79eb-4fd9-a63c-a180dfdab754',
+  RESTORE_GRAND_STAMINA_FLASK: 'c10a63c0-d2f9-4373-9936-7cd9a55f17de',
+  RESTORE_STAMINA_CANDY: '7278c6cf-fb2b-42df-84d7-c0132c7ba1b6',
+  RING_BLAZING_SUN: '97fb2297-f3da-40c9-803f-c1844e3cd7bd',
+  RING_COPPER_BAND: '242f58f8-790d-45dc-9381-22699f7ad0f8',
+  RING_INFERNO_CROWN: '6139aa14-afd7-445a-ab46-1dacb60eee6a',
+  RING_RUIN_SIGNET: '3df59bab-9c9c-4a64-aad2-d0c940d80f73',
+  RING_SOLAR_FLARE: '59adcf7c-e45b-4638-8555-d3308b3953ed',
+  RING_SUNFORGED_SIGIL: 'c6788630-c5ea-4a55-984a-bf939fae24c1',
+  RING_SWORD_SAINT_BAND: '379c5d3f-b079-4a28-8ffc-90377ee1bb88',
+  TALISMAN_ASHEN_WINGS: '1c7ebfbe-6d44-412d-a019-8e4daa0dfe4e',
+  TALISMAN_EMBERSTEP: '35ca6b54-7e48-4fd3-a44b-f92a76e509e8',
+  TALISMAN_MANEUVER_GEAR: 'b7ab73b1-3f47-46f1-945c-2995b7d1b106',
+  TALISMAN_SIMPLE_BANGLE: 'efda3337-ff9b-4ad1-ba1b-a1ac334e0577',
+  TALISMAN_TEMPEST_FEATHER: '2f2ba597-6570-498a-8319-181375c31ba2',
+  TALISMAN_WINDWALKER: '3916b750-8a6b-46b0-ae21-2d094e17e50b',
+  WEAPON_CALIDOS_GAUNTLETS: '4558eeaf-c26b-4383-883d-04aec69373f6',
+  WEAPON_CRIMSON_CALAMITY: '2fa58ede-7220-497f-8bb8-1e0458ff111d',
+  WEAPON_CRIMSON_CHANT_STAFF: '5b163937-0287-4335-8b64-da486240db10',
+  WEAPON_CRUCIBLE_HEART_BLADE: 'cbba6355-1fd3-4981-a78a-ddeb0168b1f5',
+  WEAPON_NOVICE_BLADE: '10f39f7a-2bcd-43c9-ac33-82a12942b14d',
+  WEAPON_OBSIDIAN_KATANA: 'e8520124-bdff-4461-bcf6-2fddddcfefb1',
+  WEAPON_SCOUT_BOOMERANG: '1ef80637-76b2-419b-ba3f-e69345b0c0f0',
+  WEAPON_SOLAR_LANCE: 'a3a82789-5257-4bf7-9387-2348361f21fb',
+  WEAPON_WORLD_BREAKER: '97e956d5-7bb6-44fe-9052-fd049ab8a081',
+});
+
+/**
  * Synchronizes canonical item definitions to the database.
- * Creates items that don't exist yet, and updates existing rows with catalog-owned fields
- * (name, description, type, subtype, rarity, baseStats, battlePerks, consumableEffect,
- * isShopBuyable, shopPrice, maxDailyPurchases, isTradeable) while preserving existing UUIDs.
+ * Creates items that don't exist yet with stable UUIDs, and updates existing rows with
+ * catalog-owned fields while preserving existing UUIDs.
  * The shop fields (isShopBuyable, shopPrice, maxDailyPurchases) of a row the owner console
  * edited (`ownerOverridden`) are kept, so an owner's price survives a bot restart.
  */
@@ -793,7 +852,11 @@ export async function syncCanonicalItems(
   for (const item of items) {
     const exists = await itemRepo.findByCode(item.code);
     if (!exists) {
-      await itemRepo.create(item);
+      const stableId = item.id ?? CANONICAL_ITEM_IDS[item.code];
+      await itemRepo.create({
+        ...item,
+        ...(stableId ? { id: stableId } : {}),
+      });
       created++;
     } else {
       await itemRepo.update(exists.id, {

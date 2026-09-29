@@ -134,6 +134,11 @@ To prevent lost work, uncontrolled runaway commits, and git accidents:
     > *"Epic [EPIC-XXX: Title] is complete with all tests passing. Would you like me to commit, push the branch, and create a Pull Request to `develop/2.0.0` before we proceed to the next Epic?"*
   - Wait for explicit user confirmation before initiating the next Epic.
 
+### 7.3. CI/CD & Maintainer Verification Gate (Standing Rule)
+- All Pull Requests must target `develop/2.0.0` and be verified by the automated CI/CD pipeline (lint, typecheck, coverage thresholds, build).
+- Agents are responsible for publishing branches, opening the Pull Request with complete verification details, and monitoring initial CI triggers.
+- **Strict Human Merge Gate**: Agents MUST NEVER automatically merge Pull Requests into integration branches (`develop/2.0.0` or `main`). Merging is strictly reserved for the human maintainer after independent verification and after all CI/CD checks pass.
+
 ---
 
 ## 8. Board Layout & Ticket ID Rules
