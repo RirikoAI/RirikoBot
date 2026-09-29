@@ -31,6 +31,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 - `EPIC-004` Economy bugs `BUG-0023` and `BUG-0024` (4 pts): see **Groomed Tasks for EPIC-004**
 - `EPIC-010` Achievement tracking bug `BUG-0025` (5 pts): see the bug rows under **Groomed Tasks for EPIC-004**
 - `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
+- `EPIC-005` Per-source music toggles `STORY-172` (5 pts): see **Groomed Tasks for EPIC-005**
 
 ---
 
@@ -399,6 +400,9 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | ✅ Done · [TASK-0512.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0512.md) | `TASK-0511` |
 | `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | ✅ Done · [TASK-0521.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0521.md) | `STORY-051` |
 | `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | ✅ Done · [TASK-0522.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0522.md) | `TASK-0521` |
+| `STORY-172` | Story | Per-Source Music Toggles & Pluggable Source Adapters | 5 | `EPIC-005` | 🎯 To Do | — |
+| `TASK-1721` | Task | Per-Source Toggles Across Extractor Pipeline, Lavalink Service & Music Commands | 3 | `STORY-172` | 🎯 To Do | — |
+| `TASK-1722` | Task | Extract YouTube Extractor Code into a Private Workspace Package | 2 | `STORY-172` | 🎯 To Do | `TASK-1721` |
 
 ### 🛠️ Groomed Tasks for EPIC-004
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |
