@@ -15,6 +15,9 @@ export function UserMenu({ user, owner }: { user: CurrentUser; owner: boolean })
           Owner console
         </Link>
       ) : null}
+      <Link href="/account/album" className="text-sm text-zinc-400 hover:text-zinc-200">
+        Card album
+      </Link>
       <Link href="/account/security" className="text-sm text-zinc-400 hover:text-zinc-200">
         Security
       </Link>

@@ -34,6 +34,7 @@ describe('Item Command Suite (TASK-1032)', () => {
       shopPrice: 5000,
       maxDailyPurchases: 5,
       isTradeable: true,
+      ownerOverridden: false,
       description: 'A sharp, bloodthirsty blade.',
       createdAt: new Date(),
     };
@@ -53,6 +54,7 @@ describe('Item Command Suite (TASK-1032)', () => {
       shopPrice: 1000,
       maxDailyPurchases: 3,
       isTradeable: true,
+      ownerOverridden: false,
       description: 'Restores 50 daily energy.',
       createdAt: new Date(),
     };

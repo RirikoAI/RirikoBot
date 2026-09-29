@@ -259,6 +259,61 @@ export class AchievementRepository extends BaseRepository<
     }
   }
 
+  /**
+   * Per achievement, how many members of a guild unlocked and claimed it. Members are the users
+   * with XP in the guild (`xp_accounts`), the bot's record of who has been active there.
+   */
+  async guildCompletionCounts(
+    guildId: string,
+    tx?: DatabaseClient,
+  ): Promise<{ members: number; counts: Map<string, { unlocked: number; claimed: number }> }> {
+    const client = this.getClient(tx);
+    let members: { count: number } | undefined;
+    let rows: { achievementId: string; unlocked: number; claimed: number }[];
+    if (this.isSqlite(client)) {
+      const ua = sqliteSchema.userAchievements;
+      const xp = sqliteSchema.xpAccounts;
+      [members] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(xp)
+        .where(eq(xp.guildId, guildId));
+      rows = await client.db
+        .select({
+          achievementId: ua.achievementId,
+          unlocked: sql<number>`sum(case when ${ua.isUnlocked} then 1 else 0 end)`,
+          claimed: sql<number>`sum(case when ${ua.isClaimed} then 1 else 0 end)`,
+        })
+        .from(ua)
+        .innerJoin(xp, and(eq(xp.userId, ua.userId), eq(xp.guildId, guildId)))
+        .groupBy(ua.achievementId);
+    } else {
+      const ua = pgSchema.userAchievements;
+      const xp = pgSchema.xpAccounts;
+      [members] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(xp)
+        .where(eq(xp.guildId, guildId));
+      rows = await client.db
+        .select({
+          achievementId: ua.achievementId,
+          unlocked: sql<number>`sum(case when ${ua.isUnlocked} then 1 else 0 end)`,
+          claimed: sql<number>`sum(case when ${ua.isClaimed} then 1 else 0 end)`,
+        })
+        .from(ua)
+        .innerJoin(xp, and(eq(xp.userId, ua.userId), eq(xp.guildId, guildId)))
+        .groupBy(ua.achievementId);
+    }
+    return {
+      members: Number(members?.count ?? 0),
+      counts: new Map(
+        rows.map((row) => [
+          row.achievementId,
+          { unlocked: Number(row.unlocked ?? 0), claimed: Number(row.claimed ?? 0) },
+        ]),
+      ),
+    };
+  }
+
   // --- User Achievements Methods ---
 
   async getUserAchievement(

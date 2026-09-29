@@ -81,6 +81,10 @@
     "./dungeon": {
       "types": "./dist/waifu-tcg/dungeon/public.d.ts",
       "import": "./dist/waifu-tcg/dungeon/public.js"
+    },
+    "./tcg-album": {
+      "types": "./dist/waifu-tcg/album/index.d.ts",
+      "import": "./dist/waifu-tcg/album/index.js"
     }
   },
   "scripts": {

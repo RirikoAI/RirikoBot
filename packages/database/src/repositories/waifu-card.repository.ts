@@ -2,11 +2,26 @@ import { eq, and, desc, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
 import type { DatabaseClient } from '../client/types.js';
-import type { WaifuCard, NewWaifuCard, UserCard, NewUserCard } from '../schema/types/index.js';
+import type {
+  WaifuCard,
+  NewWaifuCard,
+  UserCard,
+  NewUserCard,
+  WaifuAsset,
+  WaifuSource,
+} from '../schema/types/index.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
 import { withTransaction } from '../transactions/index.js';
+
+/** An owned card with its definition, art asset and image source (for attribution). */
+export interface UserAlbumEntry {
+  userCard: UserCard;
+  card: WaifuCard;
+  asset: WaifuAsset | null;
+  source: WaifuSource | null;
+}
 
 export class WaifuCardRepository extends BaseRepository<
   WaifuCard,
@@ -419,6 +434,79 @@ export class WaifuCardRepository extends BaseRepository<
         .offset(offset);
 
       return rows as unknown as UserCard[];
+    }
+  }
+
+  /**
+   * One page of a user's collection with each card's definition, asset and image source, newest
+   * first, plus the total that matches the filters. Owned cards whose definition is missing are
+   * skipped. Used by the dashboard album.
+   */
+  async listUserAlbum(
+    userId: string,
+    options: { favoritesOnly?: boolean; rarity?: string; limit: number; offset: number },
+    tx?: DatabaseClient,
+  ): Promise<{ total: number; entries: UserAlbumEntry[] }> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const s = sqliteSchema;
+      const conditions = [eq(s.userCards.userId, userId)];
+      if (options.favoritesOnly) conditions.push(eq(s.userCards.isFavorite, true));
+      if (options.rarity) conditions.push(eq(s.waifuCards.rarity, options.rarity));
+      const where = and(...conditions);
+
+      const [counted] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(s.userCards)
+        .innerJoin(s.waifuCards, eq(s.userCards.cardId, s.waifuCards.id))
+        .where(where);
+      const rows = await client.db
+        .select({
+          userCard: s.userCards,
+          card: s.waifuCards,
+          asset: s.waifuAssets,
+          source: s.waifuSources,
+        })
+        .from(s.userCards)
+        .innerJoin(s.waifuCards, eq(s.userCards.cardId, s.waifuCards.id))
+        .leftJoin(s.waifuAssets, eq(s.waifuCards.assetId, s.waifuAssets.id))
+        .leftJoin(s.waifuSources, eq(s.waifuAssets.sourceId, s.waifuSources.id))
+        .where(where)
+        .orderBy(desc(s.userCards.obtainedAt), desc(s.userCards.id))
+        .limit(options.limit)
+        .offset(options.offset);
+      return { total: Number(counted?.count ?? 0), entries: rows as UserAlbumEntry[] };
+    } else {
+      const p = pgSchema;
+      const conditions = [eq(p.userCards.userId, userId)];
+      if (options.favoritesOnly) conditions.push(eq(p.userCards.isFavorite, true));
+      if (options.rarity) conditions.push(eq(p.waifuCards.rarity, options.rarity));
+      const where = and(...conditions);
+
+      const [counted] = await client.db
+        .select({ count: sql<number>`count(*)` })
+        .from(p.userCards)
+        .innerJoin(p.waifuCards, eq(p.userCards.cardId, p.waifuCards.id))
+        .where(where);
+      const rows = await client.db
+        .select({
+          userCard: p.userCards,
+          card: p.waifuCards,
+          asset: p.waifuAssets,
+          source: p.waifuSources,
+        })
+        .from(p.userCards)
+        .innerJoin(p.waifuCards, eq(p.userCards.cardId, p.waifuCards.id))
+        .leftJoin(p.waifuAssets, eq(p.waifuCards.assetId, p.waifuAssets.id))
+        .leftJoin(p.waifuSources, eq(p.waifuAssets.sourceId, p.waifuSources.id))
+        .where(where)
+        .orderBy(desc(p.userCards.obtainedAt), desc(p.userCards.id))
+        .limit(options.limit)
+        .offset(options.offset);
+      return {
+        total: Number(counted?.count ?? 0),
+        entries: rows as unknown as UserAlbumEntry[],
+      };
     }
   }
 

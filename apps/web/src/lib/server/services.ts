@@ -4,6 +4,7 @@ import { REST } from '@discordjs/rest';
 import { experimental_taintObjectReference, experimental_taintUniqueValue } from 'react';
 import { loadWebConfig, SecretVault, type WebConfig } from '@ririko/core';
 import {
+  AchievementRepository,
   AuditLogRepository,
   AutoRoleRepository,
   AutoVoiceRepository,
@@ -31,7 +32,9 @@ import {
   StreamRepository,
   TcgConfigRepository,
   GiveawayRepository,
+  UserInventoryItemRepository,
   UserRepository,
+  WaifuCardRepository,
   WebKnownDeviceRepository,
   WebPasskeyRepository,
   WebSessionRepository,
@@ -42,8 +45,11 @@ import {
   DungeonSeasonAdminService,
   EconomyConfigService,
   ItemCatalogService,
+  TcgAchievementAdminService,
+  TcgItemCatalogService,
   TcgRulesService,
 } from '@ririko/services/owner';
+import { CardAlbumService } from '@ririko/services/tcg-album';
 import { createStreamAdapters, StreamAlertService } from '@ririko/services/stream-alerts';
 import { WelcomerBackgroundStore } from '@ririko/services/welcomer-backgrounds';
 import { DiscordOAuthClient } from './auth/discord-oauth';
@@ -99,6 +105,15 @@ export interface WebServices {
   tcgRules: TcgRulesService;
   /** Dungeon seasons and bosses for the owner console (after `requireOwner` or `runOwnerAction`). */
   dungeonSeasons: DungeonSeasonAdminService;
+  /** Waifu TCG items for the owner console (after `requireOwner` or `runOwnerAction`). */
+  tcgItems: TcgItemCatalogService;
+  /**
+   * Waifu TCG achievements: owner edits (after `requireOwner` or `runOwnerAction`) and read-only
+   * guild completion counts (after `requireGuildAccess`).
+   */
+  tcgAchievements: TcgAchievementAdminService;
+  /** The signed-in user's own card collection (after `requireSession`). */
+  cardAlbum: CardAlbumService;
   /** Commands the bot recorded at startup, for the Command Overrides page; read-only here. */
   commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
@@ -245,6 +260,18 @@ async function createWebServices(): Promise<WebServices> {
       items: new GameItemRepository(db),
       audit,
     }),
+    tcgItems: new TcgItemCatalogService({
+      db,
+      items: new GameItemRepository(db),
+      inventories: new UserInventoryItemRepository(db),
+      audit,
+    }),
+    tcgAchievements: new TcgAchievementAdminService({
+      db,
+      achievements: new AchievementRepository(db),
+      audit,
+    }),
+    cardAlbum: new CardAlbumService({ cards: new WaifuCardRepository(db) }),
     commandCatalog,
     botActivity: new BotActivityRepository(db),
     notifier: new DiscordNotifier({

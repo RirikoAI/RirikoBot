@@ -780,6 +780,8 @@ export const CRAFTING_DUST_CODE = 'CRAFTING_DUST';
  * Creates items that don't exist yet, and updates existing rows with catalog-owned fields
  * (name, description, type, subtype, rarity, baseStats, battlePerks, consumableEffect,
  * isShopBuyable, shopPrice, maxDailyPurchases, isTradeable) while preserving existing UUIDs.
+ * The shop fields (isShopBuyable, shopPrice, maxDailyPurchases) of a row the owner console
+ * edited (`ownerOverridden`) are kept, so an owner's price survives a bot restart.
  */
 export async function syncCanonicalItems(
   itemRepo: GameItemRepository,
@@ -803,9 +805,13 @@ export async function syncCanonicalItems(
         baseStats: item.baseStats ?? {},
         battlePerks: item.battlePerks ?? [],
         consumableEffect: item.consumableEffect ?? {},
-        isShopBuyable: item.isShopBuyable ?? true,
-        shopPrice: item.shopPrice ?? 100,
-        maxDailyPurchases: item.maxDailyPurchases ?? 5,
+        ...(exists.ownerOverridden
+          ? {}
+          : {
+              isShopBuyable: item.isShopBuyable ?? true,
+              shopPrice: item.shopPrice ?? 100,
+              maxDailyPurchases: item.maxDailyPurchases ?? 5,
+            }),
         isTradeable: item.isTradeable ?? true,
       });
       updated++;

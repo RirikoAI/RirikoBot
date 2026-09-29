@@ -165,6 +165,7 @@ describe('Guild, Achievements & TCG Permissions (TASK-1052)', () => {
         shop_price INTEGER NOT NULL DEFAULT 100,
         max_daily_purchases INTEGER NOT NULL DEFAULT 5,
         is_tradeable INTEGER NOT NULL DEFAULT 1,
+        owner_overridden INTEGER NOT NULL DEFAULT 0,
         created_at INTEGER NOT NULL
       );
     `);

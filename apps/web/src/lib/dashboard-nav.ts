@@ -12,6 +12,7 @@ export const GUILD_NAV_ITEMS = [
   { slug: 'xp', label: 'XP & Ranking' },
   { slug: 'games', label: 'Games' },
   { slug: 'tcg', label: 'Waifu TCG' },
+  { slug: 'tcg/achievements', label: 'TCG Achievements' },
   { slug: 'giveaways', label: 'Giveaways' },
   { slug: 'music', label: 'Music' },
   { slug: 'ai', label: 'AI Chatbot' },

@@ -11,7 +11,7 @@ None.
 ---
 
 ## 🔍 In Review
-See STORY-167, STORY-170 and TASK-1705 in the story table below.
+See STORY-170 and TASK-1705 in the story table below.
 
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
@@ -28,7 +28,7 @@ See STORY-167, STORY-170 and TASK-1705 in the story table below.
 Ready tickets are listed once, in their epic section at the bottom of the board.
 
 - `EPIC-004` Economy bugs `BUG-0023` and `BUG-0024` (4 pts): see **Groomed Tasks for EPIC-004**
-- `EPIC-011` Next.js 16 Web Dashboard & Management Portal (21 pts, children 122): see **Groomed Stories & Tasks for EPIC-011**
+- `EPIC-010` Achievement tracking bug `BUG-0025` (5 pts): see the bug rows under **Groomed Tasks for EPIC-004**
 - `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
 
 ---
@@ -41,6 +41,9 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `EPIC-011` | Epic | Next.js 16 Web Dashboard & Management Portal | 21 | Self | [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) |
+| `STORY-168` | Story | Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager | 5 | `EPIC-011` | [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) |
+| `STORY-167` | Story | Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot | 8 | `EPIC-011` | [TASK-1126.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1126.md) |
 | `CHORE-1703` | Chore | Remove Adventure User-Specific S+ Rank Override | 1 | — | [CHORE-1703.md](handovers/CHORE-1703.md) |
 | `CHORE-1702` | Chore | Plan Companion-Level Adventure Reward Ranks | 2 | — | [CHORE-1702.md](handovers/CHORE-1702.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | — | [CHORE-1701.md](handovers/CHORE-1701.md) |
@@ -286,12 +289,12 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-112` | Story | Guild TCG Settings (Persisted Drops, Guild-Scoped TCG Manager Role) & Owner-Gated Global TCG Rules | 8 | `EPIC-011` | ✅ Done · [TASK-1121.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1121.md), [TASK-1124.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1124.md) | `STORY-111`, `STORY-117` |
 | `TASK-1121` | Task | Guild `tcg` Config Module: Persisted Drop Settings, Drop Spawning from Messages, Guild-Scoped TCG Manager Role & TCG Settings Page | 5 | `STORY-112` | ✅ Done · [TASK-1121.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1121.md) | `STORY-111` |
 | `TASK-1124` | Task | Global TCG Rules Wired at Runtime (Market Tax 1-20%, Listing Expiry, Energy Cap/Base/Scaling, Restore-Pot Limit), Audited Owner TCG Page, `ririko tcg:rules` & `/tcg-admin` Owner Lockdown | 3 | `STORY-112` | ✅ Done · [TASK-1124.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1124.md) | `TASK-1121` |
-| `STORY-167` | Story | Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot | 8 | `EPIC-011` | 🔍 In Review · [TASK-1122.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1122.md), [TASK-1126.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1126.md) | `STORY-112` |
+| `STORY-167` | Story | Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot | 8 | `EPIC-011` | ✅ Done (PR #662) · [TASK-1122.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1122.md), [TASK-1126.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1126.md) | `STORY-112` |
 | `TASK-1122` | Task | Owner Dungeon Season & Boss Editor (Dates, Theme, Affixes, Scaling Curve, Enrage, Ward Shields) & Difficulty Curve Visualizer | 5 | `STORY-167` | ✅ Done · [TASK-1122.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1122.md) | `STORY-112` |
 | `TASK-1126` | Task | Dungeon Floor Loot Tables Wired into DungeonLootService (First-Clear & Repeat) & Floor Loot Editor | 3 | `STORY-167` | ✅ Done · [TASK-1126.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1126.md) | `TASK-1122` |
-| `STORY-168` | Story | Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager | 5 | `EPIC-011` | 🎯 To Do | `STORY-167` |
-| `TASK-1123` | Task | Card Album Viewer (Cached CardImageService Renders) | 2 | `STORY-168` | 🎯 To Do · [TASK-1123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1123.md) | `STORY-167` |
-| `TASK-1125` | Task | Override-Safe TCG Shop Catalog (`game_items`) Editor, Achievement Manager & Guild Achievement Completion Inspector | 3 | `STORY-168` | 🎯 To Do · [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) | `TASK-1123` |
+| `STORY-168` | Story | Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager | 5 | `EPIC-011` | ✅ Done · [TASK-1123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1123.md), [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) | `STORY-167` |
+| `TASK-1123` | Task | Card Album Viewer (Cached CardImageService Renders) | 2 | `STORY-168` | ✅ Done · [TASK-1123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1123.md) | `STORY-167` |
+| `TASK-1125` | Task | Override-Safe TCG Shop Catalog (`game_items`) Editor, Achievement Manager & Guild Achievement Completion Inspector | 3 | `STORY-168` | ✅ Done · [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) | `TASK-1123` |
 | `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | `EPIC-011` | ✅ Done · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `STORY-111` |
 | `TASK-1131` | Task | Command Usage Daily Counters (Dual-Dialect Table & Router Hook), Bot Status Heartbeat & Overview Tab | 3 | `STORY-113` | ✅ Done · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `STORY-111` |
 | `TASK-1132` | Task | Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer | 2 | `STORY-113` | ✅ Done · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `TASK-1131` |
@@ -407,6 +410,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-0442` | Task | Dual-Dispatch Discord Commands & Gateway Event Listeners | 2 | `STORY-044` | ✅ Done · [TASK-0442.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0442.md) | `TASK-0441` |
 | `BUG-0023` | Bug | Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message | 2 | `STORY-040` | 🎯 To Do | |
 | `BUG-0024` | Bug | Legacy Migration Reads the Wrong Karma and Welcomer Keys (Item Seed Part Moved to TASK-1653) | 2 | `STORY-043` | 🎯 To Do | |
+| `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED (Found in TASK-1125) | 5 | `STORY-105` | 🎯 To Do | |
 
 
 
