@@ -12,3 +12,4 @@ docs/
 assets/tcg/catalog/
 test-results/
 site-dist/
+.codegraph/
