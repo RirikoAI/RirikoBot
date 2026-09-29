@@ -60,3 +60,6 @@ test-results/
 
 # Vercel status site build output (pnpm site:build)
 site-dist/
+
+# CodeGraph indexing metadata & locks
+.codegraph/
