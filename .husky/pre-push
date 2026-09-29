@@ -1,4 +1,4 @@
 # Same lint gate as CircleCI's `lint` job, so a push never fails CI on lint or formatting.
 # Fix with `pnpm lint:fix` and `pnpm format`.
-pnpm lint
+pnpm lint --quiet
 pnpm format:check

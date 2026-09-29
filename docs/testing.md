@@ -67,7 +67,7 @@ CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` wor
 
 Git hooks (Husky, installed by `pnpm install`) run the lint checks locally:
 - **pre-commit**: blocks `.env` files, scans staged changes with gitleaks, then runs `lint-staged`: `eslint --fix` and `prettier --write` on staged files (rules in `package.json` `lint-staged`), re-staging the fixes.
-- **pre-push**: `pnpm lint` and `pnpm format:check`, the same commands as the `lint` job, so a push that would fail CI lint stops locally. Fix with `pnpm lint:fix` and `pnpm format`.
+- **pre-push**: `pnpm lint --quiet` (errors only) and `pnpm format:check`, the same checks as the `lint` job, so a push that would fail CI lint stops locally. Fix with `pnpm lint:fix` and `pnpm format`.
 
 ### 4.1. Coverage
 - **Merge gate (standing rule for every contributor and agent)**: a PR is **not merged** unless it passes every threshold in `vitest.config.ts` `coverage.thresholds`. On 2026-09-28 they are lines 67%, functions 69%, statements 65% and branches 54%. The CircleCI `test` job fails below any of them. Run `pnpm test:coverage` before opening a PR, and cover the code you add or change with real tests.
