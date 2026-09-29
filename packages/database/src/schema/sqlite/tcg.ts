@@ -109,6 +109,8 @@ export const gameItems = sqliteTable('game_items', {
   shopPrice: integer('shop_price').notNull().default(100),
   maxDailyPurchases: integer('max_daily_purchases').notNull().default(5),
   isTradeable: integer('is_tradeable', { mode: 'boolean' }).notNull().default(true),
+  /** The owner console set the shop fields; the canonical catalog sync leaves them alone. */
+  ownerOverridden: integer('owner_overridden', { mode: 'boolean' }).notNull().default(false),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

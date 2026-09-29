@@ -647,6 +647,7 @@ To create a rewarding gameplay loop, items are strictly tiered between the **Bas
   - *Accessories*: Copper Band (+ATK), Leather Choker (+HP), Simple Bangle (+DEF).
   - *Consumables*: Minor HP Potion (300 HP), Mana Draught (30 MP), Daily Energy Biscuit (+15 Energy, max 1 purchase/day).
 - All transactions are audited via the double-entry financial ledger (`type: 'SHOP_BUY'`).
+- **Owner console (`/owner/tcg-shop`, TASK-1125)**: the bot re-syncs the canonical catalog (`CANONICAL_ITEMS`) into `game_items` at every start. For canonical items the owner console edits only the shop fields (`is_shop_buyable`, `shop_price`, `max_daily_purchases`); saving them sets `owner_overridden`, and `syncCanonicalItems` then keeps those three fields while still updating everything else. Owners can also add custom gear (codes prefixed `CUSTOM_`) for the six gear slots, with stats, rarities and battle perks limited to what the combat engine reads (`TcgGearInputSchema` in `@ririko/core`). Custom gear is fully editable and can be deleted once it is off sale and nobody holds one. Custom consumables are not supported, because potion effects are hard-coded by subtype. `max_daily_purchases` is enforced per purchase, not per day.
 
 ### 13.2. Superior Loot Drops from PvE Battles & Quests
 Superior gear cannot simply be purchased with money; it must be won in battle:
@@ -730,6 +731,11 @@ Every achievement provides high-value rewards upon completion, dynamically spann
 | `BATTLE_BOSS_SLAYER` | Combatant | Deal 1,000,000 total damage to Raid Bosses | Platinum | 8,000 XP, 35,000 Credits, SIR Equipment: *Dragonheart Armor*, Exclusive Card: *Tiamat #001* |
 | `CRAFT_MASTER_FORGE` | Blacksmith | Enhance any Equipment to +10 | Gold | 4,000 XP, 15,000 Credits, 500 Crafting Dust, Secret Rare Relic: *Chrono Core* |
 | `DEVOTION_STREAK_30` | Devotion | Maintain 30-day Daily Claim Streak | Gold | 6,000 XP, 25,000 Credits, 3x *Grand Stamina Flasks*, Badge: *Unyielding Flame* |
+
+### 14.2.1. Current Tracking & Owner Console (TASK-1125)
+- **Only `TUTORIAL_CLEARED` progress is recorded today** (`TRACKED_ACHIEVEMENT_TYPES` in `@ririko/core`); the other requirement types in the seed cannot unlock yet. Recording them is `BUG-0025`.
+- `/owner/achievements` edits title, description, tier, reward XP and credits, reward title, badge and the hidden flag. Requirements and reward items stay fixed. The seed (`bulkCreateAchievements`) only inserts missing codes, so edits survive restarts. Audited as `owner.achievement.update`.
+- `/dashboard/[guildId]/tcg/achievements` shows guild managers, read only, how many of the server's members unlocked and claimed each visible achievement. Members are the users with an `xp_accounts` row for the guild (`guild_members` is not populated by the bot).
 
 ### 14.3. Event-Driven Architecture & Atomic Claiming
 - As players play, the `AchievementService` listens to standardized `EconomyEvent` and `GameEvent` dispatches (`CARD_CLAIMED`, `DUNGEON_CLEARED`, `PVP_WON`, `EQUIPMENT_UPGRADED`).

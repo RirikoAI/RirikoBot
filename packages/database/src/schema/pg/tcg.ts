@@ -107,6 +107,8 @@ export const gameItems = pgTable('game_items', {
   shopPrice: bigint('shop_price', { mode: 'bigint' }).notNull().default(100n),
   maxDailyPurchases: integer('max_daily_purchases').notNull().default(5),
   isTradeable: boolean('is_tradeable').notNull().default(true),
+  /** The owner console set the shop fields; the canonical catalog sync leaves them alone. */
+  ownerOverridden: boolean('owner_overridden').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

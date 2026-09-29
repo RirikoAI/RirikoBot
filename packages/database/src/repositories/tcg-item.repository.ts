@@ -173,6 +173,7 @@ export class GameItemRepository extends BaseRepository<
             shopPrice: Number(data.shopPrice ?? 100),
             maxDailyPurchases: data.maxDailyPurchases ?? 5,
             isTradeable: data.isTradeable ?? true,
+            ownerOverridden: data.ownerOverridden ?? false,
             createdAt: data.createdAt ?? new Date(),
           })
           .returning();
@@ -196,6 +197,7 @@ export class GameItemRepository extends BaseRepository<
             shopPrice: BigInt(data.shopPrice ?? 100),
             maxDailyPurchases: data.maxDailyPurchases ?? 5,
             isTradeable: data.isTradeable ?? true,
+            ownerOverridden: data.ownerOverridden ?? false,
             createdAt: data.createdAt ?? new Date(),
           })
           .returning();
@@ -553,6 +555,46 @@ export class UserInventoryItemRepository extends BaseRepository<
         .where(eq(pgSchema.userInventoryItems.id, id))
         .returning({ id: pgSchema.userInventoryItems.id });
       return deleted.length > 0;
+    }
+  }
+
+  /** Number of distinct players holding each item id (items nobody holds are absent). */
+  async holderCountsByItem(tx?: DatabaseClient): Promise<Map<string, number>> {
+    const client = this.getClient(tx);
+    let rows: { itemId: string; holders: number }[];
+    if (this.isSqlite(client)) {
+      const t = sqliteSchema.userInventoryItems;
+      rows = await client.db
+        .select({ itemId: t.itemId, holders: sql<number>`count(distinct ${t.userId})` })
+        .from(t)
+        .groupBy(t.itemId);
+    } else {
+      const t = pgSchema.userInventoryItems;
+      rows = await client.db
+        .select({ itemId: t.itemId, holders: sql<number>`count(distinct ${t.userId})` })
+        .from(t)
+        .groupBy(t.itemId);
+    }
+    return new Map(rows.map((r) => [r.itemId, Number(r.holders)]));
+  }
+
+  /** Number of distinct players holding the item. */
+  async countHolders(itemId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const t = sqliteSchema.userInventoryItems;
+      const [res] = await client.db
+        .select({ count: sql<number>`count(distinct ${t.userId})` })
+        .from(t)
+        .where(eq(t.itemId, itemId));
+      return Number(res?.count ?? 0);
+    } else {
+      const t = pgSchema.userInventoryItems;
+      const [res] = await client.db
+        .select({ count: sql<number>`count(distinct ${t.userId})` })
+        .from(t)
+        .where(eq(t.itemId, itemId));
+      return Number(res?.count ?? 0);
     }
   }
 

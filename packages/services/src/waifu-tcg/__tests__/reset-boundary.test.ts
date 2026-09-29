@@ -70,6 +70,7 @@ describe('STORY-161 shared reset boundary', () => {
         shop_price INTEGER NOT NULL DEFAULT 100,
         max_daily_purchases INTEGER NOT NULL DEFAULT 5,
         is_tradeable INTEGER NOT NULL DEFAULT 1,
+        owner_overridden INTEGER NOT NULL DEFAULT 0,
         created_at INTEGER NOT NULL
       );
       CREATE TABLE IF NOT EXISTS user_inventory_items (
