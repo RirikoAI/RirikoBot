@@ -55,6 +55,8 @@ public/bosses/
 # Test and coverage reports (pnpm test:ci / test:coverage)
 coverage/
 test-results/
+# Vitest local cache and JSON reports
+.vitest/
 
 # Vercel status site build output (pnpm site:build)
 site-dist/

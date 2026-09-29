@@ -46,11 +46,19 @@
     "@vitest/coverage-v8": "^5.0.0",
     "eslint": "^10.10.0",
     "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.9.6",
     "rimraf": "^6.0.1",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.70.0",
     "vitest": "^5.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix --no-warn-ignored",
+      "prettier --write --ignore-unknown"
+    ],
+    "*.{json,yml,yaml,css}": "prettier --write --ignore-unknown"
   }
 }
