@@ -62,8 +62,7 @@ export const TCG_FRACTION_GEAR_STATS = [
   'manaRegen',
 ] as const;
 export type TcgGearStat =
-  | (typeof TCG_FLAT_GEAR_STATS)[number]
-  | (typeof TCG_FRACTION_GEAR_STATS)[number];
+  (typeof TCG_FLAT_GEAR_STATS)[number] | (typeof TCG_FRACTION_GEAR_STATS)[number];
 
 export const MAX_TCG_ITEM_PRICE = 100_000_000;
 export const MAX_TCG_PURCHASE_LIMIT = 1000;
