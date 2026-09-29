@@ -5,6 +5,8 @@ const OWNER_PAGES = [
   { href: '/owner/shop', label: 'Item shop' },
   { href: '/owner/tcg', label: 'Waifu TCG' },
   { href: '/owner/dungeon', label: 'Dungeon' },
+  { href: '/owner/tcg-shop', label: 'TCG items' },
+  { href: '/owner/achievements', label: 'Achievements' },
 ] as const;
 
 /** Tabs for the owner console pages. */

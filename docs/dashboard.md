@@ -64,6 +64,13 @@ Guild Discovery Pipeline
 - Adding or removing a passkey also sends a DM.
 - DMs and change notices go through the bot-token REST client after the response is sent (`after()` from `next/server`). They are best effort: users who block DMs (Discord error 50007) and guilds without a log channel are skipped, and failures are only logged. User-controlled text (passkey names, setting values) is shown as inline code and mentions are disabled, so it cannot become a link or a ping; the browser is described from fixed names, never the raw user agent.
 
+
+### 2.5. Card Album (TASK-1123)
+- `/account/album` shows the signed-in user's own Waifu TCG cards, 24 per page, newest first, with a rarity filter and a favourites-only filter (plain `GET` query: `?rarity=`, `?favorites=1`, `?page=`). The user id always comes from the session; there is no way to view another user's album.
+- `CardAlbumService` (`@ririko/services/tcg-album`) reads one page with `WaifuCardRepository.listUserAlbum`, a single join of `user_cards`, `waifu_cards`, `waifu_assets` and `waifu_sources`, and draws each card with the bot's `CardImageService`. The renderer (and the native canvas) is imported only when a card is drawn. Cards are drawn one at a time; a card that fails to draw shows a placeholder instead of breaking the page.
+- Renders are cached in `public/cards/<cardId>.png`, the same folder the bot uses, so a card the bot has already shown is read from disk. In Docker the bot and the dashboard must share that volume, or each keeps its own cache.
+- Read only: equipping, favouriting, trading and dismantling stay in `/cards` in Discord.
+
 ---
 
 ## 3. Configuration Scope & Mutation Path
@@ -80,15 +87,17 @@ Guild Discovery Pipeline
   3. The five-minute passkey check. If it is missing, the form offers "Confirm with passkey and save".
 
   The authorization coverage test accepts `runOwnerAction` as both the request guard and the authorization guard.
-- Owner writes go through the owner services in `@ririko/services/owner`: `EconomyConfigService`, `ItemCatalogService`, `TcgRulesService` and `DungeonSeasonAdminService`. Their audit entries have no guild (`guild_id` is null), with the actions `owner.economy_config.update`, `owner.shop_item.*` / `owner.shop_category.*`, `owner.tcg_rules.update` and `owner.dungeon_*`. The guild audit viewer does not show them yet.
+- Owner writes go through the owner services in `@ririko/services/owner`: `EconomyConfigService`, `ItemCatalogService`, `TcgRulesService`, `DungeonSeasonAdminService`, `TcgItemCatalogService` and `TcgAchievementAdminService`. Their audit entries have no guild (`guild_id` is null), with the actions `owner.economy_config.update`, `owner.shop_item.*` / `owner.shop_category.*`, `owner.tcg_rules.update`, `owner.dungeon_*`, `owner.tcg_item.*` and `owner.achievement.update`. The guild audit viewer does not show them yet.
 - Pages:
   - `/owner/economy` edits the global economy values (docs/economy.md 5.4).
   - `/owner/tcg` edits the global Waifu TCG rules: market tax and listing expiry, energy and potions (TASK-1124).
   - `/owner/shop` lists the item catalog with holder counts and manages categories.
   - `/owner/shop/new` and `/owner/shop/[itemId]` edit an item.
   - `/owner/dungeon` lists dungeon seasons; `/owner/dungeon/new` and `/owner/dungeon/[seasonId]` edit a season and show its difficulty curve; `/owner/dungeon/[seasonId]/bosses/[bossKey]` edits a boss (TASK-1122); `/owner/dungeon/[seasonId]/floors/[floorNumber]` edits a floor's first-clear and repeat-clear loot (TASK-1126).
+  - `/owner/tcg-shop` lists the Waifu TCG items (`game_items`) with holder counts; `/owner/tcg-shop/[itemId]` edits a built-in item's shop fields (kept across bot restarts) or every field of custom gear; `/owner/tcg-shop/new` adds custom gear (TASK-1125, docs/waifu-tcg.md 13.1).
+  - `/owner/achievements` edits the wording, tier, rewards and visibility of each achievement (TASK-1125, docs/waifu-tcg.md 14.2.1).
 - `ririko economy:config [key] [value]` is the CLI for the economy values, and `ririko tcg:rules [key] [value]` for the TCG rules. They use the same schema, service and audit trail as the owner console.
-- Guild-scoped TCG settings (drop settings and the TCG Manager Role) stay with guild managers on `/dashboard/[guildId]/tcg` (TASK-1121).
+- Guild-scoped TCG settings (drop settings and the TCG Manager Role) stay with guild managers on `/dashboard/[guildId]/tcg` (TASK-1121). `/dashboard/[guildId]/tcg/achievements` shows guild managers, read only, how many members unlocked and claimed each achievement (TASK-1125).
 
 ### 3.2. No Placeholder Settings
 Each page exposes only settings the bot actually reads. A backing column is added only where the bot consumes it. Settings listed in Section 4 that the bot does not read yet are either wired end to end in the same ticket or left off the page.

@@ -1,6 +1,7 @@
 import { TabNav } from './tab-nav';
 
 const ACCOUNT_PAGES = [
+  { href: '/account/album', label: 'Card Album' },
   { href: '/account/security', label: 'Passkeys' },
   { href: '/account/sessions', label: 'Sessions' },
 ] as const;
