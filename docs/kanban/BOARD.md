@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-None.
+`STORY-120` E2E Integration Tests & Quality Gates Setup (8 pts, `EPIC-012`): see **Groomed Stories & Tasks for EPIC-012**.
 
 ---
 
@@ -31,7 +31,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 
 - `EPIC-004` Economy bugs `BUG-0023` and `BUG-0024` (4 pts): see **Groomed Tasks for EPIC-004**
 - `EPIC-010` Achievement tracking bug `BUG-0025` (5 pts): see the bug rows under **Groomed Tasks for EPIC-004**
-- `EPIC-012` Quality Gates, Docker Rootless & Production Verification (13 pts): see **Groomed Stories & Tasks for EPIC-012**
+- `EPIC-012` Quality Gates, Docker Rootless & Production Verification (`STORY-121`, `STORY-122`, `STORY-124`; 13 pts): see **Groomed Stories & Tasks for EPIC-012**
 
 ---
 
@@ -303,13 +303,16 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1132` | Task | Moderation Case Log Inspector (Filters, Pagination, Case Detail) & Dashboard Audit Log Viewer | 2 | `STORY-113` | ✅ Done · [STORY-113.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-113.md) | `TASK-1131` |
 
 ### 📋 Groomed Stories & Tasks for EPIC-012 (Quality Gates & Production Deployment)
-> Scope gap from the regrooming: the original STORY-120 targeted 80%+ test coverage and the original STORY-122 included GitHub Actions CI/CD. CI/CD and coverage tracking were pulled forward on 2026-09-26 as STORY-123 (CircleCI + Codecov instead of GitHub Actions); the 80%+ coverage target is still open. TASK-1221 can reuse the bot status record from TASK-1131 (EPIC-011).
+> Scope gap from the regrooming: the original STORY-120 targeted 80%+ test coverage and the original STORY-122 included GitHub Actions CI/CD. CI/CD and coverage tracking were pulled forward on 2026-09-26 as STORY-123 (CircleCI + Codecov instead of GitHub Actions). TASK-1221 can reuse the bot status record from TASK-1131 (EPIC-011).
+>
+> Regroomed 2026-10-01: STORY-120 went from 5 to 8 points (new TASK-1203 builds the shared fake Discord API; TASK-1201 grew to 3 for the CI job). Postgres dual-dialect runs, trade/market concurrency and AI provider fallback wiring moved to STORY-124. The 80% coverage target is parked as STORY-125. Audio playback is out of scope for TASK-1202.
 
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 5 | `EPIC-012` | 🎯 To Do | — |
-| `TASK-1201` | Task | Setup Playwright for Web Dashboard E2E Tests | 2 | `STORY-120` | 🎯 To Do | — |
-| `TASK-1202` | Task | Setup Discord API Mock Harness & Integration Test Suite | 3 | `STORY-120` | 🎯 To Do | — |
+| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | `EPIC-012` | ⚡ In Progress | — |
+| `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | `STORY-120` | 🎯 To Do | — |
+| `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | `STORY-120` | 🎯 To Do | `TASK-1203` |
+| `TASK-1201` | Task | Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job | 3 | `STORY-120` | 🎯 To Do | `TASK-1203` |
 | `STORY-121` | Story | Rootless Dockerfile & Containerization | 5 | `EPIC-012` | 🎯 To Do | `STORY-120` |
 | `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 2 | `STORY-121` | 🎯 To Do | — |
 | `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | `STORY-121` | 🎯 To Do | — |
@@ -320,6 +323,10 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | — |
 | `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | `TASK-1231` |
 | `TASK-1233` | Task | Vercel Project Status Site Generated from the Kanban Board | 1 | `STORY-123` | ✅ Done · [STORY-123.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-123.md) | — |
+| `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 5 | `EPIC-012` | 🎯 To Do | `STORY-120` |
+| `TASK-1241` | Task | CircleCI Postgres Service & Dialect-Parameterized Repository Suite | 3 | `STORY-124` | 🎯 To Do | — |
+| `TASK-1242` | Task | Postgres Trade/Market Concurrency Tests & AI Provider Fallback Through createBotServices | 2 | `STORY-124` | 🎯 To Do | `TASK-1241` |
+| `STORY-125` | Story | Raise Test Coverage Toward 80% | — | `EPIC-012` | 📥 Backlog (ungroomed) | — |
 
 ### 📋 Groomed Stories for EPIC-013 (Media Synthesis, Reactions & AI Images)
 | ID | Type | Title | Pts | Epic | Status | Prerequisites |
