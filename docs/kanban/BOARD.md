@@ -11,7 +11,7 @@ None.
 ---
 
 ## 🔍 In Review
-See STORY-170 and TASK-1705 in the story table below.
+See STORY-170, TASK-1705 and STORY-173 in the story tables below.
 
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
@@ -442,3 +442,9 @@ Groomed 2026-09-26. WIP is held by the active child only. Parent points are the 
 | `TASK-1713` | Task | Tower-Benchmarked Adventure Completion Rewards | 5 | STORY-170 | DONE · [handover](handovers/TASK-1713.md) | TASK-1712 |
 | `TASK-1714` | Task | Atomic Adventure Companion XP and Card Acquisition | 5 | STORY-170 | DONE · [handover](handovers/TASK-1714.md) | TASK-1713 |
 | `TASK-1715` | Task | Adventure Progression Balance Verification | 3 | STORY-170 | DONE · [handover](handovers/TASK-1715.md) | TASK-1714 |
+
+### 📋 Groomed Stories & Tasks for EPIC-003 — Message Translation
+
+| ID | Type | Title | Pts | Parent | Status |
+|---|---|---|---|---|---|
+| `STORY-173` | Story | Private Message Context Menu Translation to English | 5 | `EPIC-003` | 🔍 Review · [STORY-173.md](handovers/STORY-173.md) |

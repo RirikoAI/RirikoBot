@@ -2,6 +2,7 @@ import type {
   AutocompleteInteraction,
   Channel,
   ChatInputCommandInteraction,
+  MessageContextMenuCommandInteraction,
   Client,
   Guild,
   GuildMember,
@@ -74,6 +75,8 @@ export interface CommandMetadata {
   aliases?: string[] | undefined;
   slashEnabled?: boolean | undefined;
   prefixEnabled?: boolean | undefined;
+  /** Registers an additional message context menu, using this case-sensitive display name. */
+  messageContextMenuName?: string | undefined;
   userPermissions?: bigint[] | undefined;
   botPermissions?: bigint[] | undefined;
   cooldownSeconds?: number | undefined;
@@ -108,7 +111,7 @@ export interface ICommandOptionsResolver {
 }
 
 export interface CommandContext {
-  readonly source: 'slash' | 'prefix';
+  readonly source: 'slash' | 'prefix' | 'context-menu';
   readonly id: string;
   readonly client: Client;
   readonly guild: Guild | null;
@@ -133,7 +136,7 @@ export interface CommandContext {
   /**
    * Reference to the underlying Discord interaction or message.
    */
-  readonly raw: ChatInputCommandInteraction | Message;
+  readonly raw: ChatInputCommandInteraction | MessageContextMenuCommandInteraction | Message;
 
   reply(
     options: string | MessagePayload | InteractionReplyOptions | MessageReplyOptions,

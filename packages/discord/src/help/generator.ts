@@ -178,7 +178,13 @@ export class HelpGenerator {
         const { metadata } = cmd;
         let syntax: string;
 
-        if (metadata.slashEnabled !== false && metadata.prefixEnabled !== false) {
+        if (
+          metadata.messageContextMenuName &&
+          metadata.slashEnabled === false &&
+          metadata.prefixEnabled === false
+        ) {
+          syntax = `Apps → ${metadata.messageContextMenuName}`;
+        } else if (metadata.slashEnabled !== false && metadata.prefixEnabled !== false) {
           syntax = `\`/${metadata.name}\` (Prefix: \`${prefix}${metadata.name}\`)`;
         } else if (metadata.prefixEnabled !== false) {
           syntax = `\`${prefix}${metadata.name}\``;
@@ -280,7 +286,7 @@ export class HelpGenerator {
 
     const embed = new EmbedBuilder()
       .setColor(HELP_COLORS.PRIMARY)
-      .setTitle(`Command Inspector: /${metadata.name}`)
+      .setTitle(`Command Inspector: ${metadata.messageContextMenuName ?? `/${metadata.name}`}`)
       .setDescription(metadata.description);
 
     // Options signature
@@ -293,6 +299,11 @@ export class HelpGenerator {
 
     // 1. Syntax
     const syntaxLines: string[] = [];
+    if (metadata.messageContextMenuName) {
+      syntaxLines.push(
+        `• **Message menu**: Right-click → Apps → ${metadata.messageContextMenuName}`,
+      );
+    }
     if (metadata.slashEnabled !== false) {
       syntaxLines.push(`• **Slash**: \`/${metadata.name}${optionsSig}\``);
     }
