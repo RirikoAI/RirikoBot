@@ -1,5 +1,6 @@
 import type {
   ChatInputCommandInteraction,
+  MessageContextMenuCommandInteraction,
   Client,
   Guild,
   GuildMember,
@@ -25,8 +26,9 @@ import { SlashOptionsResolver, PrefixOptionsResolver } from './options.js';
 /**
  * CommandContext implementation wrapping a Discord Slash Command interaction.
  */
-export class SlashCommandContext implements CommandContext {
-  public readonly source = 'slash' as const;
+class InteractionCommandContext<
+  T extends ChatInputCommandInteraction | MessageContextMenuCommandInteraction,
+> implements CommandContext {
   public readonly id: string;
   public readonly client: Client;
   public readonly guild: Guild | null;
@@ -37,13 +39,15 @@ export class SlashCommandContext implements CommandContext {
   public readonly member: GuildMember | null;
   public readonly commandName: string;
   public readonly invokedName: string;
-  public readonly invokedPrefix = '/';
+  public readonly invokedPrefix: string;
   public readonly options: ICommandOptionsResolver;
   public readonly command?: Command | undefined;
-  public readonly raw: ChatInputCommandInteraction;
+  public readonly raw: T;
 
   constructor(
-    private readonly interaction: ChatInputCommandInteraction,
+    private readonly interaction: T,
+    public readonly source: 'slash' | 'context-menu',
+    options: ICommandOptionsResolver,
     command?: Command,
   ) {
     this.raw = interaction;
@@ -56,9 +60,10 @@ export class SlashCommandContext implements CommandContext {
     this.channelId = interaction.channelId;
     this.user = interaction.user;
     this.member = (interaction.member as GuildMember) ?? null;
-    this.commandName = interaction.commandName;
+    this.commandName = command?.metadata.name ?? interaction.commandName;
     this.invokedName = interaction.commandName.toLowerCase().trim();
-    this.options = new SlashOptionsResolver(interaction);
+    this.invokedPrefix = source === 'slash' ? '/' : '';
+    this.options = options;
   }
 
   public get isReplied(): boolean {
@@ -111,6 +116,25 @@ export class SlashCommandContext implements CommandContext {
         send: (opt: typeof options) => Promise<Message>;
       }
     ).send(options);
+  }
+}
+
+export class SlashCommandContext extends InteractionCommandContext<ChatInputCommandInteraction> {
+  constructor(interaction: ChatInputCommandInteraction, command?: Command) {
+    super(interaction, 'slash', new SlashOptionsResolver(interaction), command);
+  }
+}
+
+export class MessageContextMenuCommandContext extends InteractionCommandContext<MessageContextMenuCommandInteraction> {
+  constructor(interaction: MessageContextMenuCommandInteraction, command: Command) {
+    // Message context menus have a target message but no command arguments.
+    const options = new PrefixOptionsResolver(
+      interaction.targetMessage,
+      [],
+      [],
+      interaction.client,
+    );
+    super(interaction, 'context-menu', options, command);
   }
 }
 
