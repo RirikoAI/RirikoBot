@@ -114,6 +114,12 @@ describe('Giveaway Commands & Components Suite (TASK-0902)', () => {
       expect(names).toContain('glist');
     });
 
+    it('keeps the legacy aliases prefix-only so they use no slash command slots', () => {
+      const commands = createGiveawayCommands(mockServices as BotServices);
+      const slash = commands.filter((c) => c.metadata.slashEnabled !== false);
+      expect(slash.map((c) => c.metadata.name)).toEqual(['giveaway']);
+    });
+
     it('enforces ManageMessages or ManageGuild permission for admin actions', async () => {
       const commands = createGiveawayCommands(mockServices as BotServices);
       const giveawayCmd = commands.find((c) => c.metadata.name === 'giveaway')!;

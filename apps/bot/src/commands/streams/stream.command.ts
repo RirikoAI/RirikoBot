@@ -28,6 +28,7 @@ export function createStreamCommands(services: BotServices): Command[] {
   const streamCommand: Command = {
     metadata: {
       name: 'stream',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'Configure and monitor live stream alerts across Twitch, YouTube, and TikTok',
       usage: '/stream <subscribe|unsubscribe|list|channel|check>',
@@ -159,6 +160,8 @@ export function createStreamCommands(services: BotServices): Command[] {
       description: 'Subscribe this server to live alerts for a streamer (Twitch, YouTube, TikTok)',
       aliases: ['sub', 'stream-sub', 'streamsub'],
       usage: '!subscribe <streamer> [platform]',
+      // Prefix-only: `/stream subscribe` covers slash use within the 100-command limit.
+      slashEnabled: false,
       examples: ['!subscribe shroud', '!subscribe shroud twitch', '!subscribe @MrBeast youtube'],
     },
     async execute(ctx: CommandContext): Promise<void> {
@@ -175,6 +178,8 @@ export function createStreamCommands(services: BotServices): Command[] {
         'Unsubscribe this server from live alerts for a streamer (Twitch, YouTube, TikTok)',
       aliases: ['unsub', 'stream-unsub', 'streamunsub'],
       usage: '!unsubscribe <streamer> [platform]',
+      // Prefix-only: `/stream unsubscribe` covers slash use within the 100-command limit.
+      slashEnabled: false,
       examples: ['!unsubscribe shroud', '!unsubscribe @LofiGirl', '!unsubscribe shroud twitch'],
     },
     async execute(ctx: CommandContext): Promise<void> {
@@ -186,6 +191,7 @@ export function createStreamCommands(services: BotServices): Command[] {
   const setupStreamNotificationCommand: Command = {
     metadata: {
       name: 'setup-stream-notification',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description:
         'Set default channel for live stream announcements across Twitch, YouTube, and TikTok',

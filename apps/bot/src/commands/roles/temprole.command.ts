@@ -50,6 +50,7 @@ export function createTempRoleCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'temprole',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'Assign, remove, or list temporary expiring roles for members',
       aliases: ['temporaryrole', 'trole'],

@@ -75,6 +75,12 @@ describe('Auto-Voice Commands Suite (TASK-0912)', () => {
       expect(names).toContain('vclaim');
       expect(names).toContain('vtransfer');
     });
+
+    it('keeps the legacy aliases prefix-only so they use no slash command slots', () => {
+      const commands = createAutoVoiceCommands(mockServices as BotServices);
+      const slash = commands.filter((c) => c.metadata.slashEnabled !== false);
+      expect(slash.map((c) => c.metadata.name)).toEqual(['autovoice', 'voice']);
+    });
   });
 
   describe('/autovoice Configuration Commands', () => {

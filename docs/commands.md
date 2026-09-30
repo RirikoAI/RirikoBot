@@ -12,6 +12,18 @@ Right-click a message, then choose **Apps → Translate to English**. On mobile,
 
 Implementation: `CommandMetadata.messageContextMenuName` registers an additional message menu through the shared registry/synchronizer. Its `CommandContext.source` is `context-menu`, with `raw.targetMessage` as the selected message. It goes through the same middleware and usage hook as other commands.
 
+## Slash command slots
+
+Discord allows at most 100 slash commands per scope. Legacy shorthand aliases are prefix-only
+(`slashEnabled: false`) so they do not use slots; their slash form is the primary command:
+
+| Prefix alias | Slash command |
+|---|---|
+| `!gcreate`, `!gend`, `!greroll`, `!gdelete`, `!gedit`, `!glist` | `/giveaway action:<...>` |
+| `!avc` | `/autovoice` |
+| `!vname`, `!vlimit`, `!vlock`, `!vunlock`, `!vpermit`, `!vkick`, `!vclaim`, `!vtransfer` | `/voice action:<...>` |
+| `!subscribe`, `!unsubscribe` | `/stream action:<...>` |
+
 ## 1. Dual-Dispatch Architecture & Parity
 In Ririko AI 2.0.0, every user-facing command supports both **Slash Commands** (`/command`) and **Prefix Commands** (`!command` or custom guild prefix). Business logic is never implemented twice.
 

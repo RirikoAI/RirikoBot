@@ -41,6 +41,7 @@ export function createCreateReactionRoleCommand(services: BotServices): Command 
   return {
     metadata: {
       name: 'create-reaction-role',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'Create a reaction role system for a message (supports Emojis and Buttons)',
       aliases: ['createreactionrole', 'crr'],

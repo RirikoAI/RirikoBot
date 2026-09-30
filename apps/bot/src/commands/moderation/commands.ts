@@ -62,6 +62,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const warnCommand: Command = {
     metadata: {
       name: 'warn',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Issues a formal disciplinary warning to a member with automatic escalation.',
       aliases: ['w'],
@@ -183,6 +184,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const timeoutCommand: Command = {
     metadata: {
       name: 'timeout',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Times out a member, preventing them from speaking or reacting.',
       aliases: ['mute', 'to'],
@@ -289,6 +291,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const untimeoutCommand: Command = {
     metadata: {
       name: 'untimeout',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Removes an active communication timeout from a member.',
       aliases: ['unmute'],
@@ -357,6 +360,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const kickCommand: Command = {
     metadata: {
       name: 'kick',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Kicks a member from the server.',
       aliases: ['boot'],
@@ -445,6 +449,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const softbanCommand: Command = {
     metadata: {
       name: 'softban',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Bans and immediately unbans a member to purge recent messages.',
       aliases: ['sb'],
@@ -542,6 +547,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const banCommand: Command = {
     metadata: {
       name: 'ban',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Permanently bans a member from the server.',
       aliases: ['b'],
@@ -631,6 +637,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const unbanCommand: Command = {
     metadata: {
       name: 'unban',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Revokes a server ban by user ID.',
       usage: '/unban <user_id> [reason]',
@@ -681,6 +688,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const purgeCommand: Command = {
     metadata: {
       name: 'purge',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Bulk deletes messages in the current channel with optional filter criteria.',
       aliases: ['clear', 'clean'],
@@ -780,6 +788,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const lockCommand: Command = {
     metadata: {
       name: 'lock',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Locks the channel, preventing @everyone from sending messages.',
       usage: '/lock [channel] [reason]',
@@ -831,6 +840,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const unlockCommand: Command = {
     metadata: {
       name: 'unlock',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Unlocks the channel, restoring @everyone send messages permissions.',
       usage: '/unlock [channel] [reason]',
@@ -882,6 +892,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const nickCommand: Command = {
     metadata: {
       name: 'nick',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Moderates or resets a member nickname.',
       aliases: ['nickname'],
@@ -958,6 +969,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const historyCommand: Command = {
     metadata: {
       name: 'history',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Views a member comprehensive disciplinary history and risk profile.',
       aliases: ['modlogs', 'cases'],
@@ -998,6 +1010,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const noteCommand: Command = {
     metadata: {
       name: 'note',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Manages persistent staff notes attached to a member.',
       usage: '/note <action: add|view> <user> [content]',
@@ -1093,6 +1106,7 @@ export function createModerationCommands(services: BotServices): Command[] {
   const automodCommand: Command = {
     metadata: {
       name: 'automod',
+      registrationScope: 'guild',
       category: CommandCategory.MODERATION,
       description: 'Inspects or configures AutoMod and Anti-Raid defensive rules.',
       usage: '/automod <status|enable|disable> [rule]',

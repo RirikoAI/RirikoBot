@@ -59,6 +59,7 @@ export function createGiveawayCommands(services: BotServices): Command[] {
   const giveawayCommand: Command = {
     metadata: {
       name: 'giveaway',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'Host, manage, and roll crash-resistant giveaways',
       usage: '/giveaway <create|end|reroll|delete|edit|list>',
@@ -492,6 +493,8 @@ export function createGiveawayCommands(services: BotServices): Command[] {
       category: CommandCategory.UTILITY,
       description,
       usage: `!${name}`,
+      // Prefix-only: each alias would take one of the 100 slash command slots.
+      slashEnabled: false,
     },
     async execute(ctx: CommandContext): Promise<void> {
       // Synthesize action option and delegate to primary giveaway command
