@@ -23,10 +23,9 @@ export interface IntegrationEnv extends AiProviderEnv, ImageProviderEnv {
   SPOTIFY_CLIENT_SECRET?: string | undefined;
   SPOTIFY_DC?: string | undefined;
   SPOTIFY_KEY?: string | undefined;
-  YOUTUBE_COOKIE?: string | undefined;
-  YOUTUBE_PO_TOKEN?: string | undefined;
   LAVALINK_ENABLED?: string | undefined;
   LAVALINK_HOST?: string | undefined;
+  USE_PRIVATE_MUSIC_PACKAGE?: string | undefined;
 }
 
 export const INTEGRATION_GROUPS = [
@@ -112,11 +111,11 @@ export function integrationStatus(env: IntegrationEnv): IntegrationStatus[] {
       note: 'Optional: Ririko uses its built-in player without it.',
     },
     {
-      id: 'music.youtube',
+      id: 'music.private',
       group: 'Music',
-      label: 'YouTube playback credentials',
-      configured: Boolean(env.YOUTUBE_COOKIE || env.YOUTUBE_PO_TOKEN),
-      note: 'Optional: they make YouTube playback more reliable.',
+      label: 'Private music package',
+      configured: env.USE_PRIVATE_MUSIC_PACKAGE === 'true',
+      note: 'Optional: extra sources for the built-in player when Lavalink is unavailable.',
     },
   ];
 }

@@ -28,17 +28,22 @@ export default defineConfig({
     // Blocks network access; see the file for why.
     setupFiles: ['./vitest.setup.ts'],
     env: {
-      // createBotServices builds a YouTube adapter that fetches a PO token from youtube.com in
-      // the background unless both values are set.
-      YOUTUBE_PO_TOKEN: 'test-po-token',
-      YOUTUBE_VISITOR_DATA: 'test-visitor-data',
+      // Keeps createBotServices from loading the private music package when a maintainer has it.
+      USE_PRIVATE_MUSIC_PACKAGE: 'false',
     },
     include: ['packages/**/*.test.ts', 'apps/**/*.test.ts', 'scripts/**/*.test.ts'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**', '.local/**'],
+    // packages/music-private is a separate private repository with its own test run.
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.next/**',
+      '.local/**',
+      'packages/music-private/**',
+    ],
     coverage: {
       provider: 'v8',
       include: ['packages/*/src/**/*.{ts,tsx}', 'apps/*/src/**/*.{ts,tsx}'],
-      exclude: ['**/*.test.{ts,tsx}', '**/*.d.ts'],
+      exclude: ['**/*.test.{ts,tsx}', '**/*.d.ts', 'packages/music-private/**'],
       reporter: ['text-summary', 'lcov', 'html', 'json-summary'],
       reportsDirectory: 'coverage',
       // Ratchet: the measured baseline rounded down. Raise these as coverage grows; never lower

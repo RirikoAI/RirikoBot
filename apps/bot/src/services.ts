@@ -384,7 +384,7 @@ export async function createBotServices(
   const cardImageService = new CardImageService();
   const bossImageService = new BossImageService(waifuAssetRepo);
   const musicPlayer = new MusicPlayerService({
-    pipeline: createMusicPipeline(),
+    pipeline: await createMusicPipeline(),
     lavalink: {
       enabled: process.env.LAVALINK_ENABLED !== 'false',
       node: {

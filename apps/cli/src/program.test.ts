@@ -18,7 +18,6 @@ describe('CLI Program', () => {
     expect(commandNames).toContain('doctor');
     expect(commandNames).toContain('migrate:legacy');
     expect(commandNames).toContain('migrate:verify');
-    expect(commandNames).toContain('generate:po-token');
     expect(commandNames).toContain('ai:configure');
     expect(commandNames).toContain('economy:config');
     expect(commandNames).toContain('tcg:rules');
@@ -49,18 +48,5 @@ describe('CLI Program', () => {
 
     expect(optionFlags).toContain('--verbose');
     expect(optionFlags).toContain('--config <path>');
-  });
-
-  it('registers generate:po-token options including chrome, firefox and login', () => {
-    const program = createProgram();
-    const cmd = program.commands.find((c) => c.name() === 'generate:po-token');
-    expect(cmd).toBeDefined();
-
-    const cmdFlags = cmd?.options.map((opt) => opt.flags) ?? [];
-    expect(cmdFlags).toContain('-s, --save');
-    expect(cmdFlags).toContain('-c, --chrome');
-    expect(cmdFlags).toContain('-f, --firefox');
-    expect(cmdFlags).toContain('-b, --browser <engine>');
-    expect(cmdFlags).toContain('-l, --login');
   });
 });
