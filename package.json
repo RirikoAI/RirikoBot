@@ -27,7 +27,7 @@
     "tcg:reset-user": "tsx scripts/reset-tcg-user.ts",
     "tcg:simulate": "tsx --env-file-if-exists=.env scripts/tcg-balance-sim.ts",
     "site:build": "tsx scripts/build-status-site.ts",
-    "typecheck": "pnpm -r run typecheck",
+    "typecheck": "pnpm -r run typecheck && tsc -p tests",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
