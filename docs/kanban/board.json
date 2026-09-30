@@ -1405,6 +1405,16 @@
         "TASK-1722"
       ],
       "description": "Keep YouTube playback on Lavalink (youtube-plugin) and take the in-process YouTube fallback extractor out of the public open source project. USE_PRIVATE_MUSIC_PACKAGE (default false) decides whether the bot loads that private extractor into the fallback player used when Lavalink is unavailable; it never affects Lavalink. The Lavalink installer no longer ships a remote cipher URL: it uses the plugin built-in cipher unless LAVALINK_YOUTUBE_CIPHER_URL is set. STORY-171 is skipped because TASK-1711..1715 already belong to STORY-170. Handover: docs/kanban/handovers/STORY-172.md."
+    },
+    {
+      "id": "STORY-173",
+      "epic": "EPIC-003",
+      "title": "Private Message Context Menu Translation to English",
+      "points": 5,
+      "status": "REVIEW",
+      "requires": [],
+      "blocks": [],
+      "description": "Register and route Translate to English message context menu commands through the existing middleware, translate message and embed text using configured AI providers without chat history or tools, and return only ephemeral results and errors."
     }
   ],
   "tasks": [
