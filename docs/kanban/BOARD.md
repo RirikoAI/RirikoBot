@@ -6,12 +6,12 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-`STORY-120` E2E Integration Tests & Quality Gates Setup (8 pts, `EPIC-012`): see **Groomed Stories & Tasks for EPIC-012**.
+None.
 
 ---
 
 ## 🔍 In Review
-See STORY-170, TASK-1705, STORY-173 and STORY-174 in the story tables below, and STORY-172 (TASK-1721, TASK-1722) under **Groomed Tasks for EPIC-005**.
+See STORY-170, TASK-1705, STORY-173, STORY-174 and STORY-120 in the story tables below, and STORY-172 (TASK-1721, TASK-1722) under **Groomed Tasks for EPIC-005**.
 
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
@@ -309,10 +309,10 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | `EPIC-012` | ⚡ In Progress | — |
-| `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | `STORY-120` | 🔍 Review | — |
-| `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | `STORY-120` | 🔍 Review | `TASK-1203` |
-| `TASK-1201` | Task | Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job | 3 | `STORY-120` | 🔍 Review | `TASK-1203` |
+| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | `EPIC-012` | 🔍 Review · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | — |
+| `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | `STORY-120` | 🔍 Review · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | — |
+| `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | `STORY-120` | 🔍 Review · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | `TASK-1203` |
+| `TASK-1201` | Task | Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job | 3 | `STORY-120` | 🔍 Review · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | `TASK-1203` |
 | `STORY-121` | Story | Rootless Dockerfile & Containerization | 5 | `EPIC-012` | 🎯 To Do | `STORY-120` |
 | `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 2 | `STORY-121` | 🎯 To Do | — |
 | `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | `STORY-121` | 🎯 To Do | — |

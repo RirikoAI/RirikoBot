@@ -231,13 +231,13 @@ gantt
 ---
 
 ### Phase 7: Quality Gates, Containerization & Production Deployment
-- **Status**: 🔄 **In Progress** (`EPIC-012`, 13 pts base / 26 pts groomed, 5 pts done, 8 pts In Progress, 13 pts To Do)
+- **Status**: 🔄 **In Progress** (`EPIC-012`, 13 pts base / 26 pts groomed, 5 pts done, 8 pts In Review, 13 pts To Do)
 - **Synchronized Stories**:
   - **`STORY-123`: CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site (5 pts)**: ✅ **Complete**
     - `TASK-1231`: One-time Prettier repository-wide baseline, CircleCI pipeline configuration (`lint`, `typecheck`, `test`, `web-build`, `gitleaks` secret scan).
     - `TASK-1232`: Vitest v8 coverage tracking with strict ratchet thresholds (lines ≥ 67%, functions ≥ 69%, statements ≥ 65%, branches ≥ 54%), JUnit test reporting, and Codecov integration.
     - `TASK-1233`: Automated Vercel project status site generated directly from the kanban board registry.
-  - **`STORY-120`: E2E Integration Tests & Quality Gates Setup (8 pts, regroomed 2026-10-01)**: ⚡ **In Progress**
+  - **`STORY-120`: E2E Integration Tests & Quality Gates Setup (8 pts, regroomed 2026-10-01)**: 🔍 **In Review**
     - `TASK-1203`: Fake Discord HTTP API for tests (shared by the bot harness and the dashboard E2E) and an optional `DISCORD_API_URL` web config seam.
     - `TASK-1202`: Bot gateway harness (raw gateway packets, fake Discord REST) and integration suite for prefix/slash dispatch, component interactions and command sync. Audio playback is out of scope.
     - `TASK-1201`: Playwright dashboard E2E (real OAuth callback against the fake, guild access, settings persistence, card album) and a CircleCI `e2e` job.

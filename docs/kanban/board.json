@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "STORY-120",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -1042,7 +1042,7 @@
       "epic": "EPIC-012",
       "title": "E2E Integration Tests & Quality Gates Setup",
       "points": 8,
-      "status": "IN_PROGRESS",
+      "status": "REVIEW",
       "requires": [],
       "blocks": [
         "STORY-121"

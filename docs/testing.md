@@ -10,9 +10,10 @@ pnpm format:check
 pnpm build
 pnpm typecheck
 pnpm test:coverage
+pnpm test:e2e
 ```
 
-CI runs the same gate on every push (see [Section 4](#4-continuous-integration)). `pnpm test:integration` and `pnpm test:e2e` join the gate with STORY-120.
+CI runs the same gate on every push (see [Section 4](#4-continuous-integration)). `pnpm test:coverage` includes the bot integration suites; `pnpm test:integration` runs only those (STORY-120).
 
 ---
 
@@ -38,24 +39,50 @@ CI runs the same gate on every push (see [Section 4](#4-continuous-integration))
 - **Stream Notification Deduplication**: Idempotency key hash generation and duplicate message prevention.
 - **Command Router**: $O(1)$ lookup speed, alias resolution, argument parsing.
 
-### 3.2. Integration Tests (`tests/integration`)
-- **Drizzle Database Repositories**: Verifies dual-dialect queries against both PostgreSQL and SQLite.
-- **Discord Gateway Event Dispatcher**: Verifies event flow from `messageCreate` and `interactionCreate` through middleware to command execution.
-- **Provider Fallback Handlers**: Mocks primary API timeouts (e.g. Gemini 429) to verify automatic fallback to OpenAI or local Ollama.
-- **Atomic Trading & Market**: Verifies ACID transactions during simultaneous two-party trades and market purchases.
+### 3.2. Bot Integration Tests (`apps/bot/test/integration`)
+These drive the real bot: `createBotServices` over in-memory SQLite, the command router with its middlewares, every registered command and the component interaction handler, wired by the same functions `main()` uses (`command-router.ts`, `command-set.ts`, `component-interactions.ts`). `apps/bot/test/support/bot-harness.ts` builds it:
+- discord.js REST points at the [fake Discord API](#34-fake-discord-api), so every reply is a real HTTP request the fake records.
+- Gateway events (`READY`, `GUILD_CREATE`, `MESSAGE_CREATE`, `INTERACTION_CREATE`) enter through discord.js's own packet handler, so commands receive real `Message` and `Interaction` objects. This uses one discord.js internal (`client.ws.handlePacket`), kept in the harness; `harness.test.ts` fails first if an upgrade changes it.
+- `harness.sendMessage`, `runSlashCommand`, `runMessageCommand` and `useComponent` build the packets from the fake's fixture; `settle()` waits for every router dispatch to finish; `assertAllRoutesHandled()` fails a test that called a route the fake does not implement.
+- Not wired: the gateway connection, voice, and the message listener (automod, XP, card drops, AI chat).
+
+| Suite | Covers |
+|---|---|
+| `prefix-dispatch.test.ts` | Replies, per-guild prefix, Manage Server check, a command disabled on the dashboard, cooldowns |
+| `slash-dispatch.test.ts` | Interaction callbacks, private permission errors, prefix-only commands, a deferred context menu reply edited through the webhook |
+| `components.test.ts` | Help center select menu; a giveaway from `/giveaway` through a member's entry to the draw |
+| `command-sync.test.ts` | Global and per-server registration on startup, per-server registration when the bot joins a server |
+
+Postgres runs of the repository suites, trade and market concurrency, and AI provider fallback through `createBotServices` are STORY-124.
 
 ### 3.3. End-to-End Tests (`apps/web/e2e`)
-Powered by **Playwright**:
-- **OAuth2 Login Flow**: Mock Discord OAuth callback and session creation.
-- **Guild Switcher & Permissions**: Confirms guilds without `ManageGuild` permission are inaccessible.
-- **Module Configuration**: Modifies a setting in the web UI (e.g. changing prefix or AI channel) and verifies database persistence.
-- **Card Album Viewer**: Inspects card collection pagination, filters, and market listings.
+Playwright (Chromium) against `next start` on port 3100, configured in `apps/web/playwright.config.ts`:
+- The config starts the fake Discord API (port 3199) and the dashboard with `DISCORD_API_URL` pointing at it, after `e2e/support/seed.ts` recreates a SQLite database in the OS temp folder with a 30-card collection for the fake `admin` user.
+- `signIn(login)` in `e2e/support/fixtures.ts` sets the fake's `fake_discord_user` cookie and clicks **Sign in with Discord**. The real login route, the fake's authorize and token endpoints (with PKCE checks) and the real callback create the session.
+- Each test sends its own `X-Forwarded-For`, because the auth routes allow 20 requests a minute per client IP.
+- Every test fails if the dashboard called a Discord route the fake does not implement.
+- Specs are named `*.spec.ts` so Vitest does not pick them up.
+- The seeded cards have fixed ids and no art asset, so the album renders them without network access and reuses its `public/cards/e2e-card-*.png` cache across runs.
+
+| Spec | Covers |
+|---|---|
+| `auth.spec.ts` | Sign-in, the new-device DM, sign-out; a forged OAuth2 callback is rejected |
+| `guild-access.spec.ts` | Only servers with Manage Server are listed; other servers answer 404; a member without it sees none |
+| `settings.spec.ts` | The command prefix persists to `guild_settings`; the AI channel is checked through the bot REST client and persists |
+| `album.spec.ts` | Card album paging (newest first, market label) and the rarity filter |
+
+### 3.4. Fake Discord API
+`tests/support/fake-discord` is a dependency-free `node:http` server on loopback that both suites use:
+- `fixtures.ts`: users, guilds, roles, channels and members with permission bits (`defaultFixture()`: the bot, `admin` who owns *Ririko Test Server*, `member` without permissions there, and *Other Server* where `admin` lacks Manage Server). The same fixture feeds the fake's REST answers and the harness's gateway packets.
+- `server.ts`: `startFakeDiscord()` serves the v10 routes the bot and the dashboard call, records every request and its response (`requests`, `find`, `waitFor`), and answers 404 for any other route, listing it in `unhandled`.
+- `cli.ts` runs it as a process; `/__fake/requests`, `/__fake/unhandled` and `/__fake/reset` serve other processes.
+- To support a new route: add it to the route table in `server.ts`, with a test in `server.test.ts`. Do not make a suite pass by ignoring `unhandled`.
 
 ---
 
 ## 4. Continuous Integration
 
-CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` workflow has five parallel jobs. Each Node job restores the pnpm store cache, runs `pnpm install --frozen-lockfile` and `pnpm build` first, because every `@ririko/*` package export points at `dist/`.
+CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` workflow has six parallel jobs. Each Node job restores the pnpm store cache, runs `pnpm install --frozen-lockfile` and `pnpm build` first, because every `@ririko/*` package export points at `dist/`.
 
 | Job | Runs | Fails when |
 |---|---|---|
@@ -63,6 +90,7 @@ CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` wor
 | `typecheck` | `pnpm typecheck` | Any workspace package has a type error |
 | `test` | `pnpm test:ci` | A test fails, or coverage drops below the thresholds in `vitest.config.ts` |
 | `build-web` | `pnpm --filter @ririko/web build` | The Next.js production build fails |
+| `e2e` | Next.js build, then `playwright test` (Chromium cached, fonts installed) | A Playwright spec fails; report and traces are in the job's *Artifacts* tab |
 | `secrets` | `gitleaks git` over the full history with `.gitleaks.toml` | gitleaks finds a secret that is not listed in `.gitleaksignore` |
 
 Git hooks (Husky, installed by `pnpm install`) run the lint checks locally:
