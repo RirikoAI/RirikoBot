@@ -14,6 +14,7 @@ import {
 } from './index.js';
 import { syncCommandCatalog } from './command-catalog.js';
 import { createCommandControllers, registerBotCommands } from './command-set.js';
+import { registerGuildJoinCommandSync, syncCommandsOnStartup } from './command-sync.js';
 import {
   CommandRouter,
   handleHelpInteraction,
@@ -299,26 +300,21 @@ export async function main(): Promise<void> {
     console.error('✖ Gateway error occurred:', err.message);
   });
 
-  // 8. (Optional) Sync slash commands with Discord REST API
-  if (process.env.SYNC_COMMANDS === 'true' && clientId) {
-    try {
-      console.log('[REST] Synchronizing slash commands with Discord REST API...');
-      const rest = createRestClient(token);
-      const synchronizer = new CommandSynchronizer(rest, router.registry);
-
-      if (process.env.DISCORD_DEV_GUILD_ID) {
-        const res = await synchronizer.syncGuild(clientId, process.env.DISCORD_DEV_GUILD_ID);
-        console.log(
-          `✓ Synchronized ${res.registeredCount} slash commands to dev guild (${process.env.DISCORD_DEV_GUILD_ID}): [${res.commandNames.join(', ')}]`,
-        );
-      } else {
-        const res = await synchronizer.syncGlobal(clientId);
-        console.log(
-          `✓ Synchronized ${res.registeredCount} global slash commands: [${res.commandNames.join(', ')}]`,
-        );
-      }
-    } catch (err) {
-      console.error('✖ Failed to synchronize slash commands:', err);
+  // 8. Register commands with Discord: every server the bot joins gets the per-server
+  // commands; SYNC_COMMANDS=true also re-registers everything now (`ririko commands:sync`
+  // does the same without a restart).
+  if (clientId) {
+    const rest = createRestClient(token);
+    const synchronizer = new CommandSynchronizer(rest, router.registry);
+    registerGuildJoinCommandSync(bot.client, synchronizer, clientId);
+    if (process.env.SYNC_COMMANDS === 'true') {
+      console.log('[REST] Registering commands with Discord...');
+      await syncCommandsOnStartup({
+        sync: synchronizer,
+        rest,
+        applicationId: clientId,
+        devGuildId: process.env.DISCORD_DEV_GUILD_ID || undefined,
+      });
     }
   }
 

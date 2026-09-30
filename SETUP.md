@@ -196,11 +196,46 @@ pnpm dev:bot
 This runs `apps/bot/src/main.ts` with `tsx watch` and loads the root `.env`. It restarts when
 you save a file.
 
-With `SYNC_COMMANDS=true` and `DISCORD_DEV_GUILD_ID` set, slash commands register to your test
-server at startup and show up immediately. After the first successful sync, set
-`SYNC_COMMANDS=false` to skip the REST call on every restart. Turn it on again when you add or
-change a slash command. Without `DISCORD_DEV_GUILD_ID`, the sync registers global commands,
-which can take up to an hour to appear.
+Discord allows 100 slash commands in each scope, so Ririko registers them in two scopes:
+
+- **Global**: member commands (`/play`, `/balance`, `/card`, ...) and the Translate message
+  menu. Global changes can take a while to show; press Ctrl+R in Discord.
+- **Per server**: admin and setup commands (`/ban`, `/prefix`, `/welcomer`, ...). They appear
+  immediately. The bot registers them by itself in each server it joins.
+
+With `SYNC_COMMANDS=true` the bot registers both scopes at startup: the per-server commands go
+to `DISCORD_DEV_GUILD_ID` when it is set, otherwise to every server the bot is in. After the
+first successful run, set `SYNC_COMMANDS=false` to skip the REST calls on every restart.
+
+When you add or change a command, register it without restarting the bot. First check the slot
+usage (this writes nothing):
+
+```bash
+pnpm cli commands:sync
+```
+
+Then register the global commands, the per-server commands in one server, or both:
+
+```bash
+pnpm cli commands:sync --global --guild <server_id>
+```
+
+Use `--all-guilds` instead of `--guild` for every server the bot is in.
+
+To remove stale commands, such as ones an older bot version registered, list everything that
+is registered, then clear it and sync again:
+
+```bash
+pnpm cli commands:reset
+```
+
+```bash
+pnpm cli commands:reset --yes
+```
+
+```bash
+pnpm cli commands:sync --global --all-guilds
+```
 
 Smoke test in your server: `/help`, `$help`, `/ping`, and `/play <song>` while you are in a
 voice channel.
@@ -318,7 +353,7 @@ Always back up `data/ririko.sqlite` first.
 | Symptom | Fix |
 | --- | --- |
 | `Used disallowed intents` at login | Enable the privileged intents in the Developer Portal (step 3). |
-| Slash commands missing | Set `SYNC_COMMANDS=true` and `DISCORD_DEV_GUILD_ID`, then restart the bot. |
+| Slash commands missing | Run `pnpm cli commands:sync --global --guild <server_id>`, then press Ctrl+R in Discord. |
 | Prefix commands ignored | Message Content intent is off, or you are using the wrong prefix (`DEFAULT_PREFIX`). |
 | Music does not play, Lavalink auth error | `LAVALINK_PASSWORD` in `.env` differs from `lavalink/application.yml`. Run `pnpm lavalink:install` again. |
 | `Java 17+ is required` | Install OpenJDK 21 and make sure `java` is on `PATH`. |
