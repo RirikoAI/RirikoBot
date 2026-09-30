@@ -47,6 +47,8 @@ export interface MusicSourceAdapter {
   search(query: string, limit?: number): Promise<MusicSearchResult[]>;
   resolve(input: string): Promise<ResolvedTrack | ResolvedPlaylist>;
   healthCheck(): Promise<AdapterHealth>;
+  /** Receives the pipeline's canonical metadata source (Spotify) when the adapter can use one. */
+  setMetadataResolver?(resolver: CanonicalMetadataResolver | undefined): void;
 }
 
 /**
@@ -60,15 +62,4 @@ export interface ExtractorPipelineOptions {
   adapters?: MusicSourceAdapter[] | undefined;
   defaultSearchSource?: MusicSource | undefined;
   searchLimit?: number | undefined;
-  youtubeOptions?:
-    | {
-        cookie?: string | undefined;
-        cookies?: string[] | undefined;
-        poToken?: string | undefined;
-        visitorData?: string | undefined;
-        clientType?: string | undefined;
-        requestTimeoutMs?: number | undefined;
-        autoGeneratePoToken?: boolean | undefined;
-      }
-    | undefined;
 }

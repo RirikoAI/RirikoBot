@@ -5,9 +5,6 @@ import type { Player } from 'lavalink-client';
 import type { QueuedTrack } from '../queue/types.js';
 import type { PlayOptions } from './types.js';
 
-// Skips the background PO token fetch from youtube.com; these tests never play YouTube.
-const offline = { youtubeOptions: { autoGeneratePoToken: false } };
-
 describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
   it('resolves and caches guild volume from resolver hook', async () => {
     const resolver = vi.fn().mockImplementation(async (guildId: string) => {
@@ -16,7 +13,6 @@ describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
     });
 
     const service = new MusicPlayerService({
-      ...offline,
       resolveGuildVolume: resolver,
       defaultVolume: 80,
     });
@@ -41,7 +37,6 @@ describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
 
   it('updates cache and clamp volume on setVolume', () => {
     const service = new MusicPlayerService({
-      ...offline,
       defaultVolume: 80,
     });
 
@@ -62,7 +57,6 @@ describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
 
   it('creates new queue using the guild cached volume', () => {
     const service = new MusicPlayerService({
-      ...offline,
       defaultVolume: 80,
     });
     service.setGuildCachedVolume('guild-1', 20);
@@ -74,7 +68,6 @@ describe('MusicPlayerService - Guild Volume Persistence (BUG-0018)', () => {
   it('restores guild volume across sessions after stop', async () => {
     let savedDbVolume = 80;
     const service = new MusicPlayerService({
-      ...offline,
       resolveGuildVolume: async () => savedDbVolume,
       defaultVolume: 80,
     });
@@ -131,7 +124,6 @@ describe('MusicPlayerService - auto-leave and settings changes (TASK-1161)', () 
     vi.useFakeTimers();
     try {
       const service = new MusicPlayerService({
-        ...offline,
         idleTimeoutMs: 1000,
       });
       const stop = vi.spyOn(service, 'stop');
@@ -154,7 +146,6 @@ describe('MusicPlayerService - auto-leave and settings changes (TASK-1161)', () 
     vi.useFakeTimers();
     try {
       const service = new MusicPlayerService({
-        ...offline,
         idleTimeoutMs: 1000,
       });
       const stop = vi.spyOn(service, 'stop');
@@ -175,7 +166,6 @@ describe('MusicPlayerService - auto-leave and settings changes (TASK-1161)', () 
   it('reads the default volume again after forgetGuildSettings', async () => {
     let saved = 30;
     const service = new MusicPlayerService({
-      ...offline,
       resolveGuildVolume: () => saved,
     });
     expect(await service.resolveVolumeForGuild('g1')).toBe(30);
@@ -214,7 +204,6 @@ describe('MusicPlayerService - Lavalink backend', () => {
 
   function lavalinkBacked() {
     const service = new MusicPlayerService({
-      ...offline,
       lavalink: { node: { host: '127.0.0.1', port: 2333 } },
     });
     const lavalink = service.lavalinkService!;
@@ -223,11 +212,11 @@ describe('MusicPlayerService - Lavalink backend', () => {
   }
 
   it('is off unless Lavalink options are given and enabled', () => {
-    expect(new MusicPlayerService(offline).lavalinkService).toBeUndefined();
+    expect(new MusicPlayerService().lavalinkService).toBeUndefined();
     expect(
-      new MusicPlayerService({ ...offline, lavalink: { enabled: false } }).lavalinkService,
+      new MusicPlayerService({ lavalink: { enabled: false } }).lavalinkService,
     ).toBeUndefined();
-    expect(new MusicPlayerService(offline).isLavalinkActive()).toBe(false);
+    expect(new MusicPlayerService().isLavalinkActive()).toBe(false);
   });
 
   it('re-emits every Lavalink player event', () => {
@@ -369,7 +358,7 @@ describe('MusicPlayerService - built-in player', () => {
   });
 
   it('reports nothing for a guild without a queue', () => {
-    const service = new MusicPlayerService(offline);
+    const service = new MusicPlayerService();
     expect(service.skip('guild-1')).toBeNull();
     expect(service.previous('guild-1')).toBeNull();
     expect(service.pause('guild-1')).toBe(false);
@@ -380,7 +369,7 @@ describe('MusicPlayerService - built-in player', () => {
   });
 
   it('re-emits queue events for the guild', () => {
-    const service = new MusicPlayerService(offline);
+    const service = new MusicPlayerService();
     const events: string[] = [];
     for (const name of [
       'trackAdded',
@@ -421,7 +410,7 @@ describe('MusicPlayerService - built-in player', () => {
 
   it('skips tracks whose stream fails and reports the errors', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const service = new MusicPlayerService(offline);
+    const service = new MusicPlayerService();
     const errors = vi.fn();
     const queueEnd = vi.fn();
     service.on('error', errors);
@@ -445,7 +434,7 @@ describe('MusicPlayerService - built-in player', () => {
   });
 
   it('pauses, resumes, skips and goes back through the local queue', () => {
-    const service = new MusicPlayerService(offline);
+    const service = new MusicPlayerService();
     const queue = service.getOrCreateQueue('guild-1');
     queue.addTracks([queuedTrack('a', pendingStream), queuedTrack('b', pendingStream)]);
     queue.start();
@@ -460,7 +449,7 @@ describe('MusicPlayerService - built-in player', () => {
   });
 
   it('cleans up the guild when its voice connection ends', () => {
-    const service = new MusicPlayerService(offline);
+    const service = new MusicPlayerService();
     const voice = service.getOrCreateVoiceManager('guild-1');
     expect(service.getOrCreateVoiceManager('guild-1')).toBe(voice);
     service.getOrCreateAudioPlayer('guild-1');
@@ -472,7 +461,7 @@ describe('MusicPlayerService - built-in player', () => {
 
   it('logs error events that have no other listener', () => {
     const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const service = new MusicPlayerService(offline);
+    const service = new MusicPlayerService();
     service.emit('error', 'guild-1', new Error('boom'), { title: 'Song' });
     expect(log).toHaveBeenCalledWith(
       '[MusicPlayerService] Error event for guild guild-1:',

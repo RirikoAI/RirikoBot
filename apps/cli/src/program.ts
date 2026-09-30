@@ -6,7 +6,6 @@ import pc from 'picocolors';
 import { registerInfoCommand } from './commands/info.js';
 import { registerDoctorCommand } from './commands/doctor.js';
 import { registerMigrateCommand } from './commands/migrate.js';
-import { registerGeneratePoTokenCommand } from './commands/generate-po-token.js';
 import { registerAiConfigureCommand } from './commands/ai-configure.js';
 import { registerStreamConfigureCommand } from './commands/stream-configure.js';
 import { registerImageConfigureCommand } from './commands/image-configure.js';
@@ -59,7 +58,6 @@ export function createProgram(): Command {
   registerInfoCommand(program);
   registerDoctorCommand(program);
   registerMigrateCommand(program);
-  registerGeneratePoTokenCommand(program);
   registerAiConfigureCommand(program);
   registerStreamConfigureCommand(program);
   registerImageConfigureCommand(program);

@@ -1,0 +1,28 @@
+import { describe, expect, it } from 'vitest';
+import { renderYouTubeCipherConfig } from './lavalink-setup';
+
+describe('renderYouTubeCipherConfig', () => {
+  it.each([undefined, '', '   '])('keeps the built-in cipher when the URL is %j', (url) => {
+    const block = renderYouTubeCipherConfig(url);
+    // Every line is a YAML comment, so the plugin gets no remoteCipher setting.
+    expect(block.split('\n').every((line) => line.trimStart().startsWith('#'))).toBe(true);
+    expect(block).toContain('#   url: "https://example.com/"');
+  });
+
+  it('writes a remoteCipher block for a configured yt-cipher server', () => {
+    expect(renderYouTubeCipherConfig(' https://cipher.internal:8001/ ')).toBe(
+      [
+        '    # yt-cipher server for signature deciphering (LAVALINK_YOUTUBE_CIPHER_URL)',
+        '    remoteCipher:',
+        '      url: "https://cipher.internal:8001/"',
+        '      userAgent: "ririko-bot"',
+      ].join('\n'),
+    );
+  });
+
+  it('quotes the URL so it cannot break out of the YAML value', () => {
+    const block = renderYouTubeCipherConfig('https://x/"\nlavalink: evil');
+    expect(block).toContain(String.raw`url: "https://x/\"\nlavalink: evil"`);
+    expect(block.split('\n')).toHaveLength(4);
+  });
+});
