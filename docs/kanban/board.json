@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "STORY-120",
   "epics": [
     {
       "id": "EPIC-000",
@@ -194,7 +194,7 @@
         "EPIC-011"
       ],
       "blocks": [],
-      "description": "End-to-end integration tests, rootless Dockerfile, docker-compose.production.yml, /health probes."
+      "description": "End-to-end integration tests, rootless Dockerfile, docker-compose.production.yml, /health probes. Regroomed 2026-10-01: STORY-120 re-estimated from 5 to 8 points after an audit found no Playwright setup, no shared Discord API fake and no API base override on the web app; Postgres dual-dialect and concurrency tests moved to STORY-124; the 80% coverage target from the original STORY-120 is parked as STORY-125."
     },
     {
       "id": "EPIC-013",
@@ -1041,12 +1041,13 @@
       "id": "STORY-120",
       "epic": "EPIC-012",
       "title": "E2E Integration Tests & Quality Gates Setup",
-      "points": 5,
-      "status": "TODO",
+      "points": 8,
+      "status": "IN_PROGRESS",
       "requires": [],
       "blocks": [
         "STORY-121"
-      ]
+      ],
+      "description": "Regroomed 2026-10-01 (5 to 8 points). One local fake Discord HTTP API (tests/support/fake-discord) serves both suites, so discord.js REST and the dashboard OAuth client send real requests and tests assert on what the fake recorded. TASK-1203 builds the fake and adds an optional DISCORD_API_URL to the web config. TASK-1202 extracts the router and component-interaction wiring out of apps/bot/src/main.ts and drives the real bot through raw gateway packets in tests/integration (pnpm test:integration). TASK-1201 adds Playwright E2E for the dashboard (sign-in through the real OAuth callback, guild access gating, settings persistence, card album) and a CircleCI e2e job (pnpm test:e2e). Audio playback is out of scope: the voice gateway is not faked. Postgres runs and concurrency moved to STORY-124; the 80% coverage target moved to STORY-125."
     },
     {
       "id": "STORY-121",
@@ -1081,6 +1082,28 @@
       "requires": [],
       "blocks": [],
       "description": "Pulled forward on 2026-09-26 so the remaining EPIC-011 web PRs are verified in CI. CircleCI runs lint, Prettier check, typecheck, tests with coverage (JUnit results + Codecov upload), the Next.js production build and a gitleaks history scan on every push. Vercel deploys a zero-dependency project status page generated from this board until the bot and dashboard are hosted (STORY-121/122). Replaces the GitHub Actions CI/CD item dropped from STORY-122 during regrooming."
+    },
+    {
+      "id": "STORY-124",
+      "epic": "EPIC-012",
+      "title": "Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-120"
+      ],
+      "blocks": [],
+      "description": "Split from STORY-120 on 2026-10-01. Today Postgres runs only in the opt-in adventure suite (ADVENTURE_TEST_POSTGRES_URL). Add a Postgres service to CircleCI, a dialect-parameterized helper so repository suites run on both SQLite and Postgres, concurrent two-party trade and market purchase tests on Postgres, and a test that drives an AI command through createBotServices with a Gemini 429 falling back to the next provider."
+    },
+    {
+      "id": "STORY-125",
+      "epic": "EPIC-012",
+      "title": "Raise Test Coverage Toward 80%",
+      "points": null,
+      "status": "BACKLOG",
+      "requires": [],
+      "blocks": [],
+      "description": "Ungroomed. Parked 2026-10-01 from the original STORY-120 scope. The coverage ratchet in vitest.config.ts keeps rising with each PR; this story would target the least-covered packages to reach 80% lines. Groom from a fresh coverage report."
     },
     {
       "id": "STORY-130",
@@ -3440,20 +3463,39 @@
     {
       "id": "TASK-1201",
       "parent": "STORY-120",
-      "title": "Setup Playwright for Web Dashboard E2E Tests",
-      "points": 2,
+      "title": "Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job",
+      "points": 3,
       "status": "TODO",
-      "requires": [],
-      "blocks": []
+      "requires": [
+        "TASK-1203"
+      ],
+      "blocks": [],
+      "description": "Playwright (Chromium) against next start on a throwaway SQLite database, with the fake Discord API as the Discord backend. Sign-in intercepts the discord.com authorize redirect and lets the real callback exchange the code with the fake. Specs: sign-in and sign-out, ManageGuild gating, prefix and AI channel persistence, card album pagination and filters. New CircleCI e2e job."
     },
     {
       "id": "TASK-1202",
       "parent": "STORY-120",
-      "title": "Setup Discord API Mock Harness & Integration Test Suite",
+      "title": "Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite",
       "points": 3,
       "status": "TODO",
+      "requires": [
+        "TASK-1203"
+      ],
+      "blocks": [],
+      "description": "Extract router construction and the component interactionCreate handler out of apps/bot/src/main.ts. A harness builds the real bot over in-memory SQLite with REST pointed at the fake Discord API and feeds raw gateway packets through discord.js, so real Message and Interaction structures are built. Suites: prefix and slash dispatch through middlewares, component interactions, command sync. No audio playback."
+    },
+    {
+      "id": "TASK-1203",
+      "parent": "STORY-120",
+      "title": "Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam",
+      "points": 2,
+      "status": "TODO",
       "requires": [],
-      "blocks": []
+      "blocks": [
+        "TASK-1201",
+        "TASK-1202"
+      ],
+      "description": "tests/support/fake-discord: a node:http server on loopback with fixture state (users, guilds, roles, channels, members, OAuth codes), the Discord endpoints the bot and dashboard call, a recorded request log, and a list of unhandled routes so gaps fail loudly. Optional DISCORD_API_URL in the web config feeds the bot-token REST client and the OAuth client."
     },
     {
       "id": "TASK-1211",
@@ -3520,6 +3562,28 @@
       "points": 1,
       "status": "DONE",
       "requires": [],
+      "blocks": []
+    },
+    {
+      "id": "TASK-1241",
+      "parent": "STORY-124",
+      "title": "CircleCI Postgres Service & Dialect-Parameterized Repository Suite",
+      "points": 3,
+      "status": "TODO",
+      "requires": [],
+      "blocks": [
+        "TASK-1242"
+      ]
+    },
+    {
+      "id": "TASK-1242",
+      "parent": "STORY-124",
+      "title": "Postgres Trade/Market Concurrency Tests & AI Provider Fallback Through createBotServices",
+      "points": 2,
+      "status": "TODO",
+      "requires": [
+        "TASK-1241"
+      ],
       "blocks": []
     },
     {
