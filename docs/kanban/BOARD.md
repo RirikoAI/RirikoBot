@@ -312,7 +312,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | `EPIC-012` | ⚡ In Progress | — |
 | `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | `STORY-120` | 🔍 Review | — |
 | `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | `STORY-120` | 🔍 Review | `TASK-1203` |
-| `TASK-1201` | Task | Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job | 3 | `STORY-120` | 🎯 To Do | `TASK-1203` |
+| `TASK-1201` | Task | Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job | 3 | `STORY-120` | 🔍 Review | `TASK-1203` |
 | `STORY-121` | Story | Rootless Dockerfile & Containerization | 5 | `EPIC-012` | 🎯 To Do | `STORY-120` |
 | `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 2 | `STORY-121` | 🎯 To Do | — |
 | `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | `STORY-121` | 🎯 To Do | — |
