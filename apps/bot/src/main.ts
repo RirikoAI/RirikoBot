@@ -1,44 +1,10 @@
 import { ensureAdventureSchema, ensureCardSerialSchema } from '@ririko/database';
-import { createTranslateCommand } from './commands/ai/translate.command.js';
 import {
   createBot,
   getBotInfo,
   createBotServices,
-  createEconomyCommands,
-  createMusicCommands,
-  createSetupMusicCommand,
-  createAiCommands,
-  createModerationCommands,
-  createStreamCommands,
-  createFreeGamesCommand,
-  createGiveawayCommands,
-  createAutoVoiceCommands,
-  createGamesCommands,
-  AdventureController,
-  createCardCommand,
-  createLoadoutCommand,
-  createCraftCommand,
-  createCardsCommand,
-  createGameCommand,
-  createItemCommand,
-  createDungeonCommand,
-  createTradeCommand,
-  createMarketCommand,
-  createGuildCommand,
-  createAchievementCommand,
-  createTcgAdminCommand,
-  createTcgInfoCommand,
-  createRoleCommands,
-  createAnimeCommands,
-  createReactionCommands,
-  createMemeCommands,
-  createImageCommands,
   handleImagineButtonInteraction,
-  createReminderCommand,
-  createUtilityCommands,
   handleGiveawayButtonInteraction,
-  MusicEmbedController,
-  AiChatController,
   registerMessageListener,
   registerVoiceListener,
   registerMusicVoiceListener,
@@ -47,20 +13,17 @@ import {
   registerReactionListener,
 } from './index.js';
 import { syncCommandCatalog } from './command-catalog.js';
+import { createCommandControllers, registerBotCommands } from './command-set.js';
 import {
   CommandRouter,
-  createHelpCommand,
   handleHelpInteraction,
   type HelpOptions,
   CommandSynchronizer,
   createRestClient,
-  CommandCategory,
   DEFAULT_COMMAND_PREFIX,
   createCommandOverrideMiddleware,
   createCooldownMiddleware,
   overrideChannelId,
-  type Command,
-  type CommandContext,
 } from '@ririko/discord';
 
 /**
@@ -125,30 +88,7 @@ export async function main(): Promise<void> {
     ],
   });
 
-  // 3. Register standard test & diagnostic commands
-  const pingCommand: Command = {
-    metadata: {
-      name: 'ping',
-      category: CommandCategory.GENERAL,
-      description: 'Check bot latency, heartbeat, and gateway connection health',
-      aliases: ['latency'],
-      usage: '/ping',
-      examples: ['/ping', `${prefix}ping`],
-    },
-    async execute(ctx: CommandContext): Promise<void> {
-      const sent = Date.now();
-      const wsPing = ctx.client.ws.ping;
-      const latency = wsPing >= 0 ? `${wsPing}ms` : 'calculating...';
-
-      await ctx.reply({
-        content: `🏓 **Pong!**\n• Gateway Latency: \`${latency}\`\n• Execution Latency: \`${Date.now() - sent}ms\`\n• Bot Version: \`v${info.version}\``,
-      });
-    },
-  };
-
-  router.registry.register(pingCommand);
-
-  // 4. Register Interactive Help Center (/help, !help, !h, !commands)
+  // 4. Register every command (the same set `ririko commands:sync` registers with Discord)
   const helpOptions: HelpOptions = {
     defaultPrefix: prefix,
     resolvePrefix: async (guildId) => {
@@ -156,24 +96,15 @@ export async function main(): Promise<void> {
       return services.guildSettingsService.getPrefix(guildId, prefix);
     },
   };
-  const helpCommand = createHelpCommand(router.registry, helpOptions);
-  router.registry.register(helpCommand);
-
-  // 5. Register Economy Commands
-  const economyCommands = createEconomyCommands(services);
-  for (const cmd of economyCommands) {
-    router.registry.register(cmd);
-  }
-
-  const musicController = new MusicEmbedController(bot.client, services);
-
-  const musicCommands = createMusicCommands(services, musicController);
-  for (const cmd of musicCommands) {
-    router.registry.register(cmd);
-  }
-
-  const setupMusicCommand = createSetupMusicCommand(services, musicController);
-  router.registry.register(setupMusicCommand);
+  const controllers = createCommandControllers(bot.client, services, prefix);
+  const { musicController, aiController, adventureController } = controllers;
+  registerBotCommands(router.registry, {
+    services,
+    controllers,
+    helpOptions,
+    prefix,
+    version: info.version,
+  });
 
   // Music settings saved on the dashboard or with `ririko guild:config`.
   services.eventBus.on('guild:configChanged', ({ guildId, module }) => {
@@ -183,89 +114,10 @@ export async function main(): Promise<void> {
     void musicController.updateController(guildId);
   });
 
-  const aiController = new AiChatController(bot.client, services, {
-    defaultPrefix: prefix,
-    musicController,
-  });
-  const aiCommands = createAiCommands(services, aiController);
-  router.registry.register(createTranslateCommand(services));
   // AI settings saved on the dashboard or with `ririko guild:config` (the channel is cached).
   services.eventBus.on('guild:configChanged', ({ guildId, module }) => {
     if (module === 'ai') aiController.invalidateChannelCache(guildId);
   });
-  for (const cmd of aiCommands) {
-    router.registry.register(cmd);
-  }
-
-  const moderationCommands = createModerationCommands(services);
-  for (const cmd of moderationCommands) {
-    router.registry.register(cmd);
-  }
-
-  const streamCommands = createStreamCommands(services);
-  for (const cmd of streamCommands) {
-    router.registry.register(cmd);
-  }
-
-  const freeGamesCommand = createFreeGamesCommand(services);
-  router.registry.register(freeGamesCommand);
-
-  const giveawayCommands = createGiveawayCommands(services);
-  for (const cmd of giveawayCommands) {
-    router.registry.register(cmd);
-  }
-
-  const autoVoiceCommands = createAutoVoiceCommands(services);
-  for (const cmd of autoVoiceCommands) {
-    router.registry.register(cmd);
-  }
-
-  const adventureController = new AdventureController(services);
-  const gamesCommands = createGamesCommands(services, adventureController);
-  for (const cmd of gamesCommands) {
-    router.registry.register(cmd);
-  }
-
-  // Waifu TCG & Equipment Commands
-  router.registry.register(createCardCommand(services));
-  router.registry.register(createCardsCommand(services));
-  router.registry.register(createGameCommand(services));
-  router.registry.register(createItemCommand(services));
-  router.registry.register(createCraftCommand(services));
-  router.registry.register(createLoadoutCommand(services));
-  router.registry.register(createDungeonCommand(services));
-  router.registry.register(createTradeCommand(services));
-  router.registry.register(createMarketCommand(services));
-  router.registry.register(createGuildCommand(services));
-  router.registry.register(createAchievementCommand(services));
-  router.registry.register(createTcgAdminCommand(services));
-  router.registry.register(createTcgInfoCommand(services));
-
-  const roleCommands = createRoleCommands(services);
-  for (const cmd of roleCommands) {
-    router.registry.register(cmd);
-  }
-
-  for (const cmd of createAnimeCommands(services)) {
-    router.registry.register(cmd);
-  }
-
-  for (const cmd of createReactionCommands(services)) {
-    router.registry.register(cmd);
-  }
-
-  for (const cmd of createMemeCommands(services)) {
-    router.registry.register(cmd);
-  }
-
-  for (const cmd of createImageCommands(services)) {
-    router.registry.register(cmd);
-  }
-  router.registry.register(createReminderCommand(services));
-
-  for (const cmd of createUtilityCommands(services)) {
-    router.registry.register(cmd);
-  }
 
   console.log(
     `✓ Registered ${router.registry.size} commands: ${router.registry
