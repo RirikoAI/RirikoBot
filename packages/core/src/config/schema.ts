@@ -100,6 +100,8 @@ const BaseAppConfigSchema = z.object({
   // Optional Lavalink audio node (the bot uses its built-in player without one)
   LAVALINK_ENABLED: z.string().optional(),
   LAVALINK_HOST: z.string().optional(),
+  // `true` loads the private YouTube extractor into the fallback player used without Lavalink
+  USE_PRIVATE_MUSIC_PACKAGE: z.string().optional(),
 
   // Optional YouTube BotGuard & Authentication Credentials
   YOUTUBE_COOKIE: z.string().optional(),
