@@ -25,6 +25,25 @@ const LOCAL_REF_DIR = resolve(process.cwd(), '.local', 'how-to-setup-lavamusic',
 const LOCAL_REF_JAR = join(LOCAL_REF_DIR, 'Lavalink.jar');
 const LOCAL_REF_PLUGINS = join(LOCAL_REF_DIR, 'plugins');
 
+/**
+ * The `remoteCipher` part of the YouTube plugin config. Without a yt-cipher server URL the plugin
+ * falls back to its built-in signature cipher, so the block is written commented out as an example.
+ */
+export function renderYouTubeCipherConfig(cipherUrl: string | undefined): string {
+  const url = cipherUrl?.trim();
+  if (url) {
+    return `    # yt-cipher server for signature deciphering (LAVALINK_YOUTUBE_CIPHER_URL)
+    remoteCipher:
+      url: ${JSON.stringify(url)}
+      userAgent: "ririko-bot"`;
+  }
+  return `    # Built-in signature cipher. To use a yt-cipher server instead, set
+    # LAVALINK_YOUTUBE_CIPHER_URL and re-run \`pnpm lavalink:install\`, which writes:
+    # remoteCipher:
+    #   url: "https://example.com/"
+    #   userAgent: "ririko-bot"`;
+}
+
 export async function setupLavalink(): Promise<void> {
   console.log('🚀 [Ririko Lavalink Autoinstaller] Starting setup...');
 
@@ -167,10 +186,7 @@ plugins:
       - youtube
   youtube:
     enabled: true
-    # Public yt-cipher instance for dynamic signature deciphering
-    remoteCipher:
-      url: "https://cipher.kikkia.dev/"
-      userAgent: "ririko-bot"
+${renderYouTubeCipherConfig(process.env.LAVALINK_YOUTUBE_CIPHER_URL)}
     oauth:
       enabled: false
     allowSearch: true

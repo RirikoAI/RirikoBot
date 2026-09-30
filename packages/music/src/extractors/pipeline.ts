@@ -7,12 +7,20 @@ import type {
   MusicSource,
   ExtractorPipelineOptions,
 } from '../types.js';
-import { YouTubeAdapter } from './youtube.adapter.js';
 import { SpotifyAdapter } from './spotify.adapter.js';
 import { SoundCloudAdapter } from './soundcloud.adapter.js';
 import { DeezerAdapter } from './deezer.adapter.js';
 import { DirectAdapter } from './direct.adapter.js';
 import { PrecisionTrackMatcher } from './track-matcher.js';
+
+/**
+ * The adapters every installation ships with. Additional sources (such as the privately
+ * distributed YouTube extractor) are appended by the host application through the `adapters`
+ * option.
+ */
+export function createStandardAdapters(): MusicSourceAdapter[] {
+  return [new SoundCloudAdapter(), new SpotifyAdapter(), new DeezerAdapter(), new DirectAdapter()];
+}
 
 /**
  * ExtractorPipeline orchestrates multiple audio extractors.
@@ -27,31 +35,25 @@ export class ExtractorPipeline {
     this.defaultSearchSource = options.defaultSearchSource ?? 'soundcloud';
     this.defaultSearchLimit = options.searchLimit ?? 5;
 
-    if (options.adapters && options.adapters.length > 0) {
-      for (const adapter of options.adapters) {
-        this.registerAdapter(adapter);
-      }
-    } else {
-      // Register all standard adapters: SoundCloud, Spotify, YouTube, Deezer, Direct
-      this.registerAdapter(new SoundCloudAdapter());
-      this.registerAdapter(new SpotifyAdapter());
-      this.registerAdapter(new YouTubeAdapter(options.youtubeOptions as any));
-      this.registerAdapter(new DeezerAdapter());
-      this.registerAdapter(new DirectAdapter());
+    const adapters =
+      options.adapters && options.adapters.length > 0 ? options.adapters : createStandardAdapters();
+    for (const adapter of adapters) {
+      this.registerAdapter(adapter);
     }
 
     this.wireMetadataResolution();
   }
 
   /**
-   * Spotify holds the cleanest studio metadata for a recording. It is wired into the YouTube
-   * fallback cascade as Tier 5 to supply canonical artist and title queries for Tiers 6 and 7.
+   * Spotify holds the cleanest studio metadata for a recording. It is handed to every adapter that
+   * accepts a metadata resolver, such as the YouTube fallback cascade (Tier 5), to supply canonical
+   * artist and title queries for later tiers.
    */
   private wireMetadataResolution(): void {
-    const youtube = this.adapters.get('youtube');
     const spotify = this.adapters.get('spotify');
-    if (youtube instanceof YouTubeAdapter && spotify instanceof SpotifyAdapter) {
-      youtube.setMetadataResolver(spotify);
+    if (!(spotify instanceof SpotifyAdapter)) return;
+    for (const adapter of this.adapters.values()) {
+      if (adapter !== spotify) adapter.setMetadataResolver?.(spotify);
     }
   }
 

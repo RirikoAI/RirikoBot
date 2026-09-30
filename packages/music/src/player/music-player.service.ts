@@ -18,7 +18,6 @@ import { AutoplayEngine } from '../queue/autoplay.js';
 import { VoiceLifecycleManager } from '../voice/voice-lifecycle-manager.js';
 import type { AudioFilterName, LoopMode, QueuedTrack } from '../queue/types.js';
 import type { PlayOptions, PlayResult } from './types.js';
-import type { ExtractorPipelineOptions } from '../types.js';
 import { LavalinkService, type LavalinkClientOptions } from '../lavalink/index.js';
 
 export interface MusicPlayerServiceOptions {
@@ -26,7 +25,6 @@ export interface MusicPlayerServiceOptions {
   queueManager?: QueueManager | undefined;
   defaultVolume?: number | undefined;
   idleTimeoutMs?: number | undefined;
-  youtubeOptions?: ExtractorPipelineOptions['youtubeOptions'];
   lavalink?: LavalinkClientOptions | undefined;
   resolveGuildVolume?:
     ((guildId: string) => Promise<number | undefined> | number | undefined) | undefined;
@@ -51,8 +49,7 @@ export class MusicPlayerService extends EventEmitter {
 
   constructor(options?: MusicPlayerServiceOptions) {
     super();
-    this.pipeline =
-      options?.pipeline ?? new ExtractorPipeline({ youtubeOptions: options?.youtubeOptions });
+    this.pipeline = options?.pipeline ?? new ExtractorPipeline();
     this.queueManager = options?.queueManager ?? new QueueManager();
     this.autoplayEngine = new AutoplayEngine({ pipeline: this.pipeline });
     this.defaultVolume = options?.defaultVolume ?? 80;

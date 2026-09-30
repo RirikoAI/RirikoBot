@@ -147,7 +147,7 @@ describe('Session Cookie Rotation, Client Spoofing & Health Checks (TASK-0502)',
   describe('4. ExtractorPipeline Health Summary', () => {
     it('computes overall health summary across all registered extractors', async () => {
       // Each adapter's own health check is covered offline in extractors.test.ts.
-      const pipeline = new ExtractorPipeline({ youtubeOptions: { autoGeneratePoToken: false } });
+      const pipeline = new ExtractorPipeline();
       pipeline.getAdapters().forEach((adapter, index) => {
         vi.spyOn(adapter, 'healthCheck').mockResolvedValue({
           source: adapter.id,
@@ -158,10 +158,10 @@ describe('Session Cookie Rotation, Client Spoofing & Health Checks (TASK-0502)',
       const summary = await pipeline.getHealthSummary();
 
       expect(summary.status).toBe('HEALTHY');
-      expect(summary.totalCount).toBe(5);
-      expect(summary.healthyCount).toBe(5);
-      expect(summary.averageLatencyMs).toBe(30);
-      expect(summary.adapters).toHaveLength(5);
+      expect(summary.totalCount).toBe(4);
+      expect(summary.healthyCount).toBe(4);
+      expect(summary.averageLatencyMs).toBe(25);
+      expect(summary.adapters).toHaveLength(4);
       expect(summary.checkedAt).toBeInstanceOf(Date);
     });
 
