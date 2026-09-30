@@ -108,7 +108,6 @@ Optional integrations. Leave blank to disable the feature:
 | --- | --- | --- |
 | AI chat (`#ririko-ai`) | `DEFAULT_AI_PROVIDER`, `GEMINI_API_KEY` or `OPENAI_API_KEY` (+ `OPENAI_BASE_URL`), `OLLAMA_BASE_URL` | <https://aistudio.google.com/>, OpenAI/OpenRouter dashboard, or a local Ollama. `pnpm ai:configure` edits these interactively. |
 | Spotify search / playback | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`, `SPOTIFY_DC`, `SPOTIFY_KEY`, `SPOTIFY_SP_DC` | <https://developer.spotify.com/dashboard>; `sp_dc` / `sp_key` cookies from open.spotify.com DevTools |
-| YouTube reliability | `YOUTUBE_COOKIE`, `YOUTUBE_PO_TOKEN`, `YOUTUBE_VISITOR_DATA` | Browser cookies; `pnpm cli youtube:token` helps generate a PO token |
 | Stream alerts | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY`, `TIKTOK_SESSION_ID`, `TIKTOK_API_KEY` | <https://dev.twitch.tv/console/apps>, Google Cloud console |
 | Credential vault | `SECRET_VAULT_KEY` | `openssl rand -hex 32` (64 hex characters) |
 | Web dashboard | `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL`, `SECRET_VAULT_KEY` | Client secret from the Discord Developer Portal (OAuth2 page). See [section 8.1](#81-run-the-web-dashboard). |

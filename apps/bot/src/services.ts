@@ -47,6 +47,7 @@ import {
 import type { Client, MessageCreateOptions } from 'discord.js';
 import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 import { MusicPlayerService } from '@ririko/music';
+import { createMusicPipeline } from './music-sources.js';
 import {
   ConversationManager,
   PersonalityEngine,
@@ -383,11 +384,7 @@ export async function createBotServices(
   const cardImageService = new CardImageService();
   const bossImageService = new BossImageService(waifuAssetRepo);
   const musicPlayer = new MusicPlayerService({
-    youtubeOptions: {
-      cookie: process.env.YOUTUBE_COOKIE,
-      poToken: process.env.YOUTUBE_PO_TOKEN,
-      visitorData: process.env.YOUTUBE_VISITOR_DATA,
-    },
+    pipeline: await createMusicPipeline(),
     lavalink: {
       enabled: process.env.LAVALINK_ENABLED !== 'false',
       node: {

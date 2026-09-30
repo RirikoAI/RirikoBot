@@ -13,3 +13,4 @@ assets/tcg/catalog/
 test-results/
 site-dist/
 .codegraph/
+packages/music-private/

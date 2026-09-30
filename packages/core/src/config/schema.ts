@@ -100,11 +100,8 @@ const BaseAppConfigSchema = z.object({
   // Optional Lavalink audio node (the bot uses its built-in player without one)
   LAVALINK_ENABLED: z.string().optional(),
   LAVALINK_HOST: z.string().optional(),
-
-  // Optional YouTube BotGuard & Authentication Credentials
-  YOUTUBE_COOKIE: z.string().optional(),
-  YOUTUBE_PO_TOKEN: z.string().optional(),
-  YOUTUBE_VISITOR_DATA: z.string().optional(),
+  // `true` loads the private music package into the fallback player used without Lavalink
+  USE_PRIVATE_MUSIC_PACKAGE: z.string().optional(),
 
   // Daily Reset Boundary (shared by energy, shops and the daily reward)
   ...ResetConfigShape,

@@ -2,24 +2,17 @@ import { Readable } from 'node:stream';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   ExtractorPipeline,
-  YouTubeAdapter,
   SpotifyAdapter,
   SoundCloudAdapter,
   DeezerAdapter,
   DirectAdapter,
 } from './index.js';
-import type {
-  CanonicalMetadataResolver,
-  ResolvedTrack,
-  ResolvedPlaylist,
-  MusicSearchResult,
-} from '../types.js';
+import type { MusicSourceAdapter, ResolvedTrack, ResolvedPlaylist } from '../types.js';
 
-// These tests run offline. YouTube (youtubei.js), SoundCloud (play-dl), Spotify (spotify-url-info)
-// and every fetch() are replaced with in-memory fakes, because live calls made the suite time out
-// on CircleCI whenever a provider answered slowly or blocked the datacenter IP.
+// These tests run offline. SoundCloud (play-dl), Spotify (spotify-url-info) and every fetch() are
+// replaced with in-memory fakes, because live calls made the suite time out on CircleCI whenever a
+// provider answered slowly or blocked the datacenter IP.
 const mocks = vi.hoisted(() => ({
-  innertubeCreate: vi.fn(),
   play: {
     getFreeClientID: vi.fn(),
     setToken: vi.fn(),
@@ -31,98 +24,10 @@ const mocks = vi.hoisted(() => ({
   spotifyGetTracks: vi.fn(),
 }));
 
-vi.mock('youtubei.js', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('youtubei.js')>()),
-  Innertube: { create: mocks.innertubeCreate },
-}));
 vi.mock('play-dl', () => ({ default: mocks.play }));
 vi.mock('spotify-url-info', () => ({
   default: () => ({ getData: mocks.spotifyGetData, getTracks: mocks.spotifyGetTracks }),
 }));
-
-interface FakeVideo {
-  id: string;
-  title: string;
-  author: string;
-  duration: number;
-}
-
-const YOUTUBE_CATALOG: FakeVideo[] = [
-  {
-    id: 'dQw4w9WgXcQ',
-    title: 'Rick Astley - Never Gonna Give You Up (Official Video)',
-    author: 'Rick Astley',
-    duration: 213,
-  },
-  {
-    id: 'TUVcZfQe-Kw',
-    title: 'Dua Lipa - Levitating (Official Music Video)',
-    author: 'Dua Lipa',
-    duration: 203,
-  },
-  {
-    id: 'ZRtdQ81jPUQ',
-    title: 'YOASOBI Idol Official Music Video',
-    author: 'YOASOBI',
-    duration: 213,
-  },
-  { id: 'fOk8Tm815lE', title: 'Beethoven - Symphony No. 5', author: 'Classical', duration: 1860 },
-  { id: 'vY-hU8Rw3lI', title: 'Beethoven - Symphony No. 9', author: 'Classical', duration: 4200 },
-  { id: 'A3h7Xh6Fq3Y', title: 'Beethoven - Moonlight Sonata', author: 'Classical', duration: 900 },
-];
-
-const tokens = (text: string): string[] => text.toLowerCase().match(/[\p{L}\p{N}]{3,}/gu) ?? [];
-
-// Ranks catalog videos by how many query words their title or channel contains.
-function searchCatalog(query: string): FakeVideo[] {
-  const queryTokens = tokens(query);
-  return YOUTUBE_CATALOG.map((video) => {
-    const haystack = new Set(tokens(`${video.title} ${video.author}`));
-    return { video, hits: queryTokens.filter((t) => haystack.has(t)).length };
-  })
-    .filter(({ hits }) => hits > 0)
-    .sort((a, b) => b.hits - a.hits)
-    .map(({ video }) => video);
-}
-
-const webAudio = () =>
-  new ReadableStream<Uint8Array>({
-    start(controller) {
-      controller.enqueue(new Uint8Array([1, 2, 3]));
-      controller.close();
-    },
-  });
-
-function createFakeInnertube() {
-  return {
-    session: {},
-    getInfo: vi.fn(async (id: string) => {
-      const video = YOUTUBE_CATALOG.find((v) => v.id === id);
-      if (!video) throw new Error(`Video ${id} unavailable`);
-      return {
-        basic_info: {
-          title: video.title,
-          author: video.author,
-          duration: video.duration,
-          thumbnail: [{ url: `https://i.ytimg.com/vi/${id}/hq.jpg` }],
-        },
-      };
-    }),
-    getPlaylist: vi.fn(async () => ({
-      info: { title: 'Study Mix', thumbnails: [{ url: 'https://i.ytimg.com/mix.jpg' }] },
-      videos: [{ id: 'dQw4w9WgXcQ' }, { video_id: 'TUVcZfQe-Kw' }, {}],
-    })),
-    search: vi.fn(async (query: string) => ({
-      videos: searchCatalog(query).map((v) => ({
-        id: v.id,
-        title: { text: v.title },
-        author: { name: v.author },
-        duration: { seconds: v.duration },
-      })),
-    })),
-    download: vi.fn(async () => webAudio()),
-  };
-}
 
 function soundcloudTrack(slug: string, name: string, artist: string) {
   return {
@@ -154,12 +59,10 @@ function jsonResponse(body: unknown): Response {
 
 describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
   let pipeline: ExtractorPipeline;
-  let ytAdapter: YouTubeAdapter;
   let spAdapter: SpotifyAdapter;
   let scAdapter: SoundCloudAdapter;
   let dzAdapter: DeezerAdapter;
   let directAdapter: DirectAdapter;
-  let innertube: ReturnType<typeof createFakeInnertube>;
   let unexpectedRequests: string[];
 
   beforeEach(() => {
@@ -191,9 +94,6 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
         throw new Error(`Unexpected network request in test: ${url}`);
       }),
     );
-
-    innertube = createFakeInnertube();
-    mocks.innertubeCreate.mockResolvedValue(innertube);
 
     mocks.play.getFreeClientID.mockResolvedValue('sc-test-client');
     mocks.play.setToken.mockResolvedValue(undefined);
@@ -230,21 +130,17 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
       { id: 'physical0001', name: 'Physical', artist: 'Dua Lipa', duration: 193000, uri: 'x' },
     ]);
 
-    // Background PO token generation would fetch YouTube's embed page.
-    ytAdapter = new YouTubeAdapter({ autoGeneratePoToken: false });
     spAdapter = new SpotifyAdapter();
     scAdapter = new SoundCloudAdapter();
     dzAdapter = new DeezerAdapter();
     directAdapter = new DirectAdapter();
 
     pipeline = new ExtractorPipeline({
-      adapters: [ytAdapter, spAdapter, scAdapter, dzAdapter, directAdapter],
-      defaultSearchSource: 'youtube',
+      adapters: [spAdapter, scAdapter, dzAdapter, directAdapter],
     });
   });
 
   afterEach(() => {
-    ytAdapter.getPoTokenService()?.stopAutoRotation();
     expect(unexpectedRequests).toEqual([]);
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
@@ -252,17 +148,6 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
   });
 
   describe('1. URL Pattern Recognition & Detection', () => {
-    it('recognizes standard YouTube video, shortlink, shorts, and playlist URLs', () => {
-      expect(ytAdapter.canResolve('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBe(true);
-      expect(ytAdapter.canResolve('https://youtu.be/dQw4w9WgXcQ')).toBe(true);
-      expect(ytAdapter.canResolve('https://www.youtube.com/shorts/dQw4w9WgXcQ')).toBe(true);
-      expect(ytAdapter.canResolve('https://music.youtube.com/watch?v=dQw4w9WgXcQ')).toBe(true);
-      expect(
-        ytAdapter.canResolve('https://www.youtube.com/playlist?list=PLrAlnnR2v3e96s61f2w_h_bE2L9'),
-      ).toBe(true);
-      expect(ytAdapter.canResolve('https://google.com')).toBe(false);
-    });
-
     it('recognizes Spotify track, album, playlist URLs and URIs', () => {
       expect(spAdapter.canResolve('https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT')).toBe(
         true,
@@ -303,55 +188,6 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
   });
 
   describe('2. Single Track & Playlist Resolution', () => {
-    it('resolves single YouTube video with metadata and stream', async () => {
-      const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-      const resolved = await ytAdapter.resolve(url);
-
-      expect('tracks' in resolved).toBe(false);
-      const track = resolved as ResolvedTrack;
-      expect(track).toMatchObject({
-        id: 'dQw4w9WgXcQ',
-        source: 'youtube',
-        title: 'Rick Astley - Never Gonna Give You Up (Official Video)',
-        artist: 'Rick Astley',
-        durationSeconds: 213,
-        streamUrl: url,
-      });
-
-      const stream = await track.getStream();
-      expect(stream).toBeInstanceOf(Readable);
-      expect(innertube.download).toHaveBeenCalledWith('dQw4w9WgXcQ', expect.anything());
-    });
-
-    it('resolves YouTube playlist into multiple tracks', async () => {
-      const url = 'https://www.youtube.com/playlist?list=PLrAlnnR2v3e96s61f2w_h_bE2L9';
-      const playlist = (await ytAdapter.resolve(url)) as ResolvedPlaylist;
-
-      expect(innertube.getPlaylist).toHaveBeenCalledWith('PLrAlnnR2v3e96s61f2w_h_bE2L9');
-      expect(playlist.title).toBe('Study Mix');
-      expect(playlist.source).toBe('youtube');
-      expect(playlist.trackCount).toBe(2);
-      expect(playlist.tracks.map((t) => t.id)).toEqual(['dQw4w9WgXcQ', 'TUVcZfQe-Kw']);
-      expect(playlist.tracks[1]).toMatchObject({
-        title: 'Dua Lipa - Levitating (Official Music Video)',
-        artist: 'Dua Lipa',
-        durationSeconds: 203,
-        url: 'https://www.youtube.com/watch?v=TUVcZfQe-Kw',
-      });
-    });
-
-    it('falls back to placeholder playlist tracks when the playlist lookup fails', async () => {
-      innertube.getPlaylist.mockRejectedValue(new Error('This playlist does not exist'));
-
-      const url = 'https://www.youtube.com/playlist?list=PLrAlnnR2v3e96s61f2w_h_bE2L9';
-      const playlist = (await ytAdapter.resolve(url)) as ResolvedPlaylist;
-
-      expect(playlist.source).toBe('youtube');
-      expect(playlist.trackCount).toBe(5);
-      expect(playlist.tracks).toHaveLength(5);
-      expect(playlist.tracks[0]?.id).toBe('PL_PLrAln_01');
-    });
-
     it('resolves Spotify track and album metadata', async () => {
       const trackRes = (await spAdapter.resolve(
         'https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT',
@@ -442,51 +278,98 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
 
   describe('3. ExtractorPipeline Orchestration & Search', () => {
     it('delegates to the correct adapter based on URL priority', async () => {
-      const ytResult = await pipeline.resolve('https://youtu.be/dQw4w9WgXcQ');
-      expect((ytResult as ResolvedTrack).source).toBe('youtube');
-
       const scResult = await pipeline.resolve('https://soundcloud.com/avicii/levels');
       expect(scResult).toMatchObject({ source: 'soundcloud', title: 'Levels' });
+
+      const directResult = await pipeline.resolve('https://media.sample.com/music/intro.mp3');
+      expect(directResult).toMatchObject({ source: 'direct', title: 'intro' });
     });
 
-    it('bridges Spotify tracks to playable audio stream using YouTube search fallback', async () => {
+    it('bridges Spotify tracks to a playable SoundCloud stream', async () => {
+      mocks.play.search.mockResolvedValue([
+        soundcloudTrack('rickastley/never-gonna', 'Never Gonna Give You Up', 'Rick Astley'),
+      ]);
       const spotifyUrl = 'https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT';
       const resolved = (await pipeline.resolve(spotifyUrl)) as ResolvedTrack;
 
       expect(resolved.source).toBe('spotify');
       expect(await resolved.getStream()).toBeInstanceOf(Readable);
-      expect(innertube.download).toHaveBeenCalledWith('dQw4w9WgXcQ', expect.anything());
+      expect(mocks.play.soundcloud).toHaveBeenCalledWith(
+        'https://soundcloud.com/rickastley/never-gonna',
+      );
     });
 
-    it('bridges Spotify album tracks to playable audio stream', async () => {
+    it('bridges Spotify album tracks to playable audio streams', async () => {
+      mocks.play.search.mockResolvedValue([
+        soundcloudTrack('dualipa/levitating', 'Levitating', 'Dua Lipa'),
+      ]);
       const spotifyAlbumUrl = 'https://open.spotify.com/album/1DFixLWuPkv3KT3TnV35m3';
       const resolved = (await pipeline.resolve(spotifyAlbumUrl)) as ResolvedPlaylist;
 
       expect(resolved.source).toBe('spotify');
       expect(resolved.tracks).toHaveLength(2);
       expect(await resolved.tracks[0]?.getStream()).toBeInstanceOf(Readable);
-      expect(innertube.download).toHaveBeenCalledWith('TUVcZfQe-Kw', expect.anything());
+      expect(mocks.play.soundcloud).toHaveBeenCalledWith(
+        'https://soundcloud.com/dualipa/levitating',
+      );
     });
 
-    it('resolves keyword search queries using default search source', async () => {
-      const searchResult = (await pipeline.resolve('YOASOBI Idol')) as ResolvedTrack;
+    it('prefers an added adapter registered as youtube over SoundCloud when bridging', async () => {
+      const bridged = Readable.from([Buffer.from('added source audio')]);
+      const addedTrack = {
+        id: 'added01',
+        title: 'Rick Astley - Never Gonna Give You Up',
+        artist: 'Rick Astley',
+        durationSeconds: 213,
+        url: 'https://added.example/never-gonna',
+        source: 'youtube' as const,
+      };
+      const added: MusicSourceAdapter = {
+        id: 'youtube',
+        name: 'Added Source',
+        priority: 10,
+        canResolve: () => false,
+        search: vi.fn(async () => [addedTrack]),
+        resolve: vi.fn(async () => ({ ...addedTrack, getStream: async () => bridged })),
+        healthCheck: async () => ({ source: 'youtube', isHealthy: true, latencyMs: 0 }),
+      };
+      const withAdded = new ExtractorPipeline({ adapters: [added, spAdapter, scAdapter] });
+
+      const resolved = (await withAdded.resolve(
+        'https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT',
+      )) as ResolvedTrack;
+
+      expect(await resolved.getStream()).toBe(bridged);
+      expect(added.resolve).toHaveBeenCalledWith(addedTrack.url);
+      expect(mocks.play.search).not.toHaveBeenCalled();
+    });
+
+    it('resolves keyword search queries using SoundCloud as the default search source', async () => {
+      mocks.play.search.mockResolvedValue([
+        soundcloudTrack('alanwalker/faded', 'Faded', 'Alan Walker'),
+      ]);
+      const searchResult = (await pipeline.resolve('Alan Walker Faded')) as ResolvedTrack;
       expect(searchResult).toMatchObject({
-        id: 'ZRtdQ81jPUQ',
-        source: 'youtube',
-        url: 'https://www.youtube.com/watch?v=ZRtdQ81jPUQ',
+        source: 'soundcloud',
+        title: 'Faded',
+        url: 'https://soundcloud.com/alanwalker/faded',
       });
     });
 
     it('returns search results list for a query', async () => {
-      const results = await pipeline.search('Beethoven Symphony', 'youtube', 3);
-      expect(results).toHaveLength(3);
-      expect(results[0]?.source).toBe('youtube');
-      expect(results[0]?.title.toLowerCase()).toContain('beethoven');
+      mocks.play.search.mockResolvedValue([
+        soundcloudTrack('alanwalker/faded', 'Faded', 'Alan Walker'),
+        soundcloudTrack('alanwalker/darkside', 'Darkside', 'Alan Walker'),
+      ]);
+      const results = await pipeline.search('Alan Walker', 'soundcloud', 2);
+      expect(results).toHaveLength(2);
+      expect(results.map((r) => r.source)).toEqual(['soundcloud', 'soundcloud']);
+      expect(results[0]?.title).toBe('Faded');
     });
 
     it('reports health check status across all registered adapters', async () => {
       const healthReports = await pipeline.healthCheck();
-      expect(healthReports).toHaveLength(5);
+      expect(healthReports).toHaveLength(4);
       for (const report of healthReports) {
         expect(report.isHealthy).toBe(true);
         expect(report.latencyMs).toBeGreaterThanOrEqual(0);
@@ -498,49 +381,6 @@ describe('Multi-Source Music Extractors & Source Adapters (TASK-0501)', () => {
       await expect(pipeline.resolve('https://unsupported-unknown-site.xyz/audio')).rejects.toThrow(
         'No compatible music extractor found',
       );
-    });
-  });
-
-  describe('6. YouTube Fallback Tier 5 — Canonical Spotify Metadata', () => {
-    const stubResolver = (result: Partial<MusicSearchResult> | null): CanonicalMetadataResolver =>
-      ({
-        id: 'spotify',
-        name: 'Stub Metadata Resolver',
-        priority: 20,
-        canResolve: () => false,
-        search: async () => (result ? [result as MusicSearchResult] : []),
-        resolve: async () => {
-          throw new Error('not used');
-        },
-        healthCheck: async () => ({ source: 'spotify', isHealthy: true, latencyMs: 0 }),
-      }) as CanonicalMetadataResolver;
-
-    it('wires the Spotify adapter into the YouTube cascade on pipeline construction', () => {
-      const wired = new ExtractorPipeline({ adapters: [ytAdapter, spAdapter] });
-      expect(wired.getAdapter('youtube')).toBe(ytAdapter);
-      // Resolver is wired, so canonical lookups are attempted instead of self-skipping
-      expect(ytAdapter.getMetadataResolver()).toBe(spAdapter);
-    });
-
-    it('returns a canonical "Artist - Title" pair when the resolver matches the YouTube title', async () => {
-      ytAdapter.setMetadataResolver(stubResolver({ title: 'Lemon', artist: 'Kenshi Yonezu' }));
-      const canonical = await ytAdapter.resolveCanonicalQuery('Lemon MV', 'KenshiYonezuVEVO');
-      expect(canonical).toBe('Kenshi Yonezu - Lemon');
-    });
-
-    it('rejects unrelated resolver hits so fallback queries are not poisoned', async () => {
-      ytAdapter.setMetadataResolver(
-        stubResolver({ title: 'Blinding Lights', artist: 'The Weeknd' }),
-      );
-      expect(await ytAdapter.resolveCanonicalQuery('Lemon', 'Kenshi Yonezu')).toBeNull();
-    });
-
-    it('self-skips when no resolver is wired or the resolver returns nothing', async () => {
-      ytAdapter.setMetadataResolver(undefined);
-      expect(await ytAdapter.resolveCanonicalQuery('Lemon', 'Kenshi Yonezu')).toBeNull();
-
-      ytAdapter.setMetadataResolver(stubResolver(null));
-      expect(await ytAdapter.resolveCanonicalQuery('Lemon', 'Kenshi Yonezu')).toBeNull();
     });
   });
 

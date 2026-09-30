@@ -3,8 +3,8 @@
 ## 1. Overview & Architectural Goals
 **Music 2.0** is the production-grade audio subsystem for Ririko AI 2.0.0. It replaces the legacy monolithic, error-prone audio pipeline from version 1.4.0 with a modern, decoupled architecture:
 - **Zero Polling Loops**: Completely eliminates the aggressive 10-second `setInterval` message-editing loops from 1.4.0 that routinely triggered Discord HTTP 429 rate limits.
-- **Multi-Source Extractor Pipeline**: Native, decoupled audio extractors supporting YouTube, Spotify, SoundCloud, Deezer, and direct audio streams.
-- **Multi-Tier Audio Resiliency**: Built-in, self-healing streaming cascade designed to withstand YouTube's modern anti-bot measures (SABR, BotGuard Proof-of-Origin tokens, and geoblocks).
+- **Lavalink-First Playback**: Lavalink plugins resolve and stream every source in production (see section 4).
+- **Multi-Source Extractor Pipeline**: A built-in fallback player with decoupled extractors for Spotify, SoundCloud, Deezer, and direct audio streams.
 - **Reactive Discord Embeds**: Real-time interactive player embed controller (`#music` channel) with serialized per-guild mutexes and coalescing debouncing.
 - **Full Type Safety**: Monorepo package `@ririko/music` written in strict TypeScript 5.8+ with 100% test coverage.
 
@@ -18,8 +18,6 @@ The audio subsystem is partitioned into four decoupled modules within [`packages
 packages/music/
 ├── src/
 │   ├── extractors/                 # Audio source adapters & metadata resolvers
-│   │   ├── client-spoofing.ts      # User-Agent & header emulation (Android/iOS/Web)
-│   │   ├── cookie-rotator.ts       # Round-robin session cookie rotation & health
 │   │   ├── deezer.adapter.ts       # Native Deezer REST API extractor
 │   │   ├── direct.adapter.ts       # Raw HTTP audio stream extractor (.mp3, .ogg, .wav)
 │   │   ├── librespot.client.ts     # go-librespot daemon supervisor, REST client & audio pipe
@@ -28,7 +26,7 @@ packages/music/
 │   │   ├── soundcloud.adapter.ts   # High-availability SoundCloud audio extractor
 │   │   ├── spotify-native.service.ts # Native Spotify playback & single-stream lease
 │   │   ├── spotify.adapter.ts      # Spotify metadata scraper, native audio & stream bridging
-│   │   └── youtube.adapter.ts      # Resilient multi-tier YouTube streaming adapter
+│   │   └── track-matcher.ts        # Precision candidate matching for stream bridging
 │   ├── player/                     # Audio playback orchestration
 │   │   ├── music-player.service.ts # Core service wrapping @discordjs/voice AudioPlayer
 │   │   └── types.ts                # Play options, player events, and result interfaces
@@ -57,15 +55,14 @@ flowchart TD
     
     subgraph Extractors ["Source Resolution & Bridging"]
         Pipe --> Detect{"Detect Input Type"}
-        Detect -- "YouTube URL" --> YT["YouTubeAdapter"]
-        Detect -- "Spotify URL" --> SP["SpotifyAdapter<br/>(Bridge to SoundCloud / YouTube)"]
+        Detect -- "Spotify URL" --> SP["SpotifyAdapter<br/>(Bridge to SoundCloud)"]
         Detect -- "SoundCloud URL" --> SC["SoundCloudAdapter"]
         Detect -- "Deezer URL" --> DZ["DeezerAdapter<br/>(Bridge to SoundCloud / Preview)"]
         Detect -- "Direct Audio URL" --> DIR["DirectAdapter"]
-        Detect -- "Search Query" --> Search["Pipeline.search(query)<br/>(SoundCloud -> Spotify -> YouTube -> Deezer)"]
+        Detect -- "Search Query" --> Search["Pipeline.search(query)<br/>(SoundCloud -> Spotify -> Deezer)"]
     end
 
-    YT & SC & SP & DZ & DIR & Search --> Resolved["ResolvedTrack<br/>(Title, Artist, Duration, Thumbnail, getStream)"]
+    SC & SP & DZ & DIR & Search --> Resolved["ResolvedTrack<br/>(Title, Artist, Duration, Thumbnail, getStream)"]
     Resolved --> Queue["GuildQueue.enqueue(track)<br/>(packages/music/src/queue)"]
     Queue --> Player["MusicPlayerService.playTrackStream()"]
     Player --> Stream["track.getStream() Execution"]
@@ -77,208 +74,42 @@ flowchart TD
 
 ---
 
-## 4. Multi-Tier YouTube Resiliency Architecture
+## 4. Playback Paths
 
-In modern environments, YouTube deploys **Server-Side Adaptive Bitrate (SABR / Protobuf UMP)** and **BotGuard Proof-of-Origin (PO-Token)** verification. Unauthenticated requests to major-label official music videos receive `server_abr_streaming_url` without raw format URLs, causing traditional scrapers to crash with:
-`PlayerError: No valid URL to decipher` or `HTTP 403 Forbidden`.
+Ririko plays music through one of two paths:
 
-To ensure near 100% playback reliability while preserving our fallback pipeline, [`YouTubeAdapter`](file:///Z:/Projects/ririko-v2-2026/packages/music/src/extractors/youtube.adapter.ts) implements an in-adapter 7-tier cascade. The cascade is lazy: it executes inside `track.getStream()` at playback time, not during resolution.
-
-```mermaid
-flowchart TD
-    Start["User plays YouTube Track or URL"] --> T1["Tier 1: Innertube Direct Stream<br/>(ANDROID, WEB & WEB_EMBEDDED profiles)"]
-    T1 -- "Success" --> Play["Stream to Discord.js Voice"]
-    T1 -- "SABR / No valid URL / 403" --> T2["Tier 2: @distube/ytdl-core Streamer<br/>(1500ms chunk probe)"]
-    T2 -- "Success" --> Play
-    T2 -- "Failed" --> T3["Tier 3: play-dl Streamer<br/>(1500ms guarded stream call)"]
-    T3 -- "Success" --> Play
-    T3 -- "Failed" --> T4["Tier 4: In-YouTube Topic & Audio Resolver<br/>(Finds clean Topic / audio upload on YouTube)"]
-    T4 -- "Success" --> Play
-    T4 -- "Failed" --> T5["Tier 5: Spotify Canonical Match<br/>(Studio Artist + Title via Web API / Session Cookies)"]
-    T5 --> T6["Tier 6: SoundCloud High-Availability Fallback<br/>(Cached Client ID & Canonical Query)"]
-    T6 -- "Success" --> Play
-    T6 -- "Failed" --> T7["Tier 7: Deezer Preview Audio Fallback<br/>(30-second official MP3 preview stream)"]
-    T7 -- "Success" --> Play
-    T7 -- "Exhausted" --> Fail["Emit Descriptive Queue Error Event"]
-```
-
-### Cascade Details:
-1. **Tier 1 (Direct Innertube Streaming)**:
-   - Uses `youtubei.js` (`Innertube`).
-   - If `YOUTUBE_COOKIE`, `YOUTUBE_PO_TOKEN`, or `YOUTUBE_VISITOR_DATA` are configured, they are injected into `Innertube.create()`.
-   - Probes client profiles `['ANDROID', 'WEB', 'WEB_EMBEDDED']` and peeks the first chunk to ensure GoogleVideo CDN returns HTTP 200 OK.
-2. **Tier 2 (`@distube/ytdl-core` Secondary Streamer)**:
-   - If Innertube encounters a cipher issue, attempts streaming via `@distube/ytdl-core` with `highWaterMark: 1 << 25` and a 1500ms first-chunk probe.
-3. **Tier 3 (`play-dl` Secondary Streamer)**:
-   - Probes `play-dl` with a fast 1500ms timeout guard.
-4. **Tier 4 (In-YouTube Topic & Audio Upload Discovery)**:
-   - Official VEVO music videos have the strictest SABR locks. The exact same song almost always exists on YouTube as an official auto-generated YouTube Music track (`- Topic`) or high-fidelity studio upload.
-   - Searches YouTube for `"${artist} - ${title} audio"`, resolves the alternative video ID, and retries it through the Tier 1 streamer. **The user stays on YouTube with studio audio fidelity.**
-5. **Tier 5 (Spotify Canonical Match)**:
-   - YouTube upload titles are heavily decorated (`【MV】Lemon | Official Music Video`), and searching SoundCloud or Deezer with that string frequently misses. Spotify holds clean studio metadata for the same recording.
-   - `resolveCanonicalMatch()` identifies the recording on Spotify using official Spotify Web API or `sp_dc` session cookies, yielding a canonical `"Artist - Title"` pair.
-   - Guarded by a 2500ms timeout and a title-overlap check: an unrelated top hit is discarded rather than used, so a bad Spotify match can never degrade downstream queries.
-   - The canonical `"Artist - Title"` pair is prepended to the external fallback query list consumed by Tiers 6 and 7.
-   - The Spotify adapter is wired in by `ExtractorPipeline`. If no resolver is registered, the tier self-skips at zero cost.
-
-6. **Tier 6 (SoundCloud High-Availability Fallback)**:
-   - If all YouTube attempts fail, seamlessly falls back to SoundCloud using the canonical query from Tier 5 first, then the scrubbed YouTube title variants.
-   - **SoundCloud Client ID Caching**: Client ID is cached in memory with automatic re-acquisition on failure, completely eliminating transient client ID fetch errors.
-   - This tier yields **full-length audio** and is therefore preferred over any preview-based source.
-7. **Tier 7 (Deezer Audio Fallback)**:
-   - Final safety net querying Deezer REST API for 30-second preview audio.
+1. **Lavalink (recommended for production)**. When a Lavalink node is connected, `MusicPlayerService.play()` hands the query to [`LavalinkService`](file:///Z:/Projects/ririko-v2-2026/packages/music/src/lavalink/lavalink-service.ts). The Lavalink plugins resolve and stream every source, including YouTube and Spotify (LavaSrc). `pnpm lavalink:install` generates `lavalink/application.yml` from `.env`:
+   - `LAVALINK_YOUTUBE_CIPHER_URL` (optional) points the YouTube plugin at a yt-cipher server. Without it the plugin uses its built-in signature cipher.
+2. **Built-in player (fallback)**. When Lavalink is not configured or not reachable, the bot plays in-process through `ExtractorPipeline`. The standard adapters from `createStandardAdapters()` cover SoundCloud, Spotify and Deezer (both bridged to full-length SoundCloud audio) and direct audio URLs. Searches use SoundCloud. YouTube links are not supported in this mode.
 
 ---
 
-## 5. Guide: Obtaining YouTube Cookies, PO-Token & Visitor Data
+## 5. Optional Private Music Package
 
-While Ririko's automated Tier 4 & Tier 5 fallbacks ensure music plays even without credentials, supplying YouTube session tokens guarantees **100% direct native YouTube playback** without throttling or SABR blocks.
+Maintainers with access to the private music package can add sources to the built-in player:
 
-### 5.1. Extracting `YOUTUBE_COOKIE`
-
-A YouTube cookie authenticates your bot session, bypassing datacenter IP reputation penalties.
-
-#### Method A: Browser DevTools (Recommended)
-1. Open your browser (Chrome, Edge, Firefox, or Brave) and navigate to [youtube.com](https://www.youtube.com).
-2. Make sure you are signed in (a throwaway Google account is recommended).
-3. Press **F12** (or `Ctrl+Shift+I` / `Cmd+Option+I`) to open **Developer Tools**.
-4. Go to the **Network** tab.
-5. In the filter box, type `browse` or `v1/player`.
-6. Refresh the page or click on any video.
-7. Click on any request to `youtube.com` (e.g. `browse` or `player`).
-8. In the **Headers** panel, scroll down to **Request Headers**.
-9. Locate the `cookie:` header. Right-click its value and select **Copy value**.
-10. Paste this string into your `.env` file:
-    ```env
-    YOUTUBE_COOKIE="VISITOR_INFO1_LIVE=...; LOGIN_INFO=...; __Secure-3PSID=...; ..."
-    ```
-
-#### Method B: Browser Extension (Netscape / Cookie Format)
-1. Install an extension like **Cookie-Editor** or **Get cookies.txt LOCALLY**.
-2. Visit [youtube.com](https://www.youtube.com).
-3. Open the extension and export the cookies as **Header String** or **Netscape format**.
-4. Copy the cookie string into `YOUTUBE_COOKIE` in your `.env`.
-
-> [!TIP]
-> Essential cookies include `VISITOR_INFO1_LIVE`, `__Secure-3PSID`, and `LOGIN_INFO`. Never share your `.env` file or commit it to GitHub.
-
----
-
-### 5.2. YouTube PO-Token & Visitor Data Automation
-
-The **PO-Token (Proof of Origin Token)** is generated by Google's **BotGuard** client integrity engine. It proves to GoogleVideo CDN that stream requests originate from a legitimate browser context, bypassing throttling and deciphering blocks on age-restricted or official VEVO tracks.
-
-Ririko 2.0.0 provides **automated generation and rotation** both via CLI and in-process:
-
-#### Method A: Developer CLI Command (Instant JSDOM Mode)
-Generate fresh YouTube credentials on your host machine in ~1.2s and save directly into `.env`:
-```bash
-# Preview generated tokens
-pnpm ririko generate:po-token
-
-# Generate and automatically save to .env
-pnpm ririko generate:po-token --save
-```
-*(Alias `ririko youtube:token --save` is also supported)*
-
-#### Method B: Playwright Chrome Harvester (Cookies + PO-Token + VisitorData)
-Uses real Microsoft Playwright with Google Chrome / Chromium (with anti-automation evasion) to harvest the full credential trifecta:
-```bash
-# 1. Automated Headless Chrome Mode (Extracts full session cookies + tokens)
-pnpm ririko generate:po-token --chrome --save
-
-# 2. Interactive Login Mode (Opens visible Chrome window to log in to YouTube/Google)
-pnpm ririko generate:po-token --login --save
-
-# 3. Custom engine selection (chrome, chromium, firefox)
-pnpm ririko generate:po-token -b chrome --save
-```
-
-Output:
-```text
-🌸 Ririko AI 2.0.0 — YouTube Browser Credential Harvester
-
-  Launching Google Chrome (headless)...
-  Navigating to YouTube to establish session...
-  Extracting browser cookies and client profile...
-  Generating BotGuard Proof of Origin (poToken) matched to Google Chrome fingerprint...
-
-✔ Successfully harvested YouTube credentials in 6786ms!
-
-  Engine:        Google Chrome
-  Mode:          Guest Browser Session
-  Cookies:       7 cookies extracted
-  User-Agent:    Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36
-
-Visitor Data:
-  CgtGYjRGajhqS1BHMCjUyqrVBjIKCgJNWRIEGgAgD2KzAgqw...
-
-Proof of Origin (PO Token):
-  MtUEUtVTaFxAt2BSlONvYMq_TJXvhgln5qOmMhMs2u_zfFL...
-
-YouTube Cookie Header (Preview):
-  GPS=1; YSC=_-0E4uczQC4; VISITOR_INFO1_LIVE=Fb4Fj8jKPG0; ...
-
-💾 Saved YOUTUBE_COOKIE, YOUTUBE_PO_TOKEN, and YOUTUBE_VISITOR_DATA to:
-  Z:\Projects\ririko-v2-2026\.env
-```
-
-#### Method C: Automated In-Process Background Provider
-If `YOUTUBE_PO_TOKEN` and `YOUTUBE_VISITOR_DATA` are omitted from `.env`:
-1. When `YouTubeAdapter` is initialized, it launches a non-blocking background BotGuard challenge in JSDOM via `PoTokenService`.
-2. Bot boot and command execution are **never blocked**.
-3. Tokens are cached in memory and automatically refreshed every **18 hours** via background rotation timer, keeping credentials perpetually fresh without manual intervention.
-
-#### Method D: Manual DevTools Extraction (Optional)
-If you prefer extracting credentials from a specific logged-in browser session:
-1. Open a **New Incognito / Private Window** in your browser.
-2. Press **F12** to open **Developer Tools** and select the **Network** tab.
-3. In the filter/search box at the top of the Network tab, type:
+1. Clone the private repository into `packages/music-private` (ignored by git, the pnpm workspace, ESLint, Prettier and the public test run).
+2. Install and build it on its own, after the public `pnpm install` and `pnpm build`:
+   ```bash
+   pnpm --dir packages/music-private install --ignore-workspace
+   pnpm --dir packages/music-private build
    ```
-   v1/player
-   ```
-4. Navigate to [youtube.com](https://www.youtube.com) and click on any music video.
-5. In the Network requests list, click on the **`v1/player`** request.
-6. In the right pane, click on the **Payload** (or **Request**) tab.
-7. Expand the JSON payload:
-   - **PO-Token**: Look under `serviceIntegrityDimensions` -> find `poToken`.
-     Copy this entire string (starts with `Mn...` or `Mt...`).
-   - **Visitor Data**: Look under `context` -> `client` -> find `visitorData`.
-     Copy this string (looks like `Cgt...%3D%3D`).
+3. Set `USE_PRIVATE_MUSIC_PACKAGE=true` in `.env`.
 
-```json
-{
-  "context": {
-    "client": {
-      "clientName": "WEB",
-      "clientVersion": "2.2026...",
-      "visitorData": "Cgt4UVQ3VnRvcHBpUSjuxKnVBg%3D%3D"  <-- YOUTUBE_VISITOR_DATA
-    }
-  },
-  "serviceIntegrityDimensions": {
-    "poToken": "MnlY..."                               <-- YOUTUBE_PO_TOKEN
-  }
-}
-```
-
-8. Add them to your `.env` file:
-   ```env
-   YOUTUBE_PO_TOKEN="MnlY..."
-   YOUTUBE_VISITOR_DATA="Cgt4UVQ3VnRvcHBpUSjuxKnVBg%3D%3D"
-   ```
+[`apps/bot/src/music-sources.ts`](file:///Z:/Projects/ririko-v2-2026/apps/bot/src/music-sources.ts) imports the package only when the flag is `true`. If the package is missing or fails to load, the bot logs a warning and continues with the standard adapters. The package documents its own environment variables and tools.
 
 ---
 
 ## 6. Guide: Spotify Credentials & Web API Integration
 
-Spotify integration in Ririko powers full-fidelity track, album, and playlist metadata resolution and canonical song identification for Tier 5. You can configure either or both methods:
+Spotify integration in Ririko powers full-fidelity track, album, and playlist metadata resolution and canonical song identification. You can configure either or both methods:
 
 | Method | What it gives you | Setup |
 |---|---|---|
 | **6.1 Official Spotify Web API** | Direct API querying for search, track, album, and playlist resolution with official rate limits | Free Spotify Developer App (`SPOTIFY_CLIENT_ID` + `SPOTIFY_CLIENT_SECRET`) |
 | **6.2 Session Cookies** | Direct scraping of track, album, and playlist metadata without developer registration | `sp_dc` (and optional `sp_key`) from `open.spotify.com` |
 
-When a user plays a Spotify track or playlist (`/play <spotify-url>`), Ririko resolves the canonical metadata via Spotify Web API / session cookies and automatically bridges the audio into our high-availability streaming pipeline (SoundCloud studio stream, followed by YouTube official audio/Topic uploads).
+When a user plays a Spotify track or playlist (`/play <spotify-url>`), Ririko resolves the canonical metadata via Spotify Web API / session cookies and automatically bridges the audio to a matching full-length SoundCloud stream.
 
 ---
 
@@ -328,9 +159,8 @@ The following environment variables in `.env` govern the audio subsystem:
 | Variable | Required? | Default | Description |
 |---|---|---|---|
 | `DEFAULT_PREFIX` | Optional | `!` | Default command prefix for text commands (e.g. `!play`). |
-| `YOUTUBE_COOKIE` | Optional | None | Session cookie string to bypass YouTube datacenter IP blocking. |
-| `YOUTUBE_PO_TOKEN` | Optional | None | Proof of Origin token from YouTube Web player payload. |
-| `YOUTUBE_VISITOR_DATA` | Optional | None | Visitor context string paired with `YOUTUBE_PO_TOKEN`. |
+| `USE_PRIVATE_MUSIC_PACKAGE` | Optional | `false` | `true` loads the private music package into the built-in player (section 5). |
+| `LAVALINK_YOUTUBE_CIPHER_URL` | Optional | None | yt-cipher server for the Lavalink YouTube plugin; empty uses the built-in cipher. |
 | `SPOTIFY_CLIENT_ID` | Optional | None | Official Spotify Developer App Client ID (for official Web API). |
 | `SPOTIFY_CLIENT_SECRET` | Optional | None | Official Spotify Developer App Client Secret. |
 | `SPOTIFY_DC` | Optional | None | `sp_dc` cookie from `open.spotify.com` for session cookie scraping. |
@@ -343,11 +173,6 @@ Example `.env` configuration:
 DISCORD_TOKEN=your_token_here
 DISCORD_CLIENT_ID=your_client_id_here
 DEFAULT_PREFIX=!
-
-# YouTube Audio Credentials (Optional, maximizes reliability)
-YOUTUBE_COOKIE=
-YOUTUBE_PO_TOKEN=
-YOUTUBE_VISITOR_DATA=
 
 # Spotify Web API & Session (Optional, for playlist & track resolution)
 SPOTIFY_CLIENT_ID=
