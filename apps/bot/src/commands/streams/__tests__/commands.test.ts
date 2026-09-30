@@ -135,6 +135,13 @@ describe('Streams & Free Games Commands Suite (STORY-081)', () => {
       expect(names).toContain('setup-stream-notification');
       expect(names).toContain('stream-status');
 
+      const slash = commands.filter((c) => c.metadata.slashEnabled !== false);
+      expect(slash.map((c) => c.metadata.name)).toEqual([
+        'stream',
+        'setup-stream-notification',
+        'stream-status',
+      ]);
+
       const setupCmd = commands.find((c) => c.metadata.name === 'setup-stream-notification')!;
       expect(setupCmd.metadata.aliases).toContain('setup-twitch');
 

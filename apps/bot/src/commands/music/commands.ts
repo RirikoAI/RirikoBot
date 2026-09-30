@@ -994,6 +994,7 @@ export function createSetupMusicCommand(
   return {
     metadata: {
       name: 'setup-music',
+      registrationScope: 'guild',
       category: CommandCategory.MUSIC,
       description: 'Initialize a dedicated interactive music channel with live player controls.',
       usage: '/setup-music [channel]',

@@ -19,6 +19,7 @@ export function createSdModelCommand(services: BotServices): Command {
   return {
     metadata: {
       name: SD_MODEL_COMMAND_NAME,
+      registrationScope: 'guild',
       category: CommandCategory.AI,
       description:
         'Configure or inspect the default image generation preset and model for this server',
@@ -188,6 +189,7 @@ export function createSetupSdApiCommand(): Command {
   return {
     metadata: {
       name: SETUP_SD_API_COMMAND_NAME,
+      registrationScope: 'guild',
       category: CommandCategory.AI,
       description: 'Legacy StableDiffusion API key setup (Deprecated in Ririko 2.0.0 per ADR-011)',
       aliases: SETUP_SD_API_ALIASES,

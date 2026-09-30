@@ -8,9 +8,37 @@ Right-click a message, then choose **Apps → Translate to English**. On mobile,
 - Uses the existing AI provider fallback chain and the server's provider/model preference. An available AI provider must be configured. Translation does not read or write conversation history and cannot invoke tools.
 - Already-English text is preserved. Input is limited to 12,000 characters; oversized inputs are rejected instead of silently cut off. Results over Discord's 2,000-character message limit are attached as `translation-en.txt` in the ephemeral reply.
 - Uses the canonical command name `translate` for server/channel overrides and its default 10-second per-user cooldown. This feature is context-menu-only; `/translate` and prefix translation are not registered.
-- The normal startup command synchronization registers the type-3 message command alongside slash commands, globally or in `DISCORD_DEV_GUILD_ID` when configured. Restart the updated bot to synchronize it; global command visibility can take time to refresh in Discord.
+- The type-3 message command is registered with the global commands (`pnpm cli commands:sync --global`, or startup with `SYNC_COMMANDS=true`). Global command visibility can take time to refresh in Discord.
 
 Implementation: `CommandMetadata.messageContextMenuName` registers an additional message menu through the shared registry/synchronizer. Its `CommandContext.source` is `context-menu`, with `raw.targetMessage` as the selected message. It goes through the same middleware and usage hook as other commands.
+
+## Slash command slots
+
+Discord allows at most 100 slash commands per scope (global, and separately each server), plus
+15 message and 15 user context menus, which are always global. Ririko uses two scopes:
+
+- **Global** (default): member commands and context menus.
+- **Per server** (`registrationScope: 'guild'`): admin and setup commands: moderation,
+  `prefix`, `welcomer`, `farewell`, `autorole`, `temprole`, reaction roles, `autovoice`,
+  `setup-music`, `aichannel`, `aipersona`, image configuration, `stream`,
+  `setup-stream-notification`, `giveaway` and `tcg-admin`.
+
+`CommandSynchronizer` refuses any scope over a limit before calling Discord, because Discord
+rejects the whole request and leaves the scope unregistered. `ririko commands:sync` prints the
+used and free slots per scope; `apps/bot/src/command-set.test.ts` fails when a new command
+overflows a scope. Register changes with `ririko commands:sync --global` and/or
+`--guild <id>` / `--all-guilds` without restarting the bot. The bot registers the per-server
+commands in every server it joins.
+
+Legacy shorthand aliases are prefix-only
+(`slashEnabled: false`) so they do not use slots; their slash form is the primary command:
+
+| Prefix alias | Slash command |
+|---|---|
+| `!gcreate`, `!gend`, `!greroll`, `!gdelete`, `!gedit`, `!glist` | `/giveaway action:<...>` |
+| `!avc` | `/autovoice` |
+| `!vname`, `!vlimit`, `!vlock`, `!vunlock`, `!vpermit`, `!vkick`, `!vclaim`, `!vtransfer` | `/voice action:<...>` |
+| `!subscribe`, `!unsubscribe` | `/stream action:<...>` |
 
 ## 1. Dual-Dispatch Architecture & Parity
 In Ririko AI 2.0.0, every user-facing command supports both **Slash Commands** (`/command`) and **Prefix Commands** (`!command` or custom guild prefix). Business logic is never implemented twice.

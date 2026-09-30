@@ -7,14 +7,28 @@ import {
   type RESTPostAPIApplicationCommandsJSONBody,
   type APIApplicationCommandOption,
 } from 'discord.js';
+import { ValidationError } from '@ririko/core';
 import type { CommandRegistry } from '../router/registry.js';
-import type { Command, CommandOptionDefinition, CommandOptionType } from '../command/types.js';
+import type {
+  Command,
+  CommandOptionDefinition,
+  CommandOptionType,
+  CommandRegistrationScope,
+} from '../command/types.js';
+
+/**
+ * Discord's per-scope limits: chat-input (slash) commands apply to the global scope and to each
+ * guild separately; context menus are registered globally only.
+ */
+export const COMMAND_LIMITS = {
+  chatInput: 100,
+  message: 15,
+  user: 15,
+} as const;
 
 export interface CommandSyncOptions {
-  /**
-   * Only sync commands that have slashEnabled !== false (default: true).
-   */
-  filterSlashEnabled?: boolean | undefined;
+  /** Which commands to build payloads for (default `'global'`). */
+  scope?: CommandRegistrationScope | undefined;
 }
 
 export interface SyncResult {
@@ -109,6 +123,40 @@ export function buildCommandPayload(
   return payload;
 }
 
+/** Payload count per command type, as Discord counts them against {@link COMMAND_LIMITS}. */
+export function countPayloads(payloads: readonly RESTPostAPIApplicationCommandsJSONBody[]): {
+  chatInput: number;
+  message: number;
+  user: number;
+} {
+  const count = (type: ApplicationCommandType) =>
+    payloads.filter((p) => (p.type ?? ApplicationCommandType.ChatInput) === type).length;
+  return {
+    chatInput: count(ApplicationCommandType.ChatInput),
+    message: count(ApplicationCommandType.Message),
+    user: count(ApplicationCommandType.User),
+  };
+}
+
+function assertWithinLimits(
+  scope: CommandRegistrationScope,
+  payloads: readonly RESTPostAPIApplicationCommandsJSONBody[],
+): void {
+  const counts = countPayloads(payloads);
+  const over = (Object.keys(COMMAND_LIMITS) as (keyof typeof COMMAND_LIMITS)[]).filter(
+    (kind) => counts[kind] > COMMAND_LIMITS[kind],
+  );
+  if (over.length === 0) return;
+  throw new ValidationError(
+    `The ${scope} command scope exceeds Discord's limits: ${over
+      .map((kind) => `${counts[kind]} ${kind} commands (max ${COMMAND_LIMITS[kind]})`)
+      .join(
+        ', ',
+      )}. Move commands to the other scope with registrationScope, or set slashEnabled: false on prefix-only commands.`,
+    { details: { scope, counts } },
+  );
+}
+
 /**
  * High-performance command synchronization engine.
  * Automatically synchronizes CommandRegistry definitions with Discord's REST API v10 endpoints.
@@ -120,43 +168,49 @@ export class CommandSynchronizer {
   ) {}
 
   /**
-   * Generates REST JSON payloads for all slash-eligible commands in the registry.
+   * Generates the REST JSON payloads for one scope: its slash commands, plus every context menu
+   * for the global scope. Throws before any REST call when a Discord limit would be exceeded,
+   * since Discord rejects the whole PUT and leaves the scope unregistered.
    */
   public generatePayloads(
     options: CommandSyncOptions = {},
   ): RESTPostAPIApplicationCommandsJSONBody[] {
-    const filterSlash = options.filterSlashEnabled ?? true;
-    const commands = this.registry
-      .getAll()
-      .filter((cmd) => (filterSlash ? cmd.metadata.slashEnabled !== false : true));
+    const scope = options.scope ?? 'global';
+    const all = this.registry.getAll();
+    const payloads: RESTPostAPIApplicationCommandsJSONBody[] = all
+      .filter(
+        ({ metadata }) =>
+          metadata.slashEnabled !== false && (metadata.registrationScope ?? 'global') === scope,
+      )
+      .map(buildCommandPayload);
 
-    const payloads: RESTPostAPIApplicationCommandsJSONBody[] = commands.map(buildCommandPayload);
-    for (const { metadata } of this.registry.getAll()) {
-      if (!metadata.messageContextMenuName) continue;
-      payloads.push({
-        name: metadata.messageContextMenuName,
-        type: ApplicationCommandType.Message,
-        ...(metadata.isGuildOnly !== undefined ? { dm_permission: !metadata.isGuildOnly } : {}),
-        ...(metadata.userPermissions?.length
-          ? {
-              default_member_permissions: metadata.userPermissions
-                .reduce((a, b) => a | b, 0n)
-                .toString(),
-            }
-          : {}),
-      });
+    if (scope === 'global') {
+      for (const { metadata } of all) {
+        if (!metadata.messageContextMenuName) continue;
+        payloads.push({
+          name: metadata.messageContextMenuName,
+          type: ApplicationCommandType.Message,
+          ...(metadata.isGuildOnly !== undefined ? { dm_permission: !metadata.isGuildOnly } : {}),
+          ...(metadata.userPermissions?.length
+            ? {
+                default_member_permissions: metadata.userPermissions
+                  .reduce((a, b) => a | b, 0n)
+                  .toString(),
+              }
+            : {}),
+        });
+      }
     }
+
+    assertWithinLimits(scope, payloads);
     return payloads;
   }
 
   /**
-   * Synchronizes all registered commands globally via Discord REST v10.
+   * Replaces the application's global commands with the global scope's payloads.
    */
-  public async syncGlobal(
-    applicationId: string,
-    options: CommandSyncOptions = {},
-  ): Promise<SyncResult> {
-    const payloads = this.generatePayloads(options);
+  public async syncGlobal(applicationId: string): Promise<SyncResult> {
+    const payloads = this.generatePayloads({ scope: 'global' });
 
     await this.rest.put(Routes.applicationCommands(applicationId), {
       body: payloads,
@@ -171,14 +225,10 @@ export class CommandSynchronizer {
   }
 
   /**
-   * Synchronizes all registered commands to a specific guild via Discord REST v10 (instant for development).
+   * Replaces one guild's commands with the guild scope's payloads. Changes appear instantly.
    */
-  public async syncGuild(
-    applicationId: string,
-    guildId: string,
-    options: CommandSyncOptions = {},
-  ): Promise<SyncResult> {
-    const payloads = this.generatePayloads(options);
+  public async syncGuild(applicationId: string, guildId: string): Promise<SyncResult> {
+    const payloads = this.generatePayloads({ scope: 'guild' });
 
     await this.rest.put(Routes.applicationGuildCommands(applicationId, guildId), {
       body: payloads,

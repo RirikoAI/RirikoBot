@@ -17,6 +17,7 @@ export function createPrefixCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'prefix',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'View or update the command prefix for this server',
       aliases: ['setprefix'],

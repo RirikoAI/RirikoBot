@@ -1,7 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ApplicationCommandOptionType, PermissionFlagsBits, type REST } from 'discord.js';
 import { CommandRegistry } from '../router/registry.js';
-import { buildCommandPayload, CommandSynchronizer, mapOptionType } from './sync.js';
+import {
+  buildCommandPayload,
+  CommandSynchronizer,
+  COMMAND_LIMITS,
+  countPayloads,
+  mapOptionType,
+} from './sync.js';
 import { CommandCategory, type Command } from '../command/types.js';
 
 describe('Discord REST v10 Command Synchronizer (TASK-0332)', () => {
@@ -194,13 +200,88 @@ describe('Discord REST v10 Command Synchronizer (TASK-0332)', () => {
       execute: vi.fn(),
     };
 
-    registry.registerAll([slashCmd, prefixOnlyCmd]);
+    const guildCmd: Command = {
+      metadata: {
+        name: 'ban',
+        category: CommandCategory.MODERATION,
+        description: 'Ban a member',
+        registrationScope: 'guild',
+      },
+      execute: vi.fn(),
+    };
+
+    registry.registerAll([slashCmd, prefixOnlyCmd, guildCmd]);
     const synchronizer = new CommandSynchronizer(mockRest, registry);
 
     it('filters out slashEnabled: false commands in payload generation', () => {
       const payloads = synchronizer.generatePayloads();
       expect(payloads).toHaveLength(1);
       expect(payloads[0]?.name).toBe('ping');
+    });
+
+    it('builds each scope from registrationScope, defaulting to global', () => {
+      expect(synchronizer.generatePayloads({ scope: 'global' }).map((p) => p.name)).toEqual([
+        'ping',
+      ]);
+      expect(synchronizer.generatePayloads({ scope: 'guild' }).map((p) => p.name)).toEqual(['ban']);
+    });
+
+    describe('Discord limits', () => {
+      const make = (name: string, extra: Partial<Command['metadata']> = {}): Command => ({
+        metadata: { name, category: CommandCategory.GENERAL, description: name, ...extra },
+        execute: vi.fn(),
+      });
+      const many = (count: number, extra: Partial<Command['metadata']> = {}) =>
+        Array.from({ length: count }, (_, i) => make(`cmd${i}`, extra));
+
+      it('accepts exactly the limit per scope, ignoring prefix-only commands', () => {
+        const registry = new CommandRegistry()
+          .registerAll(many(COMMAND_LIMITS.chatInput))
+          .register(make('prefixonly', { slashEnabled: false }));
+        const sync = new CommandSynchronizer({} as REST, registry);
+        expect(countPayloads(sync.generatePayloads())).toEqual({
+          chatInput: 100,
+          message: 0,
+          user: 0,
+        });
+      });
+
+      it.each(['global', 'guild'] as const)(
+        'refuses a %s scope over 100 slash commands before calling REST',
+        async (scope) => {
+          const put = vi.fn();
+          const registry = new CommandRegistry().registerAll(
+            many(COMMAND_LIMITS.chatInput + 1, { registrationScope: scope }),
+          );
+          const sync = new CommandSynchronizer({ put } as unknown as REST, registry);
+          const run = scope === 'global' ? sync.syncGlobal('app') : sync.syncGuild('app', 'g');
+          await expect(run).rejects.toThrow(
+            `The ${scope} command scope exceeds Discord's limits: 101 chatInput commands (max 100)`,
+          );
+          expect(put).not.toHaveBeenCalled();
+        },
+      );
+
+      it('counts each scope separately', () => {
+        const registry = new CommandRegistry()
+          .registerAll(many(60))
+          .registerAll(
+            Array.from({ length: 60 }, (_, i) => make(`admin${i}`, { registrationScope: 'guild' })),
+          );
+        const sync = new CommandSynchronizer({} as REST, registry);
+        expect(sync.generatePayloads({ scope: 'global' })).toHaveLength(60);
+        expect(sync.generatePayloads({ scope: 'guild' })).toHaveLength(60);
+      });
+
+      it('refuses more than 15 message menus', () => {
+        const registry = new CommandRegistry().registerAll(
+          Array.from({ length: 16 }, (_, i) =>
+            make(`menu${i}`, { slashEnabled: false, messageContextMenuName: `Menu ${i}` }),
+          ),
+        );
+        const sync = new CommandSynchronizer({} as REST, registry);
+        expect(() => sync.generatePayloads()).toThrow('16 message commands (max 15)');
+      });
     });
 
     it('synchronizes commands globally via REST PUT', async () => {
@@ -229,14 +310,11 @@ describe('Discord REST v10 Command Synchronizer (TASK-0332)', () => {
       expect(result.scope).toBe('guild');
       expect(result.applicationId).toBe('app-12345');
       expect(result.guildId).toBe('guild-999');
-      expect(result.registeredCount).toBe(1);
+      expect(result.commandNames).toEqual(['ban']);
 
-      expect(mockPut).toHaveBeenCalledWith(
-        '/applications/app-12345/guilds/guild-999/commands',
-        expect.objectContaining({
-          body: expect.arrayContaining([expect.objectContaining({ name: 'ping' })]),
-        }),
-      );
+      expect(mockPut).toHaveBeenCalledWith('/applications/app-12345/guilds/guild-999/commands', {
+        body: [{ name: 'ban', description: 'Ban a member' }],
+      });
     });
 
     it('clears global and guild commands with empty array payloads', async () => {

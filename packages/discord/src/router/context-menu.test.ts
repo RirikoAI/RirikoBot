@@ -46,39 +46,46 @@ describe('Message context menu registration', () => {
     expect(registry.size).toBe(0);
   });
 
-  it.each(['global', 'guild'] as const)(
-    'includes menus alongside slash commands in %s bulk sync',
-    async (scope) => {
-      const translation = command();
-      translation.metadata.isGuildOnly = true;
-      translation.metadata.userPermissions = [PermissionFlagsBits.ManageMessages];
-      const registry = new CommandRegistry().register(translation).register({
+  it('registers menus with the global scope only', async () => {
+    const translation = command();
+    translation.metadata.isGuildOnly = true;
+    translation.metadata.userPermissions = [PermissionFlagsBits.ManageMessages];
+    const registry = new CommandRegistry()
+      .register(translation)
+      .register({
         metadata: { name: 'ping', description: 'Ping', category: CommandCategory.GENERAL },
         execute: vi.fn(),
-      });
-      const put = vi.fn().mockResolvedValue([]);
-      const sync = new CommandSynchronizer({ put } as unknown as REST, registry);
-      const result =
-        scope === 'global' ? await sync.syncGlobal('app') : await sync.syncGuild('app', 'server');
-      expect(result.registeredCount).toBe(2);
-      expect(put).toHaveBeenCalledWith(
-        scope === 'global'
-          ? '/applications/app/commands'
-          : '/applications/app/guilds/server/commands',
-        {
-          body: [
-            { name: 'ping', description: 'Ping' },
-            {
-              name: 'Translate to English',
-              type: 3,
-              dm_permission: false,
-              default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
-            },
-          ],
+      })
+      .register({
+        metadata: {
+          name: 'ban',
+          description: 'Ban',
+          category: CommandCategory.MODERATION,
+          registrationScope: 'guild',
         },
-      );
-    },
-  );
+        execute: vi.fn(),
+      });
+    const put = vi.fn().mockResolvedValue([]);
+    const sync = new CommandSynchronizer({ put } as unknown as REST, registry);
+
+    expect((await sync.syncGlobal('app')).registeredCount).toBe(2);
+    expect(put).toHaveBeenLastCalledWith('/applications/app/commands', {
+      body: [
+        { name: 'ping', description: 'Ping' },
+        {
+          name: 'Translate to English',
+          type: 3,
+          dm_permission: false,
+          default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
+        },
+      ],
+    });
+
+    expect((await sync.syncGuild('app', 'server')).commandNames).toEqual(['ban']);
+    expect(put).toHaveBeenLastCalledWith('/applications/app/guilds/server/commands', {
+      body: [{ name: 'ban', description: 'Ban' }],
+    });
+  });
 
   it('shows right-click syntax in help without suggesting a nonexistent slash command', () => {
     const translation = command();
