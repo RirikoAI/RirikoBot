@@ -1,6 +1,6 @@
 # STORY-174 — Scoped Command Registration (Global vs Per-Server) & CLI Command Sync
 
-REVIEW (2026-09-30), 8 points, `EPIC-003`. Branch `feat/STORY-174-command-scopes` from `develop/2.0.0`.
+REVIEW (2026-09-30), 8 points, `EPIC-003`. Branch `feat/STORY-174-command-scopes` from `develop/2.0.0`. PR: https://github.com/RirikoAI/RirikoBot/pull/668
 
 ## Why
 
