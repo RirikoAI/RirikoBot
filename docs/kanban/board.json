@@ -3489,7 +3489,7 @@
       "parent": "STORY-120",
       "title": "Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam",
       "points": 2,
-      "status": "TODO",
+      "status": "REVIEW",
       "requires": [],
       "blocks": [
         "TASK-1201",
