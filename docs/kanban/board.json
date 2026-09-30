@@ -3465,7 +3465,7 @@
       "parent": "STORY-120",
       "title": "Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job",
       "points": 3,
-      "status": "TODO",
+      "status": "REVIEW",
       "requires": [
         "TASK-1203"
       ],

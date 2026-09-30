@@ -35,7 +35,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml",
-    "test:integration": "vitest run apps/bot/test tests",
+    "test:integration": "vitest run apps/bot/test/ tests/support/",
+    "test:e2e": "pnpm build:web && pnpm --filter @ririko/web exec playwright test",
     "clean": "pnpm -r run clean",
     "prepare": "husky"
   },

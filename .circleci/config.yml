@@ -99,6 +99,39 @@ jobs:
           name: Next.js production build
           command: pnpm --filter @ririko/web build
 
+  e2e:
+    executor: node
+    steps:
+      - run:
+          # The card album draws card text with the system `sans-serif` font.
+          name: Install fonts
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends fonts-dejavu-core
+      - setup
+      - restore_cache:
+          keys:
+            - playwright-browsers-v1-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install Chromium for Playwright
+          command: pnpm --filter @ririko/web exec playwright install --with-deps chromium
+      - save_cache:
+          key: playwright-browsers-v1-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - ~/.cache/ms-playwright
+      - run:
+          name: Next.js production build
+          command: pnpm --filter @ririko/web build
+      - run:
+          # Starts the fake Discord API and `next start` itself (apps/web/playwright.config.ts).
+          name: Playwright dashboard E2E
+          command: pnpm --filter @ririko/web exec playwright test
+      - store_test_results:
+          path: apps/web/e2e-results
+      - store_artifacts:
+          path: apps/web/e2e-results
+          destination: e2e
+
   secrets:
     docker:
       - image: cimg/base:current
@@ -125,4 +158,5 @@ workflows:
       - typecheck
       - test
       - build-web
+      - e2e
       - secrets
