@@ -18,6 +18,7 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
   const autovoiceCommand: Command = {
     metadata: {
       name: 'autovoice',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'Configure and manage automatic "Join to Create" voice channels',
       usage: '/autovoice <setup|remove|list>',
@@ -471,6 +472,8 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
       category: CommandCategory.UTILITY,
       description,
       usage: `!${name}`,
+      // Prefix-only: each alias would take one of the 100 slash command slots.
+      slashEnabled: false,
     },
     async execute(ctx: CommandContext): Promise<void> {
       const delegatedCtx: CommandContext = {
@@ -498,6 +501,8 @@ export function createAutoVoiceCommands(services: BotServices): Command[] {
       category: CommandCategory.UTILITY,
       description,
       usage: `!${name}`,
+      // Prefix-only: each alias would take one of the 100 slash command slots.
+      slashEnabled: false,
     },
     async execute(ctx: CommandContext): Promise<void> {
       await autovoiceCommand.execute(ctx);

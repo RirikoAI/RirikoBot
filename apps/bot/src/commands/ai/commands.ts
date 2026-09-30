@@ -636,6 +636,7 @@ export function createAiCommands(services: BotServices, aiController: AiChatCont
   const channelCommand: Command = {
     metadata: {
       name: 'aichannel',
+      registrationScope: 'guild',
       category: CommandCategory.AI,
       description: 'Set or remove the dedicated #ririko-ai channel for this server.',
       aliases: ['setaichannel'],
@@ -699,6 +700,7 @@ export function createAiCommands(services: BotServices, aiController: AiChatCont
   const personaCommand: Command = {
     metadata: {
       name: 'aipersona',
+      registrationScope: 'guild',
       category: CommandCategory.AI,
       description: 'Configure server-wide AI personality style preset and custom prompt.',
       aliases: ['aistyle'],

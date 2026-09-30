@@ -6,6 +6,7 @@ export function createWelcomerCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'welcomer',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'Configure the server welcome message and card',
       aliases: ['welcome'],

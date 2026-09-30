@@ -6,6 +6,7 @@ export function createFarewellCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'farewell',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'Configure the server farewell message and card',
       aliases: ['goodbye'],

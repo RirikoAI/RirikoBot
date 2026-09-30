@@ -108,6 +108,7 @@ export function createTcgAdminCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'tcg-admin',
+      registrationScope: 'guild',
       category: CommandCategory.TCG,
       description:
         'TCG Administration: Manage card drops and the TCG Manager Role here; bot owners manage global energy and market rules.',
