@@ -3477,7 +3477,7 @@
       "parent": "STORY-120",
       "title": "Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite",
       "points": 3,
-      "status": "TODO",
+      "status": "REVIEW",
       "requires": [
         "TASK-1203"
       ],

@@ -51,6 +51,8 @@ export interface RecordedRequest {
   body: unknown;
   files: RecordedFile[];
   status: number;
+  /** The JSON the fake answered with, e.g. the created message. */
+  response: unknown;
 }
 
 export interface FakeDiscordServer {
@@ -62,6 +64,10 @@ export interface FakeDiscordServer {
   fixture: FakeDiscordFixture;
   requests: RecordedRequest[];
   unhandled: RecordedRequest[];
+  /** Messages the bot created, by id (channel messages, interaction replies, follow-ups). */
+  messages: ReadonlyMap<string, StoredMessage>;
+  /** The original response message of an interaction, by interaction token. */
+  originalMessage(token: string): StoredMessage | undefined;
   /** Recorded requests matching a method and a path (exact string or pattern). */
   find(method: string, path: string | RegExp): RecordedRequest[];
   /** Resolves with the first matching request, including ones already recorded. */
@@ -94,7 +100,7 @@ interface RouteContext {
 
 type Handler = (ctx: RouteContext) => Reply;
 
-interface StoredMessage {
+export interface StoredMessage {
   [key: string]: unknown;
   id: string;
   channel_id: string;
@@ -553,7 +559,8 @@ export async function startFakeDiscord(
     const controlReply = control(url.pathname, method);
     if (controlReply) return send(res, controlReply);
 
-    const path = url.pathname.replace(/^\/api(\/v\d+)?/, '') || '/';
+    // discord.js percent-encodes route segments such as `@original` and reaction emoji.
+    const path = decodeURIComponent(url.pathname).replace(/^\/api(\/v\d+)?/, '') || '/';
     const { body, files } = parseBody(req.headers['content-type'], raw);
     const ctx: RouteContext = {
       params: [],
@@ -584,6 +591,7 @@ export async function startFakeDiscord(
       body,
       files,
       status: reply.status,
+      response: reply.body,
     };
     requests.push(recorded);
     if (!matched) unhandled.push(recorded);
@@ -613,6 +621,8 @@ export async function startFakeDiscord(
     fixture,
     requests,
     unhandled,
+    messages,
+    originalMessage: (token) => originals.get(token),
     find: (method, path) => requests.filter((r) => matches(r, method, path)),
     waitFor(method, path, timeoutMs = 5000) {
       const existing = requests.find((r) => matches(r, method, path));
