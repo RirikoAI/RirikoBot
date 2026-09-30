@@ -55,3 +55,54 @@ describe('ExtractorPipeline without a YouTube extractor', () => {
     expect(setResolver).not.toHaveBeenCalled();
   });
 });
+
+describe('ExtractorPipeline health summary (TASK-0502)', () => {
+  it('computes overall health summary across all registered extractors', async () => {
+    // Each adapter's own health check is covered offline in extractors.test.ts.
+    const pipeline = new ExtractorPipeline();
+    pipeline.getAdapters().forEach((adapter, index) => {
+      vi.spyOn(adapter, 'healthCheck').mockResolvedValue({
+        source: adapter.id,
+        isHealthy: true,
+        latencyMs: (index + 1) * 10,
+      });
+    });
+    const summary = await pipeline.getHealthSummary();
+
+    expect(summary.status).toBe('HEALTHY');
+    expect(summary.totalCount).toBe(4);
+    expect(summary.healthyCount).toBe(4);
+    expect(summary.averageLatencyMs).toBe(25);
+    expect(summary.adapters).toHaveLength(4);
+    expect(summary.checkedAt).toBeInstanceOf(Date);
+  });
+
+  it('marks status as DEGRADED if an adapter fails health check', async () => {
+    const mockUnhealthyAdapter = {
+      id: 'deezer' as const,
+      name: 'Failing Deezer',
+      priority: 40,
+      canResolve: () => false,
+      search: async () => [],
+      resolve: async () => {
+        throw new Error('Failed');
+      },
+      healthCheck: async () => ({
+        source: 'deezer' as const,
+        isHealthy: false,
+        latencyMs: 1200,
+        errorMessage: '503 Service Unavailable',
+      }),
+    };
+
+    const pipeline = new ExtractorPipeline({
+      adapters: [mockUnhealthyAdapter],
+    });
+
+    const summary = await pipeline.getHealthSummary();
+    expect(summary.status).toBe('UNHEALTHY');
+    expect(summary.healthyCount).toBe(0);
+    expect(summary.totalCount).toBe(1);
+    expect(summary.adapters[0]?.errorMessage).toBe('503 Service Unavailable');
+  });
+});

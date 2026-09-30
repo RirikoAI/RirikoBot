@@ -6,12 +6,12 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-`STORY-172` Per-Source Music Toggles & Pluggable Source Adapters (5 pts, `EPIC-005`): see **Groomed Tasks for EPIC-005**.
+None.
 
 ---
 
 ## 🔍 In Review
-See STORY-170 and TASK-1705 in the story table below.
+See STORY-170 and TASK-1705 in the story table below, and STORY-172 (TASK-1721, TASK-1722) under **Groomed Tasks for EPIC-005**.
 
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
@@ -399,9 +399,9 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-0512` | Task | Voice Connection Lifecycle, Idle Auto-Disconnect & Playlists Repo | 2 | `STORY-051` | ✅ Done · [TASK-0512.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0512.md) | `TASK-0511` |
 | `TASK-0521` | Task | Dual-Dispatch Music Commands Suite (17 Commands) | 2 | `STORY-052` | ✅ Done · [TASK-0521.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0521.md) | `STORY-051` |
 | `TASK-0522` | Task | Reactive Embed Controller & Interactive Button Matrix (Zero Polling) | 1 | `STORY-052` | ✅ Done · [TASK-0522.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-0522.md) | `TASK-0521` |
-| `STORY-172` | Story | Per-Source Music Toggles & Pluggable Source Adapters | 5 | `EPIC-005` | ⚡ In Progress · [STORY-172.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-172.md) | — |
+| `STORY-172` | Story | Per-Source Music Toggles & Pluggable Source Adapters | 8 | `EPIC-005` | 🔍 Review · [STORY-172.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-172.md) | — |
 | `TASK-1721` | Task | Decouple the Fallback Pipeline from YouTube, USE_PRIVATE_MUSIC_PACKAGE Flag & Installer Cipher Default | 3 | `STORY-172` | 🔍 Review · [STORY-172.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-172.md) | — |
-| `TASK-1722` | Task | Move the YouTube Fallback Extractor into a Separate Private Repository | 2 | `STORY-172` | 🎯 To Do | `TASK-1721` |
+| `TASK-1722` | Task | Move the YouTube Fallback Extractor into a Separate Private Repository | 5 | `STORY-172` | 🔍 Review · [STORY-172.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-172.md) | `TASK-1721` |
 
 ### 🛠️ Groomed Tasks for EPIC-004
 | ID | Type | Title | Pts | Parent | Status | Prerequisites |

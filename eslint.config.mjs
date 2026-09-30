@@ -11,6 +11,7 @@ export default tseslint.config(
       '.local/**',
       '**/.local/**',
       'docs/**',
+      'packages/music-private/**',
       '**/*.d.ts',
       '*-player-script.js',
       '**/*-player-script.js',

@@ -1,33 +1,63 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { SpotifyAdapter, YouTubeAdapter, type ExtractorPipeline } from '@ririko/music';
-import { createMusicPipeline } from './music-sources.js';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { SpotifyAdapter, type MusicSourceAdapter } from '@ririko/music';
+import { createMusicPipeline, type PrivateMusicPackageLoader } from './music-sources.js';
 
-// Preset tokens keep the YouTube adapter from generating a PO token over the network.
-const youtubeEnv = { YOUTUBE_PO_TOKEN: 'po-token', YOUTUBE_VISITOR_DATA: 'visitor-data' };
+function privateAdapter(setMetadataResolver = vi.fn()): MusicSourceAdapter {
+  return {
+    id: 'youtube',
+    name: 'Private Adapter',
+    priority: 10,
+    canResolve: () => false,
+    search: async () => [],
+    resolve: async () => {
+      throw new Error('not used');
+    },
+    healthCheck: async () => ({ source: 'youtube', isHealthy: true, latencyMs: 0 }),
+    setMetadataResolver,
+  };
+}
 
 describe('createMusicPipeline', () => {
-  let pipeline: ExtractorPipeline | undefined;
-
   afterEach(() => {
-    const youtube = pipeline?.getAdapter('youtube');
-    if (youtube instanceof YouTubeAdapter) youtube.getPoTokenService()?.stopAutoRotation();
-    pipeline = undefined;
+    vi.restoreAllMocks();
   });
 
   it.each([undefined, 'false', 'TRUE', '1'])(
-    'leaves the YouTube extractor out when USE_PRIVATE_MUSIC_PACKAGE is %j',
-    (flag) => {
-      pipeline = createMusicPipeline({ ...youtubeEnv, USE_PRIVATE_MUSIC_PACKAGE: flag });
+    'never imports the private package when USE_PRIVATE_MUSIC_PACKAGE is %j',
+    async (flag) => {
+      const load = vi.fn<PrivateMusicPackageLoader>();
+      const pipeline = await createMusicPipeline({ USE_PRIVATE_MUSIC_PACKAGE: flag }, load);
+
+      expect(load).not.toHaveBeenCalled();
       expect(pipeline.getAdapter('youtube')).toBeUndefined();
       expect(pipeline.getAdapter('soundcloud')).toBeDefined();
     },
   );
 
-  it('adds the YouTube extractor, wired to Spotify metadata, when the flag is true', () => {
-    pipeline = createMusicPipeline({ ...youtubeEnv, USE_PRIVATE_MUSIC_PACKAGE: 'true' });
-    const youtube = pipeline.getAdapter('youtube');
+  it('adds the private adapters, wired to Spotify metadata, when the flag is true', async () => {
+    const setMetadataResolver = vi.fn();
+    const adapter = privateAdapter(setMetadataResolver);
+    const createMusicAdapters = vi.fn(() => [adapter]);
+    const env = { USE_PRIVATE_MUSIC_PACKAGE: 'true', YOUTUBE_COOKIE: 'cookie' };
 
-    expect(youtube).toBeInstanceOf(YouTubeAdapter);
-    expect((youtube as YouTubeAdapter).getMetadataResolver()).toBeInstanceOf(SpotifyAdapter);
+    const pipeline = await createMusicPipeline(env, async () => ({ createMusicAdapters }));
+
+    expect(createMusicAdapters).toHaveBeenCalledWith(env);
+    expect(pipeline.getAdapter('youtube')).toBe(adapter);
+    expect(setMetadataResolver).toHaveBeenCalledWith(pipeline.getAdapter('spotify'));
+    expect(pipeline.getAdapter('spotify')).toBeInstanceOf(SpotifyAdapter);
+  });
+
+  it.each([
+    ['is not installed', () => Promise.reject(new Error("Cannot find module 'index.js'"))],
+    ['exports no adapter factory', () => Promise.resolve({})],
+  ])('warns and keeps the standard adapters when the package %s', async (_case, load) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const pipeline = await createMusicPipeline({ USE_PRIVATE_MUSIC_PACKAGE: 'true' }, load);
+
+    expect(pipeline.getAdapter('youtube')).toBeUndefined();
+    expect(pipeline.getAdapters()).toHaveLength(4);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('continuing without it'));
   });
 });

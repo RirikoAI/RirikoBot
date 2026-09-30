@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "STORY-172",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -1396,8 +1396,8 @@
       "id": "STORY-172",
       "epic": "EPIC-005",
       "title": "Per-Source Music Toggles & Pluggable Source Adapters",
-      "points": 5,
-      "status": "IN_PROGRESS",
+      "points": 8,
+      "status": "REVIEW",
       "requires": [],
       "blocks": [],
       "children": [
@@ -3720,13 +3720,13 @@
       "id": "TASK-1722",
       "parent": "STORY-172",
       "title": "Move the YouTube Fallback Extractor into a Separate Private Repository",
-      "points": 2,
-      "status": "TODO",
+      "points": 5,
+      "status": "REVIEW",
       "requires": [
         "TASK-1721"
       ],
       "blocks": [],
-      "description": "A private: true workspace package inside this public repository is still public source, so the extractor must live in a separate private repository. Move youtube.adapter, po-token.service, cookie-rotator, client-spoofing, their tests, their dependencies (youtubei.js, @distube/ytdl-core, jsdom, youtube-po-token-generator; play-dl stays) and the CLI PO-token and browser-harvester tooling there. The public bot loads it with a dynamic import only when USE_PRIVATE_MUSIC_PACKAGE=true, and starts without it (warning, Lavalink still plays YouTube) when it is missing. Public install, build, lint and tests must not depend on it. Estimate pending re-grooming (proposed 5 pts; story 8 pts) and the private repository location."
+      "description": "The YouTube fallback extractor now lives in the private repository RirikoAI/ririko-music-private (initial commit 5d4a891), cloned by maintainers into the gitignored packages/music-private: youtube.adapter, po-token.service, cookie-rotator, client-spoofing, their tests, and the po-token CLI with the Playwright browser harvester. Removed from the public repository with youtubei.js, @distube/ytdl-core, jsdom, youtube-po-token-generator and playwright (play-dl stays for SoundCloud and Spotify), the YOUTUBE_* config keys and docs. apps/bot/src/music-sources.ts dynamically imports packages/music-private/dist/index.js only when USE_PRIVATE_MUSIC_PACKAGE=true and continues with a warning when it is missing. The folder is excluded from git, the pnpm workspace and lockfile, ESLint, Prettier and Vitest. Re-estimated from 2 to 5 pts (story 5 to 8) on 2026-09-30."
     }
   ],
   "chores": [

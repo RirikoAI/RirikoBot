@@ -42,6 +42,9 @@ storage/
 *.sqlite-shm
 temp-*/
 
+# Private music package (separate private repository, cloned here by maintainers)
+/packages/music-private/
+
 # go-librespot session: holds authorized Spotify credentials and the downloaded binary
 .cache/
 

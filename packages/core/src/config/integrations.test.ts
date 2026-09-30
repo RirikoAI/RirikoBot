@@ -31,7 +31,7 @@ describe('integrationStatus (TASK-1164)', () => {
       'music.spotify': true,
       // Turned off even though a host is set.
       'music.lavalink': false,
-      'music.youtube': false,
+      'music.private': false,
     });
   });
 

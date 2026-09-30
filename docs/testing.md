@@ -87,5 +87,5 @@ Git hooks (Husky, installed by `pnpm install`) run the lint checks locally:
 - The `test` job runs on Linux in UTC with FFmpeg and `fonts-dejavu-core` installed. Tests must not depend on the host time zone, path style or locally installed fonts.
 - **Tests run offline.** `vitest.setup.ts` refuses every connection and DNS lookup to a host other than loopback (`localhost`, `127.*`, `::1`), and fails the test that tried with `This test tried to reach the network: <hosts>`. Live calls used to pass or time out depending on how fast YouTube, Spotify, SoundCloud or Deezer answered CircleCI.
   - Replace the client with a fake: `vi.mock` the SDK module (see `packages/music/src/extractors/extractors.test.ts`), `vi.stubGlobal('fetch', ...)`, or pass a `fetchFn` where the class accepts one.
-  - A YouTube adapter generates a PO token from youtube.com in the background. Build it with `autoGeneratePoToken: false` (or `youtubeOptions: { autoGeneratePoToken: false }`). `vitest.config.ts` sets `YOUTUBE_PO_TOKEN` and `YOUTUBE_VISITOR_DATA` so `createBotServices` skips it too.
+  - `vitest.config.ts` sets `USE_PRIVATE_MUSIC_PACKAGE=false`, so `createBotServices` never loads the private music package during tests. `packages/music-private` is excluded from the public test run and coverage.
   - Do not skip a test on CI to hide a live call. Fake the service instead.
