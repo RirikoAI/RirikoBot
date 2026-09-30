@@ -1,5 +1,17 @@
 # Command System & Interactive Help Specification (Ririko AI 2.0.0)
 
+## Message context menu: Translate to English
+
+Right-click a message, then choose **Apps → Translate to English**. On mobile, open the message's action menu and choose Apps. The bot immediately acknowledges privately and returns an **ephemeral** English translation visible only to the person who invoked it. Errors and cooldown responses are private too.
+
+- Translates the selected message's text and readable embed text (titles, descriptions, fields, author and footer). It does not perform OCR or read attachments, linked pages, or surrounding conversation.
+- Uses the existing AI provider fallback chain and the server's provider/model preference. An available AI provider must be configured. Translation does not read or write conversation history and cannot invoke tools.
+- Already-English text is preserved. Input is limited to 12,000 characters; oversized inputs are rejected instead of silently cut off. Results over Discord's 2,000-character message limit are attached as `translation-en.txt` in the ephemeral reply.
+- Uses the canonical command name `translate` for server/channel overrides and its default 10-second per-user cooldown. This feature is context-menu-only; `/translate` and prefix translation are not registered.
+- The normal startup command synchronization registers the type-3 message command alongside slash commands, globally or in `DISCORD_DEV_GUILD_ID` when configured. Restart the updated bot to synchronize it; global command visibility can take time to refresh in Discord.
+
+Implementation: `CommandMetadata.messageContextMenuName` registers an additional message menu through the shared registry/synchronizer. Its `CommandContext.source` is `context-menu`, with `raw.targetMessage` as the selected message. It goes through the same middleware and usage hook as other commands.
+
 ## 1. Dual-Dispatch Architecture & Parity
 In Ririko AI 2.0.0, every user-facing command supports both **Slash Commands** (`/command`) and **Prefix Commands** (`!command` or custom guild prefix). Business logic is never implemented twice.
 

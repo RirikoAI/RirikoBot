@@ -1,7 +1,11 @@
-import type { Client, Interaction, Message } from 'discord.js';
+import { MessageFlags, type Client, type Interaction, type Message } from 'discord.js';
 import { CommandRegistry } from './registry.js';
 import type { CommandRouterOptions } from './types.js';
-import { SlashCommandContext, PrefixCommandContext } from '../command/context.js';
+import {
+  SlashCommandContext,
+  PrefixCommandContext,
+  MessageContextMenuCommandContext,
+} from '../command/context.js';
 import { tokenizeCommandArgs } from '../command/tokenizer.js';
 import type { CommandContext } from '../command/types.js';
 import { RirikoError } from '@ririko/core';
@@ -64,6 +68,24 @@ export class CommandRouter {
    * Returns true if handled, false if ignored.
    */
   public async dispatchInteraction(interaction: Interaction): Promise<boolean> {
+    if (interaction.isMessageContextMenuCommand?.()) {
+      const command = this.registry.getMessageContextMenu(interaction.commandName);
+      if (!command) return false;
+
+      // Acknowledge privately before any middleware database lookups or provider requests.
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+      const ctx = new MessageContextMenuCommandContext(interaction, command);
+      try {
+        await this.pipeline.execute(ctx, async () => {
+          this.notifyCommandRun(ctx);
+          await command.execute(ctx);
+        });
+      } catch (error) {
+        await this.handleError(ctx, error);
+      }
+      return true;
+    }
+
     if (interaction.isAutocomplete()) {
       const commandName = interaction.commandName;
       const command = this.registry.get(commandName);
@@ -87,7 +109,9 @@ export class CommandRouter {
 
     if (command.metadata.slashEnabled === false) {
       await interaction.reply({
-        content: `This command is only available as a prefix command (\`${this.options.defaultPrefix}${command.metadata.name}\`).`,
+        content: command.metadata.messageContextMenuName
+          ? `Right-click a message → Apps → ${command.metadata.messageContextMenuName}.`
+          : `This command is only available as a prefix command (\`${this.options.defaultPrefix}${command.metadata.name}\`).`,
         ephemeral: true,
       });
       return true;
@@ -167,7 +191,9 @@ export class CommandRouter {
 
     if (command.metadata.prefixEnabled === false) {
       await message.reply(
-        `This command is only available as a slash command (\`/${command.metadata.name}\`).`,
+        command.metadata.messageContextMenuName
+          ? `Right-click a message → Apps → ${command.metadata.messageContextMenuName}.`
+          : `This command is only available as a slash command (\`/${command.metadata.name}\`).`,
       );
       return true;
     }
@@ -238,7 +264,9 @@ export class CommandRouter {
     const replyContent = `${prefixIcon} ${userMessage}`;
 
     try {
-      if (ctx.isReplied || ctx.isDeferred) {
+      if (ctx.source === 'context-menu' && ctx.isDeferred && !ctx.isReplied) {
+        await ctx.editReply({ content: replyContent, allowedMentions: { parse: [] } });
+      } else if (ctx.isReplied || ctx.isDeferred) {
         await ctx.followUp({ content: replyContent, ephemeral: true });
       } else {
         await ctx.reply({ content: replyContent, ephemeral: true });

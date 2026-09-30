@@ -9,6 +9,7 @@ export class CommandRegistry {
   private readonly commands = new Map<string, Command>();
   private readonly aliases = new Map<string, string>();
   private readonly categories = new Map<CommandCategory, Set<string>>();
+  private readonly messageContextMenus = new Map<string, Command>();
 
   /**
    * Registers a command into the registry.
@@ -26,6 +27,13 @@ export class CommandRegistry {
 
     if (this.aliases.has(name)) {
       throw new ValidationError(`Command name "${name}" collides with an existing command alias.`);
+    }
+
+    const menuName = command.metadata.messageContextMenuName;
+    if (menuName !== undefined) {
+      if (!menuName.trim() || menuName.length > 32 || this.messageContextMenus.has(menuName)) {
+        throw new ValidationError('Message context menu names must be unique and 1–32 characters.');
+      }
     }
 
     // Register primary command
@@ -61,6 +69,7 @@ export class CommandRegistry {
       this.categories.set(category, categorySet);
     }
     categorySet.add(name);
+    if (menuName !== undefined) this.messageContextMenus.set(menuName, command);
 
     return this;
   }
@@ -89,6 +98,9 @@ export class CommandRegistry {
 
     // Remove primary command
     this.commands.delete(primaryName);
+    if (command.metadata.messageContextMenuName) {
+      this.messageContextMenus.delete(command.metadata.messageContextMenuName);
+    }
 
     // Remove aliases
     if (command.metadata.aliases) {
@@ -131,6 +143,10 @@ export class CommandRegistry {
     return this.get(nameOrAlias) !== undefined;
   }
 
+  public getMessageContextMenu(name: string): Command | undefined {
+    return this.messageContextMenus.get(name);
+  }
+
   /**
    * Returns an array of all registered commands.
    */
@@ -171,5 +187,6 @@ export class CommandRegistry {
     this.commands.clear();
     this.aliases.clear();
     this.categories.clear();
+    this.messageContextMenus.clear();
   }
 }

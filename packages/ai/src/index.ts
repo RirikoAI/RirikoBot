@@ -6,3 +6,4 @@ export * from './memory/index.js';
 export * from './personality/index.js';
 export * from './tools/index.js';
 export * from './security/index.js';
+export * from './translation.service.js';
