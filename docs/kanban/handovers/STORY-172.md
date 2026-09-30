@@ -2,7 +2,7 @@
 
 - **Ticket Type & Points**: Story | 8 pts (parent `EPIC-005`; `TASK-1721` 3 pts, `TASK-1722` 5 pts, re-estimated from 2 on 2026-09-30)
 - **Author / Agent**: Claude Code
-- **Status**: REVIEW (both tasks code complete on `feat/STORY-172-music-source-toggles`; not pushed, no PR yet)
+- **Status**: REVIEW (PR [#667](https://github.com/RirikoAI/RirikoBot/pull/667), branch `feat/STORY-172-music-source-toggles`)
 - **Timestamp**: 2026-09-30T04:10:00Z
 
 ## 1. Summary of Work Accomplished
@@ -37,7 +37,7 @@ YouTube playback stays on Lavalink (`youtube-plugin`). The in-process YouTube fa
 
 ## 2. Current State & Verification
 
-- Branch `feat/STORY-172-music-source-toggles` (TASK-1721 in `0936075`, TASK-1722 in the following commit). Not pushed.
+- Branch `feat/STORY-172-music-source-toggles` (TASK-1721 in `0936075`, TASK-1722 in `eaa48c2`), open as PR [#667](https://github.com/RirikoAI/RirikoBot/pull/667) against `develop/2.0.0`.
 - Public: `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm typecheck`, `pnpm lint` (0 errors) and `pnpm test:coverage` pass: 259 test files, 2511 tests; statements 68.29%, branches 58.16%, functions 69.72%, lines 69.63% (thresholds 65/54/69/67).
 - Private: `pnpm --dir packages/music-private install --ignore-workspace`, `build` and `test` (5 files, 28 tests) pass. `po-token --help` works.
 - End to end with the built bot: flag on loads `youtube,spotify,soundcloud,deezer,direct` with Spotify wired as the metadata resolver; flag off loads the four standard adapters; flag on with `dist` removed logs the warning and loads the four standard adapters.
@@ -69,7 +69,7 @@ YouTube playback stays on Lavalink (`youtube-plugin`). The in-process YouTube fa
 
 ## 4. Actionable Next Steps for Next Session / Continuing Agent
 
-1. Ask the maintainer whether to push `feat/STORY-172-music-source-toggles` and open a PR to `develop/2.0.0` (the maintainer merges after CI passes).
-2. After the PR, run the bot once without Lavalink and play a YouTube link and a Spotify link to confirm the fallback player with the private package.
+1. The maintainer verifies PR #667 and merges it after CI passes.
+2. After the merge, run the bot once without Lavalink and play a YouTube link and a Spotify link to confirm the fallback player with the private package.
 3. Other maintainers: follow the setup steps in the private repository's README.
 4. When the PR merges, move `STORY-172`, `TASK-1721` and `TASK-1722` to DONE and link the PR here.
