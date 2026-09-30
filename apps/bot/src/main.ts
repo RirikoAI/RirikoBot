@@ -1,4 +1,5 @@
 import { ensureAdventureSchema, ensureCardSerialSchema } from '@ririko/database';
+import { createTranslateCommand } from './commands/ai/translate.command.js';
 import {
   createBot,
   getBotInfo,
@@ -187,6 +188,7 @@ export async function main(): Promise<void> {
     musicController,
   });
   const aiCommands = createAiCommands(services, aiController);
+  router.registry.register(createTranslateCommand(services));
   // AI settings saved on the dashboard or with `ririko guild:config` (the channel is cached).
   services.eventBus.on('guild:configChanged', ({ guildId, module }) => {
     if (module === 'ai') aiController.invalidateChannelCache(guildId);

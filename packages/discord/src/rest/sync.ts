@@ -1,8 +1,10 @@
 import {
   ApplicationCommandOptionType,
+  ApplicationCommandType,
   Routes,
   type REST,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
+  type RESTPostAPIApplicationCommandsJSONBody,
   type APIApplicationCommandOption,
 } from 'discord.js';
 import type { CommandRegistry } from '../router/registry.js';
@@ -122,13 +124,29 @@ export class CommandSynchronizer {
    */
   public generatePayloads(
     options: CommandSyncOptions = {},
-  ): RESTPostAPIChatInputApplicationCommandsJSONBody[] {
+  ): RESTPostAPIApplicationCommandsJSONBody[] {
     const filterSlash = options.filterSlashEnabled ?? true;
     const commands = this.registry
       .getAll()
       .filter((cmd) => (filterSlash ? cmd.metadata.slashEnabled !== false : true));
 
-    return commands.map(buildCommandPayload);
+    const payloads: RESTPostAPIApplicationCommandsJSONBody[] = commands.map(buildCommandPayload);
+    for (const { metadata } of this.registry.getAll()) {
+      if (!metadata.messageContextMenuName) continue;
+      payloads.push({
+        name: metadata.messageContextMenuName,
+        type: ApplicationCommandType.Message,
+        ...(metadata.isGuildOnly !== undefined ? { dm_permission: !metadata.isGuildOnly } : {}),
+        ...(metadata.userPermissions?.length
+          ? {
+              default_member_permissions: metadata.userPermissions
+                .reduce((a, b) => a | b, 0n)
+                .toString(),
+            }
+          : {}),
+      });
+    }
+    return payloads;
   }
 
   /**
