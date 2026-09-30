@@ -41,6 +41,7 @@ export function createAutoRoleCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'autorole',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description:
         'Configure automatic join roles for humans and bots, or setup verification roles',

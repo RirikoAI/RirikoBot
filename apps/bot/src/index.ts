@@ -50,3 +50,5 @@ export * from './commands/reminders/index.js';
 export * from './commands/utility/index.js';
 export * from './controllers/index.js';
 export * from './listeners/index.js';
+export * from './command-set.js';
+export * from './command-sync.js';

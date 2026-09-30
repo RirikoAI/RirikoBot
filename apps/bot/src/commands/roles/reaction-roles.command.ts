@@ -23,6 +23,7 @@ export function createReactionRolesCommand(services: BotServices): Command {
   return {
     metadata: {
       name: 'reaction-roles',
+      registrationScope: 'guild',
       category: CommandCategory.UTILITY,
       description: 'List all reaction roles in the guild and optionally remove one',
       aliases: ['reactionroles', 'rr'],

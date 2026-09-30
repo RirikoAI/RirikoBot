@@ -68,12 +68,20 @@ export interface CommandOptionDefinition {
   maxLength?: number | undefined;
 }
 
+export type CommandRegistrationScope = 'global' | 'guild';
+
 export interface CommandMetadata {
   name: string;
   category: CommandCategory;
   description: string;
   aliases?: string[] | undefined;
   slashEnabled?: boolean | undefined;
+  /**
+   * Where the slash command is registered with Discord (default `'global'`). Admin and setup
+   * commands use `'guild'`, so each scope stays under Discord's 100 slash command limit.
+   * Context menus are always global.
+   */
+  registrationScope?: CommandRegistrationScope | undefined;
   prefixEnabled?: boolean | undefined;
   /** Registers an additional message context menu, using this case-sensitive display name. */
   messageContextMenuName?: string | undefined;

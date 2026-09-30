@@ -1,4 +1,4 @@
-# Ririko AI 2.0.0 — Live Scrum Kanban Board
+⚡ In Progress |✅ Done ||✅ Done |# Ririko AI 2.0.0 — Live Scrum Kanban Board
 
 > **Board Invariant**: Only **EXACTLY ONE** ticket may be in `⚡ In Progress` at any time across all agents and subagents.
 > If a new ticket must be started while one is active, the agent must **STOP AND ASK THE USER** whether to `PAUSE` or `ABANDON` the current ticket.
@@ -11,7 +11,7 @@ None.
 ---
 
 ## 🔍 In Review
-See STORY-170, TASK-1705 and STORY-173 in the story tables below, and STORY-172 (TASK-1721, TASK-1722) under **Groomed Tasks for EPIC-005**.
+See STORY-170, TASK-1705, STORY-173 and STORY-174 in the story tables below, and STORY-172 (TASK-1721, TASK-1722) under **Groomed Tasks for EPIC-005**.
 
 | ID | Type | Title | Pts | Epic / Parent | Handover Note |
 |---|---|---|---|---|---|
@@ -448,3 +448,14 @@ Groomed 2026-09-26. WIP is held by the active child only. Parent points are the 
 | ID | Type | Title | Pts | Parent | Status |
 |---|---|---|---|---|---|
 | `STORY-173` | Story | Private Message Context Menu Translation to English | 5 | `EPIC-003` | 🔍 Review · [STORY-173.md](handovers/STORY-173.md) |
+
+### 📋 Groomed Stories & Tasks for EPIC-003 — Command Registration Scopes
+
+| ID | Type | Title | Pts | Parent | Status |
+|---|---|---|---|---|---|
+| `STORY-174` | Story | Scoped Command Registration (Global vs Per-Server) & CLI Command Sync | 8 | `EPIC-003` | 🔍 Review · [STORY-174.md](handovers/STORY-174.md) |
+| `TASK-1741` | Task | Sunset 17 Legacy Slash Aliases to Prefix-Only | 1 | `STORY-174` | ✅ Done |
+| `TASK-1742` | Task | registrationScope Metadata, Scoped Synchronizer, Per-Scope Limit Guards & Per-Server Tags | 2 | `STORY-174` | ✅ Done |
+| `TASK-1743` | Task | Extract the Reusable Bot Command Set out of main() | 2 | `STORY-174` | ✅ Done |
+| `TASK-1744` | Task | CLI commands:sync and commands:reset | 2 | `STORY-174` | ✅ Done |
+| `TASK-1745` | Task | Scoped Startup Sync & guildCreate Registration | 1 | `STORY-174` | ✅ Done |

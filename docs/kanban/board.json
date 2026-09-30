@@ -1415,6 +1415,23 @@
       "requires": [],
       "blocks": [],
       "description": "Register and route Translate to English message context menu commands through the existing middleware, translate message and embed text using configured AI providers without chat history or tools, and return only ephemeral results and errors."
+    },
+    {
+      "id": "STORY-174",
+      "epic": "EPIC-003",
+      "title": "Scoped Command Registration (Global vs Per-Server) & CLI Command Sync",
+      "points": 8,
+      "status": "REVIEW",
+      "requires": [],
+      "blocks": [],
+      "children": [
+        "TASK-1741",
+        "TASK-1742",
+        "TASK-1743",
+        "TASK-1744",
+        "TASK-1745"
+      ],
+      "description": "Discord allows 100 slash commands per scope; the bot sent 116 to one scope, so the whole sync was rejected. Retire 17 legacy aliases to prefix-only, register admin/config commands per server and member commands globally (68 global, 31 per server), guard every per-scope limit before calling Discord, and re-register from the CLI (ririko commands:sync, commands:reset) without restarting the bot. Handover: docs/kanban/handovers/STORY-174.md."
     }
   ],
   "tasks": [
@@ -3737,6 +3754,64 @@
       ],
       "blocks": [],
       "description": "The YouTube fallback extractor now lives in the private repository RirikoAI/ririko-music-private (initial commit 5d4a891), cloned by maintainers into the gitignored packages/music-private: youtube.adapter, po-token.service, cookie-rotator, client-spoofing, their tests, and the po-token CLI with the Playwright browser harvester. Removed from the public repository with youtubei.js, @distube/ytdl-core, jsdom, youtube-po-token-generator and playwright (play-dl stays for SoundCloud and Spotify), the YOUTUBE_* config keys and docs. apps/bot/src/music-sources.ts dynamically imports packages/music-private/dist/index.js only when USE_PRIVATE_MUSIC_PACKAGE=true and continues with a warning when it is missing. The folder is excluded from git, the pnpm workspace and lockfile, ESLint, Prettier and Vitest. Re-estimated from 2 to 5 pts (story 5 to 8) on 2026-09-30."
+    },
+    {
+      "id": "TASK-1741",
+      "parent": "STORY-174",
+      "title": "Sunset 17 Legacy Slash Aliases to Prefix-Only",
+      "points": 1,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [],
+      "description": "Set slashEnabled: false on the giveaway (gcreate, gend, greroll, gdelete, gedit, glist), autovoice (avc, vname, vlimit, vlock, vunlock, vpermit, vkick, vclaim, vtransfer) and stream (subscribe, unsubscribe) aliases. Prefix use is unchanged."
+    },
+    {
+      "id": "TASK-1742",
+      "parent": "STORY-174",
+      "title": "registrationScope Metadata, Scoped Synchronizer, Per-Scope Limit Guards & Per-Server Tags",
+      "points": 2,
+      "status": "DONE",
+      "requires": [
+        "TASK-1741"
+      ],
+      "blocks": [],
+      "description": "CommandMetadata.registrationScope (global default, guild for 31 admin/config commands); generatePayloads per scope with context menus global only; COMMAND_LIMITS guard (100 chat-input, 15 message, 15 user) before REST; shared paginated listGuilds."
+    },
+    {
+      "id": "TASK-1743",
+      "parent": "STORY-174",
+      "title": "Extract the Reusable Bot Command Set out of main()",
+      "points": 2,
+      "status": "DONE",
+      "requires": [
+        "TASK-1742"
+      ],
+      "blocks": [],
+      "description": "createCommandControllers and registerBotCommands in apps/bot/src/command-set.ts, used by main() and the CLI with no runtime behavior change."
+    },
+    {
+      "id": "TASK-1744",
+      "parent": "STORY-174",
+      "title": "CLI commands:sync and commands:reset",
+      "points": 2,
+      "status": "DONE",
+      "requires": [
+        "TASK-1743"
+      ],
+      "blocks": [],
+      "description": "ririko commands:sync --global | --guild <id> | --all-guilds (counts only without a target) and ririko commands:reset (list, then --yes to clear every scope)."
+    },
+    {
+      "id": "TASK-1745",
+      "parent": "STORY-174",
+      "title": "Scoped Startup Sync & guildCreate Registration",
+      "points": 1,
+      "status": "DONE",
+      "requires": [
+        "TASK-1744"
+      ],
+      "blocks": [],
+      "description": "SYNC_COMMANDS=true syncs the global set and the guild set (DISCORD_DEV_GUILD_ID or every guild); joining a server registers its guild set. Docs updated."
     }
   ],
   "chores": [

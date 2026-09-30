@@ -13,6 +13,8 @@ import { registerGuildConfigCommand } from './commands/guild-config.js';
 import { registerEconomyConfigCommand } from './commands/economy-config.js';
 import { registerTcgRulesCommand } from './commands/tcg-rules.js';
 import { registerPasskeysResetCommand } from './commands/passkeys-reset.js';
+import { registerCommandsResetCommand } from './commands/commands-reset.js';
+import { registerCommandsSyncCommand } from './commands/commands-sync.js';
 
 export function loadEnvConfig(customPath?: string): void {
   if (customPath) {
@@ -65,6 +67,8 @@ export function createProgram(): Command {
   registerEconomyConfigCommand(program);
   registerTcgRulesCommand(program);
   registerPasskeysResetCommand(program);
+  registerCommandsSyncCommand(program);
+  registerCommandsResetCommand(program);
 
   // Global error handler
   program.exitOverride();
