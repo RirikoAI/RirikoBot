@@ -23,7 +23,6 @@ interface Ticket {
   title: string;
   points: number;
   status: Status;
-  epic?: string;
   parent?: string;
   description?: string;
 }
@@ -78,7 +77,7 @@ const ACTIVE: readonly Status[] = ['IN_PROGRESS', 'REVIEW', 'PAUSED'];
 /** Epic progress counts story points; tasks only break stories down, so they would double count. */
 export function buildStatusModel(board: Board): StatusModel {
   const epics = board.epics.map((epic): EpicProgress => {
-    const stories = board.stories.filter((s) => s.epic === epic.id && s.status !== 'ABANDONED');
+    const stories = board.stories.filter((s) => s.parent === epic.id && s.status !== 'ABANDONED');
     const sum = (list: Ticket[]) => list.reduce((acc, s) => acc + s.points, 0);
     return {
       id: epic.id,
@@ -96,7 +95,7 @@ export function buildStatusModel(board: Board): StatusModel {
     title: t.title,
     points: t.points,
     status: t.status,
-    parent: t.epic ?? t.parent ?? '',
+    parent: t.parent ?? '',
   });
 
   const typed: [string, Ticket[]][] = [
