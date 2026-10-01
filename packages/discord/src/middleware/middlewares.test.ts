@@ -4,7 +4,7 @@ import { createPermissionMiddleware, resolvePermissionNames } from './permission
 import { createMaintenanceMiddleware } from './maintenance.js';
 import { createModuleToggleMiddleware } from './modules.js';
 import { createCooldownMiddleware } from './cooldown.js';
-import { createRateLimitMiddleware } from './ratelimit.js';
+import { createRateLimitMiddleware, isRateLimitBypassed } from './ratelimit.js';
 import { CommandCategory, type Command, type CommandContext } from '../command/types.js';
 import {
   CommandGuildOnlyError,
@@ -180,6 +180,198 @@ describe('Built-in Middlewares (TASK-0322)', () => {
 
       await mw(ctxBotHasPerms, next);
       expect(next).toHaveBeenCalledOnce();
+    });
+
+    it('implicitly requires guild when userPermissions or botPermissions are specified', async () => {
+      const userPermCmd: Command = {
+        metadata: {
+          name: 'warn',
+          category: CommandCategory.MODERATION,
+          description: 'Warn',
+          userPermissions: [PermissionFlagsBits.ModerateMembers],
+        },
+        execute: vi.fn(),
+      };
+
+      const dmCtx = {
+        command: userPermCmd,
+        guild: null,
+        user: { id: 'u1' },
+      } as unknown as CommandContext;
+
+      await expect(mw(dmCtx, next)).rejects.toThrow(CommandGuildOnlyError);
+      expect(next).not.toHaveBeenCalled();
+
+      const botPermCmd: Command = {
+        metadata: {
+          name: 'botaction',
+          category: CommandCategory.UTILITY,
+          description: 'Bot action',
+          botPermissions: [PermissionFlagsBits.ManageChannels],
+        },
+        execute: vi.fn(),
+      };
+
+      const dmBotCtx = {
+        command: botPermCmd,
+        guild: null,
+        user: { id: 'u1' },
+      } as unknown as CommandContext;
+
+      await expect(mw(dmBotCtx, next)).rejects.toThrow(CommandGuildOnlyError);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('allows guild owner to bypass user permissions check', async () => {
+      const cmd: Command = {
+        metadata: {
+          name: 'ban',
+          category: CommandCategory.MODERATION,
+          description: 'Ban user',
+          userPermissions: [PermissionFlagsBits.BanMembers],
+        },
+        execute: vi.fn(),
+      };
+
+      // User without BanMembers, but is the guild owner
+      const memberWithoutPerms = {
+        permissions: {
+          has: vi.fn().mockReturnValue(false),
+        },
+      };
+
+      const ownerCtx = {
+        command: cmd,
+        guild: { id: 'g1', ownerId: 'server-owner-id' },
+        member: memberWithoutPerms,
+        user: { id: 'server-owner-id' },
+      } as unknown as CommandContext;
+
+      await mw(ownerCtx, next);
+      expect(next).toHaveBeenCalledOnce();
+    });
+
+    it('resolves user permissions from raw slash interaction memberPermissions', async () => {
+      const cmd: Command = {
+        metadata: {
+          name: 'kick',
+          category: CommandCategory.MODERATION,
+          description: 'Kick user',
+          userPermissions: [PermissionFlagsBits.KickMembers],
+        },
+        execute: vi.fn(),
+      };
+
+      const interactionPermissions = {
+        has: vi.fn((perm: bigint) => perm === PermissionFlagsBits.KickMembers),
+      };
+
+      const interactionCtx = {
+        command: cmd,
+        guild: { id: 'g1', ownerId: 'someone-else' },
+        member: null,
+        raw: { memberPermissions: interactionPermissions },
+        user: { id: 'slash-user' },
+      } as unknown as CommandContext;
+
+      await mw(interactionCtx, next);
+      expect(next).toHaveBeenCalledOnce();
+      expect(interactionPermissions.has).toHaveBeenCalledWith(PermissionFlagsBits.KickMembers);
+    });
+
+    it('fetches member from guild when ctx.member is missing', async () => {
+      const cmd: Command = {
+        metadata: {
+          name: 'mute',
+          category: CommandCategory.MODERATION,
+          description: 'Mute',
+          userPermissions: [PermissionFlagsBits.ModerateMembers],
+        },
+        execute: vi.fn(),
+      };
+
+      const fetchedMember = {
+        permissions: {
+          has: vi.fn().mockReturnValue(true),
+        },
+      };
+
+      const fetchFn = vi.fn().mockResolvedValue(fetchedMember);
+      const ctx = {
+        command: cmd,
+        guild: {
+          id: 'g1',
+          ownerId: 'other',
+          members: { fetch: fetchFn },
+        },
+        member: null,
+        raw: {},
+        user: { id: 'uncached-user' },
+      } as unknown as CommandContext;
+
+      await mw(ctx, next);
+      expect(fetchFn).toHaveBeenCalledWith('uncached-user');
+      expect(next).toHaveBeenCalledOnce();
+    });
+
+    it('fetches bot member via fetchMe() when ctx.guild.members.me is null', async () => {
+      const cmd: Command = {
+        metadata: {
+          name: 'role',
+          category: CommandCategory.MODERATION,
+          description: 'Manage role',
+          botPermissions: [PermissionFlagsBits.ManageRoles],
+        },
+        execute: vi.fn(),
+      };
+
+      const fetchedBot = {
+        permissions: {
+          has: vi.fn().mockReturnValue(true),
+        },
+      };
+
+      const fetchMeFn = vi.fn().mockResolvedValue(fetchedBot);
+      const ctx = {
+        command: cmd,
+        guild: {
+          id: 'g1',
+          members: { me: null, fetchMe: fetchMeFn },
+        },
+        member: null,
+        user: { id: 'u1' },
+      } as unknown as CommandContext;
+
+      await mw(ctx, next);
+      expect(fetchMeFn).toHaveBeenCalled();
+      expect(next).toHaveBeenCalledOnce();
+    });
+
+    it('throws CommandPermissionError when permissions cannot be resolved in guild', async () => {
+      const cmd: Command = {
+        metadata: {
+          name: 'ban',
+          category: CommandCategory.MODERATION,
+          description: 'Ban',
+          userPermissions: [PermissionFlagsBits.BanMembers],
+        },
+        execute: vi.fn(),
+      };
+
+      const ctxUnresolvable = {
+        command: cmd,
+        guild: {
+          id: 'g1',
+          ownerId: 'other',
+          members: { fetch: vi.fn().mockResolvedValue(null) },
+        },
+        member: null,
+        raw: {},
+        user: { id: 'ghost-user' },
+      } as unknown as CommandContext;
+
+      await expect(mw(ctxUnresolvable, next)).rejects.toThrow(CommandPermissionError);
+      expect(next).not.toHaveBeenCalled();
     });
   });
 
@@ -403,6 +595,99 @@ describe('Built-in Middlewares (TASK-0322)', () => {
       // 5. Fourth request passes
       await mw(ctx, next);
       expect(next).toHaveBeenCalledTimes(3);
+      vi.useRealTimers();
+    });
+
+    it('applies defaultLimit when command does not specify rateLimit metadata', async () => {
+      let clock = 1000;
+      const mw = createRateLimitMiddleware({
+        defaultLimit: { max: 2, windowSeconds: 10 },
+        now: () => clock,
+      });
+
+      const cmd: Command = {
+        metadata: {
+          name: 'ping',
+          category: CommandCategory.GENERAL,
+          description: 'Ping',
+        },
+        execute: vi.fn(),
+      };
+
+      const ctx = {
+        command: cmd,
+        user: { id: 'u300' },
+        channelId: 'ch1',
+      } as unknown as CommandContext;
+
+      await mw(ctx, next);
+      await mw(ctx, next);
+      await expect(mw(ctx, next)).rejects.toThrow(CommandRateLimitError);
+
+      clock += 11_000;
+      await mw(ctx, next);
+      expect(next).toHaveBeenCalledTimes(3);
+    });
+
+    it('bypasses rate limit when bypass predicate returns true', async () => {
+      const clock = 1000;
+      const mw = createRateLimitMiddleware({
+        defaultLimit: { max: 1, windowSeconds: 60 },
+        bypass: (ctx) => ctx.user.id === 'owner',
+        now: () => clock,
+      });
+
+      const cmd: Command = {
+        metadata: { name: 'help', category: CommandCategory.GENERAL, description: 'Help' },
+        execute: vi.fn(),
+      };
+
+      const ownerCtx = {
+        command: cmd,
+        user: { id: 'owner' },
+        channelId: 'ch1',
+      } as unknown as CommandContext;
+
+      await mw(ownerCtx, next);
+      await mw(ownerCtx, next);
+      await mw(ownerCtx, next);
+      expect(next).toHaveBeenCalledTimes(3);
+    });
+
+    it('evaluates isRateLimitBypassed correctly for bot owners, guild owners, and admins', () => {
+      const ownerCtx = {
+        user: { id: 'owner1' },
+      } as unknown as CommandContext;
+      expect(isRateLimitBypassed(ownerCtx, ['owner1'])).toBe(true);
+      expect(isRateLimitBypassed(ownerCtx, ['other'])).toBe(false);
+
+      const guildOwnerCtx = {
+        user: { id: 'u1' },
+        guild: { ownerId: 'u1' },
+      } as unknown as CommandContext;
+      expect(isRateLimitBypassed(guildOwnerCtx)).toBe(true);
+
+      const adminCtx = {
+        user: { id: 'admin1' },
+        guild: { ownerId: 'other' },
+        member: {
+          permissions: {
+            has: (bit: bigint) => (bit & PermissionFlagsBits.Administrator) !== 0n,
+          },
+        },
+      } as unknown as CommandContext;
+      expect(isRateLimitBypassed(adminCtx)).toBe(true);
+
+      const regularCtx = {
+        user: { id: 'reg1' },
+        guild: { ownerId: 'other' },
+        member: {
+          permissions: {
+            has: () => false,
+          },
+        },
+      } as unknown as CommandContext;
+      expect(isRateLimitBypassed(regularCtx)).toBe(false);
     });
   });
 });

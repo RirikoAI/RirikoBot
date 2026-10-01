@@ -20,8 +20,10 @@ export interface MaintenanceMiddlewareOptions {
 
   /**
    * Custom message displayed when a command is blocked by maintenance.
+   * Can be a static string or a dynamic accessor function.
    */
-  maintenanceMessage?: string | undefined;
+  maintenanceMessage?:
+    string | (() => string | undefined | Promise<string | undefined>) | undefined;
 }
 
 /**
@@ -57,8 +59,13 @@ export function createMaintenanceMiddleware(
       return;
     }
 
+    const customMessage =
+      typeof options.maintenanceMessage === 'function'
+        ? await options.maintenanceMessage()
+        : options.maintenanceMessage;
+
     throw new CommandMaintenanceError(
-      options.maintenanceMessage ??
+      customMessage ??
         'Ririko is currently undergoing scheduled maintenance. Please try again later.',
     );
   };
