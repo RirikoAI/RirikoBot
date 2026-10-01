@@ -58,6 +58,8 @@ public/bosses/
 # Test and coverage reports (pnpm test:ci / test:coverage)
 coverage/
 test-results/
+# Playwright E2E report, traces and JUnit results (pnpm test:e2e)
+apps/web/e2e-results/
 # Vitest local cache and JSON reports
 .vitest/
 

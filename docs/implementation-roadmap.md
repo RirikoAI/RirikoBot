@@ -71,10 +71,11 @@ gantt
 
     section Phase 7: Quality Gates & Deploy
     CI Pipeline, Codecov & Status Site (STORY-123) :done, 2026-09-26, 2026-09-26
-    E2E Integration & Playwright Tests (STORY-120) :active, 2026-09-29, 3d
-    Rootless Dockerfile & Packaging (STORY-121)    :2026-10-02, 3d
-    Production Orchestration & Probes (STORY-122)  :2026-10-05, 3d
-    Staging Verification & Production Release      :milestone, 2026-10-08, 0d
+    E2E Integration & Playwright Tests (STORY-120) :active, 2026-10-01, 3d
+    Postgres Integration Job (STORY-124)           :2026-10-04, 2d
+    Rootless Dockerfile & Packaging (STORY-121)    :2026-10-06, 3d
+    Production Orchestration & Probes (STORY-122)  :2026-10-09, 3d
+    Staging Verification & Production Release      :milestone, 2026-10-12, 0d
 ```
 
 ---
@@ -230,15 +231,20 @@ gantt
 ---
 
 ### Phase 7: Quality Gates, Containerization & Production Deployment
-- **Status**: 🔄 **In Progress** (`EPIC-012`, 13 pts base / 18 pts groomed, 5 pts done, 13 pts To Do)
+- **Status**: 🔄 **In Progress** (`EPIC-012`, 13 pts base / 26 pts groomed, 5 pts done, 8 pts In Review, 13 pts To Do)
 - **Synchronized Stories**:
   - **`STORY-123`: CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site (5 pts)**: ✅ **Complete**
     - `TASK-1231`: One-time Prettier repository-wide baseline, CircleCI pipeline configuration (`lint`, `typecheck`, `test`, `web-build`, `gitleaks` secret scan).
     - `TASK-1232`: Vitest v8 coverage tracking with strict ratchet thresholds (lines ≥ 67%, functions ≥ 69%, statements ≥ 65%, branches ≥ 54%), JUnit test reporting, and Codecov integration.
     - `TASK-1233`: Automated Vercel project status site generated directly from the kanban board registry.
-  - **`STORY-120`: E2E Integration Tests & Quality Gates Setup (5 pts)**: 🎯 **To Do**
-    - `TASK-1201`: Setup Playwright for Web Dashboard E2E Tests (OAuth2 mock, navigation, settings mutations).
-    - `TASK-1202`: Setup Discord API Mock Harness & Integration Test Suite for bot interactions and audio playback.
+  - **`STORY-120`: E2E Integration Tests & Quality Gates Setup (8 pts, regroomed 2026-10-01)**: 🔍 **In Review**
+    - `TASK-1203`: Fake Discord HTTP API for tests (shared by the bot harness and the dashboard E2E) and an optional `DISCORD_API_URL` web config seam.
+    - `TASK-1202`: Bot gateway harness (raw gateway packets, fake Discord REST) and integration suite for prefix/slash dispatch, component interactions and command sync. Audio playback is out of scope.
+    - `TASK-1201`: Playwright dashboard E2E (real OAuth callback against the fake, guild access, settings persistence, card album) and a CircleCI `e2e` job.
+  - **`STORY-124`: Postgres Integration Job (5 pts)**: 🎯 **To Do**
+    - `TASK-1241`: CircleCI Postgres service and a dialect-parameterized repository suite.
+    - `TASK-1242`: Postgres trade/market concurrency tests and AI provider fallback through `createBotServices`.
+  - **`STORY-125`: Raise Test Coverage Toward 80%**: 📥 **Backlog** (ungroomed)
   - **`STORY-121`: Rootless Dockerfile & Containerization (5 pts)**: 🎯 **To Do**
     - `TASK-1211`: Multi-stage Rootless Dockerfile for Next.js Web Dashboard (`nodejs` unprivileged user, standalone output).
     - `TASK-1212`: Multi-stage Rootless Dockerfile for Discord Bot (`apps/bot`).
@@ -259,9 +265,9 @@ Phase 3:  [====================] 100% (26/26 pts)   AI Chatbot & Moderation 2.0
 Phase 4:  [====================] 100% (62/62 pts)   Parity, Media & Community
 Phase 5:  [====================] 100% (156/156 pts) Flagship Waifu TCG & Adventure RPG
 Phase 6:  [====================] 100% (120/120 pts) Next.js 16 Web Dashboard
-Phase 7:  [======..............]  27% (5/18 pts)    Quality Gates & Production Deploy
+Phase 7:  [====................]  19% (5/26 pts)    Quality Gates & Production Deploy
 -------------------------------------------------------------------------------
-TOTAL:    [===================.]  97% (485/498 pts) Overall Project Completion
+TOTAL:    [===================.]  96% (485/506 pts) Overall Project Completion
 ```
 
 ---

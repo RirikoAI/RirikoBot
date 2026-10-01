@@ -59,6 +59,24 @@ describe('DiscordOAuthClient', () => {
     expect(body.get('redirect_uri')).toBe(options.redirectUri);
   });
 
+  it('sends every request to a configured API base', async () => {
+    const fetch = vi.fn().mockResolvedValue(Response.json({ id: 'u1' }));
+    const client = new DiscordOAuthClient({
+      ...options,
+      apiBase: 'http://127.0.0.1:3199/api/v10',
+      fetch,
+    });
+
+    const authorize = new URL(client.authorizationUrl({ state: 's1', codeChallenge: 'c1' }));
+    expect(authorize.origin + authorize.pathname).toBe(
+      'http://127.0.0.1:3199/api/v10/oauth2/authorize',
+    );
+    await client.getCurrentUserGuilds('at');
+    expect(fetch.mock.calls[0]?.[0]).toBe(
+      'http://127.0.0.1:3199/api/v10/users/@me/guilds?limit=200',
+    );
+  });
+
   it('raises DiscordApiError with the status and without the response body', async () => {
     const fetch = vi
       .fn()
