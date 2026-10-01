@@ -6,7 +6,9 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-None.
+| ID | Type | Title | Pts | Epic / Parent |
+|---|---|---|---|---|
+| `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | `STORY-168` |
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "active_in_progress_ticket": "BUG-0028",
   "epics": [
     {
       "id": "EPIC-000",
@@ -4285,6 +4285,16 @@
       "requires": [],
       "blocks": [],
       "description": "Bulk stamina potion use restores all requested energy but counts one daily use. Enforce remaining allowance for the entire batch and increment by quantity."
+    },
+    {
+      "id": "BUG-0028",
+      "title": "Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint",
+      "points": 3,
+      "status": "IN_PROGRESS",
+      "parent": "STORY-168",
+      "requires": [],
+      "blocks": [],
+      "description": "CardAlbumService drew all 24 cards of a page before the HTML was sent and returned each 800x1200 PNG as a data: URL, so the album HTML (and the RSC payload, which repeats every src) carried tens of megabytes of base64. next start logged \"This rendered a large document (>512 kB) without any Suspense boundaries\". Fix: the page lists cards only, and each <img> loads its render from an owner-only GET route handler that reads the CardImageService cache (public/cards/<cardId>.png)."
     }
   ]
 }
