@@ -1227,7 +1227,7 @@
       "parent": "EPIC-012",
       "title": "Rootless Dockerfile & Containerization",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-120"
       ],
@@ -3874,7 +3874,7 @@
       "parent": "STORY-121",
       "title": "CircleCI Docker Build & Smoke Job for Bot and Web Images",
       "points": 2,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "TASK-1211",
         "TASK-1212"
