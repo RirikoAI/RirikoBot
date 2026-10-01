@@ -1223,14 +1223,53 @@
       "id": "STORY-121",
       "parent": "EPIC-012",
       "title": "Rootless Dockerfile & Containerization",
-      "points": 5,
-      "status": "BACKLOG",
+      "points": 8,
+      "status": "TODO",
       "requires": [
         "STORY-120"
       ],
       "blocks": [
         "STORY-122"
-      ]
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "Dockerfile",
+          ".dockerignore",
+          "scripts/docker-smoke.ts",
+          ".circleci/config.yml",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "findWorkspaceRoot",
+          "resolveWorkspacePath",
+          "createSqliteClient",
+          "loadWebConfig"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts",
+          "apps/web/next.config.ts"
+        ],
+        "codegraph_queries": [
+          "findWorkspaceRoot resolveWorkspacePath",
+          "bot startup main.ts createBotServices createSqliteClient resolveDatabasePath",
+          "WebConfigSchema loadWebConfig createWebServices getDatabase"
+        ]
+      },
+      "acceptance": [
+        "TASK-1212: `docker build --target bot-runner .` builds a rootless bot image (uid 10001) that passes `node scripts/docker-smoke.ts bot`.",
+        "TASK-1211: `docker build --target web-runner .` builds a rootless dashboard image (uid 10001) that passes `node scripts/docker-smoke.ts web`.",
+        "TASK-1213: the CircleCI `docker` job builds both targets and runs the smoke script, and it is green on the STORY-121 PR.",
+        "docs/deployment.md section 2.1 describes the real Dockerfile targets, run commands, writable directories and volume ownership."
+      ],
+      "verify_cmd": "docker build --target bot-runner -t ririko-bot:smoke . && docker build --target web-runner -t ririko-web:smoke . && node scripts/docker-smoke.ts bot web",
+      "handovers": [
+        "STORY-121"
+      ],
+      "description": "Groomed 2026-10-01 (5 to 8 points: TASK-1213 adds a CircleCI Docker job). One root Dockerfile with shared stages and two runner targets, bot-runner and web-runner, matching the targets the compose sketch in docs/deployment.md already names. Both images keep the monorepo layout at /app so findWorkspaceRoot resolves assets/, data/, public/cards and storage/, run as uid 10001 with only the data directories writable, and ship FFmpeg (bot) and DejaVu fonts (canvas). A zero-dependency scripts/docker-smoke.ts checks a built image; CircleCI runs it for both targets. Compose, health probes, Lavalink and the Postgres schema bootstrap stay in STORY-122."
     },
     {
       "id": "STORY-122",
@@ -3691,19 +3730,171 @@
       "id": "TASK-1211",
       "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Web Dashboard",
+      "points": 3,
+      "status": "TODO",
+      "requires": [
+        "TASK-1212"
+      ],
+      "blocks": [
+        "TASK-1213"
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "Dockerfile",
+          ".dockerignore",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md",
+          "apps/web/package.json",
+          "apps/web/next.config.ts",
+          "apps/web/src/lib/security-headers.ts",
+          "apps/web/src/lib/server/services.ts",
+          "packages/core/src/config/schema.ts"
+        ],
+        "symbols": [
+          "WebConfigSchema",
+          "loadWebConfig",
+          "createWebServices",
+          "CardAlbumService",
+          "CardImageService",
+          "CardSynthesizer",
+          "WelcomerBackgroundStore"
+        ],
+        "entry_points": [
+          "apps/web/next.config.ts"
+        ],
+        "codegraph_queries": [
+          "WebConfigSchema loadWebConfig createWebServices getDatabase",
+          "CardAlbumService loadCardImageService CardImageService CardSynthesizer",
+          "WelcomerBackgroundStore WelcomerBackgroundService",
+          "staticSecurityHeaders nextConfig"
+        ]
+      },
+      "acceptance": [
+        "The `build` stage also runs `pnpm --filter @ririko/web build` with NEXT_TELEMETRY_DISABLED=1.",
+        "A `web-deps` stage runs a production install filtered to `@ririko/web...` (with --ignore-scripts).",
+        "`web-runner` builds on `runtime` and copies apps/web/.next (without .next/cache), next.config.ts and the files it imports, the dist and package.json of every workspace package the dashboard uses, and assets/tcg. It runs `next start -H 0.0.0.0` on port 3000 as uid 10001.",
+        "Run with `--cap-drop ALL --security-opt no-new-privileges` and dummy DISCORD_TOKEN, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DASHBOARD_URL and a 64-hex SECRET_VAULT_KEY, `GET /` returns 200 from inside the container, and the logs show no permission error for .next/cache or /app/data.",
+        "`node scripts/docker-smoke.ts web` checks an already-built `ririko-web:smoke` image: uid 10001, the writable directories (data, public/cards, storage/welcomer-backgrounds, apps/web/.next/cache) and the HTTP check.",
+        "docs/deployment.md section 2.1 adds the web target and the volumes the bot and dashboard share (data, public/cards, storage/welcomer-backgrounds)."
+      ],
+      "verify_cmd": "docker build --target web-runner -t ririko-web:smoke . && node scripts/docker-smoke.ts web && pnpm lint --quiet && pnpm exec prettier --check scripts/docker-smoke.ts",
+      "handovers": [
+        "STORY-121",
+        "TASK-1211",
+        "TASK-1212"
+      ],
+      "description": "Adds the web-runner target on the stages from TASK-1212. Runs `next start` from a production-only install (no standalone output), the same way the E2E job runs the dashboard. The dashboard draws album cards with the canvas, so it needs assets/tcg, the DejaVu fonts and a writable public/cards."
+    },
+    {
+      "id": "TASK-1213",
+      "parent": "STORY-121",
+      "title": "CircleCI Docker Build & Smoke Job for Bot and Web Images",
       "points": 2,
-      "status": "BACKLOG",
-      "requires": [],
-      "blocks": []
+      "status": "TODO",
+      "requires": [
+        "TASK-1211",
+        "TASK-1212"
+      ],
+      "blocks": [],
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          ".circleci/config.yml",
+          "scripts/docker-smoke.ts",
+          "docs/testing.md"
+        ],
+        "symbols": [],
+        "entry_points": [
+          ".circleci/config.yml"
+        ],
+        "codegraph_queries": [
+          "docker-smoke.ts"
+        ]
+      },
+      "acceptance": [
+        "A new `docker` job in .circleci/config.yml uses the `node` executor with `setup_remote_docker`, builds the `bot-runner` and `web-runner` targets, and runs `node scripts/docker-smoke.ts bot web`. It is listed in `workflows.ci`.",
+        "The job pushes no image to any registry.",
+        "docs/testing.md (Continuous Integration section) lists the job and what it checks.",
+        "The first CircleCI run on the STORY-121 PR is green (the coordinator checks this at PR time; workers do not push)."
+      ],
+      "verify_cmd": "pnpm exec prettier --check .circleci/config.yml && docker build --target bot-runner -t ririko-bot:smoke . && docker build --target web-runner -t ririko-web:smoke . && node scripts/docker-smoke.ts bot web",
+      "handovers": [
+        "STORY-121",
+        "TASK-1213",
+        "TASK-1211"
+      ],
+      "description": "Added during STORY-121 grooming on 2026-10-01. Builds both images on every push so the Dockerfile cannot rot unnoticed, for example when a new workspace package is missing from the manifest COPY list. Runs the same smoke script the workers use locally."
     },
     {
       "id": "TASK-1212",
       "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Bot",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "TODO",
       "requires": [],
-      "blocks": []
+      "blocks": [
+        "TASK-1211",
+        "TASK-1213"
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "Dockerfile",
+          ".dockerignore",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md",
+          "apps/bot/package.json",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/music-sources.ts",
+          "packages/core/src/config/paths.ts",
+          "packages/database/src/client/sqlite.ts",
+          "package.json",
+          "pnpm-workspace.yaml",
+          ".npmrc"
+        ],
+        "symbols": [
+          "findWorkspaceRoot",
+          "resolveWorkspacePath",
+          "createSqliteClient",
+          "resolveDatabasePath",
+          "createMusicPipeline",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "findWorkspaceRoot resolveWorkspacePath",
+          "bot startup main.ts createBotServices createSqliteClient resolveDatabasePath",
+          "createMusicPipeline loadPrivateAdapters createAudioResource StreamType",
+          "WelcomerBackgroundStore CardImageService RENDERED_CARDS_DIR RENDERED_BOSSES_DIR"
+        ]
+      },
+      "acceptance": [
+        "A root Dockerfile has these stages: `base` (node:22-bookworm-slim, pnpm through corepack at the `packageManager` version), `build` (frozen install with HUSKY=0, then `pnpm build`), `bot-deps` (`pnpm install --prod --frozen-lockfile --ignore-scripts --filter @ririko/bot...`), `runtime` (tini, fonts-dejavu-core, ca-certificates, user `ririko` uid/gid 10001) and `bot-runner` (runtime plus ffmpeg).",
+        "`docker build --target bot-runner .` succeeds from a clean checkout. `.dockerignore` keeps packages/music-private, lavalink/, .env*, data/, storage/, public/cards, public/bosses, node_modules, dist, .next and .git out of the build context.",
+        "The container runs as uid 10001. App files are owned by root and not writable by that user; only /app/data, /app/public/cards, /app/public/bosses and /app/storage/welcomer-backgrounds are writable, and they are owned by 10001 so named volumes inherit that owner.",
+        "Run with `--cap-drop ALL --security-opt no-new-privileges` and dummy DISCORD_TOKEN and DISCORD_CLIENT_ID, the bot logs `✓ Registered <n> commands` and creates its SQLite file in /app/data, with no module-resolution or permission error. The login failure that follows is expected.",
+        "`ffmpeg -version` runs in the bot image.",
+        "scripts/docker-smoke.ts is a zero-dependency script run with Node type stripping (like scripts/build-status-site.ts). `node scripts/docker-smoke.ts bot` checks an already-built `ririko-bot:smoke` image for the three results above and exits non-zero on any failure.",
+        "docs/deployment.md section 2.1 describes the real stages, the build and run commands, the writable directories and volume ownership."
+      ],
+      "verify_cmd": "docker build --target bot-runner -t ririko-bot:smoke . && node scripts/docker-smoke.ts bot && pnpm lint --quiet && pnpm exec prettier --check scripts/docker-smoke.ts",
+      "handovers": [
+        "STORY-121",
+        "TASK-1212"
+      ],
+      "description": "First of the three STORY-121 tasks: it lays the shared Dockerfile stages, .dockerignore and the smoke script that TASK-1211 and TASK-1213 build on. Rootless bot image with FFmpeg for the fallback player, DejaVu fonts for canvas, tini as PID 1, and the monorepo layout kept at /app."
     },
     {
       "id": "TASK-1221",

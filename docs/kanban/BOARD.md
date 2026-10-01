@@ -14,7 +14,12 @@
 *None.*
 
 ## 🎯 To Do
-*None.*
+| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
+|---|---|---|---|---|---|---|---|
+| `STORY-121` | Story | Rootless Dockerfile & Containerization | 8 | EPIC-012 | STORY-120 | yes | medium |
+| `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 3 | STORY-121 | TASK-1212 | blocked | medium |
+| `TASK-1213` | Task | CircleCI Docker Build & Smoke Job for Bot and Web Images | 2 | STORY-121 | TASK-1211, TASK-1212 | blocked | small |
+| `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 | — | yes | medium |
 
 ## 🔍 Review
 *None.*
@@ -343,13 +348,10 @@
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | EPIC-011 |
-| `STORY-121` | Story | Rootless Dockerfile & Containerization | 5 | EPIC-012 |
 | `STORY-122` | Story | Production Orchestration & Health Probes | 3 | EPIC-012 |
 | `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 5 | EPIC-012 |
 | `STORY-125` | Story | Raise Test Coverage Toward 80% | ? | EPIC-012 |
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
-| `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 2 | STORY-121 |
-| `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 |
 | `TASK-1221` | Task | Implement /health and /ready probes for Bot and Web | 1 | STORY-122 |
 | `TASK-1222` | Task | docker-compose.production.yml with Redis, PostgreSQL, and App Services | 2 | STORY-122 |
 | `TASK-1241` | Task | CircleCI Postgres Service & Dialect-Parameterized Repository Suite | 3 | STORY-124 |
