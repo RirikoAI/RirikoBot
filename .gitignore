@@ -68,3 +68,4 @@ site-dist/
 
 # CodeGraph indexing metadata & locks
 .codegraph/
+.claude/settings.local.json

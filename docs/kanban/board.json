@@ -1,7 +1,42 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": null,
+  "_ticket_template": {
+    "id": "TASK-001",
+    "title": "Short imperative title",
+    "status": "BACKLOG",
+    "points": 3,
+    "parent": "STORY-001",
+    "children": [],
+    "requires": [],
+    "blocks": [],
+    "model": "medium",
+    "assignee": null,
+    "claimed_at": null,
+    "blocked_reason": null,
+    "context": {
+      "files": [
+        "src/path/to/file.ts"
+      ],
+      "symbols": [
+        "ClassName.method",
+        "functionName"
+      ],
+      "entry_points": [
+        "src/index.ts"
+      ],
+      "codegraph_queries": [
+        "ClassName.method functionName"
+      ]
+    },
+    "acceptance": [
+      "Observable result that proves the ticket is done"
+    ],
+    "verify_cmd": "npm test -- path/to/test",
+    "handovers": [
+      "TASK-001"
+    ]
+  },
   "epics": [
     {
       "id": "EPIC-000",
@@ -933,19 +968,19 @@
       "id": "STORY-165",
       "epic": "EPIC-011",
       "title": "Owner Console: Global Economy Settings & Item Shop Manager",
-      "points": 13,
+      "points": 8,
       "status": "DONE",
       "requires": [
         "STORY-115"
       ],
       "blocks": [],
-      "description": "Split from STORY-115 on 2026-09-27 (dashboard.md section 4, item 8). Balances, the daily reward and the bank are global per user, so they are edited only in the owner console (bot owners, passkey). The bot reads the values on each use instead of constants. Re-groomed 2026-09-27 at story start: bank capacity is computed live from the account-wide level (it was saved once per user and synced only on level-up with a per-guild level), categories are managed and group /shop, and the item seed part of BUG-0024 is folded in as TASK-1653 (item codes)."
+      "description": "Split from STORY-115 on 2026-09-27 (dashboard.md section 4, item 8). Balances, the daily reward and the bank are global per user, so they are edited only in the owner console (bot owners, passkey). The bot reads the values on each use instead of constants. Re-groomed 2026-09-27 at story start: bank capacity is computed live from the account-wide level (it was saved once per user and synced only on level-up with a per-guild level), categories are managed and group /shop, and the item seed part of BUG-0024 is folded in as TASK-1653 (item codes). Estimate capped at 8 in the Scrum Kanban 0.4 board migration; its tasks total 13."
     },
     {
       "id": "STORY-116",
       "epic": "EPIC-011",
       "title": "Music, AI Chatbot, Image Generation & Integrations Pages",
-      "points": 13,
+      "points": 8,
       "status": "DONE",
       "requires": [
         "STORY-111",
@@ -954,20 +989,20 @@
       "blocks": [
         "STORY-166"
       ],
-      "description": "Module pages for media systems and integrations (dashboard.md sections 5, 6, 7, 20). Re-groomed 2026-09-27 at story start after an audit: most listed settings had no backing the bot reads. The music DJ role was never enforced, auto_leave_empty was never passed and nothing reported channel occupancy, the AI model_override was saved but never read and there was no per-guild provider, and image generation had no per-guild settings (/stablediffusion-model wrote junk image_presets rows). The user chose to wire these end to end. Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166."
+      "description": "Module pages for media systems and integrations (dashboard.md sections 5, 6, 7, 20). Re-groomed 2026-09-27 at story start after an audit: most listed settings had no backing the bot reads. The music DJ role was never enforced, auto_leave_empty was never passed and nothing reported channel occupancy, the AI model_override was saved but never read and there was no per-guild provider, and image generation had no per-guild settings (/stablediffusion-model wrote junk image_presets rows). The user chose to wire these end to end. Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166. Estimate capped at 8 in the Scrum Kanban 0.4 board migration; its tasks total 13."
     },
     {
       "id": "STORY-166",
       "epic": "EPIC-011",
       "title": "Stream Alerts, Free Games & Welcome & Farewell Pages",
-      "points": 13,
+      "points": 8,
       "status": "DONE",
       "requires": [
         "STORY-116",
         "STORY-133"
       ],
       "blocks": [],
-      "description": "Split from STORY-116 on 2026-09-27 (dashboard.md sections 15, 16, 17). The audit found: /stream subscribe writes text IDs into uuid columns on Postgres, handle parsing lives in apps/bot, free_game_channels has no ping role, the welcomer SSRF check is private and weaker than the profile background one, backgrounds are URL only, and the web app cannot load @napi-rs/canvas. The user chose to add the free-games ping role and welcome background upload."
+      "description": "Split from STORY-116 on 2026-09-27 (dashboard.md sections 15, 16, 17). The audit found: /stream subscribe writes text IDs into uuid columns on Postgres, handle parsing lives in apps/bot, free_game_channels has no ping role, the welcomer SSRF check is private and weaker than the profile background one, backgrounds are URL only, and the web app cannot load @napi-rs/canvas. The user chose to add the free-games ping role and welcome background upload. Estimate capped at 8 in the Scrum Kanban 0.4 board migration; its tasks total 13."
     },
     {
       "id": "STORY-117",
@@ -1042,7 +1077,7 @@
       "epic": "EPIC-012",
       "title": "E2E Integration Tests & Quality Gates Setup",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [],
       "blocks": [
         "STORY-121"
@@ -1054,7 +1089,7 @@
       "epic": "EPIC-012",
       "title": "Rootless Dockerfile & Containerization",
       "points": 5,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [
         "STORY-120"
       ],
@@ -1067,7 +1102,7 @@
       "epic": "EPIC-012",
       "title": "Production Orchestration & Health Probes",
       "points": 3,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [
         "STORY-121"
       ],
@@ -1088,7 +1123,7 @@
       "epic": "EPIC-012",
       "title": "Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring",
       "points": 5,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [
         "STORY-120"
       ],
@@ -1388,8 +1423,8 @@
     {
       "id": "STORY-170",
       "title": "Interactive Branching Adventure RPG",
-      "points": 67,
-      "status": "REVIEW",
+      "points": 8,
+      "status": "DONE",
       "requires": [
         "EPIC-009",
         "EPIC-010",
@@ -1413,14 +1448,14 @@
         "TASK-1714",
         "TASK-1715"
       ],
-      "description": "User-authorized implementation of docs/adventure_game_plan.md. Points are the 27-point child roll-up; individual tasks have Fibonacci estimates."
+      "description": "User-authorized implementation of docs/adventure_game_plan.md. Points are the 27-point child roll-up; individual tasks have Fibonacci estimates. Estimate capped at 8 in the Scrum Kanban 0.4 board migration; its tasks total 67."
     },
     {
       "id": "STORY-172",
       "epic": "EPIC-005",
       "title": "Per-Source Music Toggles & Pluggable Source Adapters",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [],
       "blocks": [],
       "children": [
@@ -1434,7 +1469,7 @@
       "epic": "EPIC-003",
       "title": "Private Message Context Menu Translation to English",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [],
       "blocks": [],
       "description": "Register and route Translate to English message context menu commands through the existing middleware, translate message and embed text using configured AI providers without chat history or tools, and return only ephemeral results and errors."
@@ -1444,7 +1479,7 @@
       "epic": "EPIC-003",
       "title": "Scoped Command Registration (Global vs Per-Server) & CLI Command Sync",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [],
       "blocks": [],
       "children": [
@@ -3484,7 +3519,7 @@
       "parent": "STORY-120",
       "title": "Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "TASK-1203"
       ],
@@ -3496,7 +3531,7 @@
       "parent": "STORY-120",
       "title": "Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "TASK-1203"
       ],
@@ -3508,7 +3543,7 @@
       "parent": "STORY-120",
       "title": "Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam",
       "points": 2,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [],
       "blocks": [
         "TASK-1201",
@@ -3521,7 +3556,7 @@
       "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Web Dashboard",
       "points": 2,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [],
       "blocks": []
     },
@@ -3530,7 +3565,7 @@
       "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Bot",
       "points": 3,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [],
       "blocks": []
     },
@@ -3539,7 +3574,7 @@
       "parent": "STORY-122",
       "title": "Implement /health and /ready probes for Bot and Web",
       "points": 1,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [],
       "blocks": []
     },
@@ -3548,7 +3583,7 @@
       "parent": "STORY-122",
       "title": "docker-compose.production.yml with Redis, PostgreSQL, and App Services",
       "points": 2,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [],
       "blocks": []
     },
@@ -3588,7 +3623,7 @@
       "parent": "STORY-124",
       "title": "CircleCI Postgres Service & Dialect-Parameterized Repository Suite",
       "points": 3,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [],
       "blocks": [
         "TASK-1242"
@@ -3599,7 +3634,7 @@
       "parent": "STORY-124",
       "title": "Postgres Trade/Market Concurrency Tests & AI Provider Fallback Through createBotServices",
       "points": 2,
-      "status": "TODO",
+      "status": "BACKLOG",
       "requires": [
         "TASK-1241"
       ],
@@ -3686,7 +3721,7 @@
       "parent": "STORY-170",
       "title": "Adventure Integration Verification and Quality Gates",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "TASK-1704"
       ],
@@ -3819,7 +3854,7 @@
       "parent": "STORY-172",
       "title": "Decouple the Fallback Pipeline from YouTube, USE_PRIVATE_MUSIC_PACKAGE Flag & Installer Cipher Default",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [],
       "blocks": [
         "TASK-1722"
@@ -3831,7 +3866,7 @@
       "parent": "STORY-172",
       "title": "Move the YouTube Fallback Extractor into a Separate Private Repository",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "TASK-1721"
       ],
@@ -3994,13 +4029,13 @@
     {
       "id": "CHORE-0602",
       "title": "Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards",
-      "points": null,
+      "points": 1,
       "status": "ABANDONED",
       "requires": [
         "BUG-0014"
       ],
       "blocks": [],
-      "description": "Dropped per architecture review. Stranded gear is harmless (ignored by loadouts in loadout-service.ts:216) and recoverable via /card action:unequip-all. Standalone boot-time scanning is unnecessary."
+      "description": "Dropped per architecture review. Stranded gear is harmless (ignored by loadouts in loadout-service.ts:216) and recoverable via /card action:unequip-all. Standalone boot-time scanning is unnecessary. Estimated at 1 in the Scrum Kanban 0.4 board migration; it was abandoned before it was estimated."
     },
     {
       "id": "CHORE-0603",
@@ -4065,6 +4100,49 @@
       "requires": [],
       "blocks": [],
       "description": "Restore companion-level reward ranks for every user on new adventures; retain frozen existing sessions and open a separate PR."
+    },
+    {
+      "id": "CHORE-0001",
+      "title": "Adopt Scrum Kanban 0.4: Single AGENTS.md and Board Migration",
+      "status": "REVIEW",
+      "points": 5,
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "model": "medium",
+      "assignee": "Claude Code (Opus 5.5)",
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "AGENTS.md",
+          "GEMINI.md",
+          "CLAUDE.md",
+          ".claude/CLAUDE.md",
+          ".scrum-kanban.json",
+          "docs/kanban/protocol.md",
+          "docs/kanban/board.json",
+          "scripts/kanban/render-board.mjs"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "scripts/kanban/render-board.mjs"
+        ],
+        "codegraph_queries": [
+          "render-board.mjs board.json BOARD.md validation"
+        ]
+      },
+      "acceptance": [
+        "`node scripts/kanban/render-board.mjs --check` passes and BOARD.md is generated from board.json.",
+        "AGENTS.md holds the merged GEMINI.md project rules; CLAUDE.md and GEMINI.md contain only `@AGENTS.md`.",
+        "`.scrum-kanban.json`, docs/kanban/protocol.md and the AGENTS.md Scrum Kanban block target `develop/2.0.0`.",
+        "A dry-run template upgrade with `--base-branch=develop/2.0.0` reports nothing to change."
+      ],
+      "verify_cmd": "node scripts/kanban/render-board.mjs --check",
+      "handovers": [
+        "CHORE-0001"
+      ],
+      "description": "Finish the Scrum-Kanban-Template 0.4.0 adoption. Merge GEMINI.md into AGENTS.md and make CLAUDE.md and GEMINI.md import it. Migrate legacy board.json data so render-board.mjs validates and writes BOARD.md. Set the template base branch to develop/2.0.0."
     }
   ],
   "bugs": [
@@ -4384,7 +4462,7 @@
       "id": "BUG-0023",
       "title": "Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message",
       "points": 2,
-      "status": "TODO",
+      "status": "BACKLOG",
       "parent": "STORY-040",
       "requires": [],
       "blocks": [],
@@ -4394,7 +4472,7 @@
       "id": "BUG-0024",
       "title": "Legacy Migration Reads the Wrong Karma and Welcomer Keys",
       "points": 2,
-      "status": "TODO",
+      "status": "BACKLOG",
       "parent": "STORY-043",
       "requires": [],
       "blocks": [],
@@ -4404,7 +4482,7 @@
       "id": "BUG-0025",
       "title": "Achievement Progress Is Recorded Only for TUTORIAL_CLEARED",
       "points": 5,
-      "status": "TODO",
+      "status": "BACKLOG",
       "parent": "STORY-105",
       "requires": [],
       "blocks": [],
@@ -4426,7 +4504,7 @@
       "id": "BUG-0027",
       "title": "Count Every Stamina Potion in Multi-Quantity Uses",
       "points": 2,
-      "status": "REVIEW",
+      "status": "DONE",
       "parent": "STORY-043",
       "requires": [],
       "blocks": [],
@@ -4436,11 +4514,12 @@
       "id": "BUG-0028",
       "title": "Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "parent": "STORY-168",
       "requires": [],
       "blocks": [],
       "description": "CardAlbumService drew all 24 cards of a page before the HTML was sent and returned each 800x1200 PNG as a data: URL, so the album HTML (and the RSC payload, which repeats every src) carried tens of megabytes of base64. next start logged \"This rendered a large document (>512 kB) without any Suspense boundaries\". Fix: the page lists cards only, and each <img> loads its render from an owner-only GET route handler that reads the CardImageService cache (public/cards/<cardId>.png)."
     }
-  ]
+  ],
+  "active_in_progress_ticket": null
 }

@@ -58,3 +58,15 @@
 1. PR #669 targets `develop/2.0.0`: watch the first `e2e` job (Chromium install with `--with-deps`, Next build, Playwright). The maintainer merges.
 2. After CI is green, consider raising the coverage ratchet to the CI-measured baseline.
 3. Next in EPIC-012: STORY-124 (Postgres integration job) reuses the fake Discord API and harness; STORY-121 (rootless Docker) is unblocked once STORY-120 is DONE.
+
+---
+
+## REVIEW · 2026-10-01T13:02:31Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- None. Legacy ticket, groomed before `verify_cmd` existed.
+
+**Acceptance**
+- [x] PR #669 merged into `develop/2.0.0` by the maintainer on 2026-10-01.
+
+Closed in the Scrum Kanban 0.4 board migration (CHORE-0001).
