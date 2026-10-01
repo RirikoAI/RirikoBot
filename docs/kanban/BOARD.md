@@ -18,7 +18,6 @@
 |---|---|---|---|---|---|---|---|
 | `STORY-121` | Story | Rootless Dockerfile & Containerization | 8 | EPIC-012 | STORY-120 | yes | medium |
 | `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | — | yes | large |
-| `TASK-1261` | Task | Real 1.4.0 Schema Fixture From the Published Image & Transformer Fidelity Fixes | 3 | STORY-126 | — | yes | medium |
 | `TASK-1262` | Task | Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount | 5 | STORY-126 | TASK-1261, STORY-121 | blocked | large |
 
 ## 🔍 Review
@@ -267,6 +266,7 @@
 | `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | STORY-120 | [TASK-1202.md](./handovers/TASK-1202.md) |
 | `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | STORY-120 | [TASK-1203.md](./handovers/TASK-1203.md) |
 | `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 3 | STORY-121 | [TASK-1211.md](./handovers/TASK-1211.md) |
+| `TASK-1261` | Task | Real 1.4.0 Schema Fixture From the Published Image & Transformer Fidelity Fixes | 3 | STORY-126 | [TASK-1261.md](./handovers/TASK-1261.md) |
 | `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 | [TASK-1212.md](./handovers/TASK-1212.md) |
 | `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | STORY-123 | — |
 | `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | STORY-123 | — |
@@ -358,6 +358,7 @@
 | `STORY-125` | Story | Raise Test Coverage Toward 80% | ? | EPIC-012 |
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
 | `STORY-127` | Story | Docker Hub Release of 2.0 Images & 1.4.0 Sunset | 8 | EPIC-012 |
+| `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 3 | EPIC-012 |
 | `TASK-1221` | Task | Implement /health and /ready probes for Bot and Web | 1 | STORY-122 |
 | `TASK-1222` | Task | docker-compose.production.yml with Redis, PostgreSQL, and App Services | 2 | STORY-122 |
 | `TASK-1241` | Task | CircleCI Postgres Service & Dialect-Parameterized Repository Suite | 3 | STORY-124 |
@@ -381,7 +382,7 @@
 | `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | DONE | 13 | STORY-090, STORY-091, STORY-092 | — |
 | `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | DONE | 21 | STORY-100, STORY-101, STORY-102, STORY-103, STORY-104, STORY-105 | [EPIC-010.md](./handovers/EPIC-010.md) |
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | DONE | 21 | STORY-110, STORY-111, STORY-112, STORY-167, STORY-168, STORY-113, STORY-114, STORY-115, STORY-165, STORY-116, STORY-166, STORY-117, STORY-118, STORY-119, STORY-163, STORY-164 | — |
-| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | TODO | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125, STORY-126, STORY-127 | — |
+| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | TODO | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125, STORY-126, STORY-127, STORY-128 | — |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | DONE | 21 | STORY-130, STORY-131, STORY-132, STORY-133 | — |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |

@@ -23,6 +23,36 @@ In accordance with Section 85 of `BLUEPRINT.md`: **The legacy bot is valuable pr
 | `Reminder` | `reminders` | Timestamps converted from ISO text to Unix epoch milliseconds. |
 | `Item` & `ItemCategory` | `economy_items`, `economy_item_categories` | Preserves shop item names, prices, and descriptions. |
 
+### 2.1. Real 1.4.0 Schema Fixture
+The migration tests (`packages/database/src/migration/migration.test.ts`) build their legacy database from `packages/database/src/migration/__fixtures__/legacy-1.4.0-schema.sql`. That file is not hand-written. It was taken on 2026-10-01 from a database created by the published image `ririkoai/ririkobot:latest`:
+- digest `sha256:c11e8defda3beb390a8ef673b92f82bb958952abfe214d49436388ab6bc9c012`, package version 1.4.1;
+- the image was run once with `DATABASE_TYPE=better-sqlite3`, and its start command ran the 12 TypeORM migrations.
+
+It holds the schema only. The seed step inserted no rows.
+
+What the real data looks like, and how the transformer reads it:
+- **Dates:** TypeORM's SQLite driver stores dates as UTC text without a zone (`2025-03-04 05:06:07.890`, or without milliseconds from `datetime('now')` defaults). `parseLegacyDate` reads them as UTC, so reminder times and created dates do not shift by the host's offset.
+- **Booleans:** stored as `0` or `1`.
+- **Integer ids:** shop items, categories, playlists, tracks, notes and reaction roles have integer ids. The 2.0 rows use their string form.
+- **Guild config names:** `guild_config` names are the ones the 1.4.0 commands wrote:
+
+  | Name | Meaning |
+  |---|---|
+  | `welcomer_channel` | Welcome card channel. |
+  | `welcomer_enabled` | `true`/`false`. |
+  | `welcomer_bg` | Welcome card background. |
+  | `farewell_channel` | Farewell card channel. |
+  | `farewell_enabled` | `true`/`false`. |
+  | `farewell_bg` | Farewell card background. |
+  | `karma-notification-enabled` | `enabled`/`disabled`. |
+  | `freeGamesChannelId` | Free games channel. |
+  | `twitch_channel` | Twitch alert channel. |
+  | `ai_model` | AI model. |
+  | `stablediffusion_model` | Stable Diffusion model. |
+- **Playlists:** they belonged to a user, not a guild. Track order is the insertion (id) order within each playlist.
+
+To refresh the fixture, run the image the same way, `docker cp` its `/app/data/ririko.db` out, and dump `sqlite_master`. Never edit the file by hand.
+
 ---
 
 ## 3. Migration CLI Tooling
