@@ -309,7 +309,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 
 | ID | Type | Title | Pts | Epic / Parent | Status | Prerequisites |
 |---|---|---|---|---|---|---|
-| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | `EPIC-012` | 🔍 Review · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | — |
+| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | `EPIC-012` | 🔍 Review (PR #669) · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | — |
 | `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | `STORY-120` | 🔍 Review · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | — |
 | `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | `STORY-120` | 🔍 Review · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | `TASK-1203` |
 | `TASK-1201` | Task | Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job | 3 | `STORY-120` | 🔍 Review · [STORY-120.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/STORY-120.md) | `TASK-1203` |
