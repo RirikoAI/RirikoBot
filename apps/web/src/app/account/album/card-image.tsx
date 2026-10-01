@@ -1,24 +1,33 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { LoadSlots } from './load-slots';
 
 const FRAME = 'aspect-[2/3] w-full rounded';
 
 /**
- * A card drawn by the album image route. When the route cannot draw it, shows the same notice
- * the album showed before images had their own route.
+ * The image route draws a user's cards one at a time, so more card requests in flight only wait
+ * on the server while holding the browser's six connections to the dashboard, and a click on
+ * Older, Newer or Filter would queue behind them. Two keep the server busy and leave the rest
+ * free for navigation.
+ */
+const slots = new LoadSlots(2);
+
+/**
+ * A card drawn by the album image route, loaded through `slots` in page order. When the route
+ * cannot draw it, shows the same notice the album showed before images had their own route.
  */
 export function AlbumCardImage({ src, alt }: { src: string; alt: string }) {
-  const image = useRef<HTMLImageElement>(null);
-  const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState<'queued' | 'shown' | 'failed'>('queued');
+  const release = useRef<() => void>(() => undefined);
 
   useEffect(() => {
-    // An image that failed before hydration fired its error event before React listened for it.
-    const img = image.current;
-    if (img?.complete && img.naturalWidth === 0) setFailed(true);
-  }, []);
+    // The slot is given back on load, on error, or here when the card leaves the page.
+    release.current = slots.request(() => setStatus('shown'));
+    return () => release.current();
+  }, [src]);
 
-  if (failed) {
+  if (status === 'failed') {
     return (
       <div
         className={`${FRAME} flex items-center justify-center bg-panel p-4 text-center text-xs text-zinc-500`}
@@ -27,18 +36,21 @@ export function AlbumCardImage({ src, alt }: { src: string; alt: string }) {
       </div>
     );
   }
+  if (status === 'queued') return <div className={`${FRAME} bg-panel`} />;
   return (
     // The route needs the session cookie, which next/image's optimizer does not send.
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      ref={image}
       src={src}
       alt={alt}
       width={800}
       height={1200}
-      loading="lazy"
       decoding="async"
-      onError={() => setFailed(true)}
+      onLoad={() => release.current()}
+      onError={() => {
+        release.current();
+        setStatus('failed');
+      }}
       className={`${FRAME} h-auto`}
     />
   );

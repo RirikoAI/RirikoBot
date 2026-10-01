@@ -132,7 +132,7 @@ export class CardAlbumService {
    * requests a page's images in parallel, so this caps the load one viewer can cause.
    */
   private oneAtATime<T>(userId: string, draw: () => Promise<T>): Promise<T> {
-    const result = (this.draws.get(userId) ?? Promise.resolve()).then(draw);
+    const result = (this.draws.get(userId) ?? Promise.resolve()).then(nextTurn).then(draw);
     const settled = result.catch(() => undefined);
     this.draws.set(userId, settled);
     void settled.then(() => {
@@ -140,6 +140,15 @@ export class CardAlbumService {
     });
     return result;
   }
+}
+
+/**
+ * Waits for the next event-loop turn. A canvas draw blocks the event loop for about 0.1 s, so
+ * queued draws must not run back to back as promise callbacks: pending requests, such as the
+ * album page the user just navigated to, are served between draws.
+ */
+function nextTurn(): Promise<void> {
+  return new Promise((resolve) => setImmediate(resolve));
 }
 
 function toAlbumCard(entry: UserAlbumEntry): AlbumCard {
