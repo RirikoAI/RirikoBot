@@ -318,7 +318,9 @@
         "STORY-122",
         "STORY-123",
         "STORY-124",
-        "STORY-125"
+        "STORY-125",
+        "STORY-126",
+        "STORY-127"
       ],
       "requires": [
         "EPIC-001",
@@ -1684,6 +1686,68 @@
         "TASK-1755"
       ],
       "description": "Assemble and wire the complete 6-stage middleware pipeline in apps/bot/src/command-router.ts (Maintenance -> Module Toggle -> Command Override -> Permission -> Rate Limit -> Cooldown). Hardens permission resolution across slash and prefix commands, provides a runtime MaintenanceService with CLI management, hooks guild module toggles, and applies sliding-window rate limiting with owner/admin bypass."
+    },
+    {
+      "id": "STORY-126",
+      "parent": "EPIC-012",
+      "title": "1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount",
+      "points": 8,
+      "status": "TODO",
+      "requires": [],
+      "blocks": [
+        "STORY-127"
+      ],
+      "model": "large",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/database/src/migration/engine.ts",
+          "packages/database/src/migration/inspector.ts",
+          "packages/database/src/migration/transformer.ts",
+          "packages/database/src/migration/migration.test.ts",
+          "apps/bot/src/main.ts",
+          "Dockerfile",
+          "scripts/docker-smoke.ts"
+        ],
+        "symbols": [
+          "MigrationEngine",
+          "LegacySqliteInspector",
+          "LegacyTransformer",
+          "createBotServices",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "MigrationEngine migrate verify LegacySqliteInspector inspect open LegacyTransformer transform rollback batchId",
+          "bot startup main.ts createBotServices createSqliteClient resolveDatabasePath"
+        ]
+      },
+      "acceptance": [
+        "TASK-1261: the migration tests run against the schema of a real 1.4.0 database produced by the published ririkoai/ririkobot:latest image, and every transformer mismatch it exposes is fixed.",
+        "TASK-1262: a 2.0 bot started with the 1.4.0 data folder mounted read-only at /app/legacy migrates it once, verifies it, records it and starts; the legacy files are never written."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src/migration apps/bot/src && pnpm lint --quiet && docker build --target bot-runner -t ririko-bot:smoke . && node scripts/docker-smoke.ts bot",
+      "handovers": [
+        "STORY-126"
+      ],
+      "description": "Groomed 2026-10-02. First half of sunsetting the 1.4.0 Docker image (ririkoai/ririkobot:latest, about 1.1k pulls). 1.4.0 users keep their ./data folder untouched and mount it read-only into the 2.0 bot (./data:/app/legacy:ro) next to a new /app/data volume. On first boot the bot migrates the 1.4.0 SQLite database through the existing MigrationEngine, from a temporary copy, records the run so restarts skip it, and refuses to start if the totals do not match. The legacy folder is never written, so going back to 1.4.0 stays possible. TASK-1261 first replaces the hand-written legacy schema in the tests with the real one taken from the published 1.4.0 image. Decided with the maintainer: automatic migration on first boot; images stay rootless."
+    },
+    {
+      "id": "STORY-127",
+      "parent": "EPIC-012",
+      "title": "Docker Hub Release of 2.0 Images & 1.4.0 Sunset",
+      "points": 8,
+      "status": "BACKLOG",
+      "requires": [
+        "STORY-121",
+        "STORY-126"
+      ],
+      "blocks": [],
+      "description": "Ungroomed; created 2026-10-02 with STORY-126. Planned tasks: (1) 1.4.0 setting aliases (AI_SERVICE_TYPE, AI_SERVICE_API_KEY, DATABASE_NAME) and a fail-fast message when the old compose layout is detected (a root-owned /app/data holding ririko.db that uid 10001 cannot write): print the upgrade steps and exit, touching nothing. (2) docs/upgrading-from-1.4.md, the 2.0 compose example with ./data:/app/legacy:ro, and the Docker Hub repository description. (3) A CircleCI release job that pushes versioned tags (X.Y.Z, X.Y, X) of bot-runner to ririkoai/ririkobot and web-runner to ririkoai/ririkobot-dashboard from git tags, with Docker Hub credentials in a CircleCI context. (4) The sunset: the maintainer tags the current latest as 1.4.0 so it stays pullable, then moves latest to 2.x after an announced period. Pushing or retagging on Docker Hub always needs the maintainer."
     }
   ],
   "tasks": [
@@ -3831,6 +3895,124 @@
         "TASK-1211"
       ],
       "description": "Added during STORY-121 grooming on 2026-10-01. Builds both images on every push so the Dockerfile cannot rot unnoticed, for example when a new workspace package is missing from the manifest COPY list. Runs the same smoke script the workers use locally."
+    },
+    {
+      "id": "TASK-1261",
+      "parent": "STORY-126",
+      "title": "Real 1.4.0 Schema Fixture From the Published Image & Transformer Fidelity Fixes",
+      "points": 3,
+      "status": "TODO",
+      "requires": [],
+      "blocks": [
+        "TASK-1262"
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/database/src/migration/migration.test.ts",
+          "packages/database/src/migration/transformer.ts",
+          "packages/database/src/migration/inspector.ts",
+          "packages/database/src/migration/types.ts",
+          "packages/database/src/migration/__fixtures__/legacy-1.4.0-schema.sql",
+          "docs/migrations.md",
+          ".local/RirikoBot/src/database/entities",
+          ".local/RirikoBot/src/database/migrations"
+        ],
+        "symbols": [
+          "LegacyTransformer.transform",
+          "LegacySqliteInspector.inspect",
+          "MigrationEngine.migrate",
+          "MigrationEngine.verify"
+        ],
+        "entry_points": [
+          "packages/database/src/migration/engine.ts"
+        ],
+        "codegraph_queries": [
+          "MigrationEngine migrate verify LegacySqliteInspector inspect open LegacyTransformer transform rollback batchId",
+          "LegacyUser LegacyGuild LegacyGuildConfig TransformedData parseDate legacyUuid"
+        ]
+      },
+      "acceptance": [
+        "A genuine 1.4.0 database is produced locally by running the published ririkoai/ririkobot:latest image once with dummy credentials (its start command runs the TypeORM migrations and seeds). The image digest is recorded in the PROGRESS entry. Nothing is pushed.",
+        "Its schema (CREATE statements from sqlite_master, no rows) is committed as packages/database/src/migration/__fixtures__/legacy-1.4.0-schema.sql.",
+        "migration.test.ts builds its legacy database from that file instead of the hand-written DDL, inserts rows using the real column names, and covers every legacy table the transformer reads.",
+        "Every mismatch between the transformer or inspector and the real schema (table names, column names, types, date formats) is fixed and covered by a test row; each is listed in the PROGRESS entry. Coin conservation and read-only access to the source still hold.",
+        "docs/migrations.md says where the fixture came from (image digest and date)."
+      ],
+      "verify_cmd": "pnpm --filter @ririko/database build && pnpm vitest run packages/database/src/migration && pnpm --filter @ririko/database typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-126",
+        "TASK-1261"
+      ],
+      "description": "The migration tests build a hand-written approximation of the 1.4.0 schema, so nothing proves the transformer reads what 1.4.0 users actually have. Take the real schema from the published 1.4.0 image and test against it."
+    },
+    {
+      "id": "TASK-1262",
+      "parent": "STORY-126",
+      "title": "Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "TASK-1261",
+        "STORY-121"
+      ],
+      "blocks": [],
+      "model": "large",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/database/src/migration/engine.ts",
+          "packages/database/src/migration/index.ts",
+          "packages/database/src/migrations/adventure-schema.ts",
+          "packages/database/src/index.ts",
+          "packages/core/src/config/schema.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "Dockerfile",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md",
+          "docs/migrations.md"
+        ],
+        "symbols": [
+          "MigrationEngine.migrate",
+          "MigrationEngine.verify",
+          "ensureAdventureSchema",
+          "createBotServices",
+          "databaseConfigFromEnv",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "MigrationEngine migrate verify LegacySqliteInspector inspect open LegacyTransformer transform rollback batchId",
+          "bot startup main.ts createBotServices createSqliteClient resolveDatabasePath",
+          "ensureAdventureSchema ensureCardSerialSchema withTransaction",
+          "seedDefaultCatalog seedAchievements syncCanonicalItems"
+        ]
+      },
+      "acceptance": [
+        "Optional LEGACY_DATABASE_PATH in AppConfigSchema; the bot-runner image sets LEGACY_DATABASE_PATH=/app/legacy/ririko.db.",
+        "An upgrade step in @ririko/database: when the file at LEGACY_DATABASE_PATH exists, it copies it (with any -journal, -wal or -shm file) to a temporary directory and runs MigrationEngine against the copy. The source path is never opened or written; a test asserts its bytes and mtime are unchanged.",
+        "An additive legacy_migrations table (CREATE TABLE IF NOT EXISTS, SQLite and Postgres, like ensureAdventureSchema) records the source sha256, batch id, per-entity counts, coin totals and time, written in the same transaction as the migrated rows. A source whose sha256 is recorded is skipped, so restarts do nothing.",
+        "Automatic migration runs only when the target has no users and no legacy_migrations row; otherwise the bot logs why it skipped and how to run the manual command. If coins are not conserved the step throws and the bot exits non-zero with a clear message, leaving the target unchanged.",
+        "apps/bot/src/main.ts opens the database, runs the upgrade step, and only then builds services (createBotServices with that client), so default seeding cannot collide with migrated rows.",
+        "A manual entry point in the bot image, node apps/bot/dist/legacy-upgrade.js [--dry-run] [--force], prints the audit and runs or previews the migration.",
+        "Unit tests cover: first run migrates and records; second run skips; read-only source unchanged; non-empty target skipped; conservation failure throws.",
+        "scripts/docker-smoke.ts gains a bot check that places a 1.4.0 database built from the TASK-1261 fixture at /app/legacy (docker create and docker cp, no bind mounts) and sees the migration summary, then command registration."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src apps/bot/src && pnpm lint --quiet && docker build --target bot-runner -t ririko-bot:smoke . && node scripts/docker-smoke.ts bot",
+      "handovers": [
+        "STORY-126",
+        "TASK-1262",
+        "TASK-1261"
+      ],
+      "description": "The core of the 1.4.0 sunset: 1.4.0 users mount their untouched ./data read-only at /app/legacy, and the 2.0 bot migrates it once on first boot."
     },
     {
       "id": "TASK-1212",
