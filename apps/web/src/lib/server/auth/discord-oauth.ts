@@ -2,7 +2,6 @@ import 'server-only';
 import { createHash, randomBytes } from 'node:crypto';
 import { ExternalApiError } from '@ririko/core';
 import {
-  OAuth2Routes,
   OAuth2Scopes,
   RouteBases,
   Routes,
@@ -34,6 +33,8 @@ export interface DiscordOAuthOptions {
   clientId: string;
   clientSecret: string;
   redirectUri: string;
+  /** Versioned API base, `https://discord.com/api/v10` by default. Tests point it at a local fake. */
+  apiBase?: string;
   fetch?: typeof fetch;
 }
 
@@ -52,13 +53,15 @@ export function createPkcePair(): { verifier: string; challenge: string } {
 /** Discord OAuth2 authorization-code flow and the user-token endpoints the dashboard reads. */
 export class DiscordOAuthClient {
   private readonly fetch: typeof fetch;
+  private readonly apiBase: string;
 
   constructor(private readonly options: DiscordOAuthOptions) {
     this.fetch = options.fetch ?? globalThis.fetch;
+    this.apiBase = options.apiBase ?? RouteBases.api;
   }
 
   authorizationUrl(params: { state: string; codeChallenge: string }): string {
-    const url = new URL(OAuth2Routes.authorizationURL);
+    const url = new URL(`${this.apiBase}${Routes.oauth2Authorization()}`);
     url.search = new URLSearchParams({
       client_id: this.options.clientId,
       response_type: 'code',
@@ -101,7 +104,7 @@ export class DiscordOAuthClient {
     const basic = Buffer.from(`${this.options.clientId}:${this.options.clientSecret}`).toString(
       'base64',
     );
-    const response = await this.fetch(`${RouteBases.api}${Routes.oauth2TokenExchange()}`, {
+    const response = await this.fetch(`${this.apiBase}${Routes.oauth2TokenExchange()}`, {
       method: 'POST',
       headers: {
         Authorization: `Basic ${basic}`,
@@ -120,7 +123,7 @@ export class DiscordOAuthClient {
   }
 
   private async requestJson<T>(path: string, accessToken: string): Promise<T> {
-    const response = await this.fetch(`${RouteBases.api}${path}`, {
+    const response = await this.fetch(`${this.apiBase}${path}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store',
     });

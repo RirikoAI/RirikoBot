@@ -159,9 +159,12 @@ async function createWebServices(): Promise<WebServices> {
     clientId: config.DISCORD_CLIENT_ID,
     clientSecret: config.DISCORD_CLIENT_SECRET,
     redirectUri: `${config.DASHBOARD_URL}/api/auth/callback`,
+    apiBase: `${config.DISCORD_API_URL}/v10`,
   });
   const sessions = new SessionService({ repo: new WebSessionRepository(db), vault, oauth });
-  const botRest = new REST({ version: '10' }).setToken(config.DISCORD_TOKEN);
+  const botRest = new REST({ version: '10', api: config.DISCORD_API_URL }).setToken(
+    config.DISCORD_TOKEN,
+  );
   const botGuilds = new BotGuildDirectory(botRest);
   const guildAccess = new GuildAccessService({
     sessions,

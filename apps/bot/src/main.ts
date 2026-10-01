@@ -3,8 +3,6 @@ import {
   createBot,
   getBotInfo,
   createBotServices,
-  handleImagineButtonInteraction,
-  handleGiveawayButtonInteraction,
   registerMessageListener,
   registerVoiceListener,
   registerMusicVoiceListener,
@@ -13,19 +11,11 @@ import {
   registerReactionListener,
 } from './index.js';
 import { syncCommandCatalog } from './command-catalog.js';
+import { createCommandRouter, createHelpOptions } from './command-router.js';
 import { createCommandControllers, registerBotCommands } from './command-set.js';
 import { registerGuildJoinCommandSync, syncCommandsOnStartup } from './command-sync.js';
-import {
-  CommandRouter,
-  handleHelpInteraction,
-  type HelpOptions,
-  CommandSynchronizer,
-  createRestClient,
-  DEFAULT_COMMAND_PREFIX,
-  createCommandOverrideMiddleware,
-  createCooldownMiddleware,
-  overrideChannelId,
-} from '@ririko/discord';
+import { registerComponentInteractions } from './component-interactions.js';
+import { CommandSynchronizer, createRestClient, DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 
 /**
  * Main application entrypoint for Ririko AI Discord Bot.
@@ -58,45 +48,10 @@ export async function main(): Promise<void> {
   await ensureCardSerialSchema(services.db);
 
   // 3. Initialize Dual-Dispatch Command Router with in-memory cached dynamic prefix resolution
-  const router = new CommandRouter(undefined, {
-    defaultPrefix: prefix,
-    mentionPrefix: true,
-    resolvePrefix: async (message) => {
-      if (!message.guildId) return prefix;
-      return services.guildSettingsService.getPrefix(message.guildId, prefix);
-    },
-    onError: (ctx, err) => {
-      console.error(`[Command:${ctx.commandName}] Execution error:`, err);
-    },
-    onCommandRun: (ctx) => services.commandUsageRecorder.record(ctx.guildId, ctx.commandName),
-    // Overrides run first, so a blocked command does not start a cooldown.
-    middlewares: [
-      createCommandOverrideMiddleware({
-        resolve: (guildId, channelId, commandName) =>
-          services.commandOverrideService.resolve(guildId, channelId, commandName),
-      }),
-      createCooldownMiddleware({
-        getCooldownSeconds: async (ctx) => {
-          if (!ctx.guildId || !ctx.command) return undefined;
-          const override = await services.commandOverrideService.resolve(
-            ctx.guildId,
-            overrideChannelId(ctx),
-            ctx.command.metadata.name,
-          );
-          return override?.cooldownSeconds ?? undefined;
-        },
-      }),
-    ],
-  });
+  const router = createCommandRouter(services, prefix);
 
   // 4. Register every command (the same set `ririko commands:sync` registers with Discord)
-  const helpOptions: HelpOptions = {
-    defaultPrefix: prefix,
-    resolvePrefix: async (guildId) => {
-      if (!guildId) return prefix;
-      return services.guildSettingsService.getPrefix(guildId, prefix);
-    },
-  };
+  const helpOptions = createHelpOptions(services, prefix);
   const controllers = createCommandControllers(bot.client, services, prefix);
   const { musicController, aiController, adventureController } = controllers;
   registerBotCommands(router.registry, {
@@ -139,51 +94,11 @@ export async function main(): Promise<void> {
   registerReactionListener(bot.client, services);
 
   // Bind interactive Help Center UI components, Music Controller buttons, Giveaway buttons, and Role components
-  bot.client.on('interactionCreate', async (interaction) => {
-    try {
-      if (interaction.isButton()) {
-        if (interaction.customId.startsWith('adventure:')) {
-          await adventureController.button(interaction);
-          return;
-        }
-        if (interaction.customId.startsWith('music_')) {
-          await musicController.handleButtonInteraction(interaction);
-          return;
-        }
-        if (interaction.customId.startsWith('imagine:')) {
-          await handleImagineButtonInteraction(interaction, services);
-          return;
-        }
-        if (interaction.customId.startsWith('giveaway:enter:')) {
-          await handleGiveawayButtonInteraction(interaction, services);
-          return;
-        }
-        if (interaction.customId.startsWith('rr:btn:')) {
-          await services.reactionRoleService.handleButtonInteraction(interaction);
-          return;
-        }
-        if (interaction.customId.startsWith('verify:btn:')) {
-          const guild = interaction.guild;
-          const member = interaction.member;
-          if (guild && member) {
-            const res = await services.autoRoleService.handleVerification(guild, member as any);
-            await interaction.reply({ content: res.message, ephemeral: true });
-          }
-          return;
-        }
-      }
-
-      if (interaction.isStringSelectMenu()) {
-        if (interaction.customId.startsWith('rr:select:')) {
-          await services.reactionRoleService.handleSelectMenuInteraction(interaction);
-          return;
-        }
-      }
-
-      await handleHelpInteraction(interaction, router.registry, helpOptions);
-    } catch (err) {
-      console.error('Unhandled error in component interaction:', err);
-    }
+  registerComponentInteractions(bot.client, {
+    services,
+    controllers,
+    registry: router.registry,
+    helpOptions,
   });
 
   // Post every new moderation case to the guild's log channel. Subscribed once here, not on

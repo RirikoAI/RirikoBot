@@ -31,7 +31,12 @@ export default defineConfig({
       // Keeps createBotServices from loading the private music package when a maintainer has it.
       USE_PRIVATE_MUSIC_PACKAGE: 'false',
     },
-    include: ['packages/**/*.test.ts', 'apps/**/*.test.ts', 'scripts/**/*.test.ts'],
+    include: [
+      'packages/**/*.test.ts',
+      'apps/**/*.test.ts',
+      'scripts/**/*.test.ts',
+      'tests/**/*.test.ts',
+    ],
     // packages/music-private is a separate private repository with its own test run.
     exclude: [
       '**/node_modules/**',

@@ -27,7 +27,7 @@
     "tcg:reset-user": "tsx scripts/reset-tcg-user.ts",
     "tcg:simulate": "tsx --env-file-if-exists=.env scripts/tcg-balance-sim.ts",
     "site:build": "tsx scripts/build-status-site.ts",
-    "typecheck": "pnpm -r run typecheck",
+    "typecheck": "pnpm -r run typecheck && tsc -p tests",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -35,6 +35,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml",
+    "test:integration": "vitest run apps/bot/test/ tests/support/",
+    "test:e2e": "pnpm build:web && pnpm --filter @ririko/web exec playwright test",
     "clean": "pnpm -r run clean",
     "prepare": "husky"
   },
