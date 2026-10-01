@@ -3,7 +3,7 @@
 - **Ticket Type & Points**: Story | 8 pts (`TASK-1203` = 2, `TASK-1202` = 3, `TASK-1201` = 3); regroomed from 5 on 2026-10-01
 - **Epic**: `EPIC-012`
 - **Author / Agent**: Claude Code (Opus 5.5)
-- **Status**: REVIEW
+- **Status**: REVIEW (PR #669)
 - **Timestamp**: 2026-10-01
 - **Branch**: `feat/STORY-120-integration-e2e` (targets `develop/2.0.0`)
 
@@ -55,6 +55,6 @@
 - The message listener (automod, XP, card drops, AI chat) is not wired in the harness, so prefix tests see only the router's replies.
 
 ## 4. Actionable Next Steps for Next Session / Continuing Agent
-1. Push the branch, open the PR to `develop/2.0.0` and watch the first `e2e` job (Chromium install with `--with-deps`, Next build, Playwright).
+1. PR #669 targets `develop/2.0.0`: watch the first `e2e` job (Chromium install with `--with-deps`, Next build, Playwright). The maintainer merges.
 2. After CI is green, consider raising the coverage ratchet to the CI-measured baseline.
 3. Next in EPIC-012: STORY-124 (Postgres integration job) reuses the fake Discord API and harness; STORY-121 (rootless Docker) is unblocked once STORY-120 is DONE.
