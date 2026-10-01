@@ -129,6 +129,32 @@ describe('Config Loader', () => {
     });
     expect(config.DASHBOARD_URL).toBe('https://dash.example.com');
     expect(config.DISCORD_CLIENT_SECRET).toBe('secret');
+    expect(config.DISCORD_API_URL).toBe('https://discord.com/api');
+  });
+
+  it('accepts DISCORD_API_URL over https or plain http on loopback only', () => {
+    const base = {
+      DISCORD_TOKEN: 'mock-token',
+      DISCORD_CLIENT_ID: 'mock-client-id',
+      DISCORD_CLIENT_SECRET: 'secret',
+      DASHBOARD_URL: 'https://dash.example.com',
+      SECRET_VAULT_KEY: 'c'.repeat(64),
+    };
+    expect(
+      loadWebConfig({ ...base, DISCORD_API_URL: 'http://127.0.0.1:3199/api/' }).DISCORD_API_URL,
+    ).toBe('http://127.0.0.1:3199/api');
+    expect(
+      loadWebConfig({ ...base, DISCORD_API_URL: 'http://localhost:3199/api' }).DISCORD_API_URL,
+    ).toBe('http://localhost:3199/api');
+    expect(
+      loadWebConfig({ ...base, DISCORD_API_URL: 'https://proxy.example.com/api' }).DISCORD_API_URL,
+    ).toBe('https://proxy.example.com/api');
+    expect(() =>
+      loadWebConfig({ ...base, DISCORD_API_URL: 'http://proxy.example.com/api' }),
+    ).toThrow(ConfigurationError);
+    expect(() => loadWebConfig({ ...base, DISCORD_API_URL: 'not a url' })).toThrow(
+      ConfigurationError,
+    );
   });
 
   it('parses BOT_OWNER_ID as a list of Discord user IDs', () => {
