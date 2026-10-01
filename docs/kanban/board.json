@@ -43,6 +43,13 @@
       "title": "Planning, Audits, Architectural Specifications & Agent Design",
       "points": 13,
       "status": "DONE",
+      "children": [
+        "STORY-001",
+        "STORY-002",
+        "STORY-003",
+        "STORY-004",
+        "STORY-005"
+      ],
       "requires": [],
       "blocks": [
         "EPIC-001",
@@ -55,6 +62,11 @@
       "title": "Monorepo Workspace, Toolchain & Core Contracts",
       "points": 13,
       "status": "DONE",
+      "children": [
+        "STORY-010",
+        "STORY-011",
+        "STORY-012"
+      ],
       "requires": [
         "EPIC-000"
       ],
@@ -69,6 +81,12 @@
       "title": "Dual-Dialect Drizzle ORM & Data Access Layer",
       "points": 21,
       "status": "DONE",
+      "children": [
+        "STORY-020",
+        "STORY-021",
+        "STORY-022",
+        "STORY-023"
+      ],
       "requires": [
         "EPIC-001"
       ],
@@ -86,6 +104,15 @@
       "title": "Discord.js 14 Gateway & O(1) Command Router",
       "points": 21,
       "status": "DONE",
+      "children": [
+        "STORY-030",
+        "STORY-031",
+        "STORY-032",
+        "STORY-033",
+        "STORY-173",
+        "STORY-174",
+        "STORY-175"
+      ],
       "requires": [
         "EPIC-001"
       ],
@@ -103,6 +130,14 @@
       "title": "Centralized Transactional Economy & Banking Engine",
       "points": 21,
       "status": "DONE",
+      "children": [
+        "STORY-040",
+        "STORY-041",
+        "STORY-042",
+        "STORY-043",
+        "STORY-044",
+        "STORY-161"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -118,6 +153,12 @@
       "title": "Multi-Source Music 2.0 Audio Engine",
       "points": 13,
       "status": "DONE",
+      "children": [
+        "STORY-050",
+        "STORY-051",
+        "STORY-052",
+        "STORY-172"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -132,6 +173,12 @@
       "title": "AI Chatbot 2.0 with Context Isolation & Safe Tools",
       "points": 13,
       "status": "DONE",
+      "children": [
+        "STORY-060",
+        "STORY-061",
+        "STORY-062",
+        "STORY-063"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -146,6 +193,12 @@
       "title": "Moderation 2.0 with Escalation & AutoMod",
       "points": 13,
       "status": "DONE",
+      "children": [
+        "STORY-070",
+        "STORY-071",
+        "STORY-072",
+        "STORY-073"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -160,6 +213,10 @@
       "title": "Streamer Notifications & Free Games Announcer",
       "points": 8,
       "status": "DONE",
+      "children": [
+        "STORY-080",
+        "STORY-081"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -174,6 +231,11 @@
       "title": "Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite",
       "points": 13,
       "status": "DONE",
+      "children": [
+        "STORY-090",
+        "STORY-091",
+        "STORY-092"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -188,6 +250,14 @@
       "title": "Waifu TCG Gameplay, Ingestion, Trading & Marketplace",
       "points": 21,
       "status": "DONE",
+      "children": [
+        "STORY-100",
+        "STORY-101",
+        "STORY-102",
+        "STORY-103",
+        "STORY-104",
+        "STORY-105"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-004"
@@ -202,6 +272,24 @@
       "title": "Next.js 16 Web Dashboard & Management Portal",
       "points": 21,
       "status": "DONE",
+      "children": [
+        "STORY-110",
+        "STORY-111",
+        "STORY-112",
+        "STORY-167",
+        "STORY-168",
+        "STORY-113",
+        "STORY-114",
+        "STORY-115",
+        "STORY-165",
+        "STORY-116",
+        "STORY-166",
+        "STORY-117",
+        "STORY-118",
+        "STORY-119",
+        "STORY-163",
+        "STORY-164"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-004",
@@ -224,6 +312,14 @@
       "title": "Quality Gates, Docker Rootless & Production Verification",
       "points": 13,
       "status": "TODO",
+      "children": [
+        "STORY-120",
+        "STORY-121",
+        "STORY-122",
+        "STORY-123",
+        "STORY-124",
+        "STORY-125"
+      ],
       "requires": [
         "EPIC-001",
         "EPIC-011"
@@ -236,6 +332,12 @@
       "title": "Media Synthesis, Anime Reactions & AI Image Generation",
       "points": 21,
       "status": "DONE",
+      "children": [
+        "STORY-130",
+        "STORY-131",
+        "STORY-132",
+        "STORY-133"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -250,6 +352,13 @@
       "title": "Server Utilities, AutoRoles & Community Systems",
       "points": 21,
       "status": "DONE",
+      "children": [
+        "STORY-140",
+        "STORY-141",
+        "STORY-142",
+        "STORY-143",
+        "STORY-144"
+      ],
       "requires": [
         "EPIC-002",
         "EPIC-003"
@@ -264,17 +373,43 @@
       "title": "Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses",
       "points": 21,
       "status": "DONE",
+      "children": [
+        "STORY-150",
+        "STORY-151",
+        "STORY-152",
+        "STORY-153",
+        "STORY-154",
+        "STORY-155",
+        "STORY-156",
+        "STORY-157",
+        "STORY-158",
+        "STORY-159",
+        "STORY-160",
+        "STORY-162"
+      ],
       "requires": [
         "EPIC-010"
       ],
       "blocks": [],
       "description": "Balanced dungeon progression (win-rate bands per floor bracket verified by a balance simulator), DB-driven seasonal bosses as real anime characters (AniList + Danbooru pipeline, plain boss art with element icon), equipment acquisition (shop, drop tables, boss signature drops) and interactive gear/shop menus. Children total 63 pts; crafting deferred to STORY-160."
+    },
+    {
+      "id": "EPIC-016",
+      "title": "Interactive Branching Adventure RPG",
+      "points": 21,
+      "status": "DONE",
+      "children": [
+        "STORY-170"
+      ],
+      "requires": [],
+      "blocks": [],
+      "description": "Interactive branching adventure RPG with illustrated quests, companion progression and card rewards (STORY-170, docs/adventure_game_plan.md). Added in CHORE-0002 because STORY-170 had no epic."
     }
   ],
   "stories": [
     {
       "id": "STORY-001",
-      "epic": "EPIC-000",
+      "parent": "EPIC-000",
       "title": "Legacy 1.4.0 Codebase Audit & Feature Inventory",
       "points": 5,
       "status": "DONE",
@@ -285,7 +420,7 @@
     },
     {
       "id": "STORY-002",
-      "epic": "EPIC-000",
+      "parent": "EPIC-000",
       "title": "Architecture Specification & ADR-001 to ADR-012",
       "points": 5,
       "status": "DONE",
@@ -298,7 +433,7 @@
     },
     {
       "id": "STORY-003",
-      "epic": "EPIC-000",
+      "parent": "EPIC-000",
       "title": "Specialist Agent Roster & Execution Protocols",
       "points": 3,
       "status": "DONE",
@@ -311,7 +446,7 @@
     },
     {
       "id": "STORY-004",
-      "epic": "EPIC-000",
+      "parent": "EPIC-000",
       "title": "Complete Subsystem Documentation Catalog (16 Docs)",
       "points": 5,
       "status": "DONE",
@@ -324,7 +459,7 @@
     },
     {
       "id": "STORY-005",
-      "epic": "EPIC-000",
+      "parent": "EPIC-000",
       "title": "Scrum Kanban & Sub-Agent Knowledge Transfer System",
       "points": 3,
       "status": "DONE",
@@ -337,7 +472,7 @@
     },
     {
       "id": "STORY-010",
-      "epic": "EPIC-001",
+      "parent": "EPIC-001",
       "title": "Workspace Configuration & Root Monorepo Tooling",
       "points": 5,
       "status": "DONE",
@@ -350,7 +485,7 @@
     },
     {
       "id": "STORY-011",
-      "epic": "EPIC-001",
+      "parent": "EPIC-001",
       "title": "packages/core Contracts, Errors, EventBus & Config",
       "points": 5,
       "status": "DONE",
@@ -363,7 +498,7 @@
     },
     {
       "id": "STORY-012",
-      "epic": "EPIC-001",
+      "parent": "EPIC-001",
       "title": "apps/cli Scaffolding & ririko doctor Diagnostics",
       "points": 5,
       "status": "DONE",
@@ -377,7 +512,7 @@
     },
     {
       "id": "STORY-020",
-      "epic": "EPIC-002",
+      "parent": "EPIC-002",
       "title": "Dual-Dialect Connection Factory & Client Harness",
       "points": 5,
       "status": "DONE",
@@ -390,7 +525,7 @@
     },
     {
       "id": "STORY-021",
-      "epic": "EPIC-002",
+      "parent": "EPIC-002",
       "title": "70+ Normalized Table Schemas & Unified TypeScript Models",
       "points": 8,
       "status": "DONE",
@@ -403,7 +538,7 @@
     },
     {
       "id": "STORY-022",
-      "epic": "EPIC-002",
+      "parent": "EPIC-002",
       "title": "Dialect-Agnostic Repositories & ACID Transaction Abstractions",
       "points": 5,
       "status": "DONE",
@@ -416,7 +551,7 @@
     },
     {
       "id": "STORY-023",
-      "epic": "EPIC-002",
+      "parent": "EPIC-002",
       "title": "Legacy 1.4.0 SQLite Migration Engine & CLI",
       "points": 3,
       "status": "DONE",
@@ -433,7 +568,7 @@
     },
     {
       "id": "STORY-030",
-      "epic": "EPIC-003",
+      "parent": "EPIC-003",
       "title": "Discord Client Gateway Lifecycle, Sharding & REST V10 Harness",
       "points": 5,
       "status": "DONE",
@@ -446,7 +581,7 @@
     },
     {
       "id": "STORY-031",
-      "epic": "EPIC-003",
+      "parent": "EPIC-003",
       "title": "O(1) Dual-Dispatch Command Router (Slash & Prefix Parity)",
       "points": 8,
       "status": "DONE",
@@ -459,7 +594,7 @@
     },
     {
       "id": "STORY-032",
-      "epic": "EPIC-003",
+      "parent": "EPIC-003",
       "title": "Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance)",
       "points": 5,
       "status": "DONE",
@@ -472,7 +607,7 @@
     },
     {
       "id": "STORY-033",
-      "epic": "EPIC-003",
+      "parent": "EPIC-003",
       "title": "Interactive Dynamic Help Center & Command Auto-Registration",
       "points": 3,
       "status": "DONE",
@@ -489,7 +624,7 @@
     },
     {
       "id": "STORY-040",
-      "epic": "EPIC-004",
+      "parent": "EPIC-004",
       "title": "Event-Driven Economy Core & Anti-Spam / Anti-AFK Engine",
       "points": 5,
       "status": "DONE",
@@ -503,7 +638,7 @@
     },
     {
       "id": "STORY-041",
-      "epic": "EPIC-004",
+      "parent": "EPIC-004",
       "title": "Transactional Banking, Daily Streak Engine & Double-Entry Ledger",
       "points": 5,
       "status": "DONE",
@@ -517,7 +652,7 @@
     },
     {
       "id": "STORY-042",
-      "epic": "EPIC-004",
+      "parent": "EPIC-004",
       "title": "Leveling 2.0, Karma & High-Performance Materialized Leaderboards",
       "points": 5,
       "status": "DONE",
@@ -530,7 +665,7 @@
     },
     {
       "id": "STORY-043",
-      "epic": "EPIC-004",
+      "parent": "EPIC-004",
       "title": "Shop Catalog, Inventory Bags & SSRF-Protected Profile Customization",
       "points": 5,
       "status": "DONE",
@@ -543,7 +678,7 @@
     },
     {
       "id": "STORY-044",
-      "epic": "EPIC-004",
+      "parent": "EPIC-004",
       "title": "Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite",
       "points": 5,
       "status": "DONE",
@@ -557,7 +692,7 @@
     },
     {
       "id": "STORY-050",
-      "epic": "EPIC-005",
+      "parent": "EPIC-005",
       "title": "Multi-Source Audio Extractors & Stream Resolvers",
       "points": 5,
       "status": "DONE",
@@ -571,7 +706,7 @@
     },
     {
       "id": "STORY-051",
-      "epic": "EPIC-005",
+      "parent": "EPIC-005",
       "title": "Voice Lifecycle, Audio Player Core & Queue Engine",
       "points": 5,
       "status": "DONE",
@@ -584,7 +719,7 @@
     },
     {
       "id": "STORY-052",
-      "epic": "EPIC-005",
+      "parent": "EPIC-005",
       "title": "Reactive Embed Controller & Dual-Dispatch Music Commands Suite",
       "points": 3,
       "status": "DONE",
@@ -597,7 +732,7 @@
     },
     {
       "id": "STORY-060",
-      "epic": "EPIC-006",
+      "parent": "EPIC-006",
       "title": "Multi-Provider AI Core, Fallback Chain & Tool Calling Engine",
       "points": 5,
       "status": "DONE",
@@ -611,7 +746,7 @@
     },
     {
       "id": "STORY-061",
-      "epic": "EPIC-006",
+      "parent": "EPIC-006",
       "title": "Persistent Memory, Strict Per-User Context Isolation & Personality Engine",
       "points": 3,
       "status": "DONE",
@@ -624,7 +759,7 @@
     },
     {
       "id": "STORY-062",
-      "epic": "EPIC-006",
+      "parent": "EPIC-006",
       "title": "Deterministic Utility Tools, Explicit Clock & Application Security Interceptor",
       "points": 3,
       "status": "DONE",
@@ -637,7 +772,7 @@
     },
     {
       "id": "STORY-063",
-      "epic": "EPIC-006",
+      "parent": "EPIC-006",
       "title": "Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite",
       "points": 2,
       "status": "DONE",
@@ -650,7 +785,7 @@
     },
     {
       "id": "STORY-070",
-      "epic": "EPIC-007",
+      "parent": "EPIC-007",
       "title": "Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core",
       "points": 5,
       "status": "DONE",
@@ -664,7 +799,7 @@
     },
     {
       "id": "STORY-071",
-      "epic": "EPIC-007",
+      "parent": "EPIC-007",
       "title": "Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations",
       "points": 3,
       "status": "DONE",
@@ -677,7 +812,7 @@
     },
     {
       "id": "STORY-072",
-      "epic": "EPIC-007",
+      "parent": "EPIC-007",
       "title": "Real-Time Automated Defense & Auto-Moderation Pipeline",
       "points": 3,
       "status": "DONE",
@@ -690,7 +825,7 @@
     },
     {
       "id": "STORY-073",
-      "epic": "EPIC-007",
+      "parent": "EPIC-007",
       "title": "Dual-Dispatch Moderation Commands Suite & Gateway Listeners",
       "points": 2,
       "status": "DONE",
@@ -704,7 +839,7 @@
     },
     {
       "id": "STORY-080",
-      "epic": "EPIC-008",
+      "parent": "EPIC-008",
       "title": "Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok)",
       "points": 5,
       "status": "DONE",
@@ -718,7 +853,7 @@
     },
     {
       "id": "STORY-081",
-      "epic": "EPIC-008",
+      "parent": "EPIC-008",
       "title": "Free Games Announcer Engine (Epic Games Store & Steam Feed)",
       "points": 3,
       "status": "DONE",
@@ -732,7 +867,7 @@
     },
     {
       "id": "STORY-090",
-      "epic": "EPIC-009",
+      "parent": "EPIC-009",
       "title": "Giveaways 2.0 Database Engine & Resilient Lifecycle",
       "points": 5,
       "status": "DONE",
@@ -746,7 +881,7 @@
     },
     {
       "id": "STORY-091",
-      "epic": "EPIC-009",
+      "parent": "EPIC-009",
       "title": "Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup)",
       "points": 3,
       "status": "DONE",
@@ -760,7 +895,7 @@
     },
     {
       "id": "STORY-092",
-      "epic": "EPIC-009",
+      "parent": "EPIC-009",
       "title": "Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice)",
       "points": 5,
       "status": "DONE",
@@ -774,7 +909,7 @@
     },
     {
       "id": "STORY-100",
-      "epic": "EPIC-010",
+      "parent": "EPIC-010",
       "title": "Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution",
       "points": 3,
       "status": "DONE",
@@ -787,7 +922,7 @@
     },
     {
       "id": "STORY-101",
-      "epic": "EPIC-010",
+      "parent": "EPIC-010",
       "title": "8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine",
       "points": 5,
       "status": "DONE",
@@ -800,7 +935,7 @@
     },
     {
       "id": "STORY-102",
-      "epic": "EPIC-010",
+      "parent": "EPIC-010",
       "title": "7-Element Combat Engine & Tactical Status Effects (Including Ice)",
       "points": 3,
       "status": "DONE",
@@ -813,7 +948,7 @@
     },
     {
       "id": "STORY-103",
-      "epic": "EPIC-010",
+      "parent": "EPIC-010",
       "title": "Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine",
       "points": 3,
       "status": "DONE",
@@ -826,7 +961,7 @@
     },
     {
       "id": "STORY-104",
-      "epic": "EPIC-010",
+      "parent": "EPIC-010",
       "title": "PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling",
       "points": 5,
       "status": "DONE",
@@ -839,7 +974,7 @@
     },
     {
       "id": "STORY-105",
-      "epic": "EPIC-010",
+      "parent": "EPIC-010",
       "title": "Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch",
       "points": 5,
       "status": "DONE",
@@ -852,7 +987,7 @@
     },
     {
       "id": "STORY-110",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization",
       "points": 8,
       "status": "DONE",
@@ -866,7 +1001,7 @@
     },
     {
       "id": "STORY-111",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity",
       "points": 8,
       "status": "DONE",
@@ -885,7 +1020,7 @@
     },
     {
       "id": "STORY-112",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Guild TCG Settings (Persisted Drops, Guild-Scoped TCG Manager Role) & Owner-Gated Global TCG Rules",
       "points": 8,
       "status": "DONE",
@@ -900,7 +1035,7 @@
     },
     {
       "id": "STORY-167",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot",
       "points": 8,
       "status": "DONE",
@@ -914,7 +1049,7 @@
     },
     {
       "id": "STORY-168",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager",
       "points": 5,
       "status": "DONE",
@@ -926,7 +1061,7 @@
     },
     {
       "id": "STORY-113",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer",
       "points": 5,
       "status": "DONE",
@@ -940,7 +1075,7 @@
     },
     {
       "id": "STORY-114",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages",
       "points": 8,
       "status": "DONE",
@@ -953,7 +1088,7 @@
     },
     {
       "id": "STORY-115",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "XP & Ranking, Games & Giveaways Pages",
       "points": 8,
       "status": "DONE",
@@ -966,7 +1101,7 @@
     },
     {
       "id": "STORY-165",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Owner Console: Global Economy Settings & Item Shop Manager",
       "points": 8,
       "status": "DONE",
@@ -978,7 +1113,7 @@
     },
     {
       "id": "STORY-116",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Music, AI Chatbot, Image Generation & Integrations Pages",
       "points": 8,
       "status": "DONE",
@@ -993,7 +1128,7 @@
     },
     {
       "id": "STORY-166",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Stream Alerts, Free Games & Welcome & Farewell Pages",
       "points": 8,
       "status": "DONE",
@@ -1006,7 +1141,7 @@
     },
     {
       "id": "STORY-117",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard",
       "points": 5,
       "status": "DONE",
@@ -1024,7 +1159,7 @@
     },
     {
       "id": "STORY-118",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage",
       "points": 5,
       "status": "DONE",
@@ -1038,7 +1173,7 @@
     },
     {
       "id": "STORY-119",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions",
       "points": 3,
       "status": "BACKLOG",
@@ -1050,7 +1185,7 @@
     },
     {
       "id": "STORY-163",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles)",
       "points": 5,
       "status": "DONE",
@@ -1062,7 +1197,7 @@
     },
     {
       "id": "STORY-164",
-      "epic": "EPIC-011",
+      "parent": "EPIC-011",
       "title": "Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages",
       "points": 8,
       "status": "DONE",
@@ -1074,7 +1209,7 @@
     },
     {
       "id": "STORY-120",
-      "epic": "EPIC-012",
+      "parent": "EPIC-012",
       "title": "E2E Integration Tests & Quality Gates Setup",
       "points": 8,
       "status": "DONE",
@@ -1086,7 +1221,7 @@
     },
     {
       "id": "STORY-121",
-      "epic": "EPIC-012",
+      "parent": "EPIC-012",
       "title": "Rootless Dockerfile & Containerization",
       "points": 5,
       "status": "BACKLOG",
@@ -1099,7 +1234,7 @@
     },
     {
       "id": "STORY-122",
-      "epic": "EPIC-012",
+      "parent": "EPIC-012",
       "title": "Production Orchestration & Health Probes",
       "points": 3,
       "status": "BACKLOG",
@@ -1110,7 +1245,7 @@
     },
     {
       "id": "STORY-123",
-      "epic": "EPIC-012",
+      "parent": "EPIC-012",
       "title": "CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site",
       "points": 5,
       "status": "DONE",
@@ -1120,7 +1255,7 @@
     },
     {
       "id": "STORY-124",
-      "epic": "EPIC-012",
+      "parent": "EPIC-012",
       "title": "Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring",
       "points": 5,
       "status": "BACKLOG",
@@ -1132,7 +1267,7 @@
     },
     {
       "id": "STORY-125",
-      "epic": "EPIC-012",
+      "parent": "EPIC-012",
       "title": "Raise Test Coverage Toward 80%",
       "points": null,
       "status": "BACKLOG",
@@ -1142,7 +1277,7 @@
     },
     {
       "id": "STORY-130",
-      "epic": "EPIC-013",
+      "parent": "EPIC-013",
       "title": "Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache",
       "points": 5,
       "status": "DONE",
@@ -1156,7 +1291,7 @@
     },
     {
       "id": "STORY-131",
-      "epic": "EPIC-013",
+      "parent": "EPIC-013",
       "title": "11 Meme Template Canvas Synthesizers with @napi-rs/canvas",
       "points": 5,
       "status": "DONE",
@@ -1169,7 +1304,7 @@
     },
     {
       "id": "STORY-132",
-      "epic": "EPIC-013",
+      "parent": "EPIC-013",
       "title": "Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate)",
       "points": 5,
       "status": "DONE",
@@ -1182,7 +1317,7 @@
     },
     {
       "id": "STORY-133",
-      "epic": "EPIC-013",
+      "parent": "EPIC-013",
       "title": "Welcomer & Farewell Dynamic Card Canvas with SSRF Verification",
       "points": 3,
       "status": "DONE",
@@ -1195,7 +1330,7 @@
     },
     {
       "id": "STORY-140",
-      "epic": "EPIC-014",
+      "parent": "EPIC-014",
       "title": "Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus)",
       "points": 5,
       "status": "DONE",
@@ -1209,7 +1344,7 @@
     },
     {
       "id": "STORY-141",
-      "epic": "EPIC-014",
+      "parent": "EPIC-014",
       "title": "Persistent Natural Language Reminders Engine & Chrono Scheduler",
       "points": 5,
       "status": "DONE",
@@ -1223,7 +1358,7 @@
     },
     {
       "id": "STORY-142",
-      "epic": "EPIC-014",
+      "parent": "EPIC-014",
       "title": "Anime & Manga Search Service (Jikan v4 & AniList API)",
       "points": 5,
       "status": "DONE",
@@ -1236,7 +1371,7 @@
     },
     {
       "id": "STORY-143",
-      "epic": "EPIC-014",
+      "parent": "EPIC-014",
       "title": "Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone)",
       "points": 5,
       "status": "DONE",
@@ -1250,7 +1385,7 @@
     },
     {
       "id": "STORY-144",
-      "epic": "EPIC-014",
+      "parent": "EPIC-014",
       "title": "Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs",
       "points": 3,
       "status": "DONE",
@@ -1263,7 +1398,7 @@
     },
     {
       "id": "STORY-150",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Card EXP from Dungeon Wins & Real Skill MP Cost in Combat",
       "points": 3,
       "status": "DONE",
@@ -1275,7 +1410,7 @@
     },
     {
       "id": "STORY-151",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table)",
       "points": 8,
       "status": "DONE",
@@ -1287,7 +1422,7 @@
     },
     {
       "id": "STORY-152",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Dungeon Balance Simulator CLI & CI Win-Rate Bands",
       "points": 5,
       "status": "DONE",
@@ -1299,7 +1434,7 @@
     },
     {
       "id": "STORY-153",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "tcg:boss-builder Script & BossSynthesizer Rendering",
       "points": 8,
       "status": "DONE",
@@ -1311,7 +1446,7 @@
     },
     {
       "id": "STORY-154",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Season 1 Infernal Crucible Boss Roster & Floor Seed Data",
       "points": 5,
       "status": "DONE",
@@ -1324,7 +1459,7 @@
     },
     {
       "id": "STORY-155",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Boss Artwork in Dungeon Battle Screen",
       "points": 2,
       "status": "DONE",
@@ -1336,7 +1471,7 @@
     },
     {
       "id": "STORY-156",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget",
       "points": 8,
       "status": "DONE",
@@ -1348,7 +1483,7 @@
     },
     {
       "id": "STORY-157",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Interactive Equipment Menu (/card gear)",
       "points": 8,
       "status": "DONE",
@@ -1360,7 +1495,7 @@
     },
     {
       "id": "STORY-158",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation",
       "points": 5,
       "status": "DONE",
@@ -1372,7 +1507,7 @@
     },
     {
       "id": "STORY-159",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Early-Floor Tuning, Pity Blessing & Floor Star Ratings",
       "points": 8,
       "status": "DONE",
@@ -1385,7 +1520,7 @@
     },
     {
       "id": "STORY-160",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Equipment Crafting with Dust",
       "points": 5,
       "status": "DONE",
@@ -1397,7 +1532,7 @@
     },
     {
       "id": "STORY-161",
-      "epic": "EPIC-004",
+      "parent": "EPIC-004",
       "title": "Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness",
       "points": 5,
       "status": "DONE",
@@ -1410,7 +1545,7 @@
     },
     {
       "id": "STORY-162",
-      "epic": "EPIC-015",
+      "parent": "EPIC-015",
       "title": "Craft & Equip Button and Card Name on Worn Gear in Inventory",
       "points": null,
       "status": "BACKLOG",
@@ -1422,6 +1557,7 @@
     },
     {
       "id": "STORY-170",
+      "parent": "EPIC-016",
       "title": "Interactive Branching Adventure RPG",
       "points": 8,
       "status": "DONE",
@@ -1452,7 +1588,7 @@
     },
     {
       "id": "STORY-172",
-      "epic": "EPIC-005",
+      "parent": "EPIC-005",
       "title": "Per-Source Music Toggles & Pluggable Source Adapters",
       "points": 8,
       "status": "DONE",
@@ -1466,7 +1602,7 @@
     },
     {
       "id": "STORY-173",
-      "epic": "EPIC-003",
+      "parent": "EPIC-003",
       "title": "Private Message Context Menu Translation to English",
       "points": 5,
       "status": "DONE",
@@ -1476,7 +1612,7 @@
     },
     {
       "id": "STORY-174",
-      "epic": "EPIC-003",
+      "parent": "EPIC-003",
       "title": "Scoped Command Registration (Global vs Per-Server) & CLI Command Sync",
       "points": 8,
       "status": "DONE",
@@ -1493,7 +1629,7 @@
     },
     {
       "id": "STORY-175",
-      "epic": "EPIC-003",
+      "parent": "EPIC-003",
       "title": "Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting",
       "points": 8,
       "status": "DONE",
@@ -3993,6 +4129,72 @@
       ],
       "blocks": [],
       "description": "Assemble the complete 6-stage middleware chain in apps/bot/src/command-router.ts in optimal execution order: Maintenance -> ModuleToggle -> CommandOverride -> Permission -> RateLimit -> Cooldown. Author end-to-end integration tests for slash and prefix commands, ensuring blocked commands never consume cooldowns or rate limit quota. Update docs/commands.md."
+    },
+    {
+      "id": "TASK-1431",
+      "title": "GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-143",
+      "requires": [
+        "EPIC-002",
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-1432",
+        "TASK-1433"
+      ],
+      "description": "In-memory cached GuildSettingsService wrapping guildSettingsRepo with TTL to eliminate DB queries on messages, plus resolveUserTimeZone and resolveGuildTimeZone fallback."
+    },
+    {
+      "id": "TASK-1432",
+      "title": "Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-143",
+      "requires": [
+        "TASK-1431"
+      ],
+      "blocks": [],
+      "description": "Dual-dispatch /prefix and /timezone commands with ManageGuild permission checks, IANA timezone validation, and server/user scope support."
+    },
+    {
+      "id": "TASK-1433",
+      "title": "Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting",
+      "points": 1,
+      "status": "DONE",
+      "parent": "STORY-143",
+      "requires": [
+        "TASK-1431"
+      ],
+      "blocks": [],
+      "description": "Dual-dispatch server utility and identity commands with rich embeds, Discord timestamp chips, and server local time representations."
+    },
+    {
+      "id": "TASK-1321",
+      "title": "Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue",
+      "points": 3,
+      "status": "DONE",
+      "parent": "STORY-132",
+      "requires": [
+        "EPIC-003"
+      ],
+      "blocks": [
+        "TASK-1322"
+      ],
+      "description": "Implement packages/services/src/image-generation/ and packages/database/src/repositories/image.repository.ts. Build typed ImageGenerationProvider adapters for Gemini Imagen, ComfyUI/SD-WebUI, Replicate, and Mock. Implement anime positive/negative presets, concurrency-limited job queue, per-user daily quota tracking, and dual-dialect persistence with full Vitest test suites."
+    },
+    {
+      "id": "TASK-1322",
+      "title": "Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-132",
+      "requires": [
+        "TASK-1321"
+      ],
+      "blocks": [],
+      "description": "Implement dual-dispatch /imagine command in apps/bot/src/commands/images/imagine.command.ts with Slash and Prefix (!imagine) parity, aspect ratio and preset choices, Discord attachment delivery, interactive Action Row buttons (Regenerate, Dismiss), /stablediffusion-model configuration, and legacy token deprecation handling. Wire into BotServices and main.ts with comprehensive Vitest suite."
     }
   ],
   "chores": [
@@ -4001,6 +4203,7 @@
       "title": "Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules",
       "points": 2,
       "status": "DONE",
+      "parent": "STORY-170",
       "requires": [],
       "blocks": [],
       "description": "Documentation-only corrections requested by the user: complete decision paths, global adventure locking, existing card APIs with rarity floors, and explicit energy and choice-payment semantics."
@@ -4010,6 +4213,7 @@
       "title": "Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility",
       "points": 2,
       "status": "DONE",
+      "parent": "EPIC-003",
       "requires": [
         "EPIC-003"
       ],
@@ -4020,6 +4224,7 @@
       "title": "CLI Command to Configure AI Chat Functions & Provider Keys",
       "points": 2,
       "status": "DONE",
+      "parent": "EPIC-006",
       "requires": [
         "EPIC-006"
       ],
@@ -4031,6 +4236,7 @@
       "title": "Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards",
       "points": 1,
       "status": "ABANDONED",
+      "parent": "EPIC-015",
       "requires": [
         "BUG-0014"
       ],
@@ -4042,6 +4248,7 @@
       "title": "Align Default Prefix: Code Fallback '!' vs .env.example and Guide Text '$'",
       "points": 1,
       "status": "DONE",
+      "parent": "EPIC-003",
       "requires": [],
       "blocks": [],
       "description": "Align default command prefix fallback to '!' across bot router, .env.example, guides, and documentation. Ensure all help views, inspectors, subcommands, and suggestions dynamically display the active server prefix (or fallback)."
@@ -4051,6 +4258,7 @@
       "title": "Shared AniList Client & HTTP Rate-Limit Layer (Decouple from Waifu TCG)",
       "points": 2,
       "status": "DONE",
+      "parent": "EPIC-014",
       "requires": [],
       "blocks": [
         "STORY-142"
@@ -4062,6 +4270,7 @@
       "title": "CLI Command to Configure Image Generation Providers & Keys (image-configure)",
       "points": 2,
       "status": "DONE",
+      "parent": "STORY-132",
       "requires": [
         "STORY-132"
       ],
@@ -4073,6 +4282,7 @@
       "title": "Cross-Process Guild Config Change Feed (guild_config_versions Table, Bot Watcher & Cache Invalidation Events)",
       "points": 2,
       "status": "DONE",
+      "parent": "EPIC-011",
       "requires": [
         "STORY-110"
       ],
@@ -4086,6 +4296,7 @@
       "title": "Plan Companion-Level Adventure Reward Ranks",
       "points": 2,
       "status": "DONE",
+      "parent": "STORY-170",
       "requires": [
         "TASK-1707"
       ],
@@ -4097,6 +4308,7 @@
       "title": "Remove Adventure User-Specific S+ Rank Override",
       "points": 1,
       "status": "DONE",
+      "parent": "STORY-170",
       "requires": [],
       "blocks": [],
       "description": "Restore companion-level reward ranks for every user on new adventures; retain frozen existing sessions and open a separate PR."
@@ -4104,9 +4316,10 @@
     {
       "id": "CHORE-0001",
       "title": "Adopt Scrum Kanban 0.4: Single AGENTS.md and Board Migration",
-      "status": "REVIEW",
+      "status": "DONE",
       "points": 5,
       "children": [],
+      "parent": "EPIC-000",
       "requires": [],
       "blocks": [],
       "model": "medium",
@@ -4143,6 +4356,53 @@
         "CHORE-0001"
       ],
       "description": "Finish the Scrum-Kanban-Template 0.4.0 adoption. Merge GEMINI.md into AGENTS.md and make CLAUDE.md and GEMINI.md import it. Migrate legacy board.json data so render-board.mjs validates and writes BOARD.md. Set the template base branch to develop/2.0.0."
+    },
+    {
+      "id": "CHORE-0002",
+      "title": "Link Stories, Tasks and Chores to Their Epics",
+      "status": "DONE",
+      "points": 3,
+      "parent": "EPIC-000",
+      "children": [],
+      "requires": [
+        "CHORE-0001"
+      ],
+      "blocks": [],
+      "model": "medium",
+      "assignee": "Claude Code (Opus 5.5)",
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "docs/kanban/board.json",
+          "scripts/build-status-site.ts",
+          "scripts/build-status-site.test.ts"
+        ],
+        "symbols": [
+          "buildStatusModel",
+          "EpicProgress"
+        ],
+        "entry_points": [
+          "scripts/kanban/render-board.mjs",
+          "scripts/kanban/board-web/index.html"
+        ],
+        "codegraph_queries": [
+          "buildStatusModel EpicProgress"
+        ]
+      },
+      "acceptance": [
+        "Every story has `parent` set to its epic and no ticket keeps the legacy `epic` field.",
+        "Every story, task, chore and bug reaches an epic through its `parent` chain.",
+        "Each epic's `children` lists exactly the stories whose `parent` is that epic.",
+        "Tasks no longer sit in the `bugs` array.",
+        "STORY-170 belongs to the new EPIC-016.",
+        "scripts/build-status-site.ts reads `parent`, and its test passes."
+      ],
+      "verify_cmd": "node scripts/kanban/render-board.mjs --check && pnpm vitest run scripts/build-status-site.test.ts",
+      "handovers": [
+        "CHORE-0002"
+      ],
+      "description": "Stories linked to epics through a legacy `epic` field, but the template renderer and web board follow only `parent`, so every ticket showed \"No epic\". Rename the field, fill epic children, give chores parents, move misfiled tasks out of `bugs`, and add EPIC-016 for the adventure RPG."
     }
   ],
   "bugs": [
@@ -4323,46 +4583,6 @@
       "description": "Discord select menus hold at most 25 options. Add pagination or chunking (and a visible 'showing X-Y of N' indicator) with Prev/Next controls in gear-menu, craft-menu and shop-menu where item or card collections can exceed 25 options."
     },
     {
-      "id": "TASK-1431",
-      "title": "GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-143",
-      "requires": [
-        "EPIC-002",
-        "EPIC-003"
-      ],
-      "blocks": [
-        "TASK-1432",
-        "TASK-1433"
-      ],
-      "description": "In-memory cached GuildSettingsService wrapping guildSettingsRepo with TTL to eliminate DB queries on messages, plus resolveUserTimeZone and resolveGuildTimeZone fallback."
-    },
-    {
-      "id": "TASK-1432",
-      "title": "Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-143",
-      "requires": [
-        "TASK-1431"
-      ],
-      "blocks": [],
-      "description": "Dual-dispatch /prefix and /timezone commands with ManageGuild permission checks, IANA timezone validation, and server/user scope support."
-    },
-    {
-      "id": "TASK-1433",
-      "title": "Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting",
-      "points": 1,
-      "status": "DONE",
-      "parent": "STORY-143",
-      "requires": [
-        "TASK-1431"
-      ],
-      "blocks": [],
-      "description": "Dual-dispatch server utility and identity commands with rich embeds, Discord timestamp chips, and server local time representations."
-    },
-    {
       "id": "BUG-0018",
       "title": "Persist and Restore Guild Default Volume Across Music Sessions",
       "points": 3,
@@ -4397,32 +4617,6 @@
       ],
       "blocks": [],
       "description": "Remove hanging Prefer: wait header in Replicate prediction creation and use fast asynchronous creation + status polling. Direct fetch image buffer downloads without API rate limiter. Fix Discord attachment extension dynamically mapping WebP and JPEG mime types so Discord embed previews render correctly."
-    },
-    {
-      "id": "TASK-1321",
-      "title": "Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue",
-      "points": 3,
-      "status": "DONE",
-      "parent": "STORY-132",
-      "requires": [
-        "EPIC-003"
-      ],
-      "blocks": [
-        "TASK-1322"
-      ],
-      "description": "Implement packages/services/src/image-generation/ and packages/database/src/repositories/image.repository.ts. Build typed ImageGenerationProvider adapters for Gemini Imagen, ComfyUI/SD-WebUI, Replicate, and Mock. Implement anime positive/negative presets, concurrency-limited job queue, per-user daily quota tracking, and dual-dialect persistence with full Vitest test suites."
-    },
-    {
-      "id": "TASK-1322",
-      "title": "Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity",
-      "points": 2,
-      "status": "DONE",
-      "parent": "STORY-132",
-      "requires": [
-        "TASK-1321"
-      ],
-      "blocks": [],
-      "description": "Implement dual-dispatch /imagine command in apps/bot/src/commands/images/imagine.command.ts with Slash and Prefix (!imagine) parity, aspect ratio and preset choices, Discord attachment delivery, interactive Action Row buttons (Regenerate, Dismiss), /stablediffusion-model configuration, and legacy token deprecation handling. Wire into BotServices and main.ts with comprehensive Vitest suite."
     },
     {
       "id": "BUG-0020",

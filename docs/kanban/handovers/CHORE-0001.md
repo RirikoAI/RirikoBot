@@ -61,3 +61,18 @@ See docs/kanban/protocol.md section 6.
 **Next steps**
 - The maintainer reviews the PR to `develop/2.0.0` and merges it after CI passes. The commit includes the rest of the template install (scripts, hooks, protocol, GitHub Actions board check).
 - Groom the 12 BACKLOG tickets before work starts on them.
+
+---
+
+## REVIEW · 2026-10-01T14:09:36Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- `node scripts/kanban/render-board.mjs --check` on `develop/2.0.0` (`02f36ef`): board OK, 342 tickets, warnings only.
+
+**Acceptance**
+- [x] `render-board.mjs --check` passes and BOARD.md is generated from board.json.
+- [x] AGENTS.md holds the merged GEMINI.md rules; CLAUDE.md and GEMINI.md contain only `@AGENTS.md`.
+- [x] `.scrum-kanban.json`, protocol.md and the AGENTS.md Scrum Kanban block target `develop/2.0.0`.
+- [x] The dry-run template upgrade reported nothing to change.
+
+PR #672 merged into `develop/2.0.0` on 2026-10-01 with CircleCI, the GitHub Actions board check, codecov and Snyk green.
