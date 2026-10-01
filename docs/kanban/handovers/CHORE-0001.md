@@ -51,7 +51,7 @@ See docs/kanban/protocol.md section 6.
 **Verification**
 - `node scripts/kanban/render-board.mjs --check`: board OK, warnings only.
 - Upstream `bin/scrum-kanban.mjs upgrade --base-branch=develop/2.0.0 --dry-run`: nothing to change.
-- Branch `chore/CHORE-0001-kanban-template-0.4`, cut from `develop/2.0.0`.
+- Branch `chore/CHORE-0001-kanban-template-0.4`, cut from `develop/2.0.0`. PR #672.
 
 **Decisions & gotchas**
 - TASK-1705 lists live PostgreSQL and live Discord checks that were never recorded as run. Its REVIEW entry says so. STORY-124 (now BACKLOG) adds the Postgres integration job.
