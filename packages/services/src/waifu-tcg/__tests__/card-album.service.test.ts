@@ -219,4 +219,24 @@ describe('CardAlbumService', () => {
     expect(getCardImage).toHaveBeenCalledTimes(3);
     expect(mostAtOnce).toBe(1);
   });
+
+  it('lets pending work (other requests) run before each draw', async () => {
+    const { repo } = fakeRepo(2, [entry(1), entry(2)]);
+    const order: string[] = [];
+    const album = new CardAlbumService({
+      cards: repo,
+      loadRenderer: async () => ({
+        getCardImage: async (card) => {
+          order.push(`draw ${card.id}`);
+          return Buffer.from('png');
+        },
+      }),
+    });
+
+    const drawn = Promise.all([album.cardImage('u1', 'uc-1'), album.cardImage('u1', 'uc-2')]);
+    setImmediate(() => order.push('other request'));
+    await drawn;
+
+    expect(order).toEqual(['other request', 'draw card-1', 'draw card-2']);
+  });
 });
