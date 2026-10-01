@@ -166,6 +166,8 @@ import {
   MemeSynthesizer,
   ImageGenerationService,
   WelcomerService,
+  MaintenanceService,
+  ModuleToggleService,
   type FreeGameItem,
 } from '@ririko/services';
 import { sendLevelUpMessage } from './listeners/level-up.js';
@@ -307,6 +309,8 @@ export interface BotServices {
   imageGenerationService: ImageGenerationService;
   welcomerRepo: WelcomerRepository;
   welcomerService: WelcomerService;
+  maintenanceService: MaintenanceService;
+  moduleToggleService: ModuleToggleService;
 }
 
 /**
@@ -605,6 +609,12 @@ export async function createBotServices(
     if (module === 'commands' || module === 'games') commandOverrideService.invalidate(guildId);
   });
   const commandCatalogRepo = new CommandCatalogRepository(db);
+  const maintenanceService = new MaintenanceService({ eventBus });
+  const moduleToggleService = new ModuleToggleService({
+    commandOverrideService,
+    guildSettingsService,
+    eventBus,
+  });
   const botActivityRepo = new BotActivityRepository(db);
   const commandUsageRecorder = new CommandUsageRecorder(botActivityRepo);
   const botStatusReporter = discordClient
@@ -1122,6 +1132,8 @@ export async function createBotServices(
     welcomerService,
     imageRepo,
     imageGenerationService,
+    maintenanceService,
+    moduleToggleService,
   };
 }
 

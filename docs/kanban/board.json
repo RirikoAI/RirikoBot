@@ -1455,6 +1455,25 @@
         "TASK-1745"
       ],
       "description": "Discord allows 100 slash commands per scope; the bot sent 116 to one scope, so the whole sync was rejected. Retire 17 legacy aliases to prefix-only, register admin/config commands per server and member commands globally (68 global, 31 per server), guard every per-scope limit before calling Discord, and re-register from the CLI (ririko commands:sync, commands:reset) without restarting the bot. Handover: docs/kanban/handovers/STORY-174.md."
+    },
+    {
+      "id": "STORY-175",
+      "epic": "EPIC-003",
+      "title": "Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting",
+      "points": 8,
+      "status": "DONE",
+      "requires": [
+        "STORY-174"
+      ],
+      "blocks": [],
+      "children": [
+        "TASK-1751",
+        "TASK-1752",
+        "TASK-1753",
+        "TASK-1754",
+        "TASK-1755"
+      ],
+      "description": "Assemble and wire the complete 6-stage middleware pipeline in apps/bot/src/command-router.ts (Maintenance -> Module Toggle -> Command Override -> Permission -> Rate Limit -> Cooldown). Hardens permission resolution across slash and prefix commands, provides a runtime MaintenanceService with CLI management, hooks guild module toggles, and applies sliding-window rate limiting with owner/admin bypass."
     }
   ],
   "tasks": [
@@ -3876,6 +3895,69 @@
       ],
       "blocks": [],
       "description": "SYNC_COMMANDS=true syncs the global set and the guild set (DISCORD_DEV_GUILD_ID or every guild); joining a server registers its guild set. Docs updated."
+    },
+    {
+      "id": "TASK-1751",
+      "parent": "STORY-175",
+      "title": "Centralized Permission Middleware Hardening & Member Resolution",
+      "points": 2,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [
+        "TASK-1755"
+      ],
+      "description": "Harden packages/discord/src/middleware/permissions.ts to resolve member permissions across slash interaction payloads and prefix message contexts with fallback member fetching. Implicitly require guild context when userPermissions or botPermissions are specified, and safely resolve bot client permissions via fetchMe()."
+    },
+    {
+      "id": "TASK-1752",
+      "parent": "STORY-175",
+      "title": "Maintenance Mode Service, CLI & Middleware Integration",
+      "points": 2,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [
+        "TASK-1755"
+      ],
+      "description": "Implement MaintenanceService in packages/services with in-memory state initialized from MAINTENANCE_MODE env var, toggle and status methods, and event bus emissions. Add ririko bot:maintenance [on|off|status] CLI command and integrate createMaintenanceMiddleware into command routing with developer bypass."
+    },
+    {
+      "id": "TASK-1753",
+      "parent": "STORY-175",
+      "title": "Module Toggle Service & Guild Category Middleware Integration",
+      "points": 2,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [
+        "TASK-1755"
+      ],
+      "description": "Implement a category/module toggle resolver connected to guild settings and command overrides, exempting general, admin, and utility categories while checking feature enablement for music, ai, tcg, economy, games, streams, reactions, and memes."
+    },
+    {
+      "id": "TASK-1754",
+      "parent": "STORY-175",
+      "title": "Sliding-Window Rate Limit Middleware & Protection Policy",
+      "points": 1,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [
+        "TASK-1755"
+      ],
+      "description": "Configure token-bucket sliding-window rate limiting in createRateLimitMiddleware with default baseline and per-command metadata overrides. Provide bypass for bot owners and guild administrators, and configure periodic sweeper to prevent memory leakage."
+    },
+    {
+      "id": "TASK-1755",
+      "parent": "STORY-175",
+      "title": "Unified Middleware Pipeline Assembly, Ordering & End-to-End Verification",
+      "points": 1,
+      "status": "DONE",
+      "requires": [
+        "TASK-1751",
+        "TASK-1752",
+        "TASK-1753",
+        "TASK-1754"
+      ],
+      "blocks": [],
+      "description": "Assemble the complete 6-stage middleware chain in apps/bot/src/command-router.ts in optimal execution order: Maintenance -> ModuleToggle -> CommandOverride -> Permission -> RateLimit -> Cooldown. Author end-to-end integration tests for slash and prefix commands, ensuring blocked commands never consume cooldowns or rate limit quota. Update docs/commands.md."
     }
   ],
   "chores": [
