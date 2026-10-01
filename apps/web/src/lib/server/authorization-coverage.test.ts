@@ -65,6 +65,7 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         'app/account/security/actions.ts#removePasskey',
         'app/account/sessions/actions.ts#revokeOtherSessions',
         'app/verify/actions.ts#finishPasskeyCheck',
+        'app/api/album/cards/[userCardId]/route.ts#GET',
         ...Object.entries(AUTH_ROUTE_ALLOWLIST).flatMap(([path, methods]) =>
           methods.map((method) => `${path}#${method}`),
         ),
