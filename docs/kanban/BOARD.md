@@ -6,9 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-| ID | Type | Title | Pts | Epic / Parent |
-|---|---|---|---|---|
-| `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | `STORY-168` |
+None.
 
 ---
 
@@ -20,6 +18,7 @@ See STORY-170, TASK-1705, STORY-173 and STORY-174 in the story tables below, and
 | | | | | | |
 
 | `BUG-0027` | Bug | Count Every Stamina Potion in Multi-Quantity Uses | 2 | `STORY-043` | [BUG-0027.md](handovers/BUG-0027.md) |
+| `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | `STORY-168` | [BUG-0028.md](handovers/BUG-0028.md) |
 
 ---
 
