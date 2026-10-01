@@ -14,3 +14,9 @@ test-results/
 site-dist/
 .codegraph/
 packages/music-private/
+# Scrum-Kanban-Template files; its upgrade command rewrites them
+scripts/kanban/
+scripts/hooks/
+.scrum-kanban.json
+.claude/settings.json
+.mcp.json

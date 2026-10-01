@@ -1,0 +1,8 @@
+#!/bin/sh
+# Keep the CodeGraph index current after branch switches, pulls, and rebases.
+# Installed by: git config core.hooksPath scripts/git-hooks
+# Runs in the background so git is not slowed down.
+[ -f "$(git rev-parse --show-toplevel)/.codegraph/codegraph.db" ] || exit 0
+command -v codegraph >/dev/null 2>&1 || exit 0
+(codegraph sync -q "$(git rev-parse --show-toplevel)" >/dev/null 2>&1 &)
+exit 0
