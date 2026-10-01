@@ -49,7 +49,7 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 | `TASK-1753` | Task | Module Toggle Service & Guild Category Middleware Integration | 2 | `STORY-175` | [TASK-1753.md](handovers/TASK-1753.md) |
 | `TASK-1752` | Task | Maintenance Mode Service, CLI & Middleware Integration | 2 | `STORY-175` | [TASK-1752.md](handovers/TASK-1752.md) |
 | `TASK-1751` | Task | Centralized Permission Middleware Hardening & Member Resolution | 2 | `STORY-175` | [TASK-1751.md](handovers/TASK-1751.md) |
-| `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | `EPIC-003` | [TASK-1755.md](handovers/TASK-1755.md) |
+| `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | `EPIC-003` | [TASK-1755.md](handovers/TASK-1755.md) · PR #671 |
 | `BUG-0026` | Bug | Canonical Game Item Seed Used Dynamic UUIDs Breaking Inventory Foreign Keys on Schema Recreation | 3 | `EPIC-010` | [BUG-0026.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0026.md) · PR #664 |
 | `EPIC-011` | Epic | Next.js 16 Web Dashboard & Management Portal | 21 | Self | [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) |
 | `STORY-168` | Story | Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager | 5 | `EPIC-011` | [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) |
@@ -478,7 +478,7 @@ Groomed 2026-09-26. WIP is held by the active child only. Parent points are the 
 
 | ID | Type | Title | Pts | Parent | Status |
 |---|---|---|---|---|---|
-| `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | `EPIC-003` | ✅ Done · [TASK-1755.md](handovers/TASK-1755.md) |
+| `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | `EPIC-003` | ✅ Done · [TASK-1755.md](handovers/TASK-1755.md) · PR #671 |
 | `TASK-1751` | Task | Centralized Permission Middleware Hardening & Member Resolution | 2 | `STORY-175` | ✅ Done · [TASK-1751.md](handovers/TASK-1751.md) |
 | `TASK-1752` | Task | Maintenance Mode Service, CLI & Middleware Integration | 2 | `STORY-175` | ✅ Done · [TASK-1752.md](handovers/TASK-1752.md) |
 | `TASK-1753` | Task | Module Toggle Service & Guild Category Middleware Integration | 2 | `STORY-175` | ✅ Done · [TASK-1753.md](handovers/TASK-1753.md) |
