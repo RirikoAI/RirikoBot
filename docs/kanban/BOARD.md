@@ -18,7 +18,7 @@ See STORY-170, TASK-1705, STORY-173, STORY-174 and STORY-120 in the story tables
 | | | | | | |
 
 | `BUG-0027` | Bug | Count Every Stamina Potion in Multi-Quantity Uses | 2 | `STORY-043` | [BUG-0027.md](handovers/BUG-0027.md) |
-| `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | `STORY-168` | [BUG-0028.md](handovers/BUG-0028.md) |
+| `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | `STORY-168` | [BUG-0028.md](handovers/BUG-0028.md) · PR #670 |
 
 ---
 
