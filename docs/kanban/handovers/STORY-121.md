@@ -46,3 +46,20 @@ See docs/kanban/protocol.md section 6.
 - Publishing images to a registry.
 - Next.js `output: 'standalone'`.
 - Moving to Node 24 (CI and `engines` use Node 22).
+
+---
+
+## REVIEW · 2026-10-01T16:22:48Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- Both targets build and `node scripts/docker-smoke.ts bot web` passes 8 of 8, locally and in CircleCI's `docker` job on PR #674.
+
+**Acceptance**
+- [x] TASK-1212: a rootless `bot-runner` (uid 10001) passes the bot smoke checks.
+- [x] TASK-1211: a rootless `web-runner` (uid 10001) passes the web smoke checks.
+- [x] TASK-1213: the CircleCI `docker` job is green on the PR.
+- [x] `docs/deployment.md` section 2.1 describes the targets, run commands, writable directories and volume ownership.
+- BUG-0029, found while building the bot image, is fixed in the same PR.
+
+**PR**
+- https://github.com/RirikoAI/RirikoBot/pull/674 targets `develop/2.0.0`. The maintainer merges it.

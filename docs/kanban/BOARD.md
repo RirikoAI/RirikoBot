@@ -16,14 +16,11 @@
 ## 🎯 To Do
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
-| `STORY-121` | Story | Rootless Dockerfile & Containerization | 8 | EPIC-012 | STORY-120 | yes | medium |
 | `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | — | yes | large |
-| `TASK-1262` | Task | Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount | 5 | STORY-126 | TASK-1261, STORY-121 | blocked | large |
+| `TASK-1262` | Task | Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount | 5 | STORY-126 | TASK-1261, STORY-121 | yes | large |
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `TASK-1213` | Task | CircleCI Docker Build & Smoke Job for Bot and Web Images | 2 | STORY-121 | [TASK-1213.md](./handovers/TASK-1213.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -87,6 +84,7 @@
 | `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | EPIC-011 | [STORY-163.md](./handovers/STORY-163.md) |
 | `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | EPIC-011 | [STORY-164.md](./handovers/STORY-164.md) |
 | `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | EPIC-012 | [STORY-120.md](./handovers/STORY-120.md) |
+| `STORY-121` | Story | Rootless Dockerfile & Containerization | 8 | EPIC-012 | [STORY-121.md](./handovers/STORY-121.md) |
 | `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | EPIC-012 | [STORY-123.md](./handovers/STORY-123.md) |
 | `STORY-130` | Story | Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | EPIC-013 | [STORY-130.md](./handovers/STORY-130.md) |
 | `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | EPIC-013 | [STORY-131.md](./handovers/STORY-131.md) |
@@ -266,6 +264,7 @@
 | `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | STORY-120 | [TASK-1202.md](./handovers/TASK-1202.md) |
 | `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | STORY-120 | [TASK-1203.md](./handovers/TASK-1203.md) |
 | `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 3 | STORY-121 | [TASK-1211.md](./handovers/TASK-1211.md) |
+| `TASK-1213` | Task | CircleCI Docker Build & Smoke Job for Bot and Web Images | 2 | STORY-121 | [TASK-1213.md](./handovers/TASK-1213.md) |
 | `TASK-1261` | Task | Real 1.4.0 Schema Fixture From the Published Image & Transformer Fidelity Fixes | 3 | STORY-126 | [TASK-1261.md](./handovers/TASK-1261.md) |
 | `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 | [TASK-1212.md](./handovers/TASK-1212.md) |
 | `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | STORY-123 | — |
