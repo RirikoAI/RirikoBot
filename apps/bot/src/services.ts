@@ -43,6 +43,7 @@ import {
   AuditLogRepository,
   ItemCategoryRepository,
   type DatabaseClient,
+  databaseConfigFromEnv,
 } from '@ririko/database';
 import type { Client, MessageCreateOptions } from 'discord.js';
 import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
@@ -325,12 +326,7 @@ export async function createBotServices(
   // Shared calendar-day reset boundary (default 00:00 GMT+8) for every daily system.
   const { schedules: resetSchedules, config: resetConfig } = resolveResetSchedulesFromEnv();
 
-  const db =
-    customDb ??
-    (await createDatabaseClient({
-      dialect: (process.env.DATABASE_DIALECT as 'sqlite' | 'postgres') || 'sqlite',
-      url: process.env.DATABASE_URL || 'sqlite:storage/ririko.db',
-    }));
+  const db = customDb ?? (await createDatabaseClient(databaseConfigFromEnv()));
 
   // Repositories
   const userRepo = new UserRepository(db);

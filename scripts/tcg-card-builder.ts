@@ -6,6 +6,7 @@ import {
   createDatabaseClient,
   WaifuAssetRepository,
   WaifuCardRepository,
+  databaseConfigFromEnv,
 } from '../packages/database/src/index.js';
 import {
   AniListClient,
@@ -381,9 +382,7 @@ function buildCard(
 type Repos = { assets: WaifuAssetRepository; cards: WaifuCardRepository } | null;
 
 async function connectRepos(): Promise<NonNullable<Repos>> {
-  const dialect = (process.env.DATABASE_DIALECT as 'sqlite' | 'postgres') || 'sqlite';
-  const url = process.env.DATABASE_URL || './data/ririko.sqlite';
-  const client = await createDatabaseClient({ dialect, url });
+  const client = await createDatabaseClient(databaseConfigFromEnv());
   return { assets: new WaifuAssetRepository(client), cards: new WaifuCardRepository(client) };
 }
 

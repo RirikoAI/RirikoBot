@@ -4,6 +4,7 @@ import {
   createDatabaseClient,
   TcgConfigRepository,
   type DatabaseClient,
+  databaseConfigFromEnv,
 } from '@ririko/database';
 import { GuildConfigValidationError } from '@ririko/services/guild';
 import { TcgRulesService } from '@ririko/services/owner';
@@ -77,10 +78,7 @@ export function registerTcgRulesCommand(program: Command): void {
     .argument('[key]', 'Rule name, e.g. marketTaxPercent; omit to list all')
     .argument('[value]', 'New whole-number value; omit to print the current one')
     .action(async (key?: string, value?: string) => {
-      const db = await createDatabaseClient({
-        dialect: (process.env.DATABASE_DIALECT || 'sqlite') as 'sqlite' | 'postgres',
-        url: process.env.DATABASE_URL || './data/ririko.sqlite',
-      });
+      const db = await createDatabaseClient(databaseConfigFromEnv());
       try {
         const lines = await runTcgRules(createTcgRulesService(db), key, value);
         console.log(lines.join('\n'));

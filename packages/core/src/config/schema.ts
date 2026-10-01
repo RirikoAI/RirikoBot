@@ -9,6 +9,9 @@ export type NodeEnv = z.infer<typeof NodeEnvSchema>;
 export const DatabaseDialectSchema = z.enum(['postgres', 'sqlite']).default('sqlite');
 export type DatabaseDialect = z.infer<typeof DatabaseDialectSchema>;
 
+/** SQLite file used when `DATABASE_URL` is unset, relative to the workspace root. */
+export const DEFAULT_DATABASE_URL = './data/ririko.sqlite';
+
 const HEX_KEY = /^[0-9a-fA-F]{64}$/;
 
 /** `BOT_OWNER_ID`: comma-separated Discord user IDs of the bot owners. */
@@ -49,7 +52,7 @@ const BaseAppConfigSchema = z.object({
   DEFAULT_PREFIX: PrefixSchema.default(DEFAULT_COMMAND_PREFIX),
 
   // Dual-Dialect Database
-  DATABASE_URL: z.string().default('./data/ririko.sqlite'),
+  DATABASE_URL: z.string().default(DEFAULT_DATABASE_URL),
   DATABASE_DIALECT: DatabaseDialectSchema,
 
   // AppSec & Credential Vault (AES-256-GCM 32-byte hex key)

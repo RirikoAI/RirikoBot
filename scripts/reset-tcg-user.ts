@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { createDatabaseClient } from '../packages/database/src/index.js';
+import { createDatabaseClient, databaseConfigFromEnv } from '../packages/database/src/index.js';
 
 // Simple .env parser for standalone script execution
 function loadEnv(): void {
@@ -48,8 +48,7 @@ async function main(): Promise<void> {
   console.log('🔄 ===================================================\n');
   console.log(`• Target User ID: ${userId}`);
 
-  const dialect = (process.env.DATABASE_DIALECT as 'sqlite' | 'postgres') || 'sqlite';
-  const url = process.env.DATABASE_URL || './data/ririko.sqlite';
+  const { dialect, url } = databaseConfigFromEnv();
 
   console.log(`• Dialect: ${dialect}`);
   console.log(`• Database URL: ${url}\n`);
