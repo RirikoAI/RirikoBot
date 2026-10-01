@@ -13,6 +13,11 @@ export interface ModuleToggleMiddlewareOptions {
    * (e.g. general, admin, utility).
    */
   exemptCategories?: readonly CommandCategory[] | undefined;
+
+  /**
+   * Predicate allowing specific callers (e.g. bot owners or guild staff) to bypass module disabling.
+   */
+  canBypass?: ((ctx: CommandContext) => boolean | Promise<boolean>) | undefined;
 }
 
 /**
@@ -33,6 +38,11 @@ export function createModuleToggleMiddleware(
 
     const category = ctx.command.metadata.category;
     if (exempt.has(category)) {
+      await next();
+      return;
+    }
+
+    if (options.canBypass && (await options.canBypass(ctx))) {
       await next();
       return;
     }

@@ -1,3 +1,4 @@
+import { PermissionFlagsBits, type GuildMember, type PermissionsBitField } from 'discord.js';
 import type { CommandContext } from '../command/types.js';
 import type { CommandMiddleware, MiddlewareNext } from './types.js';
 import { CommandRateLimitError } from '../errors/index.js';
@@ -17,6 +18,53 @@ export interface RateLimitMiddlewareOptions {
    * Scope of the rate limit: 'user' (default) or 'channel' or 'guild'.
    */
   scope?: 'user' | 'channel' | 'guild' | undefined;
+
+  /**
+   * Periodic sweep interval in milliseconds to purge expired timestamps and prevent memory leakage.
+   * If > 0, an unref'd timer periodically sweeps the store.
+   */
+  sweepIntervalMs?: number | undefined;
+
+  /**
+   * Threshold entry count before triggering an inline sweep. Defaults to 1000.
+   */
+  maxEntries?: number | undefined;
+
+  /**
+   * Optional custom clock for deterministic testing. Defaults to Date.now.
+   */
+  now?: (() => number) | undefined;
+}
+
+/**
+ * Evaluates whether a command invocation bypasses rate limits.
+ * Grants bypass to bot owners, guild owners, and guild administrators.
+ */
+export function isRateLimitBypassed(
+  ctx: CommandContext,
+  botOwnerIds: readonly string[] = [],
+): boolean {
+  // 1. Bot owner bypass
+  if (botOwnerIds.includes(ctx.user.id)) return true;
+
+  // 2. Guild owner bypass
+  if (ctx.guild && ctx.guild.ownerId === ctx.user.id) return true;
+
+  // 3. Guild Administrator bypass from member permissions
+  const member = ctx.member as Partial<GuildMember> | null;
+  if (member?.permissions && 'has' in member.permissions) {
+    if ((member.permissions as PermissionsBitField).has(PermissionFlagsBits.Administrator)) {
+      return true;
+    }
+  }
+
+  // 4. Raw interaction memberPermissions
+  const raw = ctx.raw as { memberPermissions?: PermissionsBitField } | null;
+  if (raw?.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -28,9 +76,11 @@ export function createRateLimitMiddleware(
 ): CommandMiddleware {
   // Key -> array of epoch millisecond timestamps
   const store = new Map<string, number[]>();
+  const getNow = options.now ?? Date.now;
+  const maxEntries = options.maxEntries ?? 1000;
 
   const sweep = (): void => {
-    const now = Date.now();
+    const now = getNow();
     for (const [key, timestamps] of store.entries()) {
       const valid = timestamps.filter((ts) => ts > now - 3600_000); // retain max 1hr
       if (valid.length === 0) {
@@ -40,6 +90,11 @@ export function createRateLimitMiddleware(
       }
     }
   };
+
+  if (options.sweepIntervalMs && options.sweepIntervalMs > 0) {
+    const timer = setInterval(sweep, options.sweepIntervalMs);
+    timer.unref?.();
+  }
 
   return async (ctx: CommandContext, next: MiddlewareNext): Promise<void> => {
     if (!ctx.command) {
@@ -73,7 +128,7 @@ export function createRateLimitMiddleware(
     }
 
     const key = `${ctx.command.metadata.name}:${scopeId}`;
-    const now = Date.now();
+    const now = getNow();
     const windowMs = config.windowSeconds * 1000;
     const windowStart = now - windowMs;
 
@@ -90,7 +145,7 @@ export function createRateLimitMiddleware(
     timestamps.push(now);
     store.set(key, timestamps);
 
-    if (store.size > 1000) {
+    if (store.size > maxEntries) {
       sweep();
     }
 

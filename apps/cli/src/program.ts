@@ -15,6 +15,7 @@ import { registerTcgRulesCommand } from './commands/tcg-rules.js';
 import { registerPasskeysResetCommand } from './commands/passkeys-reset.js';
 import { registerCommandsResetCommand } from './commands/commands-reset.js';
 import { registerCommandsSyncCommand } from './commands/commands-sync.js';
+import { registerMaintenanceCommand } from './commands/maintenance.js';
 
 export function loadEnvConfig(customPath?: string): void {
   if (customPath) {
@@ -69,6 +70,7 @@ export function createProgram(): Command {
   registerPasskeysResetCommand(program);
   registerCommandsSyncCommand(program);
   registerCommandsResetCommand(program);
+  registerMaintenanceCommand(program);
 
   // Global error handler
   program.exitOverride();

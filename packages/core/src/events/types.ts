@@ -12,6 +12,11 @@ export type CoreEvents = {
     reason: string;
     exitCode: number;
   };
+  'bot:maintenanceChanged': {
+    enabled: boolean;
+    reason?: string | undefined;
+    changedBy?: string | undefined;
+  };
 
   // Guild lifecycle
   'guild:joined': {
