@@ -95,16 +95,16 @@ export interface CommandMetadata {
 
 Prior to command invocation, the dispatcher passes the execution context through an extensible middleware chain.
 
-**Wired today (STORY-163):** `apps/bot/src/main.ts` runs two middlewares, in this order:
-1. **Command Override Middleware** (`createCommandOverrideMiddleware`): applies the guild's `command_settings`. The channel's rule replaces the server rule (threads use their parent channel). A disabled command, a blocked role, or a missing allowed role stops the command. `help`, `ping` and `prefix` are exempt, and members with Manage Server bypass it.
-2. **Cooldown Middleware** (`createCooldownMiddleware`): per member and command. The seconds come from the rule's cooldown override, else the command's `cooldownSeconds`; `0` turns it off. It runs after overrides, so a blocked command starts no cooldown.
+**Unified 6-Stage Pipeline (STORY-175):** Both slash and prefix command dispatches pass through the assembled middleware pipeline in `apps/bot/src/command-router.ts` in exact fail-fast order:
 
-Autocomplete and help menu interactions do not pass through the pipeline. The remaining middlewares below exist in `packages/discord/src/middleware/` but are not wired yet:
-1. **Maintenance Middleware**: Blocks command execution if maintenance mode is enabled (except for bot developers).
-2. **Module Toggle Middleware**: Verifies whether the command's parent module is enabled for the guild.
-3. **Channel Override Middleware**: Checks if the command is disabled in the specific channel.
-4. **Rate Limit & Cooldown Middleware**: Evaluates per-user and per-channel token buckets, returning ephemeral time-to-reset warnings if exceeded.
-5. **Centralized Permission Middleware**: Evaluates Discord bitfields, role hierarchy, and blacklists.
+1. **Maintenance Middleware** (`createMaintenanceMiddleware`): Bot-wide maintenance gate managed dynamically via `MaintenanceService` and `ririko bot:maintenance` CLI. If enabled, commands from non-developers are rejected immediately with HTTP 503 `CommandMaintenanceError` (displaying dynamic custom reasons). Bot owners configured in `BOT_OWNER_IDS` bypass this gate unconditionally.
+2. **Module Toggle Middleware** (`createModuleToggleMiddleware`): Checks whether the command's parent category/module is enabled in the current guild using `ModuleToggleService`. Exempt categories (`general`, `admin`, `utility`) pass without check; guild owners and administrators (`ManageGuild` / `Administrator`) bypass module blocks. Rejects with HTTP 403 `CommandDisabledError`.
+3. **Command Override Middleware** (`createCommandOverrideMiddleware`): Enforces guild- and channel-level rules from database `command_settings`. Channel-specific rules override server defaults. Core commands (`help`, `ping`, `prefix`) are exempt. Members with `ManageGuild` permission bypass role or channel restrictions. Rejects with HTTP 403 `CommandDisabledError`.
+4. **Centralized Permission Middleware** (`createPermissionMiddleware`): Validates `isGuildOnly`, `isOwnerOnly`, `userPermissions`, and `botPermissions`. Resolves guild members reliably via `fetchGuildMember()`, resolves bot permissions with `fetchMe()`, and grants automatic bypass for the Discord guild owner. Rejects with HTTP 403 `CommandPermissionError`.
+5. **Rate Limit Middleware** (`createRateLimitMiddleware`): Sliding-window rate limiter per user/command with automatic sweep timers. Configured per command via `cmd.rateLimit` (defaulting to 10 calls / 10s). Bot owners, guild owners, and members with `Administrator` permission bypass rate limits. Rejects with HTTP 429 `CommandRateLimitError`.
+6. **Cooldown Middleware** (`createCooldownMiddleware`): Enforces per-user cooldown durations from command metadata or guild override rules. Positioned after all validation and rate limiting so rejected commands never trigger cooldown timers. Rejects with HTTP 429 `CommandCooldownError`.
+
+Autocomplete queries and interactive component selects do not pass through the command middleware pipeline.
 
 ---
 

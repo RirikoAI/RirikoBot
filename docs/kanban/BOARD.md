@@ -1,4 +1,4 @@
-⚡ In Progress |✅ Done ||✅ Done |# Ririko AI 2.0.0 — Live Scrum Kanban Board
+# Ririko AI 2.0.0 — Live Scrum Kanban Board
 
 > **Board Invariant**: Only **EXACTLY ONE** ticket may be in `⚡ In Progress` at any time across all agents and subagents.
 > If a new ticket must be started while one is active, the agent must **STOP AND ASK THE USER** whether to `PAUSE` or `ABANDON` the current ticket.
@@ -6,7 +6,7 @@
 ---
 
 ## ⚡ In Progress (WIP Limit: 1)
-None.
+*No tickets currently in progress.*
 
 ---
 
@@ -44,6 +44,12 @@ Ready tickets are listed once, in their epic section at the bottom of the board.
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover Note |
 |---|---|---|---|---|---|
+| `TASK-1755` | Task | Unified Middleware Pipeline Assembly, Ordering & End-to-End Verification | 1 | `STORY-175` | [TASK-1755.md](handovers/TASK-1755.md) |
+| `TASK-1754` | Task | Sliding-Window Rate Limit Middleware & Protection Policy | 1 | `STORY-175` | [TASK-1754.md](handovers/TASK-1754.md) |
+| `TASK-1753` | Task | Module Toggle Service & Guild Category Middleware Integration | 2 | `STORY-175` | [TASK-1753.md](handovers/TASK-1753.md) |
+| `TASK-1752` | Task | Maintenance Mode Service, CLI & Middleware Integration | 2 | `STORY-175` | [TASK-1752.md](handovers/TASK-1752.md) |
+| `TASK-1751` | Task | Centralized Permission Middleware Hardening & Member Resolution | 2 | `STORY-175` | [TASK-1751.md](handovers/TASK-1751.md) |
+| `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | `EPIC-003` | [TASK-1755.md](handovers/TASK-1755.md) |
 | `BUG-0026` | Bug | Canonical Game Item Seed Used Dynamic UUIDs Breaking Inventory Foreign Keys on Schema Recreation | 3 | `EPIC-010` | [BUG-0026.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/BUG-0026.md) · PR #664 |
 | `EPIC-011` | Epic | Next.js 16 Web Dashboard & Management Portal | 21 | Self | [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) |
 | `STORY-168` | Story | Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager | 5 | `EPIC-011` | [TASK-1125.md](file:///Z:/Projects/ririko-v2-2026/docs/kanban/handovers/TASK-1125.md) |
@@ -467,3 +473,15 @@ Groomed 2026-09-26. WIP is held by the active child only. Parent points are the 
 | `TASK-1743` | Task | Extract the Reusable Bot Command Set out of main() | 2 | `STORY-174` | ✅ Done |
 | `TASK-1744` | Task | CLI commands:sync and commands:reset | 2 | `STORY-174` | ✅ Done |
 | `TASK-1745` | Task | Scoped Startup Sync & guildCreate Registration | 1 | `STORY-174` | ✅ Done |
+
+### 📋 Groomed Stories & Tasks for EPIC-003 — Runtime Middleware Wiring
+
+| ID | Type | Title | Pts | Parent | Status |
+|---|---|---|---|---|---|
+| `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | `EPIC-003` | ✅ Done · [TASK-1755.md](handovers/TASK-1755.md) |
+| `TASK-1751` | Task | Centralized Permission Middleware Hardening & Member Resolution | 2 | `STORY-175` | ✅ Done · [TASK-1751.md](handovers/TASK-1751.md) |
+| `TASK-1752` | Task | Maintenance Mode Service, CLI & Middleware Integration | 2 | `STORY-175` | ✅ Done · [TASK-1752.md](handovers/TASK-1752.md) |
+| `TASK-1753` | Task | Module Toggle Service & Guild Category Middleware Integration | 2 | `STORY-175` | ✅ Done · [TASK-1753.md](handovers/TASK-1753.md) |
+| `TASK-1754` | Task | Sliding-Window Rate Limit Middleware & Protection Policy | 1 | `STORY-175` | ✅ Done · [TASK-1754.md](handovers/TASK-1754.md) |
+| `TASK-1755` | Task | Unified Middleware Pipeline Assembly, Ordering & End-to-End Verification | 1 | `STORY-175` | ✅ Done · [TASK-1755.md](handovers/TASK-1755.md) |
+
