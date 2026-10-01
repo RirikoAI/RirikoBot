@@ -46,7 +46,7 @@ See docs/kanban/protocol.md section 6.
 - Template upgrade from upstream `fd8f3a8` with `--base-branch=develop/2.0.0`: `.scrum-kanban.json`, `docs/kanban/protocol.md`, and the AGENTS.md Scrum Kanban block.
 - `AGENTS.md`: GEMINI.md project rules merged in as sections 4–11, around the template blocks (sections 1–3). The CodeGraph block now uses the upstream text. Links are repo-relative.
 - `CLAUDE.md`, `GEMINI.md`: `@AGENTS.md`. `.claude/CLAUDE.md`: upstream one-line pointer.
-- `eslint.config.mjs`, `.prettierignore`: ignore the template-owned `scripts/kanban/` and `scripts/hooks/`, plus the installer-merged `.scrum-kanban.json`, `.claude/settings.json` and `.mcp.json`. Without this, the pre-commit hook fails on Node globals and Prettier rewrites template files, so every later upgrade would rewrite them back.
+- `eslint.config.mjs`, `.prettierignore`: ignore the template-owned `scripts/kanban/` and `scripts/hooks/`, plus the installer-written `.scrum-kanban.json`, `.claude/settings.json`, `.mcp.json` and `opencode.jsonc`. Prettier would add trailing commas to the JSONC file. Without this, the pre-commit hook fails on Node globals and Prettier rewrites template files, so every later upgrade would rewrite them back.
 
 **Verification**
 - `node scripts/kanban/render-board.mjs --check`: board OK, warnings only.
