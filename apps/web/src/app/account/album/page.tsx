@@ -6,10 +6,13 @@ import { SiteHeader } from '@/components/site-header';
 import { numberFormat } from '@/lib/chart-format';
 import { requireSession } from '@/lib/server/auth/session';
 import { getWebServices } from '@/lib/server/services';
+import { AlbumCardImage } from './card-image';
 
 export const metadata: Metadata = { title: 'Card Album · Ririko Dashboard' };
 
 const BASE = '/account/album';
+/** The owner-only route that serves each card's image (app/api/album/cards/[userCardId]). */
+const CARD_IMAGES = '/api/album/cards';
 const INPUT =
   'rounded-md border border-edge bg-ink px-3 py-2 text-sm text-zinc-100 focus-visible:outline-2 focus-visible:outline-sakura';
 
@@ -106,20 +109,10 @@ export default async function AlbumPage({
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {album.cards.map((card) => (
               <li key={card.id} className="flex flex-col gap-2 rounded-md border border-edge p-2">
-                {card.image ? (
-                  // A generated data URL; next/image cannot optimize it.
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={card.image}
-                    alt={`${card.name}, ${card.rarityName} ${card.element.toLowerCase()} card`}
-                    loading="lazy"
-                    className="w-full rounded"
-                  />
-                ) : (
-                  <div className="flex aspect-[2/3] items-center justify-center rounded bg-panel p-4 text-center text-xs text-zinc-500">
-                    This card could not be drawn right now.
-                  </div>
-                )}
+                <AlbumCardImage
+                  src={`${CARD_IMAGES}/${encodeURIComponent(card.id)}`}
+                  alt={`${card.name}, ${card.rarityName} ${card.element.toLowerCase()} card`}
+                />
                 <div className="text-sm">
                   <p className="font-medium">
                     {card.isFavorite ? <span aria-label="Favourite">★ </span> : null}
