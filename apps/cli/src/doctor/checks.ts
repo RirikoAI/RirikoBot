@@ -1,7 +1,7 @@
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import { configuredImageProviders, IMAGE_PROVIDER_LABELS } from '@ririko/core';
-import { createDatabaseClient, pingDatabase } from '@ririko/database';
+import { createDatabaseClient, pingDatabase, databaseConfigFromEnv } from '@ririko/database';
 import { DiagnosticCheck } from './types.js';
 
 const execAsync = promisify(exec);
@@ -49,8 +49,7 @@ export const databaseCheck: DiagnosticCheck = {
   name: 'Database Configuration',
   required: true,
   run: async () => {
-    const dialect = (process.env.DATABASE_DIALECT || 'sqlite') as 'sqlite' | 'postgres';
-    const dbUrl = process.env.DATABASE_URL || './data/ririko.sqlite';
+    const { dialect, url: dbUrl } = databaseConfigFromEnv();
 
     if (dialect !== 'sqlite' && dialect !== 'postgres') {
       return {

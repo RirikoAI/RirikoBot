@@ -8,6 +8,7 @@ import {
   WaifuAssetRepository,
   AchievementRepository,
   EconomyRepository,
+  databaseConfigFromEnv,
 } from '../packages/database/src/index.js';
 import { SQLITE_SCHEMA_DDL } from '../packages/database/src/schema/sqlite/ddl.js';
 import {
@@ -51,8 +52,7 @@ async function resetDatabase(): Promise<void> {
   console.log('🔄 Ririko AI 2.0.0 — Database Reset & Rebuild');
   console.log('🔄 ==========================================\n');
 
-  const dialect = (process.env.DATABASE_DIALECT as 'sqlite' | 'postgres') || 'sqlite';
-  const url = process.env.DATABASE_URL || './data/ririko.sqlite';
+  const { dialect, url } = databaseConfigFromEnv();
 
   console.log(`• Dialect: ${dialect}`);
   console.log(`• Database URL: ${url}`);

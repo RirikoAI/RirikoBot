@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { createDatabaseClient, pingDatabase } from './factory.js';
+import { createDatabaseClient, databaseConfigFromEnv, pingDatabase } from './factory.js';
 import type { DatabaseClient } from './types.js';
 import { DatabaseError } from '@ririko/core';
 import * as path from 'node:path';
@@ -131,6 +131,31 @@ describe('Database Client Factory', () => {
       expect(ping.ok).toBe(false);
       expect(ping.dialect).toBe('postgres');
       expect(ping.error).toBeDefined();
+    });
+  });
+
+  describe('databaseConfigFromEnv', () => {
+    it('defaults to the SQLite file every entry point shares', () => {
+      expect(databaseConfigFromEnv({})).toEqual({
+        dialect: 'sqlite',
+        url: './data/ririko.sqlite',
+      });
+    });
+
+    it('treats empty values as unset', () => {
+      expect(databaseConfigFromEnv({ DATABASE_DIALECT: '', DATABASE_URL: '' })).toEqual({
+        dialect: 'sqlite',
+        url: './data/ririko.sqlite',
+      });
+    });
+
+    it('uses DATABASE_DIALECT and DATABASE_URL when set', () => {
+      expect(
+        databaseConfigFromEnv({
+          DATABASE_DIALECT: 'postgres',
+          DATABASE_URL: 'postgresql://ririko@db:5432/ririko',
+        }),
+      ).toEqual({ dialect: 'postgres', url: 'postgresql://ririko@db:5432/ririko' });
     });
   });
 });
