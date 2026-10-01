@@ -132,6 +132,37 @@ jobs:
           path: apps/web/e2e-results
           destination: e2e
 
+  # Builds both production images and runs the smoke checks against them (docs/deployment.md
+  # section 2.1). Images stay on the remote engine; nothing is pushed.
+  docker:
+    executor: node
+    environment:
+      BUILDX_VERSION: 0.37.2
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          # The Dockerfile uses BuildKit cache mounts, which need the buildx plugin.
+          name: Check for Docker Buildx
+          command: |
+            if ! docker buildx version; then
+              mkdir -p ~/.docker/cli-plugins
+              curl -sSfL "https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64" \
+                -o ~/.docker/cli-plugins/docker-buildx
+              chmod +x ~/.docker/cli-plugins/docker-buildx
+              docker buildx version
+            fi
+      - run:
+          name: Build the bot image
+          command: docker build --target bot-runner -t ririko-bot:smoke .
+      - run:
+          name: Build the dashboard image
+          command: docker build --target web-runner -t ririko-web:smoke .
+      - run:
+          # Runs every check through docker run/exec/logs/diff, so it works on the remote engine.
+          name: Smoke-check both images
+          command: node scripts/docker-smoke.ts bot web
+
   secrets:
     docker:
       - image: cimg/base:current
@@ -159,4 +190,5 @@ workflows:
       - test
       - build-web
       - e2e
+      - docker
       - secrets
