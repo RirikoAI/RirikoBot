@@ -57,3 +57,15 @@ from an older build. Adding a command also needed a restart with `SYNC_COMMANDS=
 2. Press Ctrl+R in Discord. Confirm that the admin commands show only in that server, and that
    member commands also show in DMs.
 3. Review and merge the PR.
+
+---
+
+## REVIEW · 2026-10-01T13:02:31Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- None. Legacy ticket, groomed before `verify_cmd` existed.
+
+**Acceptance**
+- [x] PR #668 merged into `develop/2.0.0` by the maintainer on 2026-09-30.
+
+Closed in the Scrum Kanban 0.4 board migration (CHORE-0001).

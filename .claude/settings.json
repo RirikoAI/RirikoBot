@@ -1,6 +1,8 @@
 {
   "permissions": {
-    "allow": ["mcp__codegraph__*"]
+    "allow": [
+      "mcp__codegraph__*"
+    ]
   },
   "hooks": {
     "UserPromptSubmit": [
@@ -9,6 +11,35 @@
           {
             "type": "command",
             "command": "codegraph.cmd prompt-hook"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/prompt-context.mjs\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/session-sync.mjs\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Grep|Glob|Read|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/codegraph-first.mjs\""
           }
         ]
       }

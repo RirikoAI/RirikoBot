@@ -1,0 +1,20 @@
+{
+  "version": "0.4.0",
+  "base_branch": "develop/2.0.0",
+  "codegraph": true,
+  "ci": true,
+  "owned": [
+    "docs/kanban/protocol.md",
+    "docs/kanban/handovers/_TEMPLATE.md",
+    ".claude/agents/ticket-worker.md",
+    "scripts/git-hooks/post-checkout",
+    "scripts/git-hooks/post-merge",
+    "scripts/git-hooks/post-rewrite",
+    "scripts/hooks/codegraph-first.mjs",
+    "scripts/hooks/prompt-context.mjs",
+    "scripts/hooks/session-sync.mjs",
+    "scripts/kanban/board-server.mjs",
+    "scripts/kanban/board-web/index.html",
+    "scripts/kanban/render-board.mjs"
+  ]
+}

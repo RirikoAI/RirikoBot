@@ -14,3 +14,10 @@ test-results/
 site-dist/
 .codegraph/
 packages/music-private/
+# Scrum-Kanban-Template files: kept exactly as the template writes them
+scripts/kanban/
+scripts/hooks/
+.scrum-kanban.json
+.claude/settings.json
+.mcp.json
+opencode.jsonc
