@@ -17,99 +17,97 @@
 *None.*
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `CHORE-0001` | Chore | Adopt Scrum Kanban 0.4: Single AGENTS.md and Board Migration | 5 | — | [CHORE-0001.md](./handovers/CHORE-0001.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
 |---|---|---|---|---|---|
-| `STORY-001` | Story | Legacy 1.4.0 Codebase Audit & Feature Inventory | 5 | — | — |
-| `STORY-002` | Story | Architecture Specification & ADR-001 to ADR-012 | 5 | — | — |
-| `STORY-003` | Story | Specialist Agent Roster & Execution Protocols | 3 | — | — |
-| `STORY-004` | Story | Complete Subsystem Documentation Catalog (16 Docs) | 5 | — | — |
-| `STORY-005` | Story | Scrum Kanban & Sub-Agent Knowledge Transfer System | 3 | — | — |
-| `STORY-010` | Story | Workspace Configuration & Root Monorepo Tooling | 5 | — | — |
-| `STORY-011` | Story | packages/core Contracts, Errors, EventBus & Config | 5 | — | — |
-| `STORY-012` | Story | apps/cli Scaffolding & ririko doctor Diagnostics | 5 | — | — |
-| `STORY-020` | Story | Dual-Dialect Connection Factory & Client Harness | 5 | — | — |
-| `STORY-021` | Story | 70+ Normalized Table Schemas & Unified TypeScript Models | 8 | — | — |
-| `STORY-022` | Story | Dialect-Agnostic Repositories & ACID Transaction Abstractions | 5 | — | — |
-| `STORY-023` | Story | Legacy 1.4.0 SQLite Migration Engine & CLI | 3 | — | [STORY-023.md](./handovers/STORY-023.md) |
-| `STORY-030` | Story | Discord Client Gateway Lifecycle, Sharding & REST V10 Harness | 5 | — | [STORY-030.md](./handovers/STORY-030.md) |
-| `STORY-031` | Story | O(1) Dual-Dispatch Command Router (Slash & Prefix Parity) | 8 | — | [STORY-031.md](./handovers/STORY-031.md) |
-| `STORY-032` | Story | Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance) | 5 | — | [STORY-032.md](./handovers/STORY-032.md) |
-| `STORY-033` | Story | Interactive Dynamic Help Center & Command Auto-Registration | 3 | — | [STORY-033.md](./handovers/STORY-033.md) |
-| `STORY-040` | Story | Event-Driven Economy Core & Anti-Spam / Anti-AFK Engine | 5 | — | — |
-| `STORY-041` | Story | Transactional Banking, Daily Streak Engine & Double-Entry Ledger | 5 | — | [STORY-041.md](./handovers/STORY-041.md) |
-| `STORY-042` | Story | Leveling 2.0, Karma & High-Performance Materialized Leaderboards | 5 | — | [STORY-042.md](./handovers/STORY-042.md) |
-| `STORY-043` | Story | Shop Catalog, Inventory Bags & SSRF-Protected Profile Customization | 5 | — | [STORY-043.md](./handovers/STORY-043.md) |
-| `STORY-044` | Story | Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite | 5 | — | [STORY-044.md](./handovers/STORY-044.md) |
-| `STORY-050` | Story | Multi-Source Audio Extractors & Stream Resolvers | 5 | — | [STORY-050.md](./handovers/STORY-050.md) |
-| `STORY-051` | Story | Voice Lifecycle, Audio Player Core & Queue Engine | 5 | — | [STORY-051.md](./handovers/STORY-051.md) |
-| `STORY-052` | Story | Reactive Embed Controller & Dual-Dispatch Music Commands Suite | 3 | — | [STORY-052.md](./handovers/STORY-052.md) |
-| `STORY-060` | Story | Multi-Provider AI Core, Fallback Chain & Tool Calling Engine | 5 | — | — |
-| `STORY-061` | Story | Persistent Memory, Strict Per-User Context Isolation & Personality Engine | 3 | — | — |
-| `STORY-062` | Story | Deterministic Utility Tools, Explicit Clock & Application Security Interceptor | 3 | — | — |
-| `STORY-063` | Story | Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite | 2 | — | — |
-| `STORY-070` | Story | Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core | 5 | — | — |
-| `STORY-071` | Story | Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations | 3 | — | — |
-| `STORY-072` | Story | Real-Time Automated Defense & Auto-Moderation Pipeline | 3 | — | — |
-| `STORY-073` | Story | Dual-Dispatch Moderation Commands Suite & Gateway Listeners | 2 | — | — |
-| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | — | — |
-| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | — | — |
-| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | — | — |
-| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | — | — |
-| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | — | — |
-| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | — | — |
-| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | — | — |
-| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | — | — |
-| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | — | — |
-| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | — | — |
-| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | — | — |
-| `STORY-110` | Story | Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization | 8 | — | [STORY-110.md](./handovers/STORY-110.md) |
-| `STORY-111` | Story | Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity | 8 | — | [STORY-111.md](./handovers/STORY-111.md) |
-| `STORY-112` | Story | Guild TCG Settings (Persisted Drops, Guild-Scoped TCG Manager Role) & Owner-Gated Global TCG Rules | 8 | — | — |
-| `STORY-167` | Story | Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot | 8 | — | — |
-| `STORY-168` | Story | Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager | 5 | — | — |
-| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | — | [STORY-113.md](./handovers/STORY-113.md) |
-| `STORY-114` | Story | Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages | 8 | — | [STORY-114.md](./handovers/STORY-114.md) |
-| `STORY-115` | Story | XP & Ranking, Games & Giveaways Pages | 8 | — | [STORY-115.md](./handovers/STORY-115.md) |
-| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 8 | — | [STORY-165.md](./handovers/STORY-165.md) |
-| `STORY-116` | Story | Music, AI Chatbot, Image Generation & Integrations Pages | 8 | — | [STORY-116.md](./handovers/STORY-116.md) |
-| `STORY-166` | Story | Stream Alerts, Free Games & Welcome & Farewell Pages | 8 | — | [STORY-166.md](./handovers/STORY-166.md) |
-| `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | — | [STORY-117.md](./handovers/STORY-117.md) |
-| `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | — | [STORY-118.md](./handovers/STORY-118.md) |
-| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | — | [STORY-163.md](./handovers/STORY-163.md) |
-| `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | — | [STORY-164.md](./handovers/STORY-164.md) |
-| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | — | [STORY-120.md](./handovers/STORY-120.md) |
-| `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | — | [STORY-123.md](./handovers/STORY-123.md) |
-| `STORY-130` | Story | Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | — | [STORY-130.md](./handovers/STORY-130.md) |
-| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | — | [STORY-131.md](./handovers/STORY-131.md) |
-| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | — | [STORY-132.md](./handovers/STORY-132.md) |
-| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | — | — |
-| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | — | [STORY-140.md](./handovers/STORY-140.md) |
-| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | — | [STORY-141.md](./handovers/STORY-141.md) |
-| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | — | [STORY-142.md](./handovers/STORY-142.md) |
-| `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | — | [STORY-143.md](./handovers/STORY-143.md) |
-| `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | — | [STORY-144.md](./handovers/STORY-144.md) |
-| `STORY-150` | Story | Card EXP from Dungeon Wins & Real Skill MP Cost in Combat | 3 | — | [STORY-150.md](./handovers/STORY-150.md) |
-| `STORY-151` | Story | DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table) | 8 | — | [STORY-151.md](./handovers/STORY-151.md) |
-| `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | — | [STORY-152.md](./handovers/STORY-152.md) |
-| `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | — | [STORY-153.md](./handovers/STORY-153.md) |
-| `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | — | [STORY-154.md](./handovers/STORY-154.md) |
-| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | — | [STORY-155.md](./handovers/STORY-155.md) |
-| `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | — | [STORY-156.md](./handovers/STORY-156.md) |
-| `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | — | [STORY-157.md](./handovers/STORY-157.md) |
-| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | — | [STORY-158.md](./handovers/STORY-158.md) |
-| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | — | [STORY-159.md](./handovers/STORY-159.md) |
-| `STORY-160` | Story | Equipment Crafting with Dust | 5 | — | [STORY-160.md](./handovers/STORY-160.md) |
-| `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | — | [STORY-161.md](./handovers/STORY-161.md) |
-| `STORY-170` | Story | Interactive Branching Adventure RPG | 8 | — | [STORY-170.md](./handovers/STORY-170.md) |
-| `STORY-172` | Story | Per-Source Music Toggles & Pluggable Source Adapters | 8 | — | [STORY-172.md](./handovers/STORY-172.md) |
-| `STORY-173` | Story | Private Message Context Menu Translation to English | 5 | — | [STORY-173.md](./handovers/STORY-173.md) |
-| `STORY-174` | Story | Scoped Command Registration (Global vs Per-Server) & CLI Command Sync | 8 | — | [STORY-174.md](./handovers/STORY-174.md) |
-| `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | — | — |
+| `STORY-001` | Story | Legacy 1.4.0 Codebase Audit & Feature Inventory | 5 | EPIC-000 | — |
+| `STORY-002` | Story | Architecture Specification & ADR-001 to ADR-012 | 5 | EPIC-000 | — |
+| `STORY-003` | Story | Specialist Agent Roster & Execution Protocols | 3 | EPIC-000 | — |
+| `STORY-004` | Story | Complete Subsystem Documentation Catalog (16 Docs) | 5 | EPIC-000 | — |
+| `STORY-005` | Story | Scrum Kanban & Sub-Agent Knowledge Transfer System | 3 | EPIC-000 | — |
+| `STORY-010` | Story | Workspace Configuration & Root Monorepo Tooling | 5 | EPIC-001 | — |
+| `STORY-011` | Story | packages/core Contracts, Errors, EventBus & Config | 5 | EPIC-001 | — |
+| `STORY-012` | Story | apps/cli Scaffolding & ririko doctor Diagnostics | 5 | EPIC-001 | — |
+| `STORY-020` | Story | Dual-Dialect Connection Factory & Client Harness | 5 | EPIC-002 | — |
+| `STORY-021` | Story | 70+ Normalized Table Schemas & Unified TypeScript Models | 8 | EPIC-002 | — |
+| `STORY-022` | Story | Dialect-Agnostic Repositories & ACID Transaction Abstractions | 5 | EPIC-002 | — |
+| `STORY-023` | Story | Legacy 1.4.0 SQLite Migration Engine & CLI | 3 | EPIC-002 | [STORY-023.md](./handovers/STORY-023.md) |
+| `STORY-030` | Story | Discord Client Gateway Lifecycle, Sharding & REST V10 Harness | 5 | EPIC-003 | [STORY-030.md](./handovers/STORY-030.md) |
+| `STORY-031` | Story | O(1) Dual-Dispatch Command Router (Slash & Prefix Parity) | 8 | EPIC-003 | [STORY-031.md](./handovers/STORY-031.md) |
+| `STORY-032` | Story | Composable Middleware Pipeline (Permissions, Rate Limits, Cooldowns & Maintenance) | 5 | EPIC-003 | [STORY-032.md](./handovers/STORY-032.md) |
+| `STORY-033` | Story | Interactive Dynamic Help Center & Command Auto-Registration | 3 | EPIC-003 | [STORY-033.md](./handovers/STORY-033.md) |
+| `STORY-040` | Story | Event-Driven Economy Core & Anti-Spam / Anti-AFK Engine | 5 | EPIC-004 | — |
+| `STORY-041` | Story | Transactional Banking, Daily Streak Engine & Double-Entry Ledger | 5 | EPIC-004 | [STORY-041.md](./handovers/STORY-041.md) |
+| `STORY-042` | Story | Leveling 2.0, Karma & High-Performance Materialized Leaderboards | 5 | EPIC-004 | [STORY-042.md](./handovers/STORY-042.md) |
+| `STORY-043` | Story | Shop Catalog, Inventory Bags & SSRF-Protected Profile Customization | 5 | EPIC-004 | [STORY-043.md](./handovers/STORY-043.md) |
+| `STORY-044` | Story | Profile Card 2.0 Graphics Canvas & Discord Economy Commands Suite | 5 | EPIC-004 | [STORY-044.md](./handovers/STORY-044.md) |
+| `STORY-050` | Story | Multi-Source Audio Extractors & Stream Resolvers | 5 | EPIC-005 | [STORY-050.md](./handovers/STORY-050.md) |
+| `STORY-051` | Story | Voice Lifecycle, Audio Player Core & Queue Engine | 5 | EPIC-005 | [STORY-051.md](./handovers/STORY-051.md) |
+| `STORY-052` | Story | Reactive Embed Controller & Dual-Dispatch Music Commands Suite | 3 | EPIC-005 | [STORY-052.md](./handovers/STORY-052.md) |
+| `STORY-060` | Story | Multi-Provider AI Core, Fallback Chain & Tool Calling Engine | 5 | EPIC-006 | — |
+| `STORY-061` | Story | Persistent Memory, Strict Per-User Context Isolation & Personality Engine | 3 | EPIC-006 | — |
+| `STORY-062` | Story | Deterministic Utility Tools, Explicit Clock & Application Security Interceptor | 3 | EPIC-006 | — |
+| `STORY-063` | Story | Dedicated #ririko-ai Channel Gateway Listener & Dual-Dispatch Commands Suite | 2 | EPIC-006 | — |
+| `STORY-070` | Story | Centralized Permission & Role Hierarchy Service, Punitive Discord Actions Core | 5 | EPIC-007 | — |
+| `STORY-071` | Story | Configurable Dynamic Warning Escalation Engine & Anti-Spam Expirations | 3 | EPIC-007 | — |
+| `STORY-072` | Story | Real-Time Automated Defense & Auto-Moderation Pipeline | 3 | EPIC-007 | — |
+| `STORY-073` | Story | Dual-Dispatch Moderation Commands Suite & Gateway Listeners | 2 | EPIC-007 | — |
+| `STORY-080` | Story | Multi-Platform Stream Watcher Engine & Thumbnail CDN (Twitch, YouTube Live, TikTok) | 5 | EPIC-008 | — |
+| `STORY-081` | Story | Free Games Announcer Engine (Epic Games Store & Steam Feed) | 3 | EPIC-008 | — |
+| `STORY-090` | Story | Giveaways 2.0 Database Engine & Resilient Lifecycle | 5 | EPIC-009 | — |
+| `STORY-091` | Story | Auto Voice Channels 2.0 (Join to Create & Orphan Cleanup) | 3 | EPIC-009 | — |
+| `STORY-092` | Story | Interactive Mini-Games Suite (Minimax Tic-Tac-Toe, RPS, HighLow, CoinFlip, Dice) | 5 | EPIC-009 | — |
+| `STORY-100` | Story | Waifu Ingestion Pipeline, Asset Validation, Deduplication & Attribution | 3 | EPIC-010 | — |
+| `STORY-101` | Story | 8-Tier Rarity Math, Card Attribute Generation & Automated Drops Engine | 5 | EPIC-010 | — |
+| `STORY-102` | Story | 7-Element Combat Engine & Tactical Status Effects (Including Ice) | 3 | EPIC-010 | — |
+| `STORY-103` | Story | Equipment, Accessories, Consumables & Daily Energy Lifecycle Engine | 3 | EPIC-010 | — |
+| `STORY-104` | Story | PvE Seasonal Dungeon Tower: Tutorial, Seasons & Exponential Scaling | 5 | EPIC-010 | — |
+| `STORY-105` | Story | Atomic Trading, Marketplace, WaifuGuilds & Achievements Dispatch | 5 | EPIC-010 | — |
+| `STORY-110` | Story | Next.js 16 App Router Scaffold, Discord OAuth2 & Guild Authorization | 8 | EPIC-011 | [STORY-110.md](./handovers/STORY-110.md) |
+| `STORY-111` | Story | Shared Zod Config Schemas, Audit Trail, Dashboard Shell & CLI Parity | 8 | EPIC-011 | [STORY-111.md](./handovers/STORY-111.md) |
+| `STORY-112` | Story | Guild TCG Settings (Persisted Drops, Guild-Scoped TCG Manager Role) & Owner-Gated Global TCG Rules | 8 | EPIC-011 | — |
+| `STORY-167` | Story | Owner Dungeon Season Editor, Difficulty Curve Visualizer & Configurable Floor Loot | 8 | EPIC-011 | — |
+| `STORY-168` | Story | Card Album Viewer, TCG Shop Catalog Manager & Achievement Manager | 5 | EPIC-011 | — |
+| `STORY-113` | Story | Server Analytics Overview, Moderation Case Log Inspector & Dashboard Audit Viewer | 5 | EPIC-011 | [STORY-113.md](./handovers/STORY-113.md) |
+| `STORY-114` | Story | Settings Infrastructure, Logging, Moderation Escalation & AutoMod Pages | 8 | EPIC-011 | [STORY-114.md](./handovers/STORY-114.md) |
+| `STORY-115` | Story | XP & Ranking, Games & Giveaways Pages | 8 | EPIC-011 | [STORY-115.md](./handovers/STORY-115.md) |
+| `STORY-165` | Story | Owner Console: Global Economy Settings & Item Shop Manager | 8 | EPIC-011 | [STORY-165.md](./handovers/STORY-165.md) |
+| `STORY-116` | Story | Music, AI Chatbot, Image Generation & Integrations Pages | 8 | EPIC-011 | [STORY-116.md](./handovers/STORY-116.md) |
+| `STORY-166` | Story | Stream Alerts, Free Games & Welcome & Farewell Pages | 8 | EPIC-011 | [STORY-166.md](./handovers/STORY-166.md) |
+| `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | EPIC-011 | [STORY-117.md](./handovers/STORY-117.md) |
+| `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | EPIC-011 | [STORY-118.md](./handovers/STORY-118.md) |
+| `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | EPIC-011 | [STORY-163.md](./handovers/STORY-163.md) |
+| `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | EPIC-011 | [STORY-164.md](./handovers/STORY-164.md) |
+| `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | EPIC-012 | [STORY-120.md](./handovers/STORY-120.md) |
+| `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | EPIC-012 | [STORY-123.md](./handovers/STORY-123.md) |
+| `STORY-130` | Story | Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | EPIC-013 | [STORY-130.md](./handovers/STORY-130.md) |
+| `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | EPIC-013 | [STORY-131.md](./handovers/STORY-131.md) |
+| `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | EPIC-013 | [STORY-132.md](./handovers/STORY-132.md) |
+| `STORY-133` | Story | Welcomer & Farewell Dynamic Card Canvas with SSRF Verification | 3 | EPIC-013 | — |
+| `STORY-140` | Story | Automatic Role System & Interactive Reaction Roles (Buttons & Select Menus) | 5 | EPIC-014 | [STORY-140.md](./handovers/STORY-140.md) |
+| `STORY-141` | Story | Persistent Natural Language Reminders Engine & Chrono Scheduler | 5 | EPIC-014 | [STORY-141.md](./handovers/STORY-141.md) |
+| `STORY-142` | Story | Anime & Manga Search Service (Jikan v4 & AniList API) | 5 | EPIC-014 | [STORY-142.md](./handovers/STORY-142.md) |
+| `STORY-143` | Story | Server Utility, Identity & Timezone Commands Parity (/get-avatar, /guild-info, /member-info, /prefix, /timezone) | 5 | EPIC-014 | [STORY-143.md](./handovers/STORY-143.md) |
+| `STORY-144` | Story | Anime Image Commands Parity (/waifu & /wallpaper) on REST APIs | 3 | EPIC-014 | [STORY-144.md](./handovers/STORY-144.md) |
+| `STORY-150` | Story | Card EXP from Dungeon Wins & Real Skill MP Cost in Combat | 3 | EPIC-015 | [STORY-150.md](./handovers/STORY-150.md) |
+| `STORY-151` | Story | DB-Driven Season Curves & Floor Boss Definitions (dungeon_bosses table) | 8 | EPIC-015 | [STORY-151.md](./handovers/STORY-151.md) |
+| `STORY-152` | Story | Dungeon Balance Simulator CLI & CI Win-Rate Bands | 5 | EPIC-015 | [STORY-152.md](./handovers/STORY-152.md) |
+| `STORY-153` | Story | tcg:boss-builder Script & BossSynthesizer Rendering | 8 | EPIC-015 | [STORY-153.md](./handovers/STORY-153.md) |
+| `STORY-154` | Story | Season 1 Infernal Crucible Boss Roster & Floor Seed Data | 5 | EPIC-015 | [STORY-154.md](./handovers/STORY-154.md) |
+| `STORY-155` | Story | Boss Artwork in Dungeon Battle Screen | 2 | EPIC-015 | [STORY-155.md](./handovers/STORY-155.md) |
+| `STORY-156` | Story | Equipment Acquisition: Drop Tables, Boss Signature Drops & Gear Power Budget | 8 | EPIC-015 | [STORY-156.md](./handovers/STORY-156.md) |
+| `STORY-157` | Story | Interactive Equipment Menu (/card gear) | 8 | EPIC-015 | [STORY-157.md](./handovers/STORY-157.md) |
+| `STORY-158` | Story | Town Shop Revamp: Categories, Compare, Buy & Equip, Daily Rotation | 5 | EPIC-015 | [STORY-158.md](./handovers/STORY-158.md) |
+| `STORY-159` | Story | Early-Floor Tuning, Pity Blessing & Floor Star Ratings | 8 | EPIC-015 | [STORY-159.md](./handovers/STORY-159.md) |
+| `STORY-160` | Story | Equipment Crafting with Dust | 5 | EPIC-015 | [STORY-160.md](./handovers/STORY-160.md) |
+| `STORY-161` | Story | Unified Configurable Reset Boundary & Consecutive-Miss Streak Forgiveness | 5 | EPIC-004 | [STORY-161.md](./handovers/STORY-161.md) |
+| `STORY-170` | Story | Interactive Branching Adventure RPG | 8 | EPIC-016 | [STORY-170.md](./handovers/STORY-170.md) |
+| `STORY-172` | Story | Per-Source Music Toggles & Pluggable Source Adapters | 8 | EPIC-005 | [STORY-172.md](./handovers/STORY-172.md) |
+| `STORY-173` | Story | Private Message Context Menu Translation to English | 5 | EPIC-003 | [STORY-173.md](./handovers/STORY-173.md) |
+| `STORY-174` | Story | Scoped Command Registration (Global vs Per-Server) & CLI Command Sync | 8 | EPIC-003 | [STORY-174.md](./handovers/STORY-174.md) |
+| `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | EPIC-003 | — |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -293,15 +291,22 @@
 | `TASK-1753` | Task | Module Toggle Service & Guild Category Middleware Integration | 2 | STORY-175 | [TASK-1753.md](./handovers/TASK-1753.md) |
 | `TASK-1754` | Task | Sliding-Window Rate Limit Middleware & Protection Policy | 1 | STORY-175 | [TASK-1754.md](./handovers/TASK-1754.md) |
 | `TASK-1755` | Task | Unified Middleware Pipeline Assembly, Ordering & End-to-End Verification | 1 | STORY-175 | [TASK-1755.md](./handovers/TASK-1755.md) |
-| `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | — | [CHORE-1701.md](./handovers/CHORE-1701.md) |
-| `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | — | [CHORE-0301.md](./handovers/CHORE-0301.md) |
-| `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | — | [CHORE-0601.md](./handovers/CHORE-0601.md) |
-| `CHORE-0603` | Chore | Align Default Prefix: Code Fallback '!' vs .env.example and Guide Text '$' | 1 | — | [CHORE-0603.md](./handovers/CHORE-0603.md) |
-| `CHORE-1401` | Chore | Shared AniList Client & HTTP Rate-Limit Layer (Decouple from Waifu TCG) | 2 | — | [CHORE-1401.md](./handovers/CHORE-1401.md) |
-| `CHORE-1321` | Chore | CLI Command to Configure Image Generation Providers & Keys (image-configure) | 2 | — | [CHORE-1321.md](./handovers/CHORE-1321.md) |
-| `CHORE-1101` | Chore | Cross-Process Guild Config Change Feed (guild_config_versions Table, Bot Watcher & Cache Invalidation Events) | 2 | — | [CHORE-1101.md](./handovers/CHORE-1101.md) |
-| `CHORE-1702` | Chore | Plan Companion-Level Adventure Reward Ranks | 2 | — | [CHORE-1702.md](./handovers/CHORE-1702.md) |
-| `CHORE-1703` | Chore | Remove Adventure User-Specific S+ Rank Override | 1 | — | [CHORE-1703.md](./handovers/CHORE-1703.md) |
+| `TASK-1431` | Task | GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration | 2 | STORY-143 | — |
+| `TASK-1432` | Task | Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity | 2 | STORY-143 | — |
+| `TASK-1433` | Task | Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting | 1 | STORY-143 | — |
+| `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | STORY-132 | [TASK-1321.md](./handovers/TASK-1321.md) |
+| `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | STORY-132 | [TASK-1322.md](./handovers/TASK-1322.md) |
+| `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
+| `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
+| `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
+| `CHORE-0603` | Chore | Align Default Prefix: Code Fallback '!' vs .env.example and Guide Text '$' | 1 | EPIC-003 | [CHORE-0603.md](./handovers/CHORE-0603.md) |
+| `CHORE-1401` | Chore | Shared AniList Client & HTTP Rate-Limit Layer (Decouple from Waifu TCG) | 2 | EPIC-014 | [CHORE-1401.md](./handovers/CHORE-1401.md) |
+| `CHORE-1321` | Chore | CLI Command to Configure Image Generation Providers & Keys (image-configure) | 2 | STORY-132 | [CHORE-1321.md](./handovers/CHORE-1321.md) |
+| `CHORE-1101` | Chore | Cross-Process Guild Config Change Feed (guild_config_versions Table, Bot Watcher & Cache Invalidation Events) | 2 | EPIC-011 | [CHORE-1101.md](./handovers/CHORE-1101.md) |
+| `CHORE-1702` | Chore | Plan Companion-Level Adventure Reward Ranks | 2 | STORY-170 | [CHORE-1702.md](./handovers/CHORE-1702.md) |
+| `CHORE-1703` | Chore | Remove Adventure User-Specific S+ Rank Override | 1 | STORY-170 | [CHORE-1703.md](./handovers/CHORE-1703.md) |
+| `CHORE-0001` | Chore | Adopt Scrum Kanban 0.4: Single AGENTS.md and Board Migration | 5 | EPIC-000 | [CHORE-0001.md](./handovers/CHORE-0001.md) |
+| `CHORE-0002` | Chore | Link Stories, Tasks and Chores to Their Epics | 3 | EPIC-000 | [CHORE-0002.md](./handovers/CHORE-0002.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |
@@ -318,14 +323,9 @@
 | `BUG-0012` | Bug | Daily Energy Replenishment Never Fires: EnergyLifecycleService Is Unwired | 3 | EPIC-015 | [BUG-0012.md](./handovers/BUG-0012.md) |
 | `BUG-0015` | Bug | Catalog Seed Is Insert-Only, So Item Copy and Stat Changes Never Reach Existing DBs | 2 | EPIC-015 | [BUG-0015.md](./handovers/BUG-0015.md) |
 | `BUG-0016` | Bug | Gear, Craft and Shop Dropdowns Silently Drop Entries Past 25 | 3 | EPIC-015 | [BUG-0016.md](./handovers/BUG-0016.md) |
-| `TASK-1431` | Bug | GuildSettingsService & In-Memory Cache (Prefix & Timezone) with CommandRouter.resolvePrefix Integration | 2 | STORY-143 | — |
-| `TASK-1432` | Bug | Dual-Dispatch /prefix and /timezone Commands Suite with Slash & Prefix Parity | 2 | STORY-143 | — |
-| `TASK-1433` | Bug | Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting | 1 | STORY-143 | — |
 | `BUG-0018` | Bug | Persist and Restore Guild Default Volume Across Music Sessions | 3 | EPIC-005 | [BUG-0018.md](./handovers/BUG-0018.md) |
 | `BUG-0017` | Bug | Unknown /card Prefix Action Silently Opens the Collection & Card ID / Serial Number Overhaul | 2 | EPIC-010 | [BUG-0017.md](./handovers/BUG-0017.md) |
 | `BUG-0019` | Bug | Fix Replicate Provider Timeout from Prefer: wait Header and Discord WebP Attachment Extension | 2 | STORY-132 | [BUG-0019.md](./handovers/BUG-0019.md) |
-| `TASK-1321` | Bug | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | STORY-132 | [TASK-1321.md](./handovers/TASK-1321.md) |
-| `TASK-1322` | Bug | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | STORY-132 | [TASK-1322.md](./handovers/TASK-1322.md) |
 | `BUG-0020` | Bug | Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors | 2 | STORY-117 | [BUG-0020.md](./handovers/BUG-0020.md) |
 | `BUG-0021` | Bug | Auto Voice Deleted Every Empty Voice Channel in a Join-to-Create Hub's Category, Including Permanent Server Channels | 3 | STORY-091 | [BUG-0021.md](./handovers/BUG-0021.md) |
 | `BUG-0022` | Bug | Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone | 2 | STORY-123 | [BUG-0022.md](./handovers/BUG-0022.md) |
@@ -342,12 +342,12 @@
 ## 📋 Backlog
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
-| `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | — |
-| `STORY-121` | Story | Rootless Dockerfile & Containerization | 5 | — |
-| `STORY-122` | Story | Production Orchestration & Health Probes | 3 | — |
-| `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 5 | — |
-| `STORY-125` | Story | Raise Test Coverage Toward 80% | ? | — |
-| `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | — |
+| `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | EPIC-011 |
+| `STORY-121` | Story | Rootless Dockerfile & Containerization | 5 | EPIC-012 |
+| `STORY-122` | Story | Production Orchestration & Health Probes | 3 | EPIC-012 |
+| `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 5 | EPIC-012 |
+| `STORY-125` | Story | Raise Test Coverage Toward 80% | ? | EPIC-012 |
+| `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
 | `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 2 | STORY-121 |
 | `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 |
 | `TASK-1221` | Task | Implement /health and /ready probes for Bot and Web | 1 | STORY-122 |
@@ -361,19 +361,20 @@
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |
 |---|---|---|---|---|---|
-| `EPIC-000` | Planning, Audits, Architectural Specifications & Agent Design | DONE | 13 | — | — |
-| `EPIC-001` | Monorepo Workspace, Toolchain & Core Contracts | DONE | 13 | — | — |
-| `EPIC-002` | Dual-Dialect Drizzle ORM & Data Access Layer | DONE | 21 | — | — |
-| `EPIC-003` | Discord.js 14 Gateway & O(1) Command Router | DONE | 21 | — | [EPIC-003.md](./handovers/EPIC-003.md) |
-| `EPIC-004` | Centralized Transactional Economy & Banking Engine | DONE | 21 | — | [EPIC-004.md](./handovers/EPIC-004.md) |
-| `EPIC-005` | Multi-Source Music 2.0 Audio Engine | DONE | 13 | — | — |
-| `EPIC-006` | AI Chatbot 2.0 with Context Isolation & Safe Tools | DONE | 13 | — | — |
-| `EPIC-007` | Moderation 2.0 with Escalation & AutoMod | DONE | 13 | — | — |
-| `EPIC-008` | Streamer Notifications & Free Games Announcer | DONE | 8 | — | — |
-| `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | DONE | 13 | — | — |
-| `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | DONE | 21 | — | [EPIC-010.md](./handovers/EPIC-010.md) |
-| `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | DONE | 21 | — | — |
-| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | TODO | 13 | — | — |
-| `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | DONE | 21 | — | — |
-| `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | — | — |
-| `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | — | — |
+| `EPIC-000` | Planning, Audits, Architectural Specifications & Agent Design | DONE | 13 | STORY-001, STORY-002, STORY-003, STORY-004, STORY-005 | — |
+| `EPIC-001` | Monorepo Workspace, Toolchain & Core Contracts | DONE | 13 | STORY-010, STORY-011, STORY-012 | — |
+| `EPIC-002` | Dual-Dialect Drizzle ORM & Data Access Layer | DONE | 21 | STORY-020, STORY-021, STORY-022, STORY-023 | — |
+| `EPIC-003` | Discord.js 14 Gateway & O(1) Command Router | DONE | 21 | STORY-030, STORY-031, STORY-032, STORY-033, STORY-173, STORY-174, STORY-175 | [EPIC-003.md](./handovers/EPIC-003.md) |
+| `EPIC-004` | Centralized Transactional Economy & Banking Engine | DONE | 21 | STORY-040, STORY-041, STORY-042, STORY-043, STORY-044, STORY-161 | [EPIC-004.md](./handovers/EPIC-004.md) |
+| `EPIC-005` | Multi-Source Music 2.0 Audio Engine | DONE | 13 | STORY-050, STORY-051, STORY-052, STORY-172 | — |
+| `EPIC-006` | AI Chatbot 2.0 with Context Isolation & Safe Tools | DONE | 13 | STORY-060, STORY-061, STORY-062, STORY-063 | — |
+| `EPIC-007` | Moderation 2.0 with Escalation & AutoMod | DONE | 13 | STORY-070, STORY-071, STORY-072, STORY-073 | — |
+| `EPIC-008` | Streamer Notifications & Free Games Announcer | DONE | 8 | STORY-080, STORY-081 | — |
+| `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | DONE | 13 | STORY-090, STORY-091, STORY-092 | — |
+| `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | DONE | 21 | STORY-100, STORY-101, STORY-102, STORY-103, STORY-104, STORY-105 | [EPIC-010.md](./handovers/EPIC-010.md) |
+| `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | DONE | 21 | STORY-110, STORY-111, STORY-112, STORY-167, STORY-168, STORY-113, STORY-114, STORY-115, STORY-165, STORY-116, STORY-166, STORY-117, STORY-118, STORY-119, STORY-163, STORY-164 | — |
+| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | TODO | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125 | — |
+| `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | DONE | 21 | STORY-130, STORY-131, STORY-132, STORY-133 | — |
+| `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
+| `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
+| `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
