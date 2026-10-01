@@ -1,7 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
-  "active_in_progress_ticket": "BUG-0028",
+  "active_in_progress_ticket": null,
   "epics": [
     {
       "id": "EPIC-000",
@@ -4290,7 +4290,7 @@
       "id": "BUG-0028",
       "title": "Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint",
       "points": 3,
-      "status": "IN_PROGRESS",
+      "status": "REVIEW",
       "parent": "STORY-168",
       "requires": [],
       "blocks": [],
