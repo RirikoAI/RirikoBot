@@ -305,4 +305,39 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
     expect(commons.total).toBe(1);
     expect(commons.entries[0]?.card.id).toBe(orphanArt.id);
   });
+
+  it('finds one album entry only for the user who owns the card', async () => {
+    client.raw.exec(`
+      INSERT INTO waifu_sources (id, name, base_url, attribution_text) VALUES ('src', 'waifu.im', 'https://api.waifu.im', 'Image source: waifu.im');
+      INSERT INTO waifu_assets (id, source_id, source_image_id, character_name, anime_title, image_hash, created_at)
+        VALUES ('asset_a', 'src', '1', 'Aqua', 'Konosuba', 'hash_a', 0);
+    `);
+    const aqua = await repo.create({
+      assetId: 'asset_a',
+      name: 'Aqua',
+      rarity: 'RARE',
+      element: 'WATER',
+      attack: 100,
+      defense: 100,
+      speed: 100,
+      health: 1000,
+      collectionNumber: 1,
+    });
+    const owned = await repo.createUserCard({ userId: 'u1', cardId: aqua.id, serialNumber: 1 });
+    const orphan = await repo.createUserCard({
+      userId: 'u1',
+      cardId: 'deleted-definition',
+      serialNumber: 2,
+    });
+
+    const entry = await repo.findUserAlbumEntry('u1', owned.id);
+    expect(entry?.userCard.id).toBe(owned.id);
+    expect(entry?.card.name).toBe('Aqua');
+    expect(entry?.asset?.animeTitle).toBe('Konosuba');
+    expect(entry?.source?.attributionText).toBe('Image source: waifu.im');
+
+    expect(await repo.findUserAlbumEntry('someone-else', owned.id)).toBeNull();
+    expect(await repo.findUserAlbumEntry('u1', orphan.id)).toBeNull();
+    expect(await repo.findUserAlbumEntry('u1', 'missing')).toBeNull();
+  });
 });
