@@ -17,12 +17,11 @@
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
 | `STORY-121` | Story | Rootless Dockerfile & Containerization | 8 | EPIC-012 | STORY-120 | yes | medium |
-| `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 3 | STORY-121 | TASK-1212 | blocked | medium |
-| `TASK-1213` | Task | CircleCI Docker Build & Smoke Job for Bot and Web Images | 2 | STORY-121 | TASK-1211, TASK-1212 | blocked | small |
-| `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 | — | yes | medium |
 
 ## 🔍 Review
-*None.*
+| ID | Type | Title | Pts | Parent | Handover |
+|---|---|---|---|---|---|
+| `TASK-1213` | Task | CircleCI Docker Build & Smoke Job for Bot and Web Images | 2 | STORY-121 | [TASK-1213.md](./handovers/TASK-1213.md) |
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -264,6 +263,8 @@
 | `TASK-1201` | Task | Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job | 3 | STORY-120 | [TASK-1201.md](./handovers/TASK-1201.md) |
 | `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | STORY-120 | [TASK-1202.md](./handovers/TASK-1202.md) |
 | `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | STORY-120 | [TASK-1203.md](./handovers/TASK-1203.md) |
+| `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 3 | STORY-121 | [TASK-1211.md](./handovers/TASK-1211.md) |
+| `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 | [TASK-1212.md](./handovers/TASK-1212.md) |
 | `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | STORY-123 | — |
 | `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | STORY-123 | — |
 | `TASK-1233` | Task | Vercel Project Status Site Generated from the Kanban Board | 1 | STORY-123 | — |
@@ -337,6 +338,7 @@
 | `BUG-0026` | Bug | Canonical Game Item Seed Used Dynamic UUIDs Breaking Inventory Foreign Keys on Schema Recreation | 3 | EPIC-010 | [BUG-0026.md](./handovers/BUG-0026.md) |
 | `BUG-0027` | Bug | Count Every Stamina Potion in Multi-Quantity Uses | 2 | STORY-043 | [BUG-0027.md](./handovers/BUG-0027.md) |
 | `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | STORY-168 | [BUG-0028.md](./handovers/BUG-0028.md) |
+| `BUG-0029` | Bug | Bot Fell Back to sqlite:storage/ririko.db Without DATABASE_URL Instead of the ./data/ririko.sqlite Every Other Entry Point Uses | 2 | STORY-121 | [BUG-0029.md](./handovers/BUG-0029.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

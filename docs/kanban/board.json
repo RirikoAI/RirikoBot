@@ -3731,7 +3731,7 @@
       "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Web Dashboard",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1212"
       ],
@@ -3794,7 +3794,7 @@
       "parent": "STORY-121",
       "title": "CircleCI Docker Build & Smoke Job for Bot and Web Images",
       "points": 2,
-      "status": "TODO",
+      "status": "REVIEW",
       "requires": [
         "TASK-1211",
         "TASK-1212"
@@ -3837,7 +3837,7 @@
       "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Bot",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [],
       "blocks": [
         "TASK-1211",
@@ -4904,6 +4904,61 @@
       "requires": [],
       "blocks": [],
       "description": "CardAlbumService drew all 24 cards of a page before the HTML was sent and returned each 800x1200 PNG as a data: URL, so the album HTML (and the RSC payload, which repeats every src) carried tens of megabytes of base64. next start logged \"This rendered a large document (>512 kB) without any Suspense boundaries\". Fix: the page lists cards only, and each <img> loads its render from an owner-only GET route handler that reads the CardImageService cache (public/cards/<cardId>.png)."
+    },
+    {
+      "id": "BUG-0029",
+      "title": "Bot Fell Back to sqlite:storage/ririko.db Without DATABASE_URL Instead of the ./data/ririko.sqlite Every Other Entry Point Uses",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-121",
+      "requires": [],
+      "blocks": [],
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/core/src/config/schema.ts",
+          "packages/core/src/config/loader.test.ts",
+          "packages/database/src/client/factory.ts",
+          "packages/database/src/client/factory.test.ts",
+          "apps/bot/src/services.ts",
+          "apps/cli/src/commands/economy-config.ts",
+          "apps/cli/src/commands/guild-config.ts",
+          "apps/cli/src/commands/passkeys-reset.ts",
+          "apps/cli/src/commands/tcg-rules.ts",
+          "apps/cli/src/doctor/checks.ts",
+          "scripts/db-reset.ts",
+          "scripts/reset-tcg-user.ts",
+          "scripts/tcg-balance-sim.ts",
+          "scripts/tcg-boss-builder.ts",
+          "scripts/tcg-card-builder.ts"
+        ],
+        "symbols": [
+          "createBotServices",
+          "createDatabaseClient",
+          "AppConfigSchema",
+          "DatabaseConfig"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "createBotServices DATABASE_URL fallback createDatabaseClient AppConfigSchema DATABASE_URL default runDoctorChecks database check"
+        ]
+      },
+      "acceptance": [
+        "@ririko/core exports DEFAULT_DATABASE_URL (./data/ririko.sqlite) and AppConfigSchema uses it as the DATABASE_URL default.",
+        "@ririko/database exports databaseConfigFromEnv(env = process.env), returning { dialect: DATABASE_DIALECT or sqlite, url: DATABASE_URL or DEFAULT_DATABASE_URL }, with unit tests for the defaults and for set values.",
+        "createBotServices, the four CLI database commands, the doctor database check and the five scripts build their database config with databaseConfigFromEnv; no copy of the DATABASE_URL or DATABASE_DIALECT fallback is left outside it.",
+        "Without DATABASE_URL, the bot opens ./data/ririko.sqlite, the same file as the dashboard and CLI."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src/client packages/core/src/config apps/cli/src && pnpm lint --quiet",
+      "handovers": [
+        "BUG-0029"
+      ],
+      "description": "Found while building the bot image (TASK-1212). createBotServices fell back to sqlite:storage/ririko.db when DATABASE_URL was unset. resolveDatabasePath passes sqlite: URLs through unresolved, so better-sqlite3 opened a file named \"sqlite:storage/ririko.db\" relative to the working directory, while the config schema, the dashboard, the CLI, the scripts and .env.example all default to ./data/ririko.sqlite. A bot started without DATABASE_URL therefore used a different, empty database from the dashboard. Fix: one databaseConfigFromEnv helper in @ririko/database, with the default URL defined once in @ririko/core."
     }
   ],
   "active_in_progress_ticket": null

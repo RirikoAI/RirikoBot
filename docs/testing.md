@@ -82,7 +82,7 @@ Playwright (Chromium) against `next start` on port 3100, configured in `apps/web
 
 ## 4. Continuous Integration
 
-CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` workflow has six parallel jobs. Each Node job restores the pnpm store cache, runs `pnpm install --frozen-lockfile` and `pnpm build` first, because every `@ririko/*` package export points at `dist/`.
+CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` workflow has seven parallel jobs. Each job that runs code on the host (all but `docker` and `secrets`) restores the pnpm store cache, runs `pnpm install --frozen-lockfile` and `pnpm build` first, because every `@ririko/*` package export points at `dist/`.
 
 | Job | Runs | Fails when |
 |---|---|---|
@@ -91,6 +91,7 @@ CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` wor
 | `test` | `pnpm test:ci` | A test fails, or coverage drops below the thresholds in `vitest.config.ts` |
 | `build-web` | `pnpm --filter @ririko/web build` | The Next.js production build fails |
 | `e2e` | Next.js build, then `playwright test` (Chromium cached, fonts installed) | A Playwright spec fails; report and traces are in the job's *Artifacts* tab |
+| `docker` | `docker build` of the `bot-runner` and `web-runner` targets on CircleCI's remote Docker engine, then `node scripts/docker-smoke.ts bot web`. Nothing is pushed | An image does not build (for example, a new workspace package is missing from the Dockerfile's `manifests` stage), or a smoke check fails: wrong user, wrong writable directories, FFmpeg missing, the bot not reaching command registration, or the dashboard not serving pages and opening its database (docs/deployment.md section 2.1) |
 | `secrets` | `gitleaks git` over the full history with `.gitleaks.toml` | gitleaks finds a secret that is not listed in `.gitleaksignore` |
 
 Git hooks (Husky, installed by `pnpm install`) run the lint checks locally:
