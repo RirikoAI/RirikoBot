@@ -155,7 +155,23 @@ const BaseWebConfigSchema = BaseAppConfigSchema.extend({
   SECRET_VAULT_KEY: z
     .string({ required_error: 'SECRET_VAULT_KEY is required for the web dashboard' })
     .regex(HEX_KEY, 'SECRET_VAULT_KEY must be a 64-character hex string (32 bytes)'),
+  // Discord HTTP API base without the version, as discord.js REST expects it. Tests point it at
+  // a local fake; the bot token and client secret are sent here, so plain HTTP is loopback only.
+  DISCORD_API_URL: z
+    .string()
+    .url('DISCORD_API_URL must be an absolute URL such as https://discord.com/api')
+    .refine(isHttpsOrLoopback, 'DISCORD_API_URL must use https unless the host is loopback')
+    .transform((url) => url.replace(/\/+$/, ''))
+    .default('https://discord.com/api'),
 });
+
+function isHttpsOrLoopback(value: string): boolean {
+  // `.url()` reports unparsable values; zod still runs this refinement after that check fails.
+  if (!URL.canParse(value)) return true;
+  const url = new URL(value);
+  if (url.protocol === 'https:') return true;
+  return url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+}
 
 export const WebConfigSchema = z.preprocess(applyLegacyAliases, BaseWebConfigSchema);
 

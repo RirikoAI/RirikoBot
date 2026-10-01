@@ -29,10 +29,14 @@ These are the same checks CircleCI runs (see [testing.md](testing.md#4-continuou
 ```bash
 pnpm lint            # ESLint
 pnpm format:check    # Prettier (pnpm format fixes)
-pnpm typecheck       # tsc --noEmit in every workspace package
-pnpm test            # Vitest
+pnpm typecheck       # tsc --noEmit in every workspace package, plus the test-only projects
+pnpm test            # Vitest (includes the integration suites)
 pnpm test:coverage   # Vitest with v8 coverage, report in coverage/index.html
+pnpm test:integration  # Only the bot integration suites and the fake Discord API tests
+pnpm test:e2e        # Builds the dashboard, then runs the Playwright E2E suite
 ```
+
+`pnpm test:e2e` starts its own fake Discord API on port 3199 and `next start` on port 3100 with a throwaway SQLite database, so it can run while `next dev` is up on port 3000. It uses Playwright's Chromium; run `pnpm --filter @ririko/web exec playwright install chromium` once if it is missing. The report is in `apps/web/e2e-results/report/index.html`.
 
 `pnpm site:build` writes the Vercel status page to `site-dist/index.html` (see [deployment.md](deployment.md#4-current-hosting-vercel-status-site)).
 
