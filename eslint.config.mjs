@@ -16,6 +16,9 @@ export default tseslint.config(
       '**/*.d.ts',
       '*-player-script.js',
       '**/*-player-script.js',
+      // Scrum-Kanban-Template files; its upgrade command replaces them.
+      'scripts/kanban/**',
+      'scripts/hooks/**',
     ],
   },
   js.configs.recommended,

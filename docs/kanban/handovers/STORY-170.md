@@ -25,3 +25,15 @@ Before another story/epic, observe AGENTS.md's PR checkpoint. A review can use t
 Integrated `origin/develop/2.0.0` at `c22f1b5`. Preserved both repository export sets and board review entries; regenerated SQLite DDL from the combined schema (93 tables). Bot service/command integration merged cleanly. The unrelated `assets/tcg/catalog/manifest.json` working-tree change remains excluded and unchanged.
 
 After integration: build, typecheck, lint (0 errors, 589 existing warnings) and formatting pass. The focused adventure/card progression/game command/schema/catalog suite has **252 passing tests and 5 PostgreSQL skips**. Full suite has **2,272 passes, 35 failures and 5 skips** across the same eight unrelated failing files. The additional failure versus the earlier run is an upstream DJ-role playback test; the other failures remain provider/network/FFmpeg and locale-dependent checks. Live PostgreSQL/Discord validation remains pending under TASK-1705. Gitleaks staged scan passed using the official checksum-verified 8.30.1 binary; the commit hook remains enabled.
+
+---
+
+## REVIEW · 2026-10-01T13:02:31Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- None. Legacy ticket, groomed before `verify_cmd` existed.
+
+**Acceptance**
+- [x] PR #656 merged into `develop/2.0.0` by the maintainer on 2026-09-27.
+
+Closed in the Scrum Kanban 0.4 board migration (CHORE-0001).

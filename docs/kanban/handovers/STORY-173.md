@@ -41,3 +41,15 @@
 2. Run the updated bot with an available AI provider and let normal startup synchronize commands.
 3. In Discord, right-click a foreign-language message → Apps → Translate to English. Verify with a second account that only the invoker sees the result.
 4. Check an embed-only message, a long translation attachment, an image-only message, cooldown and disabled-command responses. Confirm private errors when providers are unavailable.
+
+---
+
+## REVIEW · 2026-10-01T13:02:31Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- None. Legacy ticket, groomed before `verify_cmd` existed.
+
+**Acceptance**
+- [x] PR #666 merged into `develop/2.0.0` by the maintainer on 2026-09-30.
+
+Closed in the Scrum Kanban 0.4 board migration (CHORE-0001).

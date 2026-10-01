@@ -73,3 +73,15 @@ YouTube playback stays on Lavalink (`youtube-plugin`). The in-process YouTube fa
 2. After the merge, run the bot once without Lavalink and play a YouTube link and a Spotify link to confirm the fallback player with the private package.
 3. Other maintainers: follow the setup steps in the private repository's README.
 4. When the PR merges, move `STORY-172`, `TASK-1721` and `TASK-1722` to DONE and link the PR here.
+
+---
+
+## REVIEW · 2026-10-01T13:02:31Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- None. Legacy ticket, groomed before `verify_cmd` existed.
+
+**Acceptance**
+- [x] PR #667 merged into `develop/2.0.0` by the maintainer on 2026-09-30.
+
+Closed in the Scrum Kanban 0.4 board migration (CHORE-0001).

@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kanban Board</title>
+<!--
+  Read-only web view of docs/kanban/board.json. Served by scripts/kanban/board-server.mjs.
+  No dependencies: plain CSS, plain JS, and a small Markdown renderer for handover notes.
+-->
+<style>
+:root {
+  --bg: #f4f5f7; --panel: #fff; --col: #ebecf0; --hover: #f7f8f9; --text: #172b4d; --muted: #626f86;
+  --border: #dcdfe4; --accent: #0c66e4; --code: #f1f2f4; --shadow: 0 1px 1px #091e4240, 0 0 1px #091e424f;
+  --danger: #ae2e24; --danger-bg: #ffeceb; --warn: #a54800; --warn-bg: #fff3eb; --ok: #1f845a; --ok-bg: #dcfff1;
+  --info: #0055cc; --info-bg: #e9f2ff; --purple: #5e4db2; --purple-bg: #f3f0ff; --grey-bg: #e2e4e9;
+  --pill-l: 90%; --pill-t: 30%;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d2125; --panel: #22272b; --col: #161a1d; --hover: #2c333a; --text: #c7d1db; --muted: #8c9bab;
+    --border: #38414a; --accent: #579dff; --code: #2c333a; --shadow: 0 1px 1px #03040480, 0 0 1px #03040480;
+    --danger: #fd9891; --danger-bg: #42221f; --warn: #fec195; --warn-bg: #3a2c1f; --ok: #7ee2b8; --ok-bg: #1c3329;
+    --info: #85b8ff; --info-bg: #1c2b41; --purple: #b8acf6; --purple-bg: #2b273f; --grey-bg: #2c333a;
+    --pill-l: 24%; --pill-t: 80%;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1d2125; --panel: #22272b; --col: #161a1d; --hover: #2c333a; --text: #c7d1db; --muted: #8c9bab;
+  --border: #38414a; --accent: #579dff; --code: #2c333a; --shadow: 0 1px 1px #03040480, 0 0 1px #03040480;
+  --danger: #fd9891; --danger-bg: #42221f; --warn: #fec195; --warn-bg: #3a2c1f; --ok: #7ee2b8; --ok-bg: #1c3329;
+  --info: #85b8ff; --info-bg: #1c2b41; --purple: #b8acf6; --purple-bg: #2b273f; --grey-bg: #2c333a;
+  --pill-l: 24%; --pill-t: 80%;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; overflow-x: hidden; }
+body { font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text); }
+a { color: var(--accent); }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+.muted { color: var(--muted); }
+.spacer { flex: 1; }
+.hidden { display: none !important; }
+
+/* Header */
+.top { display: flex; align-items: center; gap: 14px; padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 650; font-size: 16px; min-width: 0; }
+.brand .logo { flex: none; width: 28px; height: 28px; border-radius: 6px; background: var(--accent); color: #fff; display: grid; place-items: center; }
+.brand small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+.stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.stat { padding: 2px 10px; border-radius: 999px; background: var(--col); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.stat b { color: var(--text); font-weight: 600; }
+.stat.bad { background: var(--danger-bg); color: var(--danger); }
+.stat.bad b { color: inherit; }
+.live { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.live.on i { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-bg); }
+.btn { height: 32px; min-width: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn:hover { background: var(--hover); }
+
+/* Filters */
+.filters { display: flex; gap: 8px; padding: 12px 20px 8px; flex-wrap: wrap; align-items: center; }
+.filters input[type="search"], .filters select { height: 32px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: var(--text); padding: 0 10px; font: inherit; }
+.filters input[type="search"] { width: 220px; max-width: 100%; }
+.filters select { max-width: 240px; }
+.filters label.chk { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none; }
+.banner { margin: 8px 20px; padding: 10px 14px; border-radius: 6px; background: var(--danger-bg); color: var(--danger); }
+
+/* Epic strip */
+.epics { display: flex; gap: 10px; padding: 4px 20px 12px; overflow-x: auto; }
+.epic-chip { flex: none; width: 240px; background: var(--panel); border-radius: 8px; box-shadow: var(--shadow); padding: 8px 10px 10px; cursor: pointer; border-left: 4px solid hsl(var(--h) 60% 50%); }
+.epic-chip:hover { background: var(--hover); }
+.epic-chip.active { outline: 2px solid var(--accent); }
+.epic-chip .row { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
+.epic-chip .name { font-weight: 600; margin: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { height: 6px; border-radius: 3px; background: var(--col); overflow: hidden; margin-top: 6px; }
+.bar > span { display: block; height: 100%; background: var(--ok); }
+
+/* Board */
+.board { display: flex; gap: 12px; padding: 0 20px 24px; overflow-x: auto; align-items: flex-start; }
+.col { flex: 1 0 220px; max-width: 320px; background: var(--col); border-radius: 8px; display: flex; flex-direction: column; max-height: calc(100vh - 150px); border-top: 3px solid var(--sc); }
+.col-head { padding: 10px 12px 8px; font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.col-head .count { background: var(--grey-bg); color: var(--text); border-radius: 999px; padding: 0 7px; font-size: 11px; }
+.col-head .count.bad { background: var(--danger-bg); color: var(--danger); }
+.col-head .sum { margin-left: auto; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.col-body { padding: 2px 8px 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+.col-empty { color: var(--muted); font-size: 12px; text-align: center; padding: 14px 0; border: 1px dashed var(--border); border-radius: 6px; }
+.empty { margin: 40px auto; max-width: 520px; text-align: center; color: var(--muted); background: var(--panel); padding: 28px; border-radius: 10px; box-shadow: var(--shadow); }
+.empty h2 { color: var(--text); margin: 0 0 8px; font-size: 18px; }
+
+/* Card */
+.card { background: var(--panel); border-radius: 6px; box-shadow: var(--shadow); padding: 10px 12px 8px; cursor: pointer; }
+.card:hover { background: var(--hover); }
+.card:focus-visible { outline: 2px solid var(--accent); }
+.card.sel { outline: 2px solid var(--accent); }
+.card-title { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; overflow-wrap: anywhere; }
+.card-reason { font-size: 12px; color: var(--danger); background: var(--danger-bg); border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.tags:empty { display: none; }
+.tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 3px; background: var(--grey-bg); color: var(--muted); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.tag.bad { background: var(--danger-bg); color: var(--danger); }
+.tag.warn { background: var(--warn-bg); color: var(--warn); }
+.epic-pill { background: hsl(var(--h) 70% var(--pill-l)); color: hsl(var(--h) 60% var(--pill-t)); text-transform: uppercase; }
+.card-foot { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.card-id { font-weight: 600; white-space: nowrap; }
+.card-id.done { text-decoration: line-through; }
+.pts { min-width: 22px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--grey-bg); color: var(--text); font-size: 11px; font-weight: 650; display: inline-grid; place-items: center; }
+.model { font-size: 10.5px; font-weight: 650; text-transform: uppercase; padding: 0 5px; border-radius: 3px; border: 1px solid var(--border); }
+.note-ico { display: inline-flex; color: var(--muted); }
+.avatar { width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 10.5px; font-weight: 700; color: #fff; background: hsl(var(--h) 55% 45%); flex: none; }
+.avatar.none { background: var(--grey-bg); color: var(--muted); }
+.ti { width: 16px; height: 16px; border-radius: 3px; display: inline-grid; place-items: center; flex: none; color: #fff; }
+.ti svg { width: 11px; height: 11px; }
+.ti-story { background: #22a06b; } .ti-task { background: #1d7afc; } .ti-bug { background: #e34935; } .ti-chore { background: #8590a2; } .ti-epic { background: #8270db; } .ti-unknown { background: #8590a2; }
+
+/* Status pills */
+.st { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 3px; text-transform: uppercase; white-space: nowrap; background: var(--grey-bg); color: var(--text); }
+.st-TODO, .st-BACKLOG { background: var(--grey-bg); }
+.st-IN_PROGRESS { background: var(--info-bg); color: var(--info); }
+.st-PAUSED { background: var(--warn-bg); color: var(--warn); }
+.st-BLOCKED, .st-REWORK { background: var(--danger-bg); color: var(--danger); }
+.st-REVIEW { background: var(--purple-bg); color: var(--purple); }
+.st-DONE { background: var(--ok-bg); color: var(--ok); }
+.st-ABANDONED { background: var(--grey-bg); color: var(--muted); text-decoration: line-through; }
+
+/* Drawer */
+.scrim { position: fixed; inset: 0; background: #091e4240; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(640px, 100vw); background: var(--panel); box-shadow: -4px 0 24px #091e4240; display: flex; flex-direction: column; z-index: 2; }
+.d-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+.d-head .btn { border: 0; font-size: 18px; }
+.d-title { padding: 14px 20px 0; margin: 0; font-size: 20px; font-weight: 600; overflow-wrap: anywhere; }
+.tabs { display: flex; gap: 4px; padding: 10px 20px 0; border-bottom: 1px solid var(--border); }
+.tab { border: 0; background: none; font: inherit; color: var(--muted); padding: 8px 10px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab:disabled { opacity: .5; cursor: default; }
+.d-body { padding: 16px 20px 40px; overflow-y: auto; flex: 1; }
+.sec { margin-bottom: 20px; }
+.sec h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; }
+.grid { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; align-items: center; }
+.grid > dt { color: var(--muted); font-size: 13px; }
+.grid > dd { margin: 0; min-width: 0; overflow-wrap: anywhere; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.box { border-radius: 6px; padding: 10px 12px; margin-bottom: 14px; }
+.box.bad { background: var(--danger-bg); color: var(--danger); }
+.box.warn { background: var(--warn-bg); color: var(--warn); }
+.rels { flex: 1; min-width: 0; }
+.rel { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 4px; color: var(--text); text-decoration: none; }
+.rel:hover { background: var(--hover); }
+.rel .t { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { background: var(--code); border-radius: 4px; padding: 1px 6px; overflow-wrap: anywhere; }
+ul.acc { margin: 0; padding-left: 20px; }
+ul.acc li { margin: 3px 0; }
+.cmd { display: flex; gap: 8px; align-items: stretch; }
+.cmd pre { flex: 1; margin: 0; }
+pre { background: var(--code); padding: 8px 10px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+details.raw summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+
+/* Rendered Markdown */
+.md { overflow-wrap: anywhere; }
+.md h1 { font-size: 16px; margin: 0 0 10px; }
+.md h2, .md h3, .md h4 { font-size: 14px; margin: 14px 0 6px; }
+.md p { margin: 6px 0; }
+.md ul, .md ol { margin: 4px 0 8px; padding-left: 22px; }
+.md li.check { list-style: none; margin-left: -18px; }
+.md li.check.on { color: var(--ok); }
+.md hr { border: 0; border-top: 1px solid var(--border); margin: 16px 0; }
+.md code { background: var(--code); padding: 1px 4px; border-radius: 3px; }
+.md pre code { background: none; padding: 0; }
+.md table { border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+.md th, .md td { border: 1px solid var(--border); padding: 4px 8px; text-align: left; }
+.entry-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 18px 0 8px; padding: 8px 10px; border-radius: 6px; background: var(--col); border-left: 4px solid var(--ec); font-size: 13px; }
+.entry-head .etype { font-weight: 700; color: var(--ec); letter-spacing: .03em; }
+.entry-head .edate { color: var(--muted); }
+.e-grooming { --ec: var(--info); } .e-progress { --ec: var(--warn); } .e-review { --ec: var(--ok); } .e-flag { --ec: var(--danger); }
+.note-src { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+.note-src + .md { margin-bottom: 28px; }
+
+@media (max-width: 640px) {
+  .top, .filters, .epics, .board { padding-left: 16px; padding-right: 16px; }
+  .col { flex-basis: 84vw; }
+  .grid { grid-template-columns: 1fr; }
+  .stats { order: 3; width: 100%; }
+  .filters input[type="search"], .filters select { flex: 1 1 140px; max-width: none; width: auto; min-width: 0; }
+  .grid > dt { margin-top: 6px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="4" height="12" rx="1"/><rect x="6" y="2" width="4" height="8" rx="1"/><rect x="11" y="2" width="4" height="10" rx="1"/></svg></span>
+    <div><span id="project">Kanban Board</span><small>Scrum Kanban · read-only view of board.json</small></div>
+  </div>
+  <div class="stats" id="stats"></div>
+  <span class="spacer"></span>
+  <span class="live" id="live" title="Live reload"><i></i><span>connecting</span></span>
+  <button class="btn" id="theme" title="Theme: auto" aria-label="Toggle theme">◐</button>
+</header>
+
+<div class="filters">
+  <input type="search" id="q" placeholder="Search ID or title  ( / )" aria-label="Search">
+  <select id="f-epic" aria-label="Epic"></select>
+  <select id="f-type" aria-label="Type"></select>
+  <select id="f-who" aria-label="Assignee"></select>
+  <label class="chk"><input type="checkbox" id="f-notes"> Has handover</label>
+  <label class="chk"><input type="checkbox" id="f-abandoned"> Show abandoned</label>
+  <button class="btn" id="clear" title="Clear filters">Clear</button>
+</div>
+<div class="banner hidden" id="banner" role="alert"></div>
+<div class="epics" id="epics"></div>
+<main class="board" id="board"></main>
+<div id="drawer-root"></div>
+
+<script>
+'use strict';
+const STATUSES = ['BACKLOG', 'TODO', 'IN_PROGRESS', 'PAUSED', 'BLOCKED', 'REVIEW', 'DONE', 'ABANDONED'];
+const LABEL = { BACKLOG: 'Backlog', TODO: 'To Do', IN_PROGRESS: 'In Progress', PAUSED: 'Paused', BLOCKED: 'Blocked', REVIEW: 'Review', DONE: 'Done', ABANDONED: 'Abandoned' };
+const COLOR = { BACKLOG: 'var(--muted)', TODO: 'var(--muted)', IN_PROGRESS: 'var(--info)', PAUSED: 'var(--warn)', BLOCKED: 'var(--danger)', REVIEW: 'var(--purple)', DONE: 'var(--ok)', ABANDONED: 'var(--border)' };
+// Same group-to-type mapping as scripts/kanban/render-board.mjs.
+const GROUPS = { epics: 'epic', stories: 'story', tasks: 'task', chores: 'chore', bugs: 'bug' };
+const KNOWN = ['id', 'title', 'status', 'type', 'points', 'parent', 'children', 'requires', 'blocks', 'model', 'assignee', 'claimed_at', 'blocked_reason', 'context', 'acceptance', 'verify_cmd', 'handovers'];
+const STALE_CLAIM_HOURS = 24;
+const ICON = {
+  epic: '<path d="M9.5 1 3 9h4.5L6.5 15 13 7H8.5z" fill="currentColor"/>',
+  story: '<path d="M4 2h8v12l-4-3-4 3z" fill="currentColor"/>',
+  task: '<path d="m3 8.5 3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
+  bug: '<circle cx="8" cy="8" r="5" fill="currentColor"/>',
+  chore: '<path d="M3 8h10M8 3v10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+  unknown: '<circle cx="8" cy="8" r="3" fill="currentColor"/>',
+};
+const NOTE_SVG = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9 1.5V5.5h4M6 8.5h5M6 11h4"/></svg>';
+
+const S = { board: null, all: [], byId: new Map(), raw: new Map(), notes: new Set(), flags: [], project: '', open: null, tab: 'details', noteCache: new Map() };
+const F = { q: '', epic: '', type: '', who: '', notes: false, abandoned: false };
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const cls = (s) => String(s ?? '').replace(/[^\w-]/g, '');
+const hue = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 360; };
+const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : '');
+const workable = (t) => t.type !== 'epic';
+const uniq = (a) => [...new Set(a)];
+
+// ---------- data ----------
+async function get(url, kind) {
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) {
+    let msg = `${url}: ${r.status} ${r.statusText}`;
+    try { msg = (await r.json()).error ?? msg; } catch {}
+    throw new Error(msg);
+  }
+  return r[kind]();
+}
+
+async function load() {
+  try {
+    const [board, notes, flags, meta] = await Promise.all([
+      get('/api/board', 'json'), get('/api/handovers', 'json'), get('/api/flags', 'text'), get('/api/meta', 'json').catch(() => ({})),
+    ]);
+    S.board = board;
+    S.notes = new Set(notes);
+    S.flags = parseFlags(flags);
+    S.project = meta.project ?? '';
+    S.all = []; S.byId = new Map(); S.raw = new Map(); S.noteCache = new Map();
+    for (const [group, type] of Object.entries(GROUPS)) {
+      for (const t of board[group] ?? []) {
+        if (!t || !t.id) continue;
+        const rec = { ...t, type: t.type ?? type };
+        S.all.push(rec); S.byId.set(rec.id, rec); S.raw.set(rec.id, t);
+      }
+    }
+    banner('');
+  } catch (e) {
+    banner(`Could not load the board: ${e.message}`);
+  }
+  renderAll();
+}
+
+function parseFlags(text) {
+  const out = [];
+  for (const line of text.split(/\r?\n/)) {
+    const m = line.match(/^\|\s*`?([A-Za-z]+-\d+)`?\s*\|(.*)\|\s*$/);
+    if (!m) continue;
+    const [from = '', summary = '', note = ''] = m[2].split('|').map((c) => c.trim().replace(/`/g, ''));
+    out.push({ target: m[1], from, summary, note });
+  }
+  return out;
+}
+
+function epicOf(t) {
+  const seen = new Set();
+  for (let cur = t; cur && !seen.has(cur.id); cur = S.byId.get(cur.parent)) {
+    if (cur.type === 'epic') return cur;
+    seen.add(cur.id);
+  }
+  return null;
+}
+const childrenOf = (t) => uniq([...(t.children ?? []), ...S.all.filter((c) => c.parent === t.id).map((c) => c.id)]).map((id) => S.byId.get(id) ?? { id, missing: true });
+// Leaf tickets carry the real estimate: a story with tasks is counted through its tasks.
+const isLeaf = (t) => workable(t) && !S.all.some((c) => c.parent === t.id && workable(c));
+const noteIds = (t) => uniq([t.id, ...(t.handovers ?? [])]).filter((id) => S.notes.has(id));
+const waitingOn = (t) => (t.requires ?? []).filter((r) => S.byId.get(r)?.status !== 'DONE');
+const isStale = (t) => t.status === 'IN_PROGRESS' && Date.now() - Date.parse(t.claimed_at ?? '') > STALE_CLAIM_HOURS * 3600e3;
+function progress(tickets) {
+  const leaves = tickets.filter((t) => isLeaf(t) && t.status !== 'ABANDONED');
+  const total = leaves.reduce((n, t) => n + (Number(t.points) || 0), 0);
+  const done = leaves.filter((t) => t.status === 'DONE').reduce((n, t) => n + (Number(t.points) || 0), 0);
+  return { total, done, count: leaves.length, doneCount: leaves.filter((t) => t.status === 'DONE').length };
+}
+
+function matches(t) {
+  if (F.q && !`${t.id} ${t.title ?? ''}`.toLowerCase().includes(F.q.toLowerCase())) return false;
+  if (F.epic) {
+    const e = epicOf(t);
+    if (F.epic === '-' ? e : e?.id !== F.epic) return false;
+  }
+  if (F.type && t.type !== F.type) return false;
+  if (F.who && (F.who === '-' ? t.assignee : t.assignee !== F.who)) return false;
+  if (F.notes && !noteIds(t).length) return false;
+  return true;
+}
+
+// ---------- small views ----------
+const typeIcon = (type) => `<span class="ti ti-${ICON[type] ? type : 'unknown'}" title="${esc(cap(type ?? 'unknown'))}"><svg viewBox="0 0 16 16">${ICON[type] ?? ICON.unknown}</svg></span>`;
+const statusPill = (s) => `<span class="st st-${cls(s)}">${esc(LABEL[s] ?? s)}</span>`;
+const epicPill = (e) => `<span class="tag epic-pill" style="--h:${hue(e.id)}" title="${esc(e.id)}">${esc(e.title ?? e.id)}</span>`;
+function avatar(name) {
+  if (!name) return '<span class="avatar none" title="Unassigned">?</span>';
+  const parts = String(name).split(/[\s\-_./@:]+/).filter(Boolean);
+  const ini = (parts.length > 1 ? parts[0][0] + parts[1][0] : String(name).slice(0, 2)).toUpperCase();
+  return `<span class="avatar" style="--h:${hue(name)}" title="${esc(name)}">${esc(ini)}</span>`;
+}
+function fmtDate(iso) {
+  const d = Date.parse(iso);
+  return Number.isNaN(d) ? String(iso) : new Date(d).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+}
+function ago(iso) {
+  const d = Date.parse(iso);
+  if (Number.isNaN(d)) return '';
+  const s = Math.round((Date.now() - d) / 1000);
+  const [n, u] = s < 60 ? [s, 'second'] : s < 3600 ? [s / 60, 'minute'] : s < 86400 ? [s / 3600, 'hour'] : [s / 86400, 'day'];
+  const v = Math.max(0, Math.floor(n));
+  return `${v} ${u}${v === 1 ? '' : 's'} ago`;
+}
+function banner(msg) {
+  const b = $('#banner');
+  b.textContent = msg;
+  b.classList.toggle('hidden', !msg);
+}
+
+// ---------- board ----------
+function renderAll() {
+  const project = S.project || 'Kanban Board';
+  $('#project').textContent = project;
+  document.title = `${project} · Kanban`;
+  renderStats();
+  renderFilterOptions();
+  renderBoard();
+  renderDrawer();
+}
+
+function renderStats() {
+  const work = S.all.filter(workable);
+  const p = progress(S.all);
+  const active = work.filter((t) => t.status === 'IN_PROGRESS');
+  const wip = S.board?.wip_limit ?? 1;
+  const blocked = work.filter((t) => t.status === 'BLOCKED').length;
+  $('#stats').innerHTML = [
+    `<span class="stat"><b>${work.length}</b> tickets</span>`,
+    `<span class="stat"><b>${p.done}/${p.total}</b> pts done</span>`,
+    `<span class="stat ${active.length > wip ? 'bad' : ''}" title="${esc(active.map((t) => `${t.id} by ${t.assignee ?? '(none)'}`).join(', ') || 'Nothing in progress')}">WIP <b>${active.length}/${wip}</b></span>`,
+    blocked ? `<span class="stat bad"><b>${blocked}</b> blocked</span>` : '',
+    S.flags.length ? `<span class="stat" title="Open FLAG entries in HANDOVERS.md"><b>${S.flags.length}</b> open flag${S.flags.length === 1 ? '' : 's'}</span>` : '',
+  ].join('');
+}
+
+function renderFilterOptions() {
+  const epics = S.all.filter((t) => t.type === 'epic');
+  const types = uniq(S.all.filter(workable).map((t) => t.type));
+  const who = uniq(S.all.map((t) => t.assignee).filter(Boolean)).sort();
+  const opts = (all, list) => `<option value="">${all}</option>` + list.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('');
+  $('#f-epic').innerHTML = opts('All epics', [...epics.map((e) => [e.id, `${e.id} · ${e.title ?? ''}`]), ['-', 'No epic']]);
+  $('#f-type').innerHTML = opts('All types', types.map((t) => [t, cap(t)]));
+  $('#f-who').innerHTML = opts('Anyone', [...who.map((w) => [w, w]), ['-', 'Unassigned']]);
+  $('#f-epic').value = F.epic; $('#f-type').value = F.type; $('#f-who').value = F.who;
+  $('#q').value = F.q; $('#f-notes').checked = F.notes; $('#f-abandoned').checked = F.abandoned;
+}
+
+function renderBoard() {
+  const epics = S.all.filter((t) => t.type === 'epic');
+  $('#epics').innerHTML = epics.map((e) => {
+    const p = progress(S.all.filter((t) => t !== e && epicOf(t) === e));
+    const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
+    return `<div class="epic-chip ${F.epic === e.id ? 'active' : ''}" style="--h:${hue(e.id)}" data-epic="${esc(e.id)}" role="button" tabindex="0" title="Click to filter by this epic">
+      <div class="row">${typeIcon('epic')}<b>${esc(e.id)}</b><span class="spacer"></span>${statusPill(e.status)}</div>
+      <div class="name">${esc(e.title ?? '(untitled)')}</div>
+      <div class="row"><span>${p.doneCount}/${p.count} done · ${p.done}/${p.total} pts</span><span class="spacer"></span><a href="#" data-open="${esc(e.id)}">details</a></div>
+      <div class="bar"><span style="width:${pct}%"></span></div>
+    </div>`;
+  }).join('');
+  $('#epics').classList.toggle('hidden', !epics.length);
+
+  if (!S.all.length) {
+    $('#board').innerHTML = S.board ? `<div class="empty"><h2>The board is empty</h2>
+      <p>No tickets in <code>docs/kanban/board.json</code> yet. The coordinator grooms tickets from <code>_ticket_template</code>
+      (see <code>docs/kanban/protocol.md</code> section 3.1). This page updates as soon as the file changes.</p></div>` : '';
+    return;
+  }
+  const extra = uniq(S.all.map((t) => t.status)).filter((s) => !STATUSES.includes(s));
+  const cols = [...STATUSES.filter((s) => s !== 'ABANDONED' || F.abandoned), ...extra];
+  const wip = S.board?.wip_limit ?? 1;
+  $('#board').innerHTML = cols.map((s) => {
+    const inCol = S.all.filter((t) => workable(t) && t.status === s);
+    const shown = inCol.filter(matches);
+    const pts = shown.reduce((n, t) => n + (Number(t.points) || 0), 0);
+    const count = s === 'IN_PROGRESS' ? `${inCol.length}/${wip}` : shown.length;
+    const bad = s === 'IN_PROGRESS' && inCol.length > wip;
+    return `<section class="col" style="--sc:${COLOR[s] ?? 'var(--danger)'}" aria-label="${esc(LABEL[s] ?? s)}">
+      <div class="col-head">${esc(LABEL[s] ?? s)}<span class="count ${bad ? 'bad' : ''}" title="${s === 'IN_PROGRESS' ? 'WIP limit on the whole board' : 'Tickets'}">${count}</span><span class="sum">${pts} pts</span></div>
+      <div class="col-body">${shown.map(card).join('') || '<div class="col-empty">No tickets</div>'}</div>
+    </section>`;
+  }).join('');
+}
+
+function card(t) {
+  const e = epicOf(t);
+  const wait = ['DONE', 'ABANDONED'].includes(t.status) ? [] : waitingOn(t);
+  const flags = S.flags.filter((f) => f.target === t.id);
+  const kids = childrenOf(t).filter((k) => !k.missing && workable(k) && k.status !== 'ABANDONED');
+  const tags = [
+    e ? epicPill(e) : '',
+    wait.length ? `<span class="tag bad" title="Requires ${esc(wait.join(', '))} to be DONE">waits on ${esc(wait.join(', '))}</span>` : '',
+    flags.length ? `<span class="tag warn" title="${esc(flags.map((f) => f.summary).join('\n'))}">${flags.length} flag${flags.length === 1 ? '' : 's'}</span>` : '',
+    isStale(t) ? `<span class="tag warn" title="Claimed over ${STALE_CLAIM_HOURS}h ago; possible orphaned claim (protocol 5.3)">stale claim</span>` : '',
+    kids.length ? `<span class="tag" title="Child tickets done">${kids.filter((k) => k.status === 'DONE').length}/${kids.length} subtasks</span>` : '',
+  ].join('');
+  return `<div class="card ${S.open === t.id ? 'sel' : ''}" role="button" tabindex="0" data-open="${esc(t.id)}">
+    <div class="card-title">${esc(t.title ?? '(untitled)')}</div>
+    ${t.status === 'BLOCKED' && t.blocked_reason ? `<div class="card-reason">${esc(t.blocked_reason)}</div>` : ''}
+    <div class="tags">${tags}</div>
+    <div class="card-foot">
+      ${typeIcon(t.type)}<span class="card-id ${t.status === 'DONE' ? 'done' : ''}">${esc(t.id)}</span>
+      <span class="spacer"></span>
+      ${noteIds(t).length ? `<span class="note-ico" title="Has handover note">${NOTE_SVG}</span>` : ''}
+      ${t.model ? `<span class="model" title="Worker model tier">${esc(t.model)}</span>` : ''}
+      <span class="pts" title="Story points">${esc(t.points ?? '–')}</span>
+      ${avatar(t.assignee)}
+    </div>
+  </div>`;
+}
+
+// ---------- drawer ----------
+function relList(tickets) {
+  if (!tickets.length) return '<span class="muted">—</span>';
+  return '<div class="rels">' + tickets.map((r) => {
+    const t = typeof r === 'string' ? (S.byId.get(r) ?? { id: r, missing: true }) : r;
+    return `<a class="rel" href="#" data-open="${esc(t.id)}">${typeIcon(t.type)}<code>${esc(t.id)}</code><span class="t">${esc(t.missing ? 'unknown ticket' : t.title ?? '')}</span>${t.missing ? '' : statusPill(t.status)}</a>`;
+  }).join('') + '</div>';
+}
+const chips = (list) => (list?.length ? `<div class="chips">${list.map((x) => `<code class="chip">${esc(typeof x === 'string' ? x : JSON.stringify(x))}</code>`).join('')}</div>` : '<span class="muted">—</span>');
+const valueView = (v) => (v === null || v === undefined || v === '' ? '<span class="muted">—</span>'
+  : Array.isArray(v) && v.every((x) => typeof x !== 'object') ? chips(v)
+  : typeof v === 'object' ? `<pre>${esc(JSON.stringify(v, null, 2))}</pre>` : esc(v));
+
+function renderDrawer() {
+  const root = $('#drawer-root');
+  const t = S.open && S.byId.get(S.open);
+  if (!t) { root.innerHTML = ''; return; }
+  const notes = noteIds(t);
+  if (S.tab === 'handover' && !notes.length) S.tab = 'details';
+  root.innerHTML = `<div class="scrim" data-close></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="${esc(t.id)}">
+    <div class="d-head">${typeIcon(t.type)}<span>${esc(cap(t.type))}</span><b>${esc(t.id)}</b>${statusPill(t.status)}<span class="spacer"></span>
+      <button class="btn" data-close title="Close (Esc)" aria-label="Close">×</button></div>
+    <h2 class="d-title">${esc(t.title ?? '(untitled)')}</h2>
+    <div class="tabs" role="tablist">
+      <button class="tab ${S.tab === 'details' ? 'on' : ''}" data-tab="details" role="tab">Details</button>
+      <button class="tab ${S.tab === 'handover' ? 'on' : ''}" data-tab="handover" role="tab" ${notes.length ? '' : 'disabled title="No handover note yet"'}>Handover${notes.length ? ` (${notes.length})` : ''}</button>
+    </div>
+    <div class="d-body" id="d-body">${S.tab === 'details' ? details(t) : '<p class="muted">Loading…</p>'}</div>
+  </aside>`;
+  if (S.tab === 'handover') renderNotes(t, notes);
+}
+
+function details(t) {
+  const e = epicOf(t);
+  const flags = S.flags.filter((f) => f.target === t.id);
+  const wait = waitingOn(t);
+  const requiredBy = S.all.filter((x) => (x.requires ?? []).includes(t.id));
+  const kids = childrenOf(t);
+  const descendants = t.type === 'epic' ? S.all.filter((x) => x !== t && epicOf(x) === t) : [];
+  const ctx = t.context ?? {};
+  const ctxKeys = uniq(['files', 'symbols', 'entry_points', 'codegraph_queries', ...Object.keys(ctx)]);
+  const other = Object.keys(S.raw.get(t.id) ?? {}).filter((k) => !KNOWN.includes(k));
+  const p = t.type === 'epic' ? progress(descendants) : kids.length ? progress(kids.filter((k) => !k.missing)) : null;
+  return `
+    ${flags.map((f) => `<div class="box warn"><b>Open flag</b> from ${esc(f.from || '?')}: ${esc(f.summary)}</div>`).join('')}
+    ${t.status === 'BLOCKED' ? `<div class="box bad"><b>Blocked:</b> ${esc(t.blocked_reason ?? 'no blocked_reason given')}</div>` : ''}
+    ${isStale(t) ? `<div class="box warn">Claimed ${esc(ago(t.claimed_at))}. Over ${STALE_CLAIM_HOURS}h: possible orphaned claim (protocol 5.3).</div>` : ''}
+    <div class="sec"><dl class="grid">
+      <dt>Status</dt><dd>${statusPill(t.status)}${wait.length && !['DONE', 'ABANDONED'].includes(t.status) ? `<span class="tag bad">waits on ${esc(wait.join(', '))}</span>` : ''}</dd>
+      <dt>Points</dt><dd><span class="pts">${esc(t.points ?? '–')}</span>${p && p.total ? `<span class="muted">${p.done}/${p.total} pts of children done</span>` : ''}</dd>
+      <dt>Assignee</dt><dd>${avatar(t.assignee)}<span>${esc(t.assignee ?? 'Unassigned')}</span></dd>
+      <dt>Claimed</dt><dd>${t.claimed_at ? `${esc(fmtDate(t.claimed_at))} <span class="muted">(${esc(ago(t.claimed_at))})</span>` : '<span class="muted">—</span>'}</dd>
+      <dt>Model tier</dt><dd>${t.model ? `<span class="model">${esc(t.model)}</span>` : '<span class="muted">—</span>'}</dd>
+      <dt>Epic</dt><dd>${e && e !== t ? `${epicPill(e)} <a href="#" data-open="${esc(e.id)}">${esc(e.id)}</a>` : '<span class="muted">—</span>'}</dd>
+      <dt>Parent</dt><dd>${t.parent ? relList([t.parent]) : '<span class="muted">—</span>'}</dd>
+    </dl></div>
+    ${t.type === 'epic' ? `<div class="sec"><h3>Tickets in this epic (${descendants.length})</h3>${relList(descendants)}</div>` : ''}
+    ${kids.length ? `<div class="sec"><h3>Children</h3>${relList(kids)}</div>` : ''}
+    <div class="sec"><h3>Dependencies</h3><dl class="grid">
+      <dt>Requires</dt><dd>${relList(t.requires ?? [])}</dd>
+      <dt>Blocks</dt><dd>${relList(t.blocks ?? [])}</dd>
+      <dt>Required by</dt><dd>${relList(requiredBy)}</dd>
+    </dl></div>
+    <div class="sec"><h3>Acceptance</h3>${t.acceptance?.length ? `<ul class="acc">${t.acceptance.map((a) => `<li>${esc(typeof a === 'string' ? a : JSON.stringify(a))}</li>`).join('')}</ul>` : '<span class="muted">Not groomed yet.</span>'}</div>
+    <div class="sec"><h3>Verify command</h3>${t.verify_cmd ? `<div class="cmd"><pre>${esc(t.verify_cmd)}</pre><button class="btn" data-copy="${esc(t.verify_cmd)}">Copy</button></div>` : '<span class="muted">—</span>'}</div>
+    <div class="sec"><h3>Context</h3><dl class="grid">${ctxKeys.map((k) => `<dt>${esc(k)}</dt><dd>${valueView(ctx[k])}</dd>`).join('')}</dl></div>
+    <div class="sec"><h3>Handover notes</h3>${(t.handovers ?? []).length ? `<div class="chips">${t.handovers.map((h) => S.notes.has(h)
+      ? `<a class="chip" href="#" data-note="${esc(h)}">${esc(h)}.md</a>` : `<span class="chip" title="File missing">${esc(h)}.md (missing)</span>`).join('')}</div>` : '<span class="muted">—</span>'}</div>
+    ${other.length ? `<div class="sec"><h3>Other fields</h3><dl class="grid">${other.map((k) => `<dt>${esc(k)}</dt><dd>${valueView(S.raw.get(t.id)[k])}</dd>`).join('')}</dl></div>` : ''}
+    <details class="raw"><summary>Raw board.json record</summary><pre>${esc(JSON.stringify(S.raw.get(t.id), null, 2))}</pre></details>`;
+}
+
+async function renderNotes(t, ids) {
+  const parts = await Promise.all(ids.map(async (id) => {
+    if (!S.noteCache.has(id)) S.noteCache.set(id, get(`/api/handovers/${encodeURIComponent(id)}`, 'text').catch((e) => `*Could not load: ${e.message}*`));
+    const text = await S.noteCache.get(id);
+    return `<p class="note-src">docs/kanban/handovers/${esc(id)}.md${id === t.id ? '' : ' · linked note'}</p><div class="md">${markdown(text)}</div>`;
+  }));
+  const body = $('#d-body');
+  if (body && S.open === t.id && S.tab === 'handover') body.innerHTML = parts.join('');
+}
+
+// ---------- Markdown (subset used by handover notes; all input is escaped, no raw HTML) ----------
+function inline(src) {
+  const keep = [];
+  const hold = (html) => `\u0000${keep.push(html) - 1}\u0000`;
+  let s = String(src).split('`').map((seg, i) => (i % 2 ? hold(`<code>${esc(seg)}</code>`) : seg)).join('');
+  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => {
+    const id = url.match(/([A-Za-z]+-\d+)\.md$/)?.[1];
+    if (id && S.byId.has(id)) return hold(`<a href="#" data-open="${esc(id)}">${esc(text)}</a>`);
+    if (/^https?:\/\//i.test(url)) return hold(`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a>`);
+    return hold(`<span title="${esc(url)}">${esc(text)}</span>`);
+  });
+  s = esc(s)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,;:!?]|$)/g, '$1<em>$2</em>')
+    .replace(/\b([A-Z]+-\d+)\b/g, (m, id) => (S.byId.has(id) ? `<a href="#" data-open="${id}">${id}</a>` : m));
+  return s.replace(/\u0000(\d+)\u0000/g, (m, i) => keep[i]);
+}
+
+function entryHead(text) {
+  const m = text.match(/^(GROOMING|PROGRESS|REVIEW|FLAG)\b\s*·?\s*(.*)$/);
+  if (!m) return null;
+  const parts = m[2].split('·').map((x) => x.trim()).filter(Boolean);
+  const status = m[1] !== 'FLAG' && /^(PAUSED|BLOCKED|REVIEW|ABANDONED|DONE|REWORK)$/.test(parts.at(-1) ?? '') ? parts.pop() : null;
+  const [date, ...rest] = parts;
+  return `<div class="entry-head e-${m[1].toLowerCase()}"><span class="etype">${m[1]}</span>${date ? `<span class="edate" title="${esc(date)}">${esc(fmtDate(date))}</span>` : ''}<span>${inline(rest.join(' · '))}</span><span class="spacer"></span>${status ? statusPill(status) : ''}</div>`;
+}
+
+function markdown(src) {
+  const lines = String(src).replace(/<!--[\s\S]*?-->/g, '').replace(/\r\n?/g, '\n').split('\n');
+  const out = [];
+  let para = [], list = null, table = null, code = null;
+  const flush = () => {
+    if (para.length) out.push(`<p>${inline(para.join(' '))}</p>`), (para = []);
+    if (list) out.push(`<${list.tag}>${list.items.join('')}</${list.tag}>`), (list = null);
+    if (table) {
+      const [head, ...rows] = table.filter((r) => !/^\|?\s*:?-{2,}/.test(r));
+      const cells = (r) => r.replace(/^\||\|$/g, '').split('|').map((c) => inline(c.trim()));
+      out.push(`<table><thead><tr>${cells(head).map((c) => `<th>${c}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${cells(r).map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
+      table = null;
+    }
+  };
+  for (const line of lines) {
+    if (code) {
+      if (/^\s*```/.test(line)) out.push(`<pre><code>${esc(code.join('\n'))}</code></pre>`), (code = null);
+      else code.push(line);
+      continue;
+    }
+    let m;
+    if (/^\s*```/.test(line)) { flush(); code = []; continue; }
+    if (!line.trim()) { flush(); continue; }
+    if (/^\s*(-{3,}|\*{3,})\s*$/.test(line)) { flush(); out.push('<hr>'); continue; }
+    if ((m = line.match(/^(#{1,6})\s+(.*)$/))) {
+      flush();
+      const lvl = Math.min(m[1].length, 4);
+      out.push((lvl === 2 && entryHead(m[2])) || `<h${lvl}>${inline(m[2])}</h${lvl}>`);
+      continue;
+    }
+    if (line.trim().startsWith('|')) {
+      if (!table) { flush(); table = []; }
+      table.push(line.trim());
+      continue;
+    }
+    if ((m = line.match(/^\s*(?:([-*+])|(\d+)[.)])\s+(?:\[([ xX])\]\s+)?(.*)$/))) {
+      if (para.length || table) { const l = list; list = null; flush(); list = l; }
+      const tag = m[1] ? 'ul' : 'ol';
+      if (list && list.tag !== tag) flush();
+      list ??= { tag, items: [] };
+      list.items.push(m[3] !== undefined
+        ? `<li class="check ${m[3].trim() ? 'on' : ''}">${m[3].trim() ? '☑' : '☐'} ${inline(m[4])}</li>`
+        : `<li>${inline(m[4])}</li>`);
+      continue;
+    }
+    if (list && /^\s{2,}\S/.test(line)) {
+      // Continuation of the previous list item.
+      const i = list.items.length - 1;
+      list.items[i] = list.items[i].replace(/<\/li>$/, ` ${inline(line.trim())}</li>`);
+      continue;
+    }
+    if (list || table) flush();
+    para.push(line.trim());
+  }
+  if (code) out.push(`<pre><code>${esc(code.join('\n'))}</code></pre>`);
+  flush();
+  return out.join('\n');
+}
+
+// ---------- URL hash state: filters and the open ticket are shareable links ----------
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  F.q = p.get('q') ?? ''; F.epic = p.get('epic') ?? ''; F.type = p.get('type') ?? ''; F.who = p.get('who') ?? '';
+  F.notes = p.has('notes'); F.abandoned = p.has('abandoned');
+  S.open = p.get('ticket'); S.tab = p.get('tab') === 'handover' ? 'handover' : 'details';
+}
+function hashFor(open = S.open, tab = S.tab) {
+  const p = new URLSearchParams();
+  for (const k of ['q', 'epic', 'type', 'who']) if (F[k]) p.set(k, F[k]);
+  if (F.notes) p.set('notes', '');
+  if (F.abandoned) p.set('abandoned', '');
+  if (open) { p.set('ticket', open); if (tab === 'handover') p.set('tab', 'handover'); }
+  return p.toString().replace(/=(&|$)/g, '$1');
+}
+const saveFilters = () => { history.replaceState(null, '', `#${hashFor()}`); renderBoard(); };
+const openTicket = (id, tab = 'details') => { location.hash = hashFor(id, tab); };
+const closeTicket = () => { location.hash = hashFor(null); };
+
+// ---------- events ----------
+$('#q').addEventListener('input', (e) => { F.q = e.target.value; saveFilters(); });
+$('#f-epic').addEventListener('change', (e) => { F.epic = e.target.value; saveFilters(); });
+$('#f-type').addEventListener('change', (e) => { F.type = e.target.value; saveFilters(); });
+$('#f-who').addEventListener('change', (e) => { F.who = e.target.value; saveFilters(); });
+$('#f-notes').addEventListener('change', (e) => { F.notes = e.target.checked; saveFilters(); });
+$('#f-abandoned').addEventListener('change', (e) => { F.abandoned = e.target.checked; saveFilters(); });
+$('#clear').addEventListener('click', () => { Object.assign(F, { q: '', epic: '', type: '', who: '', notes: false, abandoned: false }); renderFilterOptions(); saveFilters(); });
+
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-open],[data-epic],[data-close],[data-tab],[data-note],[data-copy]');
+  if (!el) return;
+  if (el.tagName === 'A') e.preventDefault();
+  if (el.dataset.open) { e.stopPropagation(); openTicket(el.dataset.open); }
+  else if (el.dataset.epic) { F.epic = F.epic === el.dataset.epic ? '' : el.dataset.epic; renderFilterOptions(); saveFilters(); }
+  else if ('close' in el.dataset) closeTicket();
+  else if (el.dataset.tab && !el.disabled) openTicket(S.open, el.dataset.tab);
+  else if (el.dataset.note) openTicket(S.open, 'handover');
+  else if (el.dataset.copy) {
+    navigator.clipboard?.writeText(el.dataset.copy).then(() => { el.textContent = 'Copied'; setTimeout(() => (el.textContent = 'Copy'), 1200); }, () => {});
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && S.open) closeTicket();
+  else if (e.key === '/' && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName)) { e.preventDefault(); $('#q').focus(); }
+  else if ((e.key === 'Enter' || e.key === ' ') && document.activeElement?.matches('[role="button"][data-open],[role="button"][data-epic]')) { e.preventDefault(); document.activeElement.click(); }
+});
+window.addEventListener('hashchange', () => { readHash(); renderFilterOptions(); renderBoard(); renderDrawer(); });
+
+// Theme: auto -> light -> dark. Stored per browser; the page works without storage.
+const THEMES = ['auto', 'light', 'dark'];
+function applyTheme(t) {
+  if (t === 'auto') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = t;
+  $('#theme').title = `Theme: ${t}`;
+  $('#theme').textContent = t === 'light' ? '☀' : t === 'dark' ? '☾' : '◐';
+}
+let theme = 'auto';
+try { theme = localStorage.getItem('kanban-theme') ?? 'auto'; } catch {}
+applyTheme(THEMES.includes(theme) ? theme : 'auto');
+$('#theme').addEventListener('click', () => {
+  theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+  applyTheme(theme);
+  try { localStorage.setItem('kanban-theme', theme); } catch {}
+});
+
+// Live reload from board-server.mjs.
+function connect() {
+  const live = $('#live');
+  const es = new EventSource('/api/events');
+  es.onopen = () => { live.classList.add('on'); live.lastElementChild.textContent = 'live'; };
+  es.onerror = () => { live.classList.remove('on'); live.lastElementChild.textContent = 'offline'; };
+  es.addEventListener('change', load);
+}
+
+readHash();
+load();
+connect();
+// Keep relative times ("claimed 3 hours ago") and stale-claim badges fresh.
+setInterval(() => { renderBoard(); if (S.open && S.tab === 'details') renderDrawer(); }, 60_000);
+</script>
+</body>
+</html>
