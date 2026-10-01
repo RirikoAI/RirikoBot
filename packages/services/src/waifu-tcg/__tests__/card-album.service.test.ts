@@ -46,8 +46,17 @@ function entry(n: number, overrides: { source?: UserAlbumEntry['source'] } = {})
 
 function fakeRepo(total: number, entries: UserAlbumEntry[]) {
   const listUserAlbum = vi.fn(async () => ({ total, entries }));
-  const repo = { listUserAlbum, count: vi.fn(async () => 120) } as unknown as WaifuCardRepository;
-  return { repo, listUserAlbum };
+  // Like the repository: only the owner's own card is found.
+  const findUserAlbumEntry = vi.fn(
+    async (userId: string, userCardId: string) =>
+      entries.find((e) => e.userCard.userId === userId && e.userCard.id === userCardId) ?? null,
+  );
+  const repo = {
+    listUserAlbum,
+    findUserAlbumEntry,
+    count: vi.fn(async () => 120),
+  } as unknown as WaifuCardRepository;
+  return { repo, listUserAlbum, findUserAlbumEntry };
 }
 
 describe('parseAlbumQuery', () => {
@@ -71,8 +80,61 @@ describe('parseAlbumQuery', () => {
 });
 
 describe('CardAlbumService', () => {
-  it('loads one page for the given user and draws each card with attribution', async () => {
-    const { repo, listUserAlbum } = fakeRepo(30, [
+  it('lists one page for the given user without drawing any card', async () => {
+    const { repo, listUserAlbum } = fakeRepo(30, [entry(1), entry(2)]);
+    const loadRenderer = vi.fn();
+    const album = new CardAlbumService({ cards: repo, loadRenderer });
+
+    const result = await album.page('u1', { page: 2, favoritesOnly: true, rarity: 'SUPER_RARE' });
+
+    expect(listUserAlbum).toHaveBeenCalledWith('u1', {
+      favoritesOnly: true,
+      rarity: 'SUPER_RARE',
+      limit: ALBUM_PAGE_SIZE,
+      offset: ALBUM_PAGE_SIZE,
+    });
+    expect(result).toMatchObject({ page: 2, totalPages: 2, total: 30 });
+    expect(result.cards[0]).toEqual({
+      id: 'uc-1',
+      name: 'Card 1',
+      rarity: 'SUPER_RARE',
+      rarityName: 'Super Rare (SR)',
+      element: 'ICE',
+      level: 3,
+      serialNumber: 1,
+      collectionNumber: 1,
+      isFavorite: true,
+      state: 'IDLE',
+    });
+    expect(loadRenderer).not.toHaveBeenCalled();
+  });
+
+  it('moves a page past the end back to the last page', async () => {
+    const { repo, listUserAlbum } = fakeRepo(25, [entry(25)]);
+    const album = new CardAlbumService({ cards: repo });
+
+    const result = await album.page('u1', { page: 9, favoritesOnly: false, rarity: null });
+
+    expect(listUserAlbum).toHaveBeenLastCalledWith('u1', {
+      favoritesOnly: false,
+      limit: ALBUM_PAGE_SIZE,
+      offset: ALBUM_PAGE_SIZE,
+    });
+    expect(result.page).toBe(2);
+    expect(result.query.page).toBe(2);
+  });
+
+  it('returns an empty first page', async () => {
+    const { repo } = fakeRepo(0, []);
+    const album = new CardAlbumService({ cards: repo });
+
+    const result = await album.page('u1', { page: 1, favoritesOnly: false, rarity: null });
+
+    expect(result).toMatchObject({ cards: [], page: 1, totalPages: 1, total: 0 });
+  });
+
+  it("draws the owner's card with its attribution and collection size", async () => {
+    const { repo, findUserAlbumEntry } = fakeRepo(2, [
       entry(1, {
         source: {
           id: 's',
@@ -90,30 +152,15 @@ describe('CardAlbumService', () => {
       loadRenderer: async () => ({ getCardImage }) satisfies CardRenderer,
     });
 
-    const result = await album.page('u1', { page: 2, favoritesOnly: true, rarity: 'SUPER_RARE' });
+    expect(await album.cardImage('u1', 'uc-1')).toEqual(Buffer.from('png'));
+    expect(await album.cardImage('u1', 'uc-2')).toEqual(Buffer.from('png'));
 
-    expect(listUserAlbum).toHaveBeenCalledWith('u1', {
-      favoritesOnly: true,
-      rarity: 'SUPER_RARE',
-      limit: ALBUM_PAGE_SIZE,
-      offset: ALBUM_PAGE_SIZE,
-    });
-    expect(result).toMatchObject({ page: 2, totalPages: 2, total: 30 });
-    expect(result.cards[0]).toMatchObject({
-      id: 'uc-1',
-      name: 'Card 1',
-      rarityName: 'Super Rare (SR)',
-      isFavorite: true,
-      image: `data:image/png;base64,${Buffer.from('png').toString('base64')}`,
-    });
+    expect(findUserAlbumEntry).toHaveBeenCalledWith('u1', 'uc-1');
     expect(getCardImage).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ id: 'card-1' }),
       null,
-      {
-        attributionText: 'Art: Danbooru',
-        maxCollectionNumber: 120,
-      },
+      { attributionText: 'Art: Danbooru', maxCollectionNumber: 120 },
     );
     expect(getCardImage).toHaveBeenNthCalledWith(2, expect.anything(), null, {
       attributionText: 'Image source: waifu.im',
@@ -121,51 +168,55 @@ describe('CardAlbumService', () => {
     });
   });
 
-  it('moves a page past the end back to the last page', async () => {
-    const { repo, listUserAlbum } = fakeRepo(25, [entry(25)]);
-    const album = new CardAlbumService({
-      cards: repo,
-      loadRenderer: async () => ({ getCardImage: async () => Buffer.from('') }),
-    });
-
-    const result = await album.page('u1', { page: 9, favoritesOnly: false, rarity: null });
-
-    expect(listUserAlbum).toHaveBeenLastCalledWith('u1', {
-      favoritesOnly: false,
-      limit: ALBUM_PAGE_SIZE,
-      offset: ALBUM_PAGE_SIZE,
-    });
-    expect(result.page).toBe(2);
-    expect(result.query.page).toBe(2);
-  });
-
-  it('returns an empty first page without loading the renderer', async () => {
-    const { repo } = fakeRepo(0, []);
+  it("returns null for another user's card without loading the renderer", async () => {
+    const { repo } = fakeRepo(1, [entry(1)]);
     const loadRenderer = vi.fn();
     const album = new CardAlbumService({ cards: repo, loadRenderer });
 
-    const result = await album.page('u1', { page: 1, favoritesOnly: false, rarity: null });
-
-    expect(result).toMatchObject({ cards: [], page: 1, totalPages: 1, total: 0 });
+    expect(await album.cardImage('intruder', 'uc-1')).toBeNull();
+    expect(await album.cardImage('u1', 'uc-missing')).toBeNull();
     expect(loadRenderer).not.toHaveBeenCalled();
   });
 
-  it('shows a card without an image when drawing fails', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const { repo } = fakeRepo(1, [entry(1)]);
+  it('rejects when the card cannot be drawn, and draws the next card anyway', async () => {
+    const { repo } = fakeRepo(2, [entry(1), entry(2)]);
+    const getCardImage = vi.fn(async (card: { id: string }) => {
+      if (card.id === 'card-1') throw new Error('canvas unavailable');
+      return Buffer.from('png');
+    });
     const album = new CardAlbumService({
       cards: repo,
-      loadRenderer: async () => ({
-        getCardImage: async () => {
-          throw new Error('canvas unavailable');
-        },
-      }),
+      loadRenderer: async () => ({ getCardImage }),
     });
 
-    const result = await album.page('u1', { page: 1, favoritesOnly: false, rarity: null });
+    const [failed, drawn] = await Promise.allSettled([
+      album.cardImage('u1', 'uc-1'),
+      album.cardImage('u1', 'uc-2'),
+    ]);
 
-    expect(result.cards[0]?.image).toBeNull();
-    expect(warn).toHaveBeenCalled();
-    warn.mockRestore();
+    expect(failed).toMatchObject({ status: 'rejected', reason: new Error('canvas unavailable') });
+    expect(drawn).toEqual({ status: 'fulfilled', value: Buffer.from('png') });
+  });
+
+  it("draws one user's cards one at a time", async () => {
+    const { repo } = fakeRepo(3, [entry(1), entry(2), entry(3)]);
+    let drawing = 0;
+    let mostAtOnce = 0;
+    const getCardImage = vi.fn(async () => {
+      drawing += 1;
+      mostAtOnce = Math.max(mostAtOnce, drawing);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      drawing -= 1;
+      return Buffer.from('png');
+    });
+    const album = new CardAlbumService({
+      cards: repo,
+      loadRenderer: async () => ({ getCardImage }),
+    });
+
+    await Promise.all(['uc-1', 'uc-2', 'uc-3'].map((id) => album.cardImage('u1', id)));
+
+    expect(getCardImage).toHaveBeenCalledTimes(3);
+    expect(mostAtOnce).toBe(1);
   });
 });

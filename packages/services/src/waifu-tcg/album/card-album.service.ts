@@ -26,8 +26,6 @@ export interface AlbumCard {
   collectionNumber: number;
   isFavorite: boolean;
   state: string;
-  /** The full card as a PNG data URL, or null when it could not be drawn. */
-  image: string | null;
 }
 
 export interface AlbumPage {
@@ -71,14 +69,17 @@ async function loadCardImageService(): Promise<CardRenderer> {
 }
 
 /**
- * A user's card collection for the dashboard album. Cards are drawn by the bot's
- * `CardImageService`, whose `public/cards/` cache the bot and the dashboard share, so a card
- * the bot has shown before is read from disk rather than drawn again.
+ * A user's card collection for the dashboard album. A page lists the cards only; each card image
+ * is fetched separately (`cardImage`), so the page HTML stays small. Cards are drawn by the bot's
+ * `CardImageService`, whose `public/cards/` cache the bot and the dashboard share, so a card the
+ * bot has shown before is read from disk rather than drawn again.
  */
 export class CardAlbumService {
   private readonly cards: WaifuCardRepository;
   private readonly loadRenderer: () => Promise<CardRenderer>;
   private renderer: Promise<CardRenderer> | null = null;
+  /** Each user's latest queued draw; see `oneAtATime`. */
+  private readonly draws = new Map<string, Promise<unknown>>();
 
   constructor(deps: { cards: WaifuCardRepository; loadRenderer?: () => Promise<CardRenderer> }) {
     this.cards = deps.cards;
@@ -105,46 +106,53 @@ export class CardAlbumService {
       });
     }
 
-    const cards = await this.render(result.entries);
+    const cards = result.entries.map(toAlbumCard);
     return { cards, page, totalPages, total: result.total, query: { ...query, page } };
   }
 
-  /** One card at a time: an uncached card is a full canvas draw, so this caps the load. */
-  private async render(entries: UserAlbumEntry[]): Promise<AlbumCard[]> {
-    if (entries.length === 0) return [];
-    const maxCollectionNumber = await this.cards.count();
-    const cards: AlbumCard[] = [];
-    for (const entry of entries) {
-      cards.push({
-        id: entry.userCard.id,
-        name: entry.card.name,
-        rarity: entry.card.rarity,
-        rarityName: RARITY_TIERS[entry.card.rarity as CardRarity]?.name ?? entry.card.rarity,
-        element: entry.card.element,
-        level: entry.userCard.level,
-        serialNumber: entry.userCard.serialNumber,
-        collectionNumber: entry.card.collectionNumber,
-        isFavorite: entry.userCard.isFavorite,
-        state: entry.userCard.state,
-        image: await this.image(entry, maxCollectionNumber),
+  /**
+   * The full card PNG of one of `userId`'s own cards, or null when `userCardId` is not theirs.
+   * Rejects when the card cannot be drawn.
+   */
+  async cardImage(userId: string, userCardId: string): Promise<Buffer | null> {
+    const entry = await this.cards.findUserAlbumEntry(userId, userCardId);
+    if (!entry) return null;
+    return this.oneAtATime(userId, async () => {
+      this.renderer ??= this.loadRenderer();
+      const renderer = await this.renderer;
+      return renderer.getCardImage(entry.card, entry.asset, {
+        attributionText: getCardAttribution(entry.source).footerText,
+        maxCollectionNumber: await this.cards.count(),
       });
-    }
-    return cards;
+    });
   }
 
-  private async image(entry: UserAlbumEntry, maxCollectionNumber: number): Promise<string | null> {
-    try {
-      this.renderer ??= this.loadRenderer();
-      const png = await (
-        await this.renderer
-      ).getCardImage(entry.card, entry.asset, {
-        attributionText: getCardAttribution(entry.source).footerText,
-        maxCollectionNumber,
-      });
-      return `data:image/png;base64,${png.toString('base64')}`;
-    } catch (error) {
-      console.warn(`[album] Could not draw card ${entry.card.id}:`, error);
-      return null;
-    }
+  /**
+   * Runs a user's draws one at a time. An uncached card is a full canvas draw and the browser
+   * requests a page's images in parallel, so this caps the load one viewer can cause.
+   */
+  private oneAtATime<T>(userId: string, draw: () => Promise<T>): Promise<T> {
+    const result = (this.draws.get(userId) ?? Promise.resolve()).then(draw);
+    const settled = result.catch(() => undefined);
+    this.draws.set(userId, settled);
+    void settled.then(() => {
+      if (this.draws.get(userId) === settled) this.draws.delete(userId);
+    });
+    return result;
   }
+}
+
+function toAlbumCard(entry: UserAlbumEntry): AlbumCard {
+  return {
+    id: entry.userCard.id,
+    name: entry.card.name,
+    rarity: entry.card.rarity,
+    rarityName: RARITY_TIERS[entry.card.rarity as CardRarity]?.name ?? entry.card.rarity,
+    element: entry.card.element,
+    level: entry.userCard.level,
+    serialNumber: entry.userCard.serialNumber,
+    collectionNumber: entry.card.collectionNumber,
+    isFavorite: entry.userCard.isFavorite,
+    state: entry.userCard.state,
+  };
 }

@@ -14,6 +14,7 @@ import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
 import { withTransaction } from '../transactions/index.js';
+import { UUID_PATTERN } from './item.repository.js';
 
 /** An owned card with its definition, art asset and image source (for attribution). */
 export interface UserAlbumEntry {
@@ -507,6 +508,51 @@ export class WaifuCardRepository extends BaseRepository<
         total: Number(counted?.count ?? 0),
         entries: rows as unknown as UserAlbumEntry[],
       };
+    }
+  }
+
+  /**
+   * One owned card with its definition, asset and image source, or null when `userCardId` is not
+   * `userId`'s card or its definition is missing. Used to serve album card images to their owner.
+   */
+  async findUserAlbumEntry(
+    userId: string,
+    userCardId: string,
+    tx?: DatabaseClient,
+  ): Promise<UserAlbumEntry | null> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const s = sqliteSchema;
+      const [row] = await client.db
+        .select({
+          userCard: s.userCards,
+          card: s.waifuCards,
+          asset: s.waifuAssets,
+          source: s.waifuSources,
+        })
+        .from(s.userCards)
+        .innerJoin(s.waifuCards, eq(s.userCards.cardId, s.waifuCards.id))
+        .leftJoin(s.waifuAssets, eq(s.waifuCards.assetId, s.waifuAssets.id))
+        .leftJoin(s.waifuSources, eq(s.waifuAssets.sourceId, s.waifuSources.id))
+        .where(and(eq(s.userCards.id, userCardId), eq(s.userCards.userId, userId)));
+      return (row as UserAlbumEntry | undefined) ?? null;
+    } else {
+      // Owned card IDs are uuids on Postgres; anything else can match no row there.
+      if (!UUID_PATTERN.test(userCardId)) return null;
+      const p = pgSchema;
+      const [row] = await client.db
+        .select({
+          userCard: p.userCards,
+          card: p.waifuCards,
+          asset: p.waifuAssets,
+          source: p.waifuSources,
+        })
+        .from(p.userCards)
+        .innerJoin(p.waifuCards, eq(p.userCards.cardId, p.waifuCards.id))
+        .leftJoin(p.waifuAssets, eq(p.waifuCards.assetId, p.waifuAssets.id))
+        .leftJoin(p.waifuSources, eq(p.waifuAssets.sourceId, p.waifuSources.id))
+        .where(and(eq(p.userCards.id, userCardId), eq(p.userCards.userId, userId)));
+      return (row as unknown as UserAlbumEntry | undefined) ?? null;
     }
   }
 
