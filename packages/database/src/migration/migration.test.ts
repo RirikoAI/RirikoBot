@@ -1,12 +1,23 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import DatabaseConstructor from 'better-sqlite3';
 import type Database from 'better-sqlite3';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { unlinkSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { LegacySqliteInspector } from './inspector.js';
-import { LegacyTransformer } from './transformer.js';
+import { LegacyTransformer, parseLegacyDate } from './transformer.js';
 import { legacyUuid, uuidV5 } from './uuid.js';
+
+/** Schema of a real 1.4.0 database, taken from the published image (see the file header). */
+const LEGACY_SCHEMA = readFileSync(
+  new URL('./__fixtures__/legacy-1.4.0-schema.sql', import.meta.url),
+  'utf8',
+);
+
+/** How TypeORM's SQLite driver writes a Date: UTC, no zone. */
+const ALICE_CREATED = '2025-03-04 05:06:07.890';
+const REMINDER_DUE = '2025-03-04 05:06:07.890';
 
 describe('uuidV5 (TASK-1661)', () => {
   it('matches the RFC 9562 example', () => {
@@ -17,234 +28,125 @@ describe('uuidV5 (TASK-1661)', () => {
   });
 });
 
+describe('parseLegacyDate', () => {
+  // A host time zone ahead of UTC, so reading TypeORM's UTC text as local time would show.
+  const originalTz = process.env.TZ;
+  beforeAll(() => {
+    process.env.TZ = 'Asia/Kuala_Lumpur';
+  });
+  afterAll(() => {
+    if (originalTz === undefined) delete process.env.TZ;
+    else process.env.TZ = originalTz;
+  });
+
+  it('reads TypeORM SQLite datetimes as UTC', () => {
+    expect(parseLegacyDate('2025-03-04 05:06:07.890').toISOString()).toBe(
+      '2025-03-04T05:06:07.890Z',
+    );
+    // `datetime('now')` column defaults have no milliseconds.
+    expect(parseLegacyDate('2025-03-04 05:06:07').toISOString()).toBe('2025-03-04T05:06:07.000Z');
+  });
+
+  it('keeps ISO strings with a zone, epoch numbers and Date objects as they are', () => {
+    expect(parseLegacyDate('2025-03-04T05:06:07.000+08:00').toISOString()).toBe(
+      '2025-03-03T21:06:07.000Z',
+    );
+    expect(parseLegacyDate(Date.UTC(2025, 0, 1)).toISOString()).toBe('2025-01-01T00:00:00.000Z');
+    const date = new Date(Date.UTC(2024, 5, 6));
+    expect(parseLegacyDate(date)).toBe(date);
+  });
+});
+
 describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
   let tempDbPath: string;
-  let rawDb: Database.Database;
+
+  function sha256(path: string): string {
+    return createHash('sha256').update(readFileSync(path)).digest('hex');
+  }
 
   beforeEach(() => {
     tempDbPath = join(
       tmpdir(),
       `legacy_test_${Date.now()}_${Math.random().toString(36).slice(2)}.sqlite`,
     );
-    rawDb = new (DatabaseConstructor as unknown as typeof Database)(tempDbPath);
-
-    // Create 17 legacy tables matching 1.4.0 TypeORM schema
-    rawDb.exec(`
-      CREATE TABLE user (
-        id TEXT PRIMARY KEY,
-        username TEXT NOT NULL,
-        displayName TEXT,
-        backgroundImageURL TEXT,
-        karma INTEGER DEFAULT 0,
-        coins INTEGER DEFAULT 0,
-        pointsSuspended INTEGER DEFAULT 0,
-        commandsSuspended INTEGER DEFAULT 0,
-        doNotNotifyOnLevelUp INTEGER DEFAULT 0,
-        warns INTEGER DEFAULT 0,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL
-      );
-
-      CREATE TABLE guild (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        prefix TEXT DEFAULT '!'
-      );
-
-      CREATE TABLE guild_config (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        value TEXT NOT NULL,
-        guildId TEXT NOT NULL
-      );
-
-      CREATE TABLE configuration (
-        applicationId TEXT PRIMARY KEY,
-        twitchClientId TEXT,
-        twitchClientSecret TEXT,
-        stableDiffusionType TEXT,
-        stableDiffusionApiToken TEXT
-      );
-
-      CREATE TABLE user_note (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        note TEXT NOT NULL,
-        createdBy TEXT NOT NULL,
-        userId TEXT NOT NULL,
-        guildId TEXT,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL
-      );
-
-      CREATE TABLE voice_channel (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        parentId TEXT,
-        guildId TEXT NOT NULL
-      );
-
-      CREATE TABLE music_channel (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        guildId TEXT NOT NULL
-      );
-
-      CREATE TABLE playlist (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        userId TEXT,
-        author TEXT,
-        authorTag TEXT,
-        public INTEGER DEFAULT 0,
-        plays INTEGER DEFAULT 0,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL
-      );
-
-      CREATE TABLE track (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        url TEXT NOT NULL,
-        playlistId INTEGER NOT NULL
-      );
-
-      CREATE TABLE stream_subscription (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        twitchUserId TEXT NOT NULL,
-        channelId TEXT NOT NULL,
-        guildId TEXT NOT NULL,
-        createdAt TEXT,
-        updatedAt TEXT
-      );
-
-      CREATE TABLE stream_notification (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        twitchUserId TEXT NOT NULL,
-        channelId TEXT NOT NULL,
-        streamId TEXT NOT NULL,
-        notified INTEGER DEFAULT 0,
-        guildId TEXT NOT NULL,
-        createdAt TEXT,
-        updatedAt TEXT
-      );
-
-      CREATE TABLE twitch_streamer (
-        twitchUserId TEXT PRIMARY KEY,
-        isLive INTEGER DEFAULT 0,
-        createdAt TEXT,
-        updatedAt TEXT
-      );
-
-      CREATE TABLE reaction_role (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        messageId TEXT NOT NULL,
-        emoji TEXT NOT NULL,
-        roleId TEXT NOT NULL,
-        guildId TEXT NOT NULL
-      );
-
-      CREATE TABLE reminder (
-        id TEXT PRIMARY KEY,
-        userId TEXT NOT NULL,
-        channelId TEXT NOT NULL,
-        guildId TEXT,
-        message TEXT NOT NULL,
-        scheduledTime TEXT NOT NULL,
-        sent INTEGER DEFAULT 0,
-        timezone TEXT,
-        createdAt TEXT,
-        updatedAt TEXT
-      );
-
-      CREATE TABLE free_game_notification (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        gameId TEXT NOT NULL,
-        gameName TEXT NOT NULL,
-        source TEXT NOT NULL,
-        notified INTEGER DEFAULT 0,
-        guildId TEXT NOT NULL,
-        createdAt TEXT,
-        updatedAt TEXT
-      );
-
-      CREATE TABLE item_category (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL
-      );
-
-      CREATE TABLE item (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        price INTEGER NOT NULL,
-        description TEXT NOT NULL,
-        rarity INTEGER DEFAULT 1,
-        hidden INTEGER DEFAULT 0,
-        purchaseLimit INTEGER DEFAULT 0,
-        purchasable INTEGER DEFAULT 1,
-        sellable INTEGER DEFAULT 1,
-        findable INTEGER DEFAULT 1,
-        imageUrl TEXT,
-        createdAt TEXT,
-        updatedAt TEXT,
-        categoryId TEXT
-      );
-    `);
-
-    // Insert sample legacy data
-    const nowIso = new Date().toISOString();
+    const rawDb: Database.Database = new (DatabaseConstructor as unknown as typeof Database)(
+      tempDbPath,
+    );
+    // 1.4.0 ran with foreign keys on (TypeORM sets the pragma), so rows must reference real parents.
+    rawDb.pragma('foreign_keys = ON');
+    rawDb.exec(LEGACY_SCHEMA);
 
     rawDb.exec(`
-      INSERT INTO user VALUES 
-        ('user_alice', 'Alice', 'Alice Wonderland', 'https://bg.jpg', 250, 1500, 0, 0, 0, 1, '${nowIso}', '${nowIso}'),
-        ('user_bob', 'Bob', 'Builder Bob', NULL, 50, 300, 0, 0, 1, 0, '${nowIso}', '${nowIso}'),
-        ('user_charlie', 'Charlie', 'Banned Charlie', NULL, 0, 0, 1, 0, 0, 5, '${nowIso}', '${nowIso}');
+      INSERT INTO "user" (id, username, displayName, karma, coins, pointsSuspended, commandsSuspended, doNotNotifyOnLevelUp, warns, createdAt, updatedAt, backgroundImageURL) VALUES
+        ('user_alice', 'Alice', 'Alice Wonderland', 250, 1500, 0, 0, 0, 1, '${ALICE_CREATED}', '${ALICE_CREATED}', 'https://bg.jpg');
+      -- createdAt and updatedAt from the column defaults, as TypeORM leaves them.
+      INSERT INTO "user" (id, username, displayName, karma, coins, doNotNotifyOnLevelUp) VALUES
+        ('user_bob', 'Bob', 'Builder Bob', 50, 300, 1);
+      INSERT INTO "user" (id, username, displayName, pointsSuspended, warns) VALUES
+        ('user_charlie', 'Charlie', 'Banned Charlie', 1, 5);
 
-      INSERT INTO guild VALUES
+      INSERT INTO guild (id, name, prefix) VALUES
         ('guild_alpha', 'Alpha Server', '!'),
         ('guild_beta', 'Beta Server', '?');
 
+      -- Names and values as the 1.4.0 /welcomer, /farewell, /karma, /freegames and /twitch commands write them.
       INSERT INTO guild_config (name, value, guildId) VALUES
-        ('welcomer.channel', 'chan_welcome', 'guild_alpha'),
-        ('welcomer.enabled', 'true', 'guild_alpha'),
-        ('welcomer.bg', 'https://welcome.png', 'guild_alpha');
+        ('welcomer_channel', 'chan_welcome', 'guild_alpha'),
+        ('welcomer_enabled', 'true', 'guild_alpha'),
+        ('welcomer_bg', 'https://welcome.png', 'guild_alpha'),
+        ('farewell_channel', 'chan_bye', 'guild_alpha'),
+        ('farewell_enabled', 'false', 'guild_alpha'),
+        ('karma-notification-enabled', 'disabled', 'guild_beta'),
+        ('freeGamesChannelId', 'chan_free', 'guild_alpha'),
+        ('twitch_channel', 'chan_streams', 'guild_alpha');
 
-      INSERT INTO user_note (note, createdBy, userId, guildId, createdAt, updatedAt) VALUES
-        ('Helpful contributor', 'user_alice', 'user_bob', 'guild_alpha', '${nowIso}', '${nowIso}');
+      INSERT INTO configuration (applicationId, twitchClientId, twitchClientSecret) VALUES
+        ('100000000000000001', 'twitch-client', 'twitch-secret');
 
-      INSERT INTO voice_channel VALUES
+      INSERT INTO user_note (note, createdBy, guildId, userId) VALUES
+        ('Helpful contributor', 'user_alice', 'guild_alpha', 'user_bob');
+
+      INSERT INTO voice_channel (id, name, parentId, guildId) VALUES
         ('vc_main', 'Join to Create', 'cat_voice', 'guild_alpha');
 
-      INSERT INTO music_channel VALUES
+      INSERT INTO music_channel (id, name, guildId) VALUES
         ('chan_music', 'music-room', 'guild_alpha');
 
-      INSERT INTO playlist (id, name, userId, author, authorTag, public, plays, createdAt, updatedAt) VALUES
-        (1, 'Favorites', 'user_alice', 'Alice', 'Alice#0001', 1, 42, '${nowIso}', '${nowIso}');
+      INSERT INTO playlist (id, name, userId, author, authorTag, public, plays) VALUES
+        (1, 'Favorites', 'user_alice', 'Alice', 'alice', 1, 42),
+        (2, 'Chill', 'user_bob', 'Bob', 'bob', 0, 3);
 
+      -- Interleaved ids: each playlist keeps its own order.
       INSERT INTO track (id, name, url, playlistId) VALUES
         (10, 'Song 1', 'https://youtube.com/watch?v=1', 1),
-        (11, 'Song 2', 'https://youtube.com/watch?v=2', 1);
+        (11, 'Calm 1', 'https://youtube.com/watch?v=3', 2),
+        (12, 'Song 2', 'https://youtube.com/watch?v=2', 1);
 
-      INSERT INTO stream_subscription (twitchUserId, channelId, guildId, createdAt, updatedAt) VALUES
-        ('twitch_streamer_1', 'chan_streams', 'guild_alpha', '${nowIso}', '${nowIso}');
+      INSERT INTO stream_subscription (twitchUserId, channelId, guildId) VALUES
+        ('twitch_streamer_1', 'chan_streams', 'guild_alpha');
 
-      INSERT INTO twitch_streamer (twitchUserId, isLive, createdAt, updatedAt) VALUES
-        ('twitch_streamer_1', 1, '${nowIso}', '${nowIso}');
+      INSERT INTO stream_notification (twitchUserId, channelId, streamId, notified, guildId) VALUES
+        ('twitch_streamer_1', 'chan_streams', 'stream_1', 1, 'guild_alpha');
+
+      INSERT INTO twitch_streamer (twitchUserId, isLive) VALUES
+        ('twitch_streamer_1', 1);
 
       INSERT INTO reaction_role (messageId, emoji, roleId, guildId) VALUES
         ('msg_roles', '⭐', 'role_vip', 'guild_alpha');
 
-      INSERT INTO reminder (id, userId, channelId, guildId, message, scheduledTime, sent, createdAt, updatedAt) VALUES
-        ('rem_1', 'user_alice', 'chan_general', 'guild_alpha', 'Meeting in 1h', '${nowIso}', 0, '${nowIso}', '${nowIso}'),
-        ('rem_2', 'user_alice', 'dm_channel', 'DM', 'Water plants', '${nowIso}', 1, '${nowIso}', '${nowIso}');
+      -- 1.4.0 stored the literal 'DM' as the guild of direct-message reminders.
+      INSERT INTO reminder (id, userId, channelId, guildId, message, scheduledTime, sent) VALUES
+        ('rem_1', 'user_alice', 'chan_general', 'guild_alpha', 'Meeting in 1h', '${REMINDER_DUE}', 0),
+        ('rem_2', 'user_alice', 'dm_channel', 'DM', 'Water plants', '2025-03-05 00:00:00', 1);
 
-      INSERT INTO free_game_notification (gameId, gameName, source, notified, guildId, createdAt, updatedAt) VALUES
-        ('epic_game_99', 'Awesome Free Game', 'EPIC', 1, 'guild_alpha', '${nowIso}', '${nowIso}');
+      INSERT INTO free_game_notification (gameId, gameName, source, notified, guildId) VALUES
+        ('epic_game_99', 'Awesome Free Game', 'EPIC', 1, 'guild_alpha');
 
-      INSERT INTO item_category VALUES
-        ('cat_roles', 'Roles');
+      INSERT INTO item_category (id, name) VALUES (1, 'Roles');
 
-      INSERT INTO item VALUES
-        ('item_vip', 'VIP Pass', 500, 'Grants VIP role', 2, 0, 1, 1, 0, 0, 'https://vip.png', '${nowIso}', '${nowIso}', 'cat_roles');
+      INSERT INTO item (id, name, price, description, rarity, hidden, purchaseLimit, purchasable, sellable, findable, imageUrl, categoryId) VALUES
+        (1, 'VIP Pass', 500, 'Grants VIP role', 2, 0, 1, 1, 0, 0, 'https://vip.png', 1),
+        (2, 'Secret Badge', 0, 'Found, never sold', 5, 1, 0, 0, 0, 1, '', NULL);
     `);
 
     rawDb.close();
@@ -262,6 +164,7 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
 
   describe('LegacySqliteInspector', () => {
     it('audits legacy SQLite database in readonly mode without mutating file', () => {
+      const before = sha256(tempDbPath);
       const inspector = new LegacySqliteInspector(tempDbPath);
       const summary = inspector.inspect();
       inspector.close();
@@ -272,13 +175,24 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       expect(summary.totalGuilds).toBe(2);
       expect(summary.tables['user']).toBe(3);
       expect(summary.tables['guild']).toBe(2);
-      expect(summary.tables['playlist']).toBe(1);
-      expect(summary.tables['track']).toBe(2);
+      expect(summary.tables['playlist']).toBe(2);
+      expect(summary.tables['track']).toBe(3);
+      expect(summary.tables['stream_notification']).toBe(1);
       expect(summary.anomalies.length).toBe(0);
+      expect(sha256(tempDbPath)).toBe(before);
     });
   });
 
   describe('LegacyTransformer', () => {
+    const originalTz = process.env.TZ;
+    beforeAll(() => {
+      process.env.TZ = 'Asia/Kuala_Lumpur';
+    });
+    afterAll(() => {
+      if (originalTz === undefined) delete process.env.TZ;
+      else process.env.TZ = originalTz;
+    });
+
     it('transforms all 17 legacy entities into 2.0 normalized models with exact coins conservation', () => {
       const inspector = new LegacySqliteInspector(tempDbPath);
       const db = inspector.open();
@@ -291,9 +205,15 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       const alice = data.users.find((u) => u.id === 'user_alice');
       expect(alice?.username).toBe('Alice');
       expect(alice?.isBlacklisted).toBe(false);
+      expect(alice?.profileBackgroundUrl).toBe('https://bg.jpg');
+      expect(alice?.createdAt?.toISOString()).toBe('2025-03-04T05:06:07.890Z');
+
+      const bob = data.users.find((u) => u.id === 'user_bob');
+      expect(bob?.notifyLevelUp).toBe(false);
 
       const charlie = data.users.find((u) => u.id === 'user_charlie');
       expect(charlie?.isBlacklisted).toBe(true);
+      expect(charlie?.warnCount).toBe(5);
 
       // Verify Currency Sum Conservation
       const totalCoinsMigrated = data.economyBalances.reduce(
@@ -313,35 +233,56 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       expect(data.guilds.length).toBe(2);
       expect(data.guildSettings.length).toBe(2);
       const alphaSettings = data.guildSettings.find((s) => s.guildId === 'guild_alpha');
-      expect(alphaSettings?.welcomerEnabled).toBe(true);
-      expect(alphaSettings?.welcomerChannelId).toBe('chan_welcome');
-      expect(alphaSettings?.welcomerBg).toBe('https://welcome.png');
-      expect(alphaSettings?.prefix).toBe('!');
+      expect(alphaSettings).toMatchObject({
+        prefix: '!',
+        welcomerEnabled: true,
+        welcomerChannelId: 'chan_welcome',
+        welcomerBg: 'https://welcome.png',
+        farewellEnabled: false,
+        farewellChannelId: 'chan_bye',
+        karmaNotificationsEnabled: true,
+      });
+      const betaSettings = data.guildSettings.find((s) => s.guildId === 'guild_beta');
+      expect(betaSettings).toMatchObject({ prefix: '?', karmaNotificationsEnabled: false });
 
       // 3. User Notes
       expect(data.moderationNotes.length).toBe(1);
-      expect(data.moderationNotes[0]?.content).toBe('Helpful contributor');
-      expect(data.moderationNotes[0]?.authorUserId).toBe('user_alice');
+      expect(data.moderationNotes[0]).toMatchObject({
+        content: 'Helpful contributor',
+        authorUserId: 'user_alice',
+        targetUserId: 'user_bob',
+        guildId: 'guild_alpha',
+      });
 
       // 4. Voice Channels (AVC)
       expect(data.autoVoiceConfigs.length).toBe(1);
       expect(data.autoVoiceConfigs[0]?.guildId).toBe('guild_alpha');
+      expect(data.autoVoiceConfigs[0]?.parentChannelId).toBe('cat_voice');
 
       // 5. Music Channels
       expect(data.musicChannels.length).toBe(1);
       expect(data.musicChannels[0]?.channelId).toBe('chan_music');
 
       // 6. Playlists & Tracks
-      expect(data.musicSavedPlaylists.length).toBe(1);
-      expect(data.musicSavedPlaylists[0]?.name).toBe('Favorites');
-      expect(data.musicSavedPlaylists[0]?.playCount).toBe(42);
-      expect(data.musicPlaylistTracks.length).toBe(2);
-      expect(data.musicPlaylistTracks[0]?.title).toBe('Song 1');
-      expect(data.musicPlaylistTracks[1]?.title).toBe('Song 2');
+      expect(data.musicSavedPlaylists.length).toBe(2);
+      expect(data.musicSavedPlaylists[0]).toMatchObject({
+        id: '1',
+        name: 'Favorites',
+        playCount: 42,
+        isPublic: true,
+        guildId: null,
+      });
+      expect(data.musicSavedPlaylists[1]).toMatchObject({ id: '2', isPublic: false });
+      expect(data.musicPlaylistTracks.map((t) => [t.playlistId, t.title, t.position])).toEqual([
+        ['1', 'Song 1', 0],
+        ['2', 'Calm 1', 0],
+        ['1', 'Song 2', 1],
+      ]);
 
       // 7. Streamers & Subscriptions
       expect(data.streamers.length).toBe(1);
       expect(data.streamers[0]?.platform).toBe('TWITCH');
+      expect(data.streamers[0]?.isLive).toBe(true);
       expect(data.streamSubscriptions.length).toBe(1);
       // uuid IDs (Postgres columns are uuid), derived so re-runs match and the link holds.
       expect(data.streamers[0]?.id).toBe(legacyUuid('twitch_streamer:twitch_streamer_1'));
@@ -354,30 +295,52 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       expect(data.reactionRoles.length).toBe(1);
       expect(data.reactionRoles[0]?.emojiOrComponentId).toBe('⭐');
 
-      // 9. Reminders
+      // 9. Reminders: due times are UTC whatever the host time zone.
       expect(data.reminders.length).toBe(2);
       expect(data.reminders[0]).toMatchObject({
         message: 'Meeting in 1h',
         guildId: 'guild_alpha',
         isCompleted: false,
       });
-      // 1.4.0 stored the literal 'DM' as the guild of direct-message reminders.
+      expect(data.reminders[0]?.triggerAt?.toISOString()).toBe('2025-03-04T05:06:07.890Z');
       expect(data.reminders[1]).toMatchObject({
         message: 'Water plants',
         guildId: null,
         isCompleted: true,
       });
+      expect(data.reminders[1]?.triggerAt?.toISOString()).toBe('2025-03-05T00:00:00.000Z');
 
       // 10. Free Game Announcements
       expect(data.freeGameAnnouncements.length).toBe(1);
       expect(data.freeGameAnnouncements[0]?.gameId).toBe('epic_game_99');
 
-      // 11. Shop Categories & Items
-      expect(data.economyItemCategories.length).toBe(1);
-      expect(data.economyItemCategories[0]?.name).toBe('Roles');
-      expect(data.economyItems.length).toBe(1);
-      expect(data.economyItems[0]?.name).toBe('VIP Pass');
-      expect(data.economyItems[0]?.price).toBe(500);
+      // 11. Shop Categories & Items: SQLite booleans are 0 or 1.
+      expect(data.economyItemCategories).toEqual([
+        { id: '1', name: 'Roles', description: 'Roles' },
+      ]);
+      expect(data.economyItems.length).toBe(2);
+      expect(data.economyItems[0]).toMatchObject({
+        id: '1',
+        name: 'VIP Pass',
+        price: 500,
+        categoryId: '1',
+        iconUrl: 'https://vip.png',
+        isPurchasable: true,
+        metadata: {
+          findable: false,
+          sellable: false,
+          hidden: false,
+          purchaseLimit: 1,
+          legacyRarity: 2,
+        },
+      });
+      expect(data.economyItems[1]).toMatchObject({
+        id: '2',
+        categoryId: null,
+        iconUrl: null,
+        isPurchasable: false,
+        metadata: { findable: true, hidden: true, legacyRarity: 5 },
+      });
     });
   });
 
@@ -386,225 +349,16 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       const { createDatabaseClient } = await import('../client/factory.js');
       const { MigrationEngine } = await import('./engine.js');
 
-      const targetClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
+      // The real 2.0 schema, as a new install creates it.
+      const targetClient = await createDatabaseClient({
+        dialect: 'sqlite',
+        url: ':memory:',
+        autoMigrate: true,
+      });
       if (targetClient.dialect !== 'sqlite') throw new Error('Expected sqlite');
-
-      // Create target 2.0.0 tables
-      targetClient.raw.exec(`
-        CREATE TABLE users (
-          id TEXT PRIMARY KEY,
-          username TEXT NOT NULL,
-          display_name TEXT,
-          avatar_url TEXT,
-          profile_background_url TEXT,
-          is_blacklisted INTEGER NOT NULL DEFAULT 0,
-          warn_count INTEGER NOT NULL DEFAULT 0,
-          notify_level_up INTEGER NOT NULL DEFAULT 1,
-          created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE economy_balances (
-          user_id TEXT PRIMARY KEY,
-          wallet_balance INTEGER NOT NULL DEFAULT 0,
-          bank_balance INTEGER NOT NULL DEFAULT 0,
-          bank_capacity INTEGER NOT NULL DEFAULT 10000,
-          net_worth INTEGER NOT NULL DEFAULT 0,
-          updated_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE economy_transactions (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL,
-          guild_id TEXT,
-          type TEXT NOT NULL,
-          amount INTEGER NOT NULL,
-          currency TEXT NOT NULL DEFAULT 'CREDITS',
-          balance_before INTEGER NOT NULL,
-          balance_after INTEGER NOT NULL,
-          source TEXT NOT NULL,
-          metadata TEXT DEFAULT '{}',
-          created_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE xp_accounts (
-          user_id TEXT NOT NULL,
-          guild_id TEXT NOT NULL,
-          xp INTEGER NOT NULL DEFAULT 0,
-          level INTEGER NOT NULL DEFAULT 0,
-          karma INTEGER NOT NULL DEFAULT 0,
-          last_xp_at INTEGER,
-          created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL,
-          PRIMARY KEY (user_id, guild_id)
-        );
-
-        CREATE TABLE guilds (
-          id TEXT PRIMARY KEY,
-          name TEXT NOT NULL,
-          icon_url TEXT,
-          owner_id TEXT NOT NULL,
-          joined_at INTEGER NOT NULL,
-          is_active INTEGER NOT NULL DEFAULT 1,
-          created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE guild_settings (
-          guild_id TEXT PRIMARY KEY,
-          prefix TEXT NOT NULL DEFAULT '!',
-          locale TEXT NOT NULL DEFAULT 'en-US',
-          timezone TEXT NOT NULL DEFAULT 'UTC',
-          ai_channel_id TEXT,
-          log_channel_id TEXT,
-          escalation_steps TEXT,
-          music_channel_id TEXT,
-          welcomer_channel_id TEXT,
-          welcomer_enabled INTEGER NOT NULL DEFAULT 0,
-          welcomer_bg TEXT,
-          farewell_channel_id TEXT,
-          farewell_enabled INTEGER NOT NULL DEFAULT 0,
-          farewell_bg TEXT,
-          karma_notifications_enabled INTEGER NOT NULL DEFAULT 1,
-          level_up_channel_id TEXT,
-          xp_rate_percent INTEGER NOT NULL DEFAULT 100,
-          no_xp_channel_ids TEXT NOT NULL DEFAULT '[]',
-          no_xp_role_ids TEXT NOT NULL DEFAULT '[]',
-          voice_xp_enabled INTEGER NOT NULL DEFAULT 0,
-          max_game_wager INTEGER,
-          tcg_drops_enabled INTEGER NOT NULL DEFAULT 0,
-          tcg_drop_channel_id TEXT,
-          tcg_drop_message_threshold INTEGER NOT NULL DEFAULT 50,
-          tcg_drop_start_hour INTEGER NOT NULL DEFAULT 8,
-          tcg_drop_end_hour INTEGER NOT NULL DEFAULT 23,
-          tcg_drop_claim_timeout_seconds INTEGER NOT NULL DEFAULT 60,
-          tcg_drop_cooldown_minutes INTEGER NOT NULL DEFAULT 5,
-          tcg_manager_role_id TEXT,
-          created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE moderation_notes (
-          id TEXT PRIMARY KEY,
-          guild_id TEXT NOT NULL,
-          target_user_id TEXT NOT NULL,
-          author_user_id TEXT NOT NULL,
-          content TEXT NOT NULL,
-          created_at INTEGER NOT NULL,
-          updated_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE auto_voice_configs (
-          id TEXT PRIMARY KEY,
-          guild_id TEXT NOT NULL,
-          parent_channel_id TEXT NOT NULL,
-          channel_name_template TEXT NOT NULL DEFAULT "{user}'s Room",
-          user_limit INTEGER NOT NULL DEFAULT 0,
-          bitrate INTEGER NOT NULL DEFAULT 64000
-        );
-
-        CREATE TABLE music_channels (
-          guild_id TEXT PRIMARY KEY,
-          channel_id TEXT NOT NULL,
-          last_message_id TEXT
-        );
-
-        CREATE TABLE music_saved_playlists (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL,
-          name TEXT NOT NULL,
-          description TEXT,
-          is_public INTEGER NOT NULL DEFAULT 0,
-          play_count INTEGER NOT NULL DEFAULT 0,
-          guild_id TEXT,
-          created_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE music_playlist_tracks (
-          id TEXT PRIMARY KEY,
-          playlist_id TEXT NOT NULL,
-          title TEXT NOT NULL,
-          url TEXT NOT NULL,
-          duration INTEGER NOT NULL,
-          thumbnail_url TEXT,
-          position INTEGER NOT NULL
-        );
-
-        CREATE TABLE streamers (
-          id TEXT PRIMARY KEY,
-          platform TEXT NOT NULL,
-          platform_user_id TEXT NOT NULL,
-          username TEXT NOT NULL,
-          display_name TEXT,
-          avatar_url TEXT,
-          is_live INTEGER NOT NULL DEFAULT 0,
-          last_checked_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE stream_subscriptions (
-          id TEXT PRIMARY KEY,
-          streamer_id TEXT NOT NULL,
-          guild_id TEXT NOT NULL,
-          channel_id TEXT NOT NULL,
-          custom_message TEXT,
-          mention_role_id TEXT,
-          created_at INTEGER NOT NULL
-        );
-
-        CREATE TABLE reaction_roles (
-          id TEXT PRIMARY KEY,
-          guild_id TEXT NOT NULL,
-          channel_id TEXT NOT NULL,
-          message_id TEXT NOT NULL,
-          emoji_or_component_id TEXT NOT NULL,
-          role_id TEXT NOT NULL,
-          type TEXT NOT NULL DEFAULT 'EMOJI',
-          mode TEXT NOT NULL DEFAULT 'TOGGLE',
-          group_id TEXT,
-          label TEXT,
-          description TEXT
-        );
-
-        CREATE TABLE reminders (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL,
-          guild_id TEXT,
-          channel_id TEXT NOT NULL,
-          message TEXT NOT NULL,
-          trigger_at INTEGER NOT NULL,
-          repeat_interval TEXT NOT NULL DEFAULT 'NONE',
-          is_completed INTEGER NOT NULL DEFAULT 0
-        );
-
-        CREATE TABLE free_game_announcements (
-          game_id TEXT NOT NULL,
-          guild_id TEXT NOT NULL,
-          channel_id TEXT NOT NULL,
-          message_id TEXT NOT NULL,
-          announced_at INTEGER NOT NULL,
-          PRIMARY KEY (game_id, guild_id)
-        );
-
-        CREATE TABLE economy_item_categories (
-          id TEXT PRIMARY KEY,
-          code TEXT UNIQUE,
-          name TEXT NOT NULL,
-          description TEXT
-        );
-
-        CREATE TABLE economy_items (
-          id TEXT PRIMARY KEY,
-          code TEXT UNIQUE,
-          name TEXT NOT NULL,
-          description TEXT NOT NULL,
-          price INTEGER NOT NULL,
-          rarity TEXT NOT NULL DEFAULT 'COMMON',
-          category_id TEXT,
-          icon_url TEXT,
-          is_purchasable INTEGER NOT NULL DEFAULT 1,
-          metadata TEXT DEFAULT '{}'
-        );
-      `);
+      const legacyBefore = sha256(tempDbPath);
+      const count = (table: string) =>
+        (targetClient.raw.prepare(`SELECT count(*) as c FROM ${table}`).get() as { c: number }).c;
 
       const engine = new MigrationEngine();
 
@@ -616,10 +370,7 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       expect(dryResult.migratedCounts.users).toBe(3);
 
       // Verify target is still empty
-      const targetUserCountBefore = targetClient.raw
-        .prepare('SELECT count(*) as c FROM users')
-        .get() as { c: number };
-      expect(targetUserCountBefore.c).toBe(0);
+      expect(count('users')).toBe(0);
 
       // 2. Live Execution Test
       const liveResult = await engine.migrate(tempDbPath, targetClient, { dryRun: false });
@@ -628,15 +379,11 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       expect(liveResult.totalCoinsMigrated).toBe(1800n);
 
       // Verify target rows populated
-      const targetUserCountAfter = targetClient.raw
-        .prepare('SELECT count(*) as c FROM users')
-        .get() as { c: number };
-      expect(targetUserCountAfter.c).toBe(3);
-
-      const targetGuildCountAfter = targetClient.raw
-        .prepare('SELECT count(*) as c FROM guilds')
-        .get() as { c: number };
-      expect(targetGuildCountAfter.c).toBe(2);
+      expect(count('users')).toBe(3);
+      expect(count('guilds')).toBe(2);
+      expect(count('music_playlist_tracks')).toBe(3);
+      expect(count('reminders')).toBe(2);
+      expect(count('economy_items')).toBe(2);
 
       // 3. Verification Test
       const verification = await engine.verify(tempDbPath, targetClient);
@@ -645,6 +392,14 @@ describe('Legacy 1.4.0 SQLite Migration Engine & Transformer', () => {
       expect(verification.targetCoins).toBe(1800n);
       expect(verification.legacyUsers).toBe(3);
       expect(verification.targetUsers).toBe(3);
+
+      // 4. Re-running inserts nothing twice (IDs are stable, conflicts are skipped).
+      await engine.migrate(tempDbPath, targetClient, { dryRun: false });
+      expect(count('users')).toBe(3);
+      expect(count('music_playlist_tracks')).toBe(3);
+
+      // The legacy file is never written.
+      expect(sha256(tempDbPath)).toBe(legacyBefore);
 
       await targetClient.close();
     });

@@ -320,7 +320,8 @@
         "STORY-124",
         "STORY-125",
         "STORY-126",
-        "STORY-127"
+        "STORY-127",
+        "STORY-128"
       ],
       "requires": [
         "EPIC-001",
@@ -1744,10 +1745,25 @@
       "status": "BACKLOG",
       "requires": [
         "STORY-121",
-        "STORY-126"
+        "STORY-126",
+        "STORY-128"
       ],
       "blocks": [],
       "description": "Ungroomed; created 2026-10-02 with STORY-126. Planned tasks: (1) 1.4.0 setting aliases (AI_SERVICE_TYPE, AI_SERVICE_API_KEY, DATABASE_NAME) and a fail-fast message when the old compose layout is detected (a root-owned /app/data holding ririko.db that uid 10001 cannot write): print the upgrade steps and exit, touching nothing. (2) docs/upgrading-from-1.4.md, the 2.0 compose example with ./data:/app/legacy:ro, and the Docker Hub repository description. (3) A CircleCI release job that pushes versioned tags (X.Y.Z, X.Y, X) of bot-runner to ririkoai/ririkobot and web-runner to ririkoai/ririkobot-dashboard from git tags, with Docker Hub credentials in a CircleCI context. (4) The sunset: the maintainer tags the current latest as 1.4.0 so it stays pullable, then moves latest to 2.x after an announced period. Pushing or retagging on Docker Hub always needs the maintainer."
+    },
+    {
+      "id": "STORY-128",
+      "parent": "EPIC-012",
+      "title": "1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": [
+        "TASK-1261"
+      ],
+      "blocks": [
+        "STORY-127"
+      ],
+      "description": "Ungroomed; found by TASK-1261 on 2026-10-01. The migration writes 1.4.0 welcome and farewell settings into guild_settings.welcomer_* and farewell_* columns, but 2.0 reads the cards from guild_welcomer and guild_farewell (WelcomerRepository), so those settings are lost after migration. freeGamesChannelId is not migrated (free_game_announcements get the guild id as channel id; 2.0 reads free_game_channels). ai_model, stablediffusion_model and twitch_channel are not migrated (candidates: ai_guild_preferences, image_guild_settings). The configuration table holds plaintext Twitch and Stable Diffusion credentials that are deliberately not migrated; decide whether to offer them for the vault. Must land before the release (STORY-127)."
     }
   ],
   "tasks": [
@@ -3901,7 +3917,7 @@
       "parent": "STORY-126",
       "title": "Real 1.4.0 Schema Fixture From the Published Image & Transformer Fidelity Fixes",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [],
       "blocks": [
         "TASK-1262"
