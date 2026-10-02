@@ -13,10 +13,12 @@ In accordance with Section 85 of `BLUEPRINT.md`: **The legacy bot is valuable pr
 | Legacy Entity (1.4.0 SQLite) | Target Drizzle Table (2.0.0) | Transformation & Field Logic |
 |---|---|---|
 | `User` (`userId`, `coins`, `karma`, `warns`, `isSuspended`) | `users`, `economy_balances`, `xp_accounts` | `userId` $\rightarrow$ `users.id`<br>`coins` $\rightarrow$ `economy_balances.wallet_balance`<br>`karma` $\rightarrow$ `xp_accounts.xp` & `karma`<br>`warns` $\rightarrow$ `users.warn_count`<br>`isSuspended` $\rightarrow$ `users.is_blacklisted` |
-| `Guild` & `GuildConfig` | `guilds`, `guild_settings` | Merged into normalized `guild_settings` (prefix, welcomer, farewell, log channels). Plaintext tokens stripped. |
+| `Guild` & `GuildConfig` | `guilds`, `guild_settings`, `guild_welcomer`, `guild_farewell`, `free_game_channels`, `ai_guild_preferences`, `image_guild_settings` | Each setting goes to the table 2.0 reads it from (see the table in section 2.1). Plaintext tokens stripped. |
+| `Configuration` | none | The Twitch and Stable Diffusion credentials are not migrated, because 1.4.0 stored them in plain text. The migration summary names the ones that were set, so the owner can enter them again in the dashboard. |
+| `FreeGameNotification` | `free_game_announcements` | Ids become the 2.0 form (`epic-<id>`, `steam-<appId>`), in the guild's free-games channel, so games 1.4.0 posted are not posted again. Guilds without a free-games channel are skipped. |
 | `UserNote` | `moderation_notes` | `userId` $\rightarrow$ `target_user_id`, `authorId` $\rightarrow$ `author_user_id`, `text` $\rightarrow$ `content`. |
 | `VoiceChannel` | `auto_voice_configs`, `avc_channels` | Active channels preserved; orphaned temporary channels pruned. |
-| `ReactionRole` | `reaction_roles` | Normalized emoji strings and target role IDs preserved. |
+| `ReactionRole` | `reaction_roles` | Emoji strings and role IDs preserved. 1.4.0 stored no channel, so `channel_id` holds the guild ID until the first reaction to the message, when the bot saves the real channel. Until then the dashboard shows the channel as unknown. |
 | `MusicChannel` | `music_channels` | Mapped directly to dedicated guild music channels. |
 | `Playlist` & `Track` | `music_saved_playlists`, `music_playlist_tracks` | Legacy playlists and track sequences preserved with zero track loss. |
 | `TwitchSubscription` | `stream_subscriptions`, `streamers` | Migrated to multi-platform streamer model (`platform = 'TWITCH'`). |
@@ -36,19 +38,19 @@ What the real data looks like, and how the transformer reads it:
 - **Integer ids:** shop items, categories, playlists, tracks, notes and reaction roles have integer ids. The 2.0 rows use their string form.
 - **Guild config names:** `guild_config` names are the ones the 1.4.0 commands wrote:
 
-  | Name | Meaning |
-  |---|---|
-  | `welcomer_channel` | Welcome card channel. |
-  | `welcomer_enabled` | `true`/`false`. |
-  | `welcomer_bg` | Welcome card background. |
-  | `farewell_channel` | Farewell card channel. |
-  | `farewell_enabled` | `true`/`false`. |
-  | `farewell_bg` | Farewell card background. |
-  | `karma-notification-enabled` | `enabled`/`disabled`. |
-  | `freeGamesChannelId` | Free games channel. |
-  | `twitch_channel` | Twitch alert channel. |
-  | `ai_model` | AI model. |
-  | `stablediffusion_model` | Stable Diffusion model. |
+  | Name | Meaning | Migrated to |
+  |---|---|---|
+  | `welcomer_channel` | Welcome card channel. | `guild_welcomer.channel_id`. A guild with no channel gets no welcome card. |
+  | `welcomer_enabled` | `true`/`false`. | `guild_welcomer.is_enabled`, false when unset. |
+  | `welcomer_bg` | Welcome card background URL. | `guild_welcomer.background_url`. |
+  | `farewell_channel` | Farewell card channel. | `guild_farewell.channel_id`, with the same rule. |
+  | `farewell_enabled` | `true`/`false`. | `guild_farewell.is_enabled`. |
+  | `farewell_bg` | Farewell card background URL. | `guild_farewell.background_url`. |
+  | `karma-notification-enabled` | `enabled`/`disabled`. | `guild_settings.karma_notifications_enabled`. |
+  | `freeGamesChannelId` | Free games channel. | `free_game_channels.channel_id`. |
+  | `twitch_channel` | Default Twitch alert channel. | Not migrated. 2.0 has no default channel, and every migrated subscription keeps its own channel. |
+  | `ai_model` | AI model (free text, usually an Ollama model). | `ai_guild_preferences` provider and model, when 2.0 offers the model (a `:latest` tag is ignored). Otherwise the summary names the guild and it uses the bot default. |
+  | `stablediffusion_model` | Replicate model. | `image_guild_settings.default_provider = replicate`. 2.0 sets the Replicate model for the whole bot, not per guild. |
 - **Playlists:** they belonged to a user, not a guild. Track order is the insertion (id) order within each playlist.
 
 To refresh the fixture, run the image the same way, `docker cp` its `/app/data/ririko.db` out, and dump `sqlite_master`. Never edit the file by hand.
@@ -120,5 +122,5 @@ docker run --rm -v ./data:/app/legacy:ro -v ririko_data:/app/data <bot image> no
 The command exits with 0 when it migrated or found the database already migrated, and with 1 when it skipped or failed.
 
 ### 4.3. Known Gaps
-- **Settings that do not carry over yet:** some 1.4.0 guild settings land in tables 2.0 does not read (welcome and farewell cards, the free-games channel, the AI and image models). This is tracked in STORY-128. It must be fixed before `latest` moves to 2.0 (STORY-127).
+- **Settings that do not carry over:** `twitch_channel`, AI models 2.0 does not offer, and the plaintext credentials (see section 2.1). The migration summary lists the ones that applied.
 - **Postgres targets:** the migration currently fails there, because the 1.4.0 integer ids go into uuid columns. The Docker upgrade targets SQLite (the image default).

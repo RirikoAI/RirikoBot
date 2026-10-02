@@ -71,3 +71,46 @@ If the 2.0 `bot-runner` image were pushed as `latest` today, every user who runs
   - Document `chown -R 10001:10001 ./data`.
 - Before any 2.0 push, the maintainer should tag the current `latest` as `1.4.0` so it stays pullable by name.
 - Nothing was pushed or retagged during STORY-121.
+
+---
+
+## GROOMING · 2026-10-02T05:25:08Z · Claude Code (Opus 5.5)
+
+**Approach**
+- This regroom answers both STORY-121 FLAGs above. The story grows from 3 to 8 points.
+- **TASK-1223 (new, 3) Postgres schema bootstrap.** This answers FLAG 1, point 1.
+  - `db:generate-ddl` also writes `src/schema/pg/ddl.ts` (`PG_SCHEMA_DDL`).
+  - `ensurePostgresSchema` applies it under `pg_advisory_xact_lock(1701, 1)`, and only when the schema is empty.
+  - The bot (`main.ts:50`) and the dashboard (`getDatabase`, `apps/web/src/lib/server/services.ts:296`) both call it at startup, before `ensureAdventureSchema` / `ensureCardSerialSchema`.
+  - `ensureCardSerialSchema` fails on an empty Postgres today, so the order matters.
+- **TASK-1221 (2) probes.**
+  - Bot: a `node:http` server on `HEALTH_PORT`.
+  - Dashboard: route handlers under `app/api` plus rewrites.
+  - Both images get a HEALTHCHECK. The images have no curl, so the HEALTHCHECK uses `node -e fetch`.
+  - The smoke script checks the probes.
+- **TASK-1222 (3) compose.** This answers FLAG 1, points 2 to 4, and FLAG 2.
+  - Image references `ririkoai/ririkobot:${RIRIKO_VERSION}` / `ririkobot-dashboard`, with build-target fallbacks.
+  - The env names the code really reads.
+  - Shared named volumes for `public/cards`, `data/tcg/images`, `storage/welcomer-backgrounds` and `public/bosses`.
+  - The official Lavalink 4 image with the repository's `application.yml`.
+  - The uid 10001 note for bind mounts.
+- Redis is dropped: no code uses it. The maintainer decided this on 2026-10-02. Remove it from `docs/deployment.md` sections 2.2 and 3 too.
+- FLAG 2, Docker Hub publishing and `latest`, belongs to STORY-127. STORY-127 now requires this story.
+
+**Relevant code**
+- `packages/database/src/client/postgres.ts:6`: `createPostgresClient`, with `ping()` and no migration.
+- `packages/database/src/client/sqlite.ts:43-56`: the SQLite auto-migrate pattern to copy.
+- `packages/database/scripts/generate-sqlite-ddl.mjs`.
+- `packages/services/src/adventure/__tests__/postgres.integration.test.ts:84-102`: the BigInt-patched `drizzle-kit export --dialect postgresql`.
+- `packages/database/src/migrations/adventure-schema.ts:28` uses lock (1702, 1) and `card-serials.ts:6` uses (1703, 1). Use 1701 for the full schema.
+- `apps/web/src/proxy.ts`: the matcher already skips `/api`.
+- `scripts/docker-smoke.ts:340`: the web fetch runs inside the container.
+
+**Pitfalls**
+- `drizzle-kit` is a devDependency and is not in the images. Generate the DDL at build time and commit it, as with SQLite. Never generate it at runtime.
+- `LAVALINK_PORT`, `LAVALINK_PASSWORD` and `LAVALINK_SECURE` are read straight from `process.env`, not through the config schema.
+- The dashboard needs `SECRET_VAULT_KEY`, `DISCORD_CLIENT_SECRET` and `DASHBOARD_URL`.
+
+**Out of scope**
+- Docker Hub pushes and moving `latest` (STORY-127).
+- Postgres CI (STORY-124).

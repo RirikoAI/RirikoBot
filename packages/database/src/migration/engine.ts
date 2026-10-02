@@ -72,6 +72,11 @@ export class MigrationEngine {
       xpAccounts: data.xpAccounts.length,
       guilds: data.guilds.length,
       guildSettings: data.guildSettings.length,
+      guildWelcomers: data.guildWelcomers.length,
+      guildFarewells: data.guildFarewells.length,
+      freeGameChannels: data.freeGameChannels.length,
+      aiGuildPreferences: data.aiGuildPreferences.length,
+      imageGuildSettings: data.imageGuildSettings.length,
       moderationNotes: data.moderationNotes.length,
       autoVoiceConfigs: data.autoVoiceConfigs.length,
       musicChannels: data.musicChannels.length,
@@ -92,6 +97,7 @@ export class MigrationEngine {
         isDryRun: true,
         inspected,
         migratedCounts,
+        notices: data.notices,
         coinsConserved,
         totalCoinsMigrated,
         durationMs: Date.now() - startTime,
@@ -112,6 +118,7 @@ export class MigrationEngine {
       isDryRun: false,
       inspected,
       migratedCounts,
+      notices: data.notices,
       coinsConserved,
       totalCoinsMigrated,
       durationMs: 0,
@@ -164,6 +171,23 @@ export class MigrationEngine {
       // Guilds & Settings
       await insertBatch(sqliteSchema.guilds, pgSchema.guilds, data.guilds);
       await insertBatch(sqliteSchema.guildSettings, pgSchema.guildSettings, data.guildSettings);
+      await insertBatch(sqliteSchema.guildWelcomer, pgSchema.guildWelcomer, data.guildWelcomers);
+      await insertBatch(sqliteSchema.guildFarewell, pgSchema.guildFarewell, data.guildFarewells);
+      await insertBatch(
+        sqliteSchema.freeGameChannels,
+        pgSchema.freeGameChannels,
+        data.freeGameChannels,
+      );
+      await insertBatch(
+        sqliteSchema.aiGuildPreferences,
+        pgSchema.aiGuildPreferences,
+        data.aiGuildPreferences,
+      );
+      await insertBatch(
+        sqliteSchema.imageGuildSettings,
+        pgSchema.imageGuildSettings,
+        data.imageGuildSettings,
+      );
 
       // Moderation Notes
       await insertBatch(
