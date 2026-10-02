@@ -1,24 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createDatabaseClient } from '../client/factory.js';
-import type { SqliteDatabaseClient } from '../client/types.js';
+import { it, expect, beforeEach } from 'vitest';
+import { randomUUID } from 'node:crypto';
+import { describeDialects } from '../testing/dialects.js';
 import { ReactionRoleRepository } from './reaction-role.repository.js';
-import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
 
-describe('ReactionRoleRepository (TASK-1401)', () => {
-  let client: SqliteDatabaseClient;
+// Postgres ids are uuids, as the dashboard generates them.
+const NEW_BINDING_ID = randomUUID();
+
+describeDialects('ReactionRoleRepository (TASK-1401)', (db) => {
   let reactionRoleRepo: ReactionRoleRepository;
 
-  beforeEach(async () => {
-    const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
-    if (rawClient.dialect !== 'sqlite') throw new Error('Expected sqlite client');
-    client = rawClient;
-
-    client.raw.exec(SQLITE_SCHEMA_DDL);
-    reactionRoleRepo = new ReactionRoleRepository(client);
-  });
-
-  afterEach(async () => {
-    await client.close();
+  beforeEach(() => {
+    reactionRoleRepo = new ReactionRoleRepository(db.client);
   });
 
   it('creates and finds a reaction role by id', async () => {
@@ -219,7 +211,7 @@ describe('ReactionRoleRepository (TASK-1401)', () => {
     await reactionRoleRepo.replaceComponentBindings('msg-1', [
       {
         ...base,
-        id: 'new-1',
+        id: NEW_BINDING_ID,
         messageId: 'msg-1',
         emojiOrComponentId: 'rr:btn:new-1',
         roleId: 'role-new',
@@ -230,7 +222,7 @@ describe('ReactionRoleRepository (TASK-1401)', () => {
 
     const rows = await reactionRoleRepo.findByMessageId('msg-1');
     expect(rows.map((row) => row.roleId).sort()).toEqual(['role-new', 'role-star']);
-    expect(await reactionRoleRepo.findById('new-1')).toMatchObject({ groupId: 'group-1' });
+    expect(await reactionRoleRepo.findById(NEW_BINDING_ID)).toMatchObject({ groupId: 'group-1' });
     expect(await reactionRoleRepo.findByMessageId('msg-2')).toHaveLength(1);
 
     await reactionRoleRepo.replaceComponentBindings('msg-1', []);

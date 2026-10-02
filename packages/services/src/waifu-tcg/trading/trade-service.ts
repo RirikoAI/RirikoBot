@@ -5,6 +5,7 @@ import type {
   EconomyRepository,
   DatabaseClient,
   CardTrade,
+  TradeStatus,
   UserCard,
   WaifuCard,
 } from '@ririko/database';
@@ -42,6 +43,19 @@ export class TradeService {
 
   private async cardName(card: UserCard): Promise<string | undefined> {
     return (await this.waifuCardRepo.findById(card.cardId))?.name;
+  }
+
+  /**
+   * Resolves a pending trade inside `tx`, before anything else changes. The status checks above
+   * each caller run outside the transaction, so two concurrent calls can both pass them; only one
+   * of them claims the row here, and the other rolls back with the same error.
+   */
+  private async claimPending(tradeId: string, to: TradeStatus, tx: DatabaseClient) {
+    const claimed = await this.cardTradeRepo.transitionStatus(tradeId, 'PENDING', to, tx);
+    if (claimed) return claimed;
+    const current = await this.cardTradeRepo.findById(tradeId, tx);
+    if (!current) throw new Error(`Trade ${tradeId} not found.`);
+    throw new Error(`Trade ${tradeId} is not pending (status: ${current.status}).`);
   }
 
   async createProposal(params: CreateTradeProposalParams): Promise<CardTrade> {
@@ -191,6 +205,8 @@ export class TradeService {
 
     // Execute atomic balance & card ownership swap
     return withTransaction(this.dbClient, async (tx) => {
+      const accepted = await this.claimPending(trade.id, 'ACCEPTED', tx);
+
       // Re-check inside the swap: gear never changes hands with a card.
       for (const cardId of [...trade.offeredCardIds, ...trade.requestedCardIds]) {
         const card = await this.waifuCardRepo.findUserCardById(cardId, tx);
@@ -242,8 +258,7 @@ export class TradeService {
         await this.waifuCardRepo.updateUserCardOwner(cardId, trade.senderUserId, 'IDLE', tx);
       }
 
-      // Update trade status to ACCEPTED
-      return this.cardTradeRepo.updateStatus(trade.id, 'ACCEPTED', tx);
+      return accepted;
     });
   }
 
@@ -262,6 +277,7 @@ export class TradeService {
     }
 
     return withTransaction(this.dbClient, async (tx) => {
+      const rejected = await this.claimPending(trade.id, 'REJECTED', tx);
       // Unlock all cards back to IDLE
       for (const cardId of trade.offeredCardIds) {
         await this.waifuCardRepo.updateUserCardState(cardId, 'IDLE', tx);
@@ -270,7 +286,7 @@ export class TradeService {
         await this.waifuCardRepo.updateUserCardState(cardId, 'IDLE', tx);
       }
 
-      return this.cardTradeRepo.updateStatus(trade.id, 'REJECTED', tx);
+      return rejected;
     });
   }
 
@@ -289,6 +305,7 @@ export class TradeService {
     }
 
     return withTransaction(this.dbClient, async (tx) => {
+      const cancelled = await this.claimPending(trade.id, 'CANCELLED', tx);
       // Unlock all cards back to IDLE
       for (const cardId of trade.offeredCardIds) {
         await this.waifuCardRepo.updateUserCardState(cardId, 'IDLE', tx);
@@ -297,7 +314,7 @@ export class TradeService {
         await this.waifuCardRepo.updateUserCardState(cardId, 'IDLE', tx);
       }
 
-      return this.cardTradeRepo.updateStatus(trade.id, 'CANCELLED', tx);
+      return cancelled;
     });
   }
 

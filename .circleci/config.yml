@@ -91,6 +91,35 @@ jobs:
           disable_search: true
           report_type: test_results
 
+  # Runs the dual-dialect repository suites (describeDialects) and the adventure concurrency suite
+  # against a real Postgres. Each suite creates and drops its own random schema.
+  test-postgres:
+    docker:
+      - image: cimg/node:22.23
+        environment:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+          TEST_POSTGRES_URL: postgres://postgres:test@127.0.0.1:5432/ririko_test
+          ADVENTURE_TEST_POSTGRES_URL: postgres://postgres:test@127.0.0.1:5432/ririko_test
+      - image: cimg/postgres:16.15
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: ririko_test
+    resource_class: medium
+    steps:
+      - setup
+      - run:
+          name: Wait for Postgres
+          command: |
+            for attempt in $(seq 1 30); do
+              node -e "require('net').connect(5432, '127.0.0.1').on('connect', () => process.exit(0)).on('error', () => process.exit(1))" && exit 0
+              sleep 1
+            done
+            echo 'Postgres did not start' && exit 1
+      - run:
+          name: Vitest on Postgres
+          command: pnpm test:postgres
+
   build-web:
     executor: node
     steps:
@@ -188,6 +217,7 @@ workflows:
       - lint
       - typecheck
       - test
+      - test-postgres
       - build-web
       - e2e
       - docker
