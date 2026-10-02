@@ -28,6 +28,13 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '3mb',
     },
   },
+  // Container probes at the paths orchestrators expect (TASK-1221).
+  async rewrites() {
+    return [
+      { source: '/health', destination: '/api/health' },
+      { source: '/ready', destination: '/api/ready' },
+    ];
+  },
   // The per-request CSP nonce is set in src/proxy.ts.
   async headers() {
     return [

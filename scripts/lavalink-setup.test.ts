@@ -1,5 +1,11 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { renderYouTubeCipherConfig } from './lavalink-setup';
+import {
+  DOCKER_LAVALINK_CONFIG,
+  DOCKER_LAVALINK_VALUES,
+  renderLavalinkConfig,
+  renderYouTubeCipherConfig,
+} from './lavalink-setup';
 
 describe('renderYouTubeCipherConfig', () => {
   it.each([undefined, '', '   '])('keeps the built-in cipher when the URL is %j', (url) => {
@@ -24,5 +30,15 @@ describe('renderYouTubeCipherConfig', () => {
     const block = renderYouTubeCipherConfig('https://x/"\nlavalink: evil');
     expect(block).toContain(String.raw`url: "https://x/\"\nlavalink: evil"`);
     expect(block.split('\n')).toHaveLength(4);
+  });
+});
+
+describe('docker/lavalink/application.yml', () => {
+  it('matches the renderer, with secrets left to the container environment', () => {
+    const committed = readFileSync(DOCKER_LAVALINK_CONFIG, 'utf8');
+    // Regenerate with: node scripts/lavalink-setup.ts --docker-config
+    expect(committed).toBe(renderLavalinkConfig(DOCKER_LAVALINK_VALUES));
+    expect(committed).toContain('password: "${LAVALINK_PASSWORD}"');
+    expect(committed).toContain('clientSecret: "${SPOTIFY_CLIENT_SECRET:}"');
   });
 });

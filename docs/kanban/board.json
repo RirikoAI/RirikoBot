@@ -1279,7 +1279,7 @@
       "parent": "EPIC-012",
       "title": "Production Orchestration & Health Probes",
       "points": 8,
-      "status": "BACKLOG",
+      "status": "REVIEW",
       "requires": [
         "STORY-121"
       ],
@@ -1324,7 +1324,7 @@
         "TASK-1221: bot and dashboard answer /health and /ready, and both images have a HEALTHCHECK.",
         "TASK-1222: docker-compose.production.yml runs Postgres, Lavalink, bot and dashboard with the real env names and shared volumes, and docs/deployment.md matches it."
       ],
-      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src apps/bot/src apps/web/src && pnpm lint --quiet && docker compose -f docker-compose.production.yml config -q",
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src apps/bot/src apps/web/src scripts && pnpm lint --quiet && RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y docker compose -f docker-compose.production.yml --env-file .env.production.example config -q",
       "handovers": [
         "STORY-122"
       ],
@@ -4307,7 +4307,7 @@
       "parent": "STORY-122",
       "title": "Implement /health and /ready Probes for Bot and Web, With Docker HEALTHCHECKs",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "TASK-1223"
       ],
@@ -4354,6 +4354,7 @@
       ],
       "verify_cmd": "pnpm vitest run apps/bot/src apps/web/src/app/api && pnpm typecheck && pnpm build && pnpm lint --quiet && docker build --target bot-runner -t ririko-bot:smoke . && docker build --target web-runner -t ririko-web:smoke . && node scripts/docker-smoke.ts bot web",
       "handovers": [
+        "TASK-1221",
         "STORY-122"
       ]
     },
@@ -4362,7 +4363,7 @@
       "parent": "STORY-122",
       "title": "docker-compose.production.yml With PostgreSQL, Lavalink, Bot and Dashboard",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "TASK-1221",
         "TASK-1223"
@@ -4380,7 +4381,9 @@
           "lavalink/application.yml",
           "packages/core/src/config/schema.ts",
           "apps/bot/src/services.ts",
-          "docs/deployment.md"
+          "docs/deployment.md",
+          "docker/lavalink/application.yml",
+          "scripts/lavalink-setup.ts"
         ],
         "symbols": [
           "BaseAppConfigSchema",
@@ -4403,8 +4406,9 @@
         "docs/deployment.md section 2.2 is replaced by the real file, with the uid 10001 note for bind mounts.",
         "docker compose -f docker-compose.production.yml config -q passes in CI or locally."
       ],
-      "verify_cmd": "docker compose -f docker-compose.production.yml --env-file .env.production.example config -q && pnpm lint --quiet",
+      "verify_cmd": "RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y docker compose -f docker-compose.production.yml --env-file .env.production.example config -q && pnpm vitest run scripts && pnpm lint --quiet",
       "handovers": [
+        "TASK-1222",
         "STORY-122"
       ]
     },
@@ -5077,7 +5081,7 @@
     },
     {
       "id": "TASK-1223",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [
         "TASK-1222",
         "TASK-1241"
@@ -5092,7 +5096,7 @@
       "model": "medium",
       "context": {
         "files": [
-          "packages/database/scripts/generate-sqlite-ddl.mjs",
+          "packages/database/scripts/generate-ddl.mjs",
           "packages/database/package.json",
           "packages/database/src/schema/sqlite/ddl.ts",
           "packages/database/src/schema/sqlite/ddl.test.ts",
@@ -5128,6 +5132,7 @@
       ],
       "verify_cmd": "pnpm --filter @ririko/database db:generate-ddl && git diff --exit-code packages/database/src/schema && pnpm vitest run packages/database/src && pnpm typecheck && pnpm lint --quiet",
       "handovers": [
+        "TASK-1223",
         "STORY-122"
       ]
     },

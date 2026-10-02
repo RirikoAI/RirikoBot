@@ -44,6 +44,180 @@ export function renderYouTubeCipherConfig(cipherUrl: string | undefined): string
     #   userAgent: "ririko-bot"`;
 }
 
+export interface LavalinkConfigValues {
+  port: string;
+  password: string;
+  spotifyClientId: string;
+  spotifyClientSecret: string;
+  spotifySpDc: string;
+  cipherUrl: string | undefined;
+}
+
+/**
+ * The Lavalink config the bot expects. Docker Compose mounts it with Spring placeholders, which
+ * the Lavalink image fills from its environment when it starts (`DOCKER_LAVALINK_VALUES`).
+ */
+export function renderLavalinkConfig(values: LavalinkConfigValues): string {
+  return `server:
+  port: ${values.port}
+  address: 0.0.0.0
+lavalink:
+  server:
+    sources:
+      youtube: false # Native YouTube disabled in Lavalink v4, handled by youtube-plugin
+    password: "${values.password}"
+    bufferDurationMs: 225
+    frameBufferDurationMs: 5000
+    youtubePlaylistLoadLimit: 3
+    opusEncodingQuality: 5
+    resamplingQuality: MEDIUM
+    trackStuckThresholdMs: 5000
+    playerUpdateInterval: 3
+    useSeekGhosting: true
+    youtubeSearchEnabled: true
+    soundcloudSearchEnabled: true
+    gc-warnings: true
+  plugins:
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.3"
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0"
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.dunctebot:skybot-lavalink-plugin:1.7.0"
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5"
+      repository: "https://jitpack.io"
+    # Pinned YouTube snapshot build with ANDROID_VR and remoteCipher support
+    - dependency: "dev.lavalink.youtube:youtube-plugin:f45bbb7aebfcbc1c553769e04af6cd43afa8b7c3"
+      snapshot: true
+    - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.1.0"
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "me.duncte123:java-lyrics-plugin:1.6.6"
+      repository: "https://maven.lavalink.dev/releases"
+plugins:
+  lyrics:
+    countryCode: en-US
+    geniusApiKey: "<insert>"
+  lavalyrics:
+    sources:
+      - genius
+      - spotify
+      - youtube
+  youtube:
+    enabled: true
+${renderYouTubeCipherConfig(values.cipherUrl)}
+    oauth:
+      enabled: false
+    allowSearch: true
+    allowDirectVideoIds: true
+    allowDirectPlaylistIds: true
+    clients:
+      # ANDROID_VR first: needs no login and returns plain audio formats without SABR blocks
+      - "ANDROID_VR"
+      - "TV"
+      - "MWEB"
+      - "TVHTML5_SIMPLY"
+      - "ANDROID_MUSIC"
+      - "MUSIC"
+      - "WEB"
+      - "WEBEMBEDDED"
+    TVHTML5_SIMPLY:
+      playback: true
+      playlistLoading: true
+      searching: true
+      videoLoading: true
+    ANDROID_MUSIC:
+      playlistLoading: false
+      videoLoading: true
+      searching: true
+      playback: true
+    MUSIC:
+      playlistLoading: false
+      videoLoading: false
+      searching: true
+      playback: false
+    WEB:
+      playlistLoading: false
+      videoLoading: true
+      searching: true
+      playback: true
+    WEBEMBEDDED:
+      playlistLoading: false
+      videoLoading: false
+      searching: false
+      playback: true
+  lavasrc:
+    providers:
+      # Exact-recording match via ISRC first, text query fallback, then SoundCloud
+      - 'ytsearch:"%ISRC%"'
+      - "ytsearch:%QUERY%"
+      - "scsearch:%QUERY%"
+    sources:
+      spotify: true
+      applemusic: false
+      deezer: false
+      jiosaavn: false
+      pandora: false
+      yandexmusic: false
+      flowerytts: true
+      youtube: true
+      tidal: false
+      vkmusic: false
+      qobuz: false
+      ytdlp: false
+    lyrics-sources:
+      spotify: true
+      deezer: false
+      youtube: true
+      yandexmusic: false
+      vkmusic: false
+      lrcLib: true
+    spotify:
+      clientId: "${values.spotifyClientId}"
+      clientSecret: "${values.spotifyClientSecret}"
+      spDc: "${values.spotifySpDc}"
+      countryCode: "US"
+      playlistLoadLimit: 6
+      albumLoadLimit: 6
+      resolveArtistsInSearch: false
+      localFiles: false
+      preferPartnerApi: false
+      preferV1SearchApi: false
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+logging:
+  file:
+    max-history: 5
+    max-size: 10MB
+    path: ./logs/
+  level:
+    root: INFO
+    lavalink: INFO
+    dev.lavalink.youtube: DEBUG
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 5
+`;
+}
+
+/** Values for docker/lavalink/application.yml: secrets stay in the container environment. */
+export const DOCKER_LAVALINK_VALUES: LavalinkConfigValues = {
+  port: '2333',
+  password: '${LAVALINK_PASSWORD}',
+  spotifyClientId: '${SPOTIFY_CLIENT_ID:}',
+  spotifyClientSecret: '${SPOTIFY_CLIENT_SECRET:}',
+  spotifySpDc: '${SPOTIFY_SP_DC:}',
+  cipherUrl: undefined,
+};
+
+/** The config Docker Compose mounts into the Lavalink container. */
+export const DOCKER_LAVALINK_CONFIG = resolve(
+  import.meta.dirname,
+  '../docker/lavalink/application.yml',
+);
+
 export async function setupLavalink(): Promise<void> {
   console.log('🚀 [Ririko Lavalink Autoinstaller] Starting setup...');
 
@@ -132,156 +306,15 @@ export async function setupLavalink(): Promise<void> {
   }
 
   // 5. Generate application.yml with exact YouTube & LavaSrc recipe
-  const spotifyClientId = process.env.SPOTIFY_CLIENT_ID || '';
-  const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET || '';
-  const spotifySpDc = process.env.SPOTIFY_SP_DC || '';
-  const lavalinkPassword = process.env.LAVALINK_PASSWORD || '';
-  const lavalinkPort = process.env.LAVALINK_PORT || '2333';
-
   console.log('⚙️ Generating production application.yml (exact LavaMusic recipe)...');
-
-  const configContent = `server:
-  port: ${lavalinkPort}
-  address: 0.0.0.0
-lavalink:
-  server:
-    sources:
-      youtube: false # Native YouTube disabled in Lavalink v4, handled by youtube-plugin
-    password: "${lavalinkPassword}"
-    bufferDurationMs: 225
-    frameBufferDurationMs: 5000
-    youtubePlaylistLoadLimit: 3
-    opusEncodingQuality: 5
-    resamplingQuality: MEDIUM
-    trackStuckThresholdMs: 5000
-    playerUpdateInterval: 3
-    useSeekGhosting: true
-    youtubeSearchEnabled: true
-    soundcloudSearchEnabled: true
-    gc-warnings: true
-  plugins:
-    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.3"
-      repository: "https://maven.lavalink.dev/releases"
-    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0"
-      repository: "https://maven.lavalink.dev/releases"
-    - dependency: "com.dunctebot:skybot-lavalink-plugin:1.7.0"
-      repository: "https://maven.lavalink.dev/releases"
-    - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5"
-      repository: "https://jitpack.io"
-    # Pinned YouTube snapshot build with ANDROID_VR and remoteCipher support
-    - dependency: "dev.lavalink.youtube:youtube-plugin:f45bbb7aebfcbc1c553769e04af6cd43afa8b7c3"
-      snapshot: true
-    - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.1.0"
-      repository: "https://maven.lavalink.dev/releases"
-    - dependency: "me.duncte123:java-lyrics-plugin:1.6.6"
-      repository: "https://maven.lavalink.dev/releases"
-plugins:
-  lyrics:
-    countryCode: en-US
-    geniusApiKey: "<insert>"
-  lavalyrics:
-    sources:
-      - genius
-      - spotify
-      - youtube
-  youtube:
-    enabled: true
-${renderYouTubeCipherConfig(process.env.LAVALINK_YOUTUBE_CIPHER_URL)}
-    oauth:
-      enabled: false
-    allowSearch: true
-    allowDirectVideoIds: true
-    allowDirectPlaylistIds: true
-    clients:
-      # ANDROID_VR first: needs no login and returns plain audio formats without SABR blocks
-      - "ANDROID_VR"
-      - "TV"
-      - "MWEB"
-      - "TVHTML5_SIMPLY"
-      - "ANDROID_MUSIC"
-      - "MUSIC"
-      - "WEB"
-      - "WEBEMBEDDED"
-    TVHTML5_SIMPLY:
-      playback: true
-      playlistLoading: true
-      searching: true
-      videoLoading: true
-    ANDROID_MUSIC:
-      playlistLoading: false
-      videoLoading: true
-      searching: true
-      playback: true
-    MUSIC:
-      playlistLoading: false
-      videoLoading: false
-      searching: true
-      playback: false
-    WEB:
-      playlistLoading: false
-      videoLoading: true
-      searching: true
-      playback: true
-    WEBEMBEDDED:
-      playlistLoading: false
-      videoLoading: false
-      searching: false
-      playback: true
-  lavasrc:
-    providers:
-      # Exact-recording match via ISRC first, text query fallback, then SoundCloud
-      - 'ytsearch:"%ISRC%"'
-      - "ytsearch:%QUERY%"
-      - "scsearch:%QUERY%"
-    sources:
-      spotify: true
-      applemusic: false
-      deezer: false
-      jiosaavn: false
-      pandora: false
-      yandexmusic: false
-      flowerytts: true
-      youtube: true
-      tidal: false
-      vkmusic: false
-      qobuz: false
-      ytdlp: false
-    lyrics-sources:
-      spotify: true
-      deezer: false
-      youtube: true
-      yandexmusic: false
-      vkmusic: false
-      lrcLib: true
-    spotify:
-      clientId: "${spotifyClientId}"
-      clientSecret: "${spotifyClientSecret}"
-      spDc: "${spotifySpDc}"
-      countryCode: "US"
-      playlistLoadLimit: 6
-      albumLoadLimit: 6
-      resolveArtistsInSearch: false
-      localFiles: false
-      preferPartnerApi: false
-      preferV1SearchApi: false
-metrics:
-  prometheus:
-    enabled: false
-    endpoint: /metrics
-logging:
-  file:
-    max-history: 5
-    max-size: 10MB
-    path: ./logs/
-  level:
-    root: INFO
-    lavalink: INFO
-    dev.lavalink.youtube: DEBUG
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 5
-`;
+  const configContent = renderLavalinkConfig({
+    port: process.env.LAVALINK_PORT || '2333',
+    password: process.env.LAVALINK_PASSWORD || '',
+    spotifyClientId: process.env.SPOTIFY_CLIENT_ID || '',
+    spotifyClientSecret: process.env.SPOTIFY_CLIENT_SECRET || '',
+    spotifySpDc: process.env.SPOTIFY_SP_DC || '',
+    cipherUrl: process.env.LAVALINK_YOUTUBE_CIPHER_URL,
+  });
 
   writeFileSync(YML_PATH, configContent, 'utf8');
   console.log(`✅ Configuration generated at: ${YML_PATH}`);
@@ -290,7 +323,12 @@ logging:
   );
 }
 
-if (process.argv[1]?.endsWith('lavalink-setup.ts')) {
+if (process.argv[1]?.endsWith('lavalink-setup.ts') && process.argv[2] === '--docker-config') {
+  // Regenerates the committed Docker config; never touches lavalink/.
+  mkdirSync(resolve(DOCKER_LAVALINK_CONFIG, '..'), { recursive: true });
+  writeFileSync(DOCKER_LAVALINK_CONFIG, renderLavalinkConfig(DOCKER_LAVALINK_VALUES), 'utf8');
+  console.log(`✅ Wrote ${DOCKER_LAVALINK_CONFIG}`);
+} else if (process.argv[1]?.endsWith('lavalink-setup.ts')) {
   void setupLavalink().catch((err) => {
     console.error('❌ Setup error:', err);
     process.exit(1);

@@ -39,3 +39,19 @@ See docs/kanban/protocol.md section 6.
 
 **Out of scope**
 - Raising coverage thresholds (STORY-125).
+
+---
+
+## FLAG · 2026-10-02T09:21:18Z · from TASK-1223 · Claude Code (Opus 5.5)
+
+**Finding**: `packages/services/src/adventure/__tests__/postgres.integration.test.ts` already fails on real Postgres 16 in one test, "grants completion XP atomically across pools alongside tower XP": `value too long for type character varying(32)`.
+- The unchanged test from `develop/2.0.0` fails the same way, so this is not caused by TASK-1223.
+- It was never noticed because the suite only runs with `ADVENTURE_TEST_POSTGRES_URL`.
+- The other 4 tests in that file pass.
+- The cause is probably an id longer than 32 characters (a test user or guild id, or a derived id) written to a `varchar(32)` column in the Postgres schema. SQLite does not enforce the length.
+
+**Impact on this ticket**:
+- TASK-1241 runs this suite in CI, so it must fix this first.
+- If the id comes from production code rather than the test, it is a real Postgres bug: fix the code or widen the column.
+
+**Local Postgres**: `docker run -d --rm --name ririko-pg-test -e POSTGRES_PASSWORD=test -p 55432:5432 postgres:16-alpine`, then set `TEST_POSTGRES_URL=postgres://postgres:test@127.0.0.1:55432/postgres`. Loopback is allowed by `vitest.setup.ts`.
