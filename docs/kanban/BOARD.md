@@ -81,6 +81,7 @@
 | `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | EPIC-011 | [STORY-163.md](./handovers/STORY-163.md) |
 | `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | EPIC-011 | [STORY-164.md](./handovers/STORY-164.md) |
 | `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | EPIC-012 | [STORY-120.md](./handovers/STORY-120.md) |
+| `STORY-121` | Story | Rootless Dockerfile & Containerization | 8 | EPIC-012 | [STORY-121.md](./handovers/STORY-121.md) |
 | `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | EPIC-012 | [STORY-123.md](./handovers/STORY-123.md) |
 | `STORY-130` | Story | Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | EPIC-013 | [STORY-130.md](./handovers/STORY-130.md) |
 | `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | EPIC-013 | [STORY-131.md](./handovers/STORY-131.md) |
@@ -108,6 +109,7 @@
 | `STORY-173` | Story | Private Message Context Menu Translation to English | 5 | EPIC-003 | [STORY-173.md](./handovers/STORY-173.md) |
 | `STORY-174` | Story | Scoped Command Registration (Global vs Per-Server) & CLI Command Sync | 8 | EPIC-003 | [STORY-174.md](./handovers/STORY-174.md) |
 | `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | EPIC-003 | — |
+| `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | [STORY-126.md](./handovers/STORY-126.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -259,6 +261,11 @@
 | `TASK-1201` | Task | Playwright Dashboard E2E (Real OAuth Callback, Guild Access, Settings Persistence, Card Album) & CircleCI e2e Job | 3 | STORY-120 | [TASK-1201.md](./handovers/TASK-1201.md) |
 | `TASK-1202` | Task | Bot Gateway Harness (Raw Gateway Packets, Fake Discord REST) & Integration Suite | 3 | STORY-120 | [TASK-1202.md](./handovers/TASK-1202.md) |
 | `TASK-1203` | Task | Fake Discord HTTP API for Tests & DISCORD_API_URL Web Config Seam | 2 | STORY-120 | [TASK-1203.md](./handovers/TASK-1203.md) |
+| `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 3 | STORY-121 | [TASK-1211.md](./handovers/TASK-1211.md) |
+| `TASK-1213` | Task | CircleCI Docker Build & Smoke Job for Bot and Web Images | 2 | STORY-121 | [TASK-1213.md](./handovers/TASK-1213.md) |
+| `TASK-1261` | Task | Real 1.4.0 Schema Fixture From the Published Image & Transformer Fidelity Fixes | 3 | STORY-126 | [TASK-1261.md](./handovers/TASK-1261.md) |
+| `TASK-1262` | Task | Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount | 5 | STORY-126 | [TASK-1262.md](./handovers/TASK-1262.md) |
+| `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 | [TASK-1212.md](./handovers/TASK-1212.md) |
 | `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | STORY-123 | — |
 | `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | STORY-123 | — |
 | `TASK-1233` | Task | Vercel Project Status Site Generated from the Kanban Board | 1 | STORY-123 | — |
@@ -332,6 +339,8 @@
 | `BUG-0026` | Bug | Canonical Game Item Seed Used Dynamic UUIDs Breaking Inventory Foreign Keys on Schema Recreation | 3 | EPIC-010 | [BUG-0026.md](./handovers/BUG-0026.md) |
 | `BUG-0027` | Bug | Count Every Stamina Potion in Multi-Quantity Uses | 2 | STORY-043 | [BUG-0027.md](./handovers/BUG-0027.md) |
 | `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | STORY-168 | [BUG-0028.md](./handovers/BUG-0028.md) |
+| `BUG-0029` | Bug | Bot Fell Back to sqlite:storage/ririko.db Without DATABASE_URL Instead of the ./data/ririko.sqlite Every Other Entry Point Uses | 2 | STORY-121 | [BUG-0029.md](./handovers/BUG-0029.md) |
+| `BUG-0030` | Bug | Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save | 1 | STORY-121 | [BUG-0030.md](./handovers/BUG-0030.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
@@ -343,13 +352,12 @@
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | EPIC-011 |
-| `STORY-121` | Story | Rootless Dockerfile & Containerization | 5 | EPIC-012 |
 | `STORY-122` | Story | Production Orchestration & Health Probes | 3 | EPIC-012 |
 | `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 5 | EPIC-012 |
 | `STORY-125` | Story | Raise Test Coverage Toward 80% | ? | EPIC-012 |
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
-| `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 2 | STORY-121 |
-| `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 |
+| `STORY-127` | Story | Docker Hub Release of 2.0 Images & 1.4.0 Sunset | 8 | EPIC-012 |
+| `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 3 | EPIC-012 |
 | `TASK-1221` | Task | Implement /health and /ready probes for Bot and Web | 1 | STORY-122 |
 | `TASK-1222` | Task | docker-compose.production.yml with Redis, PostgreSQL, and App Services | 2 | STORY-122 |
 | `TASK-1241` | Task | CircleCI Postgres Service & Dialect-Parameterized Repository Suite | 3 | STORY-124 |
@@ -373,7 +381,7 @@
 | `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | DONE | 13 | STORY-090, STORY-091, STORY-092 | — |
 | `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | DONE | 21 | STORY-100, STORY-101, STORY-102, STORY-103, STORY-104, STORY-105 | [EPIC-010.md](./handovers/EPIC-010.md) |
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | DONE | 21 | STORY-110, STORY-111, STORY-112, STORY-167, STORY-168, STORY-113, STORY-114, STORY-115, STORY-165, STORY-116, STORY-166, STORY-117, STORY-118, STORY-119, STORY-163, STORY-164 | — |
-| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | TODO | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125 | — |
+| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | TODO | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125, STORY-126, STORY-127, STORY-128 | — |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | DONE | 21 | STORY-130, STORY-131, STORY-132, STORY-133 | — |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |

@@ -20,15 +20,30 @@ import type {
   LegacyItemCategory,
 } from './types.js';
 
-function parseDate(input: unknown): Date {
+/**
+ * TypeORM's SQLite driver stores dates as UTC text without a zone (`YYYY-MM-DD HH:MM:SS.SSS`,
+ * and `datetime('now')` defaults without the milliseconds). `new Date()` would read that as
+ * local time.
+ */
+const SQLITE_UTC_DATETIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,3})?$/;
+
+export function parseLegacyDate(input: unknown): Date {
   if (!input) return new Date();
   if (input instanceof Date) return input;
   if (typeof input === 'number') return new Date(input);
   if (typeof input === 'string') {
-    const parsed = new Date(input);
+    const iso = SQLITE_UTC_DATETIME.test(input) ? `${input.replace(' ', 'T')}Z` : input;
+    const parsed = new Date(iso);
     if (!isNaN(parsed.getTime())) return parsed;
   }
   return new Date();
+}
+
+const parseDate = parseLegacyDate;
+
+/** 1.4.0 `/karma server enable|disable` stored `enabled` or `disabled`; the others `true`/`false`. */
+function isEnabledValue(value: string): boolean {
+  return value === 'true' || value === '1' || value === 'enabled';
 }
 
 export class LegacyTransformer {
@@ -174,38 +189,34 @@ export class LegacyTransformer {
       });
     }
 
-    // 3. GuildConfig (Pivot key-value pairs into GuildSettings)
+    // 3. GuildConfig (Pivot key-value pairs into GuildSettings). The names are the ones the
+    // 1.4.0 commands write (`/welcomer`, `/farewell`, `/karma server`).
     const legacyConfigs = this.getTableRows<LegacyGuildConfig>(['guild_config', 'guild_configs']);
     for (const cfg of legacyConfigs) {
-      const settings = guildSettingsMap.get(cfg.guildId);
+      const settings = cfg.guildId ? guildSettingsMap.get(cfg.guildId) : undefined;
       if (!settings) continue;
 
       switch (cfg.name) {
-        case 'welcomer.channel':
-        case 'welcome_channel':
+        case 'welcomer_channel':
           settings.welcomerChannelId = cfg.value;
           break;
-        case 'welcomer.enabled':
-        case 'welcome_enabled':
-          settings.welcomerEnabled = cfg.value === 'true' || cfg.value === '1';
+        case 'welcomer_enabled':
+          settings.welcomerEnabled = isEnabledValue(cfg.value);
           break;
-        case 'welcomer.bg':
+        case 'welcomer_bg':
           settings.welcomerBg = cfg.value;
           break;
-        case 'farewell.channel':
+        case 'farewell_channel':
           settings.farewellChannelId = cfg.value;
           break;
-        case 'farewell.enabled':
-          settings.farewellEnabled = cfg.value === 'true' || cfg.value === '1';
+        case 'farewell_enabled':
+          settings.farewellEnabled = isEnabledValue(cfg.value);
           break;
-        case 'farewell.bg':
+        case 'farewell_bg':
           settings.farewellBg = cfg.value;
           break;
-        case 'karma.enabled':
-          settings.karmaNotificationsEnabled = cfg.value === 'true' || cfg.value === '1';
-          break;
-        case 'prefix':
-          if (cfg.value) settings.prefix = cfg.value;
+        case 'karma-notification-enabled':
+          settings.karmaNotificationsEnabled = isEnabledValue(cfg.value);
           break;
       }
     }
@@ -264,23 +275,30 @@ export class LegacyTransformer {
         description: pl.authorTag ? `Created by ${pl.authorTag}` : null,
         isPublic: Boolean(pl.public),
         playCount: pl.plays ?? 0,
-        guildId: pl.guildId ?? null,
+        // 1.4.0 playlists belonged to a user, not a guild.
+        guildId: null,
         createdAt: parseDate(pl.createdAt),
       });
     }
 
-    const legacyTracks = this.getTableRows<LegacyTrack>(['track', 'tracks']);
-    for (let i = 0; i < legacyTracks.length; i++) {
-      const tr = legacyTracks[i];
-      if (!tr?.id || !tr.name || !tr.url) continue;
+    // 1.4.0 kept a playlist's tracks in insertion order (no position column).
+    const legacyTracks = this.getTableRows<LegacyTrack>(['track', 'tracks']).sort(
+      (a, b) => Number(a.id) - Number(b.id),
+    );
+    const nextPosition = new Map<string, number>();
+    for (const tr of legacyTracks) {
+      if (!tr.id || !tr.name || !tr.url || tr.playlistId == null) continue;
+      const playlistId = String(tr.playlistId);
+      const position = nextPosition.get(playlistId) ?? 0;
+      nextPosition.set(playlistId, position + 1);
       transformed.musicPlaylistTracks.push({
         id: String(tr.id),
-        playlistId: String(tr.playlistId),
+        playlistId,
         title: tr.name,
         url: tr.url,
         duration: 0,
         thumbnailUrl: null,
-        position: i,
+        position,
       });
     }
 
@@ -392,12 +410,15 @@ export class LegacyTransformer {
         price: item.price ?? 0,
         rarity: 'COMMON',
         categoryId: item.categoryId ? String(item.categoryId) : null,
-        iconUrl: item.imageUrl ?? null,
-        isPurchasable: item.purchasable !== false,
+        iconUrl: item.imageUrl || null,
+        // SQLite booleans arrive as 0 or 1.
+        isPurchasable: Boolean(item.purchasable),
         metadata: {
-          findable: item.findable ?? false,
-          sellable: item.sellable ?? false,
+          findable: Boolean(item.findable),
+          sellable: Boolean(item.sellable),
+          hidden: Boolean(item.hidden),
           purchaseLimit: item.purchaseLimit ?? 0,
+          legacyRarity: item.rarity ?? null,
         },
       });
     }

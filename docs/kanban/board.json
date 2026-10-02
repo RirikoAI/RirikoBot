@@ -318,7 +318,10 @@
         "STORY-122",
         "STORY-123",
         "STORY-124",
-        "STORY-125"
+        "STORY-125",
+        "STORY-126",
+        "STORY-127",
+        "STORY-128"
       ],
       "requires": [
         "EPIC-001",
@@ -1223,14 +1226,53 @@
       "id": "STORY-121",
       "parent": "EPIC-012",
       "title": "Rootless Dockerfile & Containerization",
-      "points": 5,
-      "status": "BACKLOG",
+      "points": 8,
+      "status": "DONE",
       "requires": [
         "STORY-120"
       ],
       "blocks": [
         "STORY-122"
-      ]
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "Dockerfile",
+          ".dockerignore",
+          "scripts/docker-smoke.ts",
+          ".circleci/config.yml",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "findWorkspaceRoot",
+          "resolveWorkspacePath",
+          "createSqliteClient",
+          "loadWebConfig"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts",
+          "apps/web/next.config.ts"
+        ],
+        "codegraph_queries": [
+          "findWorkspaceRoot resolveWorkspacePath",
+          "bot startup main.ts createBotServices createSqliteClient resolveDatabasePath",
+          "WebConfigSchema loadWebConfig createWebServices getDatabase"
+        ]
+      },
+      "acceptance": [
+        "TASK-1212: `docker build --target bot-runner .` builds a rootless bot image (uid 10001) that passes `node scripts/docker-smoke.ts bot`.",
+        "TASK-1211: `docker build --target web-runner .` builds a rootless dashboard image (uid 10001) that passes `node scripts/docker-smoke.ts web`.",
+        "TASK-1213: the CircleCI `docker` job builds both targets and runs the smoke script, and it is green on the STORY-121 PR.",
+        "docs/deployment.md section 2.1 describes the real Dockerfile targets, run commands, writable directories and volume ownership."
+      ],
+      "verify_cmd": "docker build --target bot-runner -t ririko-bot:smoke . && docker build --target web-runner -t ririko-web:smoke . && node scripts/docker-smoke.ts bot web",
+      "handovers": [
+        "STORY-121"
+      ],
+      "description": "Groomed 2026-10-01 (5 to 8 points: TASK-1213 adds a CircleCI Docker job). One root Dockerfile with shared stages and two runner targets, bot-runner and web-runner, matching the targets the compose sketch in docs/deployment.md already names. Both images keep the monorepo layout at /app so findWorkspaceRoot resolves assets/, data/, public/cards and storage/, run as uid 10001 with only the data directories writable, and ship FFmpeg (bot) and DejaVu fonts (canvas). A zero-dependency scripts/docker-smoke.ts checks a built image; CircleCI runs it for both targets. Compose, health probes, Lavalink and the Postgres schema bootstrap stay in STORY-122."
     },
     {
       "id": "STORY-122",
@@ -1645,6 +1687,83 @@
         "TASK-1755"
       ],
       "description": "Assemble and wire the complete 6-stage middleware pipeline in apps/bot/src/command-router.ts (Maintenance -> Module Toggle -> Command Override -> Permission -> Rate Limit -> Cooldown). Hardens permission resolution across slash and prefix commands, provides a runtime MaintenanceService with CLI management, hooks guild module toggles, and applies sliding-window rate limiting with owner/admin bypass."
+    },
+    {
+      "id": "STORY-126",
+      "parent": "EPIC-012",
+      "title": "1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount",
+      "points": 8,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [
+        "STORY-127"
+      ],
+      "model": "large",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/database/src/migration/engine.ts",
+          "packages/database/src/migration/inspector.ts",
+          "packages/database/src/migration/transformer.ts",
+          "packages/database/src/migration/migration.test.ts",
+          "apps/bot/src/main.ts",
+          "Dockerfile",
+          "scripts/docker-smoke.ts"
+        ],
+        "symbols": [
+          "MigrationEngine",
+          "LegacySqliteInspector",
+          "LegacyTransformer",
+          "createBotServices",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "MigrationEngine migrate verify LegacySqliteInspector inspect open LegacyTransformer transform rollback batchId",
+          "bot startup main.ts createBotServices createSqliteClient resolveDatabasePath"
+        ]
+      },
+      "acceptance": [
+        "TASK-1261: the migration tests run against the schema of a real 1.4.0 database produced by the published ririkoai/ririkobot:latest image, and every transformer mismatch it exposes is fixed.",
+        "TASK-1262: a 2.0 bot started with the 1.4.0 data folder mounted read-only at /app/legacy migrates it once, verifies it, records it and starts; the legacy files are never written."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src/migration apps/bot/src && pnpm lint --quiet && docker build --target bot-runner -t ririko-bot:smoke . && node scripts/docker-smoke.ts bot",
+      "handovers": [
+        "STORY-126"
+      ],
+      "description": "Groomed 2026-10-02. First half of sunsetting the 1.4.0 Docker image (ririkoai/ririkobot:latest, about 1.1k pulls). 1.4.0 users keep their ./data folder untouched and mount it read-only into the 2.0 bot (./data:/app/legacy:ro) next to a new /app/data volume. On first boot the bot migrates the 1.4.0 SQLite database through the existing MigrationEngine, from a temporary copy, records the run so restarts skip it, and refuses to start if the totals do not match. The legacy folder is never written, so going back to 1.4.0 stays possible. TASK-1261 first replaces the hand-written legacy schema in the tests with the real one taken from the published 1.4.0 image. Decided with the maintainer: automatic migration on first boot; images stay rootless."
+    },
+    {
+      "id": "STORY-127",
+      "parent": "EPIC-012",
+      "title": "Docker Hub Release of 2.0 Images & 1.4.0 Sunset",
+      "points": 8,
+      "status": "BACKLOG",
+      "requires": [
+        "STORY-121",
+        "STORY-126",
+        "STORY-128"
+      ],
+      "blocks": [],
+      "description": "Ungroomed; created 2026-10-02 with STORY-126. Planned tasks: (1) 1.4.0 setting aliases (AI_SERVICE_TYPE, AI_SERVICE_API_KEY, DATABASE_NAME) and a fail-fast message when the old compose layout is detected (a root-owned /app/data holding ririko.db that uid 10001 cannot write): print the upgrade steps and exit, touching nothing. (2) docs/upgrading-from-1.4.md, the 2.0 compose example with ./data:/app/legacy:ro, and the Docker Hub repository description. (3) A CircleCI release job that pushes versioned tags (X.Y.Z, X.Y, X) of bot-runner to ririkoai/ririkobot and web-runner to ririkoai/ririkobot-dashboard from git tags, with Docker Hub credentials in a CircleCI context. (4) The sunset: the maintainer tags the current latest as 1.4.0 so it stays pullable, then moves latest to 2.x after an announced period. Pushing or retagging on Docker Hub always needs the maintainer."
+    },
+    {
+      "id": "STORY-128",
+      "parent": "EPIC-012",
+      "title": "1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads",
+      "points": 3,
+      "status": "BACKLOG",
+      "requires": [
+        "TASK-1261"
+      ],
+      "blocks": [
+        "STORY-127"
+      ],
+      "description": "Ungroomed; found by TASK-1261 on 2026-10-01. The migration writes 1.4.0 welcome and farewell settings into guild_settings.welcomer_* and farewell_* columns, but 2.0 reads the cards from guild_welcomer and guild_farewell (WelcomerRepository), so those settings are lost after migration. freeGamesChannelId is not migrated (free_game_announcements get the guild id as channel id; 2.0 reads free_game_channels). ai_model, stablediffusion_model and twitch_channel are not migrated (candidates: ai_guild_preferences, image_guild_settings). The configuration table holds plaintext Twitch and Stable Diffusion credentials that are deliberately not migrated; decide whether to offer them for the vault. Must land before the release (STORY-127)."
     }
   ],
   "tasks": [
@@ -3691,19 +3810,296 @@
       "id": "TASK-1211",
       "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Web Dashboard",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "TASK-1212"
+      ],
+      "blocks": [
+        "TASK-1213"
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "Dockerfile",
+          ".dockerignore",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md",
+          "apps/web/package.json",
+          "apps/web/next.config.ts",
+          "apps/web/src/lib/security-headers.ts",
+          "apps/web/src/lib/server/services.ts",
+          "packages/core/src/config/schema.ts"
+        ],
+        "symbols": [
+          "WebConfigSchema",
+          "loadWebConfig",
+          "createWebServices",
+          "CardAlbumService",
+          "CardImageService",
+          "CardSynthesizer",
+          "WelcomerBackgroundStore"
+        ],
+        "entry_points": [
+          "apps/web/next.config.ts"
+        ],
+        "codegraph_queries": [
+          "WebConfigSchema loadWebConfig createWebServices getDatabase",
+          "CardAlbumService loadCardImageService CardImageService CardSynthesizer",
+          "WelcomerBackgroundStore WelcomerBackgroundService",
+          "staticSecurityHeaders nextConfig"
+        ]
+      },
+      "acceptance": [
+        "The `build` stage also runs `pnpm --filter @ririko/web build` with NEXT_TELEMETRY_DISABLED=1.",
+        "A `web-deps` stage runs a production install filtered to `@ririko/web...` (with --ignore-scripts).",
+        "`web-runner` builds on `runtime` and copies apps/web/.next (without .next/cache), next.config.ts and the files it imports, the dist and package.json of every workspace package the dashboard uses, and assets/tcg. It runs `next start -H 0.0.0.0` on port 3000 as uid 10001.",
+        "Run with `--cap-drop ALL --security-opt no-new-privileges` and dummy DISCORD_TOKEN, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DASHBOARD_URL and a 64-hex SECRET_VAULT_KEY, `GET /` returns 200 from inside the container, and the logs show no permission error for .next/cache or /app/data.",
+        "`node scripts/docker-smoke.ts web` checks an already-built `ririko-web:smoke` image: uid 10001, the writable directories (data, public/cards, storage/welcomer-backgrounds, apps/web/.next/cache) and the HTTP check.",
+        "docs/deployment.md section 2.1 adds the web target and the volumes the bot and dashboard share (data, public/cards, storage/welcomer-backgrounds)."
+      ],
+      "verify_cmd": "docker build --target web-runner -t ririko-web:smoke . && node scripts/docker-smoke.ts web && pnpm lint --quiet && pnpm exec prettier --check scripts/docker-smoke.ts",
+      "handovers": [
+        "STORY-121",
+        "TASK-1211",
+        "TASK-1212"
+      ],
+      "description": "Adds the web-runner target on the stages from TASK-1212. Runs `next start` from a production-only install (no standalone output), the same way the E2E job runs the dashboard. The dashboard draws album cards with the canvas, so it needs assets/tcg, the DejaVu fonts and a writable public/cards."
+    },
+    {
+      "id": "TASK-1213",
+      "parent": "STORY-121",
+      "title": "CircleCI Docker Build & Smoke Job for Bot and Web Images",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
+      "requires": [
+        "TASK-1211",
+        "TASK-1212"
+      ],
+      "blocks": [],
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          ".circleci/config.yml",
+          "scripts/docker-smoke.ts",
+          "docs/testing.md"
+        ],
+        "symbols": [],
+        "entry_points": [
+          ".circleci/config.yml"
+        ],
+        "codegraph_queries": [
+          "docker-smoke.ts"
+        ]
+      },
+      "acceptance": [
+        "A new `docker` job in .circleci/config.yml uses the `node` executor with `setup_remote_docker`, builds the `bot-runner` and `web-runner` targets, and runs `node scripts/docker-smoke.ts bot web`. It is listed in `workflows.ci`.",
+        "The job pushes no image to any registry.",
+        "docs/testing.md (Continuous Integration section) lists the job and what it checks.",
+        "The first CircleCI run on the STORY-121 PR is green (the coordinator checks this at PR time; workers do not push)."
+      ],
+      "verify_cmd": "pnpm exec prettier --check .circleci/config.yml && docker build --target bot-runner -t ririko-bot:smoke . && docker build --target web-runner -t ririko-web:smoke . && node scripts/docker-smoke.ts bot web",
+      "handovers": [
+        "STORY-121",
+        "TASK-1213",
+        "TASK-1211"
+      ],
+      "description": "Added during STORY-121 grooming on 2026-10-01. Builds both images on every push so the Dockerfile cannot rot unnoticed, for example when a new workspace package is missing from the manifest COPY list. Runs the same smoke script the workers use locally."
+    },
+    {
+      "id": "TASK-1261",
+      "parent": "STORY-126",
+      "title": "Real 1.4.0 Schema Fixture From the Published Image & Transformer Fidelity Fixes",
+      "points": 3,
+      "status": "DONE",
       "requires": [],
-      "blocks": []
+      "blocks": [
+        "TASK-1262"
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/database/src/migration/migration.test.ts",
+          "packages/database/src/migration/transformer.ts",
+          "packages/database/src/migration/inspector.ts",
+          "packages/database/src/migration/types.ts",
+          "packages/database/src/migration/__fixtures__/legacy-1.4.0-schema.sql",
+          "docs/migrations.md",
+          ".local/RirikoBot/src/database/entities",
+          ".local/RirikoBot/src/database/migrations"
+        ],
+        "symbols": [
+          "LegacyTransformer.transform",
+          "LegacySqliteInspector.inspect",
+          "MigrationEngine.migrate",
+          "MigrationEngine.verify"
+        ],
+        "entry_points": [
+          "packages/database/src/migration/engine.ts"
+        ],
+        "codegraph_queries": [
+          "MigrationEngine migrate verify LegacySqliteInspector inspect open LegacyTransformer transform rollback batchId",
+          "LegacyUser LegacyGuild LegacyGuildConfig TransformedData parseDate legacyUuid"
+        ]
+      },
+      "acceptance": [
+        "A genuine 1.4.0 database is produced locally by running the published ririkoai/ririkobot:latest image once with dummy credentials (its start command runs the TypeORM migrations and seeds). The image digest is recorded in the PROGRESS entry. Nothing is pushed.",
+        "Its schema (CREATE statements from sqlite_master, no rows) is committed as packages/database/src/migration/__fixtures__/legacy-1.4.0-schema.sql.",
+        "migration.test.ts builds its legacy database from that file instead of the hand-written DDL, inserts rows using the real column names, and covers every legacy table the transformer reads.",
+        "Every mismatch between the transformer or inspector and the real schema (table names, column names, types, date formats) is fixed and covered by a test row; each is listed in the PROGRESS entry. Coin conservation and read-only access to the source still hold.",
+        "docs/migrations.md says where the fixture came from (image digest and date)."
+      ],
+      "verify_cmd": "pnpm --filter @ririko/database build && pnpm vitest run packages/database/src/migration && pnpm --filter @ririko/database typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-126",
+        "TASK-1261"
+      ],
+      "description": "The migration tests build a hand-written approximation of the 1.4.0 schema, so nothing proves the transformer reads what 1.4.0 users actually have. Take the real schema from the published 1.4.0 image and test against it."
+    },
+    {
+      "id": "TASK-1262",
+      "parent": "STORY-126",
+      "title": "Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount",
+      "points": 5,
+      "status": "DONE",
+      "requires": [
+        "TASK-1261",
+        "STORY-121"
+      ],
+      "blocks": [],
+      "model": "large",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/database/src/migration/engine.ts",
+          "packages/database/src/migration/index.ts",
+          "packages/database/src/migrations/adventure-schema.ts",
+          "packages/database/src/index.ts",
+          "packages/core/src/config/schema.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "Dockerfile",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md",
+          "docs/migrations.md",
+          "packages/database/src/migration/upgrade.ts",
+          "packages/database/src/migration/upgrade.test.ts",
+          "packages/database/src/migration/__fixtures__/legacy-database.ts",
+          "packages/database/src/migration/migration.test.ts",
+          "apps/bot/src/legacy-upgrade.ts",
+          "apps/bot/src/legacy-upgrade.test.ts",
+          ".env.example"
+        ],
+        "symbols": [
+          "MigrationEngine.migrate",
+          "MigrationEngine.verify",
+          "ensureAdventureSchema",
+          "createBotServices",
+          "databaseConfigFromEnv",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "MigrationEngine migrate verify LegacySqliteInspector inspect open LegacyTransformer transform rollback batchId",
+          "bot startup main.ts createBotServices createSqliteClient resolveDatabasePath",
+          "ensureAdventureSchema ensureCardSerialSchema withTransaction",
+          "seedDefaultCatalog seedAchievements syncCanonicalItems"
+        ]
+      },
+      "acceptance": [
+        "Optional LEGACY_DATABASE_PATH in AppConfigSchema; the bot-runner image sets LEGACY_DATABASE_PATH=/app/legacy/ririko.db.",
+        "An upgrade step in @ririko/database: when the file at LEGACY_DATABASE_PATH exists, it copies it (with any -journal, -wal or -shm file) to a temporary directory and runs MigrationEngine against the copy. The source path is never opened or written; a test asserts its bytes and mtime are unchanged.",
+        "An additive legacy_migrations table (CREATE TABLE IF NOT EXISTS, SQLite and Postgres, like ensureAdventureSchema) records the source sha256, batch id, per-entity counts, coin totals and time, written in the same transaction as the migrated rows. A source whose sha256 is recorded is skipped, so restarts do nothing.",
+        "Automatic migration runs only when the target has no users and no legacy_migrations row; otherwise the bot logs why it skipped and how to run the manual command. If coins are not conserved the step throws and the bot exits non-zero with a clear message, leaving the target unchanged.",
+        "apps/bot/src/main.ts opens the database, runs the upgrade step, and only then builds services (createBotServices with that client), so default seeding cannot collide with migrated rows.",
+        "A manual entry point in the bot image, node apps/bot/dist/legacy-upgrade.js [--dry-run] [--force], prints the audit and runs or previews the migration.",
+        "Unit tests cover: first run migrates and records; second run skips; read-only source unchanged; non-empty target skipped; conservation failure throws.",
+        "scripts/docker-smoke.ts gains a bot check that places a 1.4.0 database built from the TASK-1261 fixture at /app/legacy (docker create and docker cp, no bind mounts) and sees the migration summary, then command registration."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src apps/bot/src && pnpm lint --quiet && docker build --target bot-runner -t ririko-bot:smoke . && node scripts/docker-smoke.ts bot",
+      "handovers": [
+        "STORY-126",
+        "TASK-1262",
+        "TASK-1261"
+      ],
+      "description": "The core of the 1.4.0 sunset: 1.4.0 users mount their untouched ./data read-only at /app/legacy, and the 2.0 bot migrates it once on first boot."
     },
     {
       "id": "TASK-1212",
       "parent": "STORY-121",
       "title": "Multi-stage Rootless Dockerfile for Bot",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [],
-      "blocks": []
+      "blocks": [
+        "TASK-1211",
+        "TASK-1213"
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "Dockerfile",
+          ".dockerignore",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md",
+          "apps/bot/package.json",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/music-sources.ts",
+          "packages/core/src/config/paths.ts",
+          "packages/database/src/client/sqlite.ts",
+          "package.json",
+          "pnpm-workspace.yaml",
+          ".npmrc"
+        ],
+        "symbols": [
+          "findWorkspaceRoot",
+          "resolveWorkspacePath",
+          "createSqliteClient",
+          "resolveDatabasePath",
+          "createMusicPipeline",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "findWorkspaceRoot resolveWorkspacePath",
+          "bot startup main.ts createBotServices createSqliteClient resolveDatabasePath",
+          "createMusicPipeline loadPrivateAdapters createAudioResource StreamType",
+          "WelcomerBackgroundStore CardImageService RENDERED_CARDS_DIR RENDERED_BOSSES_DIR"
+        ]
+      },
+      "acceptance": [
+        "A root Dockerfile has these stages: `base` (node:22-bookworm-slim, pnpm through corepack at the `packageManager` version), `build` (frozen install with HUSKY=0, then `pnpm build`), `bot-deps` (`pnpm install --prod --frozen-lockfile --ignore-scripts --filter @ririko/bot...`), `runtime` (tini, fonts-dejavu-core, ca-certificates, user `ririko` uid/gid 10001) and `bot-runner` (runtime plus ffmpeg).",
+        "`docker build --target bot-runner .` succeeds from a clean checkout. `.dockerignore` keeps packages/music-private, lavalink/, .env*, data/, storage/, public/cards, public/bosses, node_modules, dist, .next and .git out of the build context.",
+        "The container runs as uid 10001. App files are owned by root and not writable by that user; only /app/data, /app/public/cards, /app/public/bosses and /app/storage/welcomer-backgrounds are writable, and they are owned by 10001 so named volumes inherit that owner.",
+        "Run with `--cap-drop ALL --security-opt no-new-privileges` and dummy DISCORD_TOKEN and DISCORD_CLIENT_ID, the bot logs `✓ Registered <n> commands` and creates its SQLite file in /app/data, with no module-resolution or permission error. The login failure that follows is expected.",
+        "`ffmpeg -version` runs in the bot image.",
+        "scripts/docker-smoke.ts is a zero-dependency script run with Node type stripping (like scripts/build-status-site.ts). `node scripts/docker-smoke.ts bot` checks an already-built `ririko-bot:smoke` image for the three results above and exits non-zero on any failure.",
+        "docs/deployment.md section 2.1 describes the real stages, the build and run commands, the writable directories and volume ownership."
+      ],
+      "verify_cmd": "docker build --target bot-runner -t ririko-bot:smoke . && node scripts/docker-smoke.ts bot && pnpm lint --quiet && pnpm exec prettier --check scripts/docker-smoke.ts",
+      "handovers": [
+        "STORY-121",
+        "TASK-1212"
+      ],
+      "description": "First of the three STORY-121 tasks: it lays the shared Dockerfile stages, .dockerignore and the smoke script that TASK-1211 and TASK-1213 build on. Rootless bot image with FFmpeg for the fallback player, DejaVu fonts for canvas, tini as PID 1, and the monorepo layout kept at /app."
     },
     {
       "id": "TASK-1221",
@@ -4713,6 +5109,101 @@
       "requires": [],
       "blocks": [],
       "description": "CardAlbumService drew all 24 cards of a page before the HTML was sent and returned each 800x1200 PNG as a data: URL, so the album HTML (and the RSC payload, which repeats every src) carried tens of megabytes of base64. next start logged \"This rendered a large document (>512 kB) without any Suspense boundaries\". Fix: the page lists cards only, and each <img> loads its render from an owner-only GET route handler that reads the CardImageService cache (public/cards/<cardId>.png)."
+    },
+    {
+      "id": "BUG-0029",
+      "title": "Bot Fell Back to sqlite:storage/ririko.db Without DATABASE_URL Instead of the ./data/ririko.sqlite Every Other Entry Point Uses",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-121",
+      "requires": [],
+      "blocks": [],
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/core/src/config/schema.ts",
+          "packages/core/src/config/loader.test.ts",
+          "packages/database/src/client/factory.ts",
+          "packages/database/src/client/factory.test.ts",
+          "apps/bot/src/services.ts",
+          "apps/cli/src/commands/economy-config.ts",
+          "apps/cli/src/commands/guild-config.ts",
+          "apps/cli/src/commands/passkeys-reset.ts",
+          "apps/cli/src/commands/tcg-rules.ts",
+          "apps/cli/src/doctor/checks.ts",
+          "scripts/db-reset.ts",
+          "scripts/reset-tcg-user.ts",
+          "scripts/tcg-balance-sim.ts",
+          "scripts/tcg-boss-builder.ts",
+          "scripts/tcg-card-builder.ts"
+        ],
+        "symbols": [
+          "createBotServices",
+          "createDatabaseClient",
+          "AppConfigSchema",
+          "DatabaseConfig"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "createBotServices DATABASE_URL fallback createDatabaseClient AppConfigSchema DATABASE_URL default runDoctorChecks database check"
+        ]
+      },
+      "acceptance": [
+        "@ririko/core exports DEFAULT_DATABASE_URL (./data/ririko.sqlite) and AppConfigSchema uses it as the DATABASE_URL default.",
+        "@ririko/database exports databaseConfigFromEnv(env = process.env), returning { dialect: DATABASE_DIALECT or sqlite, url: DATABASE_URL or DEFAULT_DATABASE_URL }, with unit tests for the defaults and for set values.",
+        "createBotServices, the four CLI database commands, the doctor database check and the five scripts build their database config with databaseConfigFromEnv; no copy of the DATABASE_URL or DATABASE_DIALECT fallback is left outside it.",
+        "Without DATABASE_URL, the bot opens ./data/ririko.sqlite, the same file as the dashboard and CLI."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src/client packages/core/src/config apps/cli/src && pnpm lint --quiet",
+      "handovers": [
+        "BUG-0029"
+      ],
+      "description": "Found while building the bot image (TASK-1212). createBotServices fell back to sqlite:storage/ririko.db when DATABASE_URL was unset. resolveDatabasePath passes sqlite: URLs through unresolved, so better-sqlite3 opened a file named \"sqlite:storage/ririko.db\" relative to the working directory, while the config schema, the dashboard, the CLI, the scripts and .env.example all default to ./data/ririko.sqlite. A bot started without DATABASE_URL therefore used a different, empty database from the dashboard. Fix: one databaseConfigFromEnv helper in @ririko/database, with the default URL defined once in @ririko/core."
+    },
+    {
+      "id": "BUG-0030",
+      "title": "Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save",
+      "points": 1,
+      "status": "DONE",
+      "parent": "STORY-121",
+      "requires": [],
+      "blocks": [],
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "apps/web/playwright.config.ts",
+          "apps/web/e2e/settings.spec.ts",
+          ".circleci/config.yml"
+        ],
+        "symbols": [
+          "defineConfig",
+          "queryDatabase"
+        ],
+        "entry_points": [
+          "apps/web/playwright.config.ts"
+        ],
+        "codegraph_queries": [
+          "playwright.config.ts settings.spec.ts queryDatabase"
+        ]
+      },
+      "acceptance": [
+        "Playwright runs CircleCI with as many workers as the e2e executor has vCPUs (2 for resource_class medium), not the host CPU count.",
+        "Both settings specs (prefix and AI channel) save a value different from the one the form shows, so a retry does not end on \"Nothing changed.\".",
+        "pnpm test:e2e passes locally; the e2e job passes on PR #674."
+      ],
+      "verify_cmd": "pnpm test:e2e && pnpm lint --quiet && pnpm exec prettier --check apps/web/playwright.config.ts apps/web/e2e/settings.spec.ts",
+      "handovers": [
+        "BUG-0030"
+      ],
+      "description": "CircleCI e2e build 1615 failed on PR #674 (commit 5fb6b94) while build 1614 passed on the identical tree (1f8403d). The failure screenshot shows \"Settings saved.\": the server action answered after the 5 s expect window. Playwright sized its pool from the host CPU count (8 workers) while the medium resource class gives the container 2 vCPUs, so eight Chromium instances and next start competed for 2 CPUs and the action response queued behind about 40 sidebar link prefetches. The retry then failed differently: the first attempt had saved \"?\", so the form answered \"Nothing changed.\"."
     }
   ],
   "active_in_progress_ticket": null
