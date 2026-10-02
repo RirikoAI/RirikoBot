@@ -35,7 +35,8 @@ describe('renderYouTubeCipherConfig', () => {
 
 describe('docker/lavalink/application.yml', () => {
   it('matches the renderer, with secrets left to the container environment', () => {
-    const committed = readFileSync(DOCKER_LAVALINK_CONFIG, 'utf8');
+    // Git may check the file out with CRLF line endings on Windows.
+    const committed = readFileSync(DOCKER_LAVALINK_CONFIG, 'utf8').replaceAll('\r\n', '\n');
     // Regenerate with: node scripts/lavalink-setup.ts --docker-config
     expect(committed).toBe(renderLavalinkConfig(DOCKER_LAVALINK_VALUES));
     expect(committed).toContain('password: "${LAVALINK_PASSWORD}"');
