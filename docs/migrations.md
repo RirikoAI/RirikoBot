@@ -89,6 +89,8 @@ ririko migrate:rollback --batch-id <batch_uuid>
 
 ## 4. Docker Upgrade From 1.4.0 (Read-Only Legacy Mount)
 
+The step-by-step guide for users is [upgrading-from-1.4.md](upgrading-from-1.4.md). This section describes how the upgrade works.
+
 1.4.0 ran from `ririkoai/ririkobot:latest`. Its compose file kept the SQLite database in `./data/ririko.db`, mounted at `/app/data`. To upgrade to 2.0:
 - Leave that folder exactly as it is.
 - Mount it read-only at `/app/legacy`, next to a new volume for the 2.0 data.

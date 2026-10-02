@@ -42,7 +42,7 @@ The root `Dockerfile` builds both images, `bot-runner` and `web-runner`, from on
 - **Process**: `tini` is PID 1. It forwards `SIGTERM` to Node, which shuts the gateway down cleanly, and reaps FFmpeg child processes.
 - **FFmpeg**: Included in the bot image for the built-in player used when Lavalink is not configured.
 - **Environment**: The images read configuration only from environment variables (`.env` is never copied in). Both default to SQLite (`DATABASE_DIALECT=sqlite`, `DATABASE_URL=./data/ririko.sqlite`). The dashboard also needs `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL` and `SECRET_VAULT_KEY`.
-- **Upgrading from 1.4.0**: mount the old `./data` folder read-only at `/app/legacy` (`./data:/app/legacy:ro`). The bot image sets `LEGACY_DATABASE_PATH=/app/legacy/ririko.db` and migrates that database once on first start, without writing to it. See [docs/migrations.md section 4](migrations.md).
+- **Upgrading from 1.4.0**: mount the old `./data` folder read-only at `/app/legacy` (`./data:/app/legacy:ro`). The bot image sets `LEGACY_DATABASE_PATH=/app/legacy/ririko.db` and migrates that database once on first start, without writing to it. The user guide is [docs/upgrading-from-1.4.md](upgrading-from-1.4.md); [docs/migrations.md section 4](migrations.md) explains how it works.
 
 Build and run both on one host (SQLite):
 ```bash
@@ -104,7 +104,7 @@ Volumes:
 | `welcomer_backgrounds` | `/app/storage/welcomer-backgrounds` | bot and web: uploaded welcome backgrounds |
 
 - **Ownership:** the images run as uid 10001. A named volume starts owned by that user. If you replace one with a bind mount, make it writable first: `chown -R 10001:10001 <dir>`.
-- **Upgrading from 1.4.0:** uncomment `./data:/app/legacy:ro` on the bot. The old data folder is mounted read-only and migrated once (`docs/migrations.md` section 4).
+- **Upgrading from 1.4.0:** the 1.4.0 migration does not support a Postgres target yet (`docs/migrations.md` section 4.3), and this stack uses Postgres. Upgrade with the single-container SQLite compose in [docs/upgrading-from-1.4.md](upgrading-from-1.4.md) instead. The commented `./data:/app/legacy:ro` mount is for when Postgres targets are supported.
 
 ---
 
