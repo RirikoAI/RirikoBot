@@ -3970,7 +3970,7 @@
       "parent": "STORY-126",
       "title": "Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "TASK-1261",
         "STORY-121"
@@ -3992,7 +3992,14 @@
           "Dockerfile",
           "scripts/docker-smoke.ts",
           "docs/deployment.md",
-          "docs/migrations.md"
+          "docs/migrations.md",
+          "packages/database/src/migration/upgrade.ts",
+          "packages/database/src/migration/upgrade.test.ts",
+          "packages/database/src/migration/__fixtures__/legacy-database.ts",
+          "packages/database/src/migration/migration.test.ts",
+          "apps/bot/src/legacy-upgrade.ts",
+          "apps/bot/src/legacy-upgrade.test.ts",
+          ".env.example"
         ],
         "symbols": [
           "MigrationEngine.migrate",

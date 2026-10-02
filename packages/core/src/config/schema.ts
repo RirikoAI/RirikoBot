@@ -54,6 +54,9 @@ const BaseAppConfigSchema = z.object({
   // Dual-Dialect Database
   DATABASE_URL: z.string().default(DEFAULT_DATABASE_URL),
   DATABASE_DIALECT: DatabaseDialectSchema,
+  // A 1.4.0 SQLite database to migrate once on startup (the Docker image reads a read-only
+  // mount at /app/legacy/ririko.db). It is copied, never written.
+  LEGACY_DATABASE_PATH: z.string().optional(),
 
   // AppSec & Credential Vault (AES-256-GCM 32-byte hex key)
   SECRET_VAULT_KEY: z

@@ -90,8 +90,11 @@ COPY assets assets
 # them start with this owner.
 RUN mkdir -p data public/cards public/bosses storage/welcomer-backgrounds \
   && chown 10001:10001 data public/cards public/bosses storage/welcomer-backgrounds
+# A 1.4.0 data folder mounted read-only at /app/legacy is migrated once on first start
+# (docs/migrations.md section 4). Without the mount nothing happens.
 ENV DATABASE_DIALECT=sqlite \
-    DATABASE_URL=./data/ririko.sqlite
+    DATABASE_URL=./data/ririko.sqlite \
+    LEGACY_DATABASE_PATH=/app/legacy/ririko.db
 USER 10001:10001
 CMD ["node", "apps/bot/dist/main.js"]
 

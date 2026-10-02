@@ -84,3 +84,41 @@ ririko migrate:verify --source ./old-ririko.sqlite --target postgresql://...
 ririko migrate:rollback --batch-id <batch_uuid>
 ```
 - Removes records tagged with the specific migration batch ID without affecting new user data created after launch.
+
+## 4. Docker Upgrade From 1.4.0 (Read-Only Legacy Mount)
+
+1.4.0 ran from `ririkoai/ririkobot:latest`. Its compose file kept the SQLite database in `./data/ririko.db`, mounted at `/app/data`. To upgrade to 2.0:
+- Leave that folder exactly as it is.
+- Mount it read-only at `/app/legacy`, next to a new volume for the 2.0 data.
+
+```yaml
+services:
+  bot:
+    volumes:
+      - ririko_data:/app/data # new 2.0 data, owned by uid 10001
+      - ./data:/app/legacy:ro # untouched 1.4.0 data
+```
+
+### 4.1. What Happens on First Start
+The bot image sets `LEGACY_DATABASE_PATH=/app/legacy/ririko.db`. Before the bot builds its services or seeds any defaults, it migrates that file once (`runLegacyUpgrade` in `apps/bot/src/legacy-upgrade.ts`, which calls `upgradeLegacyDatabase` in `packages/database/src/migration/upgrade.ts`):
+1. **No file there:** nothing happens and nothing is logged.
+2. **Copy:** the file, plus any `-wal` or `-journal` file, is copied to a temporary directory while its sha256 is computed. SQLite only ever opens the copy, so the read-only mount is never opened by SQLite or written. Going back to 1.4.0 always works.
+3. **Already recorded:** if `legacy_migrations` already has that sha256, the bot logs `• The 1.4.0 database at … was already migrated on …` and starts. Restarts never migrate twice.
+4. **Target not empty:** if the 2.0 database already has users, or another 1.4.0 database was migrated into it, the bot logs a warning with the manual command and starts without migrating.
+5. **Migrate:** otherwise `MigrationEngine` migrates the copy in one transaction and writes the `legacy_migrations` row (sha256, batch id, per-entity counts, coin totals, time) in the same transaction. The bot logs `✓ Migrated the 1.4.0 database at …: N users, N guilds, N coins (batch …)`.
+6. **Coins do not match:** if the migrated coins would not add up to the 1.4.0 total (for example negative balances), nothing is written and the bot exits with `Legacy coin totals do not match …`.
+
+### 4.2. Manual Command
+Run it in the bot image with the same mounts, while the bot is stopped:
+```bash
+docker run --rm -v ./data:/app/legacy:ro -v ririko_data:/app/data <bot image> node apps/bot/dist/legacy-upgrade.js --dry-run
+```
+- `--dry-run` prints the audit and the counts without writing.
+- `--force` migrates even when the 2.0 database already has users or another 1.4.0 database. Rows that already exist are kept (`onConflictDoNothing`).
+- `--source <path>` reads a file other than `LEGACY_DATABASE_PATH`.
+
+The command exits with 0 when it migrated or found the database already migrated, and with 1 when it skipped or failed.
+
+### 4.3. Known Gaps
+- **Settings that do not carry over yet:** some 1.4.0 guild settings land in tables 2.0 does not read (welcome and farewell cards, the free-games channel, the AI and image models). This is tracked in STORY-128. It must be fixed before `latest` moves to 2.0 (STORY-127).
+- **Postgres targets:** the migration currently fails there, because the 1.4.0 integer ids go into uuid columns. The Docker upgrade targets SQLite (the image default).
