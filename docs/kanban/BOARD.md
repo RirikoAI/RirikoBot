@@ -19,8 +19,7 @@
 ## 🔍 Review
 | ID | Type | Title | Pts | Parent | Handover |
 |---|---|---|---|---|---|
-| `STORY-122` | Story | Production Orchestration & Health Probes | 8 | EPIC-012 | [STORY-122.md](./handovers/STORY-122.md) |
-| `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 5 | EPIC-012 | [STORY-128.md](./handovers/STORY-128.md) |
+| `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 8 | EPIC-012 | [STORY-124.md](./handovers/STORY-124.md) |
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -85,6 +84,7 @@
 | `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | EPIC-011 | [STORY-164.md](./handovers/STORY-164.md) |
 | `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | EPIC-012 | [STORY-120.md](./handovers/STORY-120.md) |
 | `STORY-121` | Story | Rootless Dockerfile & Containerization | 8 | EPIC-012 | [STORY-121.md](./handovers/STORY-121.md) |
+| `STORY-122` | Story | Production Orchestration & Health Probes | 8 | EPIC-012 | [STORY-122.md](./handovers/STORY-122.md) |
 | `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | EPIC-012 | [STORY-123.md](./handovers/STORY-123.md) |
 | `STORY-130` | Story | Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | EPIC-013 | [STORY-130.md](./handovers/STORY-130.md) |
 | `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | EPIC-013 | [STORY-131.md](./handovers/STORY-131.md) |
@@ -113,6 +113,7 @@
 | `STORY-174` | Story | Scoped Command Registration (Global vs Per-Server) & CLI Command Sync | 8 | EPIC-003 | [STORY-174.md](./handovers/STORY-174.md) |
 | `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | EPIC-003 | — |
 | `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | [STORY-126.md](./handovers/STORY-126.md) |
+| `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 5 | EPIC-012 | [STORY-128.md](./handovers/STORY-128.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -274,6 +275,8 @@
 | `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | STORY-123 | — |
 | `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | STORY-123 | — |
 | `TASK-1233` | Task | Vercel Project Status Site Generated from the Kanban Board | 1 | STORY-123 | — |
+| `TASK-1241` | Task | CircleCI Postgres Service & Dialect-Parameterized Repository Suite | 3 | STORY-124 | [TASK-1241.md](./handovers/TASK-1241.md) |
+| `TASK-1242` | Task | Fix and Test Concurrent Trade Accepts & Market Purchases on Postgres | 3 | STORY-124 | [TASK-1242.md](./handovers/TASK-1242.md) |
 | `TASK-1331` | Task | Database schema (guild_welcomer / guild_farewell), WelcomerService with @napi-rs/canvas renderer, Background SSRF & DNS validation, and unit tests | 2 | STORY-133 | [TASK-1331.md](./handovers/TASK-1331.md) |
 | `TASK-1332` | Task | guildMemberAdd / guildMemberRemove Discord Gateway listeners and dual-dispatch configuration commands (/welcomer, /farewell) | 1 | STORY-133 | [TASK-1332.md](./handovers/TASK-1332.md) |
 | `TASK-1701` | Task | Adventure Contracts and Complete Scenario Catalog | 3 | STORY-170 | [TASK-1701.md](./handovers/TASK-1701.md) |
@@ -311,6 +314,7 @@
 | `TASK-1281` | Task | Route 1.4.0 guild_config Settings Into the 2.0 Tables the Bot Reads | 3 | STORY-128 | [TASK-1281.md](./handovers/TASK-1281.md) |
 | `TASK-1282` | Task | Backfill Migrated Reaction-Role Channels on First Reaction & Tolerate Unknown Channels | 2 | STORY-128 | [TASK-1282.md](./handovers/TASK-1282.md) |
 | `TASK-1223` | Task | Postgres Schema Bootstrap: Generated PG DDL Applied at Startup Under an Advisory Lock | 3 | STORY-122 | [TASK-1223.md](./handovers/TASK-1223.md) |
+| `TASK-1243` | Task | AI Provider Fallback Test Through createBotServices | 2 | STORY-124 | [TASK-1243.md](./handovers/TASK-1243.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -360,13 +364,9 @@
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | EPIC-011 |
-| `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 8 | EPIC-012 |
 | `STORY-125` | Story | Raise Test Coverage Toward 80% | 13 | EPIC-012 |
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
 | `STORY-127` | Story | Docker Hub Release of 2.0 Images & 1.4.0 Sunset | 8 | EPIC-012 |
-| `TASK-1241` | Task | CircleCI Postgres Service & Dialect-Parameterized Repository Suite | 3 | STORY-124 |
-| `TASK-1242` | Task | Fix and Test Concurrent Trade Accepts & Market Purchases on Postgres | 3 | STORY-124 |
-| `TASK-1243` | Task | AI Provider Fallback Test Through createBotServices | 2 | STORY-124 |
 | `TASK-1271` | Task | 1.4.0 Env Aliases & Fail-Fast on the Old Compose Layout | 2 | STORY-127 |
 | `TASK-1272` | Task | Upgrade Guide From 1.4.0 & Docker Hub Repository Descriptions | 2 | STORY-127 |
 | `TASK-1273` | Task | Tag-Driven CircleCI Release Job Pushing Versioned 2.x Images | 3 | STORY-127 |
@@ -378,6 +378,7 @@
 | `BUG-0023` | Bug | Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message | 2 | STORY-040 |
 | `BUG-0024` | Bug | Legacy Migration Reads the Wrong Karma and Welcomer Keys | 2 | STORY-043 |
 | `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED | 5 | STORY-105 |
+| `BUG-0031` | Bug | Shared Row Types Say number but Postgres Returns bigint for Balances and XP | 3 | EPIC-012 |
 
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |

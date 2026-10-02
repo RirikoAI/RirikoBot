@@ -86,3 +86,15 @@ TASK-1261 fixed the names the transformer reads. Where the values land in 2.0 is
 **Decisions & gotchas**
 - The migration summary now has a `notices` list on `MigrationResult`. The bot startup log and `ririko migrate:legacy` print it.
 - Answers to the TASK-1261 FLAG: every row of its table is handled, and the reaction-role channel is backfilled lazily.
+
+---
+
+## REVIEW · 2026-10-02T12:28:01Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- PR #676 merged into `develop/2.0.0` at 2026-10-02T12:19:39Z after CircleCI passed.
+- Rerun on `develop/2.0.0` (`4217150`): `pnpm build`, `pnpm typecheck`, `pnpm lint --quiet` pass; `pnpm vitest run packages/database/src apps/bot/src apps/web/src scripts` passes 115 files, 916 tests, 1 skipped; `docker compose -f docker-compose.production.yml config -q` passes.
+
+**Acceptance**
+- [x] TASK-1281: every 1.4.0 guild_config setting that 2.0 can represent lands in the table 2.0 reads (guild_welcomer, guild_farewell, free_game_channels, ai_guild_preferences, image_guild_settings), proven by the real-schema migration test.
+- [x] TASK-1282: migrated reaction roles (channel unknown) link their real channel on first use, and removing them or opening the dashboard panel no longer fails.
