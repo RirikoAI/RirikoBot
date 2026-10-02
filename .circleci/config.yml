@@ -41,6 +41,32 @@ commands:
           name: Build workspace packages
           command: pnpm build
 
+  build-and-smoke:
+    description: Build both production images and run the smoke checks against them
+    steps:
+      - setup_remote_docker
+      - run:
+          # The Dockerfile uses BuildKit cache mounts, which need the buildx plugin.
+          name: Check for Docker Buildx
+          command: |
+            if ! docker buildx version; then
+              mkdir -p ~/.docker/cli-plugins
+              curl -sSfL "https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64" \
+                -o ~/.docker/cli-plugins/docker-buildx
+              chmod +x ~/.docker/cli-plugins/docker-buildx
+              docker buildx version
+            fi
+      - run:
+          name: Build the bot image
+          command: docker build --target bot-runner -t ririko-bot:smoke .
+      - run:
+          name: Build the dashboard image
+          command: docker build --target web-runner -t ririko-web:smoke .
+      - run:
+          # Runs every check through docker run/exec/logs/diff, so it works on the remote engine.
+          name: Smoke-check both images
+          command: node scripts/docker-smoke.ts bot web
+
 jobs:
   lint:
     executor: node
@@ -176,28 +202,39 @@ jobs:
       BUILDX_VERSION: 0.37.2
     steps:
       - checkout
-      - setup_remote_docker
+      - build-and-smoke
+
+  # Tag-driven release (docs/release.md): runs only for git tags like v2.1.3 or v2.1.3-rc.1.
+  # Builds and smoke-checks both images as the `docker` job does, then pushes
+  # ririkoai/ririkobot and ririkoai/ririkobot-dashboard with the tags from
+  # scripts/release-tags.ts (2.1.3, 2.1 and 2; a prerelease only gets its full version).
+  # It never pushes `latest`; the maintainer moves that by hand.
+  # Docker Hub credentials come from the CircleCI context `dockerhub` (DOCKERHUB_USERNAME and
+  # DOCKERHUB_TOKEN, an access token with read and write scope), which the maintainer creates.
+  release:
+    executor: node
+    environment:
+      BUILDX_VERSION: 0.37.2
+    steps:
+      - checkout
       - run:
-          # The Dockerfile uses BuildKit cache mounts, which need the buildx plugin.
-          name: Check for Docker Buildx
+          name: Docker Hub tags for this git tag
           command: |
-            if ! docker buildx version; then
-              mkdir -p ~/.docker/cli-plugins
-              curl -sSfL "https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64" \
-                -o ~/.docker/cli-plugins/docker-buildx
-              chmod +x ~/.docker/cli-plugins/docker-buildx
-              docker buildx version
-            fi
+            node scripts/release-tags.ts "$CIRCLE_TAG" > /tmp/release-tags
+            cat /tmp/release-tags
+            if grep -qx latest /tmp/release-tags; then echo 'Refusing to push latest' && exit 1; fi
+      - build-and-smoke
       - run:
-          name: Build the bot image
-          command: docker build --target bot-runner -t ririko-bot:smoke .
-      - run:
-          name: Build the dashboard image
-          command: docker build --target web-runner -t ririko-web:smoke .
-      - run:
-          # Runs every check through docker run/exec/logs/diff, so it works on the remote engine.
-          name: Smoke-check both images
-          command: node scripts/docker-smoke.ts bot web
+          name: Push both images to Docker Hub
+          command: |
+            echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+            while read -r tag; do
+              docker tag ririko-bot:smoke "ririkoai/ririkobot:$tag"
+              docker tag ririko-web:smoke "ririkoai/ririkobot-dashboard:$tag"
+              docker push "ririkoai/ririkobot:$tag"
+              docker push "ririkoai/ririkobot-dashboard:$tag"
+            done < /tmp/release-tags
+            docker logout
 
   secrets:
     docker:
@@ -229,3 +266,13 @@ workflows:
       - e2e
       - docker
       - secrets
+  # Keep the tag pattern in sync with RELEASE_TAG_PATTERN in scripts/release-tags.ts.
+  release:
+    jobs:
+      - release:
+          context: dockerhub
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+(-.+)?$/
+            branches:
+              ignore: /.*/

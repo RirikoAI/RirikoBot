@@ -76,3 +76,20 @@ See docs/kanban/protocol.md section 6.
 - The TASK-1223 FLAG was a production bug: adventure XP could not settle on Postgres (`xp_events.source` overflow). Fixed in TASK-1241.
 - TASK-1242 also claims rows in reject, cancel and expiry, which had the same race.
 - Open question for the user: the shared row types are inferred from the SQLite schema (`number`) while Postgres returns `bigint` for balances and XP. Worth a BUG ticket.
+
+---
+
+## REVIEW · 2026-10-02T15:41:07Z · Claude Code (Opus 5.5) · DONE
+
+**Checks**
+- Re-ran the story verify_cmd on `develop/2.0.0` after PR #677 merged: `pnpm typecheck`, `pnpm vitest run packages/database/src packages/services/src/waifu-tcg apps/bot/src` (120 files, 1005 passed, 53 Postgres variants skipped), `pnpm lint --quiet`. All pass.
+- PR #677 CI is green, including the first run of `ci/circleci: test-postgres`, which the REVIEW entry listed as not yet run.
+
+**Acceptance**
+- TASK-1241: `.circleci/config.yml` has a `test-postgres` job in the `ci` workflow. The repository suites run through `describeDialects`.
+- TASK-1242: `TradeService.claimPending` and `MarketService.claimActive` move the row with `transitionStatus` inside the transaction. The concurrency tests pass on Postgres in CI.
+- TASK-1243: `apps/bot/src/controllers/ai-provider-fallback.test.ts` drives the fallback through `createBotServices`.
+- The TASK-1223 FLAG (`varchar(32)` overflow) was a production bug in `xp_events.source`, fixed in TASK-1241. The flag is closed.
+
+**Follow-up**
+- The question about row types is still open. The shared row types come from the SQLite schema (`number`), but Postgres returns `bigint` for balances and XP. Suggest a BUG ticket. It is not filed yet and waits for the user.
