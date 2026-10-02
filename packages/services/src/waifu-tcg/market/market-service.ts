@@ -5,6 +5,7 @@ import type {
   EconomyRepository,
   DatabaseClient,
   MarketListing,
+  MarketListingStatus,
   UserCard,
   WaifuCard,
 } from '@ririko/database';
@@ -63,6 +64,19 @@ export class MarketService {
     this.marketTaxRate = options?.marketTaxRate ?? 0.05; // 5% default market tax
     this.listingDurationDays = options?.listingDurationDays ?? 7; // 7 days expiration
     this.rulesResolver = options?.rulesResolver;
+  }
+
+  /**
+   * Resolves an active listing inside `tx`, before anything else changes. The status checks
+   * before each transaction can pass for two concurrent calls; only one of them claims the row
+   * here, and the other rolls back with the same error.
+   */
+  private async claimActive(listingId: string, to: MarketListingStatus, tx: DatabaseClient) {
+    const claimed = await this.marketRepo.transitionStatus(listingId, 'ACTIVE', to, tx);
+    if (claimed) return claimed;
+    const current = await this.marketRepo.findById(listingId, tx);
+    if (!current) throw new Error(`Market listing ${listingId} not found.`);
+    throw new Error(`Listing ${listingId} is no longer active (status: ${current.status}).`);
   }
 
   /** The tax and listing lifetime new listings get. */
@@ -153,6 +167,8 @@ export class MarketService {
     const netSellerCredit = listing.price - taxDeducted;
 
     const updatedListing = await withTransaction(this.dbClient, async (tx) => {
+      const sold = await this.claimActive(listing.id, 'SOLD', tx);
+
       // Listings made before gear locking may still carry gear: never sell it along with the card.
       const card = await this.waifuCardRepo.findUserCardById(listing.userCardId, tx);
       if (card) {
@@ -187,8 +203,7 @@ export class MarketService {
       // Transfer card ownership to buyer and set IDLE
       await this.waifuCardRepo.updateUserCardOwner(listing.userCardId, buyerUserId, 'IDLE', tx);
 
-      // Mark listing as SOLD
-      return this.marketRepo.updateStatus(listing.id, 'SOLD', tx);
+      return sold;
     });
 
     return { listing: updatedListing, netPaid: listing.price, taxDeducted };
@@ -211,11 +226,10 @@ export class MarketService {
     }
 
     return withTransaction(this.dbClient, async (tx) => {
+      const cancelled = await this.claimActive(listing.id, 'CANCELLED', tx);
       // Revert card state back to IDLE
       await this.waifuCardRepo.updateUserCardState(listing.userCardId, 'IDLE', tx);
-
-      // Mark listing as CANCELLED
-      return this.marketRepo.updateStatus(listing.id, 'CANCELLED', tx);
+      return cancelled;
     });
   }
 
@@ -225,13 +239,14 @@ export class MarketService {
 
     let count = 0;
     for (const listing of expiredListings) {
-      await withTransaction(this.dbClient, async (tx) => {
-        // Revert card back to IDLE
+      // A listing bought or cancelled since the scan is left alone.
+      const expired = await withTransaction(this.dbClient, async (tx) => {
+        if (!(await this.marketRepo.transitionStatus(listing.id, 'ACTIVE', 'EXPIRED', tx)))
+          return false;
         await this.waifuCardRepo.updateUserCardState(listing.userCardId, 'IDLE', tx);
-        // Mark listing EXPIRED
-        await this.marketRepo.updateStatus(listing.id, 'EXPIRED', tx);
+        return true;
       });
-      count++;
+      if (expired) count++;
     }
 
     return count;

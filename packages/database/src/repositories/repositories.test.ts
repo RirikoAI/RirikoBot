@@ -1,7 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { DEFAULT_RESET_SCHEDULE, getResetDayKey } from '@ririko/core';
-import { createDatabaseClient } from '../client/factory.js';
-import type { SqliteDatabaseClient } from '../client/types.js';
+import { describeDialects } from '../testing/dialects.js';
 import { UserRepository } from './user.repository.js';
 import { GuildSettingsRepository } from './guild-settings.repository.js';
 import { EconomyRepository } from './economy.repository.js';
@@ -12,8 +11,7 @@ import { ItemCategoryRepository } from './item-category.repository.js';
 import { InventoryRepository } from './inventory.repository.js';
 import { PlayerEnergyRepository } from './player-energy.repository.js';
 
-describe('Core Domain Repositories & ACID Financial Ledger', () => {
-  let client: SqliteDatabaseClient;
+describeDialects('Core Domain Repositories & ACID Financial Ledger', (db) => {
   let userRepo: UserRepository;
   let guildSettingsRepo: GuildSettingsRepository;
   let economyRepo: EconomyRepository;
@@ -23,159 +21,8 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
   let inventoryRepo: InventoryRepository;
   let playerEnergyRepo: PlayerEnergyRepository;
 
-  beforeEach(async () => {
-    const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
-    if (rawClient.dialect !== 'sqlite') throw new Error('Expected sqlite client');
-    client = rawClient;
-
-    // Create normalized tables needed for tests
-    client.raw.exec(`
-      CREATE TABLE users (
-        id TEXT PRIMARY KEY,
-        username TEXT NOT NULL,
-        display_name TEXT,
-        avatar_url TEXT,
-        profile_background_url TEXT,
-        is_blacklisted INTEGER NOT NULL DEFAULT 0,
-        warn_count INTEGER NOT NULL DEFAULT 0,
-        notify_level_up INTEGER NOT NULL DEFAULT 1,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE guild_settings (
-        guild_id TEXT PRIMARY KEY,
-        prefix TEXT NOT NULL DEFAULT '!',
-        locale TEXT NOT NULL DEFAULT 'en-US',
-        timezone TEXT NOT NULL DEFAULT 'UTC',
-        ai_channel_id TEXT,
-        log_channel_id TEXT,
-        escalation_steps TEXT,
-        music_channel_id TEXT,
-        welcomer_channel_id TEXT,
-        welcomer_enabled INTEGER NOT NULL DEFAULT 0,
-        welcomer_bg TEXT,
-        farewell_channel_id TEXT,
-        farewell_enabled INTEGER NOT NULL DEFAULT 0,
-        farewell_bg TEXT,
-        karma_notifications_enabled INTEGER NOT NULL DEFAULT 1,
-        level_up_channel_id TEXT,
-        xp_rate_percent INTEGER NOT NULL DEFAULT 100,
-        no_xp_channel_ids TEXT NOT NULL DEFAULT '[]',
-        no_xp_role_ids TEXT NOT NULL DEFAULT '[]',
-        voice_xp_enabled INTEGER NOT NULL DEFAULT 0,
-        max_game_wager INTEGER,
-        tcg_drops_enabled INTEGER NOT NULL DEFAULT 0,
-        tcg_drop_channel_id TEXT,
-        tcg_drop_message_threshold INTEGER NOT NULL DEFAULT 50,
-        tcg_drop_start_hour INTEGER NOT NULL DEFAULT 8,
-        tcg_drop_end_hour INTEGER NOT NULL DEFAULT 23,
-        tcg_drop_claim_timeout_seconds INTEGER NOT NULL DEFAULT 60,
-        tcg_drop_cooldown_minutes INTEGER NOT NULL DEFAULT 5,
-        tcg_manager_role_id TEXT,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE economy_balances (
-        user_id TEXT PRIMARY KEY,
-        wallet_balance INTEGER NOT NULL DEFAULT 0,
-        bank_balance INTEGER NOT NULL DEFAULT 0,
-        bank_capacity INTEGER NOT NULL DEFAULT 10000,
-        net_worth INTEGER NOT NULL DEFAULT 0,
-        updated_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE economy_transactions (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        guild_id TEXT,
-        type TEXT NOT NULL,
-        amount INTEGER NOT NULL,
-        currency TEXT NOT NULL DEFAULT 'CREDITS',
-        balance_before INTEGER NOT NULL,
-        balance_after INTEGER NOT NULL,
-        source TEXT NOT NULL,
-        metadata TEXT DEFAULT '{}',
-        created_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE xp_accounts (
-        user_id TEXT NOT NULL,
-        guild_id TEXT NOT NULL,
-        xp INTEGER NOT NULL DEFAULT 0,
-        level INTEGER NOT NULL DEFAULT 0,
-        karma INTEGER NOT NULL DEFAULT 0,
-        last_xp_at INTEGER,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL,
-        PRIMARY KEY (user_id, guild_id)
-      );
-
-      CREATE TABLE xp_events (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        guild_id TEXT NOT NULL,
-        xp_awarded INTEGER NOT NULL,
-        source TEXT NOT NULL,
-        created_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE leaderboard_snapshots (
-        user_id TEXT NOT NULL,
-        guild_id TEXT NOT NULL,
-        global_rank INTEGER NOT NULL,
-        server_rank INTEGER NOT NULL,
-        calculated_at INTEGER NOT NULL,
-        PRIMARY KEY (user_id, guild_id)
-      );
-
-      CREATE TABLE economy_item_categories (
-
-        id TEXT PRIMARY KEY,
-
-        code TEXT UNIQUE,
-
-        name TEXT NOT NULL,
-
-        description TEXT
-
-      );
-
-
-      CREATE TABLE economy_items (
-        id TEXT PRIMARY KEY,
-        code TEXT UNIQUE,
-        name TEXT NOT NULL,
-        description TEXT NOT NULL,
-        price INTEGER NOT NULL,
-        rarity TEXT NOT NULL DEFAULT 'COMMON',
-        category_id TEXT,
-        icon_url TEXT,
-        is_purchasable INTEGER NOT NULL DEFAULT 1,
-        metadata TEXT DEFAULT '{}'
-      );
-
-      CREATE TABLE economy_inventories (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        item_id TEXT NOT NULL,
-        quantity INTEGER NOT NULL DEFAULT 1,
-        acquired_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE player_energy (
-        user_id TEXT PRIMARY KEY,
-        current_energy INTEGER NOT NULL DEFAULT 100,
-        max_energy INTEGER NOT NULL DEFAULT 100,
-        bonus_energy INTEGER NOT NULL DEFAULT 0,
-        daily_energy_pots_used INTEGER NOT NULL DEFAULT 0,
-        last_replenished_at INTEGER NOT NULL,
-        last_reset_date TEXT NOT NULL,
-        updated_at INTEGER NOT NULL
-      );
-    `);
-
+  beforeEach(() => {
+    const client = db.client;
     userRepo = new UserRepository(client);
     guildSettingsRepo = new GuildSettingsRepository(client);
     economyRepo = new EconomyRepository(client);
@@ -184,10 +31,6 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
     itemRepo = new ItemRepository(client);
     inventoryRepo = new InventoryRepository(client);
     playerEnergyRepo = new PlayerEnergyRepository(client);
-  });
-
-  afterEach(async () => {
-    await client.close();
   });
 
   describe('UserRepository', () => {
@@ -273,10 +116,10 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
     it('initializes zero balance with bank capacity', async () => {
       const balance = await economyRepo.getOrCreateBalance('user_e1', 50000);
       expect(balance.userId).toBe('user_e1');
-      expect(balance.walletBalance).toBe(0);
-      expect(balance.bankBalance).toBe(0);
-      expect(balance.bankCapacity).toBe(50000);
-      expect(balance.netWorth).toBe(0);
+      expect(Number(balance.walletBalance)).toBe(0);
+      expect(Number(balance.bankBalance)).toBe(0);
+      expect(Number(balance.bankCapacity)).toBe(50000);
+      expect(Number(balance.netWorth)).toBe(0);
     });
 
     it('modifies balance and logs immutable transaction', async () => {
@@ -288,12 +131,12 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
         metadata: { streak: 1 },
       });
 
-      expect(result.balance.walletBalance).toBe(500);
-      expect(result.balance.netWorth).toBe(500);
+      expect(Number(result.balance.walletBalance)).toBe(500);
+      expect(Number(result.balance.netWorth)).toBe(500);
       expect(result.transaction.type).toBe('DAILY');
-      expect(result.transaction.amount).toBe(500);
-      expect(result.transaction.balanceBefore).toBe(0);
-      expect(result.transaction.balanceAfter).toBe(500);
+      expect(Number(result.transaction.amount)).toBe(500);
+      expect(Number(result.transaction.balanceBefore)).toBe(0);
+      expect(Number(result.transaction.balanceAfter)).toBe(500);
       expect(result.transaction.source).toBe('DAILY_COMMAND');
 
       const history = await economyRepo.getTransactionHistory('user_e1');
@@ -320,7 +163,7 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
 
       // Balance remains unchanged
       const current = await economyRepo.findById('user_broke');
-      expect(current?.walletBalance).toBe(100);
+      expect(Number(current?.walletBalance)).toBe(100);
     });
 
     it('handles deposits and withdrawals with bank capacity enforcement', async () => {
@@ -334,14 +177,14 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
 
       // Deposit 600
       const depositResult = await economyRepo.deposit('user_banker', 600);
-      expect(depositResult.balance.walletBalance).toBe(400);
-      expect(depositResult.balance.bankBalance).toBe(600);
-      expect(depositResult.balance.netWorth).toBe(1000);
+      expect(Number(depositResult.balance.walletBalance)).toBe(400);
+      expect(Number(depositResult.balance.bankBalance)).toBe(600);
+      expect(Number(depositResult.balance.netWorth)).toBe(1000);
 
       // Withdraw 200
       const withdrawResult = await economyRepo.withdraw('user_banker', 200);
-      expect(withdrawResult.balance.walletBalance).toBe(600);
-      expect(withdrawResult.balance.bankBalance).toBe(400);
+      expect(Number(withdrawResult.balance.walletBalance)).toBe(600);
+      expect(Number(withdrawResult.balance.bankBalance)).toBe(400);
 
       // Try depositing more than capacity
       await economyRepo.modifyBalance({
@@ -378,16 +221,16 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
         source: 'PAY_COMMAND',
       });
 
-      expect(transfer.fromBalance.walletBalance).toBe(650);
-      expect(transfer.toBalance.walletBalance).toBe(550);
+      expect(Number(transfer.fromBalance.walletBalance)).toBe(650);
+      expect(Number(transfer.toBalance.walletBalance)).toBe(550);
 
       expect(transfer.debitTransaction.userId).toBe('alice');
       expect(transfer.debitTransaction.type).toBe('TRANSFER');
-      expect(transfer.debitTransaction.amount).toBe(350);
+      expect(Number(transfer.debitTransaction.amount)).toBe(350);
 
       expect(transfer.creditTransaction.userId).toBe('bob');
       expect(transfer.creditTransaction.type).toBe('TRANSFER');
-      expect(transfer.creditTransaction.amount).toBe(350);
+      expect(Number(transfer.creditTransaction.amount)).toBe(350);
 
       // Verify transaction histories
       const aliceHistory = await economyRepo.getTransactionHistory('alice');
@@ -426,8 +269,8 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       const alice = await economyRepo.findById('alice_broke');
       const bob = await economyRepo.findById('bob_safe');
 
-      expect(alice?.walletBalance).toBe(100);
-      expect(bob?.walletBalance).toBe(50);
+      expect(Number(alice?.walletBalance)).toBe(100);
+      expect(Number(bob?.walletBalance)).toBe(50);
     });
   });
 
@@ -436,7 +279,7 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       const account = await xpRepo.getOrCreateAccount('user_xp_1', 'guild_1');
       expect(account.userId).toBe('user_xp_1');
       expect(account.guildId).toBe('guild_1');
-      expect(account.xp).toBe(0);
+      expect(Number(account.xp)).toBe(0);
       expect(account.level).toBe(0);
       expect(account.karma).toBe(0);
 
@@ -457,10 +300,10 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
         newLevel: 1,
       });
 
-      expect(result.account.xp).toBe(150);
+      expect(Number(result.account.xp)).toBe(150);
       expect(result.account.level).toBe(1);
       expect(result.event.id).toBeDefined();
-      expect(result.event.xpAwarded).toBe(150);
+      expect(Number(result.event.xpAwarded)).toBe(150);
       expect(result.event.source).toBe('MESSAGE');
     });
 
@@ -604,7 +447,7 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       expect(candy?.price).toBe(100);
       expect(await itemRepo.findById(candy!.id)).toMatchObject({ code: 'candy_minor' });
 
-      const categories = new ItemCategoryRepository(client);
+      const categories = new ItemCategoryRepository(db.client);
       const consumable = await categories.findByCode('consumable');
       expect(consumable?.name).toBe('Consumables');
       expect(candy?.categoryId).toBe(consumable?.id);
@@ -617,30 +460,34 @@ describe('Core Domain Repositories & ACID Financial Ledger', () => {
       expect(purchasable.length).toBe(4);
     });
 
-    it('fills codes on items an older SQLite seed stored with the code as ID', async () => {
-      await itemRepo.create({
-        id: 'candy_minor',
-        name: 'Renamed Candy',
-        description: 'Owner edit',
-        price: 5,
-        categoryId: 'consumable',
-      });
-      await inventoryRepo.addItem('legacy_user', 'candy_minor', 2);
+    // Postgres ids are uuids; only SQLite seeds ever used the code as the ID.
+    it.skipIf(db.dialect === 'postgres')(
+      'fills codes on items an older SQLite seed stored with the code as ID',
+      async () => {
+        await itemRepo.create({
+          id: 'candy_minor',
+          name: 'Renamed Candy',
+          description: 'Owner edit',
+          price: 5,
+          categoryId: 'consumable',
+        });
+        await inventoryRepo.addItem('legacy_user', 'candy_minor', 2);
 
-      expect(await itemRepo.seedDefaultCatalog()).toBe(3);
-      expect(await itemRepo.seedDefaultCatalog()).toBe(0);
+        expect(await itemRepo.seedDefaultCatalog()).toBe(3);
+        expect(await itemRepo.seedDefaultCatalog()).toBe(0);
 
-      const candy = await itemRepo.findByCode('candy_minor');
-      const consumable = await new ItemCategoryRepository(client).findByCode('consumable');
-      expect(candy).toMatchObject({
-        id: 'candy_minor',
-        name: 'Renamed Candy',
-        price: 5,
-        categoryId: consumable?.id,
-      });
-      expect(await inventoryRepo.getItemQuantity('legacy_user', candy!.id)).toBe(2);
-      expect((await itemRepo.findAll()).length).toBe(4);
-    });
+        const candy = await itemRepo.findByCode('candy_minor');
+        const consumable = await new ItemCategoryRepository(db.client).findByCode('consumable');
+        expect(candy).toMatchObject({
+          id: 'candy_minor',
+          name: 'Renamed Candy',
+          price: 5,
+          categoryId: consumable?.id,
+        });
+        expect(await inventoryRepo.getItemQuantity('legacy_user', candy!.id)).toBe(2);
+        expect((await itemRepo.findAll()).length).toBe(4);
+      },
+    );
 
     it('keeps owner edits to seeded items', async () => {
       await itemRepo.seedDefaultCatalog();

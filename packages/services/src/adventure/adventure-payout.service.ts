@@ -122,7 +122,7 @@ export class AdventurePayoutService implements AdventurePaymentPort {
           guildId: session.guildId,
           xpDelta: session.rewards.xp,
           newLevel: level,
-          source: `adventure:${session.id}`,
+          source: 'adventure',
         },
         tx,
       );

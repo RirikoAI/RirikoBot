@@ -55,3 +55,24 @@ See docs/kanban/protocol.md section 6.
 - If the id comes from production code rather than the test, it is a real Postgres bug: fix the code or widen the column.
 
 **Local Postgres**: `docker run -d --rm --name ririko-pg-test -e POSTGRES_PASSWORD=test -p 55432:5432 postgres:16-alpine`, then set `TEST_POSTGRES_URL=postgres://postgres:test@127.0.0.1:55432/postgres`. Loopback is allowed by `vitest.setup.ts`.
+
+---
+
+## PROGRESS · 2026-10-02T12:52:37Z · Claude Code (Opus 5.5) · REVIEW
+
+**Files changed**
+- TASK-1241, TASK-1242 and TASK-1243 are DONE. Their notes list the files.
+- Story gate fix: `packages/database/src/migrations/postgres-schema.test.ts` gets a 60 s timeout. `ensurePostgresSchema` takes a database-wide advisory lock, so in a full `pnpm test:postgres` run it waits for every other suite building its schema, and the default 5 s timed out.
+
+**Verification**
+- On `feat/STORY-124-postgres-integration`, not committed:
+  - Story verify_cmd passes: `pnpm typecheck`; `pnpm vitest run packages/database/src packages/services/src/waifu-tcg apps/bot/src` (120 files, 1003 passed, 51 Postgres variants skipped); `pnpm lint --quiet`.
+  - `pnpm build` and `pnpm format:check` pass.
+  - `pnpm test:coverage` passes: 2683 tests, 56 skipped. Lines 70.58%, statements 69.23%, branches 59.01%, functions 71.59%.
+  - `pnpm test:postgres` against local `postgres:16-alpine`: 143 files, 1380 passed, 1 skipped. Every test schema is dropped afterwards.
+- Not run: the CircleCI `test-postgres` job itself. Its first run is on the PR.
+
+**Decisions & gotchas**
+- The TASK-1223 FLAG was a production bug: adventure XP could not settle on Postgres (`xp_events.source` overflow). Fixed in TASK-1241.
+- TASK-1242 also claims rows in reject, cancel and expiry, which had the same race.
+- Open question for the user: the shared row types are inferred from the SQLite schema (`number`) while Postgres returns `bigint` for balances and XP. Worth a BUG ticket.

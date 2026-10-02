@@ -151,6 +151,37 @@ export class MarketListingRepository extends BaseRepository<
     return this.update(id, { status }, tx);
   }
 
+  /**
+   * Moves a listing from `from` to `to` only if it is still in `from`. Returns null when it is
+   * not (already sold, cancelled, expired, or missing). Inside a transaction this claims the
+   * listing: on Postgres a concurrent claim waits on the row lock, then matches no row.
+   */
+  async transitionStatus(
+    id: string,
+    from: MarketListingStatus,
+    to: MarketListingStatus,
+    tx?: DatabaseClient,
+  ): Promise<MarketListing | null> {
+    const client = this.getClient(tx);
+    const [row] = this.isSqlite(client)
+      ? await client.db
+          .update(sqliteSchema.marketListings)
+          .set({ status: to })
+          .where(
+            and(
+              eq(sqliteSchema.marketListings.id, id),
+              eq(sqliteSchema.marketListings.status, from),
+            ),
+          )
+          .returning()
+      : await client.db
+          .update(pgSchema.marketListings)
+          .set({ status: to })
+          .where(and(eq(pgSchema.marketListings.id, id), eq(pgSchema.marketListings.status, from)))
+          .returning();
+    return row ? this.normalizeListing(row as unknown as Record<string, unknown>) : null;
+  }
+
   async listActiveListings(
     options?: {
       sellerUserId?: string | undefined;

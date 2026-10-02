@@ -66,5 +66,7 @@ describe.skipIf(!url)('ensurePostgresSchema on PostgreSQL', () => {
     );
     expect(Number(rows[0]!.count)).toBeGreaterThan(90);
     expect(await ensurePostgresSchema(web)).toBe(false);
-  });
+    // The bootstrap's advisory lock is database-wide, so this waits for every other Postgres
+    // suite in the run (describeDialects) that is building its own schema at the same time.
+  }, 60_000);
 });
