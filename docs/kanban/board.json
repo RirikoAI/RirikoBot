@@ -1693,7 +1693,7 @@
       "parent": "EPIC-012",
       "title": "1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [],
       "blocks": [
         "STORY-127"
@@ -5169,7 +5169,7 @@
       "id": "BUG-0030",
       "title": "Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save",
       "points": 1,
-      "status": "REVIEW",
+      "status": "DONE",
       "parent": "STORY-121",
       "requires": [],
       "blocks": [],
