@@ -13,10 +13,16 @@ import { LegacyTransformer } from './transformer.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { withTransaction } from '../transactions/index.js';
+import { DatabaseError } from '@ririko/core';
 
 export interface MigrationOptions {
   dryRun?: boolean | undefined;
   batchSize?: number | undefined;
+  /**
+   * Runs inside the migration transaction after the rows are inserted, so whatever it writes
+   * commits or rolls back with them.
+   */
+  record?: ((tx: DatabaseClient, result: MigrationResult) => Promise<void>) | undefined;
 }
 
 export interface VerificationResult {
@@ -91,6 +97,25 @@ export class MigrationEngine {
         durationMs: Date.now() - startTime,
       };
     }
+
+    // Zero data loss: refuse to write when the migrated coins would not add up to the legacy total
+    // (for example negative balances, which the transformer clamps to 0).
+    if (!coinsConserved) {
+      const anomalies = inspected.anomalies.length ? ` ${inspected.anomalies.join(' ')}` : '';
+      throw new DatabaseError(
+        `Legacy coin totals do not match (legacy ${inspected.totalCoins}, migrated ${totalCoinsMigrated}); nothing was written.${anomalies}`,
+      );
+    }
+
+    const result: MigrationResult = {
+      batchId,
+      isDryRun: false,
+      inspected,
+      migratedCounts,
+      coinsConserved,
+      totalCoinsMigrated,
+      durationMs: 0,
+    };
 
     // 3. Live execution inside atomic transaction
     await withTransaction(targetClient, async (txClient) => {
@@ -195,17 +220,11 @@ export class MigrationEngine {
         data.economyItemCategories,
       );
       await insertBatch(sqliteSchema.economyItems, pgSchema.economyItems, data.economyItems);
+
+      if (options?.record) await options.record(txClient, result);
     });
 
-    return {
-      batchId,
-      isDryRun: false,
-      inspected,
-      migratedCounts,
-      coinsConserved,
-      totalCoinsMigrated,
-      durationMs: Date.now() - startTime,
-    };
+    return { ...result, durationMs: Date.now() - startTime };
   }
 
   /**

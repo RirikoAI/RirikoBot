@@ -17,7 +17,6 @@
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
 | `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | — | yes | large |
-| `TASK-1262` | Task | Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount | 5 | STORY-126 | TASK-1261, STORY-121 | yes | large |
 
 ## 🔍 Review
 *None.*
@@ -266,6 +265,7 @@
 | `TASK-1211` | Task | Multi-stage Rootless Dockerfile for Web Dashboard | 3 | STORY-121 | [TASK-1211.md](./handovers/TASK-1211.md) |
 | `TASK-1213` | Task | CircleCI Docker Build & Smoke Job for Bot and Web Images | 2 | STORY-121 | [TASK-1213.md](./handovers/TASK-1213.md) |
 | `TASK-1261` | Task | Real 1.4.0 Schema Fixture From the Published Image & Transformer Fidelity Fixes | 3 | STORY-126 | [TASK-1261.md](./handovers/TASK-1261.md) |
+| `TASK-1262` | Task | Automatic One-Time 1.4.0 Migration at Bot Startup From a Read-Only /app/legacy Mount | 5 | STORY-126 | [TASK-1262.md](./handovers/TASK-1262.md) |
 | `TASK-1212` | Task | Multi-stage Rootless Dockerfile for Bot | 3 | STORY-121 | [TASK-1212.md](./handovers/TASK-1212.md) |
 | `TASK-1231` | Task | One-Time Prettier Baseline & CircleCI Pipeline (Lint, Typecheck, Test, Web Build, Gitleaks) | 2 | STORY-123 | — |
 | `TASK-1232` | Task | Vitest v8 Coverage with Ratchet Thresholds, JUnit Test Results & Codecov Upload | 2 | STORY-123 | — |
