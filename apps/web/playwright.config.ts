@@ -15,6 +15,10 @@ export default defineConfig({
   testDir: './e2e',
   outputDir: './e2e-results/artifacts',
   fullyParallel: true,
+  // Playwright sizes its pool from the host's CPU count, but CircleCI's `medium` resource class
+  // gives the container 2 vCPUs. Eight browsers next to `next start` starved the server until
+  // server action responses missed the 5 s expect window (BUG-0030).
+  ...(process.env.CI ? { workers: 2 } : {}),
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: [

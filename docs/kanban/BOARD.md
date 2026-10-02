@@ -19,7 +19,9 @@
 | `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | — | yes | large |
 
 ## 🔍 Review
-*None.*
+| ID | Type | Title | Pts | Parent | Handover |
+|---|---|---|---|---|---|
+| `BUG-0030` | Bug | Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save | 1 | STORY-121 | [BUG-0030.md](./handovers/BUG-0030.md) |
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
