@@ -14,14 +14,10 @@
 *None.*
 
 ## 🎯 To Do
-| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
-|---|---|---|---|---|---|---|---|
-| `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | — | yes | large |
+*None.*
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `BUG-0030` | Bug | Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save | 1 | STORY-121 | [BUG-0030.md](./handovers/BUG-0030.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -113,6 +109,7 @@
 | `STORY-173` | Story | Private Message Context Menu Translation to English | 5 | EPIC-003 | [STORY-173.md](./handovers/STORY-173.md) |
 | `STORY-174` | Story | Scoped Command Registration (Global vs Per-Server) & CLI Command Sync | 8 | EPIC-003 | [STORY-174.md](./handovers/STORY-174.md) |
 | `STORY-175` | Story | Runtime Middleware Wiring: Permissions, Maintenance Mode, Module Toggles & Rate Limiting | 8 | EPIC-003 | — |
+| `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | [STORY-126.md](./handovers/STORY-126.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -343,6 +340,7 @@
 | `BUG-0027` | Bug | Count Every Stamina Potion in Multi-Quantity Uses | 2 | STORY-043 | [BUG-0027.md](./handovers/BUG-0027.md) |
 | `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | STORY-168 | [BUG-0028.md](./handovers/BUG-0028.md) |
 | `BUG-0029` | Bug | Bot Fell Back to sqlite:storage/ririko.db Without DATABASE_URL Instead of the ./data/ririko.sqlite Every Other Entry Point Uses | 2 | STORY-121 | [BUG-0029.md](./handovers/BUG-0029.md) |
+| `BUG-0030` | Bug | Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save | 1 | STORY-121 | [BUG-0030.md](./handovers/BUG-0030.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

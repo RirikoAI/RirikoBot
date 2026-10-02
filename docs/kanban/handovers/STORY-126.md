@@ -44,3 +44,19 @@ See docs/kanban/protocol.md section 6.
 **Out of scope**
 - Everything in STORY-127: aliases, the old-layout message, docs and the guide, Docker Hub, and `latest`.
 - `migrate:rollback`. Going back is done by running 1.4.0 again on the untouched folder.
+
+---
+
+## REVIEW · 2026-10-02T02:35:59Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- Locally, before PR #675: build, typecheck, 691 tests, lint, `docker build --target bot-runner` and 5 of 5 bot smoke checks, including the `/app/legacy` migration.
+- The maintainer merged PR #675 into `feat/STORY-121-rootless-docker`. On PR #674 at `a9c1200`, every CircleCI job passes: `test` with coverage, `docker` with the legacy smoke check, and `e2e` after BUG-0030.
+
+**Acceptance**
+- [x] TASK-1261: the migration tests use the real 1.4.0 schema from the published image, and the transformer mismatches are fixed.
+- [x] TASK-1262: a read-only `/app/legacy` mount is migrated once on first start, verified and recorded, and the legacy files are never written.
+
+**Follow-up**
+- STORY-128 (settings that don't carry over) and STORY-127 (release and sunset) stay in BACKLOG.
+- STORY-128 blocks STORY-127.
