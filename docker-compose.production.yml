@@ -63,8 +63,9 @@ services:
       - card_images:/app/public/cards
       - boss_images:/app/public/bosses
       - welcomer_backgrounds:/app/storage/welcomer-backgrounds
-      # Upgrading from 1.4.0: mount its untouched data folder read-only; it is migrated once
-      # on first start (docs/upgrading-from-1.4.md).
+      # Upgrading from 1.4.0: the migration does not support this Postgres stack yet. Upgrade
+      # with the SQLite compose in docs/upgrading-from-1.4.md. Once Postgres targets work, mount
+      # the untouched 1.4.0 data folder read-only here; it is migrated once on first start.
       # - ./data:/app/legacy:ro
 
   web:

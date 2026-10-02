@@ -1345,7 +1345,7 @@
       "parent": "EPIC-012",
       "title": "Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-120",
         "TASK-1223"
@@ -1860,7 +1860,7 @@
       "parent": "EPIC-012",
       "title": "Docker Hub Release of 2.0 Images & 1.4.0 Sunset",
       "points": 8,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "STORY-121",
         "STORY-126",
@@ -1868,7 +1868,7 @@
         "STORY-122"
       ],
       "blocks": [],
-      "description": "Groomed 2026-10-02 from the STORY-121 Docker Hub FLAG and the STORY-126 plan. Docker Hub ririkoai/ririkobot:latest is 1.4.0 (about 1.1k pulls). This story makes the 1.4.0 env names work, refuses the old compose layout with instructions, documents the upgrade, adds a tag-driven release job that pushes versioned tags only, and writes the maintainer runbook for retagging 1.4.0 and moving latest. Requires STORY-122 so the release ships the probes and the production compose file.",
+      "description": "Groomed 2026-10-02 (refreshed after STORY-124 closed) from the STORY-121 Docker Hub FLAG and the STORY-126 plan. Docker Hub ririkoai/ririkobot:latest is 1.4.0 (about 1.1k pulls). This story makes the 1.4.0 env names work, refuses the old compose layout with instructions, documents the upgrade, adds a tag-driven release job that pushes versioned tags only, and writes the maintainer runbook for retagging 1.4.0 and moving latest. Requires STORY-122 so the release ships the probes and the production compose file.",
       "assignee": null,
       "claimed_at": null,
       "blocked_reason": null,
@@ -5183,9 +5183,9 @@
     },
     {
       "id": "TASK-1271",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
-      "assignee": null,
+      "assignee": "Claude Code (Opus 5.5)",
       "claimed_at": null,
       "blocked_reason": null,
       "parent": "STORY-127",
@@ -5200,7 +5200,8 @@
           "apps/bot/src/services.ts",
           "apps/bot/src/legacy-upgrade.ts",
           "packages/database/src/client/sqlite.ts",
-          "scripts/docker-smoke.ts"
+          "scripts/docker-smoke.ts",
+          "apps/bot/src/legacy-layout.ts"
         ],
         "symbols": [
           "applyLegacyAliases",
@@ -5224,15 +5225,16 @@
       ],
       "verify_cmd": "pnpm vitest run packages/core/src apps/bot/src && pnpm typecheck && pnpm build && pnpm lint --quiet && docker build --target bot-runner -t ririko-bot:smoke . && node scripts/docker-smoke.ts bot",
       "handovers": [
+        "TASK-1271",
         "STORY-127",
         "STORY-126"
       ]
     },
     {
       "id": "TASK-1272",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
-      "assignee": null,
+      "assignee": "Claude Code (Opus 5.5)",
       "claimed_at": null,
       "blocked_reason": null,
       "parent": "STORY-127",
@@ -5266,14 +5268,15 @@
       ],
       "verify_cmd": "pnpm exec prettier --check docs/upgrading-from-1.4.md docs/dockerhub docs/migrations.md docs/deployment.md",
       "handovers": [
+        "TASK-1272",
         "STORY-127"
       ]
     },
     {
       "id": "TASK-1273",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
-      "assignee": null,
+      "assignee": "Claude Code (Opus 5.5)",
       "claimed_at": null,
       "blocked_reason": null,
       "parent": "STORY-127",
@@ -5307,14 +5310,15 @@
       ],
       "verify_cmd": "pnpm vitest run scripts && pnpm typecheck && pnpm lint --quiet && pnpm exec prettier --check .circleci/config.yml",
       "handovers": [
+        "TASK-1273",
         "STORY-127"
       ]
     },
     {
       "id": "TASK-1274",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
-      "assignee": null,
+      "assignee": "Claude Code (Opus 5.5)",
       "claimed_at": null,
       "blocked_reason": null,
       "parent": "STORY-127",
@@ -5335,7 +5339,9 @@
         "entry_points": [
           "docs/release.md"
         ],
-        "codegraph_queries": []
+        "codegraph_queries": [
+          "docker-smoke main images bot web"
+        ]
       },
       "acceptance": [
         "docs/release.md lists the maintainer-only steps in order: retag the current latest digest as 1.4.0 (docker buildx imagetools create), update the Docker Hub descriptions, push the first v2 tag, announce the sunset with a date, and after it move latest to the 2.x digest; with the commands and how to roll latest back.",
@@ -5343,6 +5349,7 @@
       ],
       "verify_cmd": "pnpm exec prettier --check docs/release.md",
       "handovers": [
+        "TASK-1274",
         "STORY-127"
       ]
     },

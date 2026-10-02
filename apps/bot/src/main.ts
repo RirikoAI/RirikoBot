@@ -22,13 +22,24 @@ import { createCommandControllers, registerBotCommands } from './command-set.js'
 import { registerGuildJoinCommandSync, syncCommandsOnStartup } from './command-sync.js';
 import { registerComponentInteractions } from './component-interactions.js';
 import { healthPort, startHealthServer } from './health.js';
+import { describeLegacyLayout, findLegacyLayout } from './legacy-layout.js';
 import { runLegacyUpgrade } from './legacy-upgrade.js';
+import { applyLegacyAliases } from '@ririko/core';
 import { CommandSynchronizer, createRestClient, DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 
 /**
  * Main application entrypoint for Ririko AI Discord Bot.
  */
 export async function main(): Promise<void> {
+  // 1.4.0 variable names, for the code below and the services that read process.env directly.
+  Object.assign(process.env, applyLegacyAliases({ ...process.env }));
+  // Refuse a 1.4.0 compose layout before anything opens or creates a file.
+  const legacyLayout = findLegacyLayout();
+  if (legacyLayout.length > 0) {
+    for (const line of describeLegacyLayout(legacyLayout)) console.error(line);
+    process.exit(1);
+  }
+
   const token = process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN;
   const clientId = process.env.DISCORD_CLIENT_ID || process.env.DISCORD_APPLICATION_ID;
   const prefix = process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX;
