@@ -195,9 +195,73 @@ function botBootCheck(image: string): Check {
         image,
         { DISCORD_TOKEN: 'smoke-test-token', DISCORD_CLIENT_ID: '100000000000000001' },
         '✓ Registered',
-        (container) =>
-          createdDatabase(container) ? [] : ['no /app/data/ririko.sqlite was created'],
+        (container) => {
+          const problems: string[] = [];
+          if (!createdDatabase(container)) problems.push('no /app/data/ririko.sqlite was created');
+          // The bot exits once Discord turns out to be unreachable, so the probes themselves are
+          // checked by botHealthcheckCheck.
+          if (!container.logs().includes('• Health probes on :8080')) {
+            problems.push('the health probe server did not start');
+          }
+          return problems;
+        },
       ),
+  };
+}
+
+/** The image's HEALTHCHECK command (`CMD` form) as an argument list; null when it has none. */
+function healthcheckCommand(image: string): string[] | null {
+  const result = docker(['image', 'inspect', '--format', '{{json .Config.Healthcheck}}', image]);
+  const config = JSON.parse(result.stdout.trim() || 'null') as { Test?: string[] } | null;
+  return config?.Test?.[0] === 'CMD' ? config.Test.slice(1) : null;
+}
+
+/**
+ * Runs the image's HEALTHCHECK command against the bot's real probe server, started inside the
+ * image with a working database and a gateway that is not ready.
+ */
+function botHealthcheckCheck(image: string): Check {
+  return {
+    name: 'HEALTHCHECK passes against the probe server, and /ready waits for Discord',
+    run: () => {
+      const command = healthcheckCommand(image);
+      if (!command) return 'the image has no HEALTHCHECK';
+      const script = `
+        import { spawn } from 'node:child_process';
+        import { startHealthServer } from '/app/apps/bot/dist/health.js';
+        const server = startHealthServer(8080, {
+          version: 'smoke',
+          ping: async () => ({ ok: true, dialect: 'sqlite', latencyMs: 0 }),
+          gateway: () => ({ state: 'CONNECTING', pingMs: null }),
+          started: () => true,
+        });
+        await new Promise((resolve) => server.once('listening', resolve));
+        // Asynchronous, so this process keeps answering the probe the command sends.
+        const status = await new Promise((resolve) =>
+          spawn(process.env.CHECK_BIN, JSON.parse(process.env.CHECK_ARGS)).on('exit', resolve),
+        );
+        const ready = await fetch('http://127.0.0.1:8080/ready');
+        console.log('healthcheck', status, 'ready', ready.status);
+        server.close();`;
+      const result = docker([
+        'run',
+        '--rm',
+        '--network',
+        'none',
+        '--env',
+        `CHECK_BIN=${command[0]}`,
+        '--env',
+        `CHECK_ARGS=${JSON.stringify(command.slice(1))}`,
+        image,
+        'node',
+        '--input-type=module',
+        '-e',
+        script,
+      ]);
+      return /healthcheck 0 ready 503/.test(result.stdout)
+        ? null
+        : `expected "healthcheck 0 ready 503", got: ${output(result)}`;
+    },
   };
 }
 
@@ -336,8 +400,8 @@ function botLegacyUpgradeCheck(image: string): Check {
 }
 
 /** Requests `path` from inside the container; prints `<status> <location>`. */
-function request(container: RunningContainer, path: string): string {
-  const script = `fetch('http://127.0.0.1:3000${path}', { redirect: 'manual' })
+function request(container: RunningContainer, path: string, port = 3000): string {
+  const script = `fetch('http://127.0.0.1:${port}${path}', { redirect: 'manual' })
     .then((r) => console.log(r.status, r.headers.get('location') ?? ''))
     .catch((e) => console.log('error', e.message));`;
   return container.exec(['node', '-e', script]).stdout.trim();
@@ -370,6 +434,15 @@ function webServeCheck(image: string): Check {
             problems.push(`GET /api/auth/login answered "${login}"`);
           }
           if (!createdDatabase(container)) problems.push('no /app/data/ririko.sqlite was created');
+          for (const path of ['/health', '/ready', '/api/health']) {
+            const probe = request(container, path);
+            if (!probe.startsWith('200')) problems.push(`GET ${path} answered "${probe}"`);
+          }
+          const command = healthcheckCommand(image);
+          const check = command ? container.exec(command) : null;
+          if (check?.status !== 0) {
+            problems.push(`HEALTHCHECK failed: ${check ? output(check) : 'the image has none'}`);
+          }
           return problems;
         },
       ),
@@ -419,6 +492,7 @@ const TARGETS: Record<string, Target> = {
         },
       },
       botBootCheck(image),
+      botHealthcheckCheck(image),
       botLegacyUpgradeCheck(image),
     ],
   },

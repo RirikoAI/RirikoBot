@@ -3,6 +3,7 @@ import {
   databaseConfigFromEnv,
   ensureAdventureSchema,
   ensureCardSerialSchema,
+  ensurePostgresSchema,
 } from '@ririko/database';
 import {
   createBot,
@@ -20,6 +21,7 @@ import { createCommandRouter, createHelpOptions } from './command-router.js';
 import { createCommandControllers, registerBotCommands } from './command-set.js';
 import { registerGuildJoinCommandSync, syncCommandsOnStartup } from './command-sync.js';
 import { registerComponentInteractions } from './component-interactions.js';
+import { healthPort, startHealthServer } from './health.js';
 import { runLegacyUpgrade } from './legacy-upgrade.js';
 import { CommandSynchronizer, createRestClient, DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 
@@ -45,9 +47,25 @@ export async function main(): Promise<void> {
   // 1. Initialize Bot & Gateway
   const bot = createBot();
 
-  // 2. Initialize Domain Services and Repositories. A mounted 1.4.0 database is migrated once
-  // first, before the services seed their defaults.
+  // 2. Initialize Domain Services and Repositories. An empty Postgres database gets the 2.0
+  // schema, then a mounted 1.4.0 database is migrated once, before the services seed defaults.
   const db = await createDatabaseClient(databaseConfigFromEnv());
+  // Probes answer from here on; /ready waits for the rest of startup and the gateway.
+  let started = false;
+  const port = healthPort();
+  const health =
+    port > 0
+      ? startHealthServer(port, {
+          version: info.version,
+          ping: () => db.ping(),
+          gateway: () => ({
+            state: bot.gateway.state,
+            pingMs: bot.client.ws.ping >= 0 ? Math.round(bot.client.ws.ping) : null,
+          }),
+          started: () => started,
+        })
+      : null;
+  if (await ensurePostgresSchema(db)) console.log('• Created the PostgreSQL schema.');
   await runLegacyUpgrade(db);
   console.log('• Initializing bot repositories and domain services...');
   const services = await createBotServices(db, bot.client);
@@ -113,6 +131,7 @@ export async function main(): Promise<void> {
   // Post every new moderation case to the guild's log channel. Subscribed once here, not on
   // READY, because READY fires again after each reconnect.
   const stopCaseLog = services.moderationLogService.startListening(bot.client);
+  started = true;
 
   // 6. Graceful Shutdown Handlers
   let isShuttingDown = false;
@@ -132,6 +151,7 @@ export async function main(): Promise<void> {
         console.error('[CommandUsageRecorder] Failed to write command usage on shutdown:', err);
       });
       stopCaseLog?.();
+      health?.close();
       services.autoRoleService.stopSweeper();
       await bot.gateway.destroy();
       console.log('✓ Bot gateway cleanly disconnected. Goodbye!');

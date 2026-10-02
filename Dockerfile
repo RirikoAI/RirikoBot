@@ -96,6 +96,8 @@ ENV DATABASE_DIALECT=sqlite \
     DATABASE_URL=./data/ririko.sqlite \
     LEGACY_DATABASE_PATH=/app/legacy/ririko.db
 USER 10001:10001
+# /health answers once the database is open (HEALTH_PORT, default 8080; 0 turns it off).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3   CMD ["node", "-e", "fetch('http://127.0.0.1:' + (process.env.HEALTH_PORT || 8080) + '/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
 CMD ["node", "apps/bot/dist/main.js"]
 
 FROM runtime AS web-runner
@@ -117,4 +119,5 @@ ENV DATABASE_DIALECT=sqlite \
 USER 10001:10001
 WORKDIR /app/apps/web
 EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3   CMD ["node", "-e", "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
 CMD ["node", "node_modules/next/dist/bin/next", "start", "--hostname", "0.0.0.0", "--port", "3000"]

@@ -114,3 +114,25 @@ If the 2.0 `bot-runner` image were pushed as `latest` today, every user who runs
 **Out of scope**
 - Docker Hub pushes and moving `latest` (STORY-127).
 - Postgres CI (STORY-124).
+
+---
+
+## PROGRESS · 2026-10-02T10:00:20Z · Claude Code (Opus 5.5) · REVIEW
+
+**Files changed**
+- TASK-1223, TASK-1221 and TASK-1222 are DONE. Their notes list the files.
+
+**Verification**
+- Branch `feat/STORY-122-production-orchestration`, cut from `feat/STORY-128-guild-settings-fidelity` (PR #676), which holds the grooming. Retarget it once #676 merges.
+- `pnpm lint`, `typecheck`, `build` and `test:coverage` pass: 2,676 tests; lines 70.54%, statements 69.19%, branches 58.98%, functions 71.57%.
+- `docker build` of both images, then `node scripts/docker-smoke.ts bot web`: 10 of 10 pass.
+- `docker compose ... config -q` passes. The end-to-end compose run on an empty Postgres passed: schema created, the web container healthy, the bot booted to Discord login.
+
+**Answers to the STORY-121 FLAGs**
+- FLAG 1:
+  - The Postgres bootstrap is TASK-1223.
+  - The compose env names, the shared volumes and the Lavalink image are TASK-1222.
+- FLAG 2: the compose file references `ririkoai/*` images with `RIRIKO_VERSION` (default `2`), never `latest`. Publishing stays in STORY-127.
+
+**Decisions & gotchas**
+- An open FLAG on STORY-124: the existing adventure Postgres suite has one test that fails with `varchar(32)`.

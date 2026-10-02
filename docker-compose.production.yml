@@ -1,0 +1,99 @@
+# Ririko AI 2.0 production stack: PostgreSQL, Lavalink, the bot and the dashboard.
+#
+#   cp .env.production.example .env.production   # fill in the required values
+#   docker compose -f docker-compose.production.yml --env-file .env.production up -d
+#
+# docs/deployment.md section 2 explains every service, volume and setting.
+name: ririko
+
+x-app-environment: &app-environment
+  DATABASE_DIALECT: postgres
+  DATABASE_URL: postgres://${POSTGRES_USER:-ririko}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ririko}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ririko}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-ririko}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  lavalink:
+    image: ghcr.io/lavalink-devs/lavalink:4
+    restart: unless-stopped
+    # application.yml reads these through Spring placeholders.
+    environment:
+      LAVALINK_PASSWORD: ${LAVALINK_PASSWORD:?set LAVALINK_PASSWORD}
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:-}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:-}
+      SPOTIFY_SP_DC: ${SPOTIFY_SP_DC:-}
+      _JAVA_OPTIONS: -Xmx1G
+    volumes:
+      - ./docker/lavalink/application.yml:/opt/Lavalink/application.yml:ro
+      # Plugins download on first start; keep them between restarts.
+      - lavalink_plugins:/opt/Lavalink/plugins
+
+  bot:
+    image: ririkoai/ririkobot:${RIRIKO_VERSION:-2}
+    build:
+      context: .
+      target: bot-runner
+    restart: unless-stopped
+    env_file: ${RIRIKO_ENV_FILE:-.env.production}
+    environment:
+      <<: *app-environment
+      LAVALINK_HOST: lavalink
+      LAVALINK_PORT: '2333'
+      LAVALINK_PASSWORD: ${LAVALINK_PASSWORD:?set LAVALINK_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      lavalink:
+        condition: service_started
+    volumes:
+      - ririko_data:/app/data
+      - card_images:/app/public/cards
+      - boss_images:/app/public/bosses
+      - welcomer_backgrounds:/app/storage/welcomer-backgrounds
+      # Upgrading from 1.4.0: mount its untouched data folder read-only; it is migrated once
+      # on first start (docs/upgrading-from-1.4.md).
+      # - ./data:/app/legacy:ro
+
+  web:
+    image: ririkoai/ririkobot-dashboard:${RIRIKO_VERSION:-2}
+    build:
+      context: .
+      target: web-runner
+    restart: unless-stopped
+    env_file: ${RIRIKO_ENV_FILE:-.env.production}
+    environment:
+      <<: *app-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${DASHBOARD_PORT:-3000}:3000'
+    volumes:
+      # Card art in data/tcg, rendered cards and uploaded welcome backgrounds are shared with
+      # the bot.
+      - ririko_data:/app/data
+      - card_images:/app/public/cards
+      - welcomer_backgrounds:/app/storage/welcomer-backgrounds
+
+# Named volumes start owned by the images' app user (uid 10001). A bind mount in their place
+# must be made writable for it first: chown -R 10001:10001 <dir>.
+volumes:
+  postgres_data:
+  lavalink_plugins:
+  ririko_data:
+  card_images:
+  boss_images:
+  welcomer_backgrounds:

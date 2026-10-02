@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   AUTH_ROUTE_ALLOWLIST,
+  PROBE_ROUTE_ALLOWLIST,
   checkAuthorizationCoverage,
   type CoverageSource,
 } from './testing/authorization-coverage';
@@ -66,8 +67,8 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         'app/account/sessions/actions.ts#revokeOtherSessions',
         'app/verify/actions.ts#finishPasskeyCheck',
         'app/api/album/cards/[userCardId]/route.ts#GET',
-        ...Object.entries(AUTH_ROUTE_ALLOWLIST).flatMap(([path, methods]) =>
-          methods.map((method) => `${path}#${method}`),
+        ...Object.entries({ ...AUTH_ROUTE_ALLOWLIST, ...PROBE_ROUTE_ALLOWLIST }).flatMap(
+          ([path, methods]) => methods.map((method) => `${path}#${method}`),
         ),
       ]),
     );
@@ -141,6 +142,10 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
         source: `export async function POST(request: Request) { return new Response(null); }`,
       },
       {
+        path: 'app/api/health/route.ts',
+        source: `export function GET() { return Response.json({ ok: true }); }`,
+      },
+      {
         path: 'app/api/guilds/[guildId]/route.ts',
         source: `export async function GET(_: Request, { params }: Ctx) {
             const { session } = await requireGuildAccess((await params).guildId);
@@ -151,6 +156,7 @@ describe('Server Action and route handler authorization coverage (TASK-1173)', (
     expect(report.problems).toEqual([
       expect.stringContaining('app/api/export/route.ts#GET: does not call an authorization guard'),
       'app/api/auth/logout/route.ts#POST: auth route does not call limitAuthRequest',
+      'app/api/health/route.ts#GET: probe route does not call limitProbeRequest',
     ]);
   });
 
