@@ -136,3 +136,16 @@ If the 2.0 `bot-runner` image were pushed as `latest` today, every user who runs
 
 **Decisions & gotchas**
 - An open FLAG on STORY-124: the existing adventure Postgres suite has one test that fails with `varchar(32)`.
+
+---
+
+## REVIEW · 2026-10-02T12:28:01Z · Claude Code (Opus 5.5) · DONE
+
+**verify_cmd rerun**
+- PR #676 merged into `develop/2.0.0` at 2026-10-02T12:19:39Z after CircleCI passed.
+- Rerun on `develop/2.0.0` (`4217150`): `pnpm build`, `pnpm typecheck`, `pnpm lint --quiet` pass; `pnpm vitest run packages/database/src apps/bot/src apps/web/src scripts` passes 115 files, 916 tests, 1 skipped; `docker compose -f docker-compose.production.yml config -q` passes.
+
+**Acceptance**
+- [x] TASK-1223: an empty Postgres database gets the full 2.0 schema at bot or dashboard startup, safely when both start at once.
+- [x] TASK-1221: bot and dashboard answer /health and /ready, and both images have a HEALTHCHECK.
+- [x] TASK-1222: docker-compose.production.yml runs Postgres, Lavalink, bot and dashboard with the real env names and shared volumes, and docs/deployment.md matches it.

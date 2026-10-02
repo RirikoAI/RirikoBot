@@ -1,83 +1,50 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createDatabaseClient } from '../client/factory.js';
-import type { SqliteDatabaseClient } from '../client/types.js';
+import { randomUUID } from 'node:crypto';
+import { it, expect, beforeEach } from 'vitest';
+import { describeDialects } from '../testing/dialects.js';
+import { WaifuAssetRepository } from './waifu-asset.repository.js';
 import { WaifuCardRepository } from './waifu-card.repository.js';
 
-describe('WaifuCardRepository (Dual-Dialect)', () => {
-  let client: SqliteDatabaseClient;
+// Postgres ids are uuids, so every fixture id is one.
+const id = {
+  rias: randomUUID(),
+  asset01: randomUUID(),
+  asset02: randomUUID(),
+  asset03: randomUUID(),
+  asset04: randomUUID(),
+  missingAsset: randomUUID(),
+  deletedDefinition: randomUUID(),
+  missing: randomUUID(),
+};
+
+describeDialects('WaifuCardRepository (Dual-Dialect)', (db) => {
   let repo: WaifuCardRepository;
 
-  beforeEach(async () => {
-    const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
-    if (rawClient.dialect !== 'sqlite') throw new Error('Expected sqlite client');
-    client = rawClient;
-
-    client.raw.exec(`
-      CREATE TABLE waifu_sources (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        base_url TEXT NOT NULL,
-        attribution_text TEXT NOT NULL,
-        is_active INTEGER NOT NULL DEFAULT 1
-      );
-
-      CREATE TABLE waifu_assets (
-        id TEXT PRIMARY KEY,
-        source_id TEXT NOT NULL,
-        source_image_id TEXT NOT NULL,
-        character_name TEXT NOT NULL,
-        anime_title TEXT NOT NULL,
-        image_hash TEXT NOT NULL UNIQUE,
-        local_storage_path TEXT,
-        discord_cdn_url TEXT,
-        is_deleted_by_request INTEGER NOT NULL DEFAULT 0,
-        tags TEXT NOT NULL DEFAULT '[]',
-        created_at INTEGER NOT NULL
-      );
-
-      CREATE TABLE waifu_cards (
-        id TEXT PRIMARY KEY,
-        asset_id TEXT NOT NULL,
-        name TEXT NOT NULL,
-        rarity TEXT NOT NULL,
-        element TEXT NOT NULL,
-        attack INTEGER NOT NULL,
-        defense INTEGER NOT NULL,
-        speed INTEGER NOT NULL,
-        health INTEGER NOT NULL,
-        crit_rate REAL NOT NULL DEFAULT 0.05,
-        skill_name TEXT,
-        skill_description TEXT,
-        passive_name TEXT,
-        passive_description TEXT,
-        collection_number INTEGER NOT NULL,
-        is_active INTEGER NOT NULL DEFAULT 1
-      );
-
-      CREATE TABLE user_cards (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        card_id TEXT NOT NULL,
-        serial_number INTEGER NOT NULL,
-        level INTEGER NOT NULL DEFAULT 1,
-        exp INTEGER NOT NULL DEFAULT 0,
-        battles_won INTEGER NOT NULL DEFAULT 0,
-        state TEXT NOT NULL DEFAULT 'IDLE',
-        is_favorite INTEGER NOT NULL DEFAULT 0,
-        obtained_at INTEGER NOT NULL
-      );
-    `);
-
-    repo = new WaifuCardRepository(client);
+  beforeEach(() => {
+    repo = new WaifuCardRepository(db.client);
   });
 
-  afterEach(async () => {
-    await client.close();
-  });
+  /** Seeds the waifu.im source and one Aqua asset, returning the asset id. */
+  async function seedAqua(): Promise<string> {
+    const assets = new WaifuAssetRepository(db.client);
+    await assets.createSource({
+      id: 'src',
+      name: 'waifu.im',
+      baseUrl: 'https://api.waifu.im',
+      attributionText: 'Image source: waifu.im',
+    });
+    const asset = await assets.create({
+      sourceId: 'src',
+      sourceImageId: '1',
+      characterName: 'Aqua',
+      animeTitle: 'Konosuba',
+      imageHash: 'hash_a',
+    });
+    return asset.id;
+  }
 
   it('should create and retrieve a waifu card definition', async () => {
     const card = await repo.create({
-      assetId: 'asset_rias_01',
+      assetId: id.rias,
       name: 'Rias Gremory',
       rarity: 'MYTHIC',
       element: 'FIRE',
@@ -103,14 +70,14 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
     expect(found?.name).toBe('Rias Gremory');
     expect(found?.critRate).toBeCloseTo(0.25);
 
-    const byAsset = await repo.findByAssetId('asset_rias_01');
+    const byAsset = await repo.findByAssetId(id.rias);
     expect(byAsset).not.toBeNull();
     expect(byAsset?.id).toBe(card.id);
   });
 
   it('should list cards filtered by rarity and element', async () => {
     await repo.create({
-      assetId: 'asset_01',
+      assetId: id.asset01,
       name: 'Card Fire SR',
       rarity: 'SUPER_RARE',
       element: 'FIRE',
@@ -121,7 +88,7 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
       collectionNumber: 1,
     });
     await repo.create({
-      assetId: 'asset_02',
+      assetId: id.asset02,
       name: 'Card Ice R',
       rarity: 'RARE',
       element: 'ICE',
@@ -146,7 +113,7 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
 
   it('should create user card instances with serial numbers and query by user', async () => {
     const card = await repo.create({
-      assetId: 'asset_03',
+      assetId: id.asset03,
       name: 'Megumin',
       rarity: 'ULTRA_RARE',
       element: 'FIRE',
@@ -197,7 +164,7 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
 
   it('should update level, exp, state, favorite, and delete user card', async () => {
     const card = await repo.create({
-      assetId: 'asset_04',
+      assetId: id.asset04,
       name: 'Esdeath',
       rarity: 'SECRET_RARE',
       element: 'ICE',
@@ -245,13 +212,9 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
   });
 
   it('lists one album page with definitions, assets and sources, filtered and counted', async () => {
-    client.raw.exec(`
-      INSERT INTO waifu_sources (id, name, base_url, attribution_text) VALUES ('src', 'waifu.im', 'https://api.waifu.im', 'Image source: waifu.im');
-      INSERT INTO waifu_assets (id, source_id, source_image_id, character_name, anime_title, image_hash, created_at)
-        VALUES ('asset_a', 'src', '1', 'Aqua', 'Konosuba', 'hash_a', 0);
-    `);
+    const assetA = await seedAqua();
     const aqua = await repo.create({
-      assetId: 'asset_a',
+      assetId: assetA,
       name: 'Aqua',
       rarity: 'RARE',
       element: 'WATER',
@@ -262,7 +225,7 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
       collectionNumber: 1,
     });
     const orphanArt = await repo.create({
-      assetId: 'asset_missing',
+      assetId: id.missingAsset,
       name: 'Darkness',
       rarity: 'COMMON',
       element: 'EARTH',
@@ -284,7 +247,7 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
     await mint(aqua.id, 2, true);
     await mint(orphanArt.id, 3, false);
     await mint(aqua.id, 4, false, 'someone-else');
-    await mint('deleted-definition', 5, false);
+    await mint(id.deletedDefinition, 5, false);
 
     const all = await repo.listUserAlbum('u1', { limit: 2, offset: 0 });
     expect(all.total).toBe(3);
@@ -307,13 +270,9 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
   });
 
   it('finds one album entry only for the user who owns the card', async () => {
-    client.raw.exec(`
-      INSERT INTO waifu_sources (id, name, base_url, attribution_text) VALUES ('src', 'waifu.im', 'https://api.waifu.im', 'Image source: waifu.im');
-      INSERT INTO waifu_assets (id, source_id, source_image_id, character_name, anime_title, image_hash, created_at)
-        VALUES ('asset_a', 'src', '1', 'Aqua', 'Konosuba', 'hash_a', 0);
-    `);
+    const assetA = await seedAqua();
     const aqua = await repo.create({
-      assetId: 'asset_a',
+      assetId: assetA,
       name: 'Aqua',
       rarity: 'RARE',
       element: 'WATER',
@@ -326,7 +285,7 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
     const owned = await repo.createUserCard({ userId: 'u1', cardId: aqua.id, serialNumber: 1 });
     const orphan = await repo.createUserCard({
       userId: 'u1',
-      cardId: 'deleted-definition',
+      cardId: id.deletedDefinition,
       serialNumber: 2,
     });
 
@@ -338,6 +297,6 @@ describe('WaifuCardRepository (Dual-Dialect)', () => {
 
     expect(await repo.findUserAlbumEntry('someone-else', owned.id)).toBeNull();
     expect(await repo.findUserAlbumEntry('u1', orphan.id)).toBeNull();
-    expect(await repo.findUserAlbumEntry('u1', 'missing')).toBeNull();
+    expect(await repo.findUserAlbumEntry('u1', id.missing)).toBeNull();
   });
 });

@@ -24,8 +24,15 @@ CI runs the same gate on every push (see [Section 4](#4-continuous-integration))
 - Never write tests with probabilistic assertions such as `expect(rareCount).toBeGreaterThan(10)`. Instead, seed the pseudo-random generator (PRNG) and assert exact deterministic outcomes.
 
 ### 2.2. Isolated Test Databases
-- Integration tests execute against an isolated in-memory SQLite database or a dedicated Docker PostgreSQL test container.
-- Each test file runs migrations fresh and truncates tables between test suites.
+- Repository suites declare their tests with `describeDialects(name, fn)` from `packages/database/src/testing/dialects.ts` (other packages import it as `@ririko/database/testing`). It runs `fn` twice:
+  - **SQLite**: a fresh `:memory:` database with `SQLITE_SCHEMA_DDL` for every test.
+  - **Postgres**: only when `TEST_POSTGRES_URL` is set, otherwise reported as skipped. Each suite gets a random schema built with the bot's own bootstrap (`ensurePostgresSchema` and the startup upgrades), the tables in use are emptied before every test, and the schema is dropped afterwards.
+- Use uuids for ids that Postgres stores as `uuid`, and compare `bigint` columns (balances, XP) with `Number(...)`: Postgres returns them as `bigint`.
+- Run the Postgres variants locally against a throwaway container:
+  ```bash
+  docker run -d --rm --name ririko-pg-test -e POSTGRES_PASSWORD=test -p 55432:5432 postgres:16-alpine
+  TEST_POSTGRES_URL=postgres://postgres:test@127.0.0.1:55432/postgres ADVENTURE_TEST_POSTGRES_URL=postgres://postgres:test@127.0.0.1:55432/postgres pnpm test:postgres
+  ```
 
 ---
 
@@ -53,7 +60,7 @@ These drive the real bot: `createBotServices` over in-memory SQLite, the command
 | `components.test.ts` | Help center select menu; a giveaway from `/giveaway` through a member's entry to the draw |
 | `command-sync.test.ts` | Global and per-server registration on startup, per-server registration when the bot joins a server |
 
-Postgres runs of the repository suites, trade and market concurrency, and AI provider fallback through `createBotServices` are STORY-124.
+The repository suites and the adventure concurrency suite also run on Postgres (section 2.2 and the `test-postgres` CI job).
 
 ### 3.3. End-to-End Tests (`apps/web/e2e`)
 Playwright (Chromium) against `next start` on port 3100, configured in `apps/web/playwright.config.ts`:
@@ -82,13 +89,14 @@ Playwright (Chromium) against `next start` on port 3100, configured in `apps/web
 
 ## 4. Continuous Integration
 
-CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` workflow has seven parallel jobs. Each job that runs code on the host (all but `docker` and `secrets`) restores the pnpm store cache, runs `pnpm install --frozen-lockfile` and `pnpm build` first, because every `@ririko/*` package export points at `dist/`.
+CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` workflow has eight parallel jobs. Each job that runs code on the host (all but `docker` and `secrets`) restores the pnpm store cache, runs `pnpm install --frozen-lockfile` and `pnpm build` first, because every `@ririko/*` package export points at `dist/`.
 
 | Job | Runs | Fails when |
 |---|---|---|
 | `lint` | `pnpm lint`, `pnpm format:check` | ESLint reports an error (warnings do not fail), or a file is not Prettier-formatted |
 | `typecheck` | `pnpm typecheck` | Any workspace package has a type error |
 | `test` | `pnpm test:ci` | A test fails, or coverage drops below the thresholds in `vitest.config.ts` |
+| `test-postgres` | `pnpm test:postgres` with a `cimg/postgres:16` service container, `TEST_POSTGRES_URL` and `ADVENTURE_TEST_POSTGRES_URL` set | A database or services test fails on Postgres |
 | `build-web` | `pnpm --filter @ririko/web build` | The Next.js production build fails |
 | `e2e` | Next.js build, then `playwright test` (Chromium cached, fonts installed) | A Playwright spec fails; report and traces are in the job's *Artifacts* tab |
 | `docker` | `docker build` of the `bot-runner` and `web-runner` targets on CircleCI's remote Docker engine, then `node scripts/docker-smoke.ts bot web`. Nothing is pushed | An image does not build (for example, a new workspace package is missing from the Dockerfile's `manifests` stage), or a smoke check fails: wrong user, wrong writable directories, FFmpeg missing, the bot not reaching command registration, or the dashboard not serving pages and opening its database (docs/deployment.md section 2.1) |
