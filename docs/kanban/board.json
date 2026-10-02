@@ -5164,6 +5164,46 @@
         "BUG-0029"
       ],
       "description": "Found while building the bot image (TASK-1212). createBotServices fell back to sqlite:storage/ririko.db when DATABASE_URL was unset. resolveDatabasePath passes sqlite: URLs through unresolved, so better-sqlite3 opened a file named \"sqlite:storage/ririko.db\" relative to the working directory, while the config schema, the dashboard, the CLI, the scripts and .env.example all default to ./data/ririko.sqlite. A bot started without DATABASE_URL therefore used a different, empty database from the dashboard. Fix: one databaseConfigFromEnv helper in @ririko/database, with the default URL defined once in @ririko/core."
+    },
+    {
+      "id": "BUG-0030",
+      "title": "Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save",
+      "points": 1,
+      "status": "REVIEW",
+      "parent": "STORY-121",
+      "requires": [],
+      "blocks": [],
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "apps/web/playwright.config.ts",
+          "apps/web/e2e/settings.spec.ts",
+          ".circleci/config.yml"
+        ],
+        "symbols": [
+          "defineConfig",
+          "queryDatabase"
+        ],
+        "entry_points": [
+          "apps/web/playwright.config.ts"
+        ],
+        "codegraph_queries": [
+          "playwright.config.ts settings.spec.ts queryDatabase"
+        ]
+      },
+      "acceptance": [
+        "Playwright runs CircleCI with as many workers as the e2e executor has vCPUs (2 for resource_class medium), not the host CPU count.",
+        "Both settings specs (prefix and AI channel) save a value different from the one the form shows, so a retry does not end on \"Nothing changed.\".",
+        "pnpm test:e2e passes locally; the e2e job passes on PR #674."
+      ],
+      "verify_cmd": "pnpm test:e2e && pnpm lint --quiet && pnpm exec prettier --check apps/web/playwright.config.ts apps/web/e2e/settings.spec.ts",
+      "handovers": [
+        "BUG-0030"
+      ],
+      "description": "CircleCI e2e build 1615 failed on PR #674 (commit 5fb6b94) while build 1614 passed on the identical tree (1f8403d). The failure screenshot shows \"Settings saved.\": the server action answered after the 5 s expect window. Playwright sized its pool from the host CPU count (8 workers) while the medium resource class gives the container 2 vCPUs, so eight Chromium instances and next start competed for 2 CPUs and the action response queued behind about 40 sidebar link prefetches. The retry then failed differently: the first attempt had saved \"?\", so the form answered \"Nothing changed.\"."
     }
   ],
   "active_in_progress_ticket": null
