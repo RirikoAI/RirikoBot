@@ -154,6 +154,15 @@ export interface LegacyItemCategory {
   name: string;
 }
 
+/** One row per bot application: the API credentials 1.4.0 kept in plain text. */
+export interface LegacyConfiguration {
+  applicationId: string;
+  twitchClientId?: string | null;
+  twitchClientSecret?: string | null;
+  stableDiffusionType?: string | null;
+  stableDiffusionApiToken?: string | null;
+}
+
 export interface InspectionSummary {
   tables: Record<string, number>;
   totalCoins: bigint;
@@ -183,6 +192,13 @@ export interface TransformedData {
   economyItemCategories: (typeof sqlite.economyItemCategories.$inferInsert)[];
   economyItems: (typeof sqlite.economyItems.$inferInsert)[];
   autoVoiceConfigs: (typeof sqlite.autoVoiceConfigs.$inferInsert)[];
+  guildWelcomers: (typeof sqlite.guildWelcomer.$inferInsert)[];
+  guildFarewells: (typeof sqlite.guildFarewell.$inferInsert)[];
+  freeGameChannels: (typeof sqlite.freeGameChannels.$inferInsert)[];
+  aiGuildPreferences: (typeof sqlite.aiGuildPreferences.$inferInsert)[];
+  imageGuildSettings: (typeof sqlite.imageGuildSettings.$inferInsert)[];
+  /** Legacy settings that could not be carried over, for the owner to redo by hand. */
+  notices: string[];
 }
 
 export interface MigrationResult {
@@ -190,6 +206,8 @@ export interface MigrationResult {
   isDryRun: boolean;
   inspected: InspectionSummary;
   migratedCounts: Record<string, number>;
+  /** Legacy settings that could not be carried over, for the owner to redo by hand. */
+  notices: string[];
   coinsConserved: boolean;
   totalCoinsMigrated: bigint;
   durationMs: number;

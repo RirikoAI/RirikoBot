@@ -41,9 +41,15 @@ export function createLegacyDatabase(path: string): void {
       ('welcomer_bg', 'https://welcome.png', 'guild_alpha'),
       ('farewell_channel', 'chan_bye', 'guild_alpha'),
       ('farewell_enabled', 'false', 'guild_alpha'),
+      ('farewell_bg', 'https://bye.png', 'guild_alpha'),
       ('karma-notification-enabled', 'disabled', 'guild_beta'),
       ('freeGamesChannelId', 'chan_free', 'guild_alpha'),
-      ('twitch_channel', 'chan_streams', 'guild_alpha');
+      ('twitch_channel', 'chan_streams', 'guild_alpha'),
+      ('ai_model', 'llama3.2:latest', 'guild_alpha'),
+      ('stablediffusion_model', 'luma/photon', 'guild_alpha'),
+      -- An Ollama tag 2.0 does not offer, and a welcomer that was never given a channel.
+      ('ai_model', 'llama3:8b', 'guild_beta'),
+      ('welcomer_enabled', 'true', 'guild_beta');
 
     INSERT INTO configuration (applicationId, twitchClientId, twitchClientSecret) VALUES
       ('100000000000000001', 'twitch-client', 'twitch-secret');
@@ -84,8 +90,11 @@ export function createLegacyDatabase(path: string): void {
       ('rem_1', 'user_alice', 'chan_general', 'guild_alpha', 'Meeting in 1h', '${REMINDER_DUE}', 0),
       ('rem_2', 'user_alice', 'dm_channel', 'DM', 'Water plants', '2025-03-05 00:00:00', 1);
 
+    -- 1.4.0 stored the Epic id and the Steam store URL; guild_beta had no free-games channel.
     INSERT INTO free_game_notification (gameId, gameName, source, notified, guildId) VALUES
-      ('epic_game_99', 'Awesome Free Game', 'EPIC', 1, 'guild_alpha');
+      ('epic_game_99', 'Awesome Free Game', 'Epic', 1, 'guild_alpha'),
+      ('https://store.steampowered.com/app/440/Team_Fortress_2/', 'Team Fortress 2', 'Steam', 1, 'guild_alpha'),
+      ('epic_game_98', 'Other Free Game', 'Epic', 1, 'guild_beta');
 
     INSERT INTO item_category (id, name) VALUES (1, 'Roles');
 

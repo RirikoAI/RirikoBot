@@ -41,6 +41,50 @@ describe('ReactionRoleRepository (TASK-1401)', () => {
     expect(found).toEqual(rr);
   });
 
+  it('links the channel of migrated roles on one message, leaving known channels alone', async () => {
+    const base = { guildId: 'guild-1', messageId: 'msg-100', type: 'EMOJI', mode: 'TOGGLE' };
+    // 1.4.0 stored no channel; the migration writes the guild ID in its place.
+    await reactionRoleRepo.create({
+      ...base,
+      channelId: 'guild-1',
+      emojiOrComponentId: '⭐',
+      roleId: 'r1',
+    });
+    await reactionRoleRepo.create({
+      ...base,
+      channelId: 'guild-1',
+      emojiOrComponentId: '🎮',
+      roleId: 'r2',
+    });
+    await reactionRoleRepo.create({
+      ...base,
+      messageId: 'msg-200',
+      channelId: 'guild-1',
+      emojiOrComponentId: '⭐',
+      roleId: 'r3',
+    });
+    await reactionRoleRepo.create({
+      ...base,
+      messageId: 'msg-300',
+      channelId: 'chan-old',
+      emojiOrComponentId: '⭐',
+      roleId: 'r4',
+    });
+
+    expect(await reactionRoleRepo.linkUnknownChannel('msg-100', 'chan-1')).toBe(2);
+    expect(await reactionRoleRepo.linkUnknownChannel('msg-300', 'chan-1')).toBe(0);
+
+    const channels = (await reactionRoleRepo.findByGuildId('guild-1'))
+      .map((row) => [row.roleId, row.channelId])
+      .sort();
+    expect(channels).toEqual([
+      ['r1', 'chan-1'],
+      ['r2', 'chan-1'],
+      ['r3', 'guild-1'],
+      ['r4', 'chan-old'],
+    ]);
+  });
+
   it('finds reaction role by messageId and emoji', async () => {
     await reactionRoleRepo.create({
       guildId: 'guild-1',

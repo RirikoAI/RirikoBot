@@ -54,7 +54,7 @@ export class RateLimiter {
 }
 
 const globalForLimits = globalThis as typeof globalThis & {
-  __ririkoRateLimits?: { auth: RateLimiter; actions: RateLimiter };
+  __ririkoRateLimits?: { auth: RateLimiter; actions: RateLimiter; probes: RateLimiter };
 };
 
 /**
@@ -66,7 +66,18 @@ export const rateLimits = (globalForLimits.__ririkoRateLimits ??= {
   auth: new RateLimiter({ capacity: 20, refillPerSecond: 20 / 60 }),
   /** Server Actions, keyed by user ID (or client IP before sign-in). */
   actions: new RateLimiter({ capacity: 30, refillPerSecond: 1 }),
+  /** Public /health and /ready, keyed by client IP: each one pings the database. */
+  probes: new RateLimiter({ capacity: 30, refillPerSecond: 1 }),
 });
+
+/** First check in the probe route handlers: a 429 response when the client IP is over its limit. */
+export function limitProbeRequest(request: Request): Response | null {
+  if (rateLimits.probes.take(`ip:${clientIp(request.headers) ?? 'unknown'}`)) return null;
+  return new Response('Too many requests.', {
+    status: 429,
+    headers: { 'Retry-After': '1', 'Content-Type': 'text/plain; charset=utf-8' },
+  });
+}
 
 /** First check in every auth route handler: a 429 response when the client IP is over its limit. */
 export function limitAuthRequest(request: Request): Response | null {

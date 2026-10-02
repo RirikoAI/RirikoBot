@@ -25,6 +25,7 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local
+.env.production
 *.pem
 
 # IDE & OS

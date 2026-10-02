@@ -1,8 +1,5 @@
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
 import {
   createDatabaseClient,
   AdventureSessionRepository,
@@ -15,6 +12,7 @@ import {
   UserInventoryItemRepository,
   ensureAdventureSchema,
   ensureCardSerialSchema,
+  ensurePostgresSchema,
   type PostgresDatabaseClient,
 } from '@ririko/database';
 import { AdventureEngine } from '../adventure-engine.js';
@@ -81,23 +79,8 @@ describe.skipIf(!process.env.ADVENTURE_TEST_POSTGRES_URL)(
         dialect: 'postgres',
         url: isolated.toString(),
       })) as PostgresDatabaseClient;
-      const root = resolve(fileURLToPath(new URL('../../../../../', import.meta.url)));
-      // Drizzle Kit's snapshot serializer needs JSON-safe bigint defaults, confined to this child process.
-      const ddl = execFileSync(
-        process.execPath,
-        [
-          '-e',
-          `
-      BigInt.prototype.toJSON = function () { return this.toString(); };
-      process.argv = ['node', 'drizzle-kit', 'export', '--dialect', 'postgresql', '--schema', './packages/database/src/schema/pg/index.ts'];
-      require('./packages/database/node_modules/drizzle-kit/bin.cjs');
-    `,
-        ],
-        { cwd: root, encoding: 'utf8' },
-      );
-      if (!ddl.startsWith('CREATE TABLE'))
-        throw new Error('Could not export PostgreSQL test schema');
-      await first.raw.query(ddl.replaceAll('"public".', `"${schema}".`));
+      // The same bootstrap the bot and the dashboard run on an empty database.
+      await ensurePostgresSchema(first);
       await ensureAdventureSchema(first);
       await ensureCardSerialSchema(first);
     }, 30_000);

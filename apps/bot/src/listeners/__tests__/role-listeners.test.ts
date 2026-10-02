@@ -113,6 +113,61 @@ describe('Gateway Role Listeners Suite (TASK-1405)', () => {
       );
     });
 
+    it('saves the channel of a role migrated from 1.4.0 on its first reaction', async () => {
+      const repo = mockServices.reactionRoleRepo as any;
+      repo.findByMessageAndEmoji.mockResolvedValueOnce({
+        id: 'rr-legacy',
+        guildId: 'guild-1',
+        channelId: 'guild-1', // 1.4.0 stored no channel
+        messageId: 'msg-1',
+        emojiOrComponentId: '🎮',
+        roleId: 'role-1',
+        type: 'EMOJI',
+        mode: 'TOGGLE',
+      });
+      repo.linkUnknownChannel = vi.fn().mockResolvedValue(1);
+      registerReactionListener(mockClient as any, mockServices as BotServices);
+
+      mockClient.emit(
+        'messageReactionAdd',
+        {
+          partial: false,
+          message: { id: 'msg-1', channelId: 'ch-9', guild: mockGuild, partial: false },
+          emoji: { name: '🎮', id: null },
+        },
+        { id: 'user-1', bot: false, partial: false },
+      );
+      await new Promise((r) => setTimeout(r, 20));
+
+      expect(repo.linkUnknownChannel).toHaveBeenCalledWith('msg-1', 'ch-9');
+      expect(mockServices.reactionRoleService?.handleReactionAdd).toHaveBeenCalledWith(
+        mockGuild,
+        'msg-1',
+        '🎮',
+        mockMember,
+      );
+    });
+
+    it('leaves the channel of a role that knows it', async () => {
+      const repo = mockServices.reactionRoleRepo as any;
+      repo.linkUnknownChannel = vi.fn();
+      registerReactionListener(mockClient as any, mockServices as BotServices);
+
+      mockClient.emit(
+        'messageReactionAdd',
+        {
+          partial: false,
+          message: { id: 'msg-1', channelId: 'ch-1', guild: mockGuild, partial: false },
+          emoji: { name: '🎮', id: null },
+        },
+        { id: 'user-1', bot: false, partial: false },
+      );
+      await new Promise((r) => setTimeout(r, 20));
+
+      expect(mockServices.reactionRoleService?.handleReactionAdd).toHaveBeenCalled();
+      expect(repo.linkUnknownChannel).not.toHaveBeenCalled();
+    });
+
     it('handles messageReactionAdd with custom emoji', async () => {
       registerReactionListener(mockClient as any, mockServices as BotServices);
 

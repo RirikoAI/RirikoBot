@@ -19,6 +19,7 @@ import {
   ItemCategoryRepository,
   ItemRepository,
   createDatabaseClient,
+  ensurePostgresSchema,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
@@ -297,10 +298,16 @@ function getDatabase(config: WebConfig): Promise<DatabaseClient> {
   globalForDatabase.__ririkoWebDatabase ??= createDatabaseClient({
     dialect: config.DATABASE_DIALECT,
     url: config.DATABASE_URL,
-  }).catch((error: unknown) => {
-    delete globalForDatabase.__ririkoWebDatabase;
-    throw error;
-  });
+  })
+    // The dashboard may start before the bot on an empty Postgres database.
+    .then(async (db) => {
+      await ensurePostgresSchema(db);
+      return db;
+    })
+    .catch((error: unknown) => {
+      delete globalForDatabase.__ririkoWebDatabase;
+      throw error;
+    });
   return globalForDatabase.__ririkoWebDatabase;
 }
 
