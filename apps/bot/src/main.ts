@@ -1,4 +1,9 @@
-import { ensureAdventureSchema, ensureCardSerialSchema } from '@ririko/database';
+import {
+  createDatabaseClient,
+  databaseConfigFromEnv,
+  ensureAdventureSchema,
+  ensureCardSerialSchema,
+} from '@ririko/database';
 import {
   createBot,
   getBotInfo,
@@ -15,6 +20,7 @@ import { createCommandRouter, createHelpOptions } from './command-router.js';
 import { createCommandControllers, registerBotCommands } from './command-set.js';
 import { registerGuildJoinCommandSync, syncCommandsOnStartup } from './command-sync.js';
 import { registerComponentInteractions } from './component-interactions.js';
+import { runLegacyUpgrade } from './legacy-upgrade.js';
 import { CommandSynchronizer, createRestClient, DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 
 /**
@@ -39,9 +45,12 @@ export async function main(): Promise<void> {
   // 1. Initialize Bot & Gateway
   const bot = createBot();
 
-  // 2. Initialize Domain Services and Repositories
+  // 2. Initialize Domain Services and Repositories. A mounted 1.4.0 database is migrated once
+  // first, before the services seed their defaults.
+  const db = await createDatabaseClient(databaseConfigFromEnv());
+  await runLegacyUpgrade(db);
   console.log('• Initializing bot repositories and domain services...');
-  const services = await createBotServices(undefined, bot.client);
+  const services = await createBotServices(db, bot.client);
   // Upgrade gameplay storage before any gateway events or commands can run.
   await ensureAdventureSchema(services.db);
   await services.adventureEngine.assertCompatibleSessions();

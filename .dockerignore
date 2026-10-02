@@ -1,0 +1,47 @@
+# Build context for the root Dockerfile (docs/deployment.md section 2.1). Only generated,
+# secret and private paths are left out; sources, assets and tests stay in.
+
+# Dependencies and build output (rebuilt inside the image)
+**/node_modules
+**/dist
+**/.next
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Git, editors and local tooling
+.git
+.husky/_
+.idea
+.vscode
+.codegraph
+.cache
+.local
+.claude/settings.local.json
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Runtime data (mounted as volumes), at any depth like in .gitignore
+**/data
+**/storage
+**/*.sqlite
+**/*.sqlite-wal
+**/*.sqlite-shm
+public/cards
+public/bosses
+**/tmp
+**/temp-*
+
+# Private music package and the local Lavalink install (Lavalink runs in its own container)
+packages/music-private
+lavalink
+
+# Test, coverage and site reports
+coverage
+test-results
+apps/web/e2e-results
+.vitest
+site-dist

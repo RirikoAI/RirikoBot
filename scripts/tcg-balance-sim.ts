@@ -15,6 +15,7 @@ import {
   DungeonSeasonRepository,
   PlayerEnergyRepository,
   UserDungeonProgressRepository,
+  databaseConfigFromEnv,
 } from '../packages/database/src/index.js';
 import {
   checkWinRateBands,
@@ -48,10 +49,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const client = await createDatabaseClient({
-    dialect: (process.env.DATABASE_DIALECT as 'sqlite' | 'postgres') || 'sqlite',
-    url: process.env.DATABASE_URL || './data/ririko.sqlite',
-  });
+  const client = await createDatabaseClient(databaseConfigFromEnv());
   const seasonRepo = new DungeonSeasonRepository(client);
   const runner = new DungeonRunner(
     new PlayerEnergyRepository(client),

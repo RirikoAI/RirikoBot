@@ -7,6 +7,7 @@ import {
   WebPasskeyRepository,
   WebSessionRepository,
   type DatabaseClient,
+  databaseConfigFromEnv,
 } from '@ririko/database';
 import type { Command } from 'commander';
 import pc from 'picocolors';
@@ -71,10 +72,7 @@ export function registerPasskeysResetCommand(program: Command): void {
     .argument('<user_id>', 'Discord user ID')
     .option('--yes', 'Apply the reset; without it the command only reports what would change')
     .action(async (userId: string, flags: { yes?: boolean }) => {
-      const db = await createDatabaseClient({
-        dialect: (process.env.DATABASE_DIALECT || 'sqlite') as 'sqlite' | 'postgres',
-        url: process.env.DATABASE_URL || './data/ririko.sqlite',
-      });
+      const db = await createDatabaseClient(databaseConfigFromEnv());
       try {
         const confirm = flags.yes === true;
         const result = await resetPasskeys(db, userId, { confirm, actor: cliActor() });

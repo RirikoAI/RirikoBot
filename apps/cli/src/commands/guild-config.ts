@@ -7,7 +7,7 @@ import {
   ValidationError,
   type GuildConfigModule,
 } from '@ririko/core';
-import { createDatabaseClient, type DatabaseClient } from '@ririko/database';
+import { createDatabaseClient, type DatabaseClient, databaseConfigFromEnv } from '@ririko/database';
 import {
   createGuildConfigService as createService,
   GuildConfigValidationError,
@@ -156,10 +156,7 @@ export function registerGuildConfigCommand(program: Command): void {
       'New value; omit to print the current one. Flags take true/false, ID lists are comma separated, rows are JSON, and "" clears a channel',
     )
     .action(async (guildId: string, key?: string, value?: string) => {
-      const db = await createDatabaseClient({
-        dialect: (process.env.DATABASE_DIALECT || 'sqlite') as 'sqlite' | 'postgres',
-        url: process.env.DATABASE_URL || './data/ririko.sqlite',
-      });
+      const db = await createDatabaseClient(databaseConfigFromEnv());
       try {
         const lines = await runGuildConfig(createGuildConfigService(db), guildId, key, value);
         console.log(lines.join('\n'));

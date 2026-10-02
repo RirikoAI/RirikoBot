@@ -22,6 +22,7 @@ import {
   DungeonFloorRepository,
   DungeonSeasonRepository,
   WaifuAssetRepository,
+  databaseConfigFromEnv,
 } from '../packages/database/src/index.js';
 import {
   AniListClient,
@@ -214,10 +215,7 @@ async function runImportDb(file: string): Promise<void> {
   }
   if (dryRun) return;
 
-  const client = await createDatabaseClient({
-    dialect: (process.env.DATABASE_DIALECT as 'sqlite' | 'postgres') || 'sqlite',
-    url: process.env.DATABASE_URL || './data/ririko.sqlite',
-  });
+  const client = await createDatabaseClient(databaseConfigFromEnv());
   const seasons = new DungeonSeasonRepository(client);
   const bosses = new DungeonBossRepository(client);
   const floors = new DungeonFloorRepository(client);
