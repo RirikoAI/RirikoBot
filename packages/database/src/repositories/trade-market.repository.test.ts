@@ -1,55 +1,19 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createDatabaseClient } from '../client/factory.js';
-import type { SqliteDatabaseClient } from '../client/types.js';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { randomUUID } from 'node:crypto';
+import { describeDialects } from '../testing/dialects.js';
 import { CardTradeRepository } from './card-trade.repository.js';
 import { MarketListingRepository } from './market-listing.repository.js';
 
-describe('Trade & Market Repositories (TASK-1051)', () => {
-  let client: SqliteDatabaseClient;
+const CARD_101 = randomUUID();
+const CARD_EXPIRED = randomUUID();
+
+describeDialects('Trade & Market Repositories (TASK-1051)', (db) => {
   let tradeRepo: CardTradeRepository;
   let marketRepo: MarketListingRepository;
 
-  beforeEach(async () => {
-    const rawClient = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
-    if (rawClient.dialect !== 'sqlite') throw new Error('Expected sqlite client');
-    client = rawClient;
-
-    // Create tables in memory
-    client.raw.exec(`
-      CREATE TABLE card_trades (
-        id TEXT PRIMARY KEY,
-        sender_user_id TEXT NOT NULL,
-        receiver_user_id TEXT NOT NULL,
-        offered_card_ids TEXT NOT NULL DEFAULT '[]',
-        requested_card_ids TEXT NOT NULL DEFAULT '[]',
-        offered_credits INTEGER NOT NULL DEFAULT 0,
-        requested_credits INTEGER NOT NULL DEFAULT 0,
-        status TEXT NOT NULL DEFAULT 'PENDING',
-        created_at INTEGER NOT NULL,
-        resolved_at INTEGER
-      );
-      CREATE INDEX idx_card_trades_users ON card_trades (sender_user_id, receiver_user_id);
-
-      CREATE TABLE market_listings (
-        id TEXT PRIMARY KEY,
-        seller_user_id TEXT NOT NULL,
-        user_card_id TEXT NOT NULL,
-        price INTEGER NOT NULL,
-        tax_paid INTEGER NOT NULL DEFAULT 0,
-        status TEXT NOT NULL DEFAULT 'ACTIVE',
-        created_at INTEGER NOT NULL,
-        expires_at INTEGER NOT NULL
-      );
-      CREATE INDEX idx_market_listings_status ON market_listings (status);
-      CREATE INDEX idx_market_listings_seller ON market_listings (seller_user_id);
-    `);
-
-    tradeRepo = new CardTradeRepository(client);
-    marketRepo = new MarketListingRepository(client);
-  });
-
-  afterEach(async () => {
-    await client.close();
+  beforeEach(() => {
+    tradeRepo = new CardTradeRepository(db.client);
+    marketRepo = new MarketListingRepository(db.client);
   });
 
   describe('CardTradeRepository', () => {
@@ -105,7 +69,7 @@ describe('Trade & Market Repositories (TASK-1051)', () => {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const listing = await marketRepo.create({
         sellerUserId: 'user-1',
-        userCardId: 'card-101',
+        userCardId: CARD_101,
         price: 2000,
         taxPaid: 100, // 5% of 2000
         expiresAt,
@@ -118,7 +82,7 @@ describe('Trade & Market Repositories (TASK-1051)', () => {
 
       const activeList = await marketRepo.listActiveListings();
       expect(activeList.length).toBe(1);
-      expect(activeList[0]!.userCardId).toBe('card-101');
+      expect(activeList[0]!.userCardId).toBe(CARD_101);
 
       const updated = await marketRepo.updateStatus(listing.id, 'SOLD');
       expect(updated.status).toBe('SOLD');
@@ -133,21 +97,21 @@ describe('Trade & Market Repositories (TASK-1051)', () => {
 
       await marketRepo.create({
         sellerUserId: 'user-1',
-        userCardId: 'card-expired',
+        userCardId: CARD_EXPIRED,
         price: 500,
         expiresAt: pastDate,
       });
 
       await marketRepo.create({
         sellerUserId: 'user-2',
-        userCardId: 'card-valid',
+        userCardId: randomUUID(),
         price: 1500,
         expiresAt: futureDate,
       });
 
       const expired = await marketRepo.findExpiredListings();
       expect(expired.length).toBe(1);
-      expect(expired[0]!.userCardId).toBe('card-expired');
+      expect(expired[0]!.userCardId).toBe(CARD_EXPIRED);
     });
   });
 });

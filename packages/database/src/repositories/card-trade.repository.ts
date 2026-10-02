@@ -155,6 +155,33 @@ export class CardTradeRepository extends BaseRepository<
     return this.update(id, { status, resolvedAt }, tx);
   }
 
+  /**
+   * Moves a trade from `from` to `to` only if it is still in `from`. Returns null when it is not
+   * (already resolved, or missing). Inside a transaction this claims the trade: on Postgres a
+   * concurrent claim waits on the row lock, then matches no row.
+   */
+  async transitionStatus(
+    id: string,
+    from: TradeStatus,
+    to: TradeStatus,
+    tx?: DatabaseClient,
+  ): Promise<CardTrade | null> {
+    const client = this.getClient(tx);
+    const resolvedAt = to === 'PENDING' ? null : new Date();
+    const [row] = this.isSqlite(client)
+      ? await client.db
+          .update(sqliteSchema.cardTrades)
+          .set({ status: to, resolvedAt })
+          .where(and(eq(sqliteSchema.cardTrades.id, id), eq(sqliteSchema.cardTrades.status, from)))
+          .returning()
+      : await client.db
+          .update(pgSchema.cardTrades)
+          .set({ status: to, resolvedAt })
+          .where(and(eq(pgSchema.cardTrades.id, id), eq(pgSchema.cardTrades.status, from)))
+          .returning();
+    return row ? this.normalizeTrade(row as unknown as Record<string, unknown>) : null;
+  }
+
   async listPendingTradesForUser(userId: string, tx?: DatabaseClient): Promise<CardTrade[]> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {
