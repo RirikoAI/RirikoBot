@@ -1,5 +1,8 @@
 import type * as sqlite from '../schema/sqlite/index.js';
 
+// Legacy row shapes follow the real 1.4.0 schema in __fixtures__/legacy-1.4.0-schema.sql. SQLite
+// returns booleans as 0 or 1 and dates as UTC text (see parseLegacyDate).
+
 export interface LegacyUser {
   id: string;
   username: string;
@@ -22,17 +25,17 @@ export interface LegacyGuild {
 }
 
 export interface LegacyGuildConfig {
-  id: string | number;
+  id: number;
   name: string;
   value: string;
-  guildId: string;
+  guildId: string | null;
 }
 
 export interface LegacyUserNote {
-  id: string | number;
+  id: number;
   note: string;
   createdBy: string;
-  userId: string;
+  userId: string | null;
   guildId?: string | null;
   createdAt?: string | number | Date | null;
   updatedAt?: string | number | Date | null;
@@ -42,40 +45,39 @@ export interface LegacyVoiceChannel {
   id: string;
   name: string;
   parentId?: string | null;
-  guildId: string;
+  guildId: string | null;
 }
 
 export interface LegacyMusicChannel {
   id: string;
   name: string;
-  guildId: string;
+  guildId: string | null;
 }
 
 export interface LegacyPlaylist {
-  id: number | string;
+  id: number;
   name: string;
-  userId?: string | null;
-  author?: string | null;
-  authorTag?: string | null;
-  public?: boolean | number | null;
-  plays?: number | null;
-  guildId?: string | null;
+  userId: string;
+  author: string;
+  authorTag: string;
+  public: number;
+  plays: number;
   createdAt?: string | number | Date | null;
   updatedAt?: string | number | Date | null;
 }
 
 export interface LegacyTrack {
-  id: number | string;
+  id: number;
   name: string;
   url: string;
-  playlistId: number | string;
+  playlistId: number | null;
 }
 
 export interface LegacyStreamSubscription {
-  id: string | number;
+  id: number;
   twitchUserId: string;
   channelId: string;
-  guildId: string;
+  guildId: string | null;
   createdAt?: string | number | Date | null;
   updatedAt?: string | number | Date | null;
 }
@@ -99,11 +101,11 @@ export interface LegacyTwitchStreamer {
 }
 
 export interface LegacyReactionRole {
-  id: string | number;
+  id: number;
   messageId: string;
   emoji: string;
   roleId: string;
-  guildId: string;
+  guildId: string | null;
 }
 
 export interface LegacyReminder {
@@ -131,24 +133,24 @@ export interface LegacyFreeGameNotification {
 }
 
 export interface LegacyItem {
-  id: string;
+  id: number;
   name: string;
   price: number;
   description: string;
-  rarity?: number | null;
-  hidden?: boolean | number | null;
-  purchaseLimit?: number | null;
-  purchasable?: boolean | number | null;
-  sellable?: boolean | number | null;
-  findable?: boolean | number | null;
-  imageUrl?: string | null;
+  rarity: number;
+  hidden: number;
+  purchaseLimit: number;
+  purchasable: number;
+  sellable: number;
+  findable: number;
+  imageUrl: string;
   createdAt?: string | number | Date | null;
   updatedAt?: string | number | Date | null;
-  categoryId?: string | null;
+  categoryId: number | null;
 }
 
 export interface LegacyItemCategory {
-  id: string;
+  id: number;
   name: string;
 }
 

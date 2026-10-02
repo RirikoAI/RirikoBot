@@ -42,6 +42,7 @@ The root `Dockerfile` builds both images, `bot-runner` and `web-runner`, from on
 - **Process**: `tini` is PID 1. It forwards `SIGTERM` to Node, which shuts the gateway down cleanly, and reaps FFmpeg child processes.
 - **FFmpeg**: Included in the bot image for the built-in player used when Lavalink is not configured.
 - **Environment**: The images read configuration only from environment variables (`.env` is never copied in). Both default to SQLite (`DATABASE_DIALECT=sqlite`, `DATABASE_URL=./data/ririko.sqlite`). The dashboard also needs `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL` and `SECRET_VAULT_KEY`.
+- **Upgrading from 1.4.0**: mount the old `./data` folder read-only at `/app/legacy` (`./data:/app/legacy:ro`). The bot image sets `LEGACY_DATABASE_PATH=/app/legacy/ririko.db` and migrates that database once on first start, without writing to it. See [docs/migrations.md section 4](migrations.md).
 
 Build and run both on one host (SQLite):
 ```bash
@@ -61,7 +62,7 @@ docker run -d --name ririko-web --env-file .env -p 3000:3000 \
 
 `node scripts/docker-smoke.ts bot web` checks built `ririko-bot:smoke` and `ririko-web:smoke` images with dummy credentials, no network and no capabilities:
 - both run as uid 10001, and only the directories above are writable;
-- the bot runs FFmpeg, starts up to command registration and creates its SQLite database;
+- the bot runs FFmpeg, starts up to command registration and creates its SQLite database, and migrates a root-owned 1.4.0 database at `/app/legacy` on first start without changing it;
 - the dashboard loads its native packages, answers `GET /` with 200, redirects `/api/auth/login` to Discord and creates its SQLite database.
 
 ### 2.2. Production Orchestration (`docker-compose.production.yml`)
