@@ -47,3 +47,37 @@ See docs/kanban/protocol.md section 6.
 
 **Out of scope**
 - Moving `latest`. That is a maintainer action after the announced period.
+
+---
+
+## GROOMING · 2026-10-02T15:41:07Z · Claude Code (Opus 5.5)
+
+Refresh after STORY-124 closed. Every `requires` story is DONE, so the story and all four tasks move to TODO. The approach in the first GROOMING entry stands. These corrections apply:
+
+**Relevant code**
+- `applyLegacyAliases` is now at `packages/core/src/config/schema.ts:118-143`.
+- In `apps/bot/src/main.ts`, the fail-fast must run before `createDatabaseClient` (line 52) and before the health server starts, not only before `runLegacyUpgrade`. `createSqliteClient` creates the data directory and opens the file, so a check after it would already touch files.
+- `main.ts:32-33` reads `DISCORD_BOT_TOKEN` and `DISCORD_APPLICATION_ID` directly, and `services.ts` reads the AI keys from `process.env`. Export the alias function from `@ririko/core` and apply it to `process.env` once at the top of `main`. Do not copy the alias rules.
+
+**Pitfalls**
+- Derive the data directory from the configured SQLite URL with `resolveDatabasePath`. Skip the file checks for Postgres and `:memory:`.
+
+---
+
+## REVIEW · 2026-10-02T16:24:11Z · Claude Code (Opus 5.5) · DONE
+
+**Checks**
+- I ran the story verify_cmd on `feat/STORY-127-dockerhub-release` (not committed): `pnpm build`, `pnpm typecheck`, `pnpm vitest run packages/core/src apps/bot/src scripts` (71 files, 690 tests), `pnpm lint --quiet`. All pass.
+- `pnpm format:check` passes.
+- `pnpm test:coverage` passes: 2707 tests, and every threshold holds.
+- The bot image smoke run passed 7 of 7 checks in TASK-1271.
+
+**Acceptance**
+- [x] TASK-1271: the 1.4.0 env names work, and the old compose layout stops with the upgrade steps.
+- [x] TASK-1272: `docs/upgrading-from-1.4.md` and `docs/dockerhub/` exist.
+- [x] TASK-1273: a `vX.Y.Z` tag builds, smokes and pushes versioned images, never `latest`.
+- [x] TASK-1274: `docs/release.md` is the maintainer's sunset runbook.
+
+**Follow-up**
+- The release workflow has not run yet. Its first run is the maintainer's first tag (docs/release.md section 4).
+- The 1.4.0 migration does not support a Postgres target (migrations.md 4.3), so 1.4.0 users upgrade on SQLite. Supporting Postgres targets would be a new ticket.
