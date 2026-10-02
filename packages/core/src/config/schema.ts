@@ -36,6 +36,8 @@ const BaseAppConfigSchema = z.object({
   NODE_ENV: NodeEnvSchema,
   LOG_LEVEL: LogLevelSchema,
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  // Bot /health and /ready probes; 0 turns them off
+  HEALTH_PORT: z.coerce.number().int().min(0).max(65535).default(8080),
 
   // Discord Bot Core Credentials
   DISCORD_TOKEN: z

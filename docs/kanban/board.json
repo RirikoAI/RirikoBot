@@ -328,7 +328,7 @@
         "EPIC-011"
       ],
       "blocks": [],
-      "description": "End-to-end integration tests, rootless Dockerfile, docker-compose.production.yml, /health probes. Regroomed 2026-10-01: STORY-120 re-estimated from 5 to 8 points after an audit found no Playwright setup, no shared Discord API fake and no API base override on the web app; Postgres dual-dialect and concurrency tests moved to STORY-124; the 80% coverage target from the original STORY-120 is parked as STORY-125."
+      "description": "End-to-end integration tests, rootless Dockerfile, docker-compose.production.yml, /health probes. Regroomed 2026-10-01: STORY-120 re-estimated from 5 to 8 points after an audit found no Playwright setup, no shared Discord API fake and no API base override on the web app; Postgres dual-dialect and concurrency tests moved to STORY-124; the 80% coverage target from the original STORY-120 is parked as STORY-125. Regroomed 2026-10-02: STORY-128 (5), STORY-122 (8, adds the Postgres schema bootstrap), STORY-124 (8), STORY-127 (8) and STORY-125 (13) are groomed. Order: 128, 122, 124, 127, 125. Redis was dropped from the production compose (unused)."
     },
     {
       "id": "EPIC-013",
@@ -1278,12 +1278,57 @@
       "id": "STORY-122",
       "parent": "EPIC-012",
       "title": "Production Orchestration & Health Probes",
-      "points": 3,
-      "status": "BACKLOG",
+      "points": 8,
+      "status": "REVIEW",
       "requires": [
         "STORY-121"
       ],
-      "blocks": []
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "children": [
+        "TASK-1223",
+        "TASK-1221",
+        "TASK-1222"
+      ],
+      "context": {
+        "files": [
+          "packages/database/src/client/postgres.ts",
+          "packages/database/scripts/generate-sqlite-ddl.mjs",
+          "apps/bot/src/main.ts",
+          "apps/web/src/lib/server/services.ts",
+          "Dockerfile",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "createPostgresClient",
+          "ensureAdventureSchema",
+          "ensureCardSerialSchema",
+          "getDatabase",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "codegraph_queries": [
+          "createPostgresClient createSqliteClient SQLITE_SCHEMA_DDL ensureAdventureSchema ensureCardSerialSchema",
+          "bot main startup createDatabaseClient runLegacyUpgrade createBotServices"
+        ]
+      },
+      "acceptance": [
+        "TASK-1223: an empty Postgres database gets the full 2.0 schema at bot or dashboard startup, safely when both start at once.",
+        "TASK-1221: bot and dashboard answer /health and /ready, and both images have a HEALTHCHECK.",
+        "TASK-1222: docker-compose.production.yml runs Postgres, Lavalink, bot and dashboard with the real env names and shared volumes, and docs/deployment.md matches it."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src apps/bot/src apps/web/src scripts && pnpm lint --quiet && RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y docker compose -f docker-compose.production.yml --env-file .env.production.example config -q",
+      "handovers": [
+        "STORY-122"
+      ],
+      "description": "Regroomed 2026-10-02 after the STORY-121 FLAGs: added the Postgres schema bootstrap (TASK-1223), rewrote the compose scope with the real env names and volumes, and dropped Redis (no code uses it; decided with the maintainer)."
     },
     {
       "id": "STORY-123",
@@ -1299,23 +1344,96 @@
       "id": "STORY-124",
       "parent": "EPIC-012",
       "title": "Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring",
-      "points": 5,
+      "points": 8,
       "status": "BACKLOG",
       "requires": [
-        "STORY-120"
+        "STORY-120",
+        "TASK-1223"
       ],
       "blocks": [],
-      "description": "Split from STORY-120 on 2026-10-01. Today Postgres runs only in the opt-in adventure suite (ADVENTURE_TEST_POSTGRES_URL). Add a Postgres service to CircleCI, a dialect-parameterized helper so repository suites run on both SQLite and Postgres, concurrent two-party trade and market purchase tests on Postgres, and a test that drives an AI command through createBotServices with a Gemini 429 falling back to the next provider."
+      "description": "Split from STORY-120 on 2026-10-01; groomed 2026-10-02. Needs PG_SCHEMA_DDL from TASK-1223. The grooming audit found that acceptTrade and buyListing check status outside the transaction and never lock the trade or listing row, so the concurrency task also fixes that race.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "children": [
+        "TASK-1241",
+        "TASK-1242",
+        "TASK-1243"
+      ],
+      "context": {
+        "files": [
+          ".circleci/config.yml",
+          "packages/database/src/repositories",
+          "packages/services/src/waifu-tcg/trading/trade-service.ts",
+          "packages/services/src/waifu-tcg/market/market-service.ts",
+          "apps/bot/src/services.ts"
+        ],
+        "symbols": [
+          "TradeService.acceptTrade",
+          "MarketService.buyListing",
+          "FallbackChainManager",
+          "createBotServices"
+        ],
+        "entry_points": [
+          ".circleci/config.yml"
+        ],
+        "codegraph_queries": [
+          "TradeService acceptTrade MarketService buyListing withTransaction transferBalance modifyBalance",
+          "FallbackChainManager recordFailure getCandidateProviders createBotServices aiProviders"
+        ]
+      },
+      "acceptance": [
+        "TASK-1241: CircleCI runs repository suites on SQLite and Postgres.",
+        "TASK-1242: concurrent trade accepts and market purchases on Postgres succeed exactly once.",
+        "TASK-1243: an AI command through createBotServices falls back from a rate-limited Gemini to the next provider."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm vitest run packages/database/src packages/services/src/waifu-tcg apps/bot/src && pnpm lint --quiet",
+      "handovers": [
+        "STORY-124"
+      ]
     },
     {
       "id": "STORY-125",
       "parent": "EPIC-012",
       "title": "Raise Test Coverage Toward 80%",
-      "points": null,
+      "points": 13,
       "status": "BACKLOG",
-      "requires": [],
+      "requires": [
+        "STORY-124",
+        "STORY-127"
+      ],
       "blocks": [],
-      "description": "Ungroomed. Parked 2026-10-01 from the original STORY-120 scope. The coverage ratchet in vitest.config.ts keeps rising with each PR; this story would target the least-covered packages to reach 80% lines. Groom from a fresh coverage report."
+      "description": "Groomed 2026-10-02 from the coverage report of that day: lines 70.3%, about 2,800 more covered lines needed for 80%. Least covered: apps/web/src/app 12.8%, database repositories 48.3%, apps/cli/src/commands 46.3%, apps/bot/src/commands 64.6%, bot listeners 58.7%. Runs last in EPIC-012 (decided with the maintainer). Each task starts from a fresh pnpm test:coverage and raises the ratchet.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "children": [
+        "TASK-1251",
+        "TASK-1252",
+        "TASK-1253",
+        "TASK-1254"
+      ],
+      "context": {
+        "files": [
+          "vitest.config.ts",
+          "coverage/coverage-summary.json"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "vitest.config.ts"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "Overall line coverage reaches at least 80%, and every vitest.config.ts threshold is raised to the new floor.",
+        "Each task adds real behaviour tests (no snapshot padding, no excludes added to dodge coverage)."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-125"
+      ]
     },
     {
       "id": "STORY-130",
@@ -1746,24 +1864,107 @@
       "requires": [
         "STORY-121",
         "STORY-126",
-        "STORY-128"
+        "STORY-128",
+        "STORY-122"
       ],
       "blocks": [],
-      "description": "Ungroomed; created 2026-10-02 with STORY-126. Planned tasks: (1) 1.4.0 setting aliases (AI_SERVICE_TYPE, AI_SERVICE_API_KEY, DATABASE_NAME) and a fail-fast message when the old compose layout is detected (a root-owned /app/data holding ririko.db that uid 10001 cannot write): print the upgrade steps and exit, touching nothing. (2) docs/upgrading-from-1.4.md, the 2.0 compose example with ./data:/app/legacy:ro, and the Docker Hub repository description. (3) A CircleCI release job that pushes versioned tags (X.Y.Z, X.Y, X) of bot-runner to ririkoai/ririkobot and web-runner to ririkoai/ririkobot-dashboard from git tags, with Docker Hub credentials in a CircleCI context. (4) The sunset: the maintainer tags the current latest as 1.4.0 so it stays pullable, then moves latest to 2.x after an announced period. Pushing or retagging on Docker Hub always needs the maintainer."
+      "description": "Groomed 2026-10-02 from the STORY-121 Docker Hub FLAG and the STORY-126 plan. Docker Hub ririkoai/ririkobot:latest is 1.4.0 (about 1.1k pulls). This story makes the 1.4.0 env names work, refuses the old compose layout with instructions, documents the upgrade, adds a tag-driven release job that pushes versioned tags only, and writes the maintainer runbook for retagging 1.4.0 and moving latest. Requires STORY-122 so the release ships the probes and the production compose file.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "children": [
+        "TASK-1271",
+        "TASK-1272",
+        "TASK-1273",
+        "TASK-1274"
+      ],
+      "context": {
+        "files": [
+          "packages/core/src/config/schema.ts",
+          "apps/bot/src/main.ts",
+          ".circleci/config.yml",
+          "scripts/docker-smoke.ts",
+          "docs/migrations.md",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "applyLegacyAliases",
+          "runLegacyUpgrade",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts",
+          ".circleci/config.yml"
+        ],
+        "codegraph_queries": [
+          "applyLegacyAliases AppConfigSchema WebConfigSchema",
+          "runLegacyUpgrade upgradeLegacyDatabase LEGACY_DATABASE_PATH"
+        ]
+      },
+      "acceptance": [
+        "TASK-1271: 1.4.0 env names work, and the old compose layout stops with upgrade steps.",
+        "TASK-1272: an upgrade guide and Docker Hub descriptions exist.",
+        "TASK-1273: a git tag vX.Y.Z builds, smokes and pushes versioned images, never latest.",
+        "TASK-1274: the maintainer has a written sunset runbook. Agents never push or retag on Docker Hub."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/core/src apps/bot/src scripts && pnpm lint --quiet",
+      "handovers": [
+        "STORY-127",
+        "STORY-122"
+      ]
     },
     {
       "id": "STORY-128",
       "parent": "EPIC-012",
       "title": "1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads",
-      "points": 3,
-      "status": "BACKLOG",
+      "points": 5,
+      "status": "REVIEW",
       "requires": [
         "TASK-1261"
       ],
       "blocks": [
         "STORY-127"
       ],
-      "description": "Ungroomed; found by TASK-1261 on 2026-10-01. The migration writes 1.4.0 welcome and farewell settings into guild_settings.welcomer_* and farewell_* columns, but 2.0 reads the cards from guild_welcomer and guild_farewell (WelcomerRepository), so those settings are lost after migration. freeGamesChannelId is not migrated (free_game_announcements get the guild id as channel id; 2.0 reads free_game_channels). ai_model, stablediffusion_model and twitch_channel are not migrated (candidates: ai_guild_preferences, image_guild_settings). The configuration table holds plaintext Twitch and Stable Diffusion credentials that are deliberately not migrated; decide whether to offer them for the vault. Must land before the release (STORY-127)."
+      "description": "Groomed 2026-10-02 from the TASK-1261 FLAG. The 1.4.0 migration writes welcome and farewell settings into guild_settings columns nothing reads, drops the free-games channel and the AI and image models, and gives reaction roles and free-game announcements the guild id as channel id. Route each setting into the table 2.0 reads, and backfill reaction-role channels lazily on first reaction (decided with the maintainer). Must land before the release (STORY-127).",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "children": [
+        "TASK-1281",
+        "TASK-1282"
+      ],
+      "context": {
+        "files": [
+          "packages/database/src/migration/transformer.ts",
+          "packages/database/src/migration/engine.ts",
+          "packages/database/src/migration/types.ts",
+          "packages/database/src/migration/migration.test.ts",
+          "apps/bot/src/listeners/reaction.listener.ts",
+          "apps/web/src/lib/server/guilds/reaction-role-panels.ts"
+        ],
+        "symbols": [
+          "LegacyTransformer.transform",
+          "MigrationEngine.migrate",
+          "WelcomerRepository.getWelcomeConfig"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "LegacyTransformer transform guild_config isEnabledValue TransformedData MigrationEngine migrate insertBatch",
+          "WelcomerRepository getWelcomeConfig getFarewellConfig guildWelcomer guildFarewell"
+        ]
+      },
+      "acceptance": [
+        "TASK-1281: every 1.4.0 guild_config setting that 2.0 can represent lands in the table 2.0 reads (guild_welcomer, guild_farewell, free_game_channels, ai_guild_preferences, image_guild_settings), proven by the real-schema migration test.",
+        "TASK-1282: migrated reaction roles (channel unknown) link their real channel on first use, and removing them or opening the dashboard panel no longer fails."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm vitest run packages/database/src apps/bot/src apps/web/src/lib/server && pnpm lint --quiet",
+      "handovers": [
+        "STORY-128"
+      ]
     }
   ],
   "tasks": [
@@ -4104,20 +4305,112 @@
     {
       "id": "TASK-1221",
       "parent": "STORY-122",
-      "title": "Implement /health and /ready probes for Bot and Web",
-      "points": 1,
-      "status": "BACKLOG",
-      "requires": [],
-      "blocks": []
+      "title": "Implement /health and /ready Probes for Bot and Web, With Docker HEALTHCHECKs",
+      "points": 2,
+      "status": "DONE",
+      "requires": [
+        "TASK-1223"
+      ],
+      "blocks": [
+        "TASK-1222"
+      ],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "context": {
+        "files": [
+          "apps/bot/src/main.ts",
+          "apps/web/src/app/api",
+          "apps/web/src/proxy.ts",
+          "apps/web/next.config.ts",
+          "packages/database/src/client/postgres.ts",
+          "packages/core/src/config/schema.ts",
+          "Dockerfile",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "main",
+          "createPostgresClient",
+          "BaseAppConfigSchema",
+          "getDatabase"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "bot main startup SIGTERM shutdown client ready",
+          "database client ping latencyMs",
+          "docker-smoke readyMarker web fetch"
+        ]
+      },
+      "acceptance": [
+        "The bot starts a node:http server on HEALTH_PORT (default 8080, in the config schema): GET /health returns 200 JSON with version, uptime, database ping and gateway status; GET /ready returns 200 only after the database setup, the legacy upgrade and the Discord client ready event, otherwise 503. The server closes on shutdown.",
+        "The dashboard serves /health and /ready (route handlers under app/api plus rewrites) with a database ping; /ready returns 503 when the database is unreachable.",
+        "Both runner stages have a HEALTHCHECK that uses node fetch (the images have no curl), and scripts/docker-smoke.ts asserts the bot and web probes inside the containers.",
+        "docs/deployment.md section 3 describes the real probe payloads, with no Redis.",
+        "Unit tests cover the bot probe states and the web route handlers."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src apps/web/src/app/api && pnpm typecheck && pnpm build && pnpm lint --quiet && docker build --target bot-runner -t ririko-bot:smoke . && docker build --target web-runner -t ririko-web:smoke . && node scripts/docker-smoke.ts bot web",
+      "handovers": [
+        "TASK-1221",
+        "STORY-122"
+      ]
     },
     {
       "id": "TASK-1222",
       "parent": "STORY-122",
-      "title": "docker-compose.production.yml with Redis, PostgreSQL, and App Services",
-      "points": 2,
-      "status": "BACKLOG",
-      "requires": [],
-      "blocks": []
+      "title": "docker-compose.production.yml With PostgreSQL, Lavalink, Bot and Dashboard",
+      "points": 3,
+      "status": "DONE",
+      "requires": [
+        "TASK-1221",
+        "TASK-1223"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "context": {
+        "files": [
+          "docker-compose.production.yml",
+          ".env.production.example",
+          "Dockerfile",
+          "lavalink/application.yml",
+          "packages/core/src/config/schema.ts",
+          "apps/bot/src/services.ts",
+          "docs/deployment.md",
+          "docker/lavalink/application.yml",
+          "scripts/lavalink-setup.ts"
+        ],
+        "symbols": [
+          "BaseAppConfigSchema",
+          "BaseWebConfigSchema",
+          "createBotServices"
+        ],
+        "entry_points": [
+          "Dockerfile"
+        ],
+        "codegraph_queries": [
+          "BaseAppConfigSchema BaseWebConfigSchema DATABASE_DIALECT SECRET_VAULT_KEY DASHBOARD_URL",
+          "LAVALINK_HOST LAVALINK_PORT LAVALINK_PASSWORD lavalink service",
+          "CardImageService public cards localStoragePath welcomer backgrounds"
+        ]
+      },
+      "acceptance": [
+        "docker-compose.production.yml defines postgres:16-alpine (pg_isready healthcheck), ghcr.io/lavalink-devs/lavalink:4 with the repository application.yml, bot and web. bot and web use image: ririkoai/ririkobot:${RIRIKO_VERSION} / ririkoai/ririkobot-dashboard:${RIRIKO_VERSION} with build targets bot-runner / web-runner, wait for healthy dependencies, and use the TASK-1221 healthchecks. No Redis.",
+        "Env uses the names the code reads: DATABASE_DIALECT=postgres, DATABASE_URL, DISCORD_TOKEN, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DASHBOARD_URL, SECRET_VAULT_KEY, LAVALINK_HOST/PORT/PASSWORD. .env.production.example lists them.",
+        "Named volumes are shared where both apps use a path: public/cards and data/tcg/images (bot and web), storage/welcomer-backgrounds (bot and web), public/bosses (bot). An optional commented ./data:/app/legacy:ro line covers 1.4.0 upgrades.",
+        "docs/deployment.md section 2.2 is replaced by the real file, with the uid 10001 note for bind mounts.",
+        "docker compose -f docker-compose.production.yml config -q passes in CI or locally."
+      ],
+      "verify_cmd": "RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y docker compose -f docker-compose.production.yml --env-file .env.production.example config -q && pnpm vitest run scripts && pnpm lint --quiet",
+      "handovers": [
+        "TASK-1222",
+        "STORY-122"
+      ]
     },
     {
       "id": "TASK-1231",
@@ -4156,21 +4449,100 @@
       "title": "CircleCI Postgres Service & Dialect-Parameterized Repository Suite",
       "points": 3,
       "status": "BACKLOG",
-      "requires": [],
+      "requires": [
+        "TASK-1223"
+      ],
       "blocks": [
         "TASK-1242"
+      ],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "context": {
+        "files": [
+          ".circleci/config.yml",
+          "tests/support",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/repositories/trade-market.repository.test.ts",
+          "packages/database/src/repositories/repositories.test.ts",
+          "packages/services/src/adventure/__tests__/postgres.integration.test.ts",
+          "vitest.config.ts",
+          "package.json"
+        ],
+        "symbols": [
+          "createDatabaseClient",
+          "SQLITE_SCHEMA_DDL",
+          "PG_SCHEMA_DDL"
+        ],
+        "entry_points": [
+          ".circleci/config.yml"
+        ],
+        "codegraph_queries": [
+          "createDatabaseClient sqlite memory SQLITE_SCHEMA_DDL repository test setup",
+          "postgres integration test schema search_path ADVENTURE_TEST_POSTGRES_URL"
+        ]
+      },
+      "acceptance": [
+        "tests/support/database.ts exports describeDialects(name, fn): SQLite runs on :memory: with SQLITE_SCHEMA_DDL; Postgres runs in a random schema built from PG_SCHEMA_DDL and is skipped when TEST_POSTGRES_URL is unset; the schema is dropped afterwards.",
+        "At least the economy, trade-market, waifu-card, welcomer, guild settings and reaction-role repository suites run through it.",
+        "A CircleCI test-postgres job (cimg/node plus cimg/postgres:16) sets TEST_POSTGRES_URL and ADVENTURE_TEST_POSTGRES_URL and runs pnpm test:postgres; it is in the ci workflow.",
+        "Locally, without TEST_POSTGRES_URL, everything still passes and the Postgres variants are reported as skipped."
+      ],
+      "verify_cmd": "pnpm vitest run packages/database/src tests/support && pnpm typecheck && pnpm lint --quiet && pnpm exec prettier --check .circleci/config.yml",
+      "handovers": [
+        "STORY-124"
       ]
     },
     {
       "id": "TASK-1242",
       "parent": "STORY-124",
-      "title": "Postgres Trade/Market Concurrency Tests & AI Provider Fallback Through createBotServices",
-      "points": 2,
+      "title": "Fix and Test Concurrent Trade Accepts & Market Purchases on Postgres",
+      "points": 3,
       "status": "BACKLOG",
       "requires": [
         "TASK-1241"
       ],
-      "blocks": []
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "context": {
+        "files": [
+          "packages/services/src/waifu-tcg/trading/trade-service.ts",
+          "packages/services/src/waifu-tcg/market/market-service.ts",
+          "packages/database/src/repositories/card-trade.repository.ts",
+          "packages/database/src/repositories/market-listing.repository.ts",
+          "packages/database/src/repositories/economy.repository.ts",
+          "packages/database/src/transactions/index.ts",
+          "packages/services/src/waifu-tcg/__tests__/trading-and-market.test.ts"
+        ],
+        "symbols": [
+          "TradeService.acceptTrade",
+          "MarketService.buyListing",
+          "CardTradeRepository.updateStatus",
+          "MarketListingRepository.updateStatus",
+          "withTransaction"
+        ],
+        "entry_points": [
+          "packages/services/src/waifu-tcg/trading/trade-service.ts"
+        ],
+        "codegraph_queries": [
+          "TradeService acceptTrade withTransaction transferBalance updateUserCardOwner updateStatus",
+          "MarketService buyListing modifyBalance getBalanceForUpdate updateStatus"
+        ]
+      },
+      "acceptance": [
+        "Inside each transaction, the trade or listing moves state with a conditional update (WHERE id = ? AND status = PENDING / ACTIVE) and the transaction aborts with the existing not-found or not-active error when no row changed.",
+        "A Postgres test (describeDialects) fires two acceptTrade calls and two buyListing calls concurrently: exactly one succeeds, the card has one owner, and coin totals are conserved. The SQLite variant passes too.",
+        "Existing trading and market tests still pass."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/waifu-tcg packages/database/src/repositories && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-124"
+      ]
     },
     {
       "id": "TASK-1331",
@@ -4591,6 +4963,519 @@
       ],
       "blocks": [],
       "description": "Implement dual-dispatch /imagine command in apps/bot/src/commands/images/imagine.command.ts with Slash and Prefix (!imagine) parity, aspect ratio and preset choices, Discord attachment delivery, interactive Action Row buttons (Regenerate, Dismiss), /stablediffusion-model configuration, and legacy token deprecation handling. Wire into BotServices and main.ts with comprehensive Vitest suite."
+    },
+    {
+      "id": "TASK-1281",
+      "status": "DONE",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-128",
+      "title": "Route 1.4.0 guild_config Settings Into the 2.0 Tables the Bot Reads",
+      "points": 3,
+      "requires": [],
+      "model": "medium",
+      "context": {
+        "files": [
+          "packages/database/src/migration/transformer.ts",
+          "packages/database/src/migration/types.ts",
+          "packages/database/src/migration/engine.ts",
+          "packages/database/src/migration/__fixtures__/legacy-database.ts",
+          "packages/database/src/migration/migration.test.ts",
+          "packages/database/src/schema/sqlite/utilities.ts",
+          "packages/database/src/schema/sqlite/free-games.ts",
+          "packages/database/src/schema/sqlite/ai.ts",
+          "packages/database/src/schema/sqlite/images.ts",
+          "packages/core/src/config/ai.ts",
+          "packages/services/src/free-games/providers/epic.provider.ts",
+          "packages/services/src/free-games/providers/steam.provider.ts",
+          "docs/migrations.md"
+        ],
+        "symbols": [
+          "LegacyTransformer.transform",
+          "isEnabledValue",
+          "TransformedData",
+          "MigrationEngine.migrate",
+          "MigrationEngine.verify",
+          "readAiModelChoice",
+          "AI_MODEL_CHOICES",
+          "createLegacyDatabase"
+        ],
+        "entry_points": [
+          "packages/database/src/migration/engine.ts"
+        ],
+        "codegraph_queries": [
+          "LegacyTransformer transform guild_config isEnabledValue TransformedData freeGameAnnouncements",
+          "MigrationEngine migrate insertBatch migratedCounts verify",
+          "guildWelcomer guildFarewell freeGameChannels aiGuildPreferences imageGuildSettings",
+          "readAiModelChoice formatAiModelChoice preferredAiModel AI_MODEL_CHOICES"
+        ]
+      },
+      "acceptance": [
+        "welcomer_channel / welcomer_enabled / welcomer_bg produce one guild_welcomer row per guild: channel_id from welcomer_channel, background_url from welcomer_bg (background_file null), is_enabled from isEnabledValue and false when there is no enabled row. A guild with no welcomer_channel gets no row. The same rules map farewell_* to guild_farewell.",
+        "The transformer no longer writes guild_settings.welcomer_* / farewell_*; karma_notifications_enabled is still migrated. The columns stay in the schema.",
+        "freeGamesChannelId produces a free_game_channels row. Migrated free_game_announcements use that channel id (rows of a guild without one are skipped), and legacy game ids are converted to the 2.0 provider id form (epic-<id>, steam-<appId>) when recognisable, so isGameAnnounced suppresses re-announcement.",
+        "ai_model is normalised through the 2.0 model-choice helpers into ai_guild_preferences.provider_override / model_override; an unknown model is skipped and listed in the transform warnings.",
+        "stablediffusion_model produces image_guild_settings.default_provider = replicate. twitch_channel is not migrated, and docs/migrations.md says why (each subscription keeps its own channel). The migration summary lists the configuration table credentials (Twitch, Stable Diffusion) the owner must re-enter in the dashboard.",
+        "The engine inserts the new rows in the same transaction with onConflictDoNothing, migratedCounts include them, and a second run changes nothing.",
+        "The fixture gains farewell_bg, ai_model and stablediffusion_model rows; migration.test.ts asserts every mapping above against the real 1.4.0 schema, and verify passes."
+      ],
+      "verify_cmd": "pnpm vitest run packages/database/src/migration apps/bot/src/legacy-upgrade.test.ts && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "TASK-1281",
+        "STORY-128",
+        "TASK-1261"
+      ],
+      "description": "Part of STORY-128. Fixes the guild settings the 1.4.0 migration loses or writes to tables 2.0 never reads."
+    },
+    {
+      "id": "TASK-1282",
+      "status": "DONE",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-128",
+      "title": "Backfill Migrated Reaction-Role Channels on First Reaction & Tolerate Unknown Channels",
+      "points": 2,
+      "requires": [
+        "TASK-1281"
+      ],
+      "model": "medium",
+      "context": {
+        "files": [
+          "apps/bot/src/listeners/reaction.listener.ts",
+          "packages/database/src/repositories/reaction-role.repository.ts",
+          "apps/bot/src/commands/roles/reaction-roles.command.ts",
+          "apps/web/src/lib/server/guilds/reaction-role-panels.ts",
+          "packages/database/src/migration/transformer.ts"
+        ],
+        "symbols": [
+          "ReactionRoleRepository.findByMessageAndEmoji",
+          "ReactionRoleRepository"
+        ],
+        "entry_points": [
+          "apps/bot/src/listeners/reaction.listener.ts"
+        ],
+        "codegraph_queries": [
+          "reaction listener findByMessageAndEmoji ReactionRoleRepository channelId",
+          "reaction-roles command remove channels fetch",
+          "reaction-role-panels channelMessage channelId jump link"
+        ]
+      },
+      "acceptance": [
+        "A reaction role whose channel_id equals its guild_id (the marker the 1.4.0 migration writes, since 1.4.0 stored no channel) is treated as channel-unknown by one shared helper.",
+        "When a reaction arrives on such a row, the listener grants or removes the role as before and saves reaction.message.channelId on every row of that message.",
+        "Removing a channel-unknown reaction role skips the Discord message fetch and still deletes the row.",
+        "The dashboard reaction-role panel lists channel-unknown rows with a \"channel unknown, react once to link it\" note, makes no Discord request for them, and builds no jump link.",
+        "Tests cover the backfill, the remove path and the panel listing."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/listeners apps/bot/src/commands/roles apps/web/src/lib/server/guilds packages/database/src/repositories && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "TASK-1282",
+        "STORY-128",
+        "TASK-1281"
+      ],
+      "description": "Part of STORY-128. Decided with the maintainer on 2026-10-02: lazy backfill rather than a startup scan."
+    },
+    {
+      "id": "TASK-1223",
+      "status": "DONE",
+      "blocks": [
+        "TASK-1222",
+        "TASK-1241"
+      ],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-122",
+      "title": "Postgres Schema Bootstrap: Generated PG DDL Applied at Startup Under an Advisory Lock",
+      "points": 3,
+      "requires": [],
+      "model": "medium",
+      "context": {
+        "files": [
+          "packages/database/scripts/generate-ddl.mjs",
+          "packages/database/package.json",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/sqlite/ddl.test.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/client/postgres.ts",
+          "packages/database/src/migrations/adventure-schema.ts",
+          "packages/database/src/migrations/card-serials.ts",
+          "packages/services/src/adventure/__tests__/postgres.integration.test.ts",
+          "apps/bot/src/main.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "symbols": [
+          "createPostgresClient",
+          "ensureAdventureSchema",
+          "ensureCardSerialSchema",
+          "SQLITE_SCHEMA_DDL",
+          "getDatabase"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "createPostgresClient createSqliteClient SQLITE_SCHEMA_DDL autoMigrate",
+          "ensureAdventureSchema ensureCardSerialSchema pg_advisory_xact_lock",
+          "getDatabase web services createDatabaseClient"
+        ]
+      },
+      "acceptance": [
+        "db:generate-ddl also writes packages/database/src/schema/pg/ddl.ts exporting PG_SCHEMA_DDL from drizzle-kit export --dialect postgresql (with the BigInt toJSON patch the integration test uses); a parity test like schema/sqlite/ddl.test.ts fails when it is stale.",
+        "ensurePostgresSchema(client) takes pg_advisory_xact_lock(1701, 1) in a transaction and runs PG_SCHEMA_DDL only when current_schema() has no tables; it is a no-op on SQLite.",
+        "Bot startup and the dashboard getDatabase call it before ensureAdventureSchema / ensureCardSerialSchema.",
+        "postgres.integration.test.ts builds its schema from PG_SCHEMA_DDL instead of spawning drizzle-kit, and a Postgres-gated test proves two concurrent ensurePostgresSchema calls on an empty schema both succeed."
+      ],
+      "verify_cmd": "pnpm --filter @ririko/database db:generate-ddl && git diff --exit-code packages/database/src/schema && pnpm vitest run packages/database/src && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "TASK-1223",
+        "STORY-122"
+      ]
+    },
+    {
+      "id": "TASK-1243",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-124",
+      "title": "AI Provider Fallback Test Through createBotServices",
+      "points": 2,
+      "requires": [],
+      "model": "small",
+      "context": {
+        "files": [
+          "apps/bot/src/services.ts",
+          "packages/ai/src/fallback/fallback-chain-manager.ts",
+          "apps/bot/src/controllers/ai-chat.controller.test.ts",
+          "apps/bot/src/commands/ai/commands.test.ts"
+        ],
+        "symbols": [
+          "createBotServices",
+          "FallbackChainManager.generate",
+          "FallbackChainManager.recordFailure",
+          "AiRateLimitError"
+        ],
+        "entry_points": [
+          "apps/bot/src/services.ts"
+        ],
+        "codegraph_queries": [
+          "createBotServices aiProviders FallbackChainManager defaultProviderId GEMINI_API_KEY OPENAI_API_KEY",
+          "FallbackChainManager generate recordFailure AiRateLimitError cooldown"
+        ]
+      },
+      "acceptance": [
+        "A test builds services through createBotServices with fake GEMINI_API_KEY and OPENAI_API_KEY (network stays blocked), makes the Gemini provider throw AiRateLimitError, runs an AI command or the AI chat controller, and asserts the reply came from the OpenAI provider and Gemini is in cooldown.",
+        "A second call within the cooldown goes straight to OpenAI."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src packages/ai/src && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-124"
+      ]
+    },
+    {
+      "id": "TASK-1271",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-127",
+      "title": "1.4.0 Env Aliases & Fail-Fast on the Old Compose Layout",
+      "points": 2,
+      "requires": [],
+      "model": "medium",
+      "context": {
+        "files": [
+          "packages/core/src/config/schema.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/legacy-upgrade.ts",
+          "packages/database/src/client/sqlite.ts",
+          "scripts/docker-smoke.ts"
+        ],
+        "symbols": [
+          "applyLegacyAliases",
+          "AppConfigSchema",
+          "runLegacyUpgrade",
+          "resolveDatabasePath",
+          "main"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "applyLegacyAliases DISCORD_BOT_TOKEN AI_PROVIDER DEFAULT_AI_PROVIDER",
+          "bot main process.env DATABASE_URL runLegacyUpgrade createDatabaseClient"
+        ]
+      },
+      "acceptance": [
+        "applyLegacyAliases maps AI_SERVICE_TYPE to DEFAULT_AI_PROVIDER, AI_SERVICE_DEFAULT_MODEL to DEFAULT_AI_MODEL, and AI_SERVICE_API_KEY to GEMINI_API_KEY or OPENAI_API_KEY by type, without overriding values already set. The bot paths that read process.env directly see the same values.",
+        "DATABASE_NAME is never used as the 2.0 database. When it is set, or a ririko.db sits in the 2.0 data directory, or the data directory is not writable, the bot prints the upgrade steps (mount ./data at /app/legacy:ro, use a new volume, or chown 10001:10001) and exits non-zero before touching any file.",
+        "Unit tests cover the aliases and each fail-fast trigger; scripts/docker-smoke.ts has a case that starts the bot with a root-owned 1.4.0-style /app/data and sees the message and a non-zero exit."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src apps/bot/src && pnpm typecheck && pnpm build && pnpm lint --quiet && docker build --target bot-runner -t ririko-bot:smoke . && node scripts/docker-smoke.ts bot",
+      "handovers": [
+        "STORY-127",
+        "STORY-126"
+      ]
+    },
+    {
+      "id": "TASK-1272",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-127",
+      "title": "Upgrade Guide From 1.4.0 & Docker Hub Repository Descriptions",
+      "points": 2,
+      "requires": [
+        "TASK-1271"
+      ],
+      "model": "small",
+      "context": {
+        "files": [
+          "docs/upgrading-from-1.4.md",
+          "docs/dockerhub",
+          "docs/migrations.md",
+          "docs/deployment.md",
+          "docker-compose.production.yml",
+          "README.md"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "docs/migrations.md"
+        ],
+        "codegraph_queries": [
+          "upgradeLegacyDatabase legacy-upgrade dry-run force"
+        ]
+      },
+      "acceptance": [
+        "docs/upgrading-from-1.4.md walks a 1.4.0 compose user through backing up ./data, the 2.0 compose example with ./data:/app/legacy:ro, the env name changes, the first boot, checking the migration summary, what is not migrated (credentials, twitch_channel), and how to go back to 1.4.0.",
+        "docs/dockerhub/ririkobot.md and docs/dockerhub/ririkobot-dashboard.md hold the Docker Hub descriptions, pointing 1.4.0 users at the guide and the 1.4.0 tag.",
+        "docs/migrations.md section 4 and docs/deployment.md link the guide; no doc tells users to pull latest for 2.0 before the sunset."
+      ],
+      "verify_cmd": "pnpm exec prettier --check docs/upgrading-from-1.4.md docs/dockerhub docs/migrations.md docs/deployment.md",
+      "handovers": [
+        "STORY-127"
+      ]
+    },
+    {
+      "id": "TASK-1273",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-127",
+      "title": "Tag-Driven CircleCI Release Job Pushing Versioned 2.x Images",
+      "points": 3,
+      "requires": [
+        "TASK-1271"
+      ],
+      "model": "medium",
+      "context": {
+        "files": [
+          ".circleci/config.yml",
+          "scripts/docker-smoke.ts",
+          "scripts",
+          "Dockerfile",
+          "package.json"
+        ],
+        "symbols": [],
+        "entry_points": [
+          ".circleci/config.yml"
+        ],
+        "codegraph_queries": [
+          "docker-smoke main images bot web"
+        ]
+      },
+      "acceptance": [
+        "A release workflow runs only on git tags matching ^v\\d+\\.\\d+\\.\\d+(-.+)?$ (and no branches); it builds bot-runner and web-runner, runs the smoke checks, then pushes ririkoai/ririkobot and ririkoai/ririkobot-dashboard as X.Y.Z, X.Y and X (prereleases push only the full version).",
+        "It never pushes latest. Credentials come from a CircleCI context named dockerhub (DOCKERHUB_USERNAME, DOCKERHUB_TOKEN) that the maintainer creates; the job documents that.",
+        "The tag-to-tags derivation lives in a small script with unit tests.",
+        "The ci workflow on branches is unchanged."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm typecheck && pnpm lint --quiet && pnpm exec prettier --check .circleci/config.yml",
+      "handovers": [
+        "STORY-127"
+      ]
+    },
+    {
+      "id": "TASK-1274",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-127",
+      "title": "1.4.0 Sunset Runbook for the Maintainer",
+      "points": 1,
+      "requires": [
+        "TASK-1272",
+        "TASK-1273"
+      ],
+      "model": "small",
+      "context": {
+        "files": [
+          "docs/release.md",
+          "docs/upgrading-from-1.4.md",
+          "docs/dockerhub"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "docs/release.md"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "docs/release.md lists the maintainer-only steps in order: retag the current latest digest as 1.4.0 (docker buildx imagetools create), update the Docker Hub descriptions, push the first v2 tag, announce the sunset with a date, and after it move latest to the 2.x digest; with the commands and how to roll latest back.",
+        "It states that agents never push or retag on Docker Hub."
+      ],
+      "verify_cmd": "pnpm exec prettier --check docs/release.md",
+      "handovers": [
+        "STORY-127"
+      ]
+    },
+    {
+      "id": "TASK-1251",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-125",
+      "title": "Coverage: Database Repositories",
+      "points": 3,
+      "requires": [
+        "STORY-124"
+      ],
+      "model": "medium",
+      "context": {
+        "files": [
+          "packages/database/src/repositories",
+          "vitest.config.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "packages/database/src/repositories"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "Behaviour tests for the database repositories not converted by TASK-1241, lifting packages/database/src/repositories from 48% to at least 75% lines, picked from a fresh coverage/coverage-summary.json (least covered first).",
+        "vitest.config.ts thresholds are raised to the new measured floor (rounded down), never lowered."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-125"
+      ]
+    },
+    {
+      "id": "TASK-1252",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-125",
+      "title": "Coverage: CLI Commands",
+      "points": 2,
+      "requires": [],
+      "model": "small",
+      "context": {
+        "files": [
+          "apps/cli/src/commands",
+          "vitest.config.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "apps/cli/src/commands"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "Behaviour tests for apps/cli/src/commands, lifting it from 46% to at least 80% lines, picked from a fresh coverage/coverage-summary.json (least covered first).",
+        "vitest.config.ts thresholds are raised to the new measured floor (rounded down), never lowered."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-125"
+      ]
+    },
+    {
+      "id": "TASK-1253",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-125",
+      "title": "Coverage: Dashboard Server Routes and Server Libraries",
+      "points": 3,
+      "requires": [],
+      "model": "medium",
+      "context": {
+        "files": [
+          "apps/web/src/app",
+          "apps/web/src/lib/server",
+          "tests/support/fake-discord/server.ts",
+          "vitest.config.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "apps/web/src/app"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "Behaviour tests for dashboard route handlers, server actions and apps/web/src/lib/server, using the fake Discord API, lifting apps/web from 45% to at least 70% lines, picked from a fresh coverage/coverage-summary.json (least covered first).",
+        "vitest.config.ts thresholds are raised to the new measured floor (rounded down), never lowered."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-125"
+      ]
+    },
+    {
+      "id": "TASK-1254",
+      "status": "BACKLOG",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-125",
+      "title": "Coverage: Bot Commands and Listeners",
+      "points": 5,
+      "requires": [],
+      "model": "medium",
+      "context": {
+        "files": [
+          "apps/bot/src/commands",
+          "apps/bot/src/listeners",
+          "apps/bot/test/support/bot-harness.ts",
+          "vitest.config.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "apps/bot/src/commands"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [
+        "Behaviour tests for the least-covered bot command groups and listeners, using the bot harness, lifting apps/bot/src/commands to at least 80% and listeners to at least 75% lines, picked from a fresh coverage/coverage-summary.json (least covered first).",
+        "vitest.config.ts thresholds are raised to the new measured floor (rounded down), never lowered."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "STORY-125"
+      ]
     }
   ],
   "chores": [

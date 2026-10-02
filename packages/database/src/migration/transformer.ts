@@ -1,8 +1,10 @@
 import type Database from 'better-sqlite3';
 import { randomUUID } from 'node:crypto';
+import { parseAiModelChoice, readAiModelChoice } from '@ririko/core';
 import { legacyUuid } from './uuid.js';
 import type {
   TransformedData,
+  LegacyConfiguration,
   LegacyUser,
   LegacyGuild,
   LegacyGuildConfig,
@@ -46,6 +48,17 @@ function isEnabledValue(value: string): boolean {
   return value === 'true' || value === '1' || value === 'enabled';
 }
 
+/**
+ * The id 2.0 announces a free game under, so a game 1.4.0 already posted is not posted again.
+ * 1.4.0 stored the Epic id (or slug) and the Steam store URL.
+ */
+function freeGameId(source: string, gameId: string): string {
+  const provider = source.toLowerCase();
+  if (provider === 'epic') return `epic-${gameId}`;
+  const steamApp = provider === 'steam' ? /\/app\/(\d+)/.exec(gameId) : null;
+  return steamApp ? `steam-${steamApp[1]}` : gameId;
+}
+
 export class LegacyTransformer {
   constructor(private readonly db: Database.Database) {}
 
@@ -87,6 +100,12 @@ export class LegacyTransformer {
       economyItemCategories: [],
       economyItems: [],
       autoVoiceConfigs: [],
+      guildWelcomers: [],
+      guildFarewells: [],
+      freeGameChannels: [],
+      aiGuildPreferences: [],
+      imageGuildSettings: [],
+      notices: [],
     };
 
     // 1. Users, Economy Balances, XP Accounts & Migration Ledger Records
@@ -177,51 +196,96 @@ export class LegacyTransformer {
         aiChannelId: null,
         logChannelId: null,
         musicChannelId: null,
-        welcomerChannelId: null,
-        welcomerEnabled: false,
-        welcomerBg: null,
-        farewellChannelId: null,
-        farewellEnabled: false,
-        farewellBg: null,
         karmaNotificationsEnabled: true,
         createdAt: now,
         updatedAt: now,
       });
     }
 
-    // 3. GuildConfig (Pivot key-value pairs into GuildSettings). The names are the ones the
-    // 1.4.0 commands write (`/welcomer`, `/farewell`, `/karma server`).
+    // 3. GuildConfig: key-value pairs, named as the 1.4.0 commands write them (`/welcomer`,
+    // `/farewell`, `/karma server`, `/freegames`, `/ai-model`, `/stablediffusion-model`). Each
+    // value goes to the table 2.0 reads it from.
     const legacyConfigs = this.getTableRows<LegacyGuildConfig>(['guild_config', 'guild_configs']);
+    const configByGuild = new Map<string, Map<string, string>>();
     for (const cfg of legacyConfigs) {
-      const settings = cfg.guildId ? guildSettingsMap.get(cfg.guildId) : undefined;
-      if (!settings) continue;
+      if (!cfg.guildId || !guildSettingsMap.has(cfg.guildId)) continue;
+      const values = configByGuild.get(cfg.guildId) ?? new Map<string, string>();
+      values.set(cfg.name, cfg.value);
+      configByGuild.set(cfg.guildId, values);
+    }
 
-      switch (cfg.name) {
-        case 'welcomer_channel':
-          settings.welcomerChannelId = cfg.value;
-          break;
-        case 'welcomer_enabled':
-          settings.welcomerEnabled = isEnabledValue(cfg.value);
-          break;
-        case 'welcomer_bg':
-          settings.welcomerBg = cfg.value;
-          break;
-        case 'farewell_channel':
-          settings.farewellChannelId = cfg.value;
-          break;
-        case 'farewell_enabled':
-          settings.farewellEnabled = isEnabledValue(cfg.value);
-          break;
-        case 'farewell_bg':
-          settings.farewellBg = cfg.value;
-          break;
-        case 'karma-notification-enabled':
-          settings.karmaNotificationsEnabled = isEnabledValue(cfg.value);
-          break;
+    const freeGameChannelByGuild = new Map<string, string>();
+    for (const [guildId, values] of configByGuild) {
+      const karma = values.get('karma-notification-enabled');
+      const settings = guildSettingsMap.get(guildId);
+      if (settings && karma !== undefined) {
+        settings.karmaNotificationsEnabled = isEnabledValue(karma);
+      }
+
+      // 2.0 needs a channel for a card; without one 1.4.0 could not post it either.
+      for (const [prefix, cards] of [
+        ['welcomer', transformed.guildWelcomers],
+        ['farewell', transformed.guildFarewells],
+      ] as const) {
+        const channelId = values.get(`${prefix}_channel`);
+        if (!channelId) continue;
+        const enabled = values.get(`${prefix}_enabled`);
+        cards.push({
+          guildId,
+          channelId,
+          backgroundUrl: values.get(`${prefix}_bg`) || null,
+          isEnabled: enabled !== undefined && isEnabledValue(enabled),
+        });
+      }
+
+      const freeGamesChannelId = values.get('freeGamesChannelId');
+      if (freeGamesChannelId) {
+        freeGameChannelByGuild.set(guildId, freeGamesChannelId);
+        transformed.freeGameChannels.push({ guildId, channelId: freeGamesChannelId });
+      }
+
+      const aiModel = values.get('ai_model');
+      if (aiModel) {
+        const choice = parseAiModelChoice(readAiModelChoice(aiModel.replace(/:latest$/, '')));
+        if (choice) {
+          transformed.aiGuildPreferences.push({
+            guildId,
+            providerOverride: choice.provider,
+            modelOverride: choice.model,
+          });
+        } else {
+          transformed.notices.push(
+            `Guild ${guildId} used the AI model "${aiModel}", which 2.0 does not offer; it uses the bot default now. Pick a model with /ai-model.`,
+          );
+        }
+      }
+
+      // 2.0 keeps the Replicate model per bot, not per guild; the guild keeps Replicate.
+      if (values.get('stablediffusion_model')) {
+        transformed.imageGuildSettings.push({ guildId, defaultProvider: 'replicate' });
       }
     }
 
     transformed.guildSettings = Array.from(guildSettingsMap.values());
+
+    // 1.4.0 kept API credentials in plain text; 2.0 keeps them only in the encrypted vault.
+    const legacyConfiguration = this.getTableRows<LegacyConfiguration>([
+      'configuration',
+      'configurations',
+    ]);
+    const credentials = [
+      ['twitchClientId', 'Twitch client ID'],
+      ['twitchClientSecret', 'Twitch client secret'],
+      ['stableDiffusionApiToken', 'Stable Diffusion API token'],
+    ] as const;
+    const present = credentials
+      .filter(([key]) => legacyConfiguration.some((row) => row[key]))
+      .map(([, label]) => label);
+    if (present.length > 0) {
+      transformed.notices.push(
+        `Not migrated (1.4.0 stored them in plain text): ${present.join(', ')}. Enter them again in the dashboard.`,
+      );
+    }
 
     // 4. UserNotes -> moderation_notes
     const legacyNotes = this.getTableRows<LegacyUserNote>(['user_note', 'user_notes']);
@@ -376,11 +440,12 @@ export class LegacyTransformer {
       'free_game_notifications',
     ]);
     for (const fg of legacyGames) {
-      if (!fg.gameId || !fg.guildId) continue;
+      const channelId = fg.guildId ? freeGameChannelByGuild.get(fg.guildId) : undefined;
+      if (!fg.gameId || !fg.guildId || !channelId) continue;
       transformed.freeGameAnnouncements.push({
-        gameId: fg.gameId,
+        gameId: freeGameId(fg.source, fg.gameId),
         guildId: fg.guildId,
-        channelId: fg.guildId,
+        channelId,
         messageId: 'legacy_migrated',
         announcedAt: parseDate(fg.createdAt),
       });

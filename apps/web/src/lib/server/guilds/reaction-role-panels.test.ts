@@ -446,4 +446,30 @@ describe('ReactionRolePanelService list, edit and remove (TASK-1643)', () => {
     expect(rest.delete).not.toHaveBeenCalled();
     expect(await reactionRoles.findByMessageId(MESSAGE)).toHaveLength(1);
   });
+
+  it('lists and removes roles migrated from 1.4.0 without a channel, never calling Discord', async () => {
+    // 1.4.0 stored no channel; the migration writes the guild ID in its place.
+    const migrated = () =>
+      reactionRoles.create({
+        guildId: GUILD,
+        channelId: GUILD,
+        messageId: '400000000000000000',
+        emojiOrComponentId: '⭐',
+        roleId: VIP,
+        type: 'EMOJI',
+        mode: 'TOGGLE',
+      });
+    const first = await migrated();
+
+    const [summary] = await service.listPanels(GUILD);
+    expect(summary).toMatchObject({ url: null, channelName: null, editable: false });
+
+    await service.removeBinding(GUILD, first.id, actor);
+    await migrated();
+    await service.deletePanel(GUILD, '400000000000000000', { deleteMessage: false }, actor);
+
+    expect(await reactionRoles.findByGuildId(GUILD)).toEqual([]);
+    expect(actions()).toEqual(['reaction_roles.remove', 'reaction_roles.delete_panel']);
+    for (const call of Object.values(rest)) expect(call).not.toHaveBeenCalled();
+  });
 });

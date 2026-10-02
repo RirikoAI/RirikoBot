@@ -1,0 +1,145 @@
+server:
+  port: 2333
+  address: 0.0.0.0
+lavalink:
+  server:
+    sources:
+      youtube: false # Native YouTube disabled in Lavalink v4, handled by youtube-plugin
+    password: "${LAVALINK_PASSWORD}"
+    bufferDurationMs: 225
+    frameBufferDurationMs: 5000
+    youtubePlaylistLoadLimit: 3
+    opusEncodingQuality: 5
+    resamplingQuality: MEDIUM
+    trackStuckThresholdMs: 5000
+    playerUpdateInterval: 3
+    useSeekGhosting: true
+    youtubeSearchEnabled: true
+    soundcloudSearchEnabled: true
+    gc-warnings: true
+  plugins:
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.3"
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0"
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.dunctebot:skybot-lavalink-plugin:1.7.0"
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5"
+      repository: "https://jitpack.io"
+    # Pinned YouTube snapshot build with ANDROID_VR and remoteCipher support
+    - dependency: "dev.lavalink.youtube:youtube-plugin:f45bbb7aebfcbc1c553769e04af6cd43afa8b7c3"
+      snapshot: true
+    - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.1.0"
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "me.duncte123:java-lyrics-plugin:1.6.6"
+      repository: "https://maven.lavalink.dev/releases"
+plugins:
+  lyrics:
+    countryCode: en-US
+    geniusApiKey: "<insert>"
+  lavalyrics:
+    sources:
+      - genius
+      - spotify
+      - youtube
+  youtube:
+    enabled: true
+    # Built-in signature cipher. To use a yt-cipher server instead, set
+    # LAVALINK_YOUTUBE_CIPHER_URL and re-run `pnpm lavalink:install`, which writes:
+    # remoteCipher:
+    #   url: "https://example.com/"
+    #   userAgent: "ririko-bot"
+    oauth:
+      enabled: false
+    allowSearch: true
+    allowDirectVideoIds: true
+    allowDirectPlaylistIds: true
+    clients:
+      # ANDROID_VR first: needs no login and returns plain audio formats without SABR blocks
+      - "ANDROID_VR"
+      - "TV"
+      - "MWEB"
+      - "TVHTML5_SIMPLY"
+      - "ANDROID_MUSIC"
+      - "MUSIC"
+      - "WEB"
+      - "WEBEMBEDDED"
+    TVHTML5_SIMPLY:
+      playback: true
+      playlistLoading: true
+      searching: true
+      videoLoading: true
+    ANDROID_MUSIC:
+      playlistLoading: false
+      videoLoading: true
+      searching: true
+      playback: true
+    MUSIC:
+      playlistLoading: false
+      videoLoading: false
+      searching: true
+      playback: false
+    WEB:
+      playlistLoading: false
+      videoLoading: true
+      searching: true
+      playback: true
+    WEBEMBEDDED:
+      playlistLoading: false
+      videoLoading: false
+      searching: false
+      playback: true
+  lavasrc:
+    providers:
+      # Exact-recording match via ISRC first, text query fallback, then SoundCloud
+      - 'ytsearch:"%ISRC%"'
+      - "ytsearch:%QUERY%"
+      - "scsearch:%QUERY%"
+    sources:
+      spotify: true
+      applemusic: false
+      deezer: false
+      jiosaavn: false
+      pandora: false
+      yandexmusic: false
+      flowerytts: true
+      youtube: true
+      tidal: false
+      vkmusic: false
+      qobuz: false
+      ytdlp: false
+    lyrics-sources:
+      spotify: true
+      deezer: false
+      youtube: true
+      yandexmusic: false
+      vkmusic: false
+      lrcLib: true
+    spotify:
+      clientId: "${SPOTIFY_CLIENT_ID:}"
+      clientSecret: "${SPOTIFY_CLIENT_SECRET:}"
+      spDc: "${SPOTIFY_SP_DC:}"
+      countryCode: "US"
+      playlistLoadLimit: 6
+      albumLoadLimit: 6
+      resolveArtistsInSearch: false
+      localFiles: false
+      preferPartnerApi: false
+      preferV1SearchApi: false
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+logging:
+  file:
+    max-history: 5
+    max-size: 10MB
+    path: ./logs/
+  level:
+    root: INFO
+    lavalink: INFO
+    dev.lavalink.youtube: DEBUG
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 5

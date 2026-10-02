@@ -6,6 +6,7 @@ import {
   buildPanelMessage,
   describePanelIssues,
   hasForeignComponents,
+  isReactionRoleChannelUnknown,
   isReactionRoleComponent,
   panelButtonCustomId,
   panelFromMessage,
@@ -78,7 +79,11 @@ export interface PanelSummary {
   /** Null when the channel no longer exists. */
   channelName: string | null;
   messageId: string;
-  url: string;
+  /**
+   * Null while the channel is unknown: roles migrated from 1.4.0 learn it from the first
+   * reaction to the message.
+   */
+  url: string | null;
   /** Whether the builder can edit it (it has buttons or a menu, not only emoji reactions). */
   editable: boolean;
   bindings: PanelBindingView[];
@@ -240,11 +245,14 @@ export class ReactionRolePanelService {
     return [...byMessage.values()]
       .map((bindings) => {
         const { channelId, messageId } = bindings[0]!;
+        const channelKnown = !isReactionRoleChannelUnknown(bindings[0]!);
         return {
           channelId,
-          channelName: channels.get(channelId) ?? null,
+          channelName: channelKnown ? (channels.get(channelId) ?? null) : null,
           messageId,
-          url: `https://discord.com/channels/${guildId}/${channelId}/${messageId}`,
+          url: channelKnown
+            ? `https://discord.com/channels/${guildId}/${channelId}/${messageId}`
+            : null,
           editable: bindings.some((row) => COMPONENT_TYPES.has(row.type)),
           bindings: bindings.map((row) => ({
             id: row.id,
@@ -288,6 +296,8 @@ export class ReactionRolePanelService {
     }
     const route = Routes.channelMessage(binding.channelId, binding.messageId);
     if (binding.type === 'EMOJI') {
+      // A role migrated from 1.4.0 that nobody reacted to since has no known message.
+      if (isReactionRoleChannelUnknown(binding)) return this.forget(guildId, binding, actor);
       await this.ignoreMissing(() =>
         this.deps.rest.delete(
           Routes.channelMessageOwnReaction(
@@ -307,6 +317,15 @@ export class ReactionRolePanelService {
         await this.discord(() => this.deps.rest.patch(route, { body: { components: stripped } }));
       }
     }
+    return this.forget(guildId, binding, actor);
+  }
+
+  /** Deletes one binding and records it; Discord is not touched. */
+  private async forget(
+    guildId: string,
+    binding: ReactionRole,
+    actor: PanelActor,
+  ): Promise<PanelChange[]> {
     const changes = [{ field: 'roleIds', before: [binding.roleId], after: [] }];
     await withTransaction(this.deps.db, async (tx) => {
       await this.deps.reactionRoles.delete(binding.id, tx);
@@ -331,9 +350,10 @@ export class ReactionRolePanelService {
     const first = bindings[0];
     if (!first) throw new PanelError('That panel no longer exists.');
     const route = Routes.channelMessage(first.channelId, messageId);
-    const message = await this.ignoreMissing(
-      async () => (await this.deps.rest.get(route)) as ApiMessage,
-    );
+    // Roles migrated from 1.4.0 that nobody reacted to since have no known message to edit.
+    const message = isReactionRoleChannelUnknown(first)
+      ? null
+      : await this.ignoreMissing(async () => (await this.deps.rest.get(route)) as ApiMessage);
     if (message && options.deleteMessage) {
       if (message.author.id !== (await this.deps.resources.botUserId())) {
         throw new PanelError('Ririko can only delete messages it sent. Remove the roles instead.');

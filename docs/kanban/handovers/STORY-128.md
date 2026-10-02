@@ -31,3 +31,58 @@ TASK-1261 fixed the names the transformer reads. Where the values land in 2.0 is
 - Welcome and farewell cards, the free-games channel and the AI and image models configured in 1.4.0 would silently reset after the Docker upgrade. That breaks the zero-data-loss rule (`docs/migrations.md` section 1).
 - Route each value into the table the bot reads, through the existing repositories' row shapes, and extend `packages/database/src/migration/migration.test.ts`. That test already inserts every name above.
 - This must land before STORY-127 moves `latest`.
+
+---
+
+## GROOMING · 2026-10-02T05:25:08Z · Claude Code (Opus 5.5)
+
+**Approach**
+- This answers the TASK-1261 FLAG above. The story grows from 3 to 5 points because the maintainer approved the reaction-role fix on 2026-10-02.
+- TASK-1281 routes every `guild_config` setting into the table 2.0 reads. The task acceptance and the TASK-1281 note give each mapping.
+- TASK-1282 fixes reaction roles. 1.4.0 never stored their channel, so the migration writes the guild id as the channel id.
+  - On the first reaction, the bot saves the real channel id.
+  - Until then, the remove command and the dashboard panel treat the channel as unknown.
+- Decisions:
+  - `twitch_channel` is not migrated. 2.0 has no default-channel setting, and every migrated subscription already has its own channel.
+  - The Twitch and Stable Diffusion credentials in the `configuration` table stay unmigrated, because plaintext tokens are stripped. The migration summary names the ones the owner must re-enter in the dashboard vault.
+  - `stablediffusion_model` maps only to `default_provider = replicate`. 2.0 has no per-guild image model.
+  - The `guild_settings.welcomer_*` / `farewell_*` columns stay in the schema but are no longer written. Nothing reads them, and dropping them would mean a schema change.
+
+**Relevant code** (from CodeGraph and exploration during grooming)
+- `packages/database/src/migration/transformer.ts`:
+  - `:199-221`: the `guild_config` switch.
+  - `:373-387`: free-game announcements, which get the guild id as their channel id.
+  - `:349`: reaction roles, which get the guild id as their channel id.
+- `packages/database/src/migration/engine.ts:147-222`: the insert order. Every insert uses `onConflictDoNothing`, all in one transaction.
+- `packages/database/src/repositories/welcomer.repository.ts:20,65` and `apps/bot/src/listeners/member.listener.ts:61` read `guild_welcomer` / `guild_farewell`. They need `isEnabled && channelId`.
+- `packages/database/src/repositories/free-game.repository.ts:173,251`: `isGameAnnounced` and `getGuildChannel`.
+- `packages/core/src/config/ai.ts:20-96`: the 2.0 AI model choices and the functions that normalise them.
+
+**Pitfalls**
+- Legacy `*_enabled` values are strings (`'true'`). Use `isEnabledValue`.
+- `guild_welcomer.channel_id` is NOT NULL. Write no row when the channel is missing.
+- The 2.0 default for `is_enabled` is true. Set false explicitly when legacy has no enabled row.
+- Legacy free-game ids are raw Epic ids or slugs, or Steam store URLs. The 2.0 ids are `epic-<id>` and `steam-<appId>`.
+
+**Out of scope**
+- Dropping the unused `guild_settings` columns.
+- Migrating credentials.
+- Everything in STORY-127.
+
+---
+
+## PROGRESS · 2026-10-02T05:39:03Z · Claude Code (Opus 5.5) · REVIEW
+
+**Files changed**
+- TASK-1281 and TASK-1282 are DONE. Their notes list the files.
+
+**Verification**
+- Story gate on `feat/STORY-128-guild-settings-fidelity`, not committed:
+  - `pnpm lint --quiet` and `pnpm typecheck` pass.
+  - `pnpm test:coverage` passes: 2663 tests and 5 skipped. Coverage is lines 70.34%, statements 69.01%, branches 58.93% and functions 70.57%, all above the thresholds.
+  - `pnpm build` passes.
+- Not run: `docker build` and `node scripts/docker-smoke.ts bot`. The legacy smoke check builds its database from the changed fixture, so run it before the PR, or let the CircleCI `docker` job run it.
+
+**Decisions & gotchas**
+- The migration summary now has a `notices` list on `MigrationResult`. The bot startup log and `ririko migrate:legacy` print it.
+- Answers to the TASK-1261 FLAG: every row of its table is handled, and the reaction-role channel is backfilled lazily.

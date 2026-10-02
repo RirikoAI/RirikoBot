@@ -38,6 +38,18 @@ export function panelSelectCustomId(groupId: string): string {
   return `${SELECT_PREFIX}${groupId}`;
 }
 
+/**
+ * True for a reaction role whose message channel is not known yet. 1.4.0 stored no channel,
+ * so its migration writes the guild ID instead; the bot saves the real channel on the first
+ * reaction to the message.
+ */
+export function isReactionRoleChannelUnknown(binding: {
+  guildId: string;
+  channelId: string;
+}): boolean {
+  return binding.channelId === binding.guildId;
+}
+
 /** True for components the reaction role handlers own (`rr:` custom IDs). */
 export function isReactionRoleComponent(customId: string | undefined): boolean {
   return customId?.startsWith('rr:') ?? false;

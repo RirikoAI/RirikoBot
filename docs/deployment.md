@@ -3,7 +3,7 @@
 ## 1. Overview & Sane Infrastructure Defaults
 In strict accordance with Section 68 and 69 of `BLUEPRINT.md`: **Do not over-engineer deployment.**
 - Ririko AI 2.0.0 avoids excessive cloud microservices, Kubernetes clusters, and message bus sprawl.
-- The standard production deployment consists of two containerized applications (`bot` and `web`), a PostgreSQL database, a Redis cache/queue, and an optional Lavalink audio node.
+- The standard production deployment consists of two containerized applications (`bot` and `web`), a PostgreSQL database, and a Lavalink audio node. There is no Redis: nothing in 2.0 needs one.
 - Self-hosters can run the entire platform on a single lightweight VPS using SQLite and local audio extraction without Docker dependencies if desired.
 
 ---
@@ -66,103 +66,71 @@ docker run -d --name ririko-web --env-file .env -p 3000:3000 \
 - the dashboard loads its native packages, answers `GET /` with 200, redirects `/api/auth/login` to Discord and creates its SQLite database.
 
 ### 2.2. Production Orchestration (`docker-compose.production.yml`)
-```yaml
-version: '3.8'
 
-services:
-  postgres:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      POSTGRES_DB: ririko
-      POSTGRES_USER: ririko
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ririko"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+`docker-compose.production.yml` runs the whole stack on one host:
 
-  redis:
-    image: redis:7-alpine
-    restart: always
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
+| Service | Image | Role |
+|---|---|---|
+| `postgres` | `postgres:16-alpine` | The database. Healthy when `pg_isready` answers. |
+| `lavalink` | `ghcr.io/lavalink-devs/lavalink:4` | Audio node. Uses `docker/lavalink/application.yml`, the same config `pnpm lavalink:install` writes, with the secrets read from its environment. |
+| `bot` | `ririkoai/ririkobot:${RIRIKO_VERSION:-2}` | The Discord bot. Starts once Postgres is healthy. |
+| `web` | `ririkoai/ririkobot-dashboard:${RIRIKO_VERSION:-2}` | The dashboard, published on `${DASHBOARD_PORT:-3000}`. |
 
-  bot:
-    build:
-      context: .
-      target: bot-runner
-    restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://ririko:${DB_PASSWORD}@postgres:5432/ririko
-      REDIS_URL: redis://redis:6379
-      DISCORD_TOKEN: ${DISCORD_TOKEN}
-      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
-      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
-    volumes:
-      - asset_cache:/app/assets/cache
-      - welcomer_backgrounds:/app/storage/welcomer-backgrounds
+Start it:
+1. Copy `.env.production.example` to `.env.production`.
+2. Fill in the required values: the Discord credentials, `DASHBOARD_URL`, `SECRET_VAULT_KEY` (`openssl rand -hex 32`), `POSTGRES_PASSWORD` and `LAVALINK_PASSWORD`.
+3. Run `docker compose -f docker-compose.production.yml --env-file .env.production up -d`.
 
-  web:
-    build:
-      context: .
-      target: web-runner
-    restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://ririko:${DB_PASSWORD}@postgres:5432/ririko
-      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
-      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      NEXTAUTH_URL: ${NEXTAUTH_URL}
-    volumes:
-      # Welcome and farewell backgrounds uploaded on the dashboard; the bot draws the cards
-      # from the same files, so both containers mount this volume.
-      - welcomer_backgrounds:/app/storage/welcomer-backgrounds
+What happens on startup:
+- Every service reads `.env.production`, or the file named by `RIRIKO_ENV_FILE`.
+- The compose file sets the values that must point inside the stack itself: `DATABASE_DIALECT=postgres`, `DATABASE_URL` (built from the `POSTGRES_*` values), `LAVALINK_HOST=lavalink` and `LAVALINK_PORT=2333`.
+- On the first start the bot or the dashboard creates the schema in the empty database (`ensurePostgresSchema`, see `docs/database.md` section 1).
+- Both images have a `HEALTHCHECK` (section 3).
+- Compose refuses to start when `POSTGRES_PASSWORD` or `LAVALINK_PASSWORD` is empty.
 
-volumes:
-  postgres_data:
-  redis_data:
-  asset_cache:
-  welcomer_backgrounds:
-```
+Images:
+- `build:` targets are included, so `docker compose ... build` builds both images from this checkout instead of pulling them.
+- Until the 2.x images are published (STORY-127), build them that way.
+
+Volumes:
+
+| Volume | Mounted at | Used by |
+|---|---|---|
+| `postgres_data` | `/var/lib/postgresql/data` | postgres |
+| `lavalink_plugins` | `/opt/Lavalink/plugins` | lavalink: plugins download once |
+| `ririko_data` | `/app/data` | bot and web: card art in `data/tcg` |
+| `card_images` | `/app/public/cards` | bot and web: rendered cards |
+| `boss_images` | `/app/public/bosses` | bot |
+| `welcomer_backgrounds` | `/app/storage/welcomer-backgrounds` | bot and web: uploaded welcome backgrounds |
+
+- **Ownership:** the images run as uid 10001. A named volume starts owned by that user. If you replace one with a bind mount, make it writable first: `chown -R 10001:10001 <dir>`.
+- **Upgrading from 1.4.0:** uncomment `./data:/app/legacy:ro` on the bot. The old data folder is mounted read-only and migrated once (`docs/migrations.md` section 4).
 
 ---
 
-## 3. Observability & Health Monitoring (Section 57)
+## 3. Observability & Health Monitoring
 
-The application provides HTTP health and readiness probes for monitoring and container orchestrators:
-- `GET /health` — Returns `200 OK` with JSON payload:
-  ```json
-  {
-    "status": "healthy",
-    "version": "2.0.0",
-    "uptimeSeconds": 14205,
-    "discord": { "status": "CONNECTED", "pingMs": 32, "shards": 2 },
-    "database": { "status": "CONNECTED", "latencyMs": 4 },
-    "redis": { "status": "CONNECTED" },
-    "providers": {
-      "gemini": "HEALTHY",
-      "twitch": "HEALTHY"
-    }
-  }
-  ```
-- `GET /ready` — Evaluates whether all initial database migrations have completed and Discord Gateway shard handshakes are established before traffic routing.
+Both containers answer HTTP probes. Docker uses `/health` as their `HEALTHCHECK`; orchestrators can route traffic on `/ready`.
+
+| Container | Address | `/health` | `/ready` |
+|---|---|---|---|
+| Bot | port `HEALTH_PORT` (default 8080, `0` turns it off), not published | 200 while the database answers, else 503 | 200 once startup finished (schema, 1.4.0 upgrade, services, listeners), the database answers and the Discord gateway is `READY`, else 503 |
+| Dashboard | port 3000 (`/health`, `/ready`, or `/api/health`, `/api/ready`) | 200 while the database answers, else 503 | the same |
+
+Bot `/health` body:
+```json
+{
+  "status": "healthy",
+  "version": "2.0.0",
+  "uptimeSeconds": 14205,
+  "discord": { "status": "READY", "pingMs": 32 },
+  "database": { "status": "CONNECTED", "latencyMs": 4 }
+}
+```
+- When the database fails, `status` is `unhealthy`, `database.status` is `UNREACHABLE`, and the body includes the driver error. The bot port is internal, so the error text is safe to show.
+- `/ready` answers `{ "ready": false, "started": true, "discord": "CONNECTING", "database": true }`, so you can see why it is not ready.
+
+The dashboard is public, so its probes never include error text. `/health` answers `{ status, version, uptimeSeconds, database: { status, latencyMs } }` and `/ready` answers `{ "ready": true }`. Failures are written to the server log.
 
 ---
 

@@ -5,7 +5,7 @@ import {
   type APIComponentInMessageActionRow,
   type TextChannel,
 } from 'discord.js';
-import { stripPanelBinding, type ApiComponent } from '@ririko/core';
+import { isReactionRoleChannelUnknown, stripPanelBinding, type ApiComponent } from '@ririko/core';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 
@@ -96,11 +96,14 @@ export function createReactionRolesCommand(services: BotServices): Command {
         }
 
         try {
-          // Best effort: take Ririko's reaction, or the button or menu option, off the message
+          // Best effort: take Ririko's reaction, or the button or menu option, off the message.
+          // A role migrated from 1.4.0 may not know its channel yet; then only the row goes.
           try {
-            const channel = (await ctx.guild.channels
-              .fetch(existing.channelId)
-              .catch(() => null)) as TextChannel | null;
+            const channel = isReactionRoleChannelUnknown(existing)
+              ? null
+              : ((await ctx.guild.channels
+                  .fetch(existing.channelId)
+                  .catch(() => null)) as TextChannel | null);
             const msg =
               channel && 'messages' in channel
                 ? await channel.messages.fetch(existing.messageId).catch(() => null)

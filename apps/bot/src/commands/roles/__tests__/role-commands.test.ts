@@ -350,6 +350,37 @@ describe('Role Commands Suite (TASK-1404)', () => {
       );
     });
 
+    it('removes a role migrated from 1.4.0 without looking up its unknown channel', async () => {
+      vi.mocked(mockServices.reactionRoleRepo!.findById).mockResolvedValueOnce({
+        id: 'rr-legacy',
+        guildId: 'guild-1',
+        channelId: 'guild-1', // 1.4.0 stored no channel
+        messageId: 'msg-123',
+        emojiOrComponentId: '🎮',
+        roleId: 'role-1',
+        type: 'EMOJI',
+        mode: 'TOGGLE',
+        groupId: null,
+        label: null,
+      } as any);
+      const cmd = createReactionRolesCommand(mockServices as BotServices);
+      const ctx = createMockContext({
+        options: {
+          getString: vi.fn().mockImplementation((name) => {
+            if (name === 'action') return 'remove';
+            if (name === 'id') return 'rr-legacy';
+            return null;
+          }),
+          getRawArgs: vi.fn().mockReturnValue([]),
+        } as any,
+      });
+
+      await cmd.execute(ctx);
+
+      expect(mockGuild.channels.fetch).not.toHaveBeenCalled();
+      expect(mockServices.reactionRoleRepo?.delete).toHaveBeenCalledWith('rr-legacy');
+    });
+
     it('takes the removed button off the message (TASK-1643)', async () => {
       const row = (ids: string[]) => ({
         toJSON: () => ({

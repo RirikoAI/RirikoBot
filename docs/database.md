@@ -6,6 +6,16 @@ To support both enterprise cloud deployments and zero-configuration local develo
 - **Production**: PostgreSQL (`postgres` driver / `drizzle-orm/node-postgres`) with connection pooling, high concurrency, and native UUID / JSONB support.
 - **Development & Self-Hosting**: SQLite (`better-sqlite3` / `drizzle-orm/better-sqlite3`) with WAL mode (`PRAGMA journal_mode = WAL;`) and enforced foreign keys (`PRAGMA foreign_keys = ON;`).
 
+**Empty databases get the full schema at startup.**
+- **SQLite:** `createSqliteClient` runs `SQLITE_SCHEMA_DDL` on a new database file.
+- **PostgreSQL:** the bot and the dashboard call `ensurePostgresSchema` at startup.
+  - It runs `PG_SCHEMA_DDL` in the connection's `search_path` when that schema has no tables.
+  - It holds an advisory lock while it does, so both apps can start at once.
+- **Afterwards:** additive upgrades (`ensureAdventureSchema`, `ensureCardSerialSchema`) run.
+- **The DDL files:** both are generated from the Drizzle schemas and committed. The production images have no `drizzle-kit`.
+  - Regenerate them after every schema change with `pnpm -F @ririko/database db:generate-ddl`.
+  - The parity tests `schema/sqlite/ddl.test.ts` and `schema/pg/ddl.test.ts` fail when they are stale.
+
 ---
 
 ## 2. Complete Schema Catalog (40+ Tables)

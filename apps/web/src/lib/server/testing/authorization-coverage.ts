@@ -41,6 +41,13 @@ export const AUTH_ROUTE_ALLOWLIST: Record<string, readonly string[]> = {
 };
 const AUTH_ROUTE_GUARD = 'limitAuthRequest';
 
+/** Container probes are public and return no data, so they are rate limited instead of guarded. */
+export const PROBE_ROUTE_ALLOWLIST: Record<string, readonly string[]> = {
+  'app/api/health/route.ts': ['GET'],
+  'app/api/ready/route.ts': ['GET'],
+};
+const PROBE_ROUTE_GUARD = 'limitProbeRequest';
+
 /** Route segment config exports, which are values rather than handlers. */
 const ROUTE_CONFIG_EXPORTS = new Set([
   'dynamic',
@@ -96,6 +103,12 @@ function checkFile({ path, source }: CoverageSource, report: CoverageReport): vo
       if (isRoute && allowedMethods?.includes(name)) {
         if (!calls.has(AUTH_ROUTE_GUARD)) {
           report.problems.push(`${entry}: auth route does not call ${AUTH_ROUTE_GUARD}`);
+        }
+        continue;
+      }
+      if (isRoute && PROBE_ROUTE_ALLOWLIST[path]?.includes(name)) {
+        if (!calls.has(PROBE_ROUTE_GUARD)) {
+          report.problems.push(`${entry}: probe route does not call ${PROBE_ROUTE_GUARD}`);
         }
         continue;
       }

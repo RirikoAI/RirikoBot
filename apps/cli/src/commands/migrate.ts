@@ -78,6 +78,8 @@ export function registerMigrateCommand(program: Command): void {
           }
         }
 
+        for (const notice of result.notices) console.log(`  ${pc.yellow('⚠')} ${notice}`);
+
         console.log(pc.bold('\n─── Financial Integrity & Conservation ────────────'));
         if (result.coinsConserved) {
           console.log(

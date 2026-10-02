@@ -60,6 +60,7 @@ export function describeUpgrade(
         `${verb} the 1.4.0 database at ${sourcePath}: ${run.inspected.totalUsers} users, ${run.inspected.totalGuilds} guilds, ${run.totalCoinsMigrated} coins (batch ${run.batchId}).`,
         `  ${counts || 'no rows'}`,
         ...run.inspected.anomalies.map((anomaly) => `  ⚠ ${anomaly}`),
+        ...run.notices.map((notice) => `  ⚠ ${notice}`),
       ];
     }
   }
