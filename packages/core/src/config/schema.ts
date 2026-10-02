@@ -115,31 +115,54 @@ const BaseAppConfigSchema = z.object({
   ...ResetConfigShape,
 });
 
-function applyLegacyAliases(val: unknown): unknown {
-  if (val && typeof val === 'object') {
-    const raw = { ...(val as Record<string, unknown>) };
-    // Legacy 1.4.0 environment variable compatibility
-    if (!raw.DISCORD_TOKEN && raw.DISCORD_BOT_TOKEN) {
-      raw.DISCORD_TOKEN = raw.DISCORD_BOT_TOKEN;
-    }
-    if (!raw.DISCORD_CLIENT_ID && raw.DISCORD_APPLICATION_ID) {
-      raw.DISCORD_CLIENT_ID = raw.DISCORD_APPLICATION_ID;
-    }
-    if (!raw.SPOTIFY_DC && raw.SP_DC) {
-      raw.SPOTIFY_DC = raw.SP_DC;
-    }
-    if (!raw.DEFAULT_AI_PROVIDER && raw.AI_PROVIDER) {
-      raw.DEFAULT_AI_PROVIDER = raw.AI_PROVIDER;
-    }
-    if (!raw.DEFAULT_AI_PROVIDER && raw.AI_DEFAULT_PROVIDER) {
-      raw.DEFAULT_AI_PROVIDER = raw.AI_DEFAULT_PROVIDER;
-    }
-    if (!raw.DEFAULT_AI_MODEL && raw.AI_DEFAULT_MODEL) {
-      raw.DEFAULT_AI_MODEL = raw.AI_DEFAULT_MODEL;
-    }
-    return raw;
-  }
-  return val;
+/**
+ * 1.4.0 `AI_SERVICE_TYPE` values and the 2.0 provider each maps to. OpenRouter speaks the
+ * OpenAI API, so it runs on the OpenAI provider with OpenRouter's base URL.
+ */
+const LEGACY_AI_SERVICES: Record<
+  string,
+  { provider: 'gemini' | 'openai' | 'ollama'; keyVar?: string; baseUrlVar?: string }
+> = {
+  google_ai: { provider: 'gemini', keyVar: 'GEMINI_API_KEY' },
+  openai: { provider: 'openai', keyVar: 'OPENAI_API_KEY', baseUrlVar: 'OPENAI_BASE_URL' },
+  openrouter: { provider: 'openai', keyVar: 'OPENAI_API_KEY', baseUrlVar: 'OPENAI_BASE_URL' },
+  ollama: { provider: 'ollama', baseUrlVar: 'OLLAMA_BASE_URL' },
+};
+const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+
+/** Copies `from` to `to` when `to` is unset or empty and `from` has a value. */
+function alias(raw: Record<string, unknown>, to: string, from: string): void {
+  if (!raw[to] && raw[from]) raw[to] = raw[from];
+}
+
+/** Maps the 1.4.0 `AI_SERVICE_*` variables onto the 2.0 provider variables. */
+function applyLegacyAiService(raw: Record<string, unknown>): void {
+  const type = typeof raw.AI_SERVICE_TYPE === 'string' ? raw.AI_SERVICE_TYPE.toLowerCase() : '';
+  const service = LEGACY_AI_SERVICES[type];
+  if (!service) return;
+  if (!raw.DEFAULT_AI_PROVIDER) raw.DEFAULT_AI_PROVIDER = service.provider;
+  alias(raw, 'DEFAULT_AI_MODEL', 'AI_SERVICE_DEFAULT_MODEL');
+  if (service.keyVar) alias(raw, service.keyVar, 'AI_SERVICE_API_KEY');
+  if (service.baseUrlVar) alias(raw, service.baseUrlVar, 'AI_SERVICE_BASE_URL');
+  if (type === 'openrouter' && !raw.OPENAI_BASE_URL) raw.OPENAI_BASE_URL = OPENROUTER_BASE_URL;
+}
+
+/**
+ * Fills the 2.0 variable names from their 1.4.0 equivalents. A value that is already set always
+ * wins. `DATABASE_NAME` is deliberately not mapped: the 1.4.0 file must never become the 2.0
+ * database, so the bot refuses to start instead (apps/bot/src/legacy-layout.ts).
+ */
+export function applyLegacyAliases<T>(val: T): T {
+  if (!val || typeof val !== 'object') return val;
+  const raw = { ...(val as Record<string, unknown>) };
+  alias(raw, 'DISCORD_TOKEN', 'DISCORD_BOT_TOKEN');
+  alias(raw, 'DISCORD_CLIENT_ID', 'DISCORD_APPLICATION_ID');
+  alias(raw, 'SPOTIFY_DC', 'SP_DC');
+  alias(raw, 'DEFAULT_AI_PROVIDER', 'AI_PROVIDER');
+  alias(raw, 'DEFAULT_AI_PROVIDER', 'AI_DEFAULT_PROVIDER');
+  alias(raw, 'DEFAULT_AI_MODEL', 'AI_DEFAULT_MODEL');
+  applyLegacyAiService(raw);
+  return raw as T;
 }
 
 export const AppConfigSchema = z.preprocess(applyLegacyAliases, BaseAppConfigSchema);

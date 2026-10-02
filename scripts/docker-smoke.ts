@@ -84,7 +84,7 @@ function shell(image: string, script: string): DockerResult {
  * its logs contain `readyMarker` or it exits. `prepare` can copy files into the created container
  * before it starts (returning an error message stops the check). `inspect` then returns the
  * problems it finds; the container's log is checked for permission and module errors and it is
- * always removed.
+ * always removed. `createArgs` go to `docker create` (volume mounts, for example).
  */
 function withContainer(
   image: string,
@@ -92,6 +92,7 @@ function withContainer(
   readyMarker: string,
   inspect: (container: RunningContainer) => string[],
   prepare?: (name: string) => string | null,
+  createArgs: string[] = [],
 ): string | null {
   const name = `ririko-smoke-${process.pid}-${Date.now()}`;
   const envArgs = Object.entries(env).flatMap(([key, value]) => ['--env', `${key}=${value}`]);
@@ -106,6 +107,7 @@ function withContainer(
     '--security-opt',
     'no-new-privileges',
     ...envArgs,
+    ...createArgs,
     image,
   ]);
   if (created.status !== 0) return `docker create failed: ${output(created)}`;
@@ -399,6 +401,91 @@ function botLegacyUpgradeCheck(image: string): Check {
   };
 }
 
+/**
+ * The 1.4.0 compose layout: a root-owned volume at /app/data holding ririko.db, and
+ * DATABASE_NAME set. The bot must print the upgrade steps and exit non-zero without creating
+ * anything in the volume.
+ */
+function botOldLayoutCheck(image: string): Check {
+  return {
+    name: 'refuses the 1.4.0 compose layout with upgrade steps',
+    run: () => {
+      const volume = `ririko-smoke-old-layout-${process.pid}-${Date.now()}`;
+      const mount = ['--volume', `${volume}:/app/data`];
+      try {
+        const seeded = docker([
+          'run',
+          '--rm',
+          '--network',
+          'none',
+          '--user',
+          '0:0',
+          ...mount,
+          image,
+          'sh',
+          '-c',
+          'touch /app/data/ririko.db && chown -R 0:0 /app/data && chmod 755 /app/data',
+        ]);
+        if (seeded.status !== 0) return `could not seed the 1.4.0 volume: ${output(seeded)}`;
+        return withContainer(
+          image,
+          {
+            DISCORD_BOT_TOKEN: 'smoke-test-token',
+            DISCORD_APPLICATION_ID: '100000000000000001',
+            DATABASE_TYPE: 'better-sqlite3',
+            DATABASE_NAME: '/app/data/ririko.db',
+          },
+          '4. Remove DATABASE_NAME',
+          (container) => {
+            const problems: string[] = [];
+            const logs = container.logs();
+            for (const reason of [
+              'DATABASE_NAME is set',
+              'a 1.4.0 database is at /app/data/ririko.db',
+              'the data directory /app/data is not writable',
+            ]) {
+              if (!logs.includes(reason)) problems.push(`no "${reason}" in the message`);
+            }
+            let state = '';
+            for (let i = 0; i < 10; i++) {
+              state = docker([
+                'inspect',
+                '--format',
+                '{{.State.Status}} {{.State.ExitCode}}',
+                container.name,
+              ]).stdout.trim();
+              if (state.startsWith('exited')) break;
+              sleep(500);
+            }
+            if (!/^exited [1-9]/.test(state))
+              problems.push(`expected a non-zero exit, got "${state}"`);
+            if (logs.includes('Initializing bot repositories')) problems.push('startup went on');
+            const files = docker([
+              'run',
+              '--rm',
+              '--network',
+              'none',
+              ...mount,
+              image,
+              'ls',
+              '-A',
+              '/app/data',
+            ]);
+            if (files.stdout.trim() !== 'ririko.db') {
+              problems.push(`/app/data changed: ${output(files).replace(/\s+/g, ', ')}`);
+            }
+            return problems;
+          },
+          undefined,
+          mount,
+        );
+      } finally {
+        docker(['volume', 'rm', '--force', volume]);
+      }
+    },
+  };
+}
+
 /** Requests `path` from inside the container; prints `<status> <location>`. */
 function request(container: RunningContainer, path: string, port = 3000): string {
   const script = `fetch('http://127.0.0.1:${port}${path}', { redirect: 'manual' })
@@ -494,6 +581,7 @@ const TARGETS: Record<string, Target> = {
       botBootCheck(image),
       botHealthcheckCheck(image),
       botLegacyUpgradeCheck(image),
+      botOldLayoutCheck(image),
     ],
   },
   web: {
