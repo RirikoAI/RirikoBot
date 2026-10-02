@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest';
+import { it, expect, vi } from 'vitest';
 import {
   CardTradeRepository,
   EconomyRepository,
@@ -148,9 +148,21 @@ describeDialects('Trade accepts and market purchases under concurrency', (db) =>
     });
     await first.market.buyListing({ listingId: listing.id, buyerUserId: 'buyer' });
 
-    // processExpiredListings scans first; simulate the scan having returned this listing.
+    // processExpiredListings scans first; the scan returned this listing before the sale.
     const repo = new MarketListingRepository(db.client);
-    expect(await repo.transitionStatus(listing.id, 'ACTIVE', 'EXPIRED')).toBeNull();
+    const stale = { ...listing, expiresAt: new Date(0) };
+    vi.spyOn(repo, 'findExpiredListings').mockResolvedValue([stale]);
+    const { cards, economy } = services(db.client);
+    const market = new MarketService(
+      repo,
+      cards,
+      economy,
+      db.client,
+      new UserInventoryItemRepository(db.client),
+    );
+
+    expect(await market.processExpiredListings()).toBe(0);
     expect((await repo.findById(listing.id))?.status).toBe('SOLD');
+    expect((await cards.findUserCardById(card.id))?.userId).toBe('buyer');
   });
 });

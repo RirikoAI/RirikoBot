@@ -62,6 +62,24 @@ describeDialects('Trade & Market Repositories (TASK-1051)', (db) => {
       const pendingList = await tradeRepo.listPendingTradesForUser('user-1');
       expect(pendingList.length).toBe(1);
     });
+
+    it('moves a trade only from the expected status', async () => {
+      const trade = await tradeRepo.create({
+        senderUserId: 'user-1',
+        receiverUserId: 'user-2',
+        offeredCardIds: [],
+        requestedCardIds: [],
+        offeredCredits: 10,
+      });
+
+      const accepted = await tradeRepo.transitionStatus(trade.id, 'PENDING', 'ACCEPTED');
+      expect(accepted?.status).toBe('ACCEPTED');
+      expect(accepted?.resolvedAt).toBeInstanceOf(Date);
+      // Already resolved, and a missing trade: no row matches.
+      expect(await tradeRepo.transitionStatus(trade.id, 'PENDING', 'CANCELLED')).toBeNull();
+      expect(await tradeRepo.transitionStatus(CARD_EXPIRED, 'PENDING', 'ACCEPTED')).toBeNull();
+      expect((await tradeRepo.findById(trade.id))?.status).toBe('ACCEPTED');
+    });
   });
 
   describe('MarketListingRepository', () => {
@@ -112,6 +130,22 @@ describeDialects('Trade & Market Repositories (TASK-1051)', (db) => {
       const expired = await marketRepo.findExpiredListings();
       expect(expired.length).toBe(1);
       expect(expired[0]!.userCardId).toBe(CARD_EXPIRED);
+    });
+
+    it('moves a listing only from the expected status', async () => {
+      const listing = await marketRepo.create({
+        sellerUserId: 'user-1',
+        userCardId: CARD_101,
+        price: 300,
+        expiresAt: new Date(Date.now() + 100000),
+      });
+
+      expect((await marketRepo.transitionStatus(listing.id, 'ACTIVE', 'SOLD'))?.status).toBe(
+        'SOLD',
+      );
+      expect(await marketRepo.transitionStatus(listing.id, 'ACTIVE', 'EXPIRED')).toBeNull();
+      expect(await marketRepo.transitionStatus(CARD_EXPIRED, 'ACTIVE', 'SOLD')).toBeNull();
+      expect((await marketRepo.findById(listing.id))?.status).toBe('SOLD');
     });
   });
 });
