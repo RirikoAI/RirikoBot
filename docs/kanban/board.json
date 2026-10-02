@@ -1279,7 +1279,7 @@
       "parent": "EPIC-012",
       "title": "Production Orchestration & Health Probes",
       "points": 8,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "STORY-121"
       ],
@@ -1345,7 +1345,7 @@
       "parent": "EPIC-012",
       "title": "Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring",
       "points": 8,
-      "status": "BACKLOG",
+      "status": "REVIEW",
       "requires": [
         "STORY-120",
         "TASK-1223"
@@ -1919,7 +1919,7 @@
       "parent": "EPIC-012",
       "title": "1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "requires": [
         "TASK-1261"
       ],
@@ -4448,15 +4448,15 @@
       "parent": "STORY-124",
       "title": "CircleCI Postgres Service & Dialect-Parameterized Repository Suite",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "TASK-1223"
       ],
       "blocks": [
         "TASK-1242"
       ],
-      "assignee": null,
-      "claimed_at": null,
+      "assignee": "Claude Code (Opus 5.5)",
+      "claimed_at": "2026-10-02T12:28:20Z",
       "blocked_reason": null,
       "model": "medium",
       "context": {
@@ -4492,6 +4492,7 @@
       ],
       "verify_cmd": "pnpm vitest run packages/database/src tests/support && pnpm typecheck && pnpm lint --quiet && pnpm exec prettier --check .circleci/config.yml",
       "handovers": [
+        "TASK-1241",
         "STORY-124"
       ]
     },
@@ -4500,13 +4501,13 @@
       "parent": "STORY-124",
       "title": "Fix and Test Concurrent Trade Accepts & Market Purchases on Postgres",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "TASK-1241"
       ],
       "blocks": [],
-      "assignee": null,
-      "claimed_at": null,
+      "assignee": "Claude Code (Opus 5.5)",
+      "claimed_at": "2026-10-02T12:39:13Z",
       "blocked_reason": null,
       "model": "medium",
       "context": {
@@ -4541,6 +4542,7 @@
       ],
       "verify_cmd": "pnpm vitest run packages/services/src/waifu-tcg packages/database/src/repositories && pnpm typecheck && pnpm lint --quiet",
       "handovers": [
+        "TASK-1242",
         "STORY-124"
       ]
     },
@@ -5138,10 +5140,10 @@
     },
     {
       "id": "TASK-1243",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
-      "assignee": null,
-      "claimed_at": null,
+      "assignee": "Claude Code (Opus 5.5)",
+      "claimed_at": "2026-10-02T12:43:55Z",
       "blocked_reason": null,
       "parent": "STORY-124",
       "title": "AI Provider Fallback Test Through createBotServices",
@@ -5175,6 +5177,7 @@
       ],
       "verify_cmd": "pnpm vitest run apps/bot/src packages/ai/src && pnpm typecheck && pnpm lint --quiet",
       "handovers": [
+        "TASK-1243",
         "STORY-124"
       ]
     },
@@ -6089,6 +6092,16 @@
         "BUG-0030"
       ],
       "description": "CircleCI e2e build 1615 failed on PR #674 (commit 5fb6b94) while build 1614 passed on the identical tree (1f8403d). The failure screenshot shows \"Settings saved.\": the server action answered after the 5 s expect window. Playwright sized its pool from the host CPU count (8 workers) while the medium resource class gives the container 2 vCPUs, so eight Chromium instances and next start competed for 2 CPUs and the action response queued behind about 40 sidebar link prefetches. The retry then failed differently: the first attempt had saved \"?\", so the form answered \"Nothing changed.\"."
+    },
+    {
+      "id": "BUG-0031",
+      "title": "Shared Row Types Say number but Postgres Returns bigint for Balances and XP",
+      "points": 3,
+      "status": "BACKLOG",
+      "parent": "EPIC-012",
+      "requires": [],
+      "blocks": [],
+      "description": "Found in TASK-1241 when the repository suites first ran on Postgres. The shared row types in packages/database/src/schema/types/index.ts (EconomyBalance, EconomyTransaction, XpAccount and others) are inferred from the SQLite schema, so they declare number. The Postgres schema uses bigint({ mode: \"bigint\" }) for wallet/bank balances, net worth, transaction amounts and XP, so the same repository methods return bigint on Postgres. Callers wrap the values in Number() or BigInt() today, but plain arithmetic or JSON serialisation of a raw value throws on Postgres only. Fix by normalising in the repositories (or typing the values as bigint everywhere) and drop the Number() wrappers added to repositories.test.ts."
     }
   ],
   "active_in_progress_ticket": null
