@@ -285,6 +285,35 @@ export class ReactionRoleRepository extends BaseRepository<
     }
   }
 
+  /**
+   * Saves the channel of a message whose bindings do not know it yet (migrated from 1.4.0,
+   * see `isReactionRoleChannelUnknown`). Returns how many bindings were updated.
+   */
+  async linkUnknownChannel(
+    messageId: string,
+    channelId: string,
+    tx?: DatabaseClient,
+  ): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const t = sqliteSchema.reactionRoles;
+      const updated = await client.db
+        .update(t)
+        .set({ channelId })
+        .where(and(eq(t.messageId, messageId), eq(t.channelId, t.guildId)))
+        .returning({ id: t.id });
+      return updated.length;
+    } else {
+      const t = pgSchema.reactionRoles;
+      const updated = await client.db
+        .update(t)
+        .set({ channelId })
+        .where(and(eq(t.messageId, messageId), eq(t.channelId, t.guildId)))
+        .returning({ id: t.id });
+      return updated.length;
+    }
+  }
+
   async count(tx?: DatabaseClient): Promise<number> {
     const client = this.getClient(tx);
     if (this.isSqlite(client)) {

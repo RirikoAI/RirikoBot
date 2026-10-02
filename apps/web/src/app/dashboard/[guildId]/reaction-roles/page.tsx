@@ -149,12 +149,20 @@ function PanelCard({ guildId, panel }: { guildId: string; panel: PanelSummary })
   return (
     <li className="flex flex-col gap-2 rounded-md border border-edge p-3">
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <span className="font-medium">
-          {panel.channelName ? `#${panel.channelName}` : 'Deleted channel'}
-        </span>
-        <a href={panel.url} target="_blank" rel="noreferrer" className="text-sakura underline">
-          Open in Discord
-        </a>
+        {panel.url ? (
+          <>
+            <span className="font-medium">
+              {panel.channelName ? `#${panel.channelName}` : 'Deleted channel'}
+            </span>
+            <a href={panel.url} target="_blank" rel="noreferrer" className="text-sakura underline">
+              Open in Discord
+            </a>
+          </>
+        ) : (
+          <span className="text-zinc-400">
+            Channel unknown (moved from Ririko 1.4). React to the message once to link it.
+          </span>
+        )}
         {panel.editable ? (
           <Link
             href={`/dashboard/${guildId}/reaction-roles?edit=${panel.messageId}#builder-heading`}

@@ -5,6 +5,7 @@ import type {
   User,
   PartialUser,
 } from 'discord.js';
+import { isReactionRoleChannelUnknown } from '@ririko/core';
 import type { BotServices } from '../services.js';
 
 /**
@@ -31,7 +32,14 @@ async function resolveReactionRoleBinding(
 
   for (const candidate of candidates) {
     const binding = await services.reactionRoleRepo.findByMessageAndEmoji(messageId, candidate);
-    if (binding) return { binding, identifier: candidate };
+    if (!binding) continue;
+    // Roles migrated from 1.4.0 learn their channel from the first reaction.
+    if (isReactionRoleChannelUnknown(binding)) {
+      await services.reactionRoleRepo
+        .linkUnknownChannel(messageId, reaction.message.channelId)
+        .catch((err) => console.warn('[ReactionRole] Could not save the channel:', err));
+    }
+    return { binding, identifier: candidate };
   }
   return null;
 }

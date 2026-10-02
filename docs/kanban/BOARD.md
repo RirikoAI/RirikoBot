@@ -17,7 +17,9 @@
 *None.*
 
 ## 🔍 Review
-*None.*
+| ID | Type | Title | Pts | Parent | Handover |
+|---|---|---|---|---|---|
+| `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 5 | EPIC-012 | [STORY-128.md](./handovers/STORY-128.md) |
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -303,6 +305,8 @@
 | `TASK-1433` | Task | Dual-Dispatch /get-avatar, /guild-info, and /member-info Commands Suite with Timezone-Aware Formatting | 1 | STORY-143 | — |
 | `TASK-1321` | Task | Image Generation Engine: Dual-Dialect Repository, Multi-Backend Adapters (Gemini, ComfyUI, Replicate, Mock), Anime Presets & Concurrency Job Queue | 3 | STORY-132 | [TASK-1321.md](./handovers/TASK-1321.md) |
 | `TASK-1322` | Task | Dual-Dispatch /imagine Command Suite, Discord Attachment Delivery, Interactive Action Row & Legacy Configuration Parity | 2 | STORY-132 | [TASK-1322.md](./handovers/TASK-1322.md) |
+| `TASK-1281` | Task | Route 1.4.0 guild_config Settings Into the 2.0 Tables the Bot Reads | 3 | STORY-128 | [TASK-1281.md](./handovers/TASK-1281.md) |
+| `TASK-1282` | Task | Backfill Migrated Reaction-Role Channels on First Reaction & Tolerate Unknown Channels | 2 | STORY-128 | [TASK-1282.md](./handovers/TASK-1282.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -352,16 +356,25 @@
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | EPIC-011 |
-| `STORY-122` | Story | Production Orchestration & Health Probes | 3 | EPIC-012 |
-| `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 5 | EPIC-012 |
-| `STORY-125` | Story | Raise Test Coverage Toward 80% | ? | EPIC-012 |
+| `STORY-122` | Story | Production Orchestration & Health Probes | 8 | EPIC-012 |
+| `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 8 | EPIC-012 |
+| `STORY-125` | Story | Raise Test Coverage Toward 80% | 13 | EPIC-012 |
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
 | `STORY-127` | Story | Docker Hub Release of 2.0 Images & 1.4.0 Sunset | 8 | EPIC-012 |
-| `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 3 | EPIC-012 |
-| `TASK-1221` | Task | Implement /health and /ready probes for Bot and Web | 1 | STORY-122 |
-| `TASK-1222` | Task | docker-compose.production.yml with Redis, PostgreSQL, and App Services | 2 | STORY-122 |
+| `TASK-1221` | Task | Implement /health and /ready Probes for Bot and Web, With Docker HEALTHCHECKs | 2 | STORY-122 |
+| `TASK-1222` | Task | docker-compose.production.yml With PostgreSQL, Lavalink, Bot and Dashboard | 3 | STORY-122 |
 | `TASK-1241` | Task | CircleCI Postgres Service & Dialect-Parameterized Repository Suite | 3 | STORY-124 |
-| `TASK-1242` | Task | Postgres Trade/Market Concurrency Tests & AI Provider Fallback Through createBotServices | 2 | STORY-124 |
+| `TASK-1242` | Task | Fix and Test Concurrent Trade Accepts & Market Purchases on Postgres | 3 | STORY-124 |
+| `TASK-1223` | Task | Postgres Schema Bootstrap: Generated PG DDL Applied at Startup Under an Advisory Lock | 3 | STORY-122 |
+| `TASK-1243` | Task | AI Provider Fallback Test Through createBotServices | 2 | STORY-124 |
+| `TASK-1271` | Task | 1.4.0 Env Aliases & Fail-Fast on the Old Compose Layout | 2 | STORY-127 |
+| `TASK-1272` | Task | Upgrade Guide From 1.4.0 & Docker Hub Repository Descriptions | 2 | STORY-127 |
+| `TASK-1273` | Task | Tag-Driven CircleCI Release Job Pushing Versioned 2.x Images | 3 | STORY-127 |
+| `TASK-1274` | Task | 1.4.0 Sunset Runbook for the Maintainer | 1 | STORY-127 |
+| `TASK-1251` | Task | Coverage: Database Repositories | 3 | STORY-125 |
+| `TASK-1252` | Task | Coverage: CLI Commands | 2 | STORY-125 |
+| `TASK-1253` | Task | Coverage: Dashboard Server Routes and Server Libraries | 3 | STORY-125 |
+| `TASK-1254` | Task | Coverage: Bot Commands and Listeners | 5 | STORY-125 |
 | `BUG-0023` | Bug | Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message | 2 | STORY-040 |
 | `BUG-0024` | Bug | Legacy Migration Reads the Wrong Karma and Welcomer Keys | 2 | STORY-043 |
 | `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED | 5 | STORY-105 |

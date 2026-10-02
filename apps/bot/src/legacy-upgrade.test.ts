@@ -110,6 +110,7 @@ describe('legacy upgrade', () => {
               anomalies: ['Found 1 users with negative coin balances.'],
             },
             migratedCounts: { users: 1, guilds: 0 },
+            notices: ['Not migrated (1.4.0 stored them in plain text): Twitch client ID.'],
             coinsConserved: true,
             totalCoinsMigrated: 5n,
             durationMs: 1,
@@ -121,6 +122,7 @@ describe('legacy upgrade', () => {
         'Would migrate the 1.4.0 database at /app/legacy/ririko.db: 1 users, 0 guilds, 5 coins (batch batch-1).',
         '  users 1',
         '  ⚠ Found 1 users with negative coin balances.',
+        '  ⚠ Not migrated (1.4.0 stored them in plain text): Twitch client ID.',
       ]);
     });
   });
