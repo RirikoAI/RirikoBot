@@ -28,7 +28,7 @@ describe('Gateway Moderation Listeners', () => {
         evaluateMessage: vi.fn().mockReturnValue({ isAllowed: true }),
       } as any,
       economyService: {
-        handleEvent: vi.fn().mockResolvedValue(undefined),
+        handleEvent: vi.fn().mockResolvedValue({ awarded: true, credits: 20, xp: 20 }),
       } as any,
       levelingService: {
         addExperience: vi.fn().mockResolvedValue({ didLevelUp: false, shouldNotify: false }),

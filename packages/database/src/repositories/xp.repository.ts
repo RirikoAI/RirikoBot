@@ -101,7 +101,7 @@ export class XpRepository extends BaseRepository<
         .insert(pgSchema.xpAccounts)
         .values({
           ...insertData,
-          xp: BigInt(data.xp ?? 0),
+          xp: Number(data.xp ?? 0),
         } as unknown as typeof pgSchema.xpAccounts.$inferInsert)
         .returning();
       if (!created) {
@@ -152,7 +152,7 @@ export class XpRepository extends BaseRepository<
         .values({
           userId,
           guildId,
-          xp: 0n,
+          xp: 0,
           level: 0,
           karma: 0,
           createdAt: now,
@@ -199,7 +199,7 @@ export class XpRepository extends BaseRepository<
     } else {
       const pgData = {
         ...updateData,
-        ...(data.xp !== undefined ? { xp: BigInt(data.xp) } : {}),
+        ...(data.xp !== undefined ? { xp: Number(data.xp) } : {}),
       };
       const [updated] = await client.db
         .update(pgSchema.xpAccounts)
@@ -299,7 +299,7 @@ export class XpRepository extends BaseRepository<
         const [acc] = await txClient.db
           .update(pgSchema.xpAccounts)
           .set({
-            xp: BigInt(updatedXp),
+            xp: updatedXp,
             level: updatedLevel,
             lastXpAt: now,
             updatedAt: now,
@@ -495,10 +495,7 @@ export class XpRepository extends BaseRepository<
         .select({ count: sql<number>`count(*)` })
         .from(pgSchema.xpAccounts)
         .where(
-          and(
-            eq(pgSchema.xpAccounts.guildId, guildId),
-            sql`${pgSchema.xpAccounts.xp} > ${BigInt(userXp)}`,
-          ),
+          and(eq(pgSchema.xpAccounts.guildId, guildId), sql`${pgSchema.xpAccounts.xp} > ${userXp}`),
         );
       const [totalRes] = await client.db
         .select({ count: sql<number>`count(*)` })
@@ -592,7 +589,7 @@ export class XpRepository extends BaseRepository<
             })
             .from(pgSchema.xpAccounts)
             .groupBy(pgSchema.xpAccounts.userId)
-            .having(sql`sum(${pgSchema.xpAccounts.xp}) > ${BigInt(myTotalXp)}`)
+            .having(sql`sum(${pgSchema.xpAccounts.xp}) > ${myTotalXp}`)
             .as('higher_users'),
         );
 

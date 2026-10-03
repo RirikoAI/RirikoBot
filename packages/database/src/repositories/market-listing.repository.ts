@@ -83,8 +83,8 @@ export class MarketListingRepository extends BaseRepository<
             id,
             sellerUserId: data.sellerUserId,
             userCardId: data.userCardId,
-            price: BigInt(data.price),
-            taxPaid: BigInt(data.taxPaid ?? 0),
+            price: Number(data.price),
+            taxPaid: Number(data.taxPaid ?? 0),
             status: data.status ?? 'ACTIVE',
             createdAt: data.createdAt ?? new Date(),
             expiresAt: data.expiresAt,
@@ -123,8 +123,8 @@ export class MarketListingRepository extends BaseRepository<
         return this.normalizeListing(row as unknown as Record<string, unknown>);
       } else {
         const updateData: Record<string, unknown> = { ...data };
-        if (data.price !== undefined) updateData['price'] = BigInt(data.price);
-        if (data.taxPaid !== undefined) updateData['taxPaid'] = BigInt(data.taxPaid);
+        if (data.price !== undefined) updateData['price'] = Number(data.price);
+        if (data.taxPaid !== undefined) updateData['taxPaid'] = Number(data.taxPaid);
 
         const [row] = await client.db
           .update(pgSchema.marketListings)
