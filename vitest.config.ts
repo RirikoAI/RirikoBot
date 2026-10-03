@@ -34,6 +34,7 @@ export default defineConfig({
     include: [
       'packages/**/*.test.ts',
       'apps/**/*.test.ts',
+      'apps/**/*.test.tsx',
       'scripts/**/*.test.ts',
       'tests/**/*.test.ts',
     ],
@@ -53,7 +54,7 @@ export default defineConfig({
       reportsDirectory: 'coverage',
       // Ratchet: the measured baseline rounded down. Raise these as coverage grows; never lower
       // them to get a build through.
-      thresholds: { statements: 65, branches: 54, functions: 69, lines: 67 },
+      thresholds: { statements: 79, branches: 68, functions: 81, lines: 80 },
     },
   },
 });

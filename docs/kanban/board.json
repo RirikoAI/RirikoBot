@@ -1398,7 +1398,7 @@
       "parent": "EPIC-012",
       "title": "Raise Test Coverage Toward 80%",
       "points": 13,
-      "status": "BACKLOG",
+      "status": "DONE",
       "requires": [
         "STORY-124",
         "STORY-127"
@@ -5355,7 +5355,7 @@
     },
     {
       "id": "TASK-1251",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
       "assignee": null,
       "claimed_at": null,
@@ -5369,14 +5369,36 @@
       "model": "medium",
       "context": {
         "files": [
-          "packages/database/src/repositories",
-          "vitest.config.ts"
+          "packages/database/src/repositories/dungeon.repository.ts",
+          "packages/database/src/repositories/tcg-item.repository.ts",
+          "packages/database/src/repositories/stream.repository.ts",
+          "packages/database/src/repositories/waifu-card.repository.ts",
+          "packages/database/src/repositories/achievement.repository.ts",
+          "packages/database/src/repositories/waifu-guild.repository.ts",
+          "packages/database/src/repositories/economy.repository.ts",
+          "packages/database/src/repositories/moderation.repository.ts",
+          "packages/database/src/repositories/adventure-session.repository.ts",
+          "packages/database/src/repositories/autovoice-channel.repository.ts",
+          "packages/database/src/repositories/stream.repository.test.ts",
+          "vitest.config.ts",
+          "packages/database/src/repositories/ai.repository.ts"
         ],
-        "symbols": [],
+        "symbols": [
+          "BaseRepository",
+          "GameItemRepository",
+          "StreamRepository",
+          "AchievementRepository",
+          "WaifuGuildRepository",
+          "createDatabaseClient"
+        ],
         "entry_points": [
           "packages/database/src/repositories"
         ],
-        "codegraph_queries": []
+        "codegraph_queries": [
+          "dialect-parameterized repository test suite createTestDatabase DungeonRepository GameItemRepository StreamRepository AchievementRepository WaifuGuildRepository",
+          "WaifuCardRepository EconomyRepository ModerationRepository MarketListingRepository AdventureSessionRepository AutoVoiceChannelRepository",
+          "BaseRepository isSqlite getClient createDatabaseClient stream.repository.test.ts"
+        ]
       },
       "acceptance": [
         "Behaviour tests for the database repositories not converted by TASK-1241, lifting packages/database/src/repositories from 48% to at least 75% lines, picked from a fresh coverage/coverage-summary.json (least covered first).",
@@ -5384,12 +5406,14 @@
       ],
       "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
       "handovers": [
-        "STORY-125"
+        "STORY-125",
+        "TASK-1251",
+        "TASK-1241"
       ]
     },
     {
       "id": "TASK-1252",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
       "assignee": null,
       "claimed_at": null,
@@ -5401,14 +5425,35 @@
       "model": "small",
       "context": {
         "files": [
-          "apps/cli/src/commands",
+          "apps/cli/src/commands/ai-configure.ts",
+          "apps/cli/src/commands/image-configure.ts",
+          "apps/cli/src/commands/stream-configure.ts",
+          "apps/cli/src/commands/migrate.ts",
+          "apps/cli/src/commands/commands-sync.ts",
+          "apps/cli/src/commands/passkeys-reset.ts",
+          "apps/cli/src/commands/info.ts",
+          "apps/cli/src/commands/doctor.ts",
+          "apps/cli/src/commands/ai-configure.test.ts",
+          "apps/cli/src/utils/env-editor.ts",
           "vitest.config.ts"
         ],
-        "symbols": [],
-        "entry_points": [
-          "apps/cli/src/commands"
+        "symbols": [
+          "runInteractiveWizard",
+          "testAiProviders",
+          "testImageProviders",
+          "testStreamProviders",
+          "runInteractiveSetup",
+          "registerStreamConfigureCommand",
+          "runCommandsSync"
         ],
-        "codegraph_queries": []
+        "entry_points": [
+          "apps/cli/src/program.ts"
+        ],
+        "codegraph_queries": [
+          "ai-configure image-configure stream-configure runInteractiveWizard testAiProviders testImageProviders testStreamProviders runInteractiveSetup",
+          "migrate.ts info.ts doctor.ts passkeys-reset.ts register command actions",
+          "ai-configure.test.ts stream-configure.test.ts readEnvFile updateEnvFile resolveEnvFilePath"
+        ]
       },
       "acceptance": [
         "Behaviour tests for apps/cli/src/commands, lifting it from 46% to at least 80% lines, picked from a fresh coverage/coverage-summary.json (least covered first).",
@@ -5416,12 +5461,13 @@
       ],
       "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
       "handovers": [
-        "STORY-125"
+        "STORY-125",
+        "TASK-1252"
       ]
     },
     {
       "id": "TASK-1253",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
       "assignee": null,
       "claimed_at": null,
@@ -5433,16 +5479,38 @@
       "model": "medium",
       "context": {
         "files": [
-          "apps/web/src/app",
-          "apps/web/src/lib/server",
+          "apps/web/src/app/dashboard/[guildId]/streams/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/reaction-roles/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/welcome/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/giveaways/actions.ts",
+          "apps/web/src/app/owner/tcg-shop/actions.ts",
+          "apps/web/src/app/owner/shop/actions.ts",
+          "apps/web/src/app/account/security/actions.ts",
+          "apps/web/src/lib/server/services.ts",
+          "apps/web/src/lib/server/owner-action.ts",
+          "apps/web/src/lib/server/owner-action.test.ts",
+          "apps/web/src/components/settings-form.tsx",
           "tests/support/fake-discord/server.ts",
-          "vitest.config.ts"
+          "vitest.config.ts",
+          "tests/support/web-action-harness.ts",
+          "tests/support/markup.ts"
         ],
-        "symbols": [],
+        "symbols": [
+          "runOwnerAction",
+          "createWebServices",
+          "WebServices",
+          "checkDashboardRequest",
+          "requireStepUp",
+          "requireGuildAccess"
+        ],
         "entry_points": [
           "apps/web/src/app"
         ],
-        "codegraph_queries": []
+        "codegraph_queries": [
+          "streams actions.ts reaction-roles actions.ts welcome actions.ts runGuildAction runOwnerAction fake-discord server lib/server/services.ts",
+          "owner shop actions createShopItem updateShopItem tcg-shop actions account security actions owner-action.test.ts",
+          "settings-form command-overrides-field panel-builder-field passkey-manager auto-voice-hubs-field escalation-steps-field"
+        ]
       },
       "acceptance": [
         "Behaviour tests for dashboard route handlers, server actions and apps/web/src/lib/server, using the fake Discord API, lifting apps/web from 45% to at least 70% lines, picked from a fresh coverage/coverage-summary.json (least covered first).",
@@ -5450,12 +5518,13 @@
       ],
       "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
       "handovers": [
-        "STORY-125"
+        "STORY-125",
+        "TASK-1253"
       ]
     },
     {
       "id": "TASK-1254",
-      "status": "BACKLOG",
+      "status": "DONE",
       "blocks": [],
       "assignee": null,
       "claimed_at": null,
@@ -5467,16 +5536,36 @@
       "model": "medium",
       "context": {
         "files": [
-          "apps/bot/src/commands",
-          "apps/bot/src/listeners",
+          "apps/bot/src/commands/tcg/dungeon-battle.manager.ts",
+          "apps/bot/src/commands/moderation/commands.ts",
+          "apps/bot/src/commands/tcg/cards.command.ts",
+          "apps/bot/src/commands/giveaway/giveaway.command.ts",
+          "apps/bot/src/commands/ai/commands.ts",
+          "apps/bot/src/commands/games/rps.command.ts",
+          "apps/bot/src/commands/streams/stream.command.ts",
+          "apps/bot/src/commands/games/tictactoe.command.ts",
+          "apps/bot/src/listeners/member.listener.ts",
+          "apps/bot/src/listeners/voice.listener.ts",
+          "apps/bot/src/listeners/reaction.listener.ts",
           "apps/bot/test/support/bot-harness.ts",
           "vitest.config.ts"
         ],
-        "symbols": [],
+        "symbols": [
+          "startBotHarness",
+          "DungeonBattleManager",
+          "registerVoiceListener",
+          "trackCurrentVoiceMembers",
+          "registerMusicVoiceListener",
+          "registerMemberListener"
+        ],
         "entry_points": [
           "apps/bot/src/commands"
         ],
-        "codegraph_queries": []
+        "codegraph_queries": [
+          "bot-harness createBotHarness dungeon-battle.manager moderation commands.ts voice.listener member.listener",
+          "cards.command giveaway.command ai commands rps.command stream.command gear-menu item.command",
+          "tictactoe.command highlow.command guild.command shop-menu craft-menu reaction.listener"
+        ]
       },
       "acceptance": [
         "Behaviour tests for the least-covered bot command groups and listeners, using the bot harness, lifting apps/bot/src/commands to at least 80% and listeners to at least 75% lines, picked from a fresh coverage/coverage-summary.json (least covered first).",
@@ -5484,7 +5573,8 @@
       ],
       "verify_cmd": "pnpm test:coverage && pnpm typecheck && pnpm lint --quiet",
       "handovers": [
-        "STORY-125"
+        "STORY-125",
+        "TASK-1254"
       ]
     }
   ],
@@ -5694,6 +5784,37 @@
         "CHORE-0002"
       ],
       "description": "Stories linked to epics through a legacy `epic` field, but the template renderer and web board follow only `parent`, so every ticket showed \"No epic\". Rename the field, fill epic children, give chores parents, move misfiled tasks out of `bugs`, and add EPIC-016 for the adventure RPG."
+    },
+    {
+      "id": "CHORE-0003",
+      "title": "DOM Test Environment for Dashboard Client Components",
+      "points": 3,
+      "status": "BACKLOG",
+      "parent": "EPIC-012",
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "medium",
+      "description": "apps/web has no DOM test environment, so click and typing handlers in client components cannot be tested (FLAG from TASK-1253). Add jsdom and @testing-library/react for opt-in per-file use and cover passkey-manager, session-list, passkey-check-button and field-editor row handlers.",
+      "context": {
+        "files": [
+          "vitest.config.ts",
+          "apps/web/src/components/passkeys/passkey-manager.tsx",
+          "tests/support/markup.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "vitest.config.ts"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [],
+      "verify_cmd": "",
+      "handovers": [
+        "CHORE-0003"
+      ]
     }
   ],
   "bugs": [
@@ -6206,6 +6327,79 @@
       ],
       "assignee": "Claude Code (Opus 5.5)",
       "claimed_at": null
+    },
+    {
+      "blocks": [],
+      "requires": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "EPIC-012",
+      "id": "BUG-0032",
+      "title": "Flaky Rarity Stat Scaling Test",
+      "points": 1,
+      "status": "DONE",
+      "model": "small",
+      "description": "rarity-and-card-generator.test.ts \"should scale stats according to rarity multiplier\" uses unseeded Math.random base stats and failed once in a full coverage run (FLAG 4 of TASK-1251). Seed the generator so the test is deterministic.",
+      "context": {
+        "files": [
+          "packages/services/src/waifu-tcg/__tests__/rarity-and-card-generator.test.ts",
+          "packages/services/src/waifu-tcg/card/card-generator.ts",
+          "packages/services/src/waifu-tcg/dungeon/balance-simulator.ts"
+        ],
+        "symbols": [
+          "CardGenerator",
+          "generateStats",
+          "createSeededRng"
+        ],
+        "entry_points": [
+          "packages/services/src/waifu-tcg/__tests__/rarity-and-card-generator.test.ts"
+        ],
+        "codegraph_queries": [
+          "rarity-and-card-generator.test.ts should scale stats according to rarity multiplier card generator random stats seed",
+          "createSeededRng simulateDungeonBalance CardGenerator randomFn"
+        ]
+      },
+      "acceptance": [
+        "Every test in rarity-and-card-generator.test.ts that compares generated stats uses a deterministic randomFn; no assertion is weakened.",
+        "The file passes 20 consecutive runs (pnpm vitest run packages/services/src/waifu-tcg/__tests__/rarity-and-card-generator.test.ts --repeats 20 or equivalent)."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/waifu-tcg/__tests__/rarity-and-card-generator.test.ts && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "BUG-0032"
+      ]
+    },
+    {
+      "blocks": [],
+      "requires": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "EPIC-012",
+      "id": "BUG-0033",
+      "title": "Postgres-Only Repository Inconsistencies from TASK-1251",
+      "points": 2,
+      "status": "BACKLOG",
+      "model": "small",
+      "description": "DungeonSeasonRepository.create falls back to a 36-char uuid but dungeon_seasons.id is varchar(32) on Postgres; CommandSettingsRepository.listForGuild NULL channelId ordering differs between SQLite and Postgres. Both latent (FLAG 2 and 3 of TASK-1251).",
+      "context": {
+        "files": [
+          "packages/database/src/repositories"
+        ],
+        "symbols": [
+          "DungeonSeasonRepository",
+          "CommandSettingsRepository"
+        ],
+        "entry_points": [
+          "packages/database/src/repositories"
+        ],
+        "codegraph_queries": []
+      },
+      "acceptance": [],
+      "verify_cmd": "",
+      "handovers": [
+        "BUG-0033"
+      ]
     }
   ],
   "active_in_progress_ticket": null
