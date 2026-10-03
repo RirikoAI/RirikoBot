@@ -107,12 +107,13 @@ Git hooks (Husky, installed by `pnpm install`) run the lint checks locally:
 - **pre-push**: `pnpm lint --quiet` (errors only) and `pnpm format:check`, the same checks as the `lint` job, so a push that would fail CI lint stops locally. Fix with `pnpm lint:fix` and `pnpm format`.
 
 ### 4.1. Coverage
-- **Merge gate (standing rule for every contributor and agent)**: a PR is **not merged** unless it passes every threshold in `vitest.config.ts` `coverage.thresholds`. On 2026-09-28 they are lines 67%, functions 69%, statements 65% and branches 54%. The CircleCI `test` job fails below any of them. Run `pnpm test:coverage` before opening a PR, and cover the code you add or change with real tests.
+- **Merge gate (standing rule for every contributor and agent)**: a PR is **not merged** unless it passes every threshold in `vitest.config.ts` `coverage.thresholds`. On 2026-10-03 they are lines 80%, functions 81%, statements 79% and branches 68%. The CircleCI `test` job fails below any of them. Run `pnpm test:coverage` before opening a PR, and cover the code you add or change with real tests.
 - `pnpm test:ci` runs Vitest with v8 coverage and writes `coverage/` (HTML, `lcov.info`, `coverage-summary.json`) and `test-results/junit.xml`. Run `pnpm test:coverage` locally for the same numbers.
 - Coverage counts every source file under `packages/*/src` and `apps/*/src`, including files no test imports.
 - **Ratchet rule**: `coverage.thresholds` in `vitest.config.ts` hold the measured baseline, rounded down. Raise them when coverage grows. Never lower them to get a build through; add tests instead.
 - Baseline on 2026-09-26: statements 65.8%, branches 54.5%, functions 69.3%, lines 67.2%.
 - Measured on 2026-09-28 (PR #658): statements 67.1%, branches 56.4%, functions 69.4%, lines 68.5%.
+- Measured on 2026-10-03 (STORY-125): statements 79.2%, branches 68.9%, functions 81.8%, lines 80.6%.
 - A test that imports a workspace package (`@ririko/database`, `@ririko/music`, ...) runs its built `dist/`, which coverage does not count. To cover a package's code, test it from inside that package with a relative import.
 
 ### 4.2. Where to find results

@@ -105,7 +105,7 @@ This document governs how AI agents collaborate, divide responsibilities, mainta
 5. **No Placeholders**: Never write stub functions or mock placeholders in place of real working business logic.
 6. **Strict Security**: Never store plaintext API keys or OAuth secrets in database tables. Use environment variables or AES-256-GCM encrypted credential vaults.
 7. **LLM Security Barrier**: The LLM is never the security boundary. Applications must mediate and enforce Discord permissions before executing any tool call.
-8. **Coverage Gate (merge blocker)**: Code that fails any coverage threshold is **NOT MERGED**. `pnpm test:coverage` must pass every threshold in `vitest.config.ts` (lines ≥ 67%, functions ≥ 69%, statements ≥ 65%, branches ≥ 54% as of 2026-09-28). CircleCI's `test` job enforces it. Never lower a threshold to get a build through; write real tests for the code you add or change. See [docs/testing.md §4.1](docs/testing.md).
+8. **Coverage Gate (merge blocker)**: Code that fails any coverage threshold is **NOT MERGED**. `pnpm test:coverage` must pass every threshold in `vitest.config.ts` (lines ≥ 80%, functions ≥ 81%, statements ≥ 79%, branches ≥ 68% as of 2026-10-03). CircleCI's `test` job enforces it. Never lower a threshold to get a build through; write real tests for the code you add or change. See [docs/testing.md §4.1](docs/testing.md).
 
 ---
 
