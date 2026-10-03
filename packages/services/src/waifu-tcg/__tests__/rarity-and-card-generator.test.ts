@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { RarityEngine, RARITY_TIERS, createMulberry32 } from '../rarity/rarity-engine.js';
 import {
   CardGenerator,
@@ -87,7 +87,11 @@ describe('Rarity Math, Card Generation & Leveling Engine (TASK-1011)', () => {
   });
 
   describe('Card Generator (docs/waifu-tcg.md:L72-89)', () => {
-    const generator = new CardGenerator();
+    // Seeded so every test sees the same rolls, whatever the order or the machine.
+    let generator: CardGenerator;
+    beforeEach(() => {
+      generator = new CardGenerator({ randomFn: createMulberry32(20260930) });
+    });
 
     const mockAsset: WaifuAsset = {
       id: 'asset_esdeath_01',
