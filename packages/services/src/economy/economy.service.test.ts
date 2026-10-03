@@ -100,6 +100,9 @@ describe('EconomyService Core', () => {
     expect(history.total).toBe(1);
     expect(history.items[0]!.type).toBe(EconomyEventType.MESSAGE_SENT);
     expect(history.items[0]!.amount).toBe(20);
+    // The message text feeds the anti-spam check only; the ledger never keeps it.
+    expect(JSON.stringify(history.items[0]!.metadata)).not.toContain('Hello everyone');
+    expect(history.items[0]!.metadata).not.toHaveProperty('timestamp');
 
     // Verify EventBus emission
     expect(emittedEvent).toEqual({
