@@ -498,16 +498,19 @@ export function createGiveawayCommands(services: BotServices): Command[] {
     },
     async execute(ctx: CommandContext): Promise<void> {
       // Synthesize action option and delegate to primary giveaway command
-      const delegatedCtx: CommandContext = {
-        ...ctx,
-        options: {
-          ...ctx.options,
-          getString: (opt: string) => {
-            if (opt === 'action') return action;
-            return ctx.options.getString(opt);
-          },
+      // Both objects are created on top of the originals: spreading a class instance would drop
+      // its prototype methods (getRawArgs, getInteger, reply, ...).
+      const delegatedOptions = Object.assign(Object.create(ctx.options), {
+        getString: (opt: string) => {
+          if (opt === 'action') return action;
+          return ctx.options.getString(opt);
         },
-      };
+        // The primary command reads `!giveaway <action> <args...>`, so put the action first.
+        getRawArgs: () => [action, ...ctx.options.getRawArgs()],
+      });
+      const delegatedCtx: CommandContext = Object.assign(Object.create(ctx), {
+        options: delegatedOptions,
+      });
       await giveawayCommand.execute(delegatedCtx);
     },
   });
