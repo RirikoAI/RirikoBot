@@ -53,7 +53,8 @@ for (const t of all) {
   const at = `${t.id}`;
   if (!STATUSES.includes(t.status)) errors.push(`${at}: unknown status "${t.status}"`);
   if (t.status !== 'BACKLOG' && !FIB.includes(t.points)) errors.push(`${at}: points must be one of ${FIB.join(', ')} before leaving BACKLOG`);
-  if (workable(t) && t.points >= 13 && t.status !== 'BACKLOG') errors.push(`${at}: ${t.points} pts is too large; split it before TODO`);
+  // A story already split into child tasks is tracked through them, so its size is fine.
+  if (workable(t) && t.points >= 13 && t.status !== 'BACKLOG' && !t.children?.length) errors.push(`${at}: ${t.points} pts is too large; split it before TODO`);
   if (t.parent && !byId.has(t.parent)) errors.push(`${at}: parent ${t.parent} does not exist`);
   if (t.type === 'task' && !t.parent) errors.push(`${at}: task has no parent story`);
   for (const r of [...(t.requires ?? []), ...(t.blocks ?? []), ...(t.children ?? [])]) {
