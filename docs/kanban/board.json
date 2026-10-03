@@ -311,7 +311,7 @@
       "id": "EPIC-012",
       "title": "Quality Gates, Docker Rootless & Production Verification",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "children": [
         "STORY-120",
         "STORY-121",
@@ -5789,7 +5789,7 @@
       "id": "CHORE-0003",
       "title": "DOM Test Environment for Dashboard Client Components",
       "points": 3,
-      "status": "BACKLOG",
+      "status": "DONE",
       "parent": "EPIC-012",
       "requires": [],
       "blocks": [],
@@ -5801,17 +5801,31 @@
       "context": {
         "files": [
           "vitest.config.ts",
+          "package.json",
           "apps/web/src/components/passkeys/passkey-manager.tsx",
+          "apps/web/src/components/passkeys/passkey-check-button.tsx",
+          "apps/web/src/components/sessions/session-list.tsx",
           "tests/support/markup.ts"
         ],
-        "symbols": [],
+        "symbols": [
+          "PasskeyManager",
+          "PasskeyCheckButton",
+          "SessionList"
+        ],
         "entry_points": [
           "vitest.config.ts"
         ],
-        "codegraph_queries": []
+        "codegraph_queries": [
+          "PasskeyManager PasskeyCheckButton SessionList",
+          "field editor add row remove row handlers apps/web"
+        ]
       },
-      "acceptance": [],
-      "verify_cmd": "",
+      "acceptance": [
+        "jsdom and @testing-library/react are root devDependencies; vitest default environment stays node and DOM tests opt in with // @vitest-environment jsdom",
+        "Interaction tests click and type through passkey-manager, passkey-check-button, session-list and at least one field editor add/remove row handler",
+        "pnpm test:coverage passes every threshold"
+      ],
+      "verify_cmd": "pnpm test:coverage",
       "handovers": [
         "CHORE-0003"
       ]
@@ -6379,24 +6393,33 @@
       "id": "BUG-0033",
       "title": "Postgres-Only Repository Inconsistencies from TASK-1251",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "model": "small",
       "description": "DungeonSeasonRepository.create falls back to a 36-char uuid but dungeon_seasons.id is varchar(32) on Postgres; CommandSettingsRepository.listForGuild NULL channelId ordering differs between SQLite and Postgres. Both latent (FLAG 2 and 3 of TASK-1251).",
       "context": {
         "files": [
-          "packages/database/src/repositories"
+          "packages/database/src/repositories/dungeon.repository.ts",
+          "packages/database/src/repositories/command-settings.repository.ts",
+          "packages/database/src/repositories/dungeon.repository.behaviour.test.ts",
+          "packages/database/src/repositories/command-settings.repository.behaviour.test.ts"
         ],
         "symbols": [
-          "DungeonSeasonRepository",
-          "CommandSettingsRepository"
+          "DungeonSeasonRepository.create",
+          "CommandSettingsRepository.listForGuild"
         ],
         "entry_points": [
-          "packages/database/src/repositories"
+          "packages/database/src/repositories/dungeon.repository.ts"
         ],
-        "codegraph_queries": []
+        "codegraph_queries": [
+          "DungeonSeasonRepository.create CommandSettingsRepository.listForGuild describeDialects"
+        ]
       },
-      "acceptance": [],
-      "verify_cmd": "",
+      "acceptance": [
+        "DungeonSeasonRepository.create without an id stores a 32-character id that fits dungeon_seasons.id varchar(32) on Postgres",
+        "CommandSettingsRepository.listForGuild returns the guild-wide (NULL channel) row before channel rows on both SQLite and Postgres",
+        "describeDialects behaviour tests cover both cases; the order workaround in the existing command-settings test is removed"
+      ],
+      "verify_cmd": "pnpm vitest run packages/database/src/repositories/dungeon.repository.behaviour.test.ts packages/database/src/repositories/command-settings.repository.behaviour.test.ts",
       "handovers": [
         "BUG-0033"
       ]
