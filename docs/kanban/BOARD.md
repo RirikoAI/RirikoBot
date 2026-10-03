@@ -335,6 +335,7 @@
 | `CHORE-1703` | Chore | Remove Adventure User-Specific S+ Rank Override | 1 | STORY-170 | [CHORE-1703.md](./handovers/CHORE-1703.md) |
 | `CHORE-0001` | Chore | Adopt Scrum Kanban 0.4: Single AGENTS.md and Board Migration | 5 | EPIC-000 | [CHORE-0001.md](./handovers/CHORE-0001.md) |
 | `CHORE-0002` | Chore | Link Stories, Tasks and Chores to Their Epics | 3 | EPIC-000 | [CHORE-0002.md](./handovers/CHORE-0002.md) |
+| `CHORE-0003` | Chore | DOM Test Environment for Dashboard Client Components | 3 | EPIC-012 | [CHORE-0003.md](./handovers/CHORE-0003.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |
@@ -366,6 +367,7 @@
 | `BUG-0030` | Bug | Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save | 1 | STORY-121 | [BUG-0030.md](./handovers/BUG-0030.md) |
 | `BUG-0031` | Bug | Shared Row Types Say number but Postgres Returns bigint for Balances and XP | 5 | EPIC-012 | [BUG-0031.md](./handovers/BUG-0031.md) |
 | `BUG-0032` | Bug | Flaky Rarity Stat Scaling Test | 1 | EPIC-012 | [BUG-0032.md](./handovers/BUG-0032.md) |
+| `BUG-0033` | Bug | Postgres-Only Repository Inconsistencies from TASK-1251 | 2 | EPIC-012 | [BUG-0033.md](./handovers/BUG-0033.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
@@ -378,9 +380,7 @@
 |---|---|---|---|---|
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | EPIC-011 |
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
-| `CHORE-0003` | Chore | DOM Test Environment for Dashboard Client Components | 3 | EPIC-012 |
 | `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED | 5 | STORY-105 |
-| `BUG-0033` | Bug | Postgres-Only Repository Inconsistencies from TASK-1251 | 2 | EPIC-012 |
 
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |
@@ -397,7 +397,7 @@
 | `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | DONE | 13 | STORY-090, STORY-091, STORY-092 | — |
 | `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | DONE | 21 | STORY-100, STORY-101, STORY-102, STORY-103, STORY-104, STORY-105 | [EPIC-010.md](./handovers/EPIC-010.md) |
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | DONE | 21 | STORY-110, STORY-111, STORY-112, STORY-167, STORY-168, STORY-113, STORY-114, STORY-115, STORY-165, STORY-116, STORY-166, STORY-117, STORY-118, STORY-119, STORY-163, STORY-164 | — |
-| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | TODO | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125, STORY-126, STORY-127, STORY-128 | — |
+| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | DONE | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125, STORY-126, STORY-127, STORY-128 | — |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | DONE | 21 | STORY-130, STORY-131, STORY-132, STORY-133 | — |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
