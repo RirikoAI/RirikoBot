@@ -30,6 +30,14 @@ export class AiRepository extends BaseRepository<
   InsertAiConversation,
   Partial<NewAiConversation>
 > {
+  /**
+   * A fresh row ID. SQLite keeps the readable `conv_<uuid>` form; Postgres ID columns are uuids,
+   * so a prefixed ID would be rejected there.
+   */
+  private newId(client: DatabaseClient, prefix: 'conv' | 'msg'): string {
+    return this.isSqlite(client) ? `${prefix}_${randomUUID()}` : randomUUID();
+  }
+
   // --- BaseRepository Compliance ---
 
   async findById(id: string, tx?: DatabaseClient): Promise<AiConversation | null> {
@@ -51,7 +59,7 @@ export class AiRepository extends BaseRepository<
 
   async create(data: InsertAiConversation, tx?: DatabaseClient): Promise<AiConversation> {
     const client = this.getClient(tx);
-    const id = data.id ?? `conv_${randomUUID()}`;
+    const id = data.id ?? this.newId(client, 'conv');
     const insertData = { ...data, id };
 
     if (this.isSqlite(client)) {
@@ -266,7 +274,6 @@ export class AiRepository extends BaseRepository<
 
     return this.create(
       {
-        id: `conv_${randomUUID()}`,
         userId: filter.userId,
         guildId: filter.guildId ?? null,
         channelId: filter.channelId ?? null,
@@ -311,7 +318,7 @@ export class AiRepository extends BaseRepository<
 
   async addMessage(data: InsertAiMessage, tx?: DatabaseClient): Promise<AiMessage> {
     const client = this.getClient(tx);
-    const id = data.id ?? `msg_${randomUUID()}`;
+    const id = data.id ?? this.newId(client, 'msg');
     const insertData = { ...data, id };
 
     if (this.isSqlite(client)) {
