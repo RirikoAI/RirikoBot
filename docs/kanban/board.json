@@ -5947,21 +5947,80 @@
       "id": "BUG-0023",
       "title": "Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "parent": "STORY-040",
       "requires": [],
       "blocks": [],
-      "description": "Found in the STORY-115 audit. The message listener evaluates anti-spam (apps/bot/src/listeners/message.listener.ts), which records the message, then EconomyService.handleEvent evaluates it again without the message content (packages/services/src/economy/economy.service.ts). The second check fails on minimum length and the cooldown, so MESSAGE_SENT never pays credits."
+      "description": "Found in the STORY-115 audit. The message listener evaluates anti-spam (apps/bot/src/listeners/message.listener.ts), which records the message, then EconomyService.handleEvent evaluates it again without the message content (packages/services/src/economy/economy.service.ts). The second check fails on minimum length and the cooldown, so MESSAGE_SENT never pays credits.",
+      "model": "small",
+      "context": {
+        "files": [
+          "apps/bot/src/listeners/message.listener.ts",
+          "packages/services/src/economy/economy.service.ts",
+          "packages/services/src/economy/anti-spam.ts",
+          "packages/services/src/economy/economy.service.test.ts",
+          "apps/bot/src/commands/economy/commands.test.ts"
+        ],
+        "symbols": [
+          "registerMessageListener",
+          "EconomyService.handleEvent",
+          "AntiSpamEvaluator.evaluateMessage",
+          "MessageActivityMetadata"
+        ],
+        "entry_points": [
+          "apps/bot/src/listeners/message.listener.ts"
+        ],
+        "codegraph_queries": [
+          "registerMessageListener anti-spam EconomyService.handleEvent MESSAGE_SENT AntiSpamGuard evaluate cooldown minimum length"
+        ]
+      },
+      "acceptance": [
+        "Each chat message is evaluated by the anti-spam check exactly once. EconomyService.handleEvent stays the owner of the check; the listener passes content and createdTimestamp and gates the card drop and chat XP on the result.",
+        "The message text is never stored: the economy transaction metadata keeps messageId and channelId but not content.",
+        "A listener-level test sends two valid messages 61 s apart and sees 20 credits paid each time; a message inside the cooldown, a short message and a duplicate pay nothing and give no chat XP."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/economy apps/bot/src && pnpm typecheck && pnpm lint --quiet",
+      "handovers": [
+        "BUG-0023"
+      ],
+      "assignee": "Claude Code (Opus 5.5)",
+      "claimed_at": null
     },
     {
       "id": "BUG-0024",
       "title": "Legacy Migration Reads the Wrong Karma and Welcomer Keys",
       "points": 2,
-      "status": "BACKLOG",
+      "status": "DONE",
       "parent": "STORY-043",
       "requires": [],
       "blocks": [],
-      "description": "Found in the STORY-115 audit. The legacy transformer maps karma.enabled and welcomer.channel, but 1.4.0 stored karma-notification-enabled (enabled/disabled) and welcomer_channel. The item seed part (slug IDs on a uuid column on Postgres, categories without rows) moved to TASK-1653 in STORY-165 on 2026-09-27."
+      "description": "Found in the STORY-115 audit. The legacy transformer maps karma.enabled and welcomer.channel, but 1.4.0 stored karma-notification-enabled (enabled/disabled) and welcomer_channel. The item seed part (slug IDs on a uuid column on Postgres, categories without rows) moved to TASK-1653 in STORY-165 on 2026-09-27.",
+      "model": "small",
+      "context": {
+        "files": [
+          "packages/database/src/migration/transformer.ts",
+          "packages/database/src/migration/migration.test.ts"
+        ],
+        "symbols": [
+          "LegacyTransformer.transform"
+        ],
+        "entry_points": [
+          "packages/database/src/migration/transformer.ts"
+        ],
+        "codegraph_queries": [
+          "LegacyTransformer karma.enabled welcomer.channel guild_config karma-notification-enabled welcomer_channel"
+        ]
+      },
+      "acceptance": [
+        "The transformer reads karma-notification-enabled (enabled/disabled) into guild_settings.karma_notifications_enabled and welcomer_channel, welcomer_enabled and welcomer_bg into guild_welcomer.",
+        "migration.test.ts asserts both, using the real 1.4.0 schema fixture."
+      ],
+      "verify_cmd": "pnpm vitest run packages/database/src/migration",
+      "handovers": [
+        "BUG-0024"
+      ],
+      "assignee": "Claude Code (Opus 5.5)",
+      "claimed_at": null
     },
     {
       "id": "BUG-0025",
@@ -6103,12 +6162,50 @@
     {
       "id": "BUG-0031",
       "title": "Shared Row Types Say number but Postgres Returns bigint for Balances and XP",
-      "points": 3,
-      "status": "BACKLOG",
+      "points": 5,
+      "status": "DONE",
       "parent": "EPIC-012",
       "requires": [],
       "blocks": [],
-      "description": "Found in TASK-1241 when the repository suites first ran on Postgres. The shared row types in packages/database/src/schema/types/index.ts (EconomyBalance, EconomyTransaction, XpAccount and others) are inferred from the SQLite schema, so they declare number. The Postgres schema uses bigint({ mode: \"bigint\" }) for wallet/bank balances, net worth, transaction amounts and XP, so the same repository methods return bigint on Postgres. Callers wrap the values in Number() or BigInt() today, but plain arithmetic or JSON serialisation of a raw value throws on Postgres only. Fix by normalising in the repositories (or typing the values as bigint everywhere) and drop the Number() wrappers added to repositories.test.ts."
+      "description": "Found in TASK-1241 when the repository suites first ran on Postgres. The shared row types in packages/database/src/schema/types/index.ts (EconomyBalance, EconomyTransaction, XpAccount and others) are inferred from the SQLite schema, so they declare number. The Postgres schema uses bigint({ mode: \"bigint\" }) for wallet/bank balances, net worth, transaction amounts and XP, so the same repository methods return bigint on Postgres. Callers wrap the values in Number() or BigInt() today, but plain arithmetic or JSON serialisation of a raw value throws on Postgres only. Fix by normalising in the repositories (or typing the values as bigint everywhere) and drop the Number() wrappers added to repositories.test.ts.",
+      "model": "medium",
+      "context": {
+        "files": [
+          "packages/database/src/schema/pg/economy.ts",
+          "packages/database/src/schema/pg/xp.ts",
+          "packages/database/src/schema/pg/games.ts",
+          "packages/database/src/schema/pg/tcg.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/repositories",
+          "packages/services/src/adventure"
+        ],
+        "symbols": [
+          "EconomyBalance",
+          "EconomyTransaction",
+          "XpAccount",
+          "EconomyRepository",
+          "XpRepository"
+        ],
+        "entry_points": [
+          "packages/database/src/schema/pg/economy.ts"
+        ],
+        "codegraph_queries": [
+          "EconomyBalance EconomyTransaction XpAccount schema types index.ts pg bigint mode walletBalance netWorth",
+          "modifyBalance transferBalance addXp BigInt adventure-payout reward-rank"
+        ]
+      },
+      "acceptance": [
+        "Every Postgres bigint column uses { mode: 'number' }, so the rows match the shared types. The columns stay BIGINT and PG_SCHEMA_DDL is unchanged.",
+        "Repository and service code no longer converts to or from bigint for these columns; raw-SQL paths that read them (adventure payouts, reward ranks) return numbers on both dialects.",
+        "A describeDialects test reads a balance, a transaction, an XP account and a market listing on Postgres and asserts typeof number; plain arithmetic on them works.",
+        "pnpm test:postgres passes locally against postgres:16."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm vitest run packages/database/src packages/services/src && pnpm lint --quiet",
+      "handovers": [
+        "BUG-0031"
+      ],
+      "assignee": "Claude Code (Opus 5.5)",
+      "claimed_at": null
     }
   ],
   "active_in_progress_ticket": null
