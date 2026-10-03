@@ -56,6 +56,15 @@ describeDialects('dungeon repositories', (db) => {
       expect(await repo.count()).toBe(1);
     });
 
+    it('generates an id that fits dungeon_seasons.id when none is given', async () => {
+      const repo = new DungeonSeasonRepository(db.client);
+
+      const created = await repo.create(season(''));
+
+      expect(created.id).toMatch(/^[0-9a-f]{32}$/);
+      expect((await repo.findById(created.id))?.name).toBe('Season ');
+    });
+
     it('finds the tutorial season and ignores it as the active season', async () => {
       const repo = new DungeonSeasonRepository(db.client);
       expect(await repo.findTutorialSeason()).toBeNull();

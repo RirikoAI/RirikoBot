@@ -122,7 +122,8 @@ export class DungeonSeasonRepository extends BaseRepository<
 
   async create(season: NewDungeonSeason, tx?: DatabaseClient): Promise<DungeonSeason> {
     const client = this.getClient(tx);
-    const id = season.id || randomUUID();
+    // dungeon_seasons.id is varchar(32) on Postgres, so a generated id drops the UUID dashes.
+    const id = season.id || randomUUID().replaceAll('-', '');
     const payload = {
       ...season,
       id,

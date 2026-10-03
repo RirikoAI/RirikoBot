@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { asc, eq } from 'drizzle-orm';
+import { asc, eq, sql } from 'drizzle-orm';
 
 import type { DatabaseClient } from '../client/types.js';
 import type { CommandSettings } from '../schema/types/index.js';
@@ -20,6 +20,7 @@ export class CommandSettingsRepository {
     return tx ?? this.client;
   }
 
+  /** A guild's overrides by command, the guild-wide (NULL channel) row first on both dialects. */
   async listForGuild(guildId: string, tx?: DatabaseClient): Promise<CommandSettings[]> {
     const client = this.getClient(tx);
     if (client.dialect === 'sqlite') {
@@ -28,14 +29,14 @@ export class CommandSettingsRepository {
         .select()
         .from(table)
         .where(eq(table.guildId, guildId))
-        .orderBy(asc(table.commandName), asc(table.channelId));
+        .orderBy(asc(table.commandName), sql`${table.channelId} ASC NULLS FIRST`);
     }
     const table = pgSchema.commandSettings;
     return client.db
       .select()
       .from(table)
       .where(eq(table.guildId, guildId))
-      .orderBy(asc(table.commandName), asc(table.channelId));
+      .orderBy(asc(table.commandName), sql`${table.channelId} ASC NULLS FIRST`);
   }
 
   /** Replaces every override of a guild. Call it inside a transaction. */
