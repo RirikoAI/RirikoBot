@@ -182,13 +182,11 @@ describe('DungeonBattleManager (TASK-1254)', () => {
         finalizeBattleResult: vi.fn().mockResolvedValue(runResult()),
       },
       tutorialService: {
-        getTutorialFloor: vi
-          .fn()
-          .mockReturnValue({
-            title: 'First Steps',
-            topic: 'Attacks',
-            guideMessage: 'Press attack',
-          }),
+        getTutorialFloor: vi.fn().mockReturnValue({
+          title: 'First Steps',
+          topic: 'Attacks',
+          guideMessage: 'Press attack',
+        }),
         completeTutorial: vi.fn().mockResolvedValue({ message: 'Tutorial graduated!' }),
         handleTutorialFloor3Victory: vi
           .fn()

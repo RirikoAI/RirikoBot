@@ -98,13 +98,11 @@ describe('giveaway command flows (TASK-1254)', () => {
           ...input,
           id: 'gw-new',
         })),
-        rollAndEndGiveaway: vi
-          .fn()
-          .mockResolvedValue({
-            giveaway: activeGiveaway,
-            winnerIds: ['w1', 'w2'],
-            isReroll: false,
-          }),
+        rollAndEndGiveaway: vi.fn().mockResolvedValue({
+          giveaway: activeGiveaway,
+          winnerIds: ['w1', 'w2'],
+          isReroll: false,
+        }),
         reroll: vi
           .fn()
           .mockResolvedValue({ giveaway: activeGiveaway, winnerIds: ['w3'], isReroll: true }),
