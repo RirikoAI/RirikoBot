@@ -117,6 +117,8 @@ export class EconomyService {
     let transactionId: string | undefined;
 
     if (finalCredits > 0) {
+      // The message text only feeds the anti-spam check; the ledger never stores it.
+      const { content: _content, timestamp: _timestamp, ...metadata } = event.metadata ?? {};
       const modResult = await this.repository.modifyBalance({
         userId: event.userId,
         guildId: event.guildId,
@@ -124,7 +126,7 @@ export class EconomyService {
         type: event.type,
         source: event.source,
         metadata: {
-          ...event.metadata,
+          ...metadata,
           xpAwarded: finalXp,
         },
       });

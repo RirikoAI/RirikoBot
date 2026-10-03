@@ -7,9 +7,9 @@ import { levelUpText, sendLevelUpMessage } from './level-up.js';
 import { handleCardDrop } from './card-drop.js';
 
 /**
- * Gateway Message Listener: Evaluates anti-spam heuristics, counts Waifu TCG card drops,
- * dispatches Economy events, awards experience points, and routes dedicated music channel
- * song requests or AI chat.
+ * Gateway Message Listener: pays chat credits (the economy service checks anti-spam), counts
+ * Waifu TCG card drops, awards experience points, and routes dedicated music channel song
+ * requests or AI chat.
  */
 export function registerMessageListener(
   client: Client,
@@ -80,17 +80,21 @@ export function registerMessageListener(
     const guildId = message.guild.id;
 
     try {
-      // 1. Evaluate Anti-Spam criteria (rolling 60s cooldown, length > 5, burst/copy-paste check)
-      const evaluation = services.antiSpamEvaluator.evaluateMessage(
+      // 1. Pay the chat credits. The economy service runs the anti-spam check (rolling 60s
+      // cooldown, minimum length, burst and copy-paste) once; it does not store the text.
+      const reward = await services.economyService.handleEvent({
+        type: EconomyEventType.MESSAGE_SENT,
         userId,
         guildId,
-        message.content,
-        message.createdTimestamp,
-      );
-
-      if (!evaluation.isAllowed) {
-        return; // Spam or on cooldown; zero XP and zero rewards
-      }
+        source: 'CHAT_MESSAGE',
+        metadata: {
+          messageId: message.id,
+          channelId: message.channelId,
+          content: message.content,
+          timestamp: message.createdTimestamp,
+        },
+      });
+      if (!reward.awarded) return; // Spam or on cooldown: no card drop progress and no XP
 
       // Count the member toward the guild's Waifu TCG card drop (never throws).
       await handleCardDrop(message, services);
@@ -106,19 +110,7 @@ export function registerMessageListener(
         })
         .catch(() => {});
 
-      // 2. Dispatch Economy Event
-      await services.economyService.handleEvent({
-        type: EconomyEventType.MESSAGE_SENT,
-        userId,
-        guildId,
-        source: 'CHAT_MESSAGE',
-        metadata: {
-          messageId: message.id,
-          channelId: message.channelId,
-        },
-      });
-
-      // 3. Award chat experience points: a 15-25 XP roll at the guild's rate, except in no-XP
+      // 2. Award chat experience points: a 15-25 XP roll at the guild's rate, except in no-XP
       // channels (a thread follows its parent) and for members with a no-XP role.
       const rules = await services.guildSettingsService.getSettings(guildId);
       const channelIds = [
@@ -136,7 +128,7 @@ export function registerMessageListener(
         'CHAT_MESSAGE',
       );
 
-      // 4. Announce the level-up (the member and the guild can opt out) in the guild's level-up
+      // 3. Announce the level-up (the member and the guild can opt out) in the guild's level-up
       // channel, or here when it has none or Ririko cannot post there.
       if (xpRes.didLevelUp && xpRes.shouldNotify) {
         const posted = rules.levelUpChannelId
