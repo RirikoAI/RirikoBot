@@ -31,10 +31,7 @@ describeDialects('CommandSettingsRepository behaviour', (db) => {
     await repo.replaceForGuild('g2', [override('rps')]);
     await repo.replaceForGuild('g1', [override('rps', 'c1'), override('rps')]);
 
-    // NULL channels sort first on SQLite and last on Postgres, so compare without relying on it.
-    const rows = (await repo.listForGuild('g1')).sort((a, b) =>
-      (a.channelId ?? '').localeCompare(b.channelId ?? ''),
-    );
+    const rows = await repo.listForGuild('g1');
     expect(rows.map((r) => [r.commandName, r.channelId])).toEqual([
       ['rps', null],
       ['rps', 'c1'],
@@ -42,6 +39,27 @@ describeDialects('CommandSettingsRepository behaviour', (db) => {
     expect(rows[0]).toMatchObject({ guildId: 'g1', isEnabled: false, blockedRoles: ['role-1'] });
     expect(new Set(rows.map((r) => r.id)).size).toBe(2);
     expect(await repo.listForGuild('g2')).toHaveLength(1);
+  });
+
+  it('lists by command with the guild-wide row before channel rows', async () => {
+    const repo = new CommandSettingsRepository(db.client);
+    await repo.replaceForGuild('g1', [
+      override('rps', 'c2'),
+      override('play', 'c1'),
+      override('rps'),
+      override('rps', 'c1'),
+      override('play'),
+    ]);
+
+    const rows = await repo.listForGuild('g1');
+
+    expect(rows.map((r) => [r.commandName, r.channelId])).toEqual([
+      ['play', null],
+      ['play', 'c1'],
+      ['rps', null],
+      ['rps', 'c1'],
+      ['rps', 'c2'],
+    ]);
   });
 
   it('clears a guild with an empty list', async () => {
