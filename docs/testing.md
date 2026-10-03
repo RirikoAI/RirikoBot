@@ -45,6 +45,7 @@ CI runs the same gate on every push (see [Section 4](#4-continuous-integration))
 - **Moderation Engine**: Warning threshold escalation logic, regex/trie auto-mod filters, permission hierarchy validation.
 - **Stream Notification Deduplication**: Idempotency key hash generation and duplicate message prevention.
 - **Command Router**: $O(1)$ lookup speed, alias resolution, argument parsing.
+- **Dashboard Components**: Vitest runs in `node` by default. Markup tests render with `react-dom/server` through `tests/support/markup.ts`. Tests that click or type opt in to a DOM with a `// @vitest-environment jsdom` first line and use `@testing-library/react` (for example `apps/web/src/components/account-interactions.test.tsx`).
 
 ### 3.2. Bot Integration Tests (`apps/bot/test/integration`)
 These drive the real bot: `createBotServices` over in-memory SQLite, the command router with its middlewares, every registered command and the component interaction handler, wired by the same functions `main()` uses (`command-router.ts`, `command-set.ts`, `component-interactions.ts`). `apps/bot/test/support/bot-harness.ts` builds it:
