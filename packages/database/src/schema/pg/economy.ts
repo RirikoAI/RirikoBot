@@ -23,10 +23,10 @@ export const economyAccounts = pgTable('economy_accounts', {
 
 export const economyBalances = pgTable('economy_balances', {
   userId: varchar('user_id', { length: 32 }).primaryKey(),
-  walletBalance: bigint('wallet_balance', { mode: 'bigint' }).notNull().default(0n),
-  bankBalance: bigint('bank_balance', { mode: 'bigint' }).notNull().default(0n),
-  bankCapacity: bigint('bank_capacity', { mode: 'bigint' }).notNull().default(10000n),
-  netWorth: bigint('net_worth', { mode: 'bigint' }).notNull().default(0n),
+  walletBalance: bigint('wallet_balance', { mode: 'number' }).notNull().default(0),
+  bankBalance: bigint('bank_balance', { mode: 'number' }).notNull().default(0),
+  bankCapacity: bigint('bank_capacity', { mode: 'number' }).notNull().default(10000),
+  netWorth: bigint('net_worth', { mode: 'number' }).notNull().default(0),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -37,10 +37,10 @@ export const economyTransactions = pgTable(
     userId: varchar('user_id', { length: 32 }).notNull(),
     guildId: varchar('guild_id', { length: 32 }),
     type: varchar('type', { length: 32 }).notNull(),
-    amount: bigint('amount', { mode: 'bigint' }).notNull(),
+    amount: bigint('amount', { mode: 'number' }).notNull(),
     currency: varchar('currency', { length: 16 }).notNull().default('CREDITS'),
-    balanceBefore: bigint('balance_before', { mode: 'bigint' }).notNull(),
-    balanceAfter: bigint('balance_after', { mode: 'bigint' }).notNull(),
+    balanceBefore: bigint('balance_before', { mode: 'number' }).notNull(),
+    balanceAfter: bigint('balance_after', { mode: 'number' }).notNull(),
     source: varchar('source', { length: 64 }).notNull(),
     metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -54,7 +54,7 @@ export const economyTransactions = pgTable(
 export const economyRewards = pgTable('economy_rewards', {
   id: uuid('id').primaryKey().defaultRandom(),
   eventType: varchar('event_type', { length: 64 }).notNull(),
-  baseAmount: bigint('base_amount', { mode: 'bigint' }).notNull().default(100n),
+  baseAmount: bigint('base_amount', { mode: 'number' }).notNull().default(100),
   multiplier: integer('multiplier').notNull().default(1),
   cooldownSeconds: integer('cooldown_seconds').notNull().default(86400),
 });
@@ -91,7 +91,7 @@ export const economyItems = pgTable(
     code: varchar('code', { length: 32 }),
     name: varchar('name', { length: 64 }).notNull(),
     description: text('description').notNull(),
-    price: bigint('price', { mode: 'bigint' }).notNull(),
+    price: bigint('price', { mode: 'number' }).notNull(),
     rarity: varchar('rarity', { length: 32 }).notNull().default('COMMON'),
     categoryId: uuid('category_id'),
     iconUrl: text('icon_url'),

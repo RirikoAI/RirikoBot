@@ -162,7 +162,6 @@ export class EconomyRepository extends BaseRepository<
     if (existing) return existing;
 
     const capacityNum = Number(defaultBankCapacity);
-    const capacityBig = BigInt(defaultBankCapacity);
 
     const client = this.getClient(tx);
     const now = new Date();
@@ -190,10 +189,10 @@ export class EconomyRepository extends BaseRepository<
         .insert(pgSchema.economyBalances)
         .values({
           userId,
-          walletBalance: 0n,
-          bankBalance: 0n,
-          bankCapacity: capacityBig,
-          netWorth: 0n,
+          walletBalance: 0,
+          bankBalance: 0,
+          bankCapacity: capacityNum,
+          netWorth: 0,
           updatedAt: now,
         })
         .onConflictDoUpdate({
@@ -306,9 +305,9 @@ export class EconomyRepository extends BaseRepository<
         const [bal] = await txClient.db
           .update(pgSchema.economyBalances)
           .set({
-            walletBalance: newWallet,
-            bankBalance: newBank,
-            netWorth: newNetWorth,
+            walletBalance: Number(newWallet),
+            bankBalance: Number(newBank),
+            netWorth: Number(newNetWorth),
             updatedAt: now,
           })
           .where(eq(pgSchema.economyBalances.userId, params.userId))
@@ -321,10 +320,10 @@ export class EconomyRepository extends BaseRepository<
             userId: params.userId,
             guildId: params.guildId ?? null,
             type: params.type,
-            amount: amountChange,
+            amount: Number(amountChange),
             currency,
-            balanceBefore,
-            balanceAfter: newNetWorth,
+            balanceBefore: Number(balanceBefore),
+            balanceAfter: Number(newNetWorth),
             source: params.source,
             metadata: params.metadata ?? {},
             createdAt: now,

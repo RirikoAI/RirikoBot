@@ -194,7 +194,7 @@ export class GameItemRepository extends BaseRepository<
             battlePerks: data.battlePerks ?? [],
             consumableEffect: data.consumableEffect ?? {},
             isShopBuyable: data.isShopBuyable ?? true,
-            shopPrice: BigInt(data.shopPrice ?? 100),
+            shopPrice: Number(data.shopPrice ?? 100),
             maxDailyPurchases: data.maxDailyPurchases ?? 5,
             isTradeable: data.isTradeable ?? true,
             ownerOverridden: data.ownerOverridden ?? false,
@@ -235,7 +235,7 @@ export class GameItemRepository extends BaseRepository<
       } else {
         const updateData: Record<string, unknown> = { ...data };
         if (data.shopPrice !== undefined) {
-          updateData.shopPrice = BigInt(data.shopPrice);
+          updateData.shopPrice = Number(data.shopPrice);
         }
         const [row] = await client.db
           .update(pgSchema.gameItems)

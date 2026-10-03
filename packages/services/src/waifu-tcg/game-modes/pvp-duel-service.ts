@@ -87,7 +87,7 @@ export class PvPDuelService {
       const challengerBal = await this.economyRepo.getOrCreateBalance(challengerId);
       const opponentBal = await this.economyRepo.getOrCreateBalance(opponentId);
 
-      if (BigInt(challengerBal.walletBalance) < BigInt(wagerCredits)) {
+      if (challengerBal.walletBalance < wagerCredits) {
         return {
           success: false,
           winnerUserId: 'DRAW',
@@ -96,7 +96,7 @@ export class PvPDuelService {
           error: `You do not have enough wallet credits to cover the wager of ${wagerCredits} coins!`,
         };
       }
-      if (BigInt(opponentBal.walletBalance) < BigInt(wagerCredits)) {
+      if (opponentBal.walletBalance < wagerCredits) {
         return {
           success: false,
           winnerUserId: 'DRAW',

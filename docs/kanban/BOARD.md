@@ -352,11 +352,14 @@
 | `BUG-0020` | Bug | Passkey Sign-In Check Rejected Authenticators Without the User-Verification Flag; Failures Were Unlogged and Escaped as Unhandled Errors | 2 | STORY-117 | [BUG-0020.md](./handovers/BUG-0020.md) |
 | `BUG-0021` | Bug | Auto Voice Deleted Every Empty Voice Channel in a Join-to-Create Hub's Category, Including Permanent Server Channels | 3 | STORY-091 | [BUG-0021.md](./handovers/BUG-0021.md) |
 | `BUG-0022` | Bug | Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone | 2 | STORY-123 | [BUG-0022.md](./handovers/BUG-0022.md) |
+| `BUG-0023` | Bug | Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message | 2 | STORY-040 | [BUG-0023.md](./handovers/BUG-0023.md) |
+| `BUG-0024` | Bug | Legacy Migration Reads the Wrong Karma and Welcomer Keys | 2 | STORY-043 | [BUG-0024.md](./handovers/BUG-0024.md) |
 | `BUG-0026` | Bug | Canonical Game Item Seed Used Dynamic UUIDs Breaking Inventory Foreign Keys on Schema Recreation | 3 | EPIC-010 | [BUG-0026.md](./handovers/BUG-0026.md) |
 | `BUG-0027` | Bug | Count Every Stamina Potion in Multi-Quantity Uses | 2 | STORY-043 | [BUG-0027.md](./handovers/BUG-0027.md) |
 | `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | STORY-168 | [BUG-0028.md](./handovers/BUG-0028.md) |
 | `BUG-0029` | Bug | Bot Fell Back to sqlite:storage/ririko.db Without DATABASE_URL Instead of the ./data/ririko.sqlite Every Other Entry Point Uses | 2 | STORY-121 | [BUG-0029.md](./handovers/BUG-0029.md) |
 | `BUG-0030` | Bug | Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save | 1 | STORY-121 | [BUG-0030.md](./handovers/BUG-0030.md) |
+| `BUG-0031` | Bug | Shared Row Types Say number but Postgres Returns bigint for Balances and XP | 5 | EPIC-012 | [BUG-0031.md](./handovers/BUG-0031.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
@@ -374,10 +377,7 @@
 | `TASK-1252` | Task | Coverage: CLI Commands | 2 | STORY-125 |
 | `TASK-1253` | Task | Coverage: Dashboard Server Routes and Server Libraries | 3 | STORY-125 |
 | `TASK-1254` | Task | Coverage: Bot Commands and Listeners | 5 | STORY-125 |
-| `BUG-0023` | Bug | Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message | 2 | STORY-040 |
-| `BUG-0024` | Bug | Legacy Migration Reads the Wrong Karma and Welcomer Keys | 2 | STORY-043 |
 | `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED | 5 | STORY-105 |
-| `BUG-0031` | Bug | Shared Row Types Say number but Postgres Returns bigint for Balances and XP | 3 | EPIC-012 |
 
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |

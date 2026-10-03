@@ -130,8 +130,8 @@ export class WaifuGuildRepository extends BaseRepository<
           name: data.name,
           leaderUserId: data.leaderUserId,
           level: data.level ?? 1,
-          guildXp: BigInt(data.guildXp ?? 0),
-          guildBank: BigInt(data.guildBank ?? 0),
+          guildXp: Number(data.guildXp ?? 0),
+          guildBank: Number(data.guildBank ?? 0),
           createdAt: now,
         } as unknown as typeof pgSchema.waifuGuilds.$inferInsert)
         .returning();
@@ -298,7 +298,7 @@ export class WaifuGuildRepository extends BaseRepository<
           guildId: data.guildId,
           userId: data.userId,
           rank,
-          contributionXp: 0n,
+          contributionXp: 0,
           joinedAt: now,
         } as unknown as typeof pgSchema.waifuGuildMembers.$inferInsert)
         .returning();
