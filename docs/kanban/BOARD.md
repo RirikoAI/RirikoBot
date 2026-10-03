@@ -397,7 +397,7 @@
 | `EPIC-009` | Giveaways 2.0, Auto Voice 2.0 & Mini-Games Suite | DONE | 13 | STORY-090, STORY-091, STORY-092 | — |
 | `EPIC-010` | Waifu TCG Gameplay, Ingestion, Trading & Marketplace | DONE | 21 | STORY-100, STORY-101, STORY-102, STORY-103, STORY-104, STORY-105 | [EPIC-010.md](./handovers/EPIC-010.md) |
 | `EPIC-011` | Next.js 16 Web Dashboard & Management Portal | DONE | 21 | STORY-110, STORY-111, STORY-112, STORY-167, STORY-168, STORY-113, STORY-114, STORY-115, STORY-165, STORY-116, STORY-166, STORY-117, STORY-118, STORY-119, STORY-163, STORY-164 | — |
-| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | DONE | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125, STORY-126, STORY-127, STORY-128 | — |
+| `EPIC-012` | Quality Gates, Docker Rootless & Production Verification | DONE | 13 | STORY-120, STORY-121, STORY-122, STORY-123, STORY-124, STORY-125, STORY-126, STORY-127, STORY-128 | [EPIC-012.md](./handovers/EPIC-012.md) |
 | `EPIC-013` | Media Synthesis, Anime Reactions & AI Image Generation | DONE | 21 | STORY-130, STORY-131, STORY-132, STORY-133 | — |
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
