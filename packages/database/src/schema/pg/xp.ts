@@ -14,7 +14,7 @@ export const xpAccounts = pgTable(
   {
     userId: varchar('user_id', { length: 32 }).notNull(),
     guildId: varchar('guild_id', { length: 32 }).notNull(),
-    xp: bigint('xp', { mode: 'bigint' }).notNull().default(0n),
+    xp: bigint('xp', { mode: 'number' }).notNull().default(0),
     level: integer('level').notNull().default(0),
     karma: integer('karma').notNull().default(0),
     lastXpAt: timestamp('last_xp_at', { withTimezone: true }),

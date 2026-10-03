@@ -90,8 +90,8 @@ export class CardTradeRepository extends BaseRepository<
             receiverUserId: data.receiverUserId,
             offeredCardIds: data.offeredCardIds ?? [],
             requestedCardIds: data.requestedCardIds ?? [],
-            offeredCredits: BigInt(data.offeredCredits ?? 0),
-            requestedCredits: BigInt(data.requestedCredits ?? 0),
+            offeredCredits: Number(data.offeredCredits ?? 0),
+            requestedCredits: Number(data.requestedCredits ?? 0),
             status: data.status ?? 'PENDING',
             createdAt: data.createdAt ?? new Date(),
             resolvedAt: data.resolvedAt ?? null,
@@ -129,9 +129,9 @@ export class CardTradeRepository extends BaseRepository<
       } else {
         const updateData: Record<string, unknown> = { ...data };
         if (data.offeredCredits !== undefined)
-          updateData['offeredCredits'] = BigInt(data.offeredCredits);
+          updateData['offeredCredits'] = Number(data.offeredCredits);
         if (data.requestedCredits !== undefined)
-          updateData['requestedCredits'] = BigInt(data.requestedCredits);
+          updateData['requestedCredits'] = Number(data.requestedCredits);
 
         const [row] = await client.db
           .update(pgSchema.cardTrades)

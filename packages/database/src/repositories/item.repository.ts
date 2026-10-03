@@ -185,7 +185,7 @@ export class ItemRepository extends BaseRepository<
         .insert(pgSchema.economyItems)
         .values({
           ...data,
-          price: BigInt(data.price),
+          price: Number(data.price),
         } as unknown as typeof pgSchema.economyItems.$inferInsert)
         .returning();
       if (!created) throw new DatabaseError(`Failed to create item ${data.id} in PostgreSQL`);
@@ -213,7 +213,7 @@ export class ItemRepository extends BaseRepository<
     } else {
       const updateData = {
         ...data,
-        ...(data.price !== undefined ? { price: BigInt(data.price) } : {}),
+        ...(data.price !== undefined ? { price: Number(data.price) } : {}),
       };
       const [updated] = await client.db
         .update(pgSchema.economyItems)

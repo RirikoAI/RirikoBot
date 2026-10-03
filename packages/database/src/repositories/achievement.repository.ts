@@ -154,7 +154,7 @@ export class AchievementRepository extends BaseRepository<
         .insert(pgSchema.gameAchievements)
         .values({
           ...insertValues,
-          rewardCredits: BigInt(data.rewardCredits ?? 0),
+          rewardCredits: Number(data.rewardCredits ?? 0),
         } as unknown as typeof pgSchema.gameAchievements.$inferInsert)
         .returning();
       if (!row) throw new DatabaseError('Failed to create GameAchievement');
