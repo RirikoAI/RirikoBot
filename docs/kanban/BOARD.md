@@ -85,6 +85,7 @@
 | `STORY-122` | Story | Production Orchestration & Health Probes | 8 | EPIC-012 | [STORY-122.md](./handovers/STORY-122.md) |
 | `STORY-123` | Story | CI Pipeline: CircleCI Quality Gates, Codecov Coverage & Vercel Status Site | 5 | EPIC-012 | [STORY-123.md](./handovers/STORY-123.md) |
 | `STORY-124` | Story | Postgres Integration Job: Dual-Dialect Repositories, Trade/Market Concurrency & AI Provider Fallback Wiring | 8 | EPIC-012 | [STORY-124.md](./handovers/STORY-124.md) |
+| `STORY-125` | Story | Raise Test Coverage Toward 80% | 13 | EPIC-012 | [STORY-125.md](./handovers/STORY-125.md) |
 | `STORY-130` | Story | Unified /react Command (68 Reactions, Autocomplete & Legacy Prefix Aliases) & OtakuGIFs Cache | 5 | EPIC-013 | [STORY-130.md](./handovers/STORY-130.md) |
 | `STORY-131` | Story | 11 Meme Template Canvas Synthesizers with @napi-rs/canvas | 5 | EPIC-013 | [STORY-131.md](./handovers/STORY-131.md) |
 | `STORY-132` | Story | Multi-Backend AI Image Generation Service (/imagine, Gemini Imagen, ComfyUI, Replicate) | 5 | EPIC-013 | [STORY-132.md](./handovers/STORY-132.md) |
@@ -319,6 +320,10 @@
 | `TASK-1272` | Task | Upgrade Guide From 1.4.0 & Docker Hub Repository Descriptions | 2 | STORY-127 | [TASK-1272.md](./handovers/TASK-1272.md) |
 | `TASK-1273` | Task | Tag-Driven CircleCI Release Job Pushing Versioned 2.x Images | 3 | STORY-127 | [TASK-1273.md](./handovers/TASK-1273.md) |
 | `TASK-1274` | Task | 1.4.0 Sunset Runbook for the Maintainer | 1 | STORY-127 | [TASK-1274.md](./handovers/TASK-1274.md) |
+| `TASK-1251` | Task | Coverage: Database Repositories | 3 | STORY-125 | [TASK-1251.md](./handovers/TASK-1251.md) |
+| `TASK-1252` | Task | Coverage: CLI Commands | 2 | STORY-125 | [TASK-1252.md](./handovers/TASK-1252.md) |
+| `TASK-1253` | Task | Coverage: Dashboard Server Routes and Server Libraries | 3 | STORY-125 | [TASK-1253.md](./handovers/TASK-1253.md) |
+| `TASK-1254` | Task | Coverage: Bot Commands and Listeners | 5 | STORY-125 | [TASK-1254.md](./handovers/TASK-1254.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -360,6 +365,7 @@
 | `BUG-0029` | Bug | Bot Fell Back to sqlite:storage/ririko.db Without DATABASE_URL Instead of the ./data/ririko.sqlite Every Other Entry Point Uses | 2 | STORY-121 | [BUG-0029.md](./handovers/BUG-0029.md) |
 | `BUG-0030` | Bug | Settings E2E Flaked on CircleCI: 8 Playwright Workers on a 2-vCPU Container, and a Retry That Saw Its Own Save | 1 | STORY-121 | [BUG-0030.md](./handovers/BUG-0030.md) |
 | `BUG-0031` | Bug | Shared Row Types Say number but Postgres Returns bigint for Balances and XP | 5 | EPIC-012 | [BUG-0031.md](./handovers/BUG-0031.md) |
+| `BUG-0032` | Bug | Flaky Rarity Stat Scaling Test | 1 | EPIC-012 | [BUG-0032.md](./handovers/BUG-0032.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
@@ -371,13 +377,10 @@
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
 | `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | EPIC-011 |
-| `STORY-125` | Story | Raise Test Coverage Toward 80% | 13 | EPIC-012 |
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
-| `TASK-1251` | Task | Coverage: Database Repositories | 3 | STORY-125 |
-| `TASK-1252` | Task | Coverage: CLI Commands | 2 | STORY-125 |
-| `TASK-1253` | Task | Coverage: Dashboard Server Routes and Server Libraries | 3 | STORY-125 |
-| `TASK-1254` | Task | Coverage: Bot Commands and Listeners | 5 | STORY-125 |
+| `CHORE-0003` | Chore | DOM Test Environment for Dashboard Client Components | 3 | EPIC-012 |
 | `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED | 5 | STORY-105 |
+| `BUG-0033` | Bug | Postgres-Only Repository Inconsistencies from TASK-1251 | 2 | EPIC-012 |
 
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |
