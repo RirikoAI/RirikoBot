@@ -73,4 +73,28 @@ describe('WebSessionRepository (TASK-1102)', () => {
     expect(await repo.findById('idle')).toBeNull();
     expect(await repo.findById('absolute')).toBeNull();
   });
+
+  it('finds a session by its DBSC session id, which follows a row rename (TASK-1191)', async () => {
+    const created = await repo.create(sessionRow('hash-a'));
+    expect(created.dbscSessionId).toBeNull();
+    expect(created.dbscPublicKey).toBeNull();
+    expect(await repo.findByDbscSessionId('dbsc-1')).toBeNull();
+
+    await repo.update('hash-a', { id: 'hash-b', dbscSessionId: 'dbsc-1', dbscPublicKey: '{}' });
+
+    const bound = await repo.findByDbscSessionId('dbsc-1');
+    expect(bound?.id).toBe('hash-b');
+    expect(bound?.dbscPublicKey).toBe('{}');
+    expect(await repo.findByDbscSessionId('dbsc-2')).toBeNull();
+  });
+
+  it('keeps DBSC session ids unique and allows many unbound sessions', async () => {
+    await repo.create(sessionRow('hash-a'));
+    await repo.create(sessionRow('hash-b'));
+    await repo.create(sessionRow('hash-c'));
+    await repo.update('hash-a', { dbscSessionId: 'dbsc-1' });
+
+    await expect(repo.update('hash-b', { dbscSessionId: 'dbsc-1' })).rejects.toThrow();
+    expect((await repo.findById('hash-c'))?.dbscSessionId).toBeNull();
+  });
 });
