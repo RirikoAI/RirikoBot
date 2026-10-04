@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { isSameOrigin } from '@/lib/server/auth/request';
+import { BOUND_COOKIE } from '@/lib/server/auth/dbsc';
 import { clearCookie, SESSION_COOKIE } from '@/lib/server/auth/session';
 import { limitAuthRequest } from '@/lib/server/rate-limit';
 import { getWebServices } from '@/lib/server/services';
@@ -18,5 +19,6 @@ export async function POST(request: NextRequest) {
 
   const response = NextResponse.redirect(new URL('/', config.DASHBOARD_URL), 303);
   clearCookie(response, SESSION_COOKIE);
+  clearCookie(response, BOUND_COOKIE);
   return response;
 }

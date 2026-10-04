@@ -8,6 +8,7 @@ import {
   timestamp,
   index,
   primaryKey,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 /**
@@ -32,10 +33,15 @@ export const webSessions = pgTable(
     discordAccessToken: text('discord_access_token').notNull(),
     discordRefreshToken: text('discord_refresh_token').notNull(),
     discordTokenExpiresAt: timestamp('discord_token_expires_at', { withTimezone: true }).notNull(),
+    /** DBSC session identifier (STORY-119); null until the browser binds the session to a key. */
+    dbscSessionId: varchar('dbsc_session_id', { length: 64 }),
+    /** Public JWK the browser registered for DBSC proofs, as JSON; null while unbound. */
+    dbscPublicKey: text('dbsc_public_key'),
   },
   (table) => [
     index('idx_pg_web_sessions_user').on(table.userId),
     index('idx_pg_web_sessions_expires').on(table.expiresAt),
+    uniqueIndex('uq_pg_web_sessions_dbsc_session').on(table.dbscSessionId),
   ],
 );
 

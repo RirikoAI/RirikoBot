@@ -50,6 +50,25 @@ export class WebSessionRepository {
     return row ?? null;
   }
 
+  /** The session bound to a DBSC session identifier (STORY-119), or null. */
+  async findByDbscSessionId(
+    dbscSessionId: string,
+    tx?: DatabaseClient,
+  ): Promise<WebSession | null> {
+    const client = this.getClient(tx);
+    const [row] =
+      client.dialect === 'sqlite'
+        ? await client.db
+            .select()
+            .from(sqliteSchema.webSessions)
+            .where(eq(sqliteSchema.webSessions.dbscSessionId, dbscSessionId))
+        : await client.db
+            .select()
+            .from(pgSchema.webSessions)
+            .where(eq(pgSchema.webSessions.dbscSessionId, dbscSessionId));
+    return row ?? null;
+  }
+
   /** Applies `patch` to one session; `patch.id` renames the row (session ID rotation). */
   async update(id: string, patch: WebSessionPatch, tx?: DatabaseClient): Promise<boolean> {
     const client = this.getClient(tx);

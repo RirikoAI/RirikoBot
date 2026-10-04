@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import type { NextResponse } from 'next/server';
 import { getWebServices } from '../services';
+import { BOUND_COOKIE } from './dbsc';
 import { needsPasskeyCheck, stepUpState, type StepUpState } from './passkey-policy';
 import type { ActiveSession } from './session-service';
 
@@ -29,10 +30,11 @@ export function clearCookie(response: NextResponse, name: string): void {
 
 /** The current request's session, resolved once per request. */
 export const getSession = cache(async (): Promise<ActiveSession | null> => {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const jar = await cookies();
+  const token = jar.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   const { sessions } = await getWebServices();
-  return sessions.resolve(token);
+  return sessions.resolve(token, jar.get(BOUND_COOKIE)?.value);
 });
 
 export interface CurrentUser {
