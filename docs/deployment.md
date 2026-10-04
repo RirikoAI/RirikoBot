@@ -74,7 +74,7 @@ docker run -d --name ririko-web --env-file .env -p 3000:3000 \
 | `postgres` | `postgres:16-alpine` | The database. Healthy when `pg_isready` answers. |
 | `lavalink` | `ghcr.io/lavalink-devs/lavalink:4` | Audio node. Uses `docker/lavalink/application.yml`, the same config `pnpm lavalink:install` writes, with the secrets read from its environment. |
 | `bot` | `ririkoai/ririkobot:${RIRIKO_VERSION:-2}` | The Discord bot. Starts once Postgres is healthy. |
-| `web` | `ririkoai/ririkobot-dashboard:${RIRIKO_VERSION:-2}` | The dashboard, published on `${DASHBOARD_PORT:-3000}`. |
+| `web` | `ririkoai/ririkobot-dashboard:${RIRIKO_VERSION:-2}` | The dashboard, published on `${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-3000}`. |
 
 Start it:
 1. Copy `.env.production.example` to `.env.production`.
@@ -87,6 +87,14 @@ What happens on startup:
 - On the first start the bot or the dashboard creates the schema in the empty database (`ensurePostgresSchema`, see `docs/database.md` section 1).
 - Both images have a `HEALTHCHECK` (section 3).
 - Compose refuses to start when `POSTGRES_PASSWORD` or `LAVALINK_PASSWORD` is empty.
+
+Hardening (a test in `scripts/compose-production.test.ts` parses the file and keeps these settings from regressing):
+- **Dashboard port:** published on loopback only (`DASHBOARD_BIND=127.0.0.1`), so it is reachable from the host itself and from nothing else. Put a reverse proxy or a tunnel on the host in front of it. To reach it on the LAN or from the internet, set `DASHBOARD_BIND=0.0.0.0`, and only on a host whose own firewall or reverse proxy protects the port. `DASHBOARD_PORT` still sets the host port.
+- **Client IP header:** `CLIENT_IP_HEADER` (optional) names the one request header the dashboard trusts for the client address. It keys the sign-in, probe and pre-sign-in action rate limits and fills the session and audit records. Unset, the dashboard uses the first `X-Forwarded-For` entry, which Cloudflare does not overwrite (it appends the real address to whatever the client sent), so that entry is attacker-controlled behind Cloudflare and a client can pick its own rate-limit bucket. Set `CLIENT_IP_HEADER=cf-connecting-ip` there: Cloudflare sets that header itself. The value must be a valid IPv4 or IPv6 address, otherwise the client IP is empty (shared `unknown` bucket); there is no fallback to `X-Forwarded-For` or `X-Real-IP`. Set it only when every request reaches the dashboard through Cloudflare (a tunnel with the loopback binding above): on any other path a client sends the header itself. Requests without it, such as the container `HEALTHCHECK` and the deploy readiness poll, share one `unknown` bucket, which the probe limit (30 burst, 1 per second) covers. A malformed name stops the dashboard at startup.
+- **Capabilities:** `bot` and `web` run with `cap_drop: [ALL]`: both images run as uid 10001 and use no Linux capability. `postgres` and `lavalink` keep theirs, because the Postgres entrypoint chowns its data directory and switches user.
+- **Privileges:** all four services set `security_opt: [no-new-privileges:true]`, so no process in them can gain privileges through a setuid binary.
+- **Log rotation:** all four services share one `x-logging` anchor: the `local` driver, `max-size: 20m`, `max-file: 5`. A service keeps at most 100 MB of logs.
+- **Lavalink heap:** `LAVALINK_HEAP` sets the JVM maximum heap (`-Xmx`, default `1G`). Use `512m` on a host with 4 GB of memory.
 
 Images:
 - `build:` targets are included, so `docker compose ... build` builds both images from this checkout instead of pulling them.

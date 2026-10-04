@@ -14,7 +14,21 @@
 *None.*
 
 ## 🎯 To Do
-*None.*
+| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
+|---|---|---|---|---|---|---|---|
+| `STORY-177` | Story | Lightsail Host Bootstrap & Hosting Runbook | 5 | EPIC-017 | STORY-176 | yes | large |
+| `STORY-178` | Story | CircleCI Deploy Pipeline: Automatic Staging, Approved Production | 8 | EPIC-017 | STORY-176 | yes | large |
+| `STORY-179` | Story | Backups, Health Watchdog & Heartbeat Alerts | 5 | EPIC-017 | STORY-176 | yes | large |
+| `STORY-180` | Story | Remote Lavalink Node on a VPS Malaysia KVM Host Over WireGuard | 13 | EPIC-017 | STORY-176 | yes | large |
+| `TASK-1771` | Task | Idempotent Lightsail Host Bootstrap Script | 3 | STORY-177 | TASK-1761 | yes | medium |
+| `TASK-1781` | Task | Locked-Down Host Deploy Command With Readiness Gate and Rollback | 5 | STORY-178 | TASK-1761, TASK-1771 | blocked | medium |
+| `TASK-1782` | Task | CircleCI Deploy Jobs: Automatic Staging, Approved Production | 3 | STORY-178 | TASK-1781 | blocked | medium |
+| `TASK-1791` | Task | Encrypted Off-Site Backups With restic to a Lightsail Bucket | 3 | STORY-179 | TASK-1771 | blocked | medium |
+| `TASK-1792` | Task | Health Watchdog and Heartbeat Alerts | 2 | STORY-179 | TASK-1771, TASK-1781 | blocked | medium |
+| `TASK-1772` | Task | Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery | 2 | STORY-177 | TASK-1762, TASK-1781, TASK-1782, TASK-1791, TASK-1792, TASK-1801, TASK-1802, TASK-1803 | blocked | medium |
+| `TASK-1801` | Task | Remote Lavalink Compose Override and Lavalink Host Compose File | 3 | STORY-180 | TASK-1761 | yes | medium |
+| `TASK-1802` | Task | WireGuard Link, Lavalink Host Firewall and Bootstrap Roles | 5 | STORY-180 | TASK-1771, TASK-1792 | blocked | medium |
+| `TASK-1803` | Task | Lavalink Host Deploy Role, Watchdog Checks and CI Jobs | 5 | STORY-180 | TASK-1781, TASK-1782, TASK-1792, TASK-1801, TASK-1802 | blocked | medium |
 
 ## 🔍 Review
 *None.*
@@ -116,6 +130,7 @@
 | `STORY-126` | Story | 1.4.0 Upgrade Path: Real-Schema Fixture & Automatic Migration From a Read-Only Legacy Mount | 8 | EPIC-012 | [STORY-126.md](./handovers/STORY-126.md) |
 | `STORY-127` | Story | Docker Hub Release of 2.0 Images & 1.4.0 Sunset | 8 | EPIC-012 | [STORY-127.md](./handovers/STORY-127.md) |
 | `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 5 | EPIC-012 | [STORY-128.md](./handovers/STORY-128.md) |
+| `STORY-176` | Story | Harden the Production Compose for a Tunnelled Host | 5 | EPIC-017 | [STORY-176.md](./handovers/STORY-176.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -327,6 +342,8 @@
 | `TASK-1254` | Task | Coverage: Bot Commands and Listeners | 5 | STORY-125 | [TASK-1254.md](./handovers/TASK-1254.md) |
 | `TASK-1191` | Task | DBSC Protocol Core: web_sessions Binding Columns, Proof Verification, Sealed Challenges & Bound Cookie | 5 | STORY-119 | [TASK-1191.md](./handovers/TASK-1191.md) |
 | `TASK-1192` | Task | DBSC Routes & Wiring: Register and Refresh Endpoints, Login Registration Header, Bound Cookie Enforcement, Sessions Badge & Docs | 3 | STORY-119 | [TASK-1192.md](./handovers/TASK-1192.md) |
+| `TASK-1761` | Task | Compose Hardening: Loopback Dashboard Port, Dropped Capabilities, Log Rotation, Lavalink Heap | 2 | STORY-176 | [TASK-1761.md](./handovers/TASK-1761.md) |
+| `TASK-1762` | Task | Trusted Client IP Header for the Dashboard Behind Cloudflare | 3 | STORY-176 | [TASK-1762.md](./handovers/TASK-1762.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -405,3 +422,4 @@
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
 | `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
+| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | TODO | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180 | [EPIC-017.md](./handovers/EPIC-017.md) |
