@@ -2216,7 +2216,7 @@
       "parent": "EPIC-017",
       "title": "Backups, Health Watchdog & Heartbeat Alerts",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-176"
       ],
@@ -6347,7 +6347,7 @@
       "parent": "STORY-179",
       "title": "Encrypted Off-Site Backups With restic to a Lightsail Bucket",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1771"
@@ -6399,7 +6399,7 @@
       "parent": "STORY-179",
       "title": "Health Watchdog and Heartbeat Alerts",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1771",
@@ -7608,6 +7608,53 @@
       "handovers": [
         "BUG-0034",
         "TASK-1771",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "BUG-0035",
+      "parent": "EPIC-017",
+      "title": "ririko-deploy Fails at Once When the Watchdog or a Backup Dump Briefly Holds the Lock",
+      "points": 1,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "ririko-deploy takes the shared host lock with flock -n and exits 3 when it is busy. ririko-watchdog (TASK-1792) holds that lock for a few seconds every minute, and ririko-backup holds it while it dumps Postgres, so a CI deploy can fail at random with exit 3. The deploy should wait for the lock for a bounded time instead.",
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          "deploy/host/ririko.conf.example",
+          "scripts/deploy-host.test.ts",
+          "docs/release.md"
+        ],
+        "symbols": [
+          "cmd_deploy",
+          "load_conf",
+          "validate_conf"
+        ],
+        "entry_points": [
+          "deploy/host/bin/ririko-deploy.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "cmd_deploy waits for the lock with flock -w \"$DEPLOY_LOCK_WAIT\" (default 300 seconds), logging one line while it waits, and exits 3 only after the wait times out. DEPLOY_LOCK_WAIT is a known ririko.conf key (digits only, validated like READY_TIMEOUT) and is documented, commented, in deploy/host/ririko.conf.example.",
+        "The lock is still taken before load_conf, so the conf is read under the lock as today; read DEPLOY_LOCK_WAIT from the environment or a quick conf parse before waiting, whichever keeps the code simplest, and say which in the PROGRESS entry.",
+        "scripts/deploy-host.test.ts: the existing busy-lock test sets DEPLOY_LOCK_WAIT=1 and still expects exit 3; a new test holds the lock for about 1 second with DEPLOY_LOCK_WAIT=10 and expects the deploy to proceed (exit 0). Both need real flock (WSL bash or Linux).",
+        "docs/release.md section 8 says exit 3 now means the lock stayed busy for DEPLOY_LOCK_WAIT seconds."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0035",
+        "TASK-1781",
         "EPIC-017"
       ]
     }

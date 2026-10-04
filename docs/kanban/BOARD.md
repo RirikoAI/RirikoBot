@@ -17,12 +17,9 @@
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
 | `STORY-177` | Story | Lightsail Host Bootstrap & Hosting Runbook | 5 | EPIC-017 | STORY-176 | yes | large |
-| `STORY-179` | Story | Backups, Health Watchdog & Heartbeat Alerts | 5 | EPIC-017 | STORY-176 | yes | large |
 | `STORY-180` | Story | Remote Lavalink Node on a KVM VPS Host Over WireGuard | 13 | EPIC-017 | STORY-176 | yes | large |
-| `TASK-1791` | Task | Encrypted Off-Site Backups With restic to a Lightsail Bucket | 3 | STORY-179 | TASK-1771 | yes | medium |
-| `TASK-1792` | Task | Health Watchdog and Heartbeat Alerts | 2 | STORY-179 | TASK-1771, TASK-1781 | yes | medium |
 | `TASK-1772` | Task | Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery | 2 | STORY-177 | TASK-1762, TASK-1781, TASK-1782, TASK-1791, TASK-1792, TASK-1801, TASK-1802, TASK-1803 | blocked | medium |
-| `TASK-1802` | Task | WireGuard Link, Lavalink Host Firewall and Bootstrap Roles | 5 | STORY-180 | TASK-1771, TASK-1792 | blocked | medium |
+| `TASK-1802` | Task | WireGuard Link, Lavalink Host Firewall and Bootstrap Roles | 5 | STORY-180 | TASK-1771, TASK-1792 | yes | medium |
 | `TASK-1803` | Task | Lavalink Host Deploy Role, Watchdog Checks and CI Jobs | 5 | STORY-180 | TASK-1781, TASK-1782, TASK-1792, TASK-1801, TASK-1802 | blocked | medium |
 
 ## 🔍 Review
@@ -127,6 +124,7 @@
 | `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 5 | EPIC-012 | [STORY-128.md](./handovers/STORY-128.md) |
 | `STORY-176` | Story | Harden the Production Compose for a Tunnelled Host | 5 | EPIC-017 | [STORY-176.md](./handovers/STORY-176.md) |
 | `STORY-178` | Story | CircleCI Deploy Pipeline: Automatic Staging, Approved Production | 8 | EPIC-017 | [STORY-178.md](./handovers/STORY-178.md) |
+| `STORY-179` | Story | Backups, Health Watchdog & Heartbeat Alerts | 5 | EPIC-017 | [STORY-179.md](./handovers/STORY-179.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -343,6 +341,8 @@
 | `TASK-1771` | Task | Idempotent Lightsail Host Bootstrap Script | 3 | STORY-177 | [TASK-1771.md](./handovers/TASK-1771.md) |
 | `TASK-1781` | Task | Locked-Down Host Deploy Command With Readiness Gate and Rollback | 5 | STORY-178 | [TASK-1781.md](./handovers/TASK-1781.md) |
 | `TASK-1782` | Task | CircleCI Deploy Jobs: Automatic Staging, Approved Production | 3 | STORY-178 | [TASK-1782.md](./handovers/TASK-1782.md) |
+| `TASK-1791` | Task | Encrypted Off-Site Backups With restic to a Lightsail Bucket | 3 | STORY-179 | [TASK-1791.md](./handovers/TASK-1791.md) |
+| `TASK-1792` | Task | Health Watchdog and Heartbeat Alerts | 2 | STORY-179 | [TASK-1792.md](./handovers/TASK-1792.md) |
 | `TASK-1801` | Task | Remote Lavalink Compose Override and Lavalink Host Compose File | 3 | STORY-180 | [TASK-1801.md](./handovers/TASK-1801.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
@@ -390,6 +390,7 @@
 | `BUG-0032` | Bug | Flaky Rarity Stat Scaling Test | 1 | EPIC-012 | [BUG-0032.md](./handovers/BUG-0032.md) |
 | `BUG-0033` | Bug | Postgres-Only Repository Inconsistencies from TASK-1251 | 2 | EPIC-012 | [BUG-0033.md](./handovers/BUG-0033.md) |
 | `BUG-0034` | Bug | bootstrap.sh Fails on GNU tar: Second deploy/host Wildcard Reported as Not Found | 2 | EPIC-017 | [BUG-0034.md](./handovers/BUG-0034.md) |
+| `BUG-0035` | Bug | ririko-deploy Fails at Once When the Watchdog or a Backup Dump Briefly Holds the Lock | 1 | EPIC-017 | [BUG-0035.md](./handovers/BUG-0035.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
