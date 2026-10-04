@@ -140,6 +140,72 @@ describe.skipIf(!hasBash)('bootstrap.sh arguments', () => {
   });
 });
 
+// Only GNU tar takes --wildcards (bsdtar, the Windows tar.exe, does not); the script runs on Ubuntu.
+const hasGnuTar =
+  hasBash && spawnSync('bash', ['-c', 'tar --help 2>&1 | grep -q -- --wildcards']).status === 0;
+
+describe.skipIf(!hasGnuTar)(
+  'bootstrap.sh extract_deploy_host (skipped where tar lacks --wildcards, for example bsdtar)',
+  () => {
+    // Runs the function exactly as it is written in bootstrap.sh, on a small archive laid out like
+    // a codeload download, with no root and no network. The archive is built inside the bash
+    // process, so no path crosses between Node and a bash that may live in WSL.
+    const extractFunction = /^extract_deploy_host\(\) \{\n[\s\S]*?^\}$/m.exec(
+      hasBash ? read('bootstrap.sh') : '',
+    )?.[0];
+
+    const extract = (archiveEntries: string[]) =>
+      runBash(
+        [],
+        `set -euo pipefail
+die() { printf '%s\\n' "$*" >&2; exit 1; }
+REF=test-ref
+${extractFunction}
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+top="$work/RirikoBot-abc123"
+for entry in ${archiveEntries.map((entry) => `'${entry}'`).join(' ')}; do
+  mkdir -p "$top/$(dirname "$entry")"
+  printf 'x\\n' >"$top/$entry"
+done
+tar -czf "$work/release.tar.gz" -C "$work" RirikoBot-abc123
+mkdir "$work/out"
+extract_deploy_host "$work/release.tar.gz" "$work/out"
+cd "$work/out"
+find . -type f | sort
+`,
+      );
+
+    it('finds the function in bootstrap.sh', () => {
+      expect(extractFunction).toContain('--wildcards');
+    });
+
+    it('extracts deploy/host with its files and bin, and nothing else', () => {
+      const result = extract([
+        'deploy/host/bootstrap.sh',
+        'deploy/host/files/daemon.json',
+        'deploy/host/bin/ririko-deploy.sh',
+        'deploy/host/systemd/ririko-backup.timer',
+        'deploy/lavalink/docker-compose.yml',
+        'README.md',
+      ]);
+      expect({ status: result.status, stderr: result.stderr }).toEqual({ status: 0, stderr: '' });
+      expect(result.stdout.trim().split('\n')).toEqual([
+        './deploy/host/bin/ririko-deploy.sh',
+        './deploy/host/bootstrap.sh',
+        './deploy/host/files/daemon.json',
+        './deploy/host/systemd/ririko-backup.timer',
+      ]);
+    });
+
+    it('dies with the deploy/host message when the ref has no deploy/host directory', () => {
+      const result = extract(['README.md', 'deploy/lavalink/docker-compose.yml']);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain('test-ref has no deploy/host directory');
+    });
+  },
+);
+
 describe('repository wiring', () => {
   it('forces LF for deploy/host in .gitattributes', () => {
     const attributes = readFileSync(new URL('../.gitattributes', import.meta.url), 'utf8');
