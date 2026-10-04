@@ -1,0 +1,22 @@
+# Override for an app host that uses a remote Lavalink node: it leaves the bundled Lavalink out
+# and points the bot at the node instead.
+#
+#   docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml \
+#     --env-file .env.production up -d
+#
+# Set LAVALINK_HOST (and LAVALINK_PORT, default 2333) in the host environment or .env.production.
+# LAVALINK_PASSWORD must match the node's password. Needs Docker Compose 2.24.4 or newer for
+# `!override`. docs/deployment.md section 2.2 says when to use it.
+services:
+  # Behind a profile nobody enables, so it never starts.
+  lavalink:
+    profiles: [bundled-lavalink]
+
+  bot:
+    # Replaces the base list, which also waits for the bundled Lavalink.
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+    environment:
+      LAVALINK_HOST: ${LAVALINK_HOST:?set LAVALINK_HOST}
+      LAVALINK_PORT: ${LAVALINK_PORT:-2333}

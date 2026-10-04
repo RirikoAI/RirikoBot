@@ -1,6 +1,6 @@
 # Releasing 2.x and Sunsetting 1.4.0 on Docker Hub
 
-This runbook is for the maintainer. **Agents never push, retag or log in to Docker Hub, never create release tags, and never move `latest`.** They prepare the code and the documents; every step below is done by the maintainer.
+This runbook is for the maintainer. **Agents never push, retag or log in to Docker Hub, never create release tags, never move `latest`, and never approve a deploy.** They prepare the code and the documents; every step below is done by the maintainer.
 
 ## How Releases Work
 
@@ -10,6 +10,7 @@ This runbook is for the maintainer. **Agents never push, retag or log in to Dock
   - as `2.1.3`, `2.1` and `2` for a release, or only `2.1.3-rc.1` for a prerelease (`scripts/release-tags.ts`).
 - It never pushes `latest`. Moving `latest` is a manual step (section 6).
 - The Docker Hub credentials come from the CircleCI context `dockerhub`.
+- After the push it deploys: `deploy-staging` for every release tag, then, only for a final `vX.Y.Z`, a maintainer approval and `deploy-production` (section 8).
 
 ## 1. One-Time Setup
 
@@ -67,7 +68,7 @@ Their links point to the `develop/2.0.0` branch. Once 2.0 is merged into `master
    git push origin v2.0.0
    ```
 
-4. Watch the `release` workflow in CircleCI. When it is green, check the tags:
+4. Watch the `release` workflow in CircleCI. Staging deploys by itself after the push; check it, then approve production (section 8). When it is green, check the tags:
 
    ```bash
    docker buildx imagetools inspect ririkoai/ririkobot:2.0.0
@@ -125,3 +126,70 @@ Rolling `latest` back does not touch anyone's data:
 
 - 1.4.0 users never let 2.x write to their `./data` folder.
 - Users who upgraded keep their 2.x data in its own volume.
+
+## 8. Deploy to Staging and Production
+
+After the images are pushed, the same `release` workflow deploys them. CircleCI holds no app secrets and no Docker access on the hosts: it holds one SSH key and one Cloudflare Access service token per environment, and it can only ask a host for `deploy <version>` or `status` (`deploy/host/bin/ririko-deploy-ssh.sh`, the key's forced command).
+
+### 8.1 Pipeline Order
+
+```text
+release -> deploy-staging -> approve-production -> deploy-production
+```
+
+| Git tag       | Jobs that run                                                                                                  |
+| ------------- | -------------------------------------------------------------------------------------------------------------- |
+| `v2.1.3-rc.1` | `release`, `deploy-staging`. The pipeline stops there: no approval, no production.                             |
+| `v2.1.3`      | `release`, `deploy-staging`, then `approve-production` waits for a maintainer, then `deploy-production` runs. |
+
+- `deploy-staging` starts by itself once `release` is green. If staging fails, production is never offered.
+- `approve-production` is a CircleCI approval job (`type: approval`). Open the workflow in CircleCI and press **Approve** after you have checked staging.
+- Every job has its own tag filter and ignores all branches, because CircleCI skips a job on tags without one. Branch pushes never deploy. The `ci` workflow is separate and never deploys.
+- The `release` job already pushed `2.1` and `2` before you approve production. That is the release design for self-hosters. The hosts always deploy the exact version of the tag (`2.1.3`), never a moving tag.
+- Re-running a failed deploy job is safe: the host starts from its recorded state. Deploying the version that already runs is allowed.
+
+### 8.2 CircleCI Contexts
+
+Create two organization contexts, `deploy-staging` and `deploy-production`. The `deploy` job in `.circleci/config.yml` is the same for both; each context supplies its host's values.
+
+| Variable                      | Value                                                                                                                  |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `DEPLOY_SSH_HOST`             | The host's SSH tunnel hostname, for example `ssh-staging.example.com`. Not an IP address.                                |
+| `DEPLOY_SSH_KEY_B64`          | The private key of the `deploy` user, base64 on one line: `base64 -w0 < deploy_key` (CircleCI values are single-line). |
+| `DEPLOY_KNOWN_HOSTS`          | The host key, one line, under the name in `DEPLOY_SSH_HOST` (see below).                                               |
+| `TUNNEL_SERVICE_TOKEN_ID`     | The Client ID of the Cloudflare Access service token.                                                                  |
+| `TUNNEL_SERVICE_TOKEN_SECRET` | The Client Secret of that token.                                                                                       |
+
+- Use a different key and token for each environment, so a leaked staging value cannot reach production.
+- **SSH key.** Make a dedicated key pair (`ssh-keygen -t ed25519 -N '' -f deploy_key`). The public half goes to the host with `bootstrap.sh --deploy-key` (it becomes a forced-command key). Delete the private file once the base64 copy is stored.
+- **Host key.** The job pins it with `StrictHostKeyChecking=yes` and never trusts a key on first use. On the host run `echo "ssh-staging.example.com $(cut -d' ' -f1,2 /etc/ssh/ssh_host_ed25519_key.pub)"` (with that host's own hostname) and store the output line.
+- **Service token.** In Cloudflare Zero Trust, create a service token and make sure the Access application of the SSH hostname has a **Service Auth** policy that includes it. `cloudflared access ssh` reads the two values from the environment variables above, so the secret never appears on a command line or in the process list.
+- **Restrict `deploy-production` to maintainers.** In CircleCI open Organization settings, Contexts, `deploy-production`, Security, and add a **security group** that holds only the maintainers. A job that uses a restricted context runs only for a member of that group, so a collaborator who is not a maintainer cannot make production deploy, even if they press **Approve**. The approval job has no context of its own, so this restriction on `deploy-production` is what limits it. Restricting `deploy-staging` is optional.
+- Agents never create these contexts, push tags or approve a deploy. The maintainer does all of it.
+
+### 8.3 What the Job Does
+
+1. `cimg/base:current` (no checkout) installs a pinned `cloudflared` from its GitHub release (`cloudflared-linux-amd64.deb`), checks the `.deb` against a committed sha256 with `sha256sum --check`, then installs it with `dpkg`.
+2. It checks that all five variables exist, then writes the key (mode 0600) and `known_hosts`.
+3. It runs `ssh` with `StrictHostKeyChecking=yes`, `IdentitiesOnly=yes` and `ProxyCommand="cloudflared access ssh --hostname %h"`, sending `deploy ${CIRCLE_TAG#v}` to `deploy@$DEPLOY_SSH_HOST`. The host prints its progress and the job shows it.
+4. The job fails with the host's exit status (8.4) and prints what it means.
+
+To update `cloudflared`, change `CLOUDFLARED_VERSION` and `CLOUDFLARED_SHA256` together in the `ssh-host` command of `.circleci/config.yml`. Download the file yourself (`gh release download <version> --repo cloudflare/cloudflared --pattern cloudflared-linux-amd64.deb`), run `sha256sum` on it and compare the result with the digest GitHub shows for the asset. The pinned release is 2026.9.3.
+
+### 8.4 Host Exit Codes
+
+`ririko-deploy` (`deploy/host/bin/ririko-deploy.sh`) keeps these codes stable, and the job passes them through:
+
+| Exit | Meaning                                                                                                                                                                                  |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | Deployed: the bot and the dashboard both reported ready, and the host recorded the version.                                                                                              |
+| 1    | Failed before the running release was touched (bad tag or file, pre-deploy dump failed, invalid `ririko.conf`). Nothing changed; read the output and fix the cause.                      |
+| 2    | The host rejected the command or the version: the tag is not `X.Y.Z` or `X.Y.Z-prerelease`, or the job sent something other than `deploy <version>` or `status`.                         |
+| 3    | Another deploy, backup or watchdog run holds the host's lock. Nothing changed. Run the job again when that run has finished.                                                             |
+| 4    | The new release did not become ready, so the host started the previous release again. The database was **not** restored; the output names the pre-deploy dump (`docs/migrations.md`).    |
+| 5    | The new release did not become ready and there is no previous release (first deploy, or the same version again). Nothing is running. Fix it on the host and deploy again.               |
+| 255  | `ssh` itself failed: the tunnel, the Access service token, the key or the pinned host key.                                                                                               |
+
+After 4, production runs the old version: fix the cause and tag a new patch version. After 5, log in to the host (`ririko-deploy status`, `docker compose -p ririko ps`, `/opt/ririko/deploy.log`) before you deploy again.
+
+To see what a host runs without deploying, run `ssh deploy@<DEPLOY_SSH_HOST> status` through the same `cloudflared` ProxyCommand.

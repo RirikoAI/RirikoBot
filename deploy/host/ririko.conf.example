@@ -1,0 +1,29 @@
+# /etc/ririko/ririko.conf: settings for the Ririko host scripts (ririko-deploy, ririko-backup,
+# ririko-watchdog). The scripts read it as root, so keep it root:root 0600 and write plain
+# KEY=value lines with no spaces around the equals sign.
+#
+# bootstrap.sh creates this file from the example only when it is missing, and it never overwrites
+# it. After an update, compare it with /etc/ririko/ririko.conf.example for new keys.
+
+# --- ririko-deploy (TASK-1781) -------------------------------------------------------------------
+# Every key is optional; the value shown is the default. Values may be wrapped in single or double
+# quotes. Comments must be on their own line, not after a value.
+
+# GitHub repository the tagged release files are downloaded from
+# (https://raw.githubusercontent.com/<RIRIKO_REPO>/v<version>/<file>). The repository is public.
+#RIRIKO_REPO=RirikoAI/RirikoBot
+
+# Compose files of a release, space separated, in the order they are passed to docker compose
+# (one -f each). They are downloaded from the tag, so they match the images that are deployed. The
+# Lightsail app hosts that use the remote Lavalink node set:
+#RIRIKO_COMPOSE_FILES="docker-compose.production.yml docker-compose.remote-lavalink.yml"
+#RIRIKO_COMPOSE_FILES=docker-compose.production.yml
+
+# The host's environment file: secrets and settings for the services (POSTGRES_PASSWORD, the bot
+# token, LAVALINK_HOST, ...). It never leaves the host.
+#RIRIKO_ENV_FILE=/opt/ririko/.env.production
+
+# Seconds a deploy waits for the bot (/ready) and the dashboard (/api/ready) to answer 200 before
+# it counts as failed and rolls back. The probes poll every 5 seconds. The bot's probe uses the
+# HEALTH_PORT from RIRIKO_ENV_FILE (default 8080), so do not set HEALTH_PORT=0 there.
+#READY_TIMEOUT=300

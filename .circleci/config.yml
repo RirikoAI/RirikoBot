@@ -67,6 +67,77 @@ commands:
           name: Smoke-check both images
           command: node scripts/docker-smoke.ts bot web
 
+  # Runs one command on a production host through its Cloudflare Tunnel, as the `deploy` user.
+  # The host forces ririko-deploy-ssh, which accepts only `deploy <version>` and `status`
+  # (deploy/host/bin, docs/release.md). It needs no checkout: everything comes from the CircleCI
+  # context of the job that calls it:
+  #   DEPLOY_SSH_HOST                 the host's tunnel hostname, for example ssh-staging.<domain>
+  #   DEPLOY_SSH_KEY_B64              the deploy user's private key, base64 on one line
+  #   DEPLOY_KNOWN_HOSTS              the host key line, under DEPLOY_SSH_HOST
+  #   TUNNEL_SERVICE_TOKEN_ID/SECRET  the Cloudflare Access service token; cloudflared reads both
+  #                                   from its environment, so they never appear in a command line
+  # The step fails with the exit status of the host command (docs/release.md section 8.4).
+  ssh-host:
+    description: Install a pinned cloudflared and run one command on a host over Cloudflare Access
+    parameters:
+      remote_command:
+        type: string
+    steps:
+      - run:
+          name: Install cloudflared
+          environment:
+            # Keep both lines together: the sha256 is of the linux amd64 .deb of that release.
+            CLOUDFLARED_VERSION: 2026.9.3
+            CLOUDFLARED_SHA256: bc073ef293d504cf5ac533bd0aa1c824ef6b4f358765ccaa6628a8a95cacb4b7
+          command: |
+            curl -sSfL --retry 3 \
+              -o /tmp/cloudflared.deb \
+              "https://github.com/cloudflare/cloudflared/releases/download/${CLOUDFLARED_VERSION}/cloudflared-linux-amd64.deb"
+            echo "${CLOUDFLARED_SHA256}  /tmp/cloudflared.deb" | sha256sum --check -
+            sudo dpkg -i /tmp/cloudflared.deb
+            cloudflared --version
+      - run:
+          name: Write the SSH key and the pinned host key
+          command: |
+            : "${DEPLOY_SSH_HOST:?DEPLOY_SSH_HOST is missing from the CircleCI context}"
+            : "${DEPLOY_SSH_KEY_B64:?DEPLOY_SSH_KEY_B64 is missing from the CircleCI context}"
+            : "${DEPLOY_KNOWN_HOSTS:?DEPLOY_KNOWN_HOSTS is missing from the CircleCI context}"
+            : "${TUNNEL_SERVICE_TOKEN_ID:?TUNNEL_SERVICE_TOKEN_ID is missing from the CircleCI context}"
+            : "${TUNNEL_SERVICE_TOKEN_SECRET:?TUNNEL_SERVICE_TOKEN_SECRET is missing from the CircleCI context}"
+            umask 077
+            mkdir -p ~/.ssh
+            printf '%s' "$DEPLOY_SSH_KEY_B64" | base64 -d > ~/.ssh/deploy_key
+            printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+            chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+      - run:
+          name: Run on the host
+          # The host prints its progress while it pulls and waits for readiness, which can take
+          # several minutes.
+          no_output_timeout: 20m
+          command: |
+            status=0
+            ssh \
+              -i ~/.ssh/deploy_key \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+              -o GlobalKnownHostsFile=/dev/null \
+              -o BatchMode=yes \
+              -o ServerAliveInterval=30 \
+              -o ProxyCommand="cloudflared access ssh --hostname %h" \
+              "deploy@${DEPLOY_SSH_HOST}" \
+              "<< parameters.remote_command >>" || status=$?
+            case "$status" in
+              0) echo 'The host command succeeded.' ;;
+              2) echo 'The host rejected the command or the version.' ;;
+              3) echo 'The host is busy: another deploy, backup or watchdog run holds its lock. Run the job again later.' ;;
+              4) echo 'The new release did not become ready. The host started the previous release again; the database was not restored.' ;;
+              5) echo 'The new release did not become ready and the host has no previous release: nothing is running. Fix it on the host.' ;;
+              255) echo 'SSH could not connect or authenticate. Check the tunnel, the Access service token, the key and the pinned host key.' ;;
+              *) echo "The host command failed with status ${status}. Its output is above." ;;
+            esac
+            exit "$status"
+
 jobs:
   lint:
     executor: node
@@ -78,6 +149,13 @@ jobs:
       - run:
           name: Prettier
           command: pnpm format:check
+      - run:
+          # The host scripts (deploy/host) run as root on the production hosts.
+          name: ShellCheck
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends shellcheck
+            find deploy/host -name '*.sh' -print0 | xargs -0 --no-run-if-empty shellcheck -x
 
   typecheck:
     executor: node
@@ -211,6 +289,7 @@ jobs:
   # It never pushes `latest`; the maintainer moves that by hand.
   # Docker Hub credentials come from the CircleCI context `dockerhub` (DOCKERHUB_USERNAME and
   # DOCKERHUB_TOKEN, an access token with read and write scope), which the maintainer creates.
+  # The deploy jobs below run after it.
   release:
     executor: node
     environment:
@@ -235,6 +314,27 @@ jobs:
               docker push "ririkoai/ririkobot-dashboard:$tag"
             done < /tmp/release-tags
             docker logout
+
+  # Deploys the version of the git tag to one production host (docs/release.md). Called once per
+  # environment, each with its own CircleCI context that holds the host's variables, so an
+  # environment is a parameter and a new host is one more call, not a copy.
+  deploy:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    parameters:
+      environment:
+        description: Which host to deploy to; its CircleCI context is deploy-<environment>
+        type: enum
+        enum: [staging, production]
+    steps:
+      - run:
+          name: Check the git tag
+          command: |
+            : "${CIRCLE_TAG:?This job runs only for release tags}"
+            echo "Deploying ${CIRCLE_TAG#v} to << parameters.environment >>"
+      - ssh-host:
+          remote_command: 'deploy ${CIRCLE_TAG#v}'
 
   secrets:
     docker:
@@ -274,5 +374,39 @@ workflows:
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+(-.+)?$/
+            branches:
+              ignore: /.*/
+      # After the images are pushed: every release tag deploys to staging, and only a final
+      # vX.Y.Z waits for a maintainer's approval before production. Each job keeps its own tag
+      # filter, because CircleCI skips a job on tags without one.
+      - deploy:
+          name: deploy-staging
+          environment: staging
+          context: deploy-staging
+          requires:
+            - release
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+(-.+)?$/
+            branches:
+              ignore: /.*/
+      - approve-production:
+          type: approval
+          requires:
+            - deploy-staging
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - deploy:
+          name: deploy-production
+          environment: production
+          context: deploy-production
+          requires:
+            - approve-production
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
             branches:
               ignore: /.*/

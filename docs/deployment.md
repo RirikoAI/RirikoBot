@@ -72,7 +72,7 @@ docker run -d --name ririko-web --env-file .env -p 3000:3000 \
 | Service | Image | Role |
 |---|---|---|
 | `postgres` | `postgres:16-alpine` | The database. Healthy when `pg_isready` answers. |
-| `lavalink` | `ghcr.io/lavalink-devs/lavalink:4` | Audio node. Uses `docker/lavalink/application.yml`, the same config `pnpm lavalink:install` writes, with the secrets read from its environment. |
+| `lavalink` | `ghcr.io/lavalink-devs/lavalink:4.2.2` | Audio node. Uses `docker/lavalink/application.yml`, the same config `pnpm lavalink:install` writes, with the secrets read from its environment. |
 | `bot` | `ririkoai/ririkobot:${RIRIKO_VERSION:-2}` | The Discord bot. Starts once Postgres is healthy. |
 | `web` | `ririkoai/ririkobot-dashboard:${RIRIKO_VERSION:-2}` | The dashboard, published on `${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-3000}`. |
 
@@ -95,6 +95,19 @@ Hardening (a test in `scripts/compose-production.test.ts` parses the file and ke
 - **Privileges:** all four services set `security_opt: [no-new-privileges:true]`, so no process in them can gain privileges through a setuid binary.
 - **Log rotation:** all four services share one `x-logging` anchor: the `local` driver, `max-size: 20m`, `max-file: 5`. A service keeps at most 100 MB of logs.
 - **Lavalink heap:** `LAVALINK_HEAP` sets the JVM maximum heap (`-Xmx`, default `1G`). Use `512m` on a host with 4 GB of memory.
+
+Remote Lavalink (`docker-compose.remote-lavalink.yml`): a single-host stack keeps the bundled `lavalink` service and needs nothing else. An app host that uses a Lavalink node on another machine, such as the Lightsail hosts with the Lavalink VPS (STORY-180), adds this override:
+- Run `docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production up -d`. It needs Docker Compose 2.24.4 or newer, because it uses `!override`.
+- It puts the bundled `lavalink` service in the `bundled-lavalink` profile, which nobody enables, so it never starts. `bot` then waits for Postgres only.
+- The bot connects to `LAVALINK_HOST` (required: compose refuses to start without it) on `LAVALINK_PORT` (default `2333`). `LAVALINK_PASSWORD` must be the node's password.
+- The bot reaches the node over a plain WebSocket (the `secure` option is not read from the environment), so the link itself must be private, for example WireGuard. If the node is unreachable, the bot falls back to its built-in FFmpeg player.
+
+Dedicated Lavalink host (`deploy/lavalink/docker-compose.yml`, project `ririko-lavalink`): the VPS runs one Lavalink container per environment, `lavalink-production` (port 2333, heap `LAVALINK_PRODUCTION_HEAP`, default `1536m`) and `lavalink-staging` (port 2334, heap `LAVALINK_STAGING_HEAP`, default `512m`). Both use the image tag pinned in `docker-compose.production.yml`, and a test keeps the two files on the same tag.
+- Run it from a checkout of the repository, because it mounts `../../docker/lavalink/application.yml` read-only: `WG_ADDRESS=10.77.0.1 docker compose up -d` in `deploy/lavalink/`.
+- Each container binds only `WG_ADDRESS` (required), through `SERVER_ADDRESS` and `SERVER_PORT`, which override `server.address` and `server.port` in the config.
+- `network_mode: host` lets the host firewall see each WireGuard peer; published ports would go through Docker's own chains and skip those rules.
+- Each instance reads its own env file, `LAVALINK_PRODUCTION_ENV_FILE` and `LAVALINK_STAGING_ENV_FILE` (defaults `/opt/ririko/lavalink-production.env` and `/opt/ririko/lavalink-staging.env`), written from `deploy/lavalink/lavalink.env.example`: `LAVALINK_PASSWORD` (different for each instance) and the `SPOTIFY_*` values. A relative path resolves from `deploy/lavalink/`.
+- Plugins live in separate volumes, `lavalink_production_plugins` and `lavalink_staging_plugins`. Both services use the same log rotation and `no-new-privileges` as the main file.
 
 Images:
 - `build:` targets are included, so `docker compose ... build` builds both images from this checkout instead of pulling them.
