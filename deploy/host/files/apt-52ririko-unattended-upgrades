@@ -1,0 +1,7 @@
+// Managed by deploy/host/bootstrap.sh (Ririko). Security updates only (Ubuntu's default origins);
+// the host reboots at 20:00 UTC (04:00 in Malaysia, the quietest hour) when a kernel or library
+// update needs it. The host clock is UTC.
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "20:00";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
