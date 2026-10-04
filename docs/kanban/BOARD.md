@@ -78,6 +78,7 @@
 | `STORY-166` | Story | Stream Alerts, Free Games & Welcome & Farewell Pages | 8 | EPIC-011 | [STORY-166.md](./handovers/STORY-166.md) |
 | `STORY-117` | Story | Passkey Sign-In Gate, Step-Up Re-Verification & Owner Guard | 5 | EPIC-011 | [STORY-117.md](./handovers/STORY-117.md) |
 | `STORY-118` | Story | Session Management, Sign-In & Change Alerts, Browser Hardening & Authorization Coverage | 5 | EPIC-011 | [STORY-118.md](./handovers/STORY-118.md) |
+| `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 8 | EPIC-011 | [STORY-119.md](./handovers/STORY-119.md) |
 | `STORY-163` | Story | Command Overrides Engine & Page (command_settings Enable/Disable, Channel Overrides, Allowed/Blocked Roles) | 5 | EPIC-011 | [STORY-163.md](./handovers/STORY-163.md) |
 | `STORY-164` | Story | Reaction Roles Builder (Buttons & Select Menus), Auto Roles & Auto Voice Pages | 8 | EPIC-011 | [STORY-164.md](./handovers/STORY-164.md) |
 | `STORY-120` | Story | E2E Integration Tests & Quality Gates Setup | 8 | EPIC-012 | [STORY-120.md](./handovers/STORY-120.md) |
@@ -324,6 +325,8 @@
 | `TASK-1252` | Task | Coverage: CLI Commands | 2 | STORY-125 | [TASK-1252.md](./handovers/TASK-1252.md) |
 | `TASK-1253` | Task | Coverage: Dashboard Server Routes and Server Libraries | 3 | STORY-125 | [TASK-1253.md](./handovers/TASK-1253.md) |
 | `TASK-1254` | Task | Coverage: Bot Commands and Listeners | 5 | STORY-125 | [TASK-1254.md](./handovers/TASK-1254.md) |
+| `TASK-1191` | Task | DBSC Protocol Core: web_sessions Binding Columns, Proof Verification, Sealed Challenges & Bound Cookie | 5 | STORY-119 | [TASK-1191.md](./handovers/TASK-1191.md) |
+| `TASK-1192` | Task | DBSC Routes & Wiring: Register and Refresh Endpoints, Login Registration Header, Bound Cookie Enforcement, Sessions Badge & Docs | 3 | STORY-119 | [TASK-1192.md](./handovers/TASK-1192.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -378,7 +381,6 @@
 ## 📋 Backlog
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
-| `STORY-119` | Story | Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions | 3 | EPIC-011 |
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
 | `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED | 5 | STORY-105 |
 
