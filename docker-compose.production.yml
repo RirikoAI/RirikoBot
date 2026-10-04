@@ -10,10 +10,22 @@ x-app-environment: &app-environment
   DATABASE_DIALECT: postgres
   DATABASE_URL: postgres://${POSTGRES_USER:-ririko}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ririko}
 
+# Rotate container logs so they cannot fill the disk: 5 files of 20 MB per service.
+x-logging: &logging
+  driver: local
+  options:
+    max-size: 20m
+    max-file: '5'
+
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
+    logging: *logging
+    # Keeps its default capabilities: the entrypoint chowns the data directory and drops to the
+    # postgres user.
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-ririko}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
@@ -29,13 +41,16 @@ services:
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4
     restart: unless-stopped
+    logging: *logging
+    security_opt:
+      - no-new-privileges:true
     # application.yml reads these through Spring placeholders.
     environment:
       LAVALINK_PASSWORD: ${LAVALINK_PASSWORD:?set LAVALINK_PASSWORD}
       SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID:-}
       SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:-}
       SPOTIFY_SP_DC: ${SPOTIFY_SP_DC:-}
-      _JAVA_OPTIONS: -Xmx1G
+      _JAVA_OPTIONS: -Xmx${LAVALINK_HEAP:-1G}
     volumes:
       - ./docker/lavalink/application.yml:/opt/Lavalink/application.yml:ro
       # Plugins download on first start; keep them between restarts.
@@ -47,6 +62,12 @@ services:
       context: .
       target: bot-runner
     restart: unless-stopped
+    logging: *logging
+    # Runs as uid 10001 and needs no Linux capability.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     env_file: ${RIRIKO_ENV_FILE:-.env.production}
     environment:
       <<: *app-environment
@@ -74,14 +95,20 @@ services:
       context: .
       target: web-runner
     restart: unless-stopped
+    logging: *logging
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     env_file: ${RIRIKO_ENV_FILE:-.env.production}
     environment:
       <<: *app-environment
     depends_on:
       postgres:
         condition: service_healthy
+    # Loopback by default: put a reverse proxy or tunnel on the host in front of it.
     ports:
-      - '${DASHBOARD_PORT:-3000}:3000'
+      - '${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-3000}:3000'
     volumes:
       # Card art in data/tcg, rendered cards and uploaded welcome backgrounds are shared with
       # the bot.
