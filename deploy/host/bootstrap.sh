@@ -156,14 +156,23 @@ ensure_enabled_and_started() {
 
 # --- Steps --------------------------------------------------------------------------------------
 
+# extract_deploy_host <archive> <dest>
+# Extracts only deploy/host from a codeload archive (one top-level <repo>-<ref> directory, which
+# --strip-components=1 drops). The single member '*/deploy/host' also takes everything below it;
+# GNU tar reports a second member such as '*/deploy/host/*' as "Not found in archive" and exits 2.
+# scripts/deploy-host.test.ts runs this function from this file, so keep it self-contained.
+extract_deploy_host() {
+  tar -xzf "$1" -C "$2" --strip-components=1 --wildcards '*/deploy/host' ||
+    die "$REF has no deploy/host directory"
+}
+
 fetch_release_tree() {
   local url="https://codeload.github.com/${REPO}/tar.gz/${REF}"
   log "downloading deploy/host from $url"
   curl -fsSL --retry 3 --retry-delay 2 -o "$WORK/release.tar.gz" "$url" ||
     die "could not download $url (does the ref exist and is the repository public?)"
   mkdir "$WORK/release"
-  tar -xzf "$WORK/release.tar.gz" -C "$WORK/release" --strip-components=1 --wildcards \
-    '*/deploy/host' '*/deploy/host/*' || die "$REF has no deploy/host directory"
+  extract_deploy_host "$WORK/release.tar.gz" "$WORK/release"
   SRC="$WORK/release/deploy/host"
   [[ -d $SRC/files ]] || die "$REF has no deploy/host/files directory"
 }
