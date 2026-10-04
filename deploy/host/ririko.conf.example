@@ -27,3 +27,67 @@
 # it counts as failed and rolls back. The probes poll every 5 seconds. The bot's probe uses the
 # HEALTH_PORT from RIRIKO_ENV_FILE (default 8080), so do not set HEALTH_PORT=0 there.
 #READY_TIMEOUT=300
+
+# Seconds a deploy waits for the shared host lock (when ririko-backup or ririko-watchdog is running)
+# before it gives up and fails. The lock is held only while the database is dumped, not during the
+# pull and start of containers.
+#DEPLOY_LOCK_WAIT=300
+
+# --- ririko-backup (TASK-1791) -------------------------------------------------------------------
+# Nightly restic backup of a Postgres dump and the shared app volumes to a Lightsail bucket (an S3
+# compatible object store), encrypted on this host before upload. ririko-backup.timer runs at
+# 03:30 UTC on every host, but until the five required keys below are set (and a release is
+# deployed) a run only logs a line and exits 0.
+#
+# Setup, once per host: create a Lightsail bucket and an access key for it, fill in the keys below,
+# run "sudo ririko-backup init", then "sudo systemctl start ririko-backup.service" for the first
+# backup. Keep an OFFLINE copy of RESTIC_PASSWORD: without it no backup can be read, and nobody can
+# recover it. Values may be wrapped in single or double quotes; if a password begins and ends with
+# the same quote character, wrap it in a second pair.
+
+# Required. The name this host's snapshots carry (restic --host), for example ririko-production or
+# ririko-staging. Letters, digits, dots, dashes and underscores.
+#RIRIKO_ENV_NAME=ririko-production
+
+# Required. Bucket and path inside it. Give each host its own path (or bucket).
+#RESTIC_REPOSITORY=s3:s3.us-east-1.amazonaws.com/<bucket>/ririko-production
+
+# Required. The repository password that encrypts everything.
+#RESTIC_PASSWORD=
+
+# Required. The bucket's access key.
+#AWS_ACCESS_KEY_ID=
+#AWS_SECRET_ACCESS_KEY=
+
+# The restic image the backup runs from, pinned to a version tag (or digest); "latest" is refused.
+# Keep this line in step with DEFAULT_RESTIC_IMAGE in ririko-backup.sh when you upgrade.
+#RESTIC_IMAGE=docker.io/restic/restic:0.19.1
+
+# Optional. A monitor URL such as a Healthchecks.io ping URL: it is pinged after every successful
+# backup and at <url>/fail after a failed one. Must start with https://.
+#BACKUP_PING_URL=https://hc-ping.com/<uuid>
+
+# Seconds a backup waits for the deploy lock (a running deploy) before it gives up and fails. The
+# lock is held only while the database is dumped, not during the upload.
+#BACKUP_LOCK_WAIT=1800
+
+# --- ririko-watchdog (TASK-1792) -----------------------------------------------------------------
+# ririko-watchdog.timer runs every minute on every host. Each run restarts the containers of the
+# "ririko" compose project whose health is unhealthy (Docker itself never restarts those) and then
+# pings the heartbeat monitor only while bot, web and postgres are healthy, lavalink (when the
+# project has one) is running and the root file system has room. Otherwise it posts a one-line
+# reason to <url>/fail, so a failing stack alerts immediately and a dead host alerts when the pings
+# stop. Without a URL it only logs (journalctl -u ririko-watchdog). It does nothing while a deploy
+# or a backup dump holds the deploy lock, and before the first deploy it only logs one line.
+#
+# Setup: create a Healthchecks.io check with a 1 minute period and a few minutes of grace, and
+# put its ping URL below.
+
+# Optional. The ping URL of the heartbeat monitor, for example a Healthchecks.io ping URL. It is
+# pinged once a minute while the stack is healthy and at <url>/fail with the reason otherwise. Must
+# start with https://. Use a different check for each host and for the backup (BACKUP_PING_URL).
+#HEALTHCHECK_PING_URL=https://hc-ping.com/<uuid>
+
+# Percent of the root file system in use at which the watchdog stops pinging and reports "root file
+# system is N% full" instead (1 to 100).
+#DISK_ALERT_PERCENT=85

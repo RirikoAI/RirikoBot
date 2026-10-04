@@ -48,6 +48,7 @@ RIRIKO_REPO=${RIRIKO_REPO:-RirikoAI/RirikoBot}
 RIRIKO_COMPOSE_FILES=${RIRIKO_COMPOSE_FILES:-docker-compose.production.yml}
 RIRIKO_ENV_FILE=${RIRIKO_ENV_FILE:-$RIRIKO_ROOT/.env.production}
 READY_TIMEOUT=${READY_TIMEOUT:-300}
+DEPLOY_LOCK_WAIT=${DEPLOY_LOCK_WAIT:-300}
 
 LOG_FILE=$RIRIKO_ROOT/deploy.log
 COMPOSE_FILES=()
@@ -124,7 +125,7 @@ load_conf() {
       value=${value:1:${#value}-2}
     fi
     case $key in
-      RIRIKO_REPO | RIRIKO_COMPOSE_FILES | RIRIKO_ENV_FILE | READY_TIMEOUT)
+      RIRIKO_REPO | RIRIKO_COMPOSE_FILES | RIRIKO_ENV_FILE | READY_TIMEOUT | DEPLOY_LOCK_WAIT)
         printf -v "$key" '%s' "$value"
         ;;
     esac
@@ -138,6 +139,8 @@ validate_conf() {
     fail 1 "invalid RIRIKO_REPO '$RIRIKO_REPO' in $RIRIKO_CONF"
   [[ $READY_TIMEOUT =~ ^[0-9]+$ ]] ||
     fail 1 "invalid READY_TIMEOUT '$READY_TIMEOUT' in $RIRIKO_CONF"
+  [[ $DEPLOY_LOCK_WAIT =~ ^[0-9]+$ ]] ||
+    fail 1 "invalid DEPLOY_LOCK_WAIT '$DEPLOY_LOCK_WAIT' in $RIRIKO_CONF"
   [[ $READY_POLL_SECONDS =~ ^[0-9]+(\.[0-9]+)?$ ]] ||
     fail 1 "invalid READY_POLL_SECONDS '$READY_POLL_SECONDS'"
   read -r -a COMPOSE_FILES <<<"$RIRIKO_COMPOSE_FILES"
@@ -314,19 +317,21 @@ cmd_deploy() {
   fi
   mkdir -p "$RIRIKO_ROOT/releases" "$RIRIKO_ROOT/state"
 
-  if ! { exec 9>"$RIRIKO_LOCK"; } 2>/dev/null; then
-    fail 1 "cannot open the lock file $RIRIKO_LOCK"
-  fi
-  if ! flock -n 9; then
-    fail 3 "another deploy, backup or watchdog run holds $RIRIKO_LOCK"
-  fi
-
   log "deploy $version requested"
   load_conf
   validate_conf
   [ -f "$RIRIKO_ENV_FILE" ] || fail 1 "env file $RIRIKO_ENV_FILE not found"
-  rm -rf "$RIRIKO_ROOT"/releases/.tmp.*
 
+  if ! { exec 9>"$RIRIKO_LOCK"; } 2>/dev/null; then
+    fail 1 "cannot open the lock file $RIRIKO_LOCK"
+  fi
+  if ! flock -n 9; then
+    log "waiting up to ${DEPLOY_LOCK_WAIT}s for the lock $RIRIKO_LOCK"
+    flock -w "$DEPLOY_LOCK_WAIT" 9 ||
+      fail 3 "the lock $RIRIKO_LOCK was not free within ${DEPLOY_LOCK_WAIT}s"
+  fi
+
+  rm -rf "$RIRIKO_ROOT"/releases/.tmp.*
   current=$(read_state current)
   previous=$(read_state previous)
   log "current=${current:-none} previous=${previous:-none}"

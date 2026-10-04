@@ -655,17 +655,51 @@ run deploy 2.1.3`);
     expect(result.dumps).toEqual([]);
   });
 
-  it.skipIf(!hasFlock)('exits 3 while another run holds the deploy lock', () => {
+  it.skipIf(!hasFlock)('exits 3 while another run holds the deploy lock after waiting', () => {
     const result = scenario(`
+echo 'DEPLOY_LOCK_WAIT=1' >>"$RIRIKO_CONF"
 exec 8>"$RIRIKO_LOCK"
 flock -n 8
 run deploy 2.1.3`);
     expect(result.rcs).toEqual([3]);
-    expect(result.stderr).toContain('holds');
+    expect(result.stderr).toContain('was not free within');
     expect(result.curl).toEqual([]);
     expect(result.docker).toEqual([]);
     expect(result.releases).toEqual([]);
   });
+
+  it.skipIf(!hasFlock)('waits for the lock and proceeds when it becomes free', () => {
+    const result = scenario(`
+echo 'DEPLOY_LOCK_WAIT=10' >>"$RIRIKO_CONF"
+(
+  exec 8>"$RIRIKO_LOCK"
+  flock -n 8
+  sleep 1
+) &
+sleep 0.2
+run deploy 2.1.3`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.stderr).not.toContain('was not free');
+    expect(result.current).toBe('2.1.3');
+  });
+
+  it.skipIf(!hasFlock)(
+    'does not delete pre-existing tmp directories while waiting for the lock',
+    () => {
+      const result = scenario(`
+mkdir -p "$RIRIKO_ROOT/releases/.tmp.keep"
+echo 'DEPLOY_LOCK_WAIT=10' >>"$RIRIKO_CONF"
+(
+  exec 8>"$RIRIKO_LOCK"
+  flock -n 8
+  sleep 1
+) &
+sleep 0.2
+run deploy 2.1.3`);
+      expect(result.rcs).toEqual([0]);
+      expect(result.current).toBe('2.1.3');
+    },
+  );
 
   it.each([
     ['a compose file that climbs a directory', 'RIRIKO_COMPOSE_FILES=../etc/passwd'],
@@ -673,6 +707,7 @@ run deploy 2.1.3`);
     ['a compose file with a shell character', 'RIRIKO_COMPOSE_FILES=a.yml;id'],
     ['a repository with a shell character', 'RIRIKO_REPO=RirikoAI/Ririko;id'],
     ['a timeout that is not a number', 'READY_TIMEOUT=soon'],
+    ['a lock wait that is not a number', 'DEPLOY_LOCK_WAIT=soon'],
     ['an env file that does not exist', 'RIRIKO_ENV_FILE=/nonexistent/ririko-env'],
   ])('refuses %s in ririko.conf before it downloads anything', (_name, line) => {
     const result = scenario(`echo ${bashQuote(line)} >>"$RIRIKO_CONF"\nrun deploy 2.1.3`);
@@ -727,10 +762,1110 @@ describe('ririko-deploy wiring', () => {
 
   it('documents its settings in ririko.conf.example, all commented out', () => {
     const example = read('ririko.conf.example');
-    for (const key of ['RIRIKO_REPO', 'RIRIKO_COMPOSE_FILES', 'RIRIKO_ENV_FILE', 'READY_TIMEOUT']) {
+    for (const key of [
+      'RIRIKO_REPO',
+      'RIRIKO_COMPOSE_FILES',
+      'RIRIKO_ENV_FILE',
+      'READY_TIMEOUT',
+      'DEPLOY_LOCK_WAIT',
+    ]) {
       expect(example).toMatch(new RegExp(`^#${key}=`, 'm'));
     }
     expect(example).toContain('docker-compose.remote-lavalink.yml');
     expect(example.split('\n').filter((line) => /^[A-Z_]+=/.test(line))).toEqual([]);
+  });
+});
+
+// --- ririko-backup -------------------------------------------------------------------------------
+// Same approach as the deploy scenarios: one bash script per scenario on stdin, with fake docker,
+// curl and date executables. The fake docker logs every call, copies the --env-file restic would
+// get (the real one is deleted when the script ends) and the dump it finds in the mounted
+// directory, and fails the restic subcommand named by a flag file.
+
+const fakeBackupDocker = String.raw`#!/usr/bin/env bash
+echo "RIRIKO_VERSION=$RIRIKO_VERSION docker $*" >>"$FAKE_DIR/docker.log"
+lock_state() { if (flock -n 7) 7>"$RIRIKO_LOCK" 2>/dev/null; then echo "$1 free"; else echo "$1 held"; fi >>"$FAKE_DIR/lockstate"; }
+if [ "$1" = compose ]; then
+  lock_state dump
+  if [ -e "$FAKE_DIR/dump_fails" ]; then exit 1; fi
+  if [ -e "$FAKE_DIR/dump_empty" ]; then exit 0; fi
+  echo PGDUMP-DATA
+  exit 0
+fi
+shift
+envfile=""
+while [ $# -gt 0 ]; do
+  case $1 in
+    --rm) shift ;;
+    --env-file) envfile=$2; shift 2 ;;
+    -v)
+      case $2 in
+        *:/backup/postgres:ro) cat "$(echo "$2" | cut -d: -f1)/ririko.dump" >"$FAKE_DIR/mounted_dump" ;;
+      esac
+      shift 2 ;;
+    *) break ;;
+  esac
+done
+sub=$2
+n=$(cat "$FAKE_DIR/runs" 2>/dev/null || echo 0)
+n=$((n + 1))
+echo $n >"$FAKE_DIR/runs"
+lock_state restic
+cp "$envfile" "$FAKE_DIR/env.$n"
+stat -c %a "$envfile" >"$FAKE_DIR/envmode.$n"
+if [ -e "$FAKE_DIR/fail_$sub" ]; then echo "fake restic: $sub failed" >&2; exit 1; fi
+exit 0
+`;
+
+const fakeBackupCurl = String.raw`#!/usr/bin/env bash
+echo "$*" >>"$FAKE_DIR/curl.log"
+if [ -e "$FAKE_DIR/curl_fails" ]; then exit 22; fi
+`;
+
+// The real date is used for everything but the weekday, which a flag file pins (default Wednesday).
+const fakeBackupDate = String.raw`#!/usr/bin/env bash
+if [ "$*" = "-u +%u" ]; then cat "$FAKE_DIR/weekday"; exit 0; fi
+exec "$REAL_DATE" "$@"
+`;
+
+const backupHarness = (body: string) => `set -u
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+mkdir -p "$work/bin" "$work/fake" "$work/runtime"
+cat >"$work/bin/ririko-backup" <<'${heredocEnd}'
+${hasBash ? read('bin/ririko-backup.sh') : ''}
+${heredocEnd}
+cat >"$work/bin/docker" <<'${heredocEnd}'
+${fakeBackupDocker}
+${heredocEnd}
+cat >"$work/bin/curl" <<'${heredocEnd}'
+${fakeBackupCurl}
+${heredocEnd}
+cat >"$work/bin/date" <<'${heredocEnd}'
+${fakeBackupDate}
+${heredocEnd}
+# Git Bash has no flock; the lock itself is only tested where the real one exists.
+if ! command -v flock >/dev/null; then printf '#!/usr/bin/env bash\\nexit 0\\n' >"$work/bin/flock"; fi
+export REAL_DATE=$(command -v date)
+chmod +x "$work/bin/"*
+export FAKE_DIR="$work/fake"
+export RIRIKO_ROOT="$work/root" RIRIKO_CONF="$work/ririko.conf" RIRIKO_LOCK="$work/deploy.lock"
+export DOCKER="$work/bin/docker" CURL="$work/bin/curl" RUNTIME_DIRECTORY="$work/runtime"
+export PATH="$work/bin:$PATH"
+echo 3 >"$FAKE_DIR/weekday"
+: >"$work/env.production"
+# File modes mean nothing on some file systems (Git Bash on NTFS); the mode check needs them.
+touch "$work/modeprobe"; chmod 600 "$work/modeprobe"
+if [ "$(stat -c %a "$work/modeprobe")" = 600 ]; then echo yes >"$work/posixmodes"; fi
+
+# write_conf [extra line]...: a complete ririko.conf; later lines win.
+write_conf() {
+  cat >"$RIRIKO_CONF" <<CONF
+RIRIKO_ENV_FILE=$work/env.production
+RIRIKO_ENV_NAME=ririko-staging
+RESTIC_REPOSITORY=s3:s3.us-east-1.amazonaws.com/bucket/ririko-staging
+RESTIC_PASSWORD=pa ss#word=1
+AWS_ACCESS_KEY_ID=AKIATEST
+AWS_SECRET_ACCESS_KEY=secretkey
+BACKUP_PING_URL=https://hc-ping.com/abc-123/
+BACKUP_LOCK_WAIT=5
+CONF
+  for extra in "$@"; do printf '%s\\n' "$extra" >>"$RIRIKO_CONF"; done
+}
+# seed_release <version>: a deployed release, as ririko-deploy leaves it.
+seed_release() {
+  mkdir -p "$RIRIKO_ROOT/releases/$1" "$RIRIKO_ROOT/state"
+  printf 'docker-compose.production.yml\\ndocker-compose.remote-lavalink.yml\\n' >"$RIRIKO_ROOT/releases/$1/.compose-files"
+  echo "$1" >"$RIRIKO_ROOT/state/current"
+}
+# run <args>: ririko-backup as root would run it.
+run() { bash "$work/bin/ririko-backup" "$@" </dev/null >"$work/stdout" 2>"$work/stderr"; rc=$?; echo "$rc" >>"$work/rcs"; }
+section() { printf '\\n@@%s\\n' "$1"; cat "$2" 2>/dev/null; }
+report() {
+  section stdout "$work/stdout"
+  section stderr "$work/stderr"
+  section rcs "$work/rcs"
+  section docker "$FAKE_DIR/docker.log"
+  section curl "$FAKE_DIR/curl.log"
+  section mounted "$FAKE_DIR/mounted_dump"
+  section posixmodes "$work/posixmodes"
+  section lockstate "$FAKE_DIR/lockstate"
+  printf '\\n@@envs\\n'
+  for f in "$FAKE_DIR"/env.*; do
+    [ -e "$f" ] || continue
+    printf '== %s mode=%s\\n' "$(basename "$f")" "$(cat "$FAKE_DIR/envmode.\${f##*.}")"
+    cat "$f"
+  done
+  printf '\\n@@nightly\\n'; ls -A "$RIRIKO_ROOT/backups/nightly" 2>/dev/null
+  printf '\\n@@runtime\\n'; ls -A "$RUNTIME_DIRECTORY"
+  printf '\\n@@end\\n'
+}
+${body}
+report
+`;
+
+interface BackupReport {
+  stdout: string[];
+  stderr: string;
+  rcs: number[];
+  docker: string[];
+  curl: string[];
+  mounted: string;
+  posixModes: boolean;
+  lockState: string[];
+  envs: string;
+  nightly: string[];
+  runtime: string[];
+}
+
+function backupScenario(body: string): BackupReport {
+  const result = spawnSync('bash', ['-s'], { input: backupHarness(body), encoding: 'utf8' });
+  expect(result.stdout, result.stderr).toContain('@@end');
+  const sections: Record<string, string> = {};
+  const parts = result.stdout.split(/^@@(\w+)\n/m);
+  for (let index = 1; index < parts.length; index += 2) sections[parts[index]!] = parts[index + 1]!;
+  return {
+    stdout: lines(sections.stdout),
+    stderr: (sections.stderr ?? '').trim(),
+    rcs: lines(sections.rcs).map(Number),
+    docker: lines(sections.docker),
+    curl: lines(sections.curl),
+    mounted: (sections.mounted ?? '').trim(),
+    posixModes: (sections.posixmodes ?? '').trim() === 'yes',
+    lockState: lines(sections.lockstate),
+    envs: sections.envs ?? '',
+    nightly: lines(sections.nightly),
+    runtime: lines(sections.runtime),
+  };
+}
+
+const resticImage = 'docker.io/restic/restic:0.19.1';
+const backupVolumes = [
+  'ririko_ririko_data',
+  'ririko_card_images',
+  'ririko_boss_images',
+  'ririko_welcomer_backgrounds',
+];
+/** The `docker run` lines of the fake docker log (the restic calls), in order. */
+const resticRuns = (docker: string[]) => docker.filter((line) => line.includes(' docker run '));
+const resticRunPattern = (subcommand: string, mounts = '') =>
+  new RegExp(
+    `^RIRIKO_VERSION= docker run --rm --env-file \\S+ ${mounts}${escapeDots(resticImage)} ${subcommand}$`,
+  );
+const mountArgs =
+  '-v \\S+/backups/nightly:/backup/postgres:ro ' +
+  backupVolumes.map((volume) => `-v ${volume}:/backup/${volume}:ro `).join('');
+const backupPaths = ['/backup/postgres', ...backupVolumes.map((volume) => `/backup/${volume}`)];
+const backupCommand = `backup --host ririko-staging ${backupPaths.join(' ')}`;
+const forgetCommand = 'forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune';
+const pingCall = (suffix = '') =>
+  `-fsS -m 10 --retry 3 -o /dev/null https://hc-ping.com/abc-123${suffix}`;
+const dumpCommand = 'exec -T postgres sh -c exec pg_dump -Fc -U "$POSTGRES_USER" -d "$POSTGRES_DB"';
+
+describe.skipIf(!hasBash)('ririko-backup', () => {
+  it('dumps Postgres and backs up the dump and the four volumes read-only, then prunes', () => {
+    const result = backupScenario(`
+write_conf 'unknown_key=$(touch "$work/pwned")'
+seed_release 2.1.3
+run
+[ -e "$work/pwned" ] && echo pwned >>"$work/stderr"`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.stderr).toBe('');
+    expect(result.docker).toHaveLength(3);
+    expect(result.docker[0]).toMatch(
+      /^RIRIKO_VERSION=2\.1\.3 docker compose -p ririko -f \S+\/releases\/2\.1\.3\/docker-compose\.production\.yml -f \S+\/releases\/2\.1\.3\/docker-compose\.remote-lavalink\.yml --env-file \S+\/env\.production /,
+    );
+    expect(result.docker[0]!.endsWith(dumpCommand)).toBe(true);
+    expect(result.docker[1]).toMatch(resticRunPattern(backupCommand, mountArgs));
+    expect(result.docker[2]).toMatch(resticRunPattern(forgetCommand));
+    // The dump was in the mounted directory by the time restic ran, and it is the only file there.
+    expect(result.mounted).toBe('PGDUMP-DATA');
+    expect(result.nightly).toEqual(['ririko.dump']);
+    expect(result.stdout.at(-1)).toMatch(/backup finished$/);
+  });
+
+  it.skipIf(!hasFlock)(
+    'holds the deploy lock for the dump only and frees it before restic runs',
+    () => {
+      const result = backupScenario('write_conf\nseed_release 2.1.3\nrun');
+      expect(result.rcs).toEqual([0]);
+      // The fake docker tries the lock during the dump and during each restic call (backup, forget).
+      expect(result.lockState).toEqual(['dump held', 'restic free', 'restic free']);
+    },
+  );
+
+  it('never mounts the env file, the config, the Postgres data or the Lavalink plugin cache', () => {
+    const result = backupScenario('write_conf\nseed_release 2.1.3\nrun');
+    const restic = resticRuns(result.docker).join('\n');
+    for (const secret of ['.env.production', 'ririko.conf', 'postgres_data', 'lavalink_plugins']) {
+      expect(restic).not.toContain(secret);
+    }
+    const mounts = [...restic.matchAll(/-v (\S+)/g)].map((match) => match[1]);
+    expect(mounts).toHaveLength(5);
+    for (const mount of mounts) expect(mount).toMatch(/:ro$/);
+  });
+
+  it('passes the secrets through a 0600 --env-file, never on a command line, and removes it', () => {
+    const result = backupScenario('write_conf\nseed_release 2.1.3\nrun');
+    const sections = result.envs.split(/^== /m).filter((text) => text !== '');
+    // One env file per restic call (backup, forget); the content is the same.
+    expect(sections).toHaveLength(2);
+    for (const text of sections) {
+      const [header, ...content] = text.split('\n').filter((line) => line !== '');
+      expect(header).toMatch(/^env\.\d mode=\d+$/);
+      if (result.posixModes) expect(header).toMatch(/mode=600$/);
+      expect(content).toEqual([
+        'RESTIC_REPOSITORY=s3:s3.us-east-1.amazonaws.com/bucket/ririko-staging',
+        'RESTIC_PASSWORD=pa ss#word=1',
+        'AWS_ACCESS_KEY_ID=AKIATEST',
+        'AWS_SECRET_ACCESS_KEY=secretkey',
+      ]);
+    }
+    const everything = result.docker.join('\n') + result.stdout.join('\n') + result.stderr;
+    for (const secret of ['pa ss', 'AKIATEST', 'secretkey', 'RESTIC_PASSWORD']) {
+      expect(everything).not.toContain(secret);
+    }
+    expect(result.runtime).toEqual([]);
+  });
+
+  it('pings BACKUP_PING_URL once after a successful run', () => {
+    const result = backupScenario('write_conf\nseed_release 2.1.3\nrun');
+    expect(result.curl).toEqual([pingCall()]);
+  });
+
+  it('checks the repository on Sundays only, after forget', () => {
+    const sunday = backupScenario(
+      'write_conf\nseed_release 2.1.3\necho 7 >"$FAKE_DIR/weekday"\nrun',
+    );
+    expect(sunday.rcs).toEqual([0]);
+    const runs = resticRuns(sunday.docker);
+    expect(runs).toHaveLength(3);
+    expect(runs[1]).toMatch(resticRunPattern('forget .*'));
+    expect(runs[2]).toMatch(resticRunPattern('check'));
+    for (const day of [1, 2, 3, 4, 5, 6]) {
+      const weekday = backupScenario(
+        `write_conf\nseed_release 2.1.3\necho ${day} >"$FAKE_DIR/weekday"\nrun`,
+      );
+      expect(resticRuns(weekday.docker)).toHaveLength(2);
+    }
+  });
+
+  it.each([
+    ['the database dump fails', 'touch "$FAKE_DIR/dump_fails"', 0],
+    ['the database dump is empty', 'touch "$FAKE_DIR/dump_empty"', 0],
+    ['restic backup fails', 'touch "$FAKE_DIR/fail_backup"', 1],
+    ['restic forget fails', 'touch "$FAKE_DIR/fail_forget"', 2],
+    [
+      'restic check fails on a Sunday',
+      'echo 7 >"$FAKE_DIR/weekday"\ntouch "$FAKE_DIR/fail_check"',
+      3,
+    ],
+  ])('exits 1 and pings /fail, not the success URL, when %s', (_name, setup, resticCalls) => {
+    const result = backupScenario(`write_conf\nseed_release 2.1.3\n${setup}\nrun`);
+    expect(result.rcs).toEqual([1]);
+    expect(result.curl).toEqual([pingCall('/fail')]);
+    expect(result.stderr).toContain('ERROR:');
+    expect(resticRuns(result.docker)).toHaveLength(resticCalls);
+    expect(result.stdout.join('\n')).not.toContain('backup finished');
+    expect(result.runtime).toEqual([]);
+  });
+
+  it('keeps the last good dump when the new dump fails', () => {
+    const result = backupScenario(`
+write_conf
+seed_release 2.1.3
+mkdir -p "$RIRIKO_ROOT/backups/nightly"
+echo OLD >"$RIRIKO_ROOT/backups/nightly/ririko.dump"
+touch "$FAKE_DIR/dump_fails"
+run
+cp "$RIRIKO_ROOT/backups/nightly/ririko.dump" "$work/stdout"`);
+    expect(result.rcs).toEqual([1]);
+    expect(result.nightly).toEqual(['ririko.dump']);
+    expect(result.stdout).toEqual(['OLD']);
+  });
+
+  it('pings nothing when BACKUP_PING_URL is not set', () => {
+    const ok = backupScenario('write_conf BACKUP_PING_URL=\nseed_release 2.1.3\nrun');
+    expect(ok.rcs).toEqual([0]);
+    expect(ok.curl).toEqual([]);
+    const failed = backupScenario(
+      'write_conf BACKUP_PING_URL=\nseed_release 2.1.3\ntouch "$FAKE_DIR/fail_backup"\nrun',
+    );
+    expect(failed.rcs).toEqual([1]);
+    expect(failed.curl).toEqual([]);
+  });
+
+  it('only warns when the ping itself fails', () => {
+    const result = backupScenario(
+      'write_conf\nseed_release 2.1.3\ntouch "$FAKE_DIR/curl_fails"\nrun',
+    );
+    expect(result.rcs).toEqual([0]);
+    expect(result.stdout.join('\n')).toContain('warning: could not ping');
+  });
+
+  it.each([
+    ['no ririko.conf at all', 'rm -f "$RIRIKO_CONF"'],
+    [
+      'the untouched ririko.conf.example',
+      `cat >"$RIRIKO_CONF" <<'EXAMPLE'\n${hasBash ? read('ririko.conf.example') : ''}\nEXAMPLE`,
+    ],
+    ['a missing RESTIC_PASSWORD', 'write_conf RESTIC_PASSWORD='],
+    ['a missing AWS_SECRET_ACCESS_KEY', 'write_conf AWS_SECRET_ACCESS_KEY='],
+    ['a missing RIRIKO_ENV_NAME', 'write_conf RIRIKO_ENV_NAME='],
+  ])('logs one line and exits 0, without a ping, with %s', (_name, setup) => {
+    const result = backupScenario(`write_conf\nseed_release 2.1.3\n${setup}\nrun`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.stdout).toHaveLength(1);
+    expect(result.stdout[0]).toMatch(
+      /backup is not configured \(missing in \S+: [A-Z_ ]+\); skipping$/,
+    );
+    expect(result.stderr).toBe('');
+    expect(result.docker).toEqual([]);
+    expect(result.curl).toEqual([]);
+    expect(result.nightly).toEqual([]);
+  });
+
+  it.each([
+    ['no release deployed', 'write_conf'],
+    [
+      'state/current naming a release that is gone',
+      'write_conf\nmkdir -p "$RIRIKO_ROOT/state"\necho 2.1.3 >"$RIRIKO_ROOT/state/current"',
+    ],
+    [
+      'a state/current that is not a version',
+      'write_conf\nseed_release 2.1.3\necho "../x" >"$RIRIKO_ROOT/state/current"',
+    ],
+  ])('logs one line and exits 0, without a ping, with %s', (_name, setup) => {
+    const result = backupScenario(`${setup}\nrun`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.stdout).toHaveLength(1);
+    expect(result.stdout[0]).toMatch(/no release is deployed yet; skipping the backup$/);
+    expect(result.docker).toEqual([]);
+    expect(result.curl).toEqual([]);
+    expect(result.nightly).toEqual([]);
+  });
+
+  it.each([
+    ['a lock wait that is not a number', 'BACKUP_LOCK_WAIT=soon', 'invalid BACKUP_LOCK_WAIT', true],
+    [
+      'an environment name with a shell character',
+      'RIRIKO_ENV_NAME=a;b',
+      'invalid RIRIKO_ENV_NAME',
+      true,
+    ],
+    ['an unpinned restic image', 'RESTIC_IMAGE=docker.io/restic/restic', 'must be pinned', true],
+    ['the latest restic image', 'RESTIC_IMAGE=restic/restic:latest', 'must be pinned', true],
+    ['an image with a shell character', 'RESTIC_IMAGE=restic/restic:1;id', 'must be pinned', true],
+    [
+      'a plain http ping URL',
+      'BACKUP_PING_URL=http://hc-ping.com/abc',
+      'invalid BACKUP_PING_URL',
+      false,
+    ],
+  ])('refuses %s before it touches anything', (_name, line, message, pings) => {
+    const result = backupScenario(`write_conf ${bashQuote(line)}\nseed_release 2.1.3\nrun`);
+    expect(result.rcs).toEqual([1]);
+    expect(result.stderr).toContain(message);
+    expect(result.docker).toEqual([]);
+    expect(result.curl).toEqual(pings ? [pingCall('/fail')] : []);
+    expect(result.nightly).toEqual([]);
+  });
+
+  it('runs the image named in ririko.conf', () => {
+    const result = backupScenario(
+      `write_conf 'RESTIC_IMAGE="docker.io/restic/restic:0.18.1"'\nseed_release 2.1.3\nrun`,
+    );
+    expect(result.rcs).toEqual([0]);
+    const runs = resticRuns(result.docker);
+    expect(runs).toHaveLength(2);
+    for (const line of runs) expect(line).toContain(' docker.io/restic/restic:0.18.1 ');
+  });
+
+  it('uses the compose files of the release that is running', () => {
+    const result = backupScenario(`
+write_conf
+seed_release 2.1.2
+printf 'docker-compose.production.yml\\n' >"$RIRIKO_ROOT/releases/2.1.2/.compose-files"
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.docker[0]).toMatch(
+      /^RIRIKO_VERSION=2\.1\.2 docker compose -p ririko -f \S+\/releases\/2\.1\.2\/docker-compose\.production\.yml --env-file \S+\/env\.production exec -T postgres /,
+    );
+  });
+
+  it.skipIf(!hasFlock)('waits for the deploy lock while a deploy holds it, then backs up', () => {
+    const result = backupScenario(`
+write_conf
+seed_release 2.1.3
+exec 8>"$RIRIKO_LOCK"
+flock -n 8
+sleep 1 &
+exec 8>&-
+run
+wait`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.stdout.join('\n')).toMatch(/waiting up to 5s for the lock \S+deploy\.lock/);
+    expect(result.stdout.at(-1)).toMatch(/backup finished$/);
+    expect(resticRuns(result.docker)).toHaveLength(2);
+    expect(result.curl).toEqual([pingCall()]);
+  });
+
+  it.skipIf(!hasFlock)('exits 3 and pings /fail when the lock is not free in time', () => {
+    const result = backupScenario(`
+write_conf BACKUP_LOCK_WAIT=1
+seed_release 2.1.3
+exec 8>"$RIRIKO_LOCK"
+flock -n 8
+sleep 3 &
+exec 8>&-
+run
+wait`);
+    expect(result.rcs).toEqual([3]);
+    expect(result.stderr).toContain('was not free within 1s');
+    expect(result.docker).toEqual([]);
+    expect(result.nightly).toEqual([]);
+    expect(result.curl).toEqual([pingCall('/fail')]);
+  });
+});
+
+describe.skipIf(!hasBash)('ririko-backup init', () => {
+  it('creates the repository once and is safe to repeat', () => {
+    const result = backupScenario(`
+write_conf
+touch "$FAKE_DIR/fail_cat"
+run init
+cp "$work/stdout" "$work/first"
+rm "$FAKE_DIR/fail_cat"
+run init
+cat "$work/first" "$work/stdout" >"$work/both"
+mv "$work/both" "$work/stdout"`);
+    expect(result.rcs).toEqual([0, 0]);
+    expect(result.docker).toHaveLength(3);
+    expect(result.docker[0]).toMatch(resticRunPattern('cat config'));
+    expect(result.docker[1]).toMatch(resticRunPattern('init'));
+    expect(result.docker[2]).toMatch(resticRunPattern('cat config'));
+    expect(result.stdout[0]).toMatch(/creating the restic repository s3:/);
+    expect(result.stdout.join('\n')).toContain('keep an offline copy of RESTIC_PASSWORD');
+    expect(result.stdout.at(-1)).toMatch(/restic repository s3:\S+ already exists$/);
+    // Needs neither a release nor the lock, and never pings the monitor.
+    expect(result.curl).toEqual([]);
+    expect(result.runtime).toEqual([]);
+  });
+
+  it('exits 1 when restic init fails, and when the keys are not set', () => {
+    const failed = backupScenario(
+      'write_conf\ntouch "$FAKE_DIR/fail_cat" "$FAKE_DIR/fail_init"\nrun init',
+    );
+    expect(failed.rcs).toEqual([1]);
+    expect(failed.stderr).toContain('restic init failed');
+    expect(failed.curl).toEqual([]);
+    const unset = backupScenario('write_conf RESTIC_REPOSITORY=\nrun init');
+    expect(unset.rcs).toEqual([1]);
+    expect(unset.stderr).toContain('set these keys');
+    expect(unset.stderr).toContain('RESTIC_REPOSITORY');
+    expect(unset.docker).toEqual([]);
+  });
+
+  it('exits 2 for a command it does not know', () => {
+    const result = backupScenario('run bogus\nrun init now\nrun run extra\nrun --help');
+    expect(result.rcs).toEqual([2, 2, 2, 2]);
+    expect(result.docker).toEqual([]);
+    expect(result.curl).toEqual([]);
+  });
+});
+
+describe('ririko-backup wiring', () => {
+  const directives = (entry: string) =>
+    read(entry)
+      .split('\n')
+      .filter((line) => line.trim() !== '' && !line.startsWith('#'));
+
+  it('ships the script and its two units under the names bootstrap installs', () => {
+    expect(files).toEqual(
+      expect.arrayContaining([
+        'bin/ririko-backup.sh',
+        'systemd/ririko-backup.service',
+        'systemd/ririko-backup.timer',
+      ]),
+    );
+  });
+
+  it('runs the timer daily at 03:30 UTC, catching up after downtime, with a random delay', () => {
+    expect(directives('systemd/ririko-backup.timer')).toEqual(
+      expect.arrayContaining([
+        'OnCalendar=*-*-* 03:30:00 UTC',
+        'Persistent=true',
+        'RandomizedDelaySec=10min',
+        'Unit=ririko-backup.service',
+        'WantedBy=timers.target',
+      ]),
+    );
+  });
+
+  it('runs the script once per timer firing, after Docker, with room for the lock wait', () => {
+    const service = directives('systemd/ririko-backup.service');
+    expect(service).toEqual(
+      expect.arrayContaining([
+        'Type=oneshot',
+        'ExecStart=/usr/local/bin/ririko-backup run',
+        'After=docker.service network-online.target',
+        'RuntimeDirectory=ririko-backup',
+        'RuntimeDirectoryMode=0700',
+        'TimeoutStartSec=4h',
+      ]),
+    );
+  });
+
+  it('documents its settings in ririko.conf.example, all commented out, with a pinned image', () => {
+    const example = read('ririko.conf.example');
+    for (const key of [
+      'RIRIKO_ENV_NAME',
+      'RESTIC_REPOSITORY',
+      'RESTIC_PASSWORD',
+      'AWS_ACCESS_KEY_ID',
+      'AWS_SECRET_ACCESS_KEY',
+      'RESTIC_IMAGE',
+      'BACKUP_PING_URL',
+      'BACKUP_LOCK_WAIT',
+    ]) {
+      expect(example).toMatch(new RegExp(`^#${key}=`, 'm'));
+    }
+    expect(example.split('\n').filter((line) => /^[A-Z_]+=/.test(line))).toEqual([]);
+    expect(example).toContain(`#RESTIC_IMAGE=${resticImage}`);
+    expect(read('bin/ririko-backup.sh')).toContain(`readonly DEFAULT_RESTIC_IMAGE=${resticImage}`);
+    expect(resticImage).not.toMatch(/:latest$/);
+    expect(example).toContain('OFFLINE copy of RESTIC_PASSWORD');
+  });
+
+  it('backs up exactly the four app volumes the compose file declares', () => {
+    const compose = readFileSync(
+      new URL('../docker-compose.production.yml', import.meta.url),
+      'utf8',
+    );
+    const volumesBlock = compose.split(/^volumes:\s*$/m).at(-1) ?? '';
+    const declared = [...volumesBlock.matchAll(/^ {2}(\w+):/gm)].map((match) => match[1]);
+    for (const volume of backupVolumes) {
+      expect(declared).toContain(volume.replace(/^ririko_/, ''));
+    }
+    expect(read('bin/ririko-backup.sh')).toContain(
+      `readonly BACKUP_VOLUMES=(${backupVolumes.join(' ')})`,
+    );
+  });
+});
+
+// --- ririko-watchdog -----------------------------------------------------------------------------
+// Same approach again, with fake docker, curl, df and logger. The fake docker knows the containers
+// of a scenario (a "<project> <name> <service>" line each, so containers of other projects can be
+// present) and their "<status> <health>" output, and restarts a container into "running starting",
+// as the real thing does.
+
+const fakeWatchdogDocker = String.raw`#!/usr/bin/env bash
+echo "docker $*" >>"$FAKE_DIR/docker.log"
+case $1 in
+  ps)
+    if [ -e "$FAKE_DIR/ps_fails" ]; then echo "Cannot connect to the Docker daemon" >&2; exit 1; fi
+    project=""
+    for arg in "$@"; do
+      case $arg in
+        label=com.docker.compose.project=*) project=$(printf '%s' "$arg" | cut -d= -f3-) ;;
+      esac
+    done
+    while read -r p name service; do
+      if [ "$p" = "$project" ]; then echo "$name $service"; fi
+    done <"$FAKE_DIR/containers"
+    ;;
+  inspect)
+    for name in "$@"; do :; done
+    if [ -e "$FAKE_DIR/state.$name" ]; then cat "$FAKE_DIR/state.$name"; else exit 1; fi
+    ;;
+  restart)
+    if [ -e "$FAKE_DIR/restart_fails" ]; then exit 1; fi
+    echo "running starting" >"$FAKE_DIR/state.$2"
+    echo "$2"
+    ;;
+esac
+`;
+
+const fakeWatchdogCurl = String.raw`#!/usr/bin/env bash
+echo "$*" >>"$FAKE_DIR/curl.log"
+if (flock -n 7) 7>"$RIRIKO_LOCK" 2>/dev/null; then echo free; else echo held; fi >>"$FAKE_DIR/curl.lock"
+if [ -e "$FAKE_DIR/curl_fails" ]; then exit 22; fi
+`;
+
+const fakeWatchdogDf = String.raw`#!/usr/bin/env bash
+echo "$*" >>"$FAKE_DIR/df.log"
+echo "Use%"
+echo " $(cat "$FAKE_DIR/disk")%"
+`;
+
+const fakeWatchdogLogger = String.raw`#!/usr/bin/env bash
+echo "$*" >>"$FAKE_DIR/logger.log"
+`;
+
+const watchdogHarness = (body: string) => `set -u
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+mkdir -p "$work/bin" "$work/fake"
+cat >"$work/bin/ririko-watchdog" <<'${heredocEnd}'
+${hasBash ? read('bin/ririko-watchdog.sh') : ''}
+${heredocEnd}
+cat >"$work/bin/docker" <<'${heredocEnd}'
+${fakeWatchdogDocker}
+${heredocEnd}
+cat >"$work/bin/curl" <<'${heredocEnd}'
+${fakeWatchdogCurl}
+${heredocEnd}
+cat >"$work/bin/df" <<'${heredocEnd}'
+${fakeWatchdogDf}
+${heredocEnd}
+cat >"$work/bin/logger" <<'${heredocEnd}'
+${fakeWatchdogLogger}
+${heredocEnd}
+# Git Bash has no flock; the lock itself is only tested where the real one exists.
+if ! command -v flock >/dev/null; then printf '#!/usr/bin/env bash\\nexit 0\\n' >"$work/bin/flock"; fi
+chmod +x "$work/bin/"*
+export FAKE_DIR="$work/fake"
+export RIRIKO_CONF="$work/ririko.conf" RIRIKO_LOCK="$work/deploy.lock"
+export DOCKER="$work/bin/docker" CURL="$work/bin/curl" DF="$work/bin/df" LOGGER="$work/bin/logger"
+export PATH="$work/bin:$PATH"
+echo 42 >"$FAKE_DIR/disk"
+: >"$FAKE_DIR/containers"
+
+# write_conf [extra line]...: a ririko.conf with a monitor URL; later lines win.
+write_conf() {
+  echo 'HEALTHCHECK_PING_URL=https://hc-ping.com/abc-123/' >"$RIRIKO_CONF"
+  for extra in "$@"; do echo "$extra" >>"$RIRIKO_CONF"; done
+}
+# state <container> <"status health">: what docker inspect prints for it.
+state() { echo "$2" >"$FAKE_DIR/state.$1"; }
+# stack_ok: the three services every host runs, all healthy (the Lightsail hosts have no lavalink).
+stack_ok() {
+  printf '%s\\n' 'ririko ririko-postgres-1 postgres' 'ririko ririko-bot-1 bot' 'ririko ririko-web-1 web' >"$FAKE_DIR/containers"
+  state ririko-postgres-1 'running healthy'; state ririko-bot-1 'running healthy'; state ririko-web-1 'running healthy'
+}
+# add_container <project> <name> <service> <"status health">
+add_container() { echo "$1 $2 $3" >>"$FAKE_DIR/containers"; state "$2" "$4"; }
+# run <args>: ririko-watchdog as root would run it.
+run() { bash "$work/bin/ririko-watchdog" "$@" </dev/null >"$work/stdout" 2>"$work/stderr"; rc=$?; echo "$rc" >>"$work/rcs"; }
+section() { printf '\\n@@%s\\n' "$1"; cat "$2" 2>/dev/null; }
+report() {
+  section stdout "$work/stdout"
+  section stderr "$work/stderr"
+  section rcs "$work/rcs"
+  section docker "$FAKE_DIR/docker.log"
+  section curl "$FAKE_DIR/curl.log"
+  section curllock "$FAKE_DIR/curl.lock"
+  section logger "$FAKE_DIR/logger.log"
+  section df "$FAKE_DIR/df.log"
+  printf '\\n@@end\\n'
+}
+${body}
+report
+`;
+
+interface WatchdogReport {
+  stdout: string[];
+  stderr: string;
+  rcs: number[];
+  docker: string[];
+  curl: string[];
+  curlLock: string[];
+  logger: string[];
+  df: string[];
+}
+
+function watchdogScenario(body: string): WatchdogReport {
+  const result = spawnSync('bash', ['-s'], { input: watchdogHarness(body), encoding: 'utf8' });
+  expect(result.stdout, result.stderr).toContain('@@end');
+  const sections: Record<string, string> = {};
+  const parts = result.stdout.split(/^@@(\w+)\n/m);
+  for (let index = 1; index < parts.length; index += 2) sections[parts[index]!] = parts[index + 1]!;
+  return {
+    stdout: lines(sections.stdout),
+    stderr: (sections.stderr ?? '').trim(),
+    rcs: lines(sections.rcs).map(Number),
+    docker: lines(sections.docker),
+    curl: lines(sections.curl),
+    curlLock: lines(sections.curllock),
+    logger: lines(sections.logger),
+    df: lines(sections.df),
+  };
+}
+
+const psCall =
+  'docker ps -a --filter label=com.docker.compose.project=ririko --format {{.Names}} {{.Label "com.docker.compose.service"}}';
+const inspectCall = (name: string) =>
+  `docker inspect --format {{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}} ${name}`;
+const restarts = (docker: string[]) => docker.filter((line) => line.startsWith('docker restart'));
+const heartbeat = '-fsS -m 10 --retry 3 -o /dev/null https://hc-ping.com/abc-123';
+const failPing = (reason: string) =>
+  `-fsS -m 10 --retry 3 -o /dev/null --data-raw ${reason} https://hc-ping.com/abc-123/fail`;
+const loggerLine = (message: string) => `-t ririko-watchdog -p daemon.warning -- ${message}`;
+
+describe.skipIf(!hasBash)('ririko-watchdog', () => {
+  it('pings the heartbeat once when bot, web and postgres are healthy and the disk has room', () => {
+    const result = watchdogScenario('write_conf\nstack_ok\nrun');
+    expect(result.rcs).toEqual([0]);
+    expect(result.stderr).toBe('');
+    // Without lavalink in the project (the Lightsail hosts), the stack is still healthy.
+    expect(result.docker).toEqual([
+      psCall,
+      inspectCall('ririko-postgres-1'),
+      inspectCall('ririko-bot-1'),
+      inspectCall('ririko-web-1'),
+    ]);
+    expect(result.curl).toEqual([heartbeat]);
+    expect(result.df).toEqual(['--output=pcent /']);
+    expect(result.logger).toEqual([]);
+    expect(result.stdout).toHaveLength(1);
+    expect(result.stdout[0]).toMatch(/stack healthy; root file system 42% full$/);
+  });
+
+  it('accepts lavalink when it is running, and only then', () => {
+    const running = watchdogScenario(
+      "write_conf\nstack_ok\nadd_container ririko ririko-lavalink-1 lavalink 'running '\nrun",
+    );
+    expect(running.curl).toEqual([heartbeat]);
+    const stopped = watchdogScenario(
+      "write_conf\nstack_ok\nadd_container ririko ririko-lavalink-1 lavalink 'exited '\nrun",
+    );
+    expect(stopped.curl).toEqual([failPing('lavalink is exited')]);
+    expect(restarts(stopped.docker)).toEqual([]);
+  });
+
+  it('ignores the containers of other compose projects, such as ririko-lavalink', () => {
+    const result = watchdogScenario(`write_conf
+stack_ok
+add_container ririko-lavalink ririko-lavalink-lavalink-1 lavalink 'running unhealthy'
+add_container ririko-lavalink ririko-lavalink-wireguard-1 wireguard 'exited '
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.curl).toEqual([heartbeat]);
+    expect(result.docker.some((line) => line.includes('lavalink'))).toBe(false);
+    expect(restarts(result.docker)).toEqual([]);
+  });
+
+  it('restarts an unhealthy container, logs it through logger and reports it', () => {
+    const result = watchdogScenario(`write_conf
+stack_ok
+state ririko-bot-1 'running unhealthy'
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(restarts(result.docker)).toEqual(['docker restart ririko-bot-1']);
+    expect(result.logger).toEqual([
+      loggerLine('restarting unhealthy container ririko-bot-1 (service bot)'),
+      loggerLine('stack not healthy: bot was unhealthy and was restarted'),
+    ]);
+    expect(result.curl).toEqual([failPing('bot was unhealthy and was restarted')]);
+  });
+
+  it('restarts every unhealthy container and reports them all, with the disk reason', () => {
+    const result = watchdogScenario(`write_conf
+stack_ok
+echo 91 >"$FAKE_DIR/disk"
+state ririko-web-1 'running unhealthy'
+state ririko-postgres-1 'running unhealthy'
+run`);
+    expect(restarts(result.docker)).toEqual([
+      'docker restart ririko-postgres-1',
+      'docker restart ririko-web-1',
+    ]);
+    expect(result.curl).toEqual([
+      failPing(
+        'postgres was unhealthy and was restarted; web was unhealthy and was restarted; root file system is 91% full (limit 85%)',
+      ),
+    ]);
+  });
+
+  it('leaves a restarted container alone while it starts, and pings again once it is healthy', () => {
+    const result = watchdogScenario(`write_conf
+stack_ok
+state ririko-bot-1 'running unhealthy'
+run
+run
+state ririko-bot-1 'running healthy'
+run`);
+    expect(result.rcs).toEqual([0, 0, 0]);
+    // One restart (first run), a fail ping, then silence while "starting", then the heartbeat.
+    expect(restarts(result.docker)).toHaveLength(1);
+    expect(result.curl).toEqual([failPing('bot was unhealthy and was restarted'), heartbeat]);
+  });
+
+  it('neither pings nor fails while a container is only starting, and does not restart it', () => {
+    const result = watchdogScenario(`write_conf
+stack_ok
+state ririko-bot-1 'running starting'
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(restarts(result.docker)).toEqual([]);
+    expect(result.curl).toEqual([]);
+    expect(result.stdout).toHaveLength(1);
+    expect(result.stdout[0]).toMatch(/stack is still starting \(bot\); no ping yet$/);
+  });
+
+  it.each([
+    ['postgres has exited', "state ririko-postgres-1 'exited '", 'postgres is exited'],
+    [
+      'the web container is gone',
+      'grep -v ririko-web-1 "$FAKE_DIR/containers" >"$FAKE_DIR/c" || true; mv "$FAKE_DIR/c" "$FAKE_DIR/containers"',
+      'web is missing',
+    ],
+    [
+      'the bot container cannot be inspected',
+      'rm "$FAKE_DIR/state.ririko-bot-1"',
+      'cannot inspect bot; bot is missing',
+    ],
+    [
+      'the bot is running without a healthcheck',
+      "state ririko-bot-1 'running '",
+      'bot reports no health',
+    ],
+    ['the web is paused', "state ririko-web-1 'paused '", 'web is paused'],
+  ])('posts the reason to /fail when %s', (_name, setup, reason) => {
+    const result = watchdogScenario(`write_conf\nstack_ok\n${setup}\nrun`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.curl).toEqual([failPing(reason)]);
+    expect(restarts(result.docker)).toEqual([]);
+  });
+
+  it('reports a restart that fails', () => {
+    const result = watchdogScenario(`write_conf
+stack_ok
+state ririko-web-1 'running unhealthy'
+touch "$FAKE_DIR/restart_fails"
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.logger).toContain(loggerLine('could not restart container ririko-web-1'));
+    expect(result.curl).toEqual([failPing('web is unhealthy and could not be restarted')]);
+  });
+
+  it.each([
+    ['below the default limit of 85', 'echo 84 >"$FAKE_DIR/disk"', '', true],
+    ['at the default limit of 85', 'echo 85 >"$FAKE_DIR/disk"', '', false],
+    ['above the default limit', 'echo 97 >"$FAKE_DIR/disk"', '', false],
+    ['below a configured limit', 'echo 89 >"$FAKE_DIR/disk"', 'DISK_ALERT_PERCENT=90', true],
+    ['at a configured limit', 'echo 90 >"$FAKE_DIR/disk"', 'DISK_ALERT_PERCENT=90', false],
+    ['with a quoted limit', 'echo 60 >"$FAKE_DIR/disk"', 'DISK_ALERT_PERCENT="60"', false],
+  ])('applies the disk threshold: %s', (_name, setup, conf, healthy) => {
+    const result = watchdogScenario(`write_conf ${bashQuote(conf)}\nstack_ok\n${setup}\nrun`);
+    expect(result.rcs).toEqual([0]);
+    if (healthy) {
+      expect(result.curl).toEqual([heartbeat]);
+    } else {
+      expect(result.curl).toHaveLength(1);
+      expect(result.curl[0]).toMatch(
+        /^-fsS -m 10 --retry 3 -o \/dev\/null --data-raw root file system is \d+% full \(limit \d+%\) https:\/\/hc-ping\.com\/abc-123\/fail$/,
+      );
+    }
+  });
+
+  it('names the limit that applies in the disk reason', () => {
+    const result = watchdogScenario(
+      `write_conf DISK_ALERT_PERCENT=90\nstack_ok\necho 93 >"$FAKE_DIR/disk"\nrun`,
+    );
+    expect(result.curl).toEqual([failPing('root file system is 93% full (limit 90%)')]);
+  });
+
+  it('only logs, and still restarts, when no HEALTHCHECK_PING_URL is set', () => {
+    const result = watchdogScenario(`write_conf HEALTHCHECK_PING_URL=
+stack_ok
+run
+state ririko-bot-1 'running unhealthy'
+run`);
+    expect(result.rcs).toEqual([0, 0]);
+    expect(result.curl).toEqual([]);
+    expect(restarts(result.docker)).toEqual(['docker restart ririko-bot-1']);
+    expect(result.stdout.join('\n')).toMatch(/stack not healthy: bot was unhealthy/);
+  });
+
+  it('works without a ririko.conf at all', () => {
+    const result = watchdogScenario('stack_ok\nrun');
+    expect(result.rcs).toEqual([0]);
+    expect(result.curl).toEqual([]);
+    expect(result.stdout[0]).toMatch(/stack healthy; root file system 42% full$/);
+  });
+
+  it('only warns when the ping itself fails', () => {
+    const result = watchdogScenario('write_conf\nstack_ok\ntouch "$FAKE_DIR/curl_fails"\nrun');
+    expect(result.rcs).toEqual([0]);
+    expect(result.stdout.join('\n')).toContain('warning: could not ping the heartbeat monitor');
+  });
+
+  it.each([
+    ['no ririko.conf at all', 'rm -f "$RIRIKO_CONF"'],
+    [
+      'the untouched ririko.conf.example',
+      `cat >"$RIRIKO_CONF" <<'EXAMPLE'\n${hasBash ? read('ririko.conf.example') : ''}\nEXAMPLE`,
+    ],
+    ['a configured monitor URL', 'write_conf'],
+  ])('logs one line and exits 0, without a ping, when nothing is deployed (%s)', (_name, setup) => {
+    const result = watchdogScenario(`${setup}\nrun`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.stdout).toHaveLength(1);
+    expect(result.stdout[0]).toMatch(
+      /no containers of the compose project ririko; nothing deployed yet, skipping$/,
+    );
+    expect(result.stderr).toBe('');
+    expect(result.docker).toEqual([psCall]);
+    expect(result.curl).toEqual([]);
+    expect(result.logger).toEqual([]);
+  });
+
+  it('treats a host that has only other projects the same as one with nothing deployed', () => {
+    const result = watchdogScenario(`write_conf
+add_container ririko-lavalink ririko-lavalink-lavalink-1 lavalink 'running unhealthy'
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.docker).toEqual([psCall]);
+    expect(result.curl).toEqual([]);
+    expect(result.stdout[0]).toMatch(/nothing deployed yet, skipping$/);
+  });
+
+  it('fails without a ping when Docker cannot be reached, so the monitor alerts', () => {
+    const result = watchdogScenario('write_conf\nstack_ok\ntouch "$FAKE_DIR/ps_fails"\nrun');
+    expect(result.rcs).toEqual([1]);
+    expect(result.stderr).toContain('docker ps failed; cannot check the stack');
+    expect(result.curl).toEqual([]);
+  });
+
+  it.each([
+    [
+      'a plain http monitor URL',
+      'HEALTHCHECK_PING_URL=http://hc-ping.com/abc',
+      'HEALTHCHECK_PING_URL',
+    ],
+    ['a monitor URL with a space', 'HEALTHCHECK_PING_URL=https://a b', 'HEALTHCHECK_PING_URL'],
+    ['a limit that is not a number', 'DISK_ALERT_PERCENT=lots', 'DISK_ALERT_PERCENT'],
+    ['a limit of zero', 'DISK_ALERT_PERCENT=0', 'DISK_ALERT_PERCENT'],
+    ['a limit above 100', 'DISK_ALERT_PERCENT=101', 'DISK_ALERT_PERCENT'],
+  ])('reports %s with exit 1 but still restarts unhealthy containers', (_name, line, key) => {
+    const result = watchdogScenario(`write_conf ${bashQuote(line)}
+stack_ok
+state ririko-bot-1 'running unhealthy'
+run`);
+    expect(result.rcs).toEqual([1]);
+    expect(result.stderr).toContain(`invalid ${key}`);
+    expect(restarts(result.docker)).toEqual(['docker restart ririko-bot-1']);
+    if (key === 'HEALTHCHECK_PING_URL') expect(result.curl).toEqual([]);
+  });
+
+  it('never runs a line of ririko.conf', () => {
+    const result = watchdogScenario(`write_conf 'x=$(touch "$work/pwned")' '$(touch "$work/pwned2")'
+stack_ok
+run
+[ -e "$work/pwned" ] || [ -e "$work/pwned2" ] && echo pwned >>"$work/stderr"`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.stderr).toBe('');
+    expect(result.curl).toEqual([heartbeat]);
+  });
+
+  it('exits 2 for an argument', () => {
+    const result = watchdogScenario('write_conf\nstack_ok\nrun now');
+    expect(result.rcs).toEqual([2]);
+    expect(result.stderr).toContain('Usage: ririko-watchdog');
+    expect(result.docker).toEqual([]);
+    expect(result.curl).toEqual([]);
+  });
+
+  it.skipIf(!hasFlock)(
+    'logs one line and touches nothing while the lock is held, then resumes',
+    () => {
+      const result = watchdogScenario(`write_conf
+stack_ok
+state ririko-bot-1 'running unhealthy'
+exec 8>"$RIRIKO_LOCK"
+flock -n 8
+run
+exec 8>&-
+run`);
+      expect(result.rcs).toEqual([0, 0]);
+      // Only the second run touched docker; the first one logged its skip and left.
+      expect(result.docker[0]).toBe(psCall);
+      expect(restarts(result.docker)).toHaveLength(1);
+      expect(result.curl).toEqual([failPing('bot was unhealthy and was restarted')]);
+      expect(result.logger).toHaveLength(2);
+    },
+  );
+
+  it.skipIf(!hasFlock)('exits 0 with one log line and no docker call when the lock is held', () => {
+    const result = watchdogScenario(`write_conf
+stack_ok
+state ririko-bot-1 'running unhealthy'
+exec 8>"$RIRIKO_LOCK"
+flock -n 8
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.stdout).toHaveLength(1);
+    expect(result.stdout[0]).toMatch(/holds \S+; skipping this check$/);
+    expect(result.docker).toEqual([]);
+    expect(result.curl).toEqual([]);
+    expect(result.logger).toEqual([]);
+  });
+
+  it.skipIf(!hasFlock)('releases the lock before it pings the monitor', () => {
+    const result = watchdogScenario('write_conf\nstack_ok\nrun');
+    expect(result.rcs).toEqual([0]);
+    expect(result.curlLock).toEqual(['free']);
+  });
+});
+
+describe('ririko-watchdog wiring', () => {
+  const directives = (entry: string) =>
+    read(entry)
+      .split('\n')
+      .filter((line) => line.trim() !== '' && !line.startsWith('#'));
+
+  it('ships the script and its two units under the names bootstrap installs', () => {
+    expect(files).toEqual(
+      expect.arrayContaining([
+        'bin/ririko-watchdog.sh',
+        'systemd/ririko-watchdog.service',
+        'systemd/ririko-watchdog.timer',
+      ]),
+    );
+  });
+
+  it('runs the timer every minute, starting two minutes after boot', () => {
+    expect(directives('systemd/ririko-watchdog.timer')).toEqual(
+      expect.arrayContaining([
+        'OnBootSec=2min',
+        'OnUnitActiveSec=1min',
+        'Unit=ririko-watchdog.service',
+        'WantedBy=timers.target',
+      ]),
+    );
+  });
+
+  it('runs the script once per timer firing, after Docker, and never lets a run hang', () => {
+    expect(directives('systemd/ririko-watchdog.service')).toEqual(
+      expect.arrayContaining([
+        'Type=oneshot',
+        'ExecStart=/usr/local/bin/ririko-watchdog',
+        'After=docker.service network-online.target',
+        'TimeoutStartSec=2min',
+      ]),
+    );
+  });
+
+  it('documents its settings in ririko.conf.example, all commented out', () => {
+    const example = read('ririko.conf.example');
+    expect(example).toMatch(/^#HEALTHCHECK_PING_URL=https:\/\//m);
+    expect(example).toMatch(/^#DISK_ALERT_PERCENT=85$/m);
+    expect(example.split('\n').filter((line) => /^[A-Z_]+=/.test(line))).toEqual([]);
+  });
+
+  it('uses the lock path, project name and service names of the deploy scripts', () => {
+    const script = read('bin/ririko-watchdog.sh');
+    const lock = /RIRIKO_LOCK=\$\{RIRIKO_LOCK:-([^}]+)\}/;
+    expect(script.match(lock)?.[1]).toBe(read('bin/ririko-deploy.sh').match(lock)?.[1]);
+    expect(script).toContain('readonly PROJECT=ririko');
+    expect(script).toContain('readonly REQUIRED_SERVICES=(bot web postgres)');
+    const compose = readFileSync(
+      new URL('../docker-compose.production.yml', import.meta.url),
+      'utf8',
+    );
+    const servicesBlock = compose.split(/^services:\s*$/m)[1]!.split(/^volumes:\s*$/m)[0]!;
+    const declared = [...servicesBlock.matchAll(/^ {2}(\w+):/gm)].map((match) => match[1]);
+    expect(declared).toEqual(expect.arrayContaining(['bot', 'web', 'postgres']));
   });
 });

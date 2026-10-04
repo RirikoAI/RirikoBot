@@ -185,7 +185,7 @@ To update `cloudflared`, change `CLOUDFLARED_VERSION` and `CLOUDFLARED_SHA256` t
 | 0    | Deployed: the bot and the dashboard both reported ready, and the host recorded the version.                                                                                              |
 | 1    | Failed before the running release was touched (bad tag or file, pre-deploy dump failed, invalid `ririko.conf`). Nothing changed; read the output and fix the cause.                      |
 | 2    | The host rejected the command or the version: the tag is not `X.Y.Z` or `X.Y.Z-prerelease`, or the job sent something other than `deploy <version>` or `status`.                         |
-| 3    | Another deploy, backup or watchdog run holds the host's lock. Nothing changed. Run the job again when that run has finished.                                                             |
+| 3    | The host's lock stayed busy for `DEPLOY_LOCK_WAIT` seconds (another deploy, backup or watchdog run holds it). Nothing changed. Run the job again when that run has finished.              |
 | 4    | The new release did not become ready, so the host started the previous release again. The database was **not** restored; the output names the pre-deploy dump (`docs/migrations.md`).    |
 | 5    | The new release did not become ready and there is no previous release (first deploy, or the same version again). Nothing is running. Fix it on the host and deploy again.               |
 | 255  | `ssh` itself failed: the tunnel, the Access service token, the key or the pinned host key.                                                                                               |

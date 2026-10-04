@@ -1,0 +1,16 @@
+[Unit]
+Description=Ririko encrypted off-site backup (restic to a Lightsail bucket)
+Documentation=https://github.com/RirikoAI/RirikoBot/blob/master/docs/release.md
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/ririko-backup run
+# The script waits up to 30 minutes for the deploy lock, then dumps and uploads.
+TimeoutStartSec=4h
+# A tmpfs directory for the restic secrets file (exported to the script as RUNTIME_DIRECTORY).
+RuntimeDirectory=ririko-backup
+RuntimeDirectoryMode=0700
+Nice=10
+IOSchedulingClass=idle
