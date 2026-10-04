@@ -171,6 +171,20 @@ export type AppConfig = z.infer<typeof BaseAppConfigSchema>;
 export type AppConfigInput = z.input<typeof AppConfigSchema>;
 
 /**
+ * `CLIENT_IP_HEADER`: the one request header the dashboard trusts for the client address, such as
+ * `cf-connecting-ip` behind Cloudflare. Unset or blank keeps the X-Forwarded-For default.
+ */
+export const ClientIpHeaderSchema = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9-]+$/, 'CLIENT_IP_HEADER must be a header name such as cf-connecting-ip')
+    .optional(),
+);
+
+/**
  * Web dashboard (apps/web) configuration. The OAuth2 secret, public URL and vault key are
  * optional for the bot but required for the dashboard.
  */
@@ -194,6 +208,9 @@ const BaseWebConfigSchema = BaseAppConfigSchema.extend({
     .refine(isHttpsOrLoopback, 'DISCORD_API_URL must use https unless the host is loopback')
     .transform((url) => url.replace(/\/+$/, ''))
     .default('https://discord.com/api'),
+  // Trusted client-IP header (rate-limit keys, session and audit records). Safe only when every
+  // request reaches the dashboard through the proxy that sets it.
+  CLIENT_IP_HEADER: ClientIpHeaderSchema,
 });
 
 function isHttpsOrLoopback(value: string): boolean {
