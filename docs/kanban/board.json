@@ -1,6 +1,7 @@
 {
   "$schema": "./protocol.md",
   "wip_limit": 1,
+  "coordinator_paths": [],
   "_ticket_template": {
     "id": "TASK-001",
     "title": "Short imperative title",

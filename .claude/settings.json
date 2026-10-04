@@ -42,6 +42,15 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/codegraph-first.mjs\""
           }
         ]
+      },
+      {
+        "matcher": "Agent|Task|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hooks/worker-delegation.mjs\""
+          }
+        ]
       }
     ]
   }

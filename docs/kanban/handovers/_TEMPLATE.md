@@ -55,6 +55,9 @@ See docs/kanban/protocol.md section 6.
 **Acceptance**
 - [x] Each acceptance item, checked against the diff.
 
+**Worker tier**
+- Worker named in the PROGRESS header, and whether it matches the ticket's `model` tier.
+
 **Issues** (REWORK only)
 - What the next worker must fix. The ticket goes back to TODO.
 

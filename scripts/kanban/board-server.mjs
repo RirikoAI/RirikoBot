@@ -93,21 +93,24 @@ const server = http.createServer((req, res) => {
   send(res, 404, 'Not found');
 });
 
-function listen(port, triesLeft) {
-  server.once('error', (e) => {
-    if (e.code === 'EADDRINUSE' && triesLeft > 0) return listen(port + 1, triesLeft - 1);
-    console.error(e.message);
-    process.exit(1);
-  });
-  server.listen(port, '127.0.0.1', () => {
-    const url = `http://127.0.0.1:${port}/`;
-    const rel = path.relative(process.cwd(), boardPath);
-    console.log(`Kanban board: ${url}  (reading ${rel.startsWith('..') ? boardPath : rel}; Ctrl+C to stop)`);
-    if (args.includes('--open')) {
-      const [cmd, cmdArgs] =
-        process.platform === 'win32' ? ['cmd', ['/c', 'start', '', url]] : process.platform === 'darwin' ? ['open', [url]] : ['xdg-open', [url]];
-      spawn(cmd, cmdArgs, { stdio: 'ignore', detached: true }).on('error', () => {}).unref();
-    }
-  });
-}
-listen(basePort, 10);
+// One 'error' and one 'listening' handler for every attempt. Passing a callback to each listen() call
+// would register one 'listening' listener per busy port, and all of them would fire on success.
+let port = basePort;
+let triesLeft = 10;
+server.on('error', (e) => {
+  if (e.code === 'EADDRINUSE' && triesLeft-- > 0) return server.listen(++port, '127.0.0.1');
+  console.error(e.message);
+  process.exit(1);
+});
+server.on('listening', () => {
+  const url = `http://127.0.0.1:${server.address().port}/`;
+  const rel = path.relative(process.cwd(), boardPath);
+  if (port !== basePort) console.log(`Ports ${basePort}-${port - 1} are in use (another board server may still be running).`);
+  console.log(`Kanban board: ${url}  (reading ${rel.startsWith('..') ? boardPath : rel}; Ctrl+C to stop)`);
+  if (args.includes('--open')) {
+    const [cmd, cmdArgs] =
+      process.platform === 'win32' ? ['cmd', ['/c', 'start', '', url]] : process.platform === 'darwin' ? ['open', [url]] : ['xdg-open', [url]];
+    spawn(cmd, cmdArgs, { stdio: 'ignore', detached: true }).on('error', () => {}).unref();
+  }
+});
+server.listen(port, '127.0.0.1');
