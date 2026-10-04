@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.5.2",
   "base_branch": "develop/2.0.0",
   "codegraph": true,
   "ci": true,
@@ -13,6 +13,7 @@
     "scripts/hooks/codegraph-first.mjs",
     "scripts/hooks/prompt-context.mjs",
     "scripts/hooks/session-sync.mjs",
+    "scripts/hooks/worker-delegation.mjs",
     "scripts/kanban/board-server.mjs",
     "scripts/kanban/board-web/index.html",
     "scripts/kanban/render-board.mjs"

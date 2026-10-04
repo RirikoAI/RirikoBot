@@ -4,12 +4,12 @@
 This document defines the **Scrum Kanban Governance & Handover Protocol** for this project.
 These rules are standing operating procedures for all engineering sessions, the coordinator agent, and all sub-agents.
 
-The protocol is **provider-agnostic**. Claude Code, Gemini CLI, Codex, opencode, and any other agent that reads `AGENTS.md` follow the same steps. Nothing in the core flow needs subagents, worktrees, or a specific model family. Provider-specific extras (Claude Code hooks, the Claude `ticket-worker` subagent) are optional helpers.
+The protocol is **provider-agnostic**. Claude Code, Gemini CLI, Codex, opencode, and any other agent that reads `AGENTS.md` follow the same steps. Nothing in the core flow needs worktrees or a specific model family. Each provider runs the worker on the ticket's tier with the mechanism it has (section 6.3.1). Provider-specific extras, such as Claude Code hooks, enforce the rules where the provider allows it.
 
 ### 1.1. Roles
 | Role | Tier | Job |
 |---|---|---|
-| **Coordinator** | `large` (main session) | Grooms tickets, writes grooming handovers, runs or dispatches the worker, reviews results, talks to the user. |
+| **Coordinator** | `large` (main session) | Grooms tickets, writes grooming handovers, dispatches the worker, reviews results, talks to the user. Never executes a ticket itself (section 6.3.1). |
 | **Worker** | `ticket.model` | Executes one groomed ticket with the Worker Procedure (section 6.5). Does not groom, re-scope, or start other tickets. |
 
 The saving comes from doing the expensive exploration **once**, during grooming, and handing the result to the worker. The worker can run on a cheaper tier. A worker that has to rediscover the code wastes that saving. Sections 3 and 6 exist to prevent this.
@@ -23,7 +23,7 @@ Tickets name a tier, not a model. Each agent maps the tier to the models its pro
 | `medium` | Default | Sonnet | Pro or Flash | standard models |
 | `large` | Design-heavy or high-risk work, coordination | Opus | Pro | top reasoning models |
 
-If a provider cannot switch models inside one session, the worker runs on the session's model. The tier then records the intended effort for review.
+The worker runs on the ticket's tier, not on the coordinator's model. A `large` coordinator that executes a `small` ticket spends the most expensive tokens on the cheapest work, and fills its own context with code it does not need for review. Section 6.3.1 lists how each provider runs a worker on the right tier.
 
 ### 1.3. Agent Invariants
 These are hard lines. `AGENTS.md` repeats them, so every provider loads them.
@@ -36,6 +36,11 @@ These are hard lines. `AGENTS.md` repeats them, so every provider loads them.
 - Weaken, skip, or delete tests to make `verify_cmd` pass.
 - Search code before running the ticket's `context.codegraph_queries`, when `.codegraph/` exists (section 7).
 - Commit, push, or open PRs without the user's confirmation. Workers never do.
+- Execute a ticket on a model tier other than the ticket's `model`, unless the user approved it for that ticket (section 6.3.1).
+
+**The coordinator MUST NOT:**
+- Execute a ticket itself. It dispatches a worker on the ticket's tier (section 6.3.1).
+- Edit files outside `docs/kanban/` and `coordinator_paths` (section 6.1) while a ticket is `IN_PROGRESS`. That ticket's worker owns the checkout.
 
 **The coordinator MUST:**
 - Keep `board.json` authoritative and `BOARD.md` rendered.
@@ -74,7 +79,7 @@ Bug (BUG-XXX)
    - **1–2 pts**: Configuration tweak, small documentation update, single isolated test.
    - **3–5 pts**: One service method or endpoint, a schema migration with its repository functions.
    - **8 pts**: Cross-cutting component that touches several modules.
-   - **13+ pts**: Too large. Split into smaller Stories or Tasks before `TODO`.
+   - **13+ pts**: Too large for one unit of work. Split it before `TODO`. A Story split into Tasks may total 13+ points: the limit applies to each Task, Chore, Bug, and to a Story that has no Tasks.
 2. **Pre-Start Estimation Invariant**: No ticket leaves `BACKLOG` without an approved Fibonacci estimate.
 3. **Grooming in Batches**: Groom tickets in clusters by parent Epic or Story.
 
@@ -180,6 +185,7 @@ A worker can die while it holds the only `IN_PROGRESS` slot: a crash, a closed t
 
 ### 6.1. Canonical State Files
 - `docs/kanban/board.json`: The only source of truth for tickets, states, estimates, dependencies, and context.
+- `coordinator_paths` in `board.json`: path globs the coordinator may edit while a ticket is `IN_PROGRESS`, in addition to `docs/kanban/`. Example: `["CHANGELOG.md", "docs/adr/**", "notes/"]`. `**` spans directories, `*` and `?` stay inside one directory, and a trailing `/` covers a whole directory. Default `[]`. Add a path only with the user's agreement, and never a path that tickets change. The Claude Code hook reads this list; other providers follow it as a rule.
 - `docs/kanban/BOARD.md`: **Generated** from `board.json`. Never edit it by hand. Run `node scripts/kanban/render-board.mjs` after every `board.json` change.
 - `scripts/kanban/board-server.mjs`: Read-only web view of `board.json` and the handover notes, for humans. It never changes the board; agents edit `board.json` directly.
 - **Board first, work second.** Every agent and subagent claims its ticket (`status: IN_PROGRESS`, `assignee` and `claimed_at` set) and regenerates `BOARD.md` **before** it reads code, edits files, or runs commands for that ticket. `BOARD.md` must show what agents are working on while the work happens, not after it finishes. Every later status change (`PAUSED`, `BLOCKED`, `REVIEW`, `DONE`, `ABANDONED`) is rendered the moment it happens.
@@ -205,11 +211,30 @@ Before starting a ticket, a worker reads, in this order:
 4. The last `PROGRESS` entry of every ticket in `requires`.
 
 ### 6.3.1. Running the Worker
-- **Any provider:** the coordinator runs the Worker Procedure (section 6.5) itself, in the same session. If the provider can switch models, it switches to the ticket's tier first.
-- **Claude Code (optional):** dispatch the Agent tool with `subagent_type: "ticket-worker"` and `model` mapped from the tier (`small`→`haiku`, `medium`→`sonnet`, `large`→`opus`). Prompt: ticket ID and worker name. Dispatch one worker at a time. Never use `isolation: "worktree"`.
+The coordinator never runs the Worker Procedure (section 6.5) itself. It starts a separate worker on the model that the ticket's `model` tier maps to (section 1.2), one at a time, in the main checkout. This holds for every tier, `large` included: the worker gets a fresh context, and the coordinator keeps its context for grooming and review.
+
+**Worker prompt.** Every provider uses the same prompt, so workers behave the same:
+
+```text
+Ticket: <TICKET-ID>. Worker name: <provider>-<tier>.
+You are the worker. Follow the Worker Procedure in docs/kanban/protocol.md section 6.5 and the Agent Invariants in section 1.3.
+```
+
+The worker name (for example `claude-small`, `gemini-medium`, `codex-large`) goes into `assignee` and the `PROGRESS` entry header, so the review can check the tier.
+
+**How to start the worker**, in order of preference:
+
+| Provider | Mechanism |
+|---|---|
+| Claude Code | Agent tool, `subagent_type: "ticket-worker"`, `model` mapped from the tier (`small`→`haiku`, `medium`→`sonnet`, `large`→`opus`). Never `isolation: "worktree"`. **Required.** A `PreToolUse` hook (`scripts/hooks/worker-delegation.mjs`) denies a dispatch with the wrong `model`, and denies coordinator edits outside `docs/kanban/` and `coordinator_paths` while a ticket is `IN_PROGRESS`. |
+| Provider with subagents that take a model (for example opencode agents with `mode: "subagent"`) | Dispatch a subagent on the tier's model with the worker prompt. |
+| Provider with a headless CLI (for example `gemini -m <model> -p "<prompt>"`, `codex exec -m <model> "<prompt>"`, `opencode run -m <provider/model> "<prompt>"`) | Run the CLI in the repository root on the tier's model with the worker prompt. The user decides which approval or sandbox flags the worker gets; ask before the first run. |
+| Any other provider | **Hand off.** Stop. Tell the user the tier's model and the worker prompt, and ask them to run it in a new session on that model. Resume at review when they report back. |
+
+**Inline execution** on the coordinator's model is allowed only when the user approves it for that ticket, after being told the tier mismatch. Record the approval in the `PROGRESS` entry. In Claude Code the user also sets `KANBAN_DELEGATE=off` for that session.
 
 ### 6.3.2. Review
-At `REVIEW` the coordinator reads the worker's `PROGRESS` entry and `git diff` of `context.files`, reruns `verify_cmd`, and checks each `acceptance` item. It does not re-explore the code. It records the result in a `REVIEW` entry: `DONE` when the Definition of Done (section 3.3) is met, otherwise `REWORK` and the ticket goes back to `TODO`.
+At `REVIEW` the coordinator reads the worker's `PROGRESS` entry and `git diff` of `context.files`, reruns `verify_cmd`, and checks each `acceptance` item. It checks that the `PROGRESS` entry header names a worker on the ticket's tier. A mismatch without recorded user approval goes into the `REVIEW` entry under **Worker tier**. It does not re-explore the code. It records the result in a `REVIEW` entry: `DONE` when the Definition of Done (section 3.3) is met, otherwise `REWORK` and the ticket goes back to `TODO`.
 
 ### 6.4. Handover Index
 `docs/kanban/handovers/HANDOVERS.md` lists every `FLAG` entry that is still open, one line each: target ID, source ID, one-line summary. The coordinator removes a line when the target ticket is `DONE` or `ABANDONED`.

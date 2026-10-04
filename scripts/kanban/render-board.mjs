@@ -53,8 +53,12 @@ for (const t of all) {
   const at = `${t.id}`;
   if (!STATUSES.includes(t.status)) errors.push(`${at}: unknown status "${t.status}"`);
   if (t.status !== 'BACKLOG' && !FIB.includes(t.points)) errors.push(`${at}: points must be one of ${FIB.join(', ')} before leaving BACKLOG`);
-  // A story already split into child tasks is tracked through them, so its size is fine.
-  if (workable(t) && t.points >= 13 && t.status !== 'BACKLOG' && !t.children?.length) errors.push(`${at}: ${t.points} pts is too large; split it before TODO`);
+  // The size limit is for work a worker executes as one unit. A story split into tasks is the sum of
+  // those tasks, so only the tasks are limited; a story with no tasks is executed whole and is limited.
+  const splitStory = t.type === 'story' && all.some((x) => x.type === 'task' && x.parent === t.id);
+  if (workable(t) && !splitStory && t.points >= 13 && t.status !== 'BACKLOG') {
+    errors.push(`${at}: ${t.points} pts is too large; split it${t.type === 'story' ? ' into tasks' : ''} before TODO`);
+  }
   if (t.parent && !byId.has(t.parent)) errors.push(`${at}: parent ${t.parent} does not exist`);
   if (t.type === 'task' && !t.parent) errors.push(`${at}: task has no parent story`);
   for (const r of [...(t.requires ?? []), ...(t.blocks ?? []), ...(t.children ?? [])]) {
@@ -104,6 +108,11 @@ for (const s of all.filter((t) => t.type === 'story')) {
 // WIP: at most wip_limit tickets IN_PROGRESS on the whole board. Serial work in one checkout
 // is what lets any AI provider run the workflow; see protocol.md section 5.1.
 const wip = board.wip_limit ?? 1;
+// Extra paths the coordinator may edit while a ticket is IN_PROGRESS (read by worker-delegation.mjs).
+const cp = board.coordinator_paths;
+if (cp !== undefined && !(Array.isArray(cp) && cp.every((g) => typeof g === 'string' && g.trim()))) {
+  errors.push('board.json: "coordinator_paths" must be an array of non-empty path globs');
+}
 for (const k of ['wip_limit_per_worker', 'max_parallel_workers']) {
   if (k in board) warnings.push(`board.json: "${k}" is no longer used; replace it with "wip_limit": 1`);
 }

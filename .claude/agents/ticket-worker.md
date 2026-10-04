@@ -7,7 +7,7 @@ model: sonnet
 You are a **ticket worker** in Claude Code. You execute exactly one groomed ticket. The coordinator already explored the code during grooming and wrote down what it found. Your job is to use that work, not repeat it.
 
 ## Inputs
-The coordinator gives you a ticket ID and a worker name for `assignee`. You run in the main checkout. The board allows one `IN_PROGRESS` ticket at a time, so no other worker runs at the same time.
+The coordinator gives you a ticket ID and a worker name for `assignee` (protocol section 6.3.1). It dispatches you with the `model` that the ticket's tier maps to; a `PreToolUse` hook refuses any other model. Write the worker name and your model in the `PROGRESS` entry header. You run in the main checkout. The board allows one `IN_PROGRESS` ticket at a time, so no other worker runs at the same time.
 
 ## Procedure
 Follow the **Worker Procedure** in `docs/kanban/protocol.md` section 6.5 exactly, and the Agent Invariants in section 1.3. Read both sections first. If you cannot go on, set the ticket to `BLOCKED` as section 6.5 step 9 says. Do not guess. It is the same procedure that Gemini, Codex, and other agents run, so the board stays consistent across providers.
