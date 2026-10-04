@@ -91,3 +91,37 @@
 # Percent of the root file system in use at which the watchdog stops pinging and reports "root file
 # system is N% full" instead (1 to 100).
 #DISK_ALERT_PERCENT=85
+
+# --- WireGuard link and Lavalink host firewall (TASK-1802) ---------------------------------------
+# The app hosts reach the Lavalink VPS over WireGuard (10.77.0.0/24), so the Lavalink password never
+# crosses the internet in clear text and the Lavalink ports are never public. The VPS is
+# 10.77.0.1, production 10.77.0.2, staging 10.77.0.3. bootstrap.sh (both roles) creates
+# /etc/wireguard/private.key once and prints this host's public key; copy it into the WG_PEERS of
+# the other side. Once WG_ADDRESS and WG_PEERS are set, run bootstrap.sh again: it renders
+# /etc/wireguard/wg0.conf (0600) and enables wg-quick@wg0. Rendering refuses a malformed key,
+# address, endpoint or port and writes nothing.
+#
+# WG_PEERS: one peer per entry, entries separated by ";", fields by spaces:
+#   <public key> <peer tunnel address>/32 [<endpoint host:port> | -] [<tcp ports> | -]
+# The endpoint is where this host dials the peer; the app role needs one (use the VPS's IPv4
+# literal, because a Lightsail host that dials an IPv6 endpoint is seen from its IPv6 address). The
+# ports are the Lavalink ports the peer may reach on this host over WireGuard, comma separated
+# (lavalink role only). Any number of peers; each has its own ports.
+
+# Both roles. This host's tunnel address and prefix.
+#WG_ADDRESS=10.77.0.3/24
+
+# App role, one entry for the Lavalink host (it keeps the NAT mapping open with a keepalive of 25
+# seconds):
+#WG_PEERS="<VPS public key> 10.77.0.1/32 198.51.100.20:51820"
+# Lavalink role, one entry per app host, each with its own Lavalink port:
+#WG_PEERS="<production public key> 10.77.0.2/32 - 2333; <staging public key> 10.77.0.3/32 - 2334"
+
+# Lavalink role. UDP port WireGuard listens on (default 51820).
+#WG_LISTEN_PORT=51820
+
+# Lavalink role. The public addresses the app hosts' handshakes come from (the Lightsail static
+# IPs), IPv4 and IPv6, separated by spaces or commas. The firewall (table inet ririko, input policy
+# drop) lets UDP WG_LISTEN_PORT in from these addresses only, and each WG_PEERS entry reach its own
+# ports on wg0. Required for the firewall; bootstrap.sh leaves the firewall as it is until it is set.
+#WG_ALLOWED_ENDPOINTS="203.0.113.10 2001:db8::10"

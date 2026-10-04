@@ -1869,3 +1869,725 @@ describe('ririko-watchdog wiring', () => {
     expect(declared).toEqual(expect.arrayContaining(['bot', 'web', 'postgres']));
   });
 });
+
+// --- WireGuard link, Lavalink host firewall and bootstrap roles (TASK-1802) ----------------------
+// The renderers are plain bash functions in deploy/host/lib. Their files are fed to bash through
+// stdin together with the scenario, so the tests need no root, no network and no WireGuard.
+
+const wgKey = (fill: number) => Buffer.alloc(32, fill).toString('base64');
+const keyVps = wgKey(1);
+const keyProduction = wgKey(2);
+const keyStaging = wgKey(3);
+const keyThird = wgKey(4);
+const stagingIpv4 = '203.0.113.10';
+const stagingIpv6 = '2001:db8::10';
+const vpsPeers = `${keyProduction} 10.77.0.2/32 - 2333; ${keyStaging} 10.77.0.3/32 - 2334`;
+
+const wgLibs = hasBash
+  ? ['lib/wg-common.sh', 'lib/render-wireguard.sh', 'lib/render-nftables.sh']
+      .map((entry) => read(entry))
+      .join('\n')
+  : '';
+
+interface Render {
+  status: number | null;
+  stdout: string;
+  stderr: string;
+}
+
+/** Runs `body` in a bash that has the three lib files sourced. */
+const wgBash = (body: string): Render => {
+  const result = runBash([], `set -u\n${wgLibs}\n${body}`);
+  return { status: result.status, stdout: result.stdout, stderr: result.stderr };
+};
+
+const shQuote = (value: string) => `'${value.replaceAll("'", `'\\''`)}'`;
+const renderWg = (role: string, address: string, port: string, key: string, peers: string) =>
+  wgBash(`render_wireguard_conf ${[role, address, port, key, peers].map(shQuote).join(' ')}`);
+const renderNft = (port: string, endpoints: string, peers: string) =>
+  wgBash(`render_nftables ${[port, endpoints, peers].map(shQuote).join(' ')}`);
+
+const wgHeader =
+  '# Managed by deploy/host/bootstrap.sh (Ririko). Edit /etc/ririko/ririko.conf and run it again.';
+
+describe.skipIf(!hasBash)('render_wireguard_conf', () => {
+  it('renders the app role: dials the VPS, keepalive 25, only the VPS address allowed', () => {
+    const result = renderWg(
+      'app',
+      '10.77.0.3/24',
+      '',
+      keyStaging,
+      `${keyVps} 10.77.0.1/32 198.51.100.20:51820`,
+    );
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe('');
+    expect(result.stdout).toBe(
+      [
+        wgHeader,
+        '[Interface]',
+        'Address = 10.77.0.3/24',
+        `PrivateKey = ${keyStaging}`,
+        '',
+        '[Peer]',
+        `PublicKey = ${keyVps}`,
+        'AllowedIPs = 10.77.0.1/32',
+        'Endpoint = 198.51.100.20:51820',
+        'PersistentKeepalive = 25',
+        '',
+      ].join('\n'),
+    );
+  });
+
+  it('renders the lavalink role: listens, one /32 per peer, no keepalive, no endpoint', () => {
+    const result = renderWg('lavalink', '10.77.0.1/24', '51820', keyVps, vpsPeers);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toBe(
+      [
+        wgHeader,
+        '[Interface]',
+        'Address = 10.77.0.1/24',
+        'ListenPort = 51820',
+        `PrivateKey = ${keyVps}`,
+        '',
+        '[Peer]',
+        `PublicKey = ${keyProduction}`,
+        'AllowedIPs = 10.77.0.2/32',
+        '',
+        '[Peer]',
+        `PublicKey = ${keyStaging}`,
+        'AllowedIPs = 10.77.0.3/32',
+        '',
+      ].join('\n'),
+    );
+    expect(result.stdout).not.toContain('PersistentKeepalive');
+    expect(result.stdout).not.toContain('Endpoint');
+  });
+
+  it('takes any number of peers, separated by semicolons or newlines, with a custom port', () => {
+    const peers = `${keyProduction} 10.77.0.2/32\n${keyStaging} 10.77.0.3/32 - 2334 ; ${keyThird} 10.77.0.4/32`;
+    const result = renderWg('lavalink', '10.77.0.1/24', '4444', keyVps, peers);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('ListenPort = 4444');
+    expect(result.stdout.match(/^\[Peer\]$/gm)).toHaveLength(3);
+    expect(result.stdout).toContain('AllowedIPs = 10.77.0.4/32');
+  });
+
+  it('keeps the endpoint of a lavalink peer when one is given (an IPv6 literal too)', () => {
+    const result = renderWg(
+      'lavalink',
+      '10.77.0.1/24',
+      '51820',
+      keyVps,
+      `${keyProduction} 10.77.0.2/32 [2001:db8::1]:51820 2333`,
+    );
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('Endpoint = [2001:db8::1]:51820');
+  });
+
+  it.each([
+    ['an unknown role', ['db', '10.77.0.1/24', '51820', keyVps, vpsPeers], 'unknown role'],
+    ['an address without a prefix', ['app', '10.77.0.3', '', keyVps, vpsPeers], 'WG_ADDRESS'],
+    ['a prefix above 32', ['app', '10.77.0.3/33', '', keyVps, vpsPeers], 'WG_ADDRESS'],
+    [
+      'an address with an octet above 255',
+      ['app', '10.77.0.256/24', '', keyVps, vpsPeers],
+      'WG_ADDRESS',
+    ],
+    ['a listen port of 0', ['lavalink', '10.77.0.1/24', '0', keyVps, vpsPeers], 'WG_LISTEN_PORT'],
+    [
+      'a listen port above 65535',
+      ['lavalink', '10.77.0.1/24', '65536', keyVps, vpsPeers],
+      'WG_LISTEN_PORT',
+    ],
+    [
+      'a listen port that is not a number',
+      ['lavalink', '10.77.0.1/24', 'wg', keyVps, vpsPeers],
+      'WG_LISTEN_PORT',
+    ],
+    [
+      'a private key that is too short',
+      ['lavalink', '10.77.0.1/24', '51820', 'abc=', vpsPeers],
+      'private key',
+    ],
+    [
+      'an app peer without an endpoint',
+      ['app', '10.77.0.3/24', '', keyStaging, `${keyVps} 10.77.0.1/32`],
+      'needs an endpoint',
+    ],
+    [
+      'an empty peer list',
+      ['lavalink', '10.77.0.1/24', '51820', keyVps, ' ; ;\n'],
+      'peer list is empty',
+    ],
+  ])('refuses %s and prints nothing', (_name, args, message) => {
+    const result = renderWg(...(args as [string, string, string, string, string]));
+    expect({ status: result.status, stdout: result.stdout }).toEqual({ status: 1, stdout: '' });
+    expect(result.stderr).toContain(message);
+  });
+
+  const peerWithKey = (key: string) => `${key} 10.77.0.2/32 - 2333`;
+  it.each([
+    ['a key that is too short', peerWithKey(keyProduction.slice(0, 40) + '='), 'public key'],
+    ['a key without the final =', peerWithKey(keyProduction.slice(0, 43) + 'A'), 'public key'],
+    [
+      'a key with a character outside base64',
+      peerWithKey(`${keyProduction.slice(0, 10)}!${keyProduction.slice(11)}`),
+      'public key',
+    ],
+    [
+      'a key whose last character cannot end 32 bytes',
+      peerWithKey(`${keyProduction.slice(0, 42)}B=`),
+      'public key',
+    ],
+    ['an allowed address without /32', `${keyProduction} 10.77.0.2 - 2333`, 'allowed address'],
+    ['an allowed address with /24', `${keyProduction} 10.77.0.2/24 - 2333`, 'allowed address'],
+    [
+      'an allowed address that is a host name',
+      `${keyProduction} peer.example/32 - 2333`,
+      'allowed address',
+    ],
+    ['an IPv6 allowed address', `${keyProduction} fd00::2/32 - 2333`, 'allowed address'],
+    [
+      'an allowed address with a leading zero',
+      `${keyProduction} 10.77.0.02/32 - 2333`,
+      'allowed address',
+    ],
+    ['a missing allowed address', keyProduction, 'allowed address'],
+    ['an endpoint without a port', `${keyProduction} 10.77.0.2/32 1.2.3.4 2333`, 'endpoint'],
+    [
+      'an endpoint port above 65535',
+      `${keyProduction} 10.77.0.2/32 1.2.3.4:70000 2333`,
+      'endpoint',
+    ],
+    [
+      'an endpoint with a bad IPv4 literal',
+      `${keyProduction} 10.77.0.2/32 1.2.3.999:51820 2333`,
+      'endpoint',
+    ],
+    [
+      'an endpoint with a bad host name',
+      `${keyProduction} 10.77.0.2/32 -bad-.example:51820 2333`,
+      'endpoint',
+    ],
+    [
+      'an endpoint with a bad bracketed IPv6',
+      `${keyProduction} 10.77.0.2/32 [not-ipv6]:51820 2333`,
+      'endpoint',
+    ],
+    ['a port list with a bad port', `${keyProduction} 10.77.0.2/32 - 2333,abc`, 'ports'],
+    ['a port list with port 0', `${keyProduction} 10.77.0.2/32 - 0`, 'ports'],
+    ['an empty entry in the port list', `${keyProduction} 10.77.0.2/32 - 2333,,2334`, 'ports'],
+    ['a fifth field', `${keyProduction} 10.77.0.2/32 - 2333 extra`, 'too many fields'],
+    ['the same key twice', `${vpsPeers}; ${keyProduction} 10.77.0.9/32 - 2335`, 'listed twice'],
+    ['the same address twice', `${vpsPeers}; ${keyThird} 10.77.0.2/32 - 2335`, 'listed twice'],
+  ])('refuses a peer list with %s', (_name, peers, message) => {
+    for (const result of [
+      renderWg('lavalink', '10.77.0.1/24', '51820', keyVps, peers),
+      renderNft('51820', stagingIpv4, peers),
+    ]) {
+      expect({ status: result.status, stdout: result.stdout }).toEqual({ status: 1, stdout: '' });
+      expect(result.stderr).toContain(message);
+      expect(result.stderr).toContain('WG_PEERS is invalid');
+    }
+  });
+
+  it('never prints the private key to stderr, even when it refuses the peers', () => {
+    const result = renderWg('lavalink', '10.77.0.1/24', '51820', keyVps, 'bad');
+    expect(result.status).toBe(1);
+    expect(result.stderr).not.toContain(keyVps);
+  });
+});
+
+describe.skipIf(!hasBash)('render_nftables', () => {
+  const expectedRuleset = (sourceRules: string[], peerRules: string[]) =>
+    [
+      wgHeader,
+      '# The first line declares the table so the delete cannot fail on a host that never had it. The',
+      "# file loads as one transaction and touches no other table (Docker's rules stay).",
+      'table inet ririko',
+      'delete table inet ririko',
+      '',
+      'table inet ririko {',
+      '  chain input {',
+      '    type filter hook input priority filter; policy drop;',
+      '',
+      '    ct state invalid drop',
+      '    ct state established,related accept',
+      '    iifname "lo" accept',
+      '',
+      '    # Ping, rate limited, and the IPv6 messages without which the network stops working.',
+      '    icmp type echo-request limit rate 5/second burst 10 packets accept',
+      '    icmpv6 type echo-request limit rate 5/second burst 10 packets accept',
+      '    icmpv6 type { nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept',
+      '',
+      "    # WireGuard handshakes, only from the app hosts' public addresses.",
+      ...sourceRules.map((rule) => `    ${rule}`),
+      '',
+      '    # Lavalink, over WireGuard only: each peer reaches its own ports from its own address.',
+      ...peerRules.map((rule) => `    ${rule}`),
+      '  }',
+      '}',
+      '',
+    ].join('\n');
+
+  it('renders the staging and production peers of the shared Lavalink VPS', () => {
+    const result = renderNft('51820', `${stagingIpv4} ${stagingIpv6}`, vpsPeers);
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe('');
+    expect(result.stdout).toBe(
+      expectedRuleset(
+        [
+          `ip saddr { ${stagingIpv4} } udp dport 51820 accept`,
+          `ip6 saddr { ${stagingIpv6} } udp dport 51820 accept`,
+        ],
+        [
+          'iifname "wg0" ip saddr 10.77.0.2 tcp dport { 2333 } accept',
+          'iifname "wg0" ip saddr 10.77.0.3 tcp dport { 2334 } accept',
+        ],
+      ),
+    );
+  });
+
+  it('drops by default, never flushes the whole ruleset and only recreates its own table', () => {
+    const { stdout } = renderNft('51820', stagingIpv4, vpsPeers);
+    expect(stdout).toContain('type filter hook input priority filter; policy drop;');
+    expect(stdout).not.toMatch(/^\s*flush\b/m);
+    const tableLines = stdout
+      .split('\n')
+      .filter((line) => /^\s*(table|delete|flush|add|create)\b/.test(line));
+    expect(tableLines).toEqual([
+      'table inet ririko',
+      'delete table inet ririko',
+      'table inet ririko {',
+    ]);
+  });
+
+  it('allows only loopback, established traffic, rate limited ICMP, WireGuard and the peer ports', () => {
+    const { stdout } = renderNft('51820', stagingIpv4, vpsPeers);
+    const accepted = stdout
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.endsWith(' accept'))
+      .map((line) => line.replace(/ \{.*\}/, ' {…}'));
+    expect(accepted).toEqual([
+      'ct state established,related accept',
+      'iifname "lo" accept',
+      'icmp type echo-request limit rate 5/second burst 10 packets accept',
+      'icmpv6 type echo-request limit rate 5/second burst 10 packets accept',
+      'icmpv6 type {…} accept',
+      'ip saddr {…} udp dport 51820 accept',
+      'iifname "wg0" ip saddr 10.77.0.2 tcp dport {…} accept',
+      'iifname "wg0" ip saddr 10.77.0.3 tcp dport {…} accept',
+    ]);
+  });
+
+  it('takes IPv4-only endpoints, commas, prefixes and another listen port', () => {
+    const result = renderNft('51999', '203.0.113.10, 203.0.113.0/24', vpsPeers);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain(
+      'ip saddr { 203.0.113.10, 203.0.113.0/24 } udp dport 51999 accept',
+    );
+    expect(result.stdout).not.toContain('ip6 saddr');
+  });
+
+  it('takes an IPv6-only endpoint list', () => {
+    const result = renderNft('51820', `${stagingIpv6}/128`, vpsPeers);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain(`ip6 saddr { ${stagingIpv6}/128 } udp dport 51820 accept`);
+    expect(result.stdout).not.toContain('ip saddr {');
+  });
+
+  it('is generic: one peer with one port, or many peers with their own port lists', () => {
+    const one = renderNft('51820', stagingIpv4, `${keyProduction} 10.77.0.2/32 - 2333`);
+    expect(one.stdout.match(/tcp dport/g)).toHaveLength(1);
+
+    const many = renderNft(
+      '51820',
+      stagingIpv4,
+      [
+        `${keyProduction} 10.77.0.2/32 - 2333`,
+        `${keyStaging} 10.77.0.3/32 - 2334,2335,2334`,
+        `${keyThird} 10.77.0.4/32 1.2.3.4:51820`,
+        `${keyVps} 10.77.0.5/32 - 2336`,
+      ].join('; '),
+    );
+    expect(many.status).toBe(0);
+    const rules = many.stdout.match(/^ {4}iifname "wg0".*$/gm);
+    expect(rules).toEqual([
+      '    iifname "wg0" ip saddr 10.77.0.2 tcp dport { 2333 } accept',
+      '    iifname "wg0" ip saddr 10.77.0.3 tcp dport { 2334, 2335 } accept',
+      '    iifname "wg0" ip saddr 10.77.0.5 tcp dport { 2336 } accept',
+    ]);
+  });
+
+  it.each([
+    ['a listen port of 0', ['0', stagingIpv4, vpsPeers], 'WG_LISTEN_PORT'],
+    ['no endpoints', ['51820', '  ', vpsPeers], 'WG_ALLOWED_ENDPOINTS is empty'],
+    [
+      'an endpoint that is a host name',
+      ['51820', 'lightsail.example', vpsPeers],
+      'WG_ALLOWED_ENDPOINTS',
+    ],
+    ['an endpoint with a bad octet', ['51820', '100.29.245.300', vpsPeers], 'WG_ALLOWED_ENDPOINTS'],
+    ['an IPv4 prefix above 32', ['51820', '100.29.245.0/33', vpsPeers], 'WG_ALLOWED_ENDPOINTS'],
+    [
+      'an endpoint with a shell character',
+      ['51820', '1.2.3.4; flush ruleset', vpsPeers],
+      'WG_ALLOWED_ENDPOINTS',
+    ],
+    [
+      'no peer with a ports field',
+      ['51820', stagingIpv4, `${keyProduction} 10.77.0.2/32`],
+      'no peer has a ports field',
+    ],
+  ])('refuses %s and prints nothing', (_name, args, message) => {
+    const result = renderNft(...(args as [string, string, string]));
+    expect({ status: result.status, stdout: result.stdout }).toEqual({ status: 1, stdout: '' });
+    expect(result.stderr).toContain(message);
+  });
+});
+
+describe.skipIf(!hasBash)('wg-common helpers', () => {
+  const check = (fn: string, value: string) =>
+    wgBash(`${fn} ${shQuote(value)} && echo yes || echo no`).stdout.trim();
+
+  it.each([
+    ['::1', true],
+    ['2001:db8::10', true],
+    ['2001:db8::', true],
+    ['fe80::1:2', true],
+    ['1:2:3:4:5:6:7:8', true],
+    ['1:2:3:4:5:6:7::', true],
+    ['1::2::3', false],
+    ['1:2:3:4:5:6:7', false],
+    ['1:2:3:4:5:6:7:8:9', false],
+    ['12345::1', false],
+    ['::g', false],
+    [':::', false],
+    [':1:2:3:4:5:6:7', false],
+    ['1.2.3.4', false],
+    ['', false],
+  ])('wg_valid_ipv6 %j is %s', (value, expected) => {
+    expect(check('wg_valid_ipv6', value)).toBe(expected ? 'yes' : 'no');
+  });
+
+  it.each([
+    ['0.0.0.0', true],
+    ['10.77.0.1', true],
+    ['255.255.255.255', true],
+    ['256.0.0.1', false],
+    ['1.2.3', false],
+    ['1.2.3.4.5', false],
+    ['01.2.3.4', false],
+    ['1.2.3.-4', false],
+    ['a.b.c.d', false],
+  ])('wg_valid_ipv4 %j is %s', (value, expected) => {
+    expect(check('wg_valid_ipv4', value)).toBe(expected ? 'yes' : 'no');
+  });
+
+  it('reads a ririko.conf value without sourcing the file', () => {
+    const result = wgBash(`work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+cat >"$work/ririko.conf" <<'${heredocEnd}'
+# a comment
+#WG_ADDRESS=10.0.0.1/24
+WG_ADDRESS=10.77.0.1/24
+WG_PEERS="first; second"
+WG_LISTEN_PORT='51999'
+WG_ALLOWED_ENDPOINTS=$(touch "$work/pwned")
+WG_ADDRESS=10.77.0.9/24
+${heredocEnd}
+printf '[%s]\\n' "$(conf_value "$work/ririko.conf" WG_ADDRESS)"
+printf '[%s]\\n' "$(conf_value "$work/ririko.conf" WG_PEERS)"
+printf '[%s]\\n' "$(conf_value "$work/ririko.conf" WG_LISTEN_PORT)"
+printf '[%s]\\n' "$(conf_value "$work/ririko.conf" WG_ALLOWED_ENDPOINTS)"
+printf '[%s]\\n' "$(conf_value "$work/ririko.conf" WG_MISSING)"
+printf '[%s]\\n' "$(conf_value "$work/missing.conf" WG_ADDRESS)"
+test -e "$work/pwned" && echo pwned || echo clean`);
+    expect(result.status).toBe(0);
+    expect(result.stdout.trim().split('\n')).toEqual([
+      '[10.77.0.9/24]',
+      '[first; second]',
+      '[51999]',
+      '[$(touch "$work/pwned")]',
+      '[]',
+      '[]',
+      'clean',
+    ]);
+  });
+});
+
+// Only root can ask the kernel to check a ruleset; elsewhere (CI runs as an ordinary user) this is
+// skipped, and the live hosts run the same `nft -c` in bootstrap.sh before anything is loaded.
+const canCheckNft =
+  hasBash &&
+  spawnSync('bash', ['-c', 'command -v nft >/dev/null && nft -c -f /dev/null']).status === 0;
+
+describe.skipIf(!canCheckNft)(
+  'render_nftables output (needs root and nft; skipped otherwise)',
+  () => {
+    it('passes nft -c', () => {
+      const result = wgBash(`work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+render_nftables 51820 ${shQuote(`${stagingIpv4} ${stagingIpv6}`)} ${shQuote(vpsPeers)} >"$work/ririko.nft"
+nft -c -f "$work/ririko.nft"`);
+      expect({ status: result.status, stderr: result.stderr }).toEqual({ status: 0, stderr: '' });
+    });
+  },
+);
+
+describe.skipIf(!hasBash)('bootstrap.sh roles', () => {
+  const bootstrap = hasBash ? read('bootstrap.sh') : '';
+  const sshKey = (name: string) => `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI${name}Key ci-${name}`;
+
+  it('documents the role and the per-context deploy keys in --help', () => {
+    const result = runBash(['--help'], bootstrap);
+    expect(result.status).toBe(0);
+    for (const text of ['--role app|lavalink', '--deploy-key-staging', '--deploy-key-production']) {
+      expect(result.stdout).toContain(text);
+    }
+  });
+
+  it.each([
+    ['an unknown role', ['--ref', 'v2.0.0', '--role', 'db'], 'invalid --role'],
+    ['a role without a value', ['--ref', 'v2.0.0', '--role'], '--role needs a value'],
+    [
+      'the app role with a staging key',
+      ['--ref', 'v2.0.0', '--deploy-key-staging', sshKey('Staging')],
+      'are for --role lavalink',
+    ],
+    [
+      'the app role with a production key',
+      ['--ref', 'v2.0.0', '--role', 'app', '--deploy-key-production', sshKey('Production')],
+      'are for --role lavalink',
+    ],
+    [
+      'the lavalink role with --deploy-key',
+      ['--ref', 'v2.0.0', '--role', 'lavalink', '--deploy-key', sshKey('One')],
+      '--deploy-key is for --role app',
+    ],
+    [
+      'a staging key that is not a public key',
+      ['--ref', 'v2.0.0', '--role', 'lavalink', '--deploy-key-staging', 'ssh-ed25519 AAAA"; id'],
+      '--deploy-key-staging is not a single-line SSH public key',
+    ],
+    [
+      'a production key with a second line',
+      [
+        '--ref',
+        'v2.0.0',
+        '--role',
+        'lavalink',
+        '--deploy-key-production',
+        `${sshKey('A')}\n${sshKey('B')}`,
+      ],
+      '--deploy-key-production is not a single-line SSH public key',
+    ],
+  ])('exits 2 for %s before it needs root', (_name, args, message) => {
+    const result = runBash(args, bootstrap);
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain(message);
+  });
+
+  describe('render_deploy_authorized_keys', () => {
+    const fn = /^render_deploy_authorized_keys\(\) \{\n[\s\S]*?^\}$/m.exec(bootstrap)?.[0];
+    const render = (
+      role: string,
+      keys: { app?: string; staging?: string; production?: string },
+      current = '',
+    ) =>
+      runBash(
+        [],
+        `set -euo pipefail
+ROLE=${shQuote(role)}
+DEPLOY_KEY=${shQuote(keys.app ?? '')}
+DEPLOY_KEY_STAGING=${shQuote(keys.staging ?? '')}
+DEPLOY_KEY_PRODUCTION=${shQuote(keys.production ?? '')}
+${fn}
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+${current === '' ? '' : `printf '%s\\n' ${shQuote(current)} >"$work/authorized_keys"`}
+render_deploy_authorized_keys "$work/authorized_keys"`,
+      );
+    const stagingLine = `restrict,command="/usr/local/bin/ririko-deploy-ssh staging" ${sshKey('Staging')}`;
+    const productionLine = `restrict,command="/usr/local/bin/ririko-deploy-ssh production" ${sshKey('Production')}`;
+
+    it('finds the function in bootstrap.sh', () => {
+      expect(fn).toContain('ririko-deploy-ssh');
+    });
+
+    it('app role: the one key, forced to ririko-deploy-ssh with restrict', () => {
+      const result = render('app', { app: sshKey('App') });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe(
+        `restrict,command="/usr/local/bin/ririko-deploy-ssh" ${sshKey('App')}\n`,
+      );
+    });
+
+    it('lavalink role: one key per context, each forced to its own instance', () => {
+      const result = render('lavalink', {
+        staging: sshKey('Staging'),
+        production: sshKey('Production'),
+      });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe(`${stagingLine}\n${productionLine}\n`);
+    });
+
+    it('lavalink role: a context without a key keeps its current line, and nothing else', () => {
+      const current = [
+        'ssh-ed25519 AAAAunrelated someone',
+        `restrict,command="/usr/local/bin/ririko-deploy-ssh production" ${sshKey('OldProduction')}`,
+        `restrict,command="/usr/local/bin/ririko-deploy-ssh staging" ${sshKey('OldStaging')}`,
+        `restrict,command="/usr/local/bin/ririko-deploy-ssh staging-x" ${sshKey('Other')}`,
+      ].join('\n');
+      const result = render('lavalink', { staging: sshKey('Staging') }, current);
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe(
+        `${stagingLine}\nrestrict,command="/usr/local/bin/ririko-deploy-ssh production" ${sshKey('OldProduction')}\n`,
+      );
+    });
+
+    it('lavalink role: one key gives only its own line when there is nothing to keep', () => {
+      expect(render('lavalink', { production: sshKey('Production') }).stdout).toBe(
+        `${productionLine}\n`,
+      );
+    });
+  });
+});
+
+describe('bootstrap.sh roles, WireGuard and firewall wiring', () => {
+  const bootstrap = read('bootstrap.sh');
+  const body = (name: string) =>
+    new RegExp(`^${name}\\(\\) \\{\\n[\\s\\S]*?^\\}$`, 'm').exec(bootstrap)?.[0] ?? '';
+  const nonComment = (entry: string) =>
+    read(entry)
+      .split('\n')
+      .filter((line) => line.trim() !== '' && !line.trim().startsWith('#'));
+
+  it('ships the renderers, the firewall unit and the example keys', () => {
+    expect(files).toEqual(
+      expect.arrayContaining([
+        'lib/wg-common.sh',
+        'lib/render-wireguard.sh',
+        'lib/render-nftables.sh',
+        'files/ririko-firewall.service',
+      ]),
+    );
+    const example = read('ririko.conf.example');
+    for (const key of ['WG_ADDRESS', 'WG_LISTEN_PORT', 'WG_PEERS', 'WG_ALLOWED_ENDPOINTS']) {
+      expect(example).toMatch(new RegExp(`^#${key}=`, 'm'));
+    }
+    expect(example.split('\n').filter((line) => /^[A-Z_]+=/.test(line))).toEqual([]);
+  });
+
+  it('sources the renderers from the downloaded tree and defaults to the app role', () => {
+    expect(bootstrap).toMatch(/^ROLE=app$/m);
+    for (const lib of ['wg-common', 'render-wireguard', 'render-nftables']) {
+      expect(body('load_libs')).toContain(`$SRC/lib/${lib}.sh`);
+    }
+    expect(body('fetch_release_tree')).toContain('load_libs');
+  });
+
+  it('runs WireGuard on both roles and the firewall only on the lavalink role', () => {
+    const run = bootstrap.slice(bootstrap.indexOf('# --- Run'));
+    expect(run).toMatch(/^setup_wireguard$/m);
+    expect(run).toMatch(/if \[\[ \$ROLE == lavalink \]\]; then\n {2}setup_firewall\nfi/);
+    expect(run.indexOf('create_layout')).toBeLessThan(run.indexOf('setup_wireguard'));
+    expect(run.indexOf('setup_wireguard')).toBeLessThan(run.indexOf('setup_firewall'));
+  });
+
+  it('creates the key once with mode 0600 and prints the public key', () => {
+    const setup = body('setup_wireguard');
+    expect(setup).toContain('ensure_packages wireguard-tools');
+    expect(setup).toContain('[[ ! -s $WIREGUARD_KEY ]]');
+    expect(setup).toContain('umask 077');
+    expect(setup).toContain('wg genkey');
+    expect(setup).toContain('install -m 0600');
+    expect(setup).toContain('wg pubkey');
+    expect(bootstrap).toContain('WIREGUARD_KEY=/etc/wireguard/private.key');
+    expect(setup).toContain('/etc/wireguard/wg0.conf 600');
+    expect(setup).toContain('wg-quick@wg0');
+    expect(setup).toContain('WG_ADDRESS');
+    expect(setup).toContain('WG_PEERS');
+    expect(setup).toContain('WG_LISTEN_PORT');
+    expect(setup).toContain('51820');
+  });
+
+  it('checks the rendered rules with nft -c before it installs or loads them', () => {
+    const setup = body('setup_firewall');
+    const order = [
+      'render_nftables',
+      'nft -c -f',
+      'sync_file "$WORK/ririko.nft" /etc/nftables.d/ririko.nft',
+      'systemctl restart ririko-firewall.service',
+    ].map((text) => setup.indexOf(text));
+    expect(order.every((position) => position >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(setup).toContain('WG_ALLOWED_ENDPOINTS');
+  });
+
+  it('removes the interim firewall only after the new table is loaded and verified', () => {
+    const setup = body('setup_firewall');
+    const loaded = setup.indexOf('firewall_loaded || die');
+    const removed = setup.indexOf('remove_interim_firewall');
+    expect(loaded).toBeGreaterThan(setup.indexOf('systemctl restart ririko-firewall.service'));
+    expect(removed).toBeGreaterThan(loaded);
+    const interim = body('remove_interim_firewall');
+    expect(interim).toContain('ririko-firewall-interim.service');
+    expect(interim).toContain('systemctl disable --now');
+    expect(interim).toContain('/etc/systemd/system/$unit');
+    expect(interim).toContain('/etc/ririko/firewall-interim.nft');
+    expect(interim).toContain('nft delete table inet ririko_interim');
+    // The new table must survive the interim service's own stop; the script re-checks and reloads.
+    expect(setup.slice(removed)).toContain('firewall_loaded');
+  });
+
+  it('never flushes the ruleset or touches Docker tables, anywhere under deploy/host', () => {
+    const offenders = files
+      .filter((entry) => !entry.endsWith('.json'))
+      .flatMap((entry) => nonComment(entry).map((line) => ({ entry, line })))
+      .filter(({ line }) =>
+        /flush\s+ruleset|nft\s+flush|iptables\s+-F|nft\s+delete\s+table\s+(ip|ip6|inet)\s+(nat|filter|docker)/i.test(
+          line,
+        ),
+      );
+    expect(offenders).toEqual([]);
+  });
+
+  it('loads the firewall at boot from /etc/nftables.d/ririko.nft, after nftables.service', () => {
+    const lines = nonComment('files/ririko-firewall.service');
+    expect(lines).toEqual(
+      expect.arrayContaining([
+        'Type=oneshot',
+        'RemainAfterExit=yes',
+        'ExecStart=/usr/sbin/nft -f /etc/nftables.d/ririko.nft',
+        'After=local-fs.target nftables.service',
+        'Before=network-pre.target',
+        'WantedBy=multi-user.target',
+      ]),
+    );
+    expect(read('lib/render-nftables.sh')).toContain('delete table inet ririko');
+  });
+
+  it('keeps the backup timer, script and directories to the app role', () => {
+    expect(body('role_skips')).toContain('$ROLE == lavalink && $1 == ririko-backup*');
+    const install = body('install_host_scripts');
+    expect(install.match(/role_skips/g)).toHaveLength(3);
+    expect(install).toContain('systemctl disable --now ririko-backup.timer');
+    const layout = body('create_layout');
+    expect(layout).toMatch(
+      /if \[\[ \$ROLE == app \]\]; then\n[\s\S]*\/opt\/ririko\/backups\/nightly\n {2}fi/,
+    );
+    expect(layout.split('if [[ $ROLE == app ]]')[0]).not.toContain('backups');
+  });
+
+  it('writes the deploy keys of both contexts through render_deploy_authorized_keys', () => {
+    const user = body('setup_deploy_user');
+    expect(user).toContain('render_deploy_authorized_keys "$home/.ssh/authorized_keys"');
+    expect(user).toContain('DEPLOY_KEY_STAGING');
+    expect(user).toContain('DEPLOY_KEY_PRODUCTION');
+    expect(body('render_deploy_authorized_keys')).toContain(
+      'restrict,command="/usr/local/bin/ririko-deploy-ssh %s" %s',
+    );
+  });
+});
