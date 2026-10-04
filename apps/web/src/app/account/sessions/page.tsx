@@ -39,6 +39,7 @@ export default async function SessionsPage() {
             ipAddress: entry.ipAddress,
             createdAt: entry.createdAt.toISOString(),
             lastSeenAt: entry.lastSeenAt.toISOString(),
+            deviceBound: entry.deviceBound,
           }))}
         />
       </main>

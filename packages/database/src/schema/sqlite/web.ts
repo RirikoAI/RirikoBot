@@ -1,4 +1,11 @@
-import { sqliteTable, text, integer, index, primaryKey } from 'drizzle-orm/sqlite-core';
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  primaryKey,
+  uniqueIndex,
+} from 'drizzle-orm/sqlite-core';
 
 /**
  * Web dashboard sessions (ADR-013). The primary key is the SHA-256 hash of the session cookie,
@@ -22,10 +29,15 @@ export const webSessions = sqliteTable(
     discordAccessToken: text('discord_access_token').notNull(),
     discordRefreshToken: text('discord_refresh_token').notNull(),
     discordTokenExpiresAt: integer('discord_token_expires_at', { mode: 'timestamp_ms' }).notNull(),
+    /** DBSC session identifier (STORY-119); null until the browser binds the session to a key. */
+    dbscSessionId: text('dbsc_session_id'),
+    /** Public JWK the browser registered for DBSC proofs, as JSON; null while unbound. */
+    dbscPublicKey: text('dbsc_public_key'),
   },
   (table) => [
     index('idx_web_sessions_user').on(table.userId),
     index('idx_web_sessions_expires').on(table.expiresAt),
+    uniqueIndex('uq_web_sessions_dbsc_session').on(table.dbscSessionId),
   ],
 );
 

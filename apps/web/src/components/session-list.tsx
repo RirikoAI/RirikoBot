@@ -13,6 +13,8 @@ export interface SessionEntry {
   ipAddress: string | null;
   createdAt: string;
   lastSeenAt: string;
+  /** Bound to a device key with DBSC (STORY-119). */
+  deviceBound?: boolean;
 }
 
 export function SessionList({ sessions }: { sessions: SessionEntry[] }) {
@@ -51,6 +53,11 @@ export function SessionList({ sessions }: { sessions: SessionEntry[] }) {
                 {session.current ? (
                   <span className="ml-2 rounded-full bg-sakura-strong px-2 py-0.5 text-xs font-semibold text-white">
                     This browser
+                  </span>
+                ) : null}
+                {session.deviceBound ? (
+                  <span className="ml-2 rounded-full border border-edge px-2 py-0.5 text-xs font-semibold text-zinc-300">
+                    Device-bound
                   </span>
                 ) : null}
               </p>
