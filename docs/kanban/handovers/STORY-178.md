@@ -22,3 +22,10 @@ See docs/kanban/protocol.md section 6.
 
 **Pitfalls**
 - The release job already pushes `X.Y` and `X` before production is approved. That is the existing release design for self-hosters and stays as it is; the host always deploys the exact version.
+
+---
+
+## REVIEW · 2026-10-04T22:16:57Z · Claude Code (Opus 5.5) · DONE
+
+- TASK-1781 (host deploy command) and TASK-1782 (CircleCI deploy jobs) are DONE and reviewed. `pnpm vitest run scripts` passes.
+- The first real run needs the maintainer's CircleCI contexts (`deploy-staging`, `deploy-production`), the deploy key pair, and a release tag.

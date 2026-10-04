@@ -51,3 +51,19 @@ See docs/kanban/protocol.md section 6.
 - Latency: the app host to the VPS is about 230 ms round trip. Player commands get slower by roughly that much per Lavalink call; audio itself flows straight from Lavalink to Discord's voice servers, so it gets better for Southeast Asian guilds.
 - If the link is down, the bot falls back to its built-in FFmpeg player on the app host (`isLavalinkActive`).
 - New story STORY-180 (TASK-1801, TASK-1802, TASK-1803). The epic stays at 21 points, the top of the scale; its tasks now total 34.
+
+---
+
+## GROOMING · 2026-10-04T21:52:37Z · Claude Code (Opus 5.5)
+
+**Lavalink hosts** (maintainer, 2026-10-05)
+- For now, one VPS (`lavalink-staging`, 198.51.100.20, the VPS provider, 2 vCPU / 2 GB plus 2 GB swap) runs both Lavalink instances, as STORY-180 is written.
+- Production Lavalink moves to its own VM later. Keep the design ready for that:
+  - `deploy/lavalink/docker-compose.yml` must work when a host starts only one of its two services.
+  - The WireGuard peers and per-port firewall rules must allow one instance per host.
+  - The CI job for each instance takes its target host from its own context.
+- With 2 GB RAM, the production heap on this VM stays below the 1536m default until the move. Set `LAVALINK_PRODUCTION_HEAP=768m` here.
+
+**Live host state**
+- Both hosts reach SSH only through Cloudflare Tunnel behind Access: `ssh-staging.example.com` and `ssh-lavalink-staging.example.com`.
+- The Lavalink VM firewall is the interim `table inet ririko_interim`. It drops all inbound traffic except UDP 51820 from staging's 203.0.113.10. TASK-1802 replaces it.
