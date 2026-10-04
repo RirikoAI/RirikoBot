@@ -20,6 +20,8 @@ These are hard lines for every agent, on every provider (protocol section 1.3).
 - Search code before running the ticket's `context.codegraph_queries`, when `.codegraph/` exists.
 - Commit, push, or open PRs without the user's confirmation. Workers never do.
 - Execute a ticket on a model tier other than the ticket's `model`, unless the user approved it for that ticket.
+- Pick a tier by judgment. The standing tier rule decides it: Story or Epic `large`, 1 pt `small`, every other ticket `medium` (protocol section 1.2). Only the user may write a `tier_override`.
+- Groom, review, or update the board as coordinator on a tier below `large`.
 
 **The coordinator MUST NOT:**
 - Execute a ticket itself. It dispatches a worker on the ticket's tier (protocol section 6.3.1), whatever its own model is.
@@ -50,7 +52,7 @@ The workflow is provider-agnostic. Claude Code, Gemini CLI, Codex, opencode, and
 
 ### 1.4. Grooming, Review, Done
 - Fibonacci points (1, 2, 3, 5, 8, 13, 21). 13+ must be split; a Story split into Tasks may total 13+, but each Task stays under 13. Nothing leaves `BACKLOG` without an estimate.
-- `model` is a provider-neutral tier: `small`, `medium`, or `large` (protocol section 1.2 maps tiers to models).
+- `model` is a provider-neutral tier set by the standing tier rule, not chosen: Story or Epic `large` (Claude Opus), 1 pt `small` (Claude Haiku), every other ticket `medium` (Claude Sonnet). Protocol section 1.2 maps tiers to each provider's models. Only the user changes a tier, with `tier_override`.
 - A ticket enters `TODO` only when it has `model`, `context` (files, symbols, and codegraph_queries when CodeGraph is installed), `acceptance`, `verify_cmd`, and a `GROOMING` handover entry (protocol section 3.1).
 - A ticket enters `REVIEW` only when `verify_cmd` passes, every `acceptance` item is met, and every `FLAG` on it is addressed in a `PROGRESS · … · REVIEW` entry (protocol section 3.2).
 - A ticket enters `DONE` only after the coordinator reruns `verify_cmd`, checks acceptance against the diff, writes a `REVIEW · … · DONE` entry, and removes its `HANDOVERS.md` rows (protocol section 3.3).
