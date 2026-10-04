@@ -2162,7 +2162,7 @@
       "parent": "EPIC-017",
       "title": "CircleCI Deploy Pipeline: Automatic Staging, Approved Production",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-176"
       ],
@@ -6172,7 +6172,7 @@
       "parent": "STORY-177",
       "title": "Idempotent Lightsail Host Bootstrap Script",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1761"
@@ -6230,7 +6230,7 @@
       "parent": "STORY-178",
       "title": "Locked-Down Host Deploy Command With Readiness Gate and Rollback",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1761",
@@ -6295,7 +6295,7 @@
       "parent": "STORY-178",
       "title": "CircleCI Deploy Jobs: Automatic Staging, Approved Production",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1781"
@@ -6516,7 +6516,7 @@
       "parent": "STORY-180",
       "title": "Remote Lavalink Compose Override and Lavalink Host Compose File",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1761"
@@ -6562,7 +6562,7 @@
         "deploy/lavalink/lavalink.env.example lists the per-instance variables (LAVALINK_PASSWORD and the SPOTIFY_* values), and compose config -q passes for the Lavalink file with the example env files.",
         "scripts/compose-production.test.ts covers the override and the Lavalink host file; docs/deployment.md section 2.2 explains when to use the override."
       ],
-      "verify_cmd": "POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y LAVALINK_HOST=10.77.0.1 RIRIKO_ENV_FILE=.env.production.example docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production.example config -q && WG_ADDRESS=10.77.0.1 LAVALINK_PRODUCTION_ENV_FILE=deploy/lavalink/lavalink.env.example LAVALINK_STAGING_ENV_FILE=deploy/lavalink/lavalink.env.example docker compose -f deploy/lavalink/docker-compose.yml config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "verify_cmd": "POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y LAVALINK_HOST=10.77.0.1 RIRIKO_ENV_FILE=.env.production.example docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production.example config -q && WG_ADDRESS=10.77.0.1 LAVALINK_PRODUCTION_ENV_FILE=lavalink.env.example LAVALINK_STAGING_ENV_FILE=lavalink.env.example docker compose -f deploy/lavalink/docker-compose.yml config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
       "handovers": [
         "TASK-1801",
         "STORY-180",
