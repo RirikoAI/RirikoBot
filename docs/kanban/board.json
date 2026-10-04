@@ -409,6 +409,24 @@
       "requires": [],
       "blocks": [],
       "description": "Interactive branching adventure RPG with illustrated quests, companion progression and card rewards (STORY-170, docs/adventure_game_plan.md). Added in CHORE-0002 because STORY-170 had no epic."
+    },
+    {
+      "id": "EPIC-017",
+      "title": "Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI)",
+      "points": 21,
+      "status": "TODO",
+      "children": [
+        "STORY-176",
+        "STORY-177",
+        "STORY-178",
+        "STORY-179",
+        "STORY-180"
+      ],
+      "requires": [
+        "EPIC-012"
+      ],
+      "blocks": [],
+      "description": "Decided with the maintainer on 2026-10-05: production (Lightsail 8 GB) and staging (Lightsail 4 GB) each run docker-compose.production.yml on their own AWS Lightsail instance (Ubuntu 24.04, us-east-1), without the bundled Lavalink. Both use one Lavalink VPS at the VPS provider (Linux KVM PRO: 4+1 vCPU, 4 GB, 100 GB NVMe, the VPS region) that runs a production and a staging Lavalink instance, reachable only over WireGuard. Cloudflare Tunnel is the only way in: dashboard.ririko.ai (dashboard-staging.example.com behind Cloudflare Access) and one SSH hostname per host, with no open inbound TCP ports. The CircleCI release workflow deploys every release tag to staging automatically, and a final vX.Y.Z tag to production after a manual approval. Order: TASK-1761, TASK-1762, TASK-1801, TASK-1771, TASK-1781, TASK-1782, TASK-1791, TASK-1792, TASK-1802, TASK-1803, TASK-1772."
     }
   ],
   "stories": [
@@ -2033,6 +2051,267 @@
       "verify_cmd": "pnpm typecheck && pnpm vitest run packages/database/src apps/bot/src apps/web/src/lib/server && pnpm lint --quiet",
       "handovers": [
         "STORY-128"
+      ]
+    },
+    {
+      "id": "STORY-176",
+      "parent": "EPIC-017",
+      "title": "Harden the Production Compose for a Tunnelled Host",
+      "points": 5,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [
+        "STORY-177",
+        "STORY-178",
+        "STORY-179",
+        "STORY-180"
+      ],
+      "children": [
+        "TASK-1761",
+        "TASK-1762"
+      ],
+      "description": "The production compose publishes the dashboard on 0.0.0.0, keeps every Linux capability in the app containers and has no log rotation, and the dashboard keys its rate limits on the first X-Forwarded-For entry, which a client behind Cloudflare controls. This story makes the compose safe to run on an internet-facing host and lets the dashboard trust exactly one client IP header.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "context": {
+        "files": [
+          "docker-compose.production.yml",
+          ".env.production.example",
+          "apps/web/src/lib/server/auth/request.ts",
+          "packages/core/src/config/schema.ts",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "clientIp",
+          "WebConfigSchema"
+        ],
+        "entry_points": [
+          "docker-compose.production.yml",
+          "apps/web/src/lib/server/auth/request.ts"
+        ],
+        "codegraph_queries": [
+          "clientIp requestActor checkDashboardRequest limitAuthRequest limitProbeRequest",
+          "WebConfigSchema BaseWebConfigSchema applyLegacyAliases"
+        ]
+      },
+      "acceptance": [
+        "TASK-1761: the dashboard port binds to loopback by default, bot and web drop every capability, all services have no-new-privileges and rotated logs, and the Lavalink heap is configurable.",
+        "TASK-1762: with CLIENT_IP_HEADER set, the dashboard takes the client IP only from that header; without it, behaviour is unchanged."
+      ],
+      "verify_cmd": "RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y docker compose -f docker-compose.production.yml --env-file .env.production.example config -q && pnpm vitest run scripts apps/web/src/lib/server packages/core/src/config && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "STORY-176",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "STORY-177",
+      "parent": "EPIC-017",
+      "title": "Lightsail Host Bootstrap & Hosting Runbook",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-176"
+      ],
+      "blocks": [],
+      "children": [
+        "TASK-1771",
+        "TASK-1772"
+      ],
+      "description": "An idempotent bootstrap script turns a fresh Ubuntu 24.04 Lightsail instance into a Ririko host (Docker, cloudflared, hardened sshd, the restricted deploy user, the /opt/ririko layout and the host scripts), and a runbook walks the maintainer through Lightsail, Cloudflare Tunnel and Access, CircleCI contexts, go-live and recovery. TASK-1772 is written last because it documents every other task of the epic.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "context": {
+        "files": [
+          "deploy/host/bootstrap.sh",
+          "deploy/host/ririko.conf.example",
+          ".gitattributes",
+          ".circleci/config.yml",
+          "scripts/deploy-host.test.ts",
+          "docs/hosting.md",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "releaseTags"
+        ],
+        "entry_points": [
+          "deploy/host/bootstrap.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "TASK-1771: bootstrap.sh provisions a host idempotently and shellcheck runs on every host script in CI.",
+        "TASK-1772: docs/hosting.md and an ADR describe the hosting, go-live and recovery end to end."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check && pnpm site:build",
+      "handovers": [
+        "STORY-177",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "STORY-178",
+      "parent": "EPIC-017",
+      "title": "CircleCI Deploy Pipeline: Automatic Staging, Approved Production",
+      "points": 8,
+      "status": "TODO",
+      "requires": [
+        "STORY-176"
+      ],
+      "blocks": [],
+      "children": [
+        "TASK-1781",
+        "TASK-1782"
+      ],
+      "description": "A release tag already builds, smoke-checks and pushes both images. This story adds the host side (a deploy command that CI can call through a forced-command SSH key, with a pre-deploy database dump, a readiness gate and automatic rollback) and the CircleCI side (deploy to staging after every release, then a manual approval before production for final tags). CI only ever names a version: the compose file comes from the tagged repository and the secrets stay on the host.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          "deploy/host/bin/ririko-deploy-ssh.sh",
+          ".circleci/config.yml",
+          "scripts/release-tags.ts",
+          "scripts/deploy-host.test.ts",
+          "docs/release.md"
+        ],
+        "symbols": [
+          "releaseTags",
+          "RELEASE_TAG_PATTERN",
+          "probe",
+          "webProbe"
+        ],
+        "entry_points": [
+          ".circleci/config.yml",
+          "deploy/host/bin/ririko-deploy.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test",
+          "bot health server /ready readiness HEALTH_PORT web api ready route"
+        ]
+      },
+      "acceptance": [
+        "TASK-1781: ririko-deploy deploys a version, waits for both /ready probes and rolls back on failure; the SSH wrapper accepts nothing but deploy <version> and status.",
+        "TASK-1782: every release tag deploys to staging; a final tag waits for approval, then deploys to production."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "STORY-178",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "STORY-179",
+      "parent": "EPIC-017",
+      "title": "Backups, Health Watchdog & Heartbeat Alerts",
+      "points": 5,
+      "status": "TODO",
+      "requires": [
+        "STORY-176"
+      ],
+      "blocks": [],
+      "children": [
+        "TASK-1791",
+        "TASK-1792"
+      ],
+      "description": "Nothing backs up the production data today, and restart: unless-stopped never restarts a container that keeps running while unhealthy. This story adds a nightly restic backup (database dump plus the shared volumes) to a Lightsail bucket, and a per-minute watchdog that restarts unhealthy containers and pings a heartbeat monitor only while the stack is healthy.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-backup.sh",
+          "deploy/host/bin/ririko-watchdog.sh",
+          "deploy/host/systemd",
+          "deploy/host/ririko.conf.example",
+          "scripts/deploy-host.test.ts",
+          "docker-compose.production.yml"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "deploy/host/systemd"
+        ],
+        "codegraph_queries": [
+          "bot health server /ready readiness HEALTH_PORT web api ready route"
+        ]
+      },
+      "acceptance": [
+        "TASK-1791: a nightly timer backs up the database dump and the four app volumes to restic, prunes by policy and reports to a heartbeat URL.",
+        "TASK-1792: a per-minute timer restarts unhealthy containers and pings the heartbeat URL only while the stack is healthy and the disk has room."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "STORY-179",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "STORY-180",
+      "parent": "EPIC-017",
+      "title": "Remote Lavalink Node on a KVM VPS Host Over WireGuard",
+      "points": 13,
+      "status": "TODO",
+      "requires": [
+        "STORY-176"
+      ],
+      "blocks": [],
+      "children": [
+        "TASK-1801",
+        "TASK-1802",
+        "TASK-1803"
+      ],
+      "description": "Lavalink moves off the Lightsail hosts to one small KVM VPS instance (4+1 vCPU, 4 GB RAM, 100 GB NVMe, 4 TB transfer) running two Lavalink containers: production and staging, with separate passwords, ports and heaps. The app hosts reach them only through a WireGuard link; the VPS accepts nothing from the internet except WireGuard from the two Lightsail static IPs, and SSH arrives through Cloudflare Tunnel. The release pipeline updates each Lavalink instance before its app host, and only restarts it when its config changed.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "context": {
+        "files": [
+          "docker-compose.production.yml",
+          "docker-compose.remote-lavalink.yml",
+          "deploy/lavalink/docker-compose.yml",
+          "docker/lavalink/application.yml",
+          "deploy/host/bootstrap.sh",
+          "deploy/host/bin/ririko-deploy.sh",
+          "deploy/host/bin/ririko-watchdog.sh",
+          ".circleci/config.yml"
+        ],
+        "symbols": [
+          "LavalinkService",
+          "renderLavalinkConfig"
+        ],
+        "entry_points": [
+          "docker-compose.remote-lavalink.yml",
+          "deploy/lavalink/docker-compose.yml"
+        ],
+        "codegraph_queries": [
+          "LavalinkService connect reconnect LAVALINK_HOST LAVALINK_PORT LAVALINK_PASSWORD secure node options config",
+          "renderLavalinkConfig setupLavalink isLavalinkActive"
+        ]
+      },
+      "acceptance": [
+        "TASK-1801: the app hosts run the stack without the bundled Lavalink through a compose override, and deploy/lavalink/docker-compose.yml runs the two Lavalink instances on the VPS with a pinned image.",
+        "TASK-1802: bootstrap.sh --role lavalink prepares the VPS, every host gets a WireGuard link, and the VPS firewall allows only WireGuard from the Lightsail static IPs and each app host only its own Lavalink port.",
+        "TASK-1803: the release pipeline deploys each Lavalink instance before its app host, restarts it only when its config changed, and the watchdog covers the Lavalink host."
+      ],
+      "verify_cmd": "POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y LAVALINK_HOST=10.77.0.1 RIRIKO_ENV_FILE=.env.production.example docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production.example config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check && pnpm exec prettier --check .circleci/config.yml",
+      "handovers": [
+        "STORY-180",
+        "EPIC-017"
       ]
     }
   ],
@@ -5772,6 +6051,633 @@
         "STORY-119",
         "TASK-1191",
         "TASK-1192"
+      ]
+    },
+    {
+      "id": "TASK-1761",
+      "parent": "STORY-176",
+      "title": "Compose Hardening: Loopback Dashboard Port, Dropped Capabilities, Log Rotation, Lavalink Heap",
+      "points": 2,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [
+        "TASK-1771",
+        "TASK-1781",
+        "TASK-1801"
+      ],
+      "description": "Make docker-compose.production.yml safe on an internet-facing host without changing what it runs. A test parses the file so the settings cannot silently regress.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "docker-compose.production.yml",
+          ".env.production.example",
+          "docs/deployment.md",
+          "package.json",
+          "pnpm-lock.yaml",
+          "scripts/compose-production.test.ts",
+          "scripts/release-tags.test.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "docker-compose.production.yml"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "The web service publishes '${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-3000}:3000'. .env.production.example documents DASHBOARD_BIND and says 0.0.0.0 is only for a host whose own firewall or reverse proxy protects the port.",
+        "bot and web have cap_drop: [ALL] and security_opt: [no-new-privileges:true]. postgres and lavalink have security_opt: [no-new-privileges:true] and keep their capabilities.",
+        "All four services share one logging anchor: driver local, max-size 20m, max-file 5.",
+        "Lavalink reads its heap from LAVALINK_HEAP (_JAVA_OPTIONS: -Xmx${LAVALINK_HEAP:-1G}), documented in .env.production.example (512m for a 4 GB host).",
+        "yaml is added to the root devDependencies at the version already in pnpm-lock.yaml, and scripts/compose-production.test.ts parses the compose file with it and asserts each item above.",
+        "docker compose config -q passes, and docs/deployment.md section 2.2 describes the loopback binding, the capabilities, the log rotation and LAVALINK_HEAP."
+      ],
+      "verify_cmd": "RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y docker compose -f docker-compose.production.yml --env-file .env.production.example config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1761",
+        "STORY-176",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1762",
+      "parent": "STORY-176",
+      "title": "Trusted Client IP Header for the Dashboard Behind Cloudflare",
+      "points": 3,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [
+        "TASK-1772"
+      ],
+      "description": "clientIp takes the first X-Forwarded-For entry. Cloudflare appends the real address to whatever the client sent, so behind Cloudflare that entry is attacker-controlled, and the auth, probe and pre-sign-in action rate limits are keyed on it. An optional CLIENT_IP_HEADER (cf-connecting-ip in production) makes the dashboard read exactly one trusted header.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "apps/web/src/lib/server/auth/request.ts",
+          "apps/web/src/lib/server/auth/request.test.ts",
+          "apps/web/src/lib/server/rate-limit.ts",
+          "apps/web/src/lib/server/request-context.ts",
+          "apps/web/src/app/api/auth/callback/route.ts",
+          "packages/core/src/config/schema.ts",
+          ".env.example",
+          ".env.production.example",
+          "docs/deployment.md",
+          "packages/core/src/config/client-ip-header.test.ts"
+        ],
+        "symbols": [
+          "clientIp",
+          "limitAuthRequest",
+          "limitProbeRequest",
+          "checkDashboardRequest",
+          "requestActor",
+          "BaseWebConfigSchema",
+          "WebConfigSchema"
+        ],
+        "entry_points": [
+          "apps/web/src/lib/server/auth/request.ts"
+        ],
+        "codegraph_queries": [
+          "clientIp requestActor checkDashboardRequest limitAuthRequest limitProbeRequest",
+          "WebConfigSchema BaseWebConfigSchema applyLegacyAliases"
+        ]
+      },
+      "acceptance": [
+        "packages/core exports a ClientIpHeaderSchema (optional, trimmed, lower-cased, /^[a-z0-9-]+$/), and BaseWebConfigSchema has CLIENT_IP_HEADER with it, so a malformed value stops the dashboard at startup.",
+        "When CLIENT_IP_HEADER is set, clientIp returns that header’s value only if node:net isIP accepts it, else null. It never falls back to X-Forwarded-For or X-Real-IP.",
+        "When CLIENT_IP_HEADER is unset, clientIp behaves exactly as today and the existing tests pass unchanged.",
+        "clientIp stays synchronous with the same callers; the header name is read through the schema once and cached, not from scattered process.env reads.",
+        "Tests cover: a spoofed X-Forwarded-For is ignored when the header is set, an invalid value gives null, a missing header gives null, an IPv6 address passes, and the schema rejects a value with spaces.",
+        ".env.production.example has a commented CLIENT_IP_HEADER=cf-connecting-ip with the warning that it is safe only when every request reaches the dashboard through Cloudflare; docs/deployment.md explains it."
+      ],
+      "verify_cmd": "pnpm vitest run apps/web/src/lib/server packages/core/src/config && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1762",
+        "STORY-176",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1771",
+      "parent": "STORY-177",
+      "title": "Idempotent Lightsail Host Bootstrap Script",
+      "points": 3,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1761"
+      ],
+      "blocks": [
+        "TASK-1781",
+        "TASK-1791",
+        "TASK-1792",
+        "TASK-1802"
+      ],
+      "description": "deploy/host/bootstrap.sh prepares a fresh Ubuntu 24.04 instance and can be re-run safely to update the host scripts. It is the base the deploy, backup and watchdog scripts install through.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bootstrap.sh",
+          "deploy/host/ririko.conf.example",
+          "deploy/host/files",
+          "deploy/host/bin",
+          "deploy/host/systemd",
+          ".gitattributes",
+          ".circleci/config.yml",
+          "scripts/deploy-host.test.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "deploy/host/bootstrap.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "bootstrap.sh --ref <tag or branch> [--deploy-key \"<ssh public key>\"] [--tunnel-token-file <path>] runs as root, refuses anything but Ubuntu 24.04, and a second run changes nothing it already set. --help prints usage and exits 0 without root.",
+        "It downloads https://codeload.github.com/RirikoAI/RirikoBot/tar.gz/<ref>, installs every deploy/host/bin/*.sh to /usr/local/bin without the .sh suffix (root:root 0755) and every deploy/host/systemd/* unit to /etc/systemd/system, reloads systemd and enables each installed .timer.",
+        "It installs Docker Engine and the compose plugin from Docker’s apt repository, writes /etc/docker/daemon.json (log-driver local, max-size 20m, max-file 5, live-restore true) and restarts Docker only when that file changed. It enables unattended security upgrades with automatic reboot at 05:00 UTC and adds a 2 GB swap file when the host has no swap.",
+        "It installs cloudflared from Cloudflare’s apt repository. With --tunnel-token-file and no cloudflared service yet, it runs cloudflared service install with the token read from the file, then shreds the file.",
+        "It creates the user deploy with no password and no docker group membership. --deploy-key writes authorized_keys as restrict,command=\"/usr/local/bin/ririko-deploy-ssh\" <key>. /etc/sudoers.d/ririko-deploy allows deploy to run only /usr/local/bin/ririko-deploy as root without a password and passes visudo -cf.",
+        "An sshd drop-in sets PasswordAuthentication no, KbdInteractiveAuthentication no, PermitRootLogin no and AllowUsers ubuntu deploy; sshd -t must pass before ssh is reloaded.",
+        "It creates /opt/ririko/{releases,state,backups/predeploy,backups/nightly} (root, 0750) and /etc/ririko/ririko.conf from deploy/host/ririko.conf.example when missing (root, 0600), and prints the remaining manual steps.",
+        ".gitattributes forces LF for deploy/host/**. The CircleCI lint job installs shellcheck and runs it on every deploy/host/**/*.sh. scripts/deploy-host.test.ts checks that no file under deploy/host has CRLF, that every .sh passes bash -n, and that bootstrap.sh --help exits 0."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check && pnpm exec prettier --check .circleci/config.yml",
+      "handovers": [
+        "TASK-1771",
+        "STORY-177",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1781",
+      "parent": "STORY-178",
+      "title": "Locked-Down Host Deploy Command With Readiness Gate and Rollback",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1761",
+        "TASK-1771"
+      ],
+      "blocks": [
+        "TASK-1782",
+        "TASK-1792",
+        "TASK-1772",
+        "TASK-1803"
+      ],
+      "description": "The only thing CI can do on a host: deploy a released version or read the status. The compose file is fetched from the tagged repository, so a stolen deploy key can at most pick another published version. Secrets never leave the host.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          "deploy/host/bin/ririko-deploy-ssh.sh",
+          "deploy/host/ririko.conf.example",
+          "scripts/deploy-host.test.ts",
+          "docker-compose.production.yml",
+          "scripts/release-tags.ts",
+          "Dockerfile"
+        ],
+        "symbols": [
+          "RELEASE_TAG_PATTERN",
+          "probe",
+          "healthPort",
+          "webProbe"
+        ],
+        "entry_points": [
+          "deploy/host/bin/ririko-deploy-ssh.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test",
+          "bot health server /ready readiness HEALTH_PORT web api ready route"
+        ]
+      },
+      "acceptance": [
+        "ririko-deploy-ssh (the forced command) reads SSH_ORIGINAL_COMMAND and accepts only \"deploy <version>\" and \"status\", where version matches ^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.]+)?$. It runs sudo -n /usr/local/bin/ririko-deploy with those words; anything else exits 2 with \"command not allowed\".",
+        "ririko-deploy deploy <version> (root) validates the version again, takes a flock on the deploy lock (exit 3 when busy), loads /etc/ririko/ririko.conf, and downloads every file in RIRIKO_COMPOSE_FILES (default docker-compose.production.yml; the Lightsail hosts add docker-compose.remote-lavalink.yml) plus docker/lavalink/application.yml from https://raw.githubusercontent.com/${RIRIKO_REPO}/v<version>/ into /opt/ririko/releases/<version>/, keeping the repository layout, through a temporary directory. A missing tag or file fails before anything changes.",
+        "When a release is already deployed and postgres is running, it writes pg_dump -Fc to /opt/ririko/backups/predeploy/<UTC>-from-<previous>.dump, keeps the newest 5, and aborts on a dump failure before pulling.",
+        "It runs docker compose -p ririko with one -f per RIRIKO_COMPOSE_FILES entry, --env-file and RIRIKO_ENV_FILE set to the host env file and RIRIKO_VERSION=<version>: pull, then up -d --no-build --remove-orphans.",
+        "It polls every 5 s, up to READY_TIMEOUT seconds (default 300), until the bot’s /ready (through docker compose exec -T bot node -e fetch on HEALTH_PORT, default 8080) and the dashboard’s /api/ready both answer 200. Exec errors count as not ready.",
+        "On success it writes the version to /opt/ririko/state/current and the old one to state/previous (plain files, no symlinks) and exits 0.",
+        "On failure it prints docker compose ps and the last 100 log lines of bot and web. With a previous release it redeploys that release the same way (no new dump) and exits 4 naming the pre-deploy dump; without one it exits 5. It never restores the database itself.",
+        "ririko-deploy status prints the current and previous versions and docker compose ps. Every run appends timestamped lines to /opt/ririko/deploy.log.",
+        "RIRIKO_ROOT, RIRIKO_CONF, RIRIKO_LOCK, DOCKER, CURL and READY_POLL_SECONDS can be overridden, and scripts/deploy-host.test.ts runs both scripts with fake docker and curl executables to cover: rejected commands (latest, 2.1.3;id, ../x, an empty command), the success path, rollback (exit 4), a failed first deploy (exit 5), a busy lock (exit 3) and a failed dump."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1781",
+        "STORY-178",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1782",
+      "parent": "STORY-178",
+      "title": "CircleCI Deploy Jobs: Automatic Staging, Approved Production",
+      "points": 3,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1781"
+      ],
+      "blocks": [
+        "TASK-1772",
+        "TASK-1803"
+      ],
+      "description": "Extend the tag-driven release workflow: after the images are pushed, deploy to staging, then wait for a maintainer’s approval before production. Prerelease tags stop at staging.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          ".circleci/config.yml",
+          "scripts/release-tags.test.ts",
+          "scripts/circleci-deploy.test.ts",
+          "docs/release.md"
+        ],
+        "symbols": [
+          "RELEASE_TAG_PATTERN"
+        ],
+        "entry_points": [
+          ".circleci/config.yml"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "A deploy job with an environment parameter (staging or production) installs a pinned cloudflared release whose sha256 is checked, writes the key from DEPLOY_SSH_KEY_B64 (0600) and DEPLOY_KNOWN_HOSTS, and runs ssh with StrictHostKeyChecking=yes, IdentitiesOnly=yes and a cloudflared access ssh ProxyCommand that authenticates with the Access service token, sending \"deploy ${CIRCLE_TAG#v}\" to deploy@$DEPLOY_SSH_HOST. The job fails with the host’s exit status.",
+        "The service token secrets never appear on a command line when cloudflared can read them from its environment variables.",
+        "The release workflow runs release, then deploy-staging (context deploy-staging) for every release tag, then approve-production (type: approval) and deploy-production (context deploy-production) only for tags matching ^v\\d+\\.\\d+\\.\\d+$. Every job keeps a tag filter and ignores all branches.",
+        "The ci workflow is unchanged.",
+        "scripts/circleci-deploy.test.ts parses the config with yaml and checks the job order, the approval type, the contexts, that v2.1.3-rc.1 reaches staging but not approval, and that no secret value is inline.",
+        "docs/release.md explains the contexts and their variables, restricting deploy-production to a maintainers security group so only maintainers can approve, the pipeline order and what host exit codes 3, 4 and 5 mean."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check && pnpm exec prettier --check .circleci/config.yml",
+      "handovers": [
+        "TASK-1782",
+        "STORY-178",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1791",
+      "parent": "STORY-179",
+      "title": "Encrypted Off-Site Backups With restic to a Lightsail Bucket",
+      "points": 3,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1771"
+      ],
+      "blocks": [
+        "TASK-1772"
+      ],
+      "description": "Nightly, client-side encrypted backup of everything that cannot be rebuilt: a Postgres dump and the shared app volumes. restic runs from its pinned container image, so the host needs no extra packages.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-backup.sh",
+          "deploy/host/systemd/ririko-backup.service",
+          "deploy/host/systemd/ririko-backup.timer",
+          "deploy/host/ririko.conf.example",
+          "scripts/deploy-host.test.ts",
+          "docker-compose.production.yml"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "deploy/host/systemd/ririko-backup.timer"
+        ],
+        "codegraph_queries": [
+          "bot health server /ready readiness HEALTH_PORT web api ready route"
+        ]
+      },
+      "acceptance": [
+        "ririko-backup.timer runs daily at 03:30 UTC with Persistent=true and RandomizedDelaySec=10min.",
+        "ririko-backup waits up to 30 minutes for the deploy lock, writes pg_dump -Fc to /opt/ririko/backups/nightly/ririko.dump, then runs a pinned restic image with RESTIC_REPOSITORY, RESTIC_PASSWORD, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY from /etc/ririko/ririko.conf, mounting the dump directory and the volumes ririko_ririko_data, ririko_card_images, ririko_boss_images and ririko_welcomer_backgrounds read-only.",
+        "It runs restic backup with the host name RIRIKO_ENV_NAME, then forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune, and restic check on Sundays.",
+        "It never backs up .env.production or /etc/ririko/ririko.conf.",
+        "ririko-backup init runs restic init once and is safe to repeat.",
+        "On success it pings BACKUP_PING_URL when set; on failure it pings BACKUP_PING_URL/fail and exits non-zero.",
+        "scripts/deploy-host.test.ts covers the mounts, the retention policy, the Sunday check, the fail ping and waiting for the lock with fake docker and curl."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1791",
+        "STORY-179",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1792",
+      "parent": "STORY-179",
+      "title": "Health Watchdog and Heartbeat Alerts",
+      "points": 2,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1771",
+        "TASK-1781"
+      ],
+      "blocks": [
+        "TASK-1772",
+        "TASK-1802",
+        "TASK-1803"
+      ],
+      "description": "Docker does not restart a container that keeps running while its HEALTHCHECK fails, and nothing alerts today. A per-minute watchdog restarts unhealthy containers and keeps a heartbeat monitor (Healthchecks.io or similar) fed only while the stack is healthy, so silence means trouble.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-watchdog.sh",
+          "deploy/host/systemd/ririko-watchdog.service",
+          "deploy/host/systemd/ririko-watchdog.timer",
+          "deploy/host/bin/ririko-deploy.sh",
+          "deploy/host/ririko.conf.example",
+          "scripts/deploy-host.test.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "deploy/host/systemd/ririko-watchdog.timer"
+        ],
+        "codegraph_queries": [
+          "bot health server /ready readiness HEALTH_PORT web api ready route"
+        ]
+      },
+      "acceptance": [
+        "ririko-watchdog.timer runs the watchdog every minute.",
+        "While the deploy lock is held, the watchdog exits 0 without restarting or pinging anything.",
+        "Each container of the ririko compose project whose health is unhealthy is restarted with docker restart and logged through logger.",
+        "The stack is healthy when bot, web and postgres report healthy and lavalink is running. When it is healthy and the root file system is below DISK_ALERT_PERCENT (default 85), it pings HEALTHCHECK_PING_URL; otherwise it posts a one-line reason to HEALTHCHECK_PING_URL/fail. Without a URL it only logs.",
+        "scripts/deploy-host.test.ts covers the restart, the healthy ping, the fail ping with its reason, the disk threshold and the lock skip with fake docker, curl and df."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1792",
+        "STORY-179",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1772",
+      "parent": "STORY-177",
+      "title": "Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery",
+      "points": 2,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1762",
+        "TASK-1781",
+        "TASK-1782",
+        "TASK-1791",
+        "TASK-1792",
+        "TASK-1801",
+        "TASK-1802",
+        "TASK-1803"
+      ],
+      "blocks": [],
+      "description": "The maintainer does every provider-side step by hand. This runbook makes them repeatable and records the decision as an ADR. Written last, from the finished scripts.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "docs/hosting.md",
+          "docs/deployment.md",
+          "docs/release.md",
+          "docs/adr/ADR-014-production-hosting-lightsail-cloudflare-tunnel.md",
+          "AGENTS.md",
+          "deploy/host/bootstrap.sh",
+          "deploy/host/ririko.conf.example",
+          "deploy/lavalink/docker-compose.yml",
+          "docker-compose.remote-lavalink.yml"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "docs/hosting.md"
+        ],
+        "codegraph_queries": [
+          "bot health server /ready readiness HEALTH_PORT web api ready route"
+        ]
+      },
+      "acceptance": [
+        "docs/hosting.md, Lightsail: two Ubuntu 24.04 LTS instances in us-east-1 with IPv4 (production 8 GB RAM / 2 vCPU, staging 4 GB / 2 vCPU); a static IP attached to each (the Lavalink VPS allowlists them); every IPv4 and IPv6 firewall rule deleted; automatic snapshots on; a CPU burst capacity alarm, because the bundles are burstable; one bucket per environment for restic with a bucket-scoped access key.",
+        "Lavalink VPS: small KVM VPS (4+1 vCPU, 4 GB, 100 GB NVMe, 4 TB transfer) with Ubuntu 24.04, bootstrapped with --role lavalink; the WireGuard key exchange and WG_PEERS/WG_ALLOWED_ENDPOINTS values for all three hosts; per-instance env files; cloudflared for ssh-lavalink.example.com; break-glass through the provider’s VNC console; a bandwidth note (about 110 GB a month per continuously playing session) with the upgrade path to ELITE.",
+        "Cloudflare: one remotely managed tunnel per host, including the Lavalink VPS (ssh-lavalink.example.com only). Production routes dashboard.ririko.ai to http://localhost:3000 and ssh-prod.ririko.ai to ssh://localhost:22; staging uses dashboard-staging.example.com and ssh-staging.example.com (one level deep, so Universal SSL covers them). Access applications protect both SSH hostnames (maintainers’ emails plus a Service Auth policy for that environment’s CI service token) and the staging dashboard.",
+        "Zone settings for the dashboard hostnames: Rocket Loader, Email Address Obfuscation, automatic Web Analytics injection and Zaraz off, because they inject scripts the nonce CSP blocks; Always Use HTTPS on; HTML not cached.",
+        "Discord: a separate staging application, and the OAuth2 redirect <DASHBOARD_URL>/api/auth/callback for each.",
+        "Host setup: the bootstrap command, ririko.conf, .env.production with DASHBOARD_URL and CLIENT_IP_HEADER=cf-connecting-ip, ririko-backup init, Healthchecks.io checks for the watchdog and the backup, and an external uptime monitor on https://dashboard.ririko.ai/health.",
+        "CircleCI: generating the deploy key pair, pinning known_hosts with ssh-keyscan through cloudflared, and filling the deploy-staging and deploy-production contexts.",
+        "Go-live: an rc tag deploys to staging; check Discord login, music playback from the AWS address, card rendering and a restic restore drill; then tag the release and approve production.",
+        "Recovery: deploying an older version, restoring the pre-deploy dump, rebuilding a host from restic, break-glass SSH through a temporary Lightsail browser-SSH firewall rule, and where every secret lives (SECRET_VAULT_KEY and the restic password also kept offline).",
+        "docs/adr/ADR-014 records the decision and the rejected options (serverless/Vercel, PaaS with separate machines, Kubernetes, public SSH). docs/deployment.md section 4 and the AGENTS.md catalog link docs/hosting.md.",
+        "Lightsail .env.production on each app host sets LAVALINK_HOST=10.77.0.1, LAVALINK_PORT (2333 production, 2334 staging) and the matching instance password, and RIRIKO_COMPOSE_FILES includes the remote Lavalink override."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm site:build",
+      "handovers": [
+        "TASK-1772",
+        "STORY-177",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1801",
+      "parent": "STORY-180",
+      "title": "Remote Lavalink Compose Override and Lavalink Host Compose File",
+      "points": 3,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1761"
+      ],
+      "blocks": [
+        "TASK-1803",
+        "TASK-1772"
+      ],
+      "description": "Self-hosters keep the bundled Lavalink in docker-compose.production.yml. The Lightsail hosts add an override that leaves it out and points the bot at the remote node, and the VPS gets its own compose file with one Lavalink service per environment.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "docker-compose.production.yml",
+          "docker-compose.remote-lavalink.yml",
+          "deploy/lavalink/docker-compose.yml",
+          "deploy/lavalink/lavalink.env.example",
+          "docker/lavalink/application.yml",
+          ".env.production.example",
+          "scripts/compose-production.test.ts",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "LavalinkService"
+        ],
+        "entry_points": [
+          "docker-compose.remote-lavalink.yml",
+          "deploy/lavalink/docker-compose.yml"
+        ],
+        "codegraph_queries": [
+          "LavalinkService connect reconnect LAVALINK_HOST LAVALINK_PORT LAVALINK_PASSWORD secure node options config",
+          "renderLavalinkConfig setupLavalink isLavalinkActive"
+        ]
+      },
+      "acceptance": [
+        "The Lavalink image is pinned to one exact 4.x release (not :4) in docker-compose.production.yml and deploy/lavalink/docker-compose.yml, and the test asserts both use the same tag.",
+        "docker-compose.remote-lavalink.yml puts the lavalink service in the profile bundled-lavalink so it never starts, replaces the bot depends_on with postgres only (Compose !override), and sets the bot LAVALINK_HOST to ${LAVALINK_HOST:?set LAVALINK_HOST} and LAVALINK_PORT to ${LAVALINK_PORT:-2333}.",
+        "docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml config -q passes, and the merged config has no running lavalink service and no bot dependency on it.",
+        "deploy/lavalink/docker-compose.yml (project name ririko-lavalink) has lavalink-production and lavalink-staging: network_mode host, SERVER_ADDRESS from ${WG_ADDRESS:?set WG_ADDRESS}, SERVER_PORT 2333 and 2334, env_file from LAVALINK_PRODUCTION_ENV_FILE and LAVALINK_STAGING_ENV_FILE (defaults under /opt/ririko), heaps from LAVALINK_PRODUCTION_HEAP (default 1536m) and LAVALINK_STAGING_HEAP (default 512m), separate plugin volumes, ../../docker/lavalink/application.yml mounted read-only, the shared logging settings, no-new-privileges and restart unless-stopped.",
+        "deploy/lavalink/lavalink.env.example lists the per-instance variables (LAVALINK_PASSWORD and the SPOTIFY_* values), and compose config -q passes for the Lavalink file with the example env files.",
+        "scripts/compose-production.test.ts covers the override and the Lavalink host file; docs/deployment.md section 2.2 explains when to use the override."
+      ],
+      "verify_cmd": "POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y LAVALINK_HOST=10.77.0.1 RIRIKO_ENV_FILE=.env.production.example docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production.example config -q && WG_ADDRESS=10.77.0.1 LAVALINK_PRODUCTION_ENV_FILE=deploy/lavalink/lavalink.env.example LAVALINK_STAGING_ENV_FILE=deploy/lavalink/lavalink.env.example docker compose -f deploy/lavalink/docker-compose.yml config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1801",
+        "STORY-180",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1802",
+      "parent": "STORY-180",
+      "title": "WireGuard Link, Lavalink Host Firewall and Bootstrap Roles",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1771",
+        "TASK-1792"
+      ],
+      "blocks": [
+        "TASK-1803",
+        "TASK-1772"
+      ],
+      "description": "The Lavalink password must never cross the internet in clear text, and the Lavalink ports must never be public. A WireGuard link (10.77.0.0/24) joins the VPS (10.77.0.1, listening on UDP 51820) with production (10.77.0.2) and staging (10.77.0.3); the VPS firewall limits each peer to its own Lavalink port.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bootstrap.sh",
+          "deploy/host/lib/render-wireguard.sh",
+          "deploy/host/lib/render-nftables.sh",
+          "deploy/host/files",
+          "deploy/host/ririko.conf.example",
+          "scripts/deploy-host.test.ts"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "deploy/host/bootstrap.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "bootstrap.sh takes --role app|lavalink (default app). The app role enables the backup and watchdog timers; the lavalink role enables only the watchdog, creates no backup directories, and takes --deploy-key-staging and --deploy-key-production instead of --deploy-key.",
+        "Both roles install wireguard-tools, create /etc/wireguard/private.key (0600) once and print the public key. When /etc/ririko/ririko.conf has WG_ADDRESS and WG_PEERS, they render /etc/wireguard/wg0.conf (0600) and enable wg-quick@wg0. The app role peer has PersistentKeepalive 25 and AllowedIPs 10.77.0.1/32; the lavalink role listens on WG_LISTEN_PORT (default 51820) with one /32 per peer.",
+        "The lavalink role installs an nftables table inet ririko (it never flushes the whole ruleset, which would remove Docker’s rules): input policy drop; allow loopback, established and related, ICMP echo rate-limited, UDP WG_LISTEN_PORT only from WG_ALLOWED_ENDPOINTS (the Lightsail static IPs); on wg0 allow TCP 2333 only from 10.77.0.2 and TCP 2334 only from 10.77.0.3. It checks the file with nft -c before loading.",
+        "In the lavalink role, authorized_keys for deploy has two keys: restrict,command=\"/usr/local/bin/ririko-deploy-ssh production\" and restrict,command=\"/usr/local/bin/ririko-deploy-ssh staging\", so each CI context can only deploy its own instance.",
+        "The WireGuard and nftables rendering live in deploy/host/lib/*.sh functions; scripts/deploy-host.test.ts renders both from sample configs and checks the output, and checks that a peer list with a malformed key or address is refused."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1802",
+        "STORY-180",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1803",
+      "parent": "STORY-180",
+      "title": "Lavalink Host Deploy Role, Watchdog Checks and CI Jobs",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1781",
+        "TASK-1782",
+        "TASK-1792",
+        "TASK-1801",
+        "TASK-1802"
+      ],
+      "blocks": [
+        "TASK-1772"
+      ],
+      "description": "Lavalink config ships with releases (docker/lavalink/application.yml pins the plugins), so each release updates the matching Lavalink instance first. A restart drops every playing session on that instance, so it happens only when the instance’s config actually changed.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          "deploy/host/bin/ririko-deploy-ssh.sh",
+          "deploy/host/bin/ririko-watchdog.sh",
+          "deploy/lavalink/docker-compose.yml",
+          ".circleci/config.yml",
+          "scripts/circleci-deploy.test.ts",
+          "scripts/deploy-host.test.ts",
+          "deploy/host/ririko.conf.example",
+          "docs/release.md"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "deploy/host/bin/ririko-deploy-ssh.sh",
+          ".circleci/config.yml"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "With RIRIKO_ROLE=lavalink, ririko-deploy-ssh takes the instance (staging or production) from its forced-command argument, never from SSH_ORIGINAL_COMMAND, and still accepts only \"deploy <version>\" and \"status\".",
+        "ririko-deploy deploy <version> <instance> downloads deploy/lavalink/docker-compose.yml and docker/lavalink/application.yml from the tag into releases/<version>/ with the repository layout. When the sha256 of both files equals state/lavalink-<instance>.sha, it prints \"unchanged\" and exits 0 without touching the container.",
+        "Otherwise it pulls and recreates only lavalink-<instance> (docker compose -p ririko-lavalink up -d --no-deps), waits up to 180 s for GET http://<WG_ADDRESS>:<port>/version with that instance’s password to answer 200, and on failure redeploys the previous release of that instance and exits 4 (5 when there is none).",
+        "With RIRIKO_ROLE=lavalink, the watchdog treats the host as healthy when both containers run and both /version checks answer; it restarts an instance after 3 consecutive failed checks (state kept under /opt/ririko/state) and pings HEALTHCHECK_PING_URL as on the app hosts.",
+        "The release workflow runs release, deploy-lavalink-staging (context deploy-lavalink-staging), deploy-staging, approve-production, deploy-lavalink-production (context deploy-lavalink-production), deploy-production. The Lavalink jobs reuse the deploy job with a host parameter and keep the tag filters of their app jobs.",
+        "scripts/deploy-host.test.ts covers the instance pinning, the unchanged no-op, the recreate, the rollback and the watchdog restart counter; scripts/circleci-deploy.test.ts checks the new order and contexts; docs/release.md lists the two new contexts."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check && pnpm exec prettier --check .circleci/config.yml",
+      "handovers": [
+        "TASK-1803",
+        "STORY-180",
+        "EPIC-017"
       ]
     }
   ],
