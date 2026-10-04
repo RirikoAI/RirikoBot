@@ -1,0 +1,57 @@
+# Dedicated Lavalink host: one container per environment, production and staging, each with its
+# own password, port and heap. The app hosts reach them over WireGuard; nothing here is public.
+#
+#   cd /opt/ririko/repo/deploy/lavalink   # the repository layout must stay intact
+#   WG_ADDRESS=10.77.0.1 docker compose up -d
+#
+# docs/deployment.md explains the host setup.
+name: ririko-lavalink
+
+# Rotate container logs so they cannot fill the disk: 5 files of 20 MB per service.
+x-logging: &logging
+  driver: local
+  options:
+    max-size: 20m
+    max-file: '5'
+
+services:
+  lavalink-production:
+    image: ghcr.io/lavalink-devs/lavalink:4.2.2
+    restart: unless-stopped
+    logging: *logging
+    security_opt:
+      - no-new-privileges:true
+    # Host networking, so the firewall rules for each WireGuard peer see the traffic. Published
+    # ports would go through Docker's own chains and skip them.
+    network_mode: host
+    # LAVALINK_PASSWORD and the SPOTIFY_* values, one file per instance (lavalink.env.example).
+    env_file: ${LAVALINK_PRODUCTION_ENV_FILE:-/opt/ririko/lavalink-production.env}
+    environment:
+      # These override server.address and server.port in application.yml.
+      SERVER_ADDRESS: ${WG_ADDRESS:?set WG_ADDRESS}
+      SERVER_PORT: '2333'
+      _JAVA_OPTIONS: -Xmx${LAVALINK_PRODUCTION_HEAP:-1536m}
+    volumes:
+      - ../../docker/lavalink/application.yml:/opt/Lavalink/application.yml:ro
+      # Plugins download on first start; keep them between restarts.
+      - lavalink_production_plugins:/opt/Lavalink/plugins
+
+  lavalink-staging:
+    image: ghcr.io/lavalink-devs/lavalink:4.2.2
+    restart: unless-stopped
+    logging: *logging
+    security_opt:
+      - no-new-privileges:true
+    network_mode: host
+    env_file: ${LAVALINK_STAGING_ENV_FILE:-/opt/ririko/lavalink-staging.env}
+    environment:
+      SERVER_ADDRESS: ${WG_ADDRESS:?set WG_ADDRESS}
+      SERVER_PORT: '2334'
+      _JAVA_OPTIONS: -Xmx${LAVALINK_STAGING_HEAP:-512m}
+    volumes:
+      - ../../docker/lavalink/application.yml:/opt/Lavalink/application.yml:ro
+      - lavalink_staging_plugins:/opt/Lavalink/plugins
+
+volumes:
+  lavalink_production_plugins:
+  lavalink_staging_plugins:
