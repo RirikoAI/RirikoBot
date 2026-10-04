@@ -9,6 +9,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TIERS as MODELS, tierProblem } from './tier-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const boardPath = path.join(root, 'docs', 'kanban', 'board.json');
@@ -20,8 +21,6 @@ const hasIndex = fs.existsSync(path.join(root, '.codegraph', 'codegraph.db'));
 
 const FIB = [1, 2, 3, 5, 8, 13, 21];
 const STATUSES = ['BACKLOG', 'TODO', 'IN_PROGRESS', 'PAUSED', 'BLOCKED', 'REVIEW', 'DONE', 'ABANDONED'];
-// Provider-neutral model tiers. protocol.md section 1.2 maps them to each provider's models.
-const MODELS = ['small', 'medium', 'large'];
 const LEGACY_MODELS = { haiku: 'small', sonnet: 'medium', opus: 'large' };
 const GROUPS = { epics: 'epic', stories: 'story', tasks: 'task', chores: 'chore', bugs: 'bug' };
 
@@ -66,9 +65,10 @@ for (const t of all) {
   }
   if (t.model && LEGACY_MODELS[t.model]) errors.push(`${at}: model "${t.model}" is a provider model name; use the tier "${LEGACY_MODELS[t.model]}" (or run the installer's upgrade)`);
   else if (t.model && !MODELS.includes(t.model)) errors.push(`${at}: model must be one of ${MODELS.join(', ')}`);
+  else if (tierProblem(t)) errors.push(`${at}: ${tierProblem(t)}`);
 
   if (needsGrooming(t)) {
-    if (!t.model) errors.push(`${at}: no "model" set; grooming must pick the worker model`);
+    if (!t.model) errors.push(`${at}: no "model" set; grooming sets the tier the rule requires (protocol 1.2)`);
     if (!t.context?.files?.length && !t.context?.symbols?.length) errors.push(`${at}: context.files or context.symbols is empty; grooming must record where the work is`);
     if (hasIndex && !t.context?.codegraph_queries?.length) errors.push(`${at}: context.codegraph_queries is empty; grooming must record the queries that found the code`);
     if (!t.acceptance?.length) errors.push(`${at}: acceptance criteria are empty`);

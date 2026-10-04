@@ -15,13 +15,17 @@ The protocol is **provider-agnostic**. Claude Code, Gemini CLI, Codex, opencode,
 The saving comes from doing the expensive exploration **once**, during grooming, and handing the result to the worker. The worker can run on a cheaper tier. A worker that has to rediscover the code wastes that saving. Sections 3 and 6 exist to prevent this.
 
 ### 1.2. Model Tiers
-Tickets name a tier, not a model. Each agent maps the tier to the models its provider offers. Model names change often, so the tier is the contract. The examples below are a guide.
+Tickets name a tier, not a model. Each agent maps the tier to the models its provider offers. Model names change often, so the tier is the contract. The model columns below are a guide.
 
-| Tier | Use for | Claude | Gemini | OpenAI / Codex |
+**Standing tier rule.** The tier follows from the ticket. Grooming does not choose it, and no agent may negotiate it, for any provider:
+
+| Tier | Ticket | Claude | Gemini | OpenAI / Codex |
 |---|---|---|---|---|
-| `small` | 1–2 pt mechanical work | Haiku | Flash / Flash-Lite | mini models |
-| `medium` | Default | Sonnet | Pro or Flash | standard models |
-| `large` | Design-heavy or high-risk work, coordination | Opus | Pro | top reasoning models |
+| `large` | Every Story and Epic (grooming them, and executing a Story that has no Tasks). Also the coordinator. | Opus | Pro | top reasoning models |
+| `medium` | Every Task, Bug, and Chore of 2 or more points | Sonnet | Pro or Flash | standard models |
+| `small` | Every Task, Bug, and Chore of 1 point | Haiku | Flash / Flash-Lite | mini models |
+
+Design risk, security impact, or difficulty never raise a ticket's tier. If a Task feels too hard for its tier, split it or groom it with more context. **Only the user** may set another tier, for one ticket, by adding `"tier_override": { "tier": "<tier>", "reason": "<the user's words>" }` to its record. An agent may propose an override in chat, but never writes one. `scripts/kanban/tier-policy.mjs` holds the rule; `render-board.mjs` rejects a ticket whose `model` breaks it.
 
 The worker runs on the ticket's tier, not on the coordinator's model. A `large` coordinator that executes a `small` ticket spends the most expensive tokens on the cheapest work, and fills its own context with code it does not need for review. Section 6.3.1 lists how each provider runs a worker on the right tier.
 
@@ -37,6 +41,8 @@ These are hard lines. `AGENTS.md` repeats them, so every provider loads them.
 - Search code before running the ticket's `context.codegraph_queries`, when `.codegraph/` exists (section 7).
 - Commit, push, or open PRs without the user's confirmation. Workers never do.
 - Execute a ticket on a model tier other than the ticket's `model`, unless the user approved it for that ticket (section 6.3.1).
+- Set a ticket's `model` to a tier other than the standing tier rule requires, or write a `tier_override` (section 1.2). Only the user does.
+- Groom, review, or update the board as coordinator on a tier below `large` (section 1.1).
 
 **The coordinator MUST NOT:**
 - Execute a ticket itself. It dispatches a worker on the ticket's tier (section 6.3.1).
@@ -89,7 +95,7 @@ A ticket may enter `TODO` only when its `board.json` record has all of these fie
 | Field | Content |
 |---|---|
 | `points` | Fibonacci estimate. |
-| `model` | Worker tier (section 1.2): `medium` by default, `small` for 1–2 pt mechanical work, `large` only for design-heavy or high-risk work. |
+| `model` | Worker tier from the standing tier rule (section 1.2): `large` for a Story, `small` for 1 pt, `medium` otherwise. Only a user-written `tier_override` changes it. |
 | `context.files` | Files the worker will read or change. |
 | `context.symbols` | Functions, classes, or methods involved. (`files` or `symbols` required.) |
 | `context.entry_points` | Where the flow starts (route, command, handler). Optional. |
@@ -226,7 +232,7 @@ The worker name (for example `claude-small`, `gemini-medium`, `codex-large`) goe
 
 | Provider | Mechanism |
 |---|---|
-| Claude Code | Agent tool, `subagent_type: "ticket-worker"`, `model` mapped from the tier (`small`→`haiku`, `medium`→`sonnet`, `large`→`opus`). Never `isolation: "worktree"`. **Required.** A `PreToolUse` hook (`scripts/hooks/worker-delegation.mjs`) denies a dispatch with the wrong `model`, and denies coordinator edits outside `docs/kanban/` and `coordinator_paths` while a ticket is `IN_PROGRESS`. |
+| Claude Code | Agent tool, `subagent_type: "ticket-worker"`, `model` mapped from the tier (`small`→`haiku`, `medium`→`sonnet`, `large`→`opus`). Never `isolation: "worktree"`. **Required.** A `PreToolUse` hook (`scripts/hooks/worker-delegation.mjs`) denies a dispatch with the wrong `model` or a ticket whose tier breaks the rule, denies board and handover edits from a main session that does not run Opus, denies any agent edit that adds or changes a `tier_override`, and denies coordinator edits outside `docs/kanban/` and `coordinator_paths` while a ticket is `IN_PROGRESS`. |
 | Provider with subagents that take a model (for example opencode agents with `mode: "subagent"`) | Dispatch a subagent on the tier's model with the worker prompt. |
 | Provider with a headless CLI (for example `gemini -m <model> -p "<prompt>"`, `codex exec -m <model> "<prompt>"`, `opencode run -m <provider/model> "<prompt>"`) | Run the CLI in the repository root on the tier's model with the worker prompt. The user decides which approval or sandbox flags the worker gets; ask before the first run. |
 | Any other provider | **Hand off.** Stop. Tell the user the tier's model and the worker prompt, and ask them to run it in a new session on that model. Resume at review when they report back. |
