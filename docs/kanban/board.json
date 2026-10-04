@@ -3176,7 +3176,7 @@
     {
       "id": "TASK-1042",
       "parent": "STORY-104",
-      "title": "Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite",
+      "title": "Tutorial Prologue (T1Ã¢â‚¬â€œT4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite",
       "points": 2,
       "status": "DONE",
       "requires": [
@@ -4359,7 +4359,7 @@
         "A root Dockerfile has these stages: `base` (node:22-bookworm-slim, pnpm through corepack at the `packageManager` version), `build` (frozen install with HUSKY=0, then `pnpm build`), `bot-deps` (`pnpm install --prod --frozen-lockfile --ignore-scripts --filter @ririko/bot...`), `runtime` (tini, fonts-dejavu-core, ca-certificates, user `ririko` uid/gid 10001) and `bot-runner` (runtime plus ffmpeg).",
         "`docker build --target bot-runner .` succeeds from a clean checkout. `.dockerignore` keeps packages/music-private, lavalink/, .env*, data/, storage/, public/cards, public/bosses, node_modules, dist, .next and .git out of the build context.",
         "The container runs as uid 10001. App files are owned by root and not writable by that user; only /app/data, /app/public/cards, /app/public/bosses and /app/storage/welcomer-backgrounds are writable, and they are owned by 10001 so named volumes inherit that owner.",
-        "Run with `--cap-drop ALL --security-opt no-new-privileges` and dummy DISCORD_TOKEN and DISCORD_CLIENT_ID, the bot logs `✓ Registered <n> commands` and creates its SQLite file in /app/data, with no module-resolution or permission error. The login failure that follows is expected.",
+        "Run with `--cap-drop ALL --security-opt no-new-privileges` and dummy DISCORD_TOKEN and DISCORD_CLIENT_ID, the bot logs `Ã¢Å“â€œ Registered <n> commands` and creates its SQLite file in /app/data, with no module-resolution or permission error. The login failure that follows is expected.",
         "`ffmpeg -version` runs in the bot image.",
         "scripts/docker-smoke.ts is a zero-dependency script run with Node type stripping (like scripts/build-status-site.ts). `node scripts/docker-smoke.ts bot` checks an already-built `ririko-bot:smoke` image for the three results above and exits non-zero on any failure.",
         "docs/deployment.md section 2.1 describes the real stages, the build and run commands, the writable directories and volume ownership."
@@ -6025,6 +6025,48 @@
       "verify_cmd": "pnpm test:coverage",
       "handovers": [
         "CHORE-0003"
+      ]
+    },
+    {
+      "id": "CHORE-0004",
+      "title": "Disable unused FloweryTTS source in Lavalink config",
+      "points": 1,
+      "status": "DONE",
+      "parent": "EPIC-005",
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "model": "small",
+      "tier_override": null,
+      "description": "LavaSrc 4.8.3 throws \"Default voice must be set\" at startup because the generated Lavalink config enables flowerytts without a flowerytts.voice. Nothing in the bot uses FloweryTTS, so turn the source off in the renderer and the committed Docker config.",
+      "context": {
+        "files": [
+          "scripts/lavalink-setup.ts",
+          "scripts/lavalink-setup.test.ts",
+          "docker/lavalink/application.yml"
+        ],
+        "symbols": [
+          "renderLavalinkConfig",
+          "DOCKER_LAVALINK_VALUES"
+        ],
+        "entry_points": [
+          "scripts/lavalink-setup.ts"
+        ],
+        "codegraph_queries": [
+          "renderLavalinkConfig DOCKER_LAVALINK_VALUES lavalink-setup.ts"
+        ]
+      },
+      "acceptance": [
+        "renderLavalinkConfig emits flowerytts: false under plugins.lavasrc.sources",
+        "docker/lavalink/application.yml is regenerated and still matches the renderer",
+        "scripts/lavalink-setup.test.ts asserts the rendered config has flowerytts: false and no flowerytts: true",
+        "pnpm vitest run scripts/lavalink-setup.test.ts passes"
+      ],
+      "verify_cmd": "pnpm vitest run scripts/lavalink-setup.test.ts",
+      "handovers": [
+        "CHORE-0004"
       ]
     }
   ],

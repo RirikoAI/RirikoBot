@@ -199,7 +199,7 @@
 | `TASK-1031` | Task | 6-Slot Combat Loadouts, Tier-Scaled Battle Perks, +0 to +10 Enhancement & Consumables Catalog | 2 | STORY-103 | [TASK-1031.md](./handovers/TASK-1031.md) |
 | `TASK-1032` | Task | Level-Based Energy Lifecycle, Anti-Abuse 3/Day Potion Ceiling, Town Shop & Dual-Dispatch Commands | 1 | STORY-103 | [TASK-1032.md](./handovers/TASK-1032.md) |
 | `TASK-1041` | Task | PvE Dungeon Progression Core, Multi-Layer Elemental Wards, 4 Scaling Models & Seasonal Environmental Affixes | 3 | STORY-104 | [TASK-1041.md](./handovers/TASK-1041.md) |
-| `TASK-1042` | Task | Tutorial Prologue (T1–T4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite | 2 | STORY-104 | [TASK-1042.md](./handovers/TASK-1042.md) |
+| `TASK-1042` | Task | Tutorial Prologue (T1Ã¢â‚¬â€œT4), Floor Energy Scaling, Loot Drops Engine & Dual-Dispatch /dungeon Suite | 2 | STORY-104 | [TASK-1042.md](./handovers/TASK-1042.md) |
 | `TASK-1051` | Task | Atomic P2P Trading, State Locking & Community Marketplace Engine with Tax & Expiration | 3 | STORY-105 | [TASK-1051.md](./handovers/TASK-1051.md) |
 | `TASK-1052` | Task | WaifuGuilds Factions, Multi-Asset Achievement Reward Dispatch, TCG Admin & Dual-Dispatch Commands Suite | 2 | STORY-105 | [TASK-1052.md](./handovers/TASK-1052.md) |
 | `TASK-1053` | Task | Waifu TCG Info Hub, Onboarding Guide & Type Advantage Tutorial (/tcg-info) | 2 | STORY-105 | [TASK-1053.md](./handovers/TASK-1053.md) |
@@ -339,6 +339,7 @@
 | `CHORE-0001` | Chore | Adopt Scrum Kanban 0.4: Single AGENTS.md and Board Migration | 5 | EPIC-000 | [CHORE-0001.md](./handovers/CHORE-0001.md) |
 | `CHORE-0002` | Chore | Link Stories, Tasks and Chores to Their Epics | 3 | EPIC-000 | [CHORE-0002.md](./handovers/CHORE-0002.md) |
 | `CHORE-0003` | Chore | DOM Test Environment for Dashboard Client Components | 3 | EPIC-012 | [CHORE-0003.md](./handovers/CHORE-0003.md) |
+| `CHORE-0004` | Chore | Disable unused FloweryTTS source in Lavalink config | 1 | EPIC-005 | [CHORE-0004.md](./handovers/CHORE-0004.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |

@@ -42,4 +42,10 @@ describe('docker/lavalink/application.yml', () => {
     expect(committed).toContain('password: "${LAVALINK_PASSWORD}"');
     expect(committed).toContain('clientSecret: "${SPOTIFY_CLIENT_SECRET:}"');
   });
+
+  it('disables FloweryTTS source to avoid Default voice error', () => {
+    const config = renderLavalinkConfig(DOCKER_LAVALINK_VALUES);
+    expect(config).toContain('flowerytts: false');
+    expect(config).not.toContain('flowerytts: true');
+  });
 });

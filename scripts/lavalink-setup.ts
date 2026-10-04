@@ -158,7 +158,7 @@ ${renderYouTubeCipherConfig(values.cipherUrl)}
       jiosaavn: false
       pandora: false
       yandexmusic: false
-      flowerytts: true
+      flowerytts: false
       youtube: true
       tidal: false
       vkmusic: false
