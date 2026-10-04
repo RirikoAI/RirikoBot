@@ -12,6 +12,7 @@
     "requires": [],
     "blocks": [],
     "model": "medium",
+    "tier_override": null,
     "assignee": null,
     "claimed_at": null,
     "blocked_reason": null,
@@ -306,7 +307,7 @@
       "blocks": [
         "EPIC-012"
       ],
-      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts at first grooming). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115. STORY-116 was re-groomed to 13 points on 2026-09-27 and split: Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166. STORY-112 was re-groomed on 2026-09-28 after an audit showed its TCG settings had no runtime consumer: it keeps guild TCG settings and global rules (8), the dungeon season editor moved to STORY-167 (8) and the album, shop catalog and achievement managers moved to STORY-168 (5). Completed 2026-09-29 with STORY-168; STORY-119 (DBSC) stays parked in the backlog."
+      "description": "App Router, Discord OAuth2, ManageGuild permissions, 20+ module management tabs, zero secret exposure. Groomed 2026-09-24 into STORY-110..117 (children total 58 pts at first grooming). Every page exposes only settings the bot actually reads (no placeholder UI); all mutations go through shared Zod schemas and the same services the bot and CLI use. Delivery order agreed 2026-09-25: STORY-111 (after CHORE-1101), STORY-117, STORY-118, STORY-113, STORY-115, STORY-114, STORY-116, STORY-112. Security hardening goes early because owner-console and step-up writes in later stories depend on it. STORY-117 was split into STORY-117 and STORY-118 on 2026-09-25; STORY-119 (DBSC) is parked in the backlog. STORY-114 was re-groomed on 2026-09-25 after an audit showed the bot did not support several of its pages: Command Overrides moved to STORY-163 (the bot never read command_settings), and the Reaction Roles builder, Auto Roles and Auto Voice moved to STORY-164. STORY-115 was re-groomed on 2026-09-27 after an audit showed the economy is global per user: the economy settings and item shop manager moved to STORY-165 (owner console), which follows STORY-115. STORY-116 was re-groomed to 13 points on 2026-09-27 and split: Stream Alerts, Free Games and Welcome & Farewell moved to STORY-166. STORY-112 was re-groomed on 2026-09-28 after an audit showed its TCG settings had no runtime consumer: it keeps guild TCG settings and global rules (8), the dungeon season editor moved to STORY-167 (8) and the album, shop catalog and achievement managers moved to STORY-168 (5). Completed 2026-09-29 with STORY-168; STORY-119 (DBSC) stays parked in the backlog. STORY-119 was groomed on 2026-10-04 after DBSC shipped in Chrome 146 on Windows, re-estimated to 8 points (TASK-1191, TASK-1192) and completed the same day."
     },
     {
       "id": "EPIC-012",
@@ -1179,13 +1180,80 @@
       "id": "STORY-119",
       "parent": "EPIC-011",
       "title": "Chrome Device Bound Session Credentials (DBSC) for Dashboard Sessions",
-      "points": 3,
-      "status": "BACKLOG",
+      "points": 8,
+      "status": "DONE",
       "requires": [
         "STORY-118"
       ],
       "blocks": [],
-      "description": "Optional enhancement from ADR-013 decision 4, parked 2026-09-25. Where the browser supports DBSC, bind the dashboard session to a TPM-held key and issue short-lived cookies that must be refreshed with a signature, so a cookie copied by malware stops working within minutes. Estimate is provisional: confirm current browser and platform support before grooming."
+      "description": "Optional enhancement from ADR-013 decision 4, parked 2026-09-25. Where the browser supports DBSC, bind the dashboard session to a TPM-held key and issue short-lived cookies that must be refreshed with a signature, so a cookie copied by malware stops working within minutes. Groomed 2026-10-04: DBSC is generally available in Chrome 146 on Windows (April 2026) and the spec is a W3C Working Draft; macOS support is coming. Re-estimated from 3 to 8 points and split into TASK-1191 (protocol core) and TASK-1192 (routes, wiring, UI, docs). Browsers without DBSC keep the current behavior; a bound session cannot be downgraded.",
+      "children": [
+        "TASK-1191",
+        "TASK-1192"
+      ],
+      "model": "large",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/web.ts",
+          "packages/database/src/schema/pg/web.ts",
+          "packages/database/src/repositories/web-session.repository.ts",
+          "packages/database/src/repositories/web-session.repository.test.ts",
+          "apps/web/src/lib/server/auth/session-service.ts",
+          "apps/web/src/lib/server/auth/session-service.test.ts",
+          "apps/web/src/lib/server/auth/oauth-state.ts",
+          "apps/web/src/lib/server/auth/dbsc.ts",
+          "apps/web/src/app/api/auth/callback/route.ts",
+          "apps/web/src/app/api/auth/logout/route.ts",
+          "apps/web/src/app/api/auth/dbsc/register/route.ts",
+          "apps/web/src/app/api/auth/dbsc/refresh/route.ts",
+          "apps/web/src/lib/server/auth/session.ts",
+          "apps/web/src/app/account/sessions/page.tsx",
+          "docs/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md",
+          "docs/dashboard.md"
+        ],
+        "symbols": [
+          "webSessions",
+          "WebSessionRepository",
+          "SessionService.resolve",
+          "SessionService.completePasskeyCheck",
+          "SessionService.listForUser",
+          "SessionSummary",
+          "sealPendingLogin",
+          "openPendingLogin",
+          "SecretVault",
+          "GET (auth callback)",
+          "POST (auth logout)",
+          "getSession",
+          "SESSION_COOKIE",
+          "setCookie",
+          "clearCookie",
+          "limitAuthRequest",
+          "SessionService.bindDevice",
+          "SessionService.refreshBinding"
+        ],
+        "entry_points": [
+          "apps/web/src/lib/server/auth/session-service.ts",
+          "apps/web/src/app/api/auth/callback/route.ts"
+        ],
+        "codegraph_queries": [
+          "SessionService resolve completePasskeyCheck listForUser SessionSummary isLive toActiveSession",
+          "webSessions WebSessionRepository update findById web-session.repository.test",
+          "sealPendingLogin openPendingLogin SecretVault encrypt decrypt",
+          "auth callback route GET logout route POST limitAuthRequest setCookie clearCookie getSession SESSION_COOKIE",
+          "authorization-coverage test auth routes allowlist",
+          "sessions page SessionSummary listForUser revokeSession"
+        ]
+      },
+      "acceptance": [
+        "TASK-1191 and TASK-1192 are DONE.",
+        "In a browser with DBSC, the dashboard session is bound to a device key at sign-in; a copied session cookie without a fresh bound cookie is refused, and the bound cookie lasts 10 minutes.",
+        "Browsers without DBSC keep the current behavior.",
+        "pnpm lint, pnpm typecheck, pnpm test:coverage (all thresholds) and pnpm build pass."
+      ],
+      "verify_cmd": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm build",
+      "handovers": [
+        "STORY-119"
+      ]
     },
     {
       "id": "STORY-163",
@@ -5576,6 +5644,134 @@
       "handovers": [
         "STORY-125",
         "TASK-1254"
+      ]
+    },
+    {
+      "id": "TASK-1191",
+      "status": "DONE",
+      "blocks": [
+        "TASK-1192"
+      ],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-119",
+      "title": "DBSC Protocol Core: web_sessions Binding Columns, Proof Verification, Sealed Challenges & Bound Cookie",
+      "points": 5,
+      "requires": [
+        "STORY-118"
+      ],
+      "model": "large",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/web.ts",
+          "packages/database/src/schema/pg/web.ts",
+          "packages/database/src/repositories/web-session.repository.ts",
+          "packages/database/src/repositories/web-session.repository.test.ts",
+          "apps/web/src/lib/server/auth/session-service.ts",
+          "apps/web/src/lib/server/auth/session-service.test.ts",
+          "apps/web/src/lib/server/auth/oauth-state.ts",
+          "apps/web/src/lib/server/auth/dbsc.ts",
+          "apps/web/src/lib/server/auth/dbsc.test.ts"
+        ],
+        "symbols": [
+          "webSessions",
+          "WebSessionRepository",
+          "SessionService.resolve",
+          "SessionService.completePasskeyCheck",
+          "SessionService.listForUser",
+          "SessionSummary",
+          "sealPendingLogin",
+          "openPendingLogin",
+          "SecretVault"
+        ],
+        "entry_points": [
+          "apps/web/src/lib/server/auth/session-service.ts"
+        ],
+        "codegraph_queries": [
+          "SessionService resolve completePasskeyCheck listForUser SessionSummary isLive toActiveSession",
+          "webSessions WebSessionRepository update findById web-session.repository.test",
+          "sealPendingLogin openPendingLogin SecretVault encrypt decrypt"
+        ]
+      },
+      "acceptance": [
+        "web_sessions has nullable dbsc_session_id (unique) and dbsc_public_key columns in both the SQLite and PostgreSQL schemas, and the generated DDL is regenerated with db:generate-ddl.",
+        "WebSessionRepository can find a session by dbsc_session_id; repository tests cover it on SQLite.",
+        "apps/web/src/lib/server/auth/dbsc.ts verifies a dbsc+jwt proof with node:crypto only (ES256 with ieee-p1363 signatures, RS256): it rejects alg none, other algs, a wrong typ, a missing or invalid jwk on registration, a bad signature, and a jti that is not a valid, fresh sealed challenge for the expected session.",
+        "Challenges and the bound cookie are vault-sealed {sid, exp} values under distinct vault contexts (challenge TTL 2 minutes, bound cookie 10 minutes); helpers build the Secure-Session-Registration and Secure-Session-Challenge header values and the session instructions JSON (session_identifier, refresh_url, scope with include_site false, credentials for __Host-ririko_bound with Path=/; Secure; HttpOnly; SameSite=Lax).",
+        "SessionService.bindDevice verifies the registration proof, refuses an already bound session, stores a random dbsc_session_id and the JWK, and rotates the session ID through a private helper shared with completePasskeyCheck (Discord tokens re-encrypted).",
+        "SessionService.refreshBinding returns a challenge when no proof is given, a new bound cookie for a valid proof signed by the stored key, and a not-found result for an unknown or expired session.",
+        "SessionService.resolve(token, boundCookie) returns null for a bound session without a valid, unexpired bound cookie for its dbsc_session_id; an unbound session resolves as before. listForUser reports deviceBound.",
+        "Unit tests use EC P-256 and RSA keys generated in the test and cover every rejection above plus the full register, challenge, refresh, resolve flow."
+      ],
+      "verify_cmd": "pnpm --filter @ririko/database build && pnpm exec vitest run packages/database/src/repositories/web-session.repository.test.ts apps/web/src/lib/server/auth && pnpm --filter @ririko/web typecheck && pnpm --filter @ririko/database typecheck",
+      "handovers": [
+        "STORY-119",
+        "TASK-1191"
+      ]
+    },
+    {
+      "id": "TASK-1192",
+      "status": "DONE",
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "parent": "STORY-119",
+      "title": "DBSC Routes & Wiring: Register and Refresh Endpoints, Login Registration Header, Bound Cookie Enforcement, Sessions Badge & Docs",
+      "points": 3,
+      "requires": [
+        "TASK-1191"
+      ],
+      "model": "medium",
+      "context": {
+        "files": [
+          "apps/web/src/app/api/auth/callback/route.ts",
+          "apps/web/src/app/api/auth/logout/route.ts",
+          "apps/web/src/app/api/auth/dbsc/register/route.ts",
+          "apps/web/src/app/api/auth/dbsc/refresh/route.ts",
+          "apps/web/src/lib/server/auth/session.ts",
+          "apps/web/src/app/account/sessions/page.tsx",
+          "docs/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md",
+          "docs/dashboard.md",
+          "apps/web/src/app/api/auth/dbsc/dbsc-routes.test.ts",
+          "apps/web/src/components/session-list.tsx",
+          "apps/web/src/lib/server/testing/authorization-coverage.ts",
+          "apps/web/src/app/api/auth/callback/route.test.ts"
+        ],
+        "symbols": [
+          "GET (auth callback)",
+          "POST (auth logout)",
+          "getSession",
+          "SESSION_COOKIE",
+          "setCookie",
+          "clearCookie",
+          "limitAuthRequest",
+          "SessionService.bindDevice",
+          "SessionService.refreshBinding"
+        ],
+        "entry_points": [
+          "apps/web/src/app/api/auth/callback/route.ts"
+        ],
+        "codegraph_queries": [
+          "auth callback route GET logout route POST limitAuthRequest setCookie clearCookie getSession SESSION_COOKIE",
+          "authorization-coverage test auth routes allowlist",
+          "sessions page SessionSummary listForUser revokeSession"
+        ]
+      },
+      "acceptance": [
+        "POST /api/auth/dbsc/register and POST /api/auth/dbsc/refresh exist, call limitAuthRequest first, are on the auth-route allowlist of the authorization coverage test, and map SessionService results to the DBSC HTTP semantics (register: 200 with session instructions JSON and new session and bound cookies, 4xx on failure; refresh: 403 with Secure-Session-Challenge, 200 with a new bound cookie, 404 for an unknown or ended session).",
+        "The Discord callback response sends Secure-Session-Registration with a sealed challenge for the new session (or, if the spec shows redirects are not processed, the header is sent from the first authenticated response instead, and the handover explains why).",
+        "getSession passes the __Host-ririko_bound cookie to SessionService.resolve, so a bound session without a fresh bound cookie is signed out; logout clears the bound cookie.",
+        "/account/sessions shows a Device-bound badge for bound sessions.",
+        "ADR-013 records that decision 4 is implemented (STORY-119) and docs/dashboard.md updates the threat table and story table.",
+        "Route tests with keys generated in the test cover register, the 403 challenge, a signed refresh, rejection of a bad proof, and 404 after logout."
+      ],
+      "verify_cmd": "pnpm --filter @ririko/database build && pnpm exec vitest run apps/web/src/app/api/auth apps/web/src/lib/server apps/web/src/app/account && pnpm --filter @ririko/web typecheck",
+      "handovers": [
+        "STORY-119",
+        "TASK-1191",
+        "TASK-1192"
       ]
     }
   ],

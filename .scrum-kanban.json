@@ -1,5 +1,5 @@
 {
-  "version": "0.5.2",
+  "version": "0.6.0",
   "base_branch": "develop/2.0.0",
   "codegraph": true,
   "ci": true,
@@ -16,6 +16,7 @@
     "scripts/hooks/worker-delegation.mjs",
     "scripts/kanban/board-server.mjs",
     "scripts/kanban/board-web/index.html",
-    "scripts/kanban/render-board.mjs"
+    "scripts/kanban/render-board.mjs",
+    "scripts/kanban/tier-policy.mjs"
   ]
 }

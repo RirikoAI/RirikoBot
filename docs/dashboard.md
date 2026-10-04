@@ -249,7 +249,7 @@ The decisions and rejected alternatives (JWKS, JWE, browser-side request signing
 
 | Threat | Defense |
 |---|---|
-| Stolen session cookie (XSS or infostealer malware) | HttpOnly `__Host-` cookie and strict CSP against XSS. Short idle and absolute expiry, ID rotation, passkey step-up for sensitive writes, new-device alerts, "sign out everywhere". Chrome DBSC as an optional enhancement where supported. |
+| Stolen session cookie (XSS or infostealer malware) | HttpOnly `__Host-` cookie and strict CSP against XSS. Short idle and absolute expiry, ID rotation, passkey step-up for sensitive writes, new-device alerts, "sign out everywhere". Chrome DBSC (STORY-119) binds the session to a TPM-held key on supported browsers: the bound cookie lives 10 minutes and needs a signed refresh, so a copied cookie stops working within minutes; other browsers keep the behavior above. |
 | Compromised Discord account | Enrolled passkeys are always required; bot owners must have one. Discord login alone cannot pass step-up. |
 | Leaked database or backup | Only SHA-256 hashes of session IDs are stored. Discord tokens are AES-256-GCM encrypted under a key held outside the database. |
 | Stolen user OAuth token | Scopes are `identify` and `guilds` only (read-only). Mutations use the bot token on the server after authorization. |
@@ -286,7 +286,7 @@ Tickets and estimates live on [BOARD.md](kanban/BOARD.md) under **Groomed Storie
 | STORY-116 | 13 | Music (DJ role, auto-leave), AI (per-guild provider and model), Image Generation (per-guild settings) and Integrations pages | 4 (5, 6, 7, 20) |
 | STORY-117 | 5 | Passkey sign-in gate, step-up, owner guard, recovery CLI | 2.3 |
 | STORY-118 | 5 | Session management and alerts, CSP and taint guards, rate limits, authorization coverage test | 7 |
-| STORY-119 | 3 (backlog) | Chrome DBSC device-bound sessions | 7 |
+| STORY-119 | 8 | Chrome DBSC device-bound sessions (protocol core, register and refresh routes, bound cookie enforcement, Device-bound badge) | 7 |
 | STORY-163 | 5 | Command Overrides engine (repository, catalog, override middleware) and page | 4 (19) |
 | STORY-164 | 8 | Reaction Roles builder (buttons and select menus), Auto Roles and Auto Voice pages | 2.3, 4 (13, 14) |
 | STORY-165 | 13 | Owner console: global economy settings, live bank capacity, item shop manager, item codes and a seed that works on Postgres | 3.1, 4 (8) |

@@ -61,6 +61,7 @@ describe('OAuth callback new-device alerts (TASK-1172)', () => {
           token: 's'.repeat(43),
           session: { expiresAt: new Date(Date.now() + 3_600_000) },
         }),
+        registrationChallenge: () => 'sealed-challenge',
       },
       knownDevices: new KnownDeviceService({ repo: new WebKnownDeviceRepository(client) }),
       notifier: { newDeviceSignIn: mocks.newDeviceSignIn },
@@ -105,6 +106,13 @@ describe('OAuth callback new-device alerts (TASK-1172)', () => {
     expect(header).toMatch(/Secure/);
     return header?.split(';')[0]?.split('=')[1];
   }
+
+  it('asks the browser to start device binding (DBSC) with a sealed challenge', async () => {
+    const response = await callback();
+    expect(response.headers.get('secure-session-registration')).toBe(
+      '(ES256 RS256);path="/api/auth/dbsc/register";challenge="sealed-challenge"',
+    );
+  });
 
   it('DMs the user after a sign-in from a new browser, and not from a known one', async () => {
     const first = await callback();

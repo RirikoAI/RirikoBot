@@ -1,4 +1,5 @@
 import { after, NextResponse, type NextRequest } from 'next/server';
+import { registrationHeader } from '@/lib/server/auth/dbsc';
 import { DASHBOARD_OAUTH_SCOPES } from '@/lib/server/auth/discord-oauth';
 import { DEVICE_COOKIE, DEVICE_COOKIE_MAX_AGE_SECONDS } from '@/lib/server/auth/known-devices';
 import { openPendingLogin } from '@/lib/server/auth/oauth-state';
@@ -68,6 +69,11 @@ export async function GET(request: NextRequest) {
     );
     setCookie(response, DEVICE_COOKIE, device.token, DEVICE_COOKIE_MAX_AGE_SECONDS);
     clearCookie(response, OAUTH_COOKIE);
+    // Chrome starts device binding (DBSC) from this header; other browsers ignore it.
+    response.headers.set(
+      'Secure-Session-Registration',
+      registrationHeader(sessions.registrationChallenge(session)),
+    );
     return response;
   } catch (error) {
     console.error('[web] Discord login failed:', error instanceof Error ? error.message : error);
