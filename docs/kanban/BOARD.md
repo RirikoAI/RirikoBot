@@ -389,6 +389,7 @@
 | `BUG-0031` | Bug | Shared Row Types Say number but Postgres Returns bigint for Balances and XP | 5 | EPIC-012 | [BUG-0031.md](./handovers/BUG-0031.md) |
 | `BUG-0032` | Bug | Flaky Rarity Stat Scaling Test | 1 | EPIC-012 | [BUG-0032.md](./handovers/BUG-0032.md) |
 | `BUG-0033` | Bug | Postgres-Only Repository Inconsistencies from TASK-1251 | 2 | EPIC-012 | [BUG-0033.md](./handovers/BUG-0033.md) |
+| `BUG-0034` | Bug | bootstrap.sh Fails on GNU tar: Second deploy/host Wildcard Reported as Not Found | 2 | EPIC-017 | [BUG-0034.md](./handovers/BUG-0034.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

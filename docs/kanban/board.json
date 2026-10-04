@@ -7568,6 +7568,48 @@
       "handovers": [
         "BUG-0033"
       ]
+    },
+    {
+      "id": "BUG-0034",
+      "parent": "EPIC-017",
+      "title": "bootstrap.sh Fails on GNU tar: Second deploy/host Wildcard Reported as Not Found",
+      "points": 2,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "Found on the first live run of deploy/host/bootstrap.sh (TASK-1771) on ririko-staging: fetch_release_tree passes the wildcard members */deploy/host and */deploy/host/* to tar. GNU tar extracts the directory through the first, reports the second as Not found in archive and exits 2, so the bootstrap always dies with \"has no deploy/host directory\". The unit tests never ran the extraction.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bootstrap.sh",
+          "scripts/deploy-host.test.ts"
+        ],
+        "symbols": [
+          "fetch_release_tree"
+        ],
+        "entry_points": [
+          "deploy/host/bootstrap.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "fetch_release_tree extracts with the single member '*/deploy/host' and still dies with the same message when the ref has no deploy/host/files directory.",
+        "scripts/deploy-host.test.ts builds a small .tar.gz laid out like a codeload archive (RirikoBot-<sha>/deploy/host/... plus an unrelated file) and runs the exact extraction the script uses, without root or network; it asserts deploy/host/files and bin land in place and nothing else is extracted. It runs under GNU tar (Linux CI, WSL) and skips with a stated reason only where tar lacks --wildcards.",
+        "shellcheck -x stays clean on deploy/host/**/*.sh."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0034",
+        "TASK-1771",
+        "EPIC-017"
+      ]
     }
   ],
   "active_in_progress_ticket": null
