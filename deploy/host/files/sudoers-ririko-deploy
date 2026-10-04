@@ -1,0 +1,2 @@
+# Managed by deploy/host/bootstrap.sh (Ririko). The deploy user may run exactly one program as root.
+deploy ALL=(root) NOPASSWD: /usr/local/bin/ririko-deploy

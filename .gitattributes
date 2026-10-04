@@ -1,1 +1,2 @@
 scripts/git-hooks/* text eol=lf
+deploy/host/** text eol=lf
