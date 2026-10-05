@@ -2263,7 +2263,7 @@
       "parent": "EPIC-017",
       "title": "Remote Lavalink Node on a KVM VPS Host Over WireGuard",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-176"
       ],
@@ -6462,7 +6462,8 @@
         "TASK-1792",
         "TASK-1801",
         "TASK-1802",
-        "TASK-1803"
+        "TASK-1803",
+        "BUG-0036"
       ],
       "blocks": [],
       "description": "The maintainer does every provider-side step by hand. This runbook makes them repeatable and records the decision as an ADR. Written last, from the finished scripts.",
@@ -6574,7 +6575,7 @@
       "parent": "STORY-180",
       "title": "WireGuard Link, Lavalink Host Firewall and Bootstrap Roles",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1771",
@@ -6593,6 +6594,7 @@
       "context": {
         "files": [
           "deploy/host/bootstrap.sh",
+          "deploy/host/lib/wg-common.sh",
           "deploy/host/lib/render-wireguard.sh",
           "deploy/host/lib/render-nftables.sh",
           "deploy/host/files",
@@ -6626,7 +6628,7 @@
       "parent": "STORY-180",
       "title": "Lavalink Host Deploy Role, Watchdog Checks and CI Jobs",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1781",
@@ -6648,6 +6650,7 @@
         "files": [
           "deploy/host/bin/ririko-deploy.sh",
           "deploy/host/bin/ririko-deploy-ssh.sh",
+          "deploy/host/bootstrap.sh",
           "deploy/host/bin/ririko-watchdog.sh",
           "deploy/lavalink/docker-compose.yml",
           ".circleci/config.yml",
@@ -7655,6 +7658,54 @@
       "handovers": [
         "BUG-0035",
         "TASK-1781",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "BUG-0036",
+      "parent": "EPIC-017",
+      "title": "Lavalink Crash-Loops: Plugin Volume Is Root-Owned but the Image Runs as uid 322",
+      "points": 2,
+      "status": "DONE",
+      "children": [],
+      "requires": [
+        "TASK-1803"
+      ],
+      "blocks": [
+        "TASK-1772"
+      ],
+      "description": "Found on lavalink-staging (2026-10-05): ghcr.io/lavalink-devs/lavalink:4.2.2 runs as lavalink (uid/gid 322) and has no /opt/Lavalink/plugins directory, so Docker creates the named plugin volume owned by root:root and Lavalink dies with java.io.FileNotFoundException: ./plugins/lavasrc-plugin-4.8.3.jar (Permission denied), restarting forever. Affects deploy/lavalink/docker-compose.yml (both instances) and the bundled lavalink in docker-compose.production.yml (self-hosters), which has had the same lavalink_plugins volume since STORY-122.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "docker-compose.production.yml",
+          "deploy/lavalink/docker-compose.yml",
+          "docker-compose.remote-lavalink.yml",
+          "scripts/compose-production.test.ts",
+          "docs/deployment.md"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "deploy/lavalink/docker-compose.yml"
+        ],
+        "codegraph_queries": [
+          "renderLavalinkConfig setupLavalink isLavalinkActive"
+        ]
+      },
+      "acceptance": [
+        "Every Lavalink service gets a one-shot init service from the same pinned Lavalink image (user root, cap_drop ALL plus cap_add CHOWN, no-new-privileges, restart no) that runs chown -R 322:322 on its plugin volume; the Lavalink service depends on it with condition service_completed_successfully. No extra image is pulled.",
+        "docker-compose.remote-lavalink.yml also puts the bundled init service in profile bundled-lavalink, so the remote-Lavalink app hosts start neither.",
+        "scripts/compose-production.test.ts asserts: each Lavalink service has a plugin volume, a matching init service on the same image and volume, the depends_on condition, and that the init services are excluded on the remote override.",
+        "docker compose config -q passes for base, base plus override, and the Lavalink host file; docs/deployment.md mentions why the init service exists (uid 322, image has no plugins directory)."
+      ],
+      "verify_cmd": "RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y LAVALINK_HOST=10.77.0.1 docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production.example config -q && RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y docker compose -f docker-compose.production.yml --env-file .env.production.example config -q && WG_ADDRESS=10.77.0.1 LAVALINK_PRODUCTION_ENV_FILE=lavalink.env.example LAVALINK_STAGING_ENV_FILE=lavalink.env.example docker compose -f deploy/lavalink/docker-compose.yml config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0036",
+        "TASK-1801",
         "EPIC-017"
       ]
     }
