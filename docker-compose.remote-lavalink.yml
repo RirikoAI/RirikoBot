@@ -8,8 +8,11 @@
 # LAVALINK_PASSWORD must match the node's password. Needs Docker Compose 2.24.4 or newer for
 # `!override`. docs/deployment.md section 2.2 says when to use it.
 services:
-  # Behind a profile nobody enables, so it never starts.
+  # Behind a profile nobody enables, so neither starts.
   lavalink:
+    profiles: [bundled-lavalink]
+
+  lavalink-plugins:
     profiles: [bundled-lavalink]
 
   bot:

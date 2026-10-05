@@ -95,10 +95,11 @@ Hardening (a test in `scripts/compose-production.test.ts` parses the file and ke
 - **Privileges:** all four services set `security_opt: [no-new-privileges:true]`, so no process in them can gain privileges through a setuid binary.
 - **Log rotation:** all four services share one `x-logging` anchor: the `local` driver, `max-size: 20m`, `max-file: 5`. A service keeps at most 100 MB of logs.
 - **Lavalink heap:** `LAVALINK_HEAP` sets the JVM maximum heap (`-Xmx`, default `1G`). Use `512m` on a host with 4 GB of memory.
+- **Lavalink plugin volume:** the Lavalink image runs as uid/gid 322 and has no `/opt/Lavalink/plugins` directory, so Docker creates the named volume owned by root and Lavalink dies with `Permission denied` while it downloads its plugins. The one-shot `lavalink-plugins` service therefore runs `chown -R 322:322` on the volume before `lavalink` starts (`depends_on` with `service_completed_successfully`). It uses the same pinned Lavalink image, so nothing extra is pulled, runs as root with `cap_drop: [ALL]`, `cap_add: [CHOWN]`, `no-new-privileges` and no network, and shows as `Exited (0)` in `docker compose ps -a`. That is expected.
 
 Remote Lavalink (`docker-compose.remote-lavalink.yml`): a single-host stack keeps the bundled `lavalink` service and needs nothing else. An app host that uses a Lavalink node on another machine, such as the Lightsail hosts with the Lavalink VPS (STORY-180), adds this override:
 - Run `docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production up -d`. It needs Docker Compose 2.24.4 or newer, because it uses `!override`.
-- It puts the bundled `lavalink` service in the `bundled-lavalink` profile, which nobody enables, so it never starts. `bot` then waits for Postgres only.
+- It puts the bundled `lavalink` service in the `bundled-lavalink` profile, which nobody enables, so it never starts, and does the same for its one-shot `lavalink-plugins` init service. `bot` then waits for Postgres only.
 - The bot connects to `LAVALINK_HOST` (required: compose refuses to start without it) on `LAVALINK_PORT` (default `2333`). `LAVALINK_PASSWORD` must be the node's password.
 - The bot reaches the node over a plain WebSocket (the `secure` option is not read from the environment), so the link itself must be private, for example WireGuard. If the node is unreachable, the bot falls back to its built-in FFmpeg player.
 
@@ -107,7 +108,7 @@ Dedicated Lavalink host (`deploy/lavalink/docker-compose.yml`, project `ririko-l
 - Each container binds only `WG_ADDRESS` (required), through `SERVER_ADDRESS` and `SERVER_PORT`, which override `server.address` and `server.port` in the config.
 - `network_mode: host` lets the host firewall see each WireGuard peer; published ports would go through Docker's own chains and skip those rules.
 - Each instance reads its own env file, `LAVALINK_PRODUCTION_ENV_FILE` and `LAVALINK_STAGING_ENV_FILE` (defaults `/opt/ririko/lavalink-production.env` and `/opt/ririko/lavalink-staging.env`), written from `deploy/lavalink/lavalink.env.example`: `LAVALINK_PASSWORD` (different for each instance) and the `SPOTIFY_*` values. A relative path resolves from `deploy/lavalink/`.
-- Plugins live in separate volumes, `lavalink_production_plugins` and `lavalink_staging_plugins`. Both services use the same log rotation and `no-new-privileges` as the main file.
+- Plugins live in separate volumes, `lavalink_production_plugins` and `lavalink_staging_plugins`. Each is chowned to uid/gid 322 (the user the image runs as; the image has no plugins directory, so Docker would create the volume owned by root) by a one-shot init service, `lavalink-production-plugins` and `lavalink-staging-plugins`, which its Lavalink service waits for with `service_completed_successfully`. Starting one instance with `docker compose up -d lavalink-<instance>` also starts its init service, and nothing of the other instance. The init services are expected to show `Exited (0)`; the watchdog ignores services ending in `-plugins`. Both Lavalink services use the same log rotation and `no-new-privileges` as the main file.
 
 Images:
 - `build:` targets are included, so `docker compose ... build` builds both images from this checkout instead of pulling them.

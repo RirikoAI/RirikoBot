@@ -38,6 +38,25 @@ services:
       timeout: 5s
       retries: 5
 
+  # One-shot: the image runs as uid 322 but has no plugins directory, so Docker creates the named
+  # volume owned by root and Lavalink cannot write its plugins. Same image, so nothing extra is
+  # pulled; it needs only CAP_CHOWN and no network.
+  lavalink-plugins:
+    image: ghcr.io/lavalink-devs/lavalink:4.2.2
+    restart: 'no'
+    logging: *logging
+    user: root
+    entrypoint: ['chown', '-R', '322:322', '/opt/Lavalink/plugins']
+    network_mode: none
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - lavalink_plugins:/opt/Lavalink/plugins
+
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4.2.2
     restart: unless-stopped
@@ -51,6 +70,9 @@ services:
       SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:-}
       SPOTIFY_SP_DC: ${SPOTIFY_SP_DC:-}
       _JAVA_OPTIONS: -Xmx${LAVALINK_HEAP:-1G}
+    depends_on:
+      lavalink-plugins:
+        condition: service_completed_successfully
     volumes:
       - ./docker/lavalink/application.yml:/opt/Lavalink/application.yml:ro
       # Plugins download on first start; keep them between restarts.

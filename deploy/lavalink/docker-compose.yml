@@ -14,7 +14,35 @@ x-logging: &logging
     max-size: 20m
     max-file: '5'
 
+# One-shot init service per instance. The image runs as uid 322 but has no plugins directory, so
+# Docker creates each named volume owned by root and Lavalink cannot write its plugins. Same image,
+# so nothing extra is pulled; it needs only CAP_CHOWN and no network. The Lavalink services wait
+# for it to exit 0.
+x-plugins-init: &plugins-init
+  image: ghcr.io/lavalink-devs/lavalink:4.2.2
+  restart: 'no'
+  logging: *logging
+  user: root
+  entrypoint: ['chown', '-R', '322:322', '/opt/Lavalink/plugins']
+  network_mode: none
+  cap_drop:
+    - ALL
+  cap_add:
+    - CHOWN
+  security_opt:
+    - no-new-privileges:true
+
 services:
+  lavalink-production-plugins:
+    <<: *plugins-init
+    volumes:
+      - lavalink_production_plugins:/opt/Lavalink/plugins
+
+  lavalink-staging-plugins:
+    <<: *plugins-init
+    volumes:
+      - lavalink_staging_plugins:/opt/Lavalink/plugins
+
   lavalink-production:
     image: ghcr.io/lavalink-devs/lavalink:4.2.2
     restart: unless-stopped
@@ -31,6 +59,9 @@ services:
       SERVER_ADDRESS: ${WG_ADDRESS:?set WG_ADDRESS}
       SERVER_PORT: '2333'
       _JAVA_OPTIONS: -Xmx${LAVALINK_PRODUCTION_HEAP:-1536m}
+    depends_on:
+      lavalink-production-plugins:
+        condition: service_completed_successfully
     volumes:
       - ../../docker/lavalink/application.yml:/opt/Lavalink/application.yml:ro
       # Plugins download on first start; keep them between restarts.
@@ -48,6 +79,9 @@ services:
       SERVER_ADDRESS: ${WG_ADDRESS:?set WG_ADDRESS}
       SERVER_PORT: '2334'
       _JAVA_OPTIONS: -Xmx${LAVALINK_STAGING_HEAP:-512m}
+    depends_on:
+      lavalink-staging-plugins:
+        condition: service_completed_successfully
     volumes:
       - ../../docker/lavalink/application.yml:/opt/Lavalink/application.yml:ro
       - lavalink_staging_plugins:/opt/Lavalink/plugins
