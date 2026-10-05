@@ -29,6 +29,18 @@
 # bootstrap.sh starts the timer on every host, also before ririko.conf is filled in and before the
 # first deploy. With no container of the project it logs one line and exits 0 without a ping.
 #
+# Lavalink host (RIRIKO_ROLE=lavalink in ririko.conf): the project is "ririko-lavalink" and its
+# containers have no HEALTHCHECK, so the host is healthy when every configured instance
+# (LAVALINK_INSTANCES, or the instances whose port 2333 or 2334 a WG_PEERS entry names) has a
+# running container lavalink-<instance> and GET http://<WG_ADDRESS>:<port>/version answers 200 with
+# the instance's password (LAVALINK_PASSWORD in /opt/ririko/lavalink-<instance>.env, given to curl
+# on stdin, never on a command line), and the disk has room. The one-shot init services
+# (lavalink-<instance>-plugins, exited 0 by design) are ignored. A failed check is counted in
+# /opt/ririko/state/watchdog-lavalink-<instance>; the third consecutive failure restarts that
+# container (docker restart) and resets the counter, and the next 3 minutes of failures are needed
+# before it is restarted again, which leaves the JVM time to start. Every failed check still posts
+# /fail with the reason.
+#
 # Exit codes:
 #   0  checked (healthy or not), or skipped (lock held, no stack deployed, stack still starting)
 #   1  could not check (Docker unreachable, lock file unusable) or invalid configuration
@@ -43,7 +55,12 @@ export LC_ALL=C
 readonly PROJECT=ririko
 readonly REQUIRED_SERVICES=(bot web postgres)
 readonly TAG=ririko-watchdog
+readonly LAVALINK_PROJECT=ririko-lavalink
+# Consecutive failed checks of a Lavalink instance before it is restarted.
+readonly LAVALINK_RESTART_AFTER=3
+readonly IPV4_PATTERN='^((25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})(/([0-9]|[12][0-9]|3[0-2]))?$'
 
+RIRIKO_ROOT=${RIRIKO_ROOT:-/opt/ririko}
 RIRIKO_CONF=${RIRIKO_CONF:-/etc/ririko/ririko.conf}
 RIRIKO_LOCK=${RIRIKO_LOCK:-/run/lock/ririko-deploy.lock}
 DOCKER=${DOCKER:-docker}
@@ -53,9 +70,17 @@ LOGGER=${LOGGER:-logger}
 
 HEALTHCHECK_PING_URL=""
 DISK_ALERT_PERCENT=85
+RIRIKO_ROLE=app
+WG_ADDRESS=""
+WG_PEERS=""
+LAVALINK_INSTANCES=""
 
 PING_URL=""
 CONF_ERROR=0
+LAVALINK_BIND=""
+LAVALINK_INSTANCE_LIST=()
+reasons=()
+starting=()
 
 # --- logging and pings ------------------------------------------------------------------------
 
@@ -129,7 +154,7 @@ load_conf() {
       value=${value:1:${#value}-2}
     fi
     case $key in
-      HEALTHCHECK_PING_URL | DISK_ALERT_PERCENT)
+      HEALTHCHECK_PING_URL | DISK_ALERT_PERCENT | RIRIKO_ROLE | WG_ADDRESS | WG_PEERS |         LAVALINK_INSTANCES)
         printf -v "$key" '%s' "$value"
         ;;
     esac
@@ -158,6 +183,69 @@ validate_conf() {
     CONF_ERROR=1
   fi
   DISK_ALERT_PERCENT=$((10#$DISK_ALERT_PERCENT))
+  [[ $RIRIKO_ROLE =~ ^(app|lavalink)$ ]] ||
+    fail 1 "invalid RIRIKO_ROLE '$RIRIKO_ROLE' in $RIRIKO_CONF (use app or lavalink)"
+  if [ "$RIRIKO_ROLE" = lavalink ]; then
+    validate_lavalink_conf
+  fi
+}
+
+# The Lavalink port of an instance (the compose file pins the same ports).
+lavalink_port() {
+  case $1 in
+    production) printf '2333' ;;
+    staging) printf '2334' ;;
+  esac
+}
+
+# Prints the Lavalink instances this host runs, production first, one per line: the words of
+# LAVALINK_INSTANCES (space or comma separated), or else the instances whose port is in the ports
+# field of a WG_PEERS entry (<key> <ip>/32 <endpoint|-> <tcp ports>; entries separated by ";").
+# Returns 1 for an unknown word. ririko-deploy has the same function: keep them in step.
+configured_instances() {
+  local names=" " word entry instance
+  local -a fields=() words=() ports=()
+  if [ -n "$LAVALINK_INSTANCES" ]; then
+    read -r -a words <<<"${LAVALINK_INSTANCES//,/ }"
+    for word in "${words[@]}"; do
+      case $word in
+        production | staging) names+="$word " ;;
+        *) return 1 ;;
+      esac
+    done
+  else
+    while IFS= read -r entry; do
+      read -r -a fields <<<"$entry"
+      IFS=, read -r -a ports <<<"${fields[3]:-}"
+      for word in "${ports[@]}"; do
+        for instance in production staging; do
+          if [ "$word" = "$(lavalink_port "$instance")" ]; then
+            names+="$instance "
+          fi
+        done
+      done
+    done <<<"${WG_PEERS//;/$'\n'}"
+  fi
+  for instance in production staging; do
+    if [[ $names == *" $instance "* ]]; then
+      printf '%s\n' "$instance"
+    fi
+  done
+}
+
+# Fills LAVALINK_BIND (WG_ADDRESS without its prefix) and LAVALINK_INSTANCE_LIST. Without them
+# nothing can be checked, so a bad value is a failed run (exit 1: the pings stop and the monitor
+# alerts).
+validate_lavalink_conf() {
+  local instances
+  [[ $WG_ADDRESS =~ $IPV4_PATTERN ]] ||
+    fail 1 "invalid or missing WG_ADDRESS '$WG_ADDRESS' in $RIRIKO_CONF (Lavalink listens on it)"
+  LAVALINK_BIND=${WG_ADDRESS%%/*}
+  instances=$(configured_instances) ||
+    fail 1 "invalid LAVALINK_INSTANCES '$LAVALINK_INSTANCES' in $RIRIKO_CONF (use staging, production)"
+  [ -n "$instances" ] ||
+    fail 1 "no Lavalink instance configured: set LAVALINK_INSTANCES or give a WG_PEERS entry the port 2333 or 2334 in $RIRIKO_CONF"
+  mapfile -t LAVALINK_INSTANCE_LIST <<<"$instances"
 }
 
 # --- checks -----------------------------------------------------------------------------------
@@ -174,6 +262,36 @@ disk_percent() {
   printf '%s\n' "$out" | tail -n 1 | tr -dc '0-9'
 }
 
+# Prints LAVALINK_PASSWORD of one instance from /opt/ririko/lavalink-<instance>.env (the last
+# assignment wins, one pair of quotes is stripped). The file is parsed, never sourced. Returns 1
+# when the file or the password is missing. ririko-deploy has the same function.
+lavalink_password() {
+  local file=$RIRIKO_ROOT/lavalink-$1.env line value=""
+  [ -f "$file" ] || return 1
+  while IFS= read -r line || [ -n "$line" ]; do
+    line=${line%$'\r'}
+    case $line in
+      LAVALINK_PASSWORD=*) value=${line#LAVALINK_PASSWORD=} ;;
+    esac
+  done <"$file"
+  if [[ $value == \"*\" && ${#value} -ge 2 ]]; then
+    value=${value:1:${#value}-2}
+  elif [[ $value == \'*\' && ${#value} -ge 2 ]]; then
+    value=${value:1:${#value}-2}
+  fi
+  [ -n "$value" ] || return 1
+  printf '%s' "$value"
+}
+
+# Succeeds when GET http://<WG_ADDRESS>:<port>/version answers 200 for the instance's password.
+# The password goes to curl as a header file on stdin, so it is on no command line.
+lavalink_version_ok() {
+  local password code
+  password=$(lavalink_password "$1") || return 1
+  code=$("$CURL" --silent --output /dev/null --write-out '%{http_code}' --max-time 5     --header @- "http://$LAVALINK_BIND:$(lavalink_port "$1")/version" 2>/dev/null     <<<"Authorization: $password") || return 1
+  [ "$code" = 200 ]
+}
+
 # Joins the arguments with "; ".
 join_reasons() {
   local out="" item
@@ -183,11 +301,120 @@ join_reasons() {
   printf '%s' "$out"
 }
 
+# Reads the failure counter of a Lavalink instance (digits, 0 when there is none).
+lavalink_failures() {
+  local file=$RIRIKO_ROOT/state/watchdog-lavalink-$1 value=""
+  if [ -f "$file" ]; then
+    IFS= read -r value <"$file" || true
+  fi
+  if [[ $value =~ ^[0-9]{1,6}$ ]]; then
+    printf '%s' "$((10#$value))"
+  else
+    printf '0'
+  fi
+}
+
+# Counts a failed check of one instance in watchdog-lavalink-<instance>, or clears the counter:
+#   lavalink_record <instance> <failed|ok>
+lavalink_record() {
+  local file=$RIRIKO_ROOT/state/watchdog-lavalink-$1
+  if [ "$2" = ok ]; then
+    rm -f "$file"
+    return 0
+  fi
+  mkdir -p "$RIRIKO_ROOT/state"
+  printf '%s\n' "$(($(lavalink_failures "$1") + 1))" >"$file"
+}
+
+# The Lavalink host's checks (see the header): fills reasons[] for finish().
+check_lavalink() {
+  local listing instance service name state status problem failures
+  local -A container=()
+  listing=$("$DOCKER" ps -a --filter "label=com.docker.compose.project=$LAVALINK_PROJECT"     --format '{{.Names}} {{.Label "com.docker.compose.service"}}') ||
+    fail 1 "docker ps failed; cannot check the Lavalink containers"
+  if [ -z "$listing" ]; then
+    log "no containers of the compose project $LAVALINK_PROJECT; nothing deployed yet, skipping"
+    exit "$CONF_ERROR"
+  fi
+  while read -r name service; do
+    # lavalink-<instance>-plugins is a one-shot init service (it fixes the plugin volume's owner
+    # and exits 0): an exited container is its normal state, never a broken instance.
+    if [[ $service == *-plugins ]]; then
+      continue
+    fi
+    if [ -n "$name" ] && [ -z "${container[$service]:-}" ]; then
+      container[$service]=$name
+    fi
+  done <<<"$listing"
+
+  for instance in "${LAVALINK_INSTANCE_LIST[@]}"; do
+    service=lavalink-$instance
+    name=${container[$service]:-}
+    problem=""
+    if [ -z "$name" ]; then
+      problem="$service is missing"
+    elif ! state=$(container_state "$name"); then
+      problem="cannot inspect $service"
+    else
+      read -r status _ <<<"$state"
+      if [ "$status" != running ]; then
+        problem="$service is $status"
+      elif ! lavalink_version_ok "$instance"; then
+        problem="$service does not answer /version"
+      fi
+    fi
+
+    if [ -z "$problem" ]; then
+      lavalink_record "$instance" ok
+      continue
+    fi
+    lavalink_record "$instance" failed
+    failures=$(lavalink_failures "$instance")
+    if [ -n "$name" ] && ((failures >= LAVALINK_RESTART_AFTER)); then
+      note "restarting $service (container $name): $problem in $failures checks in a row"
+      if "$DOCKER" restart "$name" >/dev/null; then
+        lavalink_record "$instance" ok
+        reasons+=("$problem; restarted after $failures failed checks")
+      else
+        note "could not restart container $name"
+        reasons+=("$problem; could not be restarted")
+      fi
+    else
+      reasons+=("$problem (failed check $failures of $LAVALINK_RESTART_AFTER)")
+    fi
+  done
+}
+
+# The tail of every run: the disk check, the lock released, then the heartbeat or /fail ping.
+finish() {
+  local percent reason
+  percent=$(disk_percent)
+  if [ -z "$percent" ]; then
+    reasons+=("cannot read the disk usage")
+  elif ((percent >= DISK_ALERT_PERCENT)); then
+    reasons+=("root file system is ${percent}% full (limit ${DISK_ALERT_PERCENT}%)")
+  fi
+
+  # The deploy lock is only needed while containers are inspected and restarted.
+  exec 9>&-
+
+  if ((${#reasons[@]} > 0)); then
+    reason=$(join_reasons "${reasons[@]}")
+    note "stack not healthy: $reason"
+    ping_monitor /fail "$reason"
+  elif ((${#starting[@]} > 0)); then
+    log "stack is still starting (${starting[*]}); no ping yet"
+  else
+    log "stack healthy; root file system ${percent}% full"
+    ping_monitor
+  fi
+  exit "$CONF_ERROR"
+}
+
 main() {
   [ $# -eq 0 ] || usage
 
-  local listing name service state status health percent reason
-  local -a reasons=() starting=()
+  local listing name service state status health
   local -A seen_status=() seen_health=()
 
   if ! { exec 9>"$RIRIKO_LOCK"; } 2>/dev/null; then
@@ -200,6 +427,11 @@ main() {
 
   load_conf
   validate_conf
+
+  if [ "$RIRIKO_ROLE" = lavalink ]; then
+    check_lavalink
+    finish
+  fi
 
   # Names and services of every container of the project, running or not. A missing Docker
   # daemon is a failure, and the monitor alerts because the pings stop.
@@ -254,27 +486,7 @@ main() {
     reasons+=("lavalink is ${seen_status[lavalink]}")
   fi
 
-  percent=$(disk_percent)
-  if [ -z "$percent" ]; then
-    reasons+=("cannot read the disk usage")
-  elif ((percent >= DISK_ALERT_PERCENT)); then
-    reasons+=("root file system is ${percent}% full (limit ${DISK_ALERT_PERCENT}%)")
-  fi
-
-  # The deploy lock is only needed while containers are inspected and restarted.
-  exec 9>&-
-
-  if ((${#reasons[@]} > 0)); then
-    reason=$(join_reasons "${reasons[@]}")
-    note "stack not healthy: $reason"
-    ping_monitor /fail "$reason"
-  elif ((${#starting[@]} > 0)); then
-    log "stack is still starting (${starting[*]}); no ping yet"
-  else
-    log "stack healthy; root file system ${percent}% full"
-    ping_monitor
-  fi
-  exit "$CONF_ERROR"
+  finish
 }
 
 main "$@"

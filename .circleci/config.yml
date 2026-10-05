@@ -129,7 +129,7 @@ commands:
               "<< parameters.remote_command >>" || status=$?
             case "$status" in
               0) echo 'The host command succeeded.' ;;
-              2) echo 'The host rejected the command or the version.' ;;
+              2) echo 'The host rejected the command or the version (a Lavalink host also refuses an instance it does not run).' ;;
               3) echo 'The host is busy: another deploy, backup or watchdog run holds its lock. Run the job again later.' ;;
               4) echo 'The new release did not become ready. The host started the previous release again; the database was not restored.' ;;
               5) echo 'The new release did not become ready and the host has no previous release: nothing is running. Fix it on the host.' ;;
@@ -316,23 +316,31 @@ jobs:
             docker logout
 
   # Deploys the version of the git tag to one production host (docs/release.md). Called once per
-  # environment, each with its own CircleCI context that holds the host's variables, so an
-  # environment is a parameter and a new host is one more call, not a copy.
+  # host and environment, each with its own CircleCI context that holds the host's variables, so
+  # a host is a parameter and a new one is one more call, not a copy. The remote command is the
+  # same for both kinds of host: an app host deploys the whole stack, and a Lavalink host (its
+  # CI key is forced to one instance, deploy/host/bin/ririko-deploy-ssh) updates the Lavalink
+  # instance of the same environment, and only when that instance's files changed.
   deploy:
     docker:
       - image: cimg/base:current
     resource_class: small
     parameters:
       environment:
-        description: Which host to deploy to; its CircleCI context is deploy-<environment>
+        description: Which environment to deploy to
         type: enum
         enum: [staging, production]
+      host:
+        description: app (the bot stack; context deploy-<environment>) or lavalink (the Lavalink node; context deploy-lavalink-<environment>)
+        type: enum
+        enum: [app, lavalink]
+        default: app
     steps:
       - run:
           name: Check the git tag
           command: |
             : "${CIRCLE_TAG:?This job runs only for release tags}"
-            echo "Deploying ${CIRCLE_TAG#v} to << parameters.environment >>"
+            echo "Deploying ${CIRCLE_TAG#v} to << parameters.host >> << parameters.environment >>"
       - ssh-host:
           remote_command: 'deploy ${CIRCLE_TAG#v}'
 
@@ -377,14 +385,28 @@ workflows:
             branches:
               ignore: /.*/
       # After the images are pushed: every release tag deploys to staging, and only a final
-      # vX.Y.Z waits for a maintainer's approval before production. Each job keeps its own tag
-      # filter, because CircleCI skips a job on tags without one.
+      # vX.Y.Z waits for a maintainer's approval before production. Each environment updates its
+      # Lavalink instance first (the release ships docker/lavalink/application.yml, so a new
+      # plugin pin must be running before the bot that needs it), then the app host. Each job
+      # keeps its own tag filter, because CircleCI skips a job on tags without one.
+      - deploy:
+          name: deploy-lavalink-staging
+          host: lavalink
+          environment: staging
+          context: deploy-lavalink-staging
+          requires:
+            - release
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+(-.+)?$/
+            branches:
+              ignore: /.*/
       - deploy:
           name: deploy-staging
           environment: staging
           context: deploy-staging
           requires:
-            - release
+            - deploy-lavalink-staging
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+(-.+)?$/
@@ -400,11 +422,23 @@ workflows:
             branches:
               ignore: /.*/
       - deploy:
+          name: deploy-lavalink-production
+          host: lavalink
+          environment: production
+          context: deploy-lavalink-production
+          requires:
+            - approve-production
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - deploy:
           name: deploy-production
           environment: production
           context: deploy-production
           requires:
-            - approve-production
+            - deploy-lavalink-production
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/

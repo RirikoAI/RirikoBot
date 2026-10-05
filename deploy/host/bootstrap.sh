@@ -460,6 +460,30 @@ harden_ssh() {
   fi
 }
 
+# The host scripts (ririko-deploy, ririko-watchdog) learn their role from RIRIKO_ROLE in
+# ririko.conf; ririko-deploy-ssh cannot read that file (it runs as the deploy
+# user), so it learns the instance from its forced-command argument instead. The lavalink role
+# writes the line and keeps it on every later run; the app role is the default, so it writes
+# nothing and only removes a leftover lavalink line. The file is rewritten in place, so its owner
+# and mode stay.
+#   set_conf_role <ririko.conf>
+set_conf_role() {
+  local conf=$1 current content
+  current=$(conf_value "$conf" RIRIKO_ROLE)
+  if [[ $current == "$ROLE" || ( -z $current && $ROLE == app ) ]]; then
+    return 0
+  fi
+  content=$(sed -e '/^RIRIKO_ROLE=/d' "$conf")
+  {
+    printf '%s\n' "$content"
+    if [[ $ROLE != app ]]; then
+      printf 'RIRIKO_ROLE=%s\n' "$ROLE"
+    fi
+  } >"$WORK/ririko.conf.new"
+  cat "$WORK/ririko.conf.new" >"$conf"
+  log "set the role of this host in $conf: $ROLE"
+}
+
 create_layout() {
   install -d -m 0750 -o root -g root /opt/ririko /opt/ririko/releases /opt/ririko/state /etc/ririko
   # Only the app role has a database and volumes to back up.
@@ -473,6 +497,7 @@ create_layout() {
     install -m 0600 -o root -g root "$SRC/ririko.conf.example" /etc/ririko/ririko.conf
     log 'created /etc/ririko/ririko.conf from the example'
   fi
+  set_conf_role /etc/ririko/ririko.conf
 }
 
 WIREGUARD_KEY=/etc/wireguard/private.key
@@ -654,7 +679,9 @@ Remaining manual steps:
      each app host's public key, tunnel address and Lavalink port, and WG_ALLOWED_ENDPOINTS with
      the app hosts' public addresses. Then run bootstrap again.
   2. In the Cloudflare dashboard, point the tunnel's SSH hostname at ssh://localhost:22.
-  3. Start the Lavalink containers (docs/deployment.md).
+  3. Create /opt/ririko/lavalink-<instance>.env for each instance (root:root, 0600; start from
+     deploy/lavalink/lavalink.env.example), then start it with the first release:
+     sudo ririko-deploy deploy <version> staging (or production). CI does this for every release.
 EOF
   fi
 }

@@ -125,3 +125,37 @@
 # drop) lets UDP WG_LISTEN_PORT in from these addresses only, and each WG_PEERS entry reach its own
 # ports on wg0. Required for the firewall; bootstrap.sh leaves the firewall as it is until it is set.
 #WG_ALLOWED_ENDPOINTS="203.0.113.10 2001:db8::10"
+
+# --- Lavalink host role (TASK-1803) --------------------------------------------------------------
+# On the Lavalink VPS, ririko-deploy, ririko-deploy-ssh and ririko-watchdog manage the Lavalink
+# containers (compose project ririko-lavalink) instead of the app stack. bootstrap.sh --role
+# lavalink writes RIRIKO_ROLE=lavalink here (and keeps it on every run), so you normally do not
+# set it by hand. ririko-deploy-ssh cannot read this file; each CI key is forced to its own
+# instance ("ririko-deploy-ssh staging" or "... production") in the deploy user's authorized_keys.
+#
+# A deploy <version> <instance> downloads deploy/lavalink/docker-compose.yml and
+# docker/lavalink/application.yml of the tag, and recreates lavalink-<instance> only when the
+# sha256 of one of them changed (a restart drops every playing session), then waits for
+# GET http://<WG_ADDRESS>:<port>/version to answer 200 with the instance's password
+# (LAVALINK_PASSWORD in /opt/ririko/lavalink-<instance>.env, one file per instance, root 0600,
+# see deploy/lavalink/lavalink.env.example). The Lavalink containers listen on WG_ADDRESS (without
+# its prefix length).
+
+# app (default) or lavalink.
+#RIRIKO_ROLE=lavalink
+
+# The instances this host runs, separated by spaces or commas. Optional: without it they are the
+# instances whose Lavalink port (production 2333, staging 2334) appears in the ports field of a
+# WG_PEERS entry. A deploy or a status for any other instance is refused with exit 2, and the
+# watchdog checks only these. Production Lavalink moving to its own VM needs no change here: that
+# VM's WG_PEERS names only the production port.
+#LAVALINK_INSTANCES="production staging"
+
+# Seconds a deploy waits for the instance's /version to answer 200 before it counts as failed and
+# starts the previous release of that instance again.
+#LAVALINK_READY_TIMEOUT=180
+
+# JVM heap of an instance (the compose file defaults to 1536m for production and 512m for staging).
+# While both run on a 2 GB VM, keep production below its default.
+#LAVALINK_PRODUCTION_HEAP=768m
+#LAVALINK_STAGING_HEAP=512m

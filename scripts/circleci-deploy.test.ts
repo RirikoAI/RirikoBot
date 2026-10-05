@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
 // The deploy half of the tag-driven release workflow (.circleci/config.yml, docs/release.md):
-// release -> deploy-staging -> approve-production -> deploy-production.
+// release -> deploy-lavalink-staging -> deploy-staging -> approve-production ->
+// deploy-lavalink-production -> deploy-production.
 
 interface Filters {
   tags?: { only?: string };
@@ -16,6 +17,7 @@ interface WorkflowJob {
   context?: string;
   requires?: string[];
   environment?: string;
+  host?: string;
   filters?: Filters;
 }
 interface Step {
@@ -29,7 +31,7 @@ interface Config {
     {
       steps: Step[];
       environment?: Record<string, string>;
-      parameters?: Record<string, { type: string; enum?: string[] }>;
+      parameters?: Record<string, { type: string; enum?: string[]; default?: string }>;
     }
   >;
   workflows: Record<string, { jobs: Array<string | Record<string, WorkflowJob | null>> }>;
@@ -59,34 +61,58 @@ const filterOf = (name: string) =>
   new RegExp(release[name]?.filters?.tags?.only?.slice(1, -1) ?? '');
 
 describe('release workflow order', () => {
-  it('runs release, deploy-staging, approve-production, deploy-production', () => {
+  it('runs release, the Lavalink node, the app host, approval, then the same for production', () => {
     expect(Object.keys(release)).toEqual([
       'release',
+      'deploy-lavalink-staging',
       'deploy-staging',
       'approve-production',
+      'deploy-lavalink-production',
       'deploy-production',
     ]);
     expect(release['release']?.requires).toBeUndefined();
-    expect(release['deploy-staging']?.requires).toEqual(['release']);
+    expect(release['deploy-lavalink-staging']?.requires).toEqual(['release']);
+    expect(release['deploy-staging']?.requires).toEqual(['deploy-lavalink-staging']);
     expect(release['approve-production']?.requires).toEqual(['deploy-staging']);
-    expect(release['deploy-production']?.requires).toEqual(['approve-production']);
+    expect(release['deploy-lavalink-production']?.requires).toEqual(['approve-production']);
+    expect(release['deploy-production']?.requires).toEqual(['deploy-lavalink-production']);
   });
 
-  it('deploys both environments with the same parameterized job', () => {
-    expect(release['deploy-staging']?.job).toBe('deploy');
-    expect(release['deploy-production']?.job).toBe('deploy');
+  it('deploys every host with the same parameterized job', () => {
+    for (const name of [
+      'deploy-lavalink-staging',
+      'deploy-staging',
+      'deploy-lavalink-production',
+      'deploy-production',
+    ]) {
+      expect(release[name]?.job, name).toBe('deploy');
+    }
     expect(release['deploy-staging']?.environment).toBe('staging');
     expect(release['deploy-production']?.environment).toBe('production');
+    expect(release['deploy-lavalink-staging']?.environment).toBe('staging');
+    expect(release['deploy-lavalink-production']?.environment).toBe('production');
+    expect(release['deploy-lavalink-staging']?.host).toBe('lavalink');
+    expect(release['deploy-lavalink-production']?.host).toBe('lavalink');
+    // The app jobs keep the default host, so they did not change.
+    expect(release['deploy-staging']?.host).toBeUndefined();
+    expect(release['deploy-production']?.host).toBeUndefined();
     expect(config.jobs['deploy']?.parameters?.['environment']).toMatchObject({
       type: 'enum',
       enum: ['staging', 'production'],
     });
+    expect(config.jobs['deploy']?.parameters?.['host']).toMatchObject({
+      type: 'enum',
+      enum: ['app', 'lavalink'],
+      default: 'app',
+    });
   });
 
-  it('uses one context per environment and none on the approval', () => {
+  it('uses one context per host and none on the approval', () => {
     expect(release['release']?.context).toBe('dockerhub');
     expect(release['deploy-staging']?.context).toBe('deploy-staging');
     expect(release['deploy-production']?.context).toBe('deploy-production');
+    expect(release['deploy-lavalink-staging']?.context).toBe('deploy-lavalink-staging');
+    expect(release['deploy-lavalink-production']?.context).toBe('deploy-lavalink-production');
     expect(release['approve-production']?.type).toBe('approval');
     expect(release['approve-production']?.context).toBeUndefined();
   });
@@ -100,17 +126,19 @@ describe('release workflow order', () => {
 
   it('sends a prerelease to staging only and a final release through approval', () => {
     const prerelease = 'v2.1.3-rc.1';
-    for (const name of ['release', 'deploy-staging']) {
+    for (const name of ['release', 'deploy-lavalink-staging', 'deploy-staging']) {
       expect(filterOf(name).test(prerelease), name).toBe(true);
     }
-    for (const name of ['approve-production', 'deploy-production']) {
+    for (const name of ['approve-production', 'deploy-lavalink-production', 'deploy-production']) {
       expect(filterOf(name).test(prerelease), name).toBe(false);
       expect(filterOf(name).test('v2.1.3'), name).toBe(true);
       expect(filterOf(name).test('v2.1'), name).toBe(false);
       expect(filterOf(name).test('v2.1.3-'), name).toBe(false);
     }
-    expect(filterOf('deploy-staging').test('v2.1.3')).toBe(true);
-    expect(filterOf('deploy-staging').test('main')).toBe(false);
+    for (const name of ['deploy-lavalink-staging', 'deploy-staging']) {
+      expect(filterOf(name).test('v2.1.3'), name).toBe(true);
+      expect(filterOf(name).test('main'), name).toBe(false);
+    }
   });
 
   it('leaves the ci workflow without deploy jobs', () => {
@@ -138,6 +166,8 @@ describe('deploy job', () => {
   const connect = sshStep('Run on the host');
 
   it('sends "deploy <version>" from the git tag to the host', () => {
+    // The same command goes to both kinds of host: the Lavalink host's CI key is forced to the
+    // instance of its environment, so the instance never travels in the command.
     expect(remoteCommand).toBe('deploy ${CIRCLE_TAG#v}');
     expect(connect?.command).toContain('"deploy@${DEPLOY_SSH_HOST}"');
     expect(connect?.command).toContain('"<< parameters.remote_command >>"');
@@ -320,6 +350,8 @@ describe('docs/release.md deploy section', () => {
     for (const text of [
       'deploy-staging',
       'deploy-production',
+      'deploy-lavalink-staging',
+      'deploy-lavalink-production',
       'DEPLOY_SSH_HOST',
       'DEPLOY_SSH_KEY_B64',
       'DEPLOY_KNOWN_HOSTS',

@@ -684,8 +684,11 @@ run deploy 2.1.3`);
   });
 
   it.skipIf(!hasFlock)(
-    'does not delete pre-existing tmp directories while waiting for the lock',
+    'leaves the temporary directories alone while it waits for the lock, and removes them after',
     () => {
+      // The lock holder looks for .tmp.keep just before it lets go of the lock. A deploy that
+      // cleaned up before it had the lock would already have deleted it, because it started
+      // waiting 0.2 s into the holder's second.
       const result = scenario(`
 mkdir -p "$RIRIKO_ROOT/releases/.tmp.keep"
 echo 'DEPLOY_LOCK_WAIT=10' >>"$RIRIKO_CONF"
@@ -693,11 +696,17 @@ echo 'DEPLOY_LOCK_WAIT=10' >>"$RIRIKO_CONF"
   exec 8>"$RIRIKO_LOCK"
   flock -n 8
   sleep 1
+  if test -d "$RIRIKO_ROOT/releases/.tmp.keep"; then echo kept >"$RIRIKO_ROOT/probe"; fi
 ) &
 sleep 0.2
-run deploy 2.1.3`);
+run deploy 2.1.3
+wait
+cat "$RIRIKO_ROOT/probe" >"$work/stdout" 2>/dev/null`);
       expect(result.rcs).toEqual([0]);
       expect(result.current).toBe('2.1.3');
+      expect(result.stdout.trim()).toBe('kept');
+      // Once the deploy has the lock, the stale directory is cleaned up as before.
+      expect(result.releases).toEqual(['2.1.3']);
     },
   );
 
@@ -2589,5 +2598,1118 @@ describe('bootstrap.sh roles, WireGuard and firewall wiring', () => {
     expect(body('render_deploy_authorized_keys')).toContain(
       'restrict,command="/usr/local/bin/ririko-deploy-ssh %s" %s',
     );
+  });
+});
+
+// --- Lavalink host role (TASK-1803) --------------------------------------------------------------
+// ririko-deploy, ririko-deploy-ssh and ririko-watchdog with RIRIKO_ROLE=lavalink. The fake docker
+// logs every call with the environment the real compose file reads, remembers which release each
+// service was last started from, and the fake curl answers /version from that (a release listed in
+// "bad_version" answers 503), reading the Authorization header from stdin as the real curl does.
+
+const stagingPeers = `${keyStaging} 10.77.0.3/32 - 2334`;
+const productionPeers = `${keyProduction} 10.77.0.2/32 - 2333`;
+
+const fakeLavalinkDocker = String.raw`#!/usr/bin/env bash
+echo "WG_ADDRESS=$WG_ADDRESS PRODUCTION_ENV=$LAVALINK_PRODUCTION_ENV_FILE STAGING_ENV=$LAVALINK_STAGING_ENV_FILE PRODUCTION_HEAP=$LAVALINK_PRODUCTION_HEAP STAGING_HEAP=$LAVALINK_STAGING_HEAP docker $*" >>"$FAKE_DIR/docker.log"
+sub=""
+file=""
+prev=""
+for arg in "$@"; do
+  if [ "$prev" = -f ]; then file=$arg; fi
+  prev=$arg
+  case $arg in
+    pull|up|ps|logs) if [ -z "$sub" ]; then sub=$arg; fi ;;
+  esac
+done
+version=$(echo "$file" | sed -E 's#.*/releases/([^/]+)/.*#\1#')
+service=$prev
+listed() {
+  for v in $(cat "$FAKE_DIR/$1" 2>/dev/null); do
+    if [ "$v" = "$version" ]; then return 0; fi
+  done
+  return 1
+}
+case $sub in
+  pull) if listed bad_pull; then exit 1; fi; exit 0 ;;
+  up)
+    if listed bad_up; then exit 1; fi
+    echo "$version" >"$FAKE_DIR/up.$service"
+    case " $* " in
+      *" --no-deps "*) ;;
+      *) if [ -e "$FAKE_DIR/init.$service" ]; then cat "$FAKE_DIR/init.$service" >>"$FAKE_DIR/started"; fi ;;
+    esac
+    exit 0 ;;
+  ps) echo "NAME STATUS fake-ps-of-$version"; exit 0 ;;
+  logs) echo "fake-log-line of $service on $version"; exit 0 ;;
+esac
+exit 0
+`;
+
+const fakeLavalinkCurl = String.raw`#!/usr/bin/env bash
+echo "$*" >>"$FAKE_DIR/curl.log"
+out=""
+url=""
+while [ $# -gt 0 ]; do
+  case $1 in
+    --output|-o) out=$2; shift ;;
+    http://*|https://*) url=$1 ;;
+  esac
+  shift
+done
+case $url in
+  http://*/version)
+    header=$(cat)
+    port=$(echo "$url" | sed -E 's#^http://[^:]+:([0-9]+)/.*#\1#')
+    echo "port=$port url=$url header=$header" >>"$FAKE_DIR/version.log"
+    case $port in 2333) service=lavalink-production ;; 2334) service=lavalink-staging ;; esac
+    up=$(cat "$FAKE_DIR/up.$service" 2>/dev/null)
+    code=200
+    for v in $(cat "$FAKE_DIR/bad_version" 2>/dev/null); do
+      if [ "$v" = "$up" ]; then code=503; fi
+    done
+    if [ -e "$FAKE_DIR/not_ready_checks" ]; then
+      n=$(cat "$FAKE_DIR/not_ready_checks")
+      if [ "$n" -gt 0 ]; then echo $((n - 1)) >"$FAKE_DIR/not_ready_checks"; code=503; fi
+    fi
+    printf '%s' "$code"
+    exit 0 ;;
+  https://*)
+    if [ -e "$FAKE_DIR/curl_fail" ] && grep -qF "$(cat "$FAKE_DIR/curl_fail")" <<<"$url"; then
+      echo "curl: (22) The requested URL returned error: 404" >&2
+      exit 22
+    fi
+    path=$(echo "$url" | sed -E 's#^https://raw.githubusercontent.com/[^/]+/[^/]+/v[^/]+/##')
+    if [ -e "$FAKE_DIR/same.$(basename "$path")" ]; then
+      echo "# fake $path" >"$out"
+    else
+      echo "# fake $url" >"$out"
+    fi ;;
+esac
+`;
+
+const lavalinkHarness = (body: string) => `set -u
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+mkdir -p "$work/bin" "$work/fake"
+cat >"$work/bin/ririko-deploy" <<'${heredocEnd}'
+${hasBash ? read('bin/ririko-deploy.sh') : ''}
+${heredocEnd}
+cat >"$work/bin/ririko-deploy-ssh" <<'${heredocEnd}'
+${hasBash ? read('bin/ririko-deploy-ssh.sh') : ''}
+${heredocEnd}
+cat >"$work/bin/docker" <<'${heredocEnd}'
+${fakeLavalinkDocker}
+${heredocEnd}
+cat >"$work/bin/curl" <<'${heredocEnd}'
+${fakeLavalinkCurl}
+${heredocEnd}
+cat >"$work/bin/sudo" <<'${heredocEnd}'
+${fakeSudo}
+${heredocEnd}
+# Git Bash has no flock; the lock itself is only tested where the real one exists.
+if ! command -v flock >/dev/null; then printf '#!/usr/bin/env bash\\nexit 0\\n' >"$work/bin/flock"; fi
+chmod +x "$work/bin/"*
+export FAKE_DIR="$work/fake"
+export RIRIKO_ROOT="$work/root" RIRIKO_CONF="$work/ririko.conf" RIRIKO_LOCK="$work/deploy.lock"
+export DOCKER="$work/bin/docker" CURL="$work/bin/curl" READY_POLL_SECONDS=0.1
+export PATH="$work/bin:$PATH"
+mkdir -p "$RIRIKO_ROOT"
+
+# conf [extra line]...: a Lavalink host that runs staging (port 2334); later lines win.
+conf() {
+  printf '%s\\n' 'RIRIKO_ROLE=lavalink' 'WG_ADDRESS=10.77.0.1/24' 'WG_PEERS="${stagingPeers}"' \\
+    'LAVALINK_READY_TIMEOUT=1' "$@" >"$RIRIKO_CONF"
+}
+# password <instance> <value>: the instance's env file.
+password() { printf 'LAVALINK_PASSWORD=%s\\nSPOTIFY_CLIENT_ID=\\n' "$2" >"$RIRIKO_ROOT/lavalink-$1.env"; }
+conf
+password staging pw-staging
+
+# run <args>: ririko-deploy as root would run it; ssh <instance> <command>: the forced command.
+run() { bash "$work/bin/ririko-deploy" "$@" </dev/null >"$work/stdout" 2>"$work/stderr"; rc=$?; echo "$rc" >>"$work/rcs"; }
+ssh() { SSH_ORIGINAL_COMMAND="$2" bash "$work/bin/ririko-deploy-ssh" "$1" </dev/null >"$work/stdout" 2>"$work/stderr"; rc=$?; echo "$rc" >>"$work/rcs"; }
+section() { printf '\\n@@%s\\n' "$1"; cat "$2" 2>/dev/null; }
+report() {
+  section stdout "$work/stdout"
+  section stderr "$work/stderr"
+  section rcs "$work/rcs"
+  section docker "$FAKE_DIR/docker.log"
+  section curl "$FAKE_DIR/curl.log"
+  section version "$FAKE_DIR/version.log"
+  section sudo "$FAKE_DIR/sudo.log"
+  section started "$FAKE_DIR/started"
+  section log "$RIRIKO_ROOT/deploy.log"
+  printf '\\n@@state\\n'
+  for f in "$RIRIKO_ROOT"/state/*; do
+    if [ -f "$f" ]; then echo "$(basename "$f")=$(tr '\\n' '|' <"$f")"; fi
+  done
+  printf '\\n@@tree\\n'; (cd "$RIRIKO_ROOT" 2>/dev/null && find releases -type f | sort)
+  printf '\\n@@releases\\n'; ls -A "$RIRIKO_ROOT/releases" 2>/dev/null
+  printf '\\n@@end\\n'
+}
+${body}
+report
+`;
+
+interface LavalinkReport {
+  stdout: string;
+  stderr: string;
+  rcs: number[];
+  docker: string[];
+  curl: string[];
+  version: string[];
+  sudo: string[];
+  started: string[];
+  log: string[];
+  state: Record<string, string>;
+  tree: string[];
+  releases: string[];
+}
+
+function lavalinkScenario(body: string): LavalinkReport {
+  const result = spawnSync('bash', ['-s'], { input: lavalinkHarness(body), encoding: 'utf8' });
+  expect(result.stdout, result.stderr).toContain('@@end');
+  const sections: Record<string, string> = {};
+  const parts = result.stdout.split(/^@@(\w+)\n/m);
+  for (let index = 1; index < parts.length; index += 2) sections[parts[index]!] = parts[index + 1]!;
+  return {
+    stdout: sections.stdout ?? '',
+    stderr: sections.stderr ?? '',
+    rcs: lines(sections.rcs).map(Number),
+    docker: lines(sections.docker),
+    curl: lines(sections.curl),
+    version: lines(sections.version),
+    sudo: lines(sections.sudo),
+    started: lines(sections.started),
+    log: lines(sections.log),
+    state: Object.fromEntries(
+      lines(sections.state).map((line) => [line.split('=')[0]!, line.slice(line.indexOf('=') + 1)]),
+    ),
+    tree: lines(sections.tree),
+    releases: lines(sections.releases),
+  };
+}
+
+const lavalinkFiles = ['deploy/lavalink/docker-compose.yml', 'docker/lavalink/application.yml'];
+/** The docker call for a Lavalink release, as the fake docker logs it. */
+const lavalinkCall = (
+  version: string,
+  subcommand: string,
+  env = 'PRODUCTION_ENV=/dev/null STAGING_ENV=\\S+/lavalink-staging\\.env',
+  heaps = 'PRODUCTION_HEAP= STAGING_HEAP=',
+) =>
+  new RegExp(
+    `^WG_ADDRESS=10\\.77\\.0\\.1 ${env} ${heaps} docker compose -p ririko-lavalink ` +
+      `-f \\S+/releases/${escapeDots(version)}/deploy/lavalink/docker-compose\\.yml ${subcommand}`,
+  );
+const shaLine =
+  /^[0-9a-f]{64} {2}(deploy\/lavalink\/docker-compose\.yml|docker\/lavalink\/application\.yml)$/;
+
+describe.skipIf(!hasBash)('ririko-deploy-ssh on a Lavalink host', () => {
+  const run = (cases: Array<[string, string]>) => {
+    const body = cases
+      .map(
+        ([instance, command], index) =>
+          `rm -f "$FAKE_DIR/sudo.log"; ssh ${bashQuote(instance)} ${bashQuote(command)}; ` +
+          `printf 'case${index} rc=%s err=%s sudo=%s\\n' "$rc" "$(cat "$work/stderr")" ` +
+          `"$(cat "$FAKE_DIR/sudo.log" 2>/dev/null)" >>"$work/cases"`,
+      )
+      .join('\n');
+    return lines(lavalinkScenario(`${body}\ncp "$work/cases" "$work/stdout"`).stdout);
+  };
+
+  it('takes the instance from its own argument and still accepts only deploy and status', () => {
+    const cases: Array<[string, string]> = [
+      ['staging', 'deploy 2.1.3'],
+      ['production', 'deploy 2.1.3-rc.1'],
+      ['staging', 'status'],
+      ['production', 'status'],
+    ];
+    expect(run(cases)).toEqual([
+      'case0 rc=0 err= sudo=-n /usr/local/bin/ririko-deploy deploy 2.1.3 staging',
+      'case1 rc=0 err= sudo=-n /usr/local/bin/ririko-deploy deploy 2.1.3-rc.1 production',
+      'case2 rc=0 err= sudo=-n /usr/local/bin/ririko-deploy status staging',
+      'case3 rc=0 err= sudo=-n /usr/local/bin/ririko-deploy status production',
+    ]);
+  });
+
+  it('never takes the instance from SSH_ORIGINAL_COMMAND', () => {
+    const cases: Array<[string, string]> = [
+      ['staging', 'deploy 2.1.3 production'],
+      ['staging', 'deploy 2.1.3 staging'],
+      ['production', 'status staging'],
+      ['staging', 'deploy 2.1.3 production;id'],
+      ['staging', 'deploy 2.1.3\nproduction'],
+      ['staging', ''],
+      ['production', 'bash'],
+      ['staging', 'deploy latest'],
+    ];
+    expect(run(cases)).toEqual(
+      cases.map((_, index) => `case${index} rc=2 err=command not allowed sudo=`),
+    );
+  });
+
+  it('refuses an argument that is not an instance, before it reads the command', () => {
+    const cases: Array<[string, string]> = [
+      ['latest', 'deploy 2.1.3'],
+      ['staging;id', 'deploy 2.1.3'],
+      ['Staging', 'status'],
+      ['staging production', 'status'],
+      ['--help', 'status'],
+      ['../staging', 'deploy 2.1.3'],
+    ];
+    expect(run(cases)).toEqual(
+      cases.map((_, index) => `case${index} rc=2 err=instance not allowed sudo=`),
+    );
+  });
+});
+
+describe.skipIf(!hasBash)('ririko-deploy on a Lavalink host', () => {
+  it('deploys the first release of staging: download, pull, recreate only that service, /version', () => {
+    const result = lavalinkScenario('run deploy 2.1.3 staging');
+    expect(result.rcs).toEqual([0]);
+    const downloads = result.curl.filter((line) => line.includes('https://'));
+    expect(downloads.map((line) => line.split(' ').at(-1))).toEqual(
+      lavalinkFiles.map((file) => `${repoUrl}/v2.1.3/${file}`),
+    );
+    // Both files of the tag, with the repository layout, plus the three state files.
+    expect(result.tree).toEqual([
+      'releases/2.1.3/deploy/lavalink/docker-compose.yml',
+      'releases/2.1.3/docker/lavalink/application.yml',
+    ]);
+    expect(Object.keys(result.state).sort()).toEqual([
+      'lavalink-staging.current',
+      'lavalink-staging.sha',
+    ]);
+    expect(result.state['lavalink-staging.current']).toBe('2.1.3|');
+    const sha = result.state['lavalink-staging.sha']!.split('|').filter(Boolean);
+    expect(sha).toHaveLength(2);
+    for (const line of sha) expect(line).toMatch(shaLine);
+    // Only lavalink-staging is pulled and recreated, without --no-deps, on the WireGuard address
+    // without its prefix; the production env file does not exist here, so it is /dev/null.
+    expect(result.docker).toHaveLength(2);
+    expect(result.docker[0]).toMatch(lavalinkCall('2.1.3', 'pull lavalink-staging$'));
+    expect(result.docker[1]).toMatch(lavalinkCall('2.1.3', 'up -d lavalink-staging$'));
+    expect(result.docker.join('\n')).not.toContain('lavalink-production$');
+    expect(result.stdout).toContain('lavalink-staging is ready');
+  });
+
+  it('checks http://<WG_ADDRESS>:<port>/version with the password, never on a command line', () => {
+    const result = lavalinkScenario('run deploy 2.1.3 staging');
+    expect(result.version).toEqual([
+      'port=2334 url=http://10.77.0.1:2334/version header=Authorization: pw-staging',
+    ]);
+    const everything = [
+      ...result.curl,
+      ...result.docker,
+      ...result.log,
+      result.stdout,
+      result.stderr,
+    ].join('\n');
+    expect(everything).not.toContain('pw-staging');
+    expect(result.curl.at(-1)).toBe(
+      '--silent --output /dev/null --write-out %{http_code} --max-time 5 --header @- http://10.77.0.1:2334/version',
+    );
+  });
+
+  it('keeps polling /version until it answers 200 and fails when it never does', () => {
+    const slow = lavalinkScenario(`
+echo 3 >"$FAKE_DIR/not_ready_checks"
+conf 'LAVALINK_READY_TIMEOUT=10'
+run deploy 2.1.3 staging`);
+    expect(slow.rcs).toEqual([0]);
+    expect(slow.version).toHaveLength(4);
+    expect(slow.state['lavalink-staging.current']).toBe('2.1.3|');
+
+    const never = lavalinkScenario(`
+echo 2.1.3 >"$FAKE_DIR/bad_version"
+run deploy 2.1.3 staging`);
+    expect(never.rcs).toEqual([5]);
+    expect(never.version.length).toBeGreaterThan(1);
+    expect(never.state).toEqual({});
+  });
+
+  it('prints "unchanged" and leaves the container alone when both files match', () => {
+    const result = lavalinkScenario(`
+touch "$FAKE_DIR/same.docker-compose.yml" "$FAKE_DIR/same.application.yml"
+run deploy 2.1.3 staging
+run deploy 2.1.4 staging`);
+    expect(result.rcs).toEqual([0, 0]);
+    expect(result.stdout).toContain('unchanged');
+    // Only the first deploy touched Docker; the second one downloaded the files and compared.
+    expect(result.docker).toHaveLength(2);
+    expect(result.docker.every((line) => line.includes('/releases/2.1.3/'))).toBe(true);
+    expect(result.version).toHaveLength(1);
+    expect(result.releases).toEqual(['2.1.3', '2.1.4']);
+    expect(result.curl.filter((line) => line.includes('/v2.1.4/'))).toHaveLength(2);
+    expect(result.state['lavalink-staging.current']).toBe('2.1.4|');
+    expect(result.state['lavalink-staging.previous']).toBe('2.1.3|');
+  });
+
+  it.each([
+    ['docker-compose.yml', 'application.yml'],
+    ['application.yml', 'docker-compose.yml'],
+  ])('recreates the service when only %s changed', (_changed, same) => {
+    const result = lavalinkScenario(`
+touch "$FAKE_DIR/same.${same}"
+run deploy 2.1.3 staging
+run deploy 2.1.4 staging`);
+    expect(result.rcs).toEqual([0, 0]);
+    expect(result.stdout).not.toContain('unchanged');
+    expect(result.docker).toHaveLength(4);
+    expect(result.docker[2]).toMatch(lavalinkCall('2.1.4', 'pull lavalink-staging$'));
+    expect(result.docker[3]).toMatch(lavalinkCall('2.1.4', 'up -d lavalink-staging$'));
+    expect(result.state['lavalink-staging.current']).toBe('2.1.4|');
+    expect(result.state['lavalink-staging.previous']).toBe('2.1.3|');
+  });
+
+  it('starts the previous release of that instance again and exits 4 when /version never answers', () => {
+    const result = lavalinkScenario(`
+run deploy 2.1.2 staging
+cp "$RIRIKO_ROOT/state/lavalink-staging.sha" "$work/sha-before"
+echo 2.1.3 >"$FAKE_DIR/bad_version"
+run deploy 2.1.3 staging
+cat "$work/sha-before" "$RIRIKO_ROOT/state/lavalink-staging.sha" >"$work/stdout"`);
+    expect(result.rcs).toEqual([0, 4]);
+    const calls = result.docker.filter((line) => /(pull|up -d) /.test(line));
+    expect(calls).toHaveLength(6);
+    expect(calls[2]).toMatch(lavalinkCall('2.1.3', 'pull lavalink-staging$'));
+    expect(calls[3]).toMatch(lavalinkCall('2.1.3', 'up -d lavalink-staging$'));
+    expect(calls[4]).toMatch(lavalinkCall('2.1.2', 'pull lavalink-staging$'));
+    expect(calls[5]).toMatch(lavalinkCall('2.1.2', 'up -d lavalink-staging$'));
+    expect(
+      result.docker.some((line) => line.includes(' logs --no-color --tail 100 lavalink-staging')),
+    ).toBe(true);
+    expect(result.stderr).toContain('rolled back to 2.1.2');
+    // Nothing is recorded for the failed release: the state still describes what runs.
+    expect(result.state['lavalink-staging.current']).toBe('2.1.2|');
+    expect(result.state['lavalink-staging.previous']).toBeUndefined();
+    const [before, after] = [
+      result.stdout.split('\n').slice(0, 2),
+      result.stdout.split('\n').slice(2, 4),
+    ];
+    expect(after).toEqual(before);
+  });
+
+  it('exits 5 when the first release of an instance does not answer', () => {
+    const result = lavalinkScenario(`
+echo 2.1.3 >"$FAKE_DIR/bad_version"
+run deploy 2.1.3 staging`);
+    expect(result.rcs).toEqual([5]);
+    expect(result.stderr).toContain('no previous release');
+    expect(result.docker.filter((line) => line.includes(' up -d '))).toHaveLength(1);
+    expect(result.state).toEqual({});
+  });
+
+  it('rolls back when the pull or the recreate of the new release fails', () => {
+    const pull = lavalinkScenario(`
+run deploy 2.1.2 staging
+echo 2.1.3 >"$FAKE_DIR/bad_pull"
+run deploy 2.1.3 staging`);
+    expect(pull.rcs).toEqual([0, 4]);
+    expect(pull.docker.filter((line) => line.includes(' up -d '))).toHaveLength(2);
+    expect(pull.docker.at(-1)).toMatch(lavalinkCall('2.1.2', 'up -d lavalink-staging$'));
+
+    const up = lavalinkScenario(`
+run deploy 2.1.2 staging
+echo 2.1.3 >"$FAKE_DIR/bad_up"
+run deploy 2.1.3 staging`);
+    expect(up.rcs).toEqual([0, 4]);
+    expect(up.state['lavalink-staging.current']).toBe('2.1.2|');
+  });
+
+  it("starts the instance's init service with it, and never the other instance's", () => {
+    // The fake docker starts the init service of an instance only when `up` is called without
+    // --no-deps, as Compose does for a depends_on with service_completed_successfully.
+    const result = lavalinkScenario(`
+conf 'WG_PEERS="${productionPeers}; ${stagingPeers}"'
+password production pw-production
+echo lavalink-staging-plugins >"$FAKE_DIR/init.lavalink-staging"
+echo lavalink-production-plugins >"$FAKE_DIR/init.lavalink-production"
+run deploy 2.1.3 staging`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.started).toEqual(['lavalink-staging-plugins']);
+    expect(result.docker.some((line) => line.includes('--no-deps'))).toBe(false);
+    expect(result.docker.filter((line) => /lavalink-production(-plugins)?$/.test(line))).toEqual(
+      [],
+    );
+  });
+
+  it('refuses the instance this host does not run with exit 2 before it touches anything', () => {
+    const result = lavalinkScenario(`
+run deploy 2.1.3 production
+run deploy 2.1.3
+run deploy 2.1.3 dev
+run deploy 2.1.3 staging extra
+run status production`);
+    expect(result.rcs).toEqual([2, 2, 2, 2, 2]);
+    expect(result.docker).toEqual([]);
+    expect(result.curl).toEqual([]);
+    expect(result.releases).toEqual([]);
+    expect(result.state).toEqual({});
+  });
+
+  it('says which instances the host runs when the other one is asked for', () => {
+    const result = lavalinkScenario('run deploy 2.1.3 production');
+    expect(result.rcs).toEqual([2]);
+    expect(result.stderr).toContain('does not run the production Lavalink instance');
+    expect(result.stderr).toContain('it runs: staging');
+  });
+
+  it('works for a production-only host (its own VM) and refuses staging there', () => {
+    const result = lavalinkScenario(`
+conf 'WG_PEERS="${productionPeers}"'
+password production pw-production
+run deploy 2.1.3 production
+run deploy 2.1.3 staging`);
+    expect(result.rcs).toEqual([0, 2]);
+    expect(result.version).toEqual([
+      'port=2333 url=http://10.77.0.1:2333/version header=Authorization: pw-production',
+    ]);
+    expect(result.docker[1]).toMatch(
+      lavalinkCall(
+        '2.1.3',
+        'up -d lavalink-production$',
+        'PRODUCTION_ENV=\\S+/lavalink-production\\.env STAGING_ENV=\\S+/lavalink-staging\\.env',
+      ),
+    );
+    expect(Object.keys(result.state)).toContain('lavalink-production.current');
+    expect(Object.keys(result.state)).not.toContain('lavalink-staging.current');
+  });
+
+  it('runs both instances of one VPS, each with its own state, env file and heap', () => {
+    const result = lavalinkScenario(`
+conf 'WG_PEERS="${productionPeers}; ${stagingPeers}"' 'LAVALINK_PRODUCTION_HEAP=768m'
+password production pw-production
+run deploy 2.1.3 staging
+run deploy 2.1.3 production
+run status`);
+    expect(result.rcs).toEqual([0, 0, 0]);
+    const env =
+      'PRODUCTION_ENV=\\S+/lavalink-production\\.env STAGING_ENV=\\S+/lavalink-staging\\.env';
+    const heaps = 'PRODUCTION_HEAP=768m STAGING_HEAP=';
+    expect(result.docker[1]).toMatch(lavalinkCall('2.1.3', 'up -d lavalink-staging$', env, heaps));
+    expect(result.docker[3]).toMatch(
+      lavalinkCall('2.1.3', 'up -d lavalink-production$', env, heaps),
+    );
+    expect(result.version.map((line) => line.slice(0, 9))).toEqual(['port=2334', 'port=2333']);
+    // One release directory, both files in place.
+    expect(result.tree).toEqual(lavalinkFiles.map((file) => `releases/2.1.3/${file}`));
+    expect(Object.keys(result.state).sort()).toEqual([
+      'lavalink-production.current',
+      'lavalink-production.sha',
+      'lavalink-staging.current',
+      'lavalink-staging.sha',
+    ]);
+    // status lists both, production first.
+    expect(result.log.filter((line) => line.includes(' status: '))).toEqual([
+      expect.stringMatching(/status: lavalink-production current=2\.1\.3 previous=none$/),
+      expect.stringMatching(/status: lavalink-staging current=2\.1\.3 previous=none$/),
+    ]);
+  });
+
+  it('reads the instances from LAVALINK_INSTANCES or from the ports of the WG_PEERS entries', () => {
+    const cases: Array<[string[], string]> = [
+      [['LAVALINK_INSTANCES="production staging"'], 'production staging'],
+      [['LAVALINK_INSTANCES=staging,production'], 'production staging'],
+      [['LAVALINK_INSTANCES=production'], 'production'],
+      [[`WG_PEERS="${keyStaging} 10.77.0.3/32 - 2333,2334"`], 'production staging'],
+      [
+        [`WG_PEERS="${keyStaging} 10.77.0.3/32 - 2334,9999; ${keyProduction} 10.77.0.2/32 -"`],
+        'staging',
+      ],
+      [[`WG_PEERS="${productionPeers}"`], 'production'],
+      // The explicit list wins over the peers.
+      [[`WG_PEERS="${productionPeers}"`, 'LAVALINK_INSTANCES=staging'], 'staging'],
+    ];
+    const body = cases
+      .map(
+        ([settings], index) =>
+          `conf ${settings.map(bashQuote).join(' ')}\n` +
+          `run status\n` +
+          `echo "case${index}: $(grep -o 'lavalink-[a-z]* current' "$work/stdout" | cut -d' ' -f1 | tr '\\n' ' ')" >>"$work/cases"`,
+      )
+      .join('\n');
+    const result = lavalinkScenario(`${body}\ncp "$work/cases" "$work/stdout"`);
+    expect(lines(result.stdout)).toEqual(
+      cases.map(
+        ([, expected], index) =>
+          `case${index}: ${expected
+            .split(' ')
+            .map((name) => `lavalink-${name}`)
+            .join(' ')} `,
+      ),
+    );
+  });
+
+  it.each([
+    ['an unknown instance word', 'LAVALINK_INSTANCES=staging,dev', 'invalid LAVALINK_INSTANCES'],
+    ['no instance at all', 'WG_PEERS=', 'no Lavalink instance configured'],
+    [
+      'peers without a Lavalink port',
+      `WG_PEERS=${keyStaging} 10.77.0.3/32 - 8080`,
+      'no Lavalink instance',
+    ],
+    ['no WG_ADDRESS', 'WG_ADDRESS=', 'invalid or missing WG_ADDRESS'],
+    [
+      'a WG_ADDRESS that is not an IPv4 address',
+      'WG_ADDRESS=10.77.0.1;id',
+      'invalid or missing WG_ADDRESS',
+    ],
+    ['an out-of-range WG_ADDRESS', 'WG_ADDRESS=10.77.0.256/24', 'invalid or missing WG_ADDRESS'],
+    [
+      'a timeout that is not a number',
+      'LAVALINK_READY_TIMEOUT=soon',
+      'invalid LAVALINK_READY_TIMEOUT',
+    ],
+    ['a heap that is not a size', 'LAVALINK_STAGING_HEAP=lots', 'invalid Lavalink heap'],
+    ['a role that does not exist', 'RIRIKO_ROLE=db', 'invalid RIRIKO_ROLE'],
+  ])(
+    'refuses %s in ririko.conf with exit 1 before it downloads anything',
+    (_name, line, message) => {
+      const result = lavalinkScenario(`conf ${bashQuote(line)}\nrun deploy 2.1.3 staging`);
+      expect(result.rcs).toEqual([1]);
+      expect(result.stderr).toContain(message);
+      expect(result.curl).toEqual([]);
+      expect(result.docker).toEqual([]);
+      expect(result.releases).toEqual([]);
+    },
+  );
+
+  it.each([
+    ['a missing env file', 'rm "$RIRIKO_ROOT/lavalink-staging.env"', 'env file'],
+    [
+      'an env file without a password',
+      'password staging ""',
+      'LAVALINK_PASSWORD is empty or missing',
+    ],
+    [
+      'an env file with only another variable',
+      'echo SPOTIFY_CLIENT_ID=x >"$RIRIKO_ROOT/lavalink-staging.env"',
+      'LAVALINK_PASSWORD is empty or missing',
+    ],
+  ])('stops with exit 1 before the lock and the download for %s', (_name, setup, message) => {
+    const result = lavalinkScenario(`${setup}\nrun deploy 2.1.3 staging`);
+    expect(result.rcs).toEqual([1]);
+    expect(result.stderr).toContain(message);
+    expect(result.curl).toEqual([]);
+    expect(result.docker).toEqual([]);
+  });
+
+  it('reads the password of the last assignment, without quotes or a carriage return', () => {
+    const result = lavalinkScenario(`
+printf 'LAVALINK_PASSWORD=old\\r\\nLAVALINK_PASSWORD="pw with space"\\r\\n' >"$RIRIKO_ROOT/lavalink-staging.env"
+run deploy 2.1.3 staging`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.version).toEqual([
+      'port=2334 url=http://10.77.0.1:2334/version header=Authorization: pw with space',
+    ]);
+  });
+
+  it('changes nothing when the tag or one of its files cannot be downloaded', () => {
+    const result = lavalinkScenario(`
+run deploy 2.1.2 staging
+echo application.yml >"$FAKE_DIR/curl_fail"
+run deploy 2.1.3 staging`);
+    expect(result.rcs).toEqual([0, 1]);
+    expect(result.stderr).toContain('could not download');
+    expect(result.docker).toHaveLength(2);
+    expect(result.releases).toEqual(['2.1.2']);
+    expect(result.state['lavalink-staging.current']).toBe('2.1.2|');
+  });
+
+  it('downloads from the repository named in ririko.conf', () => {
+    const result = lavalinkScenario(
+      `conf 'RIRIKO_REPO=Example/Fork'\nrun deploy 2.1.3-rc.1 staging`,
+    );
+    expect(result.rcs).toEqual([0]);
+    expect(result.curl[0]).toContain(
+      'https://raw.githubusercontent.com/Example/Fork/v2.1.3-rc.1/deploy/lavalink/docker-compose.yml',
+    );
+  });
+
+  it('prints the state and the container of an instance for status', () => {
+    const result = lavalinkScenario(`
+run deploy 2.1.2 staging
+echo 2.1.1 >"$RIRIKO_ROOT/state/lavalink-staging.previous"
+run status staging`);
+    expect(result.rcs).toEqual([0, 0]);
+    expect(result.stdout).toContain('lavalink-staging current=2.1.2 previous=2.1.1');
+    expect(result.stdout).toContain('NAME STATUS fake-ps-of-2.1.2');
+    expect(result.docker.at(-1)).toMatch(lavalinkCall('2.1.2', 'ps lavalink-staging$'));
+  });
+
+  it('refuses an instance on an app host (exit 2) and keeps the app behaviour without a role', () => {
+    const result = lavalinkScenario(`
+printf '%s\\n' 'RIRIKO_ENV_FILE='"$work/env.production" >"$RIRIKO_CONF"
+: >"$work/env.production"
+run deploy 2.1.3 staging
+run status staging`);
+    expect(result.rcs).toEqual([2, 2]);
+    expect(result.stderr).toContain('takes no instance');
+    expect(result.docker).toEqual([]);
+    expect(result.curl).toEqual([]);
+  });
+
+  it.skipIf(!hasFlock)('exits 3 while another run holds the lock after DEPLOY_LOCK_WAIT', () => {
+    const result = lavalinkScenario(`
+conf 'DEPLOY_LOCK_WAIT=1'
+exec 8>"$RIRIKO_LOCK"
+flock -n 8
+run deploy 2.1.3 staging`);
+    expect(result.rcs).toEqual([3]);
+    expect(result.stderr).toContain('was not free within');
+    expect(result.curl).toEqual([]);
+    expect(result.releases).toEqual([]);
+  });
+
+  it.skipIf(!hasFlock)(
+    'keeps the same order as the app deploy: temporary directories are cleaned up only under the lock',
+    () => {
+      const result = lavalinkScenario(`
+mkdir -p "$RIRIKO_ROOT/releases/.tmp.keep"
+conf 'DEPLOY_LOCK_WAIT=10'
+(
+  exec 8>"$RIRIKO_LOCK"
+  flock -n 8
+  sleep 1
+  if test -d "$RIRIKO_ROOT/releases/.tmp.keep"; then echo kept >"$RIRIKO_ROOT/probe"; fi
+) &
+sleep 0.2
+run deploy 2.1.3 staging
+wait
+cat "$RIRIKO_ROOT/probe" >"$work/stdout" 2>/dev/null`);
+      expect(result.rcs).toEqual([0]);
+      expect(result.stdout.trim()).toBe('kept');
+      expect(result.releases).toEqual(['2.1.3']);
+    },
+  );
+});
+
+// The watchdog scenarios reuse the harness above; the body replaces the fake curl with one that
+// answers /version per port ("version_fail.<port>" makes it 503) and logs the header it reads.
+const fakeLavalinkWatchdogCurl = String.raw`#!/usr/bin/env bash
+echo "$*" >>"$FAKE_DIR/curl.log"
+url=""
+for arg in "$@"; do
+  case $arg in http://*|https://*) url=$arg ;; esac
+done
+case $url in
+  http://*/version)
+    header=$(cat)
+    port=$(echo "$url" | sed -E 's#^http://[^:]+:([0-9]+)/.*#\1#')
+    echo "port=$port header=$header" >>"$FAKE_DIR/version.log"
+    if [ -e "$FAKE_DIR/version_fail.$port" ]; then printf '503'; else printf '200'; fi
+    exit 0 ;;
+esac
+if [ -e "$FAKE_DIR/curl_fails" ]; then exit 22; fi
+`;
+
+const lavalinkWatchdogScenario = (body: string) =>
+  watchdogScenario(`
+export RIRIKO_ROOT="$work/root"
+mkdir -p "$RIRIKO_ROOT/state"
+cat >"$work/bin/curl" <<'${heredocEnd}'
+${fakeLavalinkWatchdogCurl}
+${heredocEnd}
+chmod +x "$work/bin/curl"
+# lavalink_conf [extra line]...: a Lavalink host that runs staging; later lines win.
+lavalink_conf() {
+  write_conf 'RIRIKO_ROLE=lavalink' 'WG_ADDRESS=10.77.0.1/24' 'WG_PEERS="${stagingPeers}"' "$@"
+}
+password() { printf 'LAVALINK_PASSWORD=%s\\n' "$2" >"$RIRIKO_ROOT/lavalink-$1.env"; }
+password staging pw-staging
+password production pw-production
+# instance_up <instance>: its container, running.
+instance_up() { add_container ririko-lavalink "ririko-lavalink-lavalink-$1-1" "lavalink-$1" 'running '; }
+# failures <instance>: the failure counter of the instance, empty when there is none.
+failures() { tr -d '\\n' <"$RIRIKO_ROOT/state/watchdog-lavalink-$1" 2>/dev/null; echo; }
+lavalink_conf
+${body}
+`);
+
+describe.skipIf(!hasBash)('ririko-watchdog on a Lavalink host', () => {
+  const staging = 'ririko-lavalink-lavalink-staging-1';
+  const production = 'ririko-lavalink-lavalink-production-1';
+  const lavalinkPs =
+    'docker ps -a --filter label=com.docker.compose.project=ririko-lavalink --format {{.Names}} {{.Label "com.docker.compose.service"}}';
+
+  it('pings the heartbeat when the container runs and /version answers', () => {
+    const result = lavalinkWatchdogScenario('instance_up staging\nrun');
+    expect(result.rcs).toEqual([0]);
+    expect(result.stderr).toBe('');
+    expect(result.docker).toEqual([lavalinkPs, inspectCall(staging)]);
+    expect(result.curl).toEqual([
+      '--silent --output /dev/null --write-out %{http_code} --max-time 5 --header @- http://10.77.0.1:2334/version',
+      heartbeat,
+    ]);
+    expect(result.logger).toEqual([]);
+    expect(result.stdout[0]).toMatch(/stack healthy; root file system 42% full$/);
+  });
+
+  it('checks both instances of a VPS, production first, each with its own password', () => {
+    const result = lavalinkWatchdogScenario(`
+lavalink_conf 'WG_PEERS="${productionPeers}; ${stagingPeers}"'
+instance_up production
+instance_up staging
+run
+sed 's/^/V /' "$FAKE_DIR/version.log" >>"$FAKE_DIR/curl.log"`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.docker).toEqual([lavalinkPs, inspectCall(production), inspectCall(staging)]);
+    // The password reaches curl on stdin only: no argument and no logger line has it.
+    const version = (port: number) =>
+      `--silent --output /dev/null --write-out %{http_code} --max-time 5 --header @- http://10.77.0.1:${port}/version`;
+    expect(result.curl).toEqual([
+      version(2333),
+      version(2334),
+      heartbeat,
+      'V port=2333 header=Authorization: pw-production',
+      'V port=2334 header=Authorization: pw-staging',
+    ]);
+    expect(result.logger).toEqual([]);
+  });
+
+  it('ignores the one-shot init services, which exit 0 by design', () => {
+    const result = lavalinkWatchdogScenario(`
+lavalink_conf 'WG_PEERS="${productionPeers}; ${stagingPeers}"'
+instance_up production
+instance_up staging
+add_container ririko-lavalink ririko-lavalink-lavalink-staging-plugins-1 lavalink-staging-plugins 'exited '
+add_container ririko-lavalink ririko-lavalink-lavalink-production-plugins-1 lavalink-production-plugins 'exited '
+run; run; run; run`);
+    expect(result.rcs).toEqual([0, 0, 0, 0]);
+    expect(result.docker.filter((line) => line.includes('plugins'))).toEqual([]);
+    expect(restarts(result.docker)).toEqual([]);
+    expect(result.curl.filter((line) => line === heartbeat)).toHaveLength(4);
+    expect(result.logger).toEqual([]);
+  });
+
+  it('does not take a host with only its init service for a deployed one', () => {
+    const result = lavalinkWatchdogScenario(`
+add_container ririko-lavalink ririko-lavalink-lavalink-staging-plugins-1 lavalink-staging-plugins 'exited '
+run`);
+    // The instance itself is missing, which is reported as such (never restarted).
+    expect(result.curl).toEqual([failPing('lavalink-staging is missing (failed check 1 of 3)')]);
+    expect(restarts(result.docker)).toEqual([]);
+  });
+
+  it('checks only the instances the host is configured for', () => {
+    const result = lavalinkWatchdogScenario(`
+instance_up staging
+add_container ririko-lavalink ${production} lavalink-production 'exited '
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.docker).toEqual([lavalinkPs, inspectCall(staging)]);
+    expect(result.curl.filter((line) => line.includes('/version'))).toHaveLength(1);
+    expect(result.curl.at(-1)).toBe(heartbeat);
+    expect(restarts(result.docker)).toEqual([]);
+  });
+
+  it('honours LAVALINK_INSTANCES over the peers', () => {
+    const result = lavalinkWatchdogScenario(`
+lavalink_conf 'LAVALINK_INSTANCES=production'
+instance_up production
+add_container ririko-lavalink ${staging} lavalink-staging 'exited '
+run`);
+    expect(result.docker).toEqual([lavalinkPs, inspectCall(production)]);
+    expect(result.curl.at(-1)).toBe(heartbeat);
+  });
+
+  it('counts consecutive failed /version checks and restarts on the third', () => {
+    const result = lavalinkWatchdogScenario(`
+instance_up staging
+touch "$FAKE_DIR/version_fail.2334"
+run; echo "after1 $(failures staging)" >>"$FAKE_DIR/curl.log"
+run; echo "after2 $(failures staging)" >>"$FAKE_DIR/curl.log"
+run; echo "after3 $(failures staging)" >>"$FAKE_DIR/curl.log"`);
+    expect(result.rcs).toEqual([0, 0, 0]);
+    expect(restarts(result.docker)).toEqual([`docker restart ${staging}`]);
+    const pings = result.curl.filter((line) => line.startsWith('-fsS') || line.startsWith('after'));
+    expect(pings).toEqual([
+      failPing('lavalink-staging does not answer /version (failed check 1 of 3)'),
+      'after1 1',
+      failPing('lavalink-staging does not answer /version (failed check 2 of 3)'),
+      'after2 2',
+      failPing('lavalink-staging does not answer /version; restarted after 3 failed checks'),
+      'after3 ',
+    ]);
+    expect(result.logger).toContain(
+      loggerLine(
+        `restarting lavalink-staging (container ${staging}): lavalink-staging does not answer /version in 3 checks in a row`,
+      ),
+    );
+  });
+
+  it('needs three more failed checks before it restarts the same instance again', () => {
+    const result = lavalinkWatchdogScenario(`
+instance_up staging
+touch "$FAKE_DIR/version_fail.2334"
+run; run; run; run; run
+echo "counter $(failures staging)" >>"$FAKE_DIR/curl.log"`);
+    expect(restarts(result.docker)).toHaveLength(1);
+    expect(result.curl.at(-1)).toBe('counter 2');
+  });
+
+  it('forgets earlier failures after a good check', () => {
+    const result = lavalinkWatchdogScenario(`
+instance_up staging
+touch "$FAKE_DIR/version_fail.2334"
+run; run
+echo "failing $(failures staging)" >>"$FAKE_DIR/curl.log"
+rm "$FAKE_DIR/version_fail.2334"
+run
+echo "recovered $(failures staging)" >>"$FAKE_DIR/curl.log"
+touch "$FAKE_DIR/version_fail.2334"
+run
+echo "again $(failures staging)" >>"$FAKE_DIR/curl.log"`);
+    expect(restarts(result.docker)).toEqual([]);
+    const marks = result.curl.filter((line) => /^(failing|recovered|again)/.test(line));
+    expect(marks).toEqual(['failing 2', 'recovered ', 'again 1']);
+    expect(result.curl.filter((line) => line === heartbeat)).toHaveLength(1);
+  });
+
+  it('keeps a counter for each instance', () => {
+    const result = lavalinkWatchdogScenario(`
+lavalink_conf 'WG_PEERS="${productionPeers}; ${stagingPeers}"'
+instance_up production
+instance_up staging
+touch "$FAKE_DIR/version_fail.2334"
+run; run
+echo "production=$(failures production) staging=$(failures staging)" >>"$FAKE_DIR/curl.log"`);
+    expect(result.curl.at(-1)).toBe('production= staging=2');
+    expect(result.curl.filter((line) => line.startsWith('-fsS'))).toEqual([
+      failPing('lavalink-staging does not answer /version (failed check 1 of 3)'),
+      failPing('lavalink-staging does not answer /version (failed check 2 of 3)'),
+    ]);
+  });
+
+  it('counts a container that is not running and restarts it on the third check', () => {
+    const result = lavalinkWatchdogScenario(`
+add_container ririko-lavalink ${staging} lavalink-staging 'exited '
+run; run; run`);
+    expect(result.rcs).toEqual([0, 0, 0]);
+    expect(restarts(result.docker)).toEqual([`docker restart ${staging}`]);
+    expect(result.curl.filter((line) => line.startsWith('-fsS'))).toEqual([
+      failPing('lavalink-staging is exited (failed check 1 of 3)'),
+      failPing('lavalink-staging is exited (failed check 2 of 3)'),
+      failPing('lavalink-staging is exited; restarted after 3 failed checks'),
+    ]);
+    // It is not asked for /version while it is not running.
+    expect(result.curl.some((line) => line.includes('/version'))).toBe(false);
+  });
+
+  it('reports a restart that fails, and tries again on the next check', () => {
+    const result = lavalinkWatchdogScenario(`
+instance_up staging
+touch "$FAKE_DIR/version_fail.2334" "$FAKE_DIR/restart_fails"
+run; run; run; run
+echo "counter $(failures staging)" >>"$FAKE_DIR/curl.log"`);
+    expect(result.docker.filter((line) => line.startsWith('docker restart'))).toHaveLength(2);
+    expect(result.curl.at(-2)).toBe(
+      failPing('lavalink-staging does not answer /version; could not be restarted'),
+    );
+    expect(result.curl.at(-1)).toBe('counter 4');
+  });
+
+  it('reports a configured instance whose container does not exist, without a restart', () => {
+    const result = lavalinkWatchdogScenario(`
+lavalink_conf 'WG_PEERS="${productionPeers}; ${stagingPeers}"'
+instance_up staging
+run; run; run`);
+    expect(restarts(result.docker)).toEqual([]);
+    expect(result.curl.filter((line) => line.startsWith('-fsS'))).toEqual([
+      failPing('lavalink-production is missing (failed check 1 of 3)'),
+      failPing('lavalink-production is missing (failed check 2 of 3)'),
+      failPing('lavalink-production is missing (failed check 3 of 3)'),
+    ]);
+  });
+
+  it('treats a missing password as a failed check', () => {
+    const result = lavalinkWatchdogScenario(`
+instance_up staging
+rm "$RIRIKO_ROOT/lavalink-staging.env"
+run`);
+    expect(result.rcs).toEqual([0]);
+    expect(result.curl).toEqual([
+      failPing('lavalink-staging does not answer /version (failed check 1 of 3)'),
+    ]);
+  });
+
+  it('reports a full disk next to healthy instances', () => {
+    const result = lavalinkWatchdogScenario('instance_up staging\necho 90 >"$FAKE_DIR/disk"\nrun');
+    expect(result.curl.at(-1)).toBe(failPing('root file system is 90% full (limit 85%)'));
+    expect(restarts(result.docker)).toEqual([]);
+  });
+
+  it('logs one line and pings nothing before the first deploy', () => {
+    const result = lavalinkWatchdogScenario('run');
+    expect(result.rcs).toEqual([0]);
+    expect(result.docker).toEqual([lavalinkPs]);
+    expect(result.curl).toEqual([]);
+    expect(result.stdout).toHaveLength(1);
+    expect(result.stdout[0]).toContain('no containers of the compose project ririko-lavalink');
+  });
+
+  it('does not look at the app project on a Lavalink host', () => {
+    const result = lavalinkWatchdogScenario(`
+stack_ok
+instance_up staging
+run`);
+    expect(result.docker).toEqual([lavalinkPs, inspectCall(staging)]);
+    expect(result.curl.at(-1)).toBe(heartbeat);
+  });
+
+  it('only logs without a monitor URL, but still restarts', () => {
+    const result = lavalinkWatchdogScenario(`
+printf '%s\\n' 'RIRIKO_ROLE=lavalink' 'WG_ADDRESS=10.77.0.1/24' 'WG_PEERS="${stagingPeers}"' >"$RIRIKO_CONF"
+instance_up staging
+touch "$FAKE_DIR/version_fail.2334"
+run; run; run`);
+    expect(result.rcs).toEqual([0, 0, 0]);
+    expect(restarts(result.docker)).toHaveLength(1);
+    expect(result.curl.filter((line) => line.startsWith('-fsS'))).toEqual([]);
+  });
+
+  it.each([
+    ['no WG_ADDRESS', 'WG_ADDRESS=', 'invalid or missing WG_ADDRESS'],
+    [
+      'a WG_ADDRESS with a shell character',
+      'WG_ADDRESS=10.77.0.1;id',
+      'invalid or missing WG_ADDRESS',
+    ],
+    ['no instance', 'WG_PEERS=', 'no Lavalink instance configured'],
+    ['an unknown instance word', 'LAVALINK_INSTANCES=dev', 'invalid LAVALINK_INSTANCES'],
+    ['a role that does not exist', 'RIRIKO_ROLE=db', 'invalid RIRIKO_ROLE'],
+  ])('exits 1 without a ping for %s', (_name, line, message) => {
+    const result = lavalinkWatchdogScenario(`
+lavalink_conf ${bashQuote(line)}
+instance_up staging
+run`);
+    expect(result.rcs).toEqual([1]);
+    expect(result.stderr).toContain(message);
+    expect(result.curl).toEqual([]);
+    expect(restarts(result.docker)).toEqual([]);
+  });
+});
+
+describe.skipIf(!hasBash)('the Lavalink host settings in ririko-deploy and ririko-watchdog', () => {
+  const extract = (script: string, name: string) =>
+    new RegExp(`^${name}\\(\\) \\{\\n[\\s\\S]*?^\\}$`, 'm').exec(read(script))?.[0] ?? '';
+
+  it('share the instance, port and password functions word for word', () => {
+    for (const name of ['lavalink_port', 'configured_instances', 'lavalink_password']) {
+      const deploy = extract('bin/ririko-deploy.sh', name);
+      expect(deploy, name).toContain(`${name}() {`);
+      expect(extract('bin/ririko-watchdog.sh', name), name).toBe(deploy);
+    }
+  });
+
+  it('read the same pattern for WG_ADDRESS', () => {
+    const pattern = /^readonly IPV4_PATTERN=.*$/m;
+    expect(read('bin/ririko-watchdog.sh').match(pattern)?.[0]).toBe(
+      read('bin/ririko-deploy.sh').match(pattern)?.[0],
+    );
+  });
+});
+
+describe('bootstrap.sh keeps the role in ririko.conf', () => {
+  const bootstrap = read('bootstrap.sh');
+  const fn = /^set_conf_role\(\) \{\n[\s\S]*?^\}$/m.exec(bootstrap)?.[0] ?? '';
+  const run = (role: string, conf: string | null) =>
+    runBash(
+      [],
+      `set -euo pipefail
+${read('lib/wg-common.sh')}
+ROLE=${shQuote(role)}
+log() { :; }
+${fn}
+WORK=$(mktemp -d)
+trap 'rm -rf "$WORK"' EXIT
+conf="$WORK/ririko.conf"
+${conf === null ? '' : `printf %s ${shQuote(conf)} >"$conf"`}
+set_conf_role "$conf"
+cat "$conf"`,
+    );
+
+  it.skipIf(!hasBash)(
+    'finds the function and runs it for the lavalink role in create_layout',
+    () => {
+      expect(fn).toContain('set_conf_role()');
+      expect(bootstrap).toMatch(/^ {2}set_conf_role \/etc\/ririko\/ririko\.conf$/m);
+    },
+  );
+
+  it.skipIf(!hasBash)('adds RIRIKO_ROLE=lavalink once, keeping every other line', () => {
+    const conf = '# comment\nWG_ADDRESS=10.77.0.1/24\nWG_PEERS="a b"\n';
+    const result = run('lavalink', conf);
+    expect(result.status).toBe(0);
+    expect(result.stdout).toBe(`${conf}RIRIKO_ROLE=lavalink\n`);
+  });
+
+  it.skipIf(!hasBash)('adds the line after a last line without a newline', () => {
+    const result = run('lavalink', 'WG_ADDRESS=10.77.0.1/24');
+    expect(result.stdout).toBe('WG_ADDRESS=10.77.0.1/24\nRIRIKO_ROLE=lavalink\n');
+  });
+
+  it.skipIf(!hasBash)('replaces another value and leaves a correct line alone', () => {
+    expect(run('lavalink', 'RIRIKO_ROLE=app\nA=1\n').stdout).toBe('A=1\nRIRIKO_ROLE=lavalink\n');
+    const same = 'A=1\nRIRIKO_ROLE=lavalink\nB=2\n';
+    expect(run('lavalink', same).stdout).toBe(same);
+    expect(run('lavalink', 'RIRIKO_ROLE="lavalink"\n').stdout).toBe('RIRIKO_ROLE="lavalink"\n');
+  });
+
+  it.skipIf(!hasBash)(
+    'writes nothing for the app role, and removes a leftover lavalink line',
+    () => {
+      const plain = '#RIRIKO_ROLE=lavalink\nA=1\n';
+      expect(run('app', plain).stdout).toBe(plain);
+      expect(run('app', 'A=1\nRIRIKO_ROLE=lavalink\nB=2\n').stdout).toBe('A=1\nB=2\n');
+    },
+  );
+});
+
+describe('the Lavalink host role wiring', () => {
+  it('documents the new settings in ririko.conf.example, all commented out', () => {
+    const example = read('ririko.conf.example');
+    for (const key of [
+      'RIRIKO_ROLE',
+      'LAVALINK_INSTANCES',
+      'LAVALINK_READY_TIMEOUT',
+      'LAVALINK_PRODUCTION_HEAP',
+      'LAVALINK_STAGING_HEAP',
+    ]) {
+      expect(example).toMatch(new RegExp(`^#${key}=`, 'm'));
+    }
+    expect(example.split('\n').filter((line) => /^[A-Z_]+=/.test(line))).toEqual([]);
+  });
+
+  it('uses the compose project, files and ports of deploy/lavalink', () => {
+    const compose = readFileSync(
+      fileURLToPath(new URL('../deploy/lavalink/docker-compose.yml', import.meta.url)),
+      'utf8',
+    );
+    const deploy = read('bin/ririko-deploy.sh');
+    expect(compose).toMatch(/^name: ririko-lavalink$/m);
+    expect(deploy).toContain('readonly LAVALINK_PROJECT=ririko-lavalink');
+    expect(deploy).toContain('deploy/lavalink/docker-compose.yml');
+    expect(read('bin/ririko-watchdog.sh')).toContain('readonly LAVALINK_PROJECT=ririko-lavalink');
+    for (const [instance, port] of [
+      ['production', '2333'],
+      ['staging', '2334'],
+    ]) {
+      expect(compose).toMatch(new RegExp(`^ {2}lavalink-${instance}:$`, 'm'));
+      expect(compose).toContain(`SERVER_PORT: '${port}'`);
+      expect(deploy).toContain(`${instance}) printf '${port}'`);
+    }
+    for (const variable of [
+      'LAVALINK_PRODUCTION_ENV_FILE',
+      'LAVALINK_STAGING_ENV_FILE',
+      'LAVALINK_PRODUCTION_HEAP',
+      'LAVALINK_STAGING_HEAP',
+      'WG_ADDRESS',
+    ]) {
+      expect(compose, variable).toContain(variable);
+    }
   });
 });
