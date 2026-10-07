@@ -22,9 +22,9 @@ See docs/kanban/protocol.md section 6.
 
 ---
 
-## REVIEW · 2026-10-07T14:30:00Z · Claude Code (Opus 5.5) · REVIEW
+## REVIEW · 2026-10-07T14:30:00Z · Claude Code (Opus 5.5) · OPEN
 
 - TASK-1811 and TASK-1812 are DONE.
-- The story stays in REVIEW until CircleCI's `test-postgres` job passes on the PR. That job is the first real run of the PostgreSQL integration suite, which the first acceptance item requires.
+- The story stays open (TODO) until CircleCI's `test-postgres` job passes on the PR. That job is the first real run of the PostgreSQL integration suite, which the first acceptance item requires.
 - A smoke run of the engine against a copy of the maintainer's real database through `FakePostgres` copied all 93 tables, with equal row counts and matching coin totals.
 - After the merge, the coordinator runs the live staging move (handoff steps).

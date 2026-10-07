@@ -2320,7 +2320,7 @@
       "parent": "EPIC-017",
       "title": "Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy)",
       "points": 8,
-      "status": "REVIEW",
+      "status": "TODO",
       "requires": [],
       "blocks": [],
       "children": [

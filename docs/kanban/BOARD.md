@@ -19,9 +19,7 @@
 | `STORY-181` | Story | Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy) | 8 | EPIC-017 | — | yes | large |
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `TASK-1812` | Task | ririko db:copy CLI Command and Data-Move Documentation | 3 | STORY-181 | [TASK-1812.md](./handovers/TASK-1812.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -348,6 +346,7 @@
 | `TASK-1802` | Task | WireGuard Link, Lavalink Host Firewall and Bootstrap Roles | 5 | STORY-180 | [TASK-1802.md](./handovers/TASK-1802.md) |
 | `TASK-1803` | Task | Lavalink Host Deploy Role, Watchdog Checks and CI Jobs | 5 | STORY-180 | [TASK-1803.md](./handovers/TASK-1803.md) |
 | `TASK-1811` | Task | SQLite to PostgreSQL Copy Engine With Type Conversion, FK Order, Sequence Reset and Verification | 5 | STORY-181 | [TASK-1811.md](./handovers/TASK-1811.md) |
+| `TASK-1812` | Task | ririko db:copy CLI Command and Data-Move Documentation | 3 | STORY-181 | [TASK-1812.md](./handovers/TASK-1812.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
