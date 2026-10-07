@@ -39,6 +39,18 @@ describeDialects('ItemRepository behaviour', (db) => {
     expect(await repo.count()).toBe(1);
   });
 
+  it('keeps a slug item id and finds it, on both dialects', async () => {
+    const repo = new ItemRepository(db.client);
+    const created = await repo.create(item('Minor Candy', 50, { id: 'candy_minor' }));
+
+    expect(created.id).toBe('candy_minor');
+    expect((await repo.findById('candy_minor'))?.name).toBe('Minor Candy');
+    expect(await repo.exists('candy_minor')).toBe(true);
+    expect((await repo.update('candy_minor', { price: 60 })).price).toBe(60);
+    expect(await repo.delete('candy_minor')).toBe(true);
+    expect(await repo.findById('candy_minor')).toBeNull();
+  });
+
   it('lists items cheapest first and filters by category and purchasability', async () => {
     const repo = new ItemRepository(db.client);
     const categories = new ItemCategoryRepository(db.client);

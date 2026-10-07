@@ -24,6 +24,25 @@ describeDialects('InventoryRepository behaviour', (db) => {
     return created.id;
   }
 
+  it('holds a slug item id and joins it to its item, on both dialects', async () => {
+    const repo = new InventoryRepository(db.client);
+    await new ItemRepository(db.client).create({
+      id: 'candy_minor',
+      name: 'Minor Candy',
+      description: 'About Minor Candy',
+      price: 50,
+    });
+
+    await repo.addItem('u1', 'candy_minor', 2);
+    await repo.addItem('u1', 'candy_minor', 1);
+
+    expect(await repo.getItemQuantity('u1', 'candy_minor')).toBe(3);
+    const bag = await repo.getUserInventoryWithItems('u1');
+    expect(bag.map((entry) => [entry.inventory.itemId, entry.item?.name])).toEqual([
+      ['candy_minor', 'Minor Candy'],
+    ]);
+  });
+
   it('creates a slot with defaults and reads it back', async () => {
     const repo = new InventoryRepository(db.client);
     const itemId = await newItem('Candy');

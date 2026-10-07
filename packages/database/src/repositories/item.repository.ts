@@ -69,7 +69,7 @@ export const DEFAULT_SHOP_ITEM_CODES: readonly string[] = DEFAULT_SHOP_ITEMS.map
   (item) => item.code,
 );
 
-/** Item and category IDs are uuids on Postgres; anything else can match no row there. */
+/** Category and owned-card IDs are uuids on Postgres; anything else can match no row there. */
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface ItemFindOptions {
@@ -95,7 +95,6 @@ export class ItemRepository extends BaseRepository<
         .where(eq(sqliteSchema.economyItems.id, id));
       return (row as EconomyItem) ?? null;
     } else {
-      if (!UUID_PATTERN.test(id)) return null;
       const [row] = await client.db
         .select()
         .from(pgSchema.economyItems)

@@ -8,6 +8,7 @@ import type { PostgresDatabaseClient, SqliteDatabaseClient } from '../client/typ
 import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
 import { ensureCardSerialSchema } from '../migrations/card-serials.js';
 import { ensurePostgresSchema } from '../migrations/postgres-schema.js';
+import { ensureTextIdColumns } from '../migrations/text-ids.js';
 import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
 import { BIG_BANK, BIG_WALLET, MOMENT, buildSource } from '../testing/copy-fixture.js';
 import { FakePostgres, fakePostgresTarget } from '../testing/fake-postgres.js';
@@ -22,6 +23,7 @@ vi.mock('../migrations/adventure-schema.js', () => ({
   ensureAdventureSchema: vi.fn(async () => {}),
 }));
 vi.mock('../migrations/card-serials.js', () => ({ ensureCardSerialSchema: vi.fn(async () => {}) }));
+vi.mock('../migrations/text-ids.js', () => ({ ensureTextIdColumns: vi.fn(async () => []) }));
 
 const directory = mkdtempSync(join(tmpdir(), 'ririko-copy-flow-'));
 afterAll(() => rmSync(directory, { recursive: true, force: true }));
@@ -50,6 +52,7 @@ describe('copyDatabase', () => {
     vi.mocked(ensurePostgresSchema).mockClear();
     vi.mocked(ensureAdventureSchema).mockClear();
     vi.mocked(ensureCardSerialSchema).mockClear();
+    vi.mocked(ensureTextIdColumns).mockClear();
   });
 
   it('prepares the target like the bot, copies in one transaction and commits', async () => {
@@ -67,6 +70,7 @@ describe('copyDatabase', () => {
       targetRows: 1,
     });
     expect(ensurePostgresSchema).toHaveBeenCalledWith(client);
+    expect(ensureTextIdColumns).toHaveBeenCalledWith(client);
     expect(ensureAdventureSchema).toHaveBeenCalledWith(client);
     expect(ensureCardSerialSchema).toHaveBeenCalledWith(client);
     expect(fake.statements[0]).toBe('BEGIN');

@@ -2320,7 +2320,7 @@
       "parent": "EPIC-017",
       "title": "Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy)",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [],
       "blocks": [],
       "children": [
@@ -7918,6 +7918,89 @@
       "handovers": [
         "BUG-0037",
         "TASK-1803",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "BUG-0038",
+      "parent": "EPIC-017",
+      "title": "PostgreSQL uuid Id Columns Reject the Slug and Prefixed Ids SQLite Holds (Cards, Assets, Shop Items, AI Conversations)",
+      "points": 5,
+      "status": "REVIEW",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "The live staging data move (STORY-181) failed its dry run: invalid input syntax for type uuid: \"conv_<uuid>\". A scan of the maintainer's 2.0 SQLite found 962 non-uuid values in columns that are uuid in PostgreSQL: waifu_cards.id (card_fire_001 ...), waifu_assets.id (asset_card_bulk_*), economy_items.id (candy_minor ...), ai_conversations.id and ai_messages.id/conversation_id (conv_/msg_ prefixes), and the columns that reference them. Card images in public/cards are named by card id, and ids also appear in JSON payloads and waifu_card_serials.card_id (text), so remapping ids is unsafe. Decision (maintainer, 2026-10-07): make these id columns text in PostgreSQL so both dialects hold the same ids.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/src/schema/pg/ai.ts",
+          "packages/database/src/schema/pg/economy.ts",
+          "packages/database/src/schema/pg/tcg.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/src/schema/pg/ddl.test.ts",
+          "packages/database/src/migrations/postgres-schema.ts",
+          "packages/database/src/copy/copy-database.ts",
+          "packages/database/src/repositories/ai.repository.ts",
+          "packages/database/src/repositories/item.repository.ts",
+          "packages/database/src/repositories/ai.repository.behaviour.test.ts",
+          "packages/database/src/repositories/item.repository.behaviour.test.ts",
+          "apps/bot/src/main.ts",
+          "docs/database.md",
+          "apps/web/src/lib/server/services.ts",
+          "packages/database/src/index.ts",
+          "packages/database/src/schema/pg/text-id.ts",
+          "packages/database/src/migrations/text-ids.ts",
+          "packages/database/src/migrations/text-ids.test.ts",
+          "packages/database/src/testing/dialects.ts",
+          "packages/database/src/testing/copy-fixture.ts",
+          "packages/database/src/copy/copy-database.flow.test.ts",
+          "packages/database/src/copy/copy-database.integration.test.ts",
+          "packages/database/src/repositories/inventory.repository.behaviour.test.ts",
+          "packages/database/src/repositories/waifu-card.repository.behaviour.test.ts",
+          "packages/database/src/repositories/waifu-asset.repository.behaviour.test.ts"
+        ],
+        "symbols": [
+          "waifuCards",
+          "waifuAssets",
+          "userCards",
+          "economyItems",
+          "economyInventories",
+          "aiConversations",
+          "aiMessages",
+          "gameAchievements",
+          "quests",
+          "dungeonBosses",
+          "ensurePostgresSchema",
+          "copyDatabase",
+          "AiRepository",
+          "ItemRepository",
+          "UUID_PATTERN"
+        ],
+        "entry_points": [
+          "packages/database/src/migrations/postgres-schema.ts"
+        ],
+        "codegraph_queries": [
+          "waifuCards waifuAssets userCards economyItems economyInventories aiConversations aiMessages pg schema",
+          "ensurePostgresSchema ensureAdventureSchema ensureCardSerialSchema main startup upgrades copyDatabase",
+          "AiRepository newId ItemRepository findById UUID_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "In the Drizzle pg schema these columns are text (not uuid): waifu_assets.id, waifu_cards.id, waifu_cards.asset_id, user_cards.card_id, dungeon_bosses.asset_id, game_achievements.reward_card_id, quests.reward_card_id, economy_items.id, economy_inventories.item_id, ai_conversations.id, ai_messages.id, ai_messages.conversation_id, and any other pg column that stores a card, asset, economy item or AI conversation/message id (check every reference; game_achievements.reward_item_id follows the table it points at). Primary keys keep a random-uuid default (as text). The committed pg DDL is regenerated and its parity test passes.",
+        "Existing PostgreSQL databases are upgraded at startup, idempotently and without data loss: a step in the bot startup chain (next to ensureAdventureSchema and ensureCardSerialSchema), also run by copyDatabase's target preparation, alters each listed column that is still uuid to text (values keep their text form), under an advisory lock, in one transaction. A second run changes nothing.",
+        "Repositories no longer special-case uuid ids on PostgreSQL: ItemRepository.findById drops the UUID_PATTERN guard (a slug id is found on both dialects), and AiRepository.newId produces the same prefixed form on both dialects. Behaviour tests (describeDialects) cover a slug card id, a slug item id and a prefixed conversation id, and the upgrade step on a database created with the old uuid columns.",
+        "docs/database.md notes that these ids are text in both dialects and why.",
+        "No test is weakened or skipped; the coverage gate holds for the changed files."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0038",
+        "STORY-181",
         "EPIC-017"
       ]
     }

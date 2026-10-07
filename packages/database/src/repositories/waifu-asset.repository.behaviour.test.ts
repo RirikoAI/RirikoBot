@@ -81,6 +81,16 @@ describeDialects('WaifuAssetRepository behaviour', (db) => {
     expect(created.tags).toEqual(['maid', 'blue-hair']);
   });
 
+  it('keeps a slug asset id as text', async () => {
+    const repo = new WaifuAssetRepository(db.client);
+    await repo.createSource(source('src'));
+
+    const created = await repo.create(asset('src', 'img-1', { id: 'asset_card_bulk_fire_001' }));
+
+    expect(created.id).toBe('asset_card_bulk_fire_001');
+    expect((await repo.findById('asset_card_bulk_fire_001'))?.sourceImageId).toBe('img-1');
+  });
+
   it('updates an asset and throws for a missing one', async () => {
     const repo = new WaifuAssetRepository(db.client);
     await repo.createSource(source('src'));

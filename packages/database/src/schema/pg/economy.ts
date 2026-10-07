@@ -11,6 +11,7 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import { textPrimaryKey } from './text-id.js';
 
 export const economyAccounts = pgTable('economy_accounts', {
   userId: varchar('user_id', { length: 32 }).primaryKey(),
@@ -86,7 +87,7 @@ export const economyItemCategories = pgTable(
 export const economyItems = pgTable(
   'economy_items',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: textPrimaryKey('id'),
     /** Stable slug members type in `/shop buy`; the default catalog seeds by it. */
     code: varchar('code', { length: 32 }),
     name: varchar('name', { length: 64 }).notNull(),
@@ -106,7 +107,7 @@ export const economyInventories = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     userId: varchar('user_id', { length: 32 }).notNull(),
-    itemId: uuid('item_id').notNull(),
+    itemId: text('item_id').notNull(),
     quantity: integer('quantity').notNull().default(1),
     acquiredAt: timestamp('acquired_at', { withTimezone: true }).notNull().defaultNow(),
   },

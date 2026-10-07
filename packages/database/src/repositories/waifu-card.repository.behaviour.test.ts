@@ -132,6 +132,26 @@ describeDialects('WaifuCardRepository behaviour', (db) => {
     );
   });
 
+  it('keeps slug card and asset ids as text and lets members own that card', async () => {
+    const repo = new WaifuCardRepository(db.client);
+    const card = await repo.create(
+      cardInput(1, { id: 'card_fire_001', assetId: 'asset_card_bulk_fire_001' }),
+    );
+
+    expect(card.id).toBe('card_fire_001');
+    expect(card.assetId).toBe('asset_card_bulk_fire_001');
+    expect((await repo.findById('card_fire_001'))?.assetId).toBe('asset_card_bulk_fire_001');
+    expect((await repo.findByAssetId('asset_card_bulk_fire_001'))?.id).toBe('card_fire_001');
+
+    const owned = await repo.mintUserCard({ userId: 'u1', cardId: 'card_fire_001' });
+    expect(owned.cardId).toBe('card_fire_001');
+    expect(owned.serialNumber).toBe(1);
+    expect((await repo.listUserCards('u1')).map((entry) => entry.cardId)).toEqual([
+      'card_fire_001',
+    ]);
+    expect(await repo.getHighestSerialNumber('card_fire_001')).toBe(1);
+  });
+
   it('creates user cards with defaults and wraps a duplicate id', async () => {
     const repo = new WaifuCardRepository(db.client);
     const card = await repo.create(cardInput(1));

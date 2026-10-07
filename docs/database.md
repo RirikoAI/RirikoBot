@@ -11,7 +11,12 @@ To support both enterprise cloud deployments and zero-configuration local develo
 - **PostgreSQL:** the bot and the dashboard call `ensurePostgresSchema` at startup.
   - It runs `PG_SCHEMA_DDL` in the connection's `search_path` when that schema has no tables.
   - It holds an advisory lock while it does, so both apps can start at once.
-- **Afterwards:** additive upgrades (`ensureAdventureSchema`, `ensureCardSerialSchema`) run.
+- **Afterwards:** additive upgrades (`ensureTextIdColumns`, `ensureAdventureSchema`, `ensureCardSerialSchema`) run.
+- **Text ids (BUG-0038):** these id columns are `text` in both dialects, because SQLite holds slugs and prefixed ids that PostgreSQL's `uuid` rejects: card ids (`card_fire_001`), asset ids (`asset_card_bulk_fire_001`), item ids (`candy_minor`) and AI ids (`conv_<uuid>`, `msg_<uuid>`).
+  - The columns: `waifu_assets.id`, `waifu_cards.id`, `waifu_cards.asset_id`, `user_cards.card_id`, `dungeon_bosses.asset_id`, `game_achievements.reward_card_id` and `reward_item_id`, `quests.reward_card_id`, `economy_items.id`, `economy_inventories.item_id`, `ai_conversations.id`, `ai_messages.id` and `ai_messages.conversation_id`.
+  - Ids are never remapped: card images in `public/cards` are named by card id, and the same ids appear in adventure payloads, `tcg_system_configs` and `waifu_card_serials.card_id`.
+  - A primary key keeps a random-uuid default, as text (`gen_random_uuid()::text`).
+  - `ensureTextIdColumns` upgrades a PostgreSQL database that still has `uuid` there. The bot, the dashboard and `db:copy` run it. It runs under an advisory lock in one transaction, casts each value to its text form and changes nothing on a second run. It does nothing on SQLite. The list is `TEXT_ID_COLUMNS` in `packages/database/src/migrations/text-ids.ts`.
 - **The DDL files:** both are generated from the Drizzle schemas and committed. The production images have no `drizzle-kit`.
   - Regenerate them after every schema change with `pnpm -F @ririko/database db:generate-ddl`.
   - The parity tests `schema/sqlite/ddl.test.ts` and `schema/pg/ddl.test.ts` fail when they are stale.
@@ -45,9 +50,9 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 - `economy_transactions`: Immutable double-entry financial ledger (`id` UUID PK, `user_id`, `guild_id`, `type` [TRANSFER, DEPOSIT, WITHDRAW, DAILY, GAMBLE, SHOP_BUY, MARKET_FEE, TCG_REWARD], `amount` BigInt, `currency`, `balance_before` BigInt, `balance_after` BigInt, `source`, `metadata` JSON, `created_at`).
 - `economy_rewards`: System-wide reward configurations and history (`id` UUID PK, `event_type`, `base_amount`, `multiplier`, `cooldown_seconds`).
 - `economy_cooldowns`: Per-user reward rate-limit trackers (`id` UUID PK, `user_id`, `action_type`, `last_triggered_at`, `expires_at`).
-- `economy_items`: Item shop catalog (`id` UUID PK, `name`, `description`, `price`, `rarity`, `category_id`, `icon_url`, `is_purchasable`, `metadata`).
+- `economy_items`: Item shop catalog (`id` text PK, a uuid or a legacy slug, `name`, `description`, `price`, `rarity`, `category_id`, `icon_url`, `is_purchasable`, `metadata`).
 - `economy_item_categories`: Item category groupings (`id` UUID PK, `name`, `description`).
-- `economy_inventories`: User item inventory bags (`id` UUID PK, `user_id`, `item_id`, `quantity`, `acquired_at`).
+- `economy_inventories`: User item inventory bags (`id` UUID PK, `user_id`, `item_id` text, `quantity`, `acquired_at`).
 
 ### 2.5. Experience, Leveling & Rankings
 - `xp_accounts`: User leveling progress (`user_id` PK, `guild_id`, `xp` BigInt, `level` Int, `karma` Int, `last_xp_at`, `created_at`, `updated_at`).
@@ -63,8 +68,8 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 
 ### 2.7. AI Chatbot & Conversational Context
 - `ai_channels`: Dedicated AI channel registrations (`guild_id` PK, `channel_id`).
-- `ai_conversations`: Active conversation session identifiers (`id` UUID PK, `user_id`, `guild_id`, `channel_id`, `provider`, `model`, `summary`, `created_at`, `updated_at`).
-- `ai_messages`: Contextual message history with token counts (`id` UUID PK, `conversation_id`, `role` [SYSTEM, USER, ASSISTANT, TOOL], `content`, `tool_calls` JSON, `token_count`, `created_at`).
+- `ai_conversations`: Active conversation session identifiers (`id` text PK, `conv_<uuid>`, `user_id`, `guild_id`, `channel_id`, `provider`, `model`, `summary`, `created_at`, `updated_at`).
+- `ai_messages`: Contextual message history with token counts (`id` text PK, `msg_<uuid>`, `conversation_id` text, `role` [SYSTEM, USER, ASSISTANT, TOOL], `content`, `tool_calls` JSON, `token_count`, `created_at`).
 - `ai_guild_preferences`: Guild-specific personality prompt and tone (`guild_id` PK, `personality_prompt`, `speaking_style`, `allowed_tools` JSON, `model_override`).
 - `ai_user_preferences`: User personal preferences (`user_id` PK, `nickname`, `timezone`, `language_preference`).
 
@@ -93,9 +98,9 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 
 ### 2.12. Waifu Trading Card Game & Gamification (Flagship Subsystem)
 - `waifu_sources`: Ingestion sources (`id` String PK, `name`, `base_url`, `attribution_text`, `is_active`).
-- `waifu_assets`: Ingested & hashed anime character images (`id` UUID PK, `source_id`, `source_image_id`, `character_name`, `anime_title`, `image_hash` UNIQUE, `local_storage_path`, `discord_cdn_url`, `is_deleted_by_request`, `tags` JSON, `created_at`).
-- `waifu_cards`: Collectible card definitions (`id` UUID PK, `asset_id`, `name`, `rarity` [COMMON, UNCOMMON, RARE, SUPER_RARE, ULTRA_RARE, SECRET_RARE, SIR, MYTHIC], `element` [FIRE, WATER, EARTH, LIGHTNING, ICE, LIGHT, SHADOW], `attack` Int, `defense` Int, `speed` Int, `health` Int, `crit_rate` Float, `skill_name`, `skill_description`, `passive_name`, `passive_description`, `collection_number` Int, `is_active`).
-- `user_cards`: Instances of cards owned by players (`id` UUID PK, `user_id`, `card_id`, `serial_number` Int, `level` Int, `exp` Int, `state` [IDLE, EQUIPPED, IN_TRADE, IN_MARKET], `obtained_at`).
+- `waifu_assets`: Ingested & hashed anime character images (`id` text PK, `source_id`, `source_image_id`, `character_name`, `anime_title`, `image_hash` UNIQUE, `local_storage_path`, `discord_cdn_url`, `is_deleted_by_request`, `tags` JSON, `created_at`).
+- `waifu_cards`: Collectible card definitions (`id` text PK, `asset_id` text, `name`, `rarity` [COMMON, UNCOMMON, RARE, SUPER_RARE, ULTRA_RARE, SECRET_RARE, SIR, MYTHIC], `element` [FIRE, WATER, EARTH, LIGHTNING, ICE, LIGHT, SHADOW], `attack` Int, `defense` Int, `speed` Int, `health` Int, `crit_rate` Float, `skill_name`, `skill_description`, `passive_name`, `passive_description`, `collection_number` Int, `is_active`).
+- `user_cards`: Instances of cards owned by players (`id` UUID PK, `user_id`, `card_id` text, `serial_number` Int, `level` Int, `exp` Int, `state` [IDLE, EQUIPPED, IN_TRADE, IN_MARKET], `obtained_at`).
 - `game_items`: Master catalog of equipments, accessories, and consumables (`id` UUID PK, `code` UNIQUE, `name`, `description`, `type` [EQUIPMENT, ACCESSORY, CONSUMABLE], `subtype` [WEAPON, ARMOR, RELIC, RING, AMULET, TALISMAN, HP_POTION, MANA_POTION, ENERGY_RESTORE], `rarity` [COMMON, UNCOMMON, RARE, SUPER_RARE, ULTRA_RARE, SECRET_RARE, SIR, MYTHIC], `base_stats` JSON, `battle_perks` JSON, `consumable_effect` JSON, `is_shop_buyable` Boolean, `shop_price` BigInt, `max_daily_purchases` Int, `is_tradeable` Boolean, `created_at`).
 - `user_inventory_items`: Item instances owned by players (`id` UUID PK, `user_id`, `item_id`, `quantity` Int, `enhancement_level` Int, `equipped_to_card_id` UUID Nullable, `slot` [WEAPON, ARMOR, RELIC, RING, AMULET, TALISMAN, NONE], `state` [IDLE, EQUIPPED, IN_TRADE, IN_MARKET], `obtained_from` [SHOP, BATTLE, DUNGEON, BOSS, QUEST, ACHIEVEMENT, TRADE], `created_at`, `updated_at`).
 - `player_energy`: Player stamina pool & lifecycle (`user_id` Snowflake PK, `current_energy` Int, `max_energy` Int, `bonus_energy` Int, `daily_energy_pots_used` Int, `last_replenished_at` Timestamp, `last_reset_date` Date, `updated_at` Timestamp).

@@ -5,7 +5,6 @@ import { describeDialects } from '../testing/dialects.js';
 import { AiRepository } from './ai.repository.js';
 
 const MISSING_UUID = '00000000-0000-4000-8000-000000000001';
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const T0 = new Date('2026-05-01T10:00:00Z');
 const MINUTE = 60_000;
 const at = (minutes: number) => new Date(T0.getTime() + minutes * MINUTE);
@@ -25,7 +24,7 @@ describeDialects('AiRepository behaviour', (db) => {
     expect(await repo.count()).toBe(0);
 
     const created = await repo.create(conversation('u1', { guildId: 'g1' }));
-    expect(created.id).toMatch(db.dialect === 'sqlite' ? /^conv_/ : UUID);
+    expect(created.id).toMatch(/^conv_[0-9a-f-]{36}$/);
     expect(created.summary).toBeNull();
     expect(created.guildId).toBe('g1');
 
@@ -36,6 +35,25 @@ describeDialects('AiRepository behaviour', (db) => {
     const fixed = randomUUID();
     const explicit = await repo.create(conversation('u2', { id: fixed }));
     expect(explicit.id).toBe(fixed);
+  });
+
+  it('keeps prefixed conversation and message ids as text on both dialects', async () => {
+    const repo = new AiRepository(db.client);
+    const conversationId = `conv_${randomUUID()}`;
+    const messageId = `msg_${randomUUID()}`;
+
+    await repo.create(conversation('u1', { id: conversationId }));
+    await repo.addMessage({
+      id: messageId,
+      conversationId,
+      role: 'USER',
+      content: 'from the old database',
+    });
+
+    expect((await repo.findById(conversationId))?.id).toBe(conversationId);
+    const window = await repo.getSlidingWindowMessages(conversationId);
+    expect(window.map((message) => message.id)).toEqual([messageId]);
+    expect(window[0]?.conversationId).toBe(conversationId);
   });
 
   it('updates a conversation, touching updatedAt, and throws for a missing one', async () => {
@@ -162,7 +180,7 @@ describeDialects('AiRepository behaviour', (db) => {
       toolCalls: [{ name: 'get_current_time' }],
       tokenCount: 7,
     });
-    expect(message.id).toMatch(db.dialect === 'sqlite' ? /^msg_/ : UUID);
+    expect(message.id).toMatch(/^msg_[0-9a-f-]{36}$/);
     expect(message.tokenCount).toBe(7);
     expect(message.toolCalls).toEqual([{ name: 'get_current_time' }]);
 

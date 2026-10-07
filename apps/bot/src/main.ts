@@ -4,6 +4,7 @@ import {
   ensureAdventureSchema,
   ensureCardSerialSchema,
   ensurePostgresSchema,
+  ensureTextIdColumns,
 } from '@ririko/database';
 import {
   createBot,
@@ -77,6 +78,9 @@ export async function main(): Promise<void> {
         })
       : null;
   if (await ensurePostgresSchema(db)) console.log('• Created the PostgreSQL schema.');
+  // Databases from before BUG-0038 hold uuid id columns; the ids SQLite holds are text.
+  const textIds = await ensureTextIdColumns(db);
+  if (textIds.length > 0) console.log(`• Changed ${textIds.length} PostgreSQL id columns to text.`);
   await runLegacyUpgrade(db);
   console.log('• Initializing bot repositories and domain services...');
   const services = await createBotServices(db, bot.client);
