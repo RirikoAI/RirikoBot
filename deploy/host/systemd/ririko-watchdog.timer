@@ -1,0 +1,11 @@
+[Unit]
+Description=Ririko health watchdog, every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=5s
+Unit=ririko-watchdog.service
+
+[Install]
+WantedBy=timers.target

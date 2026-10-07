@@ -216,7 +216,7 @@ The Scrum Kanban files are listed in section 2.
 - [docs/database.md](docs/database.md) — 40+ table schema specifications, indexes, ACID transactions.
 - [docs/migrations.md](docs/migrations.md) — 1.4.0 SQLite to 2.0.0 Drizzle migration runbook, CLI dry-run and verification.
 - [docs/testing.md](docs/testing.md) — Testing standards, deterministic RNG seeds, quality gates (`pnpm test`, `typecheck`, `lint`).
-- [docs/deployment.md](docs/deployment.md) — Docker multi-stage containerization, docker-compose.production.yml, `/health` and `/ready` probes.
+- [docs/deployment.md](docs/deployment.md) — Docker multi-stage containerization, docker-compose.production.yml, `/health` and `/ready` probes. Hosting setup lives in a private runbook that is kept out of the repository.
 - [docs/dashboard.md](docs/dashboard.md) — Next.js 16 App Router, React 19, Discord OAuth2, 20+ module management pages.
 - [docs/ai.md](docs/ai.md) — Dedicated `#ririko-ai` channel, per-user isolated memory, `get_current_time()` tool, safe tool allowlist.
 - [docs/music.md](docs/music.md) — Music 2.0 multi-source extractors (YouTube/Spotify/SoundCloud/Deezer), reactive UI without polling.

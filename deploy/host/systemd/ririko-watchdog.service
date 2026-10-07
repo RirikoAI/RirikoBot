@@ -1,0 +1,12 @@
+[Unit]
+Description=Ririko health watchdog (restart unhealthy containers, feed the heartbeat monitor)
+Documentation=https://github.com/RirikoAI/RirikoBot/blob/master/docs/release.md
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/ririko-watchdog
+# One run is a few docker calls and at most a restart; it must never pile up behind a hung docker.
+TimeoutStartSec=2min
+Nice=5

@@ -38,7 +38,7 @@ pnpm test:e2e        # Builds the dashboard, then runs the Playwright E2E suite
 
 `pnpm test:e2e` starts its own fake Discord API on port 3199 and `next start` on port 3100 with a throwaway SQLite database, so it can run while `next dev` is up on port 3000. It uses Playwright's Chromium; run `pnpm --filter @ririko/web exec playwright install chromium` once if it is missing. The report is in `apps/web/e2e-results/report/index.html`.
 
-`pnpm site:build` writes the Vercel status page to `site-dist/index.html` (see [deployment.md](deployment.md#4-current-hosting-vercel-status-site)).
+`pnpm site:build` writes the Vercel status page to `site-dist/index.html` (see [deployment.md](deployment.md#4-current-hosting)).
 
 The Prettier baseline commit is listed in `.git-blame-ignore-revs`. Run `git config blame.ignoreRevsFile .git-blame-ignore-revs` once so local `git blame` skips it.
 

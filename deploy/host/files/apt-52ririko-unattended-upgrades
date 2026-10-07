@@ -1,5 +1,5 @@
 // Managed by deploy/host/bootstrap.sh (Ririko). Security updates only (Ubuntu's default origins);
-// the host reboots at 20:00 UTC (04:00 in the maintainer's time zone, the quietest hour) when a kernel or library
+// the host reboots at 20:00 UTC (04:00 for the operator, the quietest hour for the audio node) when a kernel or library
 // update needs it. The host clock is UTC.
 Unattended-Upgrade::Automatic-Reboot "true";
 Unattended-Upgrade::Automatic-Reboot-Time "20:00";

@@ -3,6 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
 interface ComposeService {
+  image?: string;
+  user?: string;
+  entrypoint?: string[];
+  restart?: string;
+  network_mode?: string;
+  cap_add?: string[];
+  volumes?: string[];
+  depends_on?: Record<string, { condition?: string }>;
   ports?: string[];
   cap_drop?: string[];
   security_opt?: string[];
@@ -18,8 +26,8 @@ const services = compose.services;
 const names = ['postgres', 'lavalink', 'bot', 'web'] as const;
 
 describe('docker-compose.production.yml hardening', () => {
-  it('runs exactly the four expected services', () => {
-    expect(Object.keys(services).sort()).toEqual([...names].sort());
+  it('runs exactly the four expected services and the Lavalink init service', () => {
+    expect(Object.keys(services).sort()).toEqual([...names, 'lavalink-plugins'].sort());
   });
 
   it('publishes the dashboard on loopback unless DASHBOARD_BIND says otherwise', () => {
@@ -54,7 +62,7 @@ describe('docker-compose.production.yml hardening', () => {
   it('reads the Lavalink heap from LAVALINK_HEAP', () => {
     expect(services.lavalink!.environment!._JAVA_OPTIONS).toBe('-Xmx${LAVALINK_HEAP:-1G}');
     expect(envExample).toMatch(/^# LAVALINK_HEAP=1G$/m);
-    expect(envExample).toContain('512m on a 4 GB host');
+    expect(envExample).toContain('512m on a small host');
   });
 });
 
@@ -62,7 +70,7 @@ const read = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf
 const imageTag = /^ghcr\.io\/lavalink-devs\/lavalink:(4\.\d+\.\d+)$/;
 
 describe('Lavalink image pin', () => {
-  const hostCompose = parse(read('../deploy/lavalink/docker-compose.yml')) as {
+  const hostCompose = parse(read('../deploy/lavalink/docker-compose.yml'), { merge: true }) as {
     services: Record<string, ComposeService & { image: string }>;
   };
   const mainImage = (services.lavalink as { image?: string }).image ?? '';
@@ -103,7 +111,7 @@ describe('docker-compose.remote-lavalink.yml', () => {
   });
 
   it('overrides nothing else', () => {
-    expect(Object.keys(override.services).sort()).toEqual(['bot', 'lavalink']);
+    expect(Object.keys(override.services).sort()).toEqual(['bot', 'lavalink', 'lavalink-plugins']);
     expect(Object.keys(override.services.bot!).sort()).toEqual(['depends_on', 'environment']);
   });
 
@@ -120,7 +128,7 @@ describe('deploy/lavalink/docker-compose.yml', () => {
     env_file?: string;
     volumes?: string[];
   };
-  const host = parse(read('../deploy/lavalink/docker-compose.yml')) as {
+  const host = parse(read('../deploy/lavalink/docker-compose.yml'), { merge: true }) as {
     name: string;
     services: Record<string, HostService>;
     volumes: Record<string, unknown>;
@@ -142,9 +150,14 @@ describe('deploy/lavalink/docker-compose.yml', () => {
     },
   ];
 
-  it('is the ririko-lavalink project with one service per environment', () => {
+  it('is the ririko-lavalink project with a service and an init service per environment', () => {
     expect(host.name).toBe('ririko-lavalink');
-    expect(Object.keys(host.services).sort()).toEqual(['lavalink-production', 'lavalink-staging']);
+    expect(Object.keys(host.services).sort()).toEqual([
+      'lavalink-production',
+      'lavalink-production-plugins',
+      'lavalink-staging',
+      'lavalink-staging-plugins',
+    ]);
   });
 
   it.each(instances)('configures $name', ({ name, port, envFile, heap, volume }) => {
@@ -180,5 +193,101 @@ describe('deploy/lavalink/docker-compose.yml', () => {
     ]) {
       expect(env).toMatch(new RegExp(`^${key}=`, 'm'));
     }
+  });
+});
+
+describe('Lavalink plugin volume ownership (BUG-0036)', () => {
+  // The image runs as uid/gid 322 and has no plugins directory, so Docker creates the named volume
+  // owned by root and Lavalink cannot write its plugins. A one-shot init service fixes the owner.
+  const pluginsPath = '/opt/Lavalink/plugins';
+  const hostCompose = parse(read('../deploy/lavalink/docker-compose.yml'), { merge: true }) as {
+    services: Record<string, ComposeService>;
+    volumes: Record<string, unknown>;
+  };
+  const override = parse(
+    read('../docker-compose.remote-lavalink.yml').replace(/ !override$/gm, ''),
+  ) as { services: Record<string, { profiles?: string[] }> };
+
+  const cases = [
+    {
+      file: 'docker-compose.production.yml',
+      all: services,
+      lavalink: 'lavalink',
+      init: 'lavalink-plugins',
+    },
+    {
+      file: 'deploy/lavalink/docker-compose.yml (production)',
+      all: hostCompose.services,
+      lavalink: 'lavalink-production',
+      init: 'lavalink-production-plugins',
+    },
+    {
+      file: 'deploy/lavalink/docker-compose.yml (staging)',
+      all: hostCompose.services,
+      lavalink: 'lavalink-staging',
+      init: 'lavalink-staging-plugins',
+    },
+  ];
+
+  const volumeOf = (service: ComposeService) => {
+    const mount = (service.volumes ?? []).find((v) => v.endsWith(`:${pluginsPath}`));
+    return mount?.slice(0, mount.length - pluginsPath.length - 1);
+  };
+
+  it.each(cases)('$file: $lavalink has a plugin volume', ({ all, lavalink }) => {
+    expect(volumeOf(all[lavalink]!)).toMatch(/^lavalink_[a-z_]*plugins$/);
+  });
+
+  it.each(cases)('$file: $init chowns the same volume as $lavalink', ({ all, lavalink, init }) => {
+    const service = all[init]!;
+    expect(volumeOf(service)).toBe(volumeOf(all[lavalink]!));
+    expect(service.volumes).toHaveLength(1);
+    expect(service.entrypoint).toEqual(['chown', '-R', '322:322', pluginsPath]);
+  });
+
+  it.each(cases)(
+    '$file: $init uses the pinned image and stays minimal',
+    ({ all, lavalink, init }) => {
+      const service = all[init]!;
+      expect(service.image).toBe(all[lavalink]!.image);
+      expect(service.image).toMatch(imageTag);
+      expect(service.user).toBe('root');
+      expect(service.restart).toBe('no');
+      expect(service.cap_drop).toEqual(['ALL']);
+      expect(service.cap_add).toEqual(['CHOWN']);
+      expect(service.security_opt).toEqual(['no-new-privileges:true']);
+      expect(service.network_mode).toBe('none');
+      expect(service.ports).toBeUndefined();
+    },
+  );
+
+  it.each(cases)('$file: $lavalink waits for $init to exit 0', ({ all, lavalink, init }) => {
+    expect(all[lavalink]!.depends_on).toEqual({
+      [init]: { condition: 'service_completed_successfully' },
+    });
+  });
+
+  it('declares each plugin volume of the Lavalink host and runs nothing else', () => {
+    for (const name of ['lavalink-production', 'lavalink-staging']) {
+      expect(hostCompose.volumes).toHaveProperty(volumeOf(hostCompose.services[name]!)!);
+    }
+    expect(Object.keys(hostCompose.services).sort()).toEqual([
+      'lavalink-production',
+      'lavalink-production-plugins',
+      'lavalink-staging',
+      'lavalink-staging-plugins',
+    ]);
+  });
+
+  it('excludes the bundled init service on the remote Lavalink override', () => {
+    expect(override.services['lavalink-plugins']).toEqual({ profiles: ['bundled-lavalink'] });
+    expect(override.services.lavalink).toEqual({ profiles: ['bundled-lavalink'] });
+  });
+
+  it('explains the init service in the deployment guide', () => {
+    const doc = read('../docs/deployment.md');
+    expect(doc).toContain('lavalink-plugins');
+    expect(doc).toContain('uid/gid 322');
+    expect(doc).toContain('service_completed_successfully');
   });
 });

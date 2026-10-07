@@ -414,7 +414,7 @@
       "id": "EPIC-017",
       "title": "Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI)",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "children": [
         "STORY-176",
         "STORY-177",
@@ -2112,7 +2112,7 @@
       "parent": "EPIC-017",
       "title": "Lightsail Host Bootstrap & Hosting Runbook",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-176"
       ],
@@ -2216,7 +2216,7 @@
       "parent": "EPIC-017",
       "title": "Backups, Health Watchdog & Heartbeat Alerts",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-176"
       ],
@@ -2263,7 +2263,7 @@
       "parent": "EPIC-017",
       "title": "Remote Lavalink Node on a KVM VPS Host Over WireGuard",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-176"
       ],
@@ -6347,7 +6347,7 @@
       "parent": "STORY-179",
       "title": "Encrypted Off-Site Backups With restic to a Lightsail Bucket",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1771"
@@ -6399,7 +6399,7 @@
       "parent": "STORY-179",
       "title": "Health Watchdog and Heartbeat Alerts",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1771",
@@ -6452,7 +6452,7 @@
       "parent": "STORY-177",
       "title": "Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1762",
@@ -6462,7 +6462,8 @@
         "TASK-1792",
         "TASK-1801",
         "TASK-1802",
-        "TASK-1803"
+        "TASK-1803",
+        "BUG-0036"
       ],
       "blocks": [],
       "description": "The maintainer does every provider-side step by hand. This runbook makes them repeatable and records the decision as an ADR. Written last, from the finished scripts.",
@@ -6476,6 +6477,7 @@
           "docs/hosting.md",
           "docs/deployment.md",
           "docs/release.md",
+          "docs/development.md",
           "docs/adr/ADR-014-production-hosting-lightsail-cloudflare-tunnel.md",
           "AGENTS.md",
           "deploy/host/bootstrap.sh",
@@ -6494,7 +6496,7 @@
       "acceptance": [
         "docs/hosting.md, Lightsail: two Ubuntu 24.04 LTS instances in us-east-1 with IPv4 (production 8 GB RAM / 2 vCPU, staging 4 GB / 2 vCPU); a static IP attached to each (the Lavalink VPS allowlists them); every IPv4 and IPv6 firewall rule deleted; automatic snapshots on; a CPU burst capacity alarm, because the bundles are burstable; one bucket per environment for restic with a bucket-scoped access key.",
         "Lavalink VPS: small KVM VPS (4+1 vCPU, 4 GB, 100 GB NVMe, 4 TB transfer) with Ubuntu 24.04, bootstrapped with --role lavalink; the WireGuard key exchange and WG_PEERS/WG_ALLOWED_ENDPOINTS values for all three hosts; per-instance env files; cloudflared for ssh-lavalink.example.com; break-glass through the provider’s VNC console; a bandwidth note (about 110 GB a month per continuously playing session) with the upgrade path to ELITE.",
-        "Cloudflare: one remotely managed tunnel per host, including the Lavalink VPS (ssh-lavalink.example.com only). Production routes dashboard.ririko.ai to http://localhost:3000 and ssh-prod.ririko.ai to ssh://localhost:22; staging uses dashboard-staging.example.com and ssh-staging.example.com (one level deep, so Universal SSL covers them). Access applications protect both SSH hostnames (maintainers’ emails plus a Service Auth policy for that environment’s CI service token) and the staging dashboard.",
+        "Cloudflare: one remotely managed tunnel per host, including the Lavalink VPS (ssh-lavalink.example.com only). Production routes dashboard.ririko.ai to http://localhost:3000 and ssh-production.example.com to ssh://localhost:22; staging uses dashboard-staging.example.com and ssh-staging.example.com (one level deep, so Universal SSL covers them). Access applications protect both SSH hostnames (maintainers’ emails plus a Service Auth policy for that environment’s CI service token) and the staging dashboard.",
         "Zone settings for the dashboard hostnames: Rocket Loader, Email Address Obfuscation, automatic Web Analytics injection and Zaraz off, because they inject scripts the nonce CSP blocks; Always Use HTTPS on; HTML not cached.",
         "Discord: a separate staging application, and the OAuth2 redirect <DASHBOARD_URL>/api/auth/callback for each.",
         "Host setup: the bootstrap command, ririko.conf, .env.production with DASHBOARD_URL and CLIENT_IP_HEADER=cf-connecting-ip, ririko-backup init, Healthchecks.io checks for the watchdog and the backup, and an external uptime monitor on https://dashboard.ririko.ai/health.",
@@ -6574,7 +6576,7 @@
       "parent": "STORY-180",
       "title": "WireGuard Link, Lavalink Host Firewall and Bootstrap Roles",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1771",
@@ -6593,6 +6595,7 @@
       "context": {
         "files": [
           "deploy/host/bootstrap.sh",
+          "deploy/host/lib/wg-common.sh",
           "deploy/host/lib/render-wireguard.sh",
           "deploy/host/lib/render-nftables.sh",
           "deploy/host/files",
@@ -6626,7 +6629,7 @@
       "parent": "STORY-180",
       "title": "Lavalink Host Deploy Role, Watchdog Checks and CI Jobs",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1781",
@@ -6648,6 +6651,7 @@
         "files": [
           "deploy/host/bin/ririko-deploy.sh",
           "deploy/host/bin/ririko-deploy-ssh.sh",
+          "deploy/host/bootstrap.sh",
           "deploy/host/bin/ririko-watchdog.sh",
           "deploy/lavalink/docker-compose.yml",
           ".circleci/config.yml",
@@ -7608,6 +7612,143 @@
       "handovers": [
         "BUG-0034",
         "TASK-1771",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "BUG-0035",
+      "parent": "EPIC-017",
+      "title": "ririko-deploy Fails at Once When the Watchdog or a Backup Dump Briefly Holds the Lock",
+      "points": 1,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "ririko-deploy takes the shared host lock with flock -n and exits 3 when it is busy. ririko-watchdog (TASK-1792) holds that lock for a few seconds every minute, and ririko-backup holds it while it dumps Postgres, so a CI deploy can fail at random with exit 3. The deploy should wait for the lock for a bounded time instead.",
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          "deploy/host/ririko.conf.example",
+          "scripts/deploy-host.test.ts",
+          "docs/release.md"
+        ],
+        "symbols": [
+          "cmd_deploy",
+          "load_conf",
+          "validate_conf"
+        ],
+        "entry_points": [
+          "deploy/host/bin/ririko-deploy.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "cmd_deploy waits for the lock with flock -w \"$DEPLOY_LOCK_WAIT\" (default 300 seconds), logging one line while it waits, and exits 3 only after the wait times out. DEPLOY_LOCK_WAIT is a known ririko.conf key (digits only, validated like READY_TIMEOUT) and is documented, commented, in deploy/host/ririko.conf.example.",
+        "The lock is still taken before load_conf, so the conf is read under the lock as today; read DEPLOY_LOCK_WAIT from the environment or a quick conf parse before waiting, whichever keeps the code simplest, and say which in the PROGRESS entry.",
+        "scripts/deploy-host.test.ts: the existing busy-lock test sets DEPLOY_LOCK_WAIT=1 and still expects exit 3; a new test holds the lock for about 1 second with DEPLOY_LOCK_WAIT=10 and expects the deploy to proceed (exit 0). Both need real flock (WSL bash or Linux).",
+        "docs/release.md section 8 says exit 3 now means the lock stayed busy for DEPLOY_LOCK_WAIT seconds."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0035",
+        "TASK-1781",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "BUG-0036",
+      "parent": "EPIC-017",
+      "title": "Lavalink Crash-Loops: Plugin Volume Is Root-Owned but the Image Runs as uid 322",
+      "points": 2,
+      "status": "DONE",
+      "children": [],
+      "requires": [
+        "TASK-1803"
+      ],
+      "blocks": [
+        "TASK-1772"
+      ],
+      "description": "Found on lavalink-staging (2026-10-05): ghcr.io/lavalink-devs/lavalink:4.2.2 runs as lavalink (uid/gid 322) and has no /opt/Lavalink/plugins directory, so Docker creates the named plugin volume owned by root:root and Lavalink dies with java.io.FileNotFoundException: ./plugins/lavasrc-plugin-4.8.3.jar (Permission denied), restarting forever. Affects deploy/lavalink/docker-compose.yml (both instances) and the bundled lavalink in docker-compose.production.yml (self-hosters), which has had the same lavalink_plugins volume since STORY-122.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "docker-compose.production.yml",
+          "deploy/lavalink/docker-compose.yml",
+          "docker-compose.remote-lavalink.yml",
+          "scripts/compose-production.test.ts",
+          "docs/deployment.md"
+        ],
+        "symbols": [],
+        "entry_points": [
+          "deploy/lavalink/docker-compose.yml"
+        ],
+        "codegraph_queries": [
+          "renderLavalinkConfig setupLavalink isLavalinkActive"
+        ]
+      },
+      "acceptance": [
+        "Every Lavalink service gets a one-shot init service from the same pinned Lavalink image (user root, cap_drop ALL plus cap_add CHOWN, no-new-privileges, restart no) that runs chown -R 322:322 on its plugin volume; the Lavalink service depends on it with condition service_completed_successfully. No extra image is pulled.",
+        "docker-compose.remote-lavalink.yml also puts the bundled init service in profile bundled-lavalink, so the remote-Lavalink app hosts start neither.",
+        "scripts/compose-production.test.ts asserts: each Lavalink service has a plugin volume, a matching init service on the same image and volume, the depends_on condition, and that the init services are excluded on the remote override.",
+        "docker compose config -q passes for base, base plus override, and the Lavalink host file; docs/deployment.md mentions why the init service exists (uid 322, image has no plugins directory)."
+      ],
+      "verify_cmd": "RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y LAVALINK_HOST=10.77.0.1 docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production.example config -q && RIRIKO_ENV_FILE=.env.production.example POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y docker compose -f docker-compose.production.yml --env-file .env.production.example config -q && WG_ADDRESS=10.77.0.1 LAVALINK_PRODUCTION_ENV_FILE=lavalink.env.example LAVALINK_STAGING_ENV_FILE=lavalink.env.example docker compose -f deploy/lavalink/docker-compose.yml config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0036",
+        "TASK-1801",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "BUG-0037",
+      "parent": "EPIC-017",
+      "title": "CI on PR #685: ShellCheck SC2015 in ririko-deploy and Stale .gitleaksignore SHAs After the History Rewrite",
+      "points": 1,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "Two CircleCI failures on PR #685. lint: shellcheck -x reports SC2015 at deploy/host/bin/ririko-deploy.sh line 745, `[ $# -ge 2 ] && [ $# -le 3 ] || usage`. secrets: the full-history gitleaks scan reports 8 leaks, because the 2026-10-07 history rewrite gave every commit a new SHA and .gitleaksignore fingerprints are keyed by commit SHA. The findings are the same known test fixtures and env fallbacks; only their commit SHAs changed.",
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          ".gitleaksignore"
+        ],
+        "symbols": [
+          "main"
+        ],
+        "entry_points": [
+          "deploy/host/bin/ririko-deploy.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "ririko-deploy.sh line ~745 uses an explicit if (for example `if [ $# -lt 2 ] || [ $# -gt 3 ]; then usage; fi`) with the same accepted argument counts; shellcheck -x reports nothing for deploy/host/**/*.sh.",
+        ".gitleaksignore keeps every entry and comment but replaces the four old commit SHAs with their rewritten ones: 071fcb06734223bfa86d0faf27fa915aa20d7dd8 -> f58f36f9d802d36fe9a748fc2d2ddb95186b5215, d58021065915b03e08b8b189486828c8ccf52dfc -> 3c71cdaa0787bf709bd3907c294940b8f751da78, 959272dbb9c0a3bc03772de813c3a21e7d62710c -> 18e93d8bb471dcead4dc8e5ba00a4ad5f2c6f0cf, 6f072035742448afadf88143236cc02221131d5a -> 03c33beb243943adf4fb36f5aea7e1f37d15e8ed.",
+        "A full-history gitleaks scan with the repo config reports no leaks."
+      ],
+      "verify_cmd": "gitleaks git --redact --no-banner --config .gitleaks.toml && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0037",
+        "TASK-1803",
         "EPIC-017"
       ]
     }

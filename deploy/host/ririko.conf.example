@@ -27,3 +27,135 @@
 # it counts as failed and rolls back. The probes poll every 5 seconds. The bot's probe uses the
 # HEALTH_PORT from RIRIKO_ENV_FILE (default 8080), so do not set HEALTH_PORT=0 there.
 #READY_TIMEOUT=300
+
+# Seconds a deploy waits for the shared host lock (when ririko-backup or ririko-watchdog is running)
+# before it gives up and fails. The lock is held only while the database is dumped, not during the
+# pull and start of containers.
+#DEPLOY_LOCK_WAIT=300
+
+# --- ririko-backup (TASK-1791) -------------------------------------------------------------------
+# Nightly restic backup of a Postgres dump and the shared app volumes to a Lightsail bucket (an S3
+# compatible object store), encrypted on this host before upload. ririko-backup.timer runs at
+# 03:30 UTC on every host, but until the five required keys below are set (and a release is
+# deployed) a run only logs a line and exits 0.
+#
+# Setup, once per host: create a Lightsail bucket and an access key for it, fill in the keys below,
+# run "sudo ririko-backup init", then "sudo systemctl start ririko-backup.service" for the first
+# backup. Keep an OFFLINE copy of RESTIC_PASSWORD: without it no backup can be read, and nobody can
+# recover it. Values may be wrapped in single or double quotes; if a password begins and ends with
+# the same quote character, wrap it in a second pair.
+
+# Required. The name this host's snapshots carry (restic --host), for example ririko-production or
+# ririko-staging. Letters, digits, dots, dashes and underscores.
+#RIRIKO_ENV_NAME=ririko-production
+
+# Required. Bucket and path inside it. Give each host its own path (or bucket).
+#RESTIC_REPOSITORY=s3:s3.<region>.amazonaws.com/<bucket>/ririko-production
+
+# Required. The repository password that encrypts everything.
+#RESTIC_PASSWORD=
+
+# Required. The bucket's access key.
+#AWS_ACCESS_KEY_ID=
+#AWS_SECRET_ACCESS_KEY=
+
+# The restic image the backup runs from, pinned to a version tag (or digest); "latest" is refused.
+# Keep this line in step with DEFAULT_RESTIC_IMAGE in ririko-backup.sh when you upgrade.
+#RESTIC_IMAGE=docker.io/restic/restic:0.19.1
+
+# Optional. A monitor URL such as a Healthchecks.io ping URL: it is pinged after every successful
+# backup and at <url>/fail after a failed one. Must start with https://.
+#BACKUP_PING_URL=https://hc-ping.com/<uuid>
+
+# Seconds a backup waits for the deploy lock (a running deploy) before it gives up and fails. The
+# lock is held only while the database is dumped, not during the upload.
+#BACKUP_LOCK_WAIT=1800
+
+# --- ririko-watchdog (TASK-1792) -----------------------------------------------------------------
+# ririko-watchdog.timer runs every minute on every host. Each run restarts the containers of the
+# "ririko" compose project whose health is unhealthy (Docker itself never restarts those) and then
+# pings the heartbeat monitor only while bot, web and postgres are healthy, lavalink (when the
+# project has one) is running and the root file system has room. Otherwise it posts a one-line
+# reason to <url>/fail, so a failing stack alerts immediately and a dead host alerts when the pings
+# stop. Without a URL it only logs (journalctl -u ririko-watchdog). It does nothing while a deploy
+# or a backup dump holds the deploy lock, and before the first deploy it only logs one line.
+#
+# Setup: create a Healthchecks.io check with a 1 minute period and a few minutes of grace, and
+# put its ping URL below.
+
+# Optional. The ping URL of the heartbeat monitor, for example a Healthchecks.io ping URL. It is
+# pinged once a minute while the stack is healthy and at <url>/fail with the reason otherwise. Must
+# start with https://. Use a different check for each host and for the backup (BACKUP_PING_URL).
+#HEALTHCHECK_PING_URL=https://hc-ping.com/<uuid>
+
+# Percent of the root file system in use at which the watchdog stops pinging and reports "root file
+# system is N% full" instead (1 to 100).
+#DISK_ALERT_PERCENT=85
+
+# --- WireGuard link and Lavalink host firewall (TASK-1802) ---------------------------------------
+# The app hosts reach the Lavalink VPS over WireGuard (10.77.0.0/24), so the Lavalink password never
+# crosses the internet in clear text and the Lavalink ports are never public. The VPS is
+# 10.77.0.1, production 10.77.0.2, staging 10.77.0.3. bootstrap.sh (both roles) creates
+# /etc/wireguard/private.key once and prints this host's public key; copy it into the WG_PEERS of
+# the other side. Once WG_ADDRESS and WG_PEERS are set, run bootstrap.sh again: it renders
+# /etc/wireguard/wg0.conf (0600) and enables wg-quick@wg0. Rendering refuses a malformed key,
+# address, endpoint or port and writes nothing.
+#
+# WG_PEERS: one peer per entry, entries separated by ";", fields by spaces:
+#   <public key> <peer tunnel address>/32 [<endpoint host:port> | -] [<tcp ports> | -]
+# The endpoint is where this host dials the peer; the app role needs one (use the VPS's IPv4
+# literal, because a Lightsail host that dials an IPv6 endpoint is seen from its IPv6 address). The
+# ports are the Lavalink ports the peer may reach on this host over WireGuard, comma separated
+# (lavalink role only). Any number of peers; each has its own ports.
+
+# Both roles. This host's tunnel address and prefix.
+#WG_ADDRESS=10.77.0.3/24
+
+# App role, one entry for the Lavalink host (it keeps the NAT mapping open with a keepalive of 25
+# seconds):
+#WG_PEERS="<VPS public key> 10.77.0.1/32 198.51.100.20:51820"
+# Lavalink role, one entry per app host, each with its own Lavalink port:
+#WG_PEERS="<production public key> 10.77.0.2/32 - 2333; <staging public key> 10.77.0.3/32 - 2334"
+
+# Lavalink role. UDP port WireGuard listens on (default 51820).
+#WG_LISTEN_PORT=51820
+
+# Lavalink role. The public addresses the app hosts' handshakes come from (the Lightsail static
+# IPs), IPv4 and IPv6, separated by spaces or commas. The firewall (table inet ririko, input policy
+# drop) lets UDP WG_LISTEN_PORT in from these addresses only, and each WG_PEERS entry reach its own
+# ports on wg0. Required for the firewall; bootstrap.sh leaves the firewall as it is until it is set.
+#WG_ALLOWED_ENDPOINTS="203.0.113.10 2001:db8::10"
+
+# --- Lavalink host role (TASK-1803) --------------------------------------------------------------
+# On the Lavalink VPS, ririko-deploy, ririko-deploy-ssh and ririko-watchdog manage the Lavalink
+# containers (compose project ririko-lavalink) instead of the app stack. bootstrap.sh --role
+# lavalink writes RIRIKO_ROLE=lavalink here (and keeps it on every run), so you normally do not
+# set it by hand. ririko-deploy-ssh cannot read this file; each CI key is forced to its own
+# instance ("ririko-deploy-ssh staging" or "... production") in the deploy user's authorized_keys.
+#
+# A deploy <version> <instance> downloads deploy/lavalink/docker-compose.yml and
+# docker/lavalink/application.yml of the tag, and recreates lavalink-<instance> only when the
+# sha256 of one of them changed (a restart drops every playing session), then waits for
+# GET http://<WG_ADDRESS>:<port>/version to answer 200 with the instance's password
+# (LAVALINK_PASSWORD in /opt/ririko/lavalink-<instance>.env, one file per instance, root 0600,
+# see deploy/lavalink/lavalink.env.example). The Lavalink containers listen on WG_ADDRESS (without
+# its prefix length).
+
+# app (default) or lavalink.
+#RIRIKO_ROLE=lavalink
+
+# The instances this host runs, separated by spaces or commas. Optional: without it they are the
+# instances whose Lavalink port (production 2333, staging 2334) appears in the ports field of a
+# WG_PEERS entry. A deploy or a status for any other instance is refused with exit 2, and the
+# watchdog checks only these. Production Lavalink moving to its own VM needs no change here: that
+# VM's WG_PEERS names only the production port.
+#LAVALINK_INSTANCES="production staging"
+
+# Seconds a deploy waits for the instance's /version to answer 200 before it counts as failed and
+# starts the previous release of that instance again.
+#LAVALINK_READY_TIMEOUT=180
+
+# JVM heap of an instance (the compose file defaults to 1536m for production and 512m for staging).
+# While both run on a small VM, keep production below its default.
+#LAVALINK_PRODUCTION_HEAP=768m
+#LAVALINK_STAGING_HEAP=512m

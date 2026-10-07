@@ -28,3 +28,10 @@ See docs/kanban/protocol.md section 6.
 
 **Out of scope**
 - More than one Lavalink node per environment, or load balancing across nodes.
+
+---
+
+## REVIEW · 2026-10-05T00:29:47Z · Claude Code (Opus 5.5) · DONE
+
+- TASK-1801, TASK-1802 and TASK-1803 are DONE. BUG-0036 (found by the first live Lavalink start) is DONE.
+- Live: WireGuard 10.77.0.3 ↔ 10.77.0.1 (RTT about 295 ms). The VM firewall allows only 10.77.0.3 → TCP 2334. lavalink-staging answers `/version` 4.2.2 to the bot's password over the tunnel.
