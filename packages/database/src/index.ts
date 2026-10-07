@@ -7,5 +7,6 @@ export * from './transactions/index.js';
 export * from './migrations/adventure-schema.js';
 export * from './migrations/card-serials.js';
 export * from './migrations/postgres-schema.js';
+export * from './copy/copy-database.js';
 export * from './repositories/index.js';
 export * as migration from './migration/index.js';

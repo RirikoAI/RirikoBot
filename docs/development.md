@@ -83,6 +83,7 @@ Eliminate boilerplate errors by generating typed skeletons:
 - `ririko dev` — Starts bot and dashboard with hot-reload.
 - `ririko migrate` — Applies pending database migrations.
 - `ririko migrate:legacy` — Migrates data from 1.4.0 SQLite databases.
+- `ririko db:copy --from <sqlite path> [--dry-run|--yes]` — Copies a 2.0 SQLite database into an empty PostgreSQL database. The target URL comes only from `TARGET_DATABASE_URL`. Runbook: [docs/migrations.md section 5](migrations.md).
 - `ririko command:sync` — Registers slash commands with Discord Gateway REST API.
 - `ririko guild:config <guild_id> <key> <value>` — Inspects or updates guild configuration directly.
 - `ririko cache:clear` — Prunes expired stream thumbnails and cached waifu assets.

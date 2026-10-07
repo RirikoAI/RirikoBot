@@ -15,6 +15,7 @@ To support both enterprise cloud deployments and zero-configuration local develo
 - **The DDL files:** both are generated from the Drizzle schemas and committed. The production images have no `drizzle-kit`.
   - Regenerate them after every schema change with `pnpm -F @ririko/database db:generate-ddl`.
   - The parity tests `schema/sqlite/ddl.test.ts` and `schema/pg/ddl.test.ts` fail when they are stale.
+- **Moving data from SQLite to PostgreSQL:** `ririko db:copy` copies a 2.0 SQLite database into an empty PostgreSQL database in one transaction and verifies row counts and economy totals before it commits. Steps, including stopping writers and copying the image folders into their volumes: [docs/migrations.md section 5](migrations.md).
 
 ---
 
