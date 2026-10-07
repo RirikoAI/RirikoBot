@@ -14,12 +14,12 @@
 *None.*
 
 ## 🎯 To Do
-| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
-|---|---|---|---|---|---|---|---|
-| `STORY-181` | Story | Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy) | 8 | EPIC-017 | — | yes | large |
+*None.*
 
 ## 🔍 Review
-*None.*
+| ID | Type | Title | Pts | Parent | Handover |
+|---|---|---|---|---|---|
+| `BUG-0038` | Bug | PostgreSQL uuid Id Columns Reject the Slug and Prefixed Ids SQLite Holds (Cards, Assets, Shop Items, AI Conversations) | 5 | EPIC-017 | [BUG-0038.md](./handovers/BUG-0038.md) |
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -123,6 +123,7 @@
 | `STORY-178` | Story | CircleCI Deploy Pipeline: Automatic Staging, Approved Production | 8 | EPIC-017 | [STORY-178.md](./handovers/STORY-178.md) |
 | `STORY-179` | Story | Backups, Health Watchdog & Heartbeat Alerts | 5 | EPIC-017 | [STORY-179.md](./handovers/STORY-179.md) |
 | `STORY-180` | Story | Remote Lavalink Node on a KVM VPS Host Over WireGuard | 13 | EPIC-017 | [STORY-180.md](./handovers/STORY-180.md) |
+| `STORY-181` | Story | Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy) | 8 | EPIC-017 | [STORY-181.md](./handovers/STORY-181.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
