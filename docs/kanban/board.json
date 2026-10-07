@@ -414,13 +414,14 @@
       "id": "EPIC-017",
       "title": "Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI)",
       "points": 21,
-      "status": "DONE",
+      "status": "TODO",
       "children": [
         "STORY-176",
         "STORY-177",
         "STORY-178",
         "STORY-179",
-        "STORY-180"
+        "STORY-180",
+        "STORY-181"
       ],
       "requires": [
         "EPIC-012"
@@ -2311,6 +2312,55 @@
       "verify_cmd": "POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y LAVALINK_HOST=10.77.0.1 RIRIKO_ENV_FILE=.env.production.example docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production.example config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check && pnpm exec prettier --check .circleci/config.yml",
       "handovers": [
         "STORY-180",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "STORY-181",
+      "parent": "EPIC-017",
+      "title": "Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy)",
+      "points": 8,
+      "status": "TODO",
+      "requires": [],
+      "blocks": [],
+      "children": [
+        "TASK-1811",
+        "TASK-1812"
+      ],
+      "description": "Requested by the maintainer on 2026-10-07 to move the local development data (SQLite, including the Waifu TCG card catalog and owned cards) to the staging Postgres. No tool exists: ririko migrate only converts a 1.4.0 database. A copy engine in packages/database moves every table of a 2.0 SQLite database into an empty, schema-initialised Postgres database with correct type conversion, foreign-key order, sequence resets and row-count verification; a CLI command runs it. The coordinator then runs it against staging through an SSH port-forward and copies the card images into the Docker volumes.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "context": {
+        "files": [
+          "packages/database/src/copy",
+          "apps/cli/src/commands/db-copy.ts",
+          "docs/database.md",
+          "docs/migrations.md"
+        ],
+        "symbols": [
+          "ensurePostgresSchema",
+          "ensureAdventureSchema",
+          "ensureCardSerialSchema",
+          "createDatabaseClient"
+        ],
+        "entry_points": [
+          "apps/cli/src/commands/db-copy.ts"
+        ],
+        "codegraph_queries": [
+          "ensurePostgresSchema createDatabaseClient databaseConfigFromEnv createSqliteClient",
+          "ensureAdventureSchema ensureCardSerialSchema PG_SCHEMA_DDL describeDialects"
+        ]
+      },
+      "acceptance": [
+        "TASK-1811: copyDatabase moves every table of a 2.0 SQLite database into an empty Postgres database with exact values, proven by a Postgres integration test.",
+        "TASK-1812: ririko db:copy runs it with a dry run, never prints the target password, and the docs explain the procedure."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src/copy apps/cli/src/commands && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "STORY-181",
         "EPIC-017"
       ]
     }
@@ -6681,6 +6731,125 @@
       "handovers": [
         "TASK-1803",
         "STORY-180",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1811",
+      "parent": "STORY-181",
+      "title": "SQLite to PostgreSQL Copy Engine With Type Conversion, FK Order, Sequence Reset and Verification",
+      "points": 5,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [
+        "TASK-1812"
+      ],
+      "description": "packages/database/src/copy/: copyDatabase(source SQLite path, target Postgres client, options) returning a per-table report.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/src/copy/copy-database.ts",
+          "packages/database/src/copy/copy-database.test.ts",
+          "packages/database/src/index.ts",
+          "packages/database/src/schema/sqlite",
+          "packages/database/src/schema/pg",
+          "packages/database/src/migrations",
+          "packages/database/src/testing/dialects.ts",
+          "packages/database/src/copy/copy-database.flow.test.ts",
+          "packages/database/src/copy/copy-database.integration.test.ts",
+          "packages/database/src/testing/fake-postgres.ts",
+          "packages/database/src/testing/copy-fixture.ts"
+        ],
+        "symbols": [
+          "ensurePostgresSchema",
+          "ensureAdventureSchema",
+          "ensureCardSerialSchema",
+          "createSqliteClient",
+          "createDatabaseClient",
+          "describeDialects"
+        ],
+        "entry_points": [
+          "packages/database/src/copy/copy-database.ts"
+        ],
+        "codegraph_queries": [
+          "ensurePostgresSchema createDatabaseClient databaseConfigFromEnv createSqliteClient",
+          "ensureAdventureSchema ensureCardSerialSchema PG_SCHEMA_DDL describeDialects"
+        ]
+      },
+      "acceptance": [
+        "The source is opened read-only (better-sqlite3 readonly; a WAL file next to it is read, never checkpointed or modified). The target is prepared exactly like the bot does: ensurePostgresSchema, ensureAdventureSchema, ensureCardSerialSchema.",
+        "Refuses (throws, writes nothing) when any target table already has rows, or when a source table or column has no counterpart in the target; target columns missing from the source are allowed only if nullable or defaulted, and are reported.",
+        "Copies every base table found in the source (sqlite_master, excluding sqlite_ internal and Drizzle bookkeeping tables), including raw-DDL tables (adventure_*, waifu_card_serials), not only Drizzle-schema tables.",
+        "Converts values by the target column type from information_schema: booleans from 0/1, timestamps from the representation the Drizzle sqlite schema uses for that column (seconds vs milliseconds per column mode; raw-DDL BIGINT columns copy as numbers), json/jsonb from text, bigint/numeric exactly (no float rounding), bytea from Buffer. An unknown type fails, naming the table and column.",
+        "Inserts parent tables before children using the target foreign-key graph (topological order; a cycle is an error naming the tables), in batches inside one transaction: any failure rolls back everything.",
+        "After loading, every serial/identity column sequence is set to the max value (setval via pg_get_serial_sequence) so new rows do not collide.",
+        "Returns per-table source and target row counts and fails if any differ; also checks that the sum of economy wallet plus bank balances matches between source and target.",
+        "Tests: a Postgres integration suite (describeDialects / TEST_POSTGRES_URL, run by the CircleCI test-postgres job) builds a SQLite fixture through the real repositories with rows covering booleans, timestamps, JSON, bigint balances, owned cards with serials and an adventure session, copies it, and reads it back through the same repositories, asserting equal values; plus failure cases (non-empty target, missing column, rollback on a bad row). Unit tests for the conversion and ordering helpers run without Postgres."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src/copy && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1811",
+        "STORY-181",
+        "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1812",
+      "parent": "STORY-181",
+      "title": "ririko db:copy CLI Command and Data-Move Documentation",
+      "points": 3,
+      "status": "DONE",
+      "children": [],
+      "requires": [
+        "TASK-1811"
+      ],
+      "blocks": [],
+      "description": "apps/cli command wrapping copyDatabase, plus the documentation of the data move.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "apps/cli/src/commands/db-copy.ts",
+          "apps/cli/src/commands/db-copy.test.ts",
+          "apps/cli/src/index.ts",
+          "docs/database.md",
+          "docs/migrations.md",
+          "docs/development.md",
+          "apps/cli/src/program.ts",
+          "apps/cli/src/program.test.ts"
+        ],
+        "symbols": [
+          "copyDatabase",
+          "registerMigrateCommand",
+          "registerCommandsResetCommand"
+        ],
+        "entry_points": [
+          "apps/cli/src/commands/db-copy.ts"
+        ],
+        "codegraph_queries": [
+          "registerMigrateCommand registerCommandsResetCommand registerMaintenanceCommand cli program",
+          "copyDatabase ensurePostgresSchema createDatabaseClient"
+        ]
+      },
+      "acceptance": [
+        "ririko db:copy --from <sqlite path> reads the target Postgres URL only from TARGET_DATABASE_URL (never from argv, so the password stays out of shell history and ps output) and prints only host, port and database name.",
+        "--dry-run inspects both sides and prints the table plan, counts and any refusal reasons without writing; a real run requires --yes.",
+        "Prints the per-table report and exits non-zero on any refusal or count mismatch.",
+        "Tests cover argument validation, the missing-URL error, the dry run and the report formatting with a stubbed engine.",
+        "docs/database.md or docs/migrations.md documents moving a 2.0 SQLite database to Postgres, including stopping writers and copying data/tcg, public/cards, public/bosses and storage/welcomer-backgrounds into the matching volumes, with placeholders only (no real hosts)."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/cli/src/commands && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1812",
+        "STORY-181",
         "EPIC-017"
       ]
     }

@@ -126,3 +126,80 @@ The command exits with 0 when it migrated or found the database already migrated
 ### 4.3. Known Gaps
 - **Settings that do not carry over:** `twitch_channel`, AI models 2.0 does not offer, and the plaintext credentials (see section 2.1). The migration summary lists the ones that applied.
 - **Postgres targets:** the migration currently fails there, because the 1.4.0 integer ids go into uuid columns. The Docker upgrade targets SQLite (the image default).
+
+---
+
+## 5. Moving a 2.0 SQLite Database to PostgreSQL (`ririko db:copy`)
+`ririko migrate:legacy` only reads 1.4.0 databases. To move data that already lives in a 2.0 SQLite file (users, economy, guild settings, the Waifu TCG catalog and owned cards) to the PostgreSQL stack in `docker-compose.production.yml`, use `ririko db:copy`. It copies every table in one transaction and checks the result before it commits.
+
+### 5.1. What the Command Does
+- **Source:** the SQLite file named by `--from`. It is opened read-only, in one read transaction, and no pragma is set, so a database that a stopped process left in WAL mode is read as it is and is not modified.
+- **Target:** the PostgreSQL URL in the `TARGET_DATABASE_URL` environment variable. The URL is never accepted as an argument, so the password stays out of shell history and `ps` output. The command prints only the host, port and database name.
+- **Schema:** it creates the 2.0 schema in an empty target with the same steps the bot runs at startup (`ensurePostgresSchema`, `ensureAdventureSchema`, `ensureCardSerialSchema`). A dry run on an empty target therefore creates the empty tables; it inserts no rows.
+- **Copy:** tables go in foreign-key order with batched, parameterised INSERTs. Values are converted by the target column type: integer seconds or milliseconds to `timestamptz`, `0`/`1` to `boolean`, JSON text to `jsonb`. Integers are read exactly, so balances above 2^53 are not rounded.
+- **Checks before COMMIT:** every table has the same row count on both sides, the wallet and bank totals of `economy_balances` match, and each serial or identity sequence is moved past the highest copied value.
+- **Refusals:** it refuses, writes nothing and exits non-zero when the target has any rows, when a source table or column is missing in the target, when a required target column has no source, or when it meets a column type it does not know how to convert. The reason is printed. Any other failure rolls the whole copy back.
+
+### 5.2. Options
+| Option | Meaning |
+|---|---|
+| `--from <path>` | The 2.0 SQLite database file to copy. Required. |
+| `--dry-run` | Run the whole copy and every check, print the table plan and counts, then roll back. Nothing is committed. |
+| `--yes` | Required for a real run. Without `--dry-run` and without `--yes` the command stops before it connects. |
+| `-b, --batch-size <n>` | Rows per INSERT statement (default 500). |
+
+The command exits with 0 when the copy (or the dry run) passed all checks, and with 1 on a refusal, a failure or a row-count mismatch.
+
+### 5.3. Runbook
+Replace every `<placeholder>` with your own value. Nothing here names a real host.
+
+1. **Stop the writers.** Stop the bot and the dashboard that use the SQLite file, so no row changes during the copy. Keep a copy of the file (`ririko.sqlite` and any `-wal` file next to it) until the new stack has run for a while.
+2. **Prepare an empty target.** The target must hold no rows. If a bot or dashboard has already started against it, it will have written rows (for example the command catalog), so drop and recreate the schema:
+   ```bash
+   docker compose -f docker-compose.production.yml exec postgres \
+     psql -U <db user> -d <db name> -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
+   ```
+   Keep the `bot` and `web` containers stopped while you do this.
+3. **Reach Postgres from your machine.** The production compose file publishes no Postgres port. Forward one to your machine for the length of the copy, for example over SSH to the container's address on the host:
+   ```bash
+   ssh -N -L 15432:<postgres container address>:5432 <user>@<host>
+   ```
+4. **Set the target URL in the environment** (never on the command line):
+   ```bash
+   # bash
+   read -rs TARGET_DATABASE_URL && export TARGET_DATABASE_URL   # type: postgres://<user>:<password>@127.0.0.1:15432/<db name>
+   ```
+   ```powershell
+   # PowerShell
+   $env:TARGET_DATABASE_URL = Read-Host 'Target URL'
+   ```
+5. **Dry run.** Check the plan and the refusal reasons before anything is committed:
+   ```bash
+   pnpm cli db:copy --from ./data/ririko.sqlite --dry-run
+   ```
+6. **Copy.** When the dry run is clean:
+   ```bash
+   pnpm cli db:copy --from ./data/ririko.sqlite --yes
+   ```
+   Read the per-table report. Every line must show equal source and target counts, and the economy line must say the totals match.
+7. **Copy the data folders into the volumes.** The database holds the card catalog and owned cards, but the images are files. Copy these four folders into the matching volumes of the stack (list the real volume names with `docker volume ls`; compose prefixes them with the project name):
+
+   | Local folder | Volume | Mounted at |
+   |---|---|---|
+   | `data/tcg` | the `ririko_data` volume | `/app/data/tcg` |
+   | `public/cards` | the `card_images` volume | `/app/public/cards` |
+   | `public/bosses` | the `boss_images` volume | `/app/public/bosses` |
+   | `storage/welcomer-backgrounds` | the `welcomer_backgrounds` volume | `/app/storage/welcomer-backgrounds` |
+
+   Run each copy with a throwaway container, so the files end up owned by the images' user (uid and gid 10001):
+   ```bash
+   docker run --rm -v "$PWD/public/cards:/from:ro" -v <card images volume>:/to alpine \
+     sh -c 'cp -a /from/. /to/ && chown -R 10001:10001 /to'
+   ```
+   For `data/tcg`, mount the data volume and copy into `/to/tcg` (`mkdir -p /to/tcg && cp -a /from/. /to/tcg/ && chown -R 10001:10001 /to/tcg`). Do not copy the SQLite file itself into the data volume.
+8. **Point the stack at PostgreSQL and start it.** Set `DATABASE_DIALECT=postgres` and `DATABASE_URL` for the new database (the production compose file already does), start `bot` and `web`, and check `/health` and `/ready` and a few known users, balances and cards.
+9. **Clean up.** Close the port forward and clear `TARGET_DATABASE_URL` from your shell (`unset TARGET_DATABASE_URL` or `Remove-Item Env:TARGET_DATABASE_URL`).
+
+### 5.4. Known Limits
+- It copies a 2.0 database into an empty PostgreSQL database. It does not merge into a database that already has rows, does not copy PostgreSQL back to SQLite, and does not read 1.4.0 databases (use `ririko migrate:legacy` for those).
+- A failed or refused real run commits nothing. Only the empty schema may remain; run step 2 again before you retry.

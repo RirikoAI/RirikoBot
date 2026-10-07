@@ -18,6 +18,7 @@ describe('CLI Program', () => {
     expect(commandNames).toContain('doctor');
     expect(commandNames).toContain('migrate:legacy');
     expect(commandNames).toContain('migrate:verify');
+    expect(commandNames).toContain('db:copy');
     expect(commandNames).toContain('ai:configure');
     expect(commandNames).toContain('economy:config');
     expect(commandNames).toContain('tcg:rules');

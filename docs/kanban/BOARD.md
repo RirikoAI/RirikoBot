@@ -14,7 +14,9 @@
 *None.*
 
 ## 🎯 To Do
-*None.*
+| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
+|---|---|---|---|---|---|---|---|
+| `STORY-181` | Story | Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy) | 8 | EPIC-017 | — | yes | large |
 
 ## 🔍 Review
 *None.*
@@ -343,6 +345,8 @@
 | `TASK-1801` | Task | Remote Lavalink Compose Override and Lavalink Host Compose File | 3 | STORY-180 | [TASK-1801.md](./handovers/TASK-1801.md) |
 | `TASK-1802` | Task | WireGuard Link, Lavalink Host Firewall and Bootstrap Roles | 5 | STORY-180 | [TASK-1802.md](./handovers/TASK-1802.md) |
 | `TASK-1803` | Task | Lavalink Host Deploy Role, Watchdog Checks and CI Jobs | 5 | STORY-180 | [TASK-1803.md](./handovers/TASK-1803.md) |
+| `TASK-1811` | Task | SQLite to PostgreSQL Copy Engine With Type Conversion, FK Order, Sequence Reset and Verification | 5 | STORY-181 | [TASK-1811.md](./handovers/TASK-1811.md) |
+| `TASK-1812` | Task | ririko db:copy CLI Command and Data-Move Documentation | 3 | STORY-181 | [TASK-1812.md](./handovers/TASK-1812.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -425,4 +429,4 @@
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
 | `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
-| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180 | [EPIC-017.md](./handovers/EPIC-017.md) |
+| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | TODO | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
