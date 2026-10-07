@@ -67,3 +67,12 @@ See docs/kanban/protocol.md section 6.
 **Live host state**
 - Both hosts reach SSH only through Cloudflare Tunnel behind Access: `ssh-staging.example.com` and `ssh-lavalink-staging.example.com`.
 - The Lavalink VM firewall is the interim `table inet ririko_interim`. It drops all inbound traffic except UDP 51820 from staging's 203.0.113.10. TASK-1802 replaces it.
+
+---
+
+## REVIEW · 2026-10-07T11:56:20Z · Claude Code (Opus 5.5) · DONE
+
+- STORY-176, STORY-177, STORY-178, STORY-179 and STORY-180 are DONE, along with BUG-0034, BUG-0035 and BUG-0036.
+- Live on staging: both hosts are reachable only through tunnels, the WireGuard link works, the Lavalink staging instance answers over it, and the backup and watchdog are installed. The CI deploy key and contexts for staging and Lavalink staging are filled.
+- Not yet exercised: a tagged release through CircleCI (release → Lavalink staging → staging deploy) and the production hosts, which do not exist yet.
+- Follow-ups: commit the hosting runbook with its real values in a git-ignored env-style file (maintainer idea, 2026-10-07); WSL on the maintainer's machine is down, so the host-script suite runs only in CI.

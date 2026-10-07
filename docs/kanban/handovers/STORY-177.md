@@ -16,3 +16,9 @@ See docs/kanban/protocol.md section 6.
 
 **Out of scope**
 - Terraform or CloudFormation. The maintainer creates two instances by hand; a runbook is cheaper than infrastructure code for that.
+
+---
+
+## REVIEW · 2026-10-07T11:56:20Z · Claude Code (Opus 5.5) · DONE
+
+- TASK-1771 (bootstrap), BUG-0034 (tar extraction) and TASK-1772 (runbook, now private) are DONE. The bootstrap is proven live on both staging hosts.

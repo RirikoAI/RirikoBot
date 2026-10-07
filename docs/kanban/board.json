@@ -414,7 +414,7 @@
       "id": "EPIC-017",
       "title": "Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI)",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "children": [
         "STORY-176",
         "STORY-177",
@@ -2112,7 +2112,7 @@
       "parent": "EPIC-017",
       "title": "Lightsail Host Bootstrap & Hosting Runbook",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-176"
       ],
@@ -6452,7 +6452,7 @@
       "parent": "STORY-177",
       "title": "Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1762",
@@ -6477,6 +6477,7 @@
           "docs/hosting.md",
           "docs/deployment.md",
           "docs/release.md",
+          "docs/development.md",
           "docs/adr/ADR-014-production-hosting-lightsail-cloudflare-tunnel.md",
           "AGENTS.md",
           "deploy/host/bootstrap.sh",
@@ -6495,7 +6496,7 @@
       "acceptance": [
         "docs/hosting.md, Lightsail: two Ubuntu 24.04 LTS instances in us-east-1 with IPv4 (production 8 GB RAM / 2 vCPU, staging 4 GB / 2 vCPU); a static IP attached to each (the Lavalink VPS allowlists them); every IPv4 and IPv6 firewall rule deleted; automatic snapshots on; a CPU burst capacity alarm, because the bundles are burstable; one bucket per environment for restic with a bucket-scoped access key.",
         "Lavalink VPS: small KVM VPS (4+1 vCPU, 4 GB, 100 GB NVMe, 4 TB transfer) with Ubuntu 24.04, bootstrapped with --role lavalink; the WireGuard key exchange and WG_PEERS/WG_ALLOWED_ENDPOINTS values for all three hosts; per-instance env files; cloudflared for ssh-lavalink.example.com; break-glass through the provider’s VNC console; a bandwidth note (about 110 GB a month per continuously playing session) with the upgrade path to ELITE.",
-        "Cloudflare: one remotely managed tunnel per host, including the Lavalink VPS (ssh-lavalink.example.com only). Production routes dashboard.ririko.ai to http://localhost:3000 and ssh-prod.ririko.ai to ssh://localhost:22; staging uses dashboard-staging.example.com and ssh-staging.example.com (one level deep, so Universal SSL covers them). Access applications protect both SSH hostnames (maintainers’ emails plus a Service Auth policy for that environment’s CI service token) and the staging dashboard.",
+        "Cloudflare: one remotely managed tunnel per host, including the Lavalink VPS (ssh-lavalink.example.com only). Production routes dashboard.ririko.ai to http://localhost:3000 and ssh-production.example.com to ssh://localhost:22; staging uses dashboard-staging.example.com and ssh-staging.example.com (one level deep, so Universal SSL covers them). Access applications protect both SSH hostnames (maintainers’ emails plus a Service Auth policy for that environment’s CI service token) and the staging dashboard.",
         "Zone settings for the dashboard hostnames: Rocket Loader, Email Address Obfuscation, automatic Web Analytics injection and Zaraz off, because they inject scripts the nonce CSP blocks; Always Use HTTPS on; HTML not cached.",
         "Discord: a separate staging application, and the OAuth2 redirect <DASHBOARD_URL>/api/auth/callback for each.",
         "Host setup: the bootstrap command, ririko.conf, .env.production with DASHBOARD_URL and CLIENT_IP_HEADER=cf-connecting-ip, ririko-backup init, Healthchecks.io checks for the watchdog and the backup, and an external uptime monitor on https://dashboard.ririko.ai/health.",

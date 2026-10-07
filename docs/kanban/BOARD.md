@@ -14,10 +14,7 @@
 *None.*
 
 ## 🎯 To Do
-| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
-|---|---|---|---|---|---|---|---|
-| `STORY-177` | Story | Lightsail Host Bootstrap & Hosting Runbook | 5 | EPIC-017 | STORY-176 | yes | large |
-| `TASK-1772` | Task | Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery | 2 | STORY-177 | TASK-1762, TASK-1781, TASK-1782, TASK-1791, TASK-1792, TASK-1801, TASK-1802, TASK-1803, BUG-0036 | yes | medium |
+*None.*
 
 ## 🔍 Review
 *None.*
@@ -120,6 +117,7 @@
 | `STORY-127` | Story | Docker Hub Release of 2.0 Images & 1.4.0 Sunset | 8 | EPIC-012 | [STORY-127.md](./handovers/STORY-127.md) |
 | `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 5 | EPIC-012 | [STORY-128.md](./handovers/STORY-128.md) |
 | `STORY-176` | Story | Harden the Production Compose for a Tunnelled Host | 5 | EPIC-017 | [STORY-176.md](./handovers/STORY-176.md) |
+| `STORY-177` | Story | Lightsail Host Bootstrap & Hosting Runbook | 5 | EPIC-017 | [STORY-177.md](./handovers/STORY-177.md) |
 | `STORY-178` | Story | CircleCI Deploy Pipeline: Automatic Staging, Approved Production | 8 | EPIC-017 | [STORY-178.md](./handovers/STORY-178.md) |
 | `STORY-179` | Story | Backups, Health Watchdog & Heartbeat Alerts | 5 | EPIC-017 | [STORY-179.md](./handovers/STORY-179.md) |
 | `STORY-180` | Story | Remote Lavalink Node on a KVM VPS Host Over WireGuard | 13 | EPIC-017 | [STORY-180.md](./handovers/STORY-180.md) |
@@ -341,6 +339,7 @@
 | `TASK-1782` | Task | CircleCI Deploy Jobs: Automatic Staging, Approved Production | 3 | STORY-178 | [TASK-1782.md](./handovers/TASK-1782.md) |
 | `TASK-1791` | Task | Encrypted Off-Site Backups With restic to a Lightsail Bucket | 3 | STORY-179 | [TASK-1791.md](./handovers/TASK-1791.md) |
 | `TASK-1792` | Task | Health Watchdog and Heartbeat Alerts | 2 | STORY-179 | [TASK-1792.md](./handovers/TASK-1792.md) |
+| `TASK-1772` | Task | Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery | 2 | STORY-177 | [TASK-1772.md](./handovers/TASK-1772.md) |
 | `TASK-1801` | Task | Remote Lavalink Compose Override and Lavalink Host Compose File | 3 | STORY-180 | [TASK-1801.md](./handovers/TASK-1801.md) |
 | `TASK-1802` | Task | WireGuard Link, Lavalink Host Firewall and Bootstrap Roles | 5 | STORY-180 | [TASK-1802.md](./handovers/TASK-1802.md) |
 | `TASK-1803` | Task | Lavalink Host Deploy Role, Watchdog Checks and CI Jobs | 5 | STORY-180 | [TASK-1803.md](./handovers/TASK-1803.md) |
@@ -425,4 +424,4 @@
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
 | `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
-| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | TODO | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180 | [EPIC-017.md](./handovers/EPIC-017.md) |
+| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180 | [EPIC-017.md](./handovers/EPIC-017.md) |
