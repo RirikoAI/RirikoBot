@@ -7,6 +7,7 @@ import type { PostgresDatabaseClient } from '../client/types.js';
 import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
 import { ensureCardSerialSchema } from '../migrations/card-serials.js';
 import { ensurePostgresSchema } from '../migrations/postgres-schema.js';
+import { ensureTextIdColumns } from '../migrations/text-ids.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 
 /** Options for {@link copyDatabase}. */
@@ -637,6 +638,7 @@ export async function copyDatabase(
   try {
     // Prepared like the bot at startup, so the target has the exact tables the bot expects.
     await ensurePostgresSchema(target);
+    await ensureTextIdColumns(target);
     await ensureAdventureSchema(target);
     await ensureCardSerialSchema(target);
 

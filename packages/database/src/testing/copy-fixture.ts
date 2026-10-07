@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { createDatabaseClient } from '../client/factory.js';
 import type { DatabaseClient, SqliteDatabaseClient } from '../client/types.js';
@@ -9,7 +8,10 @@ import {
   type StoredAdventureSession,
 } from '../repositories/adventure-session.repository.js';
 import { EconomyRepository } from '../repositories/economy.repository.js';
+import { AiRepository } from '../repositories/ai.repository.js';
 import { GuildSettingsRepository } from '../repositories/guild-settings.repository.js';
+import { InventoryRepository } from '../repositories/inventory.repository.js';
+import { ItemRepository } from '../repositories/item.repository.js';
 import { UserRepository } from '../repositories/user.repository.js';
 import { WaifuCardRepository } from '../repositories/waifu-card.repository.js';
 
@@ -102,8 +104,10 @@ export async function buildSource(directory: string, name: string) {
     .run(BIG_WALLET, BIG_BANK, 'u3');
 
   const cards = new WaifuCardRepository(source);
+  // Slug ids, as the maintainer's database holds them: PostgreSQL keeps them as text.
   const card = await cards.create({
-    assetId: randomUUID(),
+    id: 'card_fire_001',
+    assetId: 'asset_card_bulk_fire_001',
     name: 'Copy Test Card',
     rarity: 'RARE',
     element: 'FIRE',
@@ -115,6 +119,19 @@ export async function buildSource(directory: string, name: string) {
   });
   await cards.mintUserCard({ userId: 'u1', cardId: card.id, obtainedAt: MOMENT });
   await cards.mintUserCard({ userId: 'u2', cardId: card.id, isFavorite: true });
+
+  await new ItemRepository(source).create({
+    id: 'candy_minor',
+    name: 'Minor Candy',
+    description: 'A small treat.',
+    price: 50,
+  });
+  await new InventoryRepository(source).addItem('u1', 'candy_minor', 3);
+
+  // Conversation and message ids carry the `conv_` and `msg_` prefixes.
+  const ai = new AiRepository(source);
+  const conversation = await ai.create({ userId: 'u1', model: 'gemini-test' });
+  await ai.addMessage({ conversationId: conversation.id, role: 'USER', content: 'hello' });
 
   const adventure = new AdventureSessionRepository<StoredAdventureSession>(source);
   await adventure.create(

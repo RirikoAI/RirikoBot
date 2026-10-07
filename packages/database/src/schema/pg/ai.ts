@@ -3,12 +3,12 @@ import {
   text,
   varchar,
   integer,
-  uuid,
   timestamp,
   jsonb,
   index,
   boolean,
 } from 'drizzle-orm/pg-core';
+import { textPrimaryKey } from './text-id.js';
 
 export const aiChannels = pgTable('ai_channels', {
   guildId: varchar('guild_id', { length: 32 }).primaryKey(),
@@ -18,7 +18,7 @@ export const aiChannels = pgTable('ai_channels', {
 export const aiConversations = pgTable(
   'ai_conversations',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: textPrimaryKey('id'),
     userId: varchar('user_id', { length: 32 }).notNull(),
     guildId: varchar('guild_id', { length: 32 }),
     channelId: varchar('channel_id', { length: 32 }),
@@ -34,8 +34,8 @@ export const aiConversations = pgTable(
 export const aiMessages = pgTable(
   'ai_messages',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    conversationId: uuid('conversation_id').notNull(),
+    id: textPrimaryKey('id'),
+    conversationId: text('conversation_id').notNull(),
     role: varchar('role', { length: 32 }).notNull(),
     content: text('content').notNull(),
     toolCalls: jsonb('tool_calls').$type<Record<string, unknown>[]>(),

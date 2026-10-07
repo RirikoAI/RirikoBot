@@ -30,12 +30,9 @@ export class AiRepository extends BaseRepository<
   InsertAiConversation,
   Partial<NewAiConversation>
 > {
-  /**
-   * A fresh row ID. SQLite keeps the readable `conv_<uuid>` form; Postgres ID columns are uuids,
-   * so a prefixed ID would be rejected there.
-   */
-  private newId(client: DatabaseClient, prefix: 'conv' | 'msg'): string {
-    return this.isSqlite(client) ? `${prefix}_${randomUUID()}` : randomUUID();
+  /** A fresh row ID in the readable `conv_<uuid>` form; both dialects store these as text. */
+  private newId(prefix: 'conv' | 'msg'): string {
+    return `${prefix}_${randomUUID()}`;
   }
 
   // --- BaseRepository Compliance ---
@@ -59,7 +56,7 @@ export class AiRepository extends BaseRepository<
 
   async create(data: InsertAiConversation, tx?: DatabaseClient): Promise<AiConversation> {
     const client = this.getClient(tx);
-    const id = data.id ?? this.newId(client, 'conv');
+    const id = data.id ?? this.newId('conv');
     const insertData = { ...data, id };
 
     if (this.isSqlite(client)) {
@@ -318,7 +315,7 @@ export class AiRepository extends BaseRepository<
 
   async addMessage(data: InsertAiMessage, tx?: DatabaseClient): Promise<AiMessage> {
     const client = this.getClient(tx);
-    const id = data.id ?? this.newId(client, 'msg');
+    const id = data.id ?? this.newId('msg');
     const insertData = { ...data, id };
 
     if (this.isSqlite(client)) {

@@ -20,6 +20,7 @@ import {
   ItemRepository,
   createDatabaseClient,
   ensurePostgresSchema,
+  ensureTextIdColumns,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
@@ -302,6 +303,7 @@ function getDatabase(config: WebConfig): Promise<DatabaseClient> {
     // The dashboard may start before the bot on an empty Postgres database.
     .then(async (db) => {
       await ensurePostgresSchema(db);
+      await ensureTextIdColumns(db);
       return db;
     })
     .catch((error: unknown) => {

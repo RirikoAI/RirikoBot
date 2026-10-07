@@ -13,6 +13,7 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import { textPrimaryKey } from './text-id.js';
 
 export const waifuSources = pgTable('waifu_sources', {
   id: varchar('id', { length: 32 }).primaryKey(),
@@ -25,7 +26,7 @@ export const waifuSources = pgTable('waifu_sources', {
 export const waifuAssets = pgTable(
   'waifu_assets',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: textPrimaryKey('id'),
     sourceId: varchar('source_id', { length: 32 }).notNull(),
     sourceImageId: varchar('source_image_id', { length: 64 }).notNull(),
     characterName: text('character_name').notNull(),
@@ -43,8 +44,8 @@ export const waifuAssets = pgTable(
 export const waifuCards = pgTable(
   'waifu_cards',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    assetId: uuid('asset_id').notNull(),
+    id: textPrimaryKey('id'),
+    assetId: text('asset_id').notNull(),
     name: text('name').notNull(),
     rarity: varchar('rarity', { length: 32 }).notNull(),
     element: varchar('element', { length: 32 }).notNull(),
@@ -71,7 +72,7 @@ export const userCards = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     userId: varchar('user_id', { length: 32 }).notNull(),
-    cardId: uuid('card_id').notNull(),
+    cardId: text('card_id').notNull(),
     serialNumber: integer('serial_number').notNull(),
     level: integer('level').notNull().default(1),
     exp: integer('exp').notNull().default(0),
@@ -154,8 +155,8 @@ export const gameAchievements = pgTable('game_achievements', {
   requirementTarget: integer('requirement_target').notNull().default(1),
   rewardXp: integer('reward_xp').notNull().default(0),
   rewardCredits: bigint('reward_credits', { mode: 'number' }).notNull().default(0),
-  rewardCardId: uuid('reward_card_id'),
-  rewardItemId: uuid('reward_item_id'),
+  rewardCardId: text('reward_card_id'),
+  rewardItemId: text('reward_item_id'),
   rewardConsumables: jsonb('reward_consumables').$type<Record<string, unknown>>().default({}),
   rewardTitle: text('reward_title'),
   badgeIcon: text('badge_icon'),
@@ -228,7 +229,7 @@ export const dungeonBosses = pgTable(
     tier: varchar('tier', { length: 16 }).notNull().default('STANDARD'),
     title: text('title'),
     flavorText: text('flavor_text'),
-    assetId: uuid('asset_id'),
+    assetId: text('asset_id'),
     anilistId: integer('anilist_id'),
     danbooruTag: text('danbooru_tag'),
     imagePath: text('image_path'),
@@ -328,7 +329,7 @@ export const quests = pgTable('quests', {
   description: text('description').notNull(),
   rewardXp: integer('reward_xp').notNull().default(0),
   rewardCredits: bigint('reward_credits', { mode: 'number' }).notNull().default(0),
-  rewardCardId: uuid('reward_card_id'),
+  rewardCardId: text('reward_card_id'),
   targetCount: integer('target_count').notNull().default(1),
   type: varchar('type', { length: 32 }).notNull(),
 });
