@@ -2,12 +2,20 @@
 # Fingerprints embed commit SHAs; regenerate them after any history rewrite.
 # Test fixtures with fake values:
 071fcb06734223bfa86d0faf27fa915aa20d7dd8:apps/cli/src/commands/stream-configure.test.ts:generic-api-key:30
+f58f36f9d802d36fe9a748fc2d2ddb95186b5215:apps/cli/src/commands/stream-configure.test.ts:generic-api-key:30
 d58021065915b03e08b8b189486828c8ccf52dfc:apps/cli/src/utils/env-editor.test.ts:generic-api-key:129
+3c71cdaa0787bf709bd3907c294940b8f751da78:apps/cli/src/utils/env-editor.test.ts:generic-api-key:129
 959272dbb9c0a3bc03772de813c3a21e7d62710c:packages/core/src/config/loader.test.ts:discord-client-id:12
 959272dbb9c0a3bc03772de813c3a21e7d62710c:packages/core/src/config/loader.test.ts:discord-client-id:29
+18e93d8bb471dcead4dc8e5ba00a4ad5f2c6f0cf:packages/core/src/config/loader.test.ts:discord-client-id:12
+18e93d8bb471dcead4dc8e5ba00a4ad5f2c6f0cf:packages/core/src/config/loader.test.ts:discord-client-id:29
 # Placeholders left by the 2026-09-19 history rewrite that scrubbed leaked Spotify credentials:
 6f072035742448afadf88143236cc02221131d5a:scripts/lavalink-setup.ts:hardcoded-env-fallback:115
 6f072035742448afadf88143236cc02221131d5a:scripts/lavalink-setup.ts:hardcoded-env-fallback:117
 6f072035742448afadf88143236cc02221131d5a:scripts/lavalink-setup.ts:hardcoded-env-fallback:119
+03c33beb243943adf4fb36f5aea7e1f37d15e8ed:scripts/lavalink-setup.ts:hardcoded-env-fallback:115
+03c33beb243943adf4fb36f5aea7e1f37d15e8ed:scripts/lavalink-setup.ts:hardcoded-env-fallback:117
+03c33beb243943adf4fb36f5aea7e1f37d15e8ed:scripts/lavalink-setup.ts:hardcoded-env-fallback:119
 # Discord application IDs are public (they appear in bot invite URLs):
 6f072035742448afadf88143236cc02221131d5a:packages/music/src/lavalink/lavalink-service.ts:hardcoded-env-fallback:218
+03c33beb243943adf4fb36f5aea7e1f37d15e8ed:packages/music/src/lavalink/lavalink-service.ts:hardcoded-env-fallback:218

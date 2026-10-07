@@ -7709,6 +7709,48 @@
         "TASK-1801",
         "EPIC-017"
       ]
+    },
+    {
+      "id": "BUG-0037",
+      "parent": "EPIC-017",
+      "title": "CI on PR #685: ShellCheck SC2015 in ririko-deploy and Stale .gitleaksignore SHAs After the History Rewrite",
+      "points": 1,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "Two CircleCI failures on PR #685. lint: shellcheck -x reports SC2015 at deploy/host/bin/ririko-deploy.sh line 745, `[ $# -ge 2 ] && [ $# -le 3 ] || usage`. secrets: the full-history gitleaks scan reports 8 leaks, because the 2026-10-07 history rewrite gave every commit a new SHA and .gitleaksignore fingerprints are keyed by commit SHA. The findings are the same known test fixtures and env fallbacks; only their commit SHAs changed.",
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          ".gitleaksignore"
+        ],
+        "symbols": [
+          "main"
+        ],
+        "entry_points": [
+          "deploy/host/bin/ririko-deploy.sh"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN release-tags.test"
+        ]
+      },
+      "acceptance": [
+        "ririko-deploy.sh line ~745 uses an explicit if (for example `if [ $# -lt 2 ] || [ $# -gt 3 ]; then usage; fi`) with the same accepted argument counts; shellcheck -x reports nothing for deploy/host/**/*.sh.",
+        ".gitleaksignore keeps every entry and comment but replaces the four old commit SHAs with their rewritten ones: 071fcb06734223bfa86d0faf27fa915aa20d7dd8 -> f58f36f9d802d36fe9a748fc2d2ddb95186b5215, d58021065915b03e08b8b189486828c8ccf52dfc -> 3c71cdaa0787bf709bd3907c294940b8f751da78, 959272dbb9c0a3bc03772de813c3a21e7d62710c -> 18e93d8bb471dcead4dc8e5ba00a4ad5f2c6f0cf, 6f072035742448afadf88143236cc02221131d5a -> 03c33beb243943adf4fb36f5aea7e1f37d15e8ed.",
+        "A full-history gitleaks scan with the repo config reports no leaks."
+      ],
+      "verify_cmd": "gitleaks git --redact --no-banner --config .gitleaks.toml && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0037",
+        "TASK-1803",
+        "EPIC-017"
+      ]
     }
   ],
   "active_in_progress_ticket": null

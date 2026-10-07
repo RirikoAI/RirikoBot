@@ -391,6 +391,7 @@
 | `BUG-0034` | Bug | bootstrap.sh Fails on GNU tar: Second deploy/host Wildcard Reported as Not Found | 2 | EPIC-017 | [BUG-0034.md](./handovers/BUG-0034.md) |
 | `BUG-0035` | Bug | ririko-deploy Fails at Once When the Watchdog or a Backup Dump Briefly Holds the Lock | 1 | EPIC-017 | [BUG-0035.md](./handovers/BUG-0035.md) |
 | `BUG-0036` | Bug | Lavalink Crash-Loops: Plugin Volume Is Root-Owned but the Image Runs as uid 322 | 2 | EPIC-017 | [BUG-0036.md](./handovers/BUG-0036.md) |
+| `BUG-0037` | Bug | CI on PR #685: ShellCheck SC2015 in ririko-deploy and Stale .gitleaksignore SHAs After the History Rewrite | 1 | EPIC-017 | [BUG-0037.md](./handovers/BUG-0037.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

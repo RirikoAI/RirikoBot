@@ -742,7 +742,7 @@ cmd_status() {
 main() {
   case ${1:-} in
     deploy)
-      [ $# -ge 2 ] && [ $# -le 3 ] || usage
+      if [ $# -lt 2 ] || [ $# -gt 3 ]; then usage; fi
       cmd_deploy "$2" "${3:-}"
       ;;
     status)
