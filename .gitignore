@@ -70,3 +70,6 @@ site-dist/
 # CodeGraph indexing metadata & locks
 .codegraph/
 .claude/settings.local.json
+
+# Private hosting runbook (EPIC-017): real hosts, addresses and procedures. Never commit.
+docs/hosting.md

@@ -62,7 +62,7 @@ describe('docker-compose.production.yml hardening', () => {
   it('reads the Lavalink heap from LAVALINK_HEAP', () => {
     expect(services.lavalink!.environment!._JAVA_OPTIONS).toBe('-Xmx${LAVALINK_HEAP:-1G}');
     expect(envExample).toMatch(/^# LAVALINK_HEAP=1G$/m);
-    expect(envExample).toContain('512m on a 4 GB host');
+    expect(envExample).toContain('512m on a small host');
   });
 });
 

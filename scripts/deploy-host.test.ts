@@ -79,7 +79,7 @@ describe('static host configuration', () => {
     expect(rules).toEqual(['deploy ALL=(root) NOPASSWD: /usr/local/bin/ririko-deploy']);
   });
 
-  it('enables security upgrades with a 20:00 UTC reboot (04:00 in the maintainer's time zone)', () => {
+  it('enables security upgrades with a 20:00 UTC reboot (04:00 local time of the operator)', () => {
     expect(read('files/apt-20auto-upgrades')).toMatch(/Update-Package-Lists "1";/);
     expect(read('files/apt-20auto-upgrades')).toMatch(/Unattended-Upgrade "1";/);
     const override = read('files/apt-52ririko-unattended-upgrades');
@@ -872,7 +872,7 @@ write_conf() {
   cat >"$RIRIKO_CONF" <<CONF
 RIRIKO_ENV_FILE=$work/env.production
 RIRIKO_ENV_NAME=ririko-staging
-RESTIC_REPOSITORY=s3:s3.us-east-1.amazonaws.com/bucket/ririko-staging
+RESTIC_REPOSITORY=s3:s3.region.example.com/bucket/ririko-staging
 RESTIC_PASSWORD=pa ss#word=1
 AWS_ACCESS_KEY_ID=AKIATEST
 AWS_SECRET_ACCESS_KEY=secretkey
@@ -1024,7 +1024,7 @@ run
       expect(header).toMatch(/^env\.\d mode=\d+$/);
       if (result.posixModes) expect(header).toMatch(/mode=600$/);
       expect(content).toEqual([
-        'RESTIC_REPOSITORY=s3:s3.us-east-1.amazonaws.com/bucket/ririko-staging',
+        'RESTIC_REPOSITORY=s3:s3.region.example.com/bucket/ririko-staging',
         'RESTIC_PASSWORD=pa ss#word=1',
         'AWS_ACCESS_KEY_ID=AKIATEST',
         'AWS_SECRET_ACCESS_KEY=secretkey',
@@ -2191,10 +2191,10 @@ describe.skipIf(!hasBash)('render_nftables', () => {
   });
 
   it('takes IPv4-only endpoints, commas, prefixes and another listen port', () => {
-    const result = renderNft('51999', '203.0.113.10, 203.0.113.0/24', vpsPeers);
+    const result = renderNft('51999', '203.0.113.10, 198.51.100.0/24', vpsPeers);
     expect(result.status).toBe(0);
     expect(result.stdout).toContain(
-      'ip saddr { 203.0.113.10, 203.0.113.0/24 } udp dport 51999 accept',
+      'ip saddr { 203.0.113.10, 198.51.100.0/24 } udp dport 51999 accept',
     );
     expect(result.stdout).not.toContain('ip6 saddr');
   });
@@ -2237,8 +2237,8 @@ describe.skipIf(!hasBash)('render_nftables', () => {
       ['51820', 'lightsail.example', vpsPeers],
       'WG_ALLOWED_ENDPOINTS',
     ],
-    ['an endpoint with a bad octet', ['51820', '100.29.245.300', vpsPeers], 'WG_ALLOWED_ENDPOINTS'],
-    ['an IPv4 prefix above 32', ['51820', '100.29.245.0/33', vpsPeers], 'WG_ALLOWED_ENDPOINTS'],
+    ['an endpoint with a bad octet', ['51820', '203.0.113.300', vpsPeers], 'WG_ALLOWED_ENDPOINTS'],
+    ['an IPv4 prefix above 32', ['51820', '203.0.113.0/33', vpsPeers], 'WG_ALLOWED_ENDPOINTS'],
     [
       'an endpoint with a shell character',
       ['51820', '1.2.3.4; flush ruleset', vpsPeers],
@@ -2262,7 +2262,7 @@ describe.skipIf(!hasBash)('wg-common helpers', () => {
 
   it.each([
     ['::1', true],
-    ['2001:db8::10', true],
+    ['2001:db8:0:0:0:0:0:10', true],
     ['2001:db8::', true],
     ['fe80::1:2', true],
     ['1:2:3:4:5:6:7:8', true],

@@ -94,7 +94,7 @@ Hardening (a test in `scripts/compose-production.test.ts` parses the file and ke
 - **Capabilities:** `bot` and `web` run with `cap_drop: [ALL]`: both images run as uid 10001 and use no Linux capability. `postgres` and `lavalink` keep theirs, because the Postgres entrypoint chowns its data directory and switches user.
 - **Privileges:** all four services set `security_opt: [no-new-privileges:true]`, so no process in them can gain privileges through a setuid binary.
 - **Log rotation:** all four services share one `x-logging` anchor: the `local` driver, `max-size: 20m`, `max-file: 5`. A service keeps at most 100 MB of logs.
-- **Lavalink heap:** `LAVALINK_HEAP` sets the JVM maximum heap (`-Xmx`, default `1G`). Use `512m` on a host with 4 GB of memory.
+- **Lavalink heap:** `LAVALINK_HEAP` sets the JVM maximum heap (`-Xmx`, default `1G`). Use `512m` on a small host.
 - **Lavalink plugin volume:** the Lavalink image runs as uid/gid 322 and has no `/opt/Lavalink/plugins` directory, so Docker creates the named volume owned by root and Lavalink dies with `Permission denied` while it downloads its plugins. The one-shot `lavalink-plugins` service therefore runs `chown -R 322:322` on the volume before `lavalink` starts (`depends_on` with `service_completed_successfully`). It uses the same pinned Lavalink image, so nothing extra is pulled, runs as root with `cap_drop: [ALL]`, `cap_add: [CHOWN]`, `no-new-privileges` and no network, and shows as `Exited (0)` in `docker compose ps -a`. That is expected.
 
 Remote Lavalink (`docker-compose.remote-lavalink.yml`): a single-host stack keeps the bundled `lavalink` service and needs nothing else. An app host that uses a Lavalink node on another machine, such as the Lightsail hosts with the Lavalink VPS (STORY-180), adds this override:
@@ -156,9 +156,11 @@ The dashboard is public, so its probes never include error text. `/health` answe
 
 ---
 
-## 4. Current Hosting: Vercel Status Site
+## 4. Current Hosting
 
-The bot and dashboard are not hosted yet (STORY-121 and STORY-122 add the containers). Until then the Vercel project `ririko-bot` deploys only a static project status page:
+Production and staging run on AWS Lightsail behind Cloudflare Tunnel, with Lavalink on a separate VPS over WireGuard and releases deployed by CircleCI. The step-by-step setup (provider resources, tunnels and access policies, host configuration, CI contexts, go-live, recovery and the secret inventory) is the private hosting runbook, `docs/hosting.md`, which is not in the repository because it holds account and network details. The decision and the rejected options are in [ADR-014](adr/ADR-014-production-hosting-lightsail-cloudflare-tunnel.md); the release pipeline and its exit codes are in [release.md section 8](release.md#8-deploy-to-staging-and-production).
+
+The Vercel project `ririko-bot` still deploys a static project status page (it hosts neither the bot nor the dashboard):
 - `vercel.json` skips dependency installation and runs `scripts/build-status-site.ts` with Node's TypeScript type stripping. The script reads `docs/kanban/board.json` and the `docs/` tree and writes `site-dist/index.html`.
 - Every branch gets a preview URL, so each PR shows the board as it stands on that branch.
 - Vercel project settings must leave Root Directory empty, use the "Other" framework preset and have no install, build or output overrides, so `vercel.json` applies.

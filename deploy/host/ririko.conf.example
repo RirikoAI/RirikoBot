@@ -50,7 +50,7 @@
 #RIRIKO_ENV_NAME=ririko-production
 
 # Required. Bucket and path inside it. Give each host its own path (or bucket).
-#RESTIC_REPOSITORY=s3:s3.us-east-1.amazonaws.com/<bucket>/ririko-production
+#RESTIC_REPOSITORY=s3:s3.<region>.amazonaws.com/<bucket>/ririko-production
 
 # Required. The repository password that encrypts everything.
 #RESTIC_PASSWORD=
@@ -156,6 +156,6 @@
 #LAVALINK_READY_TIMEOUT=180
 
 # JVM heap of an instance (the compose file defaults to 1536m for production and 512m for staging).
-# While both run on a 2 GB VM, keep production below its default.
+# While both run on a small VM, keep production below its default.
 #LAVALINK_PRODUCTION_HEAP=768m
 #LAVALINK_STAGING_HEAP=512m
