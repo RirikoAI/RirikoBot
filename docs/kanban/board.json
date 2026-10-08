@@ -414,7 +414,7 @@
       "id": "EPIC-017",
       "title": "Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI)",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "children": [
         "STORY-176",
         "STORY-177",
@@ -7926,7 +7926,7 @@
       "parent": "EPIC-017",
       "title": "PostgreSQL uuid Id Columns Reject the Slug and Prefixed Ids SQLite Holds (Cards, Assets, Shop Items, AI Conversations)",
       "points": 5,
-      "status": "REVIEW",
+      "status": "DONE",
       "children": [],
       "requires": [],
       "blocks": [],

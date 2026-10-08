@@ -17,9 +17,7 @@
 *None.*
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `BUG-0038` | Bug | PostgreSQL uuid Id Columns Reject the Slug and Prefixed Ids SQLite Holds (Cards, Assets, Shop Items, AI Conversations) | 5 | EPIC-017 | [BUG-0038.md](./handovers/BUG-0038.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -397,6 +395,7 @@
 | `BUG-0035` | Bug | ririko-deploy Fails at Once When the Watchdog or a Backup Dump Briefly Holds the Lock | 1 | EPIC-017 | [BUG-0035.md](./handovers/BUG-0035.md) |
 | `BUG-0036` | Bug | Lavalink Crash-Loops: Plugin Volume Is Root-Owned but the Image Runs as uid 322 | 2 | EPIC-017 | [BUG-0036.md](./handovers/BUG-0036.md) |
 | `BUG-0037` | Bug | CI on PR #685: ShellCheck SC2015 in ririko-deploy and Stale .gitleaksignore SHAs After the History Rewrite | 1 | EPIC-017 | [BUG-0037.md](./handovers/BUG-0037.md) |
+| `BUG-0038` | Bug | PostgreSQL uuid Id Columns Reject the Slug and Prefixed Ids SQLite Holds (Cards, Assets, Shop Items, AI Conversations) | 5 | EPIC-017 | [BUG-0038.md](./handovers/BUG-0038.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
@@ -430,4 +429,4 @@
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
 | `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
-| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | TODO | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
+| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |

@@ -43,3 +43,16 @@ See docs/kanban/protocol.md section 6.
   - It runs again on an empty database.
   - The image volumes already hold the local images: 263 tcg, 26 boss and 407 card files.
   - The pre-wipe dump is in `/opt/ririko/backups/predeploy/`.
+
+---
+
+## REVIEW · 2026-10-08T00:30:00Z · Claude Code (Opus 5.5) · DONE (live move)
+
+- The staging data move ran on v2.0.0-rc.2, which includes BUG-0038:
+  1. The watchdog was paused.
+  2. A dump was taken: `/opt/ririko/backups/predeploy/20261008T001239Z-before-db-copy.dump`.
+  3. Bot and web were stopped, and the schema was dropped and recreated.
+  4. A port-forward was opened, followed by a dry run and then `--yes`.
+- 14 old `xp_events.source` values of the form `adventure:<session uuid>` (46 characters) did not fit pg `varchar(32)`. With the maintainer's approval, they were set to `adventure` (today's format) in a scratch copy of the SQLite file, and the copy ran from that copy. The original file is unchanged.
+- Result: 93 tables and 6073 rows committed, every count equal, wallet 85074 and bank 110000 on both sides.
+- Bot and web started healthy on 2.0.0-rc.2, and the bot logged in. 16 users, 374 cards, 18 owned cards and 1933 transactions are in Postgres. The 407 card images are visible in both containers. The watchdog is active again.
