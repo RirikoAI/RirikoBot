@@ -7147,6 +7147,62 @@
       "handovers": [
         "CHORE-0004"
       ]
+    },
+    {
+      "id": "CHORE-1704",
+      "parent": "EPIC-017",
+      "title": "Ship the ririko CLI in the Bot Image So Operators Run It With docker exec",
+      "points": 3,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "The bot-runner image ships only apps/bot/dist, so operator commands such as `ririko passkeys:reset <user_id>` (the documented recovery for lost passkeys, ADR-013) cannot run on a host; today they need an SSH port-forward to Postgres and the database password on the operator machine. Ship the built CLI in bot-runner and put a `ririko` command on PATH, so `docker exec ririko-bot-1 ririko passkeys:reset <id> --yes` works against the container's own DATABASE_* settings.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "Dockerfile",
+          "scripts/docker-smoke.ts",
+          "scripts/docker-smoke.test.ts",
+          "apps/cli/package.json",
+          "apps/cli/src/index.ts",
+          "apps/cli/src/program.ts",
+          "docs/deployment.md",
+          "docs/dashboard.md",
+          "docs/development.md"
+        ],
+        "symbols": [
+          "runCli",
+          "createProgram",
+          "registerPasskeysResetCommand",
+          "botBootCheck",
+          "uidCheck"
+        ],
+        "entry_points": [
+          "Dockerfile",
+          "apps/cli/src/index.ts"
+        ],
+        "codegraph_queries": [
+          "runCli createProgram registerPasskeysResetCommand databaseConfigFromEnv",
+          "docker-smoke botBootCheck uidCheck filesystemCheck shell withContainer"
+        ]
+      },
+      "acceptance": [
+        "bot-runner contains apps/cli/dist and the production dependencies the CLI needs: the bot-deps stage installs with `--filter @ririko/cli...` (the CLI depends on @ririko/bot, so the bot keeps everything it has today). The image stays without pnpm, compilers or devDependencies.",
+        "A `ririko` command is on PATH in bot-runner (for example /usr/local/bin/ririko, root-owned, running `node /app/apps/cli/dist/index.js \"$@\"`), so `docker exec <bot container> ririko <command>` runs as uid 10001 from /app and uses the container's DATABASE_DIALECT and DATABASE_URL. The bot CMD, HEALTHCHECK, user and writable directories are unchanged.",
+        "Every CLI command module loads under production dependencies only: `ririko --help` lists every command (including passkeys:reset, guild:config, economy:config and doctor) without a module-not-found error. If a command imports a devDependency at load time, make that import lazy or move the dependency, without changing the command's behaviour.",
+        "scripts/docker-smoke.ts gains a bot check that runs `ririko --help` in the built image and fails unless it exits 0 and lists passkeys:reset; it runs in the CircleCI docker and release jobs through build-and-smoke. Its unit tests (scripts/docker-smoke.test.ts, if present) cover the new check.",
+        "docs/deployment.md (bot-runner row and an operator-commands note) and docs/dashboard.md (passkey recovery) show the `docker exec ririko-bot-1 ririko passkeys:reset <user_id>` form, then `--yes`. Placeholders only, no real hosts."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run scripts/docker-smoke apps/cli/src && pnpm lint --quiet && pnpm format:check && node apps/cli/dist/index.js --help",
+      "handovers": [
+        "CHORE-1704",
+        "EPIC-017"
+      ]
     }
   ],
   "bugs": [

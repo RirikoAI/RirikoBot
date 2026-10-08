@@ -89,3 +89,16 @@ See docs/kanban/protocol.md section 6.
   - commit the hosting runbook with its values in a git-ignored env file;
   - document the Lavalink remote cipher variables in `deploy/lavalink/lavalink.env.example`;
   - delete the old local branch `feat/STORY-180-remote-lavalink` and `stash@{0}`, then remove the 4 old SHAs from `.gitleaksignore`.
+
+---
+
+## GROOMING · 2026-10-08T01:10:00Z · Claude Code (Opus 5.5)
+
+- Reopened for CHORE-1704: ship the `ririko` CLI in the bot image, so operators can run commands such as `passkeys:reset` with `docker exec` on a host. The maintainer asked for it after the staging data move.
+
+---
+
+## REVIEW · 2026-10-08T02:10:00Z · Claude Code (Opus 5.5) · DONE
+
+- CHORE-1704 is DONE: the bot image ships the `ririko` CLI (`docker exec <bot container> ririko <command>`). It is live on staging after the next release tag.
+- Every child of the epic is DONE again. The open follow-ups are unchanged from the 2026-10-08T00:35 entry.

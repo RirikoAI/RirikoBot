@@ -19,14 +19,15 @@ The root `Dockerfile` builds both images, `bot-runner` and `web-runner`, from on
 | `manifests` | Workspace `package.json` files, `pnpm-lock.yaml`, `pnpm-workspace.yaml` and `.npmrc`. A new workspace package must be added to its `COPY` list. |
 | `build` | Full frozen install, then `pnpm build` (`tsc -b`). |
 | `web-build` | `build` plus the Next.js production build of the dashboard (`.next/cache` removed). |
-| `bot-deps`, `web-deps` | Production dependencies of `@ririko/bot` or `@ririko/web` and the workspace packages each uses (`--prod --ignore-scripts`). |
+| `bot-deps`, `web-deps` | Production dependencies of `@ririko/cli` (which depends on `@ririko/bot`) or `@ririko/web` and the workspace packages each uses (`--prod --ignore-scripts`). |
 | `runtime` | `node:22-bookworm-slim` with `tini`, `fonts-dejavu-core` and `ca-certificates`, and the `ririko` user (uid/gid 10001). No pnpm, no compilers. |
-| `bot-runner` | `runtime` plus FFmpeg, the bot's `node_modules`, `dist` folders and `assets/`. Runs `node apps/bot/dist/main.js`. |
+| `bot-runner` | `runtime` plus FFmpeg, the bot's and the CLI's `node_modules`, `dist` folders (including `apps/cli/dist`) and `assets/`. A root-owned `/usr/local/bin/ririko` wrapper runs the CLI. Runs `node apps/bot/dist/main.js`. |
 | `web-runner` | `runtime` plus the dashboard's `node_modules`, `.next`, `next.config.ts` (and the file it imports) and `assets/tcg`. Runs `next start` on port 3000 from `/app/apps/web`. |
 
 - **BuildKit**: the dependency installs use a BuildKit cache mount for the pnpm store, so builds need BuildKit (the default builder since Docker Engine 23, through the buildx plugin).
 - **No compilers**: `better-sqlite3` and `@napi-rs/canvas` ship prebuilt binaries, so the images need neither build tools nor `libcairo2-dev`/`libpango1.0-dev`.
 - **Monorepo layout**: the images keep the repository layout at `/app` (with `pnpm-workspace.yaml`), so `assets/`, `data/`, `public/cards`, `public/bosses` and `storage/` resolve as they do in development.
+- **Operator commands**: the bot image carries the `ririko` CLI, so an operator runs commands inside the running container with its own `DATABASE_DIALECT` and `DATABASE_URL`, for example `docker exec <bot container> ririko passkeys:reset <user_id>` (add `--yes` to apply it; without it only the counts are reported). `docker exec <bot container> ririko --help` lists every command. The smoke check in `scripts/docker-smoke.ts` runs `ririko --help` in the built image. The web image has no CLI.
 - **Dashboard build**: Next.js bundles the workspace packages into `.next/server`, so `web-runner` needs no package `dist` folders. The native packages it leaves external (`better-sqlite3`, `pg`, `@napi-rs/canvas`) are linked from `.next/node_modules` into the production `node_modules`.
 - **Rootless**: the containers run as `USER 10001:10001`. Application files are owned by root and read-only to that user; only these directories are writable:
 

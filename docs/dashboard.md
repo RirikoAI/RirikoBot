@@ -55,7 +55,7 @@ Guild Discovery Pipeline
 - Bot owners (`BOT_OWNER_ID`) must have a passkey to use the owner console.
 - A passkey check rotates the session ID.
 - Authenticators are asked for a fingerprint, face or PIN but only user presence is required, because some (for example a Windows passkey used through Edge) do not report verification (ADR-013 revision item 7, BUG-0020). Every rejected passkey is logged with its reason (`[web] Passkey check rejected …`).
-- Lost authenticators are recovered with `ririko passkeys:reset <user_id>` by an operator.
+- Lost authenticators are recovered with `ririko passkeys:reset <user_id>` by an operator. On a host that is `docker exec <bot container> ririko passkeys:reset <user_id>`, which reports the counts; run it again with `--yes` to remove the passkeys and end the user's dashboard sessions (deployment runbook, section 2.1).
 - Sessions stay opaque and server-side; JWE was re-evaluated and rejected (ADR-013, revision 2026-09-25).
 
 ### 2.4. Session Management & Alerts (TASK-1172)

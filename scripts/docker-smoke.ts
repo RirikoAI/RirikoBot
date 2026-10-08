@@ -211,6 +211,25 @@ function botBootCheck(image: string): Check {
   };
 }
 
+/**
+ * Runs the operator CLI the way `docker exec <bot container> ririko <command>` does. `--help`
+ * makes the CLI load every command module, so a command that needs a package the image does not
+ * ship (a devDependency, a workspace package without its dist) fails here.
+ */
+function botCliCheck(image: string): Check {
+  return {
+    name: 'ririko CLI is on PATH and lists its commands',
+    run: () => {
+      const result = shell(image, 'ririko --help');
+      if (result.status !== 0) return `ririko --help exited ${result.status}: ${output(result)}`;
+      const missing = ['passkeys:reset', 'guild:config', 'economy:config', 'doctor'].filter(
+        (command) => !result.stdout.includes(command),
+      );
+      return missing.length ? `ririko --help does not list: ${missing.join(', ')}` : null;
+    },
+  };
+}
+
 /** The image's HEALTHCHECK command (`CMD` form) as an argument list; null when it has none. */
 function healthcheckCommand(image: string): string[] | null {
   const result = docker(['image', 'inspect', '--format', '{{json .Config.Healthcheck}}', image]);
@@ -567,7 +586,13 @@ const TARGETS: Record<string, Target> = {
   bot: {
     image: 'ririko-bot:smoke',
     writableDirs: ['data', 'public/cards', 'public/bosses', 'storage/welcomer-backgrounds'],
-    readOnlyPaths: ['apps/bot/dist/main.js', 'packages/core/dist/index.js', 'assets'],
+    readOnlyPaths: [
+      'apps/bot/dist/main.js',
+      'apps/cli/dist/index.js',
+      '/usr/local/bin/ririko',
+      'packages/core/dist/index.js',
+      'assets',
+    ],
     extraChecks: (image) => [
       {
         name: 'ffmpeg runs',
