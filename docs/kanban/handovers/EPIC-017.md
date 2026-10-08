@@ -76,3 +76,16 @@ See docs/kanban/protocol.md section 6.
 - Live on staging: both hosts are reachable only through tunnels, the WireGuard link works, the Lavalink staging instance answers over it, and the backup and watchdog are installed. The CI deploy key and contexts for staging and Lavalink staging are filled.
 - Not yet exercised: a tagged release through CircleCI (release → Lavalink staging → staging deploy) and the production hosts, which do not exist yet.
 - Follow-ups: commit the hosting runbook with its real values in a git-ignored env-style file (maintainer idea, 2026-10-07); WSL on the maintainer's machine is down, so the host-script suite runs only in CI.
+
+---
+
+## REVIEW · 2026-10-08T00:35:00Z · Claude Code (Opus 5.5) · DONE
+
+- Reopened on 2026-10-07 for STORY-181 (`ririko db:copy`). STORY-181 and BUG-0038 (text id columns in PostgreSQL) are now DONE.
+- Tagged releases now run through CircleCI: v2.0.0-rc.1 and v2.0.0-rc.2 each ran release, Lavalink staging and staging deploy, all green.
+- Staging runs 2.0.0-rc.2 on the maintainer's 2.0 data: 93 tables and 6073 rows moved with `db:copy`, plus the card, boss and TCG images in their volumes.
+- Still open, as follow-ups outside this epic:
+  - production hosts;
+  - commit the hosting runbook with its values in a git-ignored env file;
+  - document the Lavalink remote cipher variables in `deploy/lavalink/lavalink.env.example`;
+  - delete the old local branch `feat/STORY-180-remote-lavalink` and `stash@{0}`, then remove the 4 old SHAs from `.gitleaksignore`.
