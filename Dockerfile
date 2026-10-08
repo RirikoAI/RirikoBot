@@ -42,13 +42,14 @@ FROM build AS web-build
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @ririko/web build && rm -rf apps/web/.next/cache
 
-# Production dependencies of the bot and the workspace packages it uses. Lifecycle scripts are
-# skipped: the root `prepare` script needs devDependencies, and no runtime dependency needs one
-# (better-sqlite3 and the canvas ship prebuilt binaries).
+# Production dependencies of the operator CLI, which depends on the bot, and of the workspace
+# packages both use. Lifecycle scripts are skipped: the root `prepare` script needs
+# devDependencies, and no runtime dependency needs one (better-sqlite3 and the canvas ship
+# prebuilt binaries).
 FROM manifests AS bot-deps
 RUN --mount=type=cache,id=ririko-pnpm-store,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile --ignore-scripts --store-dir /pnpm/store \
-      --filter @ririko/bot...
+      --filter @ririko/cli...
 
 # Production dependencies of the dashboard, likewise.
 FROM manifests AS web-deps
@@ -85,7 +86,12 @@ COPY --from=build /app/packages/music/dist packages/music/dist
 COPY --from=build /app/packages/ai/dist packages/ai/dist
 COPY --from=build /app/packages/services/dist packages/services/dist
 COPY --from=build /app/apps/bot/dist apps/bot/dist
+COPY --from=build /app/apps/cli/dist apps/cli/dist
 COPY assets assets
+# Operator commands: `docker exec <bot container> ririko <command>`. A wrapper instead of a symlink
+# because tsc does not set the exec bit on dist/index.js. Root-owned like the rest of the app.
+RUN printf '#!/bin/sh\nexec node /app/apps/cli/dist/index.js "$@"\n' > /usr/local/bin/ririko \
+  && chmod 755 /usr/local/bin/ririko
 # App files stay owned by root. Only these directories are writable; named volumes mounted on
 # them start with this owner.
 RUN mkdir -p data public/cards public/bosses storage/welcomer-backgrounds \
