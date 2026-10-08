@@ -85,3 +85,11 @@ See docs/kanban/protocol.md section 6.
   - CMD, HEALTHCHECK and the web image are unchanged.
 - The worker proved the CLI loads on the exact production install, outside Docker.
 - The ticket stays in REVIEW until CircleCI's `docker` job builds the image and passes `botCliCheck` on the PR.
+
+---
+
+## REVIEW · 2026-10-08T02:10:00Z · Claude Code (Opus 5.5) · DONE
+
+- PR #689: every CircleCI job passes. The `docker` job built `bot-runner` and passed `botCliCheck`, which runs `ririko --help` as uid 10001 from `/app` and lists the operator commands, plus the read-only checks for the wrapper and the CLI entry.
+- Codecov reports that every changed line is covered.
+- Every acceptance item is met. On a host, the CLI arrives with the next release tag.

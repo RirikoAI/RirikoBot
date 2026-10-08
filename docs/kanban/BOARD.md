@@ -17,9 +17,7 @@
 *None.*
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `CHORE-1704` | Chore | Ship the ririko CLI in the Bot Image So Operators Run It With docker exec | 3 | EPIC-017 | [CHORE-1704.md](./handovers/CHORE-1704.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -361,6 +359,7 @@
 | `CHORE-0002` | Chore | Link Stories, Tasks and Chores to Their Epics | 3 | EPIC-000 | [CHORE-0002.md](./handovers/CHORE-0002.md) |
 | `CHORE-0003` | Chore | DOM Test Environment for Dashboard Client Components | 3 | EPIC-012 | [CHORE-0003.md](./handovers/CHORE-0003.md) |
 | `CHORE-0004` | Chore | Disable unused FloweryTTS source in Lavalink config | 1 | EPIC-005 | [CHORE-0004.md](./handovers/CHORE-0004.md) |
+| `CHORE-1704` | Chore | Ship the ririko CLI in the Bot Image So Operators Run It With docker exec | 3 | EPIC-017 | [CHORE-1704.md](./handovers/CHORE-1704.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |
@@ -431,4 +430,4 @@
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
 | `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
-| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | TODO | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
+| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
