@@ -398,17 +398,17 @@
 | `BUG-0036` | Bug | Lavalink Crash-Loops: Plugin Volume Is Root-Owned but the Image Runs as uid 322 | 2 | EPIC-017 | [BUG-0036.md](./handovers/BUG-0036.md) |
 | `BUG-0037` | Bug | CI on PR #685: ShellCheck SC2015 in ririko-deploy and Stale .gitleaksignore SHAs After the History Rewrite | 1 | EPIC-017 | [BUG-0037.md](./handovers/BUG-0037.md) |
 | `BUG-0038` | Bug | PostgreSQL uuid Id Columns Reject the Slug and Prefixed Ids SQLite Holds (Cards, Assets, Shop Items, AI Conversations) | 5 | EPIC-017 | [BUG-0038.md](./handovers/BUG-0038.md) |
+| `BUG-0039` | Bug | Inventory Never Shows Item IDs, So By-ID Gear and Item Commands Are Unusable | 1 | EPIC-015 | [BUG-0039.md](./handovers/BUG-0039.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
 |---|---|---|---|---|
+| `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | 3 | [STORY-162.md](./handovers/STORY-162.md) |
 | `TASK-1143` | Task | Reaction Roles Message Builder & Role Mapping, Auto Roles & Auto Voice Pages | 3 | — |
 | `CHORE-0602` | Chore | Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards | 1 | — |
 
 ## 📋 Backlog
-| ID | Type | Title | Pts | Parent |
-|---|---|---|---|---|
-| `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
+*None.*
 
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |
