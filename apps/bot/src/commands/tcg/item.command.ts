@@ -133,6 +133,29 @@ export function createItemCommand(services: BotServices): Command {
   };
 }
 
+/**
+ * Names the card that wears each distinct gear card ID, looking each card up once. A card that
+ * cannot be found keeps its card ID as the name, so stranded gear never fails the inventory.
+ */
+async function loadWearerNames(
+  services: BotServices,
+  cardIds: readonly string[],
+): Promise<Map<string, string>> {
+  const names = new Map<string, string>();
+  for (const cardId of new Set(cardIds)) {
+    let name = cardId;
+    try {
+      const userCard = await services.waifuCardRepo.findUserCardById(cardId);
+      const base = userCard ? await services.waifuCardRepo.findById(userCard.cardId) : null;
+      if (base) name = base.name;
+    } catch {
+      // Keep the card ID as the name when the lookup fails.
+    }
+    names.set(cardId, name);
+  }
+  return names;
+}
+
 async function handleInventory(
   ctx: CommandContext,
   services: BotServices,
@@ -160,7 +183,7 @@ async function handleInventory(
       }),
     );
 
-    return detailed.filter(
+    const visible = detailed.filter(
       (entry): entry is { inv: typeof entry.inv; def: NonNullable<typeof entry.def> } => {
         if (!entry.def) return false;
         if (activeFilter === 'GEAR') {
@@ -172,6 +195,22 @@ async function handleInventory(
         return true;
       },
     );
+
+    const wearerNames = await loadWearerNames(
+      services,
+      visible.flatMap(({ inv }) =>
+        inv.state === 'EQUIPPED' && inv.equippedToCardId ? [inv.equippedToCardId] : [],
+      ),
+    );
+
+    return visible.map(({ inv, def }) => ({
+      inv,
+      def,
+      wornBy:
+        inv.state === 'EQUIPPED' && inv.equippedToCardId
+          ? wearerNames.get(inv.equippedToCardId)
+          : undefined,
+    }));
   };
 
   let items = await loadItems();
@@ -190,31 +229,49 @@ async function handleInventory(
   const buildInvEmbed = (itemsList: typeof items, itemIdx: number, actionNotice?: string) => {
     const selected = itemsList[itemIdx];
 
-    const lines = itemsList.slice(0, 15).map(({ inv, def }, idx) => {
+    const lines = itemsList.slice(0, 15).map(({ inv, def, wornBy }, idx) => {
       const isCurrent = idx === itemIdx;
       const marker = isCurrent ? '👉 ' : '• ';
       const enhancementTag = inv.enhancementLevel > 0 ? ` **+${inv.enhancementLevel}**` : '';
-      const stateTag = inv.state === 'EQUIPPED' ? ` \`[EQUIPPED: ${inv.slot}]\`` : '';
+      const stateTag =
+        inv.state === 'EQUIPPED'
+          ? ` \`[EQUIPPED: ${inv.slot} on ${wornBy ?? 'unknown card'}]\``
+          : '';
       const qtyTag =
         def.type === 'CONSUMABLE' || def.type === 'MATERIAL' ? ` (x${inv.quantity})` : '';
       const perkText =
         def.battlePerks && def.battlePerks.length > 0
           ? ` | *Perk: ${def.battlePerks.join(', ')}*`
           : '';
-      return `${marker}**${def.name}**${enhancementTag}${qtyTag}${stateTag} — [${def.rarity}]\n  *${def.description}*${perkText}`;
+      return `${marker}**${def.name}**${enhancementTag}${qtyTag}${stateTag} — [${def.rarity}] · ID: \`${inv.id}\`\n  *${def.description}*${perkText}`;
     });
+
+    // Discord rejects embed descriptions over 4096 characters, so keep whole lines within a budget.
+    const LIST_CHAR_BUDGET = 3000;
+    const shownLines: string[] = [];
+    let listChars = 0;
+    for (const line of lines) {
+      if (shownLines.length > 0 && listChars + line.length > LIST_CHAR_BUDGET) break;
+      shownLines.push(line);
+      listChars += line.length + 2;
+    }
+    const hiddenCount = itemsList.length - shownLines.length;
 
     const embed = new EmbedBuilder()
       .setColor(0x5865f2)
       .setTitle(`🎒 ${ctx.user.username}'s Gear & Consumables (${itemsList.length} items)`)
       .setDescription(
         (actionNotice ? `${actionNotice}\n\n` : '') +
-          lines.join('\n\n') +
+          shownLines.join('\n\n') +
+          (hiddenCount > 0
+            ? `\n\n*${hiddenCount} more not shown. Use the filter buttons to narrow the list.*`
+            : '') +
           (selected
             ? `\n\n🎯 **Selected Item**: **${selected.def.name}** [${selected.def.rarity} ${selected.def.subtype}]` +
               (selected.def.type === 'CONSUMABLE' || selected.def.type === 'MATERIAL'
                 ? ` (Quantity: ${selected.inv.quantity})`
                 : ` (Enhancement: +${selected.inv.enhancementLevel})`) +
+              ` · ID: \`${selected.inv.id}\`` +
               `\n*${selected.def.description}*`
             : ''),
       )
