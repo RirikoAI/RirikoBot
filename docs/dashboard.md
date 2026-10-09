@@ -34,6 +34,21 @@ Guild Discovery Pipeline
  └── 4. Render the server selector grid (invite link for guilds without the bot)
 ```
 
+### 2.0. Bot Invite Flow (TASK-1841)
+
+Discord does not tell a bot who invited it, so the dashboard runs the invite itself and every server traces back to a person who can be contacted.
+
+- `GET /api/invite` (optional `?guild=<snowflake>`) starts Discord OAuth2 with the scopes `bot`, `applications.commands` and `identify`, the legacy permission set (`BOT_INVITE_PERMISSIONS`, no Administrator), `response_type=code`, PKCE (S256) and a sealed state. The state lives in its own 10-minute `__Host-ririko_invite` cookie (HttpOnly, Secure, SameSite=Lax), separate from the sign-in cookie, and uses its own encryption context, so an invite and a pending sign-in can never be swapped. It needs no dashboard session, so the Developer Portal install link can point at it. The redirect URI is `${DASHBOARD_URL}/api/invite/callback`.
+- `GET /api/invite/callback` checks the state, exchanges the code, reads the user (`identify`), upserts the user, records the server and its inviter with `GuildRepository.recordInvite` from the `guild` object of the token response (`invited_via = oauth`), and revokes the user token after the response is sent. It never creates a session. It redirects to `/servers?invited=<id>` (the Servers page shows a notice), or to `/dashboard/<id>` when the visitor already has a session. A cancelled authorization, a state mismatch, a token response without a server and any Discord error redirect to `/?error=invite_cancelled|invite_invalid_state|invite_no_server|invite_failed`, which the home page explains. Both routes call `limitAuthRequest` and are in `AUTH_ROUTE_ALLOWLIST`.
+- The Servers page "Invite Ririko" button links to `/api/invite?guild=<id>`.
+- Invites that skip the dashboard (an old invite link, or the Install Link before step 3 below) still work. The bot then falls back to the audit log (`invited_via = audit_log`) or the guild integrations (`integration`, needs Manage Server). An invite through the dashboard replaces an inviter the bot found earlier, because it is the user who actually authorized the bot.
+
+**Maintainer steps, in order, after deploying this change:**
+
+1. Developer Portal, OAuth2: add the redirect URI `${DASHBOARD_URL}/api/invite/callback`.
+2. Developer Portal, Installation: set the Install Link to "Custom URL" `${DASHBOARD_URL}/api/invite`.
+3. Developer Portal, Bot: turn on **Requires OAuth2 Code Grant**. With it on, Discord adds the bot only after the callback exchanges the code, so every new server has a definite inviter. Turn it on only once steps 1 and 2 are live: until the callback is deployed, every invite would be blocked.
+
 ### 2.1. Sessions
 - Sessions are opaque and stored server-side. JWT, JWE, JWKS and sealed-cookie sessions were rejected because a self-contained token cannot be revoked (see ADR-013).
 - The database stores only the SHA-256 hash of the session ID, plus user ID, created, last-seen and expiry timestamps, IP, user agent, `step_up_at`, and the Discord access and refresh tokens encrypted under a versioned environment key.
@@ -252,7 +267,7 @@ The decisions and rejected alternatives (JWKS, JWE, browser-side request signing
 | Stolen session cookie (XSS or infostealer malware) | HttpOnly `__Host-` cookie and strict CSP against XSS. Short idle and absolute expiry, ID rotation, passkey step-up for sensitive writes, new-device alerts, "sign out everywhere". Chrome DBSC (STORY-119) binds the session to a TPM-held key on supported browsers: the bound cookie lives 10 minutes and needs a signed refresh, so a copied cookie stops working within minutes; other browsers keep the behavior above. |
 | Compromised Discord account | Enrolled passkeys are always required; bot owners must have one. Discord login alone cannot pass step-up. |
 | Leaked database or backup | Only SHA-256 hashes of session IDs are stored. Discord tokens are AES-256-GCM encrypted under a key held outside the database. |
-| Stolen user OAuth token | Scopes are `identify` and `guilds` only (read-only). Mutations use the bot token on the server after authorization. |
+| Stolen user OAuth token | Scopes are `identify` and `guilds` only (read-only). Mutations use the bot token on the server after authorization. The invite flow's token (`bot`, `applications.commands`, `identify`) is used once to read the profile and is revoked right after. |
 | Guild ID tampering (IDOR) | `requireGuildAccess` in every Server Action and route handler, never in middleware, enforced by a coverage test. |
 | Cross-site request forgery | SameSite=Lax cookie, Server Action origin verification, Origin checks on route handlers, signed OAuth2 `state` (plus PKCE if Discord accepts it for this application type). |
 | Secret leakage to the client | `server-only` imports and React taint APIs: `experimental.taint` is on, `createWebServices` taints the config object and every credential in it (bot token, OAuth client secret, vault keys including previous ones, `DATABASE_URL`, provider API keys), so rendering one into a Client Component fails. |

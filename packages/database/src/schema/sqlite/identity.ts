@@ -23,6 +23,10 @@ export const guilds = sqliteTable('guilds', {
   name: text('name').notNull(),
   iconUrl: text('icon_url'),
   ownerId: text('owner_id').notNull(),
+  /** The member who added the bot, from the audit log; null when Discord no longer says. */
+  invitedById: text('invited_by_id'),
+  /** How the inviter was learned: `oauth`, `audit_log` or `integration`; null with no inviter. */
+  invitedVia: text('invited_via'),
   joinedAt: integer('joined_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

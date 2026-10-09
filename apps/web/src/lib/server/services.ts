@@ -9,6 +9,7 @@ import {
   AutoRoleRepository,
   AutoVoiceRepository,
   BotActivityRepository,
+  GuildRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
   DungeonBossRepository,
@@ -20,6 +21,7 @@ import {
   ItemRepository,
   createDatabaseClient,
   ensurePostgresSchema,
+  ensureGuildRegistrySchema,
   ensureTextIdColumns,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
@@ -76,6 +78,8 @@ export interface WebServices {
   db: DatabaseClient;
   vault: SecretVault;
   oauth: DiscordOAuthClient;
+  /** The same application with the bot invite callback as its redirect URI (TASK-1841). */
+  inviteOauth: DiscordOAuthClient;
   sessions: SessionService;
   passkeys: PasskeyService;
   knownDevices: KnownDeviceService;
@@ -120,6 +124,8 @@ export interface WebServices {
   commandCatalog: CommandCatalogRepository;
   /** Command usage, bot status and voice activity written by the bot; read-only here. */
   botActivity: BotActivityRepository;
+  /** The servers the bot is in, with owner and inviter, written by the bot; read-only here. */
+  guildRegistry: GuildRepository;
   /** Security DMs and guild change notices (best effort). */
   notifier: DiscordNotifier;
 }
@@ -161,6 +167,12 @@ async function createWebServices(): Promise<WebServices> {
     clientId: config.DISCORD_CLIENT_ID,
     clientSecret: config.DISCORD_CLIENT_SECRET,
     redirectUri: `${config.DASHBOARD_URL}/api/auth/callback`,
+    apiBase: `${config.DISCORD_API_URL}/v10`,
+  });
+  const inviteOauth = new DiscordOAuthClient({
+    clientId: config.DISCORD_CLIENT_ID,
+    clientSecret: config.DISCORD_CLIENT_SECRET,
+    redirectUri: `${config.DASHBOARD_URL}/api/invite/callback`,
     apiBase: `${config.DISCORD_API_URL}/v10`,
   });
   const sessions = new SessionService({ repo: new WebSessionRepository(db), vault, oauth });
@@ -206,6 +218,7 @@ async function createWebServices(): Promise<WebServices> {
     db,
     vault,
     oauth,
+    inviteOauth,
     sessions,
     passkeys,
     knownDevices: new KnownDeviceService({ repo: new WebKnownDeviceRepository(db) }),
@@ -279,6 +292,7 @@ async function createWebServices(): Promise<WebServices> {
     cardAlbum: new CardAlbumService({ cards: new WaifuCardRepository(db) }),
     commandCatalog,
     botActivity: new BotActivityRepository(db),
+    guildRegistry: new GuildRepository(db),
     notifier: new DiscordNotifier({
       rest: botRest,
       guildSettings,
@@ -304,6 +318,7 @@ function getDatabase(config: WebConfig): Promise<DatabaseClient> {
     .then(async (db) => {
       await ensurePostgresSchema(db);
       await ensureTextIdColumns(db);
+      await ensureGuildRegistrySchema(db);
       return db;
     })
     .catch((error: unknown) => {

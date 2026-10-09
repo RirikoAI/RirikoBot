@@ -11,6 +11,8 @@ import type { ActiveSession } from './session-service';
 /** `__Host-` pins the cookie to this origin: Secure, Path=/, no Domain attribute. */
 export const SESSION_COOKIE = '__Host-ririko_session';
 export const OAUTH_COOKIE = '__Host-ririko_oauth';
+/** The bot invite flow's own state cookie, so an invite never clobbers a pending sign-in. */
+export const INVITE_COOKIE = '__Host-ririko_invite';
 
 const BASE_COOKIE = { httpOnly: true, secure: true, sameSite: 'lax', path: '/' } as const;
 

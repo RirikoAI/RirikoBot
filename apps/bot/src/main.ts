@@ -3,6 +3,7 @@ import {
   databaseConfigFromEnv,
   ensureAdventureSchema,
   ensureCardSerialSchema,
+  ensureGuildRegistrySchema,
   ensurePostgresSchema,
   ensureTextIdColumns,
 } from '@ririko/database';
@@ -16,6 +17,7 @@ import {
   trackCurrentVoiceMembers,
   registerMemberListener,
   registerReactionListener,
+  registerGuildRegistryListener,
 } from './index.js';
 import { syncCommandCatalog } from './command-catalog.js';
 import { createCommandRouter, createHelpOptions } from './command-router.js';
@@ -88,6 +90,7 @@ export async function main(): Promise<void> {
   await ensureAdventureSchema(services.db);
   await services.adventureEngine.assertCompatibleSessions();
   await ensureCardSerialSchema(services.db);
+  await ensureGuildRegistrySchema(services.db);
 
   // 3. Initialize Dual-Dispatch Command Router with in-memory cached dynamic prefix resolution
   const router = createCommandRouter(services, prefix);
@@ -134,6 +137,7 @@ export async function main(): Promise<void> {
   registerMusicVoiceListener(bot.client, services);
   registerMemberListener(bot.client, services);
   registerReactionListener(bot.client, services);
+  registerGuildRegistryListener(bot.client, services);
 
   // Bind interactive Help Center UI components, Music Controller buttons, Giveaway buttons, and Role components
   registerComponentInteractions(bot.client, {

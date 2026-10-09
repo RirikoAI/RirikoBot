@@ -5,7 +5,7 @@ import type { ActiveSession } from '../auth/session-service';
 import { TtlCache } from '../ttl-cache';
 import { BotGuildDirectory } from './bot-guilds';
 import { GuildAccessService, USER_GUILDS_TTL_MS } from './guild-access';
-import { BOT_INVITE_PERMISSIONS, botInviteUrl, canManageGuild } from './permissions';
+import { BOT_INVITE_PERMISSIONS, canManageGuild } from './permissions';
 
 const MANAGE_GUILD = (1n << 5n).toString();
 const ADMINISTRATOR = (1n << 3n).toString();
@@ -44,14 +44,9 @@ describe('canManageGuild', () => {
   });
 });
 
-describe('botInviteUrl', () => {
-  it('invites the bot to one guild with the legacy permission set', () => {
-    const url = new URL(botInviteUrl('client-1', 'guild-9'));
-    expect(url.searchParams.get('client_id')).toBe('client-1');
-    expect(url.searchParams.get('guild_id')).toBe('guild-9');
-    expect(url.searchParams.get('disable_guild_select')).toBe('true');
-    expect(url.searchParams.get('scope')).toBe('bot applications.commands');
-    expect(BigInt(url.searchParams.get('permissions')!)).toBe(BOT_INVITE_PERMISSIONS);
+describe('BOT_INVITE_PERMISSIONS', () => {
+  it('is the legacy permission set and deliberately omits Administrator', () => {
+    expect(BOT_INVITE_PERMISSIONS).toBe(626721090433015n);
     expect(BOT_INVITE_PERMISSIONS & (1n << 3n)).toBe(0n);
   });
 });

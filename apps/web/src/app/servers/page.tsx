@@ -4,14 +4,21 @@ import { redirect } from 'next/navigation';
 import { GuildIcon } from '@/components/guild-icon';
 import { SiteHeader } from '@/components/site-header';
 import { requireSession } from '@/lib/server/auth/session';
-import { botInviteUrl } from '@/lib/server/guilds/permissions';
 import { getWebServices } from '@/lib/server/services';
 
 export const metadata: Metadata = { title: 'Your servers · Ririko Dashboard' };
 
-export default async function ServersPage() {
+const SNOWFLAKE = /^\d{17,20}$/;
+
+export default async function ServersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ invited?: string | string[] }>;
+}) {
+  const { invited } = await searchParams;
+  const justInvited = typeof invited === 'string' && SNOWFLAKE.test(invited);
   const session = await requireSession('/servers');
-  const { config, guildAccess } = await getWebServices();
+  const { guildAccess } = await getWebServices();
   const guilds = await guildAccess.listManageableGuilds(session);
   if (!guilds) redirect('/api/auth/login?returnTo=%2Fservers');
 
@@ -23,6 +30,14 @@ export default async function ServersPage() {
         <p className="mt-2 text-zinc-400">
           Servers where you have the Manage Server or Administrator permission.
         </p>
+        {justInvited ? (
+          <p
+            role="status"
+            className="mt-6 rounded-lg border border-edge bg-panel p-4 text-zinc-200"
+          >
+            Ririko was added to your server. Choose Manage below to set it up.
+          </p>
+        ) : null}
 
         {guilds.length === 0 ? (
           <p className="mt-10 rounded-lg border border-edge bg-panel p-6 text-zinc-300">
@@ -49,7 +64,7 @@ export default async function ServersPage() {
                   </Link>
                 ) : (
                   <a
-                    href={botInviteUrl(config.DISCORD_CLIENT_ID, guild.id)}
+                    href={`/api/invite?guild=${guild.id}`}
                     className="rounded-md border border-edge px-3 py-1.5 text-sm text-zinc-300 hover:bg-edge"
                   >
                     Invite Ririko

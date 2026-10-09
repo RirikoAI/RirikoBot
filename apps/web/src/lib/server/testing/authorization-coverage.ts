@@ -37,6 +37,8 @@ const REQUEST_GUARDS = ['checkDashboardRequest', 'saveGuildSettings', 'runOwnerA
 export const AUTH_ROUTE_ALLOWLIST: Record<string, readonly string[]> = {
   'app/api/auth/login/route.ts': ['GET'],
   'app/api/auth/callback/route.ts': ['GET'],
+  'app/api/invite/route.ts': ['GET'],
+  'app/api/invite/callback/route.ts': ['GET'],
   'app/api/auth/logout/route.ts': ['POST'],
   'app/api/auth/dbsc/register/route.ts': ['POST'],
   'app/api/auth/dbsc/refresh/route.ts': ['POST'],

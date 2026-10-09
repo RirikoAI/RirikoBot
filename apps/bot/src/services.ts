@@ -7,6 +7,7 @@ import {
   GuildSettingsRepository,
   GuildConfigVersionRepository,
   BotActivityRepository,
+  GuildRepository,
   CommandCatalogRepository,
   CommandSettingsRepository,
   LeaderboardRepository,
@@ -241,6 +242,8 @@ export interface BotServices {
   commandOverrideService: CommandOverrideService;
   /** Registered commands, written at startup so the dashboard and CLI can list them. */
   commandCatalogRepo: CommandCatalogRepository;
+  /** The servers the bot is in, with owner and inviter; kept current by the guild registry listener. */
+  guildRepo: GuildRepository;
   /** Null when no Discord client was supplied (tests); started on gateway READY. */
   botStatusReporter: BotStatusReporter | null;
   /** Zone for reading reminder times: the user's saved zone, then the guild's, then UTC. */
@@ -612,6 +615,7 @@ export async function createBotServices(
     eventBus,
   });
   const botActivityRepo = new BotActivityRepository(db);
+  const guildRepo = new GuildRepository(db);
   const commandUsageRecorder = new CommandUsageRecorder(botActivityRepo);
   const botStatusReporter = discordClient
     ? new BotStatusReporter(discordClient, botActivityRepo, { version: CORE_VERSION })
@@ -1066,6 +1070,7 @@ export async function createBotServices(
     commandUsageRecorder,
     commandOverrideService,
     commandCatalogRepo,
+    guildRepo,
     botStatusReporter,
     resolveUserTimeZone,
     resolveGuildTimeZone,

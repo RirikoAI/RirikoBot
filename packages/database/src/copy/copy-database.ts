@@ -6,6 +6,7 @@ import { DatabaseError } from '@ririko/core';
 import type { PostgresDatabaseClient } from '../client/types.js';
 import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
 import { ensureCardSerialSchema } from '../migrations/card-serials.js';
+import { ensureGuildRegistrySchema } from '../migrations/guild-registry.js';
 import { ensurePostgresSchema } from '../migrations/postgres-schema.js';
 import { ensureTextIdColumns } from '../migrations/text-ids.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
@@ -641,6 +642,7 @@ export async function copyDatabase(
     await ensureTextIdColumns(target);
     await ensureAdventureSchema(target);
     await ensureCardSerialSchema(target);
+    await ensureGuildRegistrySchema(target);
 
     const client = await target.raw.connect();
     const connection: PgConnection = {

@@ -6,6 +6,7 @@ export * from './schema/types/index.js';
 export * from './transactions/index.js';
 export * from './migrations/adventure-schema.js';
 export * from './migrations/card-serials.js';
+export * from './migrations/guild-registry.js';
 export * from './migrations/postgres-schema.js';
 export * from './migrations/text-ids.js';
 export * from './copy/copy-database.js';

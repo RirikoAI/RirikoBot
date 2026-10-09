@@ -7,6 +7,7 @@ import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PostgresDatabaseClient, SqliteDatabaseClient } from '../client/types.js';
 import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
 import { ensureCardSerialSchema } from '../migrations/card-serials.js';
+import { ensureGuildRegistrySchema } from '../migrations/guild-registry.js';
 import { ensurePostgresSchema } from '../migrations/postgres-schema.js';
 import { ensureTextIdColumns } from '../migrations/text-ids.js';
 import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
@@ -23,6 +24,9 @@ vi.mock('../migrations/adventure-schema.js', () => ({
   ensureAdventureSchema: vi.fn(async () => {}),
 }));
 vi.mock('../migrations/card-serials.js', () => ({ ensureCardSerialSchema: vi.fn(async () => {}) }));
+vi.mock('../migrations/guild-registry.js', () => ({
+  ensureGuildRegistrySchema: vi.fn(async () => false),
+}));
 vi.mock('../migrations/text-ids.js', () => ({ ensureTextIdColumns: vi.fn(async () => []) }));
 
 const directory = mkdtempSync(join(tmpdir(), 'ririko-copy-flow-'));
@@ -52,6 +56,7 @@ describe('copyDatabase', () => {
     vi.mocked(ensurePostgresSchema).mockClear();
     vi.mocked(ensureAdventureSchema).mockClear();
     vi.mocked(ensureCardSerialSchema).mockClear();
+    vi.mocked(ensureGuildRegistrySchema).mockClear();
     vi.mocked(ensureTextIdColumns).mockClear();
   });
 
@@ -73,6 +78,7 @@ describe('copyDatabase', () => {
     expect(ensureTextIdColumns).toHaveBeenCalledWith(client);
     expect(ensureAdventureSchema).toHaveBeenCalledWith(client);
     expect(ensureCardSerialSchema).toHaveBeenCalledWith(client);
+    expect(ensureGuildRegistrySchema).toHaveBeenCalledWith(client);
     expect(fake.statements[0]).toBe('BEGIN');
     expect(fake.statements.at(-1)).toBe('COMMIT');
     expect(fake.statements).not.toContain('ROLLBACK');

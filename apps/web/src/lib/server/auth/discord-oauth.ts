@@ -29,6 +29,22 @@ export interface DiscordTokenSet {
   scopes: string[];
 }
 
+/** Scopes of the dashboard invite flow: add the bot and commands, and learn who authorized it. */
+export const INVITE_OAUTH_SCOPES = [
+  OAuth2Scopes.Bot,
+  OAuth2Scopes.ApplicationsCommands,
+  OAuth2Scopes.Identify,
+] as const;
+
+/** The server the bot was added to, from the `guild` object of the token response. */
+export interface InvitedGuild {
+  id: string;
+  name: string;
+  /** The icon hash, or null when the server has no icon. */
+  icon: string | null;
+  ownerId: string;
+}
+
 export interface DiscordOAuthOptions {
   clientId: string;
   clientSecret: string;
@@ -48,6 +64,25 @@ export function createPkcePair(): { verifier: string; challenge: string } {
   const verifier = randomToken();
   const challenge = createHash('sha256').update(verifier).digest('base64url');
   return { verifier, challenge };
+}
+
+function toTokenSet(body: RESTPostOAuth2AccessTokenResult, now: Date): DiscordTokenSet {
+  return {
+    accessToken: body.access_token,
+    refreshToken: body.refresh_token,
+    expiresAt: new Date(now.getTime() + body.expires_in * 1000),
+    scopes: body.scope.split(' '),
+  };
+}
+
+/** The token response's `guild` is not in `RESTPostOAuth2AccessTokenResult`, so check every field. */
+function parseInvitedGuild(raw: unknown): InvitedGuild | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+  const { id, name, icon, owner_id: ownerId } = raw as Record<string, unknown>;
+  if (typeof id !== 'string' || typeof name !== 'string' || typeof ownerId !== 'string') {
+    return null;
+  }
+  return { id, name, icon: typeof icon === 'string' ? icon : null, ownerId };
 }
 
 /** Discord OAuth2 authorization-code flow and the user-token endpoints the dashboard reads. */
@@ -73,6 +108,75 @@ export class DiscordOAuthClient {
       prompt: 'none',
     }).toString();
     return url.toString();
+  }
+
+  /**
+   * The bot invite URL: authorizes the bot and commands, and the user's identity, for one server
+   * when `guildId` is given. With Requires OAuth2 Code Grant on, Discord adds the bot only after
+   * `exchangeInviteCode` succeeds, so the user who authorized it is always known. The `bot` scope
+   * always shows the consent screen, so there is no `prompt`.
+   */
+  inviteUrl(params: {
+    state: string;
+    codeChallenge: string;
+    permissions: bigint;
+    guildId?: string | undefined;
+  }): string {
+    const url = new URL(`${this.apiBase}${Routes.oauth2Authorization()}`);
+    const query = new URLSearchParams({
+      client_id: this.options.clientId,
+      response_type: 'code',
+      redirect_uri: this.options.redirectUri,
+      scope: INVITE_OAUTH_SCOPES.join(' '),
+      permissions: params.permissions.toString(),
+      state: params.state,
+      code_challenge: params.codeChallenge,
+      code_challenge_method: 'S256',
+    });
+    if (params.guildId) {
+      query.set('guild_id', params.guildId);
+      query.set('disable_guild_select', 'true');
+    }
+    url.search = query.toString();
+    return url.toString();
+  }
+
+  /**
+   * Exchanges the code of an invite. `guild` is null when the response names no usable server,
+   * for example when the user authorized without the `bot` scope.
+   */
+  async exchangeInviteCode(
+    code: string,
+    codeVerifier: string,
+    now: Date,
+  ): Promise<{ tokens: DiscordTokenSet; guild: InvitedGuild | null }> {
+    const body = await this.postToken(
+      {
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: this.options.redirectUri,
+        code_verifier: codeVerifier,
+      },
+      'token exchange',
+    );
+    return { tokens: toTokenSet(body, now), guild: parseInvitedGuild(body.guild) };
+  }
+
+  /** Revokes a user token (RFC 7009); the invite flow keeps none of its tokens. */
+  async revokeToken(accessToken: string): Promise<void> {
+    const response = await this.fetch(`${this.apiBase}${Routes.oauth2TokenRevocation()}`, {
+      method: 'POST',
+      headers: this.tokenHeaders(),
+      body: new URLSearchParams({ token: accessToken, token_type_hint: 'access_token' }),
+      cache: 'no-store',
+    });
+    // The response body is empty or irrelevant; only the status matters.
+    if (!response.ok) {
+      throw new DiscordApiError(
+        response.status,
+        `token revocation failed with HTTP ${response.status}`,
+      );
+    }
   }
 
   exchangeCode(code: string, codeVerifier: string, now: Date): Promise<DiscordTokenSet> {
@@ -101,24 +205,31 @@ export class DiscordOAuthClient {
   }
 
   private async requestToken(params: Record<string, string>, now: Date): Promise<DiscordTokenSet> {
+    return toTokenSet(await this.postToken(params, 'token exchange'), now);
+  }
+
+  private tokenHeaders(): Record<string, string> {
     const basic = Buffer.from(`${this.options.clientId}:${this.options.clientSecret}`).toString(
       'base64',
     );
+    return {
+      Authorization: `Basic ${basic}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+  }
+
+  private async postToken(
+    params: Record<string, string>,
+    operation: string,
+  ): Promise<RESTPostOAuth2AccessTokenResult & { guild?: unknown }> {
     const response = await this.fetch(`${this.apiBase}${Routes.oauth2TokenExchange()}`, {
       method: 'POST',
-      headers: {
-        Authorization: `Basic ${basic}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: this.tokenHeaders(),
       body: new URLSearchParams(params),
       cache: 'no-store',
     });
-    const body = (await this.parse(response, 'token exchange')) as RESTPostOAuth2AccessTokenResult;
-    return {
-      accessToken: body.access_token,
-      refreshToken: body.refresh_token,
-      expiresAt: new Date(now.getTime() + body.expires_in * 1000),
-      scopes: body.scope.split(' '),
+    return (await this.parse(response, operation)) as RESTPostOAuth2AccessTokenResult & {
+      guild?: unknown;
     };
   }
 

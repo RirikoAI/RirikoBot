@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { LocalTime } from '@/components/local-time';
+import { TopCommands } from '@/components/top-commands';
 import { UsageChart } from '@/components/usage-chart';
 import { formatDay, numberFormat } from '@/lib/chart-format';
 import { loadGuildOverview, USAGE_DAYS } from '@/lib/server/guilds/guild-overview';
@@ -119,37 +120,7 @@ export default async function GuildOverviewPage({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="Most used commands">
-          {usage.top.length === 0 ? (
-            <p className="text-sm text-zinc-400">None yet.</p>
-          ) : (
-            <ol className="flex flex-col gap-2 text-sm">
-              {usage.top.map((command) => (
-                <li key={command.commandName} className="flex flex-col gap-1">
-                  <div className="flex justify-between gap-3">
-                    <span className="font-mono text-zinc-200">{command.commandName}</span>
-                    <span className="text-zinc-400 tabular-nums">
-                      {numberFormat.format(command.count)}
-                    </span>
-                  </div>
-                  {/* SVG geometry, not a style attribute: the production CSP blocks those. */}
-                  <svg
-                    viewBox="0 0 100 6"
-                    preserveAspectRatio="none"
-                    className="h-1.5 w-full"
-                    aria-hidden
-                  >
-                    <rect width="100" height="6" rx="3" className="fill-ink" />
-                    <rect
-                      width={(command.count / usage.top[0]!.count) * 100}
-                      height="6"
-                      rx="3"
-                      className="fill-sakura-strong"
-                    />
-                  </svg>
-                </li>
-              ))}
-            </ol>
-          )}
+          <TopCommands commands={usage.top} />
         </Card>
 
         <Card title="Voice channels in use">
