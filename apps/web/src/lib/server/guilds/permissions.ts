@@ -20,15 +20,3 @@ export function canManageGuild(guild: { owner?: boolean; permissions: string }):
   const required = PermissionFlagsBits.ManageGuild | PermissionFlagsBits.Administrator;
   return (permissions & required) !== 0n;
 }
-
-export function botInviteUrl(clientId: string, guildId: string): string {
-  const url = new URL('https://discord.com/oauth2/authorize');
-  url.search = new URLSearchParams({
-    client_id: clientId,
-    scope: 'bot applications.commands',
-    permissions: BOT_INVITE_PERMISSIONS.toString(),
-    guild_id: guildId,
-    disable_guild_select: 'true',
-  }).toString();
-  return url.toString();
-}

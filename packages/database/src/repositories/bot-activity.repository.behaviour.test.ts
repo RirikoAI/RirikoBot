@@ -26,6 +26,25 @@ describeDialects('BotActivityRepository behaviour', (db) => {
     expect(await repo.listCommandUsage('nowhere', '2000-01-01')).toEqual([]);
   });
 
+  it('lists every guild from a day on, ordered by guild, day and command', async () => {
+    const repo = new BotActivityRepository(db.client);
+    expect(await repo.listAllCommandUsage('2000-01-01')).toEqual([]);
+    await repo.addCommandUsage([
+      { guildId: 'g2', day: '2026-09-25', commandName: 'play', count: 7 },
+      { guildId: 'g1', day: '2026-09-25', commandName: 'play', count: 1 },
+      { guildId: 'g1', day: '2026-09-24', commandName: 'play', count: 2 },
+      { guildId: 'g1', day: '2026-09-25', commandName: 'help', count: 3 },
+    ]);
+
+    expect(await repo.listAllCommandUsage('2026-09-25')).toEqual([
+      { guildId: 'g1', day: '2026-09-25', commandName: 'help', count: 3 },
+      { guildId: 'g1', day: '2026-09-25', commandName: 'play', count: 1 },
+      { guildId: 'g2', day: '2026-09-25', commandName: 'play', count: 7 },
+    ]);
+    expect(await repo.listAllCommandUsage('2000-01-01')).toHaveLength(4);
+    expect(await repo.listAllCommandUsage('2027-01-01')).toEqual([]);
+  });
+
   it('deletes usage rows before a day, keeping that day and later ones', async () => {
     const repo = new BotActivityRepository(db.client);
     await repo.addCommandUsage([

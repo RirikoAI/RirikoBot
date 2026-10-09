@@ -6,6 +6,7 @@ import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
 import { ensurePostgresSchema } from '../migrations/postgres-schema.js';
 import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
 import { ensureCardSerialSchema } from '../migrations/card-serials.js';
+import { ensureGuildRegistrySchema } from '../migrations/guild-registry.js';
 import { ensureTextIdColumns } from '../migrations/text-ids.js';
 
 export interface DialectSuite {
@@ -23,6 +24,7 @@ async function upgrade(client: DatabaseClient): Promise<void> {
   await ensureTextIdColumns(client);
   await ensureAdventureSchema(client);
   await ensureCardSerialSchema(client);
+  await ensureGuildRegistrySchema(client);
 }
 
 /**

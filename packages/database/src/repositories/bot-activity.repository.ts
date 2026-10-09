@@ -61,6 +61,28 @@ export class BotActivityRepository {
       .orderBy(asc(table.day), asc(table.commandName));
   }
 
+  /**
+   * Every guild's usage rows from `fromDay` (inclusive, `YYYY-MM-DD`), for the owner console.
+   * Ordered by guild, then oldest day first, then command.
+   */
+  async listAllCommandUsage(fromDay: string): Promise<CommandUsageDaily[]> {
+    const client = this.client;
+    if (client.dialect === 'sqlite') {
+      const table = sqliteSchema.commandUsageDaily;
+      return client.db
+        .select()
+        .from(table)
+        .where(gte(table.day, fromDay))
+        .orderBy(asc(table.guildId), asc(table.day), asc(table.commandName));
+    }
+    const table = pgSchema.commandUsageDaily;
+    return client.db
+      .select()
+      .from(table)
+      .where(gte(table.day, fromDay))
+      .orderBy(asc(table.guildId), asc(table.day), asc(table.commandName));
+  }
+
   /** Deletes usage rows for days before `day` (`YYYY-MM-DD`). */
   async deleteCommandUsageBefore(day: string): Promise<void> {
     const client = this.client;

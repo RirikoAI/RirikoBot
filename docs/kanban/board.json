@@ -428,6 +428,22 @@
       ],
       "blocks": [],
       "description": "Decided with the maintainer on 2026-10-05: production (Lightsail 8 GB) and staging (Lightsail 4 GB) each run docker-compose.production.yml on their own AWS Lightsail instance (Ubuntu 24.04, us-east-1), without the bundled Lavalink. Both use one Lavalink VPS at the VPS provider (Linux KVM PRO: 4+1 vCPU, 4 GB, 100 GB NVMe, the VPS region) that runs a production and a staging Lavalink instance, reachable only over WireGuard. Cloudflare Tunnel is the only way in: dashboard.ririko.ai (dashboard-staging.example.com behind Cloudflare Access) and one SSH hostname per host, with no open inbound TCP ports. The CircleCI release workflow deploys every release tag to staging automatically, and a final vX.Y.Z tag to production after a manual approval. Order: TASK-1761, TASK-1762, TASK-1801, TASK-1771, TASK-1781, TASK-1782, TASK-1791, TASK-1792, TASK-1802, TASK-1803, TASK-1772."
+    },
+    {
+      "id": "EPIC-018",
+      "title": "Dashboard Usability Improvements",
+      "points": 21,
+      "status": "DONE",
+      "children": [
+        "STORY-182",
+        "STORY-183",
+        "STORY-184"
+      ],
+      "requires": [
+        "EPIC-011"
+      ],
+      "blocks": [],
+      "description": "Maintainer-requested polish for the Next.js dashboard after rc.4. Collects usability fixes to existing pages; no new modules. More stories will be added as the maintainer lists them."
     }
   ],
   "stories": [
@@ -2365,6 +2381,73 @@
       "handovers": [
         "STORY-181",
         "EPIC-017"
+      ]
+    },
+    {
+      "id": "STORY-182",
+      "parent": "EPIC-018",
+      "title": "Grouped Guild Sidebar Navigation with a Mobile Page Picker",
+      "points": 3,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [],
+      "children": [
+        "TASK-1821"
+      ],
+      "description": "The guild sidebar is one flat list of 24 links (about 960px tall) that scrolls away with the page, and on mobile it is a 24-link horizontal strip. Group the links under headings, keep the sidebar in view on desktop, and replace the mobile strip with a grouped page picker. Executed as TASK-1821.",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-182"
+      ]
+    },
+    {
+      "id": "STORY-183",
+      "parent": "EPIC-018",
+      "title": "Owner Console Server List with Inviters and Cross-Server Command Usage",
+      "points": 8,
+      "status": "DONE",
+      "requires": [],
+      "blocks": [],
+      "children": [
+        "TASK-1831",
+        "TASK-1832"
+      ],
+      "description": "A Servers tab in the owner console, for bot owners only: every server the bot is in, with its name, owner and the member who invited the bot, plus command usage across servers (busiest servers, busiest days, most used commands), so the owner can spot a server that sends an unrealistic number of commands. TASK-1831 makes the bot record its servers and inviters in the existing guilds table; TASK-1832 builds the page. Story estimate 8; its tasks total 10 (5 + 5).",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-183"
+      ]
+    },
+    {
+      "id": "STORY-184",
+      "parent": "EPIC-018",
+      "title": "Accountable Server Inviters: Invite Through the Dashboard and Show Who to Contact",
+      "points": 8,
+      "status": "DONE",
+      "requires": [
+        "STORY-183"
+      ],
+      "blocks": [],
+      "children": [
+        "TASK-1841",
+        "TASK-1842"
+      ],
+      "description": "Maintainer request (2026-10-10): every server must trace back to a contactable person. Invites go through a dashboard OAuth2 flow that records the authorizing user (enforced once the maintainer turns on Requires OAuth2 Code Grant), the bot falls back to the guild integrations list when the audit log is unavailable, and the Servers tab shows owner and inviter as \"username (ID)\" with how the inviter was found, naming the owner as the contact when no inviter is known. Story estimate 8; its tasks total 10 (8 + 2).",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-184"
       ]
     }
   ],
@@ -6854,6 +6937,330 @@
         "TASK-1812",
         "STORY-181",
         "EPIC-017"
+      ]
+    },
+    {
+      "id": "TASK-1821",
+      "title": "Group Guild Nav Links, Make the Sidebar Sticky and Add a Mobile Page Picker",
+      "status": "DONE",
+      "points": 3,
+      "parent": "STORY-182",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "model": "medium",
+      "tier_override": null,
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "apps/web/src/lib/dashboard-nav.ts",
+          "apps/web/src/components/guild-nav.tsx",
+          "apps/web/src/app/dashboard/[guildId]/layout.tsx",
+          "apps/web/src/components/guild-nav.test.tsx",
+          "apps/web/src/lib/dashboard-nav.test.ts"
+        ],
+        "symbols": [
+          "GUILD_NAV_ITEMS",
+          "GuildNav",
+          "GuildLayout"
+        ],
+        "entry_points": [
+          "apps/web/src/app/dashboard/[guildId]/layout.tsx"
+        ],
+        "codegraph_queries": [
+          "GUILD_NAV_ITEMS GuildNav guild-nav.tsx dashboard-nav.ts",
+          "GuildLayout dashboard guildId layout aside GuildNav",
+          "GUILD_NAV_ITEMS discord-notifier label module GuildDashboardPage redirect"
+        ]
+      },
+      "acceptance": [
+        "Every GUILD_NAV_ITEMS entry has a group, and a GUILD_NAV_GROUPS list gives the group order and headings: Server (Overview, General, Commands, Integrations), Moderation (Moderation, AutoMod, Logging, Case Log, Audit Log), Members (Auto Roles, Reaction Roles, Auto Voice, Welcome Card, Farewell Card), Engagement (XP & Ranking, Games, Giveaways), Waifu TCG (Waifu TCG, TCG Achievements), Features (Music, AI Chatbot, Image Generation, Stream Alerts, Free Games). Slugs and labels are unchanged; GUILD_NAV_ITEMS[0] is still overview.",
+        "From the md breakpoint up, GuildNav renders one list per group under a small heading (not a link), with tighter link spacing than today; the current-page highlight and aria-current keep the longest-slug rule. The sidebar stays in view while the page scrolls (sticky) and scrolls on its own when taller than the viewport.",
+        "Below md, the link list is hidden and a labelled native <select> with one <optgroup> per group replaces it. It shows the current page as selected and navigates with router.push to the chosen page. No new dependency.",
+        "Tests: a dashboard-nav test checks every item has a known group, every group has items, and slugs are unique; a jsdom guild-nav test checks the group headings, the current page highlight (tcg/achievements does not also mark tcg), the select options and groups, and that changing the select calls router.push with the right href. No test is weakened or skipped."
+      ],
+      "verify_cmd": "pnpm vitest run apps/web/src/components/guild-nav.test.tsx apps/web/src/lib/dashboard-nav.test.ts && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1821",
+        "EPIC-018"
+      ]
+    },
+    {
+      "id": "TASK-1831",
+      "title": "Record Every Server the Bot Is In, with Its Owner and Inviter, in the guilds Table",
+      "status": "DONE",
+      "points": 5,
+      "parent": "STORY-183",
+      "children": [],
+      "requires": [],
+      "blocks": [
+        "TASK-1832"
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/src/schema/pg/identity.ts",
+          "packages/database/src/schema/sqlite/identity.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/migrations/guild-registry.ts",
+          "packages/database/src/migrations/guild-registry.test.ts",
+          "packages/database/src/repositories/guild.repository.ts",
+          "packages/database/src/repositories/guild.repository.behaviour.test.ts",
+          "packages/database/src/index.ts",
+          "packages/database/src/copy/copy-database.ts",
+          "packages/database/src/copy/copy-database.flow.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/testing/dialects.ts",
+          "apps/bot/src/listeners/index.ts",
+          "apps/bot/src/listeners/guild-registry.listener.ts",
+          "apps/bot/src/listeners/__tests__/guild-registry.listener.test.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/web/src/lib/server/services.ts",
+          "docs/database.md"
+        ],
+        "symbols": [
+          "guilds",
+          "ensureCardSerialSchema",
+          "ensurePostgresSchema",
+          "createBotServices",
+          "BotServices",
+          "BOT_INVITE_PERMISSIONS"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "guilds pgTable identity.ts ownerId joinedAt isActive sqlite guilds",
+          "ensureCardSerialSchema ensureAdventureSchema ensurePostgresSchema main.ts startup upgrades copy-database",
+          "command-sync.ts Events.GuildCreate client ready listener",
+          "createBotServices BotServices BotActivityRepository describeDialects behaviour test"
+        ]
+      },
+      "acceptance": [
+        "guilds gets a nullable invited_by_id column in both dialects. The generated DDL files are regenerated (pnpm -F @ririko/database db:generate-ddl) and their parity tests pass. An additive, idempotent upgrade (ensureGuildRegistrySchema in packages/database/src/migrations/guild-registry.ts) adds the column to existing SQLite and PostgreSQL databases; the bot, the dashboard and db:copy run it at startup next to the existing upgrades. A second run changes nothing.",
+        "A GuildRepository (both dialects) upserts a server (id, name, icon URL, owner ID, joined at, active), marks servers inactive, sets the inviter only when it is still null, and lists every server. It is exported from @ririko/database and has a describeDialects behaviour test.",
+        "The bot keeps the table current: on every ready it upserts every cached guild as active and marks rows for guilds it is no longer in inactive; on GuildCreate it upserts the guild; on GuildUpdate it updates name, icon and owner; on GuildDelete it marks the guild inactive, except when the guild is only unavailable (an outage). Database errors are logged and never stop the bot.",
+        "The inviter is read from the audit log (AuditLogEvent.BotAdd, the entry whose target is the bot) on GuildCreate, and once on ready for active guilds whose inviter is still null. A missing permission, an expired entry (Discord keeps 45 days) or any API error leaves it null. Ready backfill runs one guild at a time, so it never bursts the audit log endpoint.",
+        "Tests cover the upgrade (adds the column, idempotent), the repository, and the listener: ready sync and inactive marking, create, update, delete versus unavailable, inviter found, inviter missing or forbidden. No test is weakened or skipped; the coverage gate holds for the changed files."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database apps/bot/src/listeners && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1831",
+        "STORY-183",
+        "EPIC-018"
+      ]
+    },
+    {
+      "id": "TASK-1832",
+      "title": "Owner Console Servers Tab: Server List, Inviters and Cross-Server Command Usage",
+      "status": "DONE",
+      "points": 5,
+      "parent": "STORY-183",
+      "children": [],
+      "requires": [
+        "TASK-1831"
+      ],
+      "blocks": [],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "apps/web/src/components/owner-nav.tsx",
+          "apps/web/src/app/owner/servers/page.tsx",
+          "apps/web/src/lib/server/owner/server-usage.ts",
+          "apps/web/src/lib/server/owner/server-usage.test.ts",
+          "apps/web/src/components/top-commands.tsx",
+          "apps/web/src/components/top-commands.test.tsx",
+          "apps/web/src/app/dashboard/[guildId]/overview/page.tsx",
+          "packages/database/src/repositories/bot-activity.repository.ts",
+          "packages/database/src/repositories/bot-activity.repository.behaviour.test.ts",
+          "apps/web/src/lib/server/services.ts",
+          "apps/web/src/app/owner/servers/page.test.tsx"
+        ],
+        "symbols": [
+          "OwnerNav",
+          "requireOwner",
+          "BotActivityRepository.listCommandUsage",
+          "summarizeCommandUsage",
+          "UsageChart",
+          "UserDirectory",
+          "GuildRepository",
+          "GuildOverviewPage"
+        ],
+        "entry_points": [
+          "apps/web/src/app/owner/servers/page.tsx"
+        ],
+        "codegraph_queries": [
+          "OwnerNav OWNER_PAGES requireOwner OwnerLayout owner console page",
+          "BotActivityRepository listCommandUsage summarizeCommandUsage loadGuildOverview USAGE_DAYS",
+          "GuildOverviewPage UsageChart Most used commands numberFormat formatDay",
+          "UserDirectory UserSummary user names cache"
+        ]
+      },
+      "acceptance": [
+        "The owner console has a Servers tab (/owner/servers) after the existing tabs. The page calls requireOwner('/owner/servers'), so other users get a 404 and owners need a recent passkey check, like every owner page. It is read-only: no actions, no forms.",
+        "The page lists every active server from GuildRepository: icon, name, server ID, owner and inviter as Discord user names (UserDirectory, falling back to the ID), joined date, and, for the last 30 UTC days, total commands, the busiest day (date and count) and the top command. Rows are sorted by 30-day total, highest first. An unknown inviter reads \"Unknown\" with a short note (audit log missing or older than 45 days). Servers the bot has left are listed in a separate, collapsed section.",
+        "Above the list, a cross-server section shows the 30-day usage chart (UsageChart) and the most used commands across all servers, the same view as the server Overview. Choosing a server (?guild=<id>, validated against the listed servers) shows that server's chart and top commands instead.",
+        "Usage comes from one new BotActivityRepository query for every guild's rows since a day (both dialects, behaviour test), summarized by a pure helper in apps/web/src/lib/server/owner/server-usage.ts that reuses summarizeCommandUsage. The most used commands list moves from the Overview page into a shared component used by both pages, with no visible change on the Overview page.",
+        "Tests: the repository query, the summary helper (per-server totals, busiest day, top command, sorting, empty data), and the shared list component. No test is weakened or skipped; the coverage gate holds for the changed files."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src/repositories/bot-activity apps/web/src/lib/server/owner apps/web/src/components && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1832",
+        "STORY-183",
+        "EPIC-018"
+      ]
+    },
+    {
+      "id": "TASK-1841",
+      "title": "Record the Inviter Through a Dashboard Invite Flow and an Integrations Fallback",
+      "status": "DONE",
+      "points": 8,
+      "parent": "STORY-184",
+      "children": [],
+      "requires": [],
+      "blocks": [
+        "TASK-1842"
+      ],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/src/schema/pg/identity.ts",
+          "packages/database/src/schema/sqlite/identity.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/migrations/guild-registry.ts",
+          "packages/database/src/migrations/guild-registry.test.ts",
+          "packages/database/src/repositories/guild.repository.ts",
+          "packages/database/src/repositories/guild.repository.behaviour.test.ts",
+          "apps/bot/src/listeners/guild-registry.listener.ts",
+          "apps/bot/src/listeners/__tests__/guild-registry.listener.test.ts",
+          "apps/web/src/lib/server/auth/discord-oauth.ts",
+          "apps/web/src/lib/server/auth/discord-oauth.test.ts",
+          "apps/web/src/lib/server/auth/oauth-state.ts",
+          "apps/web/src/lib/server/auth/session.ts",
+          "apps/web/src/lib/server/services.ts",
+          "apps/web/src/lib/server/guilds/permissions.ts",
+          "apps/web/src/lib/server/guilds/guild-access.test.ts",
+          "apps/web/src/app/api/invite/route.ts",
+          "apps/web/src/app/api/invite/route.test.ts",
+          "apps/web/src/app/api/invite/callback/route.ts",
+          "apps/web/src/app/api/invite/callback/route.test.ts",
+          "apps/web/src/app/servers/page.tsx",
+          "apps/web/src/lib/server/testing/authorization-coverage.ts",
+          "apps/web/src/lib/login-errors.ts",
+          "docs/dashboard.md",
+          "docs/database.md",
+          "apps/web/src/app/owner/servers/page.test.tsx",
+          "apps/web/src/lib/server/owner/server-usage.test.ts",
+          "apps/web/src/app/servers/page.test.tsx",
+          "apps/web/src/lib/server/auth/oauth-state.test.ts"
+        ],
+        "symbols": [
+          "GuildRepository",
+          "ensureGuildRegistrySchema",
+          "findBotInviter",
+          "registerGuildRegistryListener",
+          "DiscordOAuthClient",
+          "sealPendingLogin",
+          "openPendingLogin",
+          "botInviteUrl",
+          "BOT_INVITE_PERMISSIONS",
+          "AUTH_ROUTE_ALLOWLIST",
+          "limitAuthRequest"
+        ],
+        "entry_points": [
+          "apps/web/src/app/api/invite/route.ts",
+          "apps/web/src/app/api/invite/callback/route.ts",
+          "apps/bot/src/listeners/guild-registry.listener.ts"
+        ],
+        "codegraph_queries": [
+          "GuildRepository upsert setInviterIfMissing ensureGuildRegistrySchema guilds invitedById",
+          "findBotInviter registerGuildRegistryListener fetchAuditLogs BotAdd",
+          "DiscordOAuthClient authorizationUrl exchangeCode createPkcePair sealPendingLogin openPendingLogin OAUTH_COOKIE",
+          "login route callback route limitAuthRequest AUTH_ROUTE_ALLOWLIST checkAuthorizationCoverage",
+          "ServersPage botInviteUrl BOT_INVITE_PERMISSIONS"
+        ]
+      },
+      "acceptance": [
+        "guilds gets a nullable invited_via column (oauth, audit_log or integration) in both dialects; DDL regenerated; ensureGuildRegistrySchema adds invited_by_id and invited_via independently and stays idempotent, including on a database that already has invited_by_id from TASK-1831.",
+        "GuildRepository: setInviterIfMissing stores the source with the inviter; a new recordInvite(guild, inviterId) upserts the server as active from the dashboard and sets the inviter with source oauth, replacing any earlier inviter (the invite flow is authoritative). A later bot upsert of the active row keeps it. Behaviour test on both dialects.",
+        "Bot: when the audit log names no inviter, findBotInviter reads the guild integrations (needs Manage Server) and takes the user of the integration whose application is the bot. It returns the user and the source; missing permissions or API errors give null without noisy logs, as today.",
+        "Dashboard: GET /api/invite (optional ?guild=<snowflake>) starts Discord OAuth2 with scopes bot, applications.commands and identify, BOT_INVITE_PERMISSIONS, response_type code, PKCE and a sealed short-lived state cookie, redirect_uri ${DASHBOARD_URL}/api/invite/callback. It needs no dashboard session, so the Developer Portal install link can point at it. GET /api/invite/callback checks the state, exchanges the code, reads the user, records the server and inviter with recordInvite from the guild in the token response, upserts the user, revokes the token, and redirects to /servers (or the guild dashboard when the user signed in) with a success or error notice. It never creates a session. Both routes call limitAuthRequest and are in AUTH_ROUTE_ALLOWLIST.",
+        "The Servers page \"Invite Ririko\" button uses /api/invite?guild=<id>. docs/dashboard.md documents the maintainer steps in order: deploy, add the redirect URI ${DASHBOARD_URL}/api/invite/callback in the Developer Portal, set the Install Link to a custom URL ${DASHBOARD_URL}/api/invite, then turn on Requires OAuth2 Code Grant (until then, invites that skip the dashboard still work and fall back to the audit log or integrations). docs/database.md describes invited_via.",
+        "Tests: the upgrade, the repository, the integrations fallback, both routes (state mismatch, Discord error, missing guild in the token response, success path records the inviter and revokes the token) and the authorization coverage test. No test is weakened or skipped; the coverage gate holds for the changed files."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database apps/bot/src/listeners apps/web/src/lib/server apps/web/src/app/api apps/web/src/app/servers && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1841",
+        "STORY-184",
+        "STORY-183",
+        "EPIC-018"
+      ]
+    },
+    {
+      "id": "TASK-1842",
+      "title": "Servers Tab: Owner and Inviter as Username and ID, Inviter Source and Contact Fallback",
+      "status": "DONE",
+      "points": 2,
+      "parent": "STORY-184",
+      "children": [],
+      "requires": [
+        "TASK-1841"
+      ],
+      "blocks": [],
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "apps/web/src/app/owner/servers/page.tsx",
+          "apps/web/src/app/owner/servers/page.test.tsx",
+          "apps/web/src/lib/server/owner/server-usage.ts",
+          "apps/web/src/lib/server/owner/server-usage.test.ts"
+        ],
+        "symbols": [
+          "OwnerServersPage",
+          "ServerTable",
+          "loadServerUsage",
+          "summarizeServers",
+          "ServerRow",
+          "UserDirectory"
+        ],
+        "entry_points": [
+          "apps/web/src/app/owner/servers/page.tsx"
+        ],
+        "codegraph_queries": [
+          "OwnerServersPage ServerTable ServerRow loadServerUsage summarizeServers",
+          "UserDirectory UserSummary lookup username"
+        ]
+      },
+      "acceptance": [
+        "Owner and inviter cells show the Discord username and ID as \"username (ID)\", for example \"angel.net.my (1257377848671600722)\", with the display name as the cell title; when Discord cannot return the user, only the ID. The text is selectable so it can be copied.",
+        "The inviter cell names its source under the name: \"via invite link\" (oauth), \"via audit log\" or \"via integrations\". With no inviter it reads \"Unknown\" and says the owner is the contact for that server.",
+        "ServerRow carries invitedVia and the user summaries (username, display name) instead of only display names; the page and its tests are updated. No test is weakened or skipped."
+      ],
+      "verify_cmd": "pnpm vitest run apps/web/src/lib/server/owner apps/web/src/app/owner && pnpm --filter @ririko/web typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1842",
+        "STORY-184"
       ]
     }
   ],

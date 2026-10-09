@@ -23,7 +23,7 @@ export default async function GuildLayout({
     <>
       <SiteHeader />
       <div className="mx-auto max-w-6xl px-4 py-8 md:grid md:grid-cols-[14rem_1fr] md:gap-10">
-        <aside className="mb-6 flex flex-col gap-6 md:mb-0">
+        <aside className="mb-6 flex flex-col gap-6 md:sticky md:top-4 md:mb-0 md:max-h-[calc(100vh-2rem)] md:self-start md:overflow-y-auto">
           <Link href="/servers" className="text-sm text-zinc-400 hover:text-zinc-200">
             ← All servers
           </Link>

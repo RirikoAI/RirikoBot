@@ -28,6 +28,10 @@ export const guilds = pgTable('guilds', {
   name: text('name').notNull(),
   iconUrl: text('icon_url'),
   ownerId: varchar('owner_id', { length: 32 }).notNull(),
+  /** The member who added the bot, from the audit log; null when Discord no longer says. */
+  invitedById: varchar('invited_by_id', { length: 32 }),
+  /** How the inviter was learned: `oauth`, `audit_log` or `integration`; null with no inviter. */
+  invitedVia: varchar('invited_via', { length: 16 }),
   joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
