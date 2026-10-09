@@ -24,6 +24,13 @@ export interface UserAlbumEntry {
   source: WaifuSource | null;
 }
 
+/** A user's collection milestones, used by the collection achievements. */
+export interface CollectionStats {
+  uniqueCards: number;
+  elements: number;
+  mythicCards: number;
+}
+
 export class WaifuCardRepository extends BaseRepository<
   WaifuCard,
   NewWaifuCard,
@@ -580,6 +587,47 @@ export class WaifuCardRepository extends BaseRepository<
         .from(pgSchema.userCards)
         .where(and(...conditions));
       return Number(res?.count ?? 0);
+    }
+  }
+
+  /**
+   * Collection milestones for achievements: distinct cards owned, distinct elements among them and
+   * distinct MYTHIC cards. Duplicate copies of one card count once.
+   */
+  async getCollectionStats(userId: string, tx?: DatabaseClient): Promise<CollectionStats> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const s = sqliteSchema;
+      const [res] = await client.db
+        .select({
+          uniqueCards: sql<number>`count(distinct ${s.userCards.cardId})`,
+          elements: sql<number>`count(distinct ${s.waifuCards.element})`,
+          mythicCards: sql<number>`count(distinct case when ${s.waifuCards.rarity} = 'MYTHIC' then ${s.userCards.cardId} end)`,
+        })
+        .from(s.userCards)
+        .innerJoin(s.waifuCards, eq(s.userCards.cardId, s.waifuCards.id))
+        .where(eq(s.userCards.userId, userId));
+      return {
+        uniqueCards: Number(res?.uniqueCards ?? 0),
+        elements: Number(res?.elements ?? 0),
+        mythicCards: Number(res?.mythicCards ?? 0),
+      };
+    } else {
+      const p = pgSchema;
+      const [res] = await client.db
+        .select({
+          uniqueCards: sql<number>`count(distinct ${p.userCards.cardId})`,
+          elements: sql<number>`count(distinct ${p.waifuCards.element})`,
+          mythicCards: sql<number>`count(distinct case when ${p.waifuCards.rarity} = 'MYTHIC' then ${p.userCards.cardId} end)`,
+        })
+        .from(p.userCards)
+        .innerJoin(p.waifuCards, eq(p.userCards.cardId, p.waifuCards.id))
+        .where(eq(p.userCards.userId, userId));
+      return {
+        uniqueCards: Number(res?.uniqueCards ?? 0),
+        elements: Number(res?.elements ?? 0),
+        mythicCards: Number(res?.mythicCards ?? 0),
+      };
     }
   }
 

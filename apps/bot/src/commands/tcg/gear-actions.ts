@@ -1,5 +1,6 @@
 import type { EnhancementResult } from '@ririko/services';
 import type { BotServices } from '../../services.js';
+import { recordEnhancementAchievement } from './achievement-progress.js';
 
 /**
  * Enhances a gear piece by one level: the enhancement service spends the Crafting Dust, then the
@@ -28,6 +29,8 @@ export async function enhanceGear(
       guildId: context.guildId,
     });
   }
+
+  await recordEnhancementAchievement(services, userId, result.newLevel);
 
   return { ...result, dustLeft: await services.enhancementService.getDustBalance(userId) };
 }

@@ -18,6 +18,7 @@ describe('Card Command Suite (TASK-1012)', () => {
   let cardRepo: WaifuCardRepository;
   let assetRepo: WaifuAssetRepository;
   let dropManager: DropManager;
+  let syncCollection: ReturnType<typeof vi.fn>;
   let dismantleService: CardDismantleService;
   let services: BotServices;
   let getCardImage: ReturnType<typeof vi.fn>;
@@ -152,12 +153,14 @@ describe('Card Command Suite (TASK-1012)', () => {
     };
 
     getCardImage = vi.fn(async () => Buffer.from('rendered-card-png'));
+    syncCollection = vi.fn().mockResolvedValue(undefined);
 
     services = {
       cardImageService: { getCardImage } as any,
       waifuAssetRepo: assetRepo,
       waifuCardRepo: cardRepo,
       dropManager,
+      achievementService: { syncCollection },
       dismantleService,
       loadoutService: mockLoadoutService as any,
       userInventoryItemRepo: { findByUser: async () => [] } as any,
@@ -246,6 +249,7 @@ describe('Card Command Suite (TASK-1012)', () => {
     expect(repliesClaim[0].files).toEqual([
       { attachment: Buffer.from('rendered-card-png'), name: 'card.png' },
     ]);
+    expect(syncCollection.mock.calls).toEqual([['user_lucky']]);
     expect(getCardImage).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Rias Gremory' }),
       expect.objectContaining({ characterName: 'Rias Gremory' }),

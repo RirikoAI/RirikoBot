@@ -17,6 +17,7 @@ import {
   buildCardInspectComponents,
 } from './cards.command.js';
 import { resolveUserCard } from './card-resolver.js';
+import { syncCollectionAchievements } from './achievement-progress.js';
 import { resolveContextPrefix } from '../shared/prefix-resolver.js';
 
 const CARD_IMAGE_NAME = 'card.png';
@@ -327,6 +328,7 @@ export function createCardCommand(services: BotServices): Command {
             });
             return;
           }
+          await syncCollectionAchievements(services, ctx.user.id);
 
           const tier = RARITY_TIERS[(claimResult.card?.rarity as CardRarity) ?? 'COMMON'];
           const claimSource = claimResult.asset

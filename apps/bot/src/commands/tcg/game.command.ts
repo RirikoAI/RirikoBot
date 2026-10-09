@@ -2,6 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { openShopMenu } from './shop-menu.js';
+import { recordAchievementProgress } from './achievement-progress.js';
 import { type ExpeditionDuration } from '@ririko/services';
 
 export function createGameCommand(services: BotServices): Command {
@@ -186,6 +187,9 @@ export function createGameCommand(services: BotServices): Command {
           } else if (duelResult.winnerUserId === targetUser.id) {
             services.questService.recordProgress(targetUser.id, 'daily_pvp_win', 1);
           }
+          if (duelResult.winnerUserId !== 'DRAW') {
+            await recordAchievementProgress(services, duelResult.winnerUserId, 'PVP_WINS', 1);
+          }
 
           const isChallengerWinner = duelResult.winnerUserId === ctx.user.id;
           const isDraw = duelResult.winnerUserId === 'DRAW';
@@ -353,6 +357,12 @@ export function createGameCommand(services: BotServices): Command {
             services.questService.recordProgress(
               ctx.user.id,
               'weekly_boss_raid_damage',
+              attackRes.damageDealt,
+            );
+            await recordAchievementProgress(
+              services,
+              ctx.user.id,
+              'BOSS_DAMAGE',
               attackRes.damageDealt,
             );
 

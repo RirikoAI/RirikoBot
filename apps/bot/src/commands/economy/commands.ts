@@ -1,5 +1,6 @@
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
+import { recordAchievementProgress } from '../tcg/achievement-progress.js';
 
 /**
  * Creates the complete suite of 11 dual-dispatch Economy commands with full Slash & Prefix parity:
@@ -63,6 +64,7 @@ export function createEconomyCommands(services: BotServices): Command[] {
       const res = await services.dailyService.claimDaily(ctx.user.id, ctx.guild?.id);
 
       if (res.success) {
+        await recordAchievementProgress(services, ctx.user.id, 'DAILY_STREAK', res.streak, true);
         const bonusPercent = Math.round((res.multiplier - 1.0) * 100);
         await ctx.reply({
           content: `🎉 **Daily Reward Claimed!**\n• Awarded: **+${res.creditsAwarded} credits**\n• Consecutive Streak: **${res.streak} days** (+${bonusPercent}% bonus)\n• Wallet Balance: **${(res.walletBalance ?? 0).toLocaleString()} credits**`,

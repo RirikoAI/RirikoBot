@@ -231,6 +231,35 @@ describeDialects('WaifuCardRepository behaviour', (db) => {
     expect(await repo.countUserCards('nobody')).toBe(0);
   });
 
+  it('summarises a collection by distinct cards, elements and mythic cards', async () => {
+    const repo = new WaifuCardRepository(db.client);
+    const fire = await repo.create(cardInput(1));
+    const ice = await repo.create(cardInput(2, { element: 'ICE' }));
+    const mythic = await repo.create(cardInput(3, { element: 'ICE', rarity: 'MYTHIC' }));
+    await repo.createUserCard({ userId: 'u1', cardId: fire.id, serialNumber: 1 });
+    await repo.createUserCard({ userId: 'u1', cardId: fire.id, serialNumber: 2 });
+    await repo.createUserCard({ userId: 'u1', cardId: ice.id, serialNumber: 3 });
+    await repo.createUserCard({ userId: 'u1', cardId: mythic.id, serialNumber: 4 });
+    await repo.createUserCard({ userId: 'u1', cardId: mythic.id, serialNumber: 5 });
+    await repo.createUserCard({ userId: 'u2', cardId: fire.id, serialNumber: 6 });
+
+    expect(await repo.getCollectionStats('u1')).toEqual({
+      uniqueCards: 3,
+      elements: 2,
+      mythicCards: 1,
+    });
+    expect(await repo.getCollectionStats('u2')).toEqual({
+      uniqueCards: 1,
+      elements: 1,
+      mythicCards: 0,
+    });
+    expect(await repo.getCollectionStats('nobody')).toEqual({
+      uniqueCards: 0,
+      elements: 0,
+      mythicCards: 0,
+    });
+  });
+
   it('transfers a card to a new owner and state, and reports missing cards as null', async () => {
     const repo = new WaifuCardRepository(db.client);
     const card = await repo.create(cardInput(1));

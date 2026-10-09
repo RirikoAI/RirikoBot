@@ -204,6 +204,7 @@ describe('DungeonBattleManager (TASK-1254)', () => {
         update: vi.fn().mockResolvedValue(undefined),
       },
       gameItemRepo: { findById: vi.fn() },
+      achievementService: { recordProgress: vi.fn().mockResolvedValue([]) },
     };
     manager = new DungeonBattleManager(services as BotServices);
   });
@@ -566,6 +567,50 @@ describe('DungeonBattleManager (TASK-1254)', () => {
       expect(payload.components[0].components[0].data.label).toBe('⚔️ Next Floor (Floor 2)');
     });
 
+    describe('DUNGEON_FLOOR achievement progress', () => {
+      const playToTheEnd = async () => {
+        await collect(component('dungeon:action:attack'));
+        const final = component('dungeon:action:attack');
+        await collect(final);
+        return final;
+      };
+
+      it('records the highest cleared floor, absolute, after a season win', async () => {
+        services.dungeonRunner.finalizeBattleResult.mockResolvedValue(
+          runResult({ highestFloorCleared: 7 }),
+        );
+        await playToTheEnd();
+
+        expect(services.achievementService.recordProgress).toHaveBeenCalledTimes(1);
+        expect(services.achievementService.recordProgress).toHaveBeenCalledWith(
+          'u1',
+          'DUNGEON_FLOOR',
+          7,
+          true,
+        );
+      });
+
+      it('records nothing after a defeat', async () => {
+        services.dungeonRunner.finalizeBattleResult.mockResolvedValue(
+          runResult({ victory: false }),
+        );
+        await playToTheEnd();
+
+        expect(services.achievementService.recordProgress).not.toHaveBeenCalled();
+      });
+
+      it('still shows the victory report when recording fails', async () => {
+        services.achievementService.recordProgress.mockRejectedValue(new Error('database is down'));
+        const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const final = await playToTheEnd();
+
+        expect(final.update.mock.calls[0]![0].embeds[0].data.title).toBe(
+          '🏆 Floor 1 CLEARED! — Victory!',
+        );
+        expect(logged).toHaveBeenCalled();
+      });
+    });
+
     it('forfeiting ends the battle as a defeat with retry offered', async () => {
       services.dungeonRunner.finalizeBattleResult.mockResolvedValue(runResult({ victory: false }));
       const flee = component('dungeon:action:flee');
@@ -879,6 +924,18 @@ describe('DungeonBattleManager (TASK-1254)', () => {
         'dungeon:action:enter_season_1',
         'dungeon:action:status',
       ]);
+    });
+
+    it('a tutorial win does not count towards the dungeon floor achievement', async () => {
+      sessions[0] = fakeSession([turnState(), victory()], {
+        seasonId: 'season_tutorial',
+        floorNumber: 4,
+      });
+      await manager.startBattle(ctx, tutorialOptions(4));
+      await collect(component('dungeon:action:attack'));
+
+      expect(services.dungeonRunner.finalizeBattleResult).toHaveBeenCalled();
+      expect(services.achievementService.recordProgress).not.toHaveBeenCalled();
     });
 
     it('clearing floor 3 grants its reward, and a refused reward adds no message', async () => {

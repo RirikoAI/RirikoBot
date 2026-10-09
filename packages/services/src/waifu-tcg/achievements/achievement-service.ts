@@ -109,9 +109,28 @@ export class AchievementService {
   }
 
   /**
-   * Claims rewards for an unlocked achievement atomically.
+   * Brings the collection achievements (CARD_COUNT, ELEMENTAL_COUNT, MYTHIC_CARD_COUNT) up to the
+   * user's current collection. Values are absolute and keep the highest seen, so giving a card
+   * away never lowers progress. A no-op when no card repository was provided.
+   */
+  async syncCollection(userId: string): Promise<void> {
+    if (!this.waifuCardRepo) return;
+    const stats = await this.waifuCardRepo.getCollectionStats(userId);
+    await this.recordProgress(userId, 'CARD_COUNT', stats.uniqueCards, true);
+    await this.recordProgress(userId, 'ELEMENTAL_COUNT', stats.elements, true);
+    await this.recordProgress(userId, 'MYTHIC_CARD_COUNT', stats.mythicCards, true);
+  }
+
+  /**
+   * Claims rewards for an unlocked achievement atomically. Syncs collection progress first, so a
+   * card obtained outside the tracked sources still counts.
    */
   async claimAchievement(userId: string, codeOrId: string): Promise<AchievementClaimResult> {
+    await this.syncCollection(userId);
+    return this.claimSynced(userId, codeOrId);
+  }
+
+  private async claimSynced(userId: string, codeOrId: string): Promise<AchievementClaimResult> {
     const achievement =
       (await this.achievementRepo.findById(codeOrId)) ??
       (await this.achievementRepo.findByCode(codeOrId));
@@ -236,6 +255,7 @@ export class AchievementService {
    * Claims all currently unlocked and unclaimed achievements for a user.
    */
   async claimAll(userId: string): Promise<AchievementClaimResult[]> {
+    await this.syncCollection(userId);
     const userAchievements = await this.achievementRepo.listUserAchievements(userId, {
       isUnlocked: true,
       isClaimed: false,
@@ -243,7 +263,7 @@ export class AchievementService {
 
     const results: AchievementClaimResult[] = [];
     for (const uAch of userAchievements) {
-      const res = await this.claimAchievement(userId, uAch.achievement.id);
+      const res = await this.claimSynced(userId, uAch.achievement.id);
       results.push(res);
     }
     return results;
@@ -255,6 +275,7 @@ export class AchievementService {
   async getUserAchievements(
     userId: string,
   ): Promise<(UserAchievement & { achievement: GameAchievement })[]> {
+    await this.syncCollection(userId);
     const all = await this.achievementRepo.listAchievements();
     const userMap = new Map<string, UserAchievement>();
 

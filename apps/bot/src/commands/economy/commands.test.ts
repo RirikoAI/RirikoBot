@@ -337,10 +337,16 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
 
   describe('2. /daily command', () => {
     it('successfully claims daily reward and reflects in wallet', async () => {
+      const recordProgress = vi
+        .spyOn(services.achievementService, 'recordProgress')
+        .mockResolvedValue([]);
       const replyFn = vi.fn().mockResolvedValue(undefined);
       const ctx = createMockContext({ userId: 'user_daily_01', replyFn });
 
       await commands.get('daily')!(ctx);
+
+      expect(recordProgress).toHaveBeenCalledTimes(1);
+      expect(recordProgress).toHaveBeenCalledWith('user_daily_01', 'DAILY_STREAK', 1, true);
 
       expect(replyFn).toHaveBeenCalledTimes(1);
       const callArgs = replyFn.mock.calls[0]?.[0];
@@ -355,6 +361,22 @@ describe('Economy Discord Commands Suite & Gateway Listeners (TASK-0442)', () =>
 
       const callArgs2 = replyFn2.mock.calls[0]?.[0];
       expect(callArgs2.content).toContain('Daily Reward Cooldown');
+      expect(recordProgress).toHaveBeenCalledTimes(1);
+    });
+
+    it('still replies when recording the streak fails', async () => {
+      vi.spyOn(services.achievementService, 'recordProgress').mockRejectedValue(
+        new Error('database is down'),
+      );
+      const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const replyFn = vi.fn().mockResolvedValue(undefined);
+      const ctx = createMockContext({ userId: 'user_daily_02', replyFn });
+
+      await commands.get('daily')!(ctx);
+
+      expect(replyFn.mock.calls[0]?.[0].content).toContain('Daily Reward Claimed!');
+      expect(logged).toHaveBeenCalled();
+      logged.mockRestore();
     });
   });
 

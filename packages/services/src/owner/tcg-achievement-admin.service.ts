@@ -61,7 +61,7 @@ function byCategoryThenTitle(a: AchievementView, b: AchievementView): number {
 
 /**
  * Waifu TCG achievements. The owner changes wording, tier, rewards and visibility; the
- * requirement stays, because the bot only records progress for `TRACKED_ACHIEVEMENT_TYPES`.
+ * requirement stays, because the bot records progress for the types in `TRACKED_ACHIEVEMENT_TYPES`.
  * The bot seeds missing achievements at start without touching existing rows, so edits last.
  * Guild managers get read-only completion counts for their members.
  */

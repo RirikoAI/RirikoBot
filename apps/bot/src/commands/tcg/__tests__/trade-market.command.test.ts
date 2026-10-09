@@ -7,6 +7,7 @@ import type { CommandContext } from '@ririko/discord';
 describe('TASK-1051: Trade & Market Command Suites', () => {
   let services: BotServices;
   let replyMock: any;
+  let syncCollection: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     replyMock = vi.fn().mockResolvedValue(undefined);
@@ -24,6 +25,8 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
       }),
       acceptTrade: vi.fn().mockResolvedValue({
         id: 'trade_123',
+        senderUserId: 'user_2',
+        receiverUserId: 'user_1',
         status: 'ACCEPTED',
       }),
       rejectTrade: vi.fn().mockResolvedValue({
@@ -121,9 +124,11 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
       ]),
     };
 
+    syncCollection = vi.fn().mockResolvedValue(undefined);
     services = {
       tradeService: mockTradeService,
       marketService: mockMarketService,
+      achievementService: { syncCollection },
     } as unknown as BotServices;
   });
 
@@ -181,6 +186,23 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
       await cmd.execute(ctx);
       expect(services.tradeService.acceptTrade).toHaveBeenCalledWith('trade_123', 'user_1');
       expect(replyMock).toHaveBeenCalled();
+      // Both traders' collections changed, so both catch up on collection achievements.
+      expect(syncCollection.mock.calls).toEqual([['user_2'], ['user_1']]);
+    });
+
+    it('still completes /trade accept when the collection sync fails', async () => {
+      syncCollection.mockRejectedValue(new Error('database is down'));
+      const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const cmd = createTradeCommand(services);
+      const ctx = createMockContext({ action: 'accept', trade_id: 'trade_123' }, [
+        'accept',
+        'trade_123',
+      ]);
+
+      await cmd.execute(ctx);
+
+      expect(replyMock.mock.calls[0]![0].embeds[0].data.title).toContain('Trade Completed');
+      logged.mockRestore();
     });
 
     it('handles /trade reject and cancel', async () => {
@@ -246,6 +268,7 @@ describe('TASK-1051: Trade & Market Command Suites', () => {
         buyerUserId: 'user_1',
       });
       expect(replyMock).toHaveBeenCalled();
+      expect(syncCollection.mock.calls).toEqual([['user_1']]);
     });
 
     it('handles /market cancel correctly', async () => {
