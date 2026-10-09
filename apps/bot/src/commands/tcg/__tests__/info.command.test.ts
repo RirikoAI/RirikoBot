@@ -121,6 +121,8 @@ describe('Waifu TCG Info & Player Guide Command Suite (/tcg-info)', () => {
     expect(embed.data.title).toContain('Equipments, Accessories & +10 Enhancement');
     expect(embed.data.description).toContain('6 Gear Slots');
     expect(embed.data.description).toContain('Crafting Dust');
+    expect(embed.data.description).toContain('[EQUIPPED: <SLOT> on <card name>]');
+    expect(embed.data.description).toContain("shows each item's ID for the by-ID commands");
   });
 
   it('should render tutorial prologue warning when topic is "tutorial"', async () => {

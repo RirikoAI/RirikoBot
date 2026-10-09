@@ -123,7 +123,7 @@ export function buildTcgInfoEmbed(
             `• Press **Equip**. The old piece goes back to your inventory. **Unequip**, **Unequip All** and **Enhance** are on the same screen.\n` +
             `• Empty a card: \`/card action:unequip-all id:<card_id>\`. Without an ID it empties every card you own.\n` +
             `• Gear stays yours: only empty cards can be sold or traded, and dismantling a card returns its gear to your inventory.\n` +
-            `• Check worn gear: \`/item action:inventory\` tags it \`[EQUIPPED: <SLOT>]\`.\n` +
+            `• Check worn gear: \`/item action:inventory\` tags it \`[EQUIPPED: <SLOT> on <card name>]\` and shows each item's ID for the by-ID commands below.\n` +
             `• By ID: \`/card action:equip-gear id:<card_id> item_id:<item_id> slot:<SLOT>\` and \`/card action:unequip-gear item_id:<item_id>\`.`,
         )
         .setFooter({ text: 'Buy gear with /game action:shop, or craft it with /craft!' });

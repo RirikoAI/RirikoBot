@@ -12,6 +12,7 @@ describe('Item Command Suite (TASK-1032)', () => {
   let userInventory: Map<string, UserInventoryItem>;
   let userBalances: Map<string, { walletBalance: string }>;
   let modifiedBalances: any[];
+  let cardLookups: string[];
 
   beforeEach(() => {
     itemsCatalog = new Map();
@@ -117,8 +118,19 @@ describe('Item Command Suite (TASK-1032)', () => {
       },
     };
 
+    cardLookups = [];
+    const userCards = new Map([
+      ['uc_hero', { id: 'uc_hero', userId: 'user_123', cardId: 'base_hero' }],
+    ]);
+    const waifuCards = new Map([['base_hero', { id: 'base_hero', name: 'Aria Nightbloom' }]]);
+
     const mockWaifuCardRepo = {
       listUserCards: async () => [],
+      findUserCardById: async (id: string) => {
+        cardLookups.push(id);
+        return userCards.get(id) ?? null;
+      },
+      findById: async (id: string) => waifuCards.get(id) ?? null,
     };
 
     const mockEnhancementService = {
@@ -284,6 +296,95 @@ describe('Item Command Suite (TASK-1032)', () => {
       expect(replies).toHaveLength(1);
       const embed = replies[0].embeds[0];
       expect(embed.data.description).toContain('empty');
+    });
+
+    it('shows each item ID on its inventory line', async () => {
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({ subcommand: 'inventory' });
+
+      await command.execute(ctx);
+
+      const description = replies[0].embeds[0].data.description as string;
+      expect(description).toContain('ID: `inv_user_sword_1`');
+      expect(description).toContain('ID: `inv_user_pot_1`');
+      expect(description).toContain('Selected Item');
+      expect(description).toContain('· ID: `inv_user_sword_1`');
+    });
+
+    it('names the card that wears each worn piece, looking the card up once', async () => {
+      const sword = userInventory.get('inv_user_sword_1')!;
+      userInventory.set(sword.id, {
+        ...sword,
+        state: 'EQUIPPED',
+        slot: 'WEAPON',
+        equippedToCardId: 'uc_hero',
+      });
+      userInventory.set('inv_user_armor_1', {
+        ...sword,
+        id: 'inv_user_armor_1',
+        state: 'EQUIPPED',
+        slot: 'ARMOR',
+        equippedToCardId: 'uc_hero',
+      });
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({ subcommand: 'inventory' });
+
+      await command.execute(ctx);
+
+      const description = replies[0].embeds[0].data.description as string;
+      expect(description).toContain('[EQUIPPED: WEAPON on Aria Nightbloom]');
+      expect(description).toContain('[EQUIPPED: ARMOR on Aria Nightbloom]');
+      expect(cardLookups.filter((id) => id === 'uc_hero')).toHaveLength(1);
+    });
+
+    it('falls back to the card ID when the card wearing a piece cannot be found', async () => {
+      const sword = userInventory.get('inv_user_sword_1')!;
+      userInventory.set(sword.id, {
+        ...sword,
+        state: 'EQUIPPED',
+        slot: 'WEAPON',
+        equippedToCardId: 'uc_gone',
+      });
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({ subcommand: 'inventory' });
+
+      await command.execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      const description = replies[0].embeds[0].data.description as string;
+      expect(description).toContain('[EQUIPPED: WEAPON on uc_gone]');
+    });
+
+    it('keeps the inventory embed within Discord description limits with 15 long lines', async () => {
+      const sword = userInventory.get('inv_user_sword_1')!;
+      const swordDef = itemsCatalog.get('item_sword_1')!;
+      itemsCatalog.set('item_long', {
+        ...swordDef,
+        id: 'item_long',
+        code: 'LONG_RELIC',
+        name: 'Long Named Relic Of Considerable Length',
+        description: 'D'.repeat(200),
+        battlePerks: ['BLEED_ON_HIT', 'BURN_ON_HIT', 'CHILL_ON_HIT'],
+      });
+      for (let i = 0; i < 16; i++) {
+        const id = `inv-${'0'.repeat(30)}${String(i).padStart(2, '0')}`;
+        userInventory.set(id, {
+          ...sword,
+          id,
+          itemId: 'item_long',
+          state: 'EQUIPPED',
+          slot: 'ARMOR',
+          equippedToCardId: 'uc_hero',
+        });
+      }
+      const command = createItemCommand(services);
+      const { ctx, replies } = createMockContext({ subcommand: 'inventory' });
+
+      await command.execute(ctx);
+
+      const description = replies[0].embeds[0].data.description as string;
+      expect(description.length).toBeLessThanOrEqual(4096);
+      expect(description).toContain('more not shown');
     });
   });
 

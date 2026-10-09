@@ -1795,13 +1795,16 @@
       "id": "STORY-162",
       "parent": "EPIC-015",
       "title": "Craft & Equip Button and Card Name on Worn Gear in Inventory",
-      "points": null,
-      "status": "BACKLOG",
+      "points": 3,
+      "status": "ABANDONED",
       "requires": [
         "STORY-160"
       ],
       "blocks": [],
-      "description": "Ungroomed. Crafted gear lands in the inventory and must be equipped separately; add a Craft & Equip button (onto the active card) like the shop's Buy & Equip. /item inventory tags worn gear [EQUIPPED: SLOT] without saying which card wears it; show the card name, and surface item IDs so /card action:equip-gear and unequip-gear are usable by hand."
+      "description": "Dropped on 2026-10-09 by user decision; no work was started. Craft & Equip saves one step over /loadout, which already equips gear, and the case players would want it for (upgrading worn gear) needs the equipped ingredient swapped out mid-craft. The real gap, that no screen shows inventory item IDs, moved to BUG-0039 together with the card name on worn gear. Originally: add a Craft & Equip button like the shop's Buy & Equip, show the wearing card on worn gear in /item inventory, and surface item IDs. Estimated at 3 when abandoned; it was never estimated before.",
+      "handovers": [
+        "STORY-162"
+      ]
     },
     {
       "id": "STORY-170",
@@ -8137,6 +8140,54 @@
         "BUG-0038",
         "STORY-181",
         "EPIC-017"
+      ]
+    },
+    {
+      "id": "BUG-0039",
+      "parent": "EPIC-015",
+      "title": "Inventory Never Shows Item IDs, So By-ID Gear and Item Commands Are Unusable",
+      "points": 1,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "Found while reviewing STORY-162. /card action:equip-gear, /card action:unequip-gear, /item action:enhance id: and /item action:use id: all take an inventory item ID, and /card help and /info tell players to use them, but no screen ever shows that ID. /item action:inventory tags worn gear only as [EQUIPPED: <SLOT>], without the card that wears it. Show each item's ID on its inventory line and name the wearing card on worn gear.",
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "apps/bot/src/commands/tcg/item.command.ts",
+          "apps/bot/src/commands/tcg/info.command.ts",
+          "apps/bot/src/commands/tcg/__tests__/item.command.test.ts",
+          "apps/bot/src/commands/tcg/__tests__/info.command.test.ts"
+        ],
+        "symbols": [
+          "handleInventory",
+          "WaifuCardRepository.findUserCardById",
+          "WaifuCardRepository.findById",
+          "UserInventoryItemRepository.findByUser"
+        ],
+        "entry_points": [
+          "apps/bot/src/commands/tcg/item.command.ts"
+        ],
+        "codegraph_queries": [
+          "handleInventory buildInvEmbed loadItems item.command inventory EQUIPPED stateTag",
+          "WaifuCardRepository findUserCardById findById UserCard cardId name",
+          "createInfoCommand gear guide equip-gear unequip-gear item_id"
+        ]
+      },
+      "acceptance": [
+        "Every line in the /item action:inventory list shows the item's inventory ID in inline code, so it can be copied into /card action:equip-gear, /card action:unequip-gear, /item action:enhance and /item action:use. The Selected Item line shows the ID too.",
+        "Worn gear reads [EQUIPPED: <SLOT> on <card name>] instead of [EQUIPPED: <SLOT>]. Card names are loaded once per distinct equippedToCardId when the list loads (no per-render or per-line query beyond that), and a card that cannot be found falls back to its card ID instead of failing the command.",
+        "The /info gear guide line about checking worn gear describes the new tag and says the inventory shows item IDs.",
+        "Tests in item.command.test.ts assert that the inventory embed contains the item ID and the wearing card name, and the card-not-found fallback; info.command.test.ts expectations match the updated text. No test is weakened or skipped."
+      ],
+      "verify_cmd": "pnpm vitest run apps/bot/src/commands/tcg/__tests__/item.command.test.ts apps/bot/src/commands/tcg/__tests__/info.command.test.ts && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0039"
       ]
     }
   ],
