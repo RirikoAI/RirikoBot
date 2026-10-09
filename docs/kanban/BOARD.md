@@ -384,6 +384,7 @@
 | `BUG-0022` | Bug | Reminder Times Were Read in the Host's Time Zone Instead of the User's IANA Zone | 2 | STORY-123 | [BUG-0022.md](./handovers/BUG-0022.md) |
 | `BUG-0023` | Bug | Message Credits Are Never Awarded Because Anti-Spam Runs Twice per Message | 2 | STORY-040 | [BUG-0023.md](./handovers/BUG-0023.md) |
 | `BUG-0024` | Bug | Legacy Migration Reads the Wrong Karma and Welcomer Keys | 2 | STORY-043 | [BUG-0024.md](./handovers/BUG-0024.md) |
+| `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED | 5 | STORY-105 | [BUG-0025.md](./handovers/BUG-0025.md) |
 | `BUG-0026` | Bug | Canonical Game Item Seed Used Dynamic UUIDs Breaking Inventory Foreign Keys on Schema Recreation | 3 | EPIC-010 | [BUG-0026.md](./handovers/BUG-0026.md) |
 | `BUG-0027` | Bug | Count Every Stamina Potion in Multi-Quantity Uses | 2 | STORY-043 | [BUG-0027.md](./handovers/BUG-0027.md) |
 | `BUG-0028` | Bug | Card Album Inlined Every Card Render as a Base64 Data URL, Producing a Multi-Megabyte Page That Blocked First Paint | 3 | STORY-168 | [BUG-0028.md](./handovers/BUG-0028.md) |
@@ -408,7 +409,6 @@
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
 | `STORY-162` | Story | Craft & Equip Button and Card Name on Worn Gear in Inventory | ? | EPIC-015 |
-| `BUG-0025` | Bug | Achievement Progress Is Recorded Only for TUTORIAL_CLEARED | 5 | STORY-105 |
 
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |

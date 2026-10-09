@@ -7535,11 +7535,90 @@
       "id": "BUG-0025",
       "title": "Achievement Progress Is Recorded Only for TUTORIAL_CLEARED",
       "points": 5,
-      "status": "BACKLOG",
+      "status": "DONE",
       "parent": "STORY-105",
       "requires": [],
       "blocks": [],
-      "description": "Found in TASK-1125. AchievementService.recordProgress is only called by the tutorial (TUTORIAL_CLEARED). The seeded CARD_COUNT, ELEMENTAL_COUNT, MYTHIC_CARD_COUNT, PVP_WINS, DUNGEON_FLOOR, BOSS_DAMAGE, EQUIPMENT_ENHANCE_10 and DAILY_STREAK achievements can never unlock. Record progress at each source, then add the types to TRACKED_ACHIEVEMENT_TYPES in @ririko/core so the owner console and guild inspector stop flagging them."
+      "description": "Found in TASK-1125. AchievementService.recordProgress is only called by the tutorial (TUTORIAL_CLEARED). The seeded CARD_COUNT, ELEMENTAL_COUNT, MYTHIC_CARD_COUNT, PVP_WINS, DUNGEON_FLOOR, BOSS_DAMAGE, EQUIPMENT_ENHANCE_10 and DAILY_STREAK achievements can never unlock. Record progress at each source, then add the types to TRACKED_ACHIEVEMENT_TYPES in @ririko/core so the owner console and guild inspector stop flagging them.",
+      "children": [],
+      "model": "medium",
+      "tier_override": null,
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "packages/core/src/config/tcg-catalog.ts",
+          "packages/services/src/waifu-tcg/achievements/achievement-service.ts",
+          "packages/services/src/waifu-tcg/achievements/seeds.ts",
+          "packages/services/src/waifu-tcg/__tests__/guild-and-achievements.test.ts",
+          "packages/services/src/owner/tcg-achievement-admin.service.ts",
+          "packages/services/src/owner/tcg-item-catalog.service.test.ts",
+          "packages/database/src/repositories/waifu-card.repository.ts",
+          "packages/database/src/repositories/waifu-card.repository.behaviour.test.ts",
+          "apps/bot/src/commands/tcg/achievement-progress.ts",
+          "apps/bot/src/commands/tcg/game.command.ts",
+          "apps/bot/src/commands/tcg/dungeon-battle.manager.ts",
+          "apps/bot/src/commands/tcg/gear-actions.ts",
+          "apps/bot/src/commands/tcg/item.command.ts",
+          "apps/bot/src/commands/tcg/card.command.ts",
+          "apps/bot/src/commands/tcg/trade.command.ts",
+          "apps/bot/src/commands/tcg/market.command.ts",
+          "apps/bot/src/commands/economy/commands.ts",
+          "apps/bot/src/commands/tcg/__tests__/game.command.test.ts",
+          "docs/waifu-tcg.md",
+          "packages/services/src/waifu-tcg/__tests__/achievement-collection-sync.test.ts",
+          "apps/bot/src/commands/tcg/__tests__/achievement-progress.test.ts",
+          "apps/bot/src/commands/tcg/__tests__/dungeon-battle.manager.test.ts",
+          "apps/bot/src/commands/tcg/__tests__/card.command.test.ts",
+          "apps/bot/src/commands/tcg/__tests__/trade-market.command.test.ts",
+          "apps/bot/src/commands/economy/commands.test.ts"
+        ],
+        "symbols": [
+          "AchievementService.recordProgress",
+          "AchievementService.getUserAchievements",
+          "AchievementService.claimAchievement",
+          "AchievementService.claimAll",
+          "TRACKED_ACHIEVEMENT_TYPES",
+          "CANONICAL_ACHIEVEMENTS",
+          "WaifuCardRepository.countUserCards",
+          "PvPDuelService.executeDuel",
+          "BossRaidService.attackBoss",
+          "DungeonRunner.finalizeBattleResult",
+          "EnhancementService.enhance",
+          "DailyService.claimDaily",
+          "DropManager.claimDrop",
+          "TradeService.acceptTrade",
+          "MarketService.buyListing",
+          "TcgAchievementAdminService"
+        ],
+        "entry_points": [
+          "apps/bot/src/commands/tcg/game.command.ts",
+          "apps/bot/src/commands/tcg/dungeon-battle.manager.ts",
+          "apps/bot/src/commands/tcg/achievement.command.ts"
+        ],
+        "codegraph_queries": [
+          "AchievementService recordProgress TRACKED_ACHIEVEMENT_TYPES achievement types seed CARD_COUNT PVP_WINS DUNGEON_FLOOR BOSS_DAMAGE DAILY_STREAK",
+          "WaifuCardRepository countUserCards listUserCards mintUserCard userCards waifuCards element rarity",
+          "createGameCommand executeDuel attackBoss questService recordProgress",
+          "DungeonBattleManager finalizeBattleResult highestFloorCleared isTutorial",
+          "enhanceGear EnhancementService enhance EnhancementResult newLevel MAX_ENHANCEMENT_LEVEL",
+          "claimDaily daily command streak claimDrop acceptTrade buyListing"
+        ]
+      },
+      "acceptance": [
+        "Each seeded type records progress at its source: PVP_WINS +1 for the duel winner (not on a draw); BOSS_DAMAGE + damageDealt per World Boss Raid attack; DUNGEON_FLOOR = highestFloorCleared (absolute) after a won non-tutorial dungeon battle; EQUIPMENT_ENHANCE_10 = 1 (absolute) when an enhancement reaches +10, from both the /item and the gear-menu paths; DAILY_STREAK = the new streak (absolute) after a successful daily claim.",
+        "CARD_COUNT (unique cards = distinct card ids owned), ELEMENTAL_COUNT (distinct elements owned) and MYTHIC_CARD_COUNT (owned MYTHIC cards) come from one new WaifuCardRepository collection-stats query (both dialects) and are recorded as absolute values by an AchievementService method. It runs after a drop claim, after a trade is accepted (both parties) and after a market purchase (buyer), and at the start of getUserAchievements, claimAchievement and claimAll, so existing players and other card sources (tutorial, adventure, reward cards) catch up when they open or claim achievements.",
+        "Achievement recording never fails or delays the user-facing action: errors are caught and logged, and the action replies as before. Absolute values keep the highest value seen (existing max semantics), so losing a card or a streak never lowers progress.",
+        "TRACKED_ACHIEVEMENT_TYPES lists all nine seeded requirement types, so the owner console and guild inspector no longer show not tracked for any seeded achievement. Comments that say only some types are tracked are updated.",
+        "Tests: a describeDialects behaviour test for the collection-stats query; AchievementService tests for collection sync (unique, elements, mythic, never lowers); bot tests that a duel win, a raid attack, a dungeon win (and not a tutorial win), a +10 enhancement and a daily claim call recordProgress with the right type and value, and that a recordProgress error does not break the reply. The tracked-types test expects every seeded type.",
+        "No test is weakened or skipped; the coverage gate holds for the changed files."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database/src/repositories/waifu-card packages/services/src/waifu-tcg packages/services/src/owner apps/bot/src/commands && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0025",
+        "EPIC-010"
+      ]
     },
     {
       "id": "BUG-0026",
