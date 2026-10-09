@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ValidationError } from '@ririko/core';
+import { TRACKED_ACHIEVEMENT_TYPES, ValidationError } from '@ririko/core';
 import {
   AchievementRepository,
   AuditLogRepository,
@@ -253,9 +253,10 @@ describe('Owner TCG catalog and achievements (TASK-1125)', () => {
     it('lists every achievement and flags the ones the bot tracks', async () => {
       const list = await achievementAdmin.list();
       expect(list).toHaveLength(CANONICAL_ACHIEVEMENTS.length);
-      expect(list.filter((v) => v.tracked).map((v) => v.achievement.requirementType)).toEqual([
-        'TUTORIAL_CLEARED',
-      ]);
+      expect(list.filter((v) => v.tracked)).toHaveLength(CANONICAL_ACHIEVEMENTS.length);
+      expect([...new Set(CANONICAL_ACHIEVEMENTS.map((a) => a.requirementType))].sort()).toEqual(
+        [...TRACKED_ACHIEVEMENT_TYPES].sort(),
+      );
     });
 
     it('edits wording and rewards, keeps the requirement and survives the seed', async () => {

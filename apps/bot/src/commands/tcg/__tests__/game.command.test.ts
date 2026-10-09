@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createGameCommand } from '../game.command.js';
 import type { BotServices } from '../../../services.js';
 import type { CommandContext } from '@ririko/discord';
@@ -16,11 +16,13 @@ describe('Game Command Suite (TASK-1022)', () => {
   let userEnergyMap: Map<string, number>;
   let userCardsMap: Map<string, any[]>;
   let baseCardsMap: Map<string, any>;
+  let recordProgress: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     userEnergyMap = new Map();
     userCardsMap = new Map();
     baseCardsMap = new Map();
+    recordProgress = vi.fn().mockResolvedValue([]);
 
     const mockEnergyRepo = {
       consumeEnergy: async (userId: string, amount: number) => {
@@ -99,6 +101,7 @@ describe('Game Command Suite (TASK-1022)', () => {
       bossRaidService,
       pvpDuelService,
       questService,
+      achievementService: { recordProgress } as any,
       tcgShopService: mockTcgShopService as any,
       loadoutService: mockLoadoutService as any,
     } as unknown as BotServices;
@@ -245,6 +248,36 @@ describe('Game Command Suite (TASK-1022)', () => {
     expect(repliesAttack[0].embeds).toHaveLength(1);
     expect(repliesAttack[0].embeds[0].data.description).toContain('You dealt');
     expect(repliesAttack[0].embeds[0].data.description).toContain('30 Energy');
+
+    const damage = services.bossRaidService.getLeaderboard()[0]?.totalDamage ?? 0;
+    expect(recordProgress).toHaveBeenCalledTimes(1);
+    expect(recordProgress).toHaveBeenCalledWith('user_commander_1', 'BOSS_DAMAGE', damage, false);
+  });
+
+  it('still replies when recording raid achievement progress fails', async () => {
+    const command = createGameCommand(services);
+    baseCardsMap.set('base_hero', {
+      id: 'base_hero',
+      name: 'Rias Gremory',
+      element: 'FIRE',
+      health: 3000,
+      attack: 600,
+      defense: 200,
+      speed: 100,
+      critRate: 0.1,
+    });
+    userCardsMap.set('user_commander_1', [
+      { id: 'uc_hero', cardId: 'base_hero', level: 10, state: 'EQUIPPED' },
+    ]);
+    recordProgress.mockRejectedValue(new Error('database is down'));
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const { ctx, replies } = createMockContext({ action: 'boss', subaction: 'attack' });
+    await command.execute(ctx);
+
+    expect(replies[0].embeds[0].data.description).toContain('You dealt');
+    expect(logged).toHaveBeenCalled();
+    logged.mockRestore();
   });
 
   it('should handle /game pvp against another player', async () => {
@@ -289,6 +322,73 @@ describe('Game Command Suite (TASK-1022)', () => {
     expect(replies[0].embeds).toHaveLength(1);
     expect(replies[0].embeds[0].data.title).toContain('PvP Elemental Duel');
     expect(replies[0].embeds[0].data.description).toContain('Combat Action Log');
+  });
+
+  describe('PvP achievement progress', () => {
+    function arrangeDuel(winnerUserId: string) {
+      baseCardsMap.set('base_1', {
+        id: 'base_1',
+        name: 'Hero 1',
+        element: 'FIRE',
+        health: 3000,
+        attack: 500,
+        defense: 100,
+        speed: 100,
+        critRate: 0.1,
+      });
+      userCardsMap.set('user_commander_1', [
+        { id: 'uc_1', cardId: 'base_1', level: 5, state: 'EQUIPPED' },
+      ]);
+      userCardsMap.set('user_rival_2', [
+        { id: 'uc_2', cardId: 'base_1', level: 5, state: 'EQUIPPED' },
+      ]);
+      vi.spyOn(services.pvpDuelService, 'executeDuel').mockResolvedValue({
+        success: true,
+        winnerUserId,
+        loserUserId: 'someone',
+        ratingDelta: 25,
+      });
+      return createMockContext({
+        action: 'pvp',
+        user: { id: 'user_rival_2', username: 'Rival' },
+      });
+    }
+
+    it('credits the challenger with a PVP_WINS when they win', async () => {
+      const { ctx, replies } = arrangeDuel('user_commander_1');
+      await createGameCommand(services).execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      expect(recordProgress).toHaveBeenCalledTimes(1);
+      expect(recordProgress).toHaveBeenCalledWith('user_commander_1', 'PVP_WINS', 1, false);
+    });
+
+    it('credits the challenged player when they win', async () => {
+      const { ctx } = arrangeDuel('user_rival_2');
+      await createGameCommand(services).execute(ctx);
+
+      expect(recordProgress).toHaveBeenCalledTimes(1);
+      expect(recordProgress).toHaveBeenCalledWith('user_rival_2', 'PVP_WINS', 1, false);
+    });
+
+    it('records nothing for a draw', async () => {
+      const { ctx, replies } = arrangeDuel('DRAW');
+      await createGameCommand(services).execute(ctx);
+
+      expect(replies).toHaveLength(1);
+      expect(recordProgress).not.toHaveBeenCalled();
+    });
+
+    it('still replies when recording the win fails', async () => {
+      recordProgress.mockRejectedValue(new Error('database is down'));
+      const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { ctx, replies } = arrangeDuel('user_commander_1');
+      await createGameCommand(services).execute(ctx);
+
+      expect(replies[0].embeds[0].data.title).toContain('PvP Elemental Duel');
+      expect(logged).toHaveBeenCalled();
+      logged.mockRestore();
+    });
   });
 
   it('should display the Town Shop catalog with /game shop', async () => {

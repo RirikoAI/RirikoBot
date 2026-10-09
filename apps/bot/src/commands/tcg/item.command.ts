@@ -9,6 +9,7 @@ import {
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type { BotServices } from '../../services.js';
 import { enhanceGear } from './gear-actions.js';
+import { recordEnhancementAchievement } from './achievement-progress.js';
 import { openCraftMenu } from './craft-menu.js';
 import { ALL_GEAR_SLOTS } from '@ririko/services';
 import type { RecipeStatus } from '@ririko/services';
@@ -406,6 +407,7 @@ async function handleInventory(
               guildId: ctx.guild?.id,
             });
           }
+          await recordEnhancementAchievement(services, userId, enhanceResult.newLevel);
 
           const notice = `✨ **Enhancement Succeeded!** +${enhanceResult.previousLevel} ➜ **+${enhanceResult.newLevel}**! (Spent: ${enhanceResult.creditsSpent} credits, ${enhanceResult.dustSpent} dust)`;
           items = await loadItems();

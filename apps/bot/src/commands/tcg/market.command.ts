@@ -3,6 +3,7 @@ import { CommandCategory, type Command, type CommandContext } from '@ririko/disc
 import type { BotServices } from '../../services.js';
 import type { MarketListing } from '@ririko/database';
 import type { EnrichedMarketListing } from '@ririko/services';
+import { syncCollectionAchievements } from './achievement-progress.js';
 
 export function createMarketCommand(services: BotServices): Command {
   return {
@@ -130,6 +131,7 @@ export function createMarketCommand(services: BotServices): Command {
             listingId,
             buyerUserId: ctx.user.id,
           });
+          await syncCollectionAchievements(services, ctx.user.id);
 
           const embed = new EmbedBuilder()
             .setColor(0x57f287)

@@ -3,6 +3,7 @@ import { CommandCategory, type Command, type CommandContext } from '@ririko/disc
 import type { BotServices } from '../../services.js';
 import type { TradeEnrichedCard } from '@ririko/services';
 import type { CardTrade } from '@ririko/database';
+import { syncCollectionAchievements } from './achievement-progress.js';
 
 export function createTradeCommand(services: BotServices): Command {
   return {
@@ -153,6 +154,7 @@ export function createTradeCommand(services: BotServices): Command {
 
         try {
           const trade = await tradeService.acceptTrade(tradeId, ctx.user.id);
+          await syncCollectionAchievements(services, trade.senderUserId, trade.receiverUserId);
           const embed = new EmbedBuilder()
             .setColor(0x57f287)
             .setTitle('🎉 Trade Completed Successfully!')

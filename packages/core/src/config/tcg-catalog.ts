@@ -5,8 +5,8 @@ import { FlagSetting, IntSetting } from './guild-config.js';
  * The global Waifu TCG item catalog (`game_items`) and achievements (`game_achievements`) as the
  * owner console edits them. The bot re-syncs its canonical items at every start, so canonical
  * items only expose the shop fields (kept through `owner_overridden`); custom gear is fully
- * editable. Achievements keep their requirement, because the bot only records progress for the
- * types in `TRACKED_ACHIEVEMENT_TYPES`.
+ * editable. Achievements keep their requirement, because the bot records progress for the
+ * types in `TRACKED_ACHIEVEMENT_TYPES` and a new type needs a new source.
  */
 
 /** Gear slots, which are also the `subtype` of a gear item. */
@@ -186,8 +186,18 @@ export function tcgGearBaseStats(input: TcgGearInput): Record<string, number> {
   return stats;
 }
 
-/** Requirement types the bot records progress for; other achievements never unlock yet. */
-export const TRACKED_ACHIEVEMENT_TYPES: readonly string[] = ['TUTORIAL_CLEARED'];
+/** Requirement types the bot records progress for: every requirement type in the seed. */
+export const TRACKED_ACHIEVEMENT_TYPES: readonly string[] = [
+  'TUTORIAL_CLEARED',
+  'CARD_COUNT',
+  'ELEMENTAL_COUNT',
+  'MYTHIC_CARD_COUNT',
+  'PVP_WINS',
+  'DUNGEON_FLOOR',
+  'BOSS_DAMAGE',
+  'EQUIPMENT_ENHANCE_10',
+  'DAILY_STREAK',
+];
 
 export const ACHIEVEMENT_TIERS = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'MYTHIC'] as const;
 

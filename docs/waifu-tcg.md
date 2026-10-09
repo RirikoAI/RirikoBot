@@ -733,7 +733,7 @@ Every achievement provides high-value rewards upon completion, dynamically spann
 | `DEVOTION_STREAK_30` | Devotion | Maintain 30-day Daily Claim Streak | Gold | 6,000 XP, 25,000 Credits, 3x *Grand Stamina Flasks*, Badge: *Unyielding Flame* |
 
 ### 14.2.1. Current Tracking & Owner Console (TASK-1125)
-- **Only `TUTORIAL_CLEARED` progress is recorded today** (`TRACKED_ACHIEVEMENT_TYPES` in `@ririko/core`); the other requirement types in the seed cannot unlock yet. Recording them is `BUG-0025`.
+- Every requirement type in the seed is recorded (`TRACKED_ACHIEVEMENT_TYPES` in `@ririko/core`). Sources: PvP duel win, raid attack damage, dungeon win, +10 enhancement, daily claim and the tutorial; the collection types (`CARD_COUNT`, `ELEMENTAL_COUNT`, `MYTHIC_CARD_COUNT`) sync from the user's collection after a drop claim, trade or market purchase, and whenever achievements are listed or claimed.
 - `/owner/achievements` edits title, description, tier, reward XP and credits, reward title, badge and the hidden flag. Requirements and reward items stay fixed. The seed (`bulkCreateAchievements`) only inserts missing codes, so edits survive restarts. Audited as `owner.achievement.update`.
 - `/dashboard/[guildId]/tcg/achievements` shows guild managers, read only, how many of the server's members unlocked and claimed each visible achievement. Members are the users with an `xp_accounts` row for the guild (`guild_members` is not populated by the bot).
 

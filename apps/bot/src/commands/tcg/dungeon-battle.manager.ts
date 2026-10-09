@@ -18,6 +18,7 @@ import {
   formatProgressOutcome,
 } from '@ririko/services';
 import type { BotServices } from '../../services.js';
+import { recordAchievementProgress } from './achievement-progress.js';
 
 export interface StartBattleOptions {
   floorNumber: number;
@@ -207,6 +208,16 @@ export class DungeonBattleManager {
       const runResult = await this.services.dungeonRunner.finalizeBattleResult(session, {
         energySpent: sessionResult.energySpent,
       });
+
+      if (runResult.victory && !isTutorial) {
+        await recordAchievementProgress(
+          this.services,
+          ctx.user.id,
+          'DUNGEON_FLOOR',
+          runResult.highestFloorCleared,
+          true,
+        );
+      }
 
       let tutorialCompletionMsg: string | undefined;
       let floor4DefeatResult: Floor4DefeatResult | undefined;
