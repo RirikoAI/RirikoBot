@@ -122,6 +122,9 @@
 | `STORY-179` | Story | Backups, Health Watchdog & Heartbeat Alerts | 5 | EPIC-017 | [STORY-179.md](./handovers/STORY-179.md) |
 | `STORY-180` | Story | Remote Lavalink Node on a KVM VPS Host Over WireGuard | 13 | EPIC-017 | [STORY-180.md](./handovers/STORY-180.md) |
 | `STORY-181` | Story | Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy) | 8 | EPIC-017 | [STORY-181.md](./handovers/STORY-181.md) |
+| `STORY-182` | Story | Grouped Guild Sidebar Navigation with a Mobile Page Picker | 3 | EPIC-018 | [STORY-182.md](./handovers/STORY-182.md) |
+| `STORY-183` | Story | Owner Console Server List with Inviters and Cross-Server Command Usage | 8 | EPIC-018 | [STORY-183.md](./handovers/STORY-183.md) |
+| `STORY-184` | Story | Accountable Server Inviters: Invite Through the Dashboard and Show Who to Contact | 8 | EPIC-018 | [STORY-184.md](./handovers/STORY-184.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -346,6 +349,11 @@
 | `TASK-1803` | Task | Lavalink Host Deploy Role, Watchdog Checks and CI Jobs | 5 | STORY-180 | [TASK-1803.md](./handovers/TASK-1803.md) |
 | `TASK-1811` | Task | SQLite to PostgreSQL Copy Engine With Type Conversion, FK Order, Sequence Reset and Verification | 5 | STORY-181 | [TASK-1811.md](./handovers/TASK-1811.md) |
 | `TASK-1812` | Task | ririko db:copy CLI Command and Data-Move Documentation | 3 | STORY-181 | [TASK-1812.md](./handovers/TASK-1812.md) |
+| `TASK-1821` | Task | Group Guild Nav Links, Make the Sidebar Sticky and Add a Mobile Page Picker | 3 | STORY-182 | [TASK-1821.md](./handovers/TASK-1821.md) |
+| `TASK-1831` | Task | Record Every Server the Bot Is In, with Its Owner and Inviter, in the guilds Table | 5 | STORY-183 | [TASK-1831.md](./handovers/TASK-1831.md) |
+| `TASK-1832` | Task | Owner Console Servers Tab: Server List, Inviters and Cross-Server Command Usage | 5 | STORY-183 | [TASK-1832.md](./handovers/TASK-1832.md) |
+| `TASK-1841` | Task | Record the Inviter Through a Dashboard Invite Flow and an Integrations Fallback | 8 | STORY-184 | [TASK-1841.md](./handovers/TASK-1841.md) |
+| `TASK-1842` | Task | Servers Tab: Owner and Inviter as Username and ID, Inviter Source and Contact Fallback | 2 | STORY-184 | [TASK-1842.md](./handovers/TASK-1842.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -431,3 +439,4 @@
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
 | `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
 | `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
+| `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
