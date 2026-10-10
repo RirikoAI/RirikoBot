@@ -9380,7 +9380,7 @@
       "parent": "EPIC-019",
       "title": "Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check",
       "points": 3,
-      "status": "REVIEW",
+      "status": "DONE",
       "children": [],
       "requires": [
         "STORY-185"

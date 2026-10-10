@@ -23,9 +23,7 @@
 | `BUG-0040` | Bug | /lyrics and the Music Controller Lyrics Button Show Placeholder Text Instead of Lyrics | 5 | EPIC-005 | — | yes | medium |
 
 ## 🔍 Review
-| ID | Type | Title | Pts | Parent | Handover |
-|---|---|---|---|---|---|
-| `BUG-0042` | Bug | Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check | 3 | EPIC-019 | [BUG-0042.md](./handovers/BUG-0042.md) |
+*None.*
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |
@@ -422,6 +420,7 @@
 | `BUG-0038` | Bug | PostgreSQL uuid Id Columns Reject the Slug and Prefixed Ids SQLite Holds (Cards, Assets, Shop Items, AI Conversations) | 5 | EPIC-017 | [BUG-0038.md](./handovers/BUG-0038.md) |
 | `BUG-0039` | Bug | Inventory Never Shows Item IDs, So By-ID Gear and Item Commands Are Unusable | 1 | EPIC-015 | [BUG-0039.md](./handovers/BUG-0039.md) |
 | `BUG-0041` | Bug | SQLite Adoption Refuses Databases Whose Adventure Tables Were Created as BIGINT by the Old ensureAdventureSchema | 3 | EPIC-019 | [BUG-0041.md](./handovers/BUG-0041.md) |
+| `BUG-0042` | Bug | Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check | 3 | EPIC-019 | [BUG-0042.md](./handovers/BUG-0042.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |
