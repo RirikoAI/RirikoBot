@@ -14,9 +14,7 @@
 *None.*
 
 ## 🎯 To Do
-| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
-|---|---|---|---|---|---|---|---|
-| `TASK-1333` | Task | Optional Text Message With the Welcome and Farewell Cards (Dashboard, /welcomer, /farewell) | 8 | STORY-133 | STORY-185 | yes | medium |
+*None.*
 
 ## 🔍 Review
 *None.*
@@ -358,6 +356,7 @@
 | `TASK-1832` | Task | Owner Console Servers Tab: Server List, Inviters and Cross-Server Command Usage | 5 | STORY-183 | [TASK-1832.md](./handovers/TASK-1832.md) |
 | `TASK-1841` | Task | Record the Inviter Through a Dashboard Invite Flow and an Integrations Fallback | 8 | STORY-184 | [TASK-1841.md](./handovers/TASK-1841.md) |
 | `TASK-1842` | Task | Servers Tab: Owner and Inviter as Username and ID, Inviter Source and Contact Fallback | 2 | STORY-184 | [TASK-1842.md](./handovers/TASK-1842.md) |
+| `TASK-1333` | Task | Optional Text Message With the Welcome and Farewell Cards (Dashboard, /welcomer, /farewell) | 8 | STORY-133 | [TASK-1333.md](./handovers/TASK-1333.md) |
 | `TASK-1851` | Task | Migration Authoring: Per-Dialect drizzle-kit Configs, 0000 Baseline and Embedded Migration Modules | 5 | STORY-185 | [TASK-1851.md](./handovers/TASK-1851.md) |
 | `TASK-1852` | Task | Migration Runner: Tracking Table, Locks, Checksums, SQLite Backup and Downgrade Guard | 5 | STORY-185 | [TASK-1852.md](./handovers/TASK-1852.md) |
 | `TASK-1853` | Task | One-Time Baseline Adoption of Existing Databases With Additive Drift Repair | 5 | STORY-185 | [TASK-1853.md](./handovers/TASK-1853.md) |
