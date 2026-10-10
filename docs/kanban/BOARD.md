@@ -421,6 +421,7 @@
 | `BUG-0039` | Bug | Inventory Never Shows Item IDs, So By-ID Gear and Item Commands Are Unusable | 1 | EPIC-015 | [BUG-0039.md](./handovers/BUG-0039.md) |
 | `BUG-0041` | Bug | SQLite Adoption Refuses Databases Whose Adventure Tables Were Created as BIGINT by the Old ensureAdventureSchema | 3 | EPIC-019 | [BUG-0041.md](./handovers/BUG-0041.md) |
 | `BUG-0042` | Bug | Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check | 3 | EPIC-019 | [BUG-0042.md](./handovers/BUG-0042.md) |
+| `BUG-0043` | Bug | ririko db:migrate Prints Adoption Notes and the Backup Twice and Ends With "Nothing to do" After Adopting | 1 | EPIC-019 | [BUG-0043.md](./handovers/BUG-0043.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

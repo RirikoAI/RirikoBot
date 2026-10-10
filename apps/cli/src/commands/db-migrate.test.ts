@@ -85,7 +85,7 @@ describe('ririko db:migrate on a SQLite file', () => {
     const first = await runDbMigrate({}, env);
     expect(first.exitCode).toBe(0);
     const text = plain(first.lines);
-    expect(text).toContain('Applied migration 0000_baseline');
+    expect(text).not.toContain('Applied migration 0000_baseline');
     expect(text).toContain('Applied 1 migration(s): 0000_baseline');
     expect(await tables()).toContain(MIGRATIONS_TABLE);
     expect(await tables()).toContain('users');
@@ -283,6 +283,81 @@ describe('ririko db:migrate failures', () => {
     expect(text).toContain('0 index(es) created');
     expect(text).toContain('Extra column guilds.legacy');
     expect(text).toContain('Would apply 1 migration(s): 0001_next');
+  });
+
+  /** The printed lines without colour codes. */
+  const rows = (lines: string[]) => lines.map((line) => line.replace(ANSI, ''));
+
+  it('prints each adoption note and the backup once, and ends with the adoption line', async () => {
+    const backup = '/data/backups/ririko-pre-migrate-1.sqlite';
+    const notes = ['Extra column guilds.legacy', 'Index guilds_old_idx is not in the baseline'];
+    const { stub } = deps({
+      migrate: async (_db, options) => {
+        options.log.info(`Wrote the pre-migration backup ${backup}`);
+        for (const note of notes) options.log.warn(note);
+        options.log.info(
+          'Adopted the existing database: recorded 0000_baseline without running it',
+        );
+        return {
+          applied: [],
+          alreadyApplied: [],
+          unknown: [],
+          backupPath: backup,
+          adoption: { createdTables: [], addedColumns: [], createdIndexes: [], notes },
+        };
+      },
+    });
+    const result = await runDbMigrate({}, env, stub);
+    expect(result.exitCode).toBe(0);
+    const lines = rows(result.lines);
+    for (const note of notes) {
+      expect(lines.filter((line) => line.includes(note))).toHaveLength(1);
+    }
+    expect(lines.filter((line) => line.includes(backup))).toHaveLength(1);
+    expect(lines.some((line) => line.includes('Adopted the existing database'))).toBe(false);
+    expect(lines[lines.length - 1]).toBe(
+      '✔ Adopted the database: recorded 0000_baseline as applied.',
+    );
+  });
+
+  it('ends an adoption that also applied migrations with both facts', async () => {
+    const { stub } = deps({
+      migrate: async () => ({
+        applied: ['0001_next'],
+        alreadyApplied: [],
+        unknown: [],
+        backupPath: null,
+        adoption: { createdTables: [], addedColumns: [], createdIndexes: [], notes: [] },
+      }),
+    });
+    const result = await runDbMigrate({}, env, stub);
+    const lines = rows(result.lines);
+    expect(lines[lines.length - 1]).toBe(
+      '✔ Adopted the database and applied 1 migration(s): 0001_next',
+    );
+  });
+
+  it('still prints a warning that the adoption summary does not list', async () => {
+    const warning =
+      'The database has 1 migration(s) this release does not know (0009_future); they are all additive, so this release continues.';
+    const { stub } = deps({
+      migrate: async (_db, options) => {
+        options.log.warn(warning);
+        options.log.info('Applied migration 0001_next');
+        return {
+          applied: ['0001_next'],
+          alreadyApplied: [],
+          unknown: ['0009_future'],
+          backupPath: null,
+          adoption: null,
+        };
+      },
+    });
+    const result = await runDbMigrate({}, env, stub);
+    const lines = rows(result.lines);
+    expect(lines.filter((line) => line.includes(warning))).toHaveLength(1);
+    expect(lines.some((line) => line.includes('Applied migration 0001_next'))).toBe(false);
+    expect(lines[lines.length - 1]).toBe('✔ Applied 1 migration(s): 0001_next');
   });
 });
 

@@ -83,6 +83,29 @@ function adoptionLines(result: MigrateResult, verb: string): string[] {
   ];
 }
 
+/** One line the migration runner logged while it worked. */
+interface LoggedLine {
+  level: 'info' | 'warn';
+  message: string;
+}
+
+const renderLogged = (entry: LoggedLine): string =>
+  entry.level === 'warn' ? `  ${pc.yellow('⚠')} ${entry.message}` : `  ${entry.message}`;
+
+/** The last line of a real run: what was adopted and applied, or that nothing was due. */
+function summaryLine(result: MigrateResult, latest: string | null): string {
+  const applied = result.applied;
+  const ids = applied.join(', ');
+  if (result.adoption) {
+    return applied.length > 0
+      ? `${pc.green('✔')} Adopted the database and applied ${applied.length} migration(s): ${ids}`
+      : `${pc.green('✔')} Adopted the database: recorded 0000_baseline as applied.`;
+  }
+  return applied.length > 0
+    ? `${pc.green('✔')} Applied ${applied.length} migration(s): ${ids}`
+    : `${pc.green('✔')} Nothing to do: the database is up to date (${latest ?? 'no migrations'}).`;
+}
+
 /**
  * Executes `ririko db:migrate` (ADR-015): applies the migrations this release ships to the
  * database named by `DATABASE_URL`, one transaction each. `--status` prints the state and
@@ -131,17 +154,17 @@ export async function runDbMigrate(
     }
 
     const dryRun = options.dryRun === true;
-    const logged: string[] = [];
+    const logged: LoggedLine[] = [];
     const result = await deps.migrate(db, {
       dryRun,
       log: {
-        info: (message) => logged.push(`  ${message}`),
-        warn: (message) => logged.push(`  ${pc.yellow('⚠')} ${message}`),
+        info: (message) => logged.push({ level: 'info', message }),
+        warn: (message) => logged.push({ level: 'warn', message }),
       },
     });
 
-    const out = [...lines, ...logged];
     if (dryRun) {
+      const out = [...lines, ...logged.map(renderLogged)];
       out.push(pc.yellow(pc.bold('DRY RUN: nothing was changed.')));
       out.push(...adoptionLines(result, 'would record'));
       out.push(
@@ -151,13 +174,18 @@ export async function runDbMigrate(
       );
       return { lines: out, exitCode: 0 };
     }
+
+    // The summary below already reports the backup, the adoption and every applied migration, so
+    // the runner's info lines would repeat it. Warnings stay, except the adoption notes that the
+    // summary lists.
+    const adoptionNotes = new Set(result.adoption?.notes ?? []);
+    const warnings = logged.filter(
+      (entry) => entry.level === 'warn' && !adoptionNotes.has(entry.message),
+    );
+    const out = [...lines, ...warnings.map(renderLogged)];
     if (result.backupPath) out.push(`  ${pc.bold('Backup')}: ${result.backupPath}`);
     out.push(...adoptionLines(result, 'recorded'));
-    out.push(
-      result.applied.length > 0
-        ? `${pc.green('✔')} Applied ${result.applied.length} migration(s): ${result.applied.join(', ')}`
-        : `${pc.green('✔')} Nothing to do: the database is up to date (${status.latest ?? 'no migrations'}).`,
-    );
+    out.push(summaryLine(result, status.latest));
     return { lines: out, exitCode: 0 };
   } catch (error) {
     if (!(error instanceof Error)) throw error;
