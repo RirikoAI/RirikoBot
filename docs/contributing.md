@@ -23,6 +23,11 @@ For any significant task or feature implementation:
    pnpm build
    ```
    **Coverage is a merge gate**: a PR is not merged unless every coverage threshold in `vitest.config.ts` passes (see [testing.md §4.1](testing.md#41-coverage)).
+7. **Schema changes ship a migration**: if you changed a Drizzle schema (`packages/database/src/schema/`), run `pnpm db:generate`, review the SQL for both dialects and commit `packages/database/migrations/` together with the embedded modules and the DDL files (see [database.md](database.md#1-overview)).
+   - Never edit a migration after it has been released.
+   - A destructive change (`DROP TABLE`, `DROP COLUMN`, a rename, a column type change, `SET NOT NULL`) follows expand/contract: ship the additive step first, and do the destructive step in a later migration whose first line is `-- ririko:contract`, once no release still uses the old shape.
+   - `pnpm db:push` is a development shortcut. It never runs against staging or production.
+   - Run `pnpm db:check` before you push. It is what the CircleCI `lint` job runs: it fails when a schema change has no migration, when the embedded modules are stale, or when a migration has an unmarked destructive statement.
 
 ---
 

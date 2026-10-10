@@ -20,9 +20,6 @@ import {
   ItemCategoryRepository,
   ItemRepository,
   createDatabaseClient,
-  ensurePostgresSchema,
-  ensureGuildRegistrySchema,
-  ensureTextIdColumns,
   GuildConfigVersionRepository,
   GuildSettingsRepository,
   ModerationRepository,
@@ -61,6 +58,7 @@ import { KnownDeviceService } from './auth/known-devices';
 import { PasskeyService } from './auth/passkeys';
 import { SessionService } from './auth/session-service';
 import { DiscordNotifier } from './discord-notifier';
+import { assertSchemaCurrent } from './schema-guard';
 import { BotGuildDirectory } from './guilds/bot-guilds';
 import { GiveawayManagementService } from './guilds/giveaways';
 import { GuildAccessService } from './guilds/guild-access';
@@ -314,11 +312,16 @@ function getDatabase(config: WebConfig): Promise<DatabaseClient> {
     dialect: config.DATABASE_DIALECT,
     url: config.DATABASE_URL,
   })
-    // The dashboard may start before the bot on an empty Postgres database.
+    // The dashboard never changes the schema (ADR-015). While the bot (or `ririko db:migrate`)
+    // has not migrated the database yet, this rejects, `/ready` answers 503 and the next
+    // request tries again.
     .then(async (db) => {
-      await ensurePostgresSchema(db);
-      await ensureTextIdColumns(db);
-      await ensureGuildRegistrySchema(db);
+      try {
+        await assertSchemaCurrent(db);
+      } catch (error) {
+        await db.close().catch(() => undefined);
+        throw error;
+      }
       return db;
     })
     .catch((error: unknown) => {

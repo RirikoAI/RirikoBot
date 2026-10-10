@@ -9,6 +9,21 @@ export type NodeEnv = z.infer<typeof NodeEnvSchema>;
 export const DatabaseDialectSchema = z.enum(['postgres', 'sqlite']).default('sqlite');
 export type DatabaseDialect = z.infer<typeof DatabaseDialectSchema>;
 
+/**
+ * `DB_AUTO_MIGRATE`: whether the bot applies pending schema migrations at startup (default
+ * `true`). With `false` it only checks and refuses to start while migrations are pending; run
+ * `ririko db:migrate` first. An empty value counts as unset.
+ */
+export const DbAutoMigrateSchema = z.preprocess(
+  (value) => (typeof value === 'string' ? value.trim().toLowerCase() || undefined : value),
+  z
+    .enum(['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'], {
+      errorMap: () => ({ message: 'DB_AUTO_MIGRATE must be true or false' }),
+    })
+    .default('true')
+    .transform((value) => ['true', '1', 'yes', 'on'].includes(value)),
+);
+
 /** SQLite file used when `DATABASE_URL` is unset, relative to the workspace root. */
 export const DEFAULT_DATABASE_URL = './data/ririko.sqlite';
 
@@ -56,6 +71,8 @@ const BaseAppConfigSchema = z.object({
   // Dual-Dialect Database
   DATABASE_URL: z.string().default(DEFAULT_DATABASE_URL),
   DATABASE_DIALECT: DatabaseDialectSchema,
+  // Apply pending schema migrations when the bot starts; false only checks (ADR-015).
+  DB_AUTO_MIGRATE: DbAutoMigrateSchema,
   // A 1.4.0 SQLite database to migrate once on startup (the Docker image reads a read-only
   // mount at /app/legacy/ririko.db). It is copied, never written.
   LEGACY_DATABASE_PATH: z.string().optional(),

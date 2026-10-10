@@ -2,12 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, beforeEach, describe } from 'vitest';
 import { createDatabaseClient } from '../client/factory.js';
 import type { DatabaseClient, DatabaseDialect, PostgresDatabaseClient } from '../client/types.js';
-import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
-import { ensurePostgresSchema } from '../migrations/postgres-schema.js';
-import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
-import { ensureCardSerialSchema } from '../migrations/card-serials.js';
-import { ensureGuildRegistrySchema } from '../migrations/guild-registry.js';
-import { ensureTextIdColumns } from '../migrations/text-ids.js';
+import { MIGRATIONS_TABLE, migrateDatabase } from '../migrations/runner.js';
 
 export interface DialectSuite {
   readonly dialect: DatabaseDialect;
@@ -19,18 +14,10 @@ export interface DialectSuite {
 
 const SCHEMA_NAME = /^ririko_test_[a-f0-9]{32}$/;
 
-/** Runs the startup upgrades the bot runs after the base schema, so tests see the real tables. */
-async function upgrade(client: DatabaseClient): Promise<void> {
-  await ensureTextIdColumns(client);
-  await ensureAdventureSchema(client);
-  await ensureCardSerialSchema(client);
-  await ensureGuildRegistrySchema(client);
-}
-
 /**
  * Declares `fn` once per database dialect. SQLite runs on a fresh `:memory:` database for every
  * test. Postgres runs only when `TEST_POSTGRES_URL` is set: each suite gets its own random schema
- * (so parallel test files never share tables), built with the same bootstrap the bot uses, emptied
+ * (so parallel test files never share tables), built by the migration runner the bot uses, emptied
  * before every test and dropped afterwards.
  */
 export function describeDialects(name: string, fn: (db: DialectSuite) => void): void {
@@ -38,8 +25,7 @@ export function describeDialects(name: string, fn: (db: DialectSuite) => void): 
     let current: DatabaseClient | undefined;
     beforeEach(async () => {
       current = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
-      if (current.dialect === 'sqlite') current.raw.exec(SQLITE_SCHEMA_DDL);
-      await upgrade(current);
+      await migrateDatabase(current);
     });
     afterEach(async () => {
       await current?.close();
@@ -80,14 +66,14 @@ export function describeDialects(name: string, fn: (db: DialectSuite) => void): 
       await admin.raw.query(`CREATE SCHEMA "${schema}"`);
       created = true;
       current = await openClient();
-      await ensurePostgresSchema(current);
-      await upgrade(current);
+      await migrateDatabase(current);
       const { rows } = await admin.raw.query<{ name: string }>(
         `SELECT table_name AS name FROM information_schema.tables
           WHERE table_schema = $1 AND table_type = 'BASE TABLE'`,
         [schema],
       );
-      tables = rows.map((row) => `"${row.name}"`);
+      // The tracking table keeps its rows: tests start with empty tables, not an unmigrated schema.
+      tables = rows.filter((row) => row.name !== MIGRATIONS_TABLE).map((row) => `"${row.name}"`);
     }, 60_000);
     beforeEach(async () => {
       // TRUNCATE of every table takes about a second; emptying only the tables in use is fast.

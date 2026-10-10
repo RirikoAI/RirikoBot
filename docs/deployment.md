@@ -64,7 +64,9 @@ docker run -d --name ririko-web --env-file .env -p 3000:3000 \
 `node scripts/docker-smoke.ts bot web` checks built `ririko-bot:smoke` and `ririko-web:smoke` images with dummy credentials, no network and no capabilities:
 - both run as uid 10001, and only the directories above are writable;
 - the bot runs FFmpeg, starts up to command registration and creates its SQLite database, and migrates a root-owned 1.4.0 database at `/app/legacy` on first start without changing it;
-- the dashboard loads its native packages, answers `GET /` with 200, redirects `/api/auth/login` to Discord and creates its SQLite database.
+- the dashboard loads its native packages;
+- on an empty database it stays live (`/health`, `/api/health` and the `HEALTHCHECK` answer 200 with `MIGRATION_PENDING`) but not ready (`/ready` answers 503 and the log names the pending migration);
+- on a database that a throwaway `ririko-bot:smoke` container migrated with `ririko db:migrate` first (so the bot image must be built too), it answers `GET /` with 200, redirects `/api/auth/login` to Discord, and `/health`, `/ready` and the `HEALTHCHECK` pass.
 
 ### 2.2. Production Orchestration (`docker-compose.production.yml`)
 
@@ -85,7 +87,8 @@ Start it:
 What happens on startup:
 - Every service reads `.env.production`, or the file named by `RIRIKO_ENV_FILE`.
 - The compose file sets the values that must point inside the stack itself: `DATABASE_DIALECT=postgres`, `DATABASE_URL` (built from the `POSTGRES_*` values), `LAVALINK_HOST=lavalink` and `LAVALINK_PORT=2333`.
-- On the first start the bot or the dashboard creates the schema in the empty database (`ensurePostgresSchema`, see `docs/database.md` section 1).
+- On start the bot applies the schema migrations (`DB_AUTO_MIGRATE`, default `true`, see `docs/database.md` section 1): an empty database gets the baseline, a database from before migration records is adopted once. The dashboard never changes the schema: it answers `/ready` with 503, and logs the pending migrations, until the bot (or `ririko db:migrate`) has migrated the database, then recovers by itself. `/health` (the liveness probe and the `HEALTHCHECK`) stays 200 meanwhile.
+- `DB_AUTO_MIGRATE=false` makes the bot only check: it exits with a message naming the pending migrations instead of starting on an old schema. Then run `docker compose -f docker-compose.production.yml --env-file .env.production run --rm bot ririko db:migrate` (or `docker exec <bot container> ririko db:migrate` on a running bot), and start the bot again. `ririko db:migrate --status` prints the pending migrations, `--dry-run` the plan; exit code 2 means the downgrade guard refused (the database holds a contract migration this release does not know).
 - Both images have a `HEALTHCHECK` (section 3).
 - Compose refuses to start when `POSTGRES_PASSWORD` or `LAVALINK_PASSWORD` is empty.
 
@@ -138,7 +141,7 @@ Both containers answer HTTP probes. Docker uses `/health` as their `HEALTHCHECK`
 | Container | Address | `/health` | `/ready` |
 |---|---|---|---|
 | Bot | port `HEALTH_PORT` (default 8080, `0` turns it off), not published | 200 while the database answers, else 503 | 200 once startup finished (schema, 1.4.0 upgrade, services, listeners), the database answers and the Discord gateway is `READY`, else 503 |
-| Dashboard | port 3000 (`/health`, `/ready`, or `/api/health`, `/api/ready`) | 200 while the database answers, else 503 | the same |
+| Dashboard | port 3000 (`/health`, `/ready`, or `/api/health`, `/api/ready`) | liveness: 200 while the database answers, and also while its schema is only behind (migrations pending); 503 when the database cannot be reached | 200 while the database answers and the schema is current, else 503 (also while migrations are pending) |
 
 Bot `/health` body:
 ```json
@@ -154,6 +157,8 @@ Bot `/health` body:
 - `/ready` answers `{ "ready": false, "started": true, "discord": "CONNECTING", "database": true }`, so you can see why it is not ready.
 
 The dashboard is public, so its probes never include error text. `/health` answers `{ status, version, uptimeSeconds, database: { status, latencyMs } }` and `/ready` answers `{ "ready": true }`. Failures are written to the server log.
+
+While migrations are pending, `/health` stays 200 and reports `database: { status: "MIGRATION_PENDING", pending: ["0000_baseline"] }` (the migration ids are not sensitive), and `/ready` answers 503 and logs which migrations are pending. Liveness must not fail then: Docker would mark the container unhealthy and the host watchdog would restart it while the bot is still migrating. A database that cannot be reached still fails both probes. `scripts/docker-smoke.ts` checks both states: the dashboard on an empty database (live, not ready) and on a database migrated by the bot image (everything answers).
 
 ---
 

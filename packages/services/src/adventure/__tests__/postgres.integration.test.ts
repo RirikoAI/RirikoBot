@@ -10,9 +10,7 @@ import {
   WaifuAssetRepository,
   GameItemRepository,
   UserInventoryItemRepository,
-  ensureAdventureSchema,
-  ensureCardSerialSchema,
-  ensurePostgresSchema,
+  migrateDatabase,
   type PostgresDatabaseClient,
 } from '@ririko/database';
 import { AdventureEngine } from '../adventure-engine.js';
@@ -79,10 +77,8 @@ describe.skipIf(!process.env.ADVENTURE_TEST_POSTGRES_URL)(
         dialect: 'postgres',
         url: isolated.toString(),
       })) as PostgresDatabaseClient;
-      // The same bootstrap the bot and the dashboard run on an empty database.
-      await ensurePostgresSchema(first);
-      await ensureAdventureSchema(first);
-      await ensureCardSerialSchema(first);
+      // The same migrations the bot runs on an empty database.
+      await migrateDatabase(first);
     }, 30_000);
     afterAll(async () => {
       await first?.close();

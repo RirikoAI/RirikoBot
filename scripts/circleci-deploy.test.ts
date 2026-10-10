@@ -160,6 +160,45 @@ describe('release workflow order', () => {
   });
 });
 
+describe('migration gates', () => {
+  const steps = (job: string) => config.jobs[job]?.steps.map((entry) => entry.run) ?? [];
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+    scripts: Record<string, string>;
+  };
+
+  it('runs pnpm db:check in the lint job, after setup', () => {
+    const check = steps('lint').find((step) => step?.command === 'pnpm db:check');
+    expect(check?.name).toBe('Migrations');
+    expect(config.jobs['lint']?.steps[0]).toBe('setup');
+    expect(pkg.scripts['db:check']).toBe('tsx scripts/check-migrations.ts');
+  });
+
+  it('runs the PostgreSQL migration tests in test-postgres', () => {
+    const command = steps('test-postgres').find(
+      (step) => step?.name === 'Vitest on Postgres',
+    )?.command;
+    expect(command).toBe('pnpm test:postgres');
+    // The script covers packages/database/src, which holds the runner, adoption and baseline tests.
+    expect(pkg.scripts['test:postgres']).toContain('packages/database/src');
+    const docker = (config.jobs['test-postgres'] as { docker?: Array<{ environment?: object }> })
+      .docker;
+    expect(docker?.[0]?.environment).toHaveProperty('TEST_POSTGRES_URL');
+    for (const file of ['runner', 'adopt-baseline', 'generated']) {
+      const text = readFileSync(
+        new URL(`../packages/database/src/migrations/${file}.test.ts`, import.meta.url),
+        'utf8',
+      );
+      expect(text, file).toContain('TEST_POSTGRES_URL');
+    }
+  });
+
+  it('runs lint and test-postgres in the ci workflow on every push', () => {
+    const ci = workflowJobs('ci');
+    expect(ci['lint']?.filters).toBeUndefined();
+    expect(ci['test-postgres']?.filters).toBeUndefined();
+  });
+});
+
 describe('deploy job', () => {
   const install = sshStep('Install cloudflared');
   const writeKey = sshStep('Write the SSH key and the pinned host key');

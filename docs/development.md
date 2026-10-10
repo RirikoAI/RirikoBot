@@ -36,6 +36,8 @@ pnpm test:integration  # Only the bot integration suites and the fake Discord AP
 pnpm test:e2e        # Builds the dashboard, then runs the Playwright E2E suite
 ```
 
+After you change a Drizzle schema, run `pnpm db:generate`. It writes the versioned SQL migrations for both dialects (`packages/database/migrations/`), embeds them as TypeScript, and regenerates the bootstrap DDL. Commit all of the output, and run `pnpm db:check` (the CI migration gate) before you push. The flow is described in [database.md](database.md#1-overview--dual-dialect-strategy) and [ADR-015](adr/ADR-015-versioned-schema-migrations.md).
+
 `pnpm test:e2e` starts its own fake Discord API on port 3199 and `next start` on port 3100 with a throwaway SQLite database, so it can run while `next dev` is up on port 3000. It uses Playwright's Chromium; run `pnpm --filter @ririko/web exec playwright install chromium` once if it is missing. The report is in `apps/web/e2e-results/report/index.html`.
 
 `pnpm site:build` writes the Vercel status page to `site-dist/index.html` (see [deployment.md](deployment.md#4-current-hosting)).
@@ -81,7 +83,7 @@ Eliminate boilerplate errors by generating typed skeletons:
 
 ### 3.3. Management & Maintenance Commands
 - `ririko dev` — Starts bot and dashboard with hot-reload.
-- `ririko migrate` — Applies pending database migrations.
+- `ririko db:migrate [--status|--dry-run]` — Applies the schema migrations this release ships to the database in `DATABASE_URL` (ADR-015). The bot does the same at startup unless `DB_AUTO_MIGRATE=false`. `--status` prints the latest, pending and unknown migration ids, `--dry-run` prints the plan (also what adopting an old database would change) and changes nothing. Exit codes: 0 done or nothing to do, 1 failure, 2 refused by the downgrade guard. In the bot image: `docker exec <bot container> ririko db:migrate`. `pnpm db:push` is a development shortcut only; it never runs against staging or production.
 - `ririko migrate:legacy` — Migrates data from 1.4.0 SQLite databases.
 - `ririko db:copy --from <sqlite path> [--dry-run|--yes]` — Copies a 2.0 SQLite database into an empty PostgreSQL database. The target URL comes only from `TARGET_DATABASE_URL`. Runbook: [docs/migrations.md section 5](migrations.md).
 - `ririko command:sync` — Registers slash commands with Discord Gateway REST API.

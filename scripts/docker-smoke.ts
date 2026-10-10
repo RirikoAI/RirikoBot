@@ -19,6 +19,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const APP_UID = '10001';
+const BOT_IMAGE = 'ririko-bot:smoke';
 const START_TIMEOUT_MS = 90_000;
 const LOG_PROBLEMS = ['EACCES', 'EROFS', 'ERR_MODULE_NOT_FOUND', 'Cannot find module'];
 
@@ -513,23 +514,131 @@ function request(container: RunningContainer, path: string, port = 3000): string
   return container.exec(['node', '-e', script]).stdout.trim();
 }
 
+/** Like `request`, but prints `<status> <body>` (for the JSON probe bodies). */
+function requestBody(container: RunningContainer, path: string, port = 3000): string {
+  const script = `fetch('http://127.0.0.1:${port}${path}')
+    .then(async (r) => console.log(r.status, await r.text()))
+    .catch((e) => console.log('error', e.message));`;
+  return container.exec(['node', '-e', script]).stdout.trim();
+}
+
+/** Dummy credentials the dashboard needs to start; it never reaches Discord (no network). */
+const WEB_ENV = {
+  DISCORD_TOKEN: 'smoke-test-token',
+  DISCORD_CLIENT_ID: '100000000000000001',
+  DISCORD_CLIENT_SECRET: 'smoke-test-client-secret',
+  DASHBOARD_URL: 'http://localhost:3000',
+  SECRET_VAULT_KEY: `${'0'.repeat(63)}1`,
+};
+
+/** Runs the image's HEALTHCHECK inside the container; a problem text, or null when it passes. */
+function healthcheckProblem(image: string, container: RunningContainer): string | null {
+  const command = healthcheckCommand(image);
+  const check = command ? container.exec(command) : null;
+  return check?.status === 0
+    ? null
+    : `HEALTHCHECK failed: ${check ? output(check) : 'the image has none'}`;
+}
+
 /**
- * Starts the dashboard with dummy credentials. The sign-in route builds the dashboard services,
- * which opens (and creates) the SQLite database, then redirects to Discord's authorize page.
+ * The dashboard alone on an empty SQLite database, which nothing migrates (the bot does, ADR-015).
+ * It must stay live, so the HEALTHCHECK passes and the host watchdog does not restart it while
+ * the bot migrates, and report not ready, naming the pending migration in its log.
  */
-function webServeCheck(image: string): Check {
+function webPendingMigrationsCheck(image: string): Check {
   return {
-    name: 'serves the dashboard and creates the SQLite database',
+    name: 'stays live but not ready while the database has pending migrations',
     run: () =>
-      withContainer(
+      withContainer(image, WEB_ENV, 'Ready in', (container) => {
+        const problems: string[] = [];
+        for (const path of ['/health', '/api/health']) {
+          const probe = requestBody(container, path);
+          if (!probe.startsWith('200 ')) problems.push(`GET ${path} answered "${probe}"`);
+          else if (!probe.includes('MIGRATION_PENDING') || !probe.includes('0000_baseline')) {
+            problems.push(`GET ${path} does not report the pending migration: "${probe}"`);
+          }
+        }
+        for (const path of ['/ready', '/api/ready']) {
+          const probe = requestBody(container, path);
+          if (probe !== '503 {"ready":false}') problems.push(`GET ${path} answered "${probe}"`);
+        }
+        if (!createdDatabase(container)) problems.push('no /app/data/ririko.sqlite was created');
+        // The readiness probes above logged why the dashboard is not ready.
+        if (!/pending migration\(s\) \(0000_baseline/.test(container.logs())) {
+          problems.push('the log does not name the pending migration');
+        }
+        const unhealthy = healthcheckProblem(image, container);
+        if (unhealthy) problems.push(unhealthy);
+        return problems;
+      }),
+  };
+}
+
+/**
+ * Migrates a new SQLite database with the bot image's own CLI (`ririko db:migrate`), the way the
+ * deploy does it, and returns the file as a tar (as `docker cp <container>:<file> -` writes it).
+ * The builder runs as the image's own user, so the file belongs to the user that runs the dashboard.
+ */
+function buildMigratedDatabase(botImage: string): Buffer | string {
+  if (docker(['image', 'inspect', botImage]).status !== 0) {
+    return `the migrated-database check needs the bot image ${botImage}; build it first (docker build --target bot-runner -t ${botImage} .)`;
+  }
+  const name = `ririko-smoke-migrated-${process.pid}-${Date.now()}`;
+  // `chmod 666` keeps the file writable even if the engine ignores the owner (see the copy below).
+  const script =
+    'mkdir -p /tmp/m && ririko db:migrate && ririko db:migrate --status && chmod 666 /tmp/m/ririko.sqlite && ls -A /tmp/m';
+  try {
+    const built = docker([
+      'run',
+      '--name',
+      name,
+      '--network',
+      'none',
+      '--cap-drop',
+      'ALL',
+      '--security-opt',
+      'no-new-privileges',
+      '--env',
+      'DATABASE_DIALECT=sqlite',
+      '--env',
+      'DATABASE_URL=/tmp/m/ririko.sqlite',
+      botImage,
+      'sh',
+      '-c',
+      script,
+    ]);
+    if (built.status !== 0) return `ririko db:migrate failed: ${output(built)}`;
+    if (!/Pending:\s+\(none\)/.test(built.stdout)) {
+      return `the database is still behind after ririko db:migrate: ${output(built)}`;
+    }
+    // A leftover WAL would hold changes that the copied file does not have.
+    if (built.stdout.split('\n').some((line) => line.trim() === 'ririko.sqlite-wal')) {
+      return `the migrated database left a WAL file behind: ${output(built)}`;
+    }
+    // Copying the file (not the folder) gives a tar whose only entry is `ririko.sqlite`.
+    const tar = dockerBytes(['cp', `${name}:/tmp/m/ririko.sqlite`, '-']);
+    if (tar.status !== 0) return `could not copy the migrated database out: ${tar.stderr}`;
+    const file = firstTarFile(tar.stdout);
+    if (!file || file.content.length === 0) return 'the migrated database copy is empty';
+    return tar.stdout;
+  } finally {
+    docker(['rm', '--force', name]);
+  }
+}
+
+/**
+ * The dashboard on a database that the bot image migrated beforehand, as in a normal deploy:
+ * everything answers, the sign-in redirects to Discord and the HEALTHCHECK passes.
+ */
+function webMigratedDatabaseCheck(image: string): Check {
+  return {
+    name: 'serves the dashboard on a database migrated by the bot image',
+    run: () => {
+      const database = buildMigratedDatabase(BOT_IMAGE);
+      if (typeof database === 'string') return database;
+      return withContainer(
         image,
-        {
-          DISCORD_TOKEN: 'smoke-test-token',
-          DISCORD_CLIENT_ID: '100000000000000001',
-          DISCORD_CLIENT_SECRET: 'smoke-test-client-secret',
-          DASHBOARD_URL: 'http://localhost:3000',
-          SECRET_VAULT_KEY: `${'0'.repeat(63)}1`,
-        },
+        WEB_ENV,
         'Ready in',
         (container) => {
           const problems: string[] = [];
@@ -539,19 +648,22 @@ function webServeCheck(image: string): Check {
           if (!/^30[27] https:\/\/discord\.com\/api\/v10\/oauth2\/authorize/.test(login)) {
             problems.push(`GET /api/auth/login answered "${login}"`);
           }
-          if (!createdDatabase(container)) problems.push('no /app/data/ririko.sqlite was created');
-          for (const path of ['/health', '/ready', '/api/health']) {
+          for (const path of ['/health', '/ready', '/api/health', '/api/ready']) {
             const probe = request(container, path);
             if (!probe.startsWith('200')) problems.push(`GET ${path} answered "${probe}"`);
           }
-          const command = healthcheckCommand(image);
-          const check = command ? container.exec(command) : null;
-          if (check?.status !== 0) {
-            problems.push(`HEALTHCHECK failed: ${check ? output(check) : 'the image has none'}`);
-          }
+          const unhealthy = healthcheckProblem(image, container);
+          if (unhealthy) problems.push(unhealthy);
           return problems;
         },
-      ),
+        // `-a` keeps the owner from the tar (the app user); without it the engine writes the file
+        // as root, which `chmod 666` above still lets the app user open for writing.
+        (name) => {
+          const copied = docker(['cp', '-a', '-', `${name}:/app/data`], database);
+          return copied.status === 0 ? null : `docker cp failed: ${output(copied)}`;
+        },
+      );
+    },
   };
 }
 
@@ -584,7 +696,7 @@ function webExternalsCheck(image: string): Check {
 
 const TARGETS: Record<string, Target> = {
   bot: {
-    image: 'ririko-bot:smoke',
+    image: BOT_IMAGE,
     writableDirs: ['data', 'public/cards', 'public/bosses', 'storage/welcomer-backgrounds'],
     readOnlyPaths: [
       'apps/bot/dist/main.js',
@@ -613,7 +725,11 @@ const TARGETS: Record<string, Target> = {
     image: 'ririko-web:smoke',
     writableDirs: ['data', 'public/cards', 'storage/welcomer-backgrounds', 'apps/web/.next/cache'],
     readOnlyPaths: ['apps/web/.next/BUILD_ID', 'apps/web/next.config.ts', 'assets'],
-    extraChecks: (image) => [webExternalsCheck(image), webServeCheck(image)],
+    extraChecks: (image) => [
+      webExternalsCheck(image),
+      webPendingMigrationsCheck(image),
+      webMigratedDatabaseCheck(image),
+    ],
   },
 };
 

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   createDatabaseClient,
-  ensureCardSerialSchema,
   UserInventoryItemRepository,
   WaifuCardRepository,
   WaifuAssetRepository,
@@ -98,7 +97,11 @@ describe('Card Command Suite (TASK-1012)', () => {
       );
     `);
 
-    await ensureCardSerialSchema(client);
+    // The serial counter table and the unique serial index the card repository relies on.
+    client.raw.exec(`
+      CREATE TABLE IF NOT EXISTS waifu_card_serials (card_id TEXT PRIMARY KEY NOT NULL, next_serial INTEGER NOT NULL);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_user_cards_serial_unique ON user_cards(card_id, serial_number);
+    `);
     cardRepo = new WaifuCardRepository(client);
     assetRepo = new WaifuAssetRepository(client);
 

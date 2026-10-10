@@ -4,11 +4,7 @@ import { getTableConfig, SQLiteTable } from 'drizzle-orm/sqlite-core';
 import { is } from 'drizzle-orm';
 import { DatabaseError } from '@ririko/core';
 import type { PostgresDatabaseClient } from '../client/types.js';
-import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
-import { ensureCardSerialSchema } from '../migrations/card-serials.js';
-import { ensureGuildRegistrySchema } from '../migrations/guild-registry.js';
-import { ensurePostgresSchema } from '../migrations/postgres-schema.js';
-import { ensureTextIdColumns } from '../migrations/text-ids.js';
+import { MIGRATIONS_TABLE, migrateDatabase } from '../migrations/runner.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 
 /** Options for {@link copyDatabase}. */
@@ -104,7 +100,8 @@ export interface CopyPlan {
 const DEFAULT_BATCH_SIZE = 500;
 /** PostgreSQL allows at most 65535 bind parameters per statement. */
 const MAX_PARAMETERS = 65_535;
-const BOOKKEEPING_TABLE = /^_*drizzle_/;
+/** Drizzle's own tables and the migration tracking table: never copied, the target keeps its own. */
+const BOOKKEEPING_TABLE = new RegExp(`^(_*drizzle_|${MIGRATIONS_TABLE}$)`);
 const INTEGER_PATTERN = /^-?\d+$/;
 const DECIMAL_PATTERN = /^-?\d+(\.\d+)?([eE][+-]?\d+)?$/;
 
@@ -637,12 +634,9 @@ export async function copyDatabase(
     });
   }
   try {
-    // Prepared like the bot at startup, so the target has the exact tables the bot expects.
-    await ensurePostgresSchema(target);
-    await ensureTextIdColumns(target);
-    await ensureAdventureSchema(target);
-    await ensureCardSerialSchema(target);
-    await ensureGuildRegistrySchema(target);
+    // Migrated like the bot at startup, so the target has the exact tables the bot expects and
+    // records which migrations it holds.
+    await migrateDatabase(target);
 
     const client = await target.raw.connect();
     const connection: PgConnection = {

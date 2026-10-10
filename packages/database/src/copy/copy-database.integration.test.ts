@@ -12,6 +12,7 @@ import {
   sqlite,
 } from '../testing/copy-fixture.js';
 import { WaifuCardRepository } from '../repositories/waifu-card.repository.js';
+import { MIGRATIONS_TABLE } from '../migrations/runner.js';
 import { describeDialects } from '../testing/dialects.js';
 import { copyDatabase } from './copy-database.js';
 
@@ -19,10 +20,13 @@ const directory = mkdtempSync(join(tmpdir(), 'ririko-copy-'));
 afterAll(() => rmSync(directory, { recursive: true, force: true }));
 const buildSourceIn = (name: string) => buildSource(directory, name);
 
+/** Rows of the data tables; the migration records are the target's own, not copied data. */
 async function totalRows(pg: PostgresDatabaseClient): Promise<number> {
   const { rows: tables } = await pg.raw.query<{ name: string }>(
     `SELECT table_name AS name FROM information_schema.tables
-      WHERE table_schema = current_schema() AND table_type = 'BASE TABLE'`,
+      WHERE table_schema = current_schema() AND table_type = 'BASE TABLE'
+        AND table_name <> $1`,
+    [MIGRATIONS_TABLE],
   );
   let total = 0;
   for (const { name } of tables) {
@@ -51,6 +55,12 @@ describeDialects('copyDatabase', (db) => {
     const report = await copyDatabase(path, target());
 
     expect(report.committed).toBe(true);
+    // The target was migrated by the runner, so it holds its own record of the baseline.
+    const recorded = await target().raw.query<{ id: string; adopted: boolean }>(
+      `SELECT id, adopted FROM ${MIGRATIONS_TABLE}`,
+    );
+    expect(recorded.rows).toEqual([{ id: '0000_baseline', adopted: false }]);
+    expect(report.tables.map((table) => table.name)).not.toContain(MIGRATIONS_TABLE);
     expect(report.tables.length).toBeGreaterThan(90);
     expect(report.tables.every((table) => table.sourceRows === table.targetRows)).toBe(true);
     const rows = Object.fromEntries(report.tables.map((table) => [table.name, table.targetRows]));

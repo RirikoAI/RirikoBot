@@ -10,7 +10,7 @@ import {
   GameItemRepository,
   UserInventoryItemRepository,
   withTransaction,
-  ensureCardSerialSchema,
+  migrateDatabase,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { AdventureEngine } from '../adventure-engine.js';
@@ -290,7 +290,9 @@ describe('transactional adventure payouts', () => {
     await definition('legacy');
     for (const userId of ['alice', 'bob'])
       await cards.createUserCard({ userId, cardId: 'legacy', serialNumber: 1 });
-    await expect(ensureCardSerialSchema(db)).rejects.toThrow('explicit repair');
+    // Adoption audits the serials of a database that has no migration records yet.
+    db.raw.exec('DROP TABLE ririko_schema_migrations');
+    await expect(migrateDatabase(db)).rejects.toThrow('explicit repair');
     expect(db.raw.prepare('SELECT count(*) AS n FROM user_cards').get()).toEqual({ n: 2 });
   });
   it.each(ORDERED_RARITY_TIERS)('never grants below the %s rarity floor', async (floor) => {

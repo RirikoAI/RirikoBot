@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ConfigurationError, getConfig, loadConfig, loadWebConfig, resetConfig } from './loader.js';
+import {
+  ConfigurationError,
+  dbAutoMigrateFromEnv,
+  getConfig,
+  loadConfig,
+  loadWebConfig,
+  resetConfig,
+} from './loader.js';
 
 describe('Config Loader', () => {
   beforeEach(() => {
@@ -177,5 +184,53 @@ describe('Config Loader', () => {
 
     expect(config.DISCORD_TOKEN).toBe('legacy-token-123');
     expect(config.DISCORD_CLIENT_ID).toBe('legacy-app-id-456');
+  });
+});
+
+describe('DB_AUTO_MIGRATE', () => {
+  const base = { DISCORD_TOKEN: 'mock-token', DISCORD_CLIENT_ID: 'mock-client-id' };
+
+  it('defaults to true, also when the variable is empty', () => {
+    expect(loadConfig(base, { cache: false }).DB_AUTO_MIGRATE).toBe(true);
+    expect(loadConfig({ ...base, DB_AUTO_MIGRATE: '' }, { cache: false }).DB_AUTO_MIGRATE).toBe(
+      true,
+    );
+  });
+
+  it.each([
+    ['true', true],
+    ['TRUE', true],
+    ['1', true],
+    ['false', false],
+    [' False ', false],
+    ['0', false],
+    ['off', false],
+  ])('reads %j as %s', (value, expected) => {
+    expect(loadConfig({ ...base, DB_AUTO_MIGRATE: value }, { cache: false }).DB_AUTO_MIGRATE).toBe(
+      expected,
+    );
+  });
+
+  it('rejects any other value with a clear message', () => {
+    expect(() => loadConfig({ ...base, DB_AUTO_MIGRATE: 'maybe' }, { cache: false })).toThrow(
+      /DB_AUTO_MIGRATE must be true or false/,
+    );
+  });
+
+  it('can be read on its own from the environment', () => {
+    expect(dbAutoMigrateFromEnv({})).toBe(true);
+    expect(dbAutoMigrateFromEnv({ DB_AUTO_MIGRATE: 'false' })).toBe(false);
+    expect(() => dbAutoMigrateFromEnv({ DB_AUTO_MIGRATE: 'later' })).toThrow(ConfigurationError);
+  });
+
+  it('is part of the dashboard configuration too', () => {
+    const web = loadWebConfig({
+      ...base,
+      DISCORD_CLIENT_SECRET: 'secret',
+      DASHBOARD_URL: 'https://dash.example.com',
+      SECRET_VAULT_KEY: 'c'.repeat(64),
+      DB_AUTO_MIGRATE: 'false',
+    });
+    expect(web.DB_AUTO_MIGRATE).toBe(false);
   });
 });

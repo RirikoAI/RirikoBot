@@ -2,6 +2,7 @@ import DatabaseConstructor from 'better-sqlite3';
 import type Database from 'better-sqlite3';
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { describe, expect, it } from 'vitest';
+import { MIGRATIONS_TABLE } from '../migrations/runner.js';
 import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
 import { FakePostgres, type FakeTableSpec } from '../testing/fake-postgres.js';
 import {
@@ -474,16 +475,20 @@ describe('copyIntoConnection', () => {
     source.close();
   });
 
-  it('skips SQLite internals and Drizzle bookkeeping tables', async () => {
+  it('skips SQLite internals, Drizzle bookkeeping and the migration tracking table', async () => {
     const source = openSource();
     source.exec('CREATE TABLE __drizzle_migrations (id INTEGER, hash TEXT)');
     source.exec("INSERT INTO __drizzle_migrations VALUES (1, 'abc')");
+    // The target keeps its own records of the migrations it ran; the source's are not copied.
+    source.exec(`CREATE TABLE ${MIGRATIONS_TABLE} (id TEXT PRIMARY KEY, applied_at INTEGER)`);
+    source.exec(`INSERT INTO ${MIGRATIONS_TABLE} VALUES ('0000_baseline', 0)`);
     const fake = new FakePostgres();
 
     const report = await copyIntoConnection(source, fake);
     source.close();
 
     expect(tableNames(report)).not.toContain('__drizzle_migrations');
+    expect(tableNames(report)).not.toContain(MIGRATIONS_TABLE);
     expect(tableNames(report).some((name) => name.startsWith('sqlite_'))).toBe(false);
     expect(fake.inserts).toEqual([]);
     // An empty economy table still gets the check: zero against zero.

@@ -1,8 +1,6 @@
 import { join } from 'node:path';
 import { createDatabaseClient } from '../client/factory.js';
 import type { DatabaseClient, SqliteDatabaseClient } from '../client/types.js';
-import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
-import { ensureCardSerialSchema } from '../migrations/card-serials.js';
 import {
   AdventureSessionRepository,
   type StoredAdventureSession,
@@ -52,15 +50,13 @@ export async function readBack(client: DatabaseClient, cardId: string) {
 }
 
 /**
- * A SQLite file built as the bot builds one (schema, then the startup upgrades) and filled through
+ * A SQLite file built as the bot builds one (the migrations applied) and filled through
  * the repositories: booleans, timestamps, JSON, bigint balances, owned cards with serials and an
  * adventure session.
  */
 export async function buildSource(directory: string, name: string) {
   const path = join(directory, `${name}.sqlite`);
-  const source = await createDatabaseClient({ dialect: 'sqlite', url: path });
-  await ensureAdventureSchema(source);
-  await ensureCardSerialSchema(source);
+  const source = await createDatabaseClient({ dialect: 'sqlite', url: path, autoMigrate: true });
 
   const users = new UserRepository(source);
   await users.create({

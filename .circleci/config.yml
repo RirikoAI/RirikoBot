@@ -150,6 +150,11 @@ jobs:
           name: Prettier
           command: pnpm format:check
       - run:
+          # Offline gate for the versioned migrations (ADR-015): a schema change without its
+          # migration, a stale embedded module, or an unmarked DROP/RENAME fails here.
+          name: Migrations
+          command: pnpm db:check
+      - run:
           # The host scripts (deploy/host) run as root on the production hosts.
           name: ShellCheck
           command: |
@@ -195,8 +200,9 @@ jobs:
           disable_search: true
           report_type: test_results
 
-  # Runs the dual-dialect repository suites (describeDialects) and the adventure concurrency suite
-  # against a real Postgres. Each suite creates and drops its own random schema.
+  # Runs the dual-dialect repository suites (describeDialects), the adventure concurrency suite and
+  # the migration runner, adoption and baseline tests (packages/database/src/migrations) against a
+  # real Postgres. Each suite creates and drops its own random schema.
   test-postgres:
     docker:
       - image: cimg/node:22.23

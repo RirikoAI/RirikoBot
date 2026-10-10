@@ -1,5 +1,11 @@
-import type { z } from 'zod';
-import { AppConfig, AppConfigSchema, WebConfig, WebConfigSchema } from './schema.js';
+import { z } from 'zod';
+import {
+  AppConfig,
+  AppConfigSchema,
+  DbAutoMigrateSchema,
+  WebConfig,
+  WebConfigSchema,
+} from './schema.js';
 
 let cachedConfig: AppConfig | null = null;
 
@@ -70,6 +76,16 @@ export function parseConfig<TSchema extends z.ZodTypeAny>(
  */
 export function loadWebConfig(env: Record<string, string | undefined> = process.env): WebConfig {
   return parseConfig(WebConfigSchema, env);
+}
+
+/**
+ * `DB_AUTO_MIGRATE` on its own (default `true`), for the entry points that read the environment
+ * directly. Throws a ConfigurationError for a value that is not true or false.
+ */
+export function dbAutoMigrateFromEnv(
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  return parseConfig(z.object({ DB_AUTO_MIGRATE: DbAutoMigrateSchema }), env).DB_AUTO_MIGRATE;
 }
 
 /**
