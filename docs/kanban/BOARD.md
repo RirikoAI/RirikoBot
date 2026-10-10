@@ -14,7 +14,19 @@
 *None.*
 
 ## 🎯 To Do
-*None.*
+| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
+|---|---|---|---|---|---|---|---|
+| `STORY-185` | Story | Versioned Forward-Only Schema Migrations With One-Time Baseline Adoption | 13 | EPIC-019 | — | yes | large |
+| `STORY-186` | Story | Host Deploys Apply Migrations as a Gated Step (Staging First) | 8 | EPIC-019 | STORY-185 | blocked | large |
+| `TASK-1333` | Task | Optional Text Message With the Welcome and Farewell Cards (Dashboard, /welcomer, /farewell) | 8 | STORY-133 | STORY-185 | blocked | medium |
+| `TASK-1851` | Task | Migration Authoring: Per-Dialect drizzle-kit Configs, 0000 Baseline and Embedded Migration Modules | 5 | STORY-185 | — | yes | medium |
+| `TASK-1852` | Task | Migration Runner: Tracking Table, Locks, Checksums, SQLite Backup and Downgrade Guard | 5 | STORY-185 | TASK-1851 | blocked | medium |
+| `TASK-1853` | Task | One-Time Baseline Adoption of Existing Databases With Additive Drift Repair | 5 | STORY-185 | TASK-1852 | blocked | medium |
+| `TASK-1854` | Task | Wire Migrations Into the Bot, CLI (ririko db:migrate), db:copy and Dashboard Readiness | 5 | STORY-185 | TASK-1853 | blocked | medium |
+| `TASK-1855` | Task | CI Gates for Migrations: Schema In Sync, Embedded Modules, Parity, Upgrade and Safety Lint | 3 | STORY-185 | TASK-1852 | blocked | medium |
+| `TASK-1861` | Task | ririko-deploy Runs ririko db:migrate From the New Image Before Starting It | 5 | STORY-186 | STORY-185 | blocked | medium |
+| `TASK-1862` | Task | Release Runbook: Migrations, Failure Recovery From the Pre-Deploy Dump, and Staging Adoption Checklist | 3 | STORY-186 | TASK-1861 | blocked | medium |
+| `BUG-0040` | Bug | /lyrics and the Music Controller Lyrics Button Show Placeholder Text Instead of Lyrics | 5 | EPIC-005 | — | yes | medium |
 
 ## 🔍 Review
 *None.*
@@ -440,3 +452,4 @@
 | `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
 | `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
+| `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | TODO | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |

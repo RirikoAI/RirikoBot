@@ -444,6 +444,21 @@
       ],
       "blocks": [],
       "description": "Maintainer-requested polish for the Next.js dashboard after rc.4. Collects usability fixes to existing pages; no new modules. More stories will be added as the maintainer lists them."
+    },
+    {
+      "id": "EPIC-019",
+      "title": "Production Harness: Controlled, Automated and Safeguarded Releases",
+      "points": 21,
+      "status": "TODO",
+      "children": [
+        "STORY-185",
+        "STORY-186"
+      ],
+      "requires": [
+        "EPIC-017"
+      ],
+      "blocks": [],
+      "description": "Everything the public Ririko bot needs before real production: releases that change the database and the hosts without manual steps, with gates, backups and a defined rollback. Staging, the only long-lived 2.0 database, is the case study. STORY-185 replaces db:push and hand-written ensure* upgrades with versioned, forward-only migrations (ADR-015); STORY-186 makes the host deploy apply them as a gated step. More stories will be added as the maintainer lists them. db:push never runs against staging or production."
     }
   ],
   "stories": [
@@ -2448,6 +2463,111 @@
       "model": "large",
       "handovers": [
         "STORY-184"
+      ]
+    },
+    {
+      "id": "STORY-185",
+      "parent": "EPIC-019",
+      "title": "Versioned Forward-Only Schema Migrations With One-Time Baseline Adoption",
+      "points": 13,
+      "status": "TODO",
+      "requires": [],
+      "blocks": [
+        "STORY-186",
+        "TASK-1333"
+      ],
+      "children": [
+        "TASK-1851",
+        "TASK-1852",
+        "TASK-1853",
+        "TASK-1854",
+        "TASK-1855"
+      ],
+      "description": "Implements ADR-015 decisions 1-8 and 10: SQL migrations per dialect authored with drizzle-kit generate and embedded in code, a small runner with a tracking table, locks, checksums, a SQLite pre-migration backup and a downgrade guard, a one-time additive adoption of existing databases (staging and self-hosted 2.0 databases) that also repairs past db:push drift, wiring into the bot, CLI, db:copy and dashboard readiness, and CI gates. Story estimate 13; its tasks total 23 (5 + 5 + 5 + 5 + 3).",
+      "model": "large",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "docs/adr/ADR-015-versioned-schema-migrations.md",
+          "packages/database/src/migrations/",
+          "packages/database/src/client/sqlite.ts",
+          "packages/database/scripts/generate-ddl.mjs",
+          "apps/bot/src/main.ts",
+          "apps/web/src/lib/server/services.ts",
+          "packages/database/src/copy/copy-database.ts"
+        ],
+        "symbols": [
+          "ensurePostgresSchema",
+          "ensureTextIdColumns",
+          "ensureAdventureSchema",
+          "ensureCardSerialSchema",
+          "ensureGuildRegistrySchema",
+          "createSqliteClient"
+        ],
+        "codegraph_queries": [
+          "ensurePostgresSchema ensureTextIdColumns ensureAdventureSchema ensureCardSerialSchema ensureGuildRegistrySchema",
+          "createSqliteClient createDatabaseClient copyDatabase getDatabase main"
+        ]
+      },
+      "acceptance": [
+        "TASK-1851 to TASK-1855 are DONE.",
+        "A fresh SQLite and a fresh PostgreSQL database reach the full schema through migrations alone, and a staging-shaped database (created from the DDL before the columns that only had a db:push note) is adopted and repaired with no data change.",
+        "No startup path runs SQLITE_SCHEMA_DDL, PG_SCHEMA_DDL or an ensure* upgrade directly any more; db:push is documented as a development shortcut only."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm build && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "STORY-185",
+        "EPIC-019"
+      ]
+    },
+    {
+      "id": "STORY-186",
+      "parent": "EPIC-019",
+      "title": "Host Deploys Apply Migrations as a Gated Step (Staging First)",
+      "points": 8,
+      "status": "TODO",
+      "requires": [
+        "STORY-185"
+      ],
+      "blocks": [],
+      "children": [
+        "TASK-1861",
+        "TASK-1862"
+      ],
+      "description": "Implements ADR-015 decision 9: ririko-deploy runs ririko db:migrate from the new image after the pre-deploy dump and before the new containers start, aborts with the old release still running when it fails, and the production compose file turns migrate-on-start off. Includes the runbook and the first staging adoption. Story estimate 8 (5 + 3).",
+      "model": "large",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          "docker-compose.production.yml",
+          "scripts/deploy-host.test.ts",
+          "docs/release.md"
+        ],
+        "symbols": [
+          "cmd_deploy",
+          "apply_release",
+          "predeploy_dump",
+          "wait_ready"
+        ],
+        "codegraph_queries": [
+          "ririko-deploy.sh cmd_deploy apply_release predeploy_dump wait_ready"
+        ]
+      },
+      "acceptance": [
+        "TASK-1861 and TASK-1862 are DONE.",
+        "Staging has been deployed once with the migration step (an operator action by the coordinator over SSH, after the maintainer merges): the deploy log shows the baseline adoption, and ririko-deploy status shows the latest migration id."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/deploy-host.test.ts scripts/circleci-deploy.test.ts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "STORY-186",
+        "EPIC-019"
       ]
     }
   ],
@@ -7262,6 +7382,500 @@
         "TASK-1842",
         "STORY-184"
       ]
+    },
+    {
+      "id": "TASK-1333",
+      "parent": "STORY-133",
+      "title": "Optional Text Message With the Welcome and Farewell Cards (Dashboard, /welcomer, /farewell)",
+      "points": 8,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "STORY-185"
+      ],
+      "blocks": [],
+      "description": "The welcome and farewell cards post only the image. Add an optional text message per card: a checkbox that turns it on and a text box for the message, for example \"Welcome to the server, {user}! Please read the rules in #rules\". The bot sends the text in the same message as the card. It is configurable from the dashboard Welcome and Farewell pages, from /welcomer and /farewell (slash and prefix), and from ririko guild:config.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/utilities.ts",
+          "packages/database/src/schema/pg/utilities.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/src/repositories/welcomer.repository.test.ts",
+          "packages/core/src/config/welcomer.ts",
+          "packages/core/src/config/welcomer.test.ts",
+          "packages/core/src/config/guild-config.ts",
+          "packages/core/src/config/guild-config.test.ts",
+          "packages/services/src/guild/guild-config.service.ts",
+          "packages/services/src/guild/__tests__/guild-config.service.test.ts",
+          "packages/services/src/welcomer/welcomer.service.ts",
+          "packages/services/src/welcomer/__tests__/welcomer.service.test.ts",
+          "apps/bot/src/listeners/member.listener.ts",
+          "apps/bot/src/listeners/__tests__/voice-and-welcome-listeners.test.ts",
+          "apps/bot/src/commands/utility/welcomer-card.ts",
+          "apps/bot/src/commands/utility/welcomer.command.ts",
+          "apps/bot/src/commands/utility/farewell.command.ts",
+          "apps/bot/src/commands/utility/__tests__/welcomer-card.test.ts",
+          "apps/web/src/app/dashboard/[guildId]/welcome/card-page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/welcome/actions.ts",
+          "apps/web/src/app/dashboard/[guildId]/welcome/actions.test.ts",
+          "apps/web/src/components/settings-form.tsx",
+          "apps/cli/src/commands/guild-config.test.ts",
+          "docs/modules.md"
+        ],
+        "symbols": [
+          "guildWelcomer",
+          "guildFarewell",
+          "WelcomerRepository.setWelcomeConfig",
+          "WelcomerRepository.setFarewellConfig",
+          "WelcomerMessageSetting",
+          "WELCOMER_MESSAGE_VARIABLES",
+          "fillWelcomerMessage",
+          "welcomerCardStore",
+          "registerMemberListener",
+          "runWelcomerCardCommand",
+          "readChanges",
+          "WelcomerCardPage",
+          "saveCardSettings",
+          "ToggleField",
+          "TextAreaField"
+        ],
+        "entry_points": [
+          "apps/bot/src/listeners/member.listener.ts",
+          "apps/web/src/app/dashboard/[guildId]/welcome/card-page.tsx",
+          "apps/bot/src/commands/utility/welcomer-card.ts"
+        ],
+        "codegraph_queries": [
+          "registerMemberListener guildMemberAdd guildMemberRemove renderCard AttachmentBuilder send",
+          "guildWelcomer guildFarewell WelcomeConfig FarewellConfig WelcomerRepository setWelcomeConfig",
+          "welcomerCardStore GuildConfigService welcome farewell guild-config WelcomerMessageSetting fillWelcomerMessage",
+          "WelcomerCardPage saveCardSettings readFormFields ToggleField TextAreaField renderPreview",
+          "runWelcomerCardCommand readChanges problemWith COPY createWelcomerCommand createFarewellCommand"
+        ]
+      },
+      "acceptance": [
+        "guild_welcomer and guild_farewell get two new columns in both dialects: text_message_enabled (boolean, NOT NULL, default false) and text_message (text, NOT NULL, default empty string). They ship as a generated migration for each dialect (pnpm db:generate, ADR-015), additive only, so existing rows keep working with the card only and staging gets them on its next deploy. The generated DDL is regenerated too. No db:push step and no ensure* function.",
+        "packages/core/src/config/welcomer.ts defines the text message rules in one place: at most 2000 characters (the Discord message limit), trimmed, and the placeholders {user}, {username}, {server} and {memberCount}. The welcome and farewell objects in guild-config.ts gain textMessageEnabled and textMessage. Turning the text on with an empty message is rejected with a clear error, on the dashboard, on the commands and on ririko guild:config.",
+        "When a member joins or leaves and the card is on, the bot sends the card and, when the text is on, the filled text as the content of that same message. In the welcome text {user} is a mention of the new member; in the farewell text {user} is the plain username. {username} is always the plain username. A #channel-name word that names a channel in the server becomes a channel mention (<#id>); text that already holds <#id> is sent as it is; other # words stay as typed.",
+        "The text message can never ping @everyone, @here or a role, even when the template contains them: the welcome send allows only the joining member as a user mention, and the farewell send allows no mentions. With the text off, the bot sends exactly what it sends today (the card only).",
+        "The dashboard Welcome and Farewell pages each show a checkbox \"Also send a text message\" and a text box for the message. The text box description lists the placeholders and explains #channel-name. Saving goes through saveCardSettings and the guild config service, so the change is versioned, reaches the bot through the config change feed, and is logged like other card fields. The page also shows the filled text under the card preview when the text is on.",
+        "/welcomer and /farewell get a text option: text:<message> sets the message and turns the text on; text:none turns it off and keeps the stored message. The prefix forms !welcomer text <message> and !welcomer text none (and the !farewell equivalents) do the same. The settings summary the commands reply with shows whether the text is on and the message.",
+        "ririko guild:config <guild> welcome.textMessage / welcome.textMessageEnabled (and farewell.*) read and write the new fields through the shared schema, with no CLI-specific code.",
+        "Tests cover: the schema rules (length, empty-while-on), the store read and write with defaults for rows that predate the columns, the placeholder filling and #channel-name resolution, the listener sending content plus file with the right allowedMentions for welcome and farewell and the card-only path when the text is off, the slash and prefix text option, and the dashboard save action. No test is weakened or skipped, and the coverage thresholds in vitest.config.ts still pass.",
+        "docs/modules.md describes the text message, its placeholders and the #channel-name rule."
+      ],
+      "verify_cmd": "pnpm vitest run packages/core/src/config packages/database/src/repositories/welcomer.repository.test.ts packages/services/src/guild packages/services/src/welcomer apps/bot/src/listeners/__tests__/voice-and-welcome-listeners.test.ts apps/bot/src/commands/utility/__tests__/welcomer-card.test.ts apps/bot/src/guild-config-sync.test.ts apps/cli/src/commands/guild-config.test.ts \"apps/web/src/app/dashboard/[guildId]/welcome\" && pnpm db:check && pnpm build && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1333",
+        "TASK-1332",
+        "STORY-166",
+        "EPIC-019"
+      ]
+    },
+    {
+      "id": "TASK-1851",
+      "parent": "STORY-185",
+      "title": "Migration Authoring: Per-Dialect drizzle-kit Configs, 0000 Baseline and Embedded Migration Modules",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [],
+      "blocks": [
+        "TASK-1852"
+      ],
+      "description": "ADR-015 decisions 1, 2 and 4. Set up drizzle-kit generate for both schemas, generate the 0000_baseline migration per dialect, and a generator that embeds the SQL files as TypeScript modules the runner and every app can import.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/drizzle.config.ts",
+          "packages/database/package.json",
+          "packages/database/scripts/generate-ddl.mjs",
+          "packages/database/src/schema/sqlite/index.ts",
+          "packages/database/src/schema/pg/index.ts",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/database/src/schema/sqlite/ddl.test.ts",
+          "packages/database/src/schema/pg/ddl.test.ts",
+          "package.json",
+          "docs/database.md",
+          "docs/development.md"
+        ],
+        "symbols": [
+          "SQLITE_SCHEMA_DDL",
+          "PG_SCHEMA_DDL"
+        ],
+        "entry_points": [
+          "packages/database/scripts/generate-ddl.mjs"
+        ],
+        "codegraph_queries": [
+          "generate-ddl SQLITE_SCHEMA_DDL PG_SCHEMA_DDL drizzle.config ddl.test",
+          "sqlite schema index pg schema index guildWelcomer guildSettings"
+        ]
+      },
+      "acceptance": [
+        "Two drizzle-kit configs (one per dialect) write to packages/database/migrations/sqlite and packages/database/migrations/pg, each with drizzle-kit's meta snapshots committed so the next generate diffs against them. The existing drizzle.config.ts used by db:push keeps working for development.",
+        "Each dialect has exactly one migration, 0000_baseline.sql, equal to the current schema (the same tables, columns, defaults and indexes as SQLITE_SCHEMA_DDL and PG_SCHEMA_DDL, including adventure_*, waifu_card_serials and guilds.invited_*).",
+        "pnpm -F @ririko/database db:generate-migrations embeds the SQL files into packages/database/src/migrations/generated/sqlite.ts and pg.ts: an ordered, readonly list of { id, statements, checksum, contract }, where statements are split on drizzle's \"--> statement-breakpoint\", checksum is the sha256 of the file bytes with CRLF normalised to LF, and contract is true when the first line is \"-- ririko:contract\". The output is deterministic (running it twice changes nothing).",
+        "A root script pnpm db:generate runs drizzle-kit generate for both dialects and then the embedder, so a contributor has one command after changing a schema.",
+        "Tests prove the embedded modules match the SQL files byte for byte (by checksum), and that the baseline creates the same columns as the generated DDL on both dialects (SQLite in-memory; PostgreSQL in the existing test-postgres setup, skipped when unavailable as the other Postgres tests are).",
+        "docs/database.md and docs/development.md describe the new authoring flow; nothing at runtime uses the migrations yet."
+      ],
+      "verify_cmd": "pnpm vitest run packages/database && pnpm build && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1851",
+        "STORY-185",
+        "EPIC-019"
+      ]
+    },
+    {
+      "id": "TASK-1852",
+      "parent": "STORY-185",
+      "title": "Migration Runner: Tracking Table, Locks, Checksums, SQLite Backup and Downgrade Guard",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1851"
+      ],
+      "blocks": [
+        "TASK-1853",
+        "TASK-1855"
+      ],
+      "description": "ADR-015 decisions 3 and 8. migrateDatabase(client, options) and migrationStatus(client) in packages/database, applying the embedded migrations by id.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/src/migrations/runner.ts",
+          "packages/database/src/migrations/runner.test.ts",
+          "packages/database/src/migrations/generated/sqlite.ts",
+          "packages/database/src/migrations/generated/pg.ts",
+          "packages/database/src/migrations/postgres-schema.ts",
+          "packages/database/src/migrations/text-ids.ts",
+          "packages/database/src/transactions/index.ts",
+          "packages/database/src/client/types.ts",
+          "packages/database/src/index.ts",
+          "packages/database/src/testing/dialects.ts"
+        ],
+        "symbols": [
+          "ensurePostgresSchema",
+          "ensureTextIdColumns",
+          "withTransaction",
+          "DatabaseClient"
+        ],
+        "codegraph_queries": [
+          "ensurePostgresSchema ensureTextIdColumns withTransaction pg_advisory_xact_lock connect release",
+          "DatabaseClient SqliteDatabaseClient PostgresDatabaseClient raw dialect testing dialects"
+        ]
+      },
+      "acceptance": [
+        "migrateDatabase(client, { log?, dryRun?, now? }) creates ririko_schema_migrations (id text primary key, checksum text not null, applied_at not null) in the connection's current schema when missing, and applies every embedded migration whose id is not recorded, in id order, each in its own transaction together with its tracking row. It returns { applied, alreadyApplied, unknown, backupPath }.",
+        "PostgreSQL: one dedicated pool connection holds pg_advisory_lock for the whole run and always releases it (also on error); two concurrent runs apply each migration once. SQLite: each migration runs in BEGIN IMMEDIATE.",
+        "SQLite file databases: when at least one migration is pending and the database already has tables, the runner first writes VACUUM INTO <db dir>/backups/pre-migrate-<UTC stamp>.sqlite and keeps the newest 5 such files. In-memory databases and empty databases get no backup.",
+        "A recorded migration whose checksum differs from the embedded one stops the run before any change, naming the id. dryRun reports what would run and changes nothing (no table, no backup).",
+        "Downgrade guard: recorded ids the image does not know are returned as unknown. If any of them was recorded as a contract migration (store contract in the tracking row), migrateDatabase throws a DatabaseError telling the operator to deploy the newer release or restore the pre-deploy dump; otherwise it logs one warning and continues.",
+        "migrationStatus(client) returns { latest, pending, unknown, adopted } without changing anything, for the CLI and the dashboard.",
+        "Tests on SQLite and PostgreSQL (test-postgres): fresh database, idempotent second run, partial failure rolls back only the failing migration, checksum mismatch, concurrent runs (Postgres), backup creation and pruning, dry run, unknown ordinary and unknown contract ids. Migrations used by the tests are injected, so the tests do not depend on the real list."
+      ],
+      "verify_cmd": "pnpm vitest run packages/database && pnpm build && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1852",
+        "STORY-185",
+        "EPIC-019"
+      ]
+    },
+    {
+      "id": "TASK-1853",
+      "parent": "STORY-185",
+      "title": "One-Time Baseline Adoption of Existing Databases With Additive Drift Repair",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1852"
+      ],
+      "blocks": [
+        "TASK-1854"
+      ],
+      "description": "ADR-015 decision 5. A database that has tables but no ririko_schema_migrations table (staging, self-hosted 2.0 databases) is repaired and stamped with 0000_baseline instead of running it.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/src/migrations/adopt-baseline.ts",
+          "packages/database/src/migrations/adopt-baseline.test.ts",
+          "packages/database/src/migrations/runner.ts",
+          "packages/database/src/migrations/text-ids.ts",
+          "packages/database/src/migrations/card-serials.ts",
+          "packages/database/src/migrations/adventure-schema.ts",
+          "packages/database/src/migrations/guild-registry.ts",
+          "packages/database/src/migrations/postgres-schema.ts"
+        ],
+        "symbols": [
+          "ensureTextIdColumns",
+          "ensureCardSerialSchema",
+          "ensureAdventureSchema",
+          "ensureGuildRegistrySchema",
+          "TEXT_ID_COLUMNS"
+        ],
+        "codegraph_queries": [
+          "ensureTextIdColumns TEXT_ID_COLUMNS ensureCardSerialSchema ensureAdventureSchema ensureGuildRegistrySchema",
+          "ensurePostgresSchema information_schema columns PRAGMA table_info"
+        ]
+      },
+      "acceptance": [
+        "migrateDatabase adopts a database that has application tables and no tracking table: under the same lock (and after the same SQLite backup) it runs ensureTextIdColumns and the card serial duplicate audit, then compares the live schema with the baseline and records 0000_baseline as applied (with an adopted flag) instead of executing it. Later migrations then run as usual.",
+        "Reconciliation is additive only and runs in one transaction: missing baseline tables and indexes are created from the baseline statements; a missing column that is nullable or has a default is added with that definition; extra tables or columns are only logged. A missing NOT NULL column without a default, or a column whose type differs, refuses the adoption with a report listing every problem, and nothing is changed.",
+        "A staging-shaped fixture (the baseline minus guild_welcomer.background_file, guild_farewell.background_file, free_game_channels.mention_role_id, the tcg_* columns of guild_settings, guilds.invited_by_id and invited_via, with rows in those tables) adopts on both dialects with no row lost or changed, and ends with exactly the baseline columns.",
+        "ensureAdventureSchema, ensureCardSerialSchema and ensureGuildRegistrySchema are no longer needed on their own (the baseline holds their tables); keep them exported only if a caller outside startup still needs them, otherwise remove them with their tests moved to the adoption tests. ensureTextIdColumns stays as an adoption repair.",
+        "A second run on an adopted database changes nothing."
+      ],
+      "verify_cmd": "pnpm vitest run packages/database && pnpm build && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1853",
+        "STORY-185",
+        "EPIC-019"
+      ]
+    },
+    {
+      "id": "TASK-1854",
+      "parent": "STORY-185",
+      "title": "Wire Migrations Into the Bot, CLI (ririko db:migrate), db:copy and Dashboard Readiness",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1853"
+      ],
+      "blocks": [],
+      "description": "ADR-015 decision 6. Replace every startup call to the full DDL and ensure* upgrades with migrateDatabase (bot, db:copy, test harness) or migrationStatus (dashboard), add DB_AUTO_MIGRATE and the ririko db:migrate command.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "apps/bot/src/main.ts",
+          "apps/bot/test/support/bot-harness.ts",
+          "apps/web/src/lib/server/services.ts",
+          "apps/web/src/lib/server/health.ts",
+          "apps/web/src/lib/server/health.test.ts",
+          "apps/cli/src/index.ts",
+          "apps/cli/src/commands/db-copy.ts",
+          "packages/database/src/copy/copy-database.ts",
+          "packages/database/src/client/sqlite.ts",
+          "packages/database/src/client/types.ts",
+          "packages/core/src/config/",
+          ".env.example",
+          "docker-compose.production.yml",
+          "docs/database.md",
+          "docs/development.md",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "main",
+          "getDatabase",
+          "copyDatabase",
+          "createSqliteClient",
+          "startBotHarness",
+          "runLegacyUpgrade"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts",
+          "apps/cli/src/index.ts",
+          "apps/web/src/lib/server/services.ts"
+        ],
+        "codegraph_queries": [
+          "main ensurePostgresSchema ensureTextIdColumns runLegacyUpgrade createBotServices ensureAdventureSchema",
+          "getDatabase createWebServices ensurePostgresSchema readiness api ready health",
+          "copyDatabase db-copy command registerCommands cli index",
+          "createSqliteClient autoMigrate SQLITE_SCHEMA_DDL startBotHarness"
+        ]
+      },
+      "acceptance": [
+        "The bot runs migrateDatabase before runLegacyUpgrade and before services start, unless DB_AUTO_MIGRATE is false; with it false it calls migrationStatus and exits with a clear message when migrations are pending. DB_AUTO_MIGRATE is in the shared config schema (default true), .env.example and docs/deployment.md.",
+        "createSqliteClient no longer runs SQLITE_SCHEMA_DDL for file databases at startup. Tests that relied on autoMigrate either run migrateDatabase or keep the DDL fixture through an explicit test helper; the autoMigrate option is removed or limited to tests, and no test is weakened.",
+        "The dashboard never changes the schema: getDatabase calls migrationStatus, and /api/ready returns 503 with a log line naming the pending migrations while the database is behind; the downgrade guard applies as in the bot.",
+        "ririko db:migrate applies migrations and prints what ran; --status prints latest, pending and unknown ids; --dry-run prints the plan and changes nothing. Exit codes: 0 done or nothing to do, 1 failure, 2 refused by the downgrade guard. The command is in the bot image (apps/cli/dist).",
+        "ririko db:copy prepares its PostgreSQL target with migrateDatabase; the bot test harness and copy tests use it too. No code outside packages/database/src/migrations calls ensurePostgresSchema, PG_SCHEMA_DDL or SQLITE_SCHEMA_DDL at runtime.",
+        "docs/database.md section 1 describes the new startup flow; docs/development.md lists ririko db:migrate and says db:push is a development shortcut that never runs against staging or production."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm test:integration && pnpm build && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1854",
+        "STORY-185",
+        "EPIC-019"
+      ]
+    },
+    {
+      "id": "TASK-1855",
+      "parent": "STORY-185",
+      "title": "CI Gates for Migrations: Schema In Sync, Embedded Modules, Parity, Upgrade and Safety Lint",
+      "points": 3,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1852"
+      ],
+      "blocks": [],
+      "description": "ADR-015 decisions 7 and 10, plus the contributor rule. A schema change without its migration, an edited released migration, or an unmarked destructive statement fails CI.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          ".circleci/config.yml",
+          "scripts/check-migrations.ts",
+          "scripts/check-migrations.test.ts",
+          "scripts/circleci-deploy.test.ts",
+          "packages/database/migrations/",
+          "AGENTS.md",
+          "docs/contributing.md",
+          "docs/testing.md"
+        ],
+        "symbols": [
+          "lint",
+          "typecheck",
+          "test-postgres"
+        ],
+        "codegraph_queries": [
+          "circleci config lint typecheck test test-postgres jobs workflows",
+          "generate-ddl drizzle-kit generate migrations embed checksum"
+        ]
+      },
+      "acceptance": [
+        "A script (scripts/check-migrations.ts, run by pnpm db:check and in the CircleCI lint job) fails when: drizzle-kit generate for either dialect would write a new migration; the embedded modules differ from the SQL files; or a migration contains DROP TABLE, DROP COLUMN, RENAME, ALTER COLUMN ... TYPE or SET NOT NULL without \"-- ririko:contract\" on its first line. It prints the file and the statement.",
+        "Each check has a unit test with a temporary migrations folder (no network, no real database).",
+        "The test-postgres CircleCI job runs the PostgreSQL migration and adoption tests.",
+        "AGENTS.md section 5 gets a rule: every schema change ships a generated migration for both dialects (pnpm db:generate); destructive changes follow expand/contract; db:push is a development shortcut and never runs against staging or production. docs/contributing.md and docs/testing.md say the same."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/check-migrations.test.ts scripts/circleci-deploy.test.ts && pnpm db:check && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1855",
+        "STORY-185",
+        "EPIC-019"
+      ]
+    },
+    {
+      "id": "TASK-1861",
+      "parent": "STORY-186",
+      "title": "ririko-deploy Runs ririko db:migrate From the New Image Before Starting It",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "STORY-185"
+      ],
+      "blocks": [
+        "TASK-1862"
+      ],
+      "description": "ADR-015 decision 9 on the host side: after the pre-deploy dump and the image pull, and before docker compose up, the deploy runs the migration once from the new bot image; production compose sets DB_AUTO_MIGRATE=false.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "deploy/host/bin/ririko-deploy.sh",
+          "docker-compose.production.yml",
+          "scripts/deploy-host.test.ts",
+          "scripts/circleci-deploy.test.ts",
+          ".circleci/config.yml"
+        ],
+        "symbols": [
+          "cmd_deploy",
+          "apply_release",
+          "predeploy_dump",
+          "wait_ready",
+          "diagnose"
+        ],
+        "entry_points": [
+          "deploy/host/bin/ririko-deploy.sh"
+        ],
+        "codegraph_queries": [
+          "ririko-deploy.sh cmd_deploy apply_release predeploy_dump wait_ready diagnose compose",
+          "deploy-host.test.ts ririko-deploy exit codes rollback"
+        ]
+      },
+      "acceptance": [
+        "apply_release pulls the new images, then runs \"compose <version> run --rm --no-deps bot ririko db:migrate\" (the image's CLI wrapper) while the previous release is still running, and only then runs up -d. The step is skipped for a Lavalink host.",
+        "When the migration fails the deploy stops with a new exit code 6, the previous release keeps running untouched, and the output names the pre-deploy dump and the migration error. Exit 2 from the CLI (downgrade guard) is reported as such. ririko-deploy-ssh and the CircleCI ssh-host job map exit 6 to a clear message, like the existing codes.",
+        "When the migration succeeded but the new release does not become ready, the existing rollback to the previous release still runs (allowed by the expand rule); the output says the database keeps the new migrations.",
+        "docker-compose.production.yml sets DB_AUTO_MIGRATE=false on the bot; the dashboard never migrates.",
+        "ririko-deploy status prints the database's latest migration id and any pending ones (ririko db:migrate --status from the running image).",
+        "scripts/deploy-host.test.ts covers: migration before up, failure exit 6 with the old release untouched, guard exit, rollback after a successful migration, Lavalink host skip. scripts/circleci-deploy.test.ts covers the exit 6 message. shellcheck passes."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/deploy-host.test.ts scripts/circleci-deploy.test.ts && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "TASK-1861",
+        "STORY-186",
+        "EPIC-019"
+      ]
+    },
+    {
+      "id": "TASK-1862",
+      "parent": "STORY-186",
+      "title": "Release Runbook: Migrations, Failure Recovery From the Pre-Deploy Dump, and Staging Adoption Checklist",
+      "points": 3,
+      "status": "TODO",
+      "children": [],
+      "requires": [
+        "TASK-1861"
+      ],
+      "blocks": [],
+      "description": "Operator documentation for the gated migration step, written so the same steps hold for production. No provider, address or hostname details (they stay in the private docs/hosting.md).",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "docs/release.md",
+          "docs/migrations.md",
+          "docs/deployment.md",
+          "docs/database.md"
+        ],
+        "symbols": [
+          "predeploy_dump",
+          "cmd_deploy"
+        ],
+        "codegraph_queries": [
+          "ririko-deploy.sh predeploy_dump cmd_deploy KEEP_DUMPS status"
+        ]
+      },
+      "acceptance": [
+        "docs/release.md section 8 explains the migration step, exit 6, the downgrade guard, and what rollback does and does not undo (the database keeps expand migrations).",
+        "A restore procedure from backups/predeploy/*.dump (stop the stack, pg_restore --clean into the database, start the matching release), checked against the dump format ririko-deploy writes (pg_dump -Fc).",
+        "A one-time staging adoption checklist: a manual dump first, deploy the first release with the runner, check the adoption lines in the deploy log and ririko-deploy status, and what to do when adoption refuses (the report, fix, redeploy).",
+        "A self-hoster section in docs/deployment.md: upgrades migrate on start, where the SQLite pre-migration backups are, DB_AUTO_MIGRATE=false plus ririko db:migrate for operators who want to run it by hand.",
+        "git grep finds no hostnames, IP addresses or provider account details added by this task."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet",
+      "handovers": [
+        "TASK-1862",
+        "STORY-186",
+        "EPIC-019"
+      ]
     }
   ],
   "chores": [
@@ -8595,6 +9209,78 @@
       "verify_cmd": "pnpm vitest run apps/bot/src/commands/tcg/__tests__/item.command.test.ts apps/bot/src/commands/tcg/__tests__/info.command.test.ts && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check",
       "handovers": [
         "BUG-0039"
+      ]
+    },
+    {
+      "id": "BUG-0040",
+      "parent": "EPIC-005",
+      "title": "/lyrics and the Music Controller Lyrics Button Show Placeholder Text Instead of Lyrics",
+      "points": 5,
+      "status": "TODO",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "/lyrics (!ly) replies with a fixed embed that claims 'Lyrics search provider: Genius' and never fetches lyrics. The music controller's Lyrics button (music_lyrics) replies with a link to the track and points to /lyrics. Both are placeholders, which AGENTS.md rule 5 forbids, and the legacy bot did return lyrics (genius-lyrics). Fetch real lyrics from LRCLIB (https://lrclib.net), a free API that needs no key, through a rate-limited client in @ririko/services, and show them from both entry points.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/services/src/lyrics/lrclib.client.ts",
+          "packages/services/src/lyrics/index.ts",
+          "packages/services/src/lyrics/__tests__/lrclib.client.test.ts",
+          "packages/services/src/index.ts",
+          "packages/services/src/http/rate-limiter.ts",
+          "packages/services/src/anime/waifu-im.client.ts",
+          "packages/music/src/extractors/track-matcher.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/commands/music/lyrics.ts",
+          "apps/bot/src/commands/music/commands.ts",
+          "apps/bot/src/commands/music/commands.test.ts",
+          "apps/bot/src/controllers/music-embed.controller.ts",
+          "apps/bot/src/controllers/music-embed.controller.test.ts",
+          "docs/music.md",
+          "docs/legacy-feature-inventory.md"
+        ],
+        "symbols": [
+          "createMusicCommands",
+          "MusicEmbedController.handleButtonInteraction",
+          "createBotServices",
+          "BotServices",
+          "fetchWithRetry",
+          "RateLimiter",
+          "WaifuImClient",
+          "PrecisionTrackMatcher.cleanTitle",
+          "GuildQueue.currentTrack"
+        ],
+        "entry_points": [
+          "apps/bot/src/commands/music/commands.ts",
+          "apps/bot/src/controllers/music-embed.controller.ts"
+        ],
+        "codegraph_queries": [
+          "createMusicCommands lyricsCommand getQueue currentTrack formatDuration",
+          "MusicEmbedController handleButtonInteraction music_lyrics buildControllerButtonRows",
+          "createBotServices BotServices WaifuImClient waifuImClient",
+          "fetchWithRetry RateLimiter WaifuImClient fetch USER_AGENT",
+          "PrecisionTrackMatcher cleanTitle NOISE_REGEX QueuedTrack artist durationSeconds"
+        ]
+      },
+      "acceptance": [
+        "A new LrclibClient in packages/services/src/lyrics/ (exported from @ririko/services) calls https://lrclib.net through fetchWithRetry with its own RateLimiter, a timeout, and the same RirikoBot User-Agent string that WaifuImClient sends. It needs no API key and no env var. createBotServices builds one instance and exposes it on BotServices.",
+        "For a track (title, artist, durationSeconds) the client first calls GET /api/get with track_name, artist_name and duration, and treats 404 (TrackNotFound) as \"no match\" instead of throwing. When that finds nothing it calls GET /api/search with track_name and artist_name and picks the first result whose duration is within 3 seconds of the track (the first result when the duration is unknown). A free-text lookup (/lyrics song:<text>) calls GET /api/search?q=<text> and takes the first result.",
+        "The now-playing title is cleaned with PrecisionTrackMatcher.cleanTitle, and a trailing \" - Topic\" is removed from the artist, before the lookup. A YouTube title such as \"Artist - Song (Official Video)\" therefore still matches.",
+        "/lyrics with no argument looks up the current track; /lyrics song:<text> and !ly <text> look up the given text. The reply shows the real lyrics (plainLyrics; when that is empty, syncedLyrics with its [mm:ss.xx] timestamps removed), the matched track and artist names, and a \"Lyrics from LRCLIB\" footer. The fake \"Lyrics search provider: Genius\" and \"sync lyrics provider active\" text is gone.",
+        "The music_lyrics controller button shows the same lyrics for the current track as an ephemeral reply. The command and the button both use one shared helper in apps/bot/src/commands/music/lyrics.ts. The placeholder text that points to /lyrics is gone.",
+        "Lyrics longer than one embed description (4096 characters) are split on line breaks across several embeds in one message (at most 10 embeds, at most 6000 embed characters in total). Text beyond that limit is cut, with a note that the lyrics are truncated.",
+        "Each failure has a clear reply: nothing playing and no argument, no lyrics found, an instrumental track, and LRCLIB unreachable or returning an error. Errors are logged and never become an unhandled rejection. /lyrics defers its reply before the network call.",
+        "Tests: lrclib.client.test.ts covers the exact match, the 404 fallback to search with the duration filter, free-text search, an instrumental result and an HTTP error, all with an injected fetchFn (no real network). commands.test.ts and music-embed.controller.test.ts assert that the lyrics text reaches the reply, the not-found reply, and the long-lyrics split, with the client mocked. No test is weakened or skipped, and the coverage thresholds in vitest.config.ts still pass.",
+        "docs/music.md says /lyrics uses LRCLIB and needs no key. The lyrics row in docs/legacy-feature-inventory.md names LRCLIB instead of Genius / Musixmatch."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/lyrics apps/bot/src/commands/music/commands.test.ts apps/bot/src/controllers/music-embed.controller.test.ts && pnpm build && pnpm --filter @ririko/bot typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0040"
       ]
     }
   ],
