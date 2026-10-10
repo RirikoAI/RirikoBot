@@ -11,6 +11,7 @@ import {
 import type { BotServices } from '../services.js';
 import type { GuildQueue, LoopMode, QueuedTrack } from '@ririko/music';
 import { formatDuration, createProgressBar } from '../commands/music/commands.js';
+import { fetchLyricsReply } from '../commands/music/lyrics.js';
 import {
   canControlPlayback,
   DJ_ONLY_MESSAGE,
@@ -660,15 +661,12 @@ export class MusicEmbedController {
         }
 
         await interaction.deferReply({ ephemeral: true });
-        const lyricsEmbed = new EmbedBuilder()
-          .setColor(0x5865f2)
-          .setTitle(`📝 Lyrics: ${track.title}`)
-          .setDescription(
-            `*Lyrics search for [${track.title}](${track.url})*\n\n*(Full dynamic lyrics available via \`/lyrics\` command)*`,
-          )
-          .setFooter({ text: 'Ririko Music 2.0 • Lyrics' });
-
-        await interaction.editReply({ embeds: [lyricsEmbed] });
+        const reply = await fetchLyricsReply(this.services, { track });
+        try {
+          await interaction.editReply(reply);
+        } catch (error) {
+          console.error('[MusicEmbedController] Could not send the lyrics reply:', error);
+        }
         break;
       }
 

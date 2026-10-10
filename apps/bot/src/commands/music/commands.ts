@@ -9,6 +9,7 @@ import {
 } from '@ririko/music';
 import type { MusicEmbedController } from '../../controllers/music-embed.controller.js';
 import { createDjRoleMiddleware } from './dj-role.js';
+import { MSG_NOTHING_TO_LOOK_UP, fetchLyricsReply } from './lyrics.js';
 
 export function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0 || !Number.isFinite(seconds)) return '0:00';
@@ -655,23 +656,25 @@ export function createMusicCommands(
       ],
     },
     async execute(ctx: CommandContext): Promise<void> {
-      const queue = ctx.guildId ? services.musicPlayer.getQueue(ctx.guildId) : undefined;
-      const songArg = ctx.options.getString('song');
-      const targetTitle = songArg || queue?.currentTrack?.title;
+      const songArg = ctx.options.getString('song')?.trim();
+      const track = songArg
+        ? undefined
+        : ctx.guildId
+          ? services.musicPlayer.getQueue(ctx.guildId)?.currentTrack
+          : undefined;
 
-      if (!targetTitle) {
-        await ctx.reply({ content: '❌ No song specified and nothing is currently playing.' });
+      if (!songArg && !track) {
+        await ctx.reply({ content: MSG_NOTHING_TO_LOOK_UP });
         return;
       }
 
-      const embed = new EmbedBuilder()
-        .setColor(0x5865f2)
-        .setTitle(`🎤 Lyrics: ${targetTitle}`)
-        .setDescription(
-          `*(Lyrics search provider: Genius)*\n\n🎶 Lyrics search for **${targetTitle}** is available.\n*(Detailed line-by-line sync lyrics provider active)*`,
-        );
-
-      await ctx.reply({ embeds: [embed] });
+      // The lookup is a network call, so acknowledge the command first.
+      await ctx.deferReply();
+      const reply = await fetchLyricsReply(
+        services,
+        songArg ? { text: songArg } : { track: track! },
+      );
+      await ctx.editReply(reply);
     },
   };
 

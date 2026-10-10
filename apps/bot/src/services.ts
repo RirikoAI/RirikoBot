@@ -149,6 +149,7 @@ import {
   JikanClient,
   AnimeSearchService,
   WaifuImClient,
+  LrclibClient,
   WallhavenClient,
   ZerochanClient,
   KonachanClient,
@@ -226,6 +227,8 @@ export interface BotServices {
   /** MyAnimeList-first anime/manga/character search with AniList fallback and caching. */
   animeSearchService: AnimeSearchService;
   waifuImClient: WaifuImClient;
+  /** LRCLIB lyrics lookup for /lyrics and the music controller Lyrics button; needs no key. */
+  lrclibClient: LrclibClient;
   /** Backs `/react` and its 67 legacy `!<reaction>` aliases with pooled otakugifs.xyz GIF urls. */
   reactionGifService: ReactionGifService;
   /** Backs `/meme` and its 11 legacy `!<template>` aliases with dynamic canvas rendering. */
@@ -542,6 +545,7 @@ export async function createBotServices(
     anilist: anilistClient,
   });
   const waifuImClient = new WaifuImClient({ maxRetries: 1, timeoutMs: 5000 });
+  const lrclibClient = new LrclibClient({ maxRetries: 1, timeoutMs: 5000 });
   const reactionGifService = new ReactionGifService();
   const memeSynthesizer = new MemeSynthesizer();
   const imageRepo = new ImageRepository(db);
@@ -1061,6 +1065,7 @@ export async function createBotServices(
     anilistClient,
     animeSearchService,
     waifuImClient,
+    lrclibClient,
     reactionGifService,
     memeSynthesizer,
     reminderService,

@@ -221,7 +221,7 @@ All commands support dual-dispatch: full Slash Command (`/play`) and Message Pre
 | `/shuffle` | `!mix` | None | Randomizes waiting tracks in the queue. |
 | `/seek` | `!jump` | `<seconds>` | Seeks to a specific timestamp in the track. |
 | `/filter` | `!fx` | `<bassboost \| nightcore \| 8d \| ...>` | Applies audio filter preset. |
-| `/lyrics` | `!ly` | `[song]` | Fetches synced or plain lyrics. |
+| `/lyrics` | `!ly` | `[song]` | Shows the lyrics of the current track, or of `song`, from LRCLIB. See section 9.2. |
 | `/join` | `!connect` | None | Summons bot to user's voice channel. |
 | `/setup-music` | None | None | Generates the dedicated `#music` interactive channel. Needs Manage Server. |
 
@@ -236,7 +236,18 @@ The dashboard Music page, and `ririko guild:config <guild> music.<key>`, edit th
   Everyone can still add songs (`/play`, the music channel, `/playlist`) and use `/queue`, `/nowplaying`, `/lyrics` and `/join`. The check runs as command middleware (`commands/music/dj-role.ts`).
 - **Leave empty voice channels** (`music_guild_settings.auto_leave_empty`, default on): a `voiceStateUpdate` listener counts the members who are not bots in Ririko's voice channel. With nobody left, `MusicPlayerService.handleChannelOccupancy` stops the player and leaves after the idle timeout (3 minutes); anyone joining cancels it. This works for the built-in player and Lavalink. Before STORY-116, Ririko never left an empty channel.
 
-`restrict_voice_channel_id` and `lyrics_provider` are not read by the bot, so they are not on the page. Audio filters are per session and are not saved.
+`restrict_voice_channel_id` and `lyrics_provider` are not read by the bot, so they are not on the page. `/lyrics` always uses LRCLIB (section 9.2), whatever `lyrics_provider` holds. Audio filters are per session and are not saved.
+
+### 9.2. Lyrics (BUG-0040)
+`/lyrics` (`!ly`) and the Lyrics button of the music controller fetch lyrics from [LRCLIB](https://lrclib.net). The API is free and needs **no API key and no environment variable**. `LrclibClient` (`packages/services/src/lyrics/lrclib.client.ts`) sends the `RirikoBot/2.0` User-Agent that LRCLIB asks clients to send, goes through `fetchWithRetry` with its own rate limiter and a 5 second timeout, and is built once in `createBotServices` as `lrclibClient`.
+
+- **Current track** (`/lyrics` with no argument, and the button): the title is cleaned with `PrecisionTrackMatcher.cleanTitle` and a trailing ` - Topic` is removed from the artist. The client calls `GET /api/get` with the track name, artist and duration. A 404 means no exact match, so it then calls `GET /api/search` and takes the first result whose length is within 3 seconds of the track (the first result when the length is unknown).
+- **Free text** (`/lyrics song:<text>`, `!ly <text>`): `GET /api/search?q=<text>`, first result.
+- **Reply**: the plain lyrics, or the synced lyrics with their `[mm:ss.xx]` timestamps removed, with the matched track and artist in the title and a `Lyrics from LRCLIB` footer. The button reply is ephemeral. Anyone in voice can use the button; the DJ role does not apply.
+- **Long lyrics** are split on line breaks across up to 10 embeds in one message (4096 characters per embed, 6000 in total). Anything beyond that is cut with a note.
+- **Failures** each get a clear reply: nothing playing and no argument, no lyrics found, an instrumental track, and LRCLIB unreachable. Errors are logged and never reach the gateway as unhandled rejections. `/lyrics` defers its reply before the lookup.
+
+Lavalink's lyrics plugins, synced karaoke display and providers that need a key are out of scope.
 
 ### Interactive Embed Buttons:
 - `music_pause_resume`: Toggles pause/play state.

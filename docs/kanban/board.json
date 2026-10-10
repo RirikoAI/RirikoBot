@@ -9258,7 +9258,7 @@
       "parent": "EPIC-005",
       "title": "/lyrics and the Music Controller Lyrics Button Show Placeholder Text Instead of Lyrics",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [],
       "blocks": [],
