@@ -158,4 +158,38 @@ describe('getWebServices', { timeout: 60_000 }, () => {
     const [entry] = await audit.listByGuild(ids.mainGuild, { limit: 5 });
     expect(entry).toMatchObject({ guildId: ids.mainGuild, actorUserId: ids.admin });
   });
+
+  it('never changes the schema: it rejects while the database is behind, then recovers once the bot migrated it', async () => {
+    const globals = globalThis as { __ririkoWebDatabase?: Promise<{ close(): Promise<void> }> };
+    const held = () => globals.__ririkoWebDatabase;
+    const shared = held();
+    delete globals.__ririkoWebDatabase;
+    try {
+      const behindPath = path.join(dir, 'behind.sqlite');
+      vi.resetModules();
+      setEnv({ DATABASE_URL: behindPath });
+      const { getWebServices } = await import('./services');
+
+      await expect(getWebServices()).rejects.toThrow(
+        /1 pending migration\(s\) \(0000_baseline\).*ririko db:migrate/,
+      );
+      const untouched = await createDatabaseClient({ dialect: 'sqlite', url: behindPath });
+      if (untouched.dialect !== 'sqlite') throw new Error('Expected sqlite');
+      expect(
+        untouched.raw.prepare("SELECT count(*) AS n FROM sqlite_master WHERE type = 'table'").get(),
+      ).toEqual({ n: 0 });
+      await untouched.close();
+
+      // The bot starts and migrates; the next request works without restarting the dashboard.
+      await (
+        await createDatabaseClient({ dialect: 'sqlite', url: behindPath, autoMigrate: true })
+      ).close();
+      const services = await getWebServices();
+      expect(services.config.DATABASE_URL).toBe(behindPath);
+    } finally {
+      await (await held())?.close();
+      if (shared) globals.__ririkoWebDatabase = shared;
+      else delete globals.__ririkoWebDatabase;
+    }
+  });
 });

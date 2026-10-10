@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { DatabaseClient } from '@ririko/database';
 import { webProbe } from './health';
+import { SchemaNotReadyError } from './schema-guard';
 
 const database = (ping: DatabaseClient['ping']) => async () => ({ ping }) as DatabaseClient;
 
@@ -51,6 +52,26 @@ describe('dashboard probes', () => {
     expect(broken.status).toBe(503);
     expect(await broken.text()).toBe('{"ready":false}');
     expect(log).toHaveBeenCalledTimes(2);
+    log.mockRestore();
+  });
+
+  it('is not ready while migrations are pending, and logs which ones', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const behind = new SchemaNotReadyError('The database schema is behind: 0001_add_column.', [
+      '0001_add_column',
+    ]);
+
+    const ready = await webProbe('ready', {
+      database: async () => {
+        throw behind;
+      },
+      version: '2.0.0',
+    });
+
+    expect(ready.status).toBe(503);
+    expect(await ready.text()).toBe('{"ready":false}');
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('ready probe'), behind);
+    expect(String(log.mock.calls[0]?.[1])).toContain('0001_add_column');
     log.mockRestore();
   });
 });

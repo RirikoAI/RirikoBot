@@ -62,7 +62,7 @@ export function summariseTarget(url: string): TargetSummary {
 }
 
 /** Removes the URL and its password from a message, in case a driver error echoes them. */
-function scrub(message: string, url: string): string {
+export function scrub(message: string, url: string): string {
   let result = message.split(url).join('<target>');
   try {
     const parsed = new URL(url);

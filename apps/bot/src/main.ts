@@ -1,12 +1,4 @@
-import {
-  createDatabaseClient,
-  databaseConfigFromEnv,
-  ensureAdventureSchema,
-  ensureCardSerialSchema,
-  ensureGuildRegistrySchema,
-  ensurePostgresSchema,
-  ensureTextIdColumns,
-} from '@ririko/database';
+import { createDatabaseClient, databaseConfigFromEnv } from '@ririko/database';
 import {
   createBot,
   getBotInfo,
@@ -22,12 +14,13 @@ import {
 import { syncCommandCatalog } from './command-catalog.js';
 import { createCommandRouter, createHelpOptions } from './command-router.js';
 import { createCommandControllers, registerBotCommands } from './command-set.js';
+import { prepareDatabase } from './database-startup.js';
 import { registerGuildJoinCommandSync, syncCommandsOnStartup } from './command-sync.js';
 import { registerComponentInteractions } from './component-interactions.js';
 import { healthPort, startHealthServer } from './health.js';
 import { describeLegacyLayout, findLegacyLayout } from './legacy-layout.js';
 import { runLegacyUpgrade } from './legacy-upgrade.js';
-import { applyLegacyAliases } from '@ririko/core';
+import { applyLegacyAliases, dbAutoMigrateFromEnv } from '@ririko/core';
 import { CommandSynchronizer, createRestClient, DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
 
 /**
@@ -46,6 +39,7 @@ export async function main(): Promise<void> {
   const token = process.env.DISCORD_TOKEN || process.env.DISCORD_BOT_TOKEN;
   const clientId = process.env.DISCORD_CLIENT_ID || process.env.DISCORD_APPLICATION_ID;
   const prefix = process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX;
+  const autoMigrate = dbAutoMigrateFromEnv();
 
   if (!token) {
     console.error('✖ Error: DISCORD_TOKEN is not configured in environment or .env file.');
@@ -61,8 +55,8 @@ export async function main(): Promise<void> {
   // 1. Initialize Bot & Gateway
   const bot = createBot();
 
-  // 2. Initialize Domain Services and Repositories. An empty Postgres database gets the 2.0
-  // schema, then a mounted 1.4.0 database is migrated once, before the services seed defaults.
+  // 2. Initialize Domain Services and Repositories. The schema is migrated first (ADR-015),
+  // then a mounted 1.4.0 database is imported once, before the services seed defaults.
   const db = await createDatabaseClient(databaseConfigFromEnv());
   // Probes answer from here on; /ready waits for the rest of startup and the gateway.
   let started = false;
@@ -79,18 +73,15 @@ export async function main(): Promise<void> {
           started: () => started,
         })
       : null;
-  if (await ensurePostgresSchema(db)) console.log('• Created the PostgreSQL schema.');
-  // Databases from before BUG-0038 hold uuid id columns; the ids SQLite holds are text.
-  const textIds = await ensureTextIdColumns(db);
-  if (textIds.length > 0) console.log(`• Changed ${textIds.length} PostgreSQL id columns to text.`);
+  // Apply (or, with DB_AUTO_MIGRATE=false, check) the schema migrations. A failure here ends the
+  // process: the bot never runs on an old schema.
+  await prepareDatabase(db, { autoMigrate });
   await runLegacyUpgrade(db);
   console.log('• Initializing bot repositories and domain services...');
   const services = await createBotServices(db, bot.client);
-  // Upgrade gameplay storage before any gateway events or commands can run.
-  await ensureAdventureSchema(services.db);
+  // Refuse stored adventure sessions this release cannot read, before any gateway events or
+  // commands can run.
   await services.adventureEngine.assertCompatibleSessions();
-  await ensureCardSerialSchema(services.db);
-  await ensureGuildRegistrySchema(services.db);
 
   // 3. Initialize Dual-Dispatch Command Router with in-memory cached dynamic prefix resolution
   const router = createCommandRouter(services, prefix);

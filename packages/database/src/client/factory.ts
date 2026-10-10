@@ -2,6 +2,7 @@ import type { DatabaseConfig, DatabaseClient, DatabaseDialect, PingResult } from
 import { createSqliteClient } from './sqlite.js';
 import { createPostgresClient } from './postgres.js';
 import { DatabaseError, DEFAULT_DATABASE_URL } from '@ririko/core';
+import { migrateDatabase } from '../migrations/runner.js';
 
 /**
  * The database connection named by `DATABASE_DIALECT` and `DATABASE_URL`, with the same defaults
@@ -21,15 +22,22 @@ export function databaseConfigFromEnv(
  * Factory creating a type-safe DatabaseClient configured for SQLite or PostgreSQL.
  */
 export async function createDatabaseClient(config: DatabaseConfig): Promise<DatabaseClient> {
-  if (config.dialect === 'sqlite') {
-    return createSqliteClient(config);
-  } else if (config.dialect === 'postgres') {
-    return createPostgresClient(config);
+  if (config.dialect !== 'sqlite' && config.dialect !== 'postgres') {
+    throw new DatabaseError(
+      `Unsupported database dialect: ${(config as { dialect: string }).dialect}`,
+    );
   }
-
-  throw new DatabaseError(
-    `Unsupported database dialect: ${(config as { dialect: string }).dialect}`,
-  );
+  const client =
+    config.dialect === 'sqlite' ? createSqliteClient(config) : createPostgresClient(config);
+  if (config.autoMigrate === true) {
+    try {
+      await migrateDatabase(client);
+    } catch (error) {
+      await client.close().catch(() => undefined);
+      throw error;
+    }
+  }
+  return client;
 }
 
 /**

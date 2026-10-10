@@ -85,7 +85,8 @@ Start it:
 What happens on startup:
 - Every service reads `.env.production`, or the file named by `RIRIKO_ENV_FILE`.
 - The compose file sets the values that must point inside the stack itself: `DATABASE_DIALECT=postgres`, `DATABASE_URL` (built from the `POSTGRES_*` values), `LAVALINK_HOST=lavalink` and `LAVALINK_PORT=2333`.
-- On the first start the bot or the dashboard creates the schema in the empty database (`ensurePostgresSchema`, see `docs/database.md` section 1).
+- On start the bot applies the schema migrations (`DB_AUTO_MIGRATE`, default `true`, see `docs/database.md` section 1): an empty database gets the baseline, a database from before migration records is adopted once. The dashboard never changes the schema: it answers `/ready` with 503, and logs the pending migrations, until the bot (or `ririko db:migrate`) has migrated the database, then recovers by itself.
+- `DB_AUTO_MIGRATE=false` makes the bot only check: it exits with a message naming the pending migrations instead of starting on an old schema. Then run `docker compose -f docker-compose.production.yml --env-file .env.production run --rm bot ririko db:migrate` (or `docker exec <bot container> ririko db:migrate` on a running bot), and start the bot again. `ririko db:migrate --status` prints the pending migrations, `--dry-run` the plan; exit code 2 means the downgrade guard refused (the database holds a contract migration this release does not know).
 - Both images have a `HEALTHCHECK` (section 3).
 - Compose refuses to start when `POSTGRES_PASSWORD` or `LAVALINK_PASSWORD` is empty.
 

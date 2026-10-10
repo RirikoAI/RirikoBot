@@ -20,6 +20,8 @@
     "doctor": "tsx apps/cli/src/index.ts doctor",
     "ai:configure": "tsx apps/cli/src/index.ts ai:configure",
     "db:push": "pnpm --filter @ririko/database db:push",
+    "db:check": "tsx scripts/check-migrations.ts",
+    "db:generate": "pnpm --filter @ririko/database db:generate-sql && pnpm --filter @ririko/database db:generate-migrations && pnpm --filter @ririko/database db:generate-ddl && prettier --write packages/database/src/schema/sqlite/ddl.ts packages/database/src/schema/pg/ddl.ts",
     "db:reset": "tsx scripts/db-reset.ts",
     "tcg:generate-assets": "tsx scripts/generate-tcg-assets.ts",
     "tcg:card-builder": "tsx scripts/tcg-card-builder.ts",

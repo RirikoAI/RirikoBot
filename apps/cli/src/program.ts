@@ -7,6 +7,7 @@ import { registerInfoCommand } from './commands/info.js';
 import { registerDoctorCommand } from './commands/doctor.js';
 import { registerMigrateCommand } from './commands/migrate.js';
 import { registerDbCopyCommand } from './commands/db-copy.js';
+import { registerDbMigrateCommand } from './commands/db-migrate.js';
 import { registerAiConfigureCommand } from './commands/ai-configure.js';
 import { registerStreamConfigureCommand } from './commands/stream-configure.js';
 import { registerImageConfigureCommand } from './commands/image-configure.js';
@@ -63,6 +64,7 @@ export function createProgram(): Command {
   registerDoctorCommand(program);
   registerMigrateCommand(program);
   registerDbCopyCommand(program);
+  registerDbMigrateCommand(program);
   registerAiConfigureCommand(program);
   registerStreamConfigureCommand(program);
   registerImageConfigureCommand(program);

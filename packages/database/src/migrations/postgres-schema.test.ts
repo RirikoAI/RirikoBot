@@ -3,8 +3,6 @@ import { randomUUID } from 'node:crypto';
 import { createDatabaseClient } from '../client/factory.js';
 import type { PostgresDatabaseClient } from '../client/types.js';
 import { ensurePostgresSchema } from './postgres-schema.js';
-import { ensureAdventureSchema } from './adventure-schema.js';
-import { ensureCardSerialSchema } from './card-serials.js';
 
 describe('ensurePostgresSchema', () => {
   it('leaves SQLite to createSqliteClient', async () => {
@@ -55,10 +53,6 @@ describe.skipIf(!url)('ensurePostgresSchema on PostgreSQL', () => {
     const [bot, web] = await Promise.all([connect(), connect()]);
     const results = await Promise.all([ensurePostgresSchema(bot), ensurePostgresSchema(web)]);
     expect(results.sort()).toEqual([false, true]);
-
-    // The additive upgrades that run after it now find the tables they need.
-    await ensureAdventureSchema(bot);
-    await ensureCardSerialSchema(bot);
 
     const { rows } = await admin.raw.query<{ count: string }>(
       `SELECT count(*) AS count FROM information_schema.tables WHERE table_schema = $1`,

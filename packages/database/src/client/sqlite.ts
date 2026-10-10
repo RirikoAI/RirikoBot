@@ -5,7 +5,6 @@ import { DatabaseError, resolveWorkspacePath } from '@ririko/core';
 import { dirname } from 'node:path';
 import { mkdirSync } from 'node:fs';
 import type { DatabaseConfig, PingResult, SqliteDatabaseClient } from './types.js';
-import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
 
 export function resolveDatabasePath(url: string): string {
   if (url === ':memory:' || url.startsWith('file::memory:') || url.startsWith('sqlite:')) {
@@ -39,21 +38,6 @@ export function createSqliteClient(config: DatabaseConfig): SqliteDatabaseClient
 
     const syncMode = config.synchronous ?? (isMemory ? 'OFF' : 'NORMAL');
     sqlite.pragma(`synchronous = ${syncMode}`);
-
-    // Auto-initialize schema if new/empty database
-    const shouldAutoMigrate =
-      config.autoMigrate === true || (!isMemory && config.autoMigrate !== false);
-    if (shouldAutoMigrate) {
-      const tableCountRow = sqlite
-        .prepare(
-          "SELECT count(*) as count FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-        )
-        .get() as { count: number } | undefined;
-
-      if (!tableCountRow || tableCountRow.count === 0) {
-        sqlite.exec(SQLITE_SCHEMA_DDL);
-      }
-    }
 
     const db = drizzle(sqlite);
 

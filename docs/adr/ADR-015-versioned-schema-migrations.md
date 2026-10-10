@@ -1,7 +1,7 @@
 # ADR-015: Versioned, Forward-Only Schema Migrations Applied by the Application
 
 ## Status
-Proposed (2026-10-10, EPIC-019 grooming). It becomes Accepted when STORY-185 is done.
+Accepted (2026-10-10, STORY-185 done). Proposed during EPIC-019 grooming.
 
 ## Context
 Until EPIC-019, the schema reached a database in three ways:

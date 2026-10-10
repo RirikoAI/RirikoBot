@@ -5,29 +5,26 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PostgresDatabaseClient, SqliteDatabaseClient } from '../client/types.js';
-import { ensureAdventureSchema } from '../migrations/adventure-schema.js';
-import { ensureCardSerialSchema } from '../migrations/card-serials.js';
-import { ensureGuildRegistrySchema } from '../migrations/guild-registry.js';
-import { ensurePostgresSchema } from '../migrations/postgres-schema.js';
-import { ensureTextIdColumns } from '../migrations/text-ids.js';
+import { migrateDatabase } from '../migrations/runner.js';
 import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
 import { BIG_BANK, BIG_WALLET, MOMENT, buildSource } from '../testing/copy-fixture.js';
 import { FakePostgres, fakePostgresTarget } from '../testing/fake-postgres.js';
 import { copyDatabase } from './copy-database.js';
 
-// The schema bootstrap needs a real PostgreSQL server; the integration suite covers it. Here the
-// transaction handling of `copyDatabase` runs against a scripted connection.
-vi.mock('../migrations/postgres-schema.js', () => ({
-  ensurePostgresSchema: vi.fn(async () => true),
-}));
-vi.mock('../migrations/adventure-schema.js', () => ({
-  ensureAdventureSchema: vi.fn(async () => {}),
-}));
-vi.mock('../migrations/card-serials.js', () => ({ ensureCardSerialSchema: vi.fn(async () => {}) }));
-vi.mock('../migrations/guild-registry.js', () => ({
-  ensureGuildRegistrySchema: vi.fn(async () => false),
-}));
-vi.mock('../migrations/text-ids.js', () => ({ ensureTextIdColumns: vi.fn(async () => []) }));
+// Migrating the target needs a real PostgreSQL server; the integration suite covers it. Here the
+// transaction handling of `copyDatabase` runs against a scripted connection. The SQLite sources
+// of the fixtures still migrate for real.
+vi.mock('../migrations/runner.js', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../migrations/runner.js')>();
+  return {
+    ...original,
+    migrateDatabase: vi.fn(async (...args: Parameters<typeof original.migrateDatabase>) =>
+      args[0].dialect === 'postgres'
+        ? { applied: [], alreadyApplied: [], unknown: [], backupPath: null, adoption: null }
+        : original.migrateDatabase(...args),
+    ),
+  };
+});
 
 const directory = mkdtempSync(join(tmpdir(), 'ririko-copy-flow-'));
 afterAll(() => rmSync(directory, { recursive: true, force: true }));
@@ -53,11 +50,7 @@ function writeSource(name: string, journal: 'DELETE' | 'WAL' = 'DELETE'): Databa
 
 describe('copyDatabase', () => {
   beforeEach(() => {
-    vi.mocked(ensurePostgresSchema).mockClear();
-    vi.mocked(ensureAdventureSchema).mockClear();
-    vi.mocked(ensureCardSerialSchema).mockClear();
-    vi.mocked(ensureGuildRegistrySchema).mockClear();
-    vi.mocked(ensureTextIdColumns).mockClear();
+    vi.mocked(migrateDatabase).mockClear();
   });
 
   it('prepares the target like the bot, copies in one transaction and commits', async () => {
@@ -74,11 +67,7 @@ describe('copyDatabase', () => {
       sourceRows: 1,
       targetRows: 1,
     });
-    expect(ensurePostgresSchema).toHaveBeenCalledWith(client);
-    expect(ensureTextIdColumns).toHaveBeenCalledWith(client);
-    expect(ensureAdventureSchema).toHaveBeenCalledWith(client);
-    expect(ensureCardSerialSchema).toHaveBeenCalledWith(client);
-    expect(ensureGuildRegistrySchema).toHaveBeenCalledWith(client);
+    expect(migrateDatabase).toHaveBeenCalledWith(client);
     expect(fake.statements[0]).toBe('BEGIN');
     expect(fake.statements.at(-1)).toBe('COMMIT');
     expect(fake.statements).not.toContain('ROLLBACK');
@@ -201,7 +190,7 @@ describe('copyDatabase', () => {
       /Cannot open the source SQLite database/,
     );
 
-    expect(ensurePostgresSchema).not.toHaveBeenCalled();
+    expect(migrateDatabase).not.toHaveBeenCalled();
     expect(fake.statements).toEqual([]);
   });
 

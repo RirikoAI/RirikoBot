@@ -25,8 +25,8 @@ CI runs the same gate on every push (see [Section 4](#4-continuous-integration))
 
 ### 2.2. Isolated Test Databases
 - Repository suites declare their tests with `describeDialects(name, fn)` from `packages/database/src/testing/dialects.ts` (other packages import it as `@ririko/database/testing`). It runs `fn` twice:
-  - **SQLite**: a fresh `:memory:` database with `SQLITE_SCHEMA_DDL` for every test.
-  - **Postgres**: only when `TEST_POSTGRES_URL` is set, otherwise reported as skipped. Each suite gets a random schema built with the bot's own bootstrap (`ensurePostgresSchema` and the startup upgrades), the tables in use are emptied before every test, and the schema is dropped afterwards.
+  - **SQLite**: a fresh `:memory:` database migrated by `migrateDatabase` for every test.
+  - **Postgres**: only when `TEST_POSTGRES_URL` is set, otherwise reported as skipped. Each suite gets a random schema built by the bot's own migration runner (`migrateDatabase`), the tables in use are emptied before every test, and the schema is dropped afterwards.
 - Use uuids for ids that Postgres stores as `uuid`, and compare `bigint` columns (balances, XP) with `Number(...)`: Postgres returns them as `bigint`.
 - Run the Postgres variants locally against a throwaway container:
   ```bash
@@ -94,14 +94,21 @@ CircleCI runs `.circleci/config.yml` on every push to every branch. The `ci` wor
 
 | Job | Runs | Fails when |
 |---|---|---|
-| `lint` | `pnpm lint`, `pnpm format:check` | ESLint reports an error (warnings do not fail), or a file is not Prettier-formatted |
+| `lint` | `pnpm lint`, `pnpm format:check`, `pnpm db:check` | ESLint reports an error (warnings do not fail), a file is not Prettier-formatted, or a migration gate fails (below) |
 | `typecheck` | `pnpm typecheck` | Any workspace package has a type error |
 | `test` | `pnpm test:ci` | A test fails, or coverage drops below the thresholds in `vitest.config.ts` |
-| `test-postgres` | `pnpm test:postgres` with a `cimg/postgres:16` service container, `TEST_POSTGRES_URL` and `ADVENTURE_TEST_POSTGRES_URL` set | A database or services test fails on Postgres |
+| `test-postgres` | `pnpm test:postgres` with a `cimg/postgres:16` service container, `TEST_POSTGRES_URL` and `ADVENTURE_TEST_POSTGRES_URL` set | A database or services test fails on Postgres, including the migration runner, adoption and baseline tests in `packages/database/src/migrations` |
 | `build-web` | `pnpm --filter @ririko/web build` | The Next.js production build fails |
 | `e2e` | Next.js build, then `playwright test` (Chromium cached, fonts installed) | A Playwright spec fails; report and traces are in the job's *Artifacts* tab |
 | `docker` | `docker build` of the `bot-runner` and `web-runner` targets on CircleCI's remote Docker engine, then `node scripts/docker-smoke.ts bot web`. Nothing is pushed | An image does not build (for example, a new workspace package is missing from the Dockerfile's `manifests` stage), or a smoke check fails: wrong user, wrong writable directories, FFmpeg missing, the bot not reaching command registration, or the dashboard not serving pages and opening its database (docs/deployment.md section 2.1) |
 | `secrets` | `gitleaks git` over the full history with `.gitleaks.toml` | gitleaks finds a secret that is not listed in `.gitleaksignore` |
+
+`pnpm db:check` (`scripts/check-migrations.ts`, tested by `scripts/check-migrations.test.ts`) is the offline gate for the versioned migrations (ADR-015). It needs no database and no network, never writes the real migrations folder, and fails with the file and the statement when:
+- **schema**: `drizzle-kit generate` for either dialect would write a new migration, which means a schema change has no migration (it runs on a temporary copy of `packages/database/migrations/`). Fix: `pnpm db:generate`.
+- **embedded**: `src/migrations/generated/{sqlite,pg}.ts` differ from the SQL files (rebuilt in memory and compared). Fix: `pnpm db:generate`.
+- **safety**: a migration contains `DROP TABLE`, `DROP COLUMN`, `RENAME`, `ALTER COLUMN ... TYPE` or `SET NOT NULL` and its first line is not `-- ririko:contract`. Comments, string literals and quoted identifiers are ignored. The baseline passes.
+
+The SQLite runner treats a migration that contains `PRAGMA foreign_keys=OFF` (a drizzle-kit table rebuild) as SQLite's rebuild procedure; `runner.test.ts` shows that `ON DELETE CASCADE` children survive and that a dangling reference rolls the migration back (see [database.md](database.md#1-overview)).
 
 Git hooks (Husky, installed by `pnpm install`) run the lint checks locally:
 - **pre-commit**: blocks `.env` files, scans staged changes with gitleaks, then runs `lint-staged`: `eslint --fix` and `prettier --write` on staged files (rules in `package.json` `lint-staged`), re-staging the fixes.

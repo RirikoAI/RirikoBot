@@ -4,6 +4,8 @@ import type { DatabaseClient } from './types.js';
 import { DatabaseError } from '@ririko/core';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
+import * as os from 'node:os';
+import { MIGRATIONS_TABLE } from '../migrations/runner.js';
 
 describe('Database Client Factory', () => {
   let client: DatabaseClient | undefined;
@@ -80,6 +82,45 @@ describe('Database Client Factory', () => {
       }
     });
 
+    const tableNames = (db: DatabaseClient): string[] => {
+      if (db.dialect !== 'sqlite') throw new Error('Expected sqlite');
+      return (
+        db.raw
+          .prepare(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
+          )
+          .all() as { name: string }[]
+      ).map((row) => row.name);
+    };
+
+    it('creates no tables by itself, not even in a new database file', async () => {
+      const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ririko-factory-'));
+      try {
+        client = await createDatabaseClient({
+          dialect: 'sqlite',
+          url: path.join(testDir, 'new.sqlite'),
+        });
+        expect(tableNames(client)).toEqual([]);
+      } finally {
+        await client?.close();
+        client = undefined;
+        fs.rmSync(testDir, { recursive: true, force: true });
+      }
+    });
+
+    it('applies and records the migrations when autoMigrate is set (tests and throwaway databases)', async () => {
+      client = await createDatabaseClient({
+        dialect: 'sqlite',
+        url: ':memory:',
+        autoMigrate: true,
+      });
+      expect(tableNames(client)).toEqual(expect.arrayContaining(['users', MIGRATIONS_TABLE]));
+      if (client.dialect !== 'sqlite') throw new Error('Expected sqlite');
+      expect(client.raw.prepare(`SELECT id FROM ${MIGRATIONS_TABLE}`).all()).toEqual([
+        { id: '0000_baseline' },
+      ]);
+    });
+
     it('handles closed SQLite connection in ping()', async () => {
       client = await createDatabaseClient({
         dialect: 'sqlite',
@@ -118,6 +159,17 @@ describe('Database Client Factory', () => {
         expect(client.raw.options.max).toBe(10);
         expect(client.raw.options.idleTimeoutMillis).toBe(10000);
       }
+    });
+
+    it('rejects when autoMigrate cannot reach the server', async () => {
+      await expect(
+        createDatabaseClient({
+          dialect: 'postgres',
+          url: 'postgresql://invalid:invalid@127.0.0.1:54329/nonexistent',
+          connectionTimeoutMs: 300,
+          autoMigrate: true,
+        }),
+      ).rejects.toThrow();
     });
 
     it('returns ok: false on PostgreSQL ping when connection fails', async () => {

@@ -2,6 +2,7 @@ import { resolveWorkspacePath } from '@ririko/core';
 import {
   createDatabaseClient,
   databaseConfigFromEnv,
+  migrateDatabase,
   migration,
   type DatabaseClient,
 } from '@ririko/database';
@@ -109,6 +110,9 @@ export async function main(
 
   const db = await createDatabaseClient(databaseConfigFromEnv(env));
   try {
+    // This command may run before the bot ever started, so the target gets this release's
+    // schema first, exactly as at bot startup.
+    await migrateDatabase(db);
     const result = await migration.upgradeLegacyDatabase(db, {
       sourcePath,
       dryRun: options.dryRun,

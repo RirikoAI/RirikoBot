@@ -7,7 +7,7 @@ import {
   AdventureSessionRepository,
   PlayerEnergyRepository,
   EconomyRepository,
-  ensureAdventureSchema,
+  migrateDatabase,
 } from '@ririko/database';
 import type { SqliteDatabaseClient } from '@ririko/database';
 import {
@@ -122,8 +122,8 @@ describe('durable adventure engine', () => {
 
   it('migrates existing databases idempotently without dropping user data', async () => {
     await energy.getOrCreate('alice');
-    await ensureAdventureSchema(db);
-    await ensureAdventureSchema(db);
+    await migrateDatabase(db);
+    await migrateDatabase(db);
     expect((await energy.findById('alice'))?.currentEnergy).toBe(100);
     expect((await engine.start(input)).status).toBe('ACTIVE');
   });

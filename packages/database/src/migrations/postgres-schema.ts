@@ -2,11 +2,12 @@ import type { DatabaseClient } from '../client/types.js';
 import { PG_SCHEMA_DDL } from '../schema/pg/ddl.js';
 
 /**
- * Creates the full 2.0 schema in an empty PostgreSQL schema (the connection's `search_path`),
- * as `createSqliteClient` does for a new SQLite file. A schema that already has tables is left
- * alone; additive upgrades (`ensureAdventureSchema`, `ensureCardSerialSchema`) run after this.
- * The bot and the dashboard may start together, so the check and the DDL run under one
- * transaction-wide advisory lock. Does nothing on SQLite. Returns whether it created the schema.
+ * Creates the full 2.0 schema from `PG_SCHEMA_DDL` in an empty PostgreSQL schema (the
+ * connection's `search_path`). A schema that already has tables is left alone. Nothing at runtime
+ * calls it any more: the bot, the CLI and `db:copy` use `migrateDatabase` (ADR-015). It stays for
+ * the tests that need the bare DDL schema, such as the ones of the text id repair. The check and
+ * the DDL run under one transaction-wide advisory lock. Does nothing on SQLite. Returns whether it
+ * created the schema.
  */
 export async function ensurePostgresSchema(client: DatabaseClient): Promise<boolean> {
   if (client.dialect !== 'postgres') return false;

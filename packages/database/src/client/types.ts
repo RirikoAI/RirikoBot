@@ -14,6 +14,11 @@ export interface DatabaseConfig {
   walMode?: boolean | undefined;
   foreignKeys?: boolean | undefined;
   synchronous?: 'OFF' | 'NORMAL' | 'FULL' | 'EXTRA' | undefined;
+  /**
+   * Tests and throwaway databases only: `createDatabaseClient` applies the migrations
+   * (`migrateDatabase`) right after connecting. Off by default; the bot and the CLI migrate
+   * explicitly, and the dashboard never changes the schema (ADR-015).
+   */
   autoMigrate?: boolean | undefined;
 }
 

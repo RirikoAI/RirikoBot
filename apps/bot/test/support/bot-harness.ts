@@ -7,12 +7,7 @@
  * Not wired: the gateway connection, voice, and the message listener (automod, XP, card drops,
  * AI chat), so a prefix command produces only the router's replies.
  */
-import {
-  createDatabaseClient,
-  ensureAdventureSchema,
-  ensureCardSerialSchema,
-  type DatabaseClient,
-} from '@ririko/database';
+import { createDatabaseClient, type DatabaseClient } from '@ririko/database';
 import type { CommandRouter } from '@ririko/discord';
 import type { Client } from 'discord.js';
 import {
@@ -35,6 +30,7 @@ import {
 import { createCommandRouter, createHelpOptions } from '../../src/command-router.js';
 import { createCommandControllers, registerBotCommands } from '../../src/command-set.js';
 import { registerComponentInteractions } from '../../src/component-interactions.js';
+import { prepareDatabase } from '../../src/database-startup.js';
 import { createBot } from '../../src/index.js';
 import { createBotServices, type BotServices } from '../../src/services.js';
 
@@ -115,13 +111,16 @@ export interface BotHarnessOptions {
 export async function startBotHarness(options: BotHarnessOptions = {}): Promise<BotHarness> {
   const prefix = options.prefix ?? '!';
   const fake = await startFakeDiscord(options.fixture ? { fixture: options.fixture } : {});
-  const db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
+  const db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:' });
+  // The same database step as main(): the migrations are applied before the services start.
+  await prepareDatabase(db, {
+    autoMigrate: true,
+    log: { log: () => undefined, warn: () => undefined },
+  });
 
   const { client } = createBot({ clientOptions: { rest: { api: fake.apiUrl } } });
   client.rest.setToken('fake-bot-token');
   const services = await createBotServices(db, client);
-  await ensureAdventureSchema(services.db);
-  await ensureCardSerialSchema(services.db);
 
   // The same wiring as main(): router, command set, component interactions.
   const router = createCommandRouter(services, prefix);

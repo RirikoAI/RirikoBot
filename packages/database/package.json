@@ -22,7 +22,9 @@
     "db:push": "drizzle-kit push",
     "db:reset": "tsx ../../scripts/db-reset.ts",
     "db:export": "drizzle-kit export --dialect sqlite --schema ./src/schema/sqlite/index.ts",
-    "db:generate-ddl": "node scripts/generate-ddl.mjs"
+    "db:generate-ddl": "node scripts/generate-ddl.mjs",
+    "db:generate-sql": "node scripts/generate-migrations-sql.mjs",
+    "db:generate-migrations": "node scripts/embed-migrations.mjs"
   },
   "dependencies": {
     "@ririko/core": "workspace:*",

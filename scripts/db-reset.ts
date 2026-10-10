@@ -9,8 +9,8 @@ import {
   AchievementRepository,
   EconomyRepository,
   databaseConfigFromEnv,
+  migrateDatabase,
 } from '../packages/database/src/index.js';
-import { SQLITE_SCHEMA_DDL } from '../packages/database/src/schema/sqlite/ddl.js';
 import {
   CANONICAL_ITEMS,
   AchievementService,
@@ -81,11 +81,7 @@ async function resetDatabase(): Promise<void> {
     }
 
     // Connect via standard client
-    const dbClient = await createDatabaseClient({
-      dialect: 'sqlite',
-      url,
-      autoMigrate: true,
-    });
+    const dbClient = await createDatabaseClient({ dialect: 'sqlite', url });
 
     if (!unlinkedFiles && dbClient.dialect === 'sqlite') {
       const rawDb = dbClient.raw;
@@ -107,11 +103,13 @@ async function resetDatabase(): Promise<void> {
 
       rawDb.exec('VACUUM');
       rawDb.pragma('foreign_keys = ON');
-
-      // Re-apply full DDL
-      rawDb.exec(SQLITE_SCHEMA_DDL);
-      console.log('✓ Successfully wiped all existing tables and re-applied DDL.');
+      console.log('✓ Successfully wiped all existing tables.');
     }
+
+    // A fresh (or wiped) database gets the schema the same way the bot builds it.
+    await migrateDatabase(dbClient, {
+      log: { info: (message) => console.log(`  ${message}`), warn: console.warn },
+    });
 
     const ping = await dbClient.ping();
     if (!ping.ok) {
