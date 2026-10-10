@@ -2470,7 +2470,7 @@
       "parent": "EPIC-019",
       "title": "Versioned Forward-Only Schema Migrations With One-Time Baseline Adoption",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [],
       "blocks": [
         "STORY-186",
@@ -7482,7 +7482,7 @@
       "parent": "STORY-185",
       "title": "Migration Authoring: Per-Dialect drizzle-kit Configs, 0000 Baseline and Embedded Migration Modules",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [],
       "blocks": [
@@ -7499,6 +7499,17 @@
           "packages/database/drizzle.config.ts",
           "packages/database/package.json",
           "packages/database/scripts/generate-ddl.mjs",
+          "packages/database/drizzle.sqlite.config.ts",
+          "packages/database/drizzle.pg.config.ts",
+          "packages/database/scripts/generate-migrations-sql.mjs",
+          "packages/database/scripts/embed-migrations.mjs",
+          "packages/database/migrations/sqlite/0000_baseline.sql",
+          "packages/database/migrations/pg/0000_baseline.sql",
+          "packages/database/src/migrations/embedded.ts",
+          "packages/database/src/migrations/generated/sqlite.ts",
+          "packages/database/src/migrations/generated/pg.ts",
+          "packages/database/src/migrations/generated.test.ts",
+          ".prettierignore",
           "packages/database/src/schema/sqlite/index.ts",
           "packages/database/src/schema/pg/index.ts",
           "packages/database/src/schema/sqlite/ddl.ts",
@@ -7541,7 +7552,7 @@
       "parent": "STORY-185",
       "title": "Migration Runner: Tracking Table, Locks, Checksums, SQLite Backup and Downgrade Guard",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1851"
@@ -7601,7 +7612,7 @@
       "parent": "STORY-185",
       "title": "One-Time Baseline Adoption of Existing Databases With Additive Drift Repair",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1852"
@@ -7624,7 +7635,9 @@
           "packages/database/src/migrations/card-serials.ts",
           "packages/database/src/migrations/adventure-schema.ts",
           "packages/database/src/migrations/guild-registry.ts",
-          "packages/database/src/migrations/postgres-schema.ts"
+          "packages/database/src/migrations/postgres-schema.ts",
+          "packages/database/src/index.ts",
+          "packages/database/src/migrations/runner.test.ts"
         ],
         "symbols": [
           "ensureTextIdColumns",
@@ -7657,7 +7670,7 @@
       "parent": "STORY-185",
       "title": "Wire Migrations Into the Bot, CLI (ririko db:migrate), db:copy and Dashboard Readiness",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1853"
@@ -7686,7 +7699,28 @@
           "docker-compose.production.yml",
           "docs/database.md",
           "docs/development.md",
-          "docs/deployment.md"
+          "docs/deployment.md",
+          "apps/bot/src/database-startup.ts",
+          "apps/bot/src/database-startup.test.ts",
+          "apps/bot/src/legacy-upgrade.ts",
+          "apps/cli/src/commands/db-migrate.ts",
+          "apps/cli/src/commands/db-migrate.test.ts",
+          "apps/cli/src/program.ts",
+          "apps/web/src/lib/server/schema-guard.ts",
+          "apps/web/src/lib/server/schema-guard.test.ts",
+          "apps/web/src/lib/server/services.test.ts",
+          "packages/database/src/index.ts",
+          "packages/database/src/migrations/runner.ts",
+          "packages/database/src/migrations/adopt-baseline.ts",
+          "packages/database/src/migrations/adventure-schema.ts",
+          "packages/database/src/migrations/card-serials.ts",
+          "packages/database/src/migrations/guild-registry.ts",
+          "packages/database/src/testing/dialects.ts",
+          "packages/database/src/testing/copy-fixture.ts",
+          "scripts/db-reset.ts",
+          ".env.production.example",
+          "docs/migrations.md",
+          "docs/testing.md"
         ],
         "symbols": [
           "main",
@@ -7727,8 +7761,8 @@
       "id": "TASK-1855",
       "parent": "STORY-185",
       "title": "CI Gates for Migrations: Schema In Sync, Embedded Modules, Parity, Upgrade and Safety Lint",
-      "points": 3,
-      "status": "TODO",
+      "points": 5,
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1852"
@@ -7749,7 +7783,14 @@
           "packages/database/migrations/",
           "AGENTS.md",
           "docs/contributing.md",
-          "docs/testing.md"
+          "docs/testing.md",
+          "packages/database/src/migrations/runner.ts",
+          "packages/database/src/migrations/runner.test.ts",
+          "packages/database/scripts/migration-files.mjs",
+          "packages/database/scripts/embed-migrations.mjs",
+          "package.json",
+          "docs/database.md",
+          "docs/development.md"
         ],
         "symbols": [
           "lint",
@@ -7765,9 +7806,10 @@
         "A script (scripts/check-migrations.ts, run by pnpm db:check and in the CircleCI lint job) fails when: drizzle-kit generate for either dialect would write a new migration; the embedded modules differ from the SQL files; or a migration contains DROP TABLE, DROP COLUMN, RENAME, ALTER COLUMN ... TYPE or SET NOT NULL without \"-- ririko:contract\" on its first line. It prints the file and the statement.",
         "Each check has a unit test with a temporary migrations folder (no network, no real database).",
         "The test-postgres CircleCI job runs the PostgreSQL migration and adoption tests.",
-        "AGENTS.md section 5 gets a rule: every schema change ships a generated migration for both dialects (pnpm db:generate); destructive changes follow expand/contract; db:push is a development shortcut and never runs against staging or production. docs/contributing.md and docs/testing.md say the same."
+        "AGENTS.md section 5 gets a rule: every schema change ships a generated migration for both dialects (pnpm db:generate); destructive changes follow expand/contract; db:push is a development shortcut and never runs against staging or production. docs/contributing.md and docs/testing.md say the same.",
+        "SQLite: a migration containing PRAGMA foreign_keys=OFF runs as the table-rebuild procedure: foreign_keys is turned off on the connection before BEGIN, the two PRAGMA statements are skipped inside the transaction, PRAGMA foreign_key_check must return no rows before COMMIT (otherwise roll back with a DatabaseError naming the table), and foreign_keys is restored in finally. A runner test shows a drizzle-style rebuild of a parent table with ON DELETE CASCADE children keeps every child row, and a rebuild that leaves a dangling reference rolls back."
       ],
-      "verify_cmd": "pnpm vitest run scripts/check-migrations.test.ts scripts/circleci-deploy.test.ts && pnpm db:check && pnpm lint --quiet && pnpm format:check",
+      "verify_cmd": "pnpm vitest run scripts/check-migrations.test.ts scripts/circleci-deploy.test.ts packages/database/src/migrations/runner.test.ts && pnpm db:check && pnpm lint --quiet && pnpm format:check",
       "handovers": [
         "TASK-1855",
         "STORY-185",

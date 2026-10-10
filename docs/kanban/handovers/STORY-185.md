@@ -31,3 +31,19 @@ See docs/kanban/protocol.md section 6.
 
 **Out of scope**
 - Down migrations, a migrations UI on the dashboard, and changing any existing table.
+
+---
+
+## REVIEW · 2026-10-10T09:56:15Z · coordinator (claude-opus-5-5) · DONE
+
+**Children**: TASK-1851, TASK-1852, TASK-1853, TASK-1854 and TASK-1855 are DONE, each with its own REVIEW entry.
+
+**Story outcome**
+- Schema changes are versioned SQL migrations per dialect, embedded in code and applied by `migrateDatabase`. The runner records each one with a checksum, takes the PostgreSQL advisory lock, writes the SQLite backup, has a downgrade guard and runs SQLite table rebuilds safely.
+- Existing databases are adopted once, additively, or refused with a report and no change.
+- The bot migrates at startup (`DB_AUTO_MIGRATE`), the CLI has `ririko db:migrate` and `db:copy` migrates its target. The dashboard only reads the status.
+- CI: `pnpm db:check` runs in `lint`, and the migration tests run in `test-postgres`.
+- The PostgreSQL paths were also proven locally (PostgreSQL 18).
+- ADR-015 is now Accepted.
+
+**Not done here**: the gated deploy step and `DB_AUTO_MIGRATE=false` in the production compose (STORY-186: TASK-1861, TASK-1862), and the staging adoption.
