@@ -229,7 +229,7 @@ const hasFlock = hasBash && spawnSync('bash', ['-c', 'command -v flock']).status
 const heredocEnd = '__RIRIKO_TEST_EOF__';
 
 const fakeDocker = `#!/usr/bin/env bash
-echo "RIRIKO_VERSION=$RIRIKO_VERSION RIRIKO_ENV_FILE=$RIRIKO_ENV_FILE docker $*" >>"$FAKE_DIR/docker.log"
+echo "RIRIKO_VERSION=$RIRIKO_VERSION RIRIKO_ENV_FILE=$RIRIKO_ENV_FILE DB_AUTO_MIGRATE=$DB_AUTO_MIGRATE docker $*" >>"$FAKE_DIR/docker.log"
 sub=""
 skip=0
 for arg in "$@"; do
@@ -255,9 +255,25 @@ case $sub in
     echo "NAME STATUS fake-ps-of-$RIRIKO_VERSION"
     exit 0 ;;
   pull) if [ -e "$FAKE_DIR/pull_fails" ]; then exit 1; fi; exit 0 ;;
+  up)
+    case $args in
+      *" --wait "*) touch "$FAKE_DIR/postgres_up" ;;
+    esac
+    exit 0 ;;
+  run)
+    case $args in
+      *" ririko db:migrate "*)
+        if bad bad_migrate; then
+          echo "fake-migrate-error: migration 0003_fake failed in $RIRIKO_VERSION" >&2
+          exit "$(cat "$FAKE_DIR/migrate_exit" 2>/dev/null || echo 1)"
+        fi
+        echo "fake-migrate: applied 0002_fake with $RIRIKO_VERSION"
+        exit 0 ;;
+    esac ;;
   logs) echo "fake-log-line from bot and web of $RIRIKO_VERSION"; exit 0 ;;
   exec)
     case $args in
+      *" ririko db:migrate --status "*) echo "fake-migrate-status: Latest 0002_fake, Pending none"; exit 0 ;;
       *" postgres "*) if [ -e "$FAKE_DIR/dump_fails" ]; then exit 1; fi; echo PGDUMP-DATA; exit 0 ;;
       *" bot "*)
         if bad bad_bot; then exit 1; fi
@@ -410,7 +426,7 @@ const composeCall = (
   files = ['docker-compose.production.yml'],
 ) =>
   new RegExp(
-    `^RIRIKO_VERSION=${escapeDots(version)} RIRIKO_ENV_FILE=\\S+/env\\.production ` +
+    `^RIRIKO_VERSION=${escapeDots(version)} RIRIKO_ENV_FILE=\\S+/env\\.production DB_AUTO_MIGRATE=false ` +
       `docker compose -p ririko ${files
         .map((file) => `-f \\S+/releases/${escapeDots(version)}/${escapeDots(file)}`)
         .join(' ')} --env-file \\S+/env\\.production ${subcommand}`,
@@ -503,10 +519,20 @@ describe.skipIf(!hasBash)('ririko-deploy', () => {
       'state/current',
     ]);
     expect(result.releases).toEqual(['2.1.3']);
+    // Nothing was deployed before, so there is nothing to dump. Postgres does not run yet, so it
+    // is started (and waited for) before the migration, which comes before the stack starts.
+    expect(result.docker).toHaveLength(7);
     expect(result.docker[0]).toMatch(composeCall('2.1.3', 'pull$'));
-    expect(result.docker[1]).toMatch(composeCall('2.1.3', 'up -d --no-build --remove-orphans$'));
-    // Nothing was deployed before, so there is nothing to dump or to list.
-    expect(result.docker.some((line) => line.includes(' ps '))).toBe(false);
+    expect(result.docker[1]).toMatch(composeCall('2.1.3', 'ps --status running --services$'));
+    expect(result.docker[2]).toMatch(
+      composeCall('2.1.3', 'up -d --no-build --wait --wait-timeout 1 postgres$'),
+    );
+    expect(result.docker[3]).toMatch(
+      composeCall('2.1.3', 'run --rm --no-deps -T bot ririko db:migrate$'),
+    );
+    expect(result.docker[4]).toMatch(composeCall('2.1.3', 'up -d --no-build --remove-orphans$'));
+    expect(result.docker.some((line) => line.includes(' exec -T postgres '))).toBe(false);
+    expect(result.stdout).toContain('db:migrate: fake-migrate: applied 0002_fake with 2.1.3');
     const probes = result.docker.filter((line) => line.includes(' exec -T '));
     expect(probes).toHaveLength(2);
     expect(probes[0]).toMatch(composeCall('2.1.3', 'exec -T bot node -e '));
@@ -600,6 +626,123 @@ run deploy 2.1.3`);
     expect(result.current).toBe('2.1.2');
     expect(result.previous).toBe('');
     expect(result.log.join('\n')).toContain('rolled back to 2.1.2');
+    // The new release migrated before it failed: the rollback does not migrate again, and the
+    // output says the database keeps the new migrations (the expand rule lets 2.1.2 run on them).
+    const migrations = result.docker.filter((line) => line.includes('ririko db:migrate'));
+    expect(migrations).toHaveLength(1);
+    expect(migrations[0]).toMatch(
+      composeCall('2.1.3', 'run --rm --no-deps -T bot ririko db:migrate$'),
+    );
+    expect(result.stderr).toContain('keeps the migrations of 2.1.3');
+    expect(result.log.join('\n')).toContain('the database keeps the migrations of 2.1.3');
+  });
+
+  it('runs every compose call with DB_AUTO_MIGRATE=false, whatever the host env file says', () => {
+    const result = scenario(`
+seed_current 2.1.2
+echo 'DB_AUTO_MIGRATE=true' >>"$work/env.production"
+export DB_AUTO_MIGRATE=true
+run deploy 2.1.3
+run status`);
+    expect(result.rcs).toEqual([0, 0]);
+    expect(result.docker.length).toBeGreaterThan(8);
+    for (const line of result.docker) {
+      expect(line).toContain(' DB_AUTO_MIGRATE=false docker compose ');
+    }
+    // The bot's own start, which would otherwise migrate on its own, is among them.
+    expect(result.docker.some((line) => line.includes(' up -d --no-build --remove-orphans'))).toBe(
+      true,
+    );
+  });
+
+  it('migrates from the new image after the pull and before up, while the old release runs', () => {
+    const result = scenario(`
+seed_current 2.1.2
+run deploy 2.1.3`);
+    expect(result.rcs).toEqual([0]);
+    const index = (pattern: RegExp) => result.docker.findIndex((line) => pattern.test(line));
+    const dump = index(composeCall('2.1.2', 'exec -T postgres sh -c '));
+    const pull = index(composeCall('2.1.3', 'pull$'));
+    const migrate = index(composeCall('2.1.3', 'run --rm --no-deps -T bot ririko db:migrate$'));
+    const up = index(composeCall('2.1.3', 'up -d --no-build --remove-orphans$'));
+    expect(dump).toBeGreaterThanOrEqual(0);
+    expect(dump).toBeLessThan(pull);
+    expect(pull).toBeLessThan(migrate);
+    expect(migrate).toBe(up - 1);
+    // The previous release is only asked about and dumped: never stopped, removed or recreated,
+    // and postgres, which already runs, is not started again.
+    expect(result.docker.filter((line) => /RIRIKO_VERSION=2\.1\.2 /.test(line))).toHaveLength(2);
+    expect(result.docker.some((line) => / (stop|down|rm|restart|kill) /.test(line))).toBe(false);
+    expect(result.docker.some((line) => line.includes('--wait'))).toBe(false);
+    expect(result.stdout).toContain('db:migrate: fake-migrate: applied 0002_fake with 2.1.3');
+    expect(result.current).toBe('2.1.3');
+    expect(result.previous).toBe('2.1.2');
+  });
+
+  it('exits 6 and leaves the running release untouched when the migration fails', () => {
+    const result = scenario(`
+seed_current 2.1.2
+echo 2.1.3 >"$FAKE_DIR/bad_migrate"
+run deploy 2.1.3`);
+    expect(result.rcs).toEqual([6]);
+    expect(result.dumps).toHaveLength(1);
+    // The output names the dump and the migration error, and says nothing was started.
+    expect(result.stderr).toContain('migration of 2.1.3 failed (ririko db:migrate exit 1');
+    expect(result.stderr).toContain(result.dumps[0]!);
+    expect(result.stderr).toContain('fake-migrate-error: migration 0003_fake failed in 2.1.3');
+    expect(result.stderr).toContain(
+      'Nothing was started or stopped. The previous release 2.1.2 keeps running',
+    );
+    expect(result.stdout).toContain('db:migrate: fake-migrate-error: migration 0003_fake failed');
+    expect(result.log.join('\n')).toContain('ririko db:migrate exited with status 1');
+    // No up, no rollback, no failure report: the stack is as it was.
+    expect(result.docker.some((line) => line.includes(' up -d '))).toBe(false);
+    expect(result.docker.some((line) => line.includes(' logs '))).toBe(false);
+    expect(
+      result.docker.some((line) => /RIRIKO_VERSION=2\.1\.2 .* (pull|run|up)\b/.test(line)),
+    ).toBe(false);
+    expect(result.docker.filter((line) => line.includes('ririko db:migrate'))).toHaveLength(1);
+    expect(result.docker.some((line) => line.includes('exec -T bot node -e'))).toBe(false);
+    expect(result.current).toBe('2.1.2');
+    expect(result.previous).toBe('');
+  });
+
+  it('exits 6 with its own message when the downgrade guard refuses (exit 2)', () => {
+    const result = scenario(`
+seed_current 2.1.2
+echo 2.1.3 >"$FAKE_DIR/bad_migrate"
+echo 2 >"$FAKE_DIR/migrate_exit"
+run deploy 2.1.3`);
+    expect(result.rcs).toEqual([6]);
+    expect(result.stderr).toContain('refused by the downgrade guard (ririko db:migrate exit 2)');
+    expect(result.stderr).toContain('this release is older than the database');
+    expect(result.stderr).toContain(result.dumps[0]!);
+    expect(result.docker.some((line) => line.includes(' up -d '))).toBe(false);
+    expect(result.current).toBe('2.1.2');
+  });
+
+  it('exits 6 on a first deploy whose migration fails, with no dump to name', () => {
+    const result = scenario(`
+echo 2.1.3 >"$FAKE_DIR/bad_migrate"
+run deploy 2.1.3`);
+    expect(result.rcs).toEqual([6]);
+    expect(result.stderr).toContain('Pre-deploy dump: none taken');
+    expect(result.stderr).not.toContain('keeps running');
+    expect(result.docker.some((line) => line.includes(' up -d --no-build --remove-orphans'))).toBe(
+      false,
+    );
+    expect(result.current).toBe('');
+  });
+
+  it('does not migrate when the images cannot be pulled, and rolls back without migrating', () => {
+    const result = scenario(`
+seed_current 2.1.2
+touch "$FAKE_DIR/pull_fails"
+run deploy 2.1.3`);
+    expect(result.rcs).toEqual([4]);
+    expect(result.docker.some((line) => line.includes('ririko db:migrate'))).toBe(false);
+    expect(result.stderr).not.toContain('keeps the migrations');
+    expect(result.current).toBe('2.1.2');
   });
 
   it('exits 5 when the first deploy fails, because the dashboard never gets ready', () => {
@@ -610,7 +753,11 @@ run deploy 2.1.3`);
     expect(result.stderr).toContain('no previous release');
     expect(result.stdout).toContain('NAME STATUS fake-ps-of-2.1.3');
     expect(result.docker.some((line) => line.includes('exec -T web node -e'))).toBe(true);
-    expect(result.docker.filter((line) => line.includes(' up -d '))).toHaveLength(1);
+    expect(
+      result.docker.filter((line) => line.includes(' up -d --no-build --remove-orphans')),
+    ).toHaveLength(1);
+    // The migration ran, and the first deploy keeps its migrated, empty database.
+    expect(result.stderr).toContain('The database keeps the migrations of 2.1.3');
     expect(result.current).toBe('');
     expect(result.dumps).toEqual([]);
   });
@@ -744,8 +891,13 @@ run status`);
     expect(result.rcs).toEqual([0]);
     expect(result.stdout).toContain('current=2.1.3 previous=2.1.2');
     expect(result.stdout).toContain('NAME STATUS fake-ps-of-2.1.3');
-    expect(result.docker).toHaveLength(1);
+    expect(result.docker).toHaveLength(2);
     expect(result.docker[0]).toMatch(composeCall('2.1.3', 'ps$'));
+    // The migration status comes from the running release's bot container.
+    expect(result.docker[1]).toMatch(
+      composeCall('2.1.3', 'exec -T bot ririko db:migrate --status$'),
+    );
+    expect(result.stdout).toContain('fake-migrate-status: Latest 0002_fake, Pending none');
     expect(result.log.at(-1)).toMatch(/status: current=2\.1\.3 previous=2\.1\.2$/);
     expect(result.curl).toEqual([]);
   });
@@ -2900,6 +3052,9 @@ describe.skipIf(!hasBash)('ririko-deploy on a Lavalink host', () => {
     expect(result.version).toEqual([
       'port=2334 url=http://10.77.0.1:2334/version header=Authorization: pw-staging',
     ]);
+    // A Lavalink host has no database: no migration, whatever the release ships.
+    expect(result.docker).toHaveLength(2);
+    expect(result.docker.join('\n')).not.toMatch(/db:migrate| run /);
     const everything = [
       ...result.curl,
       ...result.docker,

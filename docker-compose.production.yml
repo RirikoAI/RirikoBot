@@ -96,6 +96,11 @@ services:
       LAVALINK_HOST: lavalink
       LAVALINK_PORT: '2333'
       LAVALINK_PASSWORD: ${LAVALINK_PASSWORD:?set LAVALINK_PASSWORD}
+      # The bot applies pending schema migrations when it starts, so a plain `docker compose pull
+      # && up -d` upgrades a self-hosted stack. The host deploy (ririko-deploy) runs every compose
+      # call with DB_AUTO_MIGRATE=false instead and migrates as its own step, from the new image,
+      # before the stack starts (ADR-015). The dashboard never migrates.
+      DB_AUTO_MIGRATE: ${DB_AUTO_MIGRATE:-true}
     depends_on:
       postgres:
         condition: service_healthy

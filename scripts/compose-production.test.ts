@@ -38,6 +38,13 @@ describe('docker-compose.production.yml hardening', () => {
     expect(envExample).toMatch(/0\.0\.0\.0 only on a host whose own\s+# firewall or reverse proxy/);
   });
 
+  it('migrates on start by default for self-hosters, and never from the dashboard', () => {
+    expect(services.bot!.environment!.DB_AUTO_MIGRATE).toBe('${DB_AUTO_MIGRATE:-true}');
+    expect(services.web!.environment!.DB_AUTO_MIGRATE).toBeUndefined();
+    expect(envExample).toMatch(/^# DB_AUTO_MIGRATE=true$/m);
+    expect(envExample).toContain('ririko-deploy');
+  });
+
   it('drops every capability from the bot and the dashboard', () => {
     expect(services.bot!.cap_drop).toEqual(['ALL']);
     expect(services.web!.cap_drop).toEqual(['ALL']);

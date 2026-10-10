@@ -2528,7 +2528,7 @@
       "parent": "EPIC-019",
       "title": "Host Deploys Apply Migrations as a Gated Step (Staging First)",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "requires": [
         "STORY-185"
       ],
@@ -7821,7 +7821,7 @@
       "parent": "STORY-186",
       "title": "ririko-deploy Runs ririko db:migrate From the New Image Before Starting It",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "STORY-185"
@@ -7841,7 +7841,10 @@
           "docker-compose.production.yml",
           "scripts/deploy-host.test.ts",
           "scripts/circleci-deploy.test.ts",
-          ".circleci/config.yml"
+          ".circleci/config.yml",
+          ".env.production.example",
+          "docs/release.md",
+          "docs/deployment.md"
         ],
         "symbols": [
           "cmd_deploy",
@@ -7862,7 +7865,7 @@
         "apply_release pulls the new images, then runs \"compose <version> run --rm --no-deps bot ririko db:migrate\" (the image's CLI wrapper) while the previous release is still running, and only then runs up -d. The step is skipped for a Lavalink host.",
         "When the migration fails the deploy stops with a new exit code 6, the previous release keeps running untouched, and the output names the pre-deploy dump and the migration error. Exit 2 from the CLI (downgrade guard) is reported as such. ririko-deploy-ssh and the CircleCI ssh-host job map exit 6 to a clear message, like the existing codes.",
         "When the migration succeeded but the new release does not become ready, the existing rollback to the previous release still runs (allowed by the expand rule); the output says the database keeps the new migrations.",
-        "docker-compose.production.yml sets DB_AUTO_MIGRATE=false on the bot; the dashboard never migrates.",
+        "docker-compose.production.yml gives the bot DB_AUTO_MIGRATE: ${DB_AUTO_MIGRATE:-true}, so self-hosters keep migrate-on-start. ririko-deploy runs every compose call with DB_AUTO_MIGRATE=false in its environment (which wins over the env file), so on the hosts the deploy step is the only schema writer. The dashboard never migrates.",
         "ririko-deploy status prints the database's latest migration id and any pending ones (ririko db:migrate --status from the running image).",
         "scripts/deploy-host.test.ts covers: migration before up, failure exit 6 with the old release untouched, guard exit, rollback after a successful migration, Lavalink host skip. scripts/circleci-deploy.test.ts covers the exit 6 message. shellcheck passes."
       ],
@@ -7878,7 +7881,7 @@
       "parent": "STORY-186",
       "title": "Release Runbook: Migrations, Failure Recovery From the Pre-Deploy Dump, and Staging Adoption Checklist",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "TASK-1861"

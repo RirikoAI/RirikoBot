@@ -16,10 +16,7 @@
 ## 🎯 To Do
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
-| `STORY-186` | Story | Host Deploys Apply Migrations as a Gated Step (Staging First) | 8 | EPIC-019 | STORY-185 | yes | large |
 | `TASK-1333` | Task | Optional Text Message With the Welcome and Farewell Cards (Dashboard, /welcomer, /farewell) | 8 | STORY-133 | STORY-185 | yes | medium |
-| `TASK-1861` | Task | ririko-deploy Runs ririko db:migrate From the New Image Before Starting It | 5 | STORY-186 | STORY-185 | yes | medium |
-| `TASK-1862` | Task | Release Runbook: Migrations, Failure Recovery From the Pre-Deploy Dump, and Staging Adoption Checklist | 3 | STORY-186 | TASK-1861 | blocked | medium |
 
 ## 🔍 Review
 *None.*
@@ -131,6 +128,7 @@
 | `STORY-183` | Story | Owner Console Server List with Inviters and Cross-Server Command Usage | 8 | EPIC-018 | [STORY-183.md](./handovers/STORY-183.md) |
 | `STORY-184` | Story | Accountable Server Inviters: Invite Through the Dashboard and Show Who to Contact | 8 | EPIC-018 | [STORY-184.md](./handovers/STORY-184.md) |
 | `STORY-185` | Story | Versioned Forward-Only Schema Migrations With One-Time Baseline Adoption | 13 | EPIC-019 | [STORY-185.md](./handovers/STORY-185.md) |
+| `STORY-186` | Story | Host Deploys Apply Migrations as a Gated Step (Staging First) | 8 | EPIC-019 | [STORY-186.md](./handovers/STORY-186.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -365,6 +363,8 @@
 | `TASK-1853` | Task | One-Time Baseline Adoption of Existing Databases With Additive Drift Repair | 5 | STORY-185 | [TASK-1853.md](./handovers/TASK-1853.md) |
 | `TASK-1854` | Task | Wire Migrations Into the Bot, CLI (ririko db:migrate), db:copy and Dashboard Readiness | 5 | STORY-185 | [TASK-1854.md](./handovers/TASK-1854.md) |
 | `TASK-1855` | Task | CI Gates for Migrations: Schema In Sync, Embedded Modules, Parity, Upgrade and Safety Lint | 5 | STORY-185 | [TASK-1855.md](./handovers/TASK-1855.md) |
+| `TASK-1861` | Task | ririko-deploy Runs ririko db:migrate From the New Image Before Starting It | 5 | STORY-186 | [TASK-1861.md](./handovers/TASK-1861.md) |
+| `TASK-1862` | Task | Release Runbook: Migrations, Failure Recovery From the Pre-Deploy Dump, and Staging Adoption Checklist | 3 | STORY-186 | [TASK-1862.md](./handovers/TASK-1862.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |

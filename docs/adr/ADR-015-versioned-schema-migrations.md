@@ -61,7 +61,7 @@ This does not work for an open-source bot that others host, nor for the public R
    - runs `ririko db:migrate` once, from the new image, before starting the new containers;
    - aborts if the migration fails. The old release keeps running on an unchanged database, because PostgreSQL DDL is transactional.
 
-   The production compose file sets `DB_AUTO_MIGRATE=false`, so the deploy step is the only writer of the schema there. Self-hosters keep migrate-on-start.
+   `ririko-deploy` runs every compose call with `DB_AUTO_MIGRATE=false`, so the deploy step is the only writer of the schema there. The production compose file defaults to `DB_AUTO_MIGRATE=true`, so self-hosters who run it by hand keep migrate-on-start (maintainer decision, TASK-1861, 2026-10-11).
 10. **CI gates**, on both dialects:
     - `drizzle-kit generate` finds no change: no schema change ships without its migration.
     - The embedded modules match the SQL files.
