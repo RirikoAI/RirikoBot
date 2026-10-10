@@ -9431,6 +9431,47 @@
         "BUG-0042",
         "EPIC-019"
       ]
+    },
+    {
+      "id": "BUG-0043",
+      "parent": "EPIC-019",
+      "title": "ririko db:migrate Prints Adoption Notes and the Backup Twice and Ends With \"Nothing to do\" After Adopting",
+      "points": 1,
+      "status": "DONE",
+      "children": [],
+      "requires": [
+        "STORY-185"
+      ],
+      "blocks": [],
+      "description": "After a real adoption, ririko db:migrate prints the four adoption notes twice (once from the runner log, once in the summary), prints the backup path twice (\"Wrote the pre-migration backup ...\" and \"Backup: ...\") and the adoption once as a log line and again as the summary, then ends with \"✔ Nothing to do: the database is up to date (0000_baseline).\" although it just adopted the database. Output only; the database is handled correctly.",
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "apps/cli/src/commands/db-migrate.ts",
+          "apps/cli/src/commands/db-migrate.test.ts"
+        ],
+        "symbols": [
+          "runDbMigrate",
+          "adoptionLines"
+        ],
+        "codegraph_queries": [
+          "runDbMigrate adoptionLines db-migrate.ts"
+        ]
+      },
+      "acceptance": [
+        "In runDbMigrate, info lines from the runner log are not printed (the summary already reports the backup, the adoption and every applied migration). Warnings from the log are printed unless their text is one of result.adoption.notes, which the summary lists. The downgrade warning about unknown migrations is therefore still printed. The bot startup log in packages/database is unchanged.",
+        "After a real run, the last line is: \"✔ Adopted the database: recorded 0000_baseline as applied.\" when result.adoption is set and nothing was applied; \"✔ Adopted the database and applied N migration(s): <ids>\" when both; \"✔ Applied N migration(s): <ids>\" and \"✔ Nothing to do: ...\" as today otherwise. The dry run output is unchanged.",
+        "db-migrate.test.ts: an adoption run with two notes and a backup prints each note once, the backup path once and the new last line; a run with an unknown-migration warning still prints that warning; no existing test is weakened."
+      ],
+      "verify_cmd": "pnpm vitest run apps/cli/src/commands/db-migrate.test.ts && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0043",
+        "EPIC-019"
+      ]
     }
   ],
   "active_in_progress_ticket": null
