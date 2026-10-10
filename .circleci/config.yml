@@ -131,8 +131,9 @@ commands:
               0) echo 'The host command succeeded.' ;;
               2) echo 'The host rejected the command or the version (a Lavalink host also refuses an instance it does not run).' ;;
               3) echo 'The host is busy: another deploy, backup or watchdog run holds its lock. Run the job again later.' ;;
-              4) echo 'The new release did not become ready. The host started the previous release again; the database was not restored.' ;;
+              4) echo 'The new release did not become ready. The host started the previous release again; the database was not restored and keeps the migrations of the new release.' ;;
               5) echo 'The new release did not become ready and the host has no previous release: nothing is running. Fix it on the host.' ;;
+              6) echo 'The database migration of the new release failed or was refused by its downgrade guard. The host started nothing and the previous release keeps running; read the migration output above and the pre-deploy dump it names.' ;;
               255) echo 'SSH could not connect or authenticate. Check the tunnel, the Access service token, the key and the pinned host key.' ;;
               *) echo "The host command failed with status ${status}. Its output is above." ;;
             esac

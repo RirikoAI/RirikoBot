@@ -9,9 +9,16 @@
 #   ririko-deploy status [<instance>]           instance is staging or production
 #
 # A deploy downloads the compose files of the tagged release from GitHub (so the caller can only
-# choose a published version), dumps Postgres when a release is already running, pulls and starts
-# the new images, and waits until the bot and the dashboard report ready. When that fails it starts
-# the previous release again. Secrets stay on the host in RIRIKO_ENV_FILE.
+# choose a published version), dumps Postgres when a release is already running, pulls the new
+# images, applies the schema migrations from the new bot image (`ririko db:migrate`, ADR-015) while
+# the previous release keeps running, starts the new images, and waits until the bot and the
+# dashboard report ready. Every compose call below runs with DB_AUTO_MIGRATE=false in its
+# environment (which wins over the host's env file), so on a host this step is the only thing that
+# migrates; self-hosters who run the same compose file by hand keep migrate-on-start. When the
+# migration fails nothing is started or stopped (exit 6).
+# When the new release does not become ready it starts the previous release again; that is safe
+# because migrations are expand-only, so the previous release runs on the migrated database
+# (which is not restored). Secrets stay on the host in RIRIKO_ENV_FILE.
 #
 # On a Lavalink host (RIRIKO_ROLE=lavalink in ririko.conf) a deploy updates one Lavalink instance
 # (container lavalink-<instance> of the compose project ririko-lavalink): it downloads
@@ -33,6 +40,8 @@
 #   3  another deploy, backup or watchdog run holds the lock
 #   4  the new release failed and the previous one was started again
 #   5  the new release failed and there is no previous release to start
+#   6  the database migration of the new release failed (ririko db:migrate exited 1) or was
+#      refused by its downgrade guard (exit 2); the previous release was not touched
 #
 # Settings come from the environment and then from /etc/ririko/ririko.conf (see
 # deploy/host/ririko.conf.example). RIRIKO_ROOT, RIRIKO_CONF, RIRIKO_LOCK, DOCKER, CURL and
@@ -79,6 +88,12 @@ LAVALINK_PRODUCTION_HEAP=${LAVALINK_PRODUCTION_HEAP:-}
 LAVALINK_STAGING_HEAP=${LAVALINK_STAGING_HEAP:-}
 
 LOG_FILE=$RIRIKO_ROOT/deploy.log
+# apply_release returns this when `ririko db:migrate` failed (anything else it returns is 1), and
+# leaves the CLI's exit code in MIGRATE_STATUS. MIGRATED says a migration ran to the end.
+readonly MIGRATION_FAILED=6
+MIGRATE_STATUS=0
+MIGRATE_ERROR=""
+MIGRATED=""
 COMPOSE_FILES=()
 LAVALINK_BIND=""
 LAVALINK_INSTANCE_LIST=()
@@ -302,7 +317,9 @@ write_state() {
 # --- docker compose ---------------------------------------------------------------------------
 
 # docker compose for one downloaded release: project ririko, one -f per file of that release,
-# the host env file for interpolation and for the services' env_file.
+# the host env file for interpolation and for the services' env_file. DB_AUTO_MIGRATE=false is set
+# here, in the environment: it wins over the env file in Compose interpolation, so the bot only
+# checks the schema and the deploy's own `ririko db:migrate` step is the only schema writer.
 compose() {
   local version=$1 dir file
   local -a names=() files=()
@@ -316,7 +333,7 @@ compose() {
   for file in "${names[@]}"; do
     files+=(-f "$dir/$file")
   done
-  env RIRIKO_VERSION="$version" RIRIKO_ENV_FILE="$RIRIKO_ENV_FILE" \
+  env RIRIKO_VERSION="$version" RIRIKO_ENV_FILE="$RIRIKO_ENV_FILE" DB_AUTO_MIGRATE=false \
     "$DOCKER" compose -p ririko "${files[@]}" --env-file "$RIRIKO_ENV_FILE" "$@"
 }
 
@@ -371,10 +388,59 @@ wait_ready() {
   done
 }
 
-# Pulls and starts a downloaded release, then waits for readiness. Returns 1 on any failure.
-#   apply_release <version> [tolerate-pull-failure]
+# True when the postgres service of a release's compose project is running.
+#   postgres_running <version>
+postgres_running() {
+  local running
+  running=$(compose "$1" ps --status running --services) && grep -qx postgres <<<"$running"
+}
+
+# Applies the schema migrations of a release with `ririko db:migrate` from its bot image, in a
+# throwaway container next to the running release. --no-deps keeps compose from creating the new
+# web or Lavalink containers; postgres is the one service the migration needs, so it is started
+# first when nothing runs yet (a first deploy). The CLI prints what it did, which goes to the
+# output and to deploy.log. Returns 1 when it fails; MIGRATE_STATUS then holds the CLI's exit
+# code (1 failure, 2 refused by the downgrade guard) and MIGRATE_ERROR its last output line, and
+# MIGRATED is left empty.
+#   migrate_database <version>
+migrate_database() {
+  local version=$1 output="" line
+  MIGRATE_STATUS=0
+  MIGRATE_ERROR=""
+  MIGRATED=""
+  if ! postgres_running "$version"; then
+    log "postgres is not running, starting it for the migration"
+    if ! compose "$version" up -d --no-build --wait --wait-timeout "$READY_TIMEOUT" postgres; then
+      log "could not start postgres for the migration"
+      MIGRATE_STATUS=1
+      MIGRATE_ERROR="postgres did not become healthy"
+      return 1
+    fi
+  fi
+  log "migrating the database from the $version bot image (ririko db:migrate); the running release is not touched"
+  output=$(compose "$version" run --rm --no-deps -T bot ririko db:migrate </dev/null 2>&1) ||
+    MIGRATE_STATUS=$?
+  if [ -n "$output" ]; then
+    MIGRATE_ERROR=$(tail -n 1 <<<"$output")
+    while IFS= read -r line; do
+      log "db:migrate: $line"
+    done <<<"$output"
+  fi
+  if [ "$MIGRATE_STATUS" -ne 0 ]; then
+    log "ririko db:migrate exited with status $MIGRATE_STATUS"
+    return 1
+  fi
+  MIGRATED=$version
+  log "the database is migrated for $version"
+}
+
+# Pulls a downloaded release, migrates the database, starts it, then waits for readiness. Returns
+# MIGRATION_FAILED when the migration failed (nothing was started or stopped) and 1 on any other
+# failure. A rollback passes no-migrate: the previous release runs on the database as it is
+# (migrations only add, ADR-015), and its own image could not migrate it back.
+#   apply_release <version> [tolerate-pull-failure] [no-migrate]
 apply_release() {
-  local version=$1 tolerate_pull=${2:-}
+  local version=$1 tolerate_pull=${2:-} no_migrate=${3:-}
   log "pulling images for $version"
   if ! compose "$version" pull; then
     if [ -z "$tolerate_pull" ]; then
@@ -382,6 +448,9 @@ apply_release() {
       return 1
     fi
     log "pull failed, using the images already on this host"
+  fi
+  if [ -z "$no_migrate" ]; then
+    migrate_database "$version" || return "$MIGRATION_FAILED"
   fi
   log "starting $version"
   if ! compose "$version" up -d --no-build --remove-orphans; then
@@ -657,7 +726,7 @@ take_lock() {
 }
 
 cmd_deploy() {
-  local version=$1 instance=${2:-} current previous running dump="" rollback_to=""
+  local version=$1 instance=${2:-} current previous dump="" rollback_to="" apply_status=0 kept=""
   [[ $version =~ $VERSION_PATTERN ]] || fail 2 "invalid version '$version'"
   if [ "$RIRIKO_ROOT" = /opt/ririko ] && [ "$(id -u)" -ne 0 ]; then
     fail 1 "ririko-deploy must run as root (through sudo)"
@@ -688,15 +757,15 @@ cmd_deploy() {
     if [ "$current" != "$version" ]; then
       rollback_to=$current
     fi
-    if running=$(compose "$current" ps --status running --services) &&
-      grep -qx postgres <<<"$running"; then
+    if postgres_running "$current"; then
       dump=$(predeploy_dump "$current") || exit 1
     else
       log "postgres is not running, no pre-deploy dump"
     fi
   fi
 
-  if apply_release "$version"; then
+  apply_release "$version" || apply_status=$?
+  if [ "$apply_status" -eq 0 ]; then
     if [ -n "$current" ] && [ "$current" != "$version" ]; then
       write_state previous "$current"
     fi
@@ -705,20 +774,33 @@ cmd_deploy() {
     return 0
   fi
 
+  dump=${dump:-none taken}
+  if [ "$apply_status" -eq "$MIGRATION_FAILED" ]; then
+    # Nothing of the new release was started and the running one was not touched, so there is
+    # nothing to roll back.
+    kept=${current:+" The previous release $current keeps running."}
+    if [ "$MIGRATE_STATUS" -eq 2 ]; then
+      fail 6 "the database migration of $version was refused by the downgrade guard (ririko db:migrate exit 2): the database holds a migration that this release does not know, so this release is older than the database. Last line of its output: ${MIGRATE_ERROR:-none}. Nothing was started or stopped.${kept} Deploy a newer version. Pre-deploy dump: $dump."
+    fi
+    fail 6 "the database migration of $version failed (ririko db:migrate exit $MIGRATE_STATUS; its output is above and in $LOG_FILE). Last line of its output: ${MIGRATE_ERROR:-none}. Nothing was started or stopped.${kept} Pre-deploy dump: $dump. Fix the cause and deploy again."
+  fi
+
   log "deploy of $version failed"
   diagnose "$version"
-  dump=${dump:-none taken}
+  if [ -n "$MIGRATED" ]; then
+    log "the database keeps the migrations of $version (they only add, so the previous release runs on them)"
+  fi
   if [ -n "$rollback_to" ]; then
     log "rolling back to $rollback_to"
-    if apply_release "$rollback_to" tolerate-pull-failure; then
+    if apply_release "$rollback_to" tolerate-pull-failure no-migrate; then
       log "rolled back to $rollback_to"
     else
       log "ROLLBACK FAILED: $rollback_to did not become ready either"
       diagnose "$rollback_to"
     fi
-    fail 4 "deploy of $version failed; rolled back to $rollback_to (state/current is unchanged). Pre-deploy dump: $dump. The database was not restored; restore it by hand only if the failed release changed data."
+    fail 4 "deploy of $version failed; rolled back to $rollback_to (state/current is unchanged). Pre-deploy dump: $dump. The database was not restored${MIGRATED:+ and keeps the migrations of $version (they only add, so $rollback_to runs on them)}; restore it by hand only if the failed release changed data."
   fi
-  fail 5 "deploy of $version failed and there is no previous release to roll back to"
+  fail 5 "deploy of $version failed and there is no previous release to roll back to${MIGRATED:+. The database keeps the migrations of $version}"
 }
 
 cmd_status() {
@@ -736,6 +818,10 @@ cmd_status() {
   log "status: current=${current:-none} previous=${previous:-none}"
   if [ -n "$current" ] && [ -d "$RIRIKO_ROOT/releases/$current" ]; then
     compose "$current" ps
+    # The CLI prints the latest, pending and unknown migration ids and always exits 0.
+    if ! compose "$current" exec -T bot ririko db:migrate --status </dev/null; then
+      log "status: could not read the migration status (is the bot container running?)"
+    fi
   fi
 }
 

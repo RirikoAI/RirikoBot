@@ -88,6 +88,7 @@ What happens on startup:
 - Every service reads `.env.production`, or the file named by `RIRIKO_ENV_FILE`.
 - The compose file sets the values that must point inside the stack itself: `DATABASE_DIALECT=postgres`, `DATABASE_URL` (built from the `POSTGRES_*` values), `LAVALINK_HOST=lavalink` and `LAVALINK_PORT=2333`.
 - On start the bot applies the schema migrations (`DB_AUTO_MIGRATE`, default `true`, see `docs/database.md` section 1): an empty database gets the baseline, a database from before migration records is adopted once. The dashboard never changes the schema: it answers `/ready` with 503, and logs the pending migrations, until the bot (or `ririko db:migrate`) has migrated the database, then recovers by itself. `/health` (the liveness probe and the `HEALTHCHECK`) stays 200 meanwhile.
+- A hand-run stack keeps migrate-on-start: `docker compose pull && docker compose up -d` upgrades it with no other step. The CI host deploy (`ririko-deploy`, `docs/release.md` section 8) is different: it runs every compose call with `DB_AUTO_MIGRATE=false` in its environment (which wins over the env file), so the bot only checks the schema there, and the deploy runs `ririko db:migrate` from the new bot image after the pull and before `up -d` as its own step. It exits 6 without starting anything when that migration fails.
 - `DB_AUTO_MIGRATE=false` makes the bot only check: it exits with a message naming the pending migrations instead of starting on an old schema. Then run `docker compose -f docker-compose.production.yml --env-file .env.production run --rm bot ririko db:migrate` (or `docker exec <bot container> ririko db:migrate` on a running bot), and start the bot again. `ririko db:migrate --status` prints the pending migrations, `--dry-run` the plan; exit code 2 means the downgrade guard refused (the database holds a contract migration this release does not know).
 - Both images have a `HEALTHCHECK` (section 3).
 - Compose refuses to start when `POSTGRES_PASSWORD` or `LAVALINK_PASSWORD` is empty.
@@ -131,6 +132,38 @@ Volumes:
 
 - **Ownership:** the images run as uid 10001. A named volume starts owned by that user. If you replace one with a bind mount, make it writable first: `chown -R 10001:10001 <dir>`.
 - **Upgrading from 1.4.0:** the 1.4.0 migration does not support a Postgres target yet (`docs/migrations.md` section 4.3), and this stack uses Postgres. Upgrade with the single-container SQLite compose in [docs/upgrading-from-1.4.md](upgrading-from-1.4.md) instead. The commented `./data:/app/legacy:ro` mount is for when Postgres targets are supported.
+
+### 2.3. Upgrading a Self-Hosted Stack
+
+This section is for anyone who runs `docker-compose.production.yml` (PostgreSQL) or the SQLite container of section 2.1 by hand. Hosts that deploy through CI use `ririko-deploy`, which migrates as its own gated step ([release.md section 8.6](release.md#86-migrations-on-a-host)).
+
+- **Upgrades migrate on start.** `DB_AUTO_MIGRATE` defaults to `true`, so `docker compose -f docker-compose.production.yml --env-file .env.production pull` followed by the same command with `up -d` upgrades the stack across any number of versions, with no other step. The bot applies the pending migrations before it starts its services, one transaction each (under an advisory lock on PostgreSQL, so two processes never migrate at once), and the dashboard answers not ready until it has finished. A migration that fails leaves the database at the last migration that succeeded, and the bot does not start on the old schema: read `docker compose logs bot`. To be able to go back to a known release, set `RIRIKO_VERSION` to an exact version (for example `2.1.3`) instead of the moving default `2`.
+- **PostgreSQL: dump before you upgrade.** The runner makes no backup there, and migrations only add, so the previous release still runs on the new schema; but the dump is the only way back for a change that went wrong. In a shell, set the compose command once:
+
+  ```bash
+  COMPOSE="docker compose -f docker-compose.production.yml --env-file .env.production"
+  $COMPOSE exec -T postgres sh -c 'exec pg_dump -Fc -U "$POSTGRES_USER" -d "$POSTGRES_DB"' > ririko-before-upgrade.dump
+  ```
+
+  To restore it, stop the writers, restore, and start the release the dump came from (`RIRIKO_VERSION=<old version>`):
+
+  ```bash
+  $COMPOSE stop bot web
+  $COMPOSE exec -T postgres sh -c 'exec pg_restore --clean --if-exists --single-transaction -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < ririko-before-upgrade.dump
+  RIRIKO_VERSION=<old version> $COMPOSE up -d
+  ```
+
+  The dump is in the custom format, so `pg_restore` reads it, not `psql`. Everything written after the dump is lost. [release.md section 8.7](release.md#87-restoring-the-pre-deploy-dump) has the long version.
+- **SQLite: the backups are automatic.** When migrations are pending on an existing SQLite file, the runner first copies the database with `VACUUM INTO` to `backups/pre-migrate-<UTC timestamp>.sqlite` in a `backups` folder next to the database file, and keeps the newest five. In the images that is `/app/data/backups/`, inside the `ririko_data` volume (`./data/backups/` in development). The first start of a database from before migration records is covered too. A new empty database, or one with nothing pending, gets no backup. To go back, stop the bot and the dashboard, copy a backup over the database file (`/app/data/ririko.sqlite` by default), delete the `-wal` and `-shm` files next to it, and start the previous version.
+- **Running the migrations by hand.** Set `DB_AUTO_MIGRATE=false` in `.env.production` (or the container's environment). The bot then only checks the schema: it exits with a message that names the pending migrations instead of starting on an old schema. Upgrade in this order (`run` starts Postgres if it is not up), with `$COMPOSE` set as above:
+
+  ```bash
+  $COMPOSE pull
+  $COMPOSE run --rm bot ririko db:migrate
+  $COMPOSE up -d
+  ```
+
+  `ririko db:migrate --status` prints the latest, pending and unknown ids, and `--dry-run` prints the plan, including what adopting an old database would change; neither changes anything. Exit code 0 is done or nothing to do, 1 a failure, and 2 the downgrade guard (the database holds a contract migration this release does not know: run the newer release, or restore the dump). On a single container, `docker exec <bot container> ririko db:migrate` does the same.
 
 ---
 

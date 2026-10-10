@@ -203,3 +203,9 @@ Replace every `<placeholder>` with your own value. Nothing here names a real hos
 ### 5.4. Known Limits
 - It copies a 2.0 database into an empty PostgreSQL database. It does not merge into a database that already has rows, does not copy PostgreSQL back to SQLite, and does not read 1.4.0 databases (use `ririko migrate:legacy` for those).
 - A failed or refused real run commits nothing. Only the empty schema may remain; run step 2 again before you retry.
+
+## 6. Schema Migrations and Recovery (ADR-015)
+
+Everything above moves data from 1.4.0 or between databases. The versioned schema migrations of 2.x (`ririko db:migrate`, [docs/database.md section 1](database.md)) have their own runbooks:
+- **Hosts deployed by CI** (staging and production): the gated migration step, exit 6, the downgrade guard, what a rollback does and does not undo, restoring the pre-deploy dump (`backups/predeploy/*.dump`, `pg_dump -Fc`), and the one-time adoption of a database that predates migration records: [release.md sections 8.6 to 8.8](release.md#86-migrations-on-a-host).
+- **Self-hosters:** upgrades migrate on start; the SQLite pre-migration backups, a PostgreSQL dump before an upgrade, and running the migrations by hand with `DB_AUTO_MIGRATE=false`: [deployment.md section 2.3](deployment.md).

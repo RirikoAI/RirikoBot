@@ -322,6 +322,7 @@ rm -rf "$tmp"
     [3, 'holds its lock'],
     [4, 'started the previous release again'],
     [5, 'no previous release'],
+    [6, 'database migration of the new release failed'],
     [255, 'could not connect'],
     [7, 'failed with status 7'],
   ])('fails with the host exit status %i', (status, message) => {
@@ -403,8 +404,8 @@ describe('docs/release.md deploy section', () => {
     }
   });
 
-  it('explains host exit codes 3, 4 and 5', () => {
-    for (const code of [3, 4, 5]) {
+  it('explains host exit codes 3, 4, 5 and 6', () => {
+    for (const code of [3, 4, 5, 6]) {
       expect(docs, `exit ${code}`).toMatch(new RegExp(`\\|\\s*${code}\\s*\\|`));
     }
   });
