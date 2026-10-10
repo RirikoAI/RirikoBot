@@ -111,7 +111,7 @@ This document provides an exhaustive audit of the Ririko AI legacy codebase (ver
 | `filter` | Music | Applies audio filters (bassboost, nightcore, 8D, etc.). | **REWORK** | `packages/music` | Use FFmpeg realtime audio filter pipeline. |
 | `join` | Music | Joins user voice channel without playing. | **KEEP** | `packages/music` | Permission check, voice connection state binding. |
 | `leave` | Music | Leaves voice channel and clears queue. | **KEEP** | `packages/music` | Graceful audio stream destruction. |
-| `lyrics` | Music | Fetches song lyrics. | **REWORK** | `packages/music` | Use Genius / Musixmatch API with fallback search. |
+| `lyrics` | Music | Fetches song lyrics. | **REWORK** | `packages/music` | Use the LRCLIB API (no key) with an exact match first, then search. See docs/music.md section 9.2. |
 | `mute` | Music | Sets volume to 0% or restores previous volume. | **KEEP** | `packages/music` | Volume toggle state preserved. |
 | `playlist` | Music | Creates, plays, or lists user custom playlists from database. | **REWORK** | `packages/music`, `packages/database` | Migrate `playlist` and `track` entities to Drizzle, support public/private sharing and import from Spotify. |
 | `playtop` | Music | Inserts track at the top of the queue. | **KEEP** | `packages/music` | Shift track to position 0 in queue. |

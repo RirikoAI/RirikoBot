@@ -26,6 +26,7 @@ import {
   type VoiceConnection,
 } from '@ririko/music';
 import { Readable } from 'node:stream';
+import type { LrclibLyrics } from '@ririko/services';
 
 describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', () => {
   let dbClient: SqliteDatabaseClient;
@@ -523,14 +524,164 @@ describe('Reactive Embed Controller & Interactive Button Matrix (TASK-0522)', ()
       expect(queue.volume).toBe(80);
     });
 
+    const lrclibHit = (overrides: Partial<LrclibLyrics> = {}): LrclibLyrics => ({
+      id: 1,
+      trackName: 'Idol',
+      artistName: 'YOASOBI',
+      albumName: null,
+      durationSeconds: 215,
+      instrumental: false,
+      plainLyrics: 'first line\nsecond line',
+      syncedLyrics: null,
+      ...overrides,
+    });
+
+    it('looks the lyrics of the current track up with a cleaned title and replies ephemerally', async () => {
+      const find = vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(lrclibHit());
+      const interaction = createMockButtonInteraction('music_lyrics');
+
+      await controller.handleButtonInteraction(interaction);
+
+      expect(interaction.deferReply).toHaveBeenCalledWith({ ephemeral: true });
+      expect(find).toHaveBeenCalledWith({
+        title: 'YOASOBI Idol',
+        artist: 'YOASOBI',
+        durationSeconds: 215,
+      });
+      const reply = vi.mocked(interaction.editReply).mock.calls[0]![0] as {
+        embeds: Array<{
+          data: { title?: string; description?: string; footer?: { text: string } };
+        }>;
+      };
+      expect(reply.embeds).toHaveLength(1);
+      expect(reply.embeds[0]!.data.title).toBe('🎤 Idol - YOASOBI');
+      expect(reply.embeds[0]!.data.description).toBe('first line\nsecond line');
+      expect(reply.embeds[0]!.data.footer?.text).toBe('Lyrics from LRCLIB');
+      expect(JSON.stringify(reply)).not.toContain('Genius');
+    });
+
+    it('says so when no lyrics are found', async () => {
+      vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(null);
+      const interaction = createMockButtonInteraction('music_lyrics');
+
+      await controller.handleButtonInteraction(interaction);
+
+      expect(interaction.editReply).toHaveBeenCalledWith({
+        content: expect.stringContaining('No lyrics found'),
+      });
+    });
+
+    it('says so when the track is an instrumental', async () => {
+      vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(
+        lrclibHit({ instrumental: true, plainLyrics: null }),
+      );
+      const interaction = createMockButtonInteraction('music_lyrics');
+
+      await controller.handleButtonInteraction(interaction);
+
+      expect(interaction.editReply).toHaveBeenCalledWith({
+        content: expect.stringContaining('instrumental'),
+      });
+    });
+
+    it('reports an unreachable lyrics service and logs the error without rejecting', async () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(services.lrclibClient, 'findForTrack').mockRejectedValue(
+        new Error('LRCLIB request failed: HTTP 503'),
+      );
+      const interaction = createMockButtonInteraction('music_lyrics');
+
+      await expect(controller.handleButtonInteraction(interaction)).resolves.toBeUndefined();
+
+      expect(interaction.editReply).toHaveBeenCalledWith({
+        content: expect.stringContaining('LRCLIB'),
+      });
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it('logs instead of rejecting when the lyrics reply cannot be delivered', async () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(lrclibHit());
+      const interaction = createMockButtonInteraction('music_lyrics');
+      vi.mocked(interaction.editReply).mockRejectedValue(new Error('Unknown interaction'));
+
+      await expect(controller.handleButtonInteraction(interaction)).resolves.toBeUndefined();
+
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it('splits long lyrics across several embeds in one reply', async () => {
+      const longLyrics = Array.from(
+        { length: 400 },
+        (_, i) => `line number ${i + 1} of the song`,
+      ).join('\n');
+      vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(
+        lrclibHit({ plainLyrics: longLyrics }),
+      );
+      const interaction = createMockButtonInteraction('music_lyrics');
+
+      await controller.handleButtonInteraction(interaction);
+
+      const reply = vi.mocked(interaction.editReply).mock.calls[0]![0] as {
+        embeds: Array<{ data: { description?: string } }>;
+      };
+      expect(reply.embeds.length).toBeGreaterThan(1);
+      for (const embed of reply.embeds) {
+        expect(embed.data.description!.length).toBeLessThanOrEqual(4096);
+      }
+    });
+
+    it('keeps the lyrics button open to everyone in voice even with a DJ role set', async () => {
+      await services.musicRepo.upsertGuildSettings('guild_01', { djRoleId: 'role-dj' });
+      vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(lrclibHit());
+      const interaction = createMockButtonInteraction('music_lyrics');
+      Object.assign(interaction.member as object, {
+        roles: { cache: new Map() },
+        permissions: { has: () => false },
+      });
+
+      await controller.handleButtonInteraction(interaction);
+
+      expect(interaction.deferReply).toHaveBeenCalledWith({ ephemeral: true });
+    });
+
+    it('does not look anything up when nothing is playing', async () => {
+      const find = vi.spyOn(services.lrclibClient, 'findForTrack');
+      services.musicPlayer.stop('guild_01');
+      const interaction = createMockButtonInteraction('music_lyrics');
+
+      await controller.handleButtonInteraction(interaction);
+
+      expect(find).not.toHaveBeenCalled();
+      expect(interaction.reply).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: expect.stringContaining('Nothing is currently playing'),
+        }),
+      );
+    });
+
     it('handles stop, lyrics, queue, and refresh buttons', async () => {
+      vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(lrclibHit());
       // Lyrics
       const lyricsInteraction = createMockButtonInteraction('music_lyrics');
       await controller.handleButtonInteraction(lyricsInteraction);
       expect(lyricsInteraction.deferReply).toHaveBeenCalledWith(
         expect.objectContaining({ ephemeral: true }),
       );
-      expect(lyricsInteraction.editReply).toHaveBeenCalled();
+      expect(lyricsInteraction.editReply).toHaveBeenCalledWith(
+        expect.objectContaining({
+          embeds: [
+            expect.objectContaining({
+              data: expect.objectContaining({
+                title: expect.stringContaining('Idol'),
+                description: expect.stringContaining('first line'),
+              }),
+            }),
+          ],
+        }),
+      );
 
       // Queue (ephemeral response showing now playing track even when upcoming is 0)
       const queueInteraction = createMockButtonInteraction('music_queue');

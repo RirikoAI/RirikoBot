@@ -10,6 +10,7 @@ import {
   createProgressBar,
 } from './commands.js';
 import { Readable } from 'node:stream';
+import type { LrclibLyrics } from '@ririko/services';
 import {
   VoiceLifecycleManager,
   type MusicSourceAdapter,
@@ -576,6 +577,245 @@ describe('Dual-Dispatch Music Commands Suite (TASK-0521)', () => {
           content: expect.stringContaining('Disconnected from voice channel'),
         }),
       );
+    });
+  });
+
+  describe('5b. /lyrics Command (BUG-0040)', () => {
+    const lrclibHit = (overrides: Partial<LrclibLyrics> = {}): LrclibLyrics => ({
+      id: 1,
+      trackName: 'Idol',
+      artistName: 'YOASOBI',
+      albumName: null,
+      durationSeconds: 215,
+      instrumental: false,
+      plainLyrics: 'first line\nsecond line',
+      syncedLyrics: null,
+      ...overrides,
+    });
+
+    const lyricsCommand = () =>
+      createMusicCommands(services).find((c) => c.metadata.name === 'lyrics')!;
+
+    type SentReply = {
+      content?: string;
+      embeds?: Array<{ data: { title?: string; description?: string; footer?: { text: string } } }>;
+    };
+    const sentReply = (ctx: CommandContext) =>
+      vi.mocked(ctx.editReply).mock.calls[0]![0] as unknown as SentReply;
+
+    const nowPlaying = (title: string, artist: string, durationSeconds: number) =>
+      vi.spyOn(services.musicPlayer, 'getQueue').mockReturnValue({
+        currentTrack: { title, artist, durationSeconds, url: 'https://example.com/t' },
+      } as never);
+
+    it('replies without a lookup when nothing is playing and no song is given', async () => {
+      const find = vi.spyOn(services.lrclibClient, 'findForTrack');
+      const search = vi.spyOn(services.lrclibClient, 'search');
+      const ctx = createMockContext({ replyFn: vi.fn() });
+
+      await lyricsCommand().execute(ctx);
+
+      expect(ctx.reply).toHaveBeenCalledWith({
+        content: expect.stringContaining('nothing is currently playing'),
+      });
+      expect(ctx.deferReply).not.toHaveBeenCalled();
+      expect(find).not.toHaveBeenCalled();
+      expect(search).not.toHaveBeenCalled();
+    });
+
+    it('defers, then shows the lyrics of the current track found with a cleaned title', async () => {
+      nowPlaying('YOASOBI - Idol (Official Video)', 'YOASOBI - Topic', 215);
+      const find = vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(lrclibHit());
+      const ctx = createMockContext({ replyFn: vi.fn() });
+
+      await lyricsCommand().execute(ctx);
+
+      expect(find).toHaveBeenCalledWith({
+        title: 'YOASOBI Idol',
+        artist: 'YOASOBI',
+        durationSeconds: 215,
+      });
+      expect(ctx.deferReply).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(ctx.deferReply).mock.invocationCallOrder[0]!).toBeLessThan(
+        find.mock.invocationCallOrder[0]!,
+      );
+      const reply = sentReply(ctx);
+      expect(reply.embeds).toHaveLength(1);
+      expect(reply.embeds![0]!.data.title).toBe('🎤 Idol - YOASOBI');
+      expect(reply.embeds![0]!.data.description).toBe('first line\nsecond line');
+      expect(reply.embeds![0]!.data.footer?.text).toBe('Lyrics from LRCLIB');
+      expect(JSON.stringify(reply)).not.toMatch(/Genius|sync lyrics provider/);
+    });
+
+    it('drops an unknown placeholder artist from the lookup', async () => {
+      nowPlaying('Some Song', 'Unknown Artist', 0);
+      const find = vi.spyOn(services.lrclibClient, 'findForTrack').mockResolvedValue(lrclibHit());
+
+      await lyricsCommand().execute(createMockContext({ replyFn: vi.fn() }));
+
+      expect(find).toHaveBeenCalledWith({ title: 'Some Song', artist: '', durationSeconds: 0 });
+    });
+
+    it('looks the given text up with a free-text search, also for the !ly prefix form', async () => {
+      const search = vi.spyOn(services.lrclibClient, 'search').mockResolvedValue(lrclibHit());
+      const find = vi.spyOn(services.lrclibClient, 'findForTrack');
+      const ctx = createMockContext({ optionsMap: { song: '  yoasobi idol ' }, replyFn: vi.fn() });
+
+      await lyricsCommand().execute(ctx);
+
+      expect(search).toHaveBeenCalledWith('yoasobi idol');
+      expect(find).not.toHaveBeenCalled();
+      expect(ctx.deferReply).toHaveBeenCalledTimes(1);
+      expect(sentReply(ctx).embeds![0]!.data.description).toContain('first line');
+      expect(lyricsCommand().metadata.aliases).toContain('ly');
+    });
+
+    it('prefers the given text over the current track', async () => {
+      nowPlaying('Playing Now', 'Someone', 100);
+      const search = vi.spyOn(services.lrclibClient, 'search').mockResolvedValue(lrclibHit());
+      const find = vi.spyOn(services.lrclibClient, 'findForTrack');
+
+      await lyricsCommand().execute(
+        createMockContext({ optionsMap: { song: 'other song' }, replyFn: vi.fn() }),
+      );
+
+      expect(search).toHaveBeenCalledWith('other song');
+      expect(find).not.toHaveBeenCalled();
+    });
+
+    it('shows synced lyrics without their timestamps when there is no plain text', async () => {
+      vi.spyOn(services.lrclibClient, 'search').mockResolvedValue(
+        lrclibHit({
+          plainLyrics: null,
+          syncedLyrics:
+            '[00:01.00] first line\n[00:02.50]second line\n[01:02.123] [01:03.00] third',
+        }),
+      );
+      const ctx = createMockContext({ optionsMap: { song: 'x' }, replyFn: vi.fn() });
+
+      await lyricsCommand().execute(ctx);
+
+      expect(sentReply(ctx).embeds![0]!.data.description).toBe('first line\nsecond line\nthird');
+    });
+
+    it('replies that nothing was found', async () => {
+      vi.spyOn(services.lrclibClient, 'search').mockResolvedValue(null);
+      const ctx = createMockContext({
+        optionsMap: { song: '@everyone nonsense' },
+        replyFn: vi.fn(),
+      });
+
+      await lyricsCommand().execute(ctx);
+
+      const reply = sentReply(ctx);
+      expect(reply.embeds).toBeUndefined();
+      expect(reply.content).toContain('No lyrics found for `@everyone nonsense`');
+    });
+
+    it('replies that a track is an instrumental, and that an empty record has no lyrics', async () => {
+      const search = vi
+        .spyOn(services.lrclibClient, 'search')
+        .mockResolvedValueOnce(lrclibHit({ instrumental: true, plainLyrics: null }))
+        .mockResolvedValueOnce(lrclibHit({ plainLyrics: '  ', syncedLyrics: null }));
+
+      const instrumental = createMockContext({ optionsMap: { song: 'x' }, replyFn: vi.fn() });
+      await lyricsCommand().execute(instrumental);
+      expect(sentReply(instrumental).content).toContain('instrumental');
+
+      const empty = createMockContext({ optionsMap: { song: 'x' }, replyFn: vi.fn() });
+      await lyricsCommand().execute(empty);
+      expect(sentReply(empty).content).toContain('No lyrics found');
+      expect(search).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports an unreachable lyrics service and logs the error', async () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(services.lrclibClient, 'search').mockRejectedValue(new Error('network down'));
+      const ctx = createMockContext({ optionsMap: { song: 'x' }, replyFn: vi.fn() });
+
+      await expect(lyricsCommand().execute(ctx)).resolves.toBeUndefined();
+
+      expect(sentReply(ctx).content).toContain('LRCLIB');
+      expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it('splits long lyrics on line breaks across embeds within the Discord limits', async () => {
+      const lyrics = Array.from({ length: 200 }, (_, i) => `line ${i + 1} of the long song`).join(
+        '\n',
+      );
+      vi.spyOn(services.lrclibClient, 'search').mockResolvedValue(
+        lrclibHit({ plainLyrics: lyrics }),
+      );
+      const ctx = createMockContext({ optionsMap: { song: 'x' }, replyFn: vi.fn() });
+
+      await lyricsCommand().execute(ctx);
+
+      const embeds = sentReply(ctx).embeds!;
+      expect(embeds.length).toBeGreaterThan(1);
+      const descriptions = embeds.map((e) => e.data.description!);
+      for (const description of descriptions) {
+        expect(description.length).toBeLessThanOrEqual(4096);
+        // Never cut in the middle of a line.
+        for (const line of description.split('\n'))
+          expect(line).toMatch(/^line \d+ of the long song$/);
+      }
+      expect(descriptions.join('\n')).toBe(lyrics);
+      expect(embeds[0]!.data.title).toBeDefined();
+      expect(embeds[1]!.data.title).toBeUndefined();
+      expect(embeds.at(-1)!.data.footer?.text).toBe('Lyrics from LRCLIB');
+    });
+
+    it('cuts lyrics beyond the total embed limit and says they are truncated', async () => {
+      const lyrics = Array.from(
+        { length: 2000 },
+        (_, i) => `line ${i + 1} of the endless song`,
+      ).join('\n');
+      vi.spyOn(services.lrclibClient, 'search').mockResolvedValue(
+        lrclibHit({ plainLyrics: lyrics }),
+      );
+      const ctx = createMockContext({ optionsMap: { song: 'x' }, replyFn: vi.fn() });
+
+      await lyricsCommand().execute(ctx);
+
+      const embeds = sentReply(ctx).embeds!;
+      expect(embeds.length).toBeLessThanOrEqual(10);
+      const total = embeds.reduce(
+        (sum, e) =>
+          sum +
+          (e.data.title?.length ?? 0) +
+          (e.data.description?.length ?? 0) +
+          (e.data.footer?.text.length ?? 0),
+        0,
+      );
+      expect(total).toBeLessThanOrEqual(6000);
+      for (const e of embeds) expect(e.data.description!.length).toBeLessThanOrEqual(4096);
+      expect(embeds.at(-1)!.data.description).toContain('the lyrics are truncated');
+      expect(embeds.at(-1)!.data.description).not.toContain('line 2000 ');
+    });
+
+    it('cuts a single line that is longer than one embed', async () => {
+      vi.spyOn(services.lrclibClient, 'search').mockResolvedValue(
+        lrclibHit({ plainLyrics: 'la '.repeat(1500) }),
+      );
+      const ctx = createMockContext({ optionsMap: { song: 'x' }, replyFn: vi.fn() });
+
+      await lyricsCommand().execute(ctx);
+
+      for (const e of sentReply(ctx).embeds!) {
+        expect(e.data.description!.length).toBeLessThanOrEqual(4096);
+      }
+    });
+
+    it('truncates an over-long track title in the embed title', async () => {
+      vi.spyOn(services.lrclibClient, 'search').mockResolvedValue(
+        lrclibHit({ trackName: 'T'.repeat(400) }),
+      );
+      const ctx = createMockContext({ optionsMap: { song: 'x' }, replyFn: vi.fn() });
+
+      await lyricsCommand().execute(ctx);
+
+      expect(sentReply(ctx).embeds![0]!.data.title!.length).toBeLessThanOrEqual(256);
     });
   });
 
