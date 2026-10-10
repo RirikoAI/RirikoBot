@@ -23,7 +23,9 @@
 | `BUG-0040` | Bug | /lyrics and the Music Controller Lyrics Button Show Placeholder Text Instead of Lyrics | 5 | EPIC-005 | — | yes | medium |
 
 ## 🔍 Review
-*None.*
+| ID | Type | Title | Pts | Parent | Handover |
+|---|---|---|---|---|---|
+| `BUG-0042` | Bug | Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check | 3 | EPIC-019 | [BUG-0042.md](./handovers/BUG-0042.md) |
 
 ## ✅ Done
 | ID | Type | Title | Pts | Parent | Handover |

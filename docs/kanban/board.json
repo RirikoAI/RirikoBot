@@ -9374,6 +9374,63 @@
         "BUG-0041",
         "EPIC-019"
       ]
+    },
+    {
+      "id": "BUG-0042",
+      "parent": "EPIC-019",
+      "title": "Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check",
+      "points": 3,
+      "status": "REVIEW",
+      "children": [],
+      "requires": [
+        "STORY-185"
+      ],
+      "blocks": [],
+      "description": "CircleCI docker job 2109 on PR #693 fails \"Smoke-check both images\": the web image started alone on an empty SQLite database answers 503 on /health, /api/health and its HEALTHCHECK (SchemaNotReadyError: pending 0000_baseline), because TASK-1854 made getDatabase reject while the schema is behind and webProbe treats any rejection as unhealthy for both kinds. ADR-015 only asks /ready to wait for migrations. Liveness must stay 200 while the database is reachable but behind, or the container is marked unhealthy and the host watchdog restarts it while the bot migrates. The smoke check must also cover both states: web on an unmigrated database (live, not ready) and web on a migrated database (everything 200, sign-in redirects).",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "apps/web/src/lib/server/health.ts",
+          "apps/web/src/lib/server/health.test.ts",
+          "apps/web/src/lib/server/schema-guard.ts",
+          "apps/web/src/app/api/health/route.ts",
+          "apps/web/src/app/api/health/route.test.ts",
+          "apps/web/src/app/api/ready/route.ts",
+          "scripts/docker-smoke.ts",
+          "docs/deployment.md",
+          "docs/dashboard.md"
+        ],
+        "symbols": [
+          "webProbe",
+          "WebProbeDeps",
+          "SchemaNotReadyError",
+          "assertSchemaCurrent",
+          "webServeCheck",
+          "withContainer",
+          "buildLegacyDatabase",
+          "healthcheckCommand",
+          "createdDatabase"
+        ],
+        "codegraph_queries": [
+          "webProbe WebProbeDeps health.ts SchemaNotReadyError assertSchemaCurrent",
+          "webServeCheck withContainer buildLegacyDatabase healthcheckCommand docker-smoke.ts"
+        ]
+      },
+      "acceptance": [
+        "webProbe: when deps.database() rejects with SchemaNotReadyError, the health kind answers 200 with database status MIGRATION_PENDING and the pending ids, and the ready kind answers 503 and logs the reason. Any other failure keeps 503 for both, as today. The image HEALTHCHECK (which uses the health probe) therefore passes while migrations are pending.",
+        "Unit tests in health.test.ts (and the health route test) cover: schema pending (health 200, ready 503), database unreachable (both 503), healthy (both 200).",
+        "scripts/docker-smoke.ts webServeCheck covers two states. (a) Web alone on an empty database: /health, /api/health and the HEALTHCHECK answer 200, /ready answers 503, and the logs name the pending migration. (b) Web on a database migrated beforehand with the bot image (ririko db:migrate in a throwaway ririko-bot:smoke container, copied in through the prepare hook as buildLegacyDatabase does): GET / is 200, /api/auth/login redirects to Discord, /health, /ready and /api/health are 200, and the HEALTHCHECK passes. The check fails with a clear message when the bot image is missing.",
+        "docs/deployment.md (probes) says /health is liveness and stays 200 while migrations are pending, and /ready waits for them."
+      ],
+      "verify_cmd": "pnpm vitest run apps/web/src/lib/server apps/web/src/app/api && pnpm build && pnpm typecheck && pnpm lint --quiet && pnpm format:check",
+      "handovers": [
+        "BUG-0042",
+        "EPIC-019"
+      ]
     }
   ],
   "active_in_progress_ticket": null

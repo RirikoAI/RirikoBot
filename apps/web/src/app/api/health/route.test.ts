@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { rateLimits } from '@/lib/server/rate-limit';
+import { SchemaNotReadyError } from '@/lib/server/schema-guard';
 
 const ping = vi.fn(async () => ({ ok: true, dialect: 'sqlite', latencyMs: 1 }));
-vi.mock('@/lib/server/services', () => ({ getWebServices: async () => ({ db: { ping } }) }));
+const services = vi.fn(async () => ({ db: { ping } }));
+vi.mock('@/lib/server/services', () => ({ getWebServices: () => services() }));
 
 const health = await import('./route');
 const ready = await import('../ready/route');
@@ -17,6 +19,24 @@ describe('probe routes (TASK-1221)', () => {
     expect(await live.json()).toMatchObject({ status: 'healthy', version: '2.0.0' });
     expect(await (await ready.GET(request('203.0.113.1'))).json()).toEqual({ ready: true });
     expect(ping).toHaveBeenCalledTimes(2);
+  });
+
+  it('stay alive but not ready while migrations are pending', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    services.mockRejectedValue(
+      new SchemaNotReadyError('The database schema is behind this dashboard.', ['0000_baseline']),
+    );
+
+    const live = await health.GET(request('203.0.113.3'));
+    expect(live.status).toBe(200);
+    expect(await live.json()).toMatchObject({
+      database: { status: 'MIGRATION_PENDING', pending: ['0000_baseline'] },
+    });
+    expect((await ready.GET(request('203.0.113.3'))).status).toBe(503);
+
+    services.mockReset();
+    services.mockImplementation(async () => ({ db: { ping } }));
+    log.mockRestore();
   });
 
   it('are rate limited per client, before the database is touched', async () => {
