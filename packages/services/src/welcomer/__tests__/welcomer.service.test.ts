@@ -11,7 +11,7 @@ import {
   isPrivateOrRestrictedIp,
 } from '../../net/remote-image.js';
 import { BackgroundUploadError, WelcomerBackgroundStore } from '../background-store.js';
-import { fillWelcomerMessage, WelcomerService } from '../welcomer.service.js';
+import { fillWelcomerMessage, fillWelcomerText, WelcomerService } from '../welcomer.service.js';
 
 const GUILD = '123456789012345678';
 
@@ -195,5 +195,71 @@ describe('WelcomerService (TASK-1663)', () => {
       background: png(40, 20),
     });
     expect(card.subarray(0, 4)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  });
+});
+
+describe('fillWelcomerText (TASK-1333)', () => {
+  const channels = [
+    { id: '111', name: 'rules' },
+    { id: '222', name: 'General-Chat' },
+    { id: '333', name: 'rules' },
+  ];
+  const values = {
+    user: '<@42>',
+    username: 'ririko',
+    serverName: 'Home',
+    memberCount: 7,
+    channels,
+  };
+
+  it('replaces {user}, {username}, {server} and {memberCount} everywhere', () => {
+    expect(
+      fillWelcomerText(
+        '{user} aka {username} joined {server} as member {memberCount}; {user}',
+        values,
+      ),
+    ).toBe('<@42> aka ririko joined Home as member 7; <@42>');
+    expect(fillWelcomerText('{unknown} {User}', values)).toBe('{unknown} {User}');
+  });
+
+  it('turns a #channel-name word into a channel mention, ignoring case', () => {
+    expect(fillWelcomerText('Read #rules, then say hi in #general-chat.', values)).toBe(
+      'Read <#111>, then say hi in <#222>.',
+    );
+    expect(fillWelcomerText('#RULES', values)).toBe('<#111>');
+  });
+
+  it('leaves unknown #words, partial names, mid-word hashes and existing mentions as typed', () => {
+    expect(
+      fillWelcomerText('#nowhere #rule #rules-extra issue#rules <#999> &#rules;', values),
+    ).toBe('#nowhere #rule #rules-extra issue#rules <#999> &#rules;');
+    expect(fillWelcomerText('see <#111> and #rules', values)).toBe('see <#111> and <#111>');
+  });
+
+  it('never resolves a channel name that arrives through a value', () => {
+    expect(
+      fillWelcomerText('Hi {username} from {server}', {
+        ...values,
+        username: '#rules',
+        serverName: '#general-chat',
+      }),
+    ).toBe('Hi #rules from #general-chat');
+  });
+
+  it('keeps @everyone, @here and role mentions in the text as typed (the send blocks the pings)', () => {
+    expect(fillWelcomerText('@everyone @here <@&5> {user}', values)).toBe(
+      '@everyone @here <@&5> <@42>',
+    );
+  });
+
+  it('cuts the result to 2000 characters, never inside a mention', () => {
+    const exact = 'a'.repeat(2000);
+    expect(fillWelcomerText(exact, values)).toBe(exact);
+    const long = fillWelcomerText(`${'a'.repeat(1997)} #rules and more`, values);
+    expect(long).toBe(`${'a'.repeat(1997)} `);
+    expect(long.length).toBeLessThanOrEqual(2000);
+    const whole = fillWelcomerText(`${'a'.repeat(1989)} #rules and more`, values);
+    expect(whole).toBe(`${'a'.repeat(1989)} <#111> and`);
+    expect(whole.length).toBeLessThanOrEqual(2000);
   });
 });

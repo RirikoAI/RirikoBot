@@ -3,7 +3,9 @@ import {
   MAX_BACKGROUND_UPLOAD_BYTES,
   MAX_BACKGROUND_UPLOAD_SIDE,
   MAX_WELCOMER_MESSAGE_LENGTH,
+  MAX_WELCOMER_TEXT_LENGTH,
   WELCOMER_MESSAGE_VARIABLES,
+  WELCOMER_TEXT_VARIABLES,
   type WelcomerCardKind,
 } from '@ririko/core';
 import type { WelcomeConfig } from '@ririko/database';
@@ -64,6 +66,42 @@ async function renderPreview(
   }
 }
 
+/** What the text message box explains: the placeholders and how `#channel-name` works. */
+function textMessageHelp(kind: WelcomerCardKind): string {
+  const variables = WELCOMER_TEXT_VARIABLES.map((name) => `{${name}}`).join(', ');
+  const user =
+    kind === 'welcome'
+      ? '{user} mentions the new member and {username} is their plain name'
+      : '{user} and {username} are the plain name of the member who left';
+  return `Sent with the card when the box above is checked. ${variables} are replaced: ${user}. A word like #rules that names a channel of the server becomes a link to it. It never pings @everyone, @here or roles. At most ${MAX_WELCOMER_TEXT_LENGTH} characters.`;
+}
+
+/**
+ * The text message as members will see it, with the viewer as the member and `#names` left as
+ * typed (the dashboard does not look up the server's channels here). Null when it is off.
+ */
+async function renderPreviewText(
+  kind: WelcomerCardKind,
+  values: { textMessageEnabled: boolean; textMessage: string },
+  viewerName: string,
+  guild: { name: string; memberCount: number },
+): Promise<string | null> {
+  if (!values.textMessageEnabled || !values.textMessage) return null;
+  try {
+    const { fillWelcomerText } = await import('@ririko/services/welcomer');
+    return fillWelcomerText(values.textMessage, {
+      user: kind === 'welcome' ? `@${viewerName}` : viewerName,
+      username: viewerName,
+      serverName: guild.name,
+      memberCount: guild.memberCount,
+      channels: [],
+    });
+  } catch (error) {
+    console.error(`[web] Could not fill the ${kind} text message preview:`, error);
+    return null;
+  }
+}
+
 export async function WelcomerCardPage({
   guildId,
   kind,
@@ -92,6 +130,10 @@ export async function WelcomerCardPage({
     { name: guild.name, memberCount: counts.members },
   );
   const copy = COPY[kind];
+  const previewText = await renderPreviewText(kind, values, viewer?.username ?? 'new-member', {
+    name: guild.name,
+    memberCount: counts.members,
+  });
 
   return (
     <section className="flex flex-col gap-6">
@@ -123,6 +165,14 @@ export async function WelcomerCardPage({
         <p className="text-xs text-zinc-500">
           Shows the saved settings with your name and avatar. Save to update it.
         </p>
+        {previewText ? (
+          <div className="flex flex-col gap-1">
+            <h3 className="text-sm font-medium text-zinc-200">Text message</h3>
+            <p className="whitespace-pre-wrap rounded-md border border-edge p-3 text-sm text-zinc-200">
+              {previewText}
+            </p>
+          </div>
+        ) : null}
       </section>
 
       <SettingsForm action={saveCardSettings.bind(null, guildId, kind)}>
@@ -146,6 +196,20 @@ export async function WelcomerCardPage({
           defaultValue={values.messageTemplate}
           maxLength={MAX_WELCOMER_MESSAGE_LENGTH}
           rows={2}
+        />
+        <ToggleField
+          name="textMessageEnabled"
+          label="Also send a text message"
+          description="Sent in the same message as the card."
+          defaultValue={values.textMessageEnabled}
+        />
+        <TextAreaField
+          name="textMessage"
+          label="Text message"
+          description={textMessageHelp(kind)}
+          defaultValue={values.textMessage}
+          maxLength={MAX_WELCOMER_TEXT_LENGTH}
+          rows={3}
         />
         <TextField
           name="textColor"

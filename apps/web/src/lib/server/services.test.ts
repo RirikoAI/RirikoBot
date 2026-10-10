@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { createDatabaseClient } from '@ririko/database';
+import { createDatabaseClient, SQLITE_MIGRATIONS } from '@ririko/database';
 import {
   ids,
   startFakeDiscord,
@@ -170,9 +170,11 @@ describe('getWebServices', { timeout: 60_000 }, () => {
       setEnv({ DATABASE_URL: behindPath });
       const { getWebServices } = await import('./services');
 
+      const ids = SQLITE_MIGRATIONS.map((migration) => migration.id);
       await expect(getWebServices()).rejects.toThrow(
-        /1 pending migration\(s\) \(0000_baseline\).*ririko db:migrate/,
+        `${ids.length} pending migration(s) (${ids.join(', ')})`,
       );
+      await expect(getWebServices()).rejects.toThrow('ririko db:migrate');
       const untouched = await createDatabaseClient({ dialect: 'sqlite', url: behindPath });
       if (untouched.dialect !== 'sqlite') throw new Error('Expected sqlite');
       expect(

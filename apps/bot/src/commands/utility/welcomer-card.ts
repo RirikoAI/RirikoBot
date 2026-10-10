@@ -5,8 +5,10 @@ import {
   DEFAULT_WELCOME_MESSAGE,
   HexColorSetting,
   OptionalImageUrlSetting,
+  MAX_WELCOMER_TEXT_LENGTH,
   SecurityError,
   WelcomerMessageSetting,
+  WelcomerTextSetting,
   type WelcomerCardKind,
 } from '@ririko/core';
 import type { WelcomeConfig } from '@ririko/database';
@@ -43,7 +45,14 @@ interface CardChanges {
   messageTemplate?: string | undefined;
   backgroundUrl?: string | undefined;
   textColor?: string | undefined;
+  /** The text message sent with the card, or `none` to turn it off (the message is kept). */
+  textMessage?: string | undefined;
   enable?: boolean | undefined;
+}
+
+/** True when `text:` asked to turn the text message off. */
+function turnsTextOff(value: string | undefined): boolean {
+  return value !== undefined && value.trim().toLowerCase() === 'none';
 }
 
 /** Reads the changes from slash options, or from `!<command> <field> <value>`. */
@@ -57,6 +66,7 @@ async function readChanges(ctx: CommandContext): Promise<CardChanges> {
     if (action === 'message') return { messageTemplate: value };
     if (action === 'background') return { backgroundUrl: value };
     if (action === 'color') return { textColor: value };
+    if (action === 'text') return { textMessage: value };
     if (action === 'enable') {
       return { enable: ['true', 'on', 'yes', '1', ''].includes(value.toLowerCase()) };
     }
@@ -69,6 +79,7 @@ async function readChanges(ctx: CommandContext): Promise<CardChanges> {
     messageTemplate: ctx.options.getString('message') ?? undefined,
     backgroundUrl: ctx.options.getString('background') ?? undefined,
     textColor: ctx.options.getString('color') ?? undefined,
+    textMessage: ctx.options.getString('text') ?? undefined,
     enable: enable ?? undefined,
   };
 }
@@ -90,6 +101,12 @@ async function problemWith(ctx: CommandContext, changes: CardChanges): Promise<s
   if (changes.textColor !== undefined && !HexColorSetting.safeParse(changes.textColor).success) {
     return '❌ Use a color like `#ffffff`.';
   }
+  if (changes.textMessage !== undefined && !turnsTextOff(changes.textMessage)) {
+    const text = WelcomerTextSetting.safeParse(changes.textMessage);
+    if (!text.success || text.data === '') {
+      return `❌ The text message must be 1 to ${MAX_WELCOMER_TEXT_LENGTH} characters, or \`none\` to turn it off.`;
+    }
+  }
   if (changes.backgroundUrl !== undefined) {
     const parsed = OptionalImageUrlSetting.safeParse(changes.backgroundUrl);
     if (!parsed.success) return '❌ Use an http or https link to an image, or `none`.';
@@ -103,6 +120,19 @@ async function problemWith(ctx: CommandContext, changes: CardChanges): Promise<s
     }
   }
   return null;
+}
+
+/** The summary line for the text message: whether it is sent, and the stored message. */
+function describeText(config: {
+  textMessageEnabled?: boolean | undefined;
+  textMessage?: string | undefined;
+}): string {
+  const message = (config.textMessage ?? '').trim();
+  if (!message) return 'Off';
+  // An embed field holds 1024 characters, and a backtick would end the code span.
+  const shown = message.length > 900 ? `${message.slice(0, 900)}…` : message;
+  const code = `\`${shown.replace(/`/g, "'")}\``;
+  return config.textMessageEnabled ? `✅ On: ${code}` : `Off (message kept): ${code}`;
 }
 
 /**
@@ -147,6 +177,11 @@ export async function runWelcomerCardCommand(
       changes.backgroundUrl === undefined
         ? (config?.backgroundUrl ?? null)
         : OptionalImageUrlSetting.parse(changes.backgroundUrl);
+    // `text:<message>` sets the text and turns it on; `text:none` turns it off and keeps it.
+    const textMessage =
+      changes.textMessage !== undefined && !turnsTextOff(changes.textMessage)
+        ? WelcomerTextSetting.parse(changes.textMessage)
+        : (config?.textMessage ?? '');
     const data: WelcomeConfig = {
       guildId,
       channelId: changes.channelId ?? config?.channelId ?? '',
@@ -163,6 +198,11 @@ export async function runWelcomerCardCommand(
           ? HexColorSetting.parse(changes.textColor)
           : (config?.textColor ?? DEFAULT_CARD_TEXT_COLOR),
       isEnabled: changes.enable ?? config?.isEnabled ?? true,
+      textMessageEnabled:
+        changes.textMessage === undefined
+          ? Boolean(config?.textMessageEnabled) && textMessage !== ''
+          : !turnsTextOff(changes.textMessage),
+      textMessage,
     };
 
     if (!data.channelId && data.isEnabled) {
@@ -205,6 +245,7 @@ export async function runWelcomerCardCommand(
       },
       { name: 'Text Color', value: `\`${config.textColor}\``, inline: true },
       { name: 'Message Template', value: `\`${config.messageTemplate}\``, inline: false },
+      { name: 'Text Message', value: describeText(config), inline: false },
       {
         name: 'Background',
         value: config.backgroundFile

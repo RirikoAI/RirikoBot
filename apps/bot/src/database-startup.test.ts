@@ -3,6 +3,7 @@ import {
   createDatabaseClient,
   MIGRATIONS_TABLE,
   migrationStatus,
+  SQLITE_MIGRATIONS,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { MANUAL_MIGRATE_COMMAND, prepareDatabase } from './database-startup.js';
@@ -47,8 +48,8 @@ describe('prepareDatabase (bot startup)', () => {
     });
 
     it('adopts a database that has tables but no migration records', async () => {
-      await prepareDatabase(db, { autoMigrate: true, log: captureLog() });
-      db.raw.exec(`DROP TABLE ${MIGRATIONS_TABLE}`);
+      // The schema the first 2.0 builds created at startup, which is the baseline.
+      for (const statement of SQLITE_MIGRATIONS[0]!.statements) db.raw.exec(statement);
 
       const out = captureLog();
       await prepareDatabase(db, { autoMigrate: true, log: out });
@@ -76,8 +77,12 @@ describe('prepareDatabase (bot startup)', () => {
         () => null,
         (reason: unknown) => reason as Error,
       );
-      expect(error?.message).toMatch(/DB_AUTO_MIGRATE is false and the database has 1 pending/);
-      expect(error?.message).toContain('0000_baseline');
+      expect(error?.message).toMatch(
+        new RegExp(
+          `DB_AUTO_MIGRATE is false and the database has ${SQLITE_MIGRATIONS.length} pending`,
+        ),
+      );
+      for (const { id } of SQLITE_MIGRATIONS) expect(error?.message).toContain(id);
       expect(error?.message).toContain(MANUAL_MIGRATE_COMMAND);
       expect(tables()).toEqual([]);
     });

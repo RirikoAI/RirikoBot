@@ -1,10 +1,38 @@
 import {
   AttachmentBuilder,
   type Client,
+  type Guild,
   type GuildMember,
   type PartialGuildMember,
 } from 'discord.js';
+import { fillWelcomerText } from '@ririko/services';
 import type { BotServices } from '../services.js';
+
+/** The channels of the server by name, for turning `#channel-name` in the text into a link. */
+function namedChannels(guild: Guild): { id: string; name: string }[] {
+  const channels: { id: string; name: string }[] = [];
+  for (const channel of guild.channels.cache.values()) {
+    if (channel.isThread() || typeof channel.name !== 'string') continue;
+    channels.push({ id: channel.id, name: channel.name });
+  }
+  return channels;
+}
+
+/** The optional text of a welcome or farewell card, or null when it is off or empty. */
+function cardText(
+  config: { textMessageEnabled?: boolean; textMessage?: string },
+  guild: Guild,
+  who: { user: string; username: string },
+): string | null {
+  if (!config.textMessageEnabled || !config.textMessage?.trim()) return null;
+  const text = fillWelcomerText(config.textMessage, {
+    ...who,
+    serverName: guild.name,
+    memberCount: guild.memberCount,
+    channels: namedChannels(guild),
+  });
+  return text.trim() === '' ? null : text;
+}
 
 /**
  * Gateway Member Listener: Monitors member join events, evaluates join velocity
@@ -77,7 +105,15 @@ export function registerMemberListener(client: Client, services: BotServices): v
             isFarewell: false,
           });
           const attachment = new AttachmentBuilder(cardBuf, { name: 'welcome.png' });
-          await (channel as any).send({ files: [attachment] }).catch((err: any) => {
+          const text = cardText(welcomeConfig, member.guild, {
+            user: `<@${member.id}>`,
+            username: member.user.username,
+          });
+          // Only the joining member can be pinged by the text, never @everyone, @here or a role.
+          const payload = text
+            ? { files: [attachment], content: text, allowedMentions: { users: [member.id] } }
+            : { files: [attachment] };
+          await (channel as any).send(payload).catch((err: any) => {
             console.error(`[Welcomer] Failed to send welcome for ${member.id}:`, err);
           });
         }
@@ -111,7 +147,13 @@ export function registerMemberListener(client: Client, services: BotServices): v
             isFarewell: true,
           });
           const attachment = new AttachmentBuilder(cardBuf, { name: 'farewell.png' });
-          await (channel as any).send({ files: [attachment] }).catch((err: any) => {
+          const name = user?.username ?? 'Unknown User';
+          const text = cardText(farewellConfig, member.guild, { user: name, username: name });
+          // The farewell text pings nobody.
+          const payload = text
+            ? { files: [attachment], content: text, allowedMentions: { parse: [] } }
+            : { files: [attachment] };
+          await (channel as any).send(payload).catch((err: any) => {
             console.error(`[Farewell] Failed to send farewell for ${member.id}:`, err);
           });
         }

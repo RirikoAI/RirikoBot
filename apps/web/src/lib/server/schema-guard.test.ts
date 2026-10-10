@@ -3,6 +3,7 @@ import {
   createDatabaseClient,
   MIGRATIONS_TABLE,
   migrateDatabase,
+  SQLITE_MIGRATIONS,
   type SqliteDatabaseClient,
 } from '@ririko/database';
 import { assertSchemaCurrent, SchemaNotReadyError } from './schema-guard';
@@ -31,11 +32,12 @@ describe('assertSchemaCurrent', () => {
     const error = await assertSchemaCurrent(db).catch((reason: unknown) => reason);
 
     expect(error).toBeInstanceOf(SchemaNotReadyError);
-    expect((error as SchemaNotReadyError).message).toMatch(
-      /1 pending migration\(s\) \(0000_baseline\)/,
+    const ids = SQLITE_MIGRATIONS.map((migration) => migration.id);
+    expect((error as SchemaNotReadyError).message).toContain(
+      `${ids.length} pending migration(s) (${ids.join(', ')})`,
     );
     expect((error as SchemaNotReadyError).message).toContain('ririko db:migrate');
-    expect((error as SchemaNotReadyError).pending).toEqual(['0000_baseline']);
+    expect((error as SchemaNotReadyError).pending).toEqual(ids);
     expect(
       db.raw.prepare("SELECT count(*) AS n FROM sqlite_master WHERE type = 'table'").get(),
     ).toEqual({ n: 0 });

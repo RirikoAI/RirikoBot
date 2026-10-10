@@ -12,6 +12,7 @@ import {
   sqlite,
 } from '../testing/copy-fixture.js';
 import { WaifuCardRepository } from '../repositories/waifu-card.repository.js';
+import { PG_MIGRATIONS } from '../migrations/generated/pg.js';
 import { MIGRATIONS_TABLE } from '../migrations/runner.js';
 import { describeDialects } from '../testing/dialects.js';
 import { copyDatabase } from './copy-database.js';
@@ -55,11 +56,11 @@ describeDialects('copyDatabase', (db) => {
     const report = await copyDatabase(path, target());
 
     expect(report.committed).toBe(true);
-    // The target was migrated by the runner, so it holds its own record of the baseline.
+    // The target was migrated by the runner, so it holds its own record of every migration.
     const recorded = await target().raw.query<{ id: string; adopted: boolean }>(
-      `SELECT id, adopted FROM ${MIGRATIONS_TABLE}`,
+      `SELECT id, adopted FROM ${MIGRATIONS_TABLE} ORDER BY id`,
     );
-    expect(recorded.rows).toEqual([{ id: '0000_baseline', adopted: false }]);
+    expect(recorded.rows).toEqual(PG_MIGRATIONS.map(({ id }) => ({ id, adopted: false })));
     expect(report.tables.map((table) => table.name)).not.toContain(MIGRATIONS_TABLE);
     expect(report.tables.length).toBeGreaterThan(90);
     expect(report.tables.every((table) => table.sourceRows === table.targetRows)).toBe(true);

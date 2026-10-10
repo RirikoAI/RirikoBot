@@ -501,4 +501,115 @@ describe('member listener welcome and farewell cards (TASK-1254)', () => {
       expect.any(Error),
     );
   });
+
+  describe('text message (TASK-1333)', () => {
+    const text = 'Welcome {user} ({username}) to {server}! Read #rules. @everyone <@&9>';
+
+    /** A server channel as discord.js caches it: a name, an id and the type checks. */
+    function named(id: string, name: string, onSend = send) {
+      return { id, name, isTextBased: () => true, isThread: () => false, send: onSend };
+    }
+
+    function joining(onSend = send) {
+      const joined = member();
+      joined.guild.channels.cache = new Map<string, unknown>([
+        ['welcome-1', named('welcome-1', 'welcome', onSend)],
+        ['rules-1', named('rules-1', 'Rules')],
+        ['thread-1', { ...named('thread-1', 'rules'), isThread: () => true }],
+      ]);
+      return joined;
+    }
+
+    it('sends the filled text as the content of the welcome card message', async () => {
+      services.welcomerRepo.getWelcomeConfig.mockResolvedValue({
+        ...welcomeConfig,
+        textMessageEnabled: true,
+        textMessage: text,
+      });
+      client.emit('guildMemberAdd', joining());
+      await flush();
+
+      expect(send).toHaveBeenCalledTimes(1);
+      const payload = send.mock.calls[0]![0];
+      expect(payload.files[0].name).toBe('welcome.png');
+      expect(payload.content).toBe(
+        'Welcome <@user-1> (tester) to Test Guild! Read <#rules-1>. @everyone <@&9>',
+      );
+      // Only the joining member may be pinged; @everyone, @here and roles never are.
+      expect(payload.allowedMentions).toEqual({ users: ['user-1'] });
+    });
+
+    it('sends the farewell text with the plain username and no mentions at all', async () => {
+      const byeSend = vi.fn().mockResolvedValue({});
+      services.welcomerRepo.getFarewellConfig.mockResolvedValue({
+        ...welcomeConfig,
+        channelId: 'bye-1',
+        textMessageEnabled: true,
+        textMessage: 'Bye {user}/{username}, see #rules {memberCount}',
+      });
+      const leaving = joining();
+      leaving.guild.channels.cache.set('bye-1', named('bye-1', 'goodbye', byeSend));
+      client.emit('guildMemberRemove', leaving);
+      await flush();
+
+      const payload = byeSend.mock.calls[0]![0];
+      expect(payload.files[0].name).toBe('farewell.png');
+      expect(payload.content).toBe('Bye tester/tester, see <#rules-1> 7');
+      expect(payload.allowedMentions).toEqual({ parse: [] });
+    });
+
+    it('uses Unknown User in the farewell text when the member is partial', async () => {
+      const byeSend = vi.fn().mockResolvedValue({});
+      services.welcomerRepo.getFarewellConfig.mockResolvedValue({
+        ...welcomeConfig,
+        channelId: 'bye-1',
+        textMessageEnabled: true,
+        textMessage: '{user} left',
+      });
+      const partial = member({ user: null });
+      partial.guild.channels.cache = new Map([['bye-1', named('bye-1', 'goodbye', byeSend)]]);
+      client.emit('guildMemberRemove', partial);
+      await flush();
+      expect(byeSend.mock.calls[0]![0].content).toBe('Unknown User left');
+    });
+
+    it('sends the card only, exactly as before, when the text is off or empty', async () => {
+      for (const config of [
+        { textMessageEnabled: false, textMessage: text },
+        { textMessageEnabled: true, textMessage: '   ' },
+        {},
+      ]) {
+        send.mockClear();
+        services.welcomerRepo.getWelcomeConfig.mockResolvedValue({ ...welcomeConfig, ...config });
+        client.emit('guildMemberAdd', joining());
+        await flush();
+        expect(send).toHaveBeenCalledTimes(1);
+        expect(Object.keys(send.mock.calls[0]![0])).toEqual(['files']);
+      }
+
+      const byeSend = vi.fn().mockResolvedValue({});
+      services.welcomerRepo.getFarewellConfig.mockResolvedValue({
+        ...welcomeConfig,
+        channelId: 'bye-1',
+        textMessageEnabled: false,
+        textMessage: text,
+      });
+      const leaving = member();
+      leaving.guild.channels.cache = new Map([['bye-1', textChannel(byeSend)]]);
+      client.emit('guildMemberRemove', leaving);
+      await flush();
+      expect(Object.keys(byeSend.mock.calls[0]![0])).toEqual(['files']);
+    });
+
+    it('sends a text that is only the mention of the new member', async () => {
+      services.welcomerRepo.getWelcomeConfig.mockResolvedValue({
+        ...welcomeConfig,
+        textMessageEnabled: true,
+        textMessage: '{user}',
+      });
+      client.emit('guildMemberAdd', joining());
+      await flush();
+      expect(send.mock.calls[0]![0].content).toBe('<@user-1>');
+    });
+  });
 });

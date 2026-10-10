@@ -201,4 +201,35 @@ describe('ririko guild:config (TASK-1113)', () => {
     await expect(runGuildConfig(service, 'not-a-guild')).rejects.toThrow(/not a Discord guild ID/);
     expect(await runGuildConfig(service, GUILD, 'general.prefix')).toEqual(['!']);
   });
+
+  it('reads and writes the card text message for welcome and farewell (TASK-1333)', async () => {
+    const keys = listConfigKeys().map((entry) => entry.key);
+    for (const card of ['welcome', 'farewell']) {
+      expect(keys).toContain(`${card}.textMessage`);
+      expect(keys).toContain(`${card}.textMessageEnabled`);
+
+      expect(await runGuildConfig(service, GUILD, `${card}.textMessageEnabled`)).toEqual(['false']);
+      expect(await runGuildConfig(service, GUILD, `${card}.textMessage`)).toEqual(['']);
+
+      // On with no message is refused, whichever of the two keys is set.
+      await expect(
+        runGuildConfig(service, GUILD, `${card}.textMessageEnabled`, 'on'),
+      ).rejects.toThrow(/Enter the text message, or turn it off./);
+
+      const set = plain(
+        await runGuildConfig(service, GUILD, `${card}.textMessage`, '  Read #rules  '),
+      );
+      expect(set[0]).toContain(`${card}.textMessage`);
+      expect(await runGuildConfig(service, GUILD, `${card}.textMessage`)).toEqual(['Read #rules']);
+      await runGuildConfig(service, GUILD, `${card}.textMessageEnabled`, 'on');
+      expect(await runGuildConfig(service, GUILD, `${card}.textMessageEnabled`)).toEqual(['true']);
+
+      await expect(
+        runGuildConfig(service, GUILD, `${card}.textMessage`, 'x'.repeat(2001)),
+      ).rejects.toThrow(/Invalid value for .*textMessage: .*2000/);
+      await expect(runGuildConfig(service, GUILD, `${card}.textMessage`, '')).rejects.toThrow(
+        /Enter the text message, or turn it off./,
+      );
+    }
+  });
 });

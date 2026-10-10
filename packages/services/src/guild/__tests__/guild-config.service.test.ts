@@ -904,6 +904,8 @@ describe('GuildConfigService (TASK-1111)', () => {
         messageTemplate: 'Welcome to {server}, {user}!',
         textColor: '#ffffff',
         backgroundUrl: null,
+        textMessageEnabled: false,
+        textMessage: '',
       });
       expect((await service.get('g1', 'farewell')).messageTemplate).toBe('Goodbye {user}!');
     });
@@ -920,6 +922,8 @@ describe('GuildConfigService (TASK-1111)', () => {
         backgroundFile: 'upload.png',
         textColor: '#ffffff',
         isEnabled: true,
+        textMessageEnabled: false,
+        textMessage: '',
       });
 
       await service.update('g1', 'welcome', { textColor: '#FF0000' }, dashboardActor);
@@ -951,6 +955,8 @@ describe('GuildConfigService (TASK-1111)', () => {
         backgroundFile: null,
         textColor: 'red',
         isEnabled: true,
+        textMessageEnabled: true,
+        textMessage: '',
       });
 
       const values = await service.get('g1', 'farewell');
@@ -961,9 +967,75 @@ describe('GuildConfigService (TASK-1111)', () => {
         backgroundUrl: null,
       });
       expect(values.messageTemplate).toHaveLength(200);
+      // A text that is on without any text reads as off, so it never blocks saving other fields.
+      expect(values).toMatchObject({ textMessageEnabled: false, textMessage: '' });
       await expect(
         service.update('g1', 'farewell', { channelId: CHANNEL, enabled: 'true' }, dashboardActor),
       ).resolves.toMatchObject({ values: { enabled: true, channelId: CHANNEL } });
+    });
+
+    it('saves the text message for each card, trimmed, and keeps it when turned off', async () => {
+      const welcomer = new WelcomerRepository(db);
+      await service.update(
+        'g1',
+        'welcome',
+        {
+          channelId: CHANNEL,
+          enabled: 'true',
+          textMessageEnabled: 'on',
+          textMessage: '  Read #rules  ',
+        },
+        dashboardActor,
+      );
+      expect(await welcomer.getWelcomeConfig('g1')).toMatchObject({
+        textMessageEnabled: true,
+        textMessage: 'Read #rules',
+      });
+      expect(await welcomer.getFarewellConfig('g1')).toBeNull();
+
+      const off = await service.update(
+        'g1',
+        'welcome',
+        { textMessageEnabled: false },
+        dashboardActor,
+      );
+      expect(off.changes.map((change) => change.field)).toEqual(['textMessageEnabled']);
+      expect(await service.get('g1', 'welcome')).toMatchObject({
+        textMessageEnabled: false,
+        textMessage: 'Read #rules',
+      });
+
+      await service.update(
+        'g1',
+        'farewell',
+        { textMessageEnabled: true, textMessage: 'Bye {username}' },
+        dashboardActor,
+      );
+      expect(await service.get('g1', 'farewell')).toMatchObject({
+        textMessageEnabled: true,
+        textMessage: 'Bye {username}',
+      });
+    });
+
+    it('rejects a text message that is on without text, or longer than 2000 characters', async () => {
+      const noText = await service
+        .update('g1', 'welcome', { textMessageEnabled: true, textMessage: '   ' }, dashboardActor)
+        .catch((error: unknown) => error);
+      expect(noText).toBeInstanceOf(GuildConfigValidationError);
+      expect((noText as GuildConfigValidationError).fieldErrors).toEqual({
+        textMessage: ['Enter the text message, or turn it off.'],
+      });
+      // Turning it on alone fails the same way while nothing is stored.
+      await expect(
+        service.update('g1', 'farewell', { textMessageEnabled: 'true' }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { textMessage: expect.any(Array) } });
+      await expect(
+        service.update('g1', 'welcome', { textMessage: 'x'.repeat(2001) }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { textMessage: expect.any(Array) } });
+      expect(await service.get('g1', 'welcome')).toMatchObject({
+        textMessageEnabled: false,
+        textMessage: '',
+      });
     });
 
     it('rejects a background link to a local or private address', async () => {

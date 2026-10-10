@@ -102,13 +102,66 @@ describe('welcome and farewell card actions', () => {
       expect(mocks.update).toHaveBeenCalledWith(
         GUILD_ID,
         'welcome',
-        { channelId: CHANNEL, messageTemplate: 'Hi {user}', textColor: '#ffffff', enabled: false },
+        {
+          channelId: CHANNEL,
+          messageTemplate: 'Hi {user}',
+          textColor: '#ffffff',
+          enabled: false,
+          textMessageEnabled: false,
+        },
         expect.objectContaining({ userId: harness.userId, source: 'dashboard' }),
       );
       expect(mocks.pruneUnused).not.toHaveBeenCalled();
       await flushAfter();
       expect(mocks.pruneUnused).toHaveBeenCalledWith(GUILD_ID, 'welcome');
       expect(mocks.guildSettingsChanged).toHaveBeenCalled();
+    });
+
+    it('sends the text message and its checkbox through the guild config service', async () => {
+      mocks.update.mockResolvedValue({ values: {}, changes: [] });
+      for (const kind of ['welcome', 'farewell'] as const) {
+        await saveCardSettings(
+          GUILD_ID,
+          kind,
+          INITIAL_SETTINGS_FORM_STATE,
+          form({
+            channelId: CHANNEL,
+            textMessage: 'Read #rules, {user}',
+            textMessageEnabled: 'on',
+          }),
+        );
+        expect(mocks.update).toHaveBeenLastCalledWith(
+          GUILD_ID,
+          kind,
+          {
+            channelId: CHANNEL,
+            textMessage: 'Read #rules, {user}',
+            enabled: false,
+            textMessageEnabled: true,
+          },
+          expect.objectContaining({ source: 'dashboard' }),
+        );
+      }
+    });
+
+    it('shows the empty-text error under the text box and prunes nothing', async () => {
+      mocks.update.mockRejectedValue(
+        new GuildConfigValidationError({
+          textMessage: ['Enter the text message, or turn it off.'],
+        }),
+      );
+      const state = await saveCardSettings(
+        GUILD_ID,
+        'welcome',
+        INITIAL_SETTINGS_FORM_STATE,
+        form({ channelId: CHANNEL, textMessage: '', textMessageEnabled: 'on' }),
+      );
+      expect(state).toMatchObject({
+        status: 'error',
+        fieldErrors: { textMessage: ['Enter the text message, or turn it off.'] },
+      });
+      await flushAfter();
+      expect(mocks.pruneUnused).not.toHaveBeenCalled();
     });
 
     it('names the missing channel when the card is switched on without one', async () => {

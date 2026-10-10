@@ -158,5 +158,16 @@ export const PG_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "a9257821199696aac941726db7b21ec340e7475761536e9696dde14c2c446931",
     "contract": false
+  },
+  {
+    "id": "0001_welcomer_text_message",
+    "statements": [
+      "ALTER TABLE \"guild_farewell\" ADD COLUMN \"text_message_enabled\" boolean DEFAULT false NOT NULL;",
+      "ALTER TABLE \"guild_farewell\" ADD COLUMN \"text_message\" text DEFAULT '' NOT NULL;",
+      "ALTER TABLE \"guild_welcomer\" ADD COLUMN \"text_message_enabled\" boolean DEFAULT false NOT NULL;",
+      "ALTER TABLE \"guild_welcomer\" ADD COLUMN \"text_message\" text DEFAULT '' NOT NULL;"
+    ],
+    "checksum": "4d43aea5de2b72de3a788023490a27cb1501a4533d2b611b263b679efad5c880",
+    "contract": false
   }
 ];

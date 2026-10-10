@@ -18,6 +18,8 @@ describeDialects('WelcomerRepository', (db) => {
     backgroundFile: null,
     textColor: '#ffffff',
     isEnabled: true,
+    textMessageEnabled: false,
+    textMessage: '',
   };
 
   it('returns null for a guild without a welcome or farewell card', async () => {
@@ -31,6 +33,47 @@ describeDialects('WelcomerRepository', (db) => {
     const updated = { ...card, channelId: 'channel-2', backgroundUrl: null, isEnabled: false };
     expect(await repo.setWelcomeConfig(updated)).toEqual(updated);
     expect(await repo.getWelcomeConfig('guild-1')).toEqual(updated);
+  });
+
+  it('stores the text message on and off, and keeps the message when it is turned off', async () => {
+    const withText = { ...card, textMessageEnabled: true, textMessage: 'Read #rules, {user}!' };
+    expect(await repo.setWelcomeConfig(withText)).toEqual(withText);
+    expect(await repo.getWelcomeConfig('guild-1')).toEqual(withText);
+
+    const off = { ...withText, textMessageEnabled: false };
+    await repo.setWelcomeConfig(off);
+    expect(await repo.getWelcomeConfig('guild-1')).toEqual(off);
+
+    const farewell = { ...card, textMessageEnabled: true, textMessage: 'Bye {username}' };
+    await repo.setFarewellConfig(farewell);
+    expect(await repo.getFarewellConfig('guild-1')).toEqual(farewell);
+    expect(await repo.getWelcomeConfig('guild-1')).toEqual(off);
+  });
+
+  it('gives a row written without the text columns the defaults (off, empty)', async () => {
+    // A row as it was before the columns existed: the migration's defaults fill them in.
+    const insert =
+      'INSERT INTO %t (guild_id, channel_id, message_template, card_theme, text_color, is_enabled)';
+    for (const table of ['guild_welcomer', 'guild_farewell']) {
+      const columns = insert.replace('%t', table);
+      if (db.client.dialect === 'sqlite') {
+        db.client.raw.exec(
+          `${columns} VALUES ('guild-9', 'channel-9', 'Hi', 'DEFAULT', '#ffffff', 1)`,
+        );
+      } else {
+        await db.client.raw.query(
+          `${columns} VALUES ('guild-9', 'channel-9', 'Hi', 'DEFAULT', '#ffffff', true)`,
+        );
+      }
+    }
+    expect(await repo.getWelcomeConfig('guild-9')).toMatchObject({
+      textMessageEnabled: false,
+      textMessage: '',
+    });
+    expect(await repo.getFarewellConfig('guild-9')).toMatchObject({
+      textMessageEnabled: false,
+      textMessage: '',
+    });
   });
 
   it('keeps the farewell card separate from the welcome card', async () => {

@@ -28,8 +28,10 @@ import {
   DEFAULT_FAREWELL_MESSAGE,
   DEFAULT_WELCOME_MESSAGE,
   MAX_WELCOMER_MESSAGE_LENGTH,
+  MAX_WELCOMER_TEXT_LENGTH,
   OptionalImageUrlSetting,
   SecurityError,
+  welcomerTextProblem,
   type WelcomerCardKind,
 } from '@ririko/core';
 import { assertPublicUrl } from '../net/remote-image.js';
@@ -233,6 +235,7 @@ function welcomerCardStore<M extends 'welcome' | 'farewell'>(
     read: async (guildId, tx) => {
       const row = await get(guildId, tx);
       const channelId = row?.channelId || null;
+      const textMessage = (row?.textMessage ?? '').trim().slice(0, MAX_WELCOMER_TEXT_LENGTH);
       return {
         enabled: Boolean(row?.isEnabled && channelId),
         channelId,
@@ -242,6 +245,9 @@ function welcomerCardStore<M extends 'welcome' | 'farewell'>(
           ? row!.textColor.toLowerCase()
           : DEFAULT_CARD_TEXT_COLOR,
         backgroundUrl: /^https?:\/\//i.test(row?.backgroundUrl ?? '') ? row!.backgroundUrl : null,
+        // Rows from before the columns have neither; a text that is on without text reads as off.
+        textMessageEnabled: Boolean(row?.textMessageEnabled && textMessage),
+        textMessage,
       } as GuildConfigValues<M>;
     },
     write: async (guildId, values, tx) => {
@@ -256,9 +262,16 @@ function welcomerCardStore<M extends 'welcome' | 'farewell'>(
         backgroundFile: values.backgroundUrl ? null : (current?.backgroundFile ?? null),
         textColor: values.textColor,
         isEnabled: values.enabled && values.channelId !== null,
+        textMessageEnabled: values.textMessageEnabled,
+        textMessage: values.textMessage,
       };
       if (kind === 'welcome') await repo.setWelcomeConfig(data, tx);
       else await repo.setFarewellConfig(data, tx);
+    },
+    // A text message that is on needs text; reported under the text field, like any other error.
+    validate: (values) => {
+      const problem = welcomerTextProblem(values);
+      return problem ? { textMessage: [problem] } : {};
     },
     // The bot and the dashboard preview fetch the background, so it must be a public address.
     check: async (patch) => {
@@ -287,6 +300,8 @@ interface ModuleStore<M extends GuildConfigModule> {
    * before the transaction, so no lock is held while it waits on the network.
    */
   check?(patch: Record<string, unknown>): Promise<Record<string, string[]>>;
+  /** Rules across fields, applied to the merged values once the schema accepts them. */
+  validate?(values: GuildConfigValues<M>): Record<string, string[]>;
 }
 
 export interface GuildConfigServiceDeps {
@@ -666,6 +681,8 @@ export class GuildConfigService {
         throw new GuildConfigValidationError(fieldErrorsOf(parsed.error.issues));
       }
       const values = parsed.data as GuildConfigValues<M>;
+      const crossErrors = store.validate?.(values) ?? {};
+      if (Object.keys(crossErrors).length > 0) throw new GuildConfigValidationError(crossErrors);
       const changes = diffFields(before, values);
       if (changes.length === 0) return { values: before, changes };
 

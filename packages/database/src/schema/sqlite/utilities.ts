@@ -100,6 +100,9 @@ export const guildWelcomer = sqliteTable('guild_welcomer', {
   backgroundFile: text('background_file'),
   textColor: text('text_color').notNull().default('#ffffff'),
   isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
+  /** Also send `textMessage` with the card as message text (TASK-1333). */
+  textMessageEnabled: integer('text_message_enabled', { mode: 'boolean' }).notNull().default(false),
+  textMessage: text('text_message').notNull().default(''),
 });
 
 export const guildFarewell = sqliteTable('guild_farewell', {
@@ -112,6 +115,9 @@ export const guildFarewell = sqliteTable('guild_farewell', {
   backgroundFile: text('background_file'),
   textColor: text('text_color').notNull().default('#ffffff'),
   isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(true),
+  /** Also send `textMessage` with the card as message text (TASK-1333). */
+  textMessageEnabled: integer('text_message_enabled', { mode: 'boolean' }).notNull().default(false),
+  textMessage: text('text_message').notNull().default(''),
 });
 
 export const auditLogs = sqliteTable(

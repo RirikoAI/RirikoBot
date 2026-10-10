@@ -73,9 +73,27 @@ describe.each(dialects)('embedded $name migrations', ({ name, migrations, ddl })
     }
   });
 
-  it('makes the baseline equal to the generated full DDL, statement for statement', () => {
+  it('makes the baseline equal to the full DDL statement for statement, except for tables later migrations change', () => {
     const baseline = migrations[0]!;
-    expect(statementsOf(baseline.statements.join('\n')).sort()).toEqual(statementsOf(ddl).sort());
+    // Later migrations add to the baseline and the full DDL is the baseline with them applied.
+    // Their effect on the tables they change is checked by the schema comparisons below, which
+    // apply every migration; everything else must still match the baseline statement for statement.
+    const changed = [
+      ...new Set(
+        migrations
+          .slice(1)
+          .flatMap((migration) => statementsOf(migration.statements.join('\n')))
+          .map((statement) => /^(?:ALTER|CREATE) TABLE [`"]?(\w+)/.exec(statement)?.[1])
+          .filter((table): table is string => table !== undefined),
+      ),
+    ];
+    const unchanged = (statement: string) =>
+      !changed.some(
+        (table) => statement.includes(`\`${table}\``) || statement.includes(`"${table}"`),
+      );
+    expect(statementsOf(baseline.statements.join('\n')).filter(unchanged).sort()).toEqual(
+      statementsOf(ddl).filter(unchanged).sort(),
+    );
     expect(baseline.contract).toBe(false);
   });
 });

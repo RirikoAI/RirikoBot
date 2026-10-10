@@ -18,8 +18,10 @@ import {
 import {
   HexColorSetting,
   MAX_WELCOMER_MESSAGE_LENGTH,
+  MAX_WELCOMER_TEXT_LENGTH,
   OptionalImageUrlSetting,
   WelcomerMessageSetting,
+  WelcomerTextSetting,
 } from './welcomer.js';
 
 /** Prefix used in DMs and in guilds that have not set their own. */
@@ -427,6 +429,12 @@ export const GuildConfigSchemas = {
       backgroundUrl: OptionalImageUrlSetting.describe(
         'Background image link (public http or https); empty for the uploaded image or the default',
       ),
+      textMessageEnabled: FlagSetting.describe(
+        'Also send a text message with the welcome card (needs the message text)',
+      ),
+      textMessage: WelcomerTextSetting.describe(
+        `Text sent with the card, up to ${MAX_WELCOMER_TEXT_LENGTH} characters; {user} (a mention), {username}, {server} and {memberCount} are replaced, and #channel-name becomes a link to that channel`,
+      ),
     })
     .strict(),
   farewell: z
@@ -441,6 +449,12 @@ export const GuildConfigSchemas = {
       textColor: HexColorSetting.describe('Text and border color as #rrggbb'),
       backgroundUrl: OptionalImageUrlSetting.describe(
         'Background image link (public http or https); empty for the uploaded image or the default',
+      ),
+      textMessageEnabled: FlagSetting.describe(
+        'Also send a text message with the farewell card (needs the message text)',
+      ),
+      textMessage: WelcomerTextSetting.describe(
+        `Text sent with the card, up to ${MAX_WELCOMER_TEXT_LENGTH} characters; {user} (the username), {username}, {server} and {memberCount} are replaced, and #channel-name becomes a link to that channel`,
       ),
     })
     .strict(),

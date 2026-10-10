@@ -182,6 +182,8 @@ describe('GuildConfigSchemas', () => {
         'messageTemplate',
         'textColor',
         'backgroundUrl',
+        'textMessageEnabled',
+        'textMessage',
       ]);
     }
     expect(Object.keys(GuildConfigSchemas.logging.shape)).toEqual(['logChannelId']);
@@ -205,6 +207,35 @@ describe('GuildConfigSchemas', () => {
     expect(Object.keys(GuildConfigSchemas.games.shape)).toEqual(['maxWager', 'rules']);
     expect(isGuildConfigModule('general')).toBe(true);
     expect(isGuildConfigModule('toString')).toBe(false);
+  });
+
+  it('reads the card text message from strings, trimmed, and rejects a long one (TASK-1333)', () => {
+    for (const card of ['welcome', 'farewell'] as const) {
+      const base = {
+        enabled: 'on',
+        channelId: '',
+        messageTemplate: 'Hi',
+        textColor: '#ffffff',
+        backgroundUrl: '',
+      };
+      expect(
+        GuildConfigSchemas[card].parse({
+          ...base,
+          textMessageEnabled: 'yes',
+          textMessage: '  Read #rules  ',
+        }),
+      ).toMatchObject({ textMessageEnabled: true, textMessage: 'Read #rules' });
+      expect(
+        GuildConfigSchemas[card].safeParse({ ...base, textMessageEnabled: 'off', textMessage: '' })
+          .success,
+      ).toBe(true);
+      const tooLong = GuildConfigSchemas[card].safeParse({
+        ...base,
+        textMessageEnabled: false,
+        textMessage: 'x'.repeat(2001),
+      });
+      expect(tooLong.success).toBe(false);
+    }
   });
 
   it('reads an optional wager limit and drops game rules that change nothing', () => {

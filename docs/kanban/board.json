@@ -7388,7 +7388,7 @@
       "parent": "STORY-133",
       "title": "Optional Text Message With the Welcome and Farewell Cards (Dashboard, /welcomer, /farewell)",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "children": [],
       "requires": [
         "STORY-185"
@@ -7426,7 +7426,20 @@
           "apps/web/src/app/dashboard/[guildId]/welcome/actions.test.ts",
           "apps/web/src/components/settings-form.tsx",
           "apps/cli/src/commands/guild-config.test.ts",
-          "docs/modules.md"
+          "docs/modules.md",
+          "apps/web/src/lib/server/guilds/welcomer-backgrounds.ts",
+          "apps/web/src/lib/server/guilds/welcomer-backgrounds.test.ts",
+          "packages/database/migrations/sqlite/0001_welcomer_text_message.sql",
+          "packages/database/migrations/pg/0001_welcomer_text_message.sql",
+          "packages/database/src/migrations/generated.test.ts",
+          "packages/database/src/migrations/adopt-baseline.test.ts",
+          "packages/database/src/client/factory.test.ts",
+          "packages/database/src/copy/copy-database.integration.test.ts",
+          "apps/cli/src/commands/db-migrate.test.ts",
+          "apps/bot/src/database-startup.test.ts",
+          "apps/web/src/lib/server/schema-guard.test.ts",
+          "apps/web/src/lib/server/services.test.ts",
+          "docs/database.md"
         ],
         "symbols": [
           "guildWelcomer",

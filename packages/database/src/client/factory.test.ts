@@ -5,6 +5,7 @@ import { DatabaseError } from '@ririko/core';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
+import { SQLITE_MIGRATIONS } from '../migrations/generated/sqlite.js';
 import { MIGRATIONS_TABLE } from '../migrations/runner.js';
 
 describe('Database Client Factory', () => {
@@ -116,9 +117,9 @@ describe('Database Client Factory', () => {
       });
       expect(tableNames(client)).toEqual(expect.arrayContaining(['users', MIGRATIONS_TABLE]));
       if (client.dialect !== 'sqlite') throw new Error('Expected sqlite');
-      expect(client.raw.prepare(`SELECT id FROM ${MIGRATIONS_TABLE}`).all()).toEqual([
-        { id: '0000_baseline' },
-      ]);
+      expect(client.raw.prepare(`SELECT id FROM ${MIGRATIONS_TABLE} ORDER BY id`).all()).toEqual(
+        SQLITE_MIGRATIONS.map(({ id }) => ({ id })),
+      );
     });
 
     it('handles closed SQLite connection in ping()', async () => {
