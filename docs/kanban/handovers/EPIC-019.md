@@ -37,3 +37,25 @@ See docs/kanban/protocol.md section 6.
 
 **Out of scope (for now)**
 - Production host setup itself (EPIC-017 built the tooling), release approval gates, monitoring and alerting. Add these as stories here when the maintainer asks.
+
+---
+
+## REVIEW · 2026-10-10T20:25:16Z · coordinator (claude-opus-5-5) · DONE
+
+**Stories**: STORY-185 (PR #693, with BUG-0041 and BUG-0042) and STORY-186 (PR #696) are DONE. Related work: BUG-0043 (PR #694). The first real migration came from TASK-1333 (PR #697).
+
+**Staging, the case study, 2026-10-11**
+1. Manual pre-adoption dump on the host (`backups/before-adoption-*.dump`, mode 600, 93 tables).
+2. **v2.0.0-rc.6** (tag on the #696 merge): the host's `ririko-deploy` was still the pre-STORY-186 copy, so the bot adopted the database at startup. `0000_baseline` was recorded with `adopted = true`, adding 0 tables, columns and indexes, with no notes. `status`: Pending `(none)`, Adopted `yes`.
+3. The coordinator ran `bootstrap.sh --ref v2.0.0-rc.6` on staging (approved by the maintainer). It updated `ririko-deploy` to the gated version.
+4. **v2.0.0-rc.7** (tag on the #697 merge), the gated path end to end:
+   - pre-deploy dump, pull, then "migrating the database from the 2.0.0-rc.7 bot image ... the running release is not touched";
+   - "✔ Applied 1 migration(s): 0001_welcomer_text_message", then "the database is migrated", start, ready in 6 s;
+   - the bot logged "DB_AUTO_MIGRATE is false";
+   - `status`: Latest `0001_welcomer_text_message`, Pending `(none)`; containers healthy; dashboard `/api/ready` 200.
+
+**Outcome**: schema changes ship as reviewed migrations with CI gates, existing databases are adopted once, and host deploys apply migrations as a gated step with a dump and a rollback. Self-hosters keep migrate-on-start. `db:push` never ran on staging.
+
+**Follow-ups**
+- CHORE-1901 (groomed): the runbook must say to rerun `bootstrap.sh` before the first deploy with the runner, because a deploy never updates the host scripts.
+- Production: run the same `bootstrap.sh` and check `status` before its first approval (`docs/release.md` 8.8).

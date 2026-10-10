@@ -449,7 +449,7 @@
       "id": "EPIC-019",
       "title": "Production Harness: Controlled, Automated and Safeguarded Releases",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "children": [
         "STORY-185",
         "STORY-186"
@@ -8284,6 +8284,42 @@
       "handovers": [
         "CHORE-1704",
         "EPIC-017"
+      ]
+    },
+    {
+      "id": "CHORE-1901",
+      "parent": "EPIC-019",
+      "title": "Runbook: Rerun bootstrap.sh Before the First Deploy With the Migration Runner (Host Scripts Do Not Self-Update)",
+      "points": 1,
+      "status": "DONE",
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "description": "During the staging adoption (2026-10-11) the rc.6 deploy ran the host's old ririko-deploy (installed 2026-10-07): it has no migrate step and does not force DB_AUTO_MIGRATE=false, so the bot adopted the database itself at startup. Host scripts change only when bootstrap.sh runs again (private hosting runbook 6.2 step 5); a deploy never updates them. docs/release.md 8.8 assumed the gated step was already on the host. After the maintainer approved it, the coordinator reran bootstrap.sh --ref v2.0.0-rc.6 on staging, and rc.7 then ran the gated step (Applied 0001_welcomer_text_message).",
+      "model": "small",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "docs/release.md",
+          "docs/deployment.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "ririko-deploy migrate_database apply_release"
+        ]
+      },
+      "acceptance": [
+        "docs/release.md 8.8 gets a step 0 before the manual dump: update the host scripts by rerunning bootstrap.sh with --ref set to the release that adds the runner (the same command as in the hosting runbook, with placeholders only), and check that /usr/local/bin/ririko-deploy contains the migrate step (for example grep -c db:migrate). It says why: a deploy never updates the host scripts. It notes that a deploy with old host scripts is still safe (the bot adopts and migrates at startup, and a failure ends in the readiness rollback) but is not the gated path.",
+        "docs/release.md section 8 (or 8.6) states in one sentence that changes to deploy/host/bin reach a host only through bootstrap.sh, so a release that changes them needs that step on every host before its deploy.",
+        "docs/deployment.md, where it describes ririko-deploy, links that sentence. No live host details in either file (placeholders only)."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet",
+      "handovers": [
+        "CHORE-1901",
+        "EPIC-019"
       ]
     }
   ],

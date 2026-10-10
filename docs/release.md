@@ -214,6 +214,8 @@ The Lavalink VPS runs one container per environment (`lavalink-production` on po
 
 The host applies the schema migrations of the release it deploys as its own step (ADR-015, decision 9), between the pull and `up -d` (the order is in 8.3). `ririko-deploy` runs every compose call with `DB_AUTO_MIGRATE=false`, so the bot never migrates on a host: it only checks the schema, and `ririko db:migrate`, run once from the new bot image, is the only schema writer. Self-hosters run the same compose file without that override and keep migrate-on-start (`docs/deployment.md` section 2.3).
 
+The host scripts (`/usr/local/bin/ririko-deploy` and the rest of `deploy/host/bin`) change on a host only when `bootstrap.sh --ref <ref>` runs there, so a release that changes them needs that step on every host before its deploy. A deploy never updates them; 8.8 step 0 shows the step.
+
 - **The old release keeps running during the migration.** Every migration follows the expand rule: it leaves the schema usable by the previous release (new tables, new nullable or defaulted columns, indexes, backfills). Destructive changes ship in a later release as a `-- ririko:contract` migration. The host starts the new containers only after the migration finished.
 - **Each migration is one transaction.** On PostgreSQL the DDL is transactional, so a failing migration rolls back by itself and the database stays at the last migration that succeeded. Migrations of the same run that already committed stay applied; they only add. The adoption of an old database (8.8) is one transaction as well.
 - **Exit 6, `ririko db:migrate` exit 1: the migration failed.** The host started and stopped nothing, and the old release still runs on the database. The job output and `/opt/ririko/deploy.log` hold the migration's own output (each line starts with `db:migrate:`); the exit message repeats its last line and names the pre-deploy dump. Nothing needs restoring. Fix the cause, which is usually the migration itself, and tag a new patch version. When the cause is a one-off problem in the data of that host, fix it there and run the failed job again.
@@ -270,6 +272,16 @@ What it costs: every change since the dump is gone, including what users did whi
 ### 8.8 Adopting a Database That Predates Migration Records (Staging, One Time)
 
 Staging was built before the migration runner existed: it has tables but no `ririko_schema_migrations` table. The first deploy with the runner does not run `0000_baseline` on it; it adopts the database (`docs/database.md` section 1). It compares the live schema with the baseline, adds what is missing (tables, indexes, nullable or defaulted columns) in one transaction, and records `0000_baseline` as applied. Anything it cannot repair additively refuses the adoption and changes nothing. Do this once on staging, and the same way on any other host whose database predates the runner. A database that the runner created from empty is never adopted, but look at `status` on production before the first approval.
+
+0. **Update the host scripts first.** A deploy never updates them. Rerun `bootstrap.sh` as root on the host, with `--ref` set to the release that adds the runner (the hosting runbook has the full command; placeholders here):
+
+   ```bash
+   sudo bash <path-to>/bootstrap.sh --ref <ref>
+   ```
+
+   To keep the run going if the SSH session drops, start it as a transient unit with `sudo systemd-run --unit=ririko-bootstrap --collect bash <path-to>/bootstrap.sh --ref <ref>`, then read its output with `journalctl -u ririko-bootstrap`.
+
+   Check that the migrate step is in the installed script: `grep -c db:migrate /usr/local/bin/ririko-deploy` must print a number above 0. A host that skips this step still deploys safely: the bot adopts and migrates at startup, and a start that fails ends in the readiness rollback (8.4, exit 4). That is not the gated path of 8.6, so do not skip it before the first deploy with the runner.
 
 1. **Take a manual dump first.** The deploy takes its own, but the host keeps only the newest five of those. A manual dump is yours and survives repeated deploys. On the host, as root, under `umask 077`: run steps 1 and 4 of 8.7 (with `V` set to the content of `state/current`) and name the file `backups/before-adoption-<UTC>.dump`. Check that it is not empty and that `rc exec -T postgres pg_restore --list < <file> | head` lists tables.
 2. **Deploy the first release with the runner as a prerelease tag.** A tag like `v2.1.3-rc.1` runs `release`, `deploy-lavalink-staging` and `deploy-staging`, and stops before production (8.1).
