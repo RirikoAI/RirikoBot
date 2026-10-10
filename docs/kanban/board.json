@@ -9324,6 +9324,56 @@
       "handovers": [
         "BUG-0040"
       ]
+    },
+    {
+      "id": "BUG-0041",
+      "parent": "EPIC-019",
+      "title": "SQLite Adoption Refuses Databases Whose Adventure Tables Were Created as BIGINT by the Old ensureAdventureSchema",
+      "points": 3,
+      "status": "DONE",
+      "children": [],
+      "requires": [
+        "STORY-185"
+      ],
+      "blocks": [],
+      "description": "On a SQLite database built before ADR-015, ririko db:migrate --dry-run (and bot startup) refuses the adoption: \"adventure_players.last_start_at is BIGINT but the baseline has INTEGER\" (also cooldown_until, adventure_sessions.deadline and created_at). The removed ensureAdventureSchema created those columns with dialect-neutral BIGINT, and the drizzle SQLite baseline declares INTEGER. In SQLite both have INTEGER affinity and store the same values, so adoption must compare SQLite types by affinity, not by declared text. Every self-hosted SQLite database whose adventure tables came from that upgrade is affected, and the bot would refuse to start on it. PostgreSQL is not affected (its baseline is bigint). The CLI also prints each refusal problem twice.",
+      "model": "medium",
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "context": {
+        "files": [
+          "packages/database/src/migrations/adopt-baseline.ts",
+          "packages/database/src/migrations/adopt-baseline.test.ts",
+          "apps/cli/src/commands/db-migrate.ts",
+          "apps/cli/src/commands/db-migrate.test.ts",
+          "docs/database.md"
+        ],
+        "symbols": [
+          "planAdoption",
+          "cannotAdd",
+          "readSqliteShape",
+          "checkAdoption",
+          "runDbMigrate",
+          "ColumnShape"
+        ],
+        "codegraph_queries": [
+          "planAdoption readSqliteShape checkAdoption ColumnShape adopt-baseline.ts",
+          "runDbMigrate db-migrate.ts problems details"
+        ]
+      },
+      "acceptance": [
+        "On SQLite, planAdoption compares a live column with the baseline by SQLite type affinity (https://sqlite.org/datatype3.html section 3.1: INT gives INTEGER; CHAR, CLOB or TEXT gives TEXT; BLOB or no type gives BLOB; REAL, FLOA or DOUB gives REAL; anything else NUMERIC). The same affinity with a different declared type (BIGINT and INTEGER, VARCHAR(32) and TEXT) is a note naming both types, not a problem. INTEGER and NUMERIC affinity also count as compatible (a note): both keep whole numbers as INTEGER, and BOOLEAN or DATETIME declare NUMERIC. Any other different affinity (TEXT, BLOB, REAL against INTEGER or NUMERIC) is still a problem. The PostgreSQL comparison is unchanged (exact format_type).",
+        "A SQLite test builds all four adventure tables (adventure_settings with energy_enabled BOOLEAN, adventure_players, adventure_sessions, adventure_choices) with the old ensureAdventureSchema DDL (BIGINT columns, as in packages/database/src/migrations/adventure-schema.ts at commit 8ffd7a6), with rows, on an otherwise baseline database without a tracking table. migrateDatabase adopts it, records 0000_baseline as adopted, loses or changes no row, and the dry run reports the notes. A planAdoption test shows that a real affinity mismatch (TEXT live, INTEGER baseline) still refuses.",
+        "ririko db:migrate prints each refusal problem once: the first line of the error message, then the problems from details.problems as one list. A test asserts no problem line appears twice.",
+        "docs/database.md (adoption section) says SQLite types are compared by affinity."
+      ],
+      "verify_cmd": "pnpm vitest run packages/database/src/migrations apps/cli/src/commands/db-migrate.test.ts && pnpm build && pnpm typecheck && pnpm lint --quiet && pnpm format:check && pnpm db:check",
+      "handovers": [
+        "BUG-0041",
+        "EPIC-019"
+      ]
     }
   ],
   "active_in_progress_ticket": null

@@ -179,6 +179,34 @@ function cannotAdd(
 }
 
 /**
+ * The column affinity SQLite derives from a declared type (https://sqlite.org/datatype3.html section
+ * 3.1), by its five rules in order. The affinity decides how values are stored, so two declared types
+ * with one affinity (BIGINT and INTEGER, VARCHAR(32) and TEXT) hold the same data.
+ */
+export function sqliteAffinity(declared: string): 'INTEGER' | 'TEXT' | 'BLOB' | 'REAL' | 'NUMERIC' {
+  const type = declared.toUpperCase();
+  if (type.includes('INT')) return 'INTEGER';
+  if (type.includes('CHAR') || type.includes('CLOB') || type.includes('TEXT')) return 'TEXT';
+  if (type === '' || type.includes('BLOB')) return 'BLOB';
+  if (type.includes('REAL') || type.includes('FLOA') || type.includes('DOUB')) return 'REAL';
+  return 'NUMERIC';
+}
+
+/**
+ * Why two declared SQLite types may differ without a problem, or null when they may not. Equal
+ * affinity stores values alike. INTEGER and NUMERIC are compatible too: NUMERIC keeps a whole
+ * number as INTEGER, so a BOOLEAN or DATETIME column holds what an INTEGER one does. TEXT, BLOB and
+ * REAL against either are real differences.
+ */
+function compatibleSqliteTypes(live: string, wanted: string): string | null {
+  const a = sqliteAffinity(live);
+  const b = sqliteAffinity(wanted);
+  if (a === b) return 'same SQLite affinity';
+  const whole = (affinity: string): boolean => affinity === 'INTEGER' || affinity === 'NUMERIC';
+  return whole(a) && whole(b) ? `${a} and ${b} affinity both store whole numbers as INTEGER` : null;
+}
+
+/**
  * Compares the live shape with the baseline's and lists what to run and what to refuse. Pure: no
  * database access. `ignoreTables` (the tracking table) is neither compared nor reported.
  */
@@ -223,10 +251,19 @@ export function planAdoption(input: {
           continue;
         }
         if (found.type !== column.type) {
-          plan.problems.push(
-            `"${entry.name}.${name}" is ${found.type || '(no type)'} but the baseline has ${column.type || '(no type)'}`,
+          const compatible =
+            dialect === 'sqlite' ? compatibleSqliteTypes(found.type, column.type) : null;
+          if (compatible === null) {
+            plan.problems.push(
+              `"${entry.name}.${name}" is ${found.type || '(no type)'} but the baseline has ${column.type || '(no type)'}`,
+            );
+            continue;
+          }
+          plan.notes.push(
+            `"${entry.name}.${name}" is ${found.type || '(no type)'}, the baseline has ${column.type || '(no type)'} (${compatible}); left as it is`,
           );
-        } else if (found.notNull !== column.notNull) {
+        }
+        if (found.notNull !== column.notNull) {
           plan.notes.push(
             `"${entry.name}.${name}" is ${found.notNull ? 'NOT NULL' : 'nullable'} but the baseline has it ${column.notNull ? 'NOT NULL' : 'nullable'}; left as it is`,
           );

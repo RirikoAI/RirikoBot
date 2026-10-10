@@ -14,6 +14,7 @@ import {
   postgresBaselineShape,
   readCurrentPostgresShape,
   readSqliteShape,
+  sqliteAffinity,
   sqliteBaselineShape,
   type ColumnShape,
   type SchemaShape,
@@ -182,6 +183,104 @@ describe('planAdoption', () => {
       'Extra column "a.legacy" is not in the baseline; kept',
       'Extra table "old_table" is not in the baseline; kept',
     ]);
+  });
+
+  describe('SQLite type affinity', () => {
+    it.each([
+      ['INTEGER', 'INTEGER'],
+      ['BIGINT', 'INTEGER'],
+      ['UNSIGNED BIG INT', 'INTEGER'],
+      ['TEXT', 'TEXT'],
+      ['VARCHAR(32)', 'TEXT'],
+      ['NCHAR(55)', 'TEXT'],
+      ['CLOB', 'TEXT'],
+      ['BLOB', 'BLOB'],
+      ['', 'BLOB'],
+      ['REAL', 'REAL'],
+      ['DOUBLE PRECISION', 'REAL'],
+      ['FLOAT', 'REAL'],
+      ['NUMERIC', 'NUMERIC'],
+      ['BOOLEAN', 'NUMERIC'],
+      ['DECIMAL(10,5)', 'NUMERIC'],
+      ['DATETIME', 'NUMERIC'],
+      // The rules apply in order: INT beats CHAR, and "POINT" holds INT.
+      ['CHARINT', 'INTEGER'],
+      ['POINT', 'INTEGER'],
+      ['TEXTBLOB', 'TEXT'],
+    ])('%j has %s affinity', (declared, affinity) => {
+      expect(sqliteAffinity(declared)).toBe(affinity);
+      expect(sqliteAffinity(declared.toLowerCase())).toBe(affinity);
+    });
+
+    const b = Object.fromEntries(expected.tables.get('b')!);
+    const live = (type: string, notNull = true) =>
+      shape({
+        a: {
+          id: col('text', { notNull: true, primaryKey: true }),
+          n: col(type, { notNull, default: '1' }),
+        },
+        b,
+      });
+
+    it('notes a SQLite type that differs from the baseline but has the same affinity', () => {
+      const result = plan(live('BIGINT'), 'sqlite');
+      expect(result.problems).toEqual([]);
+      expect(result.statements).toEqual([statements[1]]);
+      expect(result.notes).toEqual([
+        '"a.n" is BIGINT, the baseline has integer (same SQLite affinity); left as it is',
+      ]);
+    });
+
+    it('still reports nullability when it notes a same-affinity type', () => {
+      expect(plan(live('BIGINT', false), 'sqlite').notes).toEqual([
+        '"a.n" is BIGINT, the baseline has integer (same SQLite affinity); left as it is',
+        '"a.n" is nullable but the baseline has it NOT NULL; left as it is',
+      ]);
+    });
+
+    it('notes NUMERIC affinity against an INTEGER baseline, because whole numbers are stored alike', () => {
+      for (const type of ['BOOLEAN', 'NUMERIC', 'DATETIME']) {
+        const result = plan(live(type), 'sqlite');
+        expect(result.problems).toEqual([]);
+        expect(result.notes).toEqual([
+          `"a.n" is ${type}, the baseline has integer (NUMERIC and INTEGER affinity both store whole numbers as INTEGER); left as it is`,
+        ]);
+      }
+    });
+
+    it('notes INTEGER affinity against a NUMERIC baseline', () => {
+      const wanted = shape({
+        a: {
+          id: col('text', { notNull: true, primaryKey: true }),
+          n: col('NUMERIC', { notNull: true, default: '1' }),
+        },
+        b,
+      });
+      const result = planAdoption({
+        dialect: 'sqlite',
+        statements,
+        expected: wanted,
+        live: live('INTEGER'),
+      });
+      expect(result.problems).toEqual([]);
+      expect(result.notes).toEqual([
+        '"a.n" is INTEGER, the baseline has NUMERIC (INTEGER and NUMERIC affinity both store whole numbers as INTEGER); left as it is',
+      ]);
+    });
+
+    it('still refuses a SQLite type with another affinity', () => {
+      for (const type of ['TEXT', 'VARCHAR(8)', 'REAL', 'DOUBLE', 'BLOB', '']) {
+        expect(plan(live(type), 'sqlite').problems).toEqual([
+          `"a.n" is ${type || '(no type)'} but the baseline has integer`,
+        ]);
+      }
+    });
+
+    it('compares PostgreSQL types exactly', () => {
+      expect(plan(live('bigint'), 'postgres').problems).toEqual([
+        '"a.n" is bigint but the baseline has integer',
+      ]);
+    });
   });
 
   it('rejects a baseline statement it does not understand', () => {
@@ -764,5 +863,128 @@ describe('adoption [sqlite] backup', () => {
     copy.close();
     expect(columns).not.toContain('invited_by_id');
     expect(columns).toContain('name');
+  });
+});
+
+/**
+ * What `ensureAdventureSchema` ran on both dialects before ADR-015 (removed in TASK-1854;
+ * `packages/database/src/migrations/adventure-schema.ts` at commit 8ffd7a6). On SQLite it left
+ * BIGINT and BOOLEAN columns where the baseline declares INTEGER.
+ */
+const OLD_ADVENTURE_DDL = [
+  `CREATE TABLE IF NOT EXISTS adventure_settings (
+    guild_id TEXT PRIMARY KEY NOT NULL, energy_enabled BOOLEAN NOT NULL DEFAULT TRUE
+  )`,
+  `CREATE TABLE IF NOT EXISTS adventure_players (
+    user_id TEXT PRIMARY KEY NOT NULL, cooldown_until BIGINT NOT NULL DEFAULT 0, last_start_at BIGINT NOT NULL DEFAULT 0
+  )`,
+  `CREATE TABLE IF NOT EXISTS adventure_sessions (
+    id TEXT PRIMARY KEY NOT NULL, user_id TEXT NOT NULL, guild_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL, revision INTEGER NOT NULL, delivered_revision INTEGER NOT NULL DEFAULT -1, status TEXT NOT NULL,
+    deadline BIGINT NOT NULL, created_at BIGINT NOT NULL, payload TEXT NOT NULL
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_adventure_active_user ON adventure_sessions(user_id)
+    WHERE status IN ('ACTIVE', 'SETTLING')`,
+  `CREATE INDEX IF NOT EXISTS idx_adventure_due ON adventure_sessions(status, deadline)`,
+  `CREATE INDEX IF NOT EXISTS idx_adventure_user_created ON adventure_sessions(user_id, created_at)`,
+  `CREATE TABLE IF NOT EXISTS adventure_choices (
+    session_id TEXT NOT NULL REFERENCES adventure_sessions(id), revision INTEGER NOT NULL,
+    payload TEXT NOT NULL, PRIMARY KEY(session_id, revision)
+  )`,
+];
+
+describe('adoption [sqlite] adventure tables the old upgrade created as BIGINT and BOOLEAN', () => {
+  let env: Env;
+  const baseline = baselineOf('sqlite');
+  const rowsOf = async (name: string) =>
+    (await env.rows(`SELECT * FROM ${name} ORDER BY 1, 2`)).map((row) => ({ ...row }));
+
+  beforeEach(async () => {
+    env = await sqliteEnv();
+    await env.exec(SQLITE_SCHEMA_DDL);
+    for (const name of [
+      'adventure_choices',
+      'adventure_sessions',
+      'adventure_players',
+      'adventure_settings',
+    ]) {
+      await env.exec(`DROP TABLE ${name}`);
+    }
+    for (const statement of OLD_ADVENTURE_DDL) await env.exec(statement);
+    await env.exec(
+      `INSERT INTO adventure_settings (guild_id, energy_enabled) VALUES ('g1', TRUE), ('g2', FALSE)`,
+    );
+    await env.exec(
+      `INSERT INTO adventure_players (user_id, cooldown_until, last_start_at) VALUES ('u1', 1760000000000, 1759999999000), ('u2', 0, 0)`,
+    );
+    await env.exec(
+      `INSERT INTO adventure_sessions (id, user_id, guild_id, channel_id, revision, delivered_revision, status, deadline, created_at, payload)
+       VALUES ('s1', 'u1', 'g1', 'c1', 3, 2, 'ACTIVE', 1760000600000, 1760000000000, '{"a":1}'),
+              ('s2', 'u2', 'g1', 'c1', 1, -1, 'DONE', 1750000600000, 1750000000000, '{}')`,
+    );
+    await env.exec(
+      `INSERT INTO adventure_choices (session_id, revision, payload) VALUES ('s1', 1, 'x'), ('s1', 2, 'y')`,
+    );
+  });
+  afterEach(async () => {
+    await env.dispose();
+  });
+
+  it('adopts the database, keeps every row and column, and reports the notes on a dry run', async () => {
+    const before = {
+      settings: await rowsOf('adventure_settings'),
+      players: await rowsOf('adventure_players'),
+      sessions: await rowsOf('adventure_sessions'),
+      choices: await rowsOf('adventure_choices'),
+    };
+    const columns = columnNames(await env.liveShape());
+    const notes = [
+      '"adventure_settings.energy_enabled" is BOOLEAN, the baseline has INTEGER (NUMERIC and INTEGER affinity both store whole numbers as INTEGER); left as it is',
+      '"adventure_players.last_start_at" is BIGINT, the baseline has INTEGER (same SQLite affinity); left as it is',
+      '"adventure_players.cooldown_until" is BIGINT, the baseline has INTEGER (same SQLite affinity); left as it is',
+      '"adventure_sessions.deadline" is BIGINT, the baseline has INTEGER (same SQLite affinity); left as it is',
+      '"adventure_sessions.created_at" is BIGINT, the baseline has INTEGER (same SQLite affinity); left as it is',
+    ].sort();
+
+    const dry = await migrateDatabase(env.client, { migrations: [baseline], dryRun: true });
+    expect([...dry.adoption!.notes].sort()).toEqual(notes);
+    expect(dry.adoption!.createdTables).toEqual([]);
+    expect(dry.adoption!.addedColumns).toEqual([]);
+    expect(await env.tables()).not.toContain(MIGRATIONS_TABLE);
+
+    const result = await migrateDatabase(env.client, { migrations: [baseline] });
+    expect([...result.adoption!.notes].sort()).toEqual(notes);
+    const recorded = await env.rows(`SELECT id, checksum, adopted FROM ${MIGRATIONS_TABLE}`);
+    expect(recorded.map((row) => [row.id, row.checksum, Boolean(row.adopted)])).toEqual([
+      [baseline.id, baseline.checksum, true],
+    ]);
+
+    expect(await rowsOf('adventure_settings')).toEqual(before.settings);
+    expect(await rowsOf('adventure_players')).toEqual(before.players);
+    expect(await rowsOf('adventure_sessions')).toEqual(before.sessions);
+    expect(await rowsOf('adventure_choices')).toEqual(before.choices);
+    const after = columnNames(await env.liveShape());
+    expect(after).toEqual(columns);
+    const live = (await env.liveShape()).tables;
+    expect(live.get('adventure_sessions')!.get('deadline')!.type).toBe('BIGINT');
+    expect(live.get('adventure_settings')!.get('energy_enabled')!.type).toBe('BOOLEAN');
+
+    expect((await migrateDatabase(env.client, { migrations: [baseline] })).adoption).toBeNull();
+  });
+
+  it('still refuses an adventure column whose type has another affinity', async () => {
+    await env.exec('ALTER TABLE adventure_players DROP COLUMN last_start_at');
+    await env.exec(
+      `ALTER TABLE adventure_players ADD COLUMN last_start_at TEXT NOT NULL DEFAULT '0'`,
+    );
+    const failure = await migrateDatabase(env.client, { migrations: [baseline] }).catch(
+      (error: unknown) => error as Error,
+    );
+    const message = (failure as Error).message;
+    expect(message).toContain(
+      '"adventure_players.last_start_at" is TEXT but the baseline has INTEGER',
+    );
+    expect(message).not.toContain('cooldown_until');
+    expect(await env.tables()).not.toContain(MIGRATIONS_TABLE);
   });
 });

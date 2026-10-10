@@ -163,10 +163,12 @@ export async function runDbMigrate(
     if (!(error instanceof Error)) throw error;
     const details = error instanceof RirikoError ? (error.details as { problems?: unknown }) : null;
     const problems = Array.isArray(details?.problems) ? details.problems : [];
+    // A refusal's message already ends with its problems; print them once, as the list below.
+    const headline = problems.length > 0 ? (error.message.split('\n')[0] ?? '') : error.message;
     return {
       lines: [
         ...lines,
-        pc.red(`✖ Migration failed: ${scrub(error.message, url)}`),
+        pc.red(`✖ Migration failed: ${scrub(headline, url)}`),
         ...problems.map((problem) => `  - ${scrub(String(problem), url)}`),
       ],
       exitCode: 1,

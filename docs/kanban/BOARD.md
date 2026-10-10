@@ -419,6 +419,7 @@
 | `BUG-0037` | Bug | CI on PR #685: ShellCheck SC2015 in ririko-deploy and Stale .gitleaksignore SHAs After the History Rewrite | 1 | EPIC-017 | [BUG-0037.md](./handovers/BUG-0037.md) |
 | `BUG-0038` | Bug | PostgreSQL uuid Id Columns Reject the Slug and Prefixed Ids SQLite Holds (Cards, Assets, Shop Items, AI Conversations) | 5 | EPIC-017 | [BUG-0038.md](./handovers/BUG-0038.md) |
 | `BUG-0039` | Bug | Inventory Never Shows Item IDs, So By-ID Gear and Item Commands Are Unusable | 1 | EPIC-015 | [BUG-0039.md](./handovers/BUG-0039.md) |
+| `BUG-0041` | Bug | SQLite Adoption Refuses Databases Whose Adventure Tables Were Created as BIGINT by the Old ensureAdventureSchema | 3 | EPIC-019 | [BUG-0041.md](./handovers/BUG-0041.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

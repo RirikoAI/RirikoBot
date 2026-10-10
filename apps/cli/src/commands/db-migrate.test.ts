@@ -213,6 +213,41 @@ describe('ririko db:migrate failures', () => {
     expect(close).toHaveBeenCalledTimes(1);
   });
 
+  it('prints each refusal problem once, as the real adoption refusal builds its message', async () => {
+    const problems = [
+      '"adventure_players.last_start_at" is TEXT but the baseline has INTEGER',
+      '"adventure_sessions.deadline" is BLOB but the baseline has INTEGER',
+    ];
+    const { stub } = deps({
+      migrate: async () => {
+        throw new DatabaseError(
+          `The existing database cannot be adopted. Nothing was changed.\n- ${problems.join('\n- ')}`,
+          { details: { problems } },
+        );
+      },
+    });
+    const result = await runDbMigrate({ dryRun: true }, env, stub);
+    expect(result.exitCode).toBe(1);
+    const text = plain(result.lines);
+    expect(text).toContain(
+      'Migration failed: The existing database cannot be adopted. Nothing was changed.',
+    );
+    for (const problem of problems) {
+      expect(text.split(problem).length - 1).toBe(1);
+      expect(result.lines.filter((line) => line.includes(problem))).toHaveLength(1);
+    }
+  });
+
+  it('prints the whole message of a failure that has no problem list', async () => {
+    const { stub } = deps({
+      migrate: async () => {
+        throw new Error('first line\nsecond line');
+      },
+    });
+    const result = await runDbMigrate({}, env, stub);
+    expect(plain(result.lines)).toContain('Migration failed: first line\nsecond line');
+  });
+
   it('passes non-Error failures on', async () => {
     const { stub } = deps({
       status: async () => {
