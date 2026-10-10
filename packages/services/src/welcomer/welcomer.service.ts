@@ -1,4 +1,5 @@
 import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { MAX_WELCOMER_TEXT_LENGTH } from '@ririko/core';
 import { fetchRemoteImage } from '../net/remote-image.js';
 import { WelcomerBackgroundStore } from './background-store.js';
 
@@ -36,6 +37,59 @@ export function fillWelcomerMessage(
         ? values.serverName
         : values.memberCount.toString(),
   );
+}
+
+/** A text channel of the server, for turning `#channel-name` into a channel link. */
+export interface WelcomerTextChannel {
+  id: string;
+  name: string;
+}
+
+export interface WelcomerTextValues {
+  /** What `{user}` becomes: a mention in the welcome text, the plain username in the farewell. */
+  user: string;
+  /** What `{username}` becomes: always the plain username. */
+  username: string;
+  serverName: string;
+  memberCount: number;
+  channels: readonly WelcomerTextChannel[];
+}
+
+/** A `#word` that is not part of a longer word, a `<#id>` mention or an HTML entity. */
+const CHANNEL_WORD = /(?<![\p{L}\p{N}_<&])#([\p{L}\p{N}_-]+)/gu;
+
+/**
+ * The text sent with a welcome or farewell card. `#channel-name` words that name a text channel
+ * of the server become `<#id>` (case-insensitive; other `#words` and existing `<#id>` mentions
+ * stay as they are). Channels are resolved in the template before the values go in, so a user
+ * or server name that contains `#general` is never turned into a link. The result is cut to
+ * Discord's 2000 characters, never in the middle of a `<...>` mention.
+ */
+export function fillWelcomerText(template: string, values: WelcomerTextValues): string {
+  const byName = new Map<string, string>();
+  for (const channel of values.channels) {
+    const key = channel.name.toLowerCase();
+    if (!byName.has(key)) byName.set(key, channel.id);
+  }
+  const linked = template.replace(CHANNEL_WORD, (match, name: string) => {
+    const id = byName.get(name.toLowerCase());
+    return id ? `<#${id}>` : match;
+  });
+  const filled = linked.replace(
+    /\{(user|username|server|memberCount)\}/g,
+    (_match, name: string) =>
+      name === 'user'
+        ? values.user
+        : name === 'username'
+          ? values.username
+          : name === 'server'
+            ? values.serverName
+            : values.memberCount.toString(),
+  );
+  if (filled.length <= MAX_WELCOMER_TEXT_LENGTH) return filled;
+  const cut = filled.slice(0, MAX_WELCOMER_TEXT_LENGTH);
+  const open = cut.lastIndexOf('<');
+  return open > cut.lastIndexOf('>') ? cut.slice(0, open) : cut;
 }
 
 export class WelcomerService {

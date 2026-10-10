@@ -102,6 +102,9 @@ export const guildWelcomer = pgTable('guild_welcomer', {
   backgroundFile: text('background_file'),
   textColor: varchar('text_color', { length: 7 }).notNull().default('#ffffff'),
   isEnabled: boolean('is_enabled').notNull().default(true),
+  /** Also send `textMessage` with the card as message text (TASK-1333). */
+  textMessageEnabled: boolean('text_message_enabled').notNull().default(false),
+  textMessage: text('text_message').notNull().default(''),
 });
 
 export const guildFarewell = pgTable('guild_farewell', {
@@ -114,6 +117,9 @@ export const guildFarewell = pgTable('guild_farewell', {
   backgroundFile: text('background_file'),
   textColor: varchar('text_color', { length: 7 }).notNull().default('#ffffff'),
   isEnabled: boolean('is_enabled').notNull().default(true),
+  /** Also send `textMessage` with the card as message text (TASK-1333). */
+  textMessageEnabled: boolean('text_message_enabled').notNull().default(false),
+  textMessage: text('text_message').notNull().default(''),
 });
 
 export const auditLogs = pgTable(

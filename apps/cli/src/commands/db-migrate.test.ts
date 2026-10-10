@@ -7,6 +7,7 @@ import { DatabaseError, ValidationError } from '@ririko/core';
 import {
   createDatabaseClient,
   MIGRATIONS_TABLE,
+  SQLITE_MIGRATIONS,
   type DatabaseClient,
   type MigrationStatus,
   type SqliteDatabaseClient,
@@ -16,6 +17,11 @@ import { registerDbMigrateCommand, runDbMigrate, type DbMigrateDeps } from './db
 // eslint-disable-next-line no-control-regex
 const ANSI = /\x1b\[[0-9;]*m/g;
 const plain = (lines: string[]) => lines.map((line) => line.replace(ANSI, '')).join('\n');
+
+/** Every migration of this release, in order: a new database applies all of them. */
+const IDS = SQLITE_MIGRATIONS.map((migration) => migration.id);
+const LATEST = IDS.at(-1)!;
+const APPLIED_ALL = `Applied ${IDS.length} migration(s): ${IDS.join(', ')}`;
 
 describe('ririko db:migrate on a SQLite file', () => {
   let dir: string;
@@ -65,8 +71,8 @@ describe('ririko db:migrate on a SQLite file', () => {
     const result = await runDbMigrate({ status: true }, env);
     expect(result.exitCode).toBe(0);
     const text = plain(result.lines);
-    expect(text).toContain('Latest:  0000_baseline');
-    expect(text).toContain('Pending: 0000_baseline');
+    expect(text).toContain(`Latest:  ${LATEST}`);
+    expect(text).toContain(`Pending: ${IDS.join(', ')}`);
     expect(text).toContain('Unknown: (none)');
     expect(text).toContain('Adopted: no');
     expect(await tables()).toEqual([]);
@@ -77,7 +83,7 @@ describe('ririko db:migrate on a SQLite file', () => {
     expect(result.exitCode).toBe(0);
     const text = plain(result.lines);
     expect(text).toContain('DRY RUN: nothing was changed.');
-    expect(text).toContain('Would apply 1 migration(s): 0000_baseline');
+    expect(text).toContain(`Would apply ${IDS.length} migration(s): ${IDS.join(', ')}`);
     expect(await tables()).toEqual([]);
   });
 
@@ -86,23 +92,21 @@ describe('ririko db:migrate on a SQLite file', () => {
     expect(first.exitCode).toBe(0);
     const text = plain(first.lines);
     expect(text).not.toContain('Applied migration 0000_baseline');
-    expect(text).toContain('Applied 1 migration(s): 0000_baseline');
+    expect(text).toContain(APPLIED_ALL);
     expect(await tables()).toContain(MIGRATIONS_TABLE);
     expect(await tables()).toContain('users');
 
     const second = await runDbMigrate({}, env);
     expect(second.exitCode).toBe(0);
-    expect(plain(second.lines)).toContain(
-      'Nothing to do: the database is up to date (0000_baseline)',
-    );
+    expect(plain(second.lines)).toContain(`Nothing to do: the database is up to date (${LATEST})`);
 
     const status = await runDbMigrate({ status: true }, env);
     expect(plain(status.lines)).toContain('Pending: (none)');
   });
 
   it('adopts a database without migration records, backing it up first', async () => {
-    await runDbMigrate({}, env);
-    await sql(`DROP TABLE ${MIGRATIONS_TABLE}`);
+    // A database as the startup path of the first 2.0 builds left it: the baseline schema, no records.
+    for (const statement of SQLITE_MIGRATIONS[0]!.statements) await sql(statement);
 
     const preview = await runDbMigrate({ dryRun: true }, env);
     expect(preview.exitCode).toBe(0);
@@ -399,13 +403,13 @@ describe('ririko db:migrate command', () => {
 
   it('migrates the database in DATABASE_URL and leaves the exit code at zero', async () => {
     await run('db:migrate');
-    expect(plain(out)).toContain('Applied 1 migration(s): 0000_baseline');
+    expect(plain(out)).toContain(APPLIED_ALL);
     expect(process.exitCode).toBeUndefined();
   });
 
   it('prints the state with --status', async () => {
     await run('db:migrate', '--status');
-    expect(plain(out)).toContain('Pending: 0000_baseline');
+    expect(plain(out)).toContain(`Pending: ${IDS.join(', ')}`);
     expect(process.exitCode).toBeUndefined();
   });
 

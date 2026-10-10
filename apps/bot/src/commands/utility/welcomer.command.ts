@@ -10,13 +10,15 @@ export function createWelcomerCommand(services: BotServices): Command {
       category: CommandCategory.UTILITY,
       description: 'Configure the server welcome message and card',
       aliases: ['welcome'],
-      usage: '/welcomer [channel] [message] [background] [color] [enable]',
+      usage: '/welcomer [channel] [message] [background] [color] [text] [enable]',
       examples: [
         '/welcomer',
         '/welcomer channel:#welcome',
         '/welcomer message:Welcome {user} to {server}!',
         '/welcomer background:https://example.com/bg.png',
         '/welcomer color:#ff0000',
+        '/welcomer text:Please read #rules, {user}!',
+        '/welcomer text:none',
         '/welcomer enable:false',
       ],
       options: [
@@ -41,6 +43,12 @@ export function createWelcomerCommand(services: BotServices): Command {
         {
           name: 'color',
           description: 'Hex color for the welcome card text and border',
+          type: 'STRING',
+          required: false,
+        },
+        {
+          name: 'text',
+          description: 'Text sent with the card ({user}, {username}, {server}, #channel), or none',
           type: 'STRING',
           required: false,
         },

@@ -10,13 +10,15 @@ export function createFarewellCommand(services: BotServices): Command {
       category: CommandCategory.UTILITY,
       description: 'Configure the server farewell message and card',
       aliases: ['goodbye'],
-      usage: '/farewell [channel] [message] [background] [color] [enable]',
+      usage: '/farewell [channel] [message] [background] [color] [text] [enable]',
       examples: [
         '/farewell',
         '/farewell channel:#goodbye',
         '/farewell message:Goodbye {user}!',
         '/farewell background:https://example.com/bg.png',
         '/farewell color:#ff0000',
+        '/farewell text:Please read #rules, {user}!',
+        '/farewell text:none',
         '/farewell enable:false',
       ],
       options: [
@@ -41,6 +43,12 @@ export function createFarewellCommand(services: BotServices): Command {
         {
           name: 'color',
           description: 'Hex color for the farewell card text and border',
+          type: 'STRING',
+          required: false,
+        },
+        {
+          name: 'text',
+          description: 'Text sent with the card ({user}, {username}, {server}, #channel), or none',
           type: 'STRING',
           required: false,
         },

@@ -98,6 +98,8 @@ export class WelcomerBackgroundService {
         backgroundFile: fileName,
         textColor: current?.textColor ?? DEFAULT_CARD_TEXT_COLOR,
         isEnabled: current?.isEnabled ?? false,
+        textMessageEnabled: current?.textMessageEnabled ?? false,
+        textMessage: current?.textMessage ?? '',
       };
       if (kind === 'welcome') await this.deps.welcomer.setWelcomeConfig(data, tx);
       else await this.deps.welcomer.setFarewellConfig(data, tx);

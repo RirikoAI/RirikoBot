@@ -162,5 +162,16 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "6cc4ab96da2735a86b8deb2cfd672ee752ef9ed4cc948f8d3c9ba831596a549c",
     "contract": false
+  },
+  {
+    "id": "0001_welcomer_text_message",
+    "statements": [
+      "ALTER TABLE `guild_farewell` ADD `text_message_enabled` integer DEFAULT false NOT NULL;",
+      "ALTER TABLE `guild_farewell` ADD `text_message` text DEFAULT '' NOT NULL;",
+      "ALTER TABLE `guild_welcomer` ADD `text_message_enabled` integer DEFAULT false NOT NULL;",
+      "ALTER TABLE `guild_welcomer` ADD `text_message` text DEFAULT '' NOT NULL;"
+    ],
+    "checksum": "dd917e3a5dde03c1b03516af91f22f6edadf7d55167fa683307dfc3be64b01be",
+    "contract": false
   }
 ];

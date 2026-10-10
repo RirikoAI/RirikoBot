@@ -6,8 +6,6 @@ import DatabaseConstructor from 'better-sqlite3';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDatabaseClient } from '../client/factory.js';
 import type { DatabaseClient, PostgresDatabaseClient } from '../client/types.js';
-import { PG_SCHEMA_DDL } from '../schema/pg/ddl.js';
-import { SQLITE_SCHEMA_DDL } from '../schema/sqlite/ddl.js';
 import {
   BASELINE_ID,
   planAdoption,
@@ -443,9 +441,13 @@ describe.each(['sqlite', 'postgres'] as const)('adoption [%s]', (dialect) => {
       await env.dispose();
     });
 
-    /** The database as the old startup path built it: the full DDL, no tracking table. */
-    const buildFromFullDdl = () =>
-      env.exec(dialect === 'sqlite' ? SQLITE_SCHEMA_DDL : PG_SCHEMA_DDL);
+    /**
+     * The database as the old startup path built it, no tracking table. That path built the full
+     * DDL of its time, which is the baseline (the full DDL has grown with later migrations).
+     */
+    const buildFromFullDdl = async () => {
+      for (const statement of baselineOf(dialect).statements) await env.exec(statement);
+    };
 
     /** The whole mini baseline, then `edit` to make it drift. */
     async function miniDatabase(...edits: string[]): Promise<void> {
@@ -841,7 +843,7 @@ describe('adoption [sqlite] backup', () => {
 
   it('backs the file up before it adopts, and not when the adoption is refused', async () => {
     if (client.dialect !== 'sqlite') throw new Error('expected SQLite');
-    client.raw.exec(SQLITE_SCHEMA_DDL);
+    for (const statement of baselineOf('sqlite').statements) client.raw.exec(statement);
     client.raw.exec('ALTER TABLE guilds DROP COLUMN invited_by_id');
     client.raw.exec('ALTER TABLE guilds DROP COLUMN name');
 
@@ -901,7 +903,7 @@ describe('adoption [sqlite] adventure tables the old upgrade created as BIGINT a
 
   beforeEach(async () => {
     env = await sqliteEnv();
-    await env.exec(SQLITE_SCHEMA_DDL);
+    for (const statement of baseline.statements) await env.exec(statement);
     for (const name of [
       'adventure_choices',
       'adventure_sessions',

@@ -38,8 +38,8 @@ export async function saveCardSettings(
     guildId,
     kind,
     readFormFields(formData, {
-      text: ['channelId', 'messageTemplate', 'textColor', 'backgroundUrl'],
-      flag: ['enabled'],
+      text: ['channelId', 'messageTemplate', 'textColor', 'backgroundUrl', 'textMessage'],
+      flag: ['enabled', 'textMessageEnabled'],
     }),
     { check: (patch) => checkCard(guildId, patch) },
   );

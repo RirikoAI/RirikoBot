@@ -64,6 +64,8 @@ describe('WelcomerBackgroundService (TASK-1663)', () => {
       backgroundFile: null,
       textColor: '#ff0000',
       isEnabled: true,
+      textMessageEnabled: true,
+      textMessage: 'Read #rules',
     });
 
     await service.upload(GUILD, 'welcome', png(10, 10, 1), actor);
@@ -74,6 +76,8 @@ describe('WelcomerBackgroundService (TASK-1663)', () => {
       backgroundUrl: null,
       messageTemplate: 'Hi {user}',
       isEnabled: true,
+      textMessageEnabled: true,
+      textMessage: 'Read #rules',
     });
     expect(await readdir(dir)).toEqual([row!.backgroundFile]);
     const actions = db.raw.prepare('SELECT action FROM audit_logs').all() as { action: string }[];
