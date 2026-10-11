@@ -108,7 +108,11 @@ describe('StreamAlertService (TASK-1661)', () => {
   let streams: StreamRepository;
   let resolveStreamer: Mock<StreamPlatformAdapter['resolveStreamer']>;
   let service: StreamAlertService;
-  const actor: StreamAlertActor = { userId: 'user-1', source: 'dashboard', ipAddress: '1.2.3.4' };
+  const actor: StreamAlertActor = {
+    userId: 'user-1',
+    source: 'dashboard',
+    ipAddress: '198.51.100.4',
+  };
 
   const auditActions = () =>
     (

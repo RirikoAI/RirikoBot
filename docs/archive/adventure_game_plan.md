@@ -4,11 +4,11 @@
 
 Build `/adventure` and prefix equivalents as a public, player-controlled RPG connecting mini-games, economy, leveling, and Waifu TCG. Completed runs require exactly four or five meaningful decisions, targeting roughly 2–3 minutes for an engaged player; the 90-second per-decision timeout is a maximum wait, not the expected pace.
 
-The authoritative contracts, full revised scenario graphs, payment examples, and edge cases are in [adventure-game.md](adventure-game.md). The implementation now lives in the repository; rollout verification is recorded below.
+The authoritative contracts, full revised scenario graphs, payment examples, and edge cases are in [adventure-game.md](../adventure-game.md). The implementation now lives in the repository; rollout verification is recorded below.
 
 ## Implementation status — 2026-09-26
 
-`TASK-1701` through `TASK-1704`, presentation follow-up `TASK-1706`, catalog expansion `TASK-1707`, and reward-rank tasks `TASK-1708`–`TASK-1711` are DONE. The 35 scenarios, durable global ownership, transactional payments/rewards, public Discord commands, restart recovery and shared scene illustrations are implemented. `TASK-1705` and `STORY-170` are in REVIEW: focused suites pass, while live PostgreSQL/Discord validation remains unexecuted by the agent and the previously documented full-suite/coverage environment limitations remain. See [verification handover](kanban/handovers/TASK-1705.md), [presentation handover](kanban/handovers/TASK-1706.md) and [runtime guide](adventure-runtime.md). The [catalog](adventure-catalog.md) lists all 35 adventures and their artwork.
+`TASK-1701` through `TASK-1704`, presentation follow-up `TASK-1706`, catalog expansion `TASK-1707`, and reward-rank tasks `TASK-1708`–`TASK-1711` are DONE. The 35 scenarios, durable global ownership, transactional payments/rewards, public Discord commands, restart recovery and shared scene illustrations are implemented. `TASK-1705` and `STORY-170` are in REVIEW: focused suites pass, while live PostgreSQL/Discord validation remains unexecuted by the agent and the previously documented full-suite/coverage environment limitations remain. See [verification handover](../kanban/handovers/TASK-1705.md), [presentation handover](../kanban/handovers/TASK-1706.md) and [runtime guide](../adventure-runtime.md). The [catalog](../adventure-catalog.md) lists all 35 adventures and their artwork.
 
 ## Resolved grooming decisions
 
@@ -109,7 +109,7 @@ Use injected clocks and seeded RNG. Run transaction integration tests on both SQ
 
 Presentation follow-up `TASK-1706 (5)` addresses playtest feedback: one start message, story and companion focus, zero-free summaries without route history, and 15 illustrated locations shared across all 111 nodes. The user selected shared locations over one image per node. Generation prompts are recorded in `assets/adventure/manifest.json`.
 
-Expansion `TASK-1707 (8)` adds 30 authored four-decision adventures with at least three endings each, 30 distinct shared-location illustrations and searchable scenario autocomplete. The complete catalog has 35 adventures, 45 images and 413 nodes; traversal validates 1,315 complete paths. Exact new prompts are recorded in `assets/adventure/expansion-manifest.json`. See [expansion handover](kanban/handovers/TASK-1707.md).
+Expansion `TASK-1707 (8)` adds 30 authored four-decision adventures with at least three endings each, 30 distinct shared-location illustrations and searchable scenario autocomplete. The complete catalog has 35 adventures, 45 images and 413 nodes; traversal validates 1,315 complete paths. Exact new prompts are recorded in `assets/adventure/expansion-manifest.json`. See [expansion handover](../kanban/handovers/TASK-1707.md).
 
 **67 points total**, including the presentation follow-up and the persistent ownership/payment safeguards. Individual task estimates use Fibonacci values; the total is their roll-up. The story and task dependencies are registered on the board. Keep one ticket in progress and follow the story-completion PR checkpoint.
 
@@ -126,6 +126,6 @@ Then `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`.
 
 For manual verification run `pnpm dev:bot`, finish each scenario, inspect `/balance` and `/card collection`, try prefix aliases, test cross-channel/guild starts, and exercise zero-energy, insufficient-funds, timeout, and abandonment behavior. Automated verification and known environment limits are recorded in the TASK-1705 handover.
 
-Completion economy TASK-1713 (5), companion XP/card acquisition TASK-1714 (5) and verification TASK-1715 (3) implement [tower-benchmarked completion rewards](adventure-completion-rewards.md). Failed endings earn progression, new runs cap restoration at seven energy, and the original companion receives atomic XP. See the [balance report](adventure-reward-balance.md).
+Completion economy TASK-1713 (5), companion XP/card acquisition TASK-1714 (5) and verification TASK-1715 (3) implement [tower-benchmarked completion rewards](../adventure-completion-rewards.md). Failed endings earn progression, new runs cap restoration at seven energy, and the original companion receives atomic XP. See the [balance report](../adventure-reward-balance.md).
 
 Historical user override TASK-1712 (1 point) was removed by CHORE-1703 on 2026-09-28. New admissions use companion level for every user; existing runs retain their saved rank.

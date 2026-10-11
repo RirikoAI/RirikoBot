@@ -6,7 +6,7 @@
 # Prints the wg-quick configuration, or prints nothing and returns 1 (reason on stderr) when any
 # input is malformed, so the caller never writes a half-checked file.
 #   app role      dials out: every peer needs an endpoint and gets PersistentKeepalive 25, which also
-#                 keeps the NAT mapping of a Lightsail host open. No ListenPort.
+#                 keeps the NAT mapping of an app host open. No ListenPort.
 #   lavalink role listens on <listen port>; peers need no endpoint (the app hosts dial in).
 render_wireguard_conf() {
   local role=$1 address=$2 listen_port=$3 private_key=$4 peers_raw=$5

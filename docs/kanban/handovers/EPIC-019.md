@@ -17,7 +17,7 @@ See docs/kanban/protocol.md section 6.
 - This epic is dedicated to the production harness. More stories will follow as the maintainer lists them.
 
 **Approach**
-- The decision record is [ADR-015](../../adr/ADR-015-versioned-schema-migrations.md): versioned, forward-only SQL migrations per dialect, embedded in code, applied by our own small runner. The runner uses a tracking table, a lock, checksums, a SQLite pre-migration backup and a downgrade guard. Existing databases are adopted once, and CI gates the whole flow.
+- The decision record is [ADR-015](../../archive/adr/ADR-015-versioned-schema-migrations.md): versioned, forward-only SQL migrations per dialect, embedded in code, applied by our own small runner. The runner uses a tracking table, a lock, checksums, a SQLite pre-migration backup and a downgrade guard. Existing databases are adopted once, and CI gates the whole flow.
 - STORY-185 builds the migration system: TASK-1851, then 1852, then 1853, then 1854. TASK-1855 can run after 1852.
 - STORY-186 makes the host deploy apply migrations as a gated step. It requires STORY-185.
 - TASK-1333 (welcome text message) is the first feature that ships a migration. It requires STORY-185.

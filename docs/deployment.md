@@ -1,7 +1,7 @@
 # Production Deployment & Infrastructure Runbook (Ririko AI 2.0.0)
 
 ## 1. Overview & Sane Infrastructure Defaults
-In strict accordance with Section 68 and 69 of `BLUEPRINT.md`: **Do not over-engineer deployment.**
+In strict accordance with Section 68 and 69 of `docs/archive/BLUEPRINT.md`: **Do not over-engineer deployment.**
 - Ririko AI 2.0.0 avoids excessive cloud microservices, Kubernetes clusters, and message bus sprawl.
 - The standard production deployment consists of two containerized applications (`bot` and `web`), a PostgreSQL database, and a Lavalink audio node. There is no Redis: nothing in 2.0 needs one.
 - Self-hosters can run the entire platform on a single lightweight VPS using SQLite and local audio extraction without Docker dependencies if desired.
@@ -102,7 +102,7 @@ Hardening (a test in `scripts/compose-production.test.ts` parses the file and ke
 - **Lavalink heap:** `LAVALINK_HEAP` sets the JVM maximum heap (`-Xmx`, default `1G`). Use `512m` on a small host.
 - **Lavalink plugin volume:** the Lavalink image runs as uid/gid 322 and has no `/opt/Lavalink/plugins` directory, so Docker creates the named volume owned by root and Lavalink dies with `Permission denied` while it downloads its plugins. The one-shot `lavalink-plugins` service therefore runs `chown -R 322:322` on the volume before `lavalink` starts (`depends_on` with `service_completed_successfully`). It uses the same pinned Lavalink image, so nothing extra is pulled, runs as root with `cap_drop: [ALL]`, `cap_add: [CHOWN]`, `no-new-privileges` and no network, and shows as `Exited (0)` in `docker compose ps -a`. That is expected.
 
-Remote Lavalink (`docker-compose.remote-lavalink.yml`): a single-host stack keeps the bundled `lavalink` service and needs nothing else. An app host that uses a Lavalink node on another machine, such as the Lightsail hosts with the Lavalink VPS (STORY-180), adds this override:
+Remote Lavalink (`docker-compose.remote-lavalink.yml`): a single-host stack keeps the bundled `lavalink` service and needs nothing else. An app host that uses a Lavalink node on another machine, such as the production and staging hosts with the separate Lavalink host (STORY-180), adds this override:
 - Run `docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production up -d`. It needs Docker Compose 2.24.4 or newer, because it uses `!override`.
 - It puts the bundled `lavalink` service in the `bundled-lavalink` profile, which nobody enables, so it never starts, and does the same for its one-shot `lavalink-plugins` init service. `bot` then waits for Postgres only.
 - The bot connects to `LAVALINK_HOST` (required: compose refuses to start without it) on `LAVALINK_PORT` (default `2333`). `LAVALINK_PASSWORD` must be the node's password.
@@ -197,7 +197,7 @@ While migrations are pending, `/health` stays 200 and reports `database: { statu
 
 ## 4. Current Hosting
 
-Production and staging run on AWS Lightsail behind Cloudflare Tunnel, with Lavalink on a separate VPS over WireGuard and releases deployed by CircleCI. The step-by-step setup (provider resources, tunnels and access policies, host configuration, CI contexts, go-live, recovery and the secret inventory) is the private hosting runbook, `docs/hosting.md`, which is not in the repository because it holds account and network details. The decision and the rejected options are in [ADR-014](adr/ADR-014-production-hosting-lightsail-cloudflare-tunnel.md); the release pipeline and its exit codes are in [release.md section 8](release.md#8-deploy-to-staging-and-production).
+Production and staging run on managed VMs behind Cloudflare Tunnel, with Lavalink on a separate host over WireGuard and releases deployed by CircleCI. The step-by-step setup (provider resources, tunnels and access policies, host configuration, CI contexts, go-live, recovery and the secret inventory) is the private hosting runbook, `docs/hosting.md`, which is not in the repository because it holds account and network details. The decision and the rejected options are in [ADR-014](archive/adr/ADR-014-production-hosting-cloudflare-tunnel.md); the release pipeline and its exit codes are in [release.md section 8](release.md#8-deploy-to-staging-and-production).
 
 The Vercel project `ririko-bot` still deploys a static project status page (it hosts neither the bot nor the dashboard):
 - `vercel.json` skips dependency installation and runs `scripts/build-status-site.ts` with Node's TypeScript type stripping. The script reads `docs/kanban/board.json` and the `docs/` tree and writes `site-dist/index.html`.

@@ -2,7 +2,7 @@
 
 ## 1. Architectural Vision & Principles
 
-Ririko AI 2.0.0 is re-architected from the ground up to modernize the legacy 1.4.0 bot into a high-performance, maintainable, production-ready platform. It adheres strictly to the comprehensive architectural guidelines set forth in `BLUEPRINT.md`.
+Ririko AI 2.0.0 is re-architected from the ground up to modernize the legacy 1.4.0 bot into a high-performance, maintainable, production-ready platform. It adheres strictly to the comprehensive architectural guidelines set forth in `docs/archive/BLUEPRINT.md`.
 
 ### Core Architectural Principles:
 1. **KISS (Keep It Simple, Stupid)**: Avoid over-engineered enterprise patterns (such as excessive microservices, message brokers, or heavy NestJS metadata reflection). Prefer straightforward composition, small modules, and strongly typed interfaces.
@@ -163,10 +163,7 @@ ririko-v2-2026/
 │   ├── economy.md                # Double-entry ledger, bank & anti-spam XP
 │   ├── waifu-tcg.md              # Ingestion, rarities, combat, marketplace
 │   ├── contributing.md           # Engineering guidelines & Git standards
-│   ├── legacy-feature-inventory.md # 141 command audit & mapping
-│   ├── dependency-evaluation.md  # 2026 dependency justification matrix
-│   ├── implementation-roadmap.md # Phases 0 through 7 Gantt schedule
-│   └── adr/                      # ADR-001 through ADR-012+
+│   └── archive/                  # Design history: blueprint, ADRs, plans, roadmap
 └── .gemini/agents/               # 18 specialist agent configurations
 ```
 

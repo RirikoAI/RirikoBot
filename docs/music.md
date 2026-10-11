@@ -260,7 +260,7 @@ Lavalink's lyrics plugins, synced karaoke display and providers that need a key 
 
 ## 10. AI Invocation & Safety Guardrails
 
-In strict adherence to `BLUEPRINT.md` Sections 10 and 75:
+In strict adherence to `docs/archive/BLUEPRINT.md` Sections 10 and 75:
 1. **Safe Tool Calling Contract**:
    When a user interacts with the AI in `#ririko-ai` (e.g. *"Ririko, play Lemon by Kenshi Yonezu"*), the LLM executes structured function calling:
    ```json

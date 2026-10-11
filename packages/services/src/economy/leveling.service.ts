@@ -12,7 +12,7 @@ export interface LevelingServiceOptions {
 }
 
 /**
- * Leveling & Karma Service implementing Section 33 of BLUEPRINT.md and Section 6 of docs/economy.md:
+ * Leveling & Karma Service implementing Section 33 of docs/archive/BLUEPRINT.md and Section 6 of docs/economy.md:
  * - Mathematical formula: Delta XP = 5L^2 + 50L + 100.
  * - Closed-form total XP cumulative summation.
  * - Bidirectional exact level & progress calculation.

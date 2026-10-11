@@ -37,7 +37,7 @@ export interface InventoryServiceOptions {
 }
 
 /**
- * Inventory & Item Shop Service implementing Section 33 of BLUEPRINT.md and Section 7 of docs/economy.md:
+ * Inventory & Item Shop Service implementing Section 33 of docs/archive/BLUEPRINT.md and Section 7 of docs/economy.md:
  * - Town shop catalog retrieval and deflationary currency sink.
  * - Daily purchase limits on entry-level goods (e.g. max 1 minor candy per day).
  * - Multi-slot inventory bag persistence.

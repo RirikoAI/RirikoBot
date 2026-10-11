@@ -29,7 +29,7 @@ export interface ProfileBackgroundManagerOptions {
 }
 
 /**
- * Profile Background Manager implementing Section 33 of BLUEPRINT.md and Section 6.2 of docs/economy.md:
+ * Profile Background Manager implementing Section 33 of docs/archive/BLUEPRINT.md and Section 6.2 of docs/economy.md:
  * - Anti-SSRF hostname resolution and private/reserved IP blocking.
  * - HTTP safe image download with size limits.
  * - Exact dimension scanning with 1200x400 px hard bounds.

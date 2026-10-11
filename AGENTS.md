@@ -1,6 +1,6 @@
 # AGENTS.md — Ririko AI 2.0.0 Project Context & Agent Guidelines
 Rules for every AI agent on this project: Claude Code, Gemini CLI, Codex, opencode, and others. `CLAUDE.md` and `GEMINI.md` import this file.
-Based on the blueprint in [BLUEPRINT.md](BLUEPRINT.md) and [docs/kanban/protocol.md](docs/kanban/protocol.md).
+Based on the blueprint in [docs/archive/BLUEPRINT.md](docs/archive/BLUEPRINT.md) and [docs/kanban/protocol.md](docs/kanban/protocol.md).
 
 Sections 1–3 come from the [Scrum-Kanban-Template](https://github.com/earnestangel/Scrum-Kanban-Template). The template's `upgrade` command replaces the text between the `scrum-kanban` markers; edit project rules in sections 4 and up.
 
@@ -99,7 +99,7 @@ If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is 
 
 ## 4. Project Overview & Scope
 **Ririko AI 2.0.0** is the next-generation, production-grade overhaul of the Ririko Discord bot (originally version 1.4.0).
-- **Production Target Date**: 2026-08-14
+- **Release**: 2.0.0 is the current release.
 - **Core Philosophy**: Modernize the architecture, eliminate technical debt, enhance scalability, and implement modern flagship systems (Waifu TCG, Next.js 16 Web Dashboard, Multi-Provider AI with safe tool calling) while strictly preserving all existing functionality and user familiarity from 1.4.0.
 - **Reference Legacy Codebase**: `.local/RirikoBot` (strictly **READ-ONLY**, never modify).
 
@@ -139,7 +139,7 @@ This document governs how AI agents collaborate, divide responsibilities, mainta
 
 | Agent Name | Core Domain | Primary Responsibilities | Dedicated Subsystem Doc |
 |---|---|---|---|
-| `legacy-auditor` | Legacy Analysis | Inspect `.local/RirikoBot` (read-only), document entities, commands, and edge cases. | [docs/legacy-feature-inventory.md](docs/legacy-feature-inventory.md) |
+| `legacy-auditor` | Legacy Analysis | Inspect `.local/RirikoBot` (read-only), document entities, commands, and edge cases. | [docs/archive/legacy-feature-inventory.md](docs/archive/legacy-feature-inventory.md) |
 | `architecture` | Systems Architecture | Monorepo package boundaries, dependency graphs, ADRs, clean service interfaces. | [docs/architecture.md](docs/architecture.md) |
 | `discord` | Discord Bot Core | Discord.js 14, Slash & Prefix parity, interaction routing, autocomplete, components. | [docs/commands.md](docs/commands.md) |
 | `database` | Data & Storage | Drizzle ORM schemas, PostgreSQL & SQLite dual-dialect, 40+ tables, transactions. | [docs/database.md](docs/database.md) |
@@ -164,10 +164,10 @@ This document governs how AI agents collaborate, divide responsibilities, mainta
 
 1. **Read-First Handshake**:
    - Before implementing any domain service, the executing agent must review:
-     - `BLUEPRINT.md` (the master platform specification)
+     - `docs/archive/BLUEPRINT.md` (the master platform specification)
      - `docs/kanban/protocol.md` (Scrum Kanban & Handover protocol)
      - `docs/kanban/BOARD.md` (confirm that at most one ticket is in progress)
-     - `docs/legacy-feature-inventory.md`
+     - `docs/archive/legacy-feature-inventory.md`
      - `docs/architecture.md`
      - The dedicated subsystem specification in `docs/<subsystem>.md`
      - The corresponding agent file in `.gemini/agents/<agent-name>.md`
@@ -225,7 +225,8 @@ The Scrum Kanban files are listed in section 2.
 - [docs/economy.md](docs/economy.md) — Event-driven economy, double-entry ledger, anti-spam protections, voice XP rules, banking.
 - [docs/waifu-tcg.md](docs/waifu-tcg.md) — Flagship Waifu TCG: waifu.im ingestion, 8-tier rarity math, 7 elemental affinities (including Ice), combat, trading, player market, WaifuGuilds.
 - [docs/contributing.md](docs/contributing.md) — Engineering guidelines, PR standards, conventional commits.
-- [docs/legacy-feature-inventory.md](docs/legacy-feature-inventory.md) — Full audit of all 141 legacy commands and 17 entities.
-- [docs/dependency-evaluation.md](docs/dependency-evaluation.md) — 2026 production dependency evaluations and selections.
-- [docs/implementation-roadmap.md](docs/implementation-roadmap.md) — Gantt timeline and milestones for Phases 0 through 7.
-- [docs/adr/](docs/adr/) — Architecture Decision Records (ADR-001 through ADR-012+).
+- [docs/archive/legacy-feature-inventory.md](docs/archive/legacy-feature-inventory.md) — Full audit of all 141 legacy commands and 17 entities.
+- [docs/archive/dependency-evaluation.md](docs/archive/dependency-evaluation.md) — 2026 production dependency evaluations and selections.
+- [docs/archive/implementation-roadmap.md](docs/archive/implementation-roadmap.md) — Gantt timeline and milestones for Phases 0 through 7.
+- [docs/archive/adr/](docs/archive/adr/) — Architecture Decision Records (ADR-001 through ADR-015+).
+- [docs/archive/README.md](docs/archive/README.md) — Index of the design history: blueprint, ADRs, plans, roadmap and the 1.x migration spec.

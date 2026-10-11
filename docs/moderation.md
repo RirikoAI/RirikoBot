@@ -1,13 +1,13 @@
 # Moderation 2.0 & Safety Subsystem Specification
 
 ## 1. Overview & Architectural Goals
-Moderation 2.0 replaces the legacy stubs in Ririko 1.4.0 with a production-grade moderation and auto-moderation engine. It features dynamic warning escalation, centralized permission validation, staff case notes, and deep integration with Discord's native AutoMod API as specified in Sections 12 and 73 of `BLUEPRINT.md`.
+Moderation 2.0 replaces the legacy stubs in Ririko 1.4.0 with a production-grade moderation and auto-moderation engine. It features dynamic warning escalation, centralized permission validation, staff case notes, and deep integration with Discord's native AutoMod API as specified in Sections 12 and 73 of `docs/archive/BLUEPRINT.md`.
 
 ---
 
 ## 2. Centralized Permission Service
 
-In compliance with Section 73 of `BLUEPRINT.md`, permission checks are centralized rather than scattered across individual command files. For any privileged action, the `PermissionService` verifies five distinct criteria:
+In compliance with Section 73 of `docs/archive/BLUEPRINT.md`, permission checks are centralized rather than scattered across individual command files. For any privileged action, the `PermissionService` verifies five distinct criteria:
 1. **Discord Permissions**: Does the invoking user have the required Discord bitfield (e.g. `BanMembers`, `ManageMessages`)?
 2. **Bot Permissions**: Does Ririko's bot account have the requisite Discord bitfield to carry out the action?
 3. **Role Hierarchy**: Is the executor's highest role strictly superior to the target user's highest role? Is Ririko's highest role superior to the target user's highest role?

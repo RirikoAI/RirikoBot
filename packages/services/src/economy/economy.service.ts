@@ -17,7 +17,7 @@ export interface EconomyServiceOptions {
 }
 
 /**
- * Default base reward values matching Section 32 & 33 of BLUEPRINT.md.
+ * Default base reward values matching Section 32 & 33 of docs/archive/BLUEPRINT.md.
  */
 export const DEFAULT_REWARD_RULES: Record<EconomyEventType, RewardRule> = {
   [EconomyEventType.MESSAGE_SENT]: { credits: 20, xp: 20, cooldownSeconds: 60 },

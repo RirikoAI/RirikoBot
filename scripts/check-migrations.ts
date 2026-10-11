@@ -1,5 +1,5 @@
 /**
- * CI gate for the versioned schema migrations (docs/adr/ADR-015, decisions 7 and 10).
+ * CI gate for the versioned schema migrations (docs/archive/adr/ADR-015, decisions 7 and 10).
  *
  *   pnpm db:check
  *

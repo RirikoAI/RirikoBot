@@ -1,5 +1,5 @@
 // Embeds the SQL migrations in migrations/{sqlite,pg}/ as TypeScript modules, so the bot, the CLI
-// and the dashboard bundle read no migration files at runtime (docs/adr/ADR-015):
+// and the dashboard bundle read no migration files at runtime (docs/archive/adr/ADR-015):
 //   src/migrations/generated/sqlite.ts (SQLITE_MIGRATIONS) and pg.ts (PG_MIGRATIONS).
 // Run it after drizzle-kit generate: pnpm -F @ririko/database db:generate-migrations
 //

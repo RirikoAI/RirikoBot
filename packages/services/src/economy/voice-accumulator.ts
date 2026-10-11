@@ -20,7 +20,7 @@ export interface VoiceAccumulatorOptions {
 }
 
 /**
- * Voice Session Accumulator implementing Section 35 of BLUEPRINT.md:
+ * Voice Session Accumulator implementing Section 35 of docs/archive/BLUEPRINT.md:
  * - Minimum quorum of 2 unmuted, undeafened human participants.
  * - Disqualifies bots, self-muted, self-deafened, and server-muted members.
  * - Excludes designated AFK channels.

@@ -1,4 +1,4 @@
-# Handover Notes: STORY-180 Remote Lavalink Node on a KVM VPS Host Over WireGuard
+# Handover Notes: STORY-180 Remote Lavalink Node on a Separate Host Over WireGuard
 
 <!--
 Append-only log. Add new entries at the bottom. Never delete earlier entries.
@@ -19,8 +19,8 @@ See docs/kanban/protocol.md section 6.
 | Host | WireGuard | Lavalink |
 |---|---|---|
 | Lavalink VPS | 10.77.0.1, UDP 51820 | production :2333, staging :2334 on 10.77.0.1 |
-| Lightsail production | 10.77.0.2 | uses :2333 |
-| Lightsail staging | 10.77.0.3 | uses :2334 |
+| App host production | 10.77.0.2 | uses :2333 |
+| App host staging | 10.77.0.3 | uses :2334 |
 
 **Relevant code**
 - `packages/music/src/lavalink/lavalink-service.ts:200-238`: the bot reads `LAVALINK_HOST`, `LAVALINK_PORT` and `LAVALINK_PASSWORD` from the environment; `secure` defaults to false. Plain WebSocket inside WireGuard is fine.

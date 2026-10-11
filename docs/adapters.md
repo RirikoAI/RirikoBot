@@ -1,7 +1,7 @@
 # Provider Adapter Architecture & Integrations (Ririko AI 2.0.0)
 
 ## 1. Overview & Architectural Principles
-In compliance with Sections 45, 80, and 81 of `BLUEPRINT.md`, external services are strictly abstracted behind **Provider Adapters**. Domain logic never couples directly to a specific API client, SDK, or remote vendor.
+In compliance with Sections 45, 80, and 81 of `docs/archive/BLUEPRINT.md`, external services are strictly abstracted behind **Provider Adapters**. Domain logic never couples directly to a specific API client, SDK, or remote vendor.
 
 ### Key Tenets:
 1. **Capability Discovery**: Adapters declare capabilities explicitly via typed flags. The UI and command parsers dynamically adapt or hide options.

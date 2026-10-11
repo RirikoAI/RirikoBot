@@ -129,7 +129,7 @@ Rolling `latest` back does not touch anyone's data:
 
 ## 8. Deploy to Staging and Production
 
-After the images are pushed, the same `release` workflow deploys them. CircleCI holds no app secrets and no Docker access on the hosts: it holds one SSH key and one Cloudflare Access service token per host, and it can only ask a host for `deploy <version>` or `status` (`deploy/host/bin/ririko-deploy-ssh.sh`, the key's forced command). The hosts are the two app hosts (staging and production Lightsail) and the Lavalink node that serves them (a separate VPS, STORY-180). Setting up the hosts, the tunnels and the contexts is a one-time job; the private hosting runbook (`docs/hosting.md`, not in the repository) covers it, and recovery.
+After the images are pushed, the same `release` workflow deploys them. CircleCI holds no app secrets and no Docker access on the hosts: it holds one SSH key and one Cloudflare Access service token per host, and it can only ask a host for `deploy <version>` or `status` (`deploy/host/bin/ririko-deploy-ssh.sh`, the key's forced command). The hosts are the two app hosts (staging and production) and the Lavalink node that serves them (a separate host, STORY-180). Setting up the hosts, the tunnels and the contexts is a one-time job; the private hosting runbook (`docs/hosting.md`, not in the repository) covers it, and recovery.
 
 ### 8.1 Pipeline Order
 

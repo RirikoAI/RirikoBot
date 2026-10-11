@@ -310,7 +310,7 @@ export function renderStatusPage(model: StatusModel, docs: DocLink[], meta: Buil
 
 function listDocs(root: string): DocLink[] {
   const docs: DocLink[] = [];
-  for (const dir of ['docs', 'docs/adr']) {
+  for (const dir of ['docs', 'docs/archive', 'docs/archive/adr']) {
     for (const file of readdirSync(join(root, dir)).sort()) {
       if (!file.endsWith('.md')) continue;
       const path = `${dir}/${file}`;

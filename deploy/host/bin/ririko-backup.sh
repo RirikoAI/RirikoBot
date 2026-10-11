@@ -7,7 +7,7 @@
 #   ririko-backup init    create the restic repository; safe to repeat
 #
 # restic runs from a pinned container image, so the host needs no extra package. The repository is
-# a Lightsail bucket (S3 compatible), encrypted on this host with RESTIC_PASSWORD before upload.
+# an S3-compatible bucket, encrypted on this host with RESTIC_PASSWORD before upload.
 # What is backed up: a pg_dump -Fc of the running release's database and the volumes
 # ririko_ririko_data, ririko_card_images, ririko_boss_images and ririko_welcomer_backgrounds,
 # mounted read-only. Never backed up: .env.production, ririko.conf (they hold the secrets), the

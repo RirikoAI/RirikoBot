@@ -11,7 +11,7 @@ Welcome to the Ririko AI 2.0.0 engineering team! We operate like a senior open-s
 ## 2. Engineering Workflow (Section 87)
 For any significant task or feature implementation:
 1. **Inspect**: Read relevant legacy code, documentation, and dependencies.
-2. **Design**: Confirm interfaces and document architectural decisions in an Architecture Decision Record (`docs/adr/`) if a significant choice is made.
+2. **Design**: Confirm interfaces and document architectural decisions in an Architecture Decision Record (`docs/archive/adr/`) if a significant choice is made.
 3. **Scaffold**: Use CLI scaffolding tools (`ririko generate:*`) to eliminate boilerplate mistakes.
 4. **Implement**: Write domain services first, followed by Discord command glue and database queries.
 5. **Test**: Author unit tests with deterministic random seeds and integration tests.

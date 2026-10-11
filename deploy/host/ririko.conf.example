@@ -15,7 +15,7 @@
 
 # Compose files of a release, space separated, in the order they are passed to docker compose
 # (one -f each). They are downloaded from the tag, so they match the images that are deployed. The
-# Lightsail app hosts that use the remote Lavalink node set:
+# app hosts that use the remote Lavalink node set:
 #RIRIKO_COMPOSE_FILES="docker-compose.production.yml docker-compose.remote-lavalink.yml"
 #RIRIKO_COMPOSE_FILES=docker-compose.production.yml
 
@@ -34,12 +34,12 @@
 #DEPLOY_LOCK_WAIT=300
 
 # --- ririko-backup (TASK-1791) -------------------------------------------------------------------
-# Nightly restic backup of a Postgres dump and the shared app volumes to a Lightsail bucket (an S3
-# compatible object store), encrypted on this host before upload. ririko-backup.timer runs at
+# Nightly restic backup of a Postgres dump and the shared app volumes to an S3-compatible bucket,
+# encrypted on this host before upload. ririko-backup.timer runs at
 # 03:30 UTC on every host, but until the five required keys below are set (and a release is
 # deployed) a run only logs a line and exits 0.
 #
-# Setup, once per host: create a Lightsail bucket and an access key for it, fill in the keys below,
+# Setup, once per host: create a bucket and an access key for it, fill in the keys below,
 # run "sudo ririko-backup init", then "sudo systemctl start ririko-backup.service" for the first
 # backup. Keep an OFFLINE copy of RESTIC_PASSWORD: without it no backup can be read, and nobody can
 # recover it. Values may be wrapped in single or double quotes; if a password begins and ends with
@@ -50,7 +50,7 @@
 #RIRIKO_ENV_NAME=ririko-production
 
 # Required. Bucket and path inside it. Give each host its own path (or bucket).
-#RESTIC_REPOSITORY=s3:s3.<region>.amazonaws.com/<bucket>/ririko-production
+#RESTIC_REPOSITORY=s3:s3.<region>.example.com/<bucket>/ririko-production
 
 # Required. The repository password that encrypts everything.
 #RESTIC_PASSWORD=
@@ -104,7 +104,7 @@
 # WG_PEERS: one peer per entry, entries separated by ";", fields by spaces:
 #   <public key> <peer tunnel address>/32 [<endpoint host:port> | -] [<tcp ports> | -]
 # The endpoint is where this host dials the peer; the app role needs one (use the VPS's IPv4
-# literal, because a Lightsail host that dials an IPv6 endpoint is seen from its IPv6 address). The
+# literal, because a host that dials an IPv6 endpoint is seen from its IPv6 address). The
 # ports are the Lavalink ports the peer may reach on this host over WireGuard, comma separated
 # (lavalink role only). Any number of peers; each has its own ports.
 
@@ -120,7 +120,7 @@
 # Lavalink role. UDP port WireGuard listens on (default 51820).
 #WG_LISTEN_PORT=51820
 
-# Lavalink role. The public addresses the app hosts' handshakes come from (the Lightsail static
+# Lavalink role. The public addresses the app hosts' handshakes come from (the app hosts' static
 # IPs), IPv4 and IPv6, separated by spaces or commas. The firewall (table inet ririko, input policy
 # drop) lets UDP WG_LISTEN_PORT in from these addresses only, and each WG_PEERS entry reach its own
 # ports on wg0. Required for the firewall; bootstrap.sh leaves the firewall as it is until it is set.

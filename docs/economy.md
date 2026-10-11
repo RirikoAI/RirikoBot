@@ -1,7 +1,7 @@
 # Centralized Economy & Leveling Engine (Ririko AI 2.0.0)
 
 ## 1. Overview
-The **Economy & Leveling Engine** is a unified, event-driven subsystem that provides currency, experience (XP), banking, rankings, and item inventories across all bot modules. It adheres strictly to financial transaction integrity and proactive anti-abuse protections as defined in Sections 32–36 and 76 of `BLUEPRINT.md`.
+The **Economy & Leveling Engine** is a unified, event-driven subsystem that provides currency, experience (XP), banking, rankings, and item inventories across all bot modules. It adheres strictly to financial transaction integrity and proactive anti-abuse protections as defined in Sections 32–36 and 76 of `docs/archive/BLUEPRINT.md`.
 
 ---
 

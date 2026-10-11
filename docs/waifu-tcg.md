@@ -38,7 +38,7 @@ waifu.im API / AniList / Jikan
 
 ### 2.2. Copyright, Attribution & Image Removal
 
-1. **Mandatory Attribution**: In strict adherence to Section 24 of `BLUEPRINT.md`, every generated card graphic and
+1. **Mandatory Attribution**: In strict adherence to Section 24 of `docs/archive/BLUEPRINT.md`, every generated card graphic and
    Discord embed footer MUST display:
    ```text
    Image source: waifu.im

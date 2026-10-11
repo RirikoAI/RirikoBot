@@ -1,5 +1,5 @@
 // Reads the SQL migrations in migrations/{sqlite,pg}/ and renders them as the TypeScript modules
-// src/migrations/generated/{sqlite,pg}.ts (docs/adr/ADR-015). Shared by the embedder
+// src/migrations/generated/{sqlite,pg}.ts (docs/archive/adr/ADR-015). Shared by the embedder
 // (embed-migrations.mjs) and by `pnpm db:check` (scripts/check-migrations.ts), so the check
 // rebuilds exactly what the embedder writes.
 //

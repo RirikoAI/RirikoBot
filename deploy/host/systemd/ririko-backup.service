@@ -1,5 +1,5 @@
 [Unit]
-Description=Ririko encrypted off-site backup (restic to a Lightsail bucket)
+Description=Ririko encrypted off-site backup (restic to an S3-compatible bucket)
 Documentation=https://github.com/RirikoAI/RirikoBot/blob/master/docs/release.md
 After=docker.service network-online.target
 Wants=network-online.target

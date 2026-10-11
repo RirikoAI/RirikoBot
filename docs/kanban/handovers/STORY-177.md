@@ -1,4 +1,4 @@
-# Handover Notes: STORY-177 Lightsail Host Bootstrap & Hosting Runbook
+# Handover Notes: STORY-177 Host Bootstrap & Hosting Runbook
 
 <!--
 Append-only log. Add new entries at the bottom. Never delete earlier entries.

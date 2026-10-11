@@ -3,7 +3,7 @@
 ## 1. Overview & Fullstack Architecture
 The **Ririko Management Dashboard** (`apps/web`) is a modern web application built on **Next.js 16 (App Router)** and **React 19**. It provides server administrators with complete graphical control over bot settings, server analytics, card collections, and moderation cases without requiring Discord commands.
 
-> **Status (2026-09-25):** STORY-110 is implemented: the `apps/web` scaffold, Discord OAuth2 login, server-side sessions, the server selector and the `requireGuildAccess` guard. The module pages (STORY-111..117) are not built yet. Section 8 maps each part of this spec to its ticket. Security decisions are recorded in [ADR-013](adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md). Local setup is in [SETUP.md](../SETUP.md#81-run-the-web-dashboard).
+> **Status (2026-09-25):** STORY-110 is implemented: the `apps/web` scaffold, Discord OAuth2 login, server-side sessions, the server selector and the `requireGuildAccess` guard. The module pages (STORY-111..117) are not built yet. Section 8 maps each part of this spec to its ticket. Security decisions are recorded in [ADR-013](archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md). Local setup is in [SETUP.md](../SETUP.md#81-run-the-web-dashboard).
 
 ### 1.1. Integration with the Monorepo
 - `apps/web` is a pnpm workspace package (`@ririko/web`) wired into `tsc -b`, ESLint and Vitest like the other apps.
@@ -252,7 +252,7 @@ Shipped in STORY-113. The bot is the only writer of the three activity tables; t
 
 ## 6. Shared Zod Validation & Dashboard-to-CLI Parity
 
-In compliance with Sections 43 and 72 of `BLUEPRINT.md`:
+In compliance with Sections 43 and 72 of `docs/archive/BLUEPRINT.md`:
 - Configuration schemas are defined once in `packages/core/src/config/guild-config.ts` (`GuildConfigSchemas`, one strict Zod object per module) and only for keys the bot reads. The `/prefix` and `/timezone` commands validate with the same `PrefixSchema` and `TimezoneSchema`.
 - Both the **Web Dashboard** and the **CLI** invoke the exact same application services (`GuildConfigService`) and validation schemas.
 - Any change that can be configured via the web UI can also be executed via `ririko guild:config <guild_id> [key] [value]`: no key lists all keys, a key alone reads its value, and a key with a value sets it. CLI changes are written to `audit_logs` with a CLI actor marker.
@@ -260,7 +260,7 @@ In compliance with Sections 43 and 72 of `BLUEPRINT.md`:
 ---
 
 ## 7. Security & Secret Redaction
-The decisions and rejected alternatives (JWKS, JWE, browser-side request signing) are recorded in [ADR-013](adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md). A stolen credential cannot be made impossible; the design makes it short-lived, revocable, unable to perform sensitive writes without a second factor, and visible to its owner.
+The decisions and rejected alternatives (JWKS, JWE, browser-side request signing) are recorded in [ADR-013](archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md). A stolen credential cannot be made impossible; the design makes it short-lived, revocable, unable to perform sensitive writes without a second factor, and visible to its owner.
 
 | Threat | Defense |
 |---|---|

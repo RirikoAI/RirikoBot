@@ -343,7 +343,7 @@ pnpm dev:bot
 ## 12. Migrating a 1.4.0 database (optional)
 
 To import data from a legacy RirikoBot 1.4.0 SQLite file, follow
-[docs/migrations.md](docs/migrations.md) and [docs/migration-1.x-to-2.0.md](docs/migration-1.x-to-2.0.md).
+[docs/migrations.md](docs/migrations.md) and [docs/archive/migration-1.x-to-2.0.md](docs/archive/migration-1.x-to-2.0.md).
 Always back up `data/ririko.sqlite` first.
 
 ---
