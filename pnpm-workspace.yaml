@@ -1,5 +1,5 @@
 packages:
   - 'apps/*'
   - 'packages/*'
-  # Private music package: a separate repository with its own install (see docs/music.md).
+  # Private music package: a separate repository with its own install (see docs/archive/music-design.md).
   - '!packages/music-private'

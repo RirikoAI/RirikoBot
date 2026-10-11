@@ -30,7 +30,7 @@ interface StreakOutcome {
 export const DEFAULT_STREAK_FORGIVENESS = 3;
 
 /**
- * Daily Claim & Streak Engine implementing Section 5.2 of docs/economy.md:
+ * Daily Claim & Streak Engine implementing Section 5.2 of docs/archive/economy-design.md:
  * - Base reward and streak bonus from the global economy config (owner console); by default
  *   250 credits and +5% per consecutive day, capping at +150% (day 31).
  * - One claim per reset day, on the shared configurable boundary (default 00:00 GMT+8).

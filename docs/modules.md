@@ -1,82 +1,358 @@
-# Ririko 2.0 Module System & Feature Specifications
+# Server Modules
 
-## 1. Overview & Isolation Architecture
-Ririko AI 2.0.0 is organized into cohesive, independently configurable **Domain Modules**. Each module encapsulates its commands, event listeners, background schedulers, and database repositories. Server administrators can selectively enable or disable any module per guild via the web dashboard or CLI.
+This page covers the community features of Ririko: roles, giveaways, voice channels, welcome cards, stream alerts, free games, reminders, mini-games, and fun commands. Music, AI, economy, moderation and the card game have their own pages.
 
----
+## 1. Overview
 
-## 2. Core Modules Catalog
+Most features work as soon as the bot is in your server. Some need a few settings first.
 
-### 2.1. Automatic Role System (Section 13)
-Provides flexible, automated role provisioning:
-- **Join Roles**: Instant autorole for new human members or bot accounts upon joining.
-- **Verification Roles**: Automatic role assignment after completing Discord onboarding or captcha verification.
-- **Interactive Component Roles**: Button roles, reaction roles, and dropdown select-menu roles.
-- **Role Groups & Exclusivity**: Mutually exclusive role sets (e.g. selecting "Color Red" automatically strips "Color Blue").
-- **Tiered Roles**: Progression-based roles unlocked by XP level, economy net worth, or voice chat milestones.
-- **Temporary Roles**: Time-limited role grants that automatically expire.
+| Feature | Dashboard page | Needs setup | Section |
+|---|---|---|---|
+| Auto roles | Auto Roles | Yes. Pick the roles. | 2.1 |
+| Reaction roles | Reaction Roles | Yes. Build a panel. | 2.2 |
+| Temporary roles | None (command only) | No | 2.3 |
+| Giveaways | Giveaways | No | 3 |
+| Auto voice channels | Auto Voice | Yes. Pick a voice channel. | 4 |
+| Welcome and farewell cards | Welcome Card, Farewell Card | Yes. Pick a channel. | 5 |
+| Stream alerts | Stream Alerts | Yes. Pick a channel, add streamers. | 6 |
+| Free games | Free Games | Yes. Pick a channel. | 7 |
+| Reminders | None | No | 8 |
+| Server settings | General | No | 9 |
+| Mini-games | Games | No | 10 |
+| Anime, reactions, memes | None | No | 11 |
 
-### 2.2. Giveaways 2.0 (Section 16)
-Replaces fragile flat-file JSON libraries with an enterprise database-backed engine:
-- **Configurable Entry Gates**: Minimum Discord account age, minimum guild membership tenure, required roles, blacklisted roles.
-- **Interactive Entry**: Button-based entry with real-time entry count feedback.
-- **Weighted Bonus Entries**: Server boosters or active chatters earn higher roll weights.
-- **Lifecycle Controls**: Early termination, automated reroll, cancellation, and winner history.
-- **Crash Recovery**: Active giveaways resume seamlessly across bot restarts without dropping participants or duplicating winner announcements.
+To use the dashboard, see [dashboard.md](dashboard.md). To turn a command off, use the **Commands** page. See [commands.md](commands.md).
 
-### 2.3. Auto Voice Channels 2.0 (Section 17)
-Temporary dynamic voice channel generator:
-1. Member joins designated **"Join to Create"** parent voice channel.
-2. Bot instantly provisions a temporary voice channel with configurable name template (e.g. `🔊 {user}'s Lounge`).
-3. User is moved to the new channel and granted channel owner permissions.
-4. Channel owner can manage channel settings (rename, lock, set user limit, set bitrate, transfer ownership, kick members).
-5. When all members leave, the temporary channel is automatically deleted.
-6. **Orphan Cleanup**: On bot reboot, any orphaned temporary channels left behind by a crash are cleanly detected and pruned.
+## 2. Roles
 
-### 2.4. Interactive Mini-Games Suite (Section 37)
-Built on an extensible `MiniGame` session engine:
-- **Tic Tac Toe**: Interactive 3x3 button grid against an unbeatable Minimax AI or human PvP.
-- **Rock Paper Scissors**: Ephemeral button selection for secret choices in PvP or against Ririko.
-- **High / Low**: Card prediction wager game.
-- **Coin Flip & Dice**: Solo and PvP wager games with verified deterministic random number generation.
-- **Wager Escrow**: PvP matches hold wagers in database escrow until game conclusion.
+Ririko needs the **Manage Roles** permission. It can only give roles that sit below its own highest role. It cannot give `@everyone` or roles that belong to an integration.
 
-### 2.5. Social & Community Modules
-- **Anime & Manga Search**: AniList and Jikan API search for anime synopsis, staff, characters, and airing schedules.
-- **Anime Reactions Engine**: All 60 legacy anime reaction animations powered by OtakuGIFs.
-- **Meme Synthesis Engine**: All 11 meme generators rendered dynamically via `@napi-rs/canvas`.
-- **Welcomer & Farewell**: High-resolution welcome banners featuring user avatars, member counts, and customizable background graphics.
-  - **Optional text message**: each card can also send a text message in the same Discord message as the card (`guild_welcomer` and `guild_farewell` columns `text_message_enabled` and `text_message`, off and empty by default). Set it on the dashboard Welcome and Farewell pages (checkbox "Also send a text message" and a text box), with `/welcomer text:<message>` and `/farewell text:<message>` (`text:none` turns it off and keeps the stored message; the prefix forms are `!welcomer text <message>` and `!welcomer text none`), or with `ririko guild:config <guild> welcome.textMessage` / `welcome.textMessageEnabled` (and `farewell.*`). The message is trimmed and at most 2000 characters; turning it on with an empty message is refused everywhere.
-  - **Placeholders**: `{user}`, `{username}`, `{server}` and `{memberCount}`. In the welcome text `{user}` is a mention of the new member; in the farewell text `{user}` is the plain username. `{username}` is always the plain username. Values are inserted as plain text, so a name that contains `#general` is never turned into a link.
-  - **`#channel-name`**: a word like `#rules` that names a channel of the server (case-insensitive, whole word) becomes a channel mention (`<#id>`). Text that already holds `<#id>` is sent as it is, and any other `#word` stays as typed. The dashboard preview shows the filled text under the card, with `#names` left as typed.
-  - **No pings**: the welcome send allows only the joining member as a user mention and the farewell send allows no mentions, so `@everyone`, `@here` and role mentions in the template never ping. The filled text is cut to Discord's 2000 characters. With the text off, the bot sends only the card.
-- **Persistent Reminders**: User reminders parsed via natural language (`!remindme in 2 hours to study`) surviving bot reboots.
+The role commands need **Manage Roles** or **Manage Server** (or **Administrator**).
 
----
+### 2.1. Auto Roles
 
-## 3. Feature Flags & Configuration Toggles
+Auto roles give roles to new members and bots when they join. They also set up a verification button.
 
-Every major subsystem is controlled by a typed feature flag in `guild_settings`:
-- `music.enabled`
-- `ai.enabled`
-- `economy.enabled`
-- `waifu.enabled`
-- `moderation.enabled`
-- `imageGeneration.enabled`
-- `giveaways.enabled`
-- `autoVoice.enabled`
-- `streamAlerts.enabled`
-- `freeGames.enabled`
+**Turn it on.**
 
-When a module is disabled, its commands are automatically unregistered or blocked by middleware, and its background jobs skip the guild.
+1. Open the dashboard **Auto Roles** page.
+2. Pick up to 10 roles for new members.
+3. Pick up to 10 roles for new bots.
+4. Turn on **Give join roles**.
+5. Save.
 
----
+**Command.** `/autorole`
 
-## 4. Optional Future Modules (Section 84)
-Designed with clean extension points for post-2.0 releases:
-- Starboard
-- Custom Embed Builder
-- Server Counters & Statistics Channels
-- Member Milestones & Birthday Tracker
-- Suggestion System with Upvotes
-- Discord Support Ticket System
+| Option | Required | What it does |
+|---|---|---|
+| `action` | Yes | `show`, `humans`, `bots`, `verify`, `disable` or `send-verify`. |
+| `role` | For `humans`, `bots`, `verify` | The role to set. |
+| `target` | For `disable` | What to turn off: `humans`, `bots`, `both`, `verify` or `all`. |
+| `channel` | No | Where `send-verify` posts the button. |
+| `message` | No | The text on the verification message. |
+
+To set up verification:
+
+1. Run `/autorole action:verify role:@Verified`.
+2. Run `/autorole action:send-verify channel:#verify`.
+3. Members click the button to get the role.
+
+### 2.2. Reaction Roles
+
+A reaction role gives a role when a member clicks a button or a reaction.
+
+**Turn it on.** The dashboard has a message builder.
+
+1. Open the **Reaction Roles** page.
+2. Write the message. You can add an embed.
+3. Add up to 25 role buttons. Or add one role menu with up to 25 options.
+4. Pick a click mode: toggle, give only, remove only, or pick one.
+5. Check the preview. Then publish.
+
+This page needs a passkey check. See [dashboard.md](dashboard.md). The page also lists every message with roles. You can remove a role or delete a panel.
+
+**Commands.**
+
+`/create-reaction-role` adds a role to a message that already exists.
+
+| Option | Required | What it does |
+|---|---|---|
+| `message-id` | Yes | The ID of the message. |
+| `emoji` | Yes | The emoji or the button label. |
+| `role` | Yes | The role to give. |
+| `mode` | No | `toggle` (default), `give_only`, `remove_only` or `unique`. |
+| `type` | No | `emoji` (default) or `button`. |
+| `group` | No | A group name. In a `unique` group, a member keeps one role. |
+
+`/reaction-roles` lists the roles of the server.
+
+| Option | Required | What it does |
+|---|---|---|
+| `action` | No | `list` or `remove`. |
+| `id` | For `remove` | The ID of the reaction role to remove. |
+
+### 2.3. Temporary Roles
+
+A temporary role is removed by Ririko after a set time. There is no dashboard page.
+
+**Command.** `/temprole`
+
+| Option | Required | What it does |
+|---|---|---|
+| `action` | Yes | `add`, `remove` or `list`. |
+| `user` | For `add`, `remove` | The member. |
+| `role` | For `add`, `remove` | The role. |
+| `duration` | For `add` | How long, such as `30m`, `2h`, `1d` or `1w`. |
+
+## 3. Giveaways
+
+A giveaway has a prize, an end time and a button. Members click the button to enter. Giveaways continue after a restart of the bot.
+
+**Turn it on.** Nothing to turn on. Members with **Manage Messages**, **Manage Server** or **Administrator** can create giveaways.
+
+**Command.** `/giveaway`
+
+| Option | Used by | What it does |
+|---|---|---|
+| `action` | All | `create`, `end`, `reroll`, `delete`, `edit` or `list`. With no action, Ririko lists the giveaways. |
+| `prize` | `create`, `edit` | What you give away. |
+| `duration` | `create`, `edit` | Time until the end, such as `30m`, `12h` or `1d`. At least 5 seconds and at most 30 days. |
+| `winners` | `create`, `edit`, `reroll` | How many winners. The default is 1. |
+| `channel` | `create` | The channel for the giveaway. |
+| `role` | `create` | A role that members must have to enter. |
+| `giveaway` | `end`, `reroll`, `delete`, `edit` | The message ID or the giveaway ID. |
+
+- `list` is open to everyone. Every other action needs the permissions above.
+- You cannot edit a giveaway after it ends.
+- You can reroll only a giveaway that has ended.
+- The dashboard **Giveaways** page lists running giveaways and the last 25 that ended. You can end one or reroll winners there. Create giveaways in Discord.
+
+Prefix form: `!giveaway create <duration> <winners> <prize>`. The old names `!gcreate`, `!gend`, `!greroll`, `!gdelete`, `!gedit` and `!glist` still work.
+
+## 4. Auto Voice Channels
+
+A member joins a "Join to Create" voice channel. Ririko makes a new voice channel for them and moves them in. When everyone leaves, Ririko deletes the channel. After a restart, Ririko removes channels that were left behind.
+
+**Turn it on.**
+
+1. Open the dashboard **Auto Voice** page.
+2. Add a hub (up to 20). Pick the voice channel.
+3. Set a name template. Use `{user}` for the member name.
+4. Set a user limit and a bitrate.
+5. Save.
+
+Or run `/autovoice action:setup channel:<voice channel>`.
+
+**Commands.** `/autovoice` needs **Manage Channels** or **Manage Server**.
+
+| Option | Required | What it does |
+|---|---|---|
+| `action` | Yes | `setup`, `remove` or `list`. |
+| `channel` | For `setup`, `remove` | The "Join to Create" voice channel. |
+| `template` | No | The name of new channels. Use `{user}` for the member name. |
+| `limit` | No | The user limit. 0 means no limit. The most is 99. |
+| `bitrate` | No | The bitrate in bps, such as 64000. Ririko lowers it to what the server allows. |
+
+`/voice` manages your own temporary channel. Only the channel owner can use it. You must be in that channel.
+
+| Option | Required | What it does |
+|---|---|---|
+| `action` | Yes | `name`, `limit`, `lock`, `permit`, `kick`, `claim` or `transfer`. |
+| `name` | For `name` | The new channel name. |
+| `limit` | For `limit` | The user limit, 0 to 99. |
+| `locked` | For `lock` | `true` locks the channel. `false` unlocks it. |
+| `user` | For `permit`, `kick`, `transfer` | The member. |
+
+`claim` lets you take a channel when its owner has left it. The old names `!avc`, `!vname`, `!vlimit`, `!vlock`, `!vunlock`, `!vpermit`, `!vkick`, `!vclaim` and `!vtransfer` still work as prefix commands.
+
+## 5. Welcome and Farewell Cards
+
+Ririko posts a picture card when a member joins or leaves.
+
+**Turn it on.**
+
+1. Open the dashboard **Welcome Card** page. For leaves, open **Farewell Card**.
+2. Turn on the card.
+3. Pick the channel. Ririko needs to send messages and attach files there.
+4. Write the message. It can be up to 200 characters.
+5. Pick a text and border color, such as `#ffffff`.
+6. Pick a background. Give a link, or upload a file.
+7. Check the preview. Then save.
+
+The message can use `{user}`, `{server}` and `{memberCount}`.
+
+- A link must be public and point to a PNG, JPEG, WebP or GIF image.
+- An upload can be a PNG, JPEG, WebP or GIF file. It can be up to 2 MB and 4096 pixels on each side. An upload replaces the link, and a link replaces the upload.
+- You can also send a text message in the same Discord message as the card. It can be up to 2000 characters. Placeholders: `{user}`, `{username}`, `{server}` and `{memberCount}`. A word like `#rules` that names a channel becomes a channel link. The text never pings `@everyone`, `@here` or roles.
+
+**Commands.** `/welcomer` and `/farewell` need **Manage Server**. They have the same options.
+
+| Option | What it does |
+|---|---|
+| `channel` | The channel for the card. |
+| `message` | The text on the card. Use `{user}`, `{server}` and `{memberCount}`. |
+| `background` | A public link to the background image, or `none`. |
+| `color` | A hex color for the text and border. |
+| `text` | The text message sent with the card, or `none`. |
+| `enable` | `true` or `false`. |
+
+The aliases are `/welcome` and `/goodbye`.
+
+## 6. Stream Alerts
+
+Ririko posts a message when a streamer goes live. It supports Twitch, YouTube and TikTok. A server can follow up to 25 streamers.
+
+**Turn it on.**
+
+1. For Twitch alerts, the host sets the Twitch keys. YouTube and TikTok alerts work without keys. See [adapters.md](adapters.md).
+2. Open the dashboard **Stream Alerts** page.
+3. Add a streamer. Give a name, an `@handle`, a YouTube channel ID or a profile link.
+4. Pick the platform, or leave it on automatic.
+5. Pick the channel for the alerts.
+6. Optional: pick a role to mention, and write your own message.
+7. Save.
+
+The message can use `{streamer}`, `{title}`, `{game}`, `{platform}`, `{url}` and `{role}`. It can be up to 1000 characters. Ririko pings only the role you picked.
+
+**Commands.** All actions except `list` need **Manage Server**.
+
+`/stream`
+
+| Option | Used by | What it does |
+|---|---|---|
+| `action` | All | `subscribe`, `unsubscribe`, `list`, `channel` or `check`. |
+| `streamer` | `subscribe`, `unsubscribe` | The name, handle, channel ID or profile link. |
+| `platform` | No | `TWITCH`, `YOUTUBE` or `TIKTOK`. |
+| `channel` | `subscribe`, `channel` | The channel for the alerts. |
+| `role` | No | The role to mention. |
+| `custom_message` | No | Your own message. |
+
+- `!subscribe <streamer> [platform]` and `!unsubscribe <streamer> [platform]` are prefix shortcuts.
+- `/setup-stream-notification channel:<channel>` sets the default alert channel.
+- `/stream-status` lists the followed streamers and shows who is live. Everyone can use it.
+- Ririko checks for live streams every minute. The host can change this with `STREAM_CHECK_INTERVAL_MS`.
+
+## 7. Free Games
+
+Ririko announces free games from the Epic Games Store and Steam.
+
+**Turn it on.**
+
+1. Open the dashboard **Free Games** page.
+2. Pick the announcement channel. Ririko needs to send messages and embed links there.
+3. Optional: pick a role to ping above each announcement.
+4. Save. Leave the channel empty to turn the announcements off.
+
+**Command.** `/freegames`
+
+| Option | What it does |
+|---|---|
+| `action` | `show`, `setchannel` or `remove`. |
+| `channel` | The announcement channel (for `setchannel`). |
+| `role` | The role to ping. When you leave it out, the old role stays. |
+
+`setchannel` and `remove` need **Manage Server**. `show` is open to everyone.
+
+## 8. Reminders
+
+`/reminder` sets a reminder for you. Ririko sends it as a direct message.
+
+| Option | What it does |
+|---|---|
+| `time` | When. For example `30m`, `2h`, `tomorrow 9am`, `next friday 8pm` or `2026-12-25 08:00`. Up to 100 characters. |
+| `message` | What to remind you about. Up to 500 characters. |
+| `repeat` | `none`, `daily` or `weekly`. |
+| `action` | `set`, `list`, `cancel` or `timezone`. With a time, the default is `set`. Without one, it is `list`. |
+| `id` | The reminder ID to cancel. The list shows it. |
+| `zone` | Your time zone, such as `Asia/Kuala_Lumpur`. |
+
+Prefix examples:
+
+- `!remindme 1h take a break`
+- `!remindme daily 9am take pills`
+- `!reminder list`
+- `!reminder cancel <id>`
+- `!reminder tz Asia/Kuala_Lumpur`
+
+Limits:
+
+- The time must be in the future and at most 1 year away.
+- You can have 25 active reminders.
+- Ririko checks for due reminders every 15 seconds.
+- If Ririko cannot send a direct message, it posts in the channel where you set the reminder and mentions only you. If that also fails, the reminder is dropped.
+- A repeating reminder keeps the same clock time when summer time changes. It skips times missed while the bot was offline.
+
+Ririko reads times in your time zone. If you set none, it uses the time zone of the server. If that is not set either, it uses UTC.
+
+## 9. Server Settings and Information
+
+| Command | What it does |
+|---|---|
+| `/prefix` | Shows the prefix. `/prefix set:<prefix>` changes it. Needs **Manage Server**. `!setprefix <prefix>` also works. |
+| `/timezone` | Shows a time zone. `/timezone set:<zone> scope:server` sets the server zone (**Manage Server**). `scope:user` sets your own zone. |
+| `/get-avatar` | Shows the avatar of a member. Options: `user`, and `server_avatar` for the server avatar. |
+| `/guild-info` | Shows the server's information and settings. Server only. |
+| `/member-info` | Shows a member's profile, roles, permissions and time zone. Option: `user`. Server only. |
+
+The dashboard **General** page sets the prefix and time zone too. Time zone names come from the IANA list, such as `Europe/London` or `UTC`.
+
+## 10. Mini-Games
+
+Mini-games use credits. See [economy.md](economy.md). A wager is optional. When you play with a wager, Ririko takes the credits first. A win pays double the wager. A tie gives the wager back. A loss keeps the credits.
+
+**Turn it on.** The games are on by default. Open the dashboard **Games** page to:
+
+- set the largest wager (empty means no limit),
+- turn each game on or off,
+- set a cooldown for each game.
+
+| Command | Options | How it works |
+|---|---|---|
+| `/tictactoe` | `opponent` (required), `wager` | A 3x3 game with buttons. Pick a member to play a person. Pick Ririko to play the AI, which never loses. Each turn has 60 seconds. |
+| `/rps` | `opponent`, `wager` | Rock-Paper-Scissors with secret buttons. With no opponent, you play Ririko. |
+| `/highlow` | `wager` | Ririko shows a number from 1 to 100. Guess if the next number is higher or lower. A tie gives the wager back. |
+| `/coinflip` | `guess` (`heads` or `tails`), `wager` | Flips a coin. A wager needs a guess. |
+| `/dice` | `count` (1 to 6), `sides` (2 to 100), `wager` | Rolls dice. With a wager, you and Ririko each roll one six-sided die. The higher roll wins. |
+
+Prefix examples: `!cf heads 100`, `!roll 2`, `!rps @friend 50`.
+
+`/adventure` is a story game with choices. See [adventure-game.md](adventure-game.md).
+
+## 11. Anime, Reactions and Memes
+
+### 11.1. Anime Search
+
+`/anime`, `/manga` and `/anime-character` search for a title or a character. Each has one required option, `search`.
+
+1. Run the command.
+2. Pick a result in the menu (up to 10 results).
+3. Read the details. Pick another result in the same menu if you want.
+
+Only you can use the menu. It stops working after 2 minutes.
+
+- Ririko asks MyAnimeList (through Jikan) first. If that fails, it asks AniList.
+- Adult entries show only in age-restricted channels.
+- Ririko remembers search results for 10 minutes.
+
+### 11.2. Waifu Images and Wallpapers
+
+- `/waifu` sends a random safe image from waifu.im. The **Another one** button sends a new image. Only you can use it.
+- `/wallpaper search:<keyword>` finds anime wallpapers. Pick a source (WallHaven, Zerochan or Konachan). Ririko shows 3 wallpapers. Then you can load more, switch the source, or stop. Wallpapers are safe for work and never repeat.
+
+### 11.3. Reactions
+
+`/react type:<name> [target:@user]` sends an anime GIF. With no target, it is aimed at you. Start typing in `type` to see the list.
+
+There are 68 reactions: airkiss, angrystare, bite, bleh, blush, brofist, celebrate, cheers, clap, confused, cool, cry, cuddle, dance, drool, evillaugh, facepalm, handhold, happy, headbang, hug, kiss, laugh, lick, love, mad, nervous, no, nom, nosebleed, nuzzle, nyah, pat, peek, pinch, poke, pout, punch, roll, run, sad, scared, shout, shrug, shy, sigh, sip, slap, sleep, slowclap, smack, smile, smug, sneeze, sorry, stare, stopit, surprised, sweat, thumbsup, tickle, tired, wave, wink, woah, yawn, yay, yes.
+
+Each name also works as a prefix command, such as `!hug @friend`. The exception is `roll`, which is also `/dice`. Use `!react roll`. The cooldown is 2 seconds.
+
+### 11.4. Memes
+
+`/meme template:<name> text1:<text> [text2] [text3] [text4] [text5]` makes a meme picture. Start typing in `template` to see the list.
+
+Templates: `0days`, `allmyhomies`, `always-been`, `american-chopper`, `chad`, `everywhere`, `getting-paid`, `got-any-more`, `train-bus`, `undertaker` and `woman-yelling-at-cat`.
+
+- Each template uses its own number of texts. `american-chopper` has up to five panels.
+- Prefix forms: `!meme chad text1 | text2` and `!chad text1 | text2`.
+- The cooldown is 3 seconds.

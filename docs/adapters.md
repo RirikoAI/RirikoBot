@@ -1,98 +1,90 @@
-# Provider Adapter Architecture & Integrations (Ririko AI 2.0.0)
+# Integrations
 
-## 1. Overview & Architectural Principles
-In compliance with Sections 45, 80, and 81 of `docs/archive/BLUEPRINT.md`, external services are strictly abstracted behind **Provider Adapters**. Domain logic never couples directly to a specific API client, SDK, or remote vendor.
+Ririko connects to outside services for AI, images, music, streams, anime data and free games. This page lists each service, what it needs, and what happens when it is missing. It is for the person who hosts the bot.
 
-### Key Tenets:
-1. **Capability Discovery**: Adapters declare capabilities explicitly via typed flags. The UI and command parsers dynamically adapt or hide options.
-2. **Fallback Chains**: Critical services define a `Primary -> Fallback -> Graceful Degradation` chain.
-3. **Resilience & Circuit Breakers**: Timeouts, retries with exponential backoff, and circuit breakers prevent external API outages from hanging bot operations.
+You set every key in the `.env` file. Never put a key in Discord or in the database. Restart the bot after you change `.env`. The `.env.example` file shows every variable.
 
----
+## 1. Check Your Setup
 
-## 2. Capability Discovery Model
+- Run `ririko doctor`. It checks Node.js, the database settings, the Discord token and client ID, FFmpeg, the AI keys, the stream keys, Spotify and image generation. See [development.md](development.md).
+- Open the dashboard **Integrations** page. It shows `Configured` or `Not configured` for each service. It never shows a key. See [dashboard.md](dashboard.md).
 
-```typescript
-export interface ProviderCapabilities {
-  readonly canStream: boolean;
-  readonly canSearch: boolean;
-  readonly supportsPlaylists: boolean;
-  readonly supportsLyrics: boolean;
-  readonly supportsImageEditing: boolean;
-  readonly supportsImageGeneration: boolean;
-  readonly maxImageBatchSize: number;
-}
-```
+## 2. Summary
 
-UI components and command dispatchers inspect these capabilities at runtime to omit unsupported select menus, options, and buttons.
+| Feature | Service | Needed? | Variables |
+|---|---|---|---|
+| The bot | Discord | Yes | `DISCORD_TOKEN`, `DISCORD_CLIENT_ID` |
+| The dashboard | Discord OAuth | For the dashboard | `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL`, `SECRET_VAULT_KEY` |
+| AI chat | Gemini, OpenAI or Ollama | At least one, for AI | See section 3 |
+| Images | Gemini, Replicate or ComfyUI | At least one, for `/imagine` | See section 4 |
+| Music | Lavalink | Recommended | See section 5 |
+| Spotify links | Spotify | For Spotify links | See section 5 |
+| Twitch alerts | Twitch | For Twitch alerts | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` |
+| YouTube alerts | YouTube Data API | Optional | `YOUTUBE_API_KEY` |
+| TikTok alerts | TikTok session | Optional | `TIKTOK_SESSION_ID`, `TIKTOK_API_KEY` |
+| Free games | Epic Games Store, Steam | No key | None |
+| Anime search | Jikan (MyAnimeList), AniList | No key | None |
+| Waifu images | waifu.im | No key | None |
+| Wallpapers | WallHaven, Zerochan, Konachan | No key | None |
+| Reaction GIFs | OtakuGIFs | No key | None |
+| Lyrics | LRCLIB | No key | None |
 
----
+Full setup of Discord, the dashboard and Docker is in [SETUP.md](../SETUP.md) and [deployment.md](deployment.md).
 
-## 3. Subsystem Provider Adapters
+## 3. AI Chat Providers
 
-### 3.1. AI Chat Model Adapters (`ChatModelProvider`)
-- **Google Gemini Adapter** (`@google/genai`): Primary flagship adapter for high-speed chat, streaming, and function calling (Gemini 2.5 Flash / Pro).
-- **OpenAI Adapter** (`openai`): Standard adapter for GPT-4o and GPT-4o-mini.
-- **Local Ollama / OpenAI-Compatible Adapter**: Connects to self-hosted Ollama instances or custom inference proxies.
+| Provider | Variables | Notes |
+|---|---|---|
+| Google Gemini | `GEMINI_API_KEY` | The default. |
+| OpenAI | `OPENAI_API_KEY`, optional `OPENAI_BASE_URL` | Set `OPENAI_BASE_URL` for an OpenAI-compatible service. |
+| Ollama | `OLLAMA_BASE_URL` | A server you run yourself. |
 
-### 3.2. Image Generation Adapters (`ImageGenerationProvider`)
-```typescript
-export interface ImageGenerationCapabilities {
-  prompt: boolean;
-  negativePrompt: boolean;
-  aspectRatios: string[];
-  maxCount: number;
-  imageToImage: boolean;
-}
+`DEFAULT_AI_PROVIDER` picks the first provider. `DEFAULT_AI_MODEL` picks its model.
 
-export interface ImageGenerationProvider {
-  readonly id: string;
-  readonly name: string;
-  readonly capabilities: ImageGenerationCapabilities;
-  
-  generate(request: ImageGenerationRequest): Promise<ImageGenerationResult>;
-}
-```
-- **Free-Tier / Local Adapter**: Self-hosted ComfyUI / Stable Diffusion WebUI (via local REST API) or Hugging Face Inference free allocation with verified quota handling.
-- **Paid Cloud Adapters**: Google Gemini Imagen, OpenAI DALL-E 3, Replicate.
-- **Default Anime Prompts**:
-  - *Positive*: `"high quality anime illustration, detailed character design, beautiful composition, clean line art, expressive eyes, cinematic lighting, detailed background"`
-  - *Negative*: `"low quality, blurry, distorted anatomy, bad hands, missing fingers, cropped, watermark"`
-- **Asynchronous Queue**: Image requests are enqueued in `image_jobs` with concurrency throttling to prevent server lockups.
+When a provider fails or runs out of quota, Ririko tries the next provider that you have set up. A provider that keeps failing is skipped for a short time. Each server can choose its own first provider and model. See [ai.md](ai.md).
 
-### 3.3. Streamer Platform Adapters (`StreamPlatformAdapter`)
-```typescript
-export interface StreamPlatformAdapter {
-  readonly id: string;
-  readonly name: string;
-  
-  resolveStreamer(input: string): Promise<Streamer>;
-  getCurrentStream(streamer: Streamer): Promise<LiveStream | null>;
-  subscribe(streamer: Streamer, webhookUrl: string): Promise<void>;
-  unsubscribe(streamer: Streamer): Promise<void>;
-}
-```
-- **Twitch**: EventSub Webhooks with fallback polling.
-- **YouTube Live**: Official Data API v3 & RSS PubSubHubbub subscription.
-- **TikTok Live & Facebook**: Live status endpoints with scraping fallback where API access is restricted.
-- **Idempotency & Thumbnail Caching**:
-  - Idempotency Key: `platform + stream_id + guild_id + announcement_target`.
-  - Stream thumbnails are downloaded, validated for dimensions, saved to local storage/CDN, and uploaded directly to Discord as attachments to prevent broken/expired embeds.
+## 4. Image Providers
 
-### 3.4. Music Source Adapters (`MusicSourceAdapter`)
-- **YouTube Extractor**: Native audio streaming with anti-bot token rotation.
-- **Spotify Extractor**: Metadata lookup mapped to high-fidelity audio streams.
-- **SoundCloud Extractor**: Direct native HTTP Opus streaming.
-- **Deezer Extractor**: Metadata matching and preview fallback.
+| Provider | Variables | Notes |
+|---|---|---|
+| Google Gemini (Imagen) | `GEMINI_API_KEY` | The default. |
+| Replicate | `REPLICATE_API_TOKEN` | Flux models. |
+| ComfyUI or Stable Diffusion WebUI | `COMFYUI_URL` (or `COMFYUI_BASE_URL`, `SD_WEBUI_URL`) | A server you run yourself. |
+| Mock | None | A placeholder picture for tests. |
 
-### 3.5. Free Game Announcers (`FreeGameProvider`)
-```typescript
-export interface FreeGameProvider {
-  readonly id: string;
-  fetchFreeGames(): Promise<FreeGame[]>;
-}
-```
-- **Epic Games Store**: Official promotional feed API.
-- **Steam**: Official Steam store featured specials feed.
-- **GOG**: Official giveaways catalog feed.
-- Duplicate detection guarantees notifications are dispatched exactly once per guild per promotion.
+`IMAGE_DEFAULT_PROVIDER` picks the default. `IMAGE_DAILY_QUOTA` limits the images a member can make in 24 hours (default 30). Image requests wait in a queue, so a busy bot does not freeze.
+
+## 5. Music
+
+| Part | Variables | Notes |
+|---|---|---|
+| Lavalink | `LAVALINK_ENABLED`, `LAVALINK_HOST`, `LAVALINK_PORT`, `LAVALINK_PASSWORD`, `LAVALINK_SECURE` | Plays YouTube, Spotify, SoundCloud and more. Without it, Ririko uses a built-in player with fewer sources. |
+| YouTube cipher | `LAVALINK_YOUTUBE_CIPHER_URL` | Optional. |
+| Spotify | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_DC`, `SPOTIFY_KEY`, `SPOTIFY_SP_DC` | Needed to play Spotify links. |
+
+See [music.md](music.md).
+
+## 6. Stream Alerts
+
+| Platform | Variables | Notes |
+|---|---|---|
+| Twitch | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | Needed for Twitch alerts. Create an app at the [Twitch developer console](https://dev.twitch.tv/console/apps). |
+| YouTube | `YOUTUBE_API_KEY` | Optional. Without it, Ririko reads public pages. |
+| TikTok | `TIKTOK_SESSION_ID`, `TIKTOK_API_KEY` | Optional. Without them, Ririko reads public pages. |
+
+`STREAM_CHECK_INTERVAL_MS` sets how often Ririko checks for live streams. The default is 60000 (1 minute). The dashboard reads the same Twitch keys, to look up Twitch names.
+
+Ririko saves the preview picture of a stream and attaches it to the alert, so the alert still works after the stream ends. It sends each alert once for each stream, server and channel. See [modules.md](modules.md).
+
+## 7. Services Without Keys
+
+These services need no setup. If one is down, the feature that uses it shows an error message.
+
+- **Jikan and AniList** answer anime, manga and character searches. Ririko asks Jikan first. If Jikan fails, it asks AniList and skips Jikan for 60 seconds.
+- **waifu.im** gives waifu images. The card game also uses it for card art.
+- **WallHaven, Zerochan and Konachan** give wallpapers.
+- **OtakuGIFs** gives reaction GIFs.
+- **LRCLIB** gives lyrics.
+- **Epic Games Store and Steam** give free games.
+
+Every request has a time limit and a retry rule, so a slow service does not freeze the bot.

@@ -1,52 +1,87 @@
-# Adventure completion economy (version 2)
+# Adventure Rewards and Ranks
 
-Implemented locally on 2026-09-27 in TASK-1713–TASK-1715. This supersedes the original authored amount totals for **new admissions** across all 35 adventures. Rank policy version 1 and its level thresholds remain unchanged. The temporary user-specific S+ override was removed in CHORE-1703; new runs use companion level for every user. Existing sessions without `rewardEconomy` finish using their original rules.
+This page explains what an adventure pays and how your companion's level changes it. For the rules of the game, read [adventure-game.md](adventure-game.md).
 
-## Progression and the tower benchmark
+## 1. What You Get
 
-Every completed ending, including failures, awards credits, player XP, dust and XP to the original companion. Abandonment and timeout discard pending rewards. Solo runs have no companion XP; a companion at its rarity level cap receives no excess XP. The summary shows actual grants and level changes, omitting zero values.
+Every finished adventure pays rewards. This includes bad endings.
 
-The reference is repeat tower floor 34: mean rewards of 875 credits, 175 player XP, 70.5 dust and 890 XP per participating card for 20 energy. Adventure rank E (levels 10–19, including the requested level-18 comparison) targets **110% of each reference resource per net energy**, after paid choices, expected wallet losses and the shop value of consumed offerings. The target concerns one companion; tower may award XP to multiple party members.
+- **Credits**
+- **Player XP**
+- **Crafting Dust**
+- **Companion XP.** Your active card gets XP. A solo run gives none.
+- **Items and cards.** These depend on the story and on luck.
 
-At admission, an exact traversal of the chosen story includes every decision and failed check, using the companion's snapshotted stats and affinity. Choices are equally likely and assumed affordable. It freezes resource coefficients in the session, rather than choosing rewards from a successful path. The final outcome and authored rewards still determine the actual payout:
+The final ending sets how much you get:
 
-- Outcome weights: critical success 1.30, success 1.15, mixed 1.00, failure 0.70, critical failure 0.55.
-- Resource shape: outcome weight plus authored eligible credits / 300, player XP / 100 or dust / 50. Companion XP uses the player-XP shape.
-- Each coefficient makes the weighted mean meet the resource target at rank E, accounting for excluded fixed rewards and costs. Completion computes the calibrated base, floors it, then applies the frozen rank multiplier once. Fixed wager/exchange components remain excluded from multiplication.
-- Rank E is the balance anchor. Higher ranks retain the user-requested larger bonuses up to S+ (+500%); they deliberately exceed the 10% advantage. F rewards are below the E target. Better stats change route probabilities, loot and variance; admission calibration keeps the ordinary expected reward rate consistent at a given rank.
+| Ending | Reward size |
+|---|---|
+| Critical success | The largest |
+| Success | Large |
+| Mixed | Medium |
+| Failure | Small |
+| Critical failure | The smallest |
 
-This is an expectation under the documented choice model, not a guarantee that every route or player strategy beats tower. Wallet shortages, preferred routes, capped companions and unavailable loot can change realized value. Paid choices charge immediately; calibration includes their average cost but does not refund a player's exact spending. The Bazaar's winning wager retains its fixed 400-credit component for a 200-credit stake; new runs also receive the calibrated completion reward.
+Costs you paid during the story and credits you lost to bad events are taken off your total. Ririko shows the real change in the result message. It leaves out values that are zero.
 
-## Energy and cooldown mode
+The route you pick and the costs you pay change the real result.
 
-Entry remains 15 energy. Completion restoration is capped at **7 energy total** on new runs, preventing old full-refund endings from becoming free repeat farms. Penalties remain unchanged. The calibration assumes a 100-energy starting balance, no external energy changes and penalties clamped to remaining energy. Normal completed runs therefore cost at least 8 net energy. Cancellation still refunds 7; an unpublished failed start receives admission compensation under the existing rules.
+## 2. Reward Ranks
 
-When energy is disabled, neither entry nor completion affects energy. The existing global 15-minute start cooldown applies, with 15 virtual energy used only to calibrate ordinary rewards. Insufficient energy does not activate this fallback.
+Your rank comes from the level of your companion at the moment you start. The rank stays the same until the story ends. A level-up in the middle changes nothing.
 
-## Card acquisition specialty
+| Rank | Companion level | Bonus |
+|---|---|---|
+| F | No companion, or levels 1 to 9 | None |
+| E | 10 to 19 | +50% |
+| D | 20 to 29 | +100% |
+| C | 30 to 39 | +150% |
+| B | 40 to 59 | +200% |
+| A | 60 to 79 | +300% |
+| S | 80 to 99 | +400% |
+| S+ | 100 | +500% |
 
-New completion card opportunities use these base chances before the relative rank bonus:
+Run `/adventure action:ranks` (or `!adv ranks`) to see this table in Discord.
 
-| Ending | Base chance | Rank E chance | New card floor |
-|---|---:|---:|---|
-| Success / critical success | 20% | 30% | RARE |
-| Mixed | 15% | 22.5% | RARE |
-| Failure / critical failure | 10% | 15% | UNCOMMON |
+The bonus raises:
 
-An existing terminal card opportunity receives at least the corresponding base chance and retains its authored rarity floor. Guaranteed and rarer authored drops stay intact. If a prior node already awarded a card, no additional universal completion opportunity is added. Existing authored terminal drops still run. Rank multiplies chances, capped at 100%, without multiplying card quantities. A new completion opportunity remains rank-scaled even when an authored exchange bundle is excluded.
+- credits,
+- player XP,
+- Crafting Dust,
+- companion XP,
+- the chance of an item or a card drop. The chance never goes above 100%. For example, at S+ a 10% chance becomes 60%.
 
-Card selection continues to require an active eligible definition and asset. Empty/removed pools produce the existing unavailable-card receipt, never a lower-rarity substitute. The balance report counts successful card intents, assuming an eligible pool; it does not count absent assets as minted cards.
+The bonus does not change:
 
-## Atomic settlement and compatibility
+- the price of a choice,
+- credit losses and energy losses,
+- fixed wager results,
+- the number of cards you get.
 
-Companion XP uses the original owned-card ID. The shared progression service locks the card row and participates in the adventure transaction, so simultaneous tower XP cannot overwrite it. Ownership and eligible state (IDLE/EQUIPPED) are checked at payout; transferred, deleted or trade/market-listed cards receive no XP, with an explanation in the summary. XP is clipped to the card's remaining rarity-level capacity. Ordinary rewards still settle if the companion becomes unavailable.
+## 3. Card Chances
 
-The completion amounts, rank and economy coefficients are frozen before `SETTLING`. XP, wallet, player XP, dust, items, cards, energy and the receipt commit together. Retries cannot double-grant XP, and failures roll back the transaction. Rank metadata and economy version are separately validated. Old sessions and immutable receipts are not recalculated. Internal tests may explicitly disable completion rewards to exercise version-1 compatibility; production admissions default to version 2.
+Each ending has a chance to give you a card. The chance is higher at higher ranks.
 
-Deploy compatible readers/writers together and restart the bot. Drain new-format sessions before reverting to a binary without version-2 support. No new SQL column or live data migration is required for these JSON fields.
+| Ending | Base chance | At rank E | Lowest rarity |
+|---|---|---|---|
+| Success or critical success | 20% | 30% | Rare |
+| Mixed | 15% | 22.5% | Rare |
+| Failure or critical failure | 10% | 15% | Uncommon |
 
-## Verification
+Some stories have their own sure drops. They stay. If a story already gave you a card, Ririko does not add another card chance. If no card of the needed rarity exists, you get no card, and the result says so. You never get a card of a lower rarity.
 
-The [generated balance report](adventure-reward-balance.md) and [JSON data](adventure-reward-balance.json) use 3,150,000 seeded runs: 35 stories at eight ranks, plus a free-choice-only E sensitivity sample. Level-18 E results across stories are 8.8–11.2% above tower for net credits, 8.7–10.3% for player XP, 6.7–9.8% for dust and 9.3–10.9% for companion XP; integer rounding accounts for much of the dust difference. Average card intents range from 17.1% to 35.6% per run.
+## 4. Companion XP
 
-Reproduce with `pnpm exec tsx scripts/adventure-reward-balance.ts`. See [TASK-1715](kanban/handovers/TASK-1715.md) for test results and pending live PostgreSQL/Discord verification. Public adventure messages continue to hide route history; this developer report does not publish route solutions.
+- The XP goes to the card that started the story. You must still own it. It must not be in a trade or a market listing.
+- A card at its highest level for its rarity gets no more XP.
+- If the card is not available, the other rewards still arrive.
+
+## 5. Energy
+
+- An adventure costs 15 energy.
+- A finished adventure can give back at most 7 energy.
+- Events in the story can take energy away. Ririko shows one final number that includes the 15 energy of the entry.
+
+For example, a story that costs 15 energy and takes away 5 more shows `Energy: -20`. If you abandon a story, Ririko gives back 7 of the 15 energy, so you lose 8.
+
+When an admin turns energy off for a server, a story neither costs nor restores energy. You wait 15 minutes between starts.

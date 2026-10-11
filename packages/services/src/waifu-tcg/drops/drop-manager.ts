@@ -178,7 +178,7 @@ export class DropManager {
   }
 
   /**
-   * Whether `date` is within the guild's drop hours in its time zone (docs/waifu-tcg.md:L140).
+   * Whether `date` is within the guild's drop hours in its time zone (docs/archive/waifu-tcg-design.md:L140).
    * A start after the end wraps past midnight (20 to 4); equal hours mean all day.
    */
   isWithinActiveHours(date: Date, config: GuildDropConfig): boolean {
@@ -329,7 +329,7 @@ export class DropManager {
 
     const config = this.getGuildConfig(drop.guildId);
 
-    // Anti-Sniping Cooldown check (docs/waifu-tcg.md:L141-142)
+    // Anti-Sniping Cooldown check (docs/archive/waifu-tcg-design.md:L141-142)
     const lastClaim = this.lastClaimants.get(drop.guildId);
     if (lastClaim && lastClaim.userId === userId) {
       const elapsed = now - lastClaim.timestamp;

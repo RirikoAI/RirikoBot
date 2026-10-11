@@ -209,22 +209,24 @@ These rules add to section 1.7. Where they differ, this section wins.
 
 ## 11. Project Documentation Catalog
 The Scrum Kanban files are listed in section 2.
-- [docs/architecture.md](docs/architecture.md) — Monorepo topology, O(1) command router, dual-dialect DB, audio pipeline.
-- [docs/development.md](docs/development.md) — Local setup, CLI commands (`ririko doctor`, `ririko generate:*`), engineering rules.
-- [docs/commands.md](docs/commands.md) — Dual-dispatch slash & prefix pipeline, middleware chain, interactive help center.
-- [docs/modules.md](docs/modules.md) — 20+ module catalog, autoroles, giveaways, auto-voice, mini-games, feature flags.
-- [docs/adapters.md](docs/adapters.md) — Provider adapter architecture, capability discovery, fallback chains (AI, Images, Streams, Music, Games).
+- [docs/architecture.md](docs/architecture.md) — Package layout, command pipeline, settings flow, dashboard security, feature notes. For contributors.
+- [docs/development.md](docs/development.md) — Checks to run before a pull request, schema changes, and the Ririko command-line tool.
+- [docs/commands.md](docs/commands.md) — How to use commands, who can use them, per-server rules, and the list of every command.
+- [docs/modules.md](docs/modules.md) — Server modules: roles, giveaways, auto-voice, welcome cards, stream alerts, free games, reminders, mini-games, anime, reactions, memes.
+- [docs/adapters.md](docs/adapters.md) — The outside services Ririko uses (AI, images, music, streams, anime data), their keys, and what happens without them.
 - [docs/database.md](docs/database.md) — 40+ table schema specifications, indexes, ACID transactions.
 - [docs/migrations.md](docs/migrations.md) — 1.4.0 SQLite to 2.0.0 Drizzle migration runbook, CLI dry-run and verification.
 - [docs/testing.md](docs/testing.md) — Testing standards, deterministic RNG seeds, quality gates (`pnpm test`, `typecheck`, `lint`).
 - [docs/deployment.md](docs/deployment.md) — Docker multi-stage containerization, docker-compose.production.yml, `/health` and `/ready` probes. Hosting setup lives in a private runbook that is kept out of the repository.
-- [docs/dashboard.md](docs/dashboard.md) — Next.js 16 App Router, React 19, Discord OAuth2, 20+ module management pages.
-- [docs/ai.md](docs/ai.md) — Dedicated `#ririko-ai` channel, per-user isolated memory, `get_current_time()` tool, safe tool allowlist.
-- [docs/music.md](docs/music.md) — Music 2.0 multi-source extractors (YouTube/Spotify/SoundCloud/Deezer), reactive UI without polling.
-- [docs/moderation.md](docs/moderation.md) — Moderation cases, dynamic warning escalations, centralized permission verification, AutoMod.
-- [docs/economy.md](docs/economy.md) — Event-driven economy, double-entry ledger, anti-spam protections, voice XP rules, banking.
-- [docs/waifu-tcg.md](docs/waifu-tcg.md) — Flagship Waifu TCG: waifu.im ingestion, 8-tier rarity math, 7 elemental affinities (including Ice), combat, trading, player market, WaifuGuilds.
+- [docs/dashboard.md](docs/dashboard.md) — The dashboard for server admins and bot owners: sign-in, passkeys, every page, the owner console and host setup.
+- [docs/ai.md](docs/ai.md) — AI chat, tools, translation and image generation: setup, commands and settings.
+- [docs/music.md](docs/music.md) — Music: setup with Lavalink, commands, player message, DJ role and Spotify keys.
+- [docs/moderation.md](docs/moderation.md) — Moderation commands, cases, the warning policy, AutoMod and raid alerts.
+- [docs/economy.md](docs/economy.md) — Credits, XP, levels, the daily reward, the bank, the shop, and the settings that control them.
+- [docs/waifu-tcg.md](docs/waifu-tcg.md) — The Waifu TCG for server admins and bot owners: card drops, rules, commands and host tools. Players read [docs/tcg-player-guide.md](docs/tcg-player-guide.md).
 - [docs/contributing.md](docs/contributing.md) — Engineering guidelines, PR standards, conventional commits.
+- [docs/tcg-player-guide.md](docs/tcg-player-guide.md) — How to play the Waifu TCG.
+- [docs/adventure-game.md](docs/adventure-game.md), [docs/adventure-catalog.md](docs/adventure-catalog.md), [docs/adventure-completion-rewards.md](docs/adventure-completion-rewards.md) — The adventure game: rules, the 35 stories, rewards and ranks.
 - [docs/archive/legacy-feature-inventory.md](docs/archive/legacy-feature-inventory.md) — Full audit of all 141 legacy commands and 17 entities.
 - [docs/archive/dependency-evaluation.md](docs/archive/dependency-evaluation.md) — 2026 production dependency evaluations and selections.
 - [docs/archive/implementation-roadmap.md](docs/archive/implementation-roadmap.md) — Gantt timeline and milestones for Phases 0 through 7.
