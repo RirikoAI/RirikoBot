@@ -227,7 +227,7 @@ const AUTOMOD_ACTION_HELP = `${AUTOMOD_ACTIONS.join(', ')}; every match also del
 
 /**
  * Guild settings editable from the dashboard and the CLI, one strict schema per module. Only
- * keys the bot reads belong here (docs/dashboard.md section 3.2).
+ * keys the bot reads belong here (docs/archive/dashboard-design.md section 3.2).
  */
 export const GuildConfigSchemas = {
   general: z

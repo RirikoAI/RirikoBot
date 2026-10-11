@@ -31,7 +31,7 @@ export class CardDismantleService {
   ) {}
 
   /**
-   * Dismantles a user card into Crafting Dust according to docs/waifu-tcg.md:L166.
+   * Dismantles a user card into Crafting Dust according to docs/archive/waifu-tcg-design.md:L166.
    * Protects favorite cards and active/equipped cards.
    */
   async dismantleCard(userId: string, userCardId: string): Promise<DismantleResult> {

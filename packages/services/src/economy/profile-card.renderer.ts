@@ -48,7 +48,7 @@ function truncateText(ctx: SKRSContext2D, text: string, maxWidth: number): strin
 }
 
 /**
- * High-performance Profile Card 2.0 Canvas Renderer implementing Section 6.2 of docs/economy.md:
+ * High-performance Profile Card 2.0 Canvas Renderer implementing Section 6.2 of docs/archive/economy-design.md:
  * - 1200x400 px crisp resolution with glassmorphic dark design.
  * - Discord avatar with presence indicator & Level badge.
  * - Server & Global dense rank pills.

@@ -1,191 +1,173 @@
-# Centralized Economy & Leveling Engine (Ririko AI 2.0.0)
+# Economy and Levels
 
-## 1. Overview
-The **Economy & Leveling Engine** is a unified, event-driven subsystem that provides currency, experience (XP), banking, rankings, and item inventories across all bot modules. It adheres strictly to financial transaction integrity and proactive anti-abuse protections as defined in Sections 32–36 and 76 of `docs/archive/BLUEPRINT.md`.
+Ririko has credits (money) and XP (experience). Members earn both by chatting, by being in voice channels, by claiming a daily reward and by playing games. They spend credits in the shop, in mini-games and in the card game.
 
----
+## 1. How It Works
 
-## 2. Event-Driven Economy Architecture
+- **Credits** are the money of Ririko. Your credits are the same in every server. Each member has a wallet and a bank.
+- **XP** is kept for each server. XP gives you a level in that server.
+- **Karma** is a small score that members give each other in a server.
+- A **profile card** is a picture that shows your level, rank and credits.
 
-Rather than hardcoding coin or XP grants across commands and event handlers, all rewarding actions publish a standardized `EconomyEvent`:
+Server admins cannot set the number of credits that members earn. This stops one server from creating credits for everyone. Bot owners set the global values (see section 8).
 
-```typescript
-export interface EconomyEvent {
-  type: EconomyEventType;
-  userId: string;
-  guildId?: string;
-  source: string;
-  metadata?: Record<string, unknown>;
-}
+**Turn it on.** The economy is always on. Admins can change how XP works in their server on the dashboard **XP & Ranking** page (see section 7).
 
-export enum EconomyEventType {
-  MESSAGE_SENT = 'MESSAGE_SENT',
-  VOICE_MINUTE = 'VOICE_MINUTE',
-  ATTACHMENT_UPLOADED = 'ATTACHMENT_UPLOADED',
-  GAME_WON = 'GAME_WON',
-  GAME_LOST = 'GAME_LOST',
-  QUEST_COMPLETE = 'QUEST_COMPLETE',
-  CARD_DROPPED = 'CARD_DROPPED',
-  CARD_CLAIMED = 'CARD_CLAIMED',
-  CARD_SOLD = 'CARD_SOLD',
-  DAILY_REWARD = 'DAILY_REWARD',
-  ACHIEVEMENT_UNLOCKED = 'ACHIEVEMENT_UNLOCKED',
-  ACHIEVEMENT_CLAIMED = 'ACHIEVEMENT_CLAIMED',
-  SHOP_PURCHASE = 'SHOP_PURCHASE',
-  CONSUMABLE_USED = 'CONSUMABLE_USED',
-}
-```
+## 2. Commands
 
-The centralized `EconomyService` intercepts these events, evaluates anti-spam criteria, calculates multipliers (roles, boosts, events), and commits ledger entries.
+All economy commands are open to everyone.
 
----
+### 2.1. Credits and Bank
 
-## 3. Anti-Spam & Abuse Protection
+| Command | Aliases | Options | What it does |
+|---|---|---|---|
+| `/balance` | `bal`, `money` | `target` (member) | Shows the wallet, bank and net worth. |
+| `/daily` | `d` | None | Claims the daily reward. |
+| `/deposit` | `dep` | `amount` (required) | Moves credits from the wallet to the bank. Type a number or `all`. |
+| `/withdraw` | `with` | `amount` (required) | Moves credits from the bank to the wallet. Type a number or `all`. |
+| `/pay` | `give`, `transfer` | `target` (required), `amount` (required, at least 1) | Sends credits from your wallet to a member. You cannot pay yourself. |
 
-A core invariant of Ririko 2.0 is: **Spam must NEVER generate money or EXP.**
+### 2.2. Ranking and Profile
 
-### 3.1. Text Anti-Spam Heuristics
-1. **Rolling Window Cooldown**: XP and coins from text chatting are awarded at most **once every 60 seconds per user**.
-2. **Burst & Copy-Paste Detection**: Messages identical or >80% similar (Levenshtein distance) to the user's previous 3 messages are discarded with zero reward.
-3. **Length & Quality Threshold**: Messages with fewer than 5 non-whitespace characters or composed purely of punctuation/emojis award zero XP/coins.
-4. **Automated & Self-Bot Guard**: Inhuman typing rates or message intervals with low variance (<100ms variance across messages) automatically trigger a 30-minute shadow cooldown on economy rewards.
+| Command | Aliases | Options | What it does |
+|---|---|---|---|
+| `/leaderboard` | `lb`, `top` | `scope` (`server` or `global`), `page` | Shows the XP ranking. |
+| `/profile` | `rank` | `target` (member), `background` (link) | Shows a profile card. With a link or an attached image, it sets your own background. |
+| `/karma` | `k` | `action` (`view` or `give`), `target` (member) | Shows karma. With `give`, you give 1 karma to another member. You cannot give karma to yourself. Server only. |
 
-### 3.2. Voice XP / Economy Anti-AFK Rules
-Voice participation generates higher XP rewards than text chatting, but AFK farming is strictly mitigated:
-- **Participant Quorum**: Minimum of **2 unmuted, undeafened human members** must be present in the voice channel.
-- **Mute & Deafen Disqualification**: Self-deafened, self-muted, or server-muted users earn zero XP/coins.
-- **AFK Channel Exclusions**: The guild's designated AFK voice channel is hard-excluded.
-- **Interval Accrual**: XP is accrued in 60-second discrete buckets validated against gateway voice state updates.
-- **Per-guild switch (STORY-115)**: voice rewards are off until a manager turns on **Voice rewards** on the XP & Ranking page (`xp.voiceXpEnabled`). `VoiceRewardService` runs the accumulator every minute and pays credits and XP only in those guilds; no-XP channels and roles and the guild's XP rate apply. Before STORY-115 nothing called the accumulator, so voice never paid. Members already in voice are tracked from the gateway cache on every READY.
+Profile background rules:
 
----
+- The image can be at most 1200 x 400 pixels and 5 MB.
+- The link must be public. Ririko saves a copy of the image.
+- You can use a link, or attach an image when you use the prefix form.
 
-## 4. Double-Entry Ledger & Financial Security
+### 2.3. Shop and Items
 
-All monetary operations are treated as audited financial transactions:
+| Command | Aliases | Options | What it does |
+|---|---|---|---|
+| `/shop` | `store` | `action` (`list` or `buy`), `item` (item code), `quantity` | Lists the shop. With `buy`, buys an item. |
+| `/inventory` | `inv`, `bag` | `target` (member) | Lists the items of a member. |
+| `/use` | `consume` | `item` (item code, required), `quantity` | Uses an item from your bag. |
 
-```typescript
-export interface EconomyTransactionRecord {
-  transactionId: string;
-  userId: string;
-  guildId?: string;
-  type: 'TRANSFER' | 'DEPOSIT' | 'WITHDRAW' | 'DAILY' | 'GAMBLE' | 'SHOP_BUY' | 'MARKET_FEE' | 'TCG_REWARD' | 'ACHIEVEMENT_REWARD';
-  amount: bigint;
-  currency: 'CREDITS' | 'GEMS';
-  balanceBefore: bigint;
-  balanceAfter: bigint;
-  source: string;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-}
-```
+Every item has a code. `/shop` and `/inventory` show it. You type the code in `/shop buy` and in `/use`.
 
-### Safety Rules:
-- Every balance mutation occurs inside an ACID database transaction.
-- Database schemas enforce `CHECK (wallet_balance >= 0)` and `CHECK (bank_balance >= 0)`. Race conditions attempting to double-spend immediately fail at the database constraint level.
-- Multi-party transfers (e.g. `/pay <@user> <amount>`) acquire deterministic row locks sorted by user ID to prevent database deadlocks.
+The shop starts with these items:
 
----
+| Code | Name | Price | What it does |
+|---|---|---|---|
+| `candy_minor` | Minor Energy Candy | 100 | Restores 20 energy. You can buy 1 each day. |
+| `stamina_potion` | Stamina Potion | 350 | Restores 50 energy. You can use 3 each day. |
+| `exp_potion_small` | Small EXP Potion | 250 | Gives 150 XP in the server where you use it. |
+| `profile_bg_voucher` | Profile Background Voucher | 1500 | A cosmetic voucher. |
 
-## 5. Banking & Daily Rewards
+Energy is used by the card game. See [tcg-player-guide.md](tcg-player-guide.md). Bot owners can add and change items (see section 8).
 
-### 5.1. Bank Features
-- **Wallet vs. Bank**: Wallet balance is vulnerable to loss in gambling or robbery (if robbery is enabled by the guild). Bank balance is 100% secure.
-- **Deposit & Withdrawal**: `/deposit <amount | all>` and `/withdraw <amount | all>`.
-- **Bank Capacity**: base capacity plus a step per account level, $10,000 + \text{Level} \times 2,500$ by default (both values are set in the owner console, 5.4). The account level comes from the member's XP on every server added together, because the bank is global while XP is kept per server. Capacity is recomputed on every deposit, withdrawal, interest payment, `/balance`, profile card and level-up, and saved to `economy_balances.bank_capacity`. Lowering it never removes credits: a member above the new capacity can withdraw but not deposit.
-- **Interest**: Guilds can enable a small daily bank interest yield (e.g. 0.5% - 1.0% per day, capped at max yield limits) to encourage saving.
+## 3. How You Earn Credits and XP
 
-### 5.2. Daily Claim Streaks (`/daily`)
-- Base reward: 250 credits by default (owner console, 5.4).
-- Daily streak multiplier: $+5\%$ per consecutive day, capping at 30 days ($+150\%$).
-- **One claim per reset day**, on the shared reset boundary described in Section 5.3 (default 00:00 GMT+8). A claim becomes available the moment the boundary passes, however recently the last one was made.
-- **Consecutive-miss forgiveness**: missing fewer than `RIRIKO_DAILY_STREAK_FORGIVENESS` consecutive reset days (default 3) preserves the streak. Missed days are *skipped, never counted*: a 15-day streak interrupted by 2 missed days resumes at **16**, not 18.
-- Reaching the threshold wipes the streak. The claim that triggers the wipe counts as day 1 and pays the day-1 reward of 250 credits.
-- Any successful claim clears the accumulated miss counter, so forgiveness measures consecutive misses rather than lifetime misses.
-- Setting `RIRIKO_DAILY_STREAK_FORGIVENESS=0` disables forgiveness: a single missed reset day ends the streak.
-- The miss count is derived from `economy_accounts.last_daily_at` and is not stored separately, so it can never drift out of step with the last claim.
-- Anti-abuse: frozen accounts cannot claim.
+| Activity | Credits | XP | Limit |
+|---|---|---|---|
+| Send a chat message | 20 | 15 to 25 | Once every 60 seconds |
+| Be in a voice channel | 35 | 40 | Each minute, if an admin turned on voice rewards |
+| `/daily` | See section 4 | None | Once each reset day |
+| Win a mini-game | You get your wager back, doubled | None | See [modules.md](modules.md) |
+| Card game and adventures | Listed on their pages | Listed on their pages | See [waifu-tcg.md](waifu-tcg.md) and [adventure-game.md](adventure-game.md) |
 
-### 5.3. Shared Daily Reset Boundary
+The XP of a chat message and of a voice minute follow the XP rate of the server.
 
-Every daily system in the bot resets on one configurable boundary rather than at UTC midnight:
+Ririko pays nothing for spam. A message earns nothing when:
 
-| System | Reset |
+- it is shorter than 5 characters,
+- it is almost the same as one of your last few messages (80% or more alike),
+- it is sent at an inhuman speed. You then wait 30 minutes before you earn again.
+
+Voice rewards need all of these:
+
+- An admin turned on **Voice rewards**.
+- You are with at least one other member. Two members are the least.
+- You are not muted or deafened.
+- You are not in the AFK channel.
+- You are not in a no-XP channel and you do not have a no-XP role.
+
+## 4. Daily Reward
+
+`/daily` gives credits and builds a streak.
+
+- The base reward is 250 credits.
+- Each further day in a streak adds 5%. The bonus stops at +150%.
+- You can claim once each reset day. A new day starts at 00:00 in GMT+8 by default.
+- If you miss 1 or 2 days, you keep your streak. The missed days are skipped, not counted. A streak of 15 days with 2 missed days continues at 16.
+- If you miss 3 days or more in a row, the streak starts again. That claim counts as day 1.
+
+The host can change the reset time and the number of days you may miss. See section 9.
+
+## 5. Bank
+
+- The wallet holds credits you carry. You can lose them in games.
+- The bank is safe. Games cannot take credits from it.
+- Bank capacity is 10,000 credits plus 2,500 for each level. Your level here is the level of your XP added together across all servers.
+- If your capacity gets lower, you keep your credits. You can withdraw them, but you cannot deposit more.
+
+## 6. Levels
+
+To go from level L to level L+1 you need `5 x L x L + 50 x L + 100` XP. Level 0 to 1 takes 100 XP. Level 1 to 2 takes 155 XP.
+
+- When you level up, Ririko can announce it (see section 7).
+- You can turn level-up messages off for yourself.
+- A higher level raises your bank capacity and your card game energy.
+
+## 7. Server XP Settings
+
+You need the **Manage Server** permission.
+
+1. Open the dashboard and pick your server. See [dashboard.md](dashboard.md).
+2. Open the **XP & Ranking** page.
+3. Change the settings.
+4. Save.
+
+| Setting | What it does |
 |---|---|
-| `/daily` claim & streak | `RIRIKO_RESET_TIME_DAILY` |
-| Player energy replenishment | `RIRIKO_RESET_TIME_ENERGY` |
-| Energy potion daily ceiling (3/day) | `RIRIKO_RESET_TIME_ENERGY_POTIONS` |
-| Waifu TCG shop daily rotation | `RIRIKO_RESET_TIME_TCG_SHOP` |
-| Economy shop daily purchase limits | `RIRIKO_RESET_TIME_SHOP_PURCHASES` |
+| Announce level-ups | Turns level-up messages on or off. Members who turned them off for themselves are never announced. |
+| Level-up channel | Where the messages go. Without one, Ririko posts in the channel of the level-up. Voice level-ups are announced only here. |
+| XP rate (%) | 100 is normal. 200 doubles XP. 0 turns XP off. The most is 300. |
+| No-XP channels | Chat and voice channels that earn no XP. Up to 50. Threads follow their channel. |
+| No-XP roles | Members with these roles earn no XP. Up to 25. |
+| Voice rewards | Turns on credits and XP for voice time. It is off by default. |
 
-- `RIRIKO_RESET_OFFSET_MINUTES` (default `480`, i.e. GMT+8) sets the timezone for **all** of them. One shared offset keeps "today" meaning the same calendar day everywhere in the bot.
-- `RIRIKO_RESET_TIME` (default `00:00`) is the wall-clock boundary inside that offset. Each system may override just the time, which lets operators stagger resets (for example rotating the shop at 06:00 instead of overnight).
-- Boundaries are evaluated lazily on access, so no scheduled job is required.
+You can also use the command line: `ririko guild:config <server> xp.<key> <value>`.
 
-### 5.4. Global Economy Settings (STORY-165)
-Balances, the daily reward and the bank are global per user, so their values are not guild settings. They live in the single-row `economy_config` table. Bot owners edit them at `/owner/economy` or with `ririko economy:config`. `DailyService` and `BankingService` read them on every use, so a change applies on the next `/daily` or deposit without a restart. Until an owner saves, the defaults apply.
+## 8. Global Settings for Bot Owners
+
+Credits, the daily reward, the bank and the shop are the same in every server. Bot owners (the users in `BOT_OWNER_ID`) change them. A passkey is required. See [dashboard.md](dashboard.md).
+
+1. Open the dashboard and go to the **Owner console**.
+2. Open **Economy** for the values below, or **Item shop** for items.
+3. Change the values and save.
 
 | Setting | Default | Range |
 |---|---|---|
-| `dailyBaseReward` | 250 | 0 to 1,000,000 credits |
-| `dailyStreakBonusPercent` (per further day of a streak) | 5 | 0 to 100 % |
-| `dailyMaxStreakBonusPercent` | 150 | 0 to 1,000 % |
-| `bankBaseCapacity` | 10,000 | 0 to 1,000,000,000 credits |
-| `bankCapacityPerLevel` | 2,500 | 0 to 10,000,000 credits |
+| Daily base reward | 250 | 0 to 1,000,000 |
+| Streak bonus for each further day (%) | 5 | 0 to 100 |
+| Largest streak bonus (%) | 150 | 0 to 1,000 |
+| Bank capacity at level 0 | 10,000 | 0 to 1,000,000,000 |
+| Bank capacity for each level | 2,500 | 0 to 10,000,000 |
 
-The formulas are in `packages/core/src/config/economy.ts` (`dailyReward`, `dailyStreakMultiplier`, `bankCapacityFor`). Voice reward amounts (3.2) are not part of this table yet.
+You can also run `ririko economy:config [key] [value]`.
 
----
+Each shop item has a code, a name, a price, a rarity, a category, an icon, a daily limit and an effect. The code has 2 to 32 lowercase letters, digits or underscores. It cannot change after you save it. An item that members hold, or an item from the starting list, can be retired but not deleted.
 
-## 6. Ranking 2.0 & High-Performance Leaderboards
+## 9. Reset Time Settings for Hosts
 
-### 6.1. Performance Architecture
-Legacy bots suffer severe query latency when calculating ranks by scanning the entire user table on every profile view. Ririko 2.0 resolves this via:
-1. **Periodic Snapshot Materialization**: Background workers compute global and guild rank percentiles every 10 minutes and populate `leaderboard_snapshots`.
-2. **Dense Rank Queries**: Point lookups use indexed rank snapshots for $O(1)$ rank retrieval.
-3. **Dual Leaderboards**:
-   - **Global Leaderboard (`/leaderboard global`)**: Ranks all users across all servers.
-   - **Guild Leaderboard (`/leaderboard server`)**: Ranks active members within the current Discord server.
+All daily systems use one reset time. These settings are in `.env`.
 
-### 6.2. Per-Guild XP Settings (STORY-115)
-XP is stored per guild, and each guild sets on the dashboard's XP & Ranking page (module `xp`, CLI keys `xp.*`, columns in `guild_settings`):
-- **Level-up announcements** on or off (`karma_notifications_enabled`; a member's own opt-out still applies), and an optional **level-up channel**. Without one, message level-ups are posted where the member levelled up; voice level-ups are only announced in the level-up channel. If Ririko cannot post in the level-up channel, it falls back to the current channel.
-- **XP rate** in percent, 0 to 300 (100 is normal). Levels also raise the global bank capacity, so the rate is capped.
-- **No-XP channels** (a thread follows its parent; voice channels count too) and **no-XP roles**.
-- **Voice rewards** (see 3.2).
+| Variable | Default | What it does |
+|---|---|---|
+| `RIRIKO_RESET_OFFSET_MINUTES` | `480` | Minutes ahead of UTC. 480 is GMT+8. |
+| `RIRIKO_RESET_TIME` | `00:00` | The reset time of day, in that offset. |
+| `RIRIKO_RESET_TIME_DAILY` | The value above | The reset time for `/daily`. |
+| `RIRIKO_RESET_TIME_ENERGY` | The value above | The reset time for card game energy. |
+| `RIRIKO_RESET_TIME_ENERGY_POTIONS` | The value above | The reset time for the daily energy potion limit. |
+| `RIRIKO_RESET_TIME_TCG_SHOP` | The value above | When the card game town shop changes stock. |
+| `RIRIKO_RESET_TIME_SHOP_PURCHASES` | The value above | The reset time for the daily purchase limits of the shop. |
+| `RIRIKO_DAILY_STREAK_FORGIVENESS` | `3` | Days in a row you can miss before the streak ends. 0 turns forgiveness off. |
 
-Credits stay global: nothing about credits can be set per guild, because one server could otherwise mint credits for everyone. Global economy values move to the owner console in STORY-165.
-
-### 6.3. Profile Card 2.0 Rendering (`/profile`)
-Rendered dynamically via `@napi-rs/canvas`:
-- Discord avatar & display name.
-- Server Rank & Global Rank badges.
-- Level, Total XP, and visual XP Progress Bar.
-- Wallet Credits & Bank Balance.
-- Equipped Waifu TCG card thumbnail and serial number.
-- Custom Profile Background (`/profile background <url>`): Remote images are fetched, DNS/SSRF validated, scanned for dimensions (1200x400 px limit), and cached locally to eliminate dead image URLs.
-
----
-
-## 7. Item Shop Currency Sinks & Consumable Control
-
-### 7.1. Shop Currency Sinks
-- The basic town shop (`/shop buy`) acts as a primary deflationary currency sink, removing credits from the economy.
-- Only entry-level Common/Uncommon items and minor potions are sold in the shop. High-tier items must be earned through gameplay (dungeons, raids, quests, achievements), preventing pay-to-win inflation.
-
-### 7.1.1. Item Codes & the Default Catalog (STORY-165)
-- Every item has a unique **code** (`candy_minor`): 2 to 32 lowercase letters, digits or underscores.
-  - Members type the code in `/shop buy` and `/use`, and `/shop` and `/inventory` show it.
-  - Lookups try the code first, then the item ID.
-  - A code cannot change once set. Items migrated from 1.4.0 have none until an owner sets one.
-- Item and category IDs are uuids on both dialects.
-- The default catalog (four items, and the `consumable` and `cosmetic` categories) is seeded by code when the bot starts:
-  - Only missing rows are added; owner edits are kept.
-  - On SQLite databases seeded before STORY-165, the items kept their old slug IDs and only got their codes, so existing inventories still match.
-  - Items and categories from the default catalog can be retired in the owner console but not deleted, since the seed would add them again.
-- `/shop list` groups items under their category, with uncategorized items last under "Other".
-
-### 7.2. Anti-Abuse Stamina & Energy Potion Controls
-- Energy restores sold in the shop are hard-capped at **1 minor candy per user per day**.
-- All stamina potion usage is tracked in `player_energy.daily_energy_pots_used` with a hard ceiling (default max 3/day).
-- Consuming stamina pots cannot be automated or looped via bots to bypass stamina limits.
+Restart the bot after you change them. See [deployment.md](deployment.md).

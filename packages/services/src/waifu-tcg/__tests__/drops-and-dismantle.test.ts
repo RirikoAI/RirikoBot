@@ -128,7 +128,7 @@ describe('Waifu Chat Drops & Dismantle Engine (TASK-1012)', () => {
     await client.close();
   });
 
-  describe('Waifu Drop Engine (docs/waifu-tcg.md:L133-144)', () => {
+  describe('Waifu Drop Engine (docs/archive/waifu-tcg-design.md:L133-144)', () => {
     it('should trigger drop when unique member threshold is reached within active hours', async () => {
       const guildId = 'guild_1';
       const channelId = 'channel_drops';
@@ -335,7 +335,7 @@ describe('Waifu Chat Drops & Dismantle Engine (TASK-1012)', () => {
     });
   });
 
-  describe('Card Dismantling Engine (docs/waifu-tcg.md:L166)', () => {
+  describe('Card Dismantling Engine (docs/archive/waifu-tcg-design.md:L166)', () => {
     it('should dismantle idle card into crafting dust scaled by rarity', async () => {
       const card = await cardRepo.create({
         assetId: 'drop_asset_01',

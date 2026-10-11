@@ -280,7 +280,7 @@ jobs:
           destination: e2e
 
   # Builds both production images and runs the smoke checks against them (docs/deployment.md
-  # section 2.1). Images stay on the remote engine; nothing is pushed.
+  # section 9.1). Images stay on the remote engine; nothing is pushed.
   docker:
     executor: node
     environment:

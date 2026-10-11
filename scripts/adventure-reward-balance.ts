@@ -25,7 +25,7 @@ for (const scenario of ADVENTURE_SCENARIOS) {
 const assumptions =
   'Rank E / level 18 targets 10% above repeat floor 34 at 20 energy. 10,000 seeded runs per scenario/rank, fixed WATER companion with 150 ATK/DEF/SPD and sufficient currency/offering items. Standard policy chooses uniformly among all buttons, including paid and losing routes. Free-only E rows show choice-policy sensitivity; they do not set the target. Net credits subtract paid credits, losses and item offerings at canonical shop prices. Energy is actual modeled entry plus drain minus restoration (new cap 7), assuming 100 initial energy and no concurrent energy changes. Loot counts are successful card intents with available definitions; companion XP is the grant budget before rarity-cap clipping. Higher ranks intentionally retain the requested multipliers, rather than remaining only 10% ahead of floor 34. Solo runs grant no companion XP. These estimates are not guaranteed payouts or optimal-route claims.';
 writeFileSync(
-  'docs/adventure-reward-balance.json',
+  'docs/archive/adventure-reward-balance.json',
   JSON.stringify(
     {
       economyVersion: 2,
@@ -64,5 +64,5 @@ for (const scenario of ADVENTURE_SCENARIOS) {
 }
 md +=
   '\n*Mean cards per run, including authored guaranteed cards; this is not a rarity-upgrade chance. Ordinary progression is calibrated independently of card/item value. Failures still have reduced completion rewards, while decisions retain their authored bonuses, losses and loot. Authored fixed wager components remain fixed; every finished run also receives its calibrated completion rewards.\n';
-writeFileSync('docs/adventure-reward-balance.md', md);
+writeFileSync('docs/archive/adventure-reward-balance.md', md);
 console.log('Wrote ' + rows.length + ' comparisons from ' + rows.length * 10_000 + ' seeded runs.');

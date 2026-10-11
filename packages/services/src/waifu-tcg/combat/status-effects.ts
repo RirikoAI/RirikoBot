@@ -1,7 +1,7 @@
 import type { ActiveStatusEffect, Combatant, StatusEffectType } from './types.js';
 
 /**
- * Constants for elemental status effects matching docs/waifu-tcg.md Section 4.2
+ * Constants for elemental status effects matching docs/archive/waifu-tcg-design.md Section 4.2
  */
 export const BURN_DOT_PERCENT = 0.1; // 10% ATK DoT per turn
 export const CHILL_SPEED_REDUCTION = 0.25; // -25% SPD

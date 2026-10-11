@@ -3,7 +3,7 @@
 #   cp .env.production.example .env.production   # fill in the required values
 #   docker compose -f docker-compose.production.yml --env-file .env.production up -d
 #
-# docs/deployment.md section 2 explains every service, volume and setting.
+# docs/deployment.md explains every service, volume and setting.
 name: ririko
 
 x-app-environment: &app-environment

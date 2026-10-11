@@ -2,7 +2,7 @@
 
 Status: **Implemented locally** (2026-09-27), TASK-1708–TASK-1711. The user requested ten times the proposed percentage bonuses: 0/50/100/150/200/300/400/500%. Applies to all 35 adventures. Live PostgreSQL/Discord checks remain pending. See [verification handover](../kanban/handovers/TASK-1711.md).
 
-Completion follow-up: **economy version 2** (TASK-1713–TASK-1715) adds companion XP, failure progression, stronger card acquisition and tower-calibrated ordinary rewards. The [completion policy](../adventure-completion-rewards.md) is authoritative for new admissions; old sessions retain their original rules. Rank multipliers remain version 1.
+Completion follow-up: **economy version 2** (TASK-1713–TASK-1715) adds companion XP, failure progression, stronger card acquisition and tower-calibrated ordinary rewards. The [completion policy](adventure-completion-economy.md) is authoritative for new admissions; old sessions retain their original rules. Rank multipliers remain version 1.
 
 ## Player experience
 
@@ -109,4 +109,4 @@ Implemented sequentially as TASK-1708 (3), TASK-1709 (5), TASK-1710 (2) and TASK
 - Review guaranteed rare-card paths and routes selectable repeatedly by scenario ID. The existing 15-minute fallback cooldown and energy regeneration still constrain frequency; measure inflation across representative route choices before release. The explicit completion-economy follow-up supersedes authored amount totals using the documented calibration; old sessions remain unchanged.
 - Run focused rank/engine/payout/command tests, then `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` and formatting checks. Record pre-existing unrelated failures separately. Smoke-test rank changes across two new runs and frozen behavior within one run in Discord before rollout.
 
-The +500% ceiling is the user-requested tenfold increase over the initial proposal. A [seeded balance report](../adventure-reward-balance.md) compares all ranks and stories; these estimates do not replace live economy observations. The implementation uses a single global policy; guild-specific multipliers, rarity upgrades and rank-specific artwork are outside this plan.
+The +500% ceiling is the user-requested tenfold increase over the initial proposal. A [seeded balance report](adventure-reward-balance.md) compares all ranks and stories; these estimates do not replace live economy observations. The implementation uses a single global policy; guild-specific multipliers, rarity upgrades and rank-specific artwork are outside this plan.

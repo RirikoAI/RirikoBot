@@ -1,61 +1,150 @@
-# Database Architecture & Schema Specification (Ririko AI 2.0.0)
+# Database Guide
 
-## 1. Overview & Dual-Dialect Strategy
-Ririko AI 2.0.0 uses **Drizzle ORM** for 100% type-safe SQL queries with zero runtime overhead.
-To support both enterprise cloud deployments and zero-configuration local development/self-hosting, Ririko supports a **Dual-Dialect Architecture**:
-- **Production**: PostgreSQL (`postgres` driver / `drizzle-orm/node-postgres`) with connection pooling, high concurrency, and native UUID / JSONB support.
-- **Development & Self-Hosting**: SQLite (`better-sqlite3` / `drizzle-orm/better-sqlite3`) with WAL mode (`PRAGMA journal_mode = WAL;`) and enforced foreign keys (`PRAGMA foreign_keys = ON;`).
+This guide describes the Ririko database: the two kinds of database it supports, how the schema is created and changed, and every table.
 
-**The schema is migrated at startup (ADR-015).** Nothing creates or upgrades tables except the migration runner, `migrateDatabase`.
-- **Bot:** `main.ts` runs `prepareDatabase` (`apps/bot/src/database-startup.ts`) right after it opens the database, before the 1.4.0 upgrade (`runLegacyUpgrade`) and before any service starts.
-  - `DB_AUTO_MIGRATE` (default `true`, part of the shared config schema) lets the bot apply the pending migrations. An empty database gets `0000_baseline`; a database from before migration records is adopted once (see below).
-  - With `DB_AUTO_MIGRATE=false` the bot calls `migrationStatus` instead and exits with a clear message while migrations are pending. It never starts on an old schema. Run `ririko db:migrate` first.
-  - Either way, recorded contract migrations this release does not know stop the bot (the downgrade guard); unknown additive ones only log a warning.
-- **CLI:** `ririko db:migrate` applies the same migrations by hand (`docker exec <bot container> ririko db:migrate` in the bot image). `--status` prints the latest, pending and unknown ids; `--dry-run` prints the plan, including what adopting an old database would change, and changes nothing. Exit codes: 0 done or nothing to do, 1 failure, 2 refused by the downgrade guard.
-- **Dashboard:** it never changes the schema. `getDatabase` (`apps/web/src/lib/server/services.ts`) calls `migrationStatus` through `assertSchemaCurrent`. While the database is behind (never migrated, tables without records, or pending migrations), the dashboard cannot start: `/api/ready` answers 503 and the server log names the pending migrations; `/api/health` stays 200 and reports `MIGRATION_PENDING`, so the container is not marked unhealthy and restarted while the bot migrates. The next request tries again, so the dashboard recovers by itself once the bot or `ririko db:migrate` has migrated the database. The same downgrade guard applies as in the bot.
-- **`db:copy`:** it prepares its PostgreSQL target with `migrateDatabase`, so the target holds the exact tables the bot expects and its own migration records. The migration tracking table of the source is never copied.
-- **Tests:** `createDatabaseClient({ autoMigrate: true })` runs `migrateDatabase` right after connecting; it is meant for tests and throwaway databases (`:memory:`), and is off by default. `describeDialects` and the bot test harness migrate the same way. `SQLITE_SCHEMA_DDL` and `PG_SCHEMA_DDL` are only fixtures for the parity and baseline tests now. `createSqliteClient` creates no tables, not even in a new file.
-- **Text ids (BUG-0038):** these id columns are `text` in both dialects, because SQLite holds slugs and prefixed ids that PostgreSQL's `uuid` rejects: card ids (`card_fire_001`), asset ids (`asset_card_bulk_fire_001`), item ids (`candy_minor`) and AI ids (`conv_<uuid>`, `msg_<uuid>`).
-  - The columns: `waifu_assets.id`, `waifu_cards.id`, `waifu_cards.asset_id`, `user_cards.card_id`, `dungeon_bosses.asset_id`, `game_achievements.reward_card_id` and `reward_item_id`, `quests.reward_card_id`, `economy_items.id`, `economy_inventories.item_id`, `ai_conversations.id`, `ai_messages.id` and `ai_messages.conversation_id`.
-  - Ids are never remapped: card images in `public/cards` are named by card id, and the same ids appear in adventure payloads, `tcg_system_configs` and `waifu_card_serials.card_id`.
-  - A primary key keeps a random-uuid default, as text (`gen_random_uuid()::text`).
-  - `ensureTextIdColumns` upgrades a PostgreSQL database that still has `uuid` there. Adoption of an existing database runs it (see below). It runs under an advisory lock in one transaction, casts each value to its text form and changes nothing on a second run. It does nothing on SQLite. The list is `TEXT_ID_COLUMNS` in `packages/database/src/migrations/text-ids.ts`.
-- **The DDL files:** both are generated from the Drizzle schemas and committed. The production images have no `drizzle-kit`.
-  - Regenerate them after every schema change with `pnpm -F @ririko/database db:generate-ddl`.
-  - The parity tests `schema/sqlite/ddl.test.ts` and `schema/pg/ddl.test.ts` fail when they are stale.
-- **Migrations (ADR-015, EPIC-019):** schema changes ship as versioned, forward-only SQL files, one ordered list per dialect, applied by `migrateDatabase` (the bot at startup, `ririko db:migrate`, `db:copy`) and checked by `migrationStatus` (the dashboard).
-  - **Files:** `packages/database/migrations/sqlite/` and `packages/database/migrations/pg/`, named `NNNN_<slug>.sql`, each with drizzle-kit's `meta/` snapshots. Commit all of it; the next `generate` diffs against the snapshots.
-  - **Baseline:** `0000_baseline.sql` is the schema at adoption time (the same tables, columns, defaults and indexes as the DDL files). PostgreSQL migrations use unqualified names, so they build the connection's `search_path`.
-  - **Authoring flow:** change the Drizzle schema in `packages/database/src/schema/`, then run `pnpm db:generate`.
-    - It runs `drizzle-kit generate` for both dialects (`drizzle.sqlite.config.ts`, `drizzle.pg.config.ts`), then `db:generate-migrations` (the embedder), then `db:generate-ddl`.
-    - To name the migration, run `pnpm -F @ririko/database db:generate-sql --name <slug>` first, then `pnpm db:generate`.
-    - Review the SQL before committing. A migration may be edited before release, for example to add a backfill; after a release it never changes.
-    - `drizzle.config.ts` stays the development config for `db:push`. `db:push` never runs on staging or production.
-  - **Embedding:** `db:generate-migrations` (`scripts/embed-migrations.mjs`) writes `packages/database/src/migrations/generated/sqlite.ts` (`SQLITE_MIGRATIONS`) and `pg.ts` (`PG_MIGRATIONS`). Each entry is `{ id, statements, checksum, contract }` (`EmbeddedMigration`):
-    - `statements`: the file split on drizzle's `--> statement-breakpoint`, never on `;`;
-    - `checksum`: sha256 of the file bytes with CRLF normalised to LF, so Windows and Linux agree;
-    - `contract`: true when the first line is `-- ririko:contract`.
-  - **CI gate:** `pnpm db:check` (`scripts/check-migrations.ts`, run by the CircleCI `lint` job) fails when `drizzle-kit generate` would still write a migration (it runs on a temporary copy of the folder), when the embedded modules differ from the SQL files, or when a migration has `DROP TABLE`, `DROP COLUMN`, `RENAME`, `ALTER COLUMN ... TYPE` or `SET NOT NULL` without `-- ririko:contract` on its first line. It prints the file and the statement. Destructive changes follow expand/contract: the additive step ships first, the contract migration in a later release.
-  - **SQLite table rebuilds:** drizzle-kit writes a column type change or a dropped column on SQLite as `PRAGMA foreign_keys=OFF`, a new table, a copy, `DROP TABLE`, a rename and `PRAGMA foreign_keys=ON`. SQLite ignores that pragma inside a transaction, so the runner treats a migration that contains `PRAGMA foreign_keys=OFF` as SQLite's rebuild procedure: it turns foreign keys off on the connection before `BEGIN`, skips the two pragma statements inside the transaction, requires `PRAGMA foreign_key_check` to return no rows before `COMMIT` (otherwise it rolls back with a `DatabaseError` that names the table), and restores the setting afterwards. `ON DELETE CASCADE` children are therefore kept. PostgreSQL does not need this.
-  - The output is deterministic. `migrations/generated.test.ts` fails when the modules are stale, and checks that the baseline builds the same schema as the DDL files (SQLite in memory; PostgreSQL when `TEST_POSTGRES_URL` is set).
-  - **Adopting an existing database** (`migrations/adopt-baseline.ts`, called by `migrateDatabase`): a database that has tables but no `ririko_schema_migrations` table (staging, self-hosted 2.0 databases) is not given `0000_baseline` to run. Under the same lock, and after the same SQLite backup:
-    - `ensureTextIdColumns` turns PostgreSQL `uuid` id columns into `text`, and the duplicate card serial audit refuses ambiguous serials.
-    - The live schema is compared with the baseline. The expected shape comes from a scratch database that runs the baseline (in-memory SQLite; temporary tables in a rolled-back PostgreSQL transaction), and both are read with the same catalog queries, so no SQL is parsed.
-    - The repair is additive and runs in one transaction. Missing tables, foreign keys and indexes are created from the baseline statements; a missing column that is nullable or has a default is added; extra tables and columns are only logged.
-    - Column types are compared exactly on PostgreSQL (`format_type`). On SQLite they are compared by type affinity ([datatype3 section 3.1](https://sqlite.org/datatype3.html): `INT` gives INTEGER; `CHAR`, `CLOB` or `TEXT` gives TEXT; `BLOB` or no type gives BLOB; `REAL`, `FLOA` or `DOUB` gives REAL; anything else NUMERIC), because the declared text does not change how SQLite stores a value. A different declared type with the same affinity (`BIGINT` for `INTEGER`, as the removed `ensureAdventureSchema` created the adventure tables; `VARCHAR(32)` for `TEXT`) is only reported as a note and left as it is. INTEGER and NUMERIC affinity also count as compatible (a note too): NUMERIC keeps a whole number as INTEGER, so the `BOOLEAN` that `ensureAdventureSchema` gave `adventure_settings.energy_enabled` holds what the baseline's `integer` does. TEXT, BLOB and REAL against INTEGER or NUMERIC are still refused. The columns are not rebuilt.
-    - A missing NOT NULL column without a default, a column that cannot be added (primary key, generated, or a non-constant default on SQLite), a differing type (on SQLite, a different affinity), or duplicate serials refuse the adoption with one report of every problem, and nothing is changed. `--dry-run` shows the same plan or report.
-    - Then `0000_baseline` is recorded with `adopted = true` and its embedded checksum, and later migrations run as usual. A second run changes nothing.
-- **Moving data from SQLite to PostgreSQL:** `ririko db:copy` copies a 2.0 SQLite database into an empty PostgreSQL database in one transaction and verifies row counts and economy totals before it commits. Steps, including stopping writers and copying the image folders into their volumes: [docs/migrations.md section 5](migrations.md).
+## 1. How the Schema Is Managed
+
+### 1.1. Two Kinds of Database
+
+Ririko uses **Drizzle ORM** for type-safe SQL queries. It supports two databases:
+
+- **PostgreSQL** for production. It uses the `pg` driver (`drizzle-orm/node-postgres`) with connection pooling, native UUID and JSONB.
+- **SQLite** for development and small self-hosted setups. It uses `better-sqlite3` (`drizzle-orm/better-sqlite3`) with WAL mode (`PRAGMA journal_mode = WAL;`) and enforced foreign keys (`PRAGMA foreign_keys = ON;`).
+
+Set the kind with `DATABASE_DIALECT` (`sqlite` or `postgres`) and the address with `DATABASE_URL`.
+
+### 1.2. Who Changes the Schema
+
+Only the migration runner, `migrateDatabase`, creates or changes tables.
+
+- **The bot.** `main.ts` runs `prepareDatabase` (`apps/bot/src/database-startup.ts`) right after it opens the database. This happens before the 1.4.0 upgrade and before any service starts.
+  - With `DB_AUTO_MIGRATE=true` (the default) the bot applies the pending migrations. An empty database gets `0000_baseline`. A database that has tables but no migration records is adopted once (section 1.6).
+  - With `DB_AUTO_MIGRATE=false` the bot only checks. It exits with a message that names the pending migrations. It never starts on an old schema. Run `ririko db:migrate` first.
+  - In both modes, a database that holds a contract migration this release does not know stops the bot. This is the downgrade guard. Additive migrations that the release does not know only produce a warning.
+- **The command-line tool.** `ririko db:migrate` applies the same migrations by hand. In the bot image, run `docker exec <bot container> ririko db:migrate`.
+  - `--status` prints the latest, pending and unknown migration ids.
+  - `--dry-run` prints the plan, including what adopting an old database would change. It changes nothing.
+  - Exit codes: `0` done or nothing to do, `1` failure, `2` refused by the downgrade guard.
+- **The dashboard.** It never changes the schema. It checks the schema through `assertSchemaCurrent` in `apps/web/src/lib/server/services.ts`.
+  - While the database is behind (never migrated, tables without records, or pending migrations), the dashboard cannot start. `/api/ready` answers `503`, and the server log names the pending migrations.
+  - `/api/health` stays `200` and reports `MIGRATION_PENDING`. So Docker does not restart the dashboard while the bot migrates.
+  - The next request tries again. The dashboard recovers by itself when the bot or `ririko db:migrate` has migrated the database. The same downgrade guard applies.
+- **`ririko db:copy`.** It prepares its PostgreSQL target with `migrateDatabase`. The target gets the exact tables the bot expects and its own migration records. The migration records of the source are never copied.
+- **Tests.** `createDatabaseClient({ autoMigrate: true })` runs `migrateDatabase` after it connects. It is for tests and throwaway databases (`:memory:`) and is off by default. `describeDialects` and the bot test harness migrate the same way. `createSqliteClient` creates no tables, not even in a new file.
+
+`pnpm db:push` is a shortcut for development. It never runs against a staging or production database.
+
+### 1.3. Change the Schema
+
+Follow these steps when you change a table.
+
+1. Change the Drizzle schema in `packages/database/src/schema/`.
+2. Optional: choose the name of the migration. Without this step, drizzle-kit picks a name:
+
+   ```bash
+   pnpm -F @ririko/database db:generate-sql --name <slug>
+   ```
+
+3. Generate the migration files for both dialects:
+
+   ```bash
+   pnpm db:generate
+   ```
+
+   This runs `drizzle-kit generate` for both dialects (`drizzle.sqlite.config.ts` and `drizzle.pg.config.ts`), then `db:generate-migrations` (the embedder), then `db:generate-ddl`.
+
+4. Read the new SQL in `packages/database/migrations/`. You may edit a migration before its release, for example to add a data backfill. After the release, a migration never changes.
+5. Run the check that CI runs:
+
+   ```bash
+   pnpm db:check
+   ```
+
+   It prints no problem when the schema, the migration files and the embedded modules agree.
+
+6. Commit all the output: `packages/database/migrations/`, the embedded modules and the DDL files.
+
+A change that removes or rewrites something (`DROP TABLE`, `DROP COLUMN`, `RENAME`, `ALTER COLUMN ... TYPE`, `SET NOT NULL`) follows the expand and contract rule:
+
+1. Ship the additive step first. The old release must still run on the new schema.
+2. Ship the removing step in a later release, in a migration whose first line is `-- ririko:contract`. Do this only when no release uses the old shape.
+
+### 1.4. Migration Files
+
+- **Files.** `packages/database/migrations/sqlite/` and `packages/database/migrations/pg/` hold one ordered list for each dialect. The files are named `NNNN_<slug>.sql`. Each folder also has the drizzle-kit `meta/` snapshots. The next `generate` compares against the snapshots, so commit them.
+- **Baseline.** `0000_baseline.sql` is the schema as it was when migrations began. PostgreSQL migrations use unqualified table names, so they build in the `search_path` of the connection.
+- **Embedded modules.** `db:generate-migrations` (`scripts/embed-migrations.mjs`) writes `packages/database/src/migrations/generated/sqlite.ts` (`SQLITE_MIGRATIONS`) and `pg.ts` (`PG_MIGRATIONS`). The production images have no `drizzle-kit`, so the runner reads these modules. Each entry is `{ id, statements, checksum, contract }`:
+  - `statements`: the file split at the drizzle marker `--> statement-breakpoint`, never at `;`;
+  - `checksum`: the sha256 of the file with CRLF changed to LF, so Windows and Linux agree;
+  - `contract`: `true` when the first line is `-- ririko:contract`.
+- **DDL files.** `pnpm -F @ririko/database db:generate-ddl` generates the bootstrap DDL (`SQLITE_SCHEMA_DDL` and `PG_SCHEMA_DDL`) from the Drizzle schemas. They are fixtures for the parity and baseline tests. The tests `schema/sqlite/ddl.test.ts` and `schema/pg/ddl.test.ts` fail when they are old.
+- **Determinism.** The output is the same every time. `migrations/generated.test.ts` fails when the embedded modules are old. It also checks that the baseline builds the same schema as the DDL files (SQLite in memory, PostgreSQL when `TEST_POSTGRES_URL` is set).
+- **CI check.** `pnpm db:check` (`scripts/check-migrations.ts`, run by the CircleCI `lint` job) fails and prints the file and the statement when:
+  - `drizzle-kit generate` would still write a migration (it runs on a temporary copy of the folder);
+  - the embedded modules differ from the SQL files;
+  - a migration has `DROP TABLE`, `DROP COLUMN`, `RENAME`, `ALTER COLUMN ... TYPE` or `SET NOT NULL` without `-- ririko:contract` on its first line.
+- **Transactions.** Each migration runs in one transaction. On PostgreSQL an advisory lock keeps two processes from migrating at the same time.
+
+### 1.5. SQLite Table Rebuilds
+
+For a changed column type or a dropped column, drizzle-kit writes a rebuild for SQLite: `PRAGMA foreign_keys=OFF`, a new table, a copy, `DROP TABLE`, a rename and `PRAGMA foreign_keys=ON`. SQLite ignores that pragma inside a transaction. So the runner treats a migration that contains `PRAGMA foreign_keys=OFF` as a rebuild:
+
+1. It turns foreign keys off on the connection before `BEGIN`.
+2. It skips the two pragma statements inside the transaction.
+3. It requires `PRAGMA foreign_key_check` to return no rows before `COMMIT`. If rows come back, it rolls back with a `DatabaseError` that names the table.
+4. It restores the setting afterwards.
+
+Children with `ON DELETE CASCADE` therefore stay. PostgreSQL does not need this.
+
+### 1.6. Adopt an Existing Database
+
+A database that has tables but no `ririko_schema_migrations` table is not given `0000_baseline` to run. It is adopted (`migrations/adopt-baseline.ts`, called by `migrateDatabase`). On SQLite the runner first makes a backup. Then, under the same lock:
+
+1. `ensureTextIdColumns` changes the PostgreSQL `uuid` id columns of section 1.7 to `text`. The audit of duplicate card serials refuses serials that are not unique.
+2. The runner compares the live schema with the baseline. The expected shape comes from a scratch database that runs the baseline (SQLite in memory, or temporary tables in a PostgreSQL transaction that rolls back). Both are read with the same catalog queries, so no SQL is parsed.
+3. The repair only adds, in one transaction:
+   - It creates missing tables, foreign keys and indexes from the baseline statements.
+   - It adds a missing column that is nullable or has a default.
+   - Extra tables and columns are only logged.
+4. PostgreSQL compares column types exactly (`format_type`). SQLite compares them by type affinity ([SQLite datatype rules, section 3.1](https://sqlite.org/datatype3.html)), because the declared text does not change how SQLite stores a value. A different declared type with the same affinity (for example `BIGINT` for `INTEGER`) is only reported as a note. INTEGER and NUMERIC affinity also count as compatible. TEXT, BLOB and REAL against INTEGER or NUMERIC are refused. The runner does not rebuild columns.
+5. The adoption is refused, with one report of every problem and no change, when:
+   - a NOT NULL column without a default is missing;
+   - a column cannot be added (a primary key, a generated column, or a non-constant default on SQLite);
+   - a column type differs (on SQLite, a different affinity);
+   - card serials are duplicated.
+
+   `--dry-run` shows the same plan or report.
+
+6. Then the runner records `0000_baseline` with `adopted = true` and its embedded checksum. Later migrations run as usual. A second run changes nothing.
+
+### 1.7. Text Ids
+
+These id columns are `text` in both dialects, because SQLite holds slugs and prefixed ids that the PostgreSQL `uuid` type rejects: card ids (`card_fire_001`), asset ids (`asset_card_bulk_fire_001`), item ids (`candy_minor`) and AI ids (`conv_<uuid>`, `msg_<uuid>`).
+
+- **The columns:** `waifu_assets.id`, `waifu_cards.id`, `waifu_cards.asset_id`, `user_cards.card_id`, `dungeon_bosses.asset_id`, `game_achievements.reward_card_id` and `reward_item_id`, `quests.reward_card_id`, `economy_items.id`, `economy_inventories.item_id`, `ai_conversations.id`, `ai_messages.id` and `ai_messages.conversation_id`.
+- **No remapping.** Ids never change. The card images in `public/cards` are named by card id, and the same ids appear in adventure payloads, `tcg_system_configs` and `waifu_card_serials.card_id`.
+- **Defaults.** A primary key keeps a random-uuid default, stored as text (`gen_random_uuid()::text`).
+- **Old PostgreSQL databases.** `ensureTextIdColumns` changes `uuid` columns to `text`. Adoption runs it. It runs under an advisory lock in one transaction, casts each value to its text form, and changes nothing on a second run. It does nothing on SQLite. The list of columns is `TEXT_ID_COLUMNS` in `packages/database/src/migrations/text-ids.ts`.
+
+### 1.8. Move Data Between Databases
+
+- To move a 2.0 SQLite database into an empty PostgreSQL database, use `ririko db:copy`. [migrations.md section 5](migrations.md#5-move-a-20-sqlite-database-to-postgresql) has the steps.
+- To move a 1.4.0 database into 2.0, see [migrations.md](migrations.md).
 
 ---
 
-## 2. Complete Schema Catalog (40+ Tables)
+## 2. Table Catalog
 
-As mandated by Section 47 of `docs/archive/BLUEPRINT.md`, the database is divided into cohesive domain table groups:
+The tables are grouped by area.
 
 ### 2.1. Core Identity & Discord Guilds
 - `users`: Universal Discord user registry (`id` Snowflake PK, `username`, `display_name`, `avatar_url`, `profile_background_url`, `is_blacklisted`, `warn_count`, `notify_level_up`, `created_at`, `updated_at`).
-- `guilds`: Discord server registry (`id` Snowflake PK, `name`, `icon_url`, `owner_id`, `invited_by_id` nullable, `invited_via` nullable, `joined_at`, `is_active`, `created_at`, `updated_at`). The bot keeps it current (TASK-1831, `GuildRepository`, `guild-registry.listener.ts`): every ready upserts the cached servers and marks the others inactive, `GuildCreate`, `GuildUpdate` and `GuildDelete` follow, and a server that is only unavailable (an outage) stays active. Rows are never deleted, so servers the bot left stay listed as inactive. `invited_by_id` is the member who added the bot and `invited_via` how that was learned (TASK-1841): `oauth` (the dashboard invite flow, `GuildRepository.recordInvite`; the user who authorized the bot, authoritative, so it replaces an earlier inviter), `audit_log` (the `BotAdd` entry, kept 45 days, needs View Audit Log) or `integration` (the user of the bot's integration in the guild's integrations list, needs Manage Server, used when the audit log names no one). Both stay null when nothing says; an active server's inviter, source and `joined_at` are never overwritten by a later bot upsert, and a server the bot left and joined again starts over.
+- `guilds`: Discord server registry (`id` Snowflake PK, `name`, `icon_url`, `owner_id`, `invited_by_id` nullable, `invited_via` nullable, `joined_at`, `is_active`, `created_at`, `updated_at`). The bot keeps it current (`GuildRepository`, `guild-registry.listener.ts`). On every ready event it saves the cached servers and marks the others inactive. The events `GuildCreate`, `GuildUpdate` and `GuildDelete` follow. A server that is only unavailable (an outage) stays active. Rows are never deleted, so servers the bot left stay listed as inactive. `invited_by_id` is the member who added the bot. `invited_via` says how the bot learned that:
+  - `oauth`: the dashboard invite flow (`GuildRepository.recordInvite`). The user who authorized the bot is the answer, so it replaces an earlier inviter.
+  - `audit_log`: the `BotAdd` entry, which Discord keeps for 45 days. It needs View Audit Log.
+  - `integration`: the user of the bot's integration in the integrations list of the server. It needs Manage Server. The bot uses it when the audit log names no one.
+
+  Both columns stay null when nothing says. A later bot update never overwrites the inviter, the source or `joined_at` of an active server. A server that the bot left and joined again starts over.
 - `guild_members`: Association table tracking guild membership (`guild_id`, `user_id`, `nickname`, `joined_at`, `roles`, `is_in_guild`).
 - `guild_settings`: Unified guild configuration (`guild_id` PK, `prefix`, `locale`, `timezone`, `ai_channel_id`, `log_channel_id`, `music_channel_id`, `welcomer_channel_id`, `welcomer_enabled`, `welcomer_bg`, `farewell_channel_id`, `farewell_enabled`, `farewell_bg`, `karma_notifications_enabled`, `created_at`, `updated_at`).
 
@@ -82,7 +171,7 @@ As mandated by Section 47 of `docs/archive/BLUEPRINT.md`, the database is divide
 ### 2.5. Experience, Leveling & Rankings
 - `xp_accounts`: User leveling progress (`user_id` PK, `guild_id`, `xp` BigInt, `level` Int, `karma` Int, `last_xp_at`, `created_at`, `updated_at`).
 - `xp_events`: Audit trail for XP gain events (`id` UUID PK, `user_id`, `guild_id`, `xp_awarded`, `source` [TEXT, VOICE, QUEST, GAME], `created_at`).
-- `leaderboard_snapshots`: Cached ranking snapshots for $O(1)$ global and server rank queries (`user_id`, `guild_id`, `global_rank`, `server_rank`, `calculated_at`).
+- `leaderboard_snapshots`: Cached ranking snapshots for fast global and server rank queries (`user_id`, `guild_id`, `global_rank`, `server_rank`, `calculated_at`).
 
 ### 2.6. Music & Audio System
 - `music_guild_settings`: Guild audio configuration (`guild_id` PK, `default_volume`, `dj_role_id`, `restrict_voice_channel_id`, `auto_leave_empty`, `lyrics_provider`).
@@ -147,30 +236,30 @@ As mandated by Section 47 of `docs/archive/BLUEPRINT.md`, the database is divide
 ### 2.13. Interactive Mini-Games
 - `mini_games`: Registered games catalog (`id` String PK, `name`, `min_players`, `max_players`, `allow_wagers`, `cooldown_seconds`).
 - `game_sessions`: Active game state instances (`id` UUID PK, `game_id`, `guild_id`, `channel_id`, `host_user_id`, `opponent_user_id`, `wager_amount` BigInt, `state` JSON, `status` [WAITING, IN_PROGRESS, COMPLETED, TIMED_OUT], `winner_user_id`, `created_at`).
-- `game_statistics`: Per-user game statistics (`user_id`, `game_id`, `wins` Int, `losses` Int, `ties` Int, `total_wagered` BigInt, `net_profit` BigInt).\
+- `game_statistics`: Per-user game statistics (`user_id`, `game_id`, `wins` Int, `losses` Int, `ties` Int, `total_wagered` BigInt, `net_profit` BigInt).
 
 ### 2.14. Server Utilities & Scheduled Reminders
 - `reaction_roles`: Message-to-role bindings (`id` UUID PK, `guild_id`, `channel_id`, `message_id`, `emoji_or_component_id`, `role_id`).
 - `auto_voice_configs`: Auto voice channel generators (`id` UUID PK, `guild_id`, `parent_channel_id`, `channel_name_template`, `user_limit`, `bitrate`).
 - `reminders`: Persistent reminder scheduler (`id` UUID PK, `user_id`, `guild_id`, `channel_id`, `message`, `trigger_at`, `repeat_interval` [NONE, DAILY, WEEKLY], `is_completed`).
-- `guild_welcomer` / `guild_farewell`: Welcome and farewell cards (`guild_id` PK, `channel_id` (empty when not set up), `message_template`, `card_theme`, `background_url`, `background_file`, `text_color`, `is_enabled`, `text_message_enabled` (default false), `text_message` (default empty)). At most one of `background_url` and `background_file` is set; `background_file` names an upload in `storage/welcomer-backgrounds`. The two text columns arrived with migration `0001_welcomer_text_message` (TASK-1333): the optional text message sent with the card (see docs/modules.md).
+- `guild_welcomer` / `guild_farewell`: Welcome and farewell cards (`guild_id` PK, `channel_id` (empty when not set up), `message_template`, `card_theme`, `background_url`, `background_file`, `text_color`, `is_enabled`, `text_message_enabled` (default false), `text_message` (default empty)). At most one of `background_url` and `background_file` is set; `background_file` names an upload in `storage/welcomer-backgrounds`. The two text columns come from migration `0001_welcomer_text_message`. They hold the optional text message sent with the card (see docs/modules.md).
 - `audit_logs`: Security and administrative action audit trails (`id` UUID PK, `guild_id`, `actor_user_id`, `action`, `details` JSON, `ip_address`, `user_agent`, `created_at`). `GuildConfigService` writes `guild_config.<module>.update` entries with `details = { source: 'dashboard' | 'cli', changes: [{ field, before, after }] }`.
 
-### 2.15. Web Dashboard (EPIC-011)
-`web_sessions`, `web_passkeys`, `web_known_devices`, `guild_config_versions`, `command_usage_daily`, `bot_status` and `guild_voice_activity` exist. The other tables are the groomed design from [docs/dashboard.md](file:///Z:/Projects/ririko-v2-2026/docs/dashboard.md) and [ADR-013](file:///Z:/Projects/ririko-v2-2026/docs/archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md); final names are set when the tickets are implemented.
-- `web_sessions` (TASK-1102): Opaque server-side dashboard sessions. The primary key `id` is the SHA-256 hash (hex) of the session cookie; the raw value exists only in the `__Host-ririko_session` cookie. Columns: `user_id`, `created_at`, `last_seen_at`, `expires_at` (12 h absolute), `ip_address`, `user_agent`, `step_up_at`, `discord_access_token` and `discord_refresh_token` (AES-256-GCM ciphertexts in the `v<key version>.<iv>.<tag>.<data>` format, bound to the row as additional authenticated data), and `discord_token_expires_at`. The key version is part of each ciphertext, so there is no separate `key_version` column. Indexes on `user_id` (for "sign out everywhere") and `expires_at` (expiry cleanup). `webauthn_challenge` (`<purpose>:<challenge>`) and `webauthn_challenge_expires_at` hold the pending WebAuthn challenge, cleared by the single update that consumes it (TASK-1171).
-- `guild_config_versions` (CHORE-1101): Change feed for settings written outside the bot process. Primary key (`guild_id`, `module`), `version` (incremented on every write), `updated_at` (indexed). The dashboard and CLI bump it in the same transaction as the settings write; the bot's `GuildConfigWatcher` polls recent rows and emits `guild:configChanged`.
-- `web_passkeys` (TASK-1171): WebAuthn credentials per user. `id` is the credential ID (base64url); `user_id` (indexed), `name`, `public_key` (COSE, base64url), `counter`, `transports` (JSON), `device_type` (`singleDevice` or `multiDevice`), `backed_up`, `created_at`, `last_used_at`. Only public keys are stored.
-- `web_known_devices` (TASK-1172): Browsers each user has signed in from. Primary key (`user_id`, `device_hash`), where `device_hash` is the SHA-256 (hex) of the random `__Host-ririko_device` cookie; `first_seen_at`, `last_seen_at` (indexed). A sign-in whose device is not listed triggers a new-device DM. Rows unseen for a year (the cookie lifetime) are deleted at sign-in.
-- `command_usage_daily` (TASK-1131): Command usage counters. Primary key (`guild_id`, `day`, `command_name`), where `day` is the UTC day as `YYYY-MM-DD`; `count`. The bot's `CommandUsageRecorder` buffers counts from the router's `onCommandRun` hook and adds them every 60 seconds with `count = count + excluded.count`; rows older than 90 days are deleted.
-- `bot_status` (TASK-1131): One row per bot process (`id = 'bot'`): `gateway_ping_ms` (null before the first heartbeat), `guild_count`, `version`, `started_at`, `updated_at`. Written by `BotStatusReporter` every 30 seconds; a row older than 90 seconds means the bot is offline. The EPIC-012 health probes can reuse it.
-- `guild_voice_activity` (TASK-1131): `guild_id` PK, `channels` (JSON list of `{ channelId, members }` for voice channels with at least one member who is not a bot), `updated_at`. Written by `BotStatusReporter` only when a guild's channels change; guilds with no active channel have no row.
-- Guild TCG settings on `guild_settings` (TASK-1121): `tcg_drops_enabled` (default false), `tcg_drop_channel_id` (null counts every channel), `tcg_drop_message_threshold` (50), `tcg_drop_start_hour` (8), `tcg_drop_end_hour` (23), `tcg_drop_claim_timeout_seconds` (60), `tcg_drop_cooldown_minutes` (5) and `tcg_manager_role_id`. Edited through the `tcg` module of `GuildConfigService`; `DropManager` reads them through `dropConfigFromSettings`. Existing databases need `pnpm db:push`.
+### 2.15. Web Dashboard
+The dashboard uses these tables. The page design is in [dashboard.md](dashboard.md). The decision about sessions and credential theft is in [ADR-013](archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md).
+- `web_sessions`: Opaque server-side dashboard sessions. The primary key `id` is the SHA-256 hash (hex) of the session cookie; the raw value exists only in the `__Host-ririko_session` cookie. Columns: `user_id`, `created_at`, `last_seen_at`, `expires_at` (12 h absolute), `ip_address`, `user_agent`, `step_up_at`, `discord_access_token` and `discord_refresh_token` (AES-256-GCM ciphertexts in the `v<key version>.<iv>.<tag>.<data>` format, bound to the row as additional authenticated data), and `discord_token_expires_at`. The key version is part of each ciphertext, so there is no separate `key_version` column. Indexes on `user_id` (for "sign out everywhere") and `expires_at` (expiry cleanup). `webauthn_challenge` (`<purpose>:<challenge>`) and `webauthn_challenge_expires_at` hold the pending WebAuthn challenge, cleared by the single update that consumes it.
+- `guild_config_versions`: Change feed for settings written outside the bot process. Primary key (`guild_id`, `module`), `version` (incremented on every write), `updated_at` (indexed). The dashboard and CLI bump it in the same transaction as the settings write; the bot's `GuildConfigWatcher` polls recent rows and emits `guild:configChanged`.
+- `web_passkeys`: WebAuthn credentials per user. `id` is the credential ID (base64url); `user_id` (indexed), `name`, `public_key` (COSE, base64url), `counter`, `transports` (JSON), `device_type` (`singleDevice` or `multiDevice`), `backed_up`, `created_at`, `last_used_at`. Only public keys are stored.
+- `web_known_devices`: Browsers each user has signed in from. Primary key (`user_id`, `device_hash`), where `device_hash` is the SHA-256 (hex) of the random `__Host-ririko_device` cookie; `first_seen_at`, `last_seen_at` (indexed). A sign-in whose device is not listed triggers a new-device DM. Rows unseen for a year (the cookie lifetime) are deleted at sign-in.
+- `command_usage_daily`: Command usage counters. Primary key (`guild_id`, `day`, `command_name`), where `day` is the UTC day as `YYYY-MM-DD`; `count`. The bot's `CommandUsageRecorder` buffers counts from the router's `onCommandRun` hook and adds them every 60 seconds with `count = count + excluded.count`; rows older than 90 days are deleted.
+- `bot_status`: One row per bot process (`id = 'bot'`): `gateway_ping_ms` (null before the first heartbeat), `guild_count`, `version`, `started_at`, `updated_at`. Written by `BotStatusReporter` every 30 seconds; a row older than 90 seconds means the bot is offline. The health probes can reuse it.
+- `guild_voice_activity`: `guild_id` PK, `channels` (JSON list of `{ channelId, members }` for voice channels with at least one member who is not a bot), `updated_at`. Written by `BotStatusReporter` only when a guild's channels change; guilds with no active channel have no row.
+- Guild TCG settings on `guild_settings`: `tcg_drops_enabled` (default false), `tcg_drop_channel_id` (null counts every channel), `tcg_drop_message_threshold` (50), `tcg_drop_start_hour` (8), `tcg_drop_end_hour` (23), `tcg_drop_claim_timeout_seconds` (60), `tcg_drop_cooldown_minutes` (5) and `tcg_manager_role_id`. Edited through the `tcg` module of `GuildConfigService`; `DropManager` reads them through `dropConfigFromSettings`.
 
 ---
 
 ## 3. Indexing & Transaction Integrity Rules
-1. **Foreign Key Enforcement**: In SQLite, every connection explicitly executes `PRAGMA foreign_keys = ON;`.\
+1. **Foreign Key Enforcement**: In SQLite, every connection explicitly executes `PRAGMA foreign_keys = ON;`.
 2. **ACID Transactions**: Balances, card trading, market purchases, equipment enhancements, and giveaway completions are strictly executed within Drizzle transactions (`db.transaction(...)`).
 3. **Compound Indexes**: Essential for high query throughput:
    - `moderation_cases(guild_id, case_number)`

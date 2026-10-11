@@ -1,91 +1,125 @@
-# Developer Guide & Tooling Manual (Ririko AI 2.0.0)
+# Developer Guide
 
-## 1. Overview & Engineering Principles
-Ririko AI 2.0.0 is developed as a modular monorepo using pnpm workspaces. The architecture prioritizes the **KISS Principle (Keep It Simple, Stupid)** while maintaining clean extension points:
-- **Boring, Explicit Code**: Avoid complex meta-programming, global singletons, and deep inheritance chains.
-- **Typed Boundaries**: Strict TypeScript interfaces at all package boundaries.
-- **Automated Boilerplate**: Repetitive file creation is handled by code generators rather than manual copy-pasting.
+This guide is for people who change the Ririko code. It shows how to check your work, how to change the database, and how to use the command-line tool.
+
+To get a working copy first, follow [SETUP.md](../SETUP.md). To send your change, read [contributing.md](contributing.md).
 
 ---
 
-## 2. Local Environment Setup
+## 1. How the Code Is Organized
 
-### 2.1. Prerequisites
-- **Node.js**: `v22.x` or `v24.x` LTS.
-- **pnpm**: `v10.x` (`corepack enable && pnpm --version`).
-- **FFmpeg**: Required for audio transcoding and music extraction.
-- **Git**: Latest version.
+Ririko is a monorepo that uses pnpm workspaces. The code follows these rules:
 
-### 2.2. Installation
-```bash
-git clone https://github.com/RirikoAI/RirikoBot.git ririko-v2-2026
-cd ririko-v2-2026
-pnpm install
-cp .env.example .env
-```
-
-### 2.3. Quality Commands
-These are the same checks CircleCI runs (see [testing.md](testing.md#4-continuous-integration)):
-```bash
-pnpm lint            # ESLint
-pnpm format:check    # Prettier (pnpm format fixes)
-pnpm typecheck       # tsc --noEmit in every workspace package, plus the test-only projects
-pnpm test            # Vitest (includes the integration suites)
-pnpm test:coverage   # Vitest with v8 coverage, report in coverage/index.html
-pnpm test:integration  # Only the bot integration suites and the fake Discord API tests
-pnpm test:e2e        # Builds the dashboard, then runs the Playwright E2E suite
-```
-
-After you change a Drizzle schema, run `pnpm db:generate`. It writes the versioned SQL migrations for both dialects (`packages/database/migrations/`), embeds them as TypeScript, and regenerates the bootstrap DDL. Commit all of the output, and run `pnpm db:check` (the CI migration gate) before you push. The flow is described in [database.md](database.md#1-overview--dual-dialect-strategy) and [ADR-015](archive/adr/ADR-015-versioned-schema-migrations.md).
-
-`pnpm test:e2e` starts its own fake Discord API on port 3199 and `next start` on port 3100 with a throwaway SQLite database, so it can run while `next dev` is up on port 3000. It uses Playwright's Chromium; run `pnpm --filter @ririko/web exec playwright install chromium` once if it is missing. The report is in `apps/web/e2e-results/report/index.html`.
-
-`pnpm site:build` writes the Vercel status page to `site-dist/index.html` (see [deployment.md](deployment.md#4-current-hosting)).
-
-The Prettier baseline commit is listed in `.git-blame-ignore-revs`. Run `git config blame.ignoreRevsFile .git-blame-ignore-revs` once so local `git blame` skips it.
+- **Keep it simple.** Write plain, explicit code. Do not use global singletons or deep inheritance.
+- **Type the borders.** Every package border has a strict TypeScript interface.
+- **Reuse the structure.** New commands, modules and adapters follow the existing ones. [architecture.md](architecture.md) shows the layout of the packages.
 
 ---
 
-## 3. The Ririko CLI (`ririko`)
+## 2. Check Your Work
 
-The monorepo includes a unified developer and operator CLI in `apps/cli`:
+Run these commands in the repository folder. CircleCI runs the same checks (see [testing.md](testing.md#4-continuous-integration)).
 
-### 3.1. Diagnostic System (`ririko doctor`)
-Runs a comprehensive environment check:
+| Command | What it checks |
+| --- | --- |
+| `pnpm lint` | ESLint. `pnpm lint:fix` fixes what it can. |
+| `pnpm format:check` | Prettier. `pnpm format` fixes the files. |
+| `pnpm typecheck` | `tsc --noEmit` in every workspace package, and in the test-only projects. |
+| `pnpm test` | All Vitest tests, including the integration tests. |
+| `pnpm test:coverage` | The same tests with coverage. The report is in `coverage/index.html`. |
+| `pnpm test:integration` | Only the bot integration tests and the tests of the fake Discord API. |
+| `pnpm test:e2e` | Builds the dashboard, then runs the Playwright end-to-end tests. |
+
+Before you open a pull request:
+
+1. Run the lint check:
+
+   ```bash
+   pnpm lint
+   ```
+
+2. Run the format check:
+
+   ```bash
+   pnpm format:check
+   ```
+
+3. Run the type check:
+
+   ```bash
+   pnpm typecheck
+   ```
+
+4. Run the tests with coverage. A pull request is not merged if a coverage threshold fails ([testing.md section 4.1](testing.md#41-coverage)):
+
+   ```bash
+   pnpm test:coverage
+   ```
+
+The end-to-end tests start their own fake Discord API on port 3199 and the dashboard on port 3100, with a throwaway SQLite database. So they can run while `next dev` runs on port 3000. They use the Chromium browser of Playwright. If it is missing, install it once:
+
 ```bash
-ririko doctor
-```
-Output:
-```text
-✓ Node.js (v22.23.2)
-✓ TypeScript (v5.8.2)
-✓ Database Connection (PostgreSQL 16 / SQLite WAL)
-✓ Discord Token & Application Verification
-✓ Database Migrations (All Applied)
-✓ Image Cache Storage (/assets/cache)
-✓ Audio Transcoder (FFmpeg detected)
-
-! Twitch Client ID not configured (Optional)
-! Google Gemini API Key not configured (Optional)
-
-Diagnosis: 7 passed, 2 optional integrations missing. System healthy!
+pnpm --filter @ririko/web exec playwright install chromium
 ```
 
-### 3.2. Code Scaffolding Commands
-Eliminate boilerplate errors by generating typed skeletons:
-- `ririko generate:command <name> <category>` — Creates slash/prefix dual-dispatch command with typed metadata.
-- `ririko generate:module <name>` — Scaffolds a new domain module with config schema and repository.
-- `ririko generate:adapter <type> <name>` — Scaffolds a provider adapter (AI, Music, Image, Stream).
-- `ririko generate:service <name>` — Scaffolds an application service with dependency injection.
-- `ririko generate:game <name>` — Creates a new `MiniGame` implementation with session handling.
-- `ririko generate:card <name> <rarity> <element>` — Generates a new collectible card asset definition.
-- `ririko generate:migration <name>` — Creates a dual-dialect Drizzle migration.
+The report is in `apps/web/e2e-results/report/index.html`.
 
-### 3.3. Management & Maintenance Commands
-- `ririko dev` — Starts bot and dashboard with hot-reload.
-- `ririko db:migrate [--status|--dry-run]` — Applies the schema migrations this release ships to the database in `DATABASE_URL` (ADR-015). The bot does the same at startup unless `DB_AUTO_MIGRATE=false`. `--status` prints the latest, pending and unknown migration ids, `--dry-run` prints the plan (also what adopting an old database would change) and changes nothing. Exit codes: 0 done or nothing to do, 1 failure, 2 refused by the downgrade guard. In the bot image: `docker exec <bot container> ririko db:migrate`. `pnpm db:push` is a development shortcut only; it never runs against staging or production.
-- `ririko migrate:legacy` — Migrates data from 1.4.0 SQLite databases.
-- `ririko db:copy --from <sqlite path> [--dry-run|--yes]` — Copies a 2.0 SQLite database into an empty PostgreSQL database. The target URL comes only from `TARGET_DATABASE_URL`. Runbook: [docs/migrations.md section 5](migrations.md).
-- `ririko command:sync` — Registers slash commands with Discord Gateway REST API.
-- `ririko guild:config <guild_id> <key> <value>` — Inspects or updates guild configuration directly.
-- `ririko cache:clear` — Prunes expired stream thumbnails and cached waifu assets.
+The Git hooks that `pnpm install` sets up run checks for you:
+
+- `pre-commit` blocks `.env` files, scans the staged changes with gitleaks, and runs ESLint and Prettier on the staged files.
+- `pre-push` runs `pnpm lint --quiet` and `pnpm format:check`.
+
+Optional: make `git blame` skip the commit that formatted the whole repository:
+
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+---
+
+## 3. Change the Database
+
+When you change a Drizzle schema in `packages/database/src/schema/`, you must ship the migration in the same change. The steps are in [database.md section 1.3](database.md#13-change-the-schema). In short:
+
+1. Run `pnpm db:generate`.
+2. Read the new SQL.
+3. Run `pnpm db:check`.
+4. Commit all the output.
+
+`pnpm db:push` is a shortcut for your own development database. Never run it against a staging or production database.
+
+---
+
+## 4. The Ririko Command-Line Tool
+
+The tool is in `apps/cli`. In a checkout, run it with `pnpm cli <command>`. In the bot image, run `ririko <command>`, for example `docker exec <bot container> ririko doctor`. Add `--help` to see the options of a command.
+
+| Command | What it does |
+| --- | --- |
+| `ririko info` | Prints the version and the runtime. |
+| `ririko doctor` | Checks Node.js, the database, the Discord token, FFmpeg and the optional integrations. |
+| `ririko db:migrate [--status\|--dry-run]` | Applies the schema migrations to the database in `DATABASE_URL`. See [database.md section 1.2](database.md#12-who-changes-the-schema). |
+| `ririko db:copy --from <sqlite path> [--dry-run\|--yes]` | Copies a 2.0 SQLite database into an empty PostgreSQL database. See [migrations.md section 5](migrations.md#5-move-a-20-sqlite-database-to-postgresql). |
+| `ririko migrate:legacy`, `ririko migrate:verify` | Migrate and verify a 1.4.0 database. See [migrations.md section 3](migrations.md#3-migrate-with-the-command-line-tool). |
+| `ririko commands:sync` | Registers the slash commands with Discord, without a restart of the bot. Without options it only shows how many slots are used. |
+| `ririko commands:reset` | Lists the registered commands. Add `--yes` to remove all of them. |
+| `ririko ai:configure` | Sets up the AI providers, keys and models. |
+| `ririko image-configure` | Sets up the image providers, keys and daily limits. |
+| `ririko stream-configure` | Sets up the stream alert providers. |
+| `ririko guild:config <guild_id> [key] [value]` | Lists, reads or sets the settings of a server, with the same rules and audit trail as the dashboard. |
+| `ririko economy:config [key] [value]` | Lists, reads or sets the global economy values. |
+| `ririko tcg:rules [key] [value]` | Lists, reads or sets the global Waifu TCG rules. |
+| `ririko passkeys:reset <user_id>` | Removes the passkeys of a dashboard user and ends their sessions. Add `--yes` to apply it. |
+| `ririko bot:maintenance [status\|on\|off\|toggle]` | Shows or changes the maintenance mode of the bot. |
+
+The root `package.json` has more scripts:
+
+| Script | What it does |
+| --- | --- |
+| `pnpm dev:bot`, `pnpm dev:web` | Run the bot or the dashboard and restart when you save a file. |
+| `pnpm doctor` | The same as `ririko doctor`. |
+| `pnpm db:reset` | Deletes the development database and builds it again with the default data. |
+| `pnpm tcg:card-builder --help`, `pnpm tcg:boss-builder --help` | Build the card and boss catalogs. |
+| `pnpm tcg:reset-user <discord_user_id>` | Resets the Waifu TCG progress of one player. |
+| `pnpm tcg:simulate` | Runs the offline balance simulation. |
+| `pnpm site:build` | Builds the static project status page in `site-dist/index.html` ([release.md section 9](release.md#9-project-status-page)). |

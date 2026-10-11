@@ -16,7 +16,7 @@ export interface LeaderboardServiceOptions {
 }
 
 /**
- * Leaderboard & Ranking Service implementing Section 33 of docs/archive/BLUEPRINT.md and Section 6 of docs/economy.md:
+ * Leaderboard & Ranking Service implementing Section 33 of docs/archive/BLUEPRINT.md and Section 6 of docs/archive/economy-design.md:
  * - High-speed materialized snapshot engine populating `leaderboard_snapshots`.
  * - O(1) indexed dense rank lookups without full table scans.
  * - Dual leaderboards: Global (/leaderboard global) and Server (/leaderboard server).

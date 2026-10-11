@@ -2654,7 +2654,7 @@
       "id": "STORY-188",
       "title": "Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps",
       "points": 13,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Readers are self-hosters, server admins and contributors, not the people who built each ticket. Move planning and decision records to docs/archive, and rewrite the user docs so every procedure is numbered, has one path per audience, and describes 2.0.0 as it is (no rc-by-rc history, no ticket narration). Maintainer (2026-10-11): once 2.0.0 is on master, everything a user needs to learn about the project (installation, configuration, every command) lives in the documentation site, the replacement for the wiki. Docs that are not for users still matter for future development sessions and stay in docs/archive (public and versioned), not in .local.",
       "context": {
         "files": [
@@ -8331,7 +8331,7 @@
       "parent": "STORY-188",
       "title": "Rewrite the Self-Host and Operator Docs as Deterministic, Current Procedures",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Rewrite SETUP.md, docs/development.md, docs/deployment.md, docs/release.md, docs/migrations.md, docs/upgrading-from-1.4.md and docs/testing.md for their readers. Every procedure is numbered steps with the exact command and the expected result; one path per audience (Docker self-host, bare Node, developer, maintainer release); 2.0.0 as it is now.",
       "context": {
         "files": [
@@ -8345,7 +8345,15 @@
           "docs/database.md",
           ".env.example",
           ".env.production.example",
-          "deploy/lavalink/lavalink.env.example"
+          "deploy/lavalink/lavalink.env.example",
+          "docs/contributing.md",
+          "AGENTS.md",
+          ".circleci/config.yml",
+          "Dockerfile",
+          ".dockerignore",
+          "docker-compose.production.yml",
+          "docker-compose.remote-lavalink.yml",
+          "deploy/lavalink/docker-compose.yml"
         ],
         "symbols": [
           "runDbMigrate",
@@ -8385,7 +8393,7 @@
       "parent": "STORY-188",
       "title": "Rewrite the Feature Docs for Server Admins and Players",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Rewrite the feature docs (commands, modules, music, ai, economy, moderation, dashboard, waifu-tcg, tcg-player-guide, adventure docs) for the people who use the bot: what it does, how to turn it on, every command with its options, and limits. Implementation detail moves to architecture.md or the archive.",
       "context": {
         "files": [

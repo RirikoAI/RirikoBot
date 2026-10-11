@@ -4,7 +4,7 @@
 #   cd /opt/ririko/repo/deploy/lavalink   # the repository layout must stay intact
 #   WG_ADDRESS=10.77.0.1 docker compose up -d
 #
-# docs/deployment.md explains the host setup.
+# docs/deployment.md section 8.1 explains the host setup.
 name: ririko-lavalink
 
 # Rotate container logs so they cannot fill the disk: 5 files of 20 MB per service.

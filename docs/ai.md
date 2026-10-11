@@ -1,138 +1,176 @@
-# AI Chatbot 2.0 Subsystem Specification
+# AI Chat and Images
 
-## 1. Overview & Core Philosophy
-Ririko AI 2.0.0 transforms the legacy in-memory chat array into a persistent, multi-provider conversational intelligence engine. It enforces strict context isolation, configurable guild personalities, deterministic utility tools (including an explicit clock tool), and safe tool-calling guardrails as mandated by Sections 11 and 74 of `docs/archive/BLUEPRINT.md`.
+Ririko can talk with your members, translate messages and make pictures. It remembers each member's chat on its own, and it only does what the member is allowed to do.
 
----
+## 1. Turn It On
 
-## 2. Dedicated Channel & Per-User Context Isolation
+### 1.1. For the Host
 
-### 2.1. Dedicated AI Channel (`#ririko-ai`)
-- Guild administrators can bind a specific text channel as the dedicated AI channel.
-- Messages sent in this channel invoke the AI **without requiring a prefix or mention**.
-- Outside the dedicated AI channel, Ririko only responds to explicit `/ai chat` commands or `@Ririko` mentions (if enabled).
+Ririko needs at least one AI provider.
 
-### 2.2. Isolated Context in Shared Channels
-Although multiple members chat within the same `#ririko-ai` channel, **conversational memory is strictly isolated per user**:
-```text
-#ririko-ai (Shared Channel)
+1. Get a key from a provider. Gemini is the default.
+   - Gemini: [Google AI Studio](https://aistudio.google.com/)
+   - OpenAI: [OpenAI](https://platform.openai.com/), or any OpenAI-compatible service (set `OPENAI_BASE_URL`)
+   - Ollama: a server you run yourself (set `OLLAMA_BASE_URL`)
+2. Add the key to `.env`:
 
-Alice: "What do you think about Gundam?"
-Ririko: [Loads Alice's context] "Gundam is legendary! Are you watching the Universal Century timeline?"
+   ```env
+   DEFAULT_AI_PROVIDER=gemini
+   GEMINI_API_KEY=your_key_here
+   ```
 
-Bob: "Do you remember my favorite anime?"
-Ririko: [Loads Bob's context] "You told me earlier that Steins;Gate is your all-time favorite!"
-```
-- Context queries filter by `(guild_id, user_id, channel_id)`.
-- Alice's private thoughts, preferences, and dialogue history are **never leaked** into Bob's context window.
+3. Restart the bot.
+4. Run `ririko doctor` to check the connection. See [development.md](development.md).
 
----
+Other variables:
 
-## 3. Personality Engine & Identity Safety
+| Variable | Default | What it does |
+|---|---|---|
+| `DEFAULT_AI_PROVIDER` | `gemini` | The provider tried first: `gemini`, `openai` or `ollama`. |
+| `DEFAULT_AI_MODEL` | Empty | A model for that provider. Empty uses the provider's default. |
+| `GEMINI_API_KEY` | Empty | Gemini key. |
+| `OPENAI_API_KEY`, `OPENAI_BASE_URL` | Empty | OpenAI key, and an optional address for compatible services. |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Your Ollama server. |
 
-### 3.1. Separated Personality Architecture
-Guild personality prompts are stored separately from immutable system safety instructions in `ai_guild_preferences`.
-- **Default Persona**: Helpful, cheerful, anime-loving companion; speaks casually in American English; occasionally uses playful Japanese expressions (*"Sugoi!"*, *"Yatta!"*); avoids excessive emojis.
-- **Customizable**: Guild owners can customize tone and boundaries via the web dashboard.
-- **Safe Identity Ingestion**: The AI receives only sanitized public Discord identity tokens (`username`, `display_name`, `server_name`, `joined_date`). Internal database IDs, tokens, and billing details are strictly excluded.
+If the first provider fails or runs out of quota, Ririko tries the next provider that you have set up. See [adapters.md](adapters.md).
 
----
+### 1.2. For the Server Admin
 
-## 4. Deterministic Tools & Explicit Time Service
+Members can chat with Ririko with `/chat` or `/ai` in any channel. For a better experience, make an AI channel.
 
-### 4.1. The Time Tool (`get_current_time`)
-Large Language Models cannot reliably guess current wall-clock time. Ririko equips the AI with an explicit time tool:
-```typescript
-export interface TimeToolResult {
-  iso: string;
-  formatted: string;
-  timezone: string;
-  utcOffset: string;
-}
-```
-Resolution Precedence:
-1. User's explicitly configured personal timezone (`ai_user_preferences.timezone`).
-2. Guild's configured server timezone (`guild_settings.timezone`).
-3. System default (`UTC`).
+1. Open the dashboard **AI Chatbot** page. See [dashboard.md](dashboard.md).
+2. Pick the **AI channel**.
+3. Pick a **speaking style**.
+4. Optional: write a **persona**.
+5. Save.
 
-### 4.2. Safe Tool Allowlist
-The AI is strictly limited to an audited tool allowlist:
-- `get_current_time()`: Retrieves accurate time.
-- `music.play(query)`: Queues a track in the guild player.
-- `economy.check_balance()`: Inspects user wallet and bank.
-- `anime.search(title)`: Fetches anime synopsis and score from AniList/MAL.
-- `reminders.create(time, message)`: Schedules a real, persistent reminder through `ReminderService` (natural-language times in the user timezone; see `docs/commands.md` §7). Returns the reason when it cannot be scheduled.
-- `games.coinflip()`: Flips a random coin.
+Or run `/aichannel channel:#ririko-ai`. With no `channel`, `/aichannel` uses the channel where you run it. To remove the AI channel, clear it on the dashboard or type `!aichannel reset`. Ririko answers every message in the AI channel without a prefix.
 
-Each server chooses which of these tools Ririko may use (the dashboard AI Chatbot page, or `ririko guild:config <guild> ai.tools`). The choice is stored in `ai_guild_preferences`:
-- `tools_enabled = false` turns every tool off.
-- Otherwise `allowed_tools` lists the allowed tools, and an empty list means every tool, including tools added later.
+## 2. How Chat Works
 
-The bot passes the resulting list both to the tool registry (so the model is only told about allowed tools) and to the security interceptor, which refuses any other tool call. An empty list refuses every tool (STORY-116).
+- In the AI channel, Ririko answers every message.
+- In any other channel, Ririko answers when you mention it (`@Ririko how are you?`) or run `/chat` or `/ai`.
+- Messages that start with the command prefix go to the command, not to the AI.
+- Ririko remembers the last 20 messages of each member in each channel. Members do not see each other's memory, even in the same channel.
+- Ririko sees only your public Discord name, display name and the server name. It never sees internal IDs, keys or account details.
+- A reply longer than 2000 characters is sent in more than one message.
 
----
+## 3. Commands
 
-## 5. Security & Application Mediation Boundaries
+| Command | Aliases | Options | Who can use it |
+|---|---|---|---|
+| `/chat` | `c` | `prompt` (required) | Everyone |
+| `/ai` | `ask` | `action`, `prompt`, `model`, `channel`, `style` | Everyone. See below. |
+| `/aiclear` | `clearchat`, `reset-ai` | None | Everyone |
+| `/aichannel` | `setaichannel` | `channel` | Manage Server or Manage Channels |
+| `/aipersona` | `aistyle` | `style`, `prompt` | Manage Server to change. Everyone to view |
+| `/aimodel` | `setmodel` | `model` | Manage Server to change. Everyone to view |
 
-In strict compliance with Section 74 of `docs/archive/BLUEPRINT.md`: **The LLM is NEVER the security boundary.**
-When the LLM outputs a tool call, the core application mediates and verifies:
-1. Does the calling user possess the requisite Discord permission?
-2. Is the target module currently enabled for this guild?
-3. Does the bot itself have the Discord permissions to execute the action?
-4. Does the action violate role hierarchy?
+`/ai` does different things depending on `action`:
 
-```text
-User: "Ban Bob."
-  ↓
-LLM emits tool call: `moderation.ban(target: Bob)`
-  ↓
-Application Security Interceptor:
-  [X] Does User have BAN_MEMBERS? No.
-  ↓
-Application blocks execution & returns permission denial to AI.
-```
+| Action | What it does | Who can use it |
+|---|---|---|
+| `chat` (default) | Chats. Use `prompt` for your message. | Everyone |
+| `model` | Shows or sets the model. Use `model`. | Manage Server to set |
+| `channel` | Sets the AI channel with `channel`. With no `channel`, it shows the current AI channel. To remove the channel, type `!ai channel reset`. | Manage Server or Manage Channels |
+| `persona` | Sets the style and persona. Use `style` and `prompt`. | Manage Server |
+| `clear` | Clears your memory in this channel. | Everyone |
 
-**Strict Prohibition**: The AI model is NEVER granted access to:
-- Operating system shell or terminal commands (`exec`, `spawn`).
-- Raw database SQL queries or ORM models.
-- Local filesystem access.
-- Arbitrary HTTP requests (SSRF vector).
-- Privileged Discord administrative APIs.
+- Speaking styles: `FRIENDLY_ANIME` (default), `TSUNDERE`, `KUUDERE`, `DANDERE`, `GENKI` and `FORMAL`.
+- The model is a choice for the whole server. Run `/aimodel` with no option to see what you can choose. A choice is `provider`, such as `openai`, or `provider/model`, such as `gemini/gemini-2.5-pro`. Type `default` to reset it.
+- Models you can choose:
+  - Gemini: `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-3.5-flash-lite`, `gemini-3.7-flash`
+  - OpenAI: `gpt-4o-mini`, `gpt-4o`, `o3-mini`
+  - Ollama: `llama3.3`, `llama3.2`, `mistral`, `qwen2.5`, `deepseek-r1`
+- The server chooses the provider that Ririko tries first. If it fails, the next provider answers with its own default model.
 
----
+## 4. Server Settings
 
-## 6. Multi-Provider Architecture
+Open the dashboard **AI Chatbot** page.
 
-The AI engine uses an abstract provider interface with native streaming support:
+| Setting | What it does |
+|---|---|
+| AI channel | The channel where Ririko answers every message. |
+| Speaking style | The tone of Ririko. |
+| Persona | Extra instructions for Ririko's personality, up to 1500 characters. |
+| Tools | The actions Ririko may take while chatting. Remove every tool to turn tools off. |
+| Provider and model | The provider and model to try first. The page lists only providers the host has set up. |
 
-```typescript
-export interface ChatToken {
-  text: string;
-  isFinished: boolean;
-}
+You can also use the command line: `ririko guild:config <server> ai.<key> <value>`.
 
-export interface ChatModelProvider {
-  readonly id: string;
-  readonly name: string;
-  
-  generate(request: ChatRequest): Promise<ChatResponse>;
-  stream?(request: ChatRequest): AsyncIterable<ChatToken>;
-}
-```
+## 5. Tools
 
-### Supported Providers:
-1. **Google Gemini** (`@google/genai`): Default flagship provider (Gemini 2.5 Flash / Pro).
-2. **OpenAI** (`openai`): GPT-4o and GPT-4o-mini adapters.
-3. **Local Ollama / OpenRouter**: Self-hosted local inference adapter for zero-cost or offline setups.
-4. **Fallback Chains**: If the primary provider triggers a 429 quota exhaustion or network timeout, requests automatically route to the configured fallback provider.
+A tool lets Ririko do something for a member while it chats. Ririko checks the permissions of the member before it uses a tool.
 
-### 6.1. Per-Server Provider & Model (STORY-116)
-- The provider and model lists live in `@ririko/core` (`AI_PROVIDER_MODELS`). The providers in `@ririko/ai` use the same lists, so the dashboard, the CLI and `/aimodel` offer only models the bot has.
-- A server's choice is stored in `ai_guild_preferences.provider_override` and `model_override`. It is written as `provider` (that provider's default model) or `provider/model`, and unset means the bot default (`DEFAULT_AI_PROVIDER`).
-- The bot passes the choice to `FallbackChainManager.generate/stream` as a `ProviderPreference`. The chosen provider is tried first. The chosen model is sent only to that provider; if the provider fails, the next provider answers with its own default model. The circuit breaker is unchanged.
-- The dashboard offers only providers with credentials (`configuredAiProviders`: `GEMINI_API_KEY`, `OPENAI_API_KEY`, or an explicit `OLLAMA_BASE_URL`). A provider without them is refused on save.
-- `/aimodel` and `/ai action:model`:
-  - Setting a model needs Manage Server.
-  - They accept a listed `provider/model`, a provider name, or a listed model name that belongs to one provider, and `default` to reset.
-  - They refuse a provider the bot has not registered as available.
-- A `model_override` saved before STORY-116, without a provider, was never used and stays unused. The page shows it as "Bot default".
+| Tool | What it does |
+|---|---|
+| Current time | Tells the time in your time zone. Ririko uses your own zone, then the server zone, then UTC. |
+| Coin flip | Flips a coin. |
+| Anime search | Looks up an anime. |
+| Check a balance | Shows your credits. |
+| Play music | Adds a song to the music queue. |
+| Create a reminder | Sets a reminder for you. |
+
+Ririko cannot run programs, read files, make web requests, change the database or use admin functions. It cannot ban, kick or change roles. If you ask it to do something you may not do, it refuses.
+
+## 6. Translate to English
+
+Right-click a message, choose **Apps**, then **Translate to English**. Only you see the result. See [commands.md](commands.md).
+
+## 7. Images
+
+`/imagine` makes a picture from a text description.
+
+### 7.1. Turn It On
+
+The host sets at least one image provider in `.env`:
+
+| Variable | What it does |
+|---|---|
+| `GEMINI_API_KEY` | Uses Google Gemini Imagen. |
+| `REPLICATE_API_TOKEN` | Uses Replicate (Flux models). |
+| `COMFYUI_URL` | Uses your own ComfyUI or Stable Diffusion server. `COMFYUI_BASE_URL` and `SD_WEBUI_URL` also work. |
+| `IMAGE_DEFAULT_PROVIDER` | The provider to use when nobody picks one: `gemini`, `replicate`, `comfyui` or `mock`. Default: `gemini`. |
+| `IMAGE_DAILY_QUOTA` | The number of images each member may make in 24 hours, across all servers. Default: 30. 0 means no limit. |
+
+The `mock` provider makes a simple test picture. Ririko uses it when the first provider fails and the member did not pick one.
+
+Never put image keys in Discord. The `/setup-stablediffusion-api` command only explains this.
+
+### 7.2. Commands
+
+`/imagine` (aliases `img`, `ai-image`, `generate-image`). The cooldown is 5 seconds.
+
+| Option | Required | What it does |
+|---|---|---|
+| `prompt` | Yes | What to draw. |
+| `preset` | No | A style: `anime` (default), `photoreal`, `pixel-art`, `fantasy`, `cyberpunk` or `none`. |
+| `aspect_ratio` | No | `1:1` (default), `16:9`, `9:16`, `4:3` or `3:4`. |
+| `negative_prompt` | No | What to leave out. |
+| `provider` | No | `auto` (default), `gemini`, `comfyui`, `replicate` or `mock`. |
+
+Prefix form: `!imagine a castle at night --ar 16:9 --preset fantasy --negative people`.
+
+`/stablediffusion-model` (aliases `sdmodel`, `sd-model`, `imagemodel`, `image-model`) sets or shows the defaults of the server. It needs **Manage Server**.
+
+| Option | What it does |
+|---|---|
+| `preset` | The default style. |
+| `provider` | The default provider: `gemini`, `replicate`, `comfyui` or `auto`. |
+
+### 7.3. Server Settings
+
+Open the dashboard **Image Generation** page.
+
+| Setting | What it does |
+|---|---|
+| Default provider | The provider for `/imagine` when a member picks none. Only providers the host set up are listed. |
+| Images per member (24 hours) | A limit for your server. It can be lower than the host's quota, not higher. |
+| Default style | The style used when a member picks none. |
+
+## 8. Limits
+
+- Ririko needs a working provider and quota. If the provider fails, Ririko tells the member.
+- Ririko remembers the last 20 messages of each member in a channel.
+- Image requests wait in a queue. A request that waits long can take time.
+- Input for translation is limited to 12,000 characters.

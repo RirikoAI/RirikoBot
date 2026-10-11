@@ -10,7 +10,7 @@ export interface RarityTierInfo {
 }
 
 /**
- * Authoritative 8-Tier Rarity Specification from docs/waifu-tcg.md:L61-L71.
+ * Authoritative 8-Tier Rarity Specification from docs/archive/waifu-tcg-design.md:L61-L71.
  */
 export const RARITY_TIERS: Record<CardRarity, RarityTierInfo> = {
   COMMON: {

@@ -4,7 +4,7 @@
 > **Current Date**: September 29, 2026 (`2026-09-29`)  
 > **Target Release**: October / November 2026  
 > **Main Development Branch**: `develop/2.0.0`  
-> **Live Board Registry**: [docs/kanban/BOARD.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/BOARD.md) · [docs/kanban/board.json](file:///z:/Projects/ririko-v2-2026/docs/kanban/board.json)
+> **Live Board Registry**: [docs/kanban/BOARD.md](../kanban/BOARD.md) · [docs/kanban/board.json](../kanban/board.json)
 
 ---
 
@@ -85,14 +85,14 @@ gantt
 ### Phase 0: Discovery, Architecture & Agent Definitions
 - **Status**: ✅ **Complete** (`EPIC-000`, 13 pts base / 21 pts groomed)
 - **Deliverables**:
-  - [docs/archive/legacy-feature-inventory.md](file:///z:/Projects/ririko-v2-2026/docs/archive/legacy-feature-inventory.md) (141 commands & 17 entities audited from 1.4.0).
-  - [docs/architecture.md](file:///z:/Projects/ririko-v2-2026/docs/architecture.md) (Clean architecture, monorepo topology, O(1) command router).
-  - [docs/migrations.md](file:///z:/Projects/ririko-v2-2026/docs/migrations.md) and [docs/archive/dependency-evaluation.md](file:///z:/Projects/ririko-v2-2026/docs/archive/dependency-evaluation.md).
-  - [docs/waifu-tcg.md](file:///z:/Projects/ririko-v2-2026/docs/waifu-tcg.md) (Comprehensive 15-subsystem flagship specification).
-  - [docs/database.md](file:///z:/Projects/ririko-v2-2026/docs/database.md), [docs/commands.md](file:///z:/Projects/ririko-v2-2026/docs/commands.md), [docs/economy.md](file:///z:/Projects/ririko-v2-2026/docs/economy.md), [docs/dashboard.md](file:///z:/Projects/ririko-v2-2026/docs/dashboard.md), [docs/adapters.md](file:///z:/Projects/ririko-v2-2026/docs/adapters.md), [docs/ai.md](file:///z:/Projects/ririko-v2-2026/docs/ai.md), [docs/music.md](file:///z:/Projects/ririko-v2-2026/docs/music.md), [docs/moderation.md](file:///z:/Projects/ririko-v2-2026/docs/moderation.md), [docs/modules.md](file:///z:/Projects/ririko-v2-2026/docs/modules.md).
-  - [docs/archive/adr/](file:///z:/Projects/ririko-v2-2026/docs/archive/adr/) (ADR-001 through ADR-012).
+  - [docs/archive/legacy-feature-inventory.md](legacy-feature-inventory.md) (141 commands & 17 entities audited from 1.4.0).
+  - [docs/architecture.md](../architecture.md) (Clean architecture, monorepo topology, O(1) command router).
+  - [docs/migrations.md](../migrations.md) and [docs/archive/dependency-evaluation.md](dependency-evaluation.md).
+  - [docs/waifu-tcg.md](waifu-tcg-design.md) (Comprehensive 15-subsystem flagship specification).
+  - [docs/database.md](../database.md), [docs/commands.md](commands-design.md), [docs/economy.md](economy-design.md), [docs/dashboard.md](dashboard-design.md), [docs/adapters.md](adapters-design.md), [docs/ai.md](ai-design.md), [docs/music.md](music-design.md), [docs/moderation.md](moderation-design.md), [docs/modules.md](modules-design.md).
+  - [docs/archive/adr/](adr/) (ADR-001 through ADR-012).
   - `GEMINI.md`, `AGENTS.md`, and 18 specialist agent definitions in `.gemini/agents/`.
-  - Scrum Kanban Governance system ([docs/kanban/protocol.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/protocol.md), [docs/kanban/BOARD.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/BOARD.md), [docs/kanban/board.json](file:///z:/Projects/ririko-v2-2026/docs/kanban/board.json)).
+  - Scrum Kanban Governance system ([docs/kanban/protocol.md](../kanban/protocol.md), [docs/kanban/BOARD.md](../kanban/BOARD.md), [docs/kanban/board.json](../kanban/board.json)).
 - **Exit Gate**: All architectural decisions documented, approved, and registered in canonical board.
 
 ---
@@ -273,9 +273,9 @@ TOTAL:    [===================.]  96% (485/506 pts) Overall Project Completion
 ---
 
 ## References & Key Documentation
-- Master Platform Specification: [BLUEPRINT.md](file:///z:/Projects/ririko-v2-2026/docs/archive/BLUEPRINT.md)
-- Scrum Kanban Governance Protocol: [docs/kanban/protocol.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/protocol.md)
-- Canonical Kanban Database: [docs/kanban/board.json](file:///z:/Projects/ririko-v2-2026/docs/kanban/board.json)
-- Live Scrum Kanban Board: [docs/kanban/BOARD.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/BOARD.md)
-- Testing & Quality Gates: [docs/testing.md](file:///z:/Projects/ririko-v2-2026/docs/testing.md)
-- Deployment & Infrastructure: [docs/deployment.md](file:///z:/Projects/ririko-v2-2026/docs/deployment.md)
+- Master Platform Specification: [BLUEPRINT.md](BLUEPRINT.md)
+- Scrum Kanban Governance Protocol: [docs/kanban/protocol.md](../kanban/protocol.md)
+- Canonical Kanban Database: [docs/kanban/board.json](../kanban/board.json)
+- Live Scrum Kanban Board: [docs/kanban/BOARD.md](../kanban/BOARD.md)
+- Testing & Quality Gates: [docs/testing.md](../testing.md)
+- Deployment & Infrastructure: [docs/deployment.md](../deployment.md)

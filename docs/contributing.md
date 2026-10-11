@@ -12,7 +12,7 @@ Welcome to the Ririko AI 2.0.0 engineering team! We operate like a senior open-s
 For any significant task or feature implementation:
 1. **Inspect**: Read relevant legacy code, documentation, and dependencies.
 2. **Design**: Confirm interfaces and document architectural decisions in an Architecture Decision Record (`docs/archive/adr/`) if a significant choice is made.
-3. **Scaffold**: Use CLI scaffolding tools (`ririko generate:*`) to eliminate boilerplate mistakes.
+3. **Scaffold**: Copy the layout of a nearby command or module. [architecture.md](architecture.md) shows where each part lives. The command-line tool has no scaffolding commands. [development.md](development.md) lists the real ones.
 4. **Implement**: Write domain services first, followed by Discord command glue and database queries.
 5. **Test**: Author unit tests with deterministic random seeds and integration tests.
 6. **Verify Quality Gate**:
@@ -23,7 +23,7 @@ For any significant task or feature implementation:
    pnpm build
    ```
    **Coverage is a merge gate**: a PR is not merged unless every coverage threshold in `vitest.config.ts` passes (see [testing.md §4.1](testing.md#41-coverage)).
-7. **Schema changes ship a migration**: if you changed a Drizzle schema (`packages/database/src/schema/`), run `pnpm db:generate`, review the SQL for both dialects and commit `packages/database/migrations/` together with the embedded modules and the DDL files (see [database.md](database.md#1-overview)).
+7. **Schema changes ship a migration**: if you changed a Drizzle schema (`packages/database/src/schema/`), run `pnpm db:generate`, review the SQL for both dialects and commit `packages/database/migrations/` together with the embedded modules and the DDL files (see [database.md](database.md#13-change-the-schema)).
    - Never edit a migration after it has been released.
    - A destructive change (`DROP TABLE`, `DROP COLUMN`, a rename, a column type change, `SET NOT NULL`) follows expand/contract: ship the additive step first, and do the destructive step in a later migration whose first line is `-- ririko:contract`, once no release still uses the old shape.
    - `pnpm db:push` is a development shortcut. It never runs against staging or production.

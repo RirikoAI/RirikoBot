@@ -22,7 +22,7 @@ export interface BankingServiceOptions {
 }
 
 /**
- * Banking Service implementing Sections 4 and 5.1 of docs/economy.md:
+ * Banking Service implementing Sections 4 and 5.1 of docs/archive/economy-design.md:
  * - Deposit and Withdrawal with capacity scaling and negative-balance guardrails.
  * - Capacity from the global economy config and the account-wide level: base + level * step
  *   (10,000 + level * 2,500 by default), recomputed on every bank operation.

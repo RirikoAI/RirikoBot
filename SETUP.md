@@ -1,375 +1,391 @@
-# Ririko AI 2.0.0 — Local Development Setup
+# Set Up Ririko From Source
 
-This guide takes a fresh clone to a running bot with the same toolchain, database content,
-TCG card pool, bosses and music stack as the maintainer's development machine.
+This guide takes you from a fresh download to a running Ririko bot on your own computer, without Docker. Use it to try Ririko, to run it on a server with Node.js, or to work on the code. If you prefer Docker, read [docs/deployment.md](docs/deployment.md) instead.
 
-No secrets live in the repository. You create your own Discord application and API keys and
-put them in a local `.env`, which is gitignored.
+No secrets are stored in the repository. You create your own Discord application and your own keys. You put them in a local `.env` file, which Git ignores.
 
 ---
 
 ## 1. Prerequisites
 
-| Tool | Version used | Notes |
+Install these tools first:
+
+| Tool | Version | Notes |
 | --- | --- | --- |
-| Node.js | 22.x LTS (22.23.2) | `engines.node >= 22`. Node 24 LTS also works. |
-| pnpm | 10.8.1 | Pinned by `packageManager`. Run `corepack enable` and corepack picks the right version. |
-| Java (OpenJDK) | 21 (17+ minimum) | Only needed for Lavalink (music). |
-| Git | 2.4x | |
-| gitleaks | 8.x | Required. The pre-commit hook refuses to commit without it. `winget install gitleaks`, `brew install gitleaks`, or `go install github.com/zricethezav/gitleaks/v8@latest`. |
-| FFmpeg | any recent | Optional. Only used by the non-Lavalink fallback audio path. |
+| Node.js | 22 LTS or newer | Node.js 24 LTS also works. |
+| pnpm | 10.8.1 | Run `corepack enable` and corepack picks this version for you. |
+| Git | 2.4 or newer | |
+| Java (OpenJDK) | 21 (17 is the minimum) | Only for Lavalink, the music server. |
+| gitleaks | 8.x | Only for developers. The Git pre-commit hook refuses to commit without it. Install it with `winget install gitleaks`, `brew install gitleaks`, or `go install github.com/zricethezav/gitleaks/v8@latest`. |
+| FFmpeg | any recent version | Optional. Only the fallback audio player uses it. |
 
-Native modules (`better-sqlite3`, `@napi-rs/canvas`) ship prebuilt binaries for Node 22 on
-Windows, macOS and Linux, so no C++ toolchain is normally needed. If `pnpm install` falls back
-to a source build, install the platform build tools (Visual Studio Build Tools on Windows,
-`build-essential` + `python3` on Linux).
+The native modules (`better-sqlite3` and `@napi-rs/canvas`) come with ready-made files for Windows, macOS and Linux. You normally need no C++ tools. If `pnpm install` has to build a module from source, install the build tools of your system first: Visual Studio Build Tools on Windows, or `build-essential` and `python3` on Linux.
 
-Development happens on Windows 11 with Git Bash / PowerShell. All commands below work in any
-POSIX shell or PowerShell unless noted.
+All commands in this guide work in a POSIX shell (Bash, zsh) and in PowerShell.
 
 ---
 
-## 2. Clone and install
+## 2. Download and Install
 
-```bash
-git clone https://github.com/RirikoAI/RirikoBot.git ririko-v2-2026
-```
+1. Download the repository:
 
-```bash
-cd ririko-v2-2026
-```
+   ```bash
+   git clone https://github.com/RirikoAI/RirikoBot.git
+   ```
 
-```bash
-git checkout develop/2.0.0
-```
+2. Go into the folder:
 
-```bash
-corepack enable
-```
+   ```bash
+   cd RirikoBot
+   ```
 
-```bash
-pnpm install
-```
+3. Turn on corepack:
 
-`pnpm install` also runs `husky` (the `prepare` script), which installs the Git pre-commit hook.
-The hook blocks staged `.env` files and runs `gitleaks` on the staged changes.
+   ```bash
+   corepack enable
+   ```
 
----
+4. Install the packages:
 
-## 3. Create a Discord application
+   ```bash
+   pnpm install
+   ```
 
-1. Open <https://discord.com/developers/applications> and create a new application.
-2. **Bot** tab: reset and copy the token (`DISCORD_TOKEN`). Enable the **Server Members** and
-   **Message Content** privileged gateway intents. Prefix commands, leveling and moderation
-   need them.
-3. **General Information** tab: copy the Application ID (`DISCORD_CLIENT_ID`).
-4. **OAuth2 → URL Generator**: select the `bot` and `applications.commands` scopes and the
-   `Administrator` permission (simplest for a private test server). Open the URL and add the
-   bot to your own test server.
-5. In Discord, enable Developer Mode (User Settings → Advanced). Right-click your test server
-   to copy its ID (`DISCORD_DEV_GUILD_ID`), and right-click your own name to copy your user ID
-   (`BOT_OWNER_ID`).
-
-Use your own application for development. Never share a bot token; anyone with it controls
-the bot.
+   The command ends without errors. It also runs `husky`, which sets up the Git pre-commit hook. The hook blocks staged `.env` files and runs `gitleaks` on the staged changes.
 
 ---
 
-## 4. Configure `.env`
+## 3. Create a Discord Application
 
-```bash
-cp .env.example .env
-```
+1. Open <https://discord.com/developers/applications> and click **New Application**.
+2. Open the **Bot** tab. Click **Reset Token** and copy the token. This is your `DISCORD_TOKEN`.
+3. On the same tab, turn on **Server Members Intent** and **Message Content Intent**. Click **Save Changes**. Prefix commands, levels and moderation need them.
+4. Open the **General Information** tab. Copy the **Application ID**. This is your `DISCORD_CLIENT_ID`.
+5. Open **OAuth2**, then **URL Generator**. Select the scopes `bot` and `applications.commands`. Select the permission `Administrator`. This is the simplest choice for a private test server.
+6. Open the generated URL and add the bot to your own server.
+7. In Discord, turn on Developer Mode (**User Settings**, **Advanced**). Right-click your server and click **Copy Server ID**. This is your `DISCORD_DEV_GUILD_ID`. Right-click your own name and click **Copy User ID**. This is your `BOT_OWNER_ID`.
 
-Fill in at minimum:
-
-| Variable | Value |
-| --- | --- |
-| `DISCORD_TOKEN` | Bot token from step 3 |
-| `DISCORD_CLIENT_ID` | Application ID from step 3 |
-| `DISCORD_DEV_GUILD_ID` | Your test server ID |
-| `BOT_OWNER_ID` | Your Discord user ID (comma-separate several owners). Owners can open the dashboard owner console once they add a passkey. |
-| `SYNC_COMMANDS` | `true` for the first run (see step 8) |
-
-Keep these defaults for the standard local setup:
-
-```env
-DATABASE_DIALECT=sqlite
-DATABASE_URL=./data/ririko.sqlite
-DEFAULT_PREFIX=!
-LAVALINK_HOST=127.0.0.1
-LAVALINK_PORT=2333
-LAVALINK_PASSWORD=youshallnotpass
-```
-
-Optional integrations. Leave blank to disable the feature:
-
-| Feature | Variables | Where to get them |
-| --- | --- | --- |
-| AI chat (`#ririko-ai`) | `DEFAULT_AI_PROVIDER`, `GEMINI_API_KEY` or `OPENAI_API_KEY` (+ `OPENAI_BASE_URL`), `OLLAMA_BASE_URL` | <https://aistudio.google.com/>, OpenAI/OpenRouter dashboard, or a local Ollama. `pnpm ai:configure` edits these interactively. |
-| Spotify search / playback | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`, `SPOTIFY_DC`, `SPOTIFY_KEY`, `SPOTIFY_SP_DC` | <https://developer.spotify.com/dashboard>; `sp_dc` / `sp_key` cookies from open.spotify.com DevTools |
-| Stream alerts | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY`, `TIKTOK_SESSION_ID`, `TIKTOK_API_KEY` | <https://dev.twitch.tv/console/apps>, Google Cloud console |
-| Credential vault | `SECRET_VAULT_KEY` | `openssl rand -hex 32` (64 hex characters) |
-| Web dashboard | `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL`, `SECRET_VAULT_KEY` | Client secret from the Discord Developer Portal (OAuth2 page). See [section 8.1](#81-run-the-web-dashboard). |
-
-Check the result:
-
-```bash
-pnpm doctor
-```
+Never share the bot token. Anyone who has it controls your bot.
 
 ---
 
-## 5. Build the database
+## 4. Write the `.env` File
 
-The dev database is SQLite at `data/ririko.sqlite` (gitignored). This command deletes any
-existing file, applies the schema, and seeds the shop catalog, achievements, game items and
-equipment, dungeon seasons and the canonical waifu assets:
+1. Copy the example file:
 
-```bash
-pnpm db:reset
-```
+   ```bash
+   cp .env.example .env
+   ```
 
-It needs internet access (waifu.im). Run it again at any time to start from a clean database.
-It deletes all local data, including player progress.
+2. Open `.env` in a text editor and set at least these values:
 
-The bot also creates the schema on its own when it starts against an empty file, but it does
-not seed the TCG content. Always run `db:reset` on a fresh clone.
+   | Variable | Value |
+   | --- | --- |
+   | `DISCORD_TOKEN` | The bot token from step 3. |
+   | `DISCORD_CLIENT_ID` | The application ID from step 3. |
+   | `DISCORD_DEV_GUILD_ID` | The ID of your test server. |
+   | `BOT_OWNER_ID` | Your Discord user ID. Separate several owners with commas. An owner can open the owner console of the dashboard after they add a passkey. |
+   | `SYNC_COMMANDS` | `true` for the first run (step 8). |
 
----
+3. Keep these default values for a standard local setup:
 
-## 6. Restore the TCG card pool and bosses
+   ```env
+   DATABASE_DIALECT=sqlite
+   DATABASE_URL=./data/ririko.sqlite
+   DEFAULT_PREFIX=!
+   LAVALINK_HOST=127.0.0.1
+   LAVALINK_PORT=2333
+   LAVALINK_PASSWORD=youshallnotpass
+   ```
 
-The card and boss definitions are committed under `assets/tcg/catalog/`. The rendered images
-(`public/cards/`, `public/bosses/`) and the downloaded artwork cache (`data/tcg/`) are
-gitignored, so rebuild them and write the rows into your database:
+   Change `LAVALINK_PASSWORD` if the computer is reachable from other computers.
 
-```bash
-pnpm tcg:card-builder --rerender
-```
+4. Optional: set the values for the features you want. If you leave a value empty, the feature is off.
 
-```bash
-pnpm tcg:boss-builder --all
-```
+   | Feature | Variables | Where to get them |
+   | --- | --- | --- |
+   | AI chat (`#ririko-ai`) | `DEFAULT_AI_PROVIDER`, and `GEMINI_API_KEY`, or `OPENAI_API_KEY` (with `OPENAI_BASE_URL`), or `OLLAMA_BASE_URL` | <https://aistudio.google.com/>, the dashboard of OpenAI or OpenRouter, or a local Ollama. The command `pnpm ai:configure` edits these values for you. |
+   | Spotify search and playback | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`, `SPOTIFY_DC`, `SPOTIFY_KEY`, `SPOTIFY_SP_DC` | <https://developer.spotify.com/dashboard>. The `sp_dc` and `sp_key` cookies come from the developer tools of your browser on open.spotify.com. |
+   | Stream alerts | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY`, `TIKTOK_SESSION_ID`, `TIKTOK_API_KEY` | <https://dev.twitch.tv/console/apps> and the Google Cloud console. |
+   | Credential vault | `SECRET_VAULT_KEY` | Run `openssl rand -hex 32`. The result has 64 characters. |
+   | Web dashboard | `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL`, `SECRET_VAULT_KEY` | The client secret is on the **OAuth2** page of the Developer Portal. See [section 8.1](#81-run-the-web-dashboard). |
 
-- `--rerender` re-renders every card in `assets/tcg/catalog/manifest.json` and upserts it into
-  `waifu_cards` with the same IDs, stats, skills and collection numbers.
-- `--all` syncs, renders and imports every boss catalog in `assets/tcg/catalog/bosses/`.
+5. Check your settings:
 
-Both commands download artwork from AniList and Danbooru with rate limiting. The first run
-takes a while; later runs use the cache in `data/tcg/`. Both commands are resumable.
+   ```bash
+   pnpm doctor
+   ```
 
----
-
-## 7. Set up Lavalink (music)
-
-Lavalink 4.2.2 is a separate Java server in `lavalink/` (gitignored).
-
-```bash
-pnpm lavalink:install
-```
-
-This checks Java, downloads `Lavalink.jar`, and writes `lavalink/application.yml` from your
-`.env` (`LAVALINK_PORT`, `LAVALINK_PASSWORD`, Spotify values). The plugins (LavaSrc,
-LavaSearch, YouTube, LavaLyrics, Skybot, LavaDSPX) are pinned in that file, and Lavalink
-downloads them on the first start.
-
-Start it in its own terminal and leave it running:
-
-```bash
-pnpm lavalink:start
-```
-
-Wait for `Lavalink is ready to accept connections`. If you change `LAVALINK_PASSWORD` or the
-Spotify values, run `pnpm lavalink:install` again so both sides match.
-
-To run the bot without music, set `LAVALINK_ENABLED=false`.
+   Each required check shows a green mark. A warning for an optional integration is normal.
 
 ---
 
-## 8. Run the bot
+## 5. Build the Database
 
-```bash
-pnpm dev:bot
-```
+The database is a SQLite file, `data/ririko.sqlite`. Git ignores it. The next command deletes any existing file and builds the schema. Then it adds the default data: the shop catalog, the achievements, the game items and equipment, the dungeon seasons and the standard waifu assets.
 
-This runs `apps/bot/src/main.ts` with `tsx watch` and loads the root `.env`. It restarts when
-you save a file.
+This command deletes all local data, including the progress of players. Do not run it on a database that you want to keep.
 
-Discord allows 100 slash commands in each scope, so Ririko registers them in two scopes:
+1. Build the database:
 
-- **Global**: member commands (`/play`, `/balance`, `/card`, ...) and the Translate message
-  menu. Global changes can take a while to show; press Ctrl+R in Discord.
-- **Per server**: admin and setup commands (`/ban`, `/prefix`, `/welcomer`, ...). They appear
-  immediately. The bot registers them by itself in each server it joins.
+   ```bash
+   pnpm db:reset
+   ```
 
-With `SYNC_COMMANDS=true` the bot registers both scopes at startup: the per-server commands go
-to `DISCORD_DEV_GUILD_ID` when it is set, otherwise to every server the bot is in. After the
-first successful run, set `SYNC_COMMANDS=false` to skip the REST calls on every restart.
+   The command needs internet access (waifu.im). It ends without errors.
 
-When you add or change a command, register it without restarting the bot. First check the slot
-usage (this writes nothing):
+You can run it again at any time to start from a clean database.
 
-```bash
-pnpm cli commands:sync
-```
+The bot also builds the schema by itself when it starts on an empty file. But it does not add the Waifu TCG content. So always run `pnpm db:reset` on a new download.
 
-Then register the global commands, the per-server commands in one server, or both:
+---
 
-```bash
-pnpm cli commands:sync --global --guild <server_id>
-```
+## 6. Restore the TCG Card Pool and Bosses
 
-Use `--all-guilds` instead of `--guild` for every server the bot is in.
+The definitions of the cards and bosses are in `assets/tcg/catalog/`. The rendered images (`public/cards/` and `public/bosses/`) and the artwork cache (`data/tcg/`) are not in Git. You build them, and write the rows into your database.
 
-To remove stale commands, such as ones an older bot version registered, list everything that
-is registered, then clear it and sync again:
+1. Render the cards:
 
-```bash
-pnpm cli commands:reset
-```
+   ```bash
+   pnpm tcg:card-builder --rerender
+   ```
 
-```bash
-pnpm cli commands:reset --yes
-```
+   The command renders every card in `assets/tcg/catalog/manifest.json` and writes it to `waifu_cards` with the same ids, stats, skills and collection numbers.
 
-```bash
-pnpm cli commands:sync --global --all-guilds
-```
+2. Render the bosses:
 
-Smoke test in your server: `/help`, `$help`, `/ping`, and `/play <song>` while you are in a
-voice channel.
+   ```bash
+   pnpm tcg:boss-builder --all
+   ```
 
-Production-style run (compiled output):
+   The command syncs, renders and imports every boss catalog in `assets/tcg/catalog/bosses/`.
 
-```bash
-pnpm build
-```
+Both commands download artwork from AniList and Danbooru, and they keep to the rate limits. The first run takes a long time. Later runs use the cache in `data/tcg/`. You can stop and start both commands again.
 
-```bash
-pnpm start:bot
-```
+---
+
+## 7. Set Up Lavalink (Music)
+
+Lavalink 4.2.2 is a separate Java program. It lives in the folder `lavalink/`, which Git ignores. If you do not want music, set `LAVALINK_ENABLED=false` in `.env` and go to step 8.
+
+1. Install Lavalink:
+
+   ```bash
+   pnpm lavalink:install
+   ```
+
+   The command checks Java, downloads `Lavalink.jar`, and writes `lavalink/application.yml` from your `.env` (`LAVALINK_PORT`, `LAVALINK_PASSWORD` and the Spotify values). The plugins (LavaSrc, LavaSearch, YouTube, LavaLyrics, Skybot and LavaDSPX) are fixed in that file. Lavalink downloads them on the first start.
+
+2. Open a new terminal window. Start Lavalink there and leave it running:
+
+   ```bash
+   pnpm lavalink:start
+   ```
+
+   Wait for the line `Lavalink is ready to accept connections`.
+
+If you change `LAVALINK_PASSWORD` or the Spotify values, run `pnpm lavalink:install` again, so the bot and Lavalink use the same values.
+
+Optional: to use a separate cipher server for YouTube, set `LAVALINK_YOUTUBE_CIPHER_URL` in `.env` and run `pnpm lavalink:install` again.
+
+---
+
+## 8. Run the Bot
+
+1. Start the bot:
+
+   ```bash
+   pnpm dev:bot
+   ```
+
+   This runs `apps/bot/src/main.ts` with `tsx watch`, and loads the `.env` file in the root folder. The bot restarts when you save a file. You see `Logged in as` and the name of your bot.
+
+2. In your server, send `/ping`. The bot answers.
+
+Discord allows 100 slash commands in each scope. So Ririko registers its commands in two scopes:
+
+- **Global.** Member commands (`/play`, `/balance`, `/card` and others) and the Translate message menu. Global changes can take a while to show. Press Ctrl+R in Discord.
+- **Per server.** Admin and setup commands (`/ban`, `/prefix`, `/welcomer` and others). They show at once. The bot registers them by itself in each server it joins.
+
+With `SYNC_COMMANDS=true`, the bot registers both scopes when it starts. The per-server commands go to `DISCORD_DEV_GUILD_ID` when it is set. Otherwise they go to every server the bot is in. After the first good run, set `SYNC_COMMANDS=false`, so the bot does not call Discord on every restart.
+
+When you add or change a command, you can register it without a restart:
+
+1. Check how many command slots are used. This writes nothing:
+
+   ```bash
+   pnpm cli commands:sync
+   ```
+
+2. Register the global commands and the per-server commands of one server. Replace `<server_id>` with the ID of the server:
+
+   ```bash
+   pnpm cli commands:sync --global --guild <server_id>
+   ```
+
+   Use `--all-guilds` in place of `--guild <server_id>` for every server the bot is in.
+
+To remove old commands that an older bot version registered:
+
+1. List every registered command:
+
+   ```bash
+   pnpm cli commands:reset
+   ```
+
+2. Remove them:
+
+   ```bash
+   pnpm cli commands:reset --yes
+   ```
+
+3. Register the current commands again:
+
+   ```bash
+   pnpm cli commands:sync --global --all-guilds
+   ```
+
+To test your bot, send `/help`, `$help` and `/ping` in your server. Join a voice channel and send `/play <song>`.
+
+To run the compiled code, as you would on a server:
+
+1. Build the project:
+
+   ```bash
+   pnpm build
+   ```
+
+2. Start the bot:
+
+   ```bash
+   pnpm start:bot
+   ```
 
 ### 8.1. Run the web dashboard
 
-The dashboard (`apps/web`, Next.js 16) signs users in with Discord OAuth2. It reads the same
-root `.env` as the bot and needs three extra values:
+The dashboard (`apps/web`) lets users sign in with Discord OAuth2. It reads the same `.env` file as the bot. It needs three more values:
 
-1. In the Discord Developer Portal, open your application, go to **OAuth2**, copy the
-   **Client Secret** into `DISCORD_CLIENT_SECRET`, and add
-   `http://localhost:3000/api/auth/callback` under **Redirects**.
-2. Set `DASHBOARD_URL=http://localhost:3000`. In production, use the public `https://` origin
-   and register `<DASHBOARD_URL>/api/auth/callback` as a redirect instead.
-3. Set `SECRET_VAULT_KEY` to the output of `openssl rand -hex 32`. It encrypts the Discord
-   tokens stored with each dashboard session. Changing it signs everyone out.
+1. In the Developer Portal, open your application and open **OAuth2**. Copy the **Client Secret** into `DISCORD_CLIENT_SECRET`. Under **Redirects**, add `http://localhost:3000/api/auth/callback`.
+2. Set `DASHBOARD_URL=http://localhost:3000`. For a public dashboard, use your public `https://` address. Then add `<DASHBOARD_URL>/api/auth/callback` as a redirect.
+3. Set `SECRET_VAULT_KEY` to the output of `openssl rand -hex 32`. The dashboard uses it to encrypt the Discord tokens of each session. If you change it, everyone is signed out.
 
-The dashboard stores sessions in the `web_sessions` table. A database created before this table
-existed needs `pnpm db:push` (or `pnpm db:reset` for a throwaway dev database).
+The dashboard keeps sessions in the table `web_sessions`. The bot creates the table when it migrates the database. Start the bot at least once before the dashboard.
 
-```bash
-pnpm dev:web
-```
+4. Start the dashboard:
 
-Open <http://localhost:3000> in Chrome or Firefox. The session cookie uses the `__Host-` prefix,
-which browsers accept only over HTTPS or on `localhost`, so do not open the dashboard through a
-LAN IP over plain HTTP.
+   ```bash
+   pnpm dev:web
+   ```
 
-Production-style run:
+5. Open <http://localhost:3000> in Chrome or Firefox. Click **Sign in with Discord**.
 
-```bash
-pnpm build:web
-```
+The session cookie uses the `__Host-` prefix. Browsers accept it only on HTTPS or on `localhost`. Do not open the dashboard through a LAN address over plain HTTP.
 
-```bash
-pnpm start:web
-```
+To run the compiled dashboard:
 
----
+1. Build it:
 
-## 9. Quality gates
+   ```bash
+   pnpm build:web
+   ```
 
-Run these before every commit. The pre-commit hook only scans for secrets, so it does not run them for you.
+2. Start it:
 
-```bash
-pnpm typecheck
-```
-
-```bash
-pnpm lint
-```
-
-```bash
-pnpm format:check
-```
-
-```bash
-pnpm test
-```
+   ```bash
+   pnpm start:web
+   ```
 
 ---
 
-## 10. Daily workflow summary
+## 9. Quality Gates
 
-Terminal 1:
+Developers run these checks before every commit. The pre-commit hook only scans for secrets. It does not run the checks.
 
-```bash
-pnpm lavalink:start
-```
+1. Check the types:
 
-Terminal 2:
+   ```bash
+   pnpm typecheck
+   ```
 
-```bash
-pnpm dev:bot
-```
+2. Check the code style:
+
+   ```bash
+   pnpm lint
+   ```
+
+3. Check the formatting:
+
+   ```bash
+   pnpm format:check
+   ```
+
+4. Run the tests:
+
+   ```bash
+   pnpm test
+   ```
+
+[docs/development.md](docs/development.md) and [docs/testing.md](docs/testing.md) have more.
 
 ---
 
-## 11. Useful scripts
+## 10. Daily Workflow
+
+1. In terminal 1, start Lavalink:
+
+   ```bash
+   pnpm lavalink:start
+   ```
+
+2. In terminal 2, start the bot:
+
+   ```bash
+   pnpm dev:bot
+   ```
+
+---
+
+## 11. Useful Scripts
 
 | Script | Purpose |
 | --- | --- |
-| `pnpm doctor` | Check Node, TypeScript, database, Discord credentials, FFmpeg and optional integrations |
-| `pnpm ai:configure` | Interactive AI provider setup (edits `.env`) |
-| `pnpm cli <command>` | Ririko CLI (`doctor`, `ai:configure`, `youtube:token`, `migrate:legacy`, `migrate:verify`, ...) |
-| `pnpm db:reset` | Wipe and reseed the dev database |
-| `pnpm tcg:card-builder --help` | Card catalog sync, generation, re-render and import |
-| `pnpm tcg:boss-builder --help` | Boss catalog sync, render and import |
-| `pnpm tcg:reset-user <discord_user_id>` | Reset one player's TCG progress |
-| `pnpm tcg:simulate` | Offline balance simulation |
-| `pnpm tcg:generate-assets` | Regenerate frame, foil, star and element assets |
+| `pnpm doctor` | Checks Node.js, TypeScript, the database, the Discord credentials, FFmpeg and the optional integrations. |
+| `pnpm ai:configure` | Sets up the AI providers. It edits `.env`. |
+| `pnpm cli <command>` | Runs the Ririko command-line tool. [docs/development.md](docs/development.md#4-the-ririko-command-line-tool) lists the commands. |
+| `pnpm db:reset` | Deletes the development database and builds it again. |
+| `pnpm tcg:card-builder --help` | Shows the options of the card catalog builder. |
+| `pnpm tcg:boss-builder --help` | Shows the options of the boss catalog builder. |
+| `pnpm tcg:reset-user <discord_user_id>` | Resets the TCG progress of one player. |
+| `pnpm tcg:simulate` | Runs the offline balance simulation. |
+| `pnpm tcg:generate-assets` | Builds the frame, foil, star and element images again. |
 
 ---
 
-## 12. Migrating a 1.4.0 database (optional)
+## 12. Move a 1.4.0 Database (Optional)
 
-To import data from a legacy RirikoBot 1.4.0 SQLite file, follow
-[docs/migrations.md](docs/migrations.md) and [docs/archive/migration-1.x-to-2.0.md](docs/archive/migration-1.x-to-2.0.md).
-Always back up `data/ririko.sqlite` first.
+To import the data of a Ririko 1.4.0 SQLite file, follow [docs/migrations.md](docs/migrations.md). Back up `data/ririko.sqlite` first.
 
 ---
 
 ## 13. Troubleshooting
 
-| Symptom | Fix |
+| What you see | What to do |
 | --- | --- |
-| `Used disallowed intents` at login | Enable the privileged intents in the Developer Portal (step 3). |
-| Slash commands missing | Run `pnpm cli commands:sync --global --guild <server_id>`, then press Ctrl+R in Discord. |
-| Prefix commands ignored | Message Content intent is off, or you are using the wrong prefix (`DEFAULT_PREFIX`). |
-| Music does not play, Lavalink auth error | `LAVALINK_PASSWORD` in `.env` differs from `lavalink/application.yml`. Run `pnpm lavalink:install` again. |
-| `Java 17+ is required` | Install OpenJDK 21 and make sure `java` is on `PATH`. |
-| `better-sqlite3` / canvas binary errors after a Node upgrade | Run `pnpm rebuild` or delete `node_modules` and run `pnpm install` again. |
-| TCG cards show without art | Run `pnpm tcg:card-builder --rerender` again. The bot renders missing cards on demand, but it needs the artwork cache. |
-| `database is locked` | Stop all running bot processes and scripts that use `data/ririko.sqlite`. |
+| `Used disallowed intents` at login | Turn on the privileged intents in the Developer Portal (step 3). |
+| Slash commands are missing | Run `pnpm cli commands:sync --global --guild <server_id>`, then press Ctrl+R in Discord. |
+| Prefix commands do nothing | The Message Content intent is off, or you use the wrong prefix. Check `DEFAULT_PREFIX`. |
+| Music does not play, or Lavalink says the password is wrong | `LAVALINK_PASSWORD` in `.env` is not the same as in `lavalink/application.yml`. Run `pnpm lavalink:install` again. |
+| `Java 17+ is required` | Install OpenJDK 21 and check that `java` is in your `PATH`. |
+| Errors from `better-sqlite3` or the canvas module after a Node.js upgrade | Run `pnpm rebuild`. Or delete the folder `node_modules` and run `pnpm install` again. |
+| TCG cards show without art | Run `pnpm tcg:card-builder --rerender` again. The bot renders missing cards when it needs them, but it needs the artwork cache. |
+| `database is locked` | Stop all bot processes and scripts that use `data/ririko.sqlite`. |
 
 ---
 
-## 14. Keep secrets out of Git
+## 14. Keep Secrets Out of Git
 
-- `.env`, `data/`, `lavalink/`, `.cache/`, `.local/`, `*.sqlite` and `*.pem` are gitignored.
-  Do not force-add them.
-- The pre-commit hook rejects staged `.env` files and runs `gitleaks` with the rules in
-  `.gitleaks.toml`. Do not bypass it with `--no-verify`.
-- If a token leaks, reset it at the provider immediately. Deleting the commit is not enough.
+- Git ignores `.env`, `data/`, `lavalink/`, `.cache/`, `.local/`, `*.sqlite` and `*.pem`. Never force-add them.
+- The pre-commit hook rejects staged `.env` files and runs `gitleaks` with the rules in `.gitleaks.toml`. Never skip it with `--no-verify`.
+- If a token leaks, reset it at its provider at once. Deleting the commit is not enough.
 
-Next: read [README.md](README.md), [docs/development.md](docs/development.md) and
-[docs/contributing.md](docs/contributing.md).
+Next, read [README.md](README.md), [docs/development.md](docs/development.md) and [docs/contributing.md](docs/contributing.md).

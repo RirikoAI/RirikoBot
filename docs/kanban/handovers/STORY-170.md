@@ -16,7 +16,7 @@ Implementation committed as `2c7e977` on `codex/adventure-rpg`. PR creation was 
 - [Requested S+-rank user override](TASK-1712.md)
 - [Companion reward rank verification](TASK-1711.md)
 - [Tower-benchmarked completion economy, companion XP and verification](TASK-1715.md)
-- [Commands, migration audit and runtime guide](../../adventure-runtime.md)
+- [Commands, migration audit and runtime guide](../../archive/adventure-runtime.md)
 
 Before another story/epic, observe AGENTS.md's PR checkpoint. A review can use this entire working-tree change; all new files must be included, not just the tracked-file diff.
 

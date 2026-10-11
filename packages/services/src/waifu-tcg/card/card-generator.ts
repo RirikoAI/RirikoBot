@@ -38,7 +38,7 @@ export interface CardGeneratorOptions {
 }
 
 /**
- * Elementary skill catalog according to docs/waifu-tcg.md:L85-86.
+ * Elementary skill catalog according to docs/archive/waifu-tcg-design.md:L85-86.
  */
 export const ELEMENTAL_SKILLS: Record<
   CardElement,
@@ -180,7 +180,7 @@ export class CardGenerator {
   }
 
   /**
-   * Generates dynamic primary stats conforming strictly to docs/waifu-tcg.md:L79-84:
+   * Generates dynamic primary stats conforming strictly to docs/archive/waifu-tcg-design.md:L79-84:
    * - HP: 500 – 15,000
    * - ATK: 50 – 2,500
    * - DEF: 30 – 1,800

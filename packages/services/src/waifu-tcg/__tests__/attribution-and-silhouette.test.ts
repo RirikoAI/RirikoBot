@@ -45,7 +45,7 @@ describe('Waifu TCG Section 24 Attribution & Soft-Deletion Silhouette (TASK-1002
     });
   });
 
-  describe('Graceful Soft-Deletion Handling (docs/waifu-tcg.md:L39-53)', () => {
+  describe('Graceful Soft-Deletion Handling (docs/archive/waifu-tcg-design.md:L39-53)', () => {
     const activeAsset: WaifuAsset = {
       id: 'asset_001',
       sourceId: 'WAIFU_IM',

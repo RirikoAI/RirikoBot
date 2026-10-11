@@ -1,182 +1,326 @@
-# Production Deployment & Infrastructure Runbook (Ririko AI 2.0.0)
+# Deploy Ririko With Docker
 
-## 1. Overview & Sane Infrastructure Defaults
-In strict accordance with Section 68 and 69 of `docs/archive/BLUEPRINT.md`: **Do not over-engineer deployment.**
-- Ririko AI 2.0.0 avoids excessive cloud microservices, Kubernetes clusters, and message bus sprawl.
-- The standard production deployment consists of two containerized applications (`bot` and `web`), a PostgreSQL database, and a Lavalink audio node. There is no Redis: nothing in 2.0 needs one.
-- Self-hosters can run the entire platform on a single lightweight VPS using SQLite and local audio extraction without Docker dependencies if desired.
+This guide takes you from nothing to a running Ririko bot and dashboard on one machine. It uses Docker Compose. The stack has four services: the bot, the dashboard, a PostgreSQL database and a Lavalink audio server.
+
+Other guides:
+
+- To run Ririko without Docker, read [SETUP.md](../SETUP.md).
+- To upgrade a Ririko 1.4.0 bot, read [upgrading-from-1.4.md](upgrading-from-1.4.md).
+- To release Ririko and deploy it with CI, read [release.md](release.md).
 
 ---
 
-## 2. Docker Architecture
+## 1. What You Need
 
-### 2.1. Multi-Stage Containerization (`Dockerfile`)
-The root `Dockerfile` builds both images, `bot-runner` and `web-runner`, from one set of shared stages. `.dockerignore` keeps `node_modules`, build output, `.env` files, runtime data (`data/`, `storage/`, `public/cards`, `public/bosses`), the local Lavalink install and the private music package out of the build context.
+- A computer or server that runs Linux, macOS or Windows with Docker. Use a Linux server for a bot that stays online all the time.
+- Docker Engine 23 or newer, with the Compose plugin (Compose v2). Docker Desktop includes both.
+- Git.
+- `openssl`, to make secret keys. Git for Windows includes it.
+- A Discord account.
 
-| Stage | Purpose |
-|---|---|
-| `base` | `node:22-bookworm-slim` with pnpm enabled through corepack (version from `packageManager`). |
-| `manifests` | Workspace `package.json` files, `pnpm-lock.yaml`, `pnpm-workspace.yaml` and `.npmrc`. A new workspace package must be added to its `COPY` list. |
-| `build` | Full frozen install, then `pnpm build` (`tsc -b`). |
-| `web-build` | `build` plus the Next.js production build of the dashboard (`.next/cache` removed). |
-| `bot-deps`, `web-deps` | Production dependencies of `@ririko/cli` (which depends on `@ririko/bot`) or `@ririko/web` and the workspace packages each uses (`--prod --ignore-scripts`). |
-| `runtime` | `node:22-bookworm-slim` with `tini`, `fonts-dejavu-core` and `ca-certificates`, and the `ririko` user (uid/gid 10001). No pnpm, no compilers. |
-| `bot-runner` | `runtime` plus FFmpeg, the bot's and the CLI's `node_modules`, `dist` folders (including `apps/cli/dist`) and `assets/`. A root-owned `/usr/local/bin/ririko` wrapper runs the CLI. Runs `node apps/bot/dist/main.js`. |
-| `web-runner` | `runtime` plus the dashboard's `node_modules`, `.next`, `next.config.ts` (and the file it imports) and `assets/tcg`. Runs `next start` on port 3000 from `/app/apps/web`. |
+---
 
-- **BuildKit**: the dependency installs use a BuildKit cache mount for the pnpm store, so builds need BuildKit (the default builder since Docker Engine 23, through the buildx plugin).
-- **No compilers**: `better-sqlite3` and `@napi-rs/canvas` ship prebuilt binaries, so the images need neither build tools nor `libcairo2-dev`/`libpango1.0-dev`.
-- **Monorepo layout**: the images keep the repository layout at `/app` (with `pnpm-workspace.yaml`), so `assets/`, `data/`, `public/cards`, `public/bosses` and `storage/` resolve as they do in development.
-- **Operator commands**: the bot image carries the `ririko` CLI, so an operator runs commands inside the running container with its own `DATABASE_DIALECT` and `DATABASE_URL`, for example `docker exec <bot container> ririko passkeys:reset <user_id>` (add `--yes` to apply it; without it only the counts are reported). `docker exec <bot container> ririko --help` lists every command. The smoke check in `scripts/docker-smoke.ts` runs `ririko --help` in the built image. The web image has no CLI.
-- **Dashboard build**: Next.js bundles the workspace packages into `.next/server`, so `web-runner` needs no package `dist` folders. The native packages it leaves external (`better-sqlite3`, `pg`, `@napi-rs/canvas`) are linked from `.next/node_modules` into the production `node_modules`.
-- **Rootless**: the containers run as `USER 10001:10001`. Application files are owned by root and read-only to that user; only these directories are writable:
+## 2. Install Ririko
 
-  | Path | Image | Contents |
-  |---|---|---|
-  | `/app/data` | both | SQLite database (default `DATABASE_URL=./data/ririko.sqlite`) and the card art cache. |
-  | `/app/public/cards` | both | Rendered card images; the bot and the dashboard album write and read the same files. |
-  | `/app/public/bosses` | bot | Rendered dungeon boss images. |
-  | `/app/storage/welcomer-backgrounds` | both | Welcome and farewell backgrounds the dashboard uploads and the bot draws. |
-  | `/app/apps/web/.next/cache` | web | Next.js image optimizer cache (Discord avatars). |
+### 2.1. Check Docker
 
-  The images create these directories owned by 10001, so a named volume mounted on one starts with that owner. A bind mount keeps the host's ownership: `chown -R 10001:10001` the host directory first. Mount `data`, `public/cards` and `storage/welcomer-backgrounds` as the same volumes in both containers.
-- **Process**: `tini` is PID 1. It forwards `SIGTERM` to Node, which shuts the gateway down cleanly, and reaps FFmpeg child processes.
-- **FFmpeg**: Included in the bot image for the built-in player used when Lavalink is not configured.
-- **Environment**: The images read configuration only from environment variables (`.env` is never copied in). Both default to SQLite (`DATABASE_DIALECT=sqlite`, `DATABASE_URL=./data/ririko.sqlite`). The dashboard also needs `DISCORD_CLIENT_SECRET`, `DASHBOARD_URL` and `SECRET_VAULT_KEY`.
-- **Upgrading from 1.4.0**: mount the old `./data` folder read-only at `/app/legacy` (`./data:/app/legacy:ro`). The bot image sets `LEGACY_DATABASE_PATH=/app/legacy/ririko.db` and migrates that database once on first start, without writing to it. The user guide is [docs/upgrading-from-1.4.md](upgrading-from-1.4.md); [docs/migrations.md section 4](migrations.md) explains how it works.
+1. Run this command:
 
-Build and run both on one host (SQLite):
+   ```bash
+   docker compose version
+   ```
+
+   You see a line that starts with `Docker Compose version v2`. If the command fails, install Docker first: <https://docs.docker.com/engine/install/>.
+
+### 2.2. Create the Discord application
+
+1. Open <https://discord.com/developers/applications> and click **New Application**. Give it a name.
+2. Open the **General Information** tab. Copy the **Application ID**. This is your `DISCORD_CLIENT_ID`.
+3. Open the **Bot** tab. Click **Reset Token** and copy the token. This is your `DISCORD_TOKEN`. Keep it secret: anyone who has it controls your bot.
+4. On the same tab, turn on **Server Members Intent** and **Message Content Intent**. Click **Save Changes**. Prefix commands, levels and moderation need these two intents.
+5. Open the **OAuth2** tab. Click **Reset Secret** and copy the client secret. This is your `DISCORD_CLIENT_SECRET`.
+6. On the same tab, under **Redirects**, click **Add Redirect** and enter `http://localhost:3000/api/auth/callback`. Click **Save Changes**. If you will use a public address for the dashboard, see section 4 first and enter that address instead.
+
+### 2.3. Get the files
+
+1. Download the repository:
+
+   ```bash
+   git clone https://github.com/RirikoAI/RirikoBot.git
+   ```
+
+2. Go into the folder:
+
+   ```bash
+   cd RirikoBot
+   ```
+
+3. Switch to the release you want to run. This makes the compose file match the image version:
+
+   ```bash
+   git checkout v2.0.0
+   ```
+
+### 2.4. Write the settings file
+
+1. Copy the example file:
+
+   ```bash
+   cp .env.production.example .env.production
+   ```
+
+2. Make a vault key. The dashboard uses it to encrypt stored data:
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+   You see 64 characters. Copy them. Keep a safe copy of this key: if you lose it, the stored credentials cannot be read again.
+
+3. Make a Lavalink password:
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+4. Make a database password:
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+5. Open `.env.production` in a text editor and fill in these seven values. Do not add spaces or quotes.
+
+   | Variable | Value |
+   | --- | --- |
+   | `DISCORD_TOKEN` | The bot token from step 2.2. |
+   | `DISCORD_CLIENT_ID` | The application ID from step 2.2. |
+   | `DISCORD_CLIENT_SECRET` | The client secret from step 2.2. |
+   | `DASHBOARD_URL` | `http://localhost:3000` if you open the dashboard on the same machine. For a public address, see section 4. |
+   | `SECRET_VAULT_KEY` | The first key from this section. |
+   | `LAVALINK_PASSWORD` | The second key from this section. |
+   | `POSTGRES_PASSWORD` | The third key from this section. |
+
+6. Optional: set `BOT_OWNER_ID` to your Discord user ID. To copy your ID, turn on Developer Mode in Discord (**User Settings**, **Advanced**), then right-click your name and click **Copy User ID**. Owners can open the owner console of the dashboard.
+
+Section 7 lists every other setting.
+
+### 2.5. Start the stack
+
+1. Start all services in the background:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production up -d
+   ```
+
+   Docker downloads the images and creates the containers. The first start takes a few minutes. The command ends when all containers are started.
+
+2. Check the containers:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production ps
+   ```
+
+   After about two minutes, `postgres`, `bot` and `web` show `healthy`. `lavalink` shows `running`. The small helper service `lavalink-plugins` is not in this list, because it runs once and stops.
+
+3. Read the bot log:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production logs bot
+   ```
+
+   You see `Logged in as` followed by your bot name. On the first start, you also see lines about the database migrations that were applied.
+
+### 2.6. Add the bot to your server
+
+1. In the Developer Portal, open **OAuth2**, then **URL Generator**.
+2. Select the scopes `bot` and `applications.commands`.
+3. Select the permission `Administrator`. This is the simplest choice. You can give fewer permissions later.
+4. Copy the generated URL, open it in your browser and add the bot to your server.
+
+### 2.7. Register the slash commands
+
+1. Run this command once:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production exec bot ririko commands:sync --global --all-guilds
+   ```
+
+   The command prints the commands it registered. Global commands can take a while to show in Discord. Press Ctrl+R in Discord to refresh.
+
+2. In your server, type `/ping`. The bot answers.
+
+The bot registers the admin commands by itself each time it joins a new server. You only repeat step 1 after an upgrade that adds commands.
+
+### 2.8. Open the dashboard
+
+1. Open <http://localhost:3000> in Chrome or Firefox.
+2. Click **Sign in with Discord** and approve the request. You see the list of servers where you can manage the bot.
+
+If the sign-in fails with a redirect error, the redirect in step 2.2 does not match `DASHBOARD_URL`. They must match exactly.
+
+---
+
+## 3. Run Commands in the Containers
+
+The bot image includes the `ririko` command-line tool. Run it inside the running bot container:
+
 ```bash
-docker build --target bot-runner -t ririko-bot .
-docker build --target web-runner -t ririko-web .
-docker run -d --name ririko-bot --env-file .env \
-  --cap-drop ALL --security-opt no-new-privileges \
-  -v ririko_data:/app/data -v ririko_cards:/app/public/cards \
-  -v ririko_bosses:/app/public/bosses -v ririko_backgrounds:/app/storage/welcomer-backgrounds \
-  ririko-bot
-docker run -d --name ririko-web --env-file .env -p 3000:3000 \
-  --cap-drop ALL --security-opt no-new-privileges \
-  -v ririko_data:/app/data -v ririko_cards:/app/public/cards \
-  -v ririko_backgrounds:/app/storage/welcomer-backgrounds \
-  ririko-web
+docker compose -f docker-compose.production.yml --env-file .env.production exec bot ririko --help
 ```
 
-`node scripts/docker-smoke.ts bot web` checks built `ririko-bot:smoke` and `ririko-web:smoke` images with dummy credentials, no network and no capabilities:
-- both run as uid 10001, and only the directories above are writable;
-- the bot runs FFmpeg, starts up to command registration and creates its SQLite database, and migrates a root-owned 1.4.0 database at `/app/legacy` on first start without changing it;
-- the dashboard loads its native packages;
-- on an empty database it stays live (`/health`, `/api/health` and the `HEALTHCHECK` answer 200 with `MIGRATION_PENDING`) but not ready (`/ready` answers 503 and the log names the pending migration);
-- on a database that a throwaway `ririko-bot:smoke` container migrated with `ririko db:migrate` first (so the bot image must be built too), it answers `GET /` with 200, redirects `/api/auth/login` to Discord, and `/health`, `/ready` and the `HEALTHCHECK` pass.
+The list shows every command. Some useful ones:
 
-### 2.2. Production Orchestration (`docker-compose.production.yml`)
+| Command | What it does |
+| --- | --- |
+| `ririko doctor` | Checks the settings, the database and the Discord login. |
+| `ririko db:migrate --status` | Shows the database migrations that are applied and pending. |
+| `ririko commands:sync` | Shows how many slash command slots are used. Add `--global --all-guilds` to register the commands. |
+| `ririko passkeys:reset <user_id>` | Shows how many passkeys a user has. Add `--yes` to remove them. |
 
-`docker-compose.production.yml` runs the whole stack on one host:
-
-| Service | Image | Role |
-|---|---|---|
-| `postgres` | `postgres:16-alpine` | The database. Healthy when `pg_isready` answers. |
-| `lavalink` | `ghcr.io/lavalink-devs/lavalink:4.2.2` | Audio node. Uses `docker/lavalink/application.yml`, the same config `pnpm lavalink:install` writes, with the secrets read from its environment. |
-| `bot` | `ririkoai/ririkobot:${RIRIKO_VERSION:-2}` | The Discord bot. Starts once Postgres is healthy. |
-| `web` | `ririkoai/ririkobot-dashboard:${RIRIKO_VERSION:-2}` | The dashboard, published on `${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-3000}`. |
-
-Start it:
-1. Copy `.env.production.example` to `.env.production`.
-2. Fill in the required values: the Discord credentials, `DASHBOARD_URL`, `SECRET_VAULT_KEY` (`openssl rand -hex 32`), `POSTGRES_PASSWORD` and `LAVALINK_PASSWORD`.
-3. Run `docker compose -f docker-compose.production.yml --env-file .env.production up -d`.
-
-What happens on startup:
-- Every service reads `.env.production`, or the file named by `RIRIKO_ENV_FILE`.
-- The compose file sets the values that must point inside the stack itself: `DATABASE_DIALECT=postgres`, `DATABASE_URL` (built from the `POSTGRES_*` values), `LAVALINK_HOST=lavalink` and `LAVALINK_PORT=2333`.
-- On start the bot applies the schema migrations (`DB_AUTO_MIGRATE`, default `true`, see `docs/database.md` section 1): an empty database gets the baseline, a database from before migration records is adopted once. The dashboard never changes the schema: it answers `/ready` with 503, and logs the pending migrations, until the bot (or `ririko db:migrate`) has migrated the database, then recovers by itself. `/health` (the liveness probe and the `HEALTHCHECK`) stays 200 meanwhile.
-- A hand-run stack keeps migrate-on-start: `docker compose pull && docker compose up -d` upgrades it with no other step. The CI host deploy (`ririko-deploy`, `docs/release.md` section 8) is different: it runs every compose call with `DB_AUTO_MIGRATE=false` in its environment (which wins over the env file), so the bot only checks the schema there, and the deploy runs `ririko db:migrate` from the new bot image after the pull and before `up -d` as its own step. It exits 6 without starting anything when that migration fails. The host scripts of that deploy change only when `bootstrap.sh` runs again on the host ([release.md section 8.6](release.md#86-migrations-on-a-host)).
-- `DB_AUTO_MIGRATE=false` makes the bot only check: it exits with a message naming the pending migrations instead of starting on an old schema. Then run `docker compose -f docker-compose.production.yml --env-file .env.production run --rm bot ririko db:migrate` (or `docker exec <bot container> ririko db:migrate` on a running bot), and start the bot again. `ririko db:migrate --status` prints the pending migrations, `--dry-run` the plan; exit code 2 means the downgrade guard refused (the database holds a contract migration this release does not know).
-- Both images have a `HEALTHCHECK` (section 3).
-- Compose refuses to start when `POSTGRES_PASSWORD` or `LAVALINK_PASSWORD` is empty.
-
-Hardening (a test in `scripts/compose-production.test.ts` parses the file and keeps these settings from regressing):
-- **Dashboard port:** published on loopback only (`DASHBOARD_BIND=127.0.0.1`), so it is reachable from the host itself and from nothing else. Put a reverse proxy or a tunnel on the host in front of it. To reach it on the LAN or from the internet, set `DASHBOARD_BIND=0.0.0.0`, and only on a host whose own firewall or reverse proxy protects the port. `DASHBOARD_PORT` still sets the host port.
-- **Client IP header:** `CLIENT_IP_HEADER` (optional) names the one request header the dashboard trusts for the client address. It keys the sign-in, probe and pre-sign-in action rate limits and fills the session and audit records. Unset, the dashboard uses the first `X-Forwarded-For` entry, which Cloudflare does not overwrite (it appends the real address to whatever the client sent), so that entry is attacker-controlled behind Cloudflare and a client can pick its own rate-limit bucket. Set `CLIENT_IP_HEADER=cf-connecting-ip` there: Cloudflare sets that header itself. The value must be a valid IPv4 or IPv6 address, otherwise the client IP is empty (shared `unknown` bucket); there is no fallback to `X-Forwarded-For` or `X-Real-IP`. Set it only when every request reaches the dashboard through Cloudflare (a tunnel with the loopback binding above): on any other path a client sends the header itself. Requests without it, such as the container `HEALTHCHECK` and the deploy readiness poll, share one `unknown` bucket, which the probe limit (30 burst, 1 per second) covers. A malformed name stops the dashboard at startup.
-- **Capabilities:** `bot` and `web` run with `cap_drop: [ALL]`: both images run as uid 10001 and use no Linux capability. `postgres` and `lavalink` keep theirs, because the Postgres entrypoint chowns its data directory and switches user.
-- **Privileges:** all four services set `security_opt: [no-new-privileges:true]`, so no process in them can gain privileges through a setuid binary.
-- **Log rotation:** all four services share one `x-logging` anchor: the `local` driver, `max-size: 20m`, `max-file: 5`. A service keeps at most 100 MB of logs.
-- **Lavalink heap:** `LAVALINK_HEAP` sets the JVM maximum heap (`-Xmx`, default `1G`). Use `512m` on a small host.
-- **Lavalink plugin volume:** the Lavalink image runs as uid/gid 322 and has no `/opt/Lavalink/plugins` directory, so Docker creates the named volume owned by root and Lavalink dies with `Permission denied` while it downloads its plugins. The one-shot `lavalink-plugins` service therefore runs `chown -R 322:322` on the volume before `lavalink` starts (`depends_on` with `service_completed_successfully`). It uses the same pinned Lavalink image, so nothing extra is pulled, runs as root with `cap_drop: [ALL]`, `cap_add: [CHOWN]`, `no-new-privileges` and no network, and shows as `Exited (0)` in `docker compose ps -a`. That is expected.
-
-Remote Lavalink (`docker-compose.remote-lavalink.yml`): a single-host stack keeps the bundled `lavalink` service and needs nothing else. An app host that uses a Lavalink node on another machine, such as the production and staging hosts with the separate Lavalink host (STORY-180), adds this override:
-- Run `docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production up -d`. It needs Docker Compose 2.24.4 or newer, because it uses `!override`.
-- It puts the bundled `lavalink` service in the `bundled-lavalink` profile, which nobody enables, so it never starts, and does the same for its one-shot `lavalink-plugins` init service. `bot` then waits for Postgres only.
-- The bot connects to `LAVALINK_HOST` (required: compose refuses to start without it) on `LAVALINK_PORT` (default `2333`). `LAVALINK_PASSWORD` must be the node's password.
-- The bot reaches the node over a plain WebSocket (the `secure` option is not read from the environment), so the link itself must be private, for example WireGuard. If the node is unreachable, the bot falls back to its built-in FFmpeg player.
-
-Dedicated Lavalink host (`deploy/lavalink/docker-compose.yml`, project `ririko-lavalink`): the VPS runs one Lavalink container per environment, `lavalink-production` (port 2333, heap `LAVALINK_PRODUCTION_HEAP`, default `1536m`) and `lavalink-staging` (port 2334, heap `LAVALINK_STAGING_HEAP`, default `512m`). Both use the image tag pinned in `docker-compose.production.yml`, and a test keeps the two files on the same tag.
-- Run it from a checkout of the repository, because it mounts `../../docker/lavalink/application.yml` read-only: `WG_ADDRESS=10.77.0.1 docker compose up -d` in `deploy/lavalink/`.
-- Each container binds only `WG_ADDRESS` (required), through `SERVER_ADDRESS` and `SERVER_PORT`, which override `server.address` and `server.port` in the config.
-- `network_mode: host` lets the host firewall see each WireGuard peer; published ports would go through Docker's own chains and skip those rules.
-- Each instance reads its own env file, `LAVALINK_PRODUCTION_ENV_FILE` and `LAVALINK_STAGING_ENV_FILE` (defaults `/opt/ririko/lavalink-production.env` and `/opt/ririko/lavalink-staging.env`), written from `deploy/lavalink/lavalink.env.example`: `LAVALINK_PASSWORD` (different for each instance) and the `SPOTIFY_*` values. A relative path resolves from `deploy/lavalink/`.
-- Plugins live in separate volumes, `lavalink_production_plugins` and `lavalink_staging_plugins`. Each is chowned to uid/gid 322 (the user the image runs as; the image has no plugins directory, so Docker would create the volume owned by root) by a one-shot init service, `lavalink-production-plugins` and `lavalink-staging-plugins`, which its Lavalink service waits for with `service_completed_successfully`. Starting one instance with `docker compose up -d lavalink-<instance>` also starts its init service, and nothing of the other instance. The init services are expected to show `Exited (0)`; the watchdog ignores services ending in `-plugins`. Both Lavalink services use the same log rotation and `no-new-privileges` as the main file.
-
-Images:
-- `build:` targets are included, so `docker compose ... build` builds both images from this checkout instead of pulling them.
-- Until the 2.x images are published (STORY-127), build them that way.
-
-Volumes:
-
-| Volume | Mounted at | Used by |
-|---|---|---|
-| `postgres_data` | `/var/lib/postgresql/data` | postgres |
-| `lavalink_plugins` | `/opt/Lavalink/plugins` | lavalink: plugins download once |
-| `ririko_data` | `/app/data` | bot and web: card art in `data/tcg` |
-| `card_images` | `/app/public/cards` | bot and web: rendered cards |
-| `boss_images` | `/app/public/bosses` | bot |
-| `welcomer_backgrounds` | `/app/storage/welcomer-backgrounds` | bot and web: uploaded welcome backgrounds |
-
-- **Ownership:** the images run as uid 10001. A named volume starts owned by that user. If you replace one with a bind mount, make it writable first: `chown -R 10001:10001 <dir>`.
-- **Upgrading from 1.4.0:** the 1.4.0 migration does not support a Postgres target yet (`docs/migrations.md` section 4.3), and this stack uses Postgres. Upgrade with the single-container SQLite compose in [docs/upgrading-from-1.4.md](upgrading-from-1.4.md) instead. The commented `./data:/app/legacy:ro` mount is for when Postgres targets are supported.
-
-### 2.3. Upgrading a Self-Hosted Stack
-
-This section is for anyone who runs `docker-compose.production.yml` (PostgreSQL) or the SQLite container of section 2.1 by hand. Hosts that deploy through CI use `ririko-deploy`, which migrates as its own gated step ([release.md section 8.6](release.md#86-migrations-on-a-host)). Its host scripts are updated only by rerunning `bootstrap.sh` on the host (same section).
-
-- **Upgrades migrate on start.** `DB_AUTO_MIGRATE` defaults to `true`, so `docker compose -f docker-compose.production.yml --env-file .env.production pull` followed by the same command with `up -d` upgrades the stack across any number of versions, with no other step. The bot applies the pending migrations before it starts its services, one transaction each (under an advisory lock on PostgreSQL, so two processes never migrate at once), and the dashboard answers not ready until it has finished. A migration that fails leaves the database at the last migration that succeeded, and the bot does not start on the old schema: read `docker compose logs bot`. To be able to go back to a known release, set `RIRIKO_VERSION` to an exact version (for example `2.1.3`) instead of the moving default `2`.
-- **PostgreSQL: dump before you upgrade.** The runner makes no backup there, and migrations only add, so the previous release still runs on the new schema; but the dump is the only way back for a change that went wrong. In a shell, set the compose command once:
-
-  ```bash
-  COMPOSE="docker compose -f docker-compose.production.yml --env-file .env.production"
-  $COMPOSE exec -T postgres sh -c 'exec pg_dump -Fc -U "$POSTGRES_USER" -d "$POSTGRES_DB"' > ririko-before-upgrade.dump
-  ```
-
-  To restore it, stop the writers, restore, and start the release the dump came from (`RIRIKO_VERSION=<old version>`):
-
-  ```bash
-  $COMPOSE stop bot web
-  $COMPOSE exec -T postgres sh -c 'exec pg_restore --clean --if-exists --single-transaction -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < ririko-before-upgrade.dump
-  RIRIKO_VERSION=<old version> $COMPOSE up -d
-  ```
-
-  The dump is in the custom format, so `pg_restore` reads it, not `psql`. Everything written after the dump is lost. [release.md section 8.7](release.md#87-restoring-the-pre-deploy-dump) has the long version.
-- **SQLite: the backups are automatic.** When migrations are pending on an existing SQLite file, the runner first copies the database with `VACUUM INTO` to `backups/pre-migrate-<UTC timestamp>.sqlite` in a `backups` folder next to the database file, and keeps the newest five. In the images that is `/app/data/backups/`, inside the `ririko_data` volume (`./data/backups/` in development). The first start of a database from before migration records is covered too. A new empty database, or one with nothing pending, gets no backup. To go back, stop the bot and the dashboard, copy a backup over the database file (`/app/data/ririko.sqlite` by default), delete the `-wal` and `-shm` files next to it, and start the previous version.
-- **Running the migrations by hand.** Set `DB_AUTO_MIGRATE=false` in `.env.production` (or the container's environment). The bot then only checks the schema: it exits with a message that names the pending migrations instead of starting on an old schema. Upgrade in this order (`run` starts Postgres if it is not up), with `$COMPOSE` set as above:
-
-  ```bash
-  $COMPOSE pull
-  $COMPOSE run --rm bot ririko db:migrate
-  $COMPOSE up -d
-  ```
-
-  `ririko db:migrate --status` prints the latest, pending and unknown ids, and `--dry-run` prints the plan, including what adopting an old database would change; neither changes anything. Exit code 0 is done or nothing to do, 1 a failure, and 2 the downgrade guard (the database holds a contract migration this release does not know: run the newer release, or restore the dump). On a single container, `docker exec <bot container> ririko db:migrate` does the same.
+The dashboard image has no command-line tool.
 
 ---
 
-## 3. Observability & Health Monitoring
+## 4. Show the Dashboard on the Internet
 
-Both containers answer HTTP probes. Docker uses `/health` as their `HEALTHCHECK`; orchestrators can route traffic on `/ready`.
+The dashboard listens on `127.0.0.1` only. Only the machine itself can reach it. To share it, put a reverse proxy or a tunnel on the machine in front of it.
+
+1. Choose a public HTTPS address, for example `https://dashboard.example.com`.
+2. Set up your reverse proxy or tunnel so that it forwards that address to `http://127.0.0.1:3000`.
+3. In the Developer Portal, open **OAuth2** and add `https://dashboard.example.com/api/auth/callback` under **Redirects**. Click **Save Changes**.
+4. In `.env.production`, set `DASHBOARD_URL=https://dashboard.example.com`.
+5. If every request reaches the dashboard through Cloudflare, also set `CLIENT_IP_HEADER=cf-connecting-ip`. Cloudflare sets this header itself, so a visitor cannot fake it. Do not set it on any other setup: a visitor could then choose their own address and avoid the rate limits. The value must be a valid IP address.
+6. Apply the change:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production up -d
+   ```
+
+   Compose recreates only the containers whose settings changed.
+
+Do not set `DASHBOARD_BIND=0.0.0.0` unless the firewall of the machine, or a reverse proxy on another machine, protects the port. `DASHBOARD_PORT` sets the port on the machine (default `3000`).
+
+---
+
+## 5. Upgrade
+
+The bot applies new database migrations by itself when it starts. The dashboard waits until the database is current.
+
+1. Make a database dump. This is your only way back if an upgrade goes wrong:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production exec -T postgres sh -c 'exec pg_dump -Fc -U "$POSTGRES_USER" -d "$POSTGRES_DB"' > ririko-before-upgrade.dump
+   ```
+
+   The file `ririko-before-upgrade.dump` is not empty.
+
+2. Get the new compose file. Replace `v2.0.1` with the new version:
+
+   ```bash
+   git fetch --tags
+   ```
+
+   ```bash
+   git checkout v2.0.1
+   ```
+
+3. In `.env.production`, set `RIRIKO_VERSION=2.0.1`. An exact version lets you go back to a known release. The default `2` always means the newest 2.x release.
+4. Download the new images:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production pull
+   ```
+
+5. Start the new version:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production up -d
+   ```
+
+6. Read the bot log. It shows the migrations that were applied:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production logs bot
+   ```
+
+If a migration fails, the database stays at the last migration that worked, and the bot does not start. The log shows the reason.
+
+### 5.1. Run the migrations yourself
+
+Do this if you want to control when the database changes.
+
+1. In `.env.production`, set `DB_AUTO_MIGRATE=false`. The bot now only checks the database. If migrations are pending, it stops and names them.
+2. Download the new images:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production pull
+   ```
+
+3. Show what the migration would do. This changes nothing:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production run --rm bot ririko db:migrate --dry-run
+   ```
+
+4. Apply the migrations:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production run --rm bot ririko db:migrate
+   ```
+
+5. Start the new version:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production up -d
+   ```
+
+The command `ririko db:migrate` ends with one of these exit codes:
+
+| Exit code | Meaning |
+| --- | --- |
+| 0 | The migrations are applied, or there was nothing to do. |
+| 1 | The command failed. Read the message. |
+| 2 | The database holds a change that this release does not know. Run the newer release, or restore the dump. Nothing was changed. |
+
+### 5.2. Restore the dump
+
+This removes everything written after the dump.
+
+1. Stop the bot and the dashboard:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production stop bot web
+   ```
+
+2. Restore the dump:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production exec -T postgres sh -c 'exec pg_restore --clean --if-exists --single-transaction -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < ririko-before-upgrade.dump
+   ```
+
+   The dump uses the custom format. Only `pg_restore` can read it.
+
+3. Set `RIRIKO_VERSION` in `.env.production` to the version that made the dump, and run `git checkout` for the same version.
+4. Start the stack:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production up -d
+   ```
+
+---
+
+## 6. Health Checks
+
+Both containers answer HTTP checks. Docker uses `/health` as the container health check. Tools that route traffic can use `/ready`.
 
 | Container | Address | `/health` | `/ready` |
-|---|---|---|---|
-| Bot | port `HEALTH_PORT` (default 8080, `0` turns it off), not published | 200 while the database answers, else 503 | 200 once startup finished (schema, 1.4.0 upgrade, services, listeners), the database answers and the Discord gateway is `READY`, else 503 |
-| Dashboard | port 3000 (`/health`, `/ready`, or `/api/health`, `/api/ready`) | liveness: 200 while the database answers, and also while its schema is only behind (migrations pending); 503 when the database cannot be reached | 200 while the database answers and the schema is current, else 503 (also while migrations are pending) |
+| --- | --- | --- | --- |
+| Bot | Port `HEALTH_PORT` (default `8080`, `0` turns it off). Docker does not publish it. | `200` while the database answers, otherwise `503`. | `200` when startup is done, the database answers and Discord is connected, otherwise `503`. |
+| Dashboard | Port `3000`: `/health` and `/ready`, or `/api/health` and `/api/ready`. | `200` while the database answers, also while migrations are pending. `503` if the database cannot be reached. | `200` while the database answers and the schema is current, otherwise `503`. |
 
-Bot `/health` body:
+The bot `/health` answer looks like this:
+
 ```json
 {
   "status": "healthy",
@@ -186,21 +330,188 @@ Bot `/health` body:
   "database": { "status": "CONNECTED", "latencyMs": 4 }
 }
 ```
-- When the database fails, `status` is `unhealthy`, `database.status` is `UNREACHABLE`, and the body includes the driver error. The bot port is internal, so the error text is safe to show.
-- `/ready` answers `{ "ready": false, "started": true, "discord": "CONNECTING", "database": true }`, so you can see why it is not ready.
 
-The dashboard is public, so its probes never include error text. `/health` answers `{ status, version, uptimeSeconds, database: { status, latencyMs } }` and `/ready` answers `{ "ready": true }`. Failures are written to the server log.
+- If the database fails, `status` is `unhealthy`, `database.status` is `UNREACHABLE`, and the answer includes the driver error. The bot port is private, so the error is safe to show.
+- If `/ready` answers `503`, the body shows why, for example `{ "ready": false, "started": true, "discord": "CONNECTING", "database": true }`.
 
-While migrations are pending, `/health` stays 200 and reports `database: { status: "MIGRATION_PENDING", pending: ["0000_baseline"] }` (the migration ids are not sensitive), and `/ready` answers 503 and logs which migrations are pending. Liveness must not fail then: Docker would mark the container unhealthy and the host watchdog would restart it while the bot is still migrating. A database that cannot be reached still fails both probes. `scripts/docker-smoke.ts` checks both states: the dashboard on an empty database (live, not ready) and on a database migrated by the bot image (everything answers).
+The dashboard is public, so its answers never include error text. `/health` answers `{ status, version, uptimeSeconds, database: { status, latencyMs } }`. `/ready` answers `{ "ready": true }`. The server log has the details.
+
+While migrations are pending, the dashboard `/health` stays `200` and reports `database: { status: "MIGRATION_PENDING", pending: [...] }`. The `/ready` check answers `503` and the log names the pending migrations. This keeps Docker from restarting the dashboard while the bot is still migrating.
 
 ---
 
-## 4. Current Hosting
+## 7. Settings Reference
 
-Production and staging run on managed VMs behind Cloudflare Tunnel, with Lavalink on a separate host over WireGuard and releases deployed by CircleCI. The step-by-step setup (provider resources, tunnels and access policies, host configuration, CI contexts, go-live, recovery and the secret inventory) is the private hosting runbook, `docs/hosting.md`, which is not in the repository because it holds account and network details. The decision and the rejected options are in [ADR-014](archive/adr/ADR-014-production-hosting-cloudflare-tunnel.md); the release pipeline and its exit codes are in [release.md section 8](release.md#8-deploy-to-staging-and-production).
+The file `.env.production.example` lists every setting with a comment. The compose file sets these values itself, so do not set them: `DATABASE_DIALECT`, `DATABASE_URL`, and `LAVALINK_HOST` and `LAVALINK_PORT` (unless you use section 8).
 
-The Vercel project `ririko-bot` still deploys a static project status page (it hosts neither the bot nor the dashboard):
-- `vercel.json` skips dependency installation and runs `scripts/build-status-site.ts` with Node's TypeScript type stripping. The script reads `docs/kanban/board.json` and the `docs/` tree and writes `site-dist/index.html`.
-- Every branch gets a preview URL, so each PR shows the board as it stands on that branch.
-- Vercel project settings must leave Root Directory empty, use the "Other" framework preset and have no install, build or output overrides, so `vercel.json` applies.
-- Preview locally with `pnpm site:build`.
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `DB_AUTO_MIGRATE` | `true` | The bot applies pending migrations at start. With `false` it only checks. |
+| `RIRIKO_VERSION` | `2` | The image tag to run: `2`, `2.0` or an exact version such as `2.0.0`. |
+| `DASHBOARD_BIND` | `127.0.0.1` | The address on the machine where the dashboard listens. |
+| `DASHBOARD_PORT` | `3000` | The port on the machine where the dashboard listens. |
+| `CLIENT_IP_HEADER` | not set | The request header the dashboard trusts for the visitor address (section 4). |
+| `LAVALINK_HEAP` | `1G` | The memory limit of Lavalink. Use `512m` on a small machine. |
+| `POSTGRES_USER` | `ririko` | The database user. |
+| `POSTGRES_DB` | `ririko` | The database name. |
+| `RIRIKO_ENV_FILE` | `.env.production` | The settings file the bot and the dashboard read. |
+| `BOT_OWNER_ID` | not set | Discord user IDs of the owners, separated by commas. |
+| `DEFAULT_PREFIX` | `!` | The default prefix for text commands. |
+
+Optional features use more settings: AI chat (`DEFAULT_AI_PROVIDER`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `OLLAMA_BASE_URL`), image generation (`REPLICATE_API_TOKEN`, `COMFYUI_URL`), stream alerts (`TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY`) and Spotify (`SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_SP_DC`). Leave a setting out to turn its feature off.
+
+Compose refuses to start if `POSTGRES_PASSWORD` or `LAVALINK_PASSWORD` is empty.
+
+---
+
+## 8. Use a Lavalink Server on Another Machine
+
+The default stack runs its own Lavalink. Use this section only if Lavalink runs on a different machine.
+
+1. Make sure Docker Compose is version 2.24.4 or newer:
+
+   ```bash
+   docker compose version
+   ```
+
+2. In `.env.production`, set `LAVALINK_HOST` to the address of the Lavalink machine. Set `LAVALINK_PORT` if it is not `2333`. Set `LAVALINK_PASSWORD` to the password of that Lavalink server.
+3. Start the stack with the extra file `docker-compose.remote-lavalink.yml`:
+
+   ```bash
+   docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production up -d
+   ```
+
+The extra file does not start the bundled `lavalink` service or its `lavalink-plugins` helper. The bot waits for PostgreSQL only.
+
+The bot connects to the Lavalink server with a plain WebSocket, so keep the link private, for example with WireGuard. If the server is not reachable, the bot uses its built-in FFmpeg player instead.
+
+### 8.1. Run Lavalink on its own machine
+
+The file `deploy/lavalink/docker-compose.yml` runs one Lavalink container for each environment: `lavalink-production` on port `2333` and `lavalink-staging` on port `2334`. Both containers use the same Lavalink image as `docker-compose.production.yml`. A test keeps the two image tags equal.
+
+1. Copy `deploy/lavalink/lavalink.env.example` to one file for each environment you run, for example `/opt/ririko/lavalink-production.env`. Use a different `LAVALINK_PASSWORD` in each file. Keep each file readable by `root` only.
+2. Set the paths of the files in `LAVALINK_PRODUCTION_ENV_FILE` and `LAVALINK_STAGING_ENV_FILE`. The defaults are `/opt/ririko/lavalink-production.env` and `/opt/ririko/lavalink-staging.env`.
+3. Go into the folder of the repository checkout that holds the file. The compose file reads `../../docker/lavalink/application.yml`, so keep the repository layout.
+
+   ```bash
+   cd deploy/lavalink
+   ```
+
+4. Start the containers. Replace `10.77.0.1` with the private address that Lavalink must listen on:
+
+   ```bash
+   WG_ADDRESS=10.77.0.1 docker compose up -d
+   ```
+
+   To start one environment only, add its name, for example `lavalink-staging`.
+
+Each container listens on `WG_ADDRESS` only. It uses host networking, so the firewall of the machine sees every client. `LAVALINK_PRODUCTION_HEAP` (default `1536m`) and `LAVALINK_STAGING_HEAP` (default `512m`) set the memory limits.
+
+Each environment has its own plugin volume, `lavalink_production_plugins` or `lavalink_staging_plugins`. The Lavalink image runs as uid/gid 322 and has no plugins folder. Docker would create the volume owned by root, and Lavalink could not write its plugins. A one-shot service, `lavalink-production-plugins` or `lavalink-staging-plugins`, changes the owner first. The Lavalink service waits for it with `service_completed_successfully`. These services show `Exited (0)` in `docker compose ps -a`. This is normal.
+
+### 8.2. Change the Lavalink settings
+
+Lavalink reads its env file only when the container is created. A deploy that does not change the compose file or `application.yml` leaves the container as it is. After you change an env file, recreate the container yourself:
+
+1. Edit the env file, for example `/opt/ririko/lavalink-staging.env`.
+2. Recreate the container. This stops all players on that environment for a moment:
+
+   ```bash
+   WG_ADDRESS=10.77.0.1 docker compose up -d --force-recreate lavalink-staging
+   ```
+
+   Run it in the folder `deploy/lavalink`.
+
+   A host that the maintainers set up with `bootstrap.sh` needs more. Run the command in `/opt/ririko/releases/<version>/deploy/lavalink`, where `<version>` is the release that runs now. Add the option `-p ririko-lavalink` to `docker compose`. Also set `LAVALINK_STAGING_ENV_FILE` (or `LAVALINK_PRODUCTION_ENV_FILE`) and the heap variables that `/etc/ririko/ririko.conf` sets.
+
+3. Check the log of the container for errors:
+
+   ```bash
+   docker logs --tail 50 ririko-lavalink-lavalink-staging-1
+   ```
+
+For YouTube playback, the Lavalink YouTube plugin can use a separate cipher server. Add the two variables from `lavalink.env.example` to the env file, then recreate the container.
+
+---
+
+## 9. Containers and Volumes
+
+### 9.1. The images
+
+One `Dockerfile` builds both images, `bot-runner` and `web-runner`.
+
+| Stage | Purpose |
+| --- | --- |
+| `base` | `node:22-bookworm-slim` with pnpm, set up through corepack. |
+| `manifests` | The `package.json` files, the lock file and the workspace files. A new workspace package must be added to its `COPY` list. |
+| `build` | A full install, then `pnpm build`. |
+| `web-build` | `build` plus the production build of the dashboard. |
+| `bot-deps`, `web-deps` | The production dependencies of the bot (with the CLI) and of the dashboard. |
+| `runtime` | `node:22-bookworm-slim` with `tini`, `fonts-dejavu-core` and `ca-certificates`, and the user `ririko` (uid and gid 10001). It has no pnpm and no compilers. |
+| `bot-runner` | `runtime` plus FFmpeg, the bot, the CLI and `assets/`. It runs `node apps/bot/dist/main.js`. |
+| `web-runner` | `runtime` plus the dashboard build and `assets/tcg`. It runs `next start` on port 3000. |
+
+- The build needs BuildKit. Docker Engine 23 and newer use it by default.
+- The images need no compilers. `better-sqlite3` and `@napi-rs/canvas` ship prebuilt binaries.
+- The images keep the repository layout at `/app`.
+- `tini` is process 1. It passes `SIGTERM` to Node, so the bot disconnects from Discord cleanly. It also removes finished FFmpeg processes.
+- The images read their settings from environment variables only. The build never copies a `.env` file into them.
+
+To build the images yourself, run these commands in the repository folder:
+
+```bash
+docker build --target bot-runner -t ririko-bot .
+```
+
+```bash
+docker build --target web-runner -t ririko-web .
+```
+
+To make compose build the images instead of pulling them, run `docker compose -f docker-compose.production.yml --env-file .env.production build`.
+
+### 9.2. The services
+
+| Service | Image | Role |
+| --- | --- | --- |
+| `postgres` | `postgres:16-alpine` | The database. It is healthy when `pg_isready` answers. |
+| `lavalink-plugins` | `ghcr.io/lavalink-devs/lavalink:4.2.2` | Runs once. It makes the plugin volume writable for Lavalink (uid/gid 322), then stops. |
+| `lavalink` | `ghcr.io/lavalink-devs/lavalink:4.2.2` | The audio server. It uses `docker/lavalink/application.yml`. Its plugins download on the first start. |
+| `bot` | `ririkoai/ririkobot:${RIRIKO_VERSION:-2}` | The Discord bot. It starts when PostgreSQL is healthy. |
+| `web` | `ririkoai/ririkobot-dashboard:${RIRIKO_VERSION:-2}` | The dashboard. It uses `${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-3000}`. |
+
+The `lavalink` service starts after `lavalink-plugins` ends with success (`service_completed_successfully`). In `docker compose ps -a`, `lavalink-plugins` shows `Exited (0)`. This is normal.
+
+### 9.3. The volumes
+
+| Volume | Mounted at | Used by |
+| --- | --- | --- |
+| `postgres_data` | `/var/lib/postgresql/data` | `postgres` |
+| `lavalink_plugins` | `/opt/Lavalink/plugins` | `lavalink` |
+| `ririko_data` | `/app/data` | `bot` and `web`: the card art in `data/tcg` |
+| `card_images` | `/app/public/cards` | `bot` and `web`: the rendered cards |
+| `boss_images` | `/app/public/bosses` | `bot`: the dungeon boss images |
+| `welcomer_backgrounds` | `/app/storage/welcomer-backgrounds` | `bot` and `web`: the uploaded welcome backgrounds |
+
+The images run as uid 10001. A named volume starts with that owner. If you use a folder on the machine instead of a named volume, make it writable for that user first:
+
+```bash
+sudo chown -R 10001:10001 <folder>
+```
+
+The images write only to these folders. Everything else is read-only.
+
+### 9.4. Safety settings
+
+The compose file sets these options. A test (`scripts/compose-production.test.ts`) checks them.
+
+- `bot` and `web` drop all Linux capabilities (`cap_drop: [ALL]`). They run as uid 10001 and need none.
+- All services use `no-new-privileges`. No process can gain rights through a setuid file.
+- All services rotate their logs: the `local` driver, 5 files of 20 MB each. A service keeps at most 100 MB of logs.
+- The dashboard port uses `127.0.0.1` unless you set `DASHBOARD_BIND`.
+- `lavalink-plugins` runs as root with only the `CHOWN` capability and no network.
+
+---
+
+## 10. Hosts That Deploy Through CI
+
+The maintainers run staging and production on managed machines behind a tunnel. Releases reach them through CircleCI. The setup of those machines is in the maintainer's private runbook, which is not in the repository. The release pipeline and its exit codes are in [release.md](release.md).

@@ -1,4 +1,4 @@
-# Ririko AI 2.0.0 production images (docs/deployment.md section 2.1).
+# Ririko AI 2.0.0 production images (docs/deployment.md section 9.1).
 #
 #   docker build --target bot-runner -t ririko-bot .
 #   docker build --target web-runner -t ririko-web .

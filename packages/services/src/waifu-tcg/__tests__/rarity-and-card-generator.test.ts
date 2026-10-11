@@ -10,7 +10,7 @@ import { LevelingEngine } from '../card/leveling-engine.js';
 import type { CardRarity, WaifuAsset } from '../types.js';
 
 describe('Rarity Math, Card Generation & Leveling Engine (TASK-1011)', () => {
-  describe('8-Tier Rarity Math (docs/waifu-tcg.md:L57-71)', () => {
+  describe('8-Tier Rarity Math (docs/archive/waifu-tcg-design.md:L57-71)', () => {
     const engine = new RarityEngine();
 
     it('should configure exact 8 rarity tiers with specified multipliers and max levels', () => {
@@ -86,7 +86,7 @@ describe('Rarity Math, Card Generation & Leveling Engine (TASK-1011)', () => {
     });
   });
 
-  describe('Card Generator (docs/waifu-tcg.md:L72-89)', () => {
+  describe('Card Generator (docs/archive/waifu-tcg-design.md:L72-89)', () => {
     // Seeded so every test sees the same rolls, whatever the order or the machine.
     let generator: CardGenerator;
     beforeEach(() => {
@@ -133,7 +133,7 @@ describe('Rarity Math, Card Generation & Leveling Engine (TASK-1011)', () => {
       expect(card.element).toBe('ICE');
       expect(card.rarity).toBe('MYTHIC');
 
-      // Primary stats bounds check (docs/waifu-tcg.md:L79-84)
+      // Primary stats bounds check (docs/archive/waifu-tcg-design.md:L79-84)
       expect(card.stats.hp).toBeGreaterThanOrEqual(500);
       expect(card.stats.hp).toBeLessThanOrEqual(15000);
 
@@ -151,7 +151,7 @@ describe('Rarity Math, Card Generation & Leveling Engine (TASK-1011)', () => {
 
       expect(card.stats.mp).toBe(100);
 
-      // Unique Active Skill and Passive (docs/waifu-tcg.md:L85-86)
+      // Unique Active Skill and Passive (docs/archive/waifu-tcg-design.md:L85-86)
       expect(card.skill.name).toBe('Glacial Prison');
       expect(card.skill.mpCost).toBe(40);
       expect(card.passive.name).toBe('Absolute Zero');

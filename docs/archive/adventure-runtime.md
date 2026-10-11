@@ -2,7 +2,7 @@
 
 ## Player commands
 
-Use `/adventure` for a random choice among 35 scenarios, or search the `scenario` option by title, theme or element. Autocomplete returns up to 25 matching titles; type more of the title to find any of the 35. For example, select `the-midnight-bakery` or `the-goblin-bazaar`. See the [complete catalog](adventure-catalog.md) for all IDs and premises. Prefix equivalents use the server's configured prefix, for example `!adv start the-goblin-bazaar`. Aliases: `adv`, `journey`, `quest-adventure`.
+Use `/adventure` for a random choice among 35 scenarios, or search the `scenario` option by title, theme or element. Autocomplete returns up to 25 matching titles; type more of the title to find any of the 35. For example, select `the-midnight-bakery` or `the-goblin-bazaar`. See the [complete catalog](../adventure-catalog.md) for all IDs and premises. Prefix equivalents use the server's configured prefix, for example `!adv start the-goblin-bazaar`. Aliases: `adv`, `journey`, `quest-adventure`.
 
 `/adventure action:status` returns your current location or stored result. `/adventure action:abandon` ends an active run. Prefix equivalents are `!adv status` and `!adv abandon`. These actions remain available during the ten-second start throttle.
 
@@ -20,9 +20,9 @@ All users receive the rank determined by their companion level. The temporary us
 
 Use `/adventure action:ranks` or `!adv ranks` for the table without starting a run. The companion field and result footer show the frozen rank; level/equipment changes affect the next run. Old active/settling/completed sessions retain their original rewards. All workers must use compatible policy readers; startup rejects unsupported unfinished payloads. No new SQL column is needed because rank/calculation/receipt data lives in existing JSON payloads. Drain new-format sessions before rolling back to an older binary.
 
-New runs use [completion economy version 2](adventure-completion-rewards.md): every completed ending, including failures, pays progression rewards. Rank E targets about 10% better ordinary rewards per net energy than repeat floor 34, including failed routes and paid choices. Completion restoration is capped at seven energy. New card opportunities have base chances of 20% for success, 15% for mixed and 10% for failure; newly added success/mixed drops have a RARE floor and failures UNCOMMON. Existing authored rarity floors and guaranteed drops remain. Companion XP goes to the original owned card, clipped to its level cap; unavailable companions are skipped with a summary notice. Cancellation gives no XP.
+New runs use [completion economy version 2](adventure-completion-economy.md): every completed ending, including failures, pays progression rewards. Rank E targets about 10% better ordinary rewards per net energy than repeat floor 34, including failed routes and paid choices. Completion restoration is capped at seven energy. New card opportunities have base chances of 20% for success, 15% for mixed and 10% for failure; newly added success/mixed drops have a RARE floor and failures UNCOMMON. Existing authored rarity floors and guaranteed drops remain. Companion XP goes to the original owned card, clipped to its level cap; unavailable companions are skipped with a summary notice. Cancellation gives no XP.
 
-See the [rank policy](archive/adventure-reward-ranks-plan.md) and [balance comparison](adventure-reward-balance.md).
+See the [rank policy](adventure-reward-ranks-plan.md) and [balance comparison](adventure-reward-balance.md).
 
 ## Server configuration and costs
 
@@ -72,4 +72,4 @@ pnpm test -- packages/services/src/adventure/__tests__/postgres.integration.test
 
 The opt-in suite creates a uniquely named isolated schema, exports the actual PostgreSQL Drizzle schema, opens two independent pools, and tests global admission, concurrent wallet settlement, shared serial allocation and concurrent tower/adventure companion XP. It drops only its own schema afterward. The role needs schema-creation privileges. No existing tables are truncated. These five tests are skipped when the variable is absent. They have not been executed on this workstation because PostgreSQL is unavailable.
 
-Original full-suite and coverage limitations are recorded in [TASK-1705](kanban/handovers/TASK-1705.md); current completion-economy results are in [TASK-1715](kanban/handovers/TASK-1715.md). Finish live PostgreSQL testing and a Discord smoke test before production rollout: complete each scenario, verify `/balance` and `/card collection`, try aliases and cross-guild starts, and check restart, timeout, abandonment and lost-message recovery.
+Original full-suite and coverage limitations are recorded in [TASK-1705](../kanban/handovers/TASK-1705.md); current completion-economy results are in [TASK-1715](../kanban/handovers/TASK-1715.md). Finish live PostgreSQL testing and a Discord smoke test before production rollout: complete each scenario, verify `/balance` and `/card collection`, try aliases and cross-guild starts, and check restart, timeout, abandonment and lost-message recovery.
