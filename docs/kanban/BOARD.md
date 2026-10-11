@@ -14,7 +14,31 @@
 *None.*
 
 ## 🎯 To Do
-*None.*
+| ID | Type | Title | Pts | Parent | Requires | Ready | Model |
+|---|---|---|---|---|---|---|---|
+| `STORY-187` | Story | Privacy and Secret Audit Before 2.0.0 Goes Public on master | 5 | EPIC-020 | — | yes | large |
+| `STORY-188` | Story | Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps | 13 | EPIC-020 | STORY-187 | blocked | large |
+| `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 13 | EPIC-020 | STORY-188 | blocked | large |
+| `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | blocked | large |
+| `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188 | blocked | large |
+| `TASK-1871` | Task | Scrub Private Hosting Details From the Working Tree | 3 | STORY-187 | — | yes | medium |
+| `TASK-1872` | Task | Audit Git History, Tags and GitHub Text for Leaked Private Details; Report and Clean .gitleaksignore | 2 | STORY-187 | TASK-1871 | blocked | medium |
+| `TASK-1881` | Task | Move Planning and Decision Records to docs/archive and Fix Every Link | 3 | STORY-188 | TASK-1871 | blocked | medium |
+| `TASK-1882` | Task | Rewrite the Self-Host and Operator Docs as Deterministic, Current Procedures | 5 | STORY-188 | TASK-1881 | blocked | medium |
+| `TASK-1883` | Task | Rewrite the Feature Docs for Server Admins and Players | 5 | STORY-188 | TASK-1881 | blocked | medium |
+| `TASK-1891` | Task | Scaffold the Docusaurus Site in website/ Built From docs/, With a Broken-Link Gate in CI | 5 | STORY-189 | STORY-188 | blocked | medium |
+| `TASK-1892` | Task | Port the Old ririko.ai Landing Page and Generate the Commands Page From Command Metadata | 5 | STORY-189 | TASK-1891 | blocked | medium |
+| `TASK-1893` | Task | Deploy the Site to GitHub Pages on ririko.ai, Serve the Install Files, Retire the Vercel Status Page | 2 | STORY-189 | TASK-1891 | blocked | medium |
+| `TASK-1894` | Task | Migrate the GitHub Wiki Into the Docs and Leave a Pointer Page | 2 | STORY-189 | TASK-1891 | blocked | medium |
+| `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | TASK-1881 | blocked | medium |
+| `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | — | yes | medium |
+| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | — | yes | medium |
+| `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | — | yes | medium |
+| `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | — | yes | medium |
+| `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | — | yes | small |
+| `CHORE-2002` | Chore | Make the Test Suite Pass on a Windows Development Machine | 2 | EPIC-020 | — | yes | medium |
+| `CHORE-2003` | Chore | Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal | 1 | EPIC-020 | — | yes | small |
+| `BUG-0045` | Bug | /lyrics Finds Nothing for Music Videos Whose Length Differs From the Song by More Than 3 Seconds | 2 | EPIC-020 | — | yes | medium |
 
 ## 🔍 Review
 *None.*
@@ -431,7 +455,11 @@
 | `CHORE-0602` | Chore | Boot-Time Repair for Gear Stranded on Deleted or Transferred Cards | 1 | — |
 
 ## 📋 Backlog
-*None.*
+| ID | Type | Title | Pts | Parent |
+|---|---|---|---|---|
+| `TASK-1901` | Task | Rework README.md Into a Standout Front Page With Quick Start, Badges and All-Contributors | 5 | STORY-190 |
+| `TASK-1904` | Task | CodeFactor Integration and Config | 1 | STORY-190 |
+| `BUG-0044` | Bug | Free Games Notification Links Are Broken (Needs Deeper Grooming) | 3 | EPIC-020 |
 
 ## 🗺️ Epics
 | ID | Title | Status | Pts | Children | Handover |
@@ -456,3 +484,4 @@
 | `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
+| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, CHORE-2001, CHORE-2002, CHORE-2003, BUG-0044, BUG-0045 | [EPIC-020.md](./handovers/EPIC-020.md) |

@@ -459,6 +459,29 @@
       ],
       "blocks": [],
       "description": "Everything the public Ririko bot needs before real production: releases that change the database and the hosts without manual steps, with gates, backups and a defined rollback. Staging, the only long-lived 2.0 database, is the case study. STORY-185 replaces db:push and hand-written ensure* upgrades with versioned, forward-only migrations (ADR-015); STORY-186 makes the host deploy apply them as a gated step. More stories will be added as the maintainer lists them. db:push never runs against staging or production."
+    },
+    {
+      "id": "EPIC-020",
+      "title": "2.0.0 on master: Production Launch and the Open-Source Front Door",
+      "points": 21,
+      "status": "TODO",
+      "children": [
+        "STORY-187",
+        "STORY-188",
+        "STORY-189",
+        "STORY-190",
+        "STORY-191",
+        "CHORE-2001",
+        "CHORE-2002",
+        "CHORE-2003",
+        "BUG-0044",
+        "BUG-0045"
+      ],
+      "requires": [
+        "EPIC-019"
+      ],
+      "blocks": [],
+      "description": "Ship Ririko 2.0.0 as the public release on master and make the project easy to find, install, use and contribute to. Covers a privacy audit before going public, a docs cleanup (archive development-only docs, rewrite user docs as deterministic, current steps), a Docusaurus site on ririko.ai that replaces the GitHub wiki and reuses the old website, a new README and CONTRIBUTING with all-contributors and CodeFactor, the master release and production launch, and the launch cleanups found during EPIC-019."
     }
   ],
   "stories": [
@@ -2569,6 +2592,219 @@
         "STORY-186",
         "EPIC-019"
       ]
+    },
+    {
+      "children": [
+        "TASK-1871",
+        "TASK-1872"
+      ],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-187",
+        "EPIC-020"
+      ],
+      "id": "STORY-187",
+      "title": "Privacy and Secret Audit Before 2.0.0 Goes Public on master",
+      "points": 5,
+      "status": "TODO",
+      "description": "The repository is public and master will be the face of the project. Remove private hosting details (live IPs, hostnames other than the product domains, providers, regions, instance sizes, keys, ping URLs) from the tree and report what history and GitHub text still hold, before anything else lands on master.",
+      "context": {
+        "files": [
+          "docs/",
+          ".gitleaksignore",
+          "scripts/",
+          "deploy/"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "TASK-1871 and TASK-1872 are DONE."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet",
+      "parent": "EPIC-020"
+    },
+    {
+      "children": [
+        "TASK-1881",
+        "TASK-1882",
+        "TASK-1883"
+      ],
+      "requires": [
+        "STORY-187"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-188",
+        "EPIC-020"
+      ],
+      "id": "STORY-188",
+      "title": "Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps",
+      "points": 13,
+      "status": "TODO",
+      "description": "Readers are self-hosters, server admins and contributors, not the people who built each ticket. Move planning and decision records to docs/archive, and rewrite the user docs so every procedure is numbered, has one path per audience, and describes 2.0.0 as it is (no rc-by-rc history, no ticket narration). Maintainer (2026-10-11): once 2.0.0 is on master, everything a user needs to learn about the project (installation, configuration, every command) lives in the documentation site, the replacement for the wiki. Docs that are not for users still matter for future development sessions and stay in docs/archive (public and versioned), not in .local.",
+      "context": {
+        "files": [
+          "docs/",
+          "BLUEPRINT.md",
+          "SETUP.md",
+          "AGENTS.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "TASK-1881, TASK-1882 and TASK-1883 are DONE."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet",
+      "parent": "EPIC-020"
+    },
+    {
+      "children": [
+        "TASK-1891",
+        "TASK-1892",
+        "TASK-1893",
+        "TASK-1894"
+      ],
+      "requires": [
+        "STORY-188"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-189",
+        "EPIC-020"
+      ],
+      "id": "STORY-189",
+      "title": "Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki",
+      "points": 13,
+      "status": "TODO",
+      "description": "A Docusaurus site in the monorepo (website/), built from the repository docs/ folder (single source, no copy), deployed to GitHub Pages on ririko.ai. Its landing page reuses the old ririko.ai website (RirikoAI/RirikoWebsite). It replaces the GitHub wiki, which is then disabled, and the Vercel status page.",
+      "context": {
+        "files": [
+          "docs/",
+          "package.json",
+          "pnpm-workspace.yaml",
+          ".circleci/config.yml",
+          "vercel.json",
+          "scripts/build-status-site.ts"
+        ],
+        "symbols": [
+          "syncCommandCatalog"
+        ],
+        "codegraph_queries": [
+          "syncCommandCatalog createCommandControllers command metadata"
+        ]
+      },
+      "acceptance": [
+        "TASK-1891 to TASK-1894 are DONE."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check && pnpm lint --quiet",
+      "parent": "EPIC-020"
+    },
+    {
+      "children": [
+        "TASK-1901",
+        "TASK-1902",
+        "TASK-1903",
+        "TASK-1904"
+      ],
+      "requires": [
+        "STORY-189"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-190",
+        "EPIC-020"
+      ],
+      "id": "STORY-190",
+      "title": "README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader",
+      "points": 13,
+      "status": "TODO",
+      "description": "The README is the first page for everyone from a first-time self-hoster to a long-term contributor. Rework it (later, once the docs site exists) into a unique front page with a promotional feature image, a deterministic quick start, badges (CircleCI, Codecov, CodeFactor, Docker pulls, all-contributors) and the all-contributors list carried over from master. Add a short CONTRIBUTING.md in simple English.",
+      "context": {
+        "files": [
+          "README.md",
+          "docs/contributing.md",
+          "codecov.yml"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "TASK-1901 to TASK-1904 are DONE."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet",
+      "parent": "EPIC-020"
+    },
+    {
+      "children": [
+        "TASK-1911",
+        "TASK-1912",
+        "TASK-1913"
+      ],
+      "requires": [
+        "STORY-187",
+        "STORY-188"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-191",
+        "EPIC-020"
+      ],
+      "id": "STORY-191",
+      "title": "Release 2.0.0 to master and Launch Production",
+      "points": 8,
+      "status": "TODO",
+      "description": "master holds 1.x and shares no history with develop/2.0.0. Preserve 1.x on its own branch, bring 2.0.0 onto master without a force push, publish the 2.0.0 images and move Docker Hub latest, and launch the production host with the same gated, dump-first deploy that staging proved in EPIC-019. Host and account steps are done by the maintainer and the coordinator, not by ticket workers.",
+      "context": {
+        "files": [
+          "docs/release.md",
+          "AGENTS.md",
+          ".circleci/config.yml",
+          "docs/dockerhub/"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "TASK-1911 to TASK-1913 are DONE, and production runs v2.0.0 with Pending (none)."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet",
+      "parent": "EPIC-020"
     }
   ],
   "tasks": [
@@ -7934,6 +8170,720 @@
         "STORY-186",
         "EPIC-019"
       ]
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1871",
+        "STORY-187",
+        "EPIC-020"
+      ],
+      "id": "TASK-1871",
+      "parent": "STORY-187",
+      "title": "Scrub Private Hosting Details From the Working Tree",
+      "points": 3,
+      "status": "TODO",
+      "description": "Find and remove private hosting details from every tracked file: live IPs, *.ririko.ai hostnames other than ririko.ai and dashboard.ririko.ai, the cloud provider and VPS provider names, regions, instance sizes and RAM, bucket names, WireGuard or host keys, ping URLs. Includes docs, board.json descriptions, handover notes, tests, examples and comments.",
+      "context": {
+        "files": [
+          "docs/",
+          "docs/kanban/board.json",
+          "docs/kanban/handovers/",
+          "docs/adr/ADR-014-production-hosting-lightsail-cloudflare-tunnel.md",
+          "docs/deployment.md",
+          "deploy/",
+          "scripts/",
+          ".env.production.example",
+          ".gitleaksignore",
+          "AGENTS.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard",
+          "deploy-host keyStaging stagingIpv4"
+        ]
+      },
+      "acceptance": [
+        "A scan of all tracked files (git grep) for public IPv4/IPv6 addresses outside the documentation ranges (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24, 2001:db8::/32) and loopback/private ranges finds none.",
+        "No tracked file names the cloud provider, the VPS provider, a region or availability zone, an instance size or RAM figure of a live host, or a *.ririko.ai host other than ririko.ai and dashboard.ririko.ai. Generic wording replaces them (\"the app host\", \"the Lavalink host\", \"ssh-staging.<domain>\"). The WireGuard addressing plan (10.77.0.0/24) may stay: it is a private design example, not a secret.",
+        "ADR-014 is renamed to a provider-neutral file name and title, and every link to it is updated. Its decision text keeps the reasoning without naming the provider, region or sizes.",
+        "board.json descriptions and the handover notes are scrubbed the same way; render-board.mjs still renders.",
+        "The scan commands are added to docs/security.md (or the testing doc) as a repeatable pre-release check, and gitleaks still passes."
+      ],
+      "verify_cmd": "node scripts/kanban/render-board.mjs && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1871"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1872",
+        "STORY-187",
+        "EPIC-020"
+      ],
+      "id": "TASK-1872",
+      "parent": "STORY-187",
+      "title": "Audit Git History, Tags and GitHub Text for Leaked Private Details; Report and Clean .gitleaksignore",
+      "points": 2,
+      "status": "TODO",
+      "description": "The tree is clean after TASK-1871, but history, tags, PR and issue bodies, commit messages, Docker Hub descriptions and the Vercel status site may still hold private details. Produce a report so the maintainer can decide on a history rewrite or edits; never rewrite history or edit GitHub text in this ticket.",
+      "context": {
+        "files": [
+          ".gitleaksignore",
+          "docs/kanban/handovers/TASK-1872.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "gitleaks runs over the full history of every remote branch and tag (git log --all) with the repository config and with extra rules for IPv4 and *.ririko.ai hostnames; the report in the PROGRESS entry lists each finding as commit, file and kind, never the secret value itself.",
+        "PR titles and bodies, issue bodies and commit messages are searched with gh for the same patterns; findings are listed by PR/issue number only.",
+        "The .gitleaksignore entries for commits that no longer exist after the earlier history rewrite are removed, and gitleaks still passes.",
+        "The report ends with a recommendation per finding: edit (GitHub text), rewrite (history), or accept (already public and harmless), for the maintainer to decide."
+      ],
+      "verify_cmd": "gitleaks detect --redact --no-banner && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1871"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1881",
+        "STORY-188",
+        "EPIC-020"
+      ],
+      "id": "TASK-1881",
+      "parent": "STORY-188",
+      "title": "Move Planning and Decision Records to docs/archive and Fix Every Link",
+      "points": 3,
+      "status": "TODO",
+      "description": "BLUEPRINT.md, the ADRs and the development plans are history, not user docs. Move them to docs/archive/ with a short index, so the user docs stay focused. AGENTS.md keeps pointing agents at them by their new paths.",
+      "context": {
+        "files": [
+          "BLUEPRINT.md",
+          "docs/adr/",
+          "docs/adventure_game_plan.md",
+          "docs/waifu-tcg-implementation_plan.md",
+          "docs/adventure-reward-ranks-plan.md",
+          "docs/dependency-evaluation.md",
+          "docs/implementation-roadmap.md",
+          "docs/legacy-feature-inventory.md",
+          "docs/migration-1.x-to-2.0.md",
+          "AGENTS.md",
+          "docs/",
+          "scripts/build-status-site.ts"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard docs tree"
+        ]
+      },
+      "acceptance": [
+        "docs/archive/ holds BLUEPRINT.md, adr/ (all ADRs), the plan files (adventure_game_plan, waifu-tcg-implementation_plan, adventure-reward-ranks-plan), dependency-evaluation.md, implementation-roadmap.md, legacy-feature-inventory.md and migration-1.x-to-2.0.md (the developer spec; docs/upgrading-from-1.4.md stays as the user guide). Files are moved with git mv so history follows.",
+        "docs/archive/README.md says in two sentences what the folder is (design history kept for contributors, not maintained as user docs) and lists the files.",
+        "Every Markdown link and code reference to a moved file is updated: a link checker run (for example lychee --offline or a small node script over all *.md) reports no broken relative links.",
+        "AGENTS.md (header, section 8 read-first list, section 11 catalog) and the agent files point to the new paths. The production target date line in AGENTS.md section 4 is removed or replaced with \"2.0.0 is the current release\".",
+        "pnpm site:build still runs (the status site reads the docs tree).",
+        "Development-only docs that agents still need (plans, balance workings, the 1.x migration spec) live in docs/archive, not in .local: .local is git-ignored, so a fresh clone or another contributor would lose them."
+      ],
+      "verify_cmd": "pnpm site:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1881"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1882",
+        "STORY-188",
+        "EPIC-020"
+      ],
+      "id": "TASK-1882",
+      "parent": "STORY-188",
+      "title": "Rewrite the Self-Host and Operator Docs as Deterministic, Current Procedures",
+      "points": 5,
+      "status": "TODO",
+      "description": "Rewrite SETUP.md, docs/development.md, docs/deployment.md, docs/release.md, docs/migrations.md, docs/upgrading-from-1.4.md and docs/testing.md for their readers. Every procedure is numbered steps with the exact command and the expected result; one path per audience (Docker self-host, bare Node, developer, maintainer release); 2.0.0 as it is now.",
+      "context": {
+        "files": [
+          "SETUP.md",
+          "docs/development.md",
+          "docs/deployment.md",
+          "docs/release.md",
+          "docs/migrations.md",
+          "docs/upgrading-from-1.4.md",
+          "docs/testing.md",
+          "docs/database.md",
+          ".env.example",
+          ".env.production.example",
+          "deploy/lavalink/lavalink.env.example"
+        ],
+        "symbols": [
+          "runDbMigrate",
+          "prepareDatabase"
+        ],
+        "codegraph_queries": [
+          "runDbMigrate prepareDatabase migrateDatabase"
+        ]
+      },
+      "acceptance": [
+        "No user doc narrates development history: no ticket IDs (TASK-, STORY-, BUG-, CHORE-, EPIC-), no \"since rc.N\" or \"fixed in rc.N\", no \"previously\"/\"used to\" about 2.0 prereleases. ADR links point to docs/archive.",
+        "Each procedure is a numbered list where every step is one action with the exact command or click and what the reader should see. Commands are copy-pasteable (no $ prompts in code blocks, one command per block).",
+        "Docker self-hosting has one complete path from nothing to a running bot, with the minimum .env, verified against docker-compose.production.yml and .env.production.example (variable names and defaults match exactly).",
+        "deploy/lavalink/lavalink.env.example documents the Lavalink YouTube plugin remote cipher variables (PLUGINS_YOUTUBE_REMOTECIPHER_URL and PLUGINS_YOUTUBE_REMOTECIPHER_USERAGENT) with neutral wording, and the deploy doc says an env change needs a manual --force-recreate.",
+        "The private hosting runbook is referred to only as \"the maintainer's private runbook\", with no provider names (TASK-1871).",
+        "Simple English for readers who are not experts: short sentences (about 20 words at most), one idea per sentence, common words, active voice, the same term for the same thing everywhere (the ASD-STE100 style the repository already uses). A first-time self-hoster can follow every procedure without outside help."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1881"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1883",
+        "STORY-188",
+        "EPIC-020"
+      ],
+      "id": "TASK-1883",
+      "parent": "STORY-188",
+      "title": "Rewrite the Feature Docs for Server Admins and Players",
+      "points": 5,
+      "status": "TODO",
+      "description": "Rewrite the feature docs (commands, modules, music, ai, economy, moderation, dashboard, waifu-tcg, tcg-player-guide, adventure docs) for the people who use the bot: what it does, how to turn it on, every command with its options, and limits. Implementation detail moves to architecture.md or the archive.",
+      "context": {
+        "files": [
+          "docs/commands.md",
+          "docs/modules.md",
+          "docs/music.md",
+          "docs/ai.md",
+          "docs/economy.md",
+          "docs/moderation.md",
+          "docs/dashboard.md",
+          "docs/waifu-tcg.md",
+          "docs/tcg-player-guide.md",
+          "docs/adventure-game.md",
+          "docs/adventure-catalog.md",
+          "docs/adventure-runtime.md",
+          "docs/adventure-completion-rewards.md",
+          "docs/adventure-reward-balance.md",
+          "docs/tcg-card-synthesis.md",
+          "docs/architecture.md",
+          "docs/adapters.md"
+        ],
+        "symbols": [
+          "createCommandControllers",
+          "syncCommandCatalog"
+        ],
+        "codegraph_queries": [
+          "createCommandControllers syncCommandCatalog command metadata options"
+        ]
+      },
+      "acceptance": [
+        "Each feature doc starts with what the feature does and how a server admin turns it on (dashboard page and command), then the commands with their options, then limits and permissions.",
+        "Command names, options and permissions match the command metadata in apps/bot/src/commands (checked against the code, not the old docs).",
+        "Implementation notes (tables, services, internal flows) move to docs/architecture.md or docs/archive; balance and design workings (adventure reward balance, card synthesis math) move to docs/archive unless a player needs them.",
+        "Same history rules as TASK-1882: no ticket IDs, no prerelease history.",
+        "Simple English for readers who are not experts: short sentences (about 20 words at most), one idea per sentence, common words, active voice, the same term for the same thing everywhere (the ASD-STE100 style the repository already uses). A first-time self-hoster can follow every procedure without outside help."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "STORY-188"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1891",
+        "STORY-189",
+        "EPIC-020"
+      ],
+      "id": "TASK-1891",
+      "parent": "STORY-189",
+      "title": "Scaffold the Docusaurus Site in website/ Built From docs/, With a Broken-Link Gate in CI",
+      "points": 5,
+      "status": "TODO",
+      "description": "Add a Docusaurus 3 site as a pnpm workspace package (website/). Its docs plugin reads ../docs (single source; no copy), excludes docs/kanban, docs/archive and anything git-ignored, and has sidebars by reader: Get Started, Self-Host, Use Ririko, Contribute, Operate.",
+      "context": {
+        "files": [
+          "website/",
+          "pnpm-workspace.yaml",
+          "package.json",
+          ".circleci/config.yml",
+          ".prettierignore",
+          "eslint.config.js",
+          "docs/"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "website/ is a Docusaurus 3 site (TypeScript config) in the pnpm workspace; pnpm docs:dev and pnpm docs:build work from the root.",
+        "The docs plugin uses path ../docs with exclude for kanban/**, archive/** and hosting.md; editUrl points to the file on GitHub (develop branch until STORY-191 lands, then master).",
+        "onBrokenLinks and onBrokenMarkdownLinks are throw, and the CircleCI lint job (or a docs job) runs pnpm docs:build, so a broken doc link fails CI.",
+        "Sidebars group the docs by reader (Get Started, Self-Host, Use Ririko, Contribute, Operate); every user doc from STORY-188 appears once.",
+        "Local search works without a third-party service (a local search plugin), and the site builds offline in CI.",
+        "The site is the project wiki and runs locally with one command: pnpm docs:dev opens it at http://localhost:3000 (or the next free port), and pnpm docs:build && pnpm docs:serve serves the built site offline. CONTRIBUTING.md and the docs home say so.",
+        "Site URLs: ririko.ai is the landing page and ririko.ai/docs the documentation (routeBasePath docs). No separate wiki subdomain."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1891"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1892",
+        "STORY-189",
+        "EPIC-020"
+      ],
+      "id": "TASK-1892",
+      "parent": "STORY-189",
+      "title": "Port the Old ririko.ai Landing Page and Generate the Commands Page From Command Metadata",
+      "points": 5,
+      "status": "TODO",
+      "description": "Reuse the old website (RirikoAI/RirikoWebsite, src/index.php and categories.php: a Bootstrap landing page with features, stats, FAQ and a command list) as the Docusaurus home page in React, and replace its PHP command list and the wiki \"LIST: All commands\" page with a commands page generated at build time from the bot's command metadata.",
+      "context": {
+        "files": [
+          "website/src/pages/",
+          "website/static/",
+          "apps/bot/src/command-set.ts",
+          "apps/bot/src/command-catalog.ts",
+          "apps/bot/src/commands/",
+          "scripts/"
+        ],
+        "symbols": [
+          "createCommandControllers",
+          "syncCommandCatalog",
+          "Command"
+        ],
+        "codegraph_queries": [
+          "createCommandControllers syncCommandCatalog command metadata category options"
+        ]
+      },
+      "acceptance": [
+        "The home page has the old site's sections (hero with invite and GitHub links, features, FAQ) rewritten for 2.0 and styled with the Docusaurus theme, with no PHP, Bootstrap CDN or external script.",
+        "A script (for example scripts/export-commands.ts) writes the command catalog (name, category, description, options, aliases, permissions) as JSON from the real command definitions; the site renders a searchable commands page from it, grouped by category, and docs:build runs the script first. Its output matches the bot (a test checks the export against createCommandControllers).",
+        "Images come from the repository (no hotlinked imgur); the old site's ririko.jpg is reused only if the maintainer confirms the rights, otherwise a placeholder is used and noted."
+      ],
+      "verify_cmd": "pnpm vitest run scripts && pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1891"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1893",
+        "STORY-189",
+        "EPIC-020"
+      ],
+      "id": "TASK-1893",
+      "parent": "STORY-189",
+      "title": "Deploy the Site to GitHub Pages on ririko.ai, Serve the Install Files, Retire the Vercel Status Page",
+      "points": 2,
+      "status": "TODO",
+      "description": "ririko.ai currently answers Cloudflare 530 and install.ririko.ai (used by the 1.x README) is dead. Publish the docs site with GitHub Pages on ririko.ai, serve the install files from it, and retire the Vercel status page.",
+      "context": {
+        "files": [
+          ".github/workflows/",
+          "website/static/",
+          "vercel.json",
+          "scripts/build-status-site.ts",
+          "package.json",
+          "docs/deployment.md",
+          "docker-compose.production.yml",
+          ".env.production.example"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "A GitHub Actions workflow builds website/ on pushes to the default branch and deploys it with actions/deploy-pages; website/static/CNAME is ririko.ai.",
+        "website/static/install/ serves docker-compose.yml and .env.example copied at build time from docker-compose.production.yml and .env.production.example (never hand-maintained copies), so ririko.ai/install/docker-compose.yml always matches the release.",
+        "The maintainer steps (GitHub Pages source = Actions, Cloudflare DNS records for ririko.ai to GitHub Pages, HTTPS) are listed in the PROGRESS entry and in docs/release.md; no DNS or account change is made by the worker.",
+        "vercel.json, scripts/build-status-site.ts and the site:build script are removed, and docs/deployment.md no longer mentions the Vercel status page. (The maintainer deletes the Vercel project.)"
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1891"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1894",
+        "STORY-189",
+        "EPIC-020"
+      ],
+      "id": "TASK-1894",
+      "parent": "STORY-189",
+      "title": "Migrate the GitHub Wiki Into the Docs and Leave a Pointer Page",
+      "points": 2,
+      "status": "TODO",
+      "description": "The wiki has seven 1.x pages (Home, deploy to Heroku, deploy to Render, music extra configuration, list of all commands, building your own Docker image, post-installation settings). Carry over what is still true for 2.0 and prepare the replacement wiki Home page; the maintainer then disables the wiki.",
+      "context": {
+        "files": [
+          "docs/",
+          "website/"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "A table in the PROGRESS entry maps each wiki page to its fate: moved (to which doc), replaced (commands page, Docker self-host doc) or dropped as 1.x-only (Heroku, Render).",
+        "Still-valid content (post-installation settings, music extra configuration, building your own image) is in the docs in the TASK-1882 style.",
+        "A replacement wiki Home text (in the PROGRESS entry) points to ririko.ai docs; the maintainer pastes it and then disables the wiki in the repository settings."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "STORY-189",
+        "TASK-1903"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1901",
+        "STORY-190",
+        "EPIC-020"
+      ],
+      "id": "TASK-1901",
+      "parent": "STORY-190",
+      "title": "Rework README.md Into a Standout Front Page With Quick Start, Badges and All-Contributors",
+      "points": 5,
+      "status": "BACKLOG",
+      "description": "Later (the maintainer asked for this after the docs site): a unique README for every reader. A newbie gets a deterministic Docker quick start; a contributor gets the path into CONTRIBUTING and the docs. Carry the all-contributors setup from master.",
+      "context": {
+        "files": [
+          "README.md",
+          ".all-contributorsrc",
+          "codecov.yml"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "Badges: CircleCI (develop and master), Codecov for the right branch (the 1.x badge points at beta/1.0.0), CodeFactor, Docker pulls, all-contributors.",
+        ".all-contributorsrc from master (3 contributors) is added unchanged, with the ALL-CONTRIBUTORS-BADGE and ALL-CONTRIBUTORS-LIST markers in the README; the maintainer installs the all-contributors GitHub app.",
+        "A quick start of at most 5 numbered steps, using ririko.ai/install files, ends with the bot online; everything else links to ririko.ai docs.",
+        "The promotional feature image from TASK-1903 sits at the top; no hotlinked images.",
+        "No 1.x-only content (Render button, Heroku, wiki links, install.ririko.ai).",
+        "No Render deploy button (maintainer, 2026-10-11)."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1881"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1902",
+        "STORY-190",
+        "EPIC-020"
+      ],
+      "id": "TASK-1902",
+      "parent": "STORY-190",
+      "title": "Write a Short CONTRIBUTING.md in Simple English",
+      "points": 2,
+      "status": "TODO",
+      "description": "A root CONTRIBUTING.md (GitHub shows it on issues and PRs) with only the essentials, in simple English: how to set up, how to make a change, what a PR needs to pass, and where to ask. docs/contributing.md becomes the detailed reference it links to, or is merged into it.",
+      "context": {
+        "files": [
+          "CONTRIBUTING.md",
+          "docs/contributing.md",
+          "docs/development.md",
+          "docs/testing.md",
+          "AGENTS.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "CONTRIBUTING.md fits on one screen: prerequisites, clone and install, run, test (pnpm lint, typecheck, test:coverage), branch and PR rules (target branch, conventional commits, migrations for schema changes), where to ask (Discord, issues).",
+        "Short sentences and common words (ASD-STE100 style, as the repository writes); no internal jargon (no kanban, no agent tiers).",
+        "The PR checklist matches what CI enforces (coverage gate, db:check, lint, typecheck)."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1903",
+        "STORY-190",
+        "EPIC-020"
+      ],
+      "id": "TASK-1903",
+      "parent": "STORY-190",
+      "title": "Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders",
+      "points": 5,
+      "status": "TODO",
+      "description": "Maintainer (2026-10-11): a tall README image with sections, editable in layers so the maintainer can swap placeholders for anime backgrounds, real screenshots and in-depth feature art. Deliver an SVG master with named layers (Inkscape layers, so it opens with layers in Inkscape) plus an OpenRaster (.ora) export, which GIMP opens as layers; and the PNGs the README uses.",
+      "context": {
+        "files": [
+          "assets/readme/",
+          "scripts/",
+          "website/static/img/",
+          "README.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "renderRankCard welcomer card canvas napi-rs"
+        ]
+      },
+      "acceptance": [
+        "assets/readme/feature-banner.svg is a tall image (about 1280 wide, 2400 to 3200 tall) with sections stacked top to bottom: hero (logo, tagline), music, Waifu TCG and adventure, AI chat, moderation and economy, web dashboard, self-hosting, community. Each section is an Inkscape layer (g with inkscape:groupmode=\"layer\" and a clear inkscape:label) holding separate sublayers for background art, screenshot frame, heading and body text.",
+        "Every replaceable picture is a clearly labelled placeholder (a rectangle with the target size written on it, for example \"Background 1280x640\" or \"Screenshot: music controller 960x540\"), so the maintainer can swap it without moving anything else.",
+        "scripts/render-readme-banner.ts renders the SVG to PNG (assets/readme/feature-banner.png and a 1200x630 social card) and writes assets/readme/feature-banner.ora (OpenRaster: one PNG layer per SVG layer plus stack.xml), so GIMP opens it with layers. Rendering is deterministic and documented in assets/readme/README.md, including how to re-export after editing.",
+        "Text uses an open-licensed font bundled in assets/readme/fonts with its licence; only original or open-licensed art; the rights of every asset are listed.",
+        "The image reads well in GitHub light and dark mode (a solid section background, no transparency behind text)."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1911"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "TASK-1904",
+        "STORY-190",
+        "EPIC-020"
+      ],
+      "id": "TASK-1904",
+      "parent": "STORY-190",
+      "title": "CodeFactor Integration and Config",
+      "points": 1,
+      "status": "BACKLOG",
+      "description": "CodeFactor already reports on master (1.x). After 2.0 is on master, configure it for the monorepo so generated code does not count, and add the badge (TASK-1901).",
+      "context": {
+        "files": [
+          ".codefactor.yml",
+          "README.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "build-status-site renderBoard"
+        ]
+      },
+      "acceptance": [
+        "A CodeFactor config excludes generated files (packages/database/migrations/, packages/database/src/migrations/generated/, packages/database/src/schema/*/ddl.ts, apps/web/.next) and test fixtures.",
+        "The PROGRESS entry lists the maintainer steps (CodeFactor app access to the repository, default branch) and the badge URL."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1911",
+        "STORY-191",
+        "EPIC-020"
+      ],
+      "id": "TASK-1911",
+      "parent": "STORY-191",
+      "title": "Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch",
+      "points": 3,
+      "status": "TODO",
+      "description": "master (1.x, 149 commits) and develop/2.0.0 share no history. Confirmed by the maintainer on 2026-10-11: 1.x becomes the legacy branch, master holds 2.0.0, and develop/2.0.0 becomes develop. Create 1.x from master; on a branch from develop run git merge -s ours --allow-unrelated-histories origin/master so the tree is 2.0 and both histories are kept; open the PR into master (a fast-forward). The maintainer pushes the branches, renames develop and changes the GitHub settings.",
+      "context": {
+        "files": [
+          "AGENTS.md",
+          "docs/contributing.md",
+          "CONTRIBUTING.md",
+          ".circleci/config.yml",
+          "docs/release.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "Branch 1.x exists at the old master head (0d8be25); tags 1.2.0 to 1.4.0 stay where they are.",
+        "A branch from develop/2.0.0 carries the -s ours merge of origin/master: its tree equals develop/2.0.0 exactly (git diff develop/2.0.0 is empty) and git merge-base with origin/master succeeds. The PR from it into master is a fast-forward; no force push.",
+        "After the maintainer renames develop/2.0.0 to develop: AGENTS.md (1.7, 10), CONTRIBUTING.md, docs/contributing.md, docs/release.md and the CircleCI branch filters name develop as the PR base and master as the release branch.",
+        "The PROGRESS entry lists the maintainer steps in order: push 1.x, merge the PR into master, rename the branch on GitHub (which retargets open PRs), set branch protection on master and develop, keep master as the default branch."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1912",
+        "STORY-191",
+        "EPIC-020"
+      ],
+      "id": "TASK-1912",
+      "parent": "STORY-191",
+      "title": "Production Go-Live Checklist in docs/release.md",
+      "points": 3,
+      "status": "TODO",
+      "description": "One deterministic checklist the maintainer and the coordinator follow to launch production: host bootstrap (8.8 step 0), deploy key and contexts, first deploy on an empty database, status and readiness checks, the 2.0.0 tag, Docker Hub latest, and the 1.4.0 sunset announcement.",
+      "context": {
+        "files": [
+          "docs/release.md",
+          "docs/deployment.md",
+          "deploy/host/bootstrap.sh",
+          ".circleci/config.yml"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "docs/release.md has a \"Production go-live\" section: numbered steps, each with who does it (maintainer or coordinator), the exact command or setting, and the check that proves it (for example ririko-deploy status shows Pending (none), /api/ready is 200).",
+        "It covers: bootstrap with --ref and the deploy key, the CircleCI production context, a first deploy on an empty database (migrations from 0000, no adoption), the approval job, Docker Hub latest moved to 2 (section 6), the 1.4.0 sunset notice (section 7), and rollback.",
+        "Placeholders only; no provider, region or size (TASK-1871)."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1913",
+        "STORY-191",
+        "EPIC-020"
+      ],
+      "id": "TASK-1913",
+      "parent": "STORY-191",
+      "title": "Docker Hub and GitHub Repository Texts for 2.0.0",
+      "points": 2,
+      "status": "TODO",
+      "description": "The GitHub description still sells 1.x (OpenAI, Stable Diffusion, Twitch notifier) and the Docker Hub overviews need the 2.0 story. Prepare the texts; the maintainer pastes them.",
+      "context": {
+        "files": [
+          "docs/dockerhub/ririkobot.md",
+          "docs/dockerhub/ririkobot-dashboard.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "docs/dockerhub/*.md describe 2.0.0: what the image is, the tags (2, 2.0, 2.0.0, latest after the move), a minimal compose snippet, and a link to ririko.ai docs.",
+        "A proposed GitHub description (at most 350 characters), homepage URL and topics list are in the PROGRESS entry."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
     }
   ],
   "chores": [
@@ -8321,6 +9271,121 @@
         "CHORE-1901",
         "EPIC-019"
       ]
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "CHORE-2001",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2001",
+      "parent": "EPIC-020",
+      "title": "bootstrap.sh Says \"CI deploy key: NOT installed\" When It Kept the Existing Key",
+      "points": 1,
+      "status": "TODO",
+      "description": "Rerunning bootstrap.sh without --deploy-key keeps the deploy user's authorized_keys, but the summary says \"CI deploy key: NOT installed (run again with --deploy-key)\". Seen on staging on 2026-10-11.",
+      "context": {
+        "files": [
+          "deploy/host/bootstrap.sh",
+          "scripts/deploy-host.test.ts"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "deploy-host bootstrap summary deploy key"
+        ]
+      },
+      "acceptance": [
+        "The summary reports \"kept (already installed)\" when authorized_keys already holds a forced-command key, \"installed\" when --deploy-key wrote one, and \"NOT installed (run again with --deploy-key)\" only when there is none.",
+        "A deploy-host test covers the three cases."
+      ],
+      "verify_cmd": "pnpm vitest run scripts/deploy-host.test.ts --testTimeout=120000 && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "CHORE-2002",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2002",
+      "parent": "EPIC-020",
+      "title": "Make the Test Suite Pass on a Windows Development Machine",
+      "points": 2,
+      "status": "TODO",
+      "description": "On the maintainer's Windows machine (Git Bash, repository on a slower drive) the full suite fails where CI passes: scripts/deploy-host.test.ts \"deploys the first release of staging\" because Git Bash sha256sum prints \"<hash> *<file>\", several deploy-host tests time out at 5 s, and file-SQLite tests (client/factory WAL test, db-migrate adoption test, copy-database suites) sometimes pass 5 s under load.",
+      "context": {
+        "files": [
+          "scripts/deploy-host.test.ts",
+          "vitest.config.ts",
+          "packages/database/src/client/factory.test.ts",
+          "apps/cli/src/commands/db-migrate.test.ts"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "deploy-host sha256 checksum release files",
+          "vitest config testTimeout projects"
+        ]
+      },
+      "acceptance": [
+        "The sha256 comparison in the deploy-host test (or the script, if the script also runs on such a shell) accepts both \"<hash>  <file>\" and \"<hash> *<file>\"; no assertion is removed.",
+        "Tests that spawn shells or write file databases get an explicit per-file or per-test timeout suited to them (for example 30 s) instead of the 5 s default; the default for everything else is unchanged.",
+        "pnpm test:coverage passes on the maintainer's Windows machine (checked by the coordinator) and in CI."
+      ],
+      "verify_cmd": "pnpm test:coverage && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "CHORE-2003",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2003",
+      "parent": "EPIC-020",
+      "title": "Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal",
+      "points": 1,
+      "status": "TODO",
+      "description": "When the database holds contract migrations the dashboard does not know, assertSchemaCurrent throws SchemaNotReadyError with an empty pending list and /health reports MIGRATION_PENDING with pending []. The status codes are right; the label is misleading.",
+      "context": {
+        "files": [
+          "apps/web/src/lib/server/schema-guard.ts",
+          "apps/web/src/lib/server/health.ts",
+          "apps/web/src/lib/server/health.test.ts",
+          "apps/web/src/lib/server/schema-guard.test.ts"
+        ],
+        "symbols": [
+          "SchemaNotReadyError",
+          "assertSchemaCurrent",
+          "webProbe"
+        ],
+        "codegraph_queries": [
+          "SchemaNotReadyError assertSchemaCurrent webProbe"
+        ]
+      },
+      "acceptance": [
+        "SchemaNotReadyError carries a reason (pending or incompatible). /health reports database.status MIGRATION_PENDING with the ids for pending, and SCHEMA_INCOMPATIBLE for the downgrade-guard case; both stay 200 for liveness and 503 for /ready.",
+        "Tests cover both reasons."
+      ],
+      "verify_cmd": "pnpm vitest run apps/web/src/lib/server && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "bugs": [
@@ -9524,6 +10589,89 @@
         "BUG-0043",
         "EPIC-019"
       ]
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "BUG-0044",
+        "EPIC-020"
+      ],
+      "id": "BUG-0044",
+      "parent": "EPIC-020",
+      "title": "Free Games Notification Links Are Broken (Needs Deeper Grooming)",
+      "points": 3,
+      "status": "BACKLOG",
+      "description": "Reported by the maintainer on 2026-10-11: the links in free games notifications are broken. Needs a deeper grooming with live samples before it can enter TODO; the estimate is provisional.",
+      "context": {
+        "files": [
+          "packages/services/src/free-games/providers/epic.provider.ts",
+          "packages/services/src/free-games/providers/steam.provider.ts",
+          "packages/services/src/free-games/engine.ts",
+          "packages/services/src/free-games/__tests__/free-games.test.ts",
+          "apps/bot/src/commands/streams/free-games.command.ts",
+          "packages/database/src/migration/transformer.ts"
+        ],
+        "symbols": [
+          "EpicGamesProvider.fetchFreeGames",
+          "SteamFreeGamesProvider.fetchFreeGames",
+          "FreeGamesEngine.formatGameEmbed",
+          "FreeGamesEngine.formatAnnouncement",
+          "freeGameId"
+        ],
+        "codegraph_queries": [
+          "EpicGamesProvider fetchFreeGames SteamFreeGamesProvider formatGameEmbed formatAnnouncement"
+        ]
+      },
+      "acceptance": [
+        "To be written at the deeper grooming, from live API samples of both providers and real broken links."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/free-games && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "BUG-0045",
+        "BUG-0040",
+        "EPIC-020"
+      ],
+      "id": "BUG-0045",
+      "parent": "EPIC-020",
+      "title": "/lyrics Finds Nothing for Music Videos Whose Length Differs From the Song by More Than 3 Seconds",
+      "points": 2,
+      "status": "TODO",
+      "description": "LrclibClient.findForTrack only takes a search hit within 3 s of the track duration (BUG-0040, as groomed). Music videos with an intro or outro miss even when LRCLIB has the song, and the user sees \"no lyrics found\".",
+      "context": {
+        "files": [
+          "packages/services/src/lyrics/lrclib.client.ts",
+          "packages/services/src/lyrics/__tests__/lrclib.client.test.ts",
+          "docs/music.md"
+        ],
+        "symbols": [
+          "LrclibClient.findForTrack"
+        ],
+        "codegraph_queries": [
+          "LrclibClient findForTrack searchRaw DURATION_TOLERANCE_SECONDS"
+        ]
+      },
+      "acceptance": [
+        "When no search hit is within 3 s, findForTrack takes the hit with the closest duration if it is within 60 s, else the first hit whose artist matches the queried artist (case-insensitive), else null.",
+        "Tests (offline, injected fetchFn) cover each branch; docs/music.md describes the matching."
+      ],
+      "verify_cmd": "pnpm vitest run packages/services/src/lyrics && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "active_in_progress_ticket": null
