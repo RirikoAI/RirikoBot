@@ -20,7 +20,7 @@ See docs/kanban/protocol.md section 6.
 
 **Facts found during grooming**
 - `master` (1.x, 149 commits, tags 1.2.0 to 1.4.0) and `develop/2.0.0` (447 commits) share **no history**. See TASK-1911.
-- `ririko.ai` answers Cloudflare 530 (no origin). `install.ririko.ai`, used by master's README quick start, does not resolve.
+- `ririko.ai` answers Cloudflare 530 (no origin). The old install domain, used by master's README quick start, does not resolve.
 - The wiki has 7 pages, all for 1.x: Home, Heroku, Render, music extra config, all commands, build your own image, post-installation settings.
 - The tracked tree has no live public IPs. But `board.json`, 8 handover notes, `docs/deployment.md` and the ADR-014 title name the provider, the region and the instance sizes. See TASK-1871.
 - master's `.all-contributorsrc` lists 3 contributors.

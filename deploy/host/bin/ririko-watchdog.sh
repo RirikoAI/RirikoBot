@@ -10,7 +10,7 @@
 #   1. a container whose health is "unhealthy" is restarted with docker restart and logged
 #      through logger (a container that is still "starting" is left alone);
 #   2. the stack is healthy when bot, web and postgres are running and report healthy, and
-#      lavalink, if it is part of the project at all, is running (the Lightsail hosts use the
+#      lavalink, if it is part of the project at all, is running (the app hosts use the
 #      remote Lavalink node, so they have none), and nothing was unhealthy in this run;
 #   3. a healthy stack on a root file system below DISK_ALERT_PERCENT pings HEALTHCHECK_PING_URL;
 #      anything else posts a one-line reason to <HEALTHCHECK_PING_URL>/fail. While the stack is

@@ -1599,7 +1599,7 @@ write_conf() {
 }
 # state <container> <"status health">: what docker inspect prints for it.
 state() { echo "$2" >"$FAKE_DIR/state.$1"; }
-# stack_ok: the three services every host runs, all healthy (the Lightsail hosts have no lavalink).
+# stack_ok: the three services every host runs, all healthy (the app hosts have no lavalink).
 stack_ok() {
   printf '%s\\n' 'ririko ririko-postgres-1 postgres' 'ririko ririko-bot-1 bot' 'ririko ririko-web-1 web' >"$FAKE_DIR/containers"
   state ririko-postgres-1 'running healthy'; state ririko-bot-1 'running healthy'; state ririko-web-1 'running healthy'
@@ -1668,7 +1668,7 @@ describe.skipIf(!hasBash)('ririko-watchdog', () => {
     const result = watchdogScenario('write_conf\nstack_ok\nrun');
     expect(result.rcs).toEqual([0]);
     expect(result.stderr).toBe('');
-    // Without lavalink in the project (the Lightsail hosts), the stack is still healthy.
+    // Without lavalink in the project (the app hosts), the stack is still healthy.
     expect(result.docker).toEqual([
       psCall,
       inspectCall('ririko-postgres-1'),
@@ -2214,15 +2214,15 @@ describe.skipIf(!hasBash)('render_wireguard_conf', () => {
       'allowed address',
     ],
     ['a missing allowed address', keyProduction, 'allowed address'],
-    ['an endpoint without a port', `${keyProduction} 10.77.0.2/32 1.2.3.4 2333`, 'endpoint'],
+    ['an endpoint without a port', `${keyProduction} 10.77.0.2/32 198.51.100.4 2333`, 'endpoint'],
     [
       'an endpoint port above 65535',
-      `${keyProduction} 10.77.0.2/32 1.2.3.4:70000 2333`,
+      `${keyProduction} 10.77.0.2/32 198.51.100.4:70000 2333`,
       'endpoint',
     ],
     [
       'an endpoint with a bad IPv4 literal',
-      `${keyProduction} 10.77.0.2/32 1.2.3.999:51820 2333`,
+      `${keyProduction} 10.77.0.2/32 198.51.100.999:51820 2333`,
       'endpoint',
     ],
     [
@@ -2368,7 +2368,7 @@ describe.skipIf(!hasBash)('render_nftables', () => {
       [
         `${keyProduction} 10.77.0.2/32 - 2333`,
         `${keyStaging} 10.77.0.3/32 - 2334,2335,2334`,
-        `${keyThird} 10.77.0.4/32 1.2.3.4:51820`,
+        `${keyThird} 10.77.0.4/32 198.51.100.4:51820`,
         `${keyVps} 10.77.0.5/32 - 2336`,
       ].join('; '),
     );
@@ -2386,14 +2386,14 @@ describe.skipIf(!hasBash)('render_nftables', () => {
     ['no endpoints', ['51820', '  ', vpsPeers], 'WG_ALLOWED_ENDPOINTS is empty'],
     [
       'an endpoint that is a host name',
-      ['51820', 'lightsail.example', vpsPeers],
+      ['51820', 'app-host.example', vpsPeers],
       'WG_ALLOWED_ENDPOINTS',
     ],
     ['an endpoint with a bad octet', ['51820', '203.0.113.300', vpsPeers], 'WG_ALLOWED_ENDPOINTS'],
     ['an IPv4 prefix above 32', ['51820', '203.0.113.0/33', vpsPeers], 'WG_ALLOWED_ENDPOINTS'],
     [
       'an endpoint with a shell character',
-      ['51820', '1.2.3.4; flush ruleset', vpsPeers],
+      ['51820', '198.51.100.4; flush ruleset', vpsPeers],
       'WG_ALLOWED_ENDPOINTS',
     ],
     [
@@ -2417,16 +2417,16 @@ describe.skipIf(!hasBash)('wg-common helpers', () => {
     ['2001:db8:0:0:0:0:0:10', true],
     ['2001:db8::', true],
     ['fe80::1:2', true],
-    ['1:2:3:4:5:6:7:8', true],
-    ['1:2:3:4:5:6:7::', true],
-    ['1::2::3', false],
-    ['1:2:3:4:5:6:7', false],
-    ['1:2:3:4:5:6:7:8:9', false],
+    ['2001:db8:3:4:5:6:7:8', true],
+    ['2001:db8:3:4:5:6:7::', true],
+    ['2001:db8::2::3', false],
+    ['2001:db8:3:4:5:6:7', false],
+    ['2001:db8:3:4:5:6:7:8:9', false],
     ['12345::1', false],
     ['::g', false],
     [':::', false],
-    [':1:2:3:4:5:6:7', false],
-    ['1.2.3.4', false],
+    [':2001:db8:3:4:5:6:7', false],
+    ['198.51.100.4', false],
     ['', false],
   ])('wg_valid_ipv6 %j is %s', (value, expected) => {
     expect(check('wg_valid_ipv6', value)).toBe(expected ? 'yes' : 'no');
@@ -2437,10 +2437,10 @@ describe.skipIf(!hasBash)('wg-common helpers', () => {
     ['10.77.0.1', true],
     ['255.255.255.255', true],
     ['256.0.0.1', false],
-    ['1.2.3', false],
-    ['1.2.3.4.5', false],
-    ['01.2.3.4', false],
-    ['1.2.3.-4', false],
+    ['198.51.100', false],
+    ['198.51.100.4.5', false],
+    ['198.051.100.4', false],
+    ['198.51.100.-4', false],
     ['a.b.c.d', false],
   ])('wg_valid_ipv4 %j is %s', (value, expected) => {
     expect(check('wg_valid_ipv4', value)).toBe(expected ? 'yes' : 'no');

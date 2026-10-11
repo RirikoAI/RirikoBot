@@ -21,9 +21,8 @@
 | `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 13 | EPIC-020 | STORY-188 | blocked | large |
 | `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | blocked | large |
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188 | blocked | large |
-| `TASK-1871` | Task | Scrub Private Hosting Details From the Working Tree | 3 | STORY-187 | — | yes | medium |
-| `TASK-1872` | Task | Audit Git History, Tags and GitHub Text for Leaked Private Details; Report and Clean .gitleaksignore | 2 | STORY-187 | TASK-1871 | blocked | medium |
-| `TASK-1881` | Task | Move Planning and Decision Records to docs/archive and Fix Every Link | 3 | STORY-188 | TASK-1871 | blocked | medium |
+| `TASK-1872` | Task | Audit Git History, Tags and GitHub Text for Leaked Private Details; Report and Clean .gitleaksignore | 2 | STORY-187 | TASK-1871 | yes | medium |
+| `TASK-1881` | Task | Move Planning and Decision Records to docs/archive and Fix Every Link | 3 | STORY-188 | TASK-1871 | yes | medium |
 | `TASK-1882` | Task | Rewrite the Self-Host and Operator Docs as Deterministic, Current Procedures | 5 | STORY-188 | TASK-1881 | blocked | medium |
 | `TASK-1883` | Task | Rewrite the Feature Docs for Server Admins and Players | 5 | STORY-188 | TASK-1881 | blocked | medium |
 | `TASK-1891` | Task | Scaffold the Docusaurus Site in website/ Built From docs/, With a Broken-Link Gate in CI | 5 | STORY-189 | STORY-188 | blocked | medium |
@@ -32,7 +31,7 @@
 | `TASK-1894` | Task | Migrate the GitHub Wiki Into the Docs and Leave a Pointer Page | 2 | STORY-189 | TASK-1891 | blocked | medium |
 | `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | TASK-1881 | blocked | medium |
 | `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | — | yes | medium |
-| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | — | yes | medium |
+| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872 | blocked | medium |
 | `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | — | yes | medium |
 | `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | — | yes | medium |
 | `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | — | yes | small |
@@ -141,10 +140,10 @@
 | `STORY-127` | Story | Docker Hub Release of 2.0 Images & 1.4.0 Sunset | 8 | EPIC-012 | [STORY-127.md](./handovers/STORY-127.md) |
 | `STORY-128` | Story | 1.4.0 Guild Settings Fidelity: Migrate guild_config Into the 2.0 Tables the Bot Reads | 5 | EPIC-012 | [STORY-128.md](./handovers/STORY-128.md) |
 | `STORY-176` | Story | Harden the Production Compose for a Tunnelled Host | 5 | EPIC-017 | [STORY-176.md](./handovers/STORY-176.md) |
-| `STORY-177` | Story | Lightsail Host Bootstrap & Hosting Runbook | 5 | EPIC-017 | [STORY-177.md](./handovers/STORY-177.md) |
+| `STORY-177` | Story | Host Bootstrap & Hosting Runbook | 5 | EPIC-017 | [STORY-177.md](./handovers/STORY-177.md) |
 | `STORY-178` | Story | CircleCI Deploy Pipeline: Automatic Staging, Approved Production | 8 | EPIC-017 | [STORY-178.md](./handovers/STORY-178.md) |
 | `STORY-179` | Story | Backups, Health Watchdog & Heartbeat Alerts | 5 | EPIC-017 | [STORY-179.md](./handovers/STORY-179.md) |
-| `STORY-180` | Story | Remote Lavalink Node on a KVM VPS Host Over WireGuard | 13 | EPIC-017 | [STORY-180.md](./handovers/STORY-180.md) |
+| `STORY-180` | Story | Remote Lavalink Node on a Separate Host Over WireGuard | 13 | EPIC-017 | [STORY-180.md](./handovers/STORY-180.md) |
 | `STORY-181` | Story | Copy a 2.0 SQLite Database Into PostgreSQL (ririko db:copy) | 8 | EPIC-017 | [STORY-181.md](./handovers/STORY-181.md) |
 | `STORY-182` | Story | Grouped Guild Sidebar Navigation with a Mobile Page Picker | 3 | EPIC-018 | [STORY-182.md](./handovers/STORY-182.md) |
 | `STORY-183` | Story | Owner Console Server List with Inviters and Cross-Server Command Usage | 8 | EPIC-018 | [STORY-183.md](./handovers/STORY-183.md) |
@@ -364,12 +363,12 @@
 | `TASK-1192` | Task | DBSC Routes & Wiring: Register and Refresh Endpoints, Login Registration Header, Bound Cookie Enforcement, Sessions Badge & Docs | 3 | STORY-119 | [TASK-1192.md](./handovers/TASK-1192.md) |
 | `TASK-1761` | Task | Compose Hardening: Loopback Dashboard Port, Dropped Capabilities, Log Rotation, Lavalink Heap | 2 | STORY-176 | [TASK-1761.md](./handovers/TASK-1761.md) |
 | `TASK-1762` | Task | Trusted Client IP Header for the Dashboard Behind Cloudflare | 3 | STORY-176 | [TASK-1762.md](./handovers/TASK-1762.md) |
-| `TASK-1771` | Task | Idempotent Lightsail Host Bootstrap Script | 3 | STORY-177 | [TASK-1771.md](./handovers/TASK-1771.md) |
+| `TASK-1771` | Task | Idempotent Host Bootstrap Script | 3 | STORY-177 | [TASK-1771.md](./handovers/TASK-1771.md) |
 | `TASK-1781` | Task | Locked-Down Host Deploy Command With Readiness Gate and Rollback | 5 | STORY-178 | [TASK-1781.md](./handovers/TASK-1781.md) |
 | `TASK-1782` | Task | CircleCI Deploy Jobs: Automatic Staging, Approved Production | 3 | STORY-178 | [TASK-1782.md](./handovers/TASK-1782.md) |
-| `TASK-1791` | Task | Encrypted Off-Site Backups With restic to a Lightsail Bucket | 3 | STORY-179 | [TASK-1791.md](./handovers/TASK-1791.md) |
+| `TASK-1791` | Task | Encrypted Off-Site Backups With restic to an S3-Compatible Bucket | 3 | STORY-179 | [TASK-1791.md](./handovers/TASK-1791.md) |
 | `TASK-1792` | Task | Health Watchdog and Heartbeat Alerts | 2 | STORY-179 | [TASK-1792.md](./handovers/TASK-1792.md) |
-| `TASK-1772` | Task | Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery | 2 | STORY-177 | [TASK-1772.md](./handovers/TASK-1772.md) |
+| `TASK-1772` | Task | Hosting Runbook: Provider Setup, Cloudflare Tunnel & Access, Go-Live and Recovery | 2 | STORY-177 | [TASK-1772.md](./handovers/TASK-1772.md) |
 | `TASK-1801` | Task | Remote Lavalink Compose Override and Lavalink Host Compose File | 3 | STORY-180 | [TASK-1801.md](./handovers/TASK-1801.md) |
 | `TASK-1802` | Task | WireGuard Link, Lavalink Host Firewall and Bootstrap Roles | 5 | STORY-180 | [TASK-1802.md](./handovers/TASK-1802.md) |
 | `TASK-1803` | Task | Lavalink Host Deploy Role, Watchdog Checks and CI Jobs | 5 | STORY-180 | [TASK-1803.md](./handovers/TASK-1803.md) |
@@ -388,6 +387,7 @@
 | `TASK-1855` | Task | CI Gates for Migrations: Schema In Sync, Embedded Modules, Parity, Upgrade and Safety Lint | 5 | STORY-185 | [TASK-1855.md](./handovers/TASK-1855.md) |
 | `TASK-1861` | Task | ririko-deploy Runs ririko db:migrate From the New Image Before Starting It | 5 | STORY-186 | [TASK-1861.md](./handovers/TASK-1861.md) |
 | `TASK-1862` | Task | Release Runbook: Migrations, Failure Recovery From the Pre-Deploy Dump, and Staging Adoption Checklist | 3 | STORY-186 | [TASK-1862.md](./handovers/TASK-1862.md) |
+| `TASK-1871` | Task | Scrub Private Hosting Details From the Working Tree | 3 | STORY-187 | [TASK-1871.md](./handovers/TASK-1871.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -481,7 +481,7 @@
 | `EPIC-014` | Server Utilities, AutoRoles & Community Systems | DONE | 21 | STORY-140, STORY-141, STORY-142, STORY-143, STORY-144 | — |
 | `EPIC-015` | Waifu TCG Progression, Equipment Economy & Seasonal Anime Bosses | DONE | 21 | STORY-150, STORY-151, STORY-152, STORY-153, STORY-154, STORY-155, STORY-156, STORY-157, STORY-158, STORY-159, STORY-160, STORY-162 | — |
 | `EPIC-016` | Interactive Branching Adventure RPG | DONE | 21 | STORY-170 | — |
-| `EPIC-017` | Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
+| `EPIC-017` | Production Hosting & Continuous Deployment (Managed VMs, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
 | `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, CHORE-2001, CHORE-2002, CHORE-2003, BUG-0044, BUG-0045 | [EPIC-020.md](./handovers/EPIC-020.md) |

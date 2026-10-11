@@ -135,3 +135,62 @@ Git hooks (Husky, installed by `pnpm install`) run the lint checks locally:
   - Replace the client with a fake: `vi.mock` the SDK module (see `packages/music/src/extractors/extractors.test.ts`), `vi.stubGlobal('fetch', ...)`, or pass a `fetchFn` where the class accepts one.
   - `vitest.config.ts` sets `USE_PRIVATE_MUSIC_PACKAGE=false`, so `createBotServices` never loads the private music package during tests. `packages/music-private` is excluded from the public test run and coverage.
   - Do not skip a test on CI to hide a live call. Fake the service instead.
+
+### 4.4. Pre-Release Privacy Scan
+Run this before a release, before a branch becomes public, and after any change to deployment docs, `deploy/` or `docs/kanban/`. The repository is public, so no tracked file may hold a live IP address, a private hostname, or the name, region or size of a hosting resource. Placeholders are `192.0.2.x`, `198.51.100.x`, `203.0.113.x`, `2001:db8::`, `<domain>` and `*.example.com`. The WireGuard plan `10.77.0.0/24` is a private design example and may stay. The private runbook `docs/hosting.md` is git-ignored and is never scanned.
+
+Every command below must print nothing. Run them from the repository root in Git Bash or any POSIX shell. They read tracked files only (`git grep`) and skip this section's own file (`':!docs/testing.md'`), because it names the patterns it searches for.
+
+1. Public IPv4 addresses. Documentation, private, loopback, link-local, multicast and reserved ranges are skipped, and so are four public addresses that tests use on purpose as "a public IP" (`1.1.1.1`, `8.8.8.8`, `93.184.216.34`, `192.0.1.1`; the documentation ranges are blocked by `isPrivateOrRestrictedIp`, so they cannot stand in for them).
+
+   ```bash
+   git grep -n -I -P -o '(?<![\w./])(?:\d{1,3}\.){3}\d{1,3}(?![\w]|\.\d)' -- . ':!pnpm-lock.yaml' ':!docs/testing.md' |
+     awk -F: '{
+       ip = $NF; split(ip, o, ".")
+       if (o[1] > 255 || o[2] > 255 || o[3] > 255 || o[4] > 255) next
+       if (ip ~ /(^|\.)0[0-9]/) next
+       if (ip ~ /^(0|10|127)\./ || ip ~ /^192\.168\./ || ip ~ /^169\.254\./) next
+       if (ip ~ /^172\.(1[6-9]|2[0-9]|3[01])\./ || ip ~ /^100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\./) next
+       if (ip ~ /^(192\.0\.[02]|198\.51\.100|203\.0\.113|198\.1[89])\./ || ip ~ /^(22[4-9]|2[3-5][0-9])\./) next
+       if (ip ~ /^(1\.1\.1\.1|8\.8\.8\.8|93\.184\.216\.34|192\.0\.1\.1)$/) next
+       print
+     }'
+   ```
+
+2. Public IPv6 addresses. Documentation (`2001:db8::/32`), link-local, unique-local, multicast and loopback addresses, clock times and one public DNS fixture (`2606:4700:4700::1111`) are skipped.
+
+   ```bash
+   git grep -n -I -P -o '(?<![\w:.\/])(?:[0-9a-fA-F]{1,4}:){2,7}[0-9a-fA-F]{1,4}(?![\w:.])|(?<![\w:.\/])(?:[0-9a-fA-F]{1,4}:){1,6}:(?:[0-9a-fA-F]{1,4})?(?![\w:])' -- . ':!pnpm-lock.yaml' ':!docs/testing.md' |
+     awk -F: '{ ip = substr($0, length($1) + length($2) + 3)
+       if (ip ~ /^[0-9]{1,2}:[0-9]{2}(:[0-9]{2})?$/) next
+       if (ip ~ /^(2001:db8|fe[89ab][0-9a-f]|f[cd][0-9a-f][0-9a-f]|ff[0-9a-f][0-9a-f]):/ || ip ~ /^::/) next
+       if (ip == "2606:4700:4700::1111") next
+       print
+     }'
+   ```
+
+3. Project-domain hostnames other than `ririko.ai` and `dashboard.ririko.ai`. Use `*.example.com` names in docs, tests and examples.
+
+   ```bash
+   git grep -n -I -i -o -P '(?<![\w.-])(?!dashboard\.)[a-z0-9-]+\.ririko\.ai\b' -- . ':!docs/testing.md'
+   ```
+
+4. Regions, availability zones and instance sizes. Describe hosts by role ("the app host", "the Lavalink host"). This command holds only generic patterns: provider and plan names must never appear in a tracked file, this one included, so they live only in `.local/private-terms.txt` (command 5). Keep sizes and plan names in the private runbook.
+
+   ```bash
+   git grep -n -I -i -P '\b(?:us|eu|ap|sa|ca|me|af)-(?:east|west|central|north|south|southeast|northeast)-\d\b|\bKVM\b|\bNVMe\b|\b\d+ ?GB (?:of )?RAM\b' -- . ':!pnpm-lock.yaml' ':!docs/testing.md'
+   ```
+
+5. The maintainer's own list of private terms: the real provider and plan names, bucket names, host names and ping URLs from the private runbook. Keep one fixed string per line in `.local/private-terms.txt` (git-ignored, never committed).
+
+   ```bash
+   test -f .local/private-terms.txt && git grep -n -I -i -F -f .local/private-terms.txt -- . ':!docs/testing.md'
+   ```
+
+6. Secrets: the same command as CircleCI's `secrets` job, over the full history. Known findings are listed in `.gitleaksignore`. Staged changes are also scanned by the pre-commit hook.
+
+   ```bash
+   gitleaks git --redact --no-banner --config .gitleaks.toml
+   ```
+
+A hit is fixed in the tree: replace it with a placeholder or generic wording and run the scan again. A hit in history needs the maintainer's decision (a history rewrite is never an agent's call). To allow a new public test fixture, add it to the allowlist in command 1 or 2 and say why in the pull request.

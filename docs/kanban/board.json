@@ -412,7 +412,7 @@
     },
     {
       "id": "EPIC-017",
-      "title": "Production Hosting & Continuous Deployment (AWS Lightsail, Cloudflare Tunnel, CircleCI)",
+      "title": "Production Hosting & Continuous Deployment (Managed VMs, Cloudflare Tunnel, CircleCI)",
       "points": 21,
       "status": "DONE",
       "children": [
@@ -427,7 +427,7 @@
         "EPIC-012"
       ],
       "blocks": [],
-      "description": "Decided with the maintainer on 2026-10-05: production (Lightsail 8 GB) and staging (Lightsail 4 GB) each run docker-compose.production.yml on their own AWS Lightsail instance (Ubuntu 24.04, us-east-1), without the bundled Lavalink. Both use one Lavalink VPS at the VPS provider (Linux KVM PRO: 4+1 vCPU, 4 GB, 100 GB NVMe, the VPS region) that runs a production and a staging Lavalink instance, reachable only over WireGuard. Cloudflare Tunnel is the only way in: dashboard.ririko.ai (dashboard-staging.example.com behind Cloudflare Access) and one SSH hostname per host, with no open inbound TCP ports. The CircleCI release workflow deploys every release tag to staging automatically, and a final vX.Y.Z tag to production after a manual approval. Order: TASK-1761, TASK-1762, TASK-1801, TASK-1771, TASK-1781, TASK-1782, TASK-1791, TASK-1792, TASK-1802, TASK-1803, TASK-1772."
+      "description": "Decided with the maintainer on 2026-10-05: production and staging each run docker-compose.production.yml on their own managed VM (Ubuntu 24.04), without the bundled Lavalink. Both use one separate Lavalink host that runs a production and a staging Lavalink instance, reachable only over WireGuard. Cloudflare Tunnel is the only way in: dashboard.ririko.ai (dashboard-staging.example.com behind Cloudflare Access) and one SSH hostname per host, with no open inbound TCP ports. The CircleCI release workflow deploys every release tag to staging automatically, and a final vX.Y.Z tag to production after a manual approval. Order: TASK-1761, TASK-1762, TASK-1801, TASK-1771, TASK-1781, TASK-1782, TASK-1791, TASK-1792, TASK-1802, TASK-1803, TASK-1772."
     },
     {
       "id": "EPIC-018",
@@ -2168,7 +2168,7 @@
     {
       "id": "STORY-177",
       "parent": "EPIC-017",
-      "title": "Lightsail Host Bootstrap & Hosting Runbook",
+      "title": "Host Bootstrap & Hosting Runbook",
       "points": 5,
       "status": "DONE",
       "requires": [
@@ -2179,7 +2179,7 @@
         "TASK-1771",
         "TASK-1772"
       ],
-      "description": "An idempotent bootstrap script turns a fresh Ubuntu 24.04 Lightsail instance into a Ririko host (Docker, cloudflared, hardened sshd, the restricted deploy user, the /opt/ririko layout and the host scripts), and a runbook walks the maintainer through Lightsail, Cloudflare Tunnel and Access, CircleCI contexts, go-live and recovery. TASK-1772 is written last because it documents every other task of the epic.",
+      "description": "An idempotent bootstrap script turns a fresh Ubuntu 24.04 instance into a Ririko host (Docker, cloudflared, hardened sshd, the restricted deploy user, the /opt/ririko layout and the host scripts), and a runbook walks the maintainer through the provider setup, Cloudflare Tunnel and Access, CircleCI contexts, go-live and recovery. TASK-1772 is written last because it documents every other task of the epic.",
       "assignee": null,
       "claimed_at": null,
       "blocked_reason": null,
@@ -2283,7 +2283,7 @@
         "TASK-1791",
         "TASK-1792"
       ],
-      "description": "Nothing backs up the production data today, and restart: unless-stopped never restarts a container that keeps running while unhealthy. This story adds a nightly restic backup (database dump plus the shared volumes) to a Lightsail bucket, and a per-minute watchdog that restarts unhealthy containers and pings a heartbeat monitor only while the stack is healthy.",
+      "description": "Nothing backs up the production data today, and restart: unless-stopped never restarts a container that keeps running while unhealthy. This story adds a nightly restic backup (database dump plus the shared volumes) to an S3-compatible bucket, and a per-minute watchdog that restarts unhealthy containers and pings a heartbeat monitor only while the stack is healthy.",
       "assignee": null,
       "claimed_at": null,
       "blocked_reason": null,
@@ -2319,7 +2319,7 @@
     {
       "id": "STORY-180",
       "parent": "EPIC-017",
-      "title": "Remote Lavalink Node on a KVM VPS Host Over WireGuard",
+      "title": "Remote Lavalink Node on a Separate Host Over WireGuard",
       "points": 13,
       "status": "DONE",
       "requires": [
@@ -2331,7 +2331,7 @@
         "TASK-1802",
         "TASK-1803"
       ],
-      "description": "Lavalink moves off the Lightsail hosts to one small KVM VPS instance (4+1 vCPU, 4 GB RAM, 100 GB NVMe, 4 TB transfer) running two Lavalink containers: production and staging, with separate passwords, ports and heaps. The app hosts reach them only through a WireGuard link; the VPS accepts nothing from the internet except WireGuard from the two Lightsail static IPs, and SSH arrives through Cloudflare Tunnel. The release pipeline updates each Lavalink instance before its app host, and only restarts it when its config changed.",
+      "description": "Lavalink moves off the app hosts to one separate small host running two Lavalink containers: production and staging, with separate passwords, ports and heaps. The app hosts reach them only through a WireGuard link; the Lavalink host accepts nothing from the internet except WireGuard from the two app hosts' static IPs, and SSH arrives through Cloudflare Tunnel. The release pipeline updates each Lavalink instance before its app host, and only restarts it when its config changed.",
       "assignee": null,
       "claimed_at": null,
       "blocked_reason": null,
@@ -2363,7 +2363,7 @@
       },
       "acceptance": [
         "TASK-1801: the app hosts run the stack without the bundled Lavalink through a compose override, and deploy/lavalink/docker-compose.yml runs the two Lavalink instances on the VPS with a pinned image.",
-        "TASK-1802: bootstrap.sh --role lavalink prepares the VPS, every host gets a WireGuard link, and the VPS firewall allows only WireGuard from the Lightsail static IPs and each app host only its own Lavalink port.",
+        "TASK-1802: bootstrap.sh --role lavalink prepares the VPS, every host gets a WireGuard link, and the Lavalink host firewall allows only WireGuard from the app hosts' static IPs and each app host only its own Lavalink port.",
         "TASK-1803: the release pipeline deploys each Lavalink instance before its app host, restarts it only when its config changed, and the watchdog covers the Lavalink host."
       ],
       "verify_cmd": "POSTGRES_PASSWORD=x LAVALINK_PASSWORD=y LAVALINK_HOST=10.77.0.1 RIRIKO_ENV_FILE=.env.production.example docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production.example config -q && pnpm vitest run scripts && pnpm lint --quiet && pnpm format:check && pnpm exec prettier --check .circleci/config.yml",
@@ -6662,7 +6662,7 @@
     {
       "id": "TASK-1771",
       "parent": "STORY-177",
-      "title": "Idempotent Lightsail Host Bootstrap Script",
+      "title": "Idempotent Host Bootstrap Script",
       "points": 3,
       "status": "DONE",
       "children": [],
@@ -6766,7 +6766,7 @@
       },
       "acceptance": [
         "ririko-deploy-ssh (the forced command) reads SSH_ORIGINAL_COMMAND and accepts only \"deploy <version>\" and \"status\", where version matches ^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.]+)?$. It runs sudo -n /usr/local/bin/ririko-deploy with those words; anything else exits 2 with \"command not allowed\".",
-        "ririko-deploy deploy <version> (root) validates the version again, takes a flock on the deploy lock (exit 3 when busy), loads /etc/ririko/ririko.conf, and downloads every file in RIRIKO_COMPOSE_FILES (default docker-compose.production.yml; the Lightsail hosts add docker-compose.remote-lavalink.yml) plus docker/lavalink/application.yml from https://raw.githubusercontent.com/${RIRIKO_REPO}/v<version>/ into /opt/ririko/releases/<version>/, keeping the repository layout, through a temporary directory. A missing tag or file fails before anything changes.",
+        "ririko-deploy deploy <version> (root) validates the version again, takes a flock on the deploy lock (exit 3 when busy), loads /etc/ririko/ririko.conf, and downloads every file in RIRIKO_COMPOSE_FILES (default docker-compose.production.yml; the app hosts add docker-compose.remote-lavalink.yml) plus docker/lavalink/application.yml from https://raw.githubusercontent.com/${RIRIKO_REPO}/v<version>/ into /opt/ririko/releases/<version>/, keeping the repository layout, through a temporary directory. A missing tag or file fails before anything changes.",
         "When a release is already deployed and postgres is running, it writes pg_dump -Fc to /opt/ririko/backups/predeploy/<UTC>-from-<previous>.dump, keeps the newest 5, and aborts on a dump failure before pulling.",
         "It runs docker compose -p ririko with one -f per RIRIKO_COMPOSE_FILES entry, --env-file and RIRIKO_ENV_FILE set to the host env file and RIRIKO_VERSION=<version>: pull, then up -d --no-build --remove-orphans.",
         "It polls every 5 s, up to READY_TIMEOUT seconds (default 300), until the bot’s /ready (through docker compose exec -T bot node -e fetch on HEALTH_PORT, default 8080) and the dashboard’s /api/ready both answer 200. Exec errors count as not ready.",
@@ -6837,7 +6837,7 @@
     {
       "id": "TASK-1791",
       "parent": "STORY-179",
-      "title": "Encrypted Off-Site Backups With restic to a Lightsail Bucket",
+      "title": "Encrypted Off-Site Backups With restic to an S3-Compatible Bucket",
       "points": 3,
       "status": "DONE",
       "children": [],
@@ -6942,7 +6942,7 @@
     {
       "id": "TASK-1772",
       "parent": "STORY-177",
-      "title": "Hosting Runbook: Lightsail, Cloudflare Tunnel & Access, Go-Live and Recovery",
+      "title": "Hosting Runbook: Provider Setup, Cloudflare Tunnel & Access, Go-Live and Recovery",
       "points": 2,
       "status": "DONE",
       "children": [],
@@ -6970,7 +6970,7 @@
           "docs/deployment.md",
           "docs/release.md",
           "docs/development.md",
-          "docs/adr/ADR-014-production-hosting-lightsail-cloudflare-tunnel.md",
+          "docs/adr/ADR-014-production-hosting-cloudflare-tunnel.md",
           "AGENTS.md",
           "deploy/host/bootstrap.sh",
           "deploy/host/ririko.conf.example",
@@ -6986,17 +6986,17 @@
         ]
       },
       "acceptance": [
-        "docs/hosting.md, Lightsail: two Ubuntu 24.04 LTS instances in us-east-1 with IPv4 (production 8 GB RAM / 2 vCPU, staging 4 GB / 2 vCPU); a static IP attached to each (the Lavalink VPS allowlists them); every IPv4 and IPv6 firewall rule deleted; automatic snapshots on; a CPU burst capacity alarm, because the bundles are burstable; one bucket per environment for restic with a bucket-scoped access key.",
-        "Lavalink VPS: small KVM VPS (4+1 vCPU, 4 GB, 100 GB NVMe, 4 TB transfer) with Ubuntu 24.04, bootstrapped with --role lavalink; the WireGuard key exchange and WG_PEERS/WG_ALLOWED_ENDPOINTS values for all three hosts; per-instance env files; cloudflared for ssh-lavalink.example.com; break-glass through the provider’s VNC console; a bandwidth note (about 110 GB a month per continuously playing session) with the upgrade path to ELITE.",
-        "Cloudflare: one remotely managed tunnel per host, including the Lavalink VPS (ssh-lavalink.example.com only). Production routes dashboard.ririko.ai to http://localhost:3000 and ssh-production.example.com to ssh://localhost:22; staging uses dashboard-staging.example.com and ssh-staging.example.com (one level deep, so Universal SSL covers them). Access applications protect both SSH hostnames (maintainers’ emails plus a Service Auth policy for that environment’s CI service token) and the staging dashboard.",
+        "docs/hosting.md, provider setup: two Ubuntu 24.04 LTS instances with IPv4; a static IP attached to each (the Lavalink host allowlists them); every IPv4 and IPv6 firewall rule deleted; automatic snapshots on; a CPU burst capacity alarm, because the bundles are burstable; one bucket per environment for restic with a bucket-scoped access key.",
+        "Lavalink host: a small VPS with Ubuntu 24.04, bootstrapped with --role lavalink; the WireGuard key exchange and WG_PEERS/WG_ALLOWED_ENDPOINTS values for all three hosts; per-instance env files; cloudflared for ssh-lavalink.example.com; break-glass through the provider’s console; a bandwidth note (about 110 GB a month per continuously playing session) with the upgrade path to a larger transfer plan.",
+        "Cloudflare: one remotely managed tunnel per host, including the Lavalink host (ssh-lavalink.example.com only). Production routes dashboard.ririko.ai to http://localhost:3000 and ssh-production.example.com to ssh://localhost:22; staging uses dashboard-staging.example.com and ssh-staging.example.com (one level deep, so Universal SSL covers them). Access applications protect both SSH hostnames (maintainers’ emails plus a Service Auth policy for that environment’s CI service token) and the staging dashboard.",
         "Zone settings for the dashboard hostnames: Rocket Loader, Email Address Obfuscation, automatic Web Analytics injection and Zaraz off, because they inject scripts the nonce CSP blocks; Always Use HTTPS on; HTML not cached.",
         "Discord: a separate staging application, and the OAuth2 redirect <DASHBOARD_URL>/api/auth/callback for each.",
         "Host setup: the bootstrap command, ririko.conf, .env.production with DASHBOARD_URL and CLIENT_IP_HEADER=cf-connecting-ip, ririko-backup init, Healthchecks.io checks for the watchdog and the backup, and an external uptime monitor on https://dashboard.ririko.ai/health.",
         "CircleCI: generating the deploy key pair, pinning known_hosts with ssh-keyscan through cloudflared, and filling the deploy-staging and deploy-production contexts.",
-        "Go-live: an rc tag deploys to staging; check Discord login, music playback from the AWS address, card rendering and a restic restore drill; then tag the release and approve production.",
-        "Recovery: deploying an older version, restoring the pre-deploy dump, rebuilding a host from restic, break-glass SSH through a temporary Lightsail browser-SSH firewall rule, and where every secret lives (SECRET_VAULT_KEY and the restic password also kept offline).",
+        "Go-live: an rc tag deploys to staging; check Discord login, music playback from the Lavalink host's address, card rendering and a restic restore drill; then tag the release and approve production.",
+        "Recovery: deploying an older version, restoring the pre-deploy dump, rebuilding a host from restic, break-glass SSH through a temporary provider-console SSH firewall rule, and where every secret lives (SECRET_VAULT_KEY and the restic password also kept offline).",
         "docs/adr/ADR-014 records the decision and the rejected options (serverless/Vercel, PaaS with separate machines, Kubernetes, public SSH). docs/deployment.md section 4 and the AGENTS.md catalog link docs/hosting.md.",
-        "Lightsail .env.production on each app host sets LAVALINK_HOST=10.77.0.1, LAVALINK_PORT (2333 production, 2334 staging) and the matching instance password, and RIRIKO_COMPOSE_FILES includes the remote Lavalink override."
+        ".env.production on each app host sets LAVALINK_HOST=10.77.0.1, LAVALINK_PORT (2333 production, 2334 staging) and the matching instance password, and RIRIKO_COMPOSE_FILES includes the remote Lavalink override."
       ],
       "verify_cmd": "pnpm format:check && pnpm site:build",
       "handovers": [
@@ -7019,7 +7019,7 @@
         "TASK-1803",
         "TASK-1772"
       ],
-      "description": "Self-hosters keep the bundled Lavalink in docker-compose.production.yml. The Lightsail hosts add an override that leaves it out and points the bot at the remote node, and the VPS gets its own compose file with one Lavalink service per environment.",
+      "description": "Self-hosters keep the bundled Lavalink in docker-compose.production.yml. The app hosts add an override that leaves it out and points the bot at the remote node, and the Lavalink host gets its own compose file with one Lavalink service per environment.",
       "model": "medium",
       "assignee": null,
       "claimed_at": null,
@@ -7078,7 +7078,7 @@
         "TASK-1803",
         "TASK-1772"
       ],
-      "description": "The Lavalink password must never cross the internet in clear text, and the Lavalink ports must never be public. A WireGuard link (10.77.0.0/24) joins the VPS (10.77.0.1, listening on UDP 51820) with production (10.77.0.2) and staging (10.77.0.3); the VPS firewall limits each peer to its own Lavalink port.",
+      "description": "The Lavalink password must never cross the internet in clear text, and the Lavalink ports must never be public. A WireGuard link (10.77.0.0/24) joins the Lavalink host (10.77.0.1, listening on UDP 51820) with production (10.77.0.2) and staging (10.77.0.3); the Lavalink host firewall limits each peer to its own Lavalink port.",
       "model": "medium",
       "assignee": null,
       "claimed_at": null,
@@ -7105,7 +7105,7 @@
       "acceptance": [
         "bootstrap.sh takes --role app|lavalink (default app). The app role enables the backup and watchdog timers; the lavalink role enables only the watchdog, creates no backup directories, and takes --deploy-key-staging and --deploy-key-production instead of --deploy-key.",
         "Both roles install wireguard-tools, create /etc/wireguard/private.key (0600) once and print the public key. When /etc/ririko/ririko.conf has WG_ADDRESS and WG_PEERS, they render /etc/wireguard/wg0.conf (0600) and enable wg-quick@wg0. The app role peer has PersistentKeepalive 25 and AllowedIPs 10.77.0.1/32; the lavalink role listens on WG_LISTEN_PORT (default 51820) with one /32 per peer.",
-        "The lavalink role installs an nftables table inet ririko (it never flushes the whole ruleset, which would remove Docker’s rules): input policy drop; allow loopback, established and related, ICMP echo rate-limited, UDP WG_LISTEN_PORT only from WG_ALLOWED_ENDPOINTS (the Lightsail static IPs); on wg0 allow TCP 2333 only from 10.77.0.2 and TCP 2334 only from 10.77.0.3. It checks the file with nft -c before loading.",
+        "The lavalink role installs an nftables table inet ririko (it never flushes the whole ruleset, which would remove Docker’s rules): input policy drop; allow loopback, established and related, ICMP echo rate-limited, UDP WG_LISTEN_PORT only from WG_ALLOWED_ENDPOINTS (the app hosts' static IPs); on wg0 allow TCP 2333 only from 10.77.0.2 and TCP 2334 only from 10.77.0.3. It checks the file with nft -c before loading.",
         "In the lavalink role, authorized_keys for deploy has two keys: restrict,command=\"/usr/local/bin/ririko-deploy-ssh production\" and restrict,command=\"/usr/local/bin/ririko-deploy-ssh staging\", so each CI context can only deploy its own instance.",
         "The WireGuard and nftables rendering live in deploy/host/lib/*.sh functions; scripts/deploy-host.test.ts renders both from sample configs and checks the output, and checks that a peer list with a malformed key or address is refused."
       ],
@@ -8189,14 +8189,14 @@
       "parent": "STORY-187",
       "title": "Scrub Private Hosting Details From the Working Tree",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Find and remove private hosting details from every tracked file: live IPs, *.ririko.ai hostnames other than ririko.ai and dashboard.ririko.ai, the cloud provider and VPS provider names, regions, instance sizes and RAM, bucket names, WireGuard or host keys, ping URLs. Includes docs, board.json descriptions, handover notes, tests, examples and comments.",
       "context": {
         "files": [
           "docs/",
           "docs/kanban/board.json",
           "docs/kanban/handovers/",
-          "docs/adr/ADR-014-production-hosting-lightsail-cloudflare-tunnel.md",
+          "docs/adr/ADR-014-production-hosting-cloudflare-tunnel.md",
           "docs/deployment.md",
           "deploy/",
           "scripts/",
@@ -8540,7 +8540,7 @@
       "title": "Deploy the Site to GitHub Pages on ririko.ai, Serve the Install Files, Retire the Vercel Status Page",
       "points": 2,
       "status": "TODO",
-      "description": "ririko.ai currently answers Cloudflare 530 and install.ririko.ai (used by the 1.x README) is dead. Publish the docs site with GitHub Pages on ririko.ai, serve the install files from it, and retire the Vercel status page.",
+      "description": "ririko.ai currently answers Cloudflare 530 and the old install domain (used by the 1.x README) is dead. Publish the docs site with GitHub Pages on ririko.ai, serve the install files from it, and retire the Vercel status page.",
       "context": {
         "files": [
           ".github/workflows/",
@@ -8643,7 +8643,7 @@
         ".all-contributorsrc from master (3 contributors) is added unchanged, with the ALL-CONTRIBUTORS-BADGE and ALL-CONTRIBUTORS-LIST markers in the README; the maintainer installs the all-contributors GitHub app.",
         "A quick start of at most 5 numbered steps, using ririko.ai/install files, ends with the bot online; everything else links to ririko.ai docs.",
         "The promotional feature image from TASK-1903 sits at the top; no hotlinked images.",
-        "No 1.x-only content (Render button, Heroku, wiki links, install.ririko.ai).",
+        "No 1.x-only content (Render button, Heroku, wiki links, the old install domain).",
         "No Render deploy button (maintainer, 2026-10-11)."
       ],
       "verify_cmd": "pnpm format:check && pnpm lint --quiet"
@@ -8771,7 +8771,9 @@
     },
     {
       "children": [],
-      "requires": [],
+      "requires": [
+        "TASK-1872"
+      ],
       "blocks": [],
       "assignee": null,
       "claimed_at": null,

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prepares an Ubuntu 24.04 host (AWS Lightsail app host, or the Lavalink VPS) to run Ririko, and
+# Prepares an Ubuntu 24.04 host (an app host, or the Lavalink host) to run Ririko, and
 # updates the host scripts on it. Safe to run again: every step checks the current state first and
 # changes only what differs.
 # Usage and what it does: docs/deployment.md, or run it with --help.
@@ -20,9 +20,9 @@ changes only what differs from the state it describes.
 Options:
   --ref <tag|branch>          Git ref of RirikoAI/RirikoBot to take deploy/host from
                               (for example v2.0.0 or develop/2.0.0). Required.
-  --role app|lavalink         app (default): a Lightsail host that runs the bot stack. Enables the
+  --role app|lavalink         app (default): a host that runs the bot stack. Enables the
                               backup and watchdog timers.
-                              lavalink: the Lavalink VPS. Enables only the watchdog timer, creates
+                              lavalink: the Lavalink host. Enables only the watchdog timer, creates
                               no backup directories, and installs the "inet ririko" firewall
                               (default drop; WireGuard and the per-peer Lavalink ports only).
   --deploy-key "<key>"        SSH public key CI uses to deploy (role app only). Written to the
