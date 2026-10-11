@@ -115,7 +115,7 @@ Create a feature inventory containing:
 
 Also create:
 
-`docs/legacy-feature-inventory.md`
+`docs/archive/legacy-feature-inventory.md`
 
 This document must be the authoritative checklist for feature parity.
 
@@ -2049,7 +2049,7 @@ This is extremely important.
 
 Create:
 
-`docs/migration-1.x-to-2.0.md`
+`docs/archive/migration-1.x-to-2.0.md`
 
 The migration strategy must explain:
 
@@ -3210,13 +3210,13 @@ Your FIRST major task is NOT to build the entire bot.
 Your first task is to create:
 
 ```text
-docs/legacy-feature-inventory.md
+docs/archive/legacy-feature-inventory.md
 docs/architecture.md
-docs/migration-1.x-to-2.0.md
-docs/dependency-evaluation.md
-docs/implementation-roadmap.md
+docs/archive/migration-1.x-to-2.0.md
+docs/archive/dependency-evaluation.md
+docs/archive/implementation-roadmap.md
 
-docs/adr/
+docs/archive/adr/
 ```
 
 plus:

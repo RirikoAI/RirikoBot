@@ -1,6 +1,6 @@
 /**
  * One versioned schema migration, embedded in code by `pnpm -F @ririko/database
- * db:generate-migrations` from `migrations/{sqlite,pg}/NNNN_<slug>.sql` (docs/adr/ADR-015).
+ * db:generate-migrations` from `migrations/{sqlite,pg}/NNNN_<slug>.sql` (docs/archive/adr/ADR-015).
  */
 export interface EmbeddedMigration {
   /** The file name without `.sql`, for example `0000_baseline`. Migrations apply in this order. */

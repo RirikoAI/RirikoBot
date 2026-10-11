@@ -1,7 +1,7 @@
 import type { EconomyConfig } from '@ririko/core';
 
 /**
- * Standard economy event types matching Section 33 of BLUEPRINT.md
+ * Standard economy event types matching Section 33 of docs/archive/BLUEPRINT.md
  * and Section 2 of docs/economy.md.
  */
 export enum EconomyEventType {

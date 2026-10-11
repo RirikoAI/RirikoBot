@@ -1,8 +1,8 @@
 # Plan: Companion-Level Adventure Reward Ranks
 
-Status: **Implemented locally** (2026-09-27), TASK-1708–TASK-1711. The user requested ten times the proposed percentage bonuses: 0/50/100/150/200/300/400/500%. Applies to all 35 adventures. Live PostgreSQL/Discord checks remain pending. See [verification handover](kanban/handovers/TASK-1711.md).
+Status: **Implemented locally** (2026-09-27), TASK-1708–TASK-1711. The user requested ten times the proposed percentage bonuses: 0/50/100/150/200/300/400/500%. Applies to all 35 adventures. Live PostgreSQL/Discord checks remain pending. See [verification handover](../kanban/handovers/TASK-1711.md).
 
-Completion follow-up: **economy version 2** (TASK-1713–TASK-1715) adds companion XP, failure progression, stronger card acquisition and tower-calibrated ordinary rewards. The [completion policy](adventure-completion-rewards.md) is authoritative for new admissions; old sessions retain their original rules. Rank multipliers remain version 1.
+Completion follow-up: **economy version 2** (TASK-1713–TASK-1715) adds companion XP, failure progression, stronger card acquisition and tower-calibrated ordinary rewards. The [completion policy](../adventure-completion-rewards.md) is authoritative for new admissions; old sessions retain their original rules. Rank multipliers remain version 1.
 
 ## Player experience
 
@@ -71,7 +71,7 @@ At rank B, a run earning 300 eligible credits, with 50 actual involuntary losses
 
 ## Contracts, persistence and integration
 
-Current integration points: [types](../packages/services/src/adventure/types.ts), [engine](../packages/services/src/adventure/adventure-engine.ts), [payout service](../packages/services/src/adventure/adventure-payout.service.ts), [command](../apps/bot/src/commands/games/adventure.command.ts), [view](../apps/bot/src/commands/games/adventure-view.ts), and [session repository](../packages/database/src/repositories/adventure-session.repository.ts).
+Current integration points: [types](../../packages/services/src/adventure/types.ts), [engine](../../packages/services/src/adventure/adventure-engine.ts), [payout service](../../packages/services/src/adventure/adventure-payout.service.ts), [command](../../apps/bot/src/commands/games/adventure.command.ts), [view](../../apps/bot/src/commands/games/adventure-view.ts), and [session repository](../../packages/database/src/repositories/adventure-session.repository.ts).
 
 1. Add a pure, versioned `reward-rank.ts` policy with rank definitions, rank lookup, amount calculation and chance calculation. Define contracts before wiring behavior. Keep UI labels and calculations on the same table.
 2. Extend new companion snapshots with explicit `userCardId` and `level`. Read the level from the equipped ownership record, alongside the existing loadout-derived stats, not from the player account, display name or command arguments. Capture the companion once for admission; changing equipment or leveling afterward does not change the frozen reward budget. Trading/dismantling can make the original companion ineligible for XP at settlement; XP is never redirected. Resolve the snapshot through a server-side admission callback using the admission transaction, validating current ownership/equipped state before charging, rather than trusting a stale pre-admission lookup.
@@ -109,4 +109,4 @@ Implemented sequentially as TASK-1708 (3), TASK-1709 (5), TASK-1710 (2) and TASK
 - Review guaranteed rare-card paths and routes selectable repeatedly by scenario ID. The existing 15-minute fallback cooldown and energy regeneration still constrain frequency; measure inflation across representative route choices before release. The explicit completion-economy follow-up supersedes authored amount totals using the documented calibration; old sessions remain unchanged.
 - Run focused rank/engine/payout/command tests, then `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` and formatting checks. Record pre-existing unrelated failures separately. Smoke-test rank changes across two new runs and frozen behavior within one run in Discord before rollout.
 
-The +500% ceiling is the user-requested tenfold increase over the initial proposal. A [seeded balance report](adventure-reward-balance.md) compares all ranks and stories; these estimates do not replace live economy observations. The implementation uses a single global policy; guild-specific multipliers, rarity upgrades and rank-specific artwork are outside this plan.
+The +500% ceiling is the user-requested tenfold increase over the initial proposal. A [seeded balance report](../adventure-reward-balance.md) compares all ranks and stories; these estimates do not replace live economy observations. The implementation uses a single global policy; guild-specific multipliers, rarity upgrades and rank-specific artwork are outside this plan.

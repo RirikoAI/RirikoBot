@@ -1,7 +1,7 @@
 # AI Chatbot 2.0 Subsystem Specification
 
 ## 1. Overview & Core Philosophy
-Ririko AI 2.0.0 transforms the legacy in-memory chat array into a persistent, multi-provider conversational intelligence engine. It enforces strict context isolation, configurable guild personalities, deterministic utility tools (including an explicit clock tool), and safe tool-calling guardrails as mandated by Sections 11 and 74 of `BLUEPRINT.md`.
+Ririko AI 2.0.0 transforms the legacy in-memory chat array into a persistent, multi-provider conversational intelligence engine. It enforces strict context isolation, configurable guild personalities, deterministic utility tools (including an explicit clock tool), and safe tool-calling guardrails as mandated by Sections 11 and 74 of `docs/archive/BLUEPRINT.md`.
 
 ---
 
@@ -74,7 +74,7 @@ The bot passes the resulting list both to the tool registry (so the model is onl
 
 ## 5. Security & Application Mediation Boundaries
 
-In strict compliance with Section 74 of `BLUEPRINT.md`: **The LLM is NEVER the security boundary.**
+In strict compliance with Section 74 of `docs/archive/BLUEPRINT.md`: **The LLM is NEVER the security boundary.**
 When the LLM outputs a tool call, the core application mediates and verifies:
 1. Does the calling user possess the requisite Discord permission?
 2. Is the target module currently enabled for this guild?

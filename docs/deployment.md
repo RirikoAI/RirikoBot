@@ -1,7 +1,7 @@
 # Production Deployment & Infrastructure Runbook (Ririko AI 2.0.0)
 
 ## 1. Overview & Sane Infrastructure Defaults
-In strict accordance with Section 68 and 69 of `BLUEPRINT.md`: **Do not over-engineer deployment.**
+In strict accordance with Section 68 and 69 of `docs/archive/BLUEPRINT.md`: **Do not over-engineer deployment.**
 - Ririko AI 2.0.0 avoids excessive cloud microservices, Kubernetes clusters, and message bus sprawl.
 - The standard production deployment consists of two containerized applications (`bot` and `web`), a PostgreSQL database, and a Lavalink audio node. There is no Redis: nothing in 2.0 needs one.
 - Self-hosters can run the entire platform on a single lightweight VPS using SQLite and local audio extraction without Docker dependencies if desired.
@@ -197,7 +197,7 @@ While migrations are pending, `/health` stays 200 and reports `database: { statu
 
 ## 4. Current Hosting
 
-Production and staging run on managed VMs behind Cloudflare Tunnel, with Lavalink on a separate host over WireGuard and releases deployed by CircleCI. The step-by-step setup (provider resources, tunnels and access policies, host configuration, CI contexts, go-live, recovery and the secret inventory) is the private hosting runbook, `docs/hosting.md`, which is not in the repository because it holds account and network details. The decision and the rejected options are in [ADR-014](adr/ADR-014-production-hosting-cloudflare-tunnel.md); the release pipeline and its exit codes are in [release.md section 8](release.md#8-deploy-to-staging-and-production).
+Production and staging run on managed VMs behind Cloudflare Tunnel, with Lavalink on a separate host over WireGuard and releases deployed by CircleCI. The step-by-step setup (provider resources, tunnels and access policies, host configuration, CI contexts, go-live, recovery and the secret inventory) is the private hosting runbook, `docs/hosting.md`, which is not in the repository because it holds account and network details. The decision and the rejected options are in [ADR-014](archive/adr/ADR-014-production-hosting-cloudflare-tunnel.md); the release pipeline and its exit codes are in [release.md section 8](release.md#8-deploy-to-staging-and-production).
 
 The Vercel project `ririko-bot` still deploys a static project status page (it hosts neither the bot nor the dashboard):
 - `vercel.json` skips dependency installation and runs `scripts/build-status-site.ts` with Node's TypeScript type stripping. The script reads `docs/kanban/board.json` and the `docs/` tree and writes `site-dist/index.html`.

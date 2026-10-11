@@ -51,7 +51,7 @@ To support both enterprise cloud deployments and zero-configuration local develo
 
 ## 2. Complete Schema Catalog (40+ Tables)
 
-As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesive domain table groups:
+As mandated by Section 47 of `docs/archive/BLUEPRINT.md`, the database is divided into cohesive domain table groups:
 
 ### 2.1. Core Identity & Discord Guilds
 - `users`: Universal Discord user registry (`id` Snowflake PK, `username`, `display_name`, `avatar_url`, `profile_background_url`, `is_blacklisted`, `warn_count`, `notify_level_up`, `created_at`, `updated_at`).
@@ -157,7 +157,7 @@ As mandated by Section 47 of `BLUEPRINT.md`, the database is divided into cohesi
 - `audit_logs`: Security and administrative action audit trails (`id` UUID PK, `guild_id`, `actor_user_id`, `action`, `details` JSON, `ip_address`, `user_agent`, `created_at`). `GuildConfigService` writes `guild_config.<module>.update` entries with `details = { source: 'dashboard' | 'cli', changes: [{ field, before, after }] }`.
 
 ### 2.15. Web Dashboard (EPIC-011)
-`web_sessions`, `web_passkeys`, `web_known_devices`, `guild_config_versions`, `command_usage_daily`, `bot_status` and `guild_voice_activity` exist. The other tables are the groomed design from [docs/dashboard.md](file:///Z:/Projects/ririko-v2-2026/docs/dashboard.md) and [ADR-013](file:///Z:/Projects/ririko-v2-2026/docs/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md); final names are set when the tickets are implemented.
+`web_sessions`, `web_passkeys`, `web_known_devices`, `guild_config_versions`, `command_usage_daily`, `bot_status` and `guild_voice_activity` exist. The other tables are the groomed design from [docs/dashboard.md](file:///Z:/Projects/ririko-v2-2026/docs/dashboard.md) and [ADR-013](file:///Z:/Projects/ririko-v2-2026/docs/archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md); final names are set when the tickets are implemented.
 - `web_sessions` (TASK-1102): Opaque server-side dashboard sessions. The primary key `id` is the SHA-256 hash (hex) of the session cookie; the raw value exists only in the `__Host-ririko_session` cookie. Columns: `user_id`, `created_at`, `last_seen_at`, `expires_at` (12 h absolute), `ip_address`, `user_agent`, `step_up_at`, `discord_access_token` and `discord_refresh_token` (AES-256-GCM ciphertexts in the `v<key version>.<iv>.<tag>.<data>` format, bound to the row as additional authenticated data), and `discord_token_expires_at`. The key version is part of each ciphertext, so there is no separate `key_version` column. Indexes on `user_id` (for "sign out everywhere") and `expires_at` (expiry cleanup). `webauthn_challenge` (`<purpose>:<challenge>`) and `webauthn_challenge_expires_at` hold the pending WebAuthn challenge, cleared by the single update that consumes it (TASK-1171).
 - `guild_config_versions` (CHORE-1101): Change feed for settings written outside the bot process. Primary key (`guild_id`, `module`), `version` (incremented on every write), `updated_at` (indexed). The dashboard and CLI bump it in the same transaction as the settings write; the bot's `GuildConfigWatcher` polls recent rows and emits `guild:configChanged`.
 - `web_passkeys` (TASK-1171): WebAuthn credentials per user. `id` is the credential ID (base64url); `user_id` (indexed), `name`, `public_key` (COSE, base64url), `counter`, `transports` (JSON), `device_type` (`singleDevice` or `multiDevice`), `backed_up`, `created_at`, `last_used_at`. Only public keys are stored.

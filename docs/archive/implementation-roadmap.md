@@ -85,12 +85,12 @@ gantt
 ### Phase 0: Discovery, Architecture & Agent Definitions
 - **Status**: ✅ **Complete** (`EPIC-000`, 13 pts base / 21 pts groomed)
 - **Deliverables**:
-  - [docs/legacy-feature-inventory.md](file:///z:/Projects/ririko-v2-2026/docs/legacy-feature-inventory.md) (141 commands & 17 entities audited from 1.4.0).
+  - [docs/archive/legacy-feature-inventory.md](file:///z:/Projects/ririko-v2-2026/docs/archive/legacy-feature-inventory.md) (141 commands & 17 entities audited from 1.4.0).
   - [docs/architecture.md](file:///z:/Projects/ririko-v2-2026/docs/architecture.md) (Clean architecture, monorepo topology, O(1) command router).
-  - [docs/migrations.md](file:///z:/Projects/ririko-v2-2026/docs/migrations.md) and [docs/dependency-evaluation.md](file:///z:/Projects/ririko-v2-2026/docs/dependency-evaluation.md).
+  - [docs/migrations.md](file:///z:/Projects/ririko-v2-2026/docs/migrations.md) and [docs/archive/dependency-evaluation.md](file:///z:/Projects/ririko-v2-2026/docs/archive/dependency-evaluation.md).
   - [docs/waifu-tcg.md](file:///z:/Projects/ririko-v2-2026/docs/waifu-tcg.md) (Comprehensive 15-subsystem flagship specification).
   - [docs/database.md](file:///z:/Projects/ririko-v2-2026/docs/database.md), [docs/commands.md](file:///z:/Projects/ririko-v2-2026/docs/commands.md), [docs/economy.md](file:///z:/Projects/ririko-v2-2026/docs/economy.md), [docs/dashboard.md](file:///z:/Projects/ririko-v2-2026/docs/dashboard.md), [docs/adapters.md](file:///z:/Projects/ririko-v2-2026/docs/adapters.md), [docs/ai.md](file:///z:/Projects/ririko-v2-2026/docs/ai.md), [docs/music.md](file:///z:/Projects/ririko-v2-2026/docs/music.md), [docs/moderation.md](file:///z:/Projects/ririko-v2-2026/docs/moderation.md), [docs/modules.md](file:///z:/Projects/ririko-v2-2026/docs/modules.md).
-  - [docs/adr/](file:///z:/Projects/ririko-v2-2026/docs/adr/) (ADR-001 through ADR-012).
+  - [docs/archive/adr/](file:///z:/Projects/ririko-v2-2026/docs/archive/adr/) (ADR-001 through ADR-012).
   - `GEMINI.md`, `AGENTS.md`, and 18 specialist agent definitions in `.gemini/agents/`.
   - Scrum Kanban Governance system ([docs/kanban/protocol.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/protocol.md), [docs/kanban/BOARD.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/BOARD.md), [docs/kanban/board.json](file:///z:/Projects/ririko-v2-2026/docs/kanban/board.json)).
 - **Exit Gate**: All architectural decisions documented, approved, and registered in canonical board.
@@ -273,7 +273,7 @@ TOTAL:    [===================.]  96% (485/506 pts) Overall Project Completion
 ---
 
 ## References & Key Documentation
-- Master Platform Specification: [BLUEPRINT.md](file:///z:/Projects/ririko-v2-2026/BLUEPRINT.md)
+- Master Platform Specification: [BLUEPRINT.md](file:///z:/Projects/ririko-v2-2026/docs/archive/BLUEPRINT.md)
 - Scrum Kanban Governance Protocol: [docs/kanban/protocol.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/protocol.md)
 - Canonical Kanban Database: [docs/kanban/board.json](file:///z:/Projects/ririko-v2-2026/docs/kanban/board.json)
 - Live Scrum Kanban Board: [docs/kanban/BOARD.md](file:///z:/Projects/ririko-v2-2026/docs/kanban/BOARD.md)

@@ -8279,7 +8279,7 @@
       "parent": "STORY-188",
       "title": "Move Planning and Decision Records to docs/archive and Fix Every Link",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "description": "BLUEPRINT.md, the ADRs and the development plans are history, not user docs. Move them to docs/archive/ with a short index, so the user docs stay focused. AGENTS.md keeps pointing agents at them by their new paths.",
       "context": {
         "files": [

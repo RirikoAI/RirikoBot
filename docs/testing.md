@@ -1,7 +1,7 @@
 # Testing Strategy & Quality Assurance (Ririko AI 2.0.0)
 
 ## 1. Overview & Quality Gates
-In accordance with Sections 55 and 56 of `BLUEPRINT.md`, Ririko AI 2.0.0 enforces strict automated testing before any feature or milestone is marked complete. TypeScript compilation is a minimum prerequisite, not proof of correctness.
+In accordance with Sections 55 and 56 of `docs/archive/BLUEPRINT.md`, Ririko AI 2.0.0 enforces strict automated testing before any feature or milestone is marked complete. TypeScript compilation is a minimum prerequisite, not proof of correctness.
 
 ### Required Quality Gate:
 ```bash

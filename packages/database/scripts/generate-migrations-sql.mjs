@@ -5,7 +5,7 @@
 //   pnpm -F @ririko/database db:generate-sql [--name <migration name>]
 //
 // With no changes to a schema drizzle-kit writes nothing. Review the generated SQL before
-// committing it; committed migrations are never edited (docs/adr/ADR-015).
+// committing it; committed migrations are never edited (docs/archive/adr/ADR-015).
 /* global console, process */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';

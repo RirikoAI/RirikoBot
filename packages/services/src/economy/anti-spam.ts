@@ -82,7 +82,7 @@ interface ResolvedAntiSpamConfig {
 }
 
 /**
- * Anti-Spam Evaluator implementing Section 34 of BLUEPRINT.md:
+ * Anti-Spam Evaluator implementing Section 34 of docs/archive/BLUEPRINT.md:
  * - 60s rolling window reward cooldown per user per guild
  * - Levenshtein similarity filter (>80% similarity against recent 3 messages = 0 XP)
  * - Message quality & minimum length threshold (<5 non-whitespace chars = 0 XP)

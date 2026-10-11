@@ -11,7 +11,7 @@ export interface CardAttribution {
 }
 
 /**
- * Generates card attribution in strict compliance with Section 24 of BLUEPRINT.md.
+ * Generates card attribution in strict compliance with Section 24 of docs/archive/BLUEPRINT.md.
  * Footer MUST display: 'Image source: waifu.im' (or configured source attribution).
  */
 export function getCardAttribution(source?: WaifuSource | null): CardAttribution {

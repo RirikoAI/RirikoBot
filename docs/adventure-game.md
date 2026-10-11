@@ -12,9 +12,9 @@
 - Each decision has a 90-second deadline. Timeout or abandonment grants no pending rewards, discards pending involuntary penalties, and refunds **7 energy** if entry consumed 15.
 - Involuntary credit losses cannot make a wallet negative. Voluntary prices require full payment and cannot use the loss clamp.
 
-The execution plan is [adventure_game_plan.md](adventure_game_plan.md). This specification defines the authoritative gameplay semantics.
+The execution plan is [adventure_game_plan.md](archive/adventure_game_plan.md). This specification defines the authoritative gameplay semantics.
 
-New sessions also use [companion reward ranks](adventure-reward-ranks-plan.md), implemented with user-requested bonuses up to +500%. This policy scales eligible amounts and relative drop chances before settlement, preserving existing session payouts and fixed wagers.
+New sessions also use [companion reward ranks](archive/adventure-reward-ranks-plan.md), implemented with user-requested bonuses up to +500%. This policy scales eligible amounts and relative drop chances before settlement, preserving existing session payouts and fixed wagers.
 
 ## 2. Architecture and contracts
 
@@ -310,7 +310,7 @@ Manual verification uses `pnpm dev:bot`: check decision counts, `/balance`, `/ca
 
 ## 7. Proposed implementation breakdown
 
-These tasks are registered under `STORY-170`. TASK-1701 through TASK-1704 and follow-ups TASK-1706–TASK-1715 are DONE. TASK-1705 remains in REVIEW for live PostgreSQL/Discord verification. See [implementation status](adventure_game_plan.md#implementation-status--2026-09-26) and the [verification handover](kanban/handovers/TASK-1705.md). Revised estimates include durable locking, transaction receipts, shared card-minting safeguards and scene artwork. Individual estimates are Fibonacci values; 67 is the summed task total.
+These tasks are registered under `STORY-170`. TASK-1701 through TASK-1704 and follow-ups TASK-1706–TASK-1715 are DONE. TASK-1705 remains in REVIEW for live PostgreSQL/Discord verification. See [implementation status](archive/adventure_game_plan.md#implementation-status--2026-09-26) and the [verification handover](kanban/handovers/TASK-1705.md). Revised estimates include durable locking, transaction receipts, shared card-minting safeguards and scene artwork. Individual estimates are Fibonacci values; 67 is the summed task total.
 
 | Ticket | Points | Deliverable |
 |---|---:|---|

@@ -10,7 +10,7 @@ import { resolveCardAssetDisplay, SILHOUETTE_FALLBACK_URL } from '../silhouette.
 import type { WaifuAsset, WaifuSource } from '../types.js';
 
 describe('Waifu TCG Section 24 Attribution & Soft-Deletion Silhouette (TASK-1002)', () => {
-  describe('Section 24 Attribution Rules (BLUEPRINT.md:L1260-1280)', () => {
+  describe('Section 24 Attribution Rules (docs/archive/BLUEPRINT.md:L1260-1280)', () => {
     it('should return mandatory default attribution when source is undefined or null', () => {
       const defaultAttr = getCardAttribution(undefined);
       expect(defaultAttr.footerText).toBe('Image source: waifu.im');

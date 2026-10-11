@@ -106,7 +106,7 @@ See [SETUP.md](SETUP.md#11-useful-scripts) for the full list.
 - [docs/deployment.md](docs/deployment.md): production deployment
 - [docs/migrations.md](docs/migrations.md): migrating from 1.4.0
 - [docs/kanban/protocol.md](docs/kanban/protocol.md): Kanban workflow (WIP limit 1)
-- [BLUEPRINT.md](BLUEPRINT.md): full 2.0.0 blueprint
+- [docs/archive/BLUEPRINT.md](docs/archive/BLUEPRINT.md): full 2.0.0 blueprint
 
 ## Security
 

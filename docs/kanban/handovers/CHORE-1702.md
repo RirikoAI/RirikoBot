@@ -6,7 +6,7 @@
 
 ## Work completed
 
-Created [the reward-rank plan](../../adventure-reward-ranks-plan.md) and linked it from [the adventure implementation plan](../../adventure_game_plan.md). Reviewed current companion capture, rank-relevant card level caps, reward accumulation/RNG, atomic payout, JSON session persistence and the simplified Discord views.
+Created [the reward-rank plan](../../archive/adventure-reward-ranks-plan.md) and linked it from [the adventure implementation plan](../../archive/adventure_game_plan.md). Reviewed current companion capture, rank-relevant card level caps, reward accumulation/RNG, atomic payout, JSON session persistence and the simplified Discord views.
 
 Proposed eight ranks F–S+ at levels 1/10/20/30/40/60/80/100, scaling earned credits/player XP/dust and relative item/card drop chances up to +50%. Defined exclusions for energy, costs, losses, guaranteed quantities and fixed wagers; integer rounding, frozen policy snapshots, recovery and old-session compatibility. Preserved the story-focused UI with a compact rank line and optional rank help. Proposed four sequential implementation packages totaling 13 points, with reproducible balance checks and explicit acceptance criteria.
 

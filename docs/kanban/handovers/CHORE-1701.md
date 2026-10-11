@@ -7,7 +7,7 @@
 
 ## 1. Work completed
 
-- Revised [adventure-game.md](../../adventure-game.md) and [adventure_game_plan.md](../../adventure_game_plan.md) for the four user-requested corrections.
+- Revised [adventure-game.md](../../adventure-game.md) and [adventure_game_plan.md](../../archive/adventure_game_plan.md) for the four user-requested corrections.
 - Replaced shortcut/early-terminal graphs with explicit staged choices: Bazaar/Shrine/Peaks require 5 decisions; Crypt/Ambush require 4. All decision nodes offer 2–4 actions and a free ungated alternative.
 - Specified durable global adventure ownership by Discord user ID, admission/revision races, receipts, recovery, and cancellation. Existing mini-game per-channel semantics remain unchanged.
 - Replaced the invalid asset-randomization example with active card catalog pagination, explicit rarity floors and weighted tier selection, correct card-definition ownership IDs, and planned shared serial-allocation safeguards.

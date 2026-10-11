@@ -22,7 +22,7 @@ Use `/adventure action:ranks` or `!adv ranks` for the table without starting a r
 
 New runs use [completion economy version 2](adventure-completion-rewards.md): every completed ending, including failures, pays progression rewards. Rank E targets about 10% better ordinary rewards per net energy than repeat floor 34, including failed routes and paid choices. Completion restoration is capped at seven energy. New card opportunities have base chances of 20% for success, 15% for mixed and 10% for failure; newly added success/mixed drops have a RARE floor and failures UNCOMMON. Existing authored rarity floors and guaranteed drops remain. Companion XP goes to the original owned card, clipped to its level cap; unavailable companions are skipped with a summary notice. Cancellation gives no XP.
 
-See the [rank policy](adventure-reward-ranks-plan.md) and [balance comparison](adventure-reward-balance.md).
+See the [rank policy](archive/adventure-reward-ranks-plan.md) and [balance comparison](adventure-reward-balance.md).
 
 ## Server configuration and costs
 

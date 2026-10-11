@@ -1,7 +1,7 @@
 # Data Migration Manual: Ririko 1.4.0 to 2.0.0
 
 ## 1. Migration Philosophy & Invariants
-In accordance with Section 85 of `BLUEPRINT.md`: **The legacy bot is valuable production data.**
+In accordance with Section 85 of `docs/archive/BLUEPRINT.md`: **The legacy bot is valuable production data.**
 - Under no circumstances should users be told to "start over in 2.0".
 - All user account balances, accumulated XP/Karma, guild configurations, reaction roles, Twitch subscriptions, and custom profile backgrounds MUST be migrated with **zero data loss**.
 - The migration process must be idempotent, non-destructive, and testable via dry-run mode before execution.
