@@ -2612,7 +2612,7 @@
       "id": "STORY-187",
       "title": "Privacy and Secret Audit Before 2.0.0 Goes Public on master",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "description": "The repository is public and master will be the face of the project. Remove private hosting details (live IPs, hostnames other than the product domains, providers, regions, instance sizes, keys, ping URLs) from the tree and report what history and GitHub text still hold, before anything else lands on master.",
       "context": {
         "files": [
@@ -8239,7 +8239,7 @@
       "parent": "STORY-187",
       "title": "Audit Git History, Tags and GitHub Text for Leaked Private Details; Report and Clean .gitleaksignore",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "description": "The tree is clean after TASK-1871, but history, tags, PR and issue bodies, commit messages, Docker Hub descriptions and the Vercel status site may still hold private details. Produce a report so the maintainer can decide on a history rewrite or edits; never rewrite history or edit GitHub text in this ticket.",
       "context": {
         "files": [

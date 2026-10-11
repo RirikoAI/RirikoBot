@@ -16,12 +16,10 @@
 ## 🎯 To Do
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
-| `STORY-187` | Story | Privacy and Secret Audit Before 2.0.0 Goes Public on master | 5 | EPIC-020 | — | yes | large |
-| `STORY-188` | Story | Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps | 13 | EPIC-020 | STORY-187 | blocked | large |
+| `STORY-188` | Story | Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps | 13 | EPIC-020 | STORY-187 | yes | large |
 | `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 13 | EPIC-020 | STORY-188 | blocked | large |
 | `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | blocked | large |
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188 | blocked | large |
-| `TASK-1872` | Task | Audit Git History, Tags and GitHub Text for Leaked Private Details; Report and Clean .gitleaksignore | 2 | STORY-187 | TASK-1871 | yes | medium |
 | `TASK-1881` | Task | Move Planning and Decision Records to docs/archive and Fix Every Link | 3 | STORY-188 | TASK-1871 | yes | medium |
 | `TASK-1882` | Task | Rewrite the Self-Host and Operator Docs as Deterministic, Current Procedures | 5 | STORY-188 | TASK-1881 | blocked | medium |
 | `TASK-1883` | Task | Rewrite the Feature Docs for Server Admins and Players | 5 | STORY-188 | TASK-1881 | blocked | medium |
@@ -31,7 +29,7 @@
 | `TASK-1894` | Task | Migrate the GitHub Wiki Into the Docs and Leave a Pointer Page | 2 | STORY-189 | TASK-1891 | blocked | medium |
 | `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | TASK-1881 | blocked | medium |
 | `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | — | yes | medium |
-| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872 | blocked | medium |
+| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872 | yes | medium |
 | `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | — | yes | medium |
 | `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | — | yes | medium |
 | `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | — | yes | small |
@@ -150,6 +148,7 @@
 | `STORY-184` | Story | Accountable Server Inviters: Invite Through the Dashboard and Show Who to Contact | 8 | EPIC-018 | [STORY-184.md](./handovers/STORY-184.md) |
 | `STORY-185` | Story | Versioned Forward-Only Schema Migrations With One-Time Baseline Adoption | 13 | EPIC-019 | [STORY-185.md](./handovers/STORY-185.md) |
 | `STORY-186` | Story | Host Deploys Apply Migrations as a Gated Step (Staging First) | 8 | EPIC-019 | [STORY-186.md](./handovers/STORY-186.md) |
+| `STORY-187` | Story | Privacy and Secret Audit Before 2.0.0 Goes Public on master | 5 | EPIC-020 | [STORY-187.md](./handovers/STORY-187.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -388,6 +387,7 @@
 | `TASK-1861` | Task | ririko-deploy Runs ririko db:migrate From the New Image Before Starting It | 5 | STORY-186 | [TASK-1861.md](./handovers/TASK-1861.md) |
 | `TASK-1862` | Task | Release Runbook: Migrations, Failure Recovery From the Pre-Deploy Dump, and Staging Adoption Checklist | 3 | STORY-186 | [TASK-1862.md](./handovers/TASK-1862.md) |
 | `TASK-1871` | Task | Scrub Private Hosting Details From the Working Tree | 3 | STORY-187 | [TASK-1871.md](./handovers/TASK-1871.md) |
+| `TASK-1872` | Task | Audit Git History, Tags and GitHub Text for Leaked Private Details; Report and Clean .gitleaksignore | 2 | STORY-187 | [TASK-1872.md](./handovers/TASK-1872.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
