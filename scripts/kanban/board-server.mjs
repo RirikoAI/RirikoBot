@@ -98,12 +98,12 @@ const server = http.createServer((req, res) => {
 let port = basePort;
 let triesLeft = 10;
 server.on('error', (e) => {
-  if (e.code === 'EADDRINUSE' && triesLeft-- > 0) return server.listen(++port, '127.0.0.1');
+  if (e.code === 'EADDRINUSE' && triesLeft-- > 0) return server.listen(++port, '10.0.0.31');
   console.error(e.message);
   process.exit(1);
 });
 server.on('listening', () => {
-  const url = `http://127.0.0.1:${server.address().port}/`;
+  const url = `http://10.0.0.31:${server.address().port}/`;
   const rel = path.relative(process.cwd(), boardPath);
   if (port !== basePort) console.log(`Ports ${basePort}-${port - 1} are in use (another board server may still be running).`);
   console.log(`Kanban board: ${url}  (reading ${rel.startsWith('..') ? boardPath : rel}; Ctrl+C to stop)`);
@@ -113,4 +113,4 @@ server.on('listening', () => {
     spawn(cmd, cmdArgs, { stdio: 'ignore', detached: true }).on('error', () => {}).unref();
   }
 });
-server.listen(port, '127.0.0.1');
+server.listen(port, '10.0.0.31');

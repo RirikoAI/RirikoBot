@@ -471,9 +471,11 @@
         "STORY-189",
         "STORY-190",
         "STORY-191",
+        "STORY-192",
         "CHORE-2001",
         "CHORE-2002",
         "CHORE-2003",
+        "CHORE-2004",
         "BUG-0044",
         "BUG-0045"
       ],
@@ -481,7 +483,7 @@
         "EPIC-019"
       ],
       "blocks": [],
-      "description": "Ship Ririko 2.0.0 as the public release on master and make the project easy to find, install, use and contribute to. Covers a privacy audit before going public, a docs cleanup (archive development-only docs, rewrite user docs as deterministic, current steps), a Docusaurus site on ririko.ai that replaces the GitHub wiki and reuses the old website, a new README and CONTRIBUTING with all-contributors and CodeFactor, the master release and production launch, and the launch cleanups found during EPIC-019."
+      "description": "Ship Ririko 2.0.0 as the public release on master and make the project easy to find, install, use and contribute to. Covers a privacy audit before going public, a docs cleanup (archive development-only docs, rewrite user docs as deterministic, current steps), a Docusaurus site on ririko.ai that replaces the GitHub wiki and reuses the old website, a guided setup wizard (the 1.x installer rebuilt as `ririko setup`), a new README and CONTRIBUTING with all-contributors and CodeFactor, the master release and production launch, and the launch cleanups found during EPIC-019."
     }
   ],
   "stories": [
@@ -2771,7 +2773,8 @@
       ],
       "requires": [
         "STORY-187",
-        "STORY-188"
+        "STORY-188",
+        "STORY-192"
       ],
       "blocks": [],
       "assignee": null,
@@ -2804,6 +2807,68 @@
         "TASK-1911 to TASK-1913 are DONE, and production runs v2.0.0 with Pending (none)."
       ],
       "verify_cmd": "pnpm format:check && pnpm lint --quiet",
+      "parent": "EPIC-020"
+    },
+    {
+      "children": [
+        "TASK-1921",
+        "TASK-1922",
+        "TASK-1923",
+        "TASK-1924",
+        "TASK-1925",
+        "TASK-1926"
+      ],
+      "blocks": [
+        "STORY-191",
+        "TASK-1911"
+      ],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "requires": [
+        "STORY-188"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "id": "STORY-192",
+      "title": "Guided Setup Wizard: the 1.x Installer Rebuilt as ririko setup",
+      "points": 21,
+      "status": "TODO",
+      "description": "Rebuild the 1.x installer (a step-by-step web wizard the bot served on localhost when config.js was missing) for 2.0 as a local web wizard that the command-line tool starts: `ririko setup`, and `pnpm installer` from the repository root. Keep its layout (step tabs with an icon, a title and \"Step N\"; a content card; Previous, Next and Finish), its guides (a Note box, a \"Click here to show/hide the guide\" button, numbered steps with screenshots that open full size) and its fixed, predictable order. It writes `.env` (source install) or `.env.production` (Docker) from the example file and checks every credential live before it lets the reader go on. The 1.x files are copied, read only, to .local/installer-1x/. 2.0.0 does not go to master without it (maintainer, 2026-10-11).",
+      "context": {
+        "files": [
+          ".local/installer-1x/",
+          "apps/cli/src/installer/",
+          "apps/cli/src/utils/env-editor.ts",
+          "apps/cli/src/program.ts",
+          "packages/core/src/config/schema.ts",
+          "assets/installer/",
+          "docs/legal/",
+          "SETUP.md",
+          "docs/deployment.md"
+        ],
+        "symbols": [
+          "updateEnvFile",
+          "AppConfigSchema",
+          "WebConfigSchema",
+          "createProgram"
+        ],
+        "codegraph_queries": [
+          "updateEnvFile readEnvFile resolveEnvFilePath maskSecret",
+          "AppConfigSchema WebConfigSchema loadWebConfig parseConfig applyLegacyAliases",
+          "testAiProviders testStreamProviders testImageProviders"
+        ]
+      },
+      "acceptance": [
+        "TASK-1921 to TASK-1926 are DONE.",
+        "On a clean checkout, `pnpm installer` opens the wizard; finishing it with valid answers writes a `.env` that `pnpm doctor` accepts and the bot and the dashboard start with.",
+        "The coverage gate passes (`pnpm test:coverage`)."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm lint --quiet && pnpm format:check",
       "parent": "EPIC-020"
     }
   ],
@@ -8780,7 +8845,8 @@
     {
       "children": [],
       "requires": [
-        "TASK-1872"
+        "TASK-1872",
+        "STORY-192"
       ],
       "blocks": [],
       "assignee": null,
@@ -8892,6 +8958,373 @@
       "acceptance": [
         "docs/dockerhub/*.md describe 2.0.0: what the image is, the tags (2, 2.0, 2.0.0, latest after the move), a minimal compose snippet, and a link to ririko.ai docs.",
         "A proposed GitHub description (at most 350 characters), homepage URL and topics list are in the PROGRESS entry."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "parent": "STORY-192",
+      "status": "TODO",
+      "handovers": [
+        "TASK-1921",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "id": "TASK-1921",
+      "title": "Setup Wizard Step Model, the Kept 1.x Guides and the Settings File Writer",
+      "points": 5,
+      "requires": [],
+      "description": "The data and the file writer of the setup wizard, with no web server yet. The 7 pages, their fields, rules and guides are typed data in a fixed order. The writer turns the answers into `.env` (source) or `.env.production` (Docker) from the example file: values in place, comments kept, secrets generated once and never rotated, a backup first, and a schema check before anything is written.",
+      "context": {
+        "files": [
+          "apps/cli/src/installer/steps.ts",
+          "apps/cli/src/installer/guides.ts",
+          "apps/cli/src/installer/env-plan.ts",
+          "apps/cli/src/utils/env-editor.ts",
+          "packages/core/src/config/schema.ts",
+          "packages/core/src/config/loader.ts",
+          "packages/discord/src/client/factory.ts",
+          ".env.example",
+          ".env.production.example",
+          "assets/installer/images/",
+          ".local/installer-1x/index.html",
+          ".local/installer-1x/assets/images/"
+        ],
+        "symbols": [
+          "updateEnvFile",
+          "readEnvFile",
+          "formatEnvLine",
+          "AppConfigSchema",
+          "WebConfigSchema",
+          "parseConfig",
+          "applyLegacyAliases",
+          "DEFAULT_GATEWAY_INTENTS",
+          "DEFAULT_DATABASE_URL"
+        ],
+        "entry_points": [
+          "apps/cli/src/installer/env-plan.ts"
+        ],
+        "codegraph_queries": [
+          "updateEnvFile readEnvFile formatEnvLine resolveEnvFilePath maskSecret",
+          "AppConfigSchema WebConfigSchema loadWebConfig parseConfig applyLegacyAliases",
+          "DEFAULT_GATEWAY_INTENTS createBot",
+          "COMFYUI_URL COMFYUI_BASE_URL imageProvidersFromEnv SPOTIFY_DC"
+        ]
+      },
+      "acceptance": [
+        "apps/cli/src/installer/steps.ts defines the pages in this fixed order: Welcome, Discord Bot (Step 1), AI (Step 2), Stream Alerts (Step 3), Database & Music (Step 4), Dashboard (Step 5), Install (Step 6). Each page is typed data (id, icon, title, subtitle, intro, note, fields, guides, required checks); rendering code holds no order or rules.",
+        "Each field names its variable, label, placeholder, whether it is required, the feature switch that turns it on (if any), and its rule from AppConfigSchema or WebConfigSchema. Validating a page with the same answers always returns the same errors in the same order.",
+        "Guides are data (a \"Step N: ...\" heading, text, links, and an optional image with its caption). Ported from .local/installer-1x/index.html and updated for 2.0: Discord (Developer Portal, Application ID, Reset Token, and the privileged intents derived from DEFAULT_GATEWAY_INTENTS, which are Server Members and Message Content; no \"Add Bot\" step), the OpenAI key, the Replicate token, and Twitch (the 1.x five steps kept word for word). New guides: bot owner ID (Developer Mode, Copy User ID), Gemini key (Google AI Studio), Ollama address, ComfyUI address, YouTube Data API key, Spotify client, the PostgreSQL connection string (with an example box like the 1.x MongoDB one), and the dashboard OAuth2 client secret with the redirect <DASHBOARD_URL>/api/auth/callback. The MongoDB and NLPCloud guides are dropped.",
+        "twitch-step1.png, twitch-step2_1.png, twitch-step2_2.png, twitch-step3.png, twitch-step4.png and replicate.png are copied from .local/installer-1x/assets/images/ to assets/installer/images/. A test fails when a guide names an image file that does not exist there.",
+        "env-plan.ts plans the file for two profiles: source (.env from .env.example) and docker (.env.production from .env.production.example). A missing file starts as a copy of the example. Values are written in place with updateEnvFile, so comments and order stay. A feature that is off changes none of its variables. The docker profile never writes DATABASE_DIALECT, DATABASE_URL, LAVALINK_HOST or LAVALINK_PORT (the compose file sets them).",
+        "Generated values: SECRET_VAULT_KEY (64 hex characters), LAVALINK_PASSWORD, and for docker POSTGRES_PASSWORD, from node:crypto. A value already in the file is kept; SECRET_VAULT_KEY and POSTGRES_PASSWORD are never replaced once set.",
+        "Empty values count as unset when the configuration is parsed, as the docs promise (\"If you leave a value empty, the feature is off\"): the untouched .env.example (which has OPENAI_BASE_URL= and COMFYUI_URL=) passes AppConfigSchema and WebConfigSchema, with a core test for it. Today both schemas reject it, so the dashboard refuses to start from a copied .env.example.",
+        "Before writing, the planned file is parsed with AppConfigSchema and, when the dashboard is on, with WebConfigSchema. A failure writes nothing and names each variable.",
+        "An existing file is copied to <file>.bak-<UTC timestamp> before the write. The new file is written with mode 0600 where the platform supports it.",
+        "Golden-file tests: the same answers give byte-identical files for both profiles (generated values come through an injected generator); update mode keeps unknown variables, comments and existing secrets."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm vitest run apps/cli/src/installer apps/cli/src/utils packages/core/src/config && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "parent": "STORY-192",
+      "status": "TODO",
+      "handovers": [
+        "TASK-1922",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "id": "TASK-1922",
+      "title": "Setup Wizard Live Checks: Discord Application and Intents, OAuth2 Secret, Database and Every Optional Provider",
+      "points": 5,
+      "requires": [
+        "TASK-1921"
+      ],
+      "description": "The checks that make each wizard page trustworthy, as plain functions the server (TASK-1924) calls. The Discord check reads the application flags, so the 1.x \"I have enabled the intents\" tick-box becomes a real check. The existing ai:configure, stream-configure and image-configure tests reuse the same functions, so there is one implementation of each check.",
+      "context": {
+        "files": [
+          "apps/cli/src/installer/checks.ts",
+          "apps/cli/src/installer/steps.ts",
+          "apps/cli/src/commands/ai-configure.ts",
+          "apps/cli/src/commands/stream-configure.ts",
+          "apps/cli/src/commands/image-configure.ts",
+          "apps/cli/src/doctor/checks.ts",
+          "packages/discord/src/client/factory.ts",
+          "packages/ai/src/providers/gemini.provider.ts",
+          "packages/ai/src/providers/openai.provider.ts",
+          "packages/ai/src/providers/ollama.provider.ts",
+          "packages/services/src/stream-platforms/adapters/twitch.adapter.ts",
+          "packages/services/src/stream-platforms/adapters/youtube.adapter.ts"
+        ],
+        "symbols": [
+          "testAiProviders",
+          "testStreamProviders",
+          "testImageProviders",
+          "GeminiProvider.checkHealth",
+          "OpenAIProvider.checkHealth",
+          "OllamaProvider.checkHealth",
+          "TwitchStreamAdapter.getAccessToken",
+          "YouTubeStreamAdapter.resolveViaApi",
+          "createDatabaseClient",
+          "pingDatabase",
+          "DEFAULT_GATEWAY_INTENTS"
+        ],
+        "entry_points": [
+          "apps/cli/src/installer/checks.ts"
+        ],
+        "codegraph_queries": [
+          "testAiProviders testStreamProviders testImageProviders",
+          "GeminiProvider.checkHealth OpenAIProvider.checkHealth OllamaProvider.checkHealth",
+          "TwitchStreamAdapter.getAccessToken YouTubeStreamAdapter.resolveViaApi resolveStreamer",
+          "databaseCheck createDatabaseClient pingDatabase databaseConfigFromEnv",
+          "DEFAULT_GATEWAY_INTENTS createBot"
+        ]
+      },
+      "acceptance": [
+        "apps/cli/src/installer/checks.ts exports one function per check. Each returns { status: \"pass\" | \"warn\" | \"fail\", message, guideStep? }, never throws, never puts a secret in its message, and stops after a fixed timeout.",
+        "Discord: GET /applications/@me with the bot token. Distinct failures: the token is rejected; the token belongs to another application than the Application ID entered; a privileged intent in DEFAULT_GATEWAY_INTENTS is off (the flags have neither GatewayGuildMembers nor GatewayGuildMembersLimited, or neither GatewayMessageContent nor GatewayMessageContentLimited). Each failure names the guide step that fixes it.",
+        "OAuth2 client secret: a client_credentials request to /oauth2/token with the Application ID and the secret; a 401 reports a wrong secret.",
+        "Database: for SQLite, the folder of the file can be created and written, without creating the database; for PostgreSQL, createDatabaseClient and pingDatabase connect and the client is closed. The message masks the password.",
+        "Optional providers: Gemini, OpenAI (with an optional base URL) and Ollama through the provider classes; Replicate through its account endpoint; ComfyUI through /system_stats; Twitch through an app access token; YouTube through one Data API call.",
+        "testAiProviders, testStreamProviders and testImageProviders print the results of these functions, so ai:configure --test, stream-configure --test and image-configure --test still work, and their existing tests pass.",
+        "The Discord API base is a parameter (default https://discord.com/api/v10) and every network call goes through an injected fetch: all tests run offline and cover every pass and fail branch."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm vitest run apps/cli/src && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "parent": "STORY-192",
+      "status": "TODO",
+      "handovers": [
+        "TASK-1923",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "id": "TASK-1923",
+      "title": "Draft the 2.0 Terms of Service and Privacy Policy in docs/legal/",
+      "points": 2,
+      "requires": [],
+      "description": "The 1.x installer asked the reader to accept the terms and the privacy policy. The maintainer keeps that step, but the 1.x texts describe things 2.0 does not do (email marketing, NLPCloud, statistics sent to the maintainer). Draft 2.0 texts from what the code really stores; the wizard (TASK-1924) and the docs site link to them. The maintainer approves the wording before DONE.",
+      "context": {
+        "files": [
+          "docs/legal/terms.md",
+          "docs/legal/privacy.md",
+          ".local/installer-1x/terms-and-conditions.html",
+          ".local/installer-1x/privacy-policy.html",
+          "LICENSE",
+          "docs/ai.md",
+          "docs/dashboard.md",
+          "docs/database.md",
+          "docs/testing.md"
+        ],
+        "symbols": [
+          "CommandUsageRecorder",
+          "WebSessionRepository",
+          "WebPasskeyRepository"
+        ],
+        "codegraph_queries": [
+          "CommandUsageRecorder WebSessionRepository WebPasskeyRepository",
+          "conversation history AI chat memory store retention"
+        ]
+      },
+      "acceptance": [
+        "docs/legal/terms.md and docs/legal/privacy.md exist, dated, in simple English with numbered sections. They describe 2.0 as it is: open-source code under the MIT license (LICENSE), run by whoever hosts it, and the public Ririko bot run by the maintainer.",
+        "The privacy policy lists only data that 2.0 stores or sends, each item traced to code in the PROGRESS entry: Discord IDs and server settings, economy and card game data, moderation cases, AI chat messages sent to the configured AI provider, dashboard sessions and passkeys, and command usage counts. It says how long data is kept and how to ask for deletion. Nothing that only 1.x did (email collection, marketing, NLPCloud, statistics submission).",
+        "The 1.x clauses that still apply are kept: ownership of the images, logo and art; MIT for the code; no warranty; limitation of liability; lawful use. The governing law and the contact address stay as the maintainer wrote them in 1.x, and the PROGRESS entry lists each clause that needs the maintainer's decision.",
+        "The texts contain no secret, host name or provider name; the docs/testing.md section 4.4 scans pass.",
+        "The maintainer approves the wording before DONE; the REVIEW entry records it."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "parent": "STORY-192",
+      "status": "TODO",
+      "handovers": [
+        "TASK-1924",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "id": "TASK-1924",
+      "title": "Local Setup Wizard Server and Pages With the 1.x Layout in the 2.0 Colors",
+      "points": 5,
+      "requires": [
+        "TASK-1921",
+        "TASK-1922",
+        "TASK-1923"
+      ],
+      "description": "A small local web server that shows the wizard from the step model: one server-rendered page per step, no client framework and no JavaScript, the 1.x layout in the dashboard colors, and the security a local page that handles a bot token needs.",
+      "context": {
+        "files": [
+          "apps/cli/src/installer/server.ts",
+          "apps/cli/src/installer/render.ts",
+          "apps/cli/src/installer/steps.ts",
+          "apps/cli/src/installer/checks.ts",
+          "apps/cli/src/installer/env-plan.ts",
+          "assets/installer/",
+          "docs/legal/",
+          "apps/web/src/app/globals.css",
+          "apps/web/src/lib/security-headers.ts",
+          "apps/web/src/lib/server/guilds/permissions.ts",
+          "apps/web/src/app/api/invite/route.ts",
+          "packages/discord/src/index.ts",
+          ".local/installer-1x/index.html",
+          ".local/installer-1x/assets/scss/bd-wizard.scss",
+          ".local/installer-1x/assets/js/bd-wizard.js",
+          ".local/installer-1x/server/ririkoExpress.js"
+        ],
+        "symbols": [
+          "BOT_INVITE_PERMISSIONS",
+          "updateEnvFile",
+          "maskSecret"
+        ],
+        "entry_points": [
+          "apps/cli/src/installer/server.ts"
+        ],
+        "codegraph_queries": [
+          "BOT_INVITE_PERMISSIONS inviteUrl canManageGuild",
+          "securityHeaders contentSecurityPolicy",
+          "updateEnvFile readEnvFile resolveEnvFilePath maskSecret"
+        ]
+      },
+      "acceptance": [
+        "startInstallerServer({ profile, envFile, host, port }) serves the wizard with node:http only (no new runtime dependency), on 127.0.0.1:3999 by default. A port in use stops with a message that names --port; it never picks a random port.",
+        "Access: the start URL carries a one-time random token (32 bytes). The first visit exchanges it for an HttpOnly, SameSite=Strict cookie and redirects to a URL without the token. Any other request without the cookie gets 403. A Host header other than the bound address or localhost with the port, or a foreign Origin, gets 403. Every POST carries a per-session form token.",
+        "Layout as in 1.x, in the 2.0 colors (ink, panel, edge and sakura from apps/web/src/app/globals.css): a row of step tabs with an icon, a title and \"Step N\", with current and done states; a centered content card at most 700px wide; Previous, Next and Finish at the bottom right; the Note box; a \"Click here to show/hide the guide\" <details> with the numbered steps and images that open full size; feature switches that show their fields. CSS only, readable at 375px wide.",
+        "Everything is served from assets/installer/ and docs/legal/: no CDN, no external font, Content-Security-Policy default-src 'self', and the pages work with JavaScript turned off.",
+        "Each page is rendered from the step model. Next posts the page; the server validates it and runs the page's required checks; errors appear next to the field with the guide step to read. A later page cannot be opened by URL before the earlier pages pass. A checked value must be checked again after it changes. Previous keeps the answers.",
+        "Install page: a summary with secrets masked; an invite link https://discord.com/oauth2/authorize?client_id=<id>&scope=bot%20applications.commands&permissions=<BOT_INVITE_PERMISSIONS> (the constant moves from apps/web/src/lib/server/guilds/permissions.ts to @ririko/discord, and the web app imports it from there); two required tick-boxes for the terms and the privacy policy, linking to /legal/terms and /legal/privacy, which serve docs/legal/. Finish writes the file through env-plan and shows the exact next commands for the profile, or the error, with nothing written.",
+        "A Download button returns the planned file as an attachment, for a host where the wizard cannot write the file.",
+        "Secrets never appear in logs or in HTML: a field with an existing secret is empty with a \"keep the current value\" note. Every value put into HTML is escaped. Responses send Cache-Control: no-store.",
+        "The server stops after the Finish result page is sent, or after 30 minutes without a request.",
+        "Tests drive the server over HTTP with injected checks (offline): token and cookie, Host and Origin refusal, form token, validation errors, the skip refusal, re-checking after a change, Finish writing the expected file, Download, the idle stop and HTML escaping."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/cli/src apps/web/src/app/api/invite apps/web/src/lib/server/guilds && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "parent": "STORY-192",
+      "status": "TODO",
+      "handovers": [
+        "TASK-1925",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "id": "TASK-1925",
+      "title": "ririko setup Command, pnpm installer, Docker Mode and the Bot's First-Run Hint",
+      "points": 2,
+      "requires": [
+        "TASK-1924"
+      ],
+      "description": "Make the wizard reachable: the CLI command, the root script, a Docker one-liner for hosts without Node.js, and the hint the bot prints when it has no settings, as the 1.x bot did (\"You can now install Ririko Ai by visiting ...\").",
+      "context": {
+        "files": [
+          "apps/cli/src/commands/setup.ts",
+          "apps/cli/src/program.ts",
+          "apps/cli/src/program.test.ts",
+          "package.json",
+          "apps/bot/src/main.ts",
+          "Dockerfile"
+        ],
+        "symbols": [
+          "createProgram",
+          "loadEnvConfig",
+          "registerAiConfigureCommand",
+          "main"
+        ],
+        "entry_points": [
+          "apps/cli/src/program.ts",
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "createProgram loadEnvConfig registerAiConfigureCommand",
+          "main findLegacyLayout dbAutoMigrateFromEnv"
+        ]
+      },
+      "acceptance": [
+        "createProgram registers `ririko setup` with --docker (docker profile, default file .env.production), --env-file <path>, --port <n> (default 3999), --listen <host> (default 127.0.0.1) and --no-open. Without --env-file it uses .env (source) or .env.production (docker) in the current folder.",
+        "The root script `pnpm installer` runs it. It is not called `setup`, because `pnpm setup` is a built-in pnpm command.",
+        "It prints the start URL and opens it in the default browser (start, open or xdg-open through spawn with an argument list, no shell). With --no-open, or when no browser opens, it only prints.",
+        "--listen with an address other than 127.0.0.1, localhost or ::1 prints a warning that the port must be published to 127.0.0.1 only.",
+        "The bot image contains assets/installer/ and docs/legal/ (a Dockerfile COPY if needed), so this works and exits after Finish: docker run --rm -it -p 127.0.0.1:3999:3999 -v \"$PWD:/setup\" ririkoai/ririkobot:2 ririko setup --docker --env-file /setup/.env.production --listen 0.0.0.0 --no-open",
+        "When DISCORD_TOKEN is missing, the bot names `pnpm installer` (and the Docker command in docs/deployment.md) as the step-by-step way to set it up.",
+        "Tests cover option parsing, the default file per profile, the --listen warning and the bot message."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm vitest run apps/cli/src apps/bot/src && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "parent": "STORY-192",
+      "status": "TODO",
+      "handovers": [
+        "TASK-1926",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "id": "TASK-1926",
+      "title": "Docs: Start Every Install With the Setup Wizard",
+      "points": 2,
+      "requires": [
+        "TASK-1925"
+      ],
+      "description": "Make the wizard the first path in the install docs, with the manual steps kept below it for readers who cannot use a browser on the host.",
+      "context": {
+        "files": [
+          "SETUP.md",
+          "docs/deployment.md",
+          "docs/development.md",
+          "docs/dashboard.md",
+          "README.md"
+        ],
+        "symbols": [
+          "createProgram"
+        ],
+        "codegraph_queries": [
+          "createProgram registerAiConfigureCommand"
+        ]
+      },
+      "acceptance": [
+        "SETUP.md sections 3 and 4, and docs/deployment.md sections 2.2 to 2.4, start with the wizard: numbered steps with the exact command (`pnpm installer`, or the Docker one-liner) and what the reader sees. The current manual steps stay below, under \"Without the wizard\".",
+        "docs/development.md section 4 lists `ririko setup` with every option.",
+        "README.md \"Getting started\" starts with `pnpm installer` (only that change; the README rework is TASK-1901).",
+        "docs/dashboard.md section 7 says the wizard writes these values and checks the client secret.",
+        "Simple English and deterministic steps, with no ticket or release-candidate history; relative links only, no absolute file paths."
       ],
       "verify_cmd": "pnpm format:check && pnpm lint --quiet"
     }
@@ -9396,6 +9829,45 @@
         "Tests cover both reasons."
       ],
       "verify_cmd": "pnpm vitest run apps/web/src/lib/server && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "requires": [
+        "TASK-1924"
+      ],
+      "model": "small",
+      "handovers": [
+        "CHORE-2004",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2004",
+      "title": "Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides",
+      "points": 1,
+      "status": "TODO",
+      "description": "The 1.x screenshots of the Discord Developer Portal and the AI key pages are out of date, and taking new ones needs the maintainer's own accounts. The maintainer adds the PNG files named in the CHORE-2004 grooming entry; the worker wires them into the guides. Start only after the maintainer says the files are in place.",
+      "context": {
+        "files": [
+          "assets/installer/images/",
+          "apps/cli/src/installer/guides.ts"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "installer guides steps image"
+        ]
+      },
+      "acceptance": [
+        "Every file listed in the CHORE-2004 grooming entry is in assets/installer/images/. The worker does not take screenshots; a missing file makes the chore BLOCKED.",
+        "Each image is referenced at its guide step with a caption; the image-exists test passes; each file is 300 KB or smaller.",
+        "The worker looked at each image and states in the PROGRESS entry that none shows a token, secret, email address, server name or user name other than placeholders."
+      ],
+      "verify_cmd": "pnpm vitest run apps/cli/src/installer && pnpm lint --quiet && pnpm format:check",
+      "parent": "EPIC-020"
     }
   ],
   "bugs": [

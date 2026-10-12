@@ -28,3 +28,17 @@ See docs/kanban/protocol.md section 6.
 **Order**: STORY-187 (audit), then STORY-188 (archive, rewrite), STORY-189 (Docusaurus), STORY-190 (README, later) and STORY-191 (master release, production). The chores and bugs can run at any time.
 
 **Out of scope**: new bot features.
+
+---
+
+## GROOMING · 2026-10-11T15:13:00Z · claude-opus-5-5 (coordinator) · STORY-192 added
+
+**Maintainer request (2026-10-11)**: rebuild the 1.x installer (a step-by-step web wizard) in 2.0, keeping its guides, its wizard layout and its predictable steps.
+
+**Added**
+- STORY-192 (21 pts): `ririko setup` / `pnpm installer`, a local web wizard that writes `.env` or `.env.production` with live checks. Tasks TASK-1921 to TASK-1926. Details and the 1.x analysis are in `docs/kanban/handovers/STORY-192.md`; the 1.x files are copied, read only, to `.local/installer-1x/`.
+- CHORE-2004 (1 pt): the maintainer's new screenshots, wired into the guides after TASK-1924.
+
+**Maintainer decisions**: 2.0.0 does not reach master without the wizard, so STORY-191 and TASK-1911 now require STORY-192. The wizard uses the 2.0 dashboard colors. The terms and privacy step stays, with 2.0 texts drafted in `docs/legal/` (TASK-1923) for the maintainer's approval.
+
+**Order update**: STORY-192 runs before STORY-191. It can run in parallel with STORY-189 and STORY-190 in planning, but the board runs one ticket at a time.
