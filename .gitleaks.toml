@@ -29,7 +29,14 @@ keywords = ["spotify"]
 
 # TCG character catalog/manifest slugs ("key": "kikoru_shinomiya__kaiju_no_8") are public
 # identifiers, not credentials. Only this exact slug shape on those fields is allowed.
-[allowlist]
+[[allowlists]]
 description = "TCG catalog character keys"
 regexTarget = "line"
 regexes = ['''"(?:key|characterKey)": "[a-z0-9_]+__[a-z0-9_]+"''']
+
+# Fake fixture values in tests: sequential Discord snowflakes and a placeholder API key.
+# Only these exact strings are allowed; a real ID or key still fails.
+[[allowlists]]
+description = "Test fixture IDs and keys"
+regexTarget = "secret"
+regexes = ['''^[1-3]23456789012345678$''', '''^sk-key-0123456789$''']

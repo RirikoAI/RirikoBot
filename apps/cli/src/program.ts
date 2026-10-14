@@ -18,6 +18,7 @@ import { registerPasskeysResetCommand } from './commands/passkeys-reset.js';
 import { registerCommandsResetCommand } from './commands/commands-reset.js';
 import { registerCommandsSyncCommand } from './commands/commands-sync.js';
 import { registerMaintenanceCommand } from './commands/maintenance.js';
+import { registerSetupCommand } from './commands/setup.js';
 
 export function loadEnvConfig(customPath?: string): void {
   if (customPath) {
@@ -75,6 +76,7 @@ export function createProgram(): Command {
   registerCommandsSyncCommand(program);
   registerCommandsResetCommand(program);
   registerMaintenanceCommand(program);
+  registerSetupCommand(program);
 
   // Global error handler
   program.exitOverride();

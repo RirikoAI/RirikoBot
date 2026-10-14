@@ -25,6 +25,7 @@ describe('image-configure command (CHORE-1321)', () => {
       rmSync(testEnvPath, { force: true });
     }
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('defines metadata for all supported image providers', () => {
@@ -99,6 +100,10 @@ describe('image-configure command (CHORE-1321)', () => {
   });
 
   it('runs provider test diagnostics without throwing', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ status: 200 })),
+    );
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     await testImageProviders({
       GEMINI_API_KEY: 'AIzaSyValidFormatKey',

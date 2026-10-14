@@ -101,6 +101,16 @@ describe('image-configure providers and wizard (TASK-1252)', () => {
       expect(text).not.toContain('r8_abcdefghijklmnopqrstuvwxyz');
     });
 
+    it('reports a Replicate token that Replicate rejects, with the token masked', async () => {
+      fetchMock.mockResolvedValue({ status: 401 });
+      await testImageProviders({ REPLICATE_API_TOKEN: 'r8_abcdefghijklmnopqrstuvwxyz' });
+      const text = output();
+      expect(text).toContain('Replicate Cloud: Replicate rejected the API token');
+      expect(text).toContain('r8_abc...****...wxyz');
+      expect(text).not.toContain('r8_abcdefghijklmnopqrstuvwxyz');
+      expect(fetchMock.mock.calls[0]![0]).toBe('https://api.replicate.com/v1/account');
+    });
+
     it('reports a missing Gemini key', async () => {
       await testImageProviders({});
       expect(output()).toContain('Not configured (GEMINI_API_KEY missing)');

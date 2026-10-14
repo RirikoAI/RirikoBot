@@ -69,7 +69,13 @@ export function readEnvFile(filePath: string): Record<string, string> {
     return {};
   }
 
-  const content = readFileSync(filePath, 'utf-8');
+  return parseEnvContent(readFileSync(filePath, 'utf-8'));
+}
+
+/**
+ * Parses the text of a .env file into an object (see {@link readEnvFile}).
+ */
+export function parseEnvContent(content: string): Record<string, string> {
   const result: Record<string, string> = {};
 
   const lines = content.split(/\r?\n/);
@@ -122,6 +128,32 @@ export function updateEnvFile(
     content = readFileSync(filePath, 'utf-8');
   }
 
+  const applied = applyEnvUpdates(content, updates, sectionHeader);
+  mkdirSync(dirname(filePath), { recursive: true });
+  writeFileSync(filePath, applied.content, 'utf-8');
+
+  return {
+    updatedKeys: applied.updatedKeys,
+    addedKeys: applied.addedKeys,
+    filePath,
+  };
+}
+
+export interface AppliedEnvUpdates {
+  content: string;
+  updatedKeys: string[];
+  addedKeys: string[];
+}
+
+/**
+ * The pure part of {@link updateEnvFile}: applies the updates to the text of a .env file and
+ * returns the new text without touching the disk.
+ */
+export function applyEnvUpdates(
+  content: string,
+  updates: Record<string, string | undefined>,
+  sectionHeader = '# AI Chatbot & LLM Providers Configuration',
+): AppliedEnvUpdates {
   const lines = content.length > 0 ? content.split(/\r?\n/) : [];
   const updatedKeys: string[] = [];
   const addedKeys: string[] = [];
@@ -165,13 +197,5 @@ export function updateEnvFile(
     lines.push('');
   }
 
-  const finalContent = lines.join('\n');
-  mkdirSync(dirname(filePath), { recursive: true });
-  writeFileSync(filePath, finalContent, 'utf-8');
-
-  return {
-    updatedKeys,
-    addedKeys,
-    filePath,
-  };
+  return { content: lines.join('\n'), updatedKeys, addedKeys };
 }

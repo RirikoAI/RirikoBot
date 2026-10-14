@@ -3,6 +3,7 @@ import pc from 'picocolors';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { MockImageProvider } from '@ririko/services';
+import { checkComfyUi, checkReplicate } from '../installer/checks.js';
 import { maskSecret, readEnvFile, resolveEnvFilePath, updateEnvFile } from '../utils/env-editor.js';
 
 export interface ImageConfigureOptions {
@@ -152,26 +153,17 @@ export async function testImageProviders(env: Record<string, string>): Promise<v
   // 2. ComfyUI
   const comfyUrl = env.COMFYUI_BASE_URL;
   if (comfyUrl) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 3000);
-      const res = await fetch(`${comfyUrl.replace(/\/+$/, '')}/system_stats`, {
-        signal: controller.signal,
-      }).catch(async () => {
-        // Fallback check on root
-        return fetch(comfyUrl, { signal: controller.signal });
-      });
-      clearTimeout(timeout);
-      if (res && res.status < 500) {
-        console.log(
-          `  ${pc.green('✔')} ${pc.bold('ComfyUI / SD-WebUI:')} Server responded (${res.status} OK at ${comfyUrl})`,
-        );
-      } else {
-        console.log(
-          `  ${pc.yellow('!')} ${pc.bold('ComfyUI / SD-WebUI:')} Server returned status ${res?.status} at ${comfyUrl}`,
-        );
-      }
-    } catch {
+    const comfy = await checkComfyUi(comfyUrl, { timeoutMs: 3000 });
+    const detail = comfy.detail ?? {};
+    if (detail.reachable && (detail.httpStatus ?? 0) < 500) {
+      console.log(
+        `  ${pc.green('✔')} ${pc.bold('ComfyUI / SD-WebUI:')} Server responded (${detail.httpStatus} OK at ${comfyUrl})`,
+      );
+    } else if (detail.reachable) {
+      console.log(
+        `  ${pc.yellow('!')} ${pc.bold('ComfyUI / SD-WebUI:')} Server returned status ${detail.httpStatus} at ${comfyUrl}`,
+      );
+    } else {
       console.log(
         `  ${pc.yellow('!')} ${pc.bold('ComfyUI / SD-WebUI:')} Could not reach ${comfyUrl} (Ensure ComfyUI is running)`,
       );
@@ -184,9 +176,15 @@ export async function testImageProviders(env: Record<string, string>): Promise<v
 
   // 3. Replicate
   if (env.REPLICATE_API_TOKEN) {
-    console.log(
-      `  ${pc.green('✔')} ${pc.bold('Replicate Cloud:')} Token configured (${maskSecret(env.REPLICATE_API_TOKEN)})`,
-    );
+    const replicate = await checkReplicate(env.REPLICATE_API_TOKEN);
+    const masked = maskSecret(env.REPLICATE_API_TOKEN);
+    if (replicate.status === 'pass') {
+      console.log(`  ${pc.green('✔')} ${pc.bold('Replicate Cloud:')} Token configured (${masked})`);
+    } else {
+      console.log(
+        `  ${pc.red('✖')} ${pc.bold('Replicate Cloud:')} ${replicate.message} (${masked})`,
+      );
+    }
   } else {
     console.log(
       `  ${pc.gray('○')} ${pc.bold('Replicate Cloud:')} Not configured (REPLICATE_API_TOKEN missing)`,

@@ -2,7 +2,8 @@ import { Command } from 'commander';
 import pc from 'picocolors';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import { TwitchStreamAdapter, YouTubeStreamAdapter, TikTokStreamAdapter } from '@ririko/services';
+import { TikTokStreamAdapter } from '@ririko/services';
+import { checkTwitch, checkYouTube } from '../installer/checks.js';
 import { maskSecret, readEnvFile, resolveEnvFilePath, updateEnvFile } from '../utils/env-editor.js';
 
 export interface StreamConfigureOptions {
@@ -96,41 +97,32 @@ export async function testStreamProviders(env: Record<string, string>): Promise<
   // 1. Test Twitch
   if (env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) {
     process.stdout.write('  • Testing Twitch Helix API... ');
-    try {
-      const adapter = new TwitchStreamAdapter({
-        clientId: env.TWITCH_CLIENT_ID,
-        clientSecret: env.TWITCH_CLIENT_SECRET,
-      });
-      const resolved = await adapter.resolveStreamer('twitch');
-      if (resolved) {
-        console.log(pc.green(`✔ Connected! (Resolved: ${resolved.displayName})`));
-      } else {
-        console.log(pc.yellow('⚠ Credentials accepted, but failed to resolve default user.'));
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.log(pc.red(`✖ Failed: ${msg}`));
+    const twitch = await checkTwitch({
+      clientId: env.TWITCH_CLIENT_ID,
+      clientSecret: env.TWITCH_CLIENT_SECRET,
+    });
+    if (twitch.status === 'pass') {
+      console.log(pc.green('✔ Connected! (Twitch issued an app access token)'));
+    } else {
+      console.log(pc.red(`✖ Failed: ${twitch.message}`));
     }
   } else {
     console.log(pc.gray('  • Twitch: Skipping API test (TWITCH_CLIENT_ID / SECRET not set)'));
   }
 
   // 2. Test YouTube
-  process.stdout.write('  • Testing YouTube Live Adapter... ');
-  try {
-    const adapter = new YouTubeStreamAdapter({
-      apiKey: env.YOUTUBE_API_KEY,
-    });
-    const resolved = await adapter.resolveStreamer('YouTube');
-    if (resolved) {
-      const mode = env.YOUTUBE_API_KEY ? 'Data API v3' : 'Public Web Fallback';
-      console.log(pc.green(`✔ Connected via ${mode}! (Resolved: ${resolved.displayName})`));
+  if (env.YOUTUBE_API_KEY) {
+    process.stdout.write('  • Testing YouTube Live Adapter... ');
+    const youtube = await checkYouTube(env.YOUTUBE_API_KEY);
+    if (youtube.status === 'pass') {
+      console.log(pc.green('✔ Connected via Data API v3!'));
     } else {
-      console.log(pc.yellow('⚠ Handshake succeeded, metadata could not be fetched.'));
+      console.log(pc.red(`✖ Failed: ${youtube.message}`));
     }
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.log(pc.red(`✖ Failed: ${msg}`));
+  } else {
+    console.log(
+      `  • YouTube Live Adapter: ${pc.gray('Public Web Fallback (no YOUTUBE_API_KEY, nothing to test)')}`,
+    );
   }
 
   // 3. Test TikTok

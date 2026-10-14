@@ -22,6 +22,7 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 *.pem
 
 # Runtime data (mounted as volumes), at any depth like in .gitignore

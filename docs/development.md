@@ -98,6 +98,7 @@ The tool is in `apps/cli`. In a checkout, run it with `pnpm cli <command>`. In t
 | --- | --- |
 | `ririko info` | Prints the version and the runtime. |
 | `ririko doctor` | Checks Node.js, the database, the Discord token, FFmpeg and the optional integrations. |
+| `ririko setup [--docker] [--env-file <path>] [--port <n>] [--listen <host>] [--no-open]` | Opens the step-by-step setup wizard in your browser. In a checkout, `pnpm installer` is the same command. See the table below. |
 | `ririko db:migrate [--status\|--dry-run]` | Applies the schema migrations to the database in `DATABASE_URL`. See [database.md section 1.2](database.md#12-who-changes-the-schema). |
 | `ririko db:copy --from <sqlite path> [--dry-run\|--yes]` | Copies a 2.0 SQLite database into an empty PostgreSQL database. See [migrations.md section 5](migrations.md#5-move-a-20-sqlite-database-to-postgresql). |
 | `ririko migrate:legacy`, `ririko migrate:verify` | Migrate and verify a 1.4.0 database. See [migrations.md section 3](migrations.md#3-migrate-with-the-command-line-tool). |
@@ -111,6 +112,16 @@ The tool is in `apps/cli`. In a checkout, run it with `pnpm cli <command>`. In t
 | `ririko tcg:rules [key] [value]` | Lists, reads or sets the global Waifu TCG rules. |
 | `ririko passkeys:reset <user_id>` | Removes the passkeys of a dashboard user and ends their sessions. Add `--yes` to apply it. |
 | `ririko bot:maintenance [status\|on\|off\|toggle]` | Shows or changes the maintenance mode of the bot. |
+
+Options of `ririko setup`:
+
+| Option | What it does |
+| --- | --- |
+| `--docker` | Sets up the Docker install and writes `.env.production`. Without it, the wizard sets up the source install and writes `.env`. |
+| `--env-file <path>` | The settings file to read and write. Its name must be `.env` for the source install or `.env.production` for the Docker install. The default is that file in the current folder. |
+| `--port <n>` | The port of the wizard, from 1 to 65535. The default is 3999. |
+| `--listen <host>` | The address to listen on. The default is `127.0.0.1`. Any other address prints a warning, because other machines can then reach the wizard. |
+| `--no-open` | Prints the address and does not open the browser. |
 
 The root `package.json` has more scripts:
 

@@ -1,12 +1,8 @@
 import 'server-only';
 import { PermissionFlagsBits } from 'discord-api-types/v10';
 
-/**
- * Permissions requested when inviting the bot. Same set as the 1.4.0 invite link, so servers
- * that switch versions grant exactly what they granted before; it deliberately omits
- * Administrator.
- */
-export const BOT_INVITE_PERMISSIONS = 626721090433015n;
+// The invite permission set lives in @ririko/discord, next to the setup wizard that uses it too.
+export { BOT_INVITE_PERMISSIONS } from '@ririko/discord/permissions';
 
 /** A dashboard manager must own the guild or hold Manage Server (0x20) or Administrator (0x8). */
 export function canManageGuild(guild: { owner?: boolean; permissions: string }): boolean {
