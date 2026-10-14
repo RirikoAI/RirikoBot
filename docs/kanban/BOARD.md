@@ -18,27 +18,30 @@
 |---|---|---|---|---|---|---|---|
 | `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 13 | EPIC-020 | STORY-188 | yes | large |
 | `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | blocked | large |
-| `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192 | blocked | large |
+| `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | blocked | large |
 | `STORY-192` | Story | Guided Setup Wizard: the 1.x Installer Rebuilt as ririko setup | 21 | EPIC-020 | STORY-188 | yes | large |
+| `STORY-193` | Story | Privacy Notice, AI Consent and Data Retention Before the Public Bot Runs 2.0 | 21 | EPIC-020 | — | yes | large |
+| `STORY-194` | Story | Complete User Data Erasure Tool for Data Requests | 5 | EPIC-020 | STORY-193 | blocked | large |
 | `TASK-1891` | Task | Scaffold the Docusaurus Site in website/ Built From docs/, With a Broken-Link Gate in CI | 5 | STORY-189 | STORY-188 | yes | medium |
 | `TASK-1892` | Task | Port the Old ririko.ai Landing Page and Generate the Commands Page From Command Metadata | 5 | STORY-189 | TASK-1891 | blocked | medium |
 | `TASK-1893` | Task | Deploy the Site to GitHub Pages on ririko.ai, Serve the Install Files, Retire the Vercel Status Page | 2 | STORY-189 | TASK-1891 | blocked | medium |
 | `TASK-1894` | Task | Migrate the GitHub Wiki Into the Docs and Leave a Pointer Page | 2 | STORY-189 | TASK-1891 | blocked | medium |
 | `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | TASK-1881 | yes | medium |
 | `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | — | yes | medium |
-| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872, STORY-192 | blocked | medium |
+| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872, STORY-192, STORY-193 | blocked | medium |
 | `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | — | yes | medium |
 | `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | — | yes | medium |
-| `TASK-1921` | Task | Setup Wizard Step Model, the Kept 1.x Guides and the Settings File Writer | 5 | STORY-192 | — | yes | medium |
-| `TASK-1922` | Task | Setup Wizard Live Checks: Discord Application and Intents, OAuth2 Secret, Database and Every Optional Provider | 5 | STORY-192 | TASK-1921 | blocked | medium |
-| `TASK-1923` | Task | Draft the 2.0 Terms of Service and Privacy Policy in docs/legal/ | 2 | STORY-192 | — | yes | medium |
-| `TASK-1924` | Task | Local Setup Wizard Server and Pages With the 1.x Layout in the 2.0 Colors | 5 | STORY-192 | TASK-1921, TASK-1922, TASK-1923 | blocked | medium |
-| `TASK-1925` | Task | ririko setup Command, pnpm installer, Docker Mode and the Bot's First-Run Hint | 2 | STORY-192 | TASK-1924 | blocked | medium |
-| `TASK-1926` | Task | Docs: Start Every Install With the Setup Wizard | 2 | STORY-192 | TASK-1925 | blocked | medium |
+| `TASK-1931` | Task | Consent Records and the One-Time Terms Notice on a User's First Interaction | 5 | STORY-193 | — | yes | medium |
+| `TASK-1932` | Task | `ai clear all`: Delete a User's AI Conversations in Every Server and Channel | 2 | STORY-193 | — | yes | medium |
+| `TASK-1933` | Task | AI Consent Gate: an Explicit "I Agree" Before Any AI Feature, and Withdrawal | 5 | STORY-193 | TASK-1931, TASK-1932 | blocked | medium |
+| `TASK-1934` | Task | Daily Data Retention Purge: AI Chat, Music History and Image Jobs After 90 Days, Audit Entries After a Year | 5 | STORY-193 | — | yes | medium |
+| `TASK-1941` | Task | `ririko user erase`: Remove or Anonymise Every Row a Bot Holds About One Discord User | 8 | STORY-194 | TASK-1931, TASK-1934 | blocked | medium |
+| `TASK-1935` | Task | Delete a Server's Data 90 Days After the Bot Leaves It | 8 | STORY-193 | TASK-1934 | blocked | medium |
+| `TASK-1936` | Task | Bahasa Malaysia Versions of the Terms of Service and the Privacy Policy | 3 | STORY-193 | TASK-1923 | yes | medium |
 | `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | — | yes | small |
 | `CHORE-2002` | Chore | Make the Test Suite Pass on a Windows Development Machine | 2 | EPIC-020 | — | yes | medium |
 | `CHORE-2003` | Chore | Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal | 1 | EPIC-020 | — | yes | small |
-| `CHORE-2004` | Chore | Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides | 1 | EPIC-020 | TASK-1924 | blocked | small |
+| `CHORE-2004` | Chore | Add the New Discord, Gemini, OpenAI, YouTube and Spotify Screenshots to the Setup Wizard Guides | 1 | EPIC-020 | TASK-1924 | yes | small |
 | `BUG-0045` | Bug | /lyrics Finds Nothing for Music Videos Whose Length Differs From the Song by More Than 3 Seconds | 2 | EPIC-020 | — | yes | medium |
 
 ## 🔍 Review
@@ -396,6 +399,12 @@
 | `TASK-1881` | Task | Move Planning and Decision Records to docs/archive and Fix Every Link | 3 | STORY-188 | [TASK-1881.md](./handovers/TASK-1881.md) |
 | `TASK-1882` | Task | Rewrite the Self-Host and Operator Docs as Deterministic, Current Procedures | 5 | STORY-188 | [TASK-1882.md](./handovers/TASK-1882.md) |
 | `TASK-1883` | Task | Rewrite the Feature Docs for Server Admins and Players | 5 | STORY-188 | [TASK-1883.md](./handovers/TASK-1883.md) |
+| `TASK-1921` | Task | Setup Wizard Step Model, the Kept 1.x Guides and the Settings File Writer | 5 | STORY-192 | [TASK-1921.md](./handovers/TASK-1921.md) |
+| `TASK-1922` | Task | Setup Wizard Live Checks: Discord Application and Intents, OAuth2 Secret, Database and Every Optional Provider | 5 | STORY-192 | [TASK-1922.md](./handovers/TASK-1922.md) |
+| `TASK-1923` | Task | Draft the 2.0 Terms of Service and Privacy Policy in docs/legal/ | 2 | STORY-192 | [TASK-1923.md](./handovers/TASK-1923.md) |
+| `TASK-1924` | Task | Local Setup Wizard Server and Pages With the 1.x Layout in the 2.0 Colors | 5 | STORY-192 | [TASK-1924.md](./handovers/TASK-1924.md) |
+| `TASK-1925` | Task | ririko setup Command, pnpm installer, Docker Mode and the Bot's First-Run Hint | 2 | STORY-192 | [TASK-1925.md](./handovers/TASK-1925.md) |
+| `TASK-1926` | Task | Docs: Start Every Install With the Setup Wizard | 2 | STORY-192 | [TASK-1926.md](./handovers/TASK-1926.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -492,4 +501,4 @@
 | `EPIC-017` | Production Hosting & Continuous Deployment (Managed VMs, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
-| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045 | [EPIC-020.md](./handovers/EPIC-020.md) |
+| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045 | [EPIC-020.md](./handovers/EPIC-020.md) |

@@ -472,6 +472,8 @@
         "STORY-190",
         "STORY-191",
         "STORY-192",
+        "STORY-193",
+        "STORY-194",
         "CHORE-2001",
         "CHORE-2002",
         "CHORE-2003",
@@ -2774,7 +2776,8 @@
       "requires": [
         "STORY-187",
         "STORY-188",
-        "STORY-192"
+        "STORY-192",
+        "STORY-193"
       ],
       "blocks": [],
       "assignee": null,
@@ -2870,6 +2873,115 @@
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm lint --quiet && pnpm format:check",
       "parent": "EPIC-020"
+    },
+    {
+      "children": [
+        "TASK-1931",
+        "TASK-1932",
+        "TASK-1933",
+        "TASK-1934",
+        "TASK-1935",
+        "TASK-1936"
+      ],
+      "blocks": [
+        "STORY-191",
+        "TASK-1911"
+      ],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "STORY-193",
+      "title": "Privacy Notice, AI Consent and Data Retention Before the Public Bot Runs 2.0",
+      "points": 21,
+      "status": "TODO",
+      "parent": "EPIC-020",
+      "requires": [],
+      "model": "large",
+      "handovers": [
+        "STORY-193",
+        "EPIC-020"
+      ],
+      "description": "The maintainer decided (2026-10-13) how 2.0 handles user data: every user sees a one-time notice that using the bot means accepting the terms and the privacy policy; every AI feature needs an explicit \"I agree\" first, on public and self-hosted bots alike; `ai clear all` and consent withdrawal remove a user's AI data; AI chat, music history and image jobs older than 90 days and audit entries older than a year are deleted automatically. docs/legal (TASK-1923) describes exactly this, so the story ships before the public bot runs 2.0.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/",
+          "packages/database/src/schema/pg/",
+          "packages/database/src/repositories/ai.repository.ts",
+          "packages/services/src/activity/command-usage-recorder.ts",
+          "packages/discord/src/router/router.ts",
+          "apps/bot/src/command-router.ts",
+          "apps/bot/src/controllers/ai-chat.controller.ts",
+          "apps/bot/src/commands/ai/commands.ts",
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "docs/legal/"
+        ],
+        "symbols": [
+          "createCommandRouter",
+          "CommandRouter.dispatchInteraction",
+          "AiChatController.handleAiMessage",
+          "ConversationManager.clearMemory",
+          "AiRepository.clearUserContext",
+          "CommandUsageRecorder",
+          "registerComponentInteractions"
+        ],
+        "codegraph_queries": [
+          "createCommandRouter CommandRouter dispatchInteraction dispatchMessage MiddlewarePipeline",
+          "AiChatController handleAiMessage processChat ConversationManager clearMemory clearUserContext clearConversation",
+          "CommandUsageRecorder deleteCommandUsageBefore musicHistory imageJobs auditLogs aiMessages"
+        ]
+      },
+      "acceptance": [
+        "TASK-1931 to TASK-1936 are DONE.",
+        "On a fresh database: a user's first command shows the notice once; their first AI request shows the consent prompt and nothing reaches an AI provider until they press \"I agree\"; `ai clear all` and `ai consent withdraw` remove their AI data; the daily retention run deletes rows past their limit.",
+        "docs/legal/privacy.md (TASK-1923) matches the shipped behaviour: retention periods, the consent prompt, `ai clear`, `ai clear all` and withdrawal.",
+        "The coverage gate passes (`pnpm test:coverage`) and `pnpm db:check` passes."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm db:check && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [
+        "TASK-1941"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "STORY-194",
+      "title": "Complete User Data Erasure Tool for Data Requests",
+      "points": 5,
+      "status": "TODO",
+      "parent": "EPIC-020",
+      "requires": [
+        "STORY-193"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-194",
+        "EPIC-020"
+      ],
+      "description": "Erasure requests are handled by hand until this ships. The maintainer asked for a tool that removes everything a bot holds about one Discord user. Not required for the 2.0 launch.",
+      "context": {
+        "files": [
+          "apps/cli/src/commands/",
+          "packages/database/src/schema/sqlite/",
+          "packages/database/src/repositories/"
+        ],
+        "symbols": [
+          "createProgram"
+        ],
+        "codegraph_queries": [
+          "createProgram passkeys-reset resetPasskeys AuditLogRepository"
+        ]
+      },
+      "acceptance": [
+        "TASK-1941 is DONE.",
+        "The coverage gate passes (`pnpm test:coverage`)."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "tasks": [
@@ -8846,7 +8958,8 @@
       "children": [],
       "requires": [
         "TASK-1872",
-        "STORY-192"
+        "STORY-192",
+        "STORY-193"
       ],
       "blocks": [],
       "assignee": null,
@@ -8970,7 +9083,7 @@
       "tier_override": null,
       "model": "medium",
       "parent": "STORY-192",
-      "status": "TODO",
+      "status": "DONE",
       "handovers": [
         "TASK-1921",
         "STORY-192",
@@ -9040,7 +9153,7 @@
       "tier_override": null,
       "model": "medium",
       "parent": "STORY-192",
-      "status": "TODO",
+      "status": "DONE",
       "handovers": [
         "TASK-1922",
         "STORY-192",
@@ -9112,9 +9225,10 @@
       "tier_override": null,
       "model": "medium",
       "parent": "STORY-192",
-      "status": "TODO",
+      "status": "DONE",
       "handovers": [
         "TASK-1923",
+        "STORY-193",
         "STORY-192",
         "EPIC-020"
       ],
@@ -9147,9 +9261,13 @@
       },
       "acceptance": [
         "docs/legal/terms.md and docs/legal/privacy.md exist, dated, in simple English with numbered sections. They describe 2.0 as it is: open-source code under the MIT license (LICENSE), run by whoever hosts it, and the public Ririko bot run by the maintainer.",
-        "The privacy policy lists only data that 2.0 stores or sends, each item traced to code in the PROGRESS entry: Discord IDs and server settings, economy and card game data, moderation cases, AI chat messages sent to the configured AI provider, dashboard sessions and passkeys, and command usage counts. It says how long data is kept and how to ask for deletion. Nothing that only 1.x did (email collection, marketing, NLPCloud, statistics submission).",
-        "The 1.x clauses that still apply are kept: ownership of the images, logo and art; MIT for the code; no warranty; limitation of liability; lawful use. The governing law and the contact address stay as the maintainer wrote them in 1.x, and the PROGRESS entry lists each clause that needs the maintainer's decision.",
-        "The texts contain no secret, host name or provider name; the docs/testing.md section 4.4 scans pass.",
+        "The privacy policy lists only data that 2.0 stores or sends, each item traced to code in the PROGRESS entry, and the behaviour STORY-193 ships: the one-time terms notice, the explicit AI consent, `ai clear`, `ai clear all`, `ai consent withdraw`, and the retention periods (AI chat, music history and image jobs 90 days; audit entries 365 days; command usage 90 days; dashboard sessions and known browsers as today). Nothing that only 1.x did.",
+        "The 1.x clauses that still apply are kept (art ownership, MIT, no warranty, limitation of liability, lawful use, Malaysian law). The contact address everywhere is me@angel.net.my. Card and art owners can ask for removal at that address.",
+        "Public bot versus self-hosted: for the public bot, data requests go to the maintainer; for a self-hosted bot, to its host, who controls that data; the maintainer takes no responsibility and no liability for self-hosted bots. For both, no guarantee and no liability for any loss, to the fullest extent the law allows.",
+        "AI providers are named (OpenAI, Google Gemini, Replicate; Ollama and ComfyUI run on the host's machine). The texts say providers keep what they receive under their own policies, which the maintainer cannot control or recall, and that a deletion request can only be passed on. Hosting providers and the data location stay unnamed.",
+        "Privacy follows GDPR and Malaysia's PDPA principles without claiming certified compliance: only data needed to run each feature; the purpose and basis of each item (the service itself, the server's legitimate interest for XP, AutoMod and moderation records, consent for AI); the rights to access, correction, erasure, objection, withdrawing consent and complaining to a regulator; requests by email to the maintainer at me@angel.net.my (privacy contact; no DPO is named), answered within 30 days where able; backups expire on their own schedule; moderation records may be kept for the server's safety, decided per request.",
+        "The terms keep the \"continued use means acceptance\" clause and add the explicit AI consent; strictly 18+; third-party card image rights; in-game items have no real-world value.",
+        "The texts contain no secret, host name or hosting provider name; the docs/testing.md section 4.4 scans pass.",
         "The maintainer approves the wording before DONE; the REVIEW entry records it."
       ],
       "verify_cmd": "pnpm format:check && pnpm lint --quiet"
@@ -9163,7 +9281,7 @@
       "tier_override": null,
       "model": "medium",
       "parent": "STORY-192",
-      "status": "TODO",
+      "status": "DONE",
       "handovers": [
         "TASK-1924",
         "STORY-192",
@@ -9195,7 +9313,13 @@
           ".local/installer-1x/index.html",
           ".local/installer-1x/assets/scss/bd-wizard.scss",
           ".local/installer-1x/assets/js/bd-wizard.js",
-          ".local/installer-1x/server/ririkoExpress.js"
+          ".local/installer-1x/server/ririkoExpress.js",
+          "apps/cli/src/installer/check-runner.ts",
+          "assets/installer/wizard.css",
+          "packages/discord/src/permissions.ts",
+          "packages/discord/package.json",
+          "apps/web/package.json",
+          "pnpm-lock.yaml"
         ],
         "symbols": [
           "BOT_INVITE_PERMISSIONS",
@@ -9234,7 +9358,7 @@
       "tier_override": null,
       "model": "medium",
       "parent": "STORY-192",
-      "status": "TODO",
+      "status": "DONE",
       "handovers": [
         "TASK-1925",
         "STORY-192",
@@ -9291,7 +9415,7 @@
       "tier_override": null,
       "model": "medium",
       "parent": "STORY-192",
-      "status": "TODO",
+      "status": "DONE",
       "handovers": [
         "TASK-1926",
         "STORY-192",
@@ -9325,6 +9449,428 @@
         "README.md \"Getting started\" starts with `pnpm installer` (only that change; the README rework is TASK-1901).",
         "docs/dashboard.md section 7 says the wizard writes these values and checks the client secret.",
         "Simple English and deterministic steps, with no ticket or release-candidate history; relative links only, no absolute file paths."
+      ],
+      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [
+        "TASK-1933"
+      ],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1931",
+      "title": "Consent Records and the One-Time Terms Notice on a User's First Interaction",
+      "points": 5,
+      "status": "TODO",
+      "parent": "STORY-193",
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-1931",
+        "STORY-193",
+        "EPIC-020"
+      ],
+      "description": "A `user_consents` table records which notices and consents a user accepted and which version. The command router shows a one-time notice after a user's first command: by continuing to use the bot they accept the terms and the privacy policy, with links. TERMS_URL and PRIVACY_URL let self-hosters link their own pages.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/identity.ts",
+          "packages/database/src/schema/pg/identity.ts",
+          "packages/database/src/schema/types/index.ts",
+          "packages/database/src/repositories/",
+          "packages/database/migrations/",
+          "packages/services/src/privacy/",
+          "packages/discord/src/router/router.ts",
+          "packages/discord/src/router/types.ts",
+          "packages/discord/src/middleware/",
+          "apps/bot/src/command-router.ts",
+          "apps/bot/src/services.ts",
+          "packages/core/src/config/schema.ts",
+          ".env.example",
+          ".env.production.example",
+          "docs/database.md"
+        ],
+        "symbols": [
+          "createCommandRouter",
+          "CommandRouter.dispatchInteraction",
+          "CommandRouter.dispatchMessage",
+          "MiddlewarePipeline",
+          "createCooldownMiddleware",
+          "UserRepository",
+          "AppConfigSchema",
+          "BotServices"
+        ],
+        "entry_points": [
+          "apps/bot/src/command-router.ts"
+        ],
+        "codegraph_queries": [
+          "createCommandRouter CommandRouter dispatchInteraction dispatchMessage MiddlewarePipeline CommandMiddleware",
+          "createCooldownMiddleware createRateLimitMiddleware CommandContext reply followUp isReplied isDeferred",
+          "UserRepository users identity schema BotServices createBotServices",
+          "AppConfigSchema BaseAppConfigSchema applyLegacyAliases"
+        ]
+      },
+      "acceptance": [
+        "A `user_consents` table on both dialects: `user_id`, `kind` (`terms` or `ai`), `version` (text), `accepted_at`; primary key (`user_id`, `kind`). Its migration is generated with `pnpm db:generate` for both dialects and `pnpm db:check` passes. A repository has `find(userId, kind)`, `accept(userId, kind, version, now)` (upsert) and `withdraw(userId, kind)`.",
+        "A `ConsentService` in packages/services/src/privacy/ owns the versions (`TERMS_VERSION`, `AI_CONSENT_VERSION`, the docs/legal date) and answers `hasAccepted(userId, kind)`: true only for the current version. It caches accepted users in memory so a command costs at most one database read per user per process.",
+        "After a user's first command that passes the middleware pipeline (slash, prefix or context menu), the bot shows the notice once and records `terms` at `TERMS_VERSION`: an ephemeral follow-up for interactions, a reply to the message for prefix commands. The command itself still runs and its reply is not delayed. A user who accepted the current version never sees it again; a new version shows it once more.",
+        "The notice says, in one short message, that by continuing to use the bot the user accepts the Terms of Service and the Privacy Policy, links both, and says that on a self-hosted bot the host is responsible for their data.",
+        "TERMS_URL and PRIVACY_URL are optional URLs in AppConfigSchema and both example files, defaulting to https://github.com/RirikoAI/RirikoBot/blob/master/docs/legal/terms.md and .../privacy.md.",
+        "Failures to read or write consent never block a command: they are logged and the notice is tried again next time.",
+        "Tests cover the first, repeat and new-version cases for slash and prefix commands, the cache, and a failing repository, with no network."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database packages/services/src/privacy packages/discord apps/bot/src && pnpm db:check && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [
+        "TASK-1933"
+      ],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1932",
+      "title": "`ai clear all`: Delete a User's AI Conversations in Every Server and Channel",
+      "points": 2,
+      "status": "TODO",
+      "parent": "STORY-193",
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-1932",
+        "STORY-193",
+        "EPIC-020"
+      ],
+      "description": "`ai clear` deletes only the conversation of the current server and channel. `ai clear all` deletes every AI conversation and message of the user, everywhere. TASK-1933 reuses it for consent withdrawal.",
+      "context": {
+        "files": [
+          "apps/bot/src/commands/ai/commands.ts",
+          "packages/ai/src/memory/conversation-manager.ts",
+          "packages/database/src/repositories/ai.repository.ts",
+          "docs/ai.md",
+          "docs/commands.md"
+        ],
+        "symbols": [
+          "createAiCommands",
+          "ConversationManager.clearMemory",
+          "AiRepository.clearUserContext",
+          "AiRepository.clearConversation",
+          "AiRepository.findConversationByUserContext"
+        ],
+        "entry_points": [
+          "apps/bot/src/commands/ai/commands.ts"
+        ],
+        "codegraph_queries": [
+          "createAiCommands ConversationManager clearMemory AiRepository clearUserContext clearConversation findConversationByUserContext"
+        ]
+      },
+      "acceptance": [
+        "`AiRepository.clearAllForUser(userId)` deletes every `ai_messages` row of the user's conversations and the `ai_conversations` rows themselves, in one transaction, on both dialects, and returns the number of conversations removed. `ConversationManager.clearAllMemory(userId)` calls it.",
+        "`/ai action:clear` gains a `scope` choice (`here`, default, or `all`); the prefix form `ai clear all` works too. `all` replies ephemerally (slash) with how many conversations were deleted. `here` behaves exactly as today.",
+        "AI user preferences (nickname, timezone, language) are not touched by `clear all`.",
+        "docs/ai.md and docs/commands.md describe both scopes and say that messages already sent to an AI provider cannot be recalled.",
+        "Repository tests run on SQLite (and on PostgreSQL where the suite already does); command tests cover both scopes and both command forms."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database packages/ai apps/bot/src/commands/ai && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1933",
+      "title": "AI Consent Gate: an Explicit \"I Agree\" Before Any AI Feature, and Withdrawal",
+      "points": 5,
+      "status": "TODO",
+      "parent": "STORY-193",
+      "requires": [
+        "TASK-1931",
+        "TASK-1932"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1933",
+        "STORY-193",
+        "EPIC-020"
+      ],
+      "description": "No AI feature sends anything to an AI provider until the user pressed \"I agree\" on a prompt that names the configured providers and explains what is kept. On for every bot, public or self-hosted; there is no setting to turn it off. `ai consent withdraw` removes the consent and the user's AI data.",
+      "context": {
+        "files": [
+          "apps/bot/src/controllers/ai-chat.controller.ts",
+          "apps/bot/src/commands/ai/commands.ts",
+          "apps/bot/src/commands/ai/translate.command.ts",
+          "apps/bot/src/commands/images/imagine.command.ts",
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/services.ts",
+          "packages/services/src/privacy/",
+          "docs/ai.md",
+          "docs/commands.md"
+        ],
+        "symbols": [
+          "AiChatController.handleAiMessage",
+          "AiChatController.processChat",
+          "createAiCommands",
+          "registerComponentInteractions",
+          "handleImagineButtonInteraction",
+          "ConsentService",
+          "ConversationManager.clearAllMemory"
+        ],
+        "entry_points": [
+          "apps/bot/src/controllers/ai-chat.controller.ts",
+          "apps/bot/src/component-interactions.ts"
+        ],
+        "codegraph_queries": [
+          "AiChatController handleAiMessage processChat fallbackChainManager",
+          "createAiCommands createTranslateCommand createImagineCommand handleImagineButtonInteraction",
+          "registerComponentInteractions customId button interaction reply ephemeral",
+          "createBotServices BotServices aiProviders imageProviders DEFAULT_AI_PROVIDER IMAGE_DEFAULT_PROVIDER"
+        ]
+      },
+      "acceptance": [
+        "Every bot path that calls an AI or image provider checks `ConsentService.hasAccepted(userId, 'ai')` first: AI chat by mention or dedicated channel, `/ai action:chat`, translation, and image generation (`imagine` and its buttons). Without consent nothing is sent to a provider and nothing is stored.",
+        "Without consent the user gets the consent prompt instead (ephemeral where Discord allows, otherwise a reply): which providers this bot is configured to use, by name (OpenAI, Google Gemini, Replicate; Ollama and ComfyUI run on the host's own machine); that those providers keep what they receive under their own policies, which the bot owner cannot change or recall; that chats are stored for 90 days; `ai clear`, `ai clear all` and `ai consent withdraw`; links to TERMS_URL and PRIVACY_URL; buttons \"I agree\" and \"No thanks\".",
+        "Only the user the prompt was shown to can press its buttons. \"I agree\" records `ai` at `AI_CONSENT_VERSION` (and `terms` if missing) and tells the user to send the request again; \"No thanks\" records nothing and says AI features stay off for them.",
+        "`ai consent withdraw` (slash option and prefix form) withdraws the `ai` consent, deletes all the user's AI conversations through `clearAllMemory` and their AI user preferences, and confirms. `ai consent status` shows whether and when they agreed.",
+        "The gate has no configuration switch: it is on for public and self-hosted bots.",
+        "docs/ai.md and docs/commands.md describe the prompt, withdrawal and status.",
+        "Tests cover each gated path with and without consent (no provider call without consent), both buttons, a button pressed by another user, withdrawal and status, with no network."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/services/src/privacy apps/bot/src && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1934",
+      "title": "Daily Data Retention Purge: AI Chat, Music History and Image Jobs After 90 Days, Audit Entries After a Year",
+      "points": 5,
+      "status": "TODO",
+      "parent": "STORY-193",
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-1934",
+        "STORY-193",
+        "EPIC-020"
+      ],
+      "description": "A retention service runs once a day in the bot and deletes rows past their limit, so the privacy policy can state fixed periods. It also checks that logs do not keep chat text.",
+      "context": {
+        "files": [
+          "packages/services/src/activity/command-usage-recorder.ts",
+          "packages/services/src/privacy/",
+          "packages/database/src/schema/sqlite/ai.ts",
+          "packages/database/src/schema/pg/ai.ts",
+          "packages/database/src/schema/sqlite/music.ts",
+          "packages/database/src/schema/pg/music.ts",
+          "packages/database/src/schema/sqlite/images.ts",
+          "packages/database/src/schema/pg/images.ts",
+          "packages/database/src/schema/sqlite/utilities.ts",
+          "packages/database/src/schema/pg/utilities.ts",
+          "packages/database/src/repositories/ai.repository.ts",
+          "packages/database/src/repositories/music.repository.ts",
+          "packages/database/src/repositories/image.repository.ts",
+          "packages/database/src/repositories/audit-log.repository.ts",
+          "packages/database/migrations/",
+          "apps/bot/src/main.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/controllers/ai-chat.controller.ts",
+          "docs/database.md"
+        ],
+        "symbols": [
+          "CommandUsageRecorder",
+          "BotActivityRepository.deleteCommandUsageBefore",
+          "AiRepository",
+          "MusicRepository",
+          "ImageRepository",
+          "AuditLogRepository",
+          "createBotServices"
+        ],
+        "entry_points": [
+          "apps/bot/src/main.ts"
+        ],
+        "codegraph_queries": [
+          "CommandUsageRecorder deleteCommandUsageBefore start stop flush utcDay",
+          "aiMessages aiConversations musicHistory imageJobs auditLogs createdAt playedAt index",
+          "AiRepository MusicRepository ImageRepository AuditLogRepository",
+          "createBotServices main start stop shutdown commandUsageRecorder"
+        ]
+      },
+      "acceptance": [
+        "Each repository gets a `deleteOlderThan(cutoff)` that returns the number of rows deleted, on both dialects: `ai_messages` by `created_at`; `ai_conversations` with no messages left and `updated_at` before the cutoff are deleted, and the `summary` of any conversation not updated since the cutoff is cleared; `music_history` by `played_at`; `image_jobs` by `created_at`, only COMPLETED and FAILED; `audit_logs` by `created_at`.",
+        "A `DataRetentionService` in packages/services/src/privacy/ runs once per UTC day (first run shortly after start), with fixed periods in one exported constant: AI 90 days, music history 90, image jobs 90, audit log 365. It logs one line with the counts. A failure in one table is logged and does not stop the others. `main.ts` starts and stops it like `commandUsageRecorder`.",
+        "Indexes support the deletes where none exists (at least `ai_messages(created_at)` and `image_jobs(created_at)`), added by a generated migration for both dialects; `pnpm db:check` passes.",
+        "No log line in the bot or the AI package writes chat text, prompts or AI replies; any that does is changed to log ids and lengths only. The PROGRESS entry lists what was checked.",
+        "docs/database.md lists the retention periods.",
+        "Tests use an injected clock and cover each table's cutoff edge, the once-a-day guard and a failing table, on SQLite (and PostgreSQL where the suite already does)."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database packages/services/src/privacy packages/discord apps/bot/src && pnpm db:check && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1941",
+      "title": "`ririko user erase`: Remove or Anonymise Every Row a Bot Holds About One Discord User",
+      "points": 8,
+      "status": "TODO",
+      "parent": "STORY-194",
+      "requires": [
+        "TASK-1931",
+        "TASK-1934"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1941",
+        "STORY-194",
+        "EPIC-020"
+      ],
+      "description": "A CLI command for the host: given a Discord user ID, it shows what the database holds about that user and, after confirmation, deletes it or, where other users' records depend on it, replaces the ID with a tombstone.",
+      "context": {
+        "files": [
+          "apps/cli/src/program.ts",
+          "apps/cli/src/commands/",
+          "packages/database/src/schema/sqlite/",
+          "packages/database/src/schema/pg/",
+          "packages/database/src/repositories/",
+          "docs/development.md",
+          "docs/legal/privacy.md"
+        ],
+        "symbols": [
+          "createProgram",
+          "resetPasskeys",
+          "AuditLogRepository",
+          "UserRepository"
+        ],
+        "entry_points": [
+          "apps/cli/src/program.ts"
+        ],
+        "codegraph_queries": [
+          "createProgram passkeys-reset resetPasskeys AuditLogRepository",
+          "users economy ledger trades userCards moderation cases warnings user_id schema"
+        ]
+      },
+      "acceptance": [
+        "The PROGRESS entry inventories every table with a column that holds a Discord user ID, from the schema files of both dialects, and states for each: delete the row, tombstone the ID, or keep (with the reason). Nothing is left unclassified; a test fails when a new schema column ending in `user_id`, `_by` or `owner_id` is not in the inventory.",
+        "`ririko user erase <discordUserId>` prints the row count per table and changes nothing. `--yes` applies the plan in one transaction per dialect and writes an audit log entry with the counts, never the user ID in clear (a SHA-256 prefix).",
+        "Rows owned only by the user (AI data, consents, preferences, economy balance, inventory, cards, XP, reminders, music history, image jobs, sessions, passkeys, known browsers) are deleted. Rows shared with others (ledger entries, trades, giveaway winners, moderation cases where they are the moderator) keep the row and replace the ID with `erased:<sha256 prefix>`. Moderation cases where they are the target are kept unless `--include-moderation` is given.",
+        "Running it twice is safe; a user with no data prints zeros.",
+        "docs/development.md documents the command; docs/legal/privacy.md's request section mentions that the host can erase all data.",
+        "Tests cover the plan, each action type, idempotence and the inventory guard on SQLite."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/cli/src packages/database && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1935",
+      "title": "Delete a Server's Data 90 Days After the Bot Leaves It",
+      "points": 8,
+      "status": "TODO",
+      "parent": "STORY-193",
+      "requires": [
+        "TASK-1934"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1935",
+        "STORY-193",
+        "EPIC-020"
+      ],
+      "description": "When the bot leaves or is removed from a server, the server is only marked inactive and its data stays forever. The maintainer decided (2026-10-13) that a server's data is deleted 90 days after the bot leaves, unless the bot is added back first.",
+      "context": {
+        "files": [
+          "packages/database/src/schema/sqlite/identity.ts",
+          "packages/database/src/schema/pg/identity.ts",
+          "packages/database/src/schema/sqlite/",
+          "packages/database/src/schema/pg/",
+          "packages/database/src/repositories/guild.repository.ts",
+          "packages/database/migrations/",
+          "packages/services/src/privacy/data-retention.service.ts",
+          "docs/database.md",
+          "docs/legal/privacy.md"
+        ],
+        "symbols": [
+          "GuildRepository.markInactive",
+          "GuildRepository.upsert",
+          "DataRetentionService",
+          "guilds"
+        ],
+        "entry_points": [
+          "packages/services/src/privacy/data-retention.service.ts"
+        ],
+        "codegraph_queries": [
+          "GuildRepository markInactive upsert guilds isActive joinedAt",
+          "guild-config-sync guildDelete guildCreate markInactive reconcile",
+          "DataRetentionService RETENTION_DAYS deleteOlderThan"
+        ]
+      },
+      "acceptance": [
+        "`guilds` gets a nullable `left_at` timestamp on both dialects (additive migration from `pnpm db:generate`; `pnpm db:check` passes). `markInactive` sets it with `is_active = false`; reactivating a server (the bot is added back) clears it.",
+        "An inventory constant lists every table with a `guild_id` column (both dialects) and what the purge does with it; a test fails when a schema table with a `guild_id` column is missing from it.",
+        "`DataRetentionService` (TASK-1934) deletes, once a day, every row of every inventoried table for servers whose `left_at` is more than 90 days ago, then the `guilds` row itself, one server per transaction. The period joins `RETENTION_DAYS` as `departedGuild: 90`. Logged as counts only.",
+        "User-level data that is not tied to a server (user balances, cards, AI preferences, consents) is not touched.",
+        "A server that comes back before 90 days keeps all its data.",
+        "docs/database.md lists the rule; docs/legal/privacy.md retention table says server data is deleted 90 days after the bot leaves.",
+        "Tests cover the column update on leave and rejoin, the cutoff edge, a rejoined server, the inventory guard and a failing table, on SQLite."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/database packages/services/src/privacy apps/bot/src && pnpm db:check && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1936",
+      "title": "Bahasa Malaysia Versions of the Terms of Service and the Privacy Policy",
+      "points": 3,
+      "status": "TODO",
+      "parent": "STORY-193",
+      "requires": [
+        "TASK-1923"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1936",
+        "TASK-1923",
+        "STORY-193",
+        "EPIC-020"
+      ],
+      "description": "Malaysia's PDPA expects the privacy notice in Bahasa Malaysia and English. The maintainer decided (2026-10-15) to publish Malay versions of both legal texts before the public bot runs 2.0.",
+      "context": {
+        "files": [
+          "docs/legal/terms.md",
+          "docs/legal/privacy.md",
+          "docs/legal/ms/",
+          "docs/testing.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "TERMS_URL PRIVACY_URL ConsentService notice"
+        ]
+      },
+      "acceptance": [
+        "docs/legal/ms/terms.md and docs/legal/ms/privacy.md translate the final English texts section for section, with the same numbering and date, in plain formal Bahasa Malaysia.",
+        "Each Malay text says that the English version prevails if the two differ; each English text links its Malay version near the top, and each Malay text links back.",
+        "Commands, variable names, email address and URLs stay exactly as in English.",
+        "The texts contain no secret, host name or hosting provider name; the docs/testing.md section 4.4 scans pass.",
+        "The maintainer reviews the Malay wording before DONE; the REVIEW entry records it."
       ],
       "verify_cmd": "pnpm format:check && pnpm lint --quiet"
     }

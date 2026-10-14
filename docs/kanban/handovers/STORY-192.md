@@ -44,3 +44,16 @@ See docs/kanban/protocol.md section 6.
 **Finding during grooming**: `.env.example` as shipped fails `AppConfigSchema` and `WebConfigSchema` (`OPENAI_BASE_URL=` and `COMFYUI_URL=` are empty strings, and both are `.url()`), so a dashboard started from a copied `.env.example` refuses to start. The bot is not affected because `main.ts` reads `process.env` directly. TASK-1921 fixes it at the root (empty means unset), because the wizard writes from that file.
 
 **Out of scope**: new bot features; a hosted installer on ririko.ai; changing the dashboard's own invite flow beyond moving `BOT_INVITE_PERMISSIONS`; the README rework (TASK-1901).
+
+## REVIEW · 2026-10-14T17:45:52Z · claude-opus-5-5 (coordinator) · REWORK
+
+**verify_cmd rerun**: `pnpm build && pnpm typecheck` pass. `pnpm test:coverage` fails only in `scripts/deploy-host.test.ts` on this Windows machine (bash-spawning tests time out at 5 s under load, and one checksum-path assertion fails on Windows); STORY-192 changes nothing under `scripts/` or `deploy/`. With that one file excluded, the coverage gate passes (413 files, 4391 tests, thresholds met). CI runs it on Linux. `pnpm lint --quiet` and `pnpm format:check` pass.
+
+**Acceptance**
+- [x] 1: TASK-1921 to TASK-1926 are DONE.
+- [ ] 2: not yet run end to end. `pnpm installer` on a clean checkout, finishing with valid answers, then `pnpm doctor` and starting the bot and dashboard: the maintainer runs this before the merge. The wizard was checked in the browser against a temporary folder (TASK-1924), and the Docker command only from the Dockerfile (TASK-1925).
+- [x] 3: the coverage gate passes (see above).
+
+**Security**: gitleaks flagged four fake fixture values in the new tests; the maintainer added an exact-value allowlist to `.gitleaks.toml` (and the old `[allowlist]` table became `[[allowlists]]`, which gitleaks requires when both exist). Staged files and full history scan clean with the repository config. Privacy scans 1–4 print nothing.
+
+**Outcome**: REWORK only for acceptance 2: the story stays in TODO (every task DONE) until the maintainer runs the end-to-end check; then it moves to DONE.
