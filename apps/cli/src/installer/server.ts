@@ -153,6 +153,8 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
   '.gif': 'image/gif',
   '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.txt': 'text/plain; charset=utf-8',
 };
 
 const SECURITY_HEADERS: Readonly<Record<string, string>> = {
@@ -586,7 +588,7 @@ export async function startInstallerServer(
     const allowed =
       clean &&
       ((segments.length === 1 && relative === 'wizard.css') ||
-        (segments.length === 2 && segments[0] === 'images'));
+        (segments.length === 2 && (segments[0] === 'images' || segments[0] === 'fonts')));
     const type = CONTENT_TYPES[extname(relative).toLowerCase()];
     const file = join(assetsDir, ...segments);
     if (!allowed || !type || !existsSync(file)) {

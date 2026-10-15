@@ -121,8 +121,9 @@ describe('pages', () => {
   });
 
   it('shows the guide button, numbered steps and full-size image links', () => {
+    expect(renderStepPage(view('discord'))).toContain('Click here to show/hide the guide: ');
     const html = renderStepPage(view('streams'));
-    expect(html).toContain('Click here to show/hide the guide: ');
+    expect(html).toContain('>Click here to show/hide the guide</summary>');
     expect(html).toContain('id="guide-twitch-step-1"');
     expect(html).toMatch(/<a class="guide-image" href="#img-1">/);
     expect(html).toMatch(/<div class="lightbox" id="img-1">/);
@@ -244,7 +245,7 @@ describe('pages', () => {
 describe('conditionalCss', () => {
   it('hides conditional fields and shows them for their switch and select value', () => {
     const css = conditionalCss();
-    expect(css).toContain('[data-cond] { display: none; }');
+    expect(css).toContain('[data-cond],\n[data-gate] { display: none; }');
     expect(css).toContain(
       '.wizard:has(input[name="switch_ai-chat"]:checked):has(select[name="DEFAULT_AI_PROVIDER"] option[value="openai"]:checked) [data-field="OPENAI_API_KEY"]',
     );
@@ -254,6 +255,115 @@ describe('conditionalCss', () => {
     );
     expect(css).toContain('[data-field="TWITCH_CLIENT_ID"]');
     expect(css).toContain('@supports not selector(:has(*))');
+  });
+});
+
+describe('order of the 1.x installer', () => {
+  const profileOf = (id: PageId): Profile => (id === 'dashboard' ? 'docker' : 'source');
+  const html = (id: PageId) => renderStepPage(view(id, {}, profileOf(id)));
+  const at = (page: string, needle: string): number => {
+    const index = page.indexOf(needle);
+    expect(index, needle).toBeGreaterThanOrEqual(0);
+    return index;
+  };
+
+  it('puts the heading and the intro before the fields, and the note and guides after them', () => {
+    for (const page of PAGES) {
+      if (page.blocks.length === 0) continue;
+      const out = html(page.id);
+      const heading = at(out, 'class="section-heading"');
+      const firstField = at(out, 'data-field="');
+      const lastField = out.lastIndexOf('data-field="');
+      const firstNote = at(out, 'class="note');
+      expect(heading, page.id).toBeLessThan(firstField);
+      // No note or guide button sits above the fields.
+      expect(firstNote, page.id).toBeGreaterThan(firstField);
+      expect(out.indexOf('<details'), page.id).toBeGreaterThan(firstField);
+      // The last note follows the last field.
+      expect(out.lastIndexOf('class="note'), page.id).toBeGreaterThan(lastField);
+    }
+  });
+
+  it('places each note after the fields of its group and its guide buttons at the end of the note', () => {
+    for (const page of PAGES) {
+      page.blocks.forEach((block, index) => {
+        const out = html(page.id);
+        const gate = block.when ? `data-gate="${page.id}-note-${index}"` : 'class="note"';
+        const start = at(out, gate);
+        if (block.after !== undefined) {
+          expect(at(out, `data-field="${block.after}"`), block.after).toBeLessThan(start);
+        }
+        const note = at(out, `<b>Note:</b><br>1. `);
+        expect(note).toBeGreaterThan(-1);
+        for (const [i, button] of block.guides.entries()) {
+          const key = button.when ? `data-gate="${page.id}-note-${index}-guide-${i}"` : null;
+          const guide = at(
+            out.slice(start),
+            key ?? `<details class="guide" id="guide-${button.guide}`,
+          );
+          const noteEnd = out.indexOf('</p>', start);
+          expect(start + guide).toBeGreaterThan(noteEnd);
+        }
+      });
+    }
+  });
+
+  it('puts a switch before its fields and the note of the group after them', () => {
+    const out = html('ai');
+    const chat = at(out, 'name="switch_ai-chat"');
+    const provider = at(out, 'data-field="DEFAULT_AI_PROVIDER"');
+    const ollama = at(out, 'data-field="OLLAMA_BASE_URL"');
+    const chatNote = at(out, 'data-gate="ai-note-0"');
+    const images = at(out, 'name="switch_ai-images"');
+    const imageProvider = at(out, 'data-field="IMAGE_DEFAULT_PROVIDER"');
+    const imagesNote = at(out, 'data-gate="ai-note-1"');
+    expect(chat).toBeLessThan(provider);
+    expect(ollama).toBeLessThan(chatNote);
+    expect(chatNote).toBeLessThan(images);
+    expect(images).toBeLessThan(imageProvider);
+    expect(imageProvider).toBeLessThan(imagesNote);
+  });
+
+  it('keeps every switch-gated guide button inside its gated block and hides it by CSS', () => {
+    const css = conditionalCss();
+    const ai = html('ai');
+    const block = at(ai, 'data-gate="ai-note-0"');
+    const openai = at(ai, 'data-gate="ai-note-0-guide-1"');
+    expect(openai).toBeGreaterThan(block);
+    expect(openai).toBeLessThan(at(ai, 'data-gate="ai-note-1"'));
+    expect(ai.slice(openai, openai + 120)).toContain('<details class="guide" id="guide-openai"');
+    // The OpenAI guide shows only for the chat switch and the OpenAI choice, the block for the switch.
+    expect(css).toContain(
+      '.wizard:has(input[name="switch_ai-chat"]:checked):has(select[name="DEFAULT_AI_PROVIDER"] option[value="openai"]:checked) [data-gate="ai-note-0-guide-1"]',
+    );
+    expect(css).toContain(
+      '.wizard:has(input[name="switch_ai-chat"]:checked) [data-gate="ai-note-0"]',
+    );
+    // The PostgreSQL guide shows only for the PostgreSQL choice; the Twitch guide for its switch.
+    expect(css).toContain(
+      '.wizard:has(select[name="DATABASE_DIALECT"] option[value="postgres"]:checked) [data-gate="database-note-0-guide-0"]',
+    );
+    expect(css).toContain(
+      '.wizard:has(input[name="switch_twitch"]:checked) [data-gate="streams-note-0"]',
+    );
+    const streams = html('streams');
+    expect(at(streams, 'data-gate="streams-note-0"')).toBeLessThan(
+      at(streams, 'id="guide-twitch"'),
+    );
+    expect(at(streams, 'id="guide-twitch"')).toBeLessThan(
+      at(streams, 'data-gate="streams-note-1"'),
+    );
+    // A guide shown for two features is on the page twice with its own ids.
+    expect(ai).toContain('id="guide-gemini"');
+    expect(ai).toContain('id="guide-gemini-2"');
+    expect(ai).toContain('id="guide-gemini-2-step-1"');
+  });
+
+  it('shows the Discord guides after the fields without a gate, and no description boxes', () => {
+    const out = html('discord');
+    expect(out).not.toContain('data-gate=');
+    expect(at(out, 'data-field="DISCORD_DEV_GUILD_ID"')).toBeLessThan(at(out, 'class="note"'));
+    expect(html('ai')).not.toContain('class="feature"');
   });
 });
 

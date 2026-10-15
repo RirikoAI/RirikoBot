@@ -66,6 +66,8 @@ describe('page order', () => {
     const known = new Set(GUIDES.map((guide) => guide.id));
     for (const page of PAGES) {
       for (const id of page.guides) expect(known.has(id)).toBe(true);
+      const placed = page.blocks.flatMap((block) => block.guides.map((button) => button.guide));
+      expect(new Set(placed), page.id).toEqual(new Set(page.guides));
       for (const field of page.fields) {
         if (field.guide) expect(page.guides).toContain(field.guide);
       }

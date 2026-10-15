@@ -1,13 +1,7 @@
 import { BOT_INVITE_PERMISSIONS } from '@ririko/discord';
 import { maskSecret } from '../utils/env-editor.js';
 import type { CheckResult, CheckStatus, GuideStepRef } from './checks.js';
-import {
-  DASHBOARD_URL_PLACEHOLDER,
-  getGuide,
-  type Guide,
-  type GuideId,
-  type GuideStep,
-} from './guides.js';
+import { DASHBOARD_URL_PLACEHOLDER, getGuide, type GuideId, type GuideStep } from './guides.js';
 import {
   PAGES,
   activeFields,
@@ -18,9 +12,12 @@ import {
   type CheckId,
   type Condition,
   type Field,
+  type GuideButton,
+  type NoteBlock,
   type Page,
   type PageId,
   type Profile,
+  type SwitchDef,
   type SwitchId,
 } from './steps.js';
 
@@ -93,13 +90,23 @@ function valueSelector(condition: Condition): string {
   return parts.join('');
 }
 
+/** The `data-gate` key of a Note block. */
+export function blockGate(page: Page, index: number): string {
+  return `${page.id}-note-${index}`;
+}
+
+/** The `data-gate` key of one guide button of a Note block. */
+export function guideGate(page: Page, index: number, guide: number): string {
+  return `${page.id}-note-${index}-guide-${guide}`;
+}
+
 /**
- * The CSS that shows a conditional field while its switch is on and its select has the value.
- * Without JavaScript the browser can still hide and show fields; the server decides what is
- * required. Generated from the page model so the two cannot drift apart.
+ * The CSS that shows a conditional field, a Note block or a guide button while its switch is on
+ * and its select has the value. Without JavaScript the browser can still hide and show them; the
+ * server decides what is required. Generated from the page model so the two cannot drift apart.
  */
 export function conditionalCss(): string {
-  const rules: string[] = ['[data-cond] { display: none; }'];
+  const rules: string[] = ['[data-cond],\n[data-gate] { display: none; }'];
   for (const page of PAGES) {
     for (const field of page.fields) {
       if (!field.switch && !field.appliesWhen) continue;
@@ -111,8 +118,23 @@ export function conditionalCss(): string {
       const list = selectors.map((selector) => `${selector} [data-field="${field.name}"]`);
       rules.push(`${list.join(',\n')} { display: block; }`);
     }
+    page.blocks.forEach((block, index) => {
+      const gates: { key: string; when: Condition[] }[] = [];
+      if (block.when) gates.push({ key: blockGate(page, index), when: block.when });
+      block.guides.forEach((button, guide) => {
+        if (button.when) gates.push({ key: guideGate(page, index, guide), when: button.when });
+      });
+      for (const gate of gates) {
+        const list = gate.when.map(
+          (condition) => `.wizard${valueSelector(condition)} [data-gate="${gate.key}"]`,
+        );
+        rules.push(`${list.join(',\n')} { display: block; }`);
+      }
+    });
   }
-  rules.push('@supports not selector(:has(*)) {\n  [data-cond] { display: block; }\n}');
+  rules.push(
+    '@supports not selector(:has(*)) {\n  [data-cond],\n  [data-gate] { display: block; }\n}',
+  );
   return `${rules.join('\n')}\n`;
 }
 
@@ -336,16 +358,23 @@ function tabs(view: StepView): string {
   return `<nav class="steps" aria-label="Setup steps"><ul>${items.join('')}</ul></nav>`;
 }
 
+/** What the page collects while it renders: guide images and how often a guide was placed. */
+interface Images {
+  count: number;
+  boxes: string[];
+  guides: Map<GuideId, number>;
+}
+
 function guideStepRefLink(ref: GuideStepRef): string {
   const guide = getGuide(ref.guide);
   return `<a class="guide-link" href="#guide-${ref.guide}-step-${ref.step}">Read step ${ref.step} of the ${escapeHtml(guide.title)} guide</a>`;
 }
 
 function renderGuideStep(
-  guide: Guide,
+  domId: string,
   step: GuideStep,
   number: number,
-  images: { count: number; boxes: string[] },
+  images: Images,
   dashboardUrl: string,
 ): string {
   const parts: string[] = [`<h5>${escapeHtml(step.heading)}</h5>`];
@@ -379,44 +408,58 @@ function renderGuideStep(
       `<div class="callout ${step.callout.kind}"><p>${escapeHtml(step.callout.text)}</p>${code}</div>`,
     );
   }
-  return `<section class="guide-step" id="guide-${guide.id}-step-${number}">${parts.join('')}</section>`;
+  return `<section class="guide-step" id="${domId}-step-${number}">${parts.join('')}</section>`;
 }
 
-function renderGuides(view: StepView, images: { count: number; boxes: string[] }): string {
-  const page = view.page;
-  if (page.guides.length === 0) return '';
+function renderGuide(
+  view: StepView,
+  button: GuideButton,
+  titled: boolean,
+  gate: string | null,
+  images: Images,
+): string {
+  const guide = getGuide(button.guide);
   const dashboardUrl = answerValue(view.answers, 'DASHBOARD_URL');
   const referenced = new Set<GuideId>();
   for (const issue of view.issues.values()) {
     if (issue.guideStep) referenced.add(issue.guideStep.guide);
   }
-  return page.guides
-    .map((id) => {
-      const guide = getGuide(id);
-      const summary =
-        page.guides.length === 1
-          ? 'Click here to show/hide the guide'
-          : `Click here to show/hide the guide: ${guide.title}`;
-      const steps = guide.steps
-        .map((step, index) => renderGuideStep(guide, step, index + 1, images, dashboardUrl))
-        .join('');
-      return `<details class="guide" id="guide-${id}"${referenced.has(id) ? ' open' : ''}><summary>${escapeHtml(summary)}</summary><div class="guide-body"><h4>${escapeHtml(guide.title)}</h4>${steps}</div></details>`;
-    })
-    .join('\n');
+  // A guide shown for two features (the Gemini key) is on the page twice: the second copy gets
+  // its own ids so the page keeps unique ids.
+  const seen = images.guides.get(guide.id) ?? 0;
+  images.guides.set(guide.id, seen + 1);
+  const domId = seen === 0 ? `guide-${guide.id}` : `guide-${guide.id}-${seen + 1}`;
+  const summary = titled
+    ? `Click here to show/hide the guide: ${guide.title}`
+    : 'Click here to show/hide the guide';
+  const steps = guide.steps
+    .map((step, index) => renderGuideStep(domId, step, index + 1, images, dashboardUrl))
+    .join('');
+  const html = `<details class="guide" id="${domId}"${referenced.has(guide.id) ? ' open' : ''}><summary>${escapeHtml(summary)}</summary><div class="guide-body">${steps}</div></details>`;
+  return gate ? `<div data-gate="${gate}">${html}</div>` : html;
 }
 
-function renderSwitch(view: StepView, page: Page): string {
-  return page.switches
-    .map((def) => {
-      const always = def.alwaysOn?.includes(view.profile) === true;
-      const on = effectiveSwitches(view.profile, view.answers.switches)[def.id];
-      if (def.profiles && !def.profiles.includes(view.profile)) return '';
-      if (always) {
-        return `<input class="audible" type="checkbox" name="switch_${def.id}" value="on" checked tabindex="-1" aria-hidden="true">`;
-      }
-      return `<div class="feature"><label class="switch"><input type="checkbox" name="switch_${def.id}" value="on"${on ? ' checked' : ''}><span class="slider" aria-hidden="true"></span><span class="switch-label">${escapeHtml(def.label)}</span></label><p class="hint">${escapeHtml(def.description)}</p></div>`;
-    })
-    .join('\n');
+/** One Note block: the numbered points, then the guide buttons, each guide opening below its button. */
+function renderBlock(view: StepView, block: NoteBlock, index: number, images: Images): string {
+  const page = view.page;
+  const points = block.points.map((line, i) => `${i + 1}. ${escapeHtml(line)}`).join('<br>');
+  const titled = block.guides.length > 1;
+  const guides = block.guides
+    .map((button, i) =>
+      renderGuide(view, button, titled, button.when ? guideGate(page, index, i) : null, images),
+    )
+    .join('');
+  const html = `<div class="note${block.when ? ' switched' : ''}"><p class="note-text"><b>Note:</b><br>${points}</p>${guides}</div>`;
+  return block.when ? `<div data-gate="${blockGate(page, index)}">${html}</div>` : html;
+}
+
+function renderSwitch(view: StepView, def: SwitchDef): string {
+  if (def.profiles && !def.profiles.includes(view.profile)) return '';
+  if (def.alwaysOn?.includes(view.profile) === true) {
+    return `<input class="audible" type="checkbox" name="switch_${def.id}" value="on" checked tabindex="-1" aria-hidden="true">`;
+  }
+  const on = effectiveSwitches(view.profile, view.answers.switches)[def.id];
+  return `<div class="form-group"><label class="switch"><input type="checkbox" name="switch_${def.id}" value="on"${on ? ' checked' : ''}><span class="slider" aria-hidden="true"></span><span class="label-text">${escapeHtml(def.label)}</span></label></div>`;
 }
 
 function fieldId(name: string): string {
@@ -456,7 +499,8 @@ function renderField(view: StepView, field: Field): string {
     default:
       control = `<input id="${id}" type="text" name="${name}" value="${escapeHtml(stored)}" placeholder="${escapeHtml(field.placeholder)}" autocomplete="off" spellcheck="false"${field.kind === 'url' ? ' inputmode="url"' : ''}${aria}>`;
   }
-  const labelHtml = field.kind === 'checkbox' ? '' : `<label for="${id}">${label}</label>`;
+  const labelHtml =
+    field.kind === 'checkbox' ? '' : `<label class="text-sm" for="${id}">${label}:</label>`;
   const keep = hasKeepNote
     ? `<p class="hint" id="${id}-keep">A value is already saved. Leave this empty to keep the current value.</p>`
     : '';
@@ -464,7 +508,7 @@ function renderField(view: StepView, field: Field): string {
     ? `<p class="field-error" id="${id}-error" role="alert">${escapeHtml(issue.message)}${issue.guideStep ? ` ${guideStepRefLink(issue.guideStep)}` : ''}</p>`
     : '';
   const cond = field.switch || field.appliesWhen ? ' data-cond' : '';
-  return `<div class="field${issue ? ' has-error' : ''}" data-field="${name}"${cond}>${labelHtml}${control}${keep}${error}</div>`;
+  return `<div class="form-group field${issue ? ' has-error' : ''}" data-field="${name}"${cond}>${labelHtml}${control}${keep}${error}</div>`;
 }
 
 function renderChecks(view: StepView): string {
@@ -476,12 +520,6 @@ function renderChecks(view: StepView): string {
     )
     .join('');
   return `<ul class="checks" aria-label="Check results">${lines}</ul>`;
-}
-
-function renderNote(page: Page): string {
-  if (page.note.length === 0) return '';
-  const items = page.note.map((line) => `<li>${escapeHtml(line)}</li>`).join('');
-  return `<div class="note"><strong>Note</strong><ol>${items}</ol></div>`;
 }
 
 function renderWelcomeFacts(view: StepView): string {
@@ -516,41 +554,75 @@ function renderInstallBody(view: StepView, install: InstallView): string {
       return `${renderField(view, field)}<p class="legal-link">${link}</p>`;
     })
     .join('');
-  return `${errors}<h4>Your settings</h4><table class="summary"><tbody>${rows}</tbody></table>${invite}<h4>Terms</h4>${accept}`;
+  return `${errors}<h4 class="section-heading mb-5">Your settings</h4><table class="summary"><tbody>${rows}</tbody></table>${invite}<h4 class="section-heading mb-5">Terms</h4>${accept}`;
+}
+
+/**
+ * The switches, fields and Note blocks of a page in the order of the 1.x installer: a switch, the
+ * fields of its feature, then the note of that group with its guide buttons.
+ */
+function renderGroups(view: StepView, images: Images): string {
+  const page = view.page;
+  const isInstall = page.id === 'install';
+  const visible = page.fields
+    .filter((field) => !field.profiles || field.profiles.includes(view.profile))
+    .filter((field) => !isInstall || field.kind !== 'checkbox');
+  const names = visible.map((field) => field.name);
+  const parts: string[][] = [[], ...visible.map(() => [] as string[])];
+
+  // A block comes after its anchor field, or after the nearest shown field before it.
+  page.blocks.forEach((block, index) => {
+    let slot = visible.length;
+    if (block.after !== undefined) {
+      slot = 0;
+      for (let i = page.fields.findIndex((field) => field.name === block.after); i >= 0; i--) {
+        const found = names.indexOf(page.fields[i]?.name ?? '');
+        if (found >= 0) {
+          slot = found + 1;
+          break;
+        }
+      }
+    }
+    parts[slot]?.push(renderBlock(view, block, index, images));
+  });
+
+  // A switch comes just before the first field of its feature, after the note of the group before.
+  for (const def of page.switches) {
+    const first = visible.findIndex((field) => field.switch === def.id);
+    parts[Math.max(first, 0)]?.push(renderSwitch(view, def));
+  }
+  const out: string[] = [...(parts[0] ?? [])];
+  visible.forEach((field, i) => {
+    out.push(renderField(view, field), ...(parts[i + 1] ?? []));
+  });
+  return out.filter(Boolean).join('\n');
 }
 
 /** The whole HTML page for one step. */
 export function renderStepPage(view: StepView): string {
   const page = view.page;
-  const images = { count: 0, boxes: [] as string[] };
+  const images: Images = { count: 0, boxes: [], guides: new Map() };
   const isInstall = page.id === 'install';
   const isWelcome = page.id === 'welcome';
   const first = PAGES[0]?.id === page.id;
-  const switches = renderSwitch(view, page);
-  const fields = page.fields
-    .filter((field) => !field.profiles || field.profiles.includes(view.profile))
-    .filter((field) => !isInstall || field.kind !== 'checkbox')
-    // The page lists every field of its switches; the stylesheet hides the ones that do not apply.
-    .map((field) => renderField(view, field))
-    .join('\n');
+  const body = renderGroups(view, images);
   const hasIssues = view.issues.size > 0;
   const banner = hasIssues
     ? '<div class="banner error" role="alert">Some answers need your attention. Fix the highlighted fields to continue.</div>'
     : '';
   const intro = page.intro.map((line) => `<p>${escapeHtml(line)}</p>`).join('');
-  const guides = renderGuides(view, images);
   const verify =
     page.checks.length > 0
       ? '<button class="button secondary" type="submit" name="action" value="verify">Test the connection</button>'
       : '';
-  const body = isInstall && view.install ? renderInstallBody(view, view.install) : '';
+  const install = isInstall && view.install ? renderInstallBody(view, view.install) : '';
   const actions = isInstall
     ? `<li><button class="button secondary" type="submit" name="action" value="back">Previous</button></li><li><button class="button secondary" type="submit" name="action" value="download" formaction="/download">Download the file</button></li><li><button class="button primary" type="submit" name="action" value="finish" formaction="/finish">Finish</button></li>`
     : `${first ? '' : '<li><button class="button secondary" type="submit" name="action" value="back">Previous</button></li>'}<li><button class="button primary" type="submit" name="action" value="next">Next</button></li>`;
   const defaultAction = isInstall ? 'finish' : 'next';
   const defaultFormaction = isInstall ? ' formaction="/finish"' : '';
   const html = `<main class="wizard">
-<header class="brand"><h1>Ririko Setup</h1></header>
+<header class="brand"><h1>Ririko Setup</h1><p>Follow the instructions to set up Ririko Ai for your Discord server.</p></header>
 ${tabs(view)}
 <form class="content" method="post" action="/step/${page.id}" novalidate>
 <input type="hidden" name="_csrf" value="${escapeHtml(view.csrf)}">
@@ -560,13 +632,10 @@ ${tabs(view)}
 ${banner}
 ${intro}
 ${isWelcome ? renderWelcomeFacts(view) : ''}
-${renderNote(page)}
-${guides}
-${switches}
-${fields ? `<div class="fields">${fields}</div>` : ''}
+${body}
 ${renderChecks(view)}
 ${verify}
-${body}
+${install}
 </div>
 <div class="actions"><ul>${actions}</ul></div>
 </form>
@@ -662,7 +731,7 @@ export function renderResultPage(result: ResultView): string {
       ? `<p>These secrets were generated for you and written to the file: ${result.generatedKeys.map((key) => `<code>${escapeHtml(key)}</code>`).join(', ')}.</p>`
       : '';
   const invite = result.inviteUrl
-    ? `<h4>Add the bot to your server</h4><p class="invite"><a href="${escapeHtml(result.inviteUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.inviteUrl)}</a></p>`
+    ? `<h4 class="section-heading">Add the bot to your server</h4><p class="invite"><a href="${escapeHtml(result.inviteUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.inviteUrl)}</a></p>`
     : '';
   const commands = result.commands
     .map(
@@ -672,7 +741,7 @@ export function renderResultPage(result: ResultView): string {
     .join('');
   return layout(
     'Done',
-    `<main class="wizard"><header class="brand"><h1>Ririko Setup</h1></header><div class="content"><div class="content-wrapper"><h2 class="section-heading">The settings are written</h2><div class="banner ok" role="status">The file <code>${escapeHtml(result.file)}</code> was ${result.created ? 'created' : 'updated'}.</div>${backup}${generated}${invite}<h4>Next, run these commands</h4><ol class="commands">${commands}</ol><p class="hint">This setup page has stopped. You can close this tab.</p></div></div></main>`,
+    `<main class="wizard"><header class="brand"><h1>Ririko Setup</h1></header><div class="content"><div class="content-wrapper"><h2 class="section-heading">The settings are written</h2><div class="banner ok" role="status">The file <code>${escapeHtml(result.file)}</code> was ${result.created ? 'created' : 'updated'}.</div>${backup}${generated}${invite}<h4 class="section-heading">Next, run these commands</h4><ol class="commands">${commands}</ol><p class="hint">This setup page has stopped. You can close this tab.</p></div></div></main>`,
   );
 }
 

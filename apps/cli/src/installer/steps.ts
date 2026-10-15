@@ -98,6 +98,27 @@ export interface PageCheck {
   appliesWhen?: Condition[];
 }
 
+/** A "Click here to show/hide the guide" button, shown only while its condition holds. */
+export interface GuideButton {
+  guide: GuideId;
+  /** The button shows while one of these holds; with its block when omitted. */
+  when?: Condition[];
+}
+
+/**
+ * The "Note:" paragraph of a group of fields with the guide buttons at its end. It sits after the
+ * fields of its group and, with `when`, shows only while that group is on.
+ */
+export interface NoteBlock {
+  /** The field the block follows; the last field of the page when omitted. */
+  after?: string;
+  /** The block shows while one of these holds; always when omitted. */
+  when?: Condition[];
+  /** Numbered points of the note. */
+  points: string[];
+  guides: GuideButton[];
+}
+
 export interface Page {
   id: PageId;
   /** Material Design Icons name, as in 1.x. */
@@ -106,8 +127,8 @@ export interface Page {
   subtitle: string;
   heading: string;
   intro: string[];
-  /** Numbered points of the Note box. */
-  note: string[];
+  /** The Note blocks, each placed after the fields of its group (as in the 1.x installer). */
+  blocks: NoteBlock[];
   switches: SwitchDef[];
   fields: Field[];
   guides: GuideId[];
@@ -124,8 +145,6 @@ export interface FieldError {
   message: string;
 }
 
-const NO_SWITCH_NOTE = 'Leave a feature off and none of its settings are touched.';
-
 export const PAGES: readonly Page[] = [
   {
     id: 'welcome',
@@ -138,7 +157,7 @@ export const PAGES: readonly Page[] = [
       'During the setup, you may need to sign up for several things important for the AI, Twitch, Moderations, Giveaways etc (but of course you can opt out from using some of them).',
       "Don't fret though! This installation is guided, and easy. Let's begin, shall we?",
     ],
-    note: [],
+    blocks: [],
     switches: [],
     fields: [],
     guides: [],
@@ -151,9 +170,14 @@ export const PAGES: readonly Page[] = [
     subtitle: 'Step 1',
     heading: 'Enter your Bot details',
     intro: [],
-    note: [
-      "If you're not sure where to get the Application ID and Bot Token, click the button below.",
-      "Please make sure that your bot has the Server Members and Message Content Privileged Gateway Intents checked. If you don't know what this is, please follow the instructions below (check step 5).",
+    blocks: [
+      {
+        points: [
+          "If you're not sure where to get the Application ID and Bot Token, click the button below.",
+          "Please make sure that your bot has the Server Members and Message Content Privileged Gateway Intents checked. If you don't know what this is, please follow the instructions below (check step 5).",
+        ],
+        guides: [{ guide: 'discord' }, { guide: 'owner-id' }],
+      },
     ],
     switches: [],
     fields: [
@@ -206,10 +230,51 @@ export const PAGES: readonly Page[] = [
     intro: [
       'If you want to make your community feel alive (and smarter) with an AI Chatbot, you can enable it in this page. Also if you want to enable artwork generations using AI, you can enable image generation in here too.',
     ],
-    note: [
-      'To enable the chatbot, we will use Google Gemini, OpenAI (not free) or your own Ollama server.',
-      "To enable the features, we will need the API token / key or the server address. If you're unsure where to find them, click on the button below.",
-      NO_SWITCH_NOTE,
+    blocks: [
+      {
+        after: 'OLLAMA_BASE_URL',
+        when: [{ switch: 'ai-chat' }],
+        points: [
+          'To enable the chatbot, we will use Google Gemini, OpenAI (not free) or your own Ollama server.',
+          "To enable the feature, we will need the API token / key or the server address. If you're unsure where to find them, click on the button below.",
+        ],
+        guides: [
+          {
+            guide: 'gemini',
+            when: [{ switch: 'ai-chat', field: 'DEFAULT_AI_PROVIDER', equals: 'gemini' }],
+          },
+          {
+            guide: 'openai',
+            when: [{ switch: 'ai-chat', field: 'DEFAULT_AI_PROVIDER', equals: 'openai' }],
+          },
+          {
+            guide: 'ollama',
+            when: [{ switch: 'ai-chat', field: 'DEFAULT_AI_PROVIDER', equals: 'ollama' }],
+          },
+        ],
+      },
+      {
+        after: 'COMFYUI_URL',
+        when: [{ switch: 'ai-images' }],
+        points: [
+          'For image generation, we will use Google Gemini, Replicate.com or your own ComfyUI / Stable Diffusion WebUI server.',
+          "If you're unsure where to find the key or the server address, click on the button below.",
+        ],
+        guides: [
+          {
+            guide: 'gemini',
+            when: [{ switch: 'ai-images', field: 'IMAGE_DEFAULT_PROVIDER', equals: 'gemini' }],
+          },
+          {
+            guide: 'replicate',
+            when: [{ switch: 'ai-images', field: 'IMAGE_DEFAULT_PROVIDER', equals: 'replicate' }],
+          },
+          {
+            guide: 'comfyui',
+            when: [{ switch: 'ai-images', field: 'IMAGE_DEFAULT_PROVIDER', equals: 'comfyui' }],
+          },
+        ],
+      },
     ],
     switches: [
       {
@@ -334,10 +399,25 @@ export const PAGES: readonly Page[] = [
     subtitle: 'Step 3',
     heading: 'Configure Stream Alerts',
     intro: ['Get notified when a Twitch Streamer or a YouTube channel started streaming.'],
-    note: [
-      "To get notified when a Twitch Streamer goes live, you'll need a Twitch developer account. YouTube needs a Google Cloud API key.",
-      "If you don't have one, click on the button below for guide on how to register and get the API key.",
-      NO_SWITCH_NOTE,
+    blocks: [
+      {
+        after: 'TWITCH_CLIENT_SECRET',
+        when: [{ switch: 'twitch' }],
+        points: [
+          "To get notified when a Twitch Streamer goes live, you'll need a Twitch developer account.",
+          "If you don't have one, click on the button below for guide on how to register and get the Client ID and Client Secret.",
+        ],
+        guides: [{ guide: 'twitch' }],
+      },
+      {
+        after: 'YOUTUBE_API_KEY',
+        when: [{ switch: 'youtube' }],
+        points: [
+          'To get notified when a YouTube channel goes live, you need a Google Cloud API key.',
+          "If you don't have one, click on the button below for guide on how to register and get the API key.",
+        ],
+        guides: [{ guide: 'youtube' }],
+      },
     ],
     switches: [
       {
@@ -396,10 +476,24 @@ export const PAGES: readonly Page[] = [
     subtitle: 'Step 4',
     heading: 'Enter your Database and Music settings',
     intro: [],
-    note: [
-      'Ririko stores its data in SQLite (one file, nothing to set up) or in PostgreSQL. With Docker, a PostgreSQL database comes with the stack and its password is generated for you.',
-      'The password that Ririko and Lavalink (the music server) share is generated for you.',
-      'Spotify links need a Spotify client; leave it off to play only from other sources.',
+    blocks: [
+      {
+        after: 'DATABASE_URL',
+        points: [
+          'Ririko stores its data in SQLite (one file, nothing to set up) or in PostgreSQL. With Docker, a PostgreSQL database comes with the stack and its password is generated for you.',
+          'The password that Ririko and Lavalink (the music server) share is generated for you.',
+        ],
+        guides: [{ guide: 'postgres', when: [{ field: 'DATABASE_DIALECT', equals: 'postgres' }] }],
+      },
+      {
+        after: 'SPOTIFY_CLIENT_SECRET',
+        when: [{ switch: 'spotify' }],
+        points: [
+          'Spotify links need a Spotify client; leave the switch off to play only from other sources.',
+          "If you don't have one, click on the button below for guide on how to register and get the Client ID and Client Secret.",
+        ],
+        guides: [{ guide: 'spotify' }],
+      },
     ],
     switches: [
       {
@@ -474,10 +568,16 @@ export const PAGES: readonly Page[] = [
     intro: [
       'The dashboard lets server admins manage Ririko in a browser. Members sign in with Discord.',
     ],
-    note: [
-      'The dashboard needs the OAuth2 client secret of your Discord application and the address it will be reachable at.',
-      'The key that encrypts stored credentials is generated for you and never replaced once it is in the file.',
-      'With Docker the dashboard is always part of the stack.',
+    blocks: [
+      {
+        when: [{ switch: 'dashboard' }],
+        points: [
+          'The dashboard needs the OAuth2 client secret of your Discord application and the address it will be reachable at.',
+          'The key that encrypts stored credentials is generated for you and never replaced once it is in the file.',
+          'With Docker the dashboard is always part of the stack.',
+        ],
+        guides: [{ guide: 'dashboard-oauth' }],
+      },
     ],
     switches: [
       {
@@ -522,7 +622,7 @@ export const PAGES: readonly Page[] = [
     intro: [
       'Review your answers, accept the terms, and write the settings file. Then invite the bot to your Discord server.',
     ],
-    note: [],
+    blocks: [],
     switches: [],
     fields: [
       {

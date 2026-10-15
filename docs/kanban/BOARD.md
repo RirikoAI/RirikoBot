@@ -464,6 +464,7 @@
 | `BUG-0042` | Bug | Dashboard Liveness Probes Fail While Migrations Are Pending, Failing the CircleCI Docker Smoke Check | 3 | EPIC-019 | [BUG-0042.md](./handovers/BUG-0042.md) |
 | `BUG-0043` | Bug | ririko db:migrate Prints Adoption Notes and the Backup Twice and Ends With "Nothing to do" After Adopting | 1 | EPIC-019 | [BUG-0043.md](./handovers/BUG-0043.md) |
 | `BUG-0046` | Bug | `pnpm installer` Fails on a Fresh Clone: Workspace Packages Not Built, Native Install Scripts Blocked | 2 | STORY-192 | [BUG-0046.md](./handovers/BUG-0046.md) |
+| `BUG-0047` | Bug | Setup Wizard Pages Do Not Mirror the 1.x Installer: Font Sizes, Note and Guide Button Placement, Switch-Gated Guides, Minimal Look | 3 | STORY-192 | [BUG-0047.md](./handovers/BUG-0047.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

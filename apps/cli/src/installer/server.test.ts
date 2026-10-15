@@ -546,7 +546,7 @@ describe('pages', () => {
     const css = await get(s, '/assets/conditions.css');
     expect(css.status).toBe(200);
     expect(css.headers['content-type']).toContain('text/css');
-    expect(css.body).toContain('[data-cond] { display: none; }');
+    expect(css.body).toContain('[data-gate] { display: none; }');
     expect(css.body).toContain('input[name="switch_ai-chat"]:checked');
     expect(css.body).toContain('[data-field="GEMINI_API_KEY"]');
   });
@@ -591,6 +591,27 @@ describe('assets and legal texts', () => {
     const image = await get(s, '/assets/images/twitch-step1.png');
     expect(image.status).toBe(200);
     expect(image.headers['content-type']).toBe('image/png');
+  });
+
+  it('serves the self-hosted Karla font with its license, and no stylesheet uses another host', async () => {
+    const s = await start();
+    const css = await get(s, '/assets/wizard.css');
+    expect(css.body).toContain("font-family: 'Karla'");
+    expect(css.body).not.toMatch(/https?:\/\//);
+    // Six tabs must fit: the width limit is a sixth, not the fifth of the 1.x installer.
+    expect(css.body).toContain('max-width: calc(100% / 6 - 6px)');
+    expect(css.body).not.toContain('calc(20% - 6px)');
+    for (const file of ['karla-latin.woff2', 'karla-latin-ext.woff2']) {
+      expect(css.body).toContain(`/assets/fonts/${file}`);
+      const font = await get(s, `/assets/fonts/${file}`);
+      expect(font.status, file).toBe(200);
+      expect(font.headers['content-type']).toBe('font/woff2');
+    }
+    const license = await get(s, '/assets/fonts/OFL.txt');
+    expect(license.status).toBe(200);
+    expect(license.body).toContain('SIL Open Font License');
+    expect((await get(s, '/assets/fonts/missing.woff2')).status).toBe(404);
+    expect((await get(s, '/')).headers['content-security-policy']).not.toContain('font-src *');
   });
 
   it('refuses paths outside assets/installer', async () => {

@@ -1,8 +1,32 @@
 /*
- * Ririko setup wizard. The layout of the 1.x installer (step tabs, a centered content card,
- * Previous / Next at the bottom right) in the colors of the 2.0 dashboard
- * (apps/web/src/app/globals.css). Plain CSS, no script, no external font or CDN.
+ * Ririko setup wizard. It mirrors the 1.x installer (.local/installer-1x: Bootstrap 4 defaults
+ * plus assets/css/bd-wizard.css) in size, spacing and order; only the colors are the 2.0 ones
+ * (apps/web/src/app/globals.css). Plain CSS, no script, no CDN. Karla is self-hosted
+ * (fonts/, SIL Open Font License in fonts/OFL.txt).
  */
+
+@font-face {
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/karla-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/karla-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   --color-ink: #0f0d17;
@@ -26,20 +50,42 @@ body {
   margin: 0;
   background: var(--color-ink);
   color: var(--color-text);
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: 'Karla', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
   line-height: 1.5;
+}
+
+h1,
+h2,
+h4,
+h5 {
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0 0 1rem;
 }
 
 a {
   color: var(--color-sakura);
 }
 
-a:hover {
+.wizard a:hover {
   text-decoration: none;
 }
 
@@ -59,7 +105,7 @@ pre {
   overflow-x: auto;
   background: var(--color-ink);
   border: 1px solid var(--color-edge);
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 .audible {
@@ -74,38 +120,50 @@ pre {
   border: 0;
 }
 
-/* Wizard */
+/* Page: the Bootstrap container and `my-5` of the 1.x page */
 
 .wizard {
-  max-width: 1100px;
+  max-width: 1140px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 3rem 15px;
+}
+
+.brand {
+  margin-bottom: 1.5rem;
 }
 
 .brand h1 {
-  margin: 0 0 16px;
-  font-size: 22px;
-  color: var(--color-sakura);
+  color: var(--color-text);
 }
+
+.brand p {
+  margin: 0;
+}
+
+/* Step tabs. The first tab (Welcome) is not shown, as in 1.x. */
 
 .steps > ul {
   display: flex;
   justify-content: space-between;
-  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .steps li {
-  flex: 1 1 0;
-  max-width: calc(25% - 6px);
   min-width: 0;
+  width: 270px;
+  /* 1.x had five tabs (20%); the wizard has six. */
+  max-width: calc(100% / 6 - 6px);
+}
+
+.steps li:first-child {
+  display: none;
 }
 
 .step-link {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   height: 100%;
   padding: 28px 30px 24px;
@@ -116,76 +174,74 @@ pre {
   text-decoration: none;
 }
 
-.steps li:not(.current):not(.done) .step-link {
-  color: var(--color-muted);
+.step-icon {
+  display: inline-block;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-right: 11px;
+  border-radius: 4px;
+  background: var(--color-edge);
+  color: var(--color-sakura);
+  font-size: 20px;
+  line-height: 34px;
+  text-align: center;
+}
+
+.step-icon svg {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+.steps li.current .step-icon,
+.steps li.done .step-icon {
+  background: var(--color-sakura);
+  color: #fff;
 }
 
 .steps li.current .step-link {
   background: var(--color-panel);
 }
 
-.step-icon {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  margin-right: 11px;
-  border-radius: 4px;
-  background: var(--color-edge);
-  color: var(--color-text);
-}
-
-.steps li.current .step-icon,
-.steps li.done .step-icon {
-  background: var(--color-sakura-strong);
-  color: #fff;
-}
-
 .step-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex: 1 1 auto;
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .step-title {
+  display: block;
   font-size: 18px;
   font-weight: bold;
   line-height: 1;
 }
 
 .step-subtitle {
-  min-height: 14px;
+  display: block;
   font-size: 14px;
   line-height: 1;
-  color: var(--color-muted);
+  color: var(--color-sakura);
 }
+
+/* The white content area of 1.x */
 
 .content {
   padding: 100px 35px 20px;
   min-height: 420px;
   background: var(--color-panel);
-  border: 1px solid var(--color-edge);
-  border-top: 0;
-  border-bottom: 0;
 }
 
 .content-wrapper {
   max-width: 700px;
-  margin: 0 auto;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .section-heading {
-  margin: 0 0 22px;
-  font-size: 26px;
+  margin-bottom: 22px;
+  font-size: 1.5rem;
   font-weight: bold;
-}
-
-.content h4 {
-  margin: 28px 0 10px;
-  font-size: 18px;
 }
 
 .content p {
@@ -195,92 +251,74 @@ pre {
 .actions {
   padding: 0 35px 35px;
   background: var(--color-panel);
-  border: 1px solid var(--color-edge);
-  border-top: 0;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
 }
 
 .actions > ul {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 15px;
   max-width: 700px;
   margin: 0 auto;
-  padding: 15px 0 0;
+  padding: 0 0 15px;
   list-style: none;
-  border-top: 1px solid var(--color-edge);
+  border-bottom: 1px solid var(--color-edge);
 }
 
-.button {
+.actions li + li {
+  margin-left: 15px;
+}
+
+.actions .button {
   display: inline-block;
   padding: 16px 30px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 6px;
+  background: var(--color-sakura-strong);
+  color: #fff;
   font: inherit;
   font-weight: bold;
-  color: #fff;
   cursor: pointer;
 }
 
-.button.primary {
-  background: var(--color-sakura-strong);
-}
-
-.button.primary:hover {
+.actions .button:hover {
   background: var(--color-sakura);
 }
 
-.button.secondary {
-  background: transparent;
-  border-color: var(--color-edge);
-  color: var(--color-text);
+/* Fields: Bootstrap `.form-control` with the sizes of bd-wizard.css */
+
+.form-group {
+  margin-bottom: 1rem;
 }
 
-.button.secondary:hover {
-  border-color: var(--color-sakura);
-}
-
-.button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-summary:focus-visible {
-  outline: 2px solid var(--color-sakura);
-  outline-offset: 2px;
-}
-
-/* Fields */
-
-.fields {
-  margin-top: 18px;
-}
-
-.field {
-  margin: 0 0 18px;
-}
-
-.field label {
+.form-group label.text-sm {
   display: block;
-  margin-bottom: 6px;
-  font-weight: bold;
+  margin: 0 0 1rem;
 }
 
-.field input[type='text'],
-.field input[type='password'],
-.field select {
+.form-group input[type='text'],
+.form-group input[type='password'],
+.form-group select {
+  display: block;
   width: 100%;
   max-width: 550px;
+  height: calc(1.5em + 0.75rem + 2px);
   min-height: 50px;
-  padding: 12px 18px;
-  border: 1px solid var(--color-edge);
+  padding: 26px 25px;
+  border: 1px solid var(--color-muted);
   border-radius: 4px;
   background: var(--color-ink);
   color: var(--color-text);
   font: inherit;
+  line-height: 1.5;
 }
 
-.field input::placeholder {
+.form-group select {
+  height: 55px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.form-group input::placeholder {
   color: var(--color-muted);
 }
 
@@ -290,87 +328,85 @@ summary:focus-visible {
 }
 
 .field-error {
-  margin: 6px 0 0;
-  font-size: 14px !important;
+  margin: 0.25rem 0 0;
   color: var(--color-error);
 }
 
-.hint {
-  margin: 6px 0 0;
-  font-size: 14px !important;
+.content .field-error {
+  font-size: 14px;
+}
+
+.hint,
+.content .hint {
+  margin: 0.25rem 0 0;
+  font-size: 14px;
   color: var(--color-muted);
 }
 
 .check-row {
-  display: flex !important;
-  gap: 10px;
-  align-items: flex-start;
-  font-weight: normal !important;
+  position: relative;
+  display: block;
+  padding-left: 1.25rem;
 }
 
 .check-row input {
-  flex: none;
-  width: 20px;
-  height: 20px;
-  margin-top: 3px;
+  position: absolute;
+  margin-top: 0.3rem;
+  margin-left: -1.25rem;
   accent-color: var(--color-sakura-strong);
 }
 
 .legal-link {
-  margin: -6px 0 18px 30px;
-  font-size: 14px !important;
+  margin: 0 0 1.5rem 1.25rem;
 }
 
-/* Feature switches */
-
-.feature {
-  margin: 0 0 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--color-edge);
-  border-radius: 8px;
+.mb-5 {
+  margin-bottom: 3rem;
 }
+
+/* Switches: the 60 x 34 round slider of 1.x */
 
 .switch {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin-bottom: 14px;
   cursor: pointer;
-  font-weight: bold;
 }
 
 .switch input {
-  position: absolute;
+  width: 0;
+  height: 0;
   opacity: 0;
 }
 
 .slider {
-  position: relative;
-  flex: none;
-  width: 46px;
-  height: 26px;
-  border-radius: 13px;
+  position: absolute;
+  inset: 0;
+  border-radius: 34px;
   background: var(--color-edge);
-  transition: background 0.15s;
+  transition: 0.4s;
 }
 
-.slider::after {
+.slider::before {
   content: '';
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
+  bottom: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #fff;
-  transition: transform 0.15s;
+  transition: 0.4s;
 }
 
 .switch input:checked + .slider {
   background: var(--color-sakura-strong);
 }
 
-.switch input:checked + .slider::after {
-  transform: translateX(20px);
+.switch input:checked + .slider::before {
+  transform: translateX(26px);
 }
 
 .switch input:focus-visible + .slider {
@@ -378,30 +414,124 @@ summary:focus-visible {
   outline-offset: 2px;
 }
 
-/* Note box, banners and checks */
+.switch .label-text {
+  position: absolute;
+  top: 50%;
+  left: 75px;
+  width: max-content;
+  transform: translateY(-50%);
+}
+
+/* The note and its guide buttons */
 
 .note {
-  margin: 18px 0;
-  padding: 14px 18px;
-  border-left: 4px solid var(--color-sakura-strong);
-  border-radius: 4px;
-  background: var(--color-ink);
+  margin-bottom: 1rem;
 }
 
-.note ol {
-  margin: 8px 0 0;
-  padding-left: 20px;
+.note.switched {
+  margin-bottom: 0;
+  padding-bottom: 30px;
 }
 
-.note li {
-  margin: 4px 0;
+.content .note-text {
+  margin-bottom: 24px;
 }
+
+.guide {
+  margin-bottom: 1rem;
+}
+
+.guide > summary {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background: var(--color-sakura-strong);
+  color: #fff;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.guide > summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide > summary:hover {
+  background: var(--color-sakura);
+}
+
+.guide[open] > summary {
+  margin-bottom: 1rem;
+}
+
+.guide-body {
+  padding: 1.25rem;
+  border: 1px solid var(--color-edge);
+  border-radius: 0.25rem;
+}
+
+.guide-step {
+  scroll-margin-top: 16px;
+}
+
+.guide-step p {
+  margin: 0 0 1rem;
+}
+
+.guide-links {
+  margin: 0 0 1rem;
+  padding-left: 40px;
+}
+
+.guide-image {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.guide-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.guide-image span {
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.callout {
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 4px solid var(--color-sakura);
+}
+
+.callout.warning {
+  border-color: var(--color-warn);
+}
+
+.callout p {
+  margin: 0;
+}
+
+.callout code {
+  display: block;
+  margin-top: 6px;
+}
+
+.guide-link {
+  white-space: nowrap;
+}
+
+/* Alerts and check results */
 
 .banner {
-  margin: 0 0 18px;
-  padding: 12px 16px;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1.25rem;
   border: 1px solid var(--color-edge);
-  border-radius: 6px;
+  border-radius: 0.25rem;
 }
 
 .banner.error {
@@ -420,37 +550,51 @@ summary:focus-visible {
 }
 
 .checks {
-  margin: 18px 0;
+  margin: 0 0 1rem;
   padding: 0;
   list-style: none;
 }
 
 .check {
-  margin: 6px 0;
-  padding: 8px 12px;
-  border-left: 4px solid var(--color-edge);
-  border-radius: 4px;
-  background: var(--color-ink);
-  font-size: 15px;
+  margin-bottom: 0.5rem;
 }
 
-.check.pass {
-  border-color: var(--color-ok);
+.check.pass strong {
+  color: var(--color-ok);
 }
 
-.check.warn {
-  border-color: var(--color-warn);
+.check.warn strong {
+  color: var(--color-warn);
 }
 
-.check.fail {
-  border-color: var(--color-error);
+.check.fail strong {
+  color: var(--color-error);
+}
+
+.button.secondary {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background: var(--color-edge);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.actions .button.secondary {
+  margin-bottom: 0;
+  padding: 16px 30px;
+  background: var(--color-sakura-strong);
+  color: #fff;
 }
 
 .facts {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 6px 16px;
-  margin: 18px 0;
+  gap: 0.25rem 1rem;
+  margin: 0 0 1rem;
 }
 
 .facts dt {
@@ -465,13 +609,13 @@ summary:focus-visible {
 
 .summary {
   width: 100%;
+  margin-bottom: 1rem;
   border-collapse: collapse;
-  font-size: 15px;
 }
 
 .summary th,
 .summary td {
-  padding: 6px 8px;
+  padding: 0.25rem 0.5rem;
   border-bottom: 1px solid var(--color-edge);
   text-align: left;
   vertical-align: top;
@@ -480,8 +624,8 @@ summary:focus-visible {
 
 .summary th {
   width: 40%;
-  color: var(--color-muted);
   font-weight: normal;
+  color: var(--color-muted);
 }
 
 .invite {
@@ -497,97 +641,12 @@ summary:focus-visible {
   margin: 14px 0;
 }
 
-/* Guides */
-
-.guide {
-  margin: 18px 0;
-}
-
-.guide > summary {
-  display: inline-block;
-  padding: 14px 24px;
-  border-radius: 6px;
-  background: var(--color-sakura-strong);
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  list-style: none;
-}
-
-.guide > summary::-webkit-details-marker {
-  display: none;
-}
-
-.guide-body {
-  margin-top: 12px;
-  padding: 8px 18px 18px;
-  border: 1px solid var(--color-edge);
-  border-radius: 8px;
-  background: var(--color-ink);
-}
-
-.guide-body h4 {
-  margin-top: 12px;
-}
-
-.guide-step {
-  margin: 16px 0;
-  scroll-margin-top: 16px;
-}
-
-.guide-step h5 {
-  margin: 0 0 6px;
-  font-size: 16px;
-}
-
-.guide-step p {
-  margin: 6px 0;
-  font-size: 15px;
-}
-
-.guide-links {
-  margin: 6px 0;
-  padding-left: 20px;
-}
-
-.guide-image {
-  display: inline-block;
-  max-width: 100%;
-  margin: 8px 0;
-  font-size: 13px;
-}
-
-.guide-image img {
-  display: block;
-  max-width: 100%;
-  max-height: 220px;
-  border: 1px solid var(--color-edge);
-  border-radius: 6px;
-}
-
-.callout {
-  margin: 8px 0;
-  padding: 10px 14px;
-  border-left: 4px solid var(--color-sakura);
-  border-radius: 4px;
-  background: var(--color-panel);
-}
-
-.callout.warning {
-  border-color: var(--color-warn);
-}
-
-.callout p {
-  margin: 0;
-}
-
-.callout code {
-  display: block;
-  margin-top: 6px;
-}
-
-.guide-link {
-  white-space: nowrap;
+.button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--color-sakura);
+  outline-offset: 2px;
 }
 
 /* Full-size images: opened with :target, no script */
@@ -617,7 +676,7 @@ summary:focus-visible {
 .lightbox img {
   max-width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 .lightbox figcaption {
@@ -627,12 +686,10 @@ summary:focus-visible {
 
 .lightbox-close {
   position: fixed;
-  top: 16px;
-  right: 16px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  background: var(--color-sakura-strong);
-  color: #fff;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
   font-weight: bold;
   text-decoration: none;
 }
@@ -643,7 +700,7 @@ summary:focus-visible {
 .message {
   max-width: 800px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 3rem 15px;
 }
 
 .legal table {
@@ -664,40 +721,32 @@ summary:focus-visible {
   overflow-x: auto;
 }
 
-/* Narrow screens: the tabs show only their icon */
+/* Below 1200px six tabs have no room for their text: they show only their icon, as 1.x does on phones */
 
-@media (max-width: 767px) {
-  .wizard {
-    padding: 12px 8px 32px;
-  }
-
+@media (max-width: 1199px) {
   .step-link {
-    justify-content: center;
     padding: 15px 10px;
   }
 
   .step-icon {
+    display: block;
     margin: 0 auto;
   }
 
   .step-text {
     display: none;
   }
+}
 
+@media (max-width: 767px) {
   .content {
     min-height: auto;
-    padding: 32px 20px 20px;
+    padding-right: 20px;
+    padding-left: 20px;
   }
 
   .actions {
-    padding: 0 20px 24px;
-  }
-
-  .section-heading {
-    font-size: 22px;
-  }
-
-  .button {
-    padding: 14px 20px;
+    padding-right: 20px;
+    padding-left: 20px;
   }
 }

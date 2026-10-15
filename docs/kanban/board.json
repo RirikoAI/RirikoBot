@@ -2820,7 +2820,8 @@
         "TASK-1924",
         "TASK-1925",
         "TASK-1926",
-        "BUG-0046"
+        "BUG-0046",
+        "BUG-0047"
       ],
       "blocks": [
         "STORY-191",
@@ -2868,7 +2869,7 @@
         ]
       },
       "acceptance": [
-        "TASK-1921 to TASK-1926 and BUG-0046 are DONE.",
+        "TASK-1921 to TASK-1926, BUG-0046 and BUG-0047 are DONE.",
         "On a clean checkout, `pnpm installer` opens the wizard; finishing it with valid answers writes a `.env` that `pnpm doctor` accepts and the bot and the dashboard start with.",
         "The coverage gate passes (`pnpm test:coverage`)."
       ],
@@ -11746,6 +11747,63 @@
         "SETUP.md and README steps stay correct."
       ],
       "verify_cmd": "pnpm typecheck && pnpm vitest run apps/cli/src && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0047",
+      "title": "Setup Wizard Pages Do Not Mirror the 1.x Installer: Font Sizes, Note and Guide Button Placement, Switch-Gated Guides, Minimal Look",
+      "points": 3,
+      "status": "DONE",
+      "parent": "STORY-192",
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "BUG-0047",
+        "TASK-1924",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "description": "The maintainer (2026-10-15) set these as the acceptance of the wizard rework: mirror the 1.x installer's font sizes, the placement of the notes and the \"Click here...\" guide buttons, show a feature's guide button only when its switch or choice is on, and keep the page as minimal as 1.x. Only the colors stay 2.0.",
+      "context": {
+        "files": [
+          "apps/cli/src/installer/render.ts",
+          "apps/cli/src/installer/render.test.ts",
+          "apps/cli/src/installer/steps.ts",
+          "apps/cli/src/installer/guides.ts",
+          "apps/cli/src/installer/server.test.ts",
+          "assets/installer/wizard.css",
+          "assets/installer/",
+          ".local/installer-1x/index.html",
+          ".local/installer-1x/assets/css/bd-wizard.css",
+          ".local/installer-1x/assets/js/bd-wizard.js",
+          "apps/cli/src/installer/server.ts",
+          "assets/installer/fonts/"
+        ],
+        "symbols": [
+          "renderStepPage",
+          "renderGuide",
+          "conditionalCss",
+          "PAGES"
+        ],
+        "codegraph_queries": [
+          "render.ts renderStepPage renderGuide conditionalCss summaryRows",
+          "PAGES StepPage switches fields guides note appliesWhen"
+        ]
+      },
+      "acceptance": [
+        "Type matches 1.x bd-wizard.css: Karla (self-hosted under assets/installer/ with its OFL license file; no CDN), body and paragraph text 16px, step tab title 18px bold, step subtitle 14px, page heading the size of a Bootstrap 4 h4 (1.5rem), field labels as 1.x `p.text-sm`, inputs at least 50px tall with 26px 25px padding and max-width 550px, content column max-width 700px. Step tabs keep the 1.x sizes (34px icon box, 28px 30px 24px padding).",
+        "Order on every page follows 1.x: section heading, intro text, then the fields; the \"Note:\" block with its numbered points comes after the fields of its group; the \"Click here to show/hide the guide: …\" button(s) come at the end of that note; the guide opens directly below its button. No note or guide button sits above the fields.",
+        "A feature's fields, note and guide button(s) are inside its switch or choice block and are hidden until that switch is on or that choice is selected (for example the OpenAI key guide only when the AI chat switch is on and OpenAI is chosen; the Twitch guide only when Twitch is on; the PostgreSQL guide only when PostgreSQL is chosen). Pages without a switch (Discord) show theirs after the fields, as in 1.x. Hiding works with CSS only (the existing `:has()` approach), with no JavaScript required.",
+        "Minimal like 1.x: no extra panels, cards, badges, borders or decorative boxes beyond what 1.x has (step tabs, the white content area, the plain note paragraph, the collapsible guide card, the bottom action row). Colors stay the 2.0 palette.",
+        "Checked in a browser at 1280px and 375px against a temporary root (never the repository .env): each page compared with the matching 1.x page; the PROGRESS entry describes each page and any intended difference (2.0-only fields, the Install summary).",
+        "Tests assert the order (fields before note before guide button) and that each switch-gated guide button is inside its gated block."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm vitest run apps/cli/src/installer && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "active_in_progress_ticket": null
