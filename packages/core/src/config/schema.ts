@@ -124,7 +124,16 @@ const BaseAppConfigSchema = z.object({
 
   // Optional Lavalink audio node (the bot uses its built-in player without one)
   LAVALINK_ENABLED: z.string().optional(),
-  LAVALINK_HOST: z.string().optional(),
+  LAVALINK_HOST: z
+    .string()
+    .regex(
+      /^[^\s/]+$/,
+      'LAVALINK_HOST must be a host name or IP address, without http:// or a path',
+    )
+    .optional(),
+  LAVALINK_PORT: z.coerce.number().int().min(1).max(65535).optional(),
+  LAVALINK_PASSWORD: z.string().optional(),
+  LAVALINK_SECURE: z.enum(['true', 'false']).optional(),
   // `true` loads the private music package into the fallback player used without Lavalink
   USE_PRIVATE_MUSIC_PACKAGE: z.string().optional(),
 

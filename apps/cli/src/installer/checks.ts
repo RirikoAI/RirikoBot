@@ -433,6 +433,84 @@ export async function checkDatabase(
   );
 }
 
+// -- Lavalink ---------------------------------------------------------------------------------
+
+/** The text of a Lavalink version answer, trimmed to a short single line. */
+function shortLine(text: string): string {
+  const line = (text.split(/\r?\n/)[0] ?? '').trim();
+  return line.length > 40 ? `${line.slice(0, 40)}...` : line;
+}
+
+/**
+ * A Lavalink 4 server: `GET <http|https>://host:port/version` with the password in the
+ * Authorization header. A version answer passes; a 401 means the password is wrong; no answer
+ * means the address, the port or the connection type is wrong or Lavalink is not running.
+ */
+export async function checkLavalink(
+  values: { host: string; port: string; password: string; secure: boolean },
+  deps: CheckDeps = {},
+): Promise<CheckResult> {
+  const addressStep: GuideStepRef = { guide: 'lavalink', step: 2 };
+  const passwordStep: GuideStepRef = { guide: 'lavalink', step: 3 };
+  const host = values.host.trim();
+  const shownHost = host.includes(':') && !host.startsWith('[') ? `[${host}]` : host;
+  const address = `${shownHost}:${values.port.trim()}`;
+  return guarded(
+    'Lavalink',
+    deps,
+    [values.password],
+    async (signal) => {
+      const url = `${values.secure ? 'https' : 'http'}://${address}/version`;
+      if (!URL.canParse(url)) {
+        return {
+          status: 'fail',
+          message: `Lavalink: ${address} is not a usable address and port. Check them in the Lavalink guide (step 2).`,
+          guideStep: addressStep,
+        };
+      }
+      let res: Response;
+      try {
+        res = await fetcher(deps)(url, {
+          headers: { Authorization: values.password },
+          signal,
+        });
+      } catch (err: unknown) {
+        // A timeout is reported by `guarded`; anything else is "nothing answered".
+        if (signal.aborted) throw err;
+        return {
+          status: 'fail',
+          message: `Nothing answered at ${address}. Check that Lavalink is running, that the address and port are right and that the connection type matches (Lavalink guide, step 2).`,
+          guideStep: addressStep,
+          detail: { reachable: false, error: redactSecrets(errorMessage(err), [values.password]) },
+        };
+      }
+      if (res.status === 401 || res.status === 403) {
+        return {
+          status: 'fail',
+          message: `Lavalink at ${address} refused the password. Copy it again from the application.yml of the Lavalink server (Lavalink guide, step 3).`,
+          guideStep: passwordStep,
+          detail: { httpStatus: res.status, reachable: true },
+        };
+      }
+      if (res.status < 200 || res.status >= 300) {
+        return {
+          status: 'fail',
+          message: `Lavalink at ${address} answered HTTP ${res.status}. Check that this is a Lavalink 4 server (Lavalink guide, step 1).`,
+          guideStep: { guide: 'lavalink', step: 1 },
+          detail: { httpStatus: res.status, reachable: true },
+        };
+      }
+      const version = shortLine(await res.text().catch(() => ''));
+      return {
+        status: 'pass',
+        message: `Lavalink${version ? ` ${version}` : ''} accepted the password at ${address}.`,
+        detail: { httpStatus: res.status, reachable: true },
+      };
+    },
+    addressStep,
+  );
+}
+
 function passwordOf(url: string): string | undefined {
   const match = /:\/\/[^:/@\s]*:([^@\s]*)@/.exec(url);
   if (!match?.[1]) return undefined;

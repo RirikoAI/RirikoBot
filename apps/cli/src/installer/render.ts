@@ -7,11 +7,14 @@ import {
   activeFields,
   answerValue,
   effectiveSwitches,
+  activePlacement,
   fieldApplies,
+  usesRemoteLavalink,
   type Answers,
   type CheckId,
   type Condition,
   type Field,
+  type FieldPlacement,
   type GuideButton,
   type NoteBlock,
   type Page,
@@ -69,6 +72,7 @@ const CHECK_LABELS: Readonly<Record<CheckId, string>> = {
   'ai-provider': 'AI chatbot',
   'image-provider': 'Image generation',
   postgres: 'PostgreSQL',
+  lavalink: 'Lavalink',
   twitch: 'Twitch',
   youtube: 'YouTube',
   spotify: 'Spotify',
@@ -109,6 +113,18 @@ export function conditionalCss(): string {
   const rules: string[] = ['[data-cond],\n[data-gate] { display: none; }'];
   for (const page of PAGES) {
     for (const field of page.fields) {
+      for (const placement of field.placements ?? []) {
+        const hidden =
+          placement.unless && placement.unless.length > 0
+            ? `:not(${placement.unless.map((condition) => valueSelector(condition)).join(', ')})`
+            : '';
+        const list = placement.when.map(
+          (condition) =>
+            `.wizard${valueSelector(condition)}${hidden} [data-field="${placement.form}"]`,
+        );
+        rules.push(`${list.join(',\n')} { display: block; }`);
+      }
+      if (field.placements) continue;
       if (!field.switch && !field.appliesWhen) continue;
       const base = field.switch ? switchSelector(field.switch) : '';
       const selectors =
@@ -466,16 +482,20 @@ function fieldId(name: string): string {
   return `f-${name}`;
 }
 
-function renderField(view: StepView, field: Field): string {
-  const issue = view.issues.get(field.name);
+function renderField(view: StepView, field: Field, placement?: FieldPlacement): string {
+  // The answer and its error belong to the field; a copy only has its own form name and id.
+  const formName = placement ? placement.form : field.name;
+  // An error belongs to the copy the reader sees; the other copy of a shared field stays quiet.
+  const shown = !placement || activePlacement(field, view.profile, view.answers)?.form === formName;
+  const issue = shown ? view.issues.get(field.name) : undefined;
   const stored = view.answers.values[field.name] ?? '';
-  const id = fieldId(field.name);
+  const id = fieldId(formName);
   const hasKeepNote = field.kind === 'secret' && stored.trim() !== '';
   const describedBy = [issue ? `${id}-error` : '', hasKeepNote ? `${id}-keep` : '']
     .filter(Boolean)
     .join(' ');
   const aria = ` aria-invalid="${issue ? 'true' : 'false'}"${describedBy ? ` aria-describedby="${describedBy}"` : ''}`;
-  const name = escapeHtml(field.name);
+  const name = escapeHtml(formName);
   const label = escapeHtml(field.label);
   let control: string;
   switch (field.kind) {
@@ -507,7 +527,7 @@ function renderField(view: StepView, field: Field): string {
   const error = issue
     ? `<p class="field-error" id="${id}-error" role="alert">${escapeHtml(issue.message)}${issue.guideStep ? ` ${guideStepRefLink(issue.guideStep)}` : ''}</p>`
     : '';
-  const cond = field.switch || field.appliesWhen ? ' data-cond' : '';
+  const cond = field.switch || field.appliesWhen || placement ? ' data-cond' : '';
   return `<div class="form-group field${issue ? ' has-error' : ''}" data-field="${name}"${cond}>${labelHtml}${control}${keep}${error}</div>`;
 }
 
@@ -554,7 +574,11 @@ function renderInstallBody(view: StepView, install: InstallView): string {
       return `${renderField(view, field)}<p class="legal-link">${link}</p>`;
     })
     .join('');
-  return `${errors}<h4 class="section-heading mb-5">Your settings</h4><table class="summary"><tbody>${rows}</tbody></table>${invite}<h4 class="section-heading mb-5">Terms</h4>${accept}`;
+  const remote =
+    view.profile === 'docker' && usesRemoteLavalink('docker', view.answers)
+      ? `<p>You use a Lavalink server of your own, so start the stack with both compose files: <code>${escapeHtml(`${composeCommand(true)} up -d`)}</code></p>`
+      : '';
+  return `${errors}<h4 class="section-heading mb-5">Your settings</h4><table class="summary"><tbody>${rows}</tbody></table>${remote}${invite}<h4 class="section-heading mb-5">Terms</h4>${accept}`;
 }
 
 /**
@@ -564,14 +588,30 @@ function renderInstallBody(view: StepView, install: InstallView): string {
 function renderGroups(view: StepView, images: Images): string {
   const page = view.page;
   const isInstall = page.id === 'install';
-  const visible = page.fields
+  const shown = page.fields
     .filter((field) => !field.profiles || field.profiles.includes(view.profile))
     .filter((field) => !isInstall || field.kind !== 'checkbox');
-  const names = visible.map((field) => field.name);
+  // A field with placements is drawn once per placement, each right after the field it follows.
+  const visible: { field: Field; placement?: FieldPlacement }[] = shown
+    .filter((field) => !field.placements)
+    .map((field) => ({ field }));
+  for (const field of shown) {
+    for (const placement of field.placements ?? []) {
+      const anchor = visible.findIndex(
+        (item) => !item.placement && item.field.name === placement.after,
+      );
+      const slot = anchor >= 0 ? anchor + 1 : visible.length;
+      let end = slot;
+      while (visible[end]?.placement) end += 1;
+      visible.splice(end, 0, { field, placement });
+    }
+  }
+  const names = visible.map((item) => (item.placement ? item.placement.form : item.field.name));
   const parts: string[][] = [[], ...visible.map(() => [] as string[])];
 
   // A block comes after its anchor field, or after the nearest shown field before it.
   page.blocks.forEach((block, index) => {
+    if (block.profiles && !block.profiles.includes(view.profile)) return;
     let slot = visible.length;
     if (block.after !== undefined) {
       slot = 0;
@@ -588,12 +628,12 @@ function renderGroups(view: StepView, images: Images): string {
 
   // A switch comes just before the first field of its feature, after the note of the group before.
   for (const def of page.switches) {
-    const first = visible.findIndex((field) => field.switch === def.id);
+    const first = visible.findIndex((item) => item.field.switch === def.id);
     parts[Math.max(first, 0)]?.push(renderSwitch(view, def));
   }
   const out: string[] = [...(parts[0] ?? [])];
-  visible.forEach((field, i) => {
-    out.push(renderField(view, field), ...(parts[i + 1] ?? []));
+  visible.forEach((item, i) => {
+    out.push(renderField(view, item.field, item.placement), ...(parts[i + 1] ?? []));
   });
   return out.filter(Boolean).join('\n');
 }
@@ -623,6 +663,7 @@ export function renderStepPage(view: StepView): string {
   const defaultFormaction = isInstall ? ' formaction="/finish"' : '';
   const html = `<main class="wizard">
 <header class="brand"><h1>Ririko Setup</h1><p>Follow the instructions to set up Ririko Ai for your Discord server.</p></header>
+<div class="layout">
 ${tabs(view)}
 <form class="content" method="post" action="/step/${page.id}" novalidate>
 <input type="hidden" name="_csrf" value="${escapeHtml(view.csrf)}">
@@ -639,6 +680,7 @@ ${install}
 </div>
 <div class="actions"><ul>${actions}</ul></div>
 </form>
+</div>
 ${images.boxes.join('\n')}
 </main>`;
   return layout(page.title, html);
@@ -652,7 +694,15 @@ export interface NextCommand {
   note?: string;
 }
 
-const COMPOSE = 'docker compose -f docker-compose.production.yml --env-file .env.production';
+const COMPOSE_BASE = 'docker compose -f docker-compose.production.yml';
+const COMPOSE_ENV = '--env-file .env.production';
+
+/** The compose command; a remote Lavalink node adds the override file that leaves the bundled one out. */
+function composeCommand(remoteLavalink: boolean): string {
+  return remoteLavalink
+    ? `${COMPOSE_BASE} -f docker-compose.remote-lavalink.yml ${COMPOSE_ENV}`
+    : `${COMPOSE_BASE} ${COMPOSE_ENV}`;
+}
 
 /**
  * The commands to run after the file is written, from SETUP.md sections 5 to 8 (source) and
@@ -661,9 +711,11 @@ const COMPOSE = 'docker compose -f docker-compose.production.yml --env-file .env
  */
 export function nextCommands(
   profile: Profile,
-  options: { update: boolean; dashboard: boolean },
+  options: { update: boolean; dashboard: boolean; remoteLavalink?: boolean },
 ): NextCommand[] {
+  const remoteLavalink = options.remoteLavalink === true;
   if (profile === 'docker') {
+    const COMPOSE = composeCommand(remoteLavalink);
     return [
       { title: 'Start the stack', command: `${COMPOSE} up -d` },
       {
@@ -697,14 +749,18 @@ export function nextCommands(
       note: 'The first run takes a long time.',
     },
     { title: 'Render the TCG bosses', command: 'pnpm tcg:boss-builder --all' },
-    { title: 'Install Lavalink (music)', command: 'pnpm lavalink:install' },
-    {
-      title: 'Start Lavalink in a new terminal window',
-      command: 'pnpm lavalink:start',
-      note: 'Wait for "Lavalink is ready to accept connections".',
-    },
-    { title: 'Start the bot', command: 'pnpm dev:bot' },
   );
+  if (!remoteLavalink) {
+    commands.push(
+      { title: 'Install Lavalink (music)', command: 'pnpm lavalink:install' },
+      {
+        title: 'Start Lavalink in a new terminal window',
+        command: 'pnpm lavalink:start',
+        note: 'Wait for "Lavalink is ready to accept connections".',
+      },
+    );
+  }
+  commands.push({ title: 'Start the bot', command: 'pnpm dev:bot' });
   if (options.dashboard) {
     commands.push({ title: 'Start the web dashboard', command: 'pnpm dev:web' });
   }
@@ -747,6 +803,15 @@ export function renderResultPage(result: ResultView): string {
 
 // -- helpers shared with the server -----------------------------------------------------------
 
+/** What the summary shows for an answer: secrets masked, choices by their label. */
+function summaryValue(field: Field, value: string): string {
+  if (field.kind === 'secret') return maskSecret(value);
+  if (field.kind === 'select') {
+    return field.options?.find((option) => option.value === value)?.label ?? value;
+  }
+  return value;
+}
+
 /** The rows of the Install page's summary: the answers of every page, secrets masked. */
 export function summaryRows(profile: Profile, answers: Answers): SummaryRow[] {
   const rows: SummaryRow[] = [];
@@ -761,7 +826,7 @@ export function summaryRows(profile: Profile, answers: Answers): SummaryRow[] {
       const value = answerValue(answers, field.name);
       rows.push({
         label: field.label,
-        value: value === '' ? '(not set)' : field.kind === 'secret' ? maskSecret(value) : value,
+        value: value === '' ? '(not set)' : summaryValue(field, value),
       });
     }
   }

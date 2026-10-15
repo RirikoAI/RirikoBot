@@ -4,6 +4,7 @@ import {
   checkDiscordApplication,
   checkDiscordOAuthSecret,
   checkGemini,
+  checkLavalink,
   checkOllama,
   checkOpenAi,
   checkReplicate,
@@ -19,6 +20,11 @@ import { answerValue, type Answers, type CheckId } from './steps.js';
  * Connects the wizard's page checks (`CheckId`) to the check functions of TASK-1922: which answers
  * each check reads, and which field shows its error.
  */
+
+/** `true` when the Lavalink connection is secure; only the source install asks (Docker is plain). */
+function lavalinkSecure(answers: Answers): string {
+  return answerValue(answers, 'LAVALINK_SECURE') === 'true' ? 'true' : 'false';
+}
 
 /** The answers a check reads, in a fixed order. A check passed for these values stays valid. */
 export function checkInputs(id: CheckId, answers: Answers): string[] {
@@ -46,13 +52,23 @@ export function checkInputs(id: CheckId, answers: Answers): string[] {
       return [v('SPOTIFY_CLIENT_ID'), v('SPOTIFY_CLIENT_SECRET')];
     case 'postgres':
       return [v('DATABASE_URL')];
+    case 'lavalink':
+      return [
+        v('LAVALINK_HOST'),
+        v('LAVALINK_PORT'),
+        v('LAVALINK_PASSWORD'),
+        lavalinkSecure(answers),
+      ];
     case 'dashboard-oauth':
       return [v('DISCORD_CLIENT_ID'), v('DISCORD_CLIENT_SECRET')];
   }
 }
 
-/** The field that shows the error of a failed check. */
-export function checkField(id: CheckId, answers: Answers): string {
+/**
+ * The field that shows the error of a failed check. A Lavalink answer of 401 or 403 names the
+ * password; any other Lavalink failure names the address.
+ */
+export function checkField(id: CheckId, answers: Answers, result?: CheckResult): string {
   const v = (name: string): string => answerValue(answers, name);
   switch (id) {
     case 'discord-bot':
@@ -77,6 +93,10 @@ export function checkField(id: CheckId, answers: Answers): string {
       return 'SPOTIFY_CLIENT_SECRET';
     case 'postgres':
       return 'DATABASE_URL';
+    case 'lavalink':
+      return result?.detail?.httpStatus === 401 || result?.detail?.httpStatus === 403
+        ? 'LAVALINK_PASSWORD'
+        : 'LAVALINK_HOST';
     case 'dashboard-oauth':
       return 'DISCORD_CLIENT_SECRET';
   }
@@ -127,6 +147,16 @@ export function runInstallerCheck(
       );
     case 'postgres':
       return checkDatabase({ dialect: 'postgres', url: v('DATABASE_URL') }, deps);
+    case 'lavalink':
+      return checkLavalink(
+        {
+          host: v('LAVALINK_HOST'),
+          port: v('LAVALINK_PORT'),
+          password: v('LAVALINK_PASSWORD'),
+          secure: lavalinkSecure(answers) === 'true',
+        },
+        deps,
+      );
     case 'dashboard-oauth':
       return checkDiscordOAuthSecret(
         { applicationId: v('DISCORD_CLIENT_ID'), clientSecret: v('DISCORD_CLIENT_SECRET') },

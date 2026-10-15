@@ -21,6 +21,7 @@ export type GuideId =
   | 'youtube'
   | 'spotify'
   | 'postgres'
+  | 'lavalink'
   | 'dashboard-oauth';
 
 export interface GuideLink {
@@ -439,6 +440,39 @@ const POSTGRES: Guide = {
   ],
 };
 
+const LAVALINK: Guide = {
+  id: 'lavalink',
+  title: 'Find the address and password of your Lavalink server',
+  steps: [
+    {
+      heading: 'Step 1: Run a Lavalink 4 server.',
+      text: [
+        'Lavalink is the music server. Use one that is already running on another computer, or start one there (docs/deployment.md, section 8.1, shows a Docker setup). The bot needs Lavalink 4.',
+      ],
+      links: [{ label: 'Lavalink on GitHub', href: 'https://github.com/lavalink-devs/Lavalink' }],
+    },
+    {
+      heading: 'Step 2: Note its address and port.',
+      text: [
+        'The address is the name or the IP address of that computer, for example 192.0.2.10. Lavalink listens on port 2333 unless its application.yml says otherwise (the "port" under "server"). Paste both in the forms above.',
+        'The computer that runs the bot must be able to reach that address and port. A firewall on either side can block it.',
+      ],
+    },
+    {
+      heading: 'Step 3: Copy the password.',
+      text: [
+        'The password is in the application.yml of the Lavalink server, under "lavalink", "server", "password". Paste it in the Lavalink password form above. It must be exactly the same, or Lavalink refuses the bot.',
+      ],
+    },
+    {
+      heading: 'Step 4: Pick the connection type.',
+      text: [
+        'Choose "Plain" for a server reached directly. Choose "Secure" only when the server is behind a reverse proxy that serves HTTPS (https and wss). If you are not sure, keep "Plain".',
+      ],
+    },
+  ],
+};
+
 const DASHBOARD_OAUTH: Guide = {
   id: 'dashboard-oauth',
   title: 'Get the OAuth2 client secret and add the redirect',
@@ -487,6 +521,7 @@ export const GUIDES: readonly Guide[] = [
   YOUTUBE,
   SPOTIFY,
   POSTGRES,
+  LAVALINK,
   DASHBOARD_OAUTH,
 ];
 

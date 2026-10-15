@@ -161,7 +161,7 @@ describe('pages', () => {
     );
     expect(ai).toContain('<option value="openai" selected>OpenAI</option>');
     expect(ai).toMatch(/name="switch_ai-chat" value="on" checked/);
-    expect(ai).toContain('data-field="GEMINI_API_KEY" data-cond');
+    expect(ai).toContain('data-field="GEMINI_API_KEY__chat" data-cond');
 
     const docker = renderStepPage(view('dashboard', {}, 'docker'));
     expect(docker).toContain('name="switch_dashboard" value="on" checked');
@@ -249,10 +249,15 @@ describe('conditionalCss', () => {
     expect(css).toContain(
       '.wizard:has(input[name="switch_ai-chat"]:checked):has(select[name="DEFAULT_AI_PROVIDER"] option[value="openai"]:checked) [data-field="OPENAI_API_KEY"]',
     );
-    // A field used by two switches gets a rule for each.
+    // The Gemini key is shown in the group that needs it, and in the image group only while the
+    // chat group does not show it.
     expect(css).toContain(
-      'switch_ai-images"]:checked):has(select[name="IMAGE_DEFAULT_PROVIDER"] option[value="gemini"]:checked) [data-field="GEMINI_API_KEY"]',
+      '.wizard:has(input[name="switch_ai-chat"]:checked):has(select[name="DEFAULT_AI_PROVIDER"] option[value="gemini"]:checked) [data-field="GEMINI_API_KEY__chat"]',
     );
+    expect(css).toContain(
+      '.wizard:has(input[name="switch_ai-images"]:checked):has(select[name="IMAGE_DEFAULT_PROVIDER"] option[value="gemini"]:checked):not(:has(input[name="switch_ai-chat"]:checked):has(select[name="DEFAULT_AI_PROVIDER"] option[value="gemini"]:checked)) [data-field="GEMINI_API_KEY__images"]',
+    );
+    expect(css).not.toContain('[data-field="GEMINI_API_KEY"]');
     expect(css).toContain('[data-field="TWITCH_CLIENT_ID"]');
     expect(css).toContain('@supports not selector(:has(*))');
   });
@@ -287,6 +292,7 @@ describe('order of the 1.x installer', () => {
   it('places each note after the fields of its group and its guide buttons at the end of the note', () => {
     for (const page of PAGES) {
       page.blocks.forEach((block, index) => {
+        if (block.profiles && !block.profiles.includes(profileOf(page.id))) return;
         const out = html(page.id);
         const gate = block.when ? `data-gate="${page.id}-note-${index}"` : 'class="note"';
         const start = at(out, gate);
@@ -367,6 +373,154 @@ describe('order of the 1.x installer', () => {
   });
 });
 
+describe('the Gemini key placements', () => {
+  const chat: Answers = {
+    values: { DEFAULT_AI_PROVIDER: 'gemini' },
+    switches: { 'ai-chat': true },
+  };
+  const images: Answers = {
+    values: { IMAGE_DEFAULT_PROVIDER: 'gemini' },
+    switches: { 'ai-images': true },
+  };
+  const both: Answers = {
+    values: { ...chat.values, ...images.values },
+    switches: { ...chat.switches, ...images.switches },
+  };
+
+  it('draws one input per group with its own name, id and label, and never the plain name', () => {
+    for (const answers of [chat, images, both]) {
+      const out = renderStepPage(view('ai', { answers }));
+      expect(out).toContain('name="GEMINI_API_KEY__chat"');
+      expect(out).toContain('name="GEMINI_API_KEY__images"');
+      expect(out).not.toContain('name="GEMINI_API_KEY"');
+      expect(out.match(/Gemini API key \(shared by chat and images\):/g)).toHaveLength(2);
+      const ids = [...out.matchAll(/ id="([^"]+)"/g)].map((match) => match[1]);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
+  });
+
+  it('puts the chat copy in the chat group and the image copy in the image group', () => {
+    const out = renderStepPage(view('ai', { answers: both }));
+    const at = (needle: string): number => {
+      const index = out.indexOf(needle);
+      expect(index, needle).toBeGreaterThanOrEqual(0);
+      return index;
+    };
+    expect(at('data-field="DEFAULT_AI_PROVIDER"')).toBeLessThan(
+      at('data-field="GEMINI_API_KEY__chat"'),
+    );
+    expect(at('data-field="GEMINI_API_KEY__chat"')).toBeLessThan(at('data-field="OPENAI_API_KEY"'));
+    expect(at('data-gate="ai-note-0"')).toBeLessThan(at('name="switch_ai-images"'));
+    expect(at('data-field="IMAGE_DEFAULT_PROVIDER"')).toBeLessThan(
+      at('data-field="GEMINI_API_KEY__images"'),
+    );
+    expect(at('data-field="GEMINI_API_KEY__images"')).toBeLessThan(
+      at('data-field="REPLICATE_API_TOKEN"'),
+    );
+  });
+
+  it('shows the error only on the copy that is shown', () => {
+    const issues = new Map([['GEMINI_API_KEY', { message: 'Missing.' }]]);
+    const imagesOut = renderStepPage(view('ai', { answers: images, issues }));
+    expect(imagesOut).toContain('id="f-GEMINI_API_KEY__images-error"');
+    expect(imagesOut).not.toContain('id="f-GEMINI_API_KEY__chat-error"');
+    const bothOut = renderStepPage(view('ai', { answers: both, issues }));
+    expect(bothOut).toContain('id="f-GEMINI_API_KEY__chat-error"');
+    expect(bothOut).not.toContain('id="f-GEMINI_API_KEY__images-error"');
+  });
+
+  it('hides the image copy in the CSS while the chat copy is shown', () => {
+    const css = conditionalCss();
+    const rule = css
+      .split('\n')
+      .find((line) => line.includes('[data-field="GEMINI_API_KEY__images"]'));
+    expect(rule).toContain(':not(:has(input[name="switch_ai-chat"]:checked)');
+  });
+});
+
+describe('the Lavalink group', () => {
+  const remote: Answers = { values: { LAVALINK_MODE: 'remote' }, switches: {} };
+  const dockerRemote: Answers = { values: { LAVALINK_MODE_DOCKER: 'remote' }, switches: {} };
+
+  it('shows the choice per profile, the fields after it, and the note and guide after the fields', () => {
+    const source = renderStepPage(view('database', { answers: remote }));
+    expect(source).toContain('<option value="local">Run Lavalink on this computer</option>');
+    expect(source).toContain(
+      '<option value="remote" selected>Use a Lavalink server I already have</option>',
+    );
+    const at = (page: string, needle: string): number => {
+      const index = page.indexOf(needle);
+      expect(index, needle).toBeGreaterThanOrEqual(0);
+      return index;
+    };
+    const order = [
+      'data-field="LAVALINK_MODE"',
+      'data-field="LAVALINK_HOST"',
+      'data-field="LAVALINK_PORT"',
+      'data-field="LAVALINK_PASSWORD"',
+      'data-field="LAVALINK_SECURE"',
+      'data-gate="database-note-2"',
+      'name="switch_spotify"',
+    ].map((needle) => at(source, needle));
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(source).toContain('id="guide-lavalink"');
+    expect(source).not.toContain('name="LAVALINK_MODE_DOCKER"');
+
+    const docker = renderStepPage(view('database', { answers: dockerRemote }, 'docker'));
+    expect(docker).toContain('<option value="bundled">Bundled Lavalink</option>');
+    expect(docker).toContain('<option value="remote" selected>Remote Lavalink node</option>');
+    expect(docker).not.toContain('name="LAVALINK_MODE"');
+    expect(docker).not.toContain('name="LAVALINK_SECURE"');
+    expect(docker).toContain('data-gate="database-note-4"');
+    expect(docker).not.toContain('data-gate="database-note-2"');
+  });
+
+  it('gates each note and the guide on the choice, and names the commands only for the local one', () => {
+    const css = conditionalCss();
+    expect(css).toContain(
+      '.wizard:has(select[name="LAVALINK_MODE"] option[value="local"]:checked) [data-gate="database-note-1"]',
+    );
+    expect(css).toContain(
+      '.wizard:has(select[name="LAVALINK_MODE"] option[value="remote"]:checked) [data-gate="database-note-2"]',
+    );
+    expect(css).toContain(
+      '.wizard:has(select[name="LAVALINK_MODE_DOCKER"] option[value="remote"]:checked) [data-gate="database-note-4"]',
+    );
+    // Every Lavalink field shows for either remote choice.
+    expect(css).toMatch(/\[data-field="LAVALINK_HOST"\]/);
+    const page = renderStepPage(view('database'));
+    const local = page.slice(
+      page.indexOf('data-gate="database-note-1"'),
+      page.indexOf('data-gate="database-note-2"'),
+    );
+    expect(local).toContain('pnpm lavalink:install');
+    expect(local).toContain('pnpm lavalink:start');
+    expect(local).not.toContain('<details');
+    const remoteNote = page.slice(page.indexOf('data-gate="database-note-2"'));
+    expect(remoteNote.slice(0, remoteNote.indexOf('data-gate="database-note-3"'))).toContain(
+      '<details class="guide" id="guide-lavalink"',
+    );
+  });
+
+  it('names the override file on the Install page only for a remote node', () => {
+    const install = { summary: [], inviteUrl: null, writeErrors: [] };
+    const plain = renderStepPage(view('install', { install }, 'docker'));
+    expect(plain).not.toContain('docker-compose.remote-lavalink.yml');
+    const node = renderStepPage(view('install', { answers: dockerRemote, install }, 'docker'));
+    expect(node).toContain(
+      'docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production up -d',
+    );
+    const source = renderStepPage(view('install', { answers: remote, install }));
+    expect(source).not.toContain('docker-compose.remote-lavalink.yml');
+  });
+
+  it('shows a choice by its label in the summary', () => {
+    const rows = summaryRows('docker', dockerRemote);
+    const byLabel = new Map(rows.map((row) => [row.label, row.value]));
+    expect(byLabel.get('Music server (Lavalink)')).toBe('Remote Lavalink node');
+  });
+});
+
 describe('buildInviteUrl', () => {
   it('builds the exact invite link', () => {
     expect(buildInviteUrl('123456789012345678')).toBe(
@@ -401,6 +555,38 @@ describe('nextCommands', () => {
       `${compose} ps`,
       `${compose} logs bot`,
       `${compose} exec bot ririko commands:sync --global --all-guilds`,
+    ]);
+  });
+});
+
+describe('nextCommands with a Lavalink elsewhere', () => {
+  it('adds the override file to every docker compose command', () => {
+    const commands = nextCommands('docker', {
+      update: false,
+      dashboard: true,
+      remoteLavalink: true,
+    }).map((c) => c.command);
+    const compose =
+      'docker compose -f docker-compose.production.yml -f docker-compose.remote-lavalink.yml --env-file .env.production';
+    expect(commands).toEqual([
+      `${compose} up -d`,
+      `${compose} ps`,
+      `${compose} logs bot`,
+      `${compose} exec bot ririko commands:sync --global --all-guilds`,
+    ]);
+  });
+
+  it('leaves out installing and starting Lavalink for a source install with a server of its own', () => {
+    const commands = nextCommands('source', {
+      update: false,
+      dashboard: false,
+      remoteLavalink: true,
+    }).map((c) => c.command);
+    expect(commands).toEqual([
+      'pnpm db:reset',
+      'pnpm tcg:card-builder --rerender',
+      'pnpm tcg:boss-builder --all',
+      'pnpm dev:bot',
     ]);
   });
 });

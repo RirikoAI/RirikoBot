@@ -30,6 +30,7 @@ export type CheckId =
   | 'youtube'
   | 'spotify'
   | 'postgres'
+  | 'lavalink'
   | 'dashboard-oauth';
 
 /** True when the named switch is on, the named field has the value, or both when both are given. */
@@ -49,6 +50,21 @@ export type ExtraRule = 'snowflake' | 'postgres-url';
 export interface FieldRule {
   schema: 'app' | 'web' | 'none';
   extra?: ExtraRule;
+}
+
+/**
+ * One place where a field is shown. A field with placements is one answer (`Field.name`) that the
+ * page shows once per group that needs it, each copy with its own form name.
+ */
+export interface FieldPlacement {
+  /** The form name of this copy of the input. */
+  form: string;
+  /** The field this copy comes after on the page. */
+  after: string;
+  /** The copy shows while one of these holds. */
+  when: Condition[];
+  /** The copy is hidden while one of these holds (another copy is shown then). */
+  unless?: Condition[];
 }
 
 export interface FieldOption {
@@ -78,6 +94,8 @@ export interface Field {
   rule: FieldRule;
   /** The guide that explains where the value comes from. */
   guide?: GuideId;
+  /** Copies of the input in the groups that need it; the server maps the shown copy to `name`. */
+  placements?: FieldPlacement[];
   /** False for answers that are not written to the file (the terms checkboxes). */
   env?: false;
 }
@@ -110,6 +128,8 @@ export interface GuideButton {
  * fields of its group and, with `when`, shows only while that group is on.
  */
 export interface NoteBlock {
+  /** Profiles that show the block; all when omitted. */
+  profiles?: Profile[];
   /** The field the block follows; the last field of the page when omitted. */
   after?: string;
   /** The block shows while one of these holds; always when omitted. */
@@ -144,6 +164,26 @@ export interface FieldError {
   field: string;
   message: string;
 }
+
+/** The chat group uses Gemini. */
+const CHAT_ON_GEMINI: Condition = {
+  switch: 'ai-chat',
+  field: 'DEFAULT_AI_PROVIDER',
+  equals: 'gemini',
+};
+
+/** The image group uses Gemini. */
+const IMAGES_ON_GEMINI: Condition = {
+  switch: 'ai-images',
+  field: 'IMAGE_DEFAULT_PROVIDER',
+  equals: 'gemini',
+};
+
+/** Lavalink is somewhere else: a server the reader has (source) or a remote node (docker). */
+const LAVALINK_REMOTE: Condition[] = [
+  { field: 'LAVALINK_MODE', equals: 'remote' },
+  { field: 'LAVALINK_MODE_DOCKER', equals: 'remote' },
+];
 
 export const PAGES: readonly Page[] = [
   {
@@ -306,16 +346,24 @@ export const PAGES: readonly Page[] = [
       },
       {
         name: 'GEMINI_API_KEY',
-        label: 'Gemini API key',
+        label: 'Gemini API key (shared by chat and images)',
         placeholder: 'Enter your Gemini API key here',
         kind: 'secret',
         required: true,
-        appliesWhen: [
-          { switch: 'ai-chat', field: 'DEFAULT_AI_PROVIDER', equals: 'gemini' },
-          { switch: 'ai-images', field: 'IMAGE_DEFAULT_PROVIDER', equals: 'gemini' },
-        ],
+        appliesWhen: [CHAT_ON_GEMINI, IMAGES_ON_GEMINI],
         rule: { schema: 'app' },
         guide: 'gemini',
+        // One key for both features. It is shown in the chat group when chat uses Gemini, and
+        // otherwise in the image group; never twice.
+        placements: [
+          { form: 'GEMINI_API_KEY__chat', after: 'DEFAULT_AI_PROVIDER', when: [CHAT_ON_GEMINI] },
+          {
+            form: 'GEMINI_API_KEY__images',
+            after: 'IMAGE_DEFAULT_PROVIDER',
+            when: [IMAGES_ON_GEMINI],
+            unless: [CHAT_ON_GEMINI],
+          },
+        ],
       },
       {
         name: 'OPENAI_API_KEY',
@@ -481,9 +529,46 @@ export const PAGES: readonly Page[] = [
         after: 'DATABASE_URL',
         points: [
           'Ririko stores its data in SQLite (one file, nothing to set up) or in PostgreSQL. With Docker, a PostgreSQL database comes with the stack and its password is generated for you.',
-          'The password that Ririko and Lavalink (the music server) share is generated for you.',
         ],
         guides: [{ guide: 'postgres', when: [{ field: 'DATABASE_DIALECT', equals: 'postgres' }] }],
+      },
+      {
+        profiles: ['source'],
+        after: 'LAVALINK_SECURE',
+        when: [{ field: 'LAVALINK_MODE', equals: 'local' }],
+        points: [
+          'Lavalink is the music server. This computer runs it at 127.0.0.1, port 2333, and the setup generates the password that Ririko and Lavalink share.',
+          'After the setup, run pnpm lavalink:install once. Then run pnpm lavalink:start in a new terminal window and leave it running.',
+        ],
+        guides: [],
+      },
+      {
+        profiles: ['source'],
+        after: 'LAVALINK_SECURE',
+        when: [{ field: 'LAVALINK_MODE', equals: 'remote' }],
+        points: [
+          'Enter the address, the port and the password of your Lavalink 4 server. Choose a secure connection only when the server is behind HTTPS.',
+          "If you're unsure where to find them, click on the button below. Then press Test the connection.",
+        ],
+        guides: [{ guide: 'lavalink' }],
+      },
+      {
+        profiles: ['docker'],
+        after: 'LAVALINK_PASSWORD',
+        when: [{ field: 'LAVALINK_MODE_DOCKER', equals: 'bundled' }],
+        points: [
+          'The stack starts its own Lavalink, the music server. The password that Ririko and Lavalink share is generated for you.',
+        ],
+        guides: [],
+      },
+      {
+        profiles: ['docker'],
+        after: 'LAVALINK_PASSWORD',
+        when: [{ field: 'LAVALINK_MODE_DOCKER', equals: 'remote' }],
+        points: [
+          "Enter the address, the port and the password of your Lavalink 4 server. The stack then leaves its own Lavalink out: start it with the extra file docker-compose.remote-lavalink.yml (the last page shows the command). If you're unsure where to find them, click on the button below. Then press Test the connection.",
+        ],
+        guides: [{ guide: 'lavalink' }],
       },
       {
         after: 'SPOTIFY_CLIENT_SECRET',
@@ -530,6 +615,83 @@ export const PAGES: readonly Page[] = [
         guide: 'postgres',
       },
       {
+        name: 'LAVALINK_MODE',
+        label: 'Music server (Lavalink)',
+        placeholder: '',
+        kind: 'select',
+        options: [
+          { value: 'local', label: 'Run Lavalink on this computer' },
+          { value: 'remote', label: 'Use a Lavalink server I already have' },
+        ],
+        required: false,
+        profiles: ['source'],
+        defaults: { source: 'local' },
+        rule: { schema: 'none' },
+        env: false,
+      },
+      {
+        name: 'LAVALINK_MODE_DOCKER',
+        label: 'Music server (Lavalink)',
+        placeholder: '',
+        kind: 'select',
+        options: [
+          { value: 'bundled', label: 'Bundled Lavalink' },
+          { value: 'remote', label: 'Remote Lavalink node' },
+        ],
+        required: false,
+        profiles: ['docker'],
+        defaults: { docker: 'bundled' },
+        rule: { schema: 'none' },
+        env: false,
+      },
+      {
+        name: 'LAVALINK_HOST',
+        label: 'Lavalink address',
+        placeholder: '192.0.2.10',
+        kind: 'text',
+        required: true,
+        appliesWhen: LAVALINK_REMOTE,
+        rule: { schema: 'app' },
+        guide: 'lavalink',
+      },
+      {
+        name: 'LAVALINK_PORT',
+        label: 'Lavalink port',
+        placeholder: '2333',
+        kind: 'text',
+        required: true,
+        appliesWhen: LAVALINK_REMOTE,
+        defaults: { source: '2333', docker: '2333' },
+        rule: { schema: 'app' },
+        guide: 'lavalink',
+      },
+      {
+        name: 'LAVALINK_PASSWORD',
+        label: 'Lavalink password',
+        placeholder: 'Enter the password of your Lavalink server here',
+        kind: 'secret',
+        required: true,
+        appliesWhen: LAVALINK_REMOTE,
+        rule: { schema: 'app' },
+        guide: 'lavalink',
+      },
+      {
+        name: 'LAVALINK_SECURE',
+        label: 'Connection to Lavalink',
+        placeholder: '',
+        kind: 'select',
+        options: [
+          { value: 'false', label: 'Plain (http and ws)' },
+          { value: 'true', label: 'Secure (https and wss)' },
+        ],
+        required: true,
+        appliesWhen: [{ field: 'LAVALINK_MODE', equals: 'remote' }],
+        profiles: ['source'],
+        defaults: { source: 'false' },
+        rule: { schema: 'app' },
+        guide: 'lavalink',
+      },
+      {
         name: 'SPOTIFY_CLIENT_ID',
         label: 'Spotify Client ID',
         placeholder: 'Enter your Spotify Client ID here',
@@ -550,12 +712,13 @@ export const PAGES: readonly Page[] = [
         guide: 'spotify',
       },
     ],
-    guides: ['postgres', 'spotify'],
+    guides: ['postgres', 'lavalink', 'spotify'],
     checks: [
       {
         id: 'postgres',
         appliesWhen: [{ field: 'DATABASE_DIALECT', equals: 'postgres' }],
       },
+      { id: 'lavalink', appliesWhen: LAVALINK_REMOTE },
       { id: 'spotify', appliesWhen: [{ switch: 'spotify' }] },
     ],
   },
@@ -710,6 +873,36 @@ export function fieldApplies(field: Field, profile: Profile, answers: Answers): 
   if (field.switch && !on[field.switch]) return false;
   if (field.appliesWhen && !anyHolds(field.appliesWhen, answers, on)) return false;
   return true;
+}
+
+/**
+ * The copy of a field the reader sees for these answers: the first placement whose group needs it
+ * and that is not hidden in favor of another copy. Null when the field has no placements or none
+ * is shown. The server reads the posted value of this copy as the field's answer.
+ */
+export function activePlacement(
+  field: Field,
+  profile: Profile,
+  answers: Answers,
+): FieldPlacement | null {
+  if (!field.placements) return null;
+  const on = effectiveSwitches(profile, answers.switches);
+  return (
+    field.placements.find(
+      (placement) =>
+        anyHolds(placement.when, answers, on) &&
+        !(placement.unless && anyHolds(placement.unless, answers, on)),
+    ) ?? null
+  );
+}
+
+/**
+ * True when Lavalink runs somewhere else: a remote node (Docker, which then needs
+ * docker-compose.remote-lavalink.yml) or a server the reader already has (source).
+ */
+export function usesRemoteLavalink(profile: Profile, answers: Answers): boolean {
+  const mode = profile === 'docker' ? 'LAVALINK_MODE_DOCKER' : 'LAVALINK_MODE';
+  return answerValue(answers, mode) === 'remote';
 }
 
 /** True when an applicable field must have a value. */

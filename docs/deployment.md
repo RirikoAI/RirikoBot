@@ -83,6 +83,7 @@ The wizard runs in a short-lived container. It asks for your values in the brows
 
 2. Copy that address into your browser.
 3. Follow the pages in order: **Welcome**, **Discord Bot**, **AI**, **Stream Alerts**, **Database & Music**, **Dashboard** and **Install**. The wizard checks the bot token and the dashboard client secret before you can go on. With Docker the dashboard is always on.
+   On **Database & Music**, **Music server (Lavalink)** is "Bundled Lavalink" by default. Choose "Remote Lavalink node" for section 8: the wizard asks for the address, port and password, tests them, and the Install page and the next commands then add `-f docker-compose.remote-lavalink.yml`.
 4. On the **Install** page, read the summary, tick both boxes, and click **Finish**. The wizard writes `.env.production` in the current folder. If the file already exists, the wizard keeps your values and saves a copy named `.env.production.bak-` and a time stamp.
 5. If the page says the file could not be written, click **Download the file** instead. Save it as `.env.production` in the folder from section 2.3. The mounted folder can be read-only for the user inside the image.
 6. The terminal prints `Setup finished` and the container stops. Make sure the redirect from section 2.2, step 6 is in your Discord application, then continue with section 2.5.

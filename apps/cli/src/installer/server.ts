@@ -31,12 +31,15 @@ import {
   PAGES,
   activeChecks,
   activeFields,
+  activePlacement,
   answerValue,
   effectiveSwitches,
   getPage,
+  usesRemoteLavalink,
   validatePage,
   type Answers,
   type CheckId,
+  type Field,
   type Page,
   type PageId,
   type Profile,
@@ -202,6 +205,14 @@ function initialAnswers(profile: Profile, current: Record<string, string> | null
       if (name === 'DATABASE_URL' && !/^postgres(?:ql)?:\/\//.test(value)) continue;
       values[name] = value;
     }
+    // A Lavalink address that is not this computer means the reader uses a server of their own.
+    const lavalinkHost = prefill.LAVALINK_HOST ?? '';
+    if (profile === 'source') {
+      const elsewhere = lavalinkHost !== '' && !['127.0.0.1', 'localhost'].includes(lavalinkHost);
+      values.LAVALINK_MODE = elsewhere ? 'remote' : 'local';
+    } else {
+      values.LAVALINK_MODE_DOCKER = lavalinkHost === '' ? 'bundled' : 'remote';
+    }
     for (const [id, signs] of Object.entries(SWITCH_SIGNS) as [SwitchId, readonly string[]][]) {
       switches[id] = signs.some((name) => (prefill[name] ?? '') !== '');
     }
@@ -351,7 +362,7 @@ export async function startInstallerServer(
       for (const id of activeChecks(page, profile, session.answers)) {
         const result = currentResult(id);
         if (result?.status === 'fail') {
-          const name = checkField(id, session.answers);
+          const name = checkField(id, session.answers, result);
           if (!issues.has(name)) {
             issues.set(name, {
               message: result.message,
@@ -422,18 +433,29 @@ export async function startInstallerServer(
       if (def.profiles && !def.profiles.includes(profile)) continue;
       session.answers.switches[def.id] = form.get(`switch_${def.id}`) === 'on';
     }
-    for (const field of page.fields) {
-      if (field.profiles && !field.profiles.includes(profile)) continue;
-      const posted = form.get(field.name);
+    const store = (field: Field, posted: string | null): void => {
       if (field.kind === 'checkbox') {
         session.answers.values[field.name] = posted === 'true' ? 'true' : '';
       } else if (posted === null) {
-        continue;
+        return;
       } else if (field.kind === 'secret') {
         if (posted.trim() !== '') session.answers.values[field.name] = posted.trim();
       } else {
         session.answers.values[field.name] = posted.trim();
       }
+    };
+    const shown = page.fields.filter(
+      (field) => !field.profiles || field.profiles.includes(profile),
+    );
+    for (const field of shown) {
+      if (!field.placements) store(field, form.get(field.name));
+    }
+    // A field shown in several groups (the Gemini key) is one answer. Every copy is posted, even
+    // a hidden one, so the server decides which copy counts from the switches and choices above.
+    for (const field of shown) {
+      if (!field.placements) continue;
+      const placement = activePlacement(field, profile, session.answers);
+      if (placement) store(field, form.get(placement.form));
     }
   };
 
@@ -528,7 +550,11 @@ export async function startInstallerServer(
           created: written.created,
           generatedKeys: written.generatedKeys,
           inviteUrl: inviteUrl(),
-          commands: nextCommands(profile, { update: !written.created, dashboard: on.dashboard }),
+          commands: nextCommands(profile, {
+            update: !written.created,
+            dashboard: on.dashboard,
+            remoteLavalink: usesRemoteLavalink(profile, session.answers),
+          }),
         }),
       ),
       after: () => {

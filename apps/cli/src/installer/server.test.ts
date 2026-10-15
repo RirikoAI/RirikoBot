@@ -528,13 +528,13 @@ describe('pages', () => {
       action: 'next',
     });
     expect(missing.status).toBe(422);
-    expect(missing.body).toContain('Gemini API key is required.');
+    expect(missing.body).toContain('Gemini API key (shared by chat and images) is required.');
     expect(s.runCheck).not.toHaveBeenCalled();
 
     const ok = await post(s, '/step/ai', {
       'switch_ai-chat': 'on',
       DEFAULT_AI_PROVIDER: 'gemini',
-      GEMINI_API_KEY: 'gemini-key-value-123456',
+      GEMINI_API_KEY__chat: 'gemini-key-value-123456',
       action: 'next',
     });
     expect(ok.status).toBe(303);
@@ -548,7 +548,8 @@ describe('pages', () => {
     expect(css.headers['content-type']).toContain('text/css');
     expect(css.body).toContain('[data-gate] { display: none; }');
     expect(css.body).toContain('input[name="switch_ai-chat"]:checked');
-    expect(css.body).toContain('[data-field="GEMINI_API_KEY"]');
+    expect(css.body).toContain('[data-field="GEMINI_API_KEY__chat"]');
+    expect(css.body).toContain('[data-field="GEMINI_API_KEY__images"]');
   });
 
   it('escapes every value it puts into the page', async () => {
@@ -612,6 +613,23 @@ describe('assets and legal texts', () => {
     expect(license.body).toContain('SIL Open Font License');
     expect((await get(s, '/assets/fonts/missing.woff2')).status).toBe(404);
     expect((await get(s, '/')).headers['content-security-policy']).not.toContain('font-src *');
+  });
+
+  it('lays the step tabs in a left column from 1024px and keeps the icon row below', async () => {
+    const s = await start();
+    const css = (await get(s, '/assets/wizard.css')).body;
+    const wide = css.slice(css.indexOf('@media (min-width: 1024px)'));
+    expect(wide).toContain('grid-template-columns: 240px minmax(0, 1fr)');
+    // One tab per row; the title stays on one line and is never broken inside a word.
+    expect(wide).toContain('display: block;');
+    expect(wide).toContain('white-space: nowrap');
+    expect(wide).toContain('overflow-wrap: normal');
+    expect(css).toContain('@media (max-width: 1023px)');
+    expect(css).not.toContain('max-width: 1199px');
+    const page = await get(s, '/step/welcome');
+    expect(page.body).toMatch(
+      /<div class="layout">\s*<nav class="steps"[\s\S]*<form class="content"/,
+    );
   });
 
   it('refuses paths outside assets/installer', async () => {
@@ -802,6 +820,303 @@ describe('install', () => {
     const res = await post(s, '/download', ACCEPT);
     expect(res.status).toBe(500);
     expect(res.body).toContain('Nothing was written');
+  });
+});
+
+describe('the shared Gemini key', () => {
+  const GEMINI = 'gemini-key-value-123456';
+  const OTHER = 'other-copy-value-654321';
+  const chatOn = { 'switch_ai-chat': 'on', DEFAULT_AI_PROVIDER: 'gemini' };
+  const imagesOn = { 'switch_ai-images': 'on', IMAGE_DEFAULT_PROVIDER: 'gemini' };
+
+  /** Posts the AI page, walks to Install and returns the planned file. */
+  async function planned(s: Started, fields: Record<string, string>): Promise<string> {
+    await post(s, '/step/welcome', { action: 'next' });
+    await post(s, '/step/discord', DISCORD_FIELDS);
+    expect((await post(s, '/step/ai', { ...fields, action: 'next' })).status).toBe(303);
+    await post(s, '/step/streams', { action: 'next' });
+    await post(s, '/step/database', { DATABASE_DIALECT: 'sqlite', action: 'next' });
+    await post(s, '/step/dashboard', { action: 'next' });
+    return (await post(s, '/download', ACCEPT)).body;
+  }
+
+  it('takes the chat copy when only chat uses Gemini, and ignores the hidden image copy', async () => {
+    const s = await start();
+    const file = await planned(s, {
+      ...chatOn,
+      GEMINI_API_KEY__chat: GEMINI,
+      GEMINI_API_KEY__images: OTHER,
+    });
+    expect(file).toContain(`GEMINI_API_KEY=${GEMINI}`);
+    expect(file).not.toContain(OTHER);
+  });
+
+  it('takes the image copy when only image generation uses Gemini', async () => {
+    const s = await start();
+    const file = await planned(s, {
+      ...imagesOn,
+      GEMINI_API_KEY__chat: OTHER,
+      GEMINI_API_KEY__images: GEMINI,
+    });
+    expect(file).toContain(`GEMINI_API_KEY=${GEMINI}`);
+    expect(file).not.toContain(OTHER);
+  });
+
+  it('takes the chat copy when both use Gemini, and one key serves both', async () => {
+    const s = await start();
+    const file = await planned(s, {
+      ...chatOn,
+      ...imagesOn,
+      GEMINI_API_KEY__chat: GEMINI,
+      GEMINI_API_KEY__images: OTHER,
+    });
+    expect(file).toContain(`GEMINI_API_KEY=${GEMINI}`);
+    expect(file).not.toContain(OTHER);
+    expect(file.match(/^GEMINI_API_KEY=/gm)).toHaveLength(1);
+  });
+
+  it('takes the image copy when chat uses another provider', async () => {
+    const s = await start();
+    const file = await planned(s, {
+      'switch_ai-chat': 'on',
+      DEFAULT_AI_PROVIDER: 'ollama',
+      OLLAMA_BASE_URL: 'http://localhost:11434',
+      ...imagesOn,
+      GEMINI_API_KEY__images: GEMINI,
+    });
+    expect(file).toContain(`GEMINI_API_KEY=${GEMINI}`);
+  });
+
+  it('names one field when the key is missing, in the copy the reader sees', async () => {
+    const s = await start();
+    await post(s, '/step/welcome', { action: 'next' });
+    await post(s, '/step/discord', DISCORD_FIELDS);
+    const res = await post(s, '/step/ai', { ...imagesOn, action: 'next' });
+    expect(res.status).toBe(422);
+    expect(
+      res.body.match(/Gemini API key \(shared by chat and images\) is required\./g),
+    ).toHaveLength(1);
+    expect(res.body).toContain('id="f-GEMINI_API_KEY__images-error"');
+    expect(res.body).not.toContain('id="f-GEMINI_API_KEY__chat-error"');
+    expect(res.body).toContain('Gemini API key (shared by chat and images):');
+  });
+
+  it('keeps a saved key when the copy is left empty, and says so', async () => {
+    const root = makeRoot();
+    writeFileSync(join(root, '.env'), `GEMINI_API_KEY=${GEMINI}\nIMAGE_DEFAULT_PROVIDER=gemini\n`);
+    const s = await start({ root });
+    await post(s, '/step/welcome', { action: 'next' });
+    await post(s, '/step/discord', DISCORD_FIELDS);
+    const page = await get(s, '/step/ai');
+    expect(page.body).toContain('id="f-GEMINI_API_KEY__chat-keep"');
+    expect(page.body).not.toContain(GEMINI);
+    // Images only: the saved value serves it without typing it again.
+    expect((await post(s, '/step/ai', { ...imagesOn, action: 'next' })).status).toBe(303);
+    await post(s, '/step/streams', { action: 'next' });
+    await post(s, '/step/database', { DATABASE_DIALECT: 'sqlite', action: 'next' });
+    await post(s, '/step/dashboard', { action: 'next' });
+    expect((await post(s, '/download', ACCEPT)).body).toContain(`GEMINI_API_KEY=${GEMINI}`);
+  });
+
+  it('runs the image check with the key of the shown copy', async () => {
+    const s = await start();
+    await post(s, '/step/welcome', { action: 'next' });
+    await post(s, '/step/discord', DISCORD_FIELDS);
+    s.runCheck.mockClear();
+    await post(s, '/step/ai', { ...imagesOn, GEMINI_API_KEY__images: GEMINI, action: 'next' });
+    expect(s.runCheck.mock.calls.map((call) => call[0])).toEqual(['image-provider']);
+    const answers = s.runCheck.mock.calls[0]?.[1] as { values: Record<string, string> };
+    expect(answers.values.GEMINI_API_KEY).toBe(GEMINI);
+  });
+});
+
+describe('the Lavalink choices', () => {
+  const REMOTE = {
+    LAVALINK_HOST: '192.0.2.10',
+    LAVALINK_PORT: '2333',
+    LAVALINK_PASSWORD: 'lavalink-password-value-123',
+  };
+
+  async function toDatabase(s: Started): Promise<void> {
+    await post(s, '/step/welcome', { action: 'next' });
+    await post(s, '/step/discord', DISCORD_FIELDS);
+    await post(s, '/step/ai', { action: 'next' });
+    await post(s, '/step/streams', { action: 'next' });
+  }
+
+  it('shows the local choice first and needs nothing else for it', async () => {
+    const s = await start();
+    await toDatabase(s);
+    const page = await get(s, '/step/database');
+    expect(page.body).toContain('Music server (Lavalink):');
+    expect(page.body).toMatch(/<option value="local" selected>Run Lavalink on this computer/);
+    expect(page.body).toContain('Use a Lavalink server I already have');
+    s.runCheck.mockClear();
+    const ok = await post(s, '/step/database', { DATABASE_DIALECT: 'sqlite', action: 'next' });
+    expect(ok.status).toBe(303);
+    expect(s.runCheck).not.toHaveBeenCalled();
+  });
+
+  it('asks for the address and the password of a server the reader has, and checks them', async () => {
+    const s = await start();
+    await toDatabase(s);
+    s.runCheck.mockClear();
+    const missing = await post(s, '/step/database', {
+      DATABASE_DIALECT: 'sqlite',
+      LAVALINK_MODE: 'remote',
+      action: 'next',
+    });
+    expect(missing.status).toBe(422);
+    expect(missing.body).toContain('Lavalink address is required.');
+    expect(missing.body).toContain('Lavalink password is required.');
+    expect(s.runCheck).not.toHaveBeenCalled();
+
+    const ok = await post(s, '/step/database', {
+      DATABASE_DIALECT: 'sqlite',
+      LAVALINK_MODE: 'remote',
+      ...REMOTE,
+      LAVALINK_SECURE: 'false',
+      action: 'next',
+    });
+    expect(ok.status).toBe(303);
+    expect(s.runCheck.mock.calls.map((call) => call[0])).toEqual(['lavalink']);
+  });
+
+  it('shows a wrong password under the password and an unreachable server under the address', async () => {
+    const wrong: CheckResult = {
+      status: 'fail',
+      message: 'Lavalink refused the password.',
+      guideStep: { guide: 'lavalink', step: 3 },
+      detail: { httpStatus: 401 },
+    };
+    const s = await start();
+    await toDatabase(s);
+    s.runCheck.mockResolvedValue(wrong);
+    const res = await post(s, '/step/database', {
+      DATABASE_DIALECT: 'sqlite',
+      LAVALINK_MODE: 'remote',
+      ...REMOTE,
+      action: 'next',
+    });
+    expect(res.status).toBe(422);
+    expect(res.body).toContain('id="f-LAVALINK_PASSWORD-error"');
+    expect(res.body).not.toContain('id="f-LAVALINK_HOST-error"');
+    expect(res.body).toContain('href="#guide-lavalink-step-3"');
+
+    s.runCheck.mockResolvedValue({
+      status: 'fail',
+      message: 'Nothing answered.',
+      guideStep: { guide: 'lavalink', step: 2 },
+    });
+    const down = await post(s, '/step/database', {
+      DATABASE_DIALECT: 'sqlite',
+      LAVALINK_MODE: 'remote',
+      ...REMOTE,
+      LAVALINK_PORT: '2334',
+      action: 'verify',
+    });
+    expect(down.body).toContain('id="f-LAVALINK_HOST-error"');
+    expect(down.body).not.toContain('id="f-LAVALINK_PASSWORD-error"');
+  });
+
+  it('starts on the choice the existing settings file shows', async () => {
+    const root = makeRoot();
+    writeFileSync(join(root, '.env'), 'LAVALINK_HOST=192.0.2.10\nLAVALINK_PORT=2334\n');
+    const s = await start({ root });
+    await toDatabase(s);
+    const page = await get(s, '/step/database');
+    expect(page.body).toMatch(/<option value="remote" selected>Use a Lavalink server/);
+    expect(page.body).toContain('value="192.0.2.10"');
+    expect(page.body).toContain('value="2334"');
+
+    const local = makeRoot();
+    writeFileSync(join(local, '.env'), 'LAVALINK_HOST=127.0.0.1\n');
+    const t = await start({ root: local });
+    await toDatabase(t);
+    expect((await get(t, '/step/database')).body).toMatch(
+      /<option value="local" selected>Run Lavalink on this computer/,
+    );
+  });
+
+  it('writes a Lavalink server elsewhere, and leaves out the install and start commands', async () => {
+    const s = await start();
+    await toDatabase(s);
+    await post(s, '/step/database', {
+      DATABASE_DIALECT: 'sqlite',
+      LAVALINK_MODE: 'remote',
+      ...REMOTE,
+      LAVALINK_SECURE: 'true',
+      action: 'next',
+    });
+    await post(s, '/step/dashboard', { action: 'next' });
+    const done = await post(s, '/finish', ACCEPT);
+    expect(done.body).not.toContain('pnpm lavalink:install');
+    expect(done.body).not.toContain('pnpm lavalink:start');
+    const file = readFileSync(join(s.root, '.env'), 'utf-8');
+    expect(file).toContain('LAVALINK_HOST=192.0.2.10');
+    expect(file).toContain('LAVALINK_PASSWORD=lavalink-password-value-123');
+    expect(file).toContain('LAVALINK_SECURE=true');
+  });
+
+  describe('with Docker', () => {
+    const DASHBOARD = {
+      DISCORD_CLIENT_SECRET: 'oauth-client-secret-value',
+      DASHBOARD_URL: 'https://dashboard.example.com',
+      action: 'next',
+    };
+
+    it('offers the bundled Lavalink first and shows the plain compose command', async () => {
+      const s = await start({ profile: 'docker' });
+      await toDatabase(s);
+      const page = await get(s, '/step/database');
+      expect(page.body).toMatch(/<option value="bundled" selected>Bundled Lavalink/);
+      expect(page.body).toContain('Remote Lavalink node');
+      expect(page.body).not.toContain('name="LAVALINK_SECURE"');
+      s.runCheck.mockClear();
+      expect((await post(s, '/step/database', { action: 'next' })).status).toBe(303);
+      expect(s.runCheck).not.toHaveBeenCalled();
+      await post(s, '/step/dashboard', DASHBOARD);
+      const install = await get(s, '/step/install');
+      expect(install.body).not.toContain('docker-compose.remote-lavalink.yml');
+      const done = await post(s, '/finish', ACCEPT);
+      expect(done.body).not.toContain('docker-compose.remote-lavalink.yml');
+      const file = readFileSync(join(s.root, '.env.production'), 'utf-8');
+      expect(file).not.toMatch(/^LAVALINK_HOST=/m);
+    });
+
+    it('writes the address of a remote node and adds the override file to the commands', async () => {
+      const s = await start({ profile: 'docker' });
+      await toDatabase(s);
+      const res = await post(s, '/step/database', {
+        LAVALINK_MODE_DOCKER: 'remote',
+        ...REMOTE,
+        action: 'next',
+      });
+      expect(res.status).toBe(303);
+      expect(s.runCheck.mock.calls.map((call) => call[0])).toContain('lavalink');
+      await post(s, '/step/dashboard', DASHBOARD);
+      const install = await get(s, '/step/install');
+      expect(install.body).toContain('-f docker-compose.remote-lavalink.yml');
+      const done = await post(s, '/finish', ACCEPT);
+      expect(done.body.match(/-f docker-compose\.remote-lavalink\.yml/g)?.length).toBeGreaterThan(
+        3,
+      );
+      const file = readFileSync(join(s.root, '.env.production'), 'utf-8');
+      expect(file).toMatch(/^LAVALINK_HOST=192\.0\.2\.10$/m);
+      expect(file).toMatch(/^LAVALINK_PORT=2333$/m);
+      expect(file).toMatch(/^LAVALINK_PASSWORD=lavalink-password-value-123$/m);
+      expect(file).not.toMatch(/^DATABASE_URL=/m);
+    });
+
+    it('starts on the remote node when the settings file has an address', async () => {
+      const root = makeRoot();
+      writeFileSync(join(root, '.env.production'), 'LAVALINK_HOST=192.0.2.20\n');
+      const s = await start({ profile: 'docker', root });
+      await toDatabase(s);
+      expect((await get(s, '/step/database')).body).toMatch(
+        /<option value="remote" selected>Remote Lavalink node/,
+      );
+    });
   });
 });
 

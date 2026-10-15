@@ -2821,7 +2821,8 @@
         "TASK-1925",
         "TASK-1926",
         "BUG-0046",
-        "BUG-0047"
+        "BUG-0047",
+        "TASK-1927"
       ],
       "blocks": [
         "STORY-191",
@@ -2869,7 +2870,7 @@
         ]
       },
       "acceptance": [
-        "TASK-1921 to TASK-1926, BUG-0046 and BUG-0047 are DONE.",
+        "TASK-1921 to TASK-1927, BUG-0046 and BUG-0047 are DONE.",
         "On a clean checkout, `pnpm installer` opens the wizard; finishing it with valid answers writes a `.env` that `pnpm doctor` accepts and the bot and the dashboard start with.",
         "The coverage gate passes (`pnpm test:coverage`)."
       ],
@@ -9876,6 +9877,74 @@
         "The maintainer reviews the Malay wording before DONE; the REVIEW entry records it."
       ],
       "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1927",
+      "title": "Setup Wizard Feedback: Step Tabs on the Left, the Shared Gemini Key in the Right Group, Lavalink Settings",
+      "points": 5,
+      "status": "DONE",
+      "parent": "STORY-192",
+      "requires": [
+        "BUG-0047"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1927",
+        "BUG-0047",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "description": "Maintainer feedback on the BUG-0047 wizard (2026-10-15, with screenshots): (1) the six step tabs are cramped at the top and break mid-word; put them in a left column; (2) turning on image generation alone shows the Gemini key under the chat switch; (3) the Database & Music page needs Lavalink settings.",
+      "context": {
+        "files": [
+          "apps/cli/src/installer/steps.ts",
+          "apps/cli/src/installer/render.ts",
+          "apps/cli/src/installer/server.ts",
+          "apps/cli/src/installer/env-plan.ts",
+          "apps/cli/src/installer/checks.ts",
+          "apps/cli/src/installer/check-runner.ts",
+          "apps/cli/src/installer/guides.ts",
+          "assets/installer/wizard.css",
+          "apps/cli/src/installer/__golden__/",
+          ".env.example",
+          ".env.production.example",
+          "docker-compose.remote-lavalink.yml",
+          "packages/core/src/config/schema.ts",
+          "SETUP.md",
+          "docs/deployment.md",
+          "docs/music.md"
+        ],
+        "symbols": [
+          "PAGES",
+          "validatePage",
+          "planEnv",
+          "DOCKER_MANAGED_VARIABLES",
+          "conditionalCss",
+          "AppConfigSchema"
+        ],
+        "codegraph_queries": [
+          "PAGES steps.ts GEMINI_API_KEY ai-chat ai-images appliesWhen blocks NoteBlock",
+          "planEnv DOCKER_MANAGED_VARIABLES generateOnce LAVALINK_PASSWORD writeEnv",
+          "render.ts conditionalCss renderStepPage step tabs",
+          "LAVALINK_HOST LAVALINK_PORT LAVALINK_SECURE LAVALINK_PASSWORD AppConfigSchema LavalinkService"
+        ]
+      },
+      "acceptance": [
+        "Step tabs: at 1024px and wider they form a vertical column on the left of the content, one tab per row with icon, the title on one line and \"Step N\" under it, current and done states as in 1.x, 2.0 colors; the content keeps the 1.x 700px column. Below 1024px the icon-only row on top stays. No title breaks inside a word at any width; no sideways scroll at 1440, 1280, 1024, 800 and 375px.",
+        "Gemini key: GEMINI_API_KEY appears inside each group that needs it and nowhere else: in the AI chat group when chat is on with Gemini, in the image group when images are on with Gemini, once only when both use it. The label says the key is shared by chat and images. The server decides which placement is active from the switches and choices (a hidden input is still submitted) and maps it to one GEMINI_API_KEY answer; validation names one field; a saved value prefills it. Tests cover chat-only, images-only and both.",
+        "Lavalink, source profile: a \"Music server (Lavalink)\" group on the Database & Music page with a choice: \"Run Lavalink on this computer\" (default; host 127.0.0.1, port 2333, password generated as today; the note names `pnpm lavalink:install` and `pnpm lavalink:start`) or \"Use a Lavalink server I already have\" (LAVALINK_HOST, LAVALINK_PORT, LAVALINK_PASSWORD, LAVALINK_SECURE, validated by AppConfigSchema). Note and guide follow the 1.x order and appear only for the chosen option.",
+        "Lavalink, docker profile: a choice \"Bundled Lavalink\" (default, writes nothing new) or \"Remote Lavalink node\" (LAVALINK_HOST and LAVALINK_PASSWORD, LAVALINK_PORT default 2333). Only the remote choice lets the docker profile write LAVALINK_HOST and LAVALINK_PORT, and the Install page and next commands then tell the reader to add `-f docker-compose.remote-lavalink.yml`. DATABASE_* stay compose-managed.",
+        "A Lavalink live check in checks.ts: GET http(s)://host:port/version with the Authorization header, through the injected fetch, with a timeout and the password redacted; pass, wrong password (401) and unreachable give distinct messages naming the guide step. It runs only for \"Use a Lavalink server I already have\" and \"Remote Lavalink node\".",
+        "Golden files are regenerated for the new defaults (byte-identical for the same answers) and new golden cases cover a remote Lavalink for both profiles. SETUP.md, docs/deployment.md and docs/music.md mention the new wizard choices in one or two sentences each.",
+        "Checked in the in-app browser against a temporary root under $TEMP (never the repository .env, never port 3999): every page at the widths above; image-only, chat-only and both Gemini cases; both Lavalink choices in both profiles. The PROGRESS entry records it."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/cli/src packages/core/src/config && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "chores": [

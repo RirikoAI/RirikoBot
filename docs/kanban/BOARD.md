@@ -405,6 +405,7 @@
 | `TASK-1924` | Task | Local Setup Wizard Server and Pages With the 1.x Layout in the 2.0 Colors | 5 | STORY-192 | [TASK-1924.md](./handovers/TASK-1924.md) |
 | `TASK-1925` | Task | ririko setup Command, pnpm installer, Docker Mode and the Bot's First-Run Hint | 2 | STORY-192 | [TASK-1925.md](./handovers/TASK-1925.md) |
 | `TASK-1926` | Task | Docs: Start Every Install With the Setup Wizard | 2 | STORY-192 | [TASK-1926.md](./handovers/TASK-1926.md) |
+| `TASK-1927` | Task | Setup Wizard Feedback: Step Tabs on the Left, the Shared Gemini Key in the Right Group, Lavalink Settings | 5 | STORY-192 | [TASK-1927.md](./handovers/TASK-1927.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |

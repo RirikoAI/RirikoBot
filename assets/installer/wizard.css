@@ -477,6 +477,8 @@ pre {
 
 .guide-step p {
   margin: 0 0 1rem;
+  /* A long address in a step (the dashboard redirect) must not widen the page on a phone. */
+  overflow-wrap: anywhere;
 }
 
 .guide-links {
@@ -721,9 +723,48 @@ summary:focus-visible {
   overflow-x: auto;
 }
 
-/* Below 1200px six tabs have no room for their text: they show only their icon, as 1.x does on phones */
+/*
+ * From 1024px the step tabs are a column on the left of the content, one tab per row with the
+ * title on one line. Below that the row on top has no room for six titles, so the tabs show only
+ * their icon, as 1.x does on phones.
+ */
 
-@media (max-width: 1199px) {
+@media (min-width: 1024px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .steps > ul {
+    display: block;
+  }
+
+  .steps li {
+    width: auto;
+    max-width: none;
+    margin-bottom: 6px;
+  }
+
+  .step-link {
+    padding: 18px 14px 16px 18px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 10px;
+  }
+
+  .step-text {
+    overflow-wrap: normal;
+  }
+
+  .step-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 1023px) {
   .step-link {
     padding: 15px 10px;
   }

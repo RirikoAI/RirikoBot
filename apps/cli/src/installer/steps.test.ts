@@ -5,11 +5,13 @@ import {
   PAGE_IDS,
   activeChecks,
   activeFields,
+  activePlacement,
   effectiveSwitches,
   fieldApplies,
   fieldRequired,
   getPage,
   nextPage,
+  usesRemoteLavalink,
   validatePage,
   type Answers,
 } from './steps.js';
@@ -126,9 +128,13 @@ describe('switches and applicability', () => {
 
   it('hides source-only fields for docker', () => {
     const database = getPage('database');
-    expect(activeFields(database, 'docker', answers())).toEqual([]);
+    // Docker has no database choice; its Lavalink choice is the bundled or a remote node.
+    expect(activeFields(database, 'docker', answers()).map((field) => field.name)).toEqual([
+      'LAVALINK_MODE_DOCKER',
+    ]);
     expect(activeFields(database, 'source', answers()).map((field) => field.name)).toEqual([
       'DATABASE_DIALECT',
+      'LAVALINK_MODE',
     ]);
   });
 
@@ -223,7 +229,12 @@ describe('validatePage', () => {
         'source',
         answers({ DEFAULT_AI_PROVIDER: 'gemini' }, { 'ai-chat': true }),
       ),
-    ).toEqual([{ field: 'GEMINI_API_KEY', message: 'Gemini API key is required.' }]);
+    ).toEqual([
+      {
+        field: 'GEMINI_API_KEY',
+        message: 'Gemini API key (shared by chat and images) is required.',
+      },
+    ]);
     expect(validatePage(getPage('ai'), 'source', answers())).toEqual([]);
   });
 
@@ -287,5 +298,136 @@ describe('validatePage', () => {
 
   it('validates the Welcome page as always valid', () => {
     expect(validatePage(getPage('welcome'), 'docker', answers())).toEqual([]);
+  });
+});
+
+describe('the shared Gemini key', () => {
+  const ai = getPage('ai');
+  const gemini = ai.fields.find((field) => field.name === 'GEMINI_API_KEY')!;
+  const chat = answers({ DEFAULT_AI_PROVIDER: 'gemini' }, { 'ai-chat': true });
+  const images = answers({ IMAGE_DEFAULT_PROVIDER: 'gemini' }, { 'ai-images': true });
+  const both = answers(
+    { DEFAULT_AI_PROVIDER: 'gemini', IMAGE_DEFAULT_PROVIDER: 'gemini' },
+    { 'ai-chat': true, 'ai-images': true },
+  );
+
+  it('is one field with a copy for chat and a copy for images', () => {
+    expect(ai.fields.filter((field) => field.name.startsWith('GEMINI_API_KEY'))).toHaveLength(1);
+    expect(gemini.placements?.map((placement) => placement.form)).toEqual([
+      'GEMINI_API_KEY__chat',
+      'GEMINI_API_KEY__images',
+    ]);
+    expect(gemini.label).toContain('shared by chat and images');
+  });
+
+  it('shows the chat copy for chat only, the image copy for images only, and one copy for both', () => {
+    const form = (a: Answers) => activePlacement(gemini, 'source', a)?.form ?? null;
+    expect(form(chat)).toBe('GEMINI_API_KEY__chat');
+    expect(form(images)).toBe('GEMINI_API_KEY__images');
+    expect(form(both)).toBe('GEMINI_API_KEY__chat');
+    expect(form(answers())).toBeNull();
+    // Chat on another provider leaves the key to the image group.
+    expect(
+      form(
+        answers(
+          { DEFAULT_AI_PROVIDER: 'openai', IMAGE_DEFAULT_PROVIDER: 'gemini' },
+          { 'ai-chat': true, 'ai-images': true },
+        ),
+      ),
+    ).toBe('GEMINI_API_KEY__images');
+    // A field without placements has no copy.
+    expect(activePlacement(ai.fields[0]!, 'source', chat)).toBeNull();
+  });
+
+  it('applies exactly when one of the copies is shown, and validation names the one field', () => {
+    for (const a of [chat, images, both]) {
+      expect(fieldApplies(gemini, 'source', a)).toBe(true);
+      expect(validatePage(ai, 'source', a).map((error) => error.field)).toEqual(['GEMINI_API_KEY']);
+    }
+    expect(fieldApplies(gemini, 'source', answers())).toBe(false);
+    expect(
+      validatePage(ai, 'source', { ...both, values: { ...both.values, GEMINI_API_KEY: 'k' } }),
+    ).toEqual([]);
+  });
+});
+
+describe('the Lavalink choices', () => {
+  const database = getPage('database');
+  const names = (profile: 'source' | 'docker', values: Record<string, string>) =>
+    activeFields(database, profile, answers(values)).map((field) => field.name);
+
+  it('has one choice per profile with the documented labels and defaults', () => {
+    const local = database.fields.find((field) => field.name === 'LAVALINK_MODE')!;
+    expect(local.options?.map((option) => option.label)).toEqual([
+      'Run Lavalink on this computer',
+      'Use a Lavalink server I already have',
+    ]);
+    expect(local.defaults).toEqual({ source: 'local' });
+    expect(local.env).toBe(false);
+    const bundled = database.fields.find((field) => field.name === 'LAVALINK_MODE_DOCKER')!;
+    expect(bundled.options?.map((option) => option.label)).toEqual([
+      'Bundled Lavalink',
+      'Remote Lavalink node',
+    ]);
+    expect(bundled.defaults).toEqual({ docker: 'bundled' });
+  });
+
+  it('asks for the address, port, password and connection type only for a server elsewhere', () => {
+    expect(names('source', { LAVALINK_MODE: 'local' })).toEqual([
+      'DATABASE_DIALECT',
+      'LAVALINK_MODE',
+    ]);
+    expect(names('source', { LAVALINK_MODE: 'remote' })).toEqual([
+      'DATABASE_DIALECT',
+      'LAVALINK_MODE',
+      'LAVALINK_HOST',
+      'LAVALINK_PORT',
+      'LAVALINK_PASSWORD',
+      'LAVALINK_SECURE',
+    ]);
+    expect(names('docker', { LAVALINK_MODE_DOCKER: 'bundled' })).toEqual(['LAVALINK_MODE_DOCKER']);
+    expect(names('docker', { LAVALINK_MODE_DOCKER: 'remote' })).toEqual([
+      'LAVALINK_MODE_DOCKER',
+      'LAVALINK_HOST',
+      'LAVALINK_PORT',
+      'LAVALINK_PASSWORD',
+    ]);
+  });
+
+  it('runs the Lavalink check only for a server elsewhere', () => {
+    const checks = (profile: 'source' | 'docker', values: Record<string, string>) =>
+      activeChecks(database, profile, answers(values));
+    expect(checks('source', { LAVALINK_MODE: 'local' })).toEqual([]);
+    expect(checks('source', { LAVALINK_MODE: 'remote' })).toEqual(['lavalink']);
+    expect(checks('docker', { LAVALINK_MODE_DOCKER: 'bundled' })).toEqual([]);
+    expect(checks('docker', { LAVALINK_MODE_DOCKER: 'remote' })).toEqual(['lavalink']);
+    expect(usesRemoteLavalink('source', answers({ LAVALINK_MODE: 'remote' }))).toBe(true);
+    expect(usesRemoteLavalink('docker', answers({ LAVALINK_MODE: 'remote' }))).toBe(false);
+    expect(usesRemoteLavalink('docker', answers({ LAVALINK_MODE_DOCKER: 'remote' }))).toBe(true);
+  });
+
+  it('validates the address, the port and the connection type with the config schema', () => {
+    const remote = {
+      LAVALINK_MODE: 'remote',
+      LAVALINK_HOST: '192.0.2.10',
+      LAVALINK_PORT: '2333',
+      LAVALINK_PASSWORD: 'secret-value',
+      LAVALINK_SECURE: 'false',
+    };
+    const problems = (values: Record<string, string>) =>
+      validatePage(database, 'source', answers({ DATABASE_DIALECT: 'sqlite', ...values })).map(
+        (error) => error.field,
+      );
+    expect(problems(remote)).toEqual([]);
+    expect(problems({ ...remote, LAVALINK_HOST: 'http://192.0.2.10' })).toEqual(['LAVALINK_HOST']);
+    expect(problems({ ...remote, LAVALINK_PORT: '70000' })).toEqual(['LAVALINK_PORT']);
+    expect(problems({ ...remote, LAVALINK_PORT: 'abc' })).toEqual(['LAVALINK_PORT']);
+    expect(problems({ ...remote, LAVALINK_SECURE: 'maybe' })).toEqual(['LAVALINK_SECURE']);
+    expect(problems({ LAVALINK_MODE: 'remote' })).toEqual([
+      'LAVALINK_HOST',
+      'LAVALINK_PORT',
+      'LAVALINK_PASSWORD',
+      'LAVALINK_SECURE',
+    ]);
   });
 });

@@ -9,6 +9,7 @@ import {
   checkDiscordApplication,
   checkDiscordOAuthSecret,
   checkGemini,
+  checkLavalink,
   checkOllama,
   checkOpenAi,
   checkReplicate,
@@ -579,6 +580,76 @@ describe('checkReplicate', () => {
     });
     expect(boom.status).toBe('fail');
     noSecret(boom, REPLICATE);
+  });
+});
+
+describe('checkLavalink', () => {
+  const PASSWORD = 'lavalink-password-value-123';
+  const values = { host: '192.0.2.10', port: '2333', password: PASSWORD, secure: false };
+  const text = (body: string, status = 200): Response => new Response(body, { status });
+
+  it('asks /version with the password in the Authorization header and passes', async () => {
+    const net = fakeFetch(() => text('4.0.8'));
+    const r = await checkLavalink(values, { fetch: net.fetch });
+    expect(r.status).toBe('pass');
+    expect(r.message).toContain('4.0.8');
+    expect(net.calls[0]?.url).toBe('http://192.0.2.10:2333/version');
+    expect((net.calls[0]?.init?.headers as Record<string, string>).Authorization).toBe(PASSWORD);
+    noSecret(r, PASSWORD);
+  });
+
+  it('uses https for a secure connection and brackets an IPv6 address', async () => {
+    const net = fakeFetch(() => text('4.0.8'));
+    await checkLavalink({ ...values, host: '2001:db8::1', secure: true }, { fetch: net.fetch });
+    expect(net.calls[0]?.url).toBe('https://[2001:db8::1]:2333/version');
+  });
+
+  it('names a wrong password and points at the password step of the guide', async () => {
+    for (const status of [401, 403]) {
+      const r = await checkLavalink(values, { fetch: fakeFetch(() => text('', status)).fetch });
+      expect(r.status).toBe('fail');
+      expect(r.message).toContain('refused the password');
+      expect(r.guideStep).toEqual({ guide: 'lavalink', step: 3 });
+      expect(r.detail?.httpStatus).toBe(status);
+      noSecret(r, PASSWORD);
+    }
+  });
+
+  it('says nothing answered when the connection fails, without the password', async () => {
+    const r = await checkLavalink(values, {
+      fetch: fakeFetch(() => {
+        throw new Error(`connect ECONNREFUSED 192.0.2.10:2333 ${PASSWORD}`);
+      }).fetch,
+    });
+    expect(r.status).toBe('fail');
+    expect(r.message).toContain('Nothing answered at 192.0.2.10:2333');
+    expect(r.guideStep).toEqual({ guide: 'lavalink', step: 2 });
+    expect(r.detail?.reachable).toBe(false);
+    expect(r.detail?.error).not.toContain(PASSWORD);
+    noSecret(r, PASSWORD);
+  });
+
+  it('fails on another status and on an address that is not usable', async () => {
+    const other = await checkLavalink(values, { fetch: fakeFetch(() => text('', 500)).fetch });
+    expect(other.status).toBe('fail');
+    expect(other.message).toContain('HTTP 500');
+    expect(other.guideStep).toEqual({ guide: 'lavalink', step: 1 });
+    const net = fakeFetch(() => text('4.0.8'));
+    const bad = await checkLavalink({ ...values, host: 'a b' }, { fetch: net.fetch });
+    expect(bad.status).toBe('fail');
+    expect(bad.message).toContain('not a usable address');
+    expect(net.calls).toHaveLength(0);
+  });
+
+  it('gives up after the timeout', async () => {
+    const hang = (_url: string, init: RequestInit | undefined) =>
+      new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(new Error('aborted')));
+      });
+    const r = await checkLavalink(values, { fetch: fakeFetch(hang).fetch, timeoutMs: 20 });
+    expect(r.status).toBe('fail');
+    expect(r.message).toContain('did not answer within');
+    expect(r.guideStep).toEqual({ guide: 'lavalink', step: 2 });
   });
 });
 

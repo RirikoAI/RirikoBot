@@ -12,6 +12,7 @@ vi.mock('./checks.js', () => {
     checkDiscordApplication: make('discord'),
     checkDiscordOAuthSecret: make('oauth'),
     checkGemini: make('gemini'),
+    checkLavalink: make('lavalink'),
     checkOllama: make('ollama'),
     checkOpenAi: make('openai'),
     checkReplicate: make('replicate'),
@@ -178,5 +179,36 @@ describe('checkInputs and checkField', () => {
     expect(checkField('spotify', answers({}))).toBe('SPOTIFY_CLIENT_SECRET');
     expect(checkField('postgres', answers({}))).toBe('DATABASE_URL');
     expect(checkField('dashboard-oauth', answers({}))).toBe('DISCORD_CLIENT_SECRET');
+  });
+
+  it('runs the Lavalink check with the entered address, password and connection type', async () => {
+    const a = answers({
+      LAVALINK_HOST: '192.0.2.10',
+      LAVALINK_PORT: '2333',
+      LAVALINK_PASSWORD: 'pw',
+      LAVALINK_SECURE: 'true',
+    });
+    expect(await message('lavalink', a)).toBe(
+      'lavalink:[{"host":"192.0.2.10","port":"2333","password":"pw","secure":true}]',
+    );
+    // Docker has no connection type: plain.
+    expect(
+      await message('lavalink', answers({ LAVALINK_HOST: 'h', LAVALINK_PORT: '1' })),
+    ).toContain('"secure":false');
+    expect(checkInputs('lavalink', a)).toEqual(['192.0.2.10', '2333', 'pw', 'true']);
+  });
+
+  it('shows a Lavalink password error under the password and any other error under the address', () => {
+    const a = answers({});
+    const status = (httpStatus?: number) => ({
+      status: 'fail' as const,
+      message: 'x',
+      ...(httpStatus ? { detail: { httpStatus } } : {}),
+    });
+    expect(checkField('lavalink', a, status(401))).toBe('LAVALINK_PASSWORD');
+    expect(checkField('lavalink', a, status(403))).toBe('LAVALINK_PASSWORD');
+    expect(checkField('lavalink', a, status(500))).toBe('LAVALINK_HOST');
+    expect(checkField('lavalink', a, status())).toBe('LAVALINK_HOST');
+    expect(checkField('lavalink', a)).toBe('LAVALINK_HOST');
   });
 });

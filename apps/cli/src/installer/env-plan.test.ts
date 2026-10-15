@@ -15,6 +15,7 @@ import { parseEnvContent } from '../utils/env-editor.js';
 import {
   DOCKER_MANAGED_VARIABLES,
   PROFILE_FILES,
+  isDockerManaged,
   backupStamp,
   checkPlannedEnv,
   cryptoSecretGenerator,
@@ -99,6 +100,31 @@ const DOCKER_MINIMAL: Answers = {
   switches: {},
 };
 
+/** A Lavalink server the reader already has (source), at a documentation-range address. */
+const REMOTE_SOURCE: Answers = {
+  values: {
+    ...MINIMAL.values,
+    LAVALINK_MODE: 'remote',
+    LAVALINK_HOST: '192.0.2.10',
+    LAVALINK_PORT: '2334',
+    LAVALINK_PASSWORD: 'fake-lavalink-password',
+    LAVALINK_SECURE: 'true',
+  },
+  switches: {},
+};
+
+/** A remote Lavalink node for the docker stack. */
+const REMOTE_DOCKER: Answers = {
+  values: {
+    ...DOCKER_MINIMAL.values,
+    LAVALINK_MODE_DOCKER: 'remote',
+    LAVALINK_HOST: '192.0.2.20',
+    LAVALINK_PORT: '2333',
+    LAVALINK_PASSWORD: 'fake-lavalink-password',
+  },
+  switches: {},
+};
+
 let root: string;
 
 function seed(profile: Profile): void {
@@ -132,6 +158,7 @@ describe('golden files', () => {
     for (const [label, answers] of [
       ['full', FULL],
       ['minimal', profile === 'docker' ? DOCKER_MINIMAL : MINIMAL],
+      ['remote-lavalink', profile === 'docker' ? REMOTE_DOCKER : REMOTE_SOURCE],
     ] as const) {
       it(`writes the same ${profile} file for the same ${label} answers`, () => {
         seed(profile);
@@ -407,6 +434,113 @@ describe('planEnv', () => {
     expect(realValue({ A: 'your_bot_token_here', B: ' x ', C: '' }, 'A')).toBe('');
     expect(realValue({ B: ' x ' }, 'B')).toBe('x');
     expect(prefillValues({ A: 'your_client_id_here', B: 'x', C: '' })).toEqual({ B: 'x' });
+  });
+});
+
+describe('Lavalink choices', () => {
+  const localAnswers: Answers = {
+    ...MINIMAL,
+    values: { ...MINIMAL.values, LAVALINK_MODE: 'local' },
+  };
+
+  it('writes no Lavalink address for the local and bundled choices, and generates the password', () => {
+    const local = planEnv(localAnswers, {}, 'source', fixedGenerator());
+    expect(Object.keys(local.updates)).not.toContain('LAVALINK_HOST');
+    expect(local.generated).toEqual(['LAVALINK_PASSWORD']);
+    const bundled = planEnv(
+      {
+        ...DOCKER_MINIMAL,
+        values: {
+          ...DOCKER_MINIMAL.values,
+          LAVALINK_MODE_DOCKER: 'bundled',
+          LAVALINK_HOST: '192.0.2.20',
+          LAVALINK_PORT: '2333',
+        },
+      },
+      {},
+      'docker',
+      fixedGenerator(),
+    );
+    expect(bundled.updates.LAVALINK_HOST).toBeUndefined();
+    expect(bundled.updates.LAVALINK_PORT).toBeUndefined();
+    expect(bundled.generated).toContain('LAVALINK_PASSWORD');
+  });
+
+  it('writes the typed address and password for a server elsewhere and does not generate one', () => {
+    const source = planEnv(REMOTE_SOURCE, {}, 'source', fixedGenerator());
+    expect(source.updates).toMatchObject({
+      LAVALINK_HOST: '192.0.2.10',
+      LAVALINK_PORT: '2334',
+      LAVALINK_PASSWORD: 'fake-lavalink-password',
+      LAVALINK_SECURE: 'true',
+    });
+    expect(source.generated).not.toContain('LAVALINK_PASSWORD');
+    expect(Object.keys(source.updates)).not.toContain('LAVALINK_MODE');
+  });
+
+  it('lets only the remote node choice write the address for docker', () => {
+    const docker = planEnv(REMOTE_DOCKER, {}, 'docker', fixedGenerator());
+    expect(docker.updates).toMatchObject({
+      LAVALINK_HOST: '192.0.2.20',
+      LAVALINK_PORT: '2333',
+      LAVALINK_PASSWORD: 'fake-lavalink-password',
+    });
+    expect(docker.updates.DATABASE_URL).toBeUndefined();
+    expect(docker.updates.DATABASE_DIALECT).toBeUndefined();
+    expect(docker.generated).toEqual(['SECRET_VAULT_KEY', 'POSTGRES_PASSWORD']);
+    expect(isDockerManaged('LAVALINK_HOST', DOCKER_MINIMAL)).toBe(true);
+    expect(isDockerManaged('LAVALINK_HOST', REMOTE_DOCKER)).toBe(false);
+    expect(isDockerManaged('LAVALINK_PORT', REMOTE_DOCKER)).toBe(false);
+    expect(isDockerManaged('DATABASE_URL', REMOTE_DOCKER)).toBe(true);
+    expect(isDockerManaged('BOT_OWNER_ID', REMOTE_DOCKER)).toBe(false);
+  });
+
+  it('puts this computer back when the file held a server elsewhere', () => {
+    const back = planEnv(
+      localAnswers,
+      {
+        LAVALINK_HOST: '192.0.2.10',
+        LAVALINK_PORT: '2334',
+        LAVALINK_SECURE: 'true',
+        LAVALINK_PASSWORD: 'kept-password',
+      },
+      'source',
+      fixedGenerator(),
+    );
+    expect(back.updates).toMatchObject({
+      LAVALINK_HOST: '127.0.0.1',
+      LAVALINK_PORT: '2333',
+      LAVALINK_SECURE: 'false',
+    });
+    expect(back.updates.LAVALINK_PASSWORD).toBeUndefined();
+    const same = planEnv(
+      localAnswers,
+      { LAVALINK_HOST: 'localhost', LAVALINK_PORT: '2333', LAVALINK_SECURE: 'false' },
+      'source',
+      fixedGenerator(),
+    );
+    expect(same.updates.LAVALINK_HOST).toBeUndefined();
+    expect(same.updates.LAVALINK_PORT).toBeUndefined();
+    expect(same.updates.LAVALINK_SECURE).toBeUndefined();
+  });
+
+  it('refuses a malformed address or port with the schema message', () => {
+    const bad: Answers = {
+      ...REMOTE_SOURCE,
+      values: {
+        ...REMOTE_SOURCE.values,
+        LAVALINK_HOST: 'http://192.0.2.10',
+        LAVALINK_PORT: '99999',
+      },
+    };
+    seed('source');
+    const result = writeEnv({ root, profile: 'source', answers: bad, now: NOW });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.map((error) => error.variable)).toEqual(
+        expect.arrayContaining(['LAVALINK_HOST', 'LAVALINK_PORT']),
+      );
+    }
   });
 });
 

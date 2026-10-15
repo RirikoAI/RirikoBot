@@ -16,6 +16,7 @@ import {
   activeFields,
   answerValue,
   effectiveSwitches,
+  usesRemoteLavalink,
   validatePage,
   type Answers,
   type Profile,
@@ -40,13 +41,31 @@ export const PROFILE_FILES: Record<Profile, ProfileFiles> = {
   docker: { env: '.env.production', example: '.env.production.example' },
 };
 
-/** Variables the docker compose file sets itself; the wizard never writes them for docker. */
+/** Variables the docker compose file sets itself; the wizard does not write them for docker. */
 export const DOCKER_MANAGED_VARIABLES: readonly string[] = [
   'DATABASE_DIALECT',
   'DATABASE_URL',
   'LAVALINK_HOST',
   'LAVALINK_PORT',
 ];
+
+/** The address of a Lavalink that runs on the same computer as the bot (source install). */
+const LOCAL_LAVALINK: Readonly<Record<string, string>> = {
+  LAVALINK_HOST: '127.0.0.1',
+  LAVALINK_PORT: '2333',
+  LAVALINK_SECURE: 'false',
+};
+
+/**
+ * True when the compose file sets this variable, so the wizard must not write it. The Lavalink
+ * address is the exception: with docker-compose.remote-lavalink.yml (the remote node choice) the
+ * compose file reads it from the settings file instead.
+ */
+export function isDockerManaged(name: string, answers: Answers): boolean {
+  if (!DOCKER_MANAGED_VARIABLES.includes(name)) return false;
+  const lavalinkAddress = name === 'LAVALINK_HOST' || name === 'LAVALINK_PORT';
+  return !(lavalinkAddress && usesRemoteLavalink('docker', answers));
+}
 
 /** Example values that mean "not set yet". */
 const PLACEHOLDER_VALUES: ReadonlySet<string> = new Set([
@@ -110,7 +129,7 @@ export function planEnv(
   for (const page of PAGES) {
     for (const field of activeFields(page, profile, answers)) {
       if (field.env === false || field.kind === 'checkbox') continue;
-      if (profile === 'docker' && DOCKER_MANAGED_VARIABLES.includes(field.name)) continue;
+      if (profile === 'docker' && isDockerManaged(field.name, answers)) continue;
       const value = answerValue(answers, field.name);
       if (value !== '') {
         updates[field.name] = value;
@@ -128,8 +147,20 @@ export function planEnv(
     }
   }
 
+  if (profile === 'source' && answerValue(answers, 'LAVALINK_MODE') === 'local') {
+    // Moving back from a Lavalink server elsewhere: the file's address would no longer be this computer.
+    for (const [name, local] of Object.entries(LOCAL_LAVALINK)) {
+      const saved = realValue(current, name);
+      if (saved === '' || saved === local) continue;
+      if (name === 'LAVALINK_HOST' && saved === 'localhost') continue;
+      updates[name] = local;
+    }
+  }
+
   const generateOnce = (name: string, bytes: number): void => {
     if (realValue(current, name) !== '') return;
+    // The reader typed it (the password of a Lavalink server elsewhere).
+    if ((updates[name] ?? '') !== '') return;
     updates[name] = generate.hex(bytes);
     generated.push(name);
   };

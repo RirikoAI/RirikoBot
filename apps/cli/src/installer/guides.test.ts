@@ -29,6 +29,7 @@ describe('guides', () => {
       'youtube',
       'spotify',
       'postgres',
+      'lavalink',
       'dashboard-oauth',
     ]);
     expect(ids.some((id) => /mongo|nlp/i.test(id))).toBe(false);
