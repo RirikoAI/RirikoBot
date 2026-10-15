@@ -67,7 +67,7 @@ The wizard walks you through the Discord application and writes your `.env` file
    pnpm installer
    ```
 
-   The terminal prints `RirikoAI setup (source install)` and an address that starts with `http://127.0.0.1:3999/`. Your browser opens that address. If it does not open, copy the address into your browser.
+   The terminal prints `RirikoAI setup (source install)` and an address that starts with `http://127.0.0.1:3999/`. Your browser opens that address. If it does not open, copy the address into your browser. The first start builds the project, which takes a minute or two; later starts are faster.
 
 2. Follow the pages in order: **Welcome**, **Discord Bot**, **AI**, **Stream Alerts**, **Database & Music**, **Dashboard** and **Install**. Each page has a guide button that shows where to find the values in the Discord Developer Portal and on the other websites. The wizard checks the bot token, the dashboard client secret and the other keys before you can go on.
 3. On the **Install** page, read the summary, tick both boxes, and click **Finish**. The wizard writes the `.env` file in the repository folder. It keeps the values that are already in the file. If a `.env` file exists, the wizard first saves a copy next to it, named `.env.bak-` and a time stamp.

@@ -2819,7 +2819,8 @@
         "TASK-1923",
         "TASK-1924",
         "TASK-1925",
-        "TASK-1926"
+        "TASK-1926",
+        "BUG-0046"
       ],
       "blocks": [
         "STORY-191",
@@ -2867,7 +2868,7 @@
         ]
       },
       "acceptance": [
-        "TASK-1921 to TASK-1926 are DONE.",
+        "TASK-1921 to TASK-1926 and BUG-0046 are DONE.",
         "On a clean checkout, `pnpm installer` opens the wizard; finishing it with valid answers writes a `.env` that `pnpm doctor` accepts and the bot and the dashboard start with.",
         "The coverage gate passes (`pnpm test:coverage`)."
       ],
@@ -9378,7 +9379,8 @@
           "apps/cli/src/program.test.ts",
           "package.json",
           "apps/bot/src/main.ts",
-          "Dockerfile"
+          "Dockerfile",
+          "pnpm-workspace.yaml"
         ],
         "symbols": [
           "createProgram",
@@ -11700,6 +11702,50 @@
         "Tests (offline, injected fetchFn) cover each branch; docs/music.md describes the matching."
       ],
       "verify_cmd": "pnpm vitest run packages/services/src/lyrics && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0046",
+      "title": "`pnpm installer` Fails on a Fresh Clone: Workspace Packages Not Built, Native Install Scripts Blocked",
+      "points": 2,
+      "status": "DONE",
+      "parent": "STORY-192",
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "BUG-0046",
+        "TASK-1925",
+        "STORY-192",
+        "EPIC-020"
+      ],
+      "description": "Found by the maintainer running STORY-192 acceptance 2 on a fresh clone: `pnpm installer` throws ERR_MODULE_NOT_FOUND for @ririko/core/dist, and pnpm 10 skips the install scripts of better-sqlite3 and esbuild.",
+      "context": {
+        "files": [
+          "package.json",
+          "pnpm-workspace.yaml",
+          "SETUP.md",
+          "README.md",
+          "apps/cli/src/index.ts"
+        ],
+        "symbols": [
+          "createProgram"
+        ],
+        "codegraph_queries": [
+          "createProgram setup doctor index.ts"
+        ]
+      },
+      "acceptance": [
+        "Root scripts that run workspace source with tsx and import workspace packages (`installer`, `doctor`, `cli`, and any of `db:reset`, `lavalink:*`, `tcg:*` that need it) build first with `tsc -b &&`, as `dev:web` does.",
+        "`pnpm-workspace.yaml` lists `onlyBuiltDependencies` for the dependencies whose install scripts are needed (at least `better-sqlite3` and `esbuild`); the PROGRESS entry gives the reason for each listed and each left out (`@google/genai`, `protobufjs`, `@napi-rs/canvas`).",
+        "On a fresh clone of the branch in a temporary folder: `pnpm install`, then `pnpm installer --no-open` prints the wizard URL (stopped afterwards), and `better-sqlite3` opens an in-memory database. The clone is deleted afterwards.",
+        "SETUP.md and README steps stay correct."
+      ],
+      "verify_cmd": "pnpm typecheck && pnpm vitest run apps/cli/src && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "active_in_progress_ticket": null
