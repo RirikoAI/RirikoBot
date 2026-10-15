@@ -1,0 +1,793 @@
+/*
+ * Ririko setup wizard. It mirrors the 1.x installer (.local/installer-1x: Bootstrap 4 defaults
+ * plus assets/css/bd-wizard.css) in size, spacing and order; only the colors are the 2.0 ones
+ * (apps/web/src/app/globals.css). Plain CSS, no script, no CDN. Karla is self-hosted
+ * (fonts/, SIL Open Font License in fonts/OFL.txt).
+ */
+
+@font-face {
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/karla-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/assets/fonts/karla-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --color-ink: #0f0d17;
+  --color-panel: #1a1726;
+  --color-edge: #2c2840;
+  --color-sakura: #f472b6;
+  --color-sakura-strong: #ec4899;
+  --color-text: #e7e5f0;
+  --color-muted: #a29fb5;
+  --color-ok: #34d399;
+  --color-warn: #fbbf24;
+  --color-error: #f87171;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: 'Karla', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h4,
+h5 {
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--color-sakura);
+}
+
+.wizard a:hover {
+  text-decoration: none;
+}
+
+code,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+code {
+  overflow-wrap: anywhere;
+}
+
+pre {
+  margin: 6px 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: var(--color-ink);
+  border: 1px solid var(--color-edge);
+  border-radius: 4px;
+}
+
+.audible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Page: the Bootstrap container and `my-5` of the 1.x page */
+
+.wizard {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 3rem 15px;
+}
+
+.brand {
+  margin-bottom: 1.5rem;
+}
+
+.brand h1 {
+  color: var(--color-text);
+}
+
+.brand p {
+  margin: 0;
+}
+
+/* Step tabs. The first tab (Welcome) is not shown, as in 1.x. */
+
+.steps > ul {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  min-width: 0;
+  width: 270px;
+  /* 1.x had five tabs (20%); the wizard has six. */
+  max-width: calc(100% / 6 - 6px);
+}
+
+.steps li:first-child {
+  display: none;
+}
+
+.step-link {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  padding: 28px 30px 24px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background: rgb(153 155 163 / 10%);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.step-icon {
+  display: inline-block;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-right: 11px;
+  border-radius: 4px;
+  background: var(--color-edge);
+  color: var(--color-sakura);
+  font-size: 20px;
+  line-height: 34px;
+  text-align: center;
+}
+
+.step-icon svg {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+.steps li.current .step-icon,
+.steps li.done .step-icon {
+  background: var(--color-sakura);
+  color: #fff;
+}
+
+.steps li.current .step-link {
+  background: var(--color-panel);
+}
+
+.step-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.step-title {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.step-subtitle {
+  display: block;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--color-sakura);
+}
+
+/* The white content area of 1.x */
+
+.content {
+  padding: 100px 35px 20px;
+  min-height: 420px;
+  background: var(--color-panel);
+}
+
+.content-wrapper {
+  max-width: 700px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.section-heading {
+  margin-bottom: 22px;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.content p {
+  font-size: 16px;
+}
+
+.actions {
+  padding: 0 35px 35px;
+  background: var(--color-panel);
+}
+
+.actions > ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 0 15px;
+  list-style: none;
+  border-bottom: 1px solid var(--color-edge);
+}
+
+.actions li + li {
+  margin-left: 15px;
+}
+
+.actions .button {
+  display: inline-block;
+  padding: 16px 30px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--color-sakura-strong);
+  color: #fff;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.actions .button:hover {
+  background: var(--color-sakura);
+}
+
+/* Fields: Bootstrap `.form-control` with the sizes of bd-wizard.css */
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label.text-sm {
+  display: block;
+  margin: 0 0 1rem;
+}
+
+.form-group input[type='text'],
+.form-group input[type='password'],
+.form-group select {
+  display: block;
+  width: 100%;
+  max-width: 550px;
+  height: calc(1.5em + 0.75rem + 2px);
+  min-height: 50px;
+  padding: 26px 25px;
+  border: 1px solid var(--color-muted);
+  border-radius: 4px;
+  background: var(--color-ink);
+  color: var(--color-text);
+  font: inherit;
+  line-height: 1.5;
+}
+
+.form-group select {
+  height: 55px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.form-group input::placeholder {
+  color: var(--color-muted);
+}
+
+.field.has-error input,
+.field.has-error select {
+  border-color: var(--color-error);
+}
+
+.field-error {
+  margin: 0.25rem 0 0;
+  color: var(--color-error);
+}
+
+.content .field-error {
+  font-size: 14px;
+}
+
+.hint,
+.content .hint {
+  margin: 0.25rem 0 0;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.check-row {
+  position: relative;
+  display: block;
+  padding-left: 1.25rem;
+}
+
+.check-row input {
+  position: absolute;
+  margin-top: 0.3rem;
+  margin-left: -1.25rem;
+  accent-color: var(--color-sakura-strong);
+}
+
+.legal-link {
+  margin: 0 0 1.5rem 1.25rem;
+}
+
+.mb-5 {
+  margin-bottom: 3rem;
+}
+
+/* Switches: the 60 x 34 round slider of 1.x */
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+
+.switch input {
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 34px;
+  background: var(--color-edge);
+  transition: 0.4s;
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  transition: 0.4s;
+}
+
+.switch input:checked + .slider {
+  background: var(--color-sakura-strong);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(26px);
+}
+
+.switch input:focus-visible + .slider {
+  outline: 2px solid var(--color-sakura);
+  outline-offset: 2px;
+}
+
+.switch .label-text {
+  position: absolute;
+  top: 50%;
+  left: 75px;
+  width: max-content;
+  transform: translateY(-50%);
+}
+
+/* The note and its guide buttons */
+
+.note {
+  margin-bottom: 1rem;
+}
+
+.note.switched {
+  margin-bottom: 0;
+  padding-bottom: 30px;
+}
+
+.content .note-text {
+  margin-bottom: 24px;
+}
+
+.guide {
+  margin-bottom: 1rem;
+}
+
+.guide > summary {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background: var(--color-sakura-strong);
+  color: #fff;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.guide > summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide > summary:hover {
+  background: var(--color-sakura);
+}
+
+.guide[open] > summary {
+  margin-bottom: 1rem;
+}
+
+.guide-body {
+  padding: 1.25rem;
+  border: 1px solid var(--color-edge);
+  border-radius: 0.25rem;
+}
+
+.guide-step {
+  scroll-margin-top: 16px;
+}
+
+.guide-step p {
+  margin: 0 0 1rem;
+  /* A long address in a step (the dashboard redirect) must not widen the page on a phone. */
+  overflow-wrap: anywhere;
+}
+
+.guide-links {
+  margin: 0 0 1rem;
+  padding-left: 40px;
+}
+
+.guide-image {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.guide-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.guide-image span {
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.callout {
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 4px solid var(--color-sakura);
+}
+
+.callout.warning {
+  border-color: var(--color-warn);
+}
+
+.callout p {
+  margin: 0;
+}
+
+.callout code {
+  display: block;
+  margin-top: 6px;
+}
+
+.guide-link {
+  white-space: nowrap;
+}
+
+/* Alerts and check results */
+
+.banner {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--color-edge);
+  border-radius: 0.25rem;
+}
+
+.banner.error {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.banner.error ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.banner.ok {
+  border-color: var(--color-ok);
+  color: var(--color-ok);
+}
+
+.checks {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.check {
+  margin-bottom: 0.5rem;
+}
+
+.check.pass strong {
+  color: var(--color-ok);
+}
+
+.check.warn strong {
+  color: var(--color-warn);
+}
+
+.check.fail strong {
+  color: var(--color-error);
+}
+
+.button.secondary {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background: var(--color-edge);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.actions .button.secondary {
+  margin-bottom: 0;
+  padding: 16px 30px;
+  background: var(--color-sakura-strong);
+  color: #fff;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.facts dt {
+  font-weight: bold;
+}
+
+.facts dd {
+  margin: 0;
+}
+
+/* Summary and commands */
+
+.summary {
+  width: 100%;
+  margin-bottom: 1rem;
+  border-collapse: collapse;
+}
+
+.summary th,
+.summary td {
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--color-edge);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.summary th {
+  width: 40%;
+  font-weight: normal;
+  color: var(--color-muted);
+}
+
+.invite {
+  overflow-wrap: anywhere;
+}
+
+.commands {
+  padding-left: 0;
+  list-style: none;
+}
+
+.commands li {
+  margin: 14px 0;
+}
+
+.button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--color-sakura);
+  outline-offset: 2px;
+}
+
+/* Full-size images: opened with :target, no script */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: auto;
+  background: rgb(15 13 23 / 94%);
+}
+
+.lightbox:target {
+  display: flex;
+}
+
+.lightbox figure {
+  max-width: 100%;
+  margin: 0;
+  text-align: center;
+}
+
+.lightbox img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+.lightbox figcaption {
+  margin-top: 8px;
+  color: var(--color-muted);
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* Legal texts and message pages */
+
+.legal,
+.message {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 15px;
+}
+
+.legal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.legal th,
+.legal td {
+  padding: 6px 8px;
+  border: 1px solid var(--color-edge);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+/*
+ * From 1024px the step tabs are a column on the left of the content, one tab per row with the
+ * title on one line. Below that the row on top has no room for six titles, so the tabs show only
+ * their icon, as 1.x does on phones.
+ */
+
+@media (min-width: 1024px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .steps > ul {
+    display: block;
+  }
+
+  .steps li {
+    width: auto;
+    max-width: none;
+    margin-bottom: 6px;
+  }
+
+  .step-link {
+    padding: 18px 14px 16px 18px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 10px;
+  }
+
+  .step-text {
+    overflow-wrap: normal;
+  }
+
+  .step-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 1023px) {
+  .step-link {
+    padding: 15px 10px;
+  }
+
+  .step-icon {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .step-text {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .content {
+    min-height: auto;
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .actions {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+}

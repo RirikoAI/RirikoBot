@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { Command } from 'commander';
 
 type Resolved = { displayName: string } | null;
+type CheckLike = { status: 'pass' | 'warn' | 'fail'; message: string };
 
 const rl = vi.hoisted(() => ({
   answers: [] as string[],
@@ -13,8 +14,8 @@ const rl = vi.hoisted(() => ({
 }));
 
 const adapters = vi.hoisted(() => ({
-  twitch: (async () => ({ displayName: 'Twitch' })) as (id: string) => Promise<Resolved>,
-  youtube: (async () => ({ displayName: 'YouTube' })) as (id: string) => Promise<Resolved>,
+  twitch: (async () => ({ status: 'pass', message: 'ok' })) as () => Promise<CheckLike>,
+  youtube: (async () => ({ status: 'pass', message: 'ok' })) as () => Promise<CheckLike>,
   tiktok: (async () => ({ displayName: 'TikTok' })) as (id: string) => Promise<Resolved>,
   twitchOptions: [] as unknown[],
   youtubeOptions: [] as unknown[],
@@ -35,24 +36,6 @@ vi.mock('node:readline/promises', () => ({
 }));
 
 vi.mock('@ririko/services', () => ({
-  TwitchStreamAdapter: class {
-    constructor(options: unknown) {
-      adapters.twitchOptions.push(options);
-    }
-    resolveStreamer(id: string) {
-      adapters.lookups.push(`twitch:${id}`);
-      return adapters.twitch(id);
-    }
-  },
-  YouTubeStreamAdapter: class {
-    constructor(options: unknown) {
-      adapters.youtubeOptions.push(options);
-    }
-    resolveStreamer(id: string) {
-      adapters.lookups.push(`youtube:${id}`);
-      return adapters.youtube(id);
-    }
-  },
   TikTokStreamAdapter: class {
     constructor(options: unknown) {
       adapters.tiktokOptions.push(options);
@@ -61,6 +44,19 @@ vi.mock('@ririko/services', () => ({
       adapters.lookups.push(`tiktok:${id}`);
       return adapters.tiktok(id);
     }
+  },
+}));
+
+vi.mock('../installer/checks.js', () => ({
+  checkTwitch: async (values: unknown) => {
+    adapters.twitchOptions.push(values);
+    adapters.lookups.push('twitch:twitch');
+    return adapters.twitch();
+  },
+  checkYouTube: async (apiKey: string) => {
+    adapters.youtubeOptions.push({ apiKey });
+    adapters.lookups.push('youtube:YouTube');
+    return adapters.youtube();
   },
 }));
 
@@ -88,8 +84,8 @@ describe('stream-configure providers and wizard (TASK-1252)', () => {
     rl.answers = [];
     rl.prompts = [];
     rl.closed = 0;
-    adapters.twitch = async () => ({ displayName: 'Twitch' });
-    adapters.youtube = async () => ({ displayName: 'YouTube' });
+    adapters.twitch = async () => ({ status: 'pass', message: 'ok' });
+    adapters.youtube = async () => ({ status: 'pass', message: 'ok' });
     adapters.tiktok = async () => ({ displayName: 'TikTok' });
     adapters.twitchOptions = [];
     adapters.youtubeOptions = [];
@@ -157,8 +153,8 @@ describe('stream-configure providers and wizard (TASK-1252)', () => {
         TIKTOK_API_KEY: 'tkey',
       });
       const text = output();
-      expect(text).toContain('Connected! (Resolved: Twitch)');
-      expect(text).toContain('Connected via Data API v3! (Resolved: YouTube)');
+      expect(text).toContain('Connected! (Twitch issued an app access token)');
+      expect(text).toContain('Connected via Data API v3!');
       expect(text).toContain('Connected! (Resolved: TikTok)');
       expect(adapters.twitchOptions).toEqual([{ clientId: 'tid', clientSecret: 'tsecret' }]);
       expect(adapters.youtubeOptions).toEqual([{ apiKey: 'ykey' }]);
@@ -166,52 +162,45 @@ describe('stream-configure providers and wizard (TASK-1252)', () => {
       expect(adapters.lookups).toEqual(['twitch:twitch', 'youtube:YouTube', 'tiktok:tiktok']);
     });
 
-    it('skips Twitch without credentials and uses the YouTube web fallback', async () => {
+    it('skips Twitch without credentials and does not test YouTube without a key', async () => {
       await testStreamProviders({ TWITCH_CLIENT_ID: 'only-id' });
       const text = output();
       expect(text).toContain('Twitch: Skipping API test');
-      expect(text).toContain('Connected via Public Web Fallback! (Resolved: YouTube)');
+      expect(text).toContain('Public Web Fallback (no YOUTUBE_API_KEY, nothing to test)');
       expect(adapters.twitchOptions).toHaveLength(0);
+      expect(adapters.youtubeOptions).toHaveLength(0);
     });
 
-    it('reports adapters that resolve nothing', async () => {
-      adapters.twitch = async () => null;
-      adapters.youtube = async () => null;
+    it('reports a TikTok adapter that resolves nothing', async () => {
       adapters.tiktok = async () => null;
-      await testStreamProviders({ TWITCH_CLIENT_ID: 'a', TWITCH_CLIENT_SECRET: 'b' });
-      const text = output();
-      expect(text).toContain('Credentials accepted, but failed to resolve default user.');
-      expect(text).toContain('Handshake succeeded, metadata could not be fetched.');
-      expect(text).toContain('Public alive check active.');
+      await testStreamProviders({});
+      expect(output()).toContain('Public alive check active.');
     });
 
-    it('reports adapters that throw, including non-Error values', async () => {
-      adapters.twitch = async () => {
-        throw new Error('401 invalid client');
-      };
-      adapters.youtube = async () => {
-        throw new Error('quota exceeded');
-      };
+    it('reports failed Twitch and YouTube checks with the check message', async () => {
+      adapters.twitch = async () => ({ status: 'fail', message: 'Twitch rejected the Client ID' });
+      adapters.youtube = async () => ({ status: 'fail', message: 'YouTube rejected the API key' });
+      await testStreamProviders({
+        TWITCH_CLIENT_ID: 'a',
+        TWITCH_CLIENT_SECRET: 'b',
+        YOUTUBE_API_KEY: 'k',
+      });
+      const text = output();
+      expect(text).toContain('✖ Failed: Twitch rejected the Client ID');
+      expect(text).toContain('✖ Failed: YouTube rejected the API key');
+    });
+
+    it('reports a TikTok adapter that throws, including non-Error values', async () => {
       adapters.tiktok = async () => {
         throw 'tiktok blocked';
       };
-      await testStreamProviders({ TWITCH_CLIENT_ID: 'a', TWITCH_CLIENT_SECRET: 'b' });
-      const text = output();
-      expect(text).toContain('✖ Failed: 401 invalid client');
-      expect(text).toContain('✖ Failed: quota exceeded');
-      expect(text).toContain('✖ Failed: tiktok blocked');
-    });
-
-    it('stringifies a non-Error Twitch and YouTube failure', async () => {
-      adapters.twitch = async () => {
-        throw 'twitch string';
+      await testStreamProviders({});
+      expect(output()).toContain('✖ Failed: tiktok blocked');
+      adapters.tiktok = async () => {
+        throw new Error('tiktok down');
       };
-      adapters.youtube = async () => {
-        throw 'youtube string';
-      };
-      await testStreamProviders({ TWITCH_CLIENT_ID: 'a', TWITCH_CLIENT_SECRET: 'b' });
-      expect(output()).toContain('✖ Failed: twitch string');
-      expect(output()).toContain('✖ Failed: youtube string');
+      await testStreamProviders({});
+      expect(output()).toContain('✖ Failed: tiktok down');
     });
   });
 

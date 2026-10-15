@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import pc from 'picocolors';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import { GeminiProvider, OpenAIProvider, OllamaProvider } from '@ririko/ai';
+import { checkGemini, checkOllama, checkOpenAi, type CheckResult } from '../installer/checks.js';
 import { maskSecret, readEnvFile, resolveEnvFilePath, updateEnvFile } from '../utils/env-editor.js';
 
 export interface AiConfigureOptions {
@@ -124,67 +124,51 @@ export function printAiStatus(env: Record<string, string>, targetPath: string): 
 export async function testAiProviders(env: Record<string, string>): Promise<void> {
   console.log(pc.cyan('\n🔍 Testing AI Provider Connections...\n'));
 
-  // Test Gemini if key exists
   if (env.GEMINI_API_KEY) {
-    process.stdout.write(`  • Google Gemini: `);
-    try {
-      const provider = new GeminiProvider({ apiKey: env.GEMINI_API_KEY });
-      const health = await provider.checkHealth();
-      if (health.healthy) {
-        console.log(pc.green(`✔ Connected (${health.latencyMs}ms)`));
-      } else {
-        console.log(pc.red(`✖ Failed: ${health.error}`));
-      }
-    } catch (err: unknown) {
-      console.log(pc.red(`✖ Error: ${err instanceof Error ? err.message : String(err)}`));
-    }
+    process.stdout.write('  • Google Gemini: ');
+    printHealth(await checkGemini(env.GEMINI_API_KEY));
   } else {
     console.log(`  • Google Gemini: ${pc.gray('(skipped - no GEMINI_API_KEY)')}`);
   }
 
-  // Test OpenAI if key exists
   if (env.OPENAI_API_KEY) {
-    process.stdout.write(`  • OpenAI: `);
-    try {
-      const provider = new OpenAIProvider({
-        apiKey: env.OPENAI_API_KEY,
-        baseURL: env.OPENAI_BASE_URL,
-      });
-      const health = await provider.checkHealth();
-      if (health.healthy) {
-        console.log(pc.green(`✔ Connected (${health.latencyMs}ms)`));
-      } else {
-        console.log(pc.red(`✖ Failed: ${health.error}`));
-      }
-    } catch (err: unknown) {
-      console.log(pc.red(`✖ Error: ${err instanceof Error ? err.message : String(err)}`));
-    }
+    process.stdout.write('  • OpenAI: ');
+    printHealth(await checkOpenAi({ apiKey: env.OPENAI_API_KEY, baseUrl: env.OPENAI_BASE_URL }));
   } else {
     console.log(`  • OpenAI: ${pc.gray('(skipped - no OPENAI_API_KEY)')}`);
   }
 
-  // Test Ollama
   const ollamaUrl = env.OLLAMA_BASE_URL || 'http://localhost:11434';
   process.stdout.write(`  • Ollama (${ollamaUrl}): `);
-  try {
-    const provider = new OllamaProvider({ baseURL: ollamaUrl });
-    const health = await provider.checkHealth();
-    if (health.healthy) {
-      console.log(
-        pc.green(
-          `✔ Connected (${health.latencyMs}ms) [Models: ${health.models?.join(', ') || 'none'}]`,
-        ),
-      );
-    } else {
-      console.log(
-        pc.yellow(`! Unreachable or no models: ${health.error || 'Server did not respond'}`),
-      );
-    }
-  } catch (err: unknown) {
-    console.log(pc.yellow(`! Unreachable: ${err instanceof Error ? err.message : String(err)}`));
+  const ollama = await checkOllama(ollamaUrl);
+  const detail = ollama.detail ?? {};
+  if (detail.thrown) {
+    console.log(pc.yellow(`! Unreachable: ${detail.error}`));
+  } else if (ollama.status === 'pass') {
+    console.log(
+      pc.green(
+        `✔ Connected (${detail.latencyMs}ms) [Models: ${detail.models?.join(', ') || 'none'}]`,
+      ),
+    );
+  } else {
+    console.log(
+      pc.yellow(`! Unreachable or no models: ${detail.error || 'Server did not respond'}`),
+    );
   }
 
   console.log('');
+}
+
+/** Prints the result of a Gemini or OpenAI check in the terminal wizard's wording. */
+function printHealth(result: CheckResult): void {
+  const detail = result.detail ?? {};
+  if (detail.thrown) {
+    console.log(pc.red(`✖ Error: ${detail.error}`));
+  } else if (result.status === 'pass') {
+    console.log(pc.green(`✔ Connected (${detail.latencyMs}ms)`));
+  } else {
+    console.log(pc.red(`✖ Failed: ${detail.error}`));
+  }
 }
 
 /**

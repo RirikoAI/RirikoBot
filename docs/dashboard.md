@@ -156,6 +156,8 @@ Other people get a "not found" page when they open the owner console.
 
 ## 7. Host Setup
 
+The setup wizard (`pnpm installer`, see [SETUP.md](../SETUP.md#31-with-the-setup-wizard)) writes these values for you. It also makes the `SECRET_VAULT_KEY` and checks with Discord that the client secret is right.
+
 The dashboard needs these values in `.env`:
 
 | Variable | What it does |

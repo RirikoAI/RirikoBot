@@ -34,6 +34,12 @@ Other guides:
 
 ### 2.2. Create the Discord application
 
+#### With the wizard
+
+The setup wizard in section 2.4 shows you these steps in your browser, with a guide button on each page. You can skip this section. Do section 2.3 first, then go to section 2.4.
+
+#### Without the wizard
+
 1. Open <https://discord.com/developers/applications> and click **New Application**. Give it a name.
 2. Open the **General Information** tab. Copy the **Application ID**. This is your `DISCORD_CLIENT_ID`.
 3. Open the **Bot** tab. Click **Reset Token** and copy the token. This is your `DISCORD_TOKEN`. Keep it secret: anyone who has it controls your bot.
@@ -62,6 +68,33 @@ Other guides:
    ```
 
 ### 2.4. Write the settings file
+
+#### With the wizard: the "ririko setup --docker" one-liner
+
+The wizard runs in a short-lived container. It asks for your values in the browser, checks them, and writes `.env.production`. It also makes the vault key, the Lavalink password and the database password for you. You need only Docker.
+
+1. In the folder from section 2.3, run this command (PowerShell and Bash):
+
+   ```bash
+   docker run --rm -it -p 127.0.0.1:3999:3999 -v "$PWD:/setup" ririkoai/ririkobot:2 ririko setup --docker --env-file /setup/.env.production --listen 0.0.0.0 --no-open
+   ```
+
+   Docker downloads the image on the first run. The terminal then prints `RirikoAI setup (docker install)` and an address that starts with `http://127.0.0.1:3999/`.
+
+2. Copy that address into your browser.
+3. Follow the pages in order: **Welcome**, **Discord Bot**, **AI**, **Stream Alerts**, **Database & Music**, **Dashboard** and **Install**. The wizard checks the bot token and the dashboard client secret before you can go on. With Docker the dashboard is always on.
+   On **Database & Music**, **Music server (Lavalink)** is "Bundled Lavalink" by default. Choose "Remote Lavalink node" for section 8: the wizard asks for the address, port and password, tests them, and the Install page and the next commands then add `-f docker-compose.remote-lavalink.yml`.
+4. On the **Install** page, read the summary, tick both boxes, and click **Finish**. The wizard writes `.env.production` in the current folder. If the file already exists, the wizard keeps your values and saves a copy named `.env.production.bak-` and a time stamp.
+5. If the page says the file could not be written, click **Download the file** instead. Save it as `.env.production` in the folder from section 2.3. The mounted folder can be read-only for the user inside the image.
+6. The terminal prints `Setup finished` and the container stops. Make sure the redirect from section 2.2, step 6 is in your Discord application, then continue with section 2.5.
+
+Notes:
+
+- Always pass `--env-file /setup/.env.production`. Without it, the wizard tries to write inside the image, where it cannot.
+- The port is published to `127.0.0.1` only. Do not publish it to other machines: the wizard shows secrets and writes your settings file.
+- To use another port, change both numbers in `-p` and add `--port <number>`. [development.md](development.md#4-the-ririko-command-line-tool) lists every option of `ririko setup`.
+
+#### Without the wizard
 
 1. Copy the example file:
 

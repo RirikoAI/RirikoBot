@@ -19,6 +19,7 @@ import { registerGuildJoinCommandSync, syncCommandsOnStartup } from './command-s
 import { registerComponentInteractions } from './component-interactions.js';
 import { healthPort, startHealthServer } from './health.js';
 import { describeLegacyLayout, findLegacyLayout } from './legacy-layout.js';
+import { describeMissingToken } from './missing-token.js';
 import { runLegacyUpgrade } from './legacy-upgrade.js';
 import { applyLegacyAliases, dbAutoMigrateFromEnv } from '@ririko/core';
 import { CommandSynchronizer, createRestClient, DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
@@ -42,8 +43,7 @@ export async function main(): Promise<void> {
   const autoMigrate = dbAutoMigrateFromEnv();
 
   if (!token) {
-    console.error('✖ Error: DISCORD_TOKEN is not configured in environment or .env file.');
-    console.error('  Please check your .env file or run: pnpm ririko doctor');
+    for (const line of describeMissingToken()) console.error(line);
     process.exit(1);
   }
 

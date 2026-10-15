@@ -88,6 +88,10 @@ COPY --from=build /app/packages/services/dist packages/services/dist
 COPY --from=build /app/apps/bot/dist apps/bot/dist
 COPY --from=build /app/apps/cli/dist apps/cli/dist
 COPY assets assets
+# The setup wizard (`ririko setup`) serves assets/installer, shows docs/legal and starts from the
+# example settings files, all at the image root.
+COPY docs/legal docs/legal
+COPY .env.example .env.production.example ./
 # Operator commands: `docker exec <bot container> ririko <command>`. A wrapper instead of a symlink
 # because tsc does not set the exec bit on dist/index.js. Root-owned like the rest of the app.
 RUN printf '#!/bin/sh\nexec node /app/apps/cli/dist/index.js "$@"\n' > /usr/local/bin/ririko \

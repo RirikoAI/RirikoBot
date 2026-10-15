@@ -18,11 +18,17 @@ feature and command parity with 1.4.0, with slash and prefix versions of every c
 Follow **[SETUP.md](SETUP.md)**. It takes a fresh clone to a running bot with the same database
 content, TCG card pool, bosses and Lavalink music stack as the maintainer's machine.
 
-Short version, after you fill in `.env`:
+Short version:
 
 ```bash
 pnpm install
 ```
+
+```bash
+pnpm installer
+```
+
+The setup wizard opens in your browser, asks for your values and writes `.env`.
 
 ```bash
 pnpm db:reset

@@ -57,6 +57,32 @@ All commands in this guide work in a POSIX shell (Bash, zsh) and in PowerShell.
 
 ## 3. Create a Discord Application
 
+### 3.1. With the setup wizard
+
+The wizard walks you through the Discord application and writes your `.env` file. If you use it, you do sections 3 and 4 in one go. Then continue with section 5.
+
+1. Start the wizard in the repository folder:
+
+   ```bash
+   pnpm installer
+   ```
+
+   The terminal prints `RirikoAI setup (source install)` and an address that starts with `http://127.0.0.1:3999/`. Your browser opens that address. If it does not open, copy the address into your browser. The first start builds the project, which takes a minute or two; later starts are faster.
+
+2. Follow the pages in order: **Welcome**, **Discord Bot**, **AI**, **Stream Alerts**, **Database & Music**, **Dashboard** and **Install**. Each page has a guide button that shows where to find the values in the Discord Developer Portal and on the other websites. The wizard checks the bot token, the dashboard client secret and the other keys before you can go on.
+   On **Database & Music**, **Music server (Lavalink)** is "Run Lavalink on this computer" by default (section 7 then installs and starts it). Choose "Use a Lavalink server I already have" to enter its address, port, password and connection type; the wizard tests them and leaves out the install and start commands.
+3. On the **Install** page, read the summary, tick both boxes, and click **Finish**. The wizard writes the `.env` file in the repository folder. It keeps the values that are already in the file. If a `.env` file exists, the wizard first saves a copy next to it, named `.env.bak-` and a time stamp.
+4. The wizard shows the invite link for your bot and the next commands. The terminal prints `Setup finished` and the wizard stops.
+5. Open the invite link and add the bot to your server.
+6. Open `.env` in a text editor and set `SYNC_COMMANDS=true` for the first run (section 8).
+7. Continue with [section 5](#5-build-the-database).
+
+To use another port, add `--port <number>`. To write another file, add `--env-file <path>`. [docs/development.md](docs/development.md#4-the-ririko-command-line-tool) lists all options of `ririko setup`.
+
+### 3.2. Without the wizard
+
+Use these steps if you cannot open a browser on the computer that runs Ririko.
+
 1. Open <https://discord.com/developers/applications> and click **New Application**.
 2. Open the **Bot** tab. Click **Reset Token** and copy the token. This is your `DISCORD_TOKEN`.
 3. On the same tab, turn on **Server Members Intent** and **Message Content Intent**. Click **Save Changes**. Prefix commands, levels and moderation need them.
@@ -70,6 +96,12 @@ Never share the bot token. Anyone who has it controls your bot.
 ---
 
 ## 4. Write the `.env` File
+
+### 4.1. With the setup wizard
+
+The wizard from [section 3.1](#31-with-the-setup-wizard) already wrote the `.env` file. Open it in a text editor to set `SYNC_COMMANDS=true` for the first run (section 8), and to change a value later. Continue with [section 5](#5-build-the-database).
+
+### 4.2. Without the wizard
 
 1. Copy the example file:
 
