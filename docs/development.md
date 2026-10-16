@@ -2,7 +2,7 @@
 
 This guide is for people who change the Ririko code. It shows how to check your work, how to change the database, and how to use the command-line tool.
 
-To get a working copy first, follow [SETUP.md](../SETUP.md). To send your change, read [contributing.md](contributing.md).
+To get a working copy first, follow [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md). To send your change, read [contributing.md](contributing.md).
 
 ---
 
@@ -133,4 +133,4 @@ The root `package.json` has more scripts:
 | `pnpm tcg:card-builder --help`, `pnpm tcg:boss-builder --help` | Build the card and boss catalogs. |
 | `pnpm tcg:reset-user <discord_user_id>` | Resets the Waifu TCG progress of one player. |
 | `pnpm tcg:simulate` | Runs the offline balance simulation. |
-| `pnpm site:build` | Builds the static project status page in `site-dist/index.html` ([release.md section 9](release.md#9-project-status-page)). |
+| `pnpm docs:install` | Copies the production compose file and env example into `website/static/install/` (git-ignored; `docs:build` runs it). |

@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'website'
   # Private music package: a separate repository with its own install (see docs/archive/music-design.md).
   - '!packages/music-private'
 

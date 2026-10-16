@@ -24,6 +24,7 @@ COPY packages/database/package.json packages/database/
 COPY packages/discord/package.json packages/discord/
 COPY packages/music/package.json packages/music/
 COPY packages/services/package.json packages/services/
+COPY website/package.json website/
 # Downloads the pnpm version pinned by `packageManager` once for every later stage.
 RUN corepack install
 

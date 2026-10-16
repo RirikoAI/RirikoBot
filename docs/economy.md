@@ -27,6 +27,10 @@ All economy commands are open to everyone.
 | `/withdraw` | `with` | `amount` (required) | Moves credits from the bank to the wallet. Type a number or `all`. |
 | `/pay` | `give`, `transfer` | `target` (required), `amount` (required, at least 1) | Sends credits from your wallet to a member. You cannot pay yourself. |
 
+The reply to `/balance` shows the wallet, the bank and the net worth:
+
+![The reply to /balance: wallet, bank and net worth in credits.](img/economy-balance.webp)
+
 ### 2.2. Ranking and Profile
 
 | Command | Aliases | Options | What it does |
@@ -34,6 +38,10 @@ All economy commands are open to everyone.
 | `/leaderboard` | `lb`, `top` | `scope` (`server` or `global`), `page` | Shows the XP ranking. |
 | `/profile` | `rank` | `target` (member), `background` (link) | Shows a profile card. With a link or an attached image, it sets your own background. |
 | `/karma` | `k` | `action` (`view` or `give`), `target` (member) | Shows karma. With `give`, you give 1 karma to another member. You cannot give karma to yourself. Server only. |
+
+The reply to `/leaderboard` ranks members by level and XP:
+
+![The reply to /leaderboard: the top two members with their level and XP.](img/leaderboard.webp)
 
 Profile background rules:
 
@@ -99,6 +107,8 @@ Voice rewards need all of these:
 - If you miss 3 days or more in a row, the streak starts again. That claim counts as day 1.
 
 The host can change the reset time and the number of days you may miss. See section 9.
+
+![The reply to /daily: the credits awarded, the streak and the new wallet balance.](img/economy-daily.webp)
 
 ## 5. Bank
 
