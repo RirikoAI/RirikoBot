@@ -4,8 +4,59 @@
   --color-ink: #0f0d17;
   --color-panel: #1a1726;
   --color-edge: #2c2840;
-  --color-sakura: #f472b6;
-  --color-sakura-strong: #ec4899;
+  /* The official Ririko pink. Text and accents on ink; never behind white text (3.2:1). */
+  --color-sakura: #df6e7e;
+  /* Buttons with white text (5.1:1) and links on light surfaces. */
+  --color-sakura-strong: #b8475a;
+  /* Hover of a sakura-strong button that keeps white text (4.6:1). */
+  --color-sakura-hover: #c24f63;
+}
+
+/*
+ * Brand fonts (STORY-195). next/font/local serves the latin subsets from layout.tsx. The
+ * latin-ext subsets follow here as fallback families so accented names still use the brand
+ * fonts. Both are self-hosted and licensed under the SIL OFL (see ./fonts).
+ */
+@font-face {
+  font-family: 'Sour Gummy Ext';
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('./fonts/sour-gummy-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Libre Franklin Ext';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('./fonts/libre-franklin-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+/* Libre Franklin is the product (body, UI, h3 to h6); Sour Gummy is Ririko's voice (h1, h2). */
+@theme inline {
+  --font-sans:
+    var(--font-libre-franklin), 'Libre Franklin Ext', ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-sour-gummy), 'Sour Gummy Ext', var(--font-libre-franklin), ui-sans-serif, system-ui,
+    sans-serif;
+}
+
+@layer base {
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
 }
 
 html {

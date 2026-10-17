@@ -1,216 +1,1457 @@
 /*
- * The hero picture is wide: Ririko and her plush bunny sit on the left, so the words sit on the
- * right, over the dark part of the overlay. On narrow screens the picture goes on top and the
- * words below it (see the media query further down).
+ * Home page (STORY-195): "Ririko by day, your server by night".
+ * Cream "day" sections and ink "night" sections use fixed brand colours in both site themes,
+ * like the README banner. Section edges where day meets night are soft scallops (.gummyTop).
+ * Docusaurus bundles every CSS module into every page, so everything here is a hashed class
+ * name; the only global selector is html.ririko-home, set by the home page alone.
  */
-.hero {
-  background-color: #1b1b24;
-  background-position: 0% 20%;
-  background-size: cover;
+
+/* Anchors clear the sticky navbar at every width; snapping is for wide screens only. */
+:global(html.ririko-home) {
+  scroll-padding-top: var(--ifm-navbar-height);
 }
 
-.heroOverlay {
-  background: linear-gradient(
-    90deg,
-    rgb(15 15 25 / 0) 0%,
-    rgb(15 15 25 / 0.1) 35%,
-    rgb(15 15 25 / 0.78) 62%,
-    rgb(15 15 25 / 0.9) 100%
-  );
-  color: #fff;
-  padding: 5rem 0;
-}
-
-.heroCopy {
-  margin-left: auto;
-  max-width: min(38rem, 55%);
-  text-shadow: 0 1px 12px rgb(15 15 25 / 0.6);
-}
-
-.heroTitle {
-  font-size: 3.5rem;
-  margin-bottom: 1rem;
-}
-
-.accent {
-  color: var(--ifm-color-primary-lighter);
-}
-
-.heroText {
-  font-size: 1.2rem;
-  margin: 0 0 2rem;
-}
-
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-/* The outline button sits on the dark overlay, so it is white in both site themes. */
-.heroCopy .heroOutline:global(.button):global(:not(.button--active)):not(:hover) {
-  border-color: rgb(255 255 255 / 0.75);
-  color: #fff;
-}
-
-.heroCopy .heroOutline:hover {
-  background-color: rgb(255 255 255 / 0.15);
-  color: #fff;
-}
-
-/* Narrow screens: the picture on top (at least 640 px wide, so her face and the bunny fit), fading into the dark band that holds the words. */
-@media (max-width: 996px) {
-  .hero {
-    --hero-picture: max(100vw, 640px);
-
-    background-position: 8% 0;
-    background-repeat: no-repeat;
-    background-size: var(--hero-picture) auto;
+@media (min-width: 997px) {
+  :global(html.ririko-home) {
+    scroll-snap-type: y proximity;
   }
 
-  .heroOverlay {
-    background: linear-gradient(
-      180deg,
-      rgb(27 27 36 / 0) calc(var(--hero-picture) * 0.28),
-      rgb(27 27 36 / 0.92) calc(var(--hero-picture) * 0.5),
-      rgb(27 27 36) calc(var(--hero-picture) * 0.56)
-    );
-    padding: calc(var(--hero-picture) * 0.4) 0 3rem;
-    text-align: center;
-  }
-
-  .heroCopy {
-    margin: 0 auto;
-    max-width: 40rem;
-  }
-
-  .buttons {
-    justify-content: center;
+  .snap {
+    scroll-snap-align: start;
   }
 }
 
-/* "Meet Ririko": a full-width dark band with the demo window, in both site themes. */
-.meet {
-  background:
-    radial-gradient(ellipse 60% 50% at 15% 0%, rgb(235 69 158 / 0.22), transparent 70%),
-    radial-gradient(ellipse 60% 50% at 85% 10%, rgb(88 101 242 / 0.28), transparent 70%), #0f1017;
-  color: #fff;
-  overflow: hidden;
-  padding: 4rem 16px 3.5rem;
+@media (prefers-reduced-motion: no-preference) {
+  :global(html.ririko-home) {
+    scroll-behavior: smooth;
+  }
 }
 
-.meetInner {
-  margin: 0 auto;
-  max-width: 1280px;
+.page {
+  --paper: var(--ririko-paper);
+  --ink: var(--ririko-ink);
+  --panel: var(--ririko-panel);
+  --pink: var(--ririko-pink);
+  --pink-deep: var(--ririko-pink-deep);
+
+  font-family: var(--ririko-font-body);
+  overflow-x: clip;
 }
 
-.meetTitle {
-  color: #fff;
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-  text-align: center;
+.pink {
+  color: var(--pink);
 }
 
-.meetText {
-  color: rgb(255 255 255 / 0.78);
-  font-size: 1.1rem;
-  margin: 0 auto 2.5rem;
-  max-width: 40rem;
-  text-align: center;
+/* ---------- The gummy edge: scallops where a section meets the one above it ---------- */
+
+.gummyTop {
+  position: relative;
 }
 
-.stats {
-  background: var(--ifm-color-emphasis-100);
-  padding: 2rem 0;
+.gummyTop::before {
+  background-color: var(--edge, var(--ink));
+  content: '';
+  height: 19px;
+  left: 0;
+  mask: radial-gradient(circle 17px at 50% 100%, #000 98%, #0000) 0 0 / 34px 100% repeat-x;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: -18px;
 }
 
-.statRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: center;
-  text-align: center;
-}
+/* ---------- Buttons ---------- */
 
-.stat {
-  min-width: 10rem;
-}
-
-.statValue {
-  color: var(--ifm-color-primary);
-  font-size: 2.5rem;
+.btn {
+  align-items: center;
+  border: 2px solid transparent;
+  border-radius: 13px;
+  display: inline-flex;
+  font-family: var(--ririko-font-body);
+  font-size: 1rem;
   font-weight: 700;
-  line-height: 1.1;
-}
-
-.heading {
-  margin-bottom: 1.5rem;
+  justify-content: center;
+  line-height: 1.2;
+  min-height: 48px;
+  padding: 0.7rem 1.4rem;
   text-align: center;
+  text-decoration: none;
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    border-color 0.18s ease;
 }
 
-.featureGrid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-}
-
-.feature {
-  border: 1px solid var(--ifm-color-emphasis-300);
-  border-radius: var(--ifm-card-border-radius);
-  color: inherit;
-  padding: 1.25rem;
-  transition: border-color 0.15s;
-}
-
-.feature:hover {
-  border-color: var(--ifm-color-primary);
-  color: inherit;
+.btn:hover {
   text-decoration: none;
 }
 
-.feature h3 {
-  margin-bottom: 0.5rem;
+.btn:focus-visible {
+  outline: 3px solid var(--pink-deep);
+  outline-offset: 3px;
 }
 
-.feature p {
+.btnPrimary {
+  background: var(--pink-deep);
+  box-shadow: 0 3px 0 #8a3446;
+  color: #fff;
+}
+
+.btnPrimary:hover {
+  background: var(--ririko-pink-hover);
+  box-shadow: 0 5px 0 #8a3446;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btnPrimary:active {
+  box-shadow: 0 1px 0 #8a3446;
+  transform: translateY(2px);
+}
+
+/* Secondary on paper: an ink outline. */
+.btnGhost {
+  background: transparent;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.btnGhost:hover {
+  background: var(--ink);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Secondary on ink: a white outline. */
+.btnGhostLight {
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.85);
+  color: #fff;
+}
+
+.btnGhostLight:hover {
+  background: #fff;
+  color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.meet .btn:focus-visible,
+.abilities .btn:focus-visible,
+.getStarted .btn:focus-visible {
+  outline-color: var(--ririko-pink-tint);
+}
+
+/* ---------- Shared pieces of the section headers ---------- */
+
+.wrap {
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 0 clamp(16px, 5vw, 40px);
+}
+
+/* From 997px the dot navigator sits at the right edge: keep the content clear of it. */
+@media (min-width: 997px) {
+  .wrap {
+    max-width: calc(1240px + 112px);
+    padding: 0 56px;
+  }
+}
+
+.num {
+  color: var(--pink);
+  font-family: var(--ririko-font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0 0 0.6rem;
+}
+
+.num::after {
+  background: currentcolor;
+  border-radius: 2px;
+  content: '';
+  display: block;
+  height: 3px;
+  margin-top: 0.6rem;
+  width: 2.25rem;
+}
+
+.h2 {
+  font-family: var(--ririko-font-display);
+  font-size: clamp(2.25rem, 4.6vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1;
   margin: 0;
 }
 
+/* ---------- Hero ---------- */
+
+.hero {
+  background: var(--paper);
+  color: var(--ink);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: calc(100svh - var(--ifm-navbar-height));
+  position: relative;
+}
+
+/* The picture sits above the words and dissolves into the paper at its bottom edge. */
+.heroArt {
+  height: clamp(20rem, 56svh, 36rem);
+  mask-image: linear-gradient(to bottom, #000 62%, #0000 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+.heroImage {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  object-position: 12% 40%;
+  width: 100%;
+}
+
+.heroBody {
+  margin-top: -1.5rem;
+  padding: 0 clamp(16px, 5vw, 40px) 4.5rem;
+  position: relative;
+}
+
+.wordmark {
+  align-items: baseline;
+  color: var(--pink);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--ririko-font-display);
+  font-size: clamp(4.5rem, 9vw, 9rem);
+  font-weight: 800;
+  gap: 0 0.18em;
+  letter-spacing: -0.01em;
+  line-height: 0.9;
+  margin: 0 0 1.25rem;
+}
+
+.wordmarkAi {
+  color: var(--ink);
+  font-size: 0.46em;
+  letter-spacing: 0.02em;
+}
+
+.tagline {
+  color: var(--ink);
+  font-family: var(--ririko-font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0 0 1rem;
+  max-width: 24ch;
+  text-wrap: balance;
+}
+
+.heroNote {
+  color: rgb(15 13 23 / 0.75);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  margin: 0 0 1.75rem;
+  max-width: 34ch;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.commandsLink {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.1rem 0 0;
+}
+
+.commandsLink a {
+  align-items: center;
+  display: inline-flex;
+  min-height: 44px;
+  color: var(--pink-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.commandsLink a:hover {
+  color: var(--ririko-pink-hover);
+}
+
+.commandsLink a:focus-visible {
+  outline: 3px solid var(--pink-deep);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Cover lines, as on a magazine: three facts split by thin rules. */
+.cover {
+  border-top: 2px solid rgb(15 13 23 / 0.14);
+  display: flex;
+  margin: 2rem 0 0;
+  padding-top: 1.1rem;
+}
+
+.coverItem {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column-reverse;
+  gap: 0.2rem;
+  justify-content: flex-end;
+  padding: 0 1.1rem;
+}
+
+.coverItem:first-child {
+  padding-left: 0;
+}
+
+.coverItem + .coverItem {
+  border-left: 1px solid rgb(15 13 23 / 0.2);
+}
+
+.coverValue {
+  color: var(--pink-deep);
+  font-family: var(--ririko-font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+}
+
+.coverLabel {
+  color: rgb(15 13 23 / 0.75);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.25;
+  max-width: 11ch;
+}
+
+/* A quiet cue to the next section. It does not move. */
+.cue {
+  align-items: center;
+  background: rgb(255 246 241 / 0.88);
+  border-radius: 999px;
+  padding: 0 1rem;
+  min-height: 44px;
+  color: var(--ink);
+  display: inline-flex;
+  font-size: 0.9rem;
+  font-weight: 600;
+  gap: 0.4rem;
+  margin: 0 clamp(16px, 5vw, 40px) 2.25rem calc(clamp(16px, 5vw, 40px) - 1rem);
+  text-decoration: none;
+}
+
+.cue:hover {
+  color: var(--pink-deep);
+  text-decoration: none;
+}
+
+.cue:focus-visible {
+  border-radius: 6px;
+  outline: 3px solid var(--pink-deep);
+  outline-offset: 4px;
+}
+
+.cueArrow {
+  flex: none;
+}
+
+@media (min-width: 560px) {
+  .actions {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+/* Below 997px the buttons fill the width (tablets get a comfortable measure). */
+@media (max-width: 996px) {
+  .heroBody {
+    max-width: 44rem;
+  }
+
+  .actions .btn {
+    width: 100%;
+  }
+
+  .coverItem {
+    padding: 0 0.8rem;
+  }
+
+  .coverLabel {
+    max-width: none;
+  }
+}
+
+@media (min-width: 997px) {
+  .hero {
+    align-items: center;
+    grid-template-columns: minmax(0, 56%) minmax(0, 1fr);
+  }
+
+  /* The picture fills the left 56 percent, full height; its right edge dissolves into the paper. */
+  .heroArt {
+    bottom: 0;
+    height: auto;
+    left: 0;
+    mask-image: linear-gradient(to right, #000 58%, #0000 100%);
+    position: absolute;
+    top: 0;
+    width: 56%;
+  }
+
+  .heroImage {
+    object-position: 28% 35%;
+  }
+
+  .heroBody {
+    grid-column: 2;
+    margin: 0;
+    max-width: 40rem;
+    padding: 3rem clamp(24px, 4vw, 72px) 6rem 1.5rem;
+  }
+
+  .actions .btn {
+    width: auto;
+  }
+
+  .cue {
+    bottom: 1.75rem;
+    left: 50%;
+    margin: 0;
+    position: absolute;
+    transform: translateX(-50%);
+  }
+}
+
+/* Entrance: the picture settles, the words rise one after another. */
+@media (prefers-reduced-motion: no-preference) {
+  .heroImage {
+    animation: settle 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .heroBody > * {
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(80ms * var(--n, 0));
+  }
+
+  .heroBody > :nth-child(2) {
+    --n: 1;
+  }
+
+  .heroBody > :nth-child(3) {
+    --n: 2;
+  }
+
+  .heroBody > :nth-child(4) {
+    --n: 3;
+  }
+
+  .heroBody > :nth-child(5) {
+    --n: 4;
+  }
+
+  .heroBody > :nth-child(6) {
+    --n: 5;
+  }
+
+  .cue {
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) 0.6s both;
+  }
+}
+
+@keyframes settle {
+  from {
+    transform: scale(1.03);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The cue is centred with a transform on wide screens, so its entrance only fades there. */
+@media (min-width: 997px) and (prefers-reduced-motion: no-preference) {
+  .cue {
+    animation-name: fade;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Section headers rise into view as they scroll in (browsers without scroll timelines skip it). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise linear both;
+      animation-range: entry 0% entry 45%;
+      animation-timeline: view();
+    }
+  }
+}
+
+/* ---------- 01 Meet Ririko (ink, with a "desk" of panel colour under the demo) ---------- */
+
+.meet {
+  --desk: calc(4.5rem + clamp(230px, 40svh, 360px));
+
+  background: linear-gradient(
+    to top,
+    var(--panel) 0,
+    var(--panel) var(--desk),
+    var(--ink) var(--desk)
+  );
+  color: var(--ririko-text);
+  padding: 5rem 0 4.5rem;
+}
+
+.meetHead {
+  display: grid;
+  gap: 1.25rem 4rem;
+  margin-bottom: 2.5rem;
+}
+
+.meetHead .h2 {
+  color: #fff;
+}
+
+.meetCopy {
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
+
+.meetCopy p {
+  margin: 0;
+}
+
+@media (min-width: 997px) {
+  .meetHead {
+    align-items: end;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+}
+
+/* ---------- 02 What Ririko can do (ink; unequal weights, not a grid of cards) ---------- */
+
+.abilities {
+  background: linear-gradient(to bottom, var(--panel), var(--ink) 38rem);
+  color: var(--ririko-text);
+  padding: 5rem 0 6rem;
+}
+
+.sectionHead {
+  margin-bottom: 3rem;
+}
+
+.abilities .h2 {
+  color: #fff;
+}
+
+.deck {
+  color: var(--ririko-muted);
+  font-size: 1.125rem;
+  line-height: 1.55;
+  margin: 1.1rem 0 0;
+  max-width: 36rem;
+}
+
+.vh {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* Text links on ink: pink-tint, underlined, with a ring that shows on keyboard focus. */
+.moreLink {
+  align-items: center;
+  color: var(--ririko-pink-tint);
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.45rem;
+  min-height: 44px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.moreLink:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.moreLink:focus-visible {
+  border-radius: 6px;
+  outline: 3px solid var(--ririko-pink-tint);
+  outline-offset: 3px;
+}
+
+.moreLink svg {
+  flex: none;
+  transition: transform 0.18s ease;
+}
+
+.moreLink:hover svg {
+  transform: translateX(4px);
+}
+
+.headline {
+  display: grid;
+  gap: 5rem;
+}
+
+.lead,
+.second,
+.ai {
+  display: grid;
+  gap: 2rem;
+}
+
+.leadText h3 {
+  color: #fff;
+  font-family: var(--ririko-font-display);
+  font-size: clamp(3.25rem, 9vw, 7rem);
+  font-weight: 800;
+  line-height: 0.92;
+  margin: 0 0 1.25rem;
+}
+
+.leadText h3 span {
+  color: var(--pink);
+}
+
+.leadText p,
+.secondText p,
+.aiText p {
+  font-size: 1.125rem;
+  line-height: 1.55;
+  margin: 0 0 1rem;
+  max-width: 30rem;
+}
+
+.secondText h3,
+.aiText h3 {
+  color: #fff;
+  font-family: var(--ririko-font-display);
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1;
+  margin: 0 0 1rem;
+}
+
+/* The three demo cards, fanned. They spread a little on hover. */
+.fan {
+  --cw: clamp(124px, 33vw, 200px);
+
+  align-items: flex-end;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0 0.5rem;
+}
+
+.fanCard {
+  display: block;
+  filter: drop-shadow(0 14px 16px rgb(0 0 0 / 0.55));
+  height: auto;
+  margin-left: calc(var(--cw) * -0.3);
+  transform-origin: 50% 100%;
+  width: var(--cw);
+}
+
+.fanCard:first-child {
+  margin-left: 0;
+  transform: rotate(-8deg);
+}
+
+.fanCard:nth-child(2) {
+  position: relative;
+  transform: translateY(-1.1rem);
+  z-index: 1;
+}
+
+.fanCard:nth-child(3) {
+  transform: rotate(8deg);
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .fanCard {
+    transition:
+      transform 0.22s ease,
+      margin 0.22s ease;
+  }
+
+  .fan:hover .fanCard {
+    margin-left: calc(var(--cw) * -0.16);
+  }
+
+  .fan:hover .fanCard:first-child {
+    margin-left: 0;
+    transform: rotate(-11deg) translateX(-0.4rem);
+  }
+
+  .fan:hover .fanCard:nth-child(2) {
+    transform: translateY(-1.6rem);
+  }
+
+  .fan:hover .fanCard:nth-child(3) {
+    transform: rotate(11deg) translateX(0.4rem);
+  }
+}
+
+.fanCaption {
+  color: var(--ririko-muted);
+  font-size: 0.875rem;
+  margin: 1.1rem 0 0;
+  text-align: center;
+}
+
+/* The music message sits in a plain frame: a hairline and a flat pink offset. */
+.shot {
+  margin: 0;
+}
+
+.shotFrame {
+  background: var(--panel);
+  border: 1px solid var(--ririko-edge);
+  border-radius: 14px;
+  box-shadow: 10px 10px 0 var(--ririko-pink-deep);
+  display: block;
+  overflow: hidden;
+}
+
+.shotFrame img {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.shotCaption {
+  color: var(--ririko-muted);
+  font-size: 0.875rem;
+  margin: 1.4rem 0 0;
+}
+
+/* AI chat and images: the type is the picture. */
+.aiBig {
+  color: #fff;
+  font-family: var(--ririko-font-display);
+  font-size: clamp(2.6rem, 8.4vw, 7.25rem);
+  font-weight: 800;
+  line-height: 0.98;
+  margin: 0;
+}
+
+.aiBig span {
+  color: var(--pink);
+  font-size: 0.5em;
+  font-weight: 600;
+  padding-right: 0.1em;
+}
+
+.aiBig em {
+  color: var(--ririko-pink-tint);
+  display: block;
+  font-style: normal;
+}
+
+/* Economy, moderation, mini-games: a ruled list, three columns. */
+.trio {
+  border-top: 2px solid var(--ririko-pink-deep);
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 5.5rem 0 0;
+  padding: 0;
+}
+
+.trioItem {
+  border-bottom: 1px solid var(--ririko-edge);
+  padding: 1.5rem 0 1.75rem;
+}
+
+.trioItem h3 {
+  font-family: var(--ririko-font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0 0 0.6rem;
+}
+
+.trioItem h3 a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.trioItem h3 a:hover {
+  color: var(--ririko-pink-tint);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.trioItem h3 a:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid var(--ririko-pink-tint);
+  outline-offset: 3px;
+}
+
+.trioItem p {
+  color: var(--ririko-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 26rem;
+}
+
+/* Every command category, set as a typographic wall. Bigger word, more commands. */
+.wall {
+  margin-top: 5.5rem;
+}
+
+.wallHead {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.wallHead h3 {
+  color: #fff;
+  font-family: var(--ririko-font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  margin: 0;
+}
+
+.wallList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1.9rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wallList a {
+  color: #fff;
+  display: inline-flex;
+  font-family: var(--ririko-font-display);
+  font-weight: 700;
+  gap: 0.25em;
+  line-height: 1.15;
+  padding: 0.12em 0;
+  text-decoration: none;
+}
+
+.wallList a:hover {
+  color: var(--ririko-pink-tint);
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.15em;
+}
+
+.wallList a:focus-visible {
+  border-radius: 6px;
+  outline: 3px solid var(--ririko-pink-tint);
+  outline-offset: 2px;
+}
+
+.wallL a {
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+}
+
+.wallM a {
+  font-size: clamp(1.7rem, 3.8vw, 2.9rem);
+}
+
+.wallS a {
+  font-size: clamp(1.3rem, 2.6vw, 2rem);
+}
+
+.wallCount {
+  color: var(--pink);
+  font-size: max(0.45em, 0.85rem);
+  font-weight: 800;
+  line-height: 1;
+  padding-top: 0.2em;
+}
+
+@media (min-width: 997px) {
+  .abilities {
+    padding: 7rem 0 8rem;
+  }
+
+  .sectionHead {
+    margin-bottom: 4.5rem;
+  }
+
+  .headline {
+    gap: 8rem;
+  }
+
+  /* Waifu TCG leads: big words on the left, the fan overhanging to the right. */
+  .lead {
+    align-items: center;
+    gap: 3rem;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+
+  .fan {
+    --cw: clamp(190px, 17vw, 270px);
+
+    margin-right: -2rem;
+  }
+
+  /* Music is second: the screenshot is wide and sits left, the words end low on the right. */
+  .second {
+    align-items: end;
+    gap: 4.5rem;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    margin-right: 4rem;
+  }
+
+  /* AI chat and images: set apart on the right, one column in. */
+  .ai {
+    gap: 2.5rem;
+    margin-left: 12%;
+  }
+
+  .trio {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 8rem;
+  }
+
+  .trioItem {
+    border-bottom: 0;
+    padding: 1.75rem 2rem 0;
+  }
+
+  .trioItem + .trioItem {
+    border-left: 1px solid var(--ririko-edge);
+  }
+
+  .trioItem:first-child {
+    padding-left: 0;
+  }
+
+  .wall {
+    margin-top: 8rem;
+  }
+}
+
+/* ---------- 03 Yours to run (paper) ---------- */
+
+.openSource {
+  --edge: var(--paper);
+
+  background: var(--paper);
+  color: var(--ink);
+  padding: 5.5rem 0 6rem;
+}
+
+.openSource .h2 {
+  color: var(--ink);
+}
+
+.openSource .num {
+  color: var(--pink-deep);
+}
+
+.openLead {
+  font-size: 1.25rem;
+  line-height: 1.55;
+  margin: 1.4rem 0 0;
+  max-width: 34rem;
+}
+
+.openTop {
+  display: grid;
+  gap: 2.5rem;
+}
+
+/* The facts: a ruled definition list, term in Sour Gummy, detail in Libre Franklin. */
+.facts {
+  border-top: 2px solid var(--ink);
+  margin: 2rem 0 0;
+}
+
+.fact {
+  border-bottom: 1px solid rgb(15 13 23 / 0.2);
+  display: grid;
+  gap: 0.2rem 1.5rem;
+  padding: 0.95rem 0 1.05rem;
+}
+
+.fact dt {
+  color: var(--ink);
+  font-family: var(--ririko-font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.fact dd {
+  color: rgb(15 13 23 / 0.78);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.fact code {
+  background: var(--ririko-pink-wash);
+  border: 1px solid rgb(15 13 23 / 0.12);
+  border-radius: 5px;
+  color: var(--ink);
+  font-size: 0.875em;
+  padding: 0.05rem 0.35rem;
+}
+
+/* The dashboard, framed on paper with a flat offset. */
+.dashFigure {
+  margin: 0;
+}
+
+.dashFrame {
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 10px 10px 0 var(--ririko-pink-tint);
+  overflow: hidden;
+}
+
+.dashFrame img {
+  aspect-ratio: 6 / 5;
+  display: block;
+  height: auto;
+  object-fit: cover;
+  object-position: top;
+  width: 100%;
+}
+
+.dashCaption {
+  color: rgb(15 13 23 / 0.75);
+  font-size: 0.9rem;
+  margin: 1.6rem 0 0;
+}
+
+/* The quick start: the commands of the README, steps 1 to 3, in a dark block. */
+.quick {
+  background: var(--ink);
+  border-radius: 16px;
+  color: var(--ririko-text);
+  margin-top: 4.5rem;
+  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+}
+
+.quick h3 {
+  color: #fff;
+  font-family: var(--ririko-font-display);
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 0 0 0.5rem;
+}
+
+.quickNote {
+  color: var(--ririko-muted);
+  line-height: 1.55;
+  margin: 0 0 1.75rem;
+  max-width: 46rem;
+}
+
+.quickSteps {
+  display: grid;
+  gap: 1.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.quickStep {
+  display: grid;
+  gap: 0.5rem 1.25rem;
+}
+
+.stepNum {
+  color: var(--pink);
+  font-family: var(--ririko-font-display);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stepLabel {
+  color: #fff;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.quick pre {
+  background: var(--panel);
+  border: 1px solid var(--ririko-edge);
+  border-radius: 10px;
+  color: var(--ririko-text);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: 0.9rem 1.1rem;
+  white-space: pre-wrap;
+}
+
+.quick pre code {
+  background: none;
+  border: 0;
+  color: inherit;
+  font-size: inherit;
+  padding: 0;
+}
+
+.quickMore {
+  border-top: 1px solid var(--ririko-edge);
+  color: var(--ririko-muted);
+  line-height: 1.55;
+  margin: 1.75rem 0 0;
+  padding-top: 1.25rem;
+}
+
+.quickMore a {
+  color: var(--ririko-pink-tint);
+  text-decoration: underline;
+}
+
+.quickMore a:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid var(--ririko-pink-tint);
+  outline-offset: 2px;
+}
+
+.openLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 2rem;
+  list-style: none;
+  margin: 2.25rem 0 0;
+  padding: 0;
+}
+
+.openLinks a {
+  align-items: center;
+  color: var(--pink-deep);
+  display: inline-flex;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  gap: 0.45rem;
+  min-height: 44px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.openLinks a:hover {
+  color: var(--ririko-pink-hover);
+}
+
+.openLinks a:focus-visible {
+  border-radius: 6px;
+  outline: 3px solid var(--pink-deep);
+  outline-offset: 3px;
+}
+
+@media (min-width: 560px) {
+  .fact {
+    grid-template-columns: minmax(9rem, 11rem) minmax(0, 1fr);
+  }
+
+  .quickStep {
+    grid-template-columns: 3rem minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 997px) {
+  .openSource {
+    padding: 7rem 0 7.5rem;
+  }
+
+  .openTop {
+    align-items: start;
+    gap: 4.5rem;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  }
+
+  /* The frame hangs lower than the heading: an editorial offset, not a mirror. */
+  .dashFigure {
+    margin-top: 3.5rem;
+  }
+}
+
+/* ---------- 04 Get started (ink) ---------- */
+
+.getStarted {
+  background: var(--ink);
+  color: var(--ririko-text);
+  padding: 5.5rem 0 6rem;
+}
+
+.getStarted .h2 {
+  color: #fff;
+}
+
+/* Three paths: big type in ruled rows. The whole row is the link. */
+.paths {
+  border-top: 2px solid var(--ririko-pink-deep);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.path {
+  border-bottom: 1px solid var(--ririko-edge);
+  display: grid;
+  gap: 0.5rem 3rem;
+  padding: 1.6rem 0 1.75rem;
+  position: relative;
+}
+
+.path h3 {
+  font-family: var(--ririko-font-display);
+  font-size: clamp(2rem, 5.4vw, 4.25rem);
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+}
+
+.path h3 a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.path h3 a::after {
+  content: '';
+  inset: 0;
+  position: absolute;
+}
+
+.path h3 a:focus-visible {
+  outline: none;
+}
+
+.path:has(a:focus-visible) {
+  outline: 3px solid var(--ririko-pink-tint);
+  outline-offset: 4px;
+}
+
+.pathArrow {
+  color: var(--pink);
+  height: 0.6em;
+  margin-left: 0.3em;
+  transition: transform 0.18s ease;
+  vertical-align: -0.02em;
+  width: 0.6em;
+}
+
+.path:hover .pathArrow {
+  transform: translateX(0.12em);
+}
+
+.path:hover h3 a {
+  color: var(--ririko-pink-tint);
+}
+
+.path p {
+  color: var(--ririko-muted);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 28rem;
+}
+
+.inviteNote {
+  border-left: 4px solid var(--pink);
+  color: var(--ririko-text);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  margin: 2.5rem 0 0;
+  max-width: 40rem;
+  padding: 0.15rem 0 0.15rem 1.1rem;
+}
+
+.faqLayout {
+  display: grid;
+  gap: 1.5rem 5rem;
+  margin-top: 6rem;
+}
+
+.faqHead h3 {
+  color: #fff;
+  font-family: var(--ririko-font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.02;
+  margin: 0;
+}
+
+.faqIntro {
+  color: var(--ririko-muted);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  margin: 1rem 0 0;
+  max-width: 22rem;
+}
+
 .faq {
-  margin: 0 auto;
-  max-width: 48rem;
+  border-bottom: 1px solid var(--ririko-edge);
 }
 
 .faqItem {
-  border: 1px solid var(--ifm-color-emphasis-300);
-  border-radius: var(--ifm-card-border-radius);
-  margin-bottom: 0.75rem;
-  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--ririko-edge);
 }
 
-.faqItem summary {
+.faqQuestion {
+  align-items: center;
+  color: #fff;
   cursor: pointer;
+  display: flex;
+  font-size: 1.125rem;
   font-weight: 600;
+  gap: 1rem;
+  justify-content: space-between;
+  list-style: none;
+  padding: 1.1rem 0;
 }
 
-.faqItem p {
-  margin: 0.75rem 0 0;
+.faqQuestion::-webkit-details-marker {
+  display: none;
 }
 
-@media (max-width: 600px) {
-  .heroTitle {
+.faqQuestion::after {
+  color: var(--pink);
+  content: '+';
+  flex: none;
+  font-family: var(--ririko-font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.faqItem[open] > .faqQuestion::after {
+  content: '\2212';
+}
+
+.faqQuestion:hover {
+  color: var(--ririko-pink-tint);
+}
+
+.faqQuestion:focus-visible {
+  border-radius: 6px;
+  outline: 3px solid var(--ririko-pink-tint);
+  outline-offset: 2px;
+}
+
+.faqAnswer {
+  color: var(--ririko-text);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 44rem;
+  padding: 0 0 1.35rem;
+}
+
+.faqIntro a,
+.faqAnswer a {
+  color: var(--ririko-pink-tint);
+  text-decoration: underline;
+}
+
+.faqIntro a:focus-visible,
+.faqAnswer a:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid var(--ririko-pink-tint);
+  outline-offset: 2px;
+}
+
+.faqAnswer code {
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid var(--ririko-edge);
+  color: var(--ririko-pink-tint);
+}
+
+@media (min-width: 997px) {
+  .getStarted {
+    padding: 7rem 0 8rem;
+  }
+
+  .path {
+    align-items: center;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    padding: 2.25rem 0 2.5rem;
+  }
+
+  .faqLayout {
+    align-items: start;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    margin-top: 8rem;
+  }
+
+  .faqHead {
+    position: sticky;
+    top: calc(var(--ifm-navbar-height) + 2rem);
+  }
+}
+
+@media (max-width: 560px) {
+  .meet,
+  .abilities,
+  .openSource {
+    padding: 3.5rem 0;
+  }
+
+  .getStarted {
+    padding: 3.5rem 0 4rem;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+@media (min-width: 1600px) {
+  .heroBody {
+    max-width: 46rem;
+  }
+
+  .tagline {
     font-size: 2.5rem;
   }
 
-  .meet {
-    padding: 2.5rem 16px 2.5rem;
-  }
-
-  .meetTitle {
-    font-size: 2rem;
-  }
-
-  .meetText {
-    margin-bottom: 1.5rem;
+  .heroNote {
+    font-size: 1.1875rem;
   }
 }

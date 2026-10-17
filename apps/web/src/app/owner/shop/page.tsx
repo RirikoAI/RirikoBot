@@ -30,7 +30,7 @@ export default async function OwnerShopPage() {
         </div>
         <Link
           href="/owner/shop/new"
-          className="rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura"
+          className="rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura-hover"
         >
           New item
         </Link>

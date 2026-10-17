@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo 'The board site has no dependencies'",
+  "buildCommand": "node scripts/kanban/build-board-site.mjs",
+  "outputDirectory": "board-dist"
+}

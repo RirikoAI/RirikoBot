@@ -35,7 +35,7 @@ export default async function HomePage({
           <UserMenu user={user} owner={owner} />
           <Link
             href="/servers"
-            className="rounded-md bg-sakura-strong px-5 py-2.5 font-semibold text-white hover:bg-sakura"
+            className="rounded-md bg-sakura-strong px-5 py-2.5 font-semibold text-white hover:bg-sakura-hover"
           >
             Choose a server
           </Link>

@@ -10,7 +10,8 @@
  *
  * The SVG is the master: edit it in Inkscape, then run this script again. A layer is a `g` with
  * `inkscape:groupmode="layer"`; only layers that hold no sublayer ("leaf" layers) become ORA layers.
- * Text is drawn with the Karla fonts in assets/readme/fonts (SIL Open Font License). Output is
+ * Text is drawn with the Sour Gummy and Libre Franklin fonts in assets/readme/fonts (SIL Open Font
+ * License). Output is
  * deterministic: the same SVG always produces the same bytes.
  *
  * Skia's SVG engine does not draw `<image>`, so this script draws embedded pictures itself, in their
@@ -30,8 +31,18 @@ import {
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-/** Karla files registered under one family, so `font-weight` picks the right one in the SVG. */
-export const FONT_FILES = ['Karla-Regular.ttf', 'Karla-Bold.ttf', 'Karla-ExtraBold.ttf'] as const;
+/**
+ * Static font instances, each registered under its family, so `font-weight` picks the right file in
+ * the SVG. Sour Gummy is the brand voice (wordmark, titles, pills); Libre Franklin is the text.
+ */
+export const FONT_FILES = [
+  { file: 'SourGummy-Regular.ttf', family: 'Sour Gummy' },
+  { file: 'SourGummy-Bold.ttf', family: 'Sour Gummy' },
+  { file: 'SourGummy-ExtraBold.ttf', family: 'Sour Gummy' },
+  { file: 'LibreFranklin-Regular.ttf', family: 'Libre Franklin' },
+  { file: 'LibreFranklin-SemiBold.ttf', family: 'Libre Franklin' },
+  { file: 'LibreFranklin-Bold.ttf', family: 'Libre Franklin' },
+] as const;
 export const SOCIAL_CARD = { x: 40, y: 0, width: 1200, height: 630 } as const;
 
 export interface SvgLayer {
@@ -605,8 +616,8 @@ export async function renderBanner(svg: string): Promise<BannerOutput> {
 }
 
 export function registerFonts(fontsDir: string): void {
-  for (const file of FONT_FILES) {
-    if (!GlobalFonts.registerFromPath(resolve(fontsDir, file), 'Karla')) {
+  for (const { file, family } of FONT_FILES) {
+    if (!GlobalFonts.registerFromPath(resolve(fontsDir, file), family)) {
       throw new Error(`Could not register the font ${file} from ${fontsDir}`);
     }
   }

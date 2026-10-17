@@ -29,7 +29,7 @@ export function PasskeyCheckButton({ returnTo }: { returnTo: string }) {
         type="button"
         onClick={verify}
         disabled={pending}
-        className="rounded-md bg-sakura-strong px-5 py-2.5 font-semibold text-white hover:bg-sakura disabled:opacity-60"
+        className="rounded-md bg-sakura-strong px-5 py-2.5 font-semibold text-white hover:bg-sakura-hover disabled:opacity-60"
       >
         {pending ? 'Waiting for your passkey…' : 'Use my passkey'}
       </button>

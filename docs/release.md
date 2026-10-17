@@ -573,7 +573,7 @@ The documentation site in `website/` is published with GitHub Pages on <https://
 - The workflow `.github/workflows/docs.yml` runs on every push to `master` and on **Run workflow** (`workflow_dispatch`). It runs `pnpm install --frozen-lockfile`, `pnpm build` and `pnpm docs:build`, uploads `website/build` and deploys it with `actions/deploy-pages`. Other branches never deploy, so the site and the install files always match a release.
 - `website/static/CNAME` holds `ririko.ai`.
 - `pnpm docs:build` also runs `pnpm docs:install`. It copies `docker-compose.production.yml` to `website/static/install/docker-compose.yml` and `.env.production.example` to `website/static/install/.env.example`. The copies are git-ignored and are never edited by hand. The site then serves <https://ririko.ai/install/docker-compose.yml> and <https://ririko.ai/install/.env.example>.
-- The old status page on Vercel is retired.
+- The Kanban board is published separately, as a read-only static site on the Vercel project `ririko-bot` (`vercel.json` runs `node scripts/kanban/build-board-site.mjs` and serves `board-dist/`). It is not part of ririko.ai.
 
 ### 9.1. One-Time Setup (Maintainer)
 
@@ -584,7 +584,7 @@ Do these once, after 2.0 is on `master`. Until then ririko.ai stays down.
 3. Set the apex records to **DNS only** (grey cloud) until GitHub has issued the certificate. Leave the other records as they are.
 4. Back in **Settings**, **Pages**, wait for the DNS check to pass, set the custom domain to `ririko.ai` if it is empty, then tick **Enforce HTTPS** when GitHub offers it.
 5. Run the workflow once from the **Actions** tab (**Docs site**, **Run workflow**) or push to `master`. Open <https://ririko.ai> and <https://ririko.ai/install/docker-compose.yml> to check.
-6. Delete the Vercel project `ririko-bot`.
+6. Keep the Vercel project `ririko-bot`: it hosts the Kanban board. In its **Settings**, check that the **Production Branch** is the branch whose board you want to publish, and that **Root Directory** is the repository root.
 
 To build the site on your computer:
 

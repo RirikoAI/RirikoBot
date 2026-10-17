@@ -479,7 +479,9 @@
         "CHORE-2003",
         "CHORE-2004",
         "BUG-0044",
-        "BUG-0045"
+        "BUG-0045",
+        "STORY-195",
+        "CHORE-2005"
       ],
       "requires": [
         "EPIC-019"
@@ -2990,6 +2992,57 @@
         "The coverage gate passes (`pnpm test:coverage`)."
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [
+        "TASK-1951",
+        "TASK-1952",
+        "TASK-1953",
+        "TASK-1954",
+        "TASK-1955"
+      ],
+      "requires": [
+        "STORY-189"
+      ],
+      "model": "large",
+      "handovers": [
+        "STORY-195",
+        "EPIC-020"
+      ],
+      "id": "STORY-195",
+      "parent": "EPIC-020",
+      "title": "Ririko Brand Identity (Sour Gummy, Libre Franklin, Official Pink) and a Redesigned ririko.ai Home Page",
+      "points": 21,
+      "status": "DONE",
+      "description": "Maintainer (2026-10-18): one corporate identity for the website, the docs, the setup wizard (installer), the dashboard and the README. Main font Sour Gummy, secondary font Libre Franklin, official pink #DF6E7E; the rest of the sakura theme stays. Redesign the Docusaurus home page into a character-led, section-based page with a vertical section navigator, keeping the interactive Discord demo.",
+      "context": {
+        "files": [
+          "website/",
+          "apps/web/src/app/globals.css",
+          "assets/installer/",
+          "assets/readme/",
+          "scripts/render-readme-banner.ts"
+        ],
+        "symbols": [
+          "DiscordDemo",
+          "registerFonts",
+          "startInstallerServer"
+        ],
+        "codegraph_queries": [
+          "DiscordDemo Home Hero MeetRiriko index.tsx",
+          "registerFonts FONT_FILES renderBanner",
+          "startInstallerServer assets fonts woff2"
+        ]
+      },
+      "acceptance": [
+        "TASK-1951 to TASK-1955 are DONE."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm vitest run apps/cli/src/installer scripts/render-readme-banner.test.ts && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "tasks": [
@@ -10258,6 +10311,300 @@
         "Checked in the in-app browser against a temporary root under $TEMP (never the repository .env, never port 3999): every page at the widths above; image-only, chat-only and both Gemini cases; both Lavalink choices in both profiles. The PROGRESS entry records it."
       ],
       "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/cli/src packages/core/src/config && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [],
+      "model": "medium",
+      "handovers": [
+        "TASK-1951",
+        "STORY-195",
+        "EPIC-020"
+      ],
+      "id": "TASK-1951",
+      "parent": "STORY-195",
+      "points": 5,
+      "status": "DONE",
+      "title": "Brand Foundation: Self-Hosted Sour Gummy and Libre Franklin Plus Official Pink #DF6E7E on the Site, Docs, Dashboard and Setup Wizard",
+      "description": "Shared brand tokens and fonts on every web surface. The home page layout itself is TASK-1953/1954; the README banner is TASK-1952.",
+      "context": {
+        "files": [
+          "website/src/css/custom.css",
+          "website/docusaurus.config.ts",
+          "website/static/fonts/",
+          "website/static/img/favicon.svg",
+          "website/static/img/logo.svg",
+          "apps/web/src/app/globals.css",
+          "apps/web/src/app/layout.tsx",
+          "apps/web/src/app/fonts/",
+          "apps/web/src/components/site-header.tsx",
+          "apps/web/src/lib/server/discord-notifier.ts",
+          "assets/installer/wizard.css",
+          "assets/installer/fonts/",
+          "apps/cli/src/installer/server.test.ts",
+          "apps/cli/src/installer/render.ts",
+          "apps/web/src/app/account/album/page.tsx",
+          "apps/web/src/app/dashboard/[guildId]/cases/page.tsx",
+          "apps/web/src/app/error.tsx",
+          "apps/web/src/app/owner/dungeon/page.tsx",
+          "apps/web/src/app/owner/shop/page.tsx",
+          "apps/web/src/app/owner/tcg-shop/page.tsx",
+          "apps/web/src/app/page.tsx",
+          "apps/web/src/app/servers/page.tsx",
+          "apps/web/src/components/passkeys/passkey-check-button.tsx",
+          "apps/web/src/components/passkeys/passkey-manager.tsx",
+          "apps/web/src/components/session-list.tsx",
+          "apps/web/src/components/settings-form.tsx"
+        ],
+        "symbols": [
+          "startInstallerServer",
+          "RootLayout",
+          "NOTICE_COLOR"
+        ],
+        "entry_points": [
+          "website/docusaurus.config.ts",
+          "apps/web/src/app/layout.tsx",
+          "apps/cli/src/installer/server.ts"
+        ],
+        "codegraph_queries": [
+          "startInstallerServer assets fonts woff2 content-type",
+          "RootLayout globals.css site-header",
+          "discord-notifier NOTICE_COLOR"
+        ]
+      },
+      "acceptance": [
+        "Sour Gummy and Libre Franklin are self-hosted as woff2 (latin and latin-ext subsets, variable weight 400 to 800) on the site (website/static/fonts/), the dashboard (next/font/local) and the setup wizard (assets/installer/fonts/), each folder with the SIL OFL licence of both fonts. No page or stylesheet loads a font from another host. Karla is removed from the setup wizard.",
+        "Font roles: Sour Gummy for the wordmark, page titles, h1 and h2, section numbers and the navbar title; Libre Franklin for body text, navigation, buttons, forms, tables and h3 to h6. Code stays monospace.",
+        "Colour tokens use the names in the STORY-195 GROOMING note: official pink #DF6E7E, pink-deep #B8475A for white text and light-mode links, pink-hover #C24F63; ink, panel, edge, text, muted, ok, warn and error keep their current values.",
+        "Docusaurus: --ifm-color-primary scale built from #B8475A in light mode and #DF6E7E in dark mode; navbar shows an R mark logo (website/static/img/logo.svg) in #DF6E7E; favicon.svg uses #DF6E7E; footer uses the brand fonts. Docs pages keep their normal Docusaurus layout.",
+        "Dashboard: --color-sakura is #DF6E7E, --color-sakura-strong is #B8475A, and every button with white text meets 4.5:1 contrast at rest and on hover (use a pink-hover token where hover:bg-sakura sits behind white text). NOTICE_COLOR is 0xdf6e7e.",
+        "Setup wizard: --color-sakura is #DF6E7E, --color-sakura-strong is #B8475A, the server test asserts the new font files and still asserts that no stylesheet uses another host.",
+        "Text contrast: body and link text meets WCAG AA (4.5:1) on its background in both Docusaurus colour modes, in the dashboard and in the wizard."
+      ],
+      "verify_cmd": "pnpm vitest run apps/cli/src/installer && pnpm --filter @ririko/web typecheck && pnpm --filter website typecheck && pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1951"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1952",
+        "STORY-195",
+        "EPIC-020"
+      ],
+      "id": "TASK-1952",
+      "parent": "STORY-195",
+      "points": 3,
+      "status": "DONE",
+      "title": "README Banner and Social Card in the New Brand: Sour Gummy Headings, Libre Franklin Text, Official Pink",
+      "description": "Re-type and re-colour assets/readme/feature-banner.svg and its renderer; re-export the PNG, social card and .ora.",
+      "context": {
+        "files": [
+          "assets/readme/feature-banner.svg",
+          "assets/readme/fonts/",
+          "assets/readme/README.md",
+          "assets/readme/feature-banner.png",
+          "assets/readme/social-card.png",
+          "assets/readme/feature-banner.ora",
+          "scripts/render-readme-banner.ts",
+          "scripts/render-readme-banner.test.ts",
+          "README.md"
+        ],
+        "symbols": [
+          "registerFonts",
+          "FONT_FILES",
+          "renderBanner"
+        ],
+        "entry_points": [
+          "scripts/render-readme-banner.ts"
+        ],
+        "codegraph_queries": [
+          "registerFonts FONT_FILES renderBanner main render-readme-banner"
+        ]
+      },
+      "acceptance": [
+        "assets/readme/fonts holds static TTF instances of Sour Gummy (400, 700, 800) and Libre Franklin (400, 600, 700) with both OFL licences; the Karla files are removed. registerFonts registers each file under its family name (\"Sour Gummy\", \"Libre Franklin\") and a test proves a bold and a regular weight measure differently.",
+        "In feature-banner.svg the wordmark, section titles and pills use Sour Gummy; body lines and small labels use Libre Franklin. The pinks #f472b6, #f9a8d4, #fbcfe8 and #f5a3c7 are replaced by the brand pink family (#DF6E7E and tints from the STORY-195 GROOMING note); every other colour, the layers, slot ids and layout stay as they are. Text that no longer fits is resized, not moved out of its column.",
+        "pnpm readme:banner regenerates feature-banner.png, social-card.png and feature-banner.ora; output is deterministic (two runs give the same bytes).",
+        "assets/readme/README.md names the new fonts in the files table, the export section and the rights table."
+      ],
+      "verify_cmd": "pnpm readme:banner && pnpm vitest run scripts/render-readme-banner.test.ts && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1951"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1953",
+        "STORY-195",
+        "EPIC-020"
+      ],
+      "id": "TASK-1953",
+      "parent": "STORY-195",
+      "points": 8,
+      "status": "DONE",
+      "title": "Home Page Part 1: Cinematic Hero, Meet Ririko Demo Section, Vertical Section Navigator and Scroll Snapping",
+      "description": "The first viewport and the page skeleton of the redesigned home page, following the art direction in the STORY-195 GROOMING note.",
+      "context": {
+        "files": [
+          "website/src/pages/index.tsx",
+          "website/src/pages/index.module.css",
+          "website/src/components/SectionNav/index.tsx",
+          "website/src/components/SectionNav/styles.module.css",
+          "website/src/components/DiscordDemo/index.tsx",
+          "website/src/components/DiscordDemo/script.ts",
+          "website/static/img/ririko-hero.webp",
+          "website/src/data/commands.json"
+        ],
+        "symbols": [
+          "Home",
+          "Hero",
+          "MeetRiriko",
+          "Stats",
+          "DiscordDemo"
+        ],
+        "entry_points": [
+          "website/src/pages/index.tsx"
+        ],
+        "codegraph_queries": [
+          "Home Hero MeetRiriko Stats index.tsx",
+          "DiscordDemo script reply commands supported"
+        ]
+      },
+      "acceptance": [
+        "Home renders five sections with ids hero, meet, abilities, open-source and get-started (abilities, open-source and get-started may hold the existing feature grid, stats and FAQ until TASK-1954 rebuilds them, but must exist so the navigator works).",
+        "Hero: min-height calc(100svh - var(--ifm-navbar-height)) on desktop; cream paper background; ririko-hero.webp as an <img> dissolving into the paper with a CSS mask (no dark scrim); h1 wordmark \"Ririko AI\" in Sour Gummy at clamp scale; the tagline \"The Discord bot for music, cards, AI chat and your whole server.\"; primary CTA \"Run your own Ririko\" to /docs/deployment, secondary CTA \"Join the support server\" to the configured Discord link, text link to /commands with the real command count; cover lines with the command count and category count from commands.json and \"MIT, open source and self-hosted\"; a scroll cue to #meet. No invented invite link, statistic or claim.",
+        "Meet Ririko: the DiscordDemo component is mounted unchanged (no edits inside website/src/components/DiscordDemo/), framed in an ink section with the section number, h2, the existing intro text and a one-line list of commands the demo really answers (read from script.ts/reply.ts).",
+        "SectionNav: a <nav aria-label> fixed at the right edge on viewports 997 px and wider, one anchor per section with an accessible name, aria-current on the active one; active section found with IntersectionObserver; active indicator becomes a #DF6E7E pill; label shown on hover and focus; hidden below 997 px; works as plain anchors without JavaScript.",
+        "Scroll: html gets a class only on the home page (Docusaurus <Head><html className/></Head>); under it, at 997 px and wider, scroll-snap-type y proximity and scroll-padding-top var(--ifm-navbar-height); smooth scrolling only under prefers-reduced-motion: no-preference; the get-started section has no snap alignment. Docs and /commands pages get none of these styles (check the built CSS selectors are scoped).",
+        "Motion: hero entrance with CSS only, disabled under prefers-reduced-motion; content is visible if animations or JavaScript do not run.",
+        "Responsive: at 390 px, 768 px, 1280 px and 1920 px wide there is no horizontal scroll, the face of Ririko is not cropped, the hero text does not overlap the art and the CTAs are at least 44 px tall."
+      ],
+      "verify_cmd": "pnpm --filter website typecheck && pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "children": [],
+      "requires": [
+        "TASK-1953"
+      ],
+      "model": "medium",
+      "handovers": [
+        "TASK-1954",
+        "STORY-195",
+        "EPIC-020"
+      ],
+      "id": "TASK-1954",
+      "parent": "STORY-195",
+      "points": 5,
+      "status": "DONE",
+      "title": "Home Page Part 2: Editorial Abilities Section, Yours-to-Run Open Source Section, Get Started and FAQ, Responsive and Accessibility Pass",
+      "description": "The remaining home page sections and the final polish of the whole page, following the STORY-195 GROOMING note.",
+      "context": {
+        "files": [
+          "website/src/pages/index.tsx",
+          "website/src/pages/index.module.css",
+          "website/src/pages/commands.tsx",
+          "website/static/img/demo/",
+          "docs/img/",
+          "website/src/data/commands.json",
+          "README.md",
+          "website/src/css/custom.css",
+          "website/src/images.d.ts"
+        ],
+        "symbols": [
+          "Home",
+          "FEATURES",
+          "FAQ"
+        ],
+        "entry_points": [
+          "website/src/pages/index.tsx"
+        ],
+        "codegraph_queries": [
+          "Home FEATURES FAQ index.tsx",
+          "commands.tsx category anchors CommandsPage"
+        ]
+      },
+      "acceptance": [
+        "Abilities (#abilities): three headliners in an asymmetric layout (Waifu TCG largest with the three demo cards fanned, Music with docs/img/music-now-playing.webp, AI chat and images as a typographic block), then Economy and levels, Moderation, and Mini-games and fun as a ruled list, then every command category from commands.json with its command count. Every item links to its existing docs page; copy stays true to the current FEATURES text.",
+        "Open source (#open-source): cream section \"Yours to run\" with MIT licence, Docker, SQLite or PostgreSQL, the setup wizard, the 1.4 migration and the dashboard (Discord sign-in or passkey); docs/img/dashboard-overview.webp in a frame; quick-start commands copied exactly from README.md steps 1 to 3 (commands only, no invented output); links to GitHub, /docs/deployment and /docs/upgrading-from-1.4.",
+        "Get started (#get-started): three typographic paths (run your own, support server, browse commands), the true note that there is no public invite link yet, and the existing FAQ as details/summary with a visible focus ring; no fixed height.",
+        "Visual rhythm day/night/day/night as in the GROOMING note; no identical card grid, no glassmorphism, no pill badge above headings.",
+        "Section reveal uses CSS only (animation-timeline: view() inside @supports, disabled under prefers-reduced-motion); content stays visible where it is unsupported.",
+        "Accessibility: one h1, h2 per section, landmarks, link and focus contrast AA, alt text on screenshots; at 390, 768, 1280 and 1920 px no horizontal scroll and nothing overlaps.",
+        "Every link resolves: pnpm docs:build passes with onBrokenLinks and onBrokenAnchors set to throw.",
+        "Navbar: in dark mode the navbar and the page background use the brand ink (#0f0d17) instead of the Docusaurus grey; light mode keeps a light navbar. Docs pages still read well in both modes.",
+        "Meet Ririko: the section header no longer repeats the \"Try\" command list, because the demo window already shows its own try row."
+      ],
+      "verify_cmd": "pnpm --filter website typecheck && pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1954"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "TASK-1955",
+        "STORY-195",
+        "EPIC-020"
+      ],
+      "id": "TASK-1955",
+      "parent": "STORY-195",
+      "points": 1,
+      "status": "DONE",
+      "title": "Home Page Hero Copy From the Maintainer, and the Discord Demo Chat Column No Longer Clipped With Large Phone Text",
+      "description": "Maintainer feedback (2026-10-18) after STORY-195: new hero tagline and support line; on an Android phone with larger text the demo chat content runs past the right edge of the window.",
+      "context": {
+        "files": [
+          "website/src/pages/index.tsx",
+          "website/src/components/DiscordDemo/styles.module.css"
+        ],
+        "symbols": [
+          "Hero"
+        ],
+        "entry_points": [
+          "website/src/pages/index.tsx"
+        ],
+        "codegraph_queries": [
+          "Hero index.tsx tagline heroNote"
+        ]
+      },
+      "acceptance": [
+        "The hero tagline (website/src/pages/index.tsx, the <p> with styles.tagline) reads exactly: \"Meet your server's new best friend: an AI companion who plays, chats and keeps the peace.\"",
+        "The hero note (the <p> with styles.heroNote) reads exactly: \"You may not need another Discord bot after this.\"",
+        "In website/src/components/DiscordDemo/styles.module.css the .chat rule gains grid-template-columns: minmax(0, 1fr); nothing else in the demo changes.",
+        "pnpm docs:build passes."
+      ],
+      "verify_cmd": "pnpm --filter website typecheck && pnpm docs:build && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "chores": [
@@ -10799,6 +11146,61 @@
       ],
       "verify_cmd": "pnpm vitest run apps/cli/src/installer && pnpm lint --quiet && pnpm format:check",
       "parent": "EPIC-020"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "CHORE-2005",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2005",
+      "parent": "EPIC-020",
+      "points": 3,
+      "status": "DONE",
+      "title": "Publish the Kanban Board on Vercel as a Static Read-Only Site, and Bind the Local Board Server to 127.0.0.1 by Default",
+      "description": "Maintainer (2026-10-18): publish the Kanban board that scripts/kanban/board-server.mjs serves locally to the existing Vercel project, so maintainers can read it, and so the Vercel check on pull requests passes again (it fails since TASK-1893 removed vercel.json). The board server also has a private LAN address committed as its listen address (f801ab1); it must default to 127.0.0.1 with an opt-in host option.",
+      "context": {
+        "files": [
+          "scripts/kanban/board-server.mjs",
+          "scripts/kanban/board-web/index.html",
+          "scripts/kanban/build-board-site.mjs",
+          "vercel.json",
+          ".gitignore",
+          ".prettierignore",
+          "eslint.config.mjs",
+          "docs/kanban/protocol.md",
+          "docs/release.md",
+          "scripts/kanban/build-board-site.test.ts"
+        ],
+        "symbols": [
+          "routes",
+          "boardPath",
+          "handoverDir"
+        ],
+        "entry_points": [
+          "scripts/kanban/board-server.mjs"
+        ],
+        "codegraph_queries": [
+          "board-server boardPath handoverDir routes send",
+          "board-web index.html fetch get EventSource"
+        ]
+      },
+      "acceptance": [
+        "node scripts/kanban/build-board-site.mjs writes a static site to board-dist/ (git-ignored) with the board-web page and static copies of what the server routes return: board.json, the handover id list, every handover note except _TEMPLATE.md and HANDOVERS.md, HANDOVERS.md as the flags text, and the project meta. No dependencies; Node 22 runs it directly.",
+        "board-web/index.html works from both sources: served by board-server.mjs it uses /api/* and live reload as today; built as a static site it reads the static files and skips the EventSource without an error in the console. The page shows which mode it is in only if that is useful (for example \"Snapshot of <branch> at <commit>\" from VERCEL_GIT_COMMIT_REF and VERCEL_GIT_COMMIT_SHA when present).",
+        "vercel.json at the repository root: framework null, an install command that installs nothing, buildCommand node scripts/kanban/build-board-site.mjs, outputDirectory board-dist. The site is read-only and never writes to the repository.",
+        "scripts/kanban/board-server.mjs listens on 127.0.0.1 by default; --host=<address> (or HOST) chooses another address and the printed URL uses it. No IP address other than 127.0.0.1 appears anywhere in the committed file.",
+        "docs/kanban/protocol.md line about board-server.mjs mentions --host and the published board; docs/release.md no longer tells the maintainer to delete the Vercel project ririko-bot and says it hosts the Kanban board.",
+        "A test (scripts/kanban/build-board-site.test.ts; vitest only picks up *.test.ts) builds into a temporary folder from a small fixture docs/kanban tree and checks the files and that _TEMPLATE.md and HANDOVERS.md are not served as notes."
+      ],
+      "verify_cmd": "node scripts/kanban/build-board-site.mjs && pnpm vitest run scripts/kanban && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "bugs": [

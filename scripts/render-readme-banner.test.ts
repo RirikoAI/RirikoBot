@@ -11,6 +11,7 @@ import {
   parseLayers,
   parseTransform,
   placeImage,
+  registerFonts,
   renderBanner,
   zip,
 } from './render-readme-banner';
@@ -200,5 +201,25 @@ describe('renderBanner', () => {
   it('refuses a linked picture', async () => {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><image href="art.png" width="4" height="4"/></svg>`;
     await expect(renderBanner(svg)).rejects.toThrow('Embed it instead');
+  });
+});
+
+describe('registerFonts', () => {
+  it('registers each weight under its family, so weights measure differently', () => {
+    registerFonts(resolve(__dirname, '../assets/readme/fonts'));
+    const ctx = createCanvas(400, 100).getContext('2d');
+    const width = (font: string) => {
+      ctx.font = font;
+      return ctx.measureText('RIRIKO').width;
+    };
+    expect(width('800 40px "Sour Gummy"')).not.toBe(width('400 40px "Sour Gummy"'));
+    expect(width('700 40px "Libre Franklin"')).not.toBe(width('400 40px "Libre Franklin"'));
+    expect(width('400 40px "Sour Gummy"')).not.toBe(width('400 40px "Libre Franklin"'));
+  });
+
+  it('throws when a font file is missing', () => {
+    expect(() => registerFonts(resolve(__dirname, '../assets/readme/no-such-fonts'))).toThrow(
+      'Could not register the font',
+    );
   });
 });

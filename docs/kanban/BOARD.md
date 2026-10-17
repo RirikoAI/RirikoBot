@@ -145,6 +145,7 @@
 | `STORY-188` | Story | Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps | 13 | EPIC-020 | [STORY-188.md](./handovers/STORY-188.md) |
 | `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 21 | EPIC-020 | [STORY-189.md](./handovers/STORY-189.md) |
 | `STORY-193` | Story | Privacy Notice, AI Consent and Data Retention Before the Public Bot Runs 2.0 | 21 | EPIC-020 | [STORY-193.md](./handovers/STORY-193.md) |
+| `STORY-195` | Story | Ririko Brand Identity (Sour Gummy, Libre Franklin, Official Pink) and a Redesigned ririko.ai Home Page | 21 | EPIC-020 | [STORY-195.md](./handovers/STORY-195.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -412,6 +413,11 @@
 | `TASK-1935` | Task | Delete a Server's Data 90 Days After the Bot Leaves It | 8 | STORY-193 | [TASK-1935.md](./handovers/TASK-1935.md) |
 | `TASK-1936` | Task | Bahasa Malaysia Versions of the Terms of Service and the Privacy Policy | 3 | STORY-193 | [TASK-1936.md](./handovers/TASK-1936.md) |
 | `TASK-1927` | Task | Setup Wizard Feedback: Step Tabs on the Left, the Shared Gemini Key in the Right Group, Lavalink Settings | 5 | STORY-192 | [TASK-1927.md](./handovers/TASK-1927.md) |
+| `TASK-1951` | Task | Brand Foundation: Self-Hosted Sour Gummy and Libre Franklin Plus Official Pink #DF6E7E on the Site, Docs, Dashboard and Setup Wizard | 5 | STORY-195 | [TASK-1951.md](./handovers/TASK-1951.md) |
+| `TASK-1952` | Task | README Banner and Social Card in the New Brand: Sour Gummy Headings, Libre Franklin Text, Official Pink | 3 | STORY-195 | [TASK-1952.md](./handovers/TASK-1952.md) |
+| `TASK-1953` | Task | Home Page Part 1: Cinematic Hero, Meet Ririko Demo Section, Vertical Section Navigator and Scroll Snapping | 8 | STORY-195 | [TASK-1953.md](./handovers/TASK-1953.md) |
+| `TASK-1954` | Task | Home Page Part 2: Editorial Abilities Section, Yours-to-Run Open Source Section, Get Started and FAQ, Responsive and Accessibility Pass | 5 | STORY-195 | [TASK-1954.md](./handovers/TASK-1954.md) |
+| `TASK-1955` | Task | Home Page Hero Copy From the Maintainer, and the Discord Demo Chat Column No Longer Clipped With Large Phone Text | 1 | STORY-195 | [TASK-1955.md](./handovers/TASK-1955.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |
 | `CHORE-0601` | Chore | CLI Command to Configure AI Chat Functions & Provider Keys | 2 | EPIC-006 | [CHORE-0601.md](./handovers/CHORE-0601.md) |
@@ -427,6 +433,7 @@
 | `CHORE-0004` | Chore | Disable unused FloweryTTS source in Lavalink config | 1 | EPIC-005 | [CHORE-0004.md](./handovers/CHORE-0004.md) |
 | `CHORE-1704` | Chore | Ship the ririko CLI in the Bot Image So Operators Run It With docker exec | 3 | EPIC-017 | [CHORE-1704.md](./handovers/CHORE-1704.md) |
 | `CHORE-1901` | Chore | Runbook: Rerun bootstrap.sh Before the First Deploy With the Migration Runner (Host Scripts Do Not Self-Update) | 1 | EPIC-019 | [CHORE-1901.md](./handovers/CHORE-1901.md) |
+| `CHORE-2005` | Chore | Publish the Kanban Board on Vercel as a Static Read-Only Site, and Bind the Local Board Server to 127.0.0.1 by Default | 3 | EPIC-020 | [CHORE-2005.md](./handovers/CHORE-2005.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |
@@ -510,4 +517,4 @@
 | `EPIC-017` | Production Hosting & Continuous Deployment (Managed VMs, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
-| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045 | [EPIC-020.md](./handovers/EPIC-020.md) |
+| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195, CHORE-2005 | [EPIC-020.md](./handovers/EPIC-020.md) |

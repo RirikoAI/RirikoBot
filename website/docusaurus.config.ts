@@ -11,6 +11,20 @@ const config: Config = {
   tagline: 'The Discord bot with music, AI chat, a card game and a dashboard',
   favicon: 'img/favicon.svg',
 
+  // Brand fonts (STORY-195): the @font-face rules and the font files are in static/fonts. The two
+  // latin files are used on every page, so they are preloaded.
+  stylesheets: ['/fonts/fonts.css'],
+  headTags: ['sour-gummy-latin', 'libre-franklin-latin'].map((name) => ({
+    tagName: 'link',
+    attributes: {
+      rel: 'preload',
+      href: `/fonts/${name}.woff2`,
+      as: 'font',
+      type: 'font/woff2',
+      crossorigin: 'anonymous',
+    },
+  })),
+
   url: 'https://ririko.ai',
   baseUrl: '/',
   organizationName: 'RirikoAI',
@@ -71,6 +85,7 @@ const config: Config = {
   themeConfig: {
     navbar: {
       title: 'Ririko AI',
+      logo: { alt: 'Ririko AI', src: 'img/logo.svg' },
       items: [
         { type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs' },
         { to: '/commands', label: 'Commands', position: 'left' },

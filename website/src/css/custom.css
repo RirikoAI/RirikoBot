@@ -1,10 +1,85 @@
+/*
+ * Ririko brand (STORY-195). The @font-face rules are in static/fonts/fonts.css (self-hosted,
+ * SIL Open Font License; no page loads a font from another host). Sour Gummy is Ririko's voice
+ * (wordmark, h1, h2, the navbar and footer titles). Libre Franklin is the product (body,
+ * navigation, UI, h3 to h6). Code stays monospace.
+ */
+
 :root {
-  --ifm-color-primary: #6d5dfc;
-  --ifm-color-primary-dark: #4f3ffb;
-  --ifm-color-primary-darker: #4131fb;
-  --ifm-color-primary-darkest: #2a19e0;
-  --ifm-color-primary-light: #8b7dfd;
-  --ifm-color-primary-lighter: #9a8dfd;
-  --ifm-color-primary-lightest: #bdb4fe;
+  /* Brand tokens. The home page (TASK-1953, TASK-1954) builds on these names. */
+  --ririko-pink: #df6e7e; /* official pink: wordmark, accents, text on ink; never behind white text */
+  --ririko-pink-deep: #b8475a; /* buttons with white text, links on white or paper */
+  --ririko-pink-hover: #c24f63; /* hover of a pink-deep button */
+  --ririko-pink-tint: #f6c3ca; /* soft accents on ink */
+  --ririko-pink-wash: #fbe5e8; /* very light fills on paper */
+  --ririko-paper: #fff6f1; /* the cream "day" sections */
+  --ririko-ink: #0f0d17; /* the "night" sections, text on paper */
+  --ririko-panel: #1a1726;
+  --ririko-edge: #2c2840;
+  --ririko-text: #e7e5f0;
+  --ririko-muted: #a29fb5; /* on ink only */
+  --ririko-font-display: 'Sour Gummy', 'Libre Franklin', system-ui, sans-serif;
+  --ririko-font-body: 'Libre Franklin', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Light mode primary, from pink-deep: links are 4.5:1 or better on white. */
+  --ifm-color-primary: #b8475a;
+  --ifm-color-primary-dark: #a64051;
+  --ifm-color-primary-darker: #9c3c4d;
+  --ifm-color-primary-darkest: #81323f;
+  --ifm-color-primary-light: #bf596b;
+  --ifm-color-primary-lighter: #c36373;
+  --ifm-color-primary-lightest: #cd7e8c;
+  --ifm-link-hover-color: var(--ifm-color-primary-darker);
+  --ifm-font-family-base: var(--ririko-font-body);
+  --ifm-heading-font-family: var(--ririko-font-body);
   --ifm-code-font-size: 95%;
+  --ifm-footer-link-hover-color: var(--ririko-pink-tint);
+  --docusaurus-highlighted-code-line-bg: rgb(184 71 90 / 10%);
+}
+
+/* Dark mode primary, from the official pink: 4.5:1 or better on the dark page. */
+[data-theme='dark'] {
+  --ifm-color-primary: #df6e7e;
+  --ifm-color-primary-dark: #da596b;
+  --ifm-color-primary-darker: #d84f62;
+  --ifm-color-primary-darkest: #d12f46;
+  --ifm-color-primary-light: #e48391;
+  --ifm-color-primary-lighter: #e68d9a;
+  --ifm-color-primary-lightest: #edadb6;
+  --ifm-link-hover-color: var(--ifm-color-primary-lighter);
+  --docusaurus-highlighted-code-line-bg: rgb(223 110 126 / 14%);
+}
+
+/* The brand ink instead of the Docusaurus grey: page, navbar and raised surfaces. */
+html[data-theme='dark'] {
+  --ifm-background-color: var(--ririko-ink);
+  --ifm-background-surface-color: var(--ririko-panel);
+  --ifm-navbar-background-color: var(--ririko-ink);
+}
+
+/* The footer is dark in both modes: the brand panel colour instead of the Docusaurus grey. */
+.footer--dark {
+  --ifm-footer-background-color: var(--ririko-panel);
+}
+
+/* Sour Gummy for page titles (h1, h2) and the brand titles; h3 to h6 stay Libre Franklin. */
+h1,
+h2,
+.navbar__title,
+.footer__title {
+  font-family: var(--ririko-font-display);
+}
+
+h1,
+h2 {
+  font-weight: 700;
+}
+
+.navbar__title {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.footer__title {
+  font-weight: 700;
 }

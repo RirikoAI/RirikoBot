@@ -78,3 +78,6 @@ website/.docusaurus/
 website/src/data/commands.json
 # Install files copied from the production compose file at build time (pnpm docs:install)
 website/static/install/
+
+# Static Kanban board site for Vercel (CHORE-2005): node scripts/kanban/build-board-site.mjs
+board-dist/
