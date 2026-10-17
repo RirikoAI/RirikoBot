@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Ririko AI feature banner: layered master. Open it in Inkscape (Layers and Objects panel) to edit.
+  Every layer is an Inkscape layer; every replaceable picture sits in a group named slot-*.
+  Re-export the PNGs and the OpenRaster file after editing: see assets/readme/README.md.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1280" height="3150" viewBox="0 0 1280 3150">
+  <title>Ririko AI feature banner</title>
+  <desc>Tall README and site banner: hero, music, Waifu TCG and adventure, AI chat, moderation and economy, web dashboard, self-hosting, community. Layered master; see assets/readme/README.md.</desc>
+  <sodipodi:namedview id="namedview" pagecolor="#0f0d17" bordercolor="#666666" borderopacity="1" inkscape:document-units="px" inkscape:current-layer="layer-hero"/>
+  <g id="banner">
+    <g id="layer-hero" inkscape:groupmode="layer" inkscape:label="01 Hero">
+      <g id="hero-base" inkscape:groupmode="layer" inkscape:label="Hero: Base colour">
+        <rect id="hero-base-rect" x="0" y="0" width="1280" height="630" fill="#0f0d17"/>
+      </g>
+      <g id="hero-background" inkscape:groupmode="layer" inkscape:label="Hero: Background art">
+        <g id="slot-hero-background">
+          <rect x="0" y="0" width="1280" height="630" fill="#2a2540" fill-opacity="0.55"/>
+          <rect x="12" y="12" width="1256" height="606" fill="none" stroke="#f472b6" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="14 10"/>
+          <text x="104" y="40" font-family="Karla" font-weight="700" font-size="18" fill="#c4bed6">Background 1280x630 (placeholder: replace with art; the social card crops x 40 to 1240)</text>
+        </g>
+      </g>
+      <g id="hero-scrim" inkscape:groupmode="layer" inkscape:label="Hero: Scrim">
+        <defs><linearGradient id="hero-scrim-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0f0d17" stop-opacity="0.92"/><stop offset="0.6" stop-color="#0f0d17" stop-opacity="0.7"/><stop offset="1" stop-color="#0f0d17" stop-opacity="0.15"/></linearGradient></defs>
+        <rect id="hero-scrim-rect" x="0" y="0" width="1280" height="630" fill="url(#hero-scrim-gradient)"/>
+      </g>
+      <g id="hero-screenshot" inkscape:groupmode="layer" inkscape:label="Hero: Screenshot frame (character art)">
+        <g id="slot-hero-art">
+          <rect x="740" y="64" width="436" height="502" rx="20" fill="#2a2540" fill-opacity="0.6" stroke="#f472b6" stroke-width="2" stroke-dasharray="12 8"/>
+          <text x="958" y="300" font-family="Karla" font-weight="800" font-size="28" fill="#f4f1fa" text-anchor="middle">Character art</text>
+          <text x="958" y="338" font-family="Karla" font-weight="400" font-size="22" fill="#c4bed6" text-anchor="middle">436x502 placeholder (PNG, transparent)</text>
+        </g>
+      </g>
+      <g id="hero-logo" inkscape:groupmode="layer" inkscape:label="Hero: Logo">
+        <rect id="hero-logo-mark" x="104" y="112" width="104" height="104" rx="26" fill="#6d5dfc"/>
+        <text x="156" y="190" font-family="Karla" font-weight="800" font-size="76" fill="#ffffff" text-anchor="middle">R</text>
+        <text x="236" y="190" id="hero-wordmark" font-family="Karla" font-weight="800" font-size="92" fill="#f4f1fa">Ririko AI</text>
+      </g>
+      <g id="hero-heading" inkscape:groupmode="layer" inkscape:label="Hero: Heading">
+        <text x="104" y="288" font-family="Karla" font-weight="800" font-size="36" fill="#f4f1fa">The Discord bot for music, cards,</text>
+        <text x="104" y="342" font-family="Karla" font-weight="800" font-size="36" fill="#f472b6">AI chat and your whole server.</text>
+      </g>
+      <g id="hero-body" inkscape:groupmode="layer" inkscape:label="Hero: Body text">
+        <text x="104" y="404" font-family="Karla" font-weight="400" font-size="24" fill="#c4bed6">Version 2.0.0. Open source and self-hosted.</text>
+        <rect x="104" y="446" width="171" height="46" rx="23" fill="#1a1726" stroke="#f472b6" stroke-width="2"/>
+        <text x="189.5" y="477" font-family="Karla" font-weight="700" font-size="20" fill="#f4f1fa" text-anchor="middle">141 commands</text>
+        <rect x="289" y="446" width="214" height="46" rx="23" fill="#1a1726" stroke="#f472b6" stroke-width="2"/>
+        <text x="396" y="477" font-family="Karla" font-weight="700" font-size="20" fill="#f4f1fa" text-anchor="middle">Slash and prefix</text>
+        <rect x="517" y="446" width="139" height="46" rx="23" fill="#1a1726" stroke="#f472b6" stroke-width="2"/>
+        <text x="586.5" y="477" font-family="Karla" font-weight="700" font-size="20" fill="#f4f1fa" text-anchor="middle">Waifu TCG</text>
+        <rect x="104" y="506" width="182" height="46" rx="23" fill="#1a1726" stroke="#f472b6" stroke-width="2"/>
+        <text x="195" y="537" font-family="Karla" font-weight="700" font-size="20" fill="#f4f1fa" text-anchor="middle">Web dashboard</text>
+      </g>
+    </g>
+    <g id="layer-music" inkscape:groupmode="layer" inkscape:label="02 Music">
+      <g id="music-base" inkscape:groupmode="layer" inkscape:label="Music: Base colour">
+        <rect id="music-base-rect" x="0" y="630" width="1280" height="372" fill="#1a1726"/>
+      </g>
+      <g id="music-background" inkscape:groupmode="layer" inkscape:label="Music: Background art">
+        <g id="slot-music-background">
+          <rect x="0" y="630" width="1280" height="372" fill="#2a2540" fill-opacity="0.55"/>
+          <rect x="12" y="642" width="1256" height="348" fill="none" stroke="#f472b6" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="14 10"/>
+          <text x="80" y="662" font-family="Karla" font-weight="700" font-size="17" fill="#c4bed6">Background 1280x372 (placeholder: replace with art)</text>
+        </g>
+      </g>
+      <g id="music-scrim" inkscape:groupmode="layer" inkscape:label="Music: Scrim">
+        <defs><linearGradient id="music-scrim-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a1726" stop-opacity="0.78"/><stop offset="1" stop-color="#1a1726" stop-opacity="0.15"/></linearGradient></defs>
+        <rect id="music-scrim-rect" x="0" y="630" width="1280" height="372" fill="url(#music-scrim-gradient)"/>
+      </g>
+      <g id="music-screenshot" inkscape:groupmode="layer" inkscape:label="Music: Screenshot frame">
+        <rect x="632" y="664" width="576" height="324" rx="16" fill="#000000" fill-opacity="0.35"/>
+        <rect x="624" y="654" width="576" height="324" rx="16" fill="#0b0a12" stroke="#2c2840" stroke-width="2"/>
+        <g id="slot-music-screenshot">
+          <rect x="636" y="666" width="552" height="300" rx="10" fill="#2a2540" fill-opacity="0.6" stroke="#f472b6" stroke-width="2" stroke-dasharray="12 8"/>
+          <text x="912" y="810" font-family="Karla" font-weight="800" font-size="26" fill="#f4f1fa" text-anchor="middle">Screenshot: music controller</text>
+          <text x="912" y="844" font-family="Karla" font-weight="400" font-size="22" fill="#c4bed6" text-anchor="middle">552x300 placeholder</text>
+        </g>
+      </g>
+      <g id="music-heading" inkscape:groupmode="layer" inkscape:label="Music: Heading">
+        <rect x="80" y="702" width="48" height="4" rx="2" fill="#f472b6"/>
+        <text x="80" y="742" font-family="Karla" font-weight="800" font-size="17" letter-spacing="3" fill="#f472b6">MUSIC</text>
+        <text x="80" y="794" font-family="Karla" font-weight="800" font-size="42" fill="#f4f1fa">Music that just plays</text>
+      </g>
+      <g id="music-body" inkscape:groupmode="layer" inkscape:label="Music: Body text">
+        <text x="80" y="846" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">A player message with buttons, a queue,</text>
+        <text x="80" y="880" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">filters, lyrics and personal playlists.</text>
+        <text x="80" y="914" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Spotify, SoundCloud and direct links.</text>
+      </g>
+    </g>
+    <g id="layer-waifu-tcg-and-adventure" inkscape:groupmode="layer" inkscape:label="03 Waifu TCG and adventure">
+      <g id="waifu-tcg-and-adventure-base" inkscape:groupmode="layer" inkscape:label="Waifu TCG and adventure: Base colour">
+        <rect id="waifu-tcg-and-adventure-base-rect" x="0" y="1002" width="1280" height="372" fill="#14111e"/>
+      </g>
+      <g id="waifu-tcg-and-adventure-background" inkscape:groupmode="layer" inkscape:label="Waifu TCG and adventure: Background art">
+        <g id="slot-waifu-tcg-and-adventure-background">
+          <rect x="0" y="1002" width="1280" height="372" fill="#2a2540" fill-opacity="0.55"/>
+          <rect x="12" y="1014" width="1256" height="348" fill="none" stroke="#f472b6" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="14 10"/>
+          <text x="720" y="1034" font-family="Karla" font-weight="700" font-size="17" fill="#c4bed6">Background 1280x372 (placeholder: replace with art)</text>
+        </g>
+      </g>
+      <g id="waifu-tcg-and-adventure-scrim" inkscape:groupmode="layer" inkscape:label="Waifu TCG and adventure: Scrim">
+        <defs><linearGradient id="waifu-tcg-and-adventure-scrim-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#14111e" stop-opacity="0.15"/><stop offset="1" stop-color="#14111e" stop-opacity="0.78"/></linearGradient></defs>
+        <rect id="waifu-tcg-and-adventure-scrim-rect" x="0" y="1002" width="1280" height="372" fill="url(#waifu-tcg-and-adventure-scrim-gradient)"/>
+      </g>
+      <g id="waifu-tcg-and-adventure-screenshot" inkscape:groupmode="layer" inkscape:label="Waifu TCG and adventure: Screenshot frame">
+        <rect x="88" y="1036" width="576" height="324" rx="16" fill="#000000" fill-opacity="0.35"/>
+        <rect x="80" y="1026" width="576" height="324" rx="16" fill="#0b0a12" stroke="#2c2840" stroke-width="2"/>
+        <g id="slot-waifu-tcg-and-adventure-screenshot">
+          <rect x="92" y="1038" width="552" height="300" rx="10" fill="#2a2540" fill-opacity="0.6" stroke="#f472b6" stroke-width="2" stroke-dasharray="12 8"/>
+          <text x="368" y="1182" font-family="Karla" font-weight="800" font-size="26" fill="#f4f1fa" text-anchor="middle">Screenshot: card drop and album</text>
+          <text x="368" y="1216" font-family="Karla" font-weight="400" font-size="22" fill="#c4bed6" text-anchor="middle">552x300 placeholder</text>
+        </g>
+      </g>
+      <g id="waifu-tcg-and-adventure-heading" inkscape:groupmode="layer" inkscape:label="Waifu TCG and adventure: Heading">
+        <rect x="720" y="1074" width="48" height="4" rx="2" fill="#f472b6"/>
+        <text x="720" y="1114" font-family="Karla" font-weight="800" font-size="17" letter-spacing="3" fill="#f472b6">WAIFU TCG AND ADVENTURE</text>
+        <text x="720" y="1166" font-family="Karla" font-weight="800" font-size="42" fill="#f4f1fa">Collect, craft, explore</text>
+      </g>
+      <g id="waifu-tcg-and-adventure-body" inkscape:groupmode="layer" inkscape:label="Waifu TCG and adventure: Body text">
+        <text x="720" y="1218" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Collect cards, craft gear, clear dungeons</text>
+        <text x="720" y="1252" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">and fight seasonal bosses. Trade with</text>
+        <text x="720" y="1286" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">friends and play 35 adventure stories.</text>
+      </g>
+    </g>
+    <g id="layer-ai-chat" inkscape:groupmode="layer" inkscape:label="04 AI chat">
+      <g id="ai-chat-base" inkscape:groupmode="layer" inkscape:label="AI chat: Base colour">
+        <rect id="ai-chat-base-rect" x="0" y="1374" width="1280" height="372" fill="#1a1726"/>
+      </g>
+      <g id="ai-chat-background" inkscape:groupmode="layer" inkscape:label="AI chat: Background art">
+        <g id="slot-ai-chat-background">
+          <rect x="0" y="1374" width="1280" height="372" fill="#2a2540" fill-opacity="0.55"/>
+          <rect x="12" y="1386" width="1256" height="348" fill="none" stroke="#f472b6" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="14 10"/>
+          <text x="80" y="1406" font-family="Karla" font-weight="700" font-size="17" fill="#c4bed6">Background 1280x372 (placeholder: replace with art)</text>
+        </g>
+      </g>
+      <g id="ai-chat-scrim" inkscape:groupmode="layer" inkscape:label="AI chat: Scrim">
+        <defs><linearGradient id="ai-chat-scrim-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a1726" stop-opacity="0.78"/><stop offset="1" stop-color="#1a1726" stop-opacity="0.15"/></linearGradient></defs>
+        <rect id="ai-chat-scrim-rect" x="0" y="1374" width="1280" height="372" fill="url(#ai-chat-scrim-gradient)"/>
+      </g>
+      <g id="ai-chat-screenshot" inkscape:groupmode="layer" inkscape:label="AI chat: Screenshot frame">
+        <rect x="632" y="1408" width="576" height="324" rx="16" fill="#000000" fill-opacity="0.35"/>
+        <rect x="624" y="1398" width="576" height="324" rx="16" fill="#0b0a12" stroke="#2c2840" stroke-width="2"/>
+        <g id="slot-ai-chat-screenshot">
+          <rect x="636" y="1410" width="552" height="300" rx="10" fill="#2a2540" fill-opacity="0.6" stroke="#f472b6" stroke-width="2" stroke-dasharray="12 8"/>
+          <text x="912" y="1554" font-family="Karla" font-weight="800" font-size="26" fill="#f4f1fa" text-anchor="middle">Screenshot: AI chat reply</text>
+          <text x="912" y="1588" font-family="Karla" font-weight="400" font-size="22" fill="#c4bed6" text-anchor="middle">552x300 placeholder</text>
+        </g>
+      </g>
+      <g id="ai-chat-heading" inkscape:groupmode="layer" inkscape:label="AI chat: Heading">
+        <rect x="80" y="1446" width="48" height="4" rx="2" fill="#f472b6"/>
+        <text x="80" y="1486" font-family="Karla" font-weight="800" font-size="17" letter-spacing="3" fill="#f472b6">AI CHAT</text>
+        <text x="80" y="1538" font-family="Karla" font-weight="800" font-size="42" fill="#f4f1fa">AI chat with safe tools</text>
+      </g>
+      <g id="ai-chat-body" inkscape:groupmode="layer" inkscape:label="AI chat: Body text">
+        <text x="80" y="1590" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Pick Gemini, OpenAI or Ollama.</text>
+        <text x="80" y="1624" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Tool calls are checked against the</text>
+        <text x="80" y="1658" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">member's Discord permissions.</text>
+      </g>
+    </g>
+    <g id="layer-moderation-and-economy" inkscape:groupmode="layer" inkscape:label="05 Moderation and economy">
+      <g id="moderation-and-economy-base" inkscape:groupmode="layer" inkscape:label="Moderation and economy: Base colour">
+        <rect id="moderation-and-economy-base-rect" x="0" y="1746" width="1280" height="372" fill="#14111e"/>
+      </g>
+      <g id="moderation-and-economy-background" inkscape:groupmode="layer" inkscape:label="Moderation and economy: Background art">
+        <g id="slot-moderation-and-economy-background">
+          <rect x="0" y="1746" width="1280" height="372" fill="#2a2540" fill-opacity="0.55"/>
+          <rect x="12" y="1758" width="1256" height="348" fill="none" stroke="#f472b6" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="14 10"/>
+          <text x="720" y="1778" font-family="Karla" font-weight="700" font-size="17" fill="#c4bed6">Background 1280x372 (placeholder: replace with art)</text>
+        </g>
+      </g>
+      <g id="moderation-and-economy-scrim" inkscape:groupmode="layer" inkscape:label="Moderation and economy: Scrim">
+        <defs><linearGradient id="moderation-and-economy-scrim-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#14111e" stop-opacity="0.15"/><stop offset="1" stop-color="#14111e" stop-opacity="0.78"/></linearGradient></defs>
+        <rect id="moderation-and-economy-scrim-rect" x="0" y="1746" width="1280" height="372" fill="url(#moderation-and-economy-scrim-gradient)"/>
+      </g>
+      <g id="moderation-and-economy-screenshot" inkscape:groupmode="layer" inkscape:label="Moderation and economy: Screenshot frame">
+        <rect x="88" y="1780" width="576" height="324" rx="16" fill="#000000" fill-opacity="0.35"/>
+        <rect x="80" y="1770" width="576" height="324" rx="16" fill="#0b0a12" stroke="#2c2840" stroke-width="2"/>
+        <g id="slot-moderation-and-economy-screenshot">
+          <rect x="92" y="1782" width="552" height="300" rx="10" fill="#2a2540" fill-opacity="0.6" stroke="#f472b6" stroke-width="2" stroke-dasharray="12 8"/>
+          <text x="368" y="1926" font-family="Karla" font-weight="800" font-size="26" fill="#f4f1fa" text-anchor="middle">Screenshot: moderation case</text>
+          <text x="368" y="1960" font-family="Karla" font-weight="400" font-size="22" fill="#c4bed6" text-anchor="middle">552x300 placeholder</text>
+        </g>
+      </g>
+      <g id="moderation-and-economy-heading" inkscape:groupmode="layer" inkscape:label="Moderation and economy: Heading">
+        <rect x="720" y="1818" width="48" height="4" rx="2" fill="#f472b6"/>
+        <text x="720" y="1858" font-family="Karla" font-weight="800" font-size="17" letter-spacing="3" fill="#f472b6">MODERATION AND ECONOMY</text>
+        <text x="720" y="1910" font-family="Karla" font-weight="800" font-size="42" fill="#f4f1fa">Keep it fair and fun</text>
+      </g>
+      <g id="moderation-and-economy-body" inkscape:groupmode="layer" inkscape:label="Moderation and economy: Body text">
+        <text x="720" y="1962" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Cases, a warning policy, AutoMod and</text>
+        <text x="720" y="1996" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">raid alerts. Credits, XP, levels, a bank</text>
+        <text x="720" y="2030" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">and a shop, tuned for each server.</text>
+      </g>
+    </g>
+    <g id="layer-web-dashboard" inkscape:groupmode="layer" inkscape:label="06 Web dashboard">
+      <g id="web-dashboard-base" inkscape:groupmode="layer" inkscape:label="Web dashboard: Base colour">
+        <rect id="web-dashboard-base-rect" x="0" y="2118" width="1280" height="372" fill="#1a1726"/>
+      </g>
+      <g id="web-dashboard-background" inkscape:groupmode="layer" inkscape:label="Web dashboard: Background art">
+        <g id="slot-web-dashboard-background">
+          <rect x="0" y="2118" width="1280" height="372" fill="#2a2540" fill-opacity="0.55"/>
+          <rect x="12" y="2130" width="1256" height="348" fill="none" stroke="#f472b6" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="14 10"/>
+          <text x="80" y="2150" font-family="Karla" font-weight="700" font-size="17" fill="#c4bed6">Background 1280x372 (placeholder: replace with art)</text>
+        </g>
+      </g>
+      <g id="web-dashboard-scrim" inkscape:groupmode="layer" inkscape:label="Web dashboard: Scrim">
+        <defs><linearGradient id="web-dashboard-scrim-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a1726" stop-opacity="0.78"/><stop offset="1" stop-color="#1a1726" stop-opacity="0.15"/></linearGradient></defs>
+        <rect id="web-dashboard-scrim-rect" x="0" y="2118" width="1280" height="372" fill="url(#web-dashboard-scrim-gradient)"/>
+      </g>
+      <g id="web-dashboard-screenshot" inkscape:groupmode="layer" inkscape:label="Web dashboard: Screenshot frame">
+        <rect x="632" y="2152" width="576" height="324" rx="16" fill="#000000" fill-opacity="0.35"/>
+        <rect x="624" y="2142" width="576" height="324" rx="16" fill="#0b0a12" stroke="#2c2840" stroke-width="2"/>
+        <g id="slot-web-dashboard-screenshot">
+          <rect x="636" y="2154" width="552" height="300" rx="10" fill="#2a2540" fill-opacity="0.6" stroke="#f472b6" stroke-width="2" stroke-dasharray="12 8"/>
+          <text x="912" y="2298" font-family="Karla" font-weight="800" font-size="26" fill="#f4f1fa" text-anchor="middle">Screenshot: dashboard settings</text>
+          <text x="912" y="2332" font-family="Karla" font-weight="400" font-size="22" fill="#c4bed6" text-anchor="middle">552x300 placeholder</text>
+        </g>
+      </g>
+      <g id="web-dashboard-heading" inkscape:groupmode="layer" inkscape:label="Web dashboard: Heading">
+        <rect x="80" y="2190" width="48" height="4" rx="2" fill="#f472b6"/>
+        <text x="80" y="2230" font-family="Karla" font-weight="800" font-size="17" letter-spacing="3" fill="#f472b6">WEB DASHBOARD</text>
+        <text x="80" y="2282" font-family="Karla" font-weight="800" font-size="42" fill="#f4f1fa">Manage it in the browser</text>
+      </g>
+      <g id="web-dashboard-body" inkscape:groupmode="layer" inkscape:label="Web dashboard: Body text">
+        <text x="80" y="2334" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Sign in with Discord or a passkey,</text>
+        <text x="80" y="2368" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">set up every module for your server,</text>
+        <text x="80" y="2402" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">and run the owner console.</text>
+      </g>
+    </g>
+    <g id="layer-self-hosting" inkscape:groupmode="layer" inkscape:label="07 Self-hosting">
+      <g id="self-hosting-base" inkscape:groupmode="layer" inkscape:label="Self-hosting: Base colour">
+        <rect id="self-hosting-base-rect" x="0" y="2490" width="1280" height="372" fill="#14111e"/>
+      </g>
+      <g id="self-hosting-background" inkscape:groupmode="layer" inkscape:label="Self-hosting: Background art">
+        <g id="slot-self-hosting-background">
+          <rect x="0" y="2490" width="1280" height="372" fill="#2a2540" fill-opacity="0.55"/>
+          <rect x="12" y="2502" width="1256" height="348" fill="none" stroke="#f472b6" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="14 10"/>
+          <text x="720" y="2522" font-family="Karla" font-weight="700" font-size="17" fill="#c4bed6">Background 1280x372 (placeholder: replace with art)</text>
+        </g>
+      </g>
+      <g id="self-hosting-scrim" inkscape:groupmode="layer" inkscape:label="Self-hosting: Scrim">
+        <defs><linearGradient id="self-hosting-scrim-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#14111e" stop-opacity="0.15"/><stop offset="1" stop-color="#14111e" stop-opacity="0.78"/></linearGradient></defs>
+        <rect id="self-hosting-scrim-rect" x="0" y="2490" width="1280" height="372" fill="url(#self-hosting-scrim-gradient)"/>
+      </g>
+      <g id="self-hosting-screenshot" inkscape:groupmode="layer" inkscape:label="Self-hosting: Screenshot frame">
+        <rect x="88" y="2524" width="576" height="324" rx="16" fill="#000000" fill-opacity="0.35"/>
+        <rect x="80" y="2514" width="576" height="324" rx="16" fill="#0b0a12" stroke="#2c2840" stroke-width="2"/>
+        <g id="slot-self-hosting-screenshot">
+          <rect x="92" y="2526" width="552" height="300" rx="10" fill="#2a2540" fill-opacity="0.6" stroke="#f472b6" stroke-width="2" stroke-dasharray="12 8"/>
+          <text x="368" y="2670" font-family="Karla" font-weight="800" font-size="26" fill="#f4f1fa" text-anchor="middle">Screenshot: setup wizard</text>
+          <text x="368" y="2704" font-family="Karla" font-weight="400" font-size="22" fill="#c4bed6" text-anchor="middle">552x300 placeholder</text>
+        </g>
+      </g>
+      <g id="self-hosting-heading" inkscape:groupmode="layer" inkscape:label="Self-hosting: Heading">
+        <rect x="720" y="2562" width="48" height="4" rx="2" fill="#f472b6"/>
+        <text x="720" y="2602" font-family="Karla" font-weight="800" font-size="17" letter-spacing="3" fill="#f472b6">SELF-HOSTING</text>
+        <text x="720" y="2654" font-family="Karla" font-weight="800" font-size="42" fill="#f4f1fa">Run it yourself</text>
+      </g>
+      <g id="self-hosting-body" inkscape:groupmode="layer" inkscape:label="Self-hosting: Body text">
+        <text x="720" y="2706" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">One guided installer. SQLite to start,</text>
+        <text x="720" y="2740" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">PostgreSQL for production, and Docker</text>
+        <text x="720" y="2774" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">with health checks when you are ready.</text>
+      </g>
+    </g>
+    <g id="layer-community" inkscape:groupmode="layer" inkscape:label="08 Community">
+      <g id="community-base" inkscape:groupmode="layer" inkscape:label="Community: Base colour">
+        <rect id="community-base-rect" x="0" y="2862" width="1280" height="288" fill="#1a1726"/>
+      </g>
+      <g id="community-background" inkscape:groupmode="layer" inkscape:label="Community: Background art">
+        <g id="slot-community-background">
+          <rect x="0" y="2862" width="1280" height="288" fill="#2a2540" fill-opacity="0.55"/>
+          <rect x="12" y="2874" width="1256" height="264" fill="none" stroke="#f472b6" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="14 10"/>
+          <text x="80" y="2884" font-family="Karla" font-weight="700" font-size="17" fill="#c4bed6">Background 1280x288 (placeholder: replace with art)</text>
+        </g>
+      </g>
+      <g id="community-scrim" inkscape:groupmode="layer" inkscape:label="Community: Scrim">
+        <defs><linearGradient id="community-scrim-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a1726" stop-opacity="0.78"/><stop offset="1" stop-color="#1a1726" stop-opacity="0.15"/></linearGradient></defs>
+        <rect id="community-scrim-rect" x="0" y="2862" width="1280" height="288" fill="url(#community-scrim-gradient)"/>
+      </g>
+      <g id="community-screenshot" inkscape:groupmode="layer" inkscape:label="Community: Screenshot frame">
+        <rect x="760" y="2890" width="448" height="252" rx="16" fill="#000000" fill-opacity="0.35"/>
+        <rect x="752" y="2880" width="448" height="252" rx="16" fill="#0b0a12" stroke="#2c2840" stroke-width="2"/>
+        <g id="slot-community-screenshot">
+          <rect x="764" y="2892" width="424" height="228" rx="10" fill="#2a2540" fill-opacity="0.6" stroke="#f472b6" stroke-width="2" stroke-dasharray="12 8"/>
+          <text x="976" y="3000" font-family="Karla" font-weight="800" font-size="26" fill="#f4f1fa" text-anchor="middle">Screenshot: server</text>
+          <text x="976" y="3034" font-family="Karla" font-weight="400" font-size="22" fill="#c4bed6" text-anchor="middle">424x228 placeholder</text>
+        </g>
+      </g>
+      <g id="community-heading" inkscape:groupmode="layer" inkscape:label="Community: Heading">
+        <rect x="80" y="2898" width="48" height="4" rx="2" fill="#f472b6"/>
+        <text x="80" y="2938" font-family="Karla" font-weight="800" font-size="17" letter-spacing="3" fill="#f472b6">COMMUNITY</text>
+        <text x="80" y="2990" font-family="Karla" font-weight="800" font-size="42" fill="#f4f1fa">Join the community</text>
+      </g>
+      <g id="community-body" inkscape:groupmode="layer" inkscape:label="Community: Body text">
+        <text x="80" y="3042" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Ask questions and share ideas on Discord.</text>
+        <text x="80" y="3076" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Open an issue or a pull request on GitHub.</text>
+        <text x="80" y="3110" font-family="Karla" font-weight="400" font-size="23" fill="#c4bed6">Guides live at ririko.ai.</text>
+      </g>
+    </g>
+  </g>
+</svg>

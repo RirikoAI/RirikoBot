@@ -1,5 +1,7 @@
 # Contributing & Development Standards (Ririko AI 2.0.0)
 
+This is the detailed reference. For a short start, read [CONTRIBUTING.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/CONTRIBUTING.md).
+
 ## 1. Overview & Culture
 Welcome to the Ririko AI 2.0.0 engineering team! We operate like a senior open-source project prioritizing:
 - **Clarity over Cleverness**: Boring, readable, explicit code is always preferred over dense "magical" abstractions.

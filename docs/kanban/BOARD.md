@@ -20,8 +20,6 @@
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | blocked | large |
 | `STORY-192` | Story | Guided Setup Wizard: the 1.x Installer Rebuilt as ririko setup | 21 | EPIC-020 | STORY-188 | yes | large |
 | `STORY-194` | Story | Complete User Data Erasure Tool for Data Requests | 5 | EPIC-020 | STORY-193 | yes | large |
-| `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | TASK-1881 | yes | medium |
-| `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | — | yes | medium |
 | `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872, STORY-192, STORY-193 | blocked | medium |
 | `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | — | yes | medium |
 | `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | — | yes | medium |
@@ -398,6 +396,9 @@
 | `TASK-1897` | Task | Match the Landing Page Demo to Real Ririko Screenshots | 5 | STORY-189 | [TASK-1897.md](./handovers/TASK-1897.md) |
 | `TASK-1898` | Task | Add Real Screenshots to the Docs With Member Names Blurred | 3 | STORY-189 | [TASK-1898.md](./handovers/TASK-1898.md) |
 | `TASK-1899` | Task | Use Ririko's 2026 Redesign Art for the Hero, Demo Avatar and Demo Cards | 2 | STORY-189 | [TASK-1899.md](./handovers/TASK-1899.md) |
+| `TASK-1901` | Task | Rework README.md Into a Standout Front Page With Quick Start, Badges and All-Contributors | 5 | STORY-190 | [TASK-1901.md](./handovers/TASK-1901.md) |
+| `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | [TASK-1902.md](./handovers/TASK-1902.md) |
+| `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | [TASK-1903.md](./handovers/TASK-1903.md) |
 | `TASK-1921` | Task | Setup Wizard Step Model, the Kept 1.x Guides and the Settings File Writer | 5 | STORY-192 | [TASK-1921.md](./handovers/TASK-1921.md) |
 | `TASK-1922` | Task | Setup Wizard Live Checks: Discord Application and Intents, OAuth2 Secret, Database and Every Optional Provider | 5 | STORY-192 | [TASK-1922.md](./handovers/TASK-1922.md) |
 | `TASK-1923` | Task | Draft the 2.0 Terms of Service and Privacy Policy in docs/legal/ | 2 | STORY-192 | [TASK-1923.md](./handovers/TASK-1923.md) |
@@ -483,7 +484,6 @@
 ## 📋 Backlog
 | ID | Type | Title | Pts | Parent |
 |---|---|---|---|---|
-| `TASK-1901` | Task | Rework README.md Into a Standout Front Page With Quick Start, Badges and All-Contributors | 5 | STORY-190 |
 | `TASK-1904` | Task | CodeFactor Integration and Config | 1 | STORY-190 |
 | `BUG-0044` | Bug | Free Games Notification Links Are Broken (Needs Deeper Grooming) | 3 | EPIC-020 |
 

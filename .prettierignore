@@ -31,3 +31,6 @@ website/build/
 website/.docusaurus/
 website/src/data/commands.json
 website/static/install/
+
+# Written by the all-contributors bot; kept exactly as master has it (TASK-1901)
+.all-contributorsrc
