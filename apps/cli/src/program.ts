@@ -15,6 +15,7 @@ import { registerGuildConfigCommand } from './commands/guild-config.js';
 import { registerEconomyConfigCommand } from './commands/economy-config.js';
 import { registerTcgRulesCommand } from './commands/tcg-rules.js';
 import { registerPasskeysResetCommand } from './commands/passkeys-reset.js';
+import { registerUserEraseCommand } from './commands/user-erase.js';
 import { registerCommandsResetCommand } from './commands/commands-reset.js';
 import { registerCommandsSyncCommand } from './commands/commands-sync.js';
 import { registerMaintenanceCommand } from './commands/maintenance.js';
@@ -73,6 +74,7 @@ export function createProgram(): Command {
   registerEconomyConfigCommand(program);
   registerTcgRulesCommand(program);
   registerPasskeysResetCommand(program);
+  registerUserEraseCommand(program);
   registerCommandsSyncCommand(program);
   registerCommandsResetCommand(program);
   registerMaintenanceCommand(program);

@@ -159,7 +159,7 @@ Ririko sends data to an outside service only when the operator has set it up and
 
 9.2. For a self-hosted bot, ask its host. The host answers.
 
-9.3. For now, the operator deletes data by hand from the database. Ririko 2.0 has no tool that deletes all data of one user at once. A tool for hosts may come later.
+9.3. The host can erase all data about one user with one command, `ririko user erase <your Discord user ID>` (see section 8.3 for what stays). The command deletes the rows that only you hold. Rows that involve other people, such as trades and the ledger, stay and lose your ID. Moderation records stay unless the operator decides to remove you from them too. The host cannot recall data that an AI provider already received (section 5.8).
 
 9.4. **Complaints.** Contact the maintainer first. You may also complain to a data protection regulator, such as Malaysia's Personal Data Protection Commissioner.
 

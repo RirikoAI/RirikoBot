@@ -159,7 +159,7 @@ Ririko menghantar data kepada perkhidmatan luar hanya apabila pengendali telah m
 
 9.2. Bagi bot yang dihoskan sendiri, tanya hosnya. Hos menjawab.
 
-9.3. Buat masa ini, pengendali memadam data secara manual daripada pangkalan data. Ririko 2.0 tidak mempunyai alat yang memadam semua data seorang pengguna sekali gus. Alat untuk hos mungkin disediakan kemudian.
+9.3. Hos boleh memadam semua data tentang seorang pengguna dengan satu arahan, `ririko user erase <ID pengguna Discord anda>` (lihat bahagian 8.3 untuk rekod yang kekal). Arahan ini memadam baris yang hanya anda miliki. Baris yang melibatkan orang lain, seperti pertukaran dan lejar, kekal dan kehilangan ID anda. Rekod moderasi kekal melainkan pengendali memutuskan untuk mengalih keluar anda daripadanya juga. Hos tidak dapat menarik balik data yang sudah diterima oleh penyedia AI (bahagian 5.8).
 
 9.4. **Aduan.** Hubungi penyelenggara dahulu. Anda juga boleh mengadu kepada pengawal selia perlindungan data, seperti Pesuruhjaya Perlindungan Data Peribadi Malaysia.
 

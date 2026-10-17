@@ -43,6 +43,8 @@ export * from './bot-activity.repository.js';
 export * from './guild.repository.js';
 export * from './guild-data-inventory.js';
 export * from './guild-data.repository.js';
+export * from './user-data-inventory.js';
+export * from './user-data.repository.js';
 export * from './adventure-session.repository.js';
 
 export * from './command-settings.repository.js';

@@ -111,6 +111,7 @@ The tool is in `apps/cli`. In a checkout, run it with `pnpm cli <command>`. In t
 | `ririko economy:config [key] [value]` | Lists, reads or sets the global economy values. |
 | `ririko tcg:rules [key] [value]` | Lists, reads or sets the global Waifu TCG rules. |
 | `ririko passkeys:reset <user_id>` | Removes the passkeys of a dashboard user and ends their sessions. Add `--yes` to apply it. |
+| `ririko user erase <discord_user_id> [--yes] [--include-moderation]` | Deletes or anonymises every row the database holds about one Discord user. Without `--yes` it only prints the row counts. See section 4.1. |
 | `ririko bot:maintenance [status\|on\|off\|toggle]` | Shows or changes the maintenance mode of the bot. |
 
 Options of `ririko setup`:
@@ -134,3 +135,16 @@ The root `package.json` has more scripts:
 | `pnpm tcg:reset-user <discord_user_id>` | Resets the Waifu TCG progress of one player. |
 | `pnpm tcg:simulate` | Runs the offline balance simulation. |
 | `pnpm docs:install` | Copies the production compose file and env example into `website/static/install/` (git-ignored; `docs:build` runs it). |
+
+### 4.1. Erase One User's Data
+
+Use `ririko user erase` when a user asks the host to delete their data (see [the privacy policy](legal/privacy.md), section 9). It works on the database in `DATABASE_URL`, for both SQLite and PostgreSQL.
+
+1. The bot can keep running. If the user uses the bot again after the erasure, new rows are created.
+2. Run `pnpm cli user erase <discord_user_id>` (in the bot image: `ririko user erase <discord_user_id>`). It prints how many rows it would delete, anonymise or keep in each table, and changes nothing.
+3. Read the list. Rows the user holds alone are deleted: AI chats and preferences, consents, balance, inventory, cards, XP, reminders, music history, image jobs, dashboard sessions, passkeys and known browsers. Rows that other people depend on stay and lose the ID: the ledger, trades, giveaway winners, cases where the user is the moderator, audit entries. The ID becomes `erased:<16 hex digits>`, the start of its SHA-256.
+4. Moderation cases, notes and warnings about the user are kept, because a server's moderation history must stay complete (privacy policy, section 8.3). Add `--include-moderation` to remove the user from them too: cases get the tombstone, notes and warnings about the user are deleted.
+5. Run the same command with `--yes` (and `--include-moderation` if you decided so). The whole erasure is one transaction and writes one audit entry (`user.erase`) with the row counts and the first 16 hex digits of the SHA-256 of the ID, never the ID.
+6. Running the command again is safe and changes nothing. A user without data prints zeros.
+
+What the command does not do: it does not touch backups, it does not search free text (the reason of a case, the content of a note, or a message that names the user), and it cannot recall data that an AI provider already received. The bot keeps the acceptance of the terms in memory, so a user may not see the terms notice again until the bot restarts. The full list of columns and the action for each is `USER_DATA_INVENTORY` in `packages/database/src/repositories/user-data-inventory.ts`; [database.md section 4.2](database.md#42-erase-one-users-data) explains it.
