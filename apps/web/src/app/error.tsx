@@ -8,7 +8,7 @@ export default function ErrorPage({ reset }: { error: Error; reset: () => void }
       <button
         type="button"
         onClick={reset}
-        className="rounded-md bg-sakura-strong px-4 py-2 font-semibold text-white hover:bg-sakura"
+        className="rounded-md bg-sakura-strong px-4 py-2 font-semibold text-white hover:bg-sakura-hover"
       >
         Try again
       </button>

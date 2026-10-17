@@ -137,7 +137,7 @@ export function PasskeyManager({ passkeys }: { passkeys: PasskeySummary[] }) {
           <button
             type="submit"
             disabled={pending !== null}
-            className="shrink-0 rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura disabled:opacity-60"
+            className="shrink-0 rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura-hover disabled:opacity-60"
           >
             {pending === 'add' ? 'Waiting…' : 'Add passkey'}
           </button>

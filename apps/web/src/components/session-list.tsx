@@ -93,7 +93,7 @@ export function SessionList({ sessions }: { sessions: SessionEntry[] }) {
             type="button"
             onClick={revokeOthers}
             disabled={pending !== null}
-            className="rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura disabled:opacity-60"
+            className="rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura-hover disabled:opacity-60"
           >
             {pending === 'others' ? 'Signing out…' : 'Sign out everywhere else'}
           </button>

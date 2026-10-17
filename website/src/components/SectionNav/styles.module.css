@@ -1,0 +1,109 @@
+/*
+ * The dot navigator is shown from 997px up, the same width at which the Docusaurus navbar stops
+ * collapsing. Each dot shows on cream and on ink: an ink fill with a light ring. The current one
+ * grows into a pink pill. The label slides in on hover and on keyboard focus.
+ */
+.nav {
+  display: none;
+}
+
+@media (min-width: 997px) {
+  .nav {
+    display: block;
+    position: fixed;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  margin: 0;
+  padding: 0;
+}
+
+.link {
+  align-items: center;
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  position: relative;
+  width: 32px;
+}
+
+.link:hover,
+.link:focus-visible {
+  text-decoration: none;
+}
+
+.dot {
+  background: #0f0d17;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.9);
+  display: block;
+  height: 8px;
+  transition:
+    height 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+  width: 8px;
+}
+
+.link:hover .dot {
+  background: #df6e7e;
+}
+
+.link[aria-current='location'] .dot {
+  background: #df6e7e;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.9);
+  height: 28px;
+}
+
+.link:focus-visible {
+  outline: 3px solid #df6e7e;
+  outline-offset: 0;
+  border-radius: 8px;
+}
+
+.label {
+  background: #0f0d17;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.25);
+  color: #fff;
+  font-family: var(--ririko-font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  opacity: 0;
+  padding: 4px 10px;
+  pointer-events: none;
+  position: absolute;
+  right: calc(100% + 6px);
+  transform: translateX(6px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.link:hover .label,
+.link:focus-visible .label {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot,
+  .label {
+    transition: none;
+  }
+}

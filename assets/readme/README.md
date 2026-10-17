@@ -8,7 +8,7 @@ The tall feature image for the README and the documentation site. It has eight s
 | `feature-banner.png`  | The whole banner. The README and the site use it.                                                    |
 | `social-card.png`     | 1200x630 link-preview image: the hero, cropped at x 40 to 1240.                                      |
 | `feature-banner.ora`  | OpenRaster, one PNG per layer. GIMP, Krita and MyPaint open it with its layers.                      |
-| `fonts/`              | Karla (Regular, Bold, ExtraBold) with its licence, `OFL.txt`.                                        |
+| `fonts/`              | Sour Gummy (Regular, Bold, ExtraBold) and Libre Franklin (Regular, SemiBold, Bold) with their licences, `OFL-SourGummy.txt` and `OFL-LibreFranklin.txt`. |
 
 Never edit the PNG or the `.ora` by hand. They are generated from the SVG.
 
@@ -44,9 +44,9 @@ After editing the SVG:
 pnpm readme:banner
 ```
 
-This runs `scripts/render-readme-banner.ts`. It draws the SVG with `@napi-rs/canvas` (already a dependency of the project), using the Karla files in `fonts/`, and writes `feature-banner.png`, `social-card.png` and `feature-banner.ora` here. The output is deterministic: the same SVG gives the same bytes. Options: `--svg <file>` to render another file and `--out <folder>` to write somewhere else.
+This runs `scripts/render-readme-banner.ts`. It draws the SVG with `@napi-rs/canvas` (already a dependency of the project), using the static font files in `fonts/` (Sour Gummy for the wordmark, titles and pills; Libre Franklin for the labels and body text; each file is registered under its family name), and writes `feature-banner.png`, `social-card.png` and `feature-banner.ora` here. The output is deterministic: the same SVG gives the same bytes. Options: `--svg <file>` to render another file and `--out <folder>` to write somewhere else.
 
-The renderer is Skia's SVG engine, so keep the SVG simple: shapes, gradients, strokes and text. Filters, masks and `<foreignObject>` are not drawn. Skia does not draw `<image>` either, so the script draws embedded pictures itself, in their layer, with their transforms and `preserveAspectRatio`, but without clip paths or masks. A linked (not embedded) picture stops the script with an error. To keep the text the same in Inkscape, install the three Karla files from `fonts/`.
+The renderer is Skia's SVG engine, so keep the SVG simple: shapes, gradients, strokes and text. Filters, masks and `<foreignObject>` are not drawn. Skia does not draw `<image>` either, so the script draws embedded pictures itself, in their layer, with their transforms and `preserveAspectRatio`, but without clip paths or masks. A linked (not embedded) picture stops the script with an error. To keep the text the same in Inkscape, install the six font files from `fonts/`.
 
 Each leaf layer becomes one layer of the `.ora`, cropped to what it draws and placed with x and y in `stack.xml`. A layer that draws nothing is skipped, and the script says so. A layer you hide in Inkscape is exported as hidden.
 
@@ -57,7 +57,7 @@ Where each part comes from and under what rights:
 | Asset                                 | Source and rights                                                                                                                                                       |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Layout, shapes, colours, the "R" logo | Original work for this project. The "R" mark follows the site favicon (`website/static/img/favicon.svg`).                                                               |
-| Karla fonts in `fonts/`               | The Karla Project Authors, SIL Open Font License 1.1 (`fonts/OFL.txt`). From the official repository, `fonts/ttf/` in <https://github.com/googlefonts/karla>.           |
+| Sour Gummy and Libre Franklin fonts in `fonts/` | Sour Gummy: The Sour Gummy Project Authors. Libre Franklin: The Libre Franklin Project Authors. Both SIL Open Font License 1.1 (`fonts/OFL-SourGummy.txt`, `fonts/OFL-LibreFranklin.txt`). Static instances from Google Fonts, <https://github.com/google/fonts>. |
 | Text                                  | Written for this project.                                                                                                                                               |
 | Background art                        | Original vector art drawn for this project: sakura petals (hero), sound waves and notes (music), cards (Waifu TCG), a node network and chat bubbles (AI chat), coins, shields and a chart (moderation and economy), app windows (web dashboard), circuits and server racks (self-hosting), avatars and hearts (community). |
 | Screenshots (seven sections)          | Screenshots of Ririko 2.0 (Discord messages, the dashboard, the setup wizard and the support server invite), taken and supplied by the maintainer. Member names in the moderation screenshot are blurred. The invite screenshot shows Discord's invite page with the server's own banner art. |

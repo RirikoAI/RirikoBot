@@ -58,7 +58,7 @@ export default async function ServersPage({
                 {guild.botPresent ? (
                   <Link
                     href={`/dashboard/${guild.id}`}
-                    className="rounded-md bg-sakura-strong px-3 py-1.5 text-sm font-semibold text-white hover:bg-sakura"
+                    className="rounded-md bg-sakura-strong px-3 py-1.5 text-sm font-semibold text-white hover:bg-sakura-hover"
                   >
                     Manage
                   </Link>

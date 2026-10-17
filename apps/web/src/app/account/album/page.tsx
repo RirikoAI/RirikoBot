@@ -83,7 +83,7 @@ export default async function AlbumPage({
           </label>
           <button
             type="submit"
-            className="rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura"
+            className="rounded-md bg-sakura-strong px-4 py-2 text-sm font-semibold text-white hover:bg-sakura-hover"
           >
             Filter
           </button>

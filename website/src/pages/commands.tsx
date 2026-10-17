@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import Link from '@docusaurus/Link';
+import useBrokenLinks from '@docusaurus/useBrokenLinks';
 import Layout from '@theme/Layout';
 import catalog from '../data/commands.json';
 import styles from './commands.module.css';
@@ -95,6 +96,10 @@ function CommandEntry({ command }: { command: CatalogCommand }): ReactNode {
 export default function Commands(): ReactNode {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
+
+  // Every category section has an id the home page links to (/commands#music): tell the build.
+  const brokenLinks = useBrokenLinks();
+  for (const item of catalog.categories) brokenLinks.collectAnchor(item.id);
 
   const visible = useMemo(
     () =>

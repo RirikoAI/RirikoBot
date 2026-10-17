@@ -13,7 +13,7 @@ import { GUILD_NAV_ITEMS } from '@/lib/dashboard-nav';
 import { describeUserAgent } from '@/lib/user-agent';
 
 const ALERT_COLOR = 0xf59e0b;
-const NOTICE_COLOR = 0xf472b6;
+const NOTICE_COLOR = 0xdf6e7e;
 /** Field changes listed in one guild notice; the audit log keeps all of them. */
 const MAX_LISTED_CHANGES = 10;
 const IP_PATTERN = /^[0-9A-Fa-f:.]{2,45}$/;
