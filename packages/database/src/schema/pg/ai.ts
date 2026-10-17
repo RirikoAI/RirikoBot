@@ -28,7 +28,11 @@ export const aiConversations = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('idx_pg_ai_conversations_user').on(table.userId, table.updatedAt)],
+  (table) => [
+    index('idx_pg_ai_conversations_user').on(table.userId, table.updatedAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_pg_ai_conversations_updated').on(table.updatedAt),
+  ],
 );
 
 export const aiMessages = pgTable(
@@ -42,7 +46,11 @@ export const aiMessages = pgTable(
     tokenCount: integer('token_count').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('idx_pg_ai_messages_conv_created').on(table.conversationId, table.createdAt)],
+  (table) => [
+    index('idx_pg_ai_messages_conv_created').on(table.conversationId, table.createdAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_pg_ai_messages_created').on(table.createdAt),
+  ],
 );
 
 export const aiGuildPreferences = pgTable('ai_guild_preferences', {

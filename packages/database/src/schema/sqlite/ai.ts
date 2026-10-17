@@ -22,7 +22,11 @@ export const aiConversations = sqliteTable(
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [index('idx_ai_conversations_user').on(table.userId, table.updatedAt)],
+  (table) => [
+    index('idx_ai_conversations_user').on(table.userId, table.updatedAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_ai_conversations_updated').on(table.updatedAt),
+  ],
 );
 
 export const aiMessages = sqliteTable(
@@ -38,7 +42,11 @@ export const aiMessages = sqliteTable(
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [index('idx_ai_messages_conv_created').on(table.conversationId, table.createdAt)],
+  (table) => [
+    index('idx_ai_messages_conv_created').on(table.conversationId, table.createdAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_ai_messages_created').on(table.createdAt),
+  ],
 );
 
 export const aiGuildPreferences = sqliteTable('ai_guild_preferences', {

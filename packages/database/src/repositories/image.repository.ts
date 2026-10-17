@@ -1,6 +1,7 @@
-import { eq, and, desc, gte, inArray, sql } from 'drizzle-orm';
+import { eq, and, desc, gte, inArray, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
+import { PURGE_BATCH_SIZE, deleteInBatches } from './retention.js';
 import type { DatabaseClient } from '../client/types.js';
 import type {
   ImageJob,
@@ -16,6 +17,9 @@ import type {
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
+
+/** Statuses of jobs that are over; only these are purged by age. */
+const FINISHED_JOB_STATUSES = ['COMPLETED', 'FAILED'];
 
 export class ImageRepository extends BaseRepository<ImageJob, NewImageJob, Partial<NewImageJob>> {
   async findById(id: string, tx?: DatabaseClient): Promise<ImageJob | null> {
@@ -492,5 +496,53 @@ export class ImageRepository extends BaseRepository<ImageJob, NewImageJob, Parti
         return created as unknown as ImageProvider;
       }
     }
+  }
+
+  // --- Data Retention ---
+
+  /**
+   * Retention purge for image jobs (STORY-193): deletes COMPLETED and FAILED jobs created before
+   * `cutoff`, `batchSize` rows per statement. Jobs that are still QUEUED or PROCESSING stay,
+   * whatever their age, and so does every job created at or after `cutoff`. Returns the number
+   * of rows deleted.
+   */
+  async deleteOlderThan(
+    cutoff: Date,
+    tx?: DatabaseClient,
+    batchSize: number = PURGE_BATCH_SIZE,
+  ): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const { db } = client;
+      const t = sqliteSchema.imageJobs;
+      return deleteInBatches(batchSize, async () => {
+        const res = await db.delete(t).where(
+          inArray(
+            t.id,
+            db
+              .select({ id: t.id })
+              .from(t)
+              .where(and(lt(t.createdAt, cutoff), inArray(t.status, FINISHED_JOB_STATUSES)))
+              .limit(batchSize),
+          ),
+        );
+        return res.changes;
+      });
+    }
+    const { db } = client;
+    const t = pgSchema.imageJobs;
+    return deleteInBatches(batchSize, async () => {
+      const res = await db.delete(t).where(
+        inArray(
+          t.id,
+          db
+            .select({ id: t.id })
+            .from(t)
+            .where(and(lt(t.createdAt, cutoff), inArray(t.status, FINISHED_JOB_STATUSES)))
+            .limit(batchSize),
+        ),
+      );
+      return res.rowCount ?? 0;
+    });
   }
 }

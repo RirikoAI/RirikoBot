@@ -23,6 +23,22 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Which notice or consent a user accepted and which version (terms or ai). One row per
+ * user and kind: accepting a newer version replaces the row. No foreign key, like the other
+ * user-keyed tables: a user's row exists only after their first command.
+ */
+export const userConsents = pgTable(
+  'user_consents',
+  {
+    userId: varchar('user_id', { length: 32 }).notNull(),
+    kind: varchar('kind', { length: 16 }).notNull(),
+    version: varchar('version', { length: 32 }).notNull(),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.kind] })],
+);
+
 export const guilds = pgTable('guilds', {
   id: varchar('id', { length: 32 }).primaryKey(),
   name: text('name').notNull(),
@@ -36,6 +52,12 @@ export const guilds = pgTable('guilds', {
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  /**
+   * When the bot left or was removed; null while it is in the server. The server's data is deleted
+   * 90 days after this time (STORY-193); adding the bot back clears it. Last column: the
+   * migration adds it after the others.
+   */
+  leftAt: timestamp('left_at', { withTimezone: true }),
 });
 
 export const guildMembers = pgTable(

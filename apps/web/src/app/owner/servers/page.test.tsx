@@ -34,6 +34,7 @@ function guild(id: string, overrides: Partial<Guild> = {}): Guild {
     invitedVia: 'audit_log',
     joinedAt: date,
     isActive: true,
+    leftAt: null,
     createdAt: date,
     updatedAt: date,
     ...overrides,

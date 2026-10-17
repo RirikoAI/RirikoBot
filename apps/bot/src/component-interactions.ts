@@ -1,7 +1,9 @@
 import { handleHelpInteraction, type CommandRegistry, type HelpOptions } from '@ririko/discord';
+import { describeErrorForLog } from '@ririko/core';
 import type { Client, GuildMember } from 'discord.js';
 import type { CommandControllers } from './command-set.js';
 import { handleGiveawayButtonInteraction, handleImagineButtonInteraction } from './index.js';
+import { handleAiConsentButton } from './privacy/ai-consent.js';
 import type { BotServices } from './services.js';
 
 export interface ComponentInteractionOptions {
@@ -13,7 +15,7 @@ export interface ComponentInteractionOptions {
 
 /**
  * Routes button and select menu interactions that commands leave behind (adventure, music
- * controller, imagine, giveaways, reaction roles, verification, help center) by custom id.
+ * controller, AI consent, imagine, giveaways, reaction roles, verification, help center) by custom id.
  * Slash commands reach the command router instead.
  */
 export function registerComponentInteractions(
@@ -30,6 +32,10 @@ export function registerComponentInteractions(
         }
         if (interaction.customId.startsWith('music_')) {
           await musicController.handleButtonInteraction(interaction);
+          return;
+        }
+        if (interaction.customId.startsWith('consent:ai:')) {
+          await handleAiConsentButton(interaction, services);
           return;
         }
         if (interaction.customId.startsWith('imagine:')) {
@@ -67,7 +73,7 @@ export function registerComponentInteractions(
 
       await handleHelpInteraction(interaction, registry, helpOptions);
     } catch (err) {
-      console.error('Unhandled error in component interaction:', err);
+      console.error(`Unhandled error in component interaction: ${describeErrorForLog(err)}`);
     }
   });
 }

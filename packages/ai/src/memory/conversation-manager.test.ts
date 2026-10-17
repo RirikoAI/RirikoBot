@@ -262,6 +262,28 @@ describe('ConversationManager — Per-User Context Isolation & Memory (TASK-0611
       const messagesB = await conversationManager.getContextMessages(userB);
       expect(messagesB).toHaveLength(2);
     });
+
+    it('clears every conversation of a user in every server and channel, keeping preferences', async () => {
+      const aHere: UserContext = { userId: 'user-a', guildId: 'g1', channelId: 'c1' };
+      const aElsewhere: UserContext = { userId: 'user-a', guildId: 'g2', channelId: 'c9' };
+      const aDm: UserContext = { userId: 'user-a' };
+      const userB: UserContext = { userId: 'user-b', guildId: 'g1', channelId: 'c1' };
+
+      await conversationManager.recordTurn(aHere, 'Msg 1', 'Resp 1');
+      await conversationManager.recordTurn(aElsewhere, 'Msg 2', 'Resp 2');
+      await conversationManager.recordTurn(aDm, 'Msg 3', 'Resp 3');
+      await conversationManager.recordTurn(userB, 'Msg B', 'Resp B');
+      await conversationManager.setUserPreferences('user-a', { nickname: 'Ali' });
+
+      expect(await conversationManager.clearAllMemory('user-a')).toBe(3);
+
+      expect(await conversationManager.getContextMessages(aHere)).toEqual([]);
+      expect(await conversationManager.getContextMessages(aElsewhere)).toEqual([]);
+      expect(await conversationManager.getContextMessages(aDm)).toEqual([]);
+      expect(await conversationManager.getContextMessages(userB)).toHaveLength(2);
+      expect((await conversationManager.getUserPreferences('user-a'))?.nickname).toBe('Ali');
+      expect(await conversationManager.clearAllMemory('user-a')).toBe(0);
+    });
   });
 
   describe('5. Preferences Integration', () => {
@@ -274,6 +296,17 @@ describe('ConversationManager — Per-User Context Isolation & Memory (TASK-0611
       const prefs = await conversationManager.getUserPreferences('user-frank');
       expect(prefs?.timezone).toBe('America/New_York');
       expect(prefs?.nickname).toBe('Frankie');
+    });
+
+    it('deletes the preferences of one user', async () => {
+      await conversationManager.setUserPreferences('user-gone', { nickname: 'Gone' });
+      await conversationManager.setUserPreferences('user-kept', { nickname: 'Kept' });
+
+      expect(await conversationManager.deleteUserPreferences('user-gone')).toBe(true);
+
+      expect(await conversationManager.getUserPreferences('user-gone')).toBeNull();
+      expect((await conversationManager.getUserPreferences('user-kept'))?.nickname).toBe('Kept');
+      expect(await conversationManager.deleteUserPreferences('user-gone')).toBe(false);
     });
 
     it('manages guild preferences', async () => {

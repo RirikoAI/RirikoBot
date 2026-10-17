@@ -15,6 +15,27 @@
       "when": 1791658824299,
       "tag": "0001_welcomer_text_message",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792175386973,
+      "tag": "0002_user_consents",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792177772705,
+      "tag": "0003_data_retention_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792181260588,
+      "tag": "0004_guild_left_at",
+      "breakpoints": true
     }
   ]
 }

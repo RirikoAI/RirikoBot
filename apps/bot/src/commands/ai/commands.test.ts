@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createDatabaseClient, type SqliteDatabaseClient } from '@ririko/database';
 import type { CommandContext } from '@ririko/discord';
 import {
+  MessageFlags,
   PermissionFlagsBits,
   type User,
   type Guild,
@@ -240,6 +241,9 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
     `);
 
     services = await createBotServices(dbClient);
+    // This suite's tables are created by hand and have no consent table. The consent gate has
+    // its own tests (commands.flows.test.ts), so here every user has agreed to AI features.
+    vi.spyOn(services.consentService, 'hasAccepted').mockResolvedValue(true);
     mockProvider = new MockAiProvider();
     services.fallbackChainManager.registerProvider(mockProvider);
 
@@ -316,6 +320,98 @@ describe('AI Commands Suite & Dual-Dispatch Handlers (TASK-0632)', () => {
           content: expect.stringContaining('Ririko AI Memory Cleared'),
         }),
       );
+    });
+
+    describe('scope all', () => {
+      const here = { userId: 'user-alice', guildId: 'guild-test', channelId: 'channel-test-1' };
+      const elsewhere = { userId: 'user-alice', guildId: 'guild-two', channelId: 'channel-two' };
+      const other = { userId: 'user-bob', guildId: 'guild-test', channelId: 'channel-test-1' };
+
+      beforeEach(async () => {
+        await services.conversationManager.recordTurn(here, 'Hello', 'Hi');
+        await services.conversationManager.recordTurn(elsewhere, 'Hello', 'Hi');
+        await services.conversationManager.recordTurn(other, 'Hello', 'Hi');
+      });
+
+      it('/ai action:clear scope:all deletes everything and replies ephemerally with the count', async () => {
+        const { ctx, replies } = createMockContext({
+          optionsMap: { action: 'clear', scope: 'all' },
+        });
+        await commands.get('ai')!(ctx);
+
+        expect(replies).toHaveLength(1);
+        expect(replies[0]).toEqual({
+          content: expect.stringContaining('2 conversations'),
+          flags: MessageFlags.Ephemeral,
+        });
+        expect((replies[0] as { content: string }).content).toContain('cannot be recalled');
+        expect(await services.conversationManager.getContextMessages(here, 10)).toHaveLength(0);
+        expect(await services.conversationManager.getContextMessages(elsewhere, 10)).toHaveLength(
+          0,
+        );
+        expect(await services.conversationManager.getContextMessages(other, 10)).toHaveLength(2);
+      });
+
+      it('!ai clear all works as a prefix command and stays a plain reply', async () => {
+        const { ctx, replies } = createMockContext({
+          source: 'prefix',
+          rawArgs: ['clear', 'all'],
+        });
+        await commands.get('ai')!(ctx);
+
+        expect(replies[0]).toEqual({ content: expect.stringContaining('2 conversations') });
+        expect(await services.conversationManager.getContextMessages(elsewhere, 10)).toHaveLength(
+          0,
+        );
+      });
+
+      it('says so when there is nothing to delete and uses the singular for one', async () => {
+        const { ctx: bobCtx, replies: bobReplies } = createMockContext({
+          userId: 'user-bob',
+          optionsMap: { action: 'clear', scope: 'all' },
+        });
+        await commands.get('ai')!(bobCtx);
+        expect(bobReplies[0]).toEqual(
+          expect.objectContaining({ content: expect.stringContaining('1 conversation and') }),
+        );
+
+        const { ctx: again, replies: againReplies } = createMockContext({
+          userId: 'user-bob',
+          optionsMap: { action: 'clear', scope: 'all' },
+        });
+        await commands.get('ai')!(again);
+        expect(againReplies[0]).toEqual(
+          expect.objectContaining({ content: expect.stringContaining('Nothing to delete') }),
+        );
+      });
+
+      it('scope:here and a missing scope clear only the current channel', async () => {
+        const { ctx, replies } = createMockContext({
+          optionsMap: { action: 'clear', scope: 'here' },
+        });
+        await commands.get('ai')!(ctx);
+
+        expect(replies[0]).toEqual(
+          expect.objectContaining({ content: expect.stringContaining('Ririko AI Memory Cleared') }),
+        );
+        expect(await services.conversationManager.getContextMessages(here, 10)).toHaveLength(0);
+        expect(await services.conversationManager.getContextMessages(elsewhere, 10)).toHaveLength(
+          2,
+        );
+      });
+
+      it('rejects an unknown scope without deleting anything', async () => {
+        const { ctx, replies } = createMockContext({
+          source: 'prefix',
+          rawArgs: ['clear', 'everything'],
+        });
+        await commands.get('ai')!(ctx);
+
+        expect(replies[0]).toEqual(
+          expect.objectContaining({ content: expect.stringContaining('Unknown scope') }),
+        );
+        expect(await services.conversationManager.getContextMessages(here, 10)).toHaveLength(2);
+      });
     });
   });
 

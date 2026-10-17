@@ -24,8 +24,9 @@ const ID_CHUNK = 500;
 
 /**
  * The servers the bot is in, or was in (`guilds`, TASK-1831): name, icon, owner, who invited the
- * bot and whether it is still there. The bot is the only writer; rows are never deleted, so the
- * owner console can still list servers the bot has left.
+ * bot and whether it is still there. The bot is the only writer. A row stays after the bot leaves,
+ * so the owner console can still list the server, until `GuildDataRepository` deletes it with the
+ * rest of the server's data 90 days after `left_at` (TASK-1935).
  */
 export class GuildRepository {
   constructor(protected readonly client: DatabaseClient) {}
@@ -34,7 +35,8 @@ export class GuildRepository {
    * Records a server as active and refreshes its name, icon and owner. Running it again for an
    * active server (a `GuildCreate` after an outage, a ready after a reconnect) keeps the join time
    * and the inviter; a server the bot had left and now joined again starts over with the new join
-   * time and no inviter.
+   * time and no inviter. Either way `left_at` is cleared, so a server the bot is added back to
+   * keeps all its data (the deletion 90 days after leaving no longer applies).
    */
   async upsert(guild: GuildRegistration): Promise<void> {
     const now = new Date();
@@ -64,6 +66,7 @@ export class GuildRepository {
             invitedById: sql`CASE WHEN ${table.isActive} THEN ${table.invitedById} ELSE NULL END`,
             invitedVia: sql`CASE WHEN ${table.isActive} THEN ${table.invitedVia} ELSE NULL END`,
             isActive: true,
+            leftAt: null,
             updatedAt: now,
           },
         });
@@ -82,13 +85,18 @@ export class GuildRepository {
             invitedById: sql`CASE WHEN ${table.isActive} THEN ${table.invitedById} ELSE NULL END`,
             invitedVia: sql`CASE WHEN ${table.isActive} THEN ${table.invitedVia} ELSE NULL END`,
             isActive: true,
+            leftAt: null,
             updatedAt: now,
           },
         });
     }
   }
 
-  /** Marks these servers inactive (the bot left or was removed). Unknown IDs are ignored. */
+  /**
+   * Marks these servers inactive (the bot left or was removed) and stamps `left_at` with now.
+   * A server that is already inactive keeps its `left_at`, so repeating the call never restarts
+   * the 90 days. Unknown IDs are ignored.
+   */
   async markInactive(ids: readonly string[]): Promise<void> {
     const now = new Date();
     for (let start = 0; start < ids.length; start += ID_CHUNK) {
@@ -97,13 +105,13 @@ export class GuildRepository {
         const table = sqliteSchema.guilds;
         await this.client.db
           .update(table)
-          .set({ isActive: false, updatedAt: now })
+          .set({ isActive: false, leftAt: now, updatedAt: now })
           .where(and(inArray(table.id, chunk), eq(table.isActive, true)));
       } else {
         const table = pgSchema.guilds;
         await this.client.db
           .update(table)
-          .set({ isActive: false, updatedAt: now })
+          .set({ isActive: false, leftAt: now, updatedAt: now })
           .where(and(inArray(table.id, chunk), eq(table.isActive, true)));
       }
     }

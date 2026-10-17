@@ -8,7 +8,7 @@ import {
 } from '../command/context.js';
 import { tokenizeCommandArgs } from '../command/tokenizer.js';
 import type { CommandContext } from '../command/types.js';
-import { RirikoError } from '@ririko/core';
+import { RirikoError, describeErrorForLog } from '@ririko/core';
 import { MiddlewarePipeline } from '../middleware/pipeline.js';
 import {
   CommandCooldownError,
@@ -50,7 +50,9 @@ export class CommandRouter {
         await this.dispatchInteraction(interaction);
       } catch (error) {
         // Unexpected unhandled dispatch error
-        console.error('Unhandled interaction error in CommandRouter:', error);
+        console.error(
+          `Unhandled interaction error in CommandRouter: ${describeErrorForLog(error)}`,
+        );
       }
     });
 
@@ -58,7 +60,7 @@ export class CommandRouter {
       try {
         await this.dispatchMessage(message);
       } catch (error) {
-        console.error('Unhandled message error in CommandRouter:', error);
+        console.error(`Unhandled message error in CommandRouter: ${describeErrorForLog(error)}`);
       }
     });
   }
@@ -223,7 +225,7 @@ export class CommandRouter {
     try {
       this.options.onCommandRun?.(ctx);
     } catch (error) {
-      console.error('onCommandRun hook failed in CommandRouter:', error);
+      console.error(`onCommandRun hook failed in CommandRouter: ${describeErrorForLog(error)}`);
     }
   }
 

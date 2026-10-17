@@ -29,7 +29,11 @@ export const musicHistory = sqliteTable(
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [index('idx_music_history_guild_played').on(table.guildId, table.playedAt)],
+  (table) => [
+    index('idx_music_history_guild_played').on(table.guildId, table.playedAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_music_history_played').on(table.playedAt),
+  ],
 );
 
 export const musicSavedPlaylists = sqliteTable(

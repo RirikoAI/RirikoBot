@@ -169,6 +169,46 @@ describeDialects('AiRepository behaviour', (db) => {
     expect(await repo.clearUserContext({ userId: 'nobody' })).toBe(false);
   });
 
+  it('deletes every conversation and message of one user and keeps preferences and other users', async () => {
+    const repo = new AiRepository(db.client);
+    const a1 = await repo.create(conversation('u1', { guildId: 'g1', channelId: 'c1' }));
+    const a2 = await repo.create(conversation('u1', { guildId: 'g2', channelId: 'c2' }));
+    const a3 = await repo.create(conversation('u1'));
+    const other = await repo.create(conversation('u2', { guildId: 'g1', channelId: 'c1' }));
+    await repo.addMessage({ conversationId: a1.id, role: 'USER', content: 'one' });
+    await repo.addMessage({ conversationId: a1.id, role: 'ASSISTANT', content: 'two' });
+    await repo.addMessage({ conversationId: a2.id, role: 'USER', content: 'three' });
+    await repo.addMessage({ conversationId: other.id, role: 'USER', content: 'untouched' });
+    await repo.upsertUserPreferences('u1', { nickname: 'Ali' });
+
+    expect(await repo.clearAllForUser('u1')).toBe(3);
+
+    expect(await repo.findById(a1.id)).toBeNull();
+    expect(await repo.findById(a2.id)).toBeNull();
+    expect(await repo.findById(a3.id)).toBeNull();
+    expect(await repo.getMessages(a1.id)).toEqual([]);
+    expect(await repo.getMessages(a2.id)).toEqual([]);
+    expect(await repo.count()).toBe(1);
+    expect(await repo.getMessages(other.id)).toHaveLength(1);
+    expect((await repo.getUserPreferences('u1'))?.nickname).toBe('Ali');
+
+    expect(await repo.clearAllForUser('u1')).toBe(0);
+    expect(await repo.clearAllForUser('nobody')).toBe(0);
+  });
+
+  it('deletes the AI preferences of one user and nobody else', async () => {
+    const repo = new AiRepository(db.client);
+    await repo.upsertUserPreferences('u1', { nickname: 'Ali' });
+    await repo.upsertUserPreferences('u2', { nickname: 'Bo' });
+
+    expect(await repo.deleteUserPreferences('u1')).toBe(true);
+
+    expect(await repo.getUserPreferences('u1')).toBeNull();
+    expect((await repo.getUserPreferences('u2'))?.nickname).toBe('Bo');
+    expect(await repo.deleteUserPreferences('u1')).toBe(false);
+    expect(await repo.deleteUserPreferences('nobody')).toBe(false);
+  });
+
   it('stores messages with defaults and touches the parent conversation', async () => {
     const repo = new AiRepository(db.client);
     const conv = await repo.create(conversation('u1', { updatedAt: at(0), createdAt: at(0) }));

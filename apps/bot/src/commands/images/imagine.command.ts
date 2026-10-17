@@ -13,6 +13,7 @@ import { CommandCategory, type Command, type CommandContext } from '@ririko/disc
 import type { ImageAspectRatio } from '@ririko/services';
 import type { BotServices } from '../../services.js';
 import { attachOwnerCollector } from '../shared/owner-collector.js';
+import { requireAiConsent, requireAiConsentForButton } from '../../privacy/ai-consent.js';
 
 export const IMAGINE_COMMAND_NAME = 'imagine';
 export const IMAGINE_ALIASES = ['img', 'ai-image', 'generate-image'];
@@ -189,6 +190,9 @@ export async function handleImagineButtonInteraction(
       return;
     }
 
+    // The saved prompt goes to an image provider again: only with the user's AI consent.
+    if (!(await requireAiConsentForButton(interaction, services))) return;
+
     await interaction.deferUpdate();
 
     try {
@@ -358,6 +362,9 @@ export function createImagineCommand(services: BotServices): Command {
         });
         return;
       }
+
+      // The prompt goes to an image provider: only with the user's AI consent.
+      if (!(await requireAiConsent(ctx, services))) return;
 
       await ctx.deferReply();
 

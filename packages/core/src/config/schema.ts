@@ -27,6 +27,13 @@ export const DbAutoMigrateSchema = z.preprocess(
 /** SQLite file used when `DATABASE_URL` is unset, relative to the workspace root. */
 export const DEFAULT_DATABASE_URL = './data/ririko.sqlite';
 
+/**
+ * Where the Terms of Service and the Privacy Policy are published (the docs site). Self-hosters
+ * point `TERMS_URL` and `PRIVACY_URL` at their own pages.
+ */
+export const DEFAULT_TERMS_URL = 'https://ririko.ai/docs/legal/terms';
+export const DEFAULT_PRIVACY_URL = 'https://ririko.ai/docs/legal/privacy';
+
 const HEX_KEY = /^[0-9a-fA-F]{64}$/;
 
 /** `BOT_OWNER_ID`: comma-separated Discord user IDs of the bot owners. */
@@ -67,6 +74,10 @@ const BaseAppConfigSchema = z.object({
   // `/tcg-admin` rules are limited to them.
   BOT_OWNER_ID: BotOwnerIdsSchema,
   DEFAULT_PREFIX: PrefixSchema.default(DEFAULT_COMMAND_PREFIX),
+
+  // Legal pages linked from the one-time terms notice a user sees after their first command
+  TERMS_URL: z.string().url().default(DEFAULT_TERMS_URL),
+  PRIVACY_URL: z.string().url().default(DEFAULT_PRIVACY_URL),
 
   // Dual-Dialect Database
   DATABASE_URL: z.string().default(DEFAULT_DATABASE_URL),

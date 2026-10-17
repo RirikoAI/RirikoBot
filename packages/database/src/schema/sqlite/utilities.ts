@@ -134,5 +134,9 @@ export const auditLogs = sqliteTable(
       .notNull()
       .$defaultFn(() => new Date()),
   },
-  (table) => [index('idx_audit_logs_guild_created').on(table.guildId, table.createdAt)],
+  (table) => [
+    index('idx_audit_logs_guild_created').on(table.guildId, table.createdAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_audit_logs_created').on(table.createdAt),
+  ],
 );

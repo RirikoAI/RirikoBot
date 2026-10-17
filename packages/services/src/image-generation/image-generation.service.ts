@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { imageDailyLimit } from '@ririko/core';
+import { describeErrorForLog, imageDailyLimit } from '@ririko/core';
 import type { ImageRepository } from '@ririko/database';
 import type {
   ImageGenerationProvider,
@@ -149,9 +149,9 @@ export class ImageGenerationService {
           if (!request.providerId || request.providerId === 'auto') {
             const fallbackProvider = this.getProvider('mock');
             if (fallbackProvider && fallbackProvider.id !== provider.id) {
+              // The error can echo the prompt, so only its description is logged.
               console.warn(
-                `[ImageGenerationService] Primary provider '${provider.id}' failed, falling back to mock provider:`,
-                primaryErr,
+                `[ImageGenerationService] Primary provider '${provider.id}' failed for job ${jobId}, falling back to mock provider: ${describeErrorForLog(primaryErr)}`,
               );
               const fallbackResult = await fallbackProvider.generate(enrichedRequest);
               return {

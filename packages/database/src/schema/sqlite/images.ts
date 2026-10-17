@@ -32,6 +32,8 @@ export const imageJobs = sqliteTable(
   (table) => [
     index('idx_image_jobs_user_status').on(table.userId, table.status),
     index('idx_image_jobs_user_created').on(table.userId, table.createdAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_image_jobs_created').on(table.createdAt),
   ],
 );
 

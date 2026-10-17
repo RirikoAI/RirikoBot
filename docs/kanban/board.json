@@ -2902,7 +2902,7 @@
       "id": "STORY-193",
       "title": "Privacy Notice, AI Consent and Data Retention Before the Public Bot Runs 2.0",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "EPIC-020",
       "requires": [],
       "model": "large",
@@ -9736,7 +9736,7 @@
       "id": "TASK-1931",
       "title": "Consent Records and the One-Time Terms Notice on a User's First Interaction",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "STORY-193",
       "requires": [],
       "model": "medium",
@@ -9789,7 +9789,7 @@
         "A `ConsentService` in packages/services/src/privacy/ owns the versions (`TERMS_VERSION`, `AI_CONSENT_VERSION`, the docs/legal date) and answers `hasAccepted(userId, kind)`: true only for the current version. It caches accepted users in memory so a command costs at most one database read per user per process.",
         "After a user's first command that passes the middleware pipeline (slash, prefix or context menu), the bot shows the notice once and records `terms` at `TERMS_VERSION`: an ephemeral follow-up for interactions, a reply to the message for prefix commands. The command itself still runs and its reply is not delayed. A user who accepted the current version never sees it again; a new version shows it once more.",
         "The notice says, in one short message, that by continuing to use the bot the user accepts the Terms of Service and the Privacy Policy, links both, and says that on a self-hosted bot the host is responsible for their data.",
-        "TERMS_URL and PRIVACY_URL are optional URLs in AppConfigSchema and both example files, defaulting to https://github.com/RirikoAI/RirikoBot/blob/master/docs/legal/terms.md and .../privacy.md.",
+        "TERMS_URL and PRIVACY_URL are optional URLs in AppConfigSchema and both example files, defaulting to https://ririko.ai/docs/legal/terms and https://ririko.ai/docs/legal/privacy (the docs site from STORY-189; STORY-193 grooming 2026-10-17).",
         "Failures to read or write consent never block a command: they are logged and the notice is tried again next time.",
         "Tests cover the first, repeat and new-version cases for slash and prefix commands, the cache, and a failing repository, with no network."
       ],
@@ -9807,7 +9807,7 @@
       "id": "TASK-1932",
       "title": "`ai clear all`: Delete a User's AI Conversations in Every Server and Channel",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "STORY-193",
       "requires": [],
       "model": "medium",
@@ -9858,7 +9858,7 @@
       "id": "TASK-1933",
       "title": "AI Consent Gate: an Explicit \"I Agree\" Before Any AI Feature, and Withdrawal",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "STORY-193",
       "requires": [
         "TASK-1931",
@@ -9881,7 +9881,15 @@
           "apps/bot/src/services.ts",
           "packages/services/src/privacy/",
           "docs/ai.md",
-          "docs/commands.md"
+          "docs/commands.md",
+          "apps/bot/src/privacy/ai-consent.ts",
+          "apps/bot/src/privacy/ai-consent.test.ts",
+          "apps/bot/test/integration/ai-consent.test.ts",
+          "apps/bot/test/integration/slash-dispatch.test.ts",
+          "apps/bot/test/integration/terms-notice.test.ts",
+          "packages/database/src/repositories/ai.repository.ts",
+          "packages/ai/src/memory/conversation-manager.ts",
+          "packages/services/src/privacy/consent.service.ts"
         ],
         "symbols": [
           "AiChatController.handleAiMessage",
@@ -9912,7 +9920,7 @@
         "docs/ai.md and docs/commands.md describe the prompt, withdrawal and status.",
         "Tests cover each gated path with and without consent (no provider call without consent), both buttons, a button pressed by another user, withdrawal and status, with no network."
       ],
-      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/services/src/privacy apps/bot/src && pnpm lint --quiet && pnpm format:check"
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run packages/services/src/privacy apps/bot/src apps/bot/test && pnpm lint --quiet && pnpm format:check"
     },
     {
       "children": [],
@@ -9924,7 +9932,7 @@
       "id": "TASK-1934",
       "title": "Daily Data Retention Purge: AI Chat, Music History and Image Jobs After 90 Days, Audit Entries After a Year",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "STORY-193",
       "requires": [],
       "model": "medium",
@@ -9954,7 +9962,19 @@
           "apps/bot/src/main.ts",
           "apps/bot/src/services.ts",
           "apps/bot/src/controllers/ai-chat.controller.ts",
-          "docs/database.md"
+          "docs/database.md",
+          "packages/database/src/repositories/retention.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/repositories/data-retention.behaviour.test.ts",
+          "packages/database/src/migrations/generated.test.ts",
+          "packages/database/src/migrations/generated/",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/core/src/errors/",
+          "packages/discord/src/router/router.ts",
+          "packages/services/src/image-generation/",
+          "apps/bot/src/component-interactions.ts",
+          "apps/bot/src/data-retention-wiring.test.ts"
         ],
         "symbols": [
           "CommandUsageRecorder",
@@ -10052,7 +10072,7 @@
       "id": "TASK-1935",
       "title": "Delete a Server's Data 90 Days After the Bot Leaves It",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "STORY-193",
       "requires": [
         "TASK-1934"
@@ -10074,7 +10094,21 @@
           "packages/database/migrations/",
           "packages/services/src/privacy/data-retention.service.ts",
           "docs/database.md",
-          "docs/legal/privacy.md"
+          "docs/legal/privacy.md",
+          "packages/database/src/repositories/guild-data-inventory.ts",
+          "packages/database/src/repositories/guild-data-inventory.test.ts",
+          "packages/database/src/repositories/guild-data.repository.ts",
+          "packages/database/src/repositories/guild-data.behaviour.test.ts",
+          "packages/database/src/repositories/guild.repository.behaviour.test.ts",
+          "packages/database/src/repositories/index.ts",
+          "packages/database/src/migrations/generated/",
+          "packages/database/src/schema/sqlite/ddl.ts",
+          "packages/database/src/schema/pg/ddl.ts",
+          "packages/services/src/privacy/data-retention.service.test.ts",
+          "apps/bot/src/services.ts",
+          "apps/bot/src/data-retention-wiring.test.ts",
+          "apps/web/src/app/owner/servers/page.test.tsx",
+          "apps/web/src/lib/server/owner/server-usage.test.ts"
         ],
         "symbols": [
           "GuildRepository.markInactive",
@@ -10112,7 +10146,7 @@
       "id": "TASK-1936",
       "title": "Bahasa Malaysia Versions of the Terms of Service and the Privacy Policy",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "STORY-193",
       "requires": [
         "TASK-1923"
@@ -10130,7 +10164,8 @@
           "docs/legal/terms.md",
           "docs/legal/privacy.md",
           "docs/legal/ms/",
-          "docs/testing.md"
+          "docs/testing.md",
+          "website/sidebars.ts"
         ],
         "symbols": [],
         "codegraph_queries": [
@@ -10144,7 +10179,7 @@
         "The texts contain no secret, host name or hosting provider name; the docs/testing.md section 4.4 scans pass.",
         "The maintainer reviews the Malay wording before DONE; the REVIEW entry records it."
       ],
-      "verify_cmd": "pnpm format:check && pnpm lint --quiet"
+      "verify_cmd": "pnpm docs:build && pnpm format:check && pnpm lint --quiet"
     },
     {
       "children": [],

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, type Mock } from 'vitest';
 import { EventEmitter } from 'node:events';
-import type { ButtonInteraction, Guild, User } from 'discord.js';
+import { MessageFlags, type ButtonInteraction, type Guild, type User } from 'discord.js';
 import type { CommandContext, ICommandOptionsResolver } from '@ririko/discord';
 import type { BotServices } from '../../../services.js';
 import {
@@ -133,8 +133,23 @@ function createMockServices(overrides: Partial<BotServices> = {}): BotServices {
   return {
     imageGenerationService: mockImageGenService as unknown as BotServices['imageGenerationService'],
     imageRepo: mockImageRepo as unknown as BotServices['imageRepo'],
+    // Every user has agreed to AI features unless a test says otherwise.
+    consentService: {
+      hasAccepted: vi.fn().mockResolvedValue(true),
+    } as unknown as BotServices['consentService'],
+    legalLinks: {
+      termsUrl: 'https://example.test/terms',
+      privacyUrl: 'https://example.test/privacy',
+    },
+    fallbackChainManager: {
+      getProviders: vi.fn().mockReturnValue([]),
+    } as unknown as BotServices['fallbackChainManager'],
     ...overrides,
   } as unknown as BotServices;
+}
+
+function withoutConsent(services: BotServices): void {
+  (services.consentService.hasAccepted as unknown as Mock).mockResolvedValue(false);
 }
 
 describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
@@ -249,6 +264,22 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
       expect(services.imageGenerationService.generateImage).not.toHaveBeenCalled();
     });
 
+    it('asks for AI consent instead of generating when the user has not agreed', async () => {
+      const services = createMockServices();
+      withoutConsent(services);
+      const command = createImagineCommand(services);
+      const { ctx } = makeContext('slash', { prompt: 'a futuristic anime city' });
+
+      await command.execute(ctx);
+
+      expect(services.consentService.hasAccepted).toHaveBeenCalledWith('user-1', 'ai');
+      expect(ctx.deferReply).not.toHaveBeenCalled();
+      expect(services.imageGenerationService.generateImage).not.toHaveBeenCalled();
+      const reply = (ctx.reply as Mock).mock.calls[0]![0];
+      expect(reply.flags).toBe(MessageFlags.Ephemeral);
+      expect(reply.components).toHaveLength(1);
+    });
+
     it('handles image generation errors gracefully', async () => {
       const services = createMockServices();
       (services.imageGenerationService.generateImage as unknown as Mock).mockRejectedValueOnce(
@@ -268,6 +299,21 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
   });
 
   describe('Prefix Command Execution', () => {
+    it('replies to the message with the consent prompt and generates nothing without consent', async () => {
+      const services = createMockServices();
+      withoutConsent(services);
+      const command = createImagineCommand(services);
+      const { ctx } = makeContext('prefix', { rawArgs: ['a', 'cute', 'cat'] });
+
+      await command.execute(ctx);
+
+      expect(services.imageGenerationService.generateImage).not.toHaveBeenCalled();
+      expect(ctx.deferReply).not.toHaveBeenCalled();
+      const reply = (ctx.reply as Mock).mock.calls[0]![0];
+      expect(reply.flags).toBeUndefined();
+      expect(reply.components).toHaveLength(1);
+    });
+
     it('parses rawArgs and invokes generation service', async () => {
       const services = createMockServices();
       const command = createImagineCommand(services);
@@ -347,6 +393,42 @@ describe('Dual-Dispatch /imagine Command Suite (TASK-1322)', () => {
         guildId: 'guild-1',
       });
       expect(interaction.editReply).toHaveBeenCalled();
+    });
+
+    it('asks for AI consent on imagine:regen and generates nothing without it', async () => {
+      const services = createMockServices();
+      withoutConsent(services);
+      const interaction = {
+        customId: 'imagine:regen:job-123',
+        user: { id: 'user-1', username: 'TestUser' },
+        guildId: 'guild-1',
+        deferUpdate: vi.fn(),
+        editReply: vi.fn(),
+        reply: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ButtonInteraction;
+
+      await handleImagineButtonInteraction(interaction, services);
+
+      expect(services.imageGenerationService.generateImage).not.toHaveBeenCalled();
+      expect(interaction.deferUpdate).not.toHaveBeenCalled();
+      const reply = (interaction.reply as Mock).mock.calls[0]![0];
+      expect(reply.flags).toBe(MessageFlags.Ephemeral);
+      expect(reply.components).toHaveLength(1);
+    });
+
+    it('does not show the prompt to another user who pressed regenerate', async () => {
+      const services = createMockServices();
+      withoutConsent(services);
+      const interaction = {
+        customId: 'imagine:regen:job-123',
+        user: { id: 'user-intruder' },
+        reply: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ButtonInteraction;
+
+      await handleImagineButtonInteraction(interaction, services);
+
+      expect(services.imageGenerationService.generateImage).not.toHaveBeenCalled();
+      expect(services.consentService.hasAccepted).not.toHaveBeenCalled();
     });
 
     it('rejects imagine:regen if job not found', async () => {

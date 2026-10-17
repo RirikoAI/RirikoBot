@@ -2,6 +2,8 @@
 
 Last updated: 2026-10-15
 
+Read this text in Bahasa Malaysia: [Dasar Privasi](ms/privacy.md). If the two versions differ, this English version prevails.
+
 This policy explains what data Ririko AI 2.0 ("Ririko") stores and sends, why, and for how long. Read it together with the [Terms of Service](terms.md).
 
 ## 1. Who Is Responsible
@@ -126,9 +128,9 @@ Ririko sends data to an outside service only when the operator has set it up and
 | Known browsers | Deleted when not seen for a year |
 | Warnings | Expire after 30 days. The case record stays. |
 | Bot status | Only the latest state is kept |
-| Server data (after the bot leaves) | 90 days after the bot leaves the server. If the bot is added back first, the data stays. |
+| Server data (after the bot leaves) | 90 days after the bot leaves or is removed from the server, the bot deletes everything it stores for that server: its settings, XP and levels, moderation records, giveaways, music, AI and image settings, and the audit log entries about it. If the bot is added back first, the data stays. |
 
-7.2. All other data in section 3 stays while the feature uses it. It is deleted when you ask (sections 8 and 9). Data that is tied to a user and not to a server (for example balances, cards, AI settings and consent records) is not part of the server rule in 7.1.
+7.2. All other data in section 3 stays while the feature uses it. It is deleted when you ask (sections 8 and 9). Data that is tied to a user and not to a server (for example balances, cards, AI settings and consent records) is not part of the server rule in 7.1. Three kinds of your own data record the server where you made them: your reminders, your saved playlists and the history of your balance. When a server's data is deleted they stay with you and lose only the link to the server.
 
 7.3. An AI consent record stays while the consent is active. It is deleted when you withdraw the consent. A terms-notice record stays while you use the bot.
 

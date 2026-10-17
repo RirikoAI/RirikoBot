@@ -6,3 +6,4 @@ export * from './modules.js';
 export * from './cooldown.js';
 export * from './ratelimit.js';
 export * from './overrides.js';
+export * from './notice.js';

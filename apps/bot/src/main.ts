@@ -160,6 +160,7 @@ export async function main(): Promise<void> {
       await services.commandUsageRecorder.stop().catch((err: unknown) => {
         console.error('[CommandUsageRecorder] Failed to write command usage on shutdown:', err);
       });
+      await services.dataRetentionService.stop();
       stopCaseLog?.();
       health?.close();
       services.autoRoleService.stopSweeper();
@@ -222,6 +223,7 @@ export async function main(): Promise<void> {
       services.reminderScheduler?.start();
       services.guildConfigWatcher.start();
       services.commandUsageRecorder.start();
+      services.dataRetentionService.start();
       services.botStatusReporter?.start();
       console.log(
         '📡 Stream Watcher, Free Games Announcer, Giveaways, AutoRole, Reminder & Bot Status engines active!',

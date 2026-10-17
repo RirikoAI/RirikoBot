@@ -165,10 +165,26 @@ export class ConversationManager {
   }
 
   /**
+   * Deletes every conversation and message of the user in every server and channel.
+   * Returns how many conversations were removed. Preferences are kept.
+   */
+  async clearAllMemory(userId: string): Promise<number> {
+    return this.repository.clearAllForUser(userId);
+  }
+
+  /**
    * Retrieves preferences for a user (timezone, nickname, language).
    */
   async getUserPreferences(userId: string): Promise<AiUserPreferences | null> {
     return this.repository.getUserPreferences(userId);
+  }
+
+  /**
+   * Deletes the preferences of a user (used when they withdraw their AI consent).
+   * Returns true when there were any.
+   */
+  async deleteUserPreferences(userId: string): Promise<boolean> {
+    return this.repository.deleteUserPreferences(userId);
   }
 
   /**

@@ -139,12 +139,13 @@ The tables are grouped by area.
 
 ### 2.1. Core Identity & Discord Guilds
 - `users`: Universal Discord user registry (`id` Snowflake PK, `username`, `display_name`, `avatar_url`, `profile_background_url`, `is_blacklisted`, `warn_count`, `notify_level_up`, `created_at`, `updated_at`).
-- `guilds`: Discord server registry (`id` Snowflake PK, `name`, `icon_url`, `owner_id`, `invited_by_id` nullable, `invited_via` nullable, `joined_at`, `is_active`, `created_at`, `updated_at`). The bot keeps it current (`GuildRepository`, `guild-registry.listener.ts`). On every ready event it saves the cached servers and marks the others inactive. The events `GuildCreate`, `GuildUpdate` and `GuildDelete` follow. A server that is only unavailable (an outage) stays active. Rows are never deleted, so servers the bot left stay listed as inactive. `invited_by_id` is the member who added the bot. `invited_via` says how the bot learned that:
+- `guilds`: Discord server registry (`id` Snowflake PK, `name`, `icon_url`, `owner_id`, `invited_by_id` nullable, `invited_via` nullable, `joined_at`, `is_active`, `left_at` nullable, `created_at`, `updated_at`). The bot keeps it current (`GuildRepository`, `guild-registry.listener.ts`). On every ready event it saves the cached servers and marks the others inactive. The events `GuildCreate`, `GuildUpdate` and `GuildDelete` follow. A server that is only unavailable (an outage) stays active. A server the bot left stays listed as inactive, with `left_at` set to the time it left, until the retention purge deletes it with the rest of the server's data (section 4.1). Adding the bot back clears `left_at`. `invited_by_id` is the member who added the bot. `invited_via` says how the bot learned that:
   - `oauth`: the dashboard invite flow (`GuildRepository.recordInvite`). The user who authorized the bot is the answer, so it replaces an earlier inviter.
   - `audit_log`: the `BotAdd` entry, which Discord keeps for 45 days. It needs View Audit Log.
   - `integration`: the user of the bot's integration in the integrations list of the server. It needs Manage Server. The bot uses it when the audit log names no one.
 
   Both columns stay null when nothing says. A later bot update never overwrites the inviter, the source or `joined_at` of an active server. A server that the bot left and joined again starts over.
+- `user_consents`: Which notice or consent a user accepted (`user_id`, `kind` [`terms`, `ai`], `version`, `accepted_at`). Primary key (`user_id`, `kind`), no foreign key. `version` is the date of the legal texts in force when the user accepted (`TERMS_VERSION`, `AI_CONSENT_VERSION` in `ConsentService`); a newer version is accepted again and replaces the row, and a withdrawn consent deletes it. The bot writes a `terms` row after it shows the one-time notice that follows a user's first command (`TERMS_URL` and `PRIVACY_URL` choose the pages it links to).
 - `guild_members`: Association table tracking guild membership (`guild_id`, `user_id`, `nickname`, `joined_at`, `roles`, `is_in_guild`).
 - `guild_settings`: Unified guild configuration (`guild_id` PK, `prefix`, `locale`, `timezone`, `ai_channel_id`, `log_channel_id`, `music_channel_id`, `welcomer_channel_id`, `welcomer_enabled`, `welcomer_bg`, `farewell_channel_id`, `farewell_enabled`, `farewell_bg`, `karma_notifications_enabled`, `created_at`, `updated_at`).
 
@@ -272,3 +273,45 @@ The dashboard uses these tables. The page design is in [dashboard.md](dashboard.
    - `game_items(type, rarity)`
    - `dungeon_floors(season_id, floor_number)`
    - `user_dungeon_progress(user_id, season_id)`
+4. **Time Indexes for the Retention Purge**: a delete by time alone needs an index on that time column. Migration `0003_data_retention_indexes` adds `ai_messages(created_at)`, `ai_conversations(updated_at)`, `music_history(played_at)`, `image_jobs(created_at)` and `audit_logs(created_at)`. The older `(guild_id, time)` and `(user_id, time)` indexes do not serve them. The migration is additive; it builds the indexes with plain `CREATE INDEX`, which blocks writes to a table while PostgreSQL builds its index.
+
+---
+
+## 4. Data Retention
+The bot deletes data past a fixed period so the privacy policy can state the periods. `DataRetentionService` (`packages/services/src/privacy/data-retention.service.ts`) runs once per UTC day, starting one minute after the bot is ready, and checks every hour whether the current day has had a complete purge. The periods are the constant `RETENTION_DAYS`, so change them only together with the policy:
+
+| Data | Table and column | Kept for | What is deleted |
+|---|---|---|---|
+| AI chat | `ai_messages.created_at` | 90 days | Messages older than the period. |
+| AI chat | `ai_conversations.updated_at` | 90 days | Conversations not updated within the period that have no message left. The `summary` (text derived from chat) of every conversation not updated within the period is cleared. |
+| Music history | `music_history.played_at` | 90 days | Plays older than the period. |
+| Image jobs | `image_jobs.created_at` | 90 days | Jobs older than the period whose status is `COMPLETED` or `FAILED`. Jobs still `QUEUED` or `PROCESSING` stay. |
+| Audit log | `audit_logs.created_at` | 365 days | Entries older than the period. |
+| Server data | `guilds.left_at` | 90 days | Everything stored for a server the bot left, then its `guilds` row (section 4.1). The period is `RETENTION_DAYS.departedGuild`. |
+
+How the purge behaves:
+
+- The cutoff is the current time minus the period. A row exactly at the cutoff is kept; only rows older than it are deleted.
+- Each repository has `deleteOlderThan(cutoff)`, which returns the number of rows it deleted. It deletes in batches of 5000 rows (`PURGE_BATCH_SIZE`): one statement removes at most 5000 primary keys found through the time index, and the loop ends when a batch comes back short. A first purge of a very large table therefore never runs as one long statement. The batches are not one transaction.
+- The tables are purged one after another. A failure in one table is logged and the others still run; the day then stays open, so the next hourly check tries again.
+- The purge logs one line, `[DataRetention] Purge finished: ai=…, musicHistory=…, imageJobs=…, auditLog=…, departedGuild=…`, with the counts and no row content (`departedGuild` counts the servers purged).
+- Not covered here: `command_usage_daily` (90 days, `CommandUsageRecorder`), `web_sessions` and `web_known_devices` (cleaned when they expire). Servers the bot left are covered in section 4.1.
+
+### 4.1. Delete a Server's Data After the Bot Leaves
+
+When the bot leaves or is removed from a server, `GuildRepository.markInactive` sets `guilds.is_active` to false and `guilds.left_at` to the current time. It never moves `left_at` of a server that is already inactive. Adding the bot back (`upsert`, also through `recordInvite`) sets `is_active` to true and clears `left_at`, so the server keeps all its data. Migration `0004_guild_left_at` adds the column and sets `left_at` to the time the migration runs for servers that are already inactive, so their 90 days start at the deploy and nothing is purged before 90 days after it.
+
+The same daily purge deletes the data of every server whose `left_at` is more than 90 days ago (`RETENTION_DAYS.departedGuild`). A server that left exactly at the cutoff is kept; one that left a millisecond earlier is purged. `GuildDataRepository` (`packages/database/src/repositories/guild-data.repository.ts`) does it:
+
+- No table has a foreign key to `guilds`, so nothing cascades. `GUILD_DATA_INVENTORY` (`guild-data-inventory.ts`) lists every table with a `guild_id` column and what the purge does with it:
+  - `delete` (37 tables): the rows with this `guild_id` are deleted.
+  - `detach` (3 tables): `economy_transactions`, `music_saved_playlists` and `reminders` belong to users and only record the server where they were made. The purge keeps the rows and sets `guild_id` to null.
+  - `exclude` (1 table): `waifu_guild_members.guild_id` is the id of a WaifuGuild (the card game), not a Discord server.
+  - `GUILD_CHILD_DATA` lists the tables that hold no server id but belong to rows that are deleted: `ai_messages` (via `ai_conversations`), `giveaway_entries` and `giveaway_winners` (via `giveaways`), and `adventure_choices` (via `adventure_sessions`). They are deleted first.
+  - Rows with a null `guild_id` (a DM conversation, an owner console audit entry) belong to no server and stay.
+- Tables with no `guild_id` are never touched: user balances, cards, inventories, AI preferences and consent records.
+- The test `guild-data-inventory.test.ts` reads both Drizzle schemas and fails when a table with a `guild_id` column is not in the inventory. **A new table with a `guild_id` column must be added to `GUILD_DATA_INVENTORY` (and a table that belongs to its rows to `GUILD_CHILD_DATA`) in the same change.**
+- One server is one transaction. Inside it the purge reads the `guilds` row again (locked with `FOR UPDATE` on PostgreSQL) and does nothing unless the server is still inactive and left before the cutoff, so a server the bot was added back to a moment ago keeps its data. A failure rolls that server back; the others still run, and the day stays open for a retry.
+- Each table is deleted in batches of 5000 rows (`deleteInBatches`), found by `rowid` (SQLite) or `ctid` (PostgreSQL). The last step deletes the `guilds` row.
+- The log has one line per server with row counts per table and no content, for example `[DataRetention] Deleted server <id>: xp_accounts=12, guilds=1; unlinked from the server: reminders=2`.
+- Servers the bot left before `guilds` existed were never recorded, so their data is not purged by this rule.

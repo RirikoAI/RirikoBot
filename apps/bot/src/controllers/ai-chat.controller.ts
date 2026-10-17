@@ -10,8 +10,9 @@ import type {
   SecurityExecutionContext,
 } from '@ririko/ai';
 import { formatToolResultFallback } from '@ririko/ai';
-import { allowedAiTools, preferredAiModel } from '@ririko/core';
+import { allowedAiTools, describeErrorForLog, preferredAiModel } from '@ririko/core';
 import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
+import { buildAiConsentPrompt, ensureAiConsent } from '../privacy/ai-consent.js';
 
 export interface AiChatControllerOptions {
   minEditIntervalMs?: number;
@@ -27,6 +28,9 @@ export class AiChatController {
   public readonly musicController: MusicEmbedController | undefined;
   private readonly channelCache = new Map<string, { channelId: string | null; cachedAt: number }>();
   private readonly CACHE_TTL_MS = 60_000; // 1 minute cache for dedicated channel lookups
+  /** When the consent prompt was last shown to a user in a channel, so chat there is not flooded. */
+  private readonly consentPromptShownAt = new Map<string, number>();
+  private readonly CONSENT_PROMPT_INTERVAL_MS = 10 * 60_000;
 
   constructor(client: Client, services: BotServices, options: AiChatControllerOptions = {}) {
     this.client = client;
@@ -139,9 +143,45 @@ export class AiChatController {
       return true;
     }
 
+    // Nothing is stored or sent to a provider before the user agreed to AI features.
+    if (!(await this.hasAiConsentOrAsk(message))) {
+      return true;
+    }
+
     // Process chat invocation
     await this.processChat(message, prompt);
     return true;
+  }
+
+  /**
+   * True when the author agreed to AI features. Otherwise the consent prompt is sent as a reply
+   * (at most once per user and channel every ten minutes, so a busy AI channel is not flooded)
+   * and the message is dropped without reading it further.
+   */
+  private async hasAiConsentOrAsk(message: Message): Promise<boolean> {
+    const userId = message.author.id;
+    const key = `${userId}:${message.channelId}`;
+    try {
+      return await ensureAiConsent(this.services, userId, async () => {
+        const now = Date.now();
+        const shownAt = this.consentPromptShownAt.get(key);
+        if (shownAt !== undefined && now - shownAt < this.CONSENT_PROMPT_INTERVAL_MS) return;
+        if (this.consentPromptShownAt.size > 5000) this.consentPromptShownAt.clear();
+        this.consentPromptShownAt.set(key, now);
+        await message
+          .reply({
+            ...buildAiConsentPrompt(this.services, userId),
+            allowedMentions: { repliedUser: false },
+          })
+          .catch(() => undefined);
+      });
+    } catch (err) {
+      // A failing consent check is treated as "no consent": nothing is sent or stored.
+      console.error(
+        `[AiChatController] Could not check the AI consent of user ${userId}: ${describeErrorForLog(err)}`,
+      );
+      return false;
+    }
   }
 
   /**
@@ -461,9 +501,9 @@ export class AiChatController {
             synthesizedText = synthResponse.content;
           }
         } catch (err) {
+          // Log the ids and lengths only: the error object can carry the prompt or the reply.
           console.warn(
-            '[AiChatController] LLM synthesis from tool result failed, using formatted fallback:',
-            err,
+            `[AiChatController] LLM synthesis from tool result failed for user ${message.author.id} (prompt ${prompt.length} chars), using formatted fallback: ${describeErrorForLog(err)}`,
           );
         }
 
@@ -485,19 +525,28 @@ export class AiChatController {
         await message.channel.send({ content: remainder.slice(0, 2000) }).catch(() => {});
       }
 
-      // 12. Record Turn in Isolated User Memory
-      await this.services.conversationManager
-        .recordTurn(
-          userContext,
-          prompt,
-          accumulatedContent,
-          uniqueToolCalls.length > 0 ? { toolCalls: uniqueToolCalls } : undefined,
-        )
-        .catch((err) => {
-          console.error('[AiChatController] Failed to record conversation turn:', err);
-        });
+      // 12. Record Turn in Isolated User Memory (not when the user withdrew their consent meanwhile)
+      const stillConsenting = await this.services.consentService
+        .hasAccepted(userId, 'ai')
+        .catch(() => false);
+      if (stillConsenting) {
+        await this.services.conversationManager
+          .recordTurn(
+            userContext,
+            prompt,
+            accumulatedContent,
+            uniqueToolCalls.length > 0 ? { toolCalls: uniqueToolCalls } : undefined,
+          )
+          .catch((err) => {
+            console.error(
+              `[AiChatController] Failed to record conversation turn for user ${message.author.id} (prompt ${prompt.length} chars, reply ${accumulatedContent.length} chars): ${describeErrorForLog(err)}`,
+            );
+          });
+      }
     } catch (err) {
-      console.error('[AiChatController] Error processing AI chat message:', err);
+      console.error(
+        `[AiChatController] Error processing AI chat message from user ${message.author.id} in guild ${message.guildId ?? 'none'}, channel ${message.channelId} (prompt ${prompt.length} chars): ${describeErrorForLog(err)}`,
+      );
       if (replyMessage) {
         await replyMessage
           .edit({

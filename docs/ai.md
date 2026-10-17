@@ -55,12 +55,49 @@ Or run `/aichannel channel:#ririko-ai`. With no `channel`, `/aichannel` uses the
 - Ririko sees only your public Discord name, display name and the server name. It never sees internal IDs, keys or account details.
 - A reply longer than 2000 characters is sent in more than one message.
 
+### 2.1. Consent Before Any AI Feature
+
+Ririko sends nothing to an AI provider until the member agrees. This holds for every bot, public or self-hosted. There is no setting to turn it off.
+
+The rule covers every feature that sends a member's words to a provider: chat (by mention, in the AI channel, `/chat` and `/ai`), **Translate to English**, and `/imagine` with its **Regenerate** button.
+
+A member who has not agreed gets this question instead of an answer:
+
+> **Before you use AI features**
+>
+> To answer you, Ririko sends what you write (chat, text to translate, image prompts) to: **Google Gemini**, **OpenAI**.
+> **Ollama** runs on the host's own machine.
+> These providers keep what they receive under their own policies. The bot owner cannot change or recall it.
+>
+> Ririko stores your AI chats for 90 days, then deletes them.
+>
+> `ai clear` deletes the chat in this channel.
+> `ai clear all` deletes all your chats.
+> `ai consent withdraw` takes back your consent and deletes your AI data.
+>
+> Terms of Service · Privacy Policy
+>
+> Press **I agree** to use AI features.
+>
+> [I agree] [No thanks]
+
+- The providers named are the ones this bot is set up with, so the list differs from bot to bot. Ollama and ComfyUI run on the host's own machine. The offline image maker sends nothing anywhere and is not listed.
+- The Terms of Service and Privacy Policy links come from `TERMS_URL` and `PRIVACY_URL` (see [deployment.md](deployment.md)).
+- Slash commands and **Translate to English** show the question to you alone. A chat message or a prefix command gets a reply to that message, because Discord cannot hide those. In a busy AI channel, Ririko asks each member once every ten minutes and ignores their other messages until they answer.
+- Only the member the question was shown to can press its buttons. **I agree** also records that they accepted the terms. They then send the request again: Ririko does not remember what they asked before.
+- **No thanks** records nothing. AI stays off for that member, and Ririko can ask again.
+- Ririko stores nothing for a member who has not agreed, and does not store a reply when the member withdraws while Ririko is still writing it.
+- If Ririko cannot check the consent (for example the database is down), it treats the member as not having agreed.
+- When the AI providers or what they receive change in a way that matters, the consent version is raised and every member is asked again.
+
+To take the consent back, type `ai consent withdraw` (see below).
+
 ## 3. Commands
 
 | Command | Aliases | Options | Who can use it |
 |---|---|---|---|
 | `/chat` | `c` | `prompt` (required) | Everyone |
-| `/ai` | `ask` | `action`, `prompt`, `model`, `channel`, `style` | Everyone. See below. |
+| `/ai` | `ask` | `action`, `consent`, `scope`, `prompt`, `model`, `channel`, `style` | Everyone. See below. |
 | `/aiclear` | `clearchat`, `reset-ai` | None | Everyone |
 | `/aichannel` | `setaichannel` | `channel` | Manage Server or Manage Channels |
 | `/aipersona` | `aistyle` | `style`, `prompt` | Manage Server to change. Everyone to view |
@@ -74,7 +111,27 @@ Or run `/aichannel channel:#ririko-ai`. With no `channel`, `/aichannel` uses the
 | `model` | Shows or sets the model. Use `model`. | Manage Server to set |
 | `channel` | Sets the AI channel with `channel`. With no `channel`, it shows the current AI channel. To remove the channel, type `!ai channel reset`. | Manage Server or Manage Channels |
 | `persona` | Sets the style and persona. Use `style` and `prompt`. | Manage Server |
-| `clear` | Clears your memory in this channel. | Everyone |
+| `clear` | Clears your memory in this channel. Use `scope` to choose what to clear. | Everyone |
+| `consent` | Shows or withdraws your AI consent. Use `consent` to choose. | Everyone |
+
+`/ai action:clear` has two scopes:
+
+| Scope | Prefix form | What it deletes |
+|---|---|---|
+| `here` (default) | `!ai clear` | Your conversation in this server and channel. |
+| `all` | `!ai clear all` | Every AI conversation and message of yours, in every server and channel. Ririko answers with the number of conversations it deleted. With the slash command only you see the answer. |
+
+- Clearing does not change your AI preferences (nickname, timezone and language).
+- Deleting a conversation removes it from Ririko's database only. Messages that Ririko already sent to an AI provider cannot be recalled: the provider keeps them under its own terms.
+
+`/ai action:consent` has two choices. Only you see the slash answer.
+
+| Choice | Prefix form | What it does |
+|---|---|---|
+| `status` | `!ai consent status` | Says whether you agreed to AI features and on which day. |
+| `withdraw` | `!ai consent withdraw` | Takes back your AI consent, deletes all your AI conversations in every server and channel, and deletes your AI preferences (nickname, timezone and language). Ririko answers with what it deleted. AI stays off for you until you agree again. Messages already sent to an AI provider cannot be recalled. |
+
+Without a choice, Ririko tells you to use `status` or `withdraw`. These commands send nothing to a provider, so they work without consent.
 
 - Speaking styles: `FRIENDLY_ANIME` (default), `TSUNDERE`, `KUUDERE`, `DANDERE`, `GENKI` and `FORMAL`.
 - The model is a choice for the whole server. Run `/aimodel` with no option to see what you can choose. A choice is `provider`, such as `openai`, or `provider/model`, such as `gemini/gemini-2.5-pro`. Type `default` to reset it.
@@ -115,11 +172,11 @@ Ririko cannot run programs, read files, make web requests, change the database o
 
 ## 6. Translate to English
 
-Right-click a message, choose **Apps**, then **Translate to English**. Only you see the result. See [commands.md](commands.md).
+Right-click a message, choose **Apps**, then **Translate to English**. Only you see the result. See [commands.md](commands.md). Translation needs your AI consent (section 2.1).
 
 ## 7. Images
 
-`/imagine` makes a picture from a text description.
+`/imagine` makes a picture from a text description. It needs the member's AI consent (section 2.1), and so does its **Regenerate** button.
 
 ### 7.1. Turn It On
 

@@ -2,6 +2,7 @@ import {
   createDatabaseClient,
   AdventureSessionRepository,
   UserRepository,
+  UserConsentRepository,
   EconomyRepository,
   XpRepository,
   GuildSettingsRepository,
@@ -42,6 +43,7 @@ import {
   WelcomerRepository,
   EconomyConfigRepository,
   AuditLogRepository,
+  GuildDataRepository,
   ItemCategoryRepository,
   type DatabaseClient,
   databaseConfigFromEnv,
@@ -70,6 +72,8 @@ import {
 import {
   BotOwnerIdsSchema,
   CORE_VERSION,
+  DEFAULT_PRIVACY_URL,
+  DEFAULT_TERMS_URL,
   EventBus,
   resolveResetSchedulesFromEnv,
 } from '@ririko/core';
@@ -163,6 +167,8 @@ import {
   createGuildConfigService,
   type GuildConfigService,
   CommandUsageRecorder,
+  ConsentService,
+  DataRetentionService,
   CommandOverrideService,
   BotStatusReporter,
   ReactionGifService,
@@ -174,6 +180,7 @@ import {
   type FreeGameItem,
 } from '@ririko/services';
 import { sendLevelUpMessage } from './listeners/level-up.js';
+import type { LegalLinks } from './terms-notice.js';
 
 export interface BotServices {
   db: DatabaseClient;
@@ -241,6 +248,12 @@ export interface BotServices {
   guildConfigWatcher: GuildConfigWatcher;
   /** Counts commands run per guild for the dashboard; fed by the command router. */
   commandUsageRecorder: CommandUsageRecorder;
+  /** Who accepted which version of the terms notice (and, later, the AI consent). */
+  consentService: ConsentService;
+  /** Deletes data past its retention period once a day (STORY-193); started on gateway READY. */
+  dataRetentionService: DataRetentionService;
+  /** The terms and privacy pages the first-command notice links to (TERMS_URL, PRIVACY_URL). */
+  legalLinks: LegalLinks;
   /** Per-guild and per-channel command overrides read by the router middlewares. */
   commandOverrideService: CommandOverrideService;
   /** Registered commands, written at startup so the dashboard and CLI can list them. */
@@ -621,6 +634,18 @@ export async function createBotServices(
   const botActivityRepo = new BotActivityRepository(db);
   const guildRepo = new GuildRepository(db);
   const commandUsageRecorder = new CommandUsageRecorder(botActivityRepo);
+  const consentService = new ConsentService(new UserConsentRepository(db));
+  const dataRetentionService = new DataRetentionService({
+    ai: aiRepo,
+    music: musicRepo,
+    images: imageRepo,
+    audit: new AuditLogRepository(db),
+    guilds: new GuildDataRepository(db),
+  });
+  const legalLinks: LegalLinks = {
+    termsUrl: process.env.TERMS_URL || DEFAULT_TERMS_URL,
+    privacyUrl: process.env.PRIVACY_URL || DEFAULT_PRIVACY_URL,
+  };
   const botStatusReporter = discordClient
     ? new BotStatusReporter(discordClient, botActivityRepo, { version: CORE_VERSION })
     : null;
@@ -1073,6 +1098,9 @@ export async function createBotServices(
     guildSettingsService,
     guildConfigWatcher,
     commandUsageRecorder,
+    consentService,
+    dataRetentionService,
+    legalLinks,
     commandOverrideService,
     commandCatalogRepo,
     guildRepo,

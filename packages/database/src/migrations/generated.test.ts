@@ -83,7 +83,12 @@ describe.each(dialects)('embedded $name migrations', ({ name, migrations, ddl })
         migrations
           .slice(1)
           .flatMap((migration) => statementsOf(migration.statements.join('\n')))
-          .map((statement) => /^(?:ALTER|CREATE) TABLE [`"]?(\w+)/.exec(statement)?.[1])
+          // A migration that only adds an index counts as changing the table it indexes.
+          .map(
+            (statement) =>
+              /^(?:ALTER|CREATE) TABLE [`"]?(\w+)/.exec(statement)?.[1] ??
+              /^CREATE (?:UNIQUE )?INDEX [`"]?\w+[`"]? ON [`"]?(\w+)/.exec(statement)?.[1],
+          )
           .filter((table): table is string => table !== undefined),
       ),
     ];
