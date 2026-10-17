@@ -151,6 +151,10 @@ jobs:
           name: Prettier
           command: pnpm format:check
       - run:
+          # Builds the Docusaurus site from docs/. A broken link or anchor in a doc fails the build.
+          name: Docs site
+          command: pnpm docs:build
+      - run:
           # Offline gate for the versioned migrations (ADR-015): a schema change without its
           # migration, a stale embedded module, or an unmarked DROP/RENAME fails here.
           name: Migrations

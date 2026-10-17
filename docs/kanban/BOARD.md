@@ -16,16 +16,11 @@
 ## 🎯 To Do
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
-| `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 13 | EPIC-020 | STORY-188 | yes | large |
-| `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | blocked | large |
+| `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | yes | large |
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | blocked | large |
 | `STORY-192` | Story | Guided Setup Wizard: the 1.x Installer Rebuilt as ririko setup | 21 | EPIC-020 | STORY-188 | yes | large |
 | `STORY-193` | Story | Privacy Notice, AI Consent and Data Retention Before the Public Bot Runs 2.0 | 21 | EPIC-020 | — | yes | large |
 | `STORY-194` | Story | Complete User Data Erasure Tool for Data Requests | 5 | EPIC-020 | STORY-193 | blocked | large |
-| `TASK-1891` | Task | Scaffold the Docusaurus Site in website/ Built From docs/, With a Broken-Link Gate in CI | 5 | STORY-189 | STORY-188 | yes | medium |
-| `TASK-1892` | Task | Port the Old ririko.ai Landing Page and Generate the Commands Page From Command Metadata | 5 | STORY-189 | TASK-1891 | blocked | medium |
-| `TASK-1893` | Task | Deploy the Site to GitHub Pages on ririko.ai, Serve the Install Files, Retire the Vercel Status Page | 2 | STORY-189 | TASK-1891 | blocked | medium |
-| `TASK-1894` | Task | Migrate the GitHub Wiki Into the Docs and Leave a Pointer Page | 2 | STORY-189 | TASK-1891 | blocked | medium |
 | `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | TASK-1881 | yes | medium |
 | `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | — | yes | medium |
 | `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872, STORY-192, STORY-193 | blocked | medium |
@@ -157,6 +152,7 @@
 | `STORY-186` | Story | Host Deploys Apply Migrations as a Gated Step (Staging First) | 8 | EPIC-019 | [STORY-186.md](./handovers/STORY-186.md) |
 | `STORY-187` | Story | Privacy and Secret Audit Before 2.0.0 Goes Public on master | 5 | EPIC-020 | [STORY-187.md](./handovers/STORY-187.md) |
 | `STORY-188` | Story | Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps | 13 | EPIC-020 | [STORY-188.md](./handovers/STORY-188.md) |
+| `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 21 | EPIC-020 | [STORY-189.md](./handovers/STORY-189.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -399,6 +395,15 @@
 | `TASK-1881` | Task | Move Planning and Decision Records to docs/archive and Fix Every Link | 3 | STORY-188 | [TASK-1881.md](./handovers/TASK-1881.md) |
 | `TASK-1882` | Task | Rewrite the Self-Host and Operator Docs as Deterministic, Current Procedures | 5 | STORY-188 | [TASK-1882.md](./handovers/TASK-1882.md) |
 | `TASK-1883` | Task | Rewrite the Feature Docs for Server Admins and Players | 5 | STORY-188 | [TASK-1883.md](./handovers/TASK-1883.md) |
+| `TASK-1891` | Task | Scaffold the Docusaurus Site in website/ Built From docs/, With a Broken-Link Gate in CI | 5 | STORY-189 | [TASK-1891.md](./handovers/TASK-1891.md) |
+| `TASK-1892` | Task | Port the Old ririko.ai Landing Page and Generate the Commands Page From Command Metadata | 5 | STORY-189 | [TASK-1892.md](./handovers/TASK-1892.md) |
+| `TASK-1893` | Task | Deploy the Site to GitHub Pages on ririko.ai, Serve the Install Files, Retire the Vercel Status Page | 2 | STORY-189 | [TASK-1893.md](./handovers/TASK-1893.md) |
+| `TASK-1894` | Task | Migrate the GitHub Wiki Into the Docs and Leave a Pointer Page | 2 | STORY-189 | [TASK-1894.md](./handovers/TASK-1894.md) |
+| `TASK-1895` | Task | Interactive Discord-Styled Command Demo on the ririko.ai Landing Page | 3 | STORY-189 | [TASK-1895.md](./handovers/TASK-1895.md) |
+| `TASK-1896` | Task | Realistic Discord Window Demo as the Landing Page Centerpiece | 5 | STORY-189 | [TASK-1896.md](./handovers/TASK-1896.md) |
+| `TASK-1897` | Task | Match the Landing Page Demo to Real Ririko Screenshots | 5 | STORY-189 | [TASK-1897.md](./handovers/TASK-1897.md) |
+| `TASK-1898` | Task | Add Real Screenshots to the Docs With Member Names Blurred | 3 | STORY-189 | [TASK-1898.md](./handovers/TASK-1898.md) |
+| `TASK-1899` | Task | Use Ririko's 2026 Redesign Art for the Hero, Demo Avatar and Demo Cards | 2 | STORY-189 | [TASK-1899.md](./handovers/TASK-1899.md) |
 | `TASK-1921` | Task | Setup Wizard Step Model, the Kept 1.x Guides and the Settings File Writer | 5 | STORY-192 | [TASK-1921.md](./handovers/TASK-1921.md) |
 | `TASK-1922` | Task | Setup Wizard Live Checks: Discord Application and Intents, OAuth2 Secret, Database and Every Optional Provider | 5 | STORY-192 | [TASK-1922.md](./handovers/TASK-1922.md) |
 | `TASK-1923` | Task | Draft the 2.0 Terms of Service and Privacy Policy in docs/legal/ | 2 | STORY-192 | [TASK-1923.md](./handovers/TASK-1923.md) |
@@ -466,6 +471,7 @@
 | `BUG-0043` | Bug | ririko db:migrate Prints Adoption Notes and the Backup Twice and Ends With "Nothing to do" After Adopting | 1 | EPIC-019 | [BUG-0043.md](./handovers/BUG-0043.md) |
 | `BUG-0046` | Bug | `pnpm installer` Fails on a Fresh Clone: Workspace Packages Not Built, Native Install Scripts Blocked | 2 | STORY-192 | [BUG-0046.md](./handovers/BUG-0046.md) |
 | `BUG-0047` | Bug | Setup Wizard Pages Do Not Mirror the 1.x Installer: Font Sizes, Note and Guide Button Placement, Switch-Gated Guides, Minimal Look | 3 | STORY-192 | [BUG-0047.md](./handovers/BUG-0047.md) |
+| `BUG-0048` | Bug | Landing Page Demo Messages Overlap Once the Chat Overflows | 1 | STORY-189 | [BUG-0048.md](./handovers/BUG-0048.md) |
 
 ## ❌ Abandoned
 | ID | Type | Title | Pts | Handover |

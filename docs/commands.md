@@ -23,6 +23,8 @@ Run `/help` (or `!help`) to open the Help Center.
 2. Pick a category in the menu.
 3. Read the commands in that category.
 
+![The Ririko Help Center: an embed that lists every command category with its number of commands, and a menu to pick a category.](img/help-reply.webp)
+
 To see one command, run `/help command:<name>`. Ririko shows its description, usage, aliases, permissions and cooldown.
 
 ### 1.2. Change the Prefix

@@ -134,5 +134,3 @@ These terms cover Ririko AI 2.0 ("Ririko"), a Discord bot and its web dashboard.
 ## 14. Governing Law
 
 14.1. These terms follow the laws of Malaysia.
-
-14.2. Disputes about these terms go to the courts of Malaysia.

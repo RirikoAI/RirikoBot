@@ -5,6 +5,8 @@
 **/node_modules
 **/dist
 **/.next
+website/build
+website/.docusaurus
 **/*.tsbuildinfo
 **/next-env.d.ts
 
@@ -45,4 +47,3 @@ coverage
 test-results
 apps/web/e2e-results
 .vitest
-site-dist

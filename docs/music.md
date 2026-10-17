@@ -10,13 +10,23 @@ There are two parts: one for the host of the bot, and one for the server admin.
 
 Music works best with Lavalink. Lavalink is a separate program that plays the audio. Set it up once.
 
-1. Follow the Lavalink steps in [SETUP.md](../SETUP.md) (source install) or [deployment.md](deployment.md) (Docker).
+1. Follow the Lavalink steps in [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md) (source install) or [deployment.md](deployment.md) (Docker).
    The setup wizard (`ririko setup`) asks for this on the **Database & Music** page: run Lavalink on the same computer, use a Lavalink server you already have (it tests the address and the password), or, with Docker, the bundled Lavalink or a remote node.
 2. Make sure `LAVALINK_ENABLED=true` in `.env`, and that the bot and Lavalink use the same `LAVALINK_PASSWORD`.
 3. Optional: add Spotify keys (section 7).
 4. Restart the bot.
 
 If Lavalink is not available, Ririko falls back to a built-in player. The built-in player plays SoundCloud, Spotify and Deezer links (it finds the full song on SoundCloud), and direct audio links. It does not play YouTube links. Search uses SoundCloud.
+
+#### Install FFmpeg for the built-in player
+
+The built-in player needs FFmpeg. Lavalink does not. The Docker image already has FFmpeg, so skip this on Docker. Run `ririko doctor` to check that FFmpeg is found.
+
+- Windows: run `winget install Gyan.FFmpeg` in a new terminal, or `choco install ffmpeg` as Administrator.
+- Ubuntu and Debian: run `sudo apt update`, then `sudo apt install ffmpeg`.
+- macOS: run `brew install ffmpeg`.
+
+If FFmpeg is not on your `PATH`, set `FFMPEG_PATH` in `.env` to the full path of the program.
 
 ### 1.2. For the Server Admin
 
@@ -66,6 +76,10 @@ Playlist actions: `create` (needs `name`), `add` (needs `name` and `query`), `li
 
 Volume is 0% to 150%. Ririko will not go above 150% to protect hearing.
 
+The `/queue` command shows the current song and the songs that wait:
+
+![The reply to /queue: the song that plays now and the upcoming song with its length and requester.](img/music-queue.webp)
+
 ## 4. Player Message
 
 The player message in the music channel shows the current song and the queue. Ririko updates it when something changes. It has these buttons:
@@ -77,6 +91,8 @@ The player message in the music channel shows the current song and the queue. Ri
 - Lyrics (shows the lyrics only to you)
 - Queue (shows the queue)
 - Refresh
+
+![The player message with the song, a progress bar, the volume and loop mode, and the button rows.](img/music-now-playing.webp)
 
 ## 5. Server Settings
 

@@ -46,3 +46,11 @@ For any significant task or feature implementation:
   - `refactor(economy): migrate to double-entry ledger`
   - `docs(adr): add ADR-013 for image caching`
 - Keep pull requests focused on a single module or subsystem.
+
+## 5. Documentation Site
+- The documentation in `docs/` is also the project wiki, a Docusaurus site in `website/`. Edit the Markdown files in `docs/`; the site reads them directly and nothing is copied.
+- Run it locally with `pnpm docs:dev`. It opens at <http://localhost:3000>, or the next free port, and reloads as you edit.
+- To check the finished site, run `pnpm docs:build` and then `pnpm docs:serve`. The built site and its search work offline.
+- `pnpm docs:build` fails on any broken link or anchor, and CircleCI runs it. Link to files outside `docs/` (for example `SETUP.md`) with a full GitHub URL.
+- `docs/kanban/`, `docs/archive/` and `docs/hosting.md` are not part of the site.
+- The landing page is `website/src/pages/index.tsx`. The command reference at `/commands` is generated: `pnpm docs:commands` (run first by `docs:dev` and `docs:build`) writes `website/src/data/commands.json` from the real command definitions with `scripts/export-commands.ts`. It needs the workspace built (`pnpm build`), no token and no network. Never edit or commit that file.

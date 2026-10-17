@@ -43,6 +43,10 @@ Notes:
 - `/lock` stops `@everyone` from sending messages in the channel. `/unlock` gives the permission back.
 - The `rule` option of `/automod` is `INVITE_FILTER`, `PHISHING_SHIELD`, `MENTION_SPAM` or `BURST_SPAM`.
 
+This is the reply to `/warn`. It shows the case number, the member, the moderator, the severity, the active warnings and whether the direct message arrived:
+
+![The reply to /warn: a Warning Issued embed for case 2 with the member, moderator, severity, reason, the active warning summary and an automatic escalation notice.](img/moderation-warn.webp)
+
 ## 3. Cases, Notes and History
 
 - Each action gets a case number that counts up in your server, such as Case #1042. A case cannot be changed.

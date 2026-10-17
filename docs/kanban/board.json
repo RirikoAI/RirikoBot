@@ -2683,7 +2683,12 @@
         "TASK-1891",
         "TASK-1892",
         "TASK-1893",
-        "TASK-1894"
+        "TASK-1894",
+        "TASK-1895",
+        "TASK-1896",
+        "TASK-1897",
+        "TASK-1898",
+        "TASK-1899"
       ],
       "requires": [
         "STORY-188"
@@ -2700,8 +2705,8 @@
       ],
       "id": "STORY-189",
       "title": "Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki",
-      "points": 13,
-      "status": "TODO",
+      "points": 21,
+      "status": "DONE",
       "description": "A Docusaurus site in the monorepo (website/), built from the repository docs/ folder (single source, no copy), deployed to GitHub Pages on ririko.ai. Its landing page reuses the old ririko.ai website (RirikoAI/RirikoWebsite). It replaces the GitHub wiki, which is then disabled, and the Vercel status page.",
       "context": {
         "files": [
@@ -8632,17 +8637,22 @@
       "parent": "STORY-189",
       "title": "Scaffold the Docusaurus Site in website/ Built From docs/, With a Broken-Link Gate in CI",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Add a Docusaurus 3 site as a pnpm workspace package (website/). Its docs plugin reads ../docs (single source; no copy), excludes docs/kanban, docs/archive and anything git-ignored, and has sidebars by reader: Get Started, Self-Host, Use Ririko, Contribute, Operate.",
       "context": {
         "files": [
           "website/",
+          "CONTRIBUTING.md",
+          "docs/index.md",
+          "Dockerfile",
+          ".dockerignore",
           "pnpm-workspace.yaml",
           "package.json",
           ".circleci/config.yml",
           ".prettierignore",
           "eslint.config.js",
-          "docs/"
+          "docs/",
+          "docs/legal/terms.md"
         ],
         "symbols": [],
         "codegraph_queries": [
@@ -8680,7 +8690,7 @@
       "parent": "STORY-189",
       "title": "Port the Old ririko.ai Landing Page and Generate the Commands Page From Command Metadata",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Reuse the old website (RirikoAI/RirikoWebsite, src/index.php and categories.php: a Bootstrap landing page with features, stats, FAQ and a command list) as the Docusaurus home page in React, and replace its PHP command list and the wiki \"LIST: All commands\" page with a commands page generated at build time from the bot's command metadata.",
       "context": {
         "files": [
@@ -8727,7 +8737,7 @@
       "parent": "STORY-189",
       "title": "Deploy the Site to GitHub Pages on ririko.ai, Serve the Install Files, Retire the Vercel Status Page",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "description": "ririko.ai currently answers Cloudflare 530 and the old install domain (used by the 1.x README) is dead. Publish the docs site with GitHub Pages on ririko.ai, serve the install files from it, and retire the Vercel status page.",
       "context": {
         "files": [
@@ -8738,7 +8748,16 @@
           "package.json",
           "docs/deployment.md",
           "docker-compose.production.yml",
-          ".env.production.example"
+          ".env.production.example",
+          ".gitignore",
+          ".prettierignore",
+          ".dockerignore",
+          "docs/development.md",
+          "docs/release.md",
+          "scripts/export-install-files.ts",
+          "scripts/export-install-files.test.ts",
+          "website/static/CNAME",
+          ".github/workflows/docs.yml"
         ],
         "symbols": [],
         "codegraph_queries": [
@@ -8773,7 +8792,7 @@
       "parent": "STORY-189",
       "title": "Migrate the GitHub Wiki Into the Docs and Leave a Pointer Page",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "description": "The wiki has seven 1.x pages (Home, deploy to Heroku, deploy to Render, music extra configuration, list of all commands, building your own Docker image, post-installation settings). Carry over what is still true for 2.0 and prepare the replacement wiki Home page; the maintainer then disables the wiki.",
       "context": {
         "files": [
@@ -8791,6 +8810,255 @@
         "A replacement wiki Home text (in the PROGRESS entry) points to ririko.ai docs; the maintainer pastes it and then disables the wiki in the repository settings."
       ],
       "verify_cmd": "pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "id": "TASK-1895",
+      "title": "Interactive Discord-Styled Command Demo on the ririko.ai Landing Page",
+      "status": "DONE",
+      "points": 3,
+      "parent": "STORY-189",
+      "children": [],
+      "requires": [
+        "TASK-1892"
+      ],
+      "blocks": [],
+      "model": "medium",
+      "tier_override": null,
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "website/src/components/",
+          "website/src/pages/index.tsx",
+          "website/src/pages/index.module.css",
+          "website/src/data/commands.json",
+          "website/static/img/",
+          "scripts/export-commands.ts",
+          "website/src/components/DiscordDemo/",
+          "scripts/website-demo-reply.test.ts"
+        ],
+        "symbols": [
+          "buildCommandCatalog",
+          "CatalogCommand"
+        ],
+        "codegraph_queries": [
+          "buildCommandCatalog CatalogCommand exportCommands"
+        ]
+      },
+      "acceptance": [
+        "The landing page has a Discord-styled demo (server and channel header, message list, bot avatar and name, input box) written from scratch as a React component with a CSS module; no code or CSS is copied from the old site, no jQuery and no external script, font or hotlinked image.",
+        "A visitor can type a command with the slash or the prefix (for example /help, /play, !avatar); the demo answers with a canned bot reply. Known commands reply with their description and options from the generated catalog; a few showcase commands (help, play, ask, waifu or similar) have hand-written sample replies; an unknown command gets a friendly hint. Nothing is sent to Discord or any server.",
+        "Autocomplete or clickable suggestion chips list a few commands, so visitors without a keyboard can try it; it works at phone width and in light and dark mode, and the input is keyboard and screen-reader accessible (label, live region for replies).",
+        "The canned reply logic is a pure function with a unit test in the root vitest suite (or the existing scripts tests), and pnpm docs:build stays green."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm --filter website typecheck && pnpm format:check && pnpm lint --quiet",
+      "handovers": [
+        "TASK-1895",
+        "STORY-189",
+        "TASK-1892"
+      ],
+      "description": "Rebuild the old site's \"Discord in the website\" demo as a React component on the landing page: a Discord-like channel where visitors type Ririko commands and get canned replies, built from the generated command catalog. Built from scratch (the old code is third-party or of unknown origin) and sends nothing to Discord."
+    },
+    {
+      "id": "TASK-1896",
+      "title": "Realistic Discord Window Demo as the Landing Page Centerpiece",
+      "status": "DONE",
+      "points": 5,
+      "parent": "STORY-189",
+      "children": [],
+      "requires": [
+        "TASK-1895"
+      ],
+      "blocks": [],
+      "model": "large",
+      "tier_override": {
+        "tier": "large",
+        "reason": "Maintainer appointed the coordinator (Opus) to build it directly, 2026-10-16"
+      },
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "context": {
+        "files": [
+          "website/src/components/DiscordDemo/",
+          "website/src/pages/index.tsx",
+          "website/src/pages/index.module.css",
+          "website/static/img/",
+          "scripts/website-demo-reply.test.ts",
+          "scripts/website-demo-script.test.ts",
+          "scripts/website-demo-format.test.ts"
+        ],
+        "symbols": [
+          "replyTo",
+          "suggestCommands",
+          "DiscordDemo"
+        ],
+        "codegraph_queries": [
+          "help command embed ping command embed music now playing embed daily reward embed card drop embed"
+        ]
+      },
+      "acceptance": [
+        "The demo is a Discord-like window (title bar, server rail, channel list with a voice channel, chat, member list on wide screens, user panel) in Discord dark colors; decorative parts are aria-hidden and not clickable.",
+        "On first view Ririko shows a typing indicator, then greets the visitor with buttons; a short scripted show of 2-3 commands follows and stops on any visitor interaction; it plays once per visit and respects prefers-reduced-motion.",
+        "New messages animate in; the message list auto-scrolls inside the window only (the page never jumps), sticks to the bottom only near the bottom, and shows a jump-to-present pill otherwise.",
+        "The composer has a keyboard-accessible slash autocomplete; showcase replies mirror the real bot wording and layout; other commands still reply from the generated catalog.",
+        "Layout works at 1440, 1024 and 375 px; landing page image weight drops well below the current 650 KB hero.",
+        "Reply and script logic are pure and unit-tested in the root vitest suite; docs:build stays green."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm --filter website typecheck && pnpm vitest run scripts/website-demo && pnpm format:check && pnpm lint --quiet",
+      "handovers": [
+        "TASK-1896",
+        "STORY-189",
+        "TASK-1895"
+      ],
+      "description": "Make the landing page demo look and behave like the real Discord app: a window frame, server rail, channel list, member list and user panel (decorative), a greeting from Ririko with typing indicator, a short scripted show that stops on interaction, message animations, Discord-like auto-scroll and slash autocomplete. Match the real bot output using maintainer screenshots."
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "parent": "STORY-189",
+      "status": "DONE",
+      "model": "medium",
+      "id": "TASK-1897",
+      "title": "Match the Landing Page Demo to Real Ririko Screenshots",
+      "points": 5,
+      "requires": [
+        "TASK-1896",
+        "BUG-0048"
+      ],
+      "handovers": [
+        "TASK-1897",
+        "TASK-1896",
+        "STORY-189"
+      ],
+      "description": "Phase B of TASK-1896: use the maintainer screenshots in .local/screenshots/ (git-ignored, read-only) as the visual reference so the demo looks like Ririko in a real server, and render the demo card with the bot's own card renderer from the Ririko picture.",
+      "context": {
+        "files": [
+          "website/src/components/DiscordDemo/",
+          "website/static/img/",
+          "website/static/img/demo/",
+          "scripts/website-demo-format.test.ts",
+          "scripts/website-demo-reply.test.ts",
+          "scripts/website-demo-script.test.ts",
+          ".local/screenshots/"
+        ],
+        "symbols": [
+          "replyTo",
+          "buildNowPlayingEmbed",
+          "CardImageService"
+        ],
+        "codegraph_queries": [
+          "buildNowPlayingEmbed queue embed handleQueue",
+          "cardImageService getCardImage card-synthesizer",
+          "card claim embed Card Claimed",
+          "balance command Financial Balance leaderboard warn Warning Issued"
+        ]
+      },
+      "acceptance": [
+        "Bot messages use the APP tag (as in the screenshots), and slash replies show the \"<user> used /command\" reply line above the bot name.",
+        "/play first answers with the \"Added to Queue\" embed (title link, Artist, Duration, Position, thumbnail), then the now-playing player message matches screenshot 3.2 (slider, time boxes, inline fields, settings, footer with \"Today at\", two button rows including Queue (n) and Refresh).",
+        "/queue, /ai (plain \"Heyyy <name>! 👋✨ How can I help you today, senpai?\" style), /daily, /balance, /leaderboard, /warn (yellow bar, inline fields, escalation section), the card drop and the card claim replies match the screenshots, with wording taken from the bot code where it exists.",
+        "The demo card image is rendered by the bot's own card renderer from the Ririko picture (no third-party art), saved as an optimized WebP in website/static/img/demo/, with a footer that does not claim Danbooru.",
+        "Only fake member names and generated avatars appear; no real member names, avatars, server icons or video thumbnails from the screenshots are published. Thumbnails are generated gradients or repository images.",
+        "Reply and script tests are updated and pass; docs:build, typecheck, format and lint pass; checked in a browser against the screenshots at 1440 and 375 px."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm --filter website typecheck && pnpm vitest run scripts/website-demo && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "parent": "STORY-189",
+      "status": "DONE",
+      "model": "medium",
+      "id": "TASK-1898",
+      "title": "Add Real Screenshots to the Docs With Member Names Blurred",
+      "points": 3,
+      "requires": [
+        "TASK-1897"
+      ],
+      "handovers": [
+        "TASK-1898",
+        "STORY-189"
+      ],
+      "description": "Publish cropped screenshots from .local/screenshots/ in the user docs: the dashboard home, the help and music player embeds, and the warn and economy replies, with every member name, other servers' icons and every bot name except Ririko blurred.",
+      "context": {
+        "files": [
+          "docs/dashboard.md",
+          "docs/commands.md",
+          "docs/music.md",
+          "docs/moderation.md",
+          "docs/economy.md",
+          "docs/img/",
+          ".local/screenshots/"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "dashboard overview page"
+        ]
+      },
+      "acceptance": [
+        "Images live next to the docs (for example docs/img/) as optimized WebP or PNG, are referenced with alt text, and docs:build passes the broken-link gate.",
+        "Blurred or cropped out: every member name and avatar (the maintainer's own \"Angel\" may stay only on the dashboard), every other server's icon or thumbnail, every bot name and avatar except Ririko, video thumbnails and anything private. The image tool is a one-off script outside the repository.",
+        "Each image sits beside the step or command it shows; no doc text is replaced by an image."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "TASK-1899",
+      "parent": "STORY-189",
+      "title": "Use Ririko's 2026 Redesign Art for the Hero, Demo Avatar and Demo Cards",
+      "points": 2,
+      "status": "DONE",
+      "model": "medium",
+      "requires": [
+        "TASK-1897"
+      ],
+      "handovers": [
+        "TASK-1899",
+        "STORY-189",
+        "TASK-1897"
+      ],
+      "description": "The maintainer has a redesigned Ririko picture (.local/brand/ririko-2026-redesign.webp, 1672x940, owned by the maintainer). Replace the old art everywhere the site uses it: the landing page hero, the demo bot avatar and the three demo cards rendered by the bot's card renderer.",
+      "context": {
+        "files": [
+          "website/static/img/ririko-hero.webp",
+          "website/static/img/ririko-avatar.webp",
+          "website/static/img/demo/",
+          "website/src/pages/index.tsx",
+          "website/src/pages/index.module.css",
+          ".local/brand/ririko-2026-redesign.webp"
+        ],
+        "symbols": [
+          "Hero",
+          "CardSynthesizer"
+        ],
+        "codegraph_queries": [
+          "Hero heroImage index.module.css hero",
+          "CardSynthesizer synthesizeCard attributionText imageBuffer"
+        ]
+      },
+      "acceptance": [
+        "website/static/img/ririko-hero.webp is the new picture, optimized WebP (at most about 150 KB), and the hero crop keeps her face and the plush visible at 1440, 1024 and 375 px with the headline still readable over the overlay (adjust background-position or overlay only if needed).",
+        "ririko-avatar.webp is a new 128 px square crop centred on her face; the three demo cards (card-sr, card-ur, card-r) are re-rendered by the bot's own CardSynthesizer from the new picture with the same rarities, elements and 'Image source: Ririko AI' attribution, framed on her face.",
+        "File names stay the same, so no code references change unless the hero layout needs it; nothing references the old art afterwards.",
+        "docs:build passes and the page is checked in a browser at the three widths."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm --filter website typecheck && pnpm format:check && pnpm lint --quiet"
     },
     {
       "children": [],
@@ -11873,6 +12141,44 @@
         "Tests assert the order (fields before note before guide button) and that each switch-gated guide button is inside its gated block."
       ],
       "verify_cmd": "pnpm typecheck && pnpm vitest run apps/cli/src/installer && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "id": "BUG-0048",
+      "title": "Landing Page Demo Messages Overlap Once the Chat Overflows",
+      "points": 1,
+      "status": "DONE",
+      "parent": "STORY-189",
+      "requires": [
+        "TASK-1896"
+      ],
+      "model": "small",
+      "handovers": [
+        "BUG-0048",
+        "TASK-1896",
+        "STORY-189"
+      ],
+      "description": "In the ririko.ai Discord demo, once the message list is taller than the window, messages that start an author group shrink to 44px and their text spills over the next message (maintainer screenshot, 2026-10-16). Cause: .messages is a fixed-height flex column; its items may shrink, and .groupStart sets min-height: 44px, which replaces the min-height: auto that would stop them shrinking below their content.",
+      "context": {
+        "files": [
+          "website/src/components/DiscordDemo/styles.module.css"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "DiscordDemo Message styles messages groupStart"
+        ]
+      },
+      "acceptance": [
+        "Children of .messages never shrink (flex-shrink: 0 on .message, .welcome and any other direct child that has content; the .spacer keeps flex: 1 1 auto).",
+        "With 10+ messages in the demo, no message overlaps another and the list scrolls inside the window; checked in a browser at 1440 px on the served build.",
+        "No other demo behaviour changes; the demo tests and docs:build stay green."
+      ],
+      "verify_cmd": "pnpm docs:build && pnpm vitest run scripts/website-demo && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "active_in_progress_ticket": null

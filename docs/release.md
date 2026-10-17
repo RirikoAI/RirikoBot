@@ -566,18 +566,30 @@ The old release still runs, and the database is as it was. A problem is one of t
 
 4. Deploy again. If only the database changed, run the failed job again. The host downloads the release again and starts from its recorded state. If the code changed, tag the next prerelease.
 
-## 9. Project Status Page
+## 9. The Website (ririko.ai)
 
-The Vercel project `ririko-bot` deploys a static status page. It hosts neither the bot nor the dashboard.
+The documentation site in `website/` is published with GitHub Pages on <https://ririko.ai>. It hosts neither the bot nor the dashboard.
 
-- `vercel.json` skips the dependency install. It runs `scripts/build-status-site.ts` with Node's TypeScript type stripping. The script reads `docs/kanban/board.json` and the `docs/` folder, and writes `site-dist/index.html`.
-- Every branch gets a preview URL, so each pull request shows the board as it is on that branch.
-- The Vercel project settings must leave **Root Directory** empty, use the **Other** framework preset and have no install, build or output override. Then `vercel.json` applies.
+- The workflow `.github/workflows/docs.yml` runs on every push to `master` and on **Run workflow** (`workflow_dispatch`). It runs `pnpm install --frozen-lockfile`, `pnpm build` and `pnpm docs:build`, uploads `website/build` and deploys it with `actions/deploy-pages`. Other branches never deploy, so the site and the install files always match a release.
+- `website/static/CNAME` holds `ririko.ai`.
+- `pnpm docs:build` also runs `pnpm docs:install`. It copies `docker-compose.production.yml` to `website/static/install/docker-compose.yml` and `.env.production.example` to `website/static/install/.env.example`. The copies are git-ignored and are never edited by hand. The site then serves <https://ririko.ai/install/docker-compose.yml> and <https://ririko.ai/install/.env.example>.
+- The old status page on Vercel is retired.
 
-To build the page on your computer:
+### 9.1. One-Time Setup (Maintainer)
+
+Do these once, after 2.0 is on `master`. Until then ririko.ai stays down.
+
+1. In the repository on GitHub, open **Settings**, then **Pages**. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+2. In Cloudflare, open the DNS records of `ririko.ai`. Replace the old apex record with the GitHub Pages addresses: four `A` records (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`), or one `CNAME` on `@` to `ririkoai.github.io` (Cloudflare flattens it). Replace `ririkoai` with the GitHub organization name if it differs: the value is `<organization>.github.io`.
+3. Set the apex records to **DNS only** (grey cloud) until GitHub has issued the certificate. Leave the other records as they are.
+4. Back in **Settings**, **Pages**, wait for the DNS check to pass, set the custom domain to `ririko.ai` if it is empty, then tick **Enforce HTTPS** when GitHub offers it.
+5. Run the workflow once from the **Actions** tab (**Docs site**, **Run workflow**) or push to `master`. Open <https://ririko.ai> and <https://ririko.ai/install/docker-compose.yml> to check.
+6. Delete the Vercel project `ririko-bot`.
+
+To build the site on your computer:
 
 ```bash
-pnpm site:build
+pnpm build
+pnpm docs:build
+pnpm docs:serve
 ```
-
-The page is in `site-dist/index.html`.

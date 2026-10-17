@@ -4,7 +4,7 @@ This guide takes you from nothing to a running Ririko bot and dashboard on one m
 
 Other guides:
 
-- To run Ririko without Docker, read [SETUP.md](../SETUP.md).
+- To run Ririko without Docker, read [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md).
 - To upgrade a Ririko 1.4.0 bot, read [upgrading-from-1.4.md](upgrading-from-1.4.md).
 - To release Ririko and deploy it with CI, read [release.md](release.md).
 
@@ -501,6 +501,14 @@ docker build --target web-runner -t ririko-web .
 ```
 
 To make compose build the images instead of pulling them, run `docker compose -f docker-compose.production.yml --env-file .env.production build`.
+
+To publish your own image to a registry (Docker Hub, GitHub Container Registry or another), tag the image you built and push it:
+
+1. Log in to the registry: `docker login`.
+2. Tag the image: `docker tag ririko-bot your-username/ririko-bot:latest`.
+3. Push it: `docker push your-username/ririko-bot:latest`.
+
+The image holds no settings. The Discord token and the other keys are given to the container when it starts, so the image is safe to share. Never copy a `.env` file into an image.
 
 ### 9.2. The services
 

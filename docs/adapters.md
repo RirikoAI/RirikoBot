@@ -29,7 +29,7 @@ You set every key in the `.env` file. Never put a key in Discord or in the datab
 | Reaction GIFs | OtakuGIFs | No key | None |
 | Lyrics | LRCLIB | No key | None |
 
-Full setup of Discord, the dashboard and Docker is in [SETUP.md](../SETUP.md) and [deployment.md](deployment.md).
+Full setup of Discord, the dashboard and Docker is in [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md) and [deployment.md](deployment.md).
 
 ## 3. AI Chat Providers
 
