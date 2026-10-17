@@ -2850,7 +2850,7 @@
       "id": "STORY-192",
       "title": "Guided Setup Wizard: the 1.x Installer Rebuilt as ririko setup",
       "points": 21,
-      "status": "TODO",
+      "status": "DONE",
       "description": "Rebuild the 1.x installer (a step-by-step web wizard the bot served on localhost when config.js was missing) for 2.0 as a local web wizard that the command-line tool starts: `ririko setup`, and `pnpm installer` from the repository root. Keep its layout (step tabs with an icon, a title and \"Step N\"; a content card; Previous, Next and Finish), its guides (a Note box, a \"Click here to show/hide the guide\" button, numbered steps with screenshots that open full size) and its fixed, predictable order. It writes `.env` (source install) or `.env.production` (Docker) from the example file and checks every credential live before it lets the reader go on. The 1.x files are copied, read only, to .local/installer-1x/. 2.0.0 does not go to master without it (maintainer, 2026-10-11).",
       "context": {
         "files": [
@@ -2963,7 +2963,7 @@
       "id": "STORY-194",
       "title": "Complete User Data Erasure Tool for Data Requests",
       "points": 5,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "EPIC-020",
       "requires": [
         "STORY-193"
@@ -10078,7 +10078,7 @@
       "id": "TASK-1941",
       "title": "`ririko user erase`: Remove or Anonymise Every Row a Bot Holds About One Discord User",
       "points": 8,
-      "status": "TODO",
+      "status": "DONE",
       "parent": "STORY-194",
       "requires": [
         "TASK-1931",

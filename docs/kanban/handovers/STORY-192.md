@@ -57,3 +57,14 @@ See docs/kanban/protocol.md section 6.
 **Security**: gitleaks flagged four fake fixture values in the new tests; the maintainer added an exact-value allowlist to `.gitleaks.toml` (and the old `[allowlist]` table became `[[allowlists]]`, which gitleaks requires when both exist). Staged files and full history scan clean with the repository config. Privacy scans 1–4 print nothing.
 
 **Outcome**: REWORK only for acceptance 2: the story stays in TODO (every task DONE) until the maintainer runs the end-to-end check; then it moves to DONE.
+
+## REVIEW · 2026-10-18T09:00:00Z · claude-opus-5-5 (coordinator) · DONE
+
+**Acceptance 2** (the only open item from the 2026-10-14 REWORK): the maintainer ran the end-to-end check and reported it done on 2026-10-18 (`pnpm installer` on a clean checkout, `pnpm doctor`, bot and dashboard start). CI on develop/2.0.0 is green after PR #711, so verify_cmd holds on Linux.
+
+**Acceptance**
+- [x] 1: TASK-1921 to TASK-1927, BUG-0046 and BUG-0047 are DONE.
+- [x] 2: confirmed by the maintainer.
+- [x] 3: the coverage gate passes in CircleCI.
+
+**Outcome**: DONE. STORY-191 and TASK-1911 are no longer blocked by it.

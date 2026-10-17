@@ -315,3 +315,17 @@ The same daily purge deletes the data of every server whose `left_at` is more th
 - Each table is deleted in batches of 5000 rows (`deleteInBatches`), found by `rowid` (SQLite) or `ctid` (PostgreSQL). The last step deletes the `guilds` row.
 - The log has one line per server with row counts per table and no content, for example `[DataRetention] Deleted server <id>: xp_accounts=12, guilds=1; unlinked from the server: reminders=2`.
 - Servers the bot left before `guilds` existed were never recorded, so their data is not purged by this rule.
+
+### 4.2. Erase One User's Data
+
+`ririko user erase <discord_user_id>` answers an erasure request (see [development.md](development.md#41-erase-one-users-data)). `UserDataRepository` (`packages/database/src/repositories/user-data.repository.ts`) runs it, and `USER_DATA_INVENTORY` (`user-data-inventory.ts`) says what happens to each column that can hold a Discord user ID:
+
+- `delete`: the rows belong only to the user (AI chats, consents, preferences, balance, inventory, cards, XP, reminders, music history, image jobs, sessions, passkeys, known browsers, memberships, and the `users` row). They are deleted. Tables that hold no user column but belong to deleted rows (`ai_messages`, `music_playlist_tracks`, `adventure_choices`) are listed in `USER_CHILD_DATA` and deleted first.
+- `tombstone`: the row is shared with other people (a ledger entry, a trade, a giveaway winner, a case where the user is the moderator, the creator of a giveaway). The row stays and the ID becomes `erased:<first 16 hex digits of the SHA-256 of the ID>`. `audit_logs.actor_user_id` also loses the IP address and the browser name. A Waifu guild that the user leads alone is deleted; one with other members keeps them and loses the name of its leader.
+- `keep`: the column holds no Discord user ID (`streamers.platform_user_id` is the ID on Twitch, YouTube or TikTok).
+- Moderation records are kept unless the host adds `--include-moderation`: then cases about the user get a tombstone, and notes and warnings about the user are deleted. Cases, notes and warnings where the user is the moderator or author always get a tombstone.
+- `USER_TEXT_DATA` lists the JSON columns that can carry an ID in a value or a key: `economy_transactions.metadata` (the other side of a transfer), `audit_logs.details`, `game_sessions.state` and, with `--include-moderation`, `moderation_cases.metadata`. The quoted ID is replaced by the tombstone, as text, in the rows of every user.
+- Pending trades of the user are cancelled first and the cards of the other party go back from `IN_TRADE` to `IDLE`, so no card stays locked in a trade that cannot finish.
+- The whole erasure is one transaction, with the audit entry in it. A failure rolls everything back.
+- The test `user-data-inventory.test.ts` reads both Drizzle schemas and fails when a column that ends in `user_id`, `_by`, `_by_id`, `owner_id` or `moderator_id` is not in the inventory. **A new column that can hold a Discord user ID must be added to `USER_DATA_INVENTORY` with its action in the same change, and a new JSON column that can hold one to `USER_TEXT_DATA`.** A column with another name that holds a user ID is not found by the guard test: add it by hand.
+- Free text is not searched: the `reason` of a moderation case or warning, and the content of a note, can name the user in words. The host decides about those when it handles the request.
