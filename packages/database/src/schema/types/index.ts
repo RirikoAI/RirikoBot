@@ -9,6 +9,8 @@ export type GuildMember = typeof sqlite.guildMembers.$inferSelect;
 export type NewGuildMember = typeof sqlite.guildMembers.$inferInsert;
 export type GuildSettings = typeof sqlite.guildSettings.$inferSelect;
 export type NewGuildSettings = typeof sqlite.guildSettings.$inferInsert;
+export type UserConsent = typeof sqlite.userConsents.$inferSelect;
+export type NewUserConsent = typeof sqlite.userConsents.$inferInsert;
 
 // Commands
 export type Command = typeof sqlite.commands.$inferSelect;

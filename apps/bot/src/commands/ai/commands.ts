@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, EmbedBuilder, type GuildMember } from 'discord.js';
+import { PermissionFlagsBits, EmbedBuilder, MessageFlags, type GuildMember } from 'discord.js';
 import { CommandCategory, type Command, type CommandContext } from '@ririko/discord';
 import type {
   ChatMessage,
@@ -20,6 +20,12 @@ import {
 import type { BotServices } from '../../services.js';
 import type { AiChatController } from '../../controllers/ai-chat.controller.js';
 import type { MusicEmbedController } from '../../controllers/music-embed.controller.js';
+import {
+  formatAiConsentStatus,
+  formatAiWithdrawReply,
+  requireAiConsent,
+  withdrawAiConsent,
+} from '../../privacy/ai-consent.js';
 
 export const SPEAKING_STYLE_CHOICES = [
   { name: 'Friendly Anime (Default)', value: 'FRIENDLY_ANIME' },
@@ -106,6 +112,9 @@ export async function executeAiChatTurn(
   prompt: string,
   musicController?: MusicEmbedController,
 ): Promise<void> {
+  // Nothing is read, stored or sent to a provider before the user agreed to AI features.
+  if (!(await requireAiConsent(ctx, services))) return;
+
   await ctx.deferReply();
 
   const userId = ctx.user.id;
@@ -306,12 +315,14 @@ export async function executeAiChatTurn(
       }
     }
 
-    // 8. Record conversational turn
-    await services.conversationManager.recordTurn(userContext, prompt, replyText, {
-      provider: response.provider,
-      model: response.model,
-      toolCalls: response.toolCalls,
-    });
+    // 8. Record conversational turn (not when the user withdrew their consent meanwhile)
+    if (await services.consentService.hasAccepted(userId, 'ai')) {
+      await services.conversationManager.recordTurn(userContext, prompt, replyText, {
+        provider: response.provider,
+        model: response.model,
+        toolCalls: response.toolCalls,
+      });
+    }
 
     // 9. Send response
     await ctx.editReply({ content: replyText });
@@ -321,6 +332,19 @@ export async function executeAiChatTurn(
       content: `❌ **Ririko AI Error**: ${message}`,
     });
   }
+}
+
+/** The reply of `ai clear all`: how many conversations were deleted. */
+function formatClearAllReply(removed: number): string {
+  if (removed === 0) {
+    return '🧹 **Nothing to delete.**\nRiriko AI has no conversations stored for you.';
+  }
+  const noun = removed === 1 ? 'conversation' : 'conversations';
+  return (
+    `🧹 **All your Ririko AI conversations were deleted.**\n` +
+    `${removed} ${noun} and their messages were removed from every server and channel. ` +
+    'Messages already sent to an AI provider cannot be recalled.'
+  );
 }
 
 /**
@@ -345,7 +369,7 @@ export function createAiCommands(services: BotServices, aiController: AiChatCont
       options: [
         {
           name: 'action',
-          description: 'Action to perform (chat, model, channel, persona, clear)',
+          description: 'Action to perform (chat, model, channel, persona, clear, consent)',
           type: 'STRING',
           required: false,
           choices: [
@@ -354,6 +378,27 @@ export function createAiCommands(services: BotServices, aiController: AiChatCont
             { name: 'channel', value: 'channel' },
             { name: 'persona', value: 'persona' },
             { name: 'clear', value: 'clear' },
+            { name: 'consent', value: 'consent' },
+          ],
+        },
+        {
+          name: 'consent',
+          description: 'With consent: withdraw your AI consent and data, or show its status',
+          type: 'STRING',
+          required: false,
+          choices: [
+            { name: 'withdraw', value: 'withdraw' },
+            { name: 'status', value: 'status' },
+          ],
+        },
+        {
+          name: 'scope',
+          description: 'With clear: this channel only (here) or every server and channel (all)',
+          type: 'STRING',
+          required: false,
+          choices: [
+            { name: 'here', value: 'here' },
+            { name: 'all', value: 'all' },
           ],
         },
         {
@@ -390,13 +435,43 @@ export function createAiCommands(services: BotServices, aiController: AiChatCont
       // For prefix calls like "!ai clear" or "!ai model", parse first word if action is not set
       if (!action && rawArgs.length > 0) {
         const first = rawArgs[0]!.toLowerCase();
-        if (['chat', 'model', 'channel', 'persona', 'clear'].includes(first)) {
+        if (['chat', 'model', 'channel', 'persona', 'clear', 'consent'].includes(first)) {
           action = first;
         }
       }
 
-      // 1. Handle "clear"
+      // `/ai consent:withdraw` without an action still means the consent action.
+      if (!action && ctx.options.getString('consent')) action = 'consent';
+
+      // 1. Handle "clear" (this channel, or `all`: every conversation of the user)
       if (action === 'clear') {
+        const scope = (
+          ctx.options.getString('scope') ??
+          (rawArgs[0]?.toLowerCase() === 'clear' ? rawArgs[1] : undefined) ??
+          'here'
+        )
+          .toLowerCase()
+          .trim();
+
+        if (scope === 'all') {
+          const removed = await services.conversationManager.clearAllMemory(ctx.user.id);
+          const content = formatClearAllReply(removed);
+          if (ctx.source === 'prefix') {
+            await ctx.reply({ content });
+          } else {
+            await ctx.reply({ content, flags: MessageFlags.Ephemeral });
+          }
+          return;
+        }
+
+        if (scope !== 'here') {
+          await ctx.reply({
+            content:
+              '❌ Unknown scope. Use `ai clear` for this channel or `ai clear all` for everything.',
+          });
+          return;
+        }
+
         const userContext: UserContext = {
           userId: ctx.user.id,
           guildId: ctx.guildId ?? undefined,
@@ -409,6 +484,33 @@ export function createAiCommands(services: BotServices, aiController: AiChatCont
           content:
             '🧹 **Ririko AI Memory Cleared!**\nYour conversational history in this context has been reset.',
         });
+        return;
+      }
+
+      // 1b. Handle "consent" (withdraw or status). It sends nothing to a provider, so it is
+      // not behind the consent gate. The reply is private where Discord allows it.
+      if (action === 'consent') {
+        const choice = (
+          ctx.options.getString('consent') ??
+          (rawArgs[0]?.toLowerCase() === 'consent' ? rawArgs[1] : undefined) ??
+          ''
+        )
+          .toLowerCase()
+          .trim();
+
+        let content: string;
+        if (choice === 'withdraw') {
+          content = formatAiWithdrawReply(await withdrawAiConsent(services, ctx.user.id));
+        } else if (choice === 'status') {
+          content = await formatAiConsentStatus(services, ctx.user.id);
+        } else {
+          content = '❌ Use `ai consent status` or `ai consent withdraw`.';
+        }
+        if (ctx.source === 'prefix') {
+          await ctx.reply({ content });
+        } else {
+          await ctx.reply({ content, flags: MessageFlags.Ephemeral });
+        }
         return;
       }
 

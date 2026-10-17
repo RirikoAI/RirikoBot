@@ -3,6 +3,7 @@ import { preferredAiModel, ValidationError } from '@ririko/core';
 import { CommandCategory, type Command } from '@ririko/discord';
 import { MAX_TRANSLATION_INPUT_LENGTH, TranslationService } from '@ririko/ai';
 import type { BotServices } from '../../services.js';
+import { requireAiConsent, type AiConsentServices } from '../../privacy/ai-consent.js';
 
 /** Only text already present in the selected message; never fetch attachments or linked pages. */
 export function messageTranslationText(message: Message): string {
@@ -22,7 +23,7 @@ export function messageTranslationText(message: Message): string {
 }
 
 export function createTranslateCommand(
-  services: Pick<BotServices, 'fallbackChainManager' | 'conversationManager'>,
+  services: Pick<BotServices, 'fallbackChainManager' | 'conversationManager'> & AiConsentServices,
 ): Command {
   const translator = new TranslationService(services.fallbackChainManager);
   return {
@@ -38,6 +39,8 @@ export function createTranslateCommand(
     },
     async execute(ctx) {
       if (ctx.source !== 'context-menu' || !('targetMessage' in ctx.raw)) return;
+      // The text goes to an AI provider, so the user must have agreed to AI features first.
+      if (!(await requireAiConsent(ctx, services))) return;
       const text = messageTranslationText(ctx.raw.targetMessage);
       if (!text)
         throw new ValidationError(

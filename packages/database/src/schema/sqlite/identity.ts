@@ -18,6 +18,22 @@ export const users = sqliteTable('users', {
     .$defaultFn(() => new Date()),
 });
 
+/**
+ * Which notice or consent a user accepted and which version (terms or ai). One row per
+ * user and kind: accepting a newer version replaces the row. No foreign key, like the other
+ * user-keyed tables: a user's row exists only after their first command.
+ */
+export const userConsents = sqliteTable(
+  'user_consents',
+  {
+    userId: text('user_id').notNull(),
+    kind: text('kind').notNull(),
+    version: text('version').notNull(),
+    acceptedAt: integer('accepted_at', { mode: 'timestamp_ms' }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.kind] })],
+);
+
 export const guilds = sqliteTable('guilds', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -37,6 +53,12 @@ export const guilds = sqliteTable('guilds', {
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
+  /**
+   * When the bot left or was removed; null while it is in the server. The server's data is deleted
+   * 90 days after this time (STORY-193); adding the bot back clears it. Last column: the
+   * migration adds it after the others.
+   */
+  leftAt: integer('left_at', { mode: 'timestamp_ms' }),
 });
 
 export const guildMembers = sqliteTable(

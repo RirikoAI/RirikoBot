@@ -2,6 +2,8 @@
 
 Last updated: 2026-10-15
 
+Read this text in Bahasa Malaysia: [Terma Perkhidmatan](ms/terms.md). If the two versions differ, this English version prevails.
+
 These terms cover Ririko AI 2.0 ("Ririko"), a Discord bot and its web dashboard. Read them together with the [Privacy Policy](privacy.md).
 
 ## 1. Who These Terms Are For

@@ -19,5 +19,6 @@ export * from './memes/index.js';
 export * from './image-generation/index.js';
 export * from './welcomer/index.js';
 export * from './activity/index.js';
+export * from './privacy/index.js';
 export * from './owner/index.js';
 export * from './maintenance/index.js';

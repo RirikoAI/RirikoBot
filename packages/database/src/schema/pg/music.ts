@@ -36,7 +36,11 @@ export const musicHistory = pgTable(
     sourceProvider: varchar('source_provider', { length: 32 }).notNull(),
     playedAt: timestamp('played_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('idx_pg_music_history_guild_played').on(table.guildId, table.playedAt)],
+  (table) => [
+    index('idx_pg_music_history_guild_played').on(table.guildId, table.playedAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_pg_music_history_played').on(table.playedAt),
+  ],
 );
 
 export const musicSavedPlaylists = pgTable(

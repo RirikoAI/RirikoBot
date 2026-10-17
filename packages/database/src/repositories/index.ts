@@ -1,6 +1,8 @@
 export * from './types.js';
 export * from './base.js';
+export * from './retention.js';
 export * from './user.repository.js';
+export * from './user-consent.repository.js';
 export * from './guild-settings.repository.js';
 export * from './economy.repository.js';
 export * from './economy-config.repository.js';
@@ -39,6 +41,8 @@ export * from './web-passkey.repository.js';
 export * from './web-known-device.repository.js';
 export * from './bot-activity.repository.js';
 export * from './guild.repository.js';
+export * from './guild-data-inventory.js';
+export * from './guild-data.repository.js';
 export * from './adventure-session.repository.js';
 
 export * from './command-settings.repository.js';

@@ -19,20 +19,13 @@
 | `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | yes | large |
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | blocked | large |
 | `STORY-192` | Story | Guided Setup Wizard: the 1.x Installer Rebuilt as ririko setup | 21 | EPIC-020 | STORY-188 | yes | large |
-| `STORY-193` | Story | Privacy Notice, AI Consent and Data Retention Before the Public Bot Runs 2.0 | 21 | EPIC-020 | — | yes | large |
-| `STORY-194` | Story | Complete User Data Erasure Tool for Data Requests | 5 | EPIC-020 | STORY-193 | blocked | large |
+| `STORY-194` | Story | Complete User Data Erasure Tool for Data Requests | 5 | EPIC-020 | STORY-193 | yes | large |
 | `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | TASK-1881 | yes | medium |
 | `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | — | yes | medium |
 | `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872, STORY-192, STORY-193 | blocked | medium |
 | `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | — | yes | medium |
 | `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | — | yes | medium |
-| `TASK-1931` | Task | Consent Records and the One-Time Terms Notice on a User's First Interaction | 5 | STORY-193 | — | yes | medium |
-| `TASK-1932` | Task | `ai clear all`: Delete a User's AI Conversations in Every Server and Channel | 2 | STORY-193 | — | yes | medium |
-| `TASK-1933` | Task | AI Consent Gate: an Explicit "I Agree" Before Any AI Feature, and Withdrawal | 5 | STORY-193 | TASK-1931, TASK-1932 | blocked | medium |
-| `TASK-1934` | Task | Daily Data Retention Purge: AI Chat, Music History and Image Jobs After 90 Days, Audit Entries After a Year | 5 | STORY-193 | — | yes | medium |
-| `TASK-1941` | Task | `ririko user erase`: Remove or Anonymise Every Row a Bot Holds About One Discord User | 8 | STORY-194 | TASK-1931, TASK-1934 | blocked | medium |
-| `TASK-1935` | Task | Delete a Server's Data 90 Days After the Bot Leaves It | 8 | STORY-193 | TASK-1934 | blocked | medium |
-| `TASK-1936` | Task | Bahasa Malaysia Versions of the Terms of Service and the Privacy Policy | 3 | STORY-193 | TASK-1923 | yes | medium |
+| `TASK-1941` | Task | `ririko user erase`: Remove or Anonymise Every Row a Bot Holds About One Discord User | 8 | STORY-194 | TASK-1931, TASK-1934 | yes | medium |
 | `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | — | yes | small |
 | `CHORE-2002` | Chore | Make the Test Suite Pass on a Windows Development Machine | 2 | EPIC-020 | — | yes | medium |
 | `CHORE-2003` | Chore | Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal | 1 | EPIC-020 | — | yes | small |
@@ -153,6 +146,7 @@
 | `STORY-187` | Story | Privacy and Secret Audit Before 2.0.0 Goes Public on master | 5 | EPIC-020 | [STORY-187.md](./handovers/STORY-187.md) |
 | `STORY-188` | Story | Docs Cleanup: Archive Development Docs, Rewrite User Docs as Deterministic Current Steps | 13 | EPIC-020 | [STORY-188.md](./handovers/STORY-188.md) |
 | `STORY-189` | Story | Docusaurus Documentation Site on ririko.ai Replaces the GitHub Wiki | 21 | EPIC-020 | [STORY-189.md](./handovers/STORY-189.md) |
+| `STORY-193` | Story | Privacy Notice, AI Consent and Data Retention Before the Public Bot Runs 2.0 | 21 | EPIC-020 | [STORY-193.md](./handovers/STORY-193.md) |
 | `TASK-0051` | Task | Initialize Kanban Board, Protocol & WIP Limit Invariant | 3 | STORY-005 | [TASK-0051.md](./handovers/TASK-0051.md) |
 | `TASK-0101` | Task | pnpm Workspace Topology, Root Package.json, pnpm-workspace.yaml & Strict TSConfigs | 2 | STORY-010 | [TASK-0101.md](./handovers/TASK-0101.md) |
 | `TASK-0102` | Task | Shared TypeScript Base Configs & Package Reference Harness | 1 | STORY-010 | [TASK-0102.md](./handovers/TASK-0102.md) |
@@ -410,6 +404,12 @@
 | `TASK-1924` | Task | Local Setup Wizard Server and Pages With the 1.x Layout in the 2.0 Colors | 5 | STORY-192 | [TASK-1924.md](./handovers/TASK-1924.md) |
 | `TASK-1925` | Task | ririko setup Command, pnpm installer, Docker Mode and the Bot's First-Run Hint | 2 | STORY-192 | [TASK-1925.md](./handovers/TASK-1925.md) |
 | `TASK-1926` | Task | Docs: Start Every Install With the Setup Wizard | 2 | STORY-192 | [TASK-1926.md](./handovers/TASK-1926.md) |
+| `TASK-1931` | Task | Consent Records and the One-Time Terms Notice on a User's First Interaction | 5 | STORY-193 | [TASK-1931.md](./handovers/TASK-1931.md) |
+| `TASK-1932` | Task | `ai clear all`: Delete a User's AI Conversations in Every Server and Channel | 2 | STORY-193 | [TASK-1932.md](./handovers/TASK-1932.md) |
+| `TASK-1933` | Task | AI Consent Gate: an Explicit "I Agree" Before Any AI Feature, and Withdrawal | 5 | STORY-193 | [TASK-1933.md](./handovers/TASK-1933.md) |
+| `TASK-1934` | Task | Daily Data Retention Purge: AI Chat, Music History and Image Jobs After 90 Days, Audit Entries After a Year | 5 | STORY-193 | [TASK-1934.md](./handovers/TASK-1934.md) |
+| `TASK-1935` | Task | Delete a Server's Data 90 Days After the Bot Leaves It | 8 | STORY-193 | [TASK-1935.md](./handovers/TASK-1935.md) |
+| `TASK-1936` | Task | Bahasa Malaysia Versions of the Terms of Service and the Privacy Policy | 3 | STORY-193 | [TASK-1936.md](./handovers/TASK-1936.md) |
 | `TASK-1927` | Task | Setup Wizard Feedback: Step Tabs on the Left, the Shared Gemini Key in the Right Group, Lavalink Settings | 5 | STORY-192 | [TASK-1927.md](./handovers/TASK-1927.md) |
 | `CHORE-1701` | Chore | Resolve Adventure Plan Depth, Locking, Card Rewards & Payment Rules | 2 | STORY-170 | [CHORE-1701.md](./handovers/CHORE-1701.md) |
 | `CHORE-0301` | Chore | Discord Bot Dev Entrypoint, Ping Command & Environment Compatibility | 2 | EPIC-003 | [CHORE-0301.md](./handovers/CHORE-0301.md) |

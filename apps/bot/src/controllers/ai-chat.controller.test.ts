@@ -157,6 +157,14 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
         language_preference TEXT NOT NULL DEFAULT 'en'
       );
 
+      CREATE TABLE user_consents (
+        user_id TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        version TEXT NOT NULL,
+        accepted_at INTEGER NOT NULL,
+        PRIMARY KEY (user_id, kind)
+      );
+
       CREATE TABLE economy_balances (
         user_id TEXT PRIMARY KEY,
         wallet_balance INTEGER NOT NULL DEFAULT 0,
@@ -168,6 +176,10 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
     `);
 
     services = await createBotServices(dbClient);
+    // These users agreed to AI features; section 7 tests the users who did not.
+    for (const userId of ['user-alice', 'user-sender-1', 'user-privacy', 'alice-1']) {
+      await services.consentService.accept(userId, 'ai');
+    }
 
     mockProvider = new MockAiProvider();
     services.fallbackChainManager.registerProvider(mockProvider);
@@ -221,6 +233,7 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       content: options.content,
       channelId: options.channelId ?? 'channel-general',
       channel: mockChannel,
+      guildId: options.guildId === null ? null : (options.guildId ?? 'guild-1'),
       guild:
         options.guildId !== null
           ? {
@@ -661,6 +674,235 @@ describe('AiChatController & Dedicated #ririko-ai Gateway Listener (TASK-0631)',
       // Invalidate cache
       controller.invalidateChannelCache('guild-1');
       expect(await controller.getDedicatedChannelId('guild-1')).toBe('ch-2');
+    });
+  });
+
+  describe('6. Logs carry ids and lengths, never chat text (TASK-1934)', () => {
+    const PROMPT = 'my secret wedding plans for june';
+    const REPLY = 'a long private reply about the wedding';
+
+    /** Every argument of every console call, flattened to text, the way the log would print it. */
+    const logged = (spy: ReturnType<typeof vi.spyOn>): string =>
+      spy.mock.calls.map((args: unknown[]) => args.map(String).join(' ')).join('\n');
+
+    it('logs the user, channel and prompt length when a provider fails, not the prompt', async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
+      const failure = Object.assign(new Error('upstream exploded'), {
+        name: 'DiscordAPIError',
+        requestBody: { json: { content: REPLY } },
+        details: { prompt: PROMPT },
+      });
+      mockProvider.stream = () => {
+        throw failure;
+      };
+      mockProvider.generate = async () => {
+        throw failure;
+      };
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+      const { message } = createMockMessage({
+        content: PROMPT,
+        channelId: 'channel-ai',
+        userId: 'user-privacy',
+      });
+      await controller.handleAiMessage(message);
+
+      const text = logged(errorSpy) + logged(warnSpy);
+      expect(text).toContain('[AiChatController] Error processing AI chat message');
+      expect(text).toContain('user user-privacy');
+      expect(text).toContain('guild guild-1');
+      expect(text).toContain('channel channel-ai');
+      expect(text).toContain(`prompt ${PROMPT.length} chars`);
+      expect(text).not.toContain(PROMPT);
+      expect(text).not.toContain(REPLY);
+      errorSpy.mockRestore();
+      warnSpy.mockRestore();
+    });
+
+    it('logs only lengths when recording the turn fails', async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
+      mockProvider.streamTokens = [REPLY];
+      vi.spyOn(services.conversationManager, 'recordTurn').mockRejectedValue(
+        Object.assign(new Error('disk full'), { details: { content: PROMPT, reply: REPLY } }),
+      );
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+      const { message } = createMockMessage({
+        content: PROMPT,
+        channelId: 'channel-ai',
+        userId: 'user-privacy',
+      });
+      await controller.handleAiMessage(message);
+
+      const text = logged(errorSpy);
+      expect(text).toContain(
+        `Failed to record conversation turn for user user-privacy (prompt ${PROMPT.length} chars, reply ${REPLY.length} chars): Error: disk full`,
+      );
+      expect(text).not.toContain(PROMPT);
+      expect(text).not.toContain(REPLY);
+      errorSpy.mockRestore();
+    });
+  });
+  describe('7. The AI consent gate (TASK-1933)', () => {
+    const askWithoutConsent = (options: { channelId?: string; userId?: string } = {}) =>
+      createMockMessage({
+        content: 'my private question',
+        channelId: options.channelId ?? 'channel-ai',
+        userId: options.userId ?? 'user-new',
+      });
+
+    const sentToProvider = () => mockProvider.recordedRequests.length;
+    const promptOf = (message: Message) =>
+      (message.reply as unknown as ReturnType<typeof vi.fn>).mock.calls[0]![0] as {
+        embeds: { data: { description?: string } }[];
+        components: { components: { data: { custom_id: string; label: string } }[] }[];
+        allowedMentions: unknown;
+      };
+
+    beforeEach(async () => {
+      await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
+    });
+
+    it('answers a user without consent with the consent prompt, and nothing reaches a provider', async () => {
+      const { message } = askWithoutConsent();
+
+      expect(await controller.handleAiMessage(message)).toBe(true);
+
+      expect(sentToProvider()).toBe(0);
+      expect(message.reply).toHaveBeenCalledTimes(1);
+      const prompt = promptOf(message);
+      expect(prompt.embeds[0]!.data.description).toContain('90 days');
+      expect(prompt.components[0]!.components.map((c) => c.data.label)).toEqual([
+        'I agree',
+        'No thanks',
+      ]);
+      expect(prompt.components[0]!.components.map((c) => c.data.custom_id)).toEqual([
+        'consent:ai:accept:user-new',
+        'consent:ai:decline:user-new',
+      ]);
+      expect(prompt.allowedMentions).toEqual({ repliedUser: false });
+    });
+
+    it('stores nothing for a user without consent', async () => {
+      const { message } = askWithoutConsent();
+      await controller.handleAiMessage(message);
+
+      const history = await services.conversationManager.getContextMessages({
+        userId: 'user-new',
+        guildId: 'guild-1',
+        channelId: 'channel-ai',
+      });
+      expect(history).toEqual([]);
+      expect(await services.aiRepo.getUserPreferences('user-new')).toBeNull();
+    });
+
+    it('gates a mention in any channel the same way', async () => {
+      const { message } = createMockMessage({
+        content: '<@bot-ririko-999> tell me a joke',
+        channelId: 'channel-general',
+        mentionsBot: true,
+        userId: 'user-new',
+      });
+
+      expect(await controller.handleAiMessage(message)).toBe(true);
+
+      expect(sentToProvider()).toBe(0);
+      expect(promptOf(message).components).toHaveLength(1);
+    });
+
+    it('asks a user once per channel every ten minutes, and still sends nothing', async () => {
+      vi.useFakeTimers();
+      try {
+        const first = askWithoutConsent();
+        await controller.handleAiMessage(first.message);
+        expect(first.message.reply).toHaveBeenCalledTimes(1);
+
+        const second = askWithoutConsent();
+        expect(await controller.handleAiMessage(second.message)).toBe(true);
+        expect(second.message.reply).not.toHaveBeenCalled();
+
+        // Another user in the same channel is asked.
+        const other = askWithoutConsent({ userId: 'user-other' });
+        await controller.handleAiMessage(other.message);
+        expect(other.message.reply).toHaveBeenCalledTimes(1);
+
+        vi.advanceTimersByTime(10 * 60_000 + 1);
+        const later = askWithoutConsent();
+        await controller.handleAiMessage(later.message);
+        expect(later.message.reply).toHaveBeenCalledTimes(1);
+        expect(sentToProvider()).toBe(0);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('answers after the user agrees', async () => {
+      await services.consentService.accept('user-new', 'ai');
+      const { message, edits } = askWithoutConsent();
+
+      await controller.handleAiMessage(message);
+
+      expect(sentToProvider()).toBeGreaterThan(0);
+      expect(edits[edits.length - 1]).toContain('Hello from Ririko AI!');
+    });
+
+    it('stops again after the user withdraws', async () => {
+      await services.consentService.accept('user-new', 'ai');
+      await services.consentService.withdraw('user-new', 'ai');
+      const { message } = askWithoutConsent();
+
+      await controller.handleAiMessage(message);
+
+      expect(sentToProvider()).toBe(0);
+      expect(promptOf(message).components).toHaveLength(1);
+    });
+
+    it('fails closed when the consent check fails: no provider call, nothing stored', async () => {
+      vi.spyOn(services.consentService, 'hasAccepted').mockRejectedValue(new Error('db down'));
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const { message } = askWithoutConsent({ userId: 'user-alice' });
+
+      expect(await controller.handleAiMessage(message)).toBe(true);
+
+      expect(sentToProvider()).toBe(0);
+      expect(message.reply).not.toHaveBeenCalled();
+      expect(errorSpy.mock.calls.map((args) => args.map(String).join(' ')).join('\n')).toContain(
+        'Could not check the AI consent of user user-alice',
+      );
+      errorSpy.mockRestore();
+    });
+
+    it('does not record the turn when the user withdrew while the answer was being made', async () => {
+      await services.consentService.accept('user-new', 'ai');
+      mockProvider.streamTokens = ['Working on it'];
+      const recordTurn = vi.spyOn(services.conversationManager, 'recordTurn');
+      const originalStream = mockProvider.stream.bind(mockProvider);
+      mockProvider.stream = (request: ChatRequest) => {
+        void services.consentService.withdraw('user-new', 'ai');
+        return originalStream(request);
+      };
+      const { message } = askWithoutConsent();
+
+      await controller.handleAiMessage(message);
+
+      expect(recordTurn).not.toHaveBeenCalled();
+    });
+
+    it('still greets an empty mention, which sends nothing to a provider', async () => {
+      const { message } = createMockMessage({
+        content: '<@bot-ririko-999>',
+        channelId: 'channel-general',
+        mentionsBot: true,
+        userId: 'user-new',
+      });
+
+      await controller.handleAiMessage(message);
+
+      expect(message.reply).toHaveBeenCalledWith({
+        content: expect.stringContaining('Konnichiwa'),
+      });
+      expect(sentToProvider()).toBe(0);
     });
   });
 });

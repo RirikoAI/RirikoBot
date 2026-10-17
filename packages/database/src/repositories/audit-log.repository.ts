@@ -1,11 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { and, desc, eq, lt, or } from 'drizzle-orm';
+import { and, desc, eq, inArray, lt, or } from 'drizzle-orm';
 
 import type { DatabaseClient } from '../client/types.js';
 import type { AuditLog, NewAuditLog } from '../schema/types/index.js';
 import * as sqliteSchema from '../schema/sqlite/index.js';
 import * as pgSchema from '../schema/pg/index.js';
 import { DatabaseError } from '@ririko/core';
+import { PURGE_BATCH_SIZE, deleteInBatches } from './retention.js';
 
 /** Position in a newest-first audit listing: entries after it are older. */
 export interface AuditLogCursor {
@@ -77,5 +78,45 @@ export class AuditLogRepository {
       .orderBy(desc(t.createdAt), desc(t.id))
       .limit(limit);
     return rows as unknown as AuditLog[];
+  }
+
+  /**
+   * Retention purge (STORY-193): deletes entries created before `cutoff`, `batchSize` rows per
+   * statement. Entries created at or after `cutoff` stay. Returns the number of rows deleted.
+   */
+  async deleteOlderThan(
+    cutoff: Date,
+    tx?: DatabaseClient,
+    batchSize: number = PURGE_BATCH_SIZE,
+  ): Promise<number> {
+    const client = this.getClient(tx);
+    if (client.dialect === 'sqlite') {
+      const { db } = client;
+      const t = sqliteSchema.auditLogs;
+      return deleteInBatches(batchSize, async () => {
+        const res = await db
+          .delete(t)
+          .where(
+            inArray(
+              t.id,
+              db.select({ id: t.id }).from(t).where(lt(t.createdAt, cutoff)).limit(batchSize),
+            ),
+          );
+        return res.changes;
+      });
+    }
+    const { db } = client;
+    const t = pgSchema.auditLogs;
+    return deleteInBatches(batchSize, async () => {
+      const res = await db
+        .delete(t)
+        .where(
+          inArray(
+            t.id,
+            db.select({ id: t.id }).from(t).where(lt(t.createdAt, cutoff)).limit(batchSize),
+          ),
+        );
+      return res.rowCount ?? 0;
+    });
   }
 }

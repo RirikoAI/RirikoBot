@@ -169,5 +169,34 @@ export const PG_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "4d43aea5de2b72de3a788023490a27cb1501a4533d2b611b263b679efad5c880",
     "contract": false
+  },
+  {
+    "id": "0002_user_consents",
+    "statements": [
+      "CREATE TABLE \"user_consents\" (\n\t\"user_id\" varchar(32) NOT NULL,\n\t\"kind\" varchar(16) NOT NULL,\n\t\"version\" varchar(32) NOT NULL,\n\t\"accepted_at\" timestamp with time zone NOT NULL,\n\tCONSTRAINT \"user_consents_user_id_kind_pk\" PRIMARY KEY(\"user_id\",\"kind\")\n);"
+    ],
+    "checksum": "2007c3db7858d33803977b79299718f02f659a7327340e516542ffb892313fd7",
+    "contract": false
+  },
+  {
+    "id": "0003_data_retention_indexes",
+    "statements": [
+      "CREATE INDEX \"idx_pg_music_history_played\" ON \"music_history\" USING btree (\"played_at\");",
+      "CREATE INDEX \"idx_pg_ai_conversations_updated\" ON \"ai_conversations\" USING btree (\"updated_at\");",
+      "CREATE INDEX \"idx_pg_ai_messages_created\" ON \"ai_messages\" USING btree (\"created_at\");",
+      "CREATE INDEX \"idx_pg_image_jobs_created\" ON \"image_jobs\" USING btree (\"created_at\");",
+      "CREATE INDEX \"idx_pg_audit_logs_created\" ON \"audit_logs\" USING btree (\"created_at\");"
+    ],
+    "checksum": "ed71b7c2c73136e1636ea80f7a59b0dfcda26c6e066ba842163dbcd649ec1772",
+    "contract": false
+  },
+  {
+    "id": "0004_guild_left_at",
+    "statements": [
+      "ALTER TABLE \"guilds\" ADD COLUMN \"left_at\" timestamp with time zone;",
+      "-- Servers the bot already left: start their 90 days now, when this migration runs, so nothing is purged before 90 days after this release.\nUPDATE \"guilds\" SET \"left_at\" = now() WHERE \"is_active\" = false AND \"left_at\" IS NULL;"
+    ],
+    "checksum": "ef2f252da0dd00497fd9103daa5948934ba09b476195f37c27b552b9f545837b",
+    "contract": false
   }
 ];

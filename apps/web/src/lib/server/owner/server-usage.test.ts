@@ -18,6 +18,7 @@ function guild(id: string, overrides: Partial<Guild> = {}): Guild {
     invitedVia: 'audit_log',
     joinedAt: new Date(Date.UTC(2026, 8, 1)),
     isActive: true,
+    leftAt: null,
     createdAt: new Date(Date.UTC(2026, 8, 1)),
     updatedAt: new Date(Date.UTC(2026, 8, 1)),
     ...overrides,

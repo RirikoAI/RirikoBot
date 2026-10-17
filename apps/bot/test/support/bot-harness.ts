@@ -106,6 +106,11 @@ export interface BotHarness {
 export interface BotHarnessOptions {
   prefix?: string;
   fixture?: FakeDiscordFixture;
+  /**
+   * Whether every fixture user has already accepted the terms notice (default true), so the
+   * notice does not add a reply to the command under test. Pass false to test the notice.
+   */
+  termsAccepted?: boolean;
 }
 
 export async function startBotHarness(options: BotHarnessOptions = {}): Promise<BotHarness> {
@@ -121,6 +126,9 @@ export async function startBotHarness(options: BotHarnessOptions = {}): Promise<
   const { client } = createBot({ clientOptions: { rest: { api: fake.apiUrl } } });
   client.rest.setToken('fake-bot-token');
   const services = await createBotServices(db, client);
+  if (options.termsAccepted !== false) {
+    for (const user of fake.fixture.users) await services.consentService.accept(user.id, 'terms');
+  }
 
   // The same wiring as main(): router, command set, component interactions.
   const router = createCommandRouter(services, prefix);

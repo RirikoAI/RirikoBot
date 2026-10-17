@@ -59,6 +59,8 @@ describe('slash and context menu commands through the real router (TASK-1202)', 
   });
 
   it('defers a message context menu command, then edits the deferred reply', async () => {
+    // Translation is an AI feature: the user must have agreed before it validates anything.
+    await harness.services.consentService.accept(ids.admin, 'ai');
     const interaction = harness.runMessageCommand('Translate to English', { content: '' });
 
     const deferred = (await harness.interactionCallback(interaction)).body as CallbackBody;

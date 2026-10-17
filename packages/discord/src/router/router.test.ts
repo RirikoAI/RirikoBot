@@ -493,6 +493,9 @@ describe('CommandRouter onCommandRun hook (TASK-1131)', () => {
     await router.dispatchInteraction(interaction());
 
     expect(command.execute).toHaveBeenCalledOnce();
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('onCommandRun hook failed in CommandRouter: Error: hook failed'),
+    );
     errorSpy.mockRestore();
   });
 });

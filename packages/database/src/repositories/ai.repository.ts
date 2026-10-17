@@ -1,6 +1,8 @@
-import { eq, and, desc, isNull, sql } from 'drizzle-orm';
+import { eq, and, desc, inArray, isNotNull, isNull, lt, notExists, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
+import { PURGE_BATCH_SIZE, deleteInBatches } from './retention.js';
+import { withTransaction } from '../transactions/index.js';
 import type { DatabaseClient } from '../client/types.js';
 import type {
   AiConversation,
@@ -311,6 +313,171 @@ export class AiRepository extends BaseRepository<
     return true;
   }
 
+  /**
+   * Deletes every AI conversation of the user, in every server and channel, with all their
+   * messages, in one transaction. Returns how many conversations were removed. User and guild
+   * preferences are not touched.
+   */
+  async clearAllForUser(userId: string, tx?: DatabaseClient): Promise<number> {
+    const client = this.getClient(tx);
+    return withTransaction(client, async (txClient) => {
+      if (this.isSqlite(txClient)) {
+        const owned = txClient.db
+          .select({ id: sqliteSchema.aiConversations.id })
+          .from(sqliteSchema.aiConversations)
+          .where(eq(sqliteSchema.aiConversations.userId, userId));
+        await txClient.db
+          .delete(sqliteSchema.aiMessages)
+          .where(inArray(sqliteSchema.aiMessages.conversationId, owned));
+        const removed = await txClient.db
+          .delete(sqliteSchema.aiConversations)
+          .where(eq(sqliteSchema.aiConversations.userId, userId))
+          .returning({ id: sqliteSchema.aiConversations.id });
+        return removed.length;
+      }
+      const owned = txClient.db
+        .select({ id: pgSchema.aiConversations.id })
+        .from(pgSchema.aiConversations)
+        .where(eq(pgSchema.aiConversations.userId, userId));
+      await txClient.db
+        .delete(pgSchema.aiMessages)
+        .where(inArray(pgSchema.aiMessages.conversationId, owned));
+      const removed = await txClient.db
+        .delete(pgSchema.aiConversations)
+        .where(eq(pgSchema.aiConversations.userId, userId))
+        .returning({ id: pgSchema.aiConversations.id });
+      return removed.length;
+    });
+  }
+
+  // --- Data Retention ---
+
+  /**
+   * Retention purge for AI chat (STORY-193). In batches of `batchSize`, so a large table never
+   * runs as one statement: deletes messages created before `cutoff`; deletes conversations last
+   * updated before `cutoff` that have no message left; and clears the `summary` (text derived
+   * from chat) of every conversation last updated before `cutoff`. Rows at or after `cutoff` are
+   * never touched. Returns the messages and conversations deleted; cleared summaries are not
+   * counted.
+   */
+  async deleteOlderThan(
+    cutoff: Date,
+    tx?: DatabaseClient,
+    batchSize: number = PURGE_BATCH_SIZE,
+  ): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const { db } = client;
+      const conv = sqliteSchema.aiConversations;
+      const msg = sqliteSchema.aiMessages;
+      const messages = await deleteInBatches(batchSize, async () => {
+        const res = await db
+          .delete(msg)
+          .where(
+            inArray(
+              msg.id,
+              db.select({ id: msg.id }).from(msg).where(lt(msg.createdAt, cutoff)).limit(batchSize),
+            ),
+          );
+        return res.changes;
+      });
+      const conversations = await deleteInBatches(batchSize, async () => {
+        const res = await db.delete(conv).where(
+          inArray(
+            conv.id,
+            db
+              .select({ id: conv.id })
+              .from(conv)
+              .where(
+                and(
+                  lt(conv.updatedAt, cutoff),
+                  notExists(
+                    db
+                      .select({ one: sql`1` })
+                      .from(msg)
+                      .where(eq(msg.conversationId, conv.id)),
+                  ),
+                ),
+              )
+              .limit(batchSize),
+          ),
+        );
+        return res.changes;
+      });
+      await deleteInBatches(batchSize, async () => {
+        const res = await db
+          .update(conv)
+          .set({ summary: null })
+          .where(
+            inArray(
+              conv.id,
+              db
+                .select({ id: conv.id })
+                .from(conv)
+                .where(and(lt(conv.updatedAt, cutoff), isNotNull(conv.summary)))
+                .limit(batchSize),
+            ),
+          );
+        return res.changes;
+      });
+      return messages + conversations;
+    }
+
+    const { db } = client;
+    const conv = pgSchema.aiConversations;
+    const msg = pgSchema.aiMessages;
+    const messages = await deleteInBatches(batchSize, async () => {
+      const res = await db
+        .delete(msg)
+        .where(
+          inArray(
+            msg.id,
+            db.select({ id: msg.id }).from(msg).where(lt(msg.createdAt, cutoff)).limit(batchSize),
+          ),
+        );
+      return res.rowCount ?? 0;
+    });
+    const conversations = await deleteInBatches(batchSize, async () => {
+      const res = await db.delete(conv).where(
+        inArray(
+          conv.id,
+          db
+            .select({ id: conv.id })
+            .from(conv)
+            .where(
+              and(
+                lt(conv.updatedAt, cutoff),
+                notExists(
+                  db
+                    .select({ one: sql`1` })
+                    .from(msg)
+                    .where(eq(msg.conversationId, conv.id)),
+                ),
+              ),
+            )
+            .limit(batchSize),
+        ),
+      );
+      return res.rowCount ?? 0;
+    });
+    await deleteInBatches(batchSize, async () => {
+      const res = await db
+        .update(conv)
+        .set({ summary: null })
+        .where(
+          inArray(
+            conv.id,
+            db
+              .select({ id: conv.id })
+              .from(conv)
+              .where(and(lt(conv.updatedAt, cutoff), isNotNull(conv.summary)))
+              .limit(batchSize),
+          ),
+        );
+      return res.rowCount ?? 0;
+    });
+    return messages + conversations;
+  }
   // --- Messages Management & Sliding Window ---
 
   async addMessage(data: InsertAiMessage, tx?: DatabaseClient): Promise<AiMessage> {
@@ -475,6 +642,23 @@ export class AiRepository extends BaseRepository<
         .where(eq(pgSchema.aiUserPreferences.userId, userId));
       return (row as unknown as AiUserPreferences) ?? null;
     }
+  }
+
+  /** Deletes the user's AI preferences (time zone, nickname, language); true when there were any. */
+  async deleteUserPreferences(userId: string, tx?: DatabaseClient): Promise<boolean> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const removed = await client.db
+        .delete(sqliteSchema.aiUserPreferences)
+        .where(eq(sqliteSchema.aiUserPreferences.userId, userId))
+        .returning({ userId: sqliteSchema.aiUserPreferences.userId });
+      return removed.length > 0;
+    }
+    const removed = await client.db
+      .delete(pgSchema.aiUserPreferences)
+      .where(eq(pgSchema.aiUserPreferences.userId, userId))
+      .returning({ userId: pgSchema.aiUserPreferences.userId });
+    return removed.length > 0;
   }
 
   async upsertUserPreferences(

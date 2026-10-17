@@ -1,6 +1,7 @@
-import { eq, and, desc, asc, sql } from 'drizzle-orm';
+import { eq, and, desc, asc, inArray, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { BaseRepository } from './base.js';
+import { PURGE_BATCH_SIZE, deleteInBatches } from './retention.js';
 import type { DatabaseClient } from '../client/types.js';
 import type {
   MusicGuildSettings,
@@ -571,5 +572,48 @@ export class MusicRepository extends BaseRepository<
         .returning({ id: pgSchema.musicPlaylistTracks.id });
       return deleted.length;
     }
+  }
+
+  // --- Data Retention ---
+
+  /**
+   * Retention purge for the play history (STORY-193): deletes `music_history` rows played before
+   * `cutoff`, `batchSize` rows per statement. Rows played at or after `cutoff` stay. Returns the
+   * number of rows deleted.
+   */
+  async deleteOlderThan(
+    cutoff: Date,
+    tx?: DatabaseClient,
+    batchSize: number = PURGE_BATCH_SIZE,
+  ): Promise<number> {
+    const client = this.getClient(tx);
+    if (this.isSqlite(client)) {
+      const { db } = client;
+      const t = sqliteSchema.musicHistory;
+      return deleteInBatches(batchSize, async () => {
+        const res = await db
+          .delete(t)
+          .where(
+            inArray(
+              t.id,
+              db.select({ id: t.id }).from(t).where(lt(t.playedAt, cutoff)).limit(batchSize),
+            ),
+          );
+        return res.changes;
+      });
+    }
+    const { db } = client;
+    const t = pgSchema.musicHistory;
+    return deleteInBatches(batchSize, async () => {
+      const res = await db
+        .delete(t)
+        .where(
+          inArray(
+            t.id,
+            db.select({ id: t.id }).from(t).where(lt(t.playedAt, cutoff)).limit(batchSize),
+          ),
+        );
+      return res.rowCount ?? 0;
+    });
   }
 }

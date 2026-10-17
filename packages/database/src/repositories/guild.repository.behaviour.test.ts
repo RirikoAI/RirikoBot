@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { describeDialects } from '../testing/dialects.js';
 import { GuildRepository, type GuildRegistration } from './guild.repository.js';
 
@@ -194,5 +194,68 @@ describeDialects('GuildRepository behaviour', (db) => {
     await repo.upsert(guild('new', { joinedAt: at(5) }));
 
     expect((await repo.listAll()).map((row) => row.id)).toEqual(['new', 'old']);
+  });
+
+  describe('left_at (TASK-1935)', () => {
+    it('is empty while the bot is in the server', async () => {
+      const repo = new GuildRepository(db.client);
+      await repo.upsert(guild('g1'));
+      await repo.upsert(guild('g1', { name: 'Renamed' }));
+
+      expect((await repo.findById('g1'))?.leftAt).toBeNull();
+    });
+
+    it('is stamped with the time the bot leaves, by markInactive', async () => {
+      const repo = new GuildRepository(db.client);
+      await repo.upsert(guild('g1'));
+      const before = Date.now();
+
+      await repo.markInactive(['g1']);
+
+      const row = await repo.findById('g1');
+      expect(row?.isActive).toBe(false);
+      expect(row?.leftAt?.getTime()).toBeGreaterThanOrEqual(before);
+      expect(row?.leftAt?.getTime()).toBeLessThanOrEqual(Date.now());
+    });
+
+    it('is stamped for the servers markInactiveExcept marks, and only for those', async () => {
+      const repo = new GuildRepository(db.client);
+      await repo.upsert(guild('g1'));
+      await repo.upsert(guild('g2'));
+
+      await repo.markInactiveExcept(['g1']);
+
+      expect((await repo.findById('g1'))?.leftAt).toBeNull();
+      expect((await repo.findById('g2'))?.leftAt).toBeInstanceOf(Date);
+    });
+
+    it('keeps the first time when the server is marked inactive again', async () => {
+      const repo = new GuildRepository(db.client);
+      await repo.upsert(guild('g1'));
+      await repo.markInactive(['g1']);
+      const first = (await repo.findById('g1'))?.leftAt;
+      expect(first).toBeInstanceOf(Date);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+
+      await repo.markInactive(['g1']);
+      await repo.markInactiveExcept([]);
+
+      expect((await repo.findById('g1'))?.leftAt).toEqual(first);
+    });
+
+    it('is cleared when the bot is added back, by upsert and by the invite flow', async () => {
+      const repo = new GuildRepository(db.client);
+      await repo.upsert(guild('g1'));
+      await repo.upsert(guild('g2'));
+      await repo.markInactive(['g1', 'g2']);
+      expect((await repo.findById('g1'))?.leftAt).toBeInstanceOf(Date);
+      expect((await repo.findById('g2'))?.leftAt).toBeInstanceOf(Date);
+
+      await repo.upsert(guild('g1'));
+      await repo.recordInvite(guild('g2'), 'u1');
+
+      expect(await repo.findById('g1')).toMatchObject({ isActive: true, leftAt: null });
+      expect(await repo.findById('g2')).toMatchObject({ isActive: true, leftAt: null });
+    });
   });
 });

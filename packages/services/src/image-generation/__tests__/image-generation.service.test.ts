@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createDatabaseClient } from '@ririko/database';
 import type { SqliteDatabaseClient } from '@ririko/database';
 import { ImageRepository } from '@ririko/database';
@@ -141,9 +141,12 @@ describe('ImageGenerationService (TASK-1321)', () => {
         supportsPromptEnhance: false,
       };
       async generate(_request: ImageGenerationRequest): Promise<ImageGenerationResult> {
-        throw new Error('Primary provider network timeout');
+        throw Object.assign(new Error('Primary provider network timeout'), {
+          details: { prompt: 'resilient prompt' },
+        });
       }
     }
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     const service = new ImageGenerationService({
       repository: repo,
@@ -159,5 +162,12 @@ describe('ImageGenerationService (TASK-1321)', () => {
 
     expect(result.providerId).toBe('mock');
     expect(result.images[0]?.buffer).toBeInstanceOf(Buffer);
+    // The fallback is logged with the error described, never the error object that can echo the prompt.
+    expect(warn).toHaveBeenCalledOnce();
+    expect(warn.mock.calls[0]).toHaveLength(1);
+    expect(String(warn.mock.calls[0]?.[0])).toContain("Primary provider 'failing' failed for job");
+    expect(String(warn.mock.calls[0]?.[0])).toContain('Error: Primary provider network timeout');
+    expect(String(warn.mock.calls[0]?.[0])).not.toContain('resilient prompt');
+    warn.mockRestore();
   });
 });

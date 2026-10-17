@@ -134,5 +134,9 @@ export const auditLogs = pgTable(
     userAgent: text('user_agent'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('idx_pg_audit_logs_guild_created').on(table.guildId, table.createdAt)],
+  (table) => [
+    index('idx_pg_audit_logs_guild_created').on(table.guildId, table.createdAt),
+    // Serves the daily retention purge (a time-only delete).
+    index('idx_pg_audit_logs_created').on(table.createdAt),
+  ],
 );

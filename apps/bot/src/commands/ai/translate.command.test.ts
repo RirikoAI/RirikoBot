@@ -13,9 +13,8 @@ import {
   createCommandOverrideMiddleware,
 } from '@ririko/discord';
 import { createTranslateCommand } from './translate.command.js';
-import type { BotServices } from '../../services.js';
 
-function setup(content = 'Bonjour !', embeds: EmbedBuilder[] = []) {
+function setup(content = 'Bonjour !', embeds: EmbedBuilder[] = [], consent = true) {
   const generate = vi.fn().mockResolvedValue({
     content: 'Hello!',
     provider: 'fake',
@@ -25,10 +24,20 @@ function setup(content = 'Bonjour !', embeds: EmbedBuilder[] = []) {
   const getGuildPreferences = vi
     .fn()
     .mockResolvedValue({ providerOverride: 'gemini', modelOverride: 'gemini-2.5-flash' });
+  const hasAccepted = vi.fn().mockResolvedValue(consent);
   const services = {
-    fallbackChainManager: { generate },
+    fallbackChainManager: {
+      generate,
+      getProviders: () => [{ id: 'gemini', name: 'Google Gemini', isAvailable: true }],
+    },
     conversationManager: { getGuildPreferences },
-  } as unknown as Pick<BotServices, 'fallbackChainManager' | 'conversationManager'>;
+    consentService: { hasAccepted },
+    imageGenerationService: { getAvailableProviders: () => [] },
+    legalLinks: {
+      termsUrl: 'https://example.test/terms',
+      privacyUrl: 'https://example.test/privacy',
+    },
+  } as unknown as Parameters<typeof createTranslateCommand>[0];
   const router = new CommandRouter();
   router.registry.register(createTranslateCommand(services));
   const raw = {
@@ -60,7 +69,7 @@ function setup(content = 'Bonjour !', embeds: EmbedBuilder[] = []) {
     followUp: vi.fn(),
   };
   const interaction = raw as unknown as MessageContextMenuCommandInteraction;
-  return { router, raw, interaction, generate, getGuildPreferences };
+  return { router, raw, interaction, generate, getGuildPreferences, hasAccepted };
 }
 
 describe('Translate to English message context menu', () => {
@@ -93,6 +102,28 @@ describe('Translate to English message context menu', () => {
       flags: MessageFlags.SuppressEmbeds,
     });
     expect(raw.reply).not.toHaveBeenCalled();
+    expect(raw.followUp).not.toHaveBeenCalled();
+  });
+
+  it('asks for AI consent privately and sends nothing to a provider when the user has not agreed', async () => {
+    const { router, interaction, raw, generate, hasAccepted, getGuildPreferences } = setup(
+      'Bonjour !',
+      [],
+      false,
+    );
+    await router.dispatchInteraction(interaction);
+
+    expect(hasAccepted).toHaveBeenCalledWith('reader', 'ai');
+    expect(generate).not.toHaveBeenCalled();
+    expect(getGuildPreferences).not.toHaveBeenCalled();
+    // The router already deferred privately, so the prompt replaces the placeholder.
+    expect(raw.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
+    expect(raw.editReply).toHaveBeenCalledTimes(1);
+    const prompt = raw.editReply.mock.calls[0] as unknown as [
+      { embeds: EmbedBuilder[]; components: unknown[] },
+    ];
+    expect(prompt[0].embeds[0]!.data.description).toContain('**Google Gemini**');
+    expect(prompt[0].components).toHaveLength(1);
     expect(raw.followUp).not.toHaveBeenCalled();
   });
 

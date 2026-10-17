@@ -31,6 +31,8 @@ const sidebars: SidebarsConfig = {
         'adventure-completion-rewards',
         'legal/terms',
         'legal/privacy',
+        'legal/ms/terms',
+        'legal/ms/privacy',
       ],
     },
     {

@@ -23,6 +23,7 @@ describe('AI provider fallback through createBotServices', () => {
     vi.stubEnv('DEFAULT_AI_MODEL', '');
     db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
     services = await createBotServices(db);
+    await services.consentService.accept('user-1', 'ai');
     await services.aiRepo.setAiChannel('guild-1', 'channel-ai');
     controller = new AiChatController({ user: { id: 'bot-1' } } as unknown as Client, services, {
       minEditIntervalMs: 0,

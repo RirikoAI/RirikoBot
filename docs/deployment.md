@@ -390,6 +390,8 @@ The file `.env.production.example` lists every setting with a comment. The compo
 | `RIRIKO_ENV_FILE` | `.env.production` | The settings file the bot and the dashboard read. |
 | `BOT_OWNER_ID` | not set | Discord user IDs of the owners, separated by commas. |
 | `DEFAULT_PREFIX` | `!` | The default prefix for text commands. |
+| `TERMS_URL` | `https://ririko.ai/docs/legal/terms` | The Terms of Service the one-time notice for new users links to. Set it to your own page when you host the bot yourself. |
+| `PRIVACY_URL` | `https://ririko.ai/docs/legal/privacy` | The Privacy Policy the same notice links to. |
 
 Optional features use more settings: AI chat (`DEFAULT_AI_PROVIDER`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `OLLAMA_BASE_URL`), image generation (`REPLICATE_API_TOKEN`, `COMFYUI_URL`), stream alerts (`TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY`) and Spotify (`SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_SP_DC`). Leave a setting out to turn its feature off.
 

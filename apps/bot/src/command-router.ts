@@ -12,6 +12,7 @@ import {
   type HelpOptions,
 } from '@ririko/discord';
 import type { BotServices } from './services.js';
+import { createTermsNoticeMiddleware } from './terms-notice.js';
 
 /**
  * The bot's dual-dispatch (slash and prefix) command router: per-guild prefixes from guild
@@ -36,6 +37,7 @@ export function createCommandRouter(services: BotServices, defaultPrefix: string
     // 4. Permission: evaluates guildOnly, ownerOnly, userPermissions, botPermissions
     // 5. Rate Limit: sliding-window spam protection with owner & admin bypass
     // 6. Cooldown: per-user command cooldowns
+    // 7. Terms notice: after the command ran, shows the one-time terms notice to a new user
     middlewares: [
       createMaintenanceMiddleware({
         isMaintenanceEnabled: () => services.maintenanceService.isEnabled(),
@@ -73,6 +75,7 @@ export function createCommandRouter(services: BotServices, defaultPrefix: string
           return override?.cooldownSeconds ?? undefined;
         },
       }),
+      createTermsNoticeMiddleware(services),
     ],
   });
 }

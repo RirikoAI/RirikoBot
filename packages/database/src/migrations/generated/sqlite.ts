@@ -173,5 +173,34 @@ export const SQLITE_MIGRATIONS: readonly EmbeddedMigration[] = [
     ],
     "checksum": "dd917e3a5dde03c1b03516af91f22f6edadf7d55167fa683307dfc3be64b01be",
     "contract": false
+  },
+  {
+    "id": "0002_user_consents",
+    "statements": [
+      "CREATE TABLE `user_consents` (\n\t`user_id` text NOT NULL,\n\t`kind` text NOT NULL,\n\t`version` text NOT NULL,\n\t`accepted_at` integer NOT NULL,\n\tPRIMARY KEY(`user_id`, `kind`)\n);"
+    ],
+    "checksum": "23e997607e82f03e8987003371ccaba1dd90102abc3a2480f09dd98242faf51a",
+    "contract": false
+  },
+  {
+    "id": "0003_data_retention_indexes",
+    "statements": [
+      "CREATE INDEX `idx_music_history_played` ON `music_history` (`played_at`);",
+      "CREATE INDEX `idx_ai_conversations_updated` ON `ai_conversations` (`updated_at`);",
+      "CREATE INDEX `idx_ai_messages_created` ON `ai_messages` (`created_at`);",
+      "CREATE INDEX `idx_image_jobs_created` ON `image_jobs` (`created_at`);",
+      "CREATE INDEX `idx_audit_logs_created` ON `audit_logs` (`created_at`);"
+    ],
+    "checksum": "7eaee7433c373bc6b392b0b1673f5f68a56cef037bcfc3b60b56817140e5286c",
+    "contract": false
+  },
+  {
+    "id": "0004_guild_left_at",
+    "statements": [
+      "ALTER TABLE `guilds` ADD `left_at` integer;",
+      "-- Servers the bot already left: start their 90 days now, when this migration runs, so nothing is purged before 90 days after this release.\n-- left_at holds milliseconds since the epoch (Drizzle timestamp_ms); julianday works in every SQLite version.\nUPDATE `guilds` SET `left_at` = CAST((julianday('now') - 2440587.5) * 86400000 AS integer) WHERE `is_active` = 0 AND `left_at` IS NULL;"
+    ],
+    "checksum": "bdefff99149b0556df6867fbbd6deea5819df853f5ff99b6706cc7a572ffc6f3",
+    "contract": false
   }
 ];

@@ -133,6 +133,7 @@ Only you see the result. It uses the AI provider of the server. See [ai.md](ai.m
 - A result longer than 2,000 characters comes as the file `translation-en.txt`.
 - The cooldown is 10 seconds.
 - This is a context menu only. There is no `/translate` command.
+- Translation sends the text to an AI provider, so you must have pressed **I agree** on the AI question first. Until then you see the question in place of the translation ([ai.md](ai.md) section 2.1).
 
 ## 7. All Commands
 
@@ -197,13 +198,13 @@ See [ai.md](ai.md).
 
 | Command | Aliases | What it does | Who can use it |
 |---|---|---|---|
-| `/ai` | `ask` | Chats, or changes the AI settings. | Everyone. Manage Server for the settings |
+| `/ai` | `ask` | Chats, or changes the AI settings. With `action:clear`, `scope:here` clears your memory in this channel and `scope:all` (`!ai clear all`) deletes your AI conversations in every server and channel. Messages already sent to an AI provider cannot be recalled. With `action:consent`, `consent:status` shows whether and when you agreed to AI features, and `consent:withdraw` (`!ai consent withdraw`) takes your consent back and deletes your AI conversations and AI preferences. Chat, translation and images work only after you press **I agree** on the question Ririko shows you ([ai.md](ai.md) section 2.1). | Everyone. Manage Server for the settings |
 | `/chat` | `c` | Chats with Ririko. | Everyone |
 | `/aiclear` | `clearchat`, `reset-ai` | Clears your chat memory. | Everyone |
 | `/aichannel` | `setaichannel` | Sets the AI channel. | Manage Server or Manage Channels |
 | `/aipersona` | `aistyle` | Sets the AI personality. | Manage Server |
 | `/aimodel` | `setmodel` | Shows or sets the AI model. | Everyone to show. Manage Server to set |
-| `/imagine` | `img`, `ai-image`, `generate-image` | Makes an image. | Everyone |
+| `/imagine` | `img`, `ai-image`, `generate-image` | Makes an image. You must have pressed **I agree** on the AI question first. | Everyone |
 | `/stablediffusion-model` | `sdmodel`, `sd-model`, `imagemodel`, `image-model` | Sets the image defaults. | Manage Server |
 | `/setup-stablediffusion-api` | `setup-sd-api` | Explains where image keys go. | Manage Server |
 | Translate to English | | Context menu. | Everyone |

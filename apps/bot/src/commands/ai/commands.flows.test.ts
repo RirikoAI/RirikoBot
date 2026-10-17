@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createDatabaseClient, type DatabaseClient } from '@ririko/database';
-import { PermissionFlagsBits } from 'discord.js';
+import { MessageFlags, PermissionFlagsBits } from 'discord.js';
 import type { ChatModelProvider, ChatRequest, ChatResponse, ChatToken, ToolCall } from '@ririko/ai';
 import { createBotServices, type BotServices } from '../../services.js';
 import { AiChatController } from '../../controllers/ai-chat.controller.js';
@@ -118,6 +118,7 @@ describe('AI commands - configuration and chat flows (TASK-1254)', () => {
   beforeEach(async () => {
     db = await createDatabaseClient({ dialect: 'sqlite', url: ':memory:', autoMigrate: true });
     services = await createBotServices(db);
+    await services.consentService.accept('user-1', 'ai');
     provider = new ScriptedProvider();
     services.fallbackChainManager.registerProvider(provider);
     invalidate = vi.fn();
@@ -751,6 +752,200 @@ describe('AI commands - configuration and chat flows (TASK-1254)', () => {
       });
       await executeAiChatTurn(ctx, services, 'play something');
       expect(edits[0]).toEqual({ content: 'All done.' });
+    });
+  });
+  describe('the AI consent gate and `ai consent` (TASK-1933)', () => {
+    const answered = () => provider.requests.length;
+    const storedTurns = async () =>
+      (
+        await services.conversationManager.getContextMessages(
+          { userId: 'user-1', guildId: 'guild-1', channelId: 'chan-1' },
+          10,
+        )
+      ).length;
+
+    beforeEach(async () => {
+      await services.consentService.withdraw('user-1', 'ai');
+    });
+
+    it.each([
+      ['/ai action:chat', 'ai', { strings: { action: 'chat', prompt: 'Hi' } }],
+      ['/ai prompt', 'ai', { strings: { prompt: 'Hi' } }],
+      ['/chat', 'chat', { strings: { prompt: 'Hi' } }],
+      ['!ai chat Hi', 'ai', { source: 'prefix' as const, rawArgs: ['chat', 'Hi'] }],
+      ['!ai Hi', 'ai', { source: 'prefix' as const, rawArgs: ['Hi'] }],
+      ['!chat Hi', 'chat', { source: 'prefix' as const, rawArgs: ['Hi'] }],
+    ])('%s without consent shows the prompt and sends nothing', async (_label, name, options) => {
+      const { ctx, replies, edits } = makeCtx(options as CtxOptions);
+
+      await run(name, ctx);
+
+      expect(answered()).toBe(0);
+      expect(ctx.deferReply).not.toHaveBeenCalled();
+      expect(edits).toHaveLength(0);
+      expect(replies).toHaveLength(1);
+      expect(replies[0].components).toHaveLength(1);
+      expect(replies[0].embeds[0].data.description).toContain('90 days');
+      expect(await storedTurns()).toBe(0);
+    });
+
+    it('shows the slash prompt privately and the prefix prompt as a plain reply', async () => {
+      const slash = makeCtx({ strings: { prompt: 'Hi' } });
+      await run('ai', slash.ctx);
+      expect(slash.replies[0].flags).toBe(MessageFlags.Ephemeral);
+
+      const prefix = makeCtx({ source: 'prefix', rawArgs: ['Hi'] });
+      await run('ai', prefix.ctx);
+      expect(prefix.replies[0].flags).toBeUndefined();
+    });
+
+    it('answers once the user agrees, and stores the turn', async () => {
+      await services.consentService.accept('user-1', 'ai');
+      const { ctx, edits } = makeCtx({ strings: { prompt: 'Hi' } });
+
+      await run('ai', ctx);
+
+      expect(answered()).toBe(1);
+      expect(edits[0]).toEqual({ content: 'Hello there!' });
+      expect(await storedTurns()).toBe(2);
+    });
+
+    it('does not store the turn of a user who withdrew while the answer was made', async () => {
+      await services.consentService.accept('user-1', 'ai');
+      const recordTurn = vi.spyOn(services.conversationManager, 'recordTurn');
+      const generate = provider.generate.bind(provider);
+      vi.spyOn(provider, 'generate').mockImplementation(async (request) => {
+        await services.consentService.withdraw('user-1', 'ai');
+        return generate(request);
+      });
+      const { ctx, edits } = makeCtx({ strings: { prompt: 'Hi' } });
+
+      await run('ai', ctx);
+
+      expect(edits[0]).toEqual({ content: 'Hello there!' });
+      expect(recordTurn).not.toHaveBeenCalled();
+    });
+
+    it('does not gate the management actions: they send nothing to a provider', async () => {
+      const model = makeCtx({ strings: { action: 'model' } });
+      await run('ai', model.ctx);
+      expect(model.replies[0].embeds[0].data.title).toContain('Available Models');
+
+      const clear = makeCtx({ strings: { action: 'clear' } });
+      await run('ai', clear.ctx);
+      expect(clear.replies[0].content).toContain('Memory Cleared');
+
+      const clearAll = makeCtx({ strings: { action: 'clear', scope: 'all' } });
+      await run('ai', clearAll.ctx);
+      expect(clearAll.replies[0].content).toContain('Nothing to delete');
+      expect(answered()).toBe(0);
+    });
+
+    describe('ai consent withdraw', () => {
+      const seed = async (userId: string) => {
+        await services.consentService.accept(userId, 'ai');
+        await services.conversationManager.recordTurn(
+          { userId, guildId: 'guild-1', channelId: 'chan-1' },
+          'Hello',
+          'Hi',
+        );
+        await services.conversationManager.recordTurn(
+          { userId, guildId: 'guild-2', channelId: 'chan-9' },
+          'Hello',
+          'Hi',
+        );
+        await services.conversationManager.setUserPreferences(userId, { nickname: 'Ali' });
+      };
+      const stored = async (userId: string) => ({
+        conversations: (
+          await services.conversationManager.getContextMessages(
+            { userId, guildId: 'guild-1', channelId: 'chan-1' },
+            10,
+          )
+        ).length,
+        elsewhere: (
+          await services.conversationManager.getContextMessages(
+            { userId, guildId: 'guild-2', channelId: 'chan-9' },
+            10,
+          )
+        ).length,
+        preferences: await services.conversationManager.getUserPreferences(userId),
+      });
+
+      it('withdraws the consent and deletes every conversation and the AI preferences', async () => {
+        await seed('user-1');
+        await seed('user-2');
+        const { ctx, replies } = makeCtx({ strings: { action: 'consent', consent: 'withdraw' } });
+
+        await run('ai', ctx);
+
+        expect(replies[0].flags).toBe(MessageFlags.Ephemeral);
+        expect(replies[0].content).toContain('Your AI consent is withdrawn');
+        expect(replies[0].content).toContain('2 conversations and your AI preferences');
+        expect(await services.consentService.hasAccepted('user-1', 'ai')).toBe(false);
+        expect(await stored('user-1')).toEqual({
+          conversations: 0,
+          elsewhere: 0,
+          preferences: null,
+        });
+        // Another user keeps everything.
+        expect(await services.consentService.hasAccepted('user-2', 'ai')).toBe(true);
+        expect(await stored('user-2')).toMatchObject({ conversations: 2, elsewhere: 2 });
+      });
+
+      it('works from the prefix form and the consent option alone, and then gates again', async () => {
+        await seed('user-1');
+        const prefix = makeCtx({ source: 'prefix', rawArgs: ['consent', 'withdraw'] });
+        await run('ai', prefix.ctx);
+        expect(prefix.replies[0].flags).toBeUndefined();
+        expect(prefix.replies[0].content).toContain('Your AI consent is withdrawn');
+
+        await services.consentService.accept('user-1', 'ai');
+        const optionOnly = makeCtx({ strings: { consent: 'withdraw' } });
+        await run('ai', optionOnly.ctx);
+        expect(optionOnly.replies[0].content).toContain('Your AI consent is withdrawn');
+
+        const chat = makeCtx({ strings: { prompt: 'Hi' } });
+        await run('ai', chat.ctx);
+        expect(chat.replies[0].components).toHaveLength(1);
+        expect(answered()).toBe(0);
+      });
+
+      it('says so when the user had not agreed', async () => {
+        const { ctx, replies } = makeCtx({ strings: { action: 'consent', consent: 'withdraw' } });
+        await run('ai', ctx);
+        expect(replies[0].content).toContain('You had not agreed to AI features');
+      });
+    });
+
+    describe('ai consent status', () => {
+      it('shows whether and when the user agreed', async () => {
+        const none = makeCtx({ strings: { action: 'consent', consent: 'status' } });
+        await run('ai', none.ctx);
+        expect(none.replies[0].content).toContain('You have not agreed to AI features');
+        expect(none.replies[0].flags).toBe(MessageFlags.Ephemeral);
+
+        await services.consentService.accept('user-1', 'ai');
+        const agreed = makeCtx({ source: 'prefix', rawArgs: ['consent', 'status'] });
+        await run('ai', agreed.ctx);
+        expect(agreed.replies[0].content).toMatch(/agreed to AI features on <t:\d+:D>/);
+
+        await services.consentService.withdraw('user-1', 'ai');
+        const after = makeCtx({ strings: { action: 'consent', consent: 'status' } });
+        await run('ai', after.ctx);
+        expect(after.replies[0].content).toContain('You have not agreed to AI features');
+      });
+
+      it('explains the two words when none or an unknown one is given', async () => {
+        const bare = makeCtx({ source: 'prefix', rawArgs: ['consent'] });
+        await run('ai', bare.ctx);
+        expect(bare.replies[0].content).toContain('ai consent status');
+        expect(bare.replies[0].content).toContain('ai consent withdraw');
+
+        const unknown = makeCtx({ strings: { action: 'consent', consent: 'maybe' } });
+        await run('ai', unknown.ctx);
+        expect(unknown.replies[0].content).toContain('ai consent withdraw');
+      });
     });
   });
 });
