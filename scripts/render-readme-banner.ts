@@ -12,12 +12,21 @@
  * `inkscape:groupmode="layer"`; only layers that hold no sublayer ("leaf" layers) become ORA layers.
  * Text is drawn with the Karla fonts in assets/readme/fonts (SIL Open Font License). Output is
  * deterministic: the same SVG always produces the same bytes.
+ *
+ * Skia's SVG engine does not draw `<image>`, so this script draws embedded pictures itself, in their
+ * layer, with their transforms and `preserveAspectRatio`. Clip paths and masks are not applied to them.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deflateRawSync } from 'node:zlib';
-import { createCanvas, GlobalFonts, loadImage, type Image } from '@napi-rs/canvas';
+import {
+  createCanvas,
+  GlobalFonts,
+  loadImage,
+  type Image,
+  type SKRSContext2D,
+} from '@napi-rs/canvas';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -55,13 +64,14 @@ function attr(tag: string, name: string): string | undefined {
   return found ? (found[1] ?? found[2]) : undefined;
 }
 
+const XML_ENTITIES: Record<string, string> = { lt: '<', gt: '>', quot: '"', apos: "'", amp: '&' };
+
 function unescapeXml(text: string): string {
-  return text
-    .replaceAll('&lt;', '<')
-    .replaceAll('&gt;', '>')
-    .replaceAll('&quot;', '"')
-    .replaceAll('&apos;', "'")
-    .replaceAll('&amp;', '&');
+  return text.replace(/&(#x[0-9a-f]+|#\d+|lt|gt|quot|apos|amp);/gi, (whole, name: string) => {
+    if (!name.startsWith('#')) return XML_ENTITIES[name] ?? whole;
+    const hex = name[1] === 'x' || name[1] === 'X';
+    return String.fromCodePoint(Number.parseInt(name.slice(hex ? 2 : 1), hex ? 16 : 10));
+  });
 }
 
 /** Finds every Inkscape layer (a `g` with `inkscape:groupmode="layer"`), in document order. */
@@ -107,8 +117,9 @@ export function parseLayers(svg: string): SvgLayer[] {
 /**
  * Returns the SVG with the content of every other leaf layer removed, so only `keep` is drawn.
  * A hidden `keep` layer is made visible for the render (the ORA records it as hidden).
+ * With `keep` null, only what sits outside every leaf layer is left.
  */
-export function isolateLayer(svg: string, layers: SvgLayer[], keep: SvgLayer): string {
+export function isolateLayer(svg: string, layers: SvgLayer[], keep: SvgLayer | null): string {
   const leaves = layers.filter((layer) => layer.leaf);
   let result = svg;
   for (const layer of [...leaves].sort((a, b) => b.contentStart - a.contentStart)) {
@@ -125,6 +136,218 @@ export function isolateLayer(svg: string, layers: SvgLayer[], keep: SvgLayer): s
     result = result.slice(0, layer.contentStart) + result.slice(layer.contentEnd);
   }
   return result;
+}
+
+// --- embedded pictures (`<image>`), which Skia's SVG engine skips ---
+
+/** A 2D affine matrix [a, b, c, d, e, f], as in SVG `matrix()` and canvas `setTransform`. */
+export type Matrix = [number, number, number, number, number, number];
+const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
+
+export function multiply(m: Matrix, n: Matrix): Matrix {
+  const [a, b, c, d, e, f] = m;
+  const [A, B, C, D, E, F] = n;
+  return [
+    a * A + c * B,
+    b * A + d * B,
+    a * C + c * D,
+    b * C + d * D,
+    a * E + c * F + e,
+    b * E + d * F + f,
+  ];
+}
+
+/** Parses an SVG `transform` list (matrix, translate, scale, rotate, skewX, skewY). */
+export function parseTransform(value: string | undefined): Matrix {
+  let result = IDENTITY;
+  for (const [, name, args] of (value ?? '').matchAll(
+    /(matrix|translate|scale|rotate|skewX|skewY)\s*\(([^)]*)\)/g,
+  )) {
+    const n = (args ?? '')
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .map(Number);
+    const radians = ((n[0] ?? 0) * Math.PI) / 180;
+    let step: Matrix;
+    switch (name) {
+      case 'matrix':
+        step = [n[0] ?? 1, n[1] ?? 0, n[2] ?? 0, n[3] ?? 1, n[4] ?? 0, n[5] ?? 0];
+        break;
+      case 'translate':
+        step = [1, 0, 0, 1, n[0] ?? 0, n[1] ?? 0];
+        break;
+      case 'scale':
+        step = [n[0] ?? 1, 0, 0, n[1] ?? n[0] ?? 1, 0, 0];
+        break;
+      case 'rotate': {
+        const [cx, cy] = [n[1] ?? 0, n[2] ?? 0];
+        const turn: Matrix = [
+          Math.cos(radians),
+          Math.sin(radians),
+          -Math.sin(radians),
+          Math.cos(radians),
+          0,
+          0,
+        ];
+        step = multiply(multiply([1, 0, 0, 1, cx, cy], turn), [1, 0, 0, 1, -cx, -cy]);
+        break;
+      }
+      case 'skewX':
+        step = [1, 0, Math.tan(radians), 1, 0, 0];
+        break;
+      default:
+        step = [1, Math.tan(radians), 0, 1, 0, 0];
+    }
+    result = multiply(result, step);
+  }
+  return result;
+}
+
+export interface SvgImage {
+  /** Offset of the `<image>` tag, used to find the layer that holds it. */
+  offset: number;
+  href: string;
+  x: number;
+  y: number;
+  /** Missing width or height means the picture's own size. */
+  width: number | undefined;
+  height: number | undefined;
+  preserveAspectRatio: string;
+  /** Every transform from the root down to the image, combined. */
+  matrix: Matrix;
+  /** Opening-tag offsets of the elements (the image included) that hide it with display none. */
+  hiddenBy: number[];
+}
+
+/** Elements whose children are only referenced, never drawn where they stand. */
+const NOT_DRAWN = new Set(['defs', 'clipPath', 'mask', 'pattern', 'symbol', 'marker']);
+
+function hides(attrs: string): boolean {
+  return /display\s*:\s*none/.test(attr(attrs, 'style') ?? '') || attr(attrs, 'display') === 'none';
+}
+
+function length(value: string | undefined): number | undefined {
+  const parsed = Number.parseFloat(value ?? '');
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+/** Finds every drawable `<image>`, in document order. */
+export function parseImages(svg: string): SvgImage[] {
+  const images: SvgImage[] = [];
+  const stack: { matrix: Matrix; hiddenBy: number[]; notDrawn: boolean }[] = [];
+  for (const match of svg.matchAll(TAG)) {
+    const [, closing, name, attrs = '', selfClosing] = match;
+    if (name === undefined) continue;
+    if (closing) {
+      stack.pop();
+      continue;
+    }
+    const parent = stack.at(-1);
+    let own = parseTransform(attr(attrs, 'transform'));
+    const viewBox = attr(attrs, 'viewBox')
+      ?.split(/[\s,]+/)
+      .map(Number);
+    if (name === 'svg' && !parent && viewBox?.length === 4) {
+      const [vx = 0, vy = 0, vw = 1, vh = 1] = viewBox;
+      const sx = (length(attr(attrs, 'width')) ?? vw) / vw;
+      const sy = (length(attr(attrs, 'height')) ?? vh) / vh;
+      own = [sx, 0, 0, sy, -vx * sx, -vy * sy];
+    }
+    const matrix = multiply(parent?.matrix ?? IDENTITY, own);
+    const hiddenBy = hides(attrs)
+      ? [...(parent?.hiddenBy ?? []), match.index]
+      : (parent?.hiddenBy ?? []);
+    const notDrawn = (parent?.notDrawn ?? false) || NOT_DRAWN.has(name);
+    if (name === 'image' && !notDrawn) {
+      images.push({
+        offset: match.index,
+        href: unescapeXml(attr(attrs, 'href') ?? attr(attrs, 'xlink:href') ?? ''),
+        x: length(attr(attrs, 'x')) ?? 0,
+        y: length(attr(attrs, 'y')) ?? 0,
+        width: length(attr(attrs, 'width')),
+        height: length(attr(attrs, 'height')),
+        preserveAspectRatio: attr(attrs, 'preserveAspectRatio') ?? 'xMidYMid meet',
+        matrix,
+        hiddenBy,
+      });
+    }
+    if (!selfClosing) stack.push({ matrix, hiddenBy, notDrawn });
+  }
+  return images;
+}
+
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** Where a picture of `width` x `height` lands in `box`, following `preserveAspectRatio`. */
+export function placeImage(
+  box: Box,
+  width: number,
+  height: number,
+  preserveAspectRatio: string,
+): Box {
+  const [align = 'xMidYMid', mode = 'meet'] = preserveAspectRatio.trim().split(/\s+/);
+  if (align === 'none') return box;
+  const scale = (mode === 'slice' ? Math.max : Math.min)(box.width / width, box.height / height);
+  const fx = align.startsWith('xMin') ? 0 : align.startsWith('xMax') ? 1 : 0.5;
+  const fy = align.endsWith('YMin') ? 0 : align.endsWith('YMax') ? 1 : 0.5;
+  return {
+    x: box.x + (box.width - width * scale) * fx,
+    y: box.y + (box.height - height * scale) * fy,
+    width: width * scale,
+    height: height * scale,
+  };
+}
+
+async function decodeImage(href: string): Promise<Image> {
+  const data = /^data:[^,]*?(;base64)?,([\s\S]*)$/.exec(href);
+  if (!data) {
+    throw new Error(
+      `The banner links a picture (${href.slice(0, 80)}). Embed it instead (Embed in the Inkscape import dialog).`,
+    );
+  }
+  const payload = data[2] ?? '';
+  return loadImage(
+    data[1]
+      ? Buffer.from(payload.replace(/\s/g, ''), 'base64')
+      : Buffer.from(decodeURIComponent(payload)),
+  );
+}
+
+/** Draws `images` onto `ctx`, each clipped to its own box. `pictures` caches decoded pictures by href. */
+async function drawImages(
+  ctx: SKRSContext2D,
+  images: SvgImage[],
+  pictures: Map<string, Promise<Image>>,
+): Promise<void> {
+  for (const image of images) {
+    let picture = pictures.get(image.href);
+    if (!picture) {
+      picture = decodeImage(image.href);
+      pictures.set(image.href, picture);
+    }
+    const loaded = await picture;
+    const box = {
+      x: image.x,
+      y: image.y,
+      width: image.width ?? loaded.width,
+      height: image.height ?? loaded.height,
+    };
+    const at = placeImage(box, loaded.width, loaded.height, image.preserveAspectRatio);
+    ctx.save();
+    ctx.setTransform(...image.matrix);
+    ctx.beginPath();
+    ctx.rect(box.x, box.y, box.width, box.height);
+    ctx.clip();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(loaded, at.x, at.y, at.width, at.height);
+    ctx.restore();
+  }
 }
 
 // --- minimal zip writer (OpenRaster is a zip whose first entry is an uncompressed `mimetype`) ---
@@ -262,33 +485,40 @@ export interface BannerOutput {
 
 /** Renders the SVG text into the banner PNG, the social card and the OpenRaster file. */
 export async function renderBanner(svg: string): Promise<BannerOutput> {
-  const whole = await loadImage(Buffer.from(svg));
-  const { width, height } = whole;
-  const full = drawSvg(whole, width, height);
-  const banner = full.canvas.toBuffer('image/png');
-
-  const social = createCanvas(SOCIAL_CARD.width, SOCIAL_CARD.height);
-  social
-    .getContext('2d')
-    .drawImage(
-      full.canvas,
-      SOCIAL_CARD.x,
-      SOCIAL_CARD.y,
-      SOCIAL_CARD.width,
-      SOCIAL_CARD.height,
-      0,
-      0,
-      SOCIAL_CARD.width,
-      SOCIAL_CARD.height,
-    );
-
   const layers = parseLayers(svg);
   const leaves = layers.filter((layer) => layer.leaf);
+  const images = parseImages(svg);
+  const pictures = new Map<string, Promise<Image>>();
+  const inLayer = (image: SvgImage, layer: SvgLayer) =>
+    image.offset >= layer.contentStart && image.offset < layer.contentEnd;
+
+  // The banner is built layer by layer, so pictures stack in their layer's place. Content outside
+  // every leaf layer (normally none) goes underneath.
+  const outside = await loadImage(Buffer.from(isolateLayer(svg, layers, null)));
+  const { width, height } = outside;
+  const full = drawSvg(outside, width, height);
+  await drawImages(
+    full.ctx,
+    images.filter(
+      (image) => image.hiddenBy.length === 0 && !leaves.some((leaf) => inLayer(image, leaf)),
+    ),
+    pictures,
+  );
+
   const rendered: { layer: SvgLayer; x: number; y: number; image: Rendered }[] = [];
   const emptyLayers: string[] = [];
   for (const layer of leaves) {
     const only = await loadImage(Buffer.from(isolateLayer(svg, layers, layer)));
     const { canvas, ctx } = drawSvg(only, width, height);
+    // isolateLayer shows a hidden layer, so only that layer may be among a picture's hiders.
+    await drawImages(
+      ctx,
+      images.filter(
+        (image) => inLayer(image, layer) && image.hiddenBy.every((at) => at === layer.tagStart),
+      ),
+      pictures,
+    );
+    if (!layer.hidden) full.ctx.drawImage(canvas, 0, 0);
     const bounds = opaqueBounds(ctx.getImageData(0, 0, width, height).data, width, height);
     if (!bounds) {
       emptyLayers.push(layer.label);
@@ -315,6 +545,22 @@ export async function renderBanner(svg: string): Promise<BannerOutput> {
       image: { width: bounds.width, height: bounds.height, png: crop.toBuffer('image/png') },
     });
   }
+  const banner = full.canvas.toBuffer('image/png');
+
+  const social = createCanvas(SOCIAL_CARD.width, SOCIAL_CARD.height);
+  social
+    .getContext('2d')
+    .drawImage(
+      full.canvas,
+      SOCIAL_CARD.x,
+      SOCIAL_CARD.y,
+      SOCIAL_CARD.width,
+      SOCIAL_CARD.height,
+      0,
+      0,
+      SOCIAL_CARD.width,
+      SOCIAL_CARD.height,
+    );
 
   // OpenRaster lists the top layer first; SVG document order has the top layer last.
   const topFirst = [...rendered].reverse();
