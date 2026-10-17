@@ -244,8 +244,18 @@ const workable = (t) => t.type !== 'epic';
 const uniq = (a) => [...new Set(a)];
 
 // ---------- data ----------
+// board-server.mjs serves /api/*. build-board-site.mjs publishes the same data as static files and sets
+// window.BOARD_STATIC = { base, ref, sha } before this script; the page then reads those files instead.
+const STATIC = window.BOARD_STATIC ?? null;
+const STATIC_FILES = { '/api/board': 'board.json', '/api/handovers': 'handovers.json', '/api/flags': 'flags.md', '/api/meta': 'meta.json' };
+function dataUrl(url) {
+  if (!STATIC) return url;
+  const note = url.match(/^\/api\/handovers\/(.+)$/);
+  return STATIC.base + (note ? `notes/${note[1]}.md` : STATIC_FILES[url]);
+}
+
 async function get(url, kind) {
-  const r = await fetch(url, { cache: 'no-store' });
+  const r = await fetch(dataUrl(url), { cache: 'no-store' });
   if (!r.ok) {
     let msg = `${url}: ${r.status} ${r.statusText}`;
     try { msg = (await r.json()).error ?? msg; } catch {}
@@ -688,6 +698,13 @@ $('#theme').addEventListener('click', () => {
 // Live reload from board-server.mjs.
 function connect() {
   const live = $('#live');
+  if (STATIC) {
+    // Published snapshot: nothing changes under the page, so there is no event stream to open.
+    const when = [STATIC.ref, STATIC.sha ? STATIC.sha.slice(0, 7) : ''].filter(Boolean);
+    live.lastElementChild.textContent = 'snapshot';
+    live.title = when.length ? `Snapshot of ${when.join(' at ')}` : 'Snapshot of the board when this site was built';
+    return;
+  }
   const es = new EventSource('/api/events');
   es.onopen = () => { live.classList.add('on'); live.lastElementChild.textContent = 'live'; };
   es.onerror = () => { live.classList.remove('on'); live.lastElementChild.textContent = 'offline'; };

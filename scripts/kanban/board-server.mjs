@@ -4,6 +4,8 @@
 //   node scripts/kanban/board-server.mjs                 serve on http://127.0.0.1:4477
 //   node scripts/kanban/board-server.mjs --open          also open the page in the default browser
 //   node scripts/kanban/board-server.mjs --port=5000     use another port (or set PORT)
+//   node scripts/kanban/board-server.mjs --host=<address> listen on another address (or set HOST), for example
+//                                                        to read the board from another device on your network
 //   node scripts/kanban/board-server.mjs --root=<dir>    read docs/kanban/ from another project
 //
 // The page reloads by itself when board.json or a handover note changes.
@@ -24,6 +26,8 @@ const boardPath = path.join(kanbanDir, 'board.json');
 const handoverDir = path.join(kanbanDir, 'handovers');
 const pagePath = path.join(here, 'board-web', 'index.html');
 const basePort = Number(opt('port') ?? process.env.PORT ?? 4477);
+// Local only unless the person running the server asks otherwise; the board has no sign-in.
+const host = opt('host') ?? process.env.HOST ?? '127.0.0.1';
 const NOT_NOTES = new Set(['_TEMPLATE.md', 'HANDOVERS.md']);
 
 if (!fs.existsSync(boardPath)) {
@@ -98,12 +102,12 @@ const server = http.createServer((req, res) => {
 let port = basePort;
 let triesLeft = 10;
 server.on('error', (e) => {
-  if (e.code === 'EADDRINUSE' && triesLeft-- > 0) return server.listen(++port, '10.0.0.31');
+  if (e.code === 'EADDRINUSE' && triesLeft-- > 0) return server.listen(++port, host);
   console.error(e.message);
   process.exit(1);
 });
 server.on('listening', () => {
-  const url = `http://10.0.0.31:${server.address().port}/`;
+  const url = `http://${host.includes(':') ? `[${host}]` : host}:${server.address().port}/`;
   const rel = path.relative(process.cwd(), boardPath);
   if (port !== basePort) console.log(`Ports ${basePort}-${port - 1} are in use (another board server may still be running).`);
   console.log(`Kanban board: ${url}  (reading ${rel.startsWith('..') ? boardPath : rel}; Ctrl+C to stop)`);
@@ -113,4 +117,4 @@ server.on('listening', () => {
     spawn(cmd, cmdArgs, { stdio: 'ignore', detached: true }).on('error', () => {}).unref();
   }
 });
-server.listen(port, '10.0.0.31');
+server.listen(port, host);

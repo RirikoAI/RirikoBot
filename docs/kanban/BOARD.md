@@ -433,6 +433,7 @@
 | `CHORE-0004` | Chore | Disable unused FloweryTTS source in Lavalink config | 1 | EPIC-005 | [CHORE-0004.md](./handovers/CHORE-0004.md) |
 | `CHORE-1704` | Chore | Ship the ririko CLI in the Bot Image So Operators Run It With docker exec | 3 | EPIC-017 | [CHORE-1704.md](./handovers/CHORE-1704.md) |
 | `CHORE-1901` | Chore | Runbook: Rerun bootstrap.sh Before the First Deploy With the Migration Runner (Host Scripts Do Not Self-Update) | 1 | EPIC-019 | [CHORE-1901.md](./handovers/CHORE-1901.md) |
+| `CHORE-2005` | Chore | Publish the Kanban Board on Vercel as a Static Read-Only Site, and Bind the Local Board Server to 127.0.0.1 by Default | 3 | EPIC-020 | [CHORE-2005.md](./handovers/CHORE-2005.md) |
 | `BUG-0001` | Bug | Fix Silent Audio Player Failure & Implement Real Multi-Source Extractors | 5 | STORY-050 | [BUG-0001.md](./handovers/BUG-0001.md) |
 | `BUG-0002` | Bug | Spotify Audio Mirroring Hard Artist Gate & Blind Fallback Elimination | 3 | STORY-050 | [BUG-0002.md](./handovers/BUG-0002.md) |
 | `BUG-0003` | Bug | OpenAI & LLM Providers Function Name Schema Validation & Sanitization | 2 | STORY-060 | [BUG-0003.md](./handovers/BUG-0003.md) |
@@ -516,4 +517,4 @@
 | `EPIC-017` | Production Hosting & Continuous Deployment (Managed VMs, Cloudflare Tunnel, CircleCI) | DONE | 21 | STORY-176, STORY-177, STORY-178, STORY-179, STORY-180, STORY-181 | [EPIC-017.md](./handovers/EPIC-017.md) |
 | `EPIC-018` | Dashboard Usability Improvements | DONE | 21 | STORY-182, STORY-183, STORY-184 | [EPIC-018.md](./handovers/EPIC-018.md) |
 | `EPIC-019` | Production Harness: Controlled, Automated and Safeguarded Releases | DONE | 21 | STORY-185, STORY-186 | [EPIC-019.md](./handovers/EPIC-019.md) |
-| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195 | [EPIC-020.md](./handovers/EPIC-020.md) |
+| `EPIC-020` | 2.0.0 on master: Production Launch and the Open-Source Front Door | TODO | 21 | STORY-187, STORY-188, STORY-189, STORY-190, STORY-191, STORY-192, STORY-193, STORY-194, CHORE-2001, CHORE-2002, CHORE-2003, CHORE-2004, BUG-0044, BUG-0045, STORY-195, CHORE-2005 | [EPIC-020.md](./handovers/EPIC-020.md) |

@@ -480,7 +480,8 @@
         "CHORE-2004",
         "BUG-0044",
         "BUG-0045",
-        "STORY-195"
+        "STORY-195",
+        "CHORE-2005"
       ],
       "requires": [
         "EPIC-019"
@@ -11145,6 +11146,61 @@
       ],
       "verify_cmd": "pnpm vitest run apps/cli/src/installer && pnpm lint --quiet && pnpm format:check",
       "parent": "EPIC-020"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "CHORE-2005",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2005",
+      "parent": "EPIC-020",
+      "points": 3,
+      "status": "DONE",
+      "title": "Publish the Kanban Board on Vercel as a Static Read-Only Site, and Bind the Local Board Server to 127.0.0.1 by Default",
+      "description": "Maintainer (2026-10-18): publish the Kanban board that scripts/kanban/board-server.mjs serves locally to the existing Vercel project, so maintainers can read it, and so the Vercel check on pull requests passes again (it fails since TASK-1893 removed vercel.json). The board server also has a private LAN address committed as its listen address (f801ab1); it must default to 127.0.0.1 with an opt-in host option.",
+      "context": {
+        "files": [
+          "scripts/kanban/board-server.mjs",
+          "scripts/kanban/board-web/index.html",
+          "scripts/kanban/build-board-site.mjs",
+          "vercel.json",
+          ".gitignore",
+          ".prettierignore",
+          "eslint.config.mjs",
+          "docs/kanban/protocol.md",
+          "docs/release.md",
+          "scripts/kanban/build-board-site.test.ts"
+        ],
+        "symbols": [
+          "routes",
+          "boardPath",
+          "handoverDir"
+        ],
+        "entry_points": [
+          "scripts/kanban/board-server.mjs"
+        ],
+        "codegraph_queries": [
+          "board-server boardPath handoverDir routes send",
+          "board-web index.html fetch get EventSource"
+        ]
+      },
+      "acceptance": [
+        "node scripts/kanban/build-board-site.mjs writes a static site to board-dist/ (git-ignored) with the board-web page and static copies of what the server routes return: board.json, the handover id list, every handover note except _TEMPLATE.md and HANDOVERS.md, HANDOVERS.md as the flags text, and the project meta. No dependencies; Node 22 runs it directly.",
+        "board-web/index.html works from both sources: served by board-server.mjs it uses /api/* and live reload as today; built as a static site it reads the static files and skips the EventSource without an error in the console. The page shows which mode it is in only if that is useful (for example \"Snapshot of <branch> at <commit>\" from VERCEL_GIT_COMMIT_REF and VERCEL_GIT_COMMIT_SHA when present).",
+        "vercel.json at the repository root: framework null, an install command that installs nothing, buildCommand node scripts/kanban/build-board-site.mjs, outputDirectory board-dist. The site is read-only and never writes to the repository.",
+        "scripts/kanban/board-server.mjs listens on 127.0.0.1 by default; --host=<address> (or HOST) chooses another address and the printed URL uses it. No IP address other than 127.0.0.1 appears anywhere in the committed file.",
+        "docs/kanban/protocol.md line about board-server.mjs mentions --host and the published board; docs/release.md no longer tells the maintainer to delete the Vercel project ririko-bot and says it hosts the Kanban board.",
+        "A test (scripts/kanban/build-board-site.test.ts; vitest only picks up *.test.ts) builds into a temporary folder from a small fixture docs/kanban tree and checks the files and that _TEMPLATE.md and HANDOVERS.md are not served as notes."
+      ],
+      "verify_cmd": "node scripts/kanban/build-board-site.mjs && pnpm vitest run scripts/kanban && pnpm format:check && pnpm lint --quiet"
     }
   ],
   "bugs": [
