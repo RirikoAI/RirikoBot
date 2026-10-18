@@ -485,12 +485,12 @@ One `Dockerfile` builds both images, `bot-runner` and `web-runner`.
 
 | Stage | Purpose |
 | --- | --- |
-| `base` | `node:22-bookworm-slim` with pnpm, set up through corepack. |
+| `base` | `node:22-trixie-slim` (Debian 13) with pnpm, set up through corepack. |
 | `manifests` | The `package.json` files, the lock file and the workspace files. A new workspace package must be added to its `COPY` list. |
 | `build` | A full install, then `pnpm build`. |
 | `web-build` | `build` plus the production build of the dashboard. |
 | `bot-deps`, `web-deps` | The production dependencies of the bot (with the CLI) and of the dashboard. |
-| `runtime` | `node:22-bookworm-slim` with `tini`, `fonts-dejavu-core` and `ca-certificates`, and the user `ririko` (uid and gid 10001). It has no pnpm and no compilers. |
+| `runtime` | `node:22-trixie-slim` with the Debian security updates installed at build time, `tini`, `fonts-dejavu-core` and `ca-certificates`, and the user `ririko` (uid and gid 10001). It has no pnpm, npm, corepack, yarn or compilers. |
 | `bot-runner` | `runtime` plus FFmpeg, the bot, the CLI and `assets/`. It runs `node apps/bot/dist/main.js`. |
 | `web-runner` | `runtime` plus the dashboard build and `assets/tcg`. It runs `next start` on port 3000. |
 

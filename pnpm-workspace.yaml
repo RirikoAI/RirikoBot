@@ -19,3 +19,11 @@ ignoredBuiltDependencies:
   - better-sqlite3
   - '@google/genai'
   - protobufjs
+
+# Security fixes for transitive dependencies that Docker Scout reports in the images (BUG-0049).
+# Remove an entry once the packages that pull it in resolve a fixed version by themselves.
+# - sharp: a dependency of next (image optimization); fixed in 0.35.5.
+# - source-map-js: a dependency of postcss, which next pins; fixed in 1.2.2.
+overrides:
+  sharp: ^0.35.5
+  source-map-js: ^1.2.2

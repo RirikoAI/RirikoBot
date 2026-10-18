@@ -16,7 +16,7 @@ This image is only the dashboard. It works together with the bot image, `ririkoa
 | `2` | The dashboard of the newest Ririko 2.x release. |
 | `2.0` | The dashboard of the newest 2.0.x release. |
 | `2.0.0` | Exactly version 2.0.0. It never changes. |
-| `latest` | The newest 2.x release, once `latest` has moved to 2.x. Pin a version tag instead. |
+| `latest` | The newest 2.x release. Pin a version tag instead. |
 
 Use the same tag for the bot and the dashboard, for example `2` for both. A tag with a dash, such as `2.1.0-rc.1`, is a test build. Do not use it for a real server.
 
