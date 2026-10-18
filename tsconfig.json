@@ -8,6 +8,7 @@
     { "path": "./packages/ai" },
     { "path": "./packages/services" },
     { "path": "./apps/cli" },
+    { "path": "./apps/starter" },
     { "path": "./apps/bot" }
   ]
 }
