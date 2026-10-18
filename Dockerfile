@@ -6,7 +6,7 @@
 # Images keep the monorepo layout at /app, so repo-relative paths (assets/, data/, public/cards,
 # storage/) resolve against /app as they do in development. Both run as uid/gid 10001.
 
-FROM node:22-bookworm-slim AS base
+FROM node:22-trixie-slim AS base
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable pnpm
 WORKDIR /app
@@ -59,10 +59,19 @@ RUN --mount=type=cache,id=ririko-pnpm-store,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile --ignore-scripts --store-dir /pnpm/store \
       --filter @ririko/web...
 
-# Shared runtime: no pnpm, no compilers. tini is PID 1 so signals reach Node and child processes
-# are reaped. The canvas draws text with the system sans-serif font (DejaVu).
-FROM node:22-bookworm-slim AS runtime
+# Shared runtime: no pnpm, no npm, no compilers. tini is PID 1 so signals reach Node and child
+# processes are reaped. The canvas draws text with the system sans-serif font (DejaVu).
+# Debian 13 (trixie), not 12: most of the CVEs that scanners report for the Debian 12 image (perl,
+# util-linux, ffmpeg 5.1, tiff) have no fix there. `apt-get upgrade` adds the security updates
+# published after the Node image was built.
+FROM node:22-trixie-slim AS runtime
+# The app starts with `node` directly. The npm, corepack and yarn that the Node image bundles are
+# not needed at runtime, and the npm CLI alone carries about ten CVEs in its own dependencies.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+      /usr/local/bin/yarn /usr/local/bin/yarnpkg
 RUN apt-get update \
+  && apt-get upgrade -y \
   && apt-get install -y --no-install-recommends ca-certificates fonts-dejavu-core tini \
   && rm -rf /var/lib/apt/lists/* \
   && groupadd --gid 10001 ririko \

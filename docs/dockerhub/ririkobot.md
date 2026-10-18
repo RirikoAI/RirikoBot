@@ -16,7 +16,7 @@ This image is the bot, version 2.0. A separate image runs the web dashboard: `ri
 | `2.0` | The newest 2.0.x release. |
 | `2.0.0` | Exactly version 2.0.0. It never changes. |
 | `1.4.0` | The last 1.x release. Kept for existing installs. |
-| `latest` | Still Ririko 1.4.0 until the date announced at https://ririko.ai and in the GitHub releases. From that date it is the newest 2.x release. Pin a version tag instead. |
+| `latest` | The newest 2.x release. Pin a version tag instead. |
 
 A tag with a dash, such as `2.1.0-rc.1`, is a test build. Do not use it for a real server.
 
