@@ -7,7 +7,7 @@ describe('CLI Program', () => {
 
     expect(program.name()).toBe('ririko');
     expect(program.description()).toBe('Ririko AI 2.0.0 Operator and Developer CLI');
-    expect(program.version()).toBe('2.0.0');
+    expect(program.version()).toBe('2.0.1');
   });
 
   it('registers core subcommands', () => {

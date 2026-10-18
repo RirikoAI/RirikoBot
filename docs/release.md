@@ -92,9 +92,10 @@ The package version inside that image is 1.4.1. If you want that tag too, repeat
 
 ## 3. Update the Docker Hub Descriptions
 
-1. Open the file `docs/dockerhub/ririkobot.md`. Copy all of it into the **Overview** of `ririkoai/ririkobot` on Docker Hub.
-2. Open the file `docs/dockerhub/ririkobot-dashboard.md`. Copy all of it into the **Overview** of `ririkoai/ririkobot-dashboard`.
-3. Check that the links in both files point to the branch `master`.
+1. On Docker Hub, open the repository page and leave **Public view mode**. The **Overview** can be edited only outside that mode.
+2. Open the file `docs/dockerhub/ririkobot.md`. Copy all of it into the **Overview** of `ririkoai/ririkobot` on Docker Hub.
+3. Open the file `docs/dockerhub/ririkobot-dashboard.md`. Copy all of it into the **Overview** of `ririkoai/ririkobot-dashboard`.
+4. Check that the links in both files point to the branch `master`.
 
 ## 4. Publish a Release
 

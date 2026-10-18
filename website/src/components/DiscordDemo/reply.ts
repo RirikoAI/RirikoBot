@@ -151,7 +151,7 @@ function friendlyName(author: AuthorId): string {
   return author === 'you' ? 'friend' : DISPLAY_NAMES[author];
 }
 
-export const BOT_VERSION = '2.0.0';
+export const BOT_VERSION = '2.0.1';
 
 const COLORS = {
   primary: 0x5865f2,
@@ -713,7 +713,7 @@ export function helpHome(catalog: DemoCatalog): DemoReply {
       value: category.description,
       inline: true,
     })),
-    footer: `Prefix: ${prefix} • Total Commands: ${catalog.commands.length} • Ririko AI ${BOT_VERSION}`,
+    footer: `Prefix: ${prefix} • Total Commands: ${catalog.commands.length} • Ririko AI 2.0.0`,
   };
   return reply({
     embeds: [embed],

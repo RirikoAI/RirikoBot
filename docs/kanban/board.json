@@ -483,7 +483,10 @@
         "STORY-195",
         "CHORE-2005",
         "STORY-196",
-        "CHORE-2006"
+        "CHORE-2006",
+        "CHORE-2007",
+        "BUG-0049",
+        "CHORE-2008"
       ],
       "requires": [
         "EPIC-019"
@@ -11388,6 +11391,96 @@
         "`pnpm format:check` passes."
       ],
       "verify_cmd": "pnpm format:check"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "CHORE-2007",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2007",
+      "parent": "EPIC-020",
+      "points": 1,
+      "status": "DONE",
+      "title": "Docker Hub Texts After latest Moved to 2.0.0",
+      "description": "On 2026-10-18 the maintainer saved 1.4.0 as ririkoai/ririkobot:1.4.0 and moved latest of both images to 2.0.0 (docs/release.md sections 2 and 6), and pasted the new latest rows on Docker Hub. The repository copies still say latest is 1.4.0, and docs/release.md section 3 does not mention that Docker Hub now opens repositories in \"Public view mode\", which must be left before the overview can be edited.",
+      "context": {
+        "files": [
+          "docs/dockerhub/ririkobot.md",
+          "docs/dockerhub/ririkobot-dashboard.md",
+          "docs/release.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "In docs/dockerhub/ririkobot.md and docs/dockerhub/ririkobot-dashboard.md the `latest` row of the tag table reads exactly: | `latest` | The newest 2.x release. Pin a version tag instead. |",
+        "docs/release.md section 3 says, before the copy steps, to leave \"Public view mode\" on the repository page so the Overview can be edited.",
+        "Nothing else in those files changes. `pnpm format:check` passes."
+      ],
+      "verify_cmd": "pnpm format:check"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "CHORE-2008",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2008",
+      "parent": "EPIC-020",
+      "points": 1,
+      "status": "DONE",
+      "title": "Version 2.0.1 in Every Workspace package.json",
+      "description": "BUG-0049 (Debian 13 images, no npm at runtime, patched dashboard dependencies) ships as the 2.0.1 patch release. docs/release.md section 4 step 2 says package.json must hold the version before the tag.",
+      "context": {
+        "files": [
+          "package.json",
+          "apps/bot/package.json",
+          "apps/cli/package.json",
+          "apps/web/package.json",
+          "packages/ai/package.json",
+          "packages/core/package.json",
+          "packages/database/package.json",
+          "packages/discord/package.json",
+          "packages/music/package.json",
+          "website/package.json",
+          "packages/core/src/index.ts",
+          "apps/bot/src/index.test.ts",
+          "apps/cli/src/program.test.ts",
+          "apps/web/src/app/api/health/route.test.ts",
+          "packages/core/src/index.test.ts",
+          "website/src/components/DiscordDemo/reply.ts",
+          "scripts/website-demo-reply.test.ts"
+        ],
+        "symbols": [
+          "CORE_VERSION"
+        ],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN"
+        ]
+      },
+      "acceptance": [
+        "The \"version\" field is 2.0.1 in the root package.json, apps/bot, apps/cli, apps/web, packages/ai, packages/core, packages/database, packages/discord, packages/music and website. apps/starter (the npm starter, versioned on its own) and packages/music-private (a separate repository) stay at 2.0.0.",
+        "No other field changes. If pnpm-lock.yaml records these versions, it is updated with pnpm install --lockfile-only and nothing else changes in it.",
+        "CORE_VERSION in packages/core/src/index.ts is 2.0.1, so /api/health and ririko --version report 2.0.1; the three tests that assert it (apps/bot/src/index.test.ts, apps/cli/src/program.test.ts, apps/web/src/app/api/health/route.test.ts) expect 2.0.1. pnpm build, pnpm typecheck, pnpm format:check and those three test files pass."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/bot/src/index.test.ts apps/cli/src/program.test.ts apps/web/src/app/api/health/route.test.ts packages/core/src/index.test.ts && pnpm format:check"
     }
   ],
   "bugs": [
@@ -12813,6 +12906,50 @@
         "No other demo behaviour changes; the demo tests and docs:build stay green."
       ],
       "verify_cmd": "pnpm docs:build && pnpm vitest run scripts/website-demo && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "BUG-0049",
+        "EPIC-020"
+      ],
+      "id": "BUG-0049",
+      "parent": "EPIC-020",
+      "points": 5,
+      "status": "DONE",
+      "title": "Docker Images 2.0.0 Carry Critical and High CVEs From the Base Image, the Bundled npm and Old Dashboard Dependencies",
+      "description": "Docker Hub and Docker Scout report 6 critical and about 50 high vulnerabilities for ririkoai/ririkobot 2.0.0 (and similar for the dashboard). Most come from Debian 12 packages in node:22-bookworm-slim (perl, ffmpeg, tiff, util-linux, openssl, zlib), from the npm CLI that the Node image bundles (brace-expansion, pacote, sigstore, ip-address, picomatch, http-cache-semantics), and in the dashboard from next 16.3.6, sharp and source-map-js. Fix them for a v2.0.1 patch release.",
+      "context": {
+        "files": [
+          "Dockerfile",
+          "package.json",
+          "pnpm-lock.yaml",
+          "apps/web/package.json",
+          "pnpm-workspace.yaml",
+          ".circleci/config.yml",
+          "docs/deployment.md"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "releaseTags RELEASE_TAG_PATTERN",
+          "createCanvas registerFont GlobalFonts"
+        ]
+      },
+      "acceptance": [
+        "The runtime stages of the Dockerfile contain no npm, npx, corepack or yarn (removed from /usr/local in the runtime stage); nothing at runtime needs them (check the entrypoints, the `ririko` CLI and the compose files).",
+        "The base image is node:22-trixie-slim (Debian 13) for every stage, or, if a native module or package does not work there, bookworm-slim with `apt-get upgrade` in the runtime stage; the PROGRESS entry says which and why. Either way the runtime stage installs Debian security updates at build time.",
+        "next, sharp and source-map-js (and any other npm package that Docker Scout reports with a high or critical CVE and a fixed version) are raised to a fixed version, through the package.json files or pnpm overrides, with the lockfile updated.",
+        "The images still build and work: CircleCI docker and e2e jobs pass, and the PROGRESS entry lists what the worker checked locally (build, typecheck, tests, coverage gate).",
+        "The PROGRESS entry lists the CVE findings that remain without a fix, with the package and the reason (for example no Debian fix yet)."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "active_in_progress_ticket": null
