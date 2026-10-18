@@ -4,7 +4,7 @@ This guide takes you from nothing to a running Ririko bot and dashboard on one m
 
 Other guides:
 
-- To run Ririko without Docker, read [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md).
+- To run Ririko without Docker, read [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/master/SETUP.md).
 - To upgrade a Ririko 1.4.0 bot, read [upgrading-from-1.4.md](upgrading-from-1.4.md).
 - To release Ririko and deploy it with CI, read [release.md](release.md).
 

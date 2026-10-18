@@ -1,6 +1,6 @@
 {
   "version": "0.6.0",
-  "base_branch": "develop/2.0.0",
+  "base_branch": "develop",
   "codegraph": true,
   "ci": true,
   "owned": [

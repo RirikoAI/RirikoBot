@@ -10,7 +10,7 @@ There are two parts: one for the host of the bot, and one for the server admin.
 
 Music works best with Lavalink. Lavalink is a separate program that plays the audio. Set it up once.
 
-1. Follow the Lavalink steps in [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md) (source install) or [deployment.md](deployment.md) (Docker).
+1. Follow the Lavalink steps in [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/master/SETUP.md) (source install) or [deployment.md](deployment.md) (Docker).
    The setup wizard (`ririko setup`) asks for this on the **Database & Music** page: run Lavalink on the same computer, use a Lavalink server you already have (it tests the address and the password), or, with Docker, the bundled Lavalink or a remote node.
 2. Make sure `LAVALINK_ENABLED=true` in `.env`, and that the bot and Lavalink use the same `LAVALINK_PASSWORD`.
 3. Optional: add Spotify keys (section 7).

@@ -2,7 +2,7 @@
 
 This guide is for people who change the Ririko code. It shows how to check your work, how to change the database, and how to use the command-line tool.
 
-To get a working copy first, follow [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md). To send your change, read [contributing.md](contributing.md).
+To get a working copy first, follow [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/master/SETUP.md). To send your change, read [contributing.md](contributing.md).
 
 ---
 

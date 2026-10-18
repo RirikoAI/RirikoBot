@@ -158,7 +158,7 @@ Other people get a "not found" page when they open the owner console.
 
 ## 7. Host Setup
 
-The setup wizard (`pnpm installer`, see [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md#31-with-the-setup-wizard)) writes these values for you. It also makes the `SECRET_VAULT_KEY` and checks with Discord that the client secret is right.
+The setup wizard (`pnpm installer`, see [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/master/SETUP.md#31-with-the-setup-wizard)) writes these values for you. It also makes the `SECRET_VAULT_KEY` and checks with Discord that the client secret is right.
 
 The dashboard needs these values in `.env`:
 
@@ -172,7 +172,7 @@ The dashboard needs these values in `.env`:
 
 Steps:
 
-1. Follow section 8.1 of [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md) for a source install, or section 2.8 of [deployment.md](deployment.md) for Docker.
+1. Follow section 8.1 of [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/master/SETUP.md) for a source install, or section 2.8 of [deployment.md](deployment.md) for Docker.
 2. In the Discord Developer Portal, open **OAuth2** and add `<DASHBOARD_URL>/api/auth/callback` as a redirect.
 3. Start the bot first. It creates the database tables the dashboard needs.
 4. Start the dashboard.

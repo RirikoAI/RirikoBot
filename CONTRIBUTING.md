@@ -12,7 +12,7 @@ Thank you for helping. This page has the short version. The full guide is in [do
 
 ## Make a change
 
-1. Create a branch from `develop/2.0.0`. Name it `feat/<name>`, `fix/<name>` or `chore/<name>`.
+1. Create a branch from `develop`. (`master` holds released code and `1.x` is the old 1.4.0 line; neither takes pull requests.) Name it `feat/<name>`, `fix/<name>` or `chore/<name>`.
 2. Keep the change small. One module or one problem for each pull request.
 3. Write tests for the code you add or change. Tests that use random numbers must use a fixed seed.
 4. Write commit messages in the [conventional commits](https://www.conventionalcommits.org/) style, for example `fix(music): clamp volume requests to 150%`.
@@ -31,7 +31,7 @@ pnpm db:check
 
 - `pnpm test:coverage` fails if coverage is below a threshold in `vitest.config.ts`. Never lower a threshold. Write tests instead.
 - If you changed a database schema in `packages/database/src/schema/`, run `pnpm db:generate` and commit the new migration files. `pnpm db:check` fails without them. Never edit a migration that is already released.
-- Open the pull request against `develop/2.0.0`.
+- Open the pull request against `develop`.
 
 More about the checks: [docs/development.md](docs/development.md) and [docs/testing.md](docs/testing.md).
 

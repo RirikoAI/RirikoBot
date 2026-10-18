@@ -11,16 +11,15 @@
 *None.*
 
 ## ⏸️ Paused
-*None.*
+| ID | Type | Title | Pts | Parent | Handover |
+|---|---|---|---|---|---|
+| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | [TASK-1911.md](./handovers/TASK-1911.md) |
 
 ## 🎯 To Do
 | ID | Type | Title | Pts | Parent | Requires | Ready | Model |
 |---|---|---|---|---|---|---|---|
 | `STORY-190` | Story | README, CONTRIBUTING and Community: a Standout Front Page for Every Kind of Reader | 13 | EPIC-020 | STORY-189 | yes | large |
 | `STORY-191` | Story | Release 2.0.0 to master and Launch Production | 8 | EPIC-020 | STORY-187, STORY-188, STORY-192, STORY-193 | yes | large |
-| `TASK-1911` | Task | Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch | 3 | STORY-191 | TASK-1872, STORY-192, STORY-193 | yes | medium |
-| `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | — | yes | medium |
-| `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | — | yes | medium |
 | `CHORE-2001` | Chore | bootstrap.sh Says "CI deploy key: NOT installed" When It Kept the Existing Key | 1 | EPIC-020 | — | yes | small |
 | `CHORE-2002` | Chore | Make the Test Suite Pass on a Windows Development Machine | 2 | EPIC-020 | — | yes | medium |
 | `CHORE-2003` | Chore | Dashboard /health Reports SCHEMA_INCOMPATIBLE for a Downgrade-Guard Refusal | 1 | EPIC-020 | — | yes | small |
@@ -399,6 +398,8 @@
 | `TASK-1901` | Task | Rework README.md Into a Standout Front Page With Quick Start, Badges and All-Contributors | 5 | STORY-190 | [TASK-1901.md](./handovers/TASK-1901.md) |
 | `TASK-1902` | Task | Write a Short CONTRIBUTING.md in Simple English | 2 | STORY-190 | [TASK-1902.md](./handovers/TASK-1902.md) |
 | `TASK-1903` | Task | Tall Layered Feature Image for the README and the Site, With Replaceable Placeholders | 5 | STORY-190 | [TASK-1903.md](./handovers/TASK-1903.md) |
+| `TASK-1912` | Task | Production Go-Live Checklist in docs/release.md | 3 | STORY-191 | [TASK-1912.md](./handovers/TASK-1912.md) |
+| `TASK-1913` | Task | Docker Hub and GitHub Repository Texts for 2.0.0 | 2 | STORY-191 | [TASK-1913.md](./handovers/TASK-1913.md) |
 | `TASK-1921` | Task | Setup Wizard Step Model, the Kept 1.x Guides and the Settings File Writer | 5 | STORY-192 | [TASK-1921.md](./handovers/TASK-1921.md) |
 | `TASK-1922` | Task | Setup Wizard Live Checks: Discord Application and Intents, OAuth2 Secret, Database and Every Optional Provider | 5 | STORY-192 | [TASK-1922.md](./handovers/TASK-1922.md) |
 | `TASK-1923` | Task | Draft the 2.0 Terms of Service and Privacy Policy in docs/legal/ | 2 | STORY-192 | [TASK-1923.md](./handovers/TASK-1923.md) |

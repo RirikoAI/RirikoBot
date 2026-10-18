@@ -9310,7 +9310,7 @@
       "parent": "STORY-191",
       "title": "Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch",
       "points": 3,
-      "status": "TODO",
+      "status": "PAUSED",
       "description": "master (1.x, 149 commits) and develop/2.0.0 share no history. Confirmed by the maintainer on 2026-10-11: 1.x becomes the legacy branch, master holds 2.0.0, and develop/2.0.0 becomes develop. Create 1.x from master; on a branch from develop run git merge -s ours --allow-unrelated-histories origin/master so the tree is 2.0 and both histories are kept; open the PR into master (a fast-forward). The maintainer pushes the branches, renames develop and changes the GitHub settings.",
       "context": {
         "files": [
@@ -9351,7 +9351,7 @@
       "parent": "STORY-191",
       "title": "Production Go-Live Checklist in docs/release.md",
       "points": 3,
-      "status": "TODO",
+      "status": "DONE",
       "description": "One deterministic checklist the maintainer and the coordinator follow to launch production: host bootstrap (8.8 step 0), deploy key and contexts, first deploy on an empty database, status and readiness checks, the 2.0.0 tag, Docker Hub latest, and the 1.4.0 sunset announcement.",
       "context": {
         "files": [
@@ -9390,7 +9390,7 @@
       "parent": "STORY-191",
       "title": "Docker Hub and GitHub Repository Texts for 2.0.0",
       "points": 2,
-      "status": "TODO",
+      "status": "DONE",
       "description": "The GitHub description still sells 1.x (OpenAI, Stable Diffusion, Twitch notifier) and the Docker Hub overviews need the 2.0 story. Prepare the texts; the maintainer pastes them.",
       "context": {
         "files": [
