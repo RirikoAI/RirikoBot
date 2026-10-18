@@ -481,7 +481,9 @@
         "BUG-0044",
         "BUG-0045",
         "STORY-195",
-        "CHORE-2005"
+        "CHORE-2005",
+        "STORY-196",
+        "CHORE-2006"
       ],
       "requires": [
         "EPIC-019"
@@ -3043,6 +3045,53 @@
         "TASK-1951 to TASK-1955 are DONE."
       ],
       "verify_cmd": "pnpm docs:build && pnpm vitest run apps/cli/src/installer scripts/render-readme-banner.test.ts && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [
+        "TASK-1961",
+        "TASK-1962"
+      ],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "large",
+      "handovers": [
+        "STORY-196",
+        "EPIC-020"
+      ],
+      "id": "STORY-196",
+      "parent": "EPIC-020",
+      "points": 8,
+      "status": "DONE",
+      "title": "npx ririko: the npm Package Becomes a Zero-Dependency 2.0 Starter",
+      "description": "The npm package ririko (0.14.5, 1.x) is one of the ways people find Ririko while they browse AI packages. Its npx script clones the default branch and runs the 1.x install, which breaks now that master holds 2.0. Maintainer decisions (2026-10-18): ririko@2 is a small starter, not the whole bot; `npx ririko` asks Docker or source, fetches the newest release and opens the setup wizard; it is published from GitHub Actions with npm trusted publishing (no stored token).",
+      "context": {
+        "files": [
+          "apps/starter/",
+          "apps/cli/src/commands/setup.ts",
+          "docker-compose.production.yml",
+          ".env.production.example",
+          ".env.example",
+          "docs/deployment.md",
+          "docs/release.md",
+          "README.md",
+          ".github/workflows/"
+        ],
+        "symbols": [
+          "registerSetupCommand"
+        ],
+        "codegraph_queries": [
+          "registerSetupCommand runSetup PROFILE_FILES startInstallerServer"
+        ]
+      },
+      "acceptance": [
+        "TASK-1961 and TASK-1962 are DONE.",
+        "The coverage gate passes (`pnpm test:coverage`)."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm test:coverage && pnpm lint --quiet && pnpm format:check"
     }
   ],
   "tasks": [
@@ -9310,7 +9359,7 @@
       "parent": "STORY-191",
       "title": "Bring 2.0.0 Onto master Without a Force Push and Keep 1.x on Its Own Branch",
       "points": 3,
-      "status": "PAUSED",
+      "status": "DONE",
       "description": "master (1.x, 149 commits) and develop/2.0.0 share no history. Confirmed by the maintainer on 2026-10-11: 1.x becomes the legacy branch, master holds 2.0.0, and develop/2.0.0 becomes develop. Create 1.x from master; on a branch from develop run git merge -s ours --allow-unrelated-histories origin/master so the tree is 2.0 and both histories are kept; open the PR into master (a fast-forward). The maintainer pushes the branches, renames develop and changes the GitHub settings.",
       "context": {
         "files": [
@@ -10605,6 +10654,110 @@
         "pnpm docs:build passes."
       ],
       "verify_cmd": "pnpm --filter website typecheck && pnpm docs:build && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1961",
+        "STORY-196",
+        "EPIC-020"
+      ],
+      "id": "TASK-1961",
+      "parent": "STORY-196",
+      "points": 5,
+      "status": "DONE",
+      "title": "apps/starter: the ririko npm Package, a Zero-Dependency Starter for Docker and Source Installs",
+      "description": "A new workspace app apps/starter with package name ririko and bin ririko. `npx ririko [folder]` checks the tools, finds the newest release tag, and either sets up the Docker install (compose files, wizard from the image, start) or the source install (clone the tag, corepack pnpm, install, pnpm installer).",
+      "context": {
+        "files": [
+          "apps/starter/",
+          "apps/cli/package.json",
+          "apps/cli/tsconfig.json",
+          "apps/cli/src/commands/setup.ts",
+          "docker-compose.production.yml",
+          ".env.production.example",
+          "docs/deployment.md",
+          "Dockerfile",
+          "vitest.config.ts",
+          "tsconfig.json",
+          "pnpm-lock.yaml"
+        ],
+        "symbols": [
+          "registerSetupCommand",
+          "PROFILE_FILES"
+        ],
+        "entry_points": [
+          "apps/starter/src/index.ts"
+        ],
+        "codegraph_queries": [
+          "registerSetupCommand runSetup PROFILE_FILES startInstallerServer",
+          "DEFAULT_INSTALLER_PORT DEFAULT_INSTALLER_HOST"
+        ]
+      },
+      "acceptance": [
+        "apps/starter/package.json: name `ririko`, version `2.0.0`, bin `ririko` pointing at the built file, `files` limited to the build output, README and LICENSE, no runtime dependencies, no install scripts, `engines.node` >= 20, `publishConfig.access` public, repository/homepage/bugs set. It is a pnpm workspace member that builds with `pnpm build` and is not private.",
+        "`npx ririko [folder]` (default folder `ririko`) refuses a folder that exists and is not empty. It asks Docker or source (default Docker); `--docker` and `--source` skip the question; `--help` and `--version` work; an unknown option prints help and exits 1.",
+        "The newest release is the highest `vX.Y.Z` tag without a dash, read from the GitHub API (releases/latest first, then tags); `--ref <tag>` overrides it. Any network or API error prints a clear message and exits non-zero; nothing is half-written silently.",
+        "Docker: checks `docker` and `docker compose version`, downloads from that tag every file that docker-compose.production.yml needs to start (at least the compose file and .env.production.example; check the compose file for other bind-mounted files), runs the setup wizard from `ririkoai/ririkobot:<X.Y.Z>` the same way docs/deployment.md 2.4 does, then asks before `docker compose ... up -d`, and prints the next steps (invite, `commands:sync`, docs link).",
+        "Source: checks git and Node >= 22, `git clone --branch <tag> --depth 1`, enables pnpm through corepack, `pnpm install`, then `pnpm installer`. Every child process inherits stdio; a failing step stops with its name and exit code.",
+        "No secret is read, printed or logged by the starter; the wizard handles all settings.",
+        "Unit tests (offline: fetch and child processes are injected or mocked) cover argument parsing, the release lookup and its fallbacks, the folder check, and the exact command list for both paths. The coverage gate still passes."
+      ],
+      "verify_cmd": "pnpm build && pnpm typecheck && pnpm vitest run apps/starter && pnpm lint --quiet && pnpm format:check"
+    },
+    {
+      "children": [],
+      "requires": [
+        "TASK-1961"
+      ],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "medium",
+      "handovers": [
+        "TASK-1962",
+        "STORY-196",
+        "EPIC-020"
+      ],
+      "id": "TASK-1962",
+      "parent": "STORY-196",
+      "points": 3,
+      "status": "DONE",
+      "title": "Publish ririko to npm From GitHub Actions With Trusted Publishing, and an npm README That Brings In AI Users",
+      "description": "A publish workflow on `npm-v*` tags using npm trusted publishing and provenance, the npm-facing README and metadata that make the package easy to find among AI packages, and the docs that tell people to start with `npx ririko`.",
+      "context": {
+        "files": [
+          ".github/workflows/",
+          "apps/starter/package.json",
+          "apps/starter/README.md",
+          "README.md",
+          "docs/release.md",
+          "docs/deployment.md",
+          "docs/development.md",
+          "assets/"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "registerSetupCommand runSetup PROFILE_FILES"
+        ]
+      },
+      "acceptance": [
+        ".github/workflows/npm-publish.yml runs on tags `npm-v*` only: permissions `id-token: write` and `contents: read`, Node 22+ with an npm that supports trusted publishing, builds the starter, checks that the tag version equals apps/starter/package.json version (fails otherwise), and runs `npm publish --provenance --access public` in apps/starter. No NPM_TOKEN or other secret is used.",
+        "apps/starter/README.md is written for people browsing npm: one-line pitch (self-hosted Discord bot with AI chat on Gemini, OpenAI and Ollama, music, Waifu TCG, moderation, economy, web dashboard), the banner image by absolute URL, `npx ririko` quick start for both paths, links to ririko.ai/docs, the support server and GitHub. package.json has a matching description and at least 15 relevant keywords (for example ai, llm, chatbot, discord, discord-bot, gemini, openai, ollama, ai-agent, music-bot, self-hosted).",
+        "docs/release.md has an \"npm package\" section: the one-time trusted-publisher setup on npmjs.com (owner RirikoAI, repository RirikoBot, workflow npm-publish.yml), how to release (bump the version, tag `npm-vX.Y.Z`, push), the check (`npm view ririko version`), and the one-time `npm deprecate` command for versions below 2.0.0.",
+        "README.md and docs/deployment.md mention `npx ririko` as the quickest start, next to the existing steps.",
+        "The workflow is valid YAML and passes `pnpm format:check`."
+      ],
+      "verify_cmd": "pnpm build && pnpm format:check && pnpm lint --quiet && pnpm docs:build"
     }
   ],
   "chores": [
@@ -11201,6 +11354,40 @@
         "A test (scripts/kanban/build-board-site.test.ts; vitest only picks up *.test.ts) builds into a temporary folder from a small fixture docs/kanban tree and checks the files and that _TEMPLATE.md and HANDOVERS.md are not served as notes."
       ],
       "verify_cmd": "node scripts/kanban/build-board-site.mjs && pnpm vitest run scripts/kanban && pnpm format:check && pnpm lint --quiet"
+    },
+    {
+      "children": [],
+      "requires": [],
+      "blocks": [],
+      "assignee": null,
+      "claimed_at": null,
+      "blocked_reason": null,
+      "tier_override": null,
+      "model": "small",
+      "handovers": [
+        "CHORE-2006",
+        "EPIC-020"
+      ],
+      "id": "CHORE-2006",
+      "parent": "EPIC-020",
+      "points": 1,
+      "status": "DONE",
+      "title": "Dependabot Targets develop, Not master",
+      "description": "master is now the default branch with 2.0.0, and the repository has no .github/dependabot.yml, so Dependabot opens update PRs against master (for example #715). Add a config so updates target develop.",
+      "context": {
+        "files": [
+          ".github/dependabot.yml"
+        ],
+        "symbols": [],
+        "codegraph_queries": [
+          "registerSetupCommand"
+        ]
+      },
+      "acceptance": [
+        ".github/dependabot.yml (version 2) has an npm ecosystem entry for directory / with target-branch develop, a weekly schedule and a grouped minor-and-patch update group, plus a github-actions entry with target-branch develop.",
+        "`pnpm format:check` passes."
+      ],
+      "verify_cmd": "pnpm format:check"
     }
   ],
   "bugs": [

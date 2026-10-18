@@ -4,7 +4,7 @@ This guide is for the maintainer. It explains how to publish a release, how to d
 
 **Agents never push, retag or log in to Docker Hub. They never create release tags, never move `latest` and never approve a deploy.** They prepare the code and the documents. The maintainer does every step below.
 
-For launch day, follow the checklist in section 10.
+For launch day, follow the checklist in section 10. For the npm package (`npx ririko`), follow section 11.
 
 ## Branches
 
@@ -897,3 +897,117 @@ Nothing in this section touches 1.4.0 data. A 1.4.0 user never let 2.x write to 
 35. **Maintainer.** If 2.x must be pulled back after `latest` moved, follow section 7.
 
     Check: `ririkoai/ririkobot:latest` shows the 1.4.0 digest again.
+
+## 11. npm Package
+
+The npm package `ririko` is the starter that runs with `npx ririko` (`apps/starter`). It is not the bot. It looks up the newest bot release when it runs, so a bot release does not need an npm release.
+
+- The workflow `.github/workflows/npm-publish.yml` runs only when you push a tag that starts with `npm-v`, such as `npm-v2.0.0`. Image releases use `v*` tags in CircleCI and never start it.
+- It uses npm trusted publishing. GitHub gives the job an identity token, and npm accepts it for the package you linked in section 11.1. The repository holds no npm token.
+- The workflow builds the starter, runs its tests, and fails when the tag version differs from the `version` in `apps/starter/package.json`. Then it runs `npm publish --provenance --access public`, so the npm page shows where the package was built. A version with a dash, such as `2.1.0-beta.1`, is published with the tag `next` and not `latest`.
+- The starter has its own version number. Raise it only when the starter itself changes.
+
+### 11.1. One-Time Setup (Maintainer)
+
+1. Sign in to <https://www.npmjs.com> as an owner of the package `ririko`.
+2. Open the package page, then **Settings**. Find **Trusted Publisher** and choose **GitHub Actions**.
+3. Fill in the form. Spelling and case must match GitHub exactly:
+   - **Organization or user**: `RirikoAI`
+   - **Repository**: `RirikoBot`
+   - **Workflow filename**: `npm-publish.yml`
+   - **Environment name**: leave it empty.
+4. Click **Set up connection**.
+5. After the first successful publish, you can set **Publishing access** on the same page to **Require two-factor authentication and disallow tokens**. Trusted publishing keeps working.
+
+Check: the **Trusted Publisher** section shows the repository and the workflow file name.
+
+### 11.2. Release a New Version
+
+1. Change `version` in `apps/starter/package.json` through a pull request, and merge it into `master`. The first release is `2.0.0`, which is the version in the file now.
+2. Go to `master` and update it:
+
+   ```bash
+   git checkout master
+   ```
+
+   ```bash
+   git pull
+   ```
+
+3. Create the tag. The part after `npm-v` is the exact version:
+
+   ```bash
+   git tag -a npm-v2.0.0 -m "ririko 2.0.0 on npm"
+   ```
+
+4. Push the tag. This starts the workflow:
+
+   ```bash
+   git push origin npm-v2.0.0
+   ```
+
+5. Open the **Actions** tab on GitHub and watch **Publish to npm**.
+
+Check: the workflow is green.
+
+### 11.3. Check the Release
+
+1. Show the newest version on npm:
+
+   ```bash
+   npm view ririko version
+   ```
+
+   Check: it prints the version you tagged.
+
+2. Show the dist-tags:
+
+   ```bash
+   npm view ririko dist-tags
+   ```
+
+   Check: `latest` is the version you tagged (for a prerelease, `next` is).
+
+3. Run the starter from npm:
+
+   ```bash
+   npx ririko@latest --version
+   ```
+
+   Check: it prints the same version.
+
+4. Open <https://www.npmjs.com/package/ririko>. Check that the README shows the banner and that the page shows the provenance badge.
+
+### 11.4. Deprecate the 1.x Versions (Once)
+
+The versions before 2.0.0 are the old 1.x bot, and their installer no longer works. After 2.0.0 is on npm, mark them as deprecated:
+
+1. Log in to npm. This asks for your password and a one-time code:
+
+   ```bash
+   npm login
+   ```
+
+2. Deprecate every version below 2.0.0:
+
+   ```bash
+   npm deprecate "ririko@<2.0.0" "This is the old Ririko 1.x bot and its installer no longer works. Run npx ririko to install the current Ririko, or see https://ririko.ai"
+   ```
+
+Check: `npm view ririko@1.0.0 deprecated` prints the message. Use a version that exists in `npm view ririko versions`.
+
+### 11.5. If the Publish Fails
+
+- **The tag and the version differ.** The check step fails before anything is published. Delete the tag, fix the version, and tag again:
+
+  ```bash
+  git tag -d npm-v2.0.0
+  ```
+
+  ```bash
+  git push origin :refs/tags/npm-v2.0.0
+  ```
+
+- **npm answers with a 404 or a sign-in error.** The trusted publisher does not match. Check the four values in section 11.1 against the repository and the workflow file name. They are case sensitive. Then run the failed job again from the **Actions** tab.
+- **The npm CLI is too old.** Trusted publishing needs npm 11.5.1 or newer. The workflow installs npm 11. If the step that prints the npm version shows an older number, fix the workflow.
+- **The version already exists on npm.** npm never accepts the same version twice, not even after an unpublish. Raise the version and tag the next one.

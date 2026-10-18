@@ -1,0 +1,56 @@
+name: Publish to npm
+
+# Publishes the `ririko` starter package (apps/starter) to npm when a tag `npm-vX.Y.Z` is pushed.
+# It uses npm trusted publishing: GitHub proves the identity of this workflow to npm with an OIDC
+# token, so the repository holds no npm token or other secret. The package must be linked to this
+# repository and to this file name on npmjs.com first (docs/release.md, section 11).
+# Image releases (tags `v*`) are a separate flow in CircleCI and do not run this workflow.
+on:
+  push:
+    tags: ['npm-v*']
+
+permissions:
+  contents: read
+  # Lets the job ask GitHub for the OIDC token that npm trusts. Also needed for provenance.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # pnpm version comes from "packageManager" in package.json.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      # No registry-url and no token: npm signs in with the OIDC token by itself.
+      # Trusted publishing needs npm 11.5.1 or newer. The npm that comes with Node 22 is older.
+      - run: npm install --global npm@11
+      - run: npm --version
+      - run: pnpm install --frozen-lockfile
+      - id: version
+        name: Check that the tag matches the package version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          tag_version="${TAG#npm-v}"
+          package_version="$(node -p "require('./apps/starter/package.json').version")"
+          if [ "$tag_version" != "$package_version" ]; then
+            echo "::error::The tag $TAG says $tag_version, but apps/starter/package.json says $package_version."
+            exit 1
+          fi
+          # A version with a dash (2.1.0-beta.1) is a prerelease: npm needs a tag other than latest.
+          if [[ "$package_version" == *-* ]]; then
+            echo "dist_tag=next" >> "$GITHUB_OUTPUT"
+          else
+            echo "dist_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+      - run: pnpm --filter ./apps/starter build
+      - run: pnpm vitest run apps/starter
+      - name: Publish with provenance
+        working-directory: apps/starter
+        env:
+          DIST_TAG: ${{ steps.version.outputs.dist_tag }}
+        run: npm publish --provenance --access public --tag "$DIST_TAG"

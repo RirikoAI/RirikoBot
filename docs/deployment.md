@@ -22,6 +22,14 @@ Other guides:
 
 ## 2. Install Ririko
 
+The quickest start is the starter on npm. You need [Node.js](https://nodejs.org) 20 or newer. Run this command in the folder where you want the install:
+
+```bash
+npx ririko --docker
+```
+
+The starter checks Docker, finds the newest release, downloads the compose files into a new folder named `ririko`, runs the setup wizard (section 2.4) and asks if it should start the stack (section 2.5). Then go on with section 2.6. The sections below do the same steps by hand. Add a folder name to change the folder, or `--ref v2.0.0` to install a specific release. Run `npx ririko --help` for all options.
+
 ### 2.1. Check Docker
 
 1. Run this command:
