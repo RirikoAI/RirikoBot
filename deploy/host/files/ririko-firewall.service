@@ -1,0 +1,19 @@
+# Managed by deploy/host/bootstrap.sh (Ririko), --role lavalink only.
+[Unit]
+Description=Ririko host firewall (nftables table inet ririko)
+Documentation=https://github.com/RirikoAI/RirikoBot/blob/master/docs/deployment.md
+DefaultDependencies=no
+# After nftables.service, so its stock "flush ruleset" can never run after ours.
+After=local-fs.target nftables.service
+Before=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# The file declares, deletes and re-creates only table inet ririko, in one transaction.
+ExecStart=/usr/sbin/nft -f /etc/nftables.d/ririko.nft
+ExecReload=/usr/sbin/nft -f /etc/nftables.d/ririko.nft
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,29 @@
+{
+  "name": "@ririko/bot",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch --env-file=../../.env src/main.ts",
+    "start": "node --env-file=../../.env dist/main.js",
+    "typecheck": "tsc --noEmit && tsc -p test",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@ririko/core": "workspace:*",
+    "@ririko/database": "workspace:*",
+    "@ririko/discord": "workspace:*",
+    "@ririko/music": "workspace:*",
+    "@ririko/ai": "workspace:*",
+    "@ririko/services": "workspace:^",
+    "discord.js": "^14.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

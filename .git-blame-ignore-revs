@@ -1,0 +1,5 @@
+# Commits git blame should skip (GitHub reads this file automatically).
+# Locally: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style: apply Prettier to whole repository (STORY-123)
+e16501da9c640af604fbb446f676613a9e781000

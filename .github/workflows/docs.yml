@@ -1,0 +1,49 @@
+name: Docs site
+
+# Publishes the documentation site (website/) to GitHub Pages on https://ririko.ai.
+# Only master deploys, so the docs and the install files always match a release.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a newer push replaces a queued one but never cancels a running deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # pnpm version comes from "packageManager" in package.json.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # docs:build exports the command catalog, which needs the workspace packages built.
+      - run: pnpm build
+      # Also writes website/static/install/ from the production compose file and env example.
+      - run: pnpm docs:build
+      # v3 keeps dotfiles; install/.env.example must be uploaded. Do not move to v4 without checking.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

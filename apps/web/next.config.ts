@@ -1,0 +1,49 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import type { NextConfig } from 'next';
+import { staticSecurityHeaders } from './src/lib/security-headers';
+
+// Like the bot (`--env-file=../../.env`), the dashboard reads the shared monorepo .env.
+// Variables already set in the environment win over the file.
+const rootEnvFile = resolve(import.meta.dirname, '../../.env');
+if (existsSync(rootEnvFile)) {
+  process.loadEnvFile(rootEnvFile);
+}
+
+const nextConfig: NextConfig = {
+  // Native drivers and the canvas used for card previews must be loaded by Node at runtime,
+  // never bundled.
+  serverExternalPackages: ['better-sqlite3', 'pg', '@napi-rs/canvas'],
+  poweredByHeader: false,
+  reactStrictMode: true,
+  images: {
+    remotePatterns: [{ protocol: 'https', hostname: 'cdn.discordapp.com' }],
+  },
+  experimental: {
+    // React taint APIs guard secrets in services.ts (this also switches app/ to React's
+    // experimental channel, as Next.js requires for taint).
+    taint: true,
+    serverActions: {
+      // Welcome and farewell backgrounds are uploaded through a Server Action (2 MB images).
+      bodySizeLimit: '3mb',
+    },
+  },
+  // Container probes at the paths orchestrators expect (TASK-1221).
+  async rewrites() {
+    return [
+      { source: '/health', destination: '/api/health' },
+      { source: '/ready', destination: '/api/ready' },
+    ];
+  },
+  // The per-request CSP nonce is set in src/proxy.ts.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: staticSecurityHeaders(process.env.NODE_ENV === 'production'),
+      },
+    ];
+  },
+};
+
+export default nextConfig;

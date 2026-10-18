@@ -1,23 +1,21 @@
-codecov:
-  require_ci_to_pass: yes
-  notify:
-    wait_for_ci: yes
-
+# Codecov settings (STORY-123). Coverage is uploaded by the CircleCI `test` job.
 coverage:
-  precision: 2
-  round: up
-  range: 75...90
-
   status:
-    # Learn more at http://docs.codecov.io/docs/codecov-yaml
     project:
       default:
-        enabled: yes
-        target: 75
-        threshold: 0.1
+        # Compare against the base commit; allow 1% noise before failing.
+        target: auto
+        threshold: 1%
     patch:
       default:
-        enabled: off
+        # Reported on PRs but not blocking while the suite catches up with older code.
+        informational: true
+
+comment:
+  layout: 'condensed_header, diff, flags, files'
+  require_changes: false
 
 ignore:
-  - main.ts
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - 'scripts/**'

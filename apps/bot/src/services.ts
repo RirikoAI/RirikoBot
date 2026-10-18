@@ -1,0 +1,1180 @@
+import {
+  createDatabaseClient,
+  AdventureSessionRepository,
+  UserRepository,
+  UserConsentRepository,
+  EconomyRepository,
+  XpRepository,
+  GuildSettingsRepository,
+  GuildConfigVersionRepository,
+  BotActivityRepository,
+  GuildRepository,
+  CommandCatalogRepository,
+  CommandSettingsRepository,
+  LeaderboardRepository,
+  ItemRepository,
+  InventoryRepository,
+  PlayerEnergyRepository,
+  MusicRepository,
+  AiRepository,
+  ModerationRepository,
+  StreamRepository,
+  FreeGameRepository,
+  GiveawayRepository,
+  AutoVoiceRepository,
+  AutoVoiceChannelRepository,
+  WaifuAssetRepository,
+  WaifuCardRepository,
+  GameItemRepository,
+  UserInventoryItemRepository,
+  DungeonSeasonRepository,
+  DungeonFloorRepository,
+  DungeonBossRepository,
+  UserDungeonProgressRepository,
+  CardTradeRepository,
+  MarketListingRepository,
+  WaifuGuildRepository,
+  AchievementRepository,
+  TcgConfigRepository,
+  ReactionRoleRepository,
+  AutoRoleRepository,
+  ReminderRepository,
+  ImageRepository,
+  WelcomerRepository,
+  EconomyConfigRepository,
+  AuditLogRepository,
+  GuildDataRepository,
+  ItemCategoryRepository,
+  type DatabaseClient,
+  databaseConfigFromEnv,
+} from '@ririko/database';
+import type { Client, MessageCreateOptions } from 'discord.js';
+import { DEFAULT_COMMAND_PREFIX } from '@ririko/discord';
+import { MusicPlayerService } from '@ririko/music';
+import { createMusicPipeline } from './music-sources.js';
+import {
+  ConversationManager,
+  PersonalityEngine,
+  ToolRegistry,
+  ToolSecurityInterceptor,
+  MediatedToolExecutor,
+  FallbackChainManager,
+  GeminiProvider,
+  OpenAIProvider,
+  OllamaProvider,
+  TimeTool,
+  CoinFlipTool,
+  AnimeSearchTool,
+  ReminderTool,
+  MusicPlayTool,
+  EconomyBalanceTool,
+} from '@ririko/ai';
+import {
+  BotOwnerIdsSchema,
+  CORE_VERSION,
+  DEFAULT_PRIVACY_URL,
+  DEFAULT_TERMS_URL,
+  EventBus,
+  resolveResetSchedulesFromEnv,
+} from '@ririko/core';
+import {
+  AdventureEngine,
+  validateAdventureRewardState,
+  AdventurePayoutService,
+  type ActiveAdventureSession,
+  EconomyService,
+  BankingService,
+  DailyService,
+  EconomyConfigService,
+  LevelingService,
+  LeaderboardService,
+  InventoryService,
+  ProfileBackgroundManager,
+  ProfileCardRenderer,
+  AntiSpamEvaluator,
+  VoiceSessionAccumulator,
+  VoiceRewardService,
+  PermissionService,
+  ModerationActionService,
+  ModerationLogService,
+  DisciplinaryHistoryService,
+  WarningEscalationService,
+  PurgeService,
+  AutoModService,
+  AntiRaidService,
+  StreamWatcherEngine,
+  StreamNotificationDispatcher,
+  StreamAlertService,
+  createStreamAdapters,
+  FreeGamesEngine,
+  EpicGamesProvider,
+  SteamFreeGamesProvider,
+  GiveawayEngine,
+  buildEndedMessages,
+  AutoVoiceService,
+  MiniGameSessionManager,
+  GameEscrowService,
+  TicTacToeEngine,
+  RpsEngine,
+  DropManager,
+  dropConfigFromSettings,
+  CardDismantleService,
+  CardImageService,
+  CombatSimulator,
+  ExpeditionService,
+  BossRaidService,
+  PvPDuelService,
+  QuestService,
+  CANONICAL_ITEMS,
+  syncCanonicalItems,
+  EnhancementService,
+  LoadoutService,
+  ConsumableService,
+  EnergyLifecycleService,
+  createXpLevelResolver,
+  TcgShopService,
+  ItemGrantService,
+  CraftingService,
+  CardProgressionService,
+  DungeonProgressService,
+  BossImageService,
+  ScalingEngine,
+  DungeonRunner,
+  TutorialService,
+  DungeonLootService,
+  TradeService,
+  MarketService,
+  WaifuGuildService,
+  AchievementService,
+  TcgRulesService,
+  AutoRoleService,
+  ReactionRoleService,
+  AniListClient,
+  JikanClient,
+  AnimeSearchService,
+  WaifuImClient,
+  LrclibClient,
+  WallhavenClient,
+  ZerochanClient,
+  KonachanClient,
+  WallpaperService,
+  ReminderService,
+  ReminderScheduler,
+  createDiscordReminderDelivery,
+  resolveTimeZone,
+  GuildSettingsService,
+  GuildConfigWatcher,
+  createGuildConfigService,
+  type GuildConfigService,
+  CommandUsageRecorder,
+  ConsentService,
+  DataRetentionService,
+  CommandOverrideService,
+  BotStatusReporter,
+  ReactionGifService,
+  MemeSynthesizer,
+  ImageGenerationService,
+  WelcomerService,
+  MaintenanceService,
+  ModuleToggleService,
+  type FreeGameItem,
+} from '@ririko/services';
+import { sendLevelUpMessage } from './listeners/level-up.js';
+import type { LegalLinks } from './terms-notice.js';
+
+export interface BotServices {
+  db: DatabaseClient;
+  eventBus: EventBus;
+  userRepo: UserRepository;
+  economyRepo: EconomyRepository;
+  xpRepo: XpRepository;
+  guildSettingsRepo: GuildSettingsRepository;
+  leaderboardRepo: LeaderboardRepository;
+  itemRepo: ItemRepository;
+  inventoryRepo: InventoryRepository;
+  playerEnergyRepo: PlayerEnergyRepository;
+  musicRepo: MusicRepository;
+  aiRepo: AiRepository;
+  moderationRepo: ModerationRepository;
+  streamRepo: StreamRepository;
+  freeGameRepo: FreeGameRepository;
+  giveawayRepo: GiveawayRepository;
+  autoVoiceRepo: AutoVoiceRepository;
+  autoVoiceService: AutoVoiceService;
+  streamWatcher: StreamWatcherEngine;
+  /** Stream alert subscriptions, shared with the dashboard. */
+  streamAlertService: StreamAlertService;
+  streamDispatcher: StreamNotificationDispatcher | undefined;
+  freeGamesEngine: FreeGamesEngine;
+  giveawayEngine: GiveawayEngine;
+  adventureEngine: AdventureEngine;
+  adventureSessions: AdventureSessionRepository<ActiveAdventureSession>;
+  gameSessionManager: MiniGameSessionManager;
+  gameEscrowService: GameEscrowService;
+  tictactoeEngine: TicTacToeEngine;
+  rpsEngine: RpsEngine;
+  musicPlayer: MusicPlayerService;
+  economyService: EconomyService;
+  bankingService: BankingService;
+  dailyService: DailyService;
+  levelingService: LevelingService;
+  leaderboardService: LeaderboardService;
+  inventoryService: InventoryService;
+  profileBackgroundManager: ProfileBackgroundManager;
+  profileCardRenderer: ProfileCardRenderer;
+  antiSpamEvaluator: AntiSpamEvaluator;
+  voiceAccumulator: VoiceSessionAccumulator;
+  /** Pays voice credits and XP each minute; null without a Discord client (tests). Started on READY. */
+  voiceRewardService: VoiceRewardService | null;
+  conversationManager: ConversationManager;
+  personalityEngine: PersonalityEngine;
+  toolRegistry: ToolRegistry;
+  /** Shared AniList client; one per process so every caller shares the AniList rate limit. */
+  anilistClient: AniListClient;
+  /** MyAnimeList-first anime/manga/character search with AniList fallback and caching. */
+  animeSearchService: AnimeSearchService;
+  waifuImClient: WaifuImClient;
+  /** LRCLIB lyrics lookup for /lyrics and the music controller Lyrics button; needs no key. */
+  lrclibClient: LrclibClient;
+  /** Backs `/react` and its 67 legacy `!<reaction>` aliases with pooled otakugifs.xyz GIF urls. */
+  reactionGifService: ReactionGifService;
+  /** Backs `/meme` and its 11 legacy `!<template>` aliases with dynamic canvas rendering. */
+  memeSynthesizer: MemeSynthesizer;
+  reminderService: ReminderService;
+  /** Null when no Discord client was supplied (tests); started on gateway READY. */
+  reminderScheduler: ReminderScheduler | null;
+  guildSettingsService: GuildSettingsService;
+  /** Polls the guild config change feed; started on gateway READY. */
+  guildConfigWatcher: GuildConfigWatcher;
+  /** Counts commands run per guild for the dashboard; fed by the command router. */
+  commandUsageRecorder: CommandUsageRecorder;
+  /** Who accepted which version of the terms notice (and, later, the AI consent). */
+  consentService: ConsentService;
+  /** Deletes data past its retention period once a day (STORY-193); started on gateway READY. */
+  dataRetentionService: DataRetentionService;
+  /** The terms and privacy pages the first-command notice links to (TERMS_URL, PRIVACY_URL). */
+  legalLinks: LegalLinks;
+  /** Per-guild and per-channel command overrides read by the router middlewares. */
+  commandOverrideService: CommandOverrideService;
+  /** Registered commands, written at startup so the dashboard and CLI can list them. */
+  commandCatalogRepo: CommandCatalogRepository;
+  /** The servers the bot is in, with owner and inviter; kept current by the guild registry listener. */
+  guildRepo: GuildRepository;
+  /** Null when no Discord client was supplied (tests); started on gateway READY. */
+  botStatusReporter: BotStatusReporter | null;
+  /** Zone for reading reminder times: the user's saved zone, then the guild's, then UTC. */
+  resolveUserTimeZone: (userId: string, guildId: string | null) => Promise<string>;
+  /** Zone for reading guild times: the guild's saved zone, then UTC. */
+  resolveGuildTimeZone: (guildId: string | null) => Promise<string>;
+  /** WallHaven, Zerochan and Konachan wallpaper search for /wallpaper. */
+  wallpaperService: WallpaperService;
+  securityInterceptor: ToolSecurityInterceptor;
+  toolExecutor: MediatedToolExecutor;
+  fallbackChainManager: FallbackChainManager;
+  permissionService: PermissionService;
+  moderationActionService: ModerationActionService;
+  moderationLogService: ModerationLogService;
+  disciplinaryHistoryService: DisciplinaryHistoryService;
+  warningEscalationService: WarningEscalationService;
+  purgeService: PurgeService;
+  autoModService: AutoModService;
+  antiRaidService: AntiRaidService;
+  waifuAssetRepo: WaifuAssetRepository;
+  waifuCardRepo: WaifuCardRepository;
+  dropManager: DropManager;
+  dismantleService: CardDismantleService;
+  cardImageService: CardImageService;
+  bossImageService: BossImageService;
+  combatSimulator: CombatSimulator;
+  expeditionService: ExpeditionService;
+  bossRaidService: BossRaidService;
+  pvpDuelService: PvPDuelService;
+  questService: QuestService;
+  gameItemRepo: GameItemRepository;
+  userInventoryItemRepo: UserInventoryItemRepository;
+  enhancementService: EnhancementService;
+  loadoutService: LoadoutService;
+  consumableService: ConsumableService;
+  energyLifecycleService: EnergyLifecycleService;
+  tcgShopService: TcgShopService;
+  craftingService: CraftingService;
+  dungeonSeasonRepo: DungeonSeasonRepository;
+  dungeonFloorRepo: DungeonFloorRepository;
+  dungeonBossRepo: DungeonBossRepository;
+  userDungeonProgressRepo: UserDungeonProgressRepository;
+  scalingEngine: ScalingEngine;
+  dungeonRunner: DungeonRunner;
+  tutorialService: TutorialService;
+  dungeonLootService: DungeonLootService;
+  cardTradeRepo: CardTradeRepository;
+  marketRepo: MarketListingRepository;
+  tradeService: TradeService;
+  marketService: MarketService;
+  waifuGuildRepo: WaifuGuildRepository;
+  achievementRepo: AchievementRepository;
+  tcgConfigRepo: TcgConfigRepository;
+  waifuGuildService: WaifuGuildService;
+  achievementService: AchievementService;
+  /** Global TCG rules (market tax and expiry, energy, potions); owners edit them. */
+  tcgRulesService: TcgRulesService;
+  /** Discord user IDs from BOT_OWNER_ID; only they may change global rules from Discord. */
+  botOwnerIds: readonly string[];
+  /** Audited guild settings writes from Discord commands (same path as the dashboard and CLI). */
+  guildConfigService: GuildConfigService;
+  reactionRoleRepo: ReactionRoleRepository;
+  autoRoleRepo: AutoRoleRepository;
+  reactionRoleService: ReactionRoleService;
+  autoRoleService: AutoRoleService;
+  imageRepo: ImageRepository;
+  imageGenerationService: ImageGenerationService;
+  welcomerRepo: WelcomerRepository;
+  welcomerService: WelcomerService;
+  maintenanceService: MaintenanceService;
+  moduleToggleService: ModuleToggleService;
+}
+
+/**
+ * Initializes and wires all core repositories, services, and event buses for the Discord bot.
+ */
+export async function createBotServices(
+  customDb?: DatabaseClient,
+  discordClient?: Client,
+): Promise<BotServices> {
+  const eventBus = new EventBus();
+
+  // Shared calendar-day reset boundary (default 00:00 GMT+8) for every daily system.
+  const { schedules: resetSchedules, config: resetConfig } = resolveResetSchedulesFromEnv();
+
+  const db = customDb ?? (await createDatabaseClient(databaseConfigFromEnv()));
+
+  // Repositories
+  const userRepo = new UserRepository(db);
+  const economyRepo = new EconomyRepository(db);
+  const xpRepo = new XpRepository(db);
+  const guildSettingsRepo = new GuildSettingsRepository(db);
+  const leaderboardRepo = new LeaderboardRepository(db);
+  const itemRepo = new ItemRepository(db);
+  const inventoryRepo = new InventoryRepository(db);
+  const playerEnergyRepo = new PlayerEnergyRepository(db, resetSchedules.energyPotions);
+  const musicRepo = new MusicRepository(db);
+  const streamRepo = new StreamRepository(db);
+  const freeGameRepo = new FreeGameRepository(db);
+  const autoVoiceRepo = new AutoVoiceRepository(db);
+  const autoVoiceChannelRepo = new AutoVoiceChannelRepository(db);
+  const autoVoiceService = new AutoVoiceService(autoVoiceRepo, autoVoiceChannelRepo);
+  const waifuAssetRepo = new WaifuAssetRepository(db);
+  const waifuCardRepo = new WaifuCardRepository(db);
+  const reactionRoleRepo = new ReactionRoleRepository(db);
+  const autoRoleRepo = new AutoRoleRepository(db);
+  const reactionRoleService = new ReactionRoleService(reactionRoleRepo);
+  const autoRoleService = new AutoRoleService(autoRoleRepo);
+  const welcomerRepo = new WelcomerRepository(db);
+  const welcomerService = new WelcomerService();
+  const dropManager = new DropManager(waifuCardRepo, waifuAssetRepo, undefined, {
+    loadConfig: async (guildId) => {
+      const row = await guildSettingsRepo.findById(guildId);
+      return row ? dropConfigFromSettings(row) : null;
+    },
+  });
+  const gameItemRepo = new GameItemRepository(db);
+  const userInventoryItemRepo = new UserInventoryItemRepository(db);
+  const itemGrantService = new ItemGrantService(gameItemRepo, userInventoryItemRepo);
+  const adventureSessions = new AdventureSessionRepository<ActiveAdventureSession>(
+    db,
+    validateAdventureRewardState,
+  );
+  const adventureEngine = new AdventureEngine({
+    sessions: adventureSessions,
+    energy: playerEnergyRepo,
+    payments: new AdventurePayoutService({
+      economy: economyRepo,
+      xp: xpRepo,
+      energy: playerEnergyRepo,
+      cards: waifuCardRepo,
+      assets: waifuAssetRepo,
+      items: itemGrantService,
+    }),
+  });
+  const dismantleService = new CardDismantleService(
+    waifuCardRepo,
+    userInventoryItemRepo,
+    itemGrantService,
+  );
+  const cardImageService = new CardImageService();
+  const bossImageService = new BossImageService(waifuAssetRepo);
+  const musicPlayer = new MusicPlayerService({
+    pipeline: await createMusicPipeline(),
+    lavalink: {
+      enabled: process.env.LAVALINK_ENABLED !== 'false',
+      node: {
+        host: process.env.LAVALINK_HOST || '127.0.0.1',
+        port: parseInt(process.env.LAVALINK_PORT || '2333', 10),
+        password: process.env.LAVALINK_PASSWORD || 'youshallnotpass',
+        secure: process.env.LAVALINK_SECURE === 'true',
+      },
+    },
+    resolveGuildVolume: async (guildId: string) => {
+      const settings = await musicRepo.getGuildSettings(guildId).catch(() => null);
+      return settings?.defaultVolume;
+    },
+  });
+
+  // Add any default shop items and categories that are missing (by code); owner edits stay.
+  await itemRepo.seedDefaultCatalog().catch((err: unknown) => {
+    console.error('[ItemRepository] Could not seed the default shop catalog:', err);
+  });
+
+  // Services
+  // Daily reward and bank values set in the owner console; read on every use.
+  const economyConfigService = new EconomyConfigService({
+    db,
+    repository: new EconomyConfigRepository(db),
+    audit: new AuditLogRepository(db),
+  });
+
+  // Account-wide level from XP summed over every guild: energy and the bank are global per
+  // user while xp_accounts is per guild. Resolved lazily, after levelingService exists.
+  const accountLevel = createXpLevelResolver(
+    xpRepo,
+    (totalXp) => levelingService.getLevelProgress(totalXp).level,
+  );
+
+  const bankingService = new BankingService({
+    repository: economyRepo,
+    config: economyConfigService,
+    levelResolver: (userId) => accountLevel(userId),
+  });
+
+  const dailyService = new DailyService({
+    repository: economyRepo,
+    config: economyConfigService,
+    resetSchedule: resetSchedules.daily,
+    streakForgiveness: resetConfig.RIRIKO_DAILY_STREAK_FORGIVENESS,
+  });
+
+  const levelingService = new LevelingService({
+    xpRepository: xpRepo,
+    userRepository: userRepo,
+    guildSettingsRepository: guildSettingsRepo,
+    bankingService,
+    eventBus,
+  });
+
+  const tcgConfigRepo = new TcgConfigRepository(db);
+  const tcgRulesService = new TcgRulesService({
+    db,
+    repository: tcgConfigRepo,
+    audit: new AuditLogRepository(db),
+  });
+  const botOwnerIds = parseBotOwnerIds(process.env.BOT_OWNER_ID);
+  const guildConfigService = createGuildConfigService(db, {
+    defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
+    defaultTimezone: 'UTC',
+  });
+
+  // Energy lifecycle owns the daily boundary and level-scaled capacity, sized by the
+  // account-wide level. Capacity, potion and bonus energy rules are the global TCG rules.
+  const energyLifecycleService = new EnergyLifecycleService(playerEnergyRepo, {
+    resetSchedule: resetSchedules.energy,
+    levelResolver: accountLevel,
+    rulesResolver: async () => {
+      const rules = await tcgRulesService.getRules();
+      return {
+        globalCap: rules.globalMaxEnergyCap,
+        baseCapacity: rules.baseEnergyCapacity,
+        scalingPerLevel: rules.energyScalingPerLevel,
+        dailyPotionLimit: rules.dailyEnergyPotionLimit,
+        maxBonusCap: rules.maxBonusEnergyCap,
+        dailyBonusIncrement: rules.dailyBonusEnergyIncrement,
+      };
+    },
+  });
+
+  const leaderboardService = new LeaderboardService({
+    xpRepository: xpRepo,
+    leaderboardRepository: leaderboardRepo,
+    config: {
+      snapshotTtlMs: 10 * 60 * 1000, // 10 minutes
+      autoRefresh: false,
+    },
+  });
+
+  const inventoryService = new InventoryService({
+    itemRepository: itemRepo,
+    categoryRepository: new ItemCategoryRepository(db),
+    inventoryRepository: inventoryRepo,
+    economyRepository: economyRepo,
+    playerEnergyRepository: playerEnergyRepo,
+    levelingService,
+    eventBus,
+    resetSchedule: resetSchedules.shopPurchases,
+    energyLifecycle: energyLifecycleService,
+  });
+
+  const profileBackgroundManager = new ProfileBackgroundManager({
+    userRepository: userRepo,
+    inventoryService,
+  });
+
+  const profileCardRenderer = new ProfileCardRenderer({
+    userRepository: userRepo,
+    economyRepository: economyRepo,
+    levelingService,
+    bankingService,
+    leaderboardService,
+  });
+
+  const antiSpamEvaluator = new AntiSpamEvaluator({
+    cooldownSeconds: 60,
+    minContentLength: 5,
+    similarityThreshold: 0.8,
+  });
+
+  const economyService = new EconomyService({
+    repository: economyRepo,
+    eventBus,
+    antiSpam: antiSpamEvaluator,
+  });
+
+  // VoiceRewardService pays the events, so guild settings apply before anything is awarded.
+  const voiceAccumulator = new VoiceSessionAccumulator({
+    config: {
+      minQuorum: 2,
+      intervalSeconds: 60,
+    },
+  });
+
+  const aiRepo = new AiRepository(db);
+  const conversationManager = new ConversationManager({ repository: aiRepo });
+  const personalityEngine = new PersonalityEngine();
+  const toolRegistry = new ToolRegistry();
+  toolRegistry.register(new TimeTool());
+  toolRegistry.register(new CoinFlipTool());
+  // Interactive callers (AI chat, commands) fail fast instead of using the batch retry defaults.
+  const anilistClient = new AniListClient({ maxRetries: 1, timeoutMs: 5000 });
+  // No retries: on failure the search service answers from AniList and pauses Jikan briefly.
+  const animeSearchService = new AnimeSearchService({
+    jikan: new JikanClient({ maxRetries: 0, timeoutMs: 5000 }),
+    anilist: anilistClient,
+  });
+  const waifuImClient = new WaifuImClient({ maxRetries: 1, timeoutMs: 5000 });
+  const lrclibClient = new LrclibClient({ maxRetries: 1, timeoutMs: 5000 });
+  const reactionGifService = new ReactionGifService();
+  const memeSynthesizer = new MemeSynthesizer();
+  const imageRepo = new ImageRepository(db);
+  const imageGenerationService = new ImageGenerationService({
+    repository: imageRepo,
+    defaultProviderId: process.env.IMAGE_DEFAULT_PROVIDER || 'gemini',
+    dailyQuotaPerUser: parseInt(process.env.IMAGE_DAILY_QUOTA || '30', 10),
+  });
+  const wallpaperService = new WallpaperService({
+    wallhaven: new WallhavenClient({ maxRetries: 1, timeoutMs: 5000 }),
+    zerochan: new ZerochanClient({ maxRetries: 1, timeoutMs: 5000 }),
+    konachan: new KonachanClient({ maxRetries: 1, timeoutMs: 5000 }),
+  });
+  toolRegistry.register(
+    new AnimeSearchTool(async (title: string) => {
+      const [media] = await anilistClient.searchMedia(title, { type: 'ANIME', perPage: 1 });
+      if (!media) return null;
+      return {
+        title: media.title.english || media.title.romaji || media.title.native || title,
+        synopsis: media.description?.slice(0, 400) || 'No description available.',
+        score: media.averageScore ? media.averageScore / 10 : undefined,
+        episodes: media.episodes ?? undefined,
+        status: media.status ?? undefined,
+        url: media.siteUrl ?? undefined,
+      };
+    }),
+  );
+  const reminderRepo = new ReminderRepository(db);
+  const reminderService = new ReminderService({ repo: reminderRepo });
+  const guildSettingsService = new GuildSettingsService({
+    repo: guildSettingsRepo,
+    defaultPrefix: process.env.DEFAULT_PREFIX || DEFAULT_COMMAND_PREFIX,
+    defaultTimezone: 'UTC',
+  });
+  // Settings saved by the dashboard or CLI reach this process through the config change feed.
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    guildSettingsService.invalidate(guildId);
+    // Drop hours are read in the guild time zone, which the General page sets.
+    if (module === 'tcg' || module === 'general') dropManager.invalidate(guildId);
+  });
+  const voiceRewardService = discordClient
+    ? new VoiceRewardService({
+        accumulator: voiceAccumulator,
+        economyService,
+        levelingService,
+        getRules: (guildId) => guildSettingsService.getSettings(guildId),
+        getMemberRoleIds: (guildId, userId) => [
+          ...(discordClient.guilds.cache
+            .get(guildId)
+            ?.members.cache.get(userId)
+            ?.roles.cache.keys() ?? []),
+        ],
+        onLevelUp: async ({ channelId, userId, newLevel }) => {
+          await sendLevelUpMessage(discordClient, channelId, userId, newLevel);
+        },
+      })
+    : null;
+  const guildConfigWatcher = new GuildConfigWatcher(new GuildConfigVersionRepository(db), eventBus);
+  const commandOverrideService = new CommandOverrideService({
+    repo: new CommandSettingsRepository(db),
+  });
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    // The Games page writes the games' server-wide overrides too.
+    if (module === 'commands' || module === 'games') commandOverrideService.invalidate(guildId);
+  });
+  const commandCatalogRepo = new CommandCatalogRepository(db);
+  const maintenanceService = new MaintenanceService({ eventBus });
+  const moduleToggleService = new ModuleToggleService({
+    commandOverrideService,
+    guildSettingsService,
+    eventBus,
+  });
+  const botActivityRepo = new BotActivityRepository(db);
+  const guildRepo = new GuildRepository(db);
+  const commandUsageRecorder = new CommandUsageRecorder(botActivityRepo);
+  const consentService = new ConsentService(new UserConsentRepository(db));
+  const dataRetentionService = new DataRetentionService({
+    ai: aiRepo,
+    music: musicRepo,
+    images: imageRepo,
+    audit: new AuditLogRepository(db),
+    guilds: new GuildDataRepository(db),
+  });
+  const legalLinks: LegalLinks = {
+    termsUrl: process.env.TERMS_URL || DEFAULT_TERMS_URL,
+    privacyUrl: process.env.PRIVACY_URL || DEFAULT_PRIVACY_URL,
+  };
+  const botStatusReporter = discordClient
+    ? new BotStatusReporter(discordClient, botActivityRepo, { version: CORE_VERSION })
+    : null;
+  const resolveUserTimeZone = async (userId: string, guildId: string | null): Promise<string> => {
+    const [userPrefs, guildTz] = await Promise.all([
+      conversationManager.getUserPreferences(userId).catch(() => null),
+      guildId ? guildSettingsService.getTimezone(guildId) : 'UTC',
+    ]);
+    return resolveTimeZone(userPrefs?.timezone, guildTz);
+  };
+  const resolveGuildTimeZone = async (guildId: string | null): Promise<string> => {
+    if (!guildId) return 'UTC';
+    return guildSettingsService.getTimezone(guildId);
+  };
+  const reminderScheduler = discordClient
+    ? new ReminderScheduler({
+        repo: reminderRepo,
+        deliver: createDiscordReminderDelivery(discordClient),
+        resolveTimeZone: resolveUserTimeZone,
+      })
+    : null;
+  toolRegistry.register(
+    new ReminderTool(async (args, context) => {
+      if (!context.channelId) throw new Error('Reminders need a channel to fall back to.');
+      const reminder = await reminderService.create({
+        userId: context.userId,
+        guildId: context.guildId ?? null,
+        channelId: context.channelId,
+        when: args.timeString,
+        message: args.message,
+        timeZone: resolveTimeZone(context.userTimezone, context.guildTimezone),
+      });
+      return { message: reminder.message, triggerAt: reminder.triggerAt };
+    }),
+  );
+  toolRegistry.register(new MusicPlayTool());
+  toolRegistry.register(
+    new EconomyBalanceTool(async (userId: string) => {
+      const bal = await economyRepo.findById(userId);
+      if (!bal) return null;
+      return {
+        wallet: bal.walletBalance,
+        bank: bal.bankBalance,
+        netWorth: bal.netWorth,
+      };
+    }),
+  );
+  const securityInterceptor = new ToolSecurityInterceptor(toolRegistry);
+  const toolExecutor = new MediatedToolExecutor(toolRegistry, securityInterceptor);
+
+  const defaultAiProvider = (
+    process.env.DEFAULT_AI_PROVIDER ||
+    process.env.AI_PROVIDER ||
+    'gemini'
+  ).toLowerCase();
+
+  const aiProviders = [];
+  if (process.env.GEMINI_API_KEY) {
+    aiProviders.push(
+      new GeminiProvider({
+        apiKey: process.env.GEMINI_API_KEY,
+        defaultModel: defaultAiProvider === 'gemini' ? process.env.DEFAULT_AI_MODEL : undefined,
+      }),
+    );
+  }
+  if (process.env.OPENAI_API_KEY) {
+    aiProviders.push(
+      new OpenAIProvider({
+        apiKey: process.env.OPENAI_API_KEY,
+        baseURL: process.env.OPENAI_BASE_URL,
+        defaultModel: defaultAiProvider === 'openai' ? process.env.DEFAULT_AI_MODEL : undefined,
+      }),
+    );
+  }
+  aiProviders.push(
+    new OllamaProvider({
+      baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
+      defaultModel: defaultAiProvider === 'ollama' ? process.env.DEFAULT_AI_MODEL : undefined,
+    }),
+  );
+  const fallbackChainManager = new FallbackChainManager(aiProviders, {
+    defaultProviderId: defaultAiProvider,
+  });
+
+  // Moderation Subsystems
+  const moderationRepo = new ModerationRepository(db);
+  const permissionService = new PermissionService(guildSettingsRepo);
+  const moderationActionService = new ModerationActionService(
+    permissionService,
+    moderationRepo,
+    eventBus,
+  );
+  const moderationLogService = new ModerationLogService(
+    moderationRepo,
+    guildSettingsRepo,
+    eventBus,
+  );
+  const disciplinaryHistoryService = new DisciplinaryHistoryService(moderationRepo);
+  const warningEscalationService = new WarningEscalationService(
+    moderationRepo,
+    guildSettingsRepo,
+    permissionService,
+    moderationActionService,
+    eventBus,
+  );
+  const purgeService = new PurgeService(permissionService, moderationRepo, eventBus);
+  const autoModService = new AutoModService(
+    moderationRepo,
+    moderationActionService,
+    warningEscalationService,
+    eventBus,
+  );
+  // AutoMod caches each guild's rules for five minutes; drop them as soon as the dashboard or
+  // CLI saves new ones (the change feed reaches this process through GuildConfigWatcher).
+  eventBus.on('guild:configChanged', ({ guildId, module }) => {
+    if (module === 'automod') autoModService.invalidateRuleCache(guildId);
+  });
+  const antiRaidService = new AntiRaidService(moderationRepo, moderationActionService, eventBus);
+
+  const streamDispatcher = discordClient
+    ? new StreamNotificationDispatcher(discordClient, streamRepo)
+    : undefined;
+
+  const streamWatcher = new StreamWatcherEngine(streamRepo, {
+    checkIntervalMs: Number(process.env.STREAM_CHECK_INTERVAL_MS || 60_000),
+    onStreamLive: async (streamer, stream) => {
+      if (streamDispatcher) {
+        await streamDispatcher.dispatch(streamer, stream);
+      }
+    },
+  });
+
+  const streamAdapters = createStreamAdapters(process.env);
+  for (const adapter of streamAdapters) streamWatcher.registerAdapter(adapter);
+  const streamAlertService = new StreamAlertService({
+    db,
+    streams: streamRepo,
+    audit: new AuditLogRepository(db),
+    adapters: streamAdapters,
+  });
+
+  const freeGamesEngine: FreeGamesEngine = new FreeGamesEngine(freeGameRepo, {
+    providers: [new EpicGamesProvider(), new SteamFreeGamesProvider()],
+    onAnnounceGame: async (target, game: FreeGameItem): Promise<string | null> => {
+      if (!discordClient) return null;
+      try {
+        const channel = await discordClient.channels.fetch(target.channelId).catch(() => null);
+        if (channel && channel.isTextBased() && 'send' in channel) {
+          // The embed is plain JSON with optional keys set to undefined, which discord.js accepts.
+          const msg = await channel.send(
+            freeGamesEngine.formatAnnouncement(
+              game,
+              target.mentionRoleId,
+            ) as unknown as MessageCreateOptions,
+          );
+          return msg.id;
+        }
+      } catch (err) {
+        console.error(
+          `[FreeGamesEngine] Failed to post alert in channel ${target.channelId}:`,
+          err,
+        );
+      }
+      return null;
+    },
+    getGuildAnnounceTargets: async () => {
+      return freeGameRepo.listAllConfiguredGuildChannels();
+    },
+  });
+
+  // Giveaways Engine
+  const giveawayRepo = new GiveawayRepository(db);
+  const giveawayEngine: GiveawayEngine = new GiveawayEngine(giveawayRepo, {
+    onGiveawayEnded: async (result) => {
+      if (!discordClient) return;
+      try {
+        const giveaway = result.giveaway;
+        const channel = await discordClient.channels.fetch(giveaway.channelId).catch(() => null);
+        if (channel?.isSendable()) {
+          const entryCount = await giveawayRepo.getEntryCount(giveaway.id);
+          const messages = buildEndedMessages(
+            giveawayEngine,
+            giveaway,
+            entryCount,
+            result.winnerIds,
+          );
+          if (giveaway.messageId) {
+            const msg = await channel.messages.fetch(giveaway.messageId).catch(() => null);
+            await msg?.edit(messages.edit).catch(() => null);
+          }
+          await channel
+            .send({
+              content: messages.announcement.content,
+              allowedMentions: { parse: [], users: messages.announcement.mentionUserIds },
+            })
+            .catch(() => null);
+        }
+      } catch (err) {
+        console.error(`[GiveawayEngine] onGiveawayEnded failed for ${result.giveaway.id}:`, err);
+      }
+    },
+  });
+
+  const gameSessionManager = new MiniGameSessionManager();
+  const gameEscrowService = new GameEscrowService(economyRepo);
+  const tictactoeEngine = new TicTacToeEngine(gameSessionManager);
+  const rpsEngine = new RpsEngine(gameSessionManager);
+  const combatSimulator = new CombatSimulator({ maxTurns: 25 });
+  const rewardPayout = { economyRepo, grants: itemGrantService };
+  const expeditionService = new ExpeditionService(
+    playerEnergyRepo,
+    rewardPayout,
+    energyLifecycleService,
+  );
+  const bossRaidService = new BossRaidService(
+    playerEnergyRepo,
+    combatSimulator,
+    rewardPayout,
+    energyLifecycleService,
+  );
+  const pvpDuelService = new PvPDuelService(
+    playerEnergyRepo,
+    economyRepo,
+    combatSimulator,
+    energyLifecycleService,
+  );
+  const questService = new QuestService();
+
+  const enhancementService = new EnhancementService(gameItemRepo, userInventoryItemRepo);
+  const loadoutService = new LoadoutService(
+    gameItemRepo,
+    userInventoryItemRepo,
+    waifuCardRepo,
+    enhancementService,
+  );
+  const consumableService = new ConsumableService(
+    gameItemRepo,
+    userInventoryItemRepo,
+    playerEnergyRepo,
+    energyLifecycleService,
+  );
+  const tcgShopService = new TcgShopService(
+    gameItemRepo,
+    userInventoryItemRepo,
+    economyRepo,
+    resetSchedules.tcgShop,
+  );
+
+  const dungeonSeasonRepo = new DungeonSeasonRepository(db);
+  const dungeonFloorRepo = new DungeonFloorRepository(db);
+  const dungeonBossRepo = new DungeonBossRepository(db);
+  const userDungeonProgressRepo = new UserDungeonProgressRepository(db);
+  const craftingService = new CraftingService(
+    gameItemRepo,
+    userInventoryItemRepo,
+    economyRepo,
+    userDungeonProgressRepo,
+    dungeonSeasonRepo,
+    db,
+  );
+  const scalingEngine = new ScalingEngine();
+  const dungeonLootService = new DungeonLootService({
+    economyRepo,
+    inventoryRepo: userInventoryItemRepo,
+    itemRepo: gameItemRepo,
+    xpRepo,
+  });
+
+  const cardTradeRepo = new CardTradeRepository(db);
+  const marketRepo = new MarketListingRepository(db);
+  const tradeService = new TradeService(
+    cardTradeRepo,
+    waifuCardRepo,
+    economyRepo,
+    db,
+    userInventoryItemRepo,
+  );
+  const marketService = new MarketService(
+    marketRepo,
+    waifuCardRepo,
+    economyRepo,
+    db,
+    userInventoryItemRepo,
+    {
+      rulesResolver: async () => {
+        const rules = await tcgRulesService.getRules();
+        return {
+          taxRate: rules.marketTaxPercent / 100,
+          listingDurationDays: rules.listingExpiryDays,
+        };
+      },
+    },
+  );
+
+  const waifuGuildRepo = new WaifuGuildRepository(db);
+  const achievementRepo = new AchievementRepository(db);
+
+  const waifuGuildService = new WaifuGuildService(waifuGuildRepo, economyRepo, db);
+  const achievementService = new AchievementService(achievementRepo, economyRepo, db, {
+    xpRepo,
+    inventoryRepo: userInventoryItemRepo,
+    itemRepo: gameItemRepo,
+    waifuCardRepo,
+  });
+
+  // Seed default achievements if needed
+  try {
+    await achievementService.seedAchievements();
+  } catch {
+    // In some unit tests with isolated in-memory databases, tables may not exist yet
+  }
+
+  const tutorialService = new TutorialService(userDungeonProgressRepo, {
+    cardRepo: waifuCardRepo,
+    inventoryRepo: userInventoryItemRepo,
+    itemRepo: gameItemRepo,
+    assetRepo: waifuAssetRepo,
+    tcgConfigRepo,
+    achievementService,
+  });
+  const dungeonRunner = new DungeonRunner(playerEnergyRepo, userDungeonProgressRepo, {
+    energyLifecycle: energyLifecycleService,
+    scalingEngine,
+    floorRepo: dungeonFloorRepo,
+    bossRepo: dungeonBossRepo,
+    seasonRepo: dungeonSeasonRepo,
+    lootService: dungeonLootService,
+    cardRepo: waifuCardRepo,
+    tutorialService,
+    cardProgression: new CardProgressionService(waifuCardRepo),
+    progressService: new DungeonProgressService(tcgConfigRepo, playerEnergyRepo, itemGrantService),
+  });
+
+  // Seed and synchronize canonical items
+  try {
+    const { created, updated } = await syncCanonicalItems(gameItemRepo);
+    if (created > 0 || updated > 0) {
+      console.log(`[tcg] Canonical items synced: ${created} created, ${updated} updated.`);
+    }
+    // Rows written by older reward code point at ids that never existed in game_items.
+    const repaired = await itemGrantService.repairLegacyInventoryRows();
+    if (repaired > 0) console.log(`[tcg] Repaired ${repaired} legacy inventory item row(s).`);
+  } catch {
+    // In some unit tests with isolated in-memory databases, game_items may not be created.
+  }
+
+  // The TCG Manager Role is per guild now (its old global key cannot be assigned to one), and
+  // the dungeon curve and replenish cron keys were never read.
+  try {
+    const retired = await tcgRulesService.retireUnusedKeys();
+    if (retired) {
+      console.warn(
+        `[tcg] Removed the old global TCG Manager Role (${retired}). Set it again per server with /tcg-admin action:role or the dashboard.`,
+      );
+    }
+  } catch {
+    // Isolated test databases may lack tcg_system_configs.
+  }
+
+  // Seed default seasons if needed
+  try {
+    // Seed by id: an ended season is not active, and its id cannot be inserted again.
+    const s1 = await dungeonSeasonRepo.findById('s1_infernal_crucible');
+    if (!s1) {
+      await dungeonSeasonRepo.create({
+        id: 's1_infernal_crucible',
+        name: 'Season 1: Infernal Crucible',
+        description: 'Blistering magma towers with Scorched Earth and Heat Haze affixes.',
+        isActive: true,
+        themeElement: 'FIRE',
+        seasonalAffixes: ['SCORCHED_EARTH', 'HEAT_HAZE'],
+        scalingModel: 'EXPONENTIAL',
+        isTutorial: false,
+        startsAt: new Date(),
+        endsAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      });
+    }
+    const tutorialSeason = await dungeonSeasonRepo.findTutorialSeason();
+    if (!tutorialSeason) {
+      await dungeonSeasonRepo.create({
+        id: 'season_tutorial',
+        name: 'Tutorial Prologue: Training Grounds',
+        description: 'Introductory 4-floor training dungeon teaching basic mechanics and wards.',
+        isActive: true,
+        themeElement: 'NEUTRAL',
+        seasonalAffixes: [],
+        scalingModel: 'LINEAR',
+        isTutorial: true,
+        startsAt: new Date(),
+        endsAt: new Date(Date.now() + 3650 * 24 * 60 * 60 * 1000),
+      });
+    }
+  } catch {
+    // Ignore in tests
+  }
+
+  return {
+    db,
+    eventBus,
+    userRepo,
+    economyRepo,
+    xpRepo,
+    guildSettingsRepo,
+    leaderboardRepo,
+    itemRepo,
+    inventoryRepo,
+    playerEnergyRepo,
+    musicRepo,
+    aiRepo,
+    moderationRepo,
+    streamRepo,
+    freeGameRepo,
+    giveawayRepo,
+    autoVoiceRepo,
+    autoVoiceService,
+    streamWatcher,
+    streamAlertService,
+    streamDispatcher,
+    freeGamesEngine,
+    giveawayEngine,
+    adventureEngine,
+    adventureSessions,
+    gameSessionManager,
+    gameEscrowService,
+    tictactoeEngine,
+    rpsEngine,
+    musicPlayer,
+    economyService,
+    bankingService,
+    dailyService,
+    levelingService,
+    leaderboardService,
+    inventoryService,
+    profileBackgroundManager,
+    profileCardRenderer,
+    antiSpamEvaluator,
+    voiceAccumulator,
+    voiceRewardService,
+    conversationManager,
+    personalityEngine,
+    toolRegistry,
+    anilistClient,
+    animeSearchService,
+    waifuImClient,
+    lrclibClient,
+    reactionGifService,
+    memeSynthesizer,
+    reminderService,
+    reminderScheduler,
+    guildSettingsService,
+    guildConfigWatcher,
+    commandUsageRecorder,
+    consentService,
+    dataRetentionService,
+    legalLinks,
+    commandOverrideService,
+    commandCatalogRepo,
+    guildRepo,
+    botStatusReporter,
+    resolveUserTimeZone,
+    resolveGuildTimeZone,
+    wallpaperService,
+    securityInterceptor,
+    toolExecutor,
+    fallbackChainManager,
+    permissionService,
+    moderationActionService,
+    moderationLogService,
+    disciplinaryHistoryService,
+    warningEscalationService,
+    purgeService,
+    autoModService,
+    antiRaidService,
+    waifuAssetRepo,
+    waifuCardRepo,
+    dropManager,
+    dismantleService,
+    cardImageService,
+    bossImageService,
+    combatSimulator,
+    expeditionService,
+    bossRaidService,
+    pvpDuelService,
+    questService,
+    gameItemRepo,
+    userInventoryItemRepo,
+    enhancementService,
+    loadoutService,
+    consumableService,
+    energyLifecycleService,
+    tcgShopService,
+    craftingService,
+    dungeonSeasonRepo,
+    dungeonFloorRepo,
+    dungeonBossRepo,
+    userDungeonProgressRepo,
+    scalingEngine,
+    dungeonRunner,
+    tutorialService,
+    dungeonLootService,
+    cardTradeRepo,
+    marketRepo,
+    tradeService,
+    marketService,
+    waifuGuildRepo,
+    achievementRepo,
+    tcgConfigRepo,
+    waifuGuildService,
+    achievementService,
+    tcgRulesService,
+    botOwnerIds,
+    guildConfigService,
+    reactionRoleRepo,
+    autoRoleRepo,
+    reactionRoleService,
+    autoRoleService,
+    welcomerRepo,
+    welcomerService,
+    imageRepo,
+    imageGenerationService,
+    maintenanceService,
+    moduleToggleService,
+  };
+}
+
+/** Bot owner IDs from `BOT_OWNER_ID`; an invalid value gives none, with a warning. */
+export function parseBotOwnerIds(value: string | undefined): readonly string[] {
+  const parsed = BotOwnerIdsSchema.safeParse(value);
+  if (parsed.success) return parsed.data;
+  console.warn('[config] BOT_OWNER_ID must list Discord user IDs; bot owner commands are off.');
+  return [];
+}

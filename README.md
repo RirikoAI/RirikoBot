@@ -1,120 +1,110 @@
-[![RirikoAI](https://circleci.com/gh/RirikoAI/RirikoBot.svg?style=svg)](https://app.circleci.com/pipelines/github/RirikoAI/RirikoBot?branch=master)
-[![codecov](https://codecov.io/github/ririkoai/ririkobot/branch/beta%2F1.0.0/graph/badge.svg?token=EBD0B7CJ76)](https://codecov.io/github/ririkoai/ririkobot)
+[![CircleCI (master)](https://dl.circleci.com/status-badge/img/gh/RirikoAI/RirikoBot/tree/master.svg?style=shield)](https://app.circleci.com/pipelines/gh/RirikoAI/RirikoBot?branch=master)
+[![CircleCI (develop)](https://dl.circleci.com/status-badge/img/gh/RirikoAI/RirikoBot/tree/develop.svg?style=shield)](https://app.circleci.com/pipelines/gh/RirikoAI/RirikoBot?branch=develop)
+[![codecov](https://codecov.io/gh/RirikoAI/RirikoBot/branch/develop/graph/badge.svg)](https://app.codecov.io/gh/RirikoAI/RirikoBot/tree/develop)
 [![CodeFactor](https://www.codefactor.io/repository/github/ririkoai/ririkobot/badge/master)](https://www.codefactor.io/repository/github/ririkoai/ririkobot/overview/master)
 [![Docker Pulls](https://img.shields.io/docker/pulls/ririkoai/ririkobot.svg)](https://hub.docker.com/r/ririkoai/ririkobot)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-<img src="https://i.imgur.com/sNtvyAK.jpeg" style="max-width: 1000px;" alt="Ririko AI" />
 
-# Hi there! I'm Ririko AI! 👋
+<p align="center">
+  <img src="assets/readme/feature-banner.png" alt="Ririko AI: music, AI chat, the Waifu TCG, moderation, economy, a web dashboard and self-hosting" width="100%" />
+</p>
 
-I am a Discord bot that can do a lot of things, including:
+# Ririko AI 2.0.0
 
-<table>
-    <tr>
-        <td>Image Generation</td>
-        <td>Chatbot</td>
-        <td>Fun Commands</td>
-        <td>Moderation</td>
-        <td>Music</td>
-    </tr>
-    <tr>
-        <td>Economy</td>
-        <td>Games</td>
-        <td>Giveaways</td>
-        <td>EXP System</td>
-        <td>...and many more!</td>
-    </tr>
-</table>
+Ririko is a multipurpose Discord bot you host yourself. It plays music, chats with AI, moderates your server, runs an economy with levels, hosts giveaways and mini-games, and has a card game of its own, the Waifu TCG. A web dashboard lets server admins change every setting without a command.
 
-See [full list of commands here](https://github.com/RirikoAI/RirikoBot/wiki/LIST:-All-commands-supported-by-Ririko-AI)
+Version 2.0.0 is a full rewrite of RirikoBot 1.4.0 in TypeScript. It keeps every 1.x command, with a slash and a prefix version of each.
 
-Join [our Discord server](https://discord.gg/uw3JTwwWYT) if you need help or just want to chat.
+| What you get | In short |
+| --- | --- |
+| Music | Play from YouTube, Spotify, SoundCloud, Deezer and more through Lavalink 4, with a live player message. |
+| AI chat and images | Gemini, OpenAI-compatible APIs and Ollama, with tools that respect Discord permissions. |
+| Waifu TCG | Card drops, trading, gear, dungeons and seasonal bosses. |
+| Moderation | Warnings, cases, AutoMod and raid alerts. |
+| Economy and levels | Credits, XP, a daily reward, a bank and a shop. |
+| Web dashboard | Sign in with Discord and manage each server from a browser. |
 
-## Deploy to Render (Recommended, Easiest)
+Self-hosting means you run the bot, the dashboard, a PostgreSQL database and a Lavalink audio server on your own machine. Docker starts all four from one command, but the bot is online only while that machine is.
 
-Click the button below to deploy Ririko AI to Render. You'll need to provide your Discord bot token, App ID, and other
-configurations in the Render
-dashboard. [Click here to see the instructions](https://github.com/RirikoAI/RirikoBot/wiki/DEPLOY:-Deploying-to-Render.com).
+## Quick start with Docker
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FRirikoAI%2FRirikoBot)
+You need [Docker](https://docs.docker.com/engine/install/) 23 or newer with Compose v2, Git, and a Discord account. The steps below are the short form of [Deploy Ririko With Docker](https://ririko.ai/docs/deployment), which explains each one.
 
-## Running Ririko AI using Docker (Recommended)
+1. Clone the repository and check out the release:
 
-First, you need to have the Docker software installed on your machine. You can find the installation instructions for your OS below:
+   ```bash
+   git clone https://github.com/RirikoAI/RirikoBot.git
+   cd RirikoBot
+   git checkout v2.0.0
+   ```
 
-| Windows Install Link                                                           | Linux Install Link                                          | MacOS Install Link                                                     | Raspberry Pi Install Link                                                          |
-|--------------------------------------------------------------------------------|-------------------------------------------------------------|------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| [Docker for Windows](https://docs.docker.com/desktop/install/windows-install/) | [Docker for Linux](https://docs.docker.com/engine/install/) | [Docker for Mac](https://docs.docker.com/desktop/install/mac-install/) | [Docker for Raspberry Pi](https://docs.docker.com/engine/install/raspberry-pi-os/) |
+2. Run the setup wizard. It opens in your browser at the address it prints, guides you through the Discord application, checks your values and writes `.env.production`:
 
-### Setup docker-compose.yml
+   ```bash
+   docker run --rm -it -p 127.0.0.1:3999:3999 -v "$PWD:/setup" ririkoai/ririkobot:2 ririko setup --docker --env-file /setup/.env.production --listen 0.0.0.0 --no-open
+   ```
 
-```bash
-# Download the docker-compose.yml file
-$ curl -o docker-compose.yml https://install.ririko.ai/docker-compose.yml
+3. Start the stack:
 
-# Configure the docker-compose.yml file by adding your Discord bot token, App ID, and other configurations
-$ notepad docker-compose.yml # Windows
-$ nano docker-compose.yml # Linux / MacOS
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production up -d
+   ```
 
-# After configuring the docker-compose.yml file, run the following command to start the bot
-$ docker compose up -d
+4. Add the bot to your server with the invite link on the wizard's **Install** page. Without the wizard link, use the Developer Portal steps in [section 2.6 of the guide](https://ririko.ai/docs/deployment#26-add-the-bot-to-your-server).
+
+5. Register the slash commands:
+
+   ```bash
+   docker compose -f docker-compose.production.yml --env-file .env.production exec bot ririko commands:sync --global --all-guilds
+   ```
+
+   Then type `/ping` in your server. The bot answers.
+
+Global commands can take a while to show in Discord. Press Ctrl+R in Discord to refresh.
+
+## Find your way
+
+**Run it**
+
+- [Deploy Ririko With Docker](https://ririko.ai/docs/deployment): the full guide behind the quick start, including a public address and a remote Lavalink node.
+- [After You Install](https://ririko.ai/docs/after-installing) and [Integrations](https://ririko.ai/docs/adapters): the optional settings and the key each feature needs.
+- [Upgrade From Ririko 1.4.0 to 2.0](https://ririko.ai/docs/upgrading-from-1.4) and [Move Your Data](https://ririko.ai/docs/migrations): for an existing 1.4.0 bot.
+
+**Use it**
+
+- [Commands](https://ririko.ai/docs/commands) and [Server Modules](https://ririko.ai/docs/modules): every command and what each module does.
+- [Music](https://ririko.ai/docs/music), [AI Chat and Images](https://ririko.ai/docs/ai), [Moderation](https://ririko.ai/docs/moderation) and [Economy and Levels](https://ririko.ai/docs/economy).
+- [Web Dashboard](https://ririko.ai/docs/dashboard): sign-in, every page and the owner console.
+- [Waifu TCG Player Guide](https://ririko.ai/docs/tcg-player-guide) and [Adventures](https://ririko.ai/docs/adventure-game).
+
+**Build it**
+
+- [CONTRIBUTING.md](CONTRIBUTING.md): how to make a change and open a pull request.
+- [SETUP.md](SETUP.md): run Ririko from source on your own machine.
+- [Architecture](https://ririko.ai/docs/architecture), [Developer Guide](https://ririko.ai/docs/development), [Database Guide](https://ririko.ai/docs/database) and [Testing Guide](https://ririko.ai/docs/testing).
+
+**Ask**
+
+- Join the [Discord support server](https://discord.gg/UNMZx4qx8G) to ask for help or just chat.
+- Open an [issue](https://github.com/RirikoAI/RirikoBot/issues) for a bug or an idea.
+
+## Built with
+
+Node.js 22, TypeScript (strict), pnpm workspaces, Discord.js 14, Drizzle ORM (PostgreSQL and SQLite), Lavalink 4, Next.js 16 and Vitest.
+
+```text
+apps/       bot, web dashboard and the ririko command-line tool
+packages/   core, database, discord, services, music and ai
+assets/     TCG catalogs, installer guides and the images of this page
+docs/       the documentation, also published at ririko.ai/docs
 ```
 
-That's it. You should now have Ririko AI running on your machine. You can rerun `docker compose up -d` to start the bot
-again after stopping it or if you changed the configuration in the docker-compose.yml file.
+## Security
 
-If you want to build the image yourself,
-click [here](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Building-your-own-Docker-image)
-
-## Install without using Docker (Not recommended)
-
-### Download and install prerequisites
-
-1. Download Node here: https://nodejs.org/en/download.
-2. Download FFmpeg here: https://github.com/RirikoAI/RirikoBot/wiki/Extra-configurations-for-Music-Bot.
-
-### Note:
-
-Here's the tricky part, `canvas` and `better-sqlite3` are notoriously known for being difficult to install on Windows.
-If you are using Windows and just wants to enjoy using Ririko, we extremely recommend using the recommended methods
-above. Save yourself the headache.
-
-```bash
-# Install the dependencies and configure the project
-$ npm run setup
-
-# Copy .env.example to .env
-$ cp .env.example .env # Set your Discord bot token here
-
-# development mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Post-installation steps
-
-After installing Ririko AI, you need to set up the AI chatbot, Stable Diffusion, and others:
-[Click here to see the instructions](https://github.com/RirikoAI/RirikoBot/wiki/TUTORIAL:-Post%E2%80%90installation-settings)
-
-If you want to use the AI features, head over to this page [AI README.md](https://github.com/RirikoAI/RirikoBot/blob/master/src/ai/README.md)
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
+Never commit `.env`, tokens, cookies or database files. Report vulnerabilities privately to the maintainers, not in public issues.
 
 ## Contributors ✨
 
@@ -138,5 +128,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification.
-Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+## License
+
+[MIT](LICENSE)

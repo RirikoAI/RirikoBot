@@ -1,0 +1,21 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'website'
+  # Private music package: a separate repository with its own install (see docs/archive/music-design.md).
+  - '!packages/music-private'
+
+# pnpm 10 skips dependency install scripts unless approved (BUG-0046).
+# esbuild: its postinstall validates and optimizes the platform binary that tsx and vite use.
+onlyBuiltDependencies:
+  - esbuild
+
+# Skipped on purpose, listed so pnpm does not warn about them:
+# - better-sqlite3 ships prebuilt binaries for Windows, macOS and Linux; allowing it would make
+#   pnpm run `node-gyp rebuild`, which needs a C++ toolchain and fails without one.
+# - @google/genai: its only script is `echo`.
+# - protobufjs: its postinstall only checks a version scheme and warns.
+ignoredBuiltDependencies:
+  - better-sqlite3
+  - '@google/genai'
+  - protobufjs

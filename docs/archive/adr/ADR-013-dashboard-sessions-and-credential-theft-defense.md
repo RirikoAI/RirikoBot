@@ -1,0 +1,85 @@
+# ADR-013: Dashboard Sessions and Credential Theft Defense
+
+## Status
+Accepted (2026-09-24, EPIC-011 grooming). Amends decision 2 of [ADR-008](ADR-008-web-dashboard-architecture.md). Revisited 2026-09-25 before implementation; see [Revision 2026-09-25](#revision-2026-09-25).
+
+## Context
+ADR-008 left the dashboard session format open ("`iron-session` or standard JWT"). During EPIC-011 grooming, two questions were raised:
+
+1. Should the dashboard use JWKS and JWE so each request is secured by a verifiable, encrypted token?
+2. How can the dashboard be hardened so that stolen credentials cannot be used?
+
+The dashboard is a single Next.js application that both issues and verifies its own sessions. The realistic credential threats are:
+
+- Session cookie theft through XSS or infostealer malware that copies the browser profile.
+- A compromised Discord account used to log in through OAuth2.
+- A leaked database dump or backup.
+- Tampering with the `guildId` in a request to reach a guild the user does not manage (IDOR).
+- Cross-site request forgery.
+- Secrets (bot token, provider API keys, Discord OAuth tokens) leaking into client components.
+
+No design can make a stolen credential impossible. The goal is that a stolen credential is short-lived, revocable, unable to perform sensitive writes without a second factor, and visible to its owner.
+
+## Decision
+1. **Opaque server-side sessions, not self-contained tokens.**
+   - The `__Host-` session cookie (HttpOnly, Secure, SameSite=Lax, Path=/) holds 32 random bytes.
+   - The dual-dialect `web_sessions` table stores only the SHA-256 hash of that ID, so a database leak does not yield usable cookies.
+   - Discord access and refresh tokens are stored in the session row, encrypted with AES-256-GCM under a versioned key from the environment (see [ADR-011](ADR-011-secrets-management-and-credential-security.md)). They never reach client components.
+   - Sessions expire after 30 minutes idle or 12 hours absolute. The session ID rotates on login and on step-up.
+   - Logout, per-session revoke and "sign out everywhere" take effect on the next request.
+2. **JWKS rejected.** JWKS publishes public keys so that many independent verifiers can check tokens from one issuer. The dashboard is its own only verifier, so JWKS would add key rotation infrastructure with no consumer. Revisit only if a separate service must verify dashboard-issued tokens.
+3. **JWE (or any sealed cookie token) rejected as the session.** A self-contained token cannot be revoked: a stolen token stays valid until it expires, and logout does not invalidate it.
+4. **Browser-side per-request signing rejected.** A DPoP-style key kept in IndexedDB is copied together with the browser profile by infostealer malware. Only hardware-bound keys resist that. Chrome Device Bound Session Credentials (DBSC) may be added as an optional enhancement where the browser supports it. Implemented in STORY-119 (see [Revision 2026-10-04](#revision-2026-10-04)).
+5. **Passkey step-up for sensitive writes.**
+   - Users can enroll WebAuthn passkeys (`web_passkeys` table). Once a user has a passkey, it is always required.
+   - Bot owners (`ownerIds`) must enroll a passkey before using the owner console.
+   - Sensitive Server Actions require a passkey assertion newer than a short window (`step_up_at` on the session): the owner console, moderation escalation policy, reaction-role publishing, and integrations.
+   - A stolen cookie or a compromised Discord account alone cannot pass step-up.
+6. **Authorization in the data path, never in middleware.** Every Server Action and route handler calls `requireGuildAccess(guildId)` (or the owner guard). It re-verifies `ManageGuild` (0x20) or `Administrator` (0x8) against a short-TTL cache on every call. Next.js middleware (`proxy.ts`) is never the authorization layer, because CVE-2025-29927 showed it can be bypassed. A test enumerates every Server Action and route handler and fails if one skips the guard.
+7. **Least-privilege OAuth2.** Scopes are `identify` and `guilds` only, with a signed `state` parameter (plus PKCE if Discord accepts it for this application type). All mutations use the bot token on the server after the authorization check. A stolen user OAuth token can only read the guild list.
+8. **Browser hardening.** Nonce-based CSP without `unsafe-inline`, `frame-ancestors 'none'`, HSTS, `X-Content-Type-Options: nosniff`, a strict `Referrer-Policy` and COOP. No `dangerouslySetInnerHTML`. Origin checks on route handlers. React taint APIs (`experimental_taintUniqueValue`, `experimental_taintObjectReference`) and `server-only` imports guard secrets and tokens. Rate limits on auth routes and Server Actions.
+9. **Detection.** The bot DMs a user when they sign in from a new device and posts a notice to the guild log channel when dashboard changes are saved. `audit_logs` records the actor, IP, user agent and field diffs. An active sessions page lists sessions with revoke controls.
+
+## Consequences
+### Positive
+- Stolen sessions can be revoked immediately and expire quickly.
+- Sensitive writes need a second factor that neither a cookie thief nor a Discord account thief has.
+- A database leak exposes neither usable session IDs nor readable Discord tokens.
+- Unauthorized guild access is blocked in the data path and covered by a test.
+
+### Negative
+- One indexed database read per request to resolve the session (a few seconds of in-process caching is acceptable).
+- Passkey enrollment adds friction for bot owners and for users who opt in.
+- A WebAuthn library dependency must be evaluated in [dependency-evaluation.md](../dependency-evaluation.md).
+
+## Revision 2026-09-25
+Questions raised before STORY-117 started, and the answers:
+
+1. **Can users turn passkeys off?** Yes, by removing them. A setting that keeps passkeys but stops asking for them would be an unprotected downgrade, so there is none.
+   - Removing a passkey needs a passkey check newer than 5 minutes, so a cookie thief or a Discord account thief cannot remove it.
+   - Removal writes an audit entry and sends the user a DM.
+   - Users without a passkey cannot perform sensitive writes at all; they are not merely waved through.
+   - Bot owners must always have one.
+2. **Recovery** from lost authenticators is `ririko passkeys:reset <user_id>`, run by an operator with shell access. Recovery codes were not added: they would be the weakest way in.
+3. **What is stored in the browser.**
+   - The passkey private key stays in the authenticator (platform keychain, TPM or security key). Neither page scripts nor the server can read it; the server stores only the public key.
+   - Cookies hold only random values (session, device) or a short-lived vault-sealed login state.
+   - Nothing is stored in `localStorage` or IndexedDB.
+4. **JWE re-evaluated and rejected again.** Encrypting the cookie protects what it contains, not who presents it. A stolen cookie is replayed unchanged and the server decrypts it as usual, so JWE makes it no less useful to a thief, while making revocation impossible without a server-side list.
+   - What limits a stolen cookie is binding the session to something the thief lacks: passkey checks for sign-in and sensitive writes (now), and Chrome DBSC where supported (implemented in STORY-119, Revision 2026-10-04).
+5. **Risk-based re-checks on IP or user-agent changes: not adopted.** Infostealer malware copies the device cookie together with the session cookie, IP binding misfires for mobile and VPN users, and user agents are trivially copied. New-device DMs, the sessions page and short expiry cover detection instead.
+6. **Device-bound (non-synced) passkeys are not required for owners.** Lockout risk outweighs the gain. The synced or device-only flags are recorded and shown so owners can choose a hardware key themselves.
+7. **User verification is requested, not required (BUG-0020).** The dashboard asks authenticators for a fingerprint, face or PIN (`userVerification: 'preferred'`), but accepts an assertion that only proves user presence. Some authenticators, including a Windows passkey used through Edge, sign without the verification flag, and requiring it locked those users out. The passkey is a second factor after Discord sign-in, so a stolen cookie or Discord account still cannot pass without the authenticator; verification would only add protection against someone already using the owner's unlocked device, who also holds the browser session.
+
+## Revision 2026-10-04
+Decision 4 (and item 4 above) is implemented in STORY-119 (TASK-1191 protocol core, TASK-1192 routes and wiring). DBSC is generally available in Chrome 146 on Windows, with the key held in the TPM; the protocol is a W3C Working Draft. Other browsers ignore the headers and keep the behavior described above.
+
+1. **Registration.** The Discord callback response carries `Secure-Session-Registration` with a vault-sealed challenge. The browser posts a `dbsc+jwt` proof (ES256 or RS256, public key in the `jwk` header) to `/api/auth/dbsc/register`. The server stores a random DBSC session ID and the public key on the `web_sessions` row and **rotates the session ID**, so a cookie copied before binding is worthless.
+2. **Bound cookie.** `__Host-ririko_bound` is a vault-sealed `{sid, exp}` that lives 10 minutes. It is stateless: no database write per refresh and no race between tabs. When it expires, the browser calls `/api/auth/dbsc/refresh` itself and answers a challenge with a signature from the TPM key; the server answers 403 with a challenge, 200 with a new bound cookie, or 404 once the session ended.
+3. **Sealed challenges.** Challenges are vault-sealed `{sid, exp}` values valid for 2 minutes, so no challenge columns are needed. A proof can be replayed inside that window, but only by someone who captured the proof, who then already holds the bound cookie: the exposure DBSC accepts by design.
+4. **No downgrade.** A session with a DBSC binding resolves only with a valid bound cookie for its DBSC session ID. Without one it signs out (the row stays, so the real browser can refresh it). Sessions that existed before the rollout stay unbound and expire within 12 hours.
+5. **Result.** A cookie stolen by malware stops working within about 10 minutes, because the thief cannot sign a refresh challenge with a key that never leaves the TPM. The sessions page shows a "Device-bound" badge.
+6. **Passkey check.** `completePasskeyCheck` keeps the binding. A passkey check rotates the session ID, so a registration challenge issued at sign-in no longer matches if the browser registers after the check. Chrome registers right after the callback response, well before a user finishes a passkey prompt. A Server Action response cannot set a response header, so there is no second registration after the check.
+
+## Implementation
+Tracked in EPIC-011: TASK-1102 (sessions), TASK-1103 (guild authorization guard), STORY-117 (TASK-1171 passkeys, sign-in gate and step-up; TASK-1174 owner guard and recovery CLI), STORY-118 (TASK-1172 session management and alerts; TASK-1173 CSP, taint guards, rate limits and the authorization coverage test) and STORY-119 (DBSC: TASK-1191 protocol core, TASK-1192 routes and wiring). See [docs/dashboard.md](../../dashboard.md).

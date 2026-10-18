@@ -1,0 +1,1255 @@
+import dns from 'node:dns/promises';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  AuditLogRepository,
+  AutoRoleRepository,
+  AutoVoiceRepository,
+  CommandCatalogRepository,
+  CommandSettingsRepository,
+  createDatabaseClient,
+  GuildConfigVersionRepository,
+  GuildSettingsRepository,
+  ModerationRepository,
+  MusicRepository,
+  AiRepository,
+  ImageRepository,
+  FreeGameRepository,
+  WelcomerRepository,
+  type SqliteDatabaseClient,
+} from '@ririko/database';
+import { DEFAULT_ESCALATION_STEPS } from '@ririko/core';
+import {
+  diffFields,
+  GuildConfigService,
+  GuildConfigValidationError,
+  type GuildConfigActor,
+} from '../guild-config.service.js';
+
+const NOW = new Date('2026-09-25T00:00:00Z');
+const dashboardActor: GuildConfigActor = {
+  userId: 'user-1',
+  source: 'dashboard',
+  ipAddress: '203.0.113.7',
+  userAgent: 'vitest',
+};
+
+describe('GuildConfigService (TASK-1111)', () => {
+  let db: SqliteDatabaseClient;
+  let versions: GuildConfigVersionRepository;
+  let moderation: ModerationRepository;
+  let commandSettings: CommandSettingsRepository;
+  let commandCatalog: CommandCatalogRepository;
+  let autoRoles: AutoRoleRepository;
+  let autoVoice: AutoVoiceRepository;
+  let service: GuildConfigService;
+
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    db = raw;
+    versions = new GuildConfigVersionRepository(db);
+    moderation = new ModerationRepository(db);
+    commandSettings = new CommandSettingsRepository(db);
+    commandCatalog = new CommandCatalogRepository(db);
+    autoRoles = new AutoRoleRepository(db);
+    autoVoice = new AutoVoiceRepository(db);
+    service = new GuildConfigService({
+      db,
+      guildSettings: new GuildSettingsRepository(db),
+      moderation,
+      commandSettings,
+      commandCatalog,
+      autoRoles,
+      autoVoice,
+      music: new MusicRepository(db),
+      ai: new AiRepository(db),
+      images: new ImageRepository(db),
+      freeGames: new FreeGameRepository(db),
+      welcomer: new WelcomerRepository(db),
+      versions,
+      audit: new AuditLogRepository(db),
+      defaultPrefix: '!',
+      now: () => NOW,
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  const auditRows = () =>
+    db.raw
+      .prepare(
+        'SELECT guild_id, actor_user_id, action, details, ip_address, user_agent FROM audit_logs',
+      )
+      .all() as Array<Record<string, string>>;
+
+  it('returns defaults for a guild without settings', async () => {
+    expect(await service.get('g1', 'general')).toEqual({ prefix: '!', timezone: 'UTC' });
+  });
+
+  it('validates, saves, bumps the change feed and audits the field diff', async () => {
+    const result = await service.update(
+      'g1',
+      'general',
+      { prefix: ' ?? ', timezone: 'asia/tokyo' },
+      dashboardActor,
+    );
+
+    expect(result.values).toEqual({ prefix: '??', timezone: 'Asia/Tokyo' });
+    expect(await service.get('g1', 'general')).toEqual(result.values);
+    expect((await versions.listChangedSince(new Date(0)))[0]).toMatchObject({
+      guildId: 'g1',
+      module: 'general',
+      version: 1,
+    });
+
+    const [audit] = auditRows();
+    expect(audit).toMatchObject({
+      guild_id: 'g1',
+      actor_user_id: 'user-1',
+      action: 'guild_config.general.update',
+      ip_address: '203.0.113.7',
+      user_agent: 'vitest',
+    });
+    expect(JSON.parse(audit!.details!)).toEqual({
+      source: 'dashboard',
+      changes: [
+        { field: 'prefix', before: '!', after: '??' },
+        { field: 'timezone', before: 'UTC', after: 'Asia/Tokyo' },
+      ],
+    });
+  });
+
+  it('applies a partial patch and records only the changed field', async () => {
+    await service.update('g1', 'general', { timezone: 'Europe/London' }, dashboardActor);
+    const { changes } = await service.update(
+      'g1',
+      'general',
+      { prefix: '$' },
+      { userId: 'cli', source: 'cli' },
+    );
+    expect(changes).toEqual([{ field: 'prefix', before: '!', after: '$' }]);
+    expect(await service.get('g1', 'general')).toEqual({
+      prefix: '$',
+      timezone: 'Europe/London',
+    });
+  });
+
+  it('writes nothing when the values are unchanged', async () => {
+    const { changes } = await service.update('g1', 'general', { prefix: '!' }, dashboardActor);
+    expect(changes).toEqual([]);
+    expect(auditRows()).toEqual([]);
+    expect(await versions.listChangedSince(new Date(0))).toEqual([]);
+  });
+
+  it('rejects invalid values with field errors and writes nothing', async () => {
+    const error = await service
+      .update('g1', 'general', { prefix: '@x', timezone: 'GMT+8' }, dashboardActor)
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(GuildConfigValidationError);
+    const { fieldErrors } = error as GuildConfigValidationError;
+    expect(fieldErrors.prefix?.[0]).toContain('`@` or `#`');
+    expect(fieldErrors.timezone?.[0]).toContain('not a valid IANA timezone');
+    expect(auditRows()).toEqual([]);
+    expect(await service.get('g1', 'general')).toEqual({ prefix: '!', timezone: 'UTC' });
+  });
+
+  it('rejects keys the module does not have', async () => {
+    await expect(
+      service.update('g1', 'general', { locale: 'fr-FR' }, dashboardActor),
+    ).rejects.toBeInstanceOf(GuildConfigValidationError);
+  });
+
+  describe('logging (TASK-1141)', () => {
+    it('sets and clears the log channel', async () => {
+      expect(await service.get('g1', 'logging')).toEqual({ logChannelId: null });
+      await service.update('g1', 'logging', { logChannelId: '123456789012345678' }, dashboardActor);
+      expect(await service.get('g1', 'logging')).toEqual({ logChannelId: '123456789012345678' });
+      const { changes } = await service.update(
+        'g1',
+        'logging',
+        { logChannelId: '' },
+        dashboardActor,
+      );
+      expect(changes).toEqual([
+        { field: 'logChannelId', before: '123456789012345678', after: null },
+      ]);
+      expect(await service.get('g1', 'logging')).toEqual({ logChannelId: null });
+    });
+
+    it('keeps the other guild settings when the log channel changes', async () => {
+      await service.update('g1', 'general', { prefix: '$' }, dashboardActor);
+      await service.update('g1', 'logging', { logChannelId: '123456789012345678' }, dashboardActor);
+      expect(await service.get('g1', 'general')).toEqual({ prefix: '$', timezone: 'UTC' });
+    });
+  });
+
+  describe('xp (TASK-1151)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+
+    it('reads the defaults for a guild without settings', async () => {
+      expect(await service.get('g1', 'xp')).toEqual({
+        levelUpAnnouncements: true,
+        levelUpChannelId: null,
+        xpRatePercent: 100,
+        noXpChannelIds: [],
+        noXpRoleIds: [],
+        voiceXpEnabled: false,
+      });
+    });
+
+    it('saves CLI strings, keeps other settings and audits the diff', async () => {
+      await service.update('g1', 'general', { prefix: '$' }, dashboardActor);
+      const { changes } = await service.update(
+        'g1',
+        'xp',
+        {
+          levelUpAnnouncements: 'off',
+          levelUpChannelId: CHANNEL,
+          xpRatePercent: '150',
+          noXpChannelIds: `${CHANNEL},${CHANNEL}`,
+          noXpRoleIds: ROLE,
+          voiceXpEnabled: 'on',
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'levelUpAnnouncements',
+        'levelUpChannelId',
+        'xpRatePercent',
+        'noXpChannelIds',
+        'noXpRoleIds',
+        'voiceXpEnabled',
+      ]);
+      expect(await service.get('g1', 'xp')).toEqual({
+        levelUpAnnouncements: false,
+        levelUpChannelId: CHANNEL,
+        xpRatePercent: 150,
+        noXpChannelIds: [CHANNEL],
+        noXpRoleIds: [ROLE],
+        voiceXpEnabled: true,
+      });
+      expect(await service.get('g1', 'general')).toEqual({ prefix: '$', timezone: 'UTC' });
+    });
+
+    it('rejects a rate above the cap', async () => {
+      await expect(
+        service.update('g1', 'xp', { xpRatePercent: 301 }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { xpRatePercent: [expect.any(String)] } });
+    });
+  });
+
+  describe('tcg (TASK-1121)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+
+    it('reads drops off with the default rules for a guild without settings', async () => {
+      expect(await service.get('g1', 'tcg')).toEqual({
+        dropsEnabled: false,
+        dropChannelId: null,
+        dropMessageThreshold: 50,
+        dropStartHour: 8,
+        dropEndHour: 23,
+        dropClaimTimeoutSeconds: 60,
+        dropCooldownMinutes: 5,
+        managerRoleId: null,
+      });
+    });
+
+    it('saves drop settings and the manager role, keeps other settings and audits from Discord', async () => {
+      await service.update('g1', 'general', { timezone: 'Asia/Tokyo' }, dashboardActor);
+      const { changes } = await service.update(
+        'g1',
+        'tcg',
+        {
+          dropsEnabled: 'on',
+          dropChannelId: CHANNEL,
+          dropMessageThreshold: '20',
+          dropStartHour: 20,
+          dropEndHour: 4,
+          managerRoleId: ROLE,
+        },
+        { userId: 'user-2', source: 'discord' },
+      );
+      expect(changes.map((change) => change.field)).toEqual([
+        'dropsEnabled',
+        'dropChannelId',
+        'dropMessageThreshold',
+        'dropStartHour',
+        'dropEndHour',
+        'managerRoleId',
+      ]);
+      expect(await service.get('g1', 'tcg')).toMatchObject({
+        dropsEnabled: true,
+        dropChannelId: CHANNEL,
+        dropMessageThreshold: 20,
+        dropStartHour: 20,
+        dropEndHour: 4,
+        managerRoleId: ROLE,
+      });
+      expect(await service.get('g1', 'general')).toEqual({ prefix: '!', timezone: 'Asia/Tokyo' });
+      const audit = auditRows().at(-1)!;
+      expect(audit.action).toBe('guild_config.tcg.update');
+      expect(JSON.parse(audit.details!).source).toBe('discord');
+      expect(await versions.listChangedSince(new Date(0))).toEqual(
+        expect.arrayContaining([expect.objectContaining({ guildId: 'g1', module: 'tcg' })]),
+      );
+    });
+
+    it('rejects out-of-range drop settings', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'tcg',
+          { dropMessageThreshold: 2, dropEndHour: 24, dropClaimTimeoutSeconds: 5 },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({
+        fieldErrors: {
+          dropMessageThreshold: [expect.any(String)],
+          dropEndHour: [expect.any(String)],
+          dropClaimTimeoutSeconds: [expect.any(String)],
+        },
+      });
+    });
+  });
+
+  describe('games (TASK-1152)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+    const override = (command: string, fields: Record<string, unknown> = {}) => ({
+      commandName: command,
+      channelId: null,
+      isEnabled: true,
+      cooldownOverride: null,
+      allowedRoles: [],
+      blockedRoles: [],
+      ...fields,
+    });
+
+    it('reads no limit and no rules for a new guild', async () => {
+      expect(await service.get('g1', 'games')).toEqual({ maxWager: null, rules: [] });
+    });
+
+    it('merges game rules into the command overrides without losing roles or channel rules', async () => {
+      await commandSettings.replaceForGuild('g1', [
+        override('rps', { allowedRoles: [ROLE] }),
+        override('dice', { channelId: CHANNEL, isEnabled: false }),
+        override('highlow', { cooldownOverride: 30 }),
+        override('play', { cooldownOverride: 10 }),
+      ]);
+
+      await service.update(
+        'g1',
+        'games',
+        {
+          maxWager: '500',
+          rules: JSON.stringify([
+            { command: 'rps', enabled: false },
+            { command: 'dice', cooldownSeconds: 0 },
+          ]),
+        },
+        dashboardActor,
+      );
+
+      expect(await service.get('g1', 'games')).toEqual({
+        maxWager: 500,
+        rules: [
+          { command: 'dice', enabled: true, cooldownSeconds: 0 },
+          { command: 'rps', enabled: false, cooldownSeconds: null },
+        ],
+      });
+      // highlow's rule was not submitted, so its server row went; the rps roles, the dice
+      // channel rule and the music override stay.
+      expect((await service.get('g1', 'commands')).overrides).toEqual([
+        {
+          command: 'dice',
+          channelId: null,
+          enabled: true,
+          allowedRoleIds: [],
+          blockedRoleIds: [],
+          cooldownSeconds: 0,
+        },
+        {
+          command: 'dice',
+          channelId: CHANNEL,
+          enabled: false,
+          allowedRoleIds: [],
+          blockedRoleIds: [],
+          cooldownSeconds: null,
+        },
+        {
+          command: 'play',
+          channelId: null,
+          enabled: true,
+          allowedRoleIds: [],
+          blockedRoleIds: [],
+          cooldownSeconds: 10,
+        },
+        {
+          command: 'rps',
+          channelId: null,
+          enabled: false,
+          allowedRoleIds: [ROLE],
+          blockedRoleIds: [],
+          cooldownSeconds: null,
+        },
+      ]);
+    });
+
+    it('keeps a role-only row when its rule is cleared, and clears the limit', async () => {
+      await commandSettings.replaceForGuild('g1', [
+        override('rps', { allowedRoles: [ROLE], isEnabled: false }),
+      ]);
+      await service.update('g1', 'games', { maxWager: '10', rules: '[]' }, dashboardActor);
+      await service.update('g1', 'games', { maxWager: '' }, dashboardActor);
+      expect(await service.get('g1', 'games')).toEqual({ maxWager: null, rules: [] });
+      expect((await service.get('g1', 'commands')).overrides).toEqual([
+        expect.objectContaining({ command: 'rps', enabled: true, allowedRoleIds: [ROLE] }),
+      ]);
+    });
+
+    it('rejects unknown games, duplicates and a zero limit with row numbers', async () => {
+      const error = await service
+        .update(
+          'g1',
+          'games',
+          {
+            maxWager: '0',
+            rules: JSON.stringify([{ command: 'play' }, { command: 'rps', cooldownSeconds: 9999 }]),
+          },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(GuildConfigValidationError);
+      const { fieldErrors } = error as GuildConfigValidationError;
+      expect(fieldErrors.maxWager?.[0]).toContain('whole number from 1');
+      expect(fieldErrors.rules).toEqual([
+        expect.stringMatching(/^Row 1: Choose one of coinflip/),
+        'Row 2: Cooldowns can last at most 1 hour.',
+      ]);
+    });
+  });
+
+  describe('moderation (TASK-1142)', () => {
+    it('returns the default policy until one is saved', async () => {
+      expect(await service.get('g1', 'moderation')).toEqual({
+        escalationSteps: DEFAULT_ESCALATION_STEPS,
+      });
+    });
+
+    it('saves a sorted policy from JSON text, and an empty policy turns escalation off', async () => {
+      await service.update(
+        'g1',
+        'moderation',
+        {
+          escalationSteps:
+            '[{"warnThreshold":4,"action":"BAN"},{"warnThreshold":2,"action":"TIMEOUT","durationSeconds":900}]',
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(await service.get('g1', 'moderation')).toEqual({
+        escalationSteps: [
+          { warnThreshold: 2, action: 'TIMEOUT', durationSeconds: 900 },
+          { warnThreshold: 4, action: 'BAN' },
+        ],
+      });
+
+      await service.update('g1', 'moderation', { escalationSteps: [] }, dashboardActor);
+      expect(await service.get('g1', 'moderation')).toEqual({ escalationSteps: [] });
+    });
+
+    it('reports errors with the row they belong to', async () => {
+      const error = await service
+        .update(
+          'g1',
+          'moderation',
+          {
+            escalationSteps: [
+              { warnThreshold: 1, action: 'WARN' },
+              { warnThreshold: 2, action: 'TIMEOUT' },
+            ],
+          },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect((error as GuildConfigValidationError).fieldErrors).toEqual({
+        escalationSteps: ['Row 2: Timeout steps need a length.'],
+      });
+    });
+  });
+
+  describe('automod (TASK-1142)', () => {
+    it('reads the rule defaults when no rows exist', async () => {
+      expect(await service.get('g1', 'automod')).toEqual({
+        inviteFilterEnabled: true,
+        inviteFilterAction: 'DELETE',
+        inviteFilterExemptRoleIds: [],
+        inviteFilterExemptChannelIds: [],
+        phishingShieldEnabled: true,
+        phishingShieldAction: 'DELETE',
+        phishingShieldExemptRoleIds: [],
+        phishingShieldExemptChannelIds: [],
+        mentionSpamEnabled: true,
+        mentionSpamAction: 'DELETE',
+        mentionSpamExemptRoleIds: [],
+        mentionSpamExemptChannelIds: [],
+        mentionSpamLimit: 5,
+        burstSpamEnabled: true,
+        burstSpamAction: 'DELETE',
+        burstSpamExemptRoleIds: [],
+        burstSpamExemptChannelIds: [],
+        burstSpamLimit: 5,
+      });
+    });
+
+    it('shows what the bot runs for rows the automod command created', async () => {
+      await moderation.upsertRule({ guildId: 'g1', ruleType: 'MENTION_SPAM', isEnabled: false });
+      await moderation.upsertRule({ guildId: 'g1', ruleType: 'BURST_SPAM', action: 'ALLOW' });
+      expect(await service.get('g1', 'automod')).toMatchObject({
+        mentionSpamEnabled: false,
+        mentionSpamAction: 'WARN',
+        mentionSpamLimit: 3,
+        burstSpamAction: 'DELETE',
+      });
+    });
+
+    it('writes each rule to moderation_rules and keeps thresholds the bot does not read', async () => {
+      await moderation.upsertRule({ guildId: 'g1', ruleType: 'INVITE_FILTER', threshold: 7 });
+      await service.update(
+        'g1',
+        'automod',
+        {
+          inviteFilterEnabled: 'off',
+          mentionSpamAction: 'TIMEOUT',
+          mentionSpamLimit: '12',
+          burstSpamExemptChannelIds: '123456789012345678,223456789012345678',
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+
+      const rules = await moderation.getRules('g1');
+      expect(rules).toHaveLength(4);
+      expect(rules.find((rule) => rule.ruleType === 'INVITE_FILTER')).toMatchObject({
+        isEnabled: false,
+        action: 'WARN',
+        threshold: 7,
+      });
+      expect(rules.find((rule) => rule.ruleType === 'MENTION_SPAM')).toMatchObject({
+        action: 'TIMEOUT',
+        threshold: 12,
+      });
+      expect(rules.find((rule) => rule.ruleType === 'BURST_SPAM')).toMatchObject({
+        exemptChannels: ['123456789012345678', '223456789012345678'],
+      });
+      expect((await versions.listChangedSince(new Date(0)))[0]).toMatchObject({
+        module: 'automod',
+      });
+    });
+
+    it('rejects out-of-range limits and unknown actions', async () => {
+      const error = await service
+        .update('g1', 'automod', { mentionSpamLimit: 0, burstSpamAction: 'ALLOW' }, dashboardActor)
+        .catch((e: unknown) => e);
+      expect(Object.keys((error as GuildConfigValidationError).fieldErrors)).toEqual([
+        'mentionSpamLimit',
+        'burstSpamAction',
+      ]);
+      expect(await moderation.getRules('g1')).toEqual([]);
+    });
+  });
+
+  describe('commands (TASK-1631)', () => {
+    const CHANNEL = '123456789012345678';
+    const ROLE = '223456789012345678';
+    const catalogEntry = (name: string, category: string) => ({
+      name,
+      category,
+      description: name,
+      slashEnabled: true,
+      prefixEnabled: true,
+      defaultPermission: null,
+      cooldownSeconds: 0,
+    });
+
+    beforeEach(async () => {
+      await commandCatalog.replaceAll([
+        catalogEntry('rps', 'games'),
+        catalogEntry('play', 'music'),
+      ]);
+    });
+
+    it('reads no overrides for a new guild', async () => {
+      expect(await service.get('g1', 'commands')).toEqual({ overrides: [] });
+    });
+
+    it('replaces the rows, bumps the feed and audits the change', async () => {
+      await service.update(
+        'g1',
+        'commands',
+        {
+          overrides: JSON.stringify([
+            { command: 'rps', channelId: CHANNEL, blockedRoleIds: [ROLE] },
+            { command: 'rps', enabled: false },
+            { command: 'play', cooldownSeconds: 30 },
+          ]),
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+
+      const { overrides } = await service.get('g1', 'commands');
+      expect(overrides.map((row) => [row.command, row.channelId])).toEqual([
+        ['play', null],
+        ['rps', null],
+        ['rps', CHANNEL],
+      ]);
+      expect(await commandSettings.listForGuild('g1')).toHaveLength(3);
+      expect((await versions.listChangedSince(new Date(0)))[0]).toMatchObject({
+        module: 'commands',
+      });
+      expect(auditRows()[0]?.action).toBe('guild_config.commands.update');
+
+      // Saving the same rows in another order changes nothing.
+      const again = await service.update(
+        'g1',
+        'commands',
+        { overrides: [...overrides].reverse() },
+        dashboardActor,
+      );
+      expect(again.changes).toEqual([]);
+    });
+
+    it('rejects commands the bot did not record and writes nothing', async () => {
+      const error = await service
+        .update(
+          'g1',
+          'commands',
+          { overrides: [{ command: 'nope', enabled: false }] },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect((error as GuildConfigValidationError).fieldErrors).toEqual({
+        overrides: ['Unknown command: `nope`.'],
+      });
+      expect(await commandSettings.listForGuild('g1')).toEqual([]);
+      expect(await versions.listChangedSince(new Date(0))).toEqual([]);
+    });
+
+    it('explains an empty catalog', async () => {
+      await commandCatalog.replaceAll([]);
+      const error = await service
+        .update(
+          'g1',
+          'commands',
+          { overrides: [{ command: 'rps', enabled: false }] },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect((error as GuildConfigValidationError).fieldErrors.overrides?.[0]).toMatch(
+        /Start the bot once/,
+      );
+    });
+
+    it('keeps row numbers in schema errors', async () => {
+      const error = await service
+        .update(
+          'g1',
+          'commands',
+          {
+            overrides: [
+              { command: 'rps', enabled: false },
+              { command: 'help', enabled: false },
+            ],
+          },
+          dashboardActor,
+        )
+        .catch((e: unknown) => e);
+      expect((error as GuildConfigValidationError).fieldErrors).toEqual({
+        overrides: ['Row 2: `help` is always available and cannot be overridden.'],
+      });
+    });
+  });
+  describe('autoroles (TASK-1641)', () => {
+    const HUMAN = '200000000000000001';
+    const BOT = '200000000000000002';
+    const VERIFY = '200000000000000003';
+
+    it('reads a guild without a row as off with no roles', async () => {
+      expect(await service.get('g1', 'autoroles')).toEqual({
+        enabled: false,
+        humanRoleIds: [],
+        botRoleIds: [],
+        verificationRoleId: null,
+      });
+    });
+
+    it('saves roles from the dashboard and the CLI and keeps the verification message', async () => {
+      await autoRoles.setVerificationRole('g1', VERIFY, '300000000000000001', '400000000000000001');
+      const { changes } = await service.update(
+        'g1',
+        'autoroles',
+        { enabled: true, humanRoleIds: [HUMAN, HUMAN], botRoleIds: BOT },
+        dashboardActor,
+      );
+      expect(changes.map((change) => change.field)).toEqual(['humanRoleIds', 'botRoleIds']);
+      await service.update(
+        'g1',
+        'autoroles',
+        { verificationRoleId: 'none', enabled: 'off' },
+        { userId: 'cli', source: 'cli' },
+      );
+
+      expect(await service.get('g1', 'autoroles')).toEqual({
+        enabled: false,
+        humanRoleIds: [HUMAN],
+        botRoleIds: [BOT],
+        verificationRoleId: null,
+      });
+      expect(await autoRoles.getGuildAutoRoles('g1')).toMatchObject({
+        verificationChannelId: '300000000000000001',
+        verificationMessageId: '400000000000000001',
+      });
+      expect(auditRows().map((audit) => audit.action)).toEqual([
+        'guild_config.autoroles.update',
+        'guild_config.autoroles.update',
+      ]);
+    });
+
+    it('rejects more than 10 join roles', async () => {
+      const ids = Array.from({ length: 11 }, (_, i) => `2000000000000001${10 + i}`);
+      await expect(
+        service.update('g1', 'autoroles', { humanRoleIds: ids }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { humanRoleIds: ['Choose at most 10.'] } });
+    });
+  });
+
+  describe('autovoice (TASK-1641)', () => {
+    const HUB_A = '500000000000000001';
+    const HUB_B = '500000000000000002';
+
+    it('adds, updates and removes hubs in one save', async () => {
+      await autoVoice.upsert({ guildId: 'g1', parentChannelId: HUB_A, bitrate: 96_000 });
+      await autoVoice.upsert({ guildId: 'g2', parentChannelId: HUB_A });
+      expect((await service.get('g1', 'autovoice')).hubs).toEqual([
+        { channelId: HUB_A, nameTemplate: "{user}'s Room", userLimit: 0, bitrate: 96_000 },
+      ]);
+
+      const { changes } = await service.update(
+        'g1',
+        'autovoice',
+        {
+          hubs: JSON.stringify([
+            { channelId: HUB_B, nameTemplate: 'Squad {user}', userLimit: 4, bitrate: 64_000 },
+          ]),
+        },
+        { userId: 'cli', source: 'cli' },
+      );
+      expect(changes).toHaveLength(1);
+      expect(await autoVoice.listByGuildId('g1')).toEqual([
+        expect.objectContaining({
+          parentChannelId: HUB_B,
+          channelNameTemplate: 'Squad {user}',
+          userLimit: 4,
+          bitrate: 64_000,
+        }),
+      ]);
+      // Other guilds' hubs are untouched.
+      expect(await autoVoice.listByGuildId('g2')).toHaveLength(1);
+    });
+
+    it('keeps row numbers in errors', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'autovoice',
+          { hubs: [{ channelId: HUB_A }, { channelId: HUB_B, userLimit: 120 }] },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({
+        fieldErrors: { hubs: ['Row 2: User limit must be a whole number from 0 to 99.'] },
+      });
+    });
+
+    it('treats a reordered list as unchanged', async () => {
+      const hubs = [{ channelId: HUB_B }, { channelId: HUB_A }];
+      await service.update('g1', 'autovoice', { hubs }, dashboardActor);
+      const { changes } = await service.update(
+        'g1',
+        'autovoice',
+        { hubs: [...hubs].reverse() },
+        dashboardActor,
+      );
+      expect(changes).toEqual([]);
+    });
+  });
+
+  describe('music (TASK-1161)', () => {
+    const CHANNEL_A = '600000000000000001';
+    const CHANNEL_B = '600000000000000002';
+    const DJ = '600000000000000003';
+
+    it('returns the player defaults for a guild without settings', async () => {
+      expect(await service.get('g1', 'music')).toEqual({
+        defaultVolume: 80,
+        musicChannelId: null,
+        djRoleId: null,
+        autoLeaveEmpty: true,
+      });
+    });
+
+    it('saves the settings and keeps the columns the page does not edit', async () => {
+      const music = new MusicRepository(db);
+      await music.upsertGuildSettings('g1', { defaultVolume: 40, lyricsProvider: 'OTHER' });
+
+      await service.update(
+        'g1',
+        'music',
+        { defaultVolume: '120', djRoleId: DJ, autoLeaveEmpty: false },
+        dashboardActor,
+      );
+
+      expect(await music.getGuildSettings('g1')).toMatchObject({
+        defaultVolume: 120,
+        djRoleId: DJ,
+        autoLeaveEmpty: false,
+        lyricsProvider: 'OTHER',
+      });
+    });
+
+    it('resets the controller message only when the channel changes, and clears it', async () => {
+      const music = new MusicRepository(db);
+      await music.setMusicChannel('g1', CHANNEL_A, 'message-1');
+
+      await service.update('g1', 'music', { defaultVolume: 50 }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toMatchObject({
+        channelId: CHANNEL_A,
+        lastMessageId: 'message-1',
+      });
+
+      await service.update('g1', 'music', { musicChannelId: CHANNEL_B }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toMatchObject({
+        channelId: CHANNEL_B,
+        lastMessageId: null,
+      });
+
+      await service.update('g1', 'music', { musicChannelId: '' }, dashboardActor);
+      expect(await music.getMusicChannel('g1')).toBeNull();
+      expect((await service.get('g1', 'music')).musicChannelId).toBeNull();
+    });
+
+    it('rejects a volume above 150', async () => {
+      await expect(
+        service.update('g1', 'music', { defaultVolume: 151 }, dashboardActor),
+      ).rejects.toMatchObject({
+        fieldErrors: { defaultVolume: ['Enter a whole number from 0 to 150.'] },
+      });
+    });
+  });
+
+  describe('freegames (TASK-1662)', () => {
+    const CHANNEL = '700000000000000001';
+    const ROLE = '700000000000000002';
+
+    it('saves the channel and ping role, and clears both without a channel', async () => {
+      const freeGames = new FreeGameRepository(db);
+      expect(await service.get('g1', 'freegames')).toEqual({ channelId: null, pingRoleId: null });
+
+      await service.update(
+        'g1',
+        'freegames',
+        { channelId: CHANNEL, pingRoleId: ROLE },
+        dashboardActor,
+      );
+      expect(await freeGames.getGuildChannel('g1')).toEqual({
+        guildId: 'g1',
+        channelId: CHANNEL,
+        mentionRoleId: ROLE,
+      });
+
+      await service.update('g1', 'freegames', { pingRoleId: '' }, dashboardActor);
+      expect(await service.get('g1', 'freegames')).toEqual({
+        channelId: CHANNEL,
+        pingRoleId: null,
+      });
+
+      await service.update('g1', 'freegames', { channelId: '', pingRoleId: ROLE }, dashboardActor);
+      expect(await freeGames.getGuildChannel('g1')).toBeNull();
+    });
+
+    it('rejects an ID that is not a snowflake', async () => {
+      await expect(
+        service.update('g1', 'freegames', { channelId: 'general' }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { channelId: expect.any(Array) } });
+    });
+  });
+
+  describe('welcome and farewell (TASK-1663)', () => {
+    const CHANNEL = '800000000000000001';
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('returns the defaults for a guild without a card', async () => {
+      expect(await service.get('g1', 'welcome')).toEqual({
+        enabled: false,
+        channelId: null,
+        messageTemplate: 'Welcome to {server}, {user}!',
+        textColor: '#ffffff',
+        backgroundUrl: null,
+        textMessageEnabled: false,
+        textMessage: '',
+      });
+      expect((await service.get('g1', 'farewell')).messageTemplate).toBe('Goodbye {user}!');
+    });
+
+    it('saves the card, and a link replaces an uploaded background', async () => {
+      vi.spyOn(dns, 'lookup').mockResolvedValue([{ address: '93.184.216.34', family: 4 }] as never);
+      const welcomer = new WelcomerRepository(db);
+      await welcomer.setWelcomeConfig({
+        guildId: 'g1',
+        channelId: CHANNEL,
+        messageTemplate: 'Hi',
+        cardTheme: 'DEFAULT',
+        backgroundUrl: null,
+        backgroundFile: 'upload.png',
+        textColor: '#ffffff',
+        isEnabled: true,
+        textMessageEnabled: false,
+        textMessage: '',
+      });
+
+      await service.update('g1', 'welcome', { textColor: '#FF0000' }, dashboardActor);
+      expect(await welcomer.getWelcomeConfig('g1')).toMatchObject({
+        textColor: '#ff0000',
+        backgroundFile: 'upload.png',
+      });
+
+      await service.update(
+        'g1',
+        'welcome',
+        { backgroundUrl: 'https://example.com/bg.png' },
+        dashboardActor,
+      );
+      expect(await welcomer.getWelcomeConfig('g1')).toMatchObject({
+        backgroundUrl: 'https://example.com/bg.png',
+        backgroundFile: null,
+      });
+    });
+
+    it('reads unchecked legacy values in a form that still saves', async () => {
+      const welcomer = new WelcomerRepository(db);
+      await welcomer.setFarewellConfig({
+        guildId: 'g1',
+        channelId: '',
+        messageTemplate: 'x'.repeat(500),
+        cardTheme: 'DEFAULT',
+        backgroundUrl: 'none',
+        backgroundFile: null,
+        textColor: 'red',
+        isEnabled: true,
+        textMessageEnabled: true,
+        textMessage: '',
+      });
+
+      const values = await service.get('g1', 'farewell');
+      expect(values).toMatchObject({
+        enabled: false,
+        channelId: null,
+        textColor: '#ffffff',
+        backgroundUrl: null,
+      });
+      expect(values.messageTemplate).toHaveLength(200);
+      // A text that is on without any text reads as off, so it never blocks saving other fields.
+      expect(values).toMatchObject({ textMessageEnabled: false, textMessage: '' });
+      await expect(
+        service.update('g1', 'farewell', { channelId: CHANNEL, enabled: 'true' }, dashboardActor),
+      ).resolves.toMatchObject({ values: { enabled: true, channelId: CHANNEL } });
+    });
+
+    it('saves the text message for each card, trimmed, and keeps it when turned off', async () => {
+      const welcomer = new WelcomerRepository(db);
+      await service.update(
+        'g1',
+        'welcome',
+        {
+          channelId: CHANNEL,
+          enabled: 'true',
+          textMessageEnabled: 'on',
+          textMessage: '  Read #rules  ',
+        },
+        dashboardActor,
+      );
+      expect(await welcomer.getWelcomeConfig('g1')).toMatchObject({
+        textMessageEnabled: true,
+        textMessage: 'Read #rules',
+      });
+      expect(await welcomer.getFarewellConfig('g1')).toBeNull();
+
+      const off = await service.update(
+        'g1',
+        'welcome',
+        { textMessageEnabled: false },
+        dashboardActor,
+      );
+      expect(off.changes.map((change) => change.field)).toEqual(['textMessageEnabled']);
+      expect(await service.get('g1', 'welcome')).toMatchObject({
+        textMessageEnabled: false,
+        textMessage: 'Read #rules',
+      });
+
+      await service.update(
+        'g1',
+        'farewell',
+        { textMessageEnabled: true, textMessage: 'Bye {username}' },
+        dashboardActor,
+      );
+      expect(await service.get('g1', 'farewell')).toMatchObject({
+        textMessageEnabled: true,
+        textMessage: 'Bye {username}',
+      });
+    });
+
+    it('rejects a text message that is on without text, or longer than 2000 characters', async () => {
+      const noText = await service
+        .update('g1', 'welcome', { textMessageEnabled: true, textMessage: '   ' }, dashboardActor)
+        .catch((error: unknown) => error);
+      expect(noText).toBeInstanceOf(GuildConfigValidationError);
+      expect((noText as GuildConfigValidationError).fieldErrors).toEqual({
+        textMessage: ['Enter the text message, or turn it off.'],
+      });
+      // Turning it on alone fails the same way while nothing is stored.
+      await expect(
+        service.update('g1', 'farewell', { textMessageEnabled: 'true' }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { textMessage: expect.any(Array) } });
+      await expect(
+        service.update('g1', 'welcome', { textMessage: 'x'.repeat(2001) }, dashboardActor),
+      ).rejects.toMatchObject({ fieldErrors: { textMessage: expect.any(Array) } });
+      expect(await service.get('g1', 'welcome')).toMatchObject({
+        textMessageEnabled: false,
+        textMessage: '',
+      });
+    });
+
+    it('rejects a background link to a local or private address', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'welcome',
+          { backgroundUrl: 'http://127.0.0.1/admin.png' },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({ fieldErrors: { backgroundUrl: expect.any(Array) } });
+      expect((await service.get('g1', 'welcome')).backgroundUrl).toBeNull();
+    });
+
+    it('rejects colors and links in the wrong form', async () => {
+      await expect(
+        service.update(
+          'g1',
+          'welcome',
+          { textColor: 'blue', backgroundUrl: 'ftp://example.com/x.png' },
+          dashboardActor,
+        ),
+      ).rejects.toMatchObject({
+        fieldErrors: { textColor: expect.any(Array), backgroundUrl: expect.any(Array) },
+      });
+    });
+  });
+});
+
+describe('GuildConfigService ai (TASK-1162)', () => {
+  let db: SqliteDatabaseClient;
+  let ai: AiRepository;
+  let service: GuildConfigService;
+  const CHANNEL = '800000000000000001';
+
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    db = raw;
+    ai = new AiRepository(db);
+    service = new GuildConfigService({
+      db,
+      guildSettings: new GuildSettingsRepository(db),
+      moderation: new ModerationRepository(db),
+      commandSettings: new CommandSettingsRepository(db),
+      commandCatalog: new CommandCatalogRepository(db),
+      autoRoles: new AutoRoleRepository(db),
+      autoVoice: new AutoVoiceRepository(db),
+      music: new MusicRepository(db),
+      ai,
+      images: new ImageRepository(db),
+      freeGames: new FreeGameRepository(db),
+      welcomer: new WelcomerRepository(db),
+      versions: new GuildConfigVersionRepository(db),
+      audit: new AuditLogRepository(db),
+      defaultPrefix: '!',
+      now: () => NOW,
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  it('shows every tool and the defaults for a guild without settings', async () => {
+    const values = await service.get('g1', 'ai');
+    expect(values).toMatchObject({
+      channelId: null,
+      speakingStyle: 'FRIENDLY_ANIME',
+      personalityPrompt: null,
+      model: null,
+    });
+    expect(values.tools).toHaveLength(6);
+  });
+
+  it('saves the channel, persona, tools and provider and model', async () => {
+    await service.update(
+      'g1',
+      'ai',
+      {
+        channelId: CHANNEL,
+        speakingStyle: 'KUUDERE',
+        personalityPrompt: 'Answer in haiku.',
+        tools: ['music.play'],
+        model: 'openai/gpt-4o',
+      },
+      dashboardActor,
+    );
+
+    expect(await ai.getAiChannel('g1')).toBe(CHANNEL);
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      speakingStyle: 'KUUDERE',
+      personalityPrompt: 'Answer in haiku.',
+      toolsEnabled: true,
+      allowedTools: ['music.play'],
+      providerOverride: 'openai',
+      modelOverride: 'gpt-4o',
+    });
+
+    await service.update('g1', 'ai', { channelId: '', tools: [], model: 'ollama' }, dashboardActor);
+    expect(await ai.getAiChannel('g1')).toBeNull();
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      toolsEnabled: false,
+      allowedTools: [],
+      providerOverride: 'ollama',
+      modelOverride: null,
+    });
+    expect((await service.get('g1', 'ai')).tools).toEqual([]);
+  });
+
+  it('stores every tool as the empty list so new tools are allowed too', async () => {
+    const all = (await service.get('g1', 'ai')).tools;
+    await service.update('g1', 'ai', { tools: all, speakingStyle: 'GENKI' }, dashboardActor);
+    expect(await ai.getGuildPreferences('g1')).toMatchObject({
+      toolsEnabled: true,
+      allowedTools: [],
+    });
+  });
+
+  it('shows what the bot uses of values saved by commands', async () => {
+    await ai.upsertGuildPreferences('g1', {
+      speakingStyle: 'UNKNOWN',
+      personalityPrompt: 'y'.repeat(2000),
+      modelOverride: 'gpt-4o',
+    });
+    const values = await service.get('g1', 'ai');
+    expect(values.speakingStyle).toBe('FRIENDLY_ANIME');
+    expect(values.personalityPrompt).toHaveLength(1500);
+    expect(values.model).toBeNull();
+    // So saving another field does not fail on those values.
+    await expect(service.update('g1', 'ai', { tools: [] }, dashboardActor)).resolves.toBeDefined();
+  });
+});
+
+describe('GuildConfigService images (TASK-1163)', () => {
+  let db: SqliteDatabaseClient;
+  let images: ImageRepository;
+  let service: GuildConfigService;
+
+  beforeEach(async () => {
+    const raw = await createDatabaseClient({
+      dialect: 'sqlite',
+      url: ':memory:',
+      autoMigrate: true,
+    });
+    if (raw.dialect !== 'sqlite') throw new Error('Expected sqlite client');
+    db = raw;
+    images = new ImageRepository(db);
+    service = new GuildConfigService({
+      db,
+      guildSettings: new GuildSettingsRepository(db),
+      moderation: new ModerationRepository(db),
+      commandSettings: new CommandSettingsRepository(db),
+      commandCatalog: new CommandCatalogRepository(db),
+      autoRoles: new AutoRoleRepository(db),
+      autoVoice: new AutoVoiceRepository(db),
+      music: new MusicRepository(db),
+      ai: new AiRepository(db),
+      images,
+      freeGames: new FreeGameRepository(db),
+      welcomer: new WelcomerRepository(db),
+      versions: new GuildConfigVersionRepository(db),
+      audit: new AuditLogRepository(db),
+      defaultPrefix: '!',
+      now: () => NOW,
+    });
+  });
+
+  afterEach(async () => {
+    await db.close();
+  });
+
+  it('saves and clears the defaults and the member limit', async () => {
+    expect(await service.get('g1', 'images')).toEqual({
+      defaultProvider: null,
+      memberDailyLimit: null,
+      defaultPreset: null,
+    });
+
+    await service.update(
+      'g1',
+      'images',
+      { defaultProvider: 'gemini', memberDailyLimit: '10', defaultPreset: 'fantasy' },
+      dashboardActor,
+    );
+    expect(await images.getGuildSettings('g1')).toEqual({
+      guildId: 'g1',
+      defaultProvider: 'gemini',
+      memberDailyLimit: 10,
+      defaultPreset: 'fantasy',
+    });
+
+    await service.update(
+      'g1',
+      'images',
+      { defaultProvider: '', memberDailyLimit: '' },
+      dashboardActor,
+    );
+    expect(await service.get('g1', 'images')).toEqual({
+      defaultProvider: null,
+      memberDailyLimit: null,
+      defaultPreset: 'fantasy',
+    });
+  });
+});
+
+describe('diffFields', () => {
+  it('compares nested values by content', () => {
+    expect(
+      diffFields({ roles: ['a'], limit: 1, same: 'x' }, { roles: ['a', 'b'], limit: 1, same: 'x' }),
+    ).toEqual([{ field: 'roles', before: ['a'], after: ['a', 'b'] }]);
+  });
+});

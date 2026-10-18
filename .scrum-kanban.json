@@ -1,0 +1,22 @@
+{
+  "version": "0.6.0",
+  "base_branch": "develop",
+  "codegraph": true,
+  "ci": true,
+  "owned": [
+    "docs/kanban/protocol.md",
+    "docs/kanban/handovers/_TEMPLATE.md",
+    ".claude/agents/ticket-worker.md",
+    "scripts/git-hooks/post-checkout",
+    "scripts/git-hooks/post-merge",
+    "scripts/git-hooks/post-rewrite",
+    "scripts/hooks/codegraph-first.mjs",
+    "scripts/hooks/prompt-context.mjs",
+    "scripts/hooks/session-sync.mjs",
+    "scripts/hooks/worker-delegation.mjs",
+    "scripts/kanban/board-server.mjs",
+    "scripts/kanban/board-web/index.html",
+    "scripts/kanban/render-board.mjs",
+    "scripts/kanban/tier-policy.mjs"
+  ]
+}

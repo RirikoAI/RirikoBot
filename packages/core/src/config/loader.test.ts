@@ -1,0 +1,236 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  ConfigurationError,
+  dbAutoMigrateFromEnv,
+  getConfig,
+  loadConfig,
+  loadWebConfig,
+  resetConfig,
+} from './loader.js';
+
+describe('Config Loader', () => {
+  beforeEach(() => {
+    resetConfig();
+  });
+
+  it('loads valid configuration with defaults', () => {
+    const validEnv = {
+      DISCORD_TOKEN: 'mock-discord-token',
+      DISCORD_CLIENT_ID: '123456789012345678',
+    };
+
+    const config = loadConfig(validEnv);
+
+    expect(config.DISCORD_TOKEN).toBe('mock-discord-token');
+    expect(config.DISCORD_CLIENT_ID).toBe('123456789012345678');
+    expect(config.NODE_ENV).toBe('development');
+    expect(config.LOG_LEVEL).toBe('info');
+    expect(config.PORT).toBe(3000);
+    expect(config.DATABASE_URL).toBe('./data/ririko.sqlite');
+    expect(config.DATABASE_DIALECT).toBe('sqlite');
+  });
+
+  it('caches loaded configuration and returns via getConfig', () => {
+    const validEnv = {
+      DISCORD_TOKEN: 'mock-discord-token',
+      DISCORD_CLIENT_ID: '123456789012345678',
+    };
+
+    loadConfig(validEnv);
+    const cached = getConfig();
+    expect(cached.DISCORD_TOKEN).toBe('mock-discord-token');
+  });
+
+  it('coerces string PORT to integer', () => {
+    const validEnv = {
+      DISCORD_TOKEN: 'mock-token',
+      DISCORD_CLIENT_ID: 'mock-client-id',
+      PORT: '8080',
+    };
+
+    const config = loadConfig(validEnv);
+    expect(config.PORT).toBe(8080);
+  });
+
+  it('throws ConfigurationError when required fields are missing', () => {
+    expect(() => loadConfig({})).toThrow(ConfigurationError);
+
+    try {
+      loadConfig({});
+    } catch (err) {
+      expect(err).toBeInstanceOf(ConfigurationError);
+      const configErr = err as ConfigurationError;
+      expect(configErr.validationErrors).toBeDefined();
+      expect(configErr.validationErrors).toContain('DISCORD_TOKEN: DISCORD_TOKEN is required');
+      expect(configErr.validationErrors).toContain(
+        'DISCORD_CLIENT_ID: DISCORD_CLIENT_ID is required',
+      );
+    }
+  });
+
+  it('rejects invalid enum values for NODE_ENV and DATABASE_DIALECT', () => {
+    expect(() =>
+      loadConfig({
+        DISCORD_TOKEN: 'mock-token',
+        DISCORD_CLIENT_ID: 'mock-client-id',
+        NODE_ENV: 'staging' as unknown as 'development',
+      }),
+    ).toThrow(ConfigurationError);
+
+    expect(() =>
+      loadConfig({
+        DISCORD_TOKEN: 'mock-token',
+        DISCORD_CLIENT_ID: 'mock-client-id',
+        DATABASE_DIALECT: 'mysql' as unknown as 'sqlite',
+      }),
+    ).toThrow(ConfigurationError);
+  });
+
+  it('validates 64-character hex SECRET_VAULT_KEY', () => {
+    const validVaultKey = 'a'.repeat(64);
+    const config = loadConfig({
+      DISCORD_TOKEN: 'mock-token',
+      DISCORD_CLIENT_ID: 'mock-client-id',
+      SECRET_VAULT_KEY: validVaultKey,
+    });
+    expect(config.SECRET_VAULT_KEY).toBe(validVaultKey);
+
+    expect(() =>
+      loadConfig({
+        DISCORD_TOKEN: 'mock-token',
+        DISCORD_CLIENT_ID: 'mock-client-id',
+        SECRET_VAULT_KEY: 'too-short',
+      }),
+    ).toThrow(ConfigurationError);
+  });
+
+  it('validates SECRET_VAULT_PREVIOUS_KEYS format and defaults the key version to 1', () => {
+    const base = { DISCORD_TOKEN: 'mock-token', DISCORD_CLIENT_ID: 'mock-client-id' };
+    const config = loadConfig({ ...base, SECRET_VAULT_PREVIOUS_KEYS: `1:${'b'.repeat(64)}` });
+    expect(config.SECRET_VAULT_KEY_VERSION).toBe(1);
+    expect(() => loadConfig({ ...base, SECRET_VAULT_PREVIOUS_KEYS: 'b'.repeat(64) })).toThrow(
+      ConfigurationError,
+    );
+    expect(() => loadConfig({ ...base, SECRET_VAULT_KEY: 'z'.repeat(64) })).toThrow(
+      ConfigurationError,
+    );
+  });
+
+  it('requires the OAuth2 secret, dashboard URL and vault key for the web dashboard', () => {
+    const base = { DISCORD_TOKEN: 'mock-token', DISCORD_CLIENT_ID: 'mock-client-id' };
+    try {
+      loadWebConfig(base);
+      expect.unreachable();
+    } catch (err) {
+      const errors = (err as ConfigurationError).validationErrors ?? [];
+      expect(errors.some((e) => e.startsWith('DISCORD_CLIENT_SECRET'))).toBe(true);
+      expect(errors.some((e) => e.startsWith('DASHBOARD_URL'))).toBe(true);
+      expect(errors.some((e) => e.startsWith('SECRET_VAULT_KEY'))).toBe(true);
+    }
+
+    const config = loadWebConfig({
+      ...base,
+      DISCORD_CLIENT_SECRET: 'secret',
+      DASHBOARD_URL: 'https://dash.example.com/some/path',
+      SECRET_VAULT_KEY: 'c'.repeat(64),
+    });
+    expect(config.DASHBOARD_URL).toBe('https://dash.example.com');
+    expect(config.DISCORD_CLIENT_SECRET).toBe('secret');
+    expect(config.DISCORD_API_URL).toBe('https://discord.com/api');
+  });
+
+  it('accepts DISCORD_API_URL over https or plain http on loopback only', () => {
+    const base = {
+      DISCORD_TOKEN: 'mock-token',
+      DISCORD_CLIENT_ID: 'mock-client-id',
+      DISCORD_CLIENT_SECRET: 'secret',
+      DASHBOARD_URL: 'https://dash.example.com',
+      SECRET_VAULT_KEY: 'c'.repeat(64),
+    };
+    expect(
+      loadWebConfig({ ...base, DISCORD_API_URL: 'http://127.0.0.1:3199/api/' }).DISCORD_API_URL,
+    ).toBe('http://127.0.0.1:3199/api');
+    expect(
+      loadWebConfig({ ...base, DISCORD_API_URL: 'http://localhost:3199/api' }).DISCORD_API_URL,
+    ).toBe('http://localhost:3199/api');
+    expect(
+      loadWebConfig({ ...base, DISCORD_API_URL: 'https://proxy.example.com/api' }).DISCORD_API_URL,
+    ).toBe('https://proxy.example.com/api');
+    expect(() =>
+      loadWebConfig({ ...base, DISCORD_API_URL: 'http://proxy.example.com/api' }),
+    ).toThrow(ConfigurationError);
+    expect(() => loadWebConfig({ ...base, DISCORD_API_URL: 'not a url' })).toThrow(
+      ConfigurationError,
+    );
+  });
+
+  it('parses BOT_OWNER_ID as a list of Discord user IDs', () => {
+    const base = { DISCORD_TOKEN: 'mock-token', DISCORD_CLIENT_ID: 'mock-client-id' };
+    expect(loadConfig(base).BOT_OWNER_ID).toEqual([]);
+    expect(
+      loadConfig({ ...base, BOT_OWNER_ID: ' 123456789012345678, 223456789012345678 ' })
+        .BOT_OWNER_ID,
+    ).toEqual(['123456789012345678', '223456789012345678']);
+    expect(() => loadConfig({ ...base, BOT_OWNER_ID: 'your_discord_user_id' })).toThrow(
+      ConfigurationError,
+    );
+  });
+
+  it('supports legacy 1.4.0 DISCORD_BOT_TOKEN and DISCORD_APPLICATION_ID aliases', () => {
+    const config = loadConfig({
+      DISCORD_BOT_TOKEN: 'legacy-token-123',
+      DISCORD_APPLICATION_ID: 'legacy-app-id-456',
+    });
+
+    expect(config.DISCORD_TOKEN).toBe('legacy-token-123');
+    expect(config.DISCORD_CLIENT_ID).toBe('legacy-app-id-456');
+  });
+});
+
+describe('DB_AUTO_MIGRATE', () => {
+  const base = { DISCORD_TOKEN: 'mock-token', DISCORD_CLIENT_ID: 'mock-client-id' };
+
+  it('defaults to true, also when the variable is empty', () => {
+    expect(loadConfig(base, { cache: false }).DB_AUTO_MIGRATE).toBe(true);
+    expect(loadConfig({ ...base, DB_AUTO_MIGRATE: '' }, { cache: false }).DB_AUTO_MIGRATE).toBe(
+      true,
+    );
+  });
+
+  it.each([
+    ['true', true],
+    ['TRUE', true],
+    ['1', true],
+    ['false', false],
+    [' False ', false],
+    ['0', false],
+    ['off', false],
+  ])('reads %j as %s', (value, expected) => {
+    expect(loadConfig({ ...base, DB_AUTO_MIGRATE: value }, { cache: false }).DB_AUTO_MIGRATE).toBe(
+      expected,
+    );
+  });
+
+  it('rejects any other value with a clear message', () => {
+    expect(() => loadConfig({ ...base, DB_AUTO_MIGRATE: 'maybe' }, { cache: false })).toThrow(
+      /DB_AUTO_MIGRATE must be true or false/,
+    );
+  });
+
+  it('can be read on its own from the environment', () => {
+    expect(dbAutoMigrateFromEnv({})).toBe(true);
+    expect(dbAutoMigrateFromEnv({ DB_AUTO_MIGRATE: 'false' })).toBe(false);
+    expect(() => dbAutoMigrateFromEnv({ DB_AUTO_MIGRATE: 'later' })).toThrow(ConfigurationError);
+  });
+
+  it('is part of the dashboard configuration too', () => {
+    const web = loadWebConfig({
+      ...base,
+      DISCORD_CLIENT_SECRET: 'secret',
+      DASHBOARD_URL: 'https://dash.example.com',
+      SECRET_VAULT_KEY: 'c'.repeat(64),
+      DB_AUTO_MIGRATE: 'false',
+    });
+    expect(web.DB_AUTO_MIGRATE).toBe(false);
+  });
+});

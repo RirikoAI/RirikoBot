@@ -1,43 +1,49 @@
-# Git
+# Build context for the root Dockerfile (docs/deployment.md section 9.1). Only generated,
+# secret and private paths are left out; sources, assets and tests stay in.
+
+# Dependencies and build output (rebuilt inside the image)
+**/node_modules
+**/dist
+**/.next
+website/build
+website/.docusaurus
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Git, editors and local tooling
 .git
-.gitignore
-.github
-
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
-
-# Node.js
-node_modules
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-
-# Build artifacts
-dist
-build
-coverage
-test-results
-
-# Data
-data
-
-# Database
-*.db
-*.sqlite
-
-# Environment variables
-.env
-.env.test
-.env.*
-!.env.example
-
-# Editor directories and files
+.husky/_
 .idea
 .vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.codegraph
+.cache
+.local
+.claude/settings.local.json
+
+# Secrets
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.pem
+
+# Runtime data (mounted as volumes), at any depth like in .gitignore
+**/data
+**/storage
+**/*.sqlite
+**/*.sqlite-wal
+**/*.sqlite-shm
+public/cards
+public/bosses
+**/tmp
+**/temp-*
+
+# Private music package and the local Lavalink install (Lavalink runs in its own container)
+packages/music-private
+lavalink
+
+# Test, coverage and site reports
+coverage
+test-results
+apps/web/e2e-results
+.vitest

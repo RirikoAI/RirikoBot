@@ -1,0 +1,150 @@
+import type { Client, Message } from 'discord.js';
+import { EconomyEventType, earnsXp, scaleXp } from '@ririko/services';
+import type { BotServices } from '../services.js';
+import type { MusicEmbedController } from '../controllers/music-embed.controller.js';
+import type { AiChatController } from '../controllers/ai-chat.controller.js';
+import { levelUpText, sendLevelUpMessage } from './level-up.js';
+import { handleCardDrop } from './card-drop.js';
+
+/**
+ * Gateway Message Listener: pays chat credits (the economy service checks anti-spam), counts
+ * Waifu TCG card drops, awards experience points, and routes dedicated music channel song
+ * requests or AI chat.
+ */
+export function registerMessageListener(
+  client: Client,
+  services: BotServices,
+  musicController?: MusicEmbedController,
+  aiController?: AiChatController,
+): void {
+  client.on('messageCreate', async (message: Message) => {
+    // Ignore bots and direct messages
+    if (message.author.bot || !message.guild) return;
+
+    // 0. Evaluate AutoMod pipeline (Phishing shield, Invites, Mention spam, Burst spam)
+    if (services.autoModService) {
+      try {
+        const automodResult = await services.autoModService.processMessage({
+          guildId: message.guild.id,
+          channelId: message.channelId,
+          userId: message.author.id,
+          content: message.content,
+          messageId: message.id,
+          memberRoles: message.member?.roles?.cache
+            ? Array.from(message.member.roles.cache.keys())
+            : [],
+          memberPermissions: message.member?.permissions
+            ? message.member.permissions.toArray()
+            : [],
+          isBot: message.author.bot,
+          isOwner: message.guild.ownerId === message.author.id,
+          createdTimestamp: message.createdTimestamp,
+          mentions: {
+            users: message.mentions?.users ? message.mentions.users.size : 0,
+            roles: message.mentions?.roles ? message.mentions.roles.size : 0,
+            everyone: Boolean(message.mentions?.everyone),
+          },
+          rawMessage: {
+            delete: () => message.delete(),
+            author: { id: message.author.id, bot: message.author.bot },
+            id: message.id,
+          },
+          guild: message.guild,
+          member: message.member ?? undefined,
+        });
+
+        if (automodResult.matched) {
+          console.warn(
+            `[AutoMod] Message intercepted by rule ${automodResult.ruleType} in guild ${message.guild.id} from user ${message.author.id}`,
+          );
+          return; // Stop further processing; message was deleted or punished
+        }
+      } catch (autoModErr) {
+        console.error('[MessageListener] Error during AutoMod evaluation:', autoModErr);
+      }
+    }
+
+    // Check if message was sent in dedicated music channel
+    if (musicController) {
+      const handled = await musicController.handleMusicChannelMessage(message).catch(() => false);
+      if (handled) return;
+    }
+
+    // Check if message is addressed to dedicated AI channel or mentions bot
+    if (aiController) {
+      const handled = await aiController.handleAiMessage(message).catch(() => false);
+      if (handled) return;
+    }
+
+    const userId = message.author.id;
+    const guildId = message.guild.id;
+
+    try {
+      // 1. Pay the chat credits. The economy service runs the anti-spam check (rolling 60s
+      // cooldown, minimum length, burst and copy-paste) once; it does not store the text.
+      const reward = await services.economyService.handleEvent({
+        type: EconomyEventType.MESSAGE_SENT,
+        userId,
+        guildId,
+        source: 'CHAT_MESSAGE',
+        metadata: {
+          messageId: message.id,
+          channelId: message.channelId,
+          content: message.content,
+          timestamp: message.createdTimestamp,
+        },
+      });
+      if (!reward.awarded) return; // Spam or on cooldown: no card drop progress and no XP
+
+      // Count the member toward the guild's Waifu TCG card drop (never throws).
+      await handleCardDrop(message, services);
+
+      // Lazily ensure user record exists in database
+      await services.userRepo
+        .getOrCreate(userId, {
+          username: message.author.username,
+          displayName: message.author.displayName ?? message.author.username,
+          avatarUrl: message.author.displayAvatarURL
+            ? message.author.displayAvatarURL({ extension: 'png', size: 256 })
+            : undefined,
+        })
+        .catch(() => {});
+
+      // 2. Award chat experience points: a 15-25 XP roll at the guild's rate, except in no-XP
+      // channels (a thread follows its parent) and for members with a no-XP role.
+      const rules = await services.guildSettingsService.getSettings(guildId);
+      const channelIds = [
+        message.channelId,
+        message.channel.isThread() ? message.channel.parentId : null,
+      ];
+      const roleIds = message.member ? [...message.member.roles.cache.keys()] : [];
+      if (!earnsXp(rules, channelIds, roleIds)) return;
+      const xpReward = scaleXp(Math.floor(Math.random() * 11) + 15, rules.xpRatePercent);
+      if (xpReward <= 0) return;
+      const xpRes = await services.levelingService.addExperience(
+        userId,
+        guildId,
+        xpReward,
+        'CHAT_MESSAGE',
+      );
+
+      // 3. Announce the level-up (the member and the guild can opt out) in the guild's level-up
+      // channel, or here when it has none or Ririko cannot post there.
+      if (xpRes.didLevelUp && xpRes.shouldNotify) {
+        const posted = rules.levelUpChannelId
+          ? await sendLevelUpMessage(client, rules.levelUpChannelId, userId, xpRes.newLevel)
+          : false;
+        if (!posted && message.channel.isSendable()) {
+          await message.channel
+            .send({
+              content: levelUpText(userId, xpRes.newLevel),
+              allowedMentions: { users: [userId] },
+            })
+            .catch(() => {});
+        }
+      }
+    } catch (err) {
+      console.error('[MessageListener] Error processing message economy event:', err);
+    }
+  });
+}

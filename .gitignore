@@ -1,72 +1,83 @@
-# compiled output
-/dist
-/node_modules
-/build
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
 
-# Logs
-logs
-*.log
-npm-debug.log*
+# Build outputs
+dist/
+out-tsc/
+.next/
+next-env.d.ts
+# Written by `next dev` when it detects an AI agent; project rules live in the root AGENTS.md / CLAUDE.md
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
+*.tsbuildinfo
+
+# Logs & Temp
+tmp/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
+pnpm-debug.log*
+*-player-script.js
 
-# OS
-.DS_Store
-
-# Tests
-/coverage
-/.nyc_output
-/test-results
-
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# dotenv environment variable files
-.env.test
-.env.dev
-.env.development.local
-.env.test.local
-.env.production.local
+# Environment & Secrets
+.env
 .env.local
+.env.*.local
+.env.production
+*.pem
 
-# temp directory
-.temp
-.tmp
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-# Sqlite Databases
+# Local
+.local/
+data/
+storage/
 *.sqlite
-*.sqlite3
-*.db
+*.sqlite-wal
+*.sqlite-shm
+temp-*/
 
-# Giveaways
-giveaways.json
+# Private music package (separate private repository, cloned here by maintainers)
+/packages/music-private/
 
-# some file
-*-base.js
+# go-librespot session: holds authorized Spotify credentials and the downloaded binary
+.cache/
+
+# Lavalink runtime & downloaded binary artifacts
 /lavalink/
-/docker-compose.yml
-/.env
+
+# Rendered TCG cards (rebuilt by `pnpm tcg:card-builder --rerender`; the bot renders missing ones on demand)
+public/cards/
+public/bosses/
+
+# Test and coverage reports (pnpm test:ci / test:coverage)
+coverage/
+test-results/
+# Playwright E2E report, traces and JUnit results (pnpm test:e2e)
+apps/web/e2e-results/
+# Vitest local cache and JSON reports
+.vitest/
+
+# CodeGraph indexing metadata & locks
+.codegraph/
+.claude/settings.local.json
+
+# Private hosting runbook (EPIC-017): real hosts, addresses and procedures. Never commit.
+docs/hosting.md
+
+# Docusaurus output (TASK-1891)
+website/build/
+website/.docusaurus/
+# Generated from the bot command definitions by scripts/export-commands.ts (TASK-1892)
+website/src/data/commands.json
+# Install files copied from the production compose file at build time (pnpm docs:install)
+website/static/install/
+
+# Static Kanban board site for Vercel (CHORE-2005): node scripts/kanban/build-board-site.mjs
+board-dist/

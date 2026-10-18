@@ -1,41 +1,13 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "declaration": true,
-    "removeComments": true,
-    "noUnusedLocals": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2021",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "#*": [
-        "src/*"
-      ]
-    }
-  },
-  "exclude": [
-    "node_modules",
-    "*-base.js",
-    "public",
-    "test-results",
-    "scripts",
-    "dist",
-    ".hygen/**",
-    ".github/**",
-    ".circleci/**",
-    "typings/browser.d.ts",
-    "typings/browser/**"
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/database" },
+    { "path": "./packages/discord" },
+    { "path": "./packages/music" },
+    { "path": "./packages/ai" },
+    { "path": "./packages/services" },
+    { "path": "./apps/cli" },
+    { "path": "./apps/bot" }
   ]
 }
