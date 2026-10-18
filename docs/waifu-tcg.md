@@ -17,7 +17,7 @@ A member's cards, energy, items and progress are the same on every server. Card 
 
 ### 2.1. For the Host
 
-The card pool and the boss list are not in the database at first. Load them once. Follow section 6 of [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md). It builds the cards (`pnpm tcg:card-builder --rerender`) and the bosses (`pnpm tcg:boss-builder --all`). In Docker, the steps are in [deployment.md](deployment.md).
+The card pool and the boss list are not in the database at first. Load them once. Follow section 6 of [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/master/SETUP.md). It builds the cards (`pnpm tcg:card-builder --rerender`) and the bosses (`pnpm tcg:boss-builder --all`). In Docker, the steps are in [deployment.md](deployment.md).
 
 ### 2.2. For the Server Admin
 
@@ -169,12 +169,12 @@ Every card shows `Image source: waifu.im` in its footer. If an artist asks for a
 
 | Command | What it does |
 |---|---|
-| `pnpm tcg:card-builder` | Builds and renders the card pool. See [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md). |
+| `pnpm tcg:card-builder` | Builds and renders the card pool. See [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/master/SETUP.md). |
 | `pnpm tcg:boss-builder` | Builds and imports the dungeon bosses. |
 | `pnpm tcg:reset-user <user_id>` | Removes all of one user's cards, items, dungeon progress, energy and achievements, so they can start again. |
 | `pnpm tcg:simulate` | Estimates win rates for each dungeon floor. For balance work. |
 
-Design notes for these tools are in [archive/waifu-tcg-design.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/waifu-tcg-design.md).
+Design notes for these tools are in [archive/waifu-tcg-design.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/waifu-tcg-design.md).
 
 ## 9. Limits
 

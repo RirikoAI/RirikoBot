@@ -1,6 +1,6 @@
 [![CircleCI (master)](https://dl.circleci.com/status-badge/img/gh/RirikoAI/RirikoBot/tree/master.svg?style=shield)](https://app.circleci.com/pipelines/gh/RirikoAI/RirikoBot?branch=master)
-[![CircleCI (develop/2.0.0)](https://dl.circleci.com/status-badge/img/gh/RirikoAI/RirikoBot/tree/develop%2F2.0.0.svg?style=shield)](https://app.circleci.com/pipelines/gh/RirikoAI/RirikoBot?branch=develop%2F2.0.0)
-[![codecov](https://codecov.io/gh/RirikoAI/RirikoBot/branch/develop%2F2.0.0/graph/badge.svg)](https://app.codecov.io/gh/RirikoAI/RirikoBot/tree/develop%2F2.0.0)
+[![CircleCI (develop)](https://dl.circleci.com/status-badge/img/gh/RirikoAI/RirikoBot/tree/develop.svg?style=shield)](https://app.circleci.com/pipelines/gh/RirikoAI/RirikoBot?branch=develop)
+[![codecov](https://codecov.io/gh/RirikoAI/RirikoBot/branch/develop/graph/badge.svg)](https://app.codecov.io/gh/RirikoAI/RirikoBot/tree/develop)
 [![CodeFactor](https://www.codefactor.io/repository/github/ririkoai/ririkobot/badge/master)](https://www.codefactor.io/repository/github/ririkoai/ririkobot/overview/master)
 [![Docker Pulls](https://img.shields.io/docker/pulls/ririkoai/ririkobot.svg)](https://hub.docker.com/r/ririkoai/ririkobot)
 

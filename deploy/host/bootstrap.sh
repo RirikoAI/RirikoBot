@@ -19,7 +19,7 @@ changes only what differs from the state it describes.
 
 Options:
   --ref <tag|branch>          Git ref of RirikoAI/RirikoBot to take deploy/host from
-                              (for example v2.0.0 or develop/2.0.0). Required.
+                              (for example v2.0.0 or develop). Required.
   --role app|lavalink         app (default): a host that runs the bot stack. Enables the
                               backup and watchdog timers.
                               lavalink: the Lavalink host. Enables only the watchdog timer, creates

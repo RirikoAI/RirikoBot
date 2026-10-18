@@ -3,8 +3,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const REPO = 'https://github.com/RirikoAI/RirikoBot';
 const SUPPORT_SERVER = 'https://discord.gg/UNMZx4qx8G';
-// Docs edit links point at the integration branch until 2.0.0 lands on master (STORY-191).
-const EDIT_BRANCH = 'develop/2.0.0';
+// Docs edit links point at master, where the published docs are built from.
+const EDIT_BRANCH = 'master';
 
 const config: Config = {
   title: 'Ririko AI',

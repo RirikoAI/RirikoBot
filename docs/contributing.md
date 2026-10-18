@@ -1,6 +1,6 @@
 # Contributing & Development Standards (Ririko AI 2.0.0)
 
-This is the detailed reference. For a short start, read [CONTRIBUTING.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/CONTRIBUTING.md).
+This is the detailed reference. For a short start, read [CONTRIBUTING.md](https://github.com/RirikoAI/RirikoBot/blob/master/CONTRIBUTING.md).
 
 ## 1. Overview & Culture
 Welcome to the Ririko AI 2.0.0 engineering team! We operate like a senior open-source project prioritizing:
@@ -41,7 +41,9 @@ For any significant task or feature implementation:
 ---
 
 ## 4. Git & Commit Guidelines
-- **Main Development Branch**: `develop/2.0.0` is our main development branch for the entire 2.0.0 development lifecycle. All feature branches, subsystem PRs, and architectural docs must branch from and target `develop/2.0.0`.
+- **Main Development Branch**: `develop` is our main development branch. All feature branches, subsystem PRs, and architectural docs must branch from and target `develop`.
+- **Release Branch**: `master` holds released code. The maintainer merges `develop` into `master` and tags the release there.
+- **Legacy Branch**: `1.x` holds the 1.4.0 line. It takes no new work.
 - Use conventional commits:
   - `feat(tcg): implement 8-tier card drop generator`
   - `fix(music): clamp volume requests to 150%`

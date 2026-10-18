@@ -68,7 +68,7 @@ The workflow is provider-agnostic. Claude Code, Gemini CLI, Codex, opencode, and
 - **Board first, work second.** Every agent and subagent sets its ticket to `IN_PROGRESS` (with `assignee` and `claimed_at`) and regenerates `BOARD.md` **before** it reads code, edits files, or runs commands for that ticket. Humans must see what agents are working on while the work happens, not after. Every later status change is rendered the moment it happens.
 
 ### 1.7. Git & PRs
-- Branches `feature/|fix/|chore/<TICKET-ID>-<slug>`, PRs target `develop/2.0.0`.
+- Branches `feature/|fix/|chore/<TICKET-ID>-<slug>`, PRs target `develop`.
 - When an Epic or Story completes, **stop and ask the user** before committing, pushing, or opening a PR. Workers never commit or push.
 
 ---
@@ -200,7 +200,8 @@ This document governs how AI agents collaborate, divide responsibilities, mainta
 
 ## 10. Project Git & PR Rules
 These rules add to section 1.7. Where they differ, this section wins.
-- **Base branch**: `develop/2.0.0`. Every PR targets it.
+- **Base branch**: `develop`. Every PR targets it.
+- **Release and legacy branches**: `master` holds released code and release tags are made on it. `1.x` holds the 1.4.0 line and takes no new work.
 - **Branch names**: `feat/|fix/|chore/<TICKET-ID>-<slug>`. This project uses `feat/`, not the template's `feature/`.
 - **Grouped batches**: commits and PRs correspond to a complete Story, Bug, or Epic. Standalone chores are the exception.
 - **Maintainer merge gate**: agents push branches and open PRs only after the user confirms (section 1.7). The maintainer verifies the PR and merges it after CI passes. Agents never merge PRs.

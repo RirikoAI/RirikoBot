@@ -1,8 +1,8 @@
 # Architecture
 
-This page is for contributors. It explains how the parts of Ririko fit together and where to find each one. For setup, read [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/SETUP.md). For the daily workflow, read [development.md](development.md).
+This page is for contributors. It explains how the parts of Ririko fit together and where to find each one. For setup, read [SETUP.md](https://github.com/RirikoAI/RirikoBot/blob/master/SETUP.md). For the daily workflow, read [development.md](development.md).
 
-The decisions behind the design are in [archive/](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/README.md). Those files are history. This page describes the code as it is today.
+The decisions behind the design are in [archive/](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/README.md). Those files are history. This page describes the code as it is today.
 
 ## 1. Principles
 
@@ -140,7 +140,7 @@ Some data is global because its tables have no server column: the economy settin
 - A strict content security policy with a nonce, `server-only` imports and React taint markers keep secrets out of the browser.
 - Rate limits are in memory, which is enough for one dashboard instance.
 
-The full reasoning is in [archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md). The original page-by-page design is in [archive/dashboard-design.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/dashboard-design.md).
+The full reasoning is in [archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/adr/ADR-013-dashboard-sessions-and-credential-theft-defense.md). The original page-by-page design is in [archive/dashboard-design.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/dashboard-design.md).
 
 ## 5. Data
 
@@ -153,27 +153,27 @@ The full reasoning is in [archive/adr/ADR-013-dashboard-sessions-and-credential-
 
 ### 6.1. Economy
 
-Rewarding actions publish an `EconomyEvent`. `EconomyService` checks the anti-spam rules (60-second window, near-copy detection, minimum length, burst detection), calculates the reward and writes the ledger. Voice rewards come from `VoiceRewardService`, which runs every minute and pays only in servers that turned them on. Daily systems share one reset boundary (`RIRIKO_RESET_*`) and compute it when a value is read, so no scheduled job is needed. Details: [archive/economy-design.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/economy-design.md).
+Rewarding actions publish an `EconomyEvent`. `EconomyService` checks the anti-spam rules (60-second window, near-copy detection, minimum length, burst detection), calculates the reward and writes the ledger. Voice rewards come from `VoiceRewardService`, which runs every minute and pays only in servers that turned them on. Daily systems share one reset boundary (`RIRIKO_RESET_*`) and compute it when a value is read, so no scheduled job is needed. Details: [archive/economy-design.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/economy-design.md).
 
 ### 6.2. Moderation
 
-`PermissionService` checks the user permission, the bot permission and the role order for every punishment. `WarningEscalationService` adds up active warnings and applies the step of the policy. AutoMod rules run on every message. The anti-raid service watches joins. Details: [archive/moderation-design.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/moderation-design.md).
+`PermissionService` checks the user permission, the bot permission and the role order for every punishment. `WarningEscalationService` adds up active warnings and applies the step of the policy. AutoMod rules run on every message. The anti-raid service watches joins. Details: [archive/moderation-design.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/moderation-design.md).
 
 ### 6.3. AI
 
-`ConversationManager` stores memory for each server, user and channel. `FallbackChainManager` tries the chosen provider first, then the others, with a circuit breaker. Tools are registered with Zod schemas, and a security interceptor checks the allowed list and the caller's permissions before it runs one. The model never gets a shell, SQL, files, web access or admin APIs. Details: [archive/ai-design.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/ai-design.md).
+`ConversationManager` stores memory for each server, user and channel. `FallbackChainManager` tries the chosen provider first, then the others, with a circuit breaker. Tools are registered with Zod schemas, and a security interceptor checks the allowed list and the caller's permissions before it runs one. The model never gets a shell, SQL, files, web access or admin APIs. Details: [archive/ai-design.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/ai-design.md).
 
 ### 6.4. Music
 
-`MusicPlayerService` hands queries to Lavalink when a node is connected. Otherwise it uses `ExtractorPipeline` with the built-in adapters. A queue is kept in memory for each server. `MusicEmbedController` updates the player message when events happen, one update at a time for each server, with a 50 ms debounce. It sends a new message only when Discord says the old one is gone. Details: [archive/music-design.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/music-design.md).
+`MusicPlayerService` hands queries to Lavalink when a node is connected. Otherwise it uses `ExtractorPipeline` with the built-in adapters. A queue is kept in memory for each server. `MusicEmbedController` updates the player message when events happen, one update at a time for each server, with a 50 ms debounce. It sends a new message only when Discord says the old one is gone. Details: [archive/music-design.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/music-design.md).
 
 ### 6.5. Waifu TCG
 
-Cards, items, energy and dungeon progress belong to the user. `EnergyLifecycleService` is the only way to spend energy. It also refills it at the reset boundary. The dungeon engine builds an encounter from the season's curve, the boss definition and floor overrides. Rules that owners can change are read through a resolver with a 30-second cache. Cards are drawn with `@napi-rs/canvas` and cached in `public/cards/`. Details: [archive/waifu-tcg-design.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/waifu-tcg-design.md) and [archive/tcg-card-synthesis.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/tcg-card-synthesis.md).
+Cards, items, energy and dungeon progress belong to the user. `EnergyLifecycleService` is the only way to spend energy. It also refills it at the reset boundary. The dungeon engine builds an encounter from the season's curve, the boss definition and floor overrides. Rules that owners can change are read through a resolver with a 30-second cache. Cards are drawn with `@napi-rs/canvas` and cached in `public/cards/`. Details: [archive/waifu-tcg-design.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/waifu-tcg-design.md) and [archive/tcg-card-synthesis.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/tcg-card-synthesis.md).
 
 ### 6.6. Adventures
 
-The scenario graphs, the engine and the payout service are in `packages/services/src/adventure/`. A durable session row, keyed by the user ID, makes sure a user has one active story. A choice receipt for each decision stops double charges. Settlement is one transaction. Details: [archive/adventure-game-spec.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/adventure-game-spec.md) and [archive/adventure-runtime.md](https://github.com/RirikoAI/RirikoBot/blob/develop/2.0.0/docs/archive/adventure-runtime.md).
+The scenario graphs, the engine and the payout service are in `packages/services/src/adventure/`. A durable session row, keyed by the user ID, makes sure a user has one active story. A choice receipt for each decision stops double charges. Settlement is one transaction. Details: [archive/adventure-game-spec.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/adventure-game-spec.md) and [archive/adventure-runtime.md](https://github.com/RirikoAI/RirikoBot/blob/master/docs/archive/adventure-runtime.md).
 
 ### 6.7. Integrations
 

@@ -4,6 +4,38 @@ This guide is for the maintainer. It explains how to publish a release, how to d
 
 **Agents never push, retag or log in to Docker Hub. They never create release tags, never move `latest` and never approve a deploy.** They prepare the code and the documents. The maintainer does every step below.
 
+For launch day, follow the checklist in section 10.
+
+## Branches
+
+- `develop` is the base of every pull request. Work lands here first.
+- `master` holds released code. You merge `develop` into `master` for a release and tag the release on `master`. The published documentation (ririko.ai) is built from `master`.
+- `1.x` holds the 1.4.0 line. It takes no new work.
+
+CircleCI has no branch filters for releases: the `release` workflow runs for `v*` tags, so the branch names do not change what it runs.
+
+**After the rename.** The branch `develop/2.0.0` was renamed to `develop` on GitHub. Git cannot keep `develop` and `develop/2.0.0` in one clone, so every existing clone needs these steps once:
+
+1. Drop the old remote-tracking branch:
+
+   ```bash
+   git fetch --prune
+   ```
+
+2. Rename your local branch (or delete it with `git branch -d develop/2.0.0`):
+
+   ```bash
+   git branch -m develop/2.0.0 develop
+   ```
+
+3. Point it at the new remote branch:
+
+   ```bash
+   git branch -u origin/develop develop
+   ```
+
+Open pull requests move to `develop` by themselves when the maintainer renames the branch on GitHub.
+
 ## How Releases Work
 
 - The CircleCI `release` workflow (`.circleci/config.yml`) runs only for git tags such as `v2.1.3` or `v2.1.3-beta.1`. A branch push never starts it.
@@ -66,7 +98,7 @@ The package version inside that image is 1.4.1. If you want that tag too, repeat
 
 ## 4. Publish a Release
 
-1. Merge the release into `master`.
+1. Merge `develop` into `master` with a pull request, so `master` holds the release.
 2. Check that `package.json` has the version you are about to tag.
 3. Optional: publish a prerelease first. A prerelease checks the pipeline and does not move the tag `2`:
 
@@ -593,3 +625,275 @@ pnpm build
 pnpm docs:build
 pnpm docs:serve
 ```
+
+## 10. Production Go-Live
+
+This is the one list to follow on launch day. Every step says who does it, the exact command or setting, and the check that proves it. Do the steps in order. Do not go on until the check of a step passes.
+
+- **Maintainer**: accounts, secrets, tags, approvals, and the GitHub, Docker Hub and Cloudflare settings.
+- **Coordinator**: the commands on the hosts over SSH, only after the maintainer says go. The commands run as root on the host (`sudo`). The maintainer's private runbook has the SSH details.
+- Workers do none of these steps.
+
+Placeholders: `<DEPLOY_SSH_HOST>` is the tunnel hostname of a host (section 8.2). `<dashboard-url>` is the public HTTPS address of the production dashboard, for example the value of `DASHBOARD_URL`. `<path-to>` is the folder on the host that holds `bootstrap.sh`. Never put a real IP address, provider, region or machine size in a file of the repository.
+
+Production starts with an empty database. The first deploy runs the migrations from `0000_baseline` and does not adopt anything, so section 8.8 does not apply.
+
+### 10.1. Before You Tag
+
+1. **Maintainer.** Check that the release is on `master` and that its version is right. Update `master` (section 4, step 4), then print the version:
+
+   ```bash
+   node -p "require('./package.json').version"
+   ```
+
+   Check: it prints `2.0.0`, and the `ci` workflow of CircleCI is green for the newest commit of `master`.
+
+2. **Maintainer.** Check that staging runs and is healthy before you start. The coordinator runs this on the staging host:
+
+   ```bash
+   sudo ririko-deploy status
+   ```
+
+   Check: `Pending: (none)`, `Unknown: (none)`, and `bot` and `web` are `healthy`.
+
+3. **Maintainer.** Make or choose the Discord application of the production bot. Follow [deployment.md section 2.2](deployment.md#22-create-the-discord-application). Under **OAuth2**, **Redirects**, add `<dashboard-url>/api/auth/callback`. Keep the bot token, the application ID and the client secret for step 8.
+
+   Check: the Developer Portal shows the redirect after **Save Changes**.
+
+4. **Maintainer.** Make three new secrets for production. Do not reuse the staging values. Run the command three times: once for `SECRET_VAULT_KEY`, once for `LAVALINK_PASSWORD` and once for `POSTGRES_PASSWORD`:
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+   Check: each run prints 64 characters. Keep an offline copy of the vault key: without it the stored credentials cannot be read again.
+
+5. **Maintainer.** Set up the Cloudflare tunnel for the production app host. In Cloudflare Zero Trust, create the tunnel and save its token in a file that you give to the coordinator. Add two public hostnames: the dashboard to `http://localhost:3000`, and the SSH hostname (`<DEPLOY_SSH_HOST>`) to `ssh://localhost:22`. Create a service token and give the Access application of the SSH hostname a **Service Auth** policy that includes it (section 8.2, step 6).
+
+   Check: both hostnames show in the tunnel, and the service token is in the Service Auth policy.
+
+6. **Maintainer.** Make a new key pair for the production app host, and one for the production Lavalink instance (section 8.2, steps 1 and 2). Keep each private key for step 10, and give the coordinator the two public keys (`deploy_key.pub`).
+
+   Check: each private key is one line of base64, and the two key pairs are different.
+
+7. **Coordinator.** Bootstrap the production app host. Put `bootstrap.sh` on the host (the private runbook says how). Use the branch `master`: the tag does not exist yet. Pass the public key of the app host and the tunnel token file:
+
+   ```bash
+   sudo bash <path-to>/bootstrap.sh --ref master --role app --deploy-key "<public key of the app host>" --tunnel-token-file <path to the token file>
+   ```
+
+   Check: the output ends with `Done: ... (role app)`, and shows `CI deploy key: installed` and `Cloudflare tunnel: service present`. This command prints a number above 0:
+
+   ```bash
+   grep -c db:migrate /usr/local/bin/ririko-deploy
+   ```
+
+8. **Maintainer gives the values, coordinator writes the files.** Write the settings of the production app host. Never put these values in a commit, a ticket or a chat.
+   1. Create `/opt/ririko/.env.production` (owner root, mode 0600) from `.env.production.example`. Fill in the seven values of [deployment.md section 2.4](deployment.md#24-write-the-settings-file) with the secrets from steps 3 and 4. Set `DASHBOARD_URL` to `<dashboard-url>`. Set `CLIENT_IP_HEADER=cf-connecting-ip`, because every request comes through Cloudflare ([deployment.md section 4](deployment.md#4-show-the-dashboard-on-the-internet)). Set `LAVALINK_HOST` to the WireGuard address of the Lavalink host and `BOT_OWNER_ID` to the Discord user ID of the owner.
+   2. Edit `/etc/ririko/ririko.conf` (see `/etc/ririko/ririko.conf.example` for every key). Set `RIRIKO_COMPOSE_FILES="docker-compose.production.yml docker-compose.remote-lavalink.yml"`, `WG_ADDRESS`, `WG_PEERS` and `HEALTHCHECK_PING_URL`.
+   3. Run the command of step 7 again, so that WireGuard is set up.
+
+   Check: this command prints `root:root 600`:
+
+   ```bash
+   stat -c '%U:%G %a' /opt/ririko/.env.production
+   ```
+
+   The output of `bootstrap.sh` shows `WireGuard: wg0 up as <address>`, not `key only`.
+
+9. **Coordinator.** Make sure that the Lavalink host runs the production instance (section 8.5).
+   1. If `LAVALINK_INSTANCES` on the Lavalink host already includes `production`, skip to the check.
+   2. Otherwise run `bootstrap.sh --ref master --role lavalink --deploy-key-production "<public key of the Lavalink production instance>"` on the Lavalink host. Add the WireGuard public key of the production app host to `WG_PEERS` with the port 2333, then run `bootstrap.sh` again. Create `/opt/ririko/lavalink-production.env` (owner root, mode 0600) from `deploy/lavalink/lavalink.env.example`. Its `LAVALINK_PASSWORD` is the value of step 4.
+
+   Check: on the Lavalink host, `sudo ririko-deploy status production` prints `status: lavalink-production current=none previous=none`, and `stat -c '%U:%G %a' /opt/ririko/lavalink-production.env` prints `root:root 600`.
+
+10. **Maintainer.** Create the two CircleCI contexts `deploy-production` and `deploy-lavalink-production`, each with the five variables of section 8.2. The coordinator prints the value of `DEPLOY_KNOWN_HOSTS` on each host (section 8.2, step 5). Then delete the private key files (section 8.2, step 4). Add the security group of the maintainers to both contexts (section 8.2).
+
+    Check: **Organization settings**, **Contexts** lists both contexts with five variables each, and **Security** shows the group.
+
+11. **Coordinator.** Print the state of the production app host before the first deploy:
+
+    ```bash
+    sudo ririko-deploy status
+    ```
+
+    Check: it prints `status: current=none previous=none`. This is the proof that nothing runs yet, so the first deploy starts from an empty database.
+
+### 10.2. Tag and Approve
+
+12. **Maintainer.** Create and push the release tag from `master` (section 4, steps 4 to 6):
+
+    ```bash
+    git checkout master
+    ```
+
+    ```bash
+    git pull
+    ```
+
+    ```bash
+    git tag -a v2.0.0 -m "Ririko 2.0.0"
+    ```
+
+    ```bash
+    git push origin v2.0.0
+    ```
+
+    Check: the `release` workflow starts in CircleCI.
+
+13. **Maintainer.** Wait for `release`, `deploy-lavalink-staging` and `deploy-staging` to turn green. Then `approve-production` shows **On Hold**.
+
+    Check: the three jobs are green. If one fails, production is not offered. Read the exit code in section 8.4 and fix the cause. Tag a new patch version: never reuse `v2.0.0` for another commit.
+
+14. **Coordinator.** Check staging before the approval:
+
+    ```bash
+    sudo ririko-deploy status
+    ```
+
+    Check: on the staging host, `Latest` is the newest file in `packages/database/migrations/pg` of the tag, `Pending: (none)`, and `bot` and `web` are `healthy`. Also run this command on the staging host. It prints a body with `"ready":true`:
+
+    ```bash
+    curl -fsS http://127.0.0.1:3000/api/ready
+    ```
+
+15. **Maintainer.** Open the workflow in CircleCI and click **Approve** on `approve-production`.
+
+    Check: `deploy-lavalink-production` and then `deploy-production` run, and both turn green. A job that stays in **Blocked** means that you are not in the security group (section 8.2).
+
+16. **Coordinator.** Read the output of `deploy-production`.
+
+    Check: it shows the line `postgres is not running, starting it for the migration`, then lines that start with `db:migrate:` and end with `Applied N migration(s): 0000_baseline, ...`. There is no `Adoption:` line. The job ends with `deployed 2.0.0` and the message `The host command succeeded.`
+
+### 10.3. Check Production
+
+17. **Coordinator.** Print the state of the production app host:
+
+    ```bash
+    sudo ririko-deploy status
+    ```
+
+    Check: `current=2.0.0`, `Latest` is the newest file in `packages/database/migrations/pg`, `Pending: (none)`, `Unknown: (none)`, `Adopted: no`, and `bot` and `web` are `healthy`.
+
+18. **Coordinator.** Check that the dashboard answers on the host and in public:
+
+    ```bash
+    curl -fsS http://127.0.0.1:3000/api/ready
+    ```
+
+    ```bash
+    curl -fsS <dashboard-url>/api/ready
+    ```
+
+    Check: both commands exit with 0 and print a body with `"ready":true`. The second command runs on any computer.
+
+19. **Coordinator.** Register the slash commands. Run steps 1, 3, 4, 6 and 7 of section 8.7 to get the helper `rc`, then:
+
+    ```bash
+    rc exec -T bot ririko commands:sync --global --all-guilds
+    ```
+
+    Check: the command prints the commands it registered, and exits with 0.
+
+20. **Maintainer.** Add the production bot to your server ([deployment.md section 2.6](deployment.md#26-add-the-bot-to-your-server)). Type `/ping`. Open `<dashboard-url>` and sign in with Discord.
+
+    Check: the bot answers `/ping`, and the dashboard lists your server. Global commands can take a while to show; press Ctrl+R in Discord.
+
+21. **Coordinator.** Turn on the backup of production. Set the five backup keys in `/etc/ririko/ririko.conf` (`RIRIKO_ENV_NAME`, `RESTIC_REPOSITORY`, `RESTIC_PASSWORD`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`; see `/etc/ririko/ririko.conf.example`). The maintainer keeps an offline copy of `RESTIC_PASSWORD`. Then run:
+
+    ```bash
+    sudo ririko-backup init
+    ```
+
+    ```bash
+    sudo systemctl start ririko-backup.service
+    ```
+
+    Check: `journalctl -u ririko-backup` ends without an error, and the monitor of `BACKUP_PING_URL` shows a ping. The monitor of `HEALTHCHECK_PING_URL` shows a ping every minute.
+
+22. **Maintainer.** Check the Docker Hub tags (section 4, step 8).
+
+    Check: `ririkoai/ririkobot:2.0.0` and `ririkoai/ririkobot-dashboard:2` show a manifest, and `ririkoai/ririkobot:latest` still shows the 1.4.0 digest.
+
+### 10.4. Launch Day: Site, Texts and Settings
+
+All of these steps are the maintainer's. The texts are written already. Paste them from the file named in each step.
+
+23. **Maintainer.** Publish a GitHub release for the tag (section 4, step 9). Add a link to `docs/upgrading-from-1.4.md` in the notes.
+
+    Check: the release shows on the **Releases** page of the repository.
+
+24. **Maintainer.** Turn on HTTPS for the website. Section 9.1 must be done, and the workflow **Docs site** must have deployed from `master` at least once. Open **Settings**, **Pages**, and tick **Enforce HTTPS**. If the box is grey, wait for GitHub to issue the certificate and open the page again.
+
+    Check: this command prints a `Location: https://ririko.ai/` header:
+
+    ```bash
+    curl -sI http://ririko.ai
+    ```
+
+    Also open <https://ririko.ai/docs> in a browser. It loads without a warning.
+
+25. **Maintainer.** Set the description, the website and the topics of the GitHub repository. Click the gear next to **About**. The texts are in the entry "Proposed GitHub texts" of `docs/kanban/handovers/TASK-1913.md`. Use `https://ririko.ai` as the website.
+
+    Check: this command shows the new description, the homepage and 16 topics:
+
+    ```bash
+    gh repo view RirikoAI/RirikoBot --json description,homepageUrl,repositoryTopics
+    ```
+
+26. **Maintainer.** Update the two Docker Hub overviews (section 3). Copy `docs/dockerhub/ririkobot.md` and `docs/dockerhub/ririkobot-dashboard.md` into the **Overview** of their repositories.
+
+    Check: both pages show the 2.0.0 tag table and the links to <https://ririko.ai/docs>.
+
+27. **Maintainer.** Replace the wiki. Open the Home page of the wiki and replace all of it with the text in the entry "Replacement wiki Home text" of `docs/kanban/handovers/TASK-1894.md`. In that text, change the branch in the GitHub link to `master`. Then open **Settings**, **Features** and untick **Wikis**.
+
+    Check: before you untick it, the Home page of the wiki shows the pointer to <https://ririko.ai/docs>. After that, the repository has no **Wiki** tab.
+
+### 10.5. The 1.4.0 Sunset and `latest`
+
+28. **Maintainer.** Choose the date on which `latest` moves, at least 30 days after the release, and announce it (section 5).
+
+    Check: the date is in the GitHub release notes, the README, the Docker Hub descriptions and on the support Discord server.
+
+29. **Maintainer.** On that date, move `latest` of both images (section 6, steps 1 to 4).
+
+    Check: the digest of `ririkoai/ririkobot:latest` equals the digest of `ririkoai/ririkobot:2`, and the same for `ririkoai/ririkobot-dashboard`:
+
+    ```bash
+    docker buildx imagetools inspect ririkoai/ririkobot:latest
+    ```
+
+30. **Maintainer.** Change the `latest` row in the tag table of both Docker Hub texts. The text of the new row is in the "Decisions & gotchas" part of the `PROGRESS` entry of `docs/kanban/handovers/TASK-1913.md`. Change it in `docs/dockerhub/ririkobot.md` and `docs/dockerhub/ririkobot-dashboard.md` through a pull request, then paste both files into Docker Hub again (step 26).
+
+    Check: both Docker Hub pages show `latest` as the newest 2.x release.
+
+### 10.6. Roll Back
+
+Nothing in this section touches 1.4.0 data. A 1.4.0 user never let 2.x write to the `./data` folder.
+
+31. **Coordinator.** If `deploy-production` fails, read its exit code in section 8.4. On the first deploy there is no previous release, so the host does not roll back.
+    - Exit 5: nothing runs. Find the cause in `/opt/ririko/deploy.log` and `docker compose -p ririko ps`, fix it on the host, and run the job again in CircleCI.
+    - Exit 6: the migration failed or was refused. Nothing was started and the database is as the failed migration left it. Read the lines that start with `db:migrate:` (section 8.6). If the cause is in the code, tag a new patch version.
+    - Exit 255: the tunnel, the service token, the key or the pinned host key is wrong (section 8.2). Fix the context and run the job again.
+
+    Check: the job turns green, and step 17 passes.
+
+32. **Maintainer.** If a later release breaks production, tag a new patch version with the fix and approve it. Never reuse a version number.
+
+    Check: `sudo ririko-deploy status` shows the new version as `current` and `Pending: (none)`.
+
+33. **Coordinator.** If the new release did not become ready (exit 4), the host started the previous release again. The database keeps the migrations. Restore the dump only when the failed release damaged data (section 8.7). Tell the maintainer before you restore production.
+
+    Check: `sudo ririko-deploy status` shows the previous version as `current` and `healthy` containers.
+
+34. **Coordinator.** To take the bot and the dashboard offline while you fix a problem, run steps 1, 3, 4, 6 and 7 of section 8.7, then:
+
+    ```bash
+    rc stop bot web
+    ```
+
+    Check: `rc ps` shows no running `bot` and `web`. A deploy job, or `rc up -d --no-build`, starts them again.
+
+35. **Maintainer.** If 2.x must be pulled back after `latest` moved, follow section 7.
+
+    Check: `ririkoai/ririkobot:latest` shows the 1.4.0 digest again.
