@@ -31,6 +31,14 @@ Self-hosting means you run the bot, the dashboard, a PostgreSQL database and a L
 
 ## Quick start with Docker
 
+The quickest start is the starter on npm. You need [Node.js](https://nodejs.org) 20 or newer:
+
+```bash
+npx ririko --docker
+```
+
+It downloads the release files, runs the setup wizard and asks if it should start Ririko. Leave out `--docker` and it asks you to choose between Docker and a source install. The steps below do the same by hand.
+
 You need [Docker](https://docs.docker.com/engine/install/) 23 or newer with Compose v2, Git, and a Discord account. The steps below are the short form of [Deploy Ririko With Docker](https://ririko.ai/docs/deployment), which explains each one.
 
 1. Clone the repository and check out the release:

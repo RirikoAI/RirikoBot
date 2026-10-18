@@ -1,0 +1,63 @@
+{
+  "name": "ririko",
+  "version": "2.0.0",
+  "description": "Self-hosted Discord bot with AI chat on Gemini, OpenAI and Ollama, music, a trading card game, moderation, an economy and a web dashboard. Run npx ririko to set it up.",
+  "keywords": [
+    "ririko",
+    "ai",
+    "llm",
+    "chatbot",
+    "ai-chatbot",
+    "ai-agent",
+    "discord",
+    "discord-bot",
+    "discord-ai",
+    "discord.js",
+    "gemini",
+    "openai",
+    "ollama",
+    "music-bot",
+    "self-hosted",
+    "moderation",
+    "economy",
+    "dashboard",
+    "trading-card-game",
+    "starter"
+  ],
+  "homepage": "https://ririko.ai",
+  "bugs": {
+    "url": "https://github.com/RirikoAI/RirikoBot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RirikoAI/RirikoBot.git",
+    "directory": "apps/starter"
+  },
+  "license": "MIT",
+  "author": "Earnest Angel",
+  "type": "module",
+  "bin": {
+    "ririko": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2"
+  }
+}

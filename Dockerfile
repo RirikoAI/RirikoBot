@@ -17,6 +17,7 @@ FROM base AS manifests
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY apps/bot/package.json apps/bot/
 COPY apps/cli/package.json apps/cli/
+COPY apps/starter/package.json apps/starter/
 COPY apps/web/package.json apps/web/
 COPY packages/ai/package.json packages/ai/
 COPY packages/core/package.json packages/core/
